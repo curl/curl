@@ -54,7 +54,7 @@ Content-Type: text/html
 Funny-head: yesyes
 
 -foo-
-1234
+123
 </stdout>
 <strip>
 ^User-Agent:.*
