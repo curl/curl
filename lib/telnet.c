@@ -899,7 +899,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
       }
 
       failf(data, "Unknown telnet option %s", head->data);
-      result = CURLE_UNKNOWN_TELNET_OPTION;
+      result = CURLE_UNKNOWN_OPTION;
       break;
     }
     failf(data, "Syntax error in telnet option: %s", head->data);
