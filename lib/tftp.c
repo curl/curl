@@ -1345,7 +1345,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
 
   state = (tftp_state_data_t *)conn->proto.tftpc;
   if(!state)
-    return CURLE_BAD_CALLING_ORDER;
+    return CURLE_TFTP_ILLEGAL;
 
   result = tftp_perform(conn, done);
 
