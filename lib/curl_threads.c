@@ -110,7 +110,7 @@ curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
 #else
   t = (curl_thread_t)_beginthreadex(NULL, 0, func, arg, 0, NULL);
 #endif
-  if((t == 0) || (t == (curl_thread_t)-1L)) {
+  if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef _WIN32_WCE
     DWORD gle = GetLastError();
     errno = ((gle == ERROR_ACCESS_DENIED ||
