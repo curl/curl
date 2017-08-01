@@ -22,6 +22,10 @@
  *
  ***************************************************************************/
 
+#if defined(BUILDING_LIBCURL) && !defined(CURL_NO_OLDIES)
+#define CURL_NO_OLDIES
+#endif
+
 /*
  * Define WIN32 when build target is Win32 API
  */
