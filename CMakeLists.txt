@@ -79,14 +79,12 @@ option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
   option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
-
-  CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER
-                         "Set to ON to enable threaded DNS lookup"
-                         ON "NOT ENABLE_ARES"
-                         OFF)
-else()
-  option(ENABLE_THREADED_RESOLVER "Set to ON to enable POSIX threaded DNS lookup" OFF)
 endif()
+
+CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
+        ON "NOT ENABLE_ARES"
+        OFF)
+
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
 
@@ -109,10 +107,6 @@ set(CMAKE_DEBUG_POSTFIX "-d" CACHE STRING "Set debug library postfix" FORCE)
 
 # initialize CURL_LIBS
 set(CURL_LIBS "")
-
-if(ENABLE_THREADED_RESOLVER AND ENABLE_ARES)
-  message(FATAL_ERROR "Options ENABLE_THREADED_RESOLVER and ENABLE_ARES are mutually exclusive")
-endif()
 
 if(ENABLE_ARES)
   set(USE_ARES 1)
@@ -275,19 +269,14 @@ if(WIN32)
 endif(WIN32)
 
 if(ENABLE_THREADED_RESOLVER)
+  find_package(Threads REQUIRED)
   if(WIN32)
     set(USE_THREADS_WIN32 ON)
   else()
-    check_include_file_concat("pthread.h" HAVE_PTHREAD_H)
-    if(HAVE_PTHREAD_H)
-      set(CMAKE_THREAD_PREFER_PTHREAD 1)
-      find_package(Threads)
-      if(CMAKE_USE_PTHREADS_INIT)
-        set(CURL_LIBS ${CURL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-        set(USE_THREADS_POSIX 1)
-      endif()
-    endif()
+    set(USE_THREADS_POSIX ${CMAKE_USE_PTHREADS_INIT})
+    set(HAVE_PTHREAD_H ${CMAKE_USE_PTHREADS_INIT})
   endif()
+  set(CURL_LIBS ${CURL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 # Check for all needed libraries
