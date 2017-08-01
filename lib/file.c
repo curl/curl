@@ -501,7 +501,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
              tm->tm_hour,
              tm->tm_min,
              tm->tm_sec);
-    result = Curl_client_write(conn, CLIENTWRITE_BOTH, buf, 0);
+    result = Curl_client_write(conn, CLIENTWRITE_BOTH, header, 0);
     if(!result)
       /* set the file size to make it available post transfer */
       Curl_pgrsSetDownloadSize(data, expected_size);
