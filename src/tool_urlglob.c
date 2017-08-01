@@ -273,7 +273,10 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
         }
         errno = 0;
         max_n = strtoul(pattern, &endp, 10);
-        if(errno || (*endp == ':')) {
+        if(errno)
+          /* overflow */
+          endp = NULL;
+        else if(*endp == ':') {
           pattern = endp+1;
           errno = 0;
           step_n = strtoul(pattern, &endp, 10);
