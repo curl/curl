@@ -56,9 +56,9 @@ BUGS
 1.3 Security bugs
 
   If you find a bug or problem in curl or libcurl that you think has a
-  security impact. A bug that can put users in danger or make them vulnerable
-  if the bug becomes public knowledge, then please report that bug using our
-  security development process.
+  security impact, for example a bug that can put users in danger or make them
+  vulnerable if the bug becomes public knowledge, then please report that bug
+  using our security development process.
 
   Security related bugs or bugs that are suspected to have a security impact,
   should be reported by email to curl-security@haxx.se so that they first can
