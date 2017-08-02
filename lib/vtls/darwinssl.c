@@ -32,10 +32,12 @@
 #include "curl_base64.h"
 #include "strtok.h"
 
+#ifdef USE_DARWINSSL
+
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wtautological-pointer-compare"
-
-#ifdef USE_DARWINSSL
+#endif __clang__
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -2849,6 +2851,8 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
   return (ssize_t)processed;
 }
 
-#endif /* USE_DARWINSSL */
-
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
+
+#endif /* USE_DARWINSSL */
