@@ -211,7 +211,7 @@ int wait_ms(int timeout_ms)
 {
 #if !defined(MSDOS) && !defined(USE_WINSOCK)
 #ifndef HAVE_POLL_FINE
-  struct curltime pending_tv;
+  struct timeval pending_tv;
 #endif
   struct curltime initial_tv;
   int pending_ms;
