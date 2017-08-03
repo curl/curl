@@ -23,9 +23,11 @@ matrix:
     include:
         - os: linux
           compiler: gcc
+          dist: trusty
           env: T=normal
         - os: linux
           compiler: clang
+          dist: trusty
           env: T=debug
         - os: osx
           compiler: gcc
@@ -52,9 +54,11 @@ matrix:
           env: T=cmake
         - os: linux
           compiler: gcc
+          dist: precise
           env: T=coverage
         - os: linux
           compiler: gcc
+          dist: trusty
           env: T=distcheck
 
 install:
