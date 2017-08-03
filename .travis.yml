@@ -31,6 +31,12 @@ matrix:
           compiler: gcc
           env: BUILD_TYPE=debug
         - os: osx
+          compiler: gcc
+          env: BUILD_TYPE=debug CONFIGURE=--with-ssl=/usr/local/opt/openssl
+        - os: osx
+          compiler: gcc
+          env: BUILD_TYPE=debug CONFIGURE=--with-ssl=/usr/local/opt/libressl
+        - os: osx
           compiler: clang
           env: BUILD_TYPE=normal
         - os: linux
@@ -76,7 +82,7 @@ script:
         fi
     - |
         if [ "$BUILD_TYPE" = "debug" ]; then
-             ./configure --enable-debug --enable-werror
+             ./configure --enable-debug --enable-werror $CONFIGURE
              make
              make TFLAGS=-n test-nonflaky
         fi

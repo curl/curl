@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SPEEDCHECK_H
-#define HEADER_CURL_SPEEDCHECK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,13 +19,48 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-#include "curl_setup.h"
+#include "curlcheck.h"
 
 #include "timeval.h"
 
-void Curl_speedinit(struct Curl_easy *data);
-CURLcode Curl_speedcheck(struct Curl_easy *data,
-                         struct curltime now);
+static CURLcode unit_setup(void)
+{
+  return CURLE_OK;
+}
 
-#endif /* HEADER_CURL_SPEEDCHECK_H */
+static void unit_stop(void)
+{
+
+}
+
+struct a {
+  struct curltime first;
+  struct curltime second;
+  time_t result;
+};
+
+UNITTEST_START
+{
+  struct a tests[] = {
+    { {36762, 8345 }, {36761, 995926 }, 13 },
+    { {36761, 995926 }, {36762, 8345 }, -13 },
+    { {36761, 995926 }, {0, 0}, 36761995 },
+    { {0, 0}, {36761, 995926 }, -36761995 },
+  };
+  size_t i;
+
+  for(i=0; i < sizeof(tests)/sizeof(tests[0]); i++) {
+    time_t result = curlx_tvdiff(tests[i].first, tests[i].second);
+    if(result != tests[i].result) {
+      printf("%d.%06u to %d.%06u got %d, but expected %d\n",
+             tests[i].first.tv_sec,
+             tests[i].first.tv_usec,
+             tests[i].second.tv_sec,
+             tests[i].second.tv_usec,
+             result,
+             tests[i].result);
+      fail("unexpected result!");
+    }
+  }
+}
+UNITTEST_STOP

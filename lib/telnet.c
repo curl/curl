@@ -899,7 +899,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
       }
 
       failf(data, "Unknown telnet option %s", head->data);
-      result = CURLE_UNKNOWN_TELNET_OPTION;
+      result = CURLE_UNKNOWN_OPTION;
       break;
     }
     failf(data, "Syntax error in telnet option: %s", head->data);
@@ -1327,7 +1327,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   curl_off_t total_ul = 0;
 #endif
   ssize_t nread;
-  struct timeval now;
+  struct curltime now;
   bool keepon = TRUE;
   char *buf = data->state.buffer;
   struct TELNET *tn;

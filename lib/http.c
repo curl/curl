@@ -3322,19 +3322,22 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * says. We try to allow any number here, but we cannot make
          * guarantees on future behaviors since it isn't within the protocol.
          */
+        char separator;
         nc = sscanf(HEADER1,
-                    " HTTP/%d.%d %d",
+                    " HTTP/%1d.%1d%c%3d",
                     &httpversion_major,
                     &conn->httpversion,
+                    &separator,
                     &k->httpcode);
 
         if(nc == 1 && httpversion_major == 2 &&
            1 == sscanf(HEADER1, " HTTP/2 %d", &k->httpcode)) {
           conn->httpversion = 0;
-          nc = 3;
+          nc = 4;
+          separator = ' ';
         }
 
-        if(nc==3) {
+        if((nc==4) && (' ' == separator)) {
           conn->httpversion += 10 * httpversion_major;
 
           if(k->upgr101 == UPGR101_RECEIVED) {
@@ -3343,7 +3346,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
               infof(data, "Lying server, not serving HTTP/2\n");
           }
         }
-        else {
+        else if(!nc) {
           /* this is the real world, not a Nirvana
              NCSA 1.5.x returns this crap when asked for HTTP/1.1
           */
@@ -3360,6 +3363,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
               conn->httpversion = 10;
             }
           }
+        }
+        else {
+          failf(data, "Unsupported HTTP version in response\n");
+          return CURLE_UNSUPPORTED_PROTOCOL;
         }
       }
       else if(conn->handler->protocol & CURLPROTO_RTSP) {

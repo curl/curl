@@ -88,6 +88,25 @@ This release includes the following bugfixes:
  o CURLOPT_POSTFIELDS.3: explain the 100-continue magic better
  o cmake: offer CMAKE_DEBUG_POSTFIX when building with MSVC [54]
  o tests/valgrind.supp: supress OpenSSL false positive seen on travis [55]
+ o curl_setup_once: Remove ERRNO/SET_ERRNO macros [56]
+ o curl-compilers.m4: disable warning spam with Cygwin's clang [57]
+ o ldap: fix MinGW compiler warning [58]
+ o make: fix docs build on OpenBSD [59]
+ o curl_setup: always define WIN32_LEAN_AND_MEAN on Windows [60]
+ o system.h: include winsock2.h before windows.h
+ o winbuild: build with warning level 4 [61]
+ o rtspd: fix MSVC level 4 warning
+ o sockfilt: suppress conversion warning with explicit cast
+ o libtest: fix MSVC warning C4706
+ o darwinssl: fix pinnedpubkey build error [62]
+ o tests/server/resolve.c: fix deprecation warning [63]
+ o nss: fix a possible use-after-free in SelectClientCert() [64]
+ o checksrc: escape open brace in regex
+ o multi: mention integer overflow risk if using > 500 million sockets [65]
+ o darwinssl: fix --tlsv1.2 regression [66]
+ o timeval: struct curltime is a struct timeval replacement [67]
+ o curl_rtmp: fix a compiler warning [68]
+ o include.d: clarify that it concerns the response headers [69]
 
 This release includes the following known bugs:
 
@@ -100,9 +119,10 @@ advice from friends like these:
   Evert Pot, Frederik B, Gisle Vanem, Hannes Magnusson, Henrik S. Gaßmann,
   Jakub Wilk, Jeroen Ooms, Jesse Chisholm, Johannes Schindelin, Kamil Dudka,
   Marcel Raad, Martin Kepplinger, Matteo B., Max Dymond, Michael Kaufmann,
-  Neil Kolban, Pascal Terjan, Paul Harris, Pavel Rochnyak, Per Malmberg,
-  Ray Satiro, Ryan Winograd, Sergei Nikulov, Simon Warta, Timothe Litt,
-  (29 contributors)
+  Neil Kolban, Nick Miyake, olesteban at github, ovidiu-benea on github,
+  Pascal Terjan, Paul Harris, Pavel Rochnyak, Per Malmberg, Ray Satiro,
+  Rob Sanders, Ryan Winograd, Sergei Nikulov, Simon Warta, Timothe Litt,
+  (33 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -163,3 +183,17 @@ References to bug reports and discussions on issues:
  [53] = https://curl.haxx.se/bug/?i=1645
  [54] = https://curl.haxx.se/bug/?i=1649
  [55] = https://curl.haxx.se/bug/?i=1653
+ [56] = https://curl.haxx.se/bug/?i=1589
+ [57] = https://curl.haxx.se/bug/?i=1665
+ [58] = https://curl.haxx.se/bug/?i=1664
+ [59] = https://curl.haxx.se/bug/?i=1591
+ [60] = https://curl.haxx.se/bug/?i=1672
+ [61] = https://curl.haxx.se/bug/?i=1667
+ [62] = https://github.com/curl/curl/commit/eb16305#commitcomment-23035670
+ [63] = https://curl.haxx.se/bug/?i=1682
+ [64] = https://bugzilla.redhat.com/1436158
+ [65] = https://curl.haxx.se/bug/?i=1683
+ [66] = https://curl.haxx.se/bug/?i=1703
+ [67] = https://curl.haxx.se/bug/?i=1693
+ [68] = https://curl.haxx.se/bug/?i=1652
+ [69] = https://curl.haxx.se/bug/?i=1704

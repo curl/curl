@@ -206,7 +206,7 @@ static CURLcode rtmp_connect(struct connectdata *conn, bool *done)
   RTMP *r = conn->proto.generic;
   SET_RCVTIMEO(tv, 10);
 
-  r->m_sb.sb_socket = conn->sock[FIRSTSOCKET];
+  r->m_sb.sb_socket = (int)conn->sock[FIRSTSOCKET];
 
   /* We have to know if it's a write before we send the
    * connect request packet

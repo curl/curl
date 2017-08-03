@@ -177,7 +177,7 @@ static const struct helptxt helptext[] = {
   {"    --ignore-content-length",
    "Ignore the size of the remote resource"},
   {"-i, --include",
-   "Include protocol headers in the output"},
+   "Include protocol response headers in the output"},
   {"-k, --insecure",
    "Allow insecure server connections when using SSL"},
   {"    --interface <name>",

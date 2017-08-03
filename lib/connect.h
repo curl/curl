@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,7 +36,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
 time_t Curl_timeleft(struct Curl_easy *data,
-                     struct timeval *nowp,
+                     struct curltime *nowp,
                      bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
