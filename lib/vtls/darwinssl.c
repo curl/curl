@@ -32,6 +32,9 @@
 #include "curl_base64.h"
 #include "strtok.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-pointer-compare"
+
 #ifdef USE_DARWINSSL
 
 #ifdef HAVE_LIMITS_H
@@ -2033,7 +2036,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     const char *pinnedpubkey)
 {  /* Scratch */
   size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
-  unsigned char *pubkey = NULL, *realpubkey = NULL, *spkiHeader = NULL;
+  unsigned char *pubkey = NULL, *realpubkey = NULL;
+  const unsigned char *spkiHeader = NULL;
   CFDataRef publicKeyBits = NULL;
 
   /* Result is returned to caller */
@@ -2076,7 +2080,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 #endif /* DARWIN_SSL_PINNEDPUBKEY_V2 */
 
     pubkeylen = CFDataGetLength(publicKeyBits);
-    pubkey = CFDataGetBytePtr(publicKeyBits);
+    pubkey = (unsigned char *)CFDataGetBytePtr(publicKeyBits);
 
     switch(pubkeylen) {
       case 526:
@@ -2846,3 +2850,5 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
 }
 
 #endif /* USE_DARWINSSL */
+
+#pragma clang diagnostic pop
