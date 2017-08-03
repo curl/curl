@@ -23,9 +23,11 @@ matrix:
     include:
         - os: linux
           compiler: gcc
+          dist: trusty
           env: BUILD_TYPE=normal
         - os: linux
           compiler: clang
+          dist: trusty
           env: BUILD_TYPE=debug
         - os: osx
           compiler: gcc
@@ -49,9 +51,11 @@ matrix:
           env: BUILD_TYPE=cmake
         - os: linux
           compiler: gcc
+          dist: precise
           env: BUILD_TYPE=coverage
         - os: linux
           compiler: gcc
+          dist: trusty
           env: BUILD_TYPE=distcheck
 
 install:
