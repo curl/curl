@@ -25,11 +25,12 @@
 #include "hostip.c"
 
 #define NUM_ADDRS 8
-static struct Curl_addrinfo addrs[NUM_ADDRS] = {0};
+static struct Curl_addrinfo addrs[NUM_ADDRS] = {{0}};
 
 static CURLcode unit_setup(void)
 {
-  for(int i=0; i < NUM_ADDRS - 1; i++)  {
+  int i;
+  for(i=0; i < NUM_ADDRS - 1; i++)  {
     addrs[i].ai_next = &addrs[i+1];
   }
 
@@ -55,7 +56,7 @@ UNITTEST_START
 
   for(i = 0; i < 5; i++)  {
     addr_shuffle(easy, &addrhead);
-    if(addrhead != addrs) { break; }
+    if(addrhead != addrs) break;
   }
 
   abort_unless(addrhead != addrs, "addresses are not being reordered");
