@@ -887,21 +887,24 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
        dir) this then allows for a second try to CWD to it */
     ftpc->count3 = (conn->data->set.ftp_create_missing_dirs==2)?1:0;
 
-    if(conn->bits.reuse && ftpc->entrypath) {
+    if((conn->data->set.ftp_filemethod == FTPFILE_NOCWD) && !ftpc->cwdcount)
+      /* No CWD necessary */
+      result = ftp_state_mdtm(conn);
+    else if(conn->bits.reuse && ftpc->entrypath) {
       /* This is a re-used connection. Since we change directory to where the
          transfer is taking place, we must first get back to the original dir
          where we ended up after login: */
-      ftpc->count1 = 0; /* we count this as the first path, then we add one
-                          for all upcoming ones in the ftp->dirs[] array */
+      ftpc->cwdcount = 0; /* we count this as the first path, then we add one
+                             for all upcoming ones in the ftp->dirs[] array */
       PPSENDF(&conn->proto.ftpc.pp, "CWD %s", ftpc->entrypath);
       state(conn, FTP_CWD);
     }
     else {
       if(ftpc->dirdepth) {
-        ftpc->count1 = 1;
+        ftpc->cwdcount = 1;
         /* issue the first CWD, the rest is sent when the CWD responses are
            received... */
-        PPSENDF(&conn->proto.ftpc.pp, "CWD %s", ftpc->dirs[ftpc->count1 -1]);
+        PPSENDF(&conn->proto.ftpc.pp, "CWD %s", ftpc->dirs[ftpc->cwdcount -1]);
         state(conn, FTP_CWD);
       }
       else {
@@ -2936,10 +2939,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 != 2) {
         /* failure to CWD there */
         if(conn->data->set.ftp_create_missing_dirs &&
-           ftpc->count1 && !ftpc->count2) {
+           ftpc->cwdcount && !ftpc->count2) {
           /* try making it */
           ftpc->count2++; /* counter to prevent CWD-MKD loops */
-          PPSENDF(&ftpc->pp, "MKD %s", ftpc->dirs[ftpc->count1 - 1]);
+          PPSENDF(&ftpc->pp, "MKD %s", ftpc->dirs[ftpc->cwdcount - 1]);
           state(conn, FTP_MKD);
         }
         else {
@@ -2953,9 +2956,9 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       else {
         /* success */
         ftpc->count2=0;
-        if(++ftpc->count1 <= ftpc->dirdepth) {
+        if(++ftpc->cwdcount <= ftpc->dirdepth) {
           /* send next CWD */
-          PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->count1 - 1]);
+          PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->cwdcount - 1]);
         }
         else {
           result = ftp_state_mdtm(conn);
@@ -2973,7 +2976,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       }
       state(conn, FTP_CWD);
       /* send CWD */
-      PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->count1 - 1]);
+      PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->cwdcount - 1]);
       break;
 
     case FTP_MDTM:
