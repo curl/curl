@@ -246,7 +246,7 @@ endif(BORLAND)
 if(CURL_WERROR)
   if(MSVC_VERSION)
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /WX")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_RELEASE} /WX")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /WX")
   else()
     # this assumes clang or gcc style options
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
