@@ -107,6 +107,23 @@ This release includes the following bugfixes:
  o timeval: struct curltime is a struct timeval replacement [67]
  o curl_rtmp: fix a compiler warning [68]
  o include.d: clarify that it concerns the response headers [69]
+ o cmake: support make uninstall [70]
+ o include.d: clarify --include is only for response headers [71]
+ o libcurl: Stop using error codes defined under CURL_NO_OLDIES [72]
+ o http: fix response code parser to avoid integer overflow [73]
+ o configure: fix the check for IdnToUnicode [74]
+ o multi: fix request timer management [75]
+ o curl_threads: fix MSVC compiler warning [76]
+ o travis: build on osx with openssl
+ o travis: build on osx with libressl
+ o CURLOPT_NETRC.3: mention the file name on windows
+ o cmake: set MSVC warning level to 4 [77]
+ o netrc: skip lines starting with '#' [78]
+ o darwinssl: fix curlssl_sha256sum() compiler warnings on first argument
+ o BUILD.WINDOWS: mention buildconf.bat for builds off git
+ o darwinssl: silence compiler warnings [79]
+ o travis: build on osx with darwinssl
+ o FTP: skip unnecessary CWD when in nocwd mode [80]
 
 This release includes the following known bugs:
 
@@ -115,14 +132,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, David E. Narváez, Dmitry Kostjuchenko,
-  Evert Pot, Frederik B, Gisle Vanem, Hannes Magnusson, Henrik S. Gaßmann,
-  Jakub Wilk, Jeroen Ooms, Jesse Chisholm, Johannes Schindelin, Kamil Dudka,
+  Brad Spencer, Brian Carpenter, Dan Fandrich, Daniel Stenberg,
+  David E. Narváez, Dmitry Kostjuchenko, Dwarakanath Yadavalli, Evert Pot,
+  Frederik B, Gisle Vanem, Hannes Magnusson, Henrik S. Gaßmann, Jakub Wilk,
+  Jeremy Tan, Jeroen Ooms, Jesse Chisholm, Johannes Schindelin, Kamil Dudka,
   Marcel Raad, Martin Kepplinger, Matteo B., Max Dymond, Michael Kaufmann,
   Neil Kolban, Nick Miyake, olesteban at github, ovidiu-benea on github,
   Pascal Terjan, Paul Harris, Pavel Rochnyak, Per Malmberg, Ray Satiro,
   Rob Sanders, Ryan Winograd, Sergei Nikulov, Simon Warta, Timothe Litt,
-  (33 contributors)
+  Viktor Szakáts,
+  (38 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -197,3 +216,14 @@ References to bug reports and discussions on issues:
  [67] = https://curl.haxx.se/bug/?i=1693
  [68] = https://curl.haxx.se/bug/?i=1652
  [69] = https://curl.haxx.se/bug/?i=1704
+ [70] = https://curl.haxx.se/bug/?i=1674
+ [71] = https://github.com/curl/curl/commit/de6de94#commitcomment-23370851
+ [72] = https://curl.haxx.se/bug/?i=1688
+ [73] = https://curl.haxx.se/bug/?i=1714
+ [74] = https://curl.haxx.se/bug/?i=1669
+ [75] = https://curl.haxx.se/mail/lib-2017-07/0033.html
+ [76] = https://curl.haxx.se/bug/?i=1717
+ [77] = https://curl.haxx.se/bug/?i=1711
+ [78] = https://curl.haxx.se/mail/lib-2017-08/0008.html
+ [79] = https://curl.haxx.se/bug/?i=1722
+ [80] = https://curl.haxx.se/bug/?i=1718
