@@ -21,8 +21,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "urldata.h"
-#include "hostip.c"
+#include "hostip.h"
 
 #define NUM_ADDRS 8
 static struct Curl_addrinfo addrs[NUM_ADDRS] = {{0}};
@@ -54,8 +53,9 @@ UNITTEST_START
   code = curl_easy_setopt(easy, CURLOPT_DNS_SHUFFLE_ADDRESSES, 1L);
   abort_unless(code == CURLE_OK, "curl_easy_setopt failed");
 
-  for(i = 0; i < 5; i++)  {
-    addr_shuffle(easy, &addrhead);
+  /* Shuffle repeatedly and make sure that the list changes */
+  for(i = 0; i < 10; i++)  {
+    Curl_shuffle_addr(easy, &addrhead);
     if(addrhead != addrs) break;
   }
 

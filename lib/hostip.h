@@ -182,6 +182,18 @@ struct Curl_dns_entry *
 Curl_fetch_addr(struct connectdata *conn,
                 const char *hostname,
                 int port);
+
+/*
+ * Curl_shuffle_addr() shuffles the order of addresses in a
+ * 'Curl_addrinfo' struct by re-linking its linked list.
+ *
+ * The addr argument should be the address of a pointer to
+ * the head node of a `Curl_addrinfo` list and it will be
+ * modified to point to the new head after shuffling.
+ */
+void Curl_shuffle_addr(struct Curl_easy *data,
+                       Curl_addrinfo **addr);
+
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
  *
