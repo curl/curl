@@ -37,7 +37,7 @@
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wtautological-pointer-compare"
-#endif __clang__
+#endif /* __clang__ */
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
