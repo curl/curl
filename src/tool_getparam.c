@@ -443,6 +443,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
 
+  *usedarg = FALSE; /* default is that we don't use the arg */
 
   if(('-' != flag[0]) ||
      (('-' == flag[0]) && ('-' == flag[1]))) {
@@ -496,7 +497,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       letter = parse[0];
       subletter = parse[1];
     }
-    *usedarg = FALSE; /* default is that we don't use the arg */
 
     if(hit < 0) {
       for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
