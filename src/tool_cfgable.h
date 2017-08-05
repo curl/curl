@@ -247,6 +247,7 @@ struct OperationConfig {
                                      from user callbacks */
   curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
                                      error */
+  bool ssh_compression;           /* enable/disable SSH compression */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
