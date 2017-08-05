@@ -68,6 +68,8 @@ static const struct helptxt helptext[] = {
    "SSL ciphers to use"},
   {"    --compressed",
    "Request compressed response"},
+  {"    --compressed-ssh",
+   "Enable SSH compression"},
   {"-K, --config <file>",
    "Read config from a file"},
   {"    --connect-timeout <seconds>",

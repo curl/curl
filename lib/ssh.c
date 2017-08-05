@@ -2942,6 +2942,13 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     return CURLE_FAILED_INIT;
   }
 
+#if LIBSSH2_VERSION_NUM >= 0x010208
+  if(data->set.ssh_compression &&
+     libssh2_session_flag(ssh->ssh_session, LIBSSH2_FLAG_COMPRESS, 1) < 0) {
+    infof(data, "Failure to enable compression for ssh session");
+  }
+#endif
+
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     int rc;
