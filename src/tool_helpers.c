@@ -64,6 +64,8 @@ const char *param2text(int res)
     return "out of memory";
   case PARAM_NO_PREFIX:
     return "the given option can't be reversed with a --no- prefix";
+  case PARAM_NUMBER_TOO_LARGE:
+    return "too large number";
   default:
     return "unknown error";
   }
