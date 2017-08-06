@@ -218,7 +218,7 @@ static ParameterError str2double(double *val, const char *str, long max)
     num = strtod(str, &endptr);
     if(errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
-    if((long)val > max) {
+    if((long)num > max) {
       /* too large */
       return PARAM_NUMBER_TOO_LARGE;
     }
