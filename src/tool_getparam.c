@@ -545,7 +545,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->oauth_bearer, nextarg);
         break;
       case 'c': /* connect-timeout */
-        err = str2udouble(&config->connecttimeout, nextarg);
+        err = str2udouble(&config->connecttimeout, nextarg,
+                          LONG_MAX/1000);
         if(err)
           return err;
         break;
@@ -1047,7 +1048,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           return err;
         break;
       case 'R': /* --expect100-timeout */
-        err = str2udouble(&config->expect100timeout, nextarg);
+        err = str2udouble(&config->expect100timeout, nextarg, LONG_MAX/1000);
         if(err)
           return err;
         break;
@@ -1713,7 +1714,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'm':
       /* specified max time */
-      err = str2udouble(&config->timeout, nextarg);
+      err = str2udouble(&config->timeout, nextarg, LONG_MAX/1000);
       if(err)
         return err;
       break;

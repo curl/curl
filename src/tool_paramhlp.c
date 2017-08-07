@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -164,7 +164,11 @@ ParameterError str2num(long *val, const char *str)
 {
   if(str) {
     char *endptr;
-    long num = strtol(str, &endptr, 10);
+    long num;
+    errno = 0;
+    num = strtol(str, &endptr, 10);
+    if(errno == ERANGE)
+      return PARAM_NUMBER_TOO_LARGE;
     if((endptr != str) && (endptr == str + strlen(str))) {
       *val = num;
       return PARAM_OK;  /* Ok */
@@ -197,16 +201,27 @@ ParameterError str2unum(long *val, const char *str)
  * Parse the string and write the double in the given address. Return PARAM_OK
  * on success, otherwise a parameter specific error enum.
  *
+ * The 'max' argument is the maximum value allowed, as the numbers are often
+ * multiplied when later used.
+ *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
 
-ParameterError str2double(double *val, const char *str)
+static ParameterError str2double(double *val, const char *str, long max)
 {
   if(str) {
     char *endptr;
-    double num = strtod(str, &endptr);
+    double num;
+    errno = 0;
+    num = strtod(str, &endptr);
+    if(errno == ERANGE)
+      return PARAM_NUMBER_TOO_LARGE;
+    if((long)num > max) {
+      /* too large */
+      return PARAM_NUMBER_TOO_LARGE;
+    }
     if((endptr != str) && (endptr == str + strlen(str))) {
       *val = num;
       return PARAM_OK;  /* Ok */
@@ -219,14 +234,17 @@ ParameterError str2double(double *val, const char *str)
  * Parse the string and write the double in the given address. Return PARAM_OK
  * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
  *
+ * The 'max' argument is the maximum value allowed, as the numbers are often
+ * multiplied when later used.
+ *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
 
-ParameterError str2udouble(double *val, const char *str)
+ParameterError str2udouble(double *val, const char *str, long max)
 {
-  ParameterError result = str2double(val, str);
+  ParameterError result = str2double(val, str, max);
   if(result != PARAM_OK)
     return result;
   if(*val < 0)
@@ -384,11 +402,12 @@ ParameterError str2offset(curl_off_t *val, const char *str)
 #if(CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
   *val = curlx_strtoofft(str, &endptr, 0);
   if((*val == CURL_OFF_T_MAX || *val == CURL_OFF_T_MIN) && (errno == ERANGE))
-    return PARAM_BAD_NUMERIC;
+    return PARAM_NUMBER_TOO_LARGE;
 #else
+  errno = 0;
   *val = strtol(str, &endptr, 0);
   if((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)
-    return PARAM_BAD_NUMERIC;
+    return PARAM_NUMBER_TOO_LARGE;
 #endif
   if((endptr != str) && (endptr == str + strlen(str)))
     return PARAM_OK;
