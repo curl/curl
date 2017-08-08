@@ -1079,7 +1079,7 @@ for older and later versions as things don't change drastically that often.
 
 [1]: https://curl.haxx.se/libcurl/c/curl_easy_setopt.html
 [2]: https://curl.haxx.se/libcurl/c/curl_easy_init.html
-[3]: http://c-ares.haxx.se/
+[3]: https://c-ares.haxx.se/
 [4]: https://tools.ietf.org/html/rfc7230 "RFC 7230"
 [5]: https://curl.haxx.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
 [6]: https://curl.haxx.se/docs/manpage.html#--compressed

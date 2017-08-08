@@ -65,7 +65,7 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [Object-Pascal](http://www.tekool.com/opcurl) Free Pascal, Delphi and Kylix binding written by Christophe Espern.
 
-[OCaml](http://opam.ocaml.org/packages/ocurl/) Written by Lars Nilsson and ygrek
+[OCaml](https://opam.ocaml.org/packages/ocurl/) Written by Lars Nilsson and ygrek
 
 [Pascal](http://houston.quik.com/jkp/curlpas/) Free Pascal, Delphi and Kylix binding written by Jeffrey Pohlmeyer.
 
@@ -83,7 +83,7 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxcurl.sourceforge.io/) Written Mark Hessling
 
-[Ring](http://ring-lang.sourceforge.net/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+[Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
@@ -99,7 +99,7 @@ Ruby: [curb](http://curb.rubyforge.org/) written by Ross Bamford, [ruby-curl-mul
 
 [Smalltalk](http://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
 
-[SP-Forth](http://spf.cvs.sourceforge.net/viewvc/spf/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
+[SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
 
 [SPL](http://www.clifford.at/spl/) Written by Clifford Wolf
 
