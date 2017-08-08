@@ -18,6 +18,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o glob: do not parse after a strtoul() overflow range (CVE-2017-1000101) [85]
+ o tftp: reject file name lengths that don't fit (CVE-2017-1000100) [84]
+ o file: output the correct buffer to the user (CVE-2017-1000099) [83]
  o includes: remove curl/curlbuild.h and curl/curlrules.h [1]
  o dist: make the hugehelp.c not get regenerated unnecessarily [2]
  o timers: store internal time stamps as time_t instead of doubles [3]
@@ -124,6 +127,11 @@ This release includes the following bugfixes:
  o darwinssl: silence compiler warnings [79]
  o travis: build on osx with darwinssl
  o FTP: skip unnecessary CWD when in nocwd mode [80]
+ o gssapi: fix memory leak of output token in multi round context [81]
+ o getparameter: avoid returning uninitialized 'usedarg' [82]
+ o curl (debug build) easy_events: make event data static
+ o curl: detect and bail out early on parameter integer overflows [86]
+ o configure: fix recv/send/select detection on Android [87]
 
 This release includes the following known bugs:
 
@@ -133,15 +141,15 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Brad Spencer, Brian Carpenter, Dan Fandrich, Daniel Stenberg,
-  David E. Narváez, Dmitry Kostjuchenko, Dwarakanath Yadavalli, Evert Pot,
-  Frederik B, Gisle Vanem, Hannes Magnusson, Henrik S. Gaßmann, Jakub Wilk,
-  Jeremy Tan, Jeroen Ooms, Jesse Chisholm, Johannes Schindelin, Kamil Dudka,
-  Marcel Raad, Martin Kepplinger, Matteo B., Max Dymond, Michael Kaufmann,
-  Neil Kolban, Nick Miyake, olesteban at github, ovidiu-benea on github,
-  Pascal Terjan, Paul Harris, Pavel Rochnyak, Per Malmberg, Ray Satiro,
-  Rob Sanders, Ryan Winograd, Sergei Nikulov, Simon Warta, Timothe Litt,
-  Viktor Szakáts,
-  (38 contributors)
+  David E. Narváez, destman at github, Dmitry Kostjuchenko,
+  Dwarakanath Yadavalli, Even Rouault, Evert Pot, Frederik B, Gisle Vanem,
+  Hannes Magnusson, Henrik Gaßmann, Isaac Boukris, Jakub Wilk, Jeremy Tan,
+  Jeroen Ooms, Jesse Chisholm, Johannes Schindelin, Kamil Dudka, Marcel Raad,
+  Martin Kepplinger, Matteo B., Max Dymond, Michael Kaufmann, Neil Kolban,
+  Nick Miyake, olesteban at github, ovidiu-benea on github, Pascal Terjan,
+  Paul Harris, Pavel Rochnyak, Per Malmberg, Ray Satiro, Rob Sanders,
+  Ryan Winograd, Sergei Nikulov, Simon Warta, Timothe Litt, Viktor Szakáts,
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -227,3 +235,10 @@ References to bug reports and discussions on issues:
  [78] = https://curl.haxx.se/mail/lib-2017-08/0008.html
  [79] = https://curl.haxx.se/bug/?i=1722
  [80] = https://curl.haxx.se/bug/?i=1718
+ [81] = https://curl.haxx.se/bug/?i=1733
+ [82] = https://curl.haxx.se/bug/?i=1728
+ [83] = https://curl.haxx.se/docs/adv_20170809C.html
+ [84] = https://curl.haxx.se/docs/adv_20170809B.html
+ [85] = https://curl.haxx.se/docs/adv_20170809A.html
+ [86] = https://curl.haxx.se/bug/?i=1730
+ [87] = https://curl.haxx.se/bug/?i=1738
