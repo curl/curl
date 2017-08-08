@@ -1082,7 +1082,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
 #endif
 #define GNICALLCONV
 #endif
-                    extern int GNICALLCONV getnameinfo($gni_arg1, $gni_arg2,
+                    extern int GNICALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
+				getnameinfo($gni_arg1, $gni_arg2,
                                            char *, $gni_arg46,
                                            char *, $gni_arg46,
                                            $gni_arg7);
@@ -1386,6 +1390,9 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #define RECVCALLCONV
 #endif
                       extern $recv_retv RECVCALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
                       recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
                     ]],[[
                       $recv_arg1 s=0;
@@ -1520,6 +1527,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #define SENDCALLCONV
 #endif
                       extern $send_retv SENDCALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
                       send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
                     ]],[[
                       $send_arg1 s=0;
@@ -2365,11 +2375,15 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
                       long tv_usec;
                     };
 #endif
-                    extern $sel_retv SELECTCALLCONV select($sel_arg1,
-                                                           $sel_arg234,
-                                                           $sel_arg234,
-                                                           $sel_arg234,
-                                                           $sel_arg5);
+                    extern $sel_retv SELECTCALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
+			select($sel_arg1,
+					$sel_arg234,
+					$sel_arg234,
+					$sel_arg234,
+					$sel_arg5);
                   ]],[[
                     $sel_arg1   nfds=0;
                     $sel_arg234 rfds=0;
