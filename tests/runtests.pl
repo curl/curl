@@ -4952,7 +4952,7 @@ sub startservers {
                     return "failed starting socks5 server";
                 }
                 elsif(($sshdid =~ /OpenSSH/) && ($sshdvernum < 370)) {
-                    # Need OpenSSH 3.7 for socks5 - http://www.openssh.com/txt/release-3.7
+                    # Need OpenSSH 3.7 for socks5 - https://www.openssh.com/txt/release-3.7
                     logmsg "$sshdverstr insufficient; socks5 tests need at least OpenSSH 3.7\n";
                     return "failed starting socks5 server";
                 }

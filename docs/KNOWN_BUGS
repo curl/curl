@@ -380,7 +380,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
  library header files exporting symbols/macros that should be kept private to
- the KfW library. See ticket #5601 at http://krbdev.mit.edu/rt/
+ the KfW library. See ticket #5601 at https://krbdev.mit.edu/rt/
 
 6.3 NTLM in system context uses wrong name
 
