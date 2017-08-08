@@ -29,7 +29,7 @@
  *
  * In the ISO C standard (IEEE Std 1003.1), there is a strtoimax() function we
  * could use in case strtoll() doesn't exist...  See
- * http://www.opengroup.org/onlinepubs/009695399/functions/strtoimax.html
+ * https://www.opengroup.org/onlinepubs/009695399/functions/strtoimax.html
  */
 
 #ifdef NEED_CURL_STRTOLL
