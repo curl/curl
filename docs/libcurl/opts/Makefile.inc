@@ -7,7 +7,9 @@ man_MANS =                                      \
   CURLINFO_CONDITION_UNMET.3                    \
   CURLINFO_CONNECT_TIME.3                       \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD.3            \
+  CURLINFO_CONTENT_LENGTH_DOWNLOAD_T.3          \
   CURLINFO_CONTENT_LENGTH_UPLOAD.3              \
+  CURLINFO_CONTENT_LENGTH_UPLOAD_T.3            \
   CURLINFO_CONTENT_TYPE.3                       \
   CURLINFO_COOKIELIST.3                         \
   CURLINFO_EFFECTIVE_URL.3                      \
@@ -41,9 +43,13 @@ man_MANS =                                      \
   CURLINFO_RTSP_SESSION_ID.3                    \
   CURLINFO_SCHEME.3                             \
   CURLINFO_SIZE_DOWNLOAD.3                      \
+  CURLINFO_SIZE_DOWNLOAD_T.3                    \
   CURLINFO_SIZE_UPLOAD.3                        \
+  CURLINFO_SIZE_UPLOAD_T.3                      \
   CURLINFO_SPEED_DOWNLOAD.3                     \
+  CURLINFO_SPEED_DOWNLOAD_T.3                   \
   CURLINFO_SPEED_UPLOAD.3                       \
+  CURLINFO_SPEED_UPLOAD_T.3                     \
   CURLINFO_SSL_ENGINES.3                        \
   CURLINFO_SSL_VERIFYRESULT.3                   \
   CURLINFO_STARTTRANSFER_TIME.3                 \
@@ -248,6 +254,7 @@ man_MANS =                                      \
   CURLOPT_SHARE.3                               \
   CURLOPT_SOCKOPTDATA.3                         \
   CURLOPT_SOCKOPTFUNCTION.3                     \
+  CURLOPT_SOCKS5_AUTH.3                         \
   CURLOPT_SOCKS5_GSSAPI_NEC.3                   \
   CURLOPT_SOCKS5_GSSAPI_SERVICE.3               \
   CURLOPT_SSH_AUTH_TYPES.3                      \
