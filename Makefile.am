@@ -276,11 +276,13 @@ cygwinbin:
 install-data-hook:
 	cd include && $(MAKE) install
 	cd docs && $(MAKE) install
+	cd docs/libcurl && $(MAKE) install
 
 # We extend the standard uninstall with a custom hook:
 uninstall-hook:
 	cd include && $(MAKE) uninstall
 	cd docs && $(MAKE) uninstall
+	cd docs/libcurl && $(MAKE) uninstall
 
 ca-bundle: lib/mk-ca-bundle.pl
 	@echo "generating a fresh ca-bundle.crt"
