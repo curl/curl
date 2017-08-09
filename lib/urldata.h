@@ -417,6 +417,10 @@ struct digestdata {
   BYTE *input_token;
   size_t input_token_len;
   CtxtHandle *http_context;
+  /* copy of user/passwd used to make the identity for http_context.
+     either may be NULL. */
+  char *user;
+  char *passwd;
 #else
   char *nonce;
   char *cnonce;
