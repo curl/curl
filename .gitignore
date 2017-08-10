@@ -17,6 +17,7 @@
 .libs
 .project
 .settings
+/.vs
 /build/
 /builds/
 __pycache__
