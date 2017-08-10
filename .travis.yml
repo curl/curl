@@ -123,6 +123,9 @@ script:
             rm -rf curl-99.98.97
             # verify out-of-tree build
             (tar xf curl-99.98.97.tar.gz && mkdir build && cd build && ../curl-99.98.97/configure && make && make TFLAGS=1 test)
+            # verify cmake build
+            rm -rf curl-99.98.97
+            (tar xf curl-99.98.97.tar.gz && mkdir build && cd build && cmake .. && make && make TFLAGS=1 test)
         fi
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
