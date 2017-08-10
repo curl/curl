@@ -111,10 +111,15 @@ script:
             ./configure
             make
             ./maketgz 99.98.97
-            # verify in-tree build
-            (tar xf curl-99.98.97.tar.gz && cd curl-99.98.97 && ./configure --prefix=$HOME/temp && make && make TFLAGS=1 test)
-            # install and do a basic check
-            (cd curl-99.98.97 && make install && bash scripts/installcheck.sh $HOME/temp)
+            # verify in-tree build - and install it
+            (tar xf curl-99.98.97.tar.gz && \
+             cd curl-99.98.97 && \
+             ./configure --prefix=$HOME/temp && \
+             make && \
+             make TFLAGS=1 test && \
+             make install)
+            # basic check of the installed files
+            bash scripts/installcheck.sh $HOME/temp
             rm -rf curl-99.98.97
             # verify out-of-tree build
             (tar xf curl-99.98.97.tar.gz && mkdir build && cd build && ../curl-99.98.97/configure && make && make TFLAGS=1 test)
