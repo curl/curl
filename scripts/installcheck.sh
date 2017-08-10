@@ -13,8 +13,13 @@ fi
 diff -u <(find docs/libcurl/ -name "*.3" -printf "%f\n" | grep -v template| sort) <(find $PREFIX/share/man/ -name "*.3" -printf "%f\n" | sort)
 
 if test "$?" -ne "0"; then
-    echo "ERROR: libcurl docs mismatch"
+    echo "ERROR: installed libcurl docs mismatch"
     exit
 fi
 
 diff -u <(find include/ -name "*.h" -printf "%f\n" | sort) <(find $PREFIX/include/ -name "*.h" -printf "%f\n" | sort)
+
+if test "$?" -ne "0"; then
+    echo "ERROR: installed include files mismatch"
+    exit
+fi
