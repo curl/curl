@@ -38,8 +38,5 @@ Test file for mkdir test
 <errorcode>
 21
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>
