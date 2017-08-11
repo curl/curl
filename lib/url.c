@@ -5149,11 +5149,14 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       conn->port = port;
   }
   else {
-    if(proxyptr[0]=='/')
+    if(proxyptr[0]=='/') {
       /* If the first character in the proxy string is a slash, fail
          immediately. The following code will otherwise clear the string which
          will lead to code running as if no proxy was set! */
+      Curl_safefree(proxyuser);
+      Curl_safefree(proxypasswd);
       return CURLE_COULDNT_RESOLVE_PROXY;
+    }
 
     /* without a port number after the host name, some people seem to use
        a slash so we strip everything from the first slash */
