@@ -468,6 +468,7 @@ endif()
 if(NOT CURL_DISABLE_LDAPS)
   check_include_file_concat("ldap_ssl.h" HAVE_LDAP_SSL_H)
   check_include_file_concat("ldapssl.h"  HAVE_LDAPSSL_H)
+  set(HAVE_LDAP_SSL HAVE_LDAP_SSL_H OR HAVE_LDAPSSL_H)
 endif()
 
 # Check for idn
