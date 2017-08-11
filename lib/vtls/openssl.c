@@ -1776,6 +1776,7 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
       failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
       return CURLE_NOT_BUILT_IN;
 #endif
+      /* FALLTHROUGH */
     case CURL_SSLVERSION_TLSv1_2:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
       *ctx_options |= SSL_OP_NO_TLSv1_1;
