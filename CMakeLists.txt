@@ -1113,7 +1113,7 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS, DARWINSSL
 if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR
-   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR DARWINSSL_ENABLED))
+   USE_WINDOWS_SSPI OR GNUTLS_ENABLED OR NSS_ENABLED OR USE_DARWINSSL))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
