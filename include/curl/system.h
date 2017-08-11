@@ -403,7 +403,7 @@
 #  if !defined(__LP64__) && (defined(__ILP32__) || \
       defined(__i386__) || defined(__ppc__) || defined(__arm__) || \
       defined(__sparc__) || defined(__mips__) || defined(__sh__) || \
-      defined(__XTENSA__))
+      defined(__XTENSA__) || (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4))
 #    define CURL_SIZEOF_LONG           4
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
@@ -412,7 +412,8 @@
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  elif defined(__LP64__) || \
-        defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__)
+        defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__) || \
+        (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 8)
 #    define CURL_SIZEOF_LONG           8
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
