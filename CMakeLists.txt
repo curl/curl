@@ -799,50 +799,6 @@ if(NOT HAVE_SIZEOF_SSIZE_T)
 endif(NOT HAVE_SIZEOF_SSIZE_T)
 # off_t is sized later, after the HAVE_FILE_OFFSET_BITS test
 
-# Different sizeofs, etc.
-
-#    define CURL_SIZEOF_LONG        4
-#    define CURL_TYPEOF_CURL_OFF_T  long long
-#    define CURL_FORMAT_CURL_OFF_T  "lld"
-#    define CURL_FORMAT_CURL_OFF_TU "llu"
-#    define CURL_FORMAT_OFF_T       "%lld"
-#    define CURL_SIZEOF_CURL_OFF_T  8
-#    define CURL_SUFFIX_CURL_OFF_T  LL
-#    define CURL_SUFFIX_CURL_OFF_TU ULL
-
-set(CURL_SIZEOF_LONG ${SIZEOF_LONG})
-
-if(SIZEOF_LONG EQUAL 8)
-  set(CURL_TYPEOF_CURL_OFF_T long)
-  set(CURL_SIZEOF_CURL_OFF_T 8)
-  set(CURL_FORMAT_CURL_OFF_T "ld")
-  set(CURL_FORMAT_CURL_OFF_TU "lu")
-  set(CURL_FORMAT_OFF_T "%ld")
-  set(CURL_SUFFIX_CURL_OFF_T L)
-  set(CURL_SUFFIX_CURL_OFF_TU UL)
-endif(SIZEOF_LONG EQUAL 8)
-
-if(SIZEOF_LONG_LONG EQUAL 8)
-  set(CURL_TYPEOF_CURL_OFF_T "long long")
-  set(CURL_SIZEOF_CURL_OFF_T 8)
-  set(CURL_FORMAT_CURL_OFF_T "lld")
-  set(CURL_FORMAT_CURL_OFF_TU "llu")
-  set(CURL_FORMAT_OFF_T "%lld")
-  set(CURL_SUFFIX_CURL_OFF_T LL)
-  set(CURL_SUFFIX_CURL_OFF_TU ULL)
-endif(SIZEOF_LONG_LONG EQUAL 8)
-
-if(NOT CURL_TYPEOF_CURL_OFF_T)
-  set(CURL_TYPEOF_CURL_OFF_T ${ssize_t})
-  set(CURL_SIZEOF_CURL_OFF_T ${SIZEOF_SSIZE_T})
-  # TODO: need adjustment here.
-  set(CURL_FORMAT_CURL_OFF_T "ld")
-  set(CURL_FORMAT_CURL_OFF_TU "lu")
-  set(CURL_FORMAT_OFF_T "%ld")
-  set(CURL_SUFFIX_CURL_OFF_T L)
-  set(CURL_SUFFIX_CURL_OFF_TU LU)
-endif(NOT CURL_TYPEOF_CURL_OFF_T)
-
 if(HAVE_SIZEOF_LONG_LONG)
   set(HAVE_LONGLONG 1)
   set(HAVE_LL 1)
@@ -1011,6 +967,13 @@ if(HAVE_FILE_OFFSET_BITS)
   set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
 endif(HAVE_FILE_OFFSET_BITS)
 check_type_size("off_t"  SIZEOF_OFF_T)
+
+# include this header to get the type
+set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
+set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
+check_type_size("curl_off_t"  SIZEOF_CURL_OFF_T)
+set(CMAKE_EXTRA_INCLUDE_FILES "")
+
 set(CMAKE_REQUIRED_FLAGS)
 
 foreach(CURL_TEST
