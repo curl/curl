@@ -33,7 +33,7 @@
  * https://www.opengroup.org/onlinepubs/009695399/functions/strtoimax.html
  */
 
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
 #  ifdef HAVE_STRTOLL
 #    define strtooff strtoll
 #  else

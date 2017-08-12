@@ -399,7 +399,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
     /* offsets aren't negative, this indicates weird input */
     return PARAM_NEGATIVE_NUMERIC;
 
-#if(CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if(SIZEOF_CURL_OFF_T > SIZEOF_LONG)
   {
     CURLofft offt = curlx_strtoofft(str, &endptr, 0, val);
     if(CURL_OFFT_FLOW == offt)
