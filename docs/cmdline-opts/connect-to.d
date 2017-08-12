@@ -14,8 +14,8 @@ protocols. "HOST1" and "PORT1" may be the empty string, meaning "any
 host/port". "HOST2" and "PORT2" may also be the empty string, meaning "use the
 request's original host/port".
 
-The "hosts" specified to this optionare compared as strings, so it need to
-match the string used in the request URL but can be either numerical such as
+A "host" specified to this option is compared as a string, so it needs to
+match the name used in request URL. It can be either numerical such as
 "127.0.0.1" or the full host name such as "example.org".
 
 This option can be used many times to add many connect rules.
