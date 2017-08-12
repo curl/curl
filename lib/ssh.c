@@ -2233,18 +2233,25 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           curl_off_t from, to;
           char *ptr;
           char *ptr2;
+          CURLofft to_t;
+          CURLofft from_t;
 
-          from=curlx_strtoofft(conn->data->state.range, &ptr, 0);
+          from_t = curlx_strtoofft(conn->data->state.range, &ptr, 0, &from);
+          if(from_t == CURL_OFFT_FLOW)
+            return CURLE_RANGE_ERROR;
           while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
             ptr++;
-          to=curlx_strtoofft(ptr, &ptr2, 0);
-          if((ptr == ptr2) /* no "to" value given */
+          to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
+          if(to_t == CURL_OFFT_FLOW)
+            return CURLE_RANGE_ERROR;
+          if((to_t == CURL_OFFT_INVAL) /* no "to" value given */
              || (to >= size)) {
             to = size - 1;
           }
-          if(from < 0) {
+          if(from_t) {
             /* from is relative to end of file */
-            from += size;
+            from = size - to;
+            to = size - 1;
           }
           if(from > size) {
             failf(data, "Offset (%"

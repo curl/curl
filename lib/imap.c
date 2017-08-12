@@ -1070,10 +1070,11 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
 
   if(*ptr == '{') {
     char *endptr;
-    size = curlx_strtoofft(ptr + 1, &endptr, 10);
-    if(endptr - ptr > 1 && endptr[0] == '}' &&
-       endptr[1] == '\r' && endptr[2] == '\0')
-      parsed = TRUE;
+    if(!curlx_strtoofft(ptr + 1, &endptr, 10, &size)) {
+      if(endptr - ptr > 1 && endptr[0] == '}' &&
+         endptr[1] == '\r' && endptr[2] == '\0')
+        parsed = TRUE;
+    }
   }
 
   if(parsed) {
