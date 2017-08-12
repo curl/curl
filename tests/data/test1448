@@ -1,0 +1,92 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+IDN
+followlocation
+--write-out
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 OK swsbounce
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+Content-Type: text/plain
+Location: http://åäö.se:8990/14480001
+
+redirect
+</data>
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain; charset=us-ascii
+
+OK
+</data1>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+idn
+</features>
+<setenv>
+LC_ALL=
+LC_CTYPE=en_US.UTF-8
+</setenv>
+<precheck>
+perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
+</precheck>
+ <name>
+Redirect following to UTF-8 IDN host name
+ </name>
+
+ <command>
+http://åäö.se:%HTTPPORT/1448 --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -L --connect-to %HOSTIP:8990:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1448 HTTP/1.1
+Host: xn--4cab6c.se:%HTTPPORT
+Accept: */*
+
+GET /14480001 HTTP/1.1
+Host: xn--4cab6c.se:%HTTPPORT
+Accept: */*
+
+</protocol>
+
+<stdout>
+HTTP/1.1 302 OK swsbounce
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+Content-Type: text/plain
+Location: http://åäö.se:%HTTPPORT/14480001
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain; charset=us-ascii
+
+OK
+</stdout>
+
+</verify>
+</testcase>
