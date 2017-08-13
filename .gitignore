@@ -40,7 +40,7 @@ config.sub
 configure
 curl-*.tar.bz2
 curl-*.tar.gz
-curl-*.tar.lzma
+curl-*.tar.xz
 curl-*.zip
 curl-config
 depcomp
