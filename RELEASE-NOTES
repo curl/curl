@@ -6,10 +6,6 @@ Curl and libcurl 7.55.1
  Public functions in libcurl:  61
  Contributors:                 1592
 
-This release includes the following changes:
-
- o
-
 This release includes the following bugfixes:
 
  o build: fix 'make install' with configure, install docs/libcurl/* too
@@ -27,6 +23,18 @@ This release includes the following bugfixes:
  o maketgz: remove old *.dist files before making the tarball [10]
  o openssl: remove CONST_ASN1_BIT_STRING [11]
  o openssl: fix "error: this statement may fall through"
+ o proxy: fix memory leak in case of invalid proxy server name [12]
+ o curl/system.h: support more architectures (OpenRISC, ARC) [13]
+ o docs: fix typos [14]
+ o curl/system.h: add Oracle Solaris Studio [15]
+ o CURLINFO_TOTAL_TIME: could wrongly return 4200 seconds [16]
+ o docs: --connect-to clarified
+ o cmake: allow user to override CMAKE_DEBUG_POSTFIX [17]
+ o travis: test cmake build on tarball too
+ o redirect: make it handle absolute redirects to IDN names [18]
+ o curl/system.h: fix for gcc on PowerPC [19]
+ o curl --interface: fixed for IPV6 unique local addresses [20]
+ o cmake: threads detection improvements [21]
 
 This release includes the following known bugs:
 
@@ -35,10 +43,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Sampson, Bernard Spil, Christian Weisgerber, Daniel Krügler,
-  Daniel Stenberg, David Benjamin, Isaac Boukris, Marcel Raad,
-  paulharris on github, Ray Satiro,
-  (10 contributors)
+  Adam Sampson, Alessandro Ghedini, Alex Potapenko, Bernard Spil,
+  Christian Weisgerber, Dagobert Michelsen, Dan Fandrich, Daniel Krügler,
+  Daniel Stenberg, David Benjamin, David Lord, Even Rouault, Han Qiao,
+  Isaac Boukris, James Slaughter, Marcel Raad, paulharris on github,
+  Ray Satiro, Salah-Eddin Shaban, Sergei Nikulov, Simon Warta,
+  Thomas Petazzoni,
+  (22 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -55,3 +66,13 @@ References to bug reports and discussions on issues:
  [9] = https://curl.haxx.se/bug/?i=1743
  [10] = https://curl.haxx.se/mail/lib-2017-08/0050.html
  [11] = https://curl.haxx.se/bug/?i=1759
+ [12] = https://curl.haxx.se/bug/?i=1761
+ [13] = https://curl.haxx.se/bug/?i=1766
+ [14] = https://curl.haxx.se/bug/?i=1770
+ [15] = https://curl.haxx.se/bug/?i=1752
+ [16] = https://curl.haxx.se/bug/?i=1769
+ [17] = https://curl.haxx.se/bug/?i=1763
+ [18] = https://curl.haxx.se/bug/?i=1762
+ [19] = https://curl.haxx.se/bug/?i=1774
+ [20] = https://curl.haxx.se/bug/?i=1764
+ [21] = https://curl.haxx.se/bug/?i=1719
