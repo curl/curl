@@ -54,7 +54,7 @@ static const struct helptxt helptext[] = {
    "Append to target file when uploading"},
   {"    --basic",
    "Use HTTP Basic Authentication"},
-  {"    --cacert <CA certificate>",
+  {"    --cacert <file>",
    "CA certificate to verify peer against"},
   {"    --capath <dir>",
    "CA directory to verify peer against"},
