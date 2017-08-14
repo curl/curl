@@ -400,9 +400,13 @@ ParameterError str2offset(curl_off_t *val, const char *str)
     return PARAM_NEGATIVE_NUMERIC;
 
 #if(CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
-  *val = curlx_strtoofft(str, &endptr, 0);
-  if((*val == CURL_OFF_T_MAX || *val == CURL_OFF_T_MIN) && (errno == ERANGE))
-    return PARAM_NUMBER_TOO_LARGE;
+  {
+    CURLofft offt = curlx_strtoofft(str, &endptr, 0, val);
+    if(CURL_OFFT_FLOW == offt)
+      return PARAM_NUMBER_TOO_LARGE;
+    else if(CURL_OFFT_INVAL == offt)
+      return PARAM_BAD_NUMERIC;
+  }
 #else
   errno = 0;
   *val = strtol(str, &endptr, 0);

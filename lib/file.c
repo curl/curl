@@ -139,26 +139,28 @@ static CURLcode file_range(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
 
   if(data->state.use_range && data->state.range) {
-    from=curlx_strtoofft(data->state.range, &ptr, 0);
+    CURLofft from_t;
+    CURLofft to_t;
+    from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
+    if(from_t == CURL_OFFT_FLOW)
+      return CURLE_RANGE_ERROR;
     while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
       ptr++;
-    to=curlx_strtoofft(ptr, &ptr2, 0);
-    if(ptr == ptr2) {
-      /* we didn't get any digit */
-      to=-1;
-    }
-    if((-1 == to) && (from>=0)) {
+    to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
+    if(to_t == CURL_OFFT_FLOW)
+      return CURLE_RANGE_ERROR;
+    if((to_t == CURL_OFFT_INVAL) && !from_t) {
       /* X - */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE %" CURL_FORMAT_CURL_OFF_T " to end of file\n",
                    from));
     }
-    else if(from < 0) {
+    else if((from_t == CURL_OFFT_INVAL) && !to_t) {
       /* -Y */
-      data->req.maxdownload = -from;
-      data->state.resume_from = from;
+      data->req.maxdownload = to;
+      data->state.resume_from = -to;
       DEBUGF(infof(data, "RANGE the last %" CURL_FORMAT_CURL_OFF_T " bytes\n",
-                   -from));
+                   to));
     }
     else {
       /* X-Y */

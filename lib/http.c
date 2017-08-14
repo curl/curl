@@ -3486,28 +3486,32 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     /* Check for Content-Length: header lines to get size */
     if(!k->ignorecl && !data->set.ignorecl &&
        checkprefix("Content-Length:", k->p)) {
-      curl_off_t contentlength = curlx_strtoofft(k->p+15, NULL, 10);
-      if(data->set.max_filesize &&
-         contentlength > data->set.max_filesize) {
-        failf(data, "Maximum file size exceeded");
-        return CURLE_FILESIZE_EXCEEDED;
+      curl_off_t contentlength;
+      if(!curlx_strtoofft(k->p+15, NULL, 10, &contentlength)) {
+        if(data->set.max_filesize &&
+           contentlength > data->set.max_filesize) {
+          failf(data, "Maximum file size exceeded");
+          return CURLE_FILESIZE_EXCEEDED;
+        }
+        if(contentlength >= 0) {
+          k->size = contentlength;
+          k->maxdownload = k->size;
+          /* we set the progress download size already at this point
+             just to make it easier for apps/callbacks to extract this
+             info as soon as possible */
+          Curl_pgrsSetDownloadSize(data, k->size);
+        }
+        else {
+          /* Negative Content-Length is really odd, and we know it
+             happens for example when older Apache servers send large
+             files */
+          streamclose(conn, "negative content-length");
+          infof(data, "Negative content-length: %" CURL_FORMAT_CURL_OFF_T
+                ", closing after transfer\n", contentlength);
+        }
       }
-      if(contentlength >= 0) {
-        k->size = contentlength;
-        k->maxdownload = k->size;
-        /* we set the progress download size already at this point
-           just to make it easier for apps/callbacks to extract this
-           info as soon as possible */
-        Curl_pgrsSetDownloadSize(data, k->size);
-      }
-      else {
-        /* Negative Content-Length is really odd, and we know it
-           happens for example when older Apache servers send large
-           files */
-        streamclose(conn, "negative content-length");
-        infof(data, "Negative content-length: %" CURL_FORMAT_CURL_OFF_T
-              ", closing after transfer\n", contentlength);
-      }
+      else
+        infof(data, "Illegal Content-Length: header\n");
     }
     /* check for Content-Type: header lines to get the MIME-type */
     else if(checkprefix("Content-Type:", k->p)) {
@@ -3682,11 +3686,11 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
       /* if it truly stopped on a digit */
       if(ISDIGIT(*ptr)) {
-        k->offset = curlx_strtoofft(ptr, NULL, 10);
-
-        if(data->state.resume_from == k->offset)
-          /* we asked for a resume and we got it */
-          k->content_range = TRUE;
+        if(!curlx_strtoofft(ptr, NULL, 10, &k->offset)) {
+          if(data->state.resume_from == k->offset)
+            /* we asked for a resume and we got it */
+            k->content_range = TRUE;
+        }
       }
       else
         data->state.resume_from = 0; /* get everything */
