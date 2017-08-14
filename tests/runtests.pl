@@ -3585,9 +3585,9 @@ sub singletest {
 
         for $k (@keywords) {
             chomp $k;
-            if ($disabled_keywords{$k}) {
+            if ($disabled_keywords{lc($k)}) {
                 $why = "disabled by keyword";
-            } elsif ($enabled_keywords{$k}) {
+            } elsif ($enabled_keywords{lc($k)}) {
                 $match = 1;
             }
         }
@@ -5382,7 +5382,7 @@ EOHELP
         $disabled_keywords{$1}=$1;
     }
     elsif($ARGV[0] =~ /^([-[{a-zA-Z].*)/) {
-        $enabled_keywords{$1}=$1;
+        $enabled_keywords{lc($1)}=$1;
     }
     else {
         print "Unknown option: $ARGV[0]\n";
