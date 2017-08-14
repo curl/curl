@@ -523,8 +523,8 @@ static CURLcode CONNECT(struct connectdata *conn,
                   k->httpcode);
           }
           else {
-            s->cl = curlx_strtoofft(s->line_start +
-                                    strlen("Content-Length:"), NULL, 10);
+            (void)curlx_strtoofft(s->line_start +
+                                  strlen("Content-Length:"), NULL, 10, &s->cl);
           }
         }
         else if(Curl_compareheader(s->line_start, "Connection:", "close"))
