@@ -90,13 +90,13 @@ script:
     - |
         if [ "$T" = "debug" ]; then
              ./configure --enable-debug --enable-werror $C
-             make
+             make && make examples
              make TFLAGS=-n test-nonflaky
         fi
     - |
         if [ "$T" = "normal" ]; then
              ./configure --enable-warnings --enable-werror $C
-             make
+             make && make examples
              make test-nonflaky
         fi
     - |
