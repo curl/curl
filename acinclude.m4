@@ -3243,3 +3243,29 @@ AC_DEFUN([CURL_MAC_CFLAGS], [
   fi
 
 ])
+
+
+dnl CURL_SUPPORTS_BUILTIN_AVAILABLE
+dnl
+dnl Check to see if the compiler supports __builtin_available. This built-in
+dnl compiler function first appeared in Apple LLVM 9.0.0. It's so new that, at
+dnl the time this macro was written, the function was not yet documented. Its
+dnl purpose is to return true if the code is running under a certain OS version
+dnl or later.
+
+AC_DEFUN([CURL_SUPPORTS_BUILTIN_AVAILABLE], [
+  AC_MSG_CHECKING([to see if the compiler supports __builtin_available()])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <stdlib.h>
+    ]],[[
+      if (__builtin_available(macOS 10.8, iOS 5.0, *)) {}
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_BUILTIN_AVAILABLE, 1,
+        [Define to 1 if you have the __builtin_available function.])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+])

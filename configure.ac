@@ -354,6 +354,7 @@ esac
 CURL_CHECK_WIN32_LARGEFILE
 
 CURL_MAC_CFLAGS
+CURL_SUPPORTS_BUILTIN_AVAILABLE
 
 dnl ************************************************************
 dnl switch off particular protocols
