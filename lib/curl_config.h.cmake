@@ -51,9 +51,6 @@
 /* to disable RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
-/* to disable RTMP */
-#cmakedefine CURL_DISABLE_RTMP 1
-
 /* to disable SMB */
 #cmakedefine CURL_DISABLE_SMB 1
 
