@@ -79,9 +79,6 @@
 /* when not building a shared library */
 #cmakedefine CURL_STATICLIB 1
 
-/* Set to explicitly specify we don't want to use thread-safe functions */
-#cmakedefine DISABLED_THREADSAFE 1
-
 /* your Entropy Gathering Daemon socket pathname */
 #cmakedefine EGD_SOCKET ${EGD_SOCKET}
 
