@@ -1259,6 +1259,8 @@ struct Progress {
   struct curltime t_startop;
   struct curltime t_acceptdata;
 
+  bool is_t_startransfer_set;
+
   /* upload speed limit */
   struct curltime ul_limit_start;
   curl_off_t ul_limit_size;

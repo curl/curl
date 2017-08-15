@@ -54,6 +54,7 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   pro->t_starttransfer = 0;
   pro->timespent = 0;
   pro->t_redirect = 0;
+  pro->is_t_startransfer_set = false;
 
   info->httpcode = 0;
   info->httpproxycode = 0;
