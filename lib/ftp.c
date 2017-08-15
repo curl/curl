@@ -3197,6 +3197,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
     size_t dlen = strlen(path)-flen;
     if(!ftpc->cwdfail) {
+      ftpc->prevmethod = data->set.ftp_filemethod;
       if(dlen && (data->set.ftp_filemethod != FTPFILE_NOCWD)) {
         ftpc->prevpath = path;
         if(flen)
@@ -4305,7 +4306,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
     dlen -= ftpc->file?strlen(ftpc->file):0;
     if((dlen == strlen(ftpc->prevpath)) &&
-       !strncmp(path, ftpc->prevpath, dlen)) {
+       !strncmp(path, ftpc->prevpath, dlen) &&
+       (ftpc->prevmethod == data->set.ftp_filemethod)) {
       infof(data, "Request has same path as previous transfer\n");
       ftpc->cwddone = TRUE;
     }
