@@ -1196,7 +1196,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     }
     else {
       /* Successfully sent so adjust the response timeout relative to now */
-      pp->response = Curl_tvnow();
+      pp->response = curlx_tvnow();
 
       free(eob);
     }

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,7 +60,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
   time_t timeleft;
   *n = 0;
   for(;;) {
-    timeleft = Curl_timeleft(conn->data, NULL, TRUE);
+    timeleft = Curl_timeleft(conn->data, TRUE);
     if(timeleft < 0) {
       /* we already got the timeout */
       result = CURLE_OPERATION_TIMEDOUT;
@@ -121,7 +121,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
   curl_socket_t sock = conn->sock[sockindex];
   struct Curl_easy *data = conn->data;
 
-  if(Curl_timeleft(data, NULL, TRUE) < 0) {
+  if(Curl_timeleft(data, TRUE) < 0) {
     /* time-out, bail out, go home */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
@@ -402,7 +402,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
   }
 
   /* get timeout */
-  timeout = Curl_timeleft(data, NULL, TRUE);
+  timeout = Curl_timeleft(data, TRUE);
 
   if(timeout < 0) {
     /* time-out, bail out, go home */

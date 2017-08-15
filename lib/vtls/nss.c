@@ -2049,7 +2049,7 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
 
 
   /* check timeout situation */
-  const time_t time_left = Curl_timeleft(data, NULL, TRUE);
+  const time_t time_left = Curl_timeleft(data, TRUE);
   if(time_left < 0) {
     failf(data, "timed out before SSL handshake");
     result = CURLE_OPERATION_TIMEDOUT;

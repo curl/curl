@@ -166,8 +166,9 @@ void Curl_pgrsResetTimesSizes(struct Curl_easy *data)
  */
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  struct curltime now = Curl_tvnow();
+  struct curltime now = curlx_tvnow();
   time_t *delta = NULL;
+  data->state.now = now;
 
   switch(timer) {
   default:
@@ -181,6 +182,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
   case TIMER_STARTSINGLE:
     /* This is set at the start of each single fetch */
     data->progress.t_startsingle = now;
+    infof(data, "TIMER_STARTSINGLE\n");
     break;
   case TIMER_STARTACCEPT:
     data->progress.t_acceptdata = now;
@@ -229,7 +231,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
-  data->progress.start = Curl_tvnow();
+  data->progress.start = curlx_tvnow();
   data->progress.ul_limit_start.tv_sec = 0;
   data->progress.ul_limit_start.tv_usec = 0;
   data->progress.dl_limit_start.tv_sec = 0;
@@ -276,7 +278,7 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
     return -1;
 
   minimum = (time_t) (CURL_OFF_T_C(1000) * size / limit);
-  actual = Curl_tvdiff(now, start);
+  actual = curlx_tvdiff(now, start);
 
   if(actual < minimum)
     /* this is a conversion on some systems (64bit time_t => 32bit long) */
@@ -287,8 +289,8 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct curltime now = Curl_tvnow();
-
+  struct curltime now = curlx_tvnow();
+  data->state.now = now;
   data->progress.downloaded = size;
 
   /* download speed limit */
@@ -305,7 +307,7 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct curltime now = Curl_tvnow();
+  struct curltime now = curlx_tvnow();
 
   data->progress.uploaded = size;
 
@@ -372,7 +374,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   curl_off_t total_estimate;
   bool shownow=FALSE;
 
-  now = Curl_tvnow(); /* what time is it */
+  now = curlx_tvnow(); /* what time is it */
 
   /* The time spent so far (from the start) */
   data->progress.timespent = Curl_tvdiff_us(now, data->progress.start);
@@ -424,8 +426,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
         data->progress.speeder_c%CURR_TIME:0;
 
       /* Figure out the exact time for the time span */
-      span_ms = Curl_tvdiff(now,
-                            data->progress.speeder_time[checkindex]);
+      span_ms = curlx_tvdiff(now,
+                             data->progress.speeder_time[checkindex]);
       if(0 == span_ms)
         span_ms=1; /* at least one millisecond MUST have passed */
 

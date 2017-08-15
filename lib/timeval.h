@@ -52,10 +52,10 @@ time_t curlx_tvdiff(struct curltime t1, struct curltime t2);
  */
 time_t Curl_tvdiff_us(struct curltime newer, struct curltime older);
 
-/* These two defines below exist to provide the older API for library
-   internals only. */
-#define Curl_tvnow() curlx_tvnow()
-#define Curl_tvdiff(x,y) curlx_tvdiff(x,y)
+#ifdef CURLDEBUG
+void curlx_tvnow_set(struct curltime now);
+#endif
+
+
 
 #endif /* HEADER_CURL_TIMEVAL_H */
-

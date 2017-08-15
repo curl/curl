@@ -683,7 +683,6 @@ struct SingleRequest {
                              code) result in a CURLE_GOT_NOTHING error code */
 
   struct curltime start;         /* transfer started at this time */
-  struct curltime now;           /* current time */
   bool header;                  /* incoming data has HTTP header */
   enum {
     HEADER_NORMAL,              /* no bad header at all */
@@ -1020,7 +1019,8 @@ struct connectdata {
   int httpversion;        /* the HTTP version*10 reported by the server */
   int rtspversion;        /* the RTSP version*10 reported by the server */
 
-  struct curltime now;     /* "current" time */
+  struct curltime setup_time; /* when the connection was setup to get used (or
+                                 reused) */
   struct curltime created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
@@ -1380,7 +1380,7 @@ struct UrlState {
 
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
-
+  struct curltime now;         /* time right now */
   struct connectdata *lastconnect; /* The last connection, NULL if undefined */
 
   char *headerbuff; /* allocated buffer to store headers in */

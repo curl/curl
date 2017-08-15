@@ -59,8 +59,8 @@ static void unit_stop(void)
  */
 
 struct timetest {
-  int now_s;
-  int now_us;
+  time_t now_s;
+  unsigned int now_us;
   int timeout_ms;
   int connecttimeout_ms;
   bool connecting;
@@ -137,9 +137,12 @@ UNITTEST_START
   for(i=0; i < sizeof(run)/sizeof(run[0]); i++) {
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout =  Curl_timeleft(data, &now, run[i].connecting);
-    if(timeout != run[i].result)
+    curlx_tvnow_set(now);
+    timeout =  Curl_timeleft(data, run[i].connecting);
+    if(timeout != run[i].result) {
+      fprintf(stderr, "test %d returned %d\n", i, timeout);
       fail(run[i].comment);
+    }
   }
 }
 UNITTEST_STOP

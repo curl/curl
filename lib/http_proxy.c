@@ -313,7 +313,7 @@ static CURLcode CONNECT(struct connectdata *conn,
       s->perline = 0;
     } /* END CONNECT PHASE */
 
-    check = Curl_timeleft(data, NULL, TRUE);
+    check = Curl_timeleft(data, TRUE);
     if(check <= 0) {
       failf(data, "Proxy CONNECT aborted due to timeout");
       return CURLE_OPERATION_TIMEDOUT;
