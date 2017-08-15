@@ -135,6 +135,7 @@ struct ftp_conn {
                        caching the current directory */
   bool wait_data_conn; /* this is set TRUE if data connection is waited */
   char *prevpath;   /* conn->path from the previous transfer */
+  curl_ftpfile prevmethod; /* ftp method in previous transfer  */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
   int count1; /* general purpose counter for the state machine */
