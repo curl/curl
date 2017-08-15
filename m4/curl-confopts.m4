@@ -37,13 +37,13 @@ AC_HELP_STRING([--enable-threaded-resolver],[Enable threaded resolver])
 AC_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
   OPT_THRES=$enableval)
   case "$OPT_THRES" in
-    *)
-      dnl configure option not specified
-      want_thres="yes"
-      ;;
     no)
       dnl --disable-threaded-resolver option used
       want_thres="no"
+      ;;
+    *)
+      dnl configure option not specified
+      want_thres="yes"
       ;;
   esac
   AC_MSG_RESULT([$want_thres])
