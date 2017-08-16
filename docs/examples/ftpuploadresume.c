@@ -29,7 +29,8 @@
 #include <curl/curl.h>
 
 /* parse headers for Content-Length */
-static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb,
+                                   void *stream)
 {
   int r;
   long len = 0;
