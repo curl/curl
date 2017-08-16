@@ -46,10 +46,6 @@
  * If SIZEOF_SIZE_T has not been defined, default to the size of long.
  */
 
-#ifndef SIZEOF_SIZE_T
-#  define SIZEOF_SIZE_T CURL_SIZEOF_LONG
-#endif
-
 #ifdef HAVE_LONGLONG
 #  define LONG_LONG_TYPE long long
 #  define HAVE_LONG_LONG_TYPE
@@ -326,7 +322,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           break;
 #if defined(MP_HAVE_INT_EXTENSIONS)
         case 'I':
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
@@ -355,7 +351,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 #endif
           break;
         case 'O':
-#if (CURL_SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
