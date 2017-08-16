@@ -40,7 +40,7 @@
  * of 'long' the conversion function to use is strtol().
  */
 
-#if (CURL_SIZEOF_CURL_OFF_T == 4)
+#if (SIZEOF_CURL_OFF_T == 4)
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
 #else
    /* assume CURL_SIZEOF_CURL_OFF_T == 8 */

@@ -888,6 +888,9 @@
 /* The size of `off_t', as computed by sizeof. */
 #cmakedefine SIZEOF_OFF_T ${SIZEOF_OFF_T}
 
+/* The size of `curl_off_t', as computed by sizeof. */
+#cmakedefine SIZEOF_CURL_OFF_T ${SIZEOF_CURL_OFF_T}
+
 /* The size of `size_t', as computed by sizeof. */
 #cmakedefine SIZEOF_SIZE_T ${SIZEOF_SIZE_T}
 
