@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
  * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -22,7 +22,7 @@
  ***************************************************************************/
 
 /*
- * Source file for all iOS and Mac OS X SecureTransport-specific code for the
+ * Source file for all iOS and macOS SecureTransport-specific code for the
  * TLS/SSL layer. No code but vtls.c should ever call or use these functions.
  */
 
@@ -48,12 +48,14 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonDigest.h>
 
-/* The Security framework has changed greatly between iOS and different OS X
+/* The Security framework has changed greatly between iOS and different macOS
    versions, and we will try to support as many of them as we can (back to
    Leopard and iOS 5) by using macros and weak-linking.
 
-   IMPORTANT: If TLS 1.1 and 1.2 support are important for you on OS X, then
-   you must build this project against the 10.8 SDK or later. */
+   In general, you want to build this using the most recent OS SDK, since some
+   features require curl to be built against the latest SDK. TLS 1.1 and 1.2
+   support, for instance, require the macOS 10.8 SDK or later. TLS 1.3
+   requires the macOS 10.13 or iOS 11 SDK or later. */
 #if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
@@ -62,6 +64,7 @@
 
 #define CURL_BUILD_IOS 0
 #define CURL_BUILD_IOS_7 0
+#define CURL_BUILD_IOS_11 0
 #define CURL_BUILD_MAC 1
 /* This is the maximum API level we are allowed to use when building: */
 #define CURL_BUILD_MAC_10_5 MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
@@ -69,10 +72,11 @@
 #define CURL_BUILD_MAC_10_7 MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 #define CURL_BUILD_MAC_10_8 MAC_OS_X_VERSION_MAX_ALLOWED >= 1080
 #define CURL_BUILD_MAC_10_9 MAC_OS_X_VERSION_MAX_ALLOWED >= 1090
+#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300
 /* These macros mean "the following code is present to allow runtime backward
    compatibility with at least this cat or earlier":
-   (You set this at build-time by setting the MACOSX_DEPLOYMENT_TARGET
-   environmental variable.) */
+   (You set this at build-time using the compiler command line option
+   "-mmacos-version-min.") */
 #define CURL_SUPPORT_MAC_10_5 MAC_OS_X_VERSION_MIN_REQUIRED <= 1050
 #define CURL_SUPPORT_MAC_10_6 MAC_OS_X_VERSION_MIN_REQUIRED <= 1060
 #define CURL_SUPPORT_MAC_10_7 MAC_OS_X_VERSION_MIN_REQUIRED <= 1070
@@ -82,11 +86,14 @@
 #elif TARGET_OS_EMBEDDED || TARGET_OS_IPHONE
 #define CURL_BUILD_IOS 1
 #define CURL_BUILD_IOS_7 __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
+#define CURL_BUILD_IOS_11 __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
 #define CURL_BUILD_MAC 0
 #define CURL_BUILD_MAC_10_5 0
 #define CURL_BUILD_MAC_10_6 0
 #define CURL_BUILD_MAC_10_7 0
 #define CURL_BUILD_MAC_10_8 0
+#define CURL_BUILD_MAC_10_9 0
+#define CURL_BUILD_MAC_10_13 0
 #define CURL_SUPPORT_MAC_10_5 0
 #define CURL_SUPPORT_MAC_10_6 0
 #define CURL_SUPPORT_MAC_10_7 0
@@ -809,6 +816,30 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher)
       return "TLS_RSA_PSK_WITH_NULL_SHA384";
       break;
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
+#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+    /* New ChaCha20+Poly1305 cipher-suites used by TLS 1.3: */
+    case TLS_AES_128_GCM_SHA256:
+      return "TLS_AES_128_GCM_SHA256";
+      break;
+    case TLS_AES_256_GCM_SHA384:
+      return "TLS_AES_256_GCM_SHA384";
+      break;
+    case TLS_CHACHA20_POLY1305_SHA256:
+      return "TLS_CHACHA20_POLY1305_SHA256";
+      break;
+    case TLS_AES_128_CCM_SHA256:
+      return "TLS_AES_128_CCM_SHA256";
+      break;
+    case TLS_AES_128_CCM_8_SHA256:
+      return "TLS_AES_128_CCM_8_SHA256";
+      break;
+    case TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
+      return "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256";
+      break;
+    case TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:
+      return "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256";
+      break;
+#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
   }
   return "TLS_NULL_WITH_NULL_NULL";
 }
@@ -1094,6 +1125,15 @@ static CURLcode darwinssl_version_from_curl(SSLProtocol *darwinver,
       *darwinver = kTLSProtocol12;
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_3:
+      /* TLS 1.3 support first appeared in iOS 11 and macOS 10.13 */
+#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+      /* We can assume __builtin_available() will always work in the
+         10.13/11.0 SDK: */
+      if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
+        *darwinver = kTLSProtocol13;
+        return CURLE_OK;
+      }
+#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
       break;
   }
   return CURLE_SSL_CONNECT_ERROR;
@@ -1107,12 +1147,27 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   long ssl_version = SSL_CONN_CONFIG(version);
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
+  long max_supported_version_by_os;
+
+  /* macOS 10.5-10.7 supported TLS 1.0 only.
+     macOS 10.8 and later, and iOS 5 and later, added TLS 1.1 and 1.2.
+     macOS 10.13 and later, and iOS 11 and later, added TLS 1.3. */
+#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+  if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
+    max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_3;
+  }
+  else {
+    max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_2;
+  }
+#else
+  max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_2;
+#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
 
   switch(ssl_version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       ssl_version = CURL_SSLVERSION_TLSv1_0;
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+      ssl_version_max = max_supported_version_by_os;
       break;
   }
 
@@ -1121,7 +1176,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
       ssl_version_max = ssl_version << 16;
       break;
     case CURL_SSLVERSION_MAX_DEFAULT:
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+      ssl_version_max = max_supported_version_by_os;
       break;
   }
 
@@ -1170,7 +1225,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
                                             true);
           break;
         case CURL_SSLVERSION_TLSv1_3:
-          failf(data, "DarwinSSL: TLS 1.3 is not yet supported");
+          failf(data, "Your version of the OS does not support TLSv1.3");
           return CURLE_SSL_CONNECT_ERROR;
       }
     }
@@ -1249,7 +1304,16 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
+#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+      if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
+        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol13);
+      }
+      else {
+        (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
+      }
+#else
       (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
+#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
       break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
@@ -2281,7 +2345,13 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         infof(data, "TLS 1.2 connection using %s\n",
               TLSCipherNameForNumber(cipher));
         break;
-#endif
+#endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
+#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+      case kTLSProtocol13:
+        infof(data, "TLS 1.3 connection using %s\n",
+              TLSCipherNameForNumber(cipher));
+        break;
+#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
       default:
         infof(data, "Unknown protocol connection\n");
         break;
