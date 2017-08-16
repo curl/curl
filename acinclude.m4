@@ -2084,20 +2084,6 @@ _EOF
 ])
 
 
-dnl CURL_CONFIGURE_LONG
-dnl -------------------------------------------------
-dnl Find out the size of long as reported by sizeof() and define
-dnl CURL_SIZEOF_LONG.
-
-AC_DEFUN([CURL_CONFIGURE_LONG], [
-  if test -z "$ac_cv_sizeof_long" ||
-    test "$ac_cv_sizeof_long" -eq "0"; then
-    AC_MSG_ERROR([cannot find out size of long.])
-  fi
-  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_LONG], [$ac_cv_sizeof_long])
-])
-
-
 dnl CURL_CONFIGURE_CURL_SOCKLEN_T
 dnl -------------------------------------------------
 dnl The need for the curl_socklen_t definition arises mainly to properly

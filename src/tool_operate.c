@@ -184,7 +184,7 @@ static curl_off_t VmsSpecialSize(const char *name,
 #endif /* __VMS */
 
 #if defined(HAVE_UTIME) || \
-    (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8))
+    (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
 static void setfiletime(long filetime, const char *filename,
                         FILE *error_stream)
 {
@@ -192,10 +192,10 @@ static void setfiletime(long filetime, const char *filename,
 /* Windows utime() may attempt to adjust our unix gmt 'filetime' by a daylight
    saving time offset and since it's GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass utime and set the times directly. */
-#if defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)
+#if defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)
     HANDLE hfile;
 
-#if (CURL_SIZEOF_LONG >= 8)
+#if (SIZEOF_LONG >= 8)
     /* 910670515199 is the maximum unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
     if(filetime > CURL_OFF_T_C(910670515199)) {
@@ -204,7 +204,7 @@ static void setfiletime(long filetime, const char *filename,
               filetime);
       return;
     }
-#endif /* CURL_SIZEOF_LONG >= 8 */
+#endif /* SIZEOF_LONG >= 8 */
 
     hfile = CreateFileA(filename, FILE_WRITE_ATTRIBUTES,
                         (FILE_SHARE_READ | FILE_SHARE_WRITE |
@@ -254,7 +254,7 @@ static void setfiletime(long filetime, const char *filename,
   }
 }
 #endif /* defined(HAVE_UTIME) || \
-          (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)) */
+          (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
 
 #define BUFFER_SIZE (100*1024)
 
@@ -1844,7 +1844,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #endif
 
 #if defined(HAVE_UTIME) || \
-    (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8))
+    (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
         /* File time can only be set _after_ the file has been closed */
         if(!result && config->remote_time && outs.s_isreg && outs.filename) {
           /* Ask libcurl if we got a remote file time */
@@ -1854,7 +1854,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             setfiletime(filetime, outs.filename, config->global->errors);
         }
 #endif /* defined(HAVE_UTIME) || \
-          (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)) */
+          (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink && result == CURLE_OK) {
