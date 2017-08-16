@@ -258,6 +258,7 @@ man_MANS =                                      \
   CURLOPT_SOCKS5_GSSAPI_NEC.3                   \
   CURLOPT_SOCKS5_GSSAPI_SERVICE.3               \
   CURLOPT_SSH_AUTH_TYPES.3                      \
+  CURLOPT_SSH_COMPRESSION.3                     \
   CURLOPT_SSH_HOST_PUBLIC_KEY_MD5.3             \
   CURLOPT_SSH_KEYDATA.3                         \
   CURLOPT_SSH_KEYFUNCTION.3                     \
