@@ -1,0 +1,103 @@
+#ifndef HEADER_CURL_MIME_H
+#define HEADER_CURL_MIME_H
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+
+#define MIME_RAND_BOUNDARY_CHARS        16  /* Nb. of random boundary chars. */
+
+/* Part flags. */
+#define USERHEADERS_OWNER               (1 << 0)
+
+/* Part source kinds. */
+enum partkind {
+  MIME_NONE = 0,   /* Part not set. */
+  MIME_DATA,       /* Allocated mime data. */
+  MIME_NAMEDFILE,  /* Data from named file. */
+  MIME_FILE,       /* Data from file pointer. */
+  MIME_CALLBACK,   /* Data from `read' callback. */
+  MIME_MULTIPART,  /* Data is a mime subpart. */
+};
+
+/* Readback state tokens. */
+enum mimestate {
+  MIME_BEGIN,           /* Readback has not yet started. */
+  MIME_CURLHEADERS,     /* In curl-generated headers. */
+  MIME_USERHEADERS,     /* In caller's supplied headers. */
+  MIME_EOH,             /* End of headers. */
+  MIME_BOUNDARY1,       /* In boundary prefix. */
+  MIME_BOUNDARY2,       /* In boundary. */
+  MIME_CONTENT,         /* In content. */
+  MIME_END,             /* End of part reached. */
+};
+
+/* Mime readback state. */
+struct mime_state {
+  enum mimestate state;       /* Current state token. */
+  void *         ptr;         /* State-dependent pointer. */
+  size_t         offset;      /* State-dependent offset. */
+};
+
+/* A mime context. */
+struct Curl_mime {
+  char *                 boundary;     /* The part boundary. */
+  struct Curl_mimepart * firstpart;    /* First part. */
+  struct Curl_mimepart * lastpart;     /* Last part. */
+  curl_off_t             size;         /* Total size or -1. */
+  struct mime_state      state;        /* Current readback state. */
+};
+
+/* A mime part. */
+struct Curl_mimepart {
+  struct Curl_mimepart * nextpart;     /* Forward linked list. */
+  enum partkind          kind;         /* The part kind. */
+  char *                 data;         /* Memory data or file name. */
+  curl_read_callback     readfunc;     /* Read function. */
+  curl_seek_callback     seekfunc;     /* Seek function. */
+  curl_free_callback     freefunc;     /* Argument free function. */
+  void *                 arg;          /* Argument to callback functions. */
+  FILE *                 namedfp;      /* Named file pointer. */
+  struct curl_slist *    curlheaders;  /* Part headers. */
+  struct curl_slist *    userheaders;  /* Part headers. */
+  char *                 mimetype;     /* Part mime type. */
+  char *                 filename;     /* Remote file name. */
+  char *                 name;         /* Data name. */
+  size_t                 namesize;     /* Data name size. */
+  curl_off_t             origin;       /* Origin file offset. */
+  curl_off_t             datasize;     /* Expected data size. */
+  unsigned int           flags;        /* Flags. */
+  struct mime_state      state;        /* Current readback state. */
+};
+
+
+/* Prototypes. */
+void Curl_mime_initpart(struct Curl_mimepart *part);
+void Curl_mime_cleanpart(struct Curl_mimepart *part);
+CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
+                                   const char *contenttype,
+                                   const char *disposition);
+curl_off_t Curl_mime_size(struct Curl_mimepart *part, int bodyonly);
+size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
+                      void *instream);
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part);
+CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
+
+#endif /* HEADER_CURL_MIME_H */
