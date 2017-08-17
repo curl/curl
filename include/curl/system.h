@@ -344,8 +344,8 @@
 
 #elif defined(__GNUC__)
 #  if !defined(__LP64__) &&                                             \
-  (defined(__ILP32__) ||                                                \
-   defined(__i386__) || defined(__powerpc__) || defined(__arm__) ||     \
+  (defined(__ILP32__) || defined(__i386__) ||                           \
+   defined(__ppc__) || defined(__powerpc__) || defined(__arm__) ||      \
    defined(__sparc__) || defined(__mips__) || defined(__sh__) ||        \
    defined(__XTENSA__) ||                                               \
    (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4))
