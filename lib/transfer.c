@@ -73,6 +73,7 @@
 #include "connect.h"
 #include "non-ascii.h"
 #include "http2.h"
+#include "mime.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -256,6 +257,12 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   if(data->set.postfields ||
      (data->set.httpreq == HTTPREQ_POST_FORM))
     ; /* do nothing */
+  else if(data->set.httpreq == HTTPREQ_POST_MIME) {
+    if(Curl_mime_rewind(&data->set.mimepost)) {
+      failf(data, "Cannot rewind mime data");
+      return CURLE_SEND_FAIL_REWIND;
+    }
+  }
   else {
     if(data->set.seek_func) {
       int err;
@@ -1826,7 +1833,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * can be overridden with CURLOPT_POSTREDIR.
      */
     if((data->set.httpreq == HTTPREQ_POST
-        || data->set.httpreq == HTTPREQ_POST_FORM)
+        || data->set.httpreq == HTTPREQ_POST_FORM
+        || data->set.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       infof(data, "Switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;
@@ -1850,7 +1858,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * can be overridden with CURLOPT_POSTREDIR.
      */
     if((data->set.httpreq == HTTPREQ_POST
-        || data->set.httpreq == HTTPREQ_POST_FORM)
+        || data->set.httpreq == HTTPREQ_POST_FORM
+        || data->set.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       infof(data, "Switch from POST to GET\n");
       data->set.httpreq = HTTPREQ_GET;
