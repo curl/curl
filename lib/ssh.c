@@ -121,6 +121,7 @@ static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
 static LIBSSH2_FREE_FUNC(my_libssh2_free);
 
 static CURLcode get_pathname(const char **cpp, char **path);
+static CURLcode get_realPathname(const char **cpp, char **path, char **pwd);
 
 static CURLcode ssh_connect(struct connectdata *conn, bool *done);
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done);
@@ -1279,7 +1280,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * also, every command takes at least one argument so we get that
          * first argument right now
          */
-        result = get_pathname(&cp, &sshc->quote_path1);
+        result = get_realPathname(&cp, &sshc->quote_path1, &sshc->homedir); 
         if(result) {
           if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
@@ -1351,7 +1352,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* rename file */
           /* first param is the source path */
           /* second param is the dest. path */
-          result = get_pathname(&cp, &sshc->quote_path2);
+           result = get_realPathname(&cp, &sshc->quote_path2, &sshc->homedir); 
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -3385,6 +3386,85 @@ get_pathname(const char **cpp, char **path)
 
     memcpy(*path, cp, end - cp);
     (*path)[end - cp] = '\0';
+  }
+  return CURLE_OK;
+
+  fail:
+  Curl_safefree(*path);
+  return CURLE_QUOTE_ERROR;
+}
+
+static CURLcode get_realPathname(const char **cpp, char **path, char **pwd)
+{
+  const char *cp = *cpp;
+  char *end;
+  char quot;
+  unsigned int i, j;
+  static const char WHITESPACE[] = " \t\r\n";
+
+  cp += strspn(cp, WHITESPACE);
+  if(!*cp && (*pwd == NULL)) {
+    *cpp = cp;
+    *path = NULL;
+    return CURLE_QUOTE_ERROR;
+  }
+
+  *path = malloc(strlen(cp) + strlen(*pwd) + 2);
+  if(*path == NULL)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* first start with home dir */
+  strcpy(*path, *pwd);
+  if (cp[0] != '/') 
+  {
+     strcat(*path, "/");
+  }
+  /* Check for quoted filenames */
+  if(*cp == '\"' || *cp == '\'') {
+    quot = *cp++;
+
+    /* Search for terminating quote, unescape some chars */
+    for(i = 0, j= strlen(*path); i <= strlen(cp); i++) {
+      if(cp[i] == quot) {  /* Found quote */
+        i++;
+        (*path)[j] = '\0';
+        break;
+      }
+      if(cp[i] == '\0') {  /* End of string */
+        /*error("Unterminated quote");*/
+        goto fail;
+      }
+      if(cp[i] == '\\') {  /* Escaped characters */
+        i++;
+        if(cp[i] != '\'' && cp[i] != '\"' &&
+            cp[i] != '\\') {
+          /*error("Bad escaped character '\\%c'",
+              cp[i]);*/
+          goto fail;
+        }
+      }
+      (*path)[j++] = cp[i];
+    }
+
+    if(j == 0) {
+      /*error("Empty quotes");*/
+      goto fail;
+    }
+    *cpp = cp + i + strspn(cp + i, WHITESPACE);
+  }
+  else {
+    /* Read to end of filename */
+    end = strpbrk(cp, WHITESPACE);
+    if(end == NULL)
+      end = strchr(cp, '\0');
+    *cpp = end + strspn(end, WHITESPACE);
+    strcat(*path, cp);
+    end = strpbrk(*path, WHITESPACE);
+    if (end) 
+    {
+       *end = '\0';
+    }
+    
   }
   return CURLE_OK;
 
