@@ -55,7 +55,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: precise
-          env: T=coverage
+          env: T=coverage CC="gcc-4.8"
         - os: osx
           compiler: clang
           env: T=coverage
@@ -81,7 +81,6 @@ before_script:
 script:
     - |
         if [ "$T" = "coverage" ]; then
-             export CC="gcc-4.8"
              ./configure --enable-debug --disable-shared --enable-code-coverage
              make
              make TFLAGS=-n test-nonflaky
