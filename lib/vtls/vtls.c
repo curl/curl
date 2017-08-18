@@ -1130,7 +1130,32 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL                               /* sha256sum */
 };
 
-const struct Curl_ssl *Curl_ssl = &Curl_ssl_multi;
+const struct Curl_ssl *Curl_ssl =
+#if defined(CURL_WITH_MULTI_SSL)
+  &Curl_ssl_multi;
+#elif defined(USE_AXTLS)
+  &Curl_ssl_axtls;
+#elif defined(USE_CYASSL)
+  &Curl_ssl_cyassl;
+#elif defined(USE_DARWINSSL)
+  &Curl_ssl_darwinssl;
+#elif defined(USE_GNUTLS)
+  &Curl_ssl_gnutls;
+#elif defined(USE_GSKIT)
+  &Curl_ssl_gskit;
+#elif defined(USE_MBEDTLS)
+  &Curl_ssl_mbedtls;
+#elif defined(USE_NSS)
+  &Curl_ssl_nss;
+#elif defined(USE_OPENSSL)
+  &Curl_ssl_openssl;
+#elif defined(USE_POLARSSL)
+  &Curl_ssl_polarssl;
+#elif defined(USE_SCHANNEL)
+  &Curl_ssl_schannel;
+#else
+#error "Missing struct Curl_ssl for selected SSL backend"
+#endif
 
 static const struct Curl_ssl *available_backends[] = {
 #if defined(USE_AXTLS)
