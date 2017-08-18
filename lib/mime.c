@@ -48,16 +48,145 @@
 #define DISPOSITION_DEFAULT             "attachment"
 
 
-#ifndef HAVE_BASENAME
-static char *Curl_basename(char *path);
-#define basename(x)  Curl_basename((x))
-#endif
-
 #ifndef __VMS
 #define filesize(name, stat_data) (stat_data.st_size)
+#define fopen_read fopen
+
 #else
-    /* Getting the expected file size needs help on VMS */
+
+#include <fabdef.h>
+/*
+ * get_vms_file_size does what it takes to get the real size of the file
+ *
+ * For fixed files, find out the size of the EOF block and adjust.
+ *
+ * For all others, have to read the entire file in, discarding the contents.
+ * Most posted text files will be small, and binary files like zlib archives
+ * and CD/DVD images should be either a STREAM_LF format or a fixed format.
+ *
+ */
+curl_off_t VmsRealFileSize(const char *name,
+                           const struct_stat *stat_buf)
+{
+  char buffer[8192];
+  curl_off_t count;
+  int ret_stat;
+  FILE * file;
+
+  file = fopen(name, FOPEN_READTEXT); /* VMS */
+  if(file == NULL)
+    return 0;
+
+  count = 0;
+  ret_stat = 1;
+  while(ret_stat > 0) {
+    ret_stat = fread(buffer, 1, sizeof(buffer), file);
+    if(ret_stat != 0)
+      count += ret_stat;
+  }
+  fclose(file);
+
+  return count;
+}
+
+/*
+ *
+ *  VmsSpecialSize checks to see if the stat st_size can be trusted and
+ *  if not to call a routine to get the correct size.
+ *
+ */
+static curl_off_t VmsSpecialSize(const char *name,
+                                 const struct_stat *stat_buf)
+{
+  switch(stat_buf->st_fab_rfm) {
+  case FAB$C_VAR:
+  case FAB$C_VFC:
+    return VmsRealFileSize(name, stat_buf);
+    break;
+  default:
+    return stat_buf->st_size;
+  }
+}
+
 #define filesize(name, stat_data) VmsSpecialSize(name, &stat_data)
+
+/*
+ * vmsfopenread
+ *
+ * For upload to work as expected on VMS, different optional
+ * parameters must be added to the fopen command based on
+ * record format of the file.
+ *
+ */
+static FILE * vmsfopenread(const char *file, const char *mode)
+{
+  struct_stat statbuf;
+  int result;
+
+  result = stat(file, &statbuf);
+
+  switch(statbuf.st_fab_rfm) {
+  case FAB$C_VAR:
+  case FAB$C_VFC:
+  case FAB$C_STMCR:
+    return fopen(file, FOPEN_READTEXT); /* VMS */
+    break;
+  default:
+    return fopen(file, FOPEN_READTEXT, "rfm=stmlf", "ctx=stm");
+  }
+}
+
+#define fopen_read vmsfopenread
+#endif
+
+
+#ifndef HAVE_BASENAME
+/*
+  (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004
+  Edition)
+
+  The basename() function shall take the pathname pointed to by path and
+  return a pointer to the final component of the pathname, deleting any
+  trailing '/' characters.
+
+  If the string pointed to by path consists entirely of the '/' character,
+  basename() shall return a pointer to the string "/". If the string pointed
+  to by path is exactly "//", it is implementation-defined whether '/' or "//"
+  is returned.
+
+  If path is a null pointer or points to an empty string, basename() shall
+  return a pointer to the string ".".
+
+  The basename() function may modify the string pointed to by path, and may
+  return a pointer to static storage that may then be overwritten by a
+  subsequent call to basename().
+
+  The basename() function need not be reentrant. A function that is not
+  required to be reentrant is not required to be thread-safe.
+
+*/
+static char *Curl_basename(char *path)
+{
+  /* Ignore all the details above for now and make a quick and simple
+     implementaion here */
+  char *s1;
+  char *s2;
+
+  s1=strrchr(path, '/');
+  s2=strrchr(path, '\\');
+
+  if(s1 && s2) {
+    path = (s1 > s2? s1 : s2)+1;
+  }
+  else if(s1)
+    path = s1 + 1;
+  else if(s2)
+    path = s2 + 1;
+
+  return path;
+}
+
+#define basename(x)  Curl_basename((x))
 #endif
 
 
@@ -121,53 +250,6 @@ static char *search_header(struct curl_slist *hdrlist, const char *hdr)
 
   return value;
 }
-
-#ifndef HAVE_BASENAME
-/*
-  (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004
-  Edition)
-
-  The basename() function shall take the pathname pointed to by path and
-  return a pointer to the final component of the pathname, deleting any
-  trailing '/' characters.
-
-  If the string pointed to by path consists entirely of the '/' character,
-  basename() shall return a pointer to the string "/". If the string pointed
-  to by path is exactly "//", it is implementation-defined whether '/' or "//"
-  is returned.
-
-  If path is a null pointer or points to an empty string, basename() shall
-  return a pointer to the string ".".
-
-  The basename() function may modify the string pointed to by path, and may
-  return a pointer to static storage that may then be overwritten by a
-  subsequent call to basename().
-
-  The basename() function need not be reentrant. A function that is not
-  required to be reentrant is not required to be thread-safe.
-
-*/
-static char *Curl_basename(char *path)
-{
-  /* Ignore all the details above for now and make a quick and simple
-     implementaion here */
-  char *s1;
-  char *s2;
-
-  s1=strrchr(path, '/');
-  s2=strrchr(path, '\\');
-
-  if(s1 && s2) {
-    path = (s1 > s2? s1 : s2)+1;
-  }
-  else if(s1)
-    path = s1 + 1;
-  else if(s2)
-    path = s2 + 1;
-
-  return path;
-}
-#endif
 
 static char *strippath(const char *fullfile)
 {
@@ -257,7 +339,7 @@ static int mime_open_namedfile(struct Curl_mimepart * part)
 
   if(part->namedfp)
     return 0;
-  part->namedfp = fopen(part->data, "rb");
+  part->namedfp = fopen_read(part->data, "rb");
   return part->namedfp? 0: -1;
 }
 
