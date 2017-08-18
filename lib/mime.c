@@ -24,12 +24,16 @@
 
 #include <curl/curl.h>
 
+#include "mime.h"
+
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
+    !defined(CURL_DISABLE_IMAP)
+
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
 #endif
 
 #include "rand.h"
-#include "mime.h"
 #include "slist.h"
 #include "strcase.h"
 /* The last 3 #include files should be in this order */
@@ -1112,3 +1116,161 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
   mimesetstate(&part->state, MIME_BEGIN, NULL);
   return ret;
 }
+
+#else /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
+
+/* Mime not compiled in: define stubs for externally-referenced functions. */
+curl_mime *curl_mime_init(CURL *easy)
+{
+  (void) easy;
+  return NULL;
+}
+
+void curl_mime_free(curl_mime *mime)
+{
+  (void) mime;
+}
+
+curl_mimepart *curl_mime_addpart(curl_mime *mime)
+{
+  (void) mime;
+  return NULL;
+}
+
+CURLcode curl_mime_name(curl_mimepart *part,
+                        const char *name, ssize_t namesize)
+{
+  (void) part;
+  (void) name;
+  (void) namesize;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
+{
+  (void) part;
+  (void) filename;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
+{
+  (void) part;
+  (void) mimetype;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_encoder(struct Curl_mimepart *part, curlencoding encoding)
+{
+  (void) part;
+  (void) encoding;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_data(curl_mimepart *part,
+                        const char *data, ssize_t datasize)
+{
+  (void) part;
+  (void) data;
+  (void) datasize;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_file(curl_mimepart *part, FILE *fp, int closewhendone)
+{
+  (void) part;
+  (void) fp;
+  (void) closewhendone;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
+{
+  (void) part;
+  (void) filename;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_data_cb(curl_mimepart *part,
+                           curl_off_t datasize,
+                           curl_read_callback readfunc,
+                           curl_seek_callback seekfunc,
+                           curl_free_callback freefunc,
+                           void *arg)
+{
+  (void) part;
+  (void) datasize;
+  (void) readfunc;
+  (void) seekfunc;
+  (void) freefunc;
+  (void) arg;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_subparts(curl_mimepart *part, curl_mime *subparts)
+{
+  (void) part;
+  (void) subparts;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode curl_mime_headers(curl_mimepart *part,
+                           struct curl_slist *headers, int take_ownership)
+{
+  (void) part;
+  (void) headers;
+  (void) take_ownership;
+  return CURLE_NOT_BUILT_IN;
+}
+
+void Curl_mime_initpart(struct Curl_mimepart *part)
+{
+  (void) part;
+}
+
+void Curl_mime_cleanpart(struct Curl_mimepart *part)
+{
+  (void) part;
+}
+
+CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
+                                   const char *contenttype,
+                                   const char *disposition)
+{
+  (void) part;
+  (void) contenttype;
+  (void) disposition;
+  return CURLE_NOT_BUILT_IN;
+}
+
+curl_off_t Curl_mime_size(struct Curl_mimepart *part, int bodyonly)
+{
+  (void) part;
+  (void) bodyonly;
+  return (curl_off_t) -1;
+}
+
+size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
+{
+  (void) buffer;
+  (void) size;
+  (void) nitems;
+  (void) instream;
+  return 0;
+}
+
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part)
+{
+  (void) part;
+  return CURLE_NOT_BUILT_IN;
+}
+
+/* VARARGS2 */
+CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
+{
+  (void) slp;
+  (void) fmt;
+  return CURLE_NOT_BUILT_IN;
+}
+
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
