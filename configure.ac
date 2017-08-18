@@ -2420,14 +2420,25 @@ if test -z "$ssl_backends" -o "x$OPT_AXTLS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" in
+x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
   AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls, --with-winssl, or --with-darwinssl to address this.])
-else
-  # SSL is enabled, genericly
+  ;;
+x1)
+  # one SSL backend is enabled
   AC_SUBST(SSL_ENABLED)
   SSL_ENABLED="1"
-fi
+  ;;
+*)
+  # more than one SSL backend is enabled
+  AC_SUBST(SSL_ENABLED)
+  SSL_ENABLED="1"
+  AC_SUBST(CURL_WITH_MULTI_SSL)
+  CURL_WITH_MULTI_SSL="1"
+  AC_DEFINE(CURL_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
+  ;;
+esac
 
 if test -n "$ssl_backends"; then
   curl_ssl_msg="enabled ($ssl_backends)"
