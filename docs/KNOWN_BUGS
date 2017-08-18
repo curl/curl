@@ -82,6 +82,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
  11.3 c-ares deviates from stock resolver on http://1346569778
+ 11.4 HTTP test server 'connection-monitor' problems
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -551,6 +552,13 @@ problems may have been fixed or changed somewhat since this was written!
  not found)"
 
  See https://github.com/curl/curl/issues/893
+
+11.4 HTTP test server 'connection-monitor' problems
+
+ The 'connection-monitor' feature of the sws HTTP test server doesn't work
+ properly if some tests are run in unexpected order. Like 1509 and then 1525.
+
+ See https://github.com/curl/curl/issues/868
 
 
 12. LDAP and OpenLDAP
