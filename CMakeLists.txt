@@ -90,16 +90,18 @@ CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DN
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
 
-if (PICKY_COMPILER)
-  foreach (_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers)
-    # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
-    # test result in.
-    CHECK_C_COMPILER_FLAG(${_CCOPT} OPT${_CCOPT})
-    if(OPT${_CCOPT})
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_CCOPT}")
-    endif()
-  endforeach()
-endif(PICKY_COMPILER)
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+  if (PICKY_COMPILER)
+    foreach (_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers)
+      # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
+      # test result in.
+      CHECK_C_COMPILER_FLAG(${_CCOPT} OPT${_CCOPT})
+      if(OPT${_CCOPT})
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_CCOPT}")
+      endif()
+    endforeach()
+  endif(PICKY_COMPILER)
+endif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
 
 if (ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
