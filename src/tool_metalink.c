@@ -880,7 +880,7 @@ size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
   if(!config)
     return failure;
 
-  rv = metalink_parse_update(outs->metalink_parser, buffer, sz *nmemb);
+  rv = metalink_parse_update(outs->metalink_parser, buffer, sz * nmemb);
   if(rv == 0)
     return sz * nmemb;
   else {
