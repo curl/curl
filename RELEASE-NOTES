@@ -1,14 +1,15 @@
 Curl and libcurl 7.56.0
 
  Public curl releases:         169
- Command line options:         210
- curl_easy_setopt() options:   247
+ Command line options:         211
+ curl_easy_setopt() options:   248
  Public functions in libcurl:  61
  Contributors:                 1600
 
 This release includes the following changes:
 
- o
+ o curl: enable compression for SCP/SFTP with --compressed-ssh  [11]
+ o libcurl: enable compression for SCP/SFTP with CURLOPT_SSH_COMPRESSION [11]
 
 This release includes the following bugfixes:
 
@@ -16,6 +17,23 @@ This release includes the following bugfixes:
  o runtests: match keywords case insensitively
  o travis: build the examples too [1]
  o strtoofft: reduce integer overflow risks globally [2]
+ o zsh.pl: produce a working completion script again [3]
+ o cmake: remove dead code for CURL_DISABLE_RTMP [4]
+ o progress: Track total times following redirects [5]
+ o configure: fix --disable-threaded-resolver [6]
+ o cmake: remove dead code for DISABLED_THREADSAFE [7]
+ o configure: fix clang version detection
+ o darwinssi: fix error: variable length array used
+ o travis: add metalink to some osx builds [8]
+ o configure: check for __builtin_available() availability [9]
+ o http_proxy: fix build error for CURL_DOES_CONVERSIONS [10]
+ o examples/ftpuploadresume: checksrc compliance
+ o ftp: fix CWD when doing multicwd then nocwd on same connection [12]
+ o system.h: remove all CURL_SIZEOF_* defines [13]
+ o http: Don't wait on CONNECT when there is no proxy [14]
+ o system.h: check for __ppc__ as well [15]
+ o http2_recv: return error better on fatal h2 errors [16]
+ o scripts/contri*sh: use "git log --use-mailmap"
 
 This release includes the following known bugs:
 
@@ -24,8 +42,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Carpenter, Daniel Stenberg,
-  (2 contributors)
+  Benbuck Nason, Brian Carpenter, Daniel Stenberg, Gergely Nagy,
+  Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
+  joshhe on github, Kamil Dudka, Maksim Stsepanenka, Max Dymond, Nick Zitzmann,
+  Peter Lamare, Ray Satiro, Ryan Schmidt, Ryan Winograd, Tatsuhiro Tsujikawa,
+  Viktor Szakáts,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -33,3 +55,17 @@ References to bug reports and discussions on issues:
 
  [1] = https://curl.haxx.se/bug/?i=1777
  [2] = https://curl.haxx.se/bug/?i=1758
+ [3] = https://curl.haxx.se/bug/?i=1779
+ [4] = https://curl.haxx.se/bug/?i=1785
+ [5] = https://curl.haxx.se/bug/?i=1602
+ [6] = https://curl.haxx.se/bug/?i=1784
+ [7] = https://curl.haxx.se/bug/?i=1786
+ [8] = https://curl.haxx.se/bug/?i=1790
+ [9] = https://curl.haxx.se/bug/?i=1788
+ [10] = https://curl.haxx.se/bug/?i=1793
+ [11] = https://curl.haxx.se/bug/?i=1735
+ [12] = https://curl.haxx.se/bug/?i=1782
+ [13] = https://curl.haxx.se/bug/?i=1767
+ [14] = https://curl.haxx.se/bug/?i=1803
+ [15] = https://curl.haxx.se/bug/?i=1797
+ [16] = https://curl.haxx.se/bug/?i=1021
