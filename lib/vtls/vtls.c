@@ -596,9 +596,15 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
   return CURLE_OK;
 }
 
+static size_t Curl_multissl_version(char *buffer, size_t size);
+
 size_t Curl_ssl_version(char *buffer, size_t size)
 {
+#ifdef CURL_WITH_MULTI_SSL
+  return Curl_multissl_version(buffer, size);
+#else
   return Curl_ssl->version(buffer, size);
+#endif
 }
 
 /*
@@ -1061,13 +1067,6 @@ static int Curl_multissl_init(void)
   return Curl_ssl->init();
 }
 
-static size_t Curl_multissl_version(char *buffer, size_t size)
-{
-  if(multissl_init(NULL))
-    return 0;
-  return Curl_ssl->version(buffer, size);
-}
-
 static CURLcode Curl_multissl_connect(struct connectdata *conn, int sockindex)
 {
   if(multissl_init(NULL))
@@ -1166,6 +1165,44 @@ static const struct Curl_ssl *available_backends[] = {
 #endif
   NULL
 };
+
+static size_t Curl_multissl_version(char *buffer, size_t size)
+{
+  static const struct Curl_ssl *selected;
+  static char backends[200];
+  static size_t total;
+  const struct Curl_ssl *current;
+
+  current = Curl_ssl == &Curl_ssl_multi ? available_backends[0] : Curl_ssl;
+
+  if(current != selected) {
+    char *p = backends;
+    int i;
+
+    selected = current;
+
+    for(i = 0; available_backends[i]; i++) {
+      if(i)
+        *(p++) = ' ';
+      if(selected != available_backends[i])
+        *(p++) = '(';
+      p += available_backends[i]->version(p, backends + sizeof(backends) - p);
+      if(selected != available_backends[i])
+        *(p++) = ')';
+    }
+    *p = '\0';
+    total = p - backends;
+  }
+
+  if(size < total)
+    memcpy(buffer, backends, total + 1);
+  else {
+    memcpy(buffer, backends, size - 1);
+    buffer[size - 1] = '\0';
+  }
+
+  return total;
+}
 
 static int multissl_init(const struct Curl_ssl *backend)
 {
