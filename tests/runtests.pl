@@ -5379,7 +5379,7 @@ EOHELP
         $disabled{$1}=$1;
     }
     elsif($ARGV[0] =~ /^!(.+)/) {
-        $disabled_keywords{$1}=$1;
+        $disabled_keywords{lc($1)}=$1;
     }
     elsif($ARGV[0] =~ /^([-[{a-zA-Z].*)/) {
         $enabled_keywords{lc($1)}=$1;
