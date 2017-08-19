@@ -166,19 +166,15 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OUT_OF_MEMORY;
+  CURLcode res = CURLE_OK;
   struct data config;
   size_t i;
   static const char fill[] = "test data";
 
   config.trace_ascii = 1; /* enable ascii tracing */
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  global_init(CURL_GLOBAL_ALL);
+  easy_init(curl);
 
   test_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
   test_setopt(curl, CURLOPT_DEBUGDATA, &config);

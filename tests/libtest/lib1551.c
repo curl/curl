@@ -30,6 +30,7 @@ int test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
 
+  global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, URL);
@@ -41,5 +42,6 @@ int test(char *URL)
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return (int)res;
 }
