@@ -732,7 +732,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
 
     /* Make sure we will read the entire mime structure. */
     if(!result)
-      result = Curl_mime_rewind(&data->set.mimepost);
+      result = Curl_mime_rewind(&data->set.mimepost, 0);
 
     if(result)
       return result;

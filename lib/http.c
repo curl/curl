@@ -1783,7 +1783,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *httpstring;
   Curl_send_buffer *req_buffer;
   curl_off_t postsize = 0; /* curl_off_t to handle large file sizes */
-  curl_off_t size4hdr;
   int seekerr = CURL_SEEKFUNC_OK;
 
   /* Always consider the DO phase done after this function call, even if there
@@ -1952,6 +1951,35 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif
 
+  if(HTTPREQ_POST_FORM == httpreq) {
+    /* we must build the whole post sequence first, so that we have a size of
+       the whole transfer before we start to send it */
+    result = Curl_getformdata(data, &http->sendit, data->set.httppost,
+                              Curl_checkheaders(conn, "Content-Type:"),
+                              &http->postsize);
+    if(result)
+      return result;
+  }
+  else if(HTTPREQ_POST_MIME == httpreq) {
+    const char *cthdr = Curl_checkheaders(conn, "Content-Type:");
+
+    /* Prepare the mime structure headers & set content type. */
+
+    if(cthdr)
+      for(cthdr += 13; *cthdr == ' '; cthdr++)
+        ;
+    else if(data->set.mimepost.kind == MIME_MULTIPART)
+      cthdr = "multipart/form-data";
+
+    curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
+    result = Curl_mime_prepare_headers(&data->set.mimepost, cthdr, NULL);
+    curl_mime_headers(&data->set.mimepost, NULL, 0);
+    if(!result)
+      result = Curl_mime_rewind(&data->set.mimepost, 1);
+    if(result)
+      return result;
+  }
+
   ptr = Curl_checkheaders(conn, "Transfer-Encoding:");
   if(ptr) {
     /* Some kind of TE is requested, check if 'chunked' is chosen */
@@ -1959,9 +1987,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
   }
   else {
-    if((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
-       data->set.upload &&
-       (data->state.infilesize == -1)) {
+    if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+       ((httpreq == HTTPREQ_POST_MIME &&
+       Curl_mime_size(&data->set.mimepost, 1) < 0) ||
+       (data->set.upload && data->state.infilesize == -1))) {
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
         ;
@@ -2132,35 +2161,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
   }
 #endif /* CURL_DISABLE_PROXY */
-
-  if(HTTPREQ_POST_FORM == httpreq) {
-    /* we must build the whole post sequence first, so that we have a size of
-       the whole transfer before we start to send it */
-    result = Curl_getformdata(data, &http->sendit, data->set.httppost,
-                              Curl_checkheaders(conn, "Content-Type:"),
-                              &http->postsize);
-    if(result)
-      return result;
-  }
-  else if(HTTPREQ_POST_MIME == httpreq) {
-    const char *cthdr = Curl_checkheaders(conn, "Content-Type:");
-
-    /* Prepare the mime structure headers & set content type. */
-
-    if(cthdr)
-      for(cthdr += 13; *cthdr == ' '; cthdr++)
-        ;
-    else if(data->set.mimepost.kind == MIME_MULTIPART)
-      cthdr = "multipart/form-data";
-
-    curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(&data->set.mimepost, cthdr, NULL);
-    curl_mime_headers(&data->set.mimepost, NULL, 0);
-    if(!result)
-      result = Curl_mime_rewind(&data->set.mimepost);
-    if(result)
-      return result;
-  }
 
   http->p_accept = Curl_checkheaders(conn, "Accept:")?NULL:"Accept: */*\r\n";
 
@@ -2593,24 +2593,32 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   case HTTPREQ_POST_MIME:
     /* This is form posting using mime data. */
     postsize = 0;
-    size4hdr = 0;
-    if(!conn->bits.authneg) {
-      postsize = Curl_mime_size(&data->set.mimepost, 0);
-      size4hdr = Curl_mime_size(&data->set.mimepost, 1);
-    }
+    if(!conn->bits.authneg)
+      postsize = Curl_mime_size(&data->set.mimepost, 1);
 
     /* We only set Content-Length and allow a custom Content-Length if
        we don't upload data chunked, as RFC2616 forbids us to set both
        kinds of headers (Transfer-Encoding: chunked and Content-Length) */
-    if((postsize != -1) && !data->req.upload_chunky &&
+    if(postsize != -1 && !data->req.upload_chunky &&
        (conn->bits.authneg || !Curl_checkheaders(conn, "Content-Length:"))) {
       /* we allow replacing this header if not during auth negotiation,
          although it isn't very wise to actually set your own */
       result = Curl_add_bufferf(req_buffer,
                                 "Content-Length: %" CURL_FORMAT_CURL_OFF_T
-                                "\r\n", size4hdr);
+                                "\r\n", postsize);
       if(result)
         return result;
+    }
+
+    /* Output mime-generated headers. */
+    {
+      struct curl_slist *hdr;
+
+      for(hdr = data->set.mimepost.curlheaders; hdr; hdr = hdr->next) {
+        result = Curl_add_bufferf(req_buffer, "%s\r\n", hdr->data);
+        if(result)
+          return result;
+      }
     }
 
     /* For really small posts we don't use Expect: headers at all, and for
@@ -2629,6 +2637,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     }
     else
       data->state.expect100header = FALSE;
+
+    /* make the request end in a true CRLF */
+    result = Curl_add_buffer(req_buffer, "\r\n", 2);
+    if(result)
+      return result;
 
     /* set the upload size to the progress meter */
     Curl_pgrsSetUploadSize(data, postsize);

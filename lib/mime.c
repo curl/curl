@@ -467,7 +467,10 @@ static size_t readback_part(struct Curl_mimepart *part,
     case MIME_EOH:
       sz = readback_bytes(&part->state, buffer, bufsize, "\r\n", 2, "");
       if(!sz)
-        mimesetstate(&part->state, MIME_CONTENT, NULL);
+        mimesetstate(&part->state, MIME_BODY, NULL);
+      break;
+    case MIME_BODY:
+      mimesetstate(&part->state, MIME_CONTENT, NULL);
       break;
     case MIME_CONTENT:
       if(part->readfunc)
@@ -517,7 +520,12 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
     part = mime->state.ptr;
     switch(mime->state.state) {
     case MIME_BEGIN:
+    case MIME_BODY:
       mimesetstate(&mime->state, MIME_BOUNDARY1, mime->firstpart);
+      /* The first boundary always follows the header termination empty line,
+         so is always preceded by a CRLK. We can then spare 2 characters
+         by skipping the leading CRLF in boundary. */
+      mime->state.offset += 2;
       break;
     case MIME_BOUNDARY1:
       sz = readback_bytes(&mime->state, buffer, nitems, "\r\n--", 4, "");
@@ -957,17 +965,20 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
 }
 
 /* Rewind mime stream. */
-CURLcode Curl_mime_rewind(struct Curl_mimepart *part)
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part, int skip_headers)
 {
-  int res = CURL_SEEKFUNC_CANTSEEK;
+  int res = CURL_SEEKFUNC_OK;
+  enum mimestate targetstate = skip_headers? MIME_BODY: MIME_BEGIN;
 
-  if(part->state.state == MIME_BEGIN)
-   return CURLE_OK;           /* Already rewound. */
-  if(part->seekfunc)
-    res = part->seekfunc(part->arg, part->origin, SEEK_SET);
-  if(res != CURL_SEEKFUNC_OK)
-    return CURLE_SEND_FAIL_REWIND;
-  mimesetstate(&part->state, MIME_BEGIN, NULL);
+  if(part->state.state > targetstate) {
+    res = CURL_SEEKFUNC_CANTSEEK;
+    if(part->seekfunc)
+      res = part->seekfunc(part->arg, part->origin, SEEK_SET);
+    if(res != CURL_SEEKFUNC_OK)
+      return CURLE_SEND_FAIL_REWIND;
+  }
+  if(res == CURL_SEEKFUNC_OK)
+    mimesetstate(&part->state, targetstate, NULL);
   return CURLE_OK;
 }
 
@@ -1017,7 +1028,7 @@ static curl_off_t multipart_size(struct Curl_mime *mime)
 }
 
 /* Get/compute mime size. */
-curl_off_t Curl_mime_size(struct Curl_mimepart *part, int bodyonly)
+curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers)
 {
   curl_off_t size;
 
@@ -1025,7 +1036,7 @@ curl_off_t Curl_mime_size(struct Curl_mimepart *part, int bodyonly)
     part->datasize = multipart_size(part->arg);
 
   size = part->datasize;
-  if(size >= 0 && !bodyonly) {
+  if(size >= 0 && !skip_headers) {
     /* Compute total part size. */
     size += slist_size(part->curlheaders, 2, NULL);
     size += slist_size(part->userheaders, 2, "Content-Type");
@@ -1325,10 +1336,10 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
   return CURLE_NOT_BUILT_IN;
 }
 
-curl_off_t Curl_mime_size(struct Curl_mimepart *part, int bodyonly)
+curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers)
 {
   (void) part;
-  (void) bodyonly;
+  (void) skip_headers;
   return (curl_off_t) -1;
 }
 
@@ -1341,9 +1352,10 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
   return 0;
 }
 
-CURLcode Curl_mime_rewind(struct Curl_mimepart *part)
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part, int skip_headers)
 {
   (void) part;
+  (void) skip_headers;
   return CURLE_NOT_BUILT_IN;
 }
 

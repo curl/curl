@@ -43,6 +43,7 @@ enum mimestate {
   MIME_CURLHEADERS,     /* In curl-generated headers. */
   MIME_USERHEADERS,     /* In caller's supplied headers. */
   MIME_EOH,             /* End of headers. */
+  MIME_BODY,            /* Placeholder. */
   MIME_BOUNDARY1,       /* In boundary prefix. */
   MIME_BOUNDARY2,       /* In boundary. */
   MIME_CONTENT,         /* In content. */
@@ -94,10 +95,10 @@ void Curl_mime_cleanpart(struct Curl_mimepart *part);
 CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
                                    const char *contenttype,
                                    const char *disposition);
-curl_off_t Curl_mime_size(struct Curl_mimepart *part, int bodyonly);
+curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers);
 size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
-CURLcode Curl_mime_rewind(struct Curl_mimepart *part);
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part, int skip_headers);
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
 
 #endif /* HEADER_CURL_MIME_H */

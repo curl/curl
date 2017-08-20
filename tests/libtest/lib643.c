@@ -49,14 +49,20 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 #else
 
   struct WriteThis *pooh = (struct WriteThis *)userp;
+  int eof = !*pooh->readptr;
 
   if(size*nmemb < 1)
     return 0;
 
-  if(pooh->sizeleft) {
-    *ptr = pooh->readptr[0];         /* copy one single byte */
+#ifndef LIB645
+  eof = !pooh->sizeleft;
+  if(!eof)
+    pooh->sizeleft--;
+#endif
+
+  if(!eof) {
+    *ptr = *pooh->readptr;           /* copy one single byte */
     pooh->readptr++;                 /* advance pointer */
-    pooh->sizeleft--;                /* less data left */
     return 1;                        /* we return 1 byte at a time! */
   }
 
@@ -73,9 +79,13 @@ static int once(char *URL, bool oldstyle)
   curl_mimepart *part = NULL;
   struct WriteThis pooh;
   struct WriteThis pooh2;
+  curl_off_t datasize = -1;
 
   pooh.readptr = data;
-  pooh.sizeleft = strlen(data);
+#ifndef LIB645
+  datasize = strlen(data);
+#endif
+  pooh.sizeleft = datasize;
 
   curl = curl_easy_init();
   if(!curl) {
@@ -105,7 +115,7 @@ static int once(char *URL, bool oldstyle)
   if(oldstyle) {
     res = curl_mime_name(part, "sendfile", -1);
     if(!res)
-      res = curl_mime_data_cb(part, (long) pooh.sizeleft, read_callback,
+      res = curl_mime_data_cb(part, datasize, read_callback,
                               NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "postit2.c");
@@ -114,7 +124,7 @@ static int once(char *URL, bool oldstyle)
     /* new style */
     res = curl_mime_name(part, "sendfile alternative", -1);
     if(!res)
-      res = curl_mime_data_cb(part, (long) pooh.sizeleft, read_callback,
+      res = curl_mime_data_cb(part, datasize, read_callback,
                               NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "file name 2");
@@ -127,7 +137,10 @@ static int once(char *URL, bool oldstyle)
      a file upload but still using the callback */
 
   pooh2.readptr = data;
-  pooh2.sizeleft = strlen(data);
+#ifndef LIB645
+  datasize = strlen(data);
+#endif
+  pooh2.sizeleft = datasize;
 
   part = curl_mime_addpart(mime);
   if(!part) {
@@ -140,7 +153,7 @@ static int once(char *URL, bool oldstyle)
   /* Fill in the file upload part */
   res = curl_mime_name(part, "callbackdata", -1);
   if(!res)
-    res = curl_mime_data_cb(part, (long) pooh2.sizeleft, read_callback,
+    res = curl_mime_data_cb(part, datasize, read_callback,
                             NULL, NULL, &pooh2);
 
   if(res)
@@ -214,12 +227,6 @@ static int once(char *URL, bool oldstyle)
 
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
-
-  /* Now specify we want to POST data */
-  test_setopt(curl, CURLOPT_POST, 1L);
-
-  /* Set the expected POST size */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
   /* send a multi-part mimepost */
   test_setopt(curl, CURLOPT_MIMEPOST, mime);
