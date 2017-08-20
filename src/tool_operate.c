@@ -104,9 +104,15 @@ CURLcode curl_easy_perform_ev(CURL *easy);
   "If this HTTPS server uses a certificate signed by a CA represented in\n" \
   " the bundle, the certificate verification probably failed due to a\n"    \
   " problem with the certificate (it might be expired, or the name might\n" \
-  " not match the domain name in the URL).\n"                               \
-  "If you'd like to turn off curl's verification of the certificate, use\n" \
-  " the -k (or --insecure) option.\n"
+  " not match the domain name in the URL).\n"
+
+#define CURL_CA_CERT_ERRORMSG3                                              \
+  "If the name and the date are correct:\n"                                 \
+  " - Check that your system clock is correctly set.\n"                     \
+  " - Ensure that CA certs are installed on your system, and up to date.\n" \
+  " - If the server uses a self-signed certificate, add the --cacert\n"     \
+  " option, followed by the path to a file containing the self-signed\n"    \
+  " public key certificate (usually a .pem file).\n"
 
 static bool is_fatal_error(CURLcode code)
 {
@@ -1784,12 +1790,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
           fprintf(global->errors, "curl: (%d) %s\n", result, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror(result));
           if(result == CURLE_SSL_CACERT)
-            fprintf(global->errors, "%s%s%s",
+            fprintf(global->errors, "%s%s%s%s",
                     CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2,
+                    CURL_CA_CERT_ERRORMSG3,
                     ((curlinfo->features & CURL_VERSION_HTTPS_PROXY) ?
-                     "HTTPS-proxy has similar options --proxy-cacert "
-                     "and --proxy-insecure.\n" :
-                     ""));
+                     "For self-signed certificates, HTTPS-proxy has a similar "
+                     "option:\n"
+                     " --proxy-cacert\n" : ""));
         }
 
         /* Fall through comment to 'quit_urls' label */
