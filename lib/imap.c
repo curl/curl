@@ -720,10 +720,11 @@ static CURLcode imap_perform_append(struct connectdata *conn)
   }
 
   /* Prepare the mime data if some. */
-  if(data->set.mimepost.kind != MIME_NONE) {
+  if(data->set.mimepost.kind != MIMEKIND_NONE) {
     /* Add external headers and mime version. */
     curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL, NULL);
+    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL,
+                                       NULL, MIMESTRATEGY_MAIL);
 
     if(!result)
       if(!Curl_checkheaders(conn, "Mime-Version"))
@@ -1451,9 +1452,9 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   }
   else if(!data->set.connect_only && !imap->custom &&
           (imap->uid || data->set.upload ||
-          data->set.mimepost.kind != MIME_NONE)) {
+          data->set.mimepost.kind != MIMEKIND_NONE)) {
     /* Handle responses after FETCH or APPEND transfer has finished */
-    if(!data->set.upload && data->set.mimepost.kind == MIME_NONE)
+    if(!data->set.upload && data->set.mimepost.kind == MIMEKIND_NONE)
       state(conn, IMAP_FETCH_FINAL);
     else {
       /* End the APPEND command first by sending an empty line */
@@ -1523,7 +1524,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
     selected = TRUE;
 
   /* Start the first command in the DO phase */
-  if(conn->data->set.upload || data->set.mimepost.kind != MIME_NONE)
+  if(conn->data->set.upload || data->set.mimepost.kind != MIMEKIND_NONE)
     /* APPEND can be executed directly */
     result = imap_perform_append(conn);
   else if(imap->custom && (selected || !imap->mailbox))

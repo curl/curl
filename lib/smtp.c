@@ -532,10 +532,11 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
   }
 
   /* Prepare the mime data if some. */
-  if(data->set.mimepost.kind != MIME_NONE) {
+  if(data->set.mimepost.kind != MIMEKIND_NONE) {
     /* Add external headers and mime version. */
     curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL, NULL);
+    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL,
+                                       NULL, MIMESTRATEGY_MAIL);
 
     if(!result)
       if(!Curl_checkheaders(conn, "Mime-Version"))

@@ -163,6 +163,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
+  Curl_mime_initpart(&http->form);
   conn->data->req.protop = http;
 
   Curl_http2_setup_conn(conn);
@@ -1472,20 +1473,17 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_http2_done(conn, premature);
 
-  if(HTTPREQ_POST_FORM == data->set.httpreq) {
-    data->req.bytecount = http->readbytecount + http->writebytecount;
+  Curl_mime_cleanpart(&http->form);
 
-    Curl_formclean(&http->sendit); /* Now free that whole lot */
-    if(http->form.fp) {
-      /* a file being uploaded was left opened, close it! */
-      fclose(http->form.fp);
-      http->form.fp = NULL;
-    }
+  switch(data->set.httpreq) {
+  case HTTPREQ_PUT:
+  case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
+    data->req.bytecount = http->readbytecount + http->writebytecount;
+    break;
+  default:
+    break;
   }
-  else if(HTTPREQ_PUT == data->set.httpreq)
-    data->req.bytecount = http->readbytecount + http->writebytecount;
-  else if(HTTPREQ_POST_MIME == data->set.httpreq)
-    data->req.bytecount = http->readbytecount + http->writebytecount;
 
   if(status)
     return status;
@@ -1951,16 +1949,24 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif
 
-  if(HTTPREQ_POST_FORM == httpreq) {
-    /* we must build the whole post sequence first, so that we have a size of
-       the whole transfer before we start to send it */
-    result = Curl_getformdata(data, &http->sendit, data->set.httppost,
-                              Curl_checkheaders(conn, "Content-Type:"),
-                              &http->postsize);
+  switch(httpreq) {
+  case HTTPREQ_POST_MIME:
+    http->sendit = &data->set.mimepost;
+    break;
+  case HTTPREQ_POST_FORM:
+    /* Convert the form structure into a mime structure. */
+    Curl_mime_cleanpart(&http->form);
+    result = Curl_getformdata(data, &http->form, data->set.httppost,
+                              data->state.fread_func);
     if(result)
       return result;
+    http->sendit = &http->form;
+    break;
+  default:
+    http->sendit = NULL;
   }
-  else if(HTTPREQ_POST_MIME == httpreq) {
+
+  if(http->sendit) {
     const char *cthdr = Curl_checkheaders(conn, "Content-Type:");
 
     /* Prepare the mime structure headers & set content type. */
@@ -1968,14 +1974,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(cthdr)
       for(cthdr += 13; *cthdr == ' '; cthdr++)
         ;
-    else if(data->set.mimepost.kind == MIME_MULTIPART)
+    else if(http->sendit->kind == MIMEKIND_MULTIPART)
       cthdr = "multipart/form-data";
 
-    curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
-    result = Curl_mime_prepare_headers(&data->set.mimepost, cthdr, NULL);
-    curl_mime_headers(&data->set.mimepost, NULL, 0);
+    curl_mime_headers(http->sendit, data->set.headers, 0);
+    result = Curl_mime_prepare_headers(http->sendit, cthdr,
+                                       NULL, MIMESTRATEGY_FORM);
+    curl_mime_headers(http->sendit, NULL, 0);
     if(!result)
-      result = Curl_mime_rewind(&data->set.mimepost, 1);
+      result = Curl_mime_rewind(http->sendit, 1);
     if(result)
       return result;
   }
@@ -1988,8 +1995,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   else {
     if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-       ((httpreq == HTTPREQ_POST_MIME &&
-       Curl_mime_size(&data->set.mimepost, 1) < 0) ||
+       (((httpreq == HTTPREQ_POST_MIME || httpreq == HTTPREQ_POST_FORM) &&
+       Curl_mime_size(http->sendit, 1) < 0) ||
        (data->set.upload && data->state.infilesize == -1))) {
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
@@ -2445,107 +2452,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   switch(httpreq) {
 
-  case HTTPREQ_POST_FORM:
-    if(!http->sendit || conn->bits.authneg) {
-      /* nothing to post! */
-      result = Curl_add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
-      if(result)
-        return result;
-
-      result = Curl_add_buffer_send(req_buffer, conn,
-                                    &data->info.request_size, 0, FIRSTSOCKET);
-      if(result)
-        failf(data, "Failed sending POST request");
-      else
-        /* setup variables for the upcoming transfer */
-        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
-                            -1, NULL);
-      break;
-    }
-
-    if(Curl_FormInit(&http->form, http->sendit)) {
-      failf(data, "Internal HTTP POST error!");
-      return CURLE_HTTP_POST_ERROR;
-    }
-
-    /* Get the currently set callback function pointer and store that in the
-       form struct since we might want the actual user-provided callback later
-       on. The data->set.fread_func pointer itself will be changed for the
-       multipart case to the function that returns a multipart formatted
-       stream. */
-    http->form.fread_func = data->state.fread_func;
-
-    /* Set the read function to read from the generated form data */
-    data->state.fread_func = (curl_read_callback)Curl_FormReader;
-    data->state.in = &http->form;
-
-    http->sending = HTTPSEND_BODY;
-
-    if(!data->req.upload_chunky &&
-       !Curl_checkheaders(conn, "Content-Length:")) {
-      /* only add Content-Length if not uploading chunked */
-      result = Curl_add_bufferf(req_buffer,
-                                "Content-Length: %" CURL_FORMAT_CURL_OFF_T
-                                "\r\n", http->postsize);
-      if(result)
-        return result;
-    }
-
-    result = expect100(data, conn, req_buffer);
-    if(result)
-      return result;
-
-    {
-
-      /* Get Content-Type: line from Curl_formpostheader.
-       */
-      char *contentType;
-      size_t linelength=0;
-      contentType = Curl_formpostheader((void *)&http->form,
-                                        &linelength);
-      if(!contentType) {
-        failf(data, "Could not get Content-Type header line!");
-        return CURLE_HTTP_POST_ERROR;
-      }
-
-      result = Curl_add_buffer(req_buffer, contentType, linelength);
-      if(result)
-        return result;
-    }
-
-    /* make the request end in a true CRLF */
-    result = Curl_add_buffer(req_buffer, "\r\n", 2);
-    if(result)
-      return result;
-
-    /* set upload size to the progress meter */
-    Curl_pgrsSetUploadSize(data, http->postsize);
-
-    /* fire away the whole request to the server */
-    result = Curl_add_buffer_send(req_buffer, conn,
-                                  &data->info.request_size, 0, FIRSTSOCKET);
-    if(result)
-      failf(data, "Failed sending POST request");
-    else
-      /* setup variables for the upcoming transfer */
-      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                          &http->readbytecount, FIRSTSOCKET,
-                          &http->writebytecount);
-
-    if(result) {
-      Curl_formclean(&http->sendit); /* free that whole lot */
-      return result;
-    }
-
-    /* convert the form data */
-    result = Curl_convert_form(data, http->sendit);
-    if(result) {
-      Curl_formclean(&http->sendit); /* free that whole lot */
-      return result;
-    }
-
-    break;
-
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
     if(conn->bits.authneg)
@@ -2590,11 +2496,27 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return result;
     break;
 
+  case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
     /* This is form posting using mime data. */
-    postsize = 0;
-    if(!conn->bits.authneg)
-      postsize = Curl_mime_size(&data->set.mimepost, 1);
+    if(conn->bits.authneg) {
+      /* nothing to post! */
+      result = Curl_add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
+      if(result)
+        return result;
+
+      result = Curl_add_buffer_send(req_buffer, conn,
+                                    &data->info.request_size, 0, FIRSTSOCKET);
+      if(result)
+        failf(data, "Failed sending POST request");
+      else
+        /* setup variables for the upcoming transfer */
+        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
+                            -1, NULL);
+      break;
+    }
+
+    postsize = Curl_mime_size(http->sendit, 1);
 
     /* We only set Content-Length and allow a custom Content-Length if
        we don't upload data chunked, as RFC2616 forbids us to set both
@@ -2614,7 +2536,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     {
       struct curl_slist *hdr;
 
-      for(hdr = data->set.mimepost.curlheaders; hdr; hdr = hdr->next) {
+      for(hdr = http->sendit->curlheaders; hdr; hdr = hdr->next) {
         result = Curl_add_bufferf(req_buffer, "%s\r\n", hdr->data);
         if(result)
           return result;
@@ -2646,6 +2568,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     /* set the upload size to the progress meter */
     Curl_pgrsSetUploadSize(data, postsize);
 
+    /* Read from mime structure. */
+    data->state.fread_func = (curl_read_callback) Curl_mime_read;
+    data->state.in = (void *) http->sendit;
+    http->sending = HTTPSEND_BODY;
+
     /* this sends the buffer and frees all the buffer resources */
     result = Curl_add_buffer_send(req_buffer, conn,
                                   &data->info.request_size, 0, FIRSTSOCKET);
@@ -2659,9 +2586,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(result)
       return result;
 
-    /* Read from mime structure. */
-    data->state.fread_func = (curl_read_callback) Curl_mime_read;
-    data->state.in = (void *) &data->set.mimepost;
     break;
 
   case HTTPREQ_POST:

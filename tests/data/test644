@@ -43,13 +43,12 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 POST /644 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 765
+Content-Length: 758
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
-Content-Type: application/octet-stream
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
-Content-Transfer-Encoding: 8bit
+Content-Type: application/octet-stream
 
 </protocol>
 # CURLE_ABORTED_BY_CALLBACK (42)

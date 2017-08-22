@@ -68,12 +68,12 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 POST /554 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 718
-Expect: 100-continue
+Content-Length: 758
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
+Content-Type: application/octet-stream
 
 this is what we post to the silly web server
 
@@ -99,12 +99,12 @@ blah blah
 POST /554 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 732
-Expect: 100-continue
+Content-Length: 772
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
 Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
+Content-Type: application/octet-stream
 
 this is what we post to the silly web server
 

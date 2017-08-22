@@ -28,26 +28,32 @@
 #define USERHEADERS_OWNER               (1 << 0)
 
 /* Part source kinds. */
-enum partkind {
-  MIME_NONE = 0,   /* Part not set. */
-  MIME_DATA,       /* Allocated mime data. */
-  MIME_NAMEDFILE,  /* Data from named file. */
-  MIME_FILE,       /* Data from file pointer. */
-  MIME_CALLBACK,   /* Data from `read' callback. */
-  MIME_MULTIPART,  /* Data is a mime subpart. */
+enum mimekind {
+  MIMEKIND_NONE = 0,            /* Part not set. */
+  MIMEKIND_DATA,                /* Allocated mime data. */
+  MIMEKIND_NAMEDFILE,           /* Data from named file. */
+  MIMEKIND_FILE,                /* Data from file pointer. */
+  MIMEKIND_CALLBACK,            /* Data from `read' callback. */
+  MIMEKIND_MULTIPART,           /* Data is a mime subpart. */
 };
 
 /* Readback state tokens. */
 enum mimestate {
-  MIME_BEGIN,           /* Readback has not yet started. */
-  MIME_CURLHEADERS,     /* In curl-generated headers. */
-  MIME_USERHEADERS,     /* In caller's supplied headers. */
-  MIME_EOH,             /* End of headers. */
-  MIME_BODY,            /* Placeholder. */
-  MIME_BOUNDARY1,       /* In boundary prefix. */
-  MIME_BOUNDARY2,       /* In boundary. */
-  MIME_CONTENT,         /* In content. */
-  MIME_END,             /* End of part reached. */
+  MIMESTATE_BEGIN,              /* Readback has not yet started. */
+  MIMESTATE_CURLHEADERS,        /* In curl-generated headers. */
+  MIMESTATE_USERHEADERS,        /* In caller's supplied headers. */
+  MIMESTATE_EOH,                /* End of headers. */
+  MIMESTATE_BODY,               /* Placeholder. */
+  MIMESTATE_BOUNDARY1,          /* In boundary prefix. */
+  MIMESTATE_BOUNDARY2,          /* In boundary. */
+  MIMESTATE_CONTENT,            /* In content. */
+  MIMESTATE_END,                /* End of part reached. */
+};
+
+/* Mime headers strategies. */
+enum mimestrategy {
+  MIMESTRATEGY_MAIL,            /* Mime mail. */
+  MIMESTRATEGY_FORM,            /* HTTP post form. */
 };
 
 /* Mime readback state. */
@@ -62,14 +68,13 @@ struct Curl_mime {
   char *                 boundary;     /* The part boundary. */
   struct Curl_mimepart * firstpart;    /* First part. */
   struct Curl_mimepart * lastpart;     /* Last part. */
-  curl_off_t             size;         /* Total size or -1. */
   struct mime_state      state;        /* Current readback state. */
 };
 
 /* A mime part. */
 struct Curl_mimepart {
   struct Curl_mimepart * nextpart;     /* Forward linked list. */
-  enum partkind          kind;         /* The part kind. */
+  enum mimekind          kind;         /* The part kind. */
   char *                 data;         /* Memory data or file name. */
   curl_read_callback     readfunc;     /* Read function. */
   curl_seek_callback     seekfunc;     /* Seek function. */
@@ -94,7 +99,8 @@ void Curl_mime_initpart(struct Curl_mimepart *part);
 void Curl_mime_cleanpart(struct Curl_mimepart *part);
 CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
                                    const char *contenttype,
-                                   const char *disposition);
+                                   const char *disposition,
+                                   enum mimestrategy strategy);
 curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers);
 size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
