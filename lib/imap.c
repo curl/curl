@@ -254,6 +254,8 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       *resp = 'N';
     else if(len >= 3 && !memcmp(line, "BAD", 3))
       *resp = 'B';
+    else if(len >= 7 && !memcmp(line, "PREAUTH", 7))
+      *resp = 'P';
     else {
       failf(conn->data, "Bad tagged response");
       *resp = -1;
@@ -563,9 +565,10 @@ static CURLcode imap_perform_authentication(struct connectdata *conn)
   struct imap_conn *imapc = &conn->proto.imapc;
   saslprogress progress;
 
-  /* Check we have enough data to authenticate with and end the
-     connect phase if we don't */
-  if(!Curl_sasl_can_authenticate(&imapc->sasl, conn)) {
+  /* Check if already authenticated OR if there is enough data to authenticate
+     with and end the connect phase if we don't */
+  if(imapc->preauth ||
+     !Curl_sasl_can_authenticate(&imapc->sasl, conn)) {
     state(conn, IMAP_STOP);
     return result;
   }
@@ -789,19 +792,21 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
                                             int imapcode,
                                             imapstate instate)
 {
-  CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-
   (void)instate; /* no use for this yet */
 
-  if(imapcode != 'O') {
-    failf(data, "Got unexpected imap-server response");
-    result = CURLE_WEIRD_SERVER_REPLY;
+  if(imapcode == 'P') {
+    /* PREAUTH */
+    struct imap_conn *imapc = &conn->proto.imapc;
+    imapc->preauth = TRUE;
+    infof(data, "PREAUTH connection, already authenticated!\n");
   }
-  else
-    result = imap_perform_capability(conn);
+  else if(imapcode != 'O') {
+    failf(data, "Got unexpected imap-server response");
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
 
-  return result;
+  return imap_perform_capability(conn);
 }
 
 /* For CAPABILITY responses */
