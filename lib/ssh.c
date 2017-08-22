@@ -1280,7 +1280,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * also, every command takes at least one argument so we get that
          * first argument right now
          */
-        result = get_realPathname(&cp, &sshc->quote_path1, &sshc->homedir); 
+        result = get_realPathname(&cp, &sshc->quote_path1, &sshc->homedir);
         if(result) {
           if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
@@ -1352,7 +1352,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* rename file */
           /* first param is the source path */
           /* second param is the dest. path */
-           result = get_realPathname(&cp, &sshc->quote_path2, &sshc->homedir); 
+           result = get_realPathname(&cp, &sshc->quote_path2, &sshc->homedir);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -3401,23 +3401,25 @@ static CURLcode get_realPathname(const char **cpp, char **path, char **pwd)
   char quot;
   unsigned int i, j;
   static const char WHITESPACE[] = " \t\r\n";
-
+  size_t fullPathLength;
+  size_t pathLength;
   cp += strspn(cp, WHITESPACE);
   if(!*cp && (*pwd == NULL)) {
     *cpp = cp;
     *path = NULL;
     return CURLE_QUOTE_ERROR;
   }
-
-  *path = malloc(strlen(cp) + strlen(*pwd) + 2);
+  fullPathLength = strlen(cp) + strlen(*pwd) + 2;
+  *path = malloc(fullPathLength);
   if(*path == NULL)
     return CURLE_OUT_OF_MEMORY;
 
   /* first start with home dir */
   strcpy(*path, *pwd);
-  if (cp[0] != '/') 
-  {
-     strcat(*path, "/");
+  pathLength = strlen(*path);
+  if(cp[0] != '/') {
+    (*path)[pathLength++] = '/';
+    (*path)[pathLength++] = '\0';
   }
   /* Check for quoted filenames */
   if(*cp == '\"' || *cp == '\'') {
@@ -3458,13 +3460,12 @@ static CURLcode get_realPathname(const char **cpp, char **path, char **pwd)
     if(end == NULL)
       end = strchr(cp, '\0');
     *cpp = end + strspn(end, WHITESPACE);
-    strcat(*path, cp);
+    pathLength = strlen(*path);
+    memcpy(&(*path)[pathLength], cp, strlen(cp) + 1);
     end = strpbrk(*path, WHITESPACE);
-    if (end) 
-    {
-       *end = '\0';
+    if(end) {
+      *end = '\0';
     }
-    
   }
   return CURLE_OK;
 
