@@ -1,6 +1,7 @@
 Long: request-target
 Help: Specify the target for this request
 Protocols: HTTP
+Added: 7.55.0
 ---
 Tells curl to use an alternative "target" (path) instead of using the path as
 provided in the URL. Particularly useful when wanting to issue HTTP requests
