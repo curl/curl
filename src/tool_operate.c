@@ -92,21 +92,12 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 #  define O_BINARY 0
 #endif
 
-#define CURL_CA_CERT_ERRORMSG1                                              \
-  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"           \
-  "curl performs SSL certificate verification by default, "                 \
-  "using a \"bundle\"\n"                                                    \
-  " of Certificate Authority (CA) public keys (CA certs). If the default\n" \
-  " bundle file isn't adequate, you can specify an alternate file\n"        \
-  " using the --cacert option.\n"
-
-#define CURL_CA_CERT_ERRORMSG2                                              \
-  "If this HTTPS server uses a certificate signed by a CA represented in\n" \
-  " the bundle, the certificate verification probably failed due to a\n"    \
-  " problem with the certificate (it might be expired, or the name might\n" \
-  " not match the domain name in the URL).\n"                               \
-  "If you'd like to turn off curl's verification of the certificate, use\n" \
-  " the -k (or --insecure) option.\n"
+#define CURL_CA_CERT_ERRORMSG                                               \
+  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"          \
+  "curl failed to verify the legitimacy of the server and therefore "       \
+  "could not\nestablish a secure connection to it. To learn more about "    \
+  "this situation and\nhow to fix it, please visit the web page mentioned " \
+  "above.\n"
 
 static bool is_fatal_error(CURLcode code)
 {
@@ -1784,12 +1775,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           fprintf(global->errors, "curl: (%d) %s\n", result, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror(result));
           if(result == CURLE_SSL_CACERT)
-            fprintf(global->errors, "%s%s%s",
-                    CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2,
-                    ((curlinfo->features & CURL_VERSION_HTTPS_PROXY) ?
-                     "HTTPS-proxy has similar options --proxy-cacert "
-                     "and --proxy-insecure.\n" :
-                     ""));
+            fputs(CURL_CA_CERT_ERRORMSG, global->errors);
         }
 
         /* Fall through comment to 'quit_urls' label */
