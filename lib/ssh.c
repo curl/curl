@@ -3399,7 +3399,7 @@ static CURLcode get_realPathname(const char **cpp, char **path, char **pwd)
   const char *cp = *cpp;
   char *end;
   char quot;
-  unsigned int i, j;
+  size_t i, j;
   static const char WHITESPACE[] = " \t\r\n";
   size_t fullPathLength;
   size_t pathLength;
