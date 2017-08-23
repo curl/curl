@@ -2018,15 +2018,8 @@ CURL_EXTERN CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
  *
  * Set mime data transfer encoder.
  */
-typedef enum {
-  CURLENCODING_NONE,
-  CURLENCODING_8BIT,
-  CURLENCODING_7BIT,
-  CURLENCODING_BASE64,
-  CURLENCODING_QUOTED_PRINTABLE,
-}  curlencoding;
 CURL_EXTERN CURLcode curl_mime_encoder(struct Curl_mimepart *part,
-                                       curlencoding encoding);
+                                       const char *encoding);
 
 /*
  * NAME curl_mime_data()

@@ -877,8 +877,7 @@ CURLcode curl_mime_type(struct Curl_mimepart *part, const char *mimetype)
 }
 
 /* Set mime data transfer encoder. */
-CURLcode curl_mime_encoder(struct Curl_mimepart *part,
-                           curlencoding encoding)
+CURLcode curl_mime_encoder(struct Curl_mimepart *part, const char *encoding)
 {
   CURLcode result = CURLE_OK;
 
@@ -887,12 +886,8 @@ CURLcode curl_mime_encoder(struct Curl_mimepart *part,
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  switch(encoding) {
-  case CURLENCODING_NONE:
-    break;
-  default:
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-  }
+  if(encoding)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   return result;
 }
@@ -1256,7 +1251,7 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
   return CURLE_NOT_BUILT_IN;
 }
 
-CURLcode curl_mime_encoder(struct Curl_mimepart *part, curlencoding encoding)
+CURLcode curl_mime_encoder(struct Curl_mimepart *part, const char *encoding)
 {
   (void) part;
   (void) encoding;

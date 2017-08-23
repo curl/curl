@@ -26,16 +26,16 @@ curl_mime_encoder - set a mime part's encoder and content transfer encoding
 .B #include <curl/curl.h>
 .sp
 .BI "CURLcode curl_mime_encoder(curl_mimepart * " part ,
-.BI "curlencoding " encoding ");"
+.BI "const char * " encoding ");"
 .ad
 .SH DESCRIPTION
 curl_mime_encoder() requests a mime part's body to be encoded before being
 transmitted. Currently not supported.
 
 \fIpart\fP is the part's handle to assign an encoder.
-\fIencoding\fP is a encoding token. It may be set to CURLENCODING_NONE to
-disable an encoder previously attached to the part.
-NULL to remove a previously attached remote file name.
+\fIencoding\fP is a pointer to a nul-terminated encoding scheme. It may be
+set to NULL to disable an encoder previously attached to the part. The encoding
+scheme storage may safely be reused after this function returns.
 
 Setting a part's encoder twice is valid: only the value set by the last call is
 retained.
