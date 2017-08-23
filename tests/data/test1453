@@ -17,7 +17,7 @@ FAILURE
 none
 </server>
 <features>
-http
+tftp
 </features>
  <name>
 Too long tftp filename
