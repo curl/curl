@@ -671,7 +671,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
     result = CURLE_OUT_OF_MEMORY;
   }
 
-  Curl_mime_initpart(&data->set.mimepost);
+  Curl_mime_initpart(&data->set.mimepost, data);
 
   data->state.headerbuff = malloc(HEADERSIZE);
   if(!data->state.headerbuff) {

@@ -163,7 +163,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_mime_initpart(&http->form);
+  Curl_mime_initpart(&http->form, conn->data);
   conn->data->req.protop = http;
 
   Curl_http2_setup_conn(conn);

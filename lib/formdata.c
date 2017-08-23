@@ -833,7 +833,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
   struct Curl_mimepart *part;
   struct curl_httppost *file;
 
-  Curl_mime_initpart(finalform); /* default form is empty */
+  Curl_mime_initpart(finalform, data); /* default form is empty */
 
   if(!post)
     return result; /* no input => no output! */

@@ -624,7 +624,7 @@ void Curl_mime_cleanpart(struct Curl_mimepart *part)
   Curl_safefree(part->mimetype);
   Curl_safefree(part->name);
   Curl_safefree(part->filename);
-  Curl_mime_initpart(part);
+  Curl_mime_initpart(part, part->easy);
 }
 
 /* Recursively delete a mime handle and its parts. */
@@ -656,6 +656,7 @@ struct Curl_mime *curl_mime_init(struct Curl_easy *easy)
   mime = (struct Curl_mime *) malloc(sizeof *mime);
 
   if(mime) {
+    mime->easy = easy;
     mime->firstpart = NULL;
     mime->lastpart = NULL;
 
@@ -676,9 +677,10 @@ struct Curl_mime *curl_mime_init(struct Curl_easy *easy)
 }
 
 /* Initialize a mime part. */
-void Curl_mime_initpart(struct Curl_mimepart *part)
+void Curl_mime_initpart(struct Curl_mimepart *part, struct Curl_easy *easy)
 {
     memset((char *) part, 0, sizeof *part);
+    part->easy = easy;
     mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
 }
 
@@ -693,7 +695,7 @@ struct Curl_mimepart *curl_mime_addpart(struct Curl_mime *mime)
   part = (struct Curl_mimepart *) malloc(sizeof *part);
 
   if(part) {
-    Curl_mime_initpart(part);
+    Curl_mime_initpart(part, mime->easy);
 
     if(mime->lastpart)
       mime->lastpart->nextpart = part;
@@ -942,6 +944,8 @@ CURLcode curl_mime_subparts(struct Curl_mimepart *part,
   cleanup_part_content(part);
 
   if(subparts) {
+    if(part->easy && subparts->easy && part->easy != subparts->easy)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     part->readfunc = mime_subparts_read;
     part->seekfunc = mime_subparts_seek;
     part->freefunc = mime_subparts_free;
@@ -1314,9 +1318,10 @@ CURLcode curl_mime_headers(curl_mimepart *part,
   return CURLE_NOT_BUILT_IN;
 }
 
-void Curl_mime_initpart(struct Curl_mimepart *part)
+void Curl_mime_initpart(struct Curl_mimepart *part, struct Curl_easy *easy)
 {
   (void) part;
+  (void) data;
 }
 
 void Curl_mime_cleanpart(struct Curl_mimepart *part)

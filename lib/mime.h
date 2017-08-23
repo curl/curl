@@ -65,6 +65,7 @@ struct mime_state {
 
 /* A mime context. */
 struct Curl_mime {
+  struct Curl_easy *     easy;         /* The associated easy handle. */
   char *                 boundary;     /* The part boundary. */
   struct Curl_mimepart * firstpart;    /* First part. */
   struct Curl_mimepart * lastpart;     /* Last part. */
@@ -74,6 +75,7 @@ struct Curl_mime {
 /* A mime part. */
 struct Curl_mimepart {
   struct Curl_mimepart * nextpart;     /* Forward linked list. */
+  struct Curl_easy *     easy;         /* The associated easy handle. */
   enum mimekind          kind;         /* The part kind. */
   char *                 data;         /* Memory data or file name. */
   curl_read_callback     readfunc;     /* Read function. */
@@ -95,7 +97,7 @@ struct Curl_mimepart {
 
 
 /* Prototypes. */
-void Curl_mime_initpart(struct Curl_mimepart *part);
+void Curl_mime_initpart(struct Curl_mimepart *part, struct Curl_easy *easy);
 void Curl_mime_cleanpart(struct Curl_mimepart *part);
 CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
                                    const char *contenttype,
