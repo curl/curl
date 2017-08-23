@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -170,8 +170,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(userp, passwdp, ntlm, &base64,
-                                                 &len);
+    result = Curl_auth_create_ntlm_type1_message(conn->data, userp, passwdp,
+                                                 ntlm, &base64, &len);
     if(result)
       return result;
 

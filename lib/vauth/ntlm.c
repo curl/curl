@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -350,6 +350,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * Parameters:
  *
+ * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
@@ -359,7 +360,8 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
+CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
+                                             const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
@@ -458,7 +460,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
   });
 
   /* Return with binary blob encoded into base64 */
-  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+  return Curl_base64_encode(data, (char *)ntlmbuf, size, outptr, outlen);
 }
 
 /*
@@ -827,7 +829,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     return CURLE_CONV_FAILED;
 
   /* Return with binary blob encoded into base64 */
-  result = Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+  result = Curl_base64_encode(data, (char *)ntlmbuf, size, outptr, outlen);
 
   Curl_auth_ntlm_cleanup(ntlm);
 
