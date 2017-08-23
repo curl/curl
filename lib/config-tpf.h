@@ -618,6 +618,9 @@
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
+/* Define to the size of `long', as computed by sizeof. */
+#define SIZEOF_LONG 8
+
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 8
 
