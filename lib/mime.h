@@ -74,8 +74,8 @@ struct Curl_mime {
 
 /* A mime part. */
 struct Curl_mimepart {
-  struct Curl_mimepart * nextpart;     /* Forward linked list. */
   struct Curl_easy *     easy;         /* The associated easy handle. */
+  struct Curl_mimepart * nextpart;     /* Forward linked list. */
   enum mimekind          kind;         /* The part kind. */
   char *                 data;         /* Memory data or file name. */
   curl_read_callback     readfunc;     /* Read function. */

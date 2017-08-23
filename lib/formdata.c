@@ -33,6 +33,7 @@
 #include "urldata.h" /* for struct Curl_easy */
 #include "formdata.h"
 #include "mime.h"
+#include "non-ascii.h"
 #include "vtls/vtls.h"
 #include "strcase.h"
 #include "sendf.h"
@@ -907,8 +908,14 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
              with the contentslength */
           result = curl_mime_data_cb(part, clen,
                                      fread_func, NULL, NULL, post->userp);
-        else
+        else {
           result = curl_mime_data(part, post->contents, (ssize_t) clen);
+#ifdef CURL_DOES_CONVERSIONS
+          /* Convert textual contents now. */
+          if(!result && data && part->datasize)
+            result = Curl_convert_to_network(data, part->data, part->datasize);
+#endif
+        }
       }
 
       /* Set fake file name. */

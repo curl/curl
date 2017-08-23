@@ -25,6 +25,7 @@
 #include <curl/curl.h>
 
 #include "mime.h"
+#include "non-ascii.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
     !defined(CURL_DISABLE_IMAP)
@@ -432,6 +433,9 @@ static size_t readback_part(struct Curl_mimepart *part,
   size_t cursize = 0;
   size_t sz;
   struct curl_slist *hdr;
+#ifdef CURL_DOES_CONVERSIONS
+  char *convbuf = buffer;
+#endif
 
   /* Readback from part. */
 
@@ -468,6 +472,15 @@ static size_t readback_part(struct Curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_BODY, NULL);
       break;
     case MIMESTATE_BODY:
+#ifdef CURL_DOES_CONVERSIONS
+      if(part->easy && convbuf < buffer) {
+        CURLcode result = Curl_convert_to_network(part->easy, convbuf,
+                                                  buffer - convbuf);
+        if(result)
+          return CURL_READFUNC_ABORT;
+        convbuf = buffer;
+      }
+#endif
       mimesetstate(&part->state, MIMESTATE_CONTENT, NULL);
       break;
     case MIMESTATE_CONTENT:
@@ -499,6 +512,16 @@ static size_t readback_part(struct Curl_mimepart *part,
     bufsize -= sz;
   }
 
+#ifdef CURL_DOES_CONVERSIONS
+      if(part->easy && convbuf < buffer &&
+         part->state.state < MIMESTATE_BODY) {
+        CURLcode result = Curl_convert_to_network(part->easy, convbuf,
+                                                  buffer - convbuf);
+        if(result)
+          return CURL_READFUNC_ABORT;
+      }
+#endif
+
   return cursize;
 }
 
@@ -510,6 +533,9 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
   size_t cursize = 0;
   size_t sz;
   struct Curl_mimepart *part;
+#ifdef CURL_DOES_CONVERSIONS
+  char *convbuf = buffer;
+#endif
 
   (void) size;   /* Always 1. */
 
@@ -526,6 +552,9 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
       mime->state.offset += 2;
       break;
     case MIMESTATE_BOUNDARY1:
+#ifdef CURL_DOES_CONVERSIONS
+      convbuf = buffer;
+#endif
       sz = readback_bytes(&mime->state, buffer, nitems, "\r\n--", 4, "");
       if(!sz)
         mimesetstate(&mime->state, MIMESTATE_BOUNDARY2, part);
@@ -533,9 +562,19 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
     case MIMESTATE_BOUNDARY2:
       sz = readback_bytes(&mime->state, buffer, nitems, mime->boundary,
                           strlen(mime->boundary), part? "\r\n": "--\r\n");
-      if(!sz)
+      if(!sz) {
+#ifdef CURL_DOES_CONVERSIONS
+        if(mime->easy && convbuf < buffer) {
+          CURLcode result = Curl_convert_to_network(mime->easy, convbuf,
+                                                    buffer - convbuf);
+          if(result)
+            return CURL_READFUNC_ABORT;
+          convbuf = buffer;
+        }
+#endif
         mimesetstate(&mime->state,
                      part? MIMESTATE_CONTENT: MIMESTATE_END, part);
+      }
       break;
     case MIMESTATE_CONTENT:
       sz = readback_part(part, buffer, nitems);
@@ -559,6 +598,16 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
     buffer += sz;
     nitems -= sz;
   }
+
+#ifdef CURL_DOES_CONVERSIONS
+      if(mime->easy && convbuf < buffer &&
+         mime->state.state <= MIMESTATE_CONTENT) {
+        CURLcode result = Curl_convert_to_network(mime->easy, convbuf,
+                                                  buffer - convbuf);
+        if(result)
+          return CURL_READFUNC_ABORT;
+      }
+#endif
 
   return cursize;
 }

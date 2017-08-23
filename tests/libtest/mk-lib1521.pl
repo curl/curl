@@ -147,7 +147,7 @@ int test(char *URL)
   struct curl_slist *slist=NULL;
   struct curl_httppost *httppost=NULL;
   FILE *stream = stderr;
-  struct data object;
+  struct data object = {NULL};
   char *charp;
   long val;
   curl_off_t oval;
