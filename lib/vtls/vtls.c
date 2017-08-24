@@ -1246,6 +1246,10 @@ static int multissl_init(const struct Curl_ssl *backend)
     return 1;
 
   env = getenv("CURL_SSL_BACKEND");
+#ifdef CURL_DEFAULT_SSL_BACKEND
+  if(!env)
+    env = CURL_DEFAULT_SSL_BACKEND;
+#endif
   if(env)
     for(i = 0; available_backends[i]; i++)
       if(!strcmp(env, available_backends[i]->info.name)) {

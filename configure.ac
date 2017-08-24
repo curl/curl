@@ -1334,6 +1334,34 @@ else
   CPPFLAGS="$save_CPPFLAGS"
 fi
 
+dnl -------------------------------------------------------------
+dnl parse --with-default-ssl-backend so it can be validated below
+dnl -------------------------------------------------------------
+
+DEFAULT_SSL_BACKEND=no
+VALID_DEFAULT_SSL_BACKEND=
+AC_ARG_WITH(default-ssl-backend,
+AC_HELP_STRING([--with-default-ssl-backend=NAME],[Use NAME as default SSL backend])
+AC_HELP_STRING([--without-default-ssl-backend],[Use implicit default SSL backend]),
+  [DEFAULT_SSL_BACKEND=$withval])
+case "$DEFAULT_SSL_BACKEND" in
+  no)
+    dnl --without-default-ssl-backend option used
+    ;;
+  default|yes)
+    dnl --with-default-ssl-backend option used without name
+    AC_MSG_ERROR([The name of the default SSL backend is required.])
+    ;;
+  *)
+    dnl --with-default-ssl-backend option used with name
+    AC_SUBST(DEFAULT_SSL_BACKEND)
+    dnl needs to be validated below
+    VALID_DEFAULT_SSL_BACKEND=no
+    ;;
+esac
+
+dnl **********************************************************************
+
 dnl -------------------------------------------------
 dnl check winssl option before other SSL libraries
 dnl -------------------------------------------------
@@ -1353,6 +1381,7 @@ if test -z "$ssl_backends" -o "x$OPT_WINSSL" != xno; then
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     AC_SUBST(USE_SCHANNEL, [1])
     ssl_msg="Windows-native"
+    test schannel != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     WINSSL_ENABLED=1
     # --with-winssl implies --enable-sspi
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
@@ -1381,6 +1410,7 @@ if test -z "$ssl_backends" -o "x$OPT_DARWINSSL" != xno; then
     AC_DEFINE(USE_DARWINSSL, 1, [to enable Apple OS native SSL/TLS support])
     AC_SUBST(USE_DARWINSSL, [1])
     ssl_msg="$ssh_backends, Apple OS-native"
+    test darwinssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     DARWINSSL_ENABLED=1
     LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
   else
@@ -1589,6 +1619,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                        openssl/pem.h openssl/ssl.h openssl/err.h,
         ssl_msg="OpenSSL"
+	test openssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         OPENSSL_ENABLED=1
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
 
@@ -1827,6 +1858,7 @@ if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
        GNUTLS_ENABLED=1
        USE_GNUTLS="yes"
        ssl_msg="GnuTLS"
+       test gnutls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        [
          LIBS="$CLEANLIBS"
@@ -1932,6 +1964,7 @@ if test -z "$ssl_backends" -o "x$OPT_POLARSSL" != xno; then
          POLARSSL_ENABLED=1
          USE_POLARSSL="yes"
          ssl_msg="PolarSSL"
+	 test polarssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ])
     fi
 
@@ -1958,6 +1991,7 @@ if test -z "$ssl_backends" -o "x$OPT_POLARSSL" != xno; then
        POLARSSL_ENABLED=1
        USE_POLARSSL="yes"
        ssl_msg="PolarSSL"
+       test polarssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        [
          CPPFLAGS=$_cppflags
@@ -2021,6 +2055,7 @@ if test -z "$ssl_backends" -o "x$OPT_MBEDTLS" != xno; then
          MBEDTLS_ENABLED=1
          USE_MBEDTLS="yes"
          ssl_msg="mbedTLS"
+	 test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ], [], -lmbedx509 -lmbedcrypto)
     fi
 
@@ -2047,6 +2082,7 @@ if test -z "$ssl_backends" -o "x$OPT_MBEDTLS" != xno; then
        MBEDTLS_ENABLED=1
        USE_MBEDTLS="yes"
        ssl_msg="mbedTLS"
+       test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        [
          CPPFLAGS=$_cppflags
@@ -2115,6 +2151,7 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
          CYASSL_ENABLED=1
          USE_CYASSL="yes"
          ssl_msg="CyaSSL"
+	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ])
     fi
 
@@ -2141,6 +2178,7 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
        CYASSL_ENABLED=1
        USE_CYASSL="yes"
        ssl_msg="CyaSSL"
+       test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        [
          CPPFLAGS=$_cppflags
@@ -2186,6 +2224,7 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
          CYASSL_ENABLED=1
          USE_CYASSL="yes"
          ssl_msg="WolfSSL"
+	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        [
          AC_MSG_RESULT(no)
@@ -2331,6 +2370,7 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
      USE_NSS="yes"
      NSS_ENABLED=1
      ssl_msg="NSS"
+     test nss != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
      ],
      [
        LDFLAGS="$CLEANLDFLAGS"
@@ -2405,6 +2445,7 @@ if test -z "$ssl_backends" -o "x$OPT_AXTLS" != xno; then
       AXTLS_ENABLED=1
       USE_AXTLS="yes"
       ssl_msg="axTLS"
+      test axtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
 
       if test "x$cross_compiling" != "xyes"; then
         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
@@ -2442,6 +2483,19 @@ esac
 
 if test -n "$ssl_backends"; then
   curl_ssl_msg="enabled ($ssl_backends)"
+fi
+
+if test no = "$VALID_DEFAULT_SSL_BACKEND"
+then
+  if test -n "$SSL_ENABLED"
+  then
+    AC_MSG_ERROR([Default SSL backend $DEFAULT_SSL_BACKEND not enabled!])
+  else
+    AC_MSG_ERROR([Default SSL backend requires SSL!])
+  fi
+elif test yes = "$VALID_DEFAULT_SSL_BACKEND"
+then
+  AC_DEFINE_UNQUOTED([CURL_DEFAULT_SSL_BACKEND], ["$DEFAULT_SSL_BACKEND"], [Default SSL backend])
 fi
 
 dnl **********************************************************************
