@@ -1985,6 +1985,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       result = Curl_mime_rewind(http->sendit, 1);
     if(result)
       return result;
+    http->postsize = Curl_mime_size(http->sendit, 1);
   }
 
   ptr = Curl_checkheaders(conn, "Transfer-Encoding:");
@@ -1996,7 +1997,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else {
     if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
        (((httpreq == HTTPREQ_POST_MIME || httpreq == HTTPREQ_POST_FORM) &&
-       Curl_mime_size(http->sendit, 1) < 0) ||
+       http->postsize < 0) ||
        (data->set.upload && data->state.infilesize == -1))) {
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
@@ -2516,7 +2517,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       break;
     }
 
-    postsize = Curl_mime_size(http->sendit, 1);
+    postsize = http->postsize;
 
     /* We only set Content-Length and allow a custom Content-Length if
        we don't upload data chunked, as RFC2616 forbids us to set both
