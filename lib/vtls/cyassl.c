@@ -181,8 +181,14 @@ cyassl_connect_step1(struct connectdata *conn,
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_3:
+#ifdef WOLFSSL_TLS13
+    req_method = wolfTLSv1_3_client_method();
+    use_sni(TRUE);
+    break;
+#else
     failf(data, "CyaSSL: TLS 1.3 is not yet supported");
     return CURLE_SSL_CONNECT_ERROR;
+#endif
   case CURL_SSLVERSION_SSLv3:
 #ifdef WOLFSSL_ALLOW_SSLV3
     req_method = SSLv3_client_method();
@@ -336,9 +342,11 @@ cyassl_connect_step1(struct connectdata *conn,
      https://github.com/wolfSSL/wolfssl/issues/366
      The supported curves below are those also supported by OpenSSL 1.0.2 and
      in the same order. */
+#ifndef WOLFSSL_TLS13
   CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x17); /* secp256r1 */
   CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x19); /* secp521r1 */
   CyaSSL_CTX_UseSupportedCurve(conssl->ctx, 0x18); /* secp384r1 */
+#endif
 #endif
 
   /* give application a chance to interfere with SSL set up. */
