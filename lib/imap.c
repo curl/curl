@@ -162,11 +162,15 @@ const struct Curl_handler Curl_handler_imaps = {
 };
 #endif
 
+#define IMAP_RESP_OK       1
+#define IMAP_RESP_NOT_OK   2
+#define IMAP_RESP_PREAUTH  3
+
 /* SASL parameters for the imap protocol */
 static const struct SASLproto saslimap = {
   "imap",                     /* The service name */
   '+',                        /* Code received when continuation is expected */
-  'O',                        /* Code to receive upon authentication success */
+  IMAP_RESP_OK,               /* Code to receive upon authentication success */
   0,                          /* Maximum initial response length (no max) */
   imap_perform_authenticate,  /* Send authentication command */
   imap_continue_authenticate, /* Send authentication continuation */
@@ -249,17 +253,11 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
     len -= id_len + 1;
 
     if(len >= 2 && !memcmp(line, "OK", 2))
-      *resp = 'O';
-    else if(len >= 2 && !memcmp(line, "NO", 2))
-      *resp = 'N';
-    else if(len >= 3 && !memcmp(line, "BAD", 3))
-      *resp = 'B';
+      *resp = IMAP_RESP_OK;
     else if(len >= 7 && !memcmp(line, "PREAUTH", 7))
-      *resp = 'P';
-    else {
-      failf(conn->data, "Bad tagged response");
-      *resp = -1;
-    }
+      *resp = IMAP_RESP_PREAUTH;
+    else
+      *resp = IMAP_RESP_NOT_OK;
 
     return TRUE;
   }
@@ -795,13 +793,13 @@ static CURLcode imap_state_servergreet_resp(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   (void)instate; /* no use for this yet */
 
-  if(imapcode == 'P') {
+  if(imapcode == IMAP_RESP_PREAUTH) {
     /* PREAUTH */
     struct imap_conn *imapc = &conn->proto.imapc;
     imapc->preauth = TRUE;
     infof(data, "PREAUTH connection, already authenticated!\n");
   }
-  else if(imapcode != 'O') {
+  else if(imapcode != IMAP_RESP_OK) {
     failf(data, "Got unexpected imap-server response");
     return CURLE_WEIRD_SERVER_REPLY;
   }
@@ -873,7 +871,7 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
       line += wordlen;
     }
   }
-  else if(imapcode == 'O') {
+  else if(imapcode == IMAP_RESP_OK) {
     if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
       /* We don't have a SSL/TLS connection yet, but SSL is requested */
       if(imapc->tls_supported)
@@ -906,7 +904,7 @@ static CURLcode imap_state_starttls_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(imapcode != 'O') {
+  if(imapcode != IMAP_RESP_OK) {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
       failf(data, "STARTTLS denied");
       result = CURLE_USE_SSL_FAILED;
@@ -964,7 +962,7 @@ static CURLcode imap_state_login_resp(struct connectdata *conn,
 
   (void)instate; /* no use for this yet */
 
-  if(imapcode != 'O') {
+  if(imapcode != IMAP_RESP_OK) {
     failf(data, "Access denied. %c", imapcode);
     result = CURLE_LOGIN_DENIED;
   }
@@ -992,7 +990,7 @@ static CURLcode imap_state_listsearch_resp(struct connectdata *conn,
     result = Curl_client_write(conn, CLIENTWRITE_BODY, line, len + 1);
     line[len] = '\0';
   }
-  else if(imapcode != 'O')
+  else if(imapcode != IMAP_RESP_OK)
     result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
   else
     /* End of DO phase */
@@ -1021,7 +1019,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
       imapc->mailbox_uidvalidity = strdup(tmp);
     }
   }
-  else if(imapcode == 'O') {
+  else if(imapcode == IMAP_RESP_OK) {
     /* Check if the UIDVALIDITY has been specified and matches */
     if(imap->uidvalidity && imapc->mailbox_uidvalidity &&
        strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
@@ -1153,7 +1151,7 @@ static CURLcode imap_state_fetch_final_resp(struct connectdata *conn,
 
   (void)instate; /* No use for this yet */
 
-  if(imapcode != 'O')
+  if(imapcode != IMAP_RESP_OK)
     result = CURLE_WEIRD_SERVER_REPLY;
   else
     /* End of DONE phase */
@@ -1197,7 +1195,7 @@ static CURLcode imap_state_append_final_resp(struct connectdata *conn,
 
   (void)instate; /* No use for this yet */
 
-  if(imapcode != 'O')
+  if(imapcode != IMAP_RESP_OK)
     result = CURLE_UPLOAD_FAILED;
   else
     /* End of DONE phase */
