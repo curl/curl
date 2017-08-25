@@ -89,7 +89,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     if test -z "$clangver"; then
       if echo $fullclangver | grep "Apple LLVM version " >/dev/null; then
         dnl Starting with XCode 7 / clang 3.7, Apple clang won't tell its upstream version
-        clangver=`3.7`
+        clangver="3.7"
       else
         clangver=`echo $fullclangver | "$SED" 's/.*version \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*/\1/'`
       fi

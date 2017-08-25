@@ -34,6 +34,11 @@
 
 #ifdef USE_DARWINSSL
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-pointer-compare"
+#endif /* __clang__ */
+
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -1792,7 +1797,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 {
   int fd;
   ssize_t n, len = 0, cap = 512;
-  unsigned char buf[cap], *data;
+  unsigned char buf[512], *data;
 
   fd = open(file, 0);
   if(fd < 0)
@@ -2033,7 +2038,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
                                     const char *pinnedpubkey)
 {  /* Scratch */
   size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
-  unsigned char *pubkey = NULL, *realpubkey = NULL, *spkiHeader = NULL;
+  unsigned char *pubkey = NULL, *realpubkey = NULL;
+  const unsigned char *spkiHeader = NULL;
   CFDataRef publicKeyBits = NULL;
 
   /* Result is returned to caller */
@@ -2076,7 +2082,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 #endif /* DARWIN_SSL_PINNEDPUBKEY_V2 */
 
     pubkeylen = CFDataGetLength(publicKeyBits);
-    pubkey = CFDataGetBytePtr(publicKeyBits);
+    pubkey = (unsigned char *)CFDataGetBytePtr(publicKeyBits);
 
     switch(pubkeylen) {
       case 526:
@@ -2844,5 +2850,9 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
   }
   return (ssize_t)processed;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 #endif /* USE_DARWINSSL */

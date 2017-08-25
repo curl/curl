@@ -60,10 +60,7 @@ int test(char *URL)
 
   start_test_timing();
 
-  res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    return res;
-  }
+  global_init(CURL_GLOBAL_ALL);
 
   easy_init(easy);
 

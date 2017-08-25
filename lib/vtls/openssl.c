@@ -111,7 +111,6 @@
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
 #define HAVE_OPAQUE_RSA_DSA_DH 1 /* since 1.1.0 -pre5 */
 #define CONST_EXTS const
-#define CONST_ASN1_BIT_STRING const
 #define HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED 1
 #else
 /* For OpenSSL before 1.1.0 */
@@ -119,7 +118,6 @@
 #define X509_get0_notBefore(x) X509_get_notBefore(x)
 #define X509_get0_notAfter(x) X509_get_notAfter(x)
 #define CONST_EXTS /* nope */
-#define CONST_ASN1_BIT_STRING /* nope */
 #ifdef LIBRESSL_VERSION_NUMBER
 static unsigned long OpenSSL_version_num(void)
 {
@@ -1778,6 +1776,7 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
       failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
       return CURLE_NOT_BUILT_IN;
 #endif
+      /* FALLTHROUGH */
     case CURL_SSLVERSION_TLSv1_2:
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
       *ctx_options |= SSL_OP_NO_TLSv1_1;
@@ -2560,7 +2559,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
     EVP_PKEY *pubkey=NULL;
     int j;
     char *ptr;
-    CONST_ASN1_BIT_STRING ASN1_BIT_STRING *psig = NULL;
+    const ASN1_BIT_STRING *psig = NULL;
 
     X509_NAME_print_ex(mem, X509_get_subject_name(x), 0, XN_FLAG_ONELINE);
     push_certinfo("Subject", i);

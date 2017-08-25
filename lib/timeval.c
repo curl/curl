@@ -158,5 +158,5 @@ time_t Curl_tvdiff_us(struct curltime newer, struct curltime older)
     return 0x7fffffffffffffffLL;
 #endif
   return (newer.tv_sec-older.tv_sec)*1000000+
-    (time_t)(newer.tv_usec-older.tv_usec);
+    (int)(newer.tv_usec-older.tv_usec);
 }

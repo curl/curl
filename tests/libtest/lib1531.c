@@ -37,6 +37,9 @@ int test(char *URL)
   int still_running; /* keep number of running handles */
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
+  int res = CURLE_OK;
+
+  global_init(CURL_GLOBAL_ALL);
 
   /* Allocate one CURL handle per transfer */
   easy = curl_easy_init();
@@ -139,6 +142,7 @@ int test(char *URL)
 
   /* Free the CURL handles */
   curl_easy_cleanup(easy);
+  curl_global_cleanup();
 
   return 0;
 }

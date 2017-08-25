@@ -653,7 +653,9 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
  */
 static CURLcode easy_events(struct Curl_multi *multi)
 {
-  struct events evs= {2, FALSE, 0, NULL, 0};
+  /* this struct is made static to allow it to be used after this function
+     returns and curl_multi_remove_handle() is called */
+  static struct events evs= {2, FALSE, 0, NULL, 0};
 
   /* if running event-based, do some further multi inits */
   events_setup(multi, &evs);

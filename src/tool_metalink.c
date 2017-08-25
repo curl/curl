@@ -875,12 +875,12 @@ size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
    * it does not match then it fails with CURLE_WRITE_ERROR. So at this
    * point returning a value different from sz*nmemb indicates failure.
    */
-  const size_t failure = (sz * nmemb) ? 0 : 1;
+  const size_t failure = (sz && nmemb) ? 0 : 1;
 
   if(!config)
     return failure;
 
-  rv = metalink_parse_update(outs->metalink_parser, buffer, sz *nmemb);
+  rv = metalink_parse_update(outs->metalink_parser, buffer, sz * nmemb);
   if(rv == 0)
     return sz * nmemb;
   else {

@@ -92,21 +92,12 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 #  define O_BINARY 0
 #endif
 
-#define CURL_CA_CERT_ERRORMSG1                                              \
-  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"           \
-  "curl performs SSL certificate verification by default, "                 \
-  "using a \"bundle\"\n"                                                    \
-  " of Certificate Authority (CA) public keys (CA certs). If the default\n" \
-  " bundle file isn't adequate, you can specify an alternate file\n"        \
-  " using the --cacert option.\n"
-
-#define CURL_CA_CERT_ERRORMSG2                                              \
-  "If this HTTPS server uses a certificate signed by a CA represented in\n" \
-  " the bundle, the certificate verification probably failed due to a\n"    \
-  " problem with the certificate (it might be expired, or the name might\n" \
-  " not match the domain name in the URL).\n"                               \
-  "If you'd like to turn off curl's verification of the certificate, use\n" \
-  " the -k (or --insecure) option.\n"
+#define CURL_CA_CERT_ERRORMSG                                               \
+  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"          \
+  "curl failed to verify the legitimacy of the server and therefore "       \
+  "could not\nestablish a secure connection to it. To learn more about "    \
+  "this situation and\nhow to fix it, please visit the web page mentioned " \
+  "above.\n"
 
 static bool is_fatal_error(CURLcode code)
 {
@@ -184,7 +175,7 @@ static curl_off_t VmsSpecialSize(const char *name,
 #endif /* __VMS */
 
 #if defined(HAVE_UTIME) || \
-    (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8))
+    (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
 static void setfiletime(long filetime, const char *filename,
                         FILE *error_stream)
 {
@@ -192,10 +183,10 @@ static void setfiletime(long filetime, const char *filename,
 /* Windows utime() may attempt to adjust our unix gmt 'filetime' by a daylight
    saving time offset and since it's GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass utime and set the times directly. */
-#if defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)
+#if defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)
     HANDLE hfile;
 
-#if (CURL_SIZEOF_LONG >= 8)
+#if (SIZEOF_LONG >= 8)
     /* 910670515199 is the maximum unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
     if(filetime > CURL_OFF_T_C(910670515199)) {
@@ -204,7 +195,7 @@ static void setfiletime(long filetime, const char *filename,
               filetime);
       return;
     }
-#endif /* CURL_SIZEOF_LONG >= 8 */
+#endif /* SIZEOF_LONG >= 8 */
 
     hfile = CreateFileA(filename, FILE_WRITE_ATTRIBUTES,
                         (FILE_SHARE_READ | FILE_SHARE_WRITE |
@@ -254,7 +245,7 @@ static void setfiletime(long filetime, const char *filename,
   }
 }
 #endif /* defined(HAVE_UTIME) || \
-          (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)) */
+          (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
 
 #define BUFFER_SIZE (100*1024)
 
@@ -1091,6 +1082,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
              to fail if we are not talking to who we think we should */
           my_setopt_str(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5,
                         config->hostpubmd5);
+
+          /* new in libcurl 7.56.0 */
+          if(config->ssh_compression)
+            my_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);
         }
 
         if(config->cacert)
@@ -1780,12 +1775,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           fprintf(global->errors, "curl: (%d) %s\n", result, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror(result));
           if(result == CURLE_SSL_CACERT)
-            fprintf(global->errors, "%s%s%s",
-                    CURL_CA_CERT_ERRORMSG1, CURL_CA_CERT_ERRORMSG2,
-                    ((curlinfo->features & CURL_VERSION_HTTPS_PROXY) ?
-                     "HTTPS-proxy has similar options --proxy-cacert "
-                     "and --proxy-insecure.\n" :
-                     ""));
+            fputs(CURL_CA_CERT_ERRORMSG, global->errors);
         }
 
         /* Fall through comment to 'quit_urls' label */
@@ -1840,7 +1830,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #endif
 
 #if defined(HAVE_UTIME) || \
-    (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8))
+    (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
         /* File time can only be set _after_ the file has been closed */
         if(!result && config->remote_time && outs.s_isreg && outs.filename) {
           /* Ask libcurl if we got a remote file time */
@@ -1850,7 +1840,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             setfiletime(filetime, outs.filename, config->global->errors);
         }
 #endif /* defined(HAVE_UTIME) || \
-          (defined(WIN32) && (CURL_SIZEOF_CURL_OFF_T >= 8)) */
+          (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink && result == CURLE_OK) {

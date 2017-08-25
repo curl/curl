@@ -35,7 +35,7 @@ fi
 cat ./docs/THANKS
 
 (
-git log $start..HEAD | \
+git log --use-mailmap $start..HEAD | \
 egrep -ai '(^Author|^Commit|by):' | \
 cut -d: -f2- | \
 cut '-d(' -f1 | \

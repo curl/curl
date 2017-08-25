@@ -49,7 +49,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   int res;
   FILE *file;
   char filebuffer[512];
-  bool usedarg;
+  bool usedarg = FALSE;
   char *home;
   int rc = 0;
   struct OperationConfig *operation = global->first;
@@ -220,7 +220,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
       res = getparameter(option, param, &usedarg, global, operation);
 
-      if(param && *param && !usedarg)
+      if(!res && param && *param && !usedarg)
         /* we passed in a parameter that wasn't used! */
         res = PARAM_GOT_EXTRA_PARAMETER;
 

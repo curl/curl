@@ -183,9 +183,6 @@ AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
 dnl Checks for programs.
 
-dnl Our curl_off_t internal and external configure settings
-CURL_CONFIGURE_CURL_OFF_T
-
 dnl This defines _ALL_SOURCE for AIX
 CURL_CHECK_AIX_ALL_SOURCE
 
@@ -354,6 +351,7 @@ esac
 CURL_CHECK_WIN32_LARGEFILE
 
 CURL_MAC_CFLAGS
+CURL_SUPPORTS_BUILTIN_AVAILABLE
 
 dnl ************************************************************
 dnl switch off particular protocols
@@ -3158,18 +3156,17 @@ AC_CHECK_SIZEOF(size_t)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(short)
-CURL_CONFIGURE_LONG
 AC_CHECK_SIZEOF(time_t)
 AC_CHECK_SIZEOF(off_t)
 
-soname_bump=no
-if test x"$curl_cv_native_windows" != "xyes" &&
-   test $ac_cv_sizeof_off_t -ne $curl_sizeof_curl_off_t; then
-  AC_MSG_WARN([This libcurl built is probably not ABI compatible with previous])
-  AC_MSG_WARN([builds! You MUST read lib/README.curl_off_t to figure it out.])
-  soname_bump=yes
-fi
+o=$CPPFLAGS
+CPPFLAGS="$CPPFLAGS -I$srcdir/include"
+AC_CHECK_SIZEOF(curl_off_t, unused , [
+#include <curl/system.h>
+])
+CPPFLAGS=$o
 
+soname_bump=no
 
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1,
@@ -3402,11 +3399,8 @@ else
 fi
 AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
 
-CURL_CHECK_OPTION_THREADED_RESOLVER
-
-if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
-  AC_MSG_ERROR(
-[Options --enable-threaded-resolver and --enable-ares are mutually exclusive])
+if test "x$want_ares" != xyes; then
+  CURL_CHECK_OPTION_THREADED_RESOLVER
 fi
 
 dnl ************************************************************

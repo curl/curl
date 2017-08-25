@@ -410,7 +410,8 @@ static CURLcode CONNECT(struct connectdata *conn,
         }
 
         /* convert from the network encoding */
-        result = Curl_convert_from_network(data, line_start, perline);
+        result = Curl_convert_from_network(data, s->line_start,
+                                           (size_t)s->perline);
         /* Curl_convert_from_network calls failf if unsuccessful */
         if(result)
           return result;
@@ -523,8 +524,8 @@ static CURLcode CONNECT(struct connectdata *conn,
                   k->httpcode);
           }
           else {
-            s->cl = curlx_strtoofft(s->line_start +
-                                    strlen("Content-Length:"), NULL, 10);
+            (void)curlx_strtoofft(s->line_start +
+                                  strlen("Content-Length:"), NULL, 10, &s->cl);
           }
         }
         else if(Curl_compareheader(s->line_start, "Connection:", "close"))

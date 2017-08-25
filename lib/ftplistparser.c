@@ -609,16 +609,18 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             char *p;
             curl_off_t fsize;
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            fsize = curlx_strtoofft(finfo->b_data+parser->item_offset, &p, 10);
-            if(p[0] == '\0' && fsize != CURL_OFF_T_MAX &&
-                               fsize != CURL_OFF_T_MIN) {
-              parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
-              parser->file_data->info.size = fsize;
+            if(!curlx_strtoofft(finfo->b_data+parser->item_offset,
+                                &p, 10, &fsize)) {
+              if(p[0] == '\0' && fsize != CURL_OFF_T_MAX &&
+                 fsize != CURL_OFF_T_MIN) {
+                parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
+                parser->file_data->info.size = fsize;
+              }
+              parser->item_length = 0;
+              parser->item_offset = 0;
+              parser->state.UNIX.main = PL_UNIX_TIME;
+              parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART1;
             }
-            parser->item_length = 0;
-            parser->item_offset = 0;
-            parser->state.UNIX.main = PL_UNIX_TIME;
-            parser->state.UNIX.sub.time = PL_UNIX_TIME_PREPART1;
           }
           else if(!ISDIGIT(c)) {
             PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
@@ -935,19 +937,9 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             }
             else {
               char *endptr;
-              finfo->size = curlx_strtoofft(finfo->b_data +
-                                            parser->item_offset,
-                                            &endptr, 10);
-              if(!*endptr) {
-                if(finfo->size == CURL_OFF_T_MAX ||
-                   finfo->size == CURL_OFF_T_MIN) {
-                  if(errno == ERANGE) {
-                    PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
-                    return bufflen;
-                  }
-                }
-              }
-              else {
+              if(curlx_strtoofft(finfo->b_data +
+                                 parser->item_offset,
+                                 &endptr, 10, &finfo->size)) {
                 PL_ERROR(conn, CURLE_FTP_BAD_FILE_LIST);
                 return bufflen;
               }

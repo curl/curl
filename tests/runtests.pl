@@ -3585,9 +3585,9 @@ sub singletest {
 
         for $k (@keywords) {
             chomp $k;
-            if ($disabled_keywords{$k}) {
+            if ($disabled_keywords{lc($k)}) {
                 $why = "disabled by keyword";
-            } elsif ($enabled_keywords{$k}) {
+            } elsif ($enabled_keywords{lc($k)}) {
                 $match = 1;
             }
         }
@@ -4952,7 +4952,7 @@ sub startservers {
                     return "failed starting socks5 server";
                 }
                 elsif(($sshdid =~ /OpenSSH/) && ($sshdvernum < 370)) {
-                    # Need OpenSSH 3.7 for socks5 - http://www.openssh.com/txt/release-3.7
+                    # Need OpenSSH 3.7 for socks5 - https://www.openssh.com/txt/release-3.7
                     logmsg "$sshdverstr insufficient; socks5 tests need at least OpenSSH 3.7\n";
                     return "failed starting socks5 server";
                 }
@@ -5379,10 +5379,10 @@ EOHELP
         $disabled{$1}=$1;
     }
     elsif($ARGV[0] =~ /^!(.+)/) {
-        $disabled_keywords{$1}=$1;
+        $disabled_keywords{lc($1)}=$1;
     }
     elsif($ARGV[0] =~ /^([-[{a-zA-Z].*)/) {
-        $enabled_keywords{$1}=$1;
+        $enabled_keywords{lc($1)}=$1;
     }
     else {
         print "Unknown option: $ARGV[0]\n";

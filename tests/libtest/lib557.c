@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,7 +37,7 @@
 
 #include "memdebug.h"
 
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
 #  define MPRNT_SUFFIX_CURL_OFF_T  LL
 #else
 #  define MPRNT_SUFFIX_CURL_OFF_T  L
@@ -782,7 +782,7 @@ static int test_unsigned_long_formatting(void)
   int num_ulong_tests;
   int failed = 0;
 
-#if (CURL_SIZEOF_LONG == 2)
+#if (SIZEOF_LONG == 2)
 
   i=1; ul_test[i].num = 0xFFFFUL; ul_test[i].expected = "65535";
   i++; ul_test[i].num = 0xFF00UL; ul_test[i].expected = "65280";
@@ -803,7 +803,7 @@ static int test_unsigned_long_formatting(void)
 
   num_ulong_tests = i;
 
-#elif (CURL_SIZEOF_LONG == 4)
+#elif (SIZEOF_LONG == 4)
 
   i=1; ul_test[i].num = 0xFFFFFFFFUL; ul_test[i].expected = "4294967295";
   i++; ul_test[i].num = 0xFFFF0000UL; ul_test[i].expected = "4294901760";
@@ -837,7 +837,7 @@ static int test_unsigned_long_formatting(void)
 
   num_ulong_tests = i;
 
-#elif (CURL_SIZEOF_LONG == 8)
+#elif (SIZEOF_LONG == 8)
 
   i=1; ul_test[i].num = 0xFFFFFFFFFFFFFFFFUL; ul_test[i].expected = "18446744073709551615";
   i++; ul_test[i].num = 0xFFFFFFFF00000000UL; ul_test[i].expected = "18446744069414584320";
@@ -931,7 +931,7 @@ static int test_signed_long_formatting(void)
   int num_slong_tests;
   int failed = 0;
 
-#if (CURL_SIZEOF_LONG == 2)
+#if (SIZEOF_LONG == 2)
 
   i=1; sl_test[i].num = 0x7FFFL; sl_test[i].expected = "32767";
   i++; sl_test[i].num = 0x7FFEL; sl_test[i].expected = "32766";
@@ -974,7 +974,7 @@ static int test_signed_long_formatting(void)
 
   num_slong_tests = i;
 
-#elif (CURL_SIZEOF_LONG == 4)
+#elif (SIZEOF_LONG == 4)
 
   i=1; sl_test[i].num = 0x7FFFFFFFL; sl_test[i].expected = "2147483647";
   i++; sl_test[i].num = 0x7FFFFFFEL; sl_test[i].expected = "2147483646";
@@ -1041,7 +1041,7 @@ static int test_signed_long_formatting(void)
 
   num_slong_tests = i;
 
-#elif (CURL_SIZEOF_LONG == 8)
+#elif (SIZEOF_LONG == 8)
 
   i=1; sl_test[i].num = 0x7FFFFFFFFFFFFFFFL; sl_test[i].expected = "9223372036854775807";
   i++; sl_test[i].num = 0x7FFFFFFFFFFFFFFEL; sl_test[i].expected = "9223372036854775806";
@@ -1159,7 +1159,7 @@ static int test_curl_off_t_formatting(void)
   int num_cofft_tests;
   int failed = 0;
 
-#if (CURL_SIZEOF_CURL_OFF_T == 2)
+#if (SIZEOF_CURL_OFF_T == 2)
 
   i=1; co_test[i].num = MPRNT_OFF_T_C(0x7FFF); co_test[i].expected = "32767";
   i++; co_test[i].num = MPRNT_OFF_T_C(0x7FFE); co_test[i].expected = "32766";
@@ -1202,7 +1202,7 @@ static int test_curl_off_t_formatting(void)
 
   num_cofft_tests = i;
 
-#elif (CURL_SIZEOF_CURL_OFF_T == 4)
+#elif (SIZEOF_CURL_OFF_T == 4)
 
   i=1; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFF); co_test[i].expected = "2147483647";
   i++; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFE); co_test[i].expected = "2147483646";
@@ -1269,7 +1269,7 @@ static int test_curl_off_t_formatting(void)
 
   num_cofft_tests = i;
 
-#elif (CURL_SIZEOF_CURL_OFF_T == 8)
+#elif (SIZEOF_CURL_OFF_T == 8)
 
   i=1; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFFFFFFFFFF); co_test[i].expected = "9223372036854775807";
   i++; co_test[i].num = MPRNT_OFF_T_C(0x7FFFFFFFFFFFFFFE); co_test[i].expected = "9223372036854775806";

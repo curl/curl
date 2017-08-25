@@ -1345,7 +1345,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 #endif
 
     Curl_initinfo(data); /* reset session-specific information "variables" */
-    Curl_pgrsResetTimesSizes(data);
+    Curl_pgrsResetTransferSizes(data);
     Curl_pgrsStartNow(data);
 
     if(data->set.timeout)
@@ -1391,16 +1391,56 @@ CURLcode Curl_posttransfer(struct Curl_easy *data)
 
 #ifndef CURL_DISABLE_HTTP
 /*
+ * Find the separator at the end of the host name, or the '?' in cases like
+ * http://www.url.com?id=2380
+ */
+static const char *find_host_sep(const char *url)
+{
+  const char *sep;
+  const char *query;
+
+  /* Find the start of the hostname */
+  sep = strstr(url, "//");
+  if(!sep)
+    sep = url;
+  else
+    sep += 2;
+
+  query = strchr(sep, '?');
+  sep = strchr(sep, '/');
+
+  if(!sep)
+    sep = url + strlen(url);
+
+  if(!query)
+    query = url + strlen(url);
+
+  return sep < query ? sep : query;
+}
+
+/*
  * strlen_url() returns the length of the given URL if the spaces within the
  * URL were properly URL encoded.
+ * URL encoding should be skipped for host names, otherwise IDN resolution
+ * will fail.
  */
-static size_t strlen_url(const char *url)
+static size_t strlen_url(const char *url, bool relative)
 {
   const unsigned char *ptr;
   size_t newlen=0;
   bool left=TRUE; /* left side of the ? */
+  const unsigned char *host_sep = (const unsigned char *) url;
+
+  if(!relative)
+    host_sep = (const unsigned char *) find_host_sep(url);
 
   for(ptr=(unsigned char *)url; *ptr; ptr++) {
+
+    if(ptr < host_sep) {
+      ++newlen;
+      continue;
+    }
+
     switch(*ptr) {
     case '?':
       left=FALSE;
@@ -1423,16 +1463,29 @@ static size_t strlen_url(const char *url)
 
 /* strcpy_url() copies a url to a output buffer and URL-encodes the spaces in
  * the source URL accordingly.
+ * URL encoding should be skipped for host names, otherwise IDN resolution
+ * will fail.
  */
-static void strcpy_url(char *output, const char *url)
+static void strcpy_url(char *output, const char *url, bool relative)
 {
   /* we must add this with whitespace-replacing */
   bool left=TRUE;
   const unsigned char *iptr;
   char *optr = output;
+  const unsigned char *host_sep = (const unsigned char *) url;
+
+  if(!relative)
+    host_sep = (const unsigned char *) find_host_sep(url);
+
   for(iptr = (unsigned char *)url;    /* read from here */
       *iptr;         /* until zero byte */
       iptr++) {
+
+    if(iptr < host_sep) {
+      *optr++ = *iptr;
+      continue;
+    }
+
     switch(*iptr) {
     case '?':
       left=FALSE;
@@ -1488,6 +1541,7 @@ static char *concat_url(const char *base, const char *relurl)
   char *protsep;
   char *pathsep;
   size_t newlen;
+  bool host_changed = FALSE;
 
   const char *useurl = relurl;
   size_t urllen;
@@ -1568,6 +1622,7 @@ static char *concat_url(const char *base, const char *relurl)
       *protsep=0;
       useurl = &relurl[2]; /* we keep the slashes from the original, so we
                               skip the new ones */
+      host_changed = TRUE;
     }
     else {
       /* cut off the original URL from the first slash, or deal with URLs
@@ -1599,7 +1654,7 @@ static char *concat_url(const char *base, const char *relurl)
      letter we replace each space with %20 while it is replaced with '+'
      on the right side of the '?' letter.
   */
-  newlen = strlen_url(useurl);
+  newlen = strlen_url(useurl, !host_changed);
 
   urllen = strlen(url_clone);
 
@@ -1621,7 +1676,7 @@ static char *concat_url(const char *base, const char *relurl)
     newest[urllen++]='/';
 
   /* then append the new piece on the right side */
-  strcpy_url(&newest[urllen], useurl);
+  strcpy_url(&newest[urllen], useurl, !host_changed);
 
   free(url_clone);
 
@@ -1694,7 +1749,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     /* The new URL MAY contain space or high byte values, that means a mighty
        stupid redirect URL but we still make an effort to do "right". */
     char *newest;
-    size_t newlen = strlen_url(newurl);
+    size_t newlen = strlen_url(newurl, FALSE);
 
     /* This is an absolute URL, don't allow the custom port number */
     disallowport = TRUE;
@@ -1702,7 +1757,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
     newest = malloc(newlen+1); /* get memory for this */
     if(!newest)
       return CURLE_OUT_OF_MEMORY;
-    strcpy_url(newest, newurl); /* create a space-free URL */
+
+    strcpy_url(newest, newurl, FALSE); /* create a space-free URL */
     newurl = newest; /* use this instead now */
 
   }
@@ -1827,7 +1883,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     break;
   }
   Curl_pgrsTime(data, TIMER_REDIRECT);
-  Curl_pgrsResetTimesSizes(data);
+  Curl_pgrsResetTransferSizes(data);
 
   return CURLE_OK;
 #endif /* CURL_DISABLE_HTTP */

@@ -30,7 +30,7 @@ CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in      \
  CMake/Macros.cmake              \
  CMake/CurlSymbolHiding.cmake CMake/FindCARES.cmake             \
  CMake/FindLibSSH2.cmake CMake/FindNGHTTP2.cmake                \
- CMake/FindMbedTLS.cmake
+ CMake/FindMbedTLS.cmake CMake/cmake_uninstall.cmake.in
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist
@@ -276,11 +276,13 @@ cygwinbin:
 install-data-hook:
 	cd include && $(MAKE) install
 	cd docs && $(MAKE) install
+	cd docs/libcurl && $(MAKE) install
 
 # We extend the standard uninstall with a custom hook:
 uninstall-hook:
 	cd include && $(MAKE) uninstall
 	cd docs && $(MAKE) uninstall
+	cd docs/libcurl && $(MAKE) uninstall
 
 ca-bundle: lib/mk-ca-bundle.pl
 	@echo "generating a fresh ca-bundle.crt"

@@ -1791,6 +1791,9 @@ typedef enum {
   /* shuffle addresses before use when DNS returns multiple */
   CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 268),
 
+  /* Enable/disable SSH compression */
+  CINIT(SSH_COMPRESSION, LONG, 269),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -887,21 +887,24 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
        dir) this then allows for a second try to CWD to it */
     ftpc->count3 = (conn->data->set.ftp_create_missing_dirs==2)?1:0;
 
-    if(conn->bits.reuse && ftpc->entrypath) {
+    if((conn->data->set.ftp_filemethod == FTPFILE_NOCWD) && !ftpc->cwdcount)
+      /* No CWD necessary */
+      result = ftp_state_mdtm(conn);
+    else if(conn->bits.reuse && ftpc->entrypath) {
       /* This is a re-used connection. Since we change directory to where the
          transfer is taking place, we must first get back to the original dir
          where we ended up after login: */
-      ftpc->count1 = 0; /* we count this as the first path, then we add one
-                          for all upcoming ones in the ftp->dirs[] array */
+      ftpc->cwdcount = 0; /* we count this as the first path, then we add one
+                             for all upcoming ones in the ftp->dirs[] array */
       PPSENDF(&conn->proto.ftpc.pp, "CWD %s", ftpc->entrypath);
       state(conn, FTP_CWD);
     }
     else {
       if(ftpc->dirdepth) {
-        ftpc->count1 = 1;
+        ftpc->cwdcount = 1;
         /* issue the first CWD, the rest is sent when the CWD responses are
            received... */
-        PPSENDF(&conn->proto.ftpc.pp, "CWD %s", ftpc->dirs[ftpc->count1 -1]);
+        PPSENDF(&conn->proto.ftpc.pp, "CWD %s", ftpc->dirs[ftpc->cwdcount -1]);
         state(conn, FTP_CWD);
       }
       else {
@@ -2257,11 +2260,13 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data=conn->data;
-  curl_off_t filesize;
+  curl_off_t filesize = -1;
   char *buf = data->state.buffer;
 
   /* get the size from the ascii string: */
-  filesize = (ftpcode == 213)?curlx_strtoofft(buf+4, NULL, 0):-1;
+  if(ftpcode == 213)
+    /* ignores parsing errors, which will make the size remain unknown */
+    (void)curlx_strtoofft(buf+4, NULL, 0, &filesize);
 
   if(instate == FTP_SIZE) {
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
@@ -2432,7 +2437,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
         /* if we have nothing but digits: */
         if(bytes++) {
           /* get the number! */
-          size = curlx_strtoofft(bytes, NULL, 0);
+          (void)curlx_strtoofft(bytes, NULL, 0, &size);
         }
       }
     }
@@ -2936,10 +2941,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if(ftpcode/100 != 2) {
         /* failure to CWD there */
         if(conn->data->set.ftp_create_missing_dirs &&
-           ftpc->count1 && !ftpc->count2) {
+           ftpc->cwdcount && !ftpc->count2) {
           /* try making it */
           ftpc->count2++; /* counter to prevent CWD-MKD loops */
-          PPSENDF(&ftpc->pp, "MKD %s", ftpc->dirs[ftpc->count1 - 1]);
+          PPSENDF(&ftpc->pp, "MKD %s", ftpc->dirs[ftpc->cwdcount - 1]);
           state(conn, FTP_MKD);
         }
         else {
@@ -2953,9 +2958,9 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       else {
         /* success */
         ftpc->count2=0;
-        if(++ftpc->count1 <= ftpc->dirdepth) {
+        if(++ftpc->cwdcount <= ftpc->dirdepth) {
           /* send next CWD */
-          PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->count1 - 1]);
+          PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->cwdcount - 1]);
         }
         else {
           result = ftp_state_mdtm(conn);
@@ -2973,7 +2978,7 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       }
       state(conn, FTP_CWD);
       /* send CWD */
-      PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->count1 - 1]);
+      PPSENDF(&ftpc->pp, "CWD %s", ftpc->dirs[ftpc->cwdcount - 1]);
       break;
 
     case FTP_MDTM:
@@ -3192,6 +3197,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
     size_t dlen = strlen(path)-flen;
     if(!ftpc->cwdfail) {
+      ftpc->prevmethod = data->set.ftp_filemethod;
       if(dlen && (data->set.ftp_filemethod != FTPFILE_NOCWD)) {
         ftpc->prevpath = path;
         if(flen)
@@ -3463,31 +3469,32 @@ static CURLcode ftp_range(struct connectdata *conn)
 {
   curl_off_t from, to;
   char *ptr;
-  char *ptr2;
   struct Curl_easy *data = conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
 
   if(data->state.use_range && data->state.range) {
-    from=curlx_strtoofft(data->state.range, &ptr, 0);
+    CURLofft from_t;
+    CURLofft to_t;
+    from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
+    if(from_t == CURL_OFFT_FLOW)
+      return CURLE_RANGE_ERROR;
     while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
       ptr++;
-    to=curlx_strtoofft(ptr, &ptr2, 0);
-    if(ptr == ptr2) {
-      /* we didn't get any digit */
-      to=-1;
-    }
-    if((-1 == to) && (from>=0)) {
+    to_t = curlx_strtoofft(ptr, NULL, 0, &to);
+    if(to_t == CURL_OFFT_FLOW)
+      return CURLE_RANGE_ERROR;
+    if((to_t == CURL_OFFT_INVAL) && !from_t) {
       /* X - */
       data->state.resume_from = from;
       DEBUGF(infof(conn->data, "FTP RANGE %" CURL_FORMAT_CURL_OFF_T
                    " to end of file\n", from));
     }
-    else if(from < 0) {
+    else if(!to_t && (from_t == CURL_OFFT_INVAL)) {
       /* -Y */
-      data->req.maxdownload = -from;
-      data->state.resume_from = from;
+      data->req.maxdownload = to;
+      data->state.resume_from = -to;
       DEBUGF(infof(conn->data, "FTP RANGE the last %" CURL_FORMAT_CURL_OFF_T
-                   " bytes\n", -from));
+                   " bytes\n", to));
     }
     else {
       /* X-Y */
@@ -4299,7 +4306,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
     dlen -= ftpc->file?strlen(ftpc->file):0;
     if((dlen == strlen(ftpc->prevpath)) &&
-       !strncmp(path, ftpc->prevpath, dlen)) {
+       !strncmp(path, ftpc->prevpath, dlen) &&
+       (ftpc->prevmethod == data->set.ftp_filemethod)) {
       infof(data, "Request has same path as previous transfer\n");
       ftpc->cwddone = TRUE;
     }

@@ -1582,7 +1582,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
       failf(data, "nghttp2_session_mem_recv() returned %d:%s\n",
             rv, nghttp2_strerror((int)rv));
       *err = CURLE_RECV_ERROR;
-      return 0;
+      return -1;
     }
     DEBUGF(infof(data, "nghttp2_session_mem_recv() returns %zd\n", rv));
     if(nread == rv) {
@@ -1600,7 +1600,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     rv = h2_session_send(data, httpc->h2);
     if(rv != 0) {
       *err = CURLE_SEND_ERROR;
-      return 0;
+      return -1;
     }
 
     if(should_close_session(httpc)) {

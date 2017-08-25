@@ -62,9 +62,9 @@ endif
 ifndef LIBXML2_PATH
 LIBXML2_PATH = ../../libxml2-2.9.2
 endif
-# Edit the path below to point to the base of your libidn package.
-ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../libidn-1.32
+# Edit the path below to point to the base of your libidn2 package.
+ifndef LIBIDN2_PATH
+LIBIDN2_PATH = ../../libidn2-2.0.3
 endif
 # Edit the path below to point to the base of your MS IDN package.
 # Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
@@ -179,8 +179,8 @@ endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 ZLIB = 1
 endif
-ifeq ($(findstring -idn,$(CFG)),-idn)
-IDN = 1
+ifeq ($(findstring -idn2,$(CFG)),-idn2)
+IDN2 = 1
 endif
 ifeq ($(findstring -winidn,$(CFG)),-winidn)
 WINIDN = 1
@@ -284,9 +284,9 @@ ifdef ZLIB
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   curl_LDADD += -L"$(ZLIB_PATH)" -lz
 endif
-ifdef IDN
-  CFLAGS += -DUSE_LIBIDN
-  curl_LDADD += -L"$(LIBIDN_PATH)/lib" -lidn
+ifdef IDN2
+  CFLAGS += -DUSE_LIBIDN2
+  curl_LDADD += -L"$(LIBIDN2_PATH)/lib" -lidn2
 else
 ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN

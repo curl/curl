@@ -70,7 +70,7 @@ HTTP, FTP, SFTP
 .nf
 static int seek_cb(void *userp, curl_off_t offset, int origin)
 {
-  struct data *d = (stuct data *)userp;
+  struct data *d = (struct data *)userp;
   lseek(our_fd, offset, origin);
   return CURL_SEEKFUNC_OK;
 }

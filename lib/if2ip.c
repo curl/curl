@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,6 +71,8 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
     const unsigned char *b = sa6->sin6_addr.s6_addr;
     unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
 
+    if((b[0] & 0xFE) == 0xFC) /* Handle ULAs */
+      return IPV6_SCOPE_UNIQUELOCAL;
     switch(w & 0xFFC0) {
     case 0xFE80:
       return IPV6_SCOPE_LINKLOCAL;

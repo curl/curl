@@ -417,6 +417,10 @@ struct digestdata {
   BYTE *input_token;
   size_t input_token_len;
   CtxtHandle *http_context;
+  /* copy of user/passwd used to make the identity for http_context.
+     either may be NULL. */
+  char *user;
+  char *passwd;
 #else
   char *nonce;
   char *cnonce;
@@ -1255,6 +1259,8 @@ struct Progress {
   struct curltime t_startop;
   struct curltime t_acceptdata;
 
+  bool is_t_startransfer_set;
+
   /* upload speed limit */
   struct curltime ul_limit_start;
   curl_off_t ul_limit_size;
@@ -1736,6 +1742,7 @@ struct UserDefined {
 
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
+  bool ssh_compression;            /* enable SSH compression */
 
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
