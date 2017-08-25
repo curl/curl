@@ -1893,13 +1893,13 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_RESUME_FROM:
     /*
-     * Resume transfer at the give file position
+     * Resume transfer at the given file position
      */
     data->set.set_resume_from = va_arg(param, long);
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*
-     * Resume transfer at the give file position
+     * Resume transfer at the given file position
      */
     data->set.set_resume_from = va_arg(param, curl_off_t);
     break;

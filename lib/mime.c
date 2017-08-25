@@ -668,7 +668,7 @@ void Curl_mime_cleanpart(struct Curl_mimepart *part)
 {
   cleanup_part_content(part);
   curl_slist_free_all(part->curlheaders);
-  if(part->flags & USERHEADERS_OWNER)
+  if(part->flags & MIME_USERHEADERS_OWNER)
     curl_slist_free_all(part->userheaders);
   Curl_safefree(part->mimetype);
   Curl_safefree(part->name);
@@ -950,13 +950,13 @@ CURLcode curl_mime_headers(struct Curl_mimepart *part,
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if(part->flags & USERHEADERS_OWNER) {
+  if(part->flags & MIME_USERHEADERS_OWNER) {
     curl_slist_free_all(part->userheaders);
-    part->flags &= ~USERHEADERS_OWNER;
+    part->flags &= ~MIME_USERHEADERS_OWNER;
   }
   part->userheaders = headers;
   if(headers && take_ownership)
-    part->flags |= USERHEADERS_OWNER;
+    part->flags |= MIME_USERHEADERS_OWNER;
   return CURLE_OK;
 }
 
@@ -1018,11 +1018,13 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
 }
 
 /* Rewind mime stream. */
-CURLcode Curl_mime_rewind(struct Curl_mimepart *part, int skip_headers)
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part)
 {
   int res = CURL_SEEKFUNC_OK;
-  enum mimestate targetstate = skip_headers? MIMESTATE_BODY: MIMESTATE_BEGIN;
+  enum mimestate targetstate = MIMESTATE_BEGIN;
 
+  if(part->flags & MIME_BODY_ONLY)
+    targetstate = MIMESTATE_BODY;
   if(part->state.state > targetstate) {
     res = CURL_SEEKFUNC_CANTSEEK;
     if(part->seekfunc)
@@ -1063,7 +1065,7 @@ static curl_off_t multipart_size(struct Curl_mime *mime)
   size = boundarysize;  /* Final boundary - CRLF after headers. */
 
   for(part = mime->firstpart; part; part = part->nextpart) {
-    sz = Curl_mime_size(part, 0);
+    sz = Curl_mime_size(part);
 
     if(sz < 0)
       size = sz;
@@ -1076,7 +1078,7 @@ static curl_off_t multipart_size(struct Curl_mime *mime)
 }
 
 /* Get/compute mime size. */
-curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers)
+curl_off_t Curl_mime_size(struct Curl_mimepart *part)
 {
   curl_off_t size;
 
@@ -1084,7 +1086,7 @@ curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers)
     part->datasize = multipart_size(part->arg);
 
   size = part->datasize;
-  if(size >= 0 && !skip_headers) {
+  if(size >= 0 && !(part->flags & MIME_BODY_ONLY)) {
     /* Compute total part size. */
     size += slist_size(part->curlheaders, 2, NULL);
     size += slist_size(part->userheaders, 2, "Content-Type");
@@ -1390,10 +1392,9 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
   return CURLE_NOT_BUILT_IN;
 }
 
-curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers)
+curl_off_t Curl_mime_size(struct Curl_mimepart *part)
 {
   (void) part;
-  (void) skip_headers;
   return (curl_off_t) -1;
 }
 
@@ -1406,10 +1407,9 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
   return 0;
 }
 
-CURLcode Curl_mime_rewind(struct Curl_mimepart *part, int skip_headers)
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part)
 {
   (void) part;
-  (void) skip_headers;
   return CURLE_NOT_BUILT_IN;
 }
 

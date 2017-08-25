@@ -25,7 +25,8 @@
 #define MIME_RAND_BOUNDARY_CHARS        16  /* Nb. of random boundary chars. */
 
 /* Part flags. */
-#define USERHEADERS_OWNER               (1 << 0)
+#define MIME_USERHEADERS_OWNER  (1 << 0)
+#define MIME_BODY_ONLY          (1 << 1)
 
 /* Part source kinds. */
 enum mimekind {
@@ -103,10 +104,10 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
                                    const char *contenttype,
                                    const char *disposition,
                                    enum mimestrategy strategy);
-curl_off_t Curl_mime_size(struct Curl_mimepart *part, int skip_headers);
+curl_off_t Curl_mime_size(struct Curl_mimepart *part);
 size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
-CURLcode Curl_mime_rewind(struct Curl_mimepart *part, int skip_headers);
+CURLcode Curl_mime_rewind(struct Curl_mimepart *part);
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
 
 #endif /* HEADER_CURL_MIME_H */

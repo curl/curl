@@ -242,6 +242,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 CURLcode Curl_readrewind(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
+  struct Curl_mimepart *mimepart = &data->set.mimepost;
 
   conn->bits.rewindaftersend = FALSE; /* we rewind now */
 
@@ -254,13 +255,18 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   /* We have sent away data. If not using CURLOPT_POSTFIELDS or
      CURLOPT_HTTPPOST, call app to rewind
   */
-  if(data->set.postfields ||
-     (data->set.httpreq == HTTPREQ_POST_FORM))
+  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+    struct HTTP *http = data->req.protop;
+
+    if(http->sendit)
+      mimepart = http->sendit;
+  }
+  if(data->set.postfields)
     ; /* do nothing */
-  else if(data->set.httpreq == HTTPREQ_POST_MIME) {
-    if(Curl_mime_rewind(&data->set.mimepost, (conn->handler->protocol &
-                        (PROTO_FAMILY_HTTP | CURLPROTO_RTSP))? 1: 0)) {
-      failf(data, "Cannot rewind mime data");
+  else if(data->set.httpreq == HTTPREQ_POST_MIME ||
+          data->set.httpreq == HTTPREQ_POST_FORM) {
+    if(Curl_mime_rewind(mimepart)) {
+      failf(data, "Cannot rewind mime/post data");
       return CURLE_SEND_FAIL_REWIND;
     }
   }

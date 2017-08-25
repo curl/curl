@@ -533,6 +533,9 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
 
   /* Prepare the mime data if some. */
   if(data->set.mimepost.kind != MIMEKIND_NONE) {
+    /* Use the whole structure as data. */
+    data->set.mimepost.flags &= ~MIME_BODY_ONLY;
+
     /* Add external headers and mime version. */
     curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
     result = Curl_mime_prepare_headers(&data->set.mimepost, NULL,
@@ -545,12 +548,12 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
 
     /* Make sure we will read the entire mime structure. */
     if(!result)
-      result = Curl_mime_rewind(&data->set.mimepost, 0);
+      result = Curl_mime_rewind(&data->set.mimepost);
 
     if(result)
       return result;
 
-    data->state.infilesize = Curl_mime_size(&data->set.mimepost, 0);
+    data->state.infilesize = Curl_mime_size(&data->set.mimepost);
 
     /* Read from mime structure. */
     data->state.fread_func = (curl_read_callback) Curl_mime_read;

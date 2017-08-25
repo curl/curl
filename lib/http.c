@@ -1781,7 +1781,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *httpstring;
   Curl_send_buffer *req_buffer;
   curl_off_t postsize = 0; /* curl_off_t to handle large file sizes */
-  int seekerr = CURL_SEEKFUNC_OK;
+  int seekerr = CURL_SEEKFUNC_CANTSEEK;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
@@ -1969,6 +1969,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(http->sendit) {
     const char *cthdr = Curl_checkheaders(conn, "Content-Type:");
 
+    /* Read and seek body only. */
+    http->sendit->flags |= MIME_BODY_ONLY;
+
     /* Prepare the mime structure headers & set content type. */
 
     if(cthdr)
@@ -1982,10 +1985,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                        NULL, MIMESTRATEGY_FORM);
     curl_mime_headers(http->sendit, NULL, 0);
     if(!result)
-      result = Curl_mime_rewind(http->sendit, 1);
+      result = Curl_mime_rewind(http->sendit);
     if(result)
       return result;
-    http->postsize = Curl_mime_size(http->sendit, 1);
+    http->postsize = Curl_mime_size(http->sendit);
   }
 
   ptr = Curl_checkheaders(conn, "Transfer-Encoding:");
@@ -2172,10 +2175,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   http->p_accept = Curl_checkheaders(conn, "Accept:")?NULL:"Accept: */*\r\n";
 
-  if(( (HTTPREQ_POST == httpreq) ||
-       (HTTPREQ_POST_FORM == httpreq) ||
-       (HTTPREQ_POST_MIME == httpreq) ||
-       (HTTPREQ_PUT == httpreq) ) &&
+  if((HTTPREQ_POST == httpreq || HTTPREQ_PUT == httpreq) &&
      data->state.resume_from) {
     /**********************************************************************
      * Resuming upload in HTTP means that we PUT or POST and that we have
@@ -2183,6 +2183,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      * a Range: header that will be passed along. We need to "fast forward"
      * the file the given number of bytes and decrease the assume upload
      * file size before we continue this venture in the dark lands of HTTP.
+     * Resuming mime/form posting at an offset > 0 has no sense and is ignored.
      *********************************************************************/
 
     if(data->state.resume_from < 0) {
@@ -2257,7 +2258,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n",
                                          data->state.range);
     }
-    else if((httpreq != HTTPREQ_GET) &&
+    else if((httpreq == HTTPREQ_POST || httpreq == HTTPREQ_PUT) &&
             !Curl_checkheaders(conn, "Content-Range:")) {
 
       /* if a line like this was already allocated, free the previous one */
