@@ -1145,6 +1145,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(config->insecure_ok) {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+            warnf(config->global,
+                  "Your SSL connection is INSECURE (due to --insecure)\n");
           }
           else {
             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
@@ -1154,6 +1156,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(config->proxy_insecure_ok) {
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0L);
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0L);
+            warnf(config->global,
+                  "Your proxy SSL connection is now INSECURE "
+                  "(due to --proxy-insecure)\n");
           }
           else {
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 1L);
