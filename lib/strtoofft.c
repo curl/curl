@@ -48,16 +48,14 @@
 #      endif
 #      define strtooff _strtoi64
 #    else
-       curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
-#      define strtooff curlx_strtoll
-#      define NEED_CURL_STRTOLL 1
+#      define PRIVATE_STRTOOFF 1
 #    endif
 #  endif
 #else
 #  define strtooff strtol
 #endif
 
-#ifdef NEED_CURL_STRTOLL
+#ifdef PRIVATE_STRTOOFF
 
 /* Range tests can be used for alphanum decoding if characters are consecutive,
    like in ASCII. Else an array is scanned. Determine this condition now. */
