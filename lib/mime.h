@@ -67,15 +67,17 @@ struct mime_state {
 /* A mime context. */
 struct Curl_mime {
   struct Curl_easy *     easy;         /* The associated easy handle. */
-  char *                 boundary;     /* The part boundary. */
+  struct Curl_mimepart * parent;       /* Parent part. */
   struct Curl_mimepart * firstpart;    /* First part. */
   struct Curl_mimepart * lastpart;     /* Last part. */
+  char *                 boundary;     /* The part boundary. */
   struct mime_state      state;        /* Current readback state. */
 };
 
 /* A mime part. */
 struct Curl_mimepart {
   struct Curl_easy *     easy;         /* The associated easy handle. */
+  struct Curl_mime *     parent;       /* Parent mime structure. */
   struct Curl_mimepart * nextpart;     /* Forward linked list. */
   enum mimekind          kind;         /* The part kind. */
   char *                 data;         /* Memory data or file name. */

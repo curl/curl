@@ -754,6 +754,7 @@ int curl_formget(struct curl_httppost *form, void *arg,
   CURLcode result;
   struct Curl_mimepart toppart;
 
+  Curl_mime_initpart(&toppart, NULL); /* default form is empty */
   result = Curl_getformdata(NULL, &toppart, form, NULL);
   if(!result)
     result = Curl_mime_prepare_headers(&toppart, "multipart/form-data",
@@ -834,7 +835,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
   struct Curl_mimepart *part;
   struct curl_httppost *file;
 
-  Curl_mime_initpart(finalform, data); /* default form is empty */
+  Curl_mime_cleanpart(finalform); /* default form is empty */
 
   if(!post)
     return result; /* no input => no output! */

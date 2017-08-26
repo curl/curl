@@ -706,6 +706,7 @@ struct Curl_mime *curl_mime_init(struct Curl_easy *easy)
 
   if(mime) {
     mime->easy = easy;
+    mime->parent = NULL;
     mime->firstpart = NULL;
     mime->lastpart = NULL;
 
@@ -745,6 +746,7 @@ struct Curl_mimepart *curl_mime_addpart(struct Curl_mime *mime)
 
   if(part) {
     Curl_mime_initpart(part, mime->easy);
+    part->parent = mime;
 
     if(mime->lastpart)
       mime->lastpart->nextpart = part;
@@ -990,11 +992,22 @@ CURLcode curl_mime_subparts(struct Curl_mimepart *part,
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  /* Accept setting twice the same subparts. */
+  if(part->kind == MIMEKIND_MULTIPART && part->arg == subparts)
+    return CURLE_OK;
+
   cleanup_part_content(part);
 
   if(subparts) {
+    /* Must belong to the same data handle. */
     if(part->easy && subparts->easy && part->easy != subparts->easy)
       return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    /* Should not have been attached already. */
+    if(subparts->parent)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    subparts->parent = part;
     part->readfunc = mime_subparts_read;
     part->seekfunc = mime_subparts_seek;
     part->freefunc = mime_subparts_free;
