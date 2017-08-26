@@ -267,7 +267,7 @@ GEN_PDB = true
 
 
 !IFDEF EMBED_MANIFEST
-MANIFESTTOOL = mt -manifest $(DIRDIST)\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\$(PROGRAM_NAME);1
+MANIFESTTOOL = mt -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
 !ENDIF
 
 # Runtime library configuration
