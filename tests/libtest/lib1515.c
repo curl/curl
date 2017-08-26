@@ -148,6 +148,7 @@ int test(char *URL)
 test_cleanup:
 
   curl_multi_cleanup(multi);
+  curl_global_cleanup();
 
   return (int) res;
 }

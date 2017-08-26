@@ -157,6 +157,7 @@ int test(char *URL)
   struct curl_tlssessioninfo *tlssession;
   CURLcode res = CURLE_OK;
   (void)URL; /* not used */
+  global_init(CURL_GLOBAL_ALL);
   easy_init(dep);
   easy_init(curl);
   share = curl_share_init();
@@ -296,6 +297,7 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dep);
   curl_share_cleanup(share);
+  curl_global_cleanup();
 
   return (int)res;
 }

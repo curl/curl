@@ -24,14 +24,23 @@
 #include "speedcheck.h"
 #include "urldata.h"
 
+static CURL *easy;
+
 static CURLcode unit_setup(void)
 {
-  return CURLE_OK;
+  int res = CURLE_OK;
+
+  global_init(CURL_GLOBAL_ALL);
+  easy = curl_easy_init();
+  if(!easy)
+    return CURLE_OUT_OF_MEMORY;
+  return res;
 }
 
 static void unit_stop(void)
 {
-
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
 }
 
 static int runawhile(struct Curl_easy *easy,
@@ -66,10 +75,6 @@ static int runawhile(struct Curl_easy *easy,
 }
 
 UNITTEST_START
-{
-  struct Curl_easy *easy = curl_easy_init();
-  abort_unless(easy, "out of memory");
-
   fail_unless(runawhile(easy, 41, 41, 40, 0) == 41,
               "wrong low speed timeout");
   fail_unless(runawhile(easy, 21, 21, 20, 0) == 21,
@@ -82,9 +87,4 @@ UNITTEST_START
               "should not time out");
   fail_unless(runawhile(easy, 10, 50, 100, 2) == 36,
               "bad timeout");
-
-  curl_easy_cleanup(easy);
-
-  return 0;
-}
 UNITTEST_STOP
