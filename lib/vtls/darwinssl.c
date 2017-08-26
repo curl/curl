@@ -1451,11 +1451,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       /* If we found one, print it out: */
       err = SecIdentityCopyCertificate(cert_and_key, &cert);
       if(err == noErr) {
-        char *p;
-        CURLcode result = CopyCertSubject(data, cert, &p);
+        char *certp;
+        CURLcode result = CopyCertSubject(data, cert, &certp);
         if(!result) {
-          infof(data, "Client certificate: %s\n", p);
-          free(p);
+          infof(data, "Client certificate: %s\n", certp);
+          free(certp);
         }
 
         CFRelease(cert);
@@ -1904,7 +1904,7 @@ static int append_cert_to_array(struct Curl_easy *data,
                                 CFMutableArrayRef array)
 {
     CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, buf, buflen);
-    char *p;
+    char *certp;
     CURLcode result;
     if(!certdata) {
       failf(data, "SSL: failed to allocate array for CA certificate");
@@ -1920,10 +1920,10 @@ static int append_cert_to_array(struct Curl_easy *data,
     }
 
     /* Check if cacert is valid. */
-    result = CopyCertSubject(data, cacert, &p);
+    result = CopyCertSubject(data, cacert, &certp);
     if(result)
       return result;
-    free(p);
+    free(certp);
 
     CFArrayAppendValue(array, cacert);
     CFRelease(cacert);
@@ -2334,12 +2334,12 @@ show_verbose_server_cert(struct connectdata *conn,
     count = SecTrustGetCertificateCount(trust);
     for(i = 0L ; i < count ; i++) {
       CURLcode result;
-      char *p;
+      char *certp;
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
-      result = CopyCertSubject(data, server_cert, &p);
+      result = CopyCertSubject(data, server_cert, &certp);
       if(!result) {
-        infof(data, "Server certificate: %s\n", p);
-        free(p);
+        infof(data, "Server certificate: %s\n", certp);
+        free(certp);
       }
     }
     CFRelease(trust);
@@ -2359,13 +2359,13 @@ show_verbose_server_cert(struct connectdata *conn,
     if(err == noErr && trust) {
       count = SecTrustGetCertificateCount(trust);
       for(i = 0L ; i < count ; i++) {
-        char *p;
+        char *certp;
         CURLcode result;
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
-        result = CopyCertSubject(data, server_cert, &p);
+        result = CopyCertSubject(data, server_cert, &certp);
         if(!result) {
-          infof(data, "Server certificate: %s\n", p);
-          free(p);
+          infof(data, "Server certificate: %s\n", certp);
+          free(certp);
         }
       }
       CFRelease(trust);
@@ -2378,14 +2378,14 @@ show_verbose_server_cert(struct connectdata *conn,
     if(err == noErr && server_certs) {
       count = CFArrayGetCount(server_certs);
       for(i = 0L ; i < count ; i++) {
-        char *p;
+        char *certp;
         CURLcode result;
         server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
                                                                 i);
-        result = CopyCertSubject(data, server_cert, &p);
+        result = CopyCertSubject(data, server_cert, &certp);
         if(!result) {
-          infof(data, "Server certificate: %s\n", p);
-          free(p);
+          infof(data, "Server certificate: %s\n", certp);
+          free(certp);
         }
       }
       CFRelease(server_certs);
@@ -2400,12 +2400,12 @@ show_verbose_server_cert(struct connectdata *conn,
     count = CFArrayGetCount(server_certs);
     for(i = 0L ; i < count ; i++) {
       CURLcode result;
-      char *p;
+      char *certp;
       server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
-      result = CopyCertSubject(data, server_cert, &p);
+      result = CopyCertSubject(data, server_cert, &certp);
       if(!result) {
-        infof(data, "Server certificate: %s\n", p);
-        free(p);
+        infof(data, "Server certificate: %s\n", certp);
+        free(certp);
       }
     }
     CFRelease(server_certs);
