@@ -849,7 +849,7 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
    into a string. Some aren't available under iOS or newer cats. So here's
    a unified function for getting a string describing the certificate that
    ought to work in all cats starting with Leopard. */
-CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
+CF_INLINE CFStringRef getsubject(SecCertificateRef cert)
 {
   CFStringRef server_cert_summary = CFSTR("(null)");
 
@@ -874,6 +874,39 @@ CF_INLINE CFStringRef CopyCertSubject(SecCertificateRef cert)
   (void)SecCertificateCopyCommonName(cert, &server_cert_summary);
 #endif /* CURL_BUILD_IOS */
   return server_cert_summary;
+}
+
+static CURLcode CopyCertSubject(struct Curl_easy *data,
+                                SecCertificateRef cert, char **certp)
+{
+  CFStringRef c = getsubject(cert);
+  CURLcode result = CURLE_OK;
+  char *cbuf = NULL;
+  *certp = NULL;
+
+  /* If subject is not UTF-8 then check if it can be converted */
+  if(!CFStringGetCStringPtr(c, kCFStringEncodingUTF8)) {
+    size_t cbuf_size = ((size_t)CFStringGetLength(c) * 4) + 1;
+    cbuf = calloc(cbuf_size, 1);
+    if(cbuf) {
+      if(!CFStringGetCString(c, cbuf, cbuf_size,
+                             kCFStringEncodingUTF8)) {
+        failf(data, "SSL: invalid CA certificate subject");
+        result = CURLE_SSL_CACERT;
+      }
+      else
+        /* pass back the buffer */
+        *certp = cbuf;
+    }
+    else {
+      failf(data, "SSL: couldn't allocate %zu bytes of memory", cbuf_size);
+      result = CURLE_OUT_OF_MEMORY;
+    }
+  }
+  if(result)
+    free(cbuf);
+  CFRelease(c);
+  return result;
 }
 
 #if CURL_SUPPORT_MAC_10_6
@@ -1418,20 +1451,16 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       /* If we found one, print it out: */
       err = SecIdentityCopyCertificate(cert_and_key, &cert);
       if(err == noErr) {
-        CFStringRef cert_summary = CopyCertSubject(cert);
-        char cert_summary_c[128];
-
-        if(cert_summary) {
-          memset(cert_summary_c, 0, 128);
-          if(CFStringGetCString(cert_summary,
-                                cert_summary_c,
-                                128,
-                                kCFStringEncodingUTF8)) {
-            infof(data, "Client certificate: %s\n", cert_summary_c);
-          }
-          CFRelease(cert_summary);
-          CFRelease(cert);
+        char *certp;
+        CURLcode result = CopyCertSubject(data, cert, &certp);
+        if(!result) {
+          infof(data, "Client certificate: %s\n", certp);
+          free(certp);
         }
+
+        CFRelease(cert);
+        if(result)
+          return result;
       }
       certs_c[0] = cert_and_key;
       certs = CFArrayCreate(NULL, (const void **)certs_c, 1L,
@@ -1875,6 +1904,8 @@ static int append_cert_to_array(struct Curl_easy *data,
                                 CFMutableArrayRef array)
 {
     CFDataRef certdata = CFDataCreate(kCFAllocatorDefault, buf, buflen);
+    char *certp;
+    CURLcode result;
     if(!certdata) {
       failf(data, "SSL: failed to allocate array for CA certificate");
       return CURLE_OUT_OF_MEMORY;
@@ -1889,25 +1920,10 @@ static int append_cert_to_array(struct Curl_easy *data,
     }
 
     /* Check if cacert is valid. */
-    CFStringRef subject = CopyCertSubject(cacert);
-    if(subject) {
-      char subject_cbuf[128];
-      memset(subject_cbuf, 0, 128);
-      if(!CFStringGetCString(subject,
-                            subject_cbuf,
-                            128,
-                            kCFStringEncodingUTF8)) {
-        CFRelease(cacert);
-        failf(data, "SSL: invalid CA certificate subject");
-        return CURLE_SSL_CACERT;
-      }
-      CFRelease(subject);
-    }
-    else {
-      CFRelease(cacert);
-      failf(data, "SSL: invalid CA certificate");
-      return CURLE_SSL_CACERT;
-    }
+    result = CopyCertSubject(data, cacert, &certp);
+    if(result)
+      return result;
+    free(certp);
 
     CFArrayAppendValue(array, cacert);
     CFRelease(cacert);
@@ -2299,8 +2315,6 @@ show_verbose_server_cert(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  CFStringRef server_cert_summary;
-  char server_cert_summary_c[128];
   CFArrayRef server_certs = NULL;
   SecCertificateRef server_cert;
   OSStatus err;
@@ -2319,16 +2333,14 @@ show_verbose_server_cert(struct connectdata *conn,
   if(err == noErr && trust) {
     count = SecTrustGetCertificateCount(trust);
     for(i = 0L ; i < count ; i++) {
+      CURLcode result;
+      char *certp;
       server_cert = SecTrustGetCertificateAtIndex(trust, i);
-      server_cert_summary = CopyCertSubject(server_cert);
-      memset(server_cert_summary_c, 0, 128);
-      if(CFStringGetCString(server_cert_summary,
-                            server_cert_summary_c,
-                            128,
-                            kCFStringEncodingUTF8)) {
-        infof(data, "Server certificate: %s\n", server_cert_summary_c);
+      result = CopyCertSubject(data, server_cert, &certp);
+      if(!result) {
+        infof(data, "Server certificate: %s\n", certp);
+        free(certp);
       }
-      CFRelease(server_cert_summary);
     }
     CFRelease(trust);
   }
@@ -2347,16 +2359,14 @@ show_verbose_server_cert(struct connectdata *conn,
     if(err == noErr && trust) {
       count = SecTrustGetCertificateCount(trust);
       for(i = 0L ; i < count ; i++) {
+        char *certp;
+        CURLcode result;
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
-        server_cert_summary = CopyCertSubject(server_cert);
-        memset(server_cert_summary_c, 0, 128);
-        if(CFStringGetCString(server_cert_summary,
-                              server_cert_summary_c,
-                              128,
-                              kCFStringEncodingUTF8)) {
-          infof(data, "Server certificate: %s\n", server_cert_summary_c);
+        result = CopyCertSubject(data, server_cert, &certp);
+        if(!result) {
+          infof(data, "Server certificate: %s\n", certp);
+          free(certp);
         }
-        CFRelease(server_cert_summary);
       }
       CFRelease(trust);
     }
@@ -2368,18 +2378,15 @@ show_verbose_server_cert(struct connectdata *conn,
     if(err == noErr && server_certs) {
       count = CFArrayGetCount(server_certs);
       for(i = 0L ; i < count ; i++) {
+        char *certp;
+        CURLcode result;
         server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
                                                                 i);
-
-        server_cert_summary = CopyCertSubject(server_cert);
-        memset(server_cert_summary_c, 0, 128);
-        if(CFStringGetCString(server_cert_summary,
-                              server_cert_summary_c,
-                              128,
-                              kCFStringEncodingUTF8)) {
-          infof(data, "Server certificate: %s\n", server_cert_summary_c);
+        result = CopyCertSubject(data, server_cert, &certp);
+        if(!result) {
+          infof(data, "Server certificate: %s\n", certp);
+          free(certp);
         }
-        CFRelease(server_cert_summary);
       }
       CFRelease(server_certs);
     }
@@ -2392,16 +2399,14 @@ show_verbose_server_cert(struct connectdata *conn,
   if(err == noErr) {
     count = CFArrayGetCount(server_certs);
     for(i = 0L ; i < count ; i++) {
+      CURLcode result;
+      char *certp;
       server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
-      server_cert_summary = CopyCertSubject(server_cert);
-      memset(server_cert_summary_c, 0, 128);
-      if(CFStringGetCString(server_cert_summary,
-                            server_cert_summary_c,
-                            128,
-                            kCFStringEncodingUTF8)) {
-        infof(data, "Server certificate: %s\n", server_cert_summary_c);
+      result = CopyCertSubject(data, server_cert, &certp);
+      if(!result) {
+        infof(data, "Server certificate: %s\n", certp);
+        free(certp);
       }
-      CFRelease(server_cert_summary);
     }
     CFRelease(server_certs);
   }
