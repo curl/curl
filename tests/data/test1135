@@ -89,6 +89,7 @@ CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
 CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
 CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
+CURL_EXTERN CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
 </stdout>
 </verify>
 

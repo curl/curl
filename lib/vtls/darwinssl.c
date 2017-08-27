@@ -44,6 +44,8 @@
 #endif
 
 #include <Security/Security.h>
+/* For some reason, when building for iOS, the omnibus header above does
+ * not include SecureTransport.h as of iOS SDK 5.1. */
 #include <Security/SecureTransport.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonDigest.h>
@@ -118,6 +120,33 @@
 #define ioErr -36
 #define paramErr -50
 
+struct ssl_backend_data {
+  SSLContextRef ssl_ctx;
+  curl_socket_t ssl_sockfd;
+  bool ssl_direction; /* true if writing, false if reading */
+  size_t ssl_write_buffered_length;
+};
+
+#define BACKEND connssl->backend
+
+/* pinned public key support tests */
+
+/* version 1 supports macOS 10.12+ and iOS 10+ */
+#if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
+    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
+#define DARWIN_SSL_PINNEDPUBKEY_V1 1
+#endif
+
+/* version 2 supports MacOSX 10.7+ */
+#if (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
+#define DARWIN_SSL_PINNEDPUBKEY_V2 1
+#endif
+
+#if defined(DARWIN_SSL_PINNEDPUBKEY_V1) || defined(DARWIN_SSL_PINNEDPUBKEY_V2)
+/* this backend supports CURLOPT_PINNEDPUBLICKEY */
+#define DARWIN_SSL_PINNEDPUBKEY 1
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
+
 #ifdef DARWIN_SSL_PINNEDPUBKEY
 /* both new and old APIs return rsa keys missing the spki header (not DER) */
 static const unsigned char rsa4096SpkiHeader[] = {
@@ -161,7 +190,7 @@ static OSStatus SocketRead(SSLConnectionRef connection,
   UInt8 *currData = (UInt8 *)data;
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
-  int sock = connssl->ssl_sockfd;
+  int sock = BACKEND->ssl_sockfd;
   OSStatus rtn = noErr;
   size_t bytesRead;
   ssize_t rrtn;
@@ -190,7 +219,7 @@ static OSStatus SocketRead(SSLConnectionRef connection,
             break;
           case EAGAIN:
             rtn = errSSLWouldBlock;
-            connssl->ssl_direction = false;
+            BACKEND->ssl_direction = false;
             break;
           default:
             rtn = ioErr;
@@ -221,7 +250,7 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
   size_t bytesSent = 0;
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
-  int sock = connssl->ssl_sockfd;
+  int sock = BACKEND->ssl_sockfd;
   ssize_t length;
   size_t dataLen = *dataLength;
   const UInt8 *dataPtr = (UInt8 *)data;
@@ -241,7 +270,7 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
     theErr = errno;
     if(theErr == EAGAIN) {
       ortn = errSSLWouldBlock;
-      connssl->ssl_direction = true;
+      BACKEND->ssl_direction = true;
     }
     else {
       ortn = ioErr;
@@ -1175,30 +1204,30 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
       return result;
     }
 
-    (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, darwin_ver_min);
-    (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, darwin_ver_max);
+    (void)SSLSetProtocolVersionMin(BACKEND->ssl_ctx, darwin_ver_min);
+    (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, darwin_ver_max);
     return result;
   }
   else {
 #if CURL_SUPPORT_MAC_10_8
     long i = ssl_version;
-    (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+    (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
     for(; i <= (ssl_version_max >> 16); i++) {
       switch(i) {
         case CURL_SSLVERSION_TLSv1_0:
-          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+          (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                             kTLSProtocol1,
                                             true);
           break;
         case CURL_SSLVERSION_TLSv1_1:
-          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+          (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                             kTLSProtocol11,
                                             true);
           break;
         case CURL_SSLVERSION_TLSv1_2:
-          (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+          (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                             kTLSProtocol12,
                                             true);
           break;
@@ -1244,10 +1273,10 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLCreateContext != NULL) {  /* use the newer API if avaialble */
-    if(connssl->ssl_ctx)
-      CFRelease(connssl->ssl_ctx);
-    connssl->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
-    if(!connssl->ssl_ctx) {
+    if(BACKEND->ssl_ctx)
+      CFRelease(BACKEND->ssl_ctx);
+    BACKEND->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
+    if(!BACKEND->ssl_ctx) {
       failf(data, "SSL: couldn't create a context!");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1255,9 +1284,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   else {
   /* The old ST API does not exist under iOS, so don't compile it: */
 #if CURL_SUPPORT_MAC_10_8
-    if(connssl->ssl_ctx)
-      (void)SSLDisposeContext(connssl->ssl_ctx);
-    err = SSLNewContext(false, &(connssl->ssl_ctx));
+    if(BACKEND->ssl_ctx)
+      (void)SSLDisposeContext(BACKEND->ssl_ctx);
+    err = SSLNewContext(false, &(BACKEND->ssl_ctx));
     if(err != noErr) {
       failf(data, "SSL: couldn't create a context: OSStatus %d", err);
       return CURLE_OUT_OF_MEMORY;
@@ -1265,15 +1294,15 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
-  if(connssl->ssl_ctx)
-    (void)SSLDisposeContext(connssl->ssl_ctx);
-  err = SSLNewContext(false, &(connssl->ssl_ctx));
+  if(BACKEND->ssl_ctx)
+    (void)SSLDisposeContext(BACKEND->ssl_ctx);
+  err = SSLNewContext(false, &(BACKEND->ssl_ctx));
   if(err != noErr) {
     failf(data, "SSL: couldn't create a context: OSStatus %d", err);
     return CURLE_OUT_OF_MEMORY;
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
-  connssl->ssl_write_buffered_length = 0UL; /* reset buffered write length */
+  BACKEND->ssl_write_buffered_length = 0UL; /* reset buffered write length */
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
@@ -1281,8 +1310,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
-      (void)SSLSetProtocolVersionMin(connssl->ssl_ctx, kTLSProtocol1);
-      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kTLSProtocol12);
+      (void)SSLSetProtocolVersionMin(BACKEND->ssl_ctx, kTLSProtocol1);
+      (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, kTLSProtocol12);
       break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
@@ -1295,20 +1324,20 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         break;
       }
     case CURL_SSLVERSION_SSLv3:
-      err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol3);
+      err = SSLSetProtocolVersionMin(BACKEND->ssl_ctx, kSSLProtocol3);
       if(err != noErr) {
         failf(data, "Your version of the OS does not support SSLv3");
         return CURLE_SSL_CONNECT_ERROR;
       }
-      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol3);
+      (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, kSSLProtocol3);
       break;
     case CURL_SSLVERSION_SSLv2:
-      err = SSLSetProtocolVersionMin(connssl->ssl_ctx, kSSLProtocol2);
+      err = SSLSetProtocolVersionMin(BACKEND->ssl_ctx, kSSLProtocol2);
       if(err != noErr) {
         failf(data, "Your version of the OS does not support SSLv2");
         return CURLE_SSL_CONNECT_ERROR;
       }
-      (void)SSLSetProtocolVersionMax(connssl->ssl_ctx, kSSLProtocol2);
+      (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, kSSLProtocol2);
       break;
     default:
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
@@ -1317,19 +1346,19 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
   else {
 #if CURL_SUPPORT_MAC_10_8
-    (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+    (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
     switch(conn->ssl_config.version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+      (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                          kTLSProtocol1,
                                          true);
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+      (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                          kTLSProtocol11,
                                          true);
-      (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+      (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                          kTLSProtocol12,
                                          true);
       break;
@@ -1344,7 +1373,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         break;
       }
     case CURL_SSLVERSION_SSLv3:
-      err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+      err = SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                          kSSLProtocol3,
                                          true);
       if(err != noErr) {
@@ -1353,7 +1382,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       }
       break;
     case CURL_SSLVERSION_SSLv2:
-      err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+      err = SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                          kSSLProtocol2,
                                          true);
       if(err != noErr) {
@@ -1373,12 +1402,12 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                 " SSL/TLS version");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
+  (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx, kSSLProtocolAll, false);
   switch(conn->ssl_config.version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
-    (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+    (void)SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                        kTLSProtocol1,
                                        true);
     break;
@@ -1392,7 +1421,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     failf(data, "Your version of the OS does not support TLSv1.3");
     return CURLE_SSL_CONNECT_ERROR;
   case CURL_SSLVERSION_SSLv2:
-    err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+    err = SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                        kSSLProtocol2,
                                        true);
     if(err != noErr) {
@@ -1401,7 +1430,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
     break;
   case CURL_SSLVERSION_SSLv3:
-    err = SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
+    err = SSLSetProtocolVersionEnabled(BACKEND->ssl_ctx,
                                        kSSLProtocol3,
                                        true);
     if(err != noErr) {
@@ -1465,7 +1494,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       certs_c[0] = cert_and_key;
       certs = CFArrayCreate(NULL, (const void **)certs_c, 1L,
                             &kCFTypeArrayCallBacks);
-      err = SSLSetCertificate(connssl->ssl_ctx, certs);
+      err = SSLSetCertificate(BACKEND->ssl_ctx, certs);
       if(certs)
         CFRelease(certs);
       if(err != noErr) {
@@ -1528,7 +1557,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   if(SSLSetSessionOption != NULL) {
 #endif /* CURL_BUILD_MAC */
     bool break_on_auth = !conn->ssl_config.verifypeer || ssl_cafile;
-    err = SSLSetSessionOption(connssl->ssl_ctx,
+    err = SSLSetSessionOption(BACKEND->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               break_on_auth);
     if(err != noErr) {
@@ -1538,7 +1567,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
   else {
 #if CURL_SUPPORT_MAC_10_8
-    err = SSLSetEnableCertVerify(connssl->ssl_ctx,
+    err = SSLSetEnableCertVerify(BACKEND->ssl_ctx,
                                  conn->ssl_config.verifypeer?true:false);
     if(err != noErr) {
       failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
@@ -1547,7 +1576,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* CURL_SUPPORT_MAC_10_8 */
   }
 #else
-  err = SSLSetEnableCertVerify(connssl->ssl_ctx,
+  err = SSLSetEnableCertVerify(BACKEND->ssl_ctx,
                                conn->ssl_config.verifypeer?true:false);
   if(err != noErr) {
     failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
@@ -1568,7 +1597,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
    * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
   if(conn->ssl_config.verifyhost) {
-    err = SSLSetPeerDomainName(connssl->ssl_ctx, hostname,
+    err = SSLSetPeerDomainName(BACKEND->ssl_ctx, hostname,
     strlen(hostname));
 
     if(err != noErr) {
@@ -1594,11 +1623,11 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      higher priority, but it's probably better that we not connect at all than
      to give the user a false sense of security if the server only supports
      insecure ciphers. (Note: We don't care about SSLv2-only ciphers.) */
-  (void)SSLGetNumberSupportedCiphers(connssl->ssl_ctx, &all_ciphers_count);
+  (void)SSLGetNumberSupportedCiphers(BACKEND->ssl_ctx, &all_ciphers_count);
   all_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
   allowed_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
   if(all_ciphers && allowed_ciphers &&
-     SSLGetSupportedCiphers(connssl->ssl_ctx, all_ciphers,
+     SSLGetSupportedCiphers(BACKEND->ssl_ctx, all_ciphers,
        &all_ciphers_count) == noErr) {
     for(i = 0UL ; i < all_ciphers_count ; i++) {
 #if CURL_BUILD_MAC
@@ -1680,7 +1709,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
           break;
       }
     }
-    err = SSLSetEnabledCiphers(connssl->ssl_ctx, allowed_ciphers,
+    err = SSLSetEnabledCiphers(BACKEND->ssl_ctx, allowed_ciphers,
                                allowed_ciphers_count);
     if(err != noErr) {
       failf(data, "SSL: SSLSetEnabledCiphers() failed: OSStatus %d", err);
@@ -1701,9 +1730,9 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      specifically doesn't want us doing that: */
   if(SSLSetSessionOption != NULL) {
     /* TODO s/data->set.ssl.enable_beast/SSL_SET_OPTION(enable_beast)/g */
-    SSLSetSessionOption(connssl->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
+    SSLSetSessionOption(BACKEND->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
                       !data->set.ssl.enable_beast);
-    SSLSetSessionOption(connssl->ssl_ctx, kSSLSessionOptionFalseStart,
+    SSLSetSessionOption(BACKEND->ssl_ctx, kSSLSessionOptionFalseStart,
                       data->set.ssl.falsestart); /* false start support */
   }
 #endif /* CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7 */
@@ -1717,7 +1746,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     if(!Curl_ssl_getsessionid(conn, (void **)&ssl_sessionid,
                               &ssl_sessionid_len, sockindex)) {
       /* we got a session id, use it! */
-      err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
+      err = SSLSetPeerID(BACKEND->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       Curl_ssl_sessionid_unlock(conn);
       if(err != noErr) {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
@@ -1735,7 +1764,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                 verifypeer, SSL_CONN_CONFIG(verifyhost), hostname, port);
       ssl_sessionid_len = strlen(ssl_sessionid);
 
-      err = SSLSetPeerID(connssl->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
+      err = SSLSetPeerID(BACKEND->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       if(err != noErr) {
         Curl_ssl_sessionid_unlock(conn);
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
@@ -1752,7 +1781,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
 
-  err = SSLSetIOFuncs(connssl->ssl_ctx, SocketRead, SocketWrite);
+  err = SSLSetIOFuncs(BACKEND->ssl_ctx, SocketRead, SocketWrite);
   if(err != noErr) {
     failf(data, "SSL: SSLSetIOFuncs() failed: OSStatus %d", err);
     return CURLE_SSL_CONNECT_ERROR;
@@ -1762,8 +1791,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   /* We need to store the FD in a constant memory address, because
    * SSLSetConnection() will not copy that address. I've found that
    * conn->sock[sockindex] may change on its own. */
-  connssl->ssl_sockfd = sockfd;
-  err = SSLSetConnection(connssl->ssl_ctx, connssl);
+  BACKEND->ssl_sockfd = sockfd;
+  err = SSLSetConnection(BACKEND->ssl_ctx, connssl);
   if(err != noErr) {
     failf(data, "SSL: SSLSetConnection() failed: %d", err);
     return CURLE_SSL_CONNECT_ERROR;
@@ -2171,12 +2200,12 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
               || ssl_connect_2_writing == connssl->connecting_state);
 
   /* Here goes nothing: */
-  err = SSLHandshake(connssl->ssl_ctx);
+  err = SSLHandshake(BACKEND->ssl_ctx);
 
   if(err != noErr) {
     switch(err) {
       case errSSLWouldBlock:  /* they're not done with us yet */
-        connssl->connecting_state = connssl->ssl_direction ?
+        connssl->connecting_state = BACKEND->ssl_direction ?
             ssl_connect_2_writing : ssl_connect_2_reading;
         return CURLE_OK;
 
@@ -2185,7 +2214,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case -9841:
         if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
           int res = verify_cert(SSL_CONN_CONFIG(CAfile), data,
-                                connssl->ssl_ctx);
+                                BACKEND->ssl_ctx);
           if(res != CURLE_OK)
             return res;
         }
@@ -2263,7 +2292,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 
 #ifdef DARWIN_SSL_PINNEDPUBKEY
     if(data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]) {
-      CURLcode result = pkp_pin_peer_pubkey(data, connssl->ssl_ctx,
+      CURLcode result = pkp_pin_peer_pubkey(data, BACKEND->ssl_ctx,
                             data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]);
       if(result) {
         failf(data, "SSL: public key does not match pinned public key!");
@@ -2273,8 +2302,8 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
 #endif /* DARWIN_SSL_PINNEDPUBKEY */
 
     /* Informational message */
-    (void)SSLGetNegotiatedCipher(connssl->ssl_ctx, &cipher);
-    (void)SSLGetNegotiatedProtocolVersion(connssl->ssl_ctx, &protocol);
+    (void)SSLGetNegotiatedCipher(BACKEND->ssl_ctx, &cipher);
+    (void)SSLGetNegotiatedProtocolVersion(BACKEND->ssl_ctx, &protocol);
     switch(protocol) {
       case kSSLProtocol2:
         infof(data, "SSL 2.0 connection using %s\n",
@@ -2321,13 +2350,13 @@ show_verbose_server_cert(struct connectdata *conn,
   CFIndex i, count;
   SecTrustRef trust = NULL;
 
-  if(!connssl->ssl_ctx)
+  if(!BACKEND->ssl_ctx)
     return;
 
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
 #if CURL_BUILD_IOS
 #pragma unused(server_certs)
-  err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
+  err = SSLCopyPeerTrust(BACKEND->ssl_ctx, &trust);
   /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
      a null trust, so be on guard for that: */
   if(err == noErr && trust) {
@@ -2353,7 +2382,7 @@ show_verbose_server_cert(struct connectdata *conn,
      Lion or later. */
   if(SecTrustEvaluateAsync != NULL) {
 #pragma unused(server_certs)
-    err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
+    err = SSLCopyPeerTrust(BACKEND->ssl_ctx, &trust);
     /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
        a null trust, so be on guard for that: */
     if(err == noErr && trust) {
@@ -2373,7 +2402,7 @@ show_verbose_server_cert(struct connectdata *conn,
   }
   else {
 #if CURL_SUPPORT_MAC_10_8
-    err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
+    err = SSLCopyPeerCertificates(BACKEND->ssl_ctx, &server_certs);
     /* Just in case SSLCopyPeerCertificates() returns null too... */
     if(err == noErr && server_certs) {
       count = CFArrayGetCount(server_certs);
@@ -2395,7 +2424,7 @@ show_verbose_server_cert(struct connectdata *conn,
 #endif /* CURL_BUILD_IOS */
 #else
 #pragma unused(trust)
-  err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
+  err = SSLCopyPeerCertificates(BACKEND->ssl_ctx, &server_certs);
   if(err == noErr) {
     count = CFArrayGetCount(server_certs);
     for(i = 0L ; i < count ; i++) {
@@ -2550,17 +2579,13 @@ darwinssl_connect_common(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode
-Curl_darwinssl_connect_nonblocking(struct connectdata *conn,
-                                   int sockindex,
-                                   bool *done)
+static CURLcode Curl_darwinssl_connect_nonblocking(struct connectdata *conn,
+                                                   int sockindex, bool *done)
 {
   return darwinssl_connect_common(conn, sockindex, TRUE, done);
 }
 
-CURLcode
-Curl_darwinssl_connect(struct connectdata *conn,
-                       int sockindex)
+static CURLcode Curl_darwinssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
   bool done = FALSE;
@@ -2575,28 +2600,28 @@ Curl_darwinssl_connect(struct connectdata *conn,
   return CURLE_OK;
 }
 
-void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
+static void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  if(connssl->ssl_ctx) {
-    (void)SSLClose(connssl->ssl_ctx);
+  if(BACKEND->ssl_ctx) {
+    (void)SSLClose(BACKEND->ssl_ctx);
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
     if(SSLCreateContext != NULL)
-      CFRelease(connssl->ssl_ctx);
+      CFRelease(BACKEND->ssl_ctx);
 #if CURL_SUPPORT_MAC_10_8
     else
-      (void)SSLDisposeContext(connssl->ssl_ctx);
+      (void)SSLDisposeContext(BACKEND->ssl_ctx);
 #endif  /* CURL_SUPPORT_MAC_10_8 */
 #else
-    (void)SSLDisposeContext(connssl->ssl_ctx);
+    (void)SSLDisposeContext(BACKEND->ssl_ctx);
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
-    connssl->ssl_ctx = NULL;
+    BACKEND->ssl_ctx = NULL;
   }
-  connssl->ssl_sockfd = 0;
+  BACKEND->ssl_sockfd = 0;
 }
 
-int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct Curl_easy *data = conn->data;
@@ -2605,7 +2630,7 @@ int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
   int rc;
   char buf[120];
 
-  if(!connssl->ssl_ctx)
+  if(!BACKEND->ssl_ctx)
     return 0;
 
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
@@ -2649,7 +2674,7 @@ int Curl_darwinssl_shutdown(struct connectdata *conn, int sockindex)
   return rc;
 }
 
-void Curl_darwinssl_session_free(void *ptr)
+static void Curl_darwinssl_session_free(void *ptr)
 {
   /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
      cached session ID inside the Security framework. There is a private
@@ -2660,7 +2685,7 @@ void Curl_darwinssl_session_free(void *ptr)
   Curl_safefree(ptr);
 }
 
-size_t Curl_darwinssl_version(char *buffer, size_t size)
+static size_t Curl_darwinssl_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "SecureTransport");
 }
@@ -2673,14 +2698,14 @@ size_t Curl_darwinssl_version(char *buffer, size_t size)
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-int Curl_darwinssl_check_cxn(struct connectdata *conn)
+static int Curl_darwinssl_check_cxn(struct connectdata *conn)
 {
   struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
   OSStatus err;
   SSLSessionState state;
 
-  if(connssl->ssl_ctx) {
-    err = SSLGetSessionState(connssl->ssl_ctx, &state);
+  if(BACKEND->ssl_ctx) {
+    err = SSLGetSessionState(BACKEND->ssl_ctx, &state);
     if(err == noErr)
       return state == kSSLConnected || state == kSSLHandshake;
     return -1;
@@ -2688,15 +2713,15 @@ int Curl_darwinssl_check_cxn(struct connectdata *conn)
   return 0;
 }
 
-bool Curl_darwinssl_data_pending(const struct connectdata *conn,
-                                 int connindex)
+static bool Curl_darwinssl_data_pending(const struct connectdata *conn,
+                                        int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
   OSStatus err;
   size_t buffer;
 
-  if(connssl->ssl_ctx) {  /* SSL is in use */
-    err = SSLGetBufferedReadSize(connssl->ssl_ctx, &buffer);
+  if(BACKEND->ssl_ctx) {  /* SSL is in use */
+    err = SSLGetBufferedReadSize(BACKEND->ssl_ctx, &buffer);
     if(err == noErr)
       return buffer > 0UL;
     return false;
@@ -2705,8 +2730,8 @@ bool Curl_darwinssl_data_pending(const struct connectdata *conn,
     return false;
 }
 
-CURLcode Curl_darwinssl_random(unsigned char *entropy,
-                               size_t length)
+static CURLcode Curl_darwinssl_random(struct Curl_easy *data UNUSED_PARAM,
+                                      unsigned char *entropy, size_t length)
 {
   /* arc4random_buf() isn't available on cats older than Lion, so let's
      do this manually for the benefit of the older cats. */
@@ -2723,25 +2748,26 @@ CURLcode Curl_darwinssl_random(unsigned char *entropy,
   return CURLE_OK;
 }
 
-void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
-                           size_t tmplen,
-                           unsigned char *md5sum, /* output */
-                           size_t md5len)
+static CURLcode Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
+                                      size_t tmplen,
+                                      unsigned char *md5sum, /* output */
+                                      size_t md5len)
 {
   (void)md5len;
   (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
+  return CURLE_OK;
 }
 
-void Curl_darwinssl_sha256sum(unsigned char *tmp, /* input */
-                              size_t tmplen,
-                              unsigned char *sha256sum, /* output */
-                              size_t sha256len)
+static void Curl_darwinssl_sha256sum(const unsigned char *tmp, /* input */
+                                     size_t tmplen,
+                                     unsigned char *sha256sum, /* output */
+                                     size_t sha256len)
 {
   assert(sha256len >= SHA256_DIGEST_LENGTH);
   (void)CC_SHA256(tmp, (CC_LONG)tmplen, sha256sum);
 }
 
-bool Curl_darwinssl_false_start(void)
+static bool Curl_darwinssl_false_start(void)
 {
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   if(SSLSetSessionOption != NULL)
@@ -2776,15 +2802,15 @@ static ssize_t darwinssl_send(struct connectdata *conn,
      over again with no new data until it quits returning errSSLWouldBlock. */
 
   /* Do we have buffered data to write from the last time we were called? */
-  if(connssl->ssl_write_buffered_length) {
+  if(BACKEND->ssl_write_buffered_length) {
     /* Write the buffered data: */
-    err = SSLWrite(connssl->ssl_ctx, NULL, 0UL, &processed);
+    err = SSLWrite(BACKEND->ssl_ctx, NULL, 0UL, &processed);
     switch(err) {
       case noErr:
         /* processed is always going to be 0 because we didn't write to
            the buffer, so return how much was written to the socket */
-        processed = connssl->ssl_write_buffered_length;
-        connssl->ssl_write_buffered_length = 0UL;
+        processed = BACKEND->ssl_write_buffered_length;
+        BACKEND->ssl_write_buffered_length = 0UL;
         break;
       case errSSLWouldBlock: /* argh, try again */
         *curlcode = CURLE_AGAIN;
@@ -2797,13 +2823,13 @@ static ssize_t darwinssl_send(struct connectdata *conn,
   }
   else {
     /* We've got new data to write: */
-    err = SSLWrite(connssl->ssl_ctx, mem, len, &processed);
+    err = SSLWrite(BACKEND->ssl_ctx, mem, len, &processed);
     if(err != noErr) {
       switch(err) {
         case errSSLWouldBlock:
           /* Data was buffered but not sent, we have to tell the caller
              to try sending again, and remember how much was buffered */
-          connssl->ssl_write_buffered_length = len;
+          BACKEND->ssl_write_buffered_length = len;
           *curlcode = CURLE_AGAIN;
           return -1L;
         default:
@@ -2825,7 +2851,7 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
   /*struct Curl_easy *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[num];
   size_t processed = 0UL;
-  OSStatus err = SSLRead(connssl->ssl_ctx, buf, buffersize, &processed);
+  OSStatus err = SSLRead(BACKEND->ssl_ctx, buf, buffersize, &processed);
 
   if(err != noErr) {
     switch(err) {
@@ -2855,6 +2881,50 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
   }
   return (ssize_t)processed;
 }
+
+static void *Curl_darwinssl_get_internals(struct ssl_connect_data *connssl,
+                                          CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return BACKEND->ssl_ctx;
+}
+
+const struct Curl_ssl Curl_ssl_darwinssl = {
+  { CURLSSLBACKEND_DARWINSSL, "darwinssl" }, /* info */
+
+  0, /* have_ca_path */
+  0, /* have_certinfo */
+#ifdef DARWIN_SSL_PINNEDPUBKEY
+  1, /* have_pinnedpubkey */
+#else
+  0, /* have_pinnedpubkey */
+#endif /* DARWIN_SSL_PINNEDPUBKEY */
+  0, /* have_ssl_ctx */
+  0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
+
+  Curl_none_init,                     /* init */
+  Curl_none_cleanup,                  /* cleanup */
+  Curl_darwinssl_version,             /* version */
+  Curl_darwinssl_check_cxn,           /* check_cxn */
+  Curl_darwinssl_shutdown,            /* shutdown */
+  Curl_darwinssl_data_pending,        /* data_pending */
+  Curl_darwinssl_random,              /* random */
+  Curl_none_cert_status_request,      /* cert_status_request */
+  Curl_darwinssl_connect,             /* connect */
+  Curl_darwinssl_connect_nonblocking, /* connect_nonblocking */
+  Curl_darwinssl_get_internals,       /* get_internals */
+  Curl_darwinssl_close,               /* close */
+  Curl_none_close_all,                /* close_all */
+  Curl_darwinssl_session_free,        /* session_free */
+  Curl_none_set_engine,               /* set_engine */
+  Curl_none_set_engine_default,       /* set_engine_default */
+  Curl_none_engines_list,             /* engines_list */
+  Curl_darwinssl_false_start,         /* false_start */
+  Curl_darwinssl_md5sum,              /* md5sum */
+  Curl_darwinssl_sha256sum            /* sha256sum */
+};
 
 #ifdef __clang__
 #pragma clang diagnostic pop
