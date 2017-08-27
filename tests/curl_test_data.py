@@ -24,10 +24,13 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import os
-import xml.etree.ElementTree as ET
+import re
 import logging
 
 log = logging.getLogger(__name__)
+
+
+REPLY_DATA = re.compile("<reply>\s*<data>(.*?)</data>", re.MULTILINE | re.DOTALL)
 
 
 class TestData(object):
@@ -39,15 +42,17 @@ class TestData(object):
         filename = os.path.join(self.data_folder,
                                 "test{0}".format(test_number))
 
-        # The user should handle the exception from failing to find the file.
-        tree = ET.parse(filename)
+        log.debug("Parsing file %s", filename)
 
-        # We need the <reply><data> text.
-        reply = tree.find("reply")
-        data = reply.find("data")
+        with open(filename, "rb") as f:
+            contents = f.read().decode("utf-8")
 
-        # Return the text contents of the data
-        return data.text
+        m = REPLY_DATA.search(contents)
+        if not m:
+            raise Exception("Couldn't find a <reply><data> section")
+
+        # Left-strip the data so we don't get a newline before our data.
+        return m.group(1).lstrip()
 
 
 if __name__ == '__main__':

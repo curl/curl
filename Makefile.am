@@ -210,6 +210,9 @@ test-am:
 
 endif
 
+fuzzer:
+	@(cd tests/fuzz; $(MAKE) all)
+
 examples:
 	@(cd docs/examples; $(MAKE) check)
 

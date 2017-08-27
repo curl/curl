@@ -1833,7 +1833,7 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
           dnl linker doesn't search through, we need to add it to
           dnl LD_LIBRARY_PATH to prevent further configure tests to fail
           dnl due to this
-          if test "x$cross_compiling" != "xyes"; then 
+          if test "x$cross_compiling" != "xyes"; then
             LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlslib"
             export LD_LIBRARY_PATH
             AC_MSG_NOTICE([Added $gtlslib to LD_LIBRARY_PATH])

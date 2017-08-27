@@ -30,18 +30,21 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
 
-AM_CPPFLAGS = -I$(top_srcdir)/include        \
-              -I$(top_builddir)/lib          \
-              -I$(top_srcdir)/lib            \
-              -I$(top_srcdir)/tests/fuzz
+AM_CFLAGS = -I$(top_srcdir)/include        \
+            -I$(top_builddir)/lib          \
+            -I$(top_srcdir)/lib            \
+            -I$(top_srcdir)/tests/fuzz
 
-EXTRA_DIST = Makefile.inc CMakeLists.txt
+LIBS = -lpthread -lstdc++ -lm
 
-LIBS = -lpthread -lFuzzer -lstdc++ -lm
-LDFLAGS = -L/usr/lib/llvm-5.0/lib
+# Run e.g. "make all LIB_FUZZING_ENGINE=/path/to/libFuzzer.a"
+# to link the fuzzer(s) against a real fuzzing engine.
+#
+# OSS-Fuzz will define its own value for LIB_FUZZING_ENGINE.
+LIB_FUZZING_ENGINE ?= libstandaloneengine.a
 
 LDADD = $(top_builddir)/lib/libcurl.la      \
-        @LDFLAGS@ @LIBCURL_LIBS@
+        $(LIB_FUZZING_ENGINE) @LDFLAGS@ @LIBCURL_LIBS@
 
 # Makefile.inc provides neat definitions
 include Makefile.inc
@@ -50,4 +53,4 @@ checksrc:
 	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
 
 noinst_PROGRAMS = $(FUZZPROGS)
-
+noinst_LIBRARIES = $(FUZZLIBS)
