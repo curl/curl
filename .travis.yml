@@ -60,6 +60,10 @@ matrix:
           compiler: gcc
           dist: trusty
           env: T=distcheck
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=fuzzer
 
 install:
   - pip install --user cpp-coveralls
@@ -137,6 +141,12 @@ script:
              cd build && \
              cmake .. && \
              make)
+        fi
+    - |
+        if [ "$T" = "fuzzer" ]; then
+             cd tests/ossfuzz
+             make -f Makefile.fuzz clean
+             make -f Makefile.fuzz check
         fi
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
