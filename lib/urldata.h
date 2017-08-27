@@ -585,6 +585,9 @@ struct ConnectBits {
   bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
                                   is complete */
   bool socksproxy_connecting; /* connecting through a socks proxy */
+  bool needs_update; /* a non-blocking socket was created and a
+                        call to Curl_updateconninfo() should be made
+                        as soon as a successful read or write has happened */
 };
 
 struct hostname {

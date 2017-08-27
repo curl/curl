@@ -365,10 +365,16 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
     bytes_written = sendto(sockfd, mem, len, MSG_FASTOPEN,
                            conn->ip_addr->ai_addr, conn->ip_addr->ai_addrlen);
     conn->bits.tcp_fastopen = FALSE;
+    conn->bits.needs_update = TRUE;
   }
   else
 #endif
     bytes_written = swrite(sockfd, mem, len);
+
+  if (conn->bits.needs_update && 0 < bytes_written) {
+      Curl_updateconninfo(conn, sockfd);
+      conn->bits.needs_update = FALSE;
+  }
 
   *code = CURLE_OK;
   if(-1 == bytes_written) {
@@ -436,6 +442,11 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
   }
 
   nread = sread(sockfd, buf, len);
+
+  if (conn->bits.needs_update && 0 < nread) {
+      Curl_updateconninfo(conn, sockfd);
+      conn->bits.needs_update = FALSE;
+  }
 
   *code = CURLE_OK;
   if(-1 == nread) {
