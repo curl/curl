@@ -380,7 +380,7 @@ static bool init_resolve_thread(struct connectdata *conn,
                                 const struct addrinfo *hints)
 {
   struct thread_data *td = calloc(1, sizeof(struct thread_data));
-  int err = RESOLVER_ENOMEM;
+  int err = ENOMEM;
 
   conn->async.os_specific = (void *)td;
   if(!td)
