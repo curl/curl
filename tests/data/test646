@@ -1,0 +1,84 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+SMTP MULTIPART
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP multipart using mime API
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/646 --mail-rcpt recipient@example.com --mail-from sender@example.com -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;type=text/html" -F "=This is the plain text version" -F "=)" -F "=@log/test646.txt" -H "From: different" -H "To: another" -H "Reply-To: <followup@example.com>"
+</command>
+<file name="log/test646.txt">
+This is an attached file.
+
+It may contain any type of data.
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+EHLO 646
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+Content-Type: multipart/mixed; boundary=----------------------------
+Mime-Version: 1.0
+From: different
+To: another
+Reply-To: <followup@example.com>
+
+------------------------------
+Content-Type: multipart/alternative; boundary=----------------------------
+
+------------------------------
+Content-Type: text/html
+Content-Transfer-Encoding: 8bit
+
+<body>This is the html version</body>
+------------------------------
+
+This is the plain text version
+--------------------------------
+
+------------------------------
+Content-Disposition: attachment; filename="test646.txt"
+
+This is an attached file.
+
+It may contain any type of data.
+
+--------------------------------
+.
+</upload>
+</verify>
+</testcase>
