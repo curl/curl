@@ -43,8 +43,7 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
-static int runawhile(struct Curl_easy *easy,
-                     long time_limit,
+static int runawhile(long time_limit,
                      long speed_limit,
                      curl_off_t speed,
                      int dec)
@@ -75,16 +74,16 @@ static int runawhile(struct Curl_easy *easy,
 }
 
 UNITTEST_START
-  fail_unless(runawhile(easy, 41, 41, 40, 0) == 41,
+  fail_unless(runawhile(41, 41, 40, 0) == 41,
               "wrong low speed timeout");
-  fail_unless(runawhile(easy, 21, 21, 20, 0) == 21,
+  fail_unless(runawhile(21, 21, 20, 0) == 21,
               "wrong low speed timeout");
-  fail_unless(runawhile(easy, 60, 60, 40, 0) == 60,
+  fail_unless(runawhile(60, 60, 40, 0) == 60,
               "wrong log speed timeout");
-  fail_unless(runawhile(easy, 50, 50, 40, 0) == 50,
+  fail_unless(runawhile(50, 50, 40, 0) == 50,
               "wrong log speed timeout");
-  fail_unless(runawhile(easy, 40, 40, 40, 0) == 99,
+  fail_unless(runawhile(40, 40, 40, 0) == 99,
               "should not time out");
-  fail_unless(runawhile(easy, 10, 50, 100, 2) == 36,
+  fail_unless(runawhile(10, 50, 100, 2) == 36,
               "bad timeout");
 UNITTEST_STOP
