@@ -345,6 +345,9 @@ sub scanfile {
             elsif($3 eq "return") {
                 # return must have a space
             }
+            elsif($3 eq "case") {
+                # case must have a space
+            }
             elsif($4 eq "*") {
                 # (* beginning makes the space OK!
             }
