@@ -73,10 +73,9 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-2f6
+2ce
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
-Content-Type: application/octet-stream
 
 this is what we post to the silly web server
 
@@ -109,10 +108,9 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-304
+2dc
 ------------------------------
 Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
-Content-Type: application/octet-stream
 
 this is what we post to the silly web server
 
