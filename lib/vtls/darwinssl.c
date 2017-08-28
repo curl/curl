@@ -910,11 +910,26 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
 {
   CFStringRef c = getsubject(cert);
   CURLcode result = CURLE_OK;
+  const char *direct;
   char *cbuf = NULL;
   *certp = NULL;
 
-  /* If subject is not UTF-8 then check if it can be converted */
-  if(!CFStringGetCStringPtr(c, kCFStringEncodingUTF8)) {
+  if(!c) {
+    failf(data, "SSL: invalid CA certificate subject");
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  /* If the subject is already available as UTF-8 encoded (ie 'direct') then
+     use that, else convert it. */
+  direct = CFStringGetCStringPtr(c, kCFStringEncodingUTF8);
+  if(direct) {
+    *certp = strdup(direct);
+    if(!*certp) {
+      failf(data, "SSL: out of memory");
+      result = CURLE_OUT_OF_MEMORY;
+    }
+  }
+  else {
     size_t cbuf_size = ((size_t)CFStringGetLength(c) * 4) + 1;
     cbuf = calloc(cbuf_size, 1);
     if(cbuf) {
