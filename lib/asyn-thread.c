@@ -210,6 +210,10 @@ int init_thread_sync_data(struct thread_data * td,
 
   tsd->td = td;
   tsd->port = port;
+  /* Treat the request as done until the thread actually starts so any early
+   * cleanup gets done properly.
+   */
+  tsd->done = 1;
 #ifdef HAVE_GETADDRINFO
   DEBUGASSERT(hints);
   tsd->hints = *hints;
@@ -403,6 +407,9 @@ static bool init_resolve_thread(struct connectdata *conn,
   if(!conn->async.hostname)
     goto err_exit;
 
+  /* The thread will set this to 1 when complete. */
+  td->tsd.done = 0;
+
 #ifdef HAVE_GETADDRINFO
   td->thread_hnd = Curl_thread_create(getaddrinfo_thread, &td->tsd);
 #else
@@ -410,6 +417,8 @@ static bool init_resolve_thread(struct connectdata *conn,
 #endif
 
   if(!td->thread_hnd) {
+    /* The thread never started, so mark it as done here for proper cleanup. */
+    td->tsd.done = 1;
     err = errno;
     goto err_exit;
   }
