@@ -384,7 +384,7 @@ static bool init_resolve_thread(struct connectdata *conn,
 
   conn->async.os_specific = (void *)td;
   if(!td)
-    goto err_exit;
+    goto errno_exit;
 
   conn->async.port = port;
   conn->async.done = FALSE;
@@ -392,8 +392,11 @@ static bool init_resolve_thread(struct connectdata *conn,
   conn->async.dns = NULL;
   td->thread_hnd = curl_thread_t_null;
 
-  if(!init_thread_sync_data(td, hostname, port, hints))
-    goto err_exit;
+  if(!init_thread_sync_data(td, hostname, port, hints)) {
+    conn->async.os_specific = NULL;
+    free(td);
+    goto errno_exit;
+  }
 
   free(conn->async.hostname);
   conn->async.hostname = strdup(hostname);
@@ -416,6 +419,7 @@ static bool init_resolve_thread(struct connectdata *conn,
  err_exit:
   destroy_async_data(&conn->async);
 
+ errno_exit:
   errno = err;
   return FALSE;
 }
