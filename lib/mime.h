@@ -36,6 +36,7 @@ enum mimekind {
   MIMEKIND_FILE,                /* Data from file pointer. */
   MIMEKIND_CALLBACK,            /* Data from `read' callback. */
   MIMEKIND_MULTIPART,           /* Data is a mime subpart. */
+  MIMEKIND_LAST
 };
 
 /* Readback state tokens. */
@@ -49,12 +50,14 @@ enum mimestate {
   MIMESTATE_BOUNDARY2,          /* In boundary. */
   MIMESTATE_CONTENT,            /* In content. */
   MIMESTATE_END,                /* End of part reached. */
+  MIMESTATE_LAST
 };
 
 /* Mime headers strategies. */
 enum mimestrategy {
   MIMESTRATEGY_MAIL,            /* Mime mail. */
   MIMESTRATEGY_FORM,            /* HTTP post form. */
+  MIMESTRATEGY_LAST
 };
 
 /* Mime readback state. */
