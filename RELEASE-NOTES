@@ -10,6 +10,7 @@ This release includes the following changes:
 
  o curl: enable compression for SCP/SFTP with --compressed-ssh  [11]
  o libcurl: enable compression for SCP/SFTP with CURLOPT_SSH_COMPRESSION [11]
+ o vtls: added dynamic changing SSL backend with curl_global_sslset() [28]
 
 This release includes the following bugfixes:
 
@@ -34,6 +35,23 @@ This release includes the following bugfixes:
  o system.h: check for __ppc__ as well [15]
  o http2_recv: return error better on fatal h2 errors [16]
  o scripts/contri*sh: use "git log --use-mailmap"
+ o tftp: fix memory leak on too long filename [17]
+ o system.h: fix build for hppa [18]
+ o cmake: enable picky compiler options with clang and gcc [19]
+ o makefile.m32: add support for libidn2 [20]
+ o curl: turn off MinGW CRT's globbing [21]
+ o request-target.d: mention added in 7.55.0
+ o curl: shorten and clean up CA cert verification error message [22]
+ o imap: support PREAUTH [23]
+ o CURLOPT_USERPWD.3: see also CURLOPT_PROXYUSERPWD
+ o examples/threaded-ssl: mention that this is for openssl before 1.1
+ o winbuild: fix embedded manifest option [24]
+ o tests: Make sure libtests & unittests call curl_global_cleanup()
+ o system.h: include sys/poll.h for AIX [25]
+ o darwinssl: handle long strings in TLS certs [26]
+ o strtooff: fix build for systems with long long but no strtoll [27]
+ o asyn-thread: Improved cleanup after OOM situations
+ o HELP-US.md: "How to get started helping out in the curl project" [29]
 
 This release includes the following known bugs:
 
@@ -42,12 +60,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Benbuck Nason, Brian Carpenter, Daniel Stenberg, Gergely Nagy,
+  Benbuck Nason, Benjamin Sergeant, Bill Pyne, Brian Carpenter, Dan Fandrich,
+  Daniel Stenberg, Even Rouault, Frank Denis, Gergely Nagy, Gisle Vanem,
   Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
-  joshhe on github, Kamil Dudka, Maksim Stsepanenka, Max Dymond, Nick Zitzmann,
-  Peter Lamare, Ray Satiro, Ryan Schmidt, Ryan Winograd, Tatsuhiro Tsujikawa,
-  Viktor Szakáts,
-  (18 contributors)
+  John David Anglin, joshhe on github, Kamil Dudka, Maksim Stsepanenka,
+  Marcel Raad, Max Dymond, Michael Smith, Nick Zitzmann, Peter Lamare,
+  Ray Satiro, Ryan Schmidt, Ryan Winograd, Tatsuhiro Tsujikawa, Viktor Szakáts,
+  Nicolas Morey-Chaisemartin,
+  (27 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -69,3 +89,16 @@ References to bug reports and discussions on issues:
  [14] = https://curl.haxx.se/bug/?i=1803
  [15] = https://curl.haxx.se/bug/?i=1797
  [16] = https://curl.haxx.se/bug/?i=1021
+ [17] = https://curl.haxx.se/bug/?i=1808
+ [18] = https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=872502#10
+ [19] = https://curl.haxx.se/bug/?i=1799
+ [20] = https://curl.haxx.se/bug/?i=1815
+ [21] = https://curl.haxx.se/bug/?i=1751
+ [22] = https://curl.haxx.se/bug/?i=1810
+ [23] = https://curl.haxx.se/bug/?i=1818
+ [24] = https://curl.haxx.se/bug/?i=1832
+ [25] = https://curl.haxx.se/bug/?i=1828
+ [26] = https://curl.haxx.se/bug/?i=1823
+ [27] = https://curl.haxx.se/bug/?i=1829
+ [28] = https://curl.haxx.se/libcurl/c/curl_global_sslset.html
+ [29] = https://curl.haxx.se/bug/?i=1837
