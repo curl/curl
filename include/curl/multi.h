@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -471,10 +471,6 @@ typedef enum {
 
 CURL_EXTERN CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
                                           const curl_ssl_backend ***avail);
-
-#ifdef  __cplusplus
-}
-#endif
 
 #ifdef __cplusplus
 } /* end of extern "C" */
