@@ -210,8 +210,6 @@ static char *escape_string(const char *src, ssize_t srclen)
   size_t i;
   char *dst;
 
-  if(len < 0)
-    len = strlen(src);
   bytecount = len;
   for(i = 0; i < len; i++)
     if(src[i] == '"' || src[i] == '\\' || !src[i])
@@ -330,7 +328,8 @@ static int mime_file_seek(void *instream, curl_off_t offset, int whence)
 {
   FILE *fp = (FILE *) instream;
 
-  return fseek(fp, offset, whence)? CURL_SEEKFUNC_CANTSEEK: CURL_SEEKFUNC_OK;
+  return fseek(fp, (long) offset, whence)?
+         CURL_SEEKFUNC_CANTSEEK: CURL_SEEKFUNC_OK;
 }
 
 
@@ -886,7 +885,7 @@ CURLcode curl_mime_file(struct Curl_mimepart *part,
         part->datasize -= part->origin;
       part->seekfunc = mime_file_seek;
     }
-    fseek(fp, part->origin, SEEK_SET);
+    fseek(fp, (long) part->origin, SEEK_SET);
   }
   part->kind = MIMEKIND_FILE;
   return CURLE_OK;
@@ -1129,7 +1128,7 @@ curl_off_t Curl_mime_size(struct Curl_mimepart *part)
 /* VARARGS2 */
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
 {
-  struct curl_slist *hdr;
+  struct curl_slist *hdr = NULL;
   char *s = NULL;
   va_list ap;
 
