@@ -53,3 +53,5 @@ mkinstalldirs
 tags
 test-driver
 scripts/_curl
+curl_fuzzer
+curl_fuzzer_seed_corpus.zip
