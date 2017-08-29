@@ -1,0 +1,36 @@
+# Copyright 2017 Google Inc. All Rights Reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+
+# Build file for curl OSS-fuzzer.
+
+# By default, use our own standalone_fuzz_target_runner.
+# This runner does no fuzzing, but simply executes the inputs
+# provided via parameters.
+# Run e.g. "make all LIB_FUZZING_ENGINE=/path/to/libFuzzer.a"
+# to link the fuzzer(s) against a real fuzzing engine.
+#
+# OSS-Fuzz will define its own value for LIB_FUZZING_ENGINE.
+LIB_FUZZING_ENGINE ?= standalone_fuzz_target_runner.o
+
+# Values for CC, CFLAGS, CXX, CXXFLAGS are provided by OSS-Fuzz.
+# Outside of OSS-Fuzz use the ones you prefer or rely on the default values.
+# Do not use the -fsanitize=* flags by default.
+# OSS-Fuzz will use different -fsanitize=* flags for different builds (asan, ubsan, msan, ...)
+
+all: curl_fuzzer
+
+clean:
+	rm -fv *.a *.o *_fuzzer *_seed_corpus.zip crash-* *.zip
+
+# Continuous integration system should run "make clean && make check"
+check: all
+	./curl_fuzzer curl_fuzz_data/*
+
+# Fuzz target, links against $LIB_FUZZING_ENGINE, so that
+# you may choose which fuzzing engine to use.
+curl_fuzzer: curl_fuzzer.c $(LIB_FUZZING_ENGINE)
+	${CC} ${CFLAGS} $< ${LIB_FUZZING_ENGINE} -o $@
+	zip -q -r curl_fuzzer_seed_corpus.zip curl_fuzz_data
+
+# The standalone fuzz target runner.
+standalone_fuzz_target_runner.o: standalone_fuzz_target_runner.c
