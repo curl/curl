@@ -1,7 +1,7 @@
 # How to get started helping out in the curl project
 
 We are always in need of more help. If you are new to the project and are
-looking for ways to contrbute and help out, this document aims to give a few
+looking for ways to contribute and help out, this document aims to give a few
 good starting points.
 
 A good idea is to start by subscribing to the [curl-library mailing
@@ -50,7 +50,7 @@ implement and provide are kept in the
 rough. Some are well thought out. Some probably aren't really suitable
 anymore.
 
-Before you invest a lot of time on a TODO item, do bring it up for discusson
+Before you invest a lot of time on a TODO item, do bring it up for discussion
 on the mailing list. For discussion on applicability but also for ideas and
 brainstorming on specific ways to do the implementation etc.
 
