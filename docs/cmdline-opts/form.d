@@ -1,21 +1,26 @@
 Long: form
 Short: F
 Arg: <name=content>
-Help: Specify HTTP multipart POST data
-Protocols: HTTP
+Help: Specify multipart MIME data
+Protocols: HTTP SMTP IMAP
 Mutexed: data head upload
 ---
-This lets curl emulate a filled-in form in which a user has pressed the submit
-button. This causes curl to POST data using the Content-Type
-multipart/form-data according to RFC 2388. This enables uploading of binary
+For HTTP protocol family, this lets curl emulate a filled-in form in which a
+user has pressed the submit button. This causes curl to POST data using the
+Content-Type multipart/form-data according to RFC 2388.
+
+For SMTP and IMAP protocols, this is the mean to compose a multipart mail
+message to transmit.
+
+This enables uploading of binary
 files etc. To force the 'content' part to be a file, prefix the file name with
 an @ sign. To just get the content part from a file, prefix the file name with
 the symbol <. The difference between @ and < is then that @ makes a file get
 attached in the post as a file upload, while the < makes a text field and just
 get the contents for that text field from a file.
 
-Example: to send an image to a server, where \&'profile' is the name of the
-form-field to which portrait.jpg will be the input:
+Example: to send an image to an HTTP server, where \&'profile' is the name of
+the form-field to which portrait.jpg will be the input:
 
  curl -F profile=@portrait.jpg https://example.com/upload.cgi
 
@@ -48,6 +53,27 @@ or
 
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.
+
+To support sending multipart mail messages, the syntax is extended as follows:
+.br
+- name can be omitted: the equal sign is the first character of the argument,
+.br
+- if data starts with '(', this signals to start a new multipart: it can be
+followed by a content type specification.
+.br
+- a multipart can be terminated with a '=)' argument.
+
+Example: the following command sends an SMTP mime e-mail consisting in an
+inline part in two alternative formats: plain text and HTML. It attaches a
+text file:
+
+ curl -F '=(;type=multipart/alternative' \\
+.br
+         -F '=plain text message' \\
+.br
+         -F '= <body>HTML message</body>;type=text/html' \\
+.br
+      -F '=)' -F '=@textfile.txt' ...  smtp://example.com
 
 See further examples and details in the MANUAL.
 
