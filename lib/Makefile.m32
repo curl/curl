@@ -153,9 +153,7 @@ ZLIB = 1
 endif
 ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
 SSH2 = 1
-ifneq ($(findstring -winssl,$(CFG)),-winssl)
 SSL = 1
-endif
 ZLIB = 1
 endif
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
@@ -192,6 +190,11 @@ endif
 
 INCLUDES = -I. -I../include
 CFLAGS += -DBUILDING_LIBCURL
+ifdef SSL
+  ifdef WINSSL
+    CFLAGS += -DCURL_WITH_MULTI_SSL
+  endif
+endif
 
 ifdef SYNC
   CFLAGS += -DUSE_SYNC_DNS
@@ -257,10 +260,10 @@ ifdef SSL
       CFLAGS += -DHAVE_OPENSSL_SRP -DUSE_TLS_SRP
     endif
   endif
-else
-ifdef WINSSL
-  DLL_LIBS += -lcrypt32
 endif
+ifdef WINSSL
+  CFLAGS += -DUSE_SCHANNEL
+  DLL_LIBS += -lcrypt32
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
@@ -280,9 +283,6 @@ endif
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
-  ifdef WINSSL
-    CFLAGS += -DUSE_SCHANNEL
-  endif
 endif
 ifdef SPNEGO
   CFLAGS += -DHAVE_SPNEGO

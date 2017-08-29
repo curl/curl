@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -168,9 +168,7 @@ ZLIB = 1
 endif
 ifeq ($(findstring -ssh2,$(CFG)),-ssh2)
 SSH2 = 1
-ifneq ($(findstring -winssl,$(CFG)),-winssl)
 SSL = 1
-endif
 ZLIB = 1
 endif
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
@@ -206,6 +204,11 @@ NGHTTP2 = 1
 endif
 
 INCLUDES = -I. -I../include -I../lib
+ifdef SSL
+  ifdef WINSSL
+    CFLAGS += -DCURL_WITH_MULTI_SSL
+  endif
+endif
 
 ifdef DYN
   curl_DEPENDENCIES = $(PROOT)/lib/libcurldll.a $(PROOT)/lib/libcurl.dll
@@ -274,10 +277,10 @@ ifdef SSL
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
-else
-ifdef WINSSL
-  curl_LDADD += -lcrypt32
 endif
+ifdef WINSSL
+  CFLAGS += -DUSE_SCHANNEL
+  curl_LDADD += -lcrypt32
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
@@ -307,9 +310,6 @@ ifdef METALINK
 endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
-  ifdef WINSSL
-    CFLAGS += -DUSE_SCHANNEL
-  endif
 endif
 ifdef IPV6
   CFLAGS += -DENABLE_IPV6 -D_WIN32_WINNT=0x0501
