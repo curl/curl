@@ -405,6 +405,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
 {
   CURLcode ret = CURLE_OK;
   int i;
+  curl_off_t size;
   curl_mimepart *part;
   char *filename;
   char *escaped = NULL;
@@ -430,7 +431,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
         escaped = c_escape(part->data, -1);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
-        CODE2("curl_mime_file(part%d, \"%s\");", *mimeno, escaped);
+        CODE2("curl_mime_filedata(part%d, \"%s\");", *mimeno, escaped);
         if(!filename)
           CODE1("curl_mime_filename(part%d, NULL);", *mimeno);
         else {
@@ -445,7 +446,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
             filename = part->filename;
         }
         break;
-      case_MIMEKIND_FILE:
+      case MIMEKIND_FILE:
         /* Can only be stdin in the current context. */
         CODE1("curl_mime_file(part%d, \"-\");", *mimeno);
         break;
@@ -471,14 +472,15 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
         /* Are there any nul byte in data? */
         for(cp = data; *cp; cp++)
           ;
-        i = (cp == data + part->datasize)? -1: part->datasize;
+        size = (cp == data + part->datasize)? (curl_off_t) -1: part->datasize;
         Curl_safefree(escaped);
         escaped = c_escape(data, part->datasize);
         if(data != part->data)
           Curl_safefree(data);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
-        CODE3("curl_mime_data(part%d, \"%s\", %d);", *mimeno, escaped, i);
+        CODE3("curl_mime_data(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
+                              *mimeno, escaped, size);
         break;
       case MIMEKIND_MULTIPART:
         ret = libcurl_generate_mime(part->arg, &i);
@@ -507,8 +509,10 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
           return CURLE_OUT_OF_MEMORY;
         for(cp = part->name; *cp; cp++)
           ;
-        i = (cp == part->name + part->namesize)? -1: part->namesize;
-        CODE3("curl_mime_name(part%d, \"%s\");", *mimeno, escaped, i);
+        size = (cp == part->name + part->namesize)?
+               (curl_off_t) -1: (curl_off_t) part->namesize;
+        CODE3("curl_mime_name(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
+              *mimeno, escaped, size);
       }
 
       if(part->mimetype) {
@@ -544,7 +548,6 @@ CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
                               curl_mime *mimepost)
 {
   CURLcode ret = CURLE_OK;
-  char *escaped = NULL;
 
   ret = curl_easy_setopt(curl, tag, mimepost);
 

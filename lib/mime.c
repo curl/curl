@@ -42,6 +42,12 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef WIN32
+# ifndef R_OK
+#  define R_OK 4
+# endif
+#endif
+
 
 #define FILE_CONTENTTYPE_DEFAULT        "application/octet-stream"
 #define MULTIPART_CONTENTTYPE_DEFAULT   "multipart/mixed"
@@ -445,7 +451,8 @@ static size_t readback_part(struct Curl_mimepart *part,
     hdr = (struct curl_slist *) part->state.ptr;
     switch(part->state.state) {
     case MIMESTATE_BEGIN:
-      mimesetstate(&part->state, MIMESTATE_CURLHEADERS, part->curlheaders);
+      mimesetstate(&part->state, part->flags & MIME_BODY_ONLY? MIMESTATE_BODY:
+                                 MIMESTATE_CURLHEADERS, part->curlheaders);
       break;
     case MIMESTATE_USERHEADERS:
       if(!hdr) {
@@ -772,10 +779,8 @@ struct Curl_mimepart *curl_mime_addpart(struct Curl_mime *mime)
 
     if(mime->lastpart)
       mime->lastpart->nextpart = part;
-    else {
+    else
       mime->firstpart = part;
-      mimesetstate(&mime->state, MIMESTATE_BEGIN, NULL);
-    }
 
     mime->lastpart = part;
   }
@@ -1201,7 +1206,7 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
                                    const char *disposition,
                                    enum mimestrategy strategy)
 {
-  struct Curl_mime *mime;
+  struct Curl_mime *mime = NULL;
   const char *boundary = NULL;
   char *s;
   CURLcode ret = CURLE_OK;
@@ -1209,6 +1214,10 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
   /* Get rid of previously prepared headers. */
   curl_slist_free_all(part->curlheaders);
   part->curlheaders = NULL;
+
+  /* Be sure we won't access old headers later. */
+  if(part->state.state == MIMESTATE_CURLHEADERS)
+    mimesetstate(&mime->state, MIMESTATE_CURLHEADERS, NULL);
 
   /* Build the content-type header. */
   s = search_header(part->userheaders, "Content-Type");
@@ -1305,6 +1314,11 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
       return ret;
   }
 
+  /* If we were reading curl-generated headers, restart with new ones (this
+     should not occur). */
+  if(part->state.state == MIMESTATE_CURLHEADERS)
+    mimesetstate(&mime->state, MIMESTATE_CURLHEADERS, part->curlheaders);
+
   /* Process subparts. */
   if(part->kind == MIMEKIND_MULTIPART && mime) {
     struct Curl_mimepart *subpart;
@@ -1317,13 +1331,7 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
       if(ret)
         return ret;
     }
-
-    /* Rewind subparts. */
-    mimesetstate(&mime->state, MIMESTATE_BEGIN, NULL);
   }
-
-  /* Rewind part. */
-  mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
   return ret;
 }
 
