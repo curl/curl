@@ -29,25 +29,29 @@ curl_global_sslset - Select SSL backend to use with libcurl
 .BI ", curl_ssl_backend ***" avail ");"
 .ad
 .SH DESCRIPTION
-This function configures at runtime which SSL backend to use with libcurl. This
-function can only be called once, and it must be called \fBbefore\fP
-curl_global_init().
+This function configures at runtime which SSL backend to use with
+libcurl. This function can only be used to select an SSL backend once, and it
+must be called \fBbefore\fP \fIcurl_global_init(3)\fP.
 
-The backend can be identified by the id (e.g. CURLSSLBACKEND_OPENSSL). The
-backend can also be specified via the name parameter (passing -1 as id).
-If both id and name are specified, the name will be ignored. If neither id
-nor name are specified, the function will fail with
-CURLSSLSET_UNKNOWN_BACKEND and set the "avail" pointer to the
-NULL-terminated list of available backends.
+The backend can be identified by the \fIid\fP
+(e.g. \fBCURLSSLBACKEND_OPENSSL\fP). The backend can also be specified via the
+\fIname\fP parameter (passing -1 as \fIid\fP). If both \fIid\fP and \fIname\fP
+are specified, the \fIname\fP will be ignored.
+
+If neither \fIid\fP nor \fPname\fP are specified, the function will fail with
+CURLSSLSET_UNKNOWN_BACKEND and set the \fIavail\fP pointer to the
+NULL-terminated list of available backends. The available backends are those
+that this particular build of libcurl supports.
 
 Upon success, the function returns CURLSSLSET_OK.
 
 If the specified SSL backend is not available, the function returns
-CURLSSLSET_UNKNOWN_BACKEND and sets the "avail" pointer to a NULL-terminated
-list of available SSL backends.
+CURLSSLSET_UNKNOWN_BACKEND and sets the \fIavail\fP pointer to a
+NULL-terminated list of available SSL backends. In this case, you may call the
+function again to try to select a different backend.
 
-The SSL backend can be set only once. If it has already been set, a
-subsequent attempt to change it will result in a CURLSSLSET_TOO_LATE.
+The SSL backend can be set only once. If it has already been set, a subsequent
+attempt to change it will result in a \fBCURLSSLSET_TOO_LATE\fP.
 
 \fBThis function is not thread safe.\fP You must not call it when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
@@ -62,8 +66,8 @@ If this function returns CURLSSLSET_OK, the backend was successfully selected.
 If the chosen backend is unknown (or support for the chosed backend has not
 been compiled into libcurl), the function returns CURLSSLSET_UNKNOWN_BACKEND.
 
-If the backend had been configured previously, or if curl_global_init() has
-already been called, the function returns CURLSSLSET_TOO_LATE.
+If the backend had been configured previously, or if \fIcurl_global_init(3)\fP
+has already been called, the function returns CURLSSLSET_TOO_LATE.
 .SH "SEE ALSO"
 .BR curl_global_init "(3), "
 .BR libcurl "(3) "
