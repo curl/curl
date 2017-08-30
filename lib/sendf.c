@@ -328,9 +328,13 @@ CURLcode Curl_write(struct connectdata *conn,
   bytes_written = conn->send[num](conn, num, mem, len, &result);
 
   *written = bytes_written;
-  if(bytes_written >= 0)
+  if(bytes_written >= 0) {
+    /* if local port was not available on first send (TFO), update conninfo */
+    if(num == 0 && (conn->primary_port != 0) && (conn->local_port == 0))
+      Curl_updateconninfo(conn, conn->sock[FIRSTSOCKET]);
     /* we completely ignore the curlcode value when subzero is not returned */
     return CURLE_OK;
+  }
 
   /* handle CURLE_AGAIN or a send failure */
   switch(result) {
@@ -703,6 +707,10 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
      us use the correct ssl handle. */
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
+
+  /* if local port was not available on first send (TFO), update conninfo */
+  if(num == 0 && (conn->primary_port != 0) && (conn->local_port == 0))
+    Curl_updateconninfo(conn, conn->sock[FIRSTSOCKET]);
 
   *n = 0; /* reset amount to zero */
 
