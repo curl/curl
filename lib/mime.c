@@ -711,7 +711,8 @@ void curl_mime_free(struct Curl_mime *mime)
   struct Curl_mimepart *part;
 
   if(mime) {
-    while((part = mime->firstpart)) {
+    while(mime->firstpart) {
+      part = mime->firstpart;
       mime->firstpart = part->nextpart;
       Curl_mime_cleanpart(part);
       free(part);
