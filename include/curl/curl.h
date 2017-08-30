@@ -2244,9 +2244,9 @@ typedef enum {
 } curl_sslbackend;
 
 /* aliases for library clones and renames */
-#define CURLSSLBACKEND_LIBRESSL 1
-#define CURLSSLBACKEND_BORINGSSL 1
-#define CURLSSLBACKEND_WOLFSSL 6
+#define CURLSSLBACKEND_LIBRESSL CURLSSLBACKEND_OPENSSL
+#define CURLSSLBACKEND_BORINGSSL CURLSSLBACKEND_OPENSSL
+#define CURLSSLBACKEND_WOLFSSL CURLSSLBACKEND_CYASSL
 
 /* Information about the SSL library used and the respective internal SSL
    handle, which can be used to obtain further information regarding the
