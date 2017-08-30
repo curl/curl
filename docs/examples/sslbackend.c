@@ -55,11 +55,13 @@ int main(int argc, char **argv)
              i, list[i]->name, list[i]->id);
 
     return 0;
-  } else if(isdigit(*name)) {
+  }
+  else if(isdigit(*name)) {
     curl_sslbackend id = (curl_sslbackend)atoi(name);
 
     result = curl_global_sslset(id, NULL, NULL);
-  } else
+  }
+  else
     result = curl_global_sslset(-1, name, NULL);
 
   if(result == CURLSSLSET_UNKNOWN_BACKEND) {
