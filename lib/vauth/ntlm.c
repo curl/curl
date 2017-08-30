@@ -44,7 +44,9 @@
 #include "rand.h"
 #include "vtls/vtls.h"
 
-#ifdef USE_NSS
+/* SSL backend-specific #if branches in this file must be kept in the order
+   documented in curl_ntlm_core. */
+#if defined(NTLM_NEEDS_NSS_INIT)
 #include "vtls/nssg.h" /* for Curl_nss_force_init() */
 #endif
 
@@ -272,7 +274,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   unsigned char *type2 = NULL;
   size_t type2_len = 0;
 
-#if defined(USE_NSS)
+#if defined(NTLM_NEEDS_NSS_INIT)
   /* Make sure the crypto backend is initialized */
   result = Curl_nss_force_init(data);
   if(result)

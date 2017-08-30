@@ -124,6 +124,15 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
 
+/* If NTLM is the first available SSL backend (see order in curl_ntlm_core)
+   then it must be initialized to be used by NTLM. */
+#if !defined(USE_OPENSSL) && \
+    !defined(USE_GNUTLS_NETTLE) && \
+    !defined(USE_GNUTLS) && \
+    defined(USE_NSS)
+#define NTLM_NEEDS_NSS_INIT
+#endif
+
 /* set of helper macros for the backends to access the correct fields. For the
    proxy or for the remote host - to properly support HTTPS proxy */
 
