@@ -30,9 +30,6 @@
 #include "curl_setup.h"
 
 #ifdef USE_POLARSSL
-
-#elif defined USE_POLARSSL
-
 #include <polarssl/net.h>
 #include <polarssl/ssl.h>
 #include <polarssl/certs.h>
@@ -458,7 +455,7 @@ polarssl_connect_step2(struct connectdata *conn,
 {
   int ret;
   struct Curl_easy *data = conn->data;
-  struct ssl_connect_data* connssl = &BACKEND->ssl[sockindex];
+  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
   char buffer[1024];
   const char * const pinnedpubkey = SSL_IS_PROXY() ?
             data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
@@ -677,7 +674,7 @@ static ssize_t polarssl_send(struct connectdata *conn,
 
 static void Curl_polarssl_close(struct connectdata *conn, int sockindex)
 {
-  struct ssl_connect_data *connssl = &conn->sock[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   rsa_free(&BACKEND->rsa);
   x509_crt_free(&BACKEND->clicert);
   x509_crt_free(&BACKEND->cacert);
