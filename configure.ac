@@ -1409,7 +1409,7 @@ if test -z "$ssl_backends" -o "x$OPT_DARWINSSL" != xno; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_DARWINSSL, 1, [to enable Apple OS native SSL/TLS support])
     AC_SUBST(USE_DARWINSSL, [1])
-    ssl_msg="$ssh_backends, Apple OS-native"
+    ssl_msg="Apple OS-native"
     test darwinssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     DARWINSSL_ENABLED=1
     LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
