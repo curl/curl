@@ -3808,23 +3808,25 @@ sub singletest {
         unlink($memdump);
     }
 
-    # create a (possibly-empty) file before starting the test
-    my @inputfile=getpart("client", "file");
-    my %fileattr = getpartattr("client", "file");
-    my $filename=$fileattr{'name'};
-    if(@inputfile || $filename) {
-        if(!$filename) {
-            logmsg "ERROR: section client=>file has no name attribute\n";
-            timestampskippedevents($testnum);
-            return -1;
+    # create (possibly-empty) files before starting the test
+    for my $partsuffix (('', '1', '2', '3', '4')) {
+        my @inputfile=getpart("client", "file".$partsuffix);
+        my %fileattr = getpartattr("client", "file".$partsuffix);
+        my $filename=$fileattr{'name'};
+        if(@inputfile || $filename) {
+            if(!$filename) {
+                logmsg "ERROR: section client=>file has no name attribute\n";
+                timestampskippedevents($testnum);
+                return -1;
+            }
+            my $fileContent = join('', @inputfile);
+            subVariables \$fileContent;
+#            logmsg "DEBUG: writing file " . $filename . "\n";
+            open(OUTFILE, ">$filename");
+            binmode OUTFILE; # for crapage systems, use binary
+            print OUTFILE $fileContent;
+            close(OUTFILE);
         }
-        my $fileContent = join('', @inputfile);
-        subVariables \$fileContent;
-#        logmsg "DEBUG: writing file " . $filename . "\n";
-        open(OUTFILE, ">$filename");
-        binmode OUTFILE; # for crapage systems, use binary
-        print OUTFILE $fileContent;
-        close(OUTFILE);
     }
 
     my %cmdhash = getpartattr("client", "command");
