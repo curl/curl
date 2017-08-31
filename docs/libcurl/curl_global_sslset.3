@@ -24,10 +24,31 @@
 curl_global_sslset - Select SSL backend to use with libcurl
 .SH SYNOPSIS
 .B #include <curl/curl.h>
-.sp
-.BI "CURLsslset curl_global_sslset(curl_sslbackend " id ", const char *" name
-.BI ", curl_ssl_backend ***" avail ");"
-.ad
+.nf
+
+typedef struct {
+  curl_sslbackend id;
+  const char *name;
+} curl_ssl_backend;
+
+typedef enum {
+  CURLSSLBACKEND_NONE = 0,
+  CURLSSLBACKEND_OPENSSL = 1,
+  CURLSSLBACKEND_GNUTLS = 2,
+  CURLSSLBACKEND_NSS = 3,
+  CURLSSLBACKEND_GSKIT = 5,
+  CURLSSLBACKEND_POLARSSL = 6,
+  CURLSSLBACKEND_WOLFSSL = 7,
+  CURLSSLBACKEND_SCHANNEL = 8,
+  CURLSSLBACKEND_DARWINSSL = 9,
+  CURLSSLBACKEND_AXTLS = 10,
+  CURLSSLBACKEND_MBEDTLS = 11
+} curl_sslbackend;
+
+.B "CURLsslset curl_global_sslset(curl_sslbackend " id,
+.B "                              const char *" name,
+.B "                              curl_ssl_backend ***" avail ");"
+.fi
 .SH DESCRIPTION
 This function configures at runtime which SSL backend to use with
 libcurl. This function can only be used to select an SSL backend once, and it
