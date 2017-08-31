@@ -54,6 +54,32 @@ or
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.
 
+You can add custom headers to the field by setting headers=, like
+
+  curl -F "submit=OK;headers=\\"X-submit-type: OK\\"" example.com
+
+or
+
+  curl -F "submit=OK;headers=@headerfile" example.com
+
+The headers= keyword may appear more that once and above notes about quoting
+apply. When headers are read from a file, Empty lines and lines starting
+with '#' are comments and ignored; each header can be folded by splitting
+between two words and starting the continuation line with a space; embedded
+carriage-returns and trailing spaces are stripped.
+Here is an example of a header file contents:
+
+  # This file contain two headers.
+.br
+  X-header-1: this is a header
+
+  # The following header is folded.
+.br
+  X-header-2: this is
+.br
+   another header
+
+
 To support sending multipart mail messages, the syntax is extended as follows:
 .br
 - name can be omitted: the equal sign is the first character of the argument,
