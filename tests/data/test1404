@@ -33,7 +33,7 @@ http
 SSL_CERT_FILE=
 </setenv>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/1404 -F name=value -F 'file=@log/test1404.txt,log/test1404.txt;type=magic/content,log/test1404.txt' --libcurl log/test1404.c
+http://%HOSTIP:%HTTPPORT/we/want/1404 -F name=value -F 'file=@log/test1404.txt,log/test1404.txt;type=magic/content,log/test1404.txt;headers=X-testheader-1: header 1;headers=X-testheader-2: header 2' --libcurl log/test1404.c
 </command>
 # We create this file before the command is invoked!
 <file name="log/test1404.txt">
@@ -51,7 +51,7 @@ POST /we/want/1404 HTTP/1.1
 User-Agent: curl/7.18.2 (i686-pc-linux-gnu) libcurl/7.18.2 OpenSSL/0.9.7a ipv6 zlib/1.1.4
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 797
+Content-Length: 849
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
 ------------------------------9ef8d6205763
@@ -76,6 +76,8 @@ dummy data
 ------------------------------9ef8d6205763
 Content-Disposition: attachment; filename="test1404.txt"
 Content-Type: text/plain
+X-testheader-1: header 1
+X-testheader-2: header 2
 
 dummy data
 
@@ -107,9 +109,13 @@ int main(int argc, char *argv[])
   curl_mimepart *part1;
   curl_mime *mime2;
   curl_mimepart *part2;
+  struct curl_slist *slist1;
 
   mime1 = NULL;
   mime2 = NULL;
+  slist1 = NULL;
+  slist1 = curl_slist_append(slist1, "X-testheader-1: header 1");
+  slist1 = curl_slist_append(slist1, "X-testheader-2: header 2");
 
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
@@ -128,6 +134,8 @@ int main(int argc, char *argv[])
   curl_mime_type(part2, "magic/content");
   part2 = curl_mime_addpart(mime2);
   curl_mime_filedata(part2, "log/test1404.txt");
+  curl_mime_headers(part2, slist1, 1);
+  slist1 = NULL;
   curl_mime_subparts(part1, mime2);
   mime2 = NULL;
   curl_mime_name(part1, "file", -1);
@@ -165,6 +173,8 @@ int main(int argc, char *argv[])
   mime1 = NULL;
   curl_mime_free(mime2);
   mime2 = NULL;
+  curl_slist_free_all(slist1);
+  slist1 = NULL;
 
   return (int)ret;
 }
