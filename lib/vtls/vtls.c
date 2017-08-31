@@ -1272,7 +1272,7 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
 
   for(i = 0; available_backends[i]; i++)
     if(available_backends[i]->info.id == id ||
-       (name && !strcmp(available_backends[i]->info.name, name))) {
+       (name && Curl_strcasecompare(available_backends[i]->info.name, name))) {
       multissl_init(available_backends[i]);
       return CURLSSLSET_OK;
     }
