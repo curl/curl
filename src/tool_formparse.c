@@ -115,7 +115,6 @@ static int read_field_headers(struct OperationConfig *config,
   size_t pos = 0;
   int c;
   bool incomment = FALSE;
-  bool flush = FALSE;
   int lineno = 1;
   char hdrbuf[999]; /* Max. header length + 1. */
 
@@ -160,12 +159,12 @@ static int read_field_headers(struct OperationConfig *config,
     pos++;
     if(!incomment) {
       if(hdrlen == sizeof hdrbuf - 1) {
-        warnf(config->global,
-              "File %s line %d: header too long (truncated)\n", filename);
+        warnf(config->global, "File %s line %d: header too long (truncated)\n",
+              filename, lineno);
         c = ' ';
       }
       if(hdrlen <= sizeof hdrbuf - 1)
-        hdrbuf[hdrlen++] = c;
+        hdrbuf[hdrlen++] = (char) c;
     }
   }
   /* NOTREACHED */
