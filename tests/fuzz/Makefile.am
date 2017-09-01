@@ -30,12 +30,12 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
 
-AM_CFLAGS = -I$(top_srcdir)/include        \
-            -I$(top_builddir)/lib          \
-            -I$(top_srcdir)/lib            \
-            -I$(top_srcdir)/tests/fuzz
+AM_CXXFLAGS = -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/tests/fuzz
 
-LIBS = -lpthread -lstdc++ -lm
+LIBS = -lpthread -lm
 
 # Run e.g. "make all LIB_FUZZING_ENGINE=/path/to/libFuzzer.a"
 # to link the fuzzer(s) against a real fuzzing engine.

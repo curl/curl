@@ -145,7 +145,12 @@ script:
     - |
         if [ "$T" = "fuzzer" ]; then
           export CC=clang
+          export CXX=clang++
           export CFLAGS="-fsanitize=address"
+
+          # Specifically use libstdc++ for travis as libc++ is not installed.
+          # This is ok because we're not compiling against libFuzzer.
+          export CXXFLAGS="-fsanitize=address -stdlib=libstdc++"
           ./configure --disable-shared --enable-debug --enable-maintainer-mode
           make
           cd tests/fuzz
