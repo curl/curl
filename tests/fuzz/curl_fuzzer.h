@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 #include <curl/curl.h>
+#include <testinput.h>
 
 /**
  * TLV types.
@@ -107,7 +108,6 @@ typedef struct fuzz_data
 } FUZZ_DATA;
 
 /* Function prototypes */
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 uint32_t to_u32(uint8_t b[4]);
 uint16_t to_u16(uint8_t b[2]);
 int fuzz_initialize_fuzz_data(FUZZ_DATA *fuzz,

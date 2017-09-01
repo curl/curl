@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "standalone_fuzz_target_runner.h"
+#include "testinput.h"
 
 /**
  * Main procedure for standalone fuzzing engine.

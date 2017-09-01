@@ -52,6 +52,7 @@ CURL_CHECK_OPTION_RT
 
 XC_CHECK_PATH_SEPARATOR
 AX_CODE_COVERAGE
+AC_PROG_CXX
 
 #
 # save the configure arguments
