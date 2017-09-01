@@ -56,8 +56,8 @@ must be called \fBbefore\fP \fIcurl_global_init(3)\fP.
 
 The backend can be identified by the \fIid\fP
 (e.g. \fBCURLSSLBACKEND_OPENSSL\fP). The backend can also be specified via the
-\fIname\fP parameter (passing -1 as \fIid\fP). If both \fIid\fP and \fIname\fP
-are specified, the \fIname\fP will be ignored.
+\fIname\fP parameter for a case insensitive match (passing -1 as \fIid\fP). If
+both \fIid\fP and \fIname\fP are specified, the \fIname\fP will be ignored.
 
 If neither \fIid\fP nor \fPname\fP are specified, the function will fail with
 CURLSSLSET_UNKNOWN_BACKEND and set the \fIavail\fP pointer to the
