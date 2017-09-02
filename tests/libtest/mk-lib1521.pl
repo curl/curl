@@ -146,6 +146,7 @@ int test(char *URL)
   char *stringpointerextra=(char *)"moooo";
   struct curl_slist *slist=NULL;
   struct curl_httppost *httppost=NULL;
+  curl_mime *mimepost = NULL;
   FILE *stream = stderr;
   struct data object;
   char *charp;
@@ -215,6 +216,9 @@ while(<STDIN>) {
             }
             elsif($name eq "HTTPPOST") {
               print "${pref} httppost);\n$check";
+            }
+            elsif($name eq "MIMEPOST") {
+              print "${pref} mimepost);\n$check";
             }
             elsif($name eq "STDERR") {
               print "${pref} stream);\n$check";

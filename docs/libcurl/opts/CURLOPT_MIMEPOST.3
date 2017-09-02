@@ -19,30 +19,34 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_formfree 3 "6 April 2001" "libcurl 7.7.1" "libcurl Manual"
+.\"
+.TH CURLOPT_MIMEPOST 3 "22 Aug 2017" "libcurl 7.56.0" "curl_easy_setopt options"
 .SH NAME
-curl_formfree - free a previously build multipart/formdata HTTP POST chain
+CURLOPT_MIMEPOST \- set post/send data from mime structure
 .SH SYNOPSIS
-.B #include <curl/curl.h>
-.sp
-.BI "void curl_formfree(struct curl_httppost *" form);
-.ad
+.nf
+#include <curl/curl.h>
+
+curl_mime *mime;
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MIMEPOST, mime);
 .SH DESCRIPTION
-This function is deprecated. Do not use! See \fIcurl_mime_init(3)\fP instead!
+Pass a mime handle previously obtained from \fIcurl_mime_init()\fP.
 
-curl_formfree() is used to clean up data previously built/appended with
-\fIcurl_formadd(3)\fP. This must be called when the data has been used, which
-typically means after \fIcurl_easy_perform(3)\fP has been called.
+This setting is supported by the HTTP protocol to post forms and by the
+SMTP and IMAP protocols to provide the e-mail data to send/upload.
 
-The pointer to free is the same pointer you passed to the
-\fICURLOPT_HTTPPOST(3)\fP option, which is the \fIfirstitem\fP pointer from
-the \fIcurl_formadd(3)\fP invoke(s).
-
-\fBform\fP is the pointer as returned from a previous call to
-\fIcurl_formadd(3)\fP and may be NULL.
+This option is the preferred way of posting an HTTP form, replacing
+and extending the deprecated \fICURLOPT_HTTPPOST\fP option.
+.SH PROTOCOLS
+HTTP, SMTP, IMAP.
 .SH AVAILABILITY
-Deprecated in 7.56.0.
+Since 7.56.0.
 .SH RETURN VALUE
-None
+This will return CURLE_OK.
+.SH EXAMPLE
+Using this option implies the use of several mime structure building
+functions: see https://curl.haxx.se/libcurl/c/smtp-mime.html for a complete
+example.
 .SH "SEE ALSO"
-.BR curl_formadd "(3), " curl_mime_init "(3), " curl_mime_free "(3)"
+.BR curl_mime_init "(3)"

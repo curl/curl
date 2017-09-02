@@ -19,30 +19,36 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_formfree 3 "6 April 2001" "libcurl 7.7.1" "libcurl Manual"
+.TH curl_mime_data 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
-curl_formfree - free a previously build multipart/formdata HTTP POST chain
+curl_mime_data - set a mime part's body data from memory
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "void curl_formfree(struct curl_httppost *" form);
+.BI "CURLcode curl_mime_data(curl_mimepart * " part ", const char * " data
+.BI ", ssize_t " datasize ");"
 .ad
 .SH DESCRIPTION
-This function is deprecated. Do not use! See \fIcurl_mime_init(3)\fP instead!
+curl_mime_data() sets a mime part's body content from memory data.
 
-curl_formfree() is used to clean up data previously built/appended with
-\fIcurl_formadd(3)\fP. This must be called when the data has been used, which
-typically means after \fIcurl_easy_perform(3)\fP has been called.
+\fIdata\fP points to the data bytes: those are copied to the part and their
+storage may safely be reused after call.
+\fIdatasize\fP is the number of data bytes: it can be set to -1 to indicate
+\fIdata\fP is a nul-terminated character string.
+\fIpart\fP is the part's to assign contents to.
 
-The pointer to free is the same pointer you passed to the
-\fICURLOPT_HTTPPOST(3)\fP option, which is the \fIfirstitem\fP pointer from
-the \fIcurl_formadd(3)\fP invoke(s).
+Setting a part's contents twice is valid: only the value set by the last call
+is retained. It is possible to unassign part's contents by setting
+\fIdata\fP to NULL.
 
-\fBform\fP is the pointer as returned from a previous call to
-\fIcurl_formadd(3)\fP and may be NULL.
+Setting very large data is memory consuming: one might consider using
+\fIcurl_mime_data_cb\fP() in such a case.
+
 .SH AVAILABILITY
-Deprecated in 7.56.0.
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE
-None
+CURLE_OK or a CURL error code upon failure.
+
 .SH "SEE ALSO"
-.BR curl_formadd "(3), " curl_mime_init "(3), " curl_mime_free "(3)"
+.BR curl_mime_addpart "(3),"
+.BR curl_mime_data_cb "(3)"

@@ -19,30 +19,32 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_formfree 3 "6 April 2001" "libcurl 7.7.1" "libcurl Manual"
+.TH curl_mime_headers 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
 .SH NAME
-curl_formfree - free a previously build multipart/formdata HTTP POST chain
+curl_mime_headers - set a mime part's custom headers
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "void curl_formfree(struct curl_httppost *" form);
+.BI "CURLcode curl_mime_headers(curl_mimepart * " part ,
+.BI "struct curl_slist * " headers ", int " take_ownership ");"
 .ad
 .SH DESCRIPTION
-This function is deprecated. Do not use! See \fIcurl_mime_init(3)\fP instead!
+curl_mime_headers() sets a mime part's custom headers.
 
-curl_formfree() is used to clean up data previously built/appended with
-\fIcurl_formadd(3)\fP. This must be called when the data has been used, which
-typically means after \fIcurl_easy_perform(3)\fP has been called.
+\fIpart\fP is the part's handle to assign the custom headers list to.
+\fIheaders\fP is the head of a list of custom headers; it may be set to
+NULL to remove a previously attached custom header list.
+\fItake_ownership\fP: when non-zero, causes the list to be freed upon
+replacement or mime structure deletion; in this case the list must not be
+freed explicitly.
 
-The pointer to free is the same pointer you passed to the
-\fICURLOPT_HTTPPOST(3)\fP option, which is the \fIfirstitem\fP pointer from
-the \fIcurl_formadd(3)\fP invoke(s).
+Setting a part's custom headers list twice is valid: only the value set by
+the last call is retained.
 
-\fBform\fP is the pointer as returned from a previous call to
-\fIcurl_formadd(3)\fP and may be NULL.
 .SH AVAILABILITY
-Deprecated in 7.56.0.
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE
-None
+CURLE_OK or a CURL error code upon failure.
+
 .SH "SEE ALSO"
-.BR curl_formadd "(3), " curl_mime_init "(3), " curl_mime_free "(3)"
+.BR curl_mime_addpart "(3)"

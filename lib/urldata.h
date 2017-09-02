@@ -103,6 +103,7 @@
 #include "hash.h"
 #include "splay.h"
 
+#include "mime.h"
 #include "imap.h"
 #include "pop3.h"
 #include "smtp.h"
@@ -1140,6 +1141,7 @@ typedef enum {
   HTTPREQ_GET,
   HTTPREQ_POST,
   HTTPREQ_POST_FORM, /* we make a difference internally */
+  HTTPREQ_POST_MIME, /* we make a difference internally */
   HTTPREQ_PUT,
   HTTPREQ_HEAD,
   HTTPREQ_OPTIONS,
@@ -1557,7 +1559,8 @@ struct UserDefined {
   curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
-  struct curl_httppost *httppost;  /* linked list of POST data */
+  struct curl_httppost *httppost;  /* linked list of old POST data */
+  struct Curl_mimepart mimepost;  /* MIME/POST data. */
   bool sep_headers;     /* handle host and proxy headers separately */
   bool cookiesession;   /* new cookie session? */
   bool crlf;            /* convert crlf on ftp upload(?) */
