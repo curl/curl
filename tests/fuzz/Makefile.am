@@ -50,7 +50,7 @@ LDADD = $(top_builddir)/lib/libcurl.la      \
 include Makefile.inc
 
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.cc
 
 noinst_PROGRAMS = $(FUZZPROGS)
 noinst_LIBRARIES = $(FUZZLIBS)

@@ -31,6 +31,13 @@
 #define TLV_TYPE_USERNAME               3
 #define TLV_TYPE_PASSWORD               4
 #define TLV_TYPE_POSTFIELDS             5
+#define TLV_TYPE_HEADER                 6
+#define TLV_TYPE_COOKIE                 7
+#define TLV_TYPE_UPLOAD1                8
+#define TLV_TYPE_RANGE                  9
+#define TLV_TYPE_CUSTOMREQUEST          10
+#define TLV_TYPE_MAIL_RECIPIENT         11
+#define TLV_TYPE_MAIL_FROM              12
 
 /**
  * TLV function return codes.
@@ -91,19 +98,29 @@ typedef struct fuzz_data
   /* Parser state */
   FUZZ_PARSE_STATE state;
 
-  /* Current URL. */
-  char *url;
-
   /* Response data and length */
   const uint8_t *rsp1_data;
   size_t rsp1_data_len;
 
-  /* Username and password */
+  /* Upload data and length; */
+  const uint8_t *upload1_data;
+  size_t upload1_data_len;
+
+  /* Singleton string fields. */
+  char *url;
   char *username;
   char *password;
-
-  /* Postfields */
   char *postfields;
+  char *cookie;
+  char *range;
+  char *customrequest;
+  char *mail_from;
+
+  /* List of headers */
+  struct curl_slist *header_list;
+
+  /* List of mail recipients */
+  struct curl_slist *mail_recipients_list;
 
 } FUZZ_DATA;
 
@@ -121,6 +138,10 @@ static curl_socket_t fuzz_open_socket(void *ptr,
 static int fuzz_sockopt_callback(void *ptr,
                                  curl_socket_t curlfd,
                                  curlsocktype purpose);
+static size_t fuzz_read_callback(char *buffer,
+                                 size_t size,
+                                 size_t nitems,
+                                 void *ptr);
 int fuzz_get_first_tlv(FUZZ_DATA *fuzz, TLV *tlv);
 int fuzz_get_next_tlv(FUZZ_DATA *fuzz, TLV *tlv);
 int fuzz_get_tlv_comn(FUZZ_DATA *fuzz, TLV *tlv);
@@ -146,3 +167,10 @@ char *fuzz_tlv_to_string(TLV *tlv);
             goto EXIT_LABEL;                                                   \
           }                                                                    \
         }
+
+#define FSINGLETONTLV(TLVNAME, FIELDNAME, OPTNAME)                             \
+    case TLVNAME:                                                              \
+      FCHECK(fuzz->FIELDNAME == NULL);                                         \
+      fuzz->FIELDNAME = fuzz_tlv_to_string(tlv);                               \
+      FTRY(curl_easy_setopt(fuzz->easy, OPTNAME, fuzz->FIELDNAME));            \
+      break
