@@ -4289,6 +4289,17 @@ sub singletest {
     if(@upload) {
         # verify uploaded data
         my @out = loadarray("$LOGDIR/upload.$testnum");
+
+        # what parts to cut off from the upload
+        my @strippart = getpart("verify", "strippart");
+        my $strip;
+        for $strip (@strippart) {
+            chomp $strip;
+            for(@out) {
+                eval $strip;
+            }
+        }
+
         $res = compare($testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
             return 1;
