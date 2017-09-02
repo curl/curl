@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_MFILES_H
-#define HEADER_CURL_TOOL_MFILES_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,26 +19,41 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "tool_setup.h"
+#include "test.h"
 
-/*
- * Structure for storing the information needed to build
- * a multiple files section.
- */
+#include "memdebug.h"
 
-struct multi_files {
-  struct curl_forms   form;
-  struct multi_files *next;
-};
+int test(char *URL)
+{
+  CURL *curl;
+  CURLcode res=CURLE_OK;
 
-struct multi_files *AddMultiFiles(const char *file_name,
-                                  const char *type_name,
-                                  const char *show_filename,
-                                  struct multi_files **multi_first,
-                                  struct multi_files **multi_last);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    fprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-void FreeMultiInfo(struct multi_files **multi_first,
-                   struct multi_files **multi_last);
+  curl = curl_easy_init();
+  if(!curl) {
+    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-#endif /* HEADER_CURL_TOOL_MFILES_H */
+  /* First set the URL that is about to receive our POST. */
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_MIMEPOST, NULL);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
+  test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
+  /* Now, we should be making a zero byte POST request */
+  res = curl_easy_perform(curl);
+
+test_cleanup:
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return (int)res;
+}

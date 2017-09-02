@@ -71,6 +71,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "netrc.h"
 
 #include "formdata.h"
+#include "mime.h"
 #include "vtls/vtls.h"
 #include "hostip.h"
 #include "transfer.h"
@@ -479,6 +480,8 @@ CURLcode Curl_close(struct Curl_easy *data)
   Curl_http2_cleanup_dependencies(data);
   Curl_convert_close(data);
 
+  Curl_mime_cleanpart(&data->set.mimepost);
+
   /* No longer a dirty share, if it exists */
   if(data->share) {
     Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
@@ -667,6 +670,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
     DEBUGF(fprintf(stderr, "Error: malloc of buffer failed\n"));
     result = CURLE_OUT_OF_MEMORY;
   }
+
+  Curl_mime_initpart(&data->set.mimepost, data);
 
   data->state.headerbuff = malloc(HEADERSIZE);
   if(!data->state.headerbuff) {
@@ -1146,6 +1151,19 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.httppost = va_arg(param, struct curl_httppost *);
     data->set.httpreq = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
+    break;
+
+  case CURLOPT_MIMEPOST:
+    /*
+     * Set to make us do MIME/form POST
+     */
+    result = curl_mime_subparts(&data->set.mimepost,
+                                va_arg(param, curl_mime *));
+    if(!result) {
+      data->set.mimepost.freefunc = NULL; /* Avoid free upon easy cleanup. */
+      data->set.httpreq = HTTPREQ_POST_MIME;
+      data->set.opt_no_body = FALSE; /* this is implied */
+    }
     break;
 
   case CURLOPT_REFERER:
@@ -1875,13 +1893,13 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_RESUME_FROM:
     /*
-     * Resume transfer at the give file position
+     * Resume transfer at the given file position
      */
     data->set.set_resume_from = va_arg(param, long);
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*
-     * Resume transfer at the give file position
+     * Resume transfer at the given file position
      */
     data->set.set_resume_from = va_arg(param, curl_off_t);
     break;

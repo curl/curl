@@ -68,6 +68,7 @@
 #include "http.h" /* for HTTP proxy tunnel stuff */
 #include "socks.h"
 #include "imap.h"
+#include "mime.h"
 #include "strtoofft.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
@@ -708,18 +709,48 @@ static CURLcode imap_perform_fetch(struct connectdata *conn)
 static CURLcode imap_perform_append(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  struct IMAP *imap = conn->data->req.protop;
+  struct Curl_easy *data = conn->data;
+  struct IMAP *imap = data->req.protop;
   char *mailbox;
 
   /* Check we have a mailbox */
   if(!imap->mailbox) {
-    failf(conn->data, "Cannot APPEND without a mailbox.");
+    failf(data, "Cannot APPEND without a mailbox.");
     return CURLE_URL_MALFORMAT;
   }
 
+  /* Prepare the mime data if some. */
+  if(data->set.mimepost.kind != MIMEKIND_NONE) {
+    /* Use the whole structure as data. */
+    data->set.mimepost.flags &= ~MIME_BODY_ONLY;
+
+    /* Add external headers and mime version. */
+    curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
+    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL,
+                                       NULL, MIMESTRATEGY_MAIL);
+
+    if(!result)
+      if(!Curl_checkheaders(conn, "Mime-Version"))
+        result = Curl_mime_add_header(&data->set.mimepost.curlheaders,
+                                      "Mime-Version: 1.0");
+
+    /* Make sure we will read the entire mime structure. */
+    if(!result)
+      result = Curl_mime_rewind(&data->set.mimepost);
+
+    if(result)
+      return result;
+
+    data->state.infilesize = Curl_mime_size(&data->set.mimepost);
+
+    /* Read from mime structure. */
+    data->state.fread_func = (curl_read_callback) Curl_mime_read;
+    data->state.in = (void *) &data->set.mimepost;
+  }
+
   /* Check we know the size of the upload */
-  if(conn->data->state.infilesize < 0) {
-    failf(conn->data, "Cannot APPEND with unknown input file size\n");
+  if(data->state.infilesize < 0) {
+    failf(data, "Cannot APPEND with unknown input file size\n");
     return CURLE_UPLOAD_FAILED;
   }
 
@@ -730,7 +761,7 @@ static CURLcode imap_perform_append(struct connectdata *conn)
 
   /* Send the APPEND command */
   result = imap_sendf(conn, "APPEND %s (\\Seen) {%" CURL_FORMAT_CURL_OFF_T "}",
-                      mailbox, conn->data->state.infilesize);
+                      mailbox, data->state.infilesize);
 
   free(mailbox);
 
@@ -1423,9 +1454,10 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && !imap->custom &&
-          (imap->uid || data->set.upload)) {
+          (imap->uid || data->set.upload ||
+          data->set.mimepost.kind != MIMEKIND_NONE)) {
     /* Handle responses after FETCH or APPEND transfer has finished */
-    if(!data->set.upload)
+    if(!data->set.upload && data->set.mimepost.kind == MIMEKIND_NONE)
       state(conn, IMAP_FETCH_FINAL);
     else {
       /* End the APPEND command first by sending an empty line */
@@ -1495,7 +1527,7 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
     selected = TRUE;
 
   /* Start the first command in the DO phase */
-  if(conn->data->set.upload)
+  if(conn->data->set.upload || data->set.mimepost.kind != MIMEKIND_NONE)
     /* APPEND can be executed directly */
     result = imap_perform_append(conn);
   else if(imap->custom && (selected || !imap->mailbox))

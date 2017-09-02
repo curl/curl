@@ -69,7 +69,6 @@ POST /554 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 718
-Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
@@ -100,7 +99,6 @@ POST /554 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 732
-Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------

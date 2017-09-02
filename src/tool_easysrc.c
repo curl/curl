@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,7 +42,7 @@ struct slist_wc *easysrc_data = NULL; /* Build slists, forms etc. */
 struct slist_wc *easysrc_code = NULL; /* Setopt calls */
 struct slist_wc *easysrc_toohard = NULL; /* Unconvertible setopt */
 struct slist_wc *easysrc_clean = NULL;  /* Clean up allocated data */
-int easysrc_form_count = 0;
+int easysrc_mime_count = 0;
 int easysrc_slist_count = 0;
 
 static const char *const srchead[]={

@@ -96,6 +96,9 @@ __extension__ ({                                                              \
     if((_curl_opt) == CURLOPT_HTTPPOST)                                       \
       if(!_curl_is_arr((value), struct curl_httppost))                        \
         _curl_easy_setopt_err_curl_httpost();                                 \
+    if((_curl_opt) == CURLOPT_MIMEPOST)                                       \
+      if(!_curl_is_ptr((value), curl_mime))                                   \
+        _curl_easy_setopt_err_curl_mimepost();                                \
     if(_curl_is_slist_option(_curl_opt))                                      \
       if(!_curl_is_arr((value), struct curl_slist))                           \
         _curl_easy_setopt_err_curl_slist();                                   \
@@ -199,6 +202,9 @@ _CURL_WARNING(_curl_easy_setopt_err_postfields,
   "curl_easy_setopt expects a 'void *' or 'char *' argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_httpost,
               "curl_easy_setopt expects a 'struct curl_httppost *' "
+              "argument for this option")
+_CURL_WARNING(_curl_easy_setopt_err_curl_mimepost,
+              "curl_easy_setopt expects a 'curl_mime *' "
               "argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_curl_slist,
   "curl_easy_setopt expects a 'struct curl_slist *' argument for this option")

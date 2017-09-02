@@ -140,11 +140,11 @@ static void free_config_fields(struct OperationConfig *config)
   curl_slist_free_all(config->headers);
   curl_slist_free_all(config->proxyheaders);
 
-  if(config->httppost) {
-    curl_formfree(config->httppost);
-    config->httppost = NULL;
+  if(config->mimepost) {
+    curl_mime_free(config->mimepost);
+    config->mimepost = NULL;
   }
-  config->last_post = NULL;
+  config->mimecurrent = NULL;
 
   curl_slist_free_all(config->telnet_options);
   curl_slist_free_all(config->resolve);

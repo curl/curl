@@ -130,7 +130,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
  * HTTP unique setup
  ***************************************************************************/
 struct HTTP {
-  struct FormData *sendit;
+  struct Curl_mimepart *sendit;
   curl_off_t postsize; /* off_t to handle large file sizes */
   const char *postdata;
 
@@ -140,7 +140,7 @@ struct HTTP {
   curl_off_t writebytecount;
 
   /* For FORM posting */
-  struct Form form;
+  struct Curl_mimepart form;
 
   struct back {
     curl_read_callback fread_func; /* backup storage for fread pointer */

@@ -50,6 +50,7 @@
 #include "transfer.h"
 #include "sendf.h"
 #include "formdata.h"
+#include "mime.h"
 #include "progress.h"
 #include "curl_base64.h"
 #include "cookie.h"
@@ -162,6 +163,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
+  Curl_mime_initpart(&http->form, conn->data);
   conn->data->req.protop = http;
 
   Curl_http2_setup_conn(conn);
@@ -427,6 +429,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
         expectsend = data->state.infilesize;
       break;
     case HTTPREQ_POST_FORM:
+    case HTTPREQ_POST_MIME:
       expectsend = http->postsize;
       break;
     default:
@@ -1470,18 +1473,17 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_http2_done(conn, premature);
 
-  if(HTTPREQ_POST_FORM == data->set.httpreq) {
-    data->req.bytecount = http->readbytecount + http->writebytecount;
+  Curl_mime_cleanpart(&http->form);
 
-    Curl_formclean(&http->sendit); /* Now free that whole lot */
-    if(http->form.fp) {
-      /* a file being uploaded was left opened, close it! */
-      fclose(http->form.fp);
-      http->form.fp = NULL;
-    }
-  }
-  else if(HTTPREQ_PUT == data->set.httpreq)
+  switch(data->set.httpreq) {
+  case HTTPREQ_PUT:
+  case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
     data->req.bytecount = http->readbytecount + http->writebytecount;
+    break;
+  default:
+    break;
+  }
 
   if(status)
     return status;
@@ -1637,6 +1639,10 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                   /* this header (extended by formdata.c) is sent later */
                   checkprefix("Content-Type:", headers->data))
             ;
+          else if(data->set.httpreq == HTTPREQ_POST_MIME &&
+                  /* this header is sent later */
+                  checkprefix("Content-Type:", headers->data))
+            ;
           else if(conn->bits.authneg &&
                   /* while doing auth neg, don't allow the custom length since
                      we will force length zero then */
@@ -1775,7 +1781,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *httpstring;
   Curl_send_buffer *req_buffer;
   curl_off_t postsize = 0; /* curl_off_t to handle large file sizes */
-  int seekerr = CURL_SEEKFUNC_OK;
+  int seekerr = CURL_SEEKFUNC_CANTSEEK;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
@@ -1848,6 +1854,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       switch(httpreq) {
       case HTTPREQ_POST:
       case HTTPREQ_POST_FORM:
+      case HTTPREQ_POST_MIME:
         request = "POST";
         break;
       case HTTPREQ_PUT:
@@ -1942,6 +1949,48 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif
 
+  switch(httpreq) {
+  case HTTPREQ_POST_MIME:
+    http->sendit = &data->set.mimepost;
+    break;
+  case HTTPREQ_POST_FORM:
+    /* Convert the form structure into a mime structure. */
+    Curl_mime_cleanpart(&http->form);
+    result = Curl_getformdata(data, &http->form, data->set.httppost,
+                              data->state.fread_func);
+    if(result)
+      return result;
+    http->sendit = &http->form;
+    break;
+  default:
+    http->sendit = NULL;
+  }
+
+  if(http->sendit) {
+    const char *cthdr = Curl_checkheaders(conn, "Content-Type:");
+
+    /* Read and seek body only. */
+    http->sendit->flags |= MIME_BODY_ONLY;
+
+    /* Prepare the mime structure headers & set content type. */
+
+    if(cthdr)
+      for(cthdr += 13; *cthdr == ' '; cthdr++)
+        ;
+    else if(http->sendit->kind == MIMEKIND_MULTIPART)
+      cthdr = "multipart/form-data";
+
+    curl_mime_headers(http->sendit, data->set.headers, 0);
+    result = Curl_mime_prepare_headers(http->sendit, cthdr,
+                                       NULL, MIMESTRATEGY_FORM);
+    curl_mime_headers(http->sendit, NULL, 0);
+    if(!result)
+      result = Curl_mime_rewind(http->sendit);
+    if(result)
+      return result;
+    http->postsize = Curl_mime_size(http->sendit);
+  }
+
   ptr = Curl_checkheaders(conn, "Transfer-Encoding:");
   if(ptr) {
     /* Some kind of TE is requested, check if 'chunked' is chosen */
@@ -1949,9 +1998,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       Curl_compareheader(ptr, "Transfer-Encoding:", "chunked");
   }
   else {
-    if((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
-       data->set.upload &&
-       (data->state.infilesize == -1)) {
+    if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+       (((httpreq == HTTPREQ_POST_MIME || httpreq == HTTPREQ_POST_FORM) &&
+       http->postsize < 0) ||
+       (data->set.upload && data->state.infilesize == -1))) {
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
         ;
@@ -2123,21 +2173,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif /* CURL_DISABLE_PROXY */
 
-  if(HTTPREQ_POST_FORM == httpreq) {
-    /* we must build the whole post sequence first, so that we have a size of
-       the whole transfer before we start to send it */
-    result = Curl_getformdata(data, &http->sendit, data->set.httppost,
-                              Curl_checkheaders(conn, "Content-Type:"),
-                              &http->postsize);
-    if(result)
-      return result;
-  }
-
   http->p_accept = Curl_checkheaders(conn, "Accept:")?NULL:"Accept: */*\r\n";
 
-  if(( (HTTPREQ_POST == httpreq) ||
-       (HTTPREQ_POST_FORM == httpreq) ||
-       (HTTPREQ_PUT == httpreq) ) &&
+  if((HTTPREQ_POST == httpreq || HTTPREQ_PUT == httpreq) &&
      data->state.resume_from) {
     /**********************************************************************
      * Resuming upload in HTTP means that we PUT or POST and that we have
@@ -2145,6 +2183,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      * a Range: header that will be passed along. We need to "fast forward"
      * the file the given number of bytes and decrease the assume upload
      * file size before we continue this venture in the dark lands of HTTP.
+     * Resuming mime/form posting at an offset > 0 has no sense and is ignored.
      *********************************************************************/
 
     if(data->state.resume_from < 0) {
@@ -2219,7 +2258,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n",
                                          data->state.range);
     }
-    else if((httpreq != HTTPREQ_GET) &&
+    else if((httpreq == HTTPREQ_POST || httpreq == HTTPREQ_PUT) &&
             !Curl_checkheaders(conn, "Content-Range:")) {
 
       /* if a line like this was already allocated, free the previous one */
@@ -2415,107 +2454,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   switch(httpreq) {
 
-  case HTTPREQ_POST_FORM:
-    if(!http->sendit || conn->bits.authneg) {
-      /* nothing to post! */
-      result = Curl_add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
-      if(result)
-        return result;
-
-      result = Curl_add_buffer_send(req_buffer, conn,
-                                    &data->info.request_size, 0, FIRSTSOCKET);
-      if(result)
-        failf(data, "Failed sending POST request");
-      else
-        /* setup variables for the upcoming transfer */
-        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
-                            -1, NULL);
-      break;
-    }
-
-    if(Curl_FormInit(&http->form, http->sendit)) {
-      failf(data, "Internal HTTP POST error!");
-      return CURLE_HTTP_POST_ERROR;
-    }
-
-    /* Get the currently set callback function pointer and store that in the
-       form struct since we might want the actual user-provided callback later
-       on. The data->set.fread_func pointer itself will be changed for the
-       multipart case to the function that returns a multipart formatted
-       stream. */
-    http->form.fread_func = data->state.fread_func;
-
-    /* Set the read function to read from the generated form data */
-    data->state.fread_func = (curl_read_callback)Curl_FormReader;
-    data->state.in = &http->form;
-
-    http->sending = HTTPSEND_BODY;
-
-    if(!data->req.upload_chunky &&
-       !Curl_checkheaders(conn, "Content-Length:")) {
-      /* only add Content-Length if not uploading chunked */
-      result = Curl_add_bufferf(req_buffer,
-                                "Content-Length: %" CURL_FORMAT_CURL_OFF_T
-                                "\r\n", http->postsize);
-      if(result)
-        return result;
-    }
-
-    result = expect100(data, conn, req_buffer);
-    if(result)
-      return result;
-
-    {
-
-      /* Get Content-Type: line from Curl_formpostheader.
-       */
-      char *contentType;
-      size_t linelength=0;
-      contentType = Curl_formpostheader((void *)&http->form,
-                                        &linelength);
-      if(!contentType) {
-        failf(data, "Could not get Content-Type header line!");
-        return CURLE_HTTP_POST_ERROR;
-      }
-
-      result = Curl_add_buffer(req_buffer, contentType, linelength);
-      if(result)
-        return result;
-    }
-
-    /* make the request end in a true CRLF */
-    result = Curl_add_buffer(req_buffer, "\r\n", 2);
-    if(result)
-      return result;
-
-    /* set upload size to the progress meter */
-    Curl_pgrsSetUploadSize(data, http->postsize);
-
-    /* fire away the whole request to the server */
-    result = Curl_add_buffer_send(req_buffer, conn,
-                                  &data->info.request_size, 0, FIRSTSOCKET);
-    if(result)
-      failf(data, "Failed sending POST request");
-    else
-      /* setup variables for the upcoming transfer */
-      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                          &http->readbytecount, FIRSTSOCKET,
-                          &http->writebytecount);
-
-    if(result) {
-      Curl_formclean(&http->sendit); /* free that whole lot */
-      return result;
-    }
-
-    /* convert the form data */
-    result = Curl_convert_form(data, http->sendit);
-    if(result) {
-      Curl_formclean(&http->sendit); /* free that whole lot */
-      return result;
-    }
-
-    break;
-
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
     if(conn->bits.authneg)
@@ -2558,6 +2496,98 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                           postsize?&http->writebytecount:NULL);
     if(result)
       return result;
+    break;
+
+  case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
+    /* This is form posting using mime data. */
+    if(conn->bits.authneg) {
+      /* nothing to post! */
+      result = Curl_add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
+      if(result)
+        return result;
+
+      result = Curl_add_buffer_send(req_buffer, conn,
+                                    &data->info.request_size, 0, FIRSTSOCKET);
+      if(result)
+        failf(data, "Failed sending POST request");
+      else
+        /* setup variables for the upcoming transfer */
+        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
+                            -1, NULL);
+      break;
+    }
+
+    postsize = http->postsize;
+
+    /* We only set Content-Length and allow a custom Content-Length if
+       we don't upload data chunked, as RFC2616 forbids us to set both
+       kinds of headers (Transfer-Encoding: chunked and Content-Length) */
+    if(postsize != -1 && !data->req.upload_chunky &&
+       (conn->bits.authneg || !Curl_checkheaders(conn, "Content-Length:"))) {
+      /* we allow replacing this header if not during auth negotiation,
+         although it isn't very wise to actually set your own */
+      result = Curl_add_bufferf(req_buffer,
+                                "Content-Length: %" CURL_FORMAT_CURL_OFF_T
+                                "\r\n", postsize);
+      if(result)
+        return result;
+    }
+
+    /* Output mime-generated headers. */
+    {
+      struct curl_slist *hdr;
+
+      for(hdr = http->sendit->curlheaders; hdr; hdr = hdr->next) {
+        result = Curl_add_bufferf(req_buffer, "%s\r\n", hdr->data);
+        if(result)
+          return result;
+      }
+    }
+
+    /* For really small posts we don't use Expect: headers at all, and for
+       the somewhat bigger ones we allow the app to disable it. Just make
+       sure that the expect100header is always set to the preferred value
+       here. */
+    ptr = Curl_checkheaders(conn, "Expect:");
+    if(ptr) {
+      data->state.expect100header =
+        Curl_compareheader(ptr, "Expect:", "100-continue");
+    }
+    else if(postsize > EXPECT_100_THRESHOLD || postsize < 0) {
+      result = expect100(data, conn, req_buffer);
+      if(result)
+        return result;
+    }
+    else
+      data->state.expect100header = FALSE;
+
+    /* make the request end in a true CRLF */
+    result = Curl_add_buffer(req_buffer, "\r\n", 2);
+    if(result)
+      return result;
+
+    /* set the upload size to the progress meter */
+    Curl_pgrsSetUploadSize(data, postsize);
+
+    /* Read from mime structure. */
+    data->state.fread_func = (curl_read_callback) Curl_mime_read;
+    data->state.in = (void *) http->sendit;
+    http->sending = HTTPSEND_BODY;
+
+    /* this sends the buffer and frees all the buffer resources */
+    result = Curl_add_buffer_send(req_buffer, conn,
+                                  &data->info.request_size, 0, FIRSTSOCKET);
+    if(result)
+      failf(data, "Failed sending POST request");
+    else
+      /* prepare for transfer */
+      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
+                          &http->readbytecount, postsize?FIRSTSOCKET:-1,
+                          postsize?&http->writebytecount:NULL);
+    if(result)
+      return result;
+
     break;
 
   case HTTPREQ_POST:
@@ -3171,6 +3201,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           case HTTPREQ_PUT:
           case HTTPREQ_POST:
           case HTTPREQ_POST_FORM:
+          case HTTPREQ_POST_MIME:
             /* We got an error response. If this happened before the whole
              * request body has been sent we stop sending and mark the
              * connection for closure after we've read the entire response.

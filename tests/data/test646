@@ -1,0 +1,98 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+MULTIPART
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP multipart using mime API
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/646 --mail-rcpt recipient@example.com --mail-from sender@example.com -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;headers=X-test1: this is a header;type=text/html;headers=X-test2: this is another header " -F "=This is the plain text version;headers=@log/headers646" -F "=)" -F "=@log/test646.txt;headers=<log/headers646" -H "From: different" -H "To: another" -H "Reply-To: <followup@example.com>"
+</command>
+<file1 name="log/test646.txt">
+This is an attached file.
+
+It may contain any type of data.
+</file1>
+<file2 name="log/headers646">
+# This line is a comment
+X-fileheader1: This is a header from a file 
+
+# This line is another comment. It precedes a folded header.
+X-fileheader2: This is #a
+ folded header
+</file2>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+EHLO 646
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+Content-Type: multipart/mixed; boundary=----------------------------
+Mime-Version: 1.0
+From: different
+To: another
+Reply-To: <followup@example.com>
+
+------------------------------
+Content-Type: multipart/alternative; boundary=----------------------------
+
+------------------------------
+Content-Type: text/html
+Content-Transfer-Encoding: 8bit
+X-test1: this is a header
+X-test2: this is another header
+
+<body>This is the html version</body>
+------------------------------
+X-fileheader1: This is a header from a file
+X-fileheader2: This is #a folded header
+
+This is the plain text version
+--------------------------------
+
+------------------------------
+Content-Disposition: attachment; filename="test646.txt"
+X-fileheader1: This is a header from a file
+X-fileheader2: This is #a folded header
+
+This is an attached file.
+
+It may contain any type of data.
+
+--------------------------------
+.
+</upload>
+</verify>
+</testcase>

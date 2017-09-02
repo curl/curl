@@ -319,29 +319,4 @@ void Curl_convert_close(struct Curl_easy *data)
 #endif /* HAVE_ICONV */
 }
 
-/*
- * Curl_convert_form() is used from http.c, this converts any form items that
-   need to be sent in the network encoding.  Returns CURLE_OK on success.
- */
-CURLcode Curl_convert_form(struct Curl_easy *data, struct FormData *form)
-{
-  CURLcode result;
-
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  while(form) {
-    if(form->type == FORM_DATA) {
-      result = Curl_convert_to_network(data, form->line, form->length);
-      /* Curl_convert_to_network calls failf if unsuccessful */
-      if(result)
-        return result;
-    }
-
-    form = form->next;
-  }
-
-  return CURLE_OK;
-}
-
 #endif /* CURL_DOES_CONVERSIONS */
