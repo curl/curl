@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
+HTTP MIME POST
 </keywords>
 </info>
 
@@ -43,14 +44,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib554
+lib643
 </tool>
 
  <name>
-HTTP multi-part formpost using read callback for the file part
+HTTP multi-part mimepost using read callback for the file part
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/554
+http://%HOSTIP:%HTTPPORT/643
 </command>
 </client>
 
@@ -65,7 +66,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /554 HTTP/1.1
+POST /643 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 718
@@ -95,7 +96,7 @@ Content-Type: text/plain
 
 blah blah
 --------------------------------
-POST /554 HTTP/1.1
+POST /643 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 732

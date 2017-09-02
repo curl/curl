@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
+HTTP MIME POST
 </keywords>
 </info>
 
@@ -20,14 +21,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib587
+lib644
 </tool>
 
  <name>
 HTTP multi-part formpost with aborted read callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/587
+http://%HOSTIP:%HTTPPORT/644
 </command>
 </client>
 
@@ -39,7 +40,7 @@ s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
-POST /587 HTTP/1.1
+POST /644 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 718

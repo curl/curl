@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,47 +37,43 @@ int main(void)
   CURLM *multi_handle;
   int still_running;
 
-  struct curl_httppost *formpost=NULL;
-  struct curl_httppost *lastptr=NULL;
-  struct curl_slist *headerlist=NULL;
+  curl_mime *form = NULL;
+  curl_mimepart *field = NULL;
+  struct curl_slist *headerlist = NULL;
   static const char buf[] = "Expect:";
-
-  /* Fill in the file upload field. This makes libcurl load data from
-     the given file name when curl_easy_perform() is called. */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "sendfile",
-               CURLFORM_FILE, "postit2.c",
-               CURLFORM_END);
-
-  /* Fill in the filename field */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "filename",
-               CURLFORM_COPYCONTENTS, "postit2.c",
-               CURLFORM_END);
-
-  /* Fill in the submit field too, even if this is rarely needed */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "submit",
-               CURLFORM_COPYCONTENTS, "send",
-               CURLFORM_END);
 
   curl = curl_easy_init();
   multi_handle = curl_multi_init();
 
-  /* initialize custom header list (stating that Expect: 100-continue is not
-     wanted */
-  headerlist = curl_slist_append(headerlist, buf);
   if(curl && multi_handle) {
+    /* Create the form */
+    form = curl_mime_init(curl);
+
+    /* Fill in the file upload field */
+    field = curl_mime_addpart(form);
+    curl_mime_name(field, "sendfile", -1);
+    curl_mime_filedata(field, "multi-post.c");
+
+    /* Fill in the filename field */
+    field = curl_mime_addpart(form);
+    curl_mime_name(field, "filename", -1);
+    curl_mime_data(field, "multi-post.c", -1);
+
+    /* Fill in the submit field too, even if this is rarely needed */
+    field = curl_mime_addpart(form);
+    curl_mime_name(field, "submit", -1);
+    curl_mime_data(field, "send", -1);
+
+    /* initialize custom header list (stating that Expect: 100-continue is not
+       wanted */
+    headerlist = curl_slist_append(headerlist, buf);
 
     /* what URL that receives this POST */
     curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.com/upload.cgi");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
     curl_multi_add_handle(multi_handle, curl);
 
@@ -161,8 +157,8 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    /* then cleanup the formpost chain */
-    curl_formfree(formpost);
+    /* then cleanup the form */
+    curl_mime_free(form);
 
     /* free slist */
     curl_slist_free_all(headerlist);
