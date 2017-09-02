@@ -1002,8 +1002,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
             my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
                       config->postfieldsize);
             break;
-          case HTTPREQ_FORMPOST:
-            my_setopt_httppost(curl, CURLOPT_HTTPPOST, config->httppost);
+          case HTTPREQ_MIMEPOST:
+            my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
             break;
           default:
             break;

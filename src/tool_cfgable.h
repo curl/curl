@@ -170,8 +170,8 @@ struct OperationConfig {
   time_t condtime;
   struct curl_slist *headers;
   struct curl_slist *proxyheaders;
-  struct curl_httppost *httppost;
-  struct curl_httppost *last_post;
+  curl_mime *mimepost;
+  curl_mime *mimecurrent;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
   struct curl_slist *connect_to;

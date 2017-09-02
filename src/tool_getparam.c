@@ -1606,11 +1606,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
          to sort this out slowly and carefully */
       if(formparse(config,
                    nextarg,
-                   &config->httppost,
-                   &config->last_post,
+                   &config->mimepost,
+                   &config->mimecurrent,
                    (subletter=='s')?TRUE:FALSE)) /* 's' means literal string */
         return PARAM_BAD_USE;
-      if(SetHTTPrequest(config, HTTPREQ_FORMPOST, &config->httpreq))
+      if(SetHTTPrequest(config, HTTPREQ_MIMEPOST, &config->httpreq))
         return PARAM_BAD_USE;
       break;
 
