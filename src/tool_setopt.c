@@ -210,14 +210,18 @@ static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 
 /* Escape string to C string syntax.  Return NULL if out of memory.
  * Is this correct for those wacky EBCDIC guys? */
-static char *c_escape(const char *str, ssize_t len)
+static char *c_escape(const char *str, ssize_t plen)
 {
   const char *s;
   unsigned char c;
   char *escaped, *e;
+  size_t len = plen == -1? strlen(str): (size_t) plen;
+
+  /* Check for possible overflow. */
+  if(len > (~(size_t) 0) / 4)
+    return NULL;
+
   /* Allocate space based on worst-case */
-  if(len < 0)
-    len = strlen(str);
   escaped = malloc(4 * len + 1);
   if(!escaped)
     return NULL;
@@ -474,7 +478,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
           ;
         size = (cp == data + part->datasize)? (curl_off_t) -1: part->datasize;
         Curl_safefree(escaped);
-        escaped = c_escape(data, part->datasize);
+        escaped = c_escape(data, (ssize_t) part->datasize);
         if(data != part->data)
           Curl_safefree(data);
         if(!escaped)

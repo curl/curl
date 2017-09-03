@@ -282,7 +282,7 @@ static size_t mime_mem_read(char *buffer, size_t size, size_t nitems,
                             void *instream)
 {
   struct Curl_mimepart *part = (struct Curl_mimepart *) instream;
-  size_t sz = part->datasize - part->state.offset;
+  size_t sz = (size_t) part->datasize - part->state.offset;
 
   (void) size;   /* Always 1.*/
 
@@ -312,7 +312,7 @@ static int mime_mem_seek(void *instream, curl_off_t offset, int whence)
   if(offset < 0 || offset > part->datasize)
     return CURL_SEEKFUNC_FAIL;
 
-  part->state.offset = offset;
+  part->state.offset = (size_t) offset;
   return CURL_SEEKFUNC_OK;
 }
 
