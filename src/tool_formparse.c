@@ -352,8 +352,6 @@ static int get_param_part(struct OperationConfig *config, char **str,
  * Else use curl_mime_filedata(). */
 static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
 {
-  CURLcode ret = CURLE_OK;
-
   if(strcmp(file, "-"))
     return curl_mime_filedata(part, file);
 
@@ -671,7 +669,7 @@ int formparse(struct OperationConfig *config,
         }
 #endif
 
-        if(curl_mime_data(part, data, -1)) {
+        if(curl_mime_data(part, data, CURL_ZERO_TERMINATED)) {
           warnf(config->global, "curl_mime_data failed!\n");
           Curl_safefree(contents);
           return 26;
@@ -697,7 +695,7 @@ int formparse(struct OperationConfig *config,
     }
 
     /* Set part name. */
-    if(name && curl_mime_name(part, name, -1)) {
+    if(name && curl_mime_name(part, name, CURL_ZERO_TERMINATED)) {
       warnf(config->global, "curl_mime_name failed!\n");
       Curl_safefree(contents);
       return 29;
