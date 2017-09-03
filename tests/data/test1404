@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
   mime1 = curl_mime_init(hnd);
   part1 = curl_mime_addpart(mime1);
-  curl_mime_data(part1, "value", -1);
-  curl_mime_name(part1, "name", -1);
+  curl_mime_data(part1, "value", CURL_ZERO_TERMINATED);
+  curl_mime_name(part1, "name", CURL_ZERO_TERMINATED);
   part1 = curl_mime_addpart(mime1);
   mime2 = curl_mime_init(hnd);
   part2 = curl_mime_addpart(mime2);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
   slist1 = NULL;
   curl_mime_subparts(part1, mime2);
   mime2 = NULL;
-  curl_mime_name(part1, "file", -1);
+  curl_mime_name(part1, "file", CURL_ZERO_TERMINATED);
   curl_easy_setopt(hnd, CURLOPT_MIMEPOST, mime1);
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);

@@ -487,8 +487,12 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
           Curl_safefree(data);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
-        CODE3("curl_mime_data(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
-                              *mimeno, escaped, size);
+        if(size >= 0)
+          CODE3("curl_mime_data(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
+                                *mimeno, escaped, size);
+        else
+          CODE2("curl_mime_data(part%d, \"%s\", CURL_ZERO_TERMINATED);",
+                                *mimeno, escaped);
         break;
       case MIMEKIND_MULTIPART:
         ret = libcurl_generate_mime(part->arg, &i);
@@ -515,12 +519,17 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
         escaped = c_escape(part->name, part->namesize);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
+        /* Are there any nul byte in name? */
         for(cp = part->name; *cp; cp++)
           ;
-        size = (cp == part->name + part->namesize)?
-               (curl_off_t) -1: (curl_off_t) part->namesize;
-        CODE3("curl_mime_name(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
+        if(cp != part->name + part->namesize) {
+          size = (curl_off_t) part->namesize;
+          CODE3("curl_mime_name(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
               *mimeno, escaped, size);
+        }
+        else
+          CODE2("curl_mime_name(part%d, \"%s\", CURL_ZERO_TERMINATED);",
+              *mimeno, escaped);
       }
 
       if(part->mimetype) {
