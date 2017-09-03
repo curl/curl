@@ -347,6 +347,21 @@ static int get_param_part(struct OperationConfig *config, char **str,
   return sep & 0xFF;
 }
 
+/* Check if file is "-". If so, use a callback to read OUR stdin (to
+ * workaround Windows DLL file handle caveat).
+ * Else use curl_mime_filedata(). */
+static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
+{
+  CURLcode ret = CURLE_OK;
+
+  if(strcmp(file, "-"))
+    return curl_mime_filedata(part, file);
+
+  return curl_mime_data_cb(part, -1, (curl_read_callback) fread,
+                           (curl_seek_callback) fseek, NULL, stdin);
+}
+
+
 /***************************************************************************
  *
  * formparse()
@@ -547,9 +562,9 @@ int formparse(struct OperationConfig *config,
         }
 
         /* Setup file in part. */
-        res = curl_mime_filedata(part, data);
+        res = file_or_stdin(part, data);
         if(res) {
-          warnf(config->global, "curl_mime_filedata failed!\n");
+          warnf(config->global, "setting file %s  failed!\n", data);
           if(res != CURLE_READ_ERROR) {
             if(subparts != *mimecurrent)
               curl_mime_free(subparts);
@@ -619,9 +634,9 @@ int formparse(struct OperationConfig *config,
         }
 
         /* Setup file in part. */
-        res = curl_mime_filedata(part, data);
+        res = file_or_stdin(part, data);
         if(res) {
-          warnf(config->global, "curl_mime_filedata failed!\n");
+          warnf(config->global, "setting file %s failed!\n", data);
           if(res != CURLE_READ_ERROR) {
             Curl_safefree(contents);
             return 22;

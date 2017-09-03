@@ -153,6 +153,9 @@ int main(void)
      * clean up in the end.
      */
     curl_easy_cleanup(curl);
+
+    /* Free multipart message. */
+    curl_mime_free(mime);
   }
 
   return (int)res;

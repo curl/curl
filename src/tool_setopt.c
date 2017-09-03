@@ -450,9 +450,11 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
             filename = part->filename;
         }
         break;
-      case MIMEKIND_FILE:
-        /* Can only be stdin in the current context. */
-        CODE1("curl_mime_file(part%d, \"-\");", *mimeno);
+      case MIMEKIND_CALLBACK:
+        /* Can only be reading stdin in the current context. */
+        CODE1("curl_mime_data_cb(part%d, -1, (curl_read_callback) fread, \\",
+              *mimeno);
+        CODE0("                  (curl_seek_callback) fseek, NULL, stdin);");
         break;
       case MIMEKIND_DATA:
 #ifdef CURL_DOES_CONVERSIONS

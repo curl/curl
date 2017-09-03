@@ -634,8 +634,18 @@ static int mime_part_rewind(struct Curl_mimepart *part)
     targetstate = MIMESTATE_BODY;
   if(part->state.state > targetstate) {
     res = CURL_SEEKFUNC_CANTSEEK;
-    if(part->seekfunc)
+    if(part->seekfunc) {
       res = part->seekfunc(part->arg, part->origin, SEEK_SET);
+      switch(res) {
+      case CURL_SEEKFUNC_OK:
+      case CURL_SEEKFUNC_FAIL:
+      case CURL_SEEKFUNC_CANTSEEK:
+        break;
+      default:
+        res = CURL_SEEKFUNC_FAIL;
+        break;
+      }
+    }
   }
 
   if(res == CURL_SEEKFUNC_OK)
@@ -906,9 +916,6 @@ CURLcode curl_mime_filedata(struct Curl_mimepart *part, const char *filename)
 
   if(!part || !filename)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  if(!strcmp(filename, "-"))
-    return Curl_mime_file(part, stdin, 0);
 
   if(stat(filename, &sbuf) || access(filename, R_OK))
     result = CURLE_READ_ERROR;

@@ -897,7 +897,10 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
           clen = -1;
 
         if(post->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE)) {
-          result = curl_mime_filedata(part, file->contents);
+          if(!strcmp(file->contents, "-"))
+            result = Curl_mime_file(part, stdin, 0);
+          else
+            result = curl_mime_filedata(part, file->contents);
           if(!result && (post->flags & HTTPPOST_READFILE))
             result = curl_mime_filename(part, NULL);
         }
