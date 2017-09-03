@@ -209,12 +209,14 @@ static void mimesetstate(struct mime_state *state,
 
 
 /* Escape header string into allocated memory. */
-static char *escape_string(const char *src, ssize_t srclen)
+static char *escape_string(const char *src, size_t len)
 {
-  size_t len = srclen >= 0? (size_t) srclen: strlen(src);
   size_t bytecount;
   size_t i;
   char *dst;
+
+  if(len == CURL_ZERO_TERMINATED)
+    len = strlen(src);
 
   bytecount = len;
   for(i = 0; i < len; i++)
@@ -801,7 +803,7 @@ struct Curl_mimepart *curl_mime_addpart(struct Curl_mime *mime)
 
 /* Set mime part name. */
 CURLcode curl_mime_name(struct Curl_mimepart *part,
-                        const char *name, ssize_t namesize)
+                        const char *name, size_t namesize)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -811,7 +813,7 @@ CURLcode curl_mime_name(struct Curl_mimepart *part,
   part->namesize = 0;
 
   if(name) {
-    if(namesize < 0)
+    if(namesize == CURL_ZERO_TERMINATED)
       namesize = strlen(name);
     part->name = malloc(namesize + 1);
     if(!part->name)
@@ -845,7 +847,7 @@ CURLcode curl_mime_filename(struct Curl_mimepart *part, const char *filename)
 
 /* Set mime part content from memory data. */
 CURLcode curl_mime_data(struct Curl_mimepart *part,
-                        const char *data, ssize_t datasize)
+                        const char *data, size_t datasize)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -853,7 +855,7 @@ CURLcode curl_mime_data(struct Curl_mimepart *part,
   cleanup_part_content(part);
 
   if(data) {
-    if(datasize < 0)
+    if(datasize == CURL_ZERO_TERMINATED)
       datasize = strlen(data);
 
     part->data = malloc(datasize + 1);
@@ -1284,7 +1286,7 @@ CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
           ret = CURLE_OUT_OF_MEMORY;
       }
       if(!ret && part->filename) {
-        filename = escape_string(part->filename, -1);
+        filename = escape_string(part->filename, CURL_ZERO_TERMINATED);
         if(!filename)
           ret = CURLE_OUT_OF_MEMORY;
       }
@@ -1364,7 +1366,7 @@ curl_mimepart *curl_mime_addpart(curl_mime *mime)
 }
 
 CURLcode curl_mime_name(curl_mimepart *part,
-                        const char *name, ssize_t namesize)
+                        const char *name, size_t namesize)
 {
   (void) part;
   (void) name;
@@ -1394,7 +1396,7 @@ CURLcode curl_mime_encoder(struct Curl_mimepart *part, const char *encoding)
 }
 
 CURLcode curl_mime_data(curl_mimepart *part,
-                        const char *data, ssize_t datasize)
+                        const char *data, size_t datasize)
 {
   (void) part;
   (void) data;

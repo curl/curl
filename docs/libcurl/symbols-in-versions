@@ -160,27 +160,27 @@ CURLFINFOFLAG_KNOWN_PERM        7.21.0
 CURLFINFOFLAG_KNOWN_SIZE        7.21.0
 CURLFINFOFLAG_KNOWN_TIME        7.21.0
 CURLFINFOFLAG_KNOWN_UID         7.21.0
-CURLFORM_ARRAY                  7.9.1
+CURLFORM_ARRAY                  7.9.1         7.56.0
 CURLFORM_ARRAY_END              7.9.1         7.9.5       7.9.6
 CURLFORM_ARRAY_START            7.9.1         7.9.5       7.9.6
-CURLFORM_BUFFER                 7.9.8
-CURLFORM_BUFFERLENGTH           7.9.8
-CURLFORM_BUFFERPTR              7.9.8
-CURLFORM_CONTENTHEADER          7.9.3
-CURLFORM_CONTENTLEN             7.46.0
-CURLFORM_CONTENTSLENGTH         7.9
-CURLFORM_CONTENTTYPE            7.9
-CURLFORM_COPYCONTENTS           7.9
-CURLFORM_COPYNAME               7.9
-CURLFORM_END                    7.9
-CURLFORM_FILE                   7.9
-CURLFORM_FILECONTENT            7.9.1
-CURLFORM_FILENAME               7.9.6
-CURLFORM_NAMELENGTH             7.9
-CURLFORM_NOTHING                7.9
-CURLFORM_PTRCONTENTS            7.9
-CURLFORM_PTRNAME                7.9
-CURLFORM_STREAM                 7.18.2
+CURLFORM_BUFFER                 7.9.8         7.56.0
+CURLFORM_BUFFERLENGTH           7.9.8         7.56.0
+CURLFORM_BUFFERPTR              7.9.8         7.56.0
+CURLFORM_CONTENTHEADER          7.9.3         7.56.0
+CURLFORM_CONTENTLEN             7.46.0        7.56.0
+CURLFORM_CONTENTSLENGTH         7.9           7.56.0
+CURLFORM_CONTENTTYPE            7.9           7.56.0
+CURLFORM_COPYCONTENTS           7.9           7.56.0
+CURLFORM_COPYNAME               7.9           7.56.0
+CURLFORM_END                    7.9           7.56.0
+CURLFORM_FILE                   7.9           7.56.0
+CURLFORM_FILECONTENT            7.9.1         7.56.0
+CURLFORM_FILENAME               7.9.6         7.56.0
+CURLFORM_NAMELENGTH             7.9           7.56.0
+CURLFORM_NOTHING                7.9           7.56.0
+CURLFORM_PTRCONTENTS            7.9           7.56.0
+CURLFORM_PTRNAME                7.9           7.56.0
+CURLFORM_STREAM                 7.18.2        7.56.0
 CURLFTPAUTH_DEFAULT             7.12.2
 CURLFTPAUTH_SSL                 7.12.2
 CURLFTPAUTH_TLS                 7.12.2
@@ -406,7 +406,7 @@ CURLOPT_HTTP200ALIASES          7.10.3
 CURLOPT_HTTPAUTH                7.10.6
 CURLOPT_HTTPGET                 7.8.1
 CURLOPT_HTTPHEADER              7.1
-CURLOPT_HTTPPOST                7.1
+CURLOPT_HTTPPOST                7.1           7.56.0
 CURLOPT_HTTPPROXYTUNNEL         7.3
 CURLOPT_HTTPREQUEST             7.1           -           7.15.5
 CURLOPT_HTTP_CONTENT_DECODING   7.16.2
@@ -718,14 +718,14 @@ CURL_ERROR_SIZE                 7.1
 CURL_FNMATCHFUNC_FAIL           7.21.0
 CURL_FNMATCHFUNC_MATCH          7.21.0
 CURL_FNMATCHFUNC_NOMATCH        7.21.0
-CURL_FORMADD_DISABLED           7.12.1
-CURL_FORMADD_ILLEGAL_ARRAY      7.9.8
-CURL_FORMADD_INCOMPLETE         7.9.8
-CURL_FORMADD_MEMORY             7.9.8
-CURL_FORMADD_NULL               7.9.8
-CURL_FORMADD_OK                 7.9.8
-CURL_FORMADD_OPTION_TWICE       7.9.8
-CURL_FORMADD_UNKNOWN_OPTION     7.9.8
+CURL_FORMADD_DISABLED           7.12.1        7.56.0
+CURL_FORMADD_ILLEGAL_ARRAY      7.9.8         7.56.0
+CURL_FORMADD_INCOMPLETE         7.9.8         7.56.0
+CURL_FORMADD_MEMORY             7.9.8         7.56.0
+CURL_FORMADD_NULL               7.9.8         7.56.0
+CURL_FORMADD_OK                 7.9.8         7.56.0
+CURL_FORMADD_OPTION_TWICE       7.9.8         7.56.0
+CURL_FORMADD_UNKNOWN_OPTION     7.9.8         7.56.0
 CURL_GLOBAL_ACK_EINTR           7.30.0
 CURL_GLOBAL_ALL                 7.8
 CURL_GLOBAL_DEFAULT             7.8
@@ -854,3 +854,4 @@ CURL_WAIT_POLLIN                7.28.0
 CURL_WAIT_POLLOUT               7.28.0
 CURL_WAIT_POLLPRI               7.28.0
 CURL_WRITEFUNC_PAUSE            7.18.0
+CURL_ZERO_TERMINATED            7.56.0

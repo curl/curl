@@ -1940,6 +1940,8 @@ typedef enum {
   CURL_TIMECOND_LAST
 } curl_TimeCond;
 
+/* Special size_t value signaling a zero-terminated string. */
+#define CURL_ZERO_TERMINATED ((size_t) -1)
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future
    libcurl, see lib/README.curlx for details
@@ -1990,7 +1992,7 @@ CURL_EXTERN curl_mimepart *curl_mime_addpart(curl_mime *mime);
  * Set mime/form part name.
  */
 CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part,
-                                    const char *name, ssize_t namesize);
+                                    const char *name, size_t namesize);
 
 /*
  * NAME curl_mime_filename()
@@ -2029,7 +2031,7 @@ CURL_EXTERN CURLcode curl_mime_encoder(struct Curl_mimepart *part,
  * Set mime part data source from memory data,
  */
 CURL_EXTERN CURLcode curl_mime_data(curl_mimepart *part,
-                                    const char *data, ssize_t datasize);
+                                    const char *data, size_t datasize);
 
 /*
  * NAME curl_mime_filedata()

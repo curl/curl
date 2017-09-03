@@ -26,7 +26,7 @@ curl_mime_name - set a mime part's name
 .B #include <curl/curl.h>
 .sp
 .BI "CURLcode curl_mime_name(curl_mimepart * " part ", const char * " name
-.BI ", ssize_t " namesize ");"
+.BI ", size_t " namesize ");"
 .ad
 .SH DESCRIPTION
 curl_mime_name() sets a mime part's name. This is the way HTTP form fields are
@@ -34,8 +34,8 @@ named.
 
 \fIname\fP points to the name byte string; the string may contain nul bytes
 unless \fInamesize\fP is -1.
-\fInamesize\fP is the name length: it can be set to -1 to indicate
-\fIname\fP is a nul-terminated string.
+\fInamesize\fP is the name length: it can be set to \fICURL_ZERO_TERMINATED\fP
+to indicate \fIname\fP is a nul-terminated string.
 \fIpart\fP is the part's handle to assign a name to.
 
 The name string is copied into the part, thus the associated storage may safely

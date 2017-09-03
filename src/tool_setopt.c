@@ -210,12 +210,14 @@ static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 
 /* Escape string to C string syntax.  Return NULL if out of memory.
  * Is this correct for those wacky EBCDIC guys? */
-static char *c_escape(const char *str, ssize_t plen)
+static char *c_escape(const char *str, size_t len)
 {
   const char *s;
   unsigned char c;
   char *escaped, *e;
-  size_t len = plen == -1? strlen(str): (size_t) plen;
+
+  if(len == CURL_ZERO_TERMINATED)
+    len = strlen(str);
 
   /* Check for possible overflow. */
   if(len > (~(size_t) 0) / 4)
@@ -392,7 +394,7 @@ static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
   CLEAN1("slist%d = NULL;", *slistno);
   for(; slist; slist = slist->next) {
     Curl_safefree(escaped);
-    escaped = c_escape(slist->data, -1);
+    escaped = c_escape(slist->data, CURL_ZERO_TERMINATED);
     if(!escaped)
       return CURLE_OUT_OF_MEMORY;
     DATA3("slist%d = curl_slist_append(slist%d, \"%s\");",
@@ -432,7 +434,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
       switch(part->kind) {
       case MIMEKIND_NAMEDFILE:
         Curl_safefree(escaped);
-        escaped = c_escape(part->data, -1);
+        escaped = c_escape(part->data, CURL_ZERO_TERMINATED);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
         CODE2("curl_mime_filedata(part%d, \"%s\");", *mimeno, escaped);
@@ -480,7 +482,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
           ;
         size = (cp == data + part->datasize)? (curl_off_t) -1: part->datasize;
         Curl_safefree(escaped);
-        escaped = c_escape(data, (ssize_t) part->datasize);
+        escaped = c_escape(data, (size_t) part->datasize);
         if(data != part->data)
           Curl_safefree(data);
         if(!escaped)
@@ -502,7 +504,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
 
       if(filename) {
         Curl_safefree(escaped);
-        escaped = c_escape(filename, -1);
+        escaped = c_escape(filename, CURL_ZERO_TERMINATED);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
         CODE2("curl_mime_filename(part%d, \"%s\");", *mimeno, escaped);
@@ -523,7 +525,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
 
       if(part->mimetype) {
         Curl_safefree(escaped);
-        escaped = c_escape(part->mimetype, -1);
+        escaped = c_escape(part->mimetype, CURL_ZERO_TERMINATED);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
         CODE2("curl_mime_type(part%d, \"%s\");", *mimeno, escaped);
@@ -674,7 +676,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
       REM2("%s set to a %s", name, value);
     else {
       if(escape) {
-        escaped = c_escape(value, -1);
+        escaped = c_escape(value, CURL_ZERO_TERMINATED);
         if(!escaped) {
           ret = CURLE_OUT_OF_MEMORY;
           goto nomem;
