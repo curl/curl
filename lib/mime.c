@@ -771,9 +771,9 @@ struct Curl_mime *curl_mime_init(struct Curl_easy *easy)
 /* Initialize a mime part. */
 void Curl_mime_initpart(struct Curl_mimepart *part, struct Curl_easy *easy)
 {
-    memset((char *) part, 0, sizeof *part);
-    part->easy = easy;
-    mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
+  memset((char *) part, 0, sizeof *part);
+  part->easy = easy;
+  mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
 }
 
 /* Create a mime part and append it to a mime handle's part list. */

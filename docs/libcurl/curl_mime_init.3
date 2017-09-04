@@ -34,7 +34,7 @@ subsequently filled using the mime API, then attached to \fIeasy_handle\fP
 using option \fICURLOPT_MIMEPOST(3)\fP within a \fIcurl_easy_setopt(3)\fP
 call.
 
-Using a mime handle is the recommended way to post an HTTP form, format and 
+Using a mime handle is the recommended way to post an HTTP form, format and
 send a multi-part e-mail with SMTP or upload such an e-mail to an IMAP server.
 
 .SH AVAILABILITY
@@ -51,8 +51,8 @@ A mime struct handle, or NULL upon failure.
  /* Build an HTTP form with a single field named "data", */
  mime = curl_mime_init(easy);
  part = curl_mime_addpart(mime);
- curl_mime_data(part, "This is the field data", -1);
- curl_mime_name(part, "data", -1);
+ curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
+ curl_mime_name(part, "data", CURL_ZERO_TERMINATED);
 
  /* Post and send it. */
  curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);

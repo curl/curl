@@ -51,18 +51,18 @@ int main(void)
 
     /* Fill in the file upload field */
     field = curl_mime_addpart(form);
-    curl_mime_name(field, "sendfile", -1);
+    curl_mime_name(field, "sendfile", CURL_ZERO_TERMINATED);
     curl_mime_filedata(field, "multi-post.c");
 
     /* Fill in the filename field */
     field = curl_mime_addpart(form);
-    curl_mime_name(field, "filename", -1);
-    curl_mime_data(field, "multi-post.c", -1);
+    curl_mime_name(field, "filename", CURL_ZERO_TERMINATED);
+    curl_mime_data(field, "multi-post.c", CURL_ZERO_TERMINATED);
 
     /* Fill in the submit field too, even if this is rarely needed */
     field = curl_mime_addpart(form);
-    curl_mime_name(field, "submit", -1);
-    curl_mime_data(field, "send", -1);
+    curl_mime_name(field, "submit", CURL_ZERO_TERMINATED);
+    curl_mime_data(field, "send", CURL_ZERO_TERMINATED);
 
     /* initialize custom header list (stating that Expect: 100-continue is not
        wanted */

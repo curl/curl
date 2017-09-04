@@ -113,12 +113,12 @@ int main(void)
 
     /* HTML message. */
     part = curl_mime_addpart(alt);
-    curl_mime_data(part, inline_html, -1);
+    curl_mime_data(part, inline_html, CURL_ZERO_TERMINATED);
     curl_mime_type(part, "text/html");
 
     /* Text message. */
     part = curl_mime_addpart(alt);
-    curl_mime_data(part, inline_text, -1);
+    curl_mime_data(part, inline_text, CURL_ZERO_TERMINATED);
 
     /* Create the inline part. */
     part = curl_mime_addpart(mime);
