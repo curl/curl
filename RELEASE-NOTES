@@ -2,15 +2,16 @@ Curl and libcurl 7.56.0
 
  Public curl releases:         169
  Command line options:         211
- curl_easy_setopt() options:   248
- Public functions in libcurl:  61
- Contributors:                 1600
+ curl_easy_setopt() options:   249
+ Public functions in libcurl:  80
+ Contributors:                 1609
 
 This release includes the following changes:
 
  o curl: enable compression for SCP/SFTP with --compressed-ssh  [11]
  o libcurl: enable compression for SCP/SFTP with CURLOPT_SSH_COMPRESSION [11]
  o vtls: added dynamic changing SSL backend with curl_global_sslset() [28]
+ o new MIME API, curl_mime_init() and friends [32]
 
 This release includes the following bugfixes:
 
@@ -52,6 +53,10 @@ This release includes the following bugfixes:
  o strtooff: fix build for systems with long long but no strtoll [27]
  o asyn-thread: Improved cleanup after OOM situations
  o HELP-US.md: "How to get started helping out in the curl project" [29]
+ o curl.h: CURLSSLBACKEND_WOLFSSL used wrong value [30]
+ o unit1301: fix error message on first test
+ o ossfuzz: moving towards the ideal integration [31]
+ o http: fix a memory leakage in checkrtspprefix()
 
 This release includes the following known bugs:
 
@@ -60,14 +65,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Benbuck Nason, Benjamin Sergeant, Bill Pyne, Brian Carpenter, Dan Fandrich,
-  Daniel Stenberg, Even Rouault, Frank Denis, Gergely Nagy, Gisle Vanem,
-  Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
+  Andrei Karas, Benbuck Nason, Benjamin Sergeant, Bill Pyne, Brian Carpenter,
+  Dan Fandrich, Daniel Stenberg, Even Rouault, Frank Denis, Gergely Nagy,
+  Gisle Vanem, Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
   John David Anglin, joshhe on github, Kamil Dudka, Maksim Stsepanenka,
-  Marcel Raad, Max Dymond, Michael Smith, Nick Zitzmann, Peter Lamare,
-  Ray Satiro, Ryan Schmidt, Ryan Winograd, Tatsuhiro Tsujikawa, Viktor Szakáts,
-  Nicolas Morey-Chaisemartin,
-  (27 contributors)
+  Marcel Raad, Max Dymond, Michael Smith, Nick Zitzmann,
+  Nicolas Morey-Chaisemartin, Patrick Monnerat, Peter Lamare, Ray Satiro,
+  Rich Gray, Ryan Schmidt, Ryan Winograd, Tatsuhiro Tsujikawa, Viktor Szakáts,
+  (31 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -102,3 +107,6 @@ References to bug reports and discussions on issues:
  [27] = https://curl.haxx.se/bug/?i=1829
  [28] = https://curl.haxx.se/libcurl/c/curl_global_sslset.html
  [29] = https://curl.haxx.se/bug/?i=1837
+ [30] = https://curl.haxx.se/mail/lib-2017-08/0120.html
+ [31] = https://curl.haxx.se/bug/?i=1842
+ [32] = https://curl.haxx.se/bug/?i=1839
