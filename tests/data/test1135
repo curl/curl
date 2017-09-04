@@ -28,8 +28,8 @@ Verify CURL_EXTERN order
 
 <verify>
 <stdout>
-CURL_EXTERN int (curl_strequal)(const char *s1, const char *s2);
-CURL_EXTERN int (curl_strnequal)(const char *s1, const char *s2, size_t n);
+CURL_EXTERN int curl_strequal(const char *s1, const char *s2);
+CURL_EXTERN int curl_strnequal(const char *s1, const char *s2, size_t n);
 CURL_EXTERN curl_mime *curl_mime_init(CURL *easy);
 CURL_EXTERN void curl_mime_free(curl_mime *mime);
 CURL_EXTERN curl_mimepart *curl_mime_addpart(curl_mime *mime);
