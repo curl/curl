@@ -38,20 +38,24 @@ void freefunc(void *arg);
 .BI "        curl_free_callback " freefunc ", void * " arg ");"
 .ad
 .SH DESCRIPTION
-curl_mime_data_cb() sets the data source of a mime part's body content from
-a data read callback function.
+\fIcurl_mime_data_cb(3)\fP sets the data source of a mime part's body content
+from a data read callback function.
 
 \fIpart\fP is the part's to assign contents to.
-\fIreadfunc\fP is a pointer to a data read callback function, with a
-signature as shown by the above prototype. It may not be set to NULL.
-\fIseekfunc\fP is a pointer to a seek callback function, with a
-signature as shown by the above prototype. This function will be used upon
-resending data (i.e.: after a redirect); this pointer may be set to NULL,
-in which case a resend is not possible.
+
+\fIreadfunc\fP is a pointer to a data read callback function, with a signature
+as shown by the above prototype. It may not be set to NULL.
+
+\fIseekfunc\fP is a pointer to a seek callback function, with a signature as
+shown by the above prototype. This function will be used upon resending data
+(i.e.: after a redirect); this pointer may be set to NULL, in which case a
+resend is not possible.
+
 \fIfreefunc\fP is a pointer to a user resource freeing callback function, with
-a signature as shown by the above prototype. If no resource is to be freed,
-it may safely be set to NULL. This function will be called upon mime
-structure freeing.
+a signature as shown by the above prototype. If no resource is to be freed, it
+may safely be set to NULL. This function will be called upon mime structure
+freeing.
+
 \fIarg\fP is a user defined argument to callback functions.
 
 The read callback function gets called by libcurl as soon as it needs to

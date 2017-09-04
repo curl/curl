@@ -28,18 +28,16 @@ curl_mime_addpart - append a new empty part to a mime structure
 .BI "curl_mimepart * curl_mime_addpart(curl_mime * " mime ");"
 .ad
 .SH DESCRIPTION
-curl_mime_addpart() appends a new empty part to the given mime structure and
-returns a handle to it.
-The returned part can be subsequently filled using functions from the mime API.
+\fIcurl_mime_addpart(3)\fP creates and appends a new empty part to the given
+mime structure and returns a handle to it.  The returned part handle can
+subsequently be populated using functions from the mime API.
 
 \fImime\fP is the handle of the mime structure in which the new part must be
 appended.
-
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE
 A mime part structure handle, or NULL upon failure.
-
 .SH "SEE ALSO"
 .BR curl_mime_init "(3),"
 .BR curl_mime_name "(3),"

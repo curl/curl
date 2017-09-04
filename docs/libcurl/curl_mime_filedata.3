@@ -29,17 +29,18 @@ curl_mime_filedata - set a mime part's body data from a file contents
 .BI " const char * " filename ");"
 .ad
 .SH DESCRIPTION
-curl_mime_filedata() sets a mime part's body content from the named file's
-contents.
+\fIcurl_mime_filedata(3)\fP sets a mime part's body content from the named
+file's contents.
 
 \fIpart\fP is the part's to assign contents to.
+
 \fIfilename\fP points to the nul-terminated file's path name. The pointer can
-be NULL to detach previous part contents settings.
-Filename storage can be safely be reused after this call.
+be NULL to detach previous part contents settings.  Filename storage can be
+safely be reused after this call.
 
 As a side effect, the part's remote file name is set to the base name of the
 given \fIfilename\fP if it is a valid named file. This can be undone or
-overriden by a subsequent call to \fIcurl_mime_filename\fP().
+overriden by a subsequent call to \fIcurl_mime_filename(3)\fP.
 
 Setting a part's contents twice is valid: only the value set by the last call
 is retained.
