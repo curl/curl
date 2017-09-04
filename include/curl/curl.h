@@ -1969,8 +1969,8 @@ typedef enum {
 
    !checksrc! disable SPACEBEFOREPAREN 2
 */
-CURL_EXTERN int (curl_strequal)(const char *s1, const char *s2);
-CURL_EXTERN int (curl_strnequal)(const char *s1, const char *s2, size_t n);
+CURL_EXTERN int curl_strequal(const char *s1, const char *s2);
+CURL_EXTERN int curl_strnequal(const char *s1, const char *s2, size_t n);
 
 /* Mime/form handling support. */
 typedef struct Curl_mime        curl_mime;      /* Mime context. */
