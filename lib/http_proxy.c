@@ -567,7 +567,7 @@ static CURLcode CONNECT(struct connectdata *conn,
       if(error)
         return CURLE_RECV_ERROR;
 
-      if(data->info.httpproxycode != 200) {
+      if(data->info.httpproxycode/100 != 2) {
         /* Deal with the possibly already received authenticate
            headers. 'newurl' is set to a new URL if we must loop. */
         result = Curl_http_auth_act(conn);
@@ -598,7 +598,7 @@ static CURLcode CONNECT(struct connectdata *conn,
 
   } while(data->req.newurl);
 
-  if(200 != data->req.httpcode) {
+  if(data->info.httpproxycode/100 != 2) {
     if(closeConnection && data->req.newurl) {
       conn->bits.proxy_connect_closed = TRUE;
       infof(data, "Connect me again please\n");
