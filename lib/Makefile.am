@@ -66,21 +66,7 @@ endif
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-if SONAME_BUMP
-#
-# Bumping of SONAME conditionally may seem like a weird thing to do, and yeah
-# it is. The problem is that we try to avoid the bump as hard as possible, but
-# yet it is still necessary for a few rare situations. The configure script will
-# attempt to figure out these situations, and it can be forced to consider this
-# to be such a case! See README.curl_off_t for further details.
-#
-# This conditional soname bump SHOULD be removed at next "proper" bump.
-#
-VERSIONINFO=-version-info 10:0:5
-else
 VERSIONINFO=-version-info 9:0:5
-endif
-
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
 # 1.
