@@ -30,7 +30,8 @@ curl_mime_filedata - set a mime part's body data from a file contents
 .ad
 .SH DESCRIPTION
 \fIcurl_mime_filedata(3)\fP sets a mime part's body content from the named
-file's contents.
+file's contents. This is an alernative to \fIcurl_mime_data(3)\fP for setting
+data to a mime part.
 
 \fIpart\fP is the part's to assign contents to.
 
@@ -42,14 +43,35 @@ As a side effect, the part's remote file name is set to the base name of the
 given \fIfilename\fP if it is a valid named file. This can be undone or
 overriden by a subsequent call to \fIcurl_mime_filename(3)\fP.
 
+The contents of the file is read during the file transfer in a streaming
+manner to allow huge files to get transfered without using much memory. It
+therefore requires that the file is kept intact during the entire request.
+
 Setting a part's contents twice is valid: only the value set by the last call
 is retained.
-
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE
 CURLE_OK or a CURL error code upon failure.
+.SH EXAMPLE
+.nf
+ struct curl_mime *mime;
+ struct mimepart *part;
 
+ /* create a mime handle */
+ mime = curl_mime_init(easy);
+
+ /* add a part */
+ part = curl_mime_addpart(mime);
+
+ /* send data from this file */
+ curl_mime_filedata(part, "image.png");
+
+ /* set name */
+ curl_mime_name(part, "data", CURL_ZERO_TERMINATED);
+.fi
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
+.BR curl_mime_data "(3),"
 .BR curl_mime_filename "(3)"
+.BR curl_mime_name "(3),"

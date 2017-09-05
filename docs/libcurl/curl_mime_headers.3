@@ -46,5 +46,20 @@ the last call is retained.
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE
 CURLE_OK or a CURL error code upon failure.
+.SH EXAMPLE
+.nf
+ struct curl_slist *headers = NULL;
+
+ headers = curl_slist_append("Custom-Header: mooo", headers);
+
+ /* use these headers, please take ownership */
+ curl_mime_headers(part, headers, TRUE);
+
+ /* pass on this data */
+ curl_mime_data(part, "12345679", CURL_ZERO_TERMINATED);
+
+ /* set name */
+ curl_mime_name(part, "numbers", CURL_ZERO_TERMINATED);
+.fi
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3)"
