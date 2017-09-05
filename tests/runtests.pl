@@ -3755,6 +3755,13 @@ sub singletest {
 
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
+    if(@upload) {
+      my %hash = getpartattr("verify", "upload");
+      if($hash{'nonewline'}) {
+          # cut off the final newline from the final line of the upload data
+          chomp($upload[$#upload]);
+      }
+    }
 
     # if this section exists, it might be FTP server instructions:
     my @ftpservercmd = getpart("reply", "servercmd");
