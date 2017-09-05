@@ -2471,6 +2471,7 @@ x1)
   # one SSL backend is enabled
   AC_SUBST(SSL_ENABLED)
   SSL_ENABLED="1"
+  AC_MSG_NOTICE([built with one SSL backend])
   ;;
 *)
   # more than one SSL backend is enabled
@@ -2479,6 +2480,7 @@ x1)
   AC_SUBST(CURL_WITH_MULTI_SSL)
   CURL_WITH_MULTI_SSL="1"
   AC_DEFINE(CURL_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
+  AC_MSG_NOTICE([built with multiple SSL backends])
   ;;
 esac
 
@@ -3850,6 +3852,10 @@ fi
 
 if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
+fi
+
+if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES MultiSSL"
 fi
 
 if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1" \
