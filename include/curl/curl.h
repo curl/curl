@@ -1970,8 +1970,8 @@ CURL_EXTERN int curl_strequal(const char *s1, const char *s2);
 CURL_EXTERN int curl_strnequal(const char *s1, const char *s2, size_t n);
 
 /* Mime/form handling support. */
-typedef struct Curl_mime        curl_mime;      /* Mime context. */
-typedef struct Curl_mimepart    curl_mimepart;  /* Mime part context. */
+typedef struct curl_mime_s      curl_mime;      /* Mime context. */
+typedef struct curl_mimepart_s  curl_mimepart;  /* Mime part context. */
 
 /*
  * NAME curl_mime_init()
@@ -2038,7 +2038,7 @@ CURL_EXTERN CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
  *
  * Set mime data transfer encoder.
  */
-CURL_EXTERN CURLcode curl_mime_encoder(struct Curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_encoder(curl_mimepart *part,
                                        const char *encoding);
 
 /*
