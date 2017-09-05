@@ -55,6 +55,73 @@
 
 #define READ_ERROR                      ((size_t) -1)
 
+/* Encoders. */
+static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
+                                struct Curl_mimepart *part);
+static curl_off_t encoder_nop_size(struct Curl_mimepart *part);
+static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
+                                struct Curl_mimepart *part);
+static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
+                                struct Curl_mimepart *part);
+static curl_off_t encoder_base64_size(struct Curl_mimepart *part);
+static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
+                              struct Curl_mimepart *part);
+static curl_off_t encoder_qp_size(struct Curl_mimepart *part);
+
+static const mime_encoder encoders[] = {
+  {"binary", encoder_nop_read, encoder_nop_size},
+  {"8bit", encoder_nop_read, encoder_nop_size},
+  {"7bit", encoder_7bit_read, encoder_nop_size},
+  {"base64", encoder_base64_read, encoder_base64_size},
+  {"quoted-printable", encoder_qp_read, encoder_qp_size},
+  {ZERO_NULL, ZERO_NULL, ZERO_NULL}
+};
+
+/* Base64 encoding table */
+static const char base64[] =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+/* Quoted-printable character class table.
+ *
+ * We cannot rely on ctype functions since quoted-printable input data
+ * is assumed to be ascii-compatible, even on non-ascii platforms. */
+#define QP_OK           1       /* Can be represented by itself. */
+#define QP_SP           2       /* Space or tab. */
+#define QP_CR           3       /* Carriage return. */
+#define QP_LF           4       /* Line-feed. */
+static const unsigned char qp_class[] = {
+ 0,     0,     0,     0,     0,     0,     0,     0,            /* 00 - 07 */
+ 0,     QP_SP, QP_LF, 0,     0,     QP_CR, 0,     0,            /* 08 - 0F */
+ 0,     0,     0,     0,     0,     0,     0,     0,            /* 10 - 17 */
+ 0,     0,     0,     0,     0,     0,     0,     0,            /* 18 - 1F */
+ QP_SP, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 20 - 27 */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 28 - 2F */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 30 - 37 */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, 0    , QP_OK, QP_OK,        /* 38 - 3F */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 40 - 47 */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 48 - 4F */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 50 - 57 */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 58 - 5F */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 60 - 67 */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 68 - 6F */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK,        /* 70 - 77 */
+ QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, QP_OK, 0,            /* 78 - 7F */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                /* 80 - 8F */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                /* 90 - 9F */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                /* A0 - AF */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                /* B0 - BF */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                /* C0 - CF */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                /* D0 - DF */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                /* E0 - EF */
+ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                 /* F0 - FF */
+};
+
+
+/* Binary --> hexadecimal ASCII table. */
+static const char aschex[] =
+  "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x41\x42\x43\x44\x45\x46";
+
+
 
 #ifndef __VMS
 #define filesize(name, stat_data) (stat_data.st_size)
@@ -277,6 +344,279 @@ static char *strippath(const char *fullfile)
   return base; /* returns an allocated string or NULL ! */
 }
 
+/* Initialize data encoder state. */
+static void cleanup_encoder_state(mime_encoder_state *p)
+{
+  p->pos = 0;
+  p->bufbeg = 0;
+  p->bufend = 0;
+}
+
+
+/* Dummy encoder. This is used for 8bit and binary content encodings. */
+static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
+                               struct Curl_mimepart *part)
+{
+  mime_encoder_state *st = &part->encstate;
+  size_t insize = st->bufend - st->bufbeg;
+
+  (void) ateof;
+
+  if(size > insize)
+    size = insize;
+  if(size)
+    memcpy(buffer, st->buf, size);
+  st->bufbeg += size;
+  return size;
+}
+
+static curl_off_t encoder_nop_size(struct Curl_mimepart *part)
+{
+  return part->datasize;
+}
+
+
+/* 7bit encoder: the encoder is just a data validity check. */
+static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
+                                struct Curl_mimepart *part)
+{
+  size_t i;
+  mime_encoder_state *st = &part->encstate;
+  size_t cursize = st->bufend - st->bufbeg;
+
+  (void) ateof;
+
+  if(size > cursize)
+    size = cursize;
+
+  for(cursize = 0; cursize < size; cursize++) {
+    *buffer = st->buf[st->bufbeg];
+    if(*buffer++ & 0x80)
+      return cursize? cursize: READ_ERROR;
+    st->bufbeg++;
+  }
+
+  return cursize;
+}
+
+
+/* Base64 content encoder. */
+static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
+                                struct Curl_mimepart *part)
+{
+  mime_encoder_state *st = &part->encstate;
+  size_t cursize = 0;
+  int i;
+  char *ptr = buffer;
+
+  while(st->bufbeg < st->bufend) {
+    /* Line full ? */
+    if(st->pos >= MAX_ENCODED_LINE_LENGTH - 4) {
+      /* Yes, we need 2 characters for CRLF. */
+      if(size < 2)
+        break;
+      *ptr++ = '\r';
+      *ptr++ = '\n';
+      st->pos = 0;
+      cursize += 2;
+      size -= 2;
+    }
+
+    /* Be sure there is enough space and input data for a base64 group. */
+    if(size < 4 || st->bufend - st->bufbeg < 3)
+      break;
+
+    /* Encode three bytes a four characters. */
+    i = st->buf[st->bufbeg++] & 0xFF;
+    i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
+    i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
+    *ptr++ = base64[(i >> 18) & 0x3F];
+    *ptr++ = base64[(i >> 12) & 0x3F];
+    *ptr++ = base64[(i >> 6) & 0x3F];
+    *ptr++ = base64[i & 0x3F];
+    cursize += 4;
+    st->pos += 4;
+    size -= 4;
+  }
+
+  /* If at eof, we have to flush the buffered data. */
+  if(ateof && size >= 4) {
+    /* Buffered data size can only be 0, 1 or 2. */
+    ptr[2] = ptr[3] = '=';
+    i = 0;
+    switch(st->bufend - st->bufbeg) {
+    case 2:
+      i = (st->buf[st->bufbeg + 1] & 0xFF) << 8;
+      /* FALLTHROUGH */
+    case 1:
+      i |= (st->buf[st->bufbeg] & 0xFF) << 16;
+      ptr[0] = base64[(i >> 18) & 0x3F];
+      ptr[1] = base64[(i >> 12) & 0x3F];
+      if(++st->bufbeg != st->bufend) {
+        ptr[2] = base64[(i >> 6) & 0x3F];
+        st->bufbeg++;
+      }
+      cursize += 4;
+      st->pos += 4;
+      break;
+    }
+  }
+
+#ifdef CURL_DOES_CONVERSIONS
+  /* This is now textual data, Convert character codes. */
+  if(part->easy && cursize) {
+    CURLcode result = Curl_convert_to_network(part->easy, buffer, cursize);
+    if(result)
+      return READ_ERROR;
+  }
+#endif
+
+  return cursize;
+}
+
+static curl_off_t encoder_base64_size(struct Curl_mimepart *part)
+{
+  curl_off_t size = part->datasize;
+
+  if(size <= 0)
+    return size;    /* Unknown size or no data. */
+
+  /* Compute base64 character count. */
+  size = 4 * (1 + (size - 1) / 3);
+
+  /* Effective character count must include CRLFs. */
+  return size + 2 * ((size - 1) / MAX_ENCODED_LINE_LENGTH);
+}
+
+
+/* Quoted-printable lookahead.
+ *
+ * Check if a CRLF or end of data is in input buffer at current position + n.
+ * Return -1 if more data needed, 1 if CRLF or end of data, else 0.
+ */
+static int qp_lookahead_eol(mime_encoder_state *st, int ateof, size_t n)
+{
+  n += st->bufbeg;
+  if(n >= st->bufend && ateof)
+    return 1;
+  if(n + 2 > st->bufend)
+    return ateof? 0: -1;
+  if(qp_class[st->buf[n] & 0xFF] == QP_CR &&
+     qp_class[st->buf[n + 1] & 0xFF] == QP_LF)
+    return 1;
+  return 0;
+}
+
+/* Quoted-printable encoder. */
+static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
+                              struct Curl_mimepart *part)
+{
+  mime_encoder_state *st = &part->encstate;
+  char *ptr = buffer;
+  size_t cursize = 0;
+  int i;
+  size_t len;
+  size_t consumed;
+  int softlinebreak;
+  char buf[4];
+
+  /* On all platforms, input is supposed to be ASCII compatible: for this
+     reason, we use hexadecimal ASCII codes in this function rather than
+     character constants that can be interpreted as non-ascii on some
+     platforms. Preserve ASCII encoding on output too. */
+  while(st->bufbeg < st->bufend) {
+    len = 1;
+    consumed = 1;
+    i = st->buf[st->bufbeg];
+    buf[0] = (char) i;
+    buf[1] = aschex[(i >> 4) & 0xF];
+    buf[2] = aschex[i & 0xF];
+
+    switch(qp_class[st->buf[st->bufbeg] & 0xFF]) {
+    case QP_OK:          /* Not a special character. */
+      break;
+    case QP_SP:          /* Space or tab. */
+      /* Spacing must be escaped if followed by CRLF. */
+      switch(qp_lookahead_eol(st, ateof, 1)) {
+      case -1:          /* More input data needed. */
+        return cursize;
+      case 0:           /* No encoding needed. */
+        break;
+      default:          /* CRLF after space or tab. */
+        buf[0] = '\x3D';    /* '=' */
+        len = 3;
+        break;
+      }
+      break;
+    case QP_CR:         /* Carriage return. */
+      /* If followed by a line-feed, output the CRLF pair.
+         Else escape it. */
+      switch(qp_lookahead_eol(st, ateof, 0)) {
+      case -1:          /* Need more data. */
+        return cursize;
+      case 1:           /* CRLF found. */
+        buf[len++] = '\x0A';    /* Append '\n'. */
+        consumed = 2;
+        break;
+      default:          /* Not followed by LF: escape. */
+        buf[0] = '\x3D';    /* '=' */
+        len = 3;
+        break;
+      }
+      break;
+    default:            /* Character must be escaped. */
+      buf[0] = '\x3D';    /* '=' */
+      len = 3;
+      break;
+    }
+
+    /* Be sure the encoded character fits within maximum line length. */
+    if(buf[len - 1] != '\x0A') {    /* '\n' */
+      softlinebreak = st->pos + len > MAX_ENCODED_LINE_LENGTH;
+      if(!softlinebreak && st->pos + len == MAX_ENCODED_LINE_LENGTH) {
+        /* We may use the current line only if end of data or followed by
+           a CRLF. */
+        switch(qp_lookahead_eol(st, ateof, consumed)) {
+        case -1:        /* Need more data. */
+          return cursize;
+          break;
+        case 0:         /* Not followed by a CRLF. */
+          softlinebreak = 1;
+          break;
+        }
+      }
+      if(softlinebreak) {
+        strcpy(buf, "\x3D\x0D\x0A");    /* "=\r\n" */
+        len = 3;
+        consumed = 0;
+      }
+    }
+
+    /* If the output buffer would overflow, do not store. */
+    if(len > size)
+      break;
+
+    /* Append to output buffer. */
+    memcpy(ptr, buf, len);
+    cursize += len;
+    ptr += len;
+    size -= len;
+    st->pos += len;
+    if(buf[len - 1] == '\x0A')    /* '\n' */
+      st->pos = 0;
+    st->bufbeg += consumed;
+  }
+
+  return cursize;
+}
+
+static curl_off_t encoder_qp_size(struct Curl_mimepart *part)
+{
+  /* Determining the size can only be done by reading the data: unless the
+     data size is 0, we return it as unknown (-1). */
+  return part->datasize? -1: 0;
+}
+
 
 /* In-memory data callbacks. */
 /* Argument is a pointer to the mime part. */
@@ -435,6 +775,77 @@ static size_t readback_bytes(struct mime_state *state,
   return sz;
 }
 
+/* Read a non-encoded part content. */
+static size_t read_part_content(struct Curl_mimepart *part,
+                                char *buffer, size_t bufsize)
+{
+  size_t sz = 0;
+
+  if(part->readfunc)
+    sz = part->readfunc(buffer, 1, bufsize, part->arg);
+  return sz;
+}
+
+/* Read and encode part content. */
+static size_t read_encoded_part_content(struct Curl_mimepart *part,
+                                        char *buffer, size_t bufsize)
+{
+  mime_encoder_state *st = &part->encstate;
+  size_t cursize = 0;
+  size_t sz;
+  bool ateof = FALSE;
+
+  while(bufsize) {
+    if(st->bufbeg < st->bufend || ateof) {
+      /* Encode buffered data. */
+      sz = part->encoder->encodefunc(buffer, bufsize, ateof, part);
+      switch(sz) {
+      case 0:
+        if(ateof)
+          return cursize;
+        break;
+      case CURL_READFUNC_ABORT:
+      case CURL_READFUNC_PAUSE:
+      case READ_ERROR:
+        return cursize? cursize: sz;
+      default:
+        cursize += sz;
+        buffer += sz;
+        bufsize -= sz;
+        continue;
+      }
+    }
+
+    /* We need more data in input buffer. */
+    if(st->bufbeg) {
+      size_t len = st->bufend - st->bufbeg;
+
+      if(len)
+        memmove(st->buf, st->buf + st->bufbeg, len);
+      st->bufbeg = 0;
+      st->bufend = len;
+    }
+    if(st->bufend >= sizeof st->buf)
+      return cursize? cursize: READ_ERROR;    /* Buffer full. */
+    sz = read_part_content(part, st->buf + st->bufend,
+                           sizeof st->buf - st->bufend);
+    switch(sz) {
+    case 0:
+      ateof = TRUE;
+      break;
+    case CURL_READFUNC_ABORT:
+    case CURL_READFUNC_PAUSE:
+    case READ_ERROR:
+      return cursize? cursize: sz;
+    default:
+      st->bufend += sz;
+      break;
+    }
+  }
+
+  return cursize;
+}
+
 /* Readback a mime part. */
 static size_t readback_part(curl_mimepart *part,
                             char *buffer, size_t bufsize)
@@ -491,11 +902,14 @@ static size_t readback_part(curl_mimepart *part,
         convbuf = buffer;
       }
 #endif
+      cleanup_encoder_state(&part->encstate);
       mimesetstate(&part->state, MIMESTATE_CONTENT, NULL);
       break;
     case MIMESTATE_CONTENT:
-      if(part->readfunc)
-        sz = part->readfunc(buffer, 1, bufsize, part->arg);
+      if(part->encoder)
+        sz = read_encoded_part_content(part, buffer, bufsize);
+      else
+        sz = read_part_content(part, buffer, bufsize);
       switch(sz) {
       case 0:
         mimesetstate(&part->state, MIMESTATE_END, NULL);
@@ -634,6 +1048,7 @@ static int mime_part_rewind(curl_mimepart *part)
 
   if(part->flags & MIME_BODY_ONLY)
     targetstate = MIMESTATE_BODY;
+  cleanup_encoder_state(&part->encstate);
   if(part->state.state > targetstate) {
     res = CURL_SEEKFUNC_CANTSEEK;
     if(part->seekfunc) {
@@ -642,6 +1057,9 @@ static int mime_part_rewind(curl_mimepart *part)
       case CURL_SEEKFUNC_OK:
       case CURL_SEEKFUNC_FAIL:
       case CURL_SEEKFUNC_CANTSEEK:
+        break;
+      case -1:    /* For fseek() error. */
+        res = CURL_SEEKFUNC_CANTSEEK;
         break;
       default:
         res = CURL_SEEKFUNC_FAIL;
@@ -702,6 +1120,8 @@ static void cleanup_part_content(curl_mimepart *part)
   part->namedfp = NULL;
   part->origin = 0;
   part->datasize = (curl_off_t) 0;    /* No size yet. */
+  part->encoder = NULL;
+  cleanup_encoder_state(&part->encstate);
   part->kind = MIMEKIND_NONE;
 }
 
@@ -976,15 +1396,22 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
 /* Set mime data transfer encoder. */
 CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
 {
-  CURLcode result = CURLE_OK;
-
-  /* Encoding feature not yet implemented. */
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  const mime_encoder *mep;
 
   if(!part)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return result;
 
-  if(encoding)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  part->encoder = NULL;
+
+  if(!encoding)
+    return CURLE_OK;    /* Removing current encoder. */
+
+  for(mep = encoders; mep->name; mep++)
+    if(strcasecompare(encoding, mep->name)) {
+      part->encoder = mep;
+      result = CURLE_OK;
+    }
 
   return result;
 }
@@ -1130,6 +1557,10 @@ curl_off_t Curl_mime_size(curl_mimepart *part)
     part->datasize = multipart_size(part->arg);
 
   size = part->datasize;
+
+  if(part->encoder)
+    size = part->encoder->sizefunc(part);
+
   if(size >= 0 && !(part->flags & MIME_BODY_ONLY)) {
     /* Compute total part size. */
     size += slist_size(part->curlheaders, 2, NULL);
@@ -1219,6 +1650,7 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
   curl_mime *mime = NULL;
   const char *boundary = NULL;
   char *s;
+  const char *cte = NULL;
   CURLcode ret = CURLE_OK;
 
   /* Get rid of previously prepared headers. */
@@ -1315,13 +1747,18 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
   }
 
   /* Content-Transfer-Encoding header. */
-  if(contenttype && strategy == MIMESTRATEGY_MAIL &&
-     part->kind != MIMEKIND_MULTIPART &&
-     !search_header(part->userheaders, "Content-Transfer-Encoding")) {
-    ret = Curl_mime_add_header(&part->curlheaders,
-                               "Content-Transfer-Encoding: 8bit");
-    if(ret)
-      return ret;
+  if(!search_header(part->userheaders, "Content-Transfer-Encoding")) {
+    if(part->encoder)
+      cte = part->encoder->name;
+    else if(contenttype && strategy == MIMESTRATEGY_MAIL &&
+     part->kind != MIMEKIND_MULTIPART)
+      cte = "8bit";
+    if(cte) {
+      ret = Curl_mime_add_header(&part->curlheaders,
+                                 "Content-Transfer-Encoding: %s", cte);
+      if(ret)
+        return ret;
+    }
   }
 
   /* If we were reading curl-generated headers, restart with new ones (this

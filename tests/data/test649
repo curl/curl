@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+MULTIPART
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP multipart with 7bit encoder error
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/649 --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is valid;encoder=7bit' -F "=@log/test649.txt;encoder=7bit" -H "From: different" -H "To: another"
+</command>
+<file name="log/test649.txt">
+This is an attached file (in french: pièce jointe).
+
+It contains at least an 8-bit byte value.
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+EHLO 649
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+</protocol>
+<upload nonewline="yes">
+Content-Type: multipart/mixed; boundary=----------------------------
+Mime-Version: 1.0
+From: different
+To: another
+
+------------------------------
+Content-Transfer-Encoding: 7bit
+
+This is valid
+------------------------------
+Content-Disposition: attachment; filename="test649.txt"
+Content-Transfer-Encoding: 7bit
+
+This is an attached file (in french: pi
+</upload>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>

@@ -172,11 +172,12 @@ static int read_field_headers(struct OperationConfig *config,
 
 static int get_param_part(struct OperationConfig *config, char **str,
                           char **pdata, char **ptype, char **pfilename,
-                          struct curl_slist **pheaders)
+                          char **pencoder, struct curl_slist **pheaders)
 {
   char *p = *str;
   char *type = NULL;
   char *filename = NULL;
+  char *encoder = NULL;
   char *endpos;
   char *tp;
   char sep;
@@ -191,6 +192,8 @@ static int get_param_part(struct OperationConfig *config, char **str,
     *pfilename = NULL;
   if(pheaders)
     *pheaders = NULL;
+  if(pencoder)
+    *pencoder = NULL;
   while(ISSPACE(*p))
     p++;
   tp = p;
@@ -300,6 +303,22 @@ static int get_param_part(struct OperationConfig *config, char **str,
         }
       }
     }
+    else if(checkprefix("encoder=", p)) {
+      if(endct) {
+        *endct = '\0';
+        endct = NULL;
+      }
+      for(p += 8; ISSPACE(*p); p++)
+        ;
+      tp = p;
+      encoder = get_param_word(&p, &endpos);
+      /* If not quoted, strip trailing spaces. */
+      if(encoder == tp)
+        while(endpos > encoder && ISSPACE(endpos[-1]))
+          endpos--;
+      sep = *p;
+      *endpos = '\0';
+    }
     else {
       /* unknown prefix, skip to next block */
       char *unknown = get_param_word(&p, &endpos);
@@ -334,6 +353,12 @@ static int get_param_part(struct OperationConfig *config, char **str,
   else if(filename)
     warnf(config->global,
           "Field file name not allowed here: %s\n", filename);
+
+  if(pencoder)
+    *pencoder = encoder;
+  else if(encoder)
+    warnf(config->global,
+          "Field encoder not allowed here: %s\n", encoder);
 
   if(pheaders)
     *pheaders = headers;
@@ -421,6 +446,7 @@ int formparse(struct OperationConfig *config,
   char *data;
   char *type = NULL;
   char *filename = NULL;
+  char *encoder = NULL;
   struct curl_slist *headers = NULL;
   curl_mimepart *part = NULL;
   CURLcode res;
@@ -454,7 +480,7 @@ int formparse(struct OperationConfig *config,
       curl_mime *subparts;
 
       /* Starting a multipart. */
-      sep = get_param_part(config, &contp, &data, &type, NULL, &headers);
+      sep = get_param_part(config, &contp, &data, &type, NULL, NULL, &headers);
       if(sep < 0) {
         Curl_safefree(contents);
         return 3;
@@ -513,8 +539,8 @@ int formparse(struct OperationConfig *config,
         /* since this was a file, it may have a content-type specifier
            at the end too, or a filename. Or both. */
         ++contp;
-        sep = get_param_part(config,
-                             &contp, &data, &type, &filename, &headers);
+        sep = get_param_part(config, &contp,
+                             &data, &type, &filename, &encoder, &headers);
         if(sep < 0) {
           if(subparts != *mimecurrent)
             curl_mime_free(subparts);
@@ -577,12 +603,19 @@ int formparse(struct OperationConfig *config,
           Curl_safefree(contents);
           return 15;
         }
-        if(type && curl_mime_type(part, type)) {
+        if(curl_mime_type(part, type)) {
           warnf(config->global, "curl_mime_type failed!\n");
           if(subparts != *mimecurrent)
             curl_mime_free(subparts);
           Curl_safefree(contents);
           return 16;
+        }
+        if(curl_mime_encoder(part, encoder)) {
+          warnf(config->global, "curl_mime_encoder failed!\n");
+          if(subparts != *mimecurrent)
+            curl_mime_free(subparts);
+          Curl_safefree(contents);
+          return 17;
         }
 
         /* *contp could be '\0', so we just check with the delimiter */
@@ -595,13 +628,13 @@ int formparse(struct OperationConfig *config,
           warnf(config->global, "curl_mime_addpart failed!\n");
           curl_mime_free(subparts);
           Curl_safefree(contents);
-          return 17;
+          return 18;
         }
         if(curl_mime_subparts(part, subparts)) {
           warnf(config->global, "curl_mime_subparts failed!\n");
           curl_mime_free(subparts);
           Curl_safefree(contents);
-          return 18;
+          return 19;
         }
       }
     }
@@ -611,16 +644,16 @@ int formparse(struct OperationConfig *config,
         if(!part) {
           warnf(config->global, "curl_mime_addpart failed!\n");
           Curl_safefree(contents);
-          return 19;
+          return 20;
         }
 
       if(*contp == '<' && !literal_value) {
         ++contp;
-        sep = get_param_part(config,
-                             &contp, &data, &type, &filename, &headers);
+        sep = get_param_part(config, &contp,
+                             &data, &type, &filename, &encoder, &headers);
         if(sep < 0) {
           Curl_safefree(contents);
-          return 20;
+          return 21;
         }
 
         /* Set part headers. */
@@ -628,7 +661,7 @@ int formparse(struct OperationConfig *config,
           warnf(config->global, "curl_mime_headers failed!\n");
           curl_slist_free_all(headers);
           Curl_safefree(contents);
-          return 21;
+          return 22;
         }
 
         /* Setup file in part. */
@@ -637,7 +670,7 @@ int formparse(struct OperationConfig *config,
           warnf(config->global, "setting file %s failed!\n", data);
           if(res != CURLE_READ_ERROR) {
             Curl_safefree(contents);
-            return 22;
+            return 23;
           }
         }
       }
@@ -645,11 +678,11 @@ int formparse(struct OperationConfig *config,
         if(literal_value)
           data = contp;
         else {
-          sep = get_param_part(config,
-                               &contp, &data, &type, &filename, &headers);
+          sep = get_param_part(config, &contp,
+                               &data, &type, &filename, &encoder, &headers);
           if(sep < 0) {
             Curl_safefree(contents);
-            return 23;
+            return 24;
           }
         }
 
@@ -658,33 +691,38 @@ int formparse(struct OperationConfig *config,
           warnf(config->global, "curl_mime_headers failed!\n");
           curl_slist_free_all(headers);
           Curl_safefree(contents);
-          return 24;
+          return 25;
         }
 
 #ifdef CURL_DOES_CONVERSIONS
         if(convert_to_network(data, strlen(data))) {
           warnf(config->global, "curl_formadd failed!\n");
           Curl_safefree(contents);
-          return 25;
+          return 26;
         }
 #endif
 
         if(curl_mime_data(part, data, CURL_ZERO_TERMINATED)) {
           warnf(config->global, "curl_mime_data failed!\n");
           Curl_safefree(contents);
-          return 26;
+          return 27;
         }
       }
 
       if(curl_mime_filename(part, filename)) {
         warnf(config->global, "curl_mime_filename failed!\n");
         Curl_safefree(contents);
-        return 27;
+        return 28;
       }
       if(curl_mime_type(part, type)) {
         warnf(config->global, "curl_mime_type failed!\n");
         Curl_safefree(contents);
-        return 28;
+        return 29;
+      }
+      if(curl_mime_encoder(part, encoder)) {
+        warnf(config->global, "curl_mime_encoder failed!\n");
+        Curl_safefree(contents);
+        return 30;
       }
 
       if(sep) {
@@ -698,13 +736,13 @@ int formparse(struct OperationConfig *config,
     if(name && curl_mime_name(part, name, CURL_ZERO_TERMINATED)) {
       warnf(config->global, "curl_mime_name failed!\n");
       Curl_safefree(contents);
-      return 29;
+      return 31;
     }
   }
   else {
     warnf(config->global, "Illegally formatted input field!\n");
     Curl_safefree(contents);
-    return 30;
+    return 32;
   }
   Curl_safefree(contents);
   return 0;

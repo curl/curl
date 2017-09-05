@@ -506,6 +506,14 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
         break;
       }
 
+      if(part->encoder) {
+        Curl_safefree(escaped);
+        escaped = c_escape(part->encoder->name, CURL_ZERO_TERMINATED);
+        if(!escaped)
+          return CURLE_OUT_OF_MEMORY;
+        CODE2("curl_mime_encoder(part%d, \"%s\");", *mimeno, escaped);
+      }
+
       if(filename) {
         Curl_safefree(escaped);
         escaped = c_escape(filename, CURL_ZERO_TERMINATED);

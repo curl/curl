@@ -23,6 +23,8 @@
  ***************************************************************************/
 
 #define MIME_RAND_BOUNDARY_CHARS        16  /* Nb. of random boundary chars. */
+#define MAX_ENCODED_LINE_LENGTH         76  /* Maximum encoded line length. */
+#define ENCODING_BUFFER_SIZE            256 /* Encoding temp buffers size. */
 
 /* Part flags. */
 #define MIME_USERHEADERS_OWNER  (1 << 0)
@@ -60,6 +62,22 @@ enum mimestrategy {
   MIMESTRATEGY_LAST
 };
 
+/* Content transfer encoder. */
+typedef struct {
+  const char *   name;          /* Encoding name. */
+  size_t         (*encodefunc)(char *buffer, size_t size, bool ateof,
+                             curl_mimepart *part);  /* Encoded read. */
+  curl_off_t     (*sizefunc)(curl_mimepart *part);  /* Encoded size. */
+}  mime_encoder;
+
+/* Content transfer encoder state. */
+typedef struct {
+  size_t         pos;           /* Position on output line. */
+  size_t         bufbeg;        /* Next data index in input buffer. */
+  size_t         bufend;        /* First unused byte index in input buffer. */
+  char           buf[ENCODING_BUFFER_SIZE]; /* Input buffer. */
+}  mime_encoder_state;
+
 /* Mime readback state. */
 struct mime_state {
   enum mimestate state;       /* Current state token. */
@@ -67,7 +85,7 @@ struct mime_state {
   size_t offset;              /* State-dependent offset. */
 };
 
-/* A mime context. */
+/* A mime multipart. */
 struct curl_mime_s {
   struct Curl_easy *easy;          /* The associated easy handle. */
   curl_mimepart *parent;           /* Parent part. */
@@ -99,6 +117,8 @@ struct curl_mimepart_s {
   curl_off_t datasize;             /* Expected data size. */
   unsigned int flags;              /* Flags. */
   struct mime_state state;         /* Current readback state. */
+  const mime_encoder *encoder;     /* Content data encoder. */
+  mime_encoder_state encstate;     /* Data encoder state. */
 };
 
 
