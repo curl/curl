@@ -242,7 +242,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 CURLcode Curl_readrewind(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-  struct Curl_mimepart *mimepart = &data->set.mimepost;
+  curl_mimepart *mimepart = &data->set.mimepost;
 
   conn->bits.rewindaftersend = FALSE; /* we rewind now */
 

@@ -63,56 +63,56 @@ enum mimestrategy {
 /* Mime readback state. */
 struct mime_state {
   enum mimestate state;       /* Current state token. */
-  void *         ptr;         /* State-dependent pointer. */
-  size_t         offset;      /* State-dependent offset. */
+  void *ptr;                  /* State-dependent pointer. */
+  size_t offset;              /* State-dependent offset. */
 };
 
 /* A mime context. */
-struct Curl_mime {
-  struct Curl_easy *     easy;         /* The associated easy handle. */
-  struct Curl_mimepart * parent;       /* Parent part. */
-  struct Curl_mimepart * firstpart;    /* First part. */
-  struct Curl_mimepart * lastpart;     /* Last part. */
-  char *                 boundary;     /* The part boundary. */
-  struct mime_state      state;        /* Current readback state. */
+struct curl_mime_s {
+  struct Curl_easy *easy;          /* The associated easy handle. */
+  curl_mimepart *parent;           /* Parent part. */
+  curl_mimepart *firstpart;        /* First part. */
+  curl_mimepart *lastpart;         /* Last part. */
+  char *boundary;                  /* The part boundary. */
+  struct mime_state state;         /* Current readback state. */
 };
 
 /* A mime part. */
-struct Curl_mimepart {
-  struct Curl_easy *     easy;         /* The associated easy handle. */
-  struct Curl_mime *     parent;       /* Parent mime structure. */
-  struct Curl_mimepart * nextpart;     /* Forward linked list. */
-  enum mimekind          kind;         /* The part kind. */
-  char *                 data;         /* Memory data or file name. */
-  curl_read_callback     readfunc;     /* Read function. */
-  curl_seek_callback     seekfunc;     /* Seek function. */
-  curl_free_callback     freefunc;     /* Argument free function. */
-  void *                 arg;          /* Argument to callback functions. */
-  FILE *                 namedfp;      /* Named file pointer. */
-  struct curl_slist *    curlheaders;  /* Part headers. */
-  struct curl_slist *    userheaders;  /* Part headers. */
-  char *                 mimetype;     /* Part mime type. */
-  char *                 filename;     /* Remote file name. */
-  char *                 name;         /* Data name. */
-  size_t                 namesize;     /* Data name size. */
-  curl_off_t             origin;       /* Origin file offset. */
-  curl_off_t             datasize;     /* Expected data size. */
-  unsigned int           flags;        /* Flags. */
-  struct mime_state      state;        /* Current readback state. */
+struct curl_mimepart_s {
+  struct Curl_easy *easy;          /* The associated easy handle. */
+  curl_mime *parent;               /* Parent mime structure. */
+  curl_mimepart *nextpart;         /* Forward linked list. */
+  enum mimekind kind;              /* The part kind. */
+  char *data;                      /* Memory data or file name. */
+  curl_read_callback readfunc;     /* Read function. */
+  curl_seek_callback seekfunc;     /* Seek function. */
+  curl_free_callback freefunc;     /* Argument free function. */
+  void *arg;                       /* Argument to callback functions. */
+  FILE *namedfp;                   /* Named file pointer. */
+  struct curl_slist *curlheaders;  /* Part headers. */
+  struct curl_slist *userheaders;  /* Part headers. */
+  char *mimetype;                  /* Part mime type. */
+  char *filename;                  /* Remote file name. */
+  char *name;                      /* Data name. */
+  size_t namesize;                 /* Data name size. */
+  curl_off_t origin;               /* Origin file offset. */
+  curl_off_t datasize;             /* Expected data size. */
+  unsigned int flags;              /* Flags. */
+  struct mime_state state;         /* Current readback state. */
 };
 
 
 /* Prototypes. */
-void Curl_mime_initpart(struct Curl_mimepart *part, struct Curl_easy *easy);
-void Curl_mime_cleanpart(struct Curl_mimepart *part);
-CURLcode Curl_mime_prepare_headers(struct Curl_mimepart *part,
+void Curl_mime_initpart(curl_mimepart *part, struct Curl_easy *easy);
+void Curl_mime_cleanpart(curl_mimepart *part);
+CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
                                    const char *contenttype,
                                    const char *disposition,
                                    enum mimestrategy strategy);
-curl_off_t Curl_mime_size(struct Curl_mimepart *part);
+curl_off_t Curl_mime_size(curl_mimepart *part);
 size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
-CURLcode Curl_mime_rewind(struct Curl_mimepart *part);
+CURLcode Curl_mime_rewind(curl_mimepart *part);
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
 CURLcode Curl_mime_file(curl_mimepart *part, FILE *fp, int closewhendone);
 
