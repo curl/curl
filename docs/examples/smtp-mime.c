@@ -43,8 +43,8 @@
 static const char *headers_text[] = {
   "Date: Tue, 22 Aug 2017 14:08:43 +0100",
   "To: " TO,
-  "From: " FROM "(Example User)",
-  "Cc: " CC "(Another example User)",
+  "From: " FROM " (Example User)",
+  "Cc: " CC " (Another example User)",
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
     "rfcpedant.example.org>",
   "Subject: example sending a MIME-formatted message",
