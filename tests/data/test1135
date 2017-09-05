@@ -36,7 +36,7 @@ CURL_EXTERN curl_mimepart *curl_mime_addpart(curl_mime *mime);
 CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part,
 CURL_EXTERN CURLcode curl_mime_filename(curl_mimepart *part,
 CURL_EXTERN CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
-CURL_EXTERN CURLcode curl_mime_encoder(struct Curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_encoder(curl_mimepart *part,
 CURL_EXTERN CURLcode curl_mime_data(curl_mimepart *part,
 CURL_EXTERN CURLcode curl_mime_filedata(curl_mimepart *part,
 CURL_EXTERN CURLcode curl_mime_data_cb(curl_mimepart *part,
