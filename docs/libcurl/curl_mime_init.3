@@ -45,8 +45,8 @@ A mime struct handle, or NULL upon failure.
 .nf
 
  CURL *easy = curl_easy_init();
- struct curl_mime *mime;
- struct mimepart *part;
+ curl_mime *mime;
+ curl_mimepart *part;
 
  /* Build an HTTP form with a single field named "data", */
  mime = curl_mime_init(easy);
