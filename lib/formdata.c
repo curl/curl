@@ -752,7 +752,7 @@ int curl_formget(struct curl_httppost *form, void *arg,
                  curl_formget_callback append)
 {
   CURLcode result;
-  struct Curl_mimepart toppart;
+  curl_mimepart toppart;
 
   Curl_mime_initpart(&toppart, NULL); /* default form is empty */
   result = Curl_getformdata(NULL, &toppart, form, NULL);
@@ -825,14 +825,14 @@ void curl_formfree(struct curl_httppost *form)
  */
 
 CURLcode Curl_getformdata(struct Curl_easy *data,
-                          struct Curl_mimepart *finalform,
+                          curl_mimepart *finalform,
                           struct curl_httppost *post,
                           curl_read_callback fread_func)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_mime *form = NULL;
-  struct Curl_mime *multipart;
-  struct Curl_mimepart *part;
+  curl_mime *form = NULL;
+  curl_mime *multipart;
+  curl_mimepart *part;
   struct curl_httppost *file;
 
   Curl_mime_cleanpart(finalform); /* default form is empty */
