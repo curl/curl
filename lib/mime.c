@@ -379,7 +379,6 @@ static curl_off_t encoder_nop_size(curl_mimepart *part)
 static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part)
 {
-  size_t i;
   mime_encoder_state *st = &part->encstate;
   size_t cursize = st->bufend - st->bufbeg;
 
