@@ -79,11 +79,11 @@ typedef struct {
 }  mime_encoder_state;
 
 /* Mime readback state. */
-struct mime_state {
+typedef struct {
   enum mimestate state;       /* Current state token. */
   void *ptr;                  /* State-dependent pointer. */
   size_t offset;              /* State-dependent offset. */
-};
+}  mime_state;
 
 /* A mime multipart. */
 struct curl_mime_s {
@@ -92,7 +92,7 @@ struct curl_mime_s {
   curl_mimepart *firstpart;        /* First part. */
   curl_mimepart *lastpart;         /* Last part. */
   char *boundary;                  /* The part boundary. */
-  struct mime_state state;         /* Current readback state. */
+  mime_state state;                /* Current readback state. */
 };
 
 /* A mime part. */
@@ -116,7 +116,7 @@ struct curl_mimepart_s {
   curl_off_t origin;               /* Origin file offset. */
   curl_off_t datasize;             /* Expected data size. */
   unsigned int flags;              /* Flags. */
-  struct mime_state state;         /* Current readback state. */
+  mime_state state;                /* Current readback state. */
   const mime_encoder *encoder;     /* Content data encoder. */
   mime_encoder_state encstate;     /* Data encoder state. */
 };
