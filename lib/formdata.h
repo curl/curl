@@ -44,7 +44,7 @@ typedef struct FormInfo {
 } FormInfo;
 
 CURLcode Curl_getformdata(struct Curl_easy *data,
-                          struct Curl_mimepart *,
+                          curl_mimepart *,
                           struct curl_httppost *post,
                           curl_read_callback fread_func);
 

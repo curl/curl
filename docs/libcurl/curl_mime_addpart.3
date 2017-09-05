@@ -40,8 +40,8 @@ As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 A mime part structure handle, or NULL upon failure.
 .SH EXAMPLE
 .nf
- struct curl_mime *mime;
- struct mimepart *part;
+ curl_mime *mime;
+ curl_mimepart *part;
 
  /* create a mime handle */
  mime = curl_mime_init(easy);
