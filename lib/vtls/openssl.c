@@ -2457,10 +2457,10 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     BIO *const bio = BIO_new(BIO_f_ssl());
     SSL *handle = conn->proxy_ssl[sockindex].backend->handle;
     DEBUGASSERT(ssl_connection_complete == conn->proxy_ssl[sockindex].state);
-    DEBUGASSERT(BACKEND->handle != NULL);
+    DEBUGASSERT(handle != NULL);
     DEBUGASSERT(bio != NULL);
     BIO_set_ssl(bio, handle, FALSE);
-    SSL_set_bio(handle, bio, bio);
+    SSL_set_bio(BACKEND->handle, bio, bio);
   }
   else if(!SSL_set_fd(BACKEND->handle, (int)sockfd)) {
     /* pass the raw socket into the SSL layers */
