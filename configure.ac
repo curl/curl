@@ -3253,7 +3253,7 @@ AC_CHECK_SIZEOF(time_t)
 AC_CHECK_SIZEOF(off_t)
 
 o=$CPPFLAGS
-CPPFLAGS="$CPPFLAGS -I$srcdir/include"
+CPPFLAGS="-I$srcdir/include $CPPFLAGS"
 AC_CHECK_SIZEOF(curl_off_t, unused , [
 #include <curl/system.h>
 ])
