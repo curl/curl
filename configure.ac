@@ -3259,8 +3259,6 @@ AC_CHECK_SIZEOF(curl_off_t, unused , [
 ])
 CPPFLAGS=$o
 
-soname_bump=no
-
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1,
       [Define to 1 if the compiler supports the 'long long' data type.])]
@@ -3738,26 +3736,6 @@ dnl hiding of library internal symbols
 dnl
 CURL_CONFIGURE_SYMBOL_HIDING
 
-dnl ************************************************************
-dnl enforce SONAME bump
-dnl
-
-AC_MSG_CHECKING([whether to enforce SONAME bump])
-AC_ARG_ENABLE(soname-bump,
-AC_HELP_STRING([--enable-soname-bump],[Enable enforced SONAME bump])
-AC_HELP_STRING([--disable-soname-bump],[Disable enforced SONAME bump]),
-[ case "$enableval" in
-  yes)   AC_MSG_RESULT(yes)
-         soname_bump=yes
-         ;;
-  *)
-         AC_MSG_RESULT(no)
-         ;;
-  esac ],
-        AC_MSG_RESULT($soname_bump)
-)
-AM_CONDITIONAL(SONAME_BUMP, test x$soname_bump = xyes)
-
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl
@@ -4045,14 +4023,3 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 ])
-
-if test "x$soname_bump" = "xyes"; then
-
-cat <<EOM
-  SONAME bump:     yes - WARNING: this library will be built with the SONAME
-                   number bumped due to (a detected) ABI breakage.
-                   See lib/README.curl_off_t for details on this.
-EOM
-
-fi
-
