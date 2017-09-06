@@ -815,13 +815,14 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     }
 
     /* compute sha256sum of public key */
-    sha256sumdigest = malloc(SHA256_DIGEST_LENGTH);
+    sha256sumdigest = malloc(CURL_SHA256_DIGEST_LENGTH);
     if(!sha256sumdigest)
       return CURLE_OUT_OF_MEMORY;
     Curl_ssl->sha256sum(pubkey, pubkeylen,
-                        sha256sumdigest, SHA256_DIGEST_LENGTH);
+                        sha256sumdigest, CURL_SHA256_DIGEST_LENGTH);
     encode = Curl_base64_encode(data, (char *)sha256sumdigest,
-                                SHA256_DIGEST_LENGTH, &encoded, &encodedlen);
+                                CURL_SHA256_DIGEST_LENGTH, &encoded,
+                                &encodedlen);
     Curl_safefree(sha256sumdigest);
 
     if(encode)
