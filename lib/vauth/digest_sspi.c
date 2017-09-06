@@ -352,8 +352,8 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
       if(!Curl_auth_digest_get_pair(p, value, content, &p))
         break;
 
-      if(Curl_strcasecompare(value, "stale")
-         && Curl_strcasecompare(content, "true")) {
+      if(strcasecompare(value, "stale") &&
+         strcasecompare(content, "true")) {
         stale = true;
         break;
       }

@@ -1250,12 +1250,14 @@ static int multissl_init(const struct Curl_ssl *backend)
   if(!env)
     env = CURL_DEFAULT_SSL_BACKEND;
 #endif
-  if(env)
-    for(i = 0; available_backends[i]; i++)
-      if(!strcmp(env, available_backends[i]->info.name)) {
+  if(env) {
+    for(i = 0; available_backends[i]; i++) {
+      if(strcasecompare(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
         return 0;
       }
+    }
+  }
 
   /* Fall back to first available backend */
   Curl_ssl = available_backends[0];
@@ -1270,12 +1272,13 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
   if(Curl_ssl != &Curl_ssl_multi)
     return id == Curl_ssl->info.id ? CURLSSLSET_OK : CURLSSLSET_TOO_LATE;
 
-  for(i = 0; available_backends[i]; i++)
+  for(i = 0; available_backends[i]; i++) {
     if(available_backends[i]->info.id == id ||
-       (name && Curl_strcasecompare(available_backends[i]->info.name, name))) {
+       (name && strcasecompare(available_backends[i]->info.name, name))) {
       multissl_init(available_backends[i]);
       return CURLSSLSET_OK;
     }
+  }
 
   if(avail)
     *avail = (const curl_ssl_backend **)&available_backends;
