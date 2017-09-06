@@ -897,8 +897,16 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
           clen = -1;
 
         if(post->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE)) {
-          if(!strcmp(file->contents, "-"))
-            result = Curl_mime_file(part, stdin, 0);
+          if(!strcmp(file->contents, "-")) {
+            /* There are a few cases where the code below won't work; in
+               particular, freopen(stdin) by the caller is not guaranteed
+               to result as expected. This feature has been kept for backward
+               compatibility: use of "-" pseudo file name should be avoided. */
+            result = curl_mime_data_cb(part, (curl_off_t) -1,
+                                       (curl_read_callback) fread,
+                                       (curl_seek_callback) fseek,
+                                       NULL, (void *) stdin);
+          }
           else
             result = curl_mime_filedata(part, file->contents);
           if(!result && (post->flags & HTTPPOST_READFILE))

@@ -432,7 +432,7 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
       CODE2("part%d = curl_mime_addpart(mime%d);", *mimeno, *mimeno);
       filename = part->filename;
       switch(part->kind) {
-      case MIMEKIND_NAMEDFILE:
+      case MIMEKIND_FILE:
         Curl_safefree(escaped);
         escaped = c_escape(part->data, CURL_ZERO_TERMINATED);
         if(!escaped)
@@ -483,8 +483,9 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
         size = (cp == data + part->datasize)? (curl_off_t) -1: part->datasize;
         Curl_safefree(escaped);
         escaped = c_escape(data, (size_t) part->datasize);
-        if(data != part->data)
-          Curl_safefree(data);
+#ifdef CURL_DOES_CONVERSIONS
+        Curl_safefree(data);
+#endif
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
         if(size >= 0)

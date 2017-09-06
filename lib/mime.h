@@ -34,8 +34,7 @@
 enum mimekind {
   MIMEKIND_NONE = 0,            /* Part not set. */
   MIMEKIND_DATA,                /* Allocated mime data. */
-  MIMEKIND_NAMEDFILE,           /* Data from named file. */
-  MIMEKIND_FILE,                /* Data from file pointer. */
+  MIMEKIND_FILE,                /* Data from file. */
   MIMEKIND_CALLBACK,            /* Data from `read' callback. */
   MIMEKIND_MULTIPART,           /* Data is a mime subpart. */
   MIMEKIND_LAST
@@ -106,14 +105,13 @@ struct curl_mimepart_s {
   curl_seek_callback seekfunc;     /* Seek function. */
   curl_free_callback freefunc;     /* Argument free function. */
   void *arg;                       /* Argument to callback functions. */
-  FILE *namedfp;                   /* Named file pointer. */
+  FILE *fp;                        /* File pointer. */
   struct curl_slist *curlheaders;  /* Part headers. */
   struct curl_slist *userheaders;  /* Part headers. */
   char *mimetype;                  /* Part mime type. */
   char *filename;                  /* Remote file name. */
   char *name;                      /* Data name. */
   size_t namesize;                 /* Data name size. */
-  curl_off_t origin;               /* Origin file offset. */
   curl_off_t datasize;             /* Expected data size. */
   unsigned int flags;              /* Flags. */
   mime_state state;                /* Current readback state. */
@@ -134,6 +132,5 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
 CURLcode Curl_mime_rewind(curl_mimepart *part);
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
-CURLcode Curl_mime_file(curl_mimepart *part, FILE *fp, int closewhendone);
 
 #endif /* HEADER_CURL_MIME_H */

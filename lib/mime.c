@@ -662,76 +662,50 @@ static void mime_mem_free(void *ptr)
 }
 
 
-/* Open file callbacks. */
-/* Argument is the FILE pointer. */
+/* Named file callbacks. */
+/* Argument is a pointer to the mime part. */
+static int mime_open_file(curl_mimepart * part)
+{
+  /* Open a MIMEKIND_FILE part. */
+
+  if(part->fp)
+    return 0;
+  part->fp = fopen_read(part->data, "rb");
+  return part->fp? 0: -1;
+}
+
 static size_t mime_file_read(char *buffer, size_t size, size_t nitems,
                              void *instream)
 {
-  return (size_t) fread(buffer, size, nitems, instream);
+  curl_mimepart *part = (curl_mimepart *) instream;
+
+  if(mime_open_file(part))
+    return READ_ERROR;
+
+  return fread(buffer, size, nitems, part->fp);
 }
 
 static int mime_file_seek(void *instream, curl_off_t offset, int whence)
 {
-  FILE *fp = (FILE *) instream;
-
-  return fseek(fp, (long) offset, whence)?
-         CURL_SEEKFUNC_CANTSEEK: CURL_SEEKFUNC_OK;
-}
-
-
-/* Named file callbacks. */
-/* Argument is a pointer to the mime part. */
-static int mime_open_namedfile(curl_mimepart * part)
-{
-  /* Open a MIMEKIND_NAMEDFILE part. */
-
-  if(part->namedfp)
-    return 0;
-  part->namedfp = fopen_read(part->data, "rb");
-  return part->namedfp? 0: -1;
-}
-
-static size_t mime_namedfile_read(char *buffer, size_t size, size_t nitems,
-                                  void *instream)
-{
   curl_mimepart *part = (curl_mimepart *) instream;
 
-  if(mime_open_namedfile(part))
-    return READ_ERROR;
+  if(whence == SEEK_SET && !offset && !part->fp)
+    return CURL_SEEKFUNC_OK;   /* Not open: implicitly already at BOF. */
 
-  return mime_file_read(buffer, size, nitems, part->namedfp);
-}
-
-static int mime_namedfile_seek(void *instream, curl_off_t offset, int whence)
-{
-  curl_mimepart *part = (curl_mimepart *) instream;
-
-  switch(whence) {
-  case SEEK_CUR:
-    if(part->namedfp)
-      offset += ftell(part->namedfp);
-    break;
-  case SEEK_END:
-    offset += part->datasize;
-    break;
-  }
-
-  if(!offset && !part->namedfp)
-    return CURL_SEEKFUNC_OK;
-
-  if(mime_open_namedfile(part))
+  if(mime_open_file(part))
     return CURL_SEEKFUNC_FAIL;
 
-  return mime_file_seek(part->namedfp, offset, SEEK_SET);
+  return fseek(part->fp, (long) offset, whence)?
+               CURL_SEEKFUNC_CANTSEEK: CURL_SEEKFUNC_OK;
 }
 
-static void mime_namedfile_free(void *ptr)
+static void mime_file_free(void *ptr)
 {
   curl_mimepart *part = (curl_mimepart *) ptr;
 
-  if(part->namedfp) {
-    fclose(part->namedfp);
-    part->namedfp = NULL;
+  if(part->fp) {
+    fclose(part->fp);
+    part->fp = NULL;
   }
   Curl_safefree(part->data);
   part->data = NULL;
@@ -912,9 +886,9 @@ static size_t readback_part(curl_mimepart *part,
       case 0:
         mimesetstate(&part->state, MIMESTATE_END, NULL);
         /* Try sparing open file descriptors. */
-        if(part->kind == MIMEKIND_NAMEDFILE && part->namedfp) {
-          fclose(part->namedfp);
-          part->namedfp = NULL;
+        if(part->kind == MIMEKIND_FILE && part->fp) {
+          fclose(part->fp);
+          part->fp = NULL;
         }
         /* FALLTHROUGH */
       case CURL_READFUNC_ABORT:
@@ -1050,7 +1024,7 @@ static int mime_part_rewind(curl_mimepart *part)
   if(part->state.state > targetstate) {
     res = CURL_SEEKFUNC_CANTSEEK;
     if(part->seekfunc) {
-      res = part->seekfunc(part->arg, part->origin, SEEK_SET);
+      res = part->seekfunc(part->arg, (curl_off_t) 0, SEEK_SET);
       switch(res) {
       case CURL_SEEKFUNC_OK:
       case CURL_SEEKFUNC_FAIL:
@@ -1113,10 +1087,9 @@ static void cleanup_part_content(curl_mimepart *part)
   part->readfunc = NULL;
   part->seekfunc = NULL;
   part->freefunc = NULL;
-  part->arg = NULL;
+  part->arg = (void *) part;          /* Defaults to part itself. */
   part->data = NULL;
-  part->namedfp = NULL;
-  part->origin = 0;
+  part->fp = NULL;
   part->datasize = (curl_off_t) 0;    /* No size yet. */
   part->encoder = NULL;
   cleanup_encoder_state(&part->encstate);
@@ -1289,41 +1262,9 @@ CURLcode curl_mime_data(curl_mimepart *part,
     part->readfunc = mime_mem_read;
     part->seekfunc = mime_mem_seek;
     part->freefunc = mime_mem_free;
-    part->arg = part;
     part->kind = MIMEKIND_DATA;
   }
 
-  return CURLE_OK;
-}
-
-/* Set mime part content from opened file. */
-CURLcode Curl_mime_file(curl_mimepart *part,
-                        FILE *fp, int closewhendone)
-{
-  if(!part || !fp)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  cleanup_part_content(part);
-
-  part->arg = fp;
-  part->readfunc = (curl_read_callback) mime_file_read;
-  if(closewhendone)
-    part->freefunc = (curl_free_callback) fclose;
-  part->origin = ftell(fp);
-  /* Check if file is seekable and get its size. */
-  part->datasize = (curl_off_t) -1;    /* Unknown size. */
-  if(!fseek(fp, 0L, SEEK_END)) {
-    part->datasize = ftell(fp);
-    if(part->datasize >= 0) {
-      if(part->datasize < part->origin)
-        part->datasize = 0;
-      else
-        part->datasize -= part->origin;
-      part->seekfunc = mime_file_seek;
-    }
-    fseek(fp, (long) part->origin, SEEK_SET);
-  }
-  part->kind = MIMEKIND_FILE;
   return CURLE_OK;
 }
 
@@ -1331,44 +1272,47 @@ CURLcode Curl_mime_file(curl_mimepart *part,
 CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
 {
   CURLcode result = CURLE_OK;
-  struct_stat sbuf;
   char *base;
 
-  if(!part || !filename)
+  if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  if(stat(filename, &sbuf) || access(filename, R_OK))
-    result = CURLE_READ_ERROR;
 
   cleanup_part_content(part);
 
-  part->data = strdup(filename);
-  if(!part->data)
-    result = CURLE_OUT_OF_MEMORY;
+  if(filename) {
+    struct_stat sbuf;
 
-  part->datasize = -1;
-  if(!result && S_ISREG(sbuf.st_mode)) {
-    part->datasize = filesize(filename, sbuf);
-    part->seekfunc = mime_namedfile_seek;
-  }
+    if(stat(filename, &sbuf) || access(filename, R_OK))
+      result = CURLE_READ_ERROR;
 
-  part->readfunc = mime_namedfile_read;
-  part->freefunc = mime_namedfile_free;
-  part->arg = part;
-  part->kind = MIMEKIND_NAMEDFILE;
+    part->data = strdup(filename);
+    if(!part->data)
+      result = CURLE_OUT_OF_MEMORY;
 
-  /* As a side effect, set the filename to the current file's base name.
-     It is possible to withdraw this by explicitly calling curl_mime_filename()
-     with a NULL filename argument after the current call. */
-  base = strippath(filename);
-  if(!base)
-    result = CURLE_OUT_OF_MEMORY;
-  else {
-    CURLcode res = curl_mime_filename(part, base);
+    part->datasize = -1;
+    if(!result && S_ISREG(sbuf.st_mode)) {
+      part->datasize = filesize(filename, sbuf);
+      part->seekfunc = mime_file_seek;
+    }
 
-    if(res)
-      result = res;
-    free(base);
+    part->readfunc = mime_file_read;
+    part->freefunc = mime_file_free;
+    part->kind = MIMEKIND_FILE;
+
+    /* As a side effect, set the filename to the current file's base name.
+       It is possible to withdraw this by explicitly calling
+       curl_mime_filename() with a NULL filename argument after the current
+       call. */
+    base = strippath(filename);
+    if(!base)
+      result = CURLE_OUT_OF_MEMORY;
+    else {
+      CURLcode res = curl_mime_filename(part, base);
+
+      if(res)
+        result = res;
+      free(base);
+    }
   }
   return result;
 }
@@ -1670,15 +1614,10 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
     case MIMEKIND_MULTIPART:
       contenttype = MULTIPART_CONTENTTYPE_DEFAULT;
       break;
-    case MIMEKIND_NAMEDFILE:
+    case MIMEKIND_FILE:
       contenttype = ContentTypeForFilename(part->filename);
       if(!contenttype)
         contenttype = ContentTypeForFilename(part->data);
-      if(!contenttype && part->filename)
-        contenttype = FILE_CONTENTTYPE_DEFAULT;
-      break;
-    case MIMEKIND_FILE:
-      contenttype = ContentTypeForFilename(part->filename);
       if(!contenttype && part->filename)
         contenttype = FILE_CONTENTTYPE_DEFAULT;
       break;
@@ -1836,14 +1775,6 @@ CURLcode curl_mime_data(curl_mimepart *part,
   (void) part;
   (void) data;
   (void) datasize;
-  return CURLE_NOT_BUILT_IN;
-}
-
-CURLcode Curl_mime_file(curl_mimepart *part, FILE *fp, int closewhendone)
-{
-  (void) part;
-  (void) fp;
-  (void) closewhendone;
   return CURLE_NOT_BUILT_IN;
 }
 
