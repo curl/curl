@@ -1655,6 +1655,8 @@ static CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
 {
   HCRYPTPROV hCryptProv = 0;
 
+  (void)data;
+
   if(!CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_FAILED_INIT;

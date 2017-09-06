@@ -2753,6 +2753,8 @@ static CURLcode Curl_darwinssl_random(struct Curl_easy *data UNUSED_PARAM,
   size_t i;
   u_int32_t random_number = 0;
 
+  (void)data;
+
   for(i = 0 ; i < length ; i++) {
     if(i % sizeof(u_int32_t) == 0)
       random_number = arc4random();
