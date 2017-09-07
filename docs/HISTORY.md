@@ -275,3 +275,21 @@ August:
  March: first real release supporting HTTP/2
 
  September: Web site had 245,000 unique visitors and served 236GB data
+
+2016
+----
+
+ December: curl 7.52.0 introduced support for HTTPS-proxy!
+
+2017
+----
+
+ September: Added Multi-SSL support
+
+ The web site serves 3100 GB/month
+
+    Public curl releases:         169
+    Command line options:         211
+    curl_easy_setopt() options:   249
+    Public functions in libcurl:  74
+    Contributors:                 1609
