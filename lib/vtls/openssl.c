@@ -2457,10 +2457,10 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     BIO *const bio = BIO_new(BIO_f_ssl());
     SSL *handle = conn->proxy_ssl[sockindex].backend->handle;
     DEBUGASSERT(ssl_connection_complete == conn->proxy_ssl[sockindex].state);
-    DEBUGASSERT(BACKEND->handle != NULL);
+    DEBUGASSERT(handle != NULL);
     DEBUGASSERT(bio != NULL);
     BIO_set_ssl(bio, handle, FALSE);
-    SSL_set_bio(handle, bio, bio);
+    SSL_set_bio(BACKEND->handle, bio, bio);
   }
   else if(!SSL_set_fd(BACKEND->handle, (int)sockfd)) {
     /* pass the raw socket into the SSL layers */
@@ -3366,10 +3366,12 @@ static bool Curl_ossl_data_pending(const struct connectdata *conn,
                                    int connindex)
 {
   const struct ssl_connect_data *connssl = &conn->ssl[connindex];
+  const struct ssl_connect_data *proxyssl = &conn->proxy_ssl[connindex];
   if(BACKEND->handle)
     /* SSL is in use */
     return (0 != SSL_pending(BACKEND->handle) ||
-           (BACKEND->handle && 0 != SSL_pending(BACKEND->handle))) ?
+           (proxyssl->backend->handle &&
+            0 != SSL_pending(proxyssl->backend->handle))) ?
            TRUE : FALSE;
   return FALSE;
 }
