@@ -37,8 +37,5 @@ for ssh test
 <errorcode>
 36
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

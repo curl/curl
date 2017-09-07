@@ -34,13 +34,6 @@ Moooooooooooo
 
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
-<strip>
-</strip>
-<protocol>
-</protocol>
 <file name="log/file582.txt">
 Moooooooooooo
  upload this

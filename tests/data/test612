@@ -40,8 +40,5 @@ Dummy test file for remove test
 <upload>
 Dummy test file for remove test
 </upload>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>
