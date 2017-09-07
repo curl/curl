@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -116,8 +116,8 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #define MD5_DIGEST_LENGTH 16 /* fixed size */
 #endif
 
-#ifndef SHA256_DIGEST_LENGTH
-#define SHA256_DIGEST_LENGTH 32 /* fixed size */
+#ifndef CURL_SHA256_DIGEST_LENGTH
+#define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
 
 /* see https://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
