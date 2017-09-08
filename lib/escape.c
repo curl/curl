@@ -116,7 +116,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
         ns = testing_ptr;
       }
 
-      result = Curl_convert_to_network(data, &in, 1);
+      result = Curl_convert_to_network(data, (char *)&in, 1);
       if(result) {
         /* Curl_convert_to_network calls failf if unsuccessful */
         free(ns);
@@ -173,7 +173,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
 
       in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
 
-      result = Curl_convert_from_network(data, &in, 1);
+      result = Curl_convert_from_network(data, (char *)&in, 1);
       if(result) {
         /* Curl_convert_from_network calls failf if unsuccessful */
         free(ns);
