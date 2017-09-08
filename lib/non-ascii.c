@@ -119,7 +119,7 @@ CURLcode Curl_convert_to_network(struct Curl_easy *data,
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(*cd, (const char **)&input_ptr, &in_bytes,
+    rc = iconv(*cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
     if(!data)
       iconv_close(tmpcd);
@@ -182,7 +182,7 @@ CURLcode Curl_convert_from_network(struct Curl_easy *data,
     /* call iconv */
     input_ptr = output_ptr = buffer;
     in_bytes = out_bytes = length;
-    rc = iconv(*cd, (const char **)&input_ptr, &in_bytes,
+    rc = iconv(*cd, &input_ptr, &in_bytes,
                &output_ptr, &out_bytes);
     if(!data)
       iconv_close(tmpcd);
@@ -224,7 +224,7 @@ CURLcode Curl_convert_from_utf8(struct Curl_easy *data,
     /* do the translation ourselves */
     iconv_t tmpcd = (iconv_t) -1;
     iconv_t *cd = &tmpcd;
-    const char *input_ptr;
+    char *input_ptr;
     char *output_ptr;
     size_t in_bytes, out_bytes, rc;
 
