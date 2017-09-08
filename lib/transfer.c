@@ -74,11 +74,36 @@
 #include "non-ascii.h"
 #include "http2.h"
 #include "mime.h"
+#include "strcase.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
+    !defined(CURL_DISABLE_IMAP)
+/*
+ * checkheaders() checks the linked list of custom headers for a
+ * particular header (prefix).
+ *
+ * Returns a pointer to the first matching header or NULL if none matched.
+ */
+char *Curl_checkheaders(const struct connectdata *conn,
+                        const char *thisheader)
+{
+  struct curl_slist *head;
+  size_t thislen = strlen(thisheader);
+  struct Curl_easy *data = conn->data;
+
+  for(head = data->set.headers;head; head=head->next) {
+    if(strncasecompare(head->data, thisheader, thislen))
+      return head->data;
+  }
+
+  return NULL;
+}
+#endif
 
 /*
  * This function will call the read callback to fill our buffer with data

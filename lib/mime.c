@@ -1820,7 +1820,7 @@ CURLcode curl_mime_headers(curl_mimepart *part,
 void Curl_mime_initpart(curl_mimepart *part, struct Curl_easy *easy)
 {
   (void) part;
-  (void) data;
+  (void) easy;
 }
 
 void Curl_mime_cleanpart(curl_mimepart *part)

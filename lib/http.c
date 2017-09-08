@@ -173,27 +173,6 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
 }
 
 /*
- * checkheaders() checks the linked list of custom HTTP headers for a
- * particular header (prefix).
- *
- * Returns a pointer to the first matching header or NULL if none matched.
- */
-char *Curl_checkheaders(const struct connectdata *conn,
-                        const char *thisheader)
-{
-  struct curl_slist *head;
-  size_t thislen = strlen(thisheader);
-  struct Curl_easy *data = conn->data;
-
-  for(head = data->set.headers;head; head=head->next) {
-    if(strncasecompare(head->data, thisheader, thislen))
-      return head->data;
-  }
-
-  return NULL;
-}
-
-/*
  * checkProxyHeaders() checks the linked list of custom proxy headers
  * if proxy headers are not available, then it will lookup into http header
  * link list
