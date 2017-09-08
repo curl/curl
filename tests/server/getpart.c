@@ -66,6 +66,35 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 
+
+/*
+ * Curl_convert_clone() returns a malloced copy of the source string (if
+ * returning CURLE_OK), with the data converted to network format. This
+ * function is used by base64 code in libcurl built to support data
+ * conversion. This is a DUMMY VERSION that returns data unmodified - for
+ * use by the test server only.
+ */
+CURLcode Curl_convert_clone(struct Curl_easy *data,
+                            const char *indata,
+                            size_t insize,
+                            char **outbuf);
+CURLcode Curl_convert_clone(struct Curl_easy *data,
+                            const char *indata,
+                            size_t insize,
+                            char **outbuf)
+{
+  char *convbuf;
+  (void)data;
+
+  convbuf = malloc(insize);
+  if(!convbuf)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy(convbuf, indata, insize);
+  *outbuf = convbuf;
+  return CURLE_OK;
+}
+
 /*
  * readline()
  *
@@ -451,4 +480,3 @@ int getpart(char **outbuf, size_t *outlen,
 
   return error;
 }
-
