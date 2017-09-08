@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -922,6 +922,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 3.9 or later
           if test "$compiler_num" -ge "309"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wcomma"
+            # avoid the varargs warning, fixed in 4.0
+            # https://bugs.llvm.org/show_bug.cgi?id=29140
+            if test "$compiler_num" -lt "400"; then
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-varargs"
+            fi
           fi
         fi
         ;;
