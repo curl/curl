@@ -756,6 +756,15 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
   }
 
   writeit = data->set.fwrite_rtp?data->set.fwrite_rtp:data->set.fwrite_func;
+
+  if(!data->set.fwrite_rtp && !data->set.is_fwrite_set &&
+     !data->set.rtp_out) {
+    /* if no callback is set for either RTP or default, the default function
+       fwrite() is utilized and that can't handle a NULL input */
+    failf(data, "No destination to default data callback!");
+    return CURLE_WRITE_ERROR;
+  }
+
   wrote = writeit(ptr, 1, len, data->set.rtp_out);
 
   if(CURL_WRITEFUNC_PAUSE == wrote) {
