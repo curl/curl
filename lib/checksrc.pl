@@ -542,6 +542,19 @@ sub scanfile {
                       "no space before equals sign");
         }
 
+        # check for plus signs without spaces next to it
+        if($nostr =~ /(.*)[^+]\+[a-z0-9]/i) {
+            checkwarn("PLUSNOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after plus sign");
+        }
+        # check for plus sign without spaces before it
+        elsif($nostr =~ /(.*)[a-z0-9]\+[^+]/i) {
+            checkwarn("NOSPACEPLUS",
+                      $line, length($1)+1, $file, $ol,
+                      "no space before plus sign");
+        }
+
         $line++;
         $prevl = $ol;
     }
