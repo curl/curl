@@ -297,7 +297,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
        * it would have been populated with something of size int to begin
        * with, even though its datatype may be larger than an int.
        */
-      DEBUGASSERT((ptr+pp->cache_size) <= (buf+data->set.buffer_size+1));
+      DEBUGASSERT((ptr + pp->cache_size) <= (buf + data->set.buffer_size + 1));
       memcpy(ptr, pp->cache, pp->cache_size);
       gotbytes = (ssize_t)pp->cache_size;
       free(pp->cache);    /* free the cache */
@@ -380,7 +380,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
             memmove(buf, pp->linestart_resp, n);
             buf[n] = 0; /* zero terminate */
             keepon = FALSE;
-            pp->linestart_resp = ptr+1; /* advance pointer */
+            pp->linestart_resp = ptr + 1; /* advance pointer */
             i++; /* skip this before getting out */
 
             *size = pp->nread_resp; /* size of the response */
@@ -388,7 +388,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
             break;
           }
           perline = 0; /* line starts over here */
-          pp->linestart_resp = ptr+1;
+          pp->linestart_resp = ptr + 1;
         }
       }
 

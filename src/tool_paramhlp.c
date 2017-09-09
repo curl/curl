@@ -73,13 +73,13 @@ ParameterError file2string(char **bufp, FILE *file)
       if(ptr)
         *ptr = '\0';
       buflen = strlen(buffer);
-      ptr = realloc(string, stringlen+buflen+1);
+      ptr = realloc(string, stringlen + buflen + 1);
       if(!ptr) {
         Curl_safefree(string);
         return PARAM_NO_MEM;
       }
       string = ptr;
-      strcpy(string+stringlen, buffer);
+      strcpy(string + stringlen, buffer);
       stringlen += buflen;
     }
   }
@@ -99,27 +99,27 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     do {
       if(!buffer || (alloc == nused)) {
         /* size_t overflow detection for huge files */
-        if(alloc+1 > ((size_t)-1)/2) {
+        if(alloc + 1 > ((size_t)-1)/2) {
           Curl_safefree(buffer);
           return PARAM_NO_MEM;
         }
         alloc *= 2;
         /* allocate an extra char, reserved space, for null termination */
-        newbuf = realloc(buffer, alloc+1);
+        newbuf = realloc(buffer, alloc + 1);
         if(!newbuf) {
           Curl_safefree(buffer);
           return PARAM_NO_MEM;
         }
         buffer = newbuf;
       }
-      nread = fread(buffer+nused, 1, alloc-nused, file);
+      nread = fread(buffer + nused, 1, alloc-nused, file);
       nused += nread;
     } while(nread);
     /* null terminate the buffer in case it's used as a string later */
     buffer[nused] = '\0';
     /* free trailing slack space, if possible */
     if(alloc != nused) {
-      newbuf = realloc(buffer, nused+1);
+      newbuf = realloc(buffer, nused + 1);
       if(!newbuf) {
         Curl_safefree(buffer);
         return PARAM_NO_MEM;
@@ -474,7 +474,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* append the password separated with a colon */
     passptr[userlen] = ':';
-    memcpy(&passptr[userlen+1], passwd, passwdlen+1);
+    memcpy(&passptr[userlen + 1], passwd, passwdlen + 1);
     *userpwd = passptr;
   }
 

@@ -76,7 +76,7 @@
   } WHILE_FALSE
 #define CURL_SB_ACCUM(x,c)                                   \
   do {                                                       \
-    if(x->subpointer < (x->subbuffer+sizeof x->subbuffer))   \
+    if(x->subpointer < (x->subbuffer + sizeof x->subbuffer)) \
       *x->subpointer++ = (c);                                \
   } WHILE_FALSE
 
@@ -935,7 +935,7 @@ static void suboption(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
 
-  printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn)+2);
+  printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
       len = strlen(tn->subopt_ttype) + 4 + 2;
@@ -1033,7 +1033,7 @@ static void sendsuboption(struct connectdata *conn, int option)
     CURL_SB_TERM(tn);
     /* data suboption is now ready */
 
-    printsub(data, '>', (unsigned char *)tn->subbuffer+2,
+    printsub(data, '>', (unsigned char *)tn->subbuffer + 2,
              CURL_SB_LEN(tn)-2);
 
     /* we send the header of the suboption... */
@@ -1044,9 +1044,9 @@ static void sendsuboption(struct connectdata *conn, int option)
     }
     /* ... then the window size with the send_telnet_data() function
        to deal with 0xFF cases ... */
-    send_telnet_data(conn, (char *)tn->subbuffer+3, 4);
+    send_telnet_data(conn, (char *)tn->subbuffer + 3, 4);
     /* ... and the footer */
-    bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer+7, 2);
+    bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer + 7, 2);
     if(bytes_written < 0) {
       err = SOCKERRNO;
       failf(data, "Sending data failed (%d)", err);

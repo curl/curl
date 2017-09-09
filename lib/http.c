@@ -1132,7 +1132,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
         /* there was body data sent beyond the initial header part, pass that
            on to the debug callback too */
         Curl_debug(conn->data, CURLINFO_DATA_OUT,
-                   ptr+headlen, bodylen, conn);
+                   ptr + headlen, bodylen, conn);
       }
     }
 
@@ -1244,7 +1244,7 @@ CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
        (~(size * 2) < (in->size_used * 2)))
       new_size = (size_t)-1;
     else
-      new_size = (in->size_used+size) * 2;
+      new_size = (in->size_used + size) * 2;
 
     if(in->buffer)
       /* we have a buffer, enlarge the existing one */
@@ -2788,7 +2788,7 @@ checkhttpprefix(struct Curl_easy *data,
     failf(data, "Failed to allocate memory for conversion!");
     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
   }
-  if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s)+1)) {
+  if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s) + 1)) {
     /* Curl_convert_from_network calls failf if unsuccessful */
     free(scratch);
     return FALSE; /* can't return CURLE_foobar so return FALSE */
@@ -2827,7 +2827,7 @@ checkrtspprefix(struct Curl_easy *data,
     failf(data, "Failed to allocate memory for conversion!");
     return FALSE; /* can't return CURLE_OUT_OF_MEMORY so return FALSE */
   }
-  if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s)+1)) {
+  if(CURLE_OK != Curl_convert_from_network(data, scratch, strlen(s) + 1)) {
     /* Curl_convert_from_network calls failf if unsuccessful */
     result = FALSE; /* can't return CURLE_foobar so return FALSE */
   }
@@ -2881,7 +2881,7 @@ static CURLcode header_append(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     }
 
-    newsize = CURLMAX((k->hbuflen+ length)*3/2, data->state.headersize*2);
+    newsize = CURLMAX((k->hbuflen + length) * 3 / 2, data->state.headersize*2);
     hbufp_index = k->hbufp - data->state.headerbuff;
     newbuff = realloc(data->state.headerbuff, newsize);
     if(!newbuff) {
@@ -2981,7 +2981,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     }
 
     /* decrease the size of the remaining (supposed) header line */
-    rest_length = (k->end_ptr - k->str)+1;
+    rest_length = (k->end_ptr - k->str) + 1;
     *nread -= (ssize_t)rest_length;
 
     k->str = k->end_ptr + 1; /* move past new line */
@@ -3308,7 +3308,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 #define HEADER1 scratch
 #define SCRATCHSIZE 21
       CURLcode res;
-      char scratch[SCRATCHSIZE+1]; /* "HTTP/major.minor 123" */
+      char scratch[SCRATCHSIZE + 1]; /* "HTTP/major.minor 123" */
       /* We can't really convert this yet because we
          don't know if it's the 1st header line or the body.
          So we do a partial conversion into a scratch area,
@@ -3499,7 +3499,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     if(!k->ignorecl && !data->set.ignorecl &&
        checkprefix("Content-Length:", k->p)) {
       curl_off_t contentlength;
-      if(!curlx_strtoofft(k->p+15, NULL, 10, &contentlength)) {
+      if(!curlx_strtoofft(k->p + 15, NULL, 10, &contentlength)) {
         if(data->set.max_filesize &&
            contentlength > data->set.max_filesize) {
           failf(data, "Maximum file size exceeded");
@@ -3713,7 +3713,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
                       CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_add(data,
-                      data->cookies, TRUE, k->p+11,
+                      data->cookies, TRUE, k->p + 11,
                       /* If there is a custom-set Host: name, use it
                          here, or else use real peer host name. */
                       conn->allocptr.cookiehost?
@@ -3725,7 +3725,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     else if(checkprefix("Last-Modified:", k->p) &&
             (data->set.timecondition || data->set.get_filetime) ) {
       time_t secs = time(NULL);
-      k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
+      k->timeofdoc = curl_getdate(k->p + strlen("Last-Modified:"),
                                   &secs);
       if(data->set.get_filetime)
         data->info.filetime = (long)k->timeofdoc;

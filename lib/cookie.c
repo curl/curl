@@ -125,7 +125,7 @@ static bool tailmatch(const char *cooke_domain, const char *hostname)
   if(hostname_len < cookie_domain_len)
     return FALSE;
 
-  if(!strcasecompare(cooke_domain, hostname+hostname_len-cookie_domain_len))
+  if(!strcasecompare(cooke_domain, hostname + hostname_len-cookie_domain_len))
     return FALSE;
 
   /* A lead char of cookie_domain is not '.'.
@@ -581,7 +581,7 @@ Curl_cookie_add(struct Curl_easy *data,
         continue;
       }
 
-      ptr = semiptr+1;
+      ptr = semiptr + 1;
       while(*ptr && ISBLANK(*ptr))
         ptr++;
       semiptr = strchr(ptr, ';'); /* now, find the next semicolon */
@@ -645,8 +645,8 @@ Curl_cookie_add(struct Curl_easy *data,
       else
         endslash = memrchr(path, '/', (size_t)(queryp - path));
       if(endslash) {
-        size_t pathlen = (size_t)(endslash-path+1); /* include ending slash */
-        co->path = malloc(pathlen+1); /* one extra for the zero byte */
+        size_t pathlen = (size_t)(endslash-path + 1); /* include end slash */
+        co->path = malloc(pathlen + 1); /* one extra for the zero byte */
         if(co->path) {
           memcpy(co->path, path, pathlen);
           co->path[pathlen] = 0; /* zero terminate */
@@ -1202,7 +1202,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
     mainco = array[0]; /* start here */
     for(i = 0; i<matches-1; i++)
-      array[i]->next = array[i+1];
+      array[i]->next = array[i + 1];
     array[matches-1]->next = NULL; /* terminate the list */
 
     free(array); /* remove the temporary data again */

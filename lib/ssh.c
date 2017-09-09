@@ -428,14 +428,14 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
 
   /* Check for /~/, indicating relative to the user's home directory */
   if(conn->handler->protocol & CURLPROTO_SCP) {
-    real_path = malloc(working_path_len+1);
+    real_path = malloc(working_path_len + 1);
     if(real_path == NULL) {
       free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
     if((working_path_len > 3) && (!memcmp(working_path, "/~/", 3)))
       /* It is referenced to the home directory, so strip the leading '/~/' */
-      memcpy(real_path, working_path+3, 4 + working_path_len-3);
+      memcpy(real_path, working_path + 3, 4 + working_path_len-3);
     else
       memcpy(real_path, working_path, 1 + working_path_len);
   }
@@ -451,19 +451,19 @@ static CURLcode ssh_getworkingpath(struct connectdata *conn,
          leading '/' */
       memcpy(real_path, homedir, homelen);
       real_path[homelen] = '/';
-      real_path[homelen+1] = '\0';
+      real_path[homelen + 1] = '\0';
       if(working_path_len > 3) {
-        memcpy(real_path+homelen+1, working_path + 3,
+        memcpy(real_path + homelen + 1, working_path + 3,
                1 + working_path_len -3);
       }
     }
     else {
-      real_path = malloc(working_path_len+1);
+      real_path = malloc(working_path_len + 1);
       if(real_path == NULL) {
         free(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
-      memcpy(real_path, working_path, 1+working_path_len);
+      memcpy(real_path, working_path, 1 + working_path_len);
     }
   }
 
@@ -1983,13 +1983,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->actualcode = result?result:CURLE_SSH;
         break;
       }
-      sshc->readdir_filename = malloc(PATH_MAX+1);
+      sshc->readdir_filename = malloc(PATH_MAX + 1);
       if(!sshc->readdir_filename) {
         state(conn, SSH_SFTP_CLOSE);
         sshc->actualcode = CURLE_OUT_OF_MEMORY;
         break;
       }
-      sshc->readdir_longentry = malloc(PATH_MAX+1);
+      sshc->readdir_longentry = malloc(PATH_MAX + 1);
       if(!sshc->readdir_longentry) {
         Curl_safefree(sshc->readdir_filename);
         state(conn, SSH_SFTP_CLOSE);
@@ -2023,7 +2023,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             break;
           }
           result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                     tmpLine, sshc->readdir_len+1);
+                                     tmpLine, sshc->readdir_len + 1);
           free(tmpLine);
 
           if(result) {
@@ -2032,7 +2032,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           }
           /* since this counts what we send to the client, we include the
              newline in this counter */
-          data->req.bytecount += sshc->readdir_len+1;
+          data->req.bytecount += sshc->readdir_len + 1;
 
           /* output debug output if that is requested */
           if(data->set.verbose) {

@@ -42,7 +42,7 @@ static void splayprint(struct Curl_tree * t, int d, char output)
   if(t == NULL)
     return;
 
-  splayprint(t->larger, d+1, output);
+  splayprint(t->larger, d + 1, output);
   for(i = 0; i<d; i++)
     if(output)
       printf("  ");
@@ -62,7 +62,7 @@ static void splayprint(struct Curl_tree * t, int d, char output)
       printf("\n");
   }
 
-  splayprint(t->smaller, d+1, output);
+  splayprint(t->smaller, d + 1, output);
 }
 
 UNITTEST_START
@@ -94,7 +94,7 @@ UNITTEST_START
   splayprint(root, 0, 1);
 
   for(i = 0; i < NUM_NODES; i++) {
-    int rem = (i+7)%NUM_NODES;
+    int rem = (i + 7)%NUM_NODES;
     printf("Tree look:\n");
     splayprint(root, 0, 1);
     printf("remove pointer %d, payload %ld\n", rem,
@@ -119,13 +119,13 @@ UNITTEST_START
     /* add some nodes with the same key */
     for(j = 0; j <= i % 3; j++) {
       size_t payload = key.tv_usec*10 + j;
-      nodes[i*3+j].payload = (void *)payload; /* for simplicity */
-      root = Curl_splayinsert(key, root, &nodes[i*3+j]);
+      nodes[i * 3 + j].payload = (void *)payload; /* for simplicity */
+      root = Curl_splayinsert(key, root, &nodes[i * 3 + j]);
     }
   }
 
   removed = NULL;
-  for(i = 0; i <= 1100; i+= 100) {
+  for(i = 0; i <= 1100; i += 100) {
     printf("Removing nodes not larger than %d\n", i);
     tv_now.tv_usec = i;
     root = Curl_splaygetbest(tv_now, root, &removed);

@@ -644,7 +644,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
           /* copy name (without strdup; possibly contains null characters) */
           form->name = Curl_memdup(form->name, form->namelength?
                                    form->namelength:
-                                   strlen(form->name)+1);
+                                   strlen(form->name) + 1);
         }
         if(!form->name) {
           return_value = CURL_FORMADD_MEMORY;
@@ -658,7 +658,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         /* copy value (without strdup; possibly contains null characters) */
         size_t clen  = (size_t) form->contentslength;
         if(!clen)
-          clen = strlen(form->value)+1;
+          clen = strlen(form->value) + 1;
 
         form->value = Curl_memdup(form->value, clen);
 

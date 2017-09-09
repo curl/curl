@@ -94,7 +94,7 @@
 
 
 #define MAX_STRING              256
-#define MAX_STRING1             MAX_STRING+1
+#define MAX_STRING1             MAX_STRING + 1
 
 #define SYNCTIME_UA "synctime/1.0"
 
@@ -160,7 +160,7 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
           SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
           for(i = 0; i<12; i++) {
             if(strcmp(MthStr[i], TmpStr2) == 0) {
-              SYSTime.wMonth = i+1;
+              SYSTime.wMonth = i + 1;
               break;
             }
           }

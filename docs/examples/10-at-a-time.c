@@ -162,9 +162,9 @@ int main(void)
         T.tv_sec = L/1000;
         T.tv_usec = (L%1000)*1000;
 
-        if(0 > select(M+1, &R, &W, &E, &T)) {
+        if(0 > select(M + 1, &R, &W, &E, &T)) {
           fprintf(stderr, "E: select(%i,,,,%li): %i: %s\n",
-              M+1, L, errno, strerror(errno));
+              M + 1, L, errno, strerror(errno));
           return EXIT_FAILURE;
         }
       }

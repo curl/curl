@@ -170,7 +170,7 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
     return NULL;
 
   /* alloc at least 64 bytes */
-  size = sizeof(struct memdebug)+wantedsize;
+  size = sizeof(struct memdebug) + wantedsize;
 
   mem = (Curl_cmalloc)(size);
   if(mem) {
@@ -225,7 +225,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   if(countcheck("strdup", line, source))
     return NULL;
 
-  len = strlen(str)+1;
+  len = strlen(str) + 1;
 
   mem = curl_domalloc(len, 0, NULL); /* NULL prevents logging */
   if(mem)
@@ -271,7 +271,7 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
 {
   struct memdebug *mem = NULL;
 
-  size_t size = sizeof(struct memdebug)+wantedsize;
+  size_t size = sizeof(struct memdebug) + wantedsize;
 
   DEBUGASSERT(wantedsize != 0);
 

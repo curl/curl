@@ -152,7 +152,7 @@ static int loop(int num, CURLM *cm, const char *url, const char *userpwd,
         T.tv_usec = 0;
       }
 
-      res_select_test(M+1, &R, &W, &E, &T);
+      res_select_test(M + 1, &R, &W, &E, &T);
       if(res)
         return res;
     }

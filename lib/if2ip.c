@@ -230,7 +230,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
     return IF2IP_NOT_FOUND;
 
   memset(&req, 0, sizeof(req));
-  memcpy(req.ifr_name, interf, len+1);
+  memcpy(req.ifr_name, interf, len + 1);
   req.ifr_addr.sa_family = AF_INET;
 
   if(ioctl(dummy, SIOCGIFADDR, &req) < 0) {

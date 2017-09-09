@@ -1040,7 +1040,7 @@ static int alloc_addbyter(int output, FILE *data)
     infop->alloc = 32;
     infop->len = 0;
   }
-  else if(infop->len+1 >= infop->alloc) {
+  else if(infop->len + 1 >= infop->alloc) {
     char *newptr = NULL;
     size_t newsize = infop->alloc*2;
 

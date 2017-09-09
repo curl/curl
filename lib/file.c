@@ -165,7 +165,7 @@ static CURLcode file_range(struct connectdata *conn)
     else {
       /* X-Y */
       totalsize = to-from;
-      data->req.maxdownload = totalsize+1; /* include last byte */
+      data->req.maxdownload = totalsize + 1; /* include last byte */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE from %" CURL_FORMAT_CURL_OFF_T
                    " getting %" CURL_FORMAT_CURL_OFF_T " bytes\n",

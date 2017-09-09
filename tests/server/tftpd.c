@@ -992,7 +992,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 
     /* before increasing pointer, make sure it is still within the legal
        space */
-    if((cp+1) < &buf.storage[size]) {
+    if((cp + 1) < &buf.storage[size]) {
       ++cp;
       if(first) {
         /* store the mode since we need it later */

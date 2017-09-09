@@ -80,7 +80,7 @@ static char *get_param_word(char **str, char **end_pos)
         while(*ptr && NULL == strchr(end_chars, *ptr))
           ++ptr;
         *str = ptr;
-        return word_begin+1;
+        return word_begin + 1;
       }
       ++ptr;
     }

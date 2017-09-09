@@ -63,7 +63,8 @@ static char *printable(char *inbuf, size_t inlength)
     inlength = strlen(inbuf);
 
   if(inlength) {
-    outincr = ((inlength/2) < (HEX_STR_LEN+1)) ? HEX_STR_LEN+1 : inlength/2;
+    outincr = ((inlength/2) < (HEX_STR_LEN + 1)) ?
+      HEX_STR_LEN + 1 : inlength/2;
     outsize = inlength + outincr;
   }
   else

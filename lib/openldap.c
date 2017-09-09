@@ -198,7 +198,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   (void)done;
 
   strcpy(hosturl, "ldap");
-  ptr = hosturl+4;
+  ptr = hosturl + 4;
   if(conn->handler->flags & PROTOPT_SSL)
     *ptr++ = 's';
   snprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",

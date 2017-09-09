@@ -241,7 +241,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       /* mark this as done once this chunk is transferred */
       data->req.upload_done = TRUE;
 
-    nread+=(int)strlen(endofline_native); /* for the added end of line */
+    nread += (int)strlen(endofline_native); /* for the added end of line */
   }
 #ifdef CURL_DOES_CONVERSIONS
   else if((data->set.prefer_ascii) && (!sending_http_headers)) {
@@ -1622,7 +1622,7 @@ static char *concat_url(const char *base, const char *relurl)
        that position instead */
     pathsep = strchr(protsep, '/');
     if(pathsep)
-      protsep = pathsep+1;
+      protsep = pathsep + 1;
     else
       protsep = NULL;
 
@@ -1793,7 +1793,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     /* This is an absolute URL, don't allow the custom port number */
     disallowport = TRUE;
 
-    newest = malloc(newlen+1); /* get memory for this */
+    newest = malloc(newlen + 1); /* get memory for this */
     if(!newest)
       return CURLE_OUT_OF_MEMORY;
 

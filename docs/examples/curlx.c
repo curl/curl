@@ -492,8 +492,8 @@ int main(int argc, char **argv)
 
   /* pass our list of custom made headers */
 
-  contenttype = malloc(15+strlen(mimetype));
-  snprintf(contenttype, 15+strlen(mimetype), "Content-type: %s", mimetype);
+  contenttype = malloc(15 + strlen(mimetype));
+  snprintf(contenttype, 15 + strlen(mimetype), "Content-type: %s", mimetype);
   headers = curl_slist_append(headers, contenttype);
   curl_easy_setopt(p.curl, CURLOPT_HTTPHEADER, headers);
 

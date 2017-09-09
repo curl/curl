@@ -251,7 +251,7 @@ static char *Curl_basename(char *path)
   s2 = strrchr(path, '\\');
 
   if(s1 && s2) {
-    path = (s1 > s2? s1 : s2)+1;
+    path = (s1 > s2? s1 : s2) + 1;
   }
   else if(s1)
     path = s1 + 1;

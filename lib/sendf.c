@@ -63,7 +63,7 @@ static size_t convert_lineends(struct Curl_easy *data,
     if(*startPtr == '\n') {
       /* This block of incoming data starts with the
          previous block's LF so get rid of it */
-      memmove(startPtr, startPtr+1, size-1);
+      memmove(startPtr, startPtr + 1, size-1);
       size--;
       /* and it wasn't a bare CR but a CRLF conversion instead */
       data->state.crlf_conversions++;
@@ -75,7 +75,7 @@ static size_t convert_lineends(struct Curl_easy *data,
   inPtr = outPtr = memchr(startPtr, '\r', size);
   if(inPtr) {
     /* at least one CR, now look for CRLF */
-    while(inPtr < (startPtr+size-1)) {
+    while(inPtr < (startPtr + size-1)) {
       /* note that it's size-1, so we'll never look past the last byte */
       if(memcmp(inPtr, "\r\n", 2) == 0) {
         /* CRLF found, bump past the CR and copy the NL */
@@ -98,7 +98,7 @@ static size_t convert_lineends(struct Curl_easy *data,
       inPtr++;
     } /* end of while loop */
 
-    if(inPtr < startPtr+size) {
+    if(inPtr < startPtr + size) {
       /* handle last byte */
       if(*inPtr == '\r') {
         /* deal with a CR at the end of the buffer */
@@ -112,7 +112,7 @@ static size_t convert_lineends(struct Curl_easy *data,
       }
       outPtr++;
     }
-    if(outPtr < startPtr+size)
+    if(outPtr < startPtr + size)
       /* tidy up by null terminating the now shorter data */
       *outPtr = '\0';
 

@@ -213,7 +213,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
       return CURLE_COULDNT_CONNECT;
     }
     /* copy the proxy name WITH trailing zero */
-    memcpy(socksreq + 8, proxy_user, plen+1);
+    memcpy(socksreq + 8, proxy_user, plen + 1);
   }
 
   /*

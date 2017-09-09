@@ -141,7 +141,7 @@ static char *inet_ntop6 (const unsigned char *src, char *dst, size_t size)
      */
     if(i == 6 && best.base == 0 &&
         (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
-      if(!inet_ntop4(src+12, tp, sizeof(tmp) - (tp - tmp))) {
+      if(!inet_ntop4(src + 12, tp, sizeof(tmp) - (tp - tmp))) {
         errno = ENOSPC;
         return (NULL);
       }

@@ -4480,7 +4480,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
       /* This cannot be done with strcpy() in a portable manner, since the
          memory areas overlap! */
-      memmove(path, path + 2, strlen(path + 2)+1);
+      memmove(path, path + 2, strlen(path + 2) + 1);
     }
 
     /*
@@ -4521,7 +4521,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
         ptr++;
 
       /* This cannot be made with strcpy, as the memory chunks overlap! */
-      memmove(path, ptr, strlen(ptr)+1);
+      memmove(path, ptr, strlen(ptr) + 1);
     }
 
 #if !defined(MSDOS) && !defined(WIN32) && !defined(__CYGWIN__)
@@ -4622,7 +4622,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
    */
   at = strchr(conn->host.name, '@');
   if(at)
-    query = strchr(at+1, '?');
+    query = strchr(at + 1, '?');
   else
     query = strchr(conn->host.name, '?');
 
@@ -4640,10 +4640,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
     /* move the existing path plus the zero byte forward, to make room for
        the host-name part */
-    memmove(path+hostlen+1, path, pathlen+1);
+    memmove(path + hostlen + 1, path, pathlen + 1);
 
      /* now copy the trailing host part in front of the existing path */
-    memcpy(path+1, query, hostlen);
+    memcpy(path + 1, query, hostlen);
 
     path[0]='/'; /* prepend the missing slash */
     rebuild_url = TRUE;
@@ -4664,7 +4664,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     /* We need this function to deal with overlapping memory areas. We know
        that the memory area 'path' points to is 'urllen' bytes big and that
        is bigger than the path. Use +1 to move the zero byte too. */
-    memmove(&path[1], path, strlen(path)+1);
+    memmove(&path[1], path, strlen(path) + 1);
     path[0] = '/';
     rebuild_url = TRUE;
   }
@@ -4770,7 +4770,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       if(*endp == ']') {
         /* The address scope was well formed.  Knock it out of the
            hostname. */
-        memmove(percent, endp, strlen(endp)+1);
+        memmove(percent, endp, strlen(endp) + 1);
         conn->scope_id = (unsigned int)scope;
       }
       else {
@@ -5100,7 +5100,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   /* Parse the protocol part if present */
   endofprot = strstr(proxy, "://");
   if(endofprot) {
-    proxyptr = endofprot+3;
+    proxyptr = endofprot + 3;
     if(checkprefix("https", proxy))
       proxytype = CURLPROXY_HTTPS;
     else if(checkprefix("socks5h", proxy))
@@ -5813,7 +5813,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     char *rest;
     long port;
 
-    port = strtol(portptr+1, &rest, 10);  /* Port number must be decimal */
+    port = strtol(portptr + 1, &rest, 10);  /* Port number must be decimal */
 
     if((port < 0) || (port > 0xffff)) {
       /* Single unix standard says port numbers are 16 bits long */
@@ -6448,14 +6448,14 @@ static CURLcode create_conn(struct Curl_easy *data,
   Curl_safefree(data->state.pathbuffer);
   data->state.path = NULL;
 
-  data->state.pathbuffer = malloc(urllen+2);
+  data->state.pathbuffer = malloc(urllen + 2);
   if(NULL == data->state.pathbuffer) {
     result = CURLE_OUT_OF_MEMORY; /* really bad error */
     goto out;
   }
   data->state.path = data->state.pathbuffer;
 
-  conn->host.rawalloc = malloc(urllen+2);
+  conn->host.rawalloc = malloc(urllen + 2);
   if(NULL == conn->host.rawalloc) {
     Curl_safefree(data->state.pathbuffer);
     data->state.path = NULL;

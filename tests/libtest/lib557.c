@@ -1546,6 +1546,7 @@ static int test_weird_arguments(void)
 }
 
 /* DBL_MAX value from Linux */
+/* !checksrc! disable PLUSNOSPACE 1 */
 #define MAXIMIZE -1.7976931348623157081452E+308
 
 static int test_float_formatting(void)

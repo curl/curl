@@ -975,7 +975,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     char *port_start = NULL;
     char *port_sep = NULL;
 
-    addr = calloc(addrlen+1, 1);
+    addr = calloc(addrlen + 1, 1);
     if(!addr)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1018,7 +1018,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     if(ip_end != NULL) {
       port_start = strchr(ip_end, ':');
       if(port_start) {
-        port_min = curlx_ultous(strtoul(port_start+1, NULL, 10));
+        port_min = curlx_ultous(strtoul(port_start + 1, NULL, 10));
         port_sep = strchr(port_start, '-');
         if(port_sep) {
           port_max = curlx_ultous(strtoul(port_sep + 1, NULL, 10));
@@ -1474,7 +1474,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
       /* chop off the file part if format is dir/dir/file */
       slashPos = strrchr(lstArg, '/');
       if(slashPos)
-        *(slashPos+1) = '\0';
+        *(slashPos + 1) = '\0';
     }
   }
 
@@ -2266,7 +2266,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
   /* get the size from the ascii string: */
   if(ftpcode == 213)
     /* ignores parsing errors, which will make the size remain unknown */
-    (void)curlx_strtoofft(buf+4, NULL, 0, &filesize);
+    (void)curlx_strtoofft(buf + 4, NULL, 0, &filesize);
 
   if(instate == FTP_SIZE) {
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
@@ -3498,7 +3498,7 @@ static CURLcode ftp_range(struct connectdata *conn)
     }
     else {
       /* X-Y */
-      data->req.maxdownload = (to-from)+1; /* include last byte */
+      data->req.maxdownload = (to - from) + 1; /* include last byte */
       data->state.resume_from = from;
       DEBUGF(infof(conn->data, "FTP RANGE from %" CURL_FORMAT_CURL_OFF_T
                    " getting %" CURL_FORMAT_CURL_OFF_T " bytes\n",
@@ -4196,7 +4196,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         return result;
       }
       ftpc->dirdepth = 1; /* we consider it to be a single dir */
-      filename = slash_pos ? slash_pos+1 : cur_pos; /* rest is file name */
+      filename = slash_pos ? slash_pos + 1 : cur_pos; /* rest is file name */
     }
     else
       filename = cur_pos;  /* this is a file name only */

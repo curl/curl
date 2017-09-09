@@ -500,7 +500,7 @@ static int ProcessRequest(struct httprequest *req)
                 SET_RTP_PKT_LEN(rtp_scratch, rtp_size);
 
                 /* Fill it with junk data */
-                for(i = 0; i < rtp_size; i+= RTP_DATA_SIZE) {
+                for(i = 0; i < rtp_size; i += RTP_DATA_SIZE) {
                   memcpy(rtp_scratch + 4 + i, RTP_DATA, RTP_DATA_SIZE);
                 }
 
@@ -554,8 +554,8 @@ static int ProcessRequest(struct httprequest *req)
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
-          if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
-            req->testno = strtol(portp+1, NULL, 10);
+          if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1)))
+            req->testno = strtol(portp + 1, NULL, 10);
           else
             req->testno = DOCNUMBER_CONNECT;
         }

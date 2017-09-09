@@ -389,7 +389,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
         /* sub-match, make sure that it is followed by a colon */
         if(stream->push_headers[i][len] != ':')
           continue;
-        return &stream->push_headers[i][len+1];
+        return &stream->push_headers[i][len + 1];
       }
     }
   }

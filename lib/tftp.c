@@ -217,7 +217,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
   if(start) {
 
     maxtime = (time_t)(timeout_ms + 500) / 1000;
-    state->max_time = state->start_time+maxtime;
+    state->max_time = state->start_time + maxtime;
 
     /* Set per-block timeout to total */
     timeout = maxtime;
@@ -241,7 +241,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
     else
       maxtime = 3600;
 
-    state->max_time = state->start_time+maxtime;
+    state->max_time = state->start_time + maxtime;
 
     /* Set per-block timeout to total */
     timeout = maxtime;
@@ -321,7 +321,7 @@ static const char *tftp_option_get(const char *buf, size_t len,
     return NULL;
   *option = buf;
 
-  loc += Curl_strnlen(buf+loc, len-loc);
+  loc += Curl_strnlen(buf + loc, len-loc);
   loc++; /* NULL term */
 
   if(loc > len)
@@ -475,7 +475,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
       state->conn->data->req.upload_fromhere =
-        (char *)state->spacket.data+4;
+        (char *)state->spacket.data + 4;
       if(data->state.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
     }
@@ -497,7 +497,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       return CURLE_TFTP_ILLEGAL; /* too long file name field */
     }
 
-    snprintf((char *)state->spacket.data+2,
+    snprintf((char *)state->spacket.data + 2,
              state->blksize,
              "%s%c%s%c", filename, '\0',  mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
@@ -512,25 +512,25 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
         strcpy(buf, "0"); /* the destination is large enough */
 
       sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes,
+                                (char *)state->spacket.data + sbytes,
                                 TFTP_OPTION_TSIZE);
       sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes, buf);
+                                (char *)state->spacket.data + sbytes, buf);
       /* add blksize option */
       snprintf(buf, sizeof(buf), "%d", state->requested_blksize);
       sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes,
+                                (char *)state->spacket.data + sbytes,
                                 TFTP_OPTION_BLKSIZE);
       sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes, buf);
+                                (char *)state->spacket.data + sbytes, buf);
 
       /* add timeout option */
       snprintf(buf, sizeof(buf), "%d", state->retry_time);
       sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes,
+                                (char *)state->spacket.data + sbytes,
                                 TFTP_OPTION_INTERVAL);
       sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data+sbytes, buf);
+                                (char *)state->spacket.data + sbytes, buf);
     }
 
     /* the typecase for the 3rd argument is mostly for systems that do
@@ -576,7 +576,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
 
 /* the next blocknum is x + 1 but it needs to wrap at an unsigned 16bit
    boundary */
-#define NEXT_BLOCKNUM(x) (((x)+1)&0xffff)
+#define NEXT_BLOCKNUM(x) (((x) + 1)&0xffff)
 
 /**********************************************************
  *
@@ -627,7 +627,7 @@ static CURLcode tftp_rx(tftp_state_data_t *state, tftp_event_t event)
     }
 
     /* Check if completed (That is, a less than full packet is received) */
-    if(state->rbytes < (ssize_t)state->blksize+4) {
+    if(state->rbytes < (ssize_t)state->blksize + 4) {
       state->state = TFTP_STATE_FIN;
     }
     else {
@@ -743,7 +743,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
         else {
           /* Re-send the data packet */
           sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                          4+state->sbytes, SEND_4TH_ARG,
+                          4 + state->sbytes, SEND_4TH_ARG,
                           (struct sockaddr *)&state->remote_addr,
                           state->remote_addrlen);
           /* Check all sbytes were sent */
@@ -776,7 +776,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
      * data block.
      * */
     state->sbytes = 0;
-    state->conn->data->req.upload_fromhere = (char *)state->spacket.data+4;
+    state->conn->data->req.upload_fromhere = (char *)state->spacket.data + 4;
     do {
       result = Curl_fillreadbuffer(state->conn, state->blksize - state->sbytes,
                                    &cb);
@@ -813,7 +813,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     else {
       /* Re-send the data packet */
       sbytes = sendto(state->sockfd, (void *)state->spacket.data,
-                      4+state->sbytes, SEND_4TH_ARG,
+                      4 + state->sbytes, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
       /* Check all sbytes were sent */
@@ -1109,7 +1109,7 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
   fromlen = sizeof(fromaddr);
   state->rbytes = (int)recvfrom(state->sockfd,
                                 (void *)state->rpacket.data,
-                                state->blksize+4,
+                                state->blksize + 4,
                                 0,
                                 (struct sockaddr *)&fromaddr,
                                 &fromlen);
@@ -1135,7 +1135,7 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
       if(state->rbytes > 4 &&
          (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
         result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                                   (char *)state->rpacket.data+4,
+                                   (char *)state->rpacket.data + 4,
                                    state->rbytes-4);
         if(result) {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
@@ -1149,14 +1149,14 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
     {
       unsigned short error = getrpacketblock(&state->rpacket);
       state->error = (tftp_error_t)error;
-      infof(data, "%s\n", (const char *)state->rpacket.data+4);
+      infof(data, "%s\n", (const char *)state->rpacket.data + 4);
       break;
     }
     case TFTP_EVENT_ACK:
       break;
     case TFTP_EVENT_OACK:
       result = tftp_parse_option_ack(state,
-                                     (const char *)state->rpacket.data+2,
+                                     (const char *)state->rpacket.data + 2,
                                      state->rbytes-2);
       if(result)
         return result;
@@ -1200,7 +1200,7 @@ static long tftp_state_timeout(struct connectdata *conn, tftp_event_t *event)
     state->state = TFTP_STATE_FIN;
     return 0;
   }
-  if(current > state->rx_time+state->retry_time) {
+  if(current > state->rx_time + state->retry_time) {
     if(event)
       *event = TFTP_EVENT_TIMEOUT;
     time(&state->rx_time); /* update even though we received nothing */

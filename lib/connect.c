@@ -319,7 +319,7 @@ static CURLcode bindlocal(struct connectdata *conn,
            * as a hostname or ip address.
            */
           if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                        dev, (curl_socklen_t)strlen(dev)+1) != 0) {
+                        dev, (curl_socklen_t)strlen(dev) + 1) != 0) {
             error = SOCKERRNO;
             infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s;"
                   " will do regular bind\n",

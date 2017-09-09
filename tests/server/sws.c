@@ -578,18 +578,18 @@ static int ProcessRequest(struct httprequest *req)
           }
           if(*p != ']')
             logmsg("Invalid CONNECT IPv6 address format");
-          else if(*(p+1) != ':')
+          else if(*(p + 1) != ':')
             logmsg("Invalid CONNECT IPv6 port format");
           else
-            portp = p+1;
+            portp = p + 1;
 
           req->testno = part;
         }
         else
           portp = strchr(doc, ':');
 
-        if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1))) {
-          unsigned long ulnum = strtoul(portp+1, NULL, 10);
+        if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
+          unsigned long ulnum = strtoul(portp + 1, NULL, 10);
           if(!ulnum || (ulnum > 65535UL))
             logmsg("Invalid CONNECT port received");
           else

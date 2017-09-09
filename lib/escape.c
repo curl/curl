@@ -91,7 +91,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   if(inlength < 0)
     return NULL;
 
-  alloc = (inlength?(size_t)inlength:strlen(string))+1;
+  alloc = (inlength?(size_t)inlength:strlen(string)) + 1;
   newlen = alloc;
 
   ns = malloc(alloc);
@@ -148,7 +148,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
                         char **ostring, size_t *olen,
                         bool reject_ctrl)
 {
-  size_t alloc = (length?length:strlen(string))+1;
+  size_t alloc = (length?length:strlen(string)) + 1;
   char *ns = malloc(alloc);
   unsigned char in;
   size_t strindex = 0;

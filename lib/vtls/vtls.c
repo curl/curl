@@ -697,7 +697,7 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   snprintf(output, outlen, "%s:", label);
 
   /* memcpy the value (it might not be zero terminated) */
-  memcpy(&output[labellen+1], value, valuelen);
+  memcpy(&output[labellen + 1], value, valuelen);
 
   /* zero terminate the output */
   output[labellen + 1 + valuelen] = 0;

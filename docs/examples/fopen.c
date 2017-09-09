@@ -189,7 +189,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
     switch(rc) {
@@ -398,7 +398,7 @@ char *url_fgets(char *ptr, size_t size, URL_FILE *file)
     /* look for newline or eof */
     for(loop = 0;loop < want;loop++) {
       if(file->buffer[loop] == '\n') {
-        want = loop+1;/* include newline */
+        want = loop + 1;/* include newline */
         break;
       }
     }

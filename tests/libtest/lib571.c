@@ -70,7 +70,7 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
   }
 
   data += 4;
-  for(i = 0; i < message_size; i+= RTP_DATA_SIZE) {
+  for(i = 0; i < message_size; i += RTP_DATA_SIZE) {
     if(message_size - i > RTP_DATA_SIZE) {
       if(memcmp(RTP_DATA, data + i, RTP_DATA_SIZE) != 0) {
         printf("RTP PAYLOAD CORRUPTED [%s]\n", data + i);
