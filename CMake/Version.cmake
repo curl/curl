@@ -12,6 +12,13 @@ function(determine_version_type _out_version_type_name)
                 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
                    CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
                    CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
+
+                   # FreeBSD comes with the a.out and elf flavours
+                   # but a.out was supported up to version 3.x and
+                   # elf from 3.x. I cannot imagine someone runnig
+                   # CMake on those ancient systems
+                   CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+
                    CMAKE_SYSTEM_NAME STREQUAL "Haiku" OR
                    CMAKE_SYSTEM_NAME STREQUAL "SunOS")
                         set(_ver_type "linux")
