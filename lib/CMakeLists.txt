@@ -84,10 +84,6 @@ if(NOT CURL_STATICLIB)
   parse_versioninfo("${_versioninfo_string}" _version _soversion)
   if(_version)
     set_target_properties(${LIB_NAME} PROPERTIES VERSION ${_version})
-    if(WIN32)
-      set_target_properties(${LIB_NAME} PROPERTIES
-                            SUFFIX "-${_version}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    endif()
   endif()
   if(_soversion)
     set_target_properties(${LIB_NAME} PROPERTIES SOVERSION ${_soversion})
@@ -117,7 +113,7 @@ if(WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
 
     set_target_properties (${LIB_NAME} PROPERTIES
-       DEBUG_POSTFIX "-d"
+       DEBUG_POSTFIX "d"
        # Note: no postfix for release variants, let user choose what style of release he wants
        # MINSIZEREL_POSTFIX "-z"
        # RELWITHDEBINFO_POSTFIX "-g"
