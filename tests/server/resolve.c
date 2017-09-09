@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,11 +57,11 @@
 static bool use_ipv6 = FALSE;
 static const char *ipv_inuse = "IPv4";
 
-const char *serverlogfile=""; /* for a util.c function we don't use */
+const char *serverlogfile = ""; /* for a util.c function we don't use */
 
 int main(int argc, char *argv[])
 {
-  int arg=1;
+  int arg = 1;
   const char *host = NULL;
   int rc = 0;
 

@@ -285,7 +285,7 @@ void Curl_freeset(struct Curl_easy *data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
   enum dupstring i;
-  for(i=(enum dupstring)0; i < STRING_LAST; i++) {
+  for(i = (enum dupstring)0; i < STRING_LAST; i++) {
     Curl_safefree(data->set.str[i]);
   }
 
@@ -372,7 +372,7 @@ CURLcode Curl_dupset(struct Curl_easy *dst, struct Curl_easy *src)
   memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
 
   /* duplicate all strings */
-  for(i=(enum dupstring)0; i< STRING_LASTZEROTERMINATED; i++) {
+  for(i = (enum dupstring)0; i< STRING_LASTZEROTERMINATED; i++) {
     result = setstropt(&dst->set.str[i], src->set.str[i]);
     if(result)
       return result;
@@ -681,7 +681,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   else {
     result = Curl_init_userdefined(&data->set);
 
-    data->state.headersize=HEADERSIZE;
+    data->state.headersize = HEADERSIZE;
 
     Curl_convert_init(data);
 
@@ -1677,28 +1677,28 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * The low speed limit that if transfers are below this for
      * CURLOPT_LOW_SPEED_TIME, the transfer is aborted.
      */
-    data->set.low_speed_limit=va_arg(param, long);
+    data->set.low_speed_limit = va_arg(param, long);
     break;
   case CURLOPT_MAX_SEND_SPEED_LARGE:
     /*
      * When transfer uploads are faster then CURLOPT_MAX_SEND_SPEED_LARGE
      * bytes per second the transfer is throttled..
      */
-    data->set.max_send_speed=va_arg(param, curl_off_t);
+    data->set.max_send_speed = va_arg(param, curl_off_t);
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
      * When receiving data faster than CURLOPT_MAX_RECV_SPEED_LARGE bytes per
      * second the transfer is throttled..
      */
-    data->set.max_recv_speed=va_arg(param, curl_off_t);
+    data->set.max_recv_speed = va_arg(param, curl_off_t);
     break;
   case CURLOPT_LOW_SPEED_TIME:
     /*
      * The low speed time that if transfers are below the set
      * CURLOPT_LOW_SPEED_LIMIT during this time, the transfer is aborted.
      */
-    data->set.low_speed_time=va_arg(param, long);
+    data->set.low_speed_time = va_arg(param, long);
     break;
   case CURLOPT_URL:
     /*
@@ -2935,7 +2935,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     return CURLE_NOT_BUILT_IN;
 #else
     arg = va_arg(param, long);
-    if((arg>=1) && (arg <= 256))
+    if((arg >= 1) && (arg <= 256))
       data->set.stream_weight = (int)arg;
     break;
 #endif
@@ -3301,7 +3301,7 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
   struct curl_hash_iterator iter;
   struct curl_llist_element *curr;
   struct curl_hash_element *he;
-  time_t highscore=-1;
+  time_t highscore =- 1;
   time_t score;
   struct curltime now;
   struct connectdata *conn_candidate = NULL;
@@ -3364,7 +3364,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
                                       struct connectbundle *bundle)
 {
   struct curl_llist_element *curr;
-  time_t highscore=-1;
+  time_t highscore = -1;
   time_t score;
   struct curltime now;
   struct connectdata *conn_candidate = NULL;
@@ -3995,7 +3995,7 @@ int Curl_doing_getsock(struct connectdata *conn,
 CURLcode Curl_protocol_connecting(struct connectdata *conn,
                                   bool *done)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   if(conn && conn->handler->connecting) {
     *done = FALSE;
@@ -4014,7 +4014,7 @@ CURLcode Curl_protocol_connecting(struct connectdata *conn,
 
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   if(conn && conn->handler->doing) {
     *done = FALSE;
@@ -4034,7 +4034,7 @@ CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done)
 CURLcode Curl_protocol_connect(struct connectdata *conn,
                                bool *protocol_done)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   *protocol_done = FALSE;
 
@@ -4121,7 +4121,7 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
   if(len && (host->name[len-1] == '.'))
     /* strip off a single trailing dot if present, primarily for SNI but
        there's no use for it */
-    host->name[len-1]=0;
+    host->name[len-1] = 0;
 
   /* Check name for non-ASCII and convert hostname to ACE form if we can */
   if(!is_ASCII_name(host->name)) {
@@ -4537,7 +4537,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   else {
     /* clear path */
     char slashbuf[4];
-    path[0]=0;
+    path[0] = 0;
 
     rc = sscanf(data->change.url,
                 "%15[^\n/:]:%3[/]%[^\n/?#]%[^\n]",
@@ -4648,7 +4648,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     path[0]='/'; /* prepend the missing slash */
     rebuild_url = TRUE;
 
-    *query=0; /* now cut off the hostname at the ? */
+    *query = 0; /* now cut off the hostname at the ? */
   }
   else if(!path[0]) {
     /* if there's no path set, use a single slash */
@@ -5040,7 +5040,7 @@ static char *detect_proxy(struct connectdata *conn)
   strcpy(envp, "_proxy");
 
   /* read the protocol proxy: */
-  prox=curl_getenv(proxy_env);
+  prox = curl_getenv(proxy_env);
 
   /*
    * We don't try the uppercase version of HTTP_PROXY because of
@@ -5057,7 +5057,7 @@ static char *detect_proxy(struct connectdata *conn)
   if(!prox && !strcasecompare("http_proxy", proxy_env)) {
     /* There was no lowercase variable, try the uppercase version: */
     Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
-    prox=curl_getenv(proxy_env);
+    prox = curl_getenv(proxy_env);
   }
 
   if(prox)
@@ -5065,7 +5065,7 @@ static char *detect_proxy(struct connectdata *conn)
   else {
     proxy = curl_getenv("all_proxy"); /* default proxy to use */
     if(!proxy)
-      proxy=curl_getenv("ALL_PROXY");
+      proxy = curl_getenv("ALL_PROXY");
   }
 
   return proxy;
@@ -5813,7 +5813,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     char *rest;
     long port;
 
-    port=strtol(portptr+1, &rest, 10);  /* Port number must be decimal */
+    port = strtol(portptr+1, &rest, 10);  /* Port number must be decimal */
 
     if((port < 0) || (port > 0xffff)) {
       /* Single unix standard says port numbers are 16 bits long */
@@ -6169,7 +6169,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
                                struct connectdata *conn,
                                bool *async)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
   time_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
   /*************************************************************
@@ -6332,7 +6332,7 @@ static void reuse_conn(struct connectdata *old_conn,
   free_fixed_hostname(&conn->conn_to_host);
   Curl_safefree(conn->host.rawalloc);
   Curl_safefree(conn->conn_to_host.rawalloc);
-  conn->host=old_conn->host;
+  conn->host = old_conn->host;
   conn->bits.conn_to_host = old_conn->bits.conn_to_host;
   conn->conn_to_host = old_conn->conn_to_host;
   conn->bits.conn_to_port = old_conn->bits.conn_to_port;
@@ -6435,9 +6435,9 @@ static CURLcode create_conn(struct Curl_easy *data,
    * other parts of the code will rely on this fact
    ***********************************************************/
 #define LEAST_PATH_ALLOC 256
-  urllen=strlen(data->change.url);
+  urllen = strlen(data->change.url);
   if(urllen < LEAST_PATH_ALLOC)
-    urllen=LEAST_PATH_ALLOC;
+    urllen = LEAST_PATH_ALLOC;
 
   /*
    * We malloc() the buffers below urllen+2 to make room for 2 possibilities:
@@ -7088,7 +7088,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 
   k->buf = data->state.buffer;
   k->hbufp = data->state.headerbuff;
-  k->ignorebody=FALSE;
+  k->ignorebody = FALSE;
 
   Curl_speedinit(data);
 

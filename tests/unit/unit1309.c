@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,7 +43,7 @@ static void splayprint(struct Curl_tree * t, int d, char output)
     return;
 
   splayprint(t->larger, d+1, output);
-  for(i=0; i<d; i++)
+  for(i = 0; i<d; i++)
     if(output)
       printf("  ");
 
@@ -52,7 +52,7 @@ static void splayprint(struct Curl_tree * t, int d, char output)
            (long)t->key.tv_usec, i);
   }
 
-  for(count=0, node = t->samen; node != t; node = node->samen, count++)
+  for(count = 0, node = t->samen; node != t; node = node->samen, count++)
     ;
 
   if(output) {

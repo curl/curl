@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013, Linus Nielsen Feltzing <linus@haxx.se>
+ * Copyright (C) 2013, 2017, Linus Nielsen Feltzing <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -45,7 +45,7 @@ int test(char *URL)
   (void)URL;
 
   /* Create fake DNS entries for serverX.example.com for all handles */
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     snprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s",
              i + 1, port, address);
     printf("%s\n", dnsentry);
@@ -66,7 +66,7 @@ int test(char *URL)
   multi_setopt(m, CURLMOPT_MAXCONNECTS, 3L);
 
   /* get NUM_HANDLES easy handles */
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
@@ -85,7 +85,7 @@ int test(char *URL)
 
   fprintf(stderr, "Start at URL 0\n");
 
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     /* add handle to multi */
     multi_add_handle(m, curl[i]);
 
@@ -123,7 +123,7 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     curl_multi_remove_handle(m, curl[i]);
     curl_easy_cleanup(curl[i]);
   }

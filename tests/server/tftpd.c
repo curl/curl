@@ -515,7 +515,7 @@ static void read_ahead(struct testcase *test,
     }
     else {
       if(test->rcount) {
-        c=test->rptr[0];
+        c = test->rptr[0];
         test->rptr++;
         test->rcount--;
       }
@@ -571,9 +571,9 @@ static ssize_t write_behind(struct testcase *test, int convert)
     char outfile[256];
     snprintf(outfile, sizeof(outfile), "log/upload.%ld", test->testno);
 #ifdef WIN32
-    test->ofile=open(outfile, O_CREAT|O_RDWR|O_BINARY, 0777);
+    test->ofile = open(outfile, O_CREAT|O_RDWR|O_BINARY, 0777);
 #else
-    test->ofile=open(outfile, O_CREAT|O_RDWR, 0777);
+    test->ofile = open(outfile, O_CREAT|O_RDWR, 0777);
 #endif
     if(test->ofile == -1) {
       logmsg("Couldn't create and/or open file %s for upload!", outfile);
@@ -1074,7 +1074,7 @@ static int parse_servercmd(struct testcase *req)
 
   filename = test2file(req->testno);
 
-  stream=fopen(filename, "rb");
+  stream = fopen(filename, "rb");
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1086,7 +1086,7 @@ static int parse_servercmd(struct testcase *req)
     char *orgcmd = NULL;
     char *cmd = NULL;
     size_t cmdsize = 0;
-    int num=0;
+    int num = 0;
 
     /* get the custom server control "commands" */
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
@@ -1192,7 +1192,7 @@ static int validate_access(struct testcase *test,
       snprintf(partbuf, sizeof(partbuf), "data%ld", partno);
 
     if(file) {
-      FILE *stream=fopen(file, "rb");
+      FILE *stream = fopen(file, "rb");
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));

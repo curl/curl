@@ -229,24 +229,24 @@ static char *c_escape(const char *str, size_t len)
     return NULL;
 
   e = escaped;
-  for(s=str; (c=*s) != '\0'; s++) {
-    if(c=='\n') {
+  for(s = str; (c = *s) != '\0'; s++) {
+    if(c == '\n') {
       strcpy(e, "\\n");
       e += 2;
     }
-    else if(c=='\r') {
+    else if(c == '\r') {
       strcpy(e, "\\r");
       e += 2;
     }
-    else if(c=='\t') {
+    else if(c == '\t') {
       strcpy(e, "\\t");
       e += 2;
     }
-    else if(c=='\\') {
+    else if(c == '\\') {
       strcpy(e, "\\\\");
       e += 2;
     }
-    else if(c=='"') {
+    else if(c == '"') {
       strcpy(e, "\\\"");
       e += 2;
     }
@@ -276,7 +276,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
   if(config->libcurl && !skip && !ret) {
     /* we only use this for real if --libcurl was used */
     const NameValue *nv = NULL;
-    for(nv=nvlist; nv->name; nv++) {
+    for(nv = nvlist; nv->name; nv++) {
       if(nv->value == lval) break; /* found it */
     }
     if(! nv->name) {
@@ -313,7 +313,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
     const NameValue *nv = NULL;
     snprintf(preamble, sizeof(preamble),
              "curl_easy_setopt(hnd, %s, ", name);
-    for(nv=nvlist; nv->name; nv++) {
+    for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
         rest &= ~ nv->value;    /* remove bits handled here */
@@ -356,7 +356,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
     const NameValueUnsigned *nv = NULL;
     snprintf(preamble, sizeof(preamble),
              "curl_easy_setopt(hnd, %s, ", name);
-    for(nv=nvlist; nv->name; nv++) {
+    for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
         rest &= ~ nv->value;    /* remove bits handled here */
@@ -632,7 +632,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
     long lval = va_arg(arg, long);
     long defval = 0L;
     const NameValue *nv = NULL;
-    for(nv=setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
+    for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
       if(!strcmp(name, nv->name)) {
         defval = nv->value;
         break; /* found it */

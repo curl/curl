@@ -250,7 +250,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
 static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 {
   struct Curl_easy *data = conn->data;
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.protop;
   struct HTTP *http;

@@ -334,7 +334,7 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
       }
     }
 
-    for(pp=protos; pp->name; pp++) {
+    for(pp = protos; pp->name; pp++) {
       if(curl_strequal(token, pp->name)) {
         switch(action) {
         case deny:

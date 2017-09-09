@@ -81,11 +81,11 @@ static bool is_proxy = FALSE;
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
 
-static long prevtestno=-1;    /* previous test number we served */
-static long prevpartno=-1;    /* previous part number we served */
-static bool prevbounce=FALSE; /* instructs the server to increase the part
-                                 number for a test in case the identical
-                                 testno+partno request shows up again */
+static long prevtestno = -1;    /* previous test number we served */
+static long prevpartno = -1;    /* previous part number we served */
+static bool prevbounce = FALSE; /* instructs the server to increase the part
+                                   number for a test in case the identical
+                                   testno+partno request shows up again */
 
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
@@ -359,7 +359,7 @@ static int parse_servercmd(struct httprequest *req)
 
   filename = test2file(req->testno);
 
-  stream=fopen(filename, "rb");
+  stream = fopen(filename, "rb");
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -372,7 +372,7 @@ static int parse_servercmd(struct httprequest *req)
     char *orgcmd = NULL;
     char *cmd = NULL;
     size_t cmdsize = 0;
-    int num=0;
+    int num = 0;
 
     /* get the custom server control "commands" */
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
@@ -456,7 +456,7 @@ static int parse_servercmd(struct httprequest *req)
 
 static int ProcessRequest(struct httprequest *req)
 {
-  char *line=&req->reqbuf[req->checkindex];
+  char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
   static char doc[MAXDOCNAMELEN];
@@ -552,7 +552,7 @@ static int ProcessRequest(struct httprequest *req)
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
         char *portp = NULL;
-        unsigned long part=0;
+        unsigned long part = 0;
 
         snprintf(logbuf, sizeof(logbuf),
                  "Received a CONNECT %s HTTP/%d.%d request",
@@ -711,7 +711,7 @@ static int ProcessRequest(struct httprequest *req)
     if(got_exit_signal)
       return 1; /* done */
 
-    if((req->cl==0) && strncasecompare("Content-Length:", line, 15)) {
+    if((req->cl == 0) && strncasecompare("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
@@ -858,7 +858,7 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   size_t written;
   size_t writeleft;
   FILE *dump;
-  const char *dumpfile=is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
+  const char *dumpfile = is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP;
 
   if(reqbuf == NULL)
     return;
@@ -1044,10 +1044,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   ssize_t written;
   size_t count;
   const char *buffer;
-  char *ptr=NULL;
+  char *ptr = NULL;
   FILE *stream;
-  char *cmd=NULL;
-  size_t cmdsize=0;
+  char *cmd = NULL;
+  size_t cmdsize = 0;
   FILE *dump;
   bool persistant = TRUE;
   bool sendfailure = FALSE;
@@ -1118,7 +1118,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     /* select the <data> tag for "normal" requests and the <connect> one
        for CONNECT requests (within the <reply> section) */
-    const char *section= req->connect_request?"connect":"data";
+    const char *section = req->connect_request?"connect":"data";
 
     if(req->partno)
       snprintf(partbuf, sizeof(partbuf), "%s%ld", section, req->partno);
@@ -1127,7 +1127,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     logmsg("Send response test%ld section <%s>", req->testno, partbuf);
 
-    stream=fopen(filename, "rb");
+    stream = fopen(filename, "rb");
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1150,7 +1150,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     /* re-open the same file again */
-    stream=fopen(filename, "rb");
+    stream = fopen(filename, "rb");
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1266,7 +1266,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     char command[32];
     int quarters;
     int num;
-    ptr=cmd;
+    ptr = cmd;
     do {
       if(2 == sscanf(ptr, "%31s %d", command, &num)) {
         if(!strcmp("wait", command)) {
@@ -1436,7 +1436,7 @@ static void http_connect(curl_socket_t *infdp,
   int max_tunnel_idx; /* CTRL or DATA */
   int loop;
   int i;
-  int timeout_count=0;
+  int timeout_count = 0;
 
   /* primary tunnel client endpoint already connected */
   clientfd[CTRL] = *infdp;
@@ -1526,7 +1526,7 @@ static void http_connect(curl_socket_t *infdp,
     if(rc > 0) {
       /* socket action */
       bool tcp_fin_wr;
-      timeout_count=0;
+      timeout_count = 0;
 
       if(got_exit_signal)
         break;
@@ -1974,7 +1974,7 @@ int main(int argc, char *argv[])
   struct httprequest req;
   int rc = 0;
   int error;
-  int arg=1;
+  int arg = 1;
   long pid;
   const char *connecthost = "127.0.0.1";
   const char *socket_type = "IPv4";
@@ -2319,7 +2319,7 @@ int main(int argc, char *argv[])
             logmsg("====> Client disconnect %d", req.connmon);
 
             if(req.connmon) {
-              const char *keepopen="[DISCONNECT]\n";
+              const char *keepopen = "[DISCONNECT]\n";
               storerequest(keepopen, strlen(keepopen));
             }
 

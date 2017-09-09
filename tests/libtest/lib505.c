@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,7 +43,7 @@ int test(char *URL)
   struct_stat file_info;
   struct curl_slist *hl;
 
-  struct curl_slist *headerlist=NULL;
+  struct curl_slist *headerlist = NULL;
   const char *buf_1 = "RNFR 505";
   const char *buf_2 = "RNTO 505-forreal";
 

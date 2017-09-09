@@ -259,7 +259,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
     errno = 0;
     min_n = strtoul(pattern, &endp, 10);
     if(errno || (endp == pattern))
-      endp=NULL;
+      endp = NULL;
     else {
       if(*endp != '-')
         endp = NULL;
@@ -287,7 +287,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
         else
           step_n = 1;
         if(endp && (*endp == ']')) {
-          pattern= endp+1;
+          pattern = endp+1;
         }
         else
           endp = NULL;
@@ -444,7 +444,7 @@ CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
   glob_buffer = malloc(strlen(url) + 1);
   if(!glob_buffer)
     return CURLE_OUT_OF_MEMORY;
-  glob_buffer[0]=0;
+  glob_buffer[0] = 0;
 
   glob_expand = calloc(1, sizeof(URLGlob));
   if(!glob_expand) {
@@ -623,12 +623,12 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
       unsigned long i;
       char *ptr = filename;
       unsigned long num = strtoul(&filename[1], &filename, 10);
-      URLPattern *pat =NULL;
+      URLPattern *pat = NULL;
 
       if(num < glob->size) {
         num--; /* make it zero based */
         /* find the correct glob entry */
-        for(i=0; i<glob->size; i++) {
+        for(i = 0; i<glob->size; i++) {
           if(glob->pattern[i].globindex == (int)num) {
             pat = &glob->pattern[i];
             break;

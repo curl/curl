@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -103,7 +103,7 @@ int test(char *URL)
   int res;
   CURL *curl;
   char *stream_uri = NULL;
-  int request=1;
+  int request = 1;
   FILE *protofile = NULL;
 
   protofile = fopen(libtest_arg2, "wb");

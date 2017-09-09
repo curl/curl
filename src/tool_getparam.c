@@ -492,7 +492,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
     if(!longopt) {
       letter = (char)*parse;
-      subletter='\0';
+      subletter = '\0';
     }
     else {
       letter = parse[0];
@@ -1190,7 +1190,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->resume_from_current = TRUE;
         config->resume_from = 0;
       }
-      config->use_resume=TRUE;
+      config->use_resume = TRUE;
       break;
     case 'd':
       /* postfield data */
@@ -1608,7 +1608,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                    nextarg,
                    &config->mimepost,
                    &config->mimecurrent,
-                   (subletter=='s')?TRUE:FALSE)) /* 's' means literal string */
+                   (subletter == 's')?TRUE:FALSE)) /* 's' is literal string */
         return PARAM_BAD_USE;
       if(SetHTTPrequest(config, HTTPREQ_MIMEPOST, &config->httpreq))
         return PARAM_BAD_USE;
@@ -2053,7 +2053,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       now = time(NULL);
-      config->condtime=curl_getdate(nextarg, &now);
+      config->condtime = curl_getdate(nextarg, &now);
       if(-1 == (int)config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
         struct_stat statbuf;

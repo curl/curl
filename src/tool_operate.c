@@ -525,7 +525,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         urlnum = 1; /* without globbing, this is a single URL */
 
       /* if multiple files extracted to stdout, insert separators! */
-      separator= ((!outfiles || !strcmp(outfiles, "-")) && urlnum > 1);
+      separator = ((!outfiles || !strcmp(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
       for(li = 0 ; li < urlnum; li++) {
@@ -822,7 +822,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             if(strchr(pc, '?'))
               /* Ouch, there's already a question mark in the URL string, we
                  then append the data with an ampersand separator instead! */
-              sep='&';
+              sep = '&';
           }
           /*
            * Then append ? followed by the get fields to the url.

@@ -163,10 +163,10 @@ static CURLcode connect_init(struct connectdata *conn, bool reinit)
     s = conn->connect_state;
   }
   s->tunnel_state = TUNNEL_INIT;
-  s->keepon=TRUE;
+  s->keepon = TRUE;
   s->line_start = s->connect_buffer;
   s->ptr = s->line_start;
-  s->cl=0;
+  s->cl = 0;
   return CURLE_OK;
 }
 
@@ -182,8 +182,8 @@ static CURLcode CONNECT(struct connectdata *conn,
                         const char *hostname,
                         int remote_port)
 {
-  int subversion=0;
-  struct Curl_easy *data=conn->data;
+  int subversion = 0;
+  struct Curl_easy *data = conn->data;
   struct SingleRequest *k = &data->req;
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
@@ -234,8 +234,8 @@ static CURLcode CONNECT(struct connectdata *conn,
 
       if(!result) {
         char *host = NULL;
-        const char *proxyconn="";
-        const char *useragent="";
+        const char *proxyconn = "";
+        const char *useragent = "";
         const char *http = (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
         bool ipv6_ip = conn->bits.ipv6_ip;
@@ -244,7 +244,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         /* the hostname may be different */
         if(hostname != conn->host.name)
           ipv6_ip = (strchr(hostname, ':') != NULL);
-        hostheader= /* host:port with IPv6 support */
+        hostheader = /* host:port with IPv6 support */
           aprintf("%s%s%s:%hu", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
                   remote_port);
         if(!hostheader) {

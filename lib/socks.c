@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -154,7 +154,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
   /* DNS resolve only for SOCKS4, not SOCKS4a */
   if(!protocol4a) {
     struct Curl_dns_entry *dns;
-    Curl_addrinfo *hp=NULL;
+    Curl_addrinfo *hp = NULL;
     int rc;
 
     rc = Curl_resolv(conn, hostname, remote_port, &dns);
@@ -171,7 +171,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
      * returns a Curl_addrinfo pointer that may not always look the same.
      */
     if(dns)
-      hp=dns->addr;
+      hp = dns->addr;
     if(hp) {
       char buf[64];
       Curl_printable_address(hp, buf, sizeof(buf));
@@ -483,7 +483,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
 
   (void)curlx_nonblock(sock, FALSE);
 
-  result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
+  result = Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
   if(result || (actualread != 2)) {
     failf(data, "Unable to receive initial SOCKS5 response.");
     return CURLE_COULDNT_CONNECT;
@@ -542,7 +542,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       return CURLE_COULDNT_CONNECT;
     }
 
-    result=Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
+    result = Curl_blockread_all(conn, sock, (char *)socksreq, 2, &actualread);
     if(result || (actualread != 2)) {
       failf(data, "Unable to receive SOCKS5 sub-negotiation response.");
       return CURLE_COULDNT_CONNECT;
@@ -615,7 +615,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
      * returns a Curl_addrinfo pointer that may not always look the same.
      */
     if(dns)
-      hp=dns->addr;
+      hp = dns->addr;
     if(hp) {
       int i;
       char buf[64];

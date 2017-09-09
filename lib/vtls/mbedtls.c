@@ -253,7 +253,7 @@ mbed_connect_step1(struct connectdata *conn,
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
   int ret = -1;
   char errorbuf[128];
-  errorbuf[0]=0;
+  errorbuf[0] = 0;
 
   /* mbedTLS only supports SSLv3 and TLSv1 */
   if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) {
@@ -829,7 +829,7 @@ static CURLcode Curl_mbedtls_random(struct Curl_easy *data,
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_init(&ctr_entropy);
   mbedtls_ctr_drbg_init(&ctr_drbg);
-  errorbuf[0]=0;
+  errorbuf[0] = 0;
 
   ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
                               &ctr_entropy, NULL, 0);
@@ -887,7 +887,7 @@ mbed_connect_common(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  if(ssl_connect_1==connssl->connecting_state) {
+  if(ssl_connect_1 == connssl->connecting_state) {
     /* Find out how much more time we're allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
@@ -918,9 +918,9 @@ mbed_connect_common(struct connectdata *conn,
     if(connssl->connecting_state == ssl_connect_2_reading
        || connssl->connecting_state == ssl_connect_2_writing) {
 
-      curl_socket_t writefd = ssl_connect_2_writing==
+      curl_socket_t writefd = ssl_connect_2_writing ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading==
+      curl_socket_t readfd = ssl_connect_2_reading ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
@@ -960,13 +960,13 @@ mbed_connect_common(struct connectdata *conn,
 
   } /* repeat step2 until all transactions are done. */
 
-  if(ssl_connect_3==connssl->connecting_state) {
+  if(ssl_connect_3 == connssl->connecting_state) {
     retcode = mbed_connect_step3(conn, sockindex);
     if(retcode)
       return retcode;
   }
 
-  if(ssl_connect_done==connssl->connecting_state) {
+  if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = mbed_recv;
     conn->send[sockindex] = mbed_send;

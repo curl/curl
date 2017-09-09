@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -165,7 +165,7 @@ static int loop(int num, CURLM *cm, const char *url, const char *userpwd,
                 curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(cm, e);
         curl_easy_cleanup(e);
-        for(i=0; i < NUM_HANDLES; i++) {
+        for(i = 0; i < NUM_HANDLES; i++) {
           if(eh[i] == e) {
             eh[i] = NULL;
             break;
@@ -192,7 +192,7 @@ int test(char *URL)
   int res = 0;
   int i;
 
-  for(i=0; i < NUM_HANDLES; i++)
+  for(i = 0; i < NUM_HANDLES; i++)
     eh[i] = NULL;
 
   start_test_timing();
@@ -234,7 +234,7 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     curl_multi_remove_handle(cm, eh[i]);
     curl_easy_cleanup(eh[i]);
   }

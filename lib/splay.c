@@ -110,7 +110,7 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
 
   if(t != NULL) {
     t = Curl_splay(i, t);
-    if(compare(i, t->key)==0) {
+    if(compare(i, t->key) == 0) {
       /* There already exists a node in the tree with the very same key. Build
          a doubly-linked circular list of nodes. We add the new 'node' struct
          to the end of this list. */

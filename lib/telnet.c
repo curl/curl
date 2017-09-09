@@ -296,7 +296,7 @@ static void negotiate(struct connectdata *conn)
   struct TELNET *tn = (struct TELNET *) conn->data->req.protop;
 
   for(i = 0;i < CURL_NTELOPTS;i++) {
-    if(i==CURL_TELOPT_ECHO)
+    if(i == CURL_TELOPT_ECHO)
       continue;
 
     if(tn->us_preferred[i] == CURL_YES)
@@ -843,7 +843,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
     tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
   }
 
-  for(head = data->set.telnet_options; head; head=head->next) {
+  for(head = data->set.telnet_options; head; head = head->next) {
     if(sscanf(head->data, "%127[^= ]%*[ =]%255s",
               option_keyword, option_arg) == 2) {
 
@@ -890,8 +890,8 @@ static CURLcode check_telnet_options(struct connectdata *conn)
 
       /* To take care or not of the 8th bit in data exchange */
       if(strcasecompare(option_keyword, "BINARY")) {
-        binary_option=atoi(option_arg);
-        if(binary_option!=1) {
+        binary_option = atoi(option_arg);
+        if(binary_option != 1) {
           tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;
           tn->him_preferred[CURL_TELOPT_BINARY] = CURL_NO;
         }
@@ -1019,8 +1019,8 @@ static void sendsuboption(struct connectdata *conn, int option)
     CURL_SB_ACCUM(tn, CURL_TELOPT_NAWS);
     /* We must deal either with litte or big endian processors */
     /* Window size must be sent according to the 'network order' */
-    x=htons(tn->subopt_wsx);
-    y=htons(tn->subopt_wsy);
+    x = htons(tn->subopt_wsx);
+    y = htons(tn->subopt_wsy);
     uc1 = (unsigned char *)&x;
     uc2 = (unsigned char *)&y;
     CURL_SB_ACCUM(tn, uc1[0]);
@@ -1064,7 +1064,7 @@ CURLcode telrcv(struct connectdata *conn,
   unsigned char c;
   CURLcode result;
   int in = 0;
-  int startwrite=-1;
+  int startwrite = -1;
   struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
 

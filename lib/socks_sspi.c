@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -341,7 +341,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_enc = 1;
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.\n",
-        (gss_enc==0)?"no":((gss_enc==1)?"integrity":"confidentiality") );
+        (gss_enc == 0)?"no":((gss_enc == 1)?"integrity":"confidentiality") );
   /* force to no data protection, avoid encryption/decryption for now */
   gss_enc = 0;
   /*
@@ -588,8 +588,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   }
 
   infof(data, "SOCKS5 access with%s protection granted.\n",
-        (socksreq[0]==0)?"out GSS-API data":
-        ((socksreq[0]==1)?" GSS-API integrity":" GSS-API confidentiality"));
+        (socksreq[0] == 0)?"out GSS-API data":
+        ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality"));
 
   /* For later use if encryption is required
      conn->socks5_gssapi_enctype = socksreq[0];

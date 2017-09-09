@@ -143,9 +143,9 @@ int test(char *URL)
   void *conv_to_network_cb = NULL;
   void *conv_from_utf8_cb = NULL;
   void *interleavecb = NULL;
-  char *stringpointerextra=(char *)"moooo";
-  struct curl_slist *slist=NULL;
-  struct curl_httppost *httppost=NULL;
+  char *stringpointerextra = (char *)"moooo";
+  struct curl_slist *slist = NULL;
+  struct curl_httppost *httppost = NULL;
   curl_mime *mimepost = NULL;
   FILE *stream = stderr;
   struct data object;

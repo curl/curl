@@ -76,12 +76,12 @@
 #define TFTP_OPTION_INTERVAL "timeout"
 
 typedef enum {
-  TFTP_MODE_NETASCII=0,
+  TFTP_MODE_NETASCII = 0,
   TFTP_MODE_OCTET
 } tftp_mode_t;
 
 typedef enum {
-  TFTP_STATE_START=0,
+  TFTP_STATE_START = 0,
   TFTP_STATE_RX,
   TFTP_STATE_TX,
   TFTP_STATE_FIN
@@ -100,7 +100,7 @@ typedef enum {
 } tftp_event_t;
 
 typedef enum {
-  TFTP_ERR_UNDEF=0,
+  TFTP_ERR_UNDEF = 0,
   TFTP_ERR_NOTFOUND,
   TFTP_ERR_PERM,
   TFTP_ERR_DISKFULL,
@@ -232,7 +232,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
     /* Compute the re-start interval to suit the timeout */
     state->retry_time = (int)timeout/state->retry_max;
     if(state->retry_time<1)
-      state->retry_time=1;
+      state->retry_time = 1;
 
   }
   else {
@@ -251,15 +251,15 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
   }
   /* But bound the total number */
   if(state->retry_max<3)
-    state->retry_max=3;
+    state->retry_max = 3;
 
   if(state->retry_max>50)
-    state->retry_max=50;
+    state->retry_max = 50;
 
   /* Compute the re-ACK interval to suit the timeout */
   state->retry_time = (int)(timeout/state->retry_max);
   if(state->retry_time<1)
-    state->retry_time=1;
+    state->retry_time = 1;
 
   infof(state->conn->data,
         "set timeouts for state %d; Total %ld, retry %d maxtry %d\n",
@@ -1113,7 +1113,7 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
                                 0,
                                 (struct sockaddr *)&fromaddr,
                                 &fromlen);
-  if(state->remote_addrlen==0) {
+  if(state->remote_addrlen == 0) {
     memcpy(&state->remote_addr, &fromaddr, fromlen);
     state->remote_addrlen = fromlen;
   }

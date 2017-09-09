@@ -279,7 +279,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */
 
-  bytes_written=0;
+  bytes_written = 0;
   write_len = strlen(s);
   sptr = s;
 
@@ -387,7 +387,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
-      bytes_written=0;
+      bytes_written = 0;
       *code = CURLE_AGAIN;
     }
     else {
@@ -480,7 +480,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
   bool newtype = TRUE;
 
   if(s->tempcount) {
-    for(i=0; i< s->tempcount; i++) {
+    for(i = 0; i< s->tempcount; i++) {
       if(s->tempwrite[i].type == type) {
         /* data for this type exists */
         newtype = FALSE;
@@ -704,7 +704,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
      us use the correct ssl handle. */
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  *n=0; /* reset amount to zero */
+  *n = 0; /* reset amount to zero */
 
   /* If session can pipeline, check connection buffer  */
   if(pipelining) {
@@ -823,8 +823,8 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
   int rc;
   if(data->set.printhost && conn && conn->host.dispname) {
     char buffer[160];
-    const char *t=NULL;
-    const char *w="Data";
+    const char *t = NULL;
+    const char *w = "Data";
     switch(type) {
     case CURLINFO_HEADER_IN:
       w = "Header";

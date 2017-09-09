@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ void dump(const char *text,
   size_t i;
   size_t c;
 
-  unsigned int width=0x10;
+  unsigned int width = 0x10;
 
   if(nohex)
     /* without the hex output, we can fit more on screen */
@@ -47,7 +47,7 @@ void dump(const char *text,
   fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\n",
           text, (long)size, (long)size);
 
-  for(i=0; i<size; i+= width) {
+  for(i = 0; i<size; i+= width) {
 
     fprintf(stream, "%4.4lx: ", (long)i);
 
@@ -62,14 +62,14 @@ void dump(const char *text,
 
     for(c = 0; (c < width) && (i+c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
-      if(nohex && (i+c+1 < size) && ptr[i+c]==0x0D && ptr[i+c+1]==0x0A) {
+      if(nohex && (i+c+1 < size) && ptr[i+c] == 0x0D && ptr[i+c+1] == 0x0A) {
         i+=(c+2-width);
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
+              (ptr[i+c] >= 0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if(nohex && (i+c+2 < size) && ptr[i+c+1]==0x0D && ptr[i+c+2]==0x0A) {
+      if(nohex && (i+c+2 < size) && ptr[i+c+1] == 0x0D && ptr[i+c+2] == 0x0A) {
         i+=(c+3-width);
         break;
       }
