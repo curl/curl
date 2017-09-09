@@ -19,13 +19,20 @@ function(determine_version_type _out_version_type_name)
                    # CMake on those ancient systems
                    CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
 
-                   CMAKE_SYSTEM_NAME STREQUAL "Haiku" OR
-                   CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+                   CMAKE_SYSTEM_NAME STREQUAL "Haiku")
                         set(_ver_type "linux")
                 elseif(CMAKE_SYSTEM_NAME STREQUAL "HP-UX" OR
                        CMAKE_SYSTEM_NAME STREQUAL "NetBSD" OR
                        CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
                         set(_ver_type "sunos")
+                elseif(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+                        # This is very simplified but should be enough
+                        string(SUBSTRING 0 1 _v "${CMAKE_SYSTEM_VERSION}")
+                        if(_v STREQUAL "5" OR _v STREQUAL "6")
+                                set(_ver_type "linux")
+                        else()
+                                set(_ver_type "sunos")
+                        endif()
                 elseif(CMAKE_SYSTEM_NAME STREQUAL "SCO_SV" OR
                        CMAKE_SYSTEM_NAME STREQUAL "UnixWare" OR
                        CMAKE_SYSTEM_NAME STREQUAL "UNIX_SV" OR
