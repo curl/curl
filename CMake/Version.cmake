@@ -22,12 +22,11 @@ function(determine_version_type _out_version_type_name)
                 elseif(CMAKE_SYSTEM_NAME STREQUAL "SCO_SV" OR
                        CMAKE_SYSTEM_NAME STREQUAL "UnixWare" OR
                        CMAKE_SYSTEM_NAME STREQUAL "UNIX_SV" OR
-                       CMAKE_SYSTEM_NAME STREQUAL "XENIX")
-                        set(_ver_type "sco")
+                       CMAKE_SYSTEM_NAME STREQUAL "XENIX" OR
+                       QNXNTO)
+                        set(_ver_type "sco/qnx")
                 elseif(APPLE)
                         set(_ver_type "darwin")
-                elseif(QNXNTO)
-                        set(_ver_type "qnx")
                 endif()
         endif()
 
@@ -53,8 +52,7 @@ function(parse_versioninfo _versioninfo_string _out_version_name _out_soversion_
                 math(EXPR _major ${_current}-${_age})
                 set(${_out_version_name} ${_major}.${_age}.${_revision} PARENT_SCOPE)
                 set(${_out_soversion_name} ${_major} PARENT_SCOPE)
-        elseif(_version_type STREQUAL "sco" OR
-               _version_type STREQUAL "qnx")
+        elseif(_version_type STREQUAL "sco/qnx")
                 set(${_out_version_name} ${_current} PARENT_SCOPE)
                 set(${_out_soversion_name} ${_current} PARENT_SCOPE)
         elseif(_version_type STREQUAL "sunos")
