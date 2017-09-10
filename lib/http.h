@@ -40,8 +40,6 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
 
-char *Curl_checkheaders(const struct connectdata *conn,
-                        const char *thisheader);
 char *Curl_copy_header_value(const char *header);
 
 char *Curl_checkProxyheaders(const struct connectdata *conn,
