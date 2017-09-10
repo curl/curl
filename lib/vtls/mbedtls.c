@@ -1042,7 +1042,7 @@ static void *Curl_mbedtls_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_mbedtls = {
   { CURLSSLBACKEND_MBEDTLS, "mbedtls" }, /* info */
 
-  0, /* have_ca_path */
+  1, /* have_ca_path */
   0, /* have_certinfo */
   1, /* have_pinnedpubkey */
   1, /* have_ssl_ctx */
