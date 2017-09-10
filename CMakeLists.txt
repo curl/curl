@@ -38,7 +38,7 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
@@ -1130,6 +1130,12 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
+if(WIN32 AND NOT CYGWIN)
+    set(CURL_INSTALL_CMAKE_DIR CMake)
+else()
+    set(CURL_INSTALL_CMAKE_DIR lib/cmake/curl)
+endif()
+
 if(USE_MANUAL)
   add_subdirectory(docs)
 endif()
@@ -1279,6 +1285,25 @@ endif()
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
     DESTINATION include
     FILES_MATCHING PATTERN "*.h")
+
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${PROJECT_BINARY_DIR}/curl-config-version.cmake"
+    VERSION ${CURL_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_file(CMake/curl-config.cmake
+        "${PROJECT_BINARY_DIR}/curl-config.cmake"
+        COPYONLY
+)
+
+install(
+        FILES ${PROJECT_BINARY_DIR}/curl-config.cmake
+              ${PROJECT_BINARY_DIR}/curl-config-version.cmake
+        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+)
 
 # Workaround for MSVS10 to avoid the Dialog Hell
 # FIXME: This could be removed with future version of CMake.
