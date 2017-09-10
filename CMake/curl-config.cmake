@@ -1,0 +1,30 @@
+
+get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+if(NOT CURL_FIND_COMPONENTS)
+    set(CURL_FIND_COMPONENTS curl libcurl)
+    if(CURL_FIND_REQUIRED)
+        set(CURL_FIND_REQUIRED_curl TRUE)
+        set(CURL_FIND_REQUIRED_libcurl TRUE)
+    endif()
+endif()
+
+set(_curl_missing_components)
+foreach(_comp ${CURL_FIND_COMPONENTS})
+    if(EXISTS "${_DIR}/${_comp}-target.cmake")
+        include("${_DIR}/${_comp}-target.cmake")
+        set(CURL_${_comp}_FOUND TRUE)
+    else()
+        set(CURL_${_comp}_FOUND FALSE)
+        if(CURL_FIND_REQUIRED_${_comp})
+                set(CURL_FOUND FALSE)
+            list(APPEND _curl_missing_components ${_comp})
+        endif()
+    endif()
+endforeach()
+
+if(NOT CURL_FOUND)
+        set(CURL_NOT_FOUND_MESSAGE "Following required components not found: " ${_curl_missing_components})
+endif()
+
+unset(_curl_missing_components)
