@@ -221,20 +221,21 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
            strlen(endofline_network));
 
 #ifdef CURL_DOES_CONVERSIONS
-    CURLcode result;
-    int length;
-    if(data->set.prefer_ascii) {
-      /* translate the protocol and data */
-      length = nread;
+    {
+      CURLcode result;
+      int length;
+      if(data->set.prefer_ascii)
+        /* translate the protocol and data */
+        length = nread;
+      else
+        /* just translate the protocol portion */
+        length = (int)strlen(hexbuffer);
+      result = Curl_convert_to_network(data, data->req.upload_fromhere,
+                                       length);
+      /* Curl_convert_to_network calls failf if unsuccessful */
+      if(result)
+        return result;
     }
-    else {
-      /* just translate the protocol portion */
-      length = strlen(hexbuffer);
-    }
-    result = Curl_convert_to_network(data, data->req.upload_fromhere, length);
-    /* Curl_convert_to_network calls failf if unsuccessful */
-    if(result)
-      return result;
 #endif /* CURL_DOES_CONVERSIONS */
 
     if((nread - hexlen) == 0)

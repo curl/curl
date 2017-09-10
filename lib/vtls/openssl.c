@@ -1478,7 +1478,8 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
        peer_CN = NULL;
     else {
       /* convert peer_CN from UTF8 */
-      CURLcode rc = Curl_convert_from_utf8(data, peer_CN, strlen(peer_CN));
+      CURLcode rc = Curl_convert_from_utf8(data, (char *)peer_CN,
+                                           strlen((char *)peer_CN));
       /* Curl_convert_from_utf8 calls failf if unsuccessful */
       if(rc) {
         OPENSSL_free(peer_CN);
