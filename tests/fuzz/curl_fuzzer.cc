@@ -53,8 +53,14 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
   for(tlv_rc = fuzz_get_first_tlv(&fuzz, &tlv);
       tlv_rc == 0;
       tlv_rc = fuzz_get_next_tlv(&fuzz, &tlv)) {
+
     /* Have the TLV in hand. Parse the TLV. */
-    fuzz_parse_tlv(&fuzz, &tlv);
+    rc = fuzz_parse_tlv(&fuzz, &tlv);
+
+    if(rc != 0) {
+      /* Failed to parse the TLV. Can't continue. */
+      goto EXIT_LABEL;
+    }
   }
 
   if(tlv_rc != TLV_RC_NO_MORE_TLVS) {
@@ -408,8 +414,10 @@ int fuzz_parse_tlv(FUZZ_DATA *fuzz, TLV *tlv)
     FSINGLETONTLV(TLV_TYPE_MAIL_FROM, mail_from, CURLOPT_MAIL_FROM);
 
     default:
-      /* The fuzzer generates lots of unknown TLVs, so don't do anything if
-         the TLV isn't known. */
+      /* The fuzzer generates lots of unknown TLVs - we don't want these in the
+         corpus so we reject any unknown TLVs. */
+      rc = 255;
+      goto EXIT_LABEL;
       break;
   }
 
