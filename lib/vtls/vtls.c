@@ -147,7 +147,7 @@ int Curl_ssl_backend(void)
 #ifdef USE_SSL
 
 /* "global" init done? */
-static bool init_ssl=FALSE;
+static bool init_ssl = FALSE;
 
 /**
  * Global SSL init
@@ -383,7 +383,7 @@ void Curl_ssl_kill_session(struct curl_ssl_session *session)
 void Curl_ssl_delsessionid(struct connectdata *conn, void *ssl_sessionid)
 {
   size_t i;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
     struct curl_ssl_session *check = &data->state.session[i];
@@ -407,9 +407,9 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
                                int sockindex)
 {
   size_t i;
-  struct Curl_easy *data=conn->data; /* the mother of all structs */
+  struct Curl_easy *data = conn->data; /* the mother of all structs */
   struct curl_ssl_session *store = &data->state.session[0];
-  long oldest_age=data->state.session[0].age; /* zero if unused */
+  long oldest_age = data->state.session[0].age; /* zero if unused */
   char *clone_host;
   char *clone_conn_to_host;
   int conn_to_port;
@@ -643,7 +643,7 @@ void Curl_ssl_free_certinfo(struct Curl_easy *data)
 
   if(ci->num_of_certs) {
     /* free all individual lists used */
-    for(i=0; i<ci->num_of_certs; i++) {
+    for(i = 0; i<ci->num_of_certs; i++) {
       curl_slist_free_all(ci->certinfo[i]);
       ci->certinfo[i] = NULL;
     }
@@ -697,7 +697,7 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   snprintf(output, outlen, "%s:", label);
 
   /* memcpy the value (it might not be zero terminated) */
-  memcpy(&output[labellen+1], value, valuelen);
+  memcpy(&output[labellen + 1], value, valuelen);
 
   /* zero terminate the output */
   output[labellen + 1 + valuelen] = 0;

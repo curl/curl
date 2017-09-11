@@ -26,7 +26,7 @@
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode res=CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");

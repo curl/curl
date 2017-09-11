@@ -76,7 +76,7 @@
   } WHILE_FALSE
 #define CURL_SB_ACCUM(x,c)                                   \
   do {                                                       \
-    if(x->subpointer < (x->subbuffer+sizeof x->subbuffer))   \
+    if(x->subpointer < (x->subbuffer + sizeof x->subbuffer)) \
       *x->subpointer++ = (c);                                \
   } WHILE_FALSE
 
@@ -295,8 +295,8 @@ static void negotiate(struct connectdata *conn)
   int i;
   struct TELNET *tn = (struct TELNET *) conn->data->req.protop;
 
-  for(i = 0;i < CURL_NTELOPTS;i++) {
-    if(i==CURL_TELOPT_ECHO)
+  for(i = 0; i < CURL_NTELOPTS; i++) {
+    if(i == CURL_TELOPT_ECHO)
       continue;
 
     if(tn->us_preferred[i] == CURL_YES)
@@ -792,7 +792,7 @@ static void printsub(struct Curl_easy *data,
       case CURL_TELOPT_NEW_ENVIRON:
         if(pointer[1] == CURL_TELQUAL_IS) {
           infof(data, " ");
-          for(i = 3;i < length;i++) {
+          for(i = 3; i < length; i++) {
             switch(pointer[i]) {
             case CURL_NEW_ENV_VAR:
               infof(data, ", ");
@@ -843,7 +843,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
     tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
   }
 
-  for(head = data->set.telnet_options; head; head=head->next) {
+  for(head = data->set.telnet_options; head; head = head->next) {
     if(sscanf(head->data, "%127[^= ]%*[ =]%255s",
               option_keyword, option_arg) == 2) {
 
@@ -890,8 +890,8 @@ static CURLcode check_telnet_options(struct connectdata *conn)
 
       /* To take care or not of the 8th bit in data exchange */
       if(strcasecompare(option_keyword, "BINARY")) {
-        binary_option=atoi(option_arg);
-        if(binary_option!=1) {
+        binary_option = atoi(option_arg);
+        if(binary_option != 1) {
           tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;
           tn->him_preferred[CURL_TELOPT_BINARY] = CURL_NO;
         }
@@ -935,7 +935,7 @@ static void suboption(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
 
-  printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn)+2);
+  printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
       len = strlen(tn->subopt_ttype) + 4 + 2;
@@ -967,7 +967,7 @@ static void suboption(struct connectdata *conn)
                CURL_TELQUAL_IS);
       len = 4;
 
-      for(v = tn->telnet_vars;v;v = v->next) {
+      for(v = tn->telnet_vars; v; v = v->next) {
         tmplen = (strlen(v->data) + 1);
         /* Add the variable only if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
@@ -1019,8 +1019,8 @@ static void sendsuboption(struct connectdata *conn, int option)
     CURL_SB_ACCUM(tn, CURL_TELOPT_NAWS);
     /* We must deal either with litte or big endian processors */
     /* Window size must be sent according to the 'network order' */
-    x=htons(tn->subopt_wsx);
-    y=htons(tn->subopt_wsy);
+    x = htons(tn->subopt_wsx);
+    y = htons(tn->subopt_wsy);
     uc1 = (unsigned char *)&x;
     uc2 = (unsigned char *)&y;
     CURL_SB_ACCUM(tn, uc1[0]);
@@ -1033,7 +1033,7 @@ static void sendsuboption(struct connectdata *conn, int option)
     CURL_SB_TERM(tn);
     /* data suboption is now ready */
 
-    printsub(data, '>', (unsigned char *)tn->subbuffer+2,
+    printsub(data, '>', (unsigned char *)tn->subbuffer + 2,
              CURL_SB_LEN(tn)-2);
 
     /* we send the header of the suboption... */
@@ -1044,9 +1044,9 @@ static void sendsuboption(struct connectdata *conn, int option)
     }
     /* ... then the window size with the send_telnet_data() function
        to deal with 0xFF cases ... */
-    send_telnet_data(conn, (char *)tn->subbuffer+3, 4);
+    send_telnet_data(conn, (char *)tn->subbuffer + 3, 4);
     /* ... and the footer */
-    bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer+7, 2);
+    bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer + 7, 2);
     if(bytes_written < 0) {
       err = SOCKERRNO;
       failf(data, "Sending data failed (%d)", err);
@@ -1064,7 +1064,7 @@ CURLcode telrcv(struct connectdata *conn,
   unsigned char c;
   CURLcode result;
   int in = 0;
-  int startwrite=-1;
+  int startwrite = -1;
   struct Curl_easy *data = conn->data;
   struct TELNET *tn = (struct TELNET *)data->req.protop;
 

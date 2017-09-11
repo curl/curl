@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -151,7 +151,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
         (*p)++;
       }
       else if(c == '[') {
-        char c2 = *((*p)+1);
+        char c2 = *((*p) + 1);
         if(c2 == ':') { /* there has to be a keyword */
           (*p) += 2;
           if(parsekeyword(p, charset)) {
@@ -319,9 +319,9 @@ static int loop(const unsigned char *pattern, const unsigned char *string)
     switch(state) {
     case CURLFNM_LOOP_DEFAULT:
       if(*p == '*') {
-        while(*(p+1) == '*') /* eliminate multiple stars */
+        while(*(p + 1) == '*') /* eliminate multiple stars */
           p++;
-        if(*s == '\0' && *(p+1) == '\0')
+        if(*s == '\0' && *(p + 1) == '\0')
           return CURL_FNMATCH_MATCH;
         rc = loop(p + 1, s); /* *.txt matches .txt <=> .txt matches .txt */
         if(rc == CURL_FNMATCH_MATCH)
@@ -351,7 +351,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string)
         p++;
       }
       else if(*p == '[') {
-        unsigned char *pp = p+1; /* cannot handle with pointer to register */
+        unsigned char *pp = p + 1; /* cannot handle with pointer to register */
         if(setcharset(&pp, charset)) {
           int found = FALSE;
           if(charset[(unsigned int)*s])
@@ -381,7 +381,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string)
             found = !found;
 
           if(found) {
-            p = pp+1;
+            p = pp + 1;
             s++;
             memset(charset, 0, CURLFNM_CHSET_SIZE);
           }

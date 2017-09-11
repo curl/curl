@@ -204,7 +204,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
 
   /* Load client certificate */
   if(SSL_SET_OPTION(cert)) {
-    i=0;
+    i = 0;
     /* Instead of trying to analyze cert type here, let axTLS try them all. */
     while(cert_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, cert_types[i],
@@ -228,7 +228,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
      If a pkcs12 file successfully loaded a cert, then there's nothing to do
      because the key has already been loaded. */
   if(SSL_SET_OPTION(key) && cert_types[i] != SSL_OBJ_PKCS12) {
-    i=0;
+    i = 0;
     /* Instead of trying to analyze key type here, let axTLS try them all. */
     while(key_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, key_types[i],
@@ -444,7 +444,7 @@ static CURLcode Curl_axtls_connect_nonblocking(struct connectdata *conn,
       /* Loop to perform more work in between sleeps. This is work around the
          fact that axtls does not expose any knowledge about when work needs
          to be performed. This can save ~25% of time on SSL handshakes. */
-      for(i=0; i<5; i++) {
+      for(i = 0; i<5; i++) {
         ssl_fcn_return = ssl_read(BACKEND->ssl, NULL);
         if(ssl_fcn_return < 0) {
           Curl_axtls_close(conn, sockindex);

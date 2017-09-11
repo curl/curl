@@ -103,7 +103,7 @@ bool Curl_if_is_interface_name(const char *interf)
   struct ifaddrs *iface, *head;
 
   if(getifaddrs(&head) >= 0) {
-    for(iface=head; iface != NULL; iface=iface->ifa_next) {
+    for(iface = head; iface != NULL; iface = iface->ifa_next) {
       if(strcasecompare(iface->ifa_name, interf)) {
         result = TRUE;
         break;
@@ -131,7 +131,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 #endif
 
   if(getifaddrs(&head) >= 0) {
-    for(iface = head; iface != NULL; iface=iface->ifa_next) {
+    for(iface = head; iface != NULL; iface = iface->ifa_next) {
       if(iface->ifa_addr != NULL) {
         if(iface->ifa_addr->sa_family == af) {
           if(strcasecompare(iface->ifa_name, interf)) {
@@ -230,7 +230,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
     return IF2IP_NOT_FOUND;
 
   memset(&req, 0, sizeof(req));
-  memcpy(req.ifr_name, interf, len+1);
+  memcpy(req.ifr_name, interf, len + 1);
   req.ifr_addr.sa_family = AF_INET;
 
   if(ioctl(dummy, SIOCGIFADDR, &req) < 0) {

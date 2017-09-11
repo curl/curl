@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -478,26 +478,26 @@ static void lograw(unsigned char *buffer, ssize_t len)
   ssize_t i;
   unsigned char *ptr = buffer;
   char *optr = data;
-  ssize_t width=0;
+  ssize_t width = 0;
   int left = sizeof(data);
 
-  for(i=0; i<len; i++) {
+  for(i = 0; i<len; i++) {
     switch(ptr[i]) {
     case '\n':
       snprintf(optr, left, "\\n");
       width += 2;
       optr += 2;
-      left-=2;
+      left -= 2;
       break;
     case '\r':
       snprintf(optr, left, "\\r");
       width += 2;
       optr += 2;
-      left-=2;
+      left -= 2;
       break;
     default:
       snprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
-                                  ptr[i]==0x20) ?ptr[i]:'.');
+                                  ptr[i] == 0x20) ?ptr[i]:'.');
       width++;
       optr++;
       left--;
@@ -1200,7 +1200,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   int rc;
   int totdelay = 0;
   int maxretr = 10;
-  int delay= 20;
+  int delay = 20;
   int attempt = 0;
   int error = 0;
 
@@ -1343,7 +1343,7 @@ int main(int argc, char *argv[])
   bool juggle_again;
   int rc;
   int error;
-  int arg=1;
+  int arg = 1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
 

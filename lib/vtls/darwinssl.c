@@ -1045,7 +1045,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
       keys_list_count = CFArrayGetCount(keys_list);
       *out_cert_and_key = NULL;
       status = 1;
-      for(i=0; i<keys_list_count; i++) {
+      for(i = 0; i<keys_list_count; i++) {
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
         SecIdentityRef identity =
@@ -2499,7 +2499,7 @@ darwinssl_connect_common(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  if(ssl_connect_1==connssl->connecting_state) {
+  if(ssl_connect_1 == connssl->connecting_state) {
     /* Find out how much more time we're allowed */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
 

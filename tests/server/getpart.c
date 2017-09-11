@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -250,11 +250,11 @@ int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
 # define MAX_TAG_LEN 79
-  char couter[MAX_TAG_LEN+1]; /* current outermost section */
-  char cmain[MAX_TAG_LEN+1];  /* current main section */
-  char csub[MAX_TAG_LEN+1];   /* current sub section */
-  char ptag[MAX_TAG_LEN+1];   /* potential tag */
-  char patt[MAX_TAG_LEN+1];   /* potential attributes */
+  char couter[MAX_TAG_LEN + 1]; /* current outermost section */
+  char cmain[MAX_TAG_LEN + 1];  /* current main section */
+  char csub[MAX_TAG_LEN + 1];   /* current sub section */
+  char ptag[MAX_TAG_LEN + 1];   /* potential tag */
+  char patt[MAX_TAG_LEN + 1];   /* potential attributes */
   char *buffer = NULL;
   char *ptr;
   char *end;

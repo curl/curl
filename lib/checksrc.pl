@@ -58,7 +58,9 @@ my %warnings = (
     'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
     'ASTERISKSPACE'    => 'pointer declared with space after asterisk',
     'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk',
-    'ASSIGNWITHINCONDITION'  => 'assignment within conditional expression'
+    'ASSIGNWITHINCONDITION'  => 'assignment within conditional expression',
+    'EQUALSNOSPACE'    => 'equals sign without following space',
+    'NOSPACEEQUALS'    => 'equals sign without preceeding space',
     );
 
 sub readwhitelist {
@@ -526,6 +528,40 @@ sub scanfile {
                           "wrongly placed open brace");
             }
         }
+
+        # check for equals sign without spaces next to it
+        if($nostr =~ /(.*)\=[a-z0-9]/i) {
+            checkwarn("EQUALSNOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after equals sign");
+        }
+        # check for equals sign without spaces before it
+        elsif($nostr =~ /(.*)[a-z0-9]\=/i) {
+            checkwarn("NOSPACEEQUALS",
+                      $line, length($1)+1, $file, $ol,
+                      "no space before equals sign");
+        }
+
+        # check for plus signs without spaces next to it
+        if($nostr =~ /(.*)[^+]\+[a-z0-9]/i) {
+            checkwarn("PLUSNOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after plus sign");
+        }
+        # check for plus sign without spaces before it
+        elsif($nostr =~ /(.*)[a-z0-9]\+[^+]/i) {
+            checkwarn("NOSPACEPLUS",
+                      $line, length($1)+1, $file, $ol,
+                      "no space before plus sign");
+        }
+
+        # check for semicolons without space to it
+        if($nostr =~ /(.*)\;[a-z0-9]/i) {
+            checkwarn("SEMINOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after semilcolon");
+        }
+
         $line++;
         $prevl = $ol;
     }

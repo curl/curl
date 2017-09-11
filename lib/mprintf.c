@@ -177,7 +177,7 @@ struct asprintf {
 
 static long dprintf_DollarString(char *input, char **end)
 {
-  int number=0;
+  int number = 0;
   while(ISDIGIT(*input)) {
     number *= 10;
     number += *input-'0';
@@ -233,7 +233,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   long width;
   long precision;
   int flags;
-  long max_param=0;
+  long max_param = 0;
   long i;
 
   while(*fmt) {
@@ -376,7 +376,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           else
             width = param_num;
           if(width > max_param)
-            max_param=width;
+            max_param = width;
           break;
         default:
           break;
@@ -482,7 +482,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   }
 
   /* Read the arg list parameters into our data list */
-  for(i=0; i<max_param; i++) {
+  for(i = 0; i<max_param; i++) {
     /* Width/precision arguments must be read before the main argument
        they are attached to */
     if(vto[i].flags & FLAGS_WIDTHPARAM) {
@@ -569,7 +569,7 @@ static int dprintf_formatf(
   int done = 0;
 
   long param; /* current parameter to read */
-  long param_num=0; /* parameter counter */
+  long param_num = 0; /* parameter counter */
 
   va_stack_t vto[MAX_PARAMETERS];
   char *endpos[MAX_PARAMETERS];
@@ -639,7 +639,7 @@ static int dprintf_formatf(
 
     /* If this is a positional parameter, the position must follow immediately
        after the %, thus create a %<num>$ sequence */
-    param=dprintf_DollarString(f, &f);
+    param = dprintf_DollarString(f, &f);
 
     if(!param)
       param = param_num;
@@ -948,7 +948,7 @@ static int dprintf_formatf(
            output characters */
         (sprintf)(work, formatbuf, p->data.dnum);
         DEBUGASSERT(strlen(work) <= sizeof(work));
-        for(fptr=work; *fptr; fptr++)
+        for(fptr = work; *fptr; fptr++)
           OUTCHAR(*fptr);
       }
       break;
@@ -980,7 +980,7 @@ static int dprintf_formatf(
 /* fputc() look-alike */
 static int addbyter(int output, FILE *data)
 {
-  struct nsprintf *infop=(struct nsprintf *)data;
+  struct nsprintf *infop = (struct nsprintf *)data;
   unsigned char outc = (unsigned char)output;
 
   if(infop->length < infop->max) {
@@ -1028,7 +1028,7 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 /* fputc() look-alike */
 static int alloc_addbyter(int output, FILE *data)
 {
-  struct asprintf *infop=(struct asprintf *)data;
+  struct asprintf *infop = (struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
 
   if(!infop->buffer) {
@@ -1038,9 +1038,9 @@ static int alloc_addbyter(int output, FILE *data)
       return -1; /* fail */
     }
     infop->alloc = 32;
-    infop->len =0;
+    infop->len = 0;
   }
-  else if(infop->len+1 >= infop->alloc) {
+  else if(infop->len + 1 >= infop->alloc) {
     char *newptr = NULL;
     size_t newsize = infop->alloc*2;
 
@@ -1129,7 +1129,7 @@ int curl_msprintf(char *buffer, const char *format, ...)
   va_start(ap_save, format);
   retcode = dprintf_formatf(&buffer, storebuffer, format, ap_save);
   va_end(ap_save);
-  *buffer=0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 
@@ -1158,7 +1158,7 @@ int curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
 {
   int retcode;
   retcode = dprintf_formatf(&buffer, storebuffer, format, ap_save);
-  *buffer=0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -227,7 +227,7 @@ polarssl_connect_step1(struct connectdata *conn,
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
   int ret = -1;
   char errorbuf[128];
-  errorbuf[0]=0;
+  errorbuf[0] = 0;
 
   /* PolarSSL only supports SSLv3 and TLSv1 */
   if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) {
@@ -777,9 +777,9 @@ polarssl_connect_common(struct connectdata *conn,
     if(connssl->connecting_state == ssl_connect_2_reading ||
        connssl->connecting_state == ssl_connect_2_writing) {
 
-      curl_socket_t writefd = ssl_connect_2_writing==
+      curl_socket_t writefd = ssl_connect_2_writing ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading==
+      curl_socket_t readfd = ssl_connect_2_reading ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,

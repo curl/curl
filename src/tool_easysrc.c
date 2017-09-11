@@ -141,11 +141,11 @@ CURLcode easysrc_perform(void)
     const char *c;
     CHKRET(easysrc_add(&easysrc_code, ""));
     /* Preamble comment */
-    for(i=0; ((c = srchard[i]) != NULL); i++)
+    for(i = 0; ((c = srchard[i]) != NULL); i++)
       CHKRET(easysrc_add(&easysrc_code, c));
     /* Each unconverted option */
     if(easysrc_toohard) {
-      for(ptr=easysrc_toohard->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_toohard->first; ptr; ptr = ptr->next)
         CHKRET(easysrc_add(&easysrc_code, ptr->data));
     }
     CHKRET(easysrc_add(&easysrc_code, ""));
@@ -189,12 +189,12 @@ void dumpeasysrc(struct GlobalConfig *config)
     int i;
     const char *c;
 
-    for(i=0; ((c = srchead[i]) != NULL); i++)
+    for(i = 0; ((c = srchead[i]) != NULL); i++)
       fprintf(out, "%s\n", c);
 
     /* Declare variables used for complex setopt values */
     if(easysrc_decl) {
-      for(ptr=easysrc_decl->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_decl->first; ptr; ptr = ptr->next)
         fprintf(out, "  %s\n", ptr->data);
     }
 
@@ -202,13 +202,13 @@ void dumpeasysrc(struct GlobalConfig *config)
     if(easysrc_data) {
       fprintf(out, "\n");
 
-      for(ptr=easysrc_data->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_data->first; ptr; ptr = ptr->next)
         fprintf(out, "  %s\n", ptr->data);
     }
 
     fprintf(out, "\n");
     if(easysrc_code) {
-      for(ptr=easysrc_code->first; ptr; ptr = ptr->next) {
+      for(ptr = easysrc_code->first; ptr; ptr = ptr->next) {
         if(ptr->data[0]) {
           fprintf(out, "  %s\n", ptr->data);
         }
@@ -219,11 +219,11 @@ void dumpeasysrc(struct GlobalConfig *config)
     }
 
     if(easysrc_clean) {
-      for(ptr=easysrc_clean->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_clean->first; ptr; ptr = ptr->next)
         fprintf(out, "  %s\n", ptr->data);
     }
 
-    for(i=0; ((c = srcend[i]) != NULL); i++)
+    for(i = 0; ((c = srcend[i]) != NULL); i++)
       fprintf(out, "%s\n", c);
 
     if(fopened)

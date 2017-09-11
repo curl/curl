@@ -281,7 +281,7 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
 
     found = PR_FALSE;
 
-    for(i=0; i<NUM_OF_CIPHERS; i++) {
+    for(i = 0; i<NUM_OF_CIPHERS; i++) {
       if(strcasecompare(cipher, cipherlist[i].name)) {
         cipher_state[i] = PR_TRUE;
         found = PR_TRUE;
@@ -300,7 +300,7 @@ static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
   }
 
   /* Finally actually enable the selected ciphers */
-  for(i=0; i<NUM_OF_CIPHERS; i++) {
+  for(i = 0; i<NUM_OF_CIPHERS; i++) {
     if(!cipher_state[i])
       continue;
 
@@ -321,7 +321,7 @@ static bool any_cipher_enabled(void)
 {
   unsigned int i;
 
-  for(i=0; i<NUM_OF_CIPHERS; i++) {
+  for(i = 0; i<NUM_OF_CIPHERS; i++) {
     PRInt32 policy = 0;
     SSL_CipherPolicyGet(cipherlist[i].num, &policy);
     if(policy)
@@ -1002,7 +1002,7 @@ static SECStatus check_issuer_cert(PRFileDesc *sock,
                                    char *issuer_nickname)
 {
   CERTCertificate *cert, *cert_issuer, *issuer;
-  SECStatus res=SECSuccess;
+  SECStatus res = SECSuccess;
   void *proto_win = NULL;
 
   cert = SSL_PeerCertificate(sock);
@@ -1014,7 +1014,7 @@ static SECStatus check_issuer_cert(PRFileDesc *sock,
   if((!cert_issuer) || (!issuer))
     res = SECFailure;
   else if(SECITEM_CompareItem(&cert_issuer->derCert,
-                              &issuer->derCert)!=SECEqual)
+                              &issuer->derCert) != SECEqual)
     res = SECFailure;
 
   CERT_DestroyCertificate(cert);

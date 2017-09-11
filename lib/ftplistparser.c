@@ -421,7 +421,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else if(c == '\n') {
             finfo->b_data[parser->item_length - 1] = 0;
             if(strncmp("total ", finfo->b_data, 6) == 0) {
-              char *endptr = finfo->b_data+6;
+              char *endptr = finfo->b_data + 6;
               /* here we can deal with directory size, pass the leading white
                  spaces and then the digits */
               while(ISSPACE(*endptr))
@@ -609,7 +609,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             char *p;
             curl_off_t fsize;
             finfo->b_data[parser->item_offset + parser->item_length - 1] = 0;
-            if(!curlx_strtoofft(finfo->b_data+parser->item_offset,
+            if(!curlx_strtoofft(finfo->b_data + parser->item_offset,
                                 &p, 10, &fsize)) {
               if(p[0] == '\0' && fsize != CURL_OFF_T_MAX &&
                  fsize != CURL_OFF_T_MIN) {

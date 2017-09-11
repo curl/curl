@@ -680,7 +680,7 @@ static metalink_checksum *new_metalink_checksum_from_hex_digest
     return 0;
 
   for(i = 0; i < len; i += 2) {
-    digest[i/2] = hex_to_uint(hex_digest+i);
+    digest[i/2] = hex_to_uint(hex_digest + i);
   }
   chksum = malloc(sizeof(metalink_checksum));
   if(chksum) {
@@ -903,8 +903,8 @@ static int check_content_type(const char *content_type, const char *media_type)
     return 0;
   }
   return curl_strnequal(ptr, media_type, media_type_len) &&
-    (*(ptr+media_type_len) == '\0' || *(ptr+media_type_len) == ' ' ||
-     *(ptr+media_type_len) == '\t' || *(ptr+media_type_len) == ';');
+    (*(ptr + media_type_len) == '\0' || *(ptr + media_type_len) == ' ' ||
+     *(ptr + media_type_len) == '\t' || *(ptr + media_type_len) == ';');
 }
 
 int check_metalink_content_type(const char *content_type)

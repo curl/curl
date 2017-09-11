@@ -368,7 +368,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
   if(!encrypting) {
     int klen = curlx_uztosi(strlen((char *)global_passwd));
     if(num > klen) {
-      memcpy(buf, global_passwd, klen+1);
+      memcpy(buf, global_passwd, klen + 1);
       return klen;
     }
   }
@@ -459,7 +459,7 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
   } while(!rand_enough());
 
   /* generates a default path for the random seed file */
-  fname[0]=0; /* blank it first */
+  fname[0] = 0; /* blank it first */
   RAND_file_name(fname, sizeof(fname));
   if(fname[0]) {
     /* we got a file name to try */
@@ -755,7 +755,7 @@ int cert_stuff(struct connectdata *conn,
         break;
       if(!key_file)
         /* cert & key can only be in PEM case in the same file */
-        key_file=cert_file;
+        key_file = cert_file;
       /* FALLTHROUGH */
     case SSL_FILETYPE_ASN1:
       if(SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type) != 1) {
@@ -818,13 +818,13 @@ int cert_stuff(struct connectdata *conn,
       return 0;
     }
 
-    ssl=SSL_new(ctx);
+    ssl = SSL_new(ctx);
     if(!ssl) {
       failf(data, "unable to create an SSL structure");
       return 0;
     }
 
-    x509=SSL_get_certificate(ssl);
+    x509 = SSL_get_certificate(ssl);
 
     /* This version was provided by Evan Jordan and is supposed to not
        leak memory as the previous version: */
@@ -872,7 +872,7 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
     size--; /* don't overwrite the buffer end */
 
   memcpy(buf, biomem->data, size);
-  buf[size]=0;
+  buf[size] = 0;
 
   BIO_free(bio_out);
 
@@ -1357,7 +1357,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
     numalts = sk_GENERAL_NAME_num(altnames);
 
     /* loop through all alternatives - until a dnsmatch */
-    for(i=0; (i < numalts) && !dnsmatched; i++) {
+    for(i = 0; (i < numalts) && !dnsmatched; i++) {
       /* get a handle to alternative name number i */
       const GENERAL_NAME *check = sk_GENERAL_NAME_value(altnames, i);
 
@@ -1426,7 +1426,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
   else {
     /* we have to look to the last occurrence of a commonName in the
        distinguished one to get the most significant one. */
-    int j, i=-1;
+    int j, i = -1;
 
     /* The following is done because of a bug in 0.9.6b */
 
@@ -1435,14 +1435,14 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
 
     X509_NAME *name = X509_get_subject_name(server_cert);
     if(name)
-      while((j = X509_NAME_get_index_by_NID(name, NID_commonName, i))>=0)
-        i=j;
+      while((j = X509_NAME_get_index_by_NID(name, NID_commonName, i)) >= 0)
+        i = j;
 
     /* we have the name entry and we will now convert this to a string
        that we can use for comparison. Doing this we support BMPstring,
        UTF8 etc. */
 
-    if(i>=0) {
+    if(i >= 0) {
       ASN1_STRING *tmp =
         X509_NAME_ENTRY_get_data(X509_NAME_get_entry(name, i));
 
@@ -1455,7 +1455,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
           j = ASN1_STRING_length(tmp);
           if(j >= 0) {
-            peer_CN = OPENSSL_malloc(j+1);
+            peer_CN = OPENSSL_malloc(j + 1);
             if(peer_CN) {
               memcpy(peer_CN, ASN1_STRING_get0_data(tmp), j);
               peer_CN[j] = '\0';
@@ -2351,7 +2351,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   if(ssl_crlfile) {
     /* tell SSL where to find CRL file that is used to check certificate
      * revocation */
-    lookup=X509_STORE_add_lookup(SSL_CTX_get_cert_store(BACKEND->ctx),
+    lookup = X509_STORE_add_lookup(SSL_CTX_get_cert_store(BACKEND->ctx),
                                  X509_LOOKUP_file());
     if(!lookup ||
        (!X509_load_crl_file(lookup, ssl_crlfile, X509_FILETYPE_PEM)) ) {
@@ -2631,7 +2631,7 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
 do {                              \
   long info_len = BIO_get_mem_data(mem, &ptr); \
   Curl_ssl_push_certinfo_len(data, _num, _label, ptr, info_len); \
-  if(1!=BIO_reset(mem))                                          \
+  if(1 != BIO_reset(mem))                                        \
     break;                                                       \
 } WHILE_FALSE
 
@@ -2679,12 +2679,12 @@ static int X509V3_ext(struct Curl_easy *data,
     /* no extensions, bail out */
     return 1;
 
-  for(i=0; i < (int)sk_X509_EXTENSION_num(exts); i++) {
+  for(i = 0; i < (int)sk_X509_EXTENSION_num(exts); i++) {
     ASN1_OBJECT *obj;
     X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, i);
     BUF_MEM *biomem;
     char buf[512];
-    char *ptr=buf;
+    char *ptr = buf;
     char namebuf[128];
     BIO *bio_out = BIO_new(BIO_s_mem());
 
@@ -2701,16 +2701,16 @@ static int X509V3_ext(struct Curl_easy *data,
     BIO_get_mem_ptr(bio_out, &biomem);
 
     for(j = 0; j < (size_t)biomem->length; j++) {
-      const char *sep="";
+      const char *sep = "";
       if(biomem->data[j] == '\n') {
-        sep=", ";
+        sep = ", ";
         j++; /* skip the newline */
       };
       while((j<(size_t)biomem->length) && (biomem->data[j] == ' '))
         j++;
       if(j<(size_t)biomem->length)
-        ptr+=snprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
-                      biomem->data[j]);
+        ptr += snprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
+                        biomem->data[j]);
     }
 
     Curl_ssl_push_certinfo(data, certnum, namebuf, buf);
@@ -2749,7 +2749,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
   for(i = 0; i < numcerts; i++) {
     ASN1_INTEGER *num;
     X509 *x = sk_X509_value(sk, i);
-    EVP_PKEY *pubkey=NULL;
+    EVP_PKEY *pubkey = NULL;
     int j;
     char *ptr;
     const ASN1_BIT_STRING *psig = NULL;
@@ -3281,9 +3281,9 @@ static CURLcode ossl_connect_common(struct connectdata *conn,
     if(connssl->connecting_state == ssl_connect_2_reading ||
        connssl->connecting_state == ssl_connect_2_writing) {
 
-      curl_socket_t writefd = ssl_connect_2_writing==
+      curl_socket_t writefd = ssl_connect_2_writing ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = ssl_connect_2_reading==
+      curl_socket_t readfd = ssl_connect_2_reading ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
@@ -3502,9 +3502,9 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
   unsigned long ssleay_value;
   sub[2]='\0';
   sub[1]='\0';
-  ssleay_value=OpenSSL_version_num();
+  ssleay_value = OpenSSL_version_num();
   if(ssleay_value < 0x906000) {
-    ssleay_value=SSLEAY_VERSION_NUMBER;
+    ssleay_value = SSLEAY_VERSION_NUMBER;
     sub[0]='\0';
   }
   else {

@@ -192,7 +192,7 @@ static const char *ContentTypeForFilename(const char *filename,
     contenttype = HTTPPOST_CONTENTTYPE_DEFAULT;
 
   if(filename) { /* in case a NULL was passed in */
-    for(i=0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
+    for(i = 0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
       if(strlen(filename) >= strlen(ctts[i].extension)) {
         if(strcasecompare(filename +
                           strlen(filename) - strlen(ctts[i].extension),
@@ -267,7 +267,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct curl_httppost *post = NULL;
   CURLformoption option;
   struct curl_forms *forms = NULL;
-  char *array_value=NULL; /* value read from an array */
+  char *array_value = NULL; /* value read from an array */
 
   /* This is a state variable, that if TRUE means that we're parsing an
      array that we got passed to us. If FALSE we're parsing the input
@@ -644,7 +644,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
           /* copy name (without strdup; possibly contains null characters) */
           form->name = Curl_memdup(form->name, form->namelength?
                                    form->namelength:
-                                   strlen(form->name)+1);
+                                   strlen(form->name) + 1);
         }
         if(!form->name) {
           return_value = CURL_FORMADD_MEMORY;
@@ -658,7 +658,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         /* copy value (without strdup; possibly contains null characters) */
         size_t clen  = (size_t) form->contentslength;
         if(!clen)
-          clen = strlen(form->value)+1;
+          clen = strlen(form->value) + 1;
 
         form->value = Curl_memdup(form->value, clen);
 
@@ -795,7 +795,7 @@ void curl_formfree(struct curl_httppost *form)
     return;
 
   do {
-    next=form->next;  /* the following form line */
+    next = form->next;  /* the following form line */
 
     /* recurse to sub-contents */
     curl_formfree(form->more);

@@ -63,7 +63,8 @@ static char *printable(char *inbuf, size_t inlength)
     inlength = strlen(inbuf);
 
   if(inlength) {
-    outincr = ((inlength/2) < (HEX_STR_LEN+1)) ? HEX_STR_LEN+1 : inlength/2;
+    outincr = ((inlength/2) < (HEX_STR_LEN + 1)) ?
+      HEX_STR_LEN + 1 : inlength/2;
     outsize = inlength + outincr;
   }
   else
@@ -78,7 +79,7 @@ static char *printable(char *inbuf, size_t inlength)
     return outbuf;
   }
 
-  for(i=0; i<inlength; i++) {
+  for(i = 0; i<inlength; i++) {
 
     if(o > outsize - (HEX_STR_LEN + 1)) {
       newsize = outsize + outincr;
@@ -186,7 +187,7 @@ int main(int argc, char *argv[])
   }
 
   filename = test2file(testnum);
-  stream=fopen(filename, "rb");
+  stream = fopen(filename, "rb");
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -204,7 +205,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  stream=fopen(filename, "rb");
+  stream = fopen(filename, "rb");
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -224,7 +225,7 @@ int main(int argc, char *argv[])
 
   while(fgets(buf, sizeof(buf), stdin)) {
     if(strcmp(buf, type1_input) == 0) {
-      stream=fopen(filename, "rb");
+      stream = fopen(filename, "rb");
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
       fflush(stdout);
     }
     else if(strncmp(buf, type3_input, strlen(type3_input)) == 0) {
-      stream=fopen(filename, "rb");
+      stream = fopen(filename, "rb");
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));

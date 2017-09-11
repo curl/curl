@@ -1129,7 +1129,7 @@ struct Progress {
   struct curltime dl_limit_start;
   curl_off_t dl_limit_size;
 
-#define CURR_TIME (5+1) /* 6 entries for 5 seconds */
+#define CURR_TIME (5 + 1) /* 6 entries for 5 seconds */
 
   curl_off_t speeder[ CURR_TIME ];
   struct curltime speeder_time[ CURR_TIME ];
@@ -1251,7 +1251,7 @@ struct UrlState {
   size_t headersize;   /* size of the allocation */
 
   char *buffer; /* download buffer */
-  char uploadbuffer[UPLOAD_BUFSIZE+1]; /* upload buffer */
+  char uploadbuffer[UPLOAD_BUFSIZE + 1]; /* upload buffer */
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */

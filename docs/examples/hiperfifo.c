@@ -137,15 +137,15 @@ static void mcode_or_die(const char *where, CURLMcode code)
   if(CURLM_OK != code) {
     const char *s;
     switch(code) {
-      case     CURLM_BAD_HANDLE:         s="CURLM_BAD_HANDLE";         break;
-      case     CURLM_BAD_EASY_HANDLE:    s="CURLM_BAD_EASY_HANDLE";    break;
-      case     CURLM_OUT_OF_MEMORY:      s="CURLM_OUT_OF_MEMORY";      break;
-      case     CURLM_INTERNAL_ERROR:     s="CURLM_INTERNAL_ERROR";     break;
-      case     CURLM_UNKNOWN_OPTION:     s="CURLM_UNKNOWN_OPTION";     break;
-      case     CURLM_LAST:               s="CURLM_LAST";               break;
-      default: s="CURLM_unknown";
+      case     CURLM_BAD_HANDLE:         s = "CURLM_BAD_HANDLE";         break;
+      case     CURLM_BAD_EASY_HANDLE:    s = "CURLM_BAD_EASY_HANDLE";    break;
+      case     CURLM_OUT_OF_MEMORY:      s = "CURLM_OUT_OF_MEMORY";      break;
+      case     CURLM_INTERNAL_ERROR:     s = "CURLM_INTERNAL_ERROR";     break;
+      case     CURLM_UNKNOWN_OPTION:     s = "CURLM_UNKNOWN_OPTION";     break;
+      case     CURLM_LAST:               s = "CURLM_LAST";               break;
+      default: s = "CURLM_unknown";
         break;
-    case     CURLM_BAD_SOCKET:         s="CURLM_BAD_SOCKET";
+    case     CURLM_BAD_SOCKET:         s = "CURLM_BAD_SOCKET";
       fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
       /* ignore this error */
       return;
@@ -359,15 +359,15 @@ static void new_conn(char *url, GlobalInfo *g)
 static void fifo_cb(int fd, short event, void *arg)
 {
   char s[1024];
-  long int rv=0;
-  int n=0;
+  long int rv = 0;
+  int n = 0;
   GlobalInfo *g = (GlobalInfo *)arg;
   (void)fd; /* unused */
   (void)event; /* unused */
 
   do {
     s[0]='\0';
-    rv=fscanf(g->input, "%1023s%n", s, &n);
+    rv = fscanf(g->input, "%1023s%n", s, &n);
     s[n]='\0';
     if(n && s[0]) {
       new_conn(s, arg);  /* if we read a URL, go get it! */

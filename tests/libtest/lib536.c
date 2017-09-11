@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2011, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -63,7 +63,7 @@ static int perform(CURLM *multi)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    res_select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &interval);
+    res_select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &interval);
     if(res)
       return res;
 
