@@ -88,13 +88,13 @@ static int parse_url_file(const char *filename)
 static void free_urls(void)
 {
   int i;
-  for(i = 0;i < num_handles;i++) {
+  for(i = 0; i < num_handles; i++) {
     Curl_safefree(urlstring[i]);
   }
-  for(i = 0;i < blacklist_num_servers;i++) {
+  for(i = 0; i < blacklist_num_servers; i++) {
     Curl_safefree(server_blacklist[i]);
   }
-  for(i = 0;i < blacklist_num_sites;i++) {
+  for(i = 0; i < blacklist_num_sites; i++) {
     Curl_safefree(site_blacklist[i]);
   }
 }
@@ -103,7 +103,7 @@ static int create_handles(void)
 {
   int i;
 
-  for(i = 0;i < num_handles;i++) {
+  for(i = 0; i < num_handles; i++) {
     handles[i] = curl_easy_init();
   }
   return 0;
@@ -126,7 +126,7 @@ static void remove_handles(void)
 {
   int i;
 
-  for(i = 0;i < num_handles;i++) {
+  for(i = 0; i < num_handles; i++) {
     if(handles[i])
       curl_easy_cleanup(handles[i]);
   }
