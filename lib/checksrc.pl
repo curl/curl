@@ -555,6 +555,13 @@ sub scanfile {
                       "no space before plus sign");
         }
 
+        # check for semicolons without space to it
+        if($nostr =~ /(.*)\;[a-z0-9]/i) {
+            checkwarn("SEMINOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after semilcolon");
+        }
+
         $line++;
         $prevl = $ol;
     }
