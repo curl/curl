@@ -172,6 +172,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   return CURLE_OK;
 }
 
+
 /*
  * checkProxyHeaders() checks the linked list of custom proxy headers
  * if proxy headers are not available, then it will lookup into http header
@@ -1321,7 +1322,7 @@ Curl_compareheader(const char *headerline, /* line to check */
   clen = strlen(content); /* length of the word to find */
 
   /* find the content string in the rest of the line */
-  for(;len >= clen;len--, start++) {
+  for(; len >= clen; len--, start++) {
     if(strncasecompare(start, content, clen))
       return TRUE; /* match! */
   }

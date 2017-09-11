@@ -396,7 +396,7 @@ char *url_fgets(char *ptr, size_t size, URL_FILE *file)
 
     /*buffer contains data */
     /* look for newline or eof */
-    for(loop = 0;loop < want;loop++) {
+    for(loop = 0; loop < want; loop++) {
       if(file->buffer[loop] == '\n') {
         want = loop + 1;/* include newline */
         break;

@@ -295,7 +295,7 @@ static void negotiate(struct connectdata *conn)
   int i;
   struct TELNET *tn = (struct TELNET *) conn->data->req.protop;
 
-  for(i = 0;i < CURL_NTELOPTS;i++) {
+  for(i = 0; i < CURL_NTELOPTS; i++) {
     if(i == CURL_TELOPT_ECHO)
       continue;
 
@@ -792,7 +792,7 @@ static void printsub(struct Curl_easy *data,
       case CURL_TELOPT_NEW_ENVIRON:
         if(pointer[1] == CURL_TELQUAL_IS) {
           infof(data, " ");
-          for(i = 3;i < length;i++) {
+          for(i = 3; i < length; i++) {
             switch(pointer[i]) {
             case CURL_NEW_ENV_VAR:
               infof(data, ", ");
@@ -967,7 +967,7 @@ static void suboption(struct connectdata *conn)
                CURL_TELQUAL_IS);
       len = 4;
 
-      for(v = tn->telnet_vars;v;v = v->next) {
+      for(v = tn->telnet_vars; v; v = v->next) {
         tmplen = (strlen(v->data) + 1);
         /* Add the variable only if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
