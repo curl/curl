@@ -163,7 +163,7 @@ char *fuzz_tlv_to_string(TLV *tlv);
         {                                                                      \
           if (!(COND))                                                         \
           {                                                                    \
-            rc = 1;                                                            \
+            rc = 255;                                                          \
             goto EXIT_LABEL;                                                   \
           }                                                                    \
         }
