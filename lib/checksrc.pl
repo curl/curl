@@ -61,6 +61,7 @@ my %warnings = (
     'ASSIGNWITHINCONDITION'  => 'assignment within conditional expression',
     'EQUALSNOSPACE'    => 'equals sign without following space',
     'NOSPACEEQUALS'    => 'equals sign without preceeding space',
+    'SEMINOSPACE'      => 'semicolon without following space',
     );
 
 sub readwhitelist {
@@ -553,6 +554,13 @@ sub scanfile {
             checkwarn("NOSPACEPLUS",
                       $line, length($1)+1, $file, $ol,
                       "no space before plus sign");
+        }
+
+        # check for semicolons without space next to it
+        if($nostr =~ /(.*)\;[a-z0-9]/i) {
+            checkwarn("SEMINOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after semilcolon");
         }
 
         $line++;
