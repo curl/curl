@@ -136,6 +136,12 @@ int fuzz_initialize_fuzz_data(FUZZ_DATA *fuzz,
                         fuzz_read_callback));
   FTRY(curl_easy_setopt(fuzz->easy, CURLOPT_READDATA, fuzz));
 
+  /* Set the standard write function callback. */
+  FTRY(curl_easy_setopt(fuzz->easy,
+                        CURLOPT_WRITEFUNCTION,
+                        fuzz_write_callback));
+  FTRY(curl_easy_setopt(fuzz->easy, CURLOPT_WRITEDATA, fuzz));
+
   /* Can enable verbose mode by changing 0L to 1L */
   FTRY(curl_easy_setopt(fuzz->easy, CURLOPT_VERBOSE, 0L));
 
@@ -267,6 +273,30 @@ static size_t fuzz_read_callback(char *buffer,
          fuzz->upload1_data_len);
 
   return fuzz->upload1_data_len;
+}
+
+/**
+ * Callback function for handling data output quietly.
+ */
+static size_t fuzz_write_callback(void *contents,
+                                  size_t size,
+                                  size_t nmemb,
+                                  void *ptr)
+{
+  size_t total = size * nmemb;
+  FUZZ_DATA *fuzz = (FUZZ_DATA *)ptr;
+  size_t copy_len = total;
+
+  /* Restrict copy_len to at most TEMP_WRITE_ARRAY_SIZE. */
+  if(copy_len > TEMP_WRITE_ARRAY_SIZE) {
+    copy_len = TEMP_WRITE_ARRAY_SIZE;
+  }
+
+  /* Copy bytes to the temp store just to ensure the parameters are
+     exercised. */
+  memcpy(fuzz->write_array, contents, copy_len);
+
+  return total;
 }
 
 /**
