@@ -2079,7 +2079,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
 #ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy)  {
+  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
     /* Using a proxy but does not tunnel through it */
 
     /* The path sent to the proxy is in fact the entire URL. But if the remote
@@ -2624,7 +2624,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
          its size. */
       if(conn->httpversion != 20 &&
          !data->state.expect100header &&
-         (postsize < MAX_INITIAL_POST_SIZE))  {
+         (postsize < MAX_INITIAL_POST_SIZE)) {
         /* if we don't use expect: 100  AND
            postsize is less than MAX_INITIAL_POST_SIZE
 

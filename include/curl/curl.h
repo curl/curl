@@ -356,7 +356,7 @@ typedef size_t (*curl_read_callback)(char *buffer,
                                       size_t nitems,
                                       void *instream);
 
-typedef enum  {
+typedef enum {
   CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
   CURLSOCKTYPE_ACCEPT, /* socket created by accept() call */
   CURLSOCKTYPE_LAST    /* never use */
@@ -398,7 +398,7 @@ typedef enum {
   CURLIOE_LAST           /* never use */
 } curlioerr;
 
-typedef enum  {
+typedef enum {
   CURLIOCMD_NOP,         /* no operation */
   CURLIOCMD_RESTARTREAD, /* restart the read stream from start */
   CURLIOCMD_LAST         /* never use */

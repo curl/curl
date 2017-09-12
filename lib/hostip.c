@@ -306,7 +306,7 @@ fetch_addr(struct connectdata *conn,
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
-  if(dns && (data->set.dns_cache_timeout != -1))  {
+  if(dns && (data->set.dns_cache_timeout != -1)) {
     /* See whether the returned entry is stale. Done before we release lock */
     struct hostcache_prune_data user;
 

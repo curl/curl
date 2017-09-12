@@ -107,7 +107,7 @@ static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   } WHILE_FALSE
 
 /* Data type to read from the arglist */
-typedef enum  {
+typedef enum {
   FORMAT_UNKNOWN = 0,
   FORMAT_STRING,
   FORMAT_PTR,

@@ -1469,7 +1469,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
       return CURLE_OUT_OF_MEMORY;
 
     /* Check if path does not end with /, as then we cut off the file part */
-    if(lstArg[strlen(lstArg) - 1] != '/')  {
+    if(lstArg[strlen(lstArg) - 1] != '/') {
 
       /* chop off the file part if format is dir/dir/file */
       slashPos = strrchr(lstArg, '/');

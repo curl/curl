@@ -54,8 +54,8 @@ int Curl_splayremovebyaddr(struct Curl_tree *t,
                            struct Curl_tree *removenode,
                            struct Curl_tree **newroot);
 
-#define Curl_splaycomparekeys(i,j) ( ((i.tv_sec)  < (j.tv_sec))  ? -1 : \
-                                   ( ((i.tv_sec)  > (j.tv_sec))  ?  1 : \
+#define Curl_splaycomparekeys(i,j) ( ((i.tv_sec)  < (j.tv_sec)) ? -1 : \
+                                   ( ((i.tv_sec)  > (j.tv_sec)) ?  1 : \
                                    ( ((i.tv_usec) < (j.tv_usec)) ? -1 : \
                                    ( ((i.tv_usec) > (j.tv_usec)) ?  1 : 0))))
 
