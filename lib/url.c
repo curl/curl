@@ -3774,7 +3774,9 @@ ConnectionExists(struct Curl_easy *data,
       else {
         /* The requested connection is using the same HTTP proxy in normal
            mode (no tunneling) */
-        match = TRUE;
+        /* TODO(Oli): This is probably the wrong place for this check */
+        if(needle->remote_port == check->remote_port)
+          match = TRUE;
       }
 
       if(match) {
