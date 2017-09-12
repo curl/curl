@@ -12,6 +12,7 @@ This release includes the following changes:
  o libcurl: enable compression for SCP/SFTP with CURLOPT_SSH_COMPRESSION [11]
  o vtls: added dynamic changing SSL backend with curl_global_sslset() [28]
  o new MIME API, curl_mime_init() and friends [32]
+ o openssl: initial SSLKEYLOGFILE implementation [36]
 
 This release includes the following bugfixes:
 
@@ -57,6 +58,22 @@ This release includes the following bugfixes:
  o unit1301: fix error message on first test
  o ossfuzz: moving towards the ideal integration [31]
  o http: fix a memory leakage in checkrtspprefix()
+ o examples/post-callback: stop returning one byte at a time
+ o schannel: return CURLE_SSL_CACERT on failed verification [33]
+ o MAIL-ETIQUETTE: added "1.9 Your emails are public"
+ o http-proxy: treat all 2xx as CONNECT success [34]
+ o openssl: use OpenSSL's default ciphers by default [35]
+ o runtests.pl: support attribute "nonewline" in part verify/upload
+ o configure: remove --enable-soname-bump and SONAME_BUMP [37]
+ o travis: add c-ares enabled builds linux + osx [38]
+ o vtls: fix WolfSSL 3.12 build problems [39]
+ o http-proxy: when not doing CONNECT, that phase is done immediately [40]
+ o configure: fix curl_off_t check's include order [41]
+ o configure: use -Wno-varargs on clang 3.9[.X] debug builds
+ o rtsp: do not call fwrite() with NULL pointer FILE * [42]
+ o mbedtls: enable CA path processing [43]
+ o travis: add build without HTTP/SMTP/IMAP
+ o checksr: verify more code style rules [44]
 
 This release includes the following known bugs:
 
@@ -68,11 +85,12 @@ advice from friends like these:
   Andrei Karas, Benbuck Nason, Benjamin Sergeant, Bill Pyne, Brian Carpenter,
   Dan Fandrich, Daniel Stenberg, Even Rouault, Frank Denis, Gergely Nagy,
   Gisle Vanem, Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
-  John David Anglin, joshhe on github, Kamil Dudka, Maksim Stsepanenka,
-  Marcel Raad, Max Dymond, Michael Smith, Nick Zitzmann,
-  Nicolas Morey-Chaisemartin, Patrick Monnerat, Peter Lamare, Ray Satiro,
-  Rich Gray, Ryan Schmidt, Ryan Winograd, Tatsuhiro Tsujikawa, Viktor Szakáts,
-  (31 contributors)
+  John David Anglin, joshhe on github, Kamil Dudka, Lawrence Wagerfield,
+  Maksim Stsepanenka, Marcel Raad, Max Dymond, Michael Smith, Nick Zitzmann,
+  Nicolas Morey-Chaisemartin, Patrick Monnerat, Peter Lamare, Peter Wu,
+  Ray Satiro, Rich Gray, Ryan Schmidt, Ryan Winograd, SBKarr on github,
+  Tatsuhiro Tsujikawa, Viktor Szakáts,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -110,3 +128,15 @@ References to bug reports and discussions on issues:
  [30] = https://curl.haxx.se/mail/lib-2017-08/0120.html
  [31] = https://curl.haxx.se/bug/?i=1842
  [32] = https://curl.haxx.se/bug/?i=1839
+ [33] = https://curl.haxx.se/bug/?i=1858
+ [34] = https://curl.haxx.se/bug/?i=1859
+ [35] = https://curl.haxx.se/bug/?i=1846
+ [36] = https://curl.haxx.se/bug/?i=1866
+ [37] = https://curl.haxx.se/bug/?i=1861
+ [38] = https://curl.haxx.se/bug/?i=1868
+ [39] = https://curl.haxx.se/bug/?i=1865
+ [40] = https://curl.haxx.se/bug/?i=1853
+ [41] = https://curl.haxx.se/bug/?i=1870
+ [42] = https://curl.haxx.se/bug/?i=1874
+ [43] = https://curl.haxx.se/bug/?i=1877
+ [44] = https://curl.haxx.se/bug/?i=1878
