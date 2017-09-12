@@ -62,6 +62,7 @@ my %warnings = (
     'EQUALSNOSPACE'    => 'equals sign without following space',
     'NOSPACEEQUALS'    => 'equals sign without preceeding space',
     'SEMINOSPACE'      => 'semicolon without following space',
+    'MULTISPACE'       => 'multiple spaces used when not suitable',
     );
 
 sub readwhitelist {
@@ -561,6 +562,18 @@ sub scanfile {
             checkwarn("SEMINOSPACE",
                       $line, length($1)+1, $file, $ol,
                       "no space after semilcolon");
+        }
+
+        # check for more than one consecutive space before open brace or
+        # question mark. Skip lines containing strings since they make it hard
+        # due to artificially getting multiple spaces
+        if(($l eq $nostr) &&
+           $nostr =~ /^(.*(\S)) + [{?]/i) {
+            checkwarn("MULTISPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "multiple space");
+            print STDERR "L: $l\n";
+            print STDERR "nostr: $nostr\n";
         }
 
         $line++;
