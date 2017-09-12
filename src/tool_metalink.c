@@ -30,6 +30,8 @@
 #  include <fcntl.h>
 #endif
 
+#undef HAVE_NSS_CONTEXT
+
 #ifdef USE_OPENSSL
 #  include <openssl/md5.h>
 #  include <openssl/sha.h>
@@ -50,6 +52,7 @@
 #  define MD5_CTX    void *
 #  define SHA_CTX    void *
 #  define SHA256_CTX void *
+#  define HAVE_NSS_CONTEXT
    static NSSInitContext *nss_context;
 #elif defined(USE_POLARSSL)
 #  include <polarssl/md5.h>
@@ -967,7 +970,7 @@ void clean_metalink(struct OperationConfig *config)
 
 void metalink_cleanup(void)
 {
-#ifdef USE_NSS
+#ifdef HAVE_NSS_CONTEXT
   if(nss_context) {
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;
