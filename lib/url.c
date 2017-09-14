@@ -6337,6 +6337,7 @@ static void reuse_conn(struct connectdata *old_conn,
   conn->conn_to_host = old_conn->conn_to_host;
   conn->bits.conn_to_port = old_conn->bits.conn_to_port;
   conn->conn_to_port = old_conn->conn_to_port;
+  conn->remote_port = old_conn->remote_port;
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
