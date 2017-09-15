@@ -74,6 +74,8 @@ B) The request was HTTP and included digest details, which adds 1000 to NUM
 C) If a HTTP request is NTLM type-1, it adds 1001 to num
 D) If a HTTP request is NTLM type-3, it adds 1002 to num
 E) If a HTTP request is Basic and num is already >=1000, it adds 1 to num
+F) If a HTTP request is Negotiate, num gets incremented by one for each
+request with Negotiate authorization header on the same test case.
 
 Dynamically changing num in this way allows the test harness to be used to
 test authentication negotiation where several different requests must be sent
@@ -243,6 +245,7 @@ threaded-resolver
 unittest
 unix-sockets
 WinSSL
+ld_preload
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server

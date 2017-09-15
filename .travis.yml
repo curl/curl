@@ -18,13 +18,14 @@ addons:
             - stunnel4
             - libidn2-0-dev
             - libssh2-1-dev
+            - krb5-user
 
 matrix:
     include:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal
+          env: T=normal C=--with-gssapi
         - os: linux
           compiler: gcc
           dist: trusty
