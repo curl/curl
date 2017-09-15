@@ -242,14 +242,16 @@ static ParameterError str2double(double *val, const char *str, long max)
  * data.
  */
 
-ParameterError str2udouble(double *val, const char *str, long max)
+ParameterError str2udouble(double *valp, const char *str, long max)
 {
-  ParameterError result = str2double(val, str, max);
+  double value;
+  ParameterError result = str2double(&value, str, max);
   if(result != PARAM_OK)
     return result;
-  if(*val < 0)
+  if(value < 0)
     return PARAM_NEGATIVE_NUMERIC;
 
+  *valp = value;
   return PARAM_OK;
 }
 
