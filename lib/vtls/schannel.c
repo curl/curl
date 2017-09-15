@@ -1047,8 +1047,7 @@ schannel_send(struct connectdata *conn, int sockindex,
 
   /* check if the buffer is longer than the maximum message length */
   if(len > BACKEND->stream_sizes.cbMaximumMessage) {
-    *err = CURLE_SEND_ERROR;
-    return -1;
+    len = BACKEND->stream_sizes.cbMaximumMessage;
   }
 
   /* calculate the complete message length and allocate a buffer for it */
