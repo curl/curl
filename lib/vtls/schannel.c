@@ -67,12 +67,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* ALPN requires version 8.1 of the Windows SDK, which was
-   shipped with Visual Studio 2013, aka _MSC_VER 1800:
+/* ALPN requires Windows 8.1 / Server 2012R2:
 
    https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
 */
-#if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_)
+#if defined(WINVER) && (WINVER >= 0x0603)
 #  define HAS_ALPN 1
 #endif
 
