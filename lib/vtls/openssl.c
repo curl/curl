@@ -66,6 +66,8 @@
 #include <openssl/conf.h>
 #include <openssl/bn.h>
 #include <openssl/rsa.h>
+#include <openssl/bio.h>
+#include <openssl/buffer.h>
 
 #ifdef HAVE_OPENSSL_PKCS12_H
 #include <openssl/pkcs12.h>
