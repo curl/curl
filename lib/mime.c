@@ -296,9 +296,12 @@ static char *escape_string(const char *src, size_t len)
   for(i = 0; len; len--) {
     char c = *src++;
 
-    if(c == '"' || c == '\\' || !c)
+    if(c == '"' || c == '\\' || !c) {
       dst[i++] = '\\';
-    dst[i++] = c? c: '0';
+      if(!c)
+        c = '0';
+    }
+    dst[i++] = c;
   }
 
   dst[i] = '\0';
