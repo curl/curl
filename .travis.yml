@@ -81,7 +81,7 @@ install:
   - pip install --user cpp-coveralls
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
   - if [ $TRAVIS_OS_NAME = linux ]; then
       curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
          tar xzf - &&
