@@ -68,6 +68,9 @@ matrix:
           compiler: gcc
           dist: precise
           env: T=coverage
+        - os: osx
+          compiler: clang
+          env: T=coverage
         - os: linux
           compiler: gcc
           dist: trusty
@@ -81,7 +84,7 @@ install:
   - pip install --user cpp-coveralls
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink lcov; fi
   - if [ $TRAVIS_OS_NAME = linux ]; then
       curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
          tar xzf - &&
@@ -103,6 +106,7 @@ script:
              make "TFLAGS=-n -t $tests" test-nonflaky
              coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
              coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
+             bash <(curl -s https://codecov.io/bash)
         fi
     - |
         if [ "$T" = "debug" ]; then
