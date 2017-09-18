@@ -4,7 +4,7 @@
 
 import argparse
 import logging
-import struct
+import corpus
 import sys
 sys.path.append("..")
 import curl_test_data
@@ -15,7 +15,7 @@ def generate_corpus(options):
     td = curl_test_data.TestData("../data")
 
     with open(options.output, "wb") as f:
-        enc = TLVEncoder(f)
+        enc = corpus.TLVEncoder(f)
 
         # Write the URL to the file.
         enc.write_string(enc.TYPE_URL, options.url)
@@ -59,50 +59,6 @@ def generate_corpus(options):
                 enc.write_string(enc.TYPE_MAIL_RECIPIENT, mailrecipient)
 
     return ScriptRC.SUCCESS
-
-
-class TLVEncoder(object):
-    TYPE_URL = 1
-    TYPE_RSP1 = 2
-    TYPE_USERNAME = 3
-    TYPE_PASSWORD = 4
-    TYPE_POSTFIELDS = 5
-    TYPE_HEADER = 6
-    TYPE_COOKIE = 7
-    TYPE_UPLOAD1 = 8
-    TYPE_RANGE = 9
-    TYPE_CUSTOMREQUEST = 10
-    TYPE_MAIL_RECIPIENT = 11
-    TYPE_MAIL_FROM = 12
-
-    def __init__(self, output):
-        self.output = output
-
-    def write_string(self, tlv_type, wstring):
-        data = wstring.encode("utf-8")
-        self.write_tlv(tlv_type, len(data), data)
-
-    def write_bytes(self, tlv_type, bytedata):
-        self.write_tlv(tlv_type, len(bytedata), bytedata)
-
-    def maybe_write_string(self, tlv_type, wstring):
-        if wstring is not None:
-            self.write_string(tlv_type, wstring)
-
-    def write_tlv(self, tlv_type, tlv_length, tlv_data=None):
-        log.debug("Writing TLV %d, length %d, data %r",
-                  tlv_type,
-                  tlv_length,
-                  tlv_data)
-
-        data = struct.pack("!H", tlv_type)
-        self.output.write(data)
-
-        data = struct.pack("!L", tlv_length)
-        self.output.write(data)
-
-        if tlv_data:
-            self.output.write(tlv_data)
 
 
 def get_options():
