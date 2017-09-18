@@ -46,6 +46,9 @@
 #define TLV_RC_NO_MORE_TLVS             1
 #define TLV_RC_SIZE_ERROR               2
 
+/* Temporary write array size */
+#define TEMP_WRITE_ARRAY_SIZE           10
+
 /**
  * Byte stream representation of the TLV header. Casting the byte stream
  * to a TLV_RAW allows us to examine the type and length.
@@ -98,6 +101,9 @@ typedef struct fuzz_data
   /* Parser state */
   FUZZ_PARSE_STATE state;
 
+  /* Temporary writefunction state */
+  char write_array[TEMP_WRITE_ARRAY_SIZE];
+
   /* Response data and length */
   const uint8_t *rsp1_data;
   size_t rsp1_data_len;
@@ -142,6 +148,10 @@ static size_t fuzz_read_callback(char *buffer,
                                  size_t size,
                                  size_t nitems,
                                  void *ptr);
+static size_t fuzz_write_callback(void *contents,
+                                  size_t size,
+                                  size_t nmemb,
+                                  void *ptr);
 int fuzz_get_first_tlv(FUZZ_DATA *fuzz, TLV *tlv);
 int fuzz_get_next_tlv(FUZZ_DATA *fuzz, TLV *tlv);
 int fuzz_get_tlv_comn(FUZZ_DATA *fuzz, TLV *tlv);
