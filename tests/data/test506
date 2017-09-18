@@ -195,6 +195,8 @@ CURLOPT_COOKIEJAR
 CURLOPT_COOKIELIST RELOAD
 lock:   cookie [Pigs in space]: 78
 unlock: cookie [Pigs in space]: 79
+lock:   cookie [Pigs in space]: 80
+unlock: cookie [Pigs in space]: 81
 loaded cookies:
 -----------------
   .host.foo.com	TRUE	/	FALSE	1896263787	injected	yes
@@ -207,17 +209,17 @@ loaded cookies:
   www.host.foo.com	FALSE	/	FALSE	1993463787	test6	six_more
 -----------------
 try SHARE_CLEANUP...
-lock:   share  [Pigs in space]: 80
-unlock: share  [Pigs in space]: 81
+lock:   share  [Pigs in space]: 82
+unlock: share  [Pigs in space]: 83
 SHARE_CLEANUP failed, correct
 CLEANUP
-lock:   cookie [Pigs in space]: 82
-unlock: cookie [Pigs in space]: 83
-lock:   share  [Pigs in space]: 84
-unlock: share  [Pigs in space]: 85
-SHARE_CLEANUP
+lock:   cookie [Pigs in space]: 84
+unlock: cookie [Pigs in space]: 85
 lock:   share  [Pigs in space]: 86
 unlock: share  [Pigs in space]: 87
+SHARE_CLEANUP
+lock:   share  [Pigs in space]: 88
+unlock: share  [Pigs in space]: 89
 GLOBAL_CLEANUP
 </stdout>
 <stderr>
