@@ -1275,7 +1275,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
-
         /*
          * also, every command takes at least one argument so we get that
          * first argument right now
@@ -3415,12 +3414,13 @@ static CURLcode get_realPathname(const char **cpp, char **path, char **pwd)
     return CURLE_OUT_OF_MEMORY;
 
   /* first start with home dir */
+  if(cp[0] == '/') {
+    return (get_pathname(cpp, path));
+  }
   strcpy(*path, *pwd);
   pathLength = strlen(*path);
-  if(cp[0] != '/') {
-    (*path)[pathLength++] = '/';
-    (*path)[pathLength++] = '\0';
-  }
+  (*path)[pathLength++] = '/';
+  (*path)[pathLength++] = '\0';
   /* Check for quoted filenames */
   if(*cp == '\"' || *cp == '\'') {
     quot = *cp++;
