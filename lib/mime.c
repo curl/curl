@@ -1604,7 +1604,7 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
 
   /* Be sure we won't access old headers later. */
   if(part->state.state == MIMESTATE_CURLHEADERS)
-    mimesetstate(&mime->state, MIMESTATE_CURLHEADERS, NULL);
+    mimesetstate(&part->state, MIMESTATE_CURLHEADERS, NULL);
 
   /* Build the content-type header. */
   s = search_header(part->userheaders, "Content-Type");
@@ -1704,7 +1704,7 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
   /* If we were reading curl-generated headers, restart with new ones (this
      should not occur). */
   if(part->state.state == MIMESTATE_CURLHEADERS)
-    mimesetstate(&mime->state, MIMESTATE_CURLHEADERS, part->curlheaders);
+    mimesetstate(&part->state, MIMESTATE_CURLHEADERS, part->curlheaders);
 
   /* Process subparts. */
   if(part->kind == MIMEKIND_MULTIPART && mime) {
