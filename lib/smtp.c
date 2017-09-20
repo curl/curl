@@ -550,8 +550,11 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
     if(!result)
       result = Curl_mime_rewind(&data->set.mimepost);
 
-    if(result)
+    if(result) {
+      free(from);
+      free(auth);
       return result;
+    }
 
     data->state.infilesize = Curl_mime_size(&data->set.mimepost);
 
