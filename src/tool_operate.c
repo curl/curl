@@ -1668,6 +1668,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                   retry_sleep = RETRY_SLEEP_MAX;
               }
               if(outs.bytes && outs.filename && outs.stream) {
+                int rc;
                 /* We have written data to a output file, we truncate file
                  */
                 if(!global->mute)
@@ -1688,14 +1689,21 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 }
                 /* now seek to the end of the file, the position where we
                    just truncated the file in a large file-safe way */
-                fseek(outs.stream, 0, SEEK_END);
+                rc = fseek(outs.stream, 0, SEEK_END);
 #else
                 /* ftruncate is not available, so just reposition the file
                    to the location we would have truncated it. This won't
                    work properly with large files on 32-bit systems, but
                    most of those will have ftruncate. */
-                fseek(outs.stream, (long)outs.init, SEEK_SET);
+                rc = fseek(outs.stream, (long)outs.init, SEEK_SET);
 #endif
+                if(rc) {
+                  if(!global->mute)
+                    fprintf(global->errors,
+                            "failed seeking to end of file, exiting\n");
+                  result = CURLE_WRITE_ERROR;
+                  goto quit_urls;
+                }
                 outs.bytes = 0; /* clear for next round */
               }
               continue; /* curl_easy_perform loop */
