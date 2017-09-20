@@ -972,11 +972,14 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
           convbuf = buffer;
         }
 #endif
-        mimesetstate(&mime->state,
-                     part? MIMESTATE_CONTENT: MIMESTATE_END, part);
+        mimesetstate(&mime->state, MIMESTATE_CONTENT, part);
       }
       break;
     case MIMESTATE_CONTENT:
+      if(!part) {
+        mimesetstate(&mime->state, MIMESTATE_END, NULL);
+        break;
+      }
       sz = readback_part(part, buffer, nitems);
       switch(sz) {
       case CURL_READFUNC_ABORT:
