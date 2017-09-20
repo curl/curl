@@ -73,7 +73,21 @@ This release includes the following bugfixes:
  o rtsp: do not call fwrite() with NULL pointer FILE * [42]
  o mbedtls: enable CA path processing [43]
  o travis: add build without HTTP/SMTP/IMAP
- o checksr: verify more code style rules [44]
+ o checksrc: verify more code style rules [44]
+ o HTTP proxy: on connection re-use, still use the new remote port [45]
+ o tests: add initial gssapi test using stub implementation [46]
+ o rtsp: Segfault when using WRITEDATA [47]
+ o docs: clarify the CURLOPT_INTERLEAVE* options behavior
+ o non-ascii: use iconv() with 'char **' argument [48]
+ o server/getpart: provide dummy function to build conversion enabled
+ o conversions: fix several compiler warnings
+ o openssl: add missing includes [49]
+ o schannel: Support partial send for when data is too large [50]
+ o socks: fix incorrect port number in SOCKS4 error message [51]
+ o curl: fix integer overflow in timeout options [52]
+ o travis: on mac, don't install openssl or libidn [53]
+ o cookies: reject oversized cookies instead of truncating [54]
+ o cookies: use lock when using CURLINFO_COOKIELIST [55]
 
 This release includes the following known bugs:
 
@@ -82,15 +96,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Karas, Benbuck Nason, Benjamin Sergeant, Bill Pyne, Brian Carpenter,
-  Dan Fandrich, Daniel Stenberg, Even Rouault, Frank Denis, Gergely Nagy,
-  Gisle Vanem, Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
-  John David Anglin, joshhe on github, Kamil Dudka, Lawrence Wagerfield,
-  Maksim Stsepanenka, Marcel Raad, Max Dymond, Michael Smith, Nick Zitzmann,
-  Nicolas Morey-Chaisemartin, Patrick Monnerat, Peter Lamare, Peter Wu,
-  Ray Satiro, Rich Gray, Ryan Schmidt, Ryan Winograd, SBKarr on github,
+  Andrei Karas, Benbuck Nason, Ben Greear, Benjamin Sergeant, Bill Pyne,
+  Brian Carpenter, Dan Fandrich, Daniel Stenberg, David Benjamin, Even Rouault,
+  Frank Denis, Gergely Nagy, Gisle Vanem, Isaac Boukris, Jackarain on github,
+  Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
+  John David Anglin, joshhe on github, Kamil Dudka, Kevin Smith,
+  Lawrence Wagerfield, Maksim Stsepanenka, Marc Aldorasi, Marcel Raad,
+  Max Dymond, Michael Smith, Nick Zitzmann, Nicolas Morey-Chaisemartin,
+  Oli Kingshott, Patrick Monnerat, Pavel P, Peter Lamare, Peter Wu, Ray Satiro,
+  Rich Gray, Ryan Schmidt, Ryan Winograd, SBKarr on github,
   Tatsuhiro Tsujikawa, Viktor Szakáts,
-  (34 contributors)
+  (42 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -140,3 +156,14 @@ References to bug reports and discussions on issues:
  [42] = https://curl.haxx.se/bug/?i=1874
  [43] = https://curl.haxx.se/bug/?i=1877
  [44] = https://curl.haxx.se/bug/?i=1878
+ [45] = https://curl.haxx.se/bug/?i=1887
+ [46] = https://curl.haxx.se/bug/?i=1687
+ [47] = https://curl.haxx.se/bug/?i=1880
+ [48] = https://curl.haxx.se/mail/lib-2017-09/0031.html
+ [49] = https://curl.haxx.se/bug/?i=1891
+ [50] = https://curl.haxx.se/bug/?i=1890
+ [51] = https://curl.haxx.se/bug/?i=1892
+ [52] = https://curl.haxx.se/bug/?i=1893
+ [53] = https://curl.haxx.se/bug/?i=1895
+ [54] = https://curl.haxx.se/bug/?i=1894
+ [55] = https://curl.haxx.se/bug/?i=1896
