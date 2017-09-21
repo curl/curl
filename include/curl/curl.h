@@ -2370,7 +2370,8 @@ typedef struct {
 typedef enum {
   CURLSSLSET_OK = 0,
   CURLSSLSET_UNKNOWN_BACKEND,
-  CURLSSLSET_TOO_LATE
+  CURLSSLSET_TOO_LATE,
+  CURLSSLSET_NO_BACKENDS /* libcurl was built without any SSL support */
 } CURLsslset;
 
 CURL_EXTERN CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,

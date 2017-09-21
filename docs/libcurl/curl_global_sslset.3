@@ -85,10 +85,13 @@ support for choosing SSL backends at runtime.
 If this function returns CURLSSLSET_OK, the backend was successfully selected.
 
 If the chosen backend is unknown (or support for the chosed backend has not
-been compiled into libcurl), the function returns CURLSSLSET_UNKNOWN_BACKEND.
+been compiled into libcurl), the function returns \fICURLSSLSET_UNKNOWN_BACKEND\fP.
 
 If the backend had been configured previously, or if \fIcurl_global_init(3)\fP
-has already been called, the function returns CURLSSLSET_TOO_LATE.
+has already been called, the function returns \fICURLSSLSET_TOO_LATE\fP.
+
+If this libcurl was built completely without SSL support, with no backends at
+all, this function returns \fICURLSSLSET_NO_BACKENDS\fP.
 .SH "SEE ALSO"
 .BR curl_global_init "(3), "
 .BR libcurl "(3) "
