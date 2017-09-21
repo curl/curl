@@ -184,3 +184,4 @@ char *fuzz_tlv_to_string(TLV *tlv);
       fuzz->FIELDNAME = fuzz_tlv_to_string(tlv);                               \
       FTRY(curl_easy_setopt(fuzz->easy, OPTNAME, fuzz->FIELDNAME));            \
       break
+
