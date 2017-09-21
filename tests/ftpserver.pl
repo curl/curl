@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2014, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -174,7 +174,6 @@ my $exit_signal;         # first signal handled in exit_signal_handler
 #**********************************************************************
 # Mail related definitions
 #
-my $TEXT_USERNAME = "user";
 my $TEXT_PASSWORD = "secret";
 my $POP3_TIMESTAMP = "<1972.987654321\@curl>";
 
@@ -1121,9 +1120,6 @@ sub LOGIN_imap {
     if ($user eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
-    elsif (($user ne $TEXT_USERNAME) || ($password ne $TEXT_PASSWORD)) {
-        sendcontrol "$cmdid NO LOGIN failed\r\n";
-    }
     else {
         sendcontrol "$cmdid OK LOGIN completed\r\n";
     }
@@ -1681,7 +1677,7 @@ sub APOP_pop3 {
     else {
         my $digest = Digest::MD5::md5_hex($POP3_TIMESTAMP, $TEXT_PASSWORD);
 
-        if (($user ne $TEXT_USERNAME) || ($secret ne $digest)) {
+        if ($secret ne $digest) {
             sendcontrol "-ERR Login failure\r\n";
         }
         else {
@@ -1740,12 +1736,7 @@ sub PASS_pop3 {
 
     logmsg "PASS_pop3 got $password\n";
 
-    if (($username ne $TEXT_USERNAME) || ($password ne $TEXT_PASSWORD)) {
-        sendcontrol "-ERR Login failure\r\n";
-    }
-    else {
-        sendcontrol "+OK Login successful\r\n";
-    }
+    sendcontrol "+OK Login successful\r\n";
 
     return 0;
 }
