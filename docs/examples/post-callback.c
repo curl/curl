@@ -117,7 +117,7 @@ int main(void)
 #else
     /* Set the expected POST size. If you want to POST large amounts of data,
        consider CURLOPT_POSTFIELDSIZE_LARGE */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, wt.sizeleft);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)wt.sizeleft);
 #endif
 
 #ifdef DISABLE_EXPECT
