@@ -549,6 +549,7 @@ int cert_stuff(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   char error_buffer[256];
+  bool check_privkey = TRUE;
 
   int file_type = do_file_type(cert_type);
 
@@ -836,17 +837,32 @@ int cert_stuff(struct connectdata *conn,
       EVP_PKEY_free(pktmp);
     }
 
+#ifndef OPENSSL_NO_RSA
+    {
+      /* If RSA is used, don't check the private key if its flags indicate
+       * it doesn't support it. */
+      EVP_PKEY *priv_key = SSL_get_privatekey(ssl);
+      if(EVP_PKEY_id(priv_key) == EVP_PKEY_RSA) {
+        RSA *rsa = EVP_PKEY_get1_RSA(priv_key);
+        if(RSA_flags(rsa) & RSA_METHOD_FLAG_NO_CHECK)
+          check_privkey = FALSE;
+        RSA_free(rsa); /* Decrement reference count */
+      }
+    }
+#endif
+
     SSL_free(ssl);
 
     /* If we are using DSA, we can copy the parameters from
      * the private key */
 
-
-    /* Now we know that a key and cert have been set against
-     * the SSL context */
-    if(!SSL_CTX_check_private_key(ctx)) {
-      failf(data, "Private key does not match the certificate public key");
-      return 0;
+    if(check_privkey == TRUE) {
+      /* Now we know that a key and cert have been set against
+       * the SSL context */
+      if(!SSL_CTX_check_private_key(ctx)) {
+        failf(data, "Private key does not match the certificate public key");
+        return 0;
+      }
     }
   }
   return 1;
