@@ -1797,7 +1797,7 @@ static char *imap_atom(const char *str, bool escape_only)
     return strdup(str);
 
   /* Calculate the new string length */
-  newlen = strlen(str) + backsp_count + quote_count + (others_exists ? 2 : 0);
+  newlen = strlen(str) + backsp_count + quote_count + (escape_only ? 0 : 2);
 
   /* Allocate the new string */
   newstr = (char *) malloc((newlen + 1) * sizeof(char));
@@ -1806,7 +1806,7 @@ static char *imap_atom(const char *str, bool escape_only)
 
   /* Surround the string in quotes if necessary */
   p2 = newstr;
-  if(others_exists) {
+  if(!escape_only) {
     newstr[0] = '"';
     newstr[newlen - 1] = '"';
     p2++;
