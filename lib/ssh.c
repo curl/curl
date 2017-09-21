@@ -3419,14 +3419,14 @@ static CURLcode get_realPathname(const char **cpp, char **path, char **pwd)
     return CURLE_QUOTE_ERROR;
   }
   fullPathLength = strlen(cp) + strlen(*pwd) + 2;
+  if(cp[0] == '/') {
+    return (get_pathname(cpp, path));
+  }
   *path = malloc(fullPathLength);
   if(*path == NULL)
     return CURLE_OUT_OF_MEMORY;
 
   /* first start with home dir */
-  if(cp[0] == '/') {
-    return (get_pathname(cpp, path));
-  }
   strcpy(*path, *pwd);
   pathLength = strlen(*path);
   (*path)[pathLength++] = '/';
