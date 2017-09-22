@@ -37,6 +37,7 @@
 #include "sendf.h"
 #include "strcase.h"
 #include "http_ntlm.h"
+#include "curl_ntlm_core.h"
 #include "curl_ntlm_wb.h"
 #include "vauth/vauth.h"
 #include "url.h"

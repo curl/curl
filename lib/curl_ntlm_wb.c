@@ -48,6 +48,7 @@
 #include "sendf.h"
 #include "select.h"
 #include "vauth/ntlm.h"
+#include "curl_ntlm_core.h"
 #include "curl_ntlm_wb.h"
 #include "url.h"
 #include "strerror.h"

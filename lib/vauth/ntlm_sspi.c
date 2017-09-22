@@ -29,6 +29,7 @@
 #include "vauth/vauth.h"
 #include "urldata.h"
 #include "curl_base64.h"
+#include "curl_ntlm_core.h"
 #include "warnless.h"
 #include "curl_multibyte.h"
 #include "sendf.h"

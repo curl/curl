@@ -26,6 +26,15 @@
 
 #if defined(USE_NTLM)
 
+/* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
+   then it must be initialized to be used by NTLM. */
+#if !defined(USE_OPENSSL) && \
+    !defined(USE_GNUTLS_NETTLE) && \
+    !defined(USE_GNUTLS) && \
+    defined(USE_NSS)
+#define NTLM_NEEDS_NSS_INIT
+#endif
+
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
 #ifdef USE_OPENSSL
