@@ -2009,8 +2009,7 @@ CURL_EXTERN curl_mimepart *curl_mime_addpart(curl_mime *mime);
  *
  * Set mime/form part name.
  */
-CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part,
-                                    const char *name, size_t namesize);
+CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part, const char *name);
 
 /*
  * NAME curl_mime_filename()

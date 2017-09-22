@@ -733,7 +733,7 @@ int formparse(struct OperationConfig *config,
     }
 
     /* Set part name. */
-    if(name && curl_mime_name(part, name, CURL_ZERO_TERMINATED)) {
+    if(name && curl_mime_name(part, name)) {
       warnf(config->global, "curl_mime_name failed!\n");
       Curl_safefree(contents);
       return 31;

@@ -52,7 +52,7 @@ A mime struct handle, or NULL upon failure.
  mime = curl_mime_init(easy);
  part = curl_mime_addpart(mime);
  curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
- curl_mime_name(part, "data", CURL_ZERO_TERMINATED);
+ curl_mime_name(part, "data");
 
  /* Post and send it. */
  curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);

@@ -62,16 +62,15 @@ parts.
 .IP CURLFORM_COPYNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 copies the string so your application doesn't need to keep it around after
-this function call. If the name isn't NUL-terminated, or if you'd
-like it to contain zero bytes, you must set its length with
-\fBCURLFORM_NAMELENGTH\fP. The copied data will be freed by
-\fIcurl_formfree(3)\fP.
+this function call. If the name isn't NUL-terminated, you must set its length
+with \fBCURLFORM_NAMELENGTH\fP. The \fIname\fP is not allowed to contain
+zero-valued bytes. The copied data will be freed by \fIcurl_formfree(3)\fP.
 .IP CURLFORM_PTRNAME
 followed by a string which provides the \fIname\fP of this part. libcurl
 will use the pointer and refer to the data in your application, so you
 must make sure it remains until curl no longer needs it. If the name
-isn't NUL-terminated, or if you'd like it to contain zero
-bytes, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
+isn't NUL-terminated, you must set its length with \fBCURLFORM_NAMELENGTH\fP.
+The \fIname\fP is not allowed to contain zero-valued bytes.
 .IP CURLFORM_COPYCONTENTS
 followed by a pointer to the contents of this part, the actual data
 to send away. libcurl copies the provided data, so your application doesn't
@@ -172,7 +171,8 @@ you've called \fIcurl_easy_cleanup(3)\fP for the curl handle.
 
 See example below.
 .SH AVAILABILITY
-Deprecated in 7.56.0.
+Deprecated in 7.56.0. Before this release, field names were allowed to
+contain zero-valued bytes.
 .SH RETURN VALUE
 0 means everything was ok, non-zero means an error occurred corresponding
 to a CURL_FORMADD_* constant defined in

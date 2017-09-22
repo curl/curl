@@ -636,12 +636,23 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         form->contenttype_alloc = TRUE;
       }
+      if(form->name && form->namelength) {
+        /* Name should not contain nul bytes. */
+        size_t i;
+        for(i = 0; i < form->namelength; i++)
+          if(!form->name[i]) {
+            return_value = CURL_FORMADD_NULL;
+            break;
+          }
+        if(return_value != CURL_FORMADD_OK)
+          break;
+      }
       if(!(form->flags & HTTPPOST_PTRNAME) &&
          (form == first_form) ) {
         /* Note that there's small risk that form->name is NULL here if the
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
-          /* copy name (without strdup; possibly contains null characters) */
+          /* copy name (without strdup; possibly not nul-terminated) */
           form->name = Curl_memdup(form->name, form->namelength?
                                    form->namelength:
                                    strlen(form->name) + 1);
@@ -814,6 +825,24 @@ void curl_formfree(struct curl_httppost *form)
 }
 
 
+/* Set mime part name, taking care of non nul-terminated name string. */
+static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
+{
+  char *zname;
+  CURLcode res;
+
+  if(!name || !len)
+    return curl_mime_name(part, name);
+  zname = malloc(len + 1);
+  if(!zname)
+    return CURLE_OUT_OF_MEMORY;
+  memcpy(zname, name, len);
+  zname[len] = '\0';
+  res = curl_mime_name(part, zname);
+  free(zname);
+  return res;
+}
+
 /*
  * Curl_getformdata() converts a linked list of "meta data" into a mime
  * structure. The input list is in 'post', while the output is stored in
@@ -856,8 +885,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
       if(!part)
         result = CURLE_OUT_OF_MEMORY;
       if(!result)
-        result = curl_mime_name(part, post->name,
-                                post->namelength? post->namelength: -1);
+        result = setname(part, post->name, post->namelength);
       if(!result) {
         multipart = curl_mime_init(data);
         if(!multipart)
@@ -884,8 +912,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
 
       /* Set field name. */
       if(!result && !post->more)
-        result = curl_mime_name(part, post->name,
-                                post->namelength? post->namelength: -1);
+        result = setname(part, post->name, post->namelength);
 
       /* Process contents. */
       if(!result) {

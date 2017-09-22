@@ -61,17 +61,17 @@ int main(int argc, char *argv[])
 
     /* Fill in the file upload field */
     field = curl_mime_addpart(form);
-    curl_mime_name(field, "sendfile", CURL_ZERO_TERMINATED);
+    curl_mime_name(field, "sendfile");
     curl_mime_filedata(field, "postit2.c");
 
     /* Fill in the filename field */
     field = curl_mime_addpart(form);
-    curl_mime_name(field, "filename", CURL_ZERO_TERMINATED);
+    curl_mime_name(field, "filename");
     curl_mime_data(field, "postit2.c", CURL_ZERO_TERMINATED);
 
     /* Fill in the submit field too, even if this is rarely needed */
     field = curl_mime_addpart(form);
-    curl_mime_name(field, "submit", CURL_ZERO_TERMINATED);
+    curl_mime_name(field, "submit");
     curl_mime_data(field, "send", CURL_ZERO_TERMINATED);
 
     /* initialize custom header list (stating that Expect: 100-continue is not

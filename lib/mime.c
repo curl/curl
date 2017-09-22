@@ -275,33 +275,25 @@ static void mimesetstate(mime_state *state, enum mimestate tok, void *ptr)
 
 
 /* Escape header string into allocated memory. */
-static char *escape_string(const char *src, size_t len)
+static char *escape_string(const char *src)
 {
-  size_t bytecount;
+  size_t bytecount = 0;
   size_t i;
   char *dst;
 
-  if(len == CURL_ZERO_TERMINATED)
-    len = strlen(src);
-
-  bytecount = len;
-  for(i = 0; i < len; i++)
-    if(src[i] == '"' || src[i] == '\\' || !src[i])
+  for(i = 0; src[i]; i++)
+    if(src[i] == '"' || src[i] == '\\')
       bytecount++;
 
+  bytecount += i;
   dst = malloc(bytecount + 1);
   if(!dst)
     return NULL;
 
-  for(i = 0; len; len--) {
-    char c = *src++;
-
-    if(c == '"' || c == '\\' || !c) {
+  for(i = 0; *src; src++) {
+    if(*src == '"' || *src == '\\')
       dst[i++] = '\\';
-      if(!c)
-        c = '0';
-    }
-    dst[i++] = c;
+    dst[i++] = *src;
   }
 
   dst[i] = '\0';
@@ -1199,26 +1191,18 @@ curl_mimepart *curl_mime_addpart(curl_mime *mime)
 }
 
 /* Set mime part name. */
-CURLcode curl_mime_name(curl_mimepart *part,
-                        const char *name, size_t namesize)
+CURLcode curl_mime_name(curl_mimepart *part, const char *name)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   Curl_safefree(part->name);
   part->name = NULL;
-  part->namesize = 0;
 
   if(name) {
-    if(namesize == CURL_ZERO_TERMINATED)
-      namesize = strlen(name);
-    part->name = malloc(namesize + 1);
+    part->name = strdup(name);
     if(!part->name)
       return CURLE_OUT_OF_MEMORY;
-    if(namesize)
-      memcpy(part->name, name, namesize);
-    part->name[namesize] = '\0';
-    part->namesize = namesize;
   }
 
   return CURLE_OK;
@@ -1656,12 +1640,12 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
       char *filename = NULL;
 
       if(part->name) {
-        name = escape_string(part->name, part->namesize);
+        name = escape_string(part->name);
         if(!name)
           ret = CURLE_OUT_OF_MEMORY;
       }
       if(!ret && part->filename) {
-        filename = escape_string(part->filename, CURL_ZERO_TERMINATED);
+        filename = escape_string(part->filename);
         if(!filename)
           ret = CURLE_OUT_OF_MEMORY;
       }
@@ -1745,12 +1729,10 @@ curl_mimepart *curl_mime_addpart(curl_mime *mime)
   return NULL;
 }
 
-CURLcode curl_mime_name(curl_mimepart *part,
-                        const char *name, size_t namesize)
+CURLcode curl_mime_name(curl_mimepart *part, const char *name)
 {
   (void) part;
   (void) name;
-  (void) namesize;
   return CURLE_NOT_BUILT_IN;
 }
 

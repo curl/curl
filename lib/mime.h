@@ -111,7 +111,6 @@ struct curl_mimepart_s {
   char *mimetype;                  /* Part mime type. */
   char *filename;                  /* Remote file name. */
   char *name;                      /* Data name. */
-  size_t namesize;                 /* Data name size. */
   curl_off_t datasize;             /* Expected data size. */
   unsigned int flags;              /* Flags. */
   mime_state state;                /* Current readback state. */

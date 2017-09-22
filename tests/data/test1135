@@ -33,7 +33,7 @@ CURL_EXTERN int curl_strnequal(const char *s1, const char *s2, size_t n);
 CURL_EXTERN curl_mime *curl_mime_init(CURL *easy);
 CURL_EXTERN void curl_mime_free(curl_mime *mime);
 CURL_EXTERN curl_mimepart *curl_mime_addpart(curl_mime *mime);
-CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part,
+CURL_EXTERN CURLcode curl_mime_name(curl_mimepart *part, const char *name);
 CURL_EXTERN CURLcode curl_mime_filename(curl_mimepart *part,
 CURL_EXTERN CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype);
 CURL_EXTERN CURLcode curl_mime_encoder(curl_mimepart *part,

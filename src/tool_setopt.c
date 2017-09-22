@@ -525,20 +525,10 @@ static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
 
       if(part->name) {
         Curl_safefree(escaped);
-        escaped = c_escape(part->name, part->namesize);
+        escaped = c_escape(part->name, CURL_ZERO_TERMINATED);
         if(!escaped)
           return CURLE_OUT_OF_MEMORY;
-        /* Are there any nul byte in name? */
-        for(cp = part->name; *cp; cp++)
-          ;
-        if(cp != part->name + part->namesize) {
-          size = (curl_off_t) part->namesize;
-          CODE3("curl_mime_name(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
-              *mimeno, escaped, size);
-        }
-        else
-          CODE2("curl_mime_name(part%d, \"%s\", CURL_ZERO_TERMINATED);",
-              *mimeno, escaped);
+        CODE2("curl_mime_name(part%d, \"%s\");", *mimeno, escaped);
       }
 
       if(part->mimetype) {
