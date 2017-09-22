@@ -38,6 +38,7 @@ int main(int argc, char **argv)
   FILE *infile;
   uint8_t *buffer = NULL;
   size_t buffer_len;
+  size_t total_read;
 
   for(ii = 1; ii < argc; ii++) {
     /* Try and open the file. */
@@ -56,11 +57,14 @@ int main(int argc, char **argv)
       buffer = (uint8_t *)calloc(buffer_len, sizeof(uint8_t));
       if(buffer) {
         /* Read all the text from the file into the buffer. */
-        fread(buffer, sizeof(uint8_t), buffer_len, infile);
-        printf("[%s] Read %zu bytes, calling fuzzer\n", argv[ii], buffer_len);
+        total_read = fread(buffer, sizeof(uint8_t), buffer_len, infile);
+        printf("[%s] Read %zu bytes (expected %zu bytes), calling fuzzer\n", 
+               argv[ii],
+               total_read,
+               buffer_len);
 
         /* Call the fuzzer with the data. */
-        LLVMFuzzerTestOneInput(buffer, buffer_len);
+        LLVMFuzzerTestOneInput(buffer, total_read);
 
         printf("[%s] Fuzzing complete\n", argv[ii]);
 
