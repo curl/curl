@@ -35,7 +35,7 @@ static char data[]=
 
 struct WriteThis {
   char *readptr;
-  size_t sizeleft;
+  curl_off_t sizeleft;
 };
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
@@ -55,7 +55,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
     return 0;
 
 #ifndef LIB645
-  eof = !pooh->sizeleft;
+  eof = pooh->sizeleft <= 0;
   if(!eof)
     pooh->sizeleft--;
 #endif
@@ -83,7 +83,7 @@ static int once(char *URL, bool oldstyle)
 
   pooh.readptr = data;
 #ifndef LIB645
-  datasize = strlen(data);
+  datasize = (curl_off_t)strlen(data);
 #endif
   pooh.sizeleft = datasize;
 
@@ -138,7 +138,7 @@ static int once(char *URL, bool oldstyle)
 
   pooh2.readptr = data;
 #ifndef LIB645
-  datasize = strlen(data);
+  datasize = (curl_off_t)strlen(data);
 #endif
   pooh2.sizeleft = datasize;
 
