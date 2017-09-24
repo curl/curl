@@ -5350,22 +5350,21 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
     }
   }
 
-  no_proxy = curl_getenv("no_proxy");
-  if(!no_proxy)
-    no_proxy = curl_getenv("NO_PROXY");
+  if(!data->set.str[STRING_NOPROXY]) {
+    no_proxy = curl_getenv("no_proxy");
+    if(!no_proxy)
+      no_proxy = curl_getenv("NO_PROXY");
+  }
 
-  if(check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY]) ||
-     (!data->set.str[STRING_NOPROXY] &&
-      check_noproxy(conn->host.name, no_proxy))) {
+  if(check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY] ?
+      data->set.str[STRING_NOPROXY] : no_proxy)) {
     Curl_safefree(proxy);
     Curl_safefree(socksproxy);
   }
-  else if(!proxy && !socksproxy)
 #ifndef CURL_DISABLE_HTTP
+  else if(!proxy && !socksproxy)
     /* if the host is not in the noproxy list, detect proxy. */
     proxy = detect_proxy(conn);
-#else  /* !CURL_DISABLE_HTTP */
-    proxy = NULL;
 #endif /* CURL_DISABLE_HTTP */
 
   Curl_safefree(no_proxy);
