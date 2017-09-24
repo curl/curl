@@ -90,9 +90,12 @@ Curl_ssl_config_matches(struct ssl_primary_config* data,
      (data->version_max == needle->version_max) &&
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
+     (data->verifystatus == needle->verifystatus) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
      Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
      Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
+     Curl_safe_strcasecompare(data->random_file, needle->random_file) &&
+     Curl_safe_strcasecompare(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list))
     return TRUE;
 
@@ -103,31 +106,31 @@ bool
 Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
                               struct ssl_primary_config *dest)
 {
-  dest->verifyhost = source->verifyhost;
-  dest->verifypeer = source->verifypeer;
   dest->version = source->version;
   dest->version_max = source->version_max;
+  dest->verifypeer = source->verifypeer;
+  dest->verifyhost = source->verifyhost;
+  dest->verifystatus = source->verifystatus;
+  dest->sessionid = source->sessionid;
 
-  CLONE_STRING(CAfile);
   CLONE_STRING(CApath);
-  CLONE_STRING(cipher_list);
-  CLONE_STRING(egdsocket);
-  CLONE_STRING(random_file);
+  CLONE_STRING(CAfile);
   CLONE_STRING(clientcert);
+  CLONE_STRING(random_file);
+  CLONE_STRING(egdsocket);
+  CLONE_STRING(cipher_list);
 
-  /* Disable dest sessionid cache if a client cert is used, CVE-2016-5419. */
-  dest->sessionid = (dest->clientcert ? false : source->sessionid);
   return TRUE;
 }
 
 void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
 {
-  Curl_safefree(sslc->CAfile);
   Curl_safefree(sslc->CApath);
-  Curl_safefree(sslc->cipher_list);
-  Curl_safefree(sslc->egdsocket);
-  Curl_safefree(sslc->random_file);
+  Curl_safefree(sslc->CAfile);
   Curl_safefree(sslc->clientcert);
+  Curl_safefree(sslc->random_file);
+  Curl_safefree(sslc->egdsocket);
+  Curl_safefree(sslc->cipher_list);
 }
 
 #ifdef USE_SSL

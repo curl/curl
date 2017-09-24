@@ -210,13 +210,13 @@ struct ssl_primary_config {
   bool verifypeer;       /* set TRUE if this is desired */
   bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
   bool verifystatus;     /* set TRUE if certificate status must be checked */
+  bool sessionid;        /* cache session IDs or not */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *clientcert;
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
-  bool sessionid;        /* cache session IDs or not */
 };
 
 struct ssl_config_data {
