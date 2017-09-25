@@ -156,18 +156,15 @@ script:
         fi
     - |
         if [ "$T" = "fuzzer" ]; then
-          export CC=clang
-          export CXX=clang++
-          export CFLAGS="-fsanitize=address"
+          # Download the fuzzer to a temporary folder
+          ./tests/fuzz/download_fuzzer.sh /tmp/curl_fuzzer
 
-          # Specifically use libstdc++ for travis as libc++ is not installed.
-          # This is ok because we're not compiling against libFuzzer.
-          export CXXFLAGS="-fsanitize=address -stdlib=libstdc++"
-          ./configure --disable-shared --enable-debug --enable-maintainer-mode
-          make
-          cd tests/fuzz
-          make clean
-          make check
+          export CURLSRC=$PWD
+
+          # Run the mainline fuzzer test
+          pushd /tmp/curl_fuzzer
+          ./mainline.sh ${CURLSRC}
+          popd
         fi
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
