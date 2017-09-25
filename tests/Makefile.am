@@ -53,7 +53,7 @@ DIST_UNIT = unit
 endif
 
 SUBDIRS = certs data server libtest $(BUILD_UNIT)
-DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT) fuzz
+DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
 

@@ -1,21 +1,8 @@
 Fuzz tests
 ==========
 
-The goal is to add tests for *ALL* protocols supported in libcurl.
+The fuzzing tests for curl have been moved to a separate repository:
 
-Building the fuzz target
-========================
-From the CURL root directory:
+https://github.com/curl/curl-fuzzer
 
-export CC=clang-5.0
-export CXX=clang++-5.0
-export CFLAGS="-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp"
-export CXXFLAGS="-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp -stdlib=libc++"
-./configure --disable-shared --enable-debug --enable-maintainer-mode
-make -sj
-
-cd tests/fuzz
-
-(optional) export LIB_FUZZING_ENGINE=<path to libFuzzer.a>
-
-make check
+More information on how to get started with curl fuzz testing can be found there.
