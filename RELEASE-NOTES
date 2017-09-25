@@ -88,6 +88,13 @@ This release includes the following bugfixes:
  o travis: on mac, don't install openssl or libidn [53]
  o cookies: reject oversized cookies instead of truncating [54]
  o cookies: use lock when using CURLINFO_COOKIELIST [55]
+ o curl: check fseek() return code and bail on error
+ o examples/post-callback: use long for CURLOPT_POSTFIELDSIZE
+ o openssl: only verify RSA private key if supported [56]
+ o tests: make the imap server not verify user+password [57]
+ o imap: quote atoms properly when escaping characters [58]
+ o tests: fix a compiler warning in test 643
+ o file_range: avoid integer overflow when figuring out byte range [59]
 
 This release includes the following known bugs:
 
@@ -97,16 +104,16 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andrei Karas, Benbuck Nason, Ben Greear, Benjamin Sergeant, Bill Pyne,
-  Brian Carpenter, Dan Fandrich, Daniel Stenberg, David Benjamin, Even Rouault,
-  Frank Denis, Gergely Nagy, Gisle Vanem, Isaac Boukris, Jackarain on github,
-  Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
-  John David Anglin, joshhe on github, Kamil Dudka, Kevin Smith,
-  Lawrence Wagerfield, Maksim Stsepanenka, Marc Aldorasi, Marcel Raad,
-  Max Dymond, Michael Smith, Nick Zitzmann, Nicolas Morey-Chaisemartin,
-  Oli Kingshott, Patrick Monnerat, Pavel P, Peter Lamare, Peter Wu, Ray Satiro,
-  Rich Gray, Ryan Schmidt, Ryan Winograd, SBKarr on github,
-  Tatsuhiro Tsujikawa, Viktor Szakáts,
-  (42 contributors)
+  Brian Carpenter, Dan Fandrich, Daniel Stenberg, David Benjamin, Dirk Feytons,
+  Even Rouault, Frank Denis, Gergely Nagy, Gisle Vanem, imilli on github,
+  Isaac Boukris, Jackarain on github, Jakub Zakrzewski, Jan Alexander Steffens,
+  Johannes Schindelin, John David Anglin, joshhe on github, Kamil Dudka,
+  Kevin Smith, Lawrence Wagerfield, Maksim Stsepanenka, Marc Aldorasi,
+  Marcel Raad, Max Dymond, Michael Kaufmann, Michael Smith, Nick Zitzmann,
+  Nicolas Morey-Chaisemartin, Oli Kingshott, Patrick Monnerat, Pavel P,
+  Peter Lamare, Peter Wu, Ray Satiro, Rich Gray, Ryan Schmidt, Ryan Winograd,
+  SBKarr on github, Tatsuhiro Tsujikawa, Viktor Szakáts,
+  (45 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -167,3 +174,7 @@ References to bug reports and discussions on issues:
  [53] = https://curl.haxx.se/bug/?i=1895
  [54] = https://curl.haxx.se/bug/?i=1894
  [55] = https://curl.haxx.se/bug/?i=1896
+ [56] = https://curl.haxx.se/bug/?i=1904
+ [57] = https://curl.haxx.se/bug/?i=1902
+ [58] = https://curl.haxx.se/bug/?i=1902
+ [59] = https://curl.haxx.se/bug/?i=1908
