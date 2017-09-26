@@ -220,7 +220,7 @@ if(ENABLE_MANUAL)
       if(NROFF_MANOPT_OUTPUT)
         message("Found *nroff option: -- ${_MANOPT}")
         set(NROFF_MANOPT ${_MANOPT})
-        set(USE_MANUAL 1)
+        set(USE_MANUAL ON)
         break()
       endif()
     endforeach()
@@ -234,7 +234,12 @@ if(ENABLE_MANUAL)
   endif()
 endif()
 # Required for building manual, docs, tests
-find_package(Perl REQUIRED)
+find_package(Perl)
+if(NOT PERL_FOUND)
+  set(ENABLE_MANUAL OFF)
+  set(USE_MANUAL    OFF)
+  set(BUILD_TESTING OFF)
+endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -1149,8 +1154,12 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-add_subdirectory(docs)
+if(ENABLE_MANUAL)
+  add_subdirectory(docs)
+endif()
+
 add_subdirectory(lib)
+
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
