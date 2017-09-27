@@ -1130,7 +1130,7 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-if(ENABLE_MANUAL)
+if(USE_MANUAL)
   add_subdirectory(docs)
 endif()
 
