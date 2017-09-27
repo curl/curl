@@ -1816,6 +1816,9 @@ typedef enum {
   /* Post MIME data. */
   CINIT(MIMEPOST, OBJECTPOINT, 269),
 
+  /* Head start in milliseconds to give ipv6 for happy eyeballs. */
+  CINIT(HAPPY_EYEBALLS_TIMEOUT, LONG, 271),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
