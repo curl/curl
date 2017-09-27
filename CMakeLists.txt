@@ -203,42 +203,18 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 endif()
 
-option(ENABLE_MANUAL "to provide the built-in manual" ON)
-unset(USE_MANUAL CACHE) # TODO: cache NROFF/NROFF_MANOPT/USE_MANUAL vars?
-if(ENABLE_MANUAL)
-  find_program(NROFF NAMES gnroff nroff)
-  if(NROFF)
-    # Need a way to write to stdin, this will do
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt" "test")
-    # Tests for a valid nroff option to generate a manpage
-    foreach(_MANOPT "-man" "-mandoc")
-      execute_process(COMMAND "${NROFF}" ${_MANOPT}
-        OUTPUT_VARIABLE NROFF_MANOPT_OUTPUT
-        INPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt"
-        ERROR_QUIET)
-      # Save the option if it was valid
-      if(NROFF_MANOPT_OUTPUT)
-        message("Found *nroff option: -- ${_MANOPT}")
-        set(NROFF_MANOPT ${_MANOPT})
-        set(USE_MANUAL ON)
-        break()
-      endif()
-    endforeach()
-    # No need for the temporary file
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt")
-    if(NOT USE_MANUAL)
-      message(WARNING "Found no *nroff option to get plaintext from man pages")
-    endif()
-  else()
-    message(WARNING "Found no *nroff program")
-  endif()
-endif()
-# Required for building manual, docs, tests
+CURL_NROFF_CHECK()
 find_package(Perl)
+
+CMAKE_DEPENDENT_OPTION(ENABLE_MANUAL "to provide the built-in manual"
+    ON "NROFF_USEFUL;PERL_FOUND"
+    OFF)
+
 if(NOT PERL_FOUND)
-  set(ENABLE_MANUAL OFF)
-  set(USE_MANUAL    OFF)
   set(BUILD_TESTING OFF)
+endif()
+if(ENABLE_MANUAL)
+  set(USE_MANUAL ON)
 endif()
 
 # We need ansi c-flags, especially on HP
