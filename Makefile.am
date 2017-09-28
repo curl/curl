@@ -96,8 +96,6 @@ VC14_SRCVCXPROJ = projects/Windows/VC14/src/curl.vcxproj.dist
 VC14_SRCVCXPROJ_DEPS = $(VC14_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC_DIST = projects/README                           \
- projects/build-openssl.bat                         \
- projects/build-wolfssl.bat                         \
  projects/checksrc.bat                              \
  projects/Windows/VC6/curl-all.dsw                  \
  projects/Windows/VC6/lib/libcurl.dsw               \
