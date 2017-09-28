@@ -1161,7 +1161,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   conn->tempaddr[1] = NULL;
   conn->tempsock[0] = CURL_SOCKET_BAD;
   conn->tempsock[1] = CURL_SOCKET_BAD;
-  Curl_expire(conn->data, HAPPY_EYEBALLS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS);
 
   /* Max time for the next connection attempt */
   conn->timeoutms_per_addr =
@@ -1182,6 +1181,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   data->info.numconnects++; /* to track the number of connections made */
+  Curl_expire(conn->data, HAPPY_EYEBALLS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS);
 
   return CURLE_OK;
 }
