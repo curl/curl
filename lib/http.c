@@ -1626,12 +1626,12 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
           else if(conn->bits.authneg &&
                   /* while doing auth neg, don't allow the custom length since
                      we will force length zero then */
-                  checkprefix("Content-Length", headers->data))
+                  checkprefix("Content-Length:", headers->data))
             ;
           else if(conn->allocptr.te &&
                   /* when asking for Transfer-Encoding, don't pass on a custom
                      Connection: */
-                  checkprefix("Connection", headers->data))
+                  checkprefix("Connection:", headers->data))
             ;
           else if((conn->httpversion == 20) &&
                   checkprefix("Transfer-Encoding:", headers->data))
@@ -1664,6 +1664,10 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
               *ptr = ':';
               result = Curl_add_bufferf(req_buffer, "%s\r\n",
                                         headers->data);
+
+              /* restore the previous value */
+              *ptr = ';';
+
               if(result)
                 return result;
             }
