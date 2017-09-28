@@ -1,0 +1,37 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CONNECTTIMEOUT_MS 3 "17 Jun 2014" "libcurl 7.55.3" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HAPPY_EYEBALLS_TIMEOUT \- head start for ipv6 for happy eyeballs
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECTTIMEOUT_MS, long timeout);
+.SH DESCRIPTION
+Pass a long. It should contain the time in milliseconds that you want
+to provide as a head start for ipv6 for the happy eyeballs algorithm.
+Set to zero to switch to the default built-in connection timeout 200 ms.
+.SH AVAILABILITY
+Always
+.SH RETURN VALUE
+Returns CURLE_OK
