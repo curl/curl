@@ -4,7 +4,7 @@ Curl and libcurl 7.56.0
  Command line options:         211
  curl_easy_setopt() options:   249
  Public functions in libcurl:  74
- Contributors:                 1609
+ Contributors:                 1618
 
 This release includes the following changes:
 
@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTP: zero terminate the entry path even on bad input [67]
  o examples/ftpuploadresume.c: use portable code
  o runtests: match keywords case insensitively
  o travis: build the examples too [1]
@@ -95,6 +96,15 @@ This release includes the following bugfixes:
  o imap: quote atoms properly when escaping characters [58]
  o tests: fix a compiler warning in test 643
  o file_range: avoid integer overflow when figuring out byte range [59]
+ o curl.h: include <sys/select.h> on cygwin too [60]
+ o reuse_conn: don't copy flags that are known to be equal [61]
+ o http: fix adding custom empty headers to repeated requests [62]
+ o docs: clarify the use of environment variables for proxy [63]
+ o docs: link CURLOPT_CONNECTTIMEOUT and CURLOPT_CONNECTTIMEOUT_MS [64]
+ o connect: fix race condition with happy eyeballs timeout [65]
+ o cookie: fix memory leak if path was set twice in header [66]
+ o vtls: compare and clone ssl configs properly [68]
+ o proxy: read the "no_proxy" variable only if necessary [69]
 
 This release includes the following known bugs:
 
@@ -103,17 +113,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Karas, Benbuck Nason, Ben Greear, Benjamin Sergeant, Bill Pyne,
-  Brian Carpenter, Dan Fandrich, Daniel Stenberg, David Benjamin, Dirk Feytons,
-  Even Rouault, Frank Denis, Gergely Nagy, Gisle Vanem, imilli on github,
-  Isaac Boukris, Jackarain on github, Jakub Zakrzewski, Jan Alexander Steffens,
-  Johannes Schindelin, John David Anglin, joshhe on github, Kamil Dudka,
-  Kevin Smith, Lawrence Wagerfield, Maksim Stsepanenka, Marc Aldorasi,
-  Marcel Raad, Max Dymond, Michael Kaufmann, Michael Smith, Nick Zitzmann,
+  Anders Bakken, Andrei Karas, Benbuck Nason, Ben Greear, Benjamin Sergeant,
+  Bill Pyne, Brian Carpenter, Dan Fandrich, Daniel Stenberg, David Benjamin,
+  Dirk Feytons, Even Rouault, Frank Denis, Gergely Nagy, Gisle Vanem,
+  Ian Fette, imilli on github, Isaac Boukris, Jackarain on github,
+  Jakub Zakrzewski, Jan Alexander Steffens, Johannes Schindelin,
+  John David Anglin, joshhe on github, Kamil Dudka, Kevin Smith,
+  Lawrence Wagerfield, Maksim Stsepanenka, Marc Aldorasi, Marcel Raad,
+  Max Dymond, Michael Kaufmann, Michael Smith, Nick Zitzmann,
   Nicolas Morey-Chaisemartin, Oli Kingshott, Patrick Monnerat, Pavel P,
   Peter Lamare, Peter Wu, Ray Satiro, Rich Gray, Ryan Schmidt, Ryan Winograd,
   SBKarr on github, Tatsuhiro Tsujikawa, Viktor Szakáts,
-  (45 contributors)
+  (47 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -178,3 +189,13 @@ References to bug reports and discussions on issues:
  [57] = https://curl.haxx.se/bug/?i=1902
  [58] = https://curl.haxx.se/bug/?i=1902
  [59] = https://curl.haxx.se/bug/?i=1908
+ [60] = https://curl.haxx.se/bug/?i=1925
+ [61] = https://curl.haxx.se/bug/?i=1918
+ [62] = https://curl.haxx.se/bug/?i=1920
+ [63] = https://curl.haxx.se/bug/?i=1921
+ [64] = https://curl.haxx.se/bug/?i=1922
+ [65] = https://curl.haxx.se/bug/?i=1928
+ [66] = https://curl.haxx.se/bug/?i=1932
+ [67] = https://curl.haxx.se/docs/adv_20171004.html
+ [68] = https://curl.haxx.se/bug/?i=1917
+ [69] = https://curl.haxx.se/bug/?i=1919
