@@ -286,6 +286,7 @@ struct digestdata {
   char *qop;
   char *algorithm;
   int nc; /* nounce count */
+  bool userhash;
 #endif
 };
 
