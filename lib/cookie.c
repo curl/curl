@@ -499,6 +499,7 @@ Curl_cookie_add(struct Curl_easy *data,
             badcookie = TRUE; /* out of memory bad */
             break;
           }
+          free(co->spath); /* if this is set again */
           co->spath = sanitize_cookie_path(co->path);
           if(!co->spath) {
             badcookie = TRUE; /* out of memory bad */
