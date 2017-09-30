@@ -525,7 +525,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         urlnum = 1; /* without globbing, this is a single URL */
 
       /* if multiple files extracted to stdout, insert separators! */
-      separator= ((!outfiles || !strcmp(outfiles, "-")) && urlnum > 1);
+      separator = ((!outfiles || !strcmp(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
       for(li = 0 ; li < urlnum; li++) {
@@ -800,7 +800,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         if(urlnum > 1 && !global->mute) {
           fprintf(global->errors, "\n[%lu/%lu]: %s --> %s\n",
-                  li+1, urlnum, this_url, outfile ? outfile : "<stdout>");
+                  li + 1, urlnum, this_url, outfile ? outfile : "<stdout>");
           if(separator)
             printf("%s%s\n", CURLseparator, this_url);
         }
@@ -822,7 +822,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             if(strchr(pc, '?'))
               /* Ouch, there's already a question mark in the URL string, we
                  then append the data with an ampersand separator instead! */
-              sep='&';
+              sep = '&';
           }
           /*
            * Then append ? followed by the get fields to the url.
@@ -986,6 +986,31 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
         my_setopt(curl, CURLOPT_TIMEOUT_MS, (long)(config->timeout * 1000));
 
+        switch(config->httpreq) {
+        case HTTPREQ_SIMPLEPOST:
+          my_setopt_str(curl, CURLOPT_POSTFIELDS,
+                        config->postfields);
+          my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
+                    config->postfieldsize);
+          break;
+        case HTTPREQ_MIMEPOST:
+          my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
+          break;
+        default:
+          break;
+        }
+
+        /* new in libcurl 7.10.6 (default is Basic) */
+        if(config->authtype)
+          my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);
+
+        my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
+
+        if(built_in_protos & (CURLPROTO_HTTP | CURLPROTO_RTSP)) {
+          my_setopt_str(curl, CURLOPT_REFERER, config->referer);
+          my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
+        }
+
         if(built_in_protos & CURLPROTO_HTTP) {
 
           long postRedir = 0;
@@ -995,24 +1020,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
                     config->unrestricted_auth?1L:0L);
 
-          switch(config->httpreq) {
-          case HTTPREQ_SIMPLEPOST:
-            my_setopt_str(curl, CURLOPT_POSTFIELDS,
-                          config->postfields);
-            my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
-                      config->postfieldsize);
-            break;
-          case HTTPREQ_FORMPOST:
-            my_setopt_httppost(curl, CURLOPT_HTTPPOST, config->httppost);
-            break;
-          default:
-            break;
-          }
-
-          my_setopt_str(curl, CURLOPT_REFERER, config->referer);
           my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer?1L:0L);
-          my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
-          my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
           /* new in libcurl 7.36.0 */
           if(config->proxyheaders) {
@@ -1028,10 +1036,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
           else if(curlinfo->features & CURL_VERSION_HTTP2) {
             my_setopt_enum(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
           }
-
-          /* new in libcurl 7.10.6 (default is Basic) */
-          if(config->authtype)
-            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);
 
           /* curl 7.19.1 (the 301 version existed in 7.18.2),
              303 was added in 7.26.0 */
@@ -1668,6 +1672,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                   retry_sleep = RETRY_SLEEP_MAX;
               }
               if(outs.bytes && outs.filename && outs.stream) {
+                int rc;
                 /* We have written data to a output file, we truncate file
                  */
                 if(!global->mute)
@@ -1688,14 +1693,21 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 }
                 /* now seek to the end of the file, the position where we
                    just truncated the file in a large file-safe way */
-                fseek(outs.stream, 0, SEEK_END);
+                rc = fseek(outs.stream, 0, SEEK_END);
 #else
                 /* ftruncate is not available, so just reposition the file
                    to the location we would have truncated it. This won't
                    work properly with large files on 32-bit systems, but
                    most of those will have ftruncate. */
-                fseek(outs.stream, (long)outs.init, SEEK_SET);
+                rc = fseek(outs.stream, (long)outs.init, SEEK_SET);
 #endif
+                if(rc) {
+                  if(!global->mute)
+                    fprintf(global->errors,
+                            "failed seeking to end of file, exiting\n");
+                  result = CURLE_WRITE_ERROR;
+                  goto quit_urls;
+                }
                 outs.bytes = 0; /* clear for next round */
               }
               continue; /* curl_easy_perform loop */

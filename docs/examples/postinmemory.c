@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -58,7 +58,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct MemoryStruct chunk;
-  static const char *postthis="Field=1&Field=2&Field=3";
+  static const char *postthis = "Field=1&Field=2&Field=3";
 
   chunk.memory = malloc(1);  /* will be grown as needed by realloc above */
   chunk.size = 0;    /* no data at this point */

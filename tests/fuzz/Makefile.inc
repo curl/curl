@@ -1,19 +1,15 @@
-FUZZPROGS = http11 ftp imap pop3 httpupload http2
+FUZZPROGS = curl_fuzzer
+FUZZLIBS = libstandaloneengine.a
 
-http11_SOURCES = curl_fuzzer.c
-http11_CPPFLAGS = $(AM_CPPFLAGS)
+curl_fuzzer_SOURCES = curl_fuzzer.cc
+curl_fuzzer_CXXFLAGS = $(AM_CXXFLAGS)
 
-ftp_SOURCES = curl_fuzzer.c
-ftp_CPPFLAGS = -DFUZZER_FTP $(AM_CPPFLAGS)
+libstandaloneengine_a_SOURCES = standalone_fuzz_target_runner.cc
+libstandaloneengine_a_CXXFLAGS = $(AM_CXXFLAGS)
 
-imap_SOURCES = curl_fuzzer.c
-imap_CPPFLAGS = -DFUZZER_IMAP $(AM_CPPFLAGS)
+# Some more targets.
+zip:
+	zip -q -r curl_fuzzer_seed_corpus.zip curl_fuzz_data
 
-pop3_SOURCES = curl_fuzzer.c
-pop3_CPPFLAGS = -DFUZZER_POP3 $(AM_CPPFLAGS)
-
-httpupload_SOURCES = curl_fuzzer.c
-httpupload_CPPFLAGS = -DFUZZER_HTTP_UPLOAD $(AM_CPPFLAGS)
-
-http2_SOURCES = curl_fuzzer.c
-http2_CPPFLAGS = -DFUZZER_HTTP2 $(AM_CPPFLAGS)
+check: all
+	./curl_fuzzer curl_fuzz_data/*

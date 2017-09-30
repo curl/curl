@@ -1,0 +1,79 @@
+<testcase>
+<info>
+<keywords>
+IMAP
+APPEND
+MULTIPART
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+imap
+</server>
+ <name>
+IMAP APPEND multipart using mime API
+ </name>
+ <command>
+imap://%HOSTIP:%IMAPPORT/647 -F "=(;type=multipart/alternative" -F "= <body>This is the html version</body>;type=text/html" -F "=This is the plain text version" -F "=)" -F "=@log/test647.txt" -H "Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)" -H "From: Fred Foobar <foobar@example.com>" -H "To: joe@example.com" -H "Message-Id: <B27397-0100000@example.com>" -H "Subject: afternoon meeting" -u user:secret
+</command>
+<file name="log/test647.txt">
+This is an attached file.
+
+It may contain any type of data.
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+A001 CAPABILITY
+A002 LOGIN user secret
+A003 APPEND 647 (\Seen) {892}
+A004 LOGOUT
+</protocol>
+<upload>
+Content-Type: multipart/mixed; boundary=----------------------------
+Mime-Version: 1.0
+Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
+From: Fred Foobar <foobar@example.com>
+To: joe@example.com
+Message-Id: <B27397-0100000@example.com>
+Subject: afternoon meeting
+
+------------------------------
+Content-Type: multipart/alternative; boundary=----------------------------
+
+------------------------------
+Content-Type: text/html
+Content-Transfer-Encoding: 8bit
+
+<body>This is the html version</body>
+------------------------------
+
+This is the plain text version
+--------------------------------
+
+------------------------------
+Content-Disposition: attachment; filename="test647.txt"
+
+This is an attached file.
+
+It may contain any type of data.
+
+--------------------------------
+</upload>
+</verify>
+</testcase>

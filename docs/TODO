@@ -210,7 +210,7 @@
 1.5 get rid of PATH_MAX
 
  Having code use and rely on PATH_MAX is not nice:
- http://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html
+ https://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html
 
  Currently the SSH based code uses it a bit, but to remove PATH_MAX from there
  we need libssh2 to properly tell us when we pass in a too small buffer and

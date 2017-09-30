@@ -305,9 +305,9 @@ fetch_addr(struct connectdata *conn,
   entry_len = strlen(entry_id);
 
   /* See if its already in our dns cache */
-  dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
+  dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
-  if(dns && (data->set.dns_cache_timeout != -1))  {
+  if(dns && (data->set.dns_cache_timeout != -1)) {
     /* See whether the returned entry is stale. Done before we release lock */
     struct hostcache_prune_data user;
 
@@ -317,7 +317,7 @@ fetch_addr(struct connectdata *conn,
     if(hostcache_timestamp_remove(&user, dns)) {
       infof(data, "Hostname in DNS cache was stale, zapped\n");
       dns = NULL; /* the memory deallocation is being handled by the hash */
-      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
     }
   }
 
@@ -464,7 +464,7 @@ Curl_cache_addr(struct Curl_easy *data,
     dns->timestamp = 1;   /* zero indicates CURLOPT_RESOLVE entry */
 
   /* Store the resolved data in our DNS cache. */
-  dns2 = Curl_hash_add(data->dns.hostcache, entry_id, entry_len+1,
+  dns2 = Curl_hash_add(data->dns.hostcache, entry_id, entry_len + 1,
                        (void *)dns);
   if(!dns2) {
     free(dns);
@@ -868,7 +868,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
       /* delete entry, ignore if it didn't exist */
-      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len+1);
+      Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -909,7 +909,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
       /* See if its already in our dns cache */
-      dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len+1);
+      dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       /* free the allocated entry_id again */
       free(entry_id);

@@ -44,8 +44,8 @@
 static const char *payload_text[] = {
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
   "To: " TO "\r\n",
-  "From: " FROM "(Example User)\r\n",
-  "Cc: " CC "(Another example User)\r\n",
+  "From: " FROM " (Example User)\r\n",
+  "Cc: " CC " (Another example User)\r\n",
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
   "rfcpedant.example.org>\r\n",
   "Subject: SMTP TLS example message\r\n",

@@ -175,6 +175,7 @@ man_MANS =                                      \
   CURLOPT_MAXREDIRS.3                           \
   CURLOPT_MAX_RECV_SPEED_LARGE.3                \
   CURLOPT_MAX_SEND_SPEED_LARGE.3                \
+  CURLOPT_MIMEPOST.3                            \
   CURLOPT_NETRC.3                               \
   CURLOPT_NETRC_FILE.3                          \
   CURLOPT_NEW_DIRECTORY_PERMS.3                 \

@@ -377,6 +377,12 @@
 # define CURL_TYPEOF_CURL_SOCKLEN_T int
 #endif
 
+#ifdef _AIX
+/* AIX needs <sys/poll.h> */
+#define CURL_PULL_SYS_POLL_H
+#endif
+
+
 /* CURL_PULL_WS2TCPIP_H is defined above when inclusion of header file  */
 /* ws2tcpip.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_WS2TCPIP_H
@@ -395,6 +401,12 @@
 /* sys/socket.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_SOCKET_H
 #  include <sys/socket.h>
+#endif
+
+/* CURL_PULL_SYS_POLL_H is defined above when inclusion of header file    */
+/* sys/poll.h is required here to properly make type definitions below.   */
+#ifdef CURL_PULL_SYS_POLL_H
+#  include <sys/poll.h>
 #endif
 
 /* Data type definition of curl_socklen_t. */

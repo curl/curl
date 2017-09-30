@@ -49,7 +49,7 @@ UNITTEST_START
   };
   size_t i;
 
-  for(i=0; i < sizeof(tests)/sizeof(tests[0]); i++) {
+  for(i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {
     time_t result = curlx_tvdiff(tests[i].first, tests[i].second);
     if(result != tests[i].result) {
       printf("%d.%06u to %d.%06u got %d, but expected %d\n",

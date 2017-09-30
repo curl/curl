@@ -7,7 +7,7 @@
  * rewrite to work around the paragraph 2 in the BSD licenses as explained
  * below.
  *
- * Copyright (c) 1998, 1999 Kungliga Tekniska Högskolan
+ * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
  * Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -115,7 +115,7 @@ static char level_to_char(int level)
 static int ftp_send_command(struct connectdata *conn, const char *message, ...)
 {
   int ftp_code;
-  ssize_t nread=0;
+  ssize_t nread = 0;
   va_list args;
   char print_buffer[50];
 

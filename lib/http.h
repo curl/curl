@@ -40,8 +40,6 @@ bool Curl_compareheader(const char *headerline,  /* line to check */
                         const char *header,   /* header keyword _with_ colon */
                         const char *content); /* content string to find */
 
-char *Curl_checkheaders(const struct connectdata *conn,
-                        const char *thisheader);
 char *Curl_copy_header_value(const char *header);
 
 char *Curl_checkProxyheaders(const struct connectdata *conn,
@@ -130,7 +128,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
  * HTTP unique setup
  ***************************************************************************/
 struct HTTP {
-  struct FormData *sendit;
+  curl_mimepart *sendit;
   curl_off_t postsize; /* off_t to handle large file sizes */
   const char *postdata;
 
@@ -140,7 +138,7 @@ struct HTTP {
   curl_off_t writebytecount;
 
   /* For FORM posting */
-  struct Form form;
+  curl_mimepart form;
 
   struct back {
     curl_read_callback fread_func; /* backup storage for fread pointer */

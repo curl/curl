@@ -63,7 +63,7 @@ static size_t convert_lineends(struct Curl_easy *data,
     if(*startPtr == '\n') {
       /* This block of incoming data starts with the
          previous block's LF so get rid of it */
-      memmove(startPtr, startPtr+1, size-1);
+      memmove(startPtr, startPtr + 1, size-1);
       size--;
       /* and it wasn't a bare CR but a CRLF conversion instead */
       data->state.crlf_conversions++;
@@ -75,7 +75,7 @@ static size_t convert_lineends(struct Curl_easy *data,
   inPtr = outPtr = memchr(startPtr, '\r', size);
   if(inPtr) {
     /* at least one CR, now look for CRLF */
-    while(inPtr < (startPtr+size-1)) {
+    while(inPtr < (startPtr + size-1)) {
       /* note that it's size-1, so we'll never look past the last byte */
       if(memcmp(inPtr, "\r\n", 2) == 0) {
         /* CRLF found, bump past the CR and copy the NL */
@@ -98,7 +98,7 @@ static size_t convert_lineends(struct Curl_easy *data,
       inPtr++;
     } /* end of while loop */
 
-    if(inPtr < startPtr+size) {
+    if(inPtr < startPtr + size) {
       /* handle last byte */
       if(*inPtr == '\r') {
         /* deal with a CR at the end of the buffer */
@@ -112,7 +112,7 @@ static size_t convert_lineends(struct Curl_easy *data,
       }
       outPtr++;
     }
-    if(outPtr < startPtr+size)
+    if(outPtr < startPtr + size)
       /* tidy up by null terminating the now shorter data */
       *outPtr = '\0';
 
@@ -279,7 +279,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */
 
-  bytes_written=0;
+  bytes_written = 0;
   write_len = strlen(s);
   sptr = s;
 
@@ -387,7 +387,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
-      bytes_written=0;
+      bytes_written = 0;
       *code = CURLE_AGAIN;
     }
     else {
@@ -480,7 +480,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
   bool newtype = TRUE;
 
   if(s->tempcount) {
-    for(i=0; i< s->tempcount; i++) {
+    for(i = 0; i< s->tempcount; i++) {
       if(s->tempwrite[i].type == type) {
         /* data for this type exists */
         newtype = FALSE;
@@ -704,7 +704,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
      us use the correct ssl handle. */
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  *n=0; /* reset amount to zero */
+  *n = 0; /* reset amount to zero */
 
   /* If session can pipeline, check connection buffer  */
   if(pipelining) {
@@ -823,8 +823,8 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
   int rc;
   if(data->set.printhost && conn && conn->host.dispname) {
     char buffer[160];
-    const char *t=NULL;
-    const char *w="Data";
+    const char *t = NULL;
+    const char *w = "Data";
     switch(type) {
     case CURLINFO_HEADER_IN:
       w = "Header";

@@ -134,7 +134,7 @@ int Curl_pgrsDone(struct connectdata *conn)
 {
   int rc;
   struct Curl_easy *data = conn->data;
-  data->progress.lastshow=0;
+  data->progress.lastshow = 0;
   rc = Curl_pgrsUpdate(conn); /* the final (forced) update */
   if(rc)
     return rc;
@@ -352,9 +352,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   struct curltime now;
   int result;
   char max5[6][10];
-  curl_off_t dlpercen=0;
-  curl_off_t ulpercen=0;
-  curl_off_t total_percen=0;
+  curl_off_t dlpercen = 0;
+  curl_off_t ulpercen = 0;
+  curl_off_t total_percen = 0;
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
   curl_off_t timespent;
@@ -365,10 +365,10 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   char time_left[10];
   char time_total[10];
   char time_spent[10];
-  curl_off_t ulestimate=0;
-  curl_off_t dlestimate=0;
+  curl_off_t ulestimate = 0;
+  curl_off_t dlestimate = 0;
   curl_off_t total_estimate;
-  bool shownow=FALSE;
+  bool shownow = FALSE;
 
   now = Curl_tvnow(); /* what time is it */
 
@@ -408,7 +408,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
        array. With N_ENTRIES filled in, we have about N_ENTRIES-1 seconds of
        transfer. Imagine, after one second we have filled in two entries,
        after two seconds we've filled in three entries etc. */
-    countindex = ((data->progress.speeder_c>=CURR_TIME)?
+    countindex = ((data->progress.speeder_c >= CURR_TIME)?
                   CURR_TIME:data->progress.speeder_c) - 1;
 
     /* first of all, we don't do this if there's no counted seconds yet */
@@ -418,14 +418,14 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       /* Get the index position to compare with the 'nowindex' position.
          Get the oldest entry possible. While we have less than CURR_TIME
          entries, the first entry will remain the oldest. */
-      checkindex = (data->progress.speeder_c>=CURR_TIME)?
+      checkindex = (data->progress.speeder_c >= CURR_TIME)?
         data->progress.speeder_c%CURR_TIME:0;
 
       /* Figure out the exact time for the time span */
       span_ms = Curl_tvdiff(now,
                             data->progress.speeder_time[checkindex]);
       if(0 == span_ms)
-        span_ms=1; /* at least one millisecond MUST have passed */
+        span_ms = 1; /* at least one millisecond MUST have passed */
 
       /* Calculate the average speed the last 'span_ms' milliseconds */
       {
@@ -455,22 +455,22 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     if(data->set.fxferinfo) {
       /* There's a callback set, call that */
-      result= data->set.fxferinfo(data->set.progress_client,
-                                  data->progress.size_dl,
-                                  data->progress.downloaded,
-                                  data->progress.size_ul,
-                                  data->progress.uploaded);
+      result = data->set.fxferinfo(data->set.progress_client,
+                                   data->progress.size_dl,
+                                   data->progress.downloaded,
+                                   data->progress.size_ul,
+                                   data->progress.uploaded);
       if(result)
         failf(data, "Callback aborted");
       return result;
     }
     if(data->set.fprogress) {
       /* The older deprecated callback is set, call that */
-      result= data->set.fprogress(data->set.progress_client,
-                                  (double)data->progress.size_dl,
-                                  (double)data->progress.downloaded,
-                                  (double)data->progress.size_ul,
-                                  (double)data->progress.uploaded);
+      result = data->set.fprogress(data->set.progress_client,
+                                   (double)data->progress.size_dl,
+                                   (double)data->progress.downloaded,
+                                   (double)data->progress.size_ul,
+                                   (double)data->progress.uploaded);
       if(result)
         failf(data, "Callback aborted");
       return result;

@@ -26,14 +26,14 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   https multi-app multi-debugcallback multi-double multi-post multi-single \
   persistant post-callback postit2 sepheaders simple simplepost simplessl  \
   sendrecv httpcustomheader certinfo chkspeed ftpgetinfo ftp-wildcard      \
-  smtp-mail smtp-multi smtp-ssl smtp-tls smtp-vrfy smtp-expn rtsp          \
-  externalsocket resolve progressfunc pop3-retr pop3-list pop3-uidl        \
+  smtp-mail smtp-mime smtp-multi smtp-ssl smtp-tls smtp-vrfy smtp-expn     \
+  rtsp externalsocket resolve progressfunc pop3-retr pop3-list pop3-uidl   \
   pop3-dele pop3-top pop3-stat pop3-noop pop3-ssl pop3-tls pop3-multi      \
   imap-list imap-lsub imap-fetch imap-store imap-append imap-examine       \
   imap-search imap-create imap-delete imap-copy imap-noop imap-ssl         \
   imap-tls imap-multi url2file sftpget ftpsget postinmemory http2-download \
   http2-upload http2-serverpush getredirect ftpuploadfrommem               \
-  ftpuploadresume
+  ftpuploadresume sslbackend
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.

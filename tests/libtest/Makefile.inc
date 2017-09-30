@@ -19,7 +19,8 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 lib557 lib558   \
  lib559 lib560 lib562 lib564 lib565 lib566 lib567 lib568 lib569 lib570   \
  lib571 lib572 lib573 lib574 lib575 lib576        lib578 lib579 lib582   \
- lib583 lib585 lib586 lib587        lib590 lib591 lib597 lib598 lib599   \
+ lib583 lib585 lib586 lib587 lib589 lib590 lib591 lib597 lib598 lib599   \
+ lib643 lib644 lib645 lib650 \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
  lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515         lib1517 \
  lib1520 lib1521 \
@@ -282,6 +283,9 @@ lib586_CPPFLAGS = $(AM_CPPFLAGS)
 lib587_SOURCES = lib554.c $(SUPPORTFILES)
 lib587_CPPFLAGS = $(AM_CPPFLAGS) -DLIB587
 
+lib589_SOURCES = lib589.c $(SUPPORTFILES)
+lib589_CPPFLAGS = $(AM_CPPFLAGS)
+
 lib590_SOURCES = lib590.c $(SUPPORTFILES)
 lib590_CPPFLAGS = $(AM_CPPFLAGS)
 
@@ -298,6 +302,18 @@ lib598_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib599_SOURCES = lib599.c $(SUPPORTFILES)
 lib599_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib643_SOURCES = lib643.c $(SUPPORTFILES)
+lib643_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib644_SOURCES = lib643.c $(SUPPORTFILES)
+lib644_CPPFLAGS = $(AM_CPPFLAGS) -DLIB644
+
+lib645_SOURCES = lib643.c $(SUPPORTFILES)
+lib645_CPPFLAGS = $(AM_CPPFLAGS) -DLIB645
+
+lib650_SOURCES = lib650.c $(SUPPORTFILES)
+lib650_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib1500_SOURCES = lib1500.c $(SUPPORTFILES) $(TESTUTIL)
 lib1500_LDADD = $(TESTUTIL_LIBS)

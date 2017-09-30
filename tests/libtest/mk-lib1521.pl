@@ -143,9 +143,10 @@ int test(char *URL)
   void *conv_to_network_cb = NULL;
   void *conv_from_utf8_cb = NULL;
   void *interleavecb = NULL;
-  char *stringpointerextra=(char *)"moooo";
-  struct curl_slist *slist=NULL;
-  struct curl_httppost *httppost=NULL;
+  char *stringpointerextra = (char *)"moooo";
+  struct curl_slist *slist = NULL;
+  struct curl_httppost *httppost = NULL;
+  curl_mime *mimepost = NULL;
   FILE *stream = stderr;
   struct data object;
   char *charp;
@@ -157,6 +158,7 @@ int test(char *URL)
   struct curl_tlssessioninfo *tlssession;
   CURLcode res = CURLE_OK;
   (void)URL; /* not used */
+  global_init(CURL_GLOBAL_ALL);
   easy_init(dep);
   easy_init(curl);
   share = curl_share_init();
@@ -214,6 +216,9 @@ while(<STDIN>) {
             }
             elsif($name eq "HTTPPOST") {
               print "${pref} httppost);\n$check";
+            }
+            elsif($name eq "MIMEPOST") {
+              print "${pref} mimepost);\n$check";
             }
             elsif($name eq "STDERR") {
               print "${pref} stream);\n$check";
@@ -296,6 +301,7 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dep);
   curl_share_cleanup(share);
+  curl_global_cleanup();
 
   return (int)res;
 }

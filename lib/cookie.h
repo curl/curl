@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,13 +62,16 @@ struct CookieInfo {
    that comprise the cookie non-terminal in the syntax description of the
    Set-Cookie header)"
 
+   We allow max 5000 bytes cookie header. Max 4095 bytes length per cookie
+   name and value. Name + value may not exceed 4096 bytes.
+
 */
 #define MAX_COOKIE_LINE 5000
 #define MAX_COOKIE_LINE_TXT "4999"
 
-/* This is the maximum length of a cookie name we deal with: */
-#define MAX_NAME 1024
-#define MAX_NAME_TXT "1023"
+/* This is the maximum length of a cookie name or content we deal with: */
+#define MAX_NAME 4096
+#define MAX_NAME_TXT "4095"
 
 struct Curl_easy;
 /*

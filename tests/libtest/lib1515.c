@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ static int do_one_request(CURLM *m, char *URL, char *resolve)
     timeout.tv_usec = 0;
 
     multi_fdset(m, &fdread, &fdwrite, &fdexcep, &maxfd);
-    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
     abort_on_test_timeout();
     multi_perform(m, &still_running);
@@ -148,6 +148,7 @@ int test(char *URL)
 test_cleanup:
 
   curl_multi_cleanup(multi);
+  curl_global_cleanup();
 
   return (int) res;
 }

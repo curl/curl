@@ -384,12 +384,12 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
     struct HTTP *stream = h->data->req.protop;
     size_t len = strlen(header);
     size_t i;
-    for(i=0; i<stream->push_headers_used; i++) {
+    for(i = 0; i<stream->push_headers_used; i++) {
       if(!strncmp(header, stream->push_headers[i], len)) {
         /* sub-match, make sure that it is followed by a colon */
         if(stream->push_headers[i][len] != ':')
           continue;
-        return &stream->push_headers[i][len+1];
+        return &stream->push_headers[i][len + 1];
       }
     }
   }
@@ -464,7 +464,7 @@ static int push_promise(struct Curl_easy *data,
                               data->multi->push_userp);
 
     /* free the headers again */
-    for(i=0; i<stream->push_headers_used; i++)
+    for(i = 0; i<stream->push_headers_used; i++)
       free(stream->push_headers[i]);
     free(stream->push_headers);
     stream->push_headers = NULL;
@@ -1955,6 +1955,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   switch(conn->data->set.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
   case HTTPREQ_PUT:
     if(conn->data->state.infilesize != -1)
       stream->upload_left = conn->data->state.infilesize;

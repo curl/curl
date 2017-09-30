@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#include "mime.h"
 #include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
@@ -29,7 +30,6 @@
 
 #include "tool_cfgable.h"
 #include "tool_convert.h"
-#include "tool_mfiles.h"
 #include "tool_msgs.h"
 #include "tool_formparse.h"
 
@@ -77,10 +77,10 @@ static char *get_param_word(char **str, char **end_pos)
           while(ptr < *end_pos);
           *end_pos = ptr2;
         }
-        while(*ptr && NULL==strchr(end_chars, *ptr))
+        while(*ptr && NULL == strchr(end_chars, *ptr))
           ++ptr;
         *str = ptr;
-        return word_begin+1;
+        return word_begin + 1;
       }
       ++ptr;
     }
@@ -88,11 +88,302 @@ static char *get_param_word(char **str, char **end_pos)
     ptr = word_begin;
   }
 
-  while(*ptr && NULL==strchr(end_chars, *ptr))
+  while(*ptr && NULL == strchr(end_chars, *ptr))
     ++ptr;
   *str = *end_pos = ptr;
   return word_begin;
 }
+
+/* Append slist item and return -1 if failed. */
+static int slist_append(struct curl_slist **plist, const char *data)
+{
+  struct curl_slist *s = curl_slist_append(*plist, data);
+
+  if(!s)
+    return -1;
+
+  *plist = s;
+  return 0;
+}
+
+/* Read headers from a file and append to list. */
+static int read_field_headers(struct OperationConfig *config,
+                              const char *filename, FILE *fp,
+                              struct curl_slist **pheaders)
+{
+  size_t hdrlen = 0;
+  size_t pos = 0;
+  int c;
+  bool incomment = FALSE;
+  int lineno = 1;
+  char hdrbuf[999]; /* Max. header length + 1. */
+
+  for(;;) {
+    c = getc(fp);
+    if(c == EOF || (!pos && !ISSPACE(c))) {
+      /* Strip and flush the current header. */
+      while(hdrlen && ISSPACE(hdrbuf[hdrlen - 1]))
+        hdrlen--;
+      if(hdrlen) {
+        hdrbuf[hdrlen] = '\0';
+        if(slist_append(pheaders, hdrbuf)) {
+          fprintf(config->global->errors,
+                  "Out of memory for field headers!\n");
+          return -1;
+        }
+        hdrlen = 0;
+      }
+    }
+
+    switch(c) {
+    case EOF:
+      if(ferror(fp)) {
+        fprintf(config->global->errors,
+                "Header file %s read error: %s\n", filename, strerror(errno));
+        return -1;
+      }
+      return 0;    /* Done. */
+    case '\r':
+      continue;    /* Ignore. */
+    case '\n':
+      pos = 0;
+      incomment = FALSE;
+      lineno++;
+      continue;
+    case '#':
+      if(!pos)
+        incomment = TRUE;
+      break;
+    }
+
+    pos++;
+    if(!incomment) {
+      if(hdrlen == sizeof hdrbuf - 1) {
+        warnf(config->global, "File %s line %d: header too long (truncated)\n",
+              filename, lineno);
+        c = ' ';
+      }
+      if(hdrlen <= sizeof hdrbuf - 1)
+        hdrbuf[hdrlen++] = (char) c;
+    }
+  }
+  /* NOTREACHED */
+}
+
+static int get_param_part(struct OperationConfig *config, char **str,
+                          char **pdata, char **ptype, char **pfilename,
+                          char **pencoder, struct curl_slist **pheaders)
+{
+  char *p = *str;
+  char *type = NULL;
+  char *filename = NULL;
+  char *encoder = NULL;
+  char *endpos;
+  char *tp;
+  char sep;
+  char type_major[128] = "";
+  char type_minor[128] = "";
+  char *endct = NULL;
+  struct curl_slist *headers = NULL;
+
+  if(ptype)
+    *ptype = NULL;
+  if(pfilename)
+    *pfilename = NULL;
+  if(pheaders)
+    *pheaders = NULL;
+  if(pencoder)
+    *pencoder = NULL;
+  while(ISSPACE(*p))
+    p++;
+  tp = p;
+  *pdata = get_param_word(&p, &endpos);
+  /* If not quoted, strip trailing spaces. */
+  if(*pdata == tp)
+    while(endpos > *pdata && ISSPACE(endpos[-1]))
+      endpos--;
+  sep = *p;
+  *endpos = '\0';
+  while(sep == ';') {
+    while(ISSPACE(*++p))
+      ;
+
+    if(!endct && checkprefix("type=", p)) {
+      for(p += 5; ISSPACE(*p); p++)
+        ;
+      /* set type pointer */
+      type = p;
+
+      /* verify that this is a fine type specifier */
+      if(2 != sscanf(type, "%127[^/ ]/%127[^;, \n]", type_major, type_minor)) {
+        warnf(config->global, "Illegally formatted content-type field!\n");
+        curl_slist_free_all(headers);
+        return -1; /* illegal content-type syntax! */
+      }
+
+      /* now point beyond the content-type specifier */
+      endpos = type + strlen(type_major) + strlen(type_minor) + 1;
+      for(p = endpos; ISSPACE(*p); p++)
+        ;
+      while(*p && *p != ';' && *p != ',')
+        p++;
+      endct = p;
+      sep = *p;
+    }
+    else if(checkprefix("filename=", p)) {
+      if(endct) {
+        *endct = '\0';
+        endct = NULL;
+      }
+      for(p += 9; ISSPACE(*p); p++)
+        ;
+      tp = p;
+      filename = get_param_word(&p, &endpos);
+      /* If not quoted, strip trailing spaces. */
+      if(filename == tp)
+        while(endpos > filename && ISSPACE(endpos[-1]))
+          endpos--;
+      sep = *p;
+      *endpos = '\0';
+    }
+    else if(checkprefix("headers=", p)) {
+      if(endct) {
+        *endct = '\0';
+        endct = NULL;
+      }
+      p += 8;
+      if(*p == '@' || *p == '<') {
+        char *hdrfile;
+        FILE *fp;
+        /* Read headers from a file. */
+
+        do {
+          p++;
+        } while(ISSPACE(*p));
+        tp = p;
+        hdrfile = get_param_word(&p, &endpos);
+        /* If not quoted, strip trailing spaces. */
+        if(hdrfile == tp)
+          while(endpos > hdrfile && ISSPACE(endpos[-1]))
+            endpos--;
+        sep = *p;
+        *endpos = '\0';
+        /* TODO: maybe special fopen for VMS? */
+        fp = fopen(hdrfile, FOPEN_READTEXT);
+        if(!fp)
+          warnf(config->global, "Cannot read from %s: %s\n", hdrfile,
+                strerror(errno));
+        else {
+          int i = read_field_headers(config, hdrfile, fp, &headers);
+
+          fclose(fp);
+          if(i) {
+            curl_slist_free_all(headers);
+            return -1;
+          }
+        }
+      }
+      else {
+        char *hdr;
+
+        while(ISSPACE(*p))
+          p++;
+        tp = p;
+        hdr = get_param_word(&p, &endpos);
+        /* If not quoted, strip trailing spaces. */
+        if(hdr == tp)
+          while(endpos > hdr && ISSPACE(endpos[-1]))
+            endpos--;
+        sep = *p;
+        *endpos = '\0';
+        if(slist_append(&headers, hdr)) {
+          fprintf(config->global->errors, "Out of memory for field header!\n");
+          curl_slist_free_all(headers);
+          return -1;
+        }
+      }
+    }
+    else if(checkprefix("encoder=", p)) {
+      if(endct) {
+        *endct = '\0';
+        endct = NULL;
+      }
+      for(p += 8; ISSPACE(*p); p++)
+        ;
+      tp = p;
+      encoder = get_param_word(&p, &endpos);
+      /* If not quoted, strip trailing spaces. */
+      if(encoder == tp)
+        while(endpos > encoder && ISSPACE(endpos[-1]))
+          endpos--;
+      sep = *p;
+      *endpos = '\0';
+    }
+    else {
+      /* unknown prefix, skip to next block */
+      char *unknown = get_param_word(&p, &endpos);
+
+      sep = *p;
+      if(endct)
+        endct = p;
+      else {
+        *endpos = '\0';
+         if(*unknown)
+           warnf(config->global, "skip unknown form field: %s\n", unknown);
+      }
+    }
+  }
+
+  /* Terminate and strip content type. */
+  if(type) {
+    if(!endct)
+      endct = type + strlen(type);
+    while(endct > type && ISSPACE(endct[-1]))
+      endct--;
+    *endct = '\0';
+  }
+
+  if(ptype)
+    *ptype = type;
+  else if(type)
+    warnf(config->global, "Field content type not allowed here: %s\n", type);
+
+  if(pfilename)
+    *pfilename = filename;
+  else if(filename)
+    warnf(config->global,
+          "Field file name not allowed here: %s\n", filename);
+
+  if(pencoder)
+    *pencoder = encoder;
+  else if(encoder)
+    warnf(config->global,
+          "Field encoder not allowed here: %s\n", encoder);
+
+  if(pheaders)
+    *pheaders = headers;
+  else if(headers) {
+    warnf(config->global,
+          "Field headers not allowed here: %s\n", headers->data);
+    curl_slist_free_all(headers);
+  }
+
+  *str = p;
+  return sep & 0xFF;
+}
+
+/* Check if file is "-". If so, use a callback to read OUR stdin (to
+ * workaround Windows DLL file handle caveat).
+ * Else use curl_mime_filedata(). */
+static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
+{
+  if(strcmp(file, "-"))
+    return curl_mime_filedata(part, file);
+
+  return curl_mime_data_cb(part, -1, (curl_read_callback) fread,
+                           (curl_seek_callback) fseek, NULL, stdin);
+}
+
 
 /***************************************************************************
  *
@@ -143,219 +434,315 @@ static char *get_param_word(char **str, char **end_pos)
 
 int formparse(struct OperationConfig *config,
               const char *input,
-              struct curl_httppost **httppost,
-              struct curl_httppost **last_post,
+              curl_mime **mimepost,
+              curl_mime **mimecurrent,
               bool literal_value)
 {
-  /* nextarg MUST be a string in the format 'name=contents' and we'll
+  /* input MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
-  char name[256];
+  char *name = NULL;
   char *contents = NULL;
-  char type_major[128] = "";
-  char type_minor[128] = "";
   char *contp;
+  char *data;
   char *type = NULL;
-  char *sep;
+  char *filename = NULL;
+  char *encoder = NULL;
+  struct curl_slist *headers = NULL;
+  curl_mimepart *part = NULL;
+  CURLcode res;
+  int sep = '\0';
 
-  if((1 == sscanf(input, "%255[^=]=", name)) &&
-     ((contp = strchr(input, '=')) != NULL)) {
-    /* the input was using the correct format */
-
-    /* Allocate the contents */
-    contents = strdup(contp+1);
-    if(!contents) {
-      fprintf(config->global->errors, "out of memory\n");
+  /* Allocate the main mime structure if needed. */
+  if(!*mimepost) {
+    *mimepost = curl_mime_init(config->easy);
+    if(!*mimepost) {
+      warnf(config->global, "curl_mime_init failed!\n");
       return 1;
     }
-    contp = contents;
+    *mimecurrent = *mimepost;
+  }
 
-    if('@' == contp[0] && !literal_value) {
+  /* Make a copy we can overwrite. */
+  contents = strdup(input);
+  if(!contents) {
+    fprintf(config->global->errors, "out of memory\n");
+    return 2;
+  }
+
+  /* Scan for the end of the name. */
+  contp = strchr(contents, '=');
+  if(contp) {
+    if(contp > contents)
+      name = contents;
+    *contp++ = '\0';
+
+    if(*contp == '(' && !literal_value) {
+      curl_mime *subparts;
+
+      /* Starting a multipart. */
+      sep = get_param_part(config, &contp, &data, &type, NULL, NULL, &headers);
+      if(sep < 0) {
+        Curl_safefree(contents);
+        return 3;
+      }
+      subparts = curl_mime_init(config->easy);
+      if(!subparts) {
+        warnf(config->global, "curl_mime_init failed!\n");
+        curl_slist_free_all(headers);
+        Curl_safefree(contents);
+        return 4;
+      }
+      part = curl_mime_addpart(*mimecurrent);
+      if(!part) {
+        warnf(config->global, "curl_mime_addpart failed!\n");
+        curl_mime_free(subparts);
+        curl_slist_free_all(headers);
+        Curl_safefree(contents);
+        return 5;
+      }
+      if(curl_mime_subparts(part, subparts)) {
+        warnf(config->global, "curl_mime_subparts failed!\n");
+        curl_mime_free(subparts);
+        curl_slist_free_all(headers);
+        Curl_safefree(contents);
+        return 6;
+      }
+      *mimecurrent = subparts;
+      if(curl_mime_headers(part, headers, 1)) {
+        warnf(config->global, "curl_mime_headers failed!\n");
+        curl_slist_free_all(headers);
+        Curl_safefree(contents);
+        return 7;
+      }
+      if(curl_mime_type(part, type)) {
+        warnf(config->global, "curl_mime_type failed!\n");
+        Curl_safefree(contents);
+        return 8;
+      }
+    }
+    else if(!name && !strcmp(contp, ")") && !literal_value) {
+      /* Ending a mutipart. */
+      if(*mimecurrent == *mimepost) {
+        warnf(config->global, "no multipart to terminate!\n");
+        Curl_safefree(contents);
+        return 9;
+        }
+      *mimecurrent = (*mimecurrent)->parent->parent;
+    }
+    else if('@' == contp[0] && !literal_value) {
 
       /* we use the @-letter to indicate file name(s) */
 
-      struct multi_files *multi_start = NULL;
-      struct multi_files *multi_current = NULL;
-
-      char *ptr = contp;
-      char *end = ptr + strlen(ptr);
+      curl_mime *subparts = NULL;
 
       do {
         /* since this was a file, it may have a content-type specifier
            at the end too, or a filename. Or both. */
-        char *filename = NULL;
-        char *word_end;
-        bool semicolon;
-
-        type = NULL;
-
-        ++ptr;
-        contp = get_param_word(&ptr, &word_end);
-        semicolon = (';' == *ptr) ? TRUE : FALSE;
-        *word_end = '\0'; /* terminate the contp */
-
-        /* have other content, continue parse */
-        while(semicolon) {
-          /* have type or filename field */
-          ++ptr;
-          while(*ptr && (ISSPACE(*ptr)))
-            ++ptr;
-
-          if(checkprefix("type=", ptr)) {
-            /* set type pointer */
-            type = &ptr[5];
-
-            /* verify that this is a fine type specifier */
-            if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
-                           type_major, type_minor)) {
-              warnf(config->global,
-                    "Illegally formatted content-type field!\n");
-              Curl_safefree(contents);
-              FreeMultiInfo(&multi_start, &multi_current);
-              return 2; /* illegal content-type syntax! */
-            }
-
-            /* now point beyond the content-type specifier */
-            sep = type + strlen(type_major)+strlen(type_minor)+1;
-
-            /* there's a semicolon following - we check if it is a filename
-               specified and if not we simply assume that it is text that
-               the user wants included in the type and include that too up
-               to the next sep. */
-            ptr = sep;
-            if(*sep==';') {
-              if(!checkprefix(";filename=", sep)) {
-                ptr = sep + 1;
-                (void)get_param_word(&ptr, &sep);
-                semicolon = (';' == *ptr) ? TRUE : FALSE;
-              }
-            }
-            else
-              semicolon = FALSE;
-
-            if(*sep)
-              *sep = '\0'; /* zero terminate type string */
-          }
-          else if(checkprefix("filename=", ptr)) {
-            ptr += 9;
-            filename = get_param_word(&ptr, &word_end);
-            semicolon = (';' == *ptr) ? TRUE : FALSE;
-            *word_end = '\0';
-          }
-          else {
-            /* unknown prefix, skip to next block */
-            char *unknown = NULL;
-            unknown = get_param_word(&ptr, &word_end);
-            semicolon = (';' == *ptr) ? TRUE : FALSE;
-            if(*unknown) {
-              *word_end = '\0';
-              warnf(config->global, "skip unknown form field: %s\n", unknown);
-            }
-          }
-        }
-        /* now ptr point to comma or string end */
-
-
-        /* if type == NULL curl_formadd takes care of the problem */
-
-        if(*contp && !AddMultiFiles(contp, type, filename, &multi_start,
-                          &multi_current)) {
-          warnf(config->global, "Error building form post!\n");
+        ++contp;
+        sep = get_param_part(config, &contp,
+                             &data, &type, &filename, &encoder, &headers);
+        if(sep < 0) {
+          if(subparts != *mimecurrent)
+            curl_mime_free(subparts);
           Curl_safefree(contents);
-          FreeMultiInfo(&multi_start, &multi_current);
-          return 3;
+          return 10;
         }
 
-        /* *ptr could be '\0', so we just check with the string end */
-      } while(ptr < end); /* loop if there's another file name */
+        /* now contp point to comma or string end.
+           If more files to come, make sure we have multiparts. */
+        if(!subparts) {
+          if(sep != ',')    /* If there is a single file. */
+            subparts = *mimecurrent;
+          else {
+            subparts = curl_mime_init(config->easy);
+            if(!subparts) {
+              warnf(config->global, "curl_mime_init failed!\n");
+              curl_slist_free_all(headers);
+              Curl_safefree(contents);
+              return 11;
+            }
+          }
+        }
+
+        /* Allocate a part for that file. */
+        part = curl_mime_addpart(subparts);
+        if(!part) {
+          warnf(config->global, "curl_mime_addpart failed!\n");
+          if(subparts != *mimecurrent)
+            curl_mime_free(subparts);
+          curl_slist_free_all(headers);
+          Curl_safefree(contents);
+          return 12;
+        }
+
+        /* Set part headers. */
+        if(curl_mime_headers(part, headers, 1)) {
+          warnf(config->global, "curl_mime_headers failed!\n");
+          if(subparts != *mimecurrent)
+            curl_mime_free(subparts);
+          curl_slist_free_all(headers);
+          Curl_safefree(contents);
+          return 13;
+        }
+
+        /* Setup file in part. */
+        res = file_or_stdin(part, data);
+        if(res) {
+          warnf(config->global, "setting file %s  failed!\n", data);
+          if(res != CURLE_READ_ERROR) {
+            if(subparts != *mimecurrent)
+              curl_mime_free(subparts);
+            Curl_safefree(contents);
+            return 14;
+          }
+        }
+        if(filename && curl_mime_filename(part, filename)) {
+          warnf(config->global, "curl_mime_filename failed!\n");
+          if(subparts != *mimecurrent)
+            curl_mime_free(subparts);
+          Curl_safefree(contents);
+          return 15;
+        }
+        if(curl_mime_type(part, type)) {
+          warnf(config->global, "curl_mime_type failed!\n");
+          if(subparts != *mimecurrent)
+            curl_mime_free(subparts);
+          Curl_safefree(contents);
+          return 16;
+        }
+        if(curl_mime_encoder(part, encoder)) {
+          warnf(config->global, "curl_mime_encoder failed!\n");
+          if(subparts != *mimecurrent)
+            curl_mime_free(subparts);
+          Curl_safefree(contents);
+          return 17;
+        }
+
+        /* *contp could be '\0', so we just check with the delimiter */
+      } while(sep); /* loop if there's another file name */
 
       /* now we add the multiple files section */
-      if(multi_start) {
-        struct curl_forms *forms = NULL;
-        struct multi_files *start = multi_start;
-        unsigned int i, count = 0;
-        while(start) {
-          start = start->next;
-          ++count;
-        }
-        forms = malloc((count+1)*sizeof(struct curl_forms));
-        if(!forms) {
-          fprintf(config->global->errors, "Error building form post!\n");
+      if(subparts != *mimecurrent) {
+        part = curl_mime_addpart(*mimecurrent);
+        if(!part) {
+          warnf(config->global, "curl_mime_addpart failed!\n");
+          curl_mime_free(subparts);
           Curl_safefree(contents);
-          FreeMultiInfo(&multi_start, &multi_current);
-          return 4;
+          return 18;
         }
-        for(i = 0, start = multi_start; i < count; ++i, start = start->next) {
-          forms[i].option = start->form.option;
-          forms[i].value = start->form.value;
-        }
-        forms[count].option = CURLFORM_END;
-        FreeMultiInfo(&multi_start, &multi_current);
-        if(curl_formadd(httppost, last_post,
-                        CURLFORM_COPYNAME, name,
-                        CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
-          warnf(config->global, "curl_formadd failed!\n");
-          Curl_safefree(forms);
+        if(curl_mime_subparts(part, subparts)) {
+          warnf(config->global, "curl_mime_subparts failed!\n");
+          curl_mime_free(subparts);
           Curl_safefree(contents);
-          return 5;
+          return 19;
         }
-        Curl_safefree(forms);
       }
     }
     else {
-      struct curl_forms info[4];
-      int i = 0;
-      char *ct = literal_value ? NULL : strstr(contp, ";type=");
-
-      info[i].option = CURLFORM_COPYNAME;
-      info[i].value = name;
-      i++;
-
-      if(ct) {
-        info[i].option = CURLFORM_CONTENTTYPE;
-        info[i].value = &ct[6];
-        i++;
-        ct[0] = '\0'; /* zero terminate here */
-      }
-
-      if(contp[0]=='<' && !literal_value) {
-        info[i].option = CURLFORM_FILECONTENT;
-        info[i].value = contp+1;
-        i++;
-        info[i].option = CURLFORM_END;
-
-        if(curl_formadd(httppost, last_post,
-                        CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
-          warnf(config->global, "curl_formadd failed, possibly the file %s is "
-                "bad!\n", contp + 1);
+        /* Allocate a mime part. */
+        part = curl_mime_addpart(*mimecurrent);
+        if(!part) {
+          warnf(config->global, "curl_mime_addpart failed!\n");
           Curl_safefree(contents);
-          return 6;
+          return 20;
+        }
+
+      if(*contp == '<' && !literal_value) {
+        ++contp;
+        sep = get_param_part(config, &contp,
+                             &data, &type, &filename, &encoder, &headers);
+        if(sep < 0) {
+          Curl_safefree(contents);
+          return 21;
+        }
+
+        /* Set part headers. */
+        if(curl_mime_headers(part, headers, 1)) {
+          warnf(config->global, "curl_mime_headers failed!\n");
+          curl_slist_free_all(headers);
+          Curl_safefree(contents);
+          return 22;
+        }
+
+        /* Setup file in part. */
+        res = file_or_stdin(part, data);
+        if(res) {
+          warnf(config->global, "setting file %s failed!\n", data);
+          if(res != CURLE_READ_ERROR) {
+            Curl_safefree(contents);
+            return 23;
+          }
         }
       }
       else {
+        if(literal_value)
+          data = contp;
+        else {
+          sep = get_param_part(config, &contp,
+                               &data, &type, &filename, &encoder, &headers);
+          if(sep < 0) {
+            Curl_safefree(contents);
+            return 24;
+          }
+        }
+
+        /* Set part headers. */
+        if(curl_mime_headers(part, headers, 1)) {
+          warnf(config->global, "curl_mime_headers failed!\n");
+          curl_slist_free_all(headers);
+          Curl_safefree(contents);
+          return 25;
+        }
+
 #ifdef CURL_DOES_CONVERSIONS
-        if(convert_to_network(contp, strlen(contp))) {
+        if(convert_to_network(data, strlen(data))) {
           warnf(config->global, "curl_formadd failed!\n");
           Curl_safefree(contents);
-          return 7;
+          return 26;
         }
 #endif
-        info[i].option = CURLFORM_COPYCONTENTS;
-        info[i].value = contp;
-        i++;
-        info[i].option = CURLFORM_END;
-        if(curl_formadd(httppost, last_post,
-                        CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
-          warnf(config->global, "curl_formadd failed!\n");
+
+        if(curl_mime_data(part, data, CURL_ZERO_TERMINATED)) {
+          warnf(config->global, "curl_mime_data failed!\n");
           Curl_safefree(contents);
-          return 8;
+          return 27;
         }
+      }
+
+      if(curl_mime_filename(part, filename)) {
+        warnf(config->global, "curl_mime_filename failed!\n");
+        Curl_safefree(contents);
+        return 28;
+      }
+      if(curl_mime_type(part, type)) {
+        warnf(config->global, "curl_mime_type failed!\n");
+        Curl_safefree(contents);
+        return 29;
+      }
+      if(curl_mime_encoder(part, encoder)) {
+        warnf(config->global, "curl_mime_encoder failed!\n");
+        Curl_safefree(contents);
+        return 30;
+      }
+
+      if(sep) {
+        *contp = (char) sep;
+        warnf(config->global,
+              "garbage at end of field specification: %s\n", contp);
       }
     }
 
+    /* Set part name. */
+    if(name && curl_mime_name(part, name)) {
+      warnf(config->global, "curl_mime_name failed!\n");
+      Curl_safefree(contents);
+      return 31;
+    }
   }
   else {
     warnf(config->global, "Illegally formatted input field!\n");
-    return 1;
+    Curl_safefree(contents);
+    return 32;
   }
   Curl_safefree(contents);
   return 0;

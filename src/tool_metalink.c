@@ -30,6 +30,8 @@
 #  include <fcntl.h>
 #endif
 
+#undef HAVE_NSS_CONTEXT
+
 #ifdef USE_OPENSSL
 #  include <openssl/md5.h>
 #  include <openssl/sha.h>
@@ -50,6 +52,7 @@
 #  define MD5_CTX    void *
 #  define SHA_CTX    void *
 #  define SHA256_CTX void *
+#  define HAVE_NSS_CONTEXT
    static NSSInitContext *nss_context;
 #elif defined(USE_POLARSSL)
 #  include <polarssl/md5.h>
@@ -117,7 +120,9 @@ struct win32_crypto_hash {
     return PARAM_NO_MEM; \
 } WHILE_FALSE
 
-#ifdef USE_GNUTLS_NETTLE
+#if defined(USE_OPENSSL)
+/* Functions are already defined */
+#elif defined(USE_GNUTLS_NETTLE)
 
 static int MD5_Init(MD5_CTX *ctx)
 {
@@ -375,7 +380,7 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
   sha256_finish(ctx, digest);
 }
 
-#elif defined(_WIN32) && !defined(USE_OPENSSL)
+#elif defined(_WIN32)
 
 static void win32_crypto_final(struct win32_crypto_hash *ctx,
                                unsigned char *digest,
@@ -678,7 +683,7 @@ static metalink_checksum *new_metalink_checksum_from_hex_digest
     return 0;
 
   for(i = 0; i < len; i += 2) {
-    digest[i/2] = hex_to_uint(hex_digest+i);
+    digest[i/2] = hex_to_uint(hex_digest + i);
   }
   chksum = malloc(sizeof(metalink_checksum));
   if(chksum) {
@@ -901,8 +906,8 @@ static int check_content_type(const char *content_type, const char *media_type)
     return 0;
   }
   return curl_strnequal(ptr, media_type, media_type_len) &&
-    (*(ptr+media_type_len) == '\0' || *(ptr+media_type_len) == ' ' ||
-     *(ptr+media_type_len) == '\t' || *(ptr+media_type_len) == ';');
+    (*(ptr + media_type_len) == '\0' || *(ptr + media_type_len) == ' ' ||
+     *(ptr + media_type_len) == '\t' || *(ptr + media_type_len) == ';');
 }
 
 int check_metalink_content_type(const char *content_type)
@@ -965,7 +970,7 @@ void clean_metalink(struct OperationConfig *config)
 
 void metalink_cleanup(void)
 {
-#ifdef USE_NSS
+#ifdef HAVE_NSS_CONTEXT
   if(nss_context) {
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;

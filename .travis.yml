@@ -18,13 +18,22 @@ addons:
             - stunnel4
             - libidn2-0-dev
             - libssh2-1-dev
+            - krb5-user
 
 matrix:
     include:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal
+          env: T=normal C=--with-gssapi
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal C="--disable-http --disable-smtp --disable-imap"
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal C=--enable-ares
         - os: linux
           compiler: clang
           dist: trusty
@@ -32,6 +41,9 @@ matrix:
         - os: osx
           compiler: gcc
           env: T=debug
+        - os: osx
+          compiler: gcc
+          env: T=debug C=--enable-ares
         - os: osx
           compiler: gcc
           env: T=debug C="--with-ssl=/usr/local/opt/openssl --with-libmetalink"
@@ -60,12 +72,16 @@ matrix:
           compiler: gcc
           dist: trusty
           env: T=distcheck
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=fuzzer
 
 install:
   - pip install --user cpp-coveralls
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
   - if [ $TRAVIS_OS_NAME = linux ]; then
       curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
          tar xzf - &&
@@ -137,6 +153,21 @@ script:
              cd build && \
              cmake .. && \
              make)
+        fi
+    - |
+        if [ "$T" = "fuzzer" ]; then
+          export CC=clang
+          export CXX=clang++
+          export CFLAGS="-fsanitize=address"
+
+          # Specifically use libstdc++ for travis as libc++ is not installed.
+          # This is ok because we're not compiling against libFuzzer.
+          export CXXFLAGS="-fsanitize=address -stdlib=libstdc++"
+          ./configure --disable-shared --enable-debug --enable-maintainer-mode
+          make
+          cd tests/fuzz
+          make clean
+          make check
         fi
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)

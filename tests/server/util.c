@@ -81,15 +81,15 @@ char *data_to_hex(char *data, size_t len)
   if(len > 255)
     len = 255;
 
-  for(i=0; i < len; i++) {
+  for(i = 0; i < len; i++) {
     if((data[i] >= 0x20) && (data[i] < 0x7f))
       *optr++ = *iptr++;
     else {
       snprintf(optr, 4, "%%%02x", *iptr++);
-      optr+=3;
+      optr += 3;
     }
   }
-  *optr=0; /* in case no sprintf was used */
+  *optr = 0; /* in case no sprintf was used */
 
   return buf;
 }
@@ -189,7 +189,7 @@ void win32_cleanup(void)
 #endif  /* USE_WINSOCK */
 
 /* set by the main code to point to where the test dir is */
-const char *path=".";
+const char *path = ".";
 
 char *test2file(long testno)
 {

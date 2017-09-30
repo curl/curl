@@ -47,10 +47,10 @@
 time_t Curl_pp_state_timeout(struct pingpong *pp)
 {
   struct connectdata *conn = pp->conn;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
   time_t timeout_ms; /* in milliseconds */
   time_t timeout2_ms; /* in milliseconds */
-  long response_time= (data->set.server_response_timeout)?
+  long response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
@@ -85,10 +85,10 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
   int rc;
   time_t interval_ms;
   time_t timeout_ms = Curl_pp_state_timeout(pp);
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
 
-  if(timeout_ms <=0) {
+  if(timeout_ms <= 0) {
     failf(data, "server response timeout");
     return CURLE_OPERATION_TIMEDOUT; /* already too little time */
   }
@@ -270,7 +270,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
                           size_t *size) /* size of the response */
 {
   ssize_t perline; /* count bytes per line */
-  bool keepon=TRUE;
+  bool keepon = TRUE;
   ssize_t gotbytes;
   char *ptr;
   struct connectdata *conn = pp->conn;
@@ -281,7 +281,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
   *code = 0; /* 0 for errors or not done */
   *size = 0;
 
-  ptr=buf + pp->nread_resp;
+  ptr = buf + pp->nread_resp;
 
   /* number of bytes in the current line, so far */
   perline = (ssize_t)(ptr-pp->linestart_resp);
@@ -297,7 +297,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
        * it would have been populated with something of size int to begin
        * with, even though its datatype may be larger than an int.
        */
-      DEBUGASSERT((ptr+pp->cache_size) <= (buf+data->set.buffer_size+1));
+      DEBUGASSERT((ptr + pp->cache_size) <= (buf + data->set.buffer_size + 1));
       memcpy(ptr, pp->cache, pp->cache_size);
       gotbytes = (ssize_t)pp->cache_size;
       free(pp->cache);    /* free the cache */
@@ -351,7 +351,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       pp->nread_resp += gotbytes;
       for(i = 0; i < gotbytes; ptr++, i++) {
         perline++;
-        if(*ptr=='\n') {
+        if(*ptr == '\n') {
           /* a newline is CRLF in pp-talk, so the CR is ignored as
              the line isn't really terminated until the LF comes */
 
@@ -378,17 +378,17 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
                start of the buffer and zero terminate, for old times sake */
             size_t n = ptr - pp->linestart_resp;
             memmove(buf, pp->linestart_resp, n);
-            buf[n]=0; /* zero terminate */
-            keepon=FALSE;
-            pp->linestart_resp = ptr+1; /* advance pointer */
+            buf[n] = 0; /* zero terminate */
+            keepon = FALSE;
+            pp->linestart_resp = ptr + 1; /* advance pointer */
             i++; /* skip this before getting out */
 
             *size = pp->nread_resp; /* size of the response */
             pp->nread_resp = 0; /* restart */
             break;
           }
-          perline=0; /* line starts over here */
-          pp->linestart_resp = ptr+1;
+          perline = 0; /* line starts over here */
+          pp->linestart_resp = ptr + 1;
         }
       }
 
@@ -490,7 +490,7 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
   }
   else {
     free(pp->sendthis);
-    pp->sendthis=NULL;
+    pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
     pp->response = Curl_tvnow();
   }

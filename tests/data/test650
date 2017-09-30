@@ -1,0 +1,122 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+FORM
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib650
+</tool>
+
+ <name>
+HTTP formpost using form API
+ </name>
+<stdin>
+ Some data from stdin
+</stdin>
+ <command>
+http://%HOSTIP:%HTTPPORT/650 log/test650.filedata
+</command>
+<file name="log/test650.filedata">
+This is data from a file.
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+# Note that the stripping above removes 12 bytes from every occurrence of the
+# boundary string and since 5 of them are in the body contents, we see
+# (5*12) == 60 bytes less
+<protocol>
+POST /650 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: multipart/form-data; boundary=----------------------------
+Expect: 100-continue
+
+5f0
+------------------------------
+Content-Disposition: form-data; name="fieldname"
+
+this is what we post to the silly web server
+------------------------------
+Content-Disposition: form-data; name="fieldnam"
+
+uhis is what we post to the silly web serve
+------------------------------
+Content-Disposition: form-data; name="multifile"
+Content-Type: multipart/mixed; boundary=----------------------------
+
+------------------------------
+Content-Disposition: attachment; filename="test650.filedata"
+Content-Type: application/octet-stream
+
+This is data from a file.
+
+------------------------------
+Content-Disposition: attachment; filename="test650.filedata"
+Content-Type: text/whatever
+
+This is data from a file.
+
+------------------------------
+Content-Disposition: attachment; filename="test650.filedata"
+Content-Type: text/whatever
+
+This is data from a file.
+
+--------------------------------
+
+------------------------------
+Content-Disposition: form-data; name="filecontents"
+X-customheader-1: Header 1 data
+X-customheader-2: Header 2 data
+
+This is data from a file.
+
+------------------------------
+Content-Disposition: form-data; name="formlength"
+
+1341
+------------------------------
+Content-Disposition: form-data; name="standardinput"
+Content-Type: application/octet-stream
+
+ Some data from stdin
+
+--------------------------------
+
+0
+
+</protocol>
+</verify>
+</testcase>

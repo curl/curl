@@ -331,7 +331,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_NTLM;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
+        result = Curl_auth_create_ntlm_type1_message(data,
+                                                     conn->user, conn->passwd,
                                                      &conn->ntlm, &resp, &len);
       }
     else
@@ -493,7 +494,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 #ifdef USE_NTLM
   case SASL_NTLM:
     /* Create the type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
+    result = Curl_auth_create_ntlm_type1_message(data,
+                                                 conn->user, conn->passwd,
                                                  &conn->ntlm, &resp, &len);
     newstate = SASL_NTLM_TYPE2MSG;
     break;

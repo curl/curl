@@ -1,0 +1,77 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_mime_filedata 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
+.SH NAME
+curl_mime_filedata - set a mime part's body data from a file contents
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "CURLcode curl_mime_filedata(curl_mimepart * " part ,
+.BI " const char * " filename ");"
+.ad
+.SH DESCRIPTION
+\fIcurl_mime_filedata(3)\fP sets a mime part's body content from the named
+file's contents. This is an alernative to \fIcurl_mime_data(3)\fP for setting
+data to a mime part.
+
+\fIpart\fP is the part's to assign contents to.
+
+\fIfilename\fP points to the nul-terminated file's path name. The pointer can
+be NULL to detach previous part contents settings.  Filename storage can be
+safely be reused after this call.
+
+As a side effect, the part's remote file name is set to the base name of the
+given \fIfilename\fP if it is a valid named file. This can be undone or
+overriden by a subsequent call to \fIcurl_mime_filename(3)\fP.
+
+The contents of the file is read during the file transfer in a streaming
+manner to allow huge files to get transfered without using much memory. It
+therefore requires that the file is kept intact during the entire request.
+
+Setting a part's contents twice is valid: only the value set by the last call
+is retained.
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+CURLE_OK or a CURL error code upon failure.
+.SH EXAMPLE
+.nf
+ curl_mime *mime;
+ curl_mimepart *part;
+
+ /* create a mime handle */
+ mime = curl_mime_init(easy);
+
+ /* add a part */
+ part = curl_mime_addpart(mime);
+
+ /* send data from this file */
+ curl_mime_filedata(part, "image.png");
+
+ /* set name */
+ curl_mime_name(part, "data");
+.fi
+.SH "SEE ALSO"
+.BR curl_mime_addpart "(3),"
+.BR curl_mime_data "(3),"
+.BR curl_mime_filename "(3),"
+.BR curl_mime_name "(3)"

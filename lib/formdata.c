@@ -32,6 +32,8 @@
 
 #include "urldata.h" /* for struct Curl_easy */
 #include "formdata.h"
+#include "mime.h"
+#include "non-ascii.h"
 #include "vtls/vtls.h"
 #include "strcase.h"
 #include "sendf.h"
@@ -42,13 +44,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef HAVE_BASENAME
-static char *Curl_basename(char *path);
-#define basename(x)  Curl_basename((x))
-#endif
-
-static size_t readfromfile(struct Form *form, char *buffer, size_t size);
-static CURLcode formboundary(struct Curl_easy *data, char *buffer, size_t len);
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -197,7 +192,7 @@ static const char *ContentTypeForFilename(const char *filename,
     contenttype = HTTPPOST_CONTENTTYPE_DEFAULT;
 
   if(filename) { /* in case a NULL was passed in */
-    for(i=0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
+    for(i = 0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
       if(strlen(filename) >= strlen(ctts[i].extension)) {
         if(strcasecompare(filename +
                           strlen(filename) - strlen(ctts[i].extension),
@@ -272,7 +267,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct curl_httppost *post = NULL;
   CURLformoption option;
   struct curl_forms *forms = NULL;
-  char *array_value=NULL; /* value read from an array */
+  char *array_value = NULL; /* value read from an array */
 
   /* This is a state variable, that if TRUE means that we're parsing an
      array that we got passed to us. If FALSE we're parsing the input
@@ -641,15 +636,26 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         form->contenttype_alloc = TRUE;
       }
+      if(form->name && form->namelength) {
+        /* Name should not contain nul bytes. */
+        size_t i;
+        for(i = 0; i < form->namelength; i++)
+          if(!form->name[i]) {
+            return_value = CURL_FORMADD_NULL;
+            break;
+          }
+        if(return_value != CURL_FORMADD_OK)
+          break;
+      }
       if(!(form->flags & HTTPPOST_PTRNAME) &&
          (form == first_form) ) {
         /* Note that there's small risk that form->name is NULL here if the
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
-          /* copy name (without strdup; possibly contains null characters) */
+          /* copy name (without strdup; possibly not nul-terminated) */
           form->name = Curl_memdup(form->name, form->namelength?
                                    form->namelength:
-                                   strlen(form->name)+1);
+                                   strlen(form->name) + 1);
         }
         if(!form->name) {
           return_value = CURL_FORMADD_MEMORY;
@@ -663,7 +669,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         /* copy value (without strdup; possibly contains null characters) */
         size_t clen  = (size_t) form->contentslength;
         if(!clen)
-          clen = strlen(form->value)+1;
+          clen = strlen(form->value) + 1;
 
         form->value = Curl_memdup(form->value, clen);
 
@@ -746,211 +752,6 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
   return result;
 }
 
-#ifdef __VMS
-#include <fabdef.h>
-/*
- * get_vms_file_size does what it takes to get the real size of the file
- *
- * For fixed files, find out the size of the EOF block and adjust.
- *
- * For all others, have to read the entire file in, discarding the contents.
- * Most posted text files will be small, and binary files like zlib archives
- * and CD/DVD images should be either a STREAM_LF format or a fixed format.
- *
- */
-curl_off_t VmsRealFileSize(const char *name,
-                           const struct_stat *stat_buf)
-{
-  char buffer[8192];
-  curl_off_t count;
-  int ret_stat;
-  FILE * file;
-
-  file = fopen(name, FOPEN_READTEXT); /* VMS */
-  if(file == NULL)
-    return 0;
-
-  count = 0;
-  ret_stat = 1;
-  while(ret_stat > 0) {
-    ret_stat = fread(buffer, 1, sizeof(buffer), file);
-    if(ret_stat != 0)
-      count += ret_stat;
-  }
-  fclose(file);
-
-  return count;
-}
-
-/*
- *
- *  VmsSpecialSize checks to see if the stat st_size can be trusted and
- *  if not to call a routine to get the correct size.
- *
- */
-static curl_off_t VmsSpecialSize(const char *name,
-                                 const struct_stat *stat_buf)
-{
-  switch(stat_buf->st_fab_rfm) {
-  case FAB$C_VAR:
-  case FAB$C_VFC:
-    return VmsRealFileSize(name, stat_buf);
-    break;
-  default:
-    return stat_buf->st_size;
-  }
-}
-
-#endif
-
-#ifndef __VMS
-#define filesize(name, stat_data) (stat_data.st_size)
-#else
-    /* Getting the expected file size needs help on VMS */
-#define filesize(name, stat_data) VmsSpecialSize(name, &stat_data)
-#endif
-
-/*
- * AddFormData() adds a chunk of data to the FormData linked list.
- *
- * size is incremented by the chunk length, unless it is NULL
- */
-static CURLcode AddFormData(struct FormData **formp,
-                            enum formtype type,
-                            const void *line,
-                            curl_off_t length,
-                            curl_off_t *size)
-{
-  struct FormData *newform;
-  char *alloc2 = NULL;
-  CURLcode result = CURLE_OK;
-  if(length < 0 || (size && *size < 0))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  newform = malloc(sizeof(struct FormData));
-  if(!newform)
-    return CURLE_OUT_OF_MEMORY;
-  newform->next = NULL;
-
-  if(type <= FORM_CONTENT) {
-    /* we make it easier for plain strings: */
-    if(!length)
-      length = strlen((char *)line);
-#if (SIZEOF_SIZE_T < CURL_SIZEOF_CURL_OFF_T)
-    else if(length >= (curl_off_t)(size_t)-1) {
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto error;
-    }
-#endif
-    if(type != FORM_DATAMEM) {
-      newform->line = malloc((size_t)length+1);
-      if(!newform->line) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto error;
-      }
-      alloc2 = newform->line;
-      memcpy(newform->line, line, (size_t)length);
-
-      /* zero terminate for easier debugging */
-      newform->line[(size_t)length]=0;
-    }
-    else {
-      newform->line = (char *)line;
-      type = FORM_DATA; /* in all other aspects this is just FORM_DATA */
-    }
-    newform->length = (size_t)length;
-  }
-  else
-    /* For callbacks and files we don't have any actual data so we just keep a
-       pointer to whatever this points to */
-    newform->line = (char *)line;
-
-  newform->type = type;
-
-  if(size) {
-    if(type != FORM_FILE)
-      /* for static content as well as callback data we add the size given
-         as input argument */
-      *size += length;
-    else {
-      /* Since this is a file to be uploaded here, add the size of the actual
-         file */
-      if(strcmp("-", newform->line)) {
-        struct_stat file;
-        if(!stat(newform->line, &file) && !S_ISDIR(file.st_mode))
-          *size += filesize(newform->line, file);
-        else {
-          result = CURLE_BAD_FUNCTION_ARGUMENT;
-          goto error;
-        }
-      }
-    }
-  }
-
-  if(*formp) {
-    (*formp)->next = newform;
-    *formp = newform;
-  }
-  else
-    *formp = newform;
-
-  return CURLE_OK;
-  error:
-  if(newform)
-    free(newform);
-  if(alloc2)
-    free(alloc2);
-  return result;
-}
-
-/*
- * AddFormDataf() adds printf()-style formatted data to the formdata chain.
- */
-
-static CURLcode AddFormDataf(struct FormData **formp,
-                             curl_off_t *size,
-                             const char *fmt, ...)
-{
-  char *s;
-  CURLcode result;
-  va_list ap;
-  va_start(ap, fmt);
-  s = curl_mvaprintf(fmt, ap);
-  va_end(ap);
-
-  if(!s)
-    return CURLE_OUT_OF_MEMORY;
-
-  result = AddFormData(formp, FORM_DATAMEM, s, 0, size);
-  if(result)
-    free(s);
-
-  return result;
-}
-
-/*
- * Curl_formclean() is used from http.c, this cleans a built FormData linked
- * list
- */
-void Curl_formclean(struct FormData **form_ptr)
-{
-  struct FormData *next, *form;
-
-  form = *form_ptr;
-  if(!form)
-    return;
-
-  do {
-    next=form->next;  /* the following form line */
-    if(form->type <= FORM_CONTENT)
-      free(form->line); /* free the line */
-    free(form);       /* free the struct */
-    form = next;
-  } while(form); /* continue */
-
-  *form_ptr = NULL;
-}
-
 /*
  * curl_formget()
  * Serialize a curl_httppost struct.
@@ -962,42 +763,34 @@ int curl_formget(struct curl_httppost *form, void *arg,
                  curl_formget_callback append)
 {
   CURLcode result;
-  curl_off_t size;
-  struct FormData *data, *ptr;
+  curl_mimepart toppart;
 
-  result = Curl_getformdata(NULL, &data, form, NULL, &size);
-  if(result)
-    return (int)result;
+  Curl_mime_initpart(&toppart, NULL); /* default form is empty */
+  result = Curl_getformdata(NULL, &toppart, form, NULL);
+  if(!result)
+    result = Curl_mime_prepare_headers(&toppart, "multipart/form-data",
+                                       NULL, MIMESTRATEGY_FORM);
 
-  for(ptr = data; ptr; ptr = ptr->next) {
-    if((ptr->type == FORM_FILE) || (ptr->type == FORM_CALLBACK)) {
-      char buffer[8192];
-      size_t nread;
-      struct Form temp;
+  while(!result) {
+    char buffer[8192];
+    size_t nread = Curl_mime_read(buffer, 1, sizeof buffer, &toppart);
 
-      Curl_FormInit(&temp, ptr);
+    if(!nread)
+      break;
 
-      do {
-        nread = readfromfile(&temp, buffer, sizeof(buffer));
-        if((nread == (size_t) -1) ||
-           (nread > sizeof(buffer)) ||
-           (nread != append(arg, buffer, nread))) {
-          if(temp.fp)
-            fclose(temp.fp);
-          Curl_formclean(&data);
-          return -1;
-        }
-      } while(nread);
-    }
-    else {
-      if(ptr->length != append(arg, ptr->line, ptr->length)) {
-        Curl_formclean(&data);
-        return -1;
-      }
+    switch(nread) {
+    default:
+      if(append(arg, buffer, nread) != nread)
+        result = CURLE_READ_ERROR;
+      break;
+    case CURL_READFUNC_ABORT:
+    case CURL_READFUNC_PAUSE:
+      break;
     }
   }
-  Curl_formclean(&data);
-  return 0;
+
+  Curl_mime_cleanpart(&toppart);
+  return (int) result;
 }
 
 /*
@@ -1013,7 +806,7 @@ void curl_formfree(struct curl_httppost *form)
     return;
 
   do {
-    next=form->next;  /* the following form line */
+    next = form->next;  /* the following form line */
 
     /* recurse to sub-contents */
     curl_formfree(form->more);
@@ -1031,118 +824,29 @@ void curl_formfree(struct curl_httppost *form)
   } while(form); /* continue */
 }
 
-#ifndef HAVE_BASENAME
-/*
-  (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004
-  Edition)
 
-  The basename() function shall take the pathname pointed to by path and
-  return a pointer to the final component of the pathname, deleting any
-  trailing '/' characters.
-
-  If the string pointed to by path consists entirely of the '/' character,
-  basename() shall return a pointer to the string "/". If the string pointed
-  to by path is exactly "//", it is implementation-defined whether '/' or "//"
-  is returned.
-
-  If path is a null pointer or points to an empty string, basename() shall
-  return a pointer to the string ".".
-
-  The basename() function may modify the string pointed to by path, and may
-  return a pointer to static storage that may then be overwritten by a
-  subsequent call to basename().
-
-  The basename() function need not be reentrant. A function that is not
-  required to be reentrant is not required to be thread-safe.
-
-*/
-static char *Curl_basename(char *path)
+/* Set mime part name, taking care of non nul-terminated name string. */
+static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 {
-  /* Ignore all the details above for now and make a quick and simple
-     implementaion here */
-  char *s1;
-  char *s2;
+  char *zname;
+  CURLcode res;
 
-  s1=strrchr(path, '/');
-  s2=strrchr(path, '\\');
-
-  if(s1 && s2) {
-    path = (s1 > s2? s1 : s2)+1;
-  }
-  else if(s1)
-    path = s1 + 1;
-  else if(s2)
-    path = s2 + 1;
-
-  return path;
-}
-#endif
-
-static char *strippath(const char *fullfile)
-{
-  char *filename;
-  char *base;
-  filename = strdup(fullfile); /* duplicate since basename() may ruin the
-                                  buffer it works on */
-  if(!filename)
-    return NULL;
-  base = strdup(basename(filename));
-
-  free(filename); /* free temporary buffer */
-
-  return base; /* returns an allocated string or NULL ! */
-}
-
-static CURLcode formdata_add_filename(const struct curl_httppost *file,
-                                      struct FormData **form,
-                                      curl_off_t *size)
-{
-  CURLcode result = CURLE_OK;
-  char *filename = file->showfilename;
-  char *filebasename = NULL;
-  char *filename_escaped = NULL;
-
-  if(!filename) {
-    filebasename = strippath(file->contents);
-    if(!filebasename)
-      return CURLE_OUT_OF_MEMORY;
-    filename = filebasename;
-  }
-
-  if(strchr(filename, '\\') || strchr(filename, '"')) {
-    char *p0, *p1;
-
-    /* filename need be escaped */
-    filename_escaped = malloc(strlen(filename)*2+1);
-    if(!filename_escaped) {
-      free(filebasename);
-      return CURLE_OUT_OF_MEMORY;
-    }
-    p0 = filename_escaped;
-    p1 = filename;
-    while(*p1) {
-      if(*p1 == '\\' || *p1 == '"')
-        *p0++ = '\\';
-      *p0++ = *p1++;
-    }
-    *p0 = '\0';
-    filename = filename_escaped;
-  }
-  result = AddFormDataf(form, size,
-                        "; filename=\"%s\"",
-                        filename);
-  free(filename_escaped);
-  free(filebasename);
-  return result;
+  if(!name || !len)
+    return curl_mime_name(part, name);
+  zname = malloc(len + 1);
+  if(!zname)
+    return CURLE_OUT_OF_MEMORY;
+  memcpy(zname, name, len);
+  zname[len] = '\0';
+  res = curl_mime_name(part, zname);
+  free(zname);
+  return res;
 }
 
 /*
- * Curl_getformdata() converts a linked list of "meta data" into a complete
- * (possibly huge) multipart formdata. The input list is in 'post', while the
- * output resulting linked lists gets stored in '*finalform'. *sizep will get
- * the total size of the whole POST.
- * A multipart/form_data content-type is built, unless a custom content-type
- * is passed in 'custom_content_type'.
+ * Curl_getformdata() converts a linked list of "meta data" into a mime
+ * structure. The input list is in 'post', while the output is stored in
+ * mime part at '*finalform'.
  *
  * This function will not do a failf() for the potential memory failures but
  * should for all other errors it spots. Just note that this function MAY get
@@ -1150,420 +854,121 @@ static CURLcode formdata_add_filename(const struct curl_httppost *file,
  */
 
 CURLcode Curl_getformdata(struct Curl_easy *data,
-                          struct FormData **finalform,
+                          curl_mimepart *finalform,
                           struct curl_httppost *post,
-                          const char *custom_content_type,
-                          curl_off_t *sizep)
+                          curl_read_callback fread_func)
 {
-  struct FormData *form = NULL;
-  struct FormData *firstform;
-  struct curl_httppost *file;
   CURLcode result = CURLE_OK;
-  curl_off_t size = 0; /* support potentially ENORMOUS formposts */
-  char fileboundary[42];
-  struct curl_slist *curList;
-  char boundary[42];
+  curl_mime *form = NULL;
+  curl_mime *multipart;
+  curl_mimepart *part;
+  struct curl_httppost *file;
 
-  *finalform = NULL; /* default form is empty */
+  Curl_mime_cleanpart(finalform); /* default form is empty */
 
   if(!post)
     return result; /* no input => no output! */
 
-  result = formboundary(data, boundary, sizeof(boundary));
-  if(result)
-    return result;
+  form = curl_mime_init(data);
+  if(!form)
+    result = CURLE_OUT_OF_MEMORY;
 
-  /* Make the first line of the output */
-  result = AddFormDataf(&form, NULL,
-                        "%s; boundary=%s\r\n",
-                        custom_content_type?custom_content_type:
-                        "Content-Type: multipart/form-data",
-                        boundary);
-
-  if(result) {
-    return result;
-  }
-  /* we DO NOT include that line in the total size of the POST, since it'll be
-     part of the header! */
-
-  firstform = form;
-
-  do {
-
-    if(size) {
-      result = AddFormDataf(&form, &size, "\r\n");
-      if(result)
-        break;
-    }
-
-    /* boundary */
-    result = AddFormDataf(&form, &size, "--%s\r\n", boundary);
-    if(result)
-      break;
-
-    /* Maybe later this should be disabled when a custom_content_type is
-       passed, since Content-Disposition is not meaningful for all multipart
-       types.
-    */
-    result = AddFormDataf(&form, &size,
-                          "Content-Disposition: form-data; name=\"");
-    if(result)
-      break;
-
-    result = AddFormData(&form, FORM_DATA, post->name, post->namelength,
-                         &size);
-    if(result)
-      break;
-
-    result = AddFormDataf(&form, &size, "\"");
-    if(result)
-      break;
-
-    if(post->more) {
-      /* If used, this is a link to more file names, we must then do
-         the magic to include several files with the same field name */
-
-      result = formboundary(data, fileboundary, sizeof(fileboundary));
-      if(result) {
-        break;
-      }
-
-      result = AddFormDataf(&form, &size,
-                            "\r\nContent-Type: multipart/mixed;"
-                            " boundary=%s\r\n",
-                            fileboundary);
-      if(result)
-        break;
-    }
-
-    file = post;
-
-    do {
-
-      /* If 'showfilename' is set, that is a faked name passed on to us
-         to use to in the formpost. If that is not set, the actually used
-         local file name should be added. */
-
-      if(post->more) {
-        /* if multiple-file */
-        result = AddFormDataf(&form, &size,
-                              "\r\n--%s\r\nContent-Disposition: "
-                              "attachment",
-                              fileboundary);
-        if(result)
-          break;
-        result = formdata_add_filename(file, &form, &size);
-        if(result)
-          break;
-      }
-      else if(post->flags & (HTTPPOST_FILENAME|HTTPPOST_BUFFER|
-                             HTTPPOST_CALLBACK)) {
-        /* it should be noted that for the HTTPPOST_FILENAME and
-           HTTPPOST_CALLBACK cases the ->showfilename struct member is always
-           assigned at this point */
-        if(post->showfilename || (post->flags & HTTPPOST_FILENAME)) {
-          result = formdata_add_filename(post, &form, &size);
-        }
-
-        if(result)
-          break;
-      }
-
-      if(file->contenttype) {
-        /* we have a specified type */
-        result = AddFormDataf(&form, &size,
-                              "\r\nContent-Type: %s",
-                              file->contenttype);
-        if(result)
-          break;
-      }
-
-      curList = file->contentheader;
-      while(curList) {
-        /* Process the additional headers specified for this form */
-        result = AddFormDataf(&form, &size, "\r\n%s", curList->data);
-        if(result)
-          break;
-        curList = curList->next;
-      }
-      if(result)
-        break;
-
-      result = AddFormDataf(&form, &size, "\r\n\r\n");
-      if(result)
-        break;
-
-      if((post->flags & HTTPPOST_FILENAME) ||
-         (post->flags & HTTPPOST_READFILE)) {
-        /* we should include the contents from the specified file */
-        FILE *fileread;
-
-        fileread = !strcmp("-", file->contents)?
-          stdin:fopen(file->contents, "rb"); /* binary read for win32  */
-
-        /*
-         * VMS: This only allows for stream files on VMS.  Stream files are
-         * OK, as are FIXED & VAR files WITHOUT implied CC For implied CC,
-         * every record needs to have a \n appended & 1 added to SIZE
-         */
-
-        if(fileread) {
-          if(fileread != stdin) {
-            /* close the file */
-            fclose(fileread);
-            /* add the file name only - for later reading from this */
-            result = AddFormData(&form, FORM_FILE, file->contents, 0, &size);
-          }
-          else {
-            /* When uploading from stdin, we can't know the size of the file,
-             * thus must read the full file as before. We *could* use chunked
-             * transfer-encoding, but that only works for HTTP 1.1 and we
-             * can't be sure we work with such a server.
-             */
-            size_t nread;
-            char buffer[512];
-            while((nread = fread(buffer, 1, sizeof(buffer), fileread)) != 0) {
-              result = AddFormData(&form, FORM_CONTENT, buffer, nread, &size);
-              if(result || feof(fileread) || ferror(fileread))
-                break;
-            }
-          }
-        }
-        else {
-          if(data)
-            failf(data, "couldn't open file \"%s\"", file->contents);
-          *finalform = NULL;
-          result = CURLE_READ_ERROR;
-        }
-      }
-      else if(post->flags & HTTPPOST_BUFFER)
-        /* include contents of buffer */
-        result = AddFormData(&form, FORM_CONTENT, post->buffer,
-                             post->bufferlength, &size);
-      else if(post->flags & HTTPPOST_CALLBACK)
-        /* the contents should be read with the callback and the size is set
-           with the contentslength */
-        result = AddFormData(&form, FORM_CALLBACK, post->userp,
-                             post->flags&CURL_HTTPPOST_LARGE?
-                             post->contentlen:post->contentslength, &size);
-      else
-        /* include the contents we got */
-        result = AddFormData(&form, FORM_CONTENT, post->contents,
-                             post->flags&CURL_HTTPPOST_LARGE?
-                             post->contentlen:post->contentslength, &size);
-      file = file->more;
-    } while(file && !result); /* for each specified file for this field */
-
-    if(result)
-      break;
-
-    if(post->more) {
-      /* this was a multiple-file inclusion, make a termination file
-         boundary: */
-      result = AddFormDataf(&form, &size,
-                           "\r\n--%s--",
-                           fileboundary);
-      if(result)
-        break;
-    }
-    post = post->next;
-  } while(post); /* for each field */
-
-  /* end-boundary for everything */
   if(!result)
-    result = AddFormDataf(&form, &size, "\r\n--%s--\r\n", boundary);
+    result = curl_mime_subparts(finalform, form);
 
-  if(result) {
-    Curl_formclean(&firstform);
-    return result;
+  /* Process each top part. */
+  for(; !result && post; post = post->next) {
+    /* If we have more than a file here, create a mime subpart and fill it. */
+    multipart = form;
+    if(post->more) {
+      part = curl_mime_addpart(form);
+      if(!part)
+        result = CURLE_OUT_OF_MEMORY;
+      if(!result)
+        result = setname(part, post->name, post->namelength);
+      if(!result) {
+        multipart = curl_mime_init(data);
+        if(!multipart)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+      if(!result)
+        result = curl_mime_subparts(part, multipart);
+    }
+
+    /* Generate all the part contents. */
+    for(file = post; !result && file; file = file->more) {
+      /* Create the part. */
+      part = curl_mime_addpart(multipart);
+      if(!part)
+        result = CURLE_OUT_OF_MEMORY;
+
+      /* Set the headers. */
+      if(!result)
+        result = curl_mime_headers(part, file->contentheader, 0);
+
+      /* Set the content type. */
+      if(!result &&file->contenttype)
+        result = curl_mime_type(part, file->contenttype);
+
+      /* Set field name. */
+      if(!result && !post->more)
+        result = setname(part, post->name, post->namelength);
+
+      /* Process contents. */
+      if(!result) {
+        curl_off_t clen = post->contentslength;
+
+        if(post->flags & CURL_HTTPPOST_LARGE)
+          clen = post->contentlen;
+        if(!clen)
+          clen = -1;
+
+        if(post->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE)) {
+          if(!strcmp(file->contents, "-")) {
+            /* There are a few cases where the code below won't work; in
+               particular, freopen(stdin) by the caller is not guaranteed
+               to result as expected. This feature has been kept for backward
+               compatibility: use of "-" pseudo file name should be avoided. */
+            result = curl_mime_data_cb(part, (curl_off_t) -1,
+                                       (curl_read_callback) fread,
+                                       (curl_seek_callback) fseek,
+                                       NULL, (void *) stdin);
+          }
+          else
+            result = curl_mime_filedata(part, file->contents);
+          if(!result && (post->flags & HTTPPOST_READFILE))
+            result = curl_mime_filename(part, NULL);
+        }
+        else if(post->flags & HTTPPOST_BUFFER)
+          result = curl_mime_data(part, post->buffer,
+                                  post->bufferlength? post->bufferlength: -1);
+        else if(post->flags & HTTPPOST_CALLBACK)
+          /* the contents should be read with the callback and the size is set
+             with the contentslength */
+          result = curl_mime_data_cb(part, clen,
+                                     fread_func, NULL, NULL, post->userp);
+        else {
+          result = curl_mime_data(part, post->contents, (ssize_t) clen);
+#ifdef CURL_DOES_CONVERSIONS
+          /* Convert textual contents now. */
+          if(!result && data && part->datasize)
+            result = Curl_convert_to_network(data, part->data, part->datasize);
+#endif
+        }
+      }
+
+      /* Set fake file name. */
+      if(!result && post->showfilename)
+        if(post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
+                                        HTTPPOST_CALLBACK)))
+          result = curl_mime_filename(part, post->showfilename);
+    }
   }
 
-  *sizep = size;
-  *finalform = firstform;
+  if(result)
+    Curl_mime_cleanpart(finalform);
 
   return result;
-}
-
-/*
- * Curl_FormInit() inits the struct 'form' points to with the 'formdata'
- * and resets the 'sent' counter.
- */
-int Curl_FormInit(struct Form *form, struct FormData *formdata)
-{
-  if(!formdata)
-    return 1; /* error */
-
-  form->data = formdata;
-  form->sent = 0;
-  form->fp = NULL;
-  form->fread_func = ZERO_NULL;
-
-  return 0;
-}
-
-#ifndef __VMS
-# define fopen_read fopen
-#else
-  /*
-   * vmsfopenread
-   *
-   * For upload to work as expected on VMS, different optional
-   * parameters must be added to the fopen command based on
-   * record format of the file.
-   *
-   */
-# define fopen_read vmsfopenread
-static FILE * vmsfopenread(const char *file, const char *mode)
-{
-  struct_stat statbuf;
-  int result;
-
-  result = stat(file, &statbuf);
-
-  switch(statbuf.st_fab_rfm) {
-  case FAB$C_VAR:
-  case FAB$C_VFC:
-  case FAB$C_STMCR:
-    return fopen(file, FOPEN_READTEXT); /* VMS */
-    break;
-  default:
-    return fopen(file, FOPEN_READTEXT, "rfm=stmlf", "ctx=stm");
-  }
-}
-#endif
-
-/*
- * readfromfile()
- *
- * The read callback that this function may use can return a value larger than
- * 'size' (which then this function returns) that indicates a problem and it
- * must be properly dealt with
- */
-static size_t readfromfile(struct Form *form, char *buffer,
-                           size_t size)
-{
-  size_t nread;
-  bool callback = (form->data->type == FORM_CALLBACK)?TRUE:FALSE;
-
-  if(callback) {
-    if(form->fread_func == ZERO_NULL)
-      return 0;
-    nread = form->fread_func(buffer, 1, size, form->data->line);
-  }
-  else {
-    if(!form->fp) {
-      /* this file hasn't yet been opened */
-      form->fp = fopen_read(form->data->line, "rb"); /* b is for binary */
-      if(!form->fp)
-        return (size_t)-1; /* failure */
-    }
-    nread = fread(buffer, 1, size, form->fp);
-  }
-  if(!nread) {
-    /* this is the last chunk from the file, move on */
-    if(form->fp) {
-      fclose(form->fp);
-      form->fp = NULL;
-    }
-    form->data = form->data->next;
-  }
-
-  return nread;
-}
-
-/*
- * Curl_FormReader() is the fread() emulation function that will be used to
- * deliver the formdata to the transfer loop and then sent away to the peer.
- */
-size_t Curl_FormReader(char *buffer,
-                       size_t size,
-                       size_t nitems,
-                       FILE *mydata)
-{
-  struct Form *form;
-  size_t wantedsize;
-  size_t gotsize = 0;
-
-  form=(struct Form *)mydata;
-
-  wantedsize = size * nitems;
-
-  if(!form->data)
-    return 0; /* nothing, error, empty */
-
-  if((form->data->type == FORM_FILE) ||
-     (form->data->type == FORM_CALLBACK)) {
-    gotsize = readfromfile(form, buffer, wantedsize);
-
-    if(gotsize)
-      /* If positive or -1, return. If zero, continue! */
-      return gotsize;
-  }
-  do {
-
-    if((form->data->length - form->sent) > wantedsize - gotsize) {
-
-      memcpy(buffer + gotsize, form->data->line + form->sent,
-             wantedsize - gotsize);
-
-      form->sent += wantedsize-gotsize;
-
-      return wantedsize;
-    }
-
-    memcpy(buffer+gotsize,
-           form->data->line + form->sent,
-           (form->data->length - form->sent) );
-    gotsize += form->data->length - form->sent;
-
-    form->sent = 0;
-
-    form->data = form->data->next; /* advance */
-
-  } while(form->data && (form->data->type < FORM_CALLBACK));
-  /* If we got an empty line and we have more data, we proceed to the next
-     line immediately to avoid returning zero before we've reached the end. */
-
-  return gotsize;
-}
-
-/*
- * Curl_formpostheader() returns the first line of the formpost, the
- * request-header part (which is not part of the request-body like the rest of
- * the post).
- */
-char *Curl_formpostheader(void *formp, size_t *len)
-{
-  char *header;
-  struct Form *form=(struct Form *)formp;
-
-  if(!form->data)
-    return NULL; /* nothing, ERROR! */
-
-  header = form->data->line;
-  *len = form->data->length;
-
-  form->data = form->data->next; /* advance */
-
-  return header;
-}
-
-/*
- * formboundary() creates a suitable boundary string and returns an allocated
- * one.
- */
-static CURLcode formboundary(struct Curl_easy *data,
-                             char *buffer, size_t buflen)
-{
-  /* 24 dashes and 16 hexadecimal digits makes 64 bit (18446744073709551615)
-     combinations */
-  if(buflen < 41)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  memset(buffer, '-', 24);
-  Curl_rand_hex(data, (unsigned char *)&buffer[24], 17);
-
-  return CURLE_OK;
 }
 
 #else  /* CURL_DISABLE_HTTP */

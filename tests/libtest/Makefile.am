@@ -109,6 +109,21 @@ libhostname_la_SOURCES = sethostname.c sethostname.h
 libhostname_la_LIBADD =
 libhostname_la_DEPENDENCIES =
 
+# Build a stub gssapi implementation for testing
+if BUILD_STUB_GSS
+noinst_LTLIBRARIES += libstubgss.la
+
+libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
+libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
+libstubgss_la_CFLAGS = $(AM_CFLAGS) -g -Wno-unused-parameter
+
+libstubgss_la_SOURCES = stub_gssapi.c stub_gssapi.h
+
+libstubgss_la_LIBADD =
+libstubgss_la_DEPENDENCIES =
+endif
+
+
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
 	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h > lib1521.c
 

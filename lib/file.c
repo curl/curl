@@ -133,7 +133,7 @@ static CURLcode file_setup_connection(struct connectdata *conn)
 static CURLcode file_range(struct connectdata *conn)
 {
   curl_off_t from, to;
-  curl_off_t totalsize=-1;
+  curl_off_t totalsize = -1;
   char *ptr;
   char *ptr2;
   struct Curl_easy *data = conn->data;
@@ -144,7 +144,7 @@ static CURLcode file_range(struct connectdata *conn)
     from_t = curlx_strtoofft(data->state.range, &ptr, 0, &from);
     if(from_t == CURL_OFFT_FLOW)
       return CURLE_RANGE_ERROR;
-    while(*ptr && (ISSPACE(*ptr) || (*ptr=='-')))
+    while(*ptr && (ISSPACE(*ptr) || (*ptr == '-')))
       ptr++;
     to_t = curlx_strtoofft(ptr, &ptr2, 0, &to);
     if(to_t == CURL_OFFT_FLOW)
@@ -165,7 +165,10 @@ static CURLcode file_range(struct connectdata *conn)
     else {
       /* X-Y */
       totalsize = to-from;
-      data->req.maxdownload = totalsize+1; /* include last byte */
+      if(totalsize == CURL_OFF_T_MAX)
+        /* this is too big to increase, so bail out */
+        return CURLE_RANGE_ERROR;
+      data->req.maxdownload = totalsize + 1; /* include last byte */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE from %" CURL_FORMAT_CURL_OFF_T
                    " getting %" CURL_FORMAT_CURL_OFF_T " bytes\n",
@@ -228,7 +231,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   }
 
   /* change path separators from '/' to '\\' for DOS, Windows and OS/2 */
-  for(i=0; i < real_path_len; ++i)
+  for(i = 0; i < real_path_len; ++i)
     if(actual_path[i] == '/')
       actual_path[i] = '\\';
     else if(!actual_path[i]) { /* binary zero */
@@ -430,9 +433,9 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
                           Windows version to have a different struct without
                           having to redefine the simple word 'stat' */
-  curl_off_t expected_size=0;
+  curl_off_t expected_size = 0;
   bool size_known;
-  bool fstated=FALSE;
+  bool fstated = FALSE;
   ssize_t nread;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,80 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+
+struct connectdata;
+struct ssl_connect_data;
+
+struct Curl_ssl {
+  /*
+   * This *must* be the first entry to allow returning the list of available
+   * backends in curl_global_sslset().
+   */
+  curl_ssl_backend info;
+
+  unsigned have_ca_path:1;      /* supports CAPATH */
+  unsigned have_certinfo:1;     /* supports CURLOPT_CERTINFO */
+  unsigned have_pinnedpubkey:1; /* supports CURLOPT_PINNEDPUBLICKEY */
+  unsigned have_ssl_ctx:1;      /* supports CURLOPT_SSL_CTX_* */
+
+  unsigned support_https_proxy:1; /* supports access via HTTPS proxies */
+
+  size_t sizeof_ssl_backend_data;
+
+  int (*init)(void);
+  void (*cleanup)(void);
+
+  size_t (*version)(char *buffer, size_t size);
+  int (*check_cxn)(struct connectdata *cxn);
+  int (*shutdown)(struct connectdata *conn, int sockindex);
+  bool (*data_pending)(const struct connectdata *conn,
+                       int connindex);
+
+  /* return 0 if a find random is filled in */
+  CURLcode (*random)(struct Curl_easy *data, unsigned char *entropy,
+                     size_t length);
+  bool (*cert_status_request)(void);
+
+  CURLcode (*connect)(struct connectdata *conn, int sockindex);
+  CURLcode (*connect_nonblocking)(struct connectdata *conn, int sockindex,
+                                  bool *done);
+  void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
+  void (*close)(struct connectdata *conn, int sockindex);
+  void (*close_all)(struct Curl_easy *data);
+  void (*session_free)(void *ptr);
+
+  CURLcode (*set_engine)(struct Curl_easy *data, const char *engine);
+  CURLcode (*set_engine_default)(struct Curl_easy *data);
+  struct curl_slist *(*engines_list)(struct Curl_easy *data);
+
+  bool (*false_start)(void);
+
+  CURLcode (*md5sum)(unsigned char *input, size_t inputlen,
+                     unsigned char *md5sum, size_t md5sumlen);
+  void (*sha256sum)(const unsigned char *input, size_t inputlen,
+                    unsigned char *sha256sum, size_t sha256sumlen);
+};
+
+#ifdef USE_SSL
+extern const struct Curl_ssl *Curl_ssl;
+#endif
+
+int Curl_none_init(void);
+void Curl_none_cleanup(void);
+int Curl_none_shutdown(struct connectdata *conn, int sockindex);
+int Curl_none_check_cxn(struct connectdata *conn);
+CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
+                          size_t length);
+void Curl_none_close_all(struct Curl_easy *data);
+void Curl_none_session_free(void *ptr);
+bool Curl_none_data_pending(const struct connectdata *conn, int connindex);
+bool Curl_none_cert_status_request(void);
+CURLcode Curl_none_set_engine(struct Curl_easy *data, const char *engine);
+CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
+struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
+bool Curl_none_false_start(void);
+CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
+                          unsigned char *md5sum, size_t md5len);
 
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
@@ -42,8 +116,8 @@
 #define MD5_DIGEST_LENGTH 16 /* fixed size */
 #endif
 
-#ifndef SHA256_DIGEST_LENGTH
-#define SHA256_DIGEST_LENGTH 32 /* fixed size */
+#ifndef CURL_SHA256_DIGEST_LENGTH
+#define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */
 #endif
 
 /* see https://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-04 */
@@ -172,8 +246,6 @@ bool Curl_ssl_false_start(void);
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else
-/* Set the API backend definition to none */
-#define CURL_SSL_BACKEND CURLSSLBACKEND_NONE
 
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1

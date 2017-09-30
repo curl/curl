@@ -43,7 +43,6 @@ POST /587 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 718
-Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------

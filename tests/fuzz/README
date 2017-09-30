@@ -2,13 +2,20 @@ Fuzz tests
 ==========
 
 The goal is to add tests for *ALL* protocols supported in libcurl.
-We will need some additional patches in the future, to increase coverage.
 
 Building the fuzz target
 ========================
+From the CURL root directory:
 
-CC=clang-5.0 CFLAGS="-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp" ./configure --disable-shared --enable-debug --enable-maintainer-mode
+export CC=clang-5.0
+export CXX=clang++-5.0
+export CFLAGS="-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp"
+export CXXFLAGS="-fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp -stdlib=libc++"
+./configure --disable-shared --enable-debug --enable-maintainer-mode
 make -sj
 
 cd tests/fuzz
-make
+
+(optional) export LIB_FUZZING_ENGINE=<path to libFuzzer.a>
+
+make check

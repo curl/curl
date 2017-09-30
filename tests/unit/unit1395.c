@@ -43,7 +43,7 @@ struct dotdot {
 UNITTEST_START
 
   unsigned int i;
-  int fails=0;
+  int fails = 0;
   const struct dotdot pairs[] = {
     { "/a/b/c/./../../g", "/a/g" },
     { "mid/content=5/../6", "mid/6" },
@@ -74,7 +74,7 @@ UNITTEST_START
     { ".", "" },
   };
 
-  for(i=0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
+  for(i = 0; i < sizeof(pairs)/sizeof(pairs[0]); i++) {
     char *out = Curl_dedotdotify(pairs[i].input);
     abort_unless(out != NULL, "returned NULL!");
 

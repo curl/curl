@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
+ * Copyright (C) 2010, 2017, Howard Chu, <hyc@openldap.org>
  * Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -152,7 +152,7 @@ static CURLcode ldap_setup_connection(struct connectdata *conn)
 {
   ldapconninfo *li;
   LDAPURLDesc *lud;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
   int rc, proto;
   CURLcode status;
 
@@ -198,7 +198,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   (void)done;
 
   strcpy(hosturl, "ldap");
-  ptr = hosturl+4;
+  ptr = hosturl + 4;
   if(conn->handler->flags & PROTOPT_SSL)
     *ptr++ = 's';
   snprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
@@ -354,7 +354,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
   int rc = 0;
   LDAPURLDesc *ludp = NULL;
   int msgid;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
 
   connkeep(conn, "OpenLDAP do");
 
@@ -519,7 +519,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
       else
         binary = 0;
 
-      for(i=0; bvals[i].bv_val != NULL; i++) {
+      for(i = 0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
         writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
         if(writeerr) {
@@ -549,7 +549,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
           else {
             /* check for unprintable characters */
             unsigned int j;
-            for(j=0; j<bvals[i].bv_len; j++)
+            for(j = 0; j<bvals[i].bv_len; j++)
               if(!ISPRINT(bvals[i].bv_val[j])) {
                 binval = 1;
                 break;

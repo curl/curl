@@ -232,6 +232,7 @@ my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
+my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2731,6 +2732,9 @@ sub checksystem {
             $curl =~ s/^(.*)(libcurl.*)/$1/g;
 
             $libcurl = $2;
+            if($curl =~ /linux|bsd|solaris|darwin/) {
+                $has_ldpreload = 1;
+            }
             if($curl =~ /win32|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
                 # Win32-style path.
@@ -3315,6 +3319,11 @@ sub singletest {
                     next;
                 }
             }
+            elsif($1 eq "ld_preload") {
+                if($has_ldpreload && !$debug_build) {
+                    next;
+                }
+            }
             elsif($1 eq "unittest") {
                 if($debug_build) {
                     next;
@@ -3755,6 +3764,13 @@ sub singletest {
 
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
+    if(@upload) {
+      my %hash = getpartattr("verify", "upload");
+      if($hash{'nonewline'}) {
+          # cut off the final newline from the final line of the upload data
+          chomp($upload[$#upload]);
+      }
+    }
 
     # if this section exists, it might be FTP server instructions:
     my @ftpservercmd = getpart("reply", "servercmd");
@@ -3808,23 +3824,25 @@ sub singletest {
         unlink($memdump);
     }
 
-    # create a (possibly-empty) file before starting the test
-    my @inputfile=getpart("client", "file");
-    my %fileattr = getpartattr("client", "file");
-    my $filename=$fileattr{'name'};
-    if(@inputfile || $filename) {
-        if(!$filename) {
-            logmsg "ERROR: section client=>file has no name attribute\n";
-            timestampskippedevents($testnum);
-            return -1;
+    # create (possibly-empty) files before starting the test
+    for my $partsuffix (('', '1', '2', '3', '4')) {
+        my @inputfile=getpart("client", "file".$partsuffix);
+        my %fileattr = getpartattr("client", "file".$partsuffix);
+        my $filename=$fileattr{'name'};
+        if(@inputfile || $filename) {
+            if(!$filename) {
+                logmsg "ERROR: section client=>file has no name attribute\n";
+                timestampskippedevents($testnum);
+                return -1;
+            }
+            my $fileContent = join('', @inputfile);
+            subVariables \$fileContent;
+#            logmsg "DEBUG: writing file " . $filename . "\n";
+            open(OUTFILE, ">$filename");
+            binmode OUTFILE; # for crapage systems, use binary
+            print OUTFILE $fileContent;
+            close(OUTFILE);
         }
-        my $fileContent = join('', @inputfile);
-        subVariables \$fileContent;
-#        logmsg "DEBUG: writing file " . $filename . "\n";
-        open(OUTFILE, ">$filename");
-        binmode OUTFILE; # for crapage systems, use binary
-        print OUTFILE $fileContent;
-        close(OUTFILE);
     }
 
     my %cmdhash = getpartattr("client", "command");
@@ -4289,6 +4307,17 @@ sub singletest {
     if(@upload) {
         # verify uploaded data
         my @out = loadarray("$LOGDIR/upload.$testnum");
+
+        # what parts to cut off from the upload
+        my @strippart = getpart("verify", "strippart");
+        my $strip;
+        for $strip (@strippart) {
+            chomp $strip;
+            for(@out) {
+                eval $strip;
+            }
+        }
+
         $res = compare($testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
             return 1;

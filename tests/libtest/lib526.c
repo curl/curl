@@ -59,7 +59,7 @@ int test(char *URL)
   int current = 0;
   int i;
 
-  for(i=0; i < NUM_HANDLES; i++)
+  for(i = 0; i < NUM_HANDLES; i++)
     curl[i] = NULL;
 
   start_test_timing();
@@ -67,7 +67,7 @@ int test(char *URL)
   global_init(CURL_GLOBAL_ALL);
 
   /* get NUM_HANDLES easy handles */
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     easy_init(curl[i]);
     /* specify target */
     easy_setopt(curl[i], CURLOPT_URL, URL);
@@ -133,7 +133,7 @@ int test(char *URL)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    select_test(maxfd+1, &rd, &wr, &exc, &interval);
+    select_test(maxfd + 1, &rd, &wr, &exc, &interval);
 
     abort_on_test_timeout();
   }
@@ -145,7 +145,7 @@ test_cleanup:
   /* test 526 and 528 */
   /* proper cleanup sequence - type PB */
 
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     curl_multi_remove_handle(m, curl[i]);
     curl_easy_cleanup(curl[i]);
   }
@@ -162,7 +162,7 @@ test_cleanup:
      will be leaked, let's use undocumented cleanup sequence - type UB */
 
   if(res)
-    for(i=0; i < NUM_HANDLES; i++)
+    for(i = 0; i < NUM_HANDLES; i++)
       curl_easy_cleanup(curl[i]);
 
   curl_multi_cleanup(m);
@@ -173,7 +173,7 @@ test_cleanup:
   /* test 532 */
   /* undocumented cleanup sequence - type UB */
 
-  for(i=0; i < NUM_HANDLES; i++)
+  for(i = 0; i < NUM_HANDLES; i++)
     curl_easy_cleanup(curl[i]);
   curl_multi_cleanup(m);
   curl_global_cleanup();

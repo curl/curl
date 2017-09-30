@@ -249,7 +249,7 @@ static CURLcode bindlocal(struct connectdata *conn,
   struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&sa;
 #endif
 
-  struct Curl_dns_entry *h=NULL;
+  struct Curl_dns_entry *h = NULL;
   unsigned short port = data->set.localport; /* use this port number, 0 for
                                                 "random" */
   /* how many port numbers to try to bind to, increasing one at a time */
@@ -319,7 +319,7 @@ static CURLcode bindlocal(struct connectdata *conn,
            * as a hostname or ip address.
            */
           if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                        dev, (curl_socklen_t)strlen(dev)+1) != 0) {
+                        dev, (curl_socklen_t)strlen(dev) + 1) != 0) {
             error = SOCKERRNO;
             infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s;"
                   " will do regular bind\n",
@@ -748,7 +748,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  for(i=0; i<2; i++) {
+  for(i = 0; i<2; i++) {
     const int other = i ^ 1;
     if(conn->tempsock[i] == CURL_SOCKET_BAD)
       continue;
@@ -900,7 +900,7 @@ void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 static void nosigpipe(struct connectdata *conn,
                       curl_socket_t sockfd)
 {
-  struct Curl_easy *data= conn->data;
+  struct Curl_easy *data = conn->data;
   int onoff = 1;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
                 sizeof(onoff)) < 0)
@@ -1161,7 +1161,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   conn->tempaddr[1] = NULL;
   conn->tempsock[0] = CURL_SOCKET_BAD;
   conn->tempsock[1] = CURL_SOCKET_BAD;
-  Curl_expire(conn->data, HAPPY_EYEBALLS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS);
 
   /* Max time for the next connection attempt */
   conn->timeoutms_per_addr =
@@ -1182,6 +1181,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   data->info.numconnects++; /* to track the number of connections made */
+  Curl_expire(conn->data, HAPPY_EYEBALLS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS);
 
   return CURLE_OK;
 }
@@ -1333,7 +1333,7 @@ CURLcode Curl_socket(struct connectdata *conn,
 
   addr->family = ai->ai_family;
   addr->socktype = conn->socktype;
-  addr->protocol = conn->socktype==SOCK_DGRAM?IPPROTO_UDP:ai->ai_protocol;
+  addr->protocol = conn->socktype == SOCK_DGRAM?IPPROTO_UDP:ai->ai_protocol;
   addr->addrlen = ai->ai_addrlen;
 
   if(addr->addrlen > sizeof(struct Curl_sockaddr_storage))

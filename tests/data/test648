@@ -1,0 +1,75 @@
+<testcase>
+<info>
+<keywords>
+SMTP
+MULTIPART
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+smtp
+</server>
+ <name>
+SMTP multipart with transfer content encoders
+ </name>
+<stdin>
+From: different
+To: another
+
+body
+</stdin>
+ <command>
+smtp://%HOSTIP:%SMTPPORT/648 --mail-rcpt recipient@example.com --mail-from sender@example.com -F '=This is the e-mail inline text with a very long line containing the special character = and that should be split by encoder.;headers=Content-disposition: "inline";encoder=quoted-printable' -F "=@log/test648.txt;encoder=base64" -H "From: different" -H "To: another"
+</command>
+<file name="log/test648.txt">
+This is an attached file.
+
+It may contain any type of data and will be encoded in base64 for transfer.
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+EHLO 648
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+Content-Type: multipart/mixed; boundary=----------------------------
+Mime-Version: 1.0
+From: different
+To: another
+
+------------------------------
+Content-Transfer-Encoding: quoted-printable
+Content-disposition: "inline"
+
+This is the e-mail inline text with a very long line containing the special=
+ character =3D and that should be split by encoder.
+------------------------------
+Content-Disposition: attachment; filename="test648.txt"
+Content-Transfer-Encoding: base64
+
+VGhpcyBpcyBhbiBhdHRhY2hlZCBmaWxlLgoKSXQgbWF5IGNvbnRhaW4gYW55IHR5cGUgb2Yg
+ZGF0YSBhbmQgd2lsbCBiZSBlbmNvZGVkIGluIGJhc2U2NCBmb3IgdHJhbnNmZXIuCg==
+--------------------------------
+.
+</upload>
+</verify>
+</testcase>

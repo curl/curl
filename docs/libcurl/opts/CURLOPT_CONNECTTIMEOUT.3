@@ -36,6 +36,9 @@ default built-in connection timeout - 300 seconds. See also the
 
 In unix-like systems, this might cause signals to be used unless
 \fICURLOPT_NOSIGNAL(3)\fP is set.
+
+If both \fICURLOPT_CONNECTTIMEOUT(3)\fP and \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
+are set, the value set last will be used.
 .SH DEFAULT
 300
 .SH PROTOCOLS
@@ -57,4 +60,5 @@ Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
+.BR CURLOPT_CONNECTTIMEOUT_MS "(3), " 
 .BR CURLOPT_TIMEOUT "(3), " CURLOPT_LOW_SPEED_LIMIT "(3), "

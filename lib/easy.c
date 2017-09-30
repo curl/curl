@@ -433,7 +433,7 @@ static int events_timer(struct Curl_multi *multi,    /* multi handle */
  */
 static int poll2cselect(int pollmask)
 {
-  int omask=0;
+  int omask = 0;
   if(pollmask & POLLIN)
     omask |= CURL_CSELECT_IN;
   if(pollmask & POLLOUT)
@@ -450,7 +450,7 @@ static int poll2cselect(int pollmask)
  */
 static short socketcb2poll(int pollmask)
 {
-  short omask=0;
+  short omask = 0;
   if(pollmask & CURL_POLL_IN)
     omask |= POLLIN;
   if(pollmask & CURL_POLL_OUT)
@@ -473,7 +473,7 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
 {
   struct events *ev = userp;
   struct socketmonitor *m;
-  struct socketmonitor *prev=NULL;
+  struct socketmonitor *prev = NULL;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) easy;
@@ -569,14 +569,14 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     struct socketmonitor *m;
     struct pollfd *f;
     struct pollfd fds[4];
-    int numfds=0;
+    int numfds = 0;
     int pollrc;
     int i;
     struct curltime before;
     struct curltime after;
 
     /* populate the fds[] array */
-    for(m = ev->list, f=&fds[0]; m; m = m->next) {
+    for(m = ev->list, f = &fds[0]; m; m = m->next) {
       f->fd = m->socket.fd;
       f->events = m->socket.events;
       f->revents = 0;
@@ -655,7 +655,7 @@ static CURLcode easy_events(struct Curl_multi *multi)
 {
   /* this struct is made static to allow it to be used after this function
      returns and curl_multi_remove_handle() is called */
-  static struct events evs= {2, FALSE, 0, NULL, 0};
+  static struct events evs = {2, FALSE, 0, NULL, 0};
 
   /* if running event-based, do some further multi inits */
   events_setup(multi, &evs);
@@ -1027,13 +1027,13 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     struct tempbuf writebuf[3]; /* there can only be three */
 
     /* copy the structs to allow for immediate re-pausing */
-    for(i=0; i < data->state.tempcount; i++) {
+    for(i = 0; i < data->state.tempcount; i++) {
       writebuf[i] = data->state.tempwrite[i];
       data->state.tempwrite[i].buf = NULL;
     }
     data->state.tempcount = 0;
 
-    for(i=0; i < count; i++) {
+    for(i = 0; i < count; i++) {
       /* even if one function returns error, this loops through and frees all
          buffers */
       if(!result)

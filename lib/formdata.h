@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,32 +21,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-
-enum formtype {
-  FORM_DATAMEM, /* already allocated FORM_DATA memory */
-  FORM_DATA,    /* form metadata (convert to network encoding if necessary) */
-  FORM_CONTENT, /* form content  (never convert) */
-  FORM_CALLBACK, /* 'line' points to the custom pointer we pass to the callback
-                  */
-  FORM_FILE     /* 'line' points to a file name we should read from
-                   to create the form data (never convert) */
-};
-
-/* plain and simple linked list with lines to send */
-struct FormData {
-  struct FormData *next;
-  enum formtype type;
-  char *line;
-  size_t length;
-};
-
-struct Form {
-  struct FormData *data; /* current form line to send */
-  size_t sent;           /* number of bytes of the current line that has
-                            already been sent in a previous invoke */
-  FILE *fp;              /* file to read from */
-  curl_read_callback fread_func; /* fread callback pointer */
-};
 
 /* used by FormAdd for temporary storage */
 typedef struct FormInfo {
@@ -69,31 +43,9 @@ typedef struct FormInfo {
   struct FormInfo *more;
 } FormInfo;
 
-int Curl_FormInit(struct Form *form, struct FormData *formdata);
-
 CURLcode Curl_getformdata(struct Curl_easy *data,
-                          struct FormData **,
+                          curl_mimepart *,
                           struct curl_httppost *post,
-                          const char *custom_contenttype,
-                          curl_off_t *size);
-
-/* fread() emulation */
-size_t Curl_FormReader(char *buffer,
-                       size_t size,
-                       size_t nitems,
-                       FILE *mydata);
-
-/*
- * Curl_formpostheader() returns the first line of the formpost, the
- * request-header part (which is not part of the request-body like the rest of
- * the post).
- */
-char *Curl_formpostheader(void *formp, size_t *len);
-
-char *Curl_FormBoundary(void);
-
-void Curl_formclean(struct FormData **);
-
-CURLcode Curl_formconvert(struct Curl_easy *, struct FormData *);
+                          curl_read_callback fread_func);
 
 #endif /* HEADER_CURL_FORMDATA_H */

@@ -1,6 +1,6 @@
 Long: form-string
-Help: Specify HTTP multipart POST data
-Protocols: HTTP
+Help: Specify multipart MIME data
+Protocols: HTTP SMTP IMAP
 Arg: <name=string>
 See-also: form
 ---

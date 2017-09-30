@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,11 +67,11 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 static int once(char *URL, bool oldstyle)
 {
   CURL *curl;
-  CURLcode res=CURLE_OK;
+  CURLcode res = CURLE_OK;
   CURLFORMcode formrc;
 
-  struct curl_httppost *formpost=NULL;
-  struct curl_httppost *lastptr=NULL;
+  struct curl_httppost *formpost = NULL;
+  struct curl_httppost *lastptr = NULL;
   struct WriteThis pooh;
   struct WriteThis pooh2;
 

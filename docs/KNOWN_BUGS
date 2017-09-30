@@ -316,7 +316,6 @@ problems may have been fixed or changed somewhat since this was written!
  The cmake build setup lacks several features that the autoconf build
  offers. This includes:
 
-  - symbol hiding when the shared library is built
   - use of correct soname for the shared library build
   - support for several TLS backends are missing
   - the unit tests cause link failures in regular non-static builds
