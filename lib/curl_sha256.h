@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_DIGEST_H
-#define HEADER_CURL_DIGEST_H
+#ifndef HEADER_CURL_SHA256_H
+#define HEADER_CURL_SHA256_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Florin Petriuc, <petriuc.florin@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,26 +22,11 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
-
-#define DIGEST_MAX_VALUE_LENGTH           256
-#define DIGEST_MAX_CONTENT_LENGTH         1024
-
-enum {
-  CURLDIGESTALGO_MD5,
-  CURLDIGESTALGO_MD5SESS,
-  CURLDIGESTALGO_SHA256,
-  CURLDIGESTALGO_SHA256SESS,
-  CURLDIGESTALGO_SHA512_256,
-  CURLDIGESTALGO_SHA512_256SESS
-};
-
-/* This is used to extract the realm from a challenge message */
-bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
-                               const char **endptr);
+void Curl_sha256it(unsigned char *outbuffer,
+                const unsigned char *input);
 
 #endif
 
-#endif /* HEADER_CURL_DIGEST_H */
+#endif /* HEADER_CURL_SHA256_H */

@@ -39,7 +39,7 @@ SOURCE \
   asyn-ares.c asyn-thread.c curl_gssapi.c http_ntlm.c curl_ntlm_wb.c   \
   curl_ntlm_core.c curl_sasl.c vtls/schannel.c curl_multibyte.c        \
   vtls/darwinssl.c conncache.c curl_sasl_sspi.c smb.c curl_endian.c    \
-  curl_des.c system_win32.c                                            \
+  curl_des.c system_win32.c sha256.c                                   \
   vauth/vauth.c vauth/cleartext.c vauth/cram.c vauth/digest.c          \
   vauth/digest_sspi.c vauth/krb5_gssapi.c vauth/krb5_sspi.c            \
   vauth/ntlm.c vauth/ntlm_sspi.c vauth/oauth2.c vauth/spnego_gssapi.c  \
