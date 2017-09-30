@@ -1810,14 +1810,14 @@ typedef enum {
   /* bitmask of allowed auth methods for connections to SOCKS5 proxies */
   CINIT(SOCKS5_AUTH, LONG, 267),
 
-  /* shuffle addresses before use when DNS returns multiple */
-  CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 268),
-
   /* Enable/disable SSH compression */
-  CINIT(SSH_COMPRESSION, LONG, 269),
+  CINIT(SSH_COMPRESSION, LONG, 268),
 
   /* Post MIME data. */
   CINIT(MIMEPOST, OBJECTPOINT, 269),
+
+  /* shuffle addresses before use when DNS returns multiple */
+  CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 270),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
