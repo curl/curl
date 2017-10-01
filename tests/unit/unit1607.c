@@ -24,13 +24,13 @@
 #include "hostip.h"
 
 #define NUM_ADDRS 8
-static struct Curl_addrinfo addrs[NUM_ADDRS] = {{0}};
+static struct Curl_addrinfo addrs[NUM_ADDRS];
 
 static CURLcode unit_setup(void)
 {
   int i;
-  for(i=0; i < NUM_ADDRS - 1; i++)  {
-    addrs[i].ai_next = &addrs[i+1];
+  for(i = 0; i < NUM_ADDRS - 1; i++) {
+    addrs[i].ai_next = &addrs[i + 1];
   }
 
   return CURLE_OK;
@@ -54,7 +54,7 @@ UNITTEST_START
   abort_unless(code == CURLE_OK, "curl_easy_setopt failed");
 
   /* Shuffle repeatedly and make sure that the list changes */
-  for(i = 0; i < 10; i++)  {
+  for(i = 0; i < 10; i++) {
     Curl_shuffle_addr(easy, &addrhead);
     if(addrhead != addrs) break;
   }
