@@ -625,7 +625,7 @@ becomes:
 
 Setting the last \fIcurl_mime_headers\fP argument to TRUE would have caused
 the headers to be automatically released upon destroyed the multi-part, thus
-saving a clean-up call to \fPcurl_slist_free_all(3)\fP.
+saving a clean-up call to \fIcurl_slist_free_all(3)\fP.
 
 .nf
  curl_formadd(&post, &last,
@@ -1213,7 +1213,7 @@ do not use this function (this would over-encode it), but explicitly set the
 corresponding part header.
 
 Upon sending such a message, libcurl prepends it with the header list
-set with \fICURLOPT_HTTPHEADERS(3)\fP, as 0th-level mime part headers.
+set with \fICURLOPT_HTTPHEADER(3)\fP, as 0th-level mime part headers.
 
 Here is an example building an e-mail message with an inline plain/html text
 alternative and a file attachment encoded in base64:
@@ -1254,7 +1254,7 @@ alternative and a file attachment encoded in base64:
  headers = curl_slist_append(headers, "To: you@example.com");
 
  /* Set these into the easy handle. */
- curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADERS, headers);
+ curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
  curl_easy_setopt(easyhandle, CURLOPT_MIMEPOST, mime);
 .fi
 
