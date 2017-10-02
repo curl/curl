@@ -234,7 +234,7 @@ if(ENABLE_MANUAL)
   endif()
 endif()
 # Required for building manual, docs, tests
-find_package(Perl REQUIRED)
+find_package(Perl)
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -1149,7 +1149,12 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-add_subdirectory(docs)
+if(PERL_FOUND)
+  add_subdirectory(docs)
+else()
+  message(WARNING "Perl not found - not building docs")
+endif()
+
 add_subdirectory(lib)
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
@@ -1157,7 +1162,11 @@ endif()
 
 include(CTest)
 if(BUILD_TESTING)
-  add_subdirectory(tests)
+  if(PERL_FOUND)
+    add_subdirectory(tests)
+  else()
+    message(WARNING "Perl not found - not building tests")
+  endif()
 endif()
 
 # Helper to populate a list (_items) with a label when conditions (the remaining
