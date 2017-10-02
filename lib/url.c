@@ -1152,6 +1152,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.httpreq = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
     break;
+#endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_MIMEPOST:
     /*
@@ -1194,6 +1195,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.headers = va_arg(param, struct curl_slist *);
     break;
 
+#ifndef CURL_DISABLE_HTTP
   case CURLOPT_PROXYHEADER:
     /*
      * Set a list with proxy headers to use (or replace internals with)
@@ -1345,7 +1347,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     }
 
     break;
-#endif /* CURL_DISABLE_COOKIES */
+#endif /* !CURL_DISABLE_COOKIES */
 
   case CURLOPT_HTTPGET:
     /*
@@ -1370,6 +1372,16 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 #endif
     data->set.httpversion = arg;
     break;
+
+  case CURLOPT_EXPECT_100_TIMEOUT_MS:
+    /*
+     * Time to wait for a response to a HTTP request containing an
+     * Expect: 100-continue header before sending the data anyway.
+     */
+    data->set.expect_100_timeout = va_arg(param, long);
+    break;
+
+#endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_HTTPAUTH:
     /*
@@ -1421,16 +1433,6 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.httpauth = auth;
   }
   break;
-
-  case CURLOPT_EXPECT_100_TIMEOUT_MS:
-    /*
-     * Time to wait for a response to a HTTP request containing an
-     * Expect: 100-continue header before sending the data anyway.
-     */
-    data->set.expect_100_timeout = va_arg(param, long);
-    break;
-
-#endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_CUSTOMREQUEST:
     /*
@@ -6336,9 +6338,7 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_safefree(conn->host.rawalloc);
   Curl_safefree(conn->conn_to_host.rawalloc);
   conn->host = old_conn->host;
-  conn->bits.conn_to_host = old_conn->bits.conn_to_host;
   conn->conn_to_host = old_conn->conn_to_host;
-  conn->bits.conn_to_port = old_conn->bits.conn_to_port;
   conn->conn_to_port = old_conn->conn_to_port;
   conn->remote_port = old_conn->remote_port;
 

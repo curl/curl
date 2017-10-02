@@ -986,6 +986,31 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
         my_setopt(curl, CURLOPT_TIMEOUT_MS, (long)(config->timeout * 1000));
 
+        switch(config->httpreq) {
+        case HTTPREQ_SIMPLEPOST:
+          my_setopt_str(curl, CURLOPT_POSTFIELDS,
+                        config->postfields);
+          my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
+                    config->postfieldsize);
+          break;
+        case HTTPREQ_MIMEPOST:
+          my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
+          break;
+        default:
+          break;
+        }
+
+        /* new in libcurl 7.10.6 (default is Basic) */
+        if(config->authtype)
+          my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);
+
+        my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
+
+        if(built_in_protos & (CURLPROTO_HTTP | CURLPROTO_RTSP)) {
+          my_setopt_str(curl, CURLOPT_REFERER, config->referer);
+          my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
+        }
+
         if(built_in_protos & CURLPROTO_HTTP) {
 
           long postRedir = 0;
@@ -995,24 +1020,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
                     config->unrestricted_auth?1L:0L);
 
-          switch(config->httpreq) {
-          case HTTPREQ_SIMPLEPOST:
-            my_setopt_str(curl, CURLOPT_POSTFIELDS,
-                          config->postfields);
-            my_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
-                      config->postfieldsize);
-            break;
-          case HTTPREQ_MIMEPOST:
-            my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
-            break;
-          default:
-            break;
-          }
-
-          my_setopt_str(curl, CURLOPT_REFERER, config->referer);
           my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer?1L:0L);
-          my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
-          my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
           /* new in libcurl 7.36.0 */
           if(config->proxyheaders) {
@@ -1028,10 +1036,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
           else if(curlinfo->features & CURL_VERSION_HTTP2) {
             my_setopt_enum(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
           }
-
-          /* new in libcurl 7.10.6 (default is Basic) */
-          if(config->authtype)
-            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);
 
           /* curl 7.19.1 (the 301 version existed in 7.18.2),
              303 was added in 7.26.0 */
