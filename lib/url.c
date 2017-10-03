@@ -4176,7 +4176,7 @@ static void free_fixed_hostname(struct hostname *host)
     host->encalloc = NULL;
   }
 #elif defined(USE_WIN32_IDN)
-  free(host->encalloc); /* must be freed withidn_free() since this was
+  free(host->encalloc); /* must be freed with free() since this was
                            allocated by curl_win32_idn_to_ascii */
   host->encalloc = NULL;
 #else
