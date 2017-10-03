@@ -875,7 +875,11 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Option that specifies how quickly an server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    data->set.server_response_timeout = va_arg(param, long) * 1000;
+    arg = va_arg(param, long);
+    if((arg>=0) && (arg < (INT_MAX/1000)))
+      data->set.server_response_timeout = arg * 1000;
+    else
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   case CURLOPT_TFTP_NO_OPTIONS:
     /*
@@ -1725,7 +1729,11 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * The maximum time you allow curl to use for a single transfer
      * operation.
      */
-    data->set.timeout = va_arg(param, long) * 1000L;
+    arg = va_arg(param, long);
+    if((arg>=0) && (arg < (INT_MAX/1000)))
+      data->set.timeout = arg * 1000;
+    else
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_TIMEOUT_MS:
@@ -1736,7 +1744,11 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * The maximum time you allow curl to use to connect.
      */
-    data->set.connecttimeout = va_arg(param, long) * 1000L;
+    arg = va_arg(param, long);
+    if((arg>=0) && (arg < (INT_MAX/1000)))
+      data->set.connecttimeout = arg * 1000;
+    else
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_CONNECTTIMEOUT_MS:
