@@ -2419,8 +2419,8 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       char *bytes;
       char *buf = data->state.buffer;
       bytes = strstr(buf, " bytes");
-      if(bytes--) {
-        long in = (long)(bytes-buf);
+      if(bytes) {
+        long in = (long)(--bytes-buf);
         /* this is a hint there is size information in there! ;-) */
         while(--in) {
           /* scan for the left parenthesis and break there */
