@@ -54,7 +54,9 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.10.8
 .SH RETURN VALUE
-Returns CURLE_OK if FTP is supported, and CURLE_UNKNOWN_OPTION if not.
+Returns CURLE_OK if FTP is supported, and CURLE_UNKNOWN_OPTION if not. Returns
+CURLE_BAD_FUNCTION_ARGUMENT if set to a negative value or a value that when
+converted to milliseconds is too large.
 .SH "SEE ALSO"
 .BR CURLOPT_TIMEOUT "(3), " CURLOPT_CONNECTTIMEOUT "(3), "
 .BR CURLOPT_LOW_SPEED_LIMIT "(3), "
