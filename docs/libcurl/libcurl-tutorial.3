@@ -523,7 +523,8 @@ multiple files posting is deprecated by RFC 7578, chapter 4.3.
 To set the data source from an already opened FILE pointer, use:
 
 .nf
- curl_mime_data_cb(part, filesize, fread, fseek, NULL, filepointer);
+ curl_mime_data_cb(part, filesize, (curl_read_callback) fread,
+                   (curl_seek_callback) fseek, NULL, filepointer);
 .fi
 
 A deprecated \fIcurl_formadd(3)\fP function is still supported in libcurl.
