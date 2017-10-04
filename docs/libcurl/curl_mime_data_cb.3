@@ -31,7 +31,7 @@ int seekfunc(void *arg, curl_off_t offset, int origin);
 .br
 void freefunc(void *arg);
 .sp
-.BI "CURLcode curl_mime_data(curl_mimepart * " part ", curl_off_t " datasize ,
+.BI "CURLcode curl_mime_data_cb(curl_mimepart * " part ", curl_off_t " datasize ,
 .br
 .BI "        curl_read_callback " readfunc ", curl_seek_callback " seekfunc ,
 .br
