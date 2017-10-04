@@ -72,7 +72,7 @@ target_link_libraries( ${EXE_NAME} libcurl ${CURL_LIBS})
 
 # Add the postfix to the executable since it is not added automatically as for modules and shared libraries
 set_target_properties(${EXE_NAME} PROPERTIES
-  DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
+  DEBUG_POSTFIX "d")
 
 #INCLUDE(ModuleInstall OPTIONAL)
 

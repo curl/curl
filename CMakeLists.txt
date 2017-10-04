@@ -117,9 +117,6 @@ if (ENABLE_CURLDEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS CURLDEBUG)
 endif()
 
-# For debug libs and exes, add "-d" postfix
-set(CMAKE_DEBUG_POSTFIX "-d" CACHE STRING "Set debug library postfix")
-
 # initialize CURL_LIBS
 set(CURL_LIBS "")
 
