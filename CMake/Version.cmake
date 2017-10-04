@@ -5,8 +5,10 @@ function(determine_version_type _out_version_type_name)
 
         set(_ver_type "none")
 
-        if(WIN32 OR CYGWIN)
+        if(WIN32)
                 set(_ver_type "windows")
+        elseif(CYGWIN)
+                set(_ver_type "cygwin")
         else()
                 # this part tries to mimic autotools as close as possible
                 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
@@ -76,7 +78,7 @@ function(parse_versioninfo _versioninfo_string _out_version_name _out_soversion_
                 math(EXPR _minor_current ${_current}+1)
                 set(${_out_version_name} ${_minor_current}.${_revision} PARENT_SCOPE)
                 set(${_out_soversion_name} ${_minor_current} PARENT_SCOPE)
-        elseif(_version_type STREQUAL "windows")
+        elseif(_version_type STREQUAL "windows" OR _version_type STREQUAL "cygwin")
                 math(EXPR _major ${_current}-${_age})
                 set(${_out_version_name} ${_major} PARENT_SCOPE)
         endif()
