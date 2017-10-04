@@ -1453,7 +1453,7 @@ enum dupstring {
   STRING_PROXY_SERVICE_NAME, /* Proxy service name */
 #endif
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-    defined(USE_SPNEGO)
+  defined(USE_SPNEGO) || defined(HAVE_GSSAPI)
   STRING_SERVICE_NAME,    /* Service name */
 #endif
   STRING_MAIL_FROM,
