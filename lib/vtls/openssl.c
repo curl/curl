@@ -69,7 +69,9 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 
-#ifdef HAVE_OPENSSL_PKCS12_H
+#ifndef OPENSSL_IS_BORINGSSL
+/* BoringSSL does not support PKCS12 */
+#define HAVE_PKCS12_SUPPORT 1
 #include <openssl/pkcs12.h>
 #endif
 
@@ -653,7 +655,7 @@ int cert_stuff(struct connectdata *conn,
 
     case SSL_FILETYPE_PKCS12:
     {
-#ifdef HAVE_OPENSSL_PKCS12_H
+#ifdef HAVE_PKCS12_SUPPORT
       FILE *f;
       PKCS12 *p12;
       EVP_PKEY *pri;
