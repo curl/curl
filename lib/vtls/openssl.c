@@ -837,7 +837,7 @@ int cert_stuff(struct connectdata *conn,
       EVP_PKEY_free(pktmp);
     }
 
-#ifndef OPENSSL_NO_RSA
+#if !defined(OPENSSL_NO_RSA) && defined(HAVE_OPAQUE_EVP_PKEY)
     {
       /* If RSA is used, don't check the private key if its flags indicate
        * it doesn't support it. */
