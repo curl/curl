@@ -1080,6 +1080,10 @@ CURLcode Curl_none_md5sum(unsigned char *input UNUSED_PARAM,
                           unsigned char *md5sum UNUSED_PARAM,
                           size_t md5len UNUSED_PARAM)
 {
+  (void)input;
+  (void)inputlen;
+  (void)md5sum;
+  (void)md5len;
   return CURLE_NOT_BUILT_IN;
 }
 #endif
