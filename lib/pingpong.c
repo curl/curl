@@ -168,15 +168,21 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   char *s;
   CURLcode result;
   struct connectdata *conn = pp->conn;
-  struct Curl_easy *data = conn->data;
+  struct Curl_easy *data;
 
 #ifdef HAVE_GSSAPI
-  enum protection_level data_sec = conn->data_prot;
+  enum protection_level data_sec;
 #endif
 
   DEBUGASSERT(pp->sendleft == 0);
   DEBUGASSERT(pp->sendsize == 0);
   DEBUGASSERT(pp->sendthis == NULL);
+
+  if(!conn)
+    /* can't send without a connection! */
+    return CURLE_SEND_ERROR;
+
+  data = conn->data;
 
   fmt_crlf = aprintf("%s\r\n", fmt); /* append a trailing CRLF */
   if(!fmt_crlf)
@@ -205,6 +211,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   result = Curl_write(conn, conn->sock[FIRSTSOCKET], s, write_len,
                      &bytes_written);
 #ifdef HAVE_GSSAPI
+  data_sec = conn->data_prot;
   DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
   conn->data_prot = data_sec;
 #endif
