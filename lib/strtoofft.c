@@ -219,7 +219,7 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   curl_off_t number;
   errno = 0;
   *num = 0; /* clear by default */
-  while(str && *str && ISSPACE(*str))
+  while(*str && ISSPACE(*str))
     str++;
   if('-' == *str) {
     if(endp)
