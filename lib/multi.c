@@ -2224,6 +2224,27 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 
     multi->type = 0; /* not good anymore */
 
+    /* Firsrt remove all remaining easy handles */
+    data = multi->easyp;
+    while(data) {
+      nextdata = data->next;
+      if(!data->state.done && data->easy_conn)
+        /* if DONE was never called for this handle */
+        (void)multi_done(&data->easy_conn, CURLE_OK, TRUE);
+      if(data->dns.hostcachetype == HCACHE_MULTI) {
+        /* clear out the usage of the shared DNS cache */
+        Curl_hostcache_clean(data, data->dns.hostcache);
+        data->dns.hostcache = NULL;
+        data->dns.hostcachetype = HCACHE_NONE;
+      }
+
+      /* Clear the pointer to the connection cache */
+      data->state.conn_cache = NULL;
+      data->multi = NULL; /* clear the association */
+
+      data = nextdata;
+    }
+
     /* Close all the connections in the connection cache */
     close_all_connections(multi);
 
@@ -2242,24 +2263,6 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_conncache_destroy(&multi->conn_cache);
     Curl_llist_destroy(&multi->msglist, NULL);
     Curl_llist_destroy(&multi->pending, NULL);
-
-    /* remove all easy handles */
-    data = multi->easyp;
-    while(data) {
-      nextdata = data->next;
-      if(data->dns.hostcachetype == HCACHE_MULTI) {
-        /* clear out the usage of the shared DNS cache */
-        Curl_hostcache_clean(data, data->dns.hostcache);
-        data->dns.hostcache = NULL;
-        data->dns.hostcachetype = HCACHE_NONE;
-      }
-
-      /* Clear the pointer to the connection cache */
-      data->state.conn_cache = NULL;
-      data->multi = NULL; /* clear the association */
-
-      data = nextdata;
-    }
 
     Curl_hash_destroy(&multi->hostcache);
 
