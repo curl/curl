@@ -583,6 +583,13 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, hostname, port);
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  /* Return an IP address quickly instead. */
+  if(Curl_inet_pton(AF_INET, "127.0.0.1", &in) > 0) {
+    return Curl_ip2addr(AF_INET, &in, "127.0.0.1", port);
+  }
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, NULL)) {
     *waitp = 1; /* expect asynchronous response */
@@ -610,6 +617,16 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   int pf = PF_INET;
 
   *waitp = 0; /* default to synchronous response */
+
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  {
+    struct in_addr in;
+    /* Return an IP address quickly instead. */
+    if(Curl_inet_pton(AF_INET, "127.0.0.1", &in) > 0) {
+      return Curl_ip2addr(AF_INET, &in, "127.0.0.1", port);
+    }
+  }
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
 
 #ifndef USE_RESOLVE_ON_IPS
   {

@@ -121,7 +121,15 @@ Curl_getaddrinfo_ex(const char *nodename,
 
   *result = NULL; /* assume failure */
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  /* Look up the nodename as given. */
   error = getaddrinfo(nodename, servname, hints, &aihead);
+#else
+  /* This is fuzzing mode - look up localhost. */
+  (void)nodename;
+  error = getaddrinfo("127.0.0.1", servname, hints, &aihead);
+#endif
+
   if(error)
     return error;
 

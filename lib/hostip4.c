@@ -134,6 +134,13 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, hostname, port);
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  /* Return an IP address quickly instead. */
+  if(Curl_inet_pton(AF_INET, "127.0.0.1", &in) > 0) {
+    return Curl_ip2addr(AF_INET, &in, "127.0.0.1", port);
+  }
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+
 #if defined(HAVE_GETADDRINFO_THREADSAFE)
   else {
     struct addrinfo hints;
