@@ -537,12 +537,6 @@ static CURLcode multi_done(struct connectdata **connp,
     /* Stop if multi_done() has already been called */
     return CURLE_OK;
 
-  if(data->mstate == CURLM_STATE_WAITRESOLVE) {
-    /* done while still waiting for the resolve to complete */
-    struct Curl_dns_entry *throw_away;
-    (void)Curl_resolver_wait_resolv(conn, &throw_away);
-  }
-
   Curl_getoff_all_pipelines(data, conn);
 
   /* Cleanup possible redirect junk */
