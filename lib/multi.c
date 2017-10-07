@@ -711,12 +711,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      curl_easy_cleanup is called. */
   Curl_expire_clear(data);
 
-  if(data->dns.hostcachetype == HCACHE_MULTI) {
-    /* stop using the multi handle's DNS cache */
-    data->dns.hostcache = NULL;
-    data->dns.hostcachetype = HCACHE_NONE;
-  }
-
   if(data->easy_conn) {
 
     /* we must call multi_done() here (if we still own the connection) so that
@@ -733,6 +727,13 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     else
       /* Clear connection pipelines, if multi_done above was not called */
       Curl_getoff_all_pipelines(data, data->easy_conn);
+  }
+
+  if(data->dns.hostcachetype == HCACHE_MULTI) {
+    /* stop using the multi handle's DNS cache, *after* the possible
+       multi_done() call above */
+    data->dns.hostcache = NULL;
+    data->dns.hostcachetype = HCACHE_NONE;
   }
 
   Curl_wildcard_dtor(&data->wildcard);
