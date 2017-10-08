@@ -38,6 +38,10 @@ matrix:
           compiler: clang
           dist: trusty
           env: T=debug
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=debug CFLAGS="-fsanitize=address,undefined -fno-sanitize-recover" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover -static-libasan"
         - os: osx
           compiler: gcc
           env: T=debug
