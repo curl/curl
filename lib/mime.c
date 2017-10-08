@@ -1356,7 +1356,8 @@ CURLcode curl_mime_headers(curl_mimepart *part,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(part->flags & MIME_USERHEADERS_OWNER) {
-    curl_slist_free_all(part->userheaders);
+    if(part->userheaders != headers)  /* Allow setting twice the same list. */
+      curl_slist_free_all(part->userheaders);
     part->flags &= ~MIME_USERHEADERS_OWNER;
   }
   part->userheaders = headers;
