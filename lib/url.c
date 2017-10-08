@@ -1158,10 +1158,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Set to make us do MIME/form POST
      */
-    result = curl_mime_subparts(&data->set.mimepost,
-                                va_arg(param, curl_mime *));
+    result = Curl_mime_set_subparts(&data->set.mimepost,
+                                    va_arg(param, curl_mime *), FALSE);
     if(!result) {
-      data->set.mimepost.freefunc = NULL; /* Avoid free upon easy cleanup. */
       data->set.httpreq = HTTPREQ_POST_MIME;
       data->set.opt_no_body = FALSE; /* this is implied */
     }

@@ -1069,13 +1069,6 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
   return result;
 }
 
-static void mime_subparts_free(void *ptr)
-{
-  curl_mime *mime = (curl_mime *) ptr;
-  curl_mime_free(mime);
-}
-
-
 /* Release part content. */
 static void cleanup_part_content(curl_mimepart *part)
 {
@@ -1093,6 +1086,30 @@ static void cleanup_part_content(curl_mimepart *part)
   cleanup_encoder_state(&part->encstate);
   part->kind = MIMEKIND_NONE;
 }
+
+static void mime_subparts_free(void *ptr)
+{
+  curl_mime *mime = (curl_mime *) ptr;
+
+  if(mime && mime->parent) {
+    mime->parent->freefunc = NULL;  /* Be sure we won't be called again. */
+    cleanup_part_content(mime->parent);  /* Avoid dangling pointer in part. */
+  }
+  curl_mime_free(mime);
+}
+
+/* Do not free subparts: unbind them. This is used for the top level only. */
+static void mime_subparts_unbind(void *ptr)
+{
+  curl_mime *mime = (curl_mime *) ptr;
+
+  if(mime && mime->parent) {
+    mime->parent->freefunc = NULL;  /* Be sure we won't be called again. */
+    cleanup_part_content(mime->parent);  /* Avoid dangling pointer in part. */
+    mime->parent = NULL;
+  }
+}
+
 
 void Curl_mime_cleanpart(curl_mimepart *part)
 {
@@ -1390,8 +1407,8 @@ CURLcode curl_mime_data_cb(curl_mimepart *part, curl_off_t datasize,
 }
 
 /* Set mime part content from subparts. */
-CURLcode curl_mime_subparts(curl_mimepart *part,
-                            curl_mime *subparts)
+CURLcode Curl_mime_set_subparts(curl_mimepart *part,
+                                curl_mime *subparts, int take_ownership)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1414,13 +1431,18 @@ CURLcode curl_mime_subparts(curl_mimepart *part,
     subparts->parent = part;
     part->readfunc = mime_subparts_read;
     part->seekfunc = mime_subparts_seek;
-    part->freefunc = mime_subparts_free;
+    part->freefunc = take_ownership? mime_subparts_free: mime_subparts_unbind;
     part->arg = subparts;
     part->datasize = -1;
     part->kind = MIMEKIND_MULTIPART;
   }
 
   return CURLE_OK;
+}
+
+CURLcode curl_mime_subparts(curl_mimepart *part, curl_mime *subparts)
+{
+  return Curl_mime_set_subparts(part, subparts, TRUE);
 }
 
 
@@ -1815,6 +1837,15 @@ void Curl_mime_initpart(curl_mimepart *part, struct Curl_easy *easy)
 void Curl_mime_cleanpart(curl_mimepart *part)
 {
   (void) part;
+}
+
+CURLcode Curl_mime_set_subparts(curl_mimepart *part,
+                                curl_mime *subparts, int take_ownership)
+{
+  (void) part;
+  (void) subparts;
+  (void) take_ownership;
+  return CURLE_NOT_BUILT_IN;
 }
 
 CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
