@@ -3023,7 +3023,7 @@ while(1) {
       undef $ftplistparserstate;
     }
     if($ftptargetdir) {
-      undef $ftptargetdir;
+      $ftptargetdir = "";
     }
 
     if($verbose) {
