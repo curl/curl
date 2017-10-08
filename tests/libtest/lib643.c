@@ -251,6 +251,21 @@ test_cleanup:
   return res;
 }
 
+static int add_itself(void)
+{
+  CURL *easy = curl_easy_init();
+  curl_mime *mime = curl_mime_init(easy);
+  curl_mimepart *part = curl_mime_addpart(mime);
+  CURLcode a1 = curl_mime_subparts(part, mime);
+  curl_mime_free(mime);
+  curl_easy_cleanup(easy);
+  if(a1 != CURLE_BAD_FUNCTION_ARGUMENT)
+    /* that should have failed */
+    return 1;
+
+  return 0;
+}
+
 int test(char *URL)
 {
   int res;
@@ -263,6 +278,9 @@ int test(char *URL)
   res = once(URL, TRUE); /* old */
   if(!res)
     res = once(URL, FALSE); /* new */
+
+  if(!res)
+    res = add_itself();
 
   curl_global_cleanup();
 

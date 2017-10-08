@@ -26,6 +26,8 @@
 
 #include "mime.h"
 #include "non-ascii.h"
+#include "urldata.h"
+#include "sendf.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
     !defined(CURL_DISABLE_IMAP)
@@ -1395,6 +1397,11 @@ CURLcode curl_mime_subparts(curl_mimepart *part,
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(subparts == part->parent) {
+    failf(part->parent->easy, "Can't add itself as a subpart!");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   /* Accept setting twice the same subparts. */
   if(part->kind == MIMEKIND_MULTIPART && part->arg == subparts)
