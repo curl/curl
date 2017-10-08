@@ -26,6 +26,8 @@
 
 #include "mime.h"
 #include "non-ascii.h"
+#include "urldata.h"
+#include "sendf.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
     !defined(CURL_DISABLE_IMAP)
@@ -1409,6 +1411,8 @@ CURLcode curl_mime_data_cb(curl_mimepart *part, curl_off_t datasize,
 CURLcode Curl_mime_set_subparts(curl_mimepart *part,
                                 curl_mime *subparts, int take_ownership)
 {
+  curl_mime *root;
+
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -1426,6 +1430,17 @@ CURLcode Curl_mime_set_subparts(curl_mimepart *part,
     /* Should not have been attached already. */
     if(subparts->parent)
       return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    /* Should not be the part's root. */
+    root = part->parent;
+    if(root) {
+      while(root->parent && root->parent->parent)
+        root = root->parent->parent;
+      if(subparts == root) {
+        failf(part->easy, "Can't add itself as a subpart!");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+    }
 
     subparts->parent = part;
     part->readfunc = mime_subparts_read;
