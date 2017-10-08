@@ -1082,7 +1082,6 @@ static void cleanup_part_content(curl_mimepart *part)
   part->data = NULL;
   part->fp = NULL;
   part->datasize = (curl_off_t) 0;    /* No size yet. */
-  part->encoder = NULL;
   cleanup_encoder_state(&part->encstate);
   part->kind = MIMEKIND_NONE;
 }
