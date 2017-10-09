@@ -1647,10 +1647,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
       fi
     fi
 
-    if test X"$OPENSSL_ENABLED" = X"1"; then
-       dnl is there a pkcs12.h header present?
-       AC_CHECK_HEADERS(openssl/pkcs12.h)
-    else
+    if test X"$OPENSSL_ENABLED" != X"1"; then
        LIBS="$CLEANLIBS"
     fi
 
