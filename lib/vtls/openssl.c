@@ -153,14 +153,13 @@ static unsigned long OpenSSL_version_num(void)
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
- * BoringSSL: supported since d28f59c27bac (committed 2015-11-19), the
- *            BORINGSSL_201512 macro from 2016-01-21 should be close enough.
+ * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
  * LibreSSL: unsupported in at least 2.5.1 (explicitly check for it since it
  *           lies and pretends to be OpenSSL 2.0.0).
  */
 #if (OPENSSL_VERSION_NUMBER >= 0x10101000L && \
      !defined(LIBRESSL_VERSION_NUMBER)) || \
-    defined(BORINGSSL_201512)
+    defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_KEYLOG_CALLBACK
 #endif
 
