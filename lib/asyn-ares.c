@@ -539,6 +539,13 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
 #endif /* CURLRES_IPV6 */
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+  /* Return an IP address quickly instead. */
+  if(Curl_inet_pton(AF_INET, "127.0.0.1", &in) > 0) {
+    return Curl_ip2addr(AF_INET, &in, "127.0.0.1", port);
+  }
+#endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
+
   bufp = strdup(hostname);
   if(bufp) {
     struct ResolverResults *res = NULL;
