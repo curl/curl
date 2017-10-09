@@ -93,6 +93,8 @@ before_script:
 
 script:
     - |
+        # Uncomment this when `coverage` runs on Trusty.
+        # set -eo pipefail
         if [ "$T" = "coverage" ]; then
              export CC="gcc-4.8"
              ./configure --enable-debug --disable-shared --enable-code-coverage
@@ -105,18 +107,21 @@ script:
              coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
         fi
     - |
+        set -eo pipefail
         if [ "$T" = "debug" ]; then
              ./configure --enable-debug --enable-werror $C
              make && make examples
              make TFLAGS=-n test-nonflaky
         fi
     - |
+        set -eo pipefail
         if [ "$T" = "normal" ]; then
              ./configure --enable-warnings --enable-werror $C
              make && make examples
              make test-nonflaky
         fi
     - |
+        set -eo pipefail
         if [ "$T" = "cmake" ]; then
              mkdir build
              cd build
@@ -124,6 +129,7 @@ script:
              make
         fi
     - |
+        set -eo pipefail
         if [ "$T" = "distcheck" ]; then
             ./configure
             make
@@ -155,6 +161,7 @@ script:
              make)
         fi
     - |
+        set -eo pipefail
         if [ "$T" = "fuzzer" ]; then
           # Download the fuzzer to a temporary folder
           ./tests/fuzz/download_fuzzer.sh /tmp/curl_fuzzer
