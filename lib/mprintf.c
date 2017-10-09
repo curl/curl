@@ -175,21 +175,6 @@ struct asprintf {
                    the output is not the complete data */
 };
 
-static long dprintf_DollarString(char *input, char **end)
-{
-  int number = 0;
-  while(ISDIGIT(*input)) {
-    number *= 10;
-    number += *input-'0';
-    input++;
-  }
-  if(number && ('$'==*input++)) {
-    *end = input;
-    return number;
-  }
-  return 0;
-}
-
 static bool dprintf_IsQualifierNoDollar(const char *fmt)
 {
 #if defined(MP_HAVE_INT_EXTENSIONS)
@@ -249,10 +234,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       param_num++;
 
-      this_param = dprintf_DollarString(fmt, &fmt);
-      if(0 == this_param)
-        /* we got no positional, get the next counter */
-        this_param = param_num;
+      this_param = param_num;
 
       if(this_param > max_param)
         max_param = this_param;
@@ -303,11 +285,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
             fmt++;
             param_num++;
 
-            i = dprintf_DollarString(fmt, &fmt);
-            if(i)
-              precision = i;
-            else
-              precision = param_num;
+            precision = param_num;
 
             if(precision > max_param)
               max_param = precision;
@@ -370,11 +348,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           flags |= FLAGS_WIDTHPARAM;
           param_num++;
 
-          i = dprintf_DollarString(fmt, &fmt);
-          if(i)
-            width = i;
-          else
-            width = param_num;
+          width = param_num;
           if(width > max_param)
             max_param = width;
           break;
@@ -637,15 +611,7 @@ static int dprintf_formatf(
       continue;
     }
 
-    /* If this is a positional parameter, the position must follow immediately
-       after the %, thus create a %<num>$ sequence */
-    param = dprintf_DollarString(f, &f);
-
-    if(!param)
-      param = param_num;
-    else
-      --param;
-
+    param = param_num;
     param_num++; /* increase this always to allow "%2$s %1$s %s" and then the
                     third %s will pick the 3rd argument */
 
