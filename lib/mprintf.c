@@ -162,21 +162,6 @@ struct asprintf {
                    the output is not the complete data */
 };
 
-static bool dprintf_IsQualifierNoDollar(const char *fmt)
-{
-  switch(*fmt) {
-  case '-': case '+': case ' ': case '#': case '.':
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
-  case 'h': case 'l': case 'L': case 'z': case 'q':
-  case '*': case 'O':
-    return TRUE;
-
-  default:
-    return FALSE;
-  }
-}
-
 /******************************************************************
  *
  * Pass 1:
@@ -201,6 +186,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
   while(*fmt) {
     if(*fmt++ == '%') {
+      char qual;
       if(*fmt == '%') {
         fmt++;
         continue; /* while */
@@ -228,8 +214,9 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       /* Handle the flags */
 
-      while(dprintf_IsQualifierNoDollar(fmt)) {
-        switch(*fmt++) {
+      do {
+        qual = *fmt++;
+        switch(qual) {
         case ' ':
           flags |= FLAGS_SPACE;
           break;
@@ -310,9 +297,11 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
             max_param = width;
           break;
         default:
+          fmt--;
+          qual = 0;
           break;
-        }
-      } /* switch */
+        } /* switch */
+      } while(qual);
 
       /* Handle the specifier */
 
