@@ -1188,6 +1188,9 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   if(!smtp || !pp->conn)
     return CURLE_OK;
 
+  /* Cleanup our per-request based variables */
+  Curl_safefree(smtp->custom);
+
   if(status) {
     connclose(conn, "SMTP done with bad status"); /* marked for closure */
     result = status;         /* use the already set error code */
@@ -1245,9 +1248,6 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     */
     result = smtp_block_statemach(conn);
   }
-
-  /* Cleanup our per-request based variables */
-  Curl_safefree(smtp->custom);
 
   /* Clear the transfer mode for the next request */
   smtp->transfer = FTPTRANSFER_BODY;
