@@ -576,17 +576,17 @@ sub torture {
     my $count=0;
     my @out = `$memanalyze -v $memdump`;
     for(@out) {
-        if(/^Allocations: (\d+)/) {
+        if(/^Operations: (\d+)/) {
             $count = $1;
             last;
         }
     }
     if(!$count) {
-        logmsg " found no allocs to make fail\n";
+        logmsg " found no functions to make fail\n";
         return 0;
     }
 
-    logmsg " $count allocations to make fail\n";
+    logmsg " $count functions to make fail\n";
 
     for ( 1 .. $count ) {
         my $limit = $_;
@@ -601,7 +601,7 @@ sub torture {
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
                 localtime(time());
             my $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
-            logmsg "Fail alloc no: $limit at $now\r";
+            logmsg "Fail funcion no: $limit at $now\r";
         }
 
         # make the memory allocation function number $limit return failure
@@ -610,7 +610,7 @@ sub torture {
         # remove memdump first to be sure we get a new nice and clean one
         unlink($memdump);
 
-        logmsg "*** Alloc number $limit is now set to fail ***\n" if($gdbthis);
+        logmsg "*** Function number $limit is now set to fail ***\n" if($gdbthis);
 
         my $ret = 0;
         if($gdbthis) {
@@ -655,7 +655,7 @@ sub torture {
             }
         }
         if($fail) {
-            logmsg " Failed on alloc number $limit in test.\n",
+            logmsg " Failed on function number $limit in test.\n",
             " invoke with \"-t$limit\" to repeat this single case.\n";
             stopservers($verbose);
             return 1;
@@ -5377,7 +5377,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -rf      full run time statistics
   -s       short output
   -am      automake style output PASS/FAIL: [number] [name]
-  -t[N]    torture (simulate memory alloc failures); N means fail Nth alloc
+  -t[N]    torture (simulate function failures); N means fail Nth function
   -v       verbose output
   -vc path use this curl only to verify the existing servers
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
