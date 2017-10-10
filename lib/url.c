@@ -2221,6 +2221,12 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 
     data->set.ssl.primary.verifystatus = (0 != va_arg(param, long)) ?
                                          TRUE : FALSE;
+
+    /* Update the current connection ssl_config. */
+    if(data->easy_conn) {
+      data->easy_conn->ssl_config.verifystatus =
+        data->set.ssl.primary.verifystatus;
+    }
     break;
   case CURLOPT_SSL_CTX_FUNCTION:
     /*
