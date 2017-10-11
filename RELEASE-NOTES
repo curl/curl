@@ -27,6 +27,22 @@ This release includes the following bugfixes:
  o pingpong: return error when trying to send without connection [12]
  o remove_handle: call multi_done() first, then clear dns cache pointer [13]
  o mime: be tolerant about setting twice the same header list in a part.
+ o mime: improve unbinding top multipart from easy handle.
+ o mime: avoid resetting a part's encoder when part's contents change.
+ o mime: refuse to add subparts to one of their own descendants [14]
+ o RTSP: avoid integer overflow on funny RTSP responses [15]
+ o curl: don't pass semicolons when parsing Content-Disposition [16]
+ o openssl: enable PKCS12 support for !BoringSSL [17]
+ o FAQ: s/CURLOPT_PROGRESSFUNCTION/CURLOPT_XFERINFOFUNCTION
+ o CURLOPT_NOPROGRESS.3: also refer to xferinfofunction
+ o CURLOPT_XFERINFODATA.3: fix duplicate see also
+ o test298: verify --ftp-method nowcwd with URL encoded path [18]
+ o FTP: URL decode path for dir listing in nocwd mode [19]
+ o smtp_done: fix memory leak on send failure [20]
+ o ftpserver: support case insensitive commands
+ o test950; verify SMTP with custom request
+ o openssl: don't use old BORINGSSL_YYYYMM macros [21]
+ o setopt: update current connection SSL verify params [22]
 
 This release includes the following known bugs:
 
@@ -35,10 +51,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Benbuck Nason, Dan Fandrich, Daniel Stenberg, Felix Kaiser, Javier Sixto,
-  Marcel Raad, Max Dymond, Nick Zitzmann, Patrick Monnerat, Viktor Szakáts,
-  Wyatt O'Day,
-  (11 contributors)
+  Alexey Melnichuk, Artak Galoyan, Benbuck Nason, Christian Schmitz,
+  Dan Fandrich, Daniel Stenberg, David Benjamin, Felix Kaiser, Javier Sixto,
+  Kristiyan Tsaklev, Marcel Raad, Max Dymond, Nick Zitzmann, Patrick Monnerat,
+  Viktor Szakáts, Wyatt O'Day, Zenju on github,
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -57,4 +74,12 @@ References to bug reports and discussions on issues:
  [11] = https://curl.haxx.se/bug/?i=1954
  [12] = https://curl.haxx.se/bug/?i=1953
  [13] = https://curl.haxx.se/bug/?i=1960
-
+ [14] = https://curl.haxx.se/bug/?i=1962
+ [15] = https://curl.haxx.se/bug/?i=1969
+ [16] = https://curl.haxx.se/bug/?i=1964
+ [17] = https://curl.haxx.se/bug/?i=1948
+ [18] = https://curl.haxx.se/bug/?i=1974
+ [19] = https://curl.haxx.se/bug/?i=1974
+ [20] = https://curl.haxx.se/bug/?i=1977
+ [21] = https://curl.haxx.se/bug/?i=1979
+ [22] = https://curl.haxx.se/bug/?i=1941
