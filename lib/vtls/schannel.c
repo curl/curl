@@ -129,24 +129,8 @@
  * #define failf(x, y, ...) printf(y, __VA_ARGS__)
  */
 
-/* APIs return rsa keys missing the spki header (not DER) */
-static const size_t spkiHeaderLength = 24;
-
-static const unsigned char rsa4096SpkiHeader[] = {
-                                       0x30, 0x82, 0x02, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x02, 0x0f, 0x00};
-
-static const unsigned char rsa2048SpkiHeader[] = {
-                                       0x30, 0x82, 0x01, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
-
-/* define these here if they aren't already */
 #ifndef CALG_SHA_256
-#define CALG_SHA_256 0x0000800c
+#  define CALG_SHA_256 0x0000800c
 #endif
 
 /* Structs to store Schannel handles */
@@ -1710,12 +1694,10 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CERT_CONTEXT *pCertContextServer = NULL;
-  const CERT_CHAIN_CONTEXT *pChainContext = NULL;
-  HCRYPTPROV hCryptProv = 0;
-  HCRYPTKEY hCertPubKey = NULL;
-  size_t bloblen, pubkeylen, realpubkeylen;
-  unsigned char *blob = NULL, *pubkey = NULL, *realpubkey = NULL,
-                *spkiHeader = NULL;
+  const char *x509_der;
+  int x509_der_len;
+  curl_X509certificate x509_parsed;
+  curl_asn1Element *pubkey;
 
   /* Result is returned to caller */
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
@@ -1736,122 +1718,33 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
     }
 
 
-    if(!CryptAcquireContext(&hCryptProv, NULL, NULL,
-                            /*PROV_RSA_FULL,*/
-                            PROV_RSA_AES,
-                            CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
-      failf(data, "schannel: Failed to acquire crypto context: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
-      break; /* failed */
-    }
+    if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+       (pCertContextServer->cbCertEncoded > 0)))
+      break;
 
-    /* Get the public key information for the certificate.
-     This works for RSA keys, but secp256r1 and secp384r1 gives
-     this error:
-     Unknown error (0x8009310B) - ASN1 bad tag value met.
-     */
-    if(!CryptImportPublicKeyInfo(
-        hCryptProv,
-        X509_ASN_ENCODING,
-        &pCertContextServer->pCertInfo->SubjectPublicKeyInfo,
-        &hCertPubKey)) {
-      failf(data, "schannel: Failed to import public key info: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
-      break; /* failed */
-    }
+    x509_der = pCertContextServer->pbCertEncoded;
+    x509_der_len = pCertContextServer->cbCertEncoded;
+    memset(&x509_parsed, 0, sizeof x509_parsed);
+    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
+      break;
 
-    /* export to blob */
-    if(!CryptExportKey(hCertPubKey, 0, PUBLICKEYBLOB, 0, 0, &bloblen)) {
-      failf(data, "schannel: Failed to get public key blob length: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
-      break; /* failed */
-    }
-
-    blob = malloc(bloblen);
-    if(!blob)
-      break; /* failed */
-
-    if(!CryptExportKey(hCertPubKey, 0, PUBLICKEYBLOB, 0, blob, &bloblen)) {
-      failf(data, "schannel: Failed to export public key to blob: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
-      break; /* failed */
-    }
-
-    /* export to der 
-     not sure what second arg should be,
-     X509_PUBLIC_KEY_INFO -- fails
-     RSA_CSP_PUBLICKEYBLOB -- not quite der, missing spki header bytes
-     CNG_RSA_PUBLIC_KEY_BLOB -- fails
-     PKCS_CONTENT_INFO -- fails
-     X509_SEQUENCE_OF_ANY - fails
-     CRYPT_STRING_BASE64HEADER - fails
-     */
-    if(!CryptEncodeObjectEx(X509_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, blob, 0,
-                            NULL, NULL, &pubkeylen)) {
-      failf(data, "schannel: Failed to get public key der length: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
+    pubkey = &x509_parsed.subjectPublicKeyInfo;
+    if(!pubkey->header || pubkey->end <= pubkey->header) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
       break;
     }
 
-    pubkey = malloc(pubkeylen);
-    if(!pubkey)
-      break;
-
-    if(!CryptEncodeObjectEx(X509_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, blob, 0,
-                            NULL, pubkey, &pubkeylen)) {
-      failf(data, "schannel: Failed to export public key to der: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
-      break;
+    result = Curl_pin_peer_pubkey(data,
+                                  pinnedpubkey,
+                                  (const unsigned char *)pubkey->header,
+                                  (size_t)(pubkey->end - pubkey->header));
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key!");
     }
-
-    FILE *fp;
-    fp=fopen("windows.key", "wb");
-    fwrite(pubkey, sizeof(pubkey[0]), pubkeylen, fp);
-    fclose(fp);
-
-    switch(pubkeylen) {
-      case 526:
-        /* 4096 bit RSA pubkeylen == 526 */
-        spkiHeader = rsa4096SpkiHeader;
-        break;
-      case 270:
-        /* 2048 bit RSA pubkeylen == 270 */
-        spkiHeader = rsa2048SpkiHeader;
-        break;
-      default:
-        infof(data, "SSL: unhandled public key length: %d\n", pubkeylen);
-        continue; /* break from loop */
-    }
-
-    realpubkeylen = pubkeylen + spkiHeaderLength;
-    realpubkey = malloc(realpubkeylen);
-    if(!realpubkey)
-      break;
-
-    memcpy(realpubkey, spkiHeader, spkiHeaderLength);
-    memcpy(realpubkey + spkiHeaderLength, pubkey, pubkeylen);
-
-    fp=fopen("windows.real.key", "wb");
-    fwrite(realpubkey, sizeof(realpubkey[0]), realpubkeylen, fp);
-    fclose(fp);
-
-    /* The one good exit point */
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey, realpubkey,
-                                  realpubkeylen);
   } while(0);
-
-  if(pChainContext)
-    CertFreeCertificateChain(pChainContext);
 
   if(pCertContextServer)
     CertFreeCertificateContext(pCertContextServer);
-
-  if(hCryptProv != 0)
-    CryptReleaseContext(hCryptProv, 0UL);
-
-  Curl_safefree(blob);
-  Curl_safefree(pubkey);
-  Curl_safefree(realpubkey);
 
   return result;
 }
