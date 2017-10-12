@@ -33,7 +33,13 @@ int test(char *URL)
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
 
-  memset(buffer, 'z', sizeof(buffer));
+  /* create a buffer with AAAA...BBBBB...CCCC...etc */
+  int i;
+  int size = (int)sizeof(buffer)/1000;
+
+  for(i = 0; i < size ; i++)
+    memset(&buffer[i * 1000], 65 + i, 1000);
+
   buffer[ sizeof(buffer)-1] = 0; /* zero terminate */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
