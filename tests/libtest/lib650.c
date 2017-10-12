@@ -68,10 +68,14 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* Check proper name and data copying. */
+  /* Check proper name and data copying, as well as headers. */
+  headers = curl_slist_append(headers, "X-customheader-1: Header 1 data");
+  headers = curl_slist_append(headers, "X-customheader-2: Header 2 data");
+  headers = curl_slist_append(headers, "Content-Type: text/plain");
   formrc = curl_formadd(&formpost, &lastptr,
                         CURLFORM_COPYNAME, &name,
                         CURLFORM_COPYCONTENTS, &data,
+                        CURLFORM_CONTENTHEADER, headers,
                         CURLFORM_END);
 
   if(formrc)
@@ -113,18 +117,15 @@ int test(char *URL)
   if(formrc)
     printf("curl_formadd(3) = %d\n", (int) formrc);
 
-  /* Check data from file content and headers. */
-  headers = curl_slist_append(headers, "X-customheader-1: Header 1 data");
-  headers = curl_slist_append(headers, "X-customheader-2: Header 2 data");
+  /* Check data from file content. */
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_COPYNAME, "filecontents",
                         CURLFORM_FILECONTENT, libtest_arg2,
-                        CURLFORM_CONTENTHEADER, headers,
                         CURLFORM_END);
 
   if(formrc)
-    printf("curl_formadd(3) = %d\n", (int) formrc);
+    printf("curl_formadd(4) = %d\n", (int) formrc);
 
   /* Measure the current form length.
    * This is done before including stdin data because we want to reuse it
@@ -148,7 +149,7 @@ int test(char *URL)
                         CURLFORM_END);
 
   if(formrc)
-    printf("curl_formadd(4) = %d\n", (int) formrc);
+    printf("curl_formadd(5) = %d\n", (int) formrc);
 
   curl = curl_easy_init();
   if(!curl) {

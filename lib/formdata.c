@@ -907,7 +907,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
         result = curl_mime_headers(part, file->contentheader, 0);
 
       /* Set the content type. */
-      if(!result &&file->contenttype)
+      if(!result && file->contenttype)
         result = curl_mime_type(part, file->contenttype);
 
       /* Set field name. */

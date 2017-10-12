@@ -1619,7 +1619,7 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
 {
   curl_mime *mime = NULL;
   const char *boundary = NULL;
-  char *s;
+  char *customct;
   const char *cte = NULL;
   CURLcode ret = CURLE_OK;
 
@@ -1631,12 +1631,14 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
   if(part->state.state == MIMESTATE_CURLHEADERS)
     mimesetstate(&part->state, MIMESTATE_CURLHEADERS, NULL);
 
-  /* Build the content-type header. */
-  s = search_header(part->userheaders, "Content-Type");
-  if(s)
-    contenttype = s;
-  if(part->mimetype)
-    contenttype = part->mimetype;
+  /* Check if content type is specified. */
+  customct = part->mimetype;
+  if(!customct)
+    customct = search_header(part->userheaders, "Content-Type");
+  if(customct)
+    contenttype = customct;
+
+  /* If content type is not specified, try to determine it. */
   if(!contenttype) {
     switch(part->kind) {
     case MIMEKIND_MULTIPART:
@@ -1660,7 +1662,8 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
     if(mime)
       boundary = mime->boundary;
   }
-  else if(contenttype && strcasecompare(contenttype, "text/plain"))
+  else if(contenttype && !customct &&
+          strcasecompare(contenttype, "text/plain"))
     if(strategy == MIMESTRATEGY_MAIL || !part->filename)
       contenttype = NULL;
 
