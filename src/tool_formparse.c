@@ -31,9 +31,20 @@
 #include "tool_cfgable.h"
 #include "tool_convert.h"
 #include "tool_msgs.h"
+#include "tool_binmode.h"
 #include "tool_formparse.h"
 
 #include "memdebug.h" /* keep this as LAST include */
+
+#define STDIN_BUFSIZE 0x4000   /* Always have 16K to read more stdin data. */
+
+/* Stdin parameters. */
+typedef struct {
+  char *data;  /* Memory data. */
+  curl_off_t origin;  /* File read origin offset. */
+  curl_off_t size; /* Data size. */
+  curl_off_t curpos; /* Current read position. */
+}  standard_input;
 
 
 /*
@@ -372,16 +383,146 @@ static int get_param_part(struct OperationConfig *config, char **str,
   return sep & 0xFF;
 }
 
-/* Check if file is "-". If so, use a callback to read OUR stdin (to
+
+/* Mime part callbacks for stdin. */
+static size_t stdin_read(char *buffer, size_t size, size_t nitems, void *arg)
+{
+  standard_input *sip = (standard_input *) arg;
+  curl_off_t bytesleft;
+  (void) size;  /* Always 1: ignored. */
+
+  if(sip->curpos >= sip->size)
+    return 0;  /* At eof. */
+  bytesleft = sip->size - sip->curpos;
+  if((curl_off_t) nitems > bytesleft)
+    nitems = (size_t) bytesleft;
+  if(sip->data) {
+    /* Return data from memory. */
+    memcpy(buffer, sip->data + (size_t) sip->curpos, nitems);
+  }
+  else {
+    /* Read from stdin. */
+    nitems = fread(buffer, 1, nitems, stdin);
+  }
+  sip->curpos += nitems;
+  return nitems;
+}
+
+static int stdin_seek(void *instream, curl_off_t offset, int whence)
+{
+  standard_input *sip = (standard_input *) instream;
+
+  switch(whence) {
+  case SEEK_CUR:
+    offset += sip->curpos;
+    break;
+  case SEEK_END:
+    offset += sip->size;
+    break;
+  }
+  if(offset < 0)
+    return CURL_SEEKFUNC_CANTSEEK;
+  if(!sip->data) {
+    if(fseek(stdin, offset + sip->origin, SEEK_SET))
+      return CURL_SEEKFUNC_CANTSEEK;
+  }
+  sip->curpos = offset;
+  return CURL_SEEKFUNC_OK;
+}
+
+static void stdin_free(void *ptr)
+{
+  standard_input *sip = (standard_input *) ptr;
+
+  Curl_safefree(sip->data);
+  free(sip);
+}
+
+/* Set a part's data from a file, taking care about the pseudo filename "-" as
+ * a shortcut to read stdin: if so, use a callback to read OUR stdin (to
  * workaround Windows DLL file handle caveat).
- * Else use curl_mime_filedata(). */
+ * If stdin is a regular file opened in binary mode, save current offset as
+ * origin for rewind and do not buffer data. Else read to EOF and keep in
+ * memory. In all cases, compute the stdin data size.
+ */
 static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
 {
+  standard_input *sip = NULL;
+  int fd = -1;
+  CURLcode result = CURLE_OK;
+  struct stat sbuf;
+
   if(strcmp(file, "-"))
     return curl_mime_filedata(part, file);
 
-  return curl_mime_data_cb(part, -1, (curl_read_callback) fread,
-                           (curl_seek_callback) fseek, NULL, stdin);
+  sip = (standard_input *) malloc(sizeof *sip);
+  if(!sip)
+    return CURLE_OUT_OF_MEMORY;
+
+  memset((char *) sip, 0, sizeof *sip);
+  set_binmode(stdin);
+
+  /* If stdin is a regular file, do not buffer data but read it when needed. */
+  fd = fileno(stdin);
+  sip->origin = ftell(stdin);
+  if(fd >= 0 && sip->origin >= 0 && !fstat(fd, &sbuf) &&
+#ifdef __VMS
+     sbuf.st_fab_rfm != FAB$C_VAR && sbuf.st_fab_rfm != FAB$C_VFC &&
+#endif
+     S_ISREG(sbuf.st_mode)) {
+    sip->size = sbuf.st_size - sip->origin;
+    if(sip->size < 0)
+      sip->size = 0;
+  }
+  else {
+    /* Not suitable for direct use, buffer stdin data. */
+    sip->origin = 0;
+    sip->size = 0;
+    sip->curpos = STDIN_BUFSIZE;
+    sip->data = malloc(STDIN_BUFSIZE);
+    if(!sip->data) {
+      stdin_free(sip);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    for(;;) {
+      size_t wantbytes = (size_t) (sip->curpos - sip->size);
+      size_t havebytes = fread(sip->data + (size_t) sip->size, 1, wantbytes,
+                               stdin);
+      char *p;
+
+      sip->size += havebytes;
+      if(ferror(stdin)) {
+        stdin_free(sip);
+        return CURLE_READ_ERROR;
+      }
+      if(!havebytes || feof(stdin))
+        break;
+
+      /* Enlarge data buffer. */
+      p = realloc(sip->data, (size_t) sip->size + STDIN_BUFSIZE);
+      if(!p) {
+        stdin_free(sip);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      sip->data = p;
+      sip->curpos = sip->size + STDIN_BUFSIZE;
+    }
+    /* Shrink buffer to spare memory resources. */
+    if(sip->size < sip->curpos)
+      sip->data = realloc(sip->data, (size_t) sip->size);
+  }
+  sip->curpos = 0;  /* Rewind. */
+
+  /* Set remote file name. */
+  result = curl_mime_filename(part, file);
+
+  /* Set part's data from callback. */
+  if(!result)
+    result = curl_mime_data_cb(part, sip->size,
+                               stdin_read, stdin_seek, stdin_free, sip);
+  if(result)
+    stdin_free(sip);
+  return result;
 }
 
 
@@ -650,7 +791,7 @@ int formparse(struct OperationConfig *config,
       if(*contp == '<' && !literal_value) {
         ++contp;
         sep = get_param_part(config, &contp,
-                             &data, &type, &filename, &encoder, &headers);
+                             &data, &type, NULL, &encoder, &headers);
         if(sep < 0) {
           Curl_safefree(contents);
           return 21;
