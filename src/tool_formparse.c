@@ -423,7 +423,7 @@ static int stdin_seek(void *instream, curl_off_t offset, int whence)
   if(offset < 0)
     return CURL_SEEKFUNC_CANTSEEK;
   if(!sip->data) {
-    if(fseek(stdin, offset + sip->origin, SEEK_SET))
+    if(fseek(stdin, (long) (offset + sip->origin), SEEK_SET))
       return CURL_SEEKFUNC_CANTSEEK;
   }
   sip->curpos = offset;
@@ -450,7 +450,7 @@ static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
   standard_input *sip = NULL;
   int fd = -1;
   CURLcode result = CURLE_OK;
-  struct stat sbuf;
+  struct_stat sbuf;
 
   if(strcmp(file, "-"))
     return curl_mime_filedata(part, file);
