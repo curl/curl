@@ -32,11 +32,11 @@
 #include "tool_convert.h"
 #include "tool_msgs.h"
 #include "tool_binmode.h"
+#include "tool_getparam.h"
+#include "tool_paramhlp.h"
 #include "tool_formparse.h"
 
 #include "memdebug.h" /* keep this as LAST include */
-
-#define STDIN_BUFSIZE 0x4000   /* Always have 16K to read more stdin data. */
 
 /* Stdin parameters. */
 typedef struct {
@@ -474,47 +474,24 @@ static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
     if(sip->size < 0)
       sip->size = 0;
   }
-  else {
-    /* Not suitable for direct use, buffer stdin data. */
+  else {  /* Not suitable for direct use, buffer stdin data. */
+    size_t stdinsize = 0;
+
     sip->origin = 0;
-    sip->size = 0;
-    sip->curpos = STDIN_BUFSIZE;
-    sip->data = malloc(STDIN_BUFSIZE);
-    if(!sip->data) {
-      stdin_free(sip);
-      return CURLE_OUT_OF_MEMORY;
+    if(file2memory(&sip->data, &stdinsize, stdin) != PARAM_OK)
+      result = CURLE_OUT_OF_MEMORY;
+    else {
+      if(!stdinsize)
+        sip->data = NULL;  /* Has been freed if no data. */
+      sip->size = stdinsize;
+      if(ferror(stdin))
+        result = CURLE_READ_ERROR;
     }
-    for(;;) {
-      size_t wantbytes = (size_t) (sip->curpos - sip->size);
-      size_t havebytes = fread(sip->data + (size_t) sip->size, 1, wantbytes,
-                               stdin);
-      char *p;
-
-      sip->size += havebytes;
-      if(ferror(stdin)) {
-        stdin_free(sip);
-        return CURLE_READ_ERROR;
-      }
-      if(!havebytes || feof(stdin))
-        break;
-
-      /* Enlarge data buffer. */
-      p = realloc(sip->data, (size_t) sip->size + STDIN_BUFSIZE);
-      if(!p) {
-        stdin_free(sip);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      sip->data = p;
-      sip->curpos = sip->size + STDIN_BUFSIZE;
-    }
-    /* Shrink buffer to spare memory resources. */
-    if(sip->size < sip->curpos)
-      sip->data = realloc(sip->data, (size_t) sip->size);
   }
-  sip->curpos = 0;  /* Rewind. */
 
   /* Set remote file name. */
-  result = curl_mime_filename(part, file);
+  if(!result)
+    result = curl_mime_filename(part, file);
 
   /* Set part's data from callback. */
   if(!result)
