@@ -43,6 +43,25 @@ To download the very latest source off the Git server do this:
 
 (you'll get a directory named curl created, filled with the source code)
 
+
+## Simple installation alternatives:
+
+MacOS/OSX with [Homebrew](https://brew.sh/):
+
+    brew install curl
+
+Debian/Ubuntu:
+
+    apt-get install curl
+
+Arch:
+
+    pacman -S curl
+
+NixOS (or using its pacakge manager [Nix](https://nixos.org/nix/) which can be installed on any Linux distribution:
+
+    nix-env -i curl
+    
 ## Notice
 
 Curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
