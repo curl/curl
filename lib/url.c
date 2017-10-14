@@ -721,13 +721,14 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
   char *argptr;
   CURLcode result = CURLE_OK;
   long arg;
-#ifndef CURL_DISABLE_HTTP
   curl_off_t bigsize;
-#endif
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
-    data->set.dns_cache_timeout = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.dns_cache_timeout = arg;
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     /* remember we want this enabled */
@@ -765,7 +766,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Set the absolute number of maximum simultaneous alive connection that
      * libcurl is allowed to have.
      */
-    data->set.maxconnects = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.maxconnects = arg;
     break;
   case CURLOPT_FORBID_REUSE:
     /*
@@ -876,7 +880,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * before it is considered failure. For pingpong protocols.
      */
     arg = va_arg(param, long);
-    if((arg>=0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg < (INT_MAX/1000)))
       data->set.server_response_timeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -892,7 +896,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * TFTP option that specifies the block size to use for data transmission.
      */
-    data->set.tftp_blksize = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.tftp_blksize = arg;
     break;
   case CURLOPT_DIRLISTONLY:
     /*
@@ -911,13 +918,19 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * How do access files over FTP.
      */
-    data->set.ftp_filemethod = (curl_ftpfile)va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURLFTPMETHOD_DEFAULT) || (arg > CURLFTPMETHOD_SINGLECWD))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.ftp_filemethod = (curl_ftpfile)arg;
     break;
   case CURLOPT_NETRC:
     /*
      * Parse the $HOME/.netrc file
      */
-    data->set.use_netrc = (enum CURL_NETRC_OPTION)va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURL_NETRC_IGNORED) || (arg > CURL_NETRC_REQUIRED))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.use_netrc = (enum CURL_NETRC_OPTION)arg;
     break;
   case CURLOPT_NETRC_FILE:
     /*
@@ -940,7 +953,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Set HTTP time condition. This must be one of the defines in the
      * curl/curl.h header file.
      */
-    data->set.timecondition = (curl_TimeCond)va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURL_TIMECOND_NONE) || (arg > CURL_TIMECOND_LASTMOD))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.timecondition = (curl_TimeCond)arg;
     break;
   case CURLOPT_TIMEVALUE:
     /*
@@ -956,6 +972,8 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     arg = va_arg(param, long);
+    if((arg < CURL_SSLVERSION_DEFAULT) || (arg > CURL_SSLVERSION_TLSv1_3))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ssl.primary.version = C_SSLVERSION_VALUE(arg);
     data->set.ssl.primary.version_max = C_SSLVERSION_MAX_VALUE(arg);
 #else
@@ -969,6 +987,8 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     arg = va_arg(param, long);
+    if((arg < CURL_SSLVERSION_DEFAULT) || (arg > CURL_SSLVERSION_TLSv1_3))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.proxy_ssl.primary.version = C_SSLVERSION_VALUE(arg);
     data->set.proxy_ssl.primary.version_max = C_SSLVERSION_MAX_VALUE(arg);
 #else
@@ -1026,7 +1046,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * The maximum amount of hops you allow curl to follow Location:
      * headers. This should mostly be used to detect never-ending loops.
      */
-    data->set.maxredirs = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.maxredirs = arg;
     break;
 
   case CURLOPT_POSTREDIR:
@@ -1041,6 +1064,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * other - POST is kept as POST after 301 and 302
      */
     arg = va_arg(param, long);
+    if(arg < CURL_REDIR_GET_ALL)
+      /* no return error on too high numbers since the bitmask could be
+         extended in a future */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.keep_post = arg & CURL_REDIR_POST_ALL;
   }
   break;
@@ -1120,6 +1147,8 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * figure it out. Enables binary posts.
      */
     bigsize = va_arg(param, long);
+    if(bigsize < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
 
     if(data->set.postfieldsize < bigsize &&
        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
@@ -1369,8 +1398,13 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * the listed enums in curl/curl.h.
      */
     arg = va_arg(param, long);
+    if(arg < CURL_HTTP_VERSION_NONE)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
 #ifndef USE_NGHTTP2
     if(arg >= CURL_HTTP_VERSION_2)
+      return CURLE_UNSUPPORTED_PROTOCOL;
+#else
+    if(arg > CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
     data->set.httpversion = arg;
@@ -1381,7 +1415,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Time to wait for a response to a HTTP request containing an
      * Expect: 100-continue header before sending the data anyway.
      */
-    data->set.expect_100_timeout = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.expect_100_timeout = arg;
     break;
 
 #endif   /* CURL_DISABLE_HTTP */
@@ -1463,7 +1500,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Explicitly set HTTP proxy port number.
      */
-    data->set.proxyport = va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < 0) || (arg > 65535))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.proxyport = arg;
     break;
 
   case CURLOPT_PROXYAUTH:
@@ -1546,7 +1586,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Set proxy type. HTTP/HTTP_1_0/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
      */
-    data->set.proxytype = (curl_proxytype)va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURLPROXY_HTTP) || (arg > CURLPROXY_SOCKS5_HOSTNAME))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.proxytype = (curl_proxytype)arg;
     break;
 
   case CURLOPT_PROXY_TRANSFER_MODE:
@@ -1645,7 +1688,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_FTP_SSL_CCC:
-    data->set.ftp_ccc = (curl_ftpccc)va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURLFTPSSL_CCC_NONE) || (arg > CURLFTPSSL_CCC_ACTIVE))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.ftp_ccc = (curl_ftpccc)arg;
     break;
 
   case CURLOPT_FTP_SKIP_PASV_IP:
@@ -1668,42 +1714,60 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * If known, this should inform curl about the file size of the
      * to-be-uploaded file.
      */
-    data->set.filesize = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.filesize = arg;
     break;
   case CURLOPT_INFILESIZE_LARGE:
     /*
      * If known, this should inform curl about the file size of the
      * to-be-uploaded file.
      */
-    data->set.filesize = va_arg(param, curl_off_t);
+    bigsize = va_arg(param, curl_off_t);
+    if(bigsize < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.filesize = bigsize;
     break;
   case CURLOPT_LOW_SPEED_LIMIT:
     /*
      * The low speed limit that if transfers are below this for
      * CURLOPT_LOW_SPEED_TIME, the transfer is aborted.
      */
-    data->set.low_speed_limit = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.low_speed_limit = arg;
     break;
   case CURLOPT_MAX_SEND_SPEED_LARGE:
     /*
      * When transfer uploads are faster then CURLOPT_MAX_SEND_SPEED_LARGE
      * bytes per second the transfer is throttled..
      */
-    data->set.max_send_speed = va_arg(param, curl_off_t);
+    bigsize = va_arg(param, curl_off_t);
+    if(bigsize < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.max_send_speed = bigsize;
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
      * When receiving data faster than CURLOPT_MAX_RECV_SPEED_LARGE bytes per
      * second the transfer is throttled..
      */
-    data->set.max_recv_speed = va_arg(param, curl_off_t);
+    bigsize = va_arg(param, curl_off_t);
+    if(bigsize < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.max_recv_speed = bigsize;
     break;
   case CURLOPT_LOW_SPEED_TIME:
     /*
      * The low speed time that if transfers are below the set
      * CURLOPT_LOW_SPEED_LIMIT during this time, the transfer is aborted.
      */
-    data->set.low_speed_time = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.low_speed_time = arg;
     break;
   case CURLOPT_URL:
     /*
@@ -1722,7 +1786,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * The port number to use when getting the URL
      */
-    data->set.use_port = va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < 0) || (arg > 65535))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.use_port = arg;
     break;
   case CURLOPT_TIMEOUT:
     /*
@@ -1730,14 +1797,17 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * operation.
      */
     arg = va_arg(param, long);
-    if((arg>=0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg < (INT_MAX/1000)))
       data->set.timeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_TIMEOUT_MS:
-    data->set.timeout = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.timeout = arg;
     break;
 
   case CURLOPT_CONNECTTIMEOUT:
@@ -1745,21 +1815,27 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * The maximum time you allow curl to use to connect.
      */
     arg = va_arg(param, long);
-    if((arg>=0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg < (INT_MAX/1000)))
       data->set.connecttimeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 
   case CURLOPT_CONNECTTIMEOUT_MS:
-    data->set.connecttimeout = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.connecttimeout = arg;
     break;
 
   case CURLOPT_ACCEPTTIMEOUT_MS:
     /*
      * The maximum time you allow curl to wait for server connect
      */
-    data->set.accepttimeout = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.accepttimeout = arg;
     break;
 
   case CURLOPT_USERPWD:
@@ -1908,13 +1984,19 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Resume transfer at the given file position
      */
-    data->set.set_resume_from = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < -1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.set_resume_from = arg;
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*
      * Resume transfer at the given file position
      */
-    data->set.set_resume_from = va_arg(param, curl_off_t);
+    bigsize = va_arg(param, curl_off_t);
+    if(bigsize < -1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.set_resume_from = bigsize;
     break;
   case CURLOPT_DEBUGFUNCTION:
     /*
@@ -2143,9 +2225,12 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_GSSAPI_DELEGATION:
     /*
-     * GSS-API credential delegation
+     * GSS-API credential delegation bitmask
      */
-    data->set.gssapi_delegation = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < CURLGSSAPI_DELEGATION_NONE)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.gssapi_delegation = arg;
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*
@@ -2488,7 +2573,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Set the maximum size of a file to download.
      */
-    data->set.max_filesize = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.max_filesize = arg;
     break;
 
 #ifdef USE_SSL
@@ -2496,7 +2584,10 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Make transfers attempt to use SSL/TLS.
      */
-    data->set.use_ssl = (curl_usessl)va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURLUSESSL_NONE) || (arg > CURLUSESSL_ALL))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.use_ssl = (curl_usessl)arg;
     break;
 
   case CURLOPT_SSL_OPTIONS:
@@ -2516,18 +2607,27 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Set a specific auth for FTP-SSL transfers.
      */
-    data->set.ftpsslauth = (curl_ftpauth)va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURLFTPAUTH_DEFAULT) || (arg > CURLFTPAUTH_TLS))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.ftpsslauth = (curl_ftpauth)arg;
     break;
 
   case CURLOPT_IPRESOLVE:
-    data->set.ipver = va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < CURL_IPRESOLVE_WHATEVER) || (arg > CURL_IPRESOLVE_V6))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.ipver = arg;
     break;
 
   case CURLOPT_MAXFILESIZE_LARGE:
     /*
      * Set the maximum size of a file to download.
      */
-    data->set.max_filesize = va_arg(param, curl_off_t);
+    bigsize = va_arg(param, curl_off_t);
+    if(bigsize < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.max_filesize = bigsize;
     break;
 
   case CURLOPT_TCP_NODELAY:
@@ -2612,6 +2712,9 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 #ifdef USE_LIBSSH2
     /* we only include SSH options if explicitly built to support SSH */
   case CURLOPT_SSH_AUTH_TYPES:
+    arg = va_arg(param, long);
+    if(arg < CURLSSH_AUTH_NONE)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ssh_auth_types = va_arg(param, long);
     break;
 
@@ -2681,14 +2784,20 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     /*
      * Uses these permissions instead of 0644
      */
-    data->set.new_file_perms = va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < 0) || (arg > 0777))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.new_file_perms = arg;
     break;
 
   case CURLOPT_NEW_DIRECTORY_PERMS:
     /*
      * Uses these permissions instead of 0755
      */
-    data->set.new_directory_perms = va_arg(param, long);
+    arg = va_arg(param, long);
+    if((arg < 0) || (arg > 0777))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.new_directory_perms = arg;
     break;
 
   case CURLOPT_ADDRESS_SCOPE:
@@ -2935,10 +3044,16 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     data->set.tcp_keepalive = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   case CURLOPT_TCP_KEEPIDLE:
-    data->set.tcp_keepidle = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.tcp_keepidle = arg;
     break;
   case CURLOPT_TCP_KEEPINTVL:
-    data->set.tcp_keepintvl = va_arg(param, long);
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.tcp_keepintvl = arg;
     break;
   case CURLOPT_TCP_FASTOPEN:
 #if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN)
