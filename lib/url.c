@@ -880,7 +880,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * before it is considered failure. For pingpong protocols.
      */
     arg = va_arg(param, long);
-    if((arg>=0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg < (INT_MAX/1000)))
       data->set.server_response_timeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1587,7 +1587,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Set proxy type. HTTP/HTTP_1_0/SOCKS4/SOCKS4a/SOCKS5/SOCKS5_HOSTNAME
      */
     arg = va_arg(param, long);
-    if((arg < CURLPROTO_HTTP) || (arg > CURLPROXY_SOCKS5_HOSTNAME))
+    if((arg < CURLPROXY_HTTP) || (arg > CURLPROXY_SOCKS5_HOSTNAME))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.proxytype = (curl_proxytype)arg;
     break;
@@ -1797,7 +1797,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * operation.
      */
     arg = va_arg(param, long);
-    if((arg>=0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg < (INT_MAX/1000)))
       data->set.timeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1815,7 +1815,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * The maximum time you allow curl to use to connect.
      */
     arg = va_arg(param, long);
-    if((arg>=0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg < (INT_MAX/1000)))
       data->set.connecttimeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
