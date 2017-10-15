@@ -1985,7 +1985,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Resume transfer at the given file position
      */
     arg = va_arg(param, long);
-    if(arg < 0)
+    if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.set_resume_from = arg;
     break;
@@ -1994,7 +1994,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * Resume transfer at the given file position
      */
     bigsize = va_arg(param, curl_off_t);
-    if(bigsize < 0)
+    if(bigsize < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.set_resume_from = bigsize;
     break;
