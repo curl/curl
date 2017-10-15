@@ -22,7 +22,7 @@
 
 ###########################################################################
 #
-## Makefile for building curl.exe with MingW (GCC-3.2 or later)
+## Makefile for building curl.exe with MingW (GCC-3.2 or later or LLVM/Clang)
 ## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
@@ -88,12 +88,19 @@ ifndef LIBCARES_PATH
 LIBCARES_PATH = $(PROOT)/ares
 endif
 
-CC	= $(CROSSPREFIX)gcc
+ifeq ($(CURL_CC),)
+CURL_CC := $(CROSSPREFIX)gcc
+endif
+ifeq ($(CURL_AR),)
+CURL_AR := $(CROSSPREFIX)ar
+endif
+
+CC	= $(CURL_CC)
 CFLAGS	= $(CURL_CFLAG_EXTRAS) -g -O2 -Wall -W
 CFLAGS	+= -fno-strict-aliasing
 # comment LDFLAGS below to keep debug info
 LDFLAGS	= $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
-AR	= $(CROSSPREFIX)ar
+AR	= $(CURL_AR)
 RC	= $(CROSSPREFIX)windres
 RCFLAGS	= --include-dir=$(PROOT)/include -O COFF
 STRIP	= $(CROSSPREFIX)strip -g
