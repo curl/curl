@@ -19,6 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include <curl/curl.h>
 #include "tool_setup.h"
 
 #include "strcase.h"
@@ -94,30 +95,36 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
      url && (checkprefix("http://", url) || checkprefix("https://", url))) {
     const char *p = str + 20;
 
-    /* look for the 'filename=' parameter
-       (encoded filenames (*=) are not supported) */
+    /* look for the 'filename=' or 'filename=*' parameters
+       encoded filenames (*=) are prioritized */
     for(;;) {
       char *filename;
       size_t len;
+      bool encoded = false;
 
       while(*p && (p < end) && !ISALPHA(*p))
         p++;
       if(p > end - 9)
         break;
 
-      if(memcmp(p, "filename=", 9)) {
-        /* no match, find next parameter */
+      if(memcmp(p, "filename", 8)) {
         while((p < end) && (*p != ';'))
           p++;
         continue;
       }
-      p += 9;
+      p += 8;
+      if (*p++ == '*') {
+          encoded = true;
+          p++;
+      }
 
       /* this expression below typecasts 'cb' only to avoid
          warning: signed and unsigned type in conditional expression
       */
       len = (ssize_t)cb - (p - str);
       filename = parse_filename(p, len);
+      if (encoded)
+        filename = curl_easy_unescape(outs->config->easy, filename, len, NULL);
       if(filename) {
         outs->filename = filename;
         outs->alloc_filename = TRUE;
@@ -126,7 +133,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         outs->fopened = FALSE;
         outs->stream = NULL;
         hdrcbdata->honor_cd_filename = FALSE;
-        break;
+        if (encoded)
+            break;
+        continue;
       }
       return failure;
     }
