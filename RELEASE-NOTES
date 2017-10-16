@@ -1,4 +1,4 @@
-Curl and libcurl 7.57.0
+Curl and libcurl 7.56.1
 
  Public curl releases:         170
  Command line options:         211
@@ -43,6 +43,17 @@ This release includes the following bugfixes:
  o test950; verify SMTP with custom request
  o openssl: don't use old BORINGSSL_YYYYMM macros [21]
  o setopt: update current connection SSL verify params [22]
+ o winbuild/BUILD.WINDOWS.txt: mention WITH_NGHTTP2
+ o curl: reimplement stdin buffering in -F option [23]
+ o mime: keep "text/plain" content type if user-specified [24]
+ o mime: fix the content reader to handle >16K data properly [25]
+ o configure: remove the C++ compiler check [26]
+ o memdebug: trace send, recv and socket [27]
+ o runtests: use valgrind for torture as well
+ o ldap: silence clang warning [28]
+ o makefile.m32: allow to override gcc, ar and ranlib [29]
+ o setopt: avoid integer overflows when setting millsecond values [30]
+ o setopt: range check most long options [31]
 
 This release includes the following known bugs:
 
@@ -53,9 +64,9 @@ advice from friends like these:
 
   Alexey Melnichuk, Artak Galoyan, Benbuck Nason, Christian Schmitz,
   Dan Fandrich, Daniel Stenberg, David Benjamin, Felix Kaiser, Javier Sixto,
-  Kristiyan Tsaklev, Marcel Raad, Max Dymond, Nick Zitzmann, Patrick Monnerat,
-  Viktor Szakáts, Wyatt O'Day, Zenju on github,
-  (17 contributors)
+  Jeroen Ooms, Kristiyan Tsaklev, Marcel Raad, Max Dymond, Nick Zitzmann,
+  Patrick Monnerat, Viktor Szakáts, Wyatt O'Day, Zenju on github,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -83,3 +94,12 @@ References to bug reports and discussions on issues:
  [20] = https://curl.haxx.se/bug/?i=1977
  [21] = https://curl.haxx.se/bug/?i=1979
  [22] = https://curl.haxx.se/bug/?i=1941
+ [23] = https://curl.haxx.se/bug/?i=1985
+ [24] = https://curl.haxx.se/bug/?i=1986
+ [25] = https://curl.haxx.se/bug/?i=1988
+ [26] = https://curl.haxx.se/bug/?i=1990
+ [27] = https://curl.haxx.se/bug/?i=1980
+ [28] = https://curl.haxx.se/bug/?i=1992
+ [29] = https://curl.haxx.se/bug/?i=1993
+ [30] = https://curl.haxx.se/bug/?i=1938
+ [31] = https://curl.haxx.se/bug/?i=1938
