@@ -241,7 +241,8 @@ _ If data compression has to be supported, ZLIB development environment must
   be installed.
 _ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
   developent environment must be installed.
-_ Install the curl source directory in IFS.
+_ Install the curl source directory in IFS. Do NOT install it in the
+  installation target directory (wich defaults to /curl).
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
