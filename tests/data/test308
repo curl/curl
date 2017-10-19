@@ -12,6 +12,7 @@ FAILURE
 <client>
 <features>
 OpenSSL
+!MultiSSL
 </features>
 <server>
 https
