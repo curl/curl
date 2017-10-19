@@ -50,8 +50,6 @@ my %urls = (
     'https://hg.mozilla.org/projects/nss/raw-file/default/lib/ckfw/builtins/certdata.txt',
   'central' =>
     'https://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
-  'aurora' =>
-    'https://hg.mozilla.org/releases/mozilla-aurora/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'beta' =>
     'https://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'release' =>
