@@ -406,7 +406,7 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
 
   while(st->bufbeg < st->bufend) {
     /* Line full ? */
-    if(st->pos >= MAX_ENCODED_LINE_LENGTH - 4) {
+    if(st->pos > MAX_ENCODED_LINE_LENGTH - 4) {
       /* Yes, we need 2 characters for CRLF. */
       if(size < 2)
         break;
@@ -421,7 +421,7 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
     if(size < 4 || st->bufend - st->bufbeg < 3)
       break;
 
-    /* Encode three bytes a four characters. */
+    /* Encode three bytes as four characters. */
     i = st->buf[st->bufbeg++] & 0xFF;
     i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
     i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
