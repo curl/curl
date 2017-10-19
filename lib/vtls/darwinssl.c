@@ -3002,7 +3002,7 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   Curl_darwinssl_connect,             /* connect */
   Curl_darwinssl_connect_nonblocking, /* connect_nonblocking */
   Curl_darwinssl_get_internals,       /* get_internals */
-  Curl_darwinssl_close,               /* close */
+  Curl_darwinssl_close,               /* close_one */
   Curl_none_close_all,                /* close_all */
   Curl_darwinssl_session_free,        /* session_free */
   Curl_none_set_engine,               /* set_engine */

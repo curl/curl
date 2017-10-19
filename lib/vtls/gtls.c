@@ -1827,7 +1827,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_gtls_connect,             /* connect */
   Curl_gtls_connect_nonblocking, /* connect_nonblocking */
   Curl_gtls_get_internals,       /* get_internals */
-  Curl_gtls_close,               /* close */
+  Curl_gtls_close,               /* close_one */
   Curl_none_close_all,           /* close_all */
   Curl_gtls_session_free,        /* session_free */
   Curl_none_set_engine,          /* set_engine */

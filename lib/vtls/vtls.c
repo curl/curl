@@ -549,7 +549,7 @@ int Curl_ssl_getsock(struct connectdata *conn,
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
-  Curl_ssl->close(conn, sockindex);
+  Curl_ssl->close_one(conn, sockindex);
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
@@ -1122,7 +1122,7 @@ static void Curl_multissl_close(struct connectdata *conn, int sockindex)
 {
   if(multissl_init(NULL))
     return;
-  Curl_ssl->close(conn, sockindex);
+  Curl_ssl->close_one(conn, sockindex);
 }
 
 static const struct Curl_ssl Curl_ssl_multi = {
@@ -1147,7 +1147,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_multissl_connect,             /* connect */
   Curl_multissl_connect_nonblocking, /* connect_nonblocking */
   Curl_multissl_get_internals,       /* get_internals */
-  Curl_multissl_close,               /* close */
+  Curl_multissl_close,               /* close_one */
   Curl_none_close_all,               /* close_all */
   Curl_none_session_free,            /* session_free */
   Curl_none_set_engine,              /* set_engine */

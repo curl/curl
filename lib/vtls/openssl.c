@@ -3637,7 +3637,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   Curl_ossl_connect,             /* connect */
   Curl_ossl_connect_nonblocking, /* connect_nonblocking */
   Curl_ossl_get_internals,       /* get_internals */
-  Curl_ossl_close,               /* close */
+  Curl_ossl_close,               /* close_one */
   Curl_ossl_close_all,           /* close_all */
   Curl_ossl_session_free,        /* session_free */
   Curl_ossl_set_engine,          /* set_engine */

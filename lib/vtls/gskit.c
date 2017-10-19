@@ -1375,7 +1375,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_gskit_connect,             /* connect */
   Curl_gskit_connect_nonblocking, /* connect_nonblocking */
   Curl_gskit_get_internals,       /* get_internals */
-  Curl_gskit_close,               /* close */
+  Curl_gskit_close,               /* close_one */
   Curl_none_close_all,            /* close_all */
   /* No session handling for GSKit */
   Curl_none_session_free,         /* session_free */
