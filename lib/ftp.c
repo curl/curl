@@ -1874,8 +1874,8 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   else if((ftpc->count1 == 1) &&
           (ftpcode == 227)) {
     /* positive PASV response */
-    int ip[4];
-    int port[2];
+    unsigned int ip[4];
+    unsigned int port[2];
 
     /*
      * Scan for a sequence of six comma-separated numbers and use them as
@@ -1887,14 +1887,15 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      * "227 Entering passive mode. 127,0,0,1,4,51"
      */
     while(*str) {
-      if(6 == sscanf(str, "%d,%d,%d,%d,%d,%d",
+      if(6 == sscanf(str, "%u,%u,%u,%u,%u,%u",
                      &ip[0], &ip[1], &ip[2], &ip[3],
                      &port[0], &port[1]))
         break;
       str++;
     }
 
-    if(!*str) {
+    if(!*str || (ip[0] > 255) || (ip[1] > 255)  || (ip[2] > 255)  ||
+       (ip[3] > 255) || (port[0] > 255)  || (port[1] > 255) ) {
       failf(data, "Couldn't interpret the 227-response");
       return CURLE_FTP_WEIRD_227_FORMAT;
     }
