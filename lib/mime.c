@@ -1523,7 +1523,7 @@ curl_off_t Curl_mime_size(curl_mimepart *part)
 {
   curl_off_t size;
 
-  if(part->datasize < 0 && part->kind == MIMEKIND_MULTIPART)
+  if(part->kind == MIMEKIND_MULTIPART)
     part->datasize = multipart_size(part->arg);
 
   size = part->datasize;
