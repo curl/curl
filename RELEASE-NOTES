@@ -4,14 +4,11 @@ Curl and libcurl 7.56.1
  Command line options:         211
  curl_easy_setopt() options:   249
  Public functions in libcurl:  74
- Contributors:                 1618
-
-This release includes the following changes:
-
- o
+ Contributors:                 1626
 
 This release includes the following bugfixes:
 
+ o imap: if a FETCH response has no size, don't call write callback [32]
  o ftp: UBsan fixup 'pointer index expression overflowed [1]
  o failf: skip the sprintf() if there are no consumers [2]
  o fuzzer: move to using external curl-fuzzer [3]
@@ -54,6 +51,13 @@ This release includes the following bugfixes:
  o makefile.m32: allow to override gcc, ar and ranlib [29]
  o setopt: avoid integer overflows when setting millsecond values [30]
  o setopt: range check most long options [31]
+ o ftp: reject illegal IP/port in PASV 227 response [33]
+ o mime: do not reuse previously computed multipart size [34]
+ o vtls: change struct Curl_ssl `close' field name to `close_one'
+ o os400: add missing symbols in config file
+ o mime: limit bas64-encoded lines length to 76 characters
+ o mk-ca-bundle: Remove URL for aurora [35]
+ o mk-ca-bundle: Fix URL for NSS [36]
 
 This release includes the following known bugs:
 
@@ -62,11 +66,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexey Melnichuk, Artak Galoyan, Benbuck Nason, Christian Schmitz,
-  Dan Fandrich, Daniel Stenberg, David Benjamin, Felix Kaiser, Javier Sixto,
-  Jeroen Ooms, Kristiyan Tsaklev, Marcel Raad, Max Dymond, Nick Zitzmann,
-  Patrick Monnerat, Viktor Szakáts, Wyatt O'Day, Zenju on github,
-  (18 contributors)
+  Alexey Melnichuk, Artak Galoyan, Benbuck Nason, Brian Carpenter,
+  Christian Schmitz, Dan Fandrich, Daniel Stenberg, David Benjamin,
+  Felix Kaiser, Javier Sixto, Jeroen Ooms, Jon DeVree, Kristiyan Tsaklev,
+  Marcel Raad, Max Dymond, Nick Zitzmann, Patrick Monnerat, Viktor Szakáts,
+  Wyatt O'Day, Zenju on github, 0xd34db347
+  (21 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -103,3 +108,8 @@ References to bug reports and discussions on issues:
  [29] = https://curl.haxx.se/bug/?i=1993
  [30] = https://curl.haxx.se/bug/?i=1938
  [31] = https://curl.haxx.se/bug/?i=1938
+ [32] = https://curl.haxx.se/docs/adv_20171023.html
+ [33] = https://curl.haxx.se/bug/?i=1997
+ [34] = https://curl.haxx.se/bug/?i=1999
+ [35] = https://curl.haxx.se/bug/?i=1998
+ [36] = https://curl.haxx.se/bug/?i=1998
