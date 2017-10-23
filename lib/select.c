@@ -51,7 +51,7 @@
 #include "warnless.h"
 
 /* Convenience local macros */
-#define ELAPSED_MS()  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
+#define ELAPSED_MS() (int)curlx_timediff(curlx_tvnow(), initial_tv)
 
 int Curl_ack_eintr = 0;
 #define ERROR_NOT_EINTR(error) (Curl_ack_eintr || error != EINTR)

@@ -116,6 +116,14 @@ struct curltime curlx_tvnow(void)
 
 #endif
 
+#if SIZEOF_TIME_T < 8
+#define TIME_MAX INT_MAX
+#define TIME_MIN INT_MIN
+#else
+#define TIME_MAX 9223372036854775807LL
+#define TIME_MIN -9223372036854775807LL
+#endif
+
 /*
  * Make sure that the first argument is the more recent time, as otherwise
  * we'll get a weird negative time-diff back...
@@ -125,17 +133,15 @@ struct curltime curlx_tvnow(void)
  *
  * @unittest: 1323
  */
-time_t curlx_tvdiff(struct curltime newer, struct curltime older)
+timediff_t curlx_timediff(struct curltime newer, struct curltime older)
 {
-#if SIZEOF_TIME_T < 8
-  /* for 32bit time_t systems, add a precaution to avoid overflow for really
-     big time differences */
-  time_t diff = newer.tv_sec-older.tv_sec;
-  if(diff >= (0x7fffffff/1000))
-    return 0x7fffffff;
-#endif
-  return (newer.tv_sec-older.tv_sec)*1000+
-    (int)(newer.tv_usec-older.tv_usec)/1000;
+  timediff_t diff = newer.tv_sec-older.tv_sec;
+  if(diff >= (TIME_MAX/1000))
+    return TIME_MAX;
+  else if(diff <= (TIME_MIN/1000))
+    return TIME_MIN;
+  return (timediff_t)(newer.tv_sec-older.tv_sec)*1000+
+    (timediff_t)(newer.tv_usec-older.tv_usec)/1000;
 }
 
 /*
@@ -145,18 +151,13 @@ time_t curlx_tvdiff(struct curltime newer, struct curltime older)
  * Returns: the time difference in number of microseconds. For too large diffs
  * it returns max value.
  */
-time_t Curl_tvdiff_us(struct curltime newer, struct curltime older)
+timediff_t Curl_timediff_us(struct curltime newer, struct curltime older)
 {
-  time_t diff = newer.tv_sec-older.tv_sec;
-#if SIZEOF_TIME_T < 8
-  /* for 32bit time_t systems */
-  if(diff >= (0x7fffffff/1000000))
-    return 0x7fffffff;
-#else
-  /* for 64bit time_t systems */
-  if(diff >= (0x7fffffffffffffffLL/1000000))
-    return 0x7fffffffffffffffLL;
-#endif
-  return (newer.tv_sec-older.tv_sec)*1000000+
-    (int)(newer.tv_usec-older.tv_usec);
+  timediff_t diff = newer.tv_sec-older.tv_sec;
+  if(diff >= (TIME_MAX/1000000))
+    return TIME_MAX;
+  else if(diff <= (TIME_MIN/1000000))
+    return TIME_MIN;
+  return (timediff_t)(newer.tv_sec-older.tv_sec)*1000000+
+    (timediff_t)(newer.tv_usec-older.tv_usec);
 }

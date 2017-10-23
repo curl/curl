@@ -212,13 +212,13 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
     /* this is the normal end-of-transfer thing */
     break;
   case TIMER_REDIRECT:
-    data->progress.t_redirect = Curl_tvdiff_us(now, data->progress.start);
+    data->progress.t_redirect = Curl_timediff_us(now, data->progress.start);
     break;
   }
   if(delta) {
-    time_t us = Curl_tvdiff_us(now, data->progress.t_startsingle);
-    if(!us)
-      us++; /* make sure at least one microsecond passed */
+    timediff_t us = Curl_timediff_us(now, data->progress.t_startsingle);
+    if(us < 1)
+      us = 1; /* make sure at least one microsecond passed */
     *delta += us;
   }
 }
@@ -274,7 +274,7 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
     return -1;
 
   minimum = (time_t) (CURL_OFF_T_C(1000) * size / limit);
-  actual = Curl_tvdiff(now, start);
+  actual = curlx_timediff(now, start);
 
   if(actual < minimum)
     /* this is a conversion on some systems (64bit time_t => 32bit long) */
@@ -373,7 +373,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   now = Curl_tvnow(); /* what time is it */
 
   /* The time spent so far (from the start) */
-  data->progress.timespent = Curl_tvdiff_us(now, data->progress.start);
+  data->progress.timespent = Curl_timediff_us(now, data->progress.start);
   timespent = (curl_off_t)data->progress.timespent/1000000; /* seconds */
 
   /* The average download speed this far */
@@ -413,7 +413,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     /* first of all, we don't do this if there's no counted seconds yet */
     if(countindex) {
-      time_t span_ms;
+      timediff_t span_ms;
 
       /* Get the index position to compare with the 'nowindex' position.
          Get the oldest entry possible. While we have less than CURR_TIME
@@ -422,8 +422,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
         data->progress.speeder_c%CURR_TIME:0;
 
       /* Figure out the exact time for the time span */
-      span_ms = Curl_tvdiff(now,
-                            data->progress.speeder_time[checkindex]);
+      span_ms = curlx_timediff(now,
+                               data->progress.speeder_time[checkindex]);
       if(0 == span_ms)
         span_ms = 1; /* at least one millisecond MUST have passed */
 

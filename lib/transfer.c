@@ -1174,7 +1174,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
       */
 
-      time_t ms = Curl_tvdiff(k->now, k->start100);
+      timediff_t ms = curlx_timediff(k->now, k->start100);
       if(ms >= data->set.expect_100_timeout) {
         /* we've waited long enough, continue anyway */
         k->exp100 = EXP100_SEND_DATA;
@@ -1198,13 +1198,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         failf(data, "Operation timed out after %ld milliseconds with %"
               CURL_FORMAT_CURL_OFF_T " out of %"
               CURL_FORMAT_CURL_OFF_T " bytes received",
-              Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount,
-              k->size);
+              curlx_timediff(k->now, data->progress.t_startsingle),
+              k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %ld milliseconds with %"
               CURL_FORMAT_CURL_OFF_T " bytes received",
-              Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount);
+              curlx_timediff(k->now, data->progress.t_startsingle),
+              k->bytecount);
       }
       return CURLE_OPERATION_TIMEDOUT;
     }

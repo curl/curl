@@ -245,7 +245,7 @@ int wait_ms(int timeout_ms)
     error = errno;
     if(error && (error != EINTR))
       break;
-    pending_ms = timeout_ms - (int)curlx_tvdiff(curlx_tvnow(), initial_tv);
+    pending_ms = timeout_ms - (int)curlx_timediff(curlx_tvnow(), initial_tv);
     if(pending_ms <= 0)
       break;
   } while(r == -1);

@@ -29,9 +29,16 @@
 
 #include "curl_setup.h"
 
+#if SIZEOF_TIME_T < 8
+typedef int timediff_t;
+#else
+typedef ssize_t timediff_t;
+#endif
+
+
 struct curltime {
-  time_t       tv_sec;     /* seconds */
-  unsigned int tv_usec;    /* microseconds */
+  time_t tv_sec; /* seconds */
+  int tv_usec;   /* microseconds */
 };
 
 struct curltime curlx_tvnow(void);
@@ -42,7 +49,7 @@ struct curltime curlx_tvnow(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-time_t curlx_tvdiff(struct curltime t1, struct curltime t2);
+timediff_t curlx_timediff(struct curltime t1, struct curltime t2);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -50,12 +57,11 @@ time_t curlx_tvdiff(struct curltime t1, struct curltime t2);
  *
  * Returns: the time difference in number of microseconds.
  */
-time_t Curl_tvdiff_us(struct curltime newer, struct curltime older);
+timediff_t Curl_timediff_us(struct curltime newer, struct curltime older);
 
 /* These two defines below exist to provide the older API for library
    internals only. */
 #define Curl_tvnow() curlx_tvnow()
-#define Curl_tvdiff(x,y) curlx_tvdiff(x,y)
 
 #endif /* HEADER_CURL_TIMEVAL_H */
 
