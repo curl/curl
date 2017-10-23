@@ -2716,8 +2716,15 @@ dnl Default to compiler & linker defaults for LIBSSH2 files & libraries.
 OPT_LIBSSH2=off
 AC_ARG_WITH(libssh2,dnl
 AC_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the LIBSSH2 installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AC_HELP_STRING([--without-libssh2], [disable LIBSSH2]),
-  OPT_LIBSSH2=$withval)
+AC_HELP_STRING([--with-libssh2], [enable LIBSSH2]),
+  OPT_LIBSSH2=$withval, OPT_LIBSSH2=no)
+
+
+OPT_LIBSSH=off
+AC_ARG_WITH(libssh,dnl
+AC_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to the LIBSSH installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--with-libssh], [enable LIBSSH]),
+  OPT_LIBSSH=$withval, OPT_LIBSSH=no)
 
 if test X"$OPT_LIBSSH2" != Xno; then
   dnl backup the pre-libssh2 variables
@@ -2788,6 +2795,79 @@ if test X"$OPT_LIBSSH2" != Xno; then
     fi
   else
     dnl no libssh2, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+elif test X"$OPT_LIBSSH" != Xno; then
+  dnl backup the pre-libssh variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBSSH" in
+  yes)
+    dnl --with-libssh (without path) used
+    CURL_CHECK_PKGCONFIG(libssh)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_SSH=`$PKGCONFIG --libs-only-l libssh`
+      LD_SSH=`$PKGCONFIG --libs-only-L libssh`
+      CPP_SSH=`$PKGCONFIG --cflags-only-I libssh`
+      version=`$PKGCONFIG --modversion libssh`
+      DIR_SSH=`echo $LD_SSH | $SED -e 's/-L//'`
+    fi
+
+    ;;
+  off)
+    dnl no --with-libssh option given, just check default places
+    ;;
+  *)
+    dnl use the given --with-libssh spot
+    PREFIX_SSH=$OPT_LIBSSH
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_SSH"; then
+    LIB_SSH="-lssh"
+    LD_SSH=-L${PREFIX_SSH}/lib$libsuff
+    CPP_SSH=-I${PREFIX_SSH}/include
+    DIR_SSH=${PREFIX_SSH;}/lib$libsuff
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_SSH"
+  CPPFLAGS="$CPPFLAGS $CPP_SSH"
+  LIBS="$LIB_SSH $LIBS"
+
+  AC_CHECK_LIB(ssh, ssh_new)
+
+  AC_CHECK_HEADERS(libssh/libssh.h,
+    curl_ssh_msg="enabled (libSSH)"
+    LIBSSH_ENABLED=1
+    AC_DEFINE(USE_LIBSSH, 1, [if libSSH is in use])
+    AC_SUBST(USE_LIBSSH, [1])
+  )
+
+  if test X"$OPT_LIBSSH" != Xoff &&
+     test "$LIBSSH_ENABLED" != "1"; then
+    AC_MSG_ERROR([libSSH libs and/or directories were not found where specified!])
+  fi
+
+  if test "$LIBSSH_ENABLED" = "1"; then
+    if test -n "$DIR_SSH"; then
+       dnl when the libssh shared libs were found in a path that the run-time
+       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl to prevent further configure tests to fail due to this
+
+       if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH"
+         export LD_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_SSH to LD_LIBRARY_PATH])
+       fi
+    fi
+  else
+    dnl no libssh, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
@@ -4008,6 +4088,9 @@ fi
 if test "x$USE_LIBSSH2" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SCP"
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
+fi
+if test "x$USE_LIBSSH" = "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SCP"
 fi
 if test "x$CURL_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"

@@ -87,20 +87,8 @@
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
+#include "curl_path.h"
 #include "memdebug.h"
-
-#ifdef WIN32
-#  undef  PATH_MAX
-#  define PATH_MAX MAX_PATH
-#  ifndef R_OK
-#    define R_OK 4
-#  endif
-#endif
-
-#ifndef PATH_MAX
-#define PATH_MAX 1024 /* just an extra precaution since there are systems that
-                         have their definition hidden well */
-#endif
 
 #if LIBSSH2_VERSION_NUM >= 0x010206
 /* libssh2_sftp_statvfs and friends were added in 1.2.6 */
@@ -120,15 +108,9 @@ static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
 static LIBSSH2_FREE_FUNC(my_libssh2_free);
 
-static CURLcode get_pathname(const char **cpp, char **path);
-
 static CURLcode ssh_connect(struct connectdata *conn, bool *done);
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done);
 static CURLcode ssh_do(struct connectdata *conn, bool *done);
-
-static CURLcode ssh_getworkingpath(struct connectdata *conn,
-                                   char *homedir, /* when SFTP is used */
-                                   char **path);
 
 static CURLcode scp_done(struct connectdata *conn,
                          CURLcode, bool premature);
@@ -410,70 +392,6 @@ static void state(struct connectdata *conn, sshstate nowstate)
   sshc->state = nowstate;
 }
 
-/* figure out the path to work with in this particular request */
-static CURLcode ssh_getworkingpath(struct connectdata *conn,
-                                   char *homedir,  /* when SFTP is used */
-                                   char **path) /* returns the  allocated
-                                                   real path to work with */
-{
-  struct Curl_easy *data = conn->data;
-  char *real_path = NULL;
-  char *working_path;
-  size_t working_path_len;
-  CURLcode result =
-    Curl_urldecode(data, data->state.path, 0, &working_path,
-                   &working_path_len, FALSE);
-  if(result)
-    return result;
-
-  /* Check for /~/, indicating relative to the user's home directory */
-  if(conn->handler->protocol & CURLPROTO_SCP) {
-    real_path = malloc(working_path_len + 1);
-    if(real_path == NULL) {
-      free(working_path);
-      return CURLE_OUT_OF_MEMORY;
-    }
-    if((working_path_len > 3) && (!memcmp(working_path, "/~/", 3)))
-      /* It is referenced to the home directory, so strip the leading '/~/' */
-      memcpy(real_path, working_path + 3, 4 + working_path_len-3);
-    else
-      memcpy(real_path, working_path, 1 + working_path_len);
-  }
-  else if(conn->handler->protocol & CURLPROTO_SFTP) {
-    if((working_path_len > 1) && (working_path[1] == '~')) {
-      size_t homelen = strlen(homedir);
-      real_path = malloc(homelen + working_path_len + 1);
-      if(real_path == NULL) {
-        free(working_path);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      /* It is referenced to the home directory, so strip the
-         leading '/' */
-      memcpy(real_path, homedir, homelen);
-      real_path[homelen] = '/';
-      real_path[homelen + 1] = '\0';
-      if(working_path_len > 3) {
-        memcpy(real_path + homelen + 1, working_path + 3,
-               1 + working_path_len -3);
-      }
-    }
-    else {
-      real_path = malloc(working_path_len + 1);
-      if(real_path == NULL) {
-        free(working_path);
-        return CURLE_OUT_OF_MEMORY;
-      }
-      memcpy(real_path, working_path, 1 + working_path_len);
-    }
-  }
-
-  free(working_path);
-
-  /* store the pointer for the caller to receive */
-  *path = real_path;
-
-  return CURLE_OK;
-}
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
 static int sshkeycallback(struct Curl_easy *easy,
@@ -1184,7 +1102,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
     case SSH_SFTP_QUOTE_INIT:
 
-      result = ssh_getworkingpath(conn, sshc->homedir, &sftp_scp->path);
+      result = Curl_getworkingpath(conn, sshc->homedir, &sftp_scp->path);
       if(result) {
         sshc->actualcode = result;
         state(conn, SSH_STOP);
@@ -1279,7 +1197,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * also, every command takes at least one argument so we get that
          * first argument right now
          */
-        result = get_pathname(&cp, &sshc->quote_path1);
+        result = Curl_get_pathname(&cp, &sshc->quote_path1);
         if(result) {
           if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
@@ -1304,7 +1222,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
           /* sshc->quote_path1 contains the mode to set */
           /* get the destination */
-          result = get_pathname(&cp, &sshc->quote_path2);
+          result = Curl_get_pathname(&cp, &sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -1326,7 +1244,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* symbolic linking */
           /* sshc->quote_path1 is the source */
           /* get the destination */
-          result = get_pathname(&cp, &sshc->quote_path2);
+          result = Curl_get_pathname(&cp, &sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -1351,7 +1269,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* rename file */
           /* first param is the source path */
           /* second param is the dest. path */
-          result = get_pathname(&cp, &sshc->quote_path2);
+          result = Curl_get_pathname(&cp, &sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -2399,7 +2317,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_SCP_TRANS_INIT:
-      result = ssh_getworkingpath(conn, sshc->homedir, &sftp_scp->path);
+      result = Curl_getworkingpath(conn, sshc->homedir, &sftp_scp->path);
       if(result) {
         sshc->actualcode = result;
         state(conn, SSH_STOP);
@@ -3306,93 +3224,6 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
   }
   return nread;
 }
-
-/* The get_pathname() function is being borrowed from OpenSSH sftp.c
-   version 4.6p1. */
-/*
- * Copyright (c) 2001-2004 Damien Miller <djm@openbsd.org>
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-static CURLcode
-get_pathname(const char **cpp, char **path)
-{
-  const char *cp = *cpp, *end;
-  char quot;
-  unsigned int i, j;
-  static const char WHITESPACE[] = " \t\r\n";
-
-  cp += strspn(cp, WHITESPACE);
-  if(!*cp) {
-    *cpp = cp;
-    *path = NULL;
-    return CURLE_QUOTE_ERROR;
-  }
-
-  *path = malloc(strlen(cp) + 1);
-  if(*path == NULL)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Check for quoted filenames */
-  if(*cp == '\"' || *cp == '\'') {
-    quot = *cp++;
-
-    /* Search for terminating quote, unescape some chars */
-    for(i = j = 0; i <= strlen(cp); i++) {
-      if(cp[i] == quot) {  /* Found quote */
-        i++;
-        (*path)[j] = '\0';
-        break;
-      }
-      if(cp[i] == '\0') {  /* End of string */
-        /*error("Unterminated quote");*/
-        goto fail;
-      }
-      if(cp[i] == '\\') {  /* Escaped characters */
-        i++;
-        if(cp[i] != '\'' && cp[i] != '\"' &&
-            cp[i] != '\\') {
-          /*error("Bad escaped character '\\%c'",
-              cp[i]);*/
-          goto fail;
-        }
-      }
-      (*path)[j++] = cp[i];
-    }
-
-    if(j == 0) {
-      /*error("Empty quotes");*/
-      goto fail;
-    }
-    *cpp = cp + i + strspn(cp + i, WHITESPACE);
-  }
-  else {
-    /* Read to end of filename */
-    end = strpbrk(cp, WHITESPACE);
-    if(end == NULL)
-      end = strchr(cp, '\0');
-    *cpp = end + strspn(end, WHITESPACE);
-
-    memcpy(*path, cp, end - cp);
-    (*path)[end - cp] = '\0';
-  }
-  return CURLE_OK;
-
-  fail:
-  Curl_safefree(*path);
-  return CURLE_QUOTE_ERROR;
-}
-
 
 static const char *sftp_libssh2_strerror(int err)
 {

@@ -253,6 +253,13 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
+#if defined(USE_LIBSSH)
+  if(ssh_init()) {
+    DEBUGF(fprintf(stderr, "Error: libssh_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+#endif
+
   if(flags & CURL_GLOBAL_ACK_EINTR)
     Curl_ack_eintr = 1;
 
@@ -328,6 +335,10 @@ void curl_global_cleanup(void)
 
 #if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_EXIT)
   (void)libssh2_exit();
+#endif
+
+#if defined(USE_LIBSSH)
+  (void)ssh_finalize();
 #endif
 
   init_flags  = 0;
