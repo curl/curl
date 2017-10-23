@@ -41,10 +41,10 @@ safely be reused after this call.
 
 As a side effect, the part's remote file name is set to the base name of the
 given \fIfilename\fP if it is a valid named file. This can be undone or
-overriden by a subsequent call to \fIcurl_mime_filename(3)\fP.
+overridden by a subsequent call to \fIcurl_mime_filename(3)\fP.
 
 The contents of the file is read during the file transfer in a streaming
-manner to allow huge files to get transfered without using much memory. It
+manner to allow huge files to get transferred without using much memory. It
 therefore requires that the file is kept intact during the entire request.
 
 If the file size cannot be determined before actually reading it (such as for
