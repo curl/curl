@@ -50,7 +50,7 @@ UNITTEST_START
   size_t i;
 
   for(i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {
-    timediff_t result = curlx_timediff(tests[i].first, tests[i].second);
+    timediff_t result = Curl_timediff(tests[i].first, tests[i].second);
     if(result != tests[i].result) {
       printf("%d.%06u to %d.%06u got %d, but expected %d\n",
              tests[i].first.tv_sec,
