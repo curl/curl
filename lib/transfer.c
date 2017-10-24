@@ -238,9 +238,11 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     }
 #endif /* CURL_DOES_CONVERSIONS */
 
-    if((nread - hexlen) == 0)
+    if((nread - hexlen) == 0) {
       /* mark this as done once this chunk is transferred */
       data->req.upload_done = TRUE;
+      infof(data, "Signaling end of chunked upload via terminating chunk.\n");
+    }
 
     nread += (int)strlen(endofline_native); /* for the added end of line */
   }
@@ -1046,7 +1048,8 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
 
     k->writebytecount += bytes_written;
 
-    if(k->writebytecount == data->state.infilesize) {
+    if((!k->upload_chunky || k->forbidchunk) &&
+       (k->writebytecount == data->state.infilesize)) {
       /* we have sent all data we were supposed to */
       k->upload_done = TRUE;
       infof(data, "We are completely uploaded and fine\n");
