@@ -688,14 +688,14 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    unsigned long elapsed_secs = (unsigned long) (Curl_tvdiff(Curl_tvnow(),
-                                   conn->created) / 1000);
+    timediff_t elapsed_secs = curlx_timediff(Curl_tvnow(),
+                                   conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
-    unsigned long alarm_set = prev_alarm - elapsed_secs;
+    timediff_t alarm_set = prev_alarm - elapsed_secs;
 
     if(!alarm_set ||
-       ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
+       ((alarm_set < 0) && (prev_alarm < 0x80000000)) ) {
       /* if the alarm time-left reached zero or turned "negative" (counted
          with unsigned values), we should fire off a SIGALRM here, but we
          won't, and zero would be to switch it off so we never set it to
