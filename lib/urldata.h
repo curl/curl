@@ -1547,6 +1547,7 @@ struct UserDefined {
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
+  long happy_eyeballs_timeout; /* in milliseconds, 0 means default */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long tftp_blksize;    /* in bytes, 0 means use default */
   bool tftp_no_options; /* do not send TFTP options requests */
