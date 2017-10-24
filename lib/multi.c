@@ -2790,7 +2790,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      *timeout_ms = curlx_timediff(multi->timetree->key, now);
+      *timeout_ms = (long) curlx_timediff(multi->timetree->key, now);
       if(!*timeout_ms)
         /*
          * Since we only provide millisecond resolution on the returned value
