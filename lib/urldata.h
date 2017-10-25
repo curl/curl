@@ -719,6 +719,7 @@ struct Curl_handler {
 #define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
+#define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
