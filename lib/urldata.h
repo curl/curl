@@ -719,6 +719,7 @@ struct Curl_handler {
 #define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
+#define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
@@ -1308,7 +1309,7 @@ struct UrlState {
 
   /* set after initial USER failure, to prevent an authentication loop */
   bool ftp_trying_alternative;
-
+  bool wildcardmatch; /* enable wildcard matching */
   int httpversion;       /* the lowest HTTP version*10 reported by any server
                             involved in this request */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
@@ -1672,7 +1673,7 @@ struct UserDefined {
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */
-  bool wildcardmatch; /* enable wildcard matching */
+  bool wildcard_enabled; /* enable wildcard matching */
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
                                         starts */
   curl_chunk_end_callback chunk_end; /* called after part transferring

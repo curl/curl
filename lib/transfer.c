@@ -1344,6 +1344,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(result)
     return result;
 
+  data->state.wildcardmatch = data->set.wildcard_enabled;
   data->set.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
@@ -1401,7 +1402,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->state.authhost.picked &= data->state.authhost.want;
     data->state.authproxy.picked &= data->state.authproxy.want;
 
-    if(data->set.wildcardmatch) {
+    if(data->state.wildcardmatch) {
       struct WildcardData *wc = &data->wildcard;
       if(wc->state < CURLWC_INIT) {
         result = Curl_wildcard_init(wc); /* init wildcard structures */
