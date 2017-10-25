@@ -1380,23 +1380,23 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* Handle timed out */
         if(data->mstate == CURLM_STATE_WAITRESOLVE)
           failf(data, "Resolving timed out after %ld milliseconds",
-                curlx_timediff(now, data->progress.t_startsingle));
+                Curl_timediff(now, data->progress.t_startsingle));
         else if(data->mstate == CURLM_STATE_WAITCONNECT)
           failf(data, "Connection timed out after %ld milliseconds",
-                curlx_timediff(now, data->progress.t_startsingle));
+                Curl_timediff(now, data->progress.t_startsingle));
         else {
           k = &data->req;
           if(k->size != -1) {
             failf(data, "Operation timed out after %ld milliseconds with %"
                   CURL_FORMAT_CURL_OFF_T " out of %"
                   CURL_FORMAT_CURL_OFF_T " bytes received",
-                  curlx_timediff(now, data->progress.t_startsingle),
+                  Curl_timediff(now, data->progress.t_startsingle),
                   k->bytecount, k->size);
           }
           else {
             failf(data, "Operation timed out after %ld milliseconds with %"
                   CURL_FORMAT_CURL_OFF_T " bytes received",
-                  curlx_timediff(now, data->progress.t_startsingle),
+                  Curl_timediff(now, data->progress.t_startsingle),
                   k->bytecount);
           }
         }
@@ -2516,7 +2516,7 @@ static CURLMcode add_next_timeout(struct curltime now,
     struct curl_llist_element *n = e->next;
     timediff_t diff;
     node = (struct time_node *)e->ptr;
-    diff = curlx_timediff(node->time, now);
+    diff = Curl_timediff(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
       Curl_llist_remove(list, e, NULL);
@@ -2790,8 +2790,8 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      *timeout_ms = (long) curlx_timediff(multi->timetree->key, now);
-      if(!*timeout_ms)
+      timediff_t diff = Curl_timediff(multi->timetree->key, now);
+      if(diff <= 0)
         /*
          * Since we only provide millisecond resolution on the returned value
          * and the diff might be less than one millisecond here, we don't
@@ -2800,6 +2800,10 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
          * millisecond! instead we return 1 until the time is ripe.
          */
         *timeout_ms = 1;
+      else
+        /* this should be safe even on 64 bit archs, as we don't use that
+           overly long timeouts */
+        *timeout_ms = (long)diff;
     }
     else
       /* 0 means immediately */
@@ -2906,7 +2910,7 @@ multi_addtimeout(struct Curl_easy *data,
     /* find the correct spot in the list */
     for(e = timeoutlist->head; e; e = e->next) {
       struct time_node *check = (struct time_node *)e->ptr;
-      timediff_t diff = curlx_timediff(check->time, node->time);
+      timediff_t diff = Curl_timediff(check->time, node->time);
       if(diff > 0)
         break;
       prev = e;
@@ -2965,7 +2969,7 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
-    timediff_t diff = curlx_timediff(set, *nowp);
+    timediff_t diff = Curl_timediff(set, *nowp);
 
     if(diff > 0) {
       /* The current splay tree entry is sooner than this new expiry time.

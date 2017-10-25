@@ -3481,7 +3481,7 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
 
       if(!conn->inuse) {
         /* Set higher score for the age passed since the connection was used */
-        score = curlx_timediff(now, conn->now);
+        score = Curl_timediff(now, conn->now);
 
         if(score > highscore) {
           highscore = score;
@@ -3538,7 +3538,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
 
     if(!conn->inuse) {
       /* Set higher score for the age passed since the connection was used */
-      score = curlx_timediff(now, conn->now);
+      score = Curl_timediff(now, conn->now);
 
       if(score > highscore) {
         highscore = score;
@@ -3613,7 +3613,7 @@ static int call_disconnect_if_dead(struct connectdata *conn,
 static void prune_dead_connections(struct Curl_easy *data)
 {
   struct curltime now = Curl_tvnow();
-  time_t elapsed = curlx_timediff(now, data->state.conn_cache->last_cleanup);
+  time_t elapsed = Curl_timediff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {
     Curl_conncache_foreach(data->state.conn_cache, data,

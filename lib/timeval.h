@@ -22,11 +22,6 @@
  *
  ***************************************************************************/
 
-/*
- * CAUTION: this header is designed to work when included by the app-side
- * as well as the library. Do not mix with library internals!
- */
-
 #include "curl_setup.h"
 
 #if SIZEOF_TIME_T < 8
@@ -41,7 +36,7 @@ struct curltime {
   int tv_usec;   /* microseconds */
 };
 
-struct curltime curlx_tvnow(void);
+struct curltime Curl_tvnow(void);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -49,7 +44,7 @@ struct curltime curlx_tvnow(void);
  *
  * Returns: the time difference in number of milliseconds.
  */
-timediff_t curlx_timediff(struct curltime t1, struct curltime t2);
+timediff_t Curl_timediff(struct curltime t1, struct curltime t2);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -58,10 +53,6 @@ timediff_t curlx_timediff(struct curltime t1, struct curltime t2);
  * Returns: the time difference in number of microseconds.
  */
 timediff_t Curl_timediff_us(struct curltime newer, struct curltime older);
-
-/* These two defines below exist to provide the older API for library
-   internals only. */
-#define Curl_tvnow() curlx_tvnow()
 
 #endif /* HEADER_CURL_TIMEVAL_H */
 

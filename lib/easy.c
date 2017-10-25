@@ -586,12 +586,12 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     }
 
     /* get the time stamp to use to figure out how long poll takes */
-    before = curlx_tvnow();
+    before = Curl_tvnow();
 
     /* wait for activity or timeout */
     pollrc = Curl_poll(fds, numfds, (int)ev->ms);
 
-    after = curlx_tvnow();
+    after = Curl_tvnow();
 
     ev->msbump = FALSE; /* reset here */
 
@@ -619,7 +619,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         /* If nothing updated the timeout, we decrease it by the spent time.
          * If it was updated, it has the new timeout time stored already.
          */
-        timediff_t timediff = curlx_timediff(after, before);
+        timediff_t timediff = Curl_timediff(after, before);
         if(timediff > 0) {
           if(timediff > ev->ms)
             ev->ms = 0;
@@ -680,17 +680,17 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
     int still_running = 0;
     int rc;
 
-    before = curlx_tvnow();
+    before = Curl_tvnow();
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
 
     if(!mcode) {
       if(!rc) {
-        struct curltime after = curlx_tvnow();
+        struct curltime after = Curl_tvnow();
 
         /* If it returns without any filedescriptor instantly, we need to
            avoid busy-looping during periods where it has nothing particular
            to wait for */
-        if(curlx_timediff(after, before) <= 10) {
+        if(Curl_timediff(after, before) <= 10) {
           without_fds++;
           if(without_fds > 2) {
             int sleep_ms = without_fds < 10 ? (1 << (without_fds - 1)) : 1000;

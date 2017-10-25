@@ -24,7 +24,7 @@
 
 #if defined(WIN32) && !defined(MSDOS)
 
-struct curltime curlx_tvnow(void)
+struct curltime Curl_tvnow(void)
 {
   /*
   ** GetTickCount() is available on _all_ Windows versions from W95 up
@@ -48,7 +48,7 @@ struct curltime curlx_tvnow(void)
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC)
 
-struct curltime curlx_tvnow(void)
+struct curltime Curl_tvnow(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -86,7 +86,7 @@ struct curltime curlx_tvnow(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct curltime curlx_tvnow(void)
+struct curltime Curl_tvnow(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -103,7 +103,7 @@ struct curltime curlx_tvnow(void)
 
 #else
 
-struct curltime curlx_tvnow(void)
+struct curltime Curl_tvnow(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
@@ -133,7 +133,7 @@ struct curltime curlx_tvnow(void)
  *
  * @unittest: 1323
  */
-timediff_t curlx_timediff(struct curltime newer, struct curltime older)
+timediff_t Curl_timediff(struct curltime newer, struct curltime older)
 {
   timediff_t diff = newer.tv_sec-older.tv_sec;
   if(diff >= (TIME_MAX/1000))

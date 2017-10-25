@@ -1,63 +1,18 @@
-Curl and libcurl 7.56.1
+Curl and libcurl 7.57.0
 
- Public curl releases:         170
+ Public curl releases:         171
  Command line options:         211
  curl_easy_setopt() options:   249
  Public functions in libcurl:  74
  Contributors:                 1626
 
+This release includes the following changes:
+
+ o
+
 This release includes the following bugfixes:
 
- o imap: if a FETCH response has no size, don't call write callback [32]
- o ftp: UBsan fixup 'pointer index expression overflowed [1]
- o failf: skip the sprintf() if there are no consumers [2]
- o fuzzer: move to using external curl-fuzzer [3]
- o lib/Makefile.m32: allow customizing dll suffixes [4]
- o docs: fix typo in curl_mime_data_cb man page [5]
- o darwinssl: add support for TLSv1.3 [6]
- o build: fix --disable-crypto-auth [7]
- o lib/config-win32.h: let SMB/SMBS be enabled with OpenSSL/NSS [8]
- o openssl: fix build without HAVE_OPAQUE_EVP_PKEY [9]
- o strtoofft: Remove extraneous null check [10]
- o multi_cleanup: call DONE on handles that never got that [11]
- o tests: added flaky keyword to tests 587 and 644
- o pingpong: return error when trying to send without connection [12]
- o remove_handle: call multi_done() first, then clear dns cache pointer [13]
- o mime: be tolerant about setting twice the same header list in a part.
- o mime: improve unbinding top multipart from easy handle.
- o mime: avoid resetting a part's encoder when part's contents change.
- o mime: refuse to add subparts to one of their own descendants [14]
- o RTSP: avoid integer overflow on funny RTSP responses [15]
- o curl: don't pass semicolons when parsing Content-Disposition [16]
- o openssl: enable PKCS12 support for !BoringSSL [17]
- o FAQ: s/CURLOPT_PROGRESSFUNCTION/CURLOPT_XFERINFOFUNCTION
- o CURLOPT_NOPROGRESS.3: also refer to xferinfofunction
- o CURLOPT_XFERINFODATA.3: fix duplicate see also
- o test298: verify --ftp-method nowcwd with URL encoded path [18]
- o FTP: URL decode path for dir listing in nocwd mode [19]
- o smtp_done: fix memory leak on send failure [20]
- o ftpserver: support case insensitive commands
- o test950; verify SMTP with custom request
- o openssl: don't use old BORINGSSL_YYYYMM macros [21]
- o setopt: update current connection SSL verify params [22]
- o winbuild/BUILD.WINDOWS.txt: mention WITH_NGHTTP2
- o curl: reimplement stdin buffering in -F option [23]
- o mime: keep "text/plain" content type if user-specified [24]
- o mime: fix the content reader to handle >16K data properly [25]
- o configure: remove the C++ compiler check [26]
- o memdebug: trace send, recv and socket [27]
- o runtests: use valgrind for torture as well
- o ldap: silence clang warning [28]
- o makefile.m32: allow to override gcc, ar and ranlib [29]
- o setopt: avoid integer overflows when setting millsecond values [30]
- o setopt: range check most long options [31]
- o ftp: reject illegal IP/port in PASV 227 response [33]
- o mime: do not reuse previously computed multipart size [34]
- o vtls: change struct Curl_ssl `close' field name to `close_one'
- o os400: add missing symbols in config file
- o mime: limit bas64-encoded lines length to 76 characters
- o mk-ca-bundle: Remove URL for aurora [35]
- o mk-ca-bundle: Fix URL for NSS [36]
+ o
 
 This release includes the following known bugs:
 
@@ -66,50 +21,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alexey Melnichuk, Artak Galoyan, Benbuck Nason, Brian Carpenter,
-  Christian Schmitz, Dan Fandrich, Daniel Stenberg, David Benjamin,
-  Felix Kaiser, Javier Sixto, Jeroen Ooms, Jon DeVree, Kristiyan Tsaklev,
-  Marcel Raad, Max Dymond, Nick Zitzmann, Patrick Monnerat, Viktor Szakáts,
-  Wyatt O'Day, Zenju on github, 0xd34db347
-  (21 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=1939
- [2] = https://curl.haxx.se/bug/?i=1936
- [3] = https://curl.haxx.se/bug/?i=1923
- [4] = https://curl.haxx.se/bug/?i=1942
- [5] = https://curl.haxx.se/bug/?i=1946
- [6] = https://curl.haxx.se/bug/?i=1794
- [7] = https://curl.haxx.se/bug/?i=1945
- [8] = https://curl.haxx.se/bug/?i=1943
- [9] = https://curl.haxx.se/bug/?i=1955
- [10] = https://curl.haxx.se/bug/?i=1950
- [11] = https://curl.haxx.se/bug/?i=1954
- [12] = https://curl.haxx.se/bug/?i=1953
- [13] = https://curl.haxx.se/bug/?i=1960
- [14] = https://curl.haxx.se/bug/?i=1962
- [15] = https://curl.haxx.se/bug/?i=1969
- [16] = https://curl.haxx.se/bug/?i=1964
- [17] = https://curl.haxx.se/bug/?i=1948
- [18] = https://curl.haxx.se/bug/?i=1974
- [19] = https://curl.haxx.se/bug/?i=1974
- [20] = https://curl.haxx.se/bug/?i=1977
- [21] = https://curl.haxx.se/bug/?i=1979
- [22] = https://curl.haxx.se/bug/?i=1941
- [23] = https://curl.haxx.se/bug/?i=1985
- [24] = https://curl.haxx.se/bug/?i=1986
- [25] = https://curl.haxx.se/bug/?i=1988
- [26] = https://curl.haxx.se/bug/?i=1990
- [27] = https://curl.haxx.se/bug/?i=1980
- [28] = https://curl.haxx.se/bug/?i=1992
- [29] = https://curl.haxx.se/bug/?i=1993
- [30] = https://curl.haxx.se/bug/?i=1938
- [31] = https://curl.haxx.se/bug/?i=1938
- [32] = https://curl.haxx.se/docs/adv_20171023.html
- [33] = https://curl.haxx.se/bug/?i=1997
- [34] = https://curl.haxx.se/bug/?i=1999
- [35] = https://curl.haxx.se/bug/?i=1998
- [36] = https://curl.haxx.se/bug/?i=1998
+ [1] = https://curl.haxx.se/bug/?i=

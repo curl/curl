@@ -351,7 +351,7 @@ static time_t ftp_timeleft_accept(struct Curl_easy *data)
     timeout_ms = other;
   else {
     /* subtract elapsed time */
-    timeout_ms -= curlx_timediff(now, data->progress.t_acceptdata);
+    timeout_ms -= Curl_timediff(now, data->progress.t_acceptdata);
     if(!timeout_ms)
       /* avoid returning 0 as that means no timeout! */
       return -1;
