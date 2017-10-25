@@ -1560,7 +1560,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     }
 
     if(data->set.timeout) {
-      now = Curl_tvnow();
+      now = Curl_now();
       if(Curl_timediff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
@@ -1678,7 +1678,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     } /* poll switch statement */
 
     if(data->set.timeout) {
-      now = Curl_tvnow();
+      now = Curl_now();
       if(Curl_timediff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;

@@ -341,7 +341,7 @@ static time_t ftp_timeleft_accept(struct Curl_easy *data)
   if(data->set.accepttimeout > 0)
     timeout_ms = data->set.accepttimeout;
 
-  now = Curl_tvnow();
+  now = Curl_now();
 
   /* check if the generic timeout possibly is set shorter */
   other =  Curl_timeleft(data, &now, FALSE);
@@ -3261,7 +3261,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     long old_time = pp->response_time;
 
     pp->response_time = 60*1000; /* give it only a minute for now */
-    pp->response = Curl_tvnow(); /* timeout relative now */
+    pp->response = Curl_now(); /* timeout relative now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 
@@ -3381,7 +3381,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 
       PPSENDF(&conn->proto.ftpc.pp, "%s", cmd);
 
-      pp->response = Curl_tvnow(); /* timeout relative now */
+      pp->response = Curl_now(); /* timeout relative now */
 
       result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
       if(result)

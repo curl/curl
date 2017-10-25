@@ -80,7 +80,7 @@ static void expect_timer_seconds(struct Curl_easy *data, int seconds)
  * be 3 seconds. */
 UNITTEST_START
   struct Curl_easy data;
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
 
   data.progress.t_nslookup = 0;
   data.progress.t_connect = 0;

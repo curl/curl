@@ -490,7 +490,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       Curl_pgrsTime(data, TIMER_STARTTRANSFER);
       if(k->exp100 > EXP100_SEND_DATA)
         /* set time stamp to compare with when waiting for the 100 */
-        k->start100 = Curl_tvnow();
+        k->start100 = Curl_now();
     }
 
     *didwhat |= KEEP_RECV;
@@ -925,7 +925,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
              go into the Expect: 100 state and await such a header */
           k->exp100 = EXP100_AWAITING_CONTINUE; /* wait for the header */
           k->keepon &= ~KEEP_SEND;         /* disable writing */
-          k->start100 = Curl_tvnow();       /* timeout count starts now */
+          k->start100 = Curl_now();       /* timeout count starts now */
           *didwhat &= ~KEEP_SEND;  /* we didn't write anything actually */
 
           /* set a timeout for the multi interface */
@@ -1150,7 +1150,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       return result;
   }
 
-  k->now = Curl_tvnow();
+  k->now = Curl_now();
   if(didwhat) {
     /* Update read/write counters */
     if(k->bytecountp)
@@ -2050,7 +2050,7 @@ Curl_setup_transfer(
          (http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
         k->exp100 = EXP100_AWAITING_CONTINUE;
-        k->start100 = Curl_tvnow();
+        k->start100 = Curl_now();
 
         /* Set a timeout for the multi interface. Add the inaccuracy margin so
            that we don't fire slightly too early and get denied to run. */

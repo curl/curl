@@ -535,7 +535,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    timediff_t elapsed = Curl_timediff(Curl_tvnow(),
+    timediff_t elapsed = Curl_timediff(Curl_now(),
                                        data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
