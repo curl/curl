@@ -2834,7 +2834,7 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     time_t left = 1000;
-    struct curltime now = Curl_tvnow();
+    struct curltime now = Curl_now();
 
     result = ssh_statemach_act(conn, &block);
     if(result)

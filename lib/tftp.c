@@ -1293,7 +1293,7 @@ static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done)
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(conn->data, Curl_tvnow());
+      result = Curl_speedcheck(conn->data, Curl_now());
   }
   return result;
 }

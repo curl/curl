@@ -161,7 +161,7 @@ void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
  */
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
   time_t *delta = NULL;
 
   switch(timer) {
@@ -226,7 +226,7 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
-  data->progress.start = Curl_tvnow();
+  data->progress.start = Curl_now();
   data->progress.is_t_startransfer_set = false;
   data->progress.ul_limit_start.tv_sec = 0;
   data->progress.ul_limit_start.tv_usec = 0;
@@ -285,7 +285,7 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
 
   data->progress.downloaded = size;
 
@@ -303,7 +303,7 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
 
   data->progress.uploaded = size;
 
@@ -370,7 +370,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   curl_off_t total_estimate;
   bool shownow = FALSE;
 
-  now = Curl_tvnow(); /* what time is it */
+  now = Curl_now(); /* what time is it */
 
   /* The time spent so far (from the start) */
   data->progress.timespent = Curl_timediff_us(now, data->progress.start);

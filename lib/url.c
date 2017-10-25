@@ -3465,7 +3465,7 @@ Curl_oldest_idle_connection(struct Curl_easy *data)
   struct connectdata *conn_candidate = NULL;
   struct connectbundle *bundle;
 
-  now = Curl_tvnow();
+  now = Curl_now();
 
   Curl_hash_start_iterate(&bc->hash, &iter);
 
@@ -3530,7 +3530,7 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
 
   (void)data;
 
-  now = Curl_tvnow();
+  now = Curl_now();
 
   curr = bundle->conn_list.head;
   while(curr) {
@@ -3612,7 +3612,7 @@ static int call_disconnect_if_dead(struct connectdata *conn,
  */
 static void prune_dead_connections(struct Curl_easy *data)
 {
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
   time_t elapsed = Curl_timediff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {
@@ -4385,7 +4385,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   connclose(conn, "Default to force-close");
 
   /* Store creation time to help future close decision making */
-  conn->created = Curl_tvnow();
+  conn->created = Curl_now();
 
   conn->data = data; /* Setup the association between this connection
                         and the Curl_easy */
@@ -7128,7 +7128,7 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
 
   /* set start time here for timeout purposes in the connect procedure, it
      is later set again for the progress meter purpose */
-  conn->now = Curl_tvnow();
+  conn->now = Curl_now();
 
   if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
     conn->bits.tcpconnect[FIRSTSOCKET] = FALSE;
@@ -7145,7 +7145,7 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
     Curl_verboseconnect(conn);
   }
 
-  conn->now = Curl_tvnow(); /* time this *after* the connect is done, we
+  conn->now = Curl_now(); /* time this *after* the connect is done, we
                                set this here perhaps a second time */
 
 #ifdef __EMX__
@@ -7236,7 +7236,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
        HTTP. */
     data->set.httpreq = HTTPREQ_GET;
 
-  k->start = Curl_tvnow(); /* start time */
+  k->start = Curl_now(); /* start time */
   k->now = k->start;   /* current time is now */
   k->header = TRUE; /* assume header */
 

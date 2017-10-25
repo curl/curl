@@ -51,7 +51,7 @@
 #include "warnless.h"
 
 /* Convenience local macros */
-#define ELAPSED_MS() (int)Curl_timediff(Curl_tvnow(), initial_tv)
+#define ELAPSED_MS() (int)Curl_timediff(Curl_now(), initial_tv)
 
 int Curl_ack_eintr = 0;
 #define ERROR_NOT_EINTR(error) (Curl_ack_eintr || error != EINTR)
@@ -96,7 +96,7 @@ int Curl_wait_ms(int timeout_ms)
   Sleep(timeout_ms);
 #else
   pending_ms = timeout_ms;
-  initial_tv = Curl_tvnow();
+  initial_tv = Curl_now();
   do {
 #if defined(HAVE_POLL_FINE)
     r = poll(NULL, 0, pending_ms);
@@ -184,7 +184,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 
   if(timeout_ms > 0) {
     pending_ms = (int)timeout_ms;
-    initial_tv = Curl_tvnow();
+    initial_tv = Curl_now();
   }
 
 #ifdef HAVE_POLL_FINE
@@ -425,7 +425,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 
   if(timeout_ms > 0) {
     pending_ms = timeout_ms;
-    initial_tv = Curl_tvnow();
+    initial_tv = Curl_now();
   }
 
 #ifdef HAVE_POLL_FINE
