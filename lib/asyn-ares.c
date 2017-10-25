@@ -355,7 +355,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   long timeout;
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
   struct Curl_dns_entry *temp_entry;
 
   if(entry)
@@ -400,7 +400,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
-      struct curltime now2 = Curl_tvnow();
+      struct curltime now2 = Curl_now();
       timediff_t timediff = Curl_timediff(now2, now); /* spent time */
       if(timediff <= 0)
         timeout -= 1; /* always deduct at least 1 */

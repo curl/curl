@@ -30,13 +30,12 @@ typedef int timediff_t;
 typedef ssize_t timediff_t;
 #endif
 
-
 struct curltime {
   time_t tv_sec; /* seconds */
   int tv_usec;   /* microseconds */
 };
 
-struct curltime Curl_tvnow(void);
+struct curltime Curl_now(void);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
@@ -55,4 +54,3 @@ timediff_t Curl_timediff(struct curltime t1, struct curltime t2);
 timediff_t Curl_timediff_us(struct curltime newer, struct curltime older);
 
 #endif /* HEADER_CURL_TIMEVAL_H */
-

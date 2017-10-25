@@ -586,12 +586,12 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     }
 
     /* get the time stamp to use to figure out how long poll takes */
-    before = Curl_tvnow();
+    before = Curl_now();
 
     /* wait for activity or timeout */
     pollrc = Curl_poll(fds, numfds, (int)ev->ms);
 
-    after = Curl_tvnow();
+    after = Curl_now();
 
     ev->msbump = FALSE; /* reset here */
 
@@ -680,12 +680,12 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
     int still_running = 0;
     int rc;
 
-    before = Curl_tvnow();
+    before = Curl_now();
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
 
     if(!mcode) {
       if(!rc) {
-        struct curltime after = Curl_tvnow();
+        struct curltime after = Curl_now();
 
         /* If it returns without any filedescriptor instantly, we need to
            avoid busy-looping during periods where it has nothing particular

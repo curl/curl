@@ -218,7 +218,7 @@ time_t Curl_timeleft(struct Curl_easy *data,
   }
 
   if(!nowp) {
-    now = Curl_tvnow();
+    now = Curl_now();
     nowp = &now;
   }
 
@@ -737,7 +737,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  now = Curl_tvnow();
+  now = Curl_now();
 
   /* figure out how long time we have left to connect */
   allow = Curl_timeleft(data, &now, TRUE);
@@ -1051,7 +1051,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   /* set socket non-blocking */
   (void)curlx_nonblock(sockfd, TRUE);
 
-  conn->connecttime = Curl_tvnow();
+  conn->connecttime = Curl_now();
   if(conn->num_addr > 1)
     Curl_expire(data, conn->timeoutms_per_addr, EXPIRE_DNS_PER_NAME);
 
@@ -1145,7 +1145,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           const struct Curl_dns_entry *remotehost)
 {
   struct Curl_easy *data = conn->data;
-  struct curltime before = Curl_tvnow();
+  struct curltime before = Curl_now();
   CURLcode result = CURLE_COULDNT_CONNECT;
 
   time_t timeout_ms = Curl_timeleft(data, &before, TRUE);
