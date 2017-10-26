@@ -179,12 +179,12 @@ singleipconnect(struct connectdata *conn,
  *
  * @unittest: 1303
  */
-time_t Curl_timeleft(struct Curl_easy *data,
-                     struct curltime *nowp,
-                     bool duringconnect)
+timediff_t Curl_timeleft(struct Curl_easy *data,
+                         struct curltime *nowp,
+                         bool duringconnect)
 {
   int timeout_set = 0;
-  time_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
+  timediff_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
   struct curltime now;
 
   /* if a timeout is set, use the most restrictive one */
@@ -1148,7 +1148,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   struct curltime before = Curl_now();
   CURLcode result = CURLE_COULDNT_CONNECT;
 
-  time_t timeout_ms = Curl_timeleft(data, &before, TRUE);
+  timediff_t timeout_ms = Curl_timeleft(data, &before, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */

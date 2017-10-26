@@ -333,10 +333,10 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
  * Curl_pgrsTime(..., TIMER_STARTACCEPT);
  *
  */
-static time_t ftp_timeleft_accept(struct Curl_easy *data)
+static timediff_t ftp_timeleft_accept(struct Curl_easy *data)
 {
-  time_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
-  time_t other;
+  timediff_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
+  timediff_t other;
   struct curltime now;
 
   if(data->set.accepttimeout > 0)

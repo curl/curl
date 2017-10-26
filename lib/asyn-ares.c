@@ -354,7 +354,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  long timeout;
+  timediff_t timeout;
   struct curltime now = Curl_now();
   struct Curl_dns_entry *temp_entry;
 
