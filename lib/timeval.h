@@ -27,7 +27,7 @@
 #if SIZEOF_TIME_T < 8
 typedef int timediff_t;
 #else
-typedef ssize_t timediff_t;
+typedef curl_off_t timediff_t;
 #endif
 
 struct curltime {
