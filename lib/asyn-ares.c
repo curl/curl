@@ -22,6 +22,14 @@
 
 #include "curl_setup.h"
 
+/***********************************************************************
+ * Only for ares-enabled builds
+ * And only for functions that fulfill the asynch resolver backend API
+ * as defined in asyn.h, nothing else belongs in this file!
+ **********************************************************************/
+
+#ifdef CURLRES_ARES
+
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -47,14 +55,6 @@
 #undef in_addr_t
 #define in_addr_t unsigned long
 #endif
-
-/***********************************************************************
- * Only for ares-enabled builds
- * And only for functions that fulfill the asynch resolver backend API
- * as defined in asyn.h, nothing else belongs in this file!
- **********************************************************************/
-
-#ifdef CURLRES_ARES
 
 #include "urldata.h"
 #include "sendf.h"
