@@ -27,7 +27,15 @@
 #if SIZEOF_TIME_T < 8
 typedef int timediff_t;
 #else
-typedef ssize_t timediff_t;
+/* use a suitable 64 bit type */
+#ifdef HAVE_LONGLONG
+typedef long long timediff_t;
+#elif defined(_MSC_VER) && (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64)
+typedef __int64 timediff_t;
+#else
+/* hopeless case */
+typedef long timediff_t;
+#endif
 #endif
 
 struct curltime {
