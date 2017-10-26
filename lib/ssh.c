@@ -261,6 +261,11 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
     case LIBSSH2_ERROR_NONE:
       return CURLE_OK;
 
+    /* This is the error returned by libssh2_scp_recv2
+     * on unknown file */
+    case LIBSSH2_ERROR_SCP_PROTOCOL:
+      return CURLE_REMOTE_FILE_NOT_FOUND;
+
     case LIBSSH2_ERROR_SOCKET_NONE:
       return CURLE_COULDNT_CONNECT;
 
