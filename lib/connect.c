@@ -285,6 +285,34 @@ static CURLcode bindlocal(struct connectdata *conn,
 
     /* interface */
     if(!is_host) {
+#ifdef SO_BINDTODEVICE
+      /* I am not sure any other OSs than Linux that provide this feature,
+       * and at the least I cannot test. --Ben
+       *
+       * This feature allows one to tightly bind the local socket to a
+       * particular interface.  This will force even requests to other
+       * local interfaces to go out the external interface.
+       *
+       *
+       * Only bind to the interface when specified as interface, not just
+       * as a hostname or ip address.
+       *
+       * interface might be a VRF, eg: vrf-blue, which means it cannot be
+       * converted to an IP address and would fail Curl_if2ip. Simply try
+       * to use it straight away.
+       */
+      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                    dev, (curl_socklen_t)strlen(dev) + 1) == 0) {
+        /* This is typically "errno 1, error: Operation not permitted" if
+         * you're not running as root or another suitable privileged
+         * user.
+         * If it succeeds it means the parameter was a valid interface and
+         * not an IP address. Return immediately.
+         */
+        return CURLE_OK;
+      }
+#endif
+
       switch(Curl_if2ip(af, scope, conn->scope_id, dev,
                         myhost, sizeof(myhost))) {
         case IF2IP_NOT_FOUND:
@@ -305,30 +333,6 @@ static CURLcode bindlocal(struct connectdata *conn,
           infof(data, "Local Interface %s is ip %s using address family %i\n",
                 dev, myhost, af);
           done = 1;
-
-#ifdef SO_BINDTODEVICE
-          /* I am not sure any other OSs than Linux that provide this feature,
-           * and at the least I cannot test. --Ben
-           *
-           * This feature allows one to tightly bind the local socket to a
-           * particular interface.  This will force even requests to other
-           * local interfaces to go out the external interface.
-           *
-           *
-           * Only bind to the interface when specified as interface, not just
-           * as a hostname or ip address.
-           */
-          if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                        dev, (curl_socklen_t)strlen(dev) + 1) != 0) {
-            error = SOCKERRNO;
-            infof(data, "SO_BINDTODEVICE %s failed with errno %d: %s;"
-                  " will do regular bind\n",
-                  dev, error, Curl_strerror(conn, error));
-            /* This is typically "errno 1, error: Operation not permitted" if
-               you're not running as root or another suitable privileged
-               user */
-          }
-#endif
           break;
       }
     }
