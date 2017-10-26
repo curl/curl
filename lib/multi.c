@@ -1663,7 +1663,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(!result) {
           if(!dophase_done) {
             /* some steps needed for wildcard matching */
-            if(data->set.wildcardmatch) {
+            if(data->state.wildcardmatch) {
               struct WildcardData *wc = &data->wildcard;
               if(wc->state == CURLWC_DONE || wc->state == CURLWC_SKIP) {
                 /* skip some states if it is important */
@@ -1816,7 +1816,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         multistate(data, CURLM_STATE_WAITPERFORM);
       else
       {
-        if(data->set.wildcardmatch &&
+        if(data->state.wildcardmatch &&
            ((data->easy_conn->handler->flags & PROTOPT_WILDCARD) == 0)) {
            data->wildcard.state = CURLWC_DONE;
         }
@@ -2038,7 +2038,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           data->easy_conn = NULL;
       }
 
-      if(data->set.wildcardmatch) {
+      if(data->state.wildcardmatch) {
         if(data->wildcard.state != CURLWC_DONE) {
           /* if a wildcard is set and we are not ending -> lets start again
              with CURLM_STATE_INIT */

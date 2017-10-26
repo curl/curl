@@ -3178,7 +3178,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   /* now store a copy of the directory we are in */
   free(ftpc->prevpath);
 
-  if(data->set.wildcardmatch) {
+  if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
       data->set.chunk_end(data->wildcard.customptr);
     }
@@ -3963,7 +3963,7 @@ static CURLcode ftp_do(struct connectdata *conn, bool *done)
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
-  if(conn->data->set.wildcardmatch) {
+  if(conn->data->state.wildcardmatch) {
     result = wc_statemach(conn);
     if(conn->data->wildcard.state == CURLWC_SKIP ||
       conn->data->wildcard.state == CURLWC_DONE) {

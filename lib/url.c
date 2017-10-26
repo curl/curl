@@ -489,12 +489,8 @@ CURLcode Curl_close(struct Curl_easy *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
-  if(data->set.wildcardmatch) {
-    /* destruct wildcard structures if it is needed */
-    struct WildcardData *wc = &data->wildcard;
-    Curl_wildcard_dtor(wc);
-  }
-
+  /* destruct wildcard structures if it is needed */
+  Curl_wildcard_dtor(&data->wildcard);
   Curl_freeset(data);
   free(data);
   return CURLE_OK;
@@ -609,7 +605,7 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
     return result;
 #endif
 
-  set->wildcardmatch  = FALSE;
+  set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;
   set->chunk_end      = ZERO_NULL;
 
@@ -2966,7 +2962,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_WILDCARDMATCH:
-    data->set.wildcardmatch = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    data->set.wildcard_enabled = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
   case CURLOPT_CHUNK_BGN_FUNCTION:
     data->set.chunk_bgn = va_arg(param, curl_chunk_bgn_callback);
@@ -7224,6 +7220,11 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 
   data->state.done = FALSE; /* *_done() is not called yet */
   data->state.expect100header = FALSE;
+
+  /* if the protocol used doesn't support wildcards, switch it off */
+  if(data->state.wildcardmatch &&
+     !(conn->handler->flags & PROTOPT_WILDCARD))
+    data->state.wildcardmatch = FALSE;
 
   if(data->set.opt_no_body)
     /* in HTTP lingo, no body means using the HEAD request... */
