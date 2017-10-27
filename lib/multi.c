@@ -1318,7 +1318,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   struct SingleRequest *k;
   time_t timeout_ms;
   time_t recv_timeout_ms;
-  time_t send_timeout_ms;
+  timediff_t send_timeout_ms;
   int control;
 
   if(!GOOD_EASY_HANDLE(data))
