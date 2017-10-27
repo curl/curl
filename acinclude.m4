@@ -2970,3 +2970,28 @@ AC_DEFUN([CURL_SUPPORTS_BUILTIN_AVAILABLE], [
     AC_MSG_RESULT([no])
   ])
 ])
+
+
+dnl CURL_CHECK_FUNC_MACH_ABSOLUTE_TIME
+dnl -------------------------------------------------
+dnl Check if mach_absolute_time is available.
+
+AC_DEFUN([CURL_CHECK_FUNC_MACH_ABSOLUTE_TIME], [
+  AC_CHECK_HEADERS(mach/mach_time.h)
+  AC_MSG_CHECKING([for mach_absolute_time])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <mach/mach_time.h>
+    ]],[[
+      mach_timebase_info_data_t timebase;
+      (void) mach_timebase_info(&timebase);
+      (void) mach_absolute_time();
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_MACH_ABSOLUTE_TIME, 1,
+      [Define to 1 if you have the mach_absolute_time function.])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+])

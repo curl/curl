@@ -84,7 +84,7 @@ struct curltime curlx_tvnow(void)
   return cnow;
 }
 
-#elif defined(__APPLE__)
+#elif defined(HAVE_MACH_ABSOLUTE_TIME)
 
 #include <stdint.h>
 #include <mach/mach_time.h>

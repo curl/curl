@@ -130,6 +130,9 @@
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
 #cmakedefine HAVE_CLOCK_GETTIME_MONOTONIC 1
 
+/* Define to 1 if you have the mach_absolute_time function. */
+#cmakedefine HAVE_MACH_ABSOLUTE_TIME 1
+
 /* Define to 1 if you have the `closesocket' function. */
 #cmakedefine HAVE_CLOSESOCKET 1
 
