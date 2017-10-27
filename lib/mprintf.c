@@ -60,19 +60,6 @@
 #endif
 
 /*
- * Non-ANSI integer extensions
- */
-
-#if (defined(__BORLANDC__) && (__BORLANDC__ >= 0x520)) || \
-    (defined(__WATCOMC__) && defined(__386__)) || \
-    (defined(__POCC__) && defined(_MSC_VER)) || \
-    (defined(_WIN32_WCE)) || \
-    (defined(__MINGW32__)) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64))
-#  define MP_HAVE_INT_EXTENSIONS
-#endif
-
-/*
  * Max integer data types that mprintf.c is capable
  */
 
@@ -175,45 +162,6 @@ struct asprintf {
                    the output is not the complete data */
 };
 
-static long dprintf_DollarString(char *input, char **end)
-{
-  int number = 0;
-  while(ISDIGIT(*input)) {
-    number *= 10;
-    number += *input-'0';
-    input++;
-  }
-  if(number && ('$'==*input++)) {
-    *end = input;
-    return number;
-  }
-  return 0;
-}
-
-static bool dprintf_IsQualifierNoDollar(const char *fmt)
-{
-#if defined(MP_HAVE_INT_EXTENSIONS)
-  if(!strncmp(fmt, "I32", 3) || !strncmp(fmt, "I64", 3)) {
-    return TRUE;
-  }
-#endif
-
-  switch(*fmt) {
-  case '-': case '+': case ' ': case '#': case '.':
-  case '0': case '1': case '2': case '3': case '4':
-  case '5': case '6': case '7': case '8': case '9':
-  case 'h': case 'l': case 'L': case 'z': case 'q':
-  case '*': case 'O':
-#if defined(MP_HAVE_INT_EXTENSIONS)
-  case 'I':
-#endif
-    return TRUE;
-
-  default:
-    return FALSE;
-  }
-}
-
 /******************************************************************
  *
  * Pass 1:
@@ -238,6 +186,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
   while(*fmt) {
     if(*fmt++ == '%') {
+      char qual;
       if(*fmt == '%') {
         fmt++;
         continue; /* while */
@@ -249,10 +198,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       param_num++;
 
-      this_param = dprintf_DollarString(fmt, &fmt);
-      if(0 == this_param)
-        /* we got no positional, get the next counter */
-        this_param = param_num;
+      this_param = param_num;
 
       if(this_param > max_param)
         max_param = this_param;
@@ -268,20 +214,9 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
 
       /* Handle the flags */
 
-      while(dprintf_IsQualifierNoDollar(fmt)) {
-#if defined(MP_HAVE_INT_EXTENSIONS)
-        if(!strncmp(fmt, "I32", 3)) {
-          flags |= FLAGS_LONG;
-          fmt += 3;
-        }
-        else if(!strncmp(fmt, "I64", 3)) {
-          flags |= FLAGS_LONGLONG;
-          fmt += 3;
-        }
-        else
-#endif
-
-        switch(*fmt++) {
+      do {
+        qual = *fmt++;
+        switch(qual) {
         case ' ':
           flags |= FLAGS_SPACE;
           break;
@@ -303,11 +238,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
             fmt++;
             param_num++;
 
-            i = dprintf_DollarString(fmt, &fmt);
-            if(i)
-              precision = i;
-            else
-              precision = param_num;
+            precision = param_num;
 
             if(precision > max_param)
               max_param = precision;
@@ -320,15 +251,6 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         case 'h':
           flags |= FLAGS_SHORT;
           break;
-#if defined(MP_HAVE_INT_EXTENSIONS)
-        case 'I':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-          flags |= FLAGS_LONGLONG;
-#else
-          flags |= FLAGS_LONG;
-#endif
-          break;
-#endif
         case 'l':
           if(flags & FLAGS_LONG)
             flags |= FLAGS_LONGLONG;
@@ -370,18 +292,16 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           flags |= FLAGS_WIDTHPARAM;
           param_num++;
 
-          i = dprintf_DollarString(fmt, &fmt);
-          if(i)
-            width = i;
-          else
-            width = param_num;
+          width = param_num;
           if(width > max_param)
             max_param = width;
           break;
         default:
+          fmt--;
+          qual = 0;
           break;
-        }
-      } /* switch */
+        } /* switch */
+      } while(qual);
 
       /* Handle the specifier */
 
@@ -637,15 +557,7 @@ static int dprintf_formatf(
       continue;
     }
 
-    /* If this is a positional parameter, the position must follow immediately
-       after the %, thus create a %<num>$ sequence */
-    param = dprintf_DollarString(f, &f);
-
-    if(!param)
-      param = param_num;
-    else
-      --param;
-
+    param = param_num;
     param_num++; /* increase this always to allow "%2$s %1$s %s" and then the
                     third %s will pick the 3rd argument */
 
