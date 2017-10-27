@@ -2711,7 +2711,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
     arg = va_arg(param, long);
     if(arg < CURLSSH_AUTH_NONE)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.ssh_auth_types = va_arg(param, long);
+    data->set.ssh_auth_types = arg;
     break;
 
   case CURLOPT_SSH_PUBLIC_KEYFILE:
