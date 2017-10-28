@@ -1,4 +1,4 @@
-Curl the next few years - perhaps
+curl the next few years - perhaps
 =================================
 
 Roadmap of things Daniel Stenberg and Steve Holme want to work on next. It is
@@ -98,7 +98,7 @@ Improve
 
 1. Build for windows (considered hard by many users).
 
-2. Curl -h output (considered overwhelming to users).
+2. curl -h output (considered overwhelming to users).
 
 3. We have > 200 command line options, is there a way to redo things to
    simplify or improve the situation as we are likely to keep adding
@@ -114,5 +114,5 @@ Improve
 Remove
 ------
 
-1. Makefile.vc files as there is no point in maintaining two sets of Windows
+1. makefile.vc files as there is no point in maintaining two sets of Windows
    makefiles. Note: These are currently being used by the Windows autobuilds.
