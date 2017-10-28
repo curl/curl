@@ -37,7 +37,7 @@ How to find services for specific domains/hosts.
 curl_formadd()
 --------------
 
-make sure there's an easy handle passed in to `curl_formadd()`,
+Make sure there's an easy handle passed in to `curl_formadd()`,
 `curl_formget()` and `curl_formfree()` by adding replacement functions and
 deprecating the old ones to allow custom mallocs and more.
 
@@ -62,21 +62,21 @@ Simplify the SMTP email
 Simplify the SMTP email interface so that programmers don't have to
 construct the body of an email that contains all the headers, alternative
 content, images and attachments - maintain raw interface so that
-programmers that want to do this can
+programmers that want to do this can.
 
-email capabilities
+Email capabilities
 ------------------
 
 Allow the email protocols to return the capabilities before
 authenticating. This will allow an application to decide on the best
-authentication mechanism
+authentication mechanism.
 
 Win32 pthreads
 --------------
 
-Allow Windows threading model to be replaced by Win32 pthreads port
+Allow Windows threading model to be replaced by Win32 pthreads port.
 
-dynamic buffer size
+Dynamic buffer size
 -------------------
 
 Implement a dynamic buffer size to allow SFTP to use much larger buffers and
@@ -91,28 +91,28 @@ New stuff - curl
    of course.
 
 2. Simplify the SMTP command line so that the headers and multi-part content
-   don't have to be constructed before calling curl
+   don't have to be constructed before calling curl.
 
 Improve
 -------
 
-1. build for windows (considered hard by many users)
+1. Build for windows (considered hard by many users).
 
-2. curl -h output (considered overwhelming to users)
+2. curl -h output (considered overwhelming to users).
 
-3. we have > 200 command line options, is there a way to redo things to
+3. We have > 200 command line options, is there a way to redo things to
    simplify or improve the situation as we are likely to keep adding
-   features/options in the future too
+   features/options in the future too.
 
-4. authentication framework (consider merging HTTP and SASL authentication to
-   give one API for protocols to call)
+4. Authentication framework (consider merging HTTP and SASL authentication to
+   give one API for protocols to call).
 
 5. Perform some of the clean up from the TODO document, removing old
    definitions and such like that are currently earmarked to be removed years
-   ago
+   ago.
 
 Remove
 ------
 
 1. makefile.vc files as there is no point in maintaining two sets of Windows
-   makefiles. Note: These are currently being used by the Windows autobuilds
+   makefiles. Note: These are currently being used by the Windows autobuilds.
