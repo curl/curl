@@ -1,0 +1,107 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+HTTP proxy
+HTTP Digest auth
+Resume
+Content-Range
+CUSTOMREQUEST
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 100 Continue
+Server: Microsoft-IIS/5.0
+Date: Sun, 03 Apr 2005 14:57:45 GMT
+X-Powered-By: ASP.NET
+
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", algorithm="SHA-512-256", nonce="1053604144", userhash=true
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+</data>
+<data1000>
+HTTP/1.1 200 A OK
+Server: Microsoft-IIS/6.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</data1000>
+
+<datacheck>
+HTTP/1.1 100 Continue
+Server: Microsoft-IIS/5.0
+Date: Sun, 03 Apr 2005 14:57:45 GMT
+X-Powered-By: ASP.NET
+
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", algorithm="SHA-512-256", nonce="1053604144", userhash=true
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+HTTP/1.1 200 A OK
+Server: Microsoft-IIS/6.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+# 
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+ <name>
+HTTP POST --digest with PUT, resumed upload, modified method, SHA-512-256 and userhash=true
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/2059 -u auser:apasswd --digest -T log/2059 -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
+</command>
+<file name="log/2059">
+test
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://%HOSTIP:%HTTPPORT/2059 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Content-Range: bytes 2-4/5
+User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
+Accept: */*
+Proxy-Connection: Keep-Alive
+Content-Length: 0
+
+GET http://%HOSTIP:%HTTPPORT/2059 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="fddc3bc7b753b73ab0848fd83cb20cbbca971258eb8d20c941dd5e0b010d66be", realm="testrealm", nonce="1053604144", uri="/2059", response="fc09be8192851e284e73e8b719b32a2f6f91cca0594e68713da8c49dc2c1656e", algorithm="SHA-512-256", userhash=true
+Content-Range: bytes 2-4/5
+Accept: */*
+Proxy-Connection: Keep-Alive
+Content-Length: 3
+Expect: 100-continue
+
+st
+</protocol>
+</verify>
+</testcase>
