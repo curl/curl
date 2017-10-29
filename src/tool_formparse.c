@@ -233,12 +233,10 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       }
 
       /* now point beyond the content-type specifier */
-      endpos = type + strlen(type_major) + strlen(type_minor) + 1;
-      for(p = endpos; ISSPACE(*p); p++)
-        ;
-      while(*p && *p != ';' && *p != ',')
-        p++;
-      endct = p;
+      p = type + strlen(type_major) + strlen(type_minor) + 1;
+      for(endct = p; *p && *p != ';' && *p != endchar; p++)
+        if(!ISSPACE(*p))
+          endct = p + 1;
       sep = *p;
     }
     else if(checkprefix("filename=", p)) {
@@ -330,29 +328,27 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       sep = *p;
       *endpos = '\0';
     }
+    else if(endct) {
+      /* This is part of content type. */
+      for(endct = p; *p && *p != ';' && *p != endchar; p++)
+        if(!ISSPACE(*p))
+          endct = p + 1;
+      sep = *p;
+    }
     else {
       /* unknown prefix, skip to next block */
       char *unknown = get_param_word(&p, &endpos, endchar);
 
       sep = *p;
-      if(endct)
-        endct = p;
-      else {
-        *endpos = '\0';
-         if(*unknown)
-           warnf(config->global, "skip unknown form field: %s\n", unknown);
-      }
+      *endpos = '\0';
+      if(*unknown)
+        warnf(config->global, "skip unknown form field: %s\n", unknown);
     }
   }
 
-  /* Terminate and strip content type. */
-  if(type) {
-    if(!endct)
-      endct = type + strlen(type);
-    while(endct > type && ISSPACE(endct[-1]))
-      endct--;
+  /* Terminate content type. */
+  if(endct)
     *endct = '\0';
-  }
 
   if(ptype)
     *ptype = type;
