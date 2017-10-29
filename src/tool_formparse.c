@@ -52,13 +52,12 @@ typedef struct {
  * after call get_parm_word, str either point to string end
  * or point to any of end chars.
  */
-static char *get_param_word(char **str, char **end_pos)
+static char *get_param_word(char **str, char **end_pos, char endchar)
 {
   char *ptr = *str;
   char *word_begin = NULL;
   char *ptr2;
   char *escape = NULL;
-  const char *end_chars = ";,";
 
   /* the first non-space char is here */
   word_begin = ptr;
@@ -88,7 +87,7 @@ static char *get_param_word(char **str, char **end_pos)
           while(ptr < *end_pos);
           *end_pos = ptr2;
         }
-        while(*ptr && NULL == strchr(end_chars, *ptr))
+        while(*ptr && *ptr != ';' && *ptr != endchar)
           ++ptr;
         *str = ptr;
         return word_begin + 1;
@@ -99,7 +98,7 @@ static char *get_param_word(char **str, char **end_pos)
     ptr = word_begin;
   }
 
-  while(*ptr && NULL == strchr(end_chars, *ptr))
+  while(*ptr && *ptr != ';' && *ptr != endchar)
     ++ptr;
   *str = *end_pos = ptr;
   return word_begin;
@@ -181,9 +180,10 @@ static int read_field_headers(struct OperationConfig *config,
   /* NOTREACHED */
 }
 
-static int get_param_part(struct OperationConfig *config, char **str,
-                          char **pdata, char **ptype, char **pfilename,
-                          char **pencoder, struct curl_slist **pheaders)
+static int get_param_part(struct OperationConfig *config, char endchar,
+                          char **str, char **pdata, char **ptype,
+                          char **pfilename, char **pencoder,
+                          struct curl_slist **pheaders)
 {
   char *p = *str;
   char *type = NULL;
@@ -208,7 +208,7 @@ static int get_param_part(struct OperationConfig *config, char **str,
   while(ISSPACE(*p))
     p++;
   tp = p;
-  *pdata = get_param_word(&p, &endpos);
+  *pdata = get_param_word(&p, &endpos, endchar);
   /* If not quoted, strip trailing spaces. */
   if(*pdata == tp)
     while(endpos > *pdata && ISSPACE(endpos[-1]))
@@ -249,7 +249,7 @@ static int get_param_part(struct OperationConfig *config, char **str,
       for(p += 9; ISSPACE(*p); p++)
         ;
       tp = p;
-      filename = get_param_word(&p, &endpos);
+      filename = get_param_word(&p, &endpos, endchar);
       /* If not quoted, strip trailing spaces. */
       if(filename == tp)
         while(endpos > filename && ISSPACE(endpos[-1]))
@@ -272,7 +272,7 @@ static int get_param_part(struct OperationConfig *config, char **str,
           p++;
         } while(ISSPACE(*p));
         tp = p;
-        hdrfile = get_param_word(&p, &endpos);
+        hdrfile = get_param_word(&p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
         if(hdrfile == tp)
           while(endpos > hdrfile && ISSPACE(endpos[-1]))
@@ -300,7 +300,7 @@ static int get_param_part(struct OperationConfig *config, char **str,
         while(ISSPACE(*p))
           p++;
         tp = p;
-        hdr = get_param_word(&p, &endpos);
+        hdr = get_param_word(&p, &endpos, endchar);
         /* If not quoted, strip trailing spaces. */
         if(hdr == tp)
           while(endpos > hdr && ISSPACE(endpos[-1]))
@@ -322,7 +322,7 @@ static int get_param_part(struct OperationConfig *config, char **str,
       for(p += 8; ISSPACE(*p); p++)
         ;
       tp = p;
-      encoder = get_param_word(&p, &endpos);
+      encoder = get_param_word(&p, &endpos, endchar);
       /* If not quoted, strip trailing spaces. */
       if(encoder == tp)
         while(endpos > encoder && ISSPACE(endpos[-1]))
@@ -332,7 +332,7 @@ static int get_param_part(struct OperationConfig *config, char **str,
     }
     else {
       /* unknown prefix, skip to next block */
-      char *unknown = get_param_word(&p, &endpos);
+      char *unknown = get_param_word(&p, &endpos, endchar);
 
       sep = *p;
       if(endct)
@@ -598,7 +598,8 @@ int formparse(struct OperationConfig *config,
       curl_mime *subparts;
 
       /* Starting a multipart. */
-      sep = get_param_part(config, &contp, &data, &type, NULL, NULL, &headers);
+      sep = get_param_part(config, '\0',
+                           &contp, &data, &type, NULL, NULL, &headers);
       if(sep < 0) {
         Curl_safefree(contents);
         return 3;
@@ -657,7 +658,7 @@ int formparse(struct OperationConfig *config,
         /* since this was a file, it may have a content-type specifier
            at the end too, or a filename. Or both. */
         ++contp;
-        sep = get_param_part(config, &contp,
+        sep = get_param_part(config, ',', &contp,
                              &data, &type, &filename, &encoder, &headers);
         if(sep < 0) {
           if(subparts != *mimecurrent)
@@ -767,7 +768,7 @@ int formparse(struct OperationConfig *config,
 
       if(*contp == '<' && !literal_value) {
         ++contp;
-        sep = get_param_part(config, &contp,
+        sep = get_param_part(config, '\0', &contp,
                              &data, &type, NULL, &encoder, &headers);
         if(sep < 0) {
           Curl_safefree(contents);
@@ -796,7 +797,7 @@ int formparse(struct OperationConfig *config,
         if(literal_value)
           data = contp;
         else {
-          sep = get_param_part(config, &contp,
+          sep = get_param_part(config, '\0', &contp,
                                &data, &type, &filename, &encoder, &headers);
           if(sep < 0) {
             Curl_safefree(contents);

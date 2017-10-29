@@ -57,6 +57,11 @@ or
 Note that if a filename/path is quoted by double-quotes, any double-quote
 or backslash within the filename must be escaped by backslash.
 
+Quoting must also be applied to non-file data if it contains semicolons,
+leading/trailing spaces or leading double quotes:
+
+ curl -F 'colors="red; green; blue";type=text/x-myapp' example.com
+
 You can add custom headers to the field by setting headers=, like
 
   curl -F "submit=OK;headers=\\"X-submit-type: OK\\"" example.com
