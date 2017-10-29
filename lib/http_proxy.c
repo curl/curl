@@ -188,7 +188,7 @@ static CURLcode CONNECT(struct connectdata *conn,
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
   bool closeConnection = FALSE;
-  time_t check;
+  timediff_t check;
   struct http_connect_state *s = conn->connect_state;
 
 #define SELECT_OK      0

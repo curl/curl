@@ -721,7 +721,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
-  time_t allow;
+  timediff_t allow;
   int error = 0;
   struct curltime now;
   int rc;
