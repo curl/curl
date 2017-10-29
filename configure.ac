@@ -3656,6 +3656,8 @@ CURL_CHECK_OPTION_NTLM_WB
 
 CURL_CHECK_NTLM_WB
 
+CURL_CHECK_FUNC_MACH_ABSOLUTE_TIME
+
 dnl ************************************************************
 dnl disable TLS-SRP authentication
 dnl

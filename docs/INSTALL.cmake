@@ -35,6 +35,7 @@ Current flaws in the curl CMake build
    - Doesn't find or use krb4 or GSS
    - Rebuilds test files too eagerly, but still can't run the tests
    - Does't detect the correct strerror_r flavor when cross-compiling (issue #1123)
+   - Doesn't detect mach_absolute_time on MacOS
 
 
 Command Line CMake
