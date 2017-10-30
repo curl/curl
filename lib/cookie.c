@@ -312,7 +312,7 @@ static void remove_expired(struct CookieInfo *cookies)
       if(co == cookies->cookies) {
         cookies->cookies = co->next;
       }
-      else {
+      else if (pv) {
         pv->next = co->next;
       }
       cookies->numcookies--;
