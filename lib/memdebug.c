@@ -356,29 +356,32 @@ curl_socket_t curl_socket(int domain, int type, int protocol,
   return sockfd;
 }
 
-ssize_t curl_dosend(int sockfd, const void *buf, size_t len, int flags,
-                    int line, const char *source)
+SEND_TYPE_RETV curl_dosend(SEND_TYPE_ARG1 sockfd,
+                           SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
+                           SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags, int line,
+                           const char *source)
 {
-  ssize_t rc;
+  SEND_TYPE_RETV rc;
   if(countcheck("send", line, source))
     return -1;
   rc = send(sockfd, buf, len, flags);
   if(source)
-    curl_memlog("SEND %s:%d send(%zu) = %zd\n",
-                source, line, len, rc);
+    curl_memlog("SEND %s:%d send(%lu) = %ld\n",
+                source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 
-ssize_t curl_dorecv(int sockfd, void *buf, size_t len, int flags,
-                    int line, const char *source)
+RECV_TYPE_RETV curl_dorecv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
+                           RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags, int line,
+                           const char *source)
 {
-  ssize_t rc;
+  RECV_TYPE_RETV rc;
   if(countcheck("recv", line, source))
     return -1;
   rc = recv(sockfd, buf, len, flags);
   if(source)
-    curl_memlog("RECV %s:%d recv(%zu) = %zd\n",
-                source, line, len, rc);
+    curl_memlog("RECV %s:%d recv(%lu) = %ld\n",
+                source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 
