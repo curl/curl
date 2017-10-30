@@ -612,20 +612,6 @@ curlx
    strtoll() (or equivalent) function exist on your platform. If `curl_off_t`
    is only a 32 bit number on your platform, this macro uses strtol().
 
-`curlx_tvnow()`
----------------
-   returns a struct timeval for the current time.
-
-`curlx_tvdiff()`
---------------
-   returns the difference between two timeval structs, in number of
-   milliseconds.
-
-`curlx_tvdiff_secs()`
----------------------
-   returns the same as `curlx_tvdiff` but with full usec resolution (as a
-   double)
-
 Future
 ------
 
