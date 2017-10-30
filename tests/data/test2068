@@ -1,0 +1,89 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP Digest auth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-512-256"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+</data>
+<data1000>
+HTTP/1.1 200 A OK
+Server: Microsoft-IIS/6.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</data1000>
+
+<datacheck>
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-512-256"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+HTTP/1.1 200 A OK
+Server: Microsoft-IIS/6.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 3
+
+ok
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+#
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+<name>
+HTTP POST --digest with SHA-512-256, userhash=false and user-specified Content-Length header
+</name>
+# This test is to ensure 'Content-Length: 0' is sent while negotiating auth
+# even when there is a user-specified Content-Length header.
+# https://github.com/curl/curl/pull/1242
+<command>
+-H "Content-Length: 11" -u auser:apasswd --digest -d "junkelijunk" http://%HOSTIP:%HTTPPORT/2068
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol nonewline="yes">
+POST /2068 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 0
+Content-Type: application/x-www-form-urlencoded
+
+POST /2068 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2068", response="4bc9c97a72f1856bcec9b0e1518c6b7ee28773f91357d56840bdc30bd89ca68f", algorithm="SHA-512-256"
+Accept: */*
+Content-Length: 11
+Content-Type: application/x-www-form-urlencoded
+
+junkelijunk
+</protocol>
+</verify>
+</testcase>

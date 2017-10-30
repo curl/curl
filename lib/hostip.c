@@ -688,8 +688,8 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    unsigned long elapsed_secs = (unsigned long) (Curl_tvdiff(Curl_tvnow(),
-                                   conn->created) / 1000);
+    timediff_t elapsed_secs = Curl_timediff(Curl_now(),
+                                            conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = prev_alarm - elapsed_secs;

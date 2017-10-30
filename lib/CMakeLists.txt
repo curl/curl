@@ -108,7 +108,24 @@ if(WIN32)
   endif()
 endif()
 
+target_include_directories(${LIB_NAME} INTERFACE
+	$<INSTALL_INTERFACE:include>)
+
 install(TARGETS ${LIB_NAME}
+  EXPORT libcurl-target
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+  RUNTIME DESTINATION bin
+)
+
+export(TARGETS ${LIB_NAME}
+       APPEND FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
+       NAMESPACE CURL::
+)
+
+install(EXPORT libcurl-target
+        FILE libcurl-target.cmake
+        NAMESPACE CURL::
+        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+)
+

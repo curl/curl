@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+FTP
+RETR
+LIST
+wildcardmatch
+ftplistparser
+flaky
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib576
+</tool>
+<name>
+FTP wildcard with crazy pattern
+</name>
+<command>
+"ftp://%HOSTIP:%FTPPORT/fully_simulated/DOS/[*\\s-'tl"
+</command>
+</client>
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD fully_simulated
+CWD DOS
+EPSV
+TYPE A
+LIST
+QUIT
+</protocol>
+# 78 == CURLE_REMOTE_FILE_NOT_FOUND
+<errorcode>
+78
+</errorcode>
+</verify>
+</testcase>

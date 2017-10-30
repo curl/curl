@@ -446,14 +446,14 @@ static CURLcode Curl_ossl_seed(struct Curl_easy *data)
     size_t len = sizeof(randb);
     size_t i, i_max;
     for(i = 0, i_max = len / sizeof(struct curltime); i < i_max; ++i) {
-      struct curltime tv = curlx_tvnow();
+      struct curltime tv = Curl_now();
       Curl_wait_ms(1);
       tv.tv_sec *= i + 1;
       tv.tv_usec *= (unsigned int)i + 2;
-      tv.tv_sec ^= ((curlx_tvnow().tv_sec + curlx_tvnow().tv_usec) *
+      tv.tv_sec ^= ((Curl_now().tv_sec + Curl_now().tv_usec) *
                     (i + 3)) << 8;
-      tv.tv_usec ^= (unsigned int) ((curlx_tvnow().tv_sec +
-                                     curlx_tvnow().tv_usec) *
+      tv.tv_usec ^= (unsigned int) ((Curl_now().tv_sec +
+                                     Curl_now().tv_usec) *
                                     (i + 4)) << 16;
       memcpy(&randb[i * sizeof(struct curltime)], &tv,
              sizeof(struct curltime));

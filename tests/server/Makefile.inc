@@ -4,14 +4,12 @@ CURLX_SRCS = \
  ../../lib/mprintf.c \
  ../../lib/nonblock.c \
  ../../lib/strtoofft.c \
- ../../lib/timeval.c \
  ../../lib/warnless.c
 
 CURLX_HDRS = \
  ../../lib/curlx.h \
  ../../lib/nonblock.h \
  ../../lib/strtoofft.h \
- ../../lib/timeval.h \
  ../../lib/warnless.h
 
 USEFUL = \

@@ -8,11 +8,23 @@ Curl and libcurl 7.57.0
 
 This release includes the following changes:
 
- o
+ o auth: add support for RFC7616 - HTTP Digest access authentication [12]
 
 This release includes the following bugfixes:
 
- o
+ o curl_mime_filedata.3: fix typos [1]
+ o libtest: Add required test libraries for lib1552 and lib1553 [2]
+ o fix time diffs for systems using unsigned time_t [3]
+ o ftplistparser: memory leak fix: free temporary memory always [4]
+ o multi: allow table handle sizes to be overridden [5]
+ o wildcards: don't use with non-supported protocols [6]
+ o curl_fnmatch: return error on illegal wildcard pattern [7]
+ o transfer: Fix chunked-encoding upload too early exit [8]
+ o curl_setup: Improve detection of CURL_WINDOWS_APP [9]
+ o resolvers: only include anything if needed [10]
+ o setopt: fix CURLOPT_SSH_AUTH_TYPES option read
+ o appveyor: add a win32 build
+ o Curl_timeleft: change return type to timediff_t [11]
 
 This release includes the following known bugs:
 
@@ -21,9 +33,24 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Alessandro Ghedini, Daniel Bankhead, Daniel Stenberg, Gisle Vanem,
+  Marcel Raad, Martin Storsjö, Max Dymond, moohoorama on github, Paul Howarth,
+  Peter Piekarski, Ray Satiro, Rob Cotrone,
+  (12 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=2008
+ [2] = https://curl.haxx.se/bug/?i=2006
+ [3] = https://curl.haxx.se/bug/?i=2004
+ [4] = https://curl.haxx.se/bug/?i=2013
+ [5] = https://curl.haxx.se/bug/?i=1982
+ [6] = https://curl.haxx.se/bug/?i=2016
+ [7] = https://curl.haxx.se/bug/?i=2015
+ [8] = https://curl.haxx.se/bug/?i=2001
+ [9] = https://curl.haxx.se/bug/?i=2025
+ [10] = https://curl.haxx.se/bug/?i=2023
+ [11] = https://curl.haxx.se/bug/?i=2021
+ [12] = https://curl.haxx.se/bug/?i=1934

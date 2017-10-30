@@ -200,7 +200,7 @@ const struct Curl_handler Curl_handler_tftp = {
 static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
 {
   time_t maxtime, timeout;
-  time_t timeout_ms;
+  timediff_t timeout_ms;
   bool start = (state->state == TFTP_STATE_START) ? TRUE : FALSE;
 
   time(&state->start_time);
@@ -1293,7 +1293,7 @@ static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done)
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(conn->data, Curl_tvnow());
+      result = Curl_speedcheck(conn->data, Curl_now());
   }
   return result;
 }

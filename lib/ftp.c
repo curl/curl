@@ -182,7 +182,8 @@ const struct Curl_handler Curl_handler_ftp = {
   PORT_FTP,                        /* defport */
   CURLPROTO_FTP,                   /* protocol */
   PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
-  PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP |
+  PROTOPT_WILDCARD /* flags */
 };
 
 
@@ -210,7 +211,7 @@ const struct Curl_handler Curl_handler_ftps = {
   PORT_FTPS,                       /* defport */
   CURLPROTO_FTPS,                  /* protocol */
   PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
-  PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY /* flags */
+  PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY | PROTOPT_WILDCARD /* flags */
 };
 #endif
 
@@ -332,16 +333,16 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
  * Curl_pgrsTime(..., TIMER_STARTACCEPT);
  *
  */
-static time_t ftp_timeleft_accept(struct Curl_easy *data)
+static timediff_t ftp_timeleft_accept(struct Curl_easy *data)
 {
-  time_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
-  time_t other;
+  timediff_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
+  timediff_t other;
   struct curltime now;
 
   if(data->set.accepttimeout > 0)
     timeout_ms = data->set.accepttimeout;
 
-  now = Curl_tvnow();
+  now = Curl_now();
 
   /* check if the generic timeout possibly is set shorter */
   other =  Curl_timeleft(data, &now, FALSE);
@@ -351,7 +352,7 @@ static time_t ftp_timeleft_accept(struct Curl_easy *data)
     timeout_ms = other;
   else {
     /* subtract elapsed time */
-    timeout_ms -= Curl_tvdiff(now, data->progress.t_acceptdata);
+    timeout_ms -= Curl_timediff(now, data->progress.t_acceptdata);
     if(!timeout_ms)
       /* avoid returning 0 as that means no timeout! */
       return -1;
@@ -3177,7 +3178,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   /* now store a copy of the directory we are in */
   free(ftpc->prevpath);
 
-  if(data->set.wildcardmatch) {
+  if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
       data->set.chunk_end(data->wildcard.customptr);
     }
@@ -3261,7 +3262,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     long old_time = pp->response_time;
 
     pp->response_time = 60*1000; /* give it only a minute for now */
-    pp->response = Curl_tvnow(); /* timeout relative now */
+    pp->response = Curl_now(); /* timeout relative now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 
@@ -3381,7 +3382,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 
       PPSENDF(&conn->proto.ftpc.pp, "%s", cmd);
 
-      pp->response = Curl_tvnow(); /* timeout relative now */
+      pp->response = Curl_now(); /* timeout relative now */
 
       result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
       if(result)
@@ -3962,7 +3963,7 @@ static CURLcode ftp_do(struct connectdata *conn, bool *done)
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
-  if(conn->data->set.wildcardmatch) {
+  if(conn->data->state.wildcardmatch) {
     result = wc_statemach(conn);
     if(conn->data->wildcard.state == CURLWC_SKIP ||
       conn->data->wildcard.state == CURLWC_DONE) {
