@@ -3385,6 +3385,7 @@ AC_CHECK_FUNCS([geteuid \
   getrlimit \
   gettimeofday \
   if_nametoindex \
+  mach_absolute_time \
   pipe \
   setlocale \
   setmode \
