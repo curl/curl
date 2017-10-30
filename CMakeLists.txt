@@ -878,6 +878,7 @@ check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 check_symbol_exists(fcntl          "${CURL_INCLUDES}" HAVE_FCNTL)
 check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
 check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
+check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
 
 # symbol exists in win32, but function does not.
 if(WIN32)
