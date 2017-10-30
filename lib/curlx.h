@@ -44,13 +44,16 @@
 
 #include "timeval.h"
 /*
-  "timeval.h" sets up a 'struct timeval' even for platforms that otherwise
-  don't have one and has protos for these functions:
+  "timeval.h" provides functions:
 
-  curlx_tvnow()
-  curlx_tvdiff()
-  curlx_tvdiff_secs()
+  Curl_now()
+  Curl_timediff()
+  Curl_timediff_us()
 */
+/* Set up backwards-compatible function names: */
+#define curlx_tvnow Curl_now
+#define curlx_tvdiff Curl_timediff
+#define curlx_tvdiff_secs Curl_timediff_usec
 
 #include "nonblock.h"
 /* "nonblock.h" provides curlx_nonblock() */
