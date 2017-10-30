@@ -601,7 +601,7 @@ sub torture {
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
                 localtime(time());
             my $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
-            logmsg "Fail funcion no: $limit at $now\r";
+            logmsg "Fail function no: $limit at $now\r";
         }
 
         # make the memory allocation function number $limit return failure
