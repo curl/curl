@@ -318,6 +318,7 @@ if(CMAKE_USE_OPENSSL)
   # NO_REDEF_POSIX_FUNCTIONS - Curl should not use libressl's windows posix wrappers
   # HAVE_STRNLEN - Curl defines its own Curl_strnlen that it uses, don't bring in libressl's version
   add_definitions(-DNO_REDEF_POSIX_FUNCTIONS -DHAVE_STRNLEN)
+  set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -DNO_REDEF_POSIX_FUNCTIONS -DHAVE_STRNLEN")
 
   list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
   set(USE_OPENSSL ON)
