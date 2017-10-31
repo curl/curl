@@ -305,7 +305,20 @@ if(CMAKE_USE_OPENSSL)
     find_library(RT_LIBRARY librt.a rt)
     list(APPEND OPENSSL_LIBRARIES ${RT_LIBRARY})
   endif()
+  # TODO: Do we have to add the compat folder to the include path?
+  # We need it to compile, but when building against openssl, curl didn't seem to need it.
+  # We (WBNY) added it to the include path when we added libressl support
+  # The problem with adding the compat folder to the include path is that libressl relies heavily on
+  # cmake detection for stuff it may need to provide based on the missing features of the compiler chain
+  # but curl doesn't have access to it.
   set(OPENSSL_INCLUDE_DIR ${LibreSSL_SOURCE_DIR}/include ${LibreSSL_SOURCE_DIR}/include/compat)
+
+  # Since we need to the compat folder in the include path for curl to build properly
+  # We'll need to explicitly set some defines here to avoid build issues
+  # NO_REDEF_POSIX_FUNCTIONS - Curl should not use libressl's windows posix wrappers
+  # HAVE_STRNLEN - Curl defines its own Curl_strnlen that it uses, don't bring in libressl's version
+  add_definitions(-DNO_REDEF_POSIX_FUNCTIONS -DHAVE_STRNLEN)
+
   list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
   set(USE_OPENSSL ON)
   set(HAVE_LIBCRYPTO ON)
