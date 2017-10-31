@@ -29,6 +29,7 @@
 #include <libssh2_sftp.h>
 #elif defined(HAVE_LIBSSH_LIBSSH_H)
 #include <libssh/libssh.h>
+#include <libssh/sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
 /****************************************************************************
@@ -130,8 +131,6 @@ struct ssh_conn {
                                  quote command fails) */
   char *homedir;              /* when doing SFTP we figure out home dir in the
                                  connect phase */
-  char *readdir_filename;
-  char *readdir_longentry;
   int readdir_len, readdir_totalLen, readdir_currLen;
   char *readdir_line;
   char *readdir_linkPath;
@@ -146,12 +145,29 @@ struct ssh_conn {
 
 #if defined(USE_LIBSSH)
 /* our variables */
+  unsigned kbd_state; /* 0 or 1 */
   ssh_key privkey;
   ssh_key pubkey;
   int auth_methods;
   ssh_session ssh_session;
   ssh_scp scp_session;
+  sftp_session sftp_session;
+  sftp_file sftp_file;
+  sftp_dir sftp_dir;
+
+  unsigned sftp_recv_state; /* 0 or 1 */
+  int sftp_file_index; /* for async read */
+  sftp_attributes readdir_attrs; /* used by the SFTP readdir actions */
+  sftp_attributes readdir_link_attrs; /* used by the SFTP readdir actions */
+  sftp_attributes quote_attrs; /* used by the SFTP_QUOTE state */
+
+  const char *readdir_filename; /* points within readdir_attrs */
+  const char *readdir_longentry;
+  char *readdir_tmp;
 #elif defined(USE_LIBSSH2)
+  char *readdir_filename;
+  char *readdir_longentry;
+
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
 
   /* Here's a set of struct members used by the SFTP_READDIR state */
@@ -180,6 +196,7 @@ struct ssh_conn {
 #define CURL_LIBSSH_VERSION ssh_version(0)
 
 extern const struct Curl_handler Curl_handler_scp;
+extern const struct Curl_handler Curl_handler_sftp;
 
 #elif defined(USE_LIBSSH2)
 
