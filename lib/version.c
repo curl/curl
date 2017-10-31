@@ -272,8 +272,6 @@ static const char * const protocols[] = {
 #endif
 #if defined(USE_LIBSSH) || defined(USE_LIBSSH2)
   "scp",
-#endif
-#ifdef USE_LIBSSH2
   "sftp",
 #endif
 #if !defined(CURL_DISABLE_SMB) && defined(USE_NTLM) && \
