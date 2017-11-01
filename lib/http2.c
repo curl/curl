@@ -1183,14 +1183,17 @@ CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
                                          httpc->local_settings_num);
   if(!binlen) {
     failf(conn->data, "nghttp2 unexpectedly failed on pack_settings_payload");
+    Curl_add_buffer_free(req);
     return CURLE_FAILED_INIT;
   }
   conn->proto.httpc.binlen = binlen;
 
   result = Curl_base64url_encode(conn->data, (const char *)binsettings, binlen,
                                  &base64, &blen);
-  if(result)
+  if(result) {
+    Curl_add_buffer_free(req);
     return result;
+  }
 
   result = Curl_add_bufferf(req,
                             "Connection: Upgrade, HTTP2-Settings\r\n"
