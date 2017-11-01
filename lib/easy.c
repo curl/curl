@@ -68,7 +68,6 @@
 #include "amigaos.h"
 #include "non-ascii.h"
 #include "warnless.h"
-#include "conncache.h"
 #include "multiif.h"
 #include "sigpipe.h"
 #include "ssh.h"

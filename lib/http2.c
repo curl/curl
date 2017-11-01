@@ -32,7 +32,6 @@
 #include "curl_base64.h"
 #include "strcase.h"
 #include "multiif.h"
-#include "conncache.h"
 #include "url.h"
 #include "connect.h"
 #include "strtoofft.h"
