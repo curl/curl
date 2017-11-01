@@ -326,14 +326,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_llist_init(&multi->msglist, multi_freeamsg);
   Curl_llist_init(&multi->pending, multi_freeamsg);
 
-  /* allocate a new easy handle to use when closing cached connections */
-  multi->closure_handle = curl_easy_init();
-  if(!multi->closure_handle)
-    goto error;
-
-  multi->closure_handle->multi = multi;
-  multi->closure_handle->state.conn_cache = &multi->conn_cache;
-
   multi->max_pipeline_length = 5;
 
   /* -1 means it not set by user, use the default value */
@@ -345,8 +337,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_hash_destroy(&multi->sockhash);
   Curl_hash_destroy(&multi->hostcache);
   Curl_conncache_destroy(&multi->conn_cache);
-  Curl_close(multi->closure_handle);
-  multi->closure_handle = NULL;
   Curl_llist_destroy(&multi->msglist, NULL);
   Curl_llist_destroy(&multi->pending, NULL);
 
@@ -407,8 +397,11 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->dns.hostcachetype = HCACHE_MULTI;
   }
 
-  /* Point to the multi's connection cache */
-  data->state.conn_cache = &multi->conn_cache;
+  /* Point to the shared or multi handle connection cache */
+  if(data->share && (data->share->specifier & (1<< CURL_LOCK_DATA_CONNECT)))
+    data->state.conn_cache = &data->share->conn_cache;
+  else
+    data->state.conn_cache = &multi->conn_cache;
 
   /* This adds the new entry at the 'end' of the doubly-linked circular
      list of Curl_easy structs to try and maintain a FIFO queue so
@@ -462,8 +455,8 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      state somewhat we clone the timeouts from each added handle so that the
      closure handle always has the same timeouts as the most recently added
      easy handle. */
-  multi->closure_handle->set.timeout = data->set.timeout;
-  multi->closure_handle->set.server_response_timeout =
+  data->state.conn_cache->closure_handle->set.timeout = data->set.timeout;
+  data->state.conn_cache->closure_handle->set.server_response_timeout =
     data->set.server_response_timeout;
 
   update_timer(multi);
@@ -504,7 +497,7 @@ ConnectionDone(struct Curl_easy *data, struct connectdata *conn)
      data->state.conn_cache->num_connections > maxconnects) {
     infof(data, "Connection cache is full, closing the oldest one.\n");
 
-    conn_candidate = Curl_oldest_idle_connection(data);
+    conn_candidate = Curl_conncache_oldest_idle(data);
 
     if(conn_candidate) {
       /* Set the connection's owner correctly */
@@ -2201,36 +2194,12 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   return returncode;
 }
 
-static void close_all_connections(struct Curl_multi *multi)
-{
-  struct connectdata *conn;
-
-  conn = Curl_conncache_find_first_connection(&multi->conn_cache);
-  while(conn) {
-    SIGPIPE_VARIABLE(pipe_st);
-    conn->data = multi->closure_handle;
-
-    sigpipe_ignore(conn->data, &pipe_st);
-    conn->data->easy_conn = NULL; /* clear the easy handle's connection
-                                     pointer */
-    /* This will remove the connection from the cache */
-    connclose(conn, "kill all");
-    (void)Curl_disconnect(conn, FALSE);
-    sigpipe_restore(&pipe_st);
-
-    conn = Curl_conncache_find_first_connection(&multi->conn_cache);
-  }
-}
-
 CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 {
   struct Curl_easy *data;
   struct Curl_easy *nextdata;
 
   if(GOOD_MULTI_HANDLE(multi)) {
-    bool restore_pipe = FALSE;
-    SIGPIPE_VARIABLE(pipe_st);
-
     multi->type = 0; /* not good anymore */
 
     /* Firsrt remove all remaining easy handles */
@@ -2255,18 +2224,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     }
 
     /* Close all the connections in the connection cache */
-    close_all_connections(multi);
-
-    if(multi->closure_handle) {
-      sigpipe_ignore(multi->closure_handle, &pipe_st);
-      restore_pipe = TRUE;
-
-      multi->closure_handle->dns.hostcache = &multi->hostcache;
-      Curl_hostcache_clean(multi->closure_handle,
-                           multi->closure_handle->dns.hostcache);
-
-      Curl_close(multi->closure_handle);
-    }
+    Curl_conncache_close_all_connections(&multi->conn_cache);
 
     Curl_hash_destroy(&multi->sockhash);
     Curl_conncache_destroy(&multi->conn_cache);
@@ -2280,8 +2238,6 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_pipeline_set_server_blacklist(NULL, &multi->pipelining_server_bl);
 
     free(multi);
-    if(restore_pipe)
-      sigpipe_restore(&pipe_st);
 
     return CURLM_OK;
   }
