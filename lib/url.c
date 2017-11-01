@@ -3448,58 +3448,6 @@ static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
   }
 }
 
-/*
- * This function finds the connection in the connection
- * cache that has been unused for the longest time.
- *
- * Returns the pointer to the oldest idle connection, or NULL if none was
- * found.
- */
-struct connectdata *
-Curl_oldest_idle_connection(struct Curl_easy *data)
-{
-  struct conncache *bc = data->state.conn_cache;
-  struct curl_hash_iterator iter;
-  struct curl_llist_element *curr;
-  struct curl_hash_element *he;
-  timediff_t highscore =- 1;
-  timediff_t score;
-  struct curltime now;
-  struct connectdata *conn_candidate = NULL;
-  struct connectbundle *bundle;
-
-  now = Curl_now();
-
-  Curl_hash_start_iterate(&bc->hash, &iter);
-
-  he = Curl_hash_next_element(&iter);
-  while(he) {
-    struct connectdata *conn;
-
-    bundle = he->ptr;
-
-    curr = bundle->conn_list.head;
-    while(curr) {
-      conn = curr->ptr;
-
-      if(!conn->inuse) {
-        /* Set higher score for the age passed since the connection was used */
-        score = Curl_timediff(now, conn->now);
-
-        if(score > highscore) {
-          highscore = score;
-          conn_candidate = conn;
-        }
-      }
-      curr = curr->next;
-    }
-
-    he = Curl_hash_next_element(&iter);
-  }
-
-  return conn_candidate;
-}
-
 static bool
 proxy_info_matches(const struct proxy_info* data,
                    const struct proxy_info* needle)
@@ -3619,7 +3567,7 @@ static void prune_dead_connections(struct Curl_easy *data)
   time_t elapsed = Curl_timediff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {
-    Curl_conncache_foreach(data->state.conn_cache, data,
+    Curl_conncache_foreach(data, data->state.conn_cache, data,
                            call_disconnect_if_dead);
     data->state.conn_cache->last_cleanup = now;
   }
@@ -6996,7 +6944,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       struct connectdata *conn_candidate;
 
       /* The cache is full. Let's see if we can kill a connection. */
-      conn_candidate = Curl_oldest_idle_connection(data);
+      conn_candidate = Curl_conncache_oldest_idle(data);
 
       if(conn_candidate) {
         /* Set the connection's owner correctly, then kill it */
