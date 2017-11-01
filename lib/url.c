@@ -1043,7 +1043,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * headers. This should mostly be used to detect never-ending loops.
      */
     arg = va_arg(param, long);
-    if(arg < 0)
+    if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.maxredirs = arg;
     break;
