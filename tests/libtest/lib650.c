@@ -33,7 +33,7 @@ static char data[] =
   "this is what we post to the silly web server";
 #endif
 
-static char name[] = "fieldname";
+static const char name[] = "fieldname";
 
 
 /* This test attempts to use all form API features that are not
@@ -53,10 +53,10 @@ static size_t count_chars(void *userp, const char *buf, size_t len)
 
 int test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURLcode res = TEST_ERR_MAJOR_BAD;
   CURLFORMcode formrc;
-  struct curl_slist *headers = NULL;
+  struct curl_slist *headers, *headers2 = NULL;
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
   struct curl_forms formarray[3];
@@ -69,17 +69,30 @@ int test(char *URL)
   }
 
   /* Check proper name and data copying, as well as headers. */
-  headers = curl_slist_append(headers, "X-customheader-1: Header 1 data");
-  headers = curl_slist_append(headers, "X-customheader-2: Header 2 data");
-  headers = curl_slist_append(headers, "Content-Type: text/plain");
+  headers = curl_slist_append(NULL, "X-customheader-1: Header 1 data");
+  if(!headers) {
+    goto test_cleanup;
+  }
+  headers2 = curl_slist_append(headers, "X-customheader-2: Header 2 data");
+  if(!headers2) {
+    goto test_cleanup;
+  }
+  headers = headers2;
+  headers2 = curl_slist_append(headers, "Content-Type: text/plain");
+  if(!headers2) {
+    goto test_cleanup;
+  }
+  headers = headers2;
   formrc = curl_formadd(&formpost, &lastptr,
                         CURLFORM_COPYNAME, &name,
                         CURLFORM_COPYCONTENTS, &data,
                         CURLFORM_CONTENTHEADER, headers,
                         CURLFORM_END);
 
-  if(formrc)
+  if(formrc) {
     printf("curl_formadd(1) = %d\n", (int) formrc);
+    goto test_cleanup;
+  }
 
   /* Use a form array for the non-copy test. */
   formarray[0].option = CURLFORM_PTRCONTENTS;
@@ -96,8 +109,10 @@ int test(char *URL)
                         CURLFORM_FILENAME, "remotefile.txt",
                         CURLFORM_END);
 
-  if(formrc)
+  if(formrc) {
     printf("curl_formadd(2) = %d\n", (int) formrc);
+    goto test_cleanup;
+  }
 
   /* Now change in-memory data to affect CURLOPT_PTRCONTENTS value.
      Copied values (first field) must not be affected.
@@ -114,8 +129,10 @@ int test(char *URL)
                         CURLFORM_FILE, libtest_arg2,
                         CURLFORM_END);
 
-  if(formrc)
+  if(formrc) {
     printf("curl_formadd(3) = %d\n", (int) formrc);
+    goto test_cleanup;
+  }
 
   /* Check data from file content. */
   formrc = curl_formadd(&formpost,
@@ -124,8 +141,10 @@ int test(char *URL)
                         CURLFORM_FILECONTENT, libtest_arg2,
                         CURLFORM_END);
 
-  if(formrc)
+  if(formrc) {
     printf("curl_formadd(4) = %d\n", (int) formrc);
+    goto test_cleanup;
+  }
 
   /* Measure the current form length.
    * This is done before including stdin data because we want to reuse it
@@ -140,6 +159,10 @@ int test(char *URL)
                         CURLFORM_COPYNAME, "formlength",
                         CURLFORM_COPYCONTENTS, &flbuf,
                         CURLFORM_END);
+  if(formrc) {
+    printf("curl_formadd(5) = %d\n", (int) formrc);
+    goto test_cleanup;
+  }
 
   /* Check stdin (may be problematic on some platforms). */
   formrc = curl_formadd(&formpost,
@@ -147,17 +170,15 @@ int test(char *URL)
                         CURLFORM_COPYNAME, "standardinput",
                         CURLFORM_FILE, "-",
                         CURLFORM_END);
-
-  if(formrc)
-    printf("curl_formadd(5) = %d\n", (int) formrc);
+  if(formrc) {
+    printf("curl_formadd(6) = %d\n", (int) formrc);
+    goto test_cleanup;
+  }
 
   curl = curl_easy_init();
   if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
-    curl_slist_free_all(headers);
-    curl_formfree(formpost);
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
   }
 
   /* First set the URL that is about to receive our POST. */
