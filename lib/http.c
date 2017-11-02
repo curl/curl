@@ -3103,7 +3103,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            !(conn->handler->protocol & CURLPROTO_RTSP) &&
            data->set.httpreq != HTTPREQ_HEAD) {
           /* On HTTP 1.1, when connection is not to get closed, but no
-             Content-Length nor Content-Encoding chunked have been
+             Content-Length nor Transfer-Encoding chunked have been
              received, according to RFC2616 section 4.4 point 5, we
              assume that the server will close the connection to
              signal the end of the document. */
@@ -3613,51 +3613,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * of chunks, and a chunk-data set to zero signals the
        * end-of-chunks. */
 
-      char *start;
-
-      /* Find the first non-space letter */
-      start = k->p + 18;
-
-      for(;;) {
-        /* skip whitespaces and commas */
-        while(*start && (ISSPACE(*start) || (*start == ',')))
-          start++;
-
-        if(checkprefix("chunked", start)) {
-          k->chunk = TRUE; /* chunks coming our way */
-
-          /* init our chunky engine */
-          Curl_httpchunk_init(conn);
-
-          start += 7;
-        }
-
-        if(k->auto_decoding)
-          /* TODO: we only support the first mentioned compression for now */
-          break;
-
-        if(checkprefix("identity", start)) {
-          k->auto_decoding = IDENTITY;
-          start += 8;
-        }
-        else if(checkprefix("deflate", start)) {
-          k->auto_decoding = DEFLATE;
-          start += 7;
-        }
-        else if(checkprefix("gzip", start)) {
-          k->auto_decoding = GZIP;
-          start += 4;
-        }
-        else if(checkprefix("x-gzip", start)) {
-          k->auto_decoding = GZIP;
-          start += 6;
-        }
-        else
-          /* unknown! */
-          break;
-
-      }
-
+      result = Curl_build_unencoding_stack(conn, k->p + 18, TRUE);
+      if(result)
+        return result;
     }
     else if(checkprefix("Content-Encoding:", k->p) &&
             data->set.str[STRING_ENCODING]) {
@@ -3668,21 +3626,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * 2616). zlib cannot handle compress.  However, errors are
        * handled further down when the response body is processed
        */
-      char *start;
-
-      /* Find the first non-space letter */
-      start = k->p + 17;
-      while(*start && ISSPACE(*start))
-        start++;
-
-      /* Record the content-encoding for later use */
-      if(checkprefix("identity", start))
-        k->auto_decoding = IDENTITY;
-      else if(checkprefix("deflate", start))
-        k->auto_decoding = DEFLATE;
-      else if(checkprefix("gzip", start)
-              || checkprefix("x-gzip", start))
-        k->auto_decoding = GZIP;
+      result = Curl_build_unencoding_stack(conn, k->p + 17, FALSE);
+      if(result)
+        return result;
     }
     else if(checkprefix("Content-Range:", k->p)) {
       /* Content-Range: bytes [num]-

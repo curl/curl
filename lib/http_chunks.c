@@ -187,49 +187,17 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       piece = curlx_sotouz((ch->datasize >= length)?length:ch->datasize);
 
       /* Write the data portion available */
-#ifdef HAVE_LIBZ
-      switch(conn->data->set.http_ce_skip?
-             IDENTITY : data->req.auto_decoding) {
-      case IDENTITY:
-#endif
-        if(!k->ignorebody) {
-          if(!data->set.http_te_skip)
-            result = Curl_client_write(conn, CLIENTWRITE_BODY, datap,
-                                       piece);
-          else
-            result = CURLE_OK;
-        }
-#ifdef HAVE_LIBZ
-        break;
-
-      case DEFLATE:
-        /* update data->req.keep.str to point to the chunk data. */
-        data->req.str = datap;
-        result = Curl_unencode_deflate_write(conn, &data->req,
-                                             (ssize_t)piece);
-        break;
-
-      case GZIP:
-        /* update data->req.keep.str to point to the chunk data. */
-        data->req.str = datap;
-        result = Curl_unencode_gzip_write(conn, &data->req,
-                                          (ssize_t)piece);
-        break;
-
-      default:
-        failf(conn->data,
-              "Unrecognized content encoding type. "
-              "libcurl understands `identity', `deflate' and `gzip' "
-              "content encodings.");
-        return CHUNKE_BAD_ENCODING;
+      if(conn->data->set.http_ce_skip || !k->writer_stack) {
+        if(!k->ignorebody)
+          result = Curl_client_write(conn, CLIENTWRITE_BODY, datap, piece);
       }
-#endif
+      else
+        result = Curl_unencode_write(conn, k->writer_stack, datap, piece);
 
       if(result)
         return CHUNKE_WRITE_ERROR;
 
       *wrote += piece;
-
       ch->datasize -= piece; /* decrease amount left to expect */
       datap += piece;    /* move read pointer forward */
       length -= piece;   /* decrease space left in this round */

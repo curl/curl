@@ -67,7 +67,6 @@
  5.7 Brotli compression
  5.8 QUIC
  5.9 Leave secure cookies alone
- 5.10 Support Multiple Content-Encodings
 
  6. TELNET
  6.1 ditch stdin
@@ -537,12 +536,6 @@ This is not detailed in any FTP specification.
  cookies with the 'secure' property:
 
  https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01
-
-5.10 Support Multiple Content-Encodings
-
- RFC 7231 Section 3.1.2.2 allows multiple encodings for a single request. Using
- this may result in lower bandwidth and promotes a more resource-friendly web.
- Currently, Chrome and Firefox support multiple encodings.
 
 
 6. TELNET
