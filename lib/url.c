@@ -722,7 +722,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
     arg = va_arg(param, long);
-    if(arg < 0)
+    if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.dns_cache_timeout = arg;
     break;
