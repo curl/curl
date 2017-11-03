@@ -73,7 +73,6 @@
 #include "http_proxy.h"
 #include "warnless.h"
 #include "non-ascii.h"
-#include "conncache.h"
 #include "pipeline.h"
 #include "http2.h"
 #include "connect.h"

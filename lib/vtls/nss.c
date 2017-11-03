@@ -2365,7 +2365,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_nss_connect,             /* connect */
   Curl_nss_connect_nonblocking, /* connect_nonblocking */
   Curl_nss_get_internals,       /* get_internals */
-  Curl_nss_close,               /* close */
+  Curl_nss_close,               /* close_one */
   Curl_none_close_all,          /* close_all */
   /* NSS has its own session ID cache */
   Curl_none_session_free,       /* session_free */

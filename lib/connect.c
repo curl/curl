@@ -179,12 +179,12 @@ singleipconnect(struct connectdata *conn,
  *
  * @unittest: 1303
  */
-time_t Curl_timeleft(struct Curl_easy *data,
-                     struct curltime *nowp,
-                     bool duringconnect)
+timediff_t Curl_timeleft(struct Curl_easy *data,
+                         struct curltime *nowp,
+                         bool duringconnect)
 {
   int timeout_set = 0;
-  time_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
+  timediff_t timeout_ms = duringconnect?DEFAULT_CONNECT_TIMEOUT:0;
   struct curltime now;
 
   /* if a timeout is set, use the most restrictive one */
@@ -218,17 +218,17 @@ time_t Curl_timeleft(struct Curl_easy *data,
   }
 
   if(!nowp) {
-    now = Curl_tvnow();
+    now = Curl_now();
     nowp = &now;
   }
 
   /* subtract elapsed time */
   if(duringconnect)
     /* since this most recent connect started */
-    timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startsingle);
+    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startsingle);
   else
     /* since the entire operation started */
-    timeout_ms -= Curl_tvdiff(*nowp, data->progress.t_startop);
+    timeout_ms -= Curl_timediff(*nowp, data->progress.t_startop);
   if(!timeout_ms)
     /* avoid returning 0 as that means no timeout! */
     return -1;
@@ -721,7 +721,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
-  time_t allow;
+  timediff_t allow;
   int error = 0;
   struct curltime now;
   int rc;
@@ -737,7 +737,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  now = Curl_tvnow();
+  now = Curl_now();
 
   /* figure out how long time we have left to connect */
   allow = Curl_timeleft(data, &now, TRUE);
@@ -765,7 +765,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
     if(rc == 0) { /* no connection yet */
       error = 0;
-      if(curlx_tvdiff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
+      if(Curl_timediff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
         infof(data, "After %ldms connect time, move on!\n",
               conn->timeoutms_per_addr);
         error = ETIMEDOUT;
@@ -773,7 +773,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
       /* should we try another protocol family? */
       if(i == 0 && conn->tempaddr[1] == NULL &&
-         curlx_tvdiff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
+         Curl_timediff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
         trynextip(conn, sockindex, 1);
       }
     }
@@ -1051,7 +1051,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   /* set socket non-blocking */
   (void)curlx_nonblock(sockfd, TRUE);
 
-  conn->connecttime = Curl_tvnow();
+  conn->connecttime = Curl_now();
   if(conn->num_addr > 1)
     Curl_expire(data, conn->timeoutms_per_addr, EXPIRE_DNS_PER_NAME);
 
@@ -1145,10 +1145,10 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           const struct Curl_dns_entry *remotehost)
 {
   struct Curl_easy *data = conn->data;
-  struct curltime before = Curl_tvnow();
+  struct curltime before = Curl_now();
   CURLcode result = CURLE_COULDNT_CONNECT;
 
-  time_t timeout_ms = Curl_timeleft(data, &before, TRUE);
+  timediff_t timeout_ms = Curl_timeleft(data, &before, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */

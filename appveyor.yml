@@ -56,7 +56,12 @@ environment:
         OPENSSL: OFF
         TESTING: ON
         STATICLIB: ON
-
+      - PRJ_GEN: "Visual Studio 14 2015"
+        BDIR: msvc2015
+        PRJ_CFG: Release
+        OPENSSL: OFF
+        TESTING: ON
+        STATICLIB: ON
 
 build_script:
     - mkdir build.%BDIR%

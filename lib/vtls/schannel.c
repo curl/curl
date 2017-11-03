@@ -1838,7 +1838,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_schannel_connect,             /* connect */
   Curl_schannel_connect_nonblocking, /* connect_nonblocking */
   Curl_schannel_get_internals,       /* get_internals */
-  Curl_schannel_close,               /* close */
+  Curl_schannel_close,               /* close_one */
   Curl_none_close_all,               /* close_all */
   Curl_schannel_session_free,        /* session_free */
   Curl_none_set_engine,              /* set_engine */

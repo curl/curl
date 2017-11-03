@@ -15,7 +15,7 @@ found yourself or perhaps got annoyed at in the past. It can be a spelling
 error in an error text or a weirdly phrased section in a man page. Hunt it
 down and report the bug. Or make your first pull request with a fix for that.
 
-## PR-welcome
+## Help wanted
 
 In the issue tracker we occasionally mark bugs with [help
 wanted](https://github.com/curl/curl/labels/help%20wanted), as a sign that the

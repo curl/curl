@@ -59,7 +59,9 @@
 #define CURL_SOCKET_HASH_TABLE_SIZE 911
 #endif
 
+#ifndef CURL_CONNECTION_HASH_SIZE
 #define CURL_CONNECTION_HASH_SIZE 97
+#endif
 
 #define CURL_MULTI_HANDLE 0x000bab1e
 
@@ -1316,7 +1318,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   struct SingleRequest *k;
   time_t timeout_ms;
   time_t recv_timeout_ms;
-  time_t send_timeout_ms;
+  timediff_t send_timeout_ms;
   int control;
 
   if(!GOOD_EASY_HANDLE(data))
@@ -1380,23 +1382,23 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* Handle timed out */
         if(data->mstate == CURLM_STATE_WAITRESOLVE)
           failf(data, "Resolving timed out after %ld milliseconds",
-                Curl_tvdiff(now, data->progress.t_startsingle));
+                Curl_timediff(now, data->progress.t_startsingle));
         else if(data->mstate == CURLM_STATE_WAITCONNECT)
           failf(data, "Connection timed out after %ld milliseconds",
-                Curl_tvdiff(now, data->progress.t_startsingle));
+                Curl_timediff(now, data->progress.t_startsingle));
         else {
           k = &data->req;
           if(k->size != -1) {
             failf(data, "Operation timed out after %ld milliseconds with %"
                   CURL_FORMAT_CURL_OFF_T " out of %"
                   CURL_FORMAT_CURL_OFF_T " bytes received",
-                  Curl_tvdiff(now, data->progress.t_startsingle),
+                  Curl_timediff(now, data->progress.t_startsingle),
                   k->bytecount, k->size);
           }
           else {
             failf(data, "Operation timed out after %ld milliseconds with %"
                   CURL_FORMAT_CURL_OFF_T " bytes received",
-                  Curl_tvdiff(now, data->progress.t_startsingle),
+                  Curl_timediff(now, data->progress.t_startsingle),
                   k->bytecount);
           }
         }
@@ -1661,7 +1663,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(!result) {
           if(!dophase_done) {
             /* some steps needed for wildcard matching */
-            if(data->set.wildcardmatch) {
+            if(data->state.wildcardmatch) {
               struct WildcardData *wc = &data->wildcard;
               if(wc->state == CURLWC_DONE || wc->state == CURLWC_SKIP) {
                 /* skip some states if it is important */
@@ -1813,7 +1815,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          (data->easy_conn->writesockfd != CURL_SOCKET_BAD))
         multistate(data, CURLM_STATE_WAITPERFORM);
       else
+      {
+        if(data->state.wildcardmatch &&
+           ((data->easy_conn->handler->flags & PROTOPT_WILDCARD) == 0)) {
+           data->wildcard.state = CURLWC_DONE;
+        }
         multistate(data, CURLM_STATE_DONE);
+      }
       rc = CURLM_CALL_MULTI_PERFORM;
       break;
 
@@ -2030,7 +2038,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           data->easy_conn = NULL;
       }
 
-      if(data->set.wildcardmatch) {
+      if(data->state.wildcardmatch) {
         if(data->wildcard.state != CURLWC_DONE) {
           /* if a wildcard is set and we are not ending -> lets start again
              with CURLM_STATE_INIT */
@@ -2147,7 +2155,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   struct Curl_easy *data;
   CURLMcode returncode = CURLM_OK;
   struct Curl_tree *t;
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -2514,9 +2522,9 @@ static CURLMcode add_next_timeout(struct curltime now,
      timeout in *tv */
   for(e = list->head; e;) {
     struct curl_llist_element *n = e->next;
-    time_t diff;
+    timediff_t diff;
     node = (struct time_node *)e->ptr;
-    diff = curlx_tvdiff(node->time, now);
+    diff = Curl_timediff(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
       Curl_llist_remove(list, e, NULL);
@@ -2553,7 +2561,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   CURLMcode result = CURLM_OK;
   struct Curl_easy *data = NULL;
   struct Curl_tree *t;
-  struct curltime now = Curl_tvnow();
+  struct curltime now = Curl_now();
 
   if(checkall) {
     /* *perform() deals with running_handles on its own */
@@ -2629,8 +2637,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
       data = NULL; /* set data to NULL again to avoid calling
                       multi_runsingle() in case there's no need to */
-      now = Curl_tvnow(); /* get a newer time since the multi_runsingle() loop
-                             may have taken some time */
+      now = Curl_now(); /* get a newer time since the multi_runsingle() loop
+                           may have taken some time */
     }
   }
   else {
@@ -2783,15 +2791,15 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
   if(multi->timetree) {
     /* we have a tree of expire times */
-    struct curltime now = Curl_tvnow();
+    struct curltime now = Curl_now();
 
     /* splay the lowest to the bottom */
     multi->timetree = Curl_splay(tv_zero, multi->timetree);
 
     if(Curl_splaycomparekeys(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      *timeout_ms = (long)curlx_tvdiff(multi->timetree->key, now);
-      if(!*timeout_ms)
+      timediff_t diff = Curl_timediff(multi->timetree->key, now);
+      if(diff <= 0)
         /*
          * Since we only provide millisecond resolution on the returned value
          * and the diff might be less than one millisecond here, we don't
@@ -2800,6 +2808,10 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
          * millisecond! instead we return 1 until the time is ripe.
          */
         *timeout_ms = 1;
+      else
+        /* this should be safe even on 64 bit archs, as we don't use that
+           overly long timeouts */
+        *timeout_ms = (long)diff;
     }
     else
       /* 0 means immediately */
@@ -2906,7 +2918,7 @@ multi_addtimeout(struct Curl_easy *data,
     /* find the correct spot in the list */
     for(e = timeoutlist->head; e; e = e->next) {
       struct time_node *check = (struct time_node *)e->ptr;
-      time_t diff = curlx_tvdiff(check->time, node->time);
+      timediff_t diff = Curl_timediff(check->time, node->time);
       if(diff > 0)
         break;
       prev = e;
@@ -2945,7 +2957,7 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
 
   DEBUGASSERT(id < EXPIRE_LAST);
 
-  set = Curl_tvnow();
+  set = Curl_now();
   set.tv_sec += milli/1000;
   set.tv_usec += (unsigned int)(milli%1000)*1000;
 
@@ -2965,7 +2977,7 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
-    time_t diff = curlx_tvdiff(set, *nowp);
+    timediff_t diff = Curl_timediff(set, *nowp);
 
     if(diff > 0) {
       /* The current splay tree entry is sooner than this new expiry time.

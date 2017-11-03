@@ -1003,7 +1003,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   Curl_cyassl_connect,             /* connect */
   Curl_cyassl_connect_nonblocking, /* connect_nonblocking */
   Curl_cyassl_get_internals,       /* get_internals */
-  Curl_cyassl_close,               /* close */
+  Curl_cyassl_close,               /* close_one */
   Curl_none_close_all,             /* close_all */
   Curl_cyassl_session_free,        /* session_free */
   Curl_none_set_engine,            /* set_engine */

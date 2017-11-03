@@ -233,6 +233,7 @@ my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
 my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
+my $has_multissl;   # set if curl is build with MultiSSL support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -600,7 +601,7 @@ sub torture {
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
                 localtime(time());
             my $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
-            logmsg "Fail funcion no: $limit at $now\r";
+            logmsg "Fail function no: $limit at $now\r";
         }
 
         # make the memory allocation function number $limit return failure
@@ -2858,6 +2859,10 @@ sub checksystem {
                 # ssl enabled
                 $has_ssl=1;
             }
+            if($feat =~ /MultiSSL/i) {
+                # multiple ssl backends available.
+                $has_multissl=1;
+            }
             if($feat =~ /Largefile/i) {
                 # large file support
                 $has_largefile=1;
@@ -3311,6 +3316,11 @@ sub singletest {
                     next;
                 }
             }
+            elsif($1 eq "MultiSSL") {
+                if($has_multissl) {
+                    next;
+                }
+            }
             elsif($1 eq "SSLpinning") {
                 if($has_sslpinning) {
                     next;
@@ -3476,6 +3486,11 @@ sub singletest {
             if($f =~ /^!(.*)$/) {
                 if($1 eq "SSL") {
                     if(!$has_ssl) {
+                        next;
+                    }
+                }
+                elsif($1 eq "MultiSSL") {
+                    if(!$has_multissl) {
                         next;
                     }
                 }

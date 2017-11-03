@@ -612,20 +612,6 @@ curlx
    strtoll() (or equivalent) function exist on your platform. If `curl_off_t`
    is only a 32 bit number on your platform, this macro uses strtol().
 
-`curlx_tvnow()`
----------------
-   returns a struct timeval for the current time.
-
-`curlx_tvdiff()`
---------------
-   returns the difference between two timeval structs, in number of
-   milliseconds.
-
-`curlx_tvdiff_secs()`
----------------------
-   returns the same as `curlx_tvdiff` but with full usec resolution (as a
-   double)
-
 Future
 ------
 
@@ -656,27 +642,26 @@ Content Encoding
 ## About content encodings
 
  [HTTP/1.1][4] specifies that a client may request that a server encode its
- response. This is usually used to compress a response using one of a set of
- commonly available compression techniques. These schemes are 'deflate' (the
- zlib algorithm), 'gzip' and 'compress'. A client requests that the server
- perform an encoding by including an Accept-Encoding header in the request
- document. The value of the header should be one of the recognized tokens
- 'deflate', ... (there's a way to register new schemes/tokens, see sec 3.5 of
- the spec). A server MAY honor the client's encoding request. When a response
- is encoded, the server includes a Content-Encoding header in the
- response. The value of the Content-Encoding header indicates which scheme was
- used to encode the data.
+ response. This is usually used to compress a response using one (or more)
+ encodings from a set of commonly available compression techniques. These
+ schemes include 'deflate' (the zlib algorithm), 'gzip' and 'compress'. A
+ client requests that the server perform an encoding by including an
+ Accept-Encoding header in the request document. The value of the header
+ should be one of the recognized tokens 'deflate', ... (there's a way to
+ register new schemes/tokens, see sec 3.5 of the spec). A server MAY honor
+ the client's encoding request. When a response is encoded, the server
+ includes a Content-Encoding header in the response. The value of the
+ Content-Encoding header indicates which encodings were used to encode the
+ data, in the order in which they were applied.
 
- A client may tell a server that it can understand several different encoding
- schemes. In this case the server may choose any one of those and use it to
- encode the response (indicating which one using the Content-Encoding header).
  It's also possible for a client to attach priorities to different schemes so
  that the server knows which it prefers. See sec 14.3 of RFC 2616 for more
- information on the Accept-Encoding header.
+ information on the Accept-Encoding header. See sec [3.1.2.2 of RFC 7231][15]
+ for more information on the Content-Encoding header.
 
 ## Supported content encodings
 
- The 'deflate' and 'gzip' content encoding are supported by libcurl. Both
+ The 'deflate' and 'gzip' content encodings are supported by libcurl. Both
  regular and chunked transfers work fine.  The zlib library is required for
  this feature.
 
@@ -688,14 +673,15 @@ Content Encoding
 
  where string is the intended value of the Accept-Encoding header.
 
- Currently, libcurl only understands how to process responses that use the
- "deflate" or "gzip" Content-Encoding, so the only values for
- [`CURLOPT_ACCEPT_ENCODING`][5] that will work (besides "identity," which does
- nothing) are "deflate" and "gzip" If a response is encoded using the
- "compress" or methods, libcurl will return an error indicating that the
- response could not be decoded.  If <string> is NULL no Accept-Encoding header
- is generated.  If <string> is a zero-length string, then an Accept-Encoding
- header containing all supported encodings will be generated.
+ Currently, libcurl does not support multiple encodings and only
+ understands how to process responses that use the "deflate" or "gzip"
+ Content-Encoding, so the only values for [`CURLOPT_ACCEPT_ENCODING`][5]
+ that will work (besides "identity," which does nothing) are "deflate"
+ and "gzip". If a response is encoded using the "compress" or methods,
+ libcurl will return an error indicating that the response could
+ not be decoded.  If <string> is NULL no Accept-Encoding header is generated.
+ If <string> is a zero-length string, then an Accept-Encoding header
+ containing all supported encodings will be generated.
 
  The [`CURLOPT_ACCEPT_ENCODING`][5] must be set to any non-NULL value for
  content to be automatically decoded.  If it is not set and the server still
@@ -1091,3 +1077,4 @@ for older and later versions as things don't change drastically that often.
 [12]: https://curl.haxx.se/libcurl/c/curl_multi_fdset.html
 [13]: https://curl.haxx.se/libcurl/c/curl_multi_add_handle.html
 [14]: https://curl.haxx.se/libcurl/c/curl_multi_info_read.html
+[15]: https://tools.ietf.org/html/rfc7231#section-3.1.2.2
