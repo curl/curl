@@ -376,6 +376,12 @@ static CURLcode glob_parse(URLGlob *glob, char *pattern,
           sublen += skip;
           continue;
         }
+        else if(*(pattern + 1) == ']') {
+          /* Skip over empty [], which are sometimes used for URL
+             parameter "arrays" */
+          pattern += 2;
+          continue;
+        }
         break;
       }
       if(*pattern == '}' || *pattern == ']')
