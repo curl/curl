@@ -367,9 +367,11 @@ static CURLcode glob_parse(URLGlob *glob, char *pattern,
     size_t sublen = 0;
     while(*pattern && *pattern != '{') {
       if(*pattern == '[') {
-        /* Skip over potential IPv6 literals. */
-        size_t skip;
-        if(peek_ipv6(pattern, &skip)) {
+        /* skip over IPv6 literals and [] */
+        size_t skip = 0;
+        if(!peek_ipv6(pattern, &skip) && (pattern[1] == ']'))
+          skip = 2;
+        if(skip) {
           memcpy(buf, pattern, skip);
           buf += skip;
           pattern += skip;
