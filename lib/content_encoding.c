@@ -26,6 +26,7 @@
 #include <curl/curl.h>
 #include <stddef.h>
 #include "sendf.h"
+#include "http.h"
 #include "content_encoding.h"
 #include "strdup.h"
 #include "strcase.h"
@@ -33,6 +34,8 @@
 #include "memdebug.h"
 
 #define CONTENT_ENCODING_DEFAULT  "identity"
+
+#ifndef CURL_DISABLE_HTTP
 
 #define DSIZ CURL_MAX_WRITE_SIZE /* buffer size for decompressed data */
 
@@ -907,3 +910,36 @@ CURLcode Curl_build_unencoding_stack(struct connectdata *conn,
 
   return CURLE_OK;
 }
+
+#else
+/* Stubs for builds without HTTP. */
+CURLcode Curl_build_unencoding_stack(struct connectdata *conn,
+                                     const char *enclist, int maybechunked)
+{
+  (void) conn;
+  (void) enclist;
+  (void) maybechunked;
+  return CURLE_NOT_BUILT_IN;
+}
+
+CURLcode Curl_unencode_write(struct connectdata *conn, contenc_writer *writer,
+                             const char *buf, size_t nbytes)
+{
+  (void) conn;
+  (void) writer;
+  (void) buf;
+  (void) nbytes;
+  return CURLE_NOT_BUILT_IN;
+}
+
+void Curl_unencode_cleanup(struct connectdata *conn)
+{
+  (void) conn;
+}
+
+char *Curl_all_content_encodings(void)
+{
+  return strdup(CONTENT_ENCODING_DEFAULT);  /* Satisfy caller. */
+}
+
+#endif /* CURL_DISABLE_HTTP */
