@@ -34,14 +34,14 @@
 
 #define CONTENT_ENCODING_DEFAULT  "identity"
 
+#define DSIZ CURL_MAX_WRITE_SIZE /* buffer size for decompressed data */
+
 
 #ifdef HAVE_LIBZ
 
 /* Comment this out if zlib is always going to be at least ver. 1.2.0.4
    (doing so will reduce code size slightly). */
 #define OLD_ZLIB_SUPPORT 1
-
-#define DSIZ CURL_MAX_WRITE_SIZE /* buffer size for decompressed data */
 
 #define GZIP_MAGIC_0 0x1f
 #define GZIP_MAGIC_1 0x8b
@@ -503,6 +503,136 @@ static const content_encoding gzip_encoding = {
 #endif /* HAVE_LIBZ */
 
 
+#ifdef HAVE_BROTLI
+
+/* Writer parameters. */
+typedef struct {
+  BrotliDecoderState *br;    /* State structure for brotli. */
+}  brotli_params;
+
+
+static CURLcode brotli_map_error(BrotliDecoderErrorCode be)
+{
+  switch(be) {
+  case BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE:
+  case BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_META_NIBBLE:
+  case BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_ALPHABET:
+  case BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME:
+  case BROTLI_DECODER_ERROR_FORMAT_CL_SPACE:
+  case BROTLI_DECODER_ERROR_FORMAT_HUFFMAN_SPACE:
+  case BROTLI_DECODER_ERROR_FORMAT_CONTEXT_MAP_REPEAT:
+  case BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_1:
+  case BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_2:
+  case BROTLI_DECODER_ERROR_FORMAT_TRANSFORM:
+  case BROTLI_DECODER_ERROR_FORMAT_DICTIONARY:
+  case BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS:
+  case BROTLI_DECODER_ERROR_FORMAT_PADDING_1:
+  case BROTLI_DECODER_ERROR_FORMAT_PADDING_2:
+  case BROTLI_DECODER_ERROR_COMPOUND_DICTIONARY:
+  case BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET:
+  case BROTLI_DECODER_ERROR_INVALID_ARGUMENTS:
+    return CURLE_BAD_CONTENT_ENCODING;
+  case BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES:
+  case BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS:
+  case BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP:
+  case BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1:
+  case BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2:
+  case BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES:
+    return CURLE_OUT_OF_MEMORY;
+  default:
+    break;
+  }
+  return CURLE_WRITE_ERROR;
+}
+
+static CURLcode brotli_init_writer(struct connectdata *conn,
+                                   contenc_writer *writer)
+{
+  brotli_params *bp = (brotli_params *) &writer->params;
+
+  (void) conn;
+
+  if(!writer->downstream)
+    return CURLE_WRITE_ERROR;
+
+  bp->br = BrotliDecoderCreateInstance(NULL, NULL, NULL);
+  return bp->br? CURLE_OK: CURLE_OUT_OF_MEMORY;
+}
+
+static CURLcode brotli_unencode_write(struct connectdata *conn,
+                                      contenc_writer *writer,
+                                      const char *buf, size_t nbytes)
+{
+  brotli_params *bp = (brotli_params *) &writer->params;
+  const uint8_t *src = (const uint8_t *) buf;
+  char *decomp;
+  uint8_t *dst;
+  size_t dstleft;
+  CURLcode result = CURLE_OK;
+
+  if(!nbytes)
+    return CURLE_OK;
+  if(!bp->br)
+    return CURLE_WRITE_ERROR;  /* Stream already ended. */
+
+  decomp = malloc(DSIZ);
+  if(!decomp)
+    return CURLE_OUT_OF_MEMORY;
+
+  while(nbytes && result == CURLE_OK) {
+    BrotliDecoderResult r;
+
+    dst = (uint8_t *) decomp;
+    dstleft = DSIZ;
+    r = BrotliDecoderDecompressStream(bp->br,
+                                      &nbytes, &src, &dstleft, &dst, NULL);
+    result = Curl_unencode_write(conn, writer->downstream,
+                                 decomp, DSIZ - dstleft);
+    if(result)
+      break;
+    switch(r) {
+    case BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT:
+    case BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT:
+      break;
+    case BROTLI_DECODER_RESULT_SUCCESS:
+      BrotliDecoderDestroyInstance(bp->br);
+      bp->br = NULL;
+      if(nbytes)
+        result = CURLE_WRITE_ERROR;
+      break;
+    default:
+      result = brotli_map_error(BrotliDecoderGetErrorCode(bp->br));
+      break;
+    }
+  }
+  free(decomp);
+  return result;
+}
+
+static void brotli_close_writer(struct connectdata *conn,
+                                contenc_writer *writer)
+{
+  brotli_params *bp = (brotli_params *) &writer->params;
+
+  (void) conn;
+
+  if(bp->br) {
+    BrotliDecoderDestroyInstance(bp->br);
+    bp->br = NULL;
+  }
+}
+
+static const content_encoding brotli_encoding = {
+  "br",
+  NULL,
+  brotli_init_writer,
+  brotli_unencode_write,
+  brotli_close_writer,
+  sizeof(brotli_params)
+};
+#endif
+
+
 /* Identity handler. */
 static CURLcode identity_init_writer(struct connectdata *conn,
                                      contenc_writer *writer)
@@ -541,6 +671,9 @@ static const content_encoding * const encodings[] = {
 #ifdef HAVE_LIBZ
   &deflate_encoding,
   &gzip_encoding,
+#endif
+#ifdef HAVE_BROTLI
+  &brotli_encoding,
 #endif
   NULL
 };

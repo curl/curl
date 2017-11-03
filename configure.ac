@@ -148,6 +148,7 @@ dnl initialize all the info variables
     curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,axtls,winssl,darwinssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
+ curl_brotli_msg="no      (--with-brotli)"
     curl_gss_msg="no      (--with-gssapi)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
@@ -974,6 +975,94 @@ fi
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
 AC_SUBST(ZLIB_LIBS)
+
+dnl **********************************************************************
+dnl Check for the presence of BROTLI decoder libraries and headers
+dnl **********************************************************************
+
+dnl Brotli project home page: https://github.com/google/brotli
+
+dnl Default to compiler & linker defaults for BROTLI files & libraries.
+OPT_BROTLI=off
+AC_ARG_WITH(brotli,dnl
+AC_HELP_STRING([--with-brotli=PATH],[Where to look for brotli, PATH points to the BROTLI installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--without-brotli], [disable BROTLI]),
+  OPT_BROTLI=$withval)
+
+if test X"$OPT_BROTLI" != Xno; then
+  dnl backup the pre-brotli variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_BROTLI" in
+  yes)
+    dnl --with-brotli (without path) used
+    CURL_CHECK_PKGCONFIG(libbrotlidec)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_BROTLI=`$PKGCONFIG --libs-only-l libbrotlidec`
+      LD_BROTLI=`$PKGCONFIG --libs-only-L libbrotlidec`
+      CPP_BROTLI=`$PKGCONFIG --cflags-only-I libbrotlidec`
+      version=`$PKGCONFIG --modversion libbrotlidec`
+      DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/-L//'`
+    fi
+
+    ;;
+  off)
+    dnl no --with-brotli option given, just check default places
+    ;;
+  *)
+    dnl use the given --with-brotli spot
+    PREFIX_BROTLI=$OPT_BROTLI
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_BROTLI"; then
+    LIB_BROTLI="-lbrotlidec"
+    LD_BROTLI=-L${PREFIX_BROTLI}/lib$libsuff
+    CPP_BROTLI=-I${PREFIX_BROTLI}/include
+    DIR_BROTLI=${PREFIX_BROTLI}/lib$libsuff
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_BROTLI"
+  CPPFLAGS="$CPPFLAGS $CPP_BROTLI"
+  LIBS="$LIB_BROTLI $LIBS"
+
+  AC_CHECK_LIB(brotlidec, BrotliDecoderDecompress)
+
+  AC_CHECK_HEADERS(brotli/decode.h,
+    curl_brotli_msg="enabled (libbrotlidec)"
+    HAVE_BROTLI=1
+    AC_DEFINE(HAVE_BROTLI, 1, [if BROTLI is in use])
+    AC_SUBST(HAVE_BROTLI, [1])
+  )
+
+  if test X"$OPT_BROTLI" != Xoff &&
+     test "$HAVE_BROTLI" != "1"; then
+    AC_MSG_ERROR([BROTLI libs and/or directories were not found where specified!])
+  fi
+
+  if test "$HAVE_BROTLI" = "1"; then
+    if test -n "$DIR_BROTLI"; then
+       dnl when the brotli shared libs were found in a path that the run-time
+       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl to prevent further configure tests to fail due to this
+
+       if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_BROTLI"
+         export LD_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_BROTLI to LD_LIBRARY_PATH])
+       fi
+    fi
+  else
+    dnl no brotli, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+fi
 
 dnl **********************************************************************
 dnl Check for LDAP
@@ -3786,6 +3875,9 @@ fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
 fi
+if test "x$HAVE_BROTLI" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES brotli"
+fi
 if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1" \
                             -o "x$USE_THREADS_WIN32" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
@@ -4003,6 +4095,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
+  brotli support:   ${curl_brotli_msg}
   GSS-API support:  ${curl_gss_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
