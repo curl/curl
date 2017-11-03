@@ -1713,7 +1713,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * to-be-uploaded file.
      */
     arg = va_arg(param, long);
-    if(arg < 0)
+    if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.filesize = arg;
     break;
@@ -1723,7 +1723,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      * to-be-uploaded file.
      */
     bigsize = va_arg(param, curl_off_t);
-    if(bigsize < 0)
+    if(bigsize < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.filesize = bigsize;
     break;
