@@ -360,6 +360,8 @@ static curl_version_info_data version_info = {
   NULL, /* libidn version */
   0,    /* iconv version */
   NULL, /* ssh lib version */
+  0,    /* brotli_ver_num */
+  NULL, /* brotli version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)

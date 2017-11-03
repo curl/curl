@@ -688,9 +688,11 @@ char *Curl_all_content_encodings(void)
   char *ace;
   char *p;
 
-  for(cep = encodings; (ce = *cep); cep++)
+  for(cep = encodings; *cep; cep++) {
+    ce = *cep;
     if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT))
       len += strlen(ce->name) + 2;
+  }
 
   if(!len)
     return strdup(CONTENT_ENCODING_DEFAULT);
@@ -698,13 +700,15 @@ char *Curl_all_content_encodings(void)
   ace = malloc(len);
   if(ace) {
     p = ace;
-    for(cep = encodings; (ce = *cep); cep++)
+    for(cep = encodings; *cep; cep++) {
+      ce = *cep;
       if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT)) {
         strcpy(p, ce->name);
         p += strlen(p);
         *p++ = ',';
         *p++ = ' ';
       }
+    }
     p[-2] = '\0';
   }
 
@@ -843,10 +847,12 @@ static const content_encoding *find_encoding(const char *name, size_t len)
   const content_encoding * const *cep;
   const content_encoding *ce;
 
-  for(cep = encodings; (ce = *cep); cep++)
+  for(cep = encodings; *cep; cep++) {
+    ce = *cep;
     if((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
        (ce->alias && strncasecompare(name, ce->alias, len) && !ce->alias[len]))
       return ce;
+  }
   return NULL;
 }
 
