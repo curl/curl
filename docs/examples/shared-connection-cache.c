@@ -20,11 +20,29 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Two HTTP GET using connection sharing with the share inteface
+ * Connection cache shared between easy handles with the share inteface
  * </DESC>
  */
 #include <stdio.h>
 #include <curl/curl.h>
+
+static void my_lock(CURL *handle, curl_lock_data data,
+                    curl_lock_access laccess, void *useptr)
+{
+  (void)handle;
+  (void)data;
+  (void)laccess;
+  (void)useptr;
+  fprintf(stderr, "-> Mutex lock\n");
+}
+
+static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
+{
+  (void)handle;
+  (void)data;
+  (void)useptr;
+  fprintf(stderr, "<- Mutex unlock\n");
+}
 
 int main(void)
 {
@@ -36,20 +54,19 @@ int main(void)
   share = curl_share_init();
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
 
+  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, my_lock);
+  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, my_unlock);
+
   /* Loop the transfer and cleanup the handle properly every lap. This will
      still reuse connections since the pool is in the shared object! */
 
   for(i = 0; i < 3; i++) {
     curl = curl_easy_init();
     if(curl) {
-      curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
-      /* example.com is redirected, so we tell libcurl to follow redirection */
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      curl_easy_setopt(curl, CURLOPT_URL, "https://curl.haxx.se/");
 
-      /* use the connection pool in the share object */
+      /* use the share object */
       curl_easy_setopt(curl, CURLOPT_SHARE, share);
-
-      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
       /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
