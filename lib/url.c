@@ -2710,10 +2710,7 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
 #ifdef USE_LIBSSH2
     /* we only include SSH options if explicitly built to support SSH */
   case CURLOPT_SSH_AUTH_TYPES:
-    arg = va_arg(param, long);
-    if(arg < CURLSSH_AUTH_NONE)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.ssh_auth_types = arg;
+    data->set.ssh_auth_types = va_arg(param, long);
     break;
 
   case CURLOPT_SSH_PUBLIC_KEYFILE:
