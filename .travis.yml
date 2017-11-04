@@ -35,6 +35,10 @@ matrix:
           dist: trusty
           env: T=normal C=--enable-ares
         - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal BROTLI=yes C="--with-brotli=$HOME/brotli-1.0.1"
+        - os: linux
           compiler: clang
           dist: trusty
           env: T=debug
@@ -90,6 +94,23 @@ install:
 
 before_script:
     - ./buildconf
+    # Build brotli 1.0.1 from source if required (no package in Trusty).
+    - |
+      if [ "$BROTLI" ]; then
+        if [ ! -e "$HOME/brotli-1.0.1/lib/libbrotlidec.so" ]; then
+          ( \
+            cd "$HOME" && \
+            curl -o brotli-1.0.1.tar.gz \
+                    https://github.com/google/brotli/archive/v1.0.1.tar.gz && \
+            tar xzf brotli-1.0.1.tar.gz && \
+            cd brotli-1.0.1 && \
+            cmake . -DCMAKE_INSTALL_PREFIX=`pwd` \
+                    -DCMAKE_INSTALL_LIBDIR=`pwd`/lib &&
+            make && \
+            make install \
+          }
+        fi
+      fi
 
 script:
     - |
@@ -118,6 +139,9 @@ script:
         if [ "$T" = "normal" ]; then
              ./configure --enable-warnings --enable-werror $C
              make && make examples
+             if [ "$BROTLI" ]; then
+               export LD_LIBRARY_PATH="$HOME/brotli-1.0.1/lib"
+             fi
              make test-nonflaky
         fi
     - |
