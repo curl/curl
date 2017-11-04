@@ -24,7 +24,6 @@
  ***************************************************************************/
 
 struct conncache {
-  bool inited; /* FALSE until inited */
   struct curl_hash hash;
   size_t num_connections;
   long next_connection_id;
@@ -46,7 +45,6 @@ struct connectbundle {
 
 /* returns 1 on error, 0 is fine */
 int Curl_conncache_init(struct conncache *, int size);
-bool Curl_conncache_inited(struct conncache *);
 void Curl_conncache_destroy(struct conncache *connc);
 
 /* return the correct bundle, to a host or a proxy */

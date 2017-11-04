@@ -117,11 +117,6 @@ static void free_bundle_hash_entry(void *freethis)
   bundle_destroy(b);
 }
 
-bool Curl_conncache_inited(struct conncache *connc)
-{
-  return connc->inited;
-}
-
 int Curl_conncache_init(struct conncache *connc, int size)
 {
   int rc;
@@ -137,10 +132,9 @@ int Curl_conncache_init(struct conncache *connc, int size)
     Curl_close(connc->closure_handle);
     connc->closure_handle = NULL;
   }
-  else {
+  else
     connc->closure_handle->state.conn_cache = connc;
-    connc->inited = TRUE;
-  }
+
   return rc;
 }
 
