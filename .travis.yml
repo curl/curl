@@ -91,20 +91,23 @@ install:
          tar xzf - &&
          (cd nghttp2-1.24.0 && CXX="g++-4.8" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
     fi
-  - if [ "$TRAVIS_OS_NAME" = linux -a "$BROTLI" ]; then
-      curl -L https://github.com/google/brotli/archive/v1.0.1.tar.gz |
-          tar xzf - &&
-          (
-            cd brotli-1.0.1 && \
-            cmake . -DCMAKE_INSTALL_PREFIX=/usr \
-                    -DCMAKE_INSTALL_LIBDIR=/usr/lib &&
-            make &&
-            sudo make install
-          )
-    fi
 
 before_script:
     - ./buildconf
+    - |
+      # No brotli package available for Trusty. Download & compile from source.
+      # Cannot be done in the install script because cmake is needed.
+          if [ "$TRAVIS_OS_NAME" = linux -a "$BROTLI" ]; then
+          curl -L https://github.com/google/brotli/archive/v1.0.1.tar.gz |
+              tar xzf - &&
+              (
+                  cd brotli-1.0.1 &&
+                  cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+                          -DCMAKE_INSTALL_LIBDIR=/usr/lib &&
+                  make &&
+                  sudo make install
+              )
+          fi
 
 script:
     - |
