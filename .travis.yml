@@ -100,7 +100,7 @@ before_script:
         if [ ! -e "$HOME/brotli-1.0.1/lib/libbrotlidec.so" ]; then
           ( \
             cd "$HOME" && \
-            curl -o brotli-1.0.1.tar.gz \
+            curl -L -o brotli-1.0.1.tar.gz \
                     https://github.com/google/brotli/archive/v1.0.1.tar.gz && \
             tar xzf brotli-1.0.1.tar.gz && \
             cd brotli-1.0.1 && \
