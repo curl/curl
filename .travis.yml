@@ -108,7 +108,7 @@ before_script:
                     -DCMAKE_INSTALL_LIBDIR=`pwd`/lib &&
             make && \
             make install \
-          }
+          )
         fi
       fi
 
