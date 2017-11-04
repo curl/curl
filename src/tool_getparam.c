@@ -787,7 +787,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           url = config->url_get;
         else
           /* there was no free node, create one! */
-          url = new_getout(config);
+          config->url_get = url = new_getout(config);
 
         if(!url)
           return PARAM_NO_MEM;
@@ -1787,7 +1787,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         url = config->url_out;
       else
         /* there was no free node, create one! */
-        url = new_getout(config);
+        config->url_out = url = new_getout(config);
 
       if(!url)
         return PARAM_NO_MEM;
@@ -1912,23 +1912,23 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* we are uploading */
     {
       struct getout *url;
-      if(!config->url_out)
-        config->url_out = config->url_list;
-      if(config->url_out) {
+      if(!config->url_ul)
+        config->url_ul = config->url_list;
+      if(config->url_ul) {
         /* there's a node here, if it already is filled-in continue to find
            an "empty" node */
-        while(config->url_out && (config->url_out->flags & GETOUT_UPLOAD))
-          config->url_out = config->url_out->next;
+        while(config->url_ul && (config->url_ul->flags & GETOUT_UPLOAD))
+          config->url_ul = config->url_ul->next;
       }
 
       /* now there might or might not be an available node to fill in! */
 
-      if(config->url_out)
+      if(config->url_ul)
         /* existing node */
-        url = config->url_out;
+        url = config->url_ul;
       else
         /* there was no free node, create one! */
-        url = new_getout(config);
+        config->url_ul = url = new_getout(config);
 
       if(!url)
         return PARAM_NO_MEM;
