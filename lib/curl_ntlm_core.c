@@ -557,7 +557,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
                                    unsigned char *ntbuffer /* 21 bytes */)
 {
   size_t len = strlen(password);
-  unsigned char *pw = malloc(len * 2);
+  unsigned char *pw = len ? malloc(len * 2) : strdup("");
   CURLcode result;
   if(!pw)
     return CURLE_OUT_OF_MEMORY;
