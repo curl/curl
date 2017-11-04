@@ -37,7 +37,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal BROTLI=yes C="--with-brotli=$HOME/brotli-1.0.1"
+          env: T=normal BROTLI=yes
         - os: linux
           compiler: clang
           dist: trusty
@@ -91,26 +91,20 @@ install:
          tar xzf - &&
          (cd nghttp2-1.24.0 && CXX="g++-4.8" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
     fi
+  - if [ "$TRAVIS_OS_NAME" = linux -a "$BROTLI" ]; then
+      curl -L https://github.com/google/brotli/archive/v1.0.1.tar.gz |
+          tar xzf - &&
+          (
+            cd brotli-1.0.1 && \
+            cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+                    -DCMAKE_INSTALL_LIBDIR=/usr/lib &&
+            make &&
+            sudo make install
+          )
+    fi
 
 before_script:
     - ./buildconf
-    # Build brotli 1.0.1 from source if required (no package in Trusty).
-    - |
-      if [ "$BROTLI" ]; then
-        if [ ! -e "$HOME/brotli-1.0.1/lib/libbrotlidec.so" ]; then
-          ( \
-            cd "$HOME" && \
-            curl -L -o brotli-1.0.1.tar.gz \
-                    https://github.com/google/brotli/archive/v1.0.1.tar.gz && \
-            tar xzf brotli-1.0.1.tar.gz && \
-            cd brotli-1.0.1 && \
-            cmake . -DCMAKE_INSTALL_PREFIX=`pwd` \
-                    -DCMAKE_INSTALL_LIBDIR=`pwd`/lib &&
-            make && \
-            make install \
-          )
-        fi
-      fi
 
 script:
     - |
@@ -139,9 +133,6 @@ script:
         if [ "$T" = "normal" ]; then
              ./configure --enable-warnings --enable-werror $C
              make && make examples
-             if [ "$BROTLI" ]; then
-               export LD_LIBRARY_PATH="$HOME/brotli-1.0.1/lib"
-             fi
              make test-nonflaky
         fi
     - |
