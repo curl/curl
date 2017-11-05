@@ -2368,6 +2368,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         failf(conn->data, "%s", err_msg);
         state(conn, SSH_SCP_CHANNEL_FREE);
         sshc->actualcode = libssh2_session_error_to_CURLE(ssh_err);
+        /* Map generic errors to upload failed */
+        if(sshc->actualcode == CURLE_SSH ||
+           sshc->actualcode == CURLE_REMOTE_FILE_NOT_FOUND)
+          sshc->actualcode = CURLE_UPLOAD_FAILED;
         break;
       }
 
