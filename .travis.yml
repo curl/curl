@@ -35,6 +35,10 @@ matrix:
           dist: trusty
           env: T=normal C=--enable-ares
         - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal BROTLI=yes
+        - os: linux
           compiler: clang
           dist: trusty
           env: T=debug
@@ -90,6 +94,20 @@ install:
 
 before_script:
     - ./buildconf
+    - |
+      # No brotli package available for Trusty. Download & compile from source.
+      # Cannot be done in the install script because cmake is needed.
+          if [ "$TRAVIS_OS_NAME" = linux -a "$BROTLI" ]; then
+          curl -L https://github.com/google/brotli/archive/v1.0.1.tar.gz |
+              tar xzf - &&
+              (
+                  cd brotli-1.0.1 &&
+                  cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+                          -DCMAKE_INSTALL_LIBDIR=/usr/lib &&
+                  make &&
+                  sudo make install
+              )
+          fi
 
 script:
     - |
