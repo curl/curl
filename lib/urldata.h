@@ -464,16 +464,6 @@ struct hostname {
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
 
-#ifdef HAVE_LIBZ
-typedef enum {
-  ZLIB_UNINIT,          /* uninitialized */
-  ZLIB_INIT,            /* initialized */
-  ZLIB_GZIP_HEADER,     /* reading gzip header */
-  ZLIB_GZIP_INFLATING,  /* inflating gzip stream */
-  ZLIB_INIT_GZIP        /* initialized in transparent gzip mode */
-} zlibInitState;
-#endif
-
 #ifdef CURLRES_ASYNCH
 struct Curl_async {
   char *hostname;
@@ -561,18 +551,8 @@ struct SingleRequest {
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
-  int auto_decoding;            /* What content encoding. sec 3.5, RFC2616. */
-
-#define IDENTITY 0              /* No encoding */
-#define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */
-#define GZIP 2                  /* gzip algorithm [RFC 1952] */
-
-#ifdef HAVE_LIBZ
-  zlibInitState zlib_init;      /* possible zlib init state;
-                                   undefined if Content-Encoding header. */
-  z_stream z;                   /* State structure for zlib. */
-#endif
-
+  struct contenc_writer_s *writer_stack;  /* Content unencoding stack. */
+                                          /* See sec 3.5, RFC2616. */
   time_t timeofdoc;
   long bodywrites;
 

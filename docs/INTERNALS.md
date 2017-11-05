@@ -673,7 +673,7 @@ Content Encoding
 
  where string is the intended value of the Accept-Encoding header.
 
- Currently, libcurl does not support multiple encodings and only
+ Currently, libcurl does support multiple encodings but only
  understands how to process responses that use the "deflate" or "gzip"
  Content-Encoding, so the only values for [`CURLOPT_ACCEPT_ENCODING`][5]
  that will work (besides "identity," which does nothing) are "deflate"

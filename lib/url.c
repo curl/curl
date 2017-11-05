@@ -1011,9 +1011,17 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
      *
      */
     argptr = va_arg(param, char *);
-    result = setstropt(&data->set.str[STRING_ENCODING],
-                       (argptr && !*argptr)?
-                       ALL_CONTENT_ENCODINGS: argptr);
+    if(argptr && !*argptr) {
+      argptr = Curl_all_content_encodings();
+      if(!argptr)
+        result = CURLE_OUT_OF_MEMORY;
+      else {
+        result = setstropt(&data->set.str[STRING_ENCODING], argptr);
+        free(argptr);
+      }
+    }
+    else
+      result = setstropt(&data->set.str[STRING_ENCODING], argptr);
     break;
 
   case CURLOPT_TRANSFER_ENCODING:
