@@ -289,9 +289,14 @@ ifdef ZLIB
   DLL_LIBS += -L"$(ZLIB_PATH)" -lz
 endif
 ifdef BROTLI
-  INCLUDES += -I"$(BROTLI_PATH)"
+  INCLUDES += -I"$(BROTLI_PATH)/include"
   CFLAGS += -DHAVE_BROTLI
-  DLL_LIBS += -L"$(BROTLI_PATH)/lib" -lbrotlidec
+  DLL_LIBS += -L"$(BROTLI_PATH)/lib"
+  ifdef BROTLI_LIBS
+    DLL_LIBS += $(BROTLI_LIBS)
+  else
+    DLL_LIBS += -lbrotlidec
+  endif
 endif
 ifdef IDN2
   INCLUDES += -I"$(LIBIDN2_PATH)/include"
