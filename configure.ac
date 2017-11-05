@@ -3275,6 +3275,7 @@ AC_CHECK_HEADERS(
         net/if.h \
         netinet/in.h \
         sys/un.h \
+        linux/tcp.h \
         netinet/tcp.h \
         netdb.h \
         sys/sockio.h \

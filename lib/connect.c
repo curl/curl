@@ -28,8 +28,10 @@
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
 #endif
-#ifdef HAVE_NETINET_TCP_H
-#include <netinet/tcp.h> /* for TCP_NODELAY */
+#ifdef HAVE_LINUX_TCP_H
+#include <linux/tcp.h>
+#elif defined(HAVE_NETINET_TCP_H)
+#include <netinet/tcp.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -989,6 +991,9 @@ static CURLcode singleipconnect(struct connectdata *conn,
   char ipaddress[MAX_IPADR_LEN];
   long port;
   bool is_tcp;
+#ifdef TCP_FASTOPEN_CONNECT
+  int optval = 1;
+#endif
 
   *sockp = CURL_SOCKET_BAD;
 
@@ -1092,7 +1097,15 @@ static CURLcode singleipconnect(struct connectdata *conn,
 #  else
       rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
 #  endif /* HAVE_BUILTIN_AVAILABLE */
-#elif defined(MSG_FASTOPEN) /* Linux */
+#elif defined(TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
+      if(setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
+                    (void *)&optval, sizeof(optval)) < 0)
+        infof(data, "Failed to enable TCP Fast Open on fd %d\n", sockfd);
+      else
+        infof(data, "TCP_FASTOPEN_CONNECT set\n");
+
+      rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+#elif defined(MSG_FASTOPEN) /* old Linux */
       if(conn->given->flags & PROTOPT_SSL)
         rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
       else

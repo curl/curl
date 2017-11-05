@@ -26,6 +26,10 @@
 #include <limits.h>
 #endif
 
+#ifdef HAVE_LINUX_TCP_H
+#include <linux/tcp.h>
+#endif
+
 #include "urldata.h"
 #include "url.h"
 #include "progress.h"
@@ -2450,7 +2454,8 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
     data->set.tcp_keepintvl = arg;
     break;
   case CURLOPT_TCP_FASTOPEN:
-#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN)
+#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) || \
+   defined(TCP_FASTOPEN_CONNECT)
     data->set.tcp_fastopen = (0 != va_arg(param, long))?TRUE:FALSE;
 #else
     result = CURLE_NOT_BUILT_IN;

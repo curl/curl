@@ -22,6 +22,10 @@
 
 #include "curl_setup.h"
 
+#ifdef HAVE_LINUX_TCP_H
+#include <linux/tcp.h>
+#endif
+
 #include <curl/curl.h>
 
 #include "urldata.h"
@@ -360,7 +364,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
      available. */
   pre_receive_plain(conn, num);
 
-#ifdef MSG_FASTOPEN /* Linux */
+#if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(conn->bits.tcp_fastopen) {
     bytes_written = sendto(sockfd, mem, len, MSG_FASTOPEN,
                            conn->ip_addr->ai_addr, conn->ip_addr->ai_addrlen);
