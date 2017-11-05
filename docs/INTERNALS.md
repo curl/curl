@@ -644,9 +644,9 @@ Content Encoding
  [HTTP/1.1][4] specifies that a client may request that a server encode its
  response. This is usually used to compress a response using one (or more)
  encodings from a set of commonly available compression techniques. These
- schemes include 'deflate' (the zlib algorithm), 'gzip' and 'compress'. A
- client requests that the server perform an encoding by including an
- Accept-Encoding header in the request document. The value of the header
+ schemes include 'deflate' (the zlib algorithm), 'gzip' 'br' (brotli) and
+ 'compress'. A client requests that the server perform an encoding by including
+ an Accept-Encoding header in the request document. The value of the header
  should be one of the recognized tokens 'deflate', ... (there's a way to
  register new schemes/tokens, see sec 3.5 of the spec). A server MAY honor
  the client's encoding request. When a response is encoded, the server
@@ -661,9 +661,10 @@ Content Encoding
 
 ## Supported content encodings
 
- The 'deflate' and 'gzip' content encodings are supported by libcurl. Both
- regular and chunked transfers work fine.  The zlib library is required for
- this feature.
+ The 'deflate', 'gzip' and 'br' content encodings are supported by libcurl.
+ Both regular and chunked transfers work fine.  The zlib library is required
+ for the 'deflate' and 'gzip' encodings, while the brotli decoding library is
+ for the 'br' encoding.
 
 ## The libcurl interface
 
@@ -674,10 +675,10 @@ Content Encoding
  where string is the intended value of the Accept-Encoding header.
 
  Currently, libcurl does support multiple encodings but only
- understands how to process responses that use the "deflate" or "gzip"
- Content-Encoding, so the only values for [`CURLOPT_ACCEPT_ENCODING`][5]
- that will work (besides "identity," which does nothing) are "deflate"
- and "gzip". If a response is encoded using the "compress" or methods,
+ understands how to process responses that use the "deflate", "gzip" and/or
+ "br" content encodings, so the only values for [`CURLOPT_ACCEPT_ENCODING`][5]
+ that will work (besides "identity," which does nothing) are "deflate",
+ "gzip" and "br". If a response is encoded using the "compress" or methods,
  libcurl will return an error indicating that the response could
  not be decoded.  If <string> is NULL no Accept-Encoding header is generated.
  If <string> is a zero-length string, then an Accept-Encoding header

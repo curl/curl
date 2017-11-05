@@ -64,9 +64,8 @@
  5.4 HTTP Digest using SHA-256
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
- 5.7 Brotli compression
- 5.8 QUIC
- 5.9 Leave secure cookies alone
+ 5.7 QUIC
+ 5.8 Leave secure cookies alone
 
  6. TELNET
  6.1 ditch stdin
@@ -514,13 +513,7 @@ This is not detailed in any FTP specification.
  Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
  and/or possibly a bit that refuses redirect to change protocol completely.
 
-5.7 Brotli compression
-
- Brotli compression performs better than gzip and is being implemented by
- browsers and servers widely. The algorithm: https://github.com/google/brotli
- The Firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=366559
-
-5.8 QUIC
+5.7 QUIC
 
  The standardization process of QUIC has been taken to the IETF and can be
  followed on the [IETF QUIC Mailing
@@ -530,7 +523,7 @@ This is not detailed in any FTP specification.
  implemented. This, to allow other projects to benefit from the work and to
  thus broaden the interest and chance of others to participate.
 
-5.9 Leave secure cookies alone
+5.8 Leave secure cookies alone
 
  Non-secure origins (HTTP sites) should not be allowed to set or modify
  cookies with the 'secure' property:
