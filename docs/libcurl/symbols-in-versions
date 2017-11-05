@@ -291,6 +291,8 @@ CURLKHSTAT_FINE                 7.19.6
 CURLKHSTAT_FINE_ADD_TO_FILE     7.19.6
 CURLKHSTAT_REJECT               7.19.6
 CURLKHTYPE_DSS                  7.19.6
+CURLKHTYPE_ECDSA                7.58.0
+CURLKHTYPE_ED25519              7.58.0
 CURLKHTYPE_RSA                  7.19.6
 CURLKHTYPE_RSA1                 7.19.6
 CURLKHTYPE_UNKNOWN              7.19.6
@@ -669,6 +671,7 @@ CURLSOCKTYPE_IPCXN              7.16.0
 CURLSSH_AUTH_AGENT              7.28.0
 CURLSSH_AUTH_ANY                7.16.1
 CURLSSH_AUTH_DEFAULT            7.16.1
+CURLSSH_AUTH_GSSAPI             7.58.0
 CURLSSH_AUTH_HOST               7.16.1
 CURLSSH_AUTH_KEYBOARD           7.16.1
 CURLSSH_AUTH_NONE               7.16.1
