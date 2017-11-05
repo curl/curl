@@ -23,7 +23,8 @@
 ###########################################################################
 #
 ## Makefile for building curl.exe with MingW (GCC-3.2 or later or LLVM/Clang)
-## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4)
+## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4),
+## brotli (1.0.1)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 ## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
@@ -37,6 +38,10 @@
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../zlib-1.2.8
+endif
+# Edit the path below to point to the base of your Brotli sources.
+ifndef BROTLI_PATH
+BROTLI_PATH = ../../brotli-1.0.1
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
@@ -184,6 +189,9 @@ endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 ZLIB = 1
 endif
+ifeq ($(findstring -brotli,$(CFG)),-brotli)
+BROTLI = 1
+endif
 ifeq ($(findstring -idn2,$(CFG)),-idn2)
 IDN2 = 1
 endif
@@ -293,6 +301,11 @@ ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   curl_LDADD += -L"$(ZLIB_PATH)" -lz
+endif
+ifdef BROTLI
+  INCLUDES += -I"$(BROTLI_PATH)"
+  CFLAGS += -DHAVE_BROTLI
+  curl_LDADD += -L"$(BROTLI_PATH)/lib" -lbrotlidec
 endif
 ifdef IDN2
   CFLAGS += -DUSE_LIBIDN2
