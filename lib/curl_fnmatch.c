@@ -235,12 +235,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
         return SETCHARSET_FAIL;
       break;
     case CURLFNM_SCHS_MAYRANGE2:
-      if(c == '\\') {
-        c = *(++(*p));
-        if(!ISPRINT(c))
-          return SETCHARSET_FAIL;
-      }
-      else if(c == ']') {
+      if(c == ']') {
         return SETCHARSET_OK;
       }
       else if(c == '\\') {
