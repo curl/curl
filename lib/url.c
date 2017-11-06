@@ -7221,9 +7221,8 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
   struct SingleRequest *k = &data->req;
 
-  if(conn)
-    conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to
-                                 * use */
+  conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to
+                                 use */
 
   data->state.done = FALSE; /* *_done() is not called yet */
   data->state.expect100header = FALSE;
