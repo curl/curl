@@ -139,6 +139,11 @@ inflate_stream(struct connectdata *conn, contenc_writer *writer)
   /* because the buffer size is fixed, iteratively decompress and transfer to
      the client via client_write. */
   for(;;) {
+    if(z->avail_in == 0) {
+      free(decomp);
+      return result;
+    }
+
     /* (re)set buffer for decompressed output for every iteration */
     z->next_out = (Bytef *) decomp;
     z->avail_out = DSIZ;
