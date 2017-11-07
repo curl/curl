@@ -139,6 +139,11 @@ inflate_stream(struct connectdata *conn, contenc_writer *writer)
   /* because the buffer size is fixed, iteratively decompress and transfer to
      the client via client_write. */
   for(;;) {
+    if(z->avail_in == 0) {
+      free(decomp);
+      return result;
+    }
+
     /* (re)set buffer for decompressed output for every iteration */
     z->next_out = (Bytef *) decomp;
     z->avail_out = DSIZ;
@@ -163,10 +168,7 @@ inflate_stream(struct connectdata *conn, contenc_writer *writer)
       /* Done with these bytes, exit */
 
       /* status is always Z_OK at this point! */
-      if(z->avail_in == 0) {
-        free(decomp);
-        return result;
-      }
+      continue;
     }
     else if(allow_restart && status == Z_DATA_ERROR) {
       /* some servers seem to not generate zlib headers, so this is an attempt
