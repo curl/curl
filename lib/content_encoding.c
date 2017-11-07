@@ -573,8 +573,6 @@ static CURLcode brotli_unencode_write(struct connectdata *conn,
   size_t dstleft;
   CURLcode result = CURLE_OK;
 
-  if(!nbytes)
-    return CURLE_OK;
   if(!bp->br)
     return CURLE_WRITE_ERROR;  /* Stream already ended. */
 
@@ -826,6 +824,8 @@ static contenc_writer *new_unencoding_writer(struct connectdata *conn,
 CURLcode Curl_unencode_write(struct connectdata *conn, contenc_writer *writer,
                              const char *buf, size_t nbytes)
 {
+  if(!nbytes)
+    return CURLE_OK;
   return writer->handler->unencode_write(conn, writer, buf, nbytes);
 }
 
