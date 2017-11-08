@@ -275,15 +275,15 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       case IMAP_LIST:
         if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
           (imap->custom && !imap_matchresp(line, len, imap->custom) &&
-           (strcmp(imap->custom, "STORE") ||
+           (!strcasecompare(imap->custom, "STORE") ||
             !imap_matchresp(line, len, "FETCH")) &&
-           strcmp(imap->custom, "SELECT") &&
-           strcmp(imap->custom, "EXAMINE") &&
-           strcmp(imap->custom, "SEARCH") &&
-           strcmp(imap->custom, "EXPUNGE") &&
-           strcmp(imap->custom, "LSUB") &&
-           strcmp(imap->custom, "UID") &&
-           strcmp(imap->custom, "NOOP")))
+           !strcasecompare(imap->custom, "SELECT") &&
+           !strcasecompare(imap->custom, "EXAMINE") &&
+           !strcasecompare(imap->custom, "SEARCH") &&
+           !strcasecompare(imap->custom, "EXPUNGE") &&
+           !strcasecompare(imap->custom, "LSUB") &&
+           !strcasecompare(imap->custom, "UID") &&
+           !strcasecompare(imap->custom, "NOOP")))
           return FALSE;
         break;
 
@@ -1053,7 +1053,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
   else if(imapcode == IMAP_RESP_OK) {
     /* Check if the UIDVALIDITY has been specified and matches */
     if(imap->uidvalidity && imapc->mailbox_uidvalidity &&
-       strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
+       !strcasecompare(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
       failf(conn->data, "Mailbox UIDVALIDITY has changed");
       result = CURLE_REMOTE_FILE_NOT_FOUND;
     }
@@ -1526,9 +1526,9 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   /* Determine if the requested mailbox (with the same UIDVALIDITY if set)
      has already been selected on this connection */
   if(imap->mailbox && imapc->mailbox &&
-     !strcmp(imap->mailbox, imapc->mailbox) &&
+     strcasecompare(imap->mailbox, imapc->mailbox) &&
      (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
-      !strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)))
+      strcasecompare(imap->uidvalidity, imapc->mailbox_uidvalidity)))
     selected = TRUE;
 
   /* Start the first command in the DO phase */
