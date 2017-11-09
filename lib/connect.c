@@ -785,6 +785,9 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         conn->sock[sockindex] = conn->tempsock[i];
         conn->ip_addr = conn->tempaddr[i];
         conn->tempsock[i] = CURL_SOCKET_BAD;
+#ifdef ENABLE_IPV6
+        conn->bits.ipv6 = (conn->ip_addr->ai_family == AF_INET6)?TRUE:FALSE;
+#endif
 
         /* close the other socket, if open */
         if(conn->tempsock[other] != CURL_SOCKET_BAD) {
@@ -1096,10 +1099,6 @@ static CURLcode singleipconnect(struct connectdata *conn,
     *sockp = sockfd;
     return CURLE_OK;
   }
-
-#ifdef ENABLE_IPV6
-  conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
-#endif
 
   if(-1 == rc) {
     switch(error) {
