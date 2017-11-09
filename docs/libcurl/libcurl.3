@@ -40,7 +40,9 @@ details.
 
 If libcurl was compiled with support for multiple SSL backends, the function
 \fIcurl_global_sslset(3)\fP can be called before \fIcurl_global_init(3)\fP
-to select the active SSL backend.
+to select the active SSL backend. \fIcurl_global_sslget(3)\fP can be used to
+retrieve the selected SSL backend even if multiple SSL backends are not
+supported.
 
 To transfer files, you create an "easy handle" using \fIcurl_easy_init(3)\fP
 for a single individual transfer (in either direction). You then set your

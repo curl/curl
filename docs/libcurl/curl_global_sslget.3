@@ -1,0 +1,73 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_global_sslget 3 "November 8 2017" "libcurl 7.57.1" "libcurl Manual"
+.SH NAME
+curl_global_sslget - Get the SSL backend selected to be used by libcurl
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.nf
+
+typedef struct {
+  curl_sslbackend id;
+  const char *name;
+} curl_ssl_backend;
+
+typedef enum {
+  CURLSSLBACKEND_NONE = 0,
+  CURLSSLBACKEND_OPENSSL = 1,
+  CURLSSLBACKEND_GNUTLS = 2,
+  CURLSSLBACKEND_NSS = 3,
+  CURLSSLBACKEND_GSKIT = 5,
+  CURLSSLBACKEND_POLARSSL = 6,
+  CURLSSLBACKEND_WOLFSSL = 7,
+  CURLSSLBACKEND_SCHANNEL = 8,
+  CURLSSLBACKEND_DARWINSSL = 9,
+  CURLSSLBACKEND_AXTLS = 10,
+  CURLSSLBACKEND_MBEDTLS = 11
+} curl_sslbackend;
+
+.B "const curl_ssl_backend *curl_global_sslget();"
+.fi
+.SH DESCRIPTION
+This function gets the SSL backend selected to be used by libcurl. This
+function is not thread safe if it is called before \fIcurl_global_init(3)\fP.
+
+If libcurl was built without SSL support then \fIid\fP is CURLSSLBACKEND_NONE.
+
+If libcurl was built with support for multiple SSL backends but a backend has
+not yet been selected by \fIcurl_global_sslset(3)\fP then \fIid\fP is
+CURLSSLBACKEND_NONE.
+
+If the curl_ssl_backend returned by this function has an \fIid\fP other than
+CURLSSLBACKEND_NONE then it will not change. That is because libcurl selects
+the SSL library to use only once.
+.SH AVAILABILITY
+This function was added in libcurl 7.57.1. Before this version, only
+\fICURLINFO_TLS_SSL_PTR(3)\fP could be used to obtain the SSL backend id.
+.SH RETURN VALUE
+This function will always return a valid pointer to curl_ssl_backend that
+should not be freed.
+.SH "SEE ALSO"
+.BR curl_global_init "(3), "
+.BR curl_global_sslset "(3), "
+.BR CURLINFO_TLS_SSL_PTR "(3), "
+.BR libcurl "(3) "
