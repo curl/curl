@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,8 +57,6 @@ CURLcode Curl_addHandleToPipeline(struct Curl_easy *handle,
                                   struct curl_llist *pipeline);
 int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
                                   struct curl_llist *pipeline);
-struct connectdata *
-Curl_oldest_idle_connection(struct Curl_easy *data);
 /* remove the specified connection from all (possible) pipelines and related
    queues */
 void Curl_getoff_all_pipelines(struct Curl_easy *data,

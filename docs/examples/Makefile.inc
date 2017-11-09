@@ -33,7 +33,8 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   imap-search imap-create imap-delete imap-copy imap-noop imap-ssl         \
   imap-tls imap-multi url2file sftpget ftpsget postinmemory http2-download \
   http2-upload http2-serverpush getredirect ftpuploadfrommem               \
-  ftpuploadresume sslbackend postit2-formadd multi-formadd
+  ftpuploadresume sslbackend postit2-formadd multi-formadd                 \
+  shared-connection-cache
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.

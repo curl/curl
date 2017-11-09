@@ -28,6 +28,8 @@ struct conncache {
   size_t num_connections;
   long next_connection_id;
   struct curltime last_cleanup;
+  /* handle used for closing cached connections */
+  struct Curl_easy *closure_handle;
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -41,8 +43,8 @@ struct connectbundle {
   struct curl_llist conn_list;  /* The connectdata members of the bundle */
 };
 
+/* returns 1 on error, 0 is fine */
 int Curl_conncache_init(struct conncache *, int size);
-
 void Curl_conncache_destroy(struct conncache *connc);
 
 /* return the correct bundle, to a host or a proxy */
@@ -55,7 +57,8 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
 void Curl_conncache_remove_conn(struct conncache *connc,
                                 struct connectdata *conn);
 
-void Curl_conncache_foreach(struct conncache *connc,
+void Curl_conncache_foreach(struct Curl_easy *data,
+                            struct conncache *connc,
                             void *param,
                             int (*func)(struct connectdata *conn,
                                         void *param));
@@ -63,6 +66,9 @@ void Curl_conncache_foreach(struct conncache *connc,
 struct connectdata *
 Curl_conncache_find_first_connection(struct conncache *connc);
 
+struct connectdata *
+Curl_conncache_oldest_idle(struct Curl_easy *data);
+void Curl_conncache_close_all_connections(struct conncache *connc);
 void Curl_conncache_print(struct conncache *connc);
 
 #endif /* HEADER_CURL_CONNCACHE_H */
