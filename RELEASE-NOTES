@@ -9,6 +9,8 @@ Curl and libcurl 7.57.0
 This release includes the following changes:
 
  o auth: add support for RFC7616 - HTTP Digest access authentication [12]
+ o share: add support for sharing the connection cache [31]
+ o HTTP: implement Brotli content encoding [28]
 
 This release includes the following bugfixes:
 
@@ -42,6 +44,16 @@ This release includes the following bugfixes:
  o CURLOPT_INFILESIZE: accept -1 [22]
  o curl: pass through [] in URLs instead of calling globbing error [23]
  o curl: speed up handling of many URLs [24]
+ o ntlm: avoid malloc(0) for zero length passwords [25]
+ o url: remove faulty arg value check from CURLOPT_SSH_AUTH_TYPES [26]
+ o HTTP: support multiple Content-Encodings [27]
+ o travis: add a job with brotli enabled
+ o url: remove unncessary NULL-check
+ o fnmatch: remove dead code
+ o connect: store IPv6 connection status after valid connection [29]
+ o imap: deal with commands case insensitively [30]
+ o --interface: add support for Linux VRF [32]
+ o content_encoding: fix inflate_stream for no bytes available [33]
 
 This release includes the following known bugs:
 
@@ -52,11 +64,11 @@ advice from friends like these:
 
   Alessandro Ghedini, Andrew Lambert, arainchik on github, cbartl on github,
   Dan Fandrich, Daniel Bankhead, Daniel Stenberg, Dmitri Tikhonov, Gisle Vanem,
-  Jakub Zakrzewski, Juro Bystricky, Marcel Raad, Martin Storsjo, Max Dymond,
-  moohoorama on github, omau on github, Patrick Monnerat, Paul Howarth,
-  Pavel Gushchin, Per Lundberg, Peter Piekarski, Petr Voytsik, Ray Satiro,
-  Rob Cotrone,
-  (24 contributors)
+  Jakub Zakrzewski, Juro Bystricky, Luca Boccassi, Marcel Raad, Martin Storsjö,
+  Max Dymond, moohoorama on github, omau on github, Patrick Monnerat,
+  Paul Howarth, Pavel Gushchin, Per Lundberg, Peter Piekarski, Petr Voytsik,
+  Ray Satiro, Rob Cotrone, Viktor Szakáts,
+  (26 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -86,3 +98,12 @@ References to bug reports and discussions on issues:
  [22] = https://curl.haxx.se/bug/?i=2047
  [23] = https://curl.haxx.se/bug/?i=2044
  [24] = https://curl.haxx.se/bug/?i=1959
+ [25] = https://curl.haxx.se/bug/?i=2054
+ [26] = https://github.com/curl/curl/commit/f121575#commitcomment-25347120
+ [27] = https://curl.haxx.se/bug/?i=2002
+ [28] = https://curl.haxx.se/bug/?i=2045
+ [29] = https://curl.haxx.se/bug/?i=2053
+ [30] = https://curl.haxx.se/bug/?i=2061
+ [31] = https://curl.haxx.se/bug/?i=2043
+ [32] = https://curl.haxx.se/bug/?i=2024
+ [33] = https://curl.haxx.se/bug/?i=2060
