@@ -40,7 +40,7 @@ transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
 if(MSVC)
-  list(APPEND CURL_SOURCE curl.rc)
+  list(APPEND CURL_FILES curl.rc)
 endif()
 
 # CURL_FILES comes from Makefile.inc
