@@ -23,6 +23,10 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#define READBUFFER_SIZE CURL_MAX_WRITE_SIZE
+#define READBUFFER_MAX  CURL_MAX_READ_SIZE
+#define READBUFFER_MIN  1024
+
 /*
  * Prototypes for library-wide functions provided by url.c
  */
@@ -51,7 +55,9 @@ int Curl_protocol_getsock(struct connectdata *conn,
 int Curl_doing_getsock(struct connectdata *conn,
                        curl_socket_t *socks,
                        int numsocks);
-
+CURLcode Curl_parse_login_details(const char *login, const size_t len,
+                                  char **userptr, char **passwdptr,
+                                  char **optionsptr);
 bool Curl_isPipeliningEnabled(const struct Curl_easy *handle);
 CURLcode Curl_addHandleToPipeline(struct Curl_easy *handle,
                                   struct curl_llist *pipeline);
