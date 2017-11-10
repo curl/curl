@@ -258,6 +258,7 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
   CURLcode result;
+  infof(conn->data, "Using ssl backend: %s\n", Curl_ssl->info.name);
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
     if(result)
