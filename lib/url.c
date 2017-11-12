@@ -3337,8 +3337,14 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     portptr = strchr(conn->host.name, ']');
     if(portptr) {
       *portptr++ = '\0'; /* zero terminate, killing the bracket */
-      if(':' != *portptr)
-        portptr = NULL; /* no port number available */
+      if(*portptr) {
+        if (*portptr != ':') {
+          failf(data, "IPv6 closing bracket followed by '%c'", *portptr);
+          return CURLE_URL_MALFORMAT;
+        }
+      }
+      else
+       portptr = NULL; /* no port number available */
     }
   }
   else {
