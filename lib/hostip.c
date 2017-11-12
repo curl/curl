@@ -470,6 +470,7 @@ int Curl_resolv(struct connectdata *conn,
   if(!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
 
+    const char *name_char;
     Curl_addrinfo *addr;
     int respwait;
 
@@ -477,6 +478,16 @@ int Curl_resolv(struct connectdata *conn,
      * If not, bail out. */
     if(!Curl_ipvalid(conn))
       return CURLRESOLV_ERROR;
+
+    /* Some implementations of getaddrinfo() or gethostbyname() accept
+       IP addresses that are followed by a whitespace character,
+       e.g. "127.0.0.1 www.example.com" may be resolved to "127.0.0.1".
+       Reject such host names to prevent wrong name resolutions.
+     */
+    for(name_char = hostname; name_char && *name_char; name_char++) {
+      if(ISASCII(*name_char) && ISSPACE(*name_char))
+        return CURLRESOLV_ERROR;
+    }
 
     /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
        non-zero value indicating that we need to wait for the response to the
