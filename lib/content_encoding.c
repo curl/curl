@@ -140,15 +140,12 @@ static CURLcode inflate_stream(struct connectdata *conn,
      the client via downstream_write function. */
   while(!result && z->avail_in) {
     /* Check state. */
-    switch(zp->zlib_init) {
-    case ZLIB_INIT:
-    case ZLIB_INFLATING:
-    case ZLIB_INIT_GZIP:
-    case ZLIB_GZIP_INFLATING:
-      break;
-    default:
+    if(zp->zlib_init != ZLIB_INIT &&
+       zp->zlib_init != ZLIB_INFLATING &&
+       zp->zlib_init != ZLIB_INIT_GZIP &&
+       zp->zlib_init != ZLIB_GZIP_INFLATING) {
       result = exit_zlib(conn, z, &zp->zlib_init, CURLE_WRITE_ERROR);
-      continue;
+      break;
     }
 
     /* (re)set buffer for decompressed output for every iteration */
