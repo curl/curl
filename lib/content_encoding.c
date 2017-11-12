@@ -69,7 +69,8 @@ typedef enum {
 
 /* Writer parameters. */
 typedef struct {
-  zlibInitState zlib_init;    /* zlib init state */
+  zlibInitState zlib_init;   /* zlib init state */
+  uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
 }  zlib_params;
 
@@ -116,6 +117,29 @@ exit_zlib(struct connectdata *conn,
     *zlib_init = ZLIB_UNINIT;
   }
 
+  return result;
+}
+
+static CURLcode process_trailer(struct connectdata *conn, zlib_params *zp)
+{
+  z_stream *z = &zp->z;
+  CURLcode result = CURLE_OK;
+  uInt len = z->avail_in < zp->trailerlen? z->avail_in: zp->trailerlen;
+
+  /* Consume expected trailer bytes. Terminate stream if exhausted.
+     Issue an error if unexpected bytes follow. */
+
+  zp->trailerlen -= len;
+  z->avail_in -= len;
+  z->next_in += len;
+  if(z->avail_in)
+    result = CURLE_WRITE_ERROR;
+  if(result || !zp->trailerlen)
+    result = exit_zlib(conn, z, &zp->zlib_init, result);
+  else {
+    /* Only occurs for gzip with zlib < 1.2.0.4. */
+    zp->zlib_init = ZLIB_GZIP_TRAILER;
+  }
   return result;
 }
 
@@ -168,19 +192,7 @@ static CURLcode inflate_stream(struct connectdata *conn,
     case Z_OK:
       break;
     case Z_STREAM_END:
-      /* There may be 8 gzip trailer bytes to read.
-         Use z->avail_out as a counter. */
-      z->avail_out = started == ZLIB_GZIP_INFLATING? 8: 0;
-      if(z->avail_in < z->avail_out) {
-        z->avail_out -= z->avail_in;
-        zp->zlib_init = ZLIB_GZIP_TRAILER;
-      }
-      else {
-        if(z->avail_in > z->avail_out)
-          result = CURLE_WRITE_ERROR;
-        result = exit_zlib(conn, z, &zp->zlib_init, result);
-      }
-      z->avail_in = 0;
+      result = process_trailer(conn, zp);
       break;
     case Z_DATA_ERROR:
       /* some servers seem to not generate zlib headers, so this is an attempt
@@ -289,10 +301,11 @@ static CURLcode gzip_init_writer(struct connectdata *conn,
     zp->zlib_init = ZLIB_INIT_GZIP; /* Transparent gzip decompress state */
   }
   else {
-    /* we must parse the gzip header ourselves */
+    /* we must parse the gzip header and trailer ourselves */
     if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
       return process_zlib_error(conn, z);
     }
+    zp->trailerlen = 8;          /* Trailer length. */
     zp->zlib_init = ZLIB_INIT;   /* Initial call state */
   }
 
@@ -489,13 +502,9 @@ static CURLcode gzip_unencode_write(struct connectdata *conn,
   break;
 
   case ZLIB_GZIP_TRAILER:
-    /* Read and ignore the trailer. Check for trailing data. */
-    if((uInt) nbytes < z->avail_out) {
-      z->avail_out -= (uInt) nbytes;
-      return CURLE_OK;
-    }
-    return exit_zlib(conn, z, &zp->zlib_init, (uInt) nbytes == z->avail_out?
-                     CURLE_OK: CURLE_WRITE_ERROR);
+    z->next_in = (Bytef *) buf;
+    z->avail_in = (uInt) nbytes;
+    return process_trailer(conn, zp);
 
   case ZLIB_GZIP_INFLATING:
   default:
