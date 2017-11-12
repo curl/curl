@@ -186,6 +186,7 @@ static CURLcode inflate_stream(struct connectdata *conn,
       /* some servers seem to not generate zlib headers, so this is an attempt
          to fix and continue anyway */
       if(zp->zlib_init == ZLIB_INIT) {
+        /* Do not use inflateReset2(): only available since zlib 1.2.3.4. */
         (void) inflateEnd(z);     /* don't care about the return code */
         if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
           zp->zlib_init = ZLIB_UNINIT;  /* inflateEnd() already called. */
