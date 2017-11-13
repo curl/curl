@@ -88,18 +88,6 @@
 
 #include "timeval.h"
 
-#ifdef HAVE_ZLIB_H
-#include <zlib.h>               /* for content-encoding */
-#ifdef __SYMBIAN32__
-/* zlib pollutes the namespace with this definition */
-#undef WIN32
-#endif
-#endif
-
-#ifdef HAVE_BROTLI
-#include <brotli/decode.h>
-#endif
-
 #include <curl/curl.h>
 
 #include "http_chunks.h" /* for the structs and enum stuff */

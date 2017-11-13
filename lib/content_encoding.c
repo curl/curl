@@ -25,6 +25,19 @@
 #include "urldata.h"
 #include <curl/curl.h>
 #include <stddef.h>
+
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#ifdef __SYMBIAN32__
+/* zlib pollutes the namespace with this definition */
+#undef WIN32
+#endif
+#endif
+
+#ifdef HAVE_BROTLI
+#include <brotli/decode.h>
+#endif
+
 #include "sendf.h"
 #include "http.h"
 #include "content_encoding.h"

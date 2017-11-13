@@ -64,6 +64,18 @@
 #define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
 #endif
 
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#ifdef __SYMBIAN32__
+/* zlib pollutes the namespace with this definition */
+#undef WIN32
+#endif
+#endif
+
+#ifdef HAVE_BROTLI
+#include <brotli/decode.h>
+#endif
+
 void Curl_version_init(void);
 
 /* For thread safety purposes this function is called by global_init so that
