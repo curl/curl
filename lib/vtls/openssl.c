@@ -838,12 +838,18 @@ int cert_stuff(struct connectdata *conn,
       EVP_PKEY_free(pktmp);
     }
 
-#if !defined(OPENSSL_NO_RSA) && defined(HAVE_OPAQUE_EVP_PKEY)
+#if !defined(OPENSSL_NO_RSA)
     {
       /* If RSA is used, don't check the private key if its flags indicate
        * it doesn't support it. */
       EVP_PKEY *priv_key = SSL_get_privatekey(ssl);
-      if(EVP_PKEY_id(priv_key) == EVP_PKEY_RSA) {
+      int pktype;
+#ifdef HAVE_OPAQUE_EVP_PKEY
+      pktype = EVP_PKEY_id(priv_key);
+#else
+      pktype = priv_key->type;
+#endif
+      if(pktype == EVP_PKEY_RSA) {
         RSA *rsa = EVP_PKEY_get1_RSA(priv_key);
         if(RSA_flags(rsa) & RSA_METHOD_FLAG_NO_CHECK)
           check_privkey = FALSE;
