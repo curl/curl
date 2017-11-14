@@ -54,6 +54,12 @@ This release includes the following bugfixes:
  o imap: deal with commands case insensitively [30]
  o --interface: add support for Linux VRF [32]
  o content_encoding: fix inflate_stream for no bytes available [33]
+ o cmake: Correctly include curl.rc in Windows builds [34]
+ o cmake: Add missing setmode check [35]
+ o connect.c: remove executable bit on file [36]
+ o SMB: fix uninitialized local variable
+ o zlib/brotli: only include header files in modules needing them [37]
+ o URL: return error on malformed URLs with junk after IPv6 bracket [38]
 
 This release includes the following known bugs:
 
@@ -62,13 +68,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Andrew Lambert, arainchik on github, cbartl on github,
-  Dan Fandrich, Daniel Bankhead, Daniel Stenberg, Dmitri Tikhonov, Gisle Vanem,
-  Jakub Zakrzewski, Juro Bystricky, Luca Boccassi, Marcel Raad, Martin Storsjö,
-  Max Dymond, moohoorama on github, omau on github, Patrick Monnerat,
-  Paul Howarth, Pavel Gushchin, Per Lundberg, Peter Piekarski, Petr Voytsik,
-  Ray Satiro, Rob Cotrone, Viktor Szakáts,
-  (26 contributors)
+  Alessandro Ghedini, Andrew Lambert, arainchik on github, Brian Carpenter,
+  cbartl on github, Dan Fandrich, Daniel Bankhead, Daniel Stenberg,
+  Dmitri Tikhonov, Gisle Vanem, hsiao yi, Jakub Zakrzewski, John Starks,
+  Juro Bystricky, Luca Boccassi, Marcel Raad, Martin Storsjö, Max Dymond,
+  Michael Felt, Michael Kaufmann, moohoorama on github, omau on github,
+  Orgad Shaneh, Patrick Monnerat, Paul Howarth, Pavel Gushchin, Per Lundberg,
+  Peter Piekarski, Petr Voytsik, Ray Satiro, Rob Cotrone, Viktor Szakáts,
+  (32 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -107,3 +114,9 @@ References to bug reports and discussions on issues:
  [31] = https://curl.haxx.se/bug/?i=2043
  [32] = https://curl.haxx.se/bug/?i=2024
  [33] = https://curl.haxx.se/bug/?i=2060
+ [34] = https://curl.haxx.se/bug/?i=2064
+ [35] = https://curl.haxx.se/bug/?i=2067
+ [36] = https://curl.haxx.se/bug/?i=2071
+ [37] = https://curl.haxx.se/mail/lib-2017-11/0032.html
+ [38] = https://curl.haxx.se/bug/?i=2072
+
