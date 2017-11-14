@@ -56,6 +56,7 @@
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
+ 4.8 Option to ignore private IP addresses in PASV response
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
@@ -448,17 +449,23 @@
 
 4.6 GSSAPI via Windows SSPI
 
-In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
-via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
-support for GSSAPI authentication via Windows SSPI.
+ In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
+ via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
+ support for GSSAPI authentication via Windows SSPI.
 
 4.7 STAT for LIST without data connection
 
-Some FTP servers allow STAT for listing directories instead of using LIST, and
-the response is then sent over the control connection instead of as the
-otherwise usedw data connection: http://www.nsftools.com/tips/RawFTP.htm#STAT
+ Some FTP servers allow STAT for listing directories instead of using LIST,
+ and the response is then sent over the control connection instead of as the
+ otherwise usedw data connection: http://www.nsftools.com/tips/RawFTP.htm#STAT
 
-This is not detailed in any FTP specification.
+ This is not detailed in any FTP specification.
+
+4.8 Option to ignore private IP addresses in PASV response
+
+ Some servers respond with and some other FTP client implementations can
+ ignore private (RFC 1918 style) IP addresses when received in PASV responses.
+ To consider for libcurl as well. See https://github.com/curl/curl/issues/1455
 
 5. HTTP
 
