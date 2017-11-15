@@ -1781,7 +1781,7 @@ static void llist_dtor(void *user, void *element)
 static struct connectdata *allocate_conn(struct Curl_easy *data)
 {
 #ifdef USE_SSL
-#define SSL_EXTRA + 4 * Curl_ssl->sizeof_ssl_backend_data - sizeof(long long)
+#define SSL_EXTRA (4 * Curl_ssl->sizeof_ssl_backend_data - sizeof(long long))
 #else
 #define SSL_EXTRA 0
 #endif
