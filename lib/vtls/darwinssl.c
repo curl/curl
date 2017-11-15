@@ -31,6 +31,7 @@
 #include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
 #include "strtok.h"
+#include "x509asn1.h"
 
 #ifdef USE_DARWINSSL
 
@@ -2421,13 +2422,10 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
   }
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-/* This should be called during step3 of the connection at the earliest */
-static void
-show_verbose_server_cert(struct connectdata *conn,
+static CFArrayRef
+get_server_certs(struct connectdata *conn,
                          int sockindex)
 {
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CFArrayRef server_certs = NULL;
   SecCertificateRef server_cert;
@@ -2435,25 +2433,20 @@ show_verbose_server_cert(struct connectdata *conn,
   CFIndex i, count;
   SecTrustRef trust = NULL;
 
-  if(!BACKEND->ssl_ctx)
-    return;
-
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
 #if CURL_BUILD_IOS
-#pragma unused(server_certs)
   err = SSLCopyPeerTrust(BACKEND->ssl_ctx, &trust);
   /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
      a null trust, so be on guard for that: */
   if(err == noErr && trust) {
     count = SecTrustGetCertificateCount(trust);
-    for(i = 0L ; i < count ; i++) {
-      CURLcode result;
-      char *certp;
-      server_cert = SecTrustGetCertificateAtIndex(trust, i);
-      result = CopyCertSubject(data, server_cert, &certp);
-      if(!result) {
-        infof(data, "Server certificate: %s\n", certp);
-        free(certp);
+    server_certs = CFArrayCreateMutable(NULL, 0, NULL);
+    if(server_certs != NULL) {
+      for(i = 0L ; i < count ; i++) {
+        server_cert = SecTrustGetCertificateAtIndex(trust, i);
+        if(server_cert != NULL)
+          CFArrayAppendValue((CFMutableArrayRef) server_certs, server_cert);
+        }
       }
     }
     CFRelease(trust);
@@ -2466,20 +2459,17 @@ show_verbose_server_cert(struct connectdata *conn,
      a different symbol to make sure this code is only executed under
      Lion or later. */
   if(SecTrustEvaluateAsync != NULL) {
-#pragma unused(server_certs)
     err = SSLCopyPeerTrust(BACKEND->ssl_ctx, &trust);
     /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
        a null trust, so be on guard for that: */
     if(err == noErr && trust) {
       count = SecTrustGetCertificateCount(trust);
-      for(i = 0L ; i < count ; i++) {
-        char *certp;
-        CURLcode result;
-        server_cert = SecTrustGetCertificateAtIndex(trust, i);
-        result = CopyCertSubject(data, server_cert, &certp);
-        if(!result) {
-          infof(data, "Server certificate: %s\n", certp);
-          free(certp);
+      server_certs = CFArrayCreateMutable(NULL, 0, NULL);
+      if(server_certs != NULL) {
+        for(i = 0L ; i < count ; i++) {
+          server_cert = SecTrustGetCertificateAtIndex(trust, i);
+          if(server_cert != NULL)
+            CFArrayAppendValue((CFMutableArrayRef) server_certs, server_cert);
         }
       }
       CFRelease(trust);
@@ -2488,45 +2478,57 @@ show_verbose_server_cert(struct connectdata *conn,
   else {
 #if CURL_SUPPORT_MAC_10_8
     err = SSLCopyPeerCertificates(BACKEND->ssl_ctx, &server_certs);
-    /* Just in case SSLCopyPeerCertificates() returns null too... */
-    if(err == noErr && server_certs) {
-      count = CFArrayGetCount(server_certs);
-      for(i = 0L ; i < count ; i++) {
-        char *certp;
-        CURLcode result;
-        server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs,
-                                                                i);
-        result = CopyCertSubject(data, server_cert, &certp);
-        if(!result) {
-          infof(data, "Server certificate: %s\n", certp);
-          free(certp);
-        }
-      }
-      CFRelease(server_certs);
-    }
+    if(err != noErr)
+      server_certs = NULL;
 #endif /* CURL_SUPPORT_MAC_10_8 */
   }
 #endif /* CURL_BUILD_IOS */
 #else
-#pragma unused(trust)
   err = SSLCopyPeerCertificates(BACKEND->ssl_ctx, &server_certs);
-  if(err == noErr) {
+    if(err != noErr)
+      server_certs = NULL;
+#endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
+
+  return server_certs;
+}
+
+static void
+push_server_certs(struct connectdata *conn,
+                         int sockindex)
+{
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  const char *data_begin, *data_end;
+  SecCertificateRef server_cert;
+  CFArrayRef server_certs;
+  CFDataRef cert_data;
+  CFIndex i, count;
+  CURLcode result;
+
+  if(!BACKEND->ssl_ctx)
+    return;
+
+  server_certs = get_server_certs(conn, sockindex);
+  if(server_certs != NULL) {
     count = CFArrayGetCount(server_certs);
-    for(i = 0L ; i < count ; i++) {
-      CURLcode result;
-      char *certp;
-      server_cert = (SecCertificateRef)CFArrayGetValueAtIndex(server_certs, i);
-      result = CopyCertSubject(data, server_cert, &certp);
-      if(!result) {
-        infof(data, "Server certificate: %s\n", certp);
-        free(certp);
+    result = Curl_ssl_init_certinfo(data, (int) count);
+    if(result == CURLE_OK) {
+      for(i = 0L ; i < count ; i++) {
+        server_cert = (SecCertificateRef) CFArrayGetValueAtIndex(
+                                                 server_certs, i);
+        cert_data   = SecCertificateCopyData(server_cert);
+        if(cert_data != NULL) {
+          data_begin = (const char *) CFDataGetBytePtr(cert_data);
+          data_end   = data_begin + (size_t) CFDataGetLength(cert_data);
+          result     = Curl_extract_certinfo(conn, (int) i,
+                                             data_begin, data_end);
+          CFRelease(cert_data);
+        }
       }
     }
     CFRelease(server_certs);
   }
-#endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
 }
-#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 static CURLcode
 darwinssl_connect_step3(struct connectdata *conn,
@@ -2535,13 +2537,9 @@ darwinssl_connect_step3(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
-  /* There is no step 3!
-   * Well, okay, if verbose mode is on, let's print the details of the
-   * server certificates. */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  if(data->set.verbose)
-    show_verbose_server_cert(conn, sockindex);
-#endif
+  /* Collect the server certificates. */
+  if(data->set.ssl.certinfo)
+    push_server_certs(conn, sockindex);
 
   connssl->connecting_state = ssl_connect_done;
   return CURLE_OK;
@@ -2980,7 +2978,7 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   { CURLSSLBACKEND_DARWINSSL, "darwinssl" }, /* info */
 
   0, /* have_ca_path */
-  0, /* have_certinfo */
+  1, /* have_certinfo */
 #ifdef DARWIN_SSL_PINNEDPUBKEY
   1, /* have_pinnedpubkey */
 #else

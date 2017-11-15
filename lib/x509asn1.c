@@ -23,7 +23,7 @@
 #include "curl_setup.h"
 
 #if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_CYASSL) || defined(USE_SCHANNEL)
+    defined(USE_CYASSL) || defined(USE_SCHANNEL) || defined(USE_DARWINSSL)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -1197,4 +1197,5 @@ CURLcode Curl_verifyhost(struct connectdata *conn,
   return CURLE_PEER_FAILED_VERIFICATION;
 }
 
-#endif /* USE_GSKIT */
+#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_CYASSL or
+        * USE_SCHANNEL or USE_DARWINSSL */
