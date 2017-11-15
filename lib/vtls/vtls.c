@@ -220,7 +220,7 @@ ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
     conn->proxy_ssl[sockindex] = conn->ssl[sockindex];
 
     memset(&conn->ssl[sockindex], 0, sizeof(conn->ssl[sockindex]));
-    memset(pbdata, 0, Curl_ssl->sizeof_ssl_backend_data);
+    memset(pbdata, 0, Curl_ssl->get_sizeof_backend_data());
 
     conn->ssl[sockindex].backend = pbdata;
   }
@@ -1088,6 +1088,13 @@ CURLcode Curl_none_md5sum(unsigned char *input UNUSED_PARAM,
 }
 #endif
 
+static size_t Curl_multissl_get_backend_size(void)
+{
+  if(multissl_init(NULL))
+    return 0;
+  return Curl_ssl->get_sizeof_backend_data();
+}
+
 static int Curl_multissl_init(void)
 {
   if(multissl_init(NULL))
@@ -1134,7 +1141,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
-  (size_t)-1, /* something insanely large to be on the safe side */
+  Curl_multissl_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_multissl_init,                /* init */
   Curl_none_cleanup,                 /* cleanup */

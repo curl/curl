@@ -1816,6 +1816,11 @@ static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
   return &BACKEND->ctxt->ctxt_handle;
 }
 
+static size_t Curl_schannel_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
@@ -1825,7 +1830,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_schannel_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_schannel_init,                /* init */
   Curl_schannel_cleanup,             /* cleanup */

@@ -2976,6 +2976,11 @@ static void *Curl_darwinssl_get_internals(struct ssl_connect_data *connssl,
   return BACKEND->ssl_ctx;
 }
 
+static size_t Curl_darwinssl_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_darwinssl = {
   { CURLSSLBACKEND_DARWINSSL, "darwinssl" }, /* info */
 
@@ -2989,7 +2994,7 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_darwinssl_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_none_init,                     /* init */
   Curl_none_cleanup,                  /* cleanup */

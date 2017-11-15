@@ -1039,6 +1039,11 @@ static void *Curl_mbedtls_get_internals(struct ssl_connect_data *connssl,
   return &BACKEND->ssl;
 }
 
+static size_t Curl_mbedtls_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_mbedtls = {
   { CURLSSLBACKEND_MBEDTLS, "mbedtls" }, /* info */
 
@@ -1048,7 +1053,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   1, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_mbedtls_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_mbedtls_init,                /* init */
   Curl_mbedtls_cleanup,             /* cleanup */

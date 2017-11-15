@@ -40,7 +40,7 @@ struct Curl_ssl {
 
   unsigned support_https_proxy:1; /* supports access via HTTPS proxies */
 
-  size_t sizeof_ssl_backend_data;
+  size_t (*get_sizeof_backend_data)(void);
 
   int (*init)(void);
   void (*cleanup)(void);

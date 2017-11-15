@@ -3621,6 +3621,11 @@ static void *Curl_ossl_get_internals(struct ssl_connect_data *connssl,
          (void *)BACKEND->ctx : (void *)BACKEND->handle;
 }
 
+static size_t Curl_ossl_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_openssl = {
   { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
@@ -3630,7 +3635,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   1, /* have_ssl_ctx */
   1, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_ossl_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_ossl_init,                /* init */
   Curl_ossl_cleanup,             /* cleanup */

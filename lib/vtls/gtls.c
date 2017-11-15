@@ -1805,6 +1805,11 @@ static void *Curl_gtls_get_internals(struct ssl_connect_data *connssl,
   return BACKEND->session;
 }
 
+static size_t Curl_gtls_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_gnutls = {
   { CURLSSLBACKEND_GNUTLS, "gnutls" }, /* info */
 
@@ -1814,7 +1819,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   0, /* have_ssl_ctx */
   1, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_gtls_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_gtls_init,                /* init */
   Curl_gtls_cleanup,             /* cleanup */

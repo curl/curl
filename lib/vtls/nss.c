@@ -2342,6 +2342,11 @@ static void *Curl_nss_get_internals(struct ssl_connect_data *connssl,
   return BACKEND->handle;
 }
 
+static size_t Curl_nss_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_nss = {
   { CURLSSLBACKEND_NSS, "nss" }, /* info */
 
@@ -2351,7 +2356,7 @@ const struct Curl_ssl Curl_ssl_nss = {
   0, /* have_ssl_ctx */
   1, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_nss_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_nss_init,                /* init */
   Curl_nss_cleanup,             /* cleanup */
