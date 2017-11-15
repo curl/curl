@@ -1137,28 +1137,77 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
      raise linker errors when used on that cat for some reason. */
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
   if(CFURLCreateDataAndPropertiesFromResource(NULL, pkcs_url, &pkcs_data,
-    NULL, NULL, &status)) {
+   NULL, NULL, &status)) {
+    CFArrayRef items = NULL;
+
+  /* On iOS SecPKCS12Import will never add the client certificate to the
+   * Keychain.
+   *
+   * It gives us back a SecIdentityRef that we can use directly. */
+#if CURL_BUILD_IOS
     const void *cKeys[] = {kSecImportExportPassphrase};
     const void *cValues[] = {password};
     CFDictionaryRef options = CFDictionaryCreate(NULL, cKeys, cValues,
       password ? 1L : 0L, NULL, NULL);
-    CFArrayRef items = NULL;
 
-    /* Here we go: */
-    status = SecPKCS12Import(pkcs_data, options, &items);
+    if(options != NULL) {
+      status = SecPKCS12Import(pkcs_data, options, &items);
+      CFRelease(options);
+    }
+
+
+  /* On macOS SecPKCS12Import will always add the client certificate to
+   * the Keychain.
+   *
+   * As this doesn't match iOS, and apps may not want to see their client
+   * certificate saved in the the user's keychain, we use SecItemImport
+   * with a NULL keychain to avoid importing it.
+   *
+   * This returns a SecCertificateRef from which we can construct a
+   * SecIdentityRef.
+   */
+#elif CURL_BUILD_MAC_10_7
+    SecItemImportExportKeyParameters keyParams;
+    SecExternalFormat inputFormat = kSecFormatPKCS12;
+    SecExternalItemType inputType = kSecItemTypeCertificate;
+
+    memset(&keyParams, 0x00, sizeof(keyParams));
+    keyParams.version    = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+    keyParams.passphrase = password;
+
+    status = SecItemImport(pkcs_data, NULL, &inputFormat, &inputType,
+                           0, &keyParams, NULL, &items);
+#endif
+
+
+    /* Extract the SecIdentityRef */
     if(status == errSecSuccess && items && CFArrayGetCount(items)) {
-      CFDictionaryRef identity_and_trust = CFArrayGetValueAtIndex(items, 0L);
-      const void *temp_identity = CFDictionaryGetValue(identity_and_trust,
-        kSecImportItemIdentity);
+      CFIndex i, count;
+      count = CFArrayGetCount(items);
 
-      /* Retain the identity; we don't care about any other data... */
-      CFRetain(temp_identity);
-      *out_cert_and_key = (SecIdentityRef)temp_identity;
+      for(i = 0; i < count; i++) {
+        CFTypeRef item = (CFTypeRef) CFArrayGetValueAtIndex(items, i);
+        CFTypeID  itemID = CFGetTypeID(item);
+
+        if(itemID == CFDictionaryGetTypeID()) {
+          CFTypeRef identity = (CFTypeRef) CFDictionaryGetValue(
+                                                 (CFDictionaryRef) item,
+                                                 kSecImportItemIdentity);
+          CFRetain(identity);
+          *out_cert_and_key = (SecIdentityRef) identity;
+          break;
+        }
+        else if(itemID == SecCertificateGetTypeID()) {
+          status = SecIdentityCreateWithCertificate(NULL,
+                                                 (SecCertificateRef) item,
+                                                 out_cert_and_key);
+          break;
+        }
+      }
     }
 
     if(items)
       CFRelease(items);
-    CFRelease(options);
     CFRelease(pkcs_data);
   }
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
