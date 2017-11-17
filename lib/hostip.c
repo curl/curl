@@ -778,7 +778,6 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 {
   struct curl_slist *hostp;
   char hostname[256];
-  char address[256];
   int port;
 
   for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
@@ -820,12 +819,24 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       Curl_addrinfo *addr;
       char *entry_id;
       size_t entry_len;
+      char buffer[256];
+      char *address = &buffer[0];
 
       if(3 != sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
                      address)) {
         infof(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'!\n",
               hostp->data);
         continue;
+      }
+
+      /* allow IP(v6) address within [brackets] */
+      if(address[0] == '[') {
+        size_t alen = strlen(address);
+        if(address[alen-1] != ']')
+          /* it needs to also end with ] to be valid */
+          continue;
+        address[alen-1] = 0; /* zero terminate there */
+        address++; /* pass the open bracket */
       }
 
       addr = Curl_str2addr(address, port);
