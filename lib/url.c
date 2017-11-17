@@ -1687,7 +1687,7 @@ static bool is_ASCII_name(const char *hostname)
 /*
  * Perform any necessary IDN conversion of hostname
  */
-static void fix_hostname(struct connectdata *conn, struct hostname *host)
+static CURLcode fix_hostname(struct connectdata *conn, struct hostname *host)
 {
   size_t len;
   struct Curl_easy *data = conn->data;
@@ -1727,9 +1727,11 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
         /* change the name pointer to point to the encoded hostname */
         host->name = host->encalloc;
       }
-      else
-        infof(data, "Failed to convert %s to ACE; %s\n", host->name,
+      else {
+        failf(data, "Failed to convert %s to ACE; %s\n", host->name,
               idn2_strerror(rc));
+        return CURLE_URL_MALFORMAT;
+      }
     }
 #elif defined(USE_WIN32_IDN)
     char *ace_hostname = NULL;
@@ -1739,12 +1741,24 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
       /* change the name pointer to point to the encoded hostname */
       host->name = host->encalloc;
     }
-    else
-      infof(data, "Failed to convert %s to ACE;\n", host->name);
+    else {
+      failf(data, "Failed to convert %s to ACE;\n", host->name);
+      return CURLE_URL_MALFORMAT;
+    }
 #else
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
   }
+  {
+    char *hostp;
+    for(hostp = host->name; *hostp; hostp++) {
+      if(*hostp <= 32) {
+        failf(data, "Host name '%s' contains bad letter", host->name);
+        return CURLE_URL_MALFORMAT;
+      }
+    }
+  }
+  return CURLE_OK;
 }
 
 /*
@@ -4178,13 +4192,24 @@ static CURLcode create_conn(struct Curl_easy *data,
   /*************************************************************
    * IDN-fix the hostnames
    *************************************************************/
-  fix_hostname(conn, &conn->host);
-  if(conn->bits.conn_to_host)
-    fix_hostname(conn, &conn->conn_to_host);
-  if(conn->bits.httpproxy)
-    fix_hostname(conn, &conn->http_proxy.host);
-  if(conn->bits.socksproxy)
-    fix_hostname(conn, &conn->socks_proxy.host);
+  result = fix_hostname(conn, &conn->host);
+  if(result)
+    goto out;
+  if(conn->bits.conn_to_host) {
+    result = fix_hostname(conn, &conn->conn_to_host);
+    if(result)
+      goto out;
+  }
+  if(conn->bits.httpproxy) {
+    result = fix_hostname(conn, &conn->http_proxy.host);
+    if(result)
+      goto out;
+  }
+  if(conn->bits.socksproxy) {
+    result = fix_hostname(conn, &conn->socks_proxy.host);
+    if(result)
+      goto out;
+  }
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
