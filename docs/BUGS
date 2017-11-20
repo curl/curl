@@ -63,7 +63,7 @@ BUGS
   Security related bugs or bugs that are suspected to have a security impact,
   should be reported by email to curl-security@haxx.se so that they first can
   be dealt with away from the public to minimize the harm and impact it will
-  have on existing users out there who might be using the vulernable versions.
+  have on existing users out there who might be using the vulnerable versions.
 
   The curl project's process for handling security related issues is
   documented here:
@@ -186,7 +186,7 @@ BUGS
   include the version number of the curl you're using when you experience the
   issue. If that version number shows us that you're using an out-of-date
   curl, you should also try out a modern curl version to see if the problem
-  persists or how/if it has changed in apperance.
+  persists or how/if it has changed in appearance.
 
   Even if you cannot immediately upgrade your application/system to run the
   latest curl version, you can most often at least run a test version or
@@ -290,8 +290,8 @@ BUGS
   The issue and pull request trackers on https://github.com/curl/curl will
   only hold "active" entries (using a non-precise definition of what active
   actually is, but they're at least not completely dead). Those that are
-  abandonded or in other ways dormant will be closed and sometimes added to
+  abandoned or in other ways dormant will be closed and sometimes added to
   TODO and KNOWN_BUGS instead.
 
   This way, we only have "active" issues open on github. Irrelevant issues and
-  pull requests will not distract developes or casual visitors.
+  pull requests will not distract developers or casual visitors.
