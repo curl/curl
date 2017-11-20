@@ -318,6 +318,8 @@ static const struct helptxt helptext[] = {
    "SPNEGO proxy service name"},
   {"    --proxy-ssl-allow-beast",
    "Allow security flaw for interop for HTTPS proxy"},
+  {"    --proxy-ssl-no-revoke",
+   "Disable cert revocation checks for HTTPS proxy (WinSSL)"},
   {"    --proxy-tlsauthtype <type>",
    "TLS authentication type for HTTPS proxy"},
   {"    --proxy-tlspassword <string>",

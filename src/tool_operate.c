@@ -1473,11 +1473,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
                       (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
           if(mask)
             my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);
-        }
 
-        if(config->proxy_ssl_allow_beast)
-          my_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
-                    (long)CURLSSLOPT_ALLOW_BEAST);
+          mask =
+            (config->proxy_ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
+            (config->proxy_ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
+          if(mask)
+            my_setopt_bitmask(curl, CURLOPT_PROXY_SSL_OPTIONS, mask);
+        }
 
         if(config->mail_auth)
           my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
