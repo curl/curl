@@ -1848,7 +1848,6 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     goto fail;
   }
 
-  end = line_end;
   nva[2].name = (unsigned char *)":scheme";
   nva[2].namelen = strlen((char *)nva[2].name);
   if(conn->handler->flags & PROTOPT_SSL)
