@@ -1793,14 +1793,40 @@ static void llist_dtor(void *user, void *element)
  */
 static struct connectdata *allocate_conn(struct Curl_easy *data)
 {
+  struct connectdata *conn;
+  size_t connsize = sizeof(struct connectdata);
+
 #ifdef USE_SSL
-#define SSL_EXTRA + 4 * Curl_ssl->sizeof_ssl_backend_data - sizeof(long long)
-#else
-#define SSL_EXTRA 0
+/* SSLBK_MAX_ALIGN: The max byte alignment a CPU would use */
+#define SSLBK_MAX_ALIGN 32
+  /* The SSL backend-specific data (ssl_backend_data) objects are allocated as
+     part of connectdata at the end. To ensure suitable alignment we will
+     assume a maximum of SSLBK_MAX_ALIGN for alignment. Since calloc returns a
+     pointer suitably aligned for any variable this will ensure the
+     ssl_backend_data array has proper alignment, even if that alignment turns
+     out to be less than SSLBK_MAX_ALIGN. */
+  size_t paddingsize = sizeof(struct connectdata) % SSLBK_MAX_ALIGN;
+  size_t alignsize = paddingsize ? (SSLBK_MAX_ALIGN - paddingsize) : 0;
+  size_t sslbksize = Curl_ssl->sizeof_ssl_backend_data;
+  connsize += alignsize + (4 * sslbksize);
 #endif
-  struct connectdata *conn = calloc(1, sizeof(struct connectdata) + SSL_EXTRA);
+
+  conn = calloc(1, connsize);
   if(!conn)
     return NULL;
+
+#ifdef USE_SSL
+  /* Point to the ssl_backend_data objects at the end of connectdata.
+     Note that these backend pointers can be swapped by vtls (eg ssl backend
+     data becomes proxy backend data). */
+  {
+    char *end = (char *)conn + connsize;
+    conn->ssl[0].backend = ((void *)(end - (4 * sslbksize)));
+    conn->ssl[1].backend = ((void *)(end - (3 * sslbksize)));
+    conn->proxy_ssl[0].backend = ((void *)(end - (2 * sslbksize)));
+    conn->proxy_ssl[1].backend = ((void *)(end - (1 * sslbksize)));
+  }
+#endif
 
   conn->handler = &Curl_handler_dummy;  /* Be sure we have a handler defined
                                            already from start to avoid NULL
@@ -1880,23 +1906,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->proxy_ssl_config.verifyhost = data->set.proxy_ssl.primary.verifyhost;
 
   conn->ip_version = data->set.ipver;
-
-#ifdef USE_SSL
-  /*
-   * To save on malloc()s, the SSL backend-specific data has been allocated
-   * at the end of the connectdata struct.
-   */
-  {
-    char *p = (char *)&conn->align_data__do_not_use;
-    conn->ssl[0].backend = (struct ssl_backend_data *)p;
-    conn->ssl[1].backend =
-      (struct ssl_backend_data *)(p + Curl_ssl->sizeof_ssl_backend_data);
-    conn->proxy_ssl[0].backend =
-      (struct ssl_backend_data *)(p + Curl_ssl->sizeof_ssl_backend_data * 2);
-    conn->proxy_ssl[1].backend =
-      (struct ssl_backend_data *)(p + Curl_ssl->sizeof_ssl_backend_data * 3);
-  }
-#endif
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
     defined(NTLM_WB_ENABLED)

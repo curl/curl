@@ -1004,16 +1004,6 @@ struct connectdata {
   char *unix_domain_socket;
   bool abstract_unix_socket;
 #endif
-
-#ifdef USE_SSL
-  /*
-   * To avoid multiple malloc() calls, the ssl_connect_data structures
-   * associated with a connectdata struct are allocated in the same block
-   * as the latter. This field forces alignment to an 8-byte boundary so
-   * that this all works.
-   */
-  long long *align_data__do_not_use;
-#endif
 };
 
 /* The end of connectdata. */
