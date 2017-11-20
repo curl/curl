@@ -149,6 +149,10 @@ matrix:
         - os: linux
           compiler: clang
           dist: trusty
+          env: T=scan-build
+        - os: linux
+          compiler: clang
+          dist: trusty
           env: T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
 
 install:
@@ -403,6 +407,11 @@ script:
           pushd /tmp/curl_fuzzer
           ./mainline.sh ${CURLSRC}
           popd
+        fi
+    - |
+        if [ "$T" = "scan-build" ]; then
+             scan-build ./configure --enable-debug --enable-werror $C
+             scan-build --status-bugs make && scan-build --status-bugs make examples
         fi
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
