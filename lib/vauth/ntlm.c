@@ -543,8 +543,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   else
     user = userp;
 
-  if(user)
-    userlen = strlen(user);
+  userlen = strlen(user);
 
   /* Get the machine's un-qualified host name as NTLM doesn't like the fully
      qualified domain name */
