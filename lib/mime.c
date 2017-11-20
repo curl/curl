@@ -719,8 +719,6 @@ static size_t readback_bytes(mime_state *state,
 {
   size_t sz;
 
-  sz = numbytes - state->offset;
-
   if(numbytes > state->offset) {
     sz = numbytes - state->offset;
     bytes += state->offset;
