@@ -22,6 +22,7 @@ none
 </server>
 <features>
 idn
+http
 </features>
 <setenv>
 LC_ALL=
