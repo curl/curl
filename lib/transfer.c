@@ -106,6 +106,34 @@ char *Curl_checkheaders(const struct connectdata *conn,
 #endif
 
 /*
+ * This function processes DICT protocol character data
+ * Currently replaces extraneous lines with dashes
+ * Because of downstream processing in readwrite_data()
+ * But these should be removed completely while
+ * allowing graceful downstream processing
+ */
+static void Curl_processdict(char * strPtr)
+{
+    int line_position = 0;
+
+    while(*strPtr != 0) {
+        if(isdigit(*strPtr) && isdigit(*(strPtr + 1)) && \
+           isdigit(*strPtr + 2) && (line_position == 0)) {
+            /* Filter lines of characters that start with
+               3 digit transfer codes */
+            while(*strPtr != '\n')
+                *(strPtr++) = '-';
+            continue;
+        }
+        else{
+        ++line_position;
+        if((*strPtr++) == '\n')
+            line_position = 0;
+        }
+    }
+}
+
+/*
  * This function will call the read callback to fill our buffer with data
  * to upload.
  */
@@ -514,6 +542,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     /* Default buffer to use when we write the buffer, it may be changed
        in the flow below before the actual storing is done. */
     k->str = k->buf;
+    Curl_processdict(k->str);
 
     if(conn->handler->readwrite) {
       result = conn->handler->readwrite(data, conn, &nread, &readmore);
