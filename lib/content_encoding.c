@@ -151,8 +151,16 @@ static CURLcode inflate_stream(struct connectdata *conn,
   uInt nread = z->avail_in;
   Bytef *orig_in = z->next_in;
   int status;                   /* zlib status */
+  bool done = FALSE;
   CURLcode result = CURLE_OK;   /* Curl_client_write status */
   char *decomp;                 /* Put the decompressed data here. */
+
+  /* Check state. */
+  if(zp->zlib_init != ZLIB_INIT &&
+     zp->zlib_init != ZLIB_INFLATING &&
+     zp->zlib_init != ZLIB_INIT_GZIP &&
+     zp->zlib_init != ZLIB_GZIP_INFLATING)
+    return exit_zlib(conn, z, &zp->zlib_init, CURLE_WRITE_ERROR);
 
   /* Dynamically allocate a buffer for decompression because it's uncommonly
      large to hold on the stack */
@@ -162,21 +170,15 @@ static CURLcode inflate_stream(struct connectdata *conn,
 
   /* because the buffer size is fixed, iteratively decompress and transfer to
      the client via downstream_write function. */
-  while(!result && z->avail_in) {
-    /* Check state. */
-    if(zp->zlib_init != ZLIB_INIT &&
-       zp->zlib_init != ZLIB_INFLATING &&
-       zp->zlib_init != ZLIB_INIT_GZIP &&
-       zp->zlib_init != ZLIB_GZIP_INFLATING) {
-      result = exit_zlib(conn, z, &zp->zlib_init, CURLE_WRITE_ERROR);
-      break;
-    }
+  while(!done) {
+    done = TRUE;
 
     /* (re)set buffer for decompressed output for every iteration */
     z->next_out = (Bytef *) decomp;
     z->avail_out = DSIZ;
 
     status = inflate(z, Z_SYNC_FLUSH);
+
     /* Flush output data if some. */
     if(z->avail_out != DSIZ) {
       zp->zlib_init = started;      /* Data started. */
@@ -187,9 +189,16 @@ static CURLcode inflate_stream(struct connectdata *conn,
         break;
       }
     }
+
     /* Dispatch by inflate() status. */
     switch(status) {
     case Z_OK:
+      /* There may still be latched data in state when the output buffer is
+         full, thus loop even if no more input data available. */
+      done = z->avail_in == 0 && z->avail_out;
+      break;
+    case Z_BUF_ERROR:
+      /* No more data to flush: just exit loop. */
       break;
     case Z_STREAM_END:
       result = process_trailer(conn, zp);
@@ -205,9 +214,12 @@ static CURLcode inflate_stream(struct connectdata *conn,
           result = exit_zlib(conn, z, &zp->zlib_init,
                              process_zlib_error(conn, z));
         }
-        z->next_in = orig_in;
-        z->avail_in = nread;
-        zp->zlib_init = ZLIB_INFLATING;
+        else {
+          z->next_in = orig_in;
+          z->avail_in = nread;
+          zp->zlib_init = ZLIB_INFLATING;
+          done = FALSE;
+        }
       }
       else
         result = exit_zlib(conn, z, &zp->zlib_init,
