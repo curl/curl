@@ -209,22 +209,16 @@ static CURLcode inflate_stream(struct connectdata *conn,
       if(zp->zlib_init == ZLIB_INIT) {
         /* Do not use inflateReset2(): only available since zlib 1.2.3.4. */
         (void) inflateEnd(z);     /* don't care about the return code */
-        if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
-          zp->zlib_init = ZLIB_UNINIT;  /* inflateEnd() already called. */
-          result = exit_zlib(conn, z, &zp->zlib_init,
-                             process_zlib_error(conn, z));
-        }
-        else {
+        if(inflateInit2(z, -MAX_WBITS) == Z_OK) {
           z->next_in = orig_in;
           z->avail_in = nread;
           zp->zlib_init = ZLIB_INFLATING;
           done = FALSE;
+          break;
         }
+        zp->zlib_init = ZLIB_UNINIT;    /* inflateEnd() already called. */
       }
-      else
-        result = exit_zlib(conn, z, &zp->zlib_init,
-                           process_zlib_error(conn, z));
-      break;
+      /* FALLTHROUGH */
     default:
       result = exit_zlib(conn, z, &zp->zlib_init, process_zlib_error(conn, z));
       break;
