@@ -412,6 +412,10 @@ static CURLcode bindlocal(struct connectdata *conn,
     }
 
     if(done < 1) {
+      /* errorbuf is set false so failf will overwrite any message already in
+         the error buffer, so the user receives this error message instead of a
+         generic resolve error. */
+      data->state.errorbuf = FALSE;
       failf(data, "Couldn't bind to '%s'", dev);
       return CURLE_INTERFACE_FAILED;
     }
