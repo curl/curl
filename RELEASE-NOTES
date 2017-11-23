@@ -60,6 +60,20 @@ This release includes the following bugfixes:
  o SMB: fix uninitialized local variable
  o zlib/brotli: only include header files in modules needing them [37]
  o URL: return error on malformed URLs with junk after IPv6 bracket [38]
+ o openssl: fix too broad use of HAVE_OPAQUE_EVP_PKEY [39]
+ o macOS: Fix missing connectx function with Xcode version older than 9.0 [40]
+ o --resolve: allow IP address within [] brackets [41]
+ o examples/curlx: Fix code style [42]
+ o ntlm: remove unnecessary NULL-check to please scan-build [43]
+ o Curl_llist_remove: fix potential NULL pointer deref [43]
+ o mime: fix "Value stored to 'sz' is never read" scan-build error [43]
+ o openssl: fix "Value stored to 'rc' is never read" scan-build error [43]
+ o http2: fix "Value stored to 'hdbuf' is never read" scan-build error [43]
+ o http2: fix "Value stored to 'end' is never read" scan-build error [43]
+ o Curl_open: fix OOM return error correctly [43]
+ o url: reject ASCII control characters and space in host names [44]
+ o examples/rtsp: clear RANGE again after use [45]
+ o connect: improve the bind error message [46]
 
 This release includes the following known bugs:
 
@@ -68,14 +82,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Andrew Lambert, arainchik on github, Brian Carpenter,
-  cbartl on github, Dan Fandrich, Daniel Bankhead, Daniel Stenberg,
-  Dmitri Tikhonov, Gisle Vanem, hsiao yi, Jakub Zakrzewski, John Starks,
-  Juro Bystricky, Luca Boccassi, Marcel Raad, Martin Storsjö, Max Dymond,
-  Michael Felt, Michael Kaufmann, moohoorama on github, omau on github,
-  Orgad Shaneh, Patrick Monnerat, Paul Howarth, Pavel Gushchin, Per Lundberg,
-  Peter Piekarski, Petr Voytsik, Ray Satiro, Rob Cotrone, Viktor Szakáts,
-  (32 contributors)
+  Alessandro Ghedini, Alex Malinovich, Alfonso Martone, Andrew Lambert,
+  arainchik on github, Brian Carpenter, cbartl on github, Dan Fandrich,
+  Daniel Bankhead, Daniel Stenberg, Dirk Feytons, Dmitri Tikhonov, Gisle Vanem,
+  hsiao yi, Jakub Zakrzewski, John Starks, Juro Bystricky, Luca Boccassi,
+  Marcel Raad, Martin Storsjö, Max Dymond, Michael Felt, Michael Kaufmann,
+  moohoorama on github, omau on github, Orgad Shaneh, Patrick Monnerat,
+  Paul Howarth, Pavel Gushchin, Pavol Markovic, Per Lundberg, Peter Piekarski,
+  Petr Voytsik, Ray Satiro, Rob Cotrone, Viktor Szakáts, youngchopin on github,
+  (37 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -119,4 +134,11 @@ References to bug reports and discussions on issues:
  [36] = https://curl.haxx.se/bug/?i=2071
  [37] = https://curl.haxx.se/mail/lib-2017-11/0032.html
  [38] = https://curl.haxx.se/bug/?i=2072
-
+ [39] = https://curl.haxx.se/bug/?i=2079
+ [40] = https://curl.haxx.se/bug/?i=2080
+ [41] = https://curl.haxx.se/bug/?i=2087
+ [42] = https://curl.haxx.se/bug/?i=2096
+ [43] = https://curl.haxx.se/bug/?i=2098
+ [44] = https://curl.haxx.se/bug/?i=2073
+ [45] = https://curl.haxx.se/bug/?i=2106
+ [46] = https://curl.haxx.se/bug/?i=2104
