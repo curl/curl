@@ -177,25 +177,26 @@ static CURLcode inflate_stream(struct connectdata *conn,
     z->next_out = (Bytef *) decomp;
     z->avail_out = DSIZ;
 
-    status = inflate(z, Z_SYNC_FLUSH);
+    status = inflate(z, Z_BLOCK);
 
     /* Flush output data if some. */
     if(z->avail_out != DSIZ) {
-      zp->zlib_init = started;      /* Data started. */
-      result = Curl_unencode_write(conn, writer->downstream, decomp,
-                                   DSIZ - z->avail_out);
-      if(result) {
-        exit_zlib(conn, z, &zp->zlib_init, result);
-        break;
+      if(status == Z_OK || status == Z_STREAM_END) {
+        zp->zlib_init = started;      /* Data started. */
+        result = Curl_unencode_write(conn, writer->downstream, decomp,
+                                     DSIZ - z->avail_out);
+        if(result) {
+          exit_zlib(conn, z, &zp->zlib_init, result);
+          break;
+        }
       }
     }
 
     /* Dispatch by inflate() status. */
     switch(status) {
     case Z_OK:
-      /* There may still be latched data in state when the output buffer is
-         full, thus loop even if no more input data available. */
-      done = z->avail_in == 0 && z->avail_out;
+      /* Always loop: there may be unflushed latched data in zlib state. */
+      done = FALSE;
       break;
     case Z_BUF_ERROR:
       /* No more data to flush: just exit loop. */
