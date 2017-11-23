@@ -217,15 +217,6 @@ examples:
 check-docs:
 	@(cd docs/libcurl; $(MAKE) check)
 
-# This is a hook to have 'make clean' also clean up the docs and the tests
-# dir. The extra check for the Makefiles being present is necessary because
-# 'make distcheck' will make clean first in these directories _before_ it runs
-# this hook.
-clean-local:
-	@(if test -f tests/Makefile; then cd tests; $(MAKE) clean; fi)
-	@(if test -f docs/Makefile; then cd docs; $(MAKE) clean; fi)
-
-#
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
 # must contain the following line:
 # %_topdir /home/loic/local/rpm
