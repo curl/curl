@@ -215,11 +215,10 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
   }
 
-  if(flags & CURL_GLOBAL_SSL)
-    if(!Curl_ssl_init()) {
-      DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
-      return CURLE_FAILED_INIT;
-    }
+  if(!Curl_ssl_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
 
   if(flags & CURL_GLOBAL_WIN32)
     if(win32_init()) {
@@ -319,10 +318,7 @@ void curl_global_cleanup(void)
     return;
 
   Curl_global_host_cache_dtor();
-
-  if(init_flags & CURL_GLOBAL_SSL)
-    Curl_ssl_cleanup();
-
+  Curl_ssl_cleanup();
   Curl_resolver_global_cleanup();
 
   if(init_flags & CURL_GLOBAL_WIN32)
