@@ -2347,8 +2347,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
         sshc->sftp_handle = NULL;
       }
-      if(sftp_scp)
-        Curl_safefree(sftp_scp->path);
+
+      Curl_safefree(sftp_scp->path);
 
       DEBUGF(infof(data, "SFTP DONE done\n"));
 
