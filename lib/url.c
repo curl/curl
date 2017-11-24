@@ -2039,6 +2039,14 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     ('A' <= str[0] && str[0] <= 'Z')) && \
    (str[1] == ':'))
 
+  /* MSDOS/Windows style drive prefix, optionally with
+   * a '|' instead of ':', followed by a slash or NUL */
+#define STARTS_WITH_URL_DRIVE_PREFIX(str) \
+  ((('a' <= (str)[0] && (str)[0] <= 'z') || \
+    ('A' <= (str)[0] && (str)[0] <= 'Z')) && \
+   ((str)[1] == ':' || (str)[1] == '|') && \
+   ((str)[2] == '/' || (str)[2] == 0))
+
   /* Don't mistake a drive letter for a scheme if the default protocol is file.
      curld --proto-default file c:/foo/bar.txt */
   if(STARTS_WITH_DRIVE_PREFIX(data->change.url) &&
@@ -2071,62 +2079,87 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return CURLE_URL_MALFORMAT;
     }
 
-    if(url_has_scheme && path[0] == '/' && path[1] == '/') {
-      /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
-       * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
-       * file://localhost/<path> is similar to how other schemes treat missing
-       * hostnames.  See RFC 1808. */
-
-      /* This cannot be done with strcpy() in a portable manner, since the
-         memory areas overlap! */
-      memmove(path, path + 2, strlen(path + 2) + 1);
+    if(url_has_scheme && path[0] == '/' && path[1] == '/' && path[2] == '/' && path[3] == '/') {
+      /* This appears to be a UNC string (usually indicating a SMB share).
+       * We don't do SMB in file: URLs. (TODO?)
+       */
+      failf(data, "SMB shares are not supported in file: URLs.");
+      return CURLE_URL_MALFORMAT;
     }
 
-    /*
-     * we deal with file://<host>/<path> differently since it supports no
-     * hostname other than "localhost" and "127.0.0.1", which is unique among
-     * the URL protocols specified in RFC 1738
+    /* Extra handling URLs with an authority component (i.e. that start with
+     * "file://")
+     *
+     * We allow omitted hostname (e.g. file:/<path>) -- valid according to
+     * RFC 8089, but not the (current) WHAT-WG URL spec.
      */
-    if(path[0] != '/' && !STARTS_WITH_DRIVE_PREFIX(path)) {
-      /* the URL includes a host name, it must match "localhost" or
-         "127.0.0.1" to be valid */
-      char *ptr;
-      if(!checkprefix("localhost/", path) &&
-         !checkprefix("127.0.0.1/", path)) {
-        failf(data, "Invalid file://hostname/, "
-                    "expected localhost or 127.0.0.1 or none");
-        return CURLE_URL_MALFORMAT;
+    if(url_has_scheme && path[0] == '/' && path[1] == '/') {
+      /* swallow the two slashes */
+      char *ptr = &path[2];
+
+      /*
+       * According to RFC 8089, a file: URL can be reliably dereferenced if:
+       *
+       *  o it has no/blank hostname, or
+       *
+       *  o the hostname matches "localhost" (case-insensitively), or
+       *
+       *  o the hostname is a FQDN that resolves to this machine.
+       *
+       * For brevity, we only consider URLs with empty, "localhost", or "127.0.0.1"
+       * hostnames as local.
+       *
+       * Additionally, there is an exception for URLs with a Windows drive letter
+       * in the authority (which was accidentally omitted from RFC 8089, Appendix E,
+       * but believe me, it was meant to be there. --MK)
+       */
+      if(ptr[0] != '/' && !STARTS_WITH_URL_DRIVE_PREFIX(ptr)) {
+        /* the URL includes a host name, it must match "localhost" or
+           "127.0.0.1" to be valid */
+        if(!checkprefix("localhost/", ptr) &&
+           !checkprefix("127.0.0.1/", ptr)) {
+          failf(data, "Invalid file://hostname/, "
+                      "expected localhost or 127.0.0.1 or none");
+          return CURLE_URL_MALFORMAT;
+        }
+        ptr += 9; /* now points to the slash after the host */
       }
-      ptr = &path[9]; /* now points to the slash after the host */
 
-      /* there was a host name and slash present
-
-         RFC1738 (section 3.1, page 5) says:
-
-         The rest of the locator consists of data specific to the scheme,
-         and is known as the "url-path". It supplies the details of how the
-         specified resource can be accessed. Note that the "/" between the
-         host (or port) and the url-path is NOT part of the url-path.
-
-         As most agents use file://localhost/foo to get '/foo' although the
-         slash preceding foo is a separator and not a slash for the path,
-         a URL as file://localhost//foo must be valid as well, to refer to
-         the same file with an absolute path.
-      */
-
-      if('/' == ptr[1])
-        /* if there was two slashes, we skip the first one as that is then
-           used truly as a separator */
+      /*
+       * RFC 8089, Appendix D, Section D.1, says:
+       *
+       * > In a POSIX file system, the root of the file system is represented as
+       * > a directory with a zero-length name, usually written as "/"; the
+       * > presence of this root in a file URI can be taken as given by the
+       * > initial slash in the "path-absolute" rule.
+       *
+       * i.e. the first slash is part of the path.
+       *
+       * However in RFC 1738 the "/" between the host (or port) and the URL-path
+       * was NOT part of the URL-path.  Any agent that followed the older spec
+       * strictly, and wanted to refer to a file with an absolute path, would
+       * have included a second slash.  So if there's a second slash, swallow one.
+       */
+      if('/' == ptr[1]) /* note: the only way ptr[0]!='/' is if ptr[1]==':' */
         ptr++;
 
-      /* This cannot be made with strcpy, as the memory chunks overlap! */
+      /* This cannot be done with strcpy, as the memory chunks overlap! */
       memmove(path, ptr, strlen(ptr) + 1);
     }
 
 #if !defined(MSDOS) && !defined(WIN32) && !defined(__CYGWIN__)
-    if(STARTS_WITH_DRIVE_PREFIX(path)) {
+    /* Don't allow Windows drive letters when not in Windows.
+     * This catches both "file:/c:" and "file:c:" */
+    if(('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) ||
+       STARTS_WITH_URL_DRIVE_PREFIX(path)) {
       failf(data, "File drive letters are only accepted in MSDOS/Windows.");
       return CURLE_URL_MALFORMAT;
+    }
+#else
+    /* If the path starts with a slash and a drive letter, ditch the slash */
+    if('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) {
+      /* This cannot be done with strcpy, as the memory chunks overlap! */
+      memmove(path, &path[1], strlen(&path[1]) + 1);
     }
 #endif
 
