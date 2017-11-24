@@ -539,6 +539,7 @@ digest_context *Curl_digest_init(const digest_params *dparams)
   ctxt->digest_hash = dparams;
 
   if(dparams->digest_init(ctxt->digest_hashctx) != 1) {
+    free(ctxt->digest_hashctx);
     free(ctxt);
     return NULL;
   }
@@ -557,7 +558,8 @@ int Curl_digest_update(digest_context *context,
 
 int Curl_digest_final(digest_context *context, unsigned char *result)
 {
-  (*context->digest_hash->digest_final)(result, context->digest_hashctx);
+  if(result)
+    (*context->digest_hash->digest_final)(result, context->digest_hashctx);
 
   free(context->digest_hashctx);
   free(context);
@@ -622,6 +624,7 @@ static int check_hash(const char *filename,
   result = malloc(digest_def->dparams->digest_resultlen);
   if(!result) {
     close(fd);
+    Curl_digest_final(dctx, NULL);
     return -1;
   }
   while(1) {
@@ -690,6 +693,8 @@ static metalink_checksum *new_metalink_checksum_from_hex_digest
     chksum->digest_def = digest_def;
     chksum->digest = digest;
   }
+  else
+    free(digest);
   return chksum;
 }
 
@@ -781,8 +786,24 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
          curl_strequal((*p)->type, "ftp") ||
          curl_strequal((*p)->type, "ftps")) {
         res = new_metalink_resource((*p)->url);
-        tail->next = res;
-        tail = res;
+        if(res) {
+          tail->next = res;
+          tail = res;
+        }
+        else {
+          tail = root.next;
+
+          /* clean up the linked list */
+          while(tail) {
+            res = tail->next;
+            free(tail->url);
+            free(tail);
+            tail = res;
+          }
+          free(f->filename);
+          free(f);
+          return NULL;
+        }
       }
     }
     f->resource = root.next;
