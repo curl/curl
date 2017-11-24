@@ -215,7 +215,9 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
   }
 
+#ifndef CURL_WITH_MULTI_SSL
   if(flags & CURL_GLOBAL_SSL)
+#endif
     if(!Curl_ssl_init()) {
       DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
       return CURLE_FAILED_INIT;
