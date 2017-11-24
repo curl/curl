@@ -2079,7 +2079,8 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return CURLE_URL_MALFORMAT;
     }
 
-    if(url_has_scheme && path[0] == '/' && path[1] == '/' && path[2] == '/' && path[3] == '/') {
+    if(url_has_scheme && path[0] == '/' && path[1] == '/' &&
+       path[2] == '/' && path[3] == '/') {
       /* This appears to be a UNC string (usually indicating a SMB share).
        * We don't do SMB in file: URLs. (TODO?)
        */
@@ -2106,12 +2107,12 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
        *
        *  o the hostname is a FQDN that resolves to this machine.
        *
-       * For brevity, we only consider URLs with empty, "localhost", or "127.0.0.1"
-       * hostnames as local.
+       * For brevity, we only consider URLs with empty, "localhost", or
+       * "127.0.0.1" hostnames as local.
        *
-       * Additionally, there is an exception for URLs with a Windows drive letter
-       * in the authority (which was accidentally omitted from RFC 8089, Appendix E,
-       * but believe me, it was meant to be there. --MK)
+       * Additionally, there is an exception for URLs with a Windows drive
+       * letter in the authority (which was accidentally omitted from RFC 8089
+       * Appendix E, but believe me, it was meant to be there. --MK)
        */
       if(ptr[0] != '/' && !STARTS_WITH_URL_DRIVE_PREFIX(ptr)) {
         /* the URL includes a host name, it must match "localhost" or
@@ -2128,17 +2129,18 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       /*
        * RFC 8089, Appendix D, Section D.1, says:
        *
-       * > In a POSIX file system, the root of the file system is represented as
-       * > a directory with a zero-length name, usually written as "/"; the
+       * > In a POSIX file system, the root of the file system is represented
+       * > as a directory with a zero-length name, usually written as "/"; the
        * > presence of this root in a file URI can be taken as given by the
        * > initial slash in the "path-absolute" rule.
        *
        * i.e. the first slash is part of the path.
        *
-       * However in RFC 1738 the "/" between the host (or port) and the URL-path
-       * was NOT part of the URL-path.  Any agent that followed the older spec
-       * strictly, and wanted to refer to a file with an absolute path, would
-       * have included a second slash.  So if there's a second slash, swallow one.
+       * However in RFC 1738 the "/" between the host (or port) and the
+       * URL-path was NOT part of the URL-path.  Any agent that followed the
+       * older spec strictly, and wanted to refer to a file with an absolute
+       * path, would have included a second slash.  So if there are two
+       * slashes, swallow one.
        */
       if('/' == ptr[1]) /* note: the only way ptr[0]!='/' is if ptr[1]==':' */
         ptr++;
