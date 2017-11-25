@@ -905,18 +905,52 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 #endif
 }
 
-/**
- * Global SSL init
+static int ossl_library_specific_init(void);
+
+/*
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
  *
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-static int Curl_ossl_init(void)
+static int Curl_ossl_init(long flags)
 {
+  if(flags & CURL_GLOBAL_SSL) {
+    if(!ossl_library_specific_init())
+      return 0;
+  }
+
 #ifdef ENABLE_SSLKEYLOGFILE
-  const char *keylog_file_name;
+  {
+    const char *keylog_file_name keylog_file_name =
+      curl_getenv("SSLKEYLOGFILE");
+
+    if(keylog_file_name && !keylog_file_fp) {
+      keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
+      if(keylog_file_fp) {
+        if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096)) {
+          fclose(keylog_file_fp);
+          keylog_file_fp = NULL;
+        }
+      }
+    }
+  }
 #endif
 
+  return 1;
+}
+
+/* OpenSSL library-specific initialization.
+ * This is for init routines in OpenSSL, and _not_ for init routines in
+ * libcurl. This function will not be called if CURL_GLOBAL_SSL wasn't set.
+ * Refer to Curl_ossl_init() for more information.
+ */
+static int ossl_library_specific_init(void)
+{
   OPENSSL_load_builtin_modules();
 
 #ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
@@ -953,24 +987,39 @@ static int Curl_ossl_init(void)
   OpenSSL_add_all_algorithms();
 #endif
 
-#ifdef ENABLE_SSLKEYLOGFILE
-  keylog_file_name = curl_getenv("SSLKEYLOGFILE");
-  if(keylog_file_name && !keylog_file_fp) {
-    keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
-    if(keylog_file_fp) {
-      if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096)) {
-        fclose(keylog_file_fp);
-        keylog_file_fp = NULL;
-      }
-    }
-  }
-#endif
-
   return 1;
 }
 
-/* Global cleanup */
-static void Curl_ossl_cleanup(void)
+static void ossl_library_specific_cleanup(void);
+
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_ossl_cleanup(long init_flags)
+{
+#ifdef ENABLE_SSLKEYLOGFILE
+  if(keylog_file_fp) {
+    fclose(keylog_file_fp);
+    keylog_file_fp = NULL;
+  }
+#endif
+
+  if(init_flags & CURL_GLOBAL_SSL) {
+    ossl_library_specific_cleanup();
+  }
+}
+
+/* OpenSSL library-specific de-initialization.
+ * This is for cleanup routines in OpenSSL, and _not_ for cleanup routines in
+ * libcurl. This function will not be called if CURL_GLOBAL_SSL wasn't set.
+ * Refer to Curl_ossl_cleanup() for more information.
+ */
+static void ossl_library_specific_cleanup(void)
 {
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !defined(LIBRESSL_VERSION_NUMBER)
@@ -1001,13 +1050,6 @@ static void Curl_ossl_cleanup(void)
 #ifdef HAVE_SSL_COMP_FREE_COMPRESSION_METHODS
   SSL_COMP_free_compression_methods();
 #endif
-#endif
-
-#ifdef ENABLE_SSLKEYLOGFILE
-  if(keylog_file_fp) {
-    fclose(keylog_file_fp);
-    keylog_file_fp = NULL;
-  }
 #endif
 }
 

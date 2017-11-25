@@ -435,17 +435,34 @@ static CURLcode set_ciphers(struct connectdata *conn,
 }
 
 
-static int Curl_gskit_init(void)
+/*
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
+ *
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
+ */
+static int Curl_gskit_init(long flags)
 {
-  /* No initialisation needed. */
-
+  (void)flags;
   return 1;
 }
 
 
-static void Curl_gskit_cleanup(void)
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_gskit_cleanup(long init_flags)
 {
-  /* Nothing to do. */
+  (void)init_flags;
 }
 
 

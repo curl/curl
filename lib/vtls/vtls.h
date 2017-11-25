@@ -42,8 +42,8 @@ struct Curl_ssl {
 
   size_t sizeof_ssl_backend_data;
 
-  int (*init)(void);
-  void (*cleanup)(void);
+  int (*init)(long flags);
+  void (*cleanup)(long init_flags);
 
   size_t (*version)(char *buffer, size_t size);
   int (*check_cxn)(struct connectdata *cxn);
@@ -80,8 +80,8 @@ struct Curl_ssl {
 extern const struct Curl_ssl *Curl_ssl;
 #endif
 
-int Curl_none_init(void);
-void Curl_none_cleanup(void);
+int Curl_none_init(long flags);
+void Curl_none_cleanup(long init_flags);
 int Curl_none_shutdown(struct connectdata *conn, int sockindex);
 int Curl_none_check_cxn(struct connectdata *conn);
 CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
@@ -146,8 +146,8 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
 int Curl_ssl_backend(void);
 
 #ifdef USE_SSL
-int Curl_ssl_init(void);
-void Curl_ssl_cleanup(void);
+int Curl_ssl_init(long flags);
+void Curl_ssl_cleanup(long init_flags);
 CURLcode Curl_ssl_connect(struct connectdata *conn, int sockindex);
 CURLcode Curl_ssl_connect_nonblocking(struct connectdata *conn,
                                       int sockindex,
@@ -248,8 +248,8 @@ bool Curl_ssl_false_start(void);
 #else
 
 /* When SSL support is not present, just define away these function calls */
-#define Curl_ssl_init() 1
-#define Curl_ssl_cleanup() Curl_nop_stmt
+#define Curl_ssl_init(x) 1
+#define Curl_ssl_cleanup(x) Curl_nop_stmt
 #define Curl_ssl_connect(x,y) CURLE_NOT_BUILT_IN
 #define Curl_ssl_close_all(x) Curl_nop_stmt
 #define Curl_ssl_close(x,y) Curl_nop_stmt

@@ -158,23 +158,23 @@ static bool init_ssl = FALSE;
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-int Curl_ssl_init(void)
+int Curl_ssl_init(long flags)
 {
   /* make sure this is only done once */
   if(init_ssl)
     return 1;
   init_ssl = TRUE; /* never again */
 
-  return Curl_ssl->init();
+  return Curl_ssl->init(flags);
 }
 
 
 /* Global cleanup */
-void Curl_ssl_cleanup(void)
+void Curl_ssl_cleanup(long init_flags)
 {
   if(init_ssl) {
     /* only cleanup if we did a previous init */
-    Curl_ssl->cleanup();
+    Curl_ssl->cleanup(init_flags);
     init_ssl = FALSE;
   }
 }
@@ -979,13 +979,16 @@ bool Curl_ssl_false_start(void)
  * Default implementations for unsupported functions.
  */
 
-int Curl_none_init(void)
+int Curl_none_init(long flags)
 {
+  (void)flags;
   return 1;
 }
 
-void Curl_none_cleanup(void)
-{ }
+void Curl_none_cleanup(long init_flags)
+{
+  (void)init_flags;
+}
 
 int Curl_none_shutdown(struct connectdata *conn UNUSED_PARAM,
                        int sockindex UNUSED_PARAM)
@@ -1088,11 +1091,11 @@ CURLcode Curl_none_md5sum(unsigned char *input UNUSED_PARAM,
 }
 #endif
 
-static int Curl_multissl_init(void)
+static int Curl_multissl_init(long flags)
 {
   if(multissl_init(NULL))
     return 1;
-  return Curl_ssl->init();
+  return Curl_ssl->init(flags);
 }
 
 static CURLcode Curl_multissl_connect(struct connectdata *conn, int sockindex)

@@ -1003,16 +1003,32 @@ static CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex)
 }
 
 /*
- * return 0 error initializing SSL
- * return 1 SSL initialized successfully
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
+ *
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
  */
-static int Curl_mbedtls_init(void)
+static int Curl_mbedtls_init(long flags)
 {
-  return Curl_polarsslthreadlock_thread_setup();
+  (void)flags;
+  return (Curl_polarsslthreadlock_thread_setup() ? 1 : 0);
 }
 
-static void Curl_mbedtls_cleanup(void)
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_mbedtls_cleanup(long init_flags)
 {
+  (void)init_flags;
   (void)Curl_polarsslthreadlock_thread_cleanup();
 }
 
