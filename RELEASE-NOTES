@@ -4,7 +4,7 @@ Curl and libcurl 7.57.0
  Command line options:         211
  curl_easy_setopt() options:   249
  Public functions in libcurl:  74
- Contributors:                 1626
+ Contributors:                 1649
 
 This release includes the following changes:
 
@@ -14,6 +14,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2017-8816: NTLM buffer overflow via integer overflow [47]
+ o CVE-2017-8817: FTP wildcard out of bounds read [48]
+ o CVE-2017-8818: SSL out of buffer access [49]
  o curl_mime_filedata.3: fix typos [1]
  o libtest: Add required test libraries for lib1552 and lib1553 [2]
  o fix time diffs for systems using unsigned time_t [3]
@@ -74,6 +77,12 @@ This release includes the following bugfixes:
  o url: reject ASCII control characters and space in host names [44]
  o examples/rtsp: clear RANGE again after use [45]
  o connect: improve the bind error message [46]
+ o make: fix "make distclean" [50]
+ o connect: add support for new TCP Fast Open API on Linux [51]
+ o metalink: fix memory-leak and NULL pointer dereference [52]
+ o URL: update "file:" URL handling [53]
+ o ssh: remove check for a NULL pointer [54]
+ o global_init: ignore CURL_GLOBAL_SSL's absense [55]
 
 This release includes the following known bugs:
 
@@ -82,15 +91,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alex Malinovich, Alfonso Martone, Andrew Lambert,
-  arainchik on github, Brian Carpenter, cbartl on github, Dan Fandrich,
-  Daniel Bankhead, Daniel Stenberg, Dirk Feytons, Dmitri Tikhonov, Gisle Vanem,
-  hsiao yi, Jakub Zakrzewski, John Starks, Juro Bystricky, Luca Boccassi,
-  Marcel Raad, Martin Storsjö, Max Dymond, Michael Felt, Michael Kaufmann,
+  Alessandro Ghedini, Alex Malinovich, Alex Nichols, Alfonso Martone,
+  Andrew Lambert, arainchik on github, Brian Carpenter, cbartl on github,
+  Dan Fandrich, Daniel Bankhead, Daniel Stenberg, Dirk Feytons,
+  Dmitri Tikhonov, Evgeny Grin, Gisle Vanem, hsiao yi, Jakub Zakrzewski,
+  John Starks, Juro Bystricky, Kamil Dudka, Luca Boccassi, Marcel Raad,
+  Martin Storsjö, Matthew Kerwin, Max Dymond, Michael Felt, Michael Kaufmann,
   moohoorama on github, omau on github, Orgad Shaneh, Patrick Monnerat,
   Paul Howarth, Pavel Gushchin, Pavol Markovic, Per Lundberg, Peter Piekarski,
   Petr Voytsik, Ray Satiro, Rob Cotrone, Viktor Szakáts, youngchopin on github,
-  (37 contributors)
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -142,3 +152,12 @@ References to bug reports and discussions on issues:
  [44] = https://curl.haxx.se/bug/?i=2073
  [45] = https://curl.haxx.se/bug/?i=2106
  [46] = https://curl.haxx.se/bug/?i=2104
+ [47] = https://curl.haxx.se/docs/adv_2017-11e7.html
+ [48] = https://curl.haxx.se/docs/adv_2017-ae72.html
+ [49] = https://curl.haxx.se/docs/adv_2017-af0a.html
+ [50] = https://curl.haxx.se/bug/?i=2097
+ [51] = https://curl.haxx.se/bug/?i=2056
+ [52] = https://curl.haxx.se/bug/?i=2109
+ [53] = https://curl.haxx.se/bug/?i=2110
+ [54] = https://curl.haxx.se/bug/?i=2111
+ [55] = https://curl.haxx.se/bug/?i=2083
