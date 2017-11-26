@@ -898,6 +898,11 @@ static void *Curl_polarssl_get_internals(struct ssl_connect_data *connssl,
   return &BACKEND->ssl;
 }
 
+static size_t Curl_polarssl_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_polarssl = {
   { CURLSSLBACKEND_POLARSSL, "polarssl" }, /* info */
 
@@ -907,7 +912,7 @@ const struct Curl_ssl Curl_ssl_polarssl = {
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_polarssl_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_polarssl_init,                /* init */
   Curl_polarssl_cleanup,             /* cleanup */

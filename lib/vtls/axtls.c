@@ -701,6 +701,11 @@ static void *Curl_axtls_get_internals(struct ssl_connect_data *connssl,
   return BACKEND->ssl;
 }
 
+static size_t Curl_axtls_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_axtls = {
   { CURLSSLBACKEND_AXTLS, "axtls" }, /* info */
 
@@ -710,7 +715,7 @@ const struct Curl_ssl Curl_ssl_axtls = {
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_axtls_get_backend_size,    /* get_sizeof_backend_data */
 
   /*
    * axTLS has no global init.  Everything is done through SSL and SSL_CTX

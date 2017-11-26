@@ -1794,7 +1794,7 @@ static void llist_dtor(void *user, void *element)
 static struct connectdata *allocate_conn(struct Curl_easy *data)
 {
 #ifdef USE_SSL
-#define SSL_EXTRA + 4 * Curl_ssl->sizeof_ssl_backend_data - sizeof(long long)
+#define SSL_EXTRA (4 * Curl_ssl->get_sizeof_backend_data() - sizeof(long long))
 #else
 #define SSL_EXTRA 0
 #endif
@@ -1890,11 +1890,11 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
     char *p = (char *)&conn->align_data__do_not_use;
     conn->ssl[0].backend = (struct ssl_backend_data *)p;
     conn->ssl[1].backend =
-      (struct ssl_backend_data *)(p + Curl_ssl->sizeof_ssl_backend_data);
+      (struct ssl_backend_data *)(p + Curl_ssl->get_sizeof_backend_data());
     conn->proxy_ssl[0].backend =
-      (struct ssl_backend_data *)(p + Curl_ssl->sizeof_ssl_backend_data * 2);
+      (struct ssl_backend_data *)(p + Curl_ssl->get_sizeof_backend_data() * 2);
     conn->proxy_ssl[1].backend =
-      (struct ssl_backend_data *)(p + Curl_ssl->sizeof_ssl_backend_data * 3);
+      (struct ssl_backend_data *)(p + Curl_ssl->get_sizeof_backend_data() * 3);
   }
 #endif
 

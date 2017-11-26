@@ -1352,6 +1352,11 @@ static void *Curl_gskit_get_internals(struct ssl_connect_data *connssl,
   return BACKEND->handle;
 }
 
+static size_t Curl_gskit_get_backend_size(void)
+{
+  return sizeof(struct ssl_backend_data);
+}
+
 const struct Curl_ssl Curl_ssl_gskit = {
   { CURLSSLBACKEND_GSKIT, "gskit" }, /* info */
 
@@ -1362,7 +1367,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   /* TODO: convert to 1 and fix test #1014 (if need) */
   0, /* support_https_proxy */
 
-  sizeof(struct ssl_backend_data),
+  Curl_gskit_get_backend_size,    /* get_sizeof_backend_data */
 
   Curl_gskit_init,                /* init */
   Curl_gskit_cleanup,             /* cleanup */
