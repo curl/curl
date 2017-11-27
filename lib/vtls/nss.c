@@ -1355,14 +1355,24 @@ static CURLcode nss_init(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-/**
- * Global SSL init
+/*
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
  *
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-static int Curl_nss_init(void)
+static int Curl_nss_init(long flags)
 {
+  /* Fail if CURL_GLOBAL_SSL was not set. The NSS initialization used by
+     libcurl requires that it do the library specific initialization setup. */
+  if(!(flags & CURL_GLOBAL_SSL)) {
+    return 0;
+  }
+
   /* curl_global_init() is not thread-safe so this test is ok */
   if(nss_initlock == NULL) {
     PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 256);
@@ -1395,9 +1405,19 @@ CURLcode Curl_nss_force_init(struct Curl_easy *data)
   return result;
 }
 
-/* Global cleanup */
-static void Curl_nss_cleanup(void)
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_nss_cleanup(long init_flags)
 {
+  /* CURL_GLOBAL_SSL was required when NSS was initialized */
+  DEBUGASSERT((init_flags & CURL_GLOBAL_SSL));
+
   /* This function isn't required to be threadsafe and this is only done
    * as a safety feature.
    */

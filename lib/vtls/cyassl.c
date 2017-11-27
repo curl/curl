@@ -775,9 +775,38 @@ static size_t Curl_cyassl_version(char *buffer, size_t size)
 }
 
 
-static int Curl_cyassl_init(void)
+/*
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
+ *
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
+ */
+static int Curl_cyassl_init(long flags)
 {
-  return (CyaSSL_Init() == SSL_SUCCESS);
+  if(flags & CURL_GLOBAL_SSL) {
+    if(CyaSSL_Init() != SSL_SUCCESS)
+      return 0;
+  }
+
+  return 1;
+}
+
+
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_cyassl_cleanup(long init_flags)
+{
+  (void)init_flags;
 }
 
 
@@ -993,7 +1022,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   sizeof(struct ssl_backend_data),
 
   Curl_cyassl_init,                /* init */
-  Curl_none_cleanup,               /* cleanup */
+  Curl_cyassl_cleanup,             /* cleanup */
   Curl_cyassl_version,             /* version */
   Curl_none_check_cxn,             /* check_cxn */
   Curl_cyassl_shutdown,            /* shutdown */

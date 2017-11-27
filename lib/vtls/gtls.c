@@ -189,31 +189,48 @@ static ssize_t Curl_gtls_pull_ssl(void *s, void *buf, size_t len)
   return gnutls_record_recv((gnutls_session_t) s, buf, len);
 }
 
-/* Curl_gtls_init()
+/*
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
  *
- * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
- * are not thread-safe and thus this function itself is not thread-safe and
- * must only be called from within curl_global_init() to keep the thread
- * situation under control!
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
  */
-static int Curl_gtls_init(void)
+static int Curl_gtls_init(long flags)
 {
   int ret = 1;
+
   if(!gtls_inited) {
-    ret = gnutls_global_init()?0:1;
+    if(flags & CURL_GLOBAL_SSL) {
+      ret = gnutls_global_init()?0:1;
 #ifdef GTLSDEBUG
-    gnutls_global_set_log_function(tls_log_func);
-    gnutls_global_set_log_level(2);
+      gnutls_global_set_log_function(tls_log_func);
+      gnutls_global_set_log_level(2);
 #endif
+    }
     gtls_inited = TRUE;
   }
+
   return ret;
 }
 
-static void Curl_gtls_cleanup(void)
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_gtls_cleanup(long init_flags)
 {
   if(gtls_inited) {
-    gnutls_global_deinit();
+    if(init_flags & CURL_GLOBAL_SSL) {
+      gnutls_global_deinit();
+    }
     gtls_inited = FALSE;
   }
 }

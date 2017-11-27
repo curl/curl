@@ -701,6 +701,35 @@ static void *Curl_axtls_get_internals(struct ssl_connect_data *connssl,
   return BACKEND->ssl;
 }
 
+/*
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
+ *
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
+ */
+static int Curl_axtls_init(long flags)
+{
+  (void)flags;
+  return 1;
+}
+
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_axtls_cleanup(long init_flags)
+{
+  (void)init_flags;
+}
+
 const struct Curl_ssl Curl_ssl_axtls = {
   { CURLSSLBACKEND_AXTLS, "axtls" }, /* info */
 
@@ -716,9 +745,8 @@ const struct Curl_ssl Curl_ssl_axtls = {
    * axTLS has no global init.  Everything is done through SSL and SSL_CTX
    * structs stored in connectdata structure.
    */
-  Curl_none_init,                 /* init */
-  /* axTLS has no global cleanup. */
-  Curl_none_cleanup,              /* cleanup */
+  Curl_axtls_init,                /* init */
+  Curl_axtls_cleanup,             /* cleanup */
   Curl_axtls_version,             /* version */
   Curl_axtls_check_cxn,           /* check_cxn */
   Curl_axtls_shutdown,            /* shutdown */

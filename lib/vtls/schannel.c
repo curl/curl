@@ -1632,13 +1632,40 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static int Curl_schannel_init(void)
+/*
+ * Init.
+ * This is called by curl_global_init with the global init flags.
+ * This is not thread-safe since curl_global_init is not thread-safe.
+ * Any required SSL library specific initialization (ie initialization routines
+ * not in libcurl) should take place only if CURL_GLOBAL_SSL is set in flags.
+ *
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
+ */
+static int Curl_schannel_init(long flags)
 {
+  /* Fail if CURL_GLOBAL_SSL was not set. The schannel initialization used by
+     libcurl requires that it do the library specific initialization setup. */
+  if(!(flags & CURL_GLOBAL_SSL)) {
+    return 0;
+  }
+
   return (Curl_sspi_global_init() == CURLE_OK ? 1 : 0);
 }
 
-static void Curl_schannel_cleanup(void)
+/*
+ * Cleanup.
+ * This is called by curl_global_cleanup with the global init flags.
+ * This is not thread-safe since curl_global_cleanup is not thread-safe.
+ * Any required SSL library specific de-initialization (ie de-initialization
+ * routines not in libcurl) should take place only if CURL_GLOBAL_SSL is set in
+ * init_flags.
+ */
+static void Curl_schannel_cleanup(long init_flags)
 {
+  /* CURL_GLOBAL_SSL was required when schannel was initialized */
+  DEBUGASSERT((init_flags & CURL_GLOBAL_SSL));
+
   Curl_sspi_global_cleanup();
 }
 
