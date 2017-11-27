@@ -25,7 +25,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C=--with-gssapi
+          env: T=normal C="--with-gssapi"
         - os: linux
           compiler: gcc
           dist: trusty
@@ -33,30 +33,34 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C=--enable-ares
+          env: T=normal C="--enable-ares"
         - os: linux
           compiler: gcc
           dist: trusty
           env: T=normal BROTLI=yes
         - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=debug BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib
+        - os: linux
           compiler: clang
           dist: trusty
-          env: T=debug
+          env: T=debug C="--enable-werror"
         - os: osx
           compiler: gcc
-          env: T=debug
+          env: T=debug C="--enable-werror"
         - os: osx
           compiler: gcc
-          env: T=debug C=--enable-ares
+          env: T=debug C="--enable-ares --enable-werror"
         - os: osx
           compiler: gcc
-          env: T=debug C="--with-ssl=/usr/local/opt/openssl --with-libmetalink"
+          env: T=debug C="--with-ssl=/usr/local/opt/openssl --with-libmetalink --enable-werror"
         - os: osx
           compiler: gcc
-          env: T=debug C="--with-ssl=/usr/local/opt/libressl --with-libmetalink"
+          env: T=debug C="--with-ssl=/usr/local/opt/libressl --with-libmetalink --enable-werror"
         - os: osx
           compiler: clang
-          env: T=debug C="--without-ssl --with-darwinssl --with-libmetalink"
+          env: T=debug C="--without-ssl --with-darwinssl --with-libmetalink --enable-werror"
         - os: osx
           compiler: clang
           env: T=normal
@@ -108,6 +112,22 @@ before_script:
                   sudo make install
               )
           fi
+          if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
+            (cd $HOME &&
+            git clone --depth=1 https://boringssl.googlesource.com/boringssl &&
+            cd boringssl &&
+            mkdir build &&
+            cd build &&
+            cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
+            make &&
+            cd .. &&
+            mkdir lib &&
+            cd lib &&
+            ln -s ../build/crypto/libcrypto.so . &&
+            ln -s ../build/ssl/libssl.so . &&
+            echo "BoringSSL lib dir: "`pwd` &&
+            export LIBS=-lpthread )
+          fi
 
 script:
     - |
@@ -127,7 +147,7 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "debug" ]; then
-             ./configure --enable-debug --enable-werror $C
+             ./configure --enable-debug $C
              make && make examples
              make TFLAGS=-n test-nonflaky
         fi
