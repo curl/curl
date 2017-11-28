@@ -716,6 +716,10 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->unix_domain_socket);
 #endif
 
+#ifdef USE_SSL
+  Curl_safefree(conn->ssl_extra);
+#endif
+
   free(conn); /* free all the connection oriented data */
 }
 
@@ -1793,38 +1797,27 @@ static void llist_dtor(void *user, void *element)
  */
 static struct connectdata *allocate_conn(struct Curl_easy *data)
 {
-  struct connectdata *conn;
-  size_t connsize = sizeof(struct connectdata);
-
-#ifdef USE_SSL
-/* SSLBK_MAX_ALIGN: The max byte alignment a CPU would use */
-#define SSLBK_MAX_ALIGN 32
-  /* The SSL backend-specific data (ssl_backend_data) objects are allocated as
-     part of connectdata at the end. To ensure suitable alignment we will
-     assume a maximum of SSLBK_MAX_ALIGN for alignment. Since calloc returns a
-     pointer suitably aligned for any variable this will ensure the
-     ssl_backend_data array has proper alignment, even if that alignment turns
-     out to be less than SSLBK_MAX_ALIGN. */
-  size_t paddingsize = sizeof(struct connectdata) % SSLBK_MAX_ALIGN;
-  size_t alignsize = paddingsize ? (SSLBK_MAX_ALIGN - paddingsize) : 0;
-  size_t sslbksize = Curl_ssl->sizeof_ssl_backend_data;
-  connsize += alignsize + (4 * sslbksize);
-#endif
-
-  conn = calloc(1, connsize);
+  struct connectdata *conn = calloc(1, sizeof(struct connectdata));
   if(!conn)
     return NULL;
 
 #ifdef USE_SSL
-  /* Point to the ssl_backend_data objects at the end of connectdata.
+  /* The SSL backend-specific data (ssl_backend_data) objects are allocated as
+     a separate array to ensure suitable alignment.
      Note that these backend pointers can be swapped by vtls (eg ssl backend
      data becomes proxy backend data). */
   {
-    char *end = (char *)conn + connsize;
-    conn->ssl[0].backend = ((void *)(end - (4 * sslbksize)));
-    conn->ssl[1].backend = ((void *)(end - (3 * sslbksize)));
-    conn->proxy_ssl[0].backend = ((void *)(end - (2 * sslbksize)));
-    conn->proxy_ssl[1].backend = ((void *)(end - (1 * sslbksize)));
+    size_t sslsize = Curl_ssl->sizeof_ssl_backend_data;
+    char *ssl = calloc(4, sslsize);
+    if(!ssl) {
+      free(conn);
+      return NULL;
+    }
+    conn->ssl_extra = ssl;
+    conn->ssl[0].backend = (void *)ssl;
+    conn->ssl[1].backend = (void *)(ssl + sslsize);
+    conn->proxy_ssl[0].backend = (void *)(ssl + 2 * sslsize);
+    conn->proxy_ssl[1].backend = (void *)(ssl + 3 * sslsize);
   }
 #endif
 
@@ -1953,6 +1946,9 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   free(conn->master_buffer);
   free(conn->localdev);
+#ifdef USE_SSL
+  free(conn->ssl_extra);
+#endif
   free(conn);
   return NULL;
 }
@@ -4438,6 +4434,9 @@ static CURLcode create_conn(struct Curl_easy *data,
     conn_temp->inuse = TRUE; /* mark this as being in use so that no other
                                 handle in a multi stack may nick it */
     reuse_conn(conn, conn_temp);
+#ifdef USE_SSL
+    free(conn->ssl_extra);
+#endif
     free(conn);          /* we don't need this anymore */
     conn = conn_temp;
     *in_connect = conn;
