@@ -120,8 +120,7 @@ static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
 static LIBSSH2_FREE_FUNC(my_libssh2_free);
 
-static CURLcode get_pathname(const char **cpp, char **path);
-static CURLcode get_realPathname(const char **cpp, char **path, char **pwd);
+static CURLcode get_pathname(const char **cpp, char **path, char **pwd);
 
 static CURLcode ssh_connect(struct connectdata *conn, bool *done);
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done);
@@ -1275,18 +1274,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           sshc->actualcode = CURLE_QUOTE_ERROR;
           break;
         }
+
         /*
          * also, every command takes at least one argument so we get that
          * first argument right now
          */
-        if(strncasecompare(cmd, "chgrp ", 6) ||
-           strncasecompare(cmd, "chmod ", 6) ||
-           strncasecompare(cmd, "chown ", 6)) {
-          result = get_pathname(&cp, &sshc->quote_path1);
-        }
-        else {
-          result = get_realPathname(&cp, &sshc->quote_path1, &sshc->homedir);
-        }
+        result = get_pathname(&cp, &sshc->quote_path1, &sshc->homedir );
+        infof(data, "SSH: Path 1: [%s]\n", sshc->quote_path1);
         if(result) {
           if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
@@ -1311,7 +1305,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
           /* sshc->quote_path1 contains the mode to set */
           /* get the destination */
-          result = get_pathname(&cp, &sshc->quote_path2);
+          result = get_pathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          infof(data, "SSH: Path 2: [%s]\n", sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -1333,7 +1328,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* symbolic linking */
           /* sshc->quote_path1 is the source */
           /* get the destination */
-          result = get_realPathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          result = get_pathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          infof(data, "SSH: Path 2: [%s]\n", sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -1358,7 +1354,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* rename file */
           /* first param is the source path */
           /* second param is the dest. path */
-          result = get_realPathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          result = get_pathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          infof(data, "SSH: Path 2: [%s]\n", sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -3335,21 +3332,23 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 static CURLcode
-get_pathname(const char **cpp, char **path)
+get_pathname(const char **cpp, char **path, char **pwd)
 {
   const char *cp = *cpp, *end;
   char quot;
-  unsigned int i, j;
+  unsigned int i, j, fullPathLength, pathLength, relativePathLength;
+  bool relativePath = false;
   static const char WHITESPACE[] = " \t\r\n";
-
-  cp += strspn(cp, WHITESPACE);
   if(!*cp) {
-    *cpp = cp;
+    *cpp = NULL;
     *path = NULL;
     return CURLE_QUOTE_ERROR;
   }
-
-  *path = malloc(strlen(cp) + 1);
+  /* Ignore leading whitespace */
+  cp += strspn(cp, WHITESPACE);
+  /* Allocate enough space for home directory and filename + separator */
+  fullPathLength = strlen(cp) + strlen(*pwd) + 2;
+  *path = malloc(fullPathLength);
   if(*path == NULL)
     return CURLE_OUT_OF_MEMORY;
 
@@ -3387,95 +3386,26 @@ get_pathname(const char **cpp, char **path)
     *cpp = cp + i + strspn(cp + i, WHITESPACE);
   }
   else {
-    /* Read to end of filename */
+    /* Read to end of filename - either to white space or terminator */
     end = strpbrk(cp, WHITESPACE);
     if(end == NULL)
       end = strchr(cp, '\0');
+    /* return pointer to second parameter if it exists */
     *cpp = end + strspn(end, WHITESPACE);
-
-    memcpy(*path, cp, end - cp);
-    (*path)[end - cp] = '\0';
-  }
-  return CURLE_OK;
-
-  fail:
-  Curl_safefree(*path);
-  return CURLE_QUOTE_ERROR;
-}
-
-static CURLcode get_realPathname(const char **cpp, char **path, char **pwd)
-{
-  const char *cp = *cpp;
-  char *end;
-  char quot;
-  size_t i, j;
-  static const char WHITESPACE[] = " \t\r\n";
-  size_t fullPathLength;
-  size_t pathLength;
-  cp += strspn(cp, WHITESPACE);
-  if(!*cp && (*pwd == NULL)) {
-    *cpp = cp;
-    *path = NULL;
-    return CURLE_QUOTE_ERROR;
-  }
-  fullPathLength = strlen(cp) + strlen(*pwd) + 2;
-  if(cp[0] == '/') {
-    return (get_pathname(cpp, path));
-  }
-  *path = malloc(fullPathLength);
-  if(*path == NULL)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* first start with home dir */
-  strcpy(*path, *pwd);
-  pathLength = strlen(*path);
-  (*path)[pathLength++] = '/';
-  (*path)[pathLength++] = '\0';
-  /* Check for quoted filenames */
-  if(*cp == '\"' || *cp == '\'') {
-    quot = *cp++;
-
-    /* Search for terminating quote, unescape some chars */
-    for(i = 0, j = strlen(*path); i <= strlen(cp); i++) {
-      if(cp[i] == quot) {  /* Found quote */
-        i++;
-        (*path)[j] = '\0';
-        break;
-      }
-      if(cp[i] == '\0') {  /* End of string */
-        /*error("Unterminated quote");*/
-        goto fail;
-      }
-      if(cp[i] == '\\') {  /* Escaped characters */
-        i++;
-        if(cp[i] != '\'' && cp[i] != '\"' &&
-            cp[i] != '\\') {
-          /*error("Bad escaped character '\\%c'",
-              cp[i]);*/
-          goto fail;
-        }
-      }
-      (*path)[j++] = cp[i];
+    pathLength = 0;
+    relativePath = (cp[0] == '/' && cp[1] == '~' && cp[2] == '/');
+    /* Handling for relative path - prepend home directory */
+    if(relativePath) {
+      strcpy(*path, *pwd);
+      pathLength = strlen(*pwd);
+      (*path)[pathLength++] = '/';
+      (*path)[pathLength] = '\0';
+      cp += 3;
     }
-
-    if(j == 0) {
-      /*error("Empty quotes");*/
-      goto fail;
-    }
-    *cpp = cp + i + strspn(cp + i, WHITESPACE);
-  }
-  else {
-    /* Read to end of filename */
-    end = strpbrk(cp, WHITESPACE);
-    if(end == NULL)
-      end = strchr(cp, '\0');
-    *cpp = end + strspn(end, WHITESPACE);
-    pathLength = strlen(*path);
-    memcpy(&(*path)[pathLength], cp, strlen(cp) + 1);
-    end = strpbrk(*path, WHITESPACE);
-    if(end) {
-      *end = '\0';
-    }
+    // Copy path name up until first "white space"
+    memcpy(&(*path)[pathLength], cp, (int)(end - cp));
+    pathLength += (int)(end - cp);
+    (*path)[pathLength] = '\0';
   }
   return CURLE_OK;
 
