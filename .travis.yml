@@ -41,26 +41,26 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=debug BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib
+          env: T=novalgrind BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=debug C="--enable-werror"
+          env: T=debug
         - os: osx
           compiler: gcc
-          env: T=debug C="--enable-werror"
+          env: T=debug
         - os: osx
           compiler: gcc
-          env: T=debug C="--enable-ares --enable-werror"
+          env: T=debug C=--enable-ares
         - os: osx
           compiler: gcc
-          env: T=debug C="--with-ssl=/usr/local/opt/openssl --with-libmetalink --enable-werror"
+          env: T=debug C="--with-ssl=/usr/local/opt/openssl --with-libmetalink"
         - os: osx
           compiler: gcc
-          env: T=debug C="--with-ssl=/usr/local/opt/libressl --with-libmetalink --enable-werror"
+          env: T=debug C="--with-ssl=/usr/local/opt/libressl --with-libmetalink"
         - os: osx
           compiler: clang
-          env: T=debug C="--without-ssl --with-darwinssl --with-libmetalink --enable-werror"
+          env: T=debug C="--without-ssl --with-darwinssl --with-libmetalink"
         - os: osx
           compiler: clang
           env: T=normal
@@ -147,7 +147,14 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "debug" ]; then
-             ./configure --enable-debug $C
+             ./configure --enable-debug --enable-werror $C
+             make && make examples
+             make TFLAGS=-n test-nonflaky
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "novalgrind" ]; then
+             ./configure $C
              make && make examples
              make TFLAGS=-n test-nonflaky
         fi
