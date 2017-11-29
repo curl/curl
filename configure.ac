@@ -51,7 +51,11 @@ CURL_CHECK_OPTION_ARES
 CURL_CHECK_OPTION_RT
 
 XC_CHECK_PATH_SEPARATOR
-AX_CODE_COVERAGE
+dnl Check if gcc is being used before adding AX_CODE_COVERAGE
+AS_IF([ test "$GCC" = "yes" ], [AX_CODE_COVERAGE],
+  # not using GCC so pass a test below - CODE_COVERAGE_ENABLED_TRUE is not zero length
+  CODE_COVERAGE_ENABLED_TRUE='#'
+)
 
 #
 # save the configure arguments
