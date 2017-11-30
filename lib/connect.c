@@ -872,15 +872,6 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
 
   now = Curl_now();
 
-  /* figure out how long time we have left to connect */
-  allow = Curl_timeleft(data, &now, TRUE);
-
-  if(allow < 0) {
-    /* time-out, bail out, go home */
-    failf(data, "Connection time-out");
-    return CURLE_OPERATION_TIMEDOUT;
-  }
-
   if(SOCKS_STATE(conn->cnnct.state)) {
     /* still doing SOCKS */
     result = connect_SOCKS(data, sockindex, connected);
@@ -1006,6 +997,21 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
     }
   }
 
+  /*
+   * Now that we've checked whether we are connected, check whether we've
+   * already timed out.
+   *
+   * First figure out how long time we have left to connect */
+
+  allow = Curl_timeleft(data, &now, TRUE);
+
+  if(allow < 0) {
+    /* time-out, bail out, go home */
+    failf(data, "Connection timeout after %ld ms",
+          Curl_timediff(now, data->progress.t_startsingle));
+    return CURLE_OPERATION_TIMEDOUT;
+  }
+
   if(result &&
      (conn->tempsock[0] == CURL_SOCKET_BAD) &&
      (conn->tempsock[1] == CURL_SOCKET_BAD)) {
@@ -1031,9 +1037,10 @@ CURLcode Curl_is_connected(struct Curl_easy *data,
     else
       hostname = conn->host.name;
 
-    failf(data, "Failed to connect to %s port %ld: %s",
-          hostname, conn->port,
-          Curl_strerror(error, buffer, sizeof(buffer)));
+    failf(data, "Failed to connect to %s port %ld after %ld ms: %s",
+        hostname, conn->port,
+        Curl_timediff(now, data->progress.t_startsingle),
+        Curl_strerror(error, buffer, sizeof(buffer)));
 
     Curl_quic_disconnect(data, conn, 0);
     Curl_quic_disconnect(data, conn, 1);
