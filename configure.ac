@@ -4040,6 +4040,9 @@ squeeze SUPPORT_PROTOCOLS
 
 XC_CHECK_BUILD_FLAGS
 
+SSL_BACKENDS=${ssl_backends}
+AC_SUBST(SSL_BACKENDS)
+
 if test "x$want_curldebug_assumed" = "xyes" &&
   test "x$want_curldebug" = "xyes" && test "x$USE_ARES" = "x1"; then
   ac_configure_args="$ac_configure_args --enable-curldebug"
