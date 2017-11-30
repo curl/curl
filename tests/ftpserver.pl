@@ -2755,13 +2755,19 @@ sub customize {
             $fulltextreply{$1}=eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
         }
-        elsif($_ =~ /REPLY ([A-Za-z0-9+\/=\*]*) (.*)/) {
-            $commandreply{$1}=eval "qq{$2}";
-            if($1 eq "") {
+        elsif($_ =~ /REPLY(LF|) ([A-Za-z0-9+\/=\*]*) (.*)/) {
+            $commandreply{$2}=eval "qq{$3}";
+            if($1 ne "LF") {
+                $commandreply{$2}.="\r\n";
+            }
+            else {
+                $commandreply{$2}.="\n";
+            }
+            if($2 eq "") {
                 logmsg "FTPD: set custom reply for empty command\n";
             }
             else {
-                logmsg "FTPD: set custom reply for $1 command\n";
+                logmsg "FTPD: set custom reply for $2 command\n";
             }
         }
         elsif($_ =~ /COUNT ([A-Z]+) (.*)/) {
@@ -3175,7 +3181,7 @@ while(1) {
                     $commandreply{$FTPCMD}="";
                 }
 
-                sendcontrol "$text\r\n";
+                sendcontrol $text;
                 $check = 0;
             }
             else {

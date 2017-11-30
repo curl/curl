@@ -344,23 +344,28 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
  */
 static void imap_get_message(char *buffer, char **outptr)
 {
-  size_t len = 0;
+  size_t len = strlen(buffer);
   char *message = NULL;
 
-  /* Find the start of the message */
-  for(message = buffer + 2; *message == ' ' || *message == '\t'; message++)
-    ;
+  if(len > 2) {
+    /* Find the start of the message */
+    for(message = buffer + 2; *message == ' ' || *message == '\t'; message++)
+      ;
 
-  /* Find the end of the message */
-  for(len = strlen(message); len--;)
-    if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-        message[len] != '\t')
-      break;
+    /* Find the end of the message */
+    for(len -= 2; len--;)
+      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
+         message[len] != '\t')
+        break;
 
-  /* Terminate the message */
-  if(++len) {
-    message[len] = '\0';
+    /* Terminate the message */
+    if(++len) {
+      message[len] = '\0';
+    }
   }
+  else
+    /* junk input => zero length output */
+    message = &buffer[len];
 
   *outptr = message;
 }
