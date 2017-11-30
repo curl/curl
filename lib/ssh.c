@@ -1279,7 +1279,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * also, every command takes at least one argument so we get that
          * first argument right now
          */
-        result = get_pathname(&cp, &sshc->quote_path1, &sshc->homedir );
+        result = get_pathname(&cp, &sshc->quote_path1, &sshc->homedir);
         infof(data, "SSH: Path 1: [%s]\n", sshc->quote_path1);
         if(result) {
           if(result == CURLE_OUT_OF_MEMORY)
@@ -3336,7 +3336,8 @@ get_pathname(const char **cpp, char **path, char **pwd)
 {
   const char *cp = *cpp, *end;
   char quot;
-  unsigned int i, j, fullPathLength, pathLength, relativePathLength;
+  unsigned int i, j;
+  size_t fullPathLength, pathLength;
   bool relativePath = false;
   static const char WHITESPACE[] = " \t\r\n";
   if(!*cp) {
@@ -3402,7 +3403,7 @@ get_pathname(const char **cpp, char **path, char **pwd)
       (*path)[pathLength] = '\0';
       cp += 3;
     }
-    // Copy path name up until first "white space"
+    /* Copy path name up until first "white space" */
     memcpy(&(*path)[pathLength], cp, (int)(end - cp));
     pathLength += (int)(end - cp);
     (*path)[pathLength] = '\0';
