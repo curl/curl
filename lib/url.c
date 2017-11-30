@@ -3374,9 +3374,12 @@ static CURLcode resolve_server(struct Curl_easy *data,
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
 
-      else if(rc == CURLRESOLV_TIMEDOUT)
+      else if(rc == CURLRESOLV_TIMEDOUT) {
+        failf(data, "Failed to resolve host '%s' with timeout after %ld ms",
+              connhost->dispname,
+              Curl_timediff(Curl_now(), data->progress.t_startsingle));
         result = CURLE_OPERATION_TIMEDOUT;
-
+      }
       else if(!hostaddr) {
         failf(data, "Could not resolve host: %s", connhost->dispname);
         result = CURLE_COULDNT_RESOLVE_HOST;
