@@ -91,7 +91,7 @@ matrix:
           env: T=fuzzer
 
 install:
-  - pip install --user cpp-coveralls
+  - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
