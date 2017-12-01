@@ -313,7 +313,7 @@ static int myssh_is_known(struct connectdata *conn)
   curl_sshkeycallback func =
     data->set.ssh_keyfunc;
 
-  rc = ssh_get_publickey(sshc->ssh_session, &pubkey);
+  rc = ssh_get_server_publickey(sshc->ssh_session, &pubkey);
   if(rc != SSH_OK)
     return rc;
 
