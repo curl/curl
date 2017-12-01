@@ -34,6 +34,10 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
+          env: T=normal C=--with-libssh
+        - os: linux
+          compiler: gcc
+          dist: trusty
           env: T=normal C="--disable-http --disable-smtp --disable-imap"
         - os: linux
           compiler: gcc
