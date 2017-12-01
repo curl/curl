@@ -34,7 +34,7 @@
 #include "multiif.h"
 #include "non-ascii.h"
 #include "vtls/vtls.h"
-
+#include "strcase.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -278,10 +278,12 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 {
   ssize_t perline; /* count bytes per line */
   bool keepon = TRUE;
+  static bool imapsearch = FALSE;
   ssize_t gotbytes;
   char *ptr;
   struct connectdata *conn = pp->conn;
   struct Curl_easy *data = conn->data;
+  const struct Curl_handler *handler = conn->handler;
   char * const buf = data->state.buffer;
   CURLcode result = CURLE_OK;
 
@@ -358,7 +360,12 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
       pp->nread_resp += gotbytes;
       for(i = 0; i < gotbytes; ptr++, i++) {
         perline++;
-        if(*ptr == '\n') {
+
+       if(gotbytes >= 9 &&
+          Curl_strncasecompare(handler->scheme, "IMAP", 4) &&
+          Curl_strncasecompare(ptr, "* SEARCH ", 9))
+          imapsearch = TRUE;
+        if(*ptr == '\n' || imapsearch) {
           /* a newline is CRLF in pp-talk, so the CR is ignored as
              the line isn't really terminated until the LF comes */
 
@@ -377,10 +384,23 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
            */
           result = Curl_client_write(conn, CLIENTWRITE_HEADER,
                                      pp->linestart_resp, perline);
+          if(imapsearch)
+            /*
+             *We pass all search results to the callback function registered
+             *for data.
+             */
+            result = Curl_client_write(conn, CLIENTWRITE_BODY,
+                                       pp->linestart_resp, perline);
+
+          if(*ptr == '\n' && imapsearch)
+              /*This is the end of IMAP Search*/
+              imapsearch = FALSE;
+
           if(result)
             return result;
 
-          if(pp->endofresp(conn, pp->linestart_resp, perline, code)) {
+          if(*ptr == '\n' &&
+             pp->endofresp(conn, pp->linestart_resp, perline, code)){
             /* This is the end of the last line, copy the last line to the
                start of the buffer and zero terminate, for old times sake */
             size_t n = ptr - pp->linestart_resp;
