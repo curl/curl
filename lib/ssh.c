@@ -120,7 +120,7 @@ static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
 static LIBSSH2_FREE_FUNC(my_libssh2_free);
 
-static CURLcode get_pathname(const char **cpp, char **path);
+static CURLcode get_pathname(const char **cpp, char **path, char **pwd);
 
 static CURLcode ssh_connect(struct connectdata *conn, bool *done);
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done);
@@ -1279,7 +1279,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          * also, every command takes at least one argument so we get that
          * first argument right now
          */
-        result = get_pathname(&cp, &sshc->quote_path1);
+        result = get_pathname(&cp, &sshc->quote_path1, &sshc->homedir);
+        infof(data, "SSH: Path 1: [%s]\n", sshc->quote_path1);
         if(result) {
           if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
@@ -1304,7 +1305,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
           /* sshc->quote_path1 contains the mode to set */
           /* get the destination */
-          result = get_pathname(&cp, &sshc->quote_path2);
+          result = get_pathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          infof(data, "SSH: Path 2: [%s]\n", sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -1326,7 +1328,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* symbolic linking */
           /* sshc->quote_path1 is the source */
           /* get the destination */
-          result = get_pathname(&cp, &sshc->quote_path2);
+          result = get_pathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          infof(data, "SSH: Path 2: [%s]\n", sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -1351,7 +1354,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* rename file */
           /* first param is the source path */
           /* second param is the dest. path */
-          result = get_pathname(&cp, &sshc->quote_path2);
+          result = get_pathname(&cp, &sshc->quote_path2, &sshc->homedir);
+          infof(data, "SSH: Path 2: [%s]\n", sshc->quote_path2);
           if(result) {
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
@@ -1584,9 +1588,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       if(rc != 0 && !sshc->acceptfail) {
         err = sftp_libssh2_last_error(sshc->sftp_session);
+        failf(data, "rename command failed: %s Source Path: %s Dest Path %s",
+              sftp_libssh2_strerror(err),
+              sshc->quote_path1,
+              sshc->quote_path2);
         Curl_safefree(sshc->quote_path1);
         Curl_safefree(sshc->quote_path2);
-        failf(data, "rename command failed: %s", sftp_libssh2_strerror(err));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -3325,21 +3332,24 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 static CURLcode
-get_pathname(const char **cpp, char **path)
+get_pathname(const char **cpp, char **path, char **pwd)
 {
   const char *cp = *cpp, *end;
   char quot;
   unsigned int i, j;
+  size_t fullPathLength, pathLength;
+  bool relativePath = false;
   static const char WHITESPACE[] = " \t\r\n";
-
-  cp += strspn(cp, WHITESPACE);
   if(!*cp) {
-    *cpp = cp;
+    *cpp = NULL;
     *path = NULL;
     return CURLE_QUOTE_ERROR;
   }
-
-  *path = malloc(strlen(cp) + 1);
+  /* Ignore leading whitespace */
+  cp += strspn(cp, WHITESPACE);
+  /* Allocate enough space for home directory and filename + separator */
+  fullPathLength = strlen(cp) + strlen(*pwd) + 2;
+  *path = malloc(fullPathLength);
   if(*path == NULL)
     return CURLE_OUT_OF_MEMORY;
 
@@ -3377,14 +3387,26 @@ get_pathname(const char **cpp, char **path)
     *cpp = cp + i + strspn(cp + i, WHITESPACE);
   }
   else {
-    /* Read to end of filename */
+    /* Read to end of filename - either to white space or terminator */
     end = strpbrk(cp, WHITESPACE);
     if(end == NULL)
       end = strchr(cp, '\0');
+    /* return pointer to second parameter if it exists */
     *cpp = end + strspn(end, WHITESPACE);
-
-    memcpy(*path, cp, end - cp);
-    (*path)[end - cp] = '\0';
+    pathLength = 0;
+    relativePath = (cp[0] == '/' && cp[1] == '~' && cp[2] == '/');
+    /* Handling for relative path - prepend home directory */
+    if(relativePath) {
+      strcpy(*path, *pwd);
+      pathLength = strlen(*pwd);
+      (*path)[pathLength++] = '/';
+      (*path)[pathLength] = '\0';
+      cp += 3;
+    }
+    /* Copy path name up until first "white space" */
+    memcpy(&(*path)[pathLength], cp, (int)(end - cp));
+    pathLength += (int)(end - cp);
+    (*path)[pathLength] = '\0';
   }
   return CURLE_OK;
 
