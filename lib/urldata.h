@@ -1325,6 +1325,9 @@ struct UrlState {
   struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
+#ifdef CURLDEBUG
+  bool conncache_lock;
+#endif
 };
 
 

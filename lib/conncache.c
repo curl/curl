@@ -40,11 +40,27 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef CURLDEBUG
+/* the debug versions of these macros make extra certain that the lock is
+   never doubly locked or unlocked */
+#define CONN_LOCK(x) if((x)->share) {                                   \
+    Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE); \
+    DEBUGASSERT(!(x)->state.conncache_lock);                            \
+    (x)->state.conncache_lock = TRUE;                                   \
+  }
+
+#define CONN_UNLOCK(x) if((x)->share) {                                 \
+    DEBUGASSERT((x)->state.conncache_lock);                             \
+    (x)->state.conncache_lock = FALSE;                                  \
+    Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT);                     \
+  }
+
+#else
 #define CONN_LOCK(x) if((x)->share)                                     \
     Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE)
 #define CONN_UNLOCK(x) if((x)->share)                   \
     Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT)
-
+#endif
 
 static void conn_llist_dtor(void *user, void *element)
 {
@@ -165,18 +181,24 @@ static void hashkey(struct connectdata *conn, char *buf,
   snprintf(buf, len, "%ld%s", conn->port, hostname);
 }
 
+void Curl_conncache_unlock(struct connectdata *conn)
+{
+  CONN_UNLOCK(conn->data);
+}
+
 /* Look up the bundle with all the connections to the same host this
-   connectdata struct is setup to use. */
+   connectdata struct is setup to use.
+
+   **NOTE**: When it returns, it holds the connection cache lock! */
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
                                                  struct conncache *connc)
 {
   struct connectbundle *bundle = NULL;
+  CONN_LOCK(conn->data);
   if(connc) {
     char key[128];
     hashkey(conn, key, sizeof(key));
-    CONN_LOCK(conn->data);
     bundle = Curl_hash_pick(&connc->hash, key, strlen(key));
-    CONN_UNLOCK(conn->data);
   }
 
   return bundle;
@@ -223,36 +245,34 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   struct connectbundle *new_bundle = NULL;
   struct Curl_easy *data = conn->data;
 
+  /* *find_bundle() locks the connection cache */
   bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
   if(!bundle) {
     int rc;
     char key[128];
 
     result = bundle_create(data, &new_bundle);
-    if(result)
-      return result;
+    if(result) {
+      goto unlock;
+    }
 
     hashkey(conn, key, sizeof(key));
-    CONN_LOCK(data);
     rc = conncache_add_bundle(data->state.conn_cache, key, new_bundle);
-    CONN_UNLOCK(data);
 
     if(!rc) {
       bundle_destroy(new_bundle);
-      return CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
+      goto unlock;
     }
     bundle = new_bundle;
   }
 
-  CONN_LOCK(data);
   result = bundle_add_conn(bundle, conn);
   if(result) {
     if(new_bundle)
       conncache_remove_bundle(data->state.conn_cache, new_bundle);
-    CONN_UNLOCK(data);
-    return result;
+    goto unlock;
   }
-  CONN_UNLOCK(data);
 
   conn->connection_id = connc->next_connection_id++;
   connc->num_connections++;
@@ -260,6 +280,9 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   DEBUGF(infof(conn->data, "Added connection %ld. "
                "The cache now contains %" CURL_FORMAT_CURL_OFF_TU " members\n",
                conn->connection_id, (curl_off_t) connc->num_connections));
+
+  unlock:
+  CONN_UNLOCK(data);
 
   return CURLE_OK;
 }

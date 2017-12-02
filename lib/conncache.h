@@ -50,6 +50,7 @@ void Curl_conncache_destroy(struct conncache *connc);
 /* return the correct bundle, to a host or a proxy */
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
                                                  struct conncache *connc);
+void Curl_conncache_unlock(struct connectdata *conn);
 
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn);

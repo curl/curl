@@ -1106,8 +1106,8 @@ ConnectionExists(struct Curl_easy *data,
      Curl_pipeline_site_blacklisted(data, needle))
     canpipe &= ~ CURLPIPE_HTTP1;
 
-  /* Look up the bundle with all the connections to this
-     particular host */
+  /* Look up the bundle with all the connections to this particular host.
+     Locks the connection cache, beware of early returns! */
   bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache);
   if(bundle) {
     /* Max pipe length is zero (unlimited) for multiplexed connections */
@@ -1130,6 +1130,7 @@ ConnectionExists(struct Curl_easy *data,
         if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
           infof(data, "Server doesn't support multi-use yet, wait\n");
           *waitpipe = TRUE;
+          Curl_conncache_unlock(needle);
           return FALSE; /* no re-use */
         }
 
@@ -1477,6 +1478,7 @@ ConnectionExists(struct Curl_easy *data,
       }
     }
   }
+  Curl_conncache_unlock(needle);
 
   if(chosen) {
     *usethis = chosen;
@@ -4455,7 +4457,6 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* We have decided that we want a new connection. However, we may not
        be able to do that if we have reached the limit of how many
        connections we are allowed to open. */
-    struct connectbundle *bundle = NULL;
 
     if(conn->handler->flags & PROTOPT_ALPN_NPN) {
       /* The protocol wants it, so set the bits if enabled in the easy handle
@@ -4470,26 +4471,30 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* There is a connection that *might* become usable for pipelining
          "soon", and we wait for that */
       connections_available = FALSE;
-    else
-      bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache);
+    else {
+      /* this gets a lock on the conncache */
+      struct connectbundle *bundle =
+        Curl_conncache_find_bundle(conn, data->state.conn_cache);
 
-    if(max_host_connections > 0 && bundle &&
-       (bundle->num_connections >= max_host_connections)) {
-      struct connectdata *conn_candidate;
+      if(max_host_connections > 0 && bundle &&
+         (bundle->num_connections >= max_host_connections)) {
+        struct connectdata *conn_candidate;
 
-      /* The bundle is full. Let's see if we can kill a connection. */
-      conn_candidate = find_oldest_idle_connection_in_bundle(data, bundle);
+        /* The bundle is full. Let's see if we can kill a connection. */
+        conn_candidate = find_oldest_idle_connection_in_bundle(data, bundle);
 
-      if(conn_candidate) {
-        /* Set the connection's owner correctly, then kill it */
-        conn_candidate->data = data;
-        (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
+        if(conn_candidate) {
+          /* Set the connection's owner correctly, then kill it */
+          conn_candidate->data = data;
+          (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
+        }
+        else {
+          infof(data, "No more connections allowed to host: %d\n",
+                max_host_connections);
+          connections_available = FALSE;
+        }
       }
-      else {
-        infof(data, "No more connections allowed to host: %d\n",
-              max_host_connections);
-        connections_available = FALSE;
-      }
+      Curl_conncache_unlock(conn);
     }
 
     if(connections_available &&
