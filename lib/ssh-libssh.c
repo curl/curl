@@ -325,8 +325,8 @@ static int myssh_is_known(struct connectdata *conn)
 
     if(hlen != strlen(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) ||
        memcmp(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5], hash, hlen)) {
-          rc = SSH_ERROR;
-          goto cleanup;
+      rc = SSH_ERROR;
+      goto cleanup;
     }
 
     rc = SSH_OK;
@@ -342,11 +342,15 @@ static int myssh_is_known(struct connectdata *conn)
   switch(vstate) {
     case SSH_SERVER_KNOWN_OK:
       keymatch = CURLKHMATCH_OK;
+      break;
     case SSH_SERVER_FILE_NOT_FOUND:
+      /* fallthrough */
     case SSH_SERVER_NOT_KNOWN:
       keymatch = CURLKHMATCH_MISSING;
-    default:
+      break;
+  default:
       keymatch = CURLKHMATCH_MISMATCH;
+      break;
   }
 
   if(func) { /* use callback to determine action */
@@ -994,8 +998,8 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       if(statvfs != 0 && !sshc->acceptfail) {
         Curl_safefree(sshc->quote_path1);
         err = sftp_get_error(sshc->sftp_session);
-        failf(data, "statvfs command failed: %s",
-              ssh_get_error(sshc->ssh_session));
+        failf(data, "statvfs command failed: %s (%d)",
+              ssh_get_error(sshc->ssh_session), err);
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1620,8 +1624,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         sftp_close(sshc->sftp_file);
         sshc->sftp_file = NULL;
       }
-      if(protop)
-        Curl_safefree(protop->path);
+      Curl_safefree(protop->path);
 
       DEBUGF(infof(data, "SFTP DONE done\n"));
 
