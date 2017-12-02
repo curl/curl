@@ -4526,6 +4526,9 @@ static CURLcode create_conn(struct Curl_easy *data,
       goto out;
     }
     else {
+      /* Mark the connection as used, before we add it */
+      conn->inuse = TRUE;
+
       /*
        * This is a brand new connection, so let's store it in the connection
        * cache of ours!
@@ -4552,9 +4555,6 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
 #endif
   }
-
-  /* Mark the connection as used */
-  conn->inuse = TRUE;
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */
   Curl_init_do(data, conn);
