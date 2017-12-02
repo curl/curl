@@ -23,9 +23,15 @@
  *
  ***************************************************************************/
 
+/*
+ * All accesses to struct fields and changing of data in the connection cache
+ * and connectbundles must be done with the conncache LOCKED. The cache might
+ * be shared.
+ */
+
 struct conncache {
   struct curl_hash hash;
-  size_t num_connections;
+  size_t num_conn;
   long next_connection_id;
   struct curltime last_cleanup;
   /* handle used for closing cached connections */
@@ -50,14 +56,17 @@ void Curl_conncache_destroy(struct conncache *connc);
 /* return the correct bundle, to a host or a proxy */
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
                                                  struct conncache *connc);
+void Curl_conncache_unlock(struct connectdata *conn);
+/* returns number of connections currently held in the connection cache */
+size_t Curl_conncache_size(struct Curl_easy *data);
+size_t Curl_conncache_bundle_size(struct connectdata *conn);
 
+bool Curl_conncache_return_conn(struct connectdata *conn);
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn);
-
-void Curl_conncache_remove_conn(struct conncache *connc,
-                                struct connectdata *conn);
-
-void Curl_conncache_foreach(struct Curl_easy *data,
+void Curl_conncache_remove_conn(struct connectdata *conn,
+                                bool lock);
+bool Curl_conncache_foreach(struct Curl_easy *data,
                             struct conncache *connc,
                             void *param,
                             int (*func)(struct connectdata *conn,
@@ -67,7 +76,10 @@ struct connectdata *
 Curl_conncache_find_first_connection(struct conncache *connc);
 
 struct connectdata *
-Curl_conncache_oldest_idle(struct Curl_easy *data);
+Curl_conncache_extract_bundle(struct Curl_easy *data,
+                              struct connectbundle *bundle);
+struct connectdata *
+Curl_conncache_extract_oldest(struct Curl_easy *data);
 void Curl_conncache_close_all_connections(struct conncache *connc);
 void Curl_conncache_print(struct conncache *connc);
 
