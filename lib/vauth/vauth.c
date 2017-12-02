@@ -138,7 +138,7 @@ bool Curl_auth_user_contains_domain(const char *user)
   }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   else
-    /* User and domain are obtained from the GSS-API credientials cache or the
+    /* User and domain are obtained from the GSS-API credentials cache or the
        currently logged in user from Windows */
     valid = TRUE;
 #endif

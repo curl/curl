@@ -23,8 +23,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
-                                defined(USE_WIN32_LDAP)) && defined(UNICODE))
+#if defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI) || \
+    (defined(USE_WIN32_LDAP) && defined(UNICODE))
 
  /*
   * MultiByte conversions using Windows kernel32 library.
