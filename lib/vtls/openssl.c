@@ -68,12 +68,7 @@
 #include <openssl/rsa.h>
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
-
-#ifndef OPENSSL_IS_BORINGSSL
-/* BoringSSL does not support PKCS12 */
-#define HAVE_PKCS12_SUPPORT 1
 #include <openssl/pkcs12.h>
-#endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
 #include <openssl/ocsp.h>
@@ -654,7 +649,6 @@ int cert_stuff(struct connectdata *conn,
 
     case SSL_FILETYPE_PKCS12:
     {
-#ifdef HAVE_PKCS12_SUPPORT
       FILE *f;
       PKCS12 *p12;
       EVP_PKEY *pri;
@@ -741,10 +735,6 @@ int cert_stuff(struct connectdata *conn,
       if(!cert_done)
         return 0; /* failure! */
       break;
-#else
-      failf(data, "file type P12 for certificate not supported");
-      return 0;
-#endif
     }
     default:
       failf(data, "not supported file type '%s' for certificate", cert_type);
