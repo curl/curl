@@ -51,11 +51,6 @@ CURL_CHECK_OPTION_ARES
 CURL_CHECK_OPTION_RT
 
 XC_CHECK_PATH_SEPARATOR
-dnl Check if gcc is being used before adding AX_CODE_COVERAGE
-AS_IF([ test "$GCC" = "yes" ], [AX_CODE_COVERAGE],
-  # not using GCC so pass a test below - CODE_COVERAGE_ENABLED_TRUE is not zero length
-  CODE_COVERAGE_ENABLED_TRUE='#'
-)
 
 #
 # save the configure arguments
@@ -128,6 +123,13 @@ AC_SUBST(libext)
 dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`
 XC_CHECK_PROG_CC
+
+dnl Check if gcc is being used before adding AX_CODE_COVERAGE
+AS_IF([ test "$GCC" = "yes" ], [AX_CODE_COVERAGE],
+  # not using GCC so pass a test below - CODE_COVERAGE_ENABLED_TRUE is not zero length
+  CODE_COVERAGE_ENABLED_TRUE='#'
+)
+
 XC_AUTOMAKE
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($CURLVERSION)
