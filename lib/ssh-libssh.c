@@ -989,15 +989,13 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       sftp_statvfs_t statvfs;
 
       statvfs = sftp_statvfs(sshc->sftp_session, sshc->quote_path1);
-      if(statvfs != 0 && !sshc->acceptfail) {
+      if(!statvfs && !sshc->acceptfail) {
         Curl_safefree(sshc->quote_path1);
         failf(data, "statvfs command failed: %s",
               ssh_get_error(sshc->ssh_session));
         state(conn, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
-        if(statvfs)
-          sftp_statvfs_free(statvfs);
         break;
       }
       else {
