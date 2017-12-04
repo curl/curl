@@ -23,9 +23,15 @@
  *
  ***************************************************************************/
 
+/*
+ * All accesses to struct fields and changing of data in the connection cache
+ * and connectbundles must be done with the conncache LOCKED. The cache might
+ * be shared.
+ */
+
 struct conncache {
   struct curl_hash hash;
-  size_t num_connections;
+  size_t num_conn;
   long next_connection_id;
   struct curltime last_cleanup;
   /* handle used for closing cached connections */
@@ -51,6 +57,8 @@ void Curl_conncache_destroy(struct conncache *connc);
 struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
                                                  struct conncache *connc);
 void Curl_conncache_unlock(struct connectdata *conn);
+/* returns number of connections currently held in the connection cache */
+size_t Curl_conncache_size(struct Curl_easy *data);
 
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn);

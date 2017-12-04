@@ -4420,7 +4420,7 @@ static CURLcode create_conn(struct Curl_easy *data,
             conn_temp->connection_id, pipelen);
 
       if(conn_temp->bundle->num_connections < max_host_connections &&
-         data->state.conn_cache->num_connections < max_total_connections) {
+         Curl_conncache_size(data) < max_total_connections) {
         /* We want a new connection anyway */
         reuse = FALSE;
 
@@ -4499,7 +4499,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
     if(connections_available &&
        (max_total_connections > 0) &&
-       (data->state.conn_cache->num_connections >= max_total_connections)) {
+       (Curl_conncache_size(data) >= max_total_connections)) {
       struct connectdata *conn_candidate;
 
       /* The cache is full. Let's see if we can kill a connection. */

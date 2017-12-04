@@ -54,12 +54,13 @@
     (x)->state.conncache_lock = FALSE;                                  \
     Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT);                     \
   }
-
+#define IS_LOCKED(x) DEBUGASSERT((x)->state.conncache_lock)
 #else
 #define CONN_LOCK(x) if((x)->share)                                     \
     Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE)
 #define CONN_UNLOCK(x) if((x)->share)                   \
     Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT)
+#define IS_LOCKED(x)
 #endif
 
 static void conn_llist_dtor(void *user, void *element)
@@ -186,6 +187,18 @@ void Curl_conncache_unlock(struct connectdata *conn)
   CONN_UNLOCK(conn->data);
 }
 
+/* Returns number of connections currently held in the connection cache.
+   Locks/unlocks the cache itself!
+*/
+size_t Curl_conncache_size(struct Curl_easy *data)
+{
+  size_t num;
+  CONN_LOCK(data);
+  num = data->state.conn_cache->num_conn;
+  CONN_UNLOCK(data);
+  return num;
+}
+
 /* Look up the bundle with all the connections to the same host this
    connectdata struct is setup to use.
 
@@ -275,11 +288,11 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   }
 
   conn->connection_id = connc->next_connection_id++;
-  connc->num_connections++;
+  connc->num_conn++;
 
   DEBUGF(infof(conn->data, "Added connection %ld. "
                "The cache now contains %" CURL_FORMAT_CURL_OFF_TU " members\n",
-               conn->connection_id, (curl_off_t) connc->num_connections));
+               conn->connection_id, (curl_off_t) connc->num_conn));
 
   unlock:
   CONN_UNLOCK(data);
@@ -300,10 +313,10 @@ void Curl_conncache_remove_conn(struct conncache *connc,
     if(bundle->num_connections == 0)
       conncache_remove_bundle(connc, bundle);
     if(connc) {
-      connc->num_connections--;
+      connc->num_conn--;
       DEBUGF(infof(conn->data, "The cache now contains %"
                    CURL_FORMAT_CURL_OFF_TU " members\n",
-                   (curl_off_t) connc->num_connections));
+                   (curl_off_t) connc->num_conn));
     }
     CONN_UNLOCK(conn->data);
   }

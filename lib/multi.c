@@ -494,7 +494,7 @@ ConnectionDone(struct Curl_easy *data, struct connectdata *conn)
   conn->inuse = FALSE;
 
   if(maxconnects > 0 &&
-     data->state.conn_cache->num_connections > maxconnects) {
+     Curl_conncache_size(data) > maxconnects) {
     infof(data, "Connection cache is full, closing the oldest one.\n");
 
     conn_candidate = Curl_conncache_oldest_idle(data);
