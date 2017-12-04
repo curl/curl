@@ -398,14 +398,13 @@ Curl_conncache_find_first_connection(struct conncache *connc)
 }
 
 /*
- * This function finds the connection in the connection
- * cache that has been unused for the longest time.
+ * This function finds the connection in the connection cache that has been
+ * unused for the longest time and extracts that from the bundle.
  *
- * Returns the pointer to the oldest idle connection, or NULL if none was
- * found.
+ * Returns the pointer to the connection, or NULL if none was found.
  */
 struct connectdata *
-Curl_conncache_oldest_idle(struct Curl_easy *data)
+Curl_conncache_extract_oldest(struct Curl_easy *data)
 {
   struct conncache *bc = data->state.conn_cache;
   struct curl_hash_iterator iter;
@@ -416,6 +415,7 @@ Curl_conncache_oldest_idle(struct Curl_easy *data)
   struct curltime now;
   struct connectdata *conn_candidate = NULL;
   struct connectbundle *bundle;
+  struct connectbundle *bundle_candidate = NULL;
 
   now = Curl_now();
 
@@ -439,12 +439,17 @@ Curl_conncache_oldest_idle(struct Curl_easy *data)
         if(score > highscore) {
           highscore = score;
           conn_candidate = conn;
+          bundle_candidate = bundle;
         }
       }
       curr = curr->next;
     }
 
     he = Curl_hash_next_element(&iter);
+  }
+  if(conn_candidate) {
+    /* remove it to prevent another thread from nicking it */
+    bundle_remove_conn(bundle_candidate, conn_candidate);
   }
   CONN_UNLOCK(data);
 

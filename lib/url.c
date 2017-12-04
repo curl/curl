@@ -4503,7 +4503,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       struct connectdata *conn_candidate;
 
       /* The cache is full. Let's see if we can kill a connection. */
-      conn_candidate = Curl_conncache_oldest_idle(data);
+      conn_candidate = Curl_conncache_extract_oldest(data);
 
       if(conn_candidate) {
         /* Set the connection's owner correctly, then kill it */
