@@ -998,7 +998,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
-      else {
+      else if (statvfs) {
         char *tmp = aprintf("statvfs:\n"
                             "f_bsize: %llu\n" "f_frsize: %llu\n"
                             "f_blocks: %llu\n" "f_bfree: %llu\n"
