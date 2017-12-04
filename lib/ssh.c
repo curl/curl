@@ -1142,6 +1142,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       /*
        * Support some of the "FTP" commands
+       *
+       * 'sshc->quote_item' is already verified to be non-NULL before it
+       * switched to this state.
        */
       char *cmd = sshc->quote_item->data;
       sshc->acceptfail = FALSE;
@@ -1184,7 +1187,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           state(conn, SSH_SFTP_NEXT_QUOTE);
         break;
       }
-      if(cmd) {
+      {
         /*
          * the arguments following the command must be separated from the
          * command with a space so we can check for it unconditionally
@@ -1313,9 +1316,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->actualcode = CURLE_QUOTE_ERROR;
         break;
       }
-    }
-    if(!sshc->quote_item) {
-      state(conn, SSH_SFTP_GETINFO);
     }
     break;
 
