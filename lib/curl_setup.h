@@ -320,8 +320,8 @@
 #include <assert.h>
 #endif
 
-#ifdef __TANDEM /* for nsr-tandem-nsk systems */
-#include <floss.h>
+#ifdef __TANDEM /* for nsx-, nse-, nsr-tandem-nsk systems */
+#include <floss.h(floss_read,floss_write,floss_getpwuid)>
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
