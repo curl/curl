@@ -24,6 +24,9 @@
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#if defined (__TANDEM)
+#include <netinet/in6.h>
+#endif
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
