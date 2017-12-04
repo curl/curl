@@ -299,14 +299,13 @@ void Curl_conncache_remove_conn(struct conncache *connc,
     bundle_remove_conn(bundle, conn);
     if(bundle->num_connections == 0)
       conncache_remove_bundle(connc, bundle);
-    CONN_UNLOCK(conn->data);
     if(connc) {
       connc->num_connections--;
-
       DEBUGF(infof(conn->data, "The cache now contains %"
                    CURL_FORMAT_CURL_OFF_TU " members\n",
                    (curl_off_t) connc->num_connections));
     }
+    CONN_UNLOCK(conn->data);
   }
 }
 
