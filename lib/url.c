@@ -777,7 +777,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
 
     /* unlink ourselves! */
   infof(data, "Closing connection %ld\n", conn->connection_id);
-  Curl_conncache_remove_conn(data->state.conn_cache, conn);
+  Curl_conncache_remove_conn(conn, TRUE);
 
   free_fixed_hostname(&conn->host);
   free_fixed_hostname(&conn->conn_to_host);
@@ -986,13 +986,16 @@ find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
 }
 
 /*
- * This function checks if given connection is dead and disconnects if so.
- * (That also removes it from the connection cache.)
+ * This function checks if the given connection is dead and extracts it from
+ * the connection cache if so.
  *
- * Returns TRUE if the connection actually was dead and disconnected.
+ * When this is called as a Curl_conncache_foreach() callback, the connection
+ * cache lock is held!
+ *
+ * Returns TRUE if the connection was dead and extracted.
  */
-static bool disconnect_if_dead(struct connectdata *conn,
-                               struct Curl_easy *data)
+static bool extract_if_dead(struct connectdata *conn,
+                            struct Curl_easy *data)
 {
   size_t pipeLen = conn->send_pipe.size + conn->recv_pipe.size;
   if(!pipeLen && !conn->inuse) {
@@ -1017,25 +1020,30 @@ static bool disconnect_if_dead(struct connectdata *conn,
     if(dead) {
       conn->data = data;
       infof(data, "Connection %ld seems to be dead!\n", conn->connection_id);
-
-      /* disconnect resources */
-      Curl_disconnect(conn, /* dead_connection */TRUE);
+      Curl_conncache_remove_conn(conn, FALSE);
       return TRUE;
     }
   }
   return FALSE;
 }
 
+struct prunedead {
+  struct Curl_easy *data;
+  struct connectdata *extracted;
+};
+
 /*
- * Wrapper to use disconnect_if_dead() function in Curl_conncache_foreach()
+ * Wrapper to use extract_if_dead() function in Curl_conncache_foreach()
  *
- * Returns always 0.
  */
-static int call_disconnect_if_dead(struct connectdata *conn,
-                                      void *param)
+static int call_extract_if_dead(struct connectdata *conn, void *param)
 {
-  struct Curl_easy* data = (struct Curl_easy*)param;
-  disconnect_if_dead(conn, data);
+  struct prunedead *p = (struct prunedead *)param;
+  if(extract_if_dead(conn, p->data)) {
+    /* stop the iteration here, pass back the connection that was extracted */
+    p->extracted = conn;
+    return 1;
+  }
   return 0; /* continue iteration */
 }
 
@@ -1050,8 +1058,14 @@ static void prune_dead_connections(struct Curl_easy *data)
   time_t elapsed = Curl_timediff(now, data->state.conn_cache->last_cleanup);
 
   if(elapsed >= 1000L) {
-    Curl_conncache_foreach(data, data->state.conn_cache, data,
-                           call_disconnect_if_dead);
+    struct prunedead prune;
+    prune.data = data;
+    prune.extracted = NULL;
+    while(Curl_conncache_foreach(data, data->state.conn_cache, &prune,
+                                 call_extract_if_dead)) {
+      /* disconnect it */
+      (void)Curl_disconnect(prune.extracted, /* dead_connection */TRUE);
+    }
     data->state.conn_cache->last_cleanup = now;
   }
 }
@@ -1162,8 +1176,11 @@ ConnectionExists(struct Curl_easy *data,
       check = curr->ptr;
       curr = curr->next;
 
-      if(disconnect_if_dead(check, data))
+      if(extract_if_dead(check, data)) {
+        /* disconnect it */
+        (void)Curl_disconnect(check, /* dead_connection */TRUE);
         continue;
+      }
 
       pipeLen = check->send_pipe.size + check->recv_pipe.size;
 

@@ -62,11 +62,9 @@ size_t Curl_conncache_size(struct Curl_easy *data);
 
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn);
-
-void Curl_conncache_remove_conn(struct conncache *connc,
-                                struct connectdata *conn);
-
-void Curl_conncache_foreach(struct Curl_easy *data,
+void Curl_conncache_remove_conn(struct connectdata *conn,
+                                bool lock);
+bool Curl_conncache_foreach(struct Curl_easy *data,
                             struct conncache *connc,
                             void *param,
                             int (*func)(struct connectdata *conn,

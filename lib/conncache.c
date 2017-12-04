@@ -300,15 +300,18 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   return CURLE_OK;
 }
 
-void Curl_conncache_remove_conn(struct conncache *connc,
-                                struct connectdata *conn)
+void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
 {
+  struct Curl_easy *data = conn->data;
   struct connectbundle *bundle = conn->bundle;
+  struct conncache *connc = data->state.conn_cache;
 
   /* The bundle pointer can be NULL, since this function can be called
      due to a failed connection attempt, before being added to a bundle */
   if(bundle) {
-    CONN_LOCK(conn->data);
+    if(lock) {
+      CONN_LOCK(conn->data);
+    }
     bundle_remove_conn(bundle, conn);
     if(bundle->num_connections == 0)
       conncache_remove_bundle(connc, bundle);
@@ -318,17 +321,25 @@ void Curl_conncache_remove_conn(struct conncache *connc,
                    CURL_FORMAT_CURL_OFF_TU " members\n",
                    (curl_off_t) connc->num_conn));
     }
-    CONN_UNLOCK(conn->data);
+    if(lock) {
+      CONN_UNLOCK(conn->data);
+    }
   }
 }
 
-/* This function iterates the entire connection cache and calls the
-   function func() with the connection pointer as the first argument
-   and the supplied 'param' argument as the other,
+/* This function iterates the entire connection cache and calls the function
+   func() with the connection pointer as the first argument and the supplied
+   'param' argument as the other.
+
+   The conncache lock is still held when the callback is called. It needs it,
+   so that it can safely continue traversing the lists once the callback
+   returns.
+
+   Returns 1 if the loop was aborted due to the callback's return code.
 
    Return 0 from func() to continue the loop, return 1 to abort it.
  */
-void Curl_conncache_foreach(struct Curl_easy *data,
+bool Curl_conncache_foreach(struct Curl_easy *data,
                             struct conncache *connc,
                             void *param,
                             int (*func)(struct connectdata *conn, void *param))
@@ -338,7 +349,7 @@ void Curl_conncache_foreach(struct Curl_easy *data,
   struct curl_hash_element *he;
 
   if(!connc)
-    return;
+    return FALSE;
 
   CONN_LOCK(data);
   Curl_hash_start_iterate(&connc->hash, &iter);
@@ -359,11 +370,12 @@ void Curl_conncache_foreach(struct Curl_easy *data,
 
       if(1 == func(conn, param)) {
         CONN_UNLOCK(data);
-        return;
+        return TRUE;
       }
     }
   }
   CONN_UNLOCK(data);
+  return FALSE;
 }
 
 /* Return the first connection found in the cache. Used when closing all
