@@ -26,7 +26,7 @@
  * This example fires up NUM_THREADS threads and in each single thread, it
  * downloads the same fixed URL a URL_ITERATIONS number of times. The received
  * data is just thrown away. It sets up a single shared object that holds the
- * connection cache and all easy threads in all threads share that same cache.
+ * connection cache and all easy handles in all threads share that same cache.
  *
  * This example uses pthreads for threads and mutexes, but should be easy to
  * modify to use different thread/mutex system should you want to.
