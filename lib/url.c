@@ -718,7 +718,9 @@ static void conn_free(struct connectdata *conn)
 #ifdef USE_SSL
   Curl_safefree(conn->ssl_extra);
 #endif
-
+#ifdef CURLDEBUG
+  conn->magic = 0;
+#endif
   free(conn); /* free all the connection oriented data */
 }
 
@@ -1449,12 +1451,15 @@ ConnectionExists(struct Curl_easy *data,
       }
     }
   }
-  Curl_conncache_unlock(needle);
 
   if(chosen) {
+    /* mark it as used before releasing the lock */
+    chosen->inuse = TRUE;
+    Curl_conncache_unlock(needle);
     *usethis = chosen;
     return TRUE; /* yes, we found one to use! */
   }
+  Curl_conncache_unlock(needle);
 
   if(foundPendingCandidate && data->set.pipewait) {
     infof(data,
@@ -1777,6 +1782,9 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   if(!conn)
     return NULL;
 
+#ifdef CURLDEBUG
+  conn->magic = CONN_MAGIC;
+#endif
 #ifdef USE_SSL
   /* The SSL backend-specific data (ssl_backend_data) objects are allocated as
      a separate array to ensure suitable alignment.
@@ -4382,20 +4390,21 @@ static CURLcode create_conn(struct Curl_easy *data,
   else
     reuse = ConnectionExists(data, conn, &conn_temp, &force_reuse, &waitpipe);
 
-  /* If we found a reusable connection, we may still want to
-     open a new connection if we are pipelining. */
+  /* If we found a reusable connection that is now marked as in use, we may
+     still want to open a new connection if we are pipelining. */
   if(reuse && !force_reuse && IsPipeliningPossible(data, conn_temp)) {
     size_t pipelen = conn_temp->send_pipe.size + conn_temp->recv_pipe.size;
     if(pipelen > 0) {
       infof(data, "Found connection %ld, with requests in the pipe (%zu)\n",
             conn_temp->connection_id, pipelen);
 
-      if(conn_temp->bundle->num_connections < max_host_connections &&
+      if(Curl_conncache_bundle_size(conn_temp) < max_host_connections &&
          Curl_conncache_size(data) < max_total_connections) {
         /* We want a new connection anyway */
         reuse = FALSE;
 
         infof(data, "We can reuse, but we want a new connection anyway\n");
+        Curl_conncache_return_conn(conn_temp);
       }
     }
   }
@@ -4407,11 +4416,12 @@ static CURLcode create_conn(struct Curl_easy *data,
      * just allocated before we can move along and use the previously
      * existing one.
      */
-    conn_temp->inuse = TRUE; /* mark this as being in use so that no other
-                                handle in a multi stack may nick it */
     reuse_conn(conn, conn_temp);
 #ifdef USE_SSL
     free(conn->ssl_extra);
+#endif
+#ifdef CURLDEBUG
+    conn->magic = 0;
 #endif
     free(conn);          /* we don't need this anymore */
     conn = conn_temp;

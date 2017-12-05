@@ -142,8 +142,10 @@ static void mstate(struct Curl_easy *data, CURLMstate state
      data->mstate < CURLM_STATE_COMPLETED) {
     long connection_id = -5000;
 
-    if(data->easy_conn)
+    if(data->easy_conn) {
+      Curl_check_conn(data->easy_conn);
       connection_id = data->easy_conn->connection_id;
+    }
 
     infof(data,
           "STATE: %s => %s handle %p; line %d (connection #%ld)\n",
@@ -1329,16 +1331,18 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(data->easy_conn && data->mstate > CURLM_STATE_CONNECT &&
-       data->mstate < CURLM_STATE_COMPLETED)
+       data->mstate < CURLM_STATE_COMPLETED) {
       /* Make sure we set the connection's current owner */
+      Curl_check_conn(data->easy_conn);
       data->easy_conn->data = data;
+    }
 
     if(data->easy_conn &&
        (data->mstate >= CURLM_STATE_CONNECT) &&
        (data->mstate < CURLM_STATE_COMPLETED)) {
       /* we need to wait for the connect state as only then is the start time
          stored, but we must not check already completed handles */
-
+      Curl_check_conn(data->easy_conn);
       timeout_ms = Curl_timeleft(data, &now,
                                  (data->mstate <= CURLM_STATE_WAITDO)?
                                  TRUE:FALSE);

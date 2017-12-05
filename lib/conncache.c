@@ -199,6 +199,18 @@ size_t Curl_conncache_size(struct Curl_easy *data)
   return num;
 }
 
+/* Returns number of connections currently held in the connections's bundle
+   Locks/unlocks the cache itself!
+*/
+size_t Curl_conncache_bundle_size(struct connectdata *conn)
+{
+  size_t num;
+  CONN_LOCK(conn->data);
+  num = conn->bundle->num_connections;
+  CONN_UNLOCK(conn->data);
+  return num;
+}
+
 /* Look up the bundle with all the connections to the same host this
    connectdata struct is setup to use.
 
@@ -315,6 +327,7 @@ void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
     bundle_remove_conn(bundle, conn);
     if(bundle->num_connections == 0)
       conncache_remove_bundle(connc, bundle);
+    conn->bundle = NULL; /* removed from it */
     if(connc) {
       connc->num_conn--;
       DEBUGF(infof(conn->data, "The cache now contains %"
@@ -418,7 +431,6 @@ Curl_conncache_find_first_connection(struct conncache *connc)
 bool Curl_conncache_return_conn(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-  struct conncache *connc = data->state.conn_cache;
 
   /* data->multi->maxconnects can be negative, deal with it. */
   size_t maxconnects =
@@ -493,7 +505,7 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
     data->state.conn_cache->num_conn--;
     DEBUGF(infof(data, "The cache now contains %"
                  CURL_FORMAT_CURL_OFF_TU " members\n",
-                 (curl_off_t) connc->num_conn));
+                 (curl_off_t) data->state.conn_cache->num_conn));
   }
 
   return conn_candidate;

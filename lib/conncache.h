@@ -59,6 +59,7 @@ struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
 void Curl_conncache_unlock(struct connectdata *conn);
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
+size_t Curl_conncache_bundle_size(struct connectdata *conn);
 
 bool Curl_conncache_return_conn(struct connectdata *conn);
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
