@@ -479,38 +479,6 @@ static void debug_print_sock_hash(void *p)
 }
 #endif
 
-/* Mark the connection as 'idle', or close it if the cache is full.
-   Returns TRUE if the connection is kept, or FALSE if it was closed. */
-static bool
-ConnectionDone(struct Curl_easy *data, struct connectdata *conn)
-{
-  /* data->multi->maxconnects can be negative, deal with it. */
-  size_t maxconnects =
-    (data->multi->maxconnects < 0) ? data->multi->num_easy * 4:
-    data->multi->maxconnects;
-  struct connectdata *conn_candidate = NULL;
-
-  /* Mark the current connection as 'unused' */
-  conn->inuse = FALSE;
-
-  if(maxconnects > 0 &&
-     Curl_conncache_size(data) > maxconnects) {
-    infof(data, "Connection cache is full, closing the oldest one.\n");
-
-    conn_candidate = Curl_conncache_extract_oldest(data);
-
-    if(conn_candidate) {
-      /* Set the connection's owner correctly */
-      conn_candidate->data = data;
-
-      /* the winner gets the honour of being disconnected */
-      (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
-    }
-  }
-
-  return (conn_candidate == conn) ? FALSE : TRUE;
-}
-
 static CURLcode multi_done(struct connectdata **connp,
                           CURLcode status,  /* an error if this is called
                                                after an error was detected */
@@ -621,17 +589,21 @@ static CURLcode multi_done(struct connectdata **connp,
       result = res2;
   }
   else {
+    char buffer[256];
+    /* create string before returning the connection */
+    snprintf(buffer, sizeof(buffer),
+             "Connection #%ld to host %s left intact",
+             conn->connection_id,
+             conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
+             conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+             conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+             conn->host.dispname);
+
     /* the connection is no longer in use */
-    if(ConnectionDone(data, conn)) {
+    if(Curl_conncache_return_conn(conn)) {
       /* remember the most recently used connection */
       data->state.lastconnect = conn;
-
-      infof(data, "Connection #%ld to host %s left intact\n",
-            conn->connection_id,
-            conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
-            conn->bits.httpproxy ? conn->http_proxy.host.dispname :
-            conn->bits.conn_to_host ? conn->conn_to_host.dispname :
-            conn->host.dispname);
+      infof(data, "%s\n", buffer);
     }
     else
       data->state.lastconnect = NULL;

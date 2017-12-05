@@ -60,6 +60,7 @@ void Curl_conncache_unlock(struct connectdata *conn);
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
 
+bool Curl_conncache_return_conn(struct connectdata *conn);
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn);
 void Curl_conncache_remove_conn(struct connectdata *conn,
@@ -73,6 +74,9 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
 struct connectdata *
 Curl_conncache_find_first_connection(struct conncache *connc);
 
+struct connectdata *
+Curl_conncache_extract_bundle(struct Curl_easy *data,
+                              struct connectbundle *bundle);
 struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data);
 void Curl_conncache_close_all_connections(struct conncache *connc);

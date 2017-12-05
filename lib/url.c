@@ -127,10 +127,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* Local static prototypes */
-static struct connectdata *
-find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
-                                      struct connectbundle *bundle);
 static void conn_free(struct connectdata *conn);
 static void free_fixed_hostname(struct hostname *host);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
@@ -941,48 +937,6 @@ proxy_info_matches(const struct proxy_info* data,
     return TRUE;
 
   return FALSE;
-}
-
-
-/*
- * This function finds the connection in the connection
- * bundle that has been unused for the longest time.
- *
- * Returns the pointer to the oldest idle connection, or NULL if none was
- * found.
- */
-static struct connectdata *
-find_oldest_idle_connection_in_bundle(struct Curl_easy *data,
-                                      struct connectbundle *bundle)
-{
-  struct curl_llist_element *curr;
-  timediff_t highscore = -1;
-  timediff_t score;
-  struct curltime now;
-  struct connectdata *conn_candidate = NULL;
-  struct connectdata *conn;
-
-  (void)data;
-
-  now = Curl_now();
-
-  curr = bundle->conn_list.head;
-  while(curr) {
-    conn = curr->ptr;
-
-    if(!conn->inuse) {
-      /* Set higher score for the age passed since the connection was used */
-      score = Curl_timediff(now, conn->now);
-
-      if(score > highscore) {
-        highscore = score;
-        conn_candidate = conn;
-      }
-    }
-    curr = curr->next;
-  }
-
-  return conn_candidate;
 }
 
 /*
@@ -4497,8 +4451,9 @@ static CURLcode create_conn(struct Curl_easy *data,
          (bundle->num_connections >= max_host_connections)) {
         struct connectdata *conn_candidate;
 
-        /* The bundle is full. Let's see if we can kill a connection. */
-        conn_candidate = find_oldest_idle_connection_in_bundle(data, bundle);
+        /* The bundle is full. Extract the oldest connection. */
+        conn_candidate = Curl_conncache_extract_bundle(data, bundle);
+        Curl_conncache_unlock(conn);
 
         if(conn_candidate) {
           /* Set the connection's owner correctly, then kill it */
@@ -4511,7 +4466,9 @@ static CURLcode create_conn(struct Curl_easy *data,
           connections_available = FALSE;
         }
       }
-      Curl_conncache_unlock(conn);
+      else
+        Curl_conncache_unlock(conn);
+
     }
 
     if(connections_available &&

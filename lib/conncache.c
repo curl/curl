@@ -410,6 +410,96 @@ Curl_conncache_find_first_connection(struct conncache *connc)
 }
 
 /*
+ * Give ownership of a connection back to the connection cache. Might
+ * disconnect the oldest existing in there to make space.
+ *
+ * Return TRUE if stored, FALSE if closed.
+ */
+bool Curl_conncache_return_conn(struct connectdata *conn)
+{
+  struct Curl_easy *data = conn->data;
+  struct conncache *connc = data->state.conn_cache;
+
+  /* data->multi->maxconnects can be negative, deal with it. */
+  size_t maxconnects =
+    (data->multi->maxconnects < 0) ? data->multi->num_easy * 4:
+    data->multi->maxconnects;
+  struct connectdata *conn_candidate = NULL;
+
+  if(maxconnects > 0 &&
+     Curl_conncache_size(data) > maxconnects) {
+    infof(data, "Connection cache is full, closing the oldest one.\n");
+
+    conn_candidate = Curl_conncache_extract_oldest(data);
+
+    if(conn_candidate) {
+      /* Set the connection's owner correctly */
+      conn_candidate->data = data;
+
+      /* the winner gets the honour of being disconnected */
+      (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
+    }
+  }
+  CONN_LOCK(data);
+  conn->inuse = FALSE; /* Mark the connection unused */
+  CONN_UNLOCK(data);
+
+  return (conn_candidate == conn) ? FALSE : TRUE;
+
+}
+
+/*
+ * This function finds the connection in the connection bundle that has been
+ * unused for the longest time.
+ *
+ * Does not lock the connection cache!
+ *
+ * Returns the pointer to the oldest idle connection, or NULL if none was
+ * found.
+ */
+struct connectdata *
+Curl_conncache_extract_bundle(struct Curl_easy *data,
+                              struct connectbundle *bundle)
+{
+  struct curl_llist_element *curr;
+  timediff_t highscore = -1;
+  timediff_t score;
+  struct curltime now;
+  struct connectdata *conn_candidate = NULL;
+  struct connectdata *conn;
+
+  (void)data;
+
+  now = Curl_now();
+
+  curr = bundle->conn_list.head;
+  while(curr) {
+    conn = curr->ptr;
+
+    if(!conn->inuse) {
+      /* Set higher score for the age passed since the connection was used */
+      score = Curl_timediff(now, conn->now);
+
+      if(score > highscore) {
+        highscore = score;
+        conn_candidate = conn;
+      }
+    }
+    curr = curr->next;
+  }
+  if(conn_candidate) {
+    /* remove it to prevent another thread from nicking it */
+    bundle_remove_conn(bundle, conn_candidate);
+    data->state.conn_cache->num_conn--;
+    DEBUGF(infof(data, "The cache now contains %"
+                 CURL_FORMAT_CURL_OFF_TU " members\n",
+                 (curl_off_t) connc->num_conn));
+  }
+
+  return conn_candidate;
+}
+
+/*
  * This function finds the connection in the connection cache that has been
  * unused for the longest time and extracts that from the bundle.
  *
