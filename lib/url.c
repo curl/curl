@@ -2033,7 +2033,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   ((('a' <= (str)[0] && (str)[0] <= 'z') || \
     ('A' <= (str)[0] && (str)[0] <= 'Z')) && \
    ((str)[1] == ':' || (str)[1] == '|') && \
-   ((str)[2] == '/' || (str)[2] == 0))
+   ((str)[2] == '/' || (str)[2] == '\\' || (str)[2] == 0))
 
   /* Don't mistake a drive letter for a scheme if the default protocol is file.
      curld --proto-default file c:/foo/bar.txt */
