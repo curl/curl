@@ -418,7 +418,7 @@ Curl_conncache_find_first_connection(struct conncache *connc)
 struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data)
 {
-  struct conncache *bc = data->state.conn_cache;
+  struct conncache *connc = data->state.conn_cache;
   struct curl_hash_iterator iter;
   struct curl_llist_element *curr;
   struct curl_hash_element *he;
@@ -432,7 +432,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   now = Curl_now();
 
   CONN_LOCK(data);
-  Curl_hash_start_iterate(&bc->hash, &iter);
+  Curl_hash_start_iterate(&connc->hash, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {
@@ -462,6 +462,10 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   if(conn_candidate) {
     /* remove it to prevent another thread from nicking it */
     bundle_remove_conn(bundle_candidate, conn_candidate);
+    connc->num_conn--;
+    DEBUGF(infof(data, "The cache now contains %"
+                 CURL_FORMAT_CURL_OFF_TU " members\n",
+                 (curl_off_t) connc->num_conn));
   }
   CONN_UNLOCK(data);
 
