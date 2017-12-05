@@ -1206,6 +1206,9 @@ if test "$ipv6" = yes; then
 #include <ws2tcpip.h>
 #else
 #include <netinet/in.h>
+#if defined (__TANDEM)
+# include <netinet/in6.h>
+#endif
 #endif] ,
   struct sockaddr_in6 s; s.sin6_scope_id = 0; , have_sin6_scope_id=yes)
   if test "$have_sin6_scope_id" = yes; then
@@ -3354,6 +3357,7 @@ AC_CHECK_HEADERS(
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
+	netinet/in6.h \
         sys/un.h \
         linux/tcp.h \
         netinet/tcp.h \
@@ -3403,6 +3407,9 @@ dnl default includes
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
 #endif
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h>
