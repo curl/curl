@@ -1069,6 +1069,8 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
 
   DEBUGASSERT(socketindex <= SECONDARYSOCKET);
 
+  Curl_check_conn(conn);
+
   sockfd = conn->sock[socketindex];
 
   /* The looping below is required since we use non-blocking sockets, but due
@@ -1766,6 +1768,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   curl_off_t postsize = 0; /* curl_off_t to handle large file sizes */
   int seekerr = CURL_SEEKFUNC_CANTSEEK;
 
+  Curl_check_conn(conn);
+
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
@@ -2305,6 +2309,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     result = Curl_add_buffer(req_buffer, ppath, strlen(ppath));
   if(result)
     return result;
+
+  Curl_check_conn(conn);
 
   result =
     Curl_add_bufferf(req_buffer,
@@ -2951,6 +2957,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 {
   CURLcode result;
   struct SingleRequest *k = &data->req;
+
+  Curl_check_conn(conn);
 
   /* header line within buffer loop */
   do {

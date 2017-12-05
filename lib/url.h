@@ -94,4 +94,11 @@ void Curl_verboseconnect(struct connectdata *conn);
   (conn->http_proxy.proxytype == CURLPROXY_HTTPS &&\
   !conn->bits.proxy_ssl_connected[SECONDARYSOCKET])
 
+#ifdef CURLDEBUG
+#define CONN_MAGIC 0x1234abcd
+#define Curl_check_conn(x) DEBUGASSERT((x)->magic == CONN_MAGIC)
+#else
+#define Curl_check_conn(x)
+#endif
+
 #endif /* HEADER_CURL_URL_H */

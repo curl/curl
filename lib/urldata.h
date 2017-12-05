@@ -775,9 +775,10 @@ struct connectdata {
   void *closesocket_client;
 
   bool inuse; /* This is a marker for the connection cache logic. If this is
-                 TRUE this handle is being used by an easy handle and cannot
-                 be used by any other easy handle without careful
-                 consideration (== only for pipelining). */
+                 TRUE this handle is being used by one or more easy handles
+                 and can only used by any other easy handle without careful
+                 consideration (== only for pipelining/multiplexing) and it
+                 cannot be used by another multi handle! */
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to
@@ -1006,6 +1007,9 @@ struct connectdata {
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
   bool abstract_unix_socket;
+#endif
+#ifdef CURLDEBUG
+  unsigned int magic;
 #endif
 };
 
@@ -1325,6 +1329,9 @@ struct UrlState {
   struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
+#ifdef CURLDEBUG
+  bool conncache_lock;
+#endif
 };
 
 
