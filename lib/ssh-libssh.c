@@ -2516,138 +2516,132 @@ static void sftp_quote(struct connectdata *conn)
       state(conn, SSH_SFTP_NEXT_QUOTE);
     return;
   }
-  if(cmd) {
-    /*
-     * the arguments following the command must be separated from the
-     * command with a space so we can check for it unconditionally
-     */
-    cp = strchr(cmd, ' ');
-    if(cp == NULL) {
-      failf(data, "Syntax error in SFTP command. Supply parameter(s)!");
-      state(conn, SSH_SFTP_CLOSE);
-      sshc->nextstate = SSH_NO_STATE;
-      sshc->actualcode = CURLE_QUOTE_ERROR;
-      return;
-    }
 
-    /*
-     * also, every command takes at least one argument so we get that
-     * first argument right now
-     */
-    result = Curl_get_pathname(&cp, &sshc->quote_path1);
-    if(result) {
-      if(result == CURLE_OUT_OF_MEMORY)
-        failf(data, "Out of memory");
-      else
-        failf(data, "Syntax error: Bad first parameter");
-      state(conn, SSH_SFTP_CLOSE);
-      sshc->nextstate = SSH_NO_STATE;
-      sshc->actualcode = result;
-      return;
-    }
-
-    /*
-     * SFTP is a binary protocol, so we don't send text commands
-     * to the server. Instead, we scan for commands used by
-     * OpenSSH's sftp program and call the appropriate libssh
-     * functions.
-     */
-    if(strncasecompare(cmd, "chgrp ", 6) ||
-        strncasecompare(cmd, "chmod ", 6) ||
-        strncasecompare(cmd, "chown ", 6)) {
-      /* attribute change */
-
-      /* sshc->quote_path1 contains the mode to set */
-      /* get the destination */
-      result = Curl_get_pathname(&cp, &sshc->quote_path2);
-      if(result) {
-        if(result == CURLE_OUT_OF_MEMORY)
-          failf(data, "Out of memory");
-        else
-          failf(data, "Syntax error in chgrp/chmod/chown: "
-                "Bad second parameter");
-        Curl_safefree(sshc->quote_path1);
-        state(conn, SSH_SFTP_CLOSE);
-        sshc->nextstate = SSH_NO_STATE;
-        sshc->actualcode = result;
-        return;
-      }
-      sshc->quote_attrs = NULL;
-      state(conn, SSH_SFTP_QUOTE_STAT);
-      return;
-    }
-    if(strncasecompare(cmd, "ln ", 3) ||
-        strncasecompare(cmd, "symlink ", 8)) {
-      /* symbolic linking */
-      /* sshc->quote_path1 is the source */
-      /* get the destination */
-      result = Curl_get_pathname(&cp, &sshc->quote_path2);
-      if(result) {
-        if(result == CURLE_OUT_OF_MEMORY)
-          failf(data, "Out of memory");
-        else
-          failf(data, "Syntax error in ln/symlink: Bad second parameter");
-        Curl_safefree(sshc->quote_path1);
-        state(conn, SSH_SFTP_CLOSE);
-        sshc->nextstate = SSH_NO_STATE;
-        sshc->actualcode = result;
-        return;
-      }
-      state(conn, SSH_SFTP_QUOTE_SYMLINK);
-      return;
-    }
-    else if(strncasecompare(cmd, "mkdir ", 6)) {
-      /* create dir */
-      state(conn, SSH_SFTP_QUOTE_MKDIR);
-      return;
-    }
-    else if(strncasecompare(cmd, "rename ", 7)) {
-      /* rename file */
-      /* first param is the source path */
-      /* second param is the dest. path */
-      result = Curl_get_pathname(&cp, &sshc->quote_path2);
-      if(result) {
-        if(result == CURLE_OUT_OF_MEMORY)
-          failf(data, "Out of memory");
-        else
-          failf(data, "Syntax error in rename: Bad second parameter");
-        Curl_safefree(sshc->quote_path1);
-        state(conn, SSH_SFTP_CLOSE);
-        sshc->nextstate = SSH_NO_STATE;
-        sshc->actualcode = result;
-        return;
-      }
-      state(conn, SSH_SFTP_QUOTE_RENAME);
-      return;
-    }
-    else if(strncasecompare(cmd, "rmdir ", 6)) {
-      /* delete dir */
-      state(conn, SSH_SFTP_QUOTE_RMDIR);
-      return;
-    }
-    else if(strncasecompare(cmd, "rm ", 3)) {
-      state(conn, SSH_SFTP_QUOTE_UNLINK);
-      return;
-    }
-#ifdef HAS_STATVFS_SUPPORT
-    else if(strncasecompare(cmd, "statvfs ", 8)) {
-      state(conn, SSH_SFTP_QUOTE_STATVFS);
-      return;
-    }
-#endif
-
-    failf(data, "Unknown SFTP command");
-    Curl_safefree(sshc->quote_path1);
-    Curl_safefree(sshc->quote_path2);
+  /*
+   * the arguments following the command must be separated from the
+   * command with a space so we can check for it unconditionally
+   */
+  cp = strchr(cmd, ' ');
+  if(cp == NULL) {
+    failf(data, "Syntax error in SFTP command. Supply parameter(s)!");
     state(conn, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     sshc->actualcode = CURLE_QUOTE_ERROR;
     return;
   }
 
-  if(!sshc->quote_item) {
-    state(conn, SSH_SFTP_GETINFO);
+  /*
+   * also, every command takes at least one argument so we get that
+   * first argument right now
+   */
+  result = Curl_get_pathname(&cp, &sshc->quote_path1);
+  if(result) {
+    if(result == CURLE_OUT_OF_MEMORY)
+      failf(data, "Out of memory");
+    else
+      failf(data, "Syntax error: Bad first parameter");
+    state(conn, SSH_SFTP_CLOSE);
+    sshc->nextstate = SSH_NO_STATE;
+    sshc->actualcode = result;
+    return;
   }
+
+  /*
+   * SFTP is a binary protocol, so we don't send text commands
+   * to the server. Instead, we scan for commands used by
+   * OpenSSH's sftp program and call the appropriate libssh
+   * functions.
+   */
+  if(strncasecompare(cmd, "chgrp ", 6) ||
+     strncasecompare(cmd, "chmod ", 6) ||
+     strncasecompare(cmd, "chown ", 6)) {
+    /* attribute change */
+
+    /* sshc->quote_path1 contains the mode to set */
+    /* get the destination */
+    result = Curl_get_pathname(&cp, &sshc->quote_path2);
+    if(result) {
+      if(result == CURLE_OUT_OF_MEMORY)
+        failf(data, "Out of memory");
+      else
+        failf(data, "Syntax error in chgrp/chmod/chown: "
+              "Bad second parameter");
+      Curl_safefree(sshc->quote_path1);
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = result;
+      return;
+    }
+    sshc->quote_attrs = NULL;
+    state(conn, SSH_SFTP_QUOTE_STAT);
+    return;
+  }
+  if(strncasecompare(cmd, "ln ", 3) ||
+     strncasecompare(cmd, "symlink ", 8)) {
+    /* symbolic linking */
+    /* sshc->quote_path1 is the source */
+    /* get the destination */
+    result = Curl_get_pathname(&cp, &sshc->quote_path2);
+    if(result) {
+      if(result == CURLE_OUT_OF_MEMORY)
+        failf(data, "Out of memory");
+      else
+        failf(data, "Syntax error in ln/symlink: Bad second parameter");
+      Curl_safefree(sshc->quote_path1);
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = result;
+      return;
+    }
+    state(conn, SSH_SFTP_QUOTE_SYMLINK);
+    return;
+  }
+  else if(strncasecompare(cmd, "mkdir ", 6)) {
+    /* create dir */
+    state(conn, SSH_SFTP_QUOTE_MKDIR);
+    return;
+  }
+  else if(strncasecompare(cmd, "rename ", 7)) {
+    /* rename file */
+    /* first param is the source path */
+    /* second param is the dest. path */
+    result = Curl_get_pathname(&cp, &sshc->quote_path2);
+    if(result) {
+      if(result == CURLE_OUT_OF_MEMORY)
+        failf(data, "Out of memory");
+      else
+        failf(data, "Syntax error in rename: Bad second parameter");
+      Curl_safefree(sshc->quote_path1);
+      state(conn, SSH_SFTP_CLOSE);
+      sshc->nextstate = SSH_NO_STATE;
+      sshc->actualcode = result;
+      return;
+    }
+    state(conn, SSH_SFTP_QUOTE_RENAME);
+    return;
+  }
+  else if(strncasecompare(cmd, "rmdir ", 6)) {
+    /* delete dir */
+    state(conn, SSH_SFTP_QUOTE_RMDIR);
+    return;
+  }
+  else if(strncasecompare(cmd, "rm ", 3)) {
+    state(conn, SSH_SFTP_QUOTE_UNLINK);
+    return;
+  }
+#ifdef HAS_STATVFS_SUPPORT
+  else if(strncasecompare(cmd, "statvfs ", 8)) {
+    state(conn, SSH_SFTP_QUOTE_STATVFS);
+    return;
+  }
+#endif
+
+  failf(data, "Unknown SFTP command");
+  Curl_safefree(sshc->quote_path1);
+  Curl_safefree(sshc->quote_path2);
+  state(conn, SSH_SFTP_CLOSE);
+  sshc->nextstate = SSH_NO_STATE;
+  sshc->actualcode = CURLE_QUOTE_ERROR;
 }
 
 static void sftp_quote_stat(struct connectdata *conn)
