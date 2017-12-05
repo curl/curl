@@ -30,6 +30,9 @@
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#if defined (__TANDEM)
+#include <netinet/in6.h>
+#endif
 #endif
 
 #include "hostcheck.h"

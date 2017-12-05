@@ -32,6 +32,10 @@
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#if defined (__TANDEM)
+#include <netinet/in6.h>
+const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+#endif
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
