@@ -167,6 +167,7 @@ static CURLcode connect_init(struct connectdata *conn, bool reinit)
   s->line_start = s->connect_buffer;
   s->ptr = s->line_start;
   s->cl = 0;
+  s->close_connection = FALSE;
   return CURLE_OK;
 }
 
@@ -187,7 +188,6 @@ static CURLcode CONNECT(struct connectdata *conn,
   struct SingleRequest *k = &data->req;
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
-  bool closeConnection = FALSE;
   timediff_t check;
   struct http_connect_state *s = conn->connect_state;
 
@@ -529,7 +529,7 @@ static CURLcode CONNECT(struct connectdata *conn,
           }
         }
         else if(Curl_compareheader(s->line_start, "Connection:", "close"))
-          closeConnection = TRUE;
+          s->close_connection = TRUE;
         else if(checkprefix("Transfer-Encoding:", s->line_start)) {
           if(k->httpcode/100 == 2) {
             /* A client MUST ignore any Content-Length or Transfer-Encoding
@@ -548,7 +548,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         }
         else if(Curl_compareheader(s->line_start,
                                    "Proxy-Connection:", "close"))
-          closeConnection = TRUE;
+          s->close_connection = TRUE;
         else if(2 == sscanf(s->line_start, "HTTP/1.%d %d",
                             &subversion,
                             &k->httpcode)) {
@@ -578,10 +578,10 @@ static CURLcode CONNECT(struct connectdata *conn,
           /* the connection has been marked for closure, most likely in the
              Curl_http_auth_act() function and thus we can kill it at once
              below */
-          closeConnection = TRUE;
+          s->close_connection = TRUE;
       }
 
-      if(closeConnection && data->req.newurl) {
+      if(s->close_connection && data->req.newurl) {
         /* Connection closed by server. Don't use it anymore */
         Curl_closesocket(conn, conn->sock[sockindex]);
         conn->sock[sockindex] = CURL_SOCKET_BAD;
@@ -599,7 +599,7 @@ static CURLcode CONNECT(struct connectdata *conn,
   } while(data->req.newurl);
 
   if(data->info.httpproxycode/100 != 2) {
-    if(closeConnection && data->req.newurl) {
+    if(s->close_connection && data->req.newurl) {
       conn->bits.proxy_connect_closed = TRUE;
       infof(data, "Connect me again please\n");
       connect_done(conn);
