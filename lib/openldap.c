@@ -225,7 +225,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 
 #ifdef CURL_OPENLDAP_DEBUG
   static int do_trace = 0;
-  const char *env = getenv("CURL_TRACE");
+  const char *env = getenv("CURL_OPENLDAP_TRACE");
   do_trace = (env && strtol(env, NULL, 10) > 0);
   if (do_trace) {
     ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
