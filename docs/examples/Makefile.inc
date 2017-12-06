@@ -34,12 +34,13 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   imap-tls imap-multi url2file sftpget ftpsget postinmemory http2-download \
   http2-upload http2-serverpush getredirect ftpuploadfrommem               \
   ftpuploadresume sslbackend postit2-formadd multi-formadd                 \
-  shared-connection-cache threaded-shared-conn
+  shared-connection-cache
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
-COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c       \
-  ghiper.c hiperfifo.c htmltidy.c multithread.c          \
-  opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
-  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp      \
-  multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c
+COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c	\
+  ghiper.c hiperfifo.c htmltidy.c multithread.c opensslthreadlock.c	\
+  sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c			\
+  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp	\
+  multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c			\
+  threaded-shared-conn.c
