@@ -55,15 +55,15 @@
  * Uncommenting this will enable the built-in debug logging of the openldap
  * library. The debug log level can be set using the CURL_OPENLDAP_TRACE
  * environment variable. The debug output is written to stderr.
- * 
- * The library supports the following debug flags: 
+ *
+ * The library supports the following debug flags:
  * LDAP_DEBUG_NONE         0x0000
  * LDAP_DEBUG_TRACE        0x0001
  * LDAP_DEBUG_CONSTRUCT    0x0002
  * LDAP_DEBUG_DESTROY      0x0004
  * LDAP_DEBUG_PARAMETER    0x0008
- * LDAP_DEBUG_ANY          0xffff 
- * 
+ * LDAP_DEBUG_ANY          0xffff
+ *
  * For example, use CURL_OPENLDAP_TRACE=0 for no debug,
  * CURL_OPENLDAP_TRACE=2 for LDAP_DEBUG_CONSTRUCT messages only,
  * CURL_OPENLDAP_TRACE=65535 for all debug message levels.
@@ -227,7 +227,7 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   static int do_trace = 0;
   const char *env = getenv("CURL_OPENLDAP_TRACE");
   do_trace = (env && strtol(env, NULL, 10) > 0);
-  if (do_trace) {
+  if(do_trace) {
     ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
   }
 #endif
