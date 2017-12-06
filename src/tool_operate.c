@@ -1297,9 +1297,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
                         (long)config->localportrange);
         }
 
-        my_setopt(curl, CURLOPT_HAPROXYPROTOCOL,
-                  config->haproxy_protocol?1L:0L);
-
         /* curl 7.15.5 */
         my_setopt_str(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER,
                       config->ftp_alternative_to_user);
@@ -1447,6 +1444,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->happy_eyeballs_timeout_ms != CURL_HET_DEFAULT)
           my_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                     config->happy_eyeballs_timeout_ms);
+
+        /* new in 7.60.0 */
+        if(config->haproxy_protocol)
+          my_setopt(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
 
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
