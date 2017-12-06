@@ -398,6 +398,8 @@ static const struct helptxt helptext[] = {
    "Try SSL/TLS"},
   {"    --ssl-allow-beast",
    "Allow security flaw to improve interop"},
+  {"    --ssl-no-implied-proxytunnel",
+   "Disable implied --proxytunnel for HTTPS URL"},
   {"    --ssl-no-revoke",
    "Disable cert revocation checks (WinSSL)"},
   {"    --ssl-reqd",

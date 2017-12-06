@@ -47,6 +47,18 @@ exception in the case of Windows' Untrusted Publishers blacklist which it seems
 can't be bypassed.\fP This option may have broader support to accommodate other
 SSL backends in the future.
 https://curl.haxx.se/docs/ssl-compared.html
+
+Added in 7.58.0:
+
+\fICURLSSLOPT_NO_IMPLIED_PROXYTUNNEL\fP tells libcurl to disable implied
+\fICURLOPT_HTTPPROXYTUNNEL\fP for HTTPS URL. If this option is enabled, and
+\fICURLOPT_CONNECT_TO\fP is not enabled, and CURLOPT_HTTPPROXYTUNNEL is not
+enabled, and the user has set an HTTP/HTTPS proxy then libcurl will request
+HTTPS URLs from the proxy instead of attempting to tunnel the request through
+the proxy. INSECURE: This option basically exposes the transfer to the proxy,
+whereas if it were tunneled the proxy would not be able to tamper with the
+connection. Furthermore if it is an HTTP proxy then from libcurl to the proxy
+would be unencrypted.
 .SH DEFAULT
 0
 .SH PROTOCOLS

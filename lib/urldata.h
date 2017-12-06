@@ -219,6 +219,8 @@ struct ssl_config_data {
   bool enable_beast; /* especially allow this flaw for interoperability's
                         sake*/
   bool no_revoke;    /* disable SSL certificate revocation checks */
+  bool no_implied_proxytunnel; /* disable implied --proxytunnel for HTTPS
+                                  URL */
   long certverifyresult; /* result from the certificate verification */
   char *CRLfile;   /* CRL to check certificate revocation */
   char *issuercert;/* optional issuer certificate filename */
