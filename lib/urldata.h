@@ -755,6 +755,7 @@ struct http_connect_state {
     TUNNEL_CONNECT, /* CONNECT has been sent off */
     TUNNEL_COMPLETE /* CONNECT response received completely */
   } tunnel_state;
+  bool close_connection;
 };
 
 /*
