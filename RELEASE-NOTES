@@ -1,4 +1,4 @@
-Curl and libcurl 7.57.1
+Curl and libcurl 7.58.0
 
  Public curl releases:         172
  Command line options:         211
@@ -8,7 +8,8 @@ Curl and libcurl 7.57.1
 
 This release includes the following changes:
 
- o
+ o new libssh-powered SSH SCP/SFTP back-end
+ o curl-config: add --ssl-backends [10]
 
 This release includes the following bugfixes:
 
@@ -16,6 +17,16 @@ This release includes the following bugfixes:
  o examples/xmlstream.c: don't switch off CURL_GLOBAL_SSL [2]
  o SSL: Avoid magic allocation of SSL backend specific data [3]
  o lib: don't export all symbols, just everything curl_* [4]
+ o libssh2: send the correct CURLE error code on scp file not found
+ o libssh2: return CURLE_UPLOAD_FAILED on failure to upload
+ o openssl: enable pkcs12 in boringssl builds [5]
+ o libssh2: remove dead code from SSH_SFTP_QUOTE [6]
+ o sasl_getmesssage: make sure we have a long enough string to pass [7]
+ o conncache: fix several lock issues [8]
+ o threaded-shared-conn.c: new example
+ o conncache: only allow multiplexing within same multi handle [9]
+ o configure: check for netinet/in6.h [11]
+ o URL: tolerate backslash after drive letter for FILE: [12]
 
 This release includes the following known bugs:
 
@@ -24,8 +35,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Dima Tisnek, Johannes Schindelin, W. Mark Kubacki,
-  (4 contributors)
+  ahodesuka on github, Daniel Stenberg, David Benjamin, Dima Tisnek,
+  guitared on github, Jan Ehrhardt, Johannes Schindelin, Matthew Kerwin,
+  Nikos Mavrogiannopoulos, Oleg Pudeyev, Patrick Dawson, Randall S. Becker,
+  Ray Satiro, W. Mark Kubacki,
+  (14 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -35,3 +49,12 @@ References to bug reports and discussions on issues:
  [2] = https://curl.haxx.se/mail/lib-2017-12/0000.html
  [3] = https://curl.haxx.se/bug/?i=2119
  [4] = https://curl.haxx.se/bug/?i=2127
+ [5] = https://curl.haxx.se/bug/?i=2134
+ [6] = https://curl.haxx.se/bug/?i=2143
+ [7] = https://curl.haxx.se/bug/?i=2150
+ [8] = https://curl.haxx.se/bug/?i=2132
+ [9] = https://curl.haxx.se/bug/?i=2152
+ [10] = https://curl.haxx.se/bug/?i=2128
+ [11] = https://curl.haxx.se/bug/?i=2146
+ [12] = https://curl.haxx.se/bug/?i=2154
+
