@@ -22,6 +22,10 @@
 
 #include "curl_setup.h"
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 #ifdef HAVE_LINUX_TCP_H
 #include <linux/tcp.h>
 #endif
