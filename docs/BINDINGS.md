@@ -75,7 +75,7 @@ Bailiff and Bálint Szilakszi,
 
 [PHP](https://php.net/curl) Originally written by Sterling Hughes
 
-[PostgreSQL](http://gborg.postgresql.org/project/pgcurl/projdisplay.php) Written by Gian Paolo Ciceri
+[PostgreSQL](https://github.com/pramsey/pgsql-http) - HTTP client for PostgreSQL
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
