@@ -19,6 +19,18 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+#ifdef HAVE_TERMIOS_H
+#  include <termios.h>
+#elif defined(HAVE_TERMIO_H)
+#  include <termio.h>
+#endif
+
 #include "tool_setup.h"
 
 #define ENABLE_CURLX_PRINTF
@@ -125,6 +137,9 @@ void progressbarinit(struct ProgressData *bar,
   int scr_size[2];
 #endif
   char *colp;
+#if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_UNISTD_H) && (defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H))
+  struct winsize w;
+#endif
 
   memset(bar, 0, sizeof(struct ProgressData));
 
@@ -151,7 +166,16 @@ void progressbarinit(struct ProgressData *bar,
     curl_free(colp);
   }
   else
+#if defined(HAVE_SYS_IOCTL_H) && defined(HAVE_UNISTD_H) && (defined(HAVE_TERMIOS_H) || defined(HAVE_TERMIO_H))
+    if (!ioctl(STDOUT_FILENO, TIOCGWINSZ, &w)) {
+      ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+      bar-> width = w.ws_col - 1;
+    }
+    else
+      bar->width = 79;
+#else
     bar->width = 79;
+#endif
 #else
   /* 20000318 mgs
    * We use this emx library call to get the screen width, and subtract
