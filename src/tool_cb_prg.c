@@ -61,14 +61,27 @@ int tool_progress_cb(void *clientp,
   /* we've come this far */
   point = dlnow + ulnow + bar->initial_size;
 
-  if(bar->calls && (tvdiff(now, bar->prevtime) < 100L) && point < total)
-    /* after first call, limit progress-bar updating to 10 Hz */
-    /* update when we're at 100% even if last update is less than 200ms ago */
-    return 0;
-
-  if(point > total)
-    /* we have got more than the expected total! */
-    total = point;
+  if(bar->calls) {
+    /* after first call... */
+    if(total) {
+      /* we know the total data to get... */
+      if(bar->prev == point)
+        /* progress didn't change since last invoke */
+        return 0;
+      else if((tvdiff(now, bar->prevtime) < 100L) && point < total)
+        /* limit progress-bar updating to 10 Hz except when we're at 100% */
+        return 0;
+    }
+    else {
+      /* total is unknown */
+      if(bar->prev/1024 == point/1024)
+        /* the same kilobyte level as last invoke */
+        return 0;
+      else if(tvdiff(now, bar->prevtime) < 100L)
+        /* limit progress-bar updating to 10 Hz */
+        return 0;
+    }
+  }
 
   /* simply count invokes */
   bar->calls++;
@@ -82,6 +95,10 @@ int tool_progress_cb(void *clientp,
     }
   }
   else if(point != bar->prev) {
+    if(point > total)
+      /* we have got more than the expected total! */
+      total = point;
+
     frac = (double)point / (double)total;
     percent = frac * 100.0;
     barwidth = bar->width - 7;
