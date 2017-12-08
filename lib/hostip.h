@@ -153,16 +153,6 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
 #endif
 
 /*
- * Curl_addrinfo_callback() is used when we build with any asynch specialty.
- * Handles end of async request processing. Inserts ai into hostcache when
- * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
- * request completed whether successful or failed.
- */
-CURLcode Curl_addrinfo_callback(struct connectdata *conn,
-                                int status,
-                                Curl_addrinfo *ai);
-
-/*
  * Curl_printable_address() returns a printable version of the 1st address
  * given in the 'ip' argument. The result will be stored in the buf that is
  * bufsize bytes big.
@@ -205,32 +195,6 @@ Curl_cache_addr(struct Curl_easy *data, Curl_addrinfo *addr,
  */
 extern sigjmp_buf curl_jmpenv;
 #endif
-
-/*
- * Function provided by the resolver backend to set DNS servers to use.
- */
-CURLcode Curl_set_dns_servers(struct Curl_easy *data, char *servers);
-
-/*
- * Function provided by the resolver backend to set
- * outgoing interface to use for DNS requests
- */
-CURLcode Curl_set_dns_interface(struct Curl_easy *data,
-                                const char *interf);
-
-/*
- * Function provided by the resolver backend to set
- * local IPv4 address to use as source address for DNS requests
- */
-CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
-                                const char *local_ip4);
-
-/*
- * Function provided by the resolver backend to set
- * local IPv6 address to use as source address for DNS requests
- */
-CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
-                                const char *local_ip6);
 
 /*
  * Clean off entries from the cache

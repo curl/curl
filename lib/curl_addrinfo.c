@@ -61,7 +61,7 @@
 #include "memdebug.h"
 
 /*
- * Curl_freeaddrinfo()
+ * curl_freeaddrinfo()
  *
  * This is used to free a linked list of Curl_addrinfo structs along
  * with all its associated allocated storage. This function should be
@@ -78,7 +78,7 @@
 #endif
 
 void
-Curl_freeaddrinfo(Curl_addrinfo *cahead)
+curl_freeaddrinfo(Curl_addrinfo *cahead)
 {
   Curl_addrinfo *vqualifier canext;
   Curl_addrinfo *ca;
@@ -101,8 +101,8 @@ Curl_freeaddrinfo(Curl_addrinfo *cahead)
  * the only difference that instead of returning a linked list of
  * addrinfo structs this one returns a linked list of Curl_addrinfo
  * ones. The memory allocated by this function *MUST* be free'd with
- * Curl_freeaddrinfo().  For each successful call to this function
- * there must be an associated call later to Curl_freeaddrinfo().
+ * curl_freeaddrinfo().  For each successful call to this function
+ * there must be an associated call later to curl_freeaddrinfo().
  *
  * There should be no single call to system's getaddrinfo() in the
  * whole library, any such call should be 'routed' through this one.
@@ -204,7 +204,7 @@ Curl_getaddrinfo_ex(const char *nodename,
 
   /* if we failed, also destroy the Curl_addrinfo list */
   if(error) {
-    Curl_freeaddrinfo(cafirst);
+    curl_freeaddrinfo(cafirst);
     cafirst = NULL;
   }
   else if(!cafirst) {
@@ -229,7 +229,7 @@ Curl_getaddrinfo_ex(const char *nodename,
 
 
 /*
- * Curl_he2ai()
+ * curl_he2ai()
  *
  * This function returns a pointer to the first element of a newly allocated
  * Curl_addrinfo struct linked list filled with the data of a given hostent.
@@ -237,8 +237,8 @@ Curl_getaddrinfo_ex(const char *nodename,
  * stack, but usable also for IPv4, all hosts and environments.
  *
  * The memory allocated by this function *MUST* be free'd later on calling
- * Curl_freeaddrinfo().  For each successful call to this function there
- * must be an associated call later to Curl_freeaddrinfo().
+ * curl_freeaddrinfo().  For each successful call to this function there
+ * must be an associated call later to curl_freeaddrinfo().
  *
  *   Curl_addrinfo defined in "lib/curl_addrinfo.h"
  *
@@ -270,7 +270,7 @@ Curl_getaddrinfo_ex(const char *nodename,
  */
 
 Curl_addrinfo *
-Curl_he2ai(const struct hostent *he, int port)
+curl_he2ai(const struct hostent *he, int port)
 {
   Curl_addrinfo *ai;
   Curl_addrinfo *prevai = NULL;
@@ -360,13 +360,27 @@ Curl_he2ai(const struct hostent *he, int port)
   }
 
   if(result) {
-    Curl_freeaddrinfo(firstai);
+    curl_freeaddrinfo(firstai);
     firstai = NULL;
   }
 
   return firstai;
 }
 
+struct Curl_addrinfo *curl_addrinfo_append(struct Curl_addrinfo *head,
+                                           struct Curl_addrinfo *tail)
+{
+  struct Curl_addrinfo *tmp;
+  if(!tail)
+    return head;
+  if(!head)
+    return tail;
+  tmp = head;
+  while(tmp->ai_next)
+    tmp = tmp->ai_next;
+  tmp->ai_next = tail;
+  return head;
+}
 
 struct namebuff {
   struct hostent hostentry;
@@ -381,7 +395,7 @@ struct namebuff {
 
 
 /*
- * Curl_ip2addr()
+ * curl_ip2addr()
  *
  * This function takes an internet address, in binary form, as input parameter
  * along with its address family and the string version of the address, and it
@@ -390,7 +404,7 @@ struct namebuff {
  */
 
 Curl_addrinfo *
-Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
+curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 {
   Curl_addrinfo *ai;
 
@@ -453,7 +467,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 #pragma message enable PTRMISMATCH
 #endif
 
-  ai = Curl_he2ai(h, port);
+  ai = curl_he2ai(h, port);
 
   free(hoststr);
   free(buf);
@@ -465,18 +479,18 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
  * Given an IPv4 or IPv6 dotted string address, this converts it to a proper
  * allocated Curl_addrinfo struct and returns it.
  */
-Curl_addrinfo *Curl_str2addr(char *address, int port)
+Curl_addrinfo *curl_str2addr(const char *address, int port)
 {
   struct in_addr in;
   if(Curl_inet_pton(AF_INET, address, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, address, port);
+    return curl_ip2addr(AF_INET, &in, address, port);
 #ifdef ENABLE_IPV6
   {
     struct in6_addr in6;
     if(Curl_inet_pton(AF_INET6, address, &in6) > 0)
       /* This is a dotted IPv6 address ::1-style */
-      return Curl_ip2addr(AF_INET6, &in6, address, port);
+      return curl_ip2addr(AF_INET6, &in6, address, port);
   }
 #endif
   return NULL; /* bad input format */

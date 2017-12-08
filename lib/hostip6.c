@@ -155,7 +155,7 @@ static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
  * Returns name information about the given hostname and port number. If
  * successful, the 'addrinfo' is returned and the forth argument will point to
  * memory we need to free after use. That memory *MUST* be freed with
- * Curl_freeaddrinfo(), nothing else.
+ * curl_freeaddrinfo(), nothing else.
  */
 Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 const char *hostname,

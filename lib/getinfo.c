@@ -130,7 +130,6 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_SCHEME:
     *param_charp = data->info.conn_scheme;
     break;
-
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -238,6 +237,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_PROTOCOL:
     *param_longp = data->info.conn_protocol;
+    break;
+  case CURLINFO_IP_VERSION:
+    *param_longp = data->set.ipver;
     break;
 
   default:

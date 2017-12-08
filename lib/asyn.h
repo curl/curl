@@ -28,7 +28,6 @@
 struct addrinfo;
 struct hostent;
 struct Curl_easy;
-struct connectdata;
 struct Curl_dns_entry;
 
 /*
@@ -44,6 +43,7 @@ struct Curl_dns_entry;
  * Called from curl_global_init() to initialize global resolver environment.
  * Returning anything else than CURLE_OK fails curl_global_init().
  */
+
 int Curl_resolver_global_init(void);
 
 /*
@@ -60,7 +60,7 @@ void Curl_resolver_global_cleanup(void);
  * Returning anything else than CURLE_OK fails curl_easy_init() with the
  * correspondent code.
  */
-CURLcode Curl_resolver_init(void **resolver);
+CURLcode Curl_resolver_init(void **userdata);
 
 /*
  * Curl_resolver_cleanup()
@@ -69,17 +69,17 @@ CURLcode Curl_resolver_init(void **resolver);
  * structure).  Should destroy the handler and free all resources connected to
  * it.
  */
-void Curl_resolver_cleanup(void *resolver);
+void Curl_resolver_cleanup(void *userdata);
 
 /*
- * Curl_resolver_duphandle()
+ * Curl_resolver_duplicate()
  * Called from curl_easy_duphandle() to duplicate resolver URL-state specific
  * environment ('resolver' member of the UrlState structure).  Should
  * duplicate the 'from' handle and pass the resulting handle to the 'to'
  * pointer.  Returning anything else than CURLE_OK causes failed
  * curl_easy_duphandle() call.
  */
-int Curl_resolver_duphandle(void **to, void *from);
+CURLcode Curl_resolver_duplicate(CURL *data, CURLRES **to);
 
 /*
  * Curl_resolver_cancel().
@@ -88,7 +88,7 @@ int Curl_resolver_duphandle(void **to, void *from);
  * resolver request. Should also free any temporary resources allocated to
  * perform a request.
  */
-void Curl_resolver_cancel(struct connectdata *conn);
+void Curl_resolver_cancel(CURL *data);
 
 /* Curl_resolver_getsock()
  *
@@ -98,8 +98,9 @@ void Curl_resolver_cancel(struct connectdata *conn);
  * return bitmask indicating what file descriptors (referring to array indexes
  * in the 'sock' array) to wait for, read/write.
  */
-int Curl_resolver_getsock(struct connectdata *conn, curl_socket_t *sock,
-                          int numsocks);
+int Curl_resolver_getsock(CURL *data,
+                          curl_socket_t *sock,
+                          int numsocks, long *milli);
 
 /*
  * Curl_resolver_is_resolved()
@@ -110,8 +111,7 @@ int Curl_resolver_getsock(struct connectdata *conn, curl_socket_t *sock,
  *
  * Returns normal CURLcode errors.
  */
-CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
-                                   struct Curl_dns_entry **dns);
+CURLcode Curl_resolver_is_resolved(CURL *data, int *waitp);
 
 /*
  * Curl_resolver_wait_resolv()
@@ -125,8 +125,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
 
  */
-CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
-                                   struct Curl_dns_entry **dnsentry);
+CURLcode Curl_resolver_wait_resolv(CURL *data);
 
 /*
  * Curl_resolver_getaddrinfo() - when using this resolver
@@ -134,27 +133,41 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
  * Returns name information about the given hostname and port number. If
  * successful, the 'hostent' is returned and the forth argument will point to
  * memory we need to free after use. That memory *MUST* be freed with
- * Curl_freeaddrinfo(), nothing else.
+ * curl_freeaddrinfo(), nothing else.
  *
  * Each resolver backend must of course make sure to return data in the
  * correct format to comply with this.
  */
-Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
-                                         const char *hostname,
-                                         int port,
-                                         int *waitp);
+struct Curl_addrinfo *Curl_resolver_getaddrinfo(CURL *data,
+                                                const char *hostname,
+                                                int port,
+                                                int *waitp);
+
+/*
+ * Curl_resolver_setopt() - when using this resolver
+ *
+ * Returns name information about the given hostname and port number. If
+ * successful, the 'hostent' is returned and the forth argument will point to
+ * memory we need to free after use. That memory *MUST* be freed with
+ * curl_freeaddrinfo(), nothing else.
+ *
+ * Each resolver backend must of course make sure to return data in the
+ * correct format to comply with this.
+ */
+CURLcode Curl_resolver_setopt(CURL *data, CURLoption opt, char *arg);
 
 #ifndef CURLRES_ASYNCH
 /* convert these functions if an asynch resolver isn't used */
 #define Curl_resolver_cancel(x) Curl_nop_stmt
 #define Curl_resolver_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_wait_resolv(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_getsock(x,y,z) 0
-#define Curl_resolver_duphandle(x,y) CURLE_OK
+#define Curl_resolver_wait_resolv(x) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_resolver_getsock(w,x,y,z) 0
+#define Curl_resolver_duplicate(x,y) CURLE_OK
 #define Curl_resolver_init(x) CURLE_OK
 #define Curl_resolver_global_init() CURLE_OK
 #define Curl_resolver_global_cleanup() Curl_nop_stmt
 #define Curl_resolver_cleanup(x) Curl_nop_stmt
+#define Curl_resolver_setopt(x) Curl_nop_stmt
 #endif
 
 #ifdef CURLRES_ASYNCH
