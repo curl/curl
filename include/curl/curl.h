@@ -938,7 +938,7 @@ typedef enum {
   CINIT(READDATA, OBJECTPOINT, 9),
 
   /* Buffer to receive error messages in, must be at least CURL_ERROR_SIZE
-   * bytes big. If this is not used, error messages go to stderr instead: */
+   * bytes big. */
   CINIT(ERRORBUFFER, OBJECTPOINT, 10),
 
   /* Function that will be called to store the output (instead of fwrite). The
