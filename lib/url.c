@@ -377,7 +377,11 @@ CURLcode Curl_close(struct Curl_easy *data)
   Curl_safefree(data->info.wouldredirect);
 
   /* this destroys the channel and we cannot use it anymore after this */
-  Curl_resolver_cleanup(data->state.resolver);
+#ifdef CURLRES_ASYNCH
+  if(data->resolver && data->resolver->owned)
+    curl_resolver_destroy(data->resolver);
+  data->resolver = 0;
+#endif
 
   Curl_http2_cleanup_dependencies(data);
   Curl_convert_close(data);
@@ -555,13 +559,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  result = Curl_resolver_init(&data->state.resolver);
-  if(result) {
-    DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    free(data);
-    return result;
-  }
-
   /* We do some initial setup here, all those fields that can't be just 0 */
 
   data->state.buffer = malloc(READBUFFER_SIZE + 1);
@@ -595,7 +592,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
 
   if(result) {
-    Curl_resolver_cleanup(data->state.resolver);
     free(data->state.buffer);
     free(data->state.headerbuff);
     Curl_freeset(data);
@@ -652,7 +648,10 @@ static void conn_free(struct connectdata *conn)
     return;
 
   /* possible left-overs from the async name resolvers */
-  Curl_resolver_cancel(conn);
+#ifdef CURLRES_ASYNCH
+  if(conn && conn->data && conn->data->resolver)
+    conn->data->resolver->callbacks.cancel(conn->data);
+#endif
 
   /* close the SSL stuff before we close any sockets since they will/may
      write to the sockets */

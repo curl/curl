@@ -2427,18 +2427,23 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
     break;
 #endif
   case CURLOPT_DNS_SERVERS:
-    result = Curl_set_dns_servers(data, va_arg(param, char *));
-    break;
   case CURLOPT_DNS_INTERFACE:
-    result = Curl_set_dns_interface(data, va_arg(param, char *));
-    break;
   case CURLOPT_DNS_LOCAL_IP4:
-    result = Curl_set_dns_local_ip4(data, va_arg(param, char *));
-    break;
   case CURLOPT_DNS_LOCAL_IP6:
-    result = Curl_set_dns_local_ip6(data, va_arg(param, char *));
+#ifdef CURLRES_ASYNCH
+    if(!data->resolver) {
+      data->resolver = curl_default_resolver();
+      if(!data->resolver) {
+        return CURLE_OUT_OF_MEMORY;
+      }
+      data->resolver->owned = true;
+    }
+    result = data->resolver->callbacks.setopt(data, option,
+                                              va_arg(param, char *));
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
     break;
-
   case CURLOPT_TCP_KEEPALIVE:
     data->set.tcp_keepalive = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
@@ -2521,6 +2526,24 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_SSH_COMPRESSION:
     data->set.ssh_compression = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
+  case CURLOPT_RESOLVER:
+#ifdef CURLRES_ASYNCH
+    if(data->resolver && data->resolver->owned) {
+      curl_resolver_destroy(data->resolver);
+    }
+    data->resolver = (CURLRES *)va_arg(param, void *);
+#else
+    result = CURLE_NOT_BUILT_IN;
+#endif
+
+
+    break;
+  case CURLOPT_HAPPY_EYEBALLS_TIMEOUT:
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.happy_eyeballs_timeout = arg;
     break;
   default:
     /* unknown tag and its companion, just ignore: */

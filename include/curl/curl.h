@@ -98,9 +98,11 @@ extern "C" {
 #if defined(BUILDING_LIBCURL) || defined(CURL_STRICTER)
 typedef struct Curl_easy CURL;
 typedef struct Curl_share CURLSH;
+typedef struct Curl_resolver CURLRES;
 #else
 typedef void CURL;
 typedef void CURLSH;
+typedef void CURLRES;
 #endif
 
 /*
@@ -132,6 +134,9 @@ typedef int curl_socket_t;
 #endif
 #define curl_socket_typedef
 #endif /* curl_socket_typedef */
+
+#define CURL_GETSOCK_READABLE (0x00ff)
+#define CURL_GETSOCK_WRITABLE (0xff00)
 
 /* enum for the different supported SSL backends */
 typedef enum {
@@ -1819,6 +1824,11 @@ typedef enum {
   /* Post MIME data. */
   CINIT(MIMEPOST, OBJECTPOINT, 269),
 
+  /* pointer to Curl_resolver * or 0 to us default resolver. */
+  CINIT(RESOLVER, OBJECTPOINT, 270),
+
+  CINIT(HAPPY_EYEBALLS_TIMEOUT, LONG, 271),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2496,9 +2506,10 @@ typedef enum {
   CURLINFO_PROXY_SSL_VERIFYRESULT = CURLINFO_LONG + 47,
   CURLINFO_PROTOCOL         = CURLINFO_LONG   + 48,
   CURLINFO_SCHEME           = CURLINFO_STRING + 49,
+  CURLINFO_IP_VERSION       = CURLINFO_LONG   + 50,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 49
+  CURLINFO_LASTONE          = 50
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -2670,6 +2681,7 @@ typedef struct {
 #define CURL_VERSION_MULTI_SSL    (1<<22) /* Multiple SSL backends available */
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 
+
  /*
  * NAME curl_version_info()
  *
@@ -2701,6 +2713,8 @@ CURL_EXTERN const char *curl_easy_strerror(CURLcode);
  * for printing meaningful error messages.
  */
 CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
+struct Ball;
+CURL_EXTERN struct Ball * curl_fisk(void);
 
 /*
  * NAME curl_easy_pause()
@@ -2721,6 +2735,63 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 
 #define CURLPAUSE_ALL       (CURLPAUSE_RECV|CURLPAUSE_SEND)
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
+
+struct Curl_addrinfo;
+struct Curl_resolver_callbacks {
+  CURLcode (*init)(void **userdata);
+  void (*cleanup)(void *userdata);
+  CURLcode (*duplicate)(CURL *data, CURLRES **to);
+  void (*cancel)(CURL *conn);
+  int (*getsock)(CURL *data, curl_socket_t *sock,
+                 int numsocks, long *timeout);
+  CURLcode (*is_resolved)(CURL *data, int *waitp);
+  CURLcode (*wait_resolv)(CURL *data);
+  struct Curl_addrinfo *(*get_addr_info)(CURL *data,
+                                         const char *hostname,
+                                         int port,
+                                         int *waitp);
+  CURLcode (*setopt)(CURL *data, CURLoption opt, char *arg);
+};
+
+typedef struct Curl_resolver_callbacks Curl_resolver_callbacks;
+
+CURL_EXTERN const Curl_resolver_callbacks *curl_default_resolver_callbacks(
+        void);
+CURL_EXTERN CURLRES *curl_default_resolver(void);
+CURL_EXTERN CURLRES *curl_resolver_create(
+        const struct Curl_resolver_callbacks *, void *);
+CURL_EXTERN void curl_resolver_destroy(CURLRES *resolver);
+CURL_EXTERN void *curl_resolver_userdata(CURL *easy);
+
+CURL_EXTERN void curl_freeaddrinfo(struct Curl_addrinfo *cahead);
+struct hostent;
+
+CURL_EXTERN struct Curl_addrinfo * curl_addrinfo_append(
+        struct Curl_addrinfo *head,
+        struct Curl_addrinfo *tail);
+
+CURL_EXTERN struct Curl_addrinfo * curl_he2ai(const struct hostent *he,
+                                              int port);
+
+CURL_EXTERN struct Curl_addrinfo * curl_ip2addr(int af,
+                                                const void *inaddr,
+                                                const char *hostname,
+                                                int port);
+
+CURL_EXTERN struct Curl_addrinfo * curl_str2addr(const char *dotted,
+                                                 int port);
+
+
+/*
+ * curl_addrinfo_callback() is used when we build with any asynch specialty.
+ * Handles end of async request processing. Inserts ai into hostcache when
+ * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
+ * request completed whether successful or failed.
+ */
+CURL_EXTERN CURLcode curl_addrinfo_callback(CURL *data,
+                                            int status,
+                                            struct Curl_addrinfo *ai);
+
 
 #ifdef  __cplusplus
 }
