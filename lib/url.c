@@ -4635,22 +4635,8 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
     Curl_verboseconnect(conn);
   }
 
-  conn->now = Curl_now(); /* time this *after* the connect is done, we
-                               set this here perhaps a second time */
-
-#ifdef __EMX__
-  /*
-   * This check is quite a hack. We're calling _fsetmode to fix the problem
-   * with fwrite converting newline characters (you get mangled text files,
-   * and corrupted binary files when you download to stdout and redirect it to
-   * a file).
-   */
-
-  if((data->set.out)->_handle == NULL) {
-    _fsetmode(stdout, "b");
-  }
-#endif
-
+  conn->now = Curl_now(); /* time this *after* the connect is done, we set
+                             this here perhaps a second time */
   return result;
 }
 
