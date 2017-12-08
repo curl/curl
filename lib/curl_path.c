@@ -110,21 +110,25 @@ CURLcode Curl_getworkingpath(struct connectdata *conn,
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-CURLcode Curl_get_pathname(const char **cpp, char **path)
+CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
 {
   const char *cp = *cpp, *end;
   char quot;
   unsigned int i, j;
+  size_t fullPathLength, pathLength;
+  bool relativePath = false;
   static const char WHITESPACE[] = " \t\r\n";
 
-  cp += strspn(cp, WHITESPACE);
   if(!*cp) {
-    *cpp = cp;
+    *cpp = NULL;
     *path = NULL;
     return CURLE_QUOTE_ERROR;
   }
-
-  *path = malloc(strlen(cp) + 1);
+  /* Ignore leading whitespace */
+  cp += strspn(cp, WHITESPACE);
+  /* Allocate enough space for home directory and filename + separator */
+  fullPathLength = strlen(cp) + strlen(homedir) + 2;
+  *path = malloc(fullPathLength);
   if(*path == NULL)
     return CURLE_OUT_OF_MEMORY;
 
@@ -162,14 +166,26 @@ CURLcode Curl_get_pathname(const char **cpp, char **path)
     *cpp = cp + i + strspn(cp + i, WHITESPACE);
   }
   else {
-    /* Read to end of filename */
+    /* Read to end of filename - either to white space or terminator */
     end = strpbrk(cp, WHITESPACE);
     if(end == NULL)
       end = strchr(cp, '\0');
+    /* return pointer to second parameter if it exists */
     *cpp = end + strspn(end, WHITESPACE);
-
-    memcpy(*path, cp, end - cp);
-    (*path)[end - cp] = '\0';
+    pathLength = 0;
+    relativePath = (cp[0] == '/' && cp[1] == '~' && cp[2] == '/');
+    /* Handling for relative path - prepend home directory */
+    if(relativePath) {
+      strcpy(*path, homedir);
+      pathLength = strlen(homedir);
+      (*path)[pathLength++] = '/';
+      (*path)[pathLength] = '\0';
+      cp += 3;
+    }
+    /* Copy path name up until first "white space" */
+    memcpy(&(*path)[pathLength], cp, (int)(end - cp));
+    pathLength += (int)(end - cp);
+    (*path)[pathLength] = '\0';
   }
   return CURLE_OK;
 
