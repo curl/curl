@@ -864,7 +864,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
-        my_setopt(curl, CURLOPT_INTERLEAVEDATA, &outs);
+
         if(metalink || !config->use_metalink)
           /* what call to write */
           my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
