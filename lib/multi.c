@@ -552,6 +552,7 @@ static CURLcode multi_done(struct connectdata **connp,
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
     conn->dns_entry = NULL;
   }
+  Curl_hostcache_prune(data);
 
   /* if the transfer was completed in a paused state there can be buffered
      data left to free */
