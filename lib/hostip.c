@@ -877,9 +877,12 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
           dns->inuse--;
         }
       }
-      else
+      else {
         /* this is a duplicate, free it again */
+        infof(data, "RESOLVE %s:%d is already cached, %s not stored!\n",
+              hostname, port, address);
         Curl_freeaddrinfo(addr);
+      }
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
