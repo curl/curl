@@ -2534,7 +2534,7 @@ static void sftp_quote(struct connectdata *conn)
    * also, every command takes at least one argument so we get that
    * first argument right now
    */
-  result = Curl_get_pathname(&cp, &sshc->quote_path1);
+  result = Curl_get_pathname(&cp, &sshc->quote_path1, sshc->homedir);
   if(result) {
     if(result == CURLE_OUT_OF_MEMORY)
       failf(data, "Out of memory");
@@ -2559,7 +2559,7 @@ static void sftp_quote(struct connectdata *conn)
 
     /* sshc->quote_path1 contains the mode to set */
     /* get the destination */
-    result = Curl_get_pathname(&cp, &sshc->quote_path2);
+    result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
     if(result) {
       if(result == CURLE_OUT_OF_MEMORY)
         failf(data, "Out of memory");
@@ -2581,7 +2581,7 @@ static void sftp_quote(struct connectdata *conn)
     /* symbolic linking */
     /* sshc->quote_path1 is the source */
     /* get the destination */
-    result = Curl_get_pathname(&cp, &sshc->quote_path2);
+    result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
     if(result) {
       if(result == CURLE_OUT_OF_MEMORY)
         failf(data, "Out of memory");
@@ -2605,7 +2605,7 @@ static void sftp_quote(struct connectdata *conn)
     /* rename file */
     /* first param is the source path */
     /* second param is the dest. path */
-    result = Curl_get_pathname(&cp, &sshc->quote_path2);
+    result = Curl_get_pathname(&cp, &sshc->quote_path2, sshc->homedir);
     if(result) {
       if(result == CURLE_OUT_OF_MEMORY)
         failf(data, "Out of memory");
