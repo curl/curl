@@ -2842,7 +2842,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
     LIB_SSH="-lssh"
     LD_SSH=-L${PREFIX_SSH}/lib$libsuff
     CPP_SSH=-I${PREFIX_SSH}/include
-    DIR_SSH=${PREFIX_SSH;}/lib$libsuff
+    DIR_SSH=${PREFIX_SSH}/lib$libsuff
   fi
 
   LDFLAGS="$LDFLAGS $LD_SSH"
