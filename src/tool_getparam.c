@@ -254,7 +254,7 @@ static const struct LongShort aliases[]= {
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
-  {"EC", "ssl-no-implied-proxytunnel", ARG_BOOL},
+  {"EC", "ssl-trust-proxy",          ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"F",  "form",                     ARG_STRING},
@@ -1588,9 +1588,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->socks5_auth &= ~CURLAUTH_GSSAPI;
         break;
 
-      case 'C': /* --ssl-no-implied-proxytunnel */
+      case 'C': /* --ssl-trust-proxy */
         if(curlinfo->features & CURL_VERSION_SSL)
-          config->ssl_no_implied_proxytunnel = TRUE;
+          config->ssl_trust_proxy = TRUE;
         break;
 
       default: /* unknown flag */
