@@ -1283,7 +1283,7 @@ static int multissl_init(const struct Curl_ssl *backend)
     for(i = 0; available_backends[i]; i++) {
       if(strcasecompare(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
-		curl_free(env_tmp);
+        curl_free(env_tmp);
         return 0;
       }
     }
