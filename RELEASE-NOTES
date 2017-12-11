@@ -27,6 +27,26 @@ This release includes the following bugfixes:
  o conncache: only allow multiplexing within same multi handle [9]
  o configure: check for netinet/in6.h [11]
  o URL: tolerate backslash after drive letter for FILE: [12]
+ o openldap: add commented out debug possibilities [13]
+ o include: get netinet/in.h before linux/tcp.h [14]
+ o CONNECT: keep close connection flag in http_connect_state struct [15]
+ o BINDINGS: another PostgreSQL client
+ o curl: limit -# update frequency for unknown total size [16]
+ o configure: add AX_CODE_COVERAGE only if using gcc [17]
+ o curl.h: remove incorrect comment about ERRORBUFFER
+ o openssl: improve data-pending check for https proxy [18]
+ o curl: remove __EMX__ #ifdefs [19]
+ o CURLOPT_PRIVATE.3: fix grammar [20]
+ o sftp: allow quoted commands to use relative paths [21]
+ o CURLOPT_DNS_CACHE_TIMEOUT.3: see also CURLOPT_RESOLVE
+ o RESOLVE: output verbose text when trying to set a duplicate name
+ o openssl: Disable file buffering for Win32 SSLKEYLOGFILE [22]
+ o multi_done: prune DNS cache [23]
+ o tests: update .gitignore for libtests
+ o tests: mark data files as non-executable in git
+ o CURLOPT_DNS_LOCAL_IP4.3: fixed the "SEE ALSO" to not self-reference
+ o curl.1: documented two missing valid exit codes
+ o curl.1: mention http:// and https:// as valid proxy prefixes
 
 This release includes the following known bugs:
 
@@ -36,10 +56,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   ahodesuka on github, Daniel Stenberg, David Benjamin, Dima Tisnek,
-  guitared on github, Jan Ehrhardt, Johannes Schindelin, Matthew Kerwin,
-  Nikos Mavrogiannopoulos, Oleg Pudeyev, Patrick Dawson, Randall S. Becker,
-  Ray Satiro, W. Mark Kubacki,
-  (14 contributors)
+  Elliot Saba, Frank Gevaerts, guitared on github, Jan Ehrhardt,
+  Johannes Schindelin, John DeHelian, Matthew Kerwin, Michael Felt,
+  Michael Kaufmann, Nikos Mavrogiannopoulos, Oleg Pudeyev, Patrick Dawson,
+  Per Malmberg, Rainer Canavan, Randall S. Becker, Ray Satiro, Richard Alcock,
+  Stepan Broz, W. Mark Kubacki, Zachary Seguin,
+  (24 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -57,4 +79,14 @@ References to bug reports and discussions on issues:
  [10] = https://curl.haxx.se/bug/?i=2128
  [11] = https://curl.haxx.se/bug/?i=2146
  [12] = https://curl.haxx.se/bug/?i=2154
-
+ [13] = https://curl.haxx.se/bug/?i=2159
+ [14] = https://curl.haxx.se/bug/?i=2160
+ [15] = https://curl.haxx.se/bug/?i=2088
+ [16] = https://curl.haxx.se/bug/?i=2158
+ [17] = https://curl.haxx.se/bug/?i=2076
+ [18] = https://curl.haxx.se/bug/?i=1916
+ [19] = https://curl.haxx.se/bug/?i=2166
+ [20] = https://curl.haxx.se/bug/?i=2168
+ [21] = https://curl.haxx.se/bug/?i=1900
+ [22] = https://github.com/curl/curl/pull/1346#issuecomment-350530901
+ [23] = https://curl.haxx.se/bug/?i=2169
