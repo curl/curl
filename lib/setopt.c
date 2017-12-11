@@ -277,7 +277,7 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
      * before it is considered failure. For pingpong protocols.
      */
     arg = va_arg(param, long);
-    if((arg >= 0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg <= (INT_MAX/1000)))
       data->set.server_response_timeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1202,7 +1202,7 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
      * operation.
      */
     arg = va_arg(param, long);
-    if((arg >= 0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg <= (INT_MAX/1000)))
       data->set.timeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1220,7 +1220,7 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
      * The maximum time you allow curl to use to connect.
      */
     arg = va_arg(param, long);
-    if((arg >= 0) && (arg < (INT_MAX/1000)))
+    if((arg >= 0) && (arg <= (INT_MAX/1000)))
       data->set.connecttimeout = arg * 1000;
     else
       return CURLE_BAD_FUNCTION_ARGUMENT;
