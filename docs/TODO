@@ -37,6 +37,7 @@
  1.21 API for URL parsing/splitting
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
+ 1.25 Expose tried IP addresses that failed
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -363,6 +364,13 @@
  libcurl supports the CURLOPT_TCP_FASTOPEN option since 7.49.0 for Linux and
  Mac OS. Windows supports TCP Fast Open starting with Windows 10, version 1607
  and we should add support for it.
+
+1.25 Expose tried IP addresses that failed
+
+ When libcurl fails to connect to a host, it should be able to offer the
+ application the list of IP addresses that were used in the attempt.
+
+ https://github.com/curl/curl/issues/2126
 
 2. libcurl - multi interface
 
