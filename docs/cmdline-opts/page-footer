@@ -231,6 +231,10 @@ FTP chunk callback reported error
 No connection available, the session will be queued
 .IP 90
 SSL public key does not matched pinned public key
+.IP 91
+Invalid SSL certificate status.
+.IP 92
+Stream error in HTTP/2 framing layer.
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.
