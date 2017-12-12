@@ -307,7 +307,7 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   unlock:
   CONN_UNLOCK(data);
 
-  return CURLE_OK;
+  return result;
 }
 
 void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
