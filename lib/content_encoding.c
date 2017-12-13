@@ -73,14 +73,17 @@
 typedef enum {
   ZLIB_UNINIT,          /* uninitialized */
   ZLIB_INIT,            /* initialized */
+  ZLIB_INFLATING,       /* Inflating started. */
   ZLIB_GZIP_HEADER,     /* reading gzip header */
+  ZLIB_GZIP_TRAILER,    /* reading gzip trailer */
   ZLIB_GZIP_INFLATING,  /* inflating gzip stream */
   ZLIB_INIT_GZIP        /* initialized in transparent gzip mode */
 } zlibInitState;
 
 /* Writer parameters. */
 typedef struct {
-  zlibInitState zlib_init;    /* zlib init state */
+  zlibInitState zlib_init;   /* zlib init state */
+  uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
 }  zlib_params;
 
@@ -130,80 +133,115 @@ exit_zlib(struct connectdata *conn,
   return result;
 }
 
-static CURLcode
-inflate_stream(struct connectdata *conn, contenc_writer *writer)
+static CURLcode process_trailer(struct connectdata *conn, zlib_params *zp)
+{
+  z_stream *z = &zp->z;
+  CURLcode result = CURLE_OK;
+  uInt len = z->avail_in < zp->trailerlen? z->avail_in: zp->trailerlen;
+
+  /* Consume expected trailer bytes. Terminate stream if exhausted.
+     Issue an error if unexpected bytes follow. */
+
+  zp->trailerlen -= len;
+  z->avail_in -= len;
+  z->next_in += len;
+  if(z->avail_in)
+    result = CURLE_WRITE_ERROR;
+  if(result || !zp->trailerlen)
+    result = exit_zlib(conn, z, &zp->zlib_init, result);
+  else {
+    /* Only occurs for gzip with zlib < 1.2.0.4. */
+    zp->zlib_init = ZLIB_GZIP_TRAILER;
+  }
+  return result;
+}
+
+static CURLcode inflate_stream(struct connectdata *conn,
+                               contenc_writer *writer, zlibInitState started)
 {
   zlib_params *zp = (zlib_params *) &writer->params;
-  int allow_restart = 1;
   z_stream *z = &zp->z;         /* zlib state structure */
   uInt nread = z->avail_in;
   Bytef *orig_in = z->next_in;
   int status;                   /* zlib status */
+  bool done = FALSE;
   CURLcode result = CURLE_OK;   /* Curl_client_write status */
   char *decomp;                 /* Put the decompressed data here. */
+
+  /* Check state. */
+  if(zp->zlib_init != ZLIB_INIT &&
+     zp->zlib_init != ZLIB_INFLATING &&
+     zp->zlib_init != ZLIB_INIT_GZIP &&
+     zp->zlib_init != ZLIB_GZIP_INFLATING)
+    return exit_zlib(conn, z, &zp->zlib_init, CURLE_WRITE_ERROR);
 
   /* Dynamically allocate a buffer for decompression because it's uncommonly
      large to hold on the stack */
   decomp = malloc(DSIZ);
-  if(decomp == NULL) {
+  if(decomp == NULL)
     return exit_zlib(conn, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
-  }
 
   /* because the buffer size is fixed, iteratively decompress and transfer to
-     the client via client_write. */
-  for(;;) {
-    if(z->avail_in == 0) {
-      free(decomp);
-      return result;
-    }
+     the client via downstream_write function. */
+  while(!done) {
+    done = TRUE;
 
     /* (re)set buffer for decompressed output for every iteration */
     z->next_out = (Bytef *) decomp;
     z->avail_out = DSIZ;
 
-    status = inflate(z, Z_SYNC_FLUSH);
-    if(status == Z_OK || status == Z_STREAM_END) {
-      allow_restart = 0;
-      result = Curl_unencode_write(conn, writer->downstream, decomp,
-                                   DSIZ - z->avail_out);
-      /* if !CURLE_OK, clean up, return */
-      if(result) {
-        free(decomp);
-        return exit_zlib(conn, z, &zp->zlib_init, result);
+    status = inflate(z, Z_BLOCK);
+
+    /* Flush output data if some. */
+    if(z->avail_out != DSIZ) {
+      if(status == Z_OK || status == Z_STREAM_END) {
+        zp->zlib_init = started;      /* Data started. */
+        result = Curl_unencode_write(conn, writer->downstream, decomp,
+                                     DSIZ - z->avail_out);
+        if(result) {
+          exit_zlib(conn, z, &zp->zlib_init, result);
+          break;
+        }
       }
-
-      /* Done? clean up, return */
-      if(status == Z_STREAM_END) {
-        free(decomp);
-        return exit_zlib(conn, z, &zp->zlib_init, result);
-      }
-
-      /* Done with these bytes, exit */
-
-      /* status is always Z_OK at this point! */
-      continue;
     }
-    else if(allow_restart && status == Z_DATA_ERROR) {
+
+    /* Dispatch by inflate() status. */
+    switch(status) {
+    case Z_OK:
+      /* Always loop: there may be unflushed latched data in zlib state. */
+      done = FALSE;
+      break;
+    case Z_BUF_ERROR:
+      /* No more data to flush: just exit loop. */
+      break;
+    case Z_STREAM_END:
+      result = process_trailer(conn, zp);
+      break;
+    case Z_DATA_ERROR:
       /* some servers seem to not generate zlib headers, so this is an attempt
          to fix and continue anyway */
-
-      (void) inflateEnd(z);     /* don't care about the return code */
-      if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
-        free(decomp);
-        zp->zlib_init = ZLIB_UNINIT;  /* inflateEnd() already called. */
-        return exit_zlib(conn, z, &zp->zlib_init, process_zlib_error(conn, z));
+      if(zp->zlib_init == ZLIB_INIT) {
+        /* Do not use inflateReset2(): only available since zlib 1.2.3.4. */
+        (void) inflateEnd(z);     /* don't care about the return code */
+        if(inflateInit2(z, -MAX_WBITS) == Z_OK) {
+          z->next_in = orig_in;
+          z->avail_in = nread;
+          zp->zlib_init = ZLIB_INFLATING;
+          done = FALSE;
+          break;
+        }
+        zp->zlib_init = ZLIB_UNINIT;    /* inflateEnd() already called. */
       }
-      z->next_in = orig_in;
-      z->avail_in = nread;
-      allow_restart = 0;
-      continue;
-    }
-    else {                      /* Error; exit loop, handle below */
-      free(decomp);
-      return exit_zlib(conn, z, &zp->zlib_init, process_zlib_error(conn, z));
+      /* FALLTHROUGH */
+    default:
+      result = exit_zlib(conn, z, &zp->zlib_init, process_zlib_error(conn, z));
+      break;
     }
   }
-  /* UNREACHED */
+  free(decomp);
+  if(nread && zp->zlib_init == ZLIB_INIT)
+    zp->zlib_init = started;      /* Cannot restart anymore. */
+  return result;
 }
 
 
@@ -239,7 +277,7 @@ static CURLcode deflate_unencode_write(struct connectdata *conn,
   z->avail_in = (uInt) nbytes;
 
   /* Now uncompress the data */
-  return inflate_stream(conn, writer);
+  return inflate_stream(conn, writer, ZLIB_INFLATING);
 }
 
 static void deflate_close_writer(struct connectdata *conn,
@@ -283,10 +321,11 @@ static CURLcode gzip_init_writer(struct connectdata *conn,
     zp->zlib_init = ZLIB_INIT_GZIP; /* Transparent gzip decompress state */
   }
   else {
-    /* we must parse the gzip header ourselves */
+    /* we must parse the gzip header and trailer ourselves */
     if(inflateInit2(z, -MAX_WBITS) != Z_OK) {
       return process_zlib_error(conn, z);
     }
+    zp->trailerlen = 8;          /* Trailer length. */
     zp->zlib_init = ZLIB_INIT;   /* Initial call state */
   }
 
@@ -389,7 +428,7 @@ static CURLcode gzip_unencode_write(struct connectdata *conn,
     z->next_in = (Bytef *) buf;
     z->avail_in = (uInt) nbytes;
     /* Now uncompress the data */
-    return inflate_stream(conn, writer);
+    return inflate_stream(conn, writer, ZLIB_INIT_GZIP);
   }
 
 #ifndef OLD_ZLIB_SUPPORT
@@ -482,6 +521,11 @@ static CURLcode gzip_unencode_write(struct connectdata *conn,
   }
   break;
 
+  case ZLIB_GZIP_TRAILER:
+    z->next_in = (Bytef *) buf;
+    z->avail_in = (uInt) nbytes;
+    return process_trailer(conn, zp);
+
   case ZLIB_GZIP_INFLATING:
   default:
     /* Inflating stream state */
@@ -496,7 +540,7 @@ static CURLcode gzip_unencode_write(struct connectdata *conn,
   }
 
   /* We've parsed the header, now uncompress the data */
-  return inflate_stream(conn, writer);
+  return inflate_stream(conn, writer, ZLIB_GZIP_INFLATING);
 #endif
 }
 
