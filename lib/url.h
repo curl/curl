@@ -33,7 +33,7 @@
 
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_open(struct Curl_easy **curl);
-CURLcode Curl_init_userdefined(struct UserDefined *set);
+CURLcode Curl_init_userdefined(struct Curl_easy *data);
 CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
                      va_list arg);
 CURLcode Curl_dupset(struct Curl_easy * dst, struct Curl_easy * src);

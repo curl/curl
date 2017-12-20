@@ -293,6 +293,8 @@ void Curl_freeset(struct Curl_easy *data)
     data->change.url_alloc = FALSE;
   }
   data->change.url = NULL;
+
+  Curl_mime_cleanpart(&data->set.mimepost);
 }
 
 /*
@@ -382,8 +384,6 @@ CURLcode Curl_close(struct Curl_easy *data)
   Curl_http2_cleanup_dependencies(data);
   Curl_convert_close(data);
 
-  Curl_mime_cleanpart(&data->set.mimepost);
-
   /* No longer a dirty share, if it exists */
   if(data->share) {
     Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
@@ -402,8 +402,9 @@ CURLcode Curl_close(struct Curl_easy *data)
  * Initialize the UserDefined fields within a Curl_easy.
  * This may be safely called on a new or existing Curl_easy.
  */
-CURLcode Curl_init_userdefined(struct UserDefined *set)
+CURLcode Curl_init_userdefined(struct Curl_easy *data)
 {
+  struct UserDefined *set = &data->set;
   CURLcode result = CURLE_OK;
 
   set->out = stdout; /* default output to stdout */
@@ -452,6 +453,8 @@ CURLcode Curl_init_userdefined(struct UserDefined *set)
 
   /* make libcurl quiet by default: */
   set->hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
+
+  Curl_mime_initpart(&set->mimepost, data);
 
   /*
    * libcurl 7.10 introduced SSL verification *by default*! This needs to be
@@ -569,15 +572,13 @@ CURLcode Curl_open(struct Curl_easy **curl)
     result = CURLE_OUT_OF_MEMORY;
   }
   else {
-    Curl_mime_initpart(&data->set.mimepost, data);
-
     data->state.headerbuff = malloc(HEADERSIZE);
     if(!data->state.headerbuff) {
       DEBUGF(fprintf(stderr, "Error: malloc of headerbuff failed\n"));
       result = CURLE_OUT_OF_MEMORY;
     }
     else {
-      result = Curl_init_userdefined(&data->set);
+      result = Curl_init_userdefined(data);
 
       data->state.headersize = HEADERSIZE;
       Curl_convert_init(data);

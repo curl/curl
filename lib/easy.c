@@ -998,7 +998,7 @@ void curl_easy_reset(struct Curl_easy *data)
   /* zero out UserDefined data: */
   Curl_freeset(data);
   memset(&data->set, 0, sizeof(struct UserDefined));
-  (void)Curl_init_userdefined(&data->set);
+  (void)Curl_init_userdefined(data);
 
   /* zero out Progress data: */
   memset(&data->progress, 0, sizeof(struct Progress));
