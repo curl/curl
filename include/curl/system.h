@@ -348,7 +348,8 @@
    defined(__ppc__) || defined(__powerpc__) || defined(__arm__) ||      \
    defined(__sparc__) || defined(__mips__) || defined(__sh__) ||        \
    defined(__XTENSA__) ||                                               \
-   (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4))
+   (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4) ||                \
+   (defined(SIZEOF_LONG) && SIZEOF_LONG == 4))
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
