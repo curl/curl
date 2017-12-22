@@ -2,10 +2,18 @@ Building via IDE Project Files
 ==============================
 
    This document describes how to compile, build and install curl and libcurl
-   from sources using an IDE based development tool such as Visual Studio.
+   from source by using pre-generated project files and an IDE based
+   development tool such as Visual Studio. Currently only Visual Studio project
+   files for Windows are generated.
 
-   Project files are currently available for Visual C++ v6.0 to v14.0. The
-   following directory structure has been used to cater for this:
+   The project files contain configurations that match the most common curl
+   build configurations. Typically that is just SSL enabled with the link
+   location set to the default. If you need a more custom configuration (change
+   of dependency locations, more features, etc) you can adapt these project
+   files to suit your needs or use one of the other Visual C++ build methods
+   such as cmake or the makefile in the {curl-source}\winbuild directory.
+
+   The following directory structure has been used to cater for this:
 
    somedirectory\
     |_curl
@@ -26,7 +34,7 @@ Building via IDE Project Files
 Dependencies
 ============
 
-   The projects files also support build configurations that require third
+   The project files also support build configurations that require third
    party dependencies such as OpenSSL, wolfSSL and SSH2. If you wish to support
    these, you will also need to download and compile those libraries as well.
 
@@ -43,7 +51,7 @@ Dependencies
     |          |_lib
     |          |_src
     |
-    |_openssl
+    |_{openssl,wolfssl}
     | |_ build
     |    |_<architecture>
     |      |_VC <version>
@@ -58,7 +66,20 @@ Dependencies
    As OpenSSL and wolfSSL don't support side-by-side compilation when using
    different versions of Visual Studio, build helper batch files have been
    provided to assist with this. Please run "build-openssl -help" and/or
-   "build-wolfssl -help" for usage details.
+   "build-wolfssl -help" for usage details. Example:
+
+   build-openssl vc12 x64 release
+   openssl\build\Win64\VC12\DLL Release    <--- OpenSSL libs/dlls
+
+   If build-openssl is used to build OpenSSL 1.1.0+ then the build script will
+   also create a subdirectory named _package that contains a copy of the files
+   in a tree as if they were installed (ie ready to be packaged). Example:
+
+   openssl\build\Win64\VC12\DLL Release\_package
+   openssl\build\Win64\VC12\DLL Release\_package\Program Files\OpenSSL\bin
+   openssl\build\Win64\VC12\DLL Release\_package\Program Files\OpenSSL\lib
+   openssl\build\Win64\VC12\DLL Release\_package\Program Files\OpenSSL\include
+
 
 Building with Visual C++
 ========================
@@ -94,7 +115,7 @@ Running DLL based configurations
 
    If you are a developer and plan to run the curl tool from Visual Studio (eg
    you are debugging) with any third-party libraries (such as OpenSSL, wolfSSL
-   or LibSSH2) then you will need to add the search path of these DLLs to the
+   or LibSSH2) then you will need to add the search path of those DLLs to the
    configuration's PATH environment. To do that:
 
     * Open the 'curl-all.sln' or 'curl.sln' solutions
@@ -129,6 +150,19 @@ Running DLL based configurations
    (such as DLL Debug - DLL OpenSSL - DLL LibSSH2) then 'Path to DLL' will need
    to contain the path to both of these.
 
+Installing
+==========
+
+   There is no install routine for the project output, you would just copy the
+   binaries and dependencies wherever you need them. The location of the curl
+   binaries depends on a number of variables:
+   {curl-source}\build\{architecture}\{vcver}\{configuration}
+
+   For example:
+   {curl-source}\build\Win64\VC12\DLL Debug - DLL OpenSSL
+
+   For more information on the tree structure refer to section 'Dependencies'.
+
 Notes
 =====
 
@@ -148,7 +182,7 @@ Notes
    find bugs in the project files that need correcting, and would like to
    submit updated files back then please note that, whilst the solution files
    can be edited directly, the templates for the project files (which are 
-   stored in the git repositoty) will need to be modified rather than the
+   stored in the git repository) will need to be modified rather than the
    generated project files that Visual Studio uses.
 
 Legacy Windows and SSL

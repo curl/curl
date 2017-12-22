@@ -27,7 +27,7 @@ file by using the CustomAfterMicrosoftCommonTargets property.
   </ItemDefinitionGroup>
   <!--
   The project GUID for wolfssl.vcxproj is 73973223-5EE8-41CA-8E88-1D60E89A237B.
-  Since we have are using certain options like fast math (TFM) in our options
+  Since we are using certain options like fast math (TFM) in our options
   file we must compile the corresponding units in wolfssl.vcxproj. If the user
   disables such an option the unit can still be compiled it just won't be used.
   -->
