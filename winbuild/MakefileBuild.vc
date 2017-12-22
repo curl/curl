@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 
 ###########################################################################
 #
-# Makefile for building libcurl with MSVC 6, 7, 8, 9, 10, 11, 12 and 14
+# Makefile for building libcurl with MSVC 6 through to 15
 #
 # Usage: see usage message below
 #        Should be invoked from winbuild directory
