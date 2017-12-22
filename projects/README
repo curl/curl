@@ -4,7 +4,7 @@ Building via IDE Project Files
    This document describes how to compile, build and install curl and libcurl
    from sources using an IDE based development tool such as Visual Studio.
 
-   Project files are currently available for Visual C++ v6.0 to v14.0. The
+   Project files are currently available for Visual C++ v6.0 to v15.0. The
    following directory structure has been used to cater for this:
 
    somedirectory\
