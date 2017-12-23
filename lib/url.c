@@ -3047,7 +3047,7 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
       if(!conn->bits.tunnel_proxy &&
          data->set.ssl.no_implied_proxytunnel &&
          (conn->handler->protocol & CURLPROTO_HTTPS)) {
-        conn->handler = conn->given = &Curl_handler_http;
+        conn->handler = &Curl_handler_http;
       }
       /* else force this connection's protocol to become HTTP if compatible */
       else if(!(conn->handler->protocol & PROTO_FAMILY_HTTP)) {
@@ -4194,7 +4194,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * If the protocol is using SSL and HTTP proxy is used, we set
    * the tunnel_proxy bit.
    *************************************************************/
-  if((conn->given->flags&PROTOPT_SSL) && conn->bits.httpproxy)
+  if((conn->handler->flags&PROTOPT_SSL) && conn->bits.httpproxy)
     conn->bits.tunnel_proxy = TRUE;
 
   /*************************************************************
