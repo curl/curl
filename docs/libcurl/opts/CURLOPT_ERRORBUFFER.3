@@ -28,8 +28,8 @@ CURLOPT_ERRORBUFFER \- set error buffer for error messages
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ERRORBUFFER, char *buf);
 .SH DESCRIPTION
-Pass a char * to a buffer that the libcurl may store human readable error
-messages in on failures or problems. This may be more helpful than just the
+Pass a char * to a buffer that libcurl \fBmay\fP store human readable error
+messages on failures or problems. This may be more helpful than just the
 return code from \fIcurl_easy_perform(3)\fP and related functions. The buffer
 \fBmust be at least CURL_ERROR_SIZE bytes big\fP.
 
@@ -38,11 +38,13 @@ it. Failing to do so will cause very odd behavior or even crashes. libcurl
 will need it until you call \fIcurl_easy_cleanup(3)\fP or you set the same
 option again to use a different pointer.
 
+It's advised to set the error buffer to an empty string before each request. If
+libcurl returns an error then the buffer \fBmay\fP have received an error
+message. If libcurl does not return an error then any received message in the
+buffer is irrelevant.
+
 Consider \fICURLOPT_VERBOSE(3)\fP and \fICURLOPT_DEBUGFUNCTION(3)\fP to better
 debug and trace why errors happen.
-
-If the library does not return an error, the buffer may not have been
-touched. Do not rely on the contents in those cases.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
