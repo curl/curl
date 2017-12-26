@@ -640,6 +640,7 @@ static CURLcode brotli_unencode_write(struct connectdata *conn,
   uint8_t *dst;
   size_t dstleft;
   CURLcode result = CURLE_OK;
+  BrotliDecoderResult r = BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT;
 
   if(!bp->br)
     return CURLE_WRITE_ERROR;  /* Stream already ended. */
@@ -648,9 +649,8 @@ static CURLcode brotli_unencode_write(struct connectdata *conn,
   if(!decomp)
     return CURLE_OUT_OF_MEMORY;
 
-  while(nbytes && result == CURLE_OK) {
-    BrotliDecoderResult r;
-
+  while((nbytes || r == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) &&
+        result == CURLE_OK) {
     dst = (uint8_t *) decomp;
     dstleft = DSIZ;
     r = BrotliDecoderDecompressStream(bp->br,
