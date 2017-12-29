@@ -358,6 +358,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
   curl_off_t timespent;
+  double timespent_d;
   struct Curl_easy *data = conn->data;
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
@@ -374,17 +375,18 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* The time spent so far (from the start) */
   data->progress.timespent = Curl_timediff_us(now, data->progress.start);
-  timespent = (curl_off_t)data->progress.timespent/1000000; /* seconds */
+  timespent_d = data->progress.timespent / 1000000.0; /* seconds as double */
+  timespent = (curl_off_t)timespent_d; /* seconds */
 
   /* The average download speed this far */
   data->progress.dlspeed = (curl_off_t)
     (data->progress.downloaded/
-     (timespent>0?timespent:1));
+     (timespent_d>0? timespent_d:1));
 
   /* The average upload speed this far */
   data->progress.ulspeed = (curl_off_t)
     (data->progress.uploaded/
-     (timespent>0?timespent:1));
+     (timespent_d>0? timespent_d:1));
 
   /* Calculations done at most once a second, unless end is reached */
   if(data->progress.lastshow != now.tv_sec) {
