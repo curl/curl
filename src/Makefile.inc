@@ -37,6 +37,7 @@ CURL_CFILES = \
 	tool_dirhie.c \
 	tool_doswin.c \
 	tool_easysrc.c \
+	tool_filetime.c \
 	tool_formparse.c \
 	tool_getparam.c \
 	tool_getpass.c \

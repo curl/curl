@@ -169,7 +169,7 @@ struct OperationConfig {
   long proxy_ssl_version;
   long ip_version;
   curl_TimeCond timecond;
-  time_t condtime;
+  long condtime;
   struct curl_slist *headers;
   struct curl_slist *proxyheaders;
   curl_mime *mimepost;
