@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -358,6 +358,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
   curl_off_t timespent;
+  curl_off_t timespent_ms; /* milliseconds */
   struct Curl_easy *data = conn->data;
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
@@ -369,22 +370,27 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   curl_off_t dlestimate = 0;
   curl_off_t total_estimate;
   bool shownow = FALSE;
+  curl_off_t dl = data->progress.downloaded;
+  curl_off_t ul = data->progress.uploaded;
 
   now = Curl_now(); /* what time is it */
 
   /* The time spent so far (from the start) */
   data->progress.timespent = Curl_timediff_us(now, data->progress.start);
   timespent = (curl_off_t)data->progress.timespent/1000000; /* seconds */
+  timespent_ms = (curl_off_t)data->progress.timespent/1000; /* ms */
 
   /* The average download speed this far */
-  data->progress.dlspeed = (curl_off_t)
-    (data->progress.downloaded/
-     (timespent>0?timespent:1));
+  if(dl < CURL_OFF_T_MAX/1000)
+    data->progress.dlspeed = (dl * 1000 / (timespent_ms>0?timespent_ms:1));
+  else
+    data->progress.dlspeed = (dl / (timespent>0?timespent:1));
 
   /* The average upload speed this far */
-  data->progress.ulspeed = (curl_off_t)
-    (data->progress.uploaded/
-     (timespent>0?timespent:1));
+  if(ul < CURL_OFF_T_MAX/1000)
+    data->progress.ulspeed = (ul * 1000 / (timespent_ms>0?timespent_ms:1));
+  else
+    data->progress.ulspeed = (ul / (timespent>0?timespent:1));
 
   /* Calculations done at most once a second, unless end is reached */
   if(data->progress.lastshow != now.tv_sec) {
