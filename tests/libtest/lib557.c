@@ -27,9 +27,7 @@
 
 #include "test.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifdef HAVE_LOCALE_H
 #  include <locale.h> /* for setlocale() */

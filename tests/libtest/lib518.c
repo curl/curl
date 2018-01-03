@@ -27,9 +27,7 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include "warnless.h"
 #include "memdebug.h"
