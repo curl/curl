@@ -55,9 +55,7 @@
 #error "We can't compile without socket() support!"
 #endif
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #ifdef USE_LIBIDN2
 #include <idn2.h>

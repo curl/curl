@@ -61,9 +61,7 @@
 #endif
 
 
-#ifdef HAVE_LIMITS_H
-#  include <limits.h>
-#endif
+#include <limits.h>
 
 #include <curl/curl.h>
 #include "urldata.h"
