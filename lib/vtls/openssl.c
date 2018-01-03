@@ -904,7 +904,7 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 static int Curl_ossl_init(void)
 {
 #ifdef ENABLE_SSLKEYLOGFILE
-  const char *keylog_file_name;
+  char *keylog_file_name;
 #endif
 
   OPENSSL_load_builtin_modules();
@@ -957,6 +957,7 @@ static int Curl_ossl_init(void)
         keylog_file_fp = NULL;
       }
     }
+    Curl_safefree(keylog_file_name);
   }
 #endif
 
