@@ -284,9 +284,6 @@
 /* if zlib is available */
 /* #undef HAVE_LIBZ */
 
-/* Define to 1 if you have the <limits.h> header file. */
-#define HAVE_LIMITS_H 1
-
 /* if your compiler supports LL */
 #define HAVE_LL 1
 

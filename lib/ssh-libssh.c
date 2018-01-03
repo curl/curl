@@ -27,9 +27,7 @@
 
 #ifdef USE_LIBSSH
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>

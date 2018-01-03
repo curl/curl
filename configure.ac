@@ -3359,7 +3359,6 @@ AC_CHECK_HEADERS(
         assert.h \
         unistd.h \
         stdlib.h \
-        limits.h \
         arpa/inet.h \
         net/if.h \
         netinet/in.h \

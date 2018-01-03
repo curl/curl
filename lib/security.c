@@ -50,9 +50,7 @@
 #include <netdb.h>
 #endif
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include "urldata.h"
 #include "curl_base64.h"

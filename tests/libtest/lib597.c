@@ -21,9 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include "testutil.h"
 #include "warnless.h"

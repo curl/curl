@@ -34,9 +34,7 @@
 
 #ifdef USE_OPENSSL
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"

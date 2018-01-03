@@ -39,9 +39,7 @@
 #pragma clang diagnostic ignored "-Wtautological-pointer-compare"
 #endif /* __clang__ */
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include <Security/Security.h>
 /* For some reason, when building for iOS, the omnibus header above does
