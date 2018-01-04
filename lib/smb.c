@@ -732,7 +732,7 @@ static void get_posix_time(long *_out, const void *_in)
 #else
   timestamp -= 116444736000000000ULL;
 #endif
-  
+
   timestamp /= 10000000;
   *_out = (long) timestamp;
 }
