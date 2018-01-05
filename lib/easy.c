@@ -1056,11 +1056,18 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     for(i = 0; i < count; i++) {
       /* even if one function returns error, this loops through and frees all
          buffers */
-      if(!result)
-        result = Curl_client_chop_write(data->easy_conn,
+      if(!result) {
+        struct connectdata *conn = data->easy_conn;
+        if(conn && conn->data != data && data->mstate > CURLM_STATE_CONNECT &&
+          data->mstate < CURLM_STATE_COMPLETED)
+          /* Make sure we set the connection's current owner */
+          conn->data = data;
+
+        result = Curl_client_chop_write(conn,
                                         writebuf[i].type,
                                         writebuf[i].buf,
                                         writebuf[i].len);
+      }
       free(writebuf[i].buf);
     }
     if(result)
