@@ -1357,6 +1357,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SERVICE_NAME,
                         config->service_name);
 
+        /* new in curl 7.58.0 */
+        if(config->ssl_session_file)
+          my_setopt_str(curl, CURLOPT_SSL_SESSION_FILE,
+                        config->ssl_session_file);
+
         /* curl 7.13.0 */
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
@@ -1470,6 +1475,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         /* new in 7.25.0 and 7.44.0 */
         {
           long mask = (config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
+                      (config->ssl_no_ticket ? CURLSSLOPT_NO_TICKET : 0) |
                       (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
           if(mask)
             my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);

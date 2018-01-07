@@ -206,6 +206,9 @@ struct ssl_backend_data {
  */
 #define RAND_LOAD_LENGTH 1024
 
+#define KEYLOG_PREFIX      "CLIENT_RANDOM "
+#define KEYLOG_PREFIX_LEN  (sizeof(KEYLOG_PREFIX) - 1)
+
 #ifdef ENABLE_SSLKEYLOGFILE
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
 static FILE *keylog_file_fp;
@@ -239,8 +242,6 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
   }
 }
 #else
-#define KEYLOG_PREFIX      "CLIENT_RANDOM "
-#define KEYLOG_PREFIX_LEN  (sizeof(KEYLOG_PREFIX) - 1)
 /*
  * tap_ssl_key is called by libcurl to make the CLIENT_RANDOMs if the OpenSSL
  * being used doesn't have native support for doing that.
@@ -259,7 +260,8 @@ static void tap_ssl_key(const SSL *ssl, ssl_tap_state_t *state)
   if(!session || !keylog_file_fp)
     return;
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
+    !defined(LIBRESSL_VERSION_NUMBER)
   /* ssl->s3 is not checked in openssl 1.1.0-pre6, but let's assume that
    * we have a valid SSL context if we have a non-NULL session. */
   SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
@@ -1762,6 +1764,17 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
   int msg_type, txt_len;
   const char *verstr = NULL;
   struct connectdata *conn = userp;
+  const char *hex = "0123456789ABCDEF";
+  int pos, i;
+  char line[KEYLOG_PREFIX_LEN + 2 * SSL3_RANDOM_SIZE + 1 +
+            2 * SSL_MAX_MASTER_KEY_LENGTH + 1 + 1];
+  const SSL_SESSION *session = SSL_get_session(ssl);
+  unsigned char client_random[SSL3_RANDOM_SIZE];
+  unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
+  size_t master_key_length = 0;
+
+  if(!session)
+    return;
 
   if(!conn || !conn->data || !conn->data->set.fdebug ||
      (direction != 0 && direction != 1))
@@ -1827,6 +1840,46 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
                        verstr, direction?"OUT":"IN",
                        tls_rt_name, msg_name, msg_type);
     Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len, NULL);
+
+    if(direction == 0 && msg_type == SSL3_MT_FINISHED) {
+
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
+    !defined(LIBRESSL_VERSION_NUMBER)
+      /* ssl->s3 is not checked in openssl 1.1.0-pre6, but let's assume that
+       * we have a valid SSL context if we have a non-NULL session. */
+      SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
+      master_key_length =
+        SSL_SESSION_get_master_key(session, master_key,
+                                   SSL_MAX_MASTER_KEY_LENGTH);
+#else
+      if(ssl->s3 && session->master_key_length > 0) {
+        master_key_length = session->master_key_length;
+        memcpy(master_key, session->master_key, session->master_key_length);
+        memcpy(client_random, ssl->s3->client_random, SSL3_RANDOM_SIZE);
+      }
+#endif
+
+      memcpy(line, KEYLOG_PREFIX, KEYLOG_PREFIX_LEN);
+      pos = KEYLOG_PREFIX_LEN;
+
+      /* Client Random for SSLv3/TLS */
+      for(i = 0; i < SSL3_RANDOM_SIZE; i++) {
+        line[pos++] = hex[client_random[i] >> 4];
+        line[pos++] = hex[client_random[i] & 0xF];
+      }
+      line[pos++] = ' ';
+
+      /* Master Secret (size is at most SSL_MAX_MASTER_KEY_LENGTH) */
+      for(i = 0; i < (int)master_key_length; i++) {
+        line[pos++] = hex[master_key[i] >> 4];
+        line[pos++] = hex[master_key[i] & 0xF];
+      }
+      line[pos++] = '\n';
+      line[pos] = '\0';
+
+      txt_len = snprintf(ssl_buf, sizeof(ssl_buf), "SSLKEY LINE: %s", line);
+      Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len, NULL);
+    }
   }
 
   Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
@@ -2059,6 +2112,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
   char error_buffer[256];
+  SSL_SESSION *sess;
+  BIO *stmp = NULL;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
@@ -2180,6 +2235,9 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
 #ifdef SSL_OP_NO_TICKET
   ctx_options |= SSL_OP_NO_TICKET;
+  if(SSL_SET_OPTION(session_file) && !SSL_SET_OPTION(no_ticket)) {
+    ctx_options &= ~SSL_OP_NO_TICKET;
+  }
 #endif
 
 #ifdef SSL_OP_NO_COMPRESSION
@@ -2471,6 +2529,18 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       /* Informational message */
       infof(data, "SSL re-using session ID\n");
     }
+    else if(SSL_SET_OPTION(session_file)) {
+      stmp = BIO_new_file(SSL_SET_OPTION(session_file), "r");
+      if(stmp) {
+        sess = PEM_read_bio_SSL_SESSION(stmp, NULL, 0, NULL);
+        BIO_free(stmp);
+        if(sess) {
+          SSL_set_session(BACKEND->handle, sess);
+          SSL_SESSION_free(sess);
+        }
+      }
+    }
+
     Curl_ssl_sessionid_unlock(conn);
   }
 
@@ -3189,6 +3259,7 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  BIO *stmp = NULL;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -3222,6 +3293,15 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
         failf(data, "failed to store ssl session");
         return result;
       }
+
+      if(SSL_SET_OPTION(session_file)) {
+        stmp = BIO_new_file(SSL_SET_OPTION(session_file), "w");
+        if(stmp) {
+          PEM_write_bio_SSL_SESSION(stmp, SSL_get_session(BACKEND->handle));
+          BIO_free(stmp);
+        }
+      }
+
     }
     else {
       /* Session was incache, so refcount already incremented earlier.

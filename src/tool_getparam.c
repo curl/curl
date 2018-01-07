@@ -290,6 +290,8 @@ static const struct LongShort aliases[]= {
   {"r",  "range",                    ARG_STRING},
   {"R",  "remote-time",              ARG_BOOL},
   {"s",  "silent",                   ARG_BOOL},
+  {"sf", "ssl-session-file",         ARG_STRING},
+  {"sn", "ssl-no-ticket",            ARG_BOOL},
   {"S",  "show-error",               ARG_BOOL},
   {"t",  "telnet-option",            ARG_STRING},
   {"T",  "upload-file",              ARG_STRING},
@@ -1916,6 +1918,18 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->remote_time = toggle;
       break;
     case 's':
+      if(curlinfo->features & CURL_VERSION_SSL) {
+        if(subletter == 'f') { /* --ssl-session-file */
+          GetStr(&config->ssl_session_file, nextarg);
+          break;
+        }
+
+        if(subletter == 'n') { /* --ssl-no-ticket */
+          config->ssl_no_ticket = TRUE;
+          break;
+        }
+      }
+
       /* don't show progress meter, don't show errors : */
       if(toggle)
         global->mute = global->noprogress = TRUE;

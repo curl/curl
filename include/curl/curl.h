@@ -789,6 +789,10 @@ typedef enum {
    SSL backends where such behavior is present. */
 #define CURLSSLOPT_NO_REVOKE (1<<1)
 
+/* - NO_TICKET tells libcurl to disable session ticket during the ssl
+   handshake. */
+#define CURLSSLOPT_NO_TICKET (1<<2)
+
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
 
@@ -1818,6 +1822,9 @@ typedef enum {
 
   /* Post MIME data. */
   CINIT(MIMEPOST, OBJECTPOINT, 269),
+
+  /* The ssl-session-file to use */
+  CINIT(SSL_SESSION_FILE, STRINGPOINT, 270),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

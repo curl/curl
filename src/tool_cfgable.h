@@ -211,6 +211,10 @@ struct OperationConfig {
   bool ignorecl;            /* --ignore-content-length */
   bool disable_sessionid;
 
+  char *ssl_session_file;   /* for SSL session reuse */
+
+  bool ssl_no_ticket;       /* for SSL session reuse, without session ticket */
+
   bool raw;
   bool post301;
   bool post302;

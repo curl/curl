@@ -4361,6 +4361,8 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.proxy_ssl.password = data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
 #endif
 
+  data->set.ssl.session_file = data->set.str[STRING_SSL_SESSION_FILE];
+
   if(!Curl_clone_primary_ssl_config(&data->set.ssl.primary,
      &conn->ssl_config)) {
     result = CURLE_OUT_OF_MEMORY;

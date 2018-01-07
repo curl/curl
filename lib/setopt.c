@@ -1252,6 +1252,14 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
                                &data->set.str[STRING_PASSWORD]);
     break;
 
+  case CURLOPT_SSL_SESSION_FILE:
+    /*
+     * user:ssl-session-file to use in the operation
+     */
+    result = Curl_setstropt(&data->set.str[STRING_SSL_SESSION_FILE],
+                            va_arg(param, char *));
+    break;
+
   case CURLOPT_USERNAME:
     /*
      * authentication user name to use in the operation
@@ -1999,6 +2007,7 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
     arg = va_arg(param, long);
     data->set.ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
+    data->set.ssl.no_ticket = !!(arg & CURLSSLOPT_NO_TICKET);
     break;
 
   case CURLOPT_PROXY_SSL_OPTIONS:

@@ -238,6 +238,9 @@ struct ssl_config_data {
   char *password; /* TLS password (for, e.g., SRP) */
   enum CURL_TLSAUTH authtype; /* TLS authentication type (default SRP) */
 #endif
+
+  char *session_file; /* optional ssl-session-file */
+  bool no_ticket; /* optional ssl-no-ticket */
 };
 
 struct ssl_general_config {
@@ -1453,6 +1456,8 @@ enum dupstring {
      Each such pointer must be added manually to Curl_dupset() --- */
 
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
+
+  STRING_SSL_SESSION_FILE,        /* <ssl-session-file>, if used */
 
   STRING_LAST /* not used, just an end-of-list marker */
 };
