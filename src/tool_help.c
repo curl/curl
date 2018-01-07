@@ -217,7 +217,7 @@ static const struct helptxt helptext[] = {
   {"    --mail-from <address>",
    "Mail from this address"},
   {"    --mail-rcpt <address>",
-   "Mail from this address"},
+   "Mail to this address"},
   {"-M, --manual",
    "Display the full manual"},
   {"    --max-filesize <bytes>",
