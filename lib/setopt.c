@@ -1256,8 +1256,12 @@ static CURLcode setopt(struct Curl_easy *data, CURLoption option,
     /*
      * user:ssl-session-file to use in the operation
      */
+#ifdef USE_OPENSSL
     result = Curl_setstropt(&data->set.str[STRING_SSL_SESSION_FILE],
                             va_arg(param, char *));
+#else
+    result = CURLE_UNKNOWN_OPTION;
+#endif
     break;
 
   case CURLOPT_USERNAME:
