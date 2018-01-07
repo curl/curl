@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # git log --pretty=fuller --no-color --date=short --decorate=full
 
