@@ -206,8 +206,10 @@ struct ssl_backend_data {
  */
 #define RAND_LOAD_LENGTH 1024
 
+#if defined(ENABLE_SSLKEY_VERBOSE) || defined(ENABLE_SSLKEYLOGFILE)
 #define KEYLOG_PREFIX      "CLIENT_RANDOM "
 #define KEYLOG_PREFIX_LEN  (sizeof(KEYLOG_PREFIX) - 1)
+#endif
 
 #ifdef ENABLE_SSLKEYLOGFILE
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
@@ -1764,6 +1766,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
   int msg_type, txt_len;
   const char *verstr = NULL;
   struct connectdata *conn = userp;
+#ifdef ENABLE_SSLKEY_VERBOSE
   const char *hex = "0123456789ABCDEF";
   int pos, i;
   char line[KEYLOG_PREFIX_LEN + 2 * SSL3_RANDOM_SIZE + 1 +
@@ -1775,6 +1778,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 
   if(!session)
     return;
+#endif
 
   if(!conn || !conn->data || !conn->data->set.fdebug ||
      (direction != 0 && direction != 1))
@@ -1841,6 +1845,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
                        tls_rt_name, msg_name, msg_type);
     Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len, NULL);
 
+#ifdef ENABLE_SSLKEY_VERBOSE
     if(direction == 0 && msg_type == SSL3_MT_FINISHED) {
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
@@ -1880,6 +1885,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
       txt_len = snprintf(ssl_buf, sizeof(ssl_buf), "SSLKEY LINE: %s", line);
       Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len, NULL);
     }
+#endif
   }
 
   Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
