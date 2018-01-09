@@ -58,7 +58,7 @@ test307 test308 test309 test310 test311 test312 test313 test314 test315 \
 test316                         test320 test321 test322 test323 test324 \
 test325 \
 test350 test351 test352 test353 test354 \
-test393 test394 \
+test393 test394 test395 \
 \
 test400 test401 test402 test403 test404 test405 test406 test407 test408 \
 test409 \
