@@ -1045,6 +1045,8 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     unsigned int i;
     unsigned int count = data->state.tempcount;
     struct tempbuf writebuf[3]; /* there can only be three */
+    struct connectdata *conn = data->easy_conn;
+    struct Curl_easy *saved_data = NULL;
 
     /* copy the structs to allow for immediate re-pausing */
     for(i = 0; i < data->state.tempcount; i++) {
@@ -1053,16 +1055,26 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     }
     data->state.tempcount = 0;
 
+    if(conn && conn->data != data) {
+      /* Make sure we set the connection's current owner */
+      saved_data = conn->data;
+      conn->data = data;
+    }
+
     for(i = 0; i < count; i++) {
       /* even if one function returns error, this loops through and frees all
          buffers */
       if(!result)
-        result = Curl_client_chop_write(data->easy_conn,
+        result = Curl_client_chop_write(conn,
                                         writebuf[i].type,
                                         writebuf[i].buf,
                                         writebuf[i].len);
       free(writebuf[i].buf);
     }
+    /* recover previous owner of the connection */
+    if(saved_data)
+      conn->data = saved_data;
+
     if(result)
       return result;
   }
