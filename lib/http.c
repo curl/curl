@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3505,31 +3505,35 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     if(!k->ignorecl && !data->set.ignorecl &&
        checkprefix("Content-Length:", k->p)) {
       curl_off_t contentlength;
-      if(!curlx_strtoofft(k->p + 15, NULL, 10, &contentlength)) {
+      CURLofft offt = curlx_strtoofft(k->p + 15, NULL, 10, &contentlength);
+
+      if(offt == CURL_OFFT_OK) {
         if(data->set.max_filesize &&
            contentlength > data->set.max_filesize) {
           failf(data, "Maximum file size exceeded");
           return CURLE_FILESIZE_EXCEEDED;
         }
-        if(contentlength >= 0) {
-          k->size = contentlength;
-          k->maxdownload = k->size;
-          /* we set the progress download size already at this point
-             just to make it easier for apps/callbacks to extract this
-             info as soon as possible */
-          Curl_pgrsSetDownloadSize(data, k->size);
-        }
-        else {
-          /* Negative Content-Length is really odd, and we know it
-             happens for example when older Apache servers send large
-             files */
-          streamclose(conn, "negative content-length");
-          infof(data, "Negative content-length: %" CURL_FORMAT_CURL_OFF_T
-                ", closing after transfer\n", contentlength);
-        }
+        k->size = contentlength;
+        k->maxdownload = k->size;
+        /* we set the progress download size already at this point
+           just to make it easier for apps/callbacks to extract this
+           info as soon as possible */
+        Curl_pgrsSetDownloadSize(data, k->size);
       }
-      else
-        infof(data, "Illegal Content-Length: header\n");
+      else if(offt == CURL_OFFT_FLOW) {
+        /* out of range */
+        if(data->set.max_filesize) {
+          failf(data, "Maximum file size exceeded");
+          return CURLE_FILESIZE_EXCEEDED;
+        }
+        streamclose(conn, "overflow content-length");
+        infof(data, "Overflow Content-Length: value!\n");
+      }
+      else {
+        /* negative or just rubbish - bad HTTP */
+        failf(data, "Invalid Content-Length: value");
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
     }
     /* check for Content-Type: header lines to get the MIME-type */
     else if(checkprefix("Content-Type:", k->p)) {
