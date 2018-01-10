@@ -360,32 +360,34 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      */
     data->set.timevalue = (time_t)va_arg(param, long);
     break;
+
   case CURLOPT_SSLVERSION:
+  case CURLOPT_PROXY_SSLVERSION:
     /*
      * Set explicit SSL version to try to connect with, as some SSL
      * implementations are lame.
      */
 #ifdef USE_SSL
-    arg = va_arg(param, long);
-    if((arg < CURL_SSLVERSION_DEFAULT) || (arg > CURL_SSLVERSION_TLSv1_3))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.ssl.primary.version = C_SSLVERSION_VALUE(arg);
-    data->set.ssl.primary.version_max = C_SSLVERSION_MAX_VALUE(arg);
-#else
-    result = CURLE_UNKNOWN_OPTION;
-#endif
-    break;
-  case CURLOPT_PROXY_SSLVERSION:
-    /*
-     * Set explicit SSL version to try to connect with for proxy, as some SSL
-     * implementations are lame.
-     */
-#ifdef USE_SSL
-    arg = va_arg(param, long);
-    if((arg < CURL_SSLVERSION_DEFAULT) || (arg > CURL_SSLVERSION_TLSv1_3))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.proxy_ssl.primary.version = C_SSLVERSION_VALUE(arg);
-    data->set.proxy_ssl.primary.version_max = C_SSLVERSION_MAX_VALUE(arg);
+    {
+      long version, version_max;
+      struct ssl_primary_config *primary = (option == CURLOPT_SSLVERSION ?
+                                            &data->set.ssl.primary :
+                                            &data->set.proxy_ssl.primary);
+
+      arg = va_arg(param, long);
+
+      version = C_SSLVERSION_VALUE(arg);
+      version_max = C_SSLVERSION_MAX_VALUE(arg);
+
+      if(version < CURL_SSLVERSION_DEFAULT ||
+         version >= CURL_SSLVERSION_LAST ||
+         version_max < CURL_SSLVERSION_MAX_NONE ||
+         version_max >= CURL_SSLVERSION_MAX_LAST)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+
+      primary->version = version;
+      primary->version_max = version_max;
+    }
 #else
     result = CURLE_UNKNOWN_OPTION;
 #endif
