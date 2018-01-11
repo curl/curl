@@ -2118,8 +2118,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char * const ssl_crlfile = SSL_SET_OPTION(CRLfile);
   char error_buffer[256];
-  SSL_SESSION *sess;
-  BIO *stmp = NULL;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
 
@@ -2534,17 +2532,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       }
       /* Informational message */
       infof(data, "SSL re-using session ID\n");
-    }
-    else if(SSL_SET_OPTION(session_file)) {
-      stmp = BIO_new_file(SSL_SET_OPTION(session_file), "r");
-      if(stmp) {
-        sess = PEM_read_bio_SSL_SESSION(stmp, NULL, 0, NULL);
-        BIO_free(stmp);
-        if(sess) {
-          SSL_set_session(BACKEND->handle, sess);
-          SSL_SESSION_free(sess);
-        }
-      }
     }
 
     Curl_ssl_sessionid_unlock(conn);
@@ -3265,7 +3252,6 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  BIO *stmp = NULL;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
 
@@ -3299,15 +3285,6 @@ static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
         failf(data, "failed to store ssl session");
         return result;
       }
-
-      if(SSL_SET_OPTION(session_file)) {
-        stmp = BIO_new_file(SSL_SET_OPTION(session_file), "w");
-        if(stmp) {
-          PEM_write_bio_SSL_SESSION(stmp, SSL_get_session(BACKEND->handle));
-          BIO_free(stmp);
-        }
-      }
-
     }
     else {
       /* Session was incache, so refcount already incremented earlier.
@@ -3703,6 +3680,48 @@ static void *Curl_ossl_get_internals(struct ssl_connect_data *connssl,
          (void *)BACKEND->ctx : (void *)BACKEND->handle;
 }
 
+static bool Curl_ossl_session_file_load(struct connectdata *conn,
+                                        char *sess_file, void **ssl_sess)
+{
+  BIO *stmp;
+
+  (void)conn; /* May be used later */
+
+  if(!sess_file || !ssl_sess) {
+    return FALSE;
+  }
+
+  stmp = BIO_new_file(sess_file, "r");
+  if(stmp) {
+    *ssl_sess = PEM_read_bio_SSL_SESSION(stmp, NULL, 0, NULL);
+    BIO_free(stmp);
+    if(*ssl_sess) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+static void Curl_ossl_session_file_save(struct connectdata *conn,
+                                        char *sess_file, void *ssl_sess)
+{
+  BIO *stmp;
+
+  (void)conn; /* May be used later */
+
+  if(!sess_file || !ssl_sess) {
+    return;
+  }
+
+  stmp = BIO_new_file(sess_file, "w");
+  if(stmp) {
+    chmod(sess_file, S_IRUSR|S_IWUSR); /* 0600 */
+    PEM_write_bio_SSL_SESSION(stmp, ssl_sess);
+    BIO_free(stmp);
+  }
+}
+
 const struct Curl_ssl Curl_ssl_openssl = {
   { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
@@ -3727,6 +3746,8 @@ const struct Curl_ssl Curl_ssl_openssl = {
   Curl_ossl_get_internals,       /* get_internals */
   Curl_ossl_close,               /* close_one */
   Curl_ossl_close_all,           /* close_all */
+  Curl_ossl_session_file_load,   /* session_file_load */
+  Curl_ossl_session_file_save,   /* session_file_save */
   Curl_ossl_session_free,        /* session_free */
   Curl_ossl_set_engine,          /* set_engine */
   Curl_ossl_set_engine_default,  /* set_engine_default */

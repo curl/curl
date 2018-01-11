@@ -730,6 +730,8 @@ const struct Curl_ssl Curl_ssl_axtls = {
   Curl_axtls_get_internals,       /* get_internals */
   Curl_axtls_close,               /* close_one */
   Curl_none_close_all,            /* close_all */
+  Curl_none_session_file_load,    /* session_file_load */
+  Curl_none_session_file_save,    /* session_file_save */
   Curl_axtls_session_free,        /* session_free */
   Curl_none_set_engine,           /* set_engine */
   Curl_none_set_engine_default,   /* set_engine_default */

@@ -356,6 +356,11 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
     }
   }
 
+  if(no_match && SSL_SET_OPTION(session_file)) {
+    return !Curl_ssl->session_file_load(conn, SSL_SET_OPTION(session_file),
+                                        ssl_sessionid);
+  }
+
   return no_match;
 }
 
@@ -487,6 +492,11 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
     free(clone_host);
     free(clone_conn_to_host);
     return CURLE_OUT_OF_MEMORY;
+  }
+
+  if(SSL_SET_OPTION(session_file)) {
+    Curl_ssl->session_file_save(conn, SSL_SET_OPTION(session_file),
+                                ssl_sessionid);
   }
 
   return CURLE_OK;
@@ -1016,6 +1026,24 @@ void Curl_none_close_all(struct Curl_easy *data UNUSED_PARAM)
   (void)data;
 }
 
+bool Curl_none_session_file_load(struct connectdata *conn, char *sess_file,
+                                 void **ssl_sess)
+{
+  (void)conn;
+  (void)sess_file;
+  (void)ssl_sess;
+
+  return FALSE;
+}
+
+void Curl_none_session_file_save(struct connectdata *conn, char *sess_file,
+                                 void *ssl_sess)
+{
+  (void)conn;
+  (void)sess_file;
+  (void)ssl_sess;
+}
+
 void Curl_none_session_free(void *ptr UNUSED_PARAM)
 {
   (void)ptr;
@@ -1149,6 +1177,8 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_multissl_get_internals,       /* get_internals */
   Curl_multissl_close,               /* close_one */
   Curl_none_close_all,               /* close_all */
+  Curl_none_session_file_load,       /* session_file_load */
+  Curl_none_session_file_save,       /* session_file_save */
   Curl_none_session_free,            /* session_free */
   Curl_none_set_engine,              /* set_engine */
   Curl_none_set_engine_default,      /* set_engine_default */

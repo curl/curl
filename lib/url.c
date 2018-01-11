@@ -4362,6 +4362,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 #endif
 
   data->set.ssl.session_file = data->set.str[STRING_SSL_SESSION_FILE];
+  data->set.proxy_ssl.session_file = data->set.str[STRING_SSL_SESSION_FILE];
 
   if(!Curl_clone_primary_ssl_config(&data->set.ssl.primary,
      &conn->ssl_config)) {

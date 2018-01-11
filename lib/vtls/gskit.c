@@ -1378,6 +1378,8 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_gskit_close,               /* close_one */
   Curl_none_close_all,            /* close_all */
   /* No session handling for GSKit */
+  Curl_none_session_file_load,     /* session_file_load */
+  Curl_none_session_file_save,     /* session_file_save */
   Curl_none_session_free,         /* session_free */
   Curl_none_set_engine,           /* set_engine */
   Curl_none_set_engine_default,   /* set_engine_default */
