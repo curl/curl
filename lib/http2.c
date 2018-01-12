@@ -925,8 +925,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
   if(stream->bodystarted) {
     /* This is trailer fields. */
-    /* 3 is for ":" and "\r\n". */
-    uint32_t n = (uint32_t)(namelen + valuelen + 3);
+    /* 4 is for ": " and "\r\n". */
+    uint32_t n = (uint32_t)(namelen + valuelen + 4);
 
     DEBUGF(infof(data_s, "h2 trailer: %.*s: %.*s\n", namelen, name, valuelen,
                  value));
