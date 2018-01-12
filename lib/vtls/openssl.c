@@ -3681,21 +3681,23 @@ static void *Curl_ossl_get_internals(struct ssl_connect_data *connssl,
 }
 
 static bool Curl_ossl_session_file_load(struct connectdata *conn,
-                                        char *sess_file, void **ssl_sess)
+                                        char *sess_file, void **sess,
+                                        size_t *sess_size)
 {
   BIO *stmp;
 
   (void)conn; /* May be used later */
+  (void)sess_size;
 
-  if(!sess_file || !ssl_sess) {
+  if(!sess_file || !sess) {
     return FALSE;
   }
 
   stmp = BIO_new_file(sess_file, "r");
   if(stmp) {
-    *ssl_sess = PEM_read_bio_SSL_SESSION(stmp, NULL, 0, NULL);
+    *sess = PEM_read_bio_SSL_SESSION(stmp, NULL, 0, NULL);
     BIO_free(stmp);
-    if(*ssl_sess) {
+    if(*sess) {
       return TRUE;
     }
   }
@@ -3704,20 +3706,24 @@ static bool Curl_ossl_session_file_load(struct connectdata *conn,
 }
 
 static void Curl_ossl_session_file_save(struct connectdata *conn,
-                                        char *sess_file, void *ssl_sess)
+                                        char *sess_file, void *sess,
+                                        size_t sess_size)
 {
   BIO *stmp;
 
   (void)conn; /* May be used later */
+  (void)sess_size;
 
-  if(!sess_file || !ssl_sess) {
+  if(!sess_file || !sess) {
     return;
   }
 
   stmp = BIO_new_file(sess_file, "w");
   if(stmp) {
+#if 0
     chmod(sess_file, S_IRUSR|S_IWUSR); /* 0600 */
-    PEM_write_bio_SSL_SESSION(stmp, ssl_sess);
+#endif
+    PEM_write_bio_SSL_SESSION(stmp, sess);
     BIO_free(stmp);
   }
 }

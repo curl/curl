@@ -356,9 +356,13 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
     }
   }
 
-  if(no_match && SSL_SET_OPTION(session_file)) {
-    return !Curl_ssl->session_file_load(conn, SSL_SET_OPTION(session_file),
-                                        ssl_sessionid);
+  if(no_match &&
+     !conn->bits.ssl_sess_from_file &&
+     SSL_SET_OPTION(session_file)) {
+
+    no_match = !Curl_ssl->session_file_load(conn, SSL_SET_OPTION(session_file),
+                                            ssl_sessionid, idsize);
+    conn->bits.ssl_sess_from_file = !no_match;
   }
 
   return no_match;
@@ -496,7 +500,7 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
 
   if(SSL_SET_OPTION(session_file)) {
     Curl_ssl->session_file_save(conn, SSL_SET_OPTION(session_file),
-                                ssl_sessionid);
+                                ssl_sessionid, idsize);
   }
 
   return CURLE_OK;
@@ -1026,22 +1030,134 @@ void Curl_none_close_all(struct Curl_easy *data UNUSED_PARAM)
   (void)data;
 }
 
-bool Curl_none_session_file_load(struct connectdata *conn, char *sess_file,
-                                 void **ssl_sess)
+bool Curl_none_session_file_load(struct connectdata *conn UNUSED_PARAM,
+                                 char *sess_file UNUSED_PARAM,
+                                 void **sess UNUSED_PARAM,
+                                 size_t *sess_size UNUSED_PARAM)
 {
   (void)conn;
   (void)sess_file;
-  (void)ssl_sess;
+  (void)sess;
+
+  if(sess_size) {
+    *sess_size = 0;
+  }
 
   return FALSE;
 }
 
-void Curl_none_session_file_save(struct connectdata *conn, char *sess_file,
-                                 void *ssl_sess)
+void Curl_none_session_file_save(struct connectdata *conn UNUSED_PARAM,
+                                 char *sess_file UNUSED_PARAM,
+                                 void *sess UNUSED_PARAM,
+                                 size_t sess_size UNUSED_PARAM)
 {
   (void)conn;
   (void)sess_file;
-  (void)ssl_sess;
+  (void)sess;
+  (void)sess_size;
+}
+
+/*
+ * Default implementations for load SSL session ID from file.
+ */
+bool Curl_ssl_sessionid_file_load(struct connectdata *conn, char *sess_file,
+                                  void **sess, size_t *sess_size)
+{
+  bool ret = FALSE;
+  FILE *fp;
+  char *buf = NULL;
+  char dbg_buf[256];
+  int txt_len;
+  size_t size, filesize = 0;
+
+  if(!sess_file || !sess)
+    return ret;
+
+  fp = fopen(sess_file, "rb");
+  if(!fp)
+    return ret;
+
+  do {
+    /* Determine the file's size */
+    if(fseek(fp, 0, SEEK_END))
+      break;
+    filesize = ftell(fp);
+    if(fseek(fp, 0, SEEK_SET))
+      break;
+    /*
+    if(filesize < 16 || filesize > 32)
+      break;
+    */
+
+    /*
+     * Memory for the file content is obtained with malloc.
+     * The pointer must be freed by callers.
+     */
+    buf = malloc(filesize + 1);
+    if(!buf)
+      break;
+
+    memset(buf, 0, filesize + 1);
+
+    size = fread(buf, filesize, 1, fp);
+    if(size != 1) {
+      txt_len = snprintf(dbg_buf, sizeof(dbg_buf),
+                         "SSL_SESSIONID_FILE: %s read failed[size:%lld,"
+                         "filesize:%lld]\n", sess_file, size, filesize);
+    }
+    else {
+      txt_len = snprintf(dbg_buf, sizeof(dbg_buf),
+                         "SSL_SESSIONID_FILE: %s\n", sess_file);
+    }
+
+    Curl_debug(conn->data, CURLINFO_TEXT, dbg_buf, (size_t)txt_len, NULL);
+
+    ret = TRUE;
+  } while(0);
+
+  *sess = buf;
+
+  if(sess_size) {
+    *sess_size = filesize;
+  }
+
+  fclose(fp);
+
+  return ret;
+}
+
+/*
+ * Default implementations for save SSL session ID to file.
+ */
+void Curl_ssl_sessionid_file_save(struct connectdata *conn, char *sess_file,
+                                  void *sess, size_t sess_size)
+{
+  FILE *fp;
+  char dbg_buf[256];
+  int txt_len;
+  size_t size;
+
+  if(!sess_file || !sess || sess_size <= 0)
+    return;
+
+  fp = fopen(sess_file, "wb");
+  if(!fp)
+    return;
+
+  size = fwrite(sess, sess_size, 1, fp);
+  if(size != 1) {
+    txt_len = snprintf(dbg_buf, sizeof(dbg_buf),
+                       "SSL_SESSIONID_FILE: %s write failed[size:%lld,"
+                       "sess_size:%lld]\n", sess_file, size, sess_size);
+  }
+  else {
+    txt_len = snprintf(dbg_buf, sizeof(dbg_buf),
+                       "SSL_SESSIONID_FILE: %s\n", sess_file);
+  }
+
+  Curl_debug(conn->data, CURLINFO_TEXT, dbg_buf, (size_t)txt_len, NULL);
+
+  fclose(fp);
 }
 
 void Curl_none_session_free(void *ptr UNUSED_PARAM)

@@ -893,6 +893,9 @@ gtls_connect_step1(struct connectdata *conn,
       /* we got a session id, use it! */
       gnutls_session_set_data(session, ssl_sessionid, ssl_idsize);
 
+      if(conn->bits.ssl_sess_from_file)
+        free(ssl_sessionid);
+
       /* Informational message */
       infof(data, "SSL re-using session ID\n");
     }
@@ -1829,8 +1832,8 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_gtls_get_internals,       /* get_internals */
   Curl_gtls_close,               /* close_one */
   Curl_none_close_all,           /* close_all */
-  Curl_none_session_file_load,   /* session_file_load */
-  Curl_none_session_file_save,   /* session_file_save */
+  Curl_ssl_sessionid_file_load,  /* session_file_load */
+  Curl_ssl_sessionid_file_save,  /* session_file_save */
   Curl_gtls_session_free,        /* session_free */
   Curl_none_set_engine,          /* set_engine */
   Curl_none_set_engine_default,  /* set_engine_default */

@@ -63,9 +63,9 @@ struct Curl_ssl {
   void (*close_one)(struct connectdata *conn, int sockindex);
   void (*close_all)(struct Curl_easy *data);
   bool (*session_file_load)(struct connectdata *conn, char *sess_file,
-                            void **ssl_sess);
+                            void **ssl_sess, size_t *idsize);
   void (*session_file_save)(struct connectdata *conn, char *sess_file,
-                            void *ssl_sess);
+                            void *ssl_sess, size_t idsize);
   void (*session_free)(void *ptr);
 
   CURLcode (*set_engine)(struct Curl_easy *data, const char *engine);
@@ -92,9 +92,13 @@ CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
                           size_t length);
 void Curl_none_close_all(struct Curl_easy *data);
 bool Curl_none_session_file_load(struct connectdata *conn, char *sess_file,
-                                 void **ssl_sess);
+                                 void **ssl_sess, size_t *idsize);
 void Curl_none_session_file_save(struct connectdata *conn, char *sess_file,
-                                 void *ssl_sess);
+                                 void *ssl_sess, size_t idsize);
+bool Curl_ssl_sessionid_file_load(struct connectdata *conn, char *sess_file,
+                                  void **ssl_sess, size_t *idsize);
+void Curl_ssl_sessionid_file_save(struct connectdata *conn, char *sess_file,
+                                  void *ssl_sess, size_t idsize);
 void Curl_none_session_free(void *ptr);
 bool Curl_none_data_pending(const struct connectdata *conn, int connindex);
 bool Curl_none_cert_status_request(void);

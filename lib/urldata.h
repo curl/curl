@@ -435,6 +435,10 @@ struct ConnectBits {
   bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
                                   is complete */
   bool socksproxy_connecting; /* connecting through a socks proxy */
+
+#if defined(USE_SSL)
+  bool ssl_sess_from_file; /* use the session from file */
+#endif
 };
 
 struct hostname {

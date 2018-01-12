@@ -132,6 +132,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   struct Curl_easy *data = conn->data;
   SSL_CTX *ssl_ctx;
   SSL *ssl = NULL;
+  SSL_EXTENSIONS *extensions = NULL;
   int cert_types[] = {SSL_OBJ_X509_CERT, SSL_OBJ_PKCS12, 0};
   int key_types[] = {SSL_OBJ_RSA_KEY, SSL_OBJ_PKCS8, SSL_OBJ_PKCS12, 0};
   int i, ssl_fcn_return;
@@ -248,6 +249,12 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     }
   }
 
+  if(conn->host.name) {
+    extensions = ssl_ext_new();
+    if(extensions)
+      extensions->host_name = conn->host.name;
+  }
+
   /* gtls.c does more here that is being left out for now
    * 1) set session credentials.  can probably ignore since axtls puts this
    *    info in the ssl_ctx struct
@@ -265,13 +272,17 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
       /* we got a session id, use it! */
       infof(data, "SSL re-using session ID\n");
       ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
-                           ssl_sessionid, (uint8_t)ssl_idsize, NULL);
+                           ssl_sessionid, (uint8_t)ssl_idsize, extensions);
+#if 0
+      if(conn->bits.ssl_sess_from_file)
+        free((void *)ssl_sessionid);
+#endif
     }
     Curl_ssl_sessionid_unlock(conn);
   }
 
   if(!ssl)
-    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0, NULL);
+    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0, extensions);
 
   BACKEND->ssl = ssl;
   return CURLE_OK;
@@ -730,8 +741,13 @@ const struct Curl_ssl Curl_ssl_axtls = {
   Curl_axtls_get_internals,       /* get_internals */
   Curl_axtls_close,               /* close_one */
   Curl_none_close_all,            /* close_all */
+#if 0
+  Curl_ssl_sessionid_file_load,   /* session_file_load */
+  Curl_ssl_sessionid_file_save,   /* session_file_save */
+#else
   Curl_none_session_file_load,    /* session_file_load */
   Curl_none_session_file_save,    /* session_file_save */
+#endif
   Curl_axtls_session_free,        /* session_free */
   Curl_none_set_engine,           /* set_engine */
   Curl_none_set_engine_default,   /* set_engine_default */
