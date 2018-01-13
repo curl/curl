@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -376,7 +376,9 @@ static int loop(const unsigned char *pattern, const unsigned char *string)
 
           if(found) {
             p = pp + 1;
-            s++;
+            if(*s)
+              /* don't advance if we're matching on an empty string */
+              s++;
             memset(charset, 0, CURLFNM_CHSET_SIZE);
           }
           else

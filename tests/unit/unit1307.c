@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,12 +27,9 @@
 #define NOMATCH CURL_FNMATCH_NOMATCH
 #define RE_ERR  CURL_FNMATCH_FAIL
 
-#define MAX_PATTERN_L 100
-#define MAX_STRING_L  100
-
 struct testcase {
-  char pattern[MAX_PATTERN_L];
-  char string[MAX_STRING_L];
+  const char *pattern;
+  const char *string;
   int  result;
 };
 
@@ -100,6 +97,8 @@ static const struct testcase tests[] = {
   { "*[^a].t?t",                "a.txt",                  NOMATCH },
   { "*[^a].t?t",                "ba.txt",                 NOMATCH },
   { "*[^a].t?t",                "ab.txt",                 MATCH },
+  { "*[^a]",                    "",                       MATCH },
+  { "[!ÿ]",                     "",                       MATCH },
   { "[!?*[]",                   "?",                      NOMATCH },
   { "[!!]",                     "!",                      NOMATCH },
   { "[!!]",                     "x",                      MATCH },
@@ -119,17 +118,17 @@ static const struct testcase tests[] = {
   { "[[:lower:]]",              "l",                      MATCH },
   { "[[:lower:]]",              "L",                      NOMATCH },
   { "[[:print:]]",              "L",                      MATCH },
-  { "[[:print:]]",              {'\10'},                  NOMATCH },
-  { "[[:print:]]",              {'\10'},                  NOMATCH },
+  { "[[:print:]]",              "\10",                    NOMATCH },
+  { "[[:print:]]",              "\10",                    NOMATCH },
   { "[[:space:]]",              " ",                      MATCH },
   { "[[:space:]]",              "x",                      NOMATCH },
   { "[[:graph:]]",              " ",                      NOMATCH },
   { "[[:graph:]]",              "x",                      MATCH },
-  { "[[:blank:]]",              {'\t'},                   MATCH },
-  { "[[:blank:]]",              {' '},                    MATCH },
-  { "[[:blank:]]",              {'\r'},                   NOMATCH },
-  { "[^[:blank:]]",             {'\t'},                   NOMATCH },
-  { "[^[:print:]]",             {'\10'},                  MATCH },
+  { "[[:blank:]]",              "\t",                     MATCH },
+  { "[[:blank:]]",              " ",                      MATCH },
+  { "[[:blank:]]",              "\r",                     NOMATCH },
+  { "[^[:blank:]]",             "\t",                     NOMATCH },
+  { "[^[:print:]]",             "\10",                    MATCH },
   { "[[:lower:]][[:lower:]]",   "ll",                     MATCH },
 
   { "Curl[[:blank:]];-)",       "Curl ;-)",               MATCH },
