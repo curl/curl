@@ -47,6 +47,36 @@ This release includes the following bugfixes:
  o CURLOPT_DNS_LOCAL_IP4.3: fixed the "SEE ALSO" to not self-reference
  o curl.1: documented two missing valid exit codes
  o curl.1: mention http:// and https:// as valid proxy prefixes
+ o vtls: replaced getenv() with curl_getenv() [24]
+ o setopt: less *or equal* than INT_MAX/1000 should be fine [25]
+ o examples/smtp-mail.c: use separate defines for options and mail
+ o curl: support >256 bytes warning messsages [26]
+ o conncache: fix a return code
+ o krb5: fix a potential access of uninitialized memory
+ o rand: add a clang-analyzer work-around
+ o CURLOPT_READFUNCTION.3: refer to argument with correct name [27]
+ o brotli: allow compiling with version 0.6.0
+ o content_encoding: rework zlib_inflate [28]
+ o curl_easy_reset: release mime-related data [29]
+ o examples/rtsp: fix error handling macros [30]
+ o build-openssl.bat: Added support for VC15
+ o build-wolfssl.bat: Added support for VC15
+ o build: Added Visual Studio 2017 project files
+ o winbuild: Added support for VC15
+ o curl: Support size modifiers for --max-filesize [32]
+ o examples/cacertinmem: ignore cert-already-exists error [33]
+ o brotli: data at the end of content can be lost [34]
+ o curl_version_info.3: call the argument 'age' [35]
+ o openssl: fix memory leak of SSLKEYLOGFILE filename
+ o build: remove HAVE_LIMITS_H check [36]
+ o --mail-rcpt: fix short-text description
+ o scripts: allow all perl scripts to be run directly [37]
+ o progress: calculate transfer speed on milliseconds if possible [38]
+ o system.h: check __LONG_MAX__ for defining curl_off_t [31]
+ o easy: fix connection ownership in curl_easy_pause [39]
+ o http2: fix incorrect trailer buffer size [40]
+ o setopt: reintroduce non-static Curl_vsetopt() for OS400 support [41]
+ o setopt: fix SSLVERSION to allow CURL_SSLVERSION_MAX_ values [42]
 
 This release includes the following known bugs:
 
@@ -55,13 +85,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ahodesuka on github, Daniel Stenberg, David Benjamin, Dima Tisnek,
-  Elliot Saba, Frank Gevaerts, guitared on github, Jan Ehrhardt,
-  Johannes Schindelin, John DeHelian, Matthew Kerwin, Michael Felt,
-  Michael Kaufmann, Nikos Mavrogiannopoulos, Oleg Pudeyev, Patrick Dawson,
-  Per Malmberg, Rainer Canavan, Randall S. Becker, Ray Satiro, Richard Alcock,
-  Stepan Broz, W. Mark Kubacki, Zachary Seguin,
-  (24 contributors)
+  ahodesuka on github, Basuke Suzuki, cmfrolick on github, Daniel Stenberg,
+  David Benjamin, Dima Tisnek, Dimitrios Apostolou, Dmitry Kostjuchenko,
+  Dominik Hölzl, Elliot Saba, Frank Gevaerts, Gisle Vanem, guitared on github,
+  Jan Ehrhardt, Johannes Schindelin, John DeHelian, jonrumsey on github,
+  Martin Galvan, Matthew Kerwin, Mattias Fornander, Michael Felt,
+  Michael Kaufmann, Mikalai Ananenka, Nikos Mavrogiannopoulos, Oleg Pudeyev,
+  Patrick Dawson, Patrick Monnerat, Per Malmberg, Pete Lomax, Rainer Canavan,
+  Randall S. Becker, Ray Satiro, Richard Alcock, Sean MacLennan, Stepan Broz,
+  Steve Holme, Thomas van Hesteren, W. Mark Kubacki, Zachary Seguin,
+  Zhouyihai Ding,
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -90,3 +124,22 @@ References to bug reports and discussions on issues:
  [21] = https://curl.haxx.se/bug/?i=1900
  [22] = https://github.com/curl/curl/pull/1346#issuecomment-350530901
  [23] = https://curl.haxx.se/bug/?i=2169
+ [24] = https://curl.haxx.se/bug/?i=2171
+ [25] = https://curl.haxx.se/bug/?i=2173
+ [26] = https://curl.haxx.se/bug/?i=2174
+ [27] = https://curl.haxx.se/bug/?i=2175
+ [28] = https://curl.haxx.se/bug/?i=2068
+ [29] = https://curl.haxx.se/mail/lib-2017-12/0060.html
+ [30] = https://curl.haxx.se/bug/?i=2185
+ [31] = https://curl.haxx.se/bug/?i=2216
+ [32] = https://curl.haxx.se/bug/?i=2179
+ [33] = https://curl.haxx.se/mail/lib-2017-12/0057.html
+ [34] = https://curl.haxx.se/bug/?i=2194
+ [35] = https://curl.haxx.se/mail/lib-2017-12/0074.html
+ [36] = https://curl.haxx.se/bug/?i=2215
+ [37] = https://curl.haxx.se/bug/?i=2222
+ [38] = https://curl.haxx.se/bug/?i=2200
+ [39] = https://curl.haxx.se/bug/?i=2217
+ [40] = https://curl.haxx.se/bug/?i=2231
+ [41] = https://curl.haxx.se/bug/?i=2230
+ [42] = https://curl.haxx.se/bug/?i=2225
