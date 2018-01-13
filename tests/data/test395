@@ -9,19 +9,20 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Content-Length: -6
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 36893488147419103232
+Connection: close
 Content-Type: text/html
 Funny-head: yesyes
 
-moooooooooooo
+-foo-
 </data>
-<datacheck>
-HTTP/1.1 200 OK swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-</datacheck>
 </reply>
 
 #
@@ -31,10 +32,10 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 http
 </server>
  <name>
-HTTP response with negative Content-Length
+HTTP and out-of-range Content-Length
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/178
+http://%HOSTIP:%HTTPPORT/395
 </command>
 </client>
 
@@ -45,13 +46,10 @@ http://%HOSTIP:%HTTPPORT/178
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /178 HTTP/1.1
+GET /395 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<errorcode>
-8
-</errorcode>
 </verify>
 </testcase>
