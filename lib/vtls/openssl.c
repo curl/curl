@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -175,6 +175,8 @@ static unsigned long OpenSSL_version_num(void)
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
 #endif
 
+#define ENABLE_SSLKEYLOGFILE
+
 #ifdef ENABLE_SSLKEYLOGFILE
 typedef struct ssl_tap_state {
   int master_key_length;
@@ -261,7 +263,7 @@ static void tap_ssl_key(const SSL *ssl, ssl_tap_state_t *state)
   /* ssl->s3 is not checked in openssl 1.1.0-pre6, but let's assume that
    * we have a valid SSL context if we have a non-NULL session. */
   SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
-  master_key_length =
+  master_key_length = (int)
     SSL_SESSION_get_master_key(session, master_key, SSL_MAX_MASTER_KEY_LENGTH);
 #else
   if(ssl->s3 && session->master_key_length > 0) {
@@ -2408,8 +2410,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
 #if defined(ENABLE_SSLKEYLOGFILE) && defined(HAVE_KEYLOG_CALLBACK)
-  if(keylog_file) {
-    SSL_CTX_set_keylog_callback(connssl->ctx, ossl_keylog_callback);
+  if(keylog_file_fp) {
+    SSL_CTX_set_keylog_callback(BACKEND->ctx, ossl_keylog_callback);
   }
 #endif
 
