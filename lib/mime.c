@@ -1156,6 +1156,9 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
     break;
   case MIMEKIND_FILE:
     res = curl_mime_filedata(dst, src->data);
+    /* Do not abort duplication if file is not readable. */
+    if(res == CURLE_READ_ERROR)
+      res = CURLE_OK;
     break;
   case MIMEKIND_CALLBACK:
     res = curl_mime_data_cb(dst, src->datasize, src->readfunc,
@@ -1194,6 +1197,7 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
   }
 
   /* Duplicate other fields. */
+  dst->encoder = src->encoder;
   if(!res)
     res = curl_mime_type(dst, src->mimetype);
   if(!res)
