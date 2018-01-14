@@ -1152,7 +1152,7 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
   case MIMEKIND_NONE:
     break;
   case MIMEKIND_DATA:
-    res = curl_mime_data(dst, src->data, src->datasize);
+    res = curl_mime_data(dst, src->data, (size_t) src->datasize);
     break;
   case MIMEKIND_FILE:
     res = curl_mime_filedata(dst, src->data);
