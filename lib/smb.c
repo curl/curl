@@ -727,7 +727,12 @@ static void get_posix_time(long *_out, const void *_in)
   unsigned __int64 timestamp = *(unsigned __int64 *) _in;
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER < 1400)
+  timestamp -= 116444736000000000;
+#else
   timestamp -= 116444736000000000ULL;
+#endif
+
   timestamp /= 10000000;
   *_out = (long) timestamp;
 }
