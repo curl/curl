@@ -1937,6 +1937,15 @@ static void Curl_schannel_checksum(const unsigned char *input,
     CryptReleaseContext(hProv, 0);
 }
 
+void Curl_schannel_md5sum(unsigned char *input,
+                           size_t inputlen,
+                           unsigned char *md5sum,
+                           size_t md5len)
+{
+    Curl_schannel_checksum(input, inputlen, md5sum, md5len,
+                           PROV_RSA_FULL, CALG_MD5);
+}
+
 void Curl_schannel_sha256sum(unsigned char *input,
                            size_t inputlen,
                            unsigned char *sha256sum,
@@ -1982,7 +1991,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  Curl_none_md5sum,                  /* md5sum */
+  Curl_schannel_md5sum,              /* md5sum */
   Curl_schannel_sha256sum            /* sha256sum */
 };
 
