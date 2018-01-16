@@ -204,7 +204,11 @@ static const struct testcase tests[] = {
 
   { "Lindmätarv",               "Lindmätarv",             MATCH },
 
-  { "",                         "",                       MATCH }
+  { "",                         "",                       MATCH },
+  {"**]*[*[\x13]**[*\x13)]*]*[**[*\x13~r-]*]**[.*]*[\xe3\xe3\xe3\xe3\xe3\xe3"
+   "\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3"
+   "\xe3\xe3\xe3\xe3\xe3*[\x13]**[*\x13)]*]*[*[\x13]*[~r]*]*\xba\x13\xa6~b-]*",
+                                "a",                      NOMATCH }
 };
 
 static CURLcode unit_setup(void)
