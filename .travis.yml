@@ -4,12 +4,12 @@ addons:
     apt:
         sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
+            - llvm-toolchain-trusty
         packages:
             - cmake
             - gcc-4.8
             - lcov
-            - clang-3.7
+            - clang
             - valgrind
             - libev-dev
             - libc-ares-dev
