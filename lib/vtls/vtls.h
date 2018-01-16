@@ -33,6 +33,7 @@
 #include "schannel.h"       /* Schannel SSPI version */
 #include "darwinssl.h"      /* SecureTransport (Darwin) version */
 #include "mbedtls.h"        /* mbedTLS versions */
+#include "unitytls.h"        /* unityTLS versions */
 
 #ifndef MAX_PINNED_PUBKEY_SIZE
 #define MAX_PINNED_PUBKEY_SIZE 1048576 /* 1MB */

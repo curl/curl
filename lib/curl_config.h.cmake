@@ -921,6 +921,9 @@
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
 
+/* if unityTLS is enabled */
+#cmakedefine USE_UNITYTLS 1
+
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 1
 
