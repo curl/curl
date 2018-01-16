@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -349,11 +349,13 @@ static void imap_get_message(char *buffer, char **outptr)
 
   if(len > 2) {
     /* Find the start of the message */
-    for(message = buffer + 2; *message == ' ' || *message == '\t'; message++)
+    len -= 2;
+    for(message = buffer + 2; *message == ' ' || *message == '\t';
+        message++, len--)
       ;
 
     /* Find the end of the message */
-    for(len -= 2; len--;)
+    for(; len--;)
       if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
          message[len] != '\t')
         break;

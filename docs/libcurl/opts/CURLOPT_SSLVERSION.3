@@ -50,10 +50,15 @@ TLSv1.1 (Added in 7.34.0)
 TLSv1.2 (Added in 7.34.0)
 .IP CURL_SSLVERSION_TLSv1_3
 TLSv1.3 (Added in 7.52.0)
+.RE
+The maximum TLS version can be set by using \fIone\fP of the
+CURL_SSLVERSION_MAX_ macros below. It is also possible to OR \fIone\fP of the
+CURL_SSLVERSION_ macros with \fIone\fP of the CURL_SSLVERSION_MAX_ macros.
+The MAX macros are not supported for SSL backends axTLS or wolfSSL.
+.RS
 .IP CURL_SSLVERSION_MAX_DEFAULT
 The flag defines the maximum supported TLS version as TLSv1.2, or the default
-value from the SSL library. Only the NSS library currently allows one to get
-the maximum supported TLS version.
+value from the SSL library.
 (Added in 7.54.0)
 .IP CURL_SSLVERSION_MAX_TLSv1_0
 The flag defines maximum supported TLS version as TLSv1.0.
@@ -78,9 +83,8 @@ CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* ask libcurl to use TLS version 1.1 or later */
-  curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_1 |
-                   CURL_SSLVERSION_MAX_DEFAULT);
+  /* ask libcurl to use TLS version 1.0 or later */
+  curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 
   /* Perform the request */
   curl_easy_perform(curl);
