@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -340,6 +340,7 @@ $ENV{'CURL_MEMDEBUG'} = $memdump;
 $ENV{'CURL_ENTROPY'}="12345678";
 $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
 $ENV{'HOME'}=$pwd;
+$ENV{'COLUMNS'}=79; # screen width!
 
 sub catch_zap {
     my $signame = shift;
