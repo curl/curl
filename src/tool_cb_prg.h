@@ -33,7 +33,7 @@ struct ProgressData {
   int         width;
   FILE       *out;  /* where to write everything to */
   curl_off_t  initial_size;
-  int tick;
+  unsigned int tick;
   int bar;
   int barmove;
 };

@@ -36,7 +36,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /* 200 values */
-const static unsigned int sinus[] = {
+static const unsigned int sinus[] = {
   5157, 5313, 5470, 5626, 5782, 5936, 6090, 6243, 6394, 6545, 6693, 6840, 6985,
   7128, 7269, 7408, 7545, 7679, 7810, 7938, 8064, 8187, 8306, 8422, 8535, 8644,
   8750, 8852, 8950, 9045, 9135, 9221, 9303, 9381, 9454, 9524, 9588, 9648, 9704,
@@ -74,6 +74,9 @@ static void fly(struct ProgressData *bar, bool moved)
 
   fputs(buf, stderr);
   bar->tick += 2;
+  if(bar->tick >= 200)
+    bar->tick -= 200;
+
   bar->bar += (moved?bar->barmove:0);
   if(bar->bar >= (bar->width - 6)) {
     bar->barmove = -1;
