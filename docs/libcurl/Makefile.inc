@@ -21,4 +21,5 @@ man_MANS = curl_easy_cleanup.3 curl_easy_getinfo.3 curl_easy_init.3      \
   curl_mime_init.3 curl_mime_free.3 curl_mime_addpart.3 curl_mime_name.3 \
   curl_mime_data.3 curl_mime_data_cb.3 curl_mime_filedata.3              \
   curl_mime_filename.3 curl_mime_subparts.3                              \
-  curl_mime_type.3 curl_mime_headers.3 curl_mime_encoder.3
+  curl_mime_type.3 curl_mime_headers.3 curl_mime_encoder.3               \
+  curl_global_sslget.3

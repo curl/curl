@@ -1316,6 +1316,11 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
   return CURLSSLSET_UNKNOWN_BACKEND;
 }
 
+const curl_ssl_backend *curl_global_sslget(void)
+{
+  return &Curl_ssl->info;
+}
+
 #else /* USE_SSL */
 CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
                               const curl_ssl_backend ***avail)
@@ -1324,6 +1329,12 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
   (void)name;
   (void)avail;
   return CURLSSLSET_NO_BACKENDS;
+}
+
+const curl_ssl_backend *curl_global_sslget(void)
+{
+  static curl_ssl_backend b = { CURLSSLBACKEND_NONE, "none" };
+  return &b;
 }
 
 #endif /* !USE_SSL */

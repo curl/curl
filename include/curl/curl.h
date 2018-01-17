@@ -2381,6 +2381,9 @@ typedef enum {
 CURL_EXTERN CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
                                           const curl_ssl_backend ***avail);
 
+/* Get the selected SSL backend. */
+CURL_EXTERN const curl_ssl_backend *curl_global_sslget(void);
+
 /*
  * NAME curl_slist_append()
  *
