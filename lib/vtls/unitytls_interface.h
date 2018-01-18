@@ -255,6 +255,7 @@ typedef struct
     // TODO: Sort into list (need to change mono as well)
     unitytls_key_parse_pem_t unitytls_key_parse_pem;
     unitytls_x509list_append_pem_t unitytls_x509list_append_pem;
+    unitytls_tlsctx_protocolrange UNITYTLS_TLSCTX_PROTOCOLRANGE_DEFAULT;
 } unitytls_interface_struct;
 
 

@@ -342,11 +342,12 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
   const char* const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
 
   unitytls_errorstate err = unitytls->unitytls_errorstate_create();
-  unitytls_tlsctx_protocolrange protocols;
+  unitytls_tlsctx_protocolrange protocol_range;
   unitytls_tlsctx_callbacks callbacks = { on_read, on_write, connssl };
 
   /* unitytls only supports TLS 1.0-1.2 */
-  if(SSL_CONN_CONFIG(version) != CURL_SSLVERSION_TLSv1_0 &&
+  if(SSL_CONN_CONFIG(version) != CURL_SSLVERSION_DEFAULT &&
+     SSL_CONN_CONFIG(version) != CURL_SSLVERSION_TLSv1_0 &&
      SSL_CONN_CONFIG(version) != CURL_SSLVERSION_TLSv1_1 &&
      SSL_CONN_CONFIG(version) != CURL_SSLVERSION_TLSv1_2) {
     failf(data, "unitytls only supports TLS 1.0-1.2");
@@ -409,21 +410,24 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
 
   /* Create and configure context */
   switch(SSL_CONN_CONFIG(version)) {
+    case CURL_SSLVERSION_DEFAULT:
+      protocol_range = unitytls->UNITYTLS_TLSCTX_PROTOCOLRANGE_DEFAULT;
+      break;
     case CURL_SSLVERSION_TLSv1_0:
-      protocols.max = protocols.min = UNITYTLS_PROTOCOL_TLS_1_0;
+      protocol_range.max = protocol_range.min = UNITYTLS_PROTOCOL_TLS_1_0;
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      protocols.max = protocols.min = UNITYTLS_PROTOCOL_TLS_1_1;
+      protocol_range.max = protocol_range.min = UNITYTLS_PROTOCOL_TLS_1_1;
       break;
     case CURL_SSLVERSION_TLSv1_2:
-      protocols.max = protocols.min = UNITYTLS_PROTOCOL_TLS_1_2;
+      protocol_range.max = protocol_range.min = UNITYTLS_PROTOCOL_TLS_1_2;
       break;
     default:
       failf(data, "Unrecognized/unsupported parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;
   }
 
-  connssl->ctx = unitytls->unitytls_tlsctx_create_client(protocols, callbacks, hostname, strlen(hostname), &err);
+  connssl->ctx = unitytls->unitytls_tlsctx_create_client(protocol_range, callbacks, hostname, strlen(hostname), &err);
   unitytls->unitytls_tlsctx_set_certificate_callback(connssl->ctx, on_certificate_request, connssl, &err);
   unitytls->unitytls_tlsctx_set_x509verify_callback(connssl->ctx, on_verify, connssl, &err);
   if(!err.code != UNITYTLS_SUCCESS) {
