@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -3481,6 +3481,23 @@ AC_CHECK_TYPE([bool],[
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
 #endif
+])
+
+AC_MSG_CHECKING([if time_t is unsigned])
+AC_RUN_IFELSE([
+  AC_LANG_SOURCE([[
+  #include <time.h>
+  #include <limits.h>
+  time_t t = ULONG_MAX;
+  return (t > 0);
+  ]])] ,[
+  AC_MSG_RESULT([yes])
+  AC_DEFINE(HAVE_TIME_T_UNSIGNED, 1, [Define this if time_t is unsigned])
+],[
+  AC_MSG_RESULT([no])
+],[
+  dnl cross-compiling, most systems are unsigned
+  AC_MSG_RESULT([no])
 ])
 
 CURL_CONFIGURE_CURL_SOCKLEN_T
