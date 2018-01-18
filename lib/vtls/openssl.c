@@ -259,7 +259,7 @@ static void tap_ssl_key(const SSL *ssl, ssl_tap_state_t *state)
   if(!session || !keylog_file_fp)
     return;
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
   /* ssl->s3 is not checked in openssl 1.1.0-pre6, but let's assume that
    * we have a valid SSL context if we have a non-NULL session. */
   SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
@@ -944,20 +944,23 @@ static int Curl_ossl_init(void)
 #endif
 
 #ifdef ENABLE_SSLKEYLOGFILE
-  keylog_file_name = curl_getenv("SSLKEYLOGFILE");
-  if(keylog_file_name && !keylog_file_fp) {
-    keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
-    if(keylog_file_fp) {
+  if(!keylog_file_fp) {
+    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
+    if(keylog_file_name) {
+      keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
+      if(keylog_file_fp) {
 #ifdef WIN32
-      if(setvbuf(keylog_file_fp, NULL, _IONBF, 0)) {
+        if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
 #else
-      if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096)) {
+        if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
 #endif
-        fclose(keylog_file_fp);
-        keylog_file_fp = NULL;
+        {
+          fclose(keylog_file_fp);
+          keylog_file_fp = NULL;
+        }
       }
+      Curl_safefree(keylog_file_name);
     }
-    Curl_safefree(keylog_file_name);
   }
 #endif
 
