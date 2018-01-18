@@ -100,6 +100,10 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 
+#elif defined USE_UNITYTLS
+
+#include "vtls/unitytls_interface.h"
+
 #elif defined USE_POLARSSL
 
 #include <polarssl/ssl.h>
@@ -295,6 +299,13 @@ struct ssl_connect_data {
   mbedtls_pk_context pk;
   mbedtls_ssl_config config;
   const char *protocols[3];
+#elif defined (USE_UNITYTLS)
+  unitytls_x509list* cacert;
+  unitytls_x509list* clicert;
+  unitytls_key* pk;
+  unitytls_tlsctx* ctx;
+  struct connectdata* conn;
+  curl_socket_t sockfd;
 #elif defined(USE_POLARSSL)
   ctr_drbg_context ctr_drbg;
   entropy_context entropy;
