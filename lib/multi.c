@@ -581,7 +581,8 @@ static CURLcode multi_done(struct connectdata **connp,
       && !(conn->ntlm.state == NTLMSTATE_TYPE2 ||
            conn->proxyntlm.state == NTLMSTATE_TYPE2)
 #endif
-     ) || conn->bits.close || premature) {
+     ) || conn->bits.close
+       || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
     CURLcode res2 = Curl_disconnect(conn, premature); /* close connection */
 
     /* If we had an error already, make sure we return that one. But
