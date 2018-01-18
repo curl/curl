@@ -46,6 +46,7 @@ MEM strdup.c: realloc()
 MEM escape.c: free()
 </file>
 <stripfile>
+s/^MEM escape.c:\d+ free\(\(nil\)\)[\n]$//
 s/ =.*//
 s/\(.*\)/()/
 s/:\d+/:/
