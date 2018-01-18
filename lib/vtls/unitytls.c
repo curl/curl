@@ -430,7 +430,7 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
   connssl->ctx = unitytls->unitytls_tlsctx_create_client(protocol_range, callbacks, hostname, strlen(hostname), &err);
   unitytls->unitytls_tlsctx_set_certificate_callback(connssl->ctx, on_certificate_request, connssl, &err);
   unitytls->unitytls_tlsctx_set_x509verify_callback(connssl->ctx, on_verify, connssl, &err);
-  if(!err.code != UNITYTLS_SUCCESS) {
+  if(err.code != UNITYTLS_SUCCESS) {
     failf(data, "Error creating and configuring untiytls context: %i", err.code);
     return CURLE_SSL_CONNECT_ERROR;
   }
