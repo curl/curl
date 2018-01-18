@@ -955,11 +955,11 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                                     sshc->sshagent_identity);
 
         if(rc < 0) {
-          if(rc != LIBSSH2_ERROR_EAGAIN)
+          if(rc != LIBSSH2_ERROR_EAGAIN) {
             /* tried and failed? go to next identity */
             sshc->sshagent_prev_identity = sshc->sshagent_identity;
-          else
-            break;
+          }
+          break;
         }
       }
 
