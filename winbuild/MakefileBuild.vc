@@ -151,6 +151,7 @@ MBEDTLS_LIBS   = mbedtls.lib mbedcrypto.lib mbedx509.lib
 !IF "$(WITH_UNITYTLS)"=="yes"
 USE_UNITYTLS    = true
 UNITYTLS_CFLAGS = /DUSE_UNITYTLS
+UNITYTLS_LIBS    = crypt32.lib
 !ENDIF
 
 !IF "$(WITH_CARES)"=="dll"
@@ -352,6 +353,7 @@ LFLAGS = $(LFLAGS) $(MBEDTLS_LFLAGS) $(MBEDTLS_LIBS)
 
 !IF "$(USE_UNITYTLS)"=="true"
 CFLAGS = $(CFLAGS) $(UNITYTLS_CFLAGS)
+LFLAGS = $(LFLAGS) $(UNITYTLS_LIBS)
 !ENDIF
 
 !IF "$(USE_CARES)"=="true"
