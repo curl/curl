@@ -173,17 +173,16 @@ int tool_progress_cb(void *clientp,
 void progressbarinit(struct ProgressData *bar,
                      struct OperationConfig *config)
 {
-  char *colp;
   int cols = 0;
 
 #ifdef TIOCGSIZE
   struct ttysize ts;
-  ioctl(STDIN_FILENO, TIOCGSIZE, &ts);
-  cols = ts.ts_cols;
+  if(!ioctl(STDIN_FILENO, TIOCGSIZE, &ts))
+    cols = ts.ts_cols;
 #elif defined(TIOCGWINSZ)
   struct winsize ts;
-  ioctl(STDIN_FILENO, TIOCGWINSZ, &ts);
-  cols = ts.ws_col;
+  if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
+    cols = ts.ws_col;
 #endif /* TIOCGSIZE */
 
   memset(bar, 0, sizeof(struct ProgressData));
@@ -195,7 +194,7 @@ void progressbarinit(struct ProgressData *bar,
     bar->initial_size = config->resume_from;
 
   if(!cols) {
-    colp = curlx_getenv("COLUMNS");
+    char *colp = curlx_getenv("COLUMNS");
     if(colp) {
       char *endptr;
       long num = strtol(colp, &endptr, 10);
