@@ -944,20 +944,23 @@ static int Curl_ossl_init(void)
 #endif
 
 #ifdef ENABLE_SSLKEYLOGFILE
-  keylog_file_name = curl_getenv("SSLKEYLOGFILE");
-  if(keylog_file_name && !keylog_file_fp) {
-    keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
-    if(keylog_file_fp) {
+  if(!keylog_file_fp) {
+    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
+    if(keylog_file_name) {
+      keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
+      if(keylog_file_fp) {
 #ifdef WIN32
-      if(setvbuf(keylog_file_fp, NULL, _IONBF, 0)) {
+        if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
 #else
-      if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096)) {
+        if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
 #endif
-        fclose(keylog_file_fp);
-        keylog_file_fp = NULL;
+        {
+          fclose(keylog_file_fp);
+          keylog_file_fp = NULL;
+        }
       }
+      Curl_safefree(keylog_file_name);
     }
-    Curl_safefree(keylog_file_name);
   }
 #endif
 
