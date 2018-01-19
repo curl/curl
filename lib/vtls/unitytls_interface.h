@@ -218,12 +218,14 @@ typedef void                        (*unitytls_tlsctx_set_certificate_callback_t
 typedef struct
 {
     UInt64 INVALID_HANDLE;
+    unitytls_tlsctx_protocolrange UNITYTLS_TLSCTX_PROTOCOLRANGE_DEFAULT;
 
     unitytls_errorstate_create_t unitytls_errorstate_create;
     unitytls_errorstate_raise_error_t unitytls_errorstate_raise_error;
 
     unitytls_key_get_ref_t unitytls_key_get_ref;
     unitytls_key_parse_der_t unitytls_key_parse_der;
+    unitytls_key_parse_pem_t unitytls_key_parse_pem;
     unitytls_key_free_t unitytls_key_free;
 
     unitytls_x509_export_der_t unitytls_x509_export_der;
@@ -233,6 +235,7 @@ typedef struct
     unitytls_x509list_create_t unitytls_x509list_create;
     unitytls_x509list_append_t unitytls_x509list_append;
     unitytls_x509list_append_der_t unitytls_x509list_append_der;
+    unitytls_x509list_append_pem_t unitytls_x509list_append_pem;
     unitytls_x509list_free_t unitytls_x509list_free;
 
     unitytls_x509verify_default_ca_t unitytls_x509verify_default_ca;
@@ -251,11 +254,6 @@ typedef struct
     unitytls_tlsctx_read_t unitytls_tlsctx_read;
     unitytls_tlsctx_write_t unitytls_tlsctx_write;
     unitytls_tlsctx_free_t unitytls_tlsctx_free;
-
-    // TODO: Sort into list (need to change mono as well)
-    unitytls_key_parse_pem_t unitytls_key_parse_pem;
-    unitytls_x509list_append_pem_t unitytls_x509list_append_pem;
-    unitytls_tlsctx_protocolrange UNITYTLS_TLSCTX_PROTOCOLRANGE_DEFAULT;
 } unitytls_interface_struct;
 
 
