@@ -11,14 +11,11 @@
 #include "unitytls_interface.h"
 #include "urldata.h"
 #include "sendf.h"
-#include "inet_pton.h"
 #include "vtls.h"
-#include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 
 /* The last #include files should be: */
-#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
