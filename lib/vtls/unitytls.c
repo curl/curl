@@ -262,21 +262,36 @@ static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_re
   struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
   struct connectdata* conn = connssl->conn;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
+  const bool verifyhost = SSL_CONN_CONFIG(verifyhost);
   const char* const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
+  unitytls_x509verify_result verify_result = UNITYTLS_X509VERIFY_SUCCESS;
 
-  if(!verifypeer)
-    return UNITYTLS_X509VERIFY_SUCCESS;
+  /* According to documentation the options verifypeer and verifyhost are independent of each other! */
+  /* UnityTls however, verifies both the certificate as well as the hostname in the same call. */
+  if(verifypeer || verifyhost) {
+    if(connssl->cacert) {
+      unitytls_x509list_ref trustCAref = unitytls->unitytls_x509list_get_ref(connssl->cacert, errorState);
+      verify_result = unitytls->unitytls_x509verify_explicit_ca(chain, trustCAref, hostname, strlen(hostname), NULL, NULL, errorState);
+    }
+    else {
+      verify_result = unitytls->unitytls_x509verify_default_ca(chain, hostname, strlen(hostname), NULL, NULL, errorState);
+    }
 
-  /* todo: should filter out CN missmatch if verifyhost is false */
-  /* not sure though what to do if (!verifypeer && verifyhost) - full verification and mask for hostname? */
+    /* Filter out special codes right away, so we can safely filter bitflags later on. */
+    if(verify_result == UNITYTLS_X509VERIFY_NOT_DONE || verify_result == UNITYTLS_X509VERIFY_FATAL_ERROR)
+      return verify_result;
 
-  if(connssl->cacert) {
-    unitytls_x509list_ref trustCAref = unitytls->unitytls_x509list_get_ref(connssl->cacert, errorState);
-    return unitytls->unitytls_x509verify_explicit_ca(chain, trustCAref, hostname, strlen(hostname), NULL, NULL, errorState);
+    /* not interested in hostname verification */
+    if(!verifyhost) {
+      verify_result &= ~((unitytls_x509verify_result)UNITYTLS_X509VERIFY_FLAG_CN_MISMATCH);
+    }
+    /* only interested in hostname verification */
+    else if(!verifypeer) {
+      verify_result &=  ((unitytls_x509verify_result)UNITYTLS_X509VERIFY_FLAG_CN_MISMATCH);
+    }
   }
-  else {
-    return unitytls->unitytls_x509verify_default_ca(chain, hostname, strlen(hostname), NULL, NULL, errorState);
-  }
+
+  return verify_result;
 }
 
 static ssize_t unitytls_send(struct connectdata *conn, int sockindex,
@@ -449,9 +464,6 @@ static CURLcode unitytls_connect_step2(struct Curl_easy* data, struct ssl_connec
     return CURLE_OK;  /* all fine but no state change yet */
   }
 
-  /* If verifypeer is not set we already block our own verification in the verify method.
-   * So if we get a verification error after all, it is probably user verification.
-   * In any case we better treat the state just like verificatoin was enabled. */
   if(verifyresult != UNITYTLS_X509VERIFY_SUCCESS) {
     if(verifyresult == UNITYTLS_X509VERIFY_FATAL_ERROR)
       failf(data, "Cert handshake failed. verify result: UNITYTLS_X509VERIFY_FATAL_ERROR. error state: %i", err.code);
