@@ -606,9 +606,13 @@ void Curl_unitytls_close(struct connectdata *conn, int sockindex)
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
 
   unitytls->unitytls_x509list_free(connssl->cacert);
+  connssl->cacert = NULL;
   unitytls->unitytls_x509list_free(connssl->clicert);
+  connssl->clicert = NULL;
   unitytls->unitytls_key_free(connssl->pk);
+  connssl->pk = NULL;
   unitytls->unitytls_tlsctx_free(connssl->ctx);
+  connssl->ctx = NULL;
 }
 
 size_t Curl_unitytls_version(char *buffer, size_t size)
