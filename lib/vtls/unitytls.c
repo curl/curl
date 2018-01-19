@@ -261,17 +261,8 @@ static unitytls_x509verify_result on_verify(void* userData, unitytls_x509list_re
 {
   struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
   struct connectdata* conn = connssl->conn;
-  struct Curl_easy *data = conn->data;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   const char* const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name : conn->host.name;
-
-  /* give application a chance to interfere with SSL set up. */
-  if(data->set.ssl.fsslctx) {
-    if((*data->set.ssl.fsslctx)(data, connssl->ctx, data->set.ssl.fsslctxp)) {
-      failf(data, "error signaled by ssl ctx callback");
-      return UNITYTLS_X509VERIFY_FLAG_NOT_TRUSTED;
-    }
-  }
 
   if(!verifypeer)
     return UNITYTLS_X509VERIFY_SUCCESS;
@@ -435,6 +426,15 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
   connssl->conn = conn;
   connssl->sockfd = conn->sock[sockindex];
   connssl->connecting_state = ssl_connect_2;
+
+  /* give application a chance to interfere with SSL set up. */
+  if(data->set.ssl.fsslctx) {
+    CURLcode result = (*data->set.ssl.fsslctx)(data, connssl->ctx, data->set.ssl.fsslctxp);
+    if(result != CURLE_OK) {
+      failf(data, "error signaled by ssl ctx callback");
+      return result;
+    }
+  }
 
   return CURLE_OK;
 }
