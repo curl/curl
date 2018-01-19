@@ -1599,7 +1599,7 @@ struct UserDefined {
   bool http_keep_sending_on_error; /* for HTTP status codes >= 300 */
   bool http_follow_location; /* follow HTTP redirects */
   bool http_transfer_encoding; /* request compressed HTTP transfer-encoding */
-  bool http_disable_hostname_check_before_authentication;
+  bool allow_auth_to_other_hosts;
   bool include_header;   /* include received protocol headers in data output */
   bool http_set_referer; /* is a custom referer used */
   bool http_auto_referer; /* set "correct" referer when following location: */

@@ -714,7 +714,7 @@ Curl_http_output_auth(struct connectdata *conn,
   if(!data->state.this_is_a_follow ||
      conn->bits.netrc ||
      !data->state.first_host ||
-     data->set.http_disable_hostname_check_before_authentication ||
+     data->set.allow_auth_to_other_hosts ||
      strcasecompare(data->state.first_host, conn->host.name)) {
     result = output_auth_headers(conn, authhost, request, path, FALSE);
   }
@@ -1635,6 +1635,14 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
           else if((conn->httpversion == 20) &&
                   checkprefix("Transfer-Encoding:", headers->data))
             /* HTTP/2 doesn't support chunked requests */
+            ;
+          else if(checkprefix("Authorization:", headers->data) &&
+                  /* be careful of sending this potentially sensitive header to
+                     other hosts */
+                  (data->state.this_is_a_follow &&
+                   data->state.first_host &&
+                   !data->set.allow_auth_to_other_hosts &&
+                   !strcasecompare(data->state.first_host, conn->host.name)))
             ;
           else {
             CURLcode result = Curl_add_bufferf(req_buffer, "%s\r\n",
