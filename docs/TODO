@@ -27,6 +27,8 @@
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
  1.11 minimize dependencies with dynamically loaded modules
+ 1.12 updated DNS server while running
+ 1.13 DNS-over-HTTPS
  1.14 Typesafe curl_easy_setopt()
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
@@ -272,6 +274,25 @@
  having to load ALL dependencies since only the necessary ones for this
  app/invoke/used protocols would be necessary to load.  See
  https://github.com/curl/curl/issues/349
+
+1.12 updated DNS server while running
+
+ If /etc/resolv.conf gets updated while a program using libcurl is running, it
+ is may cause name resolves to fail unless res_init() is called. We should
+ consider calling res_init() + retry once unconditionally on all name resolve
+ failures to mitigate against this. Firefox works like that. Note that Windows
+ doesn't have res_init() or an alternative.
+
+ https://github.com/curl/curl/issues/2251
+
+1.13 DNS-over-HTTPS
+
+ By adding support for DNS-over-HTTPS curl could resolve host names using a
+ totally separate name server than the standard system resolver, while at the
+ same time doing so over a communication channel that enhances privacy and
+ security.
+
+ https://github.com/curl/curl/wiki/DNS-over-HTTPS
 
 1.14 Typesafe curl_easy_setopt()
 
