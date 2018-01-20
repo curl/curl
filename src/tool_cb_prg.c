@@ -173,18 +173,7 @@ int tool_progress_cb(void *clientp,
 void progressbarinit(struct ProgressData *bar,
                      struct OperationConfig *config)
 {
-  int cols = 0;
-
-#ifdef TIOCGSIZE
-  struct ttysize ts;
-  if(!ioctl(STDIN_FILENO, TIOCGSIZE, &ts))
-    cols = ts.ts_cols;
-#elif defined(TIOCGWINSZ)
-  struct winsize ts;
-  if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
-    cols = ts.ws_col;
-#endif /* TIOCGSIZE */
-
+  char *colp;
   memset(bar, 0, sizeof(struct ProgressData));
 
   /* pass this through to progress function so
@@ -193,24 +182,33 @@ void progressbarinit(struct ProgressData *bar,
   if(config->use_resume)
     bar->initial_size = config->resume_from;
 
-  if(!cols) {
-    char *colp = curlx_getenv("COLUMNS");
-    if(colp) {
-      char *endptr;
-      long num = strtol(colp, &endptr, 10);
-      if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 0))
-        bar->width = (int)num;
-      else
-        bar->width = 79;
-      curl_free(colp);
-    }
-    else
-      bar->width = 79;
+  colp = curlx_getenv("COLUMNS");
+  if(colp) {
+    char *endptr;
+    long num = strtol(colp, &endptr, 10);
+    if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 20))
+      bar->width = (int)num;
+    curl_free(colp);
   }
-  else
-    bar->width = cols;
 
-  if(bar->width > MAX_BARLENGTH)
+  if(!bar->width) {
+    int cols = 0;
+
+#ifdef TIOCGSIZE
+    struct ttysize ts;
+    if(!ioctl(STDIN_FILENO, TIOCGSIZE, &ts))
+      cols = ts.ts_cols;
+#elif defined(TIOCGWINSZ)
+    struct winsize ts;
+    if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
+      cols = ts.ws_col;
+#endif /* TIOCGSIZE */
+    bar->width = cols;
+  }
+
+  if(!bar->width)
+    bar->width = 79;
+  else if(bar->width > MAX_BARLENGTH)
     bar->width = MAX_BARLENGTH;
 
   bar->out = config->global->errors;
