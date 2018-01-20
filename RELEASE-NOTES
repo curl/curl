@@ -77,6 +77,21 @@ This release includes the following bugfixes:
  o http2: fix incorrect trailer buffer size [40]
  o setopt: reintroduce non-static Curl_vsetopt() for OS400 support [41]
  o setopt: fix SSLVERSION to allow CURL_SSLVERSION_MAX_ values [42]
+ o configure.ac: append extra linker flags instead of prepending them [43]
+ o HTTP: bail out on negative Content-Length: values [44]
+ o docs: comment about CURLE_READ_ERROR returned by curl_mime_filedata
+ o mime: clone mime tree upon easy handle duplication [45]
+ o openssl: enable SSLKEYLOGFILE support by default [46]
+ o smtp/pop3/imap_get_message: decrease the data length too... [47]
+ o CURLOPT_TCP_NODELAY.3: fix typo [48]
+ o SMB: fix numeric constant suffix and variable types [49]
+ o ftp-wildcard: fix matching an empty string with "*[^a]" [50]
+ o curl_fnmatch: only allow 5 '*' sections in a single pattern
+ o openssl: fix potential memory leak in SSLKEYLOGFILE logic
+ o SSH: Fix state machine for ssh-agent authentication [51]
+ o examples/url2file.c: add missing curl_global_cleanup() call [52]
+ o http2: don't close connection when single transfer is stopped [53]
+ o libcurl-env.3: first version
 
 This release includes the following known bugs:
 
@@ -85,17 +100,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ahodesuka on github, Basuke Suzuki, cmfrolick on github, Daniel Stenberg,
-  David Benjamin, Dima Tisnek, Dimitrios Apostolou, Dmitry Kostjuchenko,
-  Dominik Hölzl, Elliot Saba, Frank Gevaerts, Gisle Vanem, guitared on github,
-  Jan Ehrhardt, Johannes Schindelin, John DeHelian, jonrumsey on github,
-  Martin Galvan, Matthew Kerwin, Mattias Fornander, Michael Felt,
+  ahodesuka on github, Basuke Suzuki, Brad Spencer, Chester Liu,
+  cmfrolick on github, Daniel Stenberg, Dan Johnson, David Benjamin,
+  Dima Tisnek, Dimitrios Apostolou, Dmitry Kostjuchenko, Dominik Hölzl,
+  Elliot Saba, Frank Gevaerts, Gisle Vanem, guitared on github, Jan Ehrhardt,
+  Johannes Schindelin, John DeHelian, jonrumsey on github,
+  jungle-boogie on github, Kartik Mahajan, Martin Galvan, Matthew Kerwin,
+  Mattias Fornander, Max Dymond, Michael Felt, Michael Gmelin,
   Michael Kaufmann, Mikalai Ananenka, Nikos Mavrogiannopoulos, Oleg Pudeyev,
   Patrick Dawson, Patrick Monnerat, Per Malmberg, Pete Lomax, Rainer Canavan,
   Randall S. Becker, Ray Satiro, Richard Alcock, Sean MacLennan, Stepan Broz,
-  Steve Holme, Thomas van Hesteren, W. Mark Kubacki, Zachary Seguin,
-  Zhouyihai Ding,
-  (40 contributors)
+  Steve Holme, Thomas van Hesteren, W. Mark Kubacki, XhstormR on github,
+  Zachary Seguin, Zhouyihai Ding,
+  (48 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -143,3 +160,16 @@ References to bug reports and discussions on issues:
  [40] = https://curl.haxx.se/bug/?i=2231
  [41] = https://curl.haxx.se/bug/?i=2230
  [42] = https://curl.haxx.se/bug/?i=2225
+ [43] = https://curl.haxx.se/bug/?i=2234
+ [44] = https://curl.haxx.se/bug/?i=2212
+ [45] = https://curl.haxx.se/bug/?i=2235
+ [46] = https://curl.haxx.se/bug/?i=2210
+ [47] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=5206
+ [48] = https://curl.haxx.se/bug/?i=2239
+ [49] = https://curl.haxx.se/bug/?i=2211
+ [50] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=5251
+ [51] = https://curl.haxx.se/bug/?i=2248
+ [52] = https://curl.haxx.se/bug/?i=2245
+ [53] = https://curl.haxx.se/bug/?i=2237
+
+
