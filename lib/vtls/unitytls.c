@@ -15,6 +15,10 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 
+#if !defined(WIN32)
+#include <dirent.h>
+#endif
+
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
@@ -81,14 +85,17 @@ static unitytls_key* unitytls_key_parse_pem_from_file(const char* filepath, cons
   return key;
 }
 
-static bool unitytls_parse_all_pem_in_dir(const char* path, unitytls_x509list* list, unitytls_errorstate* err)
+static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* path, unitytls_x509list* list, unitytls_errorstate* err)
 {
-  bool success = true;
-  size_t len = strlen(path);
+  bool success = false;
 #if defined(WIN32)
+  size_t len = strlen(path);
   WIN32_FIND_DATAA file_data;
   char filename[MAX_PATH];
   HANDLE hFind;
+
+  if(err->code != UNITYTLS_SUCCESS)
+    return false;
 
   /* Path needs to end with '\*' */
   memset(filename, 0, MAX_PATH);
@@ -103,46 +110,47 @@ static bool unitytls_parse_all_pem_in_dir(const char* path, unitytls_x509list* l
   do
   {
     if(file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        continue;
+      continue;
 
+    /* Try adding the file. Might or might not be a PEM file, so failure is not an error */
     unitytls_append_pem_file(file_data.cFileName, list, err);
     if(err->code != UNITYTLS_SUCCESS)
-      break;
+      *err = unitytls->unitytls_errorstate_create(); /* Need to reset to keep future falls to unitytls_append_pem_file working */
+    else
+      success = true;
   }
   while(FindNextFileA(hFind, &file_data) != 0);
-
-  if (success && GetLastError() != ERROR_NO_MORE_FILES)
-      success = false;
 
   FindClose(hFind);
 #else /* WIN32 */
   int snp_ret;
-  struct dirent *ep;
+  struct dirent *entry;
   struct stat sb;
   char entry_name[512];
-  DIR *dp = opendir(path);
+  DIR *dp;
 
+  if(err->code != UNITYTLS_SUCCESS)
+    return false;
+
+  dp = opendir(path);
   if(dp == NULL)
     success = false;
 
-  while(success && ep = readdir(dp)) {
+  while((entry = readdir(dp)) != NULL) {
     snp_ret = snprintf(entry_name, sizeof(entry_name), "%s/%s", path, entry->d_name);
     if(snp_ret < 0 || (size_t)snp_ret >= sizeof(entry_name)) {
-      success = true;
-      break;
-    }
-
-    if(stat(entry_name, &sb) == -1){
-      success = true;
       break;
     }
 
     if(!S_ISREG(sb.st_mode))
       continue;
 
+    /* Try adding the file. Might or might not be a PEM file, so failure is not an error */
     unitytls_append_pem_file(entry_name, list, err);
-    if(err.code != UNITYTLS_SUCCESS)
-      break;
+    if(err->code != UNITYTLS_SUCCESS)
+      *err = unitytls->unitytls_errorstate_create(); /* Need to reset to keep future falls to unitytls_append_pem_file working */
+    else
+      success = true;
   }
 
   closedir(dp);
@@ -183,7 +191,7 @@ static size_t on_read(void* userData, UInt8* buffer, size_t bufferLen, unitytls_
     }
 
     /* socket is writable */
-    result = Curl_read_plain(connssl->sockfd, buffer + read, bufferLen - read, &this_read);
+    result = Curl_read_plain(connssl->sockfd, (char*)(buffer + read), bufferLen - read, &this_read);
     if(result == CURLE_AGAIN)
       continue;
     else if(result != CURLE_OK) {
@@ -374,7 +382,7 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
   }
 
   if(ssl_capath) {
-    if(!unitytls_parse_all_pem_in_dir(ssl_capath, connssl->cacert, &err)) {
+    if(!unitytls_parse_all_pem_in_dir(data, ssl_capath, connssl->cacert, &err)) {
       failf(data, "Error reading ca cert path from %s", ssl_cafile);
       if(verifypeer)
         return CURLE_SSL_CACERT;
