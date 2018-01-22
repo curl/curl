@@ -4,7 +4,7 @@ Curl and libcurl 7.58.0
  Command line options:         211
  curl_easy_setopt() options:   249
  Public functions in libcurl:  74
- Contributors:                 1649
+ Contributors:                 1685
 
 This release includes the following changes:
 
@@ -13,6 +13,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o http2: fix incorrect trailer buffer size [40]
+ o http: prevent custom Authorization headers in redirects [55]
  o travis: add boringssl build [1]
  o examples/xmlstream.c: don't switch off CURL_GLOBAL_SSL [2]
  o SSL: Avoid magic allocation of SSL backend specific data [3]
@@ -74,7 +76,6 @@ This release includes the following bugfixes:
  o progress: calculate transfer speed on milliseconds if possible [38]
  o system.h: check __LONG_MAX__ for defining curl_off_t [31]
  o easy: fix connection ownership in curl_easy_pause [39]
- o http2: fix incorrect trailer buffer size [40]
  o setopt: reintroduce non-static Curl_vsetopt() for OS400 support [41]
  o setopt: fix SSLVERSION to allow CURL_SSLVERSION_MAX_ values [42]
  o configure.ac: append extra linker flags instead of prepending them [43]
@@ -92,6 +93,8 @@ This release includes the following bugfixes:
  o examples/url2file.c: add missing curl_global_cleanup() call [52]
  o http2: don't close connection when single transfer is stopped [53]
  o libcurl-env.3: first version
+ o curl: progress bar refresh, get width using ioctl() [54]
+ o CONNECT_TO: fail attempt to set an IPv6 numerical without IPv6 support [56]
 
 This release includes the following known bugs:
 
@@ -100,19 +103,20 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  ahodesuka on github, Basuke Suzuki, Brad Spencer, Chester Liu,
-  cmfrolick on github, Daniel Stenberg, Dan Johnson, David Benjamin,
-  Dima Tisnek, Dimitrios Apostolou, Dmitry Kostjuchenko, Dominik Hölzl,
-  Elliot Saba, Frank Gevaerts, Gisle Vanem, guitared on github, Jan Ehrhardt,
-  Johannes Schindelin, John DeHelian, jonrumsey on github,
-  jungle-boogie on github, Kartik Mahajan, Martin Galvan, Matthew Kerwin,
-  Mattias Fornander, Max Dymond, Michael Felt, Michael Gmelin,
-  Michael Kaufmann, Mikalai Ananenka, Nikos Mavrogiannopoulos, Oleg Pudeyev,
-  Patrick Dawson, Patrick Monnerat, Per Malmberg, Pete Lomax, Rainer Canavan,
-  Randall S. Becker, Ray Satiro, Richard Alcock, Sean MacLennan, Stepan Broz,
-  Steve Holme, Thomas van Hesteren, W. Mark Kubacki, XhstormR on github,
+  ahodesuka on github, Andreas Schneider, Basuke Suzuki, Brad Spencer,
+  Chester Liu, cmfrolick on github, Craig de Stigter, Daniel Stenberg,
+  Dan Johnson, David Benjamin, Dima Tisnek, Dimitrios Apostolou,
+  Dmitry Kostjuchenko, Dominik Hölzl, Elliot Saba, Frank Gevaerts, Gisle Vanem,
+  guitared on github, Jan Ehrhardt, Johannes Schindelin, John DeHelian,
+  John Hascall, jonrumsey on github, jungle-boogie on github, Kartik Mahajan,
+  Martin Galvan, Matthew Kerwin, Mattias Fornander, Max Dymond, Michael Felt,
+  Michael Gmelin, Michael Kaufmann, Mikalai Ananenka, Nikos Mavrogiannopoulos,
+  Oleg Pudeyev, Patrick Dawson, Patrick Monnerat, Per Malmberg, Pete Lomax,
+  Rainer Canavan, Randall S. Becker, Ray Satiro, Richard Alcock, Robert Kolcun,
+  Sean MacLennan, Stanislav Zidek, Stepan Broz, Steve Holme,
+  Thomas van Hesteren, Tomas Mraz, W. Mark Kubacki, XhstormR on github,
   Zachary Seguin, Zhouyihai Ding,
-  (48 contributors)
+  (54 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -157,7 +161,7 @@ References to bug reports and discussions on issues:
  [37] = https://curl.haxx.se/bug/?i=2222
  [38] = https://curl.haxx.se/bug/?i=2200
  [39] = https://curl.haxx.se/bug/?i=2217
- [40] = https://curl.haxx.se/bug/?i=2231
+ [40] = https://curl.haxx.se/docs/adv_2018-824a.html
  [41] = https://curl.haxx.se/bug/?i=2230
  [42] = https://curl.haxx.se/bug/?i=2225
  [43] = https://curl.haxx.se/bug/?i=2234
@@ -171,5 +175,6 @@ References to bug reports and discussions on issues:
  [51] = https://curl.haxx.se/bug/?i=2248
  [52] = https://curl.haxx.se/bug/?i=2245
  [53] = https://curl.haxx.se/bug/?i=2237
-
-
+ [54] = https://curl.haxx.se/bug/?i=2242
+ [55] = https://curl.haxx.se/docs/adv_2018-b3bf.html
+ [56] = https://curl.haxx.se/mail/lib-2018-01/0087.html
