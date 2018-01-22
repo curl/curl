@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3611,6 +3611,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
 
   /* detect and extract RFC6874-style IPv6-addresses */
   if(*hostptr == '[') {
+#ifdef ENABLE_IPV6
     char *ptr = ++hostptr; /* advance beyond the initial bracket */
     while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '.')))
       ptr++;
@@ -3634,6 +3635,11 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
      * hostptr first, but I can't see anything wrong with that as no host
      * name nor a numeric can legally start with a bracket.
      */
+#else
+    failf(data, "Use of IPv6 in *_CONNECT_TO without IPv6 support built-in!");
+    free(host_dup);
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
 
   /* Get port number off server.com:1080 */
