@@ -202,6 +202,21 @@ void progressbarinit(struct ProgressData *bar,
     struct winsize ts;
     if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
       cols = ts.ws_col;
+#elif defined(_WIN32)
+    {
+      HANDLE  stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
+      CONSOLE_SCREEN_BUFFER_INFO console_info;
+
+      if((stderr_hnd != INVALID_HANDLE_VALUE) &&
+         GetConsoleScreenBufferInfo(stderr_hnd, &console_info)) {
+        /*
+         * Do not use +1 to get the true screen-width since writing a
+         * character at the right edge will cause a line wrap.
+         */
+        cols = (int)
+          (console_info.srWindow.Right - console_info.srWindow.Left);
+      }
+    }
 #endif /* TIOCGSIZE */
     bar->width = cols;
   }
