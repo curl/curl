@@ -97,9 +97,11 @@ CURLcode curl_addrinfo_callback(CURL *data,
     else {
       result = CURLE_OUT_OF_MEMORY;
     }
+    conn->async.dns = dns;
   }
-
-  conn->async.dns = dns;
+  else {
+    result = CURLE_COULDNT_RESOLVE_HOST;
+  }
 
  /* Set async.done TRUE last in this function since it may be used multi-
     threaded and once this is TRUE the other thread may read fields from the
