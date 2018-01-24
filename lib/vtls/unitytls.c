@@ -279,10 +279,13 @@ static ssize_t unitytls_send(struct connectdata *conn, int sockindex,
 
   written = unitytls->unitytls_tlsctx_write(conn->ssl[sockindex].ctx, (const UInt8*)mem, len, &err);
 
-  if(err.code != UNITYTLS_X509VERIFY_SUCCESS) {
-    *curlcode = CURLE_SEND_ERROR;
+  if(err.code != UNITYTLS_SUCCESS) {
     if(err.code == UNITYTLS_USER_WOULD_BLOCK)
       *curlcode = CURLE_AGAIN;
+    else {
+      *curlcode = CURLE_SEND_ERROR;
+      failf(conn->data, "Sending data failed with unitytls error code %i", err.code);
+    }
     return -1;
   }
 
@@ -298,10 +301,13 @@ static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
 
   read = unitytls->unitytls_tlsctx_read(conn->ssl[sockindex].ctx, (UInt8*)buf, buffersize, &err);
 
-  if(err.code != UNITYTLS_X509VERIFY_SUCCESS) {
-    *curlcode = CURLE_RECV_ERROR;
+  if(err.code != UNITYTLS_SUCCESS) {
     if(err.code == UNITYTLS_USER_WOULD_BLOCK)
       *curlcode = CURLE_AGAIN;
+    else {
+      *curlcode = CURLE_RECV_ERROR;
+      failf(conn->data, "Receiving data failed with unitytls error code %i", err.code);
+    }
     return -1;
   }
 
