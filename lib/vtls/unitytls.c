@@ -338,26 +338,20 @@ static CURLcode unitytls_connect_step1(struct connectdata* conn, int sockindex)
     connssl->cacert = unitytls->unitytls_x509list_create(&err);
 
   if(ssl_cafile) {
-    if(!unitytls_append_pem_file(ssl_cafile, connssl->cacert, &err)) {
+    if(!unitytls_append_pem_file(ssl_cafile, connssl->cacert, &err) || err.code != UNITYTLS_SUCCESS) {
       failf(data, "Error reading ca cert file from %s", ssl_cafile);
       if(verifypeer)
-        return CURLE_SSL_CACERT;
+        return CURLE_SSL_CACERT_BADFILE;
       err = unitytls->unitytls_errorstate_create(); /* ignore any errors that came up */
-    }
-    if(verifypeer && err.code != UNITYTLS_SUCCESS) {
-      return CURLE_SSL_CACERT_BADFILE;
     }
   }
 
   if(ssl_capath) {
-    if(!unitytls_parse_all_pem_in_dir(data, ssl_capath, connssl->cacert, &err)) {
+    if(!unitytls_parse_all_pem_in_dir(data, ssl_capath, connssl->cacert, &err) || err.code != UNITYTLS_SUCCESS) {
       failf(data, "Error reading ca cert path from %s", ssl_cafile);
       if(verifypeer)
         return CURLE_SSL_CACERT;
       err = unitytls->unitytls_errorstate_create(); /* ignore any errors that came up */
-    }
-    if(verifypeer && err.code != UNITYTLS_SUCCESS) {
-      return CURLE_SSL_CACERT_BADFILE;
     }
   }
 
