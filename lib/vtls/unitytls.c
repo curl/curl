@@ -476,12 +476,19 @@ static CURLcode unitytls_connect_step2(struct Curl_easy* data, struct ssl_connec
         return CURLE_SSL_CACERT;
       }
     }
-
+    
     /* Note that UNITYTLS_X509VERIFY_NOT_DONE is always always an error as well since we are never running in server mode (unitytls_tlsctx_create_server)
-     * which means that authentification method shoul always be called. */
-    return CURLE_PEER_FAILED_VERIFICATION;
+      * which means that authentification method should always be called. 
+      * However, this usually has a different reason so it is not CURLE_PEER_FAILED_VERIFICATION */
+    if (verifyresult == UNITYTLS_X509VERIFY_NOT_DONE) {
+      failf(data, "Handshake did not perform verification. UnityTls error code: %i", err.code);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    else
+      return CURLE_PEER_FAILED_VERIFICATION;
   }
 
+  /* We almost certainly have a verifyresult!=UNITYTLS_X509VERIFY_SUCCESS as well, but in theory it is still possible to hit this code. */
   if (err.code == UNITYTLS_SUCCESS) {
     connssl->connecting_state = ssl_connect_3;
     return CURLE_OK;
