@@ -23,7 +23,19 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/*
+* UnityTls interface
+*
+* Usually we expect the user to call curl_unitytls_set_interface before using curl.
+* However, this does not work for running curls' tests in which case we define UNITYTLS_LINKED and link directly against the UnityTLS module
+*/
+//#define UNITYTLS_LINKED
+
 static unitytls_interface_struct* unitytls = NULL;
+
+#if defined(UNITYTLS_LINKED)
+extern unitytls_interface_struct* unitytls_get_interface_struct();
+#endif
 
 void curl_unitytls_set_interface(unitytls_interface_struct* interface)
 {
@@ -33,11 +45,21 @@ void curl_unitytls_set_interface(unitytls_interface_struct* interface)
 static bool unitytls_check_interface_available(struct Curl_easy* data)
 {
   if(!unitytls) {
-    failf(data, "UnityTls interface was not set. Call Curl_unitytls_set_interface first.");
+#if defined(UNITYTLS_LINKED)
+    curl_unitytls_set_interface(unitytls_get_interface_struct());
+#else
+    if(data)
+      failf(data, "UnityTls interface was not set. Call Curl_unitytls_set_interface first.");
     return false;
+#endif
   }
   return true;
 }
+
+/*
+* Implementation
+*
+*/
 
 static char* load_file(const char* filepath, long* out_size)
 {
@@ -621,6 +643,8 @@ CURLcode Curl_unitytls_connect_nonblocking(struct connectdata *conn, int sockind
 void Curl_unitytls_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  if(!unitytls_check_interface_available(NULL))
+    return;
 
   unitytls->unitytls_x509list_free(connssl->cacert);
   connssl->cacert = NULL;
