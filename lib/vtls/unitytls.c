@@ -299,7 +299,7 @@ static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
   read = unitytls->unitytls_tlsctx_read(conn->ssl[sockindex].ctx, (UInt8*)buf, buffersize, &err);
 
   if(err.code != UNITYTLS_X509VERIFY_SUCCESS) {
-    *curlcode = CURLE_SEND_ERROR;
+    *curlcode = CURLE_RECV_ERROR;
     if(err.code == UNITYTLS_USER_WOULD_BLOCK)
       *curlcode = CURLE_AGAIN;
     return -1;
