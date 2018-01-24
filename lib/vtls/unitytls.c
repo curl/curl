@@ -184,44 +184,17 @@ static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* pa
 static size_t on_read(void* userData, UInt8* buffer, size_t bufferLen, unitytls_errorstate* errorState)
 {
   struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
-  size_t read = 0;
   CURLcode result;
+  ssize_t read = 0;
 
-  while(bufferLen > read) {
-    ssize_t this_read = 0;
-    time_t timeleft;
-    int what;
-
-    timeleft = Curl_timeleft(connssl->conn->data, NULL, FALSE);
-    if(timeleft < 0) {
-      /* we already got the timeout */
-      failf(connssl->conn->data, "timed out receiving data (bytes received: %zd)", read);
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
-      return 0;
-    }
-
-    what = SOCKET_READABLE(connssl->sockfd, timeleft);
-    if(what < 0) {
-      failf(connssl->conn->data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WRITE_FAILED);
-      return 0;
-    }
-    if(what == 0) {
-      failf(connssl->conn->data, "timed out receiving data (bytes received: %zd)", read);
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
-      return 0;
-    }
-
-    /* socket is writable */
-    result = Curl_read_plain(connssl->sockfd, (char*)(buffer + read), bufferLen - read, &this_read);
-    if(result == CURLE_AGAIN)
-      continue;
-    else if(result != CURLE_OK) {
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_READ_FAILED);
-      return 0;
-    }
-
-    read += this_read;
+  result = Curl_read_plain(connssl->sockfd, (char*)(buffer), bufferLen, &read);
+  if(result == CURLE_AGAIN) {
+    unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
+    return 0;
+  }
+  else if(result != CURLE_OK) {
+    unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_READ_FAILED);
+    return 0;
   }
 
   return read;
@@ -230,44 +203,17 @@ static size_t on_read(void* userData, UInt8* buffer, size_t bufferLen, unitytls_
 static size_t on_write(void* userData, const UInt8* data, size_t bufferLen, unitytls_errorstate* errorState)
 {
   struct ssl_connect_data* connssl = (struct ssl_connect_data*)userData;
-  size_t written = 0;
   CURLcode result;
+  ssize_t written = 0;
 
-  while(bufferLen > written) {
-    ssize_t this_write = 0;
-    time_t timeleft;
-    int what;
-
-    timeleft = Curl_timeleft(connssl->conn->data, NULL, FALSE);
-    if(timeleft < 0) {
-      /* we already got the timeout */
-      failf(connssl->conn->data, "timed out sending data (bytes sent: %zd)", written);
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
-      return 0;
-    }
-
-    what = SOCKET_WRITABLE(connssl->sockfd, timeleft);
-    if(what < 0) {
-      failf(connssl->conn->data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WRITE_FAILED);
-      return 0;
-    }
-    if(what == 0) {
-      failf(connssl->conn->data, "timed out sending data (bytes sent: %zd)", written);
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
-      return 0;
-    }
-
-    /* socket is writable */
-    result = Curl_write_plain(connssl->conn, connssl->sockfd, data + written, bufferLen - written, &this_write);
-    if(result == CURLE_AGAIN)
-      continue;
-    else if(result != CURLE_OK) {
-      unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WRITE_FAILED);
-      return 0;
-    }
-
-    written += this_write;
+  result = Curl_write_plain(connssl->conn, connssl->sockfd, data, bufferLen, &written);
+  if(result == CURLE_AGAIN) {
+    unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WOULD_BLOCK);
+    return 0;
+  }
+  else if(result != CURLE_OK) {
+    unitytls->unitytls_errorstate_raise_error(errorState, UNITYTLS_USER_WRITE_FAILED);
+    return 0;
   }
 
   return written;
