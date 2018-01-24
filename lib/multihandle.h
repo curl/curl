@@ -62,8 +62,6 @@ typedef enum {
 /* we support N sockets per easy handle. Set the corresponding bit to what
    action we should wait for */
 #define MAX_SOCKSPEREASYHANDLE 5
-#define GETSOCK_READABLE (0x00ff)
-#define GETSOCK_WRITABLE (0xff00)
 
 #define CURLPIPE_ANY (CURLPIPE_HTTP1 | CURLPIPE_MULTIPLEX)
 

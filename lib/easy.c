@@ -957,10 +957,16 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     outcurl->change.referer_alloc = TRUE;
   }
 
-  /* Clone the resolver handle, if present, for the new handle */
-  if(Curl_resolver_duphandle(&outcurl->state.resolver,
-                             data->state.resolver))
-    goto fail;
+#ifdef CURLRES_ASYNCH
+  if(data->resolver) {
+    /* Clone the resolver handle, if present, for the new handle */
+    if(data->resolver->callbacks.duplicate(data, &outcurl->resolver)
+       || !outcurl->resolver)
+      goto fail;
+
+    outcurl->resolver->owned = true;
+  }
+#endif
 
   Curl_convert_setup(outcurl);
 

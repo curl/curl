@@ -118,6 +118,44 @@ static int geterr(const char *name, CURLcode val, int lineno)
   return (int)val;
 }
 
+static CURLcode resolver_init(void **userdata) { (void)userdata; return CURLE_OK; }
+static void resolver_cleanup(void *userdata) { (void)userdata; }
+static CURLcode resolver_duplicate(CURL *data, CURLRES **to) { (void)data; *to = 0; return CURLE_NOT_BUILT_IN; }
+static void resolver_cancel(CURL *conn) { (void)conn; }
+static int resolver_getsock(CURL *data, curl_socket_t *sock, int numsocks, long *timeout)
+{
+    (void)data;
+    (void)sock;
+    (void)numsocks;
+    (void)timeout;
+    return 0;
+}
+static CURLcode resolver_is_resolved(CURL *data, int *waitp) { (void)data; (void)waitp; return CURLE_NOT_BUILT_IN; }
+static CURLcode resolver_wait_resolv(CURL *data) { (void)data; return CURLE_NOT_BUILT_IN; }
+static struct Curl_addrinfo *resolver_get_addr_info(CURL *data,
+                                                    const char *hostname,
+                                                    int port,
+                                                    int *waitp)
+{
+    (void)data;
+    (void)hostname;
+    (void)port;
+    (void)waitp;
+    return 0;
+}
+static CURLcode resolver_setopt(CURL *data, CURLoption opt, char *arg) { (void)data; (void)opt; (void)arg; return CURLE_NOT_BUILT_IN; }
+static const Curl_resolver_callbacks resolver_callbacks = {
+    resolver_init,
+    resolver_cleanup,
+    resolver_duplicate,
+    resolver_cancel,
+    resolver_getsock,
+    resolver_is_resolved,
+    resolver_wait_resolv,
+    resolver_get_addr_info,
+    resolver_setopt
+};
+
 static curl_progress_callback progresscb;
 static curl_write_callback headercb;
 static curl_debug_callback debugcb;
@@ -147,6 +185,7 @@ int test(char *URL)
   struct curl_slist *slist = NULL;
   struct curl_httppost *httppost = NULL;
   curl_mime *mimepost = NULL;
+  CURLRES *resolver = NULL;
   FILE *stream = stderr;
   struct data object;
   char *charp;
@@ -166,7 +205,11 @@ int test(char *URL)
     res = CURLE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
-
+  resolver = curl_resolver_create(&resolver_callbacks, 0);
+  if(!resolver) {
+    res = CURLE_OUT_OF_MEMORY;
+    goto test_cleanup;
+  }
 HEADER
     ;
 
@@ -222,6 +265,9 @@ while(<STDIN>) {
             }
             elsif($name eq "STDERR") {
               print "${pref} stream);\n$check";
+            }
+            elsif($name eq "RESOLVER") {
+              print "${pref} resolver);\n$check";
             }
             else {
               print "${pref} &object);\n$check";
@@ -298,6 +344,7 @@ print <<FOOTER
   curl_easy_setopt(curl, 1, 0);
   res = CURLE_OK;
 test_cleanup:
+  curl_resolver_destroy(resolver);
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dep);
   curl_share_cleanup(share);

@@ -60,9 +60,6 @@ struct Curl_addrinfo {
 };
 typedef struct Curl_addrinfo Curl_addrinfo;
 
-void
-Curl_freeaddrinfo(Curl_addrinfo *cahead);
-
 #ifdef HAVE_GETADDRINFO
 int
 Curl_getaddrinfo_ex(const char *nodename,
@@ -70,14 +67,6 @@ Curl_getaddrinfo_ex(const char *nodename,
                     const struct addrinfo *hints,
                     Curl_addrinfo **result);
 #endif
-
-Curl_addrinfo *
-Curl_he2ai(const struct hostent *he, int port);
-
-Curl_addrinfo *
-Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port);
-
-Curl_addrinfo *Curl_str2addr(char *dotted, int port);
 
 #ifdef USE_UNIX_SOCKETS
 Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract);

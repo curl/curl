@@ -1060,7 +1060,6 @@ struct PureInfo {
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
 };
 
-
 struct Progress {
   time_t lastshow; /* time() of the last displayed progress meter or NULL to
                       force redraw at next call */
@@ -1262,9 +1261,6 @@ struct UrlState {
   struct auth authproxy; /* auth details for proxy */
 
   bool authproblem; /* TRUE if there's some problem authenticating */
-
-  void *resolver; /* resolver state, if it is used in the URL state -
-                     ares_channel f.e. */
 
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
@@ -1522,6 +1518,7 @@ struct UserDefined {
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
+  long happy_eyeballs_timeout; /* in milliseconds, 0 means default */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long tftp_blksize;    /* in bytes, 0 means use default */
   bool tftp_no_options; /* do not send TFTP options requests */
@@ -1704,6 +1701,12 @@ struct Names {
  * 'struct UrlState' instead.
  */
 
+struct Curl_resolver {
+  struct Curl_resolver_callbacks callbacks;
+  void *userdata;
+  bool owned;
+};
+
 struct Curl_easy {
   /* first, two fields for the linked list of these */
   struct Curl_easy *next;
@@ -1752,6 +1755,9 @@ struct Curl_easy {
   iconv_t inbound_cd;          /* for translating from the network encoding */
   iconv_t utf8_cd;             /* for translating to UTF8 */
 #endif /* CURL_DOES_CONVERSIONS && HAVE_ICONV */
+#ifdef CURLRES_ASYNCH
+  CURLRES *resolver;
+#endif
   unsigned int magic;          /* set to a CURLEASY_MAGIC_NUMBER */
 };
 

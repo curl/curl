@@ -451,7 +451,9 @@ int Curl_resolv(struct connectdata *conn,
 {
   struct Curl_dns_entry *dns = NULL;
   struct Curl_easy *data = conn->data;
+#ifdef CURLRES_ASYNCH
   CURLcode result;
+#endif
   int rc = CURLRESOLV_ERROR; /* default to failure */
 
   *entry = NULL;
@@ -493,18 +495,25 @@ int Curl_resolv(struct connectdata *conn,
                             hostname, port, &respwait);
 
     if(!addr) {
+#ifdef CURLRES_ASYNCH
       if(respwait) {
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
-        result = Curl_resolver_is_resolved(conn, &dns);
+        CURLRES *resolver = data->resolver;
+        int wait;
+        result = resolver->callbacks.is_resolved(data, &wait);
         if(result) /* error detected */
           return CURLRESOLV_ERROR;
-        if(dns)
-          rc = CURLRESOLV_RESOLVED; /* pointer provided */
-        else
+        if(wait) {
           rc = CURLRESOLV_PENDING; /* no info yet */
+        }
+        else {
+          rc = CURLRESOLV_RESOLVED; /* pointer provided */
+          dns = conn->async.dns;
+        }
       }
+#endif
     }
     else {
       if(data->share)
@@ -518,7 +527,7 @@ int Curl_resolv(struct connectdata *conn,
 
       if(!dns)
         /* returned failure, bail out nicely */
-        Curl_freeaddrinfo(addr);
+        curl_freeaddrinfo(addr);
       else
         rc = CURLRESOLV_RESOLVED;
     }
@@ -743,7 +752,7 @@ static void freednsentry(void *freethis)
 
   dns->inuse--;
   if(dns->inuse == 0) {
-    Curl_freeaddrinfo(dns->addr);
+    curl_freeaddrinfo(dns->addr);
     free(dns);
   }
 }
@@ -842,7 +851,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         address++; /* pass the open bracket */
       }
 
-      addr = Curl_str2addr(address, port);
+      addr = curl_str2addr(address, port);
       if(!addr) {
         infof(data, "Address in '%s' found illegal!\n", hostp->data);
         continue;
@@ -852,7 +861,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       entry_id = create_hostcache_id(hostname, port);
       /* If we can't create the entry id, fail */
       if(!entry_id) {
-        Curl_freeaddrinfo(addr);
+        curl_freeaddrinfo(addr);
         return CURLE_OUT_OF_MEMORY;
       }
 
@@ -881,14 +890,14 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         /* this is a duplicate, free it again */
         infof(data, "RESOLVE %s:%d is already cached, %s not stored!\n",
               hostname, port, address);
-        Curl_freeaddrinfo(addr);
+        curl_freeaddrinfo(addr);
       }
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
       if(!dns) {
-        Curl_freeaddrinfo(addr);
+        curl_freeaddrinfo(addr);
         return CURLE_OUT_OF_MEMORY;
       }
       infof(data, "Added %s:%d:%s to DNS cache\n",

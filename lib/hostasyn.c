@@ -51,13 +51,14 @@
 #include "hash.h"
 #include "share.h"
 #include "strerror.h"
+#include "inet_pton.h"
 #include "url.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
 /*
- * Curl_addrinfo_callback() gets called by ares, gethostbyname_thread()
+ * curl_addrinfo_callback() gets called by ares, gethostbyname_thread()
  * or getaddrinfo_thread() when we got the name resolved (or not!).
  *
  * If the status argument is CURL_ASYNC_SUCCESS, this function takes
@@ -66,19 +67,18 @@
  *
  * The storage operation locks and unlocks the DNS cache.
  */
-CURLcode Curl_addrinfo_callback(struct connectdata *conn,
+CURLcode curl_addrinfo_callback(CURL *data,
                                 int status,
                                 struct Curl_addrinfo *ai)
 {
   struct Curl_dns_entry *dns = NULL;
   CURLcode result = CURLE_OK;
+  struct connectdata *conn = data->easy_conn;
 
   conn->async.status = status;
 
   if(CURL_ASYNC_SUCCESS == status) {
     if(ai) {
-      struct Curl_easy *data = conn->data;
-
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
@@ -87,7 +87,7 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
                             conn->async.port);
       if(!dns) {
         /* failed to store, cleanup and return error */
-        Curl_freeaddrinfo(ai);
+        curl_freeaddrinfo(ai);
         result = CURLE_OUT_OF_MEMORY;
       }
 
@@ -97,9 +97,11 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
     else {
       result = CURLE_OUT_OF_MEMORY;
     }
+    conn->async.dns = dns;
   }
-
-  conn->async.dns = dns;
+  else {
+    result = CURLE_COULDNT_RESOLVE_HOST;
+  }
 
  /* Set async.done TRUE last in this function since it may be used multi-
     threaded and once this is TRUE the other thread may read fields from the
@@ -147,7 +149,68 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-  return Curl_resolver_getaddrinfo(conn, hostname, port, waitp);
+  CURL *data = conn->data;
+  Curl_addrinfo *ret;
+  ret = data->resolver->callbacks.get_addr_info(data, hostname,
+                                                port, waitp);
+  return ret;
 }
+
+struct Ball *curl_fisk(void)
+{
+  return 0;
+}
+
+CURLRES *curl_resolver_create(
+  const struct Curl_resolver_callbacks *callbacks, void *userdata)
+{
+  CURLRES *ret;
+  ret = (CURLRES *)calloc(1, sizeof(struct Curl_resolver));
+  ret->userdata = userdata;
+  memcpy(&ret->callbacks, callbacks, sizeof(struct Curl_resolver_callbacks));
+  if(ret->callbacks.init(&ret->userdata) != CURLE_OK) {
+    curl_resolver_destroy(ret);
+    ret = NULL;
+  }
+  return ret;
+}
+
+void curl_resolver_destroy(CURLRES *resolver)
+{
+  if(!resolver)
+    return;
+  resolver->callbacks.cleanup(resolver->userdata);
+  free(resolver);
+}
+
+CURL_EXTERN void *curl_resolver_userdata(CURL *data)
+{
+  assert(data);
+  assert(data->resolver);
+  return data->resolver->userdata;
+}
+
+static const struct Curl_resolver_callbacks default_resolver_functions = {
+  Curl_resolver_init,
+  Curl_resolver_cleanup,
+  Curl_resolver_duplicate,
+  Curl_resolver_cancel,
+  Curl_resolver_getsock,
+  Curl_resolver_is_resolved,
+  Curl_resolver_wait_resolv,
+  Curl_resolver_getaddrinfo,
+  Curl_resolver_setopt
+};
+
+const struct Curl_resolver_callbacks *curl_default_resolver_callbacks()
+{
+  return &default_resolver_functions;
+}
+
+CURLRES *curl_default_resolver(void)
+{
+  return curl_resolver_create(&default_resolver_functions, 0);
+}
+
 
 #endif /* CURLRES_ASYNCH */

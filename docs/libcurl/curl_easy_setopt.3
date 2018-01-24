@@ -269,6 +269,8 @@ Maximum number of redirects to follow. See \fICURLOPT_MAXREDIRS(3)\fP
 How to act on redirects after POST. See \fICURLOPT_POSTREDIR(3)\fP
 .IP CURLOPT_PUT
 Issue a HTTP PUT request. See \fICURLOPT_PUT(3)\fP
+.IP CURLOPT_HAPPY_EYEBALLS_TIMEOUT
+Head start for ipv6 sockets when doing happy eyeballs. See \fICURLOPT_HAPPY_EYEBALLS_TIMEOUT(3)\fP
 .IP CURLOPT_POST
 Issue a HTTP POST request. See \fICURLOPT_POST(3)\fP
 .IP CURLOPT_POSTFIELDS
@@ -446,6 +448,8 @@ Timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT(3)\fP
 Millisecond timeout for the connection phase. See \fICURLOPT_CONNECTTIMEOUT_MS(3)\fP
 .IP CURLOPT_IPRESOLVE
 IP version to resolve to. See \fICURLOPT_IPRESOLVE(3)\fP
+.IP CURLOPT_RESOLVER
+Pointer to Curl_resolver interface. See \fICURLOPT_RESOLVER(3)\fP
 .IP CURLOPT_CONNECT_ONLY
 Only connect, nothing else. See \fICURLOPT_CONNECT_ONLY(3)\fP
 .IP CURLOPT_USE_SSL

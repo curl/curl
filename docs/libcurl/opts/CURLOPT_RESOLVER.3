@@ -1,0 +1,404 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_RESOLVER 3 "16 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_RESOLVER \- pointer to a Curl_resolver created with
+curl_resolver_create or curl_resolver_create
+.sh SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WRITEDATA, void *pointer);
+.SH DESCRIPTION
+A pointer to a Curl_resolver created with curl_default_resolver or
+curl_resolver_create.
+Setting a custom resolver allows the user of libcurl to do its own
+name lookups for hostnames using this asynchronous interface.
+
+.SH DEFAULT
+When unset libcurl will implicitly create a resolver using the
+curl_default_resolver function.
+
+.SH EXAMPLE
+/* This example demonstrates how to use the Curl_resolver interface to
+do your own custom async resolving. */
+
+#include <curl/curl.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+
+struct Resolver {
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    pthread_t thread;
+    int shutdown;
+    struct Request {
+        CURL *data;
+        char *hostname;
+        int port;
+        struct Curl_addrinfo *addrinfo;
+        struct Request *next;
+    } *pending, *finished;
+    int pipe[2];
+};
+
+static void addRequest(struct Request **list, struct Request *request)
+{
+    while (*list) {
+        list = &(*list)->next;
+    }
+    *list = request;
+    request->next = 0;
+}
+
+static void *resolver_thread(void *userdata)
+{
+    struct Resolver *resolver = (struct Resolver *)userdata;
+    while (1) {
+        struct hostent *h = 0;
+        pthread_mutex_lock(&resolver->mutex);
+        while (!resolver->shutdown && !resolver->pending) {
+            printf("RESOLVER_THREAD: Waiting for stuff to do...\n");
+            pthread_cond_wait(&resolver->cond, &resolver->mutex);
+        }
+        if (resolver->shutdown) {
+            assert(!resolver->pending);
+            assert(!resolver->finished);
+            /* flag all as failed */
+            pthread_mutex_unlock(&resolver->mutex);
+            break;
+        }
+
+        struct Request *request = resolver->pending;
+        assert(request);
+        resolver->pending = request->next;
+        request->next = 0;
+        pthread_mutex_unlock(&resolver->mutex);
+        printf("RESOLVER_THREAD: Looking up host %p %s\n", request, request->hostname);
+        h = gethostbyname(request->hostname);
+        printf("RESOLVER_THREAD: Got result %p\n", h);
+        if (h) {
+            request->addrinfo = curl_he2ai(h, request->port);
+        } else {
+            char buf[16];
+            memset(buf, 0, sizeof(buf));
+            request->addrinfo = curl_ip2addr(AF_INET, buf, request->hostname, request->port);
+        }
+        addRequest(&resolver->finished, request);
+        write(resolver->pipe[1], "1", 1);
+    }
+    printf("RESOLVER_THREAD is done\n");
+
+    return 0;
+}
+
+static CURLcode resolver_init(void **userdata);
+static void resolver_cleanup(void *userdata);
+static CURLcode resolver_duplicate(CURL *data, CURLRES **to);
+static void resolver_cancel(CURL *conn);
+static int resolver_getsock(CURL *data, curl_socket_t *sock, int numsocks, long *timeout);
+static CURLcode resolver_is_resolved(CURL *data, int *waitp);
+static CURLcode resolver_wait_resolv(CURL *data);
+static struct Curl_addrinfo *resolver_get_addr_info(CURL *data,
+                                                    const char *hostname,
+                                                    int port,
+                                                    int *waitp);
+static CURLcode resolver_setopt(CURL *data, CURLoption opt, char *arg);
+
+static const Curl_resolver_callbacks callbacks = {
+    resolver_init,
+    resolver_cleanup,
+    resolver_duplicate,
+    resolver_cancel,
+    resolver_getsock,
+    resolver_is_resolved,
+    resolver_wait_resolv,
+    resolver_get_addr_info,
+    resolver_setopt
+};
+
+
+static CURLcode resolver_init(void **userdata)
+{
+    printf("resolver_init called\n");
+    struct Resolver *resolver = (struct Resolver *)calloc(1, sizeof(struct Resolver));
+    *userdata = resolver;
+    pthread_mutex_init(&resolver->mutex, 0);
+    pthread_cond_init(&resolver->cond, 0);
+    pipe(resolver->pipe);
+    int flags = fcntl(resolver->pipe[0], F_GETFL);
+    flags |= O_NONBLOCK;
+    fcntl(resolver->pipe[0], F_SETFL, flags);
+    pthread_create(&resolver->thread, 0, resolver_thread, resolver);
+    return CURLE_OK;
+}
+
+static void resolver_cleanup(void *userdata)
+{
+    printf("resolver_cleanup called\n");
+    struct Resolver *resolver = (struct Resolver *)userdata;
+    assert(resolver);
+    pthread_mutex_lock(&resolver->mutex);
+    resolver->shutdown = 1;
+    pthread_cond_signal(&resolver->cond);
+    pthread_mutex_unlock(&resolver->mutex);
+    pthread_join(resolver->thread, 0);
+    free(resolver);
+}
+
+static CURLcode resolver_duplicate(CURL *data, CURLRES **to)
+{
+    printf("resolver_duplicate called for %p\n", data);
+    (void)data;
+    *to = curl_resolver_create(&callbacks);
+    return CURLE_OK;
+}
+
+static void resolver_cancel(CURL *data)
+{
+    printf("resolver_cancel called for %p\n", data);
+    struct Request *request = 0;
+    struct Request *last = 0;
+    struct Resolver *resolver = (struct Resolver *)curl_resolver_userdata(data);
+    pthread_mutex_lock(&resolver->mutex);
+    request = resolver->pending;
+    while (request && request->data != data) {
+        last = request;
+        request = request->next;
+    }
+    if (request) {
+        if (last) {
+            last->next = request->next;
+        } else {
+            resolver->pending = request->next;
+        }
+        free(request);
+    }
+
+    pthread_mutex_unlock(&resolver->mutex);
+}
+
+static int resolver_getsock(CURL *data, curl_socket_t *sock, int numsocks, long *timeout)
+{
+    int i;
+    struct Resolver *resolver = (struct Resolver *)curl_resolver_userdata(data);
+
+    for (i=1; i<numsocks; ++i) {
+        sock[i] = -1;
+    }
+    sock[0] = resolver->pipe[0];
+    *timeout = 1000;
+    return CURL_GETSOCK_READABLE;
+}
+
+static CURLcode resolver_is_resolved(CURL *data, int *waitp)
+{
+    struct Resolver *resolver = (struct Resolver *)curl_resolver_userdata(data);
+    char buf;
+    while (read(resolver->pipe[0], &buf, 1) != -1) {
+    }
+
+    pthread_mutex_lock(&resolver->mutex);
+    struct Request **last = &resolver->finished;
+    struct Request *req = resolver->finished;
+    while (req && req->data != data) {
+        last = &req->next;
+        req = req->next;
+    }
+
+    if (req) {
+        printf("resolver_is_resolved found it %s for %p\n", req->hostname, data);
+        *last = req->next;
+        pthread_mutex_unlock(&resolver->mutex);
+        *waitp = 0;
+        if (req->addrinfo) {
+            CURLcode ret = curl_addrinfo_callback(data, CURLE_OK, req->addrinfo);
+            free(req->hostname);
+            free(req);
+            return ret;
+        }
+        free(req->hostname);
+        free(req);
+        return CURLE_COULDNT_RESOLVE_HOST;
+    }
+
+    printf("resolver_is_resolved called for %p, didn't find it\n", data);
+
+    pthread_mutex_unlock(&resolver->mutex);
+    *waitp = 1;
+    return CURLE_OK;
+}
+
+static CURLcode resolver_wait_resolv(CURL *data)
+{
+    fd_set r;
+    struct timeval t;
+    struct Resolver *resolver = (struct Resolver *)curl_resolver_userdata(data);
+    int ret;
+    CURLcode code;
+    int wait;
+
+    printf("resolver_wait_resolv for %p\n", data);
+
+    FD_ZERO(&r);
+    FD_SET(resolver->pipe[0], &r);
+    t.tv_sec = 1;
+    t.tv_usec = 0;
+    /* ### should respect dns timeout and shutdown of thread, cancel */
+    ret = select(resolver->pipe[0] + 1, &r, 0, 0, &t);
+    if (!ret) {
+        return CURLE_COULDNT_RESOLVE_HOST;
+    }
+
+    code = resolver_is_resolved(data, &wait);
+    if (code == CURLE_OK && wait) {
+        code = CURLE_COULDNT_RESOLVE_HOST;
+    }
+
+    return code;
+}
+
+static struct Curl_addrinfo *resolver_get_addr_info(CURL *data,
+                                                    const char *hostname,
+                                                    int port,
+                                                    int *waitp)
+{
+    printf("resolver_get_addr_info %s %d for %p\n", hostname, port, data);
+    struct Request *request;
+    struct Resolver *resolver = (struct Resolver *)curl_resolver_userdata(data);
+
+    request = (struct Request *)calloc(1, sizeof(struct Request));
+    request->data = data;
+    request->hostname = strdup(hostname);
+    /* printf("req is %p %s\n", request, request->hostname); */
+    request->port = port;
+
+    pthread_mutex_lock(&resolver->mutex);
+
+    addRequest(&resolver->pending, request);
+    pthread_cond_signal(&resolver->cond);
+    pthread_mutex_unlock(&resolver->mutex);
+    *waitp = 1;
+    return 0;
+}
+
+static CURLcode resolver_setopt(CURL *data, CURLoption opt, char *arg)
+{
+    printf("resolver_setopt(%d, %s)\n", opt, arg);
+    return CURLE_NOT_BUILT_IN;
+}
+
+static size_t bytes = 0;
+static size_t dataCallback(void *data, size_t size, size_t nmemb, void *userdata)
+{
+    (void)data;
+    (void)userdata;
+    bytes += (size * nmemb);
+    return size * nmemb;
+}
+
+int pending = 0;
+int requestIdx = 1;
+CURLRES *resolver = 0;
+CURLM *multi = 0;
+void sendNext(int argc, char **argv)
+{
+    if (requestIdx == argc)
+        return;
+
+    CURL *easy = curl_easy_init();
+    curl_easy_setopt(easy, CURLOPT_RESOLVER, resolver);
+    curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, dataCallback);
+    curl_easy_setopt(easy, CURLOPT_URL, argv[requestIdx]);
+    printf("Sending request %s %p\n", argv[requestIdx], easy);
+    curl_multi_add_handle(multi, easy);
+    ++pending;
+    ++requestIdx;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc == 1)
+        return 0;
+    resolver = curl_resolver_create(&callbacks);
+    assert(resolver);
+    multi = curl_multi_init();
+
+    sendNext(argc, argv);
+
+    while (pending) {
+        fd_set r, w;
+        FD_ZERO(&r);
+        FD_ZERO(&w);
+        int max = -1;
+        curl_multi_fdset(multi, &r, &w, 0, &max);
+        long timeout;
+        curl_multi_timeout(multi, &timeout);
+        /* printf("got timeout %ld\n", timeout); */
+        if (timeout > 0) {
+            if (timeout > 1000)
+                timeout = 1000;
+            struct timeval t = { timeout / 1000, (timeout % 1000) * 1000 };
+            select(max, &r, &w, 0, &t);
+        }
+        int ret;
+        do {
+            int running;
+            ret = curl_multi_perform(multi, &running);
+        } while (ret == CURLM_CALL_MULTI_PERFORM);
+
+        int remaining;
+        CURLMsg *msg;
+        while ((msg = curl_multi_info_read(multi, &remaining)) != 0) {
+            if (msg->msg == CURLMSG_DONE) {
+                char *url;
+                curl_easy_getinfo(msg->easy_handle, CURLINFO_EFFECTIVE_URL, &url);
+                printf("Request finished %s %p\n", url, msg->easy_handle);
+                curl_multi_remove_handle(multi, msg->easy_handle);
+                curl_easy_cleanup(msg->easy_handle);
+                --pending;
+                sendNext(argc, argv);
+            }
+        }
+    }
+
+    curl_multi_cleanup(multi);
+    curl_resolver_destroy(resolver);
+    return 0;
+}
+
+Note that if you use
+curl_easy_setopt(CURLOPT_DNS_SERVERS|CURLOPT_DNS_INTERFACE|CURLOPT_DNS_LOCAL_IP4|CURLOPT_DNS_LOCAL_IP6)
+you have to call curl_easy_setopt(CURLOPT_RESOLVER) first.
+
+.SH AVAILABILITY
+Available from version 7.58.0.
+.SH RETURN VALUE
+This will return CURLE_OK.

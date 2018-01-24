@@ -63,7 +63,7 @@ static CURLcode unit_setup(void)
 static void unit_stop(void)
 {
   if(data_node) {
-    Curl_freeaddrinfo(data_node->addr);
+    curl_freeaddrinfo(data_node->addr);
     free(data_node);
   }
   free(data_key);

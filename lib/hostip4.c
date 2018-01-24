@@ -133,7 +133,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
   if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, hostname, port);
+    return curl_ip2addr(AF_INET, &in, hostname, port);
 
 #if defined(HAVE_GETADDRINFO_THREADSAFE)
   else {
@@ -297,7 +297,7 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   }
 
   if(h) {
-    ai = Curl_he2ai(h, port);
+    ai = curl_he2ai(h, port);
 
     if(buf) /* used a *_r() function */
       free(buf);

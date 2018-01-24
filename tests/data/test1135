@@ -1,33 +1,3 @@
-<testcase>
-<info>
-<keywords>
-source analysis
-CURL_EXTERN
-</keywords>
-</info>
-
-#
-# Client-side
-<client>
-<server>
-none
-</server>
-
-# The VMS and OS/400 builds extract the CURL_EXTERN protos and use in
-# the build. We break binary compatibility by changing order. Only add
-# new entries last or bump the SONAME.
-# 
- <name>
-Verify CURL_EXTERN order
- </name>
-
-<command type="perl">
-%SRCDIR/extern-scan.pl %SRCDIR/..
-</command>
-</client>
-
-<verify>
-<stdout>
 CURL_EXTERN int curl_strequal(const char *s1, const char *s2);
 CURL_EXTERN int curl_strnequal(const char *s1, const char *s2, size_t n);
 CURL_EXTERN curl_mime *curl_mime_init(CURL *easy);
@@ -66,6 +36,17 @@ CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
 CURL_EXTERN const char *curl_easy_strerror(CURLcode);
 CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
 CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
+CURL_EXTERN const Curl_resolver_callbacks *curl_default_resolver_callbacks(void);
+CURL_EXTERN CURLRES *curl_default_resolver(void);
+CURL_EXTERN CURLRES *curl_resolver_create(const Curl_resolver_callbacks *, void *);
+CURL_EXTERN void curl_resolver_destroy(CURLRES *resolver);
+CURL_EXTERN void *curl_resolver_userdata(CURL *easy);
+CURL_EXTERN void curl_freeaddrinfo(struct Curl_addrinfo *cahead);
+CURL_EXTERN struct Curl_addrinfo * curl_addrinfo_append(struct Curl_addrinfo *head,
+CURL_EXTERN struct Curl_addrinfo * curl_he2ai(const struct hostent *he, int port);
+CURL_EXTERN struct Curl_addrinfo * curl_ip2addr(int af, const void *inaddr,
+CURL_EXTERN struct Curl_addrinfo * curl_str2addr(const char *dotted, int port);
+CURL_EXTERN CURLcode curl_addrinfo_callback(CURL *data,
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
 CURL_EXTERN CURLcode curl_easy_perform(CURL *curl);
@@ -102,7 +83,3 @@ CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
 CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
 CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
-</stdout>
-</verify>
-
-</testcase>
