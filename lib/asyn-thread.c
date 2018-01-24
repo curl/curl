@@ -127,10 +127,10 @@ void Curl_resolver_cleanup(void *resolver)
  * environment ('resolver' member of the UrlState structure).  Does nothing
  * here.
  */
-int Curl_resolver_duphandle(void **to, void *from)
+CURLcode Curl_resolver_duplicate(CURL *data, CURLRES **to)
 {
-  (void)to;
-  (void)from;
+  (void)data;
+  *to = curl_resolver_create(curl_default_resolver_callbacks(), 0);
   return CURLE_OK;
 }
 
@@ -139,9 +139,11 @@ static void destroy_async_data(struct Curl_async *);
 /*
  * Cancel all possibly still on-going resolves for this connection.
  */
-void Curl_resolver_cancel(struct connectdata *conn)
+void Curl_resolver_cancel(CURL *data)
 {
-  destroy_async_data(&conn->async);
+  struct connectdata *conn = data->easy_conn;
+  if(conn)
+    destroy_async_data(&conn->async);
 }
 
 /* This function is used to init a threaded resolve */
@@ -192,7 +194,7 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
   free(tsd->hostname);
 
   if(tsd->res)
-    Curl_freeaddrinfo(tsd->res);
+    curl_freeaddrinfo(tsd->res);
 
   memset(tsd, 0, sizeof(*tsd));
 }
@@ -200,9 +202,9 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
 /* Initialize resolver thread synchronization data */
 static
 int init_thread_sync_data(struct thread_data * td,
-                           const char *hostname,
-                           int port,
-                           const struct addrinfo *hints)
+                          const char *hostname,
+                          int port,
+                          const struct addrinfo *hints)
 {
   struct thread_sync_data *tsd = &td->tsd;
 
@@ -244,12 +246,13 @@ int init_thread_sync_data(struct thread_data * td,
   return 0;
 }
 
-static int getaddrinfo_complete(struct connectdata *conn)
+static int getaddrinfo_complete(CURL *data)
 {
+  struct connectdata *conn = data->easy_conn;
   struct thread_sync_data *tsd = conn_thread_sync_data(conn);
   int rc;
 
-  rc = Curl_addrinfo_callback(conn, tsd->sock_error, tsd->res);
+  rc = curl_addrinfo_callback(data, tsd->sock_error, tsd->res);
   /* The tsd->res structure has been copied to async.dns and perhaps the DNS
      cache.  Set our copy to NULL so destroy_thread_sync_data doesn't free it.
   */
@@ -468,9 +471,9 @@ static CURLcode resolver_error(struct connectdata *conn)
  *
  * This is the version for resolves-in-a-thread.
  */
-CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
-                                   struct Curl_dns_entry **entry)
+CURLcode Curl_resolver_wait_resolv(CURL *data)
 {
+  struct connectdata *conn = data->easy_conn;
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   CURLcode result = CURLE_OK;
 
@@ -478,14 +481,11 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 
   /* wait for the thread to resolve the name */
   if(Curl_thread_join(&td->thread_hnd))
-    result = getaddrinfo_complete(conn);
+    result = getaddrinfo_complete(data);
   else
     DEBUGASSERT(0);
 
   conn->async.done = TRUE;
-
-  if(entry)
-    *entry = conn->async.dns;
 
   if(!conn->async.dns)
     /* a name was not resolved, report error */
@@ -504,17 +504,15 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
  * name resolve request has completed. It should also make sure to time-out if
  * the operation seems to take too long.
  */
-CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
-                                   struct Curl_dns_entry **entry)
+CURLcode Curl_resolver_is_resolved(CURL *data, int *waitp)
 {
-  struct Curl_easy *data = conn->data;
+  struct connectdata *conn = data->easy_conn;
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   int done = 0;
 
-  *entry = NULL;
-
   if(!td) {
     DEBUGASSERT(td);
+    *waitp = false;
     return CURLE_COULDNT_RESOLVE_HOST;
   }
 
@@ -523,7 +521,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   Curl_mutex_release(td->tsd.mtx);
 
   if(done) {
-    getaddrinfo_complete(conn);
+    getaddrinfo_complete(data);
 
     if(!conn->async.dns) {
       CURLcode result = resolver_error(conn);
@@ -531,7 +529,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
       return result;
     }
     destroy_async_data(&conn->async);
-    *entry = conn->async.dns;
+    *waitp = false;
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
@@ -552,18 +550,21 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 
     td->interval_end = elapsed + td->poll_interval;
     Curl_expire(conn->data, td->poll_interval, EXPIRE_ASYNC_NAME);
+    *waitp = true;
   }
 
   return CURLE_OK;
 }
 
-int Curl_resolver_getsock(struct connectdata *conn,
+int Curl_resolver_getsock(CURL *data,
                           curl_socket_t *socks,
-                          int numsocks)
+                          int numsocks,
+                          long *milli)
 {
-  (void)conn;
+  (void)data;
   (void)socks;
   (void)numsocks;
+  (void)milli;
   return 0;
 }
 
@@ -582,7 +583,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, hostname, port);
+    return curl_ip2addr(AF_INET, &in, hostname, port);
 
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, NULL)) {
@@ -599,11 +600,12 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 /*
  * Curl_resolver_getaddrinfo() - for getaddrinfo
  */
-Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+Curl_addrinfo *Curl_resolver_getaddrinfo(CURL *data,
                                          const char *hostname,
                                          int port,
                                          int *waitp)
 {
+  struct connectdata *conn = data->easy_conn;
   struct addrinfo hints;
   Curl_addrinfo *res;
   int error;
@@ -611,25 +613,11 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   int pf = PF_INET;
 
   *waitp = 0; /* default to synchronous response */
-
 #ifndef USE_RESOLVE_ON_IPS
-  {
-    struct in_addr in;
-    /* First check if this is an IPv4 address string */
-    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
-      /* This is a dotted IP address 123.123.123.123-style */
-      return Curl_ip2addr(AF_INET, &in, hostname, port);
-  }
-#ifdef CURLRES_IPV6
-  {
-    struct in6_addr in6;
-    /* check if this is an IPv6 address string */
-    if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
-      /* This is an IPv6 address literal */
-      return Curl_ip2addr(AF_INET6, &in6, hostname, port);
-  }
-#endif /* CURLRES_IPV6 */
-#endif /* !USE_RESOLVE_ON_IPS */
+  res = curl_str2addr(hostname, port);
+  if(res)
+    return res;
+#endif
 
 #ifdef CURLRES_IPV6
   /*
@@ -665,12 +653,12 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   }
 
   /* fall-back to blocking version */
-  infof(conn->data, "init_resolve_thread() failed for %s; %s\n",
+  infof(data, "init_resolve_thread() failed for %s; %s\n",
         hostname, Curl_strerror(conn, errno));
 
   error = Curl_getaddrinfo_ex(hostname, sbuf, &hints, &res);
   if(error) {
-    infof(conn->data, "getaddrinfo() failed for %s:%d; %s\n",
+    infof(data, "getaddrinfo() failed for %s:%d; %s\n",
           hostname, port, Curl_strerror(conn, SOCKERRNO));
     return NULL;
   }
@@ -683,36 +671,11 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
 #endif /* !HAVE_GETADDRINFO */
 
-CURLcode Curl_set_dns_servers(struct Curl_easy *data,
-                              char *servers)
+CURLcode Curl_resolver_setopt(CURL *data, CURLoption opt, char *arg)
 {
   (void)data;
-  (void)servers;
-  return CURLE_NOT_BUILT_IN;
-
-}
-
-CURLcode Curl_set_dns_interface(struct Curl_easy *data,
-                                const char *interf)
-{
-  (void)data;
-  (void)interf;
-  return CURLE_NOT_BUILT_IN;
-}
-
-CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
-                                const char *local_ip4)
-{
-  (void)data;
-  (void)local_ip4;
-  return CURLE_NOT_BUILT_IN;
-}
-
-CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
-                                const char *local_ip6)
-{
-  (void)data;
-  (void)local_ip6;
+  (void)opt;
+  (void)arg;
   return CURLE_NOT_BUILT_IN;
 }
 

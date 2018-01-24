@@ -397,6 +397,18 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->dns.hostcachetype = HCACHE_MULTI;
   }
 
+#ifdef CURLRES_ASYNCH
+  if(!data->resolver) {
+    data->resolver = curl_default_resolver();
+    if(!data->resolver) {
+      return CURLM_OUT_OF_MEMORY;
+    }
+    data->resolver->owned = true;
+  }
+#endif
+
+  /* Point to the multi's connection cache */
+  data->state.conn_cache = &multi->conn_cache;
   /* Point to the shared or multi handle connection cache */
   if(data->share && (data->share->specifier & (1<< CURL_LOCK_DATA_CONNECT)))
     data->state.conn_cache = &data->share->conn_cache;
@@ -546,7 +558,9 @@ static CURLcode multi_done(struct connectdata **connp,
   }
 
   data->state.done = TRUE; /* called just now! */
-  Curl_resolver_cancel(conn);
+#ifdef CURLRES_ASYNCH
+  data->resolver->callbacks.cancel(data);
+#endif
 
   if(conn->dns_entry) {
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
@@ -856,8 +870,18 @@ static int multi_getsock(struct Curl_easy *data,
 #endif
     return 0;
 
-  case CURLM_STATE_WAITRESOLVE:
-    return Curl_resolver_getsock(data->easy_conn, socks, numsocks);
+  case CURLM_STATE_WAITRESOLVE: {
+#ifdef CURLRES_ASYNCH
+    long timeout = 0;
+    const int ret = data->resolver->callbacks.getsock(data, socks,
+                                                      numsocks, &timeout);
+    if(timeout)
+      Curl_expire(data, timeout, EXPIRE_ASYNC_NAME);
+    return ret;
+#else
+    return 0;
+#endif
+  }
 
   case CURLM_STATE_PROTOCONNECT:
   case CURLM_STATE_SENDPROTOCONNECT:
@@ -1176,9 +1200,12 @@ static CURLcode multi_reconnect_request(struct connectdata **connp)
       if(async) {
         /* Now, if async is TRUE here, we need to wait for the name
            to resolve */
-        result = Curl_resolver_wait_resolv(conn, NULL);
+#ifdef CURLRES_ASYNCH
+        CURLRES *resolver = data->resolver;
+        result = resolver->callbacks.wait_resolv(data);
         if(result)
           return result;
+#endif
 
         /* Resolved, continue with the connection */
         result = Curl_async_resolved(conn, &protocol_done);
@@ -1474,9 +1501,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         infof(data, "Hostname '%s' was found in DNS cache\n", hostname);
       }
 
-      if(!dns)
-        result = Curl_resolver_is_resolved(data->easy_conn, &dns);
-
+#ifdef CURLRES_ASYNCH
+      if(!dns) {
+        int wait;
+        result = data->resolver->callbacks.is_resolved(data, &wait);
+        if(!result && !wait)
+          dns = conn->async.dns;
+      }
+#endif
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it
          is likely that the same socket(s) will again be used further
