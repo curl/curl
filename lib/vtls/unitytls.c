@@ -120,6 +120,8 @@ static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* pa
     return false;
 
   /* Path needs to end with '\*' */
+  if(len + 2 >= MAX_PATH)
+    return false;
   memset(filename, 0, MAX_PATH);
   memcpy(filename, path, len);
   filename[len++] = '\\';
