@@ -78,7 +78,7 @@ static void fly(struct ProgressData *bar, bool moved)
   pos = sinus[(bar->tick + 15)%200] / (10000 / check);
   buf[pos] = '#';
 
-  fputs(buf, stderr);
+  fputs(buf, bar->out);
   bar->tick += 2;
   if(bar->tick >= 200)
     bar->tick -= 200;
