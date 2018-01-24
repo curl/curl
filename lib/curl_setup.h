@@ -751,11 +751,11 @@ endings either CRLF or LF so 't' is appropriate.
 #  if defined(WIN32) || defined(__CYGWIN__)
 #    define USE_RECV_BEFORE_SEND_WORKAROUND
 #  endif
-#else  /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+#else  /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 #  ifdef USE_RECV_BEFORE_SEND_WORKAROUND
 #    undef USE_RECV_BEFORE_SEND_WORKAROUND
 #  endif
-#endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+#endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
