@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -276,26 +276,23 @@ struct my_tm {
   int tm_hour;
   int tm_mday;
   int tm_mon;
-  int tm_year;
+  int tm_year; /* full year */
 };
 
 /* struct tm to time since epoch in GMT time zone.
  * This is similar to the standard mktime function but for GMT only, and
  * doesn't suffer from the various bugs and portability problems that
  * some systems' implementations have.
+ *
+ * Returns 0 on success, otherwise non-zero.
  */
-static time_t my_timegm(struct my_tm *tm)
+static void my_timegm(struct my_tm *tm, time_t *t)
 {
   static const int month_days_cumulative [12] =
     { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
   int month, year, leap_days;
 
-  if(tm->tm_year < 70)
-    /* we don't support years before 1970 as they will cause this function
-       to return a negative value */
-    return -1;
-
-  year = tm->tm_year + 1900;
+  year = tm->tm_year;
   month = tm->tm_mon;
   if(month < 0) {
     year += (11 - month) / 12;
@@ -310,9 +307,9 @@ static time_t my_timegm(struct my_tm *tm)
   leap_days = ((leap_days / 4) - (leap_days / 100) + (leap_days / 400)
                - (1969 / 4) + (1969 / 100) - (1969 / 400));
 
-  return ((((time_t) (year - 1970) * 365
-            + leap_days + month_days_cumulative [month] + tm->tm_mday - 1) * 24
-           + tm->tm_hour) * 60 + tm->tm_min) * 60 + tm->tm_sec;
+  *t = ((((time_t) (year - 1970) * 365
+          + leap_days + month_days_cumulative[month] + tm->tm_mday - 1) * 24
+         + tm->tm_hour) * 60 + tm->tm_min) * 60 + tm->tm_sec;
 }
 
 /*
@@ -462,7 +459,7 @@ static int parsedate(const char *date, time_t *output)
         if(!found && (dignext == DATE_YEAR) && (yearnum == -1)) {
           yearnum = val;
           found = TRUE;
-          if(yearnum < 1900) {
+          if(yearnum < 100) {
             if(yearnum > 70)
               yearnum += 1900;
             else
@@ -491,18 +488,39 @@ static int parsedate(const char *date, time_t *output)
     /* lacks vital info, fail */
     return PARSEDATE_FAIL;
 
-#if SIZEOF_TIME_T < 5
-  /* 32 bit time_t can only hold dates to the beginning of 2038 */
-  if(yearnum > 2037) {
-    *output = 0x7fffffff;
-    return PARSEDATE_LATER;
+#ifdef HAVE_TIME_T_UNSIGNED
+  if(yearnum < 1970) {
+    /* only positive numbers cannot return earlier */
+    *output = TIME_T_MIN;
+    return PARSEDATE_SOONER;
   }
 #endif
 
-  if(yearnum < 1970) {
-    *output = 0;
+#if (SIZEOF_TIME_T < 5)
+
+#if HAVE_TIME_T_UNSIGNED
+  /* an unsigned 32 bit time_t can only hold dates to 2106 */
+  if(yearnum > 2105) {
+    *output = TIME_T_MAX;
+    return PARSEDATE_LATER;
+  }
+#else
+  /* a signed 32 bit time_t can only hold dates to the beginning of 2038 */
+  if(yearnum > 2037) {
+    *output = TIME_T_MAX;
+    return PARSEDATE_LATER;
+  }
+  if(yearnum < 1903) {
+    *output = TIME_T_MIN;
     return PARSEDATE_SOONER;
   }
+#endif
+
+#else
+  /* The Gregorian calendar was introduced 1582 */
+  if(yearnum < 1583)
+    return PARSEDATE_FAIL;
+#endif
 
   if((mdaynum > 31) || (monnum > 11) ||
      (hournum > 23) || (minnum > 59) || (secnum > 60))
@@ -513,30 +531,24 @@ static int parsedate(const char *date, time_t *output)
   tm.tm_hour = hournum;
   tm.tm_mday = mdaynum;
   tm.tm_mon = monnum;
-  tm.tm_year = yearnum - 1900;
+  tm.tm_year = yearnum;
 
-  /* my_timegm() returns a time_t. time_t is often 32 bits, even on many
-     architectures that feature 64 bit 'long'.
-
-     Some systems have 64 bit time_t and deal with years beyond 2038. However,
-     even on some of the systems with 64 bit time_t mktime() returns -1 for
-     dates beyond 03:14:07 UTC, January 19, 2038. (Such as AIX 5100-06)
+  /* my_timegm() returns a time_t. time_t is often 32 bits, sometimes even on
+     architectures that feature 64 bit 'long' but ultimately time_t is the
+     correct data type to use.
   */
-  t = my_timegm(&tm);
+  my_timegm(&tm, &t);
 
-  /* time zone adjust (cast t to int to compare to negative one) */
-  if(-1 != (int)t) {
+  /* Add the time zone diff between local time zone and GMT. */
+  if(tzoff == -1)
+    tzoff = 0;
 
-    /* Add the time zone diff between local time zone and GMT. */
-    long delta = (long)(tzoff!=-1?tzoff:0);
-
-    if((delta>0) && (t > LONG_MAX - delta)) {
-      *output = 0x7fffffff;
-      return PARSEDATE_LATER; /* time_t overflow */
-    }
-
-    t += delta;
+  if((tzoff > 0) && (t > TIME_T_MAX - tzoff)) {
+    *output = TIME_T_MAX;
+    return PARSEDATE_LATER; /* time_t overflow */
   }
+
+  t += tzoff;
 
   *output = t;
 
@@ -551,6 +563,10 @@ time_t curl_getdate(const char *p, const time_t *now)
 
   switch(rc) {
   case PARSEDATE_OK:
+    if(parsed == -1)
+      /* avoid returning -1 for a working scenario */
+      parsed++;
+    /* fallthrough */
   case PARSEDATE_LATER:
   case PARSEDATE_SOONER:
     return parsed;
