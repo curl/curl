@@ -73,6 +73,7 @@
 #include "sigpipe.h"
 #include "ssh.h"
 #include "setopt.h"
+#include "http_digest.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1017,6 +1018,7 @@ void curl_easy_reset(struct Curl_easy *data)
   /* zero out authentication data: */
   memset(&data->state.authhost, 0, sizeof(struct auth));
   memset(&data->state.authproxy, 0, sizeof(struct auth));
+  Curl_digest_cleanup(data);
 }
 
 /*
