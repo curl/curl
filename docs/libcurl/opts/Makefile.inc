@@ -14,6 +14,7 @@ man_MANS =                                      \
   CURLINFO_COOKIELIST.3                         \
   CURLINFO_EFFECTIVE_URL.3                      \
   CURLINFO_FILETIME.3                           \
+  CURLINFO_FILETIME_T.3                         \
   CURLINFO_FTP_ENTRY_PATH.3                     \
   CURLINFO_HEADER_SIZE.3                        \
   CURLINFO_HTTPAUTH_AVAIL.3                     \
@@ -301,6 +302,7 @@ man_MANS =                                      \
   CURLOPT_TIMEOUT.3                             \
   CURLOPT_TIMEOUT_MS.3                          \
   CURLOPT_TIMEVALUE.3                           \
+  CURLOPT_TIMEVALUE_LARGE.3                     \
   CURLOPT_TLSAUTH_PASSWORD.3                    \
   CURLOPT_TLSAUTH_TYPE.3                        \
   CURLOPT_TLSAUTH_USERNAME.3                    \

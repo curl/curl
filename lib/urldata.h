@@ -1024,10 +1024,8 @@ struct PureInfo {
   int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
   int httpproxycode; /* response code from proxy when received separate */
   int httpversion; /* the http version number X.Y = X*10+Y */
-  long filetime; /* If requested, this is might get set. Set to -1 if the time
-                    was unretrievable. We cannot have this of type time_t,
-                    since time_t is unsigned on several platforms such as
-                    OpenVMS. */
+  time_t filetime; /* If requested, this is might get set. Set to -1 if the
+                      time was unretrievable. */
   bool timecond;  /* set to TRUE if the time condition didn't match, which
                      thus made the document NOT get fetched */
   long header_size;  /* size of read header(s) in bytes */

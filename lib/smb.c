@@ -709,14 +709,19 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
 }
 
 /*
- * Convert a timestamp from the Windows world (100 nsec units from
- * 1 Jan 1601) to Posix time.
+ * Convert a timestamp from the Windows world (100 nsec units from 1 Jan 1601)
+ * to Posix time. Cap the output to fit within a time_t.
  */
-static void get_posix_time(long *out, curl_off_t timestamp)
+static void get_posix_time(time_t *out, curl_off_t timestamp)
 {
   timestamp -= 116444736000000000;
   timestamp /= 10000000;
-  *out = (long) timestamp;
+  if(timestamp > TIME_T_MAX)
+    *out = TIME_T_MAX;
+  else if(timestamp < TIME_T_MIN)
+    *out = TIME_T_MIN;
+  else
+    *out = (time_t) timestamp;
 }
 
 static CURLcode smb_request_state(struct connectdata *conn, bool *done)
