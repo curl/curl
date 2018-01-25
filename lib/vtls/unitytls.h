@@ -14,6 +14,8 @@ CURLcode Curl_unitytls_connect_nonblocking(struct connectdata *conn, int sockind
 void Curl_unitytls_close(struct connectdata *conn, int sockindex);
 size_t Curl_unitytls_version(char *buffer, size_t size);
 
+int Curl_unitytls_random(struct Curl_easy *data, unsigned char *entropy, size_t length);
+
 /* Support HTTPS-proxy */
 /* #define HTTPS_PROXY_SUPPORT 1 */
 
@@ -43,9 +45,7 @@ size_t Curl_unitytls_version(char *buffer, size_t size);
 #define curlssl_data_pending(x,y) ((void)x, (void)y, 0)
 #define CURL_SSL_BACKEND CURLSSLBACKEND_UNITYTLS
 /* #define curlssl_sha256sum(a,b,c,d) unitytls_sha256(a,b,c,0)   TODO?  */
-
-/* This might cause libcurl to use a weeker random! */
-#define curlssl_random(x,y,z) (x=x, y=y, z=z, CURLE_NOT_BUILT_IN)
+#define curlssl_random(x,y,z) Curl_unitytls_random(x,y,z)
 
 #endif /* USE_UNITYTLS */
 #endif /* HEADER_CURL_UNITYTLS_H */

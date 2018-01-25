@@ -213,6 +213,8 @@ typedef unitytls_key*               (*unitytls_key_parse_pem_t)(const char* buff
 typedef size_t                      (*unitytls_x509list_append_pem_t)(unitytls_x509list* list, const char* buffer, size_t bufferLen, unitytls_errorstate* errorState);
 typedef void                        (*unitytls_tlsctx_set_certificate_callback_t)(unitytls_tlsctx* ctx, unitytls_tlsctx_certificate_callback cb, void* userData, unitytls_errorstate* errorState);
 
+typedef void                        (*unitytls_random_generate_bytes_t)(UInt8* buffer, size_t bufferLen, unitytls_errorstate* errorState);
+
 /* Interface struct used to integrate UnityTLS into external libraries. */
 /* See InterfaceStruct.cpp in UnityTLS. */
 typedef struct
@@ -254,6 +256,8 @@ typedef struct
     unitytls_tlsctx_read_t unitytls_tlsctx_read;
     unitytls_tlsctx_write_t unitytls_tlsctx_write;
     unitytls_tlsctx_free_t unitytls_tlsctx_free;
+
+    unitytls_random_generate_bytes_t unitytls_random_generate_bytes;
 } unitytls_interface_struct;
 
 

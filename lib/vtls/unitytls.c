@@ -617,4 +617,20 @@ size_t Curl_unitytls_version(char *buffer, size_t size)
   return snprintf(buffer, size, "UnityTls");
 }
 
+int Curl_unitytls_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
+{
+  unitytls_errorstate err;
+
+  if(!unitytls_check_interface_available(data))
+    return 1;
+
+  err = unitytls->unitytls_errorstate_create();
+  unitytls->unitytls_random_generate_bytes(entropy, length, &err);
+
+  if(err.code != UNITYTLS_SUCCESS)
+    return 1;
+
+  return 0;
+}
+
 #endif /* USE_UNITYTLS */
