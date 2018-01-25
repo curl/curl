@@ -3488,7 +3488,7 @@ AC_RUN_IFELSE([
   AC_LANG_SOURCE([[
   #include <time.h>
   #include <limits.h>
-  time_t t = ULONG_MAX;
+  time_t t = -1;
   return (t > 0);
   ]])] ,[
   AC_MSG_RESULT([yes])
