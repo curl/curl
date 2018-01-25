@@ -89,6 +89,10 @@ matrix:
           compiler: clang
           dist: trusty
           env: T=fuzzer
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=scan-build
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
@@ -222,6 +226,11 @@ script:
           pushd /tmp/curl_fuzzer
           ./mainline.sh ${CURLSRC}
           popd
+        fi
+    - |
+        if [ "$T" = "scan-build" ]; then
+             scan-build ./configure --enable-debug --enable-werror $C
+             scan-build --status-bugs make && scan-build --status-bugs make examples
         fi
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
