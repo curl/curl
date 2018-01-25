@@ -438,7 +438,7 @@
 #  define TIME_T_MIN 0
 #  else
 #  define TIME_T_MAX 0x7FFFFFFFFFFFFFFF
-#  define TIME_T_MIN -0x10000000000000000
+#  define TIME_T_MIN (-TIME_T_MAX - 1)
 #  endif
 #endif
 
