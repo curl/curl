@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -429,9 +429,6 @@ Curl_cookie_add(struct Curl_easy *data,
         size_t len = strlen(what);
         size_t nlen = strlen(name);
         const char *endofn = &ptr[ nlen ];
-
-        infof(data, "cookie size: name/val %d + %d bytes\n",
-              nlen, len);
 
         if(nlen >= (MAX_NAME-1) || len >= (MAX_NAME-1) ||
            ((nlen + len) > MAX_NAME)) {
