@@ -22,6 +22,9 @@ int Curl_unitytls_random(struct Curl_easy *data, unsigned char *entropy, size_t 
 /* this backend supports the CAPATH option */
 #define have_curlssl_ca_path 1
 
+/* this backend supports CURLOPT_SSL_CTX_* */
+#define have_curlssl_ssl_ctx 1
+
 /* this backend supports does not CURLOPT_CERTINFO */
 /* #define have_curlssl_certinfo 1 */
 
