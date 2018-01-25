@@ -41,6 +41,7 @@
  1.24 TCP Fast Open for windows
  1.25 Expose tried IP addresses that failed
  1.26 CURL_REFUSE_CLEARTEXT
+ 1.27 hardcode the "localhost" addresses
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -402,6 +403,17 @@
  variable can then help users to block all libcurl-using programs from
  accessing the network using unsafe protocols.
 
+1.27 hardcode the "localhost" addresses
+
+ There's this new spec getting adopted that says "localhost" should always and
+ unconditionally be a local address and not get resolved by a DNS server. A
+ fine way for curl to fix this would be to simply hard-code the response to
+ 127.0.0.1 and/or ::1 (depending on what IP versions that are requested). This
+ is what the browsers probably will do with this hostname.
+
+ https://bugzilla.mozilla.org/show_bug.cgi?id=1220810
+
+ https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
 
 2. libcurl - multi interface
 
