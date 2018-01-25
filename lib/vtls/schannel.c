@@ -129,6 +129,10 @@
  * #define failf(x, y, ...) printf(y, __VA_ARGS__)
  */
 
+#ifndef CALG_SHA_256
+#  define CALG_SHA_256 0x0000800c
+#endif
+
 /* Structs to store Schannel handles */
 struct curl_schannel_cred {
   CredHandle cred_handle;
@@ -164,6 +168,9 @@ struct ssl_backend_data {
 
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
+
+static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
+                                    const char *pinnedpubkey);
 
 #ifdef _WIN32_WCE
 static CURLcode verify_certificate(struct connectdata *conn, int sockindex);
@@ -542,6 +549,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   bool doread;
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+  const char *pubkey_ptr;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
 
@@ -759,6 +767,16 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   if(sspi_status == SEC_E_OK) {
     connssl->connecting_state = ssl_connect_3;
     infof(data, "schannel: SSL/TLS handshake complete\n");
+  }
+
+  pubkey_ptr = SSL_IS_PROXY() ? data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+                         data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+  if(pubkey_ptr) {
+    result = pkp_pin_peer_pubkey(conn, sockindex, pubkey_ptr);
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key!");
+      return result;
+    }
   }
 
 #ifdef _WIN32_WCE
@@ -1669,6 +1687,68 @@ static CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
   return CURLE_OK;
 }
 
+static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
+                                    const char *pinnedpubkey)
+{
+  SECURITY_STATUS status;
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  CERT_CONTEXT *pCertContextServer = NULL;
+  const char *x509_der;
+  int x509_der_len;
+  curl_X509certificate x509_parsed;
+  curl_asn1Element *pubkey;
+
+  /* Result is returned to caller */
+  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+  /* if a path wasn't specified, don't pin */
+  if(!pinnedpubkey)
+    return CURLE_OK;
+
+  do {
+    status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                              SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                              &pCertContextServer);
+
+    if((status != SEC_E_OK) || (pCertContextServer == NULL)) {
+      failf(data, "schannel: Failed to read remote certificate context: %s",
+            Curl_sspi_strerror(conn, status));
+      break; /* failed */
+    }
+
+
+    if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+       (pCertContextServer->cbCertEncoded > 0)))
+      break;
+
+    x509_der = pCertContextServer->pbCertEncoded;
+    x509_der_len = pCertContextServer->cbCertEncoded;
+    memset(&x509_parsed, 0, sizeof x509_parsed);
+    if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
+      break;
+
+    pubkey = &x509_parsed.subjectPublicKeyInfo;
+    if(!pubkey->header || pubkey->end <= pubkey->header) {
+      failf(data, "SSL: failed retrieving public key from server certificate");
+      break;
+    }
+
+    result = Curl_pin_peer_pubkey(data,
+                                  pinnedpubkey,
+                                  (const unsigned char *)pubkey->header,
+                                  (size_t)(pubkey->end - pubkey->header));
+    if(result) {
+      failf(data, "SSL: public key does not match pinned public key!");
+    }
+  } while(0);
+
+  if(pCertContextServer)
+    CertFreeCertificateContext(pCertContextServer);
+
+  return result;
+}
+
 #ifdef _WIN32_WCE
 static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 {
@@ -1809,6 +1889,71 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
 }
 #endif /* _WIN32_WCE */
 
+static void Curl_schannel_checksum(const unsigned char *input,
+                      size_t inputlen,
+                      unsigned char *checksum,
+                      size_t checksumlen,
+                      const unsigned char *pszProvider,
+                      const unsigned int algId)
+{
+  HCRYPTPROV hProv = 0;
+  HCRYPTHASH hHash = 0;
+  size_t cbHashSize = 0, dwCount = sizeof(size_t);
+
+  /* since this can fail in multiple ways, zero memory first so we never
+   * return old data
+   */
+  memset(checksum, 0, checksumlen);
+
+  if(!CryptAcquireContext(&hProv, NULL, NULL, pszProvider,
+                          CRYPT_VERIFYCONTEXT))
+    return; /* failed */
+
+  do {
+    if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
+      break; /* failed */
+
+    if(!CryptHashData(hHash, (const BYTE*) input, inputlen, 0))
+      break; /* failed */
+
+    /* get hash size */
+    if(!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)&cbHashSize,
+                          &dwCount, 0))
+      break; /* failed */
+
+    /* check hash size */
+    if(checksumlen < cbHashSize)
+      break; /* failed */
+
+    if (CryptGetHashParam(hHash, HP_HASHVAL, checksum, &checksumlen, 0))
+      break; /* failed */
+  } while(0);
+
+  if(hHash)
+    CryptDestroyHash(hHash);
+
+  if(hProv)
+    CryptReleaseContext(hProv, 0);
+}
+
+void Curl_schannel_md5sum(unsigned char *input,
+                           size_t inputlen,
+                           unsigned char *md5sum,
+                           size_t md5len)
+{
+    Curl_schannel_checksum(input, inputlen, md5sum, md5len,
+                           PROV_RSA_FULL, CALG_MD5);
+}
+
+void Curl_schannel_sha256sum(unsigned char *input,
+                           size_t inputlen,
+                           unsigned char *sha256sum,
+                           size_t sha256len)
+{
+    Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
+                           PROV_RSA_AES, CALG_SHA_256);
+}
+
 static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
                                          CURLINFO info UNUSED_PARAM)
 {
@@ -1821,7 +1966,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
 
   0, /* have_ca_path */
   1, /* have_certinfo */
-  0, /* have_pinnedpubkey */
+  1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   0, /* support_https_proxy */
 
@@ -1845,8 +1990,8 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
-  Curl_none_md5sum,                  /* md5sum */
-  NULL                               /* sha256sum */
+  Curl_schannel_md5sum,              /* md5sum */
+  Curl_schannel_sha256sum            /* sha256sum */
 };
 
 #endif /* USE_SCHANNEL */
