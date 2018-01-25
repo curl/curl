@@ -40,6 +40,7 @@
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
  1.25 Expose tried IP addresses that failed
+ 1.26 CURL_REFUSE_CLEARTEXT
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -392,6 +393,15 @@
  application the list of IP addresses that were used in the attempt.
 
  https://github.com/curl/curl/issues/2126
+
+1.26 CURL_REFUSE_CLEARTEXT
+
+ An environment variable that when set will make libcurl refuse to use any
+ cleartext network protocol. That's all non-encrypted ones (FTP, HTTP, Gopher,
+ etc). By adding the check to libcurl and not just curl, this environment
+ variable can then help users to block all libcurl-using programs from
+ accessing the network using unsafe protocols.
+
 
 2. libcurl - multi interface
 
