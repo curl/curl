@@ -27,6 +27,7 @@ CFGSET=true
 !MESSAGE   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
 !MESSAGE   WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
+!MESSAGE   WITH_UNITYTLS=<yes or no>    - Enable unitytls support, defaults to no
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
 !MESSAGE                                  Requires Windows Vista or later, or installation from:
 !MESSAGE                                  https://www.microsoft.com/en-us/download/details.aspx?id=734
@@ -126,10 +127,17 @@ USE_MBEDTLS = true
 MBEDTLS     = $(WITH_MBEDTLS)
 !ENDIF
 
+!IF "$(WITH_UNITYTLS)"=="yes"
+USE_UNITYTLS = $(WITH_UNITYTLS)
+!ENDIF
+
 !IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
  || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
- || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
-!ERROR SSL, MBEDTLS and WINSSL are mutual exclusive options.
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" ) \
+ || ( "$(USE_UNITYTLS)"=="true" && "$(USE_SSL)"=="true" ) \
+ || ( "$(USE_UNITYTLS)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
+ || ( "$(USE_UNITYTLS)"=="true" && "$(USE_WINSSL)"=="true" )
+!ERROR SSL, MBEDTLS, UNITYTLS and WINSSL are mutual exclusive options.
 !ENDIF
 
 !IF "$(WITH_CARES)"=="dll"

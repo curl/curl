@@ -148,6 +148,11 @@ MBEDTLS_CFLAGS = /DUSE_MBEDTLS
 MBEDTLS_LIBS   = mbedtls.lib mbedcrypto.lib mbedx509.lib
 !ENDIF
 
+!IF "$(WITH_UNITYTLS)"=="yes"
+USE_UNITYTLS    = true
+UNITYTLS_CFLAGS = /DUSE_UNITYTLS
+UNITYTLS_LIBS    = crypt32.lib
+!ENDIF
 
 !IF "$(WITH_CARES)"=="dll"
 !IF "$(DEBUG)"=="yes"
@@ -346,6 +351,11 @@ CFLAGS = $(CFLAGS) $(MBEDTLS_CFLAGS)
 LFLAGS = $(LFLAGS) $(MBEDTLS_LFLAGS) $(MBEDTLS_LIBS)
 !ENDIF
 
+!IF "$(USE_UNITYTLS)"=="true"
+CFLAGS = $(CFLAGS) $(UNITYTLS_CFLAGS)
+LFLAGS = $(LFLAGS) $(UNITYTLS_LIBS)
+!ENDIF
+
 !IF "$(USE_CARES)"=="true"
 CFLAGS = $(CFLAGS) $(CARES_CFLAGS)
 LFLAGS = $(LFLAGS) $(CARES_LFLAGS) $(CARES_LIBS)
@@ -438,6 +448,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using IPv6: $(USE_IPV6)
 	@echo Using SSPI: $(USE_SSPI)
 	@echo Using WinSSL: $(USE_WINSSL)
+	@echo Using UnityTLS: $(USE_UNITYTLS)
 	@echo CFLAGS:     $(CFLAGS)
 	@echo LFLAGS:     $(LFLAGS)
 	@echo GenPDB:     $(GEN_PDB)

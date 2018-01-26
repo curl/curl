@@ -348,6 +348,8 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
             tsi->internals = (void *)conn->ssl[i].handle;
 #elif defined(USE_MBEDTLS)
             tsi->internals = (void *)&conn->ssl[i].ssl;
+#elif defined(USE_UNITYTLS)
+            tsi->internals = (void *)&conn->ssl[i].ctx;
 #elif defined(USE_NSS)
             tsi->internals = (void *)conn->ssl[i].handle;
 #elif defined(USE_OPENSSL)
