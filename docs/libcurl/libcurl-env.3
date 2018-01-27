@@ -36,7 +36,7 @@ will use the "ftp_proxy" variable.
 
 These proxy variables are also checked for in their uppercase versions, except
 the "http_proxy" one which is only used lowercase. Note also that some systems
-actually have a case insensitve handling of environment variables and then of
+actually have a case insensitive handling of environment variables and then of
 course "HTTP_PROXY" will still work...
 .IP ALL_PROXY
 This is a setting to set proxy for all URLs, independently of what scheme is
@@ -46,7 +46,7 @@ set.
 When libcurl is built to support multiple SSL backends, it will select a
 specific backend at first use. If no selection is done by the program using
 libcurl, this variable's selection will be used. It should be set to the full
-SSL backend name to use (case insensitve).
+SSL backend name to use (case insensitive).
 .IP HOME
 When the netrc feature is used (\fICURLOPT_NETRC(3)\fP), this variable is
 checked as the primary way to find the "current" home directory in which
