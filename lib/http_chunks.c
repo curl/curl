@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,15 +73,6 @@
    zero, followed by the trailer, which is terminated by an empty line.
 
  */
-
-/* Check for an ASCII hex digit.
- We avoid the use of isxdigit to accommodate non-ASCII hosts. */
-static bool Curl_isxdigit(char digit)
-{
-  return ( (digit >= 0x30 && digit <= 0x39) /* 0-9 */
-        || (digit >= 0x41 && digit <= 0x46) /* A-F */
-        || (digit >= 0x61 && digit <= 0x66) /* a-f */) ? TRUE : FALSE;
-}
 
 void Curl_httpchunk_init(struct connectdata *conn)
 {
