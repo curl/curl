@@ -34,7 +34,7 @@ DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cer
   remote-name-all.d remote-name.d remote-time.d request.d resolve.d     \
   retry-connrefused.d retry.d retry-delay.d retry-max-time.d sasl-ir.d  \
   service-name.d show-error.d silent.d socks4a.d socks4.d socks5.d      \
-  socks5-basic.d socks5-gssapi.d                                        \
+  socks5-basic.d socks5-gssapi.d proxy-pinnedpubkey.d                   \
   socks5-gssapi-nec.d socks5-gssapi-service.d socks5-hostname.d         \
   speed-limit.d speed-time.d ssl-allow-beast.d ssl.d ssl-no-revoke.d    \
   ssl-reqd.d sslv2.d sslv3.d stderr.d suppress-connect-headers.d        \

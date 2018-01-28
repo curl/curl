@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -314,6 +314,8 @@ static const struct helptxt helptext[] = {
    "Use NTLM authentication on the proxy"},
   {"    --proxy-pass <phrase>",
    "Pass phrase for the private key for HTTPS proxy"},
+  {"    --proxy-pinnedpubkey <hashes>",
+   "FILE/HASHES public key to verify proxy with"},
   {"    --proxy-service-name <name>",
    "SPNEGO proxy service name"},
   {"    --proxy-ssl-allow-beast",
