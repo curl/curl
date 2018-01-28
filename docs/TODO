@@ -141,6 +141,7 @@
  18.2 glob posts
  18.3 prevent file overwriting
  18.4 simultaneous parallel transfers
+ 18.5 UTF-8 filenames in Content-Disposition
  18.6 warning when setting an option
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
@@ -929,6 +930,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Using the multi interface would also allow properly using parallel transfers
  with HTTP/2 and supporting HTTP/2 server push from the command line.
+
+18.5 UTF-8 filenames in Content-Disposition
+
+ RFC 6266 documents how UTF-8 names can be passed to a client in the
+ Content-Disposition header, and curl does not support this.
+
+ https://github.com/curl/curl/issues/1888
 
 18.6 warning when setting an option
 
