@@ -352,6 +352,8 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
         unsigned char *pp = p + 1; /* cannot handle with pointer to register */
         if(setcharset(&pp, charset)) {
           int found = FALSE;
+          if(!*s)
+            return CURL_FNMATCH_NOMATCH;
           if(charset[(unsigned int)*s])
             found = TRUE;
           else if(charset[CURLFNM_ALNUM])
@@ -380,9 +382,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
 
           if(found) {
             p = pp + 1;
-            if(*s)
-              /* don't advance if we're matching on an empty string */
-              s++;
+            s++;
             memset(charset, 0, CURLFNM_CHSET_SIZE);
           }
           else
