@@ -36,7 +36,6 @@
 CURLcode Curl_range(struct connectdata *conn)
 {
   curl_off_t from, to;
-  curl_off_t totalsize = -1;
   char *ptr;
   char *ptr2;
   struct Curl_easy *data = conn->data;
@@ -67,10 +66,16 @@ CURLcode Curl_range(struct connectdata *conn)
     }
     else {
       /* X-Y */
-      totalsize = to-from;
-      if(totalsize == CURL_OFF_T_MAX)
-        /* this is too big to increase, so bail out */
+      curl_off_t totalsize;
+
+      /* Ensure the range is sensible - to should follow from. */
+      if(from > to)
         return CURLE_RANGE_ERROR;
+
+      totalsize = to - from;
+      if(totalsize == CURL_OFF_T_MAX)
+        return CURLE_RANGE_ERROR;
+
       data->req.maxdownload = totalsize + 1; /* include last byte */
       data->state.resume_from = from;
       DEBUGF(infof(data, "RANGE from %" CURL_FORMAT_CURL_OFF_T
