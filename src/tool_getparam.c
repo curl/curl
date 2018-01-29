@@ -232,6 +232,7 @@ static const struct LongShort aliases[]= {
   {"En", "ssl-allow-beast",          ARG_BOOL},
   {"Eo", "login-options",            ARG_STRING},
   {"Ep", "pinnedpubkey",             ARG_STRING},
+  {"EP", "proxy-pinnedpubkey",       ARG_STRING},
   {"Eq", "cert-status",              ARG_BOOL},
   {"Er", "false-start",              ARG_BOOL},
   {"Es", "ssl-no-revoke",            ARG_BOOL},
@@ -1498,6 +1499,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'p': /* Pinned public key DER file */
         /* Pinned public key DER file */
         GetStr(&config->pinnedpubkey, nextarg);
+        break;
+
+      case 'P': /* proxy pinned public key */
+        GetStr(&config->proxy_pinnedpubkey, nextarg);
         break;
 
       case 'q': /* --cert-status */
