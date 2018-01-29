@@ -68,7 +68,7 @@ LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 
 CFLAGS_PDB = /Zi
-LFLAGS_PDB = /incremental:no /opt:ref,icf
+LFLAGS_PDB = /incremental:no /opt:ref,icf /DEBUG
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
