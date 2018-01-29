@@ -36,8 +36,8 @@ struct testcase {
 static const struct testcase tests[] = {
   /* brackets syntax */
   { "\\[",                      "[",                      MATCH },
-  { "[",                        "[",                      RE_ERR },
-  { "[]",                       "[]",                     RE_ERR },
+  { "[",                        "[",                      MATCH },
+  { "[]",                       "[]",                     MATCH },
   { "[][]",                     "[",                      MATCH },
   { "[][]",                     "]",                      MATCH },
   { "[[]",                      "[",                      MATCH },
@@ -48,6 +48,8 @@ static const struct testcase tests[] = {
   { "[][[]",                    "]",                      MATCH },
   { "[][[[]",                   "[",                      MATCH },
   { "[[]",                      "]",                      NOMATCH },
+
+  { "[a@]",                     "a",                      MATCH },
 
   { "[a-z]",                    "a",                      MATCH },
   { "[a-z]",                    "A",                      NOMATCH },
@@ -77,6 +79,7 @@ static const struct testcase tests[] = {
   { "[][?*-]",                  "*",                      MATCH },
   { "[][?*-]",                  "-",                      MATCH },
   { "[]?*-]",                   "-",                      MATCH },
+  { "[\xFF]",                   "\xFF",                   MATCH },
   { "?/b/c",                    "a/b/c",                  MATCH },
   { "^_{}~",                    "^_{}~",                  MATCH },
   { "!#%+,-./01234567889",      "!#%+,-./01234567889",    MATCH },
@@ -98,7 +101,9 @@ static const struct testcase tests[] = {
   { "*[^a].t?t",                "ba.txt",                 NOMATCH },
   { "*[^a].t?t",                "ab.txt",                 MATCH },
   { "*[^a]",                    "",                       NOMATCH },
-  { "[!ÿ]",                     "",                       NOMATCH },
+  { "[!\xFF]",                  "",                       NOMATCH },
+  { "[!\xFF]",                  "\xFF",                   NOMATCH },
+  { "[!\xFF]",                  "a",                      MATCH },
   { "[!?*[]",                   "?",                      NOMATCH },
   { "[!!]",                     "!",                      NOMATCH },
   { "[!!]",                     "x",                      MATCH },
