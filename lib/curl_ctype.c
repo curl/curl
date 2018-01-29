@@ -31,7 +31,7 @@
 #define _X (1<<6) /* hexadecimal letter */
 #define _B (1<<7) /* blank */
 
-const unsigned char Curl_ctype[128] = {
+static const unsigned char ascii[128] = {
   _C,   _C,     _C,     _C,     _C,     _C,     _C,     _C,
   _C,   _C|_S,  _C|_S,  _C|_S,  _C|_S,  _C|_S,  _C,     _C,
   _C,   _C,     _C,     _C,     _C,     _C,     _C,     _C,
@@ -54,61 +54,61 @@ int Curl_isspace(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & _S);
+  return (ascii[c] & _S);
 }
 
 int Curl_isdigit(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & _N);
+  return (ascii[c] & _N);
 }
 
 int Curl_isalnum(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & (_N|_U|_L));
+  return (ascii[c] & (_N|_U|_L));
 }
 
 int Curl_isxdigit(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & (_N|_X));
+  return (ascii[c] & (_N|_X));
 }
 
 int Curl_isgraph(int c)
 {
   if((c < 0) || (c >= 0x80) || (c == ' '))
     return FALSE;
-  return (Curl_ctype[c] & (_N|_X|_U|_L|_P|_S));
+  return (ascii[c] & (_N|_X|_U|_L|_P|_S));
 }
 
 int Curl_isprint(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & (_N|_X|_U|_L|_P|_S));
+  return (ascii[c] & (_N|_X|_U|_L|_P|_S));
 }
 
 int Curl_isalpha(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & (_U|_L));
+  return (ascii[c] & (_U|_L));
 }
 
 int Curl_isupper(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & (_U));
+  return (ascii[c] & (_U));
 }
 
 int Curl_islower(int c)
 {
   if((c < 0) || (c >= 0x80))
     return FALSE;
-  return (Curl_ctype[c] & (_L));
+  return (ascii[c] & (_L));
 }
