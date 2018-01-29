@@ -53,8 +53,6 @@ typedef enum {
 
 typedef enum {
   CURLFNM_SCHS_DEFAULT = 0,
-  CURLFNM_SCHS_MAYRANGE,
-  CURLFNM_SCHS_MAYRANGE2,
   CURLFNM_SCHS_RIGHTBR,
   CURLFNM_SCHS_RIGHTBRLEFTBR
 } setcharset_state;
@@ -63,6 +61,13 @@ typedef enum {
   CURLFNM_PKW_INIT = 0,
   CURLFNM_PKW_DDOT
 } parsekey_state;
+
+typedef enum {
+  CCLASS_OTHER = 0,
+  CCLASS_DIGIT,
+  CCLASS_UPPER,
+  CCLASS_LOWER
+} char_class;
 
 #define SETCHARSET_OK     1
 #define SETCHARSET_FAIL   0
@@ -123,14 +128,48 @@ static int parsekeyword(unsigned char **pattern, unsigned char *charset)
   return SETCHARSET_OK;
 }
 
+/* Return the character class. */
+static char_class charclass(unsigned char c)
+{
+  if(ISUPPER(c))
+    return CCLASS_UPPER;
+  if(ISLOWER(c))
+    return CCLASS_LOWER;
+  if(ISDIGIT(c))
+    return CCLASS_DIGIT;
+  return CCLASS_OTHER;
+}
+
+/* Include a character or a range in set. */
+static void setcharorrange(unsigned char **pp, unsigned char *charset)
+{
+  unsigned char *p = (*pp)++;
+  unsigned char c = *p++;
+
+  charset[c] = 1;
+  if(ISALNUM(c) && *p++ == '-') {
+    char_class cc = charclass(c);
+    unsigned char endrange = *p++;
+
+    if(endrange == '\\')
+      endrange = *p++;
+    if(endrange >= c && charclass(endrange) == cc) {
+      while(c++ != endrange)
+        if(charclass(c) == cc)  /* Chars in class may be not consecutive. */
+          charset[c] = 1;
+      *pp = p;
+    }
+  }
+}
+
 /* returns 1 (true) if pattern is OK, 0 if is bad ("p" is pattern pointer) */
 static int setcharset(unsigned char **p, unsigned char *charset)
 {
   setcharset_state state = CURLFNM_SCHS_DEFAULT;
-  unsigned char rangestart = 0;
-  unsigned char lastchar   = 0;
   bool something_found = FALSE;
   unsigned char c;
+
+  memset(charset, 0, CURLFNM_CHSET_SIZE);
   for(;;) {
     c = **p;
     if(!c)
@@ -138,14 +177,7 @@ static int setcharset(unsigned char **p, unsigned char *charset)
 
     switch(state) {
     case CURLFNM_SCHS_DEFAULT:
-      if(ISALNUM(c)) { /* ASCII value */
-        rangestart = c;
-        charset[c] = 1;
-        (*p)++;
-        state = CURLFNM_SCHS_MAYRANGE;
-        something_found = TRUE;
-      }
-      else if(c == ']') {
+      if(c == ']') {
         if(something_found)
           return SETCHARSET_OK;
         something_found = TRUE;
@@ -169,11 +201,6 @@ static int setcharset(unsigned char **p, unsigned char *charset)
         }
         something_found = TRUE;
       }
-      else if(c == '?' || c == '*') {
-        something_found = TRUE;
-        charset[c] = 1;
-        (*p)++;
-      }
       else if(c == '^' || c == '!') {
         if(!something_found) {
           if(charset[CURLFNM_NEGATE]) {
@@ -189,81 +216,16 @@ static int setcharset(unsigned char **p, unsigned char *charset)
       }
       else if(c == '\\') {
         c = *(++(*p));
-        if(ISPRINT((c))) {
-          something_found = TRUE;
-          state = CURLFNM_SCHS_MAYRANGE;
-          charset[c] = 1;
-          rangestart = c;
-          (*p)++;
-        }
+        if(c)
+          setcharorrange(p, charset);
         else
-          return SETCHARSET_FAIL;
-      }
-      else {
-        charset[c] = 1;
-        (*p)++;
+          charset['\\'] = 1;
         something_found = TRUE;
       }
-      break;
-    case CURLFNM_SCHS_MAYRANGE:
-      if(c == '-') {
-        charset[c] = 1;
-        (*p)++;
-        lastchar = '-';
-        state = CURLFNM_SCHS_MAYRANGE2;
+      else {
+        setcharorrange(p, charset);
+        something_found = TRUE;
       }
-      else if(c == '[') {
-        state = CURLFNM_SCHS_DEFAULT;
-      }
-      else if(ISALNUM(c)) {
-        charset[c] = 1;
-        (*p)++;
-      }
-      else if(c == '\\') {
-        c = *(++(*p));
-        if(ISPRINT(c)) {
-          charset[c] = 1;
-          (*p)++;
-        }
-        else
-          return SETCHARSET_FAIL;
-      }
-      else if(c == ']') {
-        return SETCHARSET_OK;
-      }
-      else
-        return SETCHARSET_FAIL;
-      break;
-    case CURLFNM_SCHS_MAYRANGE2:
-      if(c == ']') {
-        return SETCHARSET_OK;
-      }
-      else if(c == '\\') {
-        c = *(++(*p));
-        if(ISPRINT(c)) {
-          charset[c] = 1;
-          state = CURLFNM_SCHS_DEFAULT;
-          (*p)++;
-        }
-        else
-          return SETCHARSET_FAIL;
-      }
-      else if(c >= rangestart) {
-        if((ISLOWER(c) && ISLOWER(rangestart)) ||
-           (ISDIGIT(c) && ISDIGIT(rangestart)) ||
-           (ISUPPER(c) && ISUPPER(rangestart))) {
-          charset[lastchar] = 0;
-          rangestart++;
-          while(rangestart++ <= c)
-            charset[rangestart-1] = 1;
-          (*p)++;
-          state = CURLFNM_SCHS_DEFAULT;
-        }
-        else
-          return SETCHARSET_FAIL;
-      }
-      else
-        return SETCHARSET_FAIL;
       break;
     case CURLFNM_SCHS_RIGHTBR:
       if(c == '[') {
@@ -383,13 +345,14 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
           if(found) {
             p = pp + 1;
             s++;
-            memset(charset, 0, CURLFNM_CHSET_SIZE);
           }
           else
             return CURL_FNMATCH_NOMATCH;
         }
-        else
-          return CURL_FNMATCH_FAIL;
+        else {
+          if(*p++ != *s++)
+            return CURL_FNMATCH_NOMATCH;
+        }
       }
       else {
         if(*p++ != *s++)
