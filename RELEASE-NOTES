@@ -12,7 +12,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o
+ o lib555: drop text conversion and encode data as ascii codes [1]
+ o lib517: make variable static to avoid compiler warning
+ o lib544: sync ascii code data with textual data [1]
+ o GSKit: restore pinnedpubkey functionality [2]
+ o darwinssl: Don't import client certificates into Keychain on macOS [3]
+ o parsedate: fix date parsing for systems with 32 bit long [4]
+ o openssl: fix pinned public key build error in FIPS mode [5]
+ o SChannel/WinSSL: Implement public key pinning [6]
+ o cookies: remove verbose "cookie size:" output
+ o progress-bar: don't use stderr explicitly, use bar->out [7]
+ o Fixes for MSDOS
 
 This release includes the following known bugs:
 
@@ -21,10 +31,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+  Alessandro Ghedini, Dair Grant, Daniel Stenberg, Gisle Vanem,
+  Patrick Monnerat, Travis Burtrum,
+  (6 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=1872
+ [2] = https://curl.haxx.se/bug/?i=2263
+ [3] = https://curl.haxx.se/bug/?i=2085
+ [4] = https://curl.haxx.se/bug/?i=2250
+ [5] = https://curl.haxx.se/bug/?i=2258
+ [6] = https://curl.haxx.se/bug/?i=1429
+ [7] = https://github.com/curl/curl/commit/993dd5651a6c853bfe3870f6a69c7b329fa4e8ce#commitcomment-27070080
