@@ -303,6 +303,10 @@ static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
 
   read = unitytls->unitytls_tlsctx_read(conn->ssl[sockindex].ctx, (UInt8*)buf, buffersize, &err);
 
+  // Curl expects us to ignore gracefully closed connections on read.
+  if(err.code == UNITYTLS_STREAM_CLOSED)
+    return 0;
+
   if(err.code != UNITYTLS_SUCCESS) {
     if(err.code == UNITYTLS_USER_WOULD_BLOCK)
       *curlcode = CURLE_AGAIN;
