@@ -20,20 +20,21 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_TIMEVALUE 3 "17 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
+.TH CURLOPT_TIMEVALUE_LARGE 3 "25 Jan 2018" "libcurl 7.59.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_TIMEVALUE \- set time value for conditional
+CURLOPT_TIMEVALUE_LARGE \- set time value for conditional
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE, long val);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEVALUE_LARGE, curl_off_t val);
 .SH DESCRIPTION
-Pass a long \fIval\fP as parameter. This should be the time counted as seconds
-since 1 Jan 1970, and the time will be used in a condition as specified with
-\fICURLOPT_TIMECONDITION(3)\fP.
+Pass a curl_off_t \fIval\fP as parameter. This should be the time counted as
+seconds since 1 Jan 1970, and the time will be used in a condition as
+specified with \fICURLOPT_TIMECONDITION(3)\fP.
 
-On systems with 32 bit 'long' variables, this option cannot set dates beyond
-the year 2038. Consider \fICURLOPT_TIMEVALUE_LARGE(3)\fP instead.
+The difference between this option and \fICURLOPT_TIMEVALUE(3)\fP is the type
+of the argument. On systems where 'long' is only 32 bit wide, this option has
+to be used to set dates beyond the year 2038.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -45,7 +46,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
 
   /* January 1, 2020 is 1577833200 */
-  curl_easy_setopt(curl, CURLOPT_TIMEVALUE, 1577833200L);
+  curl_easy_setopt(curl, CURLOPT_TIMEVALUE_LARGE, (curl_off_t)1577833200);
 
   /* If-Modified-Since the above time stamp */
   curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
@@ -55,8 +56,9 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Always
+Added in 7.59.0.
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
 .BR CURLOPT_TIMECONDITION "(3), "
+.BR CURLOPT_TIMEVALUE_LARGE "(3), "

@@ -361,6 +361,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.timevalue = (time_t)va_arg(param, long);
     break;
 
+  case CURLOPT_TIMEVALUE_LARGE:
+    /*
+     * This is the value to compare with the remote document with the
+     * method set with CURLOPT_TIMECONDITION
+     */
+    data->set.timevalue = (time_t)va_arg(param, curl_off_t);
+    break;
+
   case CURLOPT_SSLVERSION:
   case CURLOPT_PROXY_SSLVERSION:
     /*
