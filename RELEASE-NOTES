@@ -1,14 +1,15 @@
-Curl and libcurl 7.58.1
+Curl and libcurl 7.59.0
 
  Public curl releases:         173
- Command line options:         211
- curl_easy_setopt() options:   249
+ Command line options:         212
+ curl_easy_setopt() options:   250
  Public functions in libcurl:  74
  Contributors:                 1685
 
 This release includes the following changes:
 
- o
+ o curl: add --proxy-pinnedpubkey [10]
+ o added: CURLOPT_TIMEVALUE_LARGE and CURLINFO_FILETIME_T [13]
 
 This release includes the following bugfixes:
 
@@ -23,6 +24,12 @@ This release includes the following bugfixes:
  o cookies: remove verbose "cookie size:" output
  o progress-bar: don't use stderr explicitly, use bar->out [7]
  o Fixes for MSDOS
+ o build: open VC15 projects with VS 2017
+ o curl_ctype: private is*() type macros and functions [8]
+ o configure: set PATH_SEPARATOR to colon for PATH w/o separator [9]
+ o winbuild: make linker generate proper PDB [11]
+ o curl_easy_reset: clear digest auth state [12]
+ o curl/curl.h: fix comment typo for CURLOPT_DNS_LOCAL_IP6 [14]
 
 This release includes the following known bugs:
 
@@ -31,9 +38,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Dair Grant, Daniel Stenberg, Gisle Vanem,
-  Patrick Monnerat, Travis Burtrum,
-  (6 contributors)
+  Adam Marcionek, Alessandro Ghedini, Dair Grant, Daniel Stenberg,
+  Earnestly on github, Gisle Vanem, Marcel Raad, Michał Janiszewski,
+  Patrick Monnerat, Ruurd Beerstra, Travis Burtrum,
+  (11 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -46,3 +54,11 @@ References to bug reports and discussions on issues:
  [5] = https://curl.haxx.se/bug/?i=2258
  [6] = https://curl.haxx.se/bug/?i=1429
  [7] = https://github.com/curl/curl/commit/993dd5651a6c853bfe3870f6a69c7b329fa4e8ce#commitcomment-27070080
+ [8] = https://curl.haxx.se/bug/?i=2269
+ [9] = https://curl.haxx.se/bug/?i=2202
+ [10] = https://curl.haxx.se/bug/?i=2268
+ [11] = https://curl.haxx.se/bug/?i=2274
+ [12] = https://curl.haxx.se/mail/lib-2018-01/0074.html
+ [13] = https://curl.haxx.se/bug/?i=2238
+ [14] = https://curl.haxx.se/bug/?i=2275
+
