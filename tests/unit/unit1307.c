@@ -25,7 +25,6 @@
 
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
-#define RE_ERR  CURL_FNMATCH_FAIL
 
 struct testcase {
   const char *pattern;
@@ -135,6 +134,8 @@ static const struct testcase tests[] = {
   { "[^[:blank:]]",             "\t",                     NOMATCH },
   { "[^[:print:]]",             "\10",                    MATCH },
   { "[[:lower:]][[:lower:]]",   "ll",                     MATCH },
+  { "[[:foo:]]",                "bar",                    NOMATCH },
+  { "[[:foo:]]",                "f]",                     MATCH },
 
   { "Curl[[:blank:]];-)",       "Curl ;-)",               MATCH },
   { "*[[:blank:]]*",            " ",                      MATCH },
@@ -172,7 +173,7 @@ static const struct testcase tests[] = {
   { "x",                        "",                       NOMATCH },
 
   /* backslash */
-  { "\\",                       "\\",                     RE_ERR },
+  { "\\",                       "\\",                     MATCH },
   { "\\\\",                     "\\",                     MATCH },
   { "\\\\",                     "\\\\",                   NOMATCH },
   { "\\?",                      "?",                      MATCH },
