@@ -456,7 +456,9 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   }
 
   /* Check whether file range has been specified */
-  Curl_range(conn);
+  result = Curl_range(conn);
+  if(result)
+    return result;
 
   /* Adjust the start offset in case we want to get the N last bytes
    * of the stream iff the filesize could be determined */
