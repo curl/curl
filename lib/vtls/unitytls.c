@@ -303,6 +303,10 @@ static ssize_t unitytls_recv(struct connectdata *conn, int sockindex,
 
   read = unitytls->unitytls_tlsctx_read(conn->ssl[sockindex].ctx, (UInt8*)buf, buffersize, &err);
 
+  // Curl expects us to ignore gracefully closed connections on read.
+  if(err.code == UNITYTLS_STREAM_CLOSED)
+    return 0;
+
   if(err.code != UNITYTLS_SUCCESS) {
     if(err.code == UNITYTLS_USER_WOULD_BLOCK)
       *curlcode = CURLE_AGAIN;
@@ -599,8 +603,16 @@ CURLcode Curl_unitytls_connect_nonblocking(struct connectdata *conn, int sockind
 void Curl_unitytls_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  unitytls_errorstate err;
   if(!unitytls_check_interface_available(NULL))
     return;
+
+  if (connssl->ctx) {
+    err = unitytls->unitytls_errorstate_create();
+    unitytls->unitytls_tlsctx_notify_close(connssl->ctx, &err);
+    unitytls->unitytls_tlsctx_free(connssl->ctx);
+    connssl->ctx = NULL;
+  }
 
   unitytls->unitytls_x509list_free(connssl->cacert);
   connssl->cacert = NULL;
@@ -608,8 +620,6 @@ void Curl_unitytls_close(struct connectdata *conn, int sockindex)
   connssl->clicert = NULL;
   unitytls->unitytls_key_free(connssl->pk);
   connssl->pk = NULL;
-  unitytls->unitytls_tlsctx_free(connssl->ctx);
-  connssl->ctx = NULL;
 }
 
 size_t Curl_unitytls_version(char *buffer, size_t size)
