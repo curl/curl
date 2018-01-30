@@ -14,6 +14,7 @@
 #include "vtls.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
+#include "curl_printf.h"
 
 #if !defined(WIN32)
 #include <dirent.h>
