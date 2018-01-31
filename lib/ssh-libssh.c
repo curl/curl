@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 Red Hat, Inc.
+ * Copyright (C) 2017 - 2018 Red Hat, Inc.
  *
  * Authors: Nikos Mavrogiannopoulos, Tomas Mraz, Stanislav Zidek,
  *          Robert Kolcun, Andreas Schneider
@@ -1046,7 +1046,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       attrs = sftp_stat(sshc->sftp_session, protop->path);
       if(attrs != 0) {
-        data->info.filetime = (long)attrs->mtime;
+        data->info.filetime = attrs->mtime;
         sftp_attributes_free(attrs);
       }
 
