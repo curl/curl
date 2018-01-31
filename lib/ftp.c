@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2061,7 +2061,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
                  "%04d%02d%02d %02d:%02d:%02d GMT",
                  year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
-        data->info.filetime = (long)curl_getdate(timebuf, &secs);
+        data->info.filetime = curl_getdate(timebuf, &secs);
       }
 
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
@@ -2073,7 +2073,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
          data->set.get_filetime &&
          (data->info.filetime >= 0) ) {
         char headerbuf[128];
-        time_t filetime = (time_t)data->info.filetime;
+        time_t filetime = data->info.filetime;
         struct tm buffer;
         const struct tm *tm = &buffer;
 

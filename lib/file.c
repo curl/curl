@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -403,12 +403,12 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     /* we could stat it, then read out the size */
     expected_size = statbuf.st_size;
     /* and store the modification time */
-    data->info.filetime = (long)statbuf.st_mtime;
+    data->info.filetime = statbuf.st_mtime;
     fstated = TRUE;
   }
 
   if(fstated && !data->state.range && data->set.timecondition) {
-    if(!Curl_meets_timecondition(data, (time_t)data->info.filetime)) {
+    if(!Curl_meets_timecondition(data, data->info.filetime)) {
       *done = TRUE;
       return CURLE_OK;
     }
