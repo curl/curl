@@ -190,6 +190,7 @@ static const struct LongShort aliases[]= {
   {"$X", "tls-max",                  ARG_STRING},
   {"$Y", "suppress-connect-headers", ARG_BOOL},
   {"$Z", "compressed-ssh",           ARG_BOOL},
+  {"$~", "happy-eyeballs-timeout-ms", ARG_STRING},
   {"0",   "http1.0",                 ARG_NONE},
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
@@ -1110,6 +1111,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'Z': /* --compressed-ssh */
         config->ssh_compression = toggle;
+        break;
+      case '~': /* --happy-eyeballs-timeout-ms */
+        err = str2unum(&config->happy_eyeballs_timeout_ms, nextarg);
+        if(err)
+          return err;
+        /* 0 is a valid value for this timeout */
         break;
       }
       break;

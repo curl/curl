@@ -250,6 +250,8 @@ struct OperationConfig {
   curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
                                      error */
   bool ssh_compression;           /* enable/disable SSH compression */
+  long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
+                                     0 is valid. default: CURL_HET_DEFAULT. */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */

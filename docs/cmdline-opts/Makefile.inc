@@ -12,7 +12,9 @@ DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cer
   form.d form-string.d ftp-account.d ftp-alternative-to-user.d          \
   ftp-create-dirs.d ftp-method.d ftp-pasv.d ftp-port.d ftp-pret.d       \
   ftp-skip-pasv-ip.d ftp-ssl-ccc.d ftp-ssl-ccc-mode.d ftp-ssl-control.d \
-  get.d globoff.d head.d header.d help.d hostpubmd5.d http1.0.d         \
+  get.d globoff.d                                                       \
+  happy-eyeballs-timeout-ms.d                                           \
+  head.d header.d help.d hostpubmd5.d http1.0.d                         \
   http1.1.d http2.d http2-prior-knowledge.d ignore-content-length.d     \
   include.d insecure.d interface.d ipv4.d ipv6.d junk-session-cookies.d \
   keepalive-time.d key.d key-type.d krb.d libcurl.d limit-rate.d        \

@@ -1440,6 +1440,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->tftp_no_options)
           my_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
 
+        /* new in 7.59.0 */
+        if(config->happy_eyeballs_timeout_ms != CURL_HET_DEFAULT)
+          my_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT,
+                    config->happy_eyeballs_timeout_ms);
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
