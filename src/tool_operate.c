@@ -1154,7 +1154,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #endif
 
         my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
-        my_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
+        my_setopt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
         customrequest_helper(config, config->httpreq, config->customrequest);
         my_setopt(curl, CURLOPT_STDERR, global->errors);
@@ -1766,8 +1766,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         /* File time can only be set _after_ the file has been closed */
         if(!result && config->remote_time && outs.s_isreg && outs.filename) {
           /* Ask libcurl if we got a remote file time */
-          long filetime = -1;
-          curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+          curl_off_t filetime = -1;
+          curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
           setfiletime(filetime, outs.filename, config->global->errors);
         }
 

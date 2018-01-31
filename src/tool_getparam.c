@@ -2088,10 +2088,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       now = time(NULL);
-      config->condtime = (long)curl_getdate(nextarg, &now);
+      config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
       if(-1 == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
-        long filetime = getfiletime(nextarg, config->global->errors);
+        curl_off_t filetime = getfiletime(nextarg, config->global->errors);
         if(filetime >= 0) {
           /* pull the time out from the file */
           config->condtime = filetime;

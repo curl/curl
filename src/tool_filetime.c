@@ -27,9 +27,9 @@
 #  include <sys/utime.h>
 #endif
 
-long getfiletime(const char *filename, FILE *error_stream)
+curl_off_t getfiletime(const char *filename, FILE *error_stream)
 {
-  long result = -1;
+  curl_off_t result = -1;
 
 /* Windows stat() may attempt to adjust the unix GMT file time by a daylight
    saving time offset and since it's GMT that is bad behavior. When we have
@@ -72,7 +72,7 @@ long getfiletime(const char *filename, FILE *error_stream)
 #else
   struct_stat statbuf;
   if(-1 != stat(filename, &statbuf)) {
-    result = statbuf.st_mtime;
+    result = (curl_off_t)statbuf.st_mtime;
   }
   else if(errno != ENOENT) {
     fprintf(error_stream,
@@ -84,7 +84,8 @@ long getfiletime(const char *filename, FILE *error_stream)
 
 #if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || \
     (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8))
-void setfiletime(long filetime, const char *filename, FILE *error_stream)
+void setfiletime(curl_off_t filetime, const char *filename,
+    FILE *error_stream)
 {
   if(filetime >= 0) {
 /* Windows utime() may attempt to adjust the unix GMT file time by a daylight
@@ -93,16 +94,14 @@ void setfiletime(long filetime, const char *filename, FILE *error_stream)
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)
     HANDLE hfile;
 
-#if (SIZEOF_LONG >= 8)
     /* 910670515199 is the maximum unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
-    if(filetime > 910670515199L) {
+    if(filetime > CURL_OFF_T_C(910670515199)) {
       fprintf(error_stream,
-              "Failed to set filetime %ld on outfile: overflow\n",
-              filetime);
+              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+              " on outfile: overflow\n", filetime);
       return;
     }
-#endif /* SIZEOF_LONG >= 8 */
 
     hfile = CreateFileA(filename, FILE_WRITE_ATTRIBUTES,
                         (FILE_SHARE_READ | FILE_SHARE_WRITE |
@@ -116,16 +115,16 @@ void setfiletime(long filetime, const char *filename, FILE *error_stream)
       ft.dwHighDateTime = (DWORD)(converted >> 32);
       if(!SetFileTime(hfile, NULL, &ft, &ft)) {
         fprintf(error_stream,
-                "Failed to set filetime %ld on outfile: "
-                "SetFileTime failed: GetLastError %u\n",
+                "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+                " on outfile: SetFileTime failed: GetLastError %u\n",
                 filetime, (unsigned int)GetLastError());
       }
       CloseHandle(hfile);
     }
     else {
       fprintf(error_stream,
-              "Failed to set filetime %ld on outfile: "
-              "CreateFile failed: GetLastError %u\n",
+              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+              " on outfile: CreateFile failed: GetLastError %u\n",
               filetime, (unsigned int)GetLastError());
     }
 
@@ -135,8 +134,8 @@ void setfiletime(long filetime, const char *filename, FILE *error_stream)
     times[0].tv_usec = times[1].tv_usec = 0;
     if(utimes(filename, times)) {
       fprintf(error_stream,
-              "Failed to set filetime %ld on outfile: %s\n",
-              filetime, strerror(errno));
+              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+              " on outfile: %s\n", filetime, strerror(errno));
     }
 
 #elif defined(HAVE_UTIME)
@@ -145,8 +144,8 @@ void setfiletime(long filetime, const char *filename, FILE *error_stream)
     times.modtime = (time_t)filetime;
     if(utime(filename, &times)) {
       fprintf(error_stream,
-              "Failed to set filetime %ld on outfile: %s\n",
-              filetime, strerror(errno));
+              "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+              " on outfile: %s\n", filetime, strerror(errno));
     }
 #endif
   }
