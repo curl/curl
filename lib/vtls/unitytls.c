@@ -111,7 +111,9 @@ static unitytls_key* unitytls_key_parse_pem_from_file(const char* filepath, cons
 static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* path, unitytls_x509list* list, unitytls_errorstate* err)
 {
   bool success = false;
-#if defined(WIN32)
+#if defined(CURL_WINDOWS_APP)
+  return success; // Not supported.
+#elif defined(WIN32)
   size_t len = strlen(path);
   WIN32_FIND_DATAA file_data;
   char filename[MAX_PATH];
