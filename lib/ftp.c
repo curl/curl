@@ -1474,7 +1474,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
       slashPos = strrchr(inpath, '/');
       n = slashPos - inpath;
     }
-    result = Curl_urldecode(data, inpath, n, &lstArg, NULL, FALSE);
+    result = Curl_urldecode(data, inpath, n, &lstArg, NULL, TRUE);
     if(result)
       return result;
   }
@@ -3194,7 +3194,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(!result)
     /* get the "raw" path */
-    result = Curl_urldecode(data, path_to_use, 0, &path, NULL, FALSE);
+    result = Curl_urldecode(data, path_to_use, 0, &path, NULL, TRUE);
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
@@ -4155,7 +4155,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       result = Curl_urldecode(conn->data, slash_pos ? cur_pos : "/",
                               slash_pos ? dirlen : 1,
                               &ftpc->dirs[0], NULL,
-                              FALSE);
+                              TRUE);
       if(result) {
         freedirs(ftpc);
         return result;
@@ -4262,7 +4262,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     size_t dlen;
     char *path;
     CURLcode result =
-      Curl_urldecode(conn->data, data->state.path, 0, &path, &dlen, FALSE);
+      Curl_urldecode(conn->data, data->state.path, 0, &path, &dlen, TRUE);
     if(result) {
       freedirs(ftpc);
       return result;
