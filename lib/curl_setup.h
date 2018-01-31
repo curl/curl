@@ -758,7 +758,8 @@ endings either CRLF or LF so 't' is appropriate.
 # if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
 #  include <winapifamily.h>
 #  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && \
-     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && \
+     !defined(CURL_WINDOWS_APP)
 #    define CURL_WINDOWS_APP
 #  endif
 # endif

@@ -37,6 +37,7 @@ CFGSET=true
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
 !MESSAGE   MACHINE=<x86 or x64>         - Target architecture (default x64 on AMD64, x86 on others)
+!MESSAGE   PLATFORM=<wp80 or wp81 or wsa81 or uwp> - WinRT platform (x64 also sets this value)
 !ERROR please choose a valid mode
 
 !ENDIF
@@ -164,7 +165,17 @@ USE_SSH2 = true
 SSH2     = static
 !ENDIF
 
+!IF "$(PLATFORM)"=="wp80" || "$(PLATFORM)"=="wp81" || "$(PLATFORM)"=="wsa81" || "$(PLATFORM)"=="uwp"
+WINRT = true
+!ELSE
+WINRT = false
+!ENDIF
+
+!IF "$(WINRT)"=="true"
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-$(PLATFORM)-$(MACHINE)
+!ELSE
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-vc$(VC)-$(MACHINE)
+!ENDIF
 
 !IF "$(DEBUG)"=="yes"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
@@ -238,6 +249,7 @@ $(MODE):
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)
 	@SET USE_WINSSL=$(USE_WINSSL)
+	@SET WINRT=$(WINRT)
 	@$(MAKE) /NOLOGO /F MakefileBuild.vc
 
 copy_from_lib:
