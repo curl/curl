@@ -3692,7 +3692,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       k->timeofdoc = curl_getdate(k->p + strlen("Last-Modified:"),
                                   &secs);
       if(data->set.get_filetime)
-        data->info.filetime = (long)k->timeofdoc;
+        data->info.filetime = k->timeofdoc;
     }
     else if((checkprefix("WWW-Authenticate:", k->p) &&
              (401 == k->httpcode)) ||
