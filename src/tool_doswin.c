@@ -620,7 +620,7 @@ char **__crt0_glob_function(char *arg)
 
 #endif /* MSDOS && (__DJGPP__ || __GO32__) */
 
-#ifdef WIN32
+#if defined(WIN32)
 
 /*
  * Function to find CACert bundle on a Win32 platform using SearchPath.
@@ -643,6 +643,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   CURLcode result = CURLE_OK;
 
   /* search and set cert file only if libcurl supports SSL */
+#ifndef CURL_WINDOWS_APP  /* SearchPath is not possibly in uwp apps. */
   if(curlinfo->features & CURL_VERSION_SSL) {
 
     DWORD res_len;
@@ -665,6 +666,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 
     Curl_safefree(buf);
   }
+#endif
 
   return result;
 }
