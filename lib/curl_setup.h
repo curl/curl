@@ -389,6 +389,11 @@
 #  define LSEEK_ERROR (off_t)-1
 #endif
 
+#ifndef SIZEOF_TIME_T
+/* assume default size of time_t to be 32 bit */
+#define SIZEOF_TIME_T 4
+#endif
+
 /*
  * Default sizeof(off_t) in case it hasn't been defined in config file.
  */
@@ -623,11 +628,6 @@ int netware_init(void);
 
 #if defined(USE_LIBIDN2) && defined(USE_WIN32_IDN)
 #error "Both libidn2 and WinIDN are enabled, choose one."
-#endif
-
-#ifndef SIZEOF_TIME_T
-/* assume default size of time_t to be 32 bit */
-#define SIZEOF_TIME_T 4
 #endif
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
