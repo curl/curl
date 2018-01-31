@@ -78,6 +78,11 @@ void Curl_persistconninfo(struct connectdata *conn);
 int Curl_closesocket(struct connectdata *conn, curl_socket_t sock);
 
 /*
+ * Get presentation format IP address and port from a sockaddr.
+ */
+bool Curl_getaddressinfo(struct sockaddr *sa, char *addr, long *port);
+
+/*
  * The Curl_sockaddr_ex structure is basically libcurl's external API
  * curl_sockaddr structure with enough space available to directly hold any
  * protocol-specific address structures. The variable declared here will be
