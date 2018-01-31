@@ -1823,6 +1823,10 @@ typedef enum {
      seconds since 1 Jan 1970. */
   CINIT(TIMEVALUE_LARGE, OFF_T, 270),
 
+  /* Head start in milliseconds to give ipv6 for happy eyeballs. */
+  CINIT(HAPPY_EYEBALLS_TIMEOUT, LONG, 271),
+
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
