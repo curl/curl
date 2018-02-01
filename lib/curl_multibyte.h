@@ -23,8 +23,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_UNITYTLS) || defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
-                                                         defined(USE_WIN32_LDAP)) && defined(UNICODE))
+#if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
+                               defined(USE_WIN32_LDAP)) && defined(UNICODE)) || \
+   (defined(USE_UNITYTLS) && defined(WIN32))
 
  /*
   * MultiByte conversions using Windows kernel32 library.
@@ -33,7 +34,7 @@
 wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8);
 char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
 
-#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) */
+#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) || (USE_UNITYTLS && WIN32) */
 
 
 #if defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI) || \

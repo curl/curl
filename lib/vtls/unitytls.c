@@ -17,10 +17,7 @@
 #include "curl_printf.h"
 #include "curl_multibyte.h"
 
-#include <WinBase.h>
-#if defined(WIN32)
-#include <FileAPI.h>
-#else
+#if !defined(WIN32)
 #include <dirent.h>
 #endif
 
