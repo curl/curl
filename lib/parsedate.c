@@ -561,14 +561,10 @@ time_t curl_getdate(const char *p, const time_t *now)
   int rc = parsedate(p, &parsed);
   (void)now; /* legacy argument from the past that we ignore */
 
-  switch(rc) {
-  case PARSEDATE_OK:
+  if(rc == PARSEDATE_OK) {
     if(parsed == -1)
       /* avoid returning -1 for a working scenario */
       parsed++;
-    /* fallthrough */
-  case PARSEDATE_LATER:
-  case PARSEDATE_SOONER:
     return parsed;
   }
   /* everything else is fail */
