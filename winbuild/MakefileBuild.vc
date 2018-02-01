@@ -67,9 +67,7 @@ LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 
-!IF "$(PLATFORM)"=="wp80" || "$(PLATFORM)"=="wp81"
-CFLAGS = $(CFLAGS) /DWINAPI_FAMILY=3
-!ELSEIF "$(PLATFORM)"=="wsa81" || "$(PLATFORM)"=="uwp"
+!IF "$(PLATFORM)"=="uwp"
 CFLAGS = $(CFLAGS) /DWINAPI_FAMILY=2
 !ENDIF
 
