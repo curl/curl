@@ -620,7 +620,7 @@ char **__crt0_glob_function(char *arg)
 
 #endif /* MSDOS && (__DJGPP__ || __GO32__) */
 
-#if defined(WIN32)
+#ifdef WIN32
 
 /*
  * Function to find CACert bundle on a Win32 platform using SearchPath.
