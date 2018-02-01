@@ -15,8 +15,12 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "curl_printf.h"
+#include "curl_multibyte.h"
 
-#if !defined(WIN32)
+#include <WinBase.h>
+#if defined(WIN32)
+#include <FileAPI.h>
+#else
 #include <dirent.h>
 #endif
 
@@ -111,13 +115,13 @@ static unitytls_key* unitytls_key_parse_pem_from_file(const char* filepath, cons
 static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* path, unitytls_x509list* list, unitytls_errorstate* err)
 {
   bool success = false;
-#if defined(CURL_WINDOWS_APP)
-  return success; // Not supported.
-#elif defined(WIN32)
+#if defined(WIN32)
   size_t len = strlen(path);
-  WIN32_FIND_DATAA file_data;
-  char filename[MAX_PATH];
+  WIN32_FIND_DATAW file_data;
+  char pathFilename[MAX_PATH];
   HANDLE hFind;
+  wchar_t* pathFilenameWChar = NULL;
+  char* foundFilenameUTF8 = NULL;
 
   if(err->code != UNITYTLS_SUCCESS)
     return false;
@@ -125,12 +129,14 @@ static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* pa
   /* Path needs to end with '\*' */
   if(len + 2 >= MAX_PATH)
     return false;
-  memset(filename, 0, MAX_PATH);
-  memcpy(filename, path, len);
-  filename[len++] = '\\';
-  filename[len++] = '*';
+  memset(pathFilename, 0, MAX_PATH);
+  memcpy(pathFilename, path, len);
+  pathFilename[len++] = '\\';
+  pathFilename[len++] = '*';
+  pathFilenameWChar = Curl_convert_UTF8_to_wchar(pathFilename);
 
-  hFind = FindFirstFileA(filename, &file_data);
+  hFind = FindFirstFileExW(pathFilenameWChar, FindExInfoBasic, &file_data, FindExSearchNameMatch, NULL, 0);
+  free(pathFilenameWChar);
   if(hFind == INVALID_HANDLE_VALUE)
     return CURLE_SSL_CACERT;
 
@@ -140,13 +146,15 @@ static bool unitytls_parse_all_pem_in_dir(struct Curl_easy* data, const char* pa
       continue;
 
     /* Try adding the file. Might or might not be a PEM file, so failure is not an error */
-    unitytls_append_pem_file(file_data.cFileName, list, err);
+    foundFilenameUTF8 = Curl_convert_wchar_to_UTF8(file_data.cFileName);
+    unitytls_append_pem_file(foundFilenameUTF8, list, err);
+    free(foundFilenameUTF8);
     if(err->code != UNITYTLS_SUCCESS)
       *err = unitytls->unitytls_errorstate_create(); /* Need to reset to keep future falls to unitytls_append_pem_file working */
     else
       success = true;
   }
-  while(FindNextFileA(hFind, &file_data) != 0);
+  while(FindNextFileW(hFind, &file_data) != 0);
 
   FindClose(hFind);
 #else /* WIN32 */
