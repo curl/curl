@@ -180,6 +180,7 @@ static const char *ContentTypeForFilename(const char *filename,
     {".gif",  "image/gif"},
     {".jpg",  "image/jpeg"},
     {".jpeg", "image/jpeg"},
+    {".png", "image/png"},
     {".txt",  "text/plain"},
     {".html", "text/html"},
     {".xml", "application/xml"}
