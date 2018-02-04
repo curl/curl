@@ -78,6 +78,7 @@ CURL_HFILES = \
 	tool_dirhie.h \
 	tool_doswin.h \
 	tool_easysrc.h \
+	tool_filetime.h \
 	tool_formparse.h \
 	tool_getparam.h \
 	tool_getpass.h \
