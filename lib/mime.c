@@ -51,10 +51,6 @@
 #endif
 
 
-#define FILE_CONTENTTYPE_DEFAULT        "application/octet-stream"
-#define MULTIPART_CONTENTTYPE_DEFAULT   "multipart/mixed"
-#define DISPOSITION_DEFAULT             "attachment"
-
 #define READ_ERROR                      ((size_t) -1)
 
 /* Encoders. */
@@ -1642,8 +1638,7 @@ static CURLcode add_content_type(struct curl_slist **slp,
                               boundary? boundary: "");
 }
 
-
-static const char *ContentTypeForFilename(const char *filename)
+const char *Curl_mime_contenttype(const char *filename)
 {
   unsigned int i;
 
@@ -1715,14 +1710,14 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
       contenttype = MULTIPART_CONTENTTYPE_DEFAULT;
       break;
     case MIMEKIND_FILE:
-      contenttype = ContentTypeForFilename(part->filename);
+      contenttype = Curl_mime_contenttype(part->filename);
       if(!contenttype)
-        contenttype = ContentTypeForFilename(part->data);
+        contenttype = Curl_mime_contenttype(part->data);
       if(!contenttype && part->filename)
         contenttype = FILE_CONTENTTYPE_DEFAULT;
       break;
     default:
-      contenttype = ContentTypeForFilename(part->filename);
+      contenttype = Curl_mime_contenttype(part->filename);
       break;
     }
   }

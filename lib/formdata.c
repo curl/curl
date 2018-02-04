@@ -155,60 +155,6 @@ static FormInfo * AddFormInfo(char *value,
 
 /***************************************************************************
  *
- * ContentTypeForFilename()
- *
- * Provides content type for filename if one of the known types (else
- * (either the prevtype or the default is returned).
- *
- * Returns some valid contenttype for filename.
- *
- ***************************************************************************/
-static const char *ContentTypeForFilename(const char *filename,
-                                          const char *prevtype)
-{
-  const char *contenttype = NULL;
-  unsigned int i;
-  /*
-   * No type was specified, we scan through a few well-known
-   * extensions and pick the first we match!
-   */
-  struct ContentType {
-    const char *extension;
-    const char *type;
-  };
-  static const struct ContentType ctts[]={
-    {".gif",  "image/gif"},
-    {".jpg",  "image/jpeg"},
-    {".jpeg", "image/jpeg"},
-    {".txt",  "text/plain"},
-    {".html", "text/html"},
-    {".xml", "application/xml"}
-  };
-
-  if(prevtype)
-    /* default to the previously set/used! */
-    contenttype = prevtype;
-  else
-    contenttype = HTTPPOST_CONTENTTYPE_DEFAULT;
-
-  if(filename) { /* in case a NULL was passed in */
-    for(i = 0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
-      if(strlen(filename) >= strlen(ctts[i].extension)) {
-        if(strcasecompare(filename +
-                          strlen(filename) - strlen(ctts[i].extension),
-                          ctts[i].extension)) {
-          contenttype = ctts[i].type;
-          break;
-        }
-      }
-    }
-  }
-  /* we have a contenttype by now */
-  return contenttype;
-}
-
-/***************************************************************************
- *
  * FormAdd()
  *
  * Stores a formpost parameter and builds the appropriate linked list.
@@ -627,9 +573,14 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
          !form->contenttype) {
         char *f = form->flags & HTTPPOST_BUFFER?
           form->showfilename : form->value;
+        char const *type = prevtype;
+        if(!type)
+          type = Curl_mime_contenttype(f);
+        if(!type)
+          type = FILE_CONTENTTYPE_DEFAULT;
 
         /* our contenttype is missing */
-        form->contenttype = strdup(ContentTypeForFilename(f, prevtype));
+        form->contenttype = strdup(type);
         if(!form->contenttype) {
           return_value = CURL_FORMADD_MEMORY;
           break;
