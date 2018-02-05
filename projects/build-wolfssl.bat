@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2017, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2012 - 2018, Steve Holme, <steve_holme@hotmail.com>.
 rem * Copyright (C) 2015, Jay Satiro, <raysatiro@yahoo.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
@@ -35,6 +35,16 @@ rem ***************************************************************************
   rem Ensure we have the required arguments
   if /i "%~1" == "" goto syntax
 
+  rem Calculate the program files directory
+  if defined PROGRAMFILES (
+    set "PF=%PROGRAMFILES%"
+    set OS_PLATFORM=x86
+  )
+  if defined PROGRAMFILES(x86) (
+    set "PF=%PROGRAMFILES(x86)%"
+    set OS_PLATFORM=x64
+  )
+
 :parseArgs
   if "%~1" == "" goto prerequisites
 
@@ -62,7 +72,16 @@ rem ***************************************************************************
     set VC_VER=15.0
     set VC_DESC=VC15
     set VC_TOOLSET=v141
-    set "VC_PATH=Microsoft Visual Studio\2017\Community\VC"
+
+    rem Determine the VC15 path based on the installed edition in decending
+    rem order (Enterprise, then Professional and finally Community)
+    if exist "%PF%\Microsoft Visual Studio\2017\Enterprise\VC" (
+      set "VC_PATH=Microsoft Visual Studio\2017\Enterprise\VC"
+    ) else if exist "%PF%\Microsoft Visual Studio\2017\Professional\VC" (
+      set "VC_PATH=Microsoft Visual Studio\2017\Professional\VC"
+    ) else (
+      set "VC_PATH=Microsoft Visual Studio\2017\Community\VC"
+    )    
   ) else if /i "%~1" == "x86" (
     set BUILD_PLATFORM=x86
   ) else if /i "%~1" == "x64" (
@@ -94,16 +113,6 @@ rem ***************************************************************************
 
   rem Default the start directory if one isn't specified
   if not defined START_DIR set START_DIR=..\..\wolfssl
-
-  rem Calculate the program files directory
-  if defined PROGRAMFILES (
-    set "PF=%PROGRAMFILES%"
-    set OS_PLATFORM=x86
-  )
-  if defined PROGRAMFILES(x86) (
-    set "PF=%PROGRAMFILES(x86)%"
-    set OS_PLATFORM=x64
-  )
 
   rem Check we have a program files directory
   if not defined PF goto nopf
