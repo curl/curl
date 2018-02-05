@@ -2338,10 +2338,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 
   if(ssl_cafile || ssl_capath) {
-    /* tell SSL where to find CA certificates that are used to verify
-       the servers certificate. */
-    if(!SSL_CTX_load_verify_locations(BACKEND->ctx, ssl_cafile, ssl_capath)) {
-      if(verifypeer) {
+    if(verifypeer) {
+      /* tell SSL where to find CA certificates that are used to verify
+         the servers certificate. */
+      if(!SSL_CTX_load_verify_locations(BACKEND->ctx,
+                                        ssl_cafile, ssl_capath)) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s",
@@ -2349,20 +2350,18 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
               ssl_capath ? ssl_capath : "none");
         return CURLE_SSL_CACERT_BADFILE;
       }
-      /* Just continue with a warning if no strict  certificate verification
-         is required. */
-      infof(data, "error setting certificate verify locations,"
-            " continuing anyway:\n");
+      else {
+        /* Everything is fine. */
+        infof(data, "successfully set certificate verify locations:\n"
+              "  CAfile: %s\n  CApath: %s\n",
+              ssl_cafile ? ssl_cafile : "none",
+              ssl_capath ? ssl_capath : "none");
+      }
     }
     else {
-      /* Everything is fine. */
-      infof(data, "successfully set certificate verify locations:\n");
+      infof(data, "ignoring certificate verify locations due to "
+            "disabled peer verification\n");
     }
-    infof(data,
-          "  CAfile: %s\n"
-          "  CApath: %s\n",
-          ssl_cafile ? ssl_cafile : "none",
-          ssl_capath ? ssl_capath : "none");
   }
 #ifdef CURL_CA_FALLBACK
   else if(verifypeer) {
