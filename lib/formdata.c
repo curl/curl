@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -573,9 +573,10 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
          !form->contenttype) {
         char *f = form->flags & HTTPPOST_BUFFER?
           form->showfilename : form->value;
-        char const *type = prevtype;
+        char const *type;
+        type = Curl_mime_contenttype(f);
         if(!type)
-          type = Curl_mime_contenttype(f);
+          type = prevtype;
         if(!type)
           type = FILE_CONTENTTYPE_DEFAULT;
 
