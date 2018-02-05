@@ -30,6 +30,10 @@
 #define MIME_USERHEADERS_OWNER  (1 << 0)
 #define MIME_BODY_ONLY          (1 << 1)
 
+#define FILE_CONTENTTYPE_DEFAULT        "application/octet-stream"
+#define MULTIPART_CONTENTTYPE_DEFAULT   "multipart/mixed"
+#define DISPOSITION_DEFAULT             "attachment"
+
 /* Part source kinds. */
 enum mimekind {
   MIMEKIND_NONE = 0,            /* Part not set. */
@@ -134,5 +138,6 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
 CURLcode Curl_mime_rewind(curl_mimepart *part);
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
+const char *Curl_mime_contenttype(const char *filename);
 
 #endif /* HEADER_CURL_MIME_H */
