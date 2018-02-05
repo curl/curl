@@ -37,6 +37,7 @@ CURL_CFILES = \
 	tool_dirhie.c \
 	tool_doswin.c \
 	tool_easysrc.c \
+	tool_filetime.c \
 	tool_formparse.c \
 	tool_getparam.c \
 	tool_getpass.c \
@@ -77,6 +78,7 @@ CURL_HFILES = \
 	tool_dirhie.h \
 	tool_doswin.h \
 	tool_easysrc.h \
+	tool_filetime.h \
 	tool_formparse.h \
 	tool_getparam.h \
 	tool_getpass.h \

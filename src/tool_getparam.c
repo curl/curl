@@ -31,6 +31,7 @@
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
 #include "tool_convert.h"
+#include "tool_filetime.h"
 #include "tool_formparse.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
@@ -2087,21 +2088,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       now = time(NULL);
-      config->condtime = curl_getdate(nextarg, &now);
-      if(-1 == (int)config->condtime) {
+      config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
+      if(-1 == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
-        struct_stat statbuf;
-        if(-1 == stat(nextarg, &statbuf)) {
+        curl_off_t filetime = getfiletime(nextarg, config->global->errors);
+        if(filetime >= 0) {
+          /* pull the time out from the file */
+          config->condtime = filetime;
+        }
+        else {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
           warnf(global,
                 "Illegal date format for -z, --time-cond (and not "
                 "a file name). Disabling time condition. "
                 "See curl_getdate(3) for valid date syntax.\n");
-        }
-        else {
-          /* pull the time out from the file */
-          config->condtime = statbuf.st_mtime;
         }
       }
       break;
