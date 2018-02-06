@@ -120,9 +120,8 @@ rem ***************************************************************************
   shift & goto parseArgs
 
 :prerequisites
-  rem Compiler and platform are required parameters.
+  rem Compiler is a required parameter
   if not defined VC_VER goto syntax
-  if not defined BUILD_PLATFORM goto syntax
 
   rem Default the start directory if one isn't specified
   if not defined START_DIR set START_DIR=..\..\openssl
@@ -312,7 +311,7 @@ rem ***************************************************************************
 :syntax
   rem Display the help
   echo.
-  echo Usage: build-openssl ^<compiler^> ^<platform^> [configuration] [directory]
+  echo Usage: build-openssl ^<compiler^> [platform] [configuration] [directory]
   echo.
   echo Compiler:
   echo.
