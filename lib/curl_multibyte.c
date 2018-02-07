@@ -18,14 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- ***************************************************************************/
+ ***************************************************************************/\
 
 #include "curl_setup.h"
 
 #include <curl/curl.h>
 
 #if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
-                                defined(USE_WIN32_LDAP)) && defined(UNICODE))
+                               defined(USE_WIN32_LDAP)) && defined(UNICODE)) || \
+   (defined(USE_UNITYTLS) && defined(WIN32))
 
  /*
   * MultiByte conversions using Windows kernel32 library.
@@ -81,4 +82,5 @@ char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w)
   return str_utf8;
 }
 
-#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) */
+#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) || (USE_UNITYTLS && WIN32) */
+

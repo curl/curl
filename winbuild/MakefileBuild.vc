@@ -60,19 +60,34 @@ CFLAGS     = /I. /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUIL
 !ELSE
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
-CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /WX /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
 LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 
-CFLAGS_PDB = /Zi
-LFLAGS_PDB = /incremental:no /opt:ref,icf
+!IF "$(PLATFORM)"=="uwp"
+CFLAGS = $(CFLAGS) /DWINAPI_FAMILY=2
+!ENDIF
 
+CFLAGS     = $(CFLAGS) /DCURL_DISABLE_LDAP /DCURL_DISABLE_TELNET /DCURL_DISABLE_DICT /DCURL_DISABLE_GOPHER
+
+!IF "$(WINRT)"=="true"
+LFLAGS = $(LFLAGS) /LTCG
+
+# NTLM implementation needs old crypto API which only supported on desktop apps
+CFLAGS     = $(CFLAGS) /DCURL_DISABLE_NTLM /DCURL_WINDOWS_APP
+!ENDIF
+
+CFLAGS_PDB = /Zi
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
-WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
+!IF "$(WINRT)"=="false"
+WIN_LIBS = $(WIN_LIBS) ws2_32.lib wldap32.lib advapi32.lib
+!ELSE
+WIN_LIBS = $(WIN_LIBS) Windowsapp.lib
+!ENDIF
 
 BASE_NAME              = libcurl
 BASE_NAME_DEBUG        = $(BASE_NAME)_debug
@@ -93,9 +108,13 @@ PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
 PROGRAM_NAME = curl.exe
-CURL_CFLAGS   =  /I../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c
+CURL_CFLAGS   =  /I../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /WX
 CURL_LFLAGS   = /nologo /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
 CURL_RESFLAGS = /i../include
+
+!IF "$(WINRT)"=="true"
+CURL_CFLAGS   = $(CURL_CFLAGS) /DCURL_WINDOWS_APP
+!ENDIF
 
 #############################################################
 ## Nothing more to do below this line!
@@ -110,7 +129,9 @@ DEVEL_LIB      = $(WITH_DEVEL)/lib
 DEVEL_BIN      = $(WITH_DEVEL)/bin
 
 CFLAGS         = $(CFLAGS) /I"$(DEVEL_INCLUDE)"
+!IF "$(WINRT)"=="false"
 LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
+!ENDIF
 
 
 !IF "$(WITH_SSL)"=="dll"
@@ -118,7 +139,9 @@ SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
-SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
+!IF "$(WINRT)"=="false"
+SSL_LIBS     = $(SSL_LIBS) libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
+!ENDIF
 USE_SSL      = true
 SSL          = static
 !ENDIF
@@ -151,7 +174,6 @@ MBEDTLS_LIBS   = mbedtls.lib mbedcrypto.lib mbedx509.lib
 !IF "$(WITH_UNITYTLS)"=="yes"
 USE_UNITYTLS    = true
 UNITYTLS_CFLAGS = /DUSE_UNITYTLS
-UNITYTLS_LIBS    = crypt32.lib
 !ENDIF
 
 !IF "$(WITH_CARES)"=="dll"
@@ -335,7 +357,7 @@ PDB      = $(PDB_NAME_STATIC_DEBUG)
 TARGET   = $(LIB_NAME_STATIC)
 PDB      = $(PDB_NAME_STATIC)
 !ENDIF
-LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+LNK      = $(LNKLIB) /out:$(LIB_DIROBJ)\$(TARGET)
 CURL_CC  = $(CURL_CC) $(CFLAGS_LIBCURL_STATIC)
 
 # AS_DLL
@@ -431,7 +453,14 @@ LIB_OBJS = $(LIBCURL_OBJS)
 
 EXE_OBJS = $(CURL_OBJS) $(CURL_DIROBJ)\curl.res
 
+# Can't build a desktop application when targeting WinRT-ARM.
+# We still build it for all other WinRT versions since it helps veryifing that everything links correctly in the static library case.
+!IF "$(WINRT)"=="false" || "$(MACHINE)"!="ARM"
 all : $(TARGET) $(PROGRAM_NAME)
+
+!ELSE
+all : $(TARGET)
+!ENDIF
 
 package: $(TARGET)
 	@cd $(DIRDIST)
@@ -522,7 +551,7 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj
- 
+
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(MANIFESTTOOL)
