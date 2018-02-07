@@ -256,7 +256,6 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
   unsigned char *p = (unsigned char *)pattern;
   unsigned char *s = (unsigned char *)string;
   unsigned char charset[CURLFNM_CHSET_SIZE] = { 0 };
-  int rc = 0;
 
   for(;;) {
     unsigned char *pp;
