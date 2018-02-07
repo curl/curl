@@ -1696,7 +1696,7 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CERT_CONTEXT *pCertContextServer = NULL;
   const char *x509_der;
-  int x509_der_len;
+  DWORD x509_der_len;
   curl_X509certificate x509_parsed;
   curl_asn1Element *pubkey;
 
@@ -1723,7 +1723,7 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
        (pCertContextServer->cbCertEncoded > 0)))
       break;
 
-    x509_der = pCertContextServer->pbCertEncoded;
+    x509_der = (const char *)pCertContextServer->pbCertEncoded;
     x509_der_len = pCertContextServer->cbCertEncoded;
     memset(&x509_parsed, 0, sizeof x509_parsed);
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
@@ -1894,19 +1894,21 @@ static void Curl_schannel_checksum(const unsigned char *input,
                       size_t inputlen,
                       unsigned char *checksum,
                       size_t checksumlen,
-                      const unsigned char *pszProvider,
+                      DWORD provType,
                       const unsigned int algId)
 {
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
-  size_t cbHashSize = 0, dwCount = sizeof(size_t);
+  DWORD cbHashSize = 0;
+  DWORD dwHashSizeLen = (DWORD)sizeof(cbHashSize);
+  DWORD dwChecksumLen = (DWORD)checksumlen;
 
   /* since this can fail in multiple ways, zero memory first so we never
    * return old data
    */
   memset(checksum, 0, checksumlen);
 
-  if(!CryptAcquireContext(&hProv, NULL, NULL, pszProvider,
+  if(!CryptAcquireContext(&hProv, NULL, NULL, provType,
                           CRYPT_VERIFYCONTEXT))
     return; /* failed */
 
@@ -1914,19 +1916,19 @@ static void Curl_schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-    if(!CryptHashData(hHash, (const BYTE*) input, inputlen, 0))
+    if(!CryptHashData(hHash, (const BYTE*)input, (DWORD)inputlen, 0))
       break; /* failed */
 
     /* get hash size */
     if(!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)&cbHashSize,
-                          &dwCount, 0))
+                          &dwHashSizeLen, 0))
       break; /* failed */
 
     /* check hash size */
     if(checksumlen < cbHashSize)
       break; /* failed */
 
-    if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &checksumlen, 0))
+    if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0))
       break; /* failed */
   } while(0);
 
@@ -1937,16 +1939,17 @@ static void Curl_schannel_checksum(const unsigned char *input,
     CryptReleaseContext(hProv, 0);
 }
 
-void Curl_schannel_md5sum(unsigned char *input,
+CURLcode Curl_schannel_md5sum(unsigned char *input,
                            size_t inputlen,
                            unsigned char *md5sum,
                            size_t md5len)
 {
     Curl_schannel_checksum(input, inputlen, md5sum, md5len,
                            PROV_RSA_FULL, CALG_MD5);
+    return CURLE_OK;
 }
 
-void Curl_schannel_sha256sum(unsigned char *input,
+void Curl_schannel_sha256sum(const unsigned char *input,
                            size_t inputlen,
                            unsigned char *sha256sum,
                            size_t sha256len)
