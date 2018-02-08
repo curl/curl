@@ -2483,6 +2483,15 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
     if test "x$USE_NSS" = "xyes"; then
       AC_MSG_NOTICE([detected NSS version $version])
 
+      dnl PK11_CreateManagedGenericObject() was introduced in NSS 3.34 because
+      dnl PK11_DestroyGenericObject() does not release resources allocated by
+      dnl PK11_CreateGenericObject() early enough.
+      AC_CHECK_FUNC(PK11_CreateManagedGenericObject,
+        [
+          AC_DEFINE(HAVE_PK11_CREATEMANAGEDGENERICOBJECT, 1,
+                    [if you have the PK11_CreateManagedGenericObject function])
+        ])
+
       dnl needed when linking the curl tool without USE_EXPLICIT_LIB_DEPS
       NSS_LIBS=$addlib
       AC_SUBST([NSS_LIBS])

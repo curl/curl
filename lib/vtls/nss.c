@@ -440,7 +440,17 @@ static CURLcode nss_create_object(struct ssl_connect_data *connssl,
     PK11_SETATTRS(attrs, attr_cnt, CKA_TRUST, pval, sizeof(*pval));
   }
 
-  obj = PK11_CreateGenericObject(slot, attrs, attr_cnt, PR_FALSE);
+  /* PK11_CreateManagedGenericObject() was introduced in NSS 3.34 because
+   * PK11_DestroyGenericObject() does not release resources allocated by
+   * PK11_CreateGenericObject() early enough.  */
+  obj =
+#ifdef HAVE_PK11_CREATEMANAGEDGENERICOBJECT
+    PK11_CreateManagedGenericObject
+#else
+    PK11_CreateGenericObject
+#endif
+    (slot, attrs, attr_cnt, PR_FALSE);
+
   PK11_FreeSlot(slot);
   if(!obj)
     return result;
