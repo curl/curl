@@ -726,7 +726,7 @@ static void identity_close_writer(struct connectdata *conn,
 
 static const content_encoding identity_encoding = {
   "identity",
-  NULL,
+  "none",
   identity_init_writer,
   identity_unencode_write,
   identity_close_writer,
