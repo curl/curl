@@ -219,8 +219,18 @@ rem ***************************************************************************
   nmake -f ms\ntdll.mak
 
   rem Move the output directories
-  move out32.dbg "%OUTDIR%\LIB Debug"
-  move out32dll.dbg "%OUTDIR%\DLL Debug"
+  if exist "%OUTDIR%\LIB Debug" (
+    copy /y out32.dbg\* "%OUTDIR%\LIB Debug"
+    rd out32.dbg /s /q
+  ) else (
+    move out32.dbg "%OUTDIR%\LIB Debug"
+  )
+  if exist "%OUTDIR%\DLL Debug" (
+    copy /y out32dll.dbg\* "%OUTDIR%\DLL Debug"
+    rd out32dll.dbg /s /q
+  ) else (
+    move out32dll.dbg "%OUTDIR%\DLL Debug"
+  )
 
   rem Move the PDB files
   move tmp32.dbg\lib.pdb "%OUTDIR%\LIB Debug"
@@ -240,10 +250,20 @@ rem ***************************************************************************
   call ms\do_win64a
   nmake -f ms\nt.mak
   nmake -f ms\ntdll.mak
-  
+
   rem Move the output directories
-  move out32 "%OUTDIR%\LIB Release"
-  move out32dll "%OUTDIR%\DLL Release"
+  if exist "%OUTDIR%\LIB Release" (
+    copy /y out32\* "%OUTDIR%\LIB Release"
+    rd out32 /s /q
+  ) else (
+    move out32 "%OUTDIR%\LIB Release"
+  )
+  if exist "%OUTDIR%\DLL Release" (
+    copy /y out32dll\* "%OUTDIR%\DLL Release"
+    rd out32dll /s /q
+  ) else (
+    move out32dll "%OUTDIR%\DLL Release"
+  )
 
   rem Move the PDB files
   move tmp32\lib.pdb "%OUTDIR%\LIB Release"
@@ -272,8 +292,18 @@ rem ***************************************************************************
   nmake -f ms\ntdll.mak
 
   rem Move the output directories
-  move out32.dbg "%OUTDIR%\LIB Debug"
-  move out32dll.dbg "%OUTDIR%\DLL Debug"
+  if exist "%OUTDIR%\LIB Debug" (
+    copy /y out32.dbg\* "%OUTDIR%\LIB Debug"
+    rd out32.dbg /s /q
+  ) else (
+    move out32.dbg "%OUTDIR%\LIB Debug"
+  )
+  if exist "%OUTDIR%\DLL Debug" (
+    copy /y out32dll.dbg\* "%OUTDIR%\DLL Debug"
+    rd out32dll.dbg /s /q
+  ) else (
+    move out32dll.dbg "%OUTDIR%\DLL Debug"
+  )
 
   rem Move the PDB files
   move tmp32.dbg\lib.pdb "%OUTDIR%\LIB Debug"
@@ -293,10 +323,20 @@ rem ***************************************************************************
   call ms\do_ms
   nmake -f ms\nt.mak
   nmake -f ms\ntdll.mak
-  
+
   rem Move the output directories
-  move out32 "%OUTDIR%\LIB Release"
-  move out32dll "%OUTDIR%\DLL Release"
+  if exist "%OUTDIR%\LIB Release" (
+    copy /y out32\* "%OUTDIR%\LIB Release"
+    rd out32 /s /q
+  ) else (
+    move out32 "%OUTDIR%\LIB Release"
+  )
+  if exist "%OUTDIR%\DLL Release" (
+    copy /y out32dll\* "%OUTDIR%\DLL Release"
+    rd out32dll /s /q
+  ) else (
+    move out32dll "%OUTDIR%\DLL Release"
+  )
 
   rem Move the PDB files
   move tmp32\lib.pdb "%OUTDIR%\LIB Release"
