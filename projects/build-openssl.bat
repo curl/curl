@@ -29,6 +29,7 @@ rem ***************************************************************************
   setlocal
   set VC_VER=
   set BUILD_PLATFORM=
+  set BUILD_CONFIG=
 
   rem Ensure we have the required arguments
   if /i "%~1" == "" goto syntax
