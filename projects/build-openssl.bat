@@ -240,9 +240,7 @@ rem ***************************************************************************
   call :configure x64 debug
 
   rem Perform the build
-  call ms\do_win64a
-  nmake -f ms\nt.mak
-  nmake -f ms\ntdll.mak
+  call :build x64
 
   rem Move the output directories
   if exist "%OUTDIR%\LIB Debug" (
@@ -273,9 +271,7 @@ rem ***************************************************************************
   call :configure x64 release
 
   rem Perform the build
-  call ms\do_win64a
-  nmake -f ms\nt.mak
-  nmake -f ms\ntdll.mak
+  call :build x64
 
   rem Move the output directories
   if exist "%OUTDIR%\LIB Release" (
@@ -313,9 +309,7 @@ rem ***************************************************************************
   call :configure x86 debug
 
   rem Perform the build
-  call ms\do_ms
-  nmake -f ms\nt.mak
-  nmake -f ms\ntdll.mak
+  call :build x86
 
   rem Move the output directories
   if exist "%OUTDIR%\LIB Debug" (
@@ -346,9 +340,7 @@ rem ***************************************************************************
   call :configure x86 release
 
   rem Perform the build
-  call ms\do_ms
-  nmake -f ms\nt.mak
-  nmake -f ms\ntdll.mak
+  call :build x86
 
   rem Move the output directories
   if exist "%OUTDIR%\LIB Release" (
@@ -413,6 +405,28 @@ rem
   perl Configure %options%
 
   exit /B %ERRORLEVEL
+
+rem Main build function.
+rem
+rem %1 - Platform (x86 or x64)
+rem
+:build
+  setlocal
+
+  if "%1" == "" exit /B 1
+
+  if "%1" == "x86" (
+    call ms\do_ms.bat
+  ) else if "%1" == "x64" (
+    call ms\do_win64a.bat
+  ) else (
+    exit /B 1
+  )
+
+  nmake -f ms\nt.mak
+  nmake -f ms\ntdll.mak
+
+  exit /B 0
 
 :syntax
   rem Display the help
