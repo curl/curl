@@ -1939,20 +1939,20 @@ static void Curl_schannel_checksum(const unsigned char *input,
     CryptReleaseContext(hProv, 0);
 }
 
-CURLcode Curl_schannel_md5sum(unsigned char *input,
-                           size_t inputlen,
-                           unsigned char *md5sum,
-                           size_t md5len)
+static CURLcode Curl_schannel_md5sum(unsigned char *input,
+                                     size_t inputlen,
+                                     unsigned char *md5sum,
+                                     size_t md5len)
 {
     Curl_schannel_checksum(input, inputlen, md5sum, md5len,
                            PROV_RSA_FULL, CALG_MD5);
     return CURLE_OK;
 }
 
-void Curl_schannel_sha256sum(const unsigned char *input,
-                           size_t inputlen,
-                           unsigned char *sha256sum,
-                           size_t sha256len)
+static void Curl_schannel_sha256sum(const unsigned char *input,
+                                    size_t inputlen,
+                                    unsigned char *sha256sum,
+                                    size_t sha256len)
 {
     Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
                            PROV_RSA_AES, CALG_SHA_256);
