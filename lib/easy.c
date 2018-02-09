@@ -667,6 +667,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
   while(!done && !mcode) {
     int still_running = 0;
     int rc;
+    long timeout_internal;
 
     before = Curl_now();
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
@@ -681,7 +682,11 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
         if(Curl_timediff(after, before) <= 10) {
           without_fds++;
           if(without_fds > 2) {
+            curl_multi_timeout(multi, &timeout_internal);
             int sleep_ms = without_fds < 10 ? (1 << (without_fds - 1)) : 1000;
+            if(timeout_internal < sleep_ms && timeout_internal > 0) {
+                sleep_ms = (int)timeout_internal;
+            }
             Curl_wait_ms(sleep_ms);
           }
         }

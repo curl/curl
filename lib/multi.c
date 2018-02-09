@@ -952,7 +952,6 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   long timeout_internal;
   int retcode = 0;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
-  signed char toofast_flag = 0;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -968,13 +967,6 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   data = multi->easyp;
   while(data) {
     bitmap = multi_getsock(data, sockbunch, MAX_SOCKSPEREASYHANDLE);
-
-    if(data->mstate == CURLM_STATE_TOOFAST && toofast_flag != -1) {
-      toofast_flag = 1;
-    }
-    else {
-      toofast_flag = -1;
-    }
 
     for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++) {
       curl_socket_t s = CURL_SOCKET_BAD;
@@ -1086,12 +1078,6 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
         extra_fds[i].revents = mask;
       }
     }
-  }
-  else if(toofast_flag == 1 && timeout_internal > 0) {
-    /* If all socket descriptors are in a 'CURLM_STATE_TOOFAST' state,
-       we should wait for an exact timeout. Otherwise it will
-       be mistaken for busy-looping*/
-    Curl_wait_ms((int)timeout_internal);
   }
 
   if(ufds_malloc)
