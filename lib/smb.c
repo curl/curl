@@ -716,11 +716,13 @@ static void get_posix_time(time_t *out, curl_off_t timestamp)
 {
   timestamp -= 116444736000000000;
   timestamp /= 10000000;
+#if SIZEOF_TIME_T < SIZEOF_CURL_OFF_T
   if(timestamp > TIME_T_MAX)
     *out = TIME_T_MAX;
   else if(timestamp < TIME_T_MIN)
     *out = TIME_T_MIN;
   else
+#endif
     *out = (time_t) timestamp;
 }
 
