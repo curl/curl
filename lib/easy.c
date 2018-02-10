@@ -61,6 +61,7 @@
 #include "strdup.h"
 #include "progress.h"
 #include "easyif.h"
+#include "multiif.h"
 #include "select.h"
 #include "sendf.h" /* for failf function prototype */
 #include "connect.h" /* for Curl_getconnectinfo */
@@ -761,6 +762,9 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     data->multi_easy = multi;
   }
 
+  if(multi->in_callback)
+    return CURLE_RECURSIVE_API_CALL;
+
   /* Copy the MAXCONNECTS option to the multi handle */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
 
@@ -1030,6 +1034,9 @@ void curl_easy_reset(struct Curl_easy *data)
  * the pausing, you may get your write callback called at this point.
  *
  * Action is a bitmask consisting of CURLPAUSE_* bits in curl/curl.h
+ *
+ * NOTE: This is one of few API functions that are allowed to be called from
+ * within a callback.
  */
 CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 {
@@ -1134,6 +1141,9 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   ssize_t n1;
   struct connectdata *c;
 
+  if(Curl_is_in_callback(data))
+    return CURLE_RECURSIVE_API_CALL;
+
   result = easy_connection(data, &sfd, &c);
   if(result)
     return result;
@@ -1160,6 +1170,9 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
   CURLcode result;
   ssize_t n1;
   struct connectdata *c = NULL;
+
+  if(Curl_is_in_callback(data))
+    return CURLE_RECURSIVE_API_CALL;
 
   result = easy_connection(data, &sfd, &c);
   if(result)

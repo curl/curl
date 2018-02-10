@@ -43,6 +43,7 @@
 #include "sendf.h"
 #include "http2.h"
 #include "setopt.h"
+#include "multiif.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -2544,6 +2545,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 /*
  * curl_easy_setopt() is the external interface for setting options on an
  * easy handle.
+ *
+ * NOTE: This is one of few API functions that are allowed to be called from
+ * within a callback.
  */
 
 #undef curl_easy_setopt

@@ -577,6 +577,8 @@ typedef enum {
   CURLE_SSL_INVALIDCERTSTATUS,   /* 91 - invalid certificate status */
   CURLE_HTTP2_STREAM,            /* 92 - stream error in HTTP/2 framing layer
                                     */
+  CURLE_RECURSIVE_API_CALL,      /* 93 - an api function was called from
+                                    inside a callback */
   CURL_LAST /* never use! */
 } CURLcode;
 

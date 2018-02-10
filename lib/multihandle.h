@@ -146,6 +146,7 @@ struct Curl_multi {
   void *timer_userp;
   struct curltime timer_lastcall; /* the fixed time for the timeout for the
                                     previous callback */
+  bool in_callback;            /* true while executing a callback */
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

@@ -22,7 +22,6 @@
  1.4 signal-based resolver timeouts
  1.5 get rid of PATH_MAX
  1.6 Modified buffer size approach
- 1.7 Detect when called from within callbacks
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
@@ -238,12 +237,6 @@
 
  Dynamically allocate buffer size depending on protocol in use in combination
  with freeing it after each individual transfer? Other suggestions?
-
-1.7 Detect when called from within callbacks
-
- We should set a state variable before calling callbacks, so that we
- subsequently can add code within libcurl that returns error if called within
- callbacks for when that's not supported.
 
 1.8 CURLOPT_RESOLVE for any port number
 
