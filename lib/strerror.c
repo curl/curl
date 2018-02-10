@@ -312,6 +312,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_HTTP2_STREAM:
     return "Stream error in the HTTP/2 framing layer";
 
+  case CURLE_RECURSIVE_API_CALL:
+    return "API function called from within callback";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

@@ -2191,8 +2191,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       /* Now, let's read off the proper amount of bytes from the
          input. */
       if(conn->seek_func) {
+        Curl_set_in_callback(data, true);
         seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
                                   SEEK_SET);
+        Curl_set_in_callback(data, false);
       }
 
       if(seekerr != CURL_SEEKFUNC_OK) {

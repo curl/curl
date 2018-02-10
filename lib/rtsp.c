@@ -770,7 +770,9 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
     user_ptr = data->set.out;
   }
 
+  Curl_set_in_callback(data, true);
   wrote = writeit(ptr, 1, len, user_ptr);
+  Curl_set_in_callback(data, false);
 
   if(CURL_WRITEFUNC_PAUSE == wrote) {
     failf(data, "Cannot pause RTP");

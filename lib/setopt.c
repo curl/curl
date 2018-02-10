@@ -43,6 +43,7 @@
 #include "sendf.h"
 #include "http2.h"
 #include "setopt.h"
+#include "multiif.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -2554,6 +2555,9 @@ CURLcode curl_easy_setopt(struct Curl_easy *data, CURLoption tag, ...)
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(Curl_is_in_callback(data))
+    return CURLE_RECURSIVE_API_CALL;
 
   va_start(arg, tag);
 

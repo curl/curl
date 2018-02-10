@@ -135,8 +135,10 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 
   /* this function returns a size_t, so we typecast to int to prevent warnings
      with picky compilers */
+  Curl_set_in_callback(data, true);
   nread = (int)data->state.fread_func(data->req.upload_fromhere, 1,
                                       buffersize, data->state.in);
+  Curl_set_in_callback(data, false);
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
@@ -302,7 +304,9 @@ CURLcode Curl_readrewind(struct connectdata *conn)
     if(data->set.seek_func) {
       int err;
 
+      Curl_set_in_callback(data, true);
       err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
+      Curl_set_in_callback(data, false);
       if(err) {
         failf(data, "seek callback returned error %d", (int)err);
         return CURLE_SEND_FAIL_REWIND;
@@ -311,8 +315,10 @@ CURLcode Curl_readrewind(struct connectdata *conn)
     else if(data->set.ioctl_func) {
       curlioerr err;
 
+      Curl_set_in_callback(data, true);
       err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
                                    data->set.ioctl_client);
+      Curl_set_in_callback(data, false);
       infof(data, "the ioctl callback returned %d\n", (int)err);
 
       if(err) {

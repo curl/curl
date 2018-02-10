@@ -523,9 +523,11 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
       keymatch = (enum curl_khmatch)keycheck;
 
       /* Ask the callback how to behave */
+      Curl_set_in_callback(data, true);
       rc = func(data, knownkeyp, /* from the knownhosts file */
                 &foundkey, /* from the remote host */
                 keymatch, data->set.ssh_keyfunc_userp);
+      Curl_set_in_callback(data, false);
     }
     else
       /* no remotekey means failure! */
@@ -1747,8 +1749,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(data->state.resume_from > 0) {
         /* Let's read off the proper amount of bytes from the input. */
         if(conn->seek_func) {
+          Curl_set_in_callback(data, true);
           seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
                                     SEEK_SET);
+          Curl_set_in_callback(data, false);
         }
 
         if(seekerr != CURL_SEEKFUNC_OK) {
@@ -1765,9 +1769,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
               (size_t)data->set.buffer_size :
               curlx_sotouz(data->state.resume_from - passed);
 
-            size_t actuallyread =
-              data->state.fread_func(data->state.buffer, 1,
-                                     readthisamountnow, data->state.in);
+            size_t actuallyread;
+            Curl_set_in_callback(data, true);
+            actuallyread = data->state.fread_func(data->state.buffer, 1,
+                                                  readthisamountnow,
+                                                  data->state.in);
+            Curl_set_in_callback(data, false);
 
             passed += actuallyread;
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {

@@ -464,9 +464,11 @@ static int push_promise(struct Curl_easy *data,
       goto fail;
     }
 
+    Curl_set_in_callback(data, true);
     rv = data->multi->push_cb(data, newhandle,
                               stream->push_headers_used, &heads,
                               data->multi->push_userp);
+    Curl_set_in_callback(data, false);
 
     /* free the headers again */
     for(i = 0; i<stream->push_headers_used; i++)

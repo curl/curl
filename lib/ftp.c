@@ -311,9 +311,11 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
     int error = 0;
 
     /* activate callback for setting socket options */
+    Curl_set_in_callback(data, true);
     error = data->set.fsockopt(data->set.sockopt_client,
                                s,
                                CURLSOCKTYPE_ACCEPT);
+    Curl_set_in_callback(data, false);
 
     if(error) {
       close_secondarysocket(conn);
@@ -1616,8 +1618,10 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
 
     /* Let's read off the proper amount of bytes from the input. */
     if(conn->seek_func) {
+      Curl_set_in_callback(data, true);
       seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
                                 SEEK_SET);
+      Curl_set_in_callback(data, true);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
@@ -3181,7 +3185,9 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
+      Curl_set_in_callback(data, true);
       data->set.chunk_end(data->wildcard.customptr);
+      Curl_set_in_callback(data, false);
     }
     ftpc->known_filesize = -1;
   }
@@ -3834,8 +3840,11 @@ static CURLcode wc_statemach(struct connectdata *conn)
 
     infof(conn->data, "Wildcard - START of \"%s\"\n", finfo->filename);
     if(conn->data->set.chunk_bgn) {
-      long userresponse = conn->data->set.chunk_bgn(
+      long userresponse;
+      Curl_set_in_callback(conn->data, true);
+      userresponse = conn->data->set.chunk_bgn(
         finfo, wildcard->customptr, (int)wildcard->filelist.size);
+      Curl_set_in_callback(conn->data, false);
       switch(userresponse) {
       case CURL_CHUNK_BGN_FUNC_SKIP:
         infof(conn->data, "Wildcard - \"%s\" skipped by user\n",
@@ -3871,8 +3880,11 @@ static CURLcode wc_statemach(struct connectdata *conn)
   } break;
 
   case CURLWC_SKIP: {
-    if(conn->data->set.chunk_end)
+    if(conn->data->set.chunk_end) {
+      Curl_set_in_callback(conn->data, true);
       conn->data->set.chunk_end(conn->data->wildcard.customptr);
+      Curl_set_in_callback(conn->data, false);
+    }
     Curl_llist_remove(&wildcard->filelist, wildcard->filelist.head, NULL);
     wildcard->state = (wildcard->filelist.size == 0) ?
                       CURLWC_CLEAN : CURLWC_DOWNLOADING;

@@ -1033,9 +1033,11 @@ static CURLcode singleipconnect(struct connectdata *conn,
 
   if(data->set.fsockopt) {
     /* activate callback for setting socket options */
+    Curl_set_in_callback(data, true);
     error = data->set.fsockopt(data->set.sockopt_client,
                                sockfd,
                                CURLSOCKTYPE_IPCXN);
+    Curl_set_in_callback(data, false);
 
     if(error == CURL_SOCKOPT_ALREADY_CONNECTED)
       isconnected = TRUE;
@@ -1311,8 +1313,12 @@ int Curl_closesocket(struct connectdata *conn,
          status */
       conn->sock_accepted[SECONDARYSOCKET] = FALSE;
     else {
+      int rc;
       Curl_multi_closed(conn, sock);
-      return conn->fclosesocket(conn->closesocket_client, sock);
+      Curl_set_in_callback(conn->data, true);
+      rc = conn->fclosesocket(conn->closesocket_client, sock);
+      Curl_set_in_callback(conn->data, false);
+      return rc;
     }
   }
 
@@ -1363,7 +1369,7 @@ CURLcode Curl_socket(struct connectdata *conn,
      addr->addrlen = sizeof(struct Curl_sockaddr_storage);
   memcpy(&addr->sa_addr, ai->ai_addr, addr->addrlen);
 
-  if(data->set.fopensocket)
+  if(data->set.fopensocket) {
    /*
     * If the opensocket callback is set, all the destination address
     * information is passed to the callback. Depending on this information the
@@ -1373,9 +1379,12 @@ CURLcode Curl_socket(struct connectdata *conn,
     * might have been changed and this 'new' address will actually be used
     * here to connect.
     */
+    Curl_set_in_callback(data, true);
     *sockfd = data->set.fopensocket(data->set.opensocket_client,
                                     CURLSOCKTYPE_IPCXN,
                                     (struct curl_sockaddr *)addr);
+    Curl_set_in_callback(data, false);
+  }
   else
     /* opensocket callback not set, so simply create the socket now */
     *sockfd = socket(addr->family, addr->socktype, addr->protocol);

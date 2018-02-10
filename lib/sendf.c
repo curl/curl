@@ -37,6 +37,7 @@
 #include "connect.h"
 #include "vtls/vtls.h"
 #include "ssh.h"
+#include "easyif.h"
 #include "multiif.h"
 #include "non-ascii.h"
 #include "strerror.h"
@@ -598,7 +599,10 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
     }
 
     if(writeheader) {
-      size_t wrote = writeheader(ptr, 1, chunklen, data->set.writeheader);
+      size_t wrote;
+      Curl_set_in_callback(data, true);
+      wrote = writeheader(ptr, 1, chunklen, data->set.writeheader);
+      Curl_set_in_callback(data, false);
 
       if(CURL_WRITEFUNC_PAUSE == wrote)
         /* here we pass in the HEADER bit only since if this was body as well
@@ -798,8 +802,11 @@ static int showit(struct Curl_easy *data, curl_infotype type,
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
-  if(data->set.fdebug)
+  if(data->set.fdebug) {
+    Curl_set_in_callback(data, true);
     rc = (*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+    Curl_set_in_callback(data, false);
+  }
   else {
     switch(type) {
     case CURLINFO_TEXT:

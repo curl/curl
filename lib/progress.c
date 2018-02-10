@@ -24,6 +24,7 @@
 
 #include "urldata.h"
 #include "sendf.h"
+#include "multiif.h"
 #include "progress.h"
 #include "curl_printf.h"
 
@@ -461,22 +462,26 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     if(data->set.fxferinfo) {
       /* There's a callback set, call that */
+      Curl_set_in_callback(data, true);
       result = data->set.fxferinfo(data->set.progress_client,
                                    data->progress.size_dl,
                                    data->progress.downloaded,
                                    data->progress.size_ul,
                                    data->progress.uploaded);
+      Curl_set_in_callback(data, false);
       if(result)
         failf(data, "Callback aborted");
       return result;
     }
     if(data->set.fprogress) {
       /* The older deprecated callback is set, call that */
+      Curl_set_in_callback(data, true);
       result = data->set.fprogress(data->set.progress_client,
                                    (double)data->progress.size_dl,
                                    (double)data->progress.downloaded,
                                    (double)data->progress.size_ul,
                                    (double)data->progress.uploaded);
+      Curl_set_in_callback(data, false);
       if(result)
         failf(data, "Callback aborted");
       return result;

@@ -49,6 +49,7 @@
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
 #include "curl_memory.h"
+#include "multiif.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -294,6 +295,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
     compare = Curl_fnmatch;
 
   /* filter pattern-corresponding filenames */
+  Curl_set_in_callback(conn->data, true);
   if(compare(conn->data->set.fnmatch_data, wc->pattern,
              finfo->filename) == 0) {
     /* discard symlink which is containing multiple " -> " */
@@ -305,6 +307,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
   else {
     add = FALSE;
   }
+  Curl_set_in_callback(conn->data, false);
 
   if(add) {
     Curl_llist_insert_next(llist, llist->tail, finfo, &infop->list);
