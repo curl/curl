@@ -1034,6 +1034,9 @@ void curl_easy_reset(struct Curl_easy *data)
  * the pausing, you may get your write callback called at this point.
  *
  * Action is a bitmask consisting of CURLPAUSE_* bits in curl/curl.h
+ *
+ * NOTE: This is one of few API functions that are allowed to be called from
+ * within a callback.
  */
 CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 {
@@ -1042,9 +1045,6 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 
   /* first switch off both pause bits */
   int newstate = k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
-
-  if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
 
   /* set the new desired pause bits */
   newstate |= ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
