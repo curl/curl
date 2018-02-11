@@ -1043,7 +1043,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   /* first switch off both pause bits */
   int newstate = k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
 
-  if (Curl_is_in_callback(data))
+  if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
   /* set the new desired pause bits */

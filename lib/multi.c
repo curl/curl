@@ -909,7 +909,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-  if (multi->in_callback)
+  if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
   data = multi->easyp;
@@ -965,7 +965,7 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-  if (multi->in_callback)
+  if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
   /* If the internally desired timeout is actually shorter than requested from
@@ -1133,7 +1133,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 {
   CURLMcode rc;
 
-  if (multi->in_callback)
+  if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
   rc = curl_multi_add_handle(multi, data);
@@ -2142,7 +2142,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-  if (multi->in_callback)
+  if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
   data = multi->easyp;
