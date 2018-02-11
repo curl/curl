@@ -3095,17 +3095,16 @@ void Curl_multi_process_pending_handles(struct Curl_multi *multi)
 
 void Curl_set_in_callback(struct Curl_easy *easy, bool value)
 {
-  if (easy->multi_easy)
+  if(easy->multi_easy)
     easy->multi_easy->in_callback = value;
-  else
-    if (easy->multi)
+  else if(easy->multi)
       easy->multi->in_callback = value;
 }
 
 bool Curl_is_in_callback(struct Curl_easy *easy)
 {
-  return (easy->multi && easy->multi->in_callback ||
-          easy->multi_easy && easy->multi_easy->in_callback);
+  return ((easy->multi && easy->multi->in_callback) ||
+          (easy->multi_easy && easy->multi_easy->in_callback));
 }
 
 #ifdef DEBUGBUILD
