@@ -1289,6 +1289,11 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
   /* Store the first recipient (or NULL if not specified) */
   smtp->rcpt = data->set.mail_rcpt;
 
+  /* Initial data character is the first character in line: it is implicitly
+     preceded by a virtual CRLF. */
+  smtp->trailing_crlf = TRUE;
+  smtp->eob = 2;
+
   /* Start the first command in the DO phase */
   if((data->set.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
     /* MAIL transfer */

@@ -17,15 +17,13 @@ SMTP
 smtp
 </server>
  <name>
-SMTP with no mail data
+SMTP data with dot as first character
  </name>
-
-<stdin nonewline="yes">
-
+<stdin>
+.This first line starts with a dot
 </stdin>
-
- <command>
-smtp://%HOSTIP:%SMTPPORT/911 --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+<command>
+smtp://%HOSTIP:%SMTPPORT/951 --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -33,13 +31,14 @@ smtp://%HOSTIP:%SMTPPORT/911 --mail-rcpt recipient@example.com --mail-from sende
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO 911
+EHLO 951
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
 <upload>
+..This first line starts with a dot
 .
 </upload>
 </verify>
