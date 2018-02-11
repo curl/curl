@@ -2545,6 +2545,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 /*
  * curl_easy_setopt() is the external interface for setting options on an
  * easy handle.
+ *
+ * NOTE: This is one of few API functions that are allowed to be called from
+ * within a callback.
  */
 
 #undef curl_easy_setopt
@@ -2555,9 +2558,6 @@ CURLcode curl_easy_setopt(struct Curl_easy *data, CURLoption tag, ...)
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
 
   va_start(arg, tag);
 
