@@ -70,6 +70,8 @@ typedef enum {
   CURLM_UNKNOWN_OPTION,  /* curl_multi_setopt() with unsupported option */
   CURLM_ADDED_ALREADY,   /* an easy handle already added to a multi handle was
                             attempted to get added - again */
+  CURLM_RECURSIVE_API_CALL, /* an api function was called from inside a
+                               callback */
   CURLM_LAST
 } CURLMcode;
 

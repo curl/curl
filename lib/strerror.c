@@ -383,6 +383,9 @@ curl_multi_strerror(CURLMcode error)
   case CURLM_ADDED_ALREADY:
     return "The easy handle is already added to a multi handle";
 
+  case CURLM_RECURSIVE_API_CALL:
+    return "API function called from within callback";
+
   case CURLM_LAST:
     break;
   }

@@ -367,7 +367,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     return CURLM_ADDED_ALREADY;
 
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   /* Initialize timeout list for this handle */
   Curl_llist_init(&data->state.timeoutlist, NULL);
@@ -644,7 +644,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     return CURLM_OK; /* it is already removed so let's say it is fine! */
 
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   premature = (data->mstate < CURLM_STATE_COMPLETED) ? TRUE : FALSE;
   easy_owns_conn = (data->easy_conn && (data->easy_conn->data == easy)) ?
@@ -910,7 +910,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
     return CURLM_BAD_HANDLE;
 
   if (multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   data = multi->easyp;
   while(data) {
@@ -966,7 +966,7 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
     return CURLM_BAD_HANDLE;
 
   if (multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   /* If the internally desired timeout is actually shorter than requested from
      the outside, then use the shorter time! But only if the internal timer
@@ -1134,7 +1134,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
   CURLMcode rc;
 
   if (multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   rc = curl_multi_add_handle(multi, data);
   if(!rc) {
@@ -2143,7 +2143,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
     return CURLM_BAD_HANDLE;
 
   if (multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   data = multi->easyp;
   while(data) {
@@ -2193,7 +2193,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 
   if(GOOD_MULTI_HANDLE(multi)) {
     if(multi->in_callback)
-      return CURLE_RECURSIVE_API_CALL;
+      return CURLM_RECURSIVE_API_CALL;
 
     multi->type = 0; /* not good anymore */
 
@@ -2648,7 +2648,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     return CURLM_BAD_HANDLE;
 
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   va_start(param, option);
 
@@ -2716,7 +2716,7 @@ CURLMcode curl_multi_socket(struct Curl_multi *multi, curl_socket_t s,
 {
   CURLMcode result;
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
   result = multi_socket(multi, FALSE, s, 0, running_handles);
   if(CURLM_OK >= result)
     update_timer(multi);
@@ -2728,7 +2728,7 @@ CURLMcode curl_multi_socket_action(struct Curl_multi *multi, curl_socket_t s,
 {
   CURLMcode result;
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
   result = multi_socket(multi, FALSE, s, ev_bitmask, running_handles);
   if(CURLM_OK >= result)
     update_timer(multi);
@@ -2740,7 +2740,7 @@ CURLMcode curl_multi_socket_all(struct Curl_multi *multi, int *running_handles)
 {
   CURLMcode result;
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
   result = multi_socket(multi, TRUE, CURL_SOCKET_BAD, 0, running_handles);
   if(CURLM_OK >= result)
     update_timer(multi);
@@ -2794,7 +2794,7 @@ CURLMcode curl_multi_timeout(struct Curl_multi *multi,
     return CURLM_BAD_HANDLE;
 
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   return multi_timeout(multi, timeout_ms);
 }
@@ -3029,7 +3029,7 @@ CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
   struct Curl_sh_entry *there = NULL;
 
   if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+    return CURLM_RECURSIVE_API_CALL;
 
   there = sh_getentry(&multi->sockhash, s);
 
