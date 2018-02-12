@@ -178,15 +178,15 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       piece = curlx_sotouz((ch->datasize >= length)?length:ch->datasize);
 
       /* Write the data portion available */
-      if(conn->data->set.http_ce_skip || !k->writer_stack) {
-        if(!k->ignorebody)
+      if(!conn->data->set.http_te_skip && !k->ignorebody) {
+        if(!conn->data->set.http_ce_skip && k->writer_stack)
+          result = Curl_unencode_write(conn, k->writer_stack, datap, piece);
+        else
           result = Curl_client_write(conn, CLIENTWRITE_BODY, datap, piece);
-      }
-      else
-        result = Curl_unencode_write(conn, k->writer_stack, datap, piece);
 
-      if(result)
-        return CHUNKE_WRITE_ERROR;
+        if(result)
+          return CHUNKE_WRITE_ERROR;
+      }
 
       *wrote += piece;
       ch->datasize -= piece; /* decrease amount left to expect */
