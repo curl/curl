@@ -1044,6 +1044,23 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wdouble-promotion"
           fi
           #
+          dnl Only gcc 6 or later
+          if test "$compiler_num" -ge "600"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wshift-negative-value"
+            tmp_CFLAGS="$tmp_CFLAGS -Wshift-overflow=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wnull-dereference"
+            tmp_CFLAGS="$tmp_CFLAGS -Wduplicated-cond"
+          fi
+          #
+          dnl Only gcc 7 or later
+          if test "$compiler_num" -ge "700"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wduplicated-branches"
+            tmp_CFLAGS="$tmp_CFLAGS -Wrestrict"
+            tmp_CFLAGS="$tmp_CFLAGS -Walloc-zero"
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat-overflow=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat-truncation=2"
+          fi
+          #
         fi
         #
         dnl Do not issue warnings for code in system include paths.

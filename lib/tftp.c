@@ -1010,7 +1010,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
   state->requested_blksize = blksize;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
-    (unsigned short)(conn->ip_addr->ai_family);
+    (sa_family_t)(conn->ip_addr->ai_family);
 
   tftp_set_timeouts(state);
 
