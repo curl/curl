@@ -62,7 +62,7 @@ if(curl_cv_recv)
       message(FATAL_ERROR "Cannot determine recv return type")
     endif()
 
-    foreach(recv_arg1 "int" "ssize_t" "SOCKET")
+    foreach(recv_arg1 "SOCKET" "int")
       unset(curl_cv_func_recv_test CACHE)
       check_cxx_source_compiles("${curl_recv_test_head} Arg1,${recv_arg1} ${curl_recv_test_tail}" curl_cv_func_recv_test)
       message(STATUS "Tested recv socket type == ${recv_arg1}")
@@ -271,17 +271,20 @@ int main(void) {
 
 
 include(CheckCSourceRuns)
-set(CMAKE_REQUIRED_FLAGS)
-if(HAVE_SYS_POLL_H)
-  set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
-endif(HAVE_SYS_POLL_H)
-check_c_source_runs("
-  #ifdef HAVE_SYS_POLL_H
-  #  include <sys/poll.h>
-  #endif
-  int main(void) {
-    return poll((void *)0, 0, 10 /*ms*/);
-  }" HAVE_POLL_FINE)
+# See HAVE_POLL in CMakeLists.txt for why poll is disabled on macOS
+if(NOT APPLE)
+  set(CMAKE_REQUIRED_FLAGS)
+  if(HAVE_SYS_POLL_H)
+    set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
+  endif(HAVE_SYS_POLL_H)
+  check_c_source_runs("
+    #ifdef HAVE_SYS_POLL_H
+    #  include <sys/poll.h>
+    #endif
+    int main(void) {
+      return poll((void *)0, 0, 10 /*ms*/);
+    }" HAVE_POLL_FINE)
+endif()
 
 set(HAVE_SIG_ATOMIC_T 1)
 set(CMAKE_REQUIRED_FLAGS)

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,14 +22,22 @@
 
 HTMLPAGES = testcurl.html runtests.html
 PDFPAGES = testcurl.pdf runtests.pdf
+MANDISTPAGES = runtests.1.dist testcurl.1.dist
+
+# the path to the impacket python lib used for SMB tests
+IMP = python_dependencies/impacket
+SMBDEPS = $(IMP)/__init__.py $(IMP)/nmb.py $(IMP)/nt_errors.py          \
+ $(IMP)/ntlm.py $(IMP)/smb.py $(IMP)/smb3.py $(IMP)/smb3structs.py      \
+ $(IMP)/smbserver.py $(IMP)/spnego.py $(IMP)/structure.py               \
+ $(IMP)/uuid.py $(IMP)/version.py smbserver.py curl_test_data.py
 
 EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  FILEFORMAT README stunnel.pem memanalyze.pl testcurl.pl valgrind.pm ftp.pm   \
  sshserver.pl sshhelp.pm pathhelp.pm testcurl.1 runtests.1 \
- $(HTMLPAGES) $(PDFPAGES) \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl \
  CMakeLists.txt mem-include-scan.pl valgrind.supp http_pipe.py extern-scan.pl \
- manpage-scan.pl nroff-scan.pl http2-server.pl
+ manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py \
+ negtelnetserver.py $(SMBDEPS)
 
 DISTCLEANFILES = configurehelp.pm
 
@@ -49,7 +57,7 @@ DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
 
-CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
+CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid $(MANDISTPAGES)
 
 MAN2HTML= roffit $< >$@
 
@@ -64,6 +72,10 @@ TEST_Q = -a -s
 TEST_AM = -a -am
 TEST_F = -a -p -r
 TEST_T = -a -t
+TEST_E = -a -e
+
+# !flaky means that it'll skip all tests using the flaky keyword
+TEST_NF = -a -p -r !flaky
 endif
 
 # make sure that PERL is pointing to an executable
@@ -71,19 +83,25 @@ perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
 
 test: perlcheck all
-	$(TEST)
+	$(TEST) $(TFLAGS)
 
 quiet-test: perlcheck all
-	$(TEST) $(TEST_Q)
+	$(TEST) $(TEST_Q) $(TFLAGS)
 
 am-test: perlcheck all
-	$(TEST) $(TEST_AM)
+	$(TEST) $(TEST_AM) $(TFLAGS)
 
 full-test: perlcheck all
-	$(TEST) $(TEST_F)
+	$(TEST) $(TEST_F) $(TFLAGS)
+
+nonflaky-test: perlcheck all
+	$(TEST) $(TEST_NF) $(TFLAGS)
 
 torture-test: perlcheck all
-	$(TEST) $(TEST_T)
+	$(TEST) $(TEST_T) $(TFLAGS)
+
+event-test: perlcheck all
+	$(TEST) $(TEST_E) $(TFLAGS)
 
 .1.html:
 	$(MAN2HTML)
@@ -99,3 +117,8 @@ checksrc:
 	cd libtest && $(MAKE) checksrc
 	cd unit && $(MAKE) checksrc
 	cd server && $(MAKE) checksrc
+
+if CURLDEBUG
+# for debug builds, we scan the sources on all regular make invokes
+all-local: checksrc
+endif

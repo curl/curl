@@ -30,7 +30,6 @@ FAQ
   2.2 Does curl work/build with other SSL libraries?
   2.3 Where can I find a copy of LIBEAY32.DLL?
   2.4 Does curl support SOCKS (RFC 1928) ?
-  2.5 Install libcurl for both 32bit and 64bit?
 
  3. Usage Problems
   3.1 curl: (1) SSL is disabled, https: not supported
@@ -118,6 +117,7 @@ FAQ
   7.1 What is PHP/CURL?
   7.2 Who wrote PHP/CURL?
   7.3 Can I perform multiple requests using the same handle?
+  7.4 Does PHP/CURL have dependencies?
 
 ==============================================================================
 
@@ -162,7 +162,7 @@ FAQ
   We pronounce curl with an initial k sound. It rhymes with words like girl
   and earl. This is a short WAV file to help you:
 
-     http://media.merriam-webster.com/soundc11/c/curl0001.wav
+     https://media.merriam-webster.com/soundc11/c/curl0001.wav
 
   There are numerous sub-projects and related projects that also use the word
   curl in the project names in various combinations, but you should take
@@ -215,22 +215,22 @@ FAQ
   another tool that uses libcurl.
 
   We do not add things to curl that other small and available tools already do
-  very fine at the side. Curl's output is fine to pipe into another program or
-  redirect to another file for the next program to interpret.
+  very well at the side. Curl's output can be piped into another program or
+  redirected to another file for the next program to interpret.
 
   We focus on protocol related issues and improvements. If you wanna do more
-  magic with the supported protocols than curl currently does, chances are big
+  magic with the supported protocols than curl currently does, chances are good
   we will agree. If you wanna add more protocols, we may very well agree.
 
-  If you want someone else to make all the work while you wait for us to
+  If you want someone else to do all the work while you wait for us to
   implement it for you, that is not a very friendly attitude. We spend a
   considerable time already on maintaining and developing curl. In order to
   get more out of us, you should consider trading in some of your time and
-  efforts in return. Simply go to the GitHub repo which resides at
+  effort in return. Simply go to the GitHub repo which resides at
   https://github.com/curl/curl, fork the project, and create pull requests
   with your proposed changes.
 
-  If you write the code, chances are bigger that it will get into curl faster.
+  If you write the code, chances are better that it will get into curl faster.
 
   1.5 Who makes curl?
 
@@ -238,7 +238,7 @@ FAQ
   project leader and main developer, but other persons' submissions are
   important and crucial. Anyone can contribute and post their changes and
   improvements and have them inserted in the main sources (of course on the
-  condition that developers agree on that the fixes are good).
+  condition that developers agree that the fixes are good).
 
   The full list of all contributors is found in the docs/THANKS file.
 
@@ -247,9 +247,9 @@ FAQ
   1.6 What do you get for making curl?
 
   Project cURL is entirely free and open. No person gets paid for developing
-  curl on full time. We do this voluntarily, mostly on spare time.
+  curl full time. We do this voluntarily, mostly in our spare time.
   Occasionally companies pay individual developers to work on curl, but that's
-  up to each company and developer. It is not controlled by nor supervised in
+  up to each company and developer. This is not controlled by nor supervised in
   any way by the project.
 
   We still get help from companies. Haxx provides web site, bandwidth, mailing
@@ -260,11 +260,11 @@ FAQ
   do so in the future.
 
   If you want to support our project, consider a donation or a banner-program
-  or even better: by helping us coding, documenting, testing etc.
+  or even better: by helping us with coding, documenting or testing etc.
 
   1.7 What about CURL from curl.com?
 
-  During the summer 2001, curl.com was busy advertising their client-side
+  During the summer of 2001, curl.com was busy advertising their client-side
   programming language for the web, named CURL.
 
   We are in no way associated with curl.com or their CURL programming
@@ -277,7 +277,7 @@ FAQ
   We recognize that we will be living in parallel with curl.com and wish them
   every success.
 
-  1.8 I have a problem who do I mail?
+  1.8 I have a problem whom do I mail?
 
   Please do not mail any single individual unless you really need to. Keep
   curl-related questions on a suitable mailing list. All available mailing
@@ -285,8 +285,8 @@ FAQ
   https://curl.haxx.se/mail/
 
   Keeping curl-related questions and discussions on mailing lists allows
-  others to join in and help, to share their ideas, contribute their
-  suggestions and spread their wisdom. Keeping discussions on public mailing
+  others to join in and help, to share their ideas, to contribute their
+  suggestions and to spread their wisdom. Keeping discussions on public mailing
   lists also allows for others to learn from this (both current and future
   users thanks to the web based archives of the mailing lists), thus saving us
   from having to repeat ourselves even more. Thanks for respecting this.
@@ -324,9 +324,9 @@ FAQ
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca cert bundle that used to shipped with curl was very outdated and must
-  be replaced with an up-to-date version by anyone who wants to verify
-  peers. It is no longer provided by curl. The last curl release ever that
+  The ca cert bundle that used to be shipped with curl was very outdated and
+  must be replaced with an up-to-date version by anyone who wants to verify
+  peers. It is no longer provided by curl. The last curl release that ever
   shipped a ca cert bundle was curl 7.18.0.
 
   In the cURL project we've decided not to attempt to keep this file updated
@@ -347,7 +347,7 @@ FAQ
   1.12 I have a problem who can I chat with?
 
   There's a bunch of friendly people hanging out in the #curl channel on the
-  IRC network irc.freenode.net. If you're polite and nice, chances are big
+  IRC network irc.freenode.net. If you're polite and nice, chances are good
   that you can get -- or provide -- help instantly.
 
   1.13 curl's ECCN number?
@@ -366,8 +366,8 @@ FAQ
   Comprehensible explanations of the meaning of such numbers and how to obtain
   them (resp.) are here
 
-  http://www.bis.doc.gov/licensing/exportingbasics.htm
-  http://www.bis.doc.gov/licensing/do_i_needaneccn.html
+  https://www.bis.doc.gov/licensing/exportingbasics.htm
+  https://www.bis.doc.gov/licensing/do_i_needaneccn.html
 
   An incomprehensible description of the two numbers above is here
   http://www.access.gpo.gov/bis/ear/pdf/ccl5-pt2.pdf
@@ -430,7 +430,7 @@ FAQ
     2.1.2 only the libssl lib is missing
 
     If all include files and the libcrypto lib is present, with only the
-    libssl being missing according to configure, this is mostly likely because
+    libssl being missing according to configure, this is most likely because
     a few functions are left out from the libssl.
 
     If the function names missing include RSA or RSAREF you can be certain
@@ -465,32 +465,6 @@ FAQ
 
   Yes, SOCKS 4 and 5 are supported.
 
-  2.5 Install libcurl for both 32bit and 64bit?
-
-  In curl's configure procedure one of the regular include files get created
-  with platform specific information. The file 'curl/curlbuild.h' in the
-  installed libcurl file tree is therefore somewhat tied to that particular
-  platform.
-
-  To allow applications to get built for either 32bit or 64bit you need to
-  install libcurl headers for both setups and unfortunately curl doesn't do
-  this automatically.
-
-  A commonly used procedure is this:
-
-     $ ./configure [32bit platform]
-     $ mv curl/curlbuild.h curl/curlbuild-32bit.h
-     $ ./configure [64bit platform]
-     $ mv curl/curlbuild.h curl/curlbuild-64bit.h
-
-  Then you make a toplevel curl/curlbuild.h replacement that only does this:
-
-     #ifdef IS_32BIT
-     #include "curlbuild-32bit.h"
-     else
-     #include "curlbuild-64bit.h"
-     #endif
-
 
 3. Usage problems
 
@@ -520,11 +494,14 @@ FAQ
 
   3.3 Why doesn't my posting using -F work?
 
-  You can't simply use -F or -d at your choice. The web server that will
-  receive your post expects one of the formats. If the form you're trying to
-  submit uses the type 'multipart/form-data', then and only then you must use
-  the -F type. In all the most common cases, you should use -d which then
-  causes a posting with the type 'application/x-www-form-urlencoded'.
+  You can't arbitrarily use -F or -d, the choice between -F or -d depends on the
+  HTTP operation you need curl to do and what the web server that will receive
+  your post expects.
+
+  If the form you're trying to submit uses the type 'multipart/form-data', then
+  and only then you must use the -F type. In all the most common cases, you
+  should use -d which then causes a posting with the type
+  'application/x-www-form-urlencoded'.
 
   This is described in some detail in the MANUAL and TheArtOfHttpScripting
   documents, and if you don't understand it the first time, read it again
@@ -599,7 +576,7 @@ FAQ
   In October 2009, there were interfaces available for the following
   languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Eiffel, Euphoria,
   Ferite, Gambas, glib/GTK+, Haskell, ILE/RPG, Java, Lisp, Lua, Mono, .NET,
-  Object-Pascal, O'Caml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
+  Object-Pascal, OCaml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
   Scheme, S-Lang, Smalltalk, SP-Forth, SPL, Tcl, Visual Basic, Visual FoxPro,
   Q, wxwidgets and XBLite. By the time you read this, additional ones may have
   appeared!
@@ -611,7 +588,7 @@ FAQ
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
 
-  Using libcurl is of course just as fine and you'd just use the proper
+  Using libcurl is of course just as good and you'd just use the proper
   library options to do the same.
 
   3.11 How do I POST with a different Content-Type?
@@ -631,7 +608,7 @@ FAQ
   There is one exception to this rule, and that is if you can "tunnel through"
   the given HTTP proxy. Proxy tunneling is enabled with a special option (-p)
   and is generally not available as proxy admins usually disable tunneling to
-  other ports than 443 (which is used for HTTPS access through proxies).
+  ports other than 443 (which is used for HTTPS access through proxies).
 
   3.13 Why does my single/double quotes fail?
 
@@ -650,7 +627,7 @@ FAQ
   Windows/DOS prompts I believe you're forced to use double (") quotes.
 
   Please study the documentation for your particular environment. Examples in
-  the curl docs will use a mix of both these ones as shown above. You must
+  the curl docs will use a mix of both of these as shown above. You must
   adjust them to work in your environment.
 
   Remember that curl works and runs on more operating systems than most single
@@ -685,7 +662,7 @@ FAQ
   No. curl itself has no code that performs recursive operations, such as
   those performed by wget and similar tools.
 
-  There exist wrapper scripts with that functionality (for example the
+  There exists wrapper scripts with that functionality (for example the
   curlmirror perl script), and you can write programs based on libcurl to do
   it, but the command line tool curl itself cannot.
 
@@ -696,9 +673,9 @@ FAQ
 
   CLIENT CERTIFICATE
 
-  The server you communicate may require that you can provide this in order to
-  prove that you actually are who you claim to be.  If the server doesn't
-  require this, you don't need a client certificate.
+  The server you communicate with may require that you can provide this in
+  order to prove that you actually are who you claim to be.  If the server
+  doesn't require this, you don't need a client certificate.
 
   A client certificate is always used together with a private key, and the
   private key has a pass phrase that protects it.
@@ -859,14 +836,14 @@ FAQ
 
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
 
-  Because those letters have a special meaning to the shell, and to be used in
+  Because those letters have a special meaning to the shell, to be used in
   a URL specified to curl you must quote them.
 
-  An example that downloads two URLs (sequentially) would do:
+  An example that downloads two URLs (sequentially) would be:
 
     curl '{curl,www}.haxx.se'
 
-  To be able to use those letters as actual parts of the URL (without using
+  To be able to use those characters as actual parts of the URL (without using
   them for the curl URL "globbing" system), use the -g/--globoff option:
 
     curl -g 'www.site.com/weirdname[].html'
@@ -1016,14 +993,16 @@ FAQ
 
   4.13 Why is curl -R on Windows one hour off?
 
-  During daylight savings time, when -R is used, curl will set a time that
-  appears one hour off. This happens due to a flaw in how Windows stores and
-  uses file modification times and it is not easily worked around. For details
-  on this problem, read this: http://www.codeproject.com/datetime/dstbugs.asp
+  Since curl 7.53.0 this issue should be fixed as long as curl was built with
+  any modern compiler that allows for a 64-bit curl_off_t type. For older
+  compilers or prior curl versions it may set a time that appears one hour off.
+  This happens due to a flaw in how Windows stores and uses file modification
+  times and it is not easily worked around. For more details read this:
+  http://www.codeproject.com/datetime/dstbugs.asp
 
   4.14 Redirects work in browser but not with curl!
 
-  curl supports HTTP redirects fine (see item 3.8). Browsers generally support
+  curl supports HTTP redirects well (see item 3.8). Browsers generally support
   at least two other ways to perform redirects that curl does not:
 
   Meta tags. You can write a HTML tag that will cause the browser to redirect
@@ -1047,7 +1026,7 @@ FAQ
 
   To use explicit FTPS, you use a FTP:// URL and the --ftp-ssl option (or one
   of its related flavours). This is the most common method, and the one
-  mandated by RFC4217. This kind of connection then of course uses the
+  mandated by RFC4217. This kind of connection will then of course use the
   standard FTP port 21 by default.
 
   4.16 My HTTP POST or PUT requests are slow!
@@ -1055,7 +1034,7 @@ FAQ
   libcurl makes all POST and PUT requests (except for POST requests with a
   very tiny request body) use the "Expect: 100-continue" header. This header
   allows the server to deny the operation early so that libcurl can bail out
-  already before having to send any data. This is useful in authentication
+  before having to send any data. This is useful in authentication
   cases and others.
 
   However, many servers don't implement the Expect: stuff properly and if the
@@ -1146,7 +1125,7 @@ FAQ
   When doing HTTP transfers, curl will perform exactly what you're asking it
   to do and if successful it will not return an error. You can use curl to
   test your web server's "file not found" page (that gets 404 back), you can
-  use it to check your authentication protected web pages (that get a 401
+  use it to check your authentication protected web pages (that gets a 401
   back) and so on.
 
   The specific HTTP response code does not constitute a problem or error for
@@ -1161,7 +1140,7 @@ FAQ
   libcurl speak).
 
   You can also use the -w option and the variable %{response_code} to extract
-  the exact response code that was return in the response.
+  the exact response code that was returned in the response.
 
   4.21 Why is there a HTTP/1.1 in my HTTP/2 request?
 
@@ -1171,8 +1150,8 @@ FAQ
   The reason for this is that we first generate the request to send using the
   old 1.1 style and show that request in the verbose output, and then we
   convert it over to the binary header-compressed HTTP/2 style. The actual
-  "1.1" part from that request is then not actually used in the transfer. The
-  binary HTTP/2 headers are not human readable.
+  "1.1" part from that request is then not actually used in the transfer.
+  The binary HTTP/2 headers are not human readable.
 
 5. libcurl Issues
 
@@ -1254,10 +1233,10 @@ FAQ
   libcurl will reuse connections for all transfers that are made using the
   same libcurl handle.
 
-  When you use the easy interface, the connection cache is kept within the
-  easy handle. If you instead use the multi interface, the connection cache
-  will be kept within the multi handle and will be shared among all the easy
-  handles that are used within the same multi handle.
+  When you use the easy interface the connection cache is kept within the easy
+  handle. If you instead use the multi interface, the connection cache will be
+  kept within the multi handle and will be shared among all the easy handles
+  that are used within the same multi handle.
 
   5.7 Link errors when building libcurl on Windows!
 
@@ -1316,8 +1295,8 @@ FAQ
   you want to change name resolver function you must rebuild libcurl and tell
   it to use a different function.
 
-  - The non-IPv6 resolver that can use one out of four host name resolve calls
-    (depending on what your system supports):
+  - The non-IPv6 resolver that can use one of four different host name resolve
+  calls (depending on what your system supports):
 
       A - gethostbyname()
       B - gethostbyname_r() with 3 arguments
@@ -1351,7 +1330,7 @@ FAQ
   5.12 Can I make libcurl fake or hide my real IP address?
 
   No. libcurl operates on a higher level. Besides, faking IP address would
-  imply sending IP packet with a made-up source address, and then you normally
+  imply sending IP packets with a made-up source address, and then you normally
   get a problem with receiving the packet sent back as they would then not be
   routed to you!
 
@@ -1381,7 +1360,7 @@ FAQ
 
   libcurl is a C library, it doesn't know anything about C++ member functions.
 
-  You can overcome this "limitation" with a relative ease using a static
+  You can overcome this "limitation" with relative ease using a static
   member function that is passed a pointer to the class:
 
      // f is the pointer to your object.
@@ -1439,7 +1418,7 @@ FAQ
   timed out.
 
   The most flexible way is by writing your own time-out logic and using
-  CURLOPT_PROGRESSFUNCTION (perhaps in combination with other callbacks) and
+  CURLOPT_XFERINFOFUNCTION (perhaps in combination with other callbacks) and
   use that to figure out exactly when the right condition is met when the
   transfer should get stopped.
 

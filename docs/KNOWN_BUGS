@@ -18,18 +18,15 @@ problems may have been fixed or changed somewhat since this was written!
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
  1.6 Unnecessary close when 401 received waiting for 100
- 1.7 CONNECT response larger than 16KB
- 1.8 DNS timing is wrong for HTTP redirects
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
- 1.12 HTTP/2 server push enabled when no pushes can be accepted
 
  2. TLS
- 2.1 Hangs with PolarSSL
- 2.2 CURLINFO_SSL_VERIFYRESULT has limited support
- 2.3 DER in keychain
- 2.4 GnuTLS backend skips really long certificate fields
+ 2.1 CURLINFO_SSL_VERIFYRESULT has limited support
+ 2.2 DER in keychain
+ 2.3 GnuTLS backend skips really long certificate fields
+ 2.4 DarwinSSL won't import PKCS#12 client certificates without a password
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -45,14 +42,12 @@ problems may have been fixed or changed somewhat since this was written!
  5. Build and portability issues
  5.1 Windows Borland compiler
  5.2 curl-config --libs contains private details
- 5.3 libidn and old iconv
  5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
- 5.10 Fix the gcc typechecks
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -87,6 +82,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
  11.3 c-ares deviates from stock resolver on http://1346569778
+ 11.4 HTTP test server 'connection-monitor' problems
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -144,19 +140,6 @@ problems may have been fixed or changed somewhat since this was written!
  waiting for the the 100-continue response.
  https://curl.haxx.se/mail/lib-2008-08/0462.html
 
-1.7 CONNECT response larger than 16KB
-
- If a CONNECT response-headers are larger than BUFSIZE (16KB) when the
- connection is meant to be kept alive (like for NTLM proxy auth), the function
- will return prematurely and will confuse the rest of the HTTP protocol
- code. This should be very rare.
-
-1.8 DNS timing is wrong for HTTP redirects
-
- When extracting timing information after HTTP redirects, only the last
- transfer's results are returned and not the totals:
- https://github.com/curl/curl/issues/522
-
 1.9 HTTP/2 frames while in the connection pool kill reuse
 
  If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
@@ -169,7 +152,7 @@ problems may have been fixed or changed somewhat since this was written!
 
 1.10 Strips trailing dot from host name
 
- When given a URL wit a trailing dot for the host name part:
+ When given a URL with a trailing dot for the host name part:
  "https://example.com./", libcurl will strip off the dot and use the name
  without a dot internally and send it dot-less in HTTP Host: headers and in
  the TLS SNI field.
@@ -194,7 +177,7 @@ problems may have been fixed or changed somewhat since this was written!
  It can also be noted that while adding a trailing dot to the host name in
  most (all?) cases will make the name resolve to the same set of IP addresses,
  many HTTP servers will not happily accept the trailing dot there unless that
- has been specificly configured to be a fine virtual host.
+ has been specifically configured to be a fine virtual host.
 
  If URLs with trailing dots for host names become more popular or even just
  used more than for just plain fun experiments, I'm sure we will have reason
@@ -213,40 +196,30 @@ problems may have been fixed or changed somewhat since this was written!
  seem to fix the issue or even get called. See
  https://github.com/curl/curl/issues/768
 
-1.12 HTTP/2 server push enabled when no pushes can be accepted
-
- If the easy interface is used, we can't accept any server pushes so we should
- switch off them already in the h2 settings as otherwise we risk wasting
- bandwidth when the server tries to send pushes libcurl will never accept.
-
- See https://github.com/curl/curl/issues/927
 
 2. TLS
 
-2.1 Hangs with PolarSSL
-
- "curl_easy_perform hangs with imap and PolarSSL"
- https://github.com/curl/curl/issues/334
-
- Most likely, a fix similar to commit c111178bd4 (for mbedTLS) is
- necessary. Or if we just wait a little longer we'll rip out all support for
- PolarSSL instead...
-
-2.2 CURLINFO_SSL_VERIFYRESULT has limited support
+2.1 CURLINFO_SSL_VERIFYRESULT has limited support
 
  CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
  backends, so relying on this information in a generic app is flaky.
 
-2.3 DER in keychain
+2.2 DER in keychain
 
  Curl doesn't recognize certificates in DER format in keychain, but it works
  with PEM.  https://curl.haxx.se/bug/view.cgi?id=1065
 
-2.4 GnuTLS backend skips really long certificate fields
+2.3 GnuTLS backend skips really long certificate fields
 
  libcurl calls gnutls_x509_crt_get_dn() with a fixed buffer size and if the
  field is too long in the cert, it'll just return an error and the field will
  be displayed blank.
+
+2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+
+ libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
+ function rejects certificates that do not have a password.
+ https://github.com/curl/curl/issues/1308
 
 
 3. Email protocols
@@ -322,14 +295,6 @@ problems may have been fixed or changed somewhat since this was written!
  run that might be needed only for building libcurl. Further, curl-config
  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
 
-5.3 libidn and old iconv
-
- Test case 165 might fail on a system which has libidn present, but with an
- old iconv version (2.1.3 is a known bad version), since it doesn't recognize
- the charset when named ISO8859-1. Changing the name to ISO-8859-1 makes the
- test pass, but instead makes it fail on Solaris hosts that use its native
- iconv.
-
 5.4 AIX shared build with c-ares fails
 
  curl version 7.12.2 fails on AIX if compiled with --enable-ares.  The
@@ -351,7 +316,6 @@ problems may have been fixed or changed somewhat since this was written!
  The cmake build setup lacks several features that the autoconf build
  offers. This includes:
 
-  - symbol hiding when the shared library is built
   - use of correct soname for the shared library build
   - support for several TLS backends are missing
   - the unit tests cause link failures in regular non-static builds
@@ -392,14 +356,6 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/864
 
-5.10 Fix the gcc typechecks
-
- Issue #846 identifies a problem with the gcc-typechecks and how the types are
- documented and checked for CURLINFO_CERTINFO but our attempts to fix the
- issue were futile and needs more attention.
-
- https://github.com/curl/curl/issues/846
-
 6. Authentication
 
 6.1 NTLM authentication and unicode
@@ -417,7 +373,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
  library header files exporting symbols/macros that should be kept private to
- the KfW library. See ticket #5601 at http://krbdev.mit.edu/rt/
+ the KfW library. See ticket #5601 at https://krbdev.mit.edu/rt/
 
 6.3 NTLM in system context uses wrong name
 
@@ -595,6 +551,13 @@ problems may have been fixed or changed somewhat since this was written!
  not found)"
 
  See https://github.com/curl/curl/issues/893
+
+11.4 HTTP test server 'connection-monitor' problems
+
+ The 'connection-monitor' feature of the sws HTTP test server doesn't work
+ properly if some tests are run in unexpected order. Like 1509 and then 1525.
+
+ See https://github.com/curl/curl/issues/868
 
 
 12. LDAP and OpenLDAP

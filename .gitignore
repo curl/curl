@@ -8,16 +8,19 @@
 *.o
 *.obj
 *.pdb
+*.pyc
 *~
-.*.swp
+.*.sw?
 .cproject
 .deps
 .dirstamp
 .libs
 .project
 .settings
+/.vs
 /build/
 /builds/
+__pycache__
 CHANGES.dist
 Debug
 INSTALL
@@ -37,7 +40,7 @@ config.sub
 configure
 curl-*.tar.bz2
 curl-*.tar.gz
-curl-*.tar.lzma
+curl-*.tar.xz
 curl-*.zip
 curl-config
 depcomp
@@ -50,3 +53,6 @@ mkinstalldirs
 tags
 test-driver
 scripts/_curl
+curl_fuzzer
+curl_fuzzer_seed_corpus.zip
+libstandaloneengine.a

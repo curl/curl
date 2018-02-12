@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,9 +29,7 @@
 
 #include "test.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include "testutil.h"
 #include "warnless.h"
@@ -41,8 +39,8 @@
 
 int test(char *URL)
 {
-  CURL* easy = NULL;
-  CURLM* multi = NULL;
+  CURL *easy = NULL;
+  CURLM *multi = NULL;
   int still_running;
   int res = 0;
 
@@ -99,7 +97,7 @@ int test(char *URL)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
     abort_on_test_timeout();
 

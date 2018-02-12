@@ -83,13 +83,13 @@ curl_startup.com        A procedure run at VMS startup to install the
                         libcurl shared image and to set up the needed
                         logical names.
 
-curlmsg.h               C header defining cURL status code macros.
+curlmsg.h               C header defining curl status code macros.
 
 curlmsg.msg             Error message source for curlmsg.h and curlmsg.sdl.
 
-curlmsg.sdl             SDL source defining cURL status code constants.
+curlmsg.sdl             SDL source defining curl status code constants.
 
-curlmsg_vms.h           Mapping of cURL status codes to VMS-form codes.
+curlmsg_vms.h           Mapping of curl status codes to VMS-form codes.
 
 generate_config_vms_h_curl.com
                         DCL procedure to generate the curl specific
@@ -115,9 +115,9 @@ gnv_link_curl.com       Links the libcurl shared image and then links a curl
 macro32_exactcase.patch The patch file needed to modify VAX Macro32 to be
                         case sensitive and case preserving.
 
-Makefile.am             cURL kit file list for this directory.
+Makefile.am             curl kit file list for this directory.
 
-Makefile.in             cURL kit makefile source for this directory.
+Makefile.in             curl kit makefile source for this directory.
 
 make_gnv_curl_install.sh
                         Script to do a make install using GNV after running
@@ -218,7 +218,7 @@ allow interrupted downloads to be continued.
 
 
 The libcurl file module still does not understand VMS file types and requires
-the input files to be in STREAM_LF to work propery.
+the input files to be in STREAM_LF to work property.
 
 The test suites are not supported as of 7.11.0.
 

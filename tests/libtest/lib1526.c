@@ -54,7 +54,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -84,7 +85,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE, strlen(data));
+  test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(data));
 
   res = curl_easy_perform(curl);
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -42,27 +42,31 @@ static void unit_stop(void)
 
 #if defined(MSDOS) || defined(WIN32)
 
-static char *getflagstr(int flags) {
+static char *getflagstr(int flags)
+{
   char *buf = malloc(256);
-  fail_unless(buf, "out of memory");
-  snprintf(buf, 256, "%s,%s,%s,%s",
-    ((flags & SANITIZE_ALLOW_COLONS) ? "SANITIZE_ALLOW_COLONS" : ""),
-    ((flags & SANITIZE_ALLOW_PATH) ? "SANITIZE_ALLOW_PATH" : ""),
-    ((flags & SANITIZE_ALLOW_RESERVED) ? "SANITIZE_ALLOW_RESERVED" : ""),
-    ((flags & SANITIZE_ALLOW_TRUNCATE) ? "SANITIZE_ALLOW_TRUNCATE" : ""));
+  if(buf) {
+    snprintf(buf, 256, "%s,%s,%s,%s",
+      ((flags & SANITIZE_ALLOW_COLONS) ? "SANITIZE_ALLOW_COLONS" : ""),
+      ((flags & SANITIZE_ALLOW_PATH) ? "SANITIZE_ALLOW_PATH" : ""),
+      ((flags & SANITIZE_ALLOW_RESERVED) ? "SANITIZE_ALLOW_RESERVED" : ""),
+      ((flags & SANITIZE_ALLOW_TRUNCATE) ? "SANITIZE_ALLOW_TRUNCATE" : ""));
+  }
   return buf;
 }
 
-static char *getcurlcodestr(int cc) {
+static char *getcurlcodestr(int cc)
+{
   char *buf = malloc(256);
-  fail_unless(buf, "out of memory");
-  snprintf(buf, 256, "%s (%d)",
-    (cc == SANITIZE_ERR_OK ? "SANITIZE_ERR_OK" :
-     cc == SANITIZE_ERR_BAD_ARGUMENT ? "SANITIZE_ERR_BAD_ARGUMENT" :
-     cc == SANITIZE_ERR_INVALID_PATH ? "SANITIZE_ERR_INVALID_PATH" :
-     cc == SANITIZE_ERR_OUT_OF_MEMORY ? "SANITIZE_ERR_OUT_OF_MEMORY" :
-     "unexpected error code - add name"),
-    cc);
+  if(buf) {
+    snprintf(buf, 256, "%s (%d)",
+      (cc == SANITIZE_ERR_OK ? "SANITIZE_ERR_OK" :
+       cc == SANITIZE_ERR_BAD_ARGUMENT ? "SANITIZE_ERR_BAD_ARGUMENT" :
+       cc == SANITIZE_ERR_INVALID_PATH ? "SANITIZE_ERR_INVALID_PATH" :
+       cc == SANITIZE_ERR_OUT_OF_MEMORY ? "SANITIZE_ERR_OUT_OF_MEMORY" :
+       "unexpected error code - add name"),
+      cc);
+  }
   return buf;
 }
 
@@ -308,8 +312,11 @@ UNITTEST_START
     }
 
     flagstr = getflagstr(data[i].flags);
+    abort_unless(flagstr, "out of memory");
     received_ccstr = getcurlcodestr(res);
+    abort_unless(received_ccstr, "out of memory");
     expected_ccstr = getcurlcodestr(data[i].expected_result);
+    abort_unless(expected_ccstr, "out of memory");
 
     unitfail++;
     fprintf(stderr, "\n"

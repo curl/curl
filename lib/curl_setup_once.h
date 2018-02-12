@@ -196,7 +196,7 @@ struct timeval {
   /* */
 #else
 #define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
-                                    (SEND_TYPE_ARG2)(y), \
+                                    (SEND_QUAL_ARG2 SEND_TYPE_ARG2)(y), \
                                     (SEND_TYPE_ARG3)(z), \
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #endif
@@ -432,20 +432,6 @@ typedef int sig_atomic_t;
 #else
 #define SOCKERRNO         (errno)
 #define SET_SOCKERRNO(x)  (errno = (x))
-#endif
-
-
-/*
- * Macro ERRNO / SET_ERRNO() returns / sets the NOT *socket-related* errno
- * (or equivalent) on this platform to hide platform details to code using it.
- */
-
-#if defined(WIN32) && !defined(USE_LWIPSOCK)
-#define ERRNO         ((int)GetLastError())
-#define SET_ERRNO(x)  (SetLastError((DWORD)(x)))
-#else
-#define ERRNO         (errno)
-#define SET_ERRNO(x)  (errno = (x))
 #endif
 
 

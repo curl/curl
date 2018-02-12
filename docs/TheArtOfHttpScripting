@@ -145,7 +145,7 @@ The Art Of Scripting HTTP Requests Using Curl
  address and that's what curl will communicate with. Alternatively you specify
  the IP address directly in the URL instead of a name.
 
- For development and other trying out situation, you can point out a different
+ For development and other trying out situations, you can point to a different
  IP address for a host name than what would otherwise be used, by using curl's
  --resolve option:
 
@@ -153,7 +153,7 @@ The Art Of Scripting HTTP Requests Using Curl
  
  2.3 Port number
 
- Each protocol curl supports operate on a default port number, be it over TCP
+ Each protocol curl supports operates on a default port number, be it over TCP
  or in some cases UDP. Normally you don't have to take that into
  consideration, but at times you run test servers on other ports or
  similar. Then you can specify the port number in the URL with a colon and a
@@ -164,7 +164,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  The port number you specify in the URL is the number that the server uses to
  offer its services. Sometimes you may use a local proxy, and then you may
- need to specify that proxy's port number separate on what curl needs to
+ need to specify that proxy's port number separately for what curl needs to
  connect to locally. Like when using a HTTP proxy on port 4321:
 
       curl --proxy http://proxy.example.org:4321 http://remote.example.org/
@@ -172,7 +172,7 @@ The Art Of Scripting HTTP Requests Using Curl
  2.4 User name and password
 
  Some services are setup to require HTTP authentication and then you need to
- provide name and password which then is transferred to the remote site in
+ provide name and password which is then transferred to the remote site in
  various ways depending on the exact authentication protocol used.
 
  You can opt to either insert the user and password in the URL or you can
@@ -198,7 +198,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  3.1 GET
 
- The simplest and most common request/operation made using HTTP is to get a
+ The simplest and most common request/operation made using HTTP is to GET a
  URL. The URL could itself refer to a web page, an image or a file. The client
  issues a GET request to the server and receives the document it asked for.
  If you issue the command line
@@ -269,14 +269,14 @@ The Art Of Scripting HTTP Requests Using Curl
  4.1 Forms explained
 
  Forms are the general way a web site can present a HTML page with fields for
- the user to enter data in, and then press some kind of 'OK' or 'submit'
+ the user to enter data in, and then press some kind of 'OK' or 'Submit'
  button to get that data sent to the server. The server then typically uses
  the posted data to decide how to act. Like using the entered words to search
- in a database, or to add the info in a bug track system, display the entered
+ in a database, or to add the info in a bug tracking system, display the entered
  address on a map or using the info as a login-prompt verifying that the user
  is allowed to see what it is about to see.
 
- Of course there has to be some kind of program in the server end to receive
+ Of course there has to be some kind of program on the server end to receive
  the data you send. You cannot just invent something out of the air.
 
  4.2 GET
@@ -369,7 +369,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  4.5 Hidden Fields
 
-  A very common way for HTML based application to pass state information
+  A very common way for HTML based applications to pass state information
   between pages is to add hidden fields to the forms. Hidden fields are
   already filled in, they aren't displayed to the user and they get passed
   along just as all the other fields.
@@ -383,7 +383,7 @@ The Art Of Scripting HTTP Requests Using Curl
       <input type=submit name="press" value="OK">
     </form>
 
-  To post this with curl, you won't have to think about if the fields are
+  To POST this with curl, you won't have to think about if the fields are
   hidden or not. To curl they're all the same:
 
         curl --data "birthyear=1905&press=OK&person=daniel" [URL]
@@ -405,7 +405,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  5.1 PUT
 
- The perhaps best way to upload data to a HTTP server is to use PUT. Then
+ Perhaps the best way to upload data to a HTTP server is to use PUT. Then
  again, this of course requires that someone put a program or script on the
  server end that knows how to receive a HTTP PUT stream.
 
@@ -446,7 +446,7 @@ The Art Of Scripting HTTP Requests Using Curl
  If your proxy requires the authentication to be done using the NTLM method,
  use --proxy-ntlm, if it requires Digest use --proxy-digest.
 
- If you use any one these user+password options but leave out the password
+ If you use any one of these user+password options but leave out the password
  part, curl will prompt for the password interactively.
 
  6.4 Hiding credentials
@@ -508,7 +508,7 @@ The Art Of Scripting HTTP Requests Using Curl
  to redirect is Location:.
 
  Curl does not follow Location: headers by default, but will simply display
- such pages in the same manner it display all HTTP replies. It does however
+ such pages in the same manner it displays all HTTP replies. It does however
  feature an option that will make it attempt to follow the Location: pointers.
 
  To tell curl to follow a Location:
@@ -562,7 +562,7 @@ The Art Of Scripting HTTP Requests Using Curl
  (Take note that the --cookie-jar option described below is a better way to
  store cookies.)
 
- Curl has a full blown cookie parsing engine built-in that comes to use if you
+ Curl has a full blown cookie parsing engine built-in that comes in use if you
  want to reconnect to a server and use cookies that were stored from a
  previous connection (or hand-crafted manually to fool the server into
  believing you had a previous connection). To use previously stored cookies,
@@ -592,7 +592,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  10.1 HTTPS is HTTP secure
 
- There are a few ways to do secure HTTP transfers. The by far most common
+ There are a few ways to do secure HTTP transfers. By far the most common
  protocol for doing this is what is generally known as HTTPS, HTTP over
  SSL. SSL encrypts all the data that is sent and received over the network and
  thus makes it harder for attackers to spy on sensitive information.
@@ -680,7 +680,7 @@ The Art Of Scripting HTTP Requests Using Curl
 
  12.1 Some login tricks
 
- While not strictly just HTTP related, it still cause a lot of people problems
+ While not strictly just HTTP related, it still causes a lot of people problems
  so here's the executive run-down of how the vast majority of all login forms
  work and how to login to them using curl.
 
@@ -693,7 +693,7 @@ The Art Of Scripting HTTP Requests Using Curl
  make sure you got there through their login page) so you should make a habit
  of first getting the login-form page to capture the cookies set there.
 
- Some web-based login systems features various amounts of javascript, and
+ Some web-based login systems feature various amounts of javascript, and
  sometimes they use such code to set or modify cookie contents. Possibly they
  do that to prevent programmed logins, like this manual describes how to...
  Anyway, if reading the code isn't enough to let you repeat the behavior
@@ -755,4 +755,4 @@ The Art Of Scripting HTTP Requests Using Curl
 
  14.2 Sites
 
- https://curl.haxx.se is the home of the cURL project
+ https://curl.haxx.se is the home of the curl project

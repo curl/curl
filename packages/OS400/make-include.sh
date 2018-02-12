@@ -8,15 +8,6 @@ SCRIPTDIR=`dirname "${0}"`
 cd "${TOPDIR}/include"
 
 
-#       Produce the curlbuild.h header file if not yet in distribution (CVS).
-
-if action_needed curl/curlbuild.h
-then    if action_needed curl/curlbuild.h curl/curlbuild.h.dist
-        then    cp -p curl/curlbuild.h.dist curl/curlbuild.h
-        fi
-fi
-
-
 #       Create the OS/400 source program file for the header files.
 
 SRCPF="${LIBIFSNAME}/H.FILE"

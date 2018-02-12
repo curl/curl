@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,9 +33,9 @@
 int test(char *URL)
 {
   int stillRunning;
-  CURLM* multiHandle = NULL;
-  CURL* curl = NULL;
-  int res = 0;
+  CURLM *multiHandle = NULL;
+  CURL *curl = NULL;
+  CURLMcode res = CURLM_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -65,10 +65,10 @@ int test(char *URL)
   fprintf(stderr, "curl_multi_perform() succeeded\n");
 
   fprintf(stderr, "curl_multi_remove_handle()...\n");
-  res = (int) curl_multi_remove_handle(multiHandle, curl);
+  res = curl_multi_remove_handle(multiHandle, curl);
   if(res)
     fprintf(stderr, "curl_multi_remove_handle() failed, "
-            "with code %d\n", res);
+            "with code %d\n", (int)res);
   else
     fprintf(stderr, "curl_multi_remove_handle() succeeded\n");
 
@@ -80,5 +80,5 @@ test_cleanup:
   curl_multi_cleanup(multiHandle);
   curl_global_cleanup();
 
-  return res;
+  return (int)res;
 }

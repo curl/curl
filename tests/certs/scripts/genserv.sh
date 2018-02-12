@@ -39,7 +39,7 @@ if [ ".$CAPREFIX" = . ] ; then
 	NOTOK=1
 else
     if [ ! -f $CAPREFIX-ca.cacert ] ; then
-	echo No CA certficate file $CAPREFIX-ca.caert
+	echo No CA certificate file $CAPREFIX-ca.caert
 	NOTOK=1
     fi
     if [ ! -f $CAPREFIX-ca.key ] ; then

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -477,12 +477,65 @@ multi-part because they're built by a chain of parts, each part being a single
 unit of data. Each part has its own name and contents. You can in fact create
 and post a multi-part formpost with the regular libcurl POST support described
 above, but that would require that you build a formpost yourself and provide
-to libcurl. To make that easier, libcurl provides \fIcurl_formadd(3)\fP. Using
-this function, you add parts to the form. When you're done adding parts, you
-post the whole form.
+to libcurl. To make that easier, libcurl provides a MIME API consisting in
+several functions: using those, you can create and fill a multi-part form.
+Function \fIcurl_mime_init(3)\fP creates a multi-part body; you can then
+append new parts to a multi-part body using \fIcurl_mime_addpart(3)\fP.
+There are three possible data sources for a part: memory using
+\fIcurl_mime_data(3)\fP, file using \fIcurl_mime_filedata(3)\fP and
+user-defined data read callback using \fIcurl_mime_data_cb(3)\fP.
+\fIcurl_mime_name(3)\fP sets a part's (i.e.: form field) name, while
+\fIcurl_mime_filename(3)\fP fills in the remote file name. With
+\fIcurl_mime_type(3)\fP, you can tell the MIME type of a part,
+\fIcurl_mime_headers(3)\fP allows defining the part's headers. When a
+multi-part body is no longer needed, you can destroy it using
+\fIcurl_mime_free(3)\fP.
 
 The following example sets two simple text parts with plain textual contents,
 and then a file with binary contents and uploads the whole thing.
+
+.nf
+ curl_mime *multipart = curl_mime_init(easyhandle);
+ curl_mimepart *part = curl_mime_addpart(mutipart);
+ curl_mime_name(part, "name");
+ curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
+ part = curl_mime_addpart(mutipart);
+ curl_mime_name(part, "project");
+ curl_mime_data(part, "curl", CURL_ZERO_TERMINATED);
+ part = curl_mime_addpart(mutipart);
+ curl_mime_name(part, "logotype-image");
+ curl_mime_filedata(part, "curl.png");
+ 
+ /* Set the form info */
+ curl_easy_setopt(easyhandle, CURLOPT_MIMEPOST, multipart);
+
+ curl_easy_perform(easyhandle); /* post away! */
+
+ /* free the post data again */
+ curl_mime_free(multipart);
+.fi
+
+To post multiple files for a single form field, you must supply each file in
+a separate part, all with the same field name. Although function
+\fIcurl_mime_subparts(3)\fP implements nested muti-parts, this way of
+multiple files posting is deprecated by RFC 7578, chapter 4.3.
+
+To set the data source from an already opened FILE pointer, use:
+
+.nf
+ curl_mime_data_cb(part, filesize, (curl_read_callback) fread,
+                   (curl_seek_callback) fseek, NULL, filepointer);
+.fi
+
+A deprecated \fIcurl_formadd(3)\fP function is still supported in libcurl.
+It should however not be used anymore for new designs and programs using it
+ought to be converted to the MIME API. It is however described here as an
+aid to conversion.
+
+Using \fIcurl_formadd\fP, you add parts to the form. When you're done adding
+parts, you post the whole form.
+
+The MIME API example above is expressed as follows using this function:
 
 .nf
  struct curl_httppost *post=NULL;
@@ -541,6 +594,136 @@ request. You force an easyhandle to go back to GET by using the
 
 Just setting \fICURLOPT_POSTFIELDS(3)\fP to "" or NULL will *not* stop libcurl
 from doing a POST. It will just make it POST without any data to send!
+
+.SH "Converting from deprecated form API to MIME API"
+Four rules have to be respected in building the multi-part:
+.br
+- The easy handle must be created before building the multi-part.
+.br
+- The multi-part is always created by a call to curl_mime_init(easyhandle).
+.br
+- Each part is created by a call to curl_mime_addpart(multipart).
+.br
+- When complete, the multi-part must be bound to the easy handle using
+\fICURLOPT_MIMEPOST(3)\fP instead of \fICURLOPT_HTTPPOST(3)\fP.
+
+Here are some example of \fIcurl_formadd\fP calls to MIME API sequences:
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "id",
+              CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
+              CURLFORM_CONTENTHEADER, headers,
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "id");
+ curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
+ curl_mime_headers(part, headers, FALSE);
+.fi
+
+Setting the last \fIcurl_mime_headers\fP argument to TRUE would have caused
+the headers to be automatically released upon destroyed the multi-part, thus
+saving a clean-up call to \fIcurl_slist_free_all(3)\fP.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_PTRNAME, "logotype-image",
+              CURLFORM_FILECONTENT, "-",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "logotype-image");
+ curl_mime_data_cb(part, (curl_off_t) -1, fread, fseek, NULL, stdin);
+.fi
+
+\fIcurl_mime_name\fP always copies the field name. The special file name "-"
+is not supported by \fIcurl_mime_file\fP: to read an open file, use
+a callback source using fread(). The transfer will be chunked since the data
+size is unknown.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "datafile[]",
+              CURLFORM_FILE, "file1",
+              CURLFORM_FILE, "file2",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "datafile[]");
+ curl_mime_filedata(part, "file1");
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "datafile[]");
+ curl_mime_filedata(part, "file2");
+.fi
+
+The deprecated multipart/mixed implementation of multiple files field is
+translated to two distinct parts with the same name.
+
+.nf
+ curl_easy_setopt(easyhandle, CURLOPT_READFUNCTION, myreadfunc);
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "stream",
+              CURLFORM_STREAM, arg,
+              CURLFORM_CONTENTLEN, (curl_off_t) datasize,
+              CURLFORM_FILENAME, "archive.zip",
+              CURLFORM_CONTENTTYPE, "application/zip",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "stream");
+ curl_mime_data_cb(part, (curl_off_t) datasize,
+                   myreadfunc, NULL, NULL, arg);
+ curl_mime_filename(part, "archive.zip");
+ curl_mime_type(part, "application/zip");
+.fi
+
+\fICURLOPT_READFUNCTION\fP callback is not used: it is replace by directly
+setting the part source data from the callback read function.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "memfile",
+              CURLFORM_BUFFER, "memfile.bin",
+              CURLFORM_BUFFERPTR, databuffer,
+              CURLFORM_BUFFERLENGTH, (long) sizeof databuffer,
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "memfile");
+ curl_mime_data(part, databuffer, (curl_off_t) sizeof databuffer);
+ curl_mime_filename(part, "memfile.bin");
+.fi
+
+\fIcurl_mime_data\fP always copies the initial data: data buffer is thus
+free for immediate reuse.
+
+.nf
+ curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "message",
+              CURLFORM_FILECONTENT, "msg.txt",
+              CURLFORM_END);
+.fi
+becomes:
+.nf
+ part = curl_mime_addpart(multipart);
+ curl_mime_name(part, "message");
+ curl_mime_filedata(part, "msg.txt");
+ curl_mime_filename(part, NULL);
+.fi
+
+Use of \fIcurl_mime_filedata\fP sets the remote file name as a side effect: it
+is therefore necessary to clear it for \fICURLFORM_FILECONTENT\fP emulation.
 
 .SH "Showing Progress"
 
@@ -1005,6 +1188,81 @@ When doing the "PORT" approach, libcurl will attempt to use the EPRT and the
 LPRT before trying PORT, as they work with more protocols. You can disable
 this behavior by setting \fICURLOPT_FTP_USE_EPRT(3)\fP to zero.
 
+.SH "MIME API revisited for SMTP and IMAP"
+In addition to support HTTP multi-part form fields, the MIME API can be used
+to build structured e-mail messages and send them via SMTP or append such
+messages to IMAP directories.
+
+A structured e-mail message may contain several parts: some are displayed
+inline by the MUA, some are attachments. Parts can also be structured as
+multi-part, for example to include another e-mail message or to offer several
+text formats alternatives. This can be nested to any level.
+
+To build such a message, you prepare the nth-level multi-part and then include
+it as a source to the parent multi-part using function
+\fIcurl_mime_subparts(3)\fP. Once it has been
+bound to its parent multi-part, a nth-level multi-part belongs to it and
+should not be freed explicitly.
+
+E-mail messages data is not supposed to be non-ascii and line length is
+limited: fortunately, some transfer encodings are defined by the standards
+to support the transmission of such incompatible data. Function
+\fIcurl_mime_encoder(3)\fP tells a part that its source data must be encoded
+before being sent. It also generates the corresponding header for that part.
+If the part data you want to send is already encoded in such a scheme,
+do not use this function (this would over-encode it), but explicitly set the
+corresponding part header.
+
+Upon sending such a message, libcurl prepends it with the header list
+set with \fICURLOPT_HTTPHEADER(3)\fP, as 0th-level mime part headers.
+
+Here is an example building an e-mail message with an inline plain/html text
+alternative and a file attachment encoded in base64:
+
+.nf
+ curl_mime *message = curl_mime_init(easyhandle);
+
+ /* The inline part is an alternative proposing the html and the text
+    versions of the e-mail. */
+ curl_mime *alt = curl_mime_init(easyhandle);
+
+ /* HTML message. */
+ curl_mimepart *part = curl_mime_addpart(alt);
+ curl_mime_data(part, "<html><body><p>This is HTML</p></body></html>",
+                      CURL_ZERO_TERMINATED);
+ curl_mime_type(part, "text/html");
+
+ /* Text message. */
+ part = curl_mime_addpart(alt);
+ curl_mime_data(part, "This is plain text message",
+                      CURL_ZERO_TERMINATED);
+
+ /* Create the inline part. */
+ part = curl_mime_addpart(message);
+ curl_mime_subparts(part, alt);
+ curl_mime_type(part, "multipart/alternative");
+ struct curl_slist *headers = curl_slist_append(NULL,
+                   "Content-Disposition: inline");
+ curl_mime_headers(part, headers, TRUE);
+
+ /* Add the attachment. */
+ part = curl_mime_addpart(message);
+ curl_mime_filedata(part, "manual.pdf");
+ curl_mime_encoder(part, "base64");
+
+ /* Build the mail headers. */
+ headers = curl_slist_append(NULL, "From: me@example.com");
+ headers = curl_slist_append(headers, "To: you@example.com");
+
+ /* Set these into the easy handle. */
+ curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
+ curl_easy_setopt(easyhandle, CURLOPT_MIMEPOST, mime);
+.fi
+
+It should be noted that appending a message to an IMAP directory requires
+the message size to be known prior upload. It is therefore not possible to
+include parts with unknown data size in this context.
+
 .SH "Headers Equal Fun"
 
 Some protocols provide "headers", meta-data separated from the normal
@@ -1147,7 +1405,7 @@ behind a firewall.  Apps can mitigate against this by using the
 .IP "IPv6 Addresses"
 libcurl will normally handle IPv6 addresses transparently and just as easily
 as IPv4 addresses. That means that a sanitizing function that filters out
-addressses like 127.0.0.1 isn't sufficient--the equivalent IPv6 addresses ::1,
+addresses like 127.0.0.1 isn't sufficient--the equivalent IPv6 addresses ::1,
 ::, 0:00::0:1, ::127.0.0.1 and ::ffff:7f00:1 supplied somehow by an attacker
 would all bypass a naive filter and could allow access to undesired local
 resources.  IPv6 also has special address blocks like link-local and site-local

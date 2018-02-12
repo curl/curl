@@ -120,7 +120,7 @@ Alt-Svc is an extension with a corresponding frame (ALTSVC) in HTTP/2 that
 tells the client about an alternative "route" to the same content for the same
 origin server that you get the response from. A browser or long-living client
 can use that hint to create a new connection asynchronously.  For libcurl, we
-may introduce a way to bring such clues to the applicaton and/or let a
+may introduce a way to bring such clues to the application and/or let a
 subsequent request use the alternate route automatically.
 
 [Detailed in RFC 7838](https://tools.ietf.org/html/rfc7838)

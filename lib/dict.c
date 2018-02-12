@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,6 +85,7 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_DICT,                            /* defport */
   CURLPROTO_DICT,                       /* protocol */
   PROTOPT_NONE | PROTOPT_NOURLQUERY      /* flags */
@@ -92,12 +93,12 @@ const struct Curl_handler Curl_handler_dict = {
 
 static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
 {
-  char *newp;
+  char *newp = NULL;
   char *dictp;
   char *ptr;
   size_t len;
   char ch;
-  int olen=0;
+  int olen = 0;
 
   CURLcode result = Curl_urldecode(data, inputbuff, 0, &newp, &len, FALSE);
   if(!newp || result)
@@ -116,7 +117,7 @@ static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
       }
       dictp[olen++] = ch;
     }
-    dictp[olen]=0;
+    dictp[olen] = 0;
   }
   free(newp);
   return dictp;
@@ -131,8 +132,8 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   char *strategy = NULL;
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
-  CURLcode result=CURLE_OK;
-  struct Curl_easy *data=conn->data;
+  CURLcode result = CURLE_OK;
+  struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = data->state.path;
@@ -167,7 +168,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
 
     if((word == NULL) || (*word == (char)0)) {
       infof(data, "lookup word is missing\n");
-      word=(char *)"default";
+      word = (char *)"default";
     }
     if((database == NULL) || (*database == (char)0)) {
       database = (char *)"!";
@@ -221,7 +222,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
 
     if((word == NULL) || (*word == (char)0)) {
       infof(data, "lookup word is missing\n");
-      word=(char *)"default";
+      word = (char *)"default";
     }
     if((database == NULL) || (*database == (char)0)) {
       database = (char *)"!";

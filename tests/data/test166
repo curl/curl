@@ -46,7 +46,6 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 223
-Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------b0b3d6d23991
 
 ------------------------------b0b3d6d23991

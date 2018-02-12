@@ -83,14 +83,14 @@ It is annoying when you get a huge patch from someone that is said to fix 511
 odd problems, but discussions and opinions don't agree with 510 of them - or
 509 of them were already fixed in a different way. Then the person merging
 this change needs to extract the single interesting patch from somewhere
-within the huge pile of source, and that gives a lot of extra work.
+within the huge pile of source, and that creates a lot of extra work.
 
-Preferably, each fix that correct a problem should be in its own patch/commit
+Preferably, each fix that corrects a problem should be in its own patch/commit
 with its own description/commit message stating exactly what they correct so
 that all changes can be selectively applied by the maintainer or other
 interested parties.
 
-Also, separate changes enable bisecting much better when we track problems
+Also, separate changes enable bisecting much better for tracking problems
 and regression in the future.
 
 ### Patch Against Recent Sources
@@ -103,9 +103,9 @@ release archive is quite OK as well!
 ### Documentation
 
 Writing docs is dead boring and one of the big problems with many open source
-projects. Someone's gotta do it. It makes it a lot easier if you submit a
-small description of your fix or your new features with every contribution so
-that it can be swiftly added to the package documentation.
+projects. But someone's gotta do it! It makes things a lot easier if you
+submit a small description of your fix or your new features with every
+contribution so that it can be swiftly added to the package documentation.
 
 The documentation is always made in man pages (nroff formatted) or plain
 ASCII files. All HTML files on the web site and in the release archives are
@@ -135,8 +135,8 @@ list](https://curl.haxx.se/mail/list.cgi?list=curl-library).
 
 Either way, your change will be reviewed and discussed there and you will be
 expected to correct flaws pointed out and update accordingly, or the change
-risk stalling and eventually just get deleted without action. As a submitter
-of a change, you are the owner of that change until it has been merged.
+risks stalling and eventually just getting deleted without action. As a
+submitter of a change, you are the owner of that change until it has been merged.
 
 Respond on the list or on github about the change and answer questions and/or
 fix nits/flaws. This is very important. We will take lack of replies as a
@@ -149,20 +149,39 @@ With github it is easy to send a [pull
 request](https://github.com/curl/curl/pulls) to the curl project to have
 changes merged.
 
-We prefer pull requests to mailed patches, as it makes it a proper git commit
-that is easy to merge and they are easy to track and not that easy to loose
-in a flood of many emails, like they sometimes do on the mailing lists.
+We strongly prefer pull requests to mailed patches, as it makes it a proper
+git commit that is easy to merge and they are easy to track and not that easy
+to loose in the flood of many emails, like they sometimes do on the mailing
+lists.
+
+Every pull request submitted will automatically be tested in several different
+ways. Every pull request is verfied that:
+
+ - ... it still builds, warning-free, on Linux and macOS, with both
+   clang and gcc
+ - ... it still builds fine on Windows with several MSVC versions
+ - ... it still builds with cmake on Linux, with gcc and clang
+ - ... it follows rudimentary code style rules
+ - ... the test suite still runs 100% fine
+ - ... the release tarball (the "dist") still works
+ - ... it builds fine in-tree as well as out-of-tree
+ - ... code coverage doesn't shrink drastically
+
+If the pull-request fails one of these tests, it will show up as a red X and
+you are expected to fix the problem. If you don't understand whan the issue is
+or have other problems to fix the complaint, just ask and other project
+members will likely be able to help out.
 
 When you adjust your pull requests after review, consider squashing the
 commits so that we can review the full updated version more easily.
 
 ### Making quality patches
 
-Make the patch against as recent sources as possible.
+Make the patch against as recent source versions as possible.
 
 If you've followed the tips in this document and your patch still hasn't been
-incorporated or responded to after some weeks, consider resubmitting it to
-the list or better yet: change it to a pull request.
+incorporated or responded to after some weeks, consider resubmitting it to the
+list or better yet: change it to a pull request.
 
 ### Write good commit messages
 
@@ -175,14 +194,15 @@ A short guide to how to write commit messages in the curl project.
     possible as to why this change is made, and possibly what things
     it fixes and everything else that is related]
            -- empty line --
+    [Closes/Fixes #1234 - if this closes or fixes a github issue]
     [Bug: URL to source of the report or more related discussion]
     [Reported-by: John Doe - credit the reporter]
     [whatever-else-by: credit all helpers, finders, doers]
     ---- stop ----
 
-Don't forget to use commit --author="" if you commit someone else's work,
-and make sure that you have your own user and email setup correctly in git
-before you commit
+Don't forget to use commit --author="" if you commit someone else's work, and
+make sure that you have your own user and email setup correctly in git before
+you commit
 
 ### Write Access to git Repository
 
@@ -204,8 +224,8 @@ local repository:
 
     git commit [file]
 
-As usual, group your commits so that you commit all changes that at once that
-constitutes a logical change.
+As usual, group your commits so that you commit all changes at once that
+constitute a logical change.
 
 Once you have done all your commits and you're happy with what you see, you
 can make patches out of your changes that are suitable for mailing:
@@ -243,5 +263,5 @@ For unix-like operating systems:
 
 For Windows:
 
- - [http://gnuwin32.sourceforge.net/packages/patch.htm](http://gnuwin32.sourceforge.net/packages/patch.htm)
- - [http://gnuwin32.sourceforge.net/packages/diffutils.htm](http://gnuwin32.sourceforge.net/packages/diffutils.htm)
+ - [https://gnuwin32.sourceforge.io/packages/patch.htm](https://gnuwin32.sourceforge.io/packages/patch.htm)
+ - [https://gnuwin32.sourceforge.io/packages/diffutils.htm](https://gnuwin32.sourceforge.io/packages/diffutils.htm)

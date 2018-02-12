@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,8 +20,7 @@
  *
  ***************************************************************************/
 /* <DESC>
-/* Example using an in memory PEM user certificate and RSA key to retrieve an
- * https page.
+ * Use an in-memory user certificate and RSA key and retrieve an https page.
  * </DESC>
  */
 /* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c.
@@ -201,7 +200,7 @@ int main(void)
   /* first try: retrieve page without user certificate and key -> will fail
    */
   rv = curl_easy_perform(ch);
-  if(rv==CURLE_OK) {
+  if(rv == CURLE_OK) {
     printf("*** transfer succeeded ***\n");
   }
   else {
@@ -214,7 +213,7 @@ int main(void)
    */
   rv = curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   rv = curl_easy_perform(ch);
-  if(rv==CURLE_OK) {
+  if(rv == CURLE_OK) {
     printf("*** transfer succeeded ***\n");
   }
   else {

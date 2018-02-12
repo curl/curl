@@ -19,7 +19,7 @@
  */
 
 /* This file should be incremented for each ECO that is kit */
-/* for a specific cURL x.y-z release. */
+/* for a specific curl x.y-z release. */
 /* When any part of x.y-z is incremented, the ECO should be set back to 0 */
 
 #ifndef _VMS_ECO_LEVEL_H

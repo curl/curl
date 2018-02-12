@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -55,7 +55,14 @@ my %warnings = (
     'COPYRIGHT'        => 'file missing a copyright statement',
     'BADCOMMAND'       => 'bad !checksrc! instruction',
     'UNUSEDIGNORE'     => 'a warning ignore was not used',
-    'OPENCOMMENT'      => 'file ended with a /* comment still "open"'
+    'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
+    'ASTERISKSPACE'    => 'pointer declared with space after asterisk',
+    'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk',
+    'ASSIGNWITHINCONDITION'  => 'assignment within conditional expression',
+    'EQUALSNOSPACE'    => 'equals sign without following space',
+    'NOSPACEEQUALS'    => 'equals sign without preceeding space',
+    'SEMINOSPACE'      => 'semicolon without following space',
+    'MULTISPACE'       => 'multiple spaces used when not suitable',
     );
 
 sub readwhitelist {
@@ -241,6 +248,12 @@ sub checksrc {
     }
 }
 
+sub nostrings {
+    my ($str) = @_;
+    $str =~ s/\".*\"//g;
+    return $str;
+}
+
 sub scanfile {
     my ($file) = @_;
 
@@ -327,10 +340,23 @@ sub scanfile {
                       $line, length($1), $file, $l, "\/\/ comment");
         }
 
-        # check spaces after for/if/while
-        if($l =~ /^(.*)(for|if|while) \(/) {
+        my $nostr = nostrings($l);
+        # check spaces after for/if/while/function call
+        if($nostr =~ /^(.*)(for|if|while| ([a-zA-Z0-9_]+)) \((.)/) {
             if($1 =~ / *\#/) {
                 # this is a #if, treat it differently
+            }
+            elsif($3 eq "return") {
+                # return must have a space
+            }
+            elsif($3 eq "case") {
+                # case must have a space
+            }
+            elsif($4 eq "*") {
+                # (* beginning makes the space OK!
+            }
+            elsif($1 =~ / *typedef/) {
+                # typedefs can use space-paren
             }
             else {
                 checkwarn("SPACEBEFOREPAREN", $line, length($1)+length($2), $file, $l,
@@ -338,6 +364,14 @@ sub scanfile {
             }
         }
 
+        if($nostr =~ /^((.*)(if) *\()(.*)\)/) {
+            my $pos = length($1);
+            if($4 =~ / = /) {
+                checkwarn("ASSIGNWITHINCONDITION",
+                          $line, $pos+1, $file, $l,
+                          "assignment within conditional expression");
+            }
+        }
         # check spaces after open parentheses
         if($l =~ /^(.*[a-z])\( /i) {
             checkwarn("SPACEAFTERPAREN",
@@ -469,6 +503,77 @@ sub scanfile {
 
                 }
             }
+        }
+
+        # check for 'char * name'
+        if(($l =~ /(^.*(char|int|long|void|curl_slist|CURL|CURLM|CURLMsg|curl_httppost) *(\*+)) (\w+)/) && ($4 ne "const")) {
+            checkwarn("ASTERISKNOSPACE",
+                      $line, length($1), $file, $ol,
+                      "no space after declarative asterisk");
+        }
+        # check for 'char*'
+        if(($l =~ /(^.*(char|int|long|void|curl_slist|CURL|CURLM|CURLMsg|curl_httppost|sockaddr_in|FILE)\*)/)) {
+            checkwarn("ASTERISKNOSPACE",
+                      $line, length($1)-1, $file, $ol,
+                      "no space before asterisk");
+        }
+
+        # check for 'void func() {', but avoid false positives by requiring
+        # both an open and closed parentheses before the open brace
+        if($l =~ /^((\w).*)\{\z/) {
+            my $k = $1;
+            $k =~ s/const *//;
+            $k =~ s/static *//;
+            if($k =~ /\(.*\)/) {
+                checkwarn("BRACEPOS",
+                          $line, length($l)-1, $file, $ol,
+                          "wrongly placed open brace");
+            }
+        }
+
+        # check for equals sign without spaces next to it
+        if($nostr =~ /(.*)\=[a-z0-9]/i) {
+            checkwarn("EQUALSNOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after equals sign");
+        }
+        # check for equals sign without spaces before it
+        elsif($nostr =~ /(.*)[a-z0-9]\=/i) {
+            checkwarn("NOSPACEEQUALS",
+                      $line, length($1)+1, $file, $ol,
+                      "no space before equals sign");
+        }
+
+        # check for plus signs without spaces next to it
+        if($nostr =~ /(.*)[^+]\+[a-z0-9]/i) {
+            checkwarn("PLUSNOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after plus sign");
+        }
+        # check for plus sign without spaces before it
+        elsif($nostr =~ /(.*)[a-z0-9]\+[^+]/i) {
+            checkwarn("NOSPACEPLUS",
+                      $line, length($1)+1, $file, $ol,
+                      "no space before plus sign");
+        }
+
+        # check for semicolons without space next to it
+        if($nostr =~ /(.*)\;[a-z0-9]/i) {
+            checkwarn("SEMINOSPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "no space after semilcolon");
+        }
+
+        # check for more than one consecutive space before open brace or
+        # question mark. Skip lines containing strings since they make it hard
+        # due to artificially getting multiple spaces
+        if(($l eq $nostr) &&
+           $nostr =~ /^(.*(\S)) + [{?]/i) {
+            checkwarn("MULTISPACE",
+                      $line, length($1)+1, $file, $ol,
+                      "multiple space");
+            print STDERR "L: $l\n";
+            print STDERR "nostr: $nostr\n";
         }
 
         $line++;

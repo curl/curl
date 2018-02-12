@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,7 +94,7 @@
 
 
 #define MAX_STRING              256
-#define MAX_STRING1             MAX_STRING+1
+#define MAX_STRING1             MAX_STRING + 1
 
 #define SYNCTIME_UA "synctime/1.0"
 
@@ -152,15 +152,15 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                          TmpStr1 & 2? */
         AutoSyncTime = 0;
       else {
-        RetVal = sscanf ((char *)(ptr), "Date: %s %hu %s %hu %hu:%hu:%hu",
-                         TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
-                         &SYSTime.wHour, &SYSTime.wMinute, &SYSTime.wSecond);
+        RetVal = sscanf((char *)(ptr), "Date: %s %hu %s %hu %hu:%hu:%hu",
+                        TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
+                        &SYSTime.wHour, &SYSTime.wMinute, &SYSTime.wSecond);
 
         if(RetVal == 7) {
           SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
-          for(i=0; i<12; i++) {
+          for(i = 0; i<12; i++) {
             if(strcmp(MthStr[i], TmpStr2) == 0) {
-              SYSTime.wMonth = i+1;
+              SYSTime.wMonth = i + 1;
               break;
             }
           }
@@ -243,7 +243,7 @@ int conf_init(conf_t *conf)
   int i;
 
   *conf->http_proxy       = 0;
-  for(i=0; i<MAX_STRING1; i++)
+  for(i = 0; i<MAX_STRING1; i++)
     conf->proxy_user[i]     = 0;    /* Clean up password from memory */
   *conf->timeserver       = 0;
   return 1;

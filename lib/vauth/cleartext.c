@@ -66,16 +66,27 @@ CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
   char *plainauth;
   size_t ulen;
   size_t plen;
+  size_t plainlen;
 
+  *outlen = 0;
+  *outptr = NULL;
   ulen = strlen(userp);
   plen = strlen(passwdp);
 
-  plainauth = malloc(2 * ulen + plen + 2);
-  if(!plainauth) {
-    *outlen = 0;
-    *outptr = NULL;
+  /* Compute binary message length, checking for overflows. */
+  plainlen = 2 * ulen;
+  if(plainlen < ulen)
     return CURLE_OUT_OF_MEMORY;
-  }
+  plainlen += plen;
+  if(plainlen < plen)
+    return CURLE_OUT_OF_MEMORY;
+  plainlen += 2;
+  if(plainlen < 2)
+    return CURLE_OUT_OF_MEMORY;
+
+  plainauth = malloc(plainlen);
+  if(!plainauth)
+    return CURLE_OUT_OF_MEMORY;
 
   /* Calculate the reply */
   memcpy(plainauth, userp, ulen);
@@ -85,8 +96,7 @@ CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
   memcpy(plainauth + 2 * ulen + 2, passwdp, plen);
 
   /* Base64 encode the reply */
-  result = Curl_base64_encode(data, plainauth, 2 * ulen + plen + 2, outptr,
-                              outlen);
+  result = Curl_base64_encode(data, plainauth, plainlen, outptr, outlen);
   free(plainauth);
 
   return result;

@@ -1,9 +1,16 @@
+<!-- Only file bugs here! Ask questions on the mailing list https://curl.haxx.se/mail/
+     Do not file security vulnerabilities here, e-mail curl-security at haxx.se
+
+     There are collections of known issues to be aware of:
+     https://curl.haxx.se/docs/knownbugs.html
+     https://curl.haxx.se/docs/todo.html       -->
+
 ### I did this
 
 ### I expected the following
 
 ### curl/libcurl version
 
-[curl -V output perhaps?]
+[curl -V output]
 
 ### operating system

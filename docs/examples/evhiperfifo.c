@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -86,7 +86,7 @@ typedef struct _GlobalInfo
   struct ev_timer timer_event;
   CURLM *multi;
   int still_running;
-  FILE* input;
+  FILE *input;
 } GlobalInfo;
 
 
@@ -124,7 +124,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
     ev_timer_init(&g->timer_event, timer_cb, t, 0.);
     ev_timer_start(g->loop, &g->timer_event);
   }
-  else
+  else if(timeout_ms == 0)
     timer_cb(g->loop, &g->timer_event, 0);
   return 0;
 }
@@ -134,30 +134,30 @@ static void mcode_or_die(const char *where, CURLMcode code)
 {
   if(CURLM_OK != code) {
     const char *s;
-    switch (code) {
+    switch(code) {
     case CURLM_BAD_HANDLE:
-      s="CURLM_BAD_HANDLE";
+      s = "CURLM_BAD_HANDLE";
       break;
     case CURLM_BAD_EASY_HANDLE:
-      s="CURLM_BAD_EASY_HANDLE";
+      s = "CURLM_BAD_EASY_HANDLE";
       break;
     case CURLM_OUT_OF_MEMORY:
-      s="CURLM_OUT_OF_MEMORY";
+      s = "CURLM_OUT_OF_MEMORY";
       break;
     case CURLM_INTERNAL_ERROR:
-      s="CURLM_INTERNAL_ERROR";
+      s = "CURLM_INTERNAL_ERROR";
       break;
     case CURLM_UNKNOWN_OPTION:
-      s="CURLM_UNKNOWN_OPTION";
+      s = "CURLM_UNKNOWN_OPTION";
       break;
     case CURLM_LAST:
-      s="CURLM_LAST";
+      s = "CURLM_LAST";
       break;
     default:
-      s="CURLM_unknown";
+      s = "CURLM_unknown";
       break;
     case CURLM_BAD_SOCKET:
-      s="CURLM_BAD_SOCKET";
+      s = "CURLM_BAD_SOCKET";
       fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
       /* ignore this error */
       return;
@@ -243,7 +243,8 @@ static void remsock(SockInfo *f, GlobalInfo *g)
 
 
 /* Assign information to a SockInfo structure */
-static void setsock(SockInfo*f, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
+static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
+                    GlobalInfo *g)
 {
   printf("%s  \n", __PRETTY_FUNCTION__);
 
@@ -256,7 +257,7 @@ static void setsock(SockInfo*f, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
     ev_io_stop(g->loop, &f->ev);
   ev_io_init(&f->ev, event_cb, f->sockfd, kind);
   f->ev.data = g;
-  f->evset=1;
+  f->evset = 1;
   ev_io_start(g->loop, &f->ev);
 }
 
@@ -316,8 +317,8 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 
 
 /* CURLOPT_PROGRESSFUNCTION */
-static int prog_cb (void *p, double dltotal, double dlnow, double ult,
-                    double uln)
+static int prog_cb(void *p, double dltotal, double dlnow, double ult,
+                   double uln)
 {
   ConnInfo *conn = (ConnInfo *)p;
   (void)ult;
@@ -370,13 +371,13 @@ static void new_conn(char *url, GlobalInfo *g)
 static void fifo_cb(EV_P_ struct ev_io *w, int revents)
 {
   char s[1024];
-  long int rv=0;
-  int n=0;
+  long int rv = 0;
+  int n = 0;
   GlobalInfo *g = (GlobalInfo *)w->data;
 
   do {
     s[0]='\0';
-    rv=fscanf(g->input, "%1023s%n", s, &n);
+    rv = fscanf(g->input, "%1023s%n", s, &n);
     s[n]='\0';
     if(n && s[0]) {
       new_conn(s, g);  /* if we read a URL, go get it! */
@@ -387,7 +388,7 @@ static void fifo_cb(EV_P_ struct ev_io *w, int revents)
 }
 
 /* Create a named pipe and tell libevent to monitor it */
-static int init_fifo (GlobalInfo *g)
+static int init_fifo(GlobalInfo *g)
 {
   struct stat st;
   static const char *fifo = "hiper.fifo";
@@ -398,18 +399,18 @@ static int init_fifo (GlobalInfo *g)
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
-      exit (1);
+      exit(1);
     }
   }
   unlink(fifo);
   if(mkfifo (fifo, 0600) == -1) {
     perror("mkfifo");
-    exit (1);
+    exit(1);
   }
   sockfd = open(fifo, O_RDWR | O_NONBLOCK, 0);
   if(sockfd == -1) {
     perror("open");
-    exit (1);
+    exit(1);
   }
   g->input = fdopen(sockfd, "r");
 

@@ -57,11 +57,14 @@ http://%HOSTIP:%HTTPPORT/220 --compressed
 <strip>
 ^User-Agent:.*
 </strip>
+<strippart>
+s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+</strippart>
 <protocol>
 GET /220 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Accept-Encoding: deflate, gzip
+Accept-Encoding: xxx
 
 </protocol>
 </verify>

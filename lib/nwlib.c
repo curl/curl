@@ -184,7 +184,8 @@ int GetOrSetUpData(int id, libdata_t **appData,
      */
     NXLock(gLibLock);
 
-    if(!(app_data = (libdata_t *) get_app_data(id))) {
+    app_data = (libdata_t *) get_app_data(id);
+    if(!app_data) {
       app_data = malloc(sizeof(libdata_t));
 
       if(app_data) {
@@ -259,7 +260,8 @@ int GetOrSetUpData(int id, libdata_t **appData,
           err         = ENOMEM;
         }
 
-        if((err = NXKeySetValue(key, thread_data))) {
+        err = NXKeySetValue(key, thread_data);
+        if(err) {
           free(thread_data->twentybytes);
           free(thread_data);
           thread_data = (libthreaddata_t *) NULL;
@@ -303,14 +305,14 @@ void DisposeThreadData(void *data)
 /* For native CLib-based NLM seems we can do a bit more simple. */
 #include <nwthread.h>
 
-int main (void)
+int main(void)
 {
   /* initialize any globals here... */
 
   /* do this if any global initializing was done
   SynchronizeStart();
   */
-  ExitThread (TSR_THREAD, 0);
+  ExitThread(TSR_THREAD, 0);
   return 0;
 }
 

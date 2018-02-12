@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,9 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #include <assert.h>
 
 #include "testutil.h"
@@ -33,30 +31,21 @@
 #define TEST_HANG_TIMEOUT 5 * 1000
 #define MAX_EASY_HANDLES 3
 
+static int counter[MAX_EASY_HANDLES];
 static CURL *easy[MAX_EASY_HANDLES];
 static curl_socket_t sockets[MAX_EASY_HANDLES];
 static int res = 0;
 
-static size_t callback(char* ptr, size_t size, size_t nmemb, void* data)
+static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
   ssize_t idx = ((CURL **) data) - easy;
   curl_socket_t sock;
   long longdata;
   CURLcode code;
+  const size_t failure = (size && nmemb) ? 0 : 1;
+  (void)ptr;
 
-  const size_t failure = (size * nmemb) ? 0 : 1;
-
-  char *output = malloc(size * nmemb + 1);
-  if(!output) {
-    fprintf(stderr, "output, malloc() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
-    return failure;
-  }
-
-  memcpy(output, ptr, size * nmemb);
-  output[size * nmemb] = '\0';
-  fprintf(stdout, "%s", output);
-  free(output);
+  counter[idx] += (int)(size * nmemb);
 
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
   code = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &longdata);
@@ -100,11 +89,11 @@ int test(char *url)
 {
   CURLM *multi = NULL;
   int running;
-  int i, j;
+  int i;
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
   size_t urllen = strlen(url) + 4 + 1;
-  char* full_url = malloc(urllen);
+  char *full_url = malloc(urllen);
 
   start_test_timing();
 
@@ -182,50 +171,6 @@ int test(char *url)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    /* Any socket which is new in fdread is associated with the new handle */
-    for(i = 0; i <= maxfd; ++i) {
-      bool socket_exists = FALSE;
-      curl_socket_t curfd = (curl_socket_t)i;
-
-      if(!FD_ISSET(curfd, &fdread)) {
-        continue;
-      }
-
-      /* Check if this socket was already detected for an earlier handle (or
-         for this handle, num_handles-1, in the callback */
-      for(j = 0; j < num_handles; ++j) {
-        if(sockets[j] == curfd) {
-          socket_exists = TRUE;
-          break;
-        }
-      }
-      if(socket_exists) {
-        continue;
-      }
-
-      if(found_new_socket || state != NeedSocketForNewHandle) {
-        fprintf(stderr, "Unexpected new socket\n");
-        res = TEST_ERR_MAJOR_BAD;
-        goto test_cleanup;
-      }
-
-      /* Now we know the socket is for the most recent handle, num_handles-1 */
-      if(sockets[num_handles-1] != CURL_SOCKET_BAD) {
-        /* A socket for this handle was already detected in the callback; if it
-           matched socket_exists should be true and we would never get here */
-        assert(curfd != sockets[num_handles-1]);
-        fprintf(stderr, "Handle %d wrote to socket %d then detected on %d\n",
-                num_handles-1, (int)sockets[num_handles-1], (int)curfd);
-        res = TEST_ERR_MAJOR_BAD;
-        goto test_cleanup;
-      }
-      else {
-        sockets[num_handles-1] = curfd;
-        found_new_socket = TRUE;
-        /* continue to make sure there's only one new handle */
-      }
-    }
-
     if(state == NeedSocketForNewHandle) {
       if(maxfd != -1 && !found_new_socket) {
         fprintf(stderr, "Warning: socket did not open immediately for new "
@@ -249,7 +194,7 @@ int test(char *url)
       interval.tv_usec = (itimeout%1000)*1000;
     }
     else {
-      interval.tv_sec = TEST_HANG_TIMEOUT/1000+1;
+      interval.tv_sec = TEST_HANG_TIMEOUT/1000 + 1;
       interval.tv_usec = 0;
 
       /* if there's no timeout and we get here on the last handle, we may
@@ -260,7 +205,7 @@ int test(char *url)
       }
     }
 
-    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &interval);
+    select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &interval);
 
     abort_on_test_timeout();
   }
@@ -270,6 +215,7 @@ test_cleanup:
   /* proper cleanup sequence - type PB */
 
   for(i = 0; i < MAX_EASY_HANDLES; i++) {
+    printf("Data connection %d: %d\n", i, counter[i]);
     curl_multi_remove_handle(multi, easy[i]);
     curl_easy_cleanup(easy[i]);
   }

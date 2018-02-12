@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+CURLOPT_CONNECT_TO
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Connect to specific host: use the first "connect-to" string that matches
+ </name>
+
+ <command>
+http://%HOSTIP:%HTTPPORT/2054 --connect-to foo::bar: --connect-to :123::456 --next http://www.example.com:%HTTPPORT/2054 --connect-to www.example.com::%HOSTIP: --connect-to www.example.com::foo: --next http://%HOSTIP:8083/2054 --connect-to :8083::%HTTPPORT --connect-to :8083::123 --next http://www.example.com:8084/2054 --connect-to www.example.com:8084:%HOSTIP:%HTTPPORT --connect-to www.example.com:8084:foo:123
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2054 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /2054 HTTP/1.1
+Host: www.example.com:%HTTPPORT
+Accept: */*
+
+GET /2054 HTTP/1.1
+Host: %HOSTIP:8083
+Accept: */*
+
+GET /2054 HTTP/1.1
+Host: www.example.com:8084
+Accept: */*
+
+</protocol>
+
+</verify>
+</testcase>

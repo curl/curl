@@ -32,7 +32,7 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
 {
   CURLcode res;
   size_t len = strlen(url) + 4 + 1;
-  char* full_url = malloc(len);
+  char *full_url = malloc(len);
   if(!full_url) {
     fprintf(stderr, "Not enough memory for full url\n");
     return CURLE_OUT_OF_MEMORY;
@@ -101,7 +101,8 @@ int test(char *url)
 
   /* Send wrong password, then right password */
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -110,18 +111,16 @@ int test(char *url)
   res = send_wrong_password(curl, url, 100, main_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   res = send_right_password(curl, url, 200, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   curl_easy_cleanup(curl);
 
   /* Send wrong password twice, then right password */
-
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -130,17 +129,14 @@ int test(char *url)
   res = send_wrong_password(curl, url, 300, main_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   res = send_wrong_password(curl, url, 400, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
   res = send_right_password(curl, url, 500, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
-  curl_easy_reset(curl);
 
 test_cleanup:
 

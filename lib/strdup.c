@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,11 +44,11 @@ char *curlx_strdup(const char *str)
   if(len >= ((size_t)-1) / sizeof(char))
     return (char *)NULL;
 
-  newstr = malloc((len+1)*sizeof(char));
+  newstr = malloc((len + 1)*sizeof(char));
   if(!newstr)
     return (char *)NULL;
 
-  memcpy(newstr, str, (len+1)*sizeof(char));
+  memcpy(newstr, str, (len + 1)*sizeof(char));
 
   return newstr;
 
@@ -74,4 +74,27 @@ void *Curl_memdup(const void *src, size_t length)
   memcpy(buffer, src, length);
 
   return buffer;
+}
+
+/***************************************************************************
+ *
+ * Curl_saferealloc(ptr, size)
+ *
+ * Does a normal realloc(), but will free the data pointer if the realloc
+ * fails. If 'size' is zero, it will free the data and return a failure.
+ *
+ * This convenience function is provided and used to help us avoid a common
+ * mistake pattern when we could pass in a zero, catch the NULL return and end
+ * up free'ing the memory twice.
+ *
+ * Returns the new pointer or NULL on failure.
+ *
+ ***************************************************************************/
+void *Curl_saferealloc(void *ptr, size_t size)
+{
+  void *datap = realloc(ptr, size);
+  if(size && !datap)
+    /* only free 'ptr' if size was non-zero */
+    free(ptr);
+  return datap;
 }

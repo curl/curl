@@ -1,7 +1,7 @@
 #
 # Common defines for curl (djgpp/Watt-32)
 #
-# Assumes you've unpacked cURL with long-file names
+# Assumes you've unpacked curl with long-file names
 # I.e use "set LFN=y" before untaring on Win9x/XP.
 # Requires sed, yacc, rm and the usual stuff.
 #

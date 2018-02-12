@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,7 +50,7 @@
 #include "memdebug.h"
 
 /* Supported mechanisms */
-const struct {
+static const struct {
   const char   *name;  /* Name */
   size_t        len;   /* Name length */
   unsigned int  bit;   /* Flag bit */
@@ -262,10 +262,13 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   size_t len = 0;
   saslstate state1 = SASL_STOP;
   saslstate state2 = SASL_FINAL;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 #if defined(USE_KERBEROS5)
-  const char* service = data->set.str[STRING_SERVICE_NAME] ?
-                        data->set.str[STRING_SERVICE_NAME] :
-                        sasl->params->service;
+  const char *service = data->set.str[STRING_SERVICE_NAME] ?
+    data->set.str[STRING_SERVICE_NAME] :
+    sasl->params->service;
 #endif
 
   sasl->force_ir = force_ir;    /* Latch for future use */
@@ -328,7 +331,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_NTLM;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
+        result = Curl_auth_create_ntlm_type1_message(data,
+                                                     conn->user, conn->passwd,
                                                      &conn->ntlm, &resp, &len);
       }
     else
@@ -341,8 +345,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                       conn->host.name,
-                                                       conn->port,
+                                                       hostname,
+                                                       port,
                                                        conn->oauth_bearer,
                                                        &resp, &len);
     }
@@ -408,8 +412,10 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   saslstate newstate = SASL_FINAL;
   char *resp = NULL;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
-  char *serverdata;
   char *chlg = NULL;
   size_t chlglen = 0;
 #endif
@@ -417,6 +423,10 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
                         sasl->params->service;
+#endif
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
+    defined(USE_NTLM)
+  char *serverdata;
 #endif
   size_t len = 0;
 
@@ -484,7 +494,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 #ifdef USE_NTLM
   case SASL_NTLM:
     /* Create the type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
+    result = Curl_auth_create_ntlm_type1_message(data,
+                                                 conn->user, conn->passwd,
                                                  &conn->ntlm, &resp, &len);
     newstate = SASL_NTLM_TYPE2MSG;
     break;
@@ -542,8 +553,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     /* Create the authorisation message */
     if(sasl->authused == SASL_MECH_OAUTHBEARER) {
       result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                     conn->host.name,
-                                                     conn->port,
+                                                     hostname,
+                                                     port,
                                                      conn->oauth_bearer,
                                                      &resp, &len);
 

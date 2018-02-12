@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -38,12 +38,23 @@ IETF draft draft-earhart-url-smtp-00.txt
 options, such as the preferred authentication mechanism via "AUTH=NTLM" or
 "AUTH=*", and should be used in conjunction with the \fICURLOPT_USERNAME(3)\fP
 option.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
 Only IMAP, POP3 and SMTP support login options.
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
+  curl_easy_setopt(curl, CURLOPT_LOGIN_OPTIONS, "AUTH=*");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.34.0
 .SH RETURN VALUE

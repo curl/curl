@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,17 +42,9 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef SIZEOF_LONG_DOUBLE
-#define SIZEOF_LONG_DOUBLE 0
-#endif
-
 /*
  * If SIZEOF_SIZE_T has not been defined, default to the size of long.
  */
-
-#ifndef SIZEOF_SIZE_T
-#  define SIZEOF_SIZE_T CURL_SIZEOF_LONG
-#endif
 
 #ifdef HAVE_LONGLONG
 #  define LONG_LONG_TYPE long long
@@ -92,7 +84,8 @@
 #  define mp_uintmax_t unsigned long
 #endif
 
-#define BUFFSIZE 256 /* buffer for long-to-str and float-to-str calcs */
+#define BUFFSIZE 326 /* buffer for long-to-str and float-to-str calcs, should
+                        fit negative DBL_MAX (317 letters) */
 #define MAX_PARAMETERS 128 /* lame static limit */
 
 #ifdef __AMIGA__
@@ -114,7 +107,7 @@ static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   } WHILE_FALSE
 
 /* Data type to read from the arglist */
-typedef enum  {
+typedef enum {
   FORMAT_UNKNOWN = 0,
   FORMAT_STRING,
   FORMAT_PTR,
@@ -184,7 +177,7 @@ struct asprintf {
 
 static long dprintf_DollarString(char *input, char **end)
 {
-  int number=0;
+  int number = 0;
   while(ISDIGIT(*input)) {
     number *= 10;
     number += *input-'0';
@@ -240,7 +233,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   long width;
   long precision;
   int flags;
-  long max_param=0;
+  long max_param = 0;
   long i;
 
   while(*fmt) {
@@ -303,7 +296,6 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           flags |= FLAGS_ALT;
           break;
         case '.':
-          flags |= FLAGS_PREC;
           if('*' == *fmt) {
             /* The precision is picked from a specified parameter */
 
@@ -330,7 +322,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           break;
 #if defined(MP_HAVE_INT_EXTENSIONS)
         case 'I':
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
@@ -352,14 +344,14 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         case 'z':
           /* the code below generates a warning if -Wunreachable-code is
              used */
-#if (SIZEOF_SIZE_T > CURL_SIZEOF_LONG)
+#if (SIZEOF_SIZE_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
 #endif
           break;
         case 'O':
-#if (CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
@@ -384,7 +376,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
           else
             width = param_num;
           if(width > max_param)
-            max_param=width;
+            max_param = width;
           break;
         default:
           break;
@@ -490,7 +482,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
   }
 
   /* Read the arg list parameters into our data list */
-  for(i=0; i<max_param; i++) {
+  for(i = 0; i<max_param; i++) {
     /* Width/precision arguments must be read before the main argument
        they are attached to */
     if(vto[i].flags & FLAGS_WIDTHPARAM) {
@@ -502,7 +494,7 @@ static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
         (mp_intmax_t)va_arg(arglist, int);
     }
 
-    switch (vto[i].type) {
+    switch(vto[i].type) {
     case FORMAT_STRING:
       vto[i].data.str = va_arg(arglist, char *);
       break;
@@ -577,7 +569,7 @@ static int dprintf_formatf(
   int done = 0;
 
   long param; /* current parameter to read */
-  long param_num=0; /* parameter counter */
+  long param_num = 0; /* parameter counter */
 
   va_stack_t vto[MAX_PARAMETERS];
   char *endpos[MAX_PARAMETERS];
@@ -614,7 +606,7 @@ static int dprintf_formatf(
     int is_neg;
 
     /* Base of a number to be written.  */
-    long base;
+    unsigned long base;
 
     /* Integral values to be written.  */
     mp_uintmax_t num;
@@ -647,7 +639,7 @@ static int dprintf_formatf(
 
     /* If this is a positional parameter, the position must follow immediately
        after the %, thus create a %<num>$ sequence */
-    param=dprintf_DollarString(f, &f);
+    param = dprintf_DollarString(f, &f);
 
     if(!param)
       param = param_num;
@@ -692,7 +684,7 @@ static int dprintf_formatf(
 
     is_alt = (p->flags & FLAGS_ALT) ? 1 : 0;
 
-    switch (p->type) {
+    switch(p->type) {
     case FORMAT_INT:
       num = p->data.num.as_unsigned;
       if(p->flags & FLAGS_CHAR) {
@@ -917,12 +909,25 @@ static int dprintf_formatf(
         *fptr = 0;
 
         if(width >= 0) {
+          if(width >= (long)sizeof(work))
+            width = sizeof(work)-1;
           /* RECURSIVE USAGE */
           len = curl_msnprintf(fptr, left, "%ld", width);
           fptr += len;
           left -= len;
         }
         if(prec >= 0) {
+          /* for each digit in the integer part, we can have one less
+             precision */
+          size_t maxprec = sizeof(work) - 2;
+          double val = p->data.dnum;
+          while(val >= 10.0) {
+            val /= 10;
+            maxprec--;
+          }
+
+          if(prec > (long)maxprec)
+            prec = (long)maxprec-1;
           /* RECURSIVE USAGE */
           len = curl_msnprintf(fptr, left, ".%ld", prec);
           fptr += len;
@@ -942,8 +947,8 @@ static int dprintf_formatf(
         /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
            output characters */
         (sprintf)(work, formatbuf, p->data.dnum);
-
-        for(fptr=work; *fptr; fptr++)
+        DEBUGASSERT(strlen(work) <= sizeof(work));
+        for(fptr = work; *fptr; fptr++)
           OUTCHAR(*fptr);
       }
       break;
@@ -975,7 +980,7 @@ static int dprintf_formatf(
 /* fputc() look-alike */
 static int addbyter(int output, FILE *data)
 {
-  struct nsprintf *infop=(struct nsprintf *)data;
+  struct nsprintf *infop = (struct nsprintf *)data;
   unsigned char outc = (unsigned char)output;
 
   if(infop->length < infop->max) {
@@ -1023,7 +1028,7 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 /* fputc() look-alike */
 static int alloc_addbyter(int output, FILE *data)
 {
-  struct asprintf *infop=(struct asprintf *)data;
+  struct asprintf *infop = (struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
 
   if(!infop->buffer) {
@@ -1033,9 +1038,9 @@ static int alloc_addbyter(int output, FILE *data)
       return -1; /* fail */
     }
     infop->alloc = 32;
-    infop->len =0;
+    infop->len = 0;
   }
-  else if(infop->len+1 >= infop->alloc) {
+  else if(infop->len + 1 >= infop->alloc) {
     char *newptr = NULL;
     size_t newsize = infop->alloc*2;
 
@@ -1081,8 +1086,7 @@ char *curl_maprintf(const char *format, ...)
     info.buffer[info.len] = 0; /* we terminate this with a zero byte */
     return info.buffer;
   }
-  else
-    return strdup("");
+  return strdup("");
 }
 
 char *curl_mvaprintf(const char *format, va_list ap_save)
@@ -1106,8 +1110,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
     info.buffer[info.len] = 0; /* we terminate this with a zero byte */
     return info.buffer;
   }
-  else
-    return strdup("");
+  return strdup("");
 }
 
 static int storebuffer(int output, FILE *data)
@@ -1126,7 +1129,7 @@ int curl_msprintf(char *buffer, const char *format, ...)
   va_start(ap_save, format);
   retcode = dprintf_formatf(&buffer, storebuffer, format, ap_save);
   va_end(ap_save);
-  *buffer=0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 
@@ -1155,7 +1158,7 @@ int curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
 {
   int retcode;
   retcode = dprintf_formatf(&buffer, storebuffer, format, ap_save);
-  *buffer=0; /* we terminate this with a zero byte */
+  *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 

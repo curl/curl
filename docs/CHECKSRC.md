@@ -20,7 +20,7 @@ when, for example, one of the files is generated.
 
 checksrc does not check and verify the code against the entire style guide,
 but the script is instead an effort to detect the most common mistakes and
-syntax mistakes that contributers make before they get accustomed to our code
+syntax mistakes that contributors make before they get accustomed to our code
 style. Heck, many of us regulars do the mistakes too and this script helps us
 keep the code in shape.
 
@@ -33,7 +33,7 @@ warnings are:
 - `BADCOMMAND`: There's a bad !checksrc! instruction in the code. See the
    **Ignore certain warnings** section below for details.
 
-- `BANNEDFUNC`: A banned function was used. The funtions sprintf, vsprintf,
+- `BANNEDFUNC`: A banned function was used. The functions sprintf, vsprintf,
    strcat, strncat, gets are **never** allowed in curl source code.
 
 - `BRACEELSE`: '} else' on the same line. The else is supposed to be on the

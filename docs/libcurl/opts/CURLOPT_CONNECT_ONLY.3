@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -42,10 +42,22 @@ transfers.
 .SH PROTOCOLS
 HTTP, SMTP, POP3 and IMAP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+  ret = curl_easy_perform(curl);
+  if(ret == CURLE_OK) {
+    /* only connected! */
+  }
+}
+.fi
 .SH AVAILABILITY
 Added in 7.15.2
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_VERBOSE "(3), " CURLOPT_HTTPPROXYTUNNEL  "(3), "
+.BR curl_easy_recv "(3), " curl_easy_send "(3) "

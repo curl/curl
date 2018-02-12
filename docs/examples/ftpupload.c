@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,7 +71,7 @@ int main(void)
   struct stat file_info;
   curl_off_t fsize;
 
-  struct curl_slist *headerlist=NULL;
+  struct curl_slist *headerlist = NULL;
   static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
   static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
@@ -127,7 +127,7 @@ int main(void)
               curl_easy_strerror(res));
 
     /* clean up the FTP commands list */
-    curl_slist_free_all (headerlist);
+    curl_slist_free_all(headerlist);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

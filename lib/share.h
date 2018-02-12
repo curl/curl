@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,7 @@
 #include <curl/curl.h>
 #include "cookie.h"
 #include "urldata.h"
+#include "conncache.h"
 
 /* SalfordC says "A structure member may not be volatile". Hence:
  */
@@ -43,7 +44,7 @@ struct Curl_share {
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;
   void *clientdata;
-
+  struct conncache conn_cache;
   struct curl_hash hostcache;
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   struct CookieInfo *cookies;
@@ -54,8 +55,8 @@ struct Curl_share {
   long sessionage;
 };
 
-CURLSHcode Curl_share_lock (struct Curl_easy *, curl_lock_data,
-                            curl_lock_access);
-CURLSHcode Curl_share_unlock (struct Curl_easy *, curl_lock_data);
+CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,
+                           curl_lock_access);
+CURLSHcode Curl_share_unlock(struct Curl_easy *, curl_lock_data);
 
 #endif /* HEADER_CURL_SHARE_H */

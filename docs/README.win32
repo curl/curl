@@ -12,15 +12,14 @@ README.win32
   systems. While not being the main develop target, a fair share of curl users
   are win32-based.
 
-  The unix-style man pages are tricky to read on windows, so therefore are all
-  those pages converted to HTML as well as pdf, and included in the release
-  archives.
+  The unix-style man pages are tricky to read on windows, so therefore all
+  those pages are also provided as web pages on the curl web site.
 
   The main curl.1 man page is also "built-in" in the command line tool. Use a
   command line similar to this in order to extract a separate text file:
 
         curl -M >manual.txt
 
-  Read the INSTALL file for instructions how to compile curl self.
+  Read the INSTALL file for instructions on how to compile curl self.
 
 

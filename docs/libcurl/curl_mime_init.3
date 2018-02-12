@@ -1,0 +1,69 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_mime_init 3 "22 August 2017" "libcurl 7.56.0" "libcurl Manual"
+.SH NAME
+curl_mime_init - create a mime handle
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "curl_mime * curl_mime_init(CURL * " easy_handle ");"
+.ad
+.SH DESCRIPTION
+\fIcurl_mime_init(3)\fP creates a handle to a new empty mime structure
+intended to be used with \fIeasy_handle\fP. This mime structure can be
+subsequently filled using the mime API, then attached to \fIeasy_handle\fP
+using option \fICURLOPT_MIMEPOST(3)\fP within a \fIcurl_easy_setopt(3)\fP
+call.
+
+Using a mime handle is the recommended way to post an HTTP form, format and
+send a multi-part e-mail with SMTP or upload such an e-mail to an IMAP server.
+
+.SH AVAILABILITY
+As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+.SH RETURN VALUE
+A mime struct handle, or NULL upon failure.
+.SH EXAMPLE
+.nf
+
+ CURL *easy = curl_easy_init();
+ curl_mime *mime;
+ curl_mimepart *part;
+
+ /* Build an HTTP form with a single field named "data", */
+ mime = curl_mime_init(easy);
+ part = curl_mime_addpart(mime);
+ curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
+ curl_mime_name(part, "data");
+
+ /* Post and send it. */
+ curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);
+ curl_easy_setopt(easy, CURLOPT_URL, "http://example.com");
+ curl_easy_perform(easy);
+
+ /* Clean-up. */
+ curl_easy_cleanup(easy);
+ curl_mime_free(mime);
+
+.SH "SEE ALSO"
+.BR curl_mime_addpart "(3),"
+.BR curl_mime_free "(3),"
+.BR CURLOPT_MIMEPOST "(3)"

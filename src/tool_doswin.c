@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -431,7 +431,7 @@ SANITIZEcode msdosify(char **const sanitized, const char *file_name,
             *d   = 'x';
           }
           else {
-            memcpy (d, "plus", 4);
+            memcpy(d, "plus", 4);
             d += 3;
           }
         }
@@ -615,7 +615,7 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
 char **__crt0_glob_function(char *arg)
 {
   (void)arg;
-  return (char**)0;
+  return (char **)0;
 }
 
 #endif /* MSDOS && (__DJGPP__ || __GO32__) */
@@ -646,24 +646,18 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   if(curlinfo->features & CURL_VERSION_SSL) {
 
     DWORD res_len;
-    DWORD buf_tchar_size = PATH_MAX + 1;
-    DWORD buf_bytes_size = sizeof(TCHAR) * buf_tchar_size;
+    char buf[PATH_MAX];
     char *ptr = NULL;
 
-    char *buf = malloc(buf_bytes_size);
-    if(!buf)
-      return CURLE_OUT_OF_MEMORY;
     buf[0] = '\0';
 
-    res_len = SearchPathA(NULL, bundle_file, NULL, buf_tchar_size, buf, &ptr);
+    res_len = SearchPathA(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
     if(res_len > 0) {
       Curl_safefree(config->cacert);
       config->cacert = strdup(buf);
       if(!config->cacert)
         result = CURLE_OUT_OF_MEMORY;
     }
-
-    Curl_safefree(buf);
   }
 
   return result;

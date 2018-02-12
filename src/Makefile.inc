@@ -45,7 +45,6 @@ CURL_CFILES = \
 	tool_libinfo.c \
 	tool_main.c \
 	tool_metalink.c \
-	tool_mfiles.c \
 	tool_msgs.c \
 	tool_operate.c \
 	tool_operhlp.c \
@@ -58,7 +57,6 @@ CURL_CFILES = \
 	tool_urlglob.c \
 	tool_util.c \
 	tool_vms.c \
-	tool_writeenv.c \
 	tool_writeout.c \
 	tool_xattr.c
 
@@ -87,7 +85,6 @@ CURL_HFILES = \
 	tool_libinfo.h \
 	tool_main.h \
 	tool_metalink.h \
-	tool_mfiles.h \
 	tool_msgs.h \
 	tool_operate.h \
 	tool_operhlp.h \
@@ -103,7 +100,6 @@ CURL_HFILES = \
 	tool_util.h \
 	tool_version.h \
 	tool_vms.h \
-	tool_writeenv.h \
 	tool_writeout.h \
 	tool_xattr.h
 

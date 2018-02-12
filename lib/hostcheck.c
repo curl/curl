@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,11 +22,17 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_OPENSSL) || defined(USE_AXTLS) || defined(USE_GSKIT)
+#if defined(USE_OPENSSL)                                \
+  || defined(USE_AXTLS)                                 \
+  || defined(USE_GSKIT)                                 \
+  || (defined(USE_SCHANNEL) && defined(_WIN32_WCE))
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
 #endif
 
 #include "hostcheck.h"
@@ -70,10 +76,10 @@ static int hostmatch(char *hostname, char *pattern)
   /* normalize pattern and hostname by stripping off trailing dots */
   size_t len = strlen(hostname);
   if(hostname[len-1]=='.')
-    hostname[len-1]=0;
+    hostname[len-1] = 0;
   len = strlen(pattern);
   if(pattern[len-1]=='.')
-    pattern[len-1]=0;
+    pattern[len-1] = 0;
 
   pattern_wildcard = strchr(pattern, '*');
   if(pattern_wildcard == NULL)
@@ -84,7 +90,7 @@ static int hostmatch(char *hostname, char *pattern)
   if(Curl_inet_pton(AF_INET, hostname, &ignored) > 0)
     return CURL_HOST_NOMATCH;
 #ifdef ENABLE_IPV6
-  else if(Curl_inet_pton(AF_INET6, hostname, &si6.sin6_addr) > 0)
+  if(Curl_inet_pton(AF_INET6, hostname, &si6.sin6_addr) > 0)
     return CURL_HOST_NOMATCH;
 #endif
 
@@ -92,7 +98,7 @@ static int hostmatch(char *hostname, char *pattern)
      match. */
   wildcard_enabled = 1;
   pattern_label_end = strchr(pattern, '.');
-  if(pattern_label_end == NULL || strchr(pattern_label_end+1, '.') == NULL ||
+  if(pattern_label_end == NULL || strchr(pattern_label_end + 1, '.') == NULL ||
      pattern_wildcard > pattern_label_end ||
      strncasecompare(pattern, "xn--", 4)) {
     wildcard_enabled = 0;
@@ -113,9 +119,9 @@ static int hostmatch(char *hostname, char *pattern)
     return CURL_HOST_NOMATCH;
 
   prefixlen = pattern_wildcard - pattern;
-  suffixlen = pattern_label_end - (pattern_wildcard+1);
+  suffixlen = pattern_label_end - (pattern_wildcard + 1);
   return strncasecompare(pattern, hostname, prefixlen) &&
-    strncasecompare(pattern_wildcard+1, hostname_label_end - suffixlen,
+    strncasecompare(pattern_wildcard + 1, hostname_label_end - suffixlen,
                     suffixlen) ?
     CURL_HOST_MATCH : CURL_HOST_NOMATCH;
 }
@@ -134,7 +140,7 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
       hostp = strdup(hostname);
       if(hostp) {
         if(hostmatch(hostp, matchp) == CURL_HOST_MATCH)
-          res= 1;
+          res = 1;
         free(hostp);
       }
       free(matchp);
@@ -144,4 +150,4 @@ int Curl_cert_hostcheck(const char *match_pattern, const char *hostname)
   return res;
 }
 
-#endif /* OPENSSL or AXTLS or GSKIT */
+#endif /* OPENSSL, AXTLS, GSKIT or schannel+wince */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,39 +29,15 @@
 #ifdef WIN32
 #  include <io.h>
 #else
-#  ifdef __VMS
-     typedef int intptr_t;
-#  endif
-#  if !defined(_AIX) && !defined(__sgi) && !defined(__osf__)
-#    include <stdint.h>
-#  endif
 #  include <unistd.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef _MSC_VER
-#  ifdef _WIN64
-     typedef __int64 intptr_t;
-#  else
-     typedef int intptr_t;
-#  endif
-#endif
-
 #include <curl/curl.h>
 
 #if LIBCURL_VERSION_NUM < 0x070c03
 #error "upgrade your libcurl to no less than 7.12.3"
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#if defined(_AIX) || defined(__sgi) || defined(__osf__)
-#ifndef intptr_t
-#define intptr_t long
-#endif
 #endif
 
 /*
@@ -130,7 +106,7 @@ int main(int argc, char **argv)
   if(argc < 3)
     return 1;
 
-  file= argv[1];
+  file = argv[1];
   url = argv[2];
 
   /* get the file size of the local file */
@@ -147,13 +123,13 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void*)&hd);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void *)&hd);
 
     /* set the ioctl function */
     curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
 
     /* pass the file descriptor to the ioctl callback as well */
-    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void*)&hd);
+    curl_easy_setopt(curl, CURLOPT_IOCTLDATA, (void *)&hd);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

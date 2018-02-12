@@ -1,24 +1,233 @@
-os:
-  - linux
-  - osx
-
-sudo: false
-
 language: c
+sudo: required
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+        packages:
+            - cmake
+            - gcc-4.8
+            - lcov
+            - clang-3.7
+            - valgrind
+            - libev-dev
+            - libc-ares-dev
+            - g++-4.8
+            - libstdc++-4.8-dev
+            - stunnel4
+            - libidn2-0-dev
+            - libssh2-1-dev
+            - libssh-dev
+            - krb5-user
+
+matrix:
+    include:
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal C="--with-gssapi"
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal C=--with-libssh
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal C="--disable-http --disable-smtp --disable-imap"
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal C="--enable-ares"
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=normal BROTLI=yes
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=novalgrind BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=debug
+        - os: osx
+          compiler: gcc
+          env: T=debug
+        - os: osx
+          compiler: gcc
+          env: T=debug C=--enable-ares
+        - os: osx
+          compiler: gcc
+          env: T=debug C="--with-ssl=/usr/local/opt/openssl --with-libmetalink"
+        - os: osx
+          compiler: gcc
+          env: T=debug C="--with-ssl=/usr/local/opt/libressl --with-libmetalink"
+        - os: osx
+          compiler: clang
+          env: T=debug C="--without-ssl --with-darwinssl --with-libmetalink"
+        - os: osx
+          compiler: clang
+          env: T=normal
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=cmake
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=cmake
+        - os: linux
+          compiler: gcc
+          dist: precise
+          env: T=coverage
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=distcheck
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=fuzzer
 
 install:
+  - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install openssl libidn rtmpdump libssh2 c-ares libmetalink libressl nghttp2; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
+  - if [ $TRAVIS_OS_NAME = linux ]; then
+      curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
+         tar xzf - &&
+         (cd nghttp2-1.24.0 && CXX="g++-4.8" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
+    fi
 
 before_script:
-  - ./buildconf
+    - ./buildconf
+    - |
+      # No brotli package available for Trusty. Download & compile from source.
+      # Cannot be done in the install script because cmake is needed.
+          if [ "$TRAVIS_OS_NAME" = linux -a "$BROTLI" ]; then
+          curl -L https://github.com/google/brotli/archive/v1.0.1.tar.gz |
+              tar xzf - &&
+              (
+                  cd brotli-1.0.1 &&
+                  cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+                          -DCMAKE_INSTALL_LIBDIR=/usr/lib &&
+                  make &&
+                  sudo make install
+              )
+          fi
+          if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
+            (cd $HOME &&
+            git clone --depth=1 https://boringssl.googlesource.com/boringssl &&
+            cd boringssl &&
+            mkdir build &&
+            cd build &&
+            cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
+            make &&
+            cd .. &&
+            mkdir lib &&
+            cd lib &&
+            ln -s ../build/crypto/libcrypto.so . &&
+            ln -s ../build/ssl/libssl.so . &&
+            echo "BoringSSL lib dir: "`pwd` &&
+            export LIBS=-lpthread )
+          fi
 
-script: ./configure --enable-debug && make && make test-full
+script:
+    - |
+        # Uncomment this when `coverage` runs on Trusty.
+        # set -eo pipefail
+        if [ "$T" = "coverage" ]; then
+             export CC="gcc-4.8"
+             ./configure --enable-debug --disable-shared --enable-code-coverage
+             make
+             make TFLAGS=-n test-nonflaky
+             tests="1 2 3 4 5 6 7 8 9 10 200 201 202 300 301 302 500 501 502 503 504 506 507 508 509 510 511 512 513 514 515 516 517 518 519 600 601 800 801 802 803 900 901 902 903 1000 1001 1002 1004 1302 1303 1304 1305 1306 1308 1400 1401 1402 1404 1450 1451 1452 1502 1507 1508 1600 1602 1603 1605"
+             make "TFLAGS=-n -e $tests" test-nonflaky
+             make "TFLAGS=-n -t $tests" test-nonflaky
+             coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
+             coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "debug" ]; then
+             ./configure --enable-debug --enable-werror $C
+             make && make examples
+             make TFLAGS=-n test-nonflaky
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "novalgrind" ]; then
+             ./configure $C
+             make && make examples
+             make TFLAGS=-n test-nonflaky
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "normal" ]; then
+             ./configure --enable-warnings --enable-werror $C
+             make && make examples
+             make test-nonflaky
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "cmake" ]; then
+             mkdir build
+             cd build
+             cmake ..
+             make
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "distcheck" ]; then
+            ./configure
+            make
+            ./maketgz 99.98.97
+            # verify in-tree build - and install it
+            (tar xf curl-99.98.97.tar.gz && \
+             cd curl-99.98.97 && \
+             ./configure --prefix=$HOME/temp && \
+             make && \
+             make TFLAGS=1 test && \
+             make install)
+            # basic check of the installed files
+            bash scripts/installcheck.sh $HOME/temp
+            rm -rf curl-99.98.97
+            # verify out-of-tree build
+            (tar xf curl-99.98.97.tar.gz && \
+             mkdir build && \
+             cd build && \
+             ../curl-99.98.97/configure && \
+             make && \
+             make TFLAGS=1 test)
+            # verify cmake build
+            rm -rf curl-99.98.97
+            (tar xf curl-99.98.97.tar.gz && \
+             cd curl-99.98.97 && \
+             mkdir build && \
+             cd build && \
+             cmake .. && \
+             make)
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "fuzzer" ]; then
+          # Download the fuzzer to a temporary folder
+          ./tests/fuzz/download_fuzzer.sh /tmp/curl_fuzzer
 
-compiler:
-  - clang
-  - gcc
+          export CURLSRC=$PWD
+
+          # Run the mainline fuzzer test
+          pushd /tmp/curl_fuzzer
+          ./mainline.sh ${CURLSRC}
+          popd
+        fi
+
+# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+branches:
+    only:
+        - master
 
 notifications:
   email: false

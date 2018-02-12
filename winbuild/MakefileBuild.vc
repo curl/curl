@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 
 ###########################################################################
 #
-# Makefile for building libcurl with MSVC 6, 7, 8, 9, 10, 11, 12 and 14
+# Makefile for building libcurl with MSVC 6 through to 15
 #
 # Usage: see usage message below
 #        Should be invoked from winbuild directory
@@ -56,11 +56,11 @@ CC = cl.exe
 !IF "$(VC)"=="6"
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /Gm /Zi /D_DEBUG /GZ
-CFLAGS     = /I. /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I../lib /I../include /nologo /W4 /wd4127 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 !ELSE
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
-CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
-CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
+CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd
+CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /wd4127 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
 LFLAGS     = /nologo /machine:$(MACHINE)
@@ -93,7 +93,7 @@ PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
 PROGRAM_NAME = curl.exe
-CURL_CFLAGS   =  /I../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c
+CURL_CFLAGS   =  /I../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c
 CURL_LFLAGS   = /nologo /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
 CURL_RESFLAGS = /i../include
 
@@ -114,17 +114,36 @@ LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
 
 
 !IF "$(WITH_SSL)"=="dll"
+!IF EXISTS("$(DEVEL_LIB)\libssl.lib")
+SSL_LIBS     = libssl.lib libcrypto.lib
+!ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib
+!ENDIF
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
+!IF EXISTS("$(DEVEL_LIB)\libssl.lib")
+SSL_LIBS     = libssl.lib libcrypto.lib gdi32.lib user32.lib crypt32.lib
+!ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
+!ENDIF
 USE_SSL      = true
 SSL          = static
 !ENDIF
 
 !IFDEF USE_SSL
 SSL_CFLAGS   = /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
+!IF EXISTS("$(DEVEL_INCLUDE)\openssl\is_boringssl.h")
+SSL_CFLAGS   = $(SSL_CFLAGS) /DHAVE_BORINGSSL
+!ENDIF
+!ENDIF
+
+!IF "$(WITH_NGHTTP2)"=="dll"
+NGHTTP2_CFLAGS   = /DUSE_NGHTTP2
+NGHTTP2_LIBS     = nghttp2.lib
+!ELSEIF "$(WITH_NGHTTP2)"=="static"
+NGHTTP2_CFLAGS   = /DUSE_NGHTTP2 /DNGHTTP2_STATICLIB
+NGHTTP2_LIBS     = nghttp2_static.lib
 !ENDIF
 
 !IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
@@ -248,7 +267,7 @@ GEN_PDB = true
 
 
 !IFDEF EMBED_MANIFEST
-MANIFESTTOOL = mt -manifest $(DIRDIST)\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\$(PROGRAM_NAME);1
+MANIFESTTOOL = mt -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
 !ENDIF
 
 # Runtime library configuration
@@ -359,6 +378,11 @@ CFLAGS = $(CFLAGS) $(IPV6_CFLAGS)
 CFLAGS = $(CFLAGS) $(SSPI_CFLAGS)
 !ENDIF
 
+!IF "$(USE_NGHTTP2)"=="true"
+CFLAGS = $(CFLAGS) $(NGHTTP2_CFLAGS)
+LFLAGS = $(LFLAGS) $(NGHTTP2_LFLAGS) $(NGHTTP2_LIBS)
+!ENDIF
+
 !IF "$(GEN_PDB)"=="true"
 CFLAGS = $(CFLAGS) $(CFLAGS_PDB) /Fd"$(LIB_DIROBJ)\$(PDB)"
 LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
@@ -416,6 +440,7 @@ package: $(TARGET)
 
 $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using SSL: $(USE_SSL)
+	@echo Using NGHTTP2: $(USE_NGHTTP2)
 	@echo Using c-ares: $(USE_CARES)
 	@echo Using SSH2: $(USE_SSH2)
 	@echo Using ZLIB: $(USE_ZLIB)
@@ -494,7 +519,6 @@ CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 
 CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
- $(CURL_DIROBJ)\strcase.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj
  
@@ -509,8 +533,6 @@ $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
 $(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
-$(CURL_DIROBJ)\strcase.obj: ../lib/strcase.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strcase.c
 $(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
 $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c

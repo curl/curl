@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -86,7 +86,7 @@ static const char *urls[] = {
 };
 
 #define MAX 10 /* number of simultaneous transfers */
-#define CNT sizeof(urls)/sizeof(char*) /* total number of transfers to do */
+#define CNT sizeof(urls)/sizeof(char *) /* total number of transfers to do */
 
 static size_t cb(char *d, size_t n, size_t l, void *p)
 {
@@ -114,7 +114,7 @@ int main(void)
   CURLM *cm;
   CURLMsg *msg;
   long L;
-  unsigned int C=0;
+  unsigned int C = 0;
   int M, Q, U = -1;
   fd_set R, W, E;
   struct timeval T;
@@ -162,9 +162,9 @@ int main(void)
         T.tv_sec = L/1000;
         T.tv_usec = (L%1000)*1000;
 
-        if(0 > select(M+1, &R, &W, &E, &T)) {
+        if(0 > select(M + 1, &R, &W, &E, &T)) {
           fprintf(stderr, "E: select(%i,,,,%li): %i: %s\n",
-              M+1, L, errno, strerror(errno));
+              M + 1, L, errno, strerror(errno));
           return EXIT_FAILURE;
         }
       }

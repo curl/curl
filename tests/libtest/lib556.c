@@ -45,7 +45,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -76,11 +77,10 @@ int test(char *URL)
 
     if(!res) {
       /* we assume that sending always work */
-      size_t total=0;
 
       do {
         /* busy-read like crazy */
-        res = curl_easy_recv(curl, buf, 1024, &iolen);
+        res = curl_easy_recv(curl, buf, sizeof(buf), &iolen);
 
 #ifdef TPF
         sleep(1); /* avoid ctl-10 dump */
@@ -91,10 +91,12 @@ int test(char *URL)
           if(!write(STDOUT_FILENO, buf, iolen))
             break;
         }
-        total += iolen;
 
-      } while(((res == CURLE_OK) || (res == CURLE_AGAIN)) && (total < 129));
+      } while((res == CURLE_OK && iolen != 0) || (res == CURLE_AGAIN));
     }
+
+    if(iolen != 0)
+      res = TEST_ERR_FAILURE;
   }
 
 test_cleanup:

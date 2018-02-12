@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,7 +55,7 @@ int main(void)
   int msgs_left; /* how many messages are left */
 
   /* Allocate one CURL handle per transfer */
-  for(i=0; i<HANDLECOUNT; i++)
+  for(i = 0; i<HANDLECOUNT; i++)
     handles[i] = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
@@ -68,7 +68,7 @@ int main(void)
   multi_handle = curl_multi_init();
 
   /* add the individual transfers */
-  for(i=0; i<HANDLECOUNT; i++)
+  for(i = 0; i<HANDLECOUNT; i++)
     curl_multi_add_handle(multi_handle, handles[i]);
 
   /* we start some action by calling perform right away */
@@ -130,7 +130,7 @@ int main(void)
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
     switch(rc) {
@@ -150,13 +150,13 @@ int main(void)
       int idx, found = 0;
 
       /* Find out which handle this message is about */
-      for(idx=0; idx<HANDLECOUNT; idx++) {
+      for(idx = 0; idx<HANDLECOUNT; idx++) {
         found = (msg->easy_handle == handles[idx]);
         if(found)
           break;
       }
 
-      switch (idx) {
+      switch(idx) {
       case HTTP_HANDLE:
         printf("HTTP transfer completed with status %d\n", msg->data.result);
         break;
@@ -170,7 +170,7 @@ int main(void)
   curl_multi_cleanup(multi_handle);
 
   /* Free the CURL handles */
-  for(i=0; i<HANDLECOUNT; i++)
+  for(i = 0; i<HANDLECOUNT; i++)
     curl_easy_cleanup(handles[i]);
 
   return 0;

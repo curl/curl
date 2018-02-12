@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 200 OK swsclose
+Last-Modified: Thu, 01 Jan 1970 00:00:30 GMT
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib1535
+</tool>
+<name>
+Test CURLINFO_RESPONSE_CODE CURLINFO_PROTOCOL
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/1535
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /1535 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

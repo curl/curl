@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ int Curl_resolv(struct connectdata *conn, const char *hostname,
                 int port, struct Curl_dns_entry **dnsentry);
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
-                        long timeoutms);
+                        time_t timeoutms);
 
 #ifdef CURLRES_IPV6
 /*
@@ -130,8 +130,8 @@ int Curl_mk_dnscache(struct curl_hash *hash);
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct Curl_easy *data);
 
-/* Return # of adresses in a Curl_addrinfo struct */
-int Curl_num_addresses (const Curl_addrinfo *addr);
+/* Return # of addresses in a Curl_addrinfo struct */
+int Curl_num_addresses(const Curl_addrinfo *addr);
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
@@ -143,7 +143,7 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
 #endif
 
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
-Curl_addrinfo *Curl_ipv4_resolve_r(const char * hostname, int port);
+Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
 CURLcode Curl_async_resolved(struct connectdata *conn,
                              bool *protocol_connect);

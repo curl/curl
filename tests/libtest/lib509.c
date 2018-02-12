@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@
 
 /*
  * This test uses these funny custom memory callbacks for the only purpose
- * of verifying that curl_global_init_mem() functionallity is present in
+ * of verifying that curl_global_init_mem() functionality is present in
  * libcurl and that it works unconditionally no matter how libcurl is built,
  * nothing more.
  *
@@ -36,11 +36,11 @@
 #include "memdebug.h"
 */
 
-int seen_malloc = 0;
-int seen_free = 0;
-int seen_realloc = 0;
-int seen_strdup = 0;
-int seen_calloc = 0;
+static int seen_malloc = 0;
+static int seen_free = 0;
+static int seen_realloc = 0;
+static int seen_strdup = 0;
+static int seen_calloc = 0;
 
 void *custom_malloc(size_t size);
 void custom_free(void *ptr);
@@ -122,7 +122,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;

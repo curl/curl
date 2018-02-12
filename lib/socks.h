@@ -25,7 +25,7 @@
 #include "curl_setup.h"
 
 #ifdef CURL_DISABLE_PROXY
-#define Curl_SOCKS4(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
+#define Curl_SOCKS4(a,b,c,d,e) CURLE_NOT_BUILT_IN
 #define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
 #else
 /*
@@ -49,8 +49,7 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
                      const char *hostname,
                      int remote_port,
                      int sockindex,
-                     struct connectdata *conn,
-                     bool protocol4a);
+                     struct connectdata *conn);
 
 /*
  * This function logs in to a SOCKS5 proxy and sends the specifics to the

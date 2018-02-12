@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2016 - 2017, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -68,7 +68,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  *
  * majorVersion [in] - The major version number.
  * minorVersion [in] - The minor version number.
- * platform     [in] - The optional platform identifer.
+ * platform     [in] - The optional platform identifier.
  * condition    [in] - The test condition used to specifier whether we are
  *                     checking a version less then, equal to or greater than
  *                     what is specified in the major and minor version

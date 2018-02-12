@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -199,8 +199,6 @@ AC_DEFUN([CURL_CHECK_HEADER_WINDOWS], [
     yes)
       AC_DEFINE_UNQUOTED(HAVE_WINDOWS_H, 1,
         [Define to 1 if you have the windows.h header file.])
-      AC_DEFINE_UNQUOTED(WIN32_LEAN_AND_MEAN, 1,
-        [Define to avoid automatic inclusion of winsock.h])
       ;;
   esac
 ])
@@ -790,8 +788,8 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
   #
   for x_nlibs in '' "$u_libs" \
     '-lldap' \
-    '-llber -lldap' \
     '-lldap -llber' \
+    '-llber -lldap' \
     '-lldapssl -lldapx -lldapsdk' \
     '-lldapsdk -lldapx -lldapssl' ; do
     if test "$curl_cv_ldap_LIBS" = "unknown"; then
@@ -1084,7 +1082,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GETNAMEINFO], [
 #endif
 #define GNICALLCONV
 #endif
-                    extern int GNICALLCONV getnameinfo($gni_arg1, $gni_arg2,
+                    extern int GNICALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
+				getnameinfo($gni_arg1, $gni_arg2,
                                            char *, $gni_arg46,
                                            char *, $gni_arg46,
                                            $gni_arg7);
@@ -1388,6 +1390,9 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
 #define RECVCALLCONV
 #endif
                       extern $recv_retv RECVCALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
                       recv($recv_arg1, $recv_arg2, $recv_arg3, $recv_arg4);
                     ]],[[
                       $recv_arg1 s=0;
@@ -1522,6 +1527,9 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
 #define SENDCALLCONV
 #endif
                       extern $send_retv SENDCALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
                       send($send_arg1, $send_arg2, $send_arg3, $send_arg4);
                     ]],[[
                       $send_arg1 s=0;
@@ -2076,29 +2084,8 @@ _EOF
 ])
 
 
-dnl CURL_CONFIGURE_LONG
-dnl -------------------------------------------------
-dnl Find out the size of long as reported by sizeof() and define
-dnl CURL_SIZEOF_LONG as appropriate to be used in template file
-dnl include/curl/curlbuild.h.in to properly configure the library.
-dnl The size of long is a build time characteristic and as such
-dnl must be recorded in curlbuild.h
-
-AC_DEFUN([CURL_CONFIGURE_LONG], [
-  if test -z "$ac_cv_sizeof_long" ||
-    test "$ac_cv_sizeof_long" -eq "0"; then
-    AC_MSG_ERROR([cannot find out size of long.])
-  fi
-  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_LONG], [$ac_cv_sizeof_long])
-])
-
-
 dnl CURL_CONFIGURE_CURL_SOCKLEN_T
 dnl -------------------------------------------------
-dnl Find out suitable curl_socklen_t data type definition and size, making
-dnl appropriate definitions for template file include/curl/curlbuild.h.in
-dnl to properly configure and use the library.
-dnl
 dnl The need for the curl_socklen_t definition arises mainly to properly
 dnl interface HP-UX systems which on one hand have a typedef'ed socklen_t
 dnl data type which is 32 or 64-Bit wide depending on the data model being
@@ -2222,10 +2209,6 @@ AC_DEFUN([CURL_CONFIGURE_CURL_SOCKLEN_T], [
 
 dnl CURL_CONFIGURE_PULL_SYS_POLL
 dnl -------------------------------------------------
-dnl Find out if system header file sys/poll.h must be included by the
-dnl external interface, making appropriate definitions for template file
-dnl include/curl/curlbuild.h.in to properly configure and use the library.
-dnl
 dnl The need for the sys/poll.h inclusion arises mainly to properly
 dnl interface AIX systems which define macros 'events' and 'revents'.
 
@@ -2378,11 +2361,15 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
                       long tv_usec;
                     };
 #endif
-                    extern $sel_retv SELECTCALLCONV select($sel_arg1,
-                                                           $sel_arg234,
-                                                           $sel_arg234,
-                                                           $sel_arg234,
-                                                           $sel_arg5);
+                    extern $sel_retv SELECTCALLCONV
+#ifdef __ANDROID__
+__attribute__((overloadable))
+#endif
+			select($sel_arg1,
+					$sel_arg234,
+					$sel_arg234,
+					$sel_arg234,
+					$sel_arg5);
                   ]],[[
                     $sel_arg1   nfds=0;
                     $sel_arg234 rfds=0;
@@ -2717,292 +2704,6 @@ AC_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the 
   fi
 ])
 
-
-dnl DO_CURL_OFF_T_CHECK (TYPE, SIZE)
-dnl -------------------------------------------------
-dnl Internal macro for CURL_CONFIGURE_CURL_OFF_T
-
-AC_DEFUN([DO_CURL_OFF_T_CHECK], [
-  AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
-  if test "$curl_typeof_curl_off_t" = "unknown" && test ! -z "$1"; then
-    tmp_includes=""
-    tmp_source=""
-    tmp_fmt=""
-    case XC_SH_TR_SH([$1]) in
-      int64_t)
-        tmp_includes="$curl_includes_inttypes"
-        tmp_source="char f@<:@@:>@ = PRId64;"
-        tmp_fmt="PRId64"
-        ;;
-      int32_t)
-        tmp_includes="$curl_includes_inttypes"
-        tmp_source="char f@<:@@:>@ = PRId32;"
-        tmp_fmt="PRId32"
-        ;;
-      int16_t)
-        tmp_includes="$curl_includes_inttypes"
-        tmp_source="char f@<:@@:>@ = PRId16;"
-        tmp_fmt="PRId16"
-        ;;
-    esac
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $tmp_includes
-        typedef $1 curl_off_t;
-        typedef char dummy_arr[sizeof(curl_off_t) == $2 ? 1 : -1];
-      ]],[[
-        $tmp_source
-        curl_off_t dummy;
-      ]])
-    ],[
-      if test -z "$tmp_fmt"; then
-        curl_typeof_curl_off_t="$1"
-        curl_sizeof_curl_off_t="$2"
-      else
-        CURL_CHECK_DEF([$tmp_fmt], [$curl_includes_inttypes], [silent])
-        AS_VAR_PUSHDEF([tmp_HaveFmtDef], [curl_cv_have_def_$tmp_fmt])dnl
-        AS_VAR_PUSHDEF([tmp_FmtDef], [curl_cv_def_$tmp_fmt])dnl
-        if test AS_VAR_GET(tmp_HaveFmtDef) = "yes"; then
-          curl_format_curl_off_t=AS_VAR_GET(tmp_FmtDef)
-          curl_typeof_curl_off_t="$1"
-          curl_sizeof_curl_off_t="$2"
-        fi
-        AS_VAR_POPDEF([tmp_FmtDef])dnl
-        AS_VAR_POPDEF([tmp_HaveFmtDef])dnl
-      fi
-    ])
-  fi
-])
-
-
-dnl DO_CURL_OFF_T_SUFFIX_CHECK (TYPE)
-dnl -------------------------------------------------
-dnl Internal macro for CURL_CONFIGURE_CURL_OFF_T
-
-AC_DEFUN([DO_CURL_OFF_T_SUFFIX_CHECK], [
-  AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
-  AC_MSG_CHECKING([constant suffix string for curl_off_t])
-  #
-  curl_suffix_curl_off_t="unknown"
-  curl_suffix_curl_off_tu="unknown"
-  #
-  case XC_SH_TR_SH([$1]) in
-    long_long | __longlong | __longlong_t)
-      tst_suffixes="LL::"
-      ;;
-    long)
-      tst_suffixes="L::"
-      ;;
-    int)
-      tst_suffixes="::"
-      ;;
-    __int64 | int64_t)
-      tst_suffixes="LL:i64::"
-      ;;
-    __int32 | int32_t)
-      tst_suffixes="L:i32::"
-      ;;
-    __int16 | int16_t)
-      tst_suffixes="L:i16::"
-      ;;
-    *)
-      AC_MSG_ERROR([unexpected data type $1])
-      ;;
-  esac
-  #
-  old_IFS=$IFS; IFS=':'
-  for tmp_ssuf in $tst_suffixes ; do
-    IFS=$old_IFS
-    if test "x$curl_suffix_curl_off_t" = "xunknown"; then
-      case $tmp_ssuf in
-        i64 | i32 | i16)
-          tmp_usuf="u$tmp_ssuf"
-          ;;
-        LL | L)
-          tmp_usuf="U$tmp_ssuf"
-          ;;
-        *)
-          tmp_usuf=""
-          ;;
-      esac
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-          $curl_includes_inttypes
-          typedef $1 new_t;
-        ]],[[
-          new_t s1;
-          new_t s2;
-          s1 = -10$tmp_ssuf ;
-          s2 =  20$tmp_ssuf ;
-          if(s1 > s2)
-            return 1;
-        ]])
-      ],[
-        curl_suffix_curl_off_t="$tmp_ssuf"
-        curl_suffix_curl_off_tu="$tmp_usuf"
-      ])
-    fi
-  done
-  IFS=$old_IFS
-  #
-  if test "x$curl_suffix_curl_off_t" = "xunknown"; then
-    AC_MSG_ERROR([cannot find constant suffix string for curl_off_t.])
-  else
-    AC_MSG_RESULT([$curl_suffix_curl_off_t])
-    AC_MSG_CHECKING([constant suffix string for unsigned curl_off_t])
-    AC_MSG_RESULT([$curl_suffix_curl_off_tu])
-  fi
-  #
-])
-
-
-dnl CURL_CONFIGURE_CURL_OFF_T
-dnl -------------------------------------------------
-dnl Find out suitable curl_off_t data type definition and associated
-dnl items, and make the appropriate definitions used in template file
-dnl include/curl/curlbuild.h.in to properly configure the library.
-
-AC_DEFUN([CURL_CONFIGURE_CURL_OFF_T], [
-  AC_REQUIRE([CURL_INCLUDES_INTTYPES])dnl
-  #
-  AC_BEFORE([$0],[AC_SYS_LARGEFILE])dnl
-  AC_BEFORE([$0],[CURL_CONFIGURE_REENTRANT])dnl
-  AC_BEFORE([$0],[CURL_CHECK_AIX_ALL_SOURCE])dnl
-  #
-  if test -z "$SED"; then
-    AC_MSG_ERROR([SED not set. Cannot continue without SED being set.])
-  fi
-  #
-  AC_CHECK_SIZEOF(long)
-  AC_CHECK_SIZEOF(void*)
-  #
-  if test -z "$ac_cv_sizeof_long" ||
-    test "$ac_cv_sizeof_long" -eq "0"; then
-    AC_MSG_ERROR([cannot find out size of long.])
-  fi
-  if test -z "$ac_cv_sizeof_voidp" ||
-     test "$ac_cv_sizeof_voidp" -eq "0"; then
-    AC_MSG_ERROR([cannot find out size of void*.])
-  fi
-  #
-  x_LP64_long=""
-  x_LP32_long=""
-  #
-  if test "$ac_cv_sizeof_long" -eq "8" &&
-     test "$ac_cv_sizeof_voidp" -ge "8"; then
-    x_LP64_long="long"
-  elif test "$ac_cv_sizeof_long" -eq "4" &&
-       test "$ac_cv_sizeof_voidp" -ge "4"; then
-    x_LP32_long="long"
-  fi
-  #
-  dnl DO_CURL_OFF_T_CHECK results are stored in next 3 vars
-  #
-  curl_typeof_curl_off_t="unknown"
-  curl_sizeof_curl_off_t="unknown"
-  curl_format_curl_off_t="unknown"
-  curl_format_curl_off_tu="unknown"
-  #
-  if test "$curl_typeof_curl_off_t" = "unknown"; then
-    AC_MSG_CHECKING([for 64-bit curl_off_t data type])
-    for t8 in          \
-      "$x_LP64_long"   \
-      'int64_t'        \
-      '__int64'        \
-      'long long'      \
-      '__longlong'     \
-      '__longlong_t'   ; do
-      DO_CURL_OFF_T_CHECK([$t8], [8])
-    done
-    AC_MSG_RESULT([$curl_typeof_curl_off_t])
-  fi
-  if test "$curl_typeof_curl_off_t" = "unknown"; then
-    AC_MSG_CHECKING([for 32-bit curl_off_t data type])
-    for t4 in          \
-      "$x_LP32_long"   \
-      'int32_t'        \
-      '__int32'        \
-      'int'            ; do
-      DO_CURL_OFF_T_CHECK([$t4], [4])
-    done
-    AC_MSG_RESULT([$curl_typeof_curl_off_t])
-  fi
-  if test "$curl_typeof_curl_off_t" = "unknown"; then
-    AC_MSG_ERROR([cannot find data type for curl_off_t.])
-  fi
-  #
-  AC_MSG_CHECKING([size of curl_off_t])
-  AC_MSG_RESULT([$curl_sizeof_curl_off_t])
-  #
-  AC_MSG_CHECKING([formatting string directive for curl_off_t])
-  if test "$curl_format_curl_off_t" != "unknown"; then
-    x_pull_headers="yes"
-    curl_format_curl_off_t=`echo "$curl_format_curl_off_t" | "$SED" 's/[["]]//g'`
-    curl_format_curl_off_tu=`echo "$curl_format_curl_off_t" | "$SED" 's/i$/u/'`
-    curl_format_curl_off_tu=`echo "$curl_format_curl_off_tu" | "$SED" 's/d$/u/'`
-    curl_format_curl_off_tu=`echo "$curl_format_curl_off_tu" | "$SED" 's/D$/U/'`
-  else
-    x_pull_headers="no"
-    case XC_SH_TR_SH([$curl_typeof_curl_off_t]) in
-      long_long | __longlong | __longlong_t)
-        curl_format_curl_off_t="lld"
-        curl_format_curl_off_tu="llu"
-        ;;
-      long)
-        curl_format_curl_off_t="ld"
-        curl_format_curl_off_tu="lu"
-        ;;
-      int)
-        curl_format_curl_off_t="d"
-        curl_format_curl_off_tu="u"
-        ;;
-      __int64)
-        curl_format_curl_off_t="I64d"
-        curl_format_curl_off_tu="I64u"
-        ;;
-      __int32)
-        curl_format_curl_off_t="I32d"
-        curl_format_curl_off_tu="I32u"
-        ;;
-      __int16)
-        curl_format_curl_off_t="I16d"
-        curl_format_curl_off_tu="I16u"
-        ;;
-      *)
-        AC_MSG_ERROR([cannot find print format string for curl_off_t.])
-        ;;
-    esac
-  fi
-  AC_MSG_RESULT(["$curl_format_curl_off_t"])
-  #
-  AC_MSG_CHECKING([formatting string directive for unsigned curl_off_t])
-  AC_MSG_RESULT(["$curl_format_curl_off_tu"])
-  #
-  DO_CURL_OFF_T_SUFFIX_CHECK([$curl_typeof_curl_off_t])
-  #
-  if test "$x_pull_headers" = "yes"; then
-    if test "x$ac_cv_header_sys_types_h" = "xyes"; then
-      CURL_DEFINE_UNQUOTED([CURL_PULL_SYS_TYPES_H])
-    fi
-    if test "x$ac_cv_header_stdint_h" = "xyes"; then
-      CURL_DEFINE_UNQUOTED([CURL_PULL_STDINT_H])
-    fi
-    if test "x$ac_cv_header_inttypes_h" = "xyes"; then
-      CURL_DEFINE_UNQUOTED([CURL_PULL_INTTYPES_H])
-    fi
-  fi
-  #
-  CURL_DEFINE_UNQUOTED([CURL_TYPEOF_CURL_OFF_T], [$curl_typeof_curl_off_t])
-  CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_T], ["$curl_format_curl_off_t"])
-  CURL_DEFINE_UNQUOTED([CURL_FORMAT_CURL_OFF_TU], ["$curl_format_curl_off_tu"])
-  CURL_DEFINE_UNQUOTED([CURL_FORMAT_OFF_T], ["%$curl_format_curl_off_t"])
-  CURL_DEFINE_UNQUOTED([CURL_SIZEOF_CURL_OFF_T], [$curl_sizeof_curl_off_t])
-  CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_T], [$curl_suffix_curl_off_t])
-  CURL_DEFINE_UNQUOTED([CURL_SUFFIX_CURL_OFF_TU], [$curl_suffix_curl_off_tu])
-  #
-])
-
-
 dnl CURL_CHECK_WIN32_LARGEFILE
 dnl -------------------------------------------------
 dnl Check if curl's WIN32 large file will be used
@@ -3232,7 +2933,40 @@ AC_DEFUN([CURL_MAC_CFLAGS], [
     else
       AC_MSG_RESULT([$min set])
     fi
+
+    old_CFLAGS=$CFLAGS
     CFLAGS="$CFLAGS -Werror=partial-availability"
+    AC_MSG_CHECKING([whether $CC accepts -Werror=partial-availability])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no])
+      CFLAGS=$old_CFLAGS])
   fi
 
+])
+
+
+dnl CURL_SUPPORTS_BUILTIN_AVAILABLE
+dnl
+dnl Check to see if the compiler supports __builtin_available. This built-in
+dnl compiler function first appeared in Apple LLVM 9.0.0. It's so new that, at
+dnl the time this macro was written, the function was not yet documented. Its
+dnl purpose is to return true if the code is running under a certain OS version
+dnl or later.
+
+AC_DEFUN([CURL_SUPPORTS_BUILTIN_AVAILABLE], [
+  AC_MSG_CHECKING([to see if the compiler supports __builtin_available()])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <stdlib.h>
+    ]],[[
+      if (__builtin_available(macOS 10.8, iOS 5.0, *)) {}
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_BUILTIN_AVAILABLE, 1,
+        [Define to 1 if you have the __builtin_available function.])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 ])

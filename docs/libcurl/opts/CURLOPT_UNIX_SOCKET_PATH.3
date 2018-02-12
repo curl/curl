@@ -46,6 +46,9 @@ are not supported. Proxy options such as
 .BR CURLOPT_PROXY "(3)
 have no effect either as these are TCP-oriented, and asking a proxy server to
 connect to a certain Unix domain socket is not possible.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 Default is NULL, meaning that no Unix domain sockets are used.
 .SH PROTOCOLS

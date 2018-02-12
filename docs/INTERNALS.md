@@ -56,7 +56,7 @@ git
 
  All changes to the sources are committed to the git repository as soon as
  they're somewhat verified to work. Changes shall be committed as independently
- as possible so that individual changes can be easier spotted and tracked
+ as possible so that individual changes can be easily spotted and tracked
  afterwards.
 
  Tagging shall be used extensively, and by the time we release new archives we
@@ -82,13 +82,13 @@ Dependencies
  - zlib         1.1.4
  - libssh2      0.16
  - c-ares       1.6.0
- - libidn       0.4.1
+ - libidn2      2.0.0
  - cyassl       2.0.0
  - openldap     2.0
  - MIT Kerberos 1.2.4
  - GSKit        V5R3M0
  - NSS          3.14.x
- - axTLS        1.2.7
+ - axTLS        2.1.0
  - PolarSSL     1.3.0
  - Heimdal      ?
  - nghttp2      1.0.0
@@ -98,7 +98,7 @@ Operating Systems
 
  On systems where configure runs, we aim at working on them all - if they have
  a suitable C compiler. On systems that don't run configure, we strive to keep
- curl running fine on:
+ curl running correctly on:
 
  - Windows      98
  - AS/400       V5R3M0
@@ -126,13 +126,13 @@ Build tools
 Windows vs Unix
 ===============
 
- There are a few differences in how to program curl the unix way compared to
- the Windows way. The four perhaps most notable details are:
+ There are a few differences in how to program curl the Unix way compared to
+ the Windows way. Perhaps the four most notable details are:
 
  1. Different function names for socket operations.
 
    In curl, this is solved with defines and macros, so that the source looks
-   the same at all places except for the header file that defines them. The
+   the same in all places except for the header file that defines them. The
    macros in use are sclose(), sread() and swrite().
 
  2. Windows requires a couple of init calls for the socket stuff.
@@ -142,7 +142,7 @@ Windows vs Unix
    behaviour.
 
  3. The file descriptors for network communication and file operations are
-    not easily interchangeable as in unix.
+    not as easily interchangeable as in Unix.
 
    We avoid this by not trying any funny tricks on file descriptors.
 
@@ -156,11 +156,11 @@ Windows vs Unix
  conditionals that deal with features *should* instead be in the format
  `#ifdef HAVE_THAT_WEIRD_FUNCTION`. Since Windows can't run configure scripts,
  we maintain a `curl_config-win32.h` file in lib directory that is supposed to
- look exactly as a `curl_config.h` file would have looked like on a Windows
+ look exactly like a `curl_config.h` file would have looked like on a Windows
  machine!
 
  Generally speaking: always remember that this will be compiled on dozens of
- operating systems. Don't walk on the edge.
+ operating systems. Don't walk on the edge!
 
 <a name="Library"></a>
 Library
@@ -250,8 +250,8 @@ Curl_readwrite()
 
    Called during the transfer of the actual protocol payload.
 
-   During transfer, the progress functions in lib/progress.c are called at a
-   frequent interval (or at the user's choice, a specified callback might get
+   During transfer, the progress functions in lib/progress.c are called at
+   frequent intervals (or at the user's choice, a specified callback might get
    called). The speedcheck functions in lib/speedcheck.c are also used to
    verify that the transfer is as fast as required.
 
@@ -272,7 +272,7 @@ Curl_disconnect()
    When doing normal connections and transfers, no one ever tries to close any
    connections so this is not normally called when `curl_easy_perform()` is
    used. This function is only used when we are certain that no more transfers
-   is going to be made on the connection. It can be also closed by force, or
+   are going to be made on the connection. It can be also closed by force, or
    it can be called to make sure that libcurl doesn't keep too many
    connections alive at the same time.
 
@@ -290,7 +290,7 @@ HTTP(S)
  base64-functions for user+password stuff (and more) is in (lib/base64.c) and
  all functions for parsing and sending cookies are found in (lib/cookie.c).
 
- HTTPS uses in almost every means the same procedure as HTTP, with only two
+ HTTPS uses in almost every case the same procedure as HTTP, with only two
  exceptions: the connect procedure is different and the function used to read
  or write from the socket is different, although the latter fact is hidden in
  the source by the use of `Curl_read()` for reading and `Curl_write()` for
@@ -301,8 +301,7 @@ HTTP(S)
 
  An interesting detail with the HTTP(S) request, is the `Curl_add_buffer()`
  series of functions we use. They append data to one single buffer, and when
- the building is done the entire request is sent off in one single write. This
- is done this way to overcome problems with flawed firewalls and lame servers.
+ the building is finished the entire request is sent off in one single write. This is done this way to overcome problems with flawed firewalls and lame servers.
 
 <a name="ftp"></a>
 FTP
@@ -396,12 +395,12 @@ Persistent Connections
 
  - When libcurl is told to perform a transfer, it first checks for an already
    existing connection in the cache that we can use. Otherwise it creates a
-   new one and adds that the cache. If the cache is full already when a new
-   connection is added added, it will first close the oldest unused one.
+   new one and adds that to the cache. If the cache is full already when a new
+   connection is added, it will first close the oldest unused one.
 
  - When the transfer operation is complete, the connection is left
    open. Particular options may tell libcurl not to, and protocols may signal
-   closure on connections and then they won't be kept open of course.
+   closure on connections and then they won't be kept open, of course.
 
  - When `curl_easy_cleanup()` is called, we close all still opened connections,
    unless of course the multi interface "owns" the connections.
@@ -414,7 +413,7 @@ multi interface/non-blocking
 ============================
 
  The multi interface is a non-blocking interface to the library. To make that
- interface work as good as possible, no low-level functions within libcurl
+ interface work as well as possible, no low-level functions within libcurl
  must be written to work in a blocking manner. (There are still a few spots
  violating this rule.)
 
@@ -465,7 +464,7 @@ Return Codes and Informationals
  description.
 
  In aiding the user to understand what's happening and to debug curl usage, we
- must supply a fair amount of informational messages by using the
+ must supply a fair number of informational messages by using the
  `Curl_infof()` function. Those messages are only displayed when the user
  explicitly asks for them. They are best used when revealing information that
  isn't otherwise obvious.
@@ -489,7 +488,7 @@ Client
  functions used for the URL-"globbing" support. Globbing in the sense that the
  {} and [] expansion stuff is there.
 
- The client mostly messes around to setup its 'config' struct properly, then
+ The client mostly sets up its 'config' struct properly, then
  it calls the `curl_easy_*()` functions of the library and when it gets back
  control after the `curl_easy_perform()` it cleans up the library, checks
  status and exits.
@@ -542,13 +541,13 @@ Test Suite
 
  The main test script is runtests.pl that will invoke test servers like
  httpserver.pl and ftpserver.pl before all the test cases are performed. The
- test suite currently only runs on unix-like platforms.
+ test suite currently only runs on Unix-like platforms.
 
  You'll find a description of the test suite in the tests/README file, and the
  test case data files in the tests/FILEFORMAT file.
 
  The test suite automatically detects if curl was built with the memory
- debugging enabled, and if it was it will detect memory leaks, too.
+ debugging enabled, and if it was, it will detect memory leaks, too.
 
 <a name="asyncdns"></a>
 Asynchronous name resolves
@@ -613,28 +612,14 @@ curlx
    strtoll() (or equivalent) function exist on your platform. If `curl_off_t`
    is only a 32 bit number on your platform, this macro uses strtol().
 
-`curlx_tvnow()`
----------------
-   returns a struct timeval for the current time.
-
-`curlx_tvdiff()`
---------------
-   returns the difference between two timeval structs, in number of
-   milliseconds.
-
-`curlx_tvdiff_secs()`
----------------------
-   returns the same as `curlx_tvdiff` but with full usec resolution (as a
-   double)
-
 Future
 ------
 
  Several functions will be removed from the public `curl_` name space in a
  future libcurl release. They will then only become available as `curlx_`
  functions instead. To make the transition easier, we already today provide
- these functions with the `curlx_` prefix to allow sources to get built
- properly with the new function names. The functions this concerns are:
+ these functions with the `curlx_` prefix to allow sources to be built
+ properly with the new function names. The concerned functions are:
 
  - `curlx_getenv`
  - `curlx_strequal`
@@ -657,29 +642,29 @@ Content Encoding
 ## About content encodings
 
  [HTTP/1.1][4] specifies that a client may request that a server encode its
- response. This is usually used to compress a response using one of a set of
- commonly available compression techniques. These schemes are 'deflate' (the
- zlib algorithm), 'gzip' and 'compress'. A client requests that the sever
- perform an encoding by including an Accept-Encoding header in the request
- document. The value of the header should be one of the recognized tokens
- 'deflate', ... (there's a way to register new schemes/tokens, see sec 3.5 of
- the spec). A server MAY honor the client's encoding request. When a response
- is encoded, the server includes a Content-Encoding header in the
- response. The value of the Content-Encoding header indicates which scheme was
- used to encode the data.
+ response. This is usually used to compress a response using one (or more)
+ encodings from a set of commonly available compression techniques. These
+ schemes include 'deflate' (the zlib algorithm), 'gzip' 'br' (brotli) and
+ 'compress'. A client requests that the server perform an encoding by including
+ an Accept-Encoding header in the request document. The value of the header
+ should be one of the recognized tokens 'deflate', ... (there's a way to
+ register new schemes/tokens, see sec 3.5 of the spec). A server MAY honor
+ the client's encoding request. When a response is encoded, the server
+ includes a Content-Encoding header in the response. The value of the
+ Content-Encoding header indicates which encodings were used to encode the
+ data, in the order in which they were applied.
 
- A client may tell a server that it can understand several different encoding
- schemes. In this case the server may choose any one of those and use it to
- encode the response (indicating which one using the Content-Encoding header).
  It's also possible for a client to attach priorities to different schemes so
  that the server knows which it prefers. See sec 14.3 of RFC 2616 for more
- information on the Accept-Encoding header.
+ information on the Accept-Encoding header. See sec [3.1.2.2 of RFC 7231][15]
+ for more information on the Content-Encoding header.
 
 ## Supported content encodings
 
- The 'deflate' and 'gzip' content encoding are supported by libcurl. Both
- regular and chunked transfers work fine.  The zlib library is required for
- this feature.
+ The 'deflate', 'gzip' and 'br' content encodings are supported by libcurl.
+ Both regular and chunked transfers work fine.  The zlib library is required
+ for the 'deflate' and 'gzip' encodings, while the brotli decoding library is
+ for the 'br' encoding.
 
 ## The libcurl interface
 
@@ -689,14 +674,15 @@ Content Encoding
 
  where string is the intended value of the Accept-Encoding header.
 
- Currently, libcurl only understands how to process responses that use the
- "deflate" or "gzip" Content-Encoding, so the only values for
- [`CURLOPT_ACCEPT_ENCODING`][5] that will work (besides "identity," which does
- nothing) are "deflate" and "gzip" If a response is encoded using the
- "compress" or methods, libcurl will return an error indicating that the
- response could not be decoded.  If <string> is NULL no Accept-Encoding header
- is generated.  If <string> is a zero-length string, then an Accept-Encoding
- header containing all supported encodings will be generated.
+ Currently, libcurl does support multiple encodings but only
+ understands how to process responses that use the "deflate", "gzip" and/or
+ "br" content encodings, so the only values for [`CURLOPT_ACCEPT_ENCODING`][5]
+ that will work (besides "identity," which does nothing) are "deflate",
+ "gzip" and "br". If a response is encoded using the "compress" or methods,
+ libcurl will return an error indicating that the response could
+ not be decoded.  If <string> is NULL no Accept-Encoding header is generated.
+ If <string> is a zero-length string, then an Accept-Encoding header
+ containing all supported encodings will be generated.
 
  The [`CURLOPT_ACCEPT_ENCODING`][5] must be set to any non-NULL value for
  content to be automatically decoded.  If it is not set and the server still
@@ -767,7 +753,7 @@ Track Down Memory Leaks
 
   Rebuild libcurl with -DCURLDEBUG (usually, rerunning configure with
   --enable-debug fixes this). 'make clean' first, then 'make' so that all
-  files actually are rebuilt properly. It will also make sense to build
+  files are actually rebuilt properly. It will also make sense to build
   libcurl with the debug option (usually -g to the compiler) so that debugging
   it will be easier if you actually do find a leak in the library.
 
@@ -828,16 +814,16 @@ Track Down Memory Leaks
   We also added a timer callback that makes libcurl call the application when
   the timeout value changes, and you set that with [`curl_multi_setopt()`][9]
   and the [`CURLMOPT_TIMERFUNCTION`][10] option. To get this to work,
-  Internally, there's an added a struct to each easy handle in which we store
+  Internally, there's an added struct to each easy handle in which we store
   an "expire time" (if any). The structs are then "splay sorted" so that we
   can add and remove times from the linked list and yet somewhat swiftly
-  figure out both how long time there is until the next nearest timer expires
+  figure out both how long there is until the next nearest timer expires
   and which timer (handle) we should take care of now. Of course, the upside
   of all this is that we get a [`curl_multi_timeout()`][8] that should also
   work with old-style applications that use [`curl_multi_perform()`][11].
 
   We created an internal "socket to easy handles" hash table that given
-  a socket (file descriptor) return the easy handle that waits for action on
+  a socket (file descriptor) returns the easy handle that waits for action on
   that socket.  This hash is made using the already existing hash code
   (previously only used for the DNS cache).
 
@@ -949,8 +935,8 @@ for older and later versions as things don't change drastically that often.
   until it should be checked - normally some sort of timeout. Each `Curl_easy`
   has one node in the tree.
 
-  `->sockhash` is a hash table to allow fast lookups of socket descriptor to
-  which `Curl_easy` that uses that descriptor. This is necessary for the
+  `->sockhash` is a hash table to allow fast lookups of socket descriptor for
+  which `Curl_easy` uses that descriptor. This is necessary for the
   `multi_socket` API.
 
   `->conn_cache` points to the connection cache. It keeps track of all
@@ -973,8 +959,7 @@ for older and later versions as things don't change drastically that often.
   to work with.
 
   `->scheme` is the URL scheme name, usually spelled out in uppercase. That's
-  "HTTP" or "FTP" etc. SSL versions of the protcol need its own `Curl_handler`
-  setup so HTTPS separate from HTTP.
+  "HTTP" or "FTP" etc. SSL versions of the protocol need their own `Curl_handler` setup so HTTPS separate from HTTP.
 
   `->setup_connection` is called to allow the protocol code to allocate
   protocol specific data that then gets associated with that `Curl_easy` for
@@ -1035,11 +1020,11 @@ for older and later versions as things don't change drastically that often.
 
   - `PROTOPT_CLOSEACTION` - this protocol has actions to do before closing the
     connection. This flag is no longer used by code, yet still set for a bunch
-    protocol handlers.
+    of protocol handlers.
 
   - `PROTOPT_DIRLOCK` - "direction lock". The SSH protocols set this bit to
     limit which "direction" of socket actions that the main engine will
-    concern itself about.
+    concern itself with.
 
   - `PROTOPT_NONETWORK` - a protocol that doesn't use network (read file:)
 
@@ -1060,7 +1045,7 @@ for older and later versions as things don't change drastically that often.
   The libcurl share API allocates a `Curl_share` struct, exposed to the
   external API as "CURLSH *".
 
-  The idea is that the struct can have a set of own versions of caches and
+  The idea is that the struct can have a set of its own versions of caches and
   pools and then by providing this struct in the `CURLOPT_SHARE` option, those
   specific `Curl_easy`s will use the caches/pools that this share handle
   holds.
@@ -1081,7 +1066,7 @@ for older and later versions as things don't change drastically that often.
 
 [1]: https://curl.haxx.se/libcurl/c/curl_easy_setopt.html
 [2]: https://curl.haxx.se/libcurl/c/curl_easy_init.html
-[3]: http://c-ares.haxx.se/
+[3]: https://c-ares.haxx.se/
 [4]: https://tools.ietf.org/html/rfc7230 "RFC 7230"
 [5]: https://curl.haxx.se/libcurl/c/CURLOPT_ACCEPT_ENCODING.html
 [6]: https://curl.haxx.se/docs/manpage.html#--compressed
@@ -1093,3 +1078,4 @@ for older and later versions as things don't change drastically that often.
 [12]: https://curl.haxx.se/libcurl/c/curl_multi_fdset.html
 [13]: https://curl.haxx.se/libcurl/c/curl_multi_add_handle.html
 [14]: https://curl.haxx.se/libcurl/c/curl_multi_info_read.html
+[15]: https://tools.ietf.org/html/rfc7231#section-3.1.2.2

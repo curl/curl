@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+RETR
+</keywords>
+</info>
+# Server-side
+<reply>
+<servercmd>
+REPLY PASS 633 XXXXXXXX\x00\x00XXXXXXXX
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<features>
+GSS-API
+</features>
+ <name>
+FTP with 633 response before gss initialized
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/1282
+</command>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+</protocol>
+
+# 67 == CURLE_LOGIN_DENIED
+<errorcode>
+67
+</errorcode>
+</verify>
+</testcase>

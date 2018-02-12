@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+[] range
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+
+bytes
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+globbing range with same start and stop
+</name>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/[a-a][1-1][b-b:1][2-2:1]/1283 -o "log/outfile1283_#1#2#3#4.dump"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /a1b2/1283 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file name="log/outfile1283_a1b2.dump">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+
+bytes
+</file>
+</verify>
+</testcase>

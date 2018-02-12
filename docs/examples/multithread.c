@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,10 +33,10 @@
 /*
   List of URLs to fetch.
 
-  If you intend to use a SSL-based protocol here you MUST setup the OpenSSL
-  callback functions as described here:
+  If you intend to use a SSL-based protocol here you might need to setup TLS
+  library mutex callbacks as described here:
 
-  https://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+  https://curl.haxx.se/libcurl/c/threadsafe.html
 
 */
 const char * const urls[NUMT]= {
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
   /* Must initialize libcurl before any threads are started */
   curl_global_init(CURL_GLOBAL_ALL);
 
-  for(i=0; i< NUMT; i++) {
+  for(i = 0; i< NUMT; i++) {
     error = pthread_create(&tid[i],
                            NULL, /* default attributes please */
                            pull_one_url,
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
   }
 
   /* now wait for all threads to terminate */
-  for(i=0; i< NUMT; i++) {
+  for(i = 0; i< NUMT; i++) {
     error = pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }

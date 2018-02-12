@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
+ * Copyright (C) 2010, 2017, Howard Chu, <hyc@openldap.org>
  * Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -51,6 +51,25 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/*
+ * Uncommenting this will enable the built-in debug logging of the openldap
+ * library. The debug log level can be set using the CURL_OPENLDAP_TRACE
+ * environment variable. The debug output is written to stderr.
+ *
+ * The library supports the following debug flags:
+ * LDAP_DEBUG_NONE         0x0000
+ * LDAP_DEBUG_TRACE        0x0001
+ * LDAP_DEBUG_CONSTRUCT    0x0002
+ * LDAP_DEBUG_DESTROY      0x0004
+ * LDAP_DEBUG_PARAMETER    0x0008
+ * LDAP_DEBUG_ANY          0xffff
+ *
+ * For example, use CURL_OPENLDAP_TRACE=0 for no debug,
+ * CURL_OPENLDAP_TRACE=2 for LDAP_DEBUG_CONSTRUCT messages only,
+ * CURL_OPENLDAP_TRACE=65535 for all debug message levels.
+ */
+/* #define CURL_OPENLDAP_DEBUG */
+
 #ifndef _LDAP_PVT_H
 extern int ldap_pvt_url_scheme2proto(const char *);
 extern int ldap_init_fd(ber_socket_t fd, int proto, const char *url,
@@ -85,6 +104,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* perform_getsock */
   ldap_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -110,6 +130,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* perform_getsock */
   ldap_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_LDAPS,                           /* defport */
   CURLPROTO_LDAP,                       /* protocol */
   PROTOPT_SSL                           /* flags */
@@ -150,7 +171,7 @@ static CURLcode ldap_setup_connection(struct connectdata *conn)
 {
   ldapconninfo *li;
   LDAPURLDesc *lud;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
   int rc, proto;
   CURLcode status;
 
@@ -196,11 +217,20 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
   (void)done;
 
   strcpy(hosturl, "ldap");
-  ptr = hosturl+4;
+  ptr = hosturl + 4;
   if(conn->handler->flags & PROTOPT_SSL)
     *ptr++ = 's';
   snprintf(ptr, sizeof(hosturl)-(ptr-hosturl), "://%s:%d",
     conn->host.name, conn->remote_port);
+
+#ifdef CURL_OPENLDAP_DEBUG
+  static int do_trace = 0;
+  const char *env = getenv("CURL_OPENLDAP_TRACE");
+  do_trace = (env && strtol(env, NULL, 10) > 0);
+  if(do_trace) {
+    ldap_set_option(li->ld, LDAP_OPT_DEBUG_LEVEL, &do_trace);
+  }
+#endif
 
   rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
   if(rc) {
@@ -352,7 +382,7 @@ static CURLcode ldap_do(struct connectdata *conn, bool *done)
   int rc = 0;
   LDAPURLDesc *ludp = NULL;
   int msgid;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
 
   connkeep(conn, "OpenLDAP do");
 
@@ -517,7 +547,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
       else
         binary = 0;
 
-      for(i=0; bvals[i].bv_val != NULL; i++) {
+      for(i = 0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
         writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
         if(writeerr) {
@@ -547,7 +577,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
           else {
             /* check for unprintable characters */
             unsigned int j;
-            for(j=0; j<bvals[i].bv_len; j++)
+            for(j = 0; j<bvals[i].bv_len; j++)
               if(!ISPRINT(bvals[i].bv_val[j])) {
                 binval = 1;
                 break;
@@ -675,7 +705,7 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
   ber_slen_t ret;
   CURLcode err = CURLE_RECV_ERROR;
 
-  ret = li->recv(conn, FIRSTSOCKET, buf, len, &err);
+  ret = (li->recv)(conn, FIRSTSOCKET, buf, len, &err);
   if(ret < 0 && err == CURLE_AGAIN) {
     SET_SOCKERRNO(EWOULDBLOCK);
   }
@@ -690,7 +720,7 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
   ber_slen_t ret;
   CURLcode err = CURLE_SEND_ERROR;
 
-  ret = li->send(conn, FIRSTSOCKET, buf, len, &err);
+  ret = (li->send)(conn, FIRSTSOCKET, buf, len, &err);
   if(ret < 0 && err == CURLE_AGAIN) {
     SET_SOCKERRNO(EWOULDBLOCK);
   }

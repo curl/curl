@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, DirecTV, Contact: Eric Hu, <ehu@directv.com>.
- * Copyright (C) 2010 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,25 +47,16 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+struct ssl_backend_data {
+  SSL_CTX* ssl_ctx;
+  SSL*     ssl;
+};
 
-/* Global axTLS init, called from Curl_ssl_init() */
-int Curl_axtls_init(void)
-{
-/* axTLS has no global init.  Everything is done through SSL and SSL_CTX
- * structs stored in connectdata structure.  Perhaps can move to axtls.h.
- */
-  return 1;
-}
-
-int Curl_axtls_cleanup(void)
-{
-  /* axTLS has no global cleanup.  Perhaps can move this to axtls.h. */
-  return 1;
-}
+#define BACKEND connssl->backend
 
 static CURLcode map_error_to_curl(int axtls_err)
 {
-  switch (axtls_err) {
+  switch(axtls_err) {
   case SSL_ERROR_NOT_SUPPORTED:
   case SSL_ERROR_INVALID_VERSION:
   case -70:                       /* protocol version alert from server */
@@ -120,13 +111,13 @@ static Curl_send axtls_send;
 
 static void free_ssl_structs(struct ssl_connect_data *connssl)
 {
-  if(connssl->ssl) {
-    ssl_free (connssl->ssl);
-    connssl->ssl = NULL;
+  if(BACKEND->ssl) {
+    ssl_free(BACKEND->ssl);
+    BACKEND->ssl = NULL;
   }
-  if(connssl->ssl_ctx) {
-    ssl_ctx_free(connssl->ssl_ctx);
-    connssl->ssl_ctx = NULL;
+  if(BACKEND->ssl_ctx) {
+    ssl_ctx_free(BACKEND->ssl_ctx);
+    BACKEND->ssl_ctx = NULL;
   }
 }
 
@@ -137,6 +128,7 @@ static void free_ssl_structs(struct ssl_connect_data *connssl)
  */
 static CURLcode connect_prep(struct connectdata *conn, int sockindex)
 {
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct Curl_easy *data = conn->data;
   SSL_CTX *ssl_ctx;
   SSL *ssl = NULL;
@@ -151,14 +143,20 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     SSL_SERVER_VERIFY_LATER |
     SSL_CONNECT_IN_PARTS;
 
-  if(conn->ssl[sockindex].state == ssl_connection_complete)
+  if(connssl->state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
        same connection */
     return CURLE_OK;
 
+  if(SSL_CONN_CONFIG(version_max) != CURL_SSLVERSION_MAX_NONE) {
+    failf(data, "axtls does not support CURL_SSLVERSION_MAX");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+
   /* axTLS only supports TLSv1 */
   /* check to see if we've been told to use an explicit SSL/TLS version */
-  switch(data->set.ssl.version) {
+  switch(SSL_CONN_CONFIG(version)) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
     break;
@@ -179,21 +177,21 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  conn->ssl[sockindex].ssl_ctx = ssl_ctx;
-  conn->ssl[sockindex].ssl = NULL;
+  BACKEND->ssl_ctx = ssl_ctx;
+  BACKEND->ssl = NULL;
 
   /* Load the trusted CA cert bundle file */
-  if(data->set.ssl.CAfile) {
-    if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT, data->set.ssl.CAfile, NULL)
-       != SSL_OK) {
+  if(SSL_CONN_CONFIG(CAfile)) {
+    if(ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT,
+                    SSL_CONN_CONFIG(CAfile), NULL) != SSL_OK) {
       infof(data, "error reading ca cert file %s \n",
-            data->set.ssl.CAfile);
-      if(data->set.ssl.verifypeer) {
+            SSL_CONN_CONFIG(CAfile));
+      if(SSL_CONN_CONFIG(verifypeer)) {
         return CURLE_SSL_CACERT_BADFILE;
       }
     }
     else
-      infof(data, "found certificates in %s\n", data->set.ssl.CAfile);
+      infof(data, "found certificates in %s\n", SSL_CONN_CONFIG(CAfile));
   }
 
   /* gtls.c tasks we're skipping for now:
@@ -205,15 +203,15 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
    */
 
   /* Load client certificate */
-  if(data->set.str[STRING_CERT]) {
-    i=0;
+  if(SSL_SET_OPTION(cert)) {
+    i = 0;
     /* Instead of trying to analyze cert type here, let axTLS try them all. */
     while(cert_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, cert_types[i],
-                                    data->set.str[STRING_CERT], NULL);
+                                    SSL_SET_OPTION(cert), NULL);
       if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read cert file %s \n",
-              data->set.str[STRING_CERT]);
+              SSL_SET_OPTION(cert));
         break;
       }
       i++;
@@ -221,7 +219,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     /* Tried all cert types, none worked. */
     if(cert_types[i] == 0) {
       failf(data, "%s is not x509 or pkcs12 format",
-            data->set.str[STRING_CERT]);
+            SSL_SET_OPTION(cert));
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -229,15 +227,15 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
   /* Load client key.
      If a pkcs12 file successfully loaded a cert, then there's nothing to do
      because the key has already been loaded. */
-  if(data->set.str[STRING_KEY] && cert_types[i] != SSL_OBJ_PKCS12) {
-    i=0;
+  if(SSL_SET_OPTION(key) && cert_types[i] != SSL_OBJ_PKCS12) {
+    i = 0;
     /* Instead of trying to analyze key type here, let axTLS try them all. */
     while(key_types[i] != 0) {
       ssl_fcn_return = ssl_obj_load(ssl_ctx, key_types[i],
-                                    data->set.str[STRING_KEY], NULL);
+                                    SSL_SET_OPTION(key), NULL);
       if(ssl_fcn_return == SSL_OK) {
         infof(data, "successfully read key file %s \n",
-              data->set.str[STRING_KEY]);
+              SSL_SET_OPTION(key));
         break;
       }
       i++;
@@ -245,7 +243,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
     /* Tried all key types, none worked. */
     if(key_types[i] == 0) {
       failf(data, "Failure: %s is not a supported key file",
-            data->set.str[STRING_KEY]);
+            SSL_SET_OPTION(key));
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -256,26 +254,43 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
    * 2) setting up callbacks.  these seem gnutls specific
    */
 
-  if(conn->ssl_config.sessionid) {
+  if(SSL_SET_OPTION(primary.sessionid)) {
     const uint8_t *ssl_sessionid;
     size_t ssl_idsize;
 
     /* In axTLS, handshaking happens inside ssl_client_new. */
     Curl_ssl_sessionid_lock(conn);
-    if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize)) {
+    if(!Curl_ssl_getsessionid(conn, (void **) &ssl_sessionid, &ssl_idsize,
+                              sockindex)) {
       /* we got a session id, use it! */
-      infof (data, "SSL re-using session ID\n");
+      infof(data, "SSL re-using session ID\n");
       ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex],
-                           ssl_sessionid, (uint8_t)ssl_idsize);
+                           ssl_sessionid, (uint8_t)ssl_idsize, NULL);
     }
     Curl_ssl_sessionid_unlock(conn);
   }
 
   if(!ssl)
-    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0);
+    ssl = ssl_client_new(ssl_ctx, conn->sock[sockindex], NULL, 0, NULL);
 
-  conn->ssl[sockindex].ssl = ssl;
+  BACKEND->ssl = ssl;
   return CURLE_OK;
+}
+
+static void Curl_axtls_close(struct connectdata *conn, int sockindex)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+
+  infof(conn->data, "  Curl_axtls_close\n");
+
+    /* line from openssl.c: (void)SSL_shutdown(BACKEND->ssl);
+       axTLS compat layer does nothing for SSL_shutdown */
+
+    /* The following line is from openssl.c.  There seems to be no axTLS
+       equivalent.  ssl_free and ssl_ctx_free close things.
+       SSL_set_connect_state(connssl->handle); */
+
+  free_ssl_structs(connssl);
 }
 
 /*
@@ -285,19 +300,24 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
 static CURLcode connect_finish(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
-  SSL *ssl = conn->ssl[sockindex].ssl;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  SSL *ssl = BACKEND->ssl;
   const char *peer_CN;
   uint32_t dns_altname_index;
   const char *dns_altname;
   int8_t found_subject_alt_names = 0;
   int8_t found_subject_alt_name_matching_conn = 0;
+  const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
+    conn->host.name;
+  const char * const dispname = SSL_IS_PROXY() ?
+    conn->http_proxy.host.dispname : conn->host.dispname;
 
   /* Here, gtls.c gets the peer certificates and fails out depending on
    * settings in "data."  axTLS api doesn't have get cert chain fcn, so omit?
    */
 
   /* Verify server's certificate */
-  if(data->set.ssl.verifypeer) {
+  if(SSL_CONN_CONFIG(verifypeer)) {
     if(ssl_verify_cert(ssl) != SSL_OK) {
       Curl_axtls_close(conn, sockindex);
       failf(data, "server cert verify failed");
@@ -328,8 +348,8 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
     found_subject_alt_names = 1;
 
     infof(data, "\tComparing subject alt name DNS with hostname: %s <-> %s\n",
-          dns_altname, conn->host.name);
-    if(Curl_cert_hostcheck(dns_altname, conn->host.name)) {
+          dns_altname, hostname);
+    if(Curl_cert_hostcheck(dns_altname, hostname)) {
       found_subject_alt_name_matching_conn = 1;
       break;
     }
@@ -337,23 +357,21 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
 
   /* RFC2818 checks */
   if(found_subject_alt_names && !found_subject_alt_name_matching_conn) {
-    if(data->set.ssl.verifyhost) {
+    if(SSL_CONN_CONFIG(verifyhost)) {
       /* Break connection ! */
       Curl_axtls_close(conn, sockindex);
-      failf(data, "\tsubjectAltName(s) do not match %s\n",
-            conn->host.dispname);
+      failf(data, "\tsubjectAltName(s) do not match %s\n", dispname);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     else
-      infof(data, "\tsubjectAltName(s) do not match %s\n",
-            conn->host.dispname);
+      infof(data, "\tsubjectAltName(s) do not match %s\n", dispname);
   }
   else if(found_subject_alt_names == 0) {
     /* Per RFC2818, when no Subject Alt Names were available, examine the peer
        CN as a legacy fallback */
     peer_CN = ssl_get_cert_dn(ssl, SSL_X509_CERT_COMMON_NAME);
     if(peer_CN == NULL) {
-      if(data->set.ssl.verifyhost) {
+      if(SSL_CONN_CONFIG(verifyhost)) {
         Curl_axtls_close(conn, sockindex);
         failf(data, "unable to obtain common name from peer certificate");
         return CURLE_PEER_FAILED_VERIFICATION;
@@ -362,34 +380,34 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
         infof(data, "unable to obtain common name from peer certificate");
     }
     else {
-      if(!Curl_cert_hostcheck((const char *)peer_CN, conn->host.name)) {
-        if(data->set.ssl.verifyhost) {
+      if(!Curl_cert_hostcheck((const char *)peer_CN, hostname)) {
+        if(SSL_CONN_CONFIG(verifyhost)) {
           /* Break connection ! */
           Curl_axtls_close(conn, sockindex);
           failf(data, "\tcommon name \"%s\" does not match \"%s\"\n",
-                peer_CN, conn->host.dispname);
+                peer_CN, dispname);
           return CURLE_PEER_FAILED_VERIFICATION;
         }
         else
           infof(data, "\tcommon name \"%s\" does not match \"%s\"\n",
-                peer_CN, conn->host.dispname);
+                peer_CN, dispname);
       }
     }
   }
 
   /* General housekeeping */
-  conn->ssl[sockindex].state = ssl_connection_complete;
+  connssl->state = ssl_connection_complete;
   conn->recv[sockindex] = axtls_recv;
   conn->send[sockindex] = axtls_send;
 
   /* Put our freshly minted SSL session in cache */
-  if(conn->ssl_config.sessionid) {
-    const uint8_t *ssl_sessionid = ssl_get_session_id_size(ssl);
-    size_t ssl_idsize = ssl_get_session_id(ssl);
+  if(SSL_SET_OPTION(primary.sessionid)) {
+    const uint8_t *ssl_sessionid = ssl_get_session_id(ssl);
+    size_t ssl_idsize = ssl_get_session_id_size(ssl);
     Curl_ssl_sessionid_lock(conn);
-    if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize)
-       != CURLE_OK)
-      infof (data, "failed to add session to cache\n");
+    if(Curl_ssl_addsessionid(conn, (void *) ssl_sessionid, ssl_idsize,
+                             sockindex) != CURLE_OK)
+      infof(data, "failed to add session to cache\n");
     Curl_ssl_sessionid_unlock(conn);
   }
 
@@ -400,11 +418,10 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
  * Use axTLS's non-blocking connection feature to open an SSL connection.
  * This is called after a TCP connection is already established.
  */
-CURLcode Curl_axtls_connect_nonblocking(
-    struct connectdata *conn,
-    int sockindex,
-    bool *done)
+static CURLcode Curl_axtls_connect_nonblocking(struct connectdata *conn,
+                                               int sockindex, bool *done)
 {
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode conn_step;
   int ssl_fcn_return;
   int i;
@@ -412,23 +429,23 @@ CURLcode Curl_axtls_connect_nonblocking(
  *done = FALSE;
   /* connectdata is calloc'd and connecting_state is only changed in this
      function, so this is safe, as the state is effectively initialized. */
-  if(conn->ssl[sockindex].connecting_state == ssl_connect_1) {
+  if(connssl->connecting_state == ssl_connect_1) {
     conn_step = connect_prep(conn, sockindex);
     if(conn_step != CURLE_OK) {
       Curl_axtls_close(conn, sockindex);
       return conn_step;
     }
-    conn->ssl[sockindex].connecting_state = ssl_connect_2;
+    connssl->connecting_state = ssl_connect_2;
   }
 
-  if(conn->ssl[sockindex].connecting_state == ssl_connect_2) {
+  if(connssl->connecting_state == ssl_connect_2) {
     /* Check to make sure handshake was ok. */
-    if(ssl_handshake_status(conn->ssl[sockindex].ssl) != SSL_OK) {
+    if(ssl_handshake_status(BACKEND->ssl) != SSL_OK) {
       /* Loop to perform more work in between sleeps. This is work around the
          fact that axtls does not expose any knowledge about when work needs
          to be performed. This can save ~25% of time on SSL handshakes. */
-      for(i=0; i<5; i++) {
-        ssl_fcn_return = ssl_read(conn->ssl[sockindex].ssl, NULL);
+      for(i = 0; i<5; i++) {
+        ssl_fcn_return = ssl_read(BACKEND->ssl, NULL);
         if(ssl_fcn_return < 0) {
           Curl_axtls_close(conn, sockindex);
           ssl_display_error(ssl_fcn_return); /* goes to stdout. */
@@ -437,11 +454,11 @@ CURLcode Curl_axtls_connect_nonblocking(
         return CURLE_OK;
       }
     }
-    infof (conn->data, "handshake completed successfully\n");
-    conn->ssl[sockindex].connecting_state = ssl_connect_3;
+    infof(conn->data, "handshake completed successfully\n");
+    connssl->connecting_state = ssl_connect_3;
   }
 
-  if(conn->ssl[sockindex].connecting_state == ssl_connect_3) {
+  if(connssl->connecting_state == ssl_connect_3) {
     conn_step = connect_finish(conn, sockindex);
     if(conn_step != CURLE_OK) {
       Curl_axtls_close(conn, sockindex);
@@ -449,15 +466,15 @@ CURLcode Curl_axtls_connect_nonblocking(
     }
 
     /* Reset connect state */
-    conn->ssl[sockindex].connecting_state = ssl_connect_1;
+    connssl->connecting_state = ssl_connect_1;
 
     *done = TRUE;
     return CURLE_OK;
   }
 
   /* Unrecognized state.  Things are very bad. */
-  conn->ssl[sockindex].state  = ssl_connection_none;
-  conn->ssl[sockindex].connecting_state = ssl_connect_1;
+  connssl->state  = ssl_connection_none;
+  connssl->connecting_state = ssl_connect_1;
   /* Return value perhaps not strictly correct, but distinguishes the issue.*/
   return CURLE_BAD_FUNCTION_ARGUMENT;
 }
@@ -467,15 +484,13 @@ CURLcode Curl_axtls_connect_nonblocking(
  * This function is called after the TCP connect has completed. Setup the TLS
  * layer and do all necessary magic for a blocking connect.
  */
-CURLcode
-Curl_axtls_connect(struct connectdata *conn,
-                  int sockindex)
-
+static CURLcode Curl_axtls_connect(struct connectdata *conn, int sockindex)
 {
   struct Curl_easy *data = conn->data;
   CURLcode conn_step = connect_prep(conn, sockindex);
   int ssl_fcn_return;
-  SSL *ssl = conn->ssl[sockindex].ssl;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  SSL *ssl = BACKEND->ssl;
   long timeout_ms;
 
   if(conn_step != CURLE_OK) {
@@ -503,7 +518,7 @@ Curl_axtls_connect(struct connectdata *conn,
     /* TODO: avoid polling */
     Curl_wait_ms(10);
   }
-  infof (conn->data, "handshake completed successfully\n");
+  infof(conn->data, "handshake completed successfully\n");
 
   conn_step = connect_finish(conn, sockindex);
   if(conn_step != CURLE_OK) {
@@ -521,8 +536,9 @@ static ssize_t axtls_send(struct connectdata *conn,
                           size_t len,
                           CURLcode *err)
 {
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   /* ssl_write() returns 'int' while write() and send() returns 'size_t' */
-  int rc = ssl_write(conn->ssl[sockindex].ssl, mem, (int)len);
+  int rc = ssl_write(BACKEND->ssl, mem, (int)len);
 
   infof(conn->data, "  axtls_send\n");
 
@@ -535,27 +551,11 @@ static ssize_t axtls_send(struct connectdata *conn,
   return rc;
 }
 
-void Curl_axtls_close(struct connectdata *conn, int sockindex)
-{
-  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-
-  infof(conn->data, "  Curl_axtls_close\n");
-
-    /* line from openssl.c: (void)SSL_shutdown(connssl->ssl);
-       axTLS compat layer does nothing for SSL_shutdown */
-
-    /* The following line is from openssl.c.  There seems to be no axTLS
-       equivalent.  ssl_free and ssl_ctx_free close things.
-       SSL_set_connect_state(connssl->handle); */
-
-  free_ssl_structs(connssl);
-}
-
 /*
  * This function is called to shut down the SSL layer but keep the
  * socket open (CCC - Clear Command Channel)
  */
-int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
+static int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
 {
   /* Outline taken from openssl.c since functions are in axTLS compat layer.
      axTLS's error set is much smaller, so a lot of error-handling was removed.
@@ -575,17 +575,17 @@ int Curl_axtls_shutdown(struct connectdata *conn, int sockindex)
 
   /* axTLS compat layer does nothing for SSL_shutdown, so we do nothing too
   if(data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE)
-      (void)SSL_shutdown(connssl->ssl);
+      (void)SSL_shutdown(BACKEND->ssl);
   */
 
-  if(connssl->ssl) {
+  if(BACKEND->ssl) {
     int what = SOCKET_READABLE(conn->sock[sockindex], SSL_SHUTDOWN_TIMEOUT);
     if(what > 0) {
       /* Something to read, let's do it and hope that it is the close
          notify alert from the server.  buf is managed internally by
          axTLS and will be released upon calling ssl_free via
          free_ssl_structs. */
-      nread = (ssize_t)ssl_read(connssl->ssl, &buf);
+      nread = (ssize_t)ssl_read(BACKEND->ssl, &buf);
 
       if(nread < SSL_OK) {
         failf(data, "close notify alert not received during shutdown");
@@ -621,7 +621,7 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
 
   *err = CURLE_OK;
   if(connssl) {
-    ret = ssl_read(connssl->ssl, &read_buf);
+    ret = ssl_read(BACKEND->ssl, &read_buf);
     if(ret > SSL_OK) {
       /* ssl_read returns SSL_OK if there is more data to read, so if it is
          larger, then all data has been read already.  */
@@ -654,9 +654,10 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
  *     0 means the connection has been closed
  *    -1 means the connection status is unknown
  */
-int Curl_axtls_check_cxn(struct connectdata *conn)
+static int Curl_axtls_check_cxn(struct connectdata *conn)
 {
-  /* openssl.c line: rc = SSL_peek(conn->ssl[FIRSTSOCKET].ssl, (void*)&buf, 1);
+  /* openssl.c line:
+     rc = SSL_peek(conn->ssl[FIRSTSOCKET].backend->ssl, (void*)&buf, 1);
      axTLS compat layer always returns the last argument, so connection is
      always alive? */
 
@@ -664,7 +665,7 @@ int Curl_axtls_check_cxn(struct connectdata *conn)
    return 1; /* connection still in place */
 }
 
-void Curl_axtls_session_free(void *ptr)
+static void Curl_axtls_session_free(void *ptr)
 {
   (void)ptr;
   /* free the ID */
@@ -672,14 +673,13 @@ void Curl_axtls_session_free(void *ptr)
      compatibility layer does nothing, so we do nothing too. */
 }
 
-size_t Curl_axtls_version(char *buffer, size_t size)
+static size_t Curl_axtls_version(char *buffer, size_t size)
 {
   return snprintf(buffer, size, "axTLS/%s", ssl_version());
 }
 
-int Curl_axtls_random(struct Curl_easy *data,
-                      unsigned char *entropy,
-                      size_t length)
+static CURLcode Curl_axtls_random(struct Curl_easy *data,
+                                  unsigned char *entropy, size_t length)
 {
   static bool ssl_seeded = FALSE;
   (void)data;
@@ -691,7 +691,52 @@ int Curl_axtls_random(struct Curl_easy *data,
     RNG_initialize();
   }
   get_random((int)length, entropy);
-  return 0;
+  return CURLE_OK;
 }
+
+static void *Curl_axtls_get_internals(struct ssl_connect_data *connssl,
+                                      CURLINFO info UNUSED_PARAM)
+{
+  (void)info;
+  return BACKEND->ssl;
+}
+
+const struct Curl_ssl Curl_ssl_axtls = {
+  { CURLSSLBACKEND_AXTLS, "axtls" }, /* info */
+
+  0, /* have_ca_path */
+  0, /* have_certinfo */
+  0, /* have_pinnedpubkey */
+  0, /* have_ssl_ctx */
+  0, /* support_https_proxy */
+
+  sizeof(struct ssl_backend_data),
+
+  /*
+   * axTLS has no global init.  Everything is done through SSL and SSL_CTX
+   * structs stored in connectdata structure.
+   */
+  Curl_none_init,                 /* init */
+  /* axTLS has no global cleanup. */
+  Curl_none_cleanup,              /* cleanup */
+  Curl_axtls_version,             /* version */
+  Curl_axtls_check_cxn,           /* check_cxn */
+  Curl_axtls_shutdown,            /* shutdown */
+  Curl_none_data_pending,         /* data_pending */
+  Curl_axtls_random,              /* random */
+  Curl_none_cert_status_request,  /* cert_status_request */
+  Curl_axtls_connect,             /* connect */
+  Curl_axtls_connect_nonblocking, /* connect_nonblocking */
+  Curl_axtls_get_internals,       /* get_internals */
+  Curl_axtls_close,               /* close_one */
+  Curl_none_close_all,            /* close_all */
+  Curl_axtls_session_free,        /* session_free */
+  Curl_none_set_engine,           /* set_engine */
+  Curl_none_set_engine_default,   /* set_engine_default */
+  Curl_none_engines_list,         /* engines_list */
+  Curl_none_false_start,          /* false_start */
+  Curl_none_md5sum,               /* md5sum */
+  NULL                            /* sha256sum */
+};
 
 #endif /* USE_AXTLS */

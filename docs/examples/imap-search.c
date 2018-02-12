@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,7 +48,7 @@ int main(void)
     /* This is mailbox folder to select */
     curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/INBOX");
 
-    /* Set the SEARCH command specifing what we want to search for. Note that
+    /* Set the SEARCH command specifying what we want to search for. Note that
      * this can contain a message sequence set and a number of search criteria
      * keywords including flags such as ANSWERED, DELETED, DRAFT, FLAGGED, NEW,
      * RECENT and SEEN. For more information about the search criteria please

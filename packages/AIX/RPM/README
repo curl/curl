@@ -29,5 +29,5 @@ Default is to build with ssl support.
 Lastly, the spec file expects the Curl source distribution file to be
 in .tar.bz2 format.
 
-The nifty cURL header of this README is a ripoff of the vms/readme file.
+The nifty curl header of this README is a ripoff of the vms/readme file.
 

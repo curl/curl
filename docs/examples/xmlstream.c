@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -127,7 +127,7 @@ int main(void)
   XML_SetCharacterDataHandler(parser, characterDataHandler);
 
   /* Initialize a libcurl handle. */
-  curl_global_init(CURL_GLOBAL_ALL ^ CURL_GLOBAL_SSL);
+  curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL,
                    "http://www.w3schools.com/xml/simple.xml");

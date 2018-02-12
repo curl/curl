@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -76,6 +76,8 @@ Prints out all files in "log/" to stdout when a test case fails. Very
 practical when used in the automated and distributed tests since then the
 people checking the failures and the reasons for them might not have physical
 access to the machine and logs.
+.IP "-R"
+Run the tests in a scrambled, or randomized, order instead of sequentially.
 .IP "-r"
 Display run time statistics. (Requires Perl Time::HiRes module)
 .IP "-rf"

@@ -93,7 +93,7 @@ announcement.
 Pre-notification
 ----------------
 
-If you think you are or should be eligible for a pre-notifcation about
+If you think you are or should be eligible for a pre-notification about
 upcoming security announcements for curl, we urge OS distros and similar
 vendors to primarily join the distros@openwall list as that is one of the
 purposes of that list - and not just for curl of course.
@@ -112,5 +112,5 @@ curl project and you have shown an understanding for the project and its way
 of working. You must've been around for a good while and you should have no
 plans in vanishing in the near future.
 
-We do not make the list of partipants public mostly because it tends to vary
+We do not make the list of participants public mostly because it tends to vary
 somewhat over time and a list somewhere will only risk getting outdated.

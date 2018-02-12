@@ -36,7 +36,7 @@ Note: this version is compiled without SSL support.
 %endif
 
 %package	devel
-Summary:	Development files for the curl libary
+Summary:	Development files for the curl library
 Group:		Development/Libraries
 %if %{SSL} == 1
 Requires: openssl >= 0.9.5

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,9 +75,7 @@
 
 #include "curl_setup.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #include <curl/curl.h>
 #include "strcase.h"
@@ -167,20 +165,20 @@ static const struct tzinfo tz[]= {
      RFC 1123) had their signs wrong. Here we use the correct signs to match
      actual military usage.
    */
-  {"A",  +1 * 60},         /* Alpha */
-  {"B",  +2 * 60},         /* Bravo */
-  {"C",  +3 * 60},         /* Charlie */
-  {"D",  +4 * 60},         /* Delta */
-  {"E",  +5 * 60},         /* Echo */
-  {"F",  +6 * 60},         /* Foxtrot */
-  {"G",  +7 * 60},         /* Golf */
-  {"H",  +8 * 60},         /* Hotel */
-  {"I",  +9 * 60},         /* India */
+  {"A",  1 * 60},         /* Alpha */
+  {"B",  2 * 60},         /* Bravo */
+  {"C",  3 * 60},         /* Charlie */
+  {"D",  4 * 60},         /* Delta */
+  {"E",  5 * 60},         /* Echo */
+  {"F",  6 * 60},         /* Foxtrot */
+  {"G",  7 * 60},         /* Golf */
+  {"H",  8 * 60},         /* Hotel */
+  {"I",  9 * 60},         /* India */
   /* "J", Juliet is not used as a timezone, to indicate the observer's local
      time */
-  {"K", +10 * 60},         /* Kilo */
-  {"L", +11 * 60},         /* Lima */
-  {"M", +12 * 60},         /* Mike */
+  {"K", 10 * 60},         /* Kilo */
+  {"L", 11 * 60},         /* Lima */
+  {"M", 12 * 60},         /* Mike */
   {"N",  -1 * 60},         /* November */
   {"O",  -2 * 60},         /* Oscar */
   {"P",  -3 * 60},         /* Papa */
@@ -205,14 +203,14 @@ static int checkday(const char *check, size_t len)
 {
   int i;
   const char * const *what;
-  bool found= FALSE;
+  bool found = FALSE;
   if(len > 3)
     what = &weekday[0];
   else
     what = &Curl_wkday[0];
-  for(i=0; i<7; i++) {
+  for(i = 0; i<7; i++) {
     if(strcasecompare(check, what[0])) {
-      found=TRUE;
+      found = TRUE;
       break;
     }
     what++;
@@ -224,12 +222,12 @@ static int checkmonth(const char *check)
 {
   int i;
   const char * const *what;
-  bool found= FALSE;
+  bool found = FALSE;
 
   what = &Curl_month[0];
-  for(i=0; i<12; i++) {
+  for(i = 0; i<12; i++) {
     if(strcasecompare(check, what[0])) {
-      found=TRUE;
+      found = TRUE;
       break;
     }
     what++;
@@ -244,12 +242,12 @@ static int checktz(const char *check)
 {
   unsigned int i;
   const struct tzinfo *what;
-  bool found= FALSE;
+  bool found = FALSE;
 
   what = tz;
-  for(i=0; i< sizeof(tz)/sizeof(tz[0]); i++) {
+  for(i = 0; i< sizeof(tz)/sizeof(tz[0]); i++) {
     if(strcasecompare(check, what->name)) {
-      found=TRUE;
+      found = TRUE;
       break;
     }
     what++;
@@ -331,21 +329,21 @@ static time_t my_timegm(struct my_tm *tm)
 static int parsedate(const char *date, time_t *output)
 {
   time_t t = 0;
-  int wdaynum=-1;  /* day of the week number, 0-6 (mon-sun) */
-  int monnum=-1;   /* month of the year number, 0-11 */
-  int mdaynum=-1; /* day of month, 1 - 31 */
-  int hournum=-1;
-  int minnum=-1;
-  int secnum=-1;
-  int yearnum=-1;
-  int tzoff=-1;
+  int wdaynum = -1;  /* day of the week number, 0-6 (mon-sun) */
+  int monnum = -1;   /* month of the year number, 0-11 */
+  int mdaynum = -1; /* day of month, 1 - 31 */
+  int hournum = -1;
+  int minnum = -1;
+  int secnum = -1;
+  int yearnum = -1;
+  int tzoff = -1;
   struct my_tm tm;
   enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
 
   while(*date && (part < 6)) {
-    bool found=FALSE;
+    bool found = FALSE;
 
     skip(&date);
 
@@ -386,7 +384,7 @@ static int parsedate(const char *date, time_t *output)
       /* a digit */
       int val;
       char *end;
-      int len=0;
+      int len = 0;
       if((secnum == -1) &&
          (3 == sscanf(date, "%02d:%02d:%02d%n",
                       &hournum, &minnum, &secnum, &len))) {
@@ -404,12 +402,12 @@ static int parsedate(const char *date, time_t *output)
         int error;
         int old_errno;
 
-        old_errno = ERRNO;
-        SET_ERRNO(0);
+        old_errno = errno;
+        errno = 0;
         lval = strtol(date, &end, 10);
-        error = ERRNO;
-        if(error != old_errno)
-          SET_ERRNO(old_errno);
+        error = errno;
+        if(errno != old_errno)
+          errno = old_errno;
 
         if(error)
           return PARSEDATE_FAIL;

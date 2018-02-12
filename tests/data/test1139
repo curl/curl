@@ -4,6 +4,7 @@
 source analysis
 symbols-in-versions
 documentation
+--manual
 </keywords>
 </info>
 
@@ -19,7 +20,7 @@ Verify that all libcurl options have man pages
  </name>
 
 <command type="perl">
-%SRCDIR/manpage-scan.pl %SRCDIR/..
+%SRCDIR/manpage-scan.pl %SRCDIR/.. %PWD/..
 </command>
 </client>
 

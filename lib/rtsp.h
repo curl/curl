@@ -25,13 +25,11 @@
 
 extern const struct Curl_handler Curl_handler_rtsp;
 
-bool Curl_rtsp_connisdead(struct connectdata *check);
 CURLcode Curl_rtsp_parseheader(struct connectdata *conn, char *header);
 
 #else
 /* disabled */
 #define Curl_rtsp_parseheader(x,y) CURLE_NOT_BUILT_IN
-#define Curl_rtsp_connisdead(x) TRUE
 
 #endif /* CURL_DISABLE_RTSP */
 

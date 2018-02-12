@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2015, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2012 - 2017, Steve Holme, <steve_holme@hotmail.com>.
 rem * Copyright (C) 2015, Jay Satiro, <raysatiro@yahoo.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
@@ -58,6 +58,11 @@ rem ***************************************************************************
     set VC_DESC=VC14
     set VC_TOOLSET=v140
     set "VC_PATH=Microsoft Visual Studio 14.0\VC"
+  ) else if /i "%~1" == "vc15" (
+    set VC_VER=15.0
+    set VC_DESC=VC15
+    set VC_TOOLSET=v141
+    set "VC_PATH=Microsoft Visual Studio\2017\Community\VC"
   ) else if /i "%~1" == "x86" (
     set BUILD_PLATFORM=x86
   ) else if /i "%~1" == "x64" (
@@ -119,14 +124,21 @@ rem ***************************************************************************
     if "%VC_VER%" == "11.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "12.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "14.0" set VCVARS_PLATFORM=amd64
+    if "%VC_VER%" == "15.0" set VCVARS_PLATFORM=amd64
   )
 
 :start
   echo.
-  call "%PF%\%VC_PATH%\vcvarsall" %VCVARS_PLATFORM%
+  set SAVED_PATH=%CD%
+
+  if "%VC_VER%" == "15.0" (
+    call "%PF%\%VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
+  ) else (
+    call "%PF%\%VC_PATH%\vcvarsall" %VCVARS_PLATFORM%
+  )
 
   echo.
-  set SAVED_PATH=%CD%
+  cd %SAVED_PATH%
   cd %START_DIR%
   goto %BUILD_PLATFORM%
 
@@ -287,6 +299,7 @@ rem ***************************************************************************
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
   echo vc14      - Use Visual Studio 2015
+  echo vc15      - Use Visual Studio 2017
   echo.
   echo Platform:
   echo.

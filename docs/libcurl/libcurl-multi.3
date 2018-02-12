@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -42,7 +42,7 @@ and when to ask libcurl to get/send data.
 complicated for the application.
 
 3. Enable the application to wait for action on its own file descriptors and
-curl's file descriptors simultaneous easily.
+curl's file descriptors simultaneously.
 
 4. Enable event-based handling and scaling transfers up to and beyond
 thousands of parallel connections.
@@ -173,8 +173,6 @@ the future, you should be aware of the following current restrictions:
 
 .nf
  - Name resolves unless the c-ares or threaded-resolver backends are used
- - NSS SSL connections
- - HTTP proxy CONNECT operations
  - SOCKS proxy handshakes
  - file:// transfers
  - TELNET transfers

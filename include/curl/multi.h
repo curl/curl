@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -218,7 +218,7 @@ CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
  *          curl_multi_cleanup().
  *
  *          The 'CURLMsg' struct is meant to be very simple and only contain
- *          very basic informations. If more involved information is wanted,
+ *          very basic information. If more involved information is wanted,
  *          we will provide the particular "transfer handle" in that struct
  *          and that should/could/would be used in subsequent
  *          curl_easy_getinfo() calls (or similar). The point being that we

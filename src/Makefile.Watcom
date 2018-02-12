@@ -22,7 +22,7 @@
 #***************************************************************************
 
 #
-#  Watcom / OpenWatcom / Win32 makefile for cURL.
+#  Watcom / OpenWatcom / Win32 makefile for curl.
 #
 
 .ERASE
@@ -156,7 +156,7 @@ RESOURCE = $(OBJ_DIR)/curl.res
 DIRS = $(OBJ_DIR)
 
 all: tool_hugehelp.c $(DIRS) $(TARGETS) .SYMBOLIC
-	@echo Welcome to cURL
+	@echo Welcome to curl
 
 clean: .SYMBOLIC
 	-rm -f $(OBJS)

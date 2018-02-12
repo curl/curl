@@ -4,7 +4,7 @@
                             | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
-The cURL Test Suite
+The curl Test Suite
 
  1. Running
   1.1 Requires to run
@@ -44,6 +44,7 @@ The cURL Test Suite
   stunnel (for HTTPS and FTPS tests)
   OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
   nghttpx (for HTTP/2 tests)
+  nroff (for --manual tests)
 
  1.2 Port numbers used by test servers
 
@@ -59,14 +60,24 @@ The cURL Test Suite
   - TCP/8999 for SCP/SFTP
   - TCP/9000 for SOCKS
   - TCP/9001 for POP3
-  - TCP/9002 for IMAP
-  - TCP/9003 for SMTP
-  - TCP/9004 for SMTP IPv6
-  - TCP/9005 for RTSP
-  - TCP/9006 for RTSP IPv6
-  - TCP/9007 for GOPHER
-  - TCP/9008 for GOPHER IPv6
-  - TCP/9008 for HTTPS server with TLS-SRP support
+  - TCP/9002 for POP3 IPv6
+  - TCP/9003 for IMAP
+  - TCP/9004 for IMAP IPv6
+  - TCP/9005 for SMTP
+  - TCP/9006 for SMTP IPv6
+  - TCP/9007 for RTSP
+  - TCP/9008 for RTSP IPv6
+  - TCP/9009 for GOPHER
+  - TCP/9010 for GOPHER IPv6
+  - TCP/9011 for HTTPS server with TLS-SRP support
+  - TCP/9012 for HTTPS IPv6 server with TLS-SRP support
+  - TCP/9013 for HTTP proxy server for CONNECT
+  - TCP/9014 for HTTP pipelining server
+  - TCP/9015 for HTTP/2 server
+  - TCP/9016 for DICT server
+  - TCP/9017 for SMB server
+  - TCP/9018 for SMBS server (reserved)
+  - TCP/9019 for TELNET server with negotiation support
 
  1.3 Test servers
 
@@ -87,10 +98,10 @@ The cURL Test Suite
 
  1.4 Run
 
-  'make test'. This builds the test suite support code and invokes the
-  'runtests.pl' perl script to run all the tests. Edit the top variables
-  of that script in case you have some specific needs, or run the script
-  manually (after the support code has been built).
+  './configure && make && make test'. This builds the test suite support code
+  and invokes the 'runtests.pl' perl script to run all the tests. Edit the top
+  variables of that script in case you have some specific needs, or run the
+  script manually (after the support code has been built).
 
   The script breaks on the first test that doesn't do OK. Use -a to prevent
   the script from aborting on the first error. Run the script with -v for more

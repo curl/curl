@@ -126,15 +126,6 @@ if test ! -z $SDK32; then
     pwd
     lipo libcurl.framework/${FRAMEWORK_VERSION}/libcurl32 libcurl.framework/${FRAMEWORK_VERSION}/libcurl64 -create -output libcurl.framework/${FRAMEWORK_VERSION}/libcurl
     rm libcurl.framework/${FRAMEWORK_VERSION}/libcurl32 libcurl.framework/${FRAMEWORK_VERSION}/libcurl64
-    cp libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl/curlbuild.h libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl/curlbuild32.h
-    cp include/curl/curlbuild.h libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl/curlbuild64.h
-    cat >libcurl.framework/${FRAMEWORK_VERSION}/Headers/curl/curlbuild.h <<EOF
-#ifdef __LP64__
-#include "curl/curlbuild64.h"
-#else
-#include "curl/curlbuild32.h"
-#endif
-EOF
   fi
 
   pwd

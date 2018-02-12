@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,7 @@ int test(char *URL)
 {
   int res;
   CURL *curl;
-  int request=1;
+  int request = 1;
   char *stream_uri = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -40,7 +40,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if((curl = curl_easy_init()) == NULL) {
+  curl = curl_easy_init();
+  if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -54,7 +55,8 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -74,7 +76,8 @@ int test(char *URL)
                     "RAW/RAW/UDP;unicast;client_port=3056-3057");
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -88,7 +91,8 @@ int test(char *URL)
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
 
-  if((stream_uri = suburl(URL, request++)) == NULL) {
+  stream_uri = suburl(URL, request++);
+  if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

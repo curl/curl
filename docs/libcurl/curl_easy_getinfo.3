@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -84,17 +84,29 @@ See \fICURLINFO_REDIRECT_COUNT(3)\fP
 URL a redirect would take you to, had you enabled redirects.
 See \fICURLINFO_REDIRECT_URL(3)\fP
 .IP CURLINFO_SIZE_UPLOAD
-Number of bytes uploaded.
+(Deprecated) Number of bytes uploaded.
 See \fICURLINFO_SIZE_UPLOAD(3)\fP
+.IP CURLINFO_SIZE_UPLOAD_T
+Number of bytes uploaded.
+See \fICURLINFO_SIZE_UPLOAD_T(3)\fP
 .IP CURLINFO_SIZE_DOWNLOAD
-Number of bytes downloaded.
+(Deprecated) Number of bytes downloaded.
 See \fICURLINFO_SIZE_DOWNLOAD(3)\fP
+.IP CURLINFO_SIZE_DOWNLOAD_T
+Number of bytes downloaded.
+See \fICURLINFO_SIZE_DOWNLOAD_T(3)\fP
 .IP CURLINFO_SPEED_DOWNLOAD
-Average download speed.
+(Deprecated) Average download speed.
 See \fICURLINFO_SPEED_DOWNLOAD(3)\fP
+.IP CURLINFO_SPEED_DOWNLOAD_T
+Average download speed.
+See \fICURLINFO_SPEED_DOWNLOAD_T(3)\fP
 .IP CURLINFO_SPEED_UPLOAD
-Average upload speed.
+(Deprecated) Average upload speed.
 See \fICURLINFO_SPEED_UPLOAD(3)\fP
+.IP CURLINFO_SPEED_UPLOAD_T
+Average upload speed.
+See \fICURLINFO_SPEED_UPLOAD_T(3)\fP
 .IP CURLINFO_HEADER_SIZE
 Number of bytes of all headers received.
 See \fICURLINFO_HEADER_SIZE(3)\fP
@@ -104,15 +116,22 @@ See \fICURLINFO_REQUEST_SIZE(3)\fP
 .IP CURLINFO_SSL_VERIFYRESULT
 Certificate verification result.
 See \fICURLINFO_SSL_VERIFYRESULT(3)\fP
+.IP CURLINFO_PROXY_SSL_VERIFYRESULT
+Proxy certificate verification result.
+See \fICURLINFO_PROXY_SSL_VERIFYRESULT(3)\fP
 .IP CURLINFO_SSL_ENGINES
 A list of OpenSSL crypto engines.
 See \fICURLINFO_SSL_ENGINES(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_DOWNLOAD
-Content length from the Content-Length header.
+(Deprecated) Content length from the Content-Length header.
 See \fICURLINFO_CONTENT_LENGTH_DOWNLOAD(3)\fP
+.IP CURLINFO_CONTENT_LENGTH_DOWNLOAD_T
+Content length from the Content-Length header.
+See \fICURLINFO_CONTENT_LENGTH_DOWNLOAD_T(3)\fP
 .IP CURLINFO_CONTENT_LENGTH_UPLOAD
-Upload size.
-See \fICURLINFO_CONTENT_LENGTH_UPLOAD(3)\fP
+(Deprecated) Upload size. See \fICURLINFO_CONTENT_LENGTH_UPLOAD(3)\fP
+.IP CURLINFO_CONTENT_LENGTH_UPLOAD_T
+Upload size.  See \fICURLINFO_CONTENT_LENGTH_UPLOAD_T(3)\fP
 .IP CURLINFO_CONTENT_TYPE
 Content type from the Content-Type header.
 See \fICURLINFO_CONTENT_TYPE(3)\fP
@@ -180,6 +199,12 @@ See \fICURLINFO_RTSP_SERVER_CSEQ(3)\fP
 .IP CURLINFO_RTSP_CSEQ_RECV
 RTSP CSeq last received.
 See \fICURLINFO_RTSP_CSEQ_RECV(3)\fP
+.IP CURLINFO_PROTOCOL
+The protocol used for the connection. (Added in 7.52.0)
+See \fICURLINFO_PROTOCOL(3)\fP
+.IP CURLINFO_SCHEME
+The scheme used for the connection. (Added in 7.52.0)
+See \fICURLINFO_SCHEME(3)\fP
 .SH TIMES
 .nf
 An overview of the six time values available from curl_easy_getinfo()

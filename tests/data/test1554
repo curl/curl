@@ -1,0 +1,85 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+shared connections
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 29
+
+run 1: foobar and so on fun!
+</data>
+<datacheck>
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+run 1: foobar and so on fun!
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+run 1: foobar and so on fun!
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+run 1: foobar and so on fun!
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+-> Mutex lock
+<- Mutex unlock
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP with shared connection cache
+</name>
+<tool>
+lib1554
+</tool>
+<command>
+http://%HOSTIP:%HTTPPORT/1554
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

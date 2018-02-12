@@ -1,0 +1,67 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_PROXY_SSLCERTTYPE 3 "16 Nov 2016" "libcurl 7.52.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_PROXY_SSLCERTTYPE \- specify type of the proxy client SSL certificate
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERTTYPE, char *type);
+.SH DESCRIPTION
+Pass a pointer to a zero terminated string as parameter. The string should be
+the format of your client certificate used when connecting to a HTTPS proxy.
+
+Supported formats are "PEM" and "DER", except with Secure Transport. OpenSSL
+(versions 0.9.3 and later) and Secure Transport (on iOS 5 or later, or OS X
+10.7 or later) also support "P12" for PKCS#12-encoded files.
+
+The application does not have to keep the string around after setting this
+option.
+.SH DEFAULT
+"PEM"
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+  curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT, "client.pem");
+  curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERTTYPE, "PEM");
+  curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
+  curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.52.0
+
+If built TLS enabled.
+.SH RETURN VALUE
+Returns CURLE_OK if TLS is supported, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+.SH "SEE ALSO"
+.BR CURLOPT_PROXY_SSLCERT "(3), " CURLOPT_PROXY_SSLKEY "(3), "
+.BR CURLOPT_SSLCERTTYPE "(3), "

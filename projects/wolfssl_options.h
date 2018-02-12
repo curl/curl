@@ -5,8 +5,8 @@ To remedy this issue for libcurl I've generated this options file that
 build-wolfssl will copy to the wolfSSL include directories and will result in
 maximum compatibility.
 
-These are the configure options that were used to build wolfSSL v3.9.0 in mingw
-and generate the options in this file:
+These are the configure options that were used to build wolfSSL v3.11.0 in
+mingw and generate the options in this file:
 
 C_EXTRA_FLAGS="\
   -Wno-attributes \
@@ -17,12 +17,15 @@ C_EXTRA_FLAGS="\
   -DWOLFSSL_STATIC_RSA \
   " \
 ./configure --prefix=/usr/local \
+  --disable-jobserver \
   --enable-aesgcm \
   --enable-alpn \
   --enable-certgen \
+  --enable-des3 \
   --enable-dh \
   --enable-dsa \
   --enable-ecc \
+  --enable-eccshamir \
   --enable-fastmath \
   --enable-opensslextra \
   --enable-ripemd \
@@ -93,6 +96,37 @@ extern "C" {
 #undef  OPENSSL_EXTRA
 #define OPENSSL_EXTRA
 
+/*
+The commented out defines below are the equivalent of --enable-tls13.
+Uncomment them to build wolfSSL with TLS 1.3 support as of v3.11.1-tls13-beta.
+This is for experimenting only, afaict TLS 1.3 support doesn't appear to be
+functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
+
+#undef  WC_RSA_PSS
+#define WC_RSA_PSS
+
+#undef  WOLFSSL_TLS13
+#define WOLFSSL_TLS13
+
+#undef  HAVE_TLS_EXTENSIONS
+#define HAVE_TLS_EXTENSIONS
+
+#undef  HAVE_FFDHE_2048
+#define HAVE_FFDHE_2048
+
+#undef  HAVE_HKDF
+#define HAVE_HKDF
+*/
+
+#undef  TFM_TIMING_RESISTANT
+#define TFM_TIMING_RESISTANT
+
+#undef  ECC_TIMING_RESISTANT
+#define ECC_TIMING_RESISTANT
+
+#undef  WC_RSA_BLINDING
+#define WC_RSA_BLINDING
+
 #undef  HAVE_AESGCM
 #define HAVE_AESGCM
 
@@ -162,6 +196,9 @@ extern "C" {
 #undef  HAVE_SUPPORTED_CURVES
 #define HAVE_SUPPORTED_CURVES
 
+#undef  HAVE_EXTENDED_MASTER
+#define HAVE_EXTENDED_MASTER
+
 #undef  WOLFSSL_TEST_CERT
 #define WOLFSSL_TEST_CERT
 
@@ -173,6 +210,9 @@ extern "C" {
 
 #undef  USE_FAST_MATH
 #define USE_FAST_MATH
+
+#undef  WC_NO_ASYNC_THREADING
+#define WC_NO_ASYNC_THREADING
 
 
 #ifdef __cplusplus

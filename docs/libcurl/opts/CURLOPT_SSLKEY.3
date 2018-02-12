@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -35,12 +35,25 @@ changed with \fICURLOPT_SSLKEYTYPE(3)\fP.
 (iOS and Mac OS X only) This option is ignored if curl was built against
 Secure Transport. Secure Transport expects the private key to be already
 present in the keychain or PKCS#12 file containing the certificate.
+
+The application does not have to keep the string around after setting this
+option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_SSLCERT, "client.pem");
+  curl_easy_setopt(curl, CURLOPT_SSLKEY, "key.pem");
+  curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "s3cret");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 If built TLS enabled.
 .SH RETURN VALUE

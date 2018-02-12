@@ -32,7 +32,10 @@ imap
  <name>
 --libcurl for IMAP FETCH message
  </name>
- <command>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
+<command>
 'imap://%HOSTIP:%IMAPPORT/1420/;UID=1' -u user:secret --libcurl log/test1420.c
 </command>
 </client>
@@ -60,11 +63,10 @@ int main(int argc, char *argv[])
   CURL *hnd;
 
   hnd = curl_easy_init();
+  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "imap://%HOSTIP:%IMAPPORT/1420/;UID=1");
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "user:secret");
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
-  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
@@ -98,10 +100,9 @@ int main(int argc, char *argv[])
 /**** End of sample code ****/
 </file>
 <stripfile>
-# curl's default user-agent varies with version, libraries etc.
-s/(USERAGENT, \")[^\"]+/${1}stripped/
-# CURLOPT_SSL_VERIFYPEER, SSH_KNOWNHOSTS and HTTP_VERSION vary with
-# configurations - just ignore them
+# These options vary with configurations - just ignore them
+$_ = '' if /CURLOPT_USERAGENT/
+$_ = '' if /CURLOPT_MAXREDIRS/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/

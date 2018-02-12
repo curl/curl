@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,16 +37,12 @@ int main(void)
   FILE *fd;
 
   fd = fopen("debugit", "rb"); /* open file to upload */
-  if(!fd) {
-
+  if(!fd)
     return 1; /* can't continue */
-  }
 
   /* to get the file size */
-  if(fstat(fileno(fd), &file_info) != 0) {
-
+  if(fstat(fileno(fd), &file_info) != 0)
     return 1; /* can't continue */
-  }
 
   curl = curl_easy_init();
   if(curl) {
@@ -86,5 +82,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  fclose(fd);
   return 0;
 }

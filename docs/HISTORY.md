@@ -1,14 +1,14 @@
-How cURL Became Like This
+How curl Became Like This
 =========================
 
 Towards the end of 1996, Daniel Stenberg was spending time writing an IRC bot
 for an Amiga related channel on EFnet. He then came up with the idea to make
 currency-exchange calculations available to Internet Relay Chat (IRC)
-users. All the necessary data are published on the Web; he just needed to
+users. All the necessary data were published on the Web; he just needed to
 automate their retrieval.
 
 Daniel simply adopted an existing command-line open-source tool, httpget, that
-Brazilian Rafael Sagula had written and recently release version 0.1 of. After
+Brazilian Rafael Sagula had written and recently released version 0.1 of. After
 a few minor adjustments, it did just what he needed.
 
 1997
@@ -35,14 +35,14 @@ was revealed to us much later.)
 
 SSL support was added, powered by the SSLeay library.
 
-August, first announcement of curl on freshmeat.net.
+August: first announcement of curl on freshmeat.net.
 
-October, with the curl 4.9 release and the introduction of cookie support,
+October: with the curl 4.9 release and the introduction of cookie support,
 curl was no longer released under the GPL license. Now we're at 4000 lines of
 code, we switched over to the MPL license to restrict the effects of
 "copyleft".
 
-November, configure script and reported successful compiles on several
+November: configure script and reported successful compiles on several
 major operating systems. The never-quite-understood -F option was added and
 curl could now simulate quite a lot of a browser. TELNET support was added.
 
@@ -52,30 +52,30 @@ page. People started making Linux RPM packages out of it.
 1999
 ----
 
-January, DICT support added.
+January: DICT support added.
 
-OpenSSL took over where SSLeay was abandoned.
+OpenSSL took over and SSLeay was abandoned.
 
-May, first Debian package.
+May: first Debian package.
 
-August, LDAP:// and FILE:// support added. The curl web site gets 1300 visits
+August: LDAP:// and FILE:// support added. The curl web site gets 1300 visits
 weekly. Moved site to curl.haxx.nu.
 
-Released curl 6.0 in September. 15000 lines of code.
+September: Released curl 6.0. 15000 lines of code.
 
-December 28, added the project on Sourceforge and started using its services
+December 28: added the project on Sourceforge and started using its services
 for managing the project.
 
 2000
 ----
 
-Spring 2000, major internal overhaul to provide a suitable library interface.
+Spring: major internal overhaul to provide a suitable library interface.
 The first non-beta release was named 7.1 and arrived in August. This offered
 the easy interface and turned out to be the beginning of actually getting
-other software and programs to get based on and powered by libcurl. Almost
+other software and programs to be based on and powered by libcurl. Almost
 20000 lines of code.
 
-June 2000: the curl site moves to "curl.haxx.se"
+June: the curl site moves to "curl.haxx.se"
 
 August, the curl web site gets 4000 visits weekly.
 
@@ -84,41 +84,40 @@ party libcurl binding showed up. CURL has been a supported module in PHP since
 the release of PHP 4.0.2. This would soon get followers. More than 16
 different bindings exist at the time of this writing.
 
-September, kerberos4 support was added.
+September: kerberos4 support was added.
 
-In November started the work on a test suite for curl. It was later re-written
+November: started the work on a test suite for curl. It was later re-written
 from scratch again. The libcurl major SONAME number was set to 1.
 
 2001
 ----
 
-January, Daniel released curl 7.5.2 under a new license again: MIT (or
-MPL). The MIT license is extremely liberal and can be used combined with GPL
+January: Daniel released curl 7.5.2 under a new license again: MIT (or
+MPL). The MIT license is extremely liberal and can be combined with GPL
 in other projects. This would finally put an end to the "complaints" from
 people involved in GPLed projects that previously were prohibited from using
 libcurl while it was released under MPL only. (Due to the fact that MPL is
 deemed "GPL incompatible".)
 
-curl supports HTTP 1.1 starting with the release of 7.7, March 22 2001. This
+March 22: curl supports HTTP 1.1 starting with the release of 7.7. This
 also introduced libcurl's ability to do persistent connections. 24000 lines of
 code. The libcurl major SONAME number was bumped to 2 due to this overhaul.
+The first experimental ftps:// support was added.
 
-The first experimental ftps:// support was added in March 2001.
-
-August. curl is bundled in Mac OS X, 10.1. It was already becoming more and
+August: curl is bundled in Mac OS X, 10.1. It was already becoming more and
 more of a standard utility of Linux distributions and a regular in the BSD
 ports collections. The curl web site gets 8000 visits weekly. Curl Corporation
 contacted Daniel to discuss "the name issue". After Daniel's reply, they have
-never since got in touch again.
+never since got back in touch again.
 
-September, libcurl 7.9 introduces cookie jar and curl_formadd(). During the
+September: libcurl 7.9 introduces cookie jar and curl_formadd(). During the
 forthcoming 7.9.x releases, we introduced the multi interface slowly and
-without much whistles.
+without many whistles.
 
 2002
 ----
 
-June, the curl web site gets 13000 visits weekly. curl and libcurl is
+June: the curl web site gets 13000 visits weekly. curl and libcurl is
 35000 lines of code. Reported successful compiles on more than 40 combinations
 of CPUs and operating systems.
 
@@ -127,15 +126,15 @@ impossible. Around 5000 downloaded packages each week from the main site gives
 a hint, but the packages are mirrored extensively, bundled with numerous OS
 distributions and otherwise retrieved as part of other software.
 
-September, with the release of curl 7.10 it is released under the MIT license
+September: with the release of curl 7.10 it is released under the MIT license
 only.
 
 2003
 ----
 
-January. Started working on the distributed curl tests. The autobuilds.
+January: Started working on the distributed curl tests. The autobuilds.
 
-February, the curl site averages at 20000 visits weekly. At any given moment,
+February: the curl site averages at 20000 visits weekly. At any given moment,
 there's an average of 3 people browsing the curl.haxx.se site.
 
 Multiple new authentication schemes are supported: Digest (May), NTLM (June)
@@ -144,7 +143,7 @@ and Negotiate (June).
 November: curl 7.10.8 is released. 45000 lines of code. ~55000 unique visitors
 to the curl.haxx.se site. Five official web mirrors.
 
-December, full-fledged SSL for FTP is supported.
+December: full-fledged SSL for FTP is supported.
 
 2004
 ----
@@ -158,18 +157,18 @@ curl_formparse() function
 
 August: Curl and libcurl 7.12.1
 
-    Public curl release number:               82
+    Public curl release number:                82
     Releases counted from the very beginning: 109
-    Available command line options:           96
+    Available command line options:            96
     Available curl_easy_setopt() options:     120
-    Number of public functions in libcurl:    36
-    Amount of public web site mirrors:        12
-    Number of known libcurl bindings:         26
+    Number of public functions in libcurl:     36
+    Amount of public web site mirrors:         12
+    Number of known libcurl bindings:          26
 
 2005
 ----
 
-April. GnuTLS can now optionally be used for the secure layer when curl is
+April: GnuTLS can now optionally be used for the secure layer when curl is
 built.
 
 April: Added the multi_socket() API
@@ -183,8 +182,8 @@ December: security vulnerability: libcurl URL Buffer Overflow
 2006
 ----
 
-January. We dropped support for Gopher. We found bugs in the implementation
-that turned out having been introduced years ago, so with the conclusion that
+January: We dropped support for Gopher. We found bugs in the implementation
+that turned out to have been introduced years ago, so with the conclusion that
 nobody had found out in all this time we removed it instead of fixing it.
 
 March: security vulnerability: libcurl TFTP Packet Buffer Overflow
@@ -208,8 +207,8 @@ November:
 
     Command line options:         128
     curl_easy_setopt() options:   158
-    Public functions in libcurl:  58
-    Known libcurl bindings:       37
+    Public functions in libcurl:   58
+    Known libcurl bindings:        37
     Contributors:                 683
 
  145,000 unique visitors. >100 GB downloaded.
@@ -242,11 +241,11 @@ August:
     Public curl releases:         117
     Command line options:         138
     curl_easy_setopt() options:   180
-    Public functions in libcurl:  58
-    Known libcurl bindings:       39
+    Public functions in libcurl:   58
+    Known libcurl bindings:        39
     Contributors:                 808
 
- Gopher support added (re-added actually)
+ Gopher support added (re-added actually, see January 2006)
 
 2012
 ----
@@ -276,3 +275,21 @@ August:
  March: first real release supporting HTTP/2
 
  September: Web site had 245,000 unique visitors and served 236GB data
+
+2016
+----
+
+ December: curl 7.52.0 introduced support for HTTPS-proxy!
+
+2017
+----
+
+ September: Added Multi-SSL support
+
+ The web site serves 3100 GB/month
+
+    Public curl releases:         169
+    Command line options:         211
+    curl_easy_setopt() options:   249
+    Public functions in libcurl:  74
+    Contributors:                 1609

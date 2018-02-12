@@ -1,0 +1,97 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_global_sslset 3 "15 July 2017" "libcurl 7.56" "libcurl Manual"
+.SH NAME
+curl_global_sslset - Select SSL backend to use with libcurl
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.nf
+
+typedef struct {
+  curl_sslbackend id;
+  const char *name;
+} curl_ssl_backend;
+
+typedef enum {
+  CURLSSLBACKEND_NONE = 0,
+  CURLSSLBACKEND_OPENSSL = 1,
+  CURLSSLBACKEND_GNUTLS = 2,
+  CURLSSLBACKEND_NSS = 3,
+  CURLSSLBACKEND_GSKIT = 5,
+  CURLSSLBACKEND_POLARSSL = 6,
+  CURLSSLBACKEND_WOLFSSL = 7,
+  CURLSSLBACKEND_SCHANNEL = 8,
+  CURLSSLBACKEND_DARWINSSL = 9,
+  CURLSSLBACKEND_AXTLS = 10,
+  CURLSSLBACKEND_MBEDTLS = 11
+} curl_sslbackend;
+
+.B "CURLsslset curl_global_sslset(curl_sslbackend " id,
+.B "                              const char *" name,
+.B "                              curl_ssl_backend ***" avail ");"
+.fi
+.SH DESCRIPTION
+This function configures at runtime which SSL backend to use with
+libcurl. This function can only be used to select an SSL backend once, and it
+must be called \fBbefore\fP \fIcurl_global_init(3)\fP.
+
+The backend can be identified by the \fIid\fP
+(e.g. \fBCURLSSLBACKEND_OPENSSL\fP). The backend can also be specified via the
+\fIname\fP parameter for a case insensitive match (passing -1 as \fIid\fP). If
+both \fIid\fP and \fIname\fP are specified, the \fIname\fP will be ignored.
+
+If neither \fIid\fP nor \fPname\fP are specified, the function will fail with
+CURLSSLSET_UNKNOWN_BACKEND and set the \fIavail\fP pointer to the
+NULL-terminated list of available backends. The available backends are those
+that this particular build of libcurl supports.
+
+Upon success, the function returns CURLSSLSET_OK.
+
+If the specified SSL backend is not available, the function returns
+CURLSSLSET_UNKNOWN_BACKEND and sets the \fIavail\fP pointer to a
+NULL-terminated list of available SSL backends. In this case, you may call the
+function again to try to select a different backend.
+
+The SSL backend can be set only once. If it has already been set, a subsequent
+attempt to change it will result in a \fBCURLSSLSET_TOO_LATE\fP.
+
+\fBThis function is not thread safe.\fP You must not call it when any other
+thread in the program (i.e. a thread sharing the same memory) is running.
+This doesn't just mean no other thread that is using libcurl.
+
+.SH AVAILABILITY
+This function was added in libcurl 7.56.0. Before this version, there was no
+support for choosing SSL backends at runtime.
+.SH RETURN VALUE
+If this function returns CURLSSLSET_OK, the backend was successfully selected.
+
+If the chosen backend is unknown (or support for the chosed backend has not
+been compiled into libcurl), the function returns \fICURLSSLSET_UNKNOWN_BACKEND\fP.
+
+If the backend had been configured previously, or if \fIcurl_global_init(3)\fP
+has already been called, the function returns \fICURLSSLSET_TOO_LATE\fP.
+
+If this libcurl was built completely without SSL support, with no backends at
+all, this function returns \fICURLSSLSET_NO_BACKENDS\fP.
+.SH "SEE ALSO"
+.BR curl_global_init "(3), "
+.BR libcurl "(3) "
