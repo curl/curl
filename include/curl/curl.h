@@ -35,7 +35,6 @@
 #endif
 
 #include "curlver.h"         /* libcurl version defines   */
-#include "curl/curlbuild.h"       /* libcurl build definitions */
 #include "system.h"          /* determine things run-time */
 
 /*
