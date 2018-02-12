@@ -110,7 +110,7 @@ struct curltime Curl_now(void)
   usecs /= 1000;
 
   cnow.tv_sec = usecs / 1000000;
-  cnow.tv_usec = usecs % 1000000;
+  cnow.tv_usec = (int)(usecs % 1000000);
 
   return cnow;
 }
