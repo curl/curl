@@ -27,7 +27,19 @@
 #include "warnless.h"
 #include "curl_sha256.h"
 
+#define USE_OPENSSL_SHA256      0
+
 #if defined(USE_OPENSSL)
+
+#include <openssl/opensslv.h>
+
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL)
+#define USE_OPENSSL_SHA256      1
+#endif
+
+#endif
+
+#if USE_OPENSSL_SHA256
 
 /* When OpenSSL is available we use the SHA256-function from OpenSSL */
 #include <openssl/sha.h>
