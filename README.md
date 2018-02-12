@@ -38,7 +38,7 @@ downloads.
 
 ## Git
 
-To download the very latest source off the Git server do this:
+To download the very latest source from the Git server do this:
 
     git clone https://github.com/curl/curl.git
 
