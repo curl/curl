@@ -30,6 +30,27 @@ This release includes the following bugfixes:
  o winbuild: make linker generate proper PDB [11]
  o curl_easy_reset: clear digest auth state [12]
  o curl/curl.h: fix comment typo for CURLOPT_DNS_LOCAL_IP6 [14]
+ o range: commonize FTP and FILE range handling [15]
+ o progress-bar docs: update to match implementation [16]
+ o fnmatch: do not match the empty string with a character set
+ o fnmatch: accept an alphanum to be followed by a non-alphanum in char set [17]
+ o build: fix termios issue on android cross-compile [18]
+ o getdate: return -1 for out of range [19]
+ o formdata: use the mime-content type function [20]
+ o time-cond: fix reading the file modification time on Windows [21]
+ o build-openssl.bat: Extend VC15 support to include Enterprise and Professional
+ o build-wolfssl.bat: Extend VC15 support to include Enterprise and Professional
+ o openssl: Don't add verify locations when verifypeer==0
+ o fnmatch: optimize processing of consecutive *s and ?s pattern characters [22]
+ o schannel: fix compiler warnings [23]
+ o content_encoding: Add "none" alias to "identity" [24]
+ o get_posix_time: only check for overflows if they can happen
+ o http_chunks: don't write chunks twice with CURLOPT_HTTP_TRANSFER_DECODING [25]
+ o README: language fix [26]
+ o sha256: build with OpenSSL < 0.9.8 [27]
+ o smtp: fix processing of initial dot in data [28]
+ o --tlsauthtype: works only if libcurl is built with TLS-SRP support [29]
+ o tests: new tests for http raw mode [30]
 
 This release includes the following known bugs:
 
@@ -38,10 +59,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Marcionek, Alessandro Ghedini, Dair Grant, Daniel Stenberg,
-  Earnestly on github, Gisle Vanem, Marcel Raad, Michał Janiszewski,
-  Patrick Monnerat, Ruurd Beerstra, Travis Burtrum,
-  (11 contributors)
+  Adam Marcionek, Alessandro Ghedini, Ben Greear, Bruno Grasselli, Dair Grant,
+  Daniel Stenberg, Douglas Mencken, Earnestly on github, Gisle Vanem,
+  Henry Roeland, Kamil Dudka, Marcel Raad, Martin Dreher, Max Dymond,
+  Michael Kaufmann, Michał Janiszewski, Mohammad AlSaleh, Patrick Monnerat,
+  Patrick Schlangen, Ray Satiro, Ruurd Beerstra, Steve Holme, Travis Burtrum,
+  (23 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -61,4 +84,19 @@ References to bug reports and discussions on issues:
  [12] = https://curl.haxx.se/mail/lib-2018-01/0074.html
  [13] = https://curl.haxx.se/bug/?i=2238
  [14] = https://curl.haxx.se/bug/?i=2275
-
+ [15] = https://curl.haxx.se/bug/?i=2205
+ [16] = https://curl.haxx.se/bug/?i=2271
+ [17] = https://curl.haxx.se/mail/lib-2018-01/0114.html
+ [18] = https://curl.haxx.se/mail/lib-2018-01/0122.html
+ [19] = https://curl.haxx.se/bug/?i=2278
+ [20] = https://curl.haxx.se/bug/?i=2282
+ [21] = https://curl.haxx.se/bug/?i=2164
+ [22] = https://curl.haxx.se/bug/?i=2291
+ [23] = https://curl.haxx.se/bug/?i=2296
+ [24] = https://curl.haxx.se/bug/?i=2298
+ [25] = https://curl.haxx.se/bug/?i=2303
+ [26] = https://curl.haxx.se/bug/?i=2300
+ [27] = https://curl.haxx.se/bug/?i=2305
+ [28] = https://curl.haxx.se/bug/?i=2304
+ [29] = https://bugzilla.redhat.com/1542256
+ [30] = https://curl.haxx.se/bug/?i=2303
