@@ -226,6 +226,16 @@ Remedies:
  - libcurl programs can use \fICURLOPT_PROTOCOLS(3)\fP
  - consider not allowing the user to set the full URL
  - consider strictly filtering input to only allow specific choices
+.SH "RFC 3986 vs WHATWG URL"
+curl supports URLs mostly according to how they are defined in RFC 3986, and
+has done so since the beginning.
+
+Web browsers mostly adhere to the WHATWG URL Specification.
+
+This deviance makes some URLs copied between browsers (or returned over HTTP
+for redirection) and curl not work the same way. This can mislead users into
+getting the wrong thing, connecting to the wrong host or otherwise not work
+identically.
 .SH "FTP uses two connections"
 When performing an FTP transfer, two TCP connections are used: one for setting
 up the transfer and one for the actual data.
