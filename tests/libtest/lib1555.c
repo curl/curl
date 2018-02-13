@@ -35,12 +35,12 @@ static int progressCallback(void *arg,
                             double ultotal,
                             double ulnow)
 {
+  CURLcode res = 0;
   (void)arg;
   (void)dltotal;
   (void)dlnow;
   (void)ultotal;
   (void)ulnow;
-  int res = 0;
   res = curl_easy_recv(curl, NULL, 0, NULL);
   printf("curl_easy_recv returned %d\n", res);
   res = curl_easy_send(curl, NULL, 0, NULL);
