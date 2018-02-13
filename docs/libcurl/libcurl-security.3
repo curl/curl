@@ -208,6 +208,13 @@ of how the SCP protocol is designed. e.g.
 
 Applications must not allow unsanitized SCP: URLs to be passed in for
 downloads.
+.SH "file://"
+By default curl and libcurl support file:// URLs. Such a URL is always an
+access, or attempted access, to a local resource. If your application wants to
+avoid that, keep control of what URLs to use and/or prevent curl/libcurl from
+using the protocol.
+
+By default, libcurl prohibits redirects to file:// URLs.
 .SH "What if the user can set the URL"
 Applications may find it tempting to let users set the URL that it can work
 on. That's probably fine, but opens up for mischief and trickery that you as
