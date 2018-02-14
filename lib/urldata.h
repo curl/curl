@@ -1455,6 +1455,13 @@ enum dupstring {
   STRING_LAST /* not used, just an end-of-list marker */
 };
 
+struct resolver_callbacks {
+  /* function that is called before calling resolver */
+  curl_resolver_start_cb resolver_start_cb;
+  /* user data for the resolver start callback */
+  void *resolver_start_userdata;
+};
+
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
   void *debugdata;   /* the data that will be passed to fdebug */
@@ -1681,6 +1688,8 @@ struct UserDefined {
   struct Curl_http2_dep *stream_dependents;
 
   bool abstract_unix_socket;
+
+  struct resolver_callbacks resolver_callbacks;
 };
 
 struct Names {

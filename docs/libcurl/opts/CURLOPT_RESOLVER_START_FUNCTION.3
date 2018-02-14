@@ -1,0 +1,60 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_RESOLVER_START_FUNCTION 3 "14 Feb 2018" "libcurl 7.59.1" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_RESOLVER_START_FUNCTION \- set callback to be called before resolver starts
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+void resolver_alloc_cb (void *resolver_data, void *user_data);
+
+CURLcode curl_easy_setopt(CURL *handle,
+                          CURLOPT_RESOLVER_START_FUNCTION,
+                          resolver_alloc_cb);
+.SH DESCRIPTION
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+This callback function gets called by libcurl every time a new resolver request
+is started. \fIresolver_data\fP points to resolver specific data.
+For ares backend, resolver data is the channel used by ares. This can be used
+to set up any desired option on the ares channel before it's used, for example
+setting up socket callback options.
+
+Set the \fIuser_data\fP argument with the \fICURLOPT_RESOLVER_START_DATA(3)\fP
+option.
+
+.SH DEFAULT
+No callback will be made
+.SH PROTOCOLS
+For all protocols
+.SH AVAILABILITY
+Support for CURLOPT_RESOLVER_START_FUNCTION was added in version 7.59.1.
+.SH RETURN VALUE
+This will return CURLE_OK.
+.SH EXAMPLE
+A common use case is to use this callback to setup any options on the ares
+channel, for example socket callbacks.
+.SH "SEE ALSO"
+.BR CURLOPT_RESOLVER_START_DATA "(3) "

@@ -147,6 +147,15 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
+  struct Curl_easy *data = conn->data;
+
+  /* Call the resolver start callback, if defined */
+  if(data->set.resolver_callbacks.resolver_start_cb) {
+    data->set.resolver_callbacks.
+      resolver_start_cb(data->state.resolver,
+        data->set.resolver_callbacks.resolver_start_userdata);
+  }
+
   return Curl_resolver_getaddrinfo(conn, hostname, port, waitp);
 }
 
