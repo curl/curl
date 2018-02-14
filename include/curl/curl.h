@@ -249,8 +249,6 @@ typedef size_t (*curl_write_callback)(char *buffer,
 typedef int (*curl_resolver_start_cb)(void *resolver,
                                       void *userdata);
 
-
-
 /* enumeration of file types */
 typedef enum {
   CURLFILETYPE_FILE = 0,
