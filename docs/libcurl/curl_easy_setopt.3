@@ -139,6 +139,10 @@ Callback for wildcard matching. See \fICURLOPT_FNMATCH_FUNCTION(3)\fP
 Data pointer to pass to the wildcard matching callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
 .IP CURLOPT_SUPPRESS_CONNECT_HEADERS
 Suppress proxy CONNECT response headers from user callbacks. See \fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP
+.IP CURLOPT_RESOLVER_START_FUNCTION
+Callback to be called before a new resolve request is started. See \fICURLOPT_RESOLVER_START_FUNCTION(3)\fP
+.IP CURLOPT_RESOLVER_START_DATA
+Data pointer to pass to resolver start callback. See \fICURLOPT_RESOLVER_START_DATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP

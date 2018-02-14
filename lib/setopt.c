@@ -2110,6 +2110,21 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.fclosesocket = va_arg(param, curl_closesocket_callback);
     break;
 
+  case CURLOPT_RESOLVER_START_FUNCTION:
+    /*
+     * resolver start callback function: called before a new resolver request
+     * is started
+     */
+    data->set.resolver_start = va_arg(param, curl_resolver_start_callback);
+    break;
+
+  case CURLOPT_RESOLVER_START_DATA:
+    /*
+     * resolver start callback data pointer. Might be NULL.
+     */
+    data->set.resolver_start_client = va_arg(param, void *);
+    break;
+
   case CURLOPT_CLOSESOCKETDATA:
     /*
      * socket callback data pointer. Might be NULL.

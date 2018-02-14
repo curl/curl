@@ -58,6 +58,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
+#include "multiif.h"
 #include "warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -480,6 +481,17 @@ int Curl_resolv(struct connectdata *conn,
      * If not, bail out. */
     if(!Curl_ipvalid(conn))
       return CURLRESOLV_ERROR;
+
+    /* notify the resolver start callback */
+    if(data->set.resolver_start) {
+      int st;
+      Curl_set_in_callback(data, true);
+      st = data->set.resolver_start(data->state.resolver, NULL,
+                                    data->set.resolver_start_client);
+      Curl_set_in_callback(data, false);
+      if(st)
+        return CURLRESOLV_ERROR;
+    }
 
     /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
        non-zero value indicating that we need to wait for the response to the

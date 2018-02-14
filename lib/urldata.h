@@ -1681,6 +1681,10 @@ struct UserDefined {
   struct Curl_http2_dep *stream_dependents;
 
   bool abstract_unix_socket;
+
+  curl_resolver_start_callback resolver_start; /* optional callback called
+                                                  before resolver start */
+  void *resolver_start_client; /* pointer to pass to resolver start callback */
 };
 
 struct Names {

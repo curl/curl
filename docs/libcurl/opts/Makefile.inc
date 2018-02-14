@@ -242,6 +242,8 @@ man_MANS =                                      \
   CURLOPT_REFERER.3                             \
   CURLOPT_REQUEST_TARGET.3                      \
   CURLOPT_RESOLVE.3                             \
+  CURLOPT_RESOLVER_START_DATA.3                 \
+  CURLOPT_RESOLVER_START_FUNCTION.3             \
   CURLOPT_RESUME_FROM.3                         \
   CURLOPT_RESUME_FROM_LARGE.3                   \
   CURLOPT_RTSP_CLIENT_CSEQ.3                    \

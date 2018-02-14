@@ -132,6 +132,7 @@ static curl_chunk_end_callback chunk_end_cb;
 static curl_fnmatch_callback fnmatch_cb;
 static curl_closesocket_callback closesocketcb;
 static curl_xferinfo_callback xferinfocb;
+static curl_resolver_start_callback resolver_start_cb;
 
 int test(char *URL)
 {

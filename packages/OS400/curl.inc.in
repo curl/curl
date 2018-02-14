@@ -1326,6 +1326,10 @@
      d                 c                   30270
      d  CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS...
      d                 c                   00271
+     d  CURLOPT_RESOLVER_START_FUNCTION...
+     d                 c                   20272
+     d  CURLOPT_RESOLVER_START_DATA...
+     d                 c                   10273
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
