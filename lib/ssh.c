@@ -342,6 +342,7 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_AUTH_HOST",
     "SSH_AUTH_KEY_INIT",
     "SSH_AUTH_KEY",
+    "SSH_AUTH_GSSAPI",
     "SSH_AUTH_DONE",
     "SSH_SFTP_INIT",
     "SSH_SFTP_REALPATH",
@@ -376,6 +377,7 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_SCP_TRANS_INIT",
     "SSH_SCP_UPLOAD_INIT",
     "SSH_SCP_DOWNLOAD_INIT",
+    "SSH_SCP_DOWNLOAD",
     "SSH_SCP_DONE",
     "SSH_SCP_SEND_EOF",
     "SSH_SCP_WAIT_EOF",
@@ -385,6 +387,9 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_SESSION_FREE",
     "QUIT"
   };
+
+  /* a precaution to make sure the lists are in sync */
+  DEBUGASSERT(sizeof(names)/sizeof(names[0]) == SSH_LAST);
 
   if(sshc->state != nowstate) {
     infof(conn->data, "SFTP %p state change from %s to %s\n",
