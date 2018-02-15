@@ -27,6 +27,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.2 DER in keychain
  2.3 GnuTLS backend skips really long certificate fields
  2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+ 2.5 curl should not offer "ALPN: h2" when using https-proxy
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -110,6 +111,9 @@ problems may have been fixed or changed somewhat since this was written!
 
  Disabling HTTP Pipelining when there are ongoing transfers can lead to
  heap corruption and crash. https://curl.haxx.se/bug/view.cgi?id=1411
+
+ Similarly, removing a handle when pipelining corrupts data:
+ https://github.com/curl/curl/issues/2101
 
 1.3 STARTTRANSFER time is wrong for HTTP POSTs
 
@@ -223,6 +227,10 @@ problems may have been fixed or changed somewhat since this was written!
  function rejects certificates that do not have a password.
  https://github.com/curl/curl/issues/1308
 
+2.5 curl should not offer "ALPN: h2" when using https-proxy
+
+ Since curl doesn't support HTTP/2 over proxy, it shouldn't offer the proxy to
+ speak it! https://github.com/curl/curl/issues/1254
 
 3. Email protocols
 
