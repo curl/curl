@@ -30,6 +30,7 @@
 #include "formdata.h"
 #include "sendf.h"
 #include "urldata.h"
+#include "multiif.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
