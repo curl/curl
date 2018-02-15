@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,8 +37,24 @@ User data is set to NULL by default
 .SH PROTOCOLS
 Used for all protocols.
 .SH EXAMPLE
-A common use case is to use this callback to setup any options on the ares
-channel, for example socket callbacks.
+
+static void resolver_alloc_cb(void *channel,
+                              void *userdata)
+{
+    printf("Received resolver allocation callback, channel=%p userdata=%p\n",
+      channel, userdata);
+}
+
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode res;
+  curl_easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, resolver_alloc_cb);
+  curl_easy_setopt(curl, CURLOPT_RESOLVER_START_DATA, curl);
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  res = curl_easy_perform(curl);
+  }
+  curl_easy_cleanup(curl);
+}
 
 .SH AVAILABILITY
 Support for the CURLOPT_RESOLVER_START_DATA option was added in version 7.59.1.
