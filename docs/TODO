@@ -152,6 +152,7 @@
  18.15 --retry should resume
  18.16 send only part of --data
  18.17 consider file name from the redirected URL with -O ?
+ 18.18 retry on network is unreachable
 
  19. Build
  19.1 roffit
@@ -1037,6 +1038,18 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  file name...
 
  See https://github.com/curl/curl/issues/1241
+
+18.18 retry on network is unreachable
+
+ The --retry option retries transfers on "transient failures". We later added
+ --retry-connrefused to also retry for "connection refused" errors.
+
+ Suggestions have been brought to also allow retry on "network is unreachable"
+ errors and while totally reasonable, maybe we should consider a way to make
+ this more configurable than to add a new option for every new error people
+ want to retry for?
+
+ https://github.com/curl/curl/issues/1603
 
 19. Build
 
