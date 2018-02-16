@@ -76,7 +76,7 @@ For non-HTTP protocols like FTP, POP3, IMAP and SMTP this function will get
 called with the server responses to the commands that libcurl sends.
 .SH LIMITATIONS
 libcurl does not unfold HTTP "folded headers" (deprecated since RFC 7230). A
-folder header is a header that continues on a subsequent line and starts with
+folded header is a header that continues on a subsequent line and starts with
 a whitespace. Such folds will be passed to the header callback as a separate
 one, although strictly it is just a continuation of the previous line.
 .SH DEFAULT
