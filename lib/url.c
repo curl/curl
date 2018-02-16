@@ -589,6 +589,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
       data->state.current_speed = -1; /* init to negative == impossible */
       data->set.fnmatch = ZERO_NULL;
       data->set.maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+      /* happy eyeballs timeout */
+      data->set.happy_eyeballs_timeout = CURL_HET_DEFAULT;
 
       Curl_http2_init_state(&data->state);
     }

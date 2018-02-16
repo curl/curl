@@ -789,6 +789,10 @@ typedef enum {
    SSL backends where such behavior is present. */
 #define CURLSSLOPT_NO_REVOKE (1<<1)
 
+/* Default connection attempt delay for happy eyeballs algorithm */
+
+#define CURL_HET_DEFAULT 200
+
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
 
