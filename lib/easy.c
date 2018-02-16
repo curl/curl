@@ -1079,10 +1079,8 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
       /* even if one function returns error, this loops through and frees all
          buffers */
       if(!result)
-        result = Curl_client_chop_write(conn,
-                                        writebuf[i].type,
-                                        writebuf[i].buf,
-                                        writebuf[i].len);
+        result = Curl_client_write(conn, writebuf[i].type, writebuf[i].buf,
+                                   writebuf[i].len);
       free(writebuf[i].buf);
     }
 
