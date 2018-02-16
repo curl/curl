@@ -22,6 +22,7 @@
  1.4 signal-based resolver timeouts
  1.5 get rid of PATH_MAX
  1.6 Modified buffer size approach
+ 1.7 Support HTTP/2 for HTTP(S) proxies
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
@@ -238,6 +239,10 @@
 
  Dynamically allocate buffer size depending on protocol in use in combination
  with freeing it after each individual transfer? Other suggestions?
+
+1.7 Support HTTP/2 for HTTP(S) proxies
+
+ Support for doing HTTP/2 to HTTP and HTTPS proxies is still missing.
 
 1.8 CURLOPT_RESOLVE for any port number
 
