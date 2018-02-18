@@ -106,13 +106,12 @@
  13. SSL
  13.1 Disable specific versions
  13.2 Provide mutex locking API
- 13.3 Evaluate SSL patches
+ 13.3 Support in-memory certs/ca certs/keys
  13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
- 13.10 Support SSLKEYLOGFILE
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
  13.13 Support HPKP
@@ -715,10 +714,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  library, so that the same application code can use mutex-locking
  independently of OpenSSL or GnutTLS being used.
 
-13.3 Evaluate SSL patches
+13.3 Support in-memory certs/ca certs/keys
 
- Evaluate/apply Gertjan van Wingerde's SSL patches:
- https://curl.haxx.se/mail/lib-2004-03/0087.html
+ You can specify the private and public keys for SSH/SSL as file paths. Some
+ programs want to avoid using files and instead just pass them as in-memory
+ data blobs. There's probably a challenge to make this work across the
+ plethory of different TLS and SSH backends that curl suppports.
+ https://github.com/curl/curl/issues/2310
 
 13.4 Cache/share OpenSSL contexts
 
@@ -769,16 +771,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
-
-13.10 Support SSLKEYLOGFILE
-
- When used, Firefox and Chrome dumps their master TLS keys to the file name
- this environment variable specifies. This allows tools like for example
- Wireshark to capture and decipher TLS traffic to/from those clients. libcurl
- could be made to support this more widely (presumably this already works when
- built with NSS). Peter Wu made a OpenSSL preload to make possible that can be
- used as inspiration and guidance
- https://git.lekensteyn.nl/peter/wireshark-notes/tree/src/sslkeylog.c
 
 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
 
