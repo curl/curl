@@ -113,6 +113,19 @@ static bool is_fatal_error(CURLcode code)
   return FALSE;
 }
 
+/*
+ * Check if a given string is a PKCS#11 URI
+ */
+static bool is_pkcs11_uri(const char *string)
+{
+  if(curl_strnequal(string, "pkcs11:", 7)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
 #ifdef __VMS
 /*
  * get_vms_file_size does what it takes to get the real size of the file
@@ -1073,6 +1086,46 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
         if(curlinfo->features & CURL_VERSION_SSL) {
+          /* Check if config->cert is a PKCS#11 URI and set the
+           * config->cert_type if necessary */
+          if(config->cert) {
+            if(!config->cert_type) {
+              if(is_pkcs11_uri(config->cert)) {
+                config->cert_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->key is a PKCS#11 URI and set the
+           * config->key_type if necessary */
+          if(config->key) {
+            if(!config->key_type) {
+              if(is_pkcs11_uri(config->key)) {
+                config->key_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->proxy_cert is a PKCS#11 URI and set the
+           * config->proxy_type if necessary */
+          if(config->proxy_cert) {
+            if(!config->proxy_cert_type) {
+              if(is_pkcs11_uri(config->proxy_cert)) {
+                config->proxy_cert_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->proxy_key is a PKCS#11 URI and set the
+           * config->proxy_key_type if necessary */
+          if(config->proxy_key) {
+            if(!config->proxy_key_type) {
+              if(is_pkcs11_uri(config->proxy_key)) {
+                config->proxy_key_type = strdup("ENG");
+              }
+            }
+          }
+
           my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
           my_setopt_str(curl, CURLOPT_PROXY_SSLCERT, config->proxy_cert);
           my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
