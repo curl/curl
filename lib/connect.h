@@ -41,8 +41,6 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
                          bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
-#define HAPPY_EYEBALLS_TIMEOUT     200 /* milliseconds to wait between
-                                          IPv4/IPv6 connection attempts */
 
 /*
  * Used to extract socket and connectdata struct for the most recent

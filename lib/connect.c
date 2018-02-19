@@ -736,7 +736,6 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   struct curltime now;
   int rc;
   int i;
-
   DEBUGASSERT(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
   *connected = FALSE; /* a very negative world view is best */
@@ -783,7 +782,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
       /* should we try another protocol family? */
       if(i == 0 && conn->tempaddr[1] == NULL &&
-         Curl_timediff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
+         Curl_timediff(now, conn->connecttime)
+         >= data->set.happy_eyeballs_timeout) {
         trynextip(conn, sockindex, 1);
       }
     }
@@ -1206,7 +1206,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   data->info.numconnects++; /* to track the number of connections made */
-  Curl_expire(conn->data, HAPPY_EYEBALLS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS);
+  Curl_expire(conn->data,
+              data->set.happy_eyeballs_timeout,
+              EXPIRE_HAPPY_EYEBALLS);
 
   return CURLE_OK;
 }
