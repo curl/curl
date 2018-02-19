@@ -534,6 +534,9 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
 }
 #endif
 
+static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
+                                     const char *engine);
+
 static
 int cert_stuff(struct connectdata *conn,
                SSL_CTX* ctx,
@@ -596,6 +599,16 @@ int cert_stuff(struct connectdata *conn,
     case SSL_FILETYPE_ENGINE:
 #if defined(HAVE_OPENSSL_ENGINE_H) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
       {
+        /* Implicitly use pkcs11 engine if none was provided and the
+         * cert_file is a PKCS#11 URI */
+        if(!data->state.engine) {
+          if(!strncmp(cert_file, "pkcs11:", 7)) {
+            if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+              return 0;
+            }
+          }
+        }
+
         if(data->state.engine) {
           const char *cmd_name = "LOAD_CERT_CTRL";
           struct {
@@ -762,6 +775,17 @@ int cert_stuff(struct connectdata *conn,
 #ifdef HAVE_OPENSSL_ENGINE_H
       {                         /* XXXX still needs some work */
         EVP_PKEY *priv_key = NULL;
+
+        /* Implicitly use pkcs11 engine if none was provided and the
+         * key_file is a PKCS#11 URI */
+        if(!data->state.engine) {
+          if(!strncmp(key_file, "pkcs11:", 7)) {
+            if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+              return 0;
+            }
+          }
+        }
+
         if(data->state.engine) {
           UI_METHOD *ui_method =
             UI_create_method((char *)"curl user interface");

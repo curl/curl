@@ -1057,6 +1057,46 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
         if(curlinfo->features & CURL_VERSION_SSL) {
+          /* Check if config->cert is a PKCS#11 URI and set the
+           * config->cert_type if necessary */
+          if(config->cert) {
+            if(!strncmp(config->cert, "pkcs11:", 7)) {
+              if(!config->cert_type) {
+                config->cert_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->key is a PKCS#11 URI and set the
+           * config->key_type if necessary */
+          if(config->key) {
+            if(!strncmp(config->key, "pkcs11:", 7)) {
+              if(!config->key_type) {
+                config->key_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->proxy_cert is a PKCS#11 URI and set the
+           * config->proxy_type if necessary */
+          if(config->proxy_cert) {
+            if(!strncmp(config->proxy_cert, "pkcs11:", 7)) {
+              if(!config->proxy_cert_type) {
+                config->proxy_cert_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->proxy_key is a PKCS#11 URI and set the
+           * config->proxy_key_type if necessary */
+          if(config->proxy_key) {
+            if(!strncmp(config->proxy_key, "pkcs11:", 7)) {
+              if(!config->proxy_key_type) {
+                config->proxy_key_type = strdup("ENG");
+              }
+            }
+          }
+
           my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
           my_setopt_str(curl, CURLOPT_PROXY_SSLCERT, config->proxy_cert);
           my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
