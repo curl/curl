@@ -1350,6 +1350,7 @@ struct DynamicStatic {
                                     curl_easy_setopt(COOKIEFILE) calls */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
+  bool wildcard_resolve; /* Set to true if any resolve change is a wildcard */
 };
 
 /*
