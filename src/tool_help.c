@@ -404,6 +404,8 @@ static const struct helptxt helptext[] = {
    "Disable cert revocation checks (WinSSL)"},
   {"    --ssl-reqd",
    "Require SSL/TLS"},
+  {"    --ssl-trust-proxy",
+   "Disable implied --proxytunnel for HTTPS (INSECURE)"},
   {"-2, --sslv2",
    "Use SSLv2"},
   {"-3, --sslv3",

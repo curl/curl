@@ -2007,6 +2007,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
     data->set.ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.ssl.no_implied_proxytunnel = !!(arg & CURLSSLOPT_TRUST_PROXY);
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 

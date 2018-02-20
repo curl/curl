@@ -3038,8 +3038,18 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
       result = CURLE_UNSUPPORTED_PROTOCOL;
       goto out;
 #else
-      /* force this connection's protocol to become HTTP if compatible */
-      if(!(conn->handler->protocol & PROTO_FAMILY_HTTP)) {
+      conn->bits.httpproxy = TRUE;
+
+      /* if HTTPS protocol, and user disabled implied proxy tunnel, and user
+         did not explicitly enable proxy tunnel, then treat as HTTP so that the
+         HTTPS URL will be requested from the proxy */
+      if(!conn->bits.tunnel_proxy &&
+         data->set.ssl.no_implied_proxytunnel &&
+         (conn->handler->protocol & CURLPROTO_HTTPS)) {
+        conn->handler = &Curl_handler_http;
+      }
+      /* else force this connection's protocol to become HTTP if compatible */
+      else if(!(conn->handler->protocol & PROTO_FAMILY_HTTP)) {
         if((conn->handler->flags & PROTOPT_PROXY_AS_HTTP) &&
            !conn->bits.tunnel_proxy)
           conn->handler = &Curl_handler_http;
@@ -3047,7 +3057,6 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
           /* if not converting to HTTP over the proxy, enforce tunneling */
           conn->bits.tunnel_proxy = TRUE;
       }
-      conn->bits.httpproxy = TRUE;
 #endif
     }
     else {
@@ -4190,7 +4199,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * If the protocol is using SSL and HTTP proxy is used, we set
    * the tunnel_proxy bit.
    *************************************************************/
-  if((conn->given->flags&PROTOPT_SSL) && conn->bits.httpproxy)
+  if((conn->handler->flags&PROTOPT_SSL) && conn->bits.httpproxy)
     conn->bits.tunnel_proxy = TRUE;
 
   /*************************************************************

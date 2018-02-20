@@ -791,6 +791,10 @@ typedef enum {
    SSL backends where such behavior is present. */
 #define CURLSSLOPT_NO_REVOKE (1<<1)
 
+/* - TRUST_PROXY tells libcurl to disable disable implied
+   CURLOPT_HTTPPROXYTUNNEL for HTTPS URL. */
+#define CURLSSLOPT_TRUST_PROXY (1<<2)
+
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
 

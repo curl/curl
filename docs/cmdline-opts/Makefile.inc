@@ -37,7 +37,8 @@ DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cer
   socks5-basic.d socks5-gssapi.d proxy-pinnedpubkey.d                   \
   socks5-gssapi-nec.d socks5-gssapi-service.d socks5-hostname.d         \
   speed-limit.d speed-time.d ssl-allow-beast.d ssl.d ssl-no-revoke.d    \
-  ssl-reqd.d sslv2.d sslv3.d stderr.d suppress-connect-headers.d        \
+  ssl-reqd.d ssl-trust-proxy.d                                          \
+  sslv2.d sslv3.d stderr.d suppress-connect-headers.d                   \
   tcp-fastopen.d tcp-nodelay.d                                          \
   telnet-option.d tftp-blksize.d tftp-no-options.d time-cond.d          \
   tls-max.d                                                             \
