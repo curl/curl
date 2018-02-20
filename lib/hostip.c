@@ -312,6 +312,10 @@ fetch_addr(struct connectdata *conn,
 
   /* No entry found in cache, check if we might have a wildcard entry */
   if(!dns && data->change.wildcard_resolve) {
+    // free the previous entry_id before requesting a new one 
+    // to avoid leaking memory
+    free(entry_id);
+
     entry_id = create_hostcache_id("*", port);
 
     /* If we can't create the entry id, fail */
