@@ -823,7 +823,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *entry_id;
       size_t entry_len;
       char address[64];
-      char *addresses;
+      char *addresses = NULL;
       char *addr_begin;
       char *addr_end;
       char *port_ptr;
@@ -842,7 +842,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
       port_ptr = host_end + 1;
       tmp_port = strtoul(port_ptr, &end_ptr, 10);
-      if(end_ptr == port_ptr || tmp_port > USHRT_MAX || *end_ptr != ':')
+      if(tmp_port > USHRT_MAX || end_ptr == port_ptr || *end_ptr != ':')
         goto err;
 
       port = (int)tmp_port;
