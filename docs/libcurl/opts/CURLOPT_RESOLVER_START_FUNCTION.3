@@ -27,7 +27,7 @@ CURLOPT_RESOLVER_START_FUNCTION \- set callback to be called before resolver sta
 .nf
 #include <curl/curl.h>
 
-void resolver_alloc_cb(void *resolver_data, void *user_data);
+int resolver_alloc_cb(void *resolver_data, void *user_data);
 
 CURLcode curl_easy_setopt(CURL *handle,
                           CURLOPT_RESOLVER_START_FUNCTION,
@@ -42,6 +42,9 @@ For ares backend, resolver data is the channel used by ares. This can be used
 to set up any desired option on the ares channel before it's used, for example
 setting up socket callback options.
 
+If he callback returns something other than CURLE_OK, the connection attemtp
+will be aborted.
+
 Set the \fIuser_data\fP argument with the \fICURLOPT_RESOLVER_START_DATA(3)\fP
 option.
 .SH DEFAULT
@@ -54,11 +57,13 @@ Support for CURLOPT_RESOLVER_START_FUNCTION was added in version 7.59.1.
 This will return CURLE_OK.
 .SH EXAMPLE
 
-static void resolver_alloc_cb(void *channel,
+static int resolver_alloc_cb(void *channel,
                               void *userdata)
 {
     printf("Received resolver allocation callback, channel=%p userdata=%p\n",
       channel, userdata);
+
+    return (CURLE_OK);
 }
 
 CURL *curl = curl_easy_init();

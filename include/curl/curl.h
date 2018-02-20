@@ -246,8 +246,8 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       void *outstream);
 
 /* This callback will be called when a new resolver request is made */
-typedef void (*curl_resolver_start_cb)(void *resolver,
-                                       void *userdata);
+typedef int (*curl_resolver_start_cb)(void *resolver,
+                                      void *userdata);
 
 
 

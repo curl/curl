@@ -38,11 +38,13 @@ User data is set to NULL by default
 Used for all protocols.
 .SH EXAMPLE
 
-static void resolver_alloc_cb(void *channel,
+static int resolver_alloc_cb(void *channel,
                               void *userdata)
 {
     printf("Received resolver allocation callback, channel=%p userdata=%p\n",
       channel, userdata);
+
+    return (CURLE_OK);
 }
 
 CURL *curl = curl_easy_init();

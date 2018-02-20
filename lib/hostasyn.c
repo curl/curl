@@ -52,6 +52,7 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
+#include "multiif.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -149,13 +150,20 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
 
-  /* Call the resolver start callback, if defined */
+  /* Call the resolver start callback, if defined.
+   * Callback returning != OK will cause connection to fail.
+   */
+  Curl_set_in_callback(conn->data, true);
+
   if(data->set.resolver_callbacks.resolver_start_cb) {
-    data->set.resolver_callbacks.
+    if(CURLE_OK != data->set.resolver_callbacks.
       resolver_start_cb(data->state.resolver,
-        data->set.resolver_callbacks.resolver_start_userdata);
+        data->set.resolver_callbacks.resolver_start_userdata)) {
+      return NULL;
+    }
   }
 
+  Curl_set_in_callback(conn->data, false);
   return Curl_resolver_getaddrinfo(conn, hostname, port, waitp);
 }
 
