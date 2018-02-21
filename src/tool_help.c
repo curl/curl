@@ -160,6 +160,8 @@ static const struct helptxt helptext[] = {
    "Put the post data in the URL and use GET"},
   {"-g, --globoff",
    "Disable URL sequences and ranges using {} and []"},
+  {"    --happy-eyeballs-timeout-ms",
+   "How long to wait in milliseconds for IPv6 before trying IPv4"},
   {"-I, --head",
    "Show document info only"},
   {"-H, --header <header/@file>",

@@ -1,15 +1,18 @@
 Curl and libcurl 7.59.0
 
  Public curl releases:         173
- Command line options:         212
- curl_easy_setopt() options:   250
+ Command line options:         213
+ curl_easy_setopt() options:   251
  Public functions in libcurl:  74
- Contributors:                 1685
+ Contributors:                 1698
 
 This release includes the following changes:
 
  o curl: add --proxy-pinnedpubkey [10]
  o added: CURLOPT_TIMEVALUE_LARGE and CURLINFO_FILETIME_T [13]
+ o CURLOPT_RESOLVE: Add support for multiple IP addresses per entry [37]
+ o Add option CURLOPT_HAPPY_EYEBALLS_TIMEOUT [37]
+ o Add new tool option --happy-eyeballs-timeout-ms [37]
 
 This release includes the following bugfixes:
 
@@ -51,6 +54,19 @@ This release includes the following bugfixes:
  o smtp: fix processing of initial dot in data [28]
  o --tlsauthtype: works only if libcurl is built with TLS-SRP support [29]
  o tests: new tests for http raw mode [30]
+ o libcurl-security.3: man page discussion security concerns when using libcurl
+ o curl_gssapi: make sure this file too uses our *printf()
+ o BINDINGS: fix curb link (and remove ruby-curl-multi)
+ o nss: use PK11_CreateManagedGenericObject() if available [31]
+ o travis: add build with iconv enabled [32]
+ o ssh: add two missing state names [33]
+ o CURLOPT_HEADERFUNCTION.3: mention folded headers
+ o http: fix the max header length detection logic [34]
+ o header callback: don't chop headers into smaller pieces [35]
+ o CURLOPT_HEADER.3: clarify problems with different data sizes
+ o curl --version: show PSL if the run-time lib has it enabled
+ o examples/sftpuploadresume: resume upload via CURLOPT_APPEND [36]
+ o Return error if called recursively from within callbacks [38]
 
 This release includes the following known bugs:
 
@@ -59,12 +75,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Marcionek, Alessandro Ghedini, Ben Greear, Bruno Grasselli, Dair Grant,
-  Daniel Stenberg, Douglas Mencken, Earnestly on github, Gisle Vanem,
-  Henry Roeland, Kamil Dudka, Marcel Raad, Martin Dreher, Max Dymond,
-  Michael Kaufmann, Michał Janiszewski, Mohammad AlSaleh, Patrick Monnerat,
-  Patrick Schlangen, Ray Satiro, Ruurd Beerstra, Steve Holme, Travis Burtrum,
-  (23 contributors)
+  Adam Marcionek, Alessandro Ghedini, Anders Bakken, Ben Greear,
+  Björn Stenberg, Bruno Grasselli, Dair Grant, Daniel Stenberg,
+  Douglas Mencken, Earnestly on github, Erik Johansson, Gisle Vanem,
+  Guido Berhoerster, Henry Roeland, Kamil Dudka, Klaus Stein, Marcel Raad,
+  Martin Dreher, Max Dymond, Michael Kaufmann, Michał Janiszewski,
+  Mohammad AlSaleh, Patrick Monnerat, Patrick Schlangen, Ray Satiro,
+  Rich Moore, Ruurd Beerstra, Sergio Borghese, Somnath Kundu, Steve Holme,
+  Travis Burtrum,
+  (31 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -100,3 +119,11 @@ References to bug reports and discussions on issues:
  [28] = https://curl.haxx.se/bug/?i=2304
  [29] = https://bugzilla.redhat.com/1542256
  [30] = https://curl.haxx.se/bug/?i=2303
+ [31] = https://bugzilla.redhat.com/1510247
+ [32] = https://curl.haxx.se/bug/?i=1872
+ [33] = https://curl.haxx.se/bug/?i=2312
+ [34] = https://curl.haxx.se/mail/lib-2018-02/0056.html
+ [35] = https://curl.haxx.se/bug/?i=2314
+ [36] = https://curl.haxx.se/mail/lib-2018-02/0072.html
+ [37] = https://curl.haxx.se/bug/?i=2260
+ [38] = https://curl.haxx.se/bug/?i=2302
