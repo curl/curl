@@ -246,15 +246,8 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       void *outstream);
 
 /* This callback will be called when a new resolver request is made */
-<<<<<<< 7a6a12d36d9c7a25c0d773f863f345945eaaaf7a
 typedef int (*curl_resolver_start_cb)(void *resolver,
                                       void *userdata);
-=======
-typedef void (*curl_resolver_start_cb)(void *resolver,
-                                       void *userdata);
-
-
->>>>>>> Add support for CURLOPT_RESOLVER_START callback
 
 /* enumeration of file types */
 typedef enum {
