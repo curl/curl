@@ -245,7 +245,9 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t nitems,
                                       void *outstream);
 
-
+/* This callback will be called when a new resolver request is made */
+typedef int (*curl_resolver_start_cb)(void *resolver,
+                                      void *userdata);
 
 /* enumeration of file types */
 typedef enum {
@@ -1832,6 +1834,12 @@ typedef enum {
 
   /* Head start in milliseconds to give happy eyeballs. */
   CINIT(HAPPY_EYEBALLS_TIMEOUT_MS, LONG, 271),
+
+  /* Function that will be called before a resolver request is made */
+  CINIT(RESOLVER_START_FUNCTION, FUNCTIONPOINT, 272),
+
+  /* User data to pass to the resolver start callback. */
+  CINIT(RESOLVER_START_DATA, OBJECTPOINT, 273),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
