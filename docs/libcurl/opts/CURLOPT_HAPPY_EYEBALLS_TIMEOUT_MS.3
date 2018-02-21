@@ -20,13 +20,13 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_HAPPY_EYEBALLS_TIMEOUT 3 "1 Feb 2018" "libcurl 7.59.0" "curl_easy_setopt options"
+.TH CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS 3 "1 Feb 2018" "libcurl 7.59.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HAPPY_EYEBALLS_TIMEOUT \- head start for ipv6 for happy eyeballs
+CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS \- head start for ipv6 for happy eyeballs
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT, long timeout);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, long timeout);
 .SH DESCRIPTION
 Happy eyeballs is an algorithm that attempts to connect to both IPv4 and IPv6
 addresses for dual-stack hosts, preferring IPv6 first for \fItimeout\fP
@@ -45,7 +45,7 @@ CURL_HET_DEFAULT (currently defined as 200L)
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT, 300L);
+  curl_easy_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, 300L);
 
   curl_easy_perform(curl);
 

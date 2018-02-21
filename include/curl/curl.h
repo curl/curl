@@ -792,7 +792,7 @@ typedef enum {
 #define CURLSSLOPT_NO_REVOKE (1<<1)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
-   CURLOPT_HAPPY_EYEBALLS_TIMEOUT.3 and happy-eyeballs-timeout-ms.d document
+   CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
    this value, keep them in sync. */
 #define CURL_HET_DEFAULT 200L
 
@@ -1831,7 +1831,7 @@ typedef enum {
   CINIT(TIMEVALUE_LARGE, OFF_T, 270),
 
   /* Head start in milliseconds to give happy eyeballs. */
-  CINIT(HAPPY_EYEBALLS_TIMEOUT, LONG, 271),
+  CINIT(HAPPY_EYEBALLS_TIMEOUT_MS, LONG, 271),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

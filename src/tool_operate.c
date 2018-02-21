@@ -1442,7 +1442,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* new in 7.59.0 */
         if(config->happy_eyeballs_timeout_ms != CURL_HET_DEFAULT)
-          my_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT,
+          my_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                     config->happy_eyeballs_timeout_ms);
 
         /* initialize retry vars for loop below */

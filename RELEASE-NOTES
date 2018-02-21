@@ -11,7 +11,7 @@ This release includes the following changes:
  o curl: add --proxy-pinnedpubkey [10]
  o added: CURLOPT_TIMEVALUE_LARGE and CURLINFO_FILETIME_T [13]
  o CURLOPT_RESOLVE: Add support for multiple IP addresses per entry [37]
- o Add option CURLOPT_HAPPY_EYEBALLS_TIMEOUT [37]
+ o Add option CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS [37]
  o Add new tool option --happy-eyeballs-timeout-ms [37]
 
 This release includes the following bugfixes:
