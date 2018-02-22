@@ -56,3 +56,6 @@ scripts/_curl
 curl_fuzzer
 curl_fuzzer_seed_corpus.zip
 libstandaloneengine.a
+winbuild/.vs/libcurl/v14/.suo
+winbuild/libcurl.VC.db
+*.opendb
