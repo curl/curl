@@ -1968,6 +1968,9 @@
      d curl_closesocket_callback...
      d                 s               *   based(######ptr######) procptr
       *
+     d curl_resolver_start_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
       **************************************************************************
       *                              Prototypes
       **************************************************************************
