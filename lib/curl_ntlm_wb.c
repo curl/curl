@@ -364,7 +364,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   case NTLMSTATE_TYPE1:
   default:
     /* Use Samba's 'winbind' daemon to support NTLM authentication,
-     * by delegating the NTLM challenge/response protocal to a helper
+     * by delegating the NTLM challenge/response protocol to a helper
      * in ntlm_auth.
      * http://devel.squid-cache.org/ntlm/squid_helper_protocol.html
      * https://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html

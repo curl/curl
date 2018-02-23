@@ -86,7 +86,7 @@ curl_10char_object_name() {
 # curl_8char_object_name
 #
 # Same as curl_10char_object_name() description and details above, except
-# that object name is limited to 8 charcters maximum.
+# that object name is limited to 8 characters maximum.
 #
 
 curl_8char_object_name() {

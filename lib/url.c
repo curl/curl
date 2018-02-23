@@ -4117,7 +4117,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    *************************************************************/
   if(prot_missing) {
     /* We're guessing prefixes here and if we're told to use a proxy or if
-       we're gonna follow a Location: later or... then we need the protocol
+       we're going to follow a Location: later or... then we need the protocol
        part added so that we have a valid URL. */
     char *reurl;
     char *ch_lower;

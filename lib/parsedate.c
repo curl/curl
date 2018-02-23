@@ -433,7 +433,7 @@ static int parsedate(const char *date, time_t *output)
           tzoff = (val/100 * 60 + val%100)*60;
 
           /* the + and - prefix indicates the local time compared to GMT,
-             this we need ther reversed math to get what we want */
+             this we need their reversed math to get what we want */
           tzoff = date[-1]=='+'?-tzoff:tzoff;
         }
 

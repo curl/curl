@@ -218,9 +218,9 @@ FAQ
   very well at the side. Curl's output can be piped into another program or
   redirected to another file for the next program to interpret.
 
-  We focus on protocol related issues and improvements. If you wanna do more
+  We focus on protocol related issues and improvements. If you want to do more
   magic with the supported protocols than curl currently does, chances are good
-  we will agree. If you wanna add more protocols, we may very well agree.
+  we will agree. If you want to add more protocols, we may very well agree.
 
   If you want someone else to do all the work while you wait for us to
   implement it for you, that is not a very friendly attitude. We spend a
