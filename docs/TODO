@@ -68,7 +68,6 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
- 5.4 HTTP Digest using SHA-256
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 QUIC
@@ -559,15 +558,6 @@
  sorts the headers based on that number. We could then have internally created
  headers use a default value so only headers that need to be moved have to be
  specified.
-
-5.4 HTTP Digest using SHA-256
-
- RFC 7616 introduces an update to the HTTP Digest authentication
- specification, which amongst other thing defines how new digest algorithms
- can be used instead of MD5 which is considered old and not recommended.
-
- See https://tools.ietf.org/html/rfc7616 and
- https://github.com/curl/curl/issues/1018
 
 5.5 auth= in URLs
 
