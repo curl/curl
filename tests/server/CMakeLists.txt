@@ -20,7 +20,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   target_link_libraries(${TEST_NAME} ${CURL_LIBS})
 
   # Test servers simply are standalone programs that do not use libcurl
-  # library.  For convinience and to ease portability of these servers,
+  # library.  For convenience and to ease portability of these servers,
   # some source code files from the libcurl subdirectory are also used
   # to build the servers.  In order to achieve proper linkage of these
   # files on Win32 targets it is necessary to build the test servers

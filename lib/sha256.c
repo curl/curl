@@ -242,7 +242,7 @@ static int SHA256_Final(unsigned char *out,
     sha256_compress(md, md->buf);
     md->curlen = 0;
   }
-  /* pad upto 56 bytes of zeroes */
+  /* pad up to 56 bytes of zeroes */
   while(md->curlen < 56) {
     md->buf[md->curlen++] = (unsigned char)0;
   }

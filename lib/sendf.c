@@ -389,7 +389,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       (WSAEWOULDBLOCK == err)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefor
+         due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err) ||
       (EINPROGRESS == err)
@@ -456,7 +456,7 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
       (WSAEWOULDBLOCK == err)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefor
+         due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err)
 #endif

@@ -2708,7 +2708,7 @@ sub datasockf_state {
 }
 
 #**********************************************************************
-# nodataconn_str returns string of efective nodataconn command. Notice
+# nodataconn_str returns string of effective nodataconn command. Notice
 # that $nodataconn may be set alone or in addition to a $nodataconnXXX.
 #
 sub nodataconn_str {
@@ -2934,7 +2934,7 @@ while(@ARGV) {
 }
 
 #***************************************************************************
-# Initialize command line option dependant variables
+# Initialize command line option dependent variables
 #
 
 if(!$srcdir) {

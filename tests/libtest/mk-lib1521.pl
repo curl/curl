@@ -71,7 +71,7 @@ struct data {
 /* Unexpected error.
     CURLE_NOT_BUILT_IN   - means disabled at build
     CURLE_UNKNOWN_OPTION - means no such option (anymore?)
-    CURLE_SSL_ENGINE_NOTFOUND - set unkown ssl engine
+    CURLE_SSL_ENGINE_NOTFOUND - set unknown ssl engine
     CURLE_UNSUPPORTED_PROTOCOL - set bad HTTP version
     CURLE_BAD_FUNCTION_ARGUMENT - unsupported value
    */

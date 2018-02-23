@@ -95,7 +95,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford
 
 [Scilab](https://help.scilab.org/docs/current/fr_FR/getURL.html) binding by Sylvestre Ledru
 
-[S-Lang](http://www.jedsoft.org/slang/modules/curl.html) by John E Davis
+[S-Lang](https://www.jedsoft.org/slang/modules/curl.html) by John E Davis
 
 [Smalltalk](http://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
 
