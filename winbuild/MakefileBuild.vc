@@ -45,6 +45,11 @@
 
 CFGSET=FALSE
 WINBUILD_DIR=`cd`
+
+# Utilities.
+# If a path is required that contains characters such as space, quote the path.
+MT         = mt.exe
+RC         = rc.exe
 ZIP        = zip.exe
 
 # Allow changing C compiler via environment variable CC (default cl.exe)
@@ -267,7 +272,7 @@ GEN_PDB = true
 
 
 !IFDEF EMBED_MANIFEST
-MANIFESTTOOL = mt -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
+MANIFESTTOOL = $(MT) -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
 !ENDIF
 
 # Runtime library configuration
@@ -496,7 +501,7 @@ $(CURL_DIROBJ):
 	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 $(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
-	rc $(RC_FLAGS)
+	$(RC) $(RC_FLAGS)
 
 #
 # curl.exe
