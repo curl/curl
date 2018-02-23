@@ -179,7 +179,7 @@ MAIL ETIQUETTE
   or just remove them completely from the mail. Note that this includes base64
   encoded HTTP Basic auth headers.
 
-  This public nature of the curl mailing lists makes automaticly inserted mail
+  This public nature of the curl mailing lists makes automatically inserted mail
   footers about mails being "private" or "only meant for the receipient" or
   similar even more silly than usual. Because they are absolutely not private
   when sent to a public mailing list.

@@ -1382,7 +1382,7 @@ $!			search/out 'tfile1' "$_''keyterm'"
 $			severity = '$severity'
 $		    endif
 $!
-$!		    Unix compatability routines
+$!		    Unix compatibility routines
 $!---------------------------------------------
 $		    if severity .ne. 1
 $		    then

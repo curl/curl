@@ -69,7 +69,7 @@ sub file {
             if($str =~ /((libcurl|curl)([^ ]*))\(3\)/i) {
                 my $man = "$1.3";
                 if(!manpresent($man)) {
-                    print STDERR "error: $f:$line: refering to non-existing man page $man\n";
+                    print STDERR "error: $f:$line: referring to non-existing man page $man\n";
                     $errors++;
                 }
                 if($pre ne "I") {
@@ -87,7 +87,7 @@ sub file {
             while($i =~ s/((lib|)curl([^ ]*)) *\"\(3\)(,|) *\" *//i ) {
                 my $man = "$1.3";
                 if(!manpresent($man)) {
-                    print STDERR "error: $f:$line: refering to non-existing man page $man\n";
+                    print STDERR "error: $f:$line: referring to non-existing man page $man\n";
                     $errors++;
                 }
             }

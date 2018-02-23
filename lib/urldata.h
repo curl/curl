@@ -1166,7 +1166,7 @@ struct Curl_http2_dep {
 };
 
 /*
- * This struct is for holding data that was attemped to get sent to the user's
+ * This struct is for holding data that was attempted to get sent to the user's
  * callback but is held due to pausing. One instance per type (BOTH, HEADER,
  * BODY).
  */

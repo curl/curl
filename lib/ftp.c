@@ -1538,7 +1538,7 @@ static CURLcode ftp_state_type(struct connectdata *conn)
      date. */
   if(data->set.opt_no_body && ftpc->file &&
      ftp_need_type(conn, data->set.prefer_ascii)) {
-    /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
+    /* The SIZE command is _not_ RFC 959 specified, and therefore many servers
        may not support it! It is however the only way we have to get a file's
        size! */
 
