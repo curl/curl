@@ -82,6 +82,7 @@ static const struct LongShort aliases[]= {
   {"*d", "ciphers",                  ARG_STRING},
   {"*D", "dns-interface",            ARG_STRING},
   {"*e", "disable-epsv",             ARG_BOOL},
+  {"*f", "disallow-username-in-url", ARG_BOOL},
   {"*E", "epsv",                     ARG_BOOL},
          /* 'epsv' made like this to make --no-epsv and --epsv to work
              although --disable-epsv is the documented option */
@@ -620,6 +621,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'e': /* --disable-epsv */
         config->disable_epsv = toggle;
+        break;
+      case 'f': /* --disallow-username-in-url */
+        config->disallow_username_in_url = toggle;
         break;
       case 'E': /* --epsv */
         config->disable_epsv = (!toggle)?TRUE:FALSE;

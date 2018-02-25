@@ -1474,6 +1474,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->haproxy_protocol)
           my_setopt(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
 
+        if(config->disallow_username_in_url)
+          my_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */

@@ -108,6 +108,8 @@ static const struct helptxt helptext[] = {
    "Inhibit using EPRT or LPRT"},
   {"    --disable-epsv",
    "Inhibit using EPSV"},
+  {"    --disallow-username-in-url",
+   "Disallow username in url"},
   {"    --dns-interface <interface>",
    "Interface to use for DNS requests"},
   {"    --dns-ipv4-addr <address>",
