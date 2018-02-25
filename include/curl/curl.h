@@ -1853,6 +1853,9 @@ typedef enum {
   CINIT(TLS13_CIPHERS, STRINGPOINT, 276),
   CINIT(PROXY_TLS13_CIPHERS, STRINGPOINT, 277),
 
+  /* Disallow specifying username/login in URL. */
+  CINIT(DISALLOW_USERNAME_IN_URL, LONG, 278),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

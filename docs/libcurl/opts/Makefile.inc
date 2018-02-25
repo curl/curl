@@ -114,6 +114,7 @@ man_MANS =                                      \
   CURLOPT_DEBUGFUNCTION.3                       \
   CURLOPT_DEFAULT_PROTOCOL.3                    \
   CURLOPT_DIRLISTONLY.3                         \
+  CURLOPT_DISALLOW_USERNAME_IN_URL.3            \
   CURLOPT_DNS_CACHE_TIMEOUT.3                   \
   CURLOPT_DNS_INTERFACE.3                       \
   CURLOPT_DNS_LOCAL_IP4.3                       \
