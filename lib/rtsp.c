@@ -47,7 +47,7 @@
  *  -incoming server requests
  *      -server CSeq counter
  *  -digest authentication
- *  -connect thru proxy
+ *  -connect through proxy
  *  -pipelining?
  */
 

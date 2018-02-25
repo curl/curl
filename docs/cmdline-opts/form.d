@@ -12,25 +12,35 @@ Content-Type multipart/form-data according to RFC 2388.
 For SMTP and IMAP protocols, this is the mean to compose a multipart mail
 message to transmit.
 
-This enables uploading of binary
-files etc. To force the 'content' part to be a file, prefix the file name with
-an @ sign. To just get the content part from a file, prefix the file name with
-the symbol <. The difference between @ and < is then that @ makes a file get
-attached in the post as a file upload, while the < makes a text field and just
-get the contents for that text field from a file.
+This enables uploading of binary files etc. To force the 'content' part to be
+a file, prefix the file name with an @ sign. To just get the content part from
+a file, prefix the file name with the symbol <. The difference between @ and <
+is then that @ makes a file get attached in the post as a file upload, while
+the < makes a text field and just get the contents for that text field from a
+file.
 
-Example: to send an image to an HTTP server, where \&'profile' is the name of
-the form-field to which portrait.jpg will be the input:
+Tell curl to read content from stdin instead of a file by using - as
+filename. This goes for both @ and < constructs. When stdin is used, the
+contents is buffered in memory first by curl to determine its size and allow a
+possible resend.  Defining a part's data from a named non-regular file (such
+as a named pipe or similar) is unfortunately not subject to buffering and will
+be effectively read at transmission time; since the full size is unknown
+before the transfer starts, such data is sent as chunks by HTTP and rejected
+by IMAP.
+
+Example: send an image to an HTTP server, where \&'profile' is the name of the
+form-field to which the file portrait.jpg will be the input:
 
  curl -F profile=@portrait.jpg https://example.com/upload.cgi
 
-To read content from stdin instead of a file, use - as the filename. This goes
-for both @ and < constructs. If stdin is not attached to a regular file, it is
-buffered first to determine its size and allow a possible resend. Defining a
-part's data from a named non-regular file (such as a named pipe or similar) is
-unfortunately not subject to buffering and will be effectively read at
-transmission time; since the full size is unknown before the transfer starts,
-data is sent as chunks by HTTP and rejected by IMAP.
+Example: send a your name and shoe size in two text fields to the server:
+
+ curl -F name=John -F shoesize=11 https://example.com/
+
+Example: send a your essay in a text field to the server. Send it as a plain
+text field, but get the contents for it from a local file:
+
+ curl -F "story=<hugefile.txt" https://example.com/
 
 You can also tell curl what Content-Type to use by using 'type=', in a manner
 similar to:

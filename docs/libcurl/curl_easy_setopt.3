@@ -139,6 +139,10 @@ Callback for wildcard matching. See \fICURLOPT_FNMATCH_FUNCTION(3)\fP
 Data pointer to pass to the wildcard matching callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
 .IP CURLOPT_SUPPRESS_CONNECT_HEADERS
 Suppress proxy CONNECT response headers from user callbacks. See \fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP
+.IP CURLOPT_RESOLVER_START_FUNCTION
+Callback to be called before a new resolve request is started. See \fICURLOPT_RESOLVER_START_FUNCTION(3)\fP
+.IP CURLOPT_RESOLVER_START_DATA
+Data pointer to pass to resolver start callback. See \fICURLOPT_RESOLVER_START_DATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
@@ -464,6 +468,8 @@ Bind name resolves to this IP6 address. See \fICURLOPT_DNS_LOCAL_IP6(3)\fP
 Preferred DNS servers. See \fICURLOPT_DNS_SERVERS(3)\fP
 .IP CURLOPT_ACCEPTTIMEOUT_MS
 Timeout for waiting for the server's connect back to be accepted. See \fICURLOPT_ACCEPTTIMEOUT_MS(3)\fP
+.IP CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
+Timeout for happy eyeballs. See \fICURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)\fP
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Client cert. See \fICURLOPT_SSLCERT(3)\fP

@@ -42,6 +42,7 @@ void config_init(struct OperationConfig* config)
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
   config->tcp_nodelay = TRUE; /* enabled by default */
+  config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
 }
 
 static void free_config_fields(struct OperationConfig *config)

@@ -1166,7 +1166,7 @@ struct Curl_http2_dep {
 };
 
 /*
- * This struct is for holding data that was attemped to get sent to the user's
+ * This struct is for holding data that was attempted to get sent to the user's
  * callback but is held due to pausing. One instance per type (BOTH, HEADER,
  * BODY).
  */
@@ -1520,6 +1520,7 @@ struct UserDefined {
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
+  long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long tftp_blksize;    /* in bytes, 0 means use default */
   bool tftp_no_options; /* do not send TFTP options requests */
@@ -1680,6 +1681,10 @@ struct UserDefined {
   struct Curl_http2_dep *stream_dependents;
 
   bool abstract_unix_socket;
+
+  curl_resolver_start_callback resolver_start; /* optional callback called
+                                                  before resolver start */
+  void *resolver_start_client; /* pointer to pass to resolver start callback */
 };
 
 struct Names {

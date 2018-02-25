@@ -136,6 +136,7 @@ man_MANS =                                      \
   CURLOPT_FTP_USE_EPSV.3                        \
   CURLOPT_FTP_USE_PRET.3                        \
   CURLOPT_GSSAPI_DELEGATION.3                   \
+  CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3           \
   CURLOPT_HEADER.3                              \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
@@ -241,6 +242,8 @@ man_MANS =                                      \
   CURLOPT_REFERER.3                             \
   CURLOPT_REQUEST_TARGET.3                      \
   CURLOPT_RESOLVE.3                             \
+  CURLOPT_RESOLVER_START_DATA.3                 \
+  CURLOPT_RESOLVER_START_FUNCTION.3             \
   CURLOPT_RESUME_FROM.3                         \
   CURLOPT_RESUME_FROM_LARGE.3                   \
   CURLOPT_RTSP_CLIENT_CSEQ.3                    \

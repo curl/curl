@@ -2110,6 +2110,21 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.fclosesocket = va_arg(param, curl_closesocket_callback);
     break;
 
+  case CURLOPT_RESOLVER_START_FUNCTION:
+    /*
+     * resolver start callback function: called before a new resolver request
+     * is started
+     */
+    data->set.resolver_start = va_arg(param, curl_resolver_start_callback);
+    break;
+
+  case CURLOPT_RESOLVER_START_DATA:
+    /*
+     * resolver start callback data pointer. Might be NULL.
+     */
+    data->set.resolver_start_client = va_arg(param, void *);
+    break;
+
   case CURLOPT_CLOSESOCKETDATA:
     /*
      * socket callback data pointer. Might be NULL.
@@ -2532,6 +2547,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_SSH_COMPRESSION:
     data->set.ssh_compression = (0 != va_arg(param, long))?TRUE:FALSE;
+    break;
+  case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.happy_eyeballs_timeout = arg;
     break;
   default:
     /* unknown tag and its companion, just ignore: */

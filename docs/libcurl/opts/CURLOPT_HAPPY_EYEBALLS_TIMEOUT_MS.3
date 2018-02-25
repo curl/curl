@@ -1,0 +1,59 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS 3 "1 Feb 2018" "libcurl 7.59.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS \- head start for ipv6 for happy eyeballs
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, long timeout);
+.SH DESCRIPTION
+Happy eyeballs is an algorithm that attempts to connect to both IPv4 and IPv6
+addresses for dual-stack hosts, preferring IPv6 first for \fItimeout\fP
+milliseconds. If the IPv6 address cannot be connected to within that time then
+a connection attempt is made to the IPv4 address in parallel. The first
+connection to be established is the one that is used.
+
+The range of suggested useful values for \fItimeout\fP is limited. Happy
+Eyeballs RFC 6555 says "It is RECOMMENDED that connection attempts be paced
+150-250 ms apart to balance human factors against network load." libcurl
+currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
+.SH DEFAULT
+CURL_HET_DEFAULT (currently defined as 200L)
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+  curl_easy_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS, 300L);
+
+  curl_easy_perform(curl);
+
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.59.0
+.SH RETURN VALUE
+Returns CURLE_OK

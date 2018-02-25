@@ -54,6 +54,9 @@ __extension__ ({                                                              \
     if(_curl_is_write_cb_option(_curl_opt))                                   \
       if(!_curl_is_write_cb(value))                                           \
         _curl_easy_setopt_err_write_callback();                               \
+    if((_curl_opt) == CURLOPT_RESOLVER_START_FUNCTION)                        \
+      if(!_curl_is_resolver_start_callback(value))                            \
+        _curl_easy_setopt_err_resolver_start_callback();                      \
     if((_curl_opt) == CURLOPT_READFUNCTION)                                   \
       if(!_curl_is_read_cb(value))                                            \
         _curl_easy_setopt_err_read_cb();                                      \
@@ -170,6 +173,10 @@ _CURL_WARNING(_curl_easy_setopt_err_string,
   )
 _CURL_WARNING(_curl_easy_setopt_err_write_callback,
   "curl_easy_setopt expects a curl_write_callback argument for this option")
+_CURL_WARNING(_curl_easy_setopt_err_resolver_start_callback,
+              "curl_easy_setopt expects a "
+              "curl_resolver_start_callback argument for this option"
+  )
 _CURL_WARNING(_curl_easy_setopt_err_read_cb,
   "curl_easy_setopt expects a curl_read_callback argument for this option")
 _CURL_WARNING(_curl_easy_setopt_err_ioctl_cb,
@@ -354,6 +361,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SSH_KEYDATA ||                                         \
    (option) == CURLOPT_SSL_CTX_DATA ||                                        \
    (option) == CURLOPT_WRITEDATA ||                                           \
+   (option) == CURLOPT_RESOLVER_START_DATA ||                                 \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
@@ -503,6 +511,11 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
 #define _curl_callback_compatible(func, type)                                 \
   (__builtin_types_compatible_p(__typeof__(func), type) ||                    \
    __builtin_types_compatible_p(__typeof__(func) *, type))
+
+/* evaluates to true if expr is of type curl_resolver_start_callback */
+#define _curl_is_resolver_start_callback(expr)       \
+  (_curl_is_NULL(expr) || \
+   _curl_callback_compatible((expr), curl_resolver_start_callback))
 
 /* evaluates to true if expr is of type curl_read_callback or "similar" */
 #define _curl_is_read_cb(expr)                                          \

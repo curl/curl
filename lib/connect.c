@@ -619,8 +619,8 @@ void Curl_persistconninfo(struct connectdata *conn)
 
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-static bool getaddressinfo(struct sockaddr *sa, char *addr,
-                           long *port)
+bool Curl_getaddressinfo(struct sockaddr *sa, char *addr,
+                         long *port)
 {
   unsigned short us_port;
   struct sockaddr_in *si = NULL;
@@ -700,16 +700,16 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
       return;
     }
 
-    if(!getaddressinfo((struct sockaddr*)&ssrem,
-                        conn->primary_ip, &conn->primary_port)) {
+    if(!Curl_getaddressinfo((struct sockaddr*)&ssrem,
+                            conn->primary_ip, &conn->primary_port)) {
       failf(data, "ssrem inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(conn, errno));
       return;
     }
     memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 
-    if(!getaddressinfo((struct sockaddr*)&ssloc,
-                       conn->local_ip, &conn->local_port)) {
+    if(!Curl_getaddressinfo((struct sockaddr*)&ssloc,
+                            conn->local_ip, &conn->local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(conn, errno));
       return;
@@ -783,7 +783,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
       /* should we try another protocol family? */
       if(i == 0 && conn->tempaddr[1] == NULL &&
-         Curl_timediff(now, conn->connecttime) >= HAPPY_EYEBALLS_TIMEOUT) {
+         (Curl_timediff(now, conn->connecttime) >=
+          data->set.happy_eyeballs_timeout)) {
         trynextip(conn, sockindex, 1);
       }
     }
@@ -1005,8 +1006,8 @@ static CURLcode singleipconnect(struct connectdata *conn,
     return CURLE_OK;
 
   /* store remote address and port used in this connection attempt */
-  if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
-                     ipaddress, &port)) {
+  if(!Curl_getaddressinfo((struct sockaddr*)&addr.sa_addr,
+                          ipaddress, &port)) {
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
           errno, Curl_strerror(conn, errno));
@@ -1206,7 +1207,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   data->info.numconnects++; /* to track the number of connections made */
-  Curl_expire(conn->data, HAPPY_EYEBALLS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS);
+  Curl_expire(conn->data, data->set.happy_eyeballs_timeout,
+              EXPIRE_HAPPY_EYEBALLS);
 
   return CURLE_OK;
 }

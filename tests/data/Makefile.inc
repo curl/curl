@@ -80,7 +80,7 @@ test617 test618 test619 test620 test621 test622 test623 test624 test625 \
 test626 test627 test628 test629 test630 test631 test632 test633 test634 \
 test635 test636 test637 test638 test639 test640 test641 test642 \
 test643 test644 test645 test646 test647 test648 test649 test650 test651 \
-test652 test653 test654 \
+test652 test653 test654 test655 \
 \
 test700 test701 test702 test703 test704 test705 test706 test707 test708 \
 test709 test710 test711 test712 test713 test714 test715 \
@@ -172,7 +172,7 @@ test1525 test1526 test1527 test1528 test1529 test1530 test1531 test1532 \
 test1533 test1534 test1535 test1536 test1537 test1538 \
 test1540 \
 test1550 test1551 test1552 test1553 test1554 test1555 test1556 \
-test1600 test1601 test1602 test1603 test1604 test1605 test1606 \
+test1600 test1601 test1602 test1603 test1604 test1605 test1606 test1607 \
 \
 test1700 test1701 test1702 \
 \

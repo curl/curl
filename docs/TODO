@@ -68,7 +68,6 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
- 5.4 HTTP Digest using SHA-256
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 QUIC
@@ -143,6 +142,7 @@
  18.4 simultaneous parallel transfers
  18.5 UTF-8 filenames in Content-Disposition
  18.6 warning when setting an option
+ 18.7 warning if curl version is not in sync with libcurl version
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
@@ -559,15 +559,6 @@
  headers use a default value so only headers that need to be moved have to be
  specified.
 
-5.4 HTTP Digest using SHA-256
-
- RFC 7616 introduces an update to the HTTP Digest authentication
- specification, which amongst other thing defines how new digest algorithms
- can be used instead of MD5 which is considered old and not recommended.
-
- See https://tools.ietf.org/html/rfc7616 and
- https://github.com/curl/curl/issues/1018
-
 5.5 auth= in URLs
 
  Add the ability to specify the preferred authentication mechanism to use by
@@ -951,6 +942,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Display a warning when libcurl returns an error when setting an option.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
+
+18.7 warning if curl version is not in sync with libcurl version
+
+ This is usually a sign of a funny, weird or unexpected install situations
+ that aren't always quickly nor easily detected by users. curl and libcurl are
+ always released in sync and should use the same version numbers unless very
+ special situations.
 
 18.8 offer color-coded HTTP header output
 
