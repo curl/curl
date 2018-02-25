@@ -355,7 +355,6 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   char max5[6][10];
   curl_off_t dlpercen = 0;
   curl_off_t ulpercen = 0;
-  curl_off_t total_percen = 0;
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
   curl_off_t timespent;
@@ -503,9 +502,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
                 CURL_FORMAT_CURL_OFF_T "\n", data->state.resume_from);
       }
       fprintf(data->set.err,
-              "   Total    %% Received %% Xferd  Average Speed   "
+              "  %% Total    %% Received %% Xferd  Average Speed   "
               "Time    Time     Time  Current\n"
-              "                                Dload  Upload   "
+              "                                 Dload  Upload   "
               "Total   Spent    Left  Speed\n");
       data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
     }
@@ -560,19 +559,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     time2str(time_total, total_estimate);
     time2str(time_spent, timespent);
 
-
-    /* Get the percentage of data transferred so far */
-    if(total_expected_transfer > CURL_OFF_T_C(10000))
-      total_percen = total_transfer /
-        (total_expected_transfer/CURL_OFF_T_C(100));
-    else if(total_expected_transfer > CURL_OFF_T_C(0))
-      total_percen = (total_transfer*100) / total_expected_transfer;
-
     fprintf(data->set.err,
             "\r"
-            "   %s  "
+            "%3" CURL_FORMAT_CURL_OFF_T " %s  "
             "%3" CURL_FORMAT_CURL_OFF_T " %s  "
             "%3" CURL_FORMAT_CURL_OFF_T " %s  %s  %s %s %s %s %s",
+            dlpercen,                                     /* received % */
             max5data(total_file_size, max5[2]),           /* total size */
             dlpercen,      /* 3 letters */                /* rcvd % */
             max5data(already_dl_size, max5[0]),           /* rcvd size */
