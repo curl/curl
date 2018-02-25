@@ -1691,6 +1691,7 @@ struct UserDefined {
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
+  bool disallow_username_in_url; /* disallow username in url */
 };
 
 struct Names {

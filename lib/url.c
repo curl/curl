@@ -3170,6 +3170,13 @@ static CURLcode parse_url_login(struct Curl_easy *data,
   if(userp) {
     char *newname;
 
+    if(data->set.disallow_username_in_url) {
+      failf(data, "Option DISALLOW_USERNAME_IN_URL is set "
+                  "and url contains username.");
+      result = CURLE_LOGIN_DENIED;
+      goto out;
+    }
+
     /* We have a user in the URL */
     conn->bits.userpwd_in_url = TRUE;
     conn->bits.user_passwd = TRUE; /* enable user+password */

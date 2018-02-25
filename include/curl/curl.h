@@ -1859,14 +1859,17 @@ typedef enum {
   CINIT(TLS13_CIPHERS, STRINGPOINT, 276),
   CINIT(PROXY_TLS13_CIPHERS, STRINGPOINT, 277),
 
+  /* Disallow specifying username/login in URL. */
+  CINIT(DISALLOW_USERNAME_IN_URL, LONG, 278),
+
   /* Set the ssl context callback function, currently only for OpenSSL ssl_ctx
      second argument. The function must be matching the
      curl_ssl_ctx_callback proto. */
-  CINIT(SSL_CERT_FUNCTION, FUNCTIONPOINT, 278),
+  CINIT(SSL_CERT_FUNCTION, FUNCTIONPOINT, 279),
 
   /* Set the userdata for the ssl context callback function's third
      argument */
-  CINIT(SSL_CERT_DATA, OBJECTPOINT, 279),
+  CINIT(SSL_CERT_DATA, OBJECTPOINT, 280),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
