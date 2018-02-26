@@ -298,8 +298,7 @@ POST (HTTP)
 
   How to post a form with curl, lesson #1:
 
-  Dig out all the <input> tags in the form that you want to fill in. (There's
-  a perl program called formfind.pl on the curl site that helps with this).
+  Dig out all the <input> tags in the form that you want to fill in.
 
   If there's a "normal" post, you use -d to post. -d takes a full "post
   string", which is in the format
