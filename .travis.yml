@@ -4,17 +4,17 @@ addons:
     apt:
         sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
+            - llvm-toolchain-precise-3.9
         packages:
             - cmake
-            - gcc-4.8
+            - gcc-6
             - lcov
-            - clang-3.7
+            - clang-3.9
             - valgrind
             - libev-dev
             - libc-ares-dev
-            - g++-4.8
-            - libstdc++-4.8-dev
+            - g++-6
+            - libstdc++-6-dev
             - stunnel4
             - libidn2-0-dev
             - libssh2-1-dev
@@ -102,7 +102,7 @@ install:
   - if [ $TRAVIS_OS_NAME = linux ]; then
       curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
          tar xzf - &&
-         (cd nghttp2-1.24.0 && CXX="g++-4.8" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
+         (cd nghttp2-1.24.0 && CXX="g++-6" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
     fi
 
 before_script:
@@ -143,15 +143,15 @@ script:
         # Uncomment this when `coverage` runs on Trusty.
         # set -eo pipefail
         if [ "$T" = "coverage" ]; then
-             export CC="gcc-4.8"
+             export CC="gcc-6"
              ./configure --enable-debug --disable-shared --enable-code-coverage
              make
              make TFLAGS=-n test-nonflaky
              tests="1 2 3 4 5 6 7 8 9 10 200 201 202 300 301 302 500 501 502 503 504 506 507 508 509 510 511 512 513 514 515 516 517 518 519 600 601 800 801 802 803 900 901 902 903 1000 1001 1002 1004 1302 1303 1304 1305 1306 1308 1400 1401 1402 1404 1450 1451 1452 1502 1507 1508 1600 1602 1603 1605"
              make "TFLAGS=-n -e $tests" test-nonflaky
              make "TFLAGS=-n -t $tests" test-nonflaky
-             coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
-             coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
+             coveralls --gcov /usr/bin/gcov-6 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
+             coveralls --gcov /usr/bin/gcov-6 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
         fi
     - |
         set -eo pipefail
