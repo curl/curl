@@ -26,6 +26,11 @@
 #include <curl/curl.h> /* for curl_socket_t */
 #endif
 
+#define CURLX_POINTER_TO_INTEGER_CAST(p) \
+  ((char *)(p) - (char *)NULL)
+#define CURLX_INTEGER_TO_POINTER_CAST(i) \
+  ((void *)((char *)NULL + (i)))
+
 unsigned short curlx_ultous(unsigned long ulnum);
 
 unsigned char curlx_ultouc(unsigned long ulnum);
