@@ -30,6 +30,12 @@
 static struct Curl_easy *easy;
 struct curl_hash *hostcache;
 
+static void unit_stop(void)
+{
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
+}
+
 static CURLcode unit_setup(void)
 {
   int res = CURLE_OK;
@@ -37,20 +43,18 @@ static CURLcode unit_setup(void)
   global_init(CURL_GLOBAL_ALL);
 
   easy = curl_easy_init();
-  if(!easy)
+  if(!easy) {
+    curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
+  }
 
   hostcache = Curl_global_host_cache_init();
-  if(!hostcache)
+  if(!hostcache) {
+    unit_stop();
     return CURLE_OUT_OF_MEMORY;
+  }
 
   return res;
-}
-
-static void unit_stop(void)
-{
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
 }
 
 struct testcase {
@@ -128,11 +132,17 @@ UNITTEST_START
     easy->dns.hostcachetype = HCACHE_GLOBAL;
 
     list = curl_slist_append(NULL, tests[i].optval);
+    if(!list)
+        goto unit_test_abort;
     curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
 
     Curl_loadhostpairs(easy);
 
     entry_id = (void *)aprintf("%s:%d", tests[i].host, tests[i].port);
+    if(!entry_id) {
+      curl_slist_free_all(list);
+      goto unit_test_abort;
+    }
     dns = Curl_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
     free(entry_id);
     entry_id = NULL;
