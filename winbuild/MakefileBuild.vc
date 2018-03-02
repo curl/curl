@@ -182,11 +182,19 @@ CARES_CFLAGS   = /DUSE_ARES /I"$(DEVEL_INCLUDE)/cares"
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
+!IF EXISTS("$(DEVEL_LIB)\zdll.lib")
+ZLIB_LIBS   = zdll.lib
+!ELSE
 ZLIB_LIBS   = zlib.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
+!IF EXISTS("$(DEVEL_LIB)\zlib.lib")
+ZLIB_LIBS   = zlib.lib
+!ELSE
 ZLIB_LIBS   = zlib_a.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = static
 !ENDIF
