@@ -2574,7 +2574,15 @@ static bool check_noproxy(const char *name, const char *no_proxy)
     /* NO_PROXY was specified and it wasn't just an asterisk */
 
     no_proxy_len = strlen(no_proxy);
-    endptr = strchr(name, ':');
+    if(name[0] == '[') {
+      /* IPv6 numerical address */
+      endptr = strchr(name, ']');
+      if(!endptr)
+        return FALSE;
+      name++;
+    }
+    else
+      endptr = strchr(name, ':');
     if(endptr)
       namelen = endptr - name;
     else
