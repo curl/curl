@@ -190,8 +190,10 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
                               const char *passwd, unsigned long authflags)
 {
   ULONG method = 0;
-  SEC_WINNT_AUTH_IDENTITY cred = { 0, };
+  SEC_WINNT_AUTH_IDENTITY cred;
   int rc = LDAP_AUTH_METHOD_NOT_SUPPORTED;
+
+  memset(&cred, 0, sizeof(cred));
 
 #if defined(USE_SPNEGO)
   if(authflags & CURLAUTH_NEGOTIATE) {

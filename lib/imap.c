@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -275,15 +275,15 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
       case IMAP_LIST:
         if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
           (imap->custom && !imap_matchresp(line, len, imap->custom) &&
-           (strcmp(imap->custom, "STORE") ||
+           (!strcasecompare(imap->custom, "STORE") ||
             !imap_matchresp(line, len, "FETCH")) &&
-           strcmp(imap->custom, "SELECT") &&
-           strcmp(imap->custom, "EXAMINE") &&
-           strcmp(imap->custom, "SEARCH") &&
-           strcmp(imap->custom, "EXPUNGE") &&
-           strcmp(imap->custom, "LSUB") &&
-           strcmp(imap->custom, "UID") &&
-           strcmp(imap->custom, "NOOP")))
+           !strcasecompare(imap->custom, "SELECT") &&
+           !strcasecompare(imap->custom, "EXAMINE") &&
+           !strcasecompare(imap->custom, "SEARCH") &&
+           !strcasecompare(imap->custom, "EXPUNGE") &&
+           !strcasecompare(imap->custom, "LSUB") &&
+           !strcasecompare(imap->custom, "UID") &&
+           !strcasecompare(imap->custom, "NOOP")))
           return FALSE;
         break;
 
@@ -344,23 +344,30 @@ static bool imap_endofresp(struct connectdata *conn, char *line, size_t len,
  */
 static void imap_get_message(char *buffer, char **outptr)
 {
-  size_t len = 0;
+  size_t len = strlen(buffer);
   char *message = NULL;
 
-  /* Find the start of the message */
-  for(message = buffer + 2; *message == ' ' || *message == '\t'; message++)
-    ;
+  if(len > 2) {
+    /* Find the start of the message */
+    len -= 2;
+    for(message = buffer + 2; *message == ' ' || *message == '\t';
+        message++, len--)
+      ;
 
-  /* Find the end of the message */
-  for(len = strlen(message); len--;)
-    if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-        message[len] != '\t')
-      break;
+    /* Find the end of the message */
+    for(; len--;)
+      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
+         message[len] != '\t')
+        break;
 
-  /* Terminate the message */
-  if(++len) {
-    message[len] = '\0';
+    /* Terminate the message */
+    if(++len) {
+      message[len] = '\0';
+    }
   }
+  else
+    /* junk input => zero length output */
+    message = &buffer[len];
 
   *outptr = message;
 }
@@ -1053,7 +1060,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
   else if(imapcode == IMAP_RESP_OK) {
     /* Check if the UIDVALIDITY has been specified and matches */
     if(imap->uidvalidity && imapc->mailbox_uidvalidity &&
-       strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
+       !strcasecompare(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
       failf(conn->data, "Mailbox UIDVALIDITY has changed");
       result = CURLE_REMOTE_FILE_NOT_FOUND;
     }
@@ -1126,6 +1133,11 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
         /* The conversion from curl_off_t to size_t is always fine here */
         chunk = (size_t)size;
 
+      if(!chunk) {
+        /* no size, we're done with the data */
+        state(conn, IMAP_STOP);
+        return CURLE_OK;
+      }
       result = Curl_client_write(conn, CLIENTWRITE_BODY, pp->cache, chunk);
       if(result)
         return result;
@@ -1521,9 +1533,9 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   /* Determine if the requested mailbox (with the same UIDVALIDITY if set)
      has already been selected on this connection */
   if(imap->mailbox && imapc->mailbox &&
-     !strcmp(imap->mailbox, imapc->mailbox) &&
+     strcasecompare(imap->mailbox, imapc->mailbox) &&
      (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
-      !strcmp(imap->uidvalidity, imapc->mailbox_uidvalidity)))
+      strcasecompare(imap->uidvalidity, imapc->mailbox_uidvalidity)))
     selected = TRUE;
 
   /* Start the first command in the DO phase */

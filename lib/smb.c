@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2016-2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2016-2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -146,19 +146,12 @@ static unsigned int smb_swap32(unsigned int x)
     ((x >> 24) & 0xff);
 }
 
-#ifdef HAVE_LONGLONG
-static unsigned long long smb_swap64(unsigned long long x)
+static curl_off_t smb_swap64(curl_off_t x)
 {
-  return ((unsigned long long) smb_swap32((unsigned int) x) << 32) |
+  return ((curl_off_t) smb_swap32((unsigned int) x) << 32) |
     smb_swap32((unsigned int) (x >> 32));
 }
-#else
-static unsigned __int64 smb_swap64(unsigned __int64 x)
-{
-  return ((unsigned __int64) smb_swap32((unsigned int) x) << 32) |
-    smb_swap32((unsigned int) (x >> 32));
-}
-#endif
+
 #else
 #  define smb_swap16(x) (x)
 #  define smb_swap32(x) (x)
@@ -648,7 +641,7 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
   if(smbc->state == SMB_CONNECTING) {
 #ifdef USE_SSL
     if((conn->handler->flags & PROTOPT_SSL)) {
-      bool ssl_done;
+      bool ssl_done = FALSE;
       result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &ssl_done);
       if(result && result != CURLE_AGAIN)
         return result;
@@ -716,20 +709,21 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
 }
 
 /*
- * Convert a timestamp from the Windows world (100 nsec units from
- * 1 Jan 1601) to Posix time.
+ * Convert a timestamp from the Windows world (100 nsec units from 1 Jan 1601)
+ * to Posix time. Cap the output to fit within a time_t.
  */
-static void get_posix_time(long *_out, const void *_in)
+static void get_posix_time(time_t *out, curl_off_t timestamp)
 {
-#ifdef HAVE_LONGLONG
-  long long timestamp = *(long long *) _in;
-#else
-  unsigned __int64 timestamp = *(unsigned __int64 *) _in;
-#endif
-
-  timestamp -= 116444736000000000ULL;
+  timestamp -= 116444736000000000;
   timestamp /= 10000000;
-  *_out = (long) timestamp;
+#if SIZEOF_TIME_T < SIZEOF_CURL_OFF_T
+  if(timestamp > TIME_T_MAX)
+    *out = TIME_T_MAX;
+  else if(timestamp < TIME_T_MIN)
+    *out = TIME_T_MIN;
+  else
+#endif
+    *out = (time_t) timestamp;
 }
 
 static CURLcode smb_request_state(struct connectdata *conn, bool *done)
@@ -798,7 +792,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
       conn->data->req.size = smb_swap64(smb_m->end_of_file);
       Curl_pgrsSetDownloadSize(conn->data, conn->data->req.size);
       if(conn->data->set.get_filetime)
-        get_posix_time(&conn->data->info.filetime, &smb_m->last_change_time);
+        get_posix_time(&conn->data->info.filetime, smb_m->last_change_time);
       next_state = SMB_DOWNLOAD;
     }
     break;

@@ -106,6 +106,8 @@ endif
 
 if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
 libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
+else
+libcurl_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
 endif
 
 if USE_CPPFLAG_CURL_STATICLIB

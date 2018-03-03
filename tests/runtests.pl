@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -217,6 +217,7 @@ my $gopher_ipv6;    # set if Gopher server has IPv6 support
 my $has_ipv6;       # set if libcurl is built with IPv6 support
 my $has_unix;       # set if libcurl is built with Unix sockets support
 my $has_libz;       # set if libcurl is built with libz support
+my $has_brotli;     # set if libcurl is built with brotli support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;       # set if libcurl is built with NTLM support
 my $has_ntlm_wb;    # set if libcurl is built with NTLM delegation to winbind
@@ -233,6 +234,7 @@ my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
 my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
+my $has_multissl;   # set if curl is build with MultiSSL support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -338,6 +340,7 @@ $ENV{'CURL_MEMDEBUG'} = $memdump;
 $ENV{'CURL_ENTROPY'}="12345678";
 $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
 $ENV{'HOME'}=$pwd;
+$ENV{'COLUMNS'}=79; # screen width!
 
 sub catch_zap {
     my $signame = shift;
@@ -561,8 +564,7 @@ sub runclientoutput {
 # Memory allocation test and failure torture testing.
 #
 sub torture {
-    my $testcmd = shift;
-    my $gdbline = shift;
+    my ($testcmd, $testnum, $gdbline) = @_;
 
     # remove memdump first to be sure we get a new nice and clean one
     unlink($memdump);
@@ -576,17 +578,17 @@ sub torture {
     my $count=0;
     my @out = `$memanalyze -v $memdump`;
     for(@out) {
-        if(/^Allocations: (\d+)/) {
+        if(/^Operations: (\d+)/) {
             $count = $1;
             last;
         }
     }
     if(!$count) {
-        logmsg " found no allocs to make fail\n";
+        logmsg " found no functions to make fail\n";
         return 0;
     }
 
-    logmsg " $count allocations to make fail\n";
+    logmsg " $count functions to make fail\n";
 
     for ( 1 .. $count ) {
         my $limit = $_;
@@ -601,7 +603,7 @@ sub torture {
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
                 localtime(time());
             my $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
-            logmsg "Fail alloc no: $limit at $now\r";
+            logmsg "Fail function no: $limit at $now\r";
         }
 
         # make the memory allocation function number $limit return failure
@@ -610,14 +612,28 @@ sub torture {
         # remove memdump first to be sure we get a new nice and clean one
         unlink($memdump);
 
-        logmsg "*** Alloc number $limit is now set to fail ***\n" if($gdbthis);
+        my $cmd = $testcmd;
+        if($valgrind && !$gdbthis) {
+            my @valgrindoption = getpart("verify", "valgrind");
+            if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
+                my $valgrindcmd = "$valgrind ";
+                $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
+                $valgrindcmd .= "--quiet --leak-check=yes ";
+                $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
+                # $valgrindcmd .= "--gen-suppressions=all ";
+                $valgrindcmd .= "--num-callers=16 ";
+                $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
+                $cmd = "$valgrindcmd $testcmd";
+            }
+        }
+        logmsg "*** Function number $limit is now set to fail ***\n" if($gdbthis);
 
         my $ret = 0;
         if($gdbthis) {
             runclient($gdbline);
         }
         else {
-            $ret = runclient($testcmd);
+            $ret = runclient($cmd);
         }
         #logmsg "$_ Returned " . ($ret >> 8) . "\n";
 
@@ -629,6 +645,20 @@ sub torture {
             logmsg " core dumped\n";
             $dumped_core = 1;
             $fail = 2;
+        }
+
+        if($valgrind) {
+            my @e = valgrindparse("$LOGDIR/valgrind$testnum");
+            if(@e && $e[0]) {
+                if($automakestyle) {
+                    logmsg "FAIL: torture $testnum - valgrind\n";
+                }
+                else {
+                    logmsg " valgrind ERROR ";
+                    logmsg @e;
+                }
+                $fail = 1;
+            }
         }
 
         # verify that it returns a proper error code, doesn't leak memory
@@ -655,7 +685,7 @@ sub torture {
             }
         }
         if($fail) {
-            logmsg " Failed on alloc number $limit in test.\n",
+            logmsg " Failed on function number $limit in test.\n",
             " invoke with \"-t$limit\" to repeat this single case.\n";
             stopservers($verbose);
             return 1;
@@ -2742,6 +2772,7 @@ sub checksystem {
             }
            if ($libcurl =~ /winssl/i) {
                $has_winssl=1;
+               $has_sslpinning=1;
                $ssllib="WinSSL";
            }
            elsif ($libcurl =~ /openssl/i) {
@@ -2831,6 +2862,10 @@ sub checksystem {
                 # ssl enabled
                 $has_ssl=1;
             }
+            if($feat =~ /MultiSSL/i) {
+                # multiple ssl backends available.
+                $has_multissl=1;
+            }
             if($feat =~ /Largefile/i) {
                 # large file support
                 $has_largefile=1;
@@ -2847,6 +2882,9 @@ sub checksystem {
             }
             if($feat =~ /libz/i) {
                 $has_libz = 1;
+            }
+            if($feat =~ /brotli/i) {
+                $has_brotli = 1;
             }
             if($feat =~ /NTLM/i) {
                 # NTLM enabled
@@ -3173,7 +3211,7 @@ sub fixarray {
     my @in = @_;
 
     for(@in) {
-        subVariables \$_;
+        subVariables(\$_);
     }
     return @in;
 }
@@ -3284,6 +3322,11 @@ sub singletest {
                     next;
                 }
             }
+            elsif($1 eq "MultiSSL") {
+                if($has_multissl) {
+                    next;
+                }
+            }
             elsif($1 eq "SSLpinning") {
                 if($has_sslpinning) {
                     next;
@@ -3356,6 +3399,11 @@ sub singletest {
             }
             elsif($1 eq "libz") {
                 if($has_libz) {
+                    next;
+                }
+            }
+            elsif($1 eq "brotli") {
+                if($has_brotli) {
                     next;
                 }
             }
@@ -3452,6 +3500,11 @@ sub singletest {
                         next;
                     }
                 }
+                elsif($1 eq "MultiSSL") {
+                    if(!$has_multissl) {
+                        next;
+                    }
+                }
                 elsif($1 eq "OpenSSL") {
                     if(!$has_openssl) {
                         next;
@@ -3507,6 +3560,11 @@ sub singletest {
                 }
                 elsif($1 eq "libz") {
                     if(!$has_libz) {
+                        next;
+                    }
+                }
+                elsif($1 eq "brotli") {
+                    if(!$has_brotli) {
                         next;
                     }
                 }
@@ -3638,7 +3696,7 @@ sub singletest {
     if(@setenv) {
         foreach my $s (@setenv) {
             chomp $s;
-            subVariables \$s;
+            subVariables(\$s);
             if($s =~ /([^=]*)=(.*)/) {
                 my ($var, $content) = ($1, $2);
                 # remember current setting, to restore it once test runs
@@ -4003,7 +4061,8 @@ sub singletest {
     # run the command line we built
     if ($torture) {
         $cmdres = torture($CMDLINE,
-                       "$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
+                          $testnum,
+                          "$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis) {
         my $GDBW = ($gdbxwin) ? "-w" : "";
@@ -5310,8 +5369,6 @@ while(@ARGV) {
         if($xtra =~ s/(\d+)$//) {
             $tortalloc = $1;
         }
-        # we undef valgrind to make this fly in comparison
-        undef $valgrind;
     }
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
@@ -5377,7 +5434,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -rf      full run time statistics
   -s       short output
   -am      automake style output PASS/FAIL: [number] [name]
-  -t[N]    torture (simulate memory alloc failures); N means fail Nth alloc
+  -t[N]    torture (simulate function failures); N means fail Nth function
   -v       verbose output
   -vc path use this curl only to verify the existing servers
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only

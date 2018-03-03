@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,16 +85,11 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
+#endif
 
 #include "timeval.h"
-
-#ifdef HAVE_ZLIB_H
-#include <zlib.h>               /* for content-encoding */
-#ifdef __SYMBIAN32__
-/* zlib pollutes the namespace with this definition */
-#undef WIN32
-#endif
-#endif
 
 #include <curl/curl.h>
 
@@ -210,13 +205,13 @@ struct ssl_primary_config {
   bool verifypeer;       /* set TRUE if this is desired */
   bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
   bool verifystatus;     /* set TRUE if certificate status must be checked */
+  bool sessionid;        /* cache session IDs or not */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *clientcert;
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
-  bool sessionid;        /* cache session IDs or not */
 };
 
 struct ssl_config_data {
@@ -286,6 +281,7 @@ struct digestdata {
   char *qop;
   char *algorithm;
   int nc; /* nounce count */
+  bool userhash;
 #endif
 };
 
@@ -463,16 +459,6 @@ struct hostname {
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
 
-#ifdef HAVE_LIBZ
-typedef enum {
-  ZLIB_UNINIT,          /* uninitialized */
-  ZLIB_INIT,            /* initialized */
-  ZLIB_GZIP_HEADER,     /* reading gzip header */
-  ZLIB_GZIP_INFLATING,  /* inflating gzip stream */
-  ZLIB_INIT_GZIP        /* initialized in transparent gzip mode */
-} zlibInitState;
-#endif
-
 #ifdef CURLRES_ASYNCH
 struct Curl_async {
   char *hostname;
@@ -560,18 +546,8 @@ struct SingleRequest {
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
-  int auto_decoding;            /* What content encoding. sec 3.5, RFC2616. */
-
-#define IDENTITY 0              /* No encoding */
-#define DEFLATE 1               /* zlib deflate [RFC 1950 & 1951] */
-#define GZIP 2                  /* gzip algorithm [RFC 1952] */
-
-#ifdef HAVE_LIBZ
-  zlibInitState zlib_init;      /* possible zlib init state;
-                                   undefined if Content-Encoding header. */
-  z_stream z;                   /* State structure for zlib. */
-#endif
-
+  struct contenc_writer_s *writer_stack;  /* Content unencoding stack. */
+                                          /* See sec 3.5, RFC2616. */
   time_t timeofdoc;
   long bodywrites;
 
@@ -719,6 +695,7 @@ struct Curl_handler {
 #define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
+#define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
@@ -778,6 +755,7 @@ struct http_connect_state {
     TUNNEL_CONNECT, /* CONNECT has been sent off */
     TUNNEL_COMPLETE /* CONNECT response received completely */
   } tunnel_state;
+  bool close_connection;
 };
 
 /*
@@ -801,9 +779,10 @@ struct connectdata {
   void *closesocket_client;
 
   bool inuse; /* This is a marker for the connection cache logic. If this is
-                 TRUE this handle is being used by an easy handle and cannot
-                 be used by any other easy handle without careful
-                 consideration (== only for pipelining). */
+                 TRUE this handle is being used by one or more easy handles
+                 and can only used by any other easy handle without careful
+                 consideration (== only for pipelining/multiplexing) and it
+                 cannot be used by another multi handle! */
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to
@@ -886,6 +865,9 @@ struct connectdata {
 #endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_connect_data proxy_ssl[2]; /* this is for proxy ssl-stuff */
+#ifdef USE_SSL
+  void *ssl_extra; /* separately allocated backend-specific data */
+#endif
   struct ssl_primary_config ssl_config;
   struct ssl_primary_config proxy_ssl_config;
   bool tls_upgraded;
@@ -1030,16 +1012,6 @@ struct connectdata {
   char *unix_domain_socket;
   bool abstract_unix_socket;
 #endif
-
-#ifdef USE_SSL
-  /*
-   * To avoid multiple malloc() calls, the ssl_connect_data structures
-   * associated with a connectdata struct are allocated in the same block
-   * as the latter. This field forces alignment to an 8-byte boundary so
-   * that this all works.
-   */
-  long long *align_data__do_not_use;
-#endif
 };
 
 /* The end of connectdata. */
@@ -1052,10 +1024,8 @@ struct PureInfo {
   int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
   int httpproxycode; /* response code from proxy when received separate */
   int httpversion; /* the http version number X.Y = X*10+Y */
-  long filetime; /* If requested, this is might get set. Set to -1 if the time
-                    was unretrievable. We cannot have this of type time_t,
-                    since time_t is unsigned on several platforms such as
-                    OpenVMS. */
+  time_t filetime; /* If requested, this is might get set. Set to -1 if the
+                      time was unretrievable. */
   bool timecond;  /* set to TRUE if the time condition didn't match, which
                      thus made the document NOT get fetched */
   long header_size;  /* size of read header(s) in bytes */
@@ -1196,7 +1166,7 @@ struct Curl_http2_dep {
 };
 
 /*
- * This struct is for holding data that was attemped to get sent to the user's
+ * This struct is for holding data that was attempted to get sent to the user's
  * callback but is held due to pausing. One instance per type (BOTH, HEADER,
  * BODY).
  */
@@ -1308,7 +1278,7 @@ struct UrlState {
 
   /* set after initial USER failure, to prevent an authentication loop */
   bool ftp_trying_alternative;
-
+  bool wildcardmatch; /* enable wildcard matching */
   int httpversion;       /* the lowest HTTP version*10 reported by any server
                             involved in this request */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
@@ -1358,6 +1328,9 @@ struct UrlState {
   struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
+#ifdef CURLDEBUG
+  bool conncache_lock;
+#endif
 };
 
 
@@ -1443,7 +1416,7 @@ enum dupstring {
   STRING_RTSP_SESSION_ID, /* Session ID to use */
   STRING_RTSP_STREAM_URI, /* Stream URI for this request */
   STRING_RTSP_TRANSPORT,  /* Transport for this session */
-#ifdef USE_LIBSSH2
+#if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
   STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
@@ -1453,7 +1426,7 @@ enum dupstring {
   STRING_PROXY_SERVICE_NAME, /* Proxy service name */
 #endif
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-    defined(USE_SPNEGO)
+  defined(USE_SPNEGO) || defined(HAVE_GSSAPI)
   STRING_SERVICE_NAME,    /* Service name */
 #endif
   STRING_MAIL_FROM,
@@ -1547,6 +1520,7 @@ struct UserDefined {
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
+  long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long tftp_blksize;    /* in bytes, 0 means use default */
   bool tftp_no_options; /* do not send TFTP options requests */
@@ -1624,7 +1598,7 @@ struct UserDefined {
   bool http_keep_sending_on_error; /* for HTTP status codes >= 300 */
   bool http_follow_location; /* follow HTTP redirects */
   bool http_transfer_encoding; /* request compressed HTTP transfer-encoding */
-  bool http_disable_hostname_check_before_authentication;
+  bool allow_auth_to_other_hosts;
   bool include_header;   /* include received protocol headers in data output */
   bool http_set_referer; /* is a custom referer used */
   bool http_auto_referer; /* set "correct" referer when following location: */
@@ -1672,7 +1646,7 @@ struct UserDefined {
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */
-  bool wildcardmatch; /* enable wildcard matching */
+  bool wildcard_enabled; /* enable wildcard matching */
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
                                         starts */
   curl_chunk_end_callback chunk_end; /* called after part transferring
@@ -1709,6 +1683,10 @@ struct UserDefined {
   struct Curl_http2_dep *stream_dependents;
 
   bool abstract_unix_socket;
+
+  curl_resolver_start_callback resolver_start; /* optional callback called
+                                                  before resolver start */
+  void *resolver_start_client; /* pointer to pass to resolver start callback */
 };
 
 struct Names {

@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2016 Daniel Stenberg
+ * Copyright (c) 2004 - 2017 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -282,6 +282,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
           break;
         }
 
+        _gssresp.value = NULL; /* make sure it is initialized */
         p = data->state.buffer + 4;
         p = strstr(p, "ADAT=");
         if(p) {

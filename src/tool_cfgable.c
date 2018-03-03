@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,6 +42,7 @@ void config_init(struct OperationConfig* config)
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
   config->tcp_nodelay = TRUE; /* enabled by default */
+  config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
 }
 
 static void free_config_fields(struct OperationConfig *config)
@@ -113,6 +114,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->proxy_capath);
   Curl_safefree(config->crlfile);
   Curl_safefree(config->pinnedpubkey);
+  Curl_safefree(config->proxy_pinnedpubkey);
   Curl_safefree(config->proxy_crlfile);
   Curl_safefree(config->key);
   Curl_safefree(config->proxy_key);

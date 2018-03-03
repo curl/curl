@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2001 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -44,6 +44,7 @@ Available values for OPTION include:
   --libs      library linking information
   --prefix    curl install prefix
   --protocols newline separated list of enabled protocols
+  --ssl-backends output the SSL backends libcurl was built to support
   --static-libs static libcurl library linking information
   --version   output version information
   --vernum    output the version information as a number (hexadecimal)
@@ -152,6 +153,9 @@ while test $# -gt 0; do
         else
           echo ${CURLLIBDIR}-lcurl
         fi
+        ;;
+    --ssl-backends)
+        echo "@SSL_BACKENDS@"
         ;;
 
     --static-libs)

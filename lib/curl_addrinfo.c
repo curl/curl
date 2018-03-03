@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,9 @@
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
 #endif
+#ifdef HAVE_NETINET_IN6_H
+#  include <netinet/in6.h>
+#endif
 #ifdef HAVE_NETDB_H
 #  include <netdb.h>
 #endif
@@ -45,6 +48,10 @@
 #if defined(NETWARE) && defined(__NOVELL_LIBC__)
 #  undef  in_addr_t
 #  define in_addr_t unsigned long
+#endif
+
+#if defined(WIN32) && defined(USE_UNIX_SOCKETS)
+#include <afunix.h>
 #endif
 
 #include <stddef.h>

@@ -22,6 +22,11 @@
 
 #include "curl_setup.h"
 
+/***********************************************************************
+ * Only for IPv6-enabled builds
+ **********************************************************************/
+#ifdef CURLRES_IPV6
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -53,11 +58,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-/***********************************************************************
- * Only for IPv6-enabled builds
- **********************************************************************/
-#ifdef CURLRES_IPV6
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 /* These are strictly for memory tracing and are using the same style as the

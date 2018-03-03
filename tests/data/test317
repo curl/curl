@@ -1,0 +1,94 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+HTTP Basic auth
+HTTP proxy Basic auth
+followlocation
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Location: http://goto.second.host.now/3170002
+Content-Length: 8
+Connection: close
+
+contents
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</data2>
+
+<datacheck>
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Location: http://goto.second.host.now/3170002
+Content-Length: 8
+Connection: close
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with custom Authorization: and redirect to new host
+ </name>
+ <command>
+http://first.host.it.is/we/want/that/page/317 -x %HOSTIP:%HTTPPORT -H "Authorization: s3cr3t" --proxy-user testing:this --location
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://first.host.it.is/we/want/that/page/317 HTTP/1.1
+Host: first.host.it.is
+Proxy-Authorization: Basic dGVzdGluZzp0aGlz
+Accept: */*
+Proxy-Connection: Keep-Alive
+Authorization: s3cr3t
+
+GET http://goto.second.host.now/3170002 HTTP/1.1
+Host: goto.second.host.now
+Proxy-Authorization: Basic dGVzdGluZzp0aGlz
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

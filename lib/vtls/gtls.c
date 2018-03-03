@@ -60,15 +60,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef GNUTLS_POINTER_TO_SOCKET_CAST
-#define GNUTLS_POINTER_TO_SOCKET_CAST(p) \
-  ((curl_socket_t) ((char *)(p) - (char *)NULL))
-#endif
-#ifndef GNUTLS_SOCKET_TO_POINTER_CAST
-#define GNUTLS_SOCKET_TO_POINTER_CAST(s) \
-  ((void *) ((char *)NULL + (s)))
-#endif
-
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */
 
@@ -161,7 +152,7 @@ static int gtls_mapped_sockerrno(void)
 
 static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 {
-  ssize_t ret = swrite(GNUTLS_POINTER_TO_SOCKET_CAST(s), buf, len);
+  ssize_t ret = swrite(CURLX_POINTER_TO_INTEGER_CAST(s), buf, len);
 #if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
@@ -171,7 +162,7 @@ static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 
 static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 {
-  ssize_t ret = sread(GNUTLS_POINTER_TO_SOCKET_CAST(s), buf, len);
+  ssize_t ret = sread(CURLX_POINTER_TO_INTEGER_CAST(s), buf, len);
 #if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
@@ -857,7 +848,7 @@ gtls_connect_step1(struct connectdata *conn,
   }
   else {
     /* file descriptor for the socket */
-    transport_ptr = GNUTLS_SOCKET_TO_POINTER_CAST(conn->sock[sockindex]);
+    transport_ptr = CURLX_INTEGER_TO_POINTER_CAST(conn->sock[sockindex]);
     gnutls_transport_push = Curl_gtls_push;
     gnutls_transport_pull = Curl_gtls_pull;
   }
@@ -1827,7 +1818,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_gtls_connect,             /* connect */
   Curl_gtls_connect_nonblocking, /* connect_nonblocking */
   Curl_gtls_get_internals,       /* get_internals */
-  Curl_gtls_close,               /* close */
+  Curl_gtls_close,               /* close_one */
   Curl_none_close_all,           /* close_all */
   Curl_gtls_session_free,        /* session_free */
   Curl_none_set_engine,          /* set_engine */

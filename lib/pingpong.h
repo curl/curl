@@ -58,8 +58,8 @@ struct pingpong {
                      server */
   size_t sendleft; /* number of bytes left to send from the sendthis buffer */
   size_t sendsize; /* total size of the sendthis buffer */
-  struct curltime response; /* set to Curl_tvnow() when a command has been sent
-                              off, used to time-out response reading */
+  struct curltime response; /* set to Curl_now() when a command has been sent
+                               off, used to time-out response reading */
   long response_time; /* When no timeout is given, this is the amount of
                          milliseconds we await for a server response. */
 

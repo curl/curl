@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,9 +26,12 @@
 static char teststring[] =
 #ifdef CURL_DOES_CONVERSIONS
   /* ASCII representation with escape sequences for non-ASCII platforms */
-  "\x54\x68\x69\x73\x00\x20\x69\x73\x20\x74\x65\x73\x74\x20\x62\x69\x6e\x61"
-  "\x72\x79\x20\x64\x61\x74\x61\x20\x77\x69\x74\x68\x20\x61\x6e\x20\x65\x6d"
-  "\x62\x65\x64\x64\x65\x64\x20\x4e\x55\x4c\x20\x62\x79\x74\x65\x0a";
+{ '\x54', '\x68', '\x69', '\x73', '\x00', '\x20', '\x69', '\x73', '\x20',
+  '\x74', '\x65', '\x73', '\x74', '\x20', '\x62', '\x69', '\x6e', '\x61',
+  '\x72', '\x79', '\x20', '\x64', '\x61', '\x74', '\x61', '\x20', '\x77',
+  '\x69', '\x74', '\x68', '\x20', '\x61', '\x6e', '\x20', '\x65', '\x6d',
+  '\x62', '\x65', '\x64', '\x64', '\x65', '\x64', '\x20', '\x4e', '\x55',
+  '\x4c'};
 #else
 {   'T', 'h', 'i', 's', '\0', ' ', 'i', 's', ' ', 't', 'e', 's', 't', ' ',
     'b', 'i', 'n', 'a', 'r', 'y', ' ', 'd', 'a', 't', 'a', ' ',

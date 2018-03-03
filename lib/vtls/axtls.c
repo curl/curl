@@ -728,7 +728,7 @@ const struct Curl_ssl Curl_ssl_axtls = {
   Curl_axtls_connect,             /* connect */
   Curl_axtls_connect_nonblocking, /* connect_nonblocking */
   Curl_axtls_get_internals,       /* get_internals */
-  Curl_axtls_close,               /* close */
+  Curl_axtls_close,               /* close_one */
   Curl_none_close_all,            /* close_all */
   Curl_axtls_session_free,        /* session_free */
   Curl_none_set_engine,           /* set_engine */

@@ -1061,7 +1061,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   Curl_mbedtls_connect,             /* connect */
   Curl_mbedtls_connect_nonblocking, /* connect_nonblocking */
   Curl_mbedtls_get_internals,       /* get_internals */
-  Curl_mbedtls_close,               /* close */
+  Curl_mbedtls_close,               /* close_one */
   Curl_mbedtls_close_all,           /* close_all */
   Curl_mbedtls_session_free,        /* session_free */
   Curl_none_set_engine,             /* set_engine */

@@ -70,6 +70,8 @@ typedef enum {
   CURLM_UNKNOWN_OPTION,  /* curl_multi_setopt() with unsupported option */
   CURLM_ADDED_ALREADY,   /* an easy handle already added to a multi handle was
                             attempted to get added - again */
+  CURLM_RECURSIVE_API_CALL, /* an api function was called from inside a
+                               callback */
   CURLM_LAST
 } CURLMcode;
 
@@ -184,8 +186,8 @@ CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
   *
   * Returns: CURLMcode type, general multi error code. *NOTE* that this only
   *          returns errors etc regarding the whole multi stack. There might
-  *          still have occurred problems on invidual transfers even when this
-  *          returns OK.
+  *          still have occurred problems on individual transfers even when
+  *          this returns OK.
   */
 CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
                                          int *running_handles);

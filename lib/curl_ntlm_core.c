@@ -557,7 +557,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
                                    unsigned char *ntbuffer /* 21 bytes */)
 {
   size_t len = strlen(password);
-  unsigned char *pw = malloc(len * 2);
+  unsigned char *pw = len ? malloc(len * 2) : strdup("");
   CURLcode result;
   if(!pw)
     return CURLE_OUT_OF_MEMORY;
@@ -646,6 +646,15 @@ CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
   return CURLE_OK;
 }
 
+#ifndef SIZE_T_MAX
+/* some limits.h headers have this defined, some don't */
+#if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
+#define SIZE_T_MAX 18446744073709551615U
+#else
+#define SIZE_T_MAX 4294967295U
+#endif
+#endif
+
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
  * (uppercase UserName + Domain) as the data
  */
@@ -655,9 +664,19 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
                                        unsigned char *ntlmv2hash)
 {
   /* Unicode representation */
-  size_t identity_len = (userlen + domlen) * 2;
-  unsigned char *identity = malloc(identity_len);
+  size_t identity_len;
+  unsigned char *identity;
   CURLcode result = CURLE_OK;
+
+  /* we do the length checks below separately to avoid integer overflow risk
+     on extreme data lengths */
+  if((userlen > SIZE_T_MAX/2) ||
+     (domlen > SIZE_T_MAX/2) ||
+     ((userlen + domlen) > SIZE_T_MAX/2))
+    return CURLE_OUT_OF_MEMORY;
+
+  identity_len = (userlen + domlen) * 2;
+  identity = malloc(identity_len);
 
   if(!identity)
     return CURLE_OUT_OF_MEMORY;

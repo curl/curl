@@ -38,7 +38,7 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
@@ -203,38 +203,20 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 endif()
 
-option(ENABLE_MANUAL "to provide the built-in manual" ON)
-unset(USE_MANUAL CACHE) # TODO: cache NROFF/NROFF_MANOPT/USE_MANUAL vars?
-if(ENABLE_MANUAL)
-  find_program(NROFF NAMES gnroff nroff)
-  if(NROFF)
-    # Need a way to write to stdin, this will do
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt" "test")
-    # Tests for a valid nroff option to generate a manpage
-    foreach(_MANOPT "-man" "-mandoc")
-      execute_process(COMMAND "${NROFF}" ${_MANOPT}
-        OUTPUT_VARIABLE NROFF_MANOPT_OUTPUT
-        INPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt"
-        ERROR_QUIET)
-      # Save the option if it was valid
-      if(NROFF_MANOPT_OUTPUT)
-        message("Found *nroff option: -- ${_MANOPT}")
-        set(NROFF_MANOPT ${_MANOPT})
-        set(USE_MANUAL 1)
-        break()
-      endif()
-    endforeach()
-    # No need for the temporary file
-    file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/nroff-input.txt")
-    if(NOT USE_MANUAL)
-      message(WARNING "Found no *nroff option to get plaintext from man pages")
-    endif()
-  else()
-    message(WARNING "Found no *nroff program")
-  endif()
+CURL_NROFF_CHECK()
+find_package(Perl)
+
+CMAKE_DEPENDENT_OPTION(ENABLE_MANUAL "to provide the built-in manual"
+    ON "NROFF_USEFUL;PERL_FOUND"
+    OFF)
+
+if(NOT PERL_FOUND)
+  message(STATUS "Perl not found, testing disabled.")
+  set(BUILD_TESTING OFF)
 endif()
-# Required for building manual, docs, tests
-find_package(Perl REQUIRED)
+if(ENABLE_MANUAL)
+  set(USE_MANUAL ON)
+endif()
 
 # We need ansi c-flags, especially on HP
 set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
@@ -384,7 +366,6 @@ if(CMAKE_USE_OPENSSL)
   check_include_file("openssl/engine.h" HAVE_OPENSSL_ENGINE_H)
   check_include_file("openssl/err.h"    HAVE_OPENSSL_ERR_H)
   check_include_file("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
-  check_include_file("openssl/pkcs12.h" HAVE_OPENSSL_PKCS12_H)
   check_include_file("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
   check_include_file("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
   check_include_file("openssl/x509.h"   HAVE_OPENSSL_X509_H)
@@ -756,7 +737,6 @@ check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file_concat("io.h"             HAVE_IO_H)
 check_include_file_concat("krb.h"            HAVE_KRB_H)
 check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)
-check_include_file_concat("limits.h"         HAVE_LIMITS_H)
 check_include_file_concat("locale.h"         HAVE_LOCALE_H)
 check_include_file_concat("net/if.h"         HAVE_NET_IF_H)
 check_include_file_concat("netdb.h"          HAVE_NETDB_H)
@@ -893,10 +873,12 @@ check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
 check_symbol_exists(getprotobyname "${CURL_INCLUDES}" HAVE_GETPROTOBYNAME)
 check_symbol_exists(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
 check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
+check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 check_symbol_exists(fcntl          "${CURL_INCLUDES}" HAVE_FCNTL)
 check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
 check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
+check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
 
 # symbol exists in win32, but function does not.
 if(WIN32)
@@ -1149,8 +1131,18 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-add_subdirectory(docs)
+if(WIN32 AND NOT CYGWIN)
+    set(CURL_INSTALL_CMAKE_DIR CMake)
+else()
+    set(CURL_INSTALL_CMAKE_DIR lib/cmake/curl)
+endif()
+
+if(USE_MANUAL)
+  add_subdirectory(docs)
+endif()
+
 add_subdirectory(lib)
+
 if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
@@ -1294,6 +1286,25 @@ endif()
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
     DESTINATION include
     FILES_MATCHING PATTERN "*.h")
+
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${PROJECT_BINARY_DIR}/curl-config-version.cmake"
+    VERSION ${CURL_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_file(CMake/curl-config.cmake
+        "${PROJECT_BINARY_DIR}/curl-config.cmake"
+        COPYONLY
+)
+
+install(
+        FILES ${PROJECT_BINARY_DIR}/curl-config.cmake
+              ${PROJECT_BINARY_DIR}/curl-config-version.cmake
+        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+)
 
 # Workaround for MSVS10 to avoid the Dialog Hell
 # FIXME: This could be removed with future version of CMake.

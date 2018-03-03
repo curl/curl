@@ -61,9 +61,7 @@
 #endif
 
 
-#ifdef HAVE_LIMITS_H
-#  include <limits.h>
-#endif
+#include <limits.h>
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -1357,7 +1355,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
 
   0, /* have_ca_path */
   1, /* have_certinfo */
-  0, /* have_pinnedpubkey */
+  1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
   /* TODO: convert to 1 and fix test #1014 (if need) */
   0, /* support_https_proxy */
@@ -1375,7 +1373,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   Curl_gskit_connect,             /* connect */
   Curl_gskit_connect_nonblocking, /* connect_nonblocking */
   Curl_gskit_get_internals,       /* get_internals */
-  Curl_gskit_close,               /* close */
+  Curl_gskit_close,               /* close_one */
   Curl_none_close_all,            /* close_all */
   /* No session handling for GSKit */
   Curl_none_session_free,         /* session_free */

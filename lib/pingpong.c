@@ -61,12 +61,12 @@ time_t Curl_pp_state_timeout(struct pingpong *pp)
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
   timeout_ms = response_time -
-    Curl_tvdiff(Curl_tvnow(), pp->response); /* spent time */
+    Curl_timediff(Curl_now(), pp->response); /* spent time */
 
   if(data->set.timeout) {
     /* if timeout is requested, find out how much remaining time we have */
     timeout2_ms = data->set.timeout - /* timeout time */
-      Curl_tvdiff(Curl_tvnow(), conn->now); /* spent time */
+      Curl_timediff(Curl_now(), conn->now); /* spent time */
 
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
@@ -120,7 +120,7 @@ CURLcode Curl_pp_statemach(struct pingpong *pp, bool block)
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, Curl_tvnow());
+      result = Curl_speedcheck(data, Curl_now());
 
     if(result)
       return result;
@@ -143,7 +143,7 @@ void Curl_pp_init(struct pingpong *pp)
   pp->nread_resp = 0;
   pp->linestart_resp = conn->data->state.buffer;
   pp->pending_resp = TRUE;
-  pp->response = Curl_tvnow(); /* start response time-out now! */
+  pp->response = Curl_now(); /* start response time-out now! */
 }
 
 
@@ -168,15 +168,21 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   char *s;
   CURLcode result;
   struct connectdata *conn = pp->conn;
-  struct Curl_easy *data = conn->data;
+  struct Curl_easy *data;
 
 #ifdef HAVE_GSSAPI
-  enum protection_level data_sec = conn->data_prot;
+  enum protection_level data_sec;
 #endif
 
   DEBUGASSERT(pp->sendleft == 0);
   DEBUGASSERT(pp->sendsize == 0);
   DEBUGASSERT(pp->sendthis == NULL);
+
+  if(!conn)
+    /* can't send without a connection! */
+    return CURLE_SEND_ERROR;
+
+  data = conn->data;
 
   fmt_crlf = aprintf("%s\r\n", fmt); /* append a trailing CRLF */
   if(!fmt_crlf)
@@ -205,6 +211,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   result = Curl_write(conn, conn->sock[FIRSTSOCKET], s, write_len,
                      &bytes_written);
 #ifdef HAVE_GSSAPI
+  data_sec = conn->data_prot;
   DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
   conn->data_prot = data_sec;
 #endif
@@ -228,7 +235,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
     free(s);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_tvnow();
+    pp->response = Curl_now();
   }
 
   return CURLE_OK;
@@ -492,7 +499,7 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp)
     free(pp->sendthis);
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_tvnow();
+    pp->response = Curl_now();
   }
   return CURLE_OK;
 }

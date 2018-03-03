@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,22 +25,18 @@
 
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
-#define RE_ERR  CURL_FNMATCH_FAIL
-
-#define MAX_PATTERN_L 100
-#define MAX_STRING_L  100
 
 struct testcase {
-  char pattern[MAX_PATTERN_L];
-  char string[MAX_STRING_L];
+  const char *pattern;
+  const char *string;
   int  result;
 };
 
 static const struct testcase tests[] = {
   /* brackets syntax */
   { "\\[",                      "[",                      MATCH },
-  { "[",                        "[",                      RE_ERR },
-  { "[]",                       "[]",                     RE_ERR },
+  { "[",                        "[",                      MATCH },
+  { "[]",                       "[]",                     MATCH },
   { "[][]",                     "[",                      MATCH },
   { "[][]",                     "]",                      MATCH },
   { "[[]",                      "[",                      MATCH },
@@ -51,6 +47,8 @@ static const struct testcase tests[] = {
   { "[][[]",                    "]",                      MATCH },
   { "[][[[]",                   "[",                      MATCH },
   { "[[]",                      "]",                      NOMATCH },
+
+  { "[a@]",                     "a",                      MATCH },
 
   { "[a-z]",                    "a",                      MATCH },
   { "[a-z]",                    "A",                      NOMATCH },
@@ -80,6 +78,7 @@ static const struct testcase tests[] = {
   { "[][?*-]",                  "*",                      MATCH },
   { "[][?*-]",                  "-",                      MATCH },
   { "[]?*-]",                   "-",                      MATCH },
+  { "[\xFF]",                   "\xFF",                   MATCH },
   { "?/b/c",                    "a/b/c",                  MATCH },
   { "^_{}~",                    "^_{}~",                  MATCH },
   { "!#%+,-./01234567889",      "!#%+,-./01234567889",    MATCH },
@@ -100,6 +99,10 @@ static const struct testcase tests[] = {
   { "*[^a].t?t",                "a.txt",                  NOMATCH },
   { "*[^a].t?t",                "ba.txt",                 NOMATCH },
   { "*[^a].t?t",                "ab.txt",                 MATCH },
+  { "*[^a]",                    "",                       NOMATCH },
+  { "[!\xFF]",                  "",                       NOMATCH },
+  { "[!\xFF]",                  "\xFF",                   NOMATCH },
+  { "[!\xFF]",                  "a",                      MATCH },
   { "[!?*[]",                   "?",                      NOMATCH },
   { "[!!]",                     "!",                      NOMATCH },
   { "[!!]",                     "x",                      MATCH },
@@ -119,18 +122,20 @@ static const struct testcase tests[] = {
   { "[[:lower:]]",              "l",                      MATCH },
   { "[[:lower:]]",              "L",                      NOMATCH },
   { "[[:print:]]",              "L",                      MATCH },
-  { "[[:print:]]",              {'\10'},                  NOMATCH },
-  { "[[:print:]]",              {'\10'},                  NOMATCH },
+  { "[[:print:]]",              "\10",                    NOMATCH },
+  { "[[:print:]]",              "\10",                    NOMATCH },
   { "[[:space:]]",              " ",                      MATCH },
   { "[[:space:]]",              "x",                      NOMATCH },
   { "[[:graph:]]",              " ",                      NOMATCH },
   { "[[:graph:]]",              "x",                      MATCH },
-  { "[[:blank:]]",              {'\t'},                   MATCH },
-  { "[[:blank:]]",              {' '},                    MATCH },
-  { "[[:blank:]]",              {'\r'},                   NOMATCH },
-  { "[^[:blank:]]",             {'\t'},                   NOMATCH },
-  { "[^[:print:]]",             {'\10'},                  MATCH },
+  { "[[:blank:]]",              "\t",                     MATCH },
+  { "[[:blank:]]",              " ",                      MATCH },
+  { "[[:blank:]]",              "\r",                     NOMATCH },
+  { "[^[:blank:]]",             "\t",                     NOMATCH },
+  { "[^[:print:]]",             "\10",                    MATCH },
   { "[[:lower:]][[:lower:]]",   "ll",                     MATCH },
+  { "[[:foo:]]",                "bar",                    NOMATCH },
+  { "[[:foo:]]",                "f]",                     MATCH },
 
   { "Curl[[:blank:]];-)",       "Curl ;-)",               MATCH },
   { "*[[:blank:]]*",            " ",                      MATCH },
@@ -168,7 +173,7 @@ static const struct testcase tests[] = {
   { "x",                        "",                       NOMATCH },
 
   /* backslash */
-  { "\\",                       "\\",                     RE_ERR },
+  { "\\",                       "\\",                     MATCH },
   { "\\\\",                     "\\",                     MATCH },
   { "\\\\",                     "\\\\",                   NOMATCH },
   { "\\?",                      "?",                      MATCH },
@@ -205,7 +210,11 @@ static const struct testcase tests[] = {
 
   { "Lindmätarv",               "Lindmätarv",             MATCH },
 
-  { "",                         "",                       MATCH }
+  { "",                         "",                       MATCH },
+  {"**]*[*[\x13]**[*\x13)]*]*[**[*\x13~r-]*]**[.*]*[\xe3\xe3\xe3\xe3\xe3\xe3"
+   "\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3"
+   "\xe3\xe3\xe3\xe3\xe3*[\x13]**[*\x13)]*]*[*[\x13]*[~r]*]*\xba\x13\xa6~b-]*",
+                                "a",                      NOMATCH }
 };
 
 static CURLcode unit_setup(void)

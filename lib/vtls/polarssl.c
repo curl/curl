@@ -923,7 +923,7 @@ const struct Curl_ssl Curl_ssl_polarssl = {
   Curl_polarssl_connect,             /* connect */
   Curl_polarssl_connect_nonblocking, /* connect_nonblocking */
   Curl_polarssl_get_internals,       /* get_internals */
-  Curl_polarssl_close,               /* close */
+  Curl_polarssl_close,               /* close_one */
   Curl_none_close_all,               /* close_all */
   Curl_polarssl_session_free,        /* session_free */
   Curl_none_set_engine,              /* set_engine */

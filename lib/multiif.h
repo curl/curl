@@ -31,6 +31,8 @@ void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
 void Curl_multi_handlePipeBreak(struct Curl_easy *data);
+void Curl_set_in_callback(struct Curl_easy *data, bool value);
+bool Curl_is_in_callback(struct Curl_easy *easy);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket and connection hashes */

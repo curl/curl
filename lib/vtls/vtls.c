@@ -90,9 +90,12 @@ Curl_ssl_config_matches(struct ssl_primary_config* data,
      (data->version_max == needle->version_max) &&
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
+     (data->verifystatus == needle->verifystatus) &&
      Curl_safe_strcasecompare(data->CApath, needle->CApath) &&
      Curl_safe_strcasecompare(data->CAfile, needle->CAfile) &&
      Curl_safe_strcasecompare(data->clientcert, needle->clientcert) &&
+     Curl_safe_strcasecompare(data->random_file, needle->random_file) &&
+     Curl_safe_strcasecompare(data->egdsocket, needle->egdsocket) &&
      Curl_safe_strcasecompare(data->cipher_list, needle->cipher_list))
     return TRUE;
 
@@ -103,31 +106,31 @@ bool
 Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
                               struct ssl_primary_config *dest)
 {
-  dest->verifyhost = source->verifyhost;
-  dest->verifypeer = source->verifypeer;
   dest->version = source->version;
   dest->version_max = source->version_max;
+  dest->verifypeer = source->verifypeer;
+  dest->verifyhost = source->verifyhost;
+  dest->verifystatus = source->verifystatus;
+  dest->sessionid = source->sessionid;
 
-  CLONE_STRING(CAfile);
   CLONE_STRING(CApath);
-  CLONE_STRING(cipher_list);
-  CLONE_STRING(egdsocket);
-  CLONE_STRING(random_file);
+  CLONE_STRING(CAfile);
   CLONE_STRING(clientcert);
+  CLONE_STRING(random_file);
+  CLONE_STRING(egdsocket);
+  CLONE_STRING(cipher_list);
 
-  /* Disable dest sessionid cache if a client cert is used, CVE-2016-5419. */
-  dest->sessionid = (dest->clientcert ? false : source->sessionid);
   return TRUE;
 }
 
 void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
 {
-  Curl_safefree(sslc->CAfile);
   Curl_safefree(sslc->CApath);
-  Curl_safefree(sslc->cipher_list);
-  Curl_safefree(sslc->egdsocket);
-  Curl_safefree(sslc->random_file);
+  Curl_safefree(sslc->CAfile);
   Curl_safefree(sslc->clientcert);
+  Curl_safefree(sslc->random_file);
+  Curl_safefree(sslc->egdsocket);
+  Curl_safefree(sslc->cipher_list);
 }
 
 #ifdef USE_SSL
@@ -546,7 +549,7 @@ int Curl_ssl_getsock(struct connectdata *conn,
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
 {
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
-  Curl_ssl->close(conn, sockindex);
+  Curl_ssl->close_one(conn, sockindex);
 }
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
@@ -1056,6 +1059,7 @@ bool Curl_none_false_start(void)
   return FALSE;
 }
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
 CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
                           unsigned char *md5sum, size_t md5len UNUSED_PARAM)
 {
@@ -1070,6 +1074,19 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
   Curl_MD5_final(MD5pw, md5sum);
   return CURLE_OK;
 }
+#else
+CURLcode Curl_none_md5sum(unsigned char *input UNUSED_PARAM,
+                          size_t inputlen UNUSED_PARAM,
+                          unsigned char *md5sum UNUSED_PARAM,
+                          size_t md5len UNUSED_PARAM)
+{
+  (void)input;
+  (void)inputlen;
+  (void)md5sum;
+  (void)md5len;
+  return CURLE_NOT_BUILT_IN;
+}
+#endif
 
 static int Curl_multissl_init(void)
 {
@@ -1105,7 +1122,7 @@ static void Curl_multissl_close(struct connectdata *conn, int sockindex)
 {
   if(multissl_init(NULL))
     return;
-  Curl_ssl->close(conn, sockindex);
+  Curl_ssl->close_one(conn, sockindex);
 }
 
 static const struct Curl_ssl Curl_ssl_multi = {
@@ -1130,7 +1147,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_multissl_connect,             /* connect */
   Curl_multissl_connect_nonblocking, /* connect_nonblocking */
   Curl_multissl_get_internals,       /* get_internals */
-  Curl_multissl_close,               /* close */
+  Curl_multissl_close,               /* close_one */
   Curl_none_close_all,               /* close_all */
   Curl_none_session_free,            /* session_free */
   Curl_none_set_engine,              /* set_engine */
@@ -1243,6 +1260,7 @@ static size_t Curl_multissl_version(char *buffer, size_t size)
 static int multissl_init(const struct Curl_ssl *backend)
 {
   const char *env;
+  char *env_tmp;
   int i;
 
   if(Curl_ssl != &Curl_ssl_multi)
@@ -1256,7 +1274,7 @@ static int multissl_init(const struct Curl_ssl *backend)
   if(!available_backends[0])
     return 1;
 
-  env = getenv("CURL_SSL_BACKEND");
+  env = env_tmp = curl_getenv("CURL_SSL_BACKEND");
 #ifdef CURL_DEFAULT_SSL_BACKEND
   if(!env)
     env = CURL_DEFAULT_SSL_BACKEND;
@@ -1265,6 +1283,7 @@ static int multissl_init(const struct Curl_ssl *backend)
     for(i = 0; available_backends[i]; i++) {
       if(strcasecompare(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
+        curl_free(env_tmp);
         return 0;
       }
     }
@@ -1272,6 +1291,7 @@ static int multissl_init(const struct Curl_ssl *backend)
 
   /* Fall back to first available backend */
   Curl_ssl = available_backends[0];
+  curl_free(env_tmp);
   return 0;
 }
 

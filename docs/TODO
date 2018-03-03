@@ -17,17 +17,19 @@
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
+ 1.1 Option to refuse usernames in URLs
  1.2 More data sharing
  1.3 struct lifreq
  1.4 signal-based resolver timeouts
  1.5 get rid of PATH_MAX
  1.6 Modified buffer size approach
- 1.7 Detect when called from within callbacks
+ 1.7 Support HTTP/2 for HTTP(S) proxies
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
  1.11 minimize dependencies with dynamically loaded modules
- 1.12 have form functions use CURL handle argument
+ 1.12 updated DNS server while running
+ 1.13 DNS-over-HTTPS
  1.14 Typesafe curl_easy_setopt()
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
@@ -38,6 +40,9 @@
  1.21 API for URL parsing/splitting
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
+ 1.25 Expose tried IP addresses that failed
+ 1.26 CURL_REFUSE_CLEARTEXT
+ 1.27 hardcode the "localhost" addresses
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -57,19 +62,16 @@
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
+ 4.8 Option to ignore private IP addresses in PASV response
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
- 5.4 HTTP Digest using SHA-256
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
- 5.7 Brotli compression
- 5.8 QUIC
- 5.9 Improve formpost API
- 5.10 Leave secure cookies alone
- 5.11 Chunked transfer multipart formpost
+ 5.7 QUIC
+ 5.8 Leave secure cookies alone
 
  6. TELNET
  6.1 ditch stdin
@@ -103,13 +105,12 @@
  13. SSL
  13.1 Disable specific versions
  13.2 Provide mutex locking API
- 13.3 Evaluate SSL patches
+ 13.3 Support in-memory certs/ca certs/keys
  13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
- 13.10 Support SSLKEYLOGFILE
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
  13.13 Support HPKP
@@ -139,8 +140,9 @@
  18.2 glob posts
  18.3 prevent file overwriting
  18.4 simultaneous parallel transfers
- 18.5 provide formpost headers
+ 18.5 UTF-8 filenames in Content-Disposition
  18.6 warning when setting an option
+ 18.7 warning if curl version is not in sync with libcurl version
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
@@ -151,6 +153,7 @@
  18.15 --retry should resume
  18.16 send only part of --data
  18.17 consider file name from the redirected URL with -O ?
+ 18.18 retry on network is unreachable
 
  19. Build
  19.1 roffit
@@ -182,6 +185,16 @@
 ==============================================================================
 
 1. libcurl
+
+1.1 Option to refuse usernames in URLs
+
+ There's a certain risk for application in allowing user names in URLs. For
+ example: if the wrong person gets to set the URL and manages to set a user
+ name in there when .netrc is used, the application may send along a password
+ that otherwise the person couldn't provide.
+
+ A new libcurl option could be added to allow applications to switch off this
+ feature and thus avoid a potential risk.
 
 1.2 More data sharing
 
@@ -237,11 +250,9 @@
  Dynamically allocate buffer size depending on protocol in use in combination
  with freeing it after each individual transfer? Other suggestions?
 
-1.7 Detect when called from within callbacks
+1.7 Support HTTP/2 for HTTP(S) proxies
 
- We should set a state variable before calling callbacks, so that we
- subsequently can add code within libcurl that returns error if called within
- callbacks for when that's not supported.
+ Support for doing HTTP/2 to HTTP and HTTPS proxies is still missing.
 
 1.8 CURLOPT_RESOLVE for any port number
 
@@ -276,17 +287,24 @@
  app/invoke/used protocols would be necessary to load.  See
  https://github.com/curl/curl/issues/349
 
-1.12 have form functions use CURL handle argument
+1.12 updated DNS server while running
 
- curl_formadd() and curl_formget() both currently have no CURL handle
- argument, but both can use a callback that is set in the easy handle, and
- thus curl_formget() with callback cannot function without first having
- curl_easy_perform() (or similar) called - which is hard to grasp and a design
- mistake.
+ If /etc/resolv.conf gets updated while a program using libcurl is running, it
+ is may cause name resolves to fail unless res_init() is called. We should
+ consider calling res_init() + retry once unconditionally on all name resolve
+ failures to mitigate against this. Firefox works like that. Note that Windows
+ doesn't have res_init() or an alternative.
 
- The curl_formadd() design can probably also be reconsidered to make it easier
- to use and less error-prone. Probably easiest by splitting it into several
- function calls.
+ https://github.com/curl/curl/issues/2251
+
+1.13 DNS-over-HTTPS
+
+ By adding support for DNS-over-HTTPS curl could resolve host names using a
+ totally separate name server than the standard system resolver, while at the
+ same time doing so over a communication channel that enhances privacy and
+ security.
+
+ https://github.com/curl/curl/wiki/DNS-over-HTTPS
 
 1.14 Typesafe curl_easy_setopt()
 
@@ -380,6 +398,39 @@
  Mac OS. Windows supports TCP Fast Open starting with Windows 10, version 1607
  and we should add support for it.
 
+1.25 Expose tried IP addresses that failed
+
+ When libcurl fails to connect to a host, it should be able to offer the
+ application the list of IP addresses that were used in the attempt.
+
+ https://github.com/curl/curl/issues/2126
+
+1.26 CURL_REFUSE_CLEARTEXT
+
+ An environment variable that when set will make libcurl refuse to use any
+ cleartext network protocol. That's all non-encrypted ones (FTP, HTTP, Gopher,
+ etc). By adding the check to libcurl and not just curl, this environment
+ variable can then help users to block all libcurl-using programs from
+ accessing the network using unsafe protocols.
+
+ The variable could be given some sort of syntax or different levels and be
+ used to also allow for example users to refuse libcurl to do transfers with
+ HTTPS certificate checks disabled.
+
+ It could also offer to refuse usernames in URLs (see TODO 1.1)
+
+1.27 hardcode the "localhost" addresses
+
+ There's this new spec getting adopted that says "localhost" should always and
+ unconditionally be a local address and not get resolved by a DNS server. A
+ fine way for curl to fix this would be to simply hard-code the response to
+ 127.0.0.1 and/or ::1 (depending on what IP versions that are requested). This
+ is what the browsers probably will do with this hostname.
+
+ https://bugzilla.mozilla.org/show_bug.cgi?id=1220810
+
+ https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
+
 2. libcurl - multi interface
 
 2.1 More non-blocking
@@ -465,17 +516,23 @@
 
 4.6 GSSAPI via Windows SSPI
 
-In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
-via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
-support for GSSAPI authentication via Windows SSPI.
+ In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
+ via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
+ support for GSSAPI authentication via Windows SSPI.
 
 4.7 STAT for LIST without data connection
 
-Some FTP servers allow STAT for listing directories instead of using LIST, and
-the response is then sent over the control connection instead of as the
-otherwise usedw data connection: http://www.nsftools.com/tips/RawFTP.htm#STAT
+ Some FTP servers allow STAT for listing directories instead of using LIST,
+ and the response is then sent over the control connection instead of as the
+ otherwise usedw data connection: http://www.nsftools.com/tips/RawFTP.htm#STAT
 
-This is not detailed in any FTP specification.
+ This is not detailed in any FTP specification.
+
+4.8 Option to ignore private IP addresses in PASV response
+
+ Some servers respond with and some other FTP client implementations can
+ ignore private (RFC 1918 style) IP addresses when received in PASV responses.
+ To consider for libcurl as well. See https://github.com/curl/curl/issues/1455
 
 5. HTTP
 
@@ -502,15 +559,6 @@ This is not detailed in any FTP specification.
  headers use a default value so only headers that need to be moved have to be
  specified.
 
-5.4 HTTP Digest using SHA-256
-
- RFC 7616 introduces an update to the HTTP Digest authentication
- specification, which amongst other thing defines how new digest algorithms
- can be used instead of MD5 which is considered old and not recommended.
-
- See https://tools.ietf.org/html/rfc7616 and
- https://github.com/curl/curl/issues/1018
-
 5.5 auth= in URLs
 
  Add the ability to specify the preferred authentication mechanism to use by
@@ -530,13 +578,7 @@ This is not detailed in any FTP specification.
  Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
  and/or possibly a bit that refuses redirect to change protocol completely.
 
-5.7 Brotli compression
-
- Brotli compression performs better than gzip and is being implemented by
- browsers and servers widely. The algorithm: https://github.com/google/brotli
- The Firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=366559
-
-5.8 QUIC
+5.7 QUIC
 
  The standardization process of QUIC has been taken to the IETF and can be
  followed on the [IETF QUIC Mailing
@@ -546,28 +588,12 @@ This is not detailed in any FTP specification.
  implemented. This, to allow other projects to benefit from the work and to
  thus broaden the interest and chance of others to participate.
 
-5.9 Improve formpost API
-
- Revamp the formpost API and making something that is easier to use and
- understand:
-
- https://github.com/curl/curl/wiki/formpost-API-redesigned
-
-5.10 Leave secure cookies alone
+5.8 Leave secure cookies alone
 
  Non-secure origins (HTTP sites) should not be allowed to set or modify
  cookies with the 'secure' property:
 
  https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01
-
-5.11 Chunked transfer multipart formpost
-
- For a case where the file is being made during the upload is progressing
- (like passed on stdin to the curl tool), we cannot know the size before-hand
- and we rather not read the entire thing into memory before it can start the
- upload.
-
- https://github.com/curl/curl/issues/1139
 
 
 6. TELNET
@@ -679,10 +705,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  library, so that the same application code can use mutex-locking
  independently of OpenSSL or GnutTLS being used.
 
-13.3 Evaluate SSL patches
+13.3 Support in-memory certs/ca certs/keys
 
- Evaluate/apply Gertjan van Wingerde's SSL patches:
- https://curl.haxx.se/mail/lib-2004-03/0087.html
+ You can specify the private and public keys for SSH/SSL as file paths. Some
+ programs want to avoid using files and instead just pass them as in-memory
+ data blobs. There's probably a challenge to make this work across the
+ plethory of different TLS and SSH backends that curl suppports.
+ https://github.com/curl/curl/issues/2310
 
 13.4 Cache/share OpenSSL contexts
 
@@ -733,16 +762,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
-
-13.10 Support SSLKEYLOGFILE
-
- When used, Firefox and Chrome dumps their master TLS keys to the file name
- this environment variable specifies. This allows tools like for example
- Wireshark to capture and decipher TLS traffic to/from those clients. libcurl
- could be made to support this more widely (presumably this already works when
- built with NSS). Peter Wu made a OpenSSL preload to make possible that can be
- used as inspiration and guidance
- https://git.lekensteyn.nl/peter/wireshark-notes/tree/src/sslkeylog.c
 
 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
 
@@ -911,25 +930,25 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Using the multi interface would also allow properly using parallel transfers
  with HTTP/2 and supporting HTTP/2 server push from the command line.
 
-18.5 provide formpost headers
+18.5 UTF-8 filenames in Content-Disposition
 
- Extending the capabilities of the multipart formposting. How about leaving
- the ';type=foo' syntax as it is and adding an extra tag (headers) which
- works like this: curl -F "coolfiles=@fil1.txt;headers=@fil1.hdr" where
- fil1.hdr contains extra headers like
+ RFC 6266 documents how UTF-8 names can be passed to a client in the
+ Content-Disposition header, and curl does not support this.
 
-   Content-Type: text/plain; charset=KOI8-R"
-   Content-Transfer-Encoding: base64
-   X-User-Comment: Please don't use browser specific HTML code
-
- which should overwrite the program reasonable defaults (plain/text,
- 8bit...)
+ https://github.com/curl/curl/issues/1888
 
 18.6 warning when setting an option
 
  Display a warning when libcurl returns an error when setting an option.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
+
+18.7 warning if curl version is not in sync with libcurl version
+
+ This is usually a sign of a funny, weird or unexpected install situations
+ that aren't always quickly nor easily detected by users. curl and libcurl are
+ always released in sync and should use the same version numbers unless very
+ special situations.
 
 18.8 offer color-coded HTTP header output
 
@@ -1031,6 +1050,18 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  file name...
 
  See https://github.com/curl/curl/issues/1241
+
+18.18 retry on network is unreachable
+
+ The --retry option retries transfers on "transient failures". We later added
+ --retry-connrefused to also retry for "connection refused" errors.
+
+ Suggestions have been brought to also allow retry on "network is unreachable"
+ errors and while totally reasonable, maybe we should consider a way to make
+ this more configurable than to add a new option for every new error people
+ want to retry for?
+
+ https://github.com/curl/curl/issues/1603
 
 19. Build
 

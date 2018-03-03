@@ -51,7 +51,7 @@
 #include "warnless.h"
 
 /* Convenience local macros */
-#define ELAPSED_MS()  (int)curlx_tvdiff(curlx_tvnow(), initial_tv)
+#define ELAPSED_MS() (int)Curl_timediff(Curl_now(), initial_tv)
 
 int Curl_ack_eintr = 0;
 #define ERROR_NOT_EINTR(error) (Curl_ack_eintr || error != EINTR)
@@ -96,7 +96,7 @@ int Curl_wait_ms(int timeout_ms)
   Sleep(timeout_ms);
 #else
   pending_ms = timeout_ms;
-  initial_tv = curlx_tvnow();
+  initial_tv = Curl_now();
   do {
 #if defined(HAVE_POLL_FINE)
     r = poll(NULL, 0, pending_ms);
@@ -177,14 +177,14 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     return r;
   }
 
-  /* Avoid initial timestamp, avoid curlx_tvnow() call, when elapsed
+  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
 
   if(timeout_ms > 0) {
     pending_ms = (int)timeout_ms;
-    initial_tv = curlx_tvnow();
+    initial_tv = Curl_now();
   }
 
 #ifdef HAVE_POLL_FINE
@@ -418,14 +418,14 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     return r;
   }
 
-  /* Avoid initial timestamp, avoid curlx_tvnow() call, when elapsed
+  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
 
   if(timeout_ms > 0) {
     pending_ms = timeout_ms;
-    initial_tv = curlx_tvnow();
+    initial_tv = Curl_now();
   }
 
 #ifdef HAVE_POLL_FINE

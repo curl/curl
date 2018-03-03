@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,11 @@
 
 #include "curl_gssapi.h"
 #include "sendf.h"
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 static char spnego_oid_bytes[] = "\x2b\x06\x01\x05\x05\x02";
 gss_OID_desc Curl_spnego_mech_oid = { 6, &spnego_oid_bytes };

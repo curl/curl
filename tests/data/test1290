@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Verify URL globbing ignores []
+</name>
+<command>
+"http://%HOSTIP:%HTTPPORT/we/want/[]/page/1290"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /we/want/[]/page/1290 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

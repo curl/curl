@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-curlopt_dns_shuffle_addresses
+CURLOPT_RESOLVE
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
  <name>
-verify DNS shuffling
+CURLOPT_RESOLVE parsing
  </name>
 <tool>
 unit1607

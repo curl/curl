@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,7 +73,6 @@
 #include "http_proxy.h"
 #include "warnless.h"
 #include "non-ascii.h"
-#include "conncache.h"
 #include "pipeline.h"
 #include "http2.h"
 #include "connect.h"
@@ -715,7 +714,7 @@ Curl_http_output_auth(struct connectdata *conn,
   if(!data->state.this_is_a_follow ||
      conn->bits.netrc ||
      !data->state.first_host ||
-     data->set.http_disable_hostname_check_before_authentication ||
+     data->set.allow_auth_to_other_hosts ||
      strcasecompare(data->state.first_host, conn->host.name)) {
     result = output_auth_headers(conn, authhost, request, path, FALSE);
   }
@@ -1637,6 +1636,14 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                   checkprefix("Transfer-Encoding:", headers->data))
             /* HTTP/2 doesn't support chunked requests */
             ;
+          else if(checkprefix("Authorization:", headers->data) &&
+                  /* be careful of sending this potentially sensitive header to
+                     other hosts */
+                  (data->state.this_is_a_follow &&
+                   data->state.first_host &&
+                   !data->set.allow_auth_to_other_hosts &&
+                   !strcasecompare(data->state.first_host, conn->host.name)))
+            ;
           else {
             CURLcode result = Curl_add_bufferf(req_buffer, "%s\r\n",
                                                headers->data);
@@ -2184,8 +2191,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       /* Now, let's read off the proper amount of bytes from the
          input. */
       if(conn->seek_func) {
+        Curl_set_in_callback(data, true);
         seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
                                   SEEK_SET);
+        Curl_set_in_callback(data, false);
       }
 
       if(seekerr != CURL_SEEKFUNC_OK) {
@@ -2871,20 +2880,19 @@ static CURLcode header_append(struct Curl_easy *data,
                               struct SingleRequest *k,
                               size_t length)
 {
-  if(k->hbuflen + length >= data->state.headersize) {
+  size_t newsize = k->hbuflen + length;
+  if(newsize > CURL_MAX_HTTP_HEADER) {
+    /* The reason to have a max limit for this is to avoid the risk of a bad
+       server feeding libcurl with a never-ending header that will cause
+       reallocs infinitely */
+    failf(data, "Rejected %zd bytes header (max is %d)!", newsize,
+          CURL_MAX_HTTP_HEADER);
+    return CURLE_OUT_OF_MEMORY;
+  }
+  if(newsize >= data->state.headersize) {
     /* We enlarge the header buffer as it is too small */
     char *newbuff;
     size_t hbufp_index;
-    size_t newsize;
-
-    if(k->hbuflen + length > CURL_MAX_HTTP_HEADER) {
-      /* The reason to have a max limit for this is to avoid the risk of a bad
-         server feeding libcurl with a never-ending header that will cause
-         reallocs infinitely */
-      failf(data, "Avoided giant realloc for header (max is %d)!",
-            CURL_MAX_HTTP_HEADER);
-      return CURLE_OUT_OF_MEMORY;
-    }
 
     newsize = CURLMAX((k->hbuflen + length) * 3 / 2, data->state.headersize*2);
     hbufp_index = k->hbufp - data->state.headerbuff;
@@ -3104,7 +3112,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            !(conn->handler->protocol & CURLPROTO_RTSP) &&
            data->set.httpreq != HTTPREQ_HEAD) {
           /* On HTTP 1.1, when connection is not to get closed, but no
-             Content-Length nor Content-Encoding chunked have been
+             Content-Length nor Transfer-Encoding chunked have been
              received, according to RFC2616 section 4.4 point 5, we
              assume that the server will close the connection to
              signal the end of the document. */
@@ -3387,12 +3395,14 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
       }
       else if(conn->handler->protocol & CURLPROTO_RTSP) {
+        char separator;
         nc = sscanf(HEADER1,
-                    " RTSP/%d.%d %3d",
+                    " RTSP/%1d.%1d%c%3d",
                     &rtspversion_major,
                     &conn->rtspversion,
+                    &separator,
                     &k->httpcode);
-        if(nc == 3) {
+        if((nc == 4) && (' ' == separator)) {
           conn->rtspversion += 10 * rtspversion_major;
           conn->httpversion = 11; /* For us, RTSP acts like HTTP 1.1 */
         }
@@ -3504,31 +3514,35 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     if(!k->ignorecl && !data->set.ignorecl &&
        checkprefix("Content-Length:", k->p)) {
       curl_off_t contentlength;
-      if(!curlx_strtoofft(k->p + 15, NULL, 10, &contentlength)) {
+      CURLofft offt = curlx_strtoofft(k->p + 15, NULL, 10, &contentlength);
+
+      if(offt == CURL_OFFT_OK) {
         if(data->set.max_filesize &&
            contentlength > data->set.max_filesize) {
           failf(data, "Maximum file size exceeded");
           return CURLE_FILESIZE_EXCEEDED;
         }
-        if(contentlength >= 0) {
-          k->size = contentlength;
-          k->maxdownload = k->size;
-          /* we set the progress download size already at this point
-             just to make it easier for apps/callbacks to extract this
-             info as soon as possible */
-          Curl_pgrsSetDownloadSize(data, k->size);
-        }
-        else {
-          /* Negative Content-Length is really odd, and we know it
-             happens for example when older Apache servers send large
-             files */
-          streamclose(conn, "negative content-length");
-          infof(data, "Negative content-length: %" CURL_FORMAT_CURL_OFF_T
-                ", closing after transfer\n", contentlength);
-        }
+        k->size = contentlength;
+        k->maxdownload = k->size;
+        /* we set the progress download size already at this point
+           just to make it easier for apps/callbacks to extract this
+           info as soon as possible */
+        Curl_pgrsSetDownloadSize(data, k->size);
       }
-      else
-        infof(data, "Illegal Content-Length: header\n");
+      else if(offt == CURL_OFFT_FLOW) {
+        /* out of range */
+        if(data->set.max_filesize) {
+          failf(data, "Maximum file size exceeded");
+          return CURLE_FILESIZE_EXCEEDED;
+        }
+        streamclose(conn, "overflow content-length");
+        infof(data, "Overflow Content-Length: value!\n");
+      }
+      else {
+        /* negative or just rubbish - bad HTTP */
+        failf(data, "Invalid Content-Length: value");
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
     }
     /* check for Content-Type: header lines to get the MIME-type */
     else if(checkprefix("Content-Type:", k->p)) {
@@ -3612,51 +3626,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * of chunks, and a chunk-data set to zero signals the
        * end-of-chunks. */
 
-      char *start;
-
-      /* Find the first non-space letter */
-      start = k->p + 18;
-
-      for(;;) {
-        /* skip whitespaces and commas */
-        while(*start && (ISSPACE(*start) || (*start == ',')))
-          start++;
-
-        if(checkprefix("chunked", start)) {
-          k->chunk = TRUE; /* chunks coming our way */
-
-          /* init our chunky engine */
-          Curl_httpchunk_init(conn);
-
-          start += 7;
-        }
-
-        if(k->auto_decoding)
-          /* TODO: we only support the first mentioned compression for now */
-          break;
-
-        if(checkprefix("identity", start)) {
-          k->auto_decoding = IDENTITY;
-          start += 8;
-        }
-        else if(checkprefix("deflate", start)) {
-          k->auto_decoding = DEFLATE;
-          start += 7;
-        }
-        else if(checkprefix("gzip", start)) {
-          k->auto_decoding = GZIP;
-          start += 4;
-        }
-        else if(checkprefix("x-gzip", start)) {
-          k->auto_decoding = GZIP;
-          start += 6;
-        }
-        else
-          /* unknown! */
-          break;
-
-      }
-
+      result = Curl_build_unencoding_stack(conn, k->p + 18, TRUE);
+      if(result)
+        return result;
     }
     else if(checkprefix("Content-Encoding:", k->p) &&
             data->set.str[STRING_ENCODING]) {
@@ -3667,21 +3639,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        * 2616). zlib cannot handle compress.  However, errors are
        * handled further down when the response body is processed
        */
-      char *start;
-
-      /* Find the first non-space letter */
-      start = k->p + 17;
-      while(*start && ISSPACE(*start))
-        start++;
-
-      /* Record the content-encoding for later use */
-      if(checkprefix("identity", start))
-        k->auto_decoding = IDENTITY;
-      else if(checkprefix("deflate", start))
-        k->auto_decoding = DEFLATE;
-      else if(checkprefix("gzip", start)
-              || checkprefix("x-gzip", start))
-        k->auto_decoding = GZIP;
+      result = Curl_build_unencoding_stack(conn, k->p + 17, FALSE);
+      if(result)
+        return result;
     }
     else if(checkprefix("Content-Range:", k->p)) {
       /* Content-Range: bytes [num]-
@@ -3733,7 +3693,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       k->timeofdoc = curl_getdate(k->p + strlen("Last-Modified:"),
                                   &secs);
       if(data->set.get_filetime)
-        data->info.filetime = (long)k->timeofdoc;
+        data->info.filetime = k->timeofdoc;
     }
     else if((checkprefix("WWW-Authenticate:", k->p) &&
              (401 == k->httpcode)) ||

@@ -22,6 +22,11 @@
 
 #include "curl_setup.h"
 
+/***********************************************************************
+ * Only for plain IPv4 builds
+ **********************************************************************/
+#ifdef CURLRES_IPV4 /* plain IPv4 code coming up */
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -53,10 +58,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/***********************************************************************
- * Only for plain IPv4 builds
- **********************************************************************/
-#ifdef CURLRES_IPV4 /* plain IPv4 code coming up */
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.

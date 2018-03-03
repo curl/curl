@@ -86,7 +86,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 #endif
 
   if(!seeded) {
-    struct curltime now = curlx_tvnow();
+    struct curltime now = Curl_now();
     infof(data, "WARNING: Using weak random seed\n");
     randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
     randseed = randseed * 1103515245 + 12345;
@@ -156,6 +156,12 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   unsigned char buffer[128];
   unsigned char *bufp = buffer;
   DEBUGASSERT(num > 1);
+
+#ifdef __clang_analyzer__
+  /* This silences a scan-build warning about accesssing this buffer with
+     uninitialized memory. */
+  memset(buffer, 0, sizeof(buffer));
+#endif
 
   if((num/2 >= sizeof(buffer)) || !(num&1))
     /* make sure it fits in the local buffer and that it is an odd number! */

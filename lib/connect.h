@@ -25,6 +25,7 @@
 
 #include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
 #include "sockaddr.h"
+#include "timeval.h"
 
 CURLcode Curl_is_connected(struct connectdata *conn,
                            int sockindex,
@@ -35,13 +36,11 @@ CURLcode Curl_connecthost(struct connectdata *conn,
 
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
-time_t Curl_timeleft(struct Curl_easy *data,
-                     struct curltime *nowp,
-                     bool duringconnect);
+timediff_t Curl_timeleft(struct Curl_easy *data,
+                         struct curltime *nowp,
+                         bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
-#define HAPPY_EYEBALLS_TIMEOUT     200 /* milliseconds to wait between
-                                          IPv4/IPv6 connection attempts */
 
 /*
  * Used to extract socket and connectdata struct for the most recent
@@ -75,6 +74,11 @@ void Curl_sndbufset(curl_socket_t sockfd);
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd);
 void Curl_persistconninfo(struct connectdata *conn);
 int Curl_closesocket(struct connectdata *conn, curl_socket_t sock);
+
+/*
+ * Get presentation format IP address and port from a sockaddr.
+ */
+bool Curl_getaddressinfo(struct sockaddr *sa, char *addr, long *port);
 
 /*
  * The Curl_sockaddr_ex structure is basically libcurl's external API

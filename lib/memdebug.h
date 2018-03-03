@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -66,6 +66,17 @@ CURL_EXTERN int curl_socketpair(int domain, int type, int protocol,
                                 int line, const char *source);
 #endif
 
+/* send/receive sockets */
+CURL_EXTERN SEND_TYPE_RETV curl_dosend(SEND_TYPE_ARG1 sockfd,
+                                       SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
+                                       SEND_TYPE_ARG3 len,
+                                       SEND_TYPE_ARG4 flags, int line,
+                                       const char *source);
+CURL_EXTERN RECV_TYPE_RETV curl_dorecv(RECV_TYPE_ARG1 sockfd,
+                                       RECV_TYPE_ARG2 buf, RECV_TYPE_ARG3 len,
+                                       RECV_TYPE_ARG4 flags, int line,
+                                       const char *source);
+
 /* FILE functions */
 CURL_EXTERN FILE *curl_fopen(const char *file, const char *mode, int line,
                              const char *source);
@@ -84,6 +95,8 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 #define calloc(nbelem,size) curl_docalloc(nbelem, size, __LINE__, __FILE__)
 #define realloc(ptr,size) curl_dorealloc(ptr, size, __LINE__, __FILE__)
 #define free(ptr) curl_dofree(ptr, __LINE__, __FILE__)
+#define send(a,b,c,d) curl_dosend(a,b,c,d, __LINE__, __FILE__)
+#define recv(a,b,c,d) curl_dorecv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef WIN32
 #  ifdef UNICODE

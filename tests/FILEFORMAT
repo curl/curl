@@ -124,6 +124,8 @@ REPLY [command] [return value] [response string]
    evaluated as a perl string, so it can contain embedded \r\n, for example.
    There's a special [command] named "welcome" (without quotes) which is the
    string sent immediately on connect as a welcome.
+REPLYLF (like above but sends the response terminated with LF-only and not
+   CRLF)
 COUNT [command] [num]
  - Do the REPLY change for [command] only [num] times and then go back to the
    built-in approach

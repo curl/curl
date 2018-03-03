@@ -90,6 +90,8 @@ problems may have been fixed or changed somewhat since this was written!
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
 
+ 14 DICT
+ 14.1 DICT responses show the underlying protocol
 
 ==============================================================================
 
@@ -591,3 +593,12 @@ problems may have been fixed or changed somewhat since this was written!
  locally scoped address as that is bound to fail.
 
  https://github.com/curl/curl/issues/686
+
+14. DICT
+
+14.1 DICT responses show the underlying protocol
+
+ When getting a DICT response, the protocol parts of DICT aren't stripped off
+ from the output.
+
+ https://github.com/curl/curl/issues/1809

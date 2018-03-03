@@ -71,7 +71,7 @@ struct data {
 /* Unexpected error.
     CURLE_NOT_BUILT_IN   - means disabled at build
     CURLE_UNKNOWN_OPTION - means no such option (anymore?)
-    CURLE_SSL_ENGINE_NOTFOUND - set unkown ssl engine
+    CURLE_SSL_ENGINE_NOTFOUND - set unknown ssl engine
     CURLE_UNSUPPORTED_PROTOCOL - set bad HTTP version
     CURLE_BAD_FUNCTION_ARGUMENT - unsupported value
    */
@@ -132,6 +132,7 @@ static curl_chunk_end_callback chunk_end_cb;
 static curl_fnmatch_callback fnmatch_cb;
 static curl_closesocket_callback closesocketcb;
 static curl_xferinfo_callback xferinfocb;
+static curl_resolver_start_callback resolver_start_cb;
 
 int test(char *URL)
 {

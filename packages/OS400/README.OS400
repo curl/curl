@@ -113,6 +113,7 @@ options:
         CURLOPT_RANDOM_FILE
         CURLOPT_RANGE
         CURLOPT_REFERER
+        CURLOPT_REQUEST_TARGET
         CURLOPT_RTSP_SESSION_UID
         CURLOPT_RTSP_STREAM_URI
         CURLOPT_RTSP_TRANSPORT
@@ -182,8 +183,8 @@ CCSID.
         CURLINFO_COOKIELIST
 Lists returned should be released with curl_slist_free_all() after use.
   Option CURLINFO_CERTINFO is followed by a struct curl_certinfo * * and a
-CCSID. Returned structures sould be free'ed using curl_certinfo_free_all() after
-use.
+CCSID. Returned structures should be free'ed using curl_certinfo_free_all()
+after use.
   Other options are processed like in curl_easy_getinfo().
 
 _ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
@@ -241,7 +242,8 @@ _ If data compression has to be supported, ZLIB development environment must
   be installed.
 _ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
   developent environment must be installed.
-_ Install the curl source directory in IFS.
+_ Install the curl source directory in IFS. Do NOT install it in the
+  installation target directory (which defaults to /curl).
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400

@@ -41,6 +41,10 @@ If no protocol is specified in the proxy string or if the string doesn't match
 a supported one, the proxy will be treated as an HTTP proxy.
 
 The supported proxy protocol prefixes are as follows:
+.IP "http://"
+Makes it use it as a HTTP proxy. The default if no scheme prefix is used.
+.IP "https://"
+Makes it treated as a \fBHTTPS\fP proxy.
 .IP "socks4://"
 Makes it the equivalent of --socks4
 .IP "socks4a://"
@@ -231,6 +235,10 @@ FTP chunk callback reported error
 No connection available, the session will be queued
 .IP 90
 SSL public key does not matched pinned public key
+.IP 91
+Invalid SSL certificate status.
+.IP 92
+Stream error in HTTP/2 framing layer.
 .IP XX
 More error codes will appear here in future releases. The existing ones
 are meant to never change.

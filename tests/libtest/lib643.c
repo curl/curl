@@ -251,6 +251,30 @@ test_cleanup:
   return res;
 }
 
+static int cyclic_add(void)
+{
+  CURL *easy = curl_easy_init();
+  curl_mime *mime = curl_mime_init(easy);
+  curl_mimepart *part = curl_mime_addpart(mime);
+  CURLcode a1 = curl_mime_subparts(part, mime);
+
+  if(a1 == CURLE_BAD_FUNCTION_ARGUMENT) {
+    curl_mime *submime = curl_mime_init(easy);
+    curl_mimepart *subpart = curl_mime_addpart(submime);
+
+    curl_mime_subparts(part, submime);
+    a1 = curl_mime_subparts(subpart, mime);
+  }
+
+  curl_mime_free(mime);
+  curl_easy_cleanup(easy);
+  if(a1 != CURLE_BAD_FUNCTION_ARGUMENT)
+    /* that should have failed */
+    return 1;
+
+  return 0;
+}
+
 int test(char *URL)
 {
   int res;
@@ -263,6 +287,9 @@ int test(char *URL)
   res = once(URL, TRUE); /* old */
   if(!res)
     res = once(URL, FALSE); /* new */
+
+  if(!res)
+    res = cyclic_add();
 
   curl_global_cleanup();
 

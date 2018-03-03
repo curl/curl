@@ -31,6 +31,7 @@
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
 #include "tool_convert.h"
+#include "tool_filetime.h"
 #include "tool_formparse.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
@@ -189,6 +190,7 @@ static const struct LongShort aliases[]= {
   {"$X", "tls-max",                  ARG_STRING},
   {"$Y", "suppress-connect-headers", ARG_BOOL},
   {"$Z", "compressed-ssh",           ARG_BOOL},
+  {"$~", "happy-eyeballs-timeout-ms", ARG_STRING},
   {"0",   "http1.0",                 ARG_NONE},
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
@@ -232,6 +234,7 @@ static const struct LongShort aliases[]= {
   {"En", "ssl-allow-beast",          ARG_BOOL},
   {"Eo", "login-options",            ARG_STRING},
   {"Ep", "pinnedpubkey",             ARG_STRING},
+  {"EP", "proxy-pinnedpubkey",       ARG_STRING},
   {"Eq", "cert-status",              ARG_BOOL},
   {"Er", "false-start",              ARG_BOOL},
   {"Es", "ssl-no-revoke",            ARG_BOOL},
@@ -424,6 +427,58 @@ GetFileAndPassword(char *nextarg, char **file, char **password)
   cleanarg(nextarg);
 }
 
+/* Get a size parameter for '--limit-rate' or '--max-filesize'.
+ * We support a 'G', 'M' or 'K' suffix too.
+  */
+static ParameterError GetSizeParameter(struct GlobalConfig *global,
+                                       const char *arg,
+                                       const char *which,
+                                       curl_off_t *value_out)
+{
+  char *unit;
+  curl_off_t value;
+
+  if(curlx_strtoofft(arg, &unit, 0, &value)) {
+    warnf(global, "invalid number specified for %s\n", which);
+    return PARAM_BAD_USE;
+  }
+
+  if(!*unit)
+    unit = (char *)"b";
+  else if(strlen(unit) > 1)
+    unit = (char *)"w"; /* unsupported */
+
+  switch(*unit) {
+  case 'G':
+  case 'g':
+    if(value > (CURL_OFF_T_MAX / (1024*1024*1024)))
+      return PARAM_NUMBER_TOO_LARGE;
+    value *= 1024*1024*1024;
+    break;
+  case 'M':
+  case 'm':
+    if(value > (CURL_OFF_T_MAX / (1024*1024)))
+      return PARAM_NUMBER_TOO_LARGE;
+    value *= 1024*1024;
+    break;
+  case 'K':
+  case 'k':
+    if(value > (CURL_OFF_T_MAX / 1024))
+      return PARAM_NUMBER_TOO_LARGE;
+    value *= 1024;
+    break;
+  case 'b':
+  case 'B':
+    /* for plain bytes, leave as-is */
+    break;
+  default:
+    warnf(global, "unsupported %s unit. Use G, M, K or B!\n", which);
+    return PARAM_BAD_USE;
+  }
+  *value_out = value;
+  return PARAM_OK;
+}
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
                             bool *usedarg,    /* set to TRUE if the arg
@@ -589,40 +644,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'i': /* --limit-rate */
       {
-        /* We support G, M, K too */
-        char *unit;
         curl_off_t value;
-        if(curlx_strtoofft(nextarg, &unit, 0, &value)) {
-          warnf(global, "unsupported rate\n");
-          return PARAM_BAD_USE;
-        }
+        ParameterError pe = GetSizeParameter(global, nextarg, "rate", &value);
 
-        if(!*unit)
-          unit = (char *)"b";
-        else if(strlen(unit) > 1)
-          unit = (char *)"w"; /* unsupported */
-
-        switch(*unit) {
-        case 'G':
-        case 'g':
-          value *= 1024*1024*1024;
-          break;
-        case 'M':
-        case 'm':
-          value *= 1024*1024;
-          break;
-        case 'K':
-        case 'k':
-          value *= 1024;
-          break;
-        case 'b':
-        case 'B':
-          /* for plain bytes, leave as-is */
-          break;
-        default:
-          warnf(global, "unsupported rate unit. Use G, M, K or B!\n");
-          return PARAM_BAD_USE;
-        }
+        if(pe != PARAM_OK)
+           return pe;
         config->recvpersecond = value;
         config->sendpersecond = value;
       }
@@ -753,9 +779,15 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       case 'y': /* --max-filesize */
-        err = str2offset(&config->max_filesize, nextarg);
-        if(err)
-          return err;
+        {
+          curl_off_t value;
+          ParameterError pe =
+            GetSizeParameter(global, nextarg, "max-filesize", &value);
+
+          if(pe != PARAM_OK)
+             return pe;
+          config->max_filesize = value;
+        }
         break;
       case 'z': /* --disable-eprt */
         config->disable_eprt = toggle;
@@ -787,7 +819,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           url = config->url_get;
         else
           /* there was no free node, create one! */
-          url = new_getout(config);
+          config->url_get = url = new_getout(config);
 
         if(!url)
           return PARAM_NO_MEM;
@@ -1079,6 +1111,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'Z': /* --compressed-ssh */
         config->ssh_compression = toggle;
+        break;
+      case '~': /* --happy-eyeballs-timeout-ms */
+        err = str2unum(&config->happy_eyeballs_timeout_ms, nextarg);
+        if(err)
+          return err;
+        /* 0 is a valid value for this timeout */
         break;
       }
       break;
@@ -1471,6 +1509,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->pinnedpubkey, nextarg);
         break;
 
+      case 'P': /* proxy pinned public key */
+        GetStr(&config->proxy_pinnedpubkey, nextarg);
+        break;
+
       case 'q': /* --cert-status */
         config->verifystatus = TRUE;
         break;
@@ -1787,7 +1829,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         url = config->url_out;
       else
         /* there was no free node, create one! */
-        url = new_getout(config);
+        config->url_out = url = new_getout(config);
 
       if(!url)
         return PARAM_NO_MEM;
@@ -1912,23 +1954,23 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* we are uploading */
     {
       struct getout *url;
-      if(!config->url_out)
-        config->url_out = config->url_list;
-      if(config->url_out) {
+      if(!config->url_ul)
+        config->url_ul = config->url_list;
+      if(config->url_ul) {
         /* there's a node here, if it already is filled-in continue to find
            an "empty" node */
-        while(config->url_out && (config->url_out->flags & GETOUT_UPLOAD))
-          config->url_out = config->url_out->next;
+        while(config->url_ul && (config->url_ul->flags & GETOUT_UPLOAD))
+          config->url_ul = config->url_ul->next;
       }
 
       /* now there might or might not be an available node to fill in! */
 
-      if(config->url_out)
+      if(config->url_ul)
         /* existing node */
-        url = config->url_out;
+        url = config->url_ul;
       else
         /* there was no free node, create one! */
-        url = new_getout(config);
+        config->url_ul = url = new_getout(config);
 
       if(!url)
         return PARAM_NO_MEM;
@@ -2053,21 +2095,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       now = time(NULL);
-      config->condtime = curl_getdate(nextarg, &now);
-      if(-1 == (int)config->condtime) {
+      config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
+      if(-1 == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
-        struct_stat statbuf;
-        if(-1 == stat(nextarg, &statbuf)) {
+        curl_off_t filetime = getfiletime(nextarg, config->global->errors);
+        if(filetime >= 0) {
+          /* pull the time out from the file */
+          config->condtime = filetime;
+        }
+        else {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
           warnf(global,
                 "Illegal date format for -z, --time-cond (and not "
                 "a file name). Disabling time condition. "
                 "See curl_getdate(3) for valid date syntax.\n");
-        }
-        else {
-          /* pull the time out from the file */
-          config->condtime = statbuf.st_mtime;
         }
       }
       break;

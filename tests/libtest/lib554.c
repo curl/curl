@@ -117,7 +117,7 @@ static int once(char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    printf("curl_formadd(1) = %d\n", (int)formrc);
+    printf("curl_formadd(2) = %d\n", (int)formrc);
 
   /* Fill in the filename field */
   formrc = curl_formadd(&formpost,
@@ -134,7 +134,7 @@ static int once(char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    printf("curl_formadd(2) = %d\n", (int)formrc);
+    printf("curl_formadd(3) = %d\n", (int)formrc);
 
   /* Fill in a submit field too */
   formrc = curl_formadd(&formpost,
@@ -147,10 +147,11 @@ static int once(char *URL, bool oldstyle)
 #else
                         CURLFORM_COPYCONTENTS, "send",
 #endif
+                        CURLFORM_CONTENTTYPE, "text/plain",
                         CURLFORM_END);
 
   if(formrc)
-    printf("curl_formadd(3) = %d\n", (int)formrc);
+    printf("curl_formadd(4) = %d\n", (int)formrc);
 
   formrc = curl_formadd(&formpost, &lastptr,
                         CURLFORM_COPYNAME, "somename",
@@ -160,7 +161,7 @@ static int once(char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    printf("curl_formadd(4) = %d\n", (int)formrc);
+    printf("curl_formadd(5) = %d\n", (int)formrc);
 
   curl = curl_easy_init();
   if(!curl) {

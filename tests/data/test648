@@ -66,8 +66,8 @@ This is the e-mail inline text with a very long line containing the special=
 Content-Disposition: attachment; filename="test648.txt"
 Content-Transfer-Encoding: base64
 
-VGhpcyBpcyBhbiBhdHRhY2hlZCBmaWxlLgoKSXQgbWF5IGNvbnRhaW4gYW55IHR5cGUgb2Yg
-ZGF0YSBhbmQgd2lsbCBiZSBlbmNvZGVkIGluIGJhc2U2NCBmb3IgdHJhbnNmZXIuCg==
+VGhpcyBpcyBhbiBhdHRhY2hlZCBmaWxlLgoKSXQgbWF5IGNvbnRhaW4gYW55IHR5cGUgb2YgZGF0
+YSBhbmQgd2lsbCBiZSBlbmNvZGVkIGluIGJhc2U2NCBmb3IgdHJhbnNmZXIuCg==
 --------------------------------
 .
 </upload>

@@ -16,7 +16,7 @@ Server: test-server/fake
 Content-Length: 0
 Connection: close
 Content-Type: text/html
-Content-Disposition: filename=name1422; charset=funny; option=strange
+Content-Disposition: filename=name1422; charset=funny; option=str//nge
 
 </data>
 </reply>

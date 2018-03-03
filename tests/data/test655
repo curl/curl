@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+<datacheck>
+hello
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib655
+</tool>
+
+ <name>
+resolver start callback
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/655
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

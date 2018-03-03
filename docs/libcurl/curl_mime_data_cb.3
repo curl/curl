@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@ int seekfunc(void *arg, curl_off_t offset, int origin);
 .br
 void freefunc(void *arg);
 .sp
-.BI "CURLcode curl_mime_data(curl_mimepart * " part ", curl_off_t " datasize ,
+.BI "CURLcode curl_mime_data_cb(curl_mimepart * " part ", curl_off_t " datasize ,
 .br
 .BI "        curl_read_callback " readfunc ", curl_seek_callback " seekfunc ,
 .br
@@ -90,6 +90,12 @@ The callback function must return \fICURL_SEEKFUNC_OK\fP on success,
 \fICURL_SEEKFUNC_CANTSEEK\fP to indicate that while the seek failed, libcurl
 is free to work around the problem if possible. The latter can sometimes be
 done by instead reading from the input or similar.
+
+Care must be taken if the part is bound to a curl easy handle that is later
+duplicated: the \fIarg\fP pointer argument is also duplicated, resulting in
+the pointed item to be shared between the original and the copied handle.
+In particular, special attention should be given to the \fIfreefunc\fP
+procedure code since it will be called twice with the same argument.
 
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
@@ -157,4 +163,5 @@ int seek_callback(void *arg, curl_off_t offset, int origin)
 .SH "SEE ALSO"
 .BR curl_mime_addpart "(3),"
 .BR curl_mime_data "(3),"
-.BR curl_mime_name "(3)"
+.BR curl_mime_name "(3),"
+.BR curl_easy_duphandle "(3)"

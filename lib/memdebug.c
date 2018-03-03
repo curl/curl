@@ -343,12 +343,46 @@ curl_socket_t curl_socket(int domain, int type, int protocol,
     "FD %s:%d socket() = %ld\n" :
     "FD %s:%d socket() = %zd\n";
 
-  curl_socket_t sockfd = socket(domain, type, protocol);
+  curl_socket_t sockfd;
+
+  if(countcheck("socket", line, source))
+    return CURL_SOCKET_BAD;
+
+  sockfd = socket(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_memlog(fmt, source, line, sockfd);
 
   return sockfd;
+}
+
+SEND_TYPE_RETV curl_dosend(SEND_TYPE_ARG1 sockfd,
+                           SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
+                           SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags, int line,
+                           const char *source)
+{
+  SEND_TYPE_RETV rc;
+  if(countcheck("send", line, source))
+    return -1;
+  rc = send(sockfd, buf, len, flags);
+  if(source)
+    curl_memlog("SEND %s:%d send(%lu) = %ld\n",
+                source, line, (unsigned long)len, (long)rc);
+  return rc;
+}
+
+RECV_TYPE_RETV curl_dorecv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
+                           RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags, int line,
+                           const char *source)
+{
+  RECV_TYPE_RETV rc;
+  if(countcheck("recv", line, source))
+    return -1;
+  rc = recv(sockfd, buf, len, flags);
+  if(source)
+    curl_memlog("RECV %s:%d recv(%lu) = %ld\n",
+                source, line, (unsigned long)len, (long)rc);
+  return rc;
 }
 
 #ifdef HAVE_SOCKETPAIR

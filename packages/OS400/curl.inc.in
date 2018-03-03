@@ -5,7 +5,7 @@
       *                            | (__| |_| |  _ <| |___
       *                             \___|\___/|_| \_\_____|
       *
-      * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+      * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
       *
       * This software is licensed as described in the file COPYING, which
       * you should have received as part of this distribution. The terms
@@ -1314,8 +1314,22 @@
      d                 c                   10264
      d  CURLOPT_SUPPRESS_CONNECT_HEADERS...
      d                 c                   00265
+     d  CURLOPT_REQUEST_TARGET...
+     d                 c                   10266
+     d  CURLOPT_SOCKS5_AUTH...
+     d                 c                   00267
      d  CURLOPT_SSH_COMPRESSION...
      d                 c                   00268
+     d  CURLOPT_MIMEPOST...
+     d                 c                   10269
+     d  CURLOPT_TIMEVALUE_LARGE...
+     d                 c                   30270
+     d  CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS...
+     d                 c                   00271
+     d  CURLOPT_RESOLVER_START_FUNCTION...
+     d                 c                   20272
+     d  CURLOPT_RESOLVER_START_DATA...
+     d                 c                   10273
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1952,6 +1966,9 @@
      d                 s               *   based(######ptr######) procptr
       *
      d curl_closesocket_callback...
+     d                 s               *   based(######ptr######) procptr
+      *
+     d curl_resolver_start_callback...
      d                 s               *   based(######ptr######) procptr
       *
       **************************************************************************

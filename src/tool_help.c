@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -160,6 +160,8 @@ static const struct helptxt helptext[] = {
    "Put the post data in the URL and use GET"},
   {"-g, --globoff",
    "Disable URL sequences and ranges using {} and []"},
+  {"    --happy-eyeballs-timeout-ms",
+   "How long to wait in milliseconds for IPv6 before trying IPv4"},
   {"-I, --head",
    "Show document info only"},
   {"-H, --header <header/@file>",
@@ -217,7 +219,7 @@ static const struct helptxt helptext[] = {
   {"    --mail-from <address>",
    "Mail from this address"},
   {"    --mail-rcpt <address>",
-   "Mail from this address"},
+   "Mail to this address"},
   {"-M, --manual",
    "Display the full manual"},
   {"    --max-filesize <bytes>",
@@ -314,6 +316,8 @@ static const struct helptxt helptext[] = {
    "Use NTLM authentication on the proxy"},
   {"    --proxy-pass <phrase>",
    "Pass phrase for the private key for HTTPS proxy"},
+  {"    --proxy-pinnedpubkey <hashes>",
+   "FILE/HASHES public key to verify proxy with"},
   {"    --proxy-service-name <name>",
    "SPNEGO proxy service name"},
   {"    --proxy-ssl-allow-beast",
@@ -499,12 +503,14 @@ static const struct feat feats[] = {
   {"NTLM_WB",        CURL_VERSION_NTLM_WB},
   {"SSL",            CURL_VERSION_SSL},
   {"libz",           CURL_VERSION_LIBZ},
+  {"brotli",         CURL_VERSION_BROTLI},
   {"CharConv",       CURL_VERSION_CONV},
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
   {"HTTP2",          CURL_VERSION_HTTP2},
   {"UnixSockets",    CURL_VERSION_UNIX_SOCKETS},
   {"HTTPS-proxy",    CURL_VERSION_HTTPS_PROXY},
-  {"MultiSSL",       CURL_VERSION_MULTI_SSL}
+  {"MultiSSL",       CURL_VERSION_MULTI_SSL},
+  {"PSL",            CURL_VERSION_PSL},
 };
 
 void tool_help(void)
@@ -547,9 +553,6 @@ void tool_version_info(void)
     }
 #ifdef USE_METALINK
     printf("Metalink ");
-#endif
-#ifdef USE_LIBPSL
-    printf("PSL ");
 #endif
     puts(""); /* newline */
   }

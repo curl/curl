@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -26,7 +26,7 @@ my $indent = 2;
 
 my $warnings;
 my $errors;
-my $supressed; # whitelisted problems
+my $suppressed; # whitelisted problems
 my $file;
 my $dir=".";
 my $wlist;
@@ -60,7 +60,7 @@ my %warnings = (
     'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk',
     'ASSIGNWITHINCONDITION'  => 'assignment within conditional expression',
     'EQUALSNOSPACE'    => 'equals sign without following space',
-    'NOSPACEEQUALS'    => 'equals sign without preceeding space',
+    'NOSPACEEQUALS'    => 'equals sign without preceding space',
     'SEMINOSPACE'      => 'semicolon without following space',
     'MULTISPACE'       => 'multiple spaces used when not suitable',
     );
@@ -101,7 +101,7 @@ sub checkwarn {
     }
 
     if($nowarn) {
-        $supressed++;
+        $suppressed++;
         if($w) {
             $swarnings++;
         }
@@ -422,7 +422,7 @@ sub scanfile {
                 # There is a quote here, figure out whether the comma is
                 # within a string or '' or not.
                 if($pref =~ /\"/) {
-                    # withing a string
+                    # within a string
                 }
                 elsif($pref =~ /\'$/) {
                     # a single letter
@@ -596,7 +596,7 @@ sub scanfile {
 
 if($errors || $warnings || $verbose) {
     printf "checksrc: %d errors and %d warnings\n", $errors, $warnings;
-    if($supressed) {
+    if($suppressed) {
         printf "checksrc: %d errors and %d warnings suppressed\n",
         $serrors,
         $swarnings;

@@ -95,8 +95,8 @@ int test(char *URL)
       } while((res == CURLE_OK && iolen != 0) || (res == CURLE_AGAIN));
     }
 
-    if(res != CURLE_OK || iolen != 0)
-      return TEST_ERR_FAILURE;
+    if(iolen != 0)
+      res = TEST_ERR_FAILURE;
   }
 
 test_cleanup:

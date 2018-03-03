@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -232,23 +232,30 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
  */
 static void smtp_get_message(char *buffer, char **outptr)
 {
-  size_t len = 0;
+  size_t len = strlen(buffer);
   char *message = NULL;
 
-  /* Find the start of the message */
-  for(message = buffer + 4; *message == ' ' || *message == '\t'; message++)
-    ;
+  if(len > 4) {
+    /* Find the start of the message */
+    len -= 4;
+    for(message = buffer + 4; *message == ' ' || *message == '\t';
+        message++, len--)
+      ;
 
-  /* Find the end of the message */
-  for(len = strlen(message); len--;)
-    if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-       message[len] != '\t')
-      break;
+    /* Find the end of the message */
+    for(; len--;)
+      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
+         message[len] != '\t')
+        break;
 
-  /* Terminate the message */
-  if(++len) {
-    message[len] = '\0';
+    /* Terminate the message */
+    if(++len) {
+      message[len] = '\0';
+    }
   }
+  else
+    /* junk input => zero length output */
+    message = &buffer[len];
 
   *outptr = message;
 }
@@ -1188,6 +1195,9 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   if(!smtp || !pp->conn)
     return CURLE_OK;
 
+  /* Cleanup our per-request based variables */
+  Curl_safefree(smtp->custom);
+
   if(status) {
     connclose(conn, "SMTP done with bad status"); /* marked for closure */
     result = status;         /* use the already set error code */
@@ -1230,7 +1240,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     }
     else {
       /* Successfully sent so adjust the response timeout relative to now */
-      pp->response = Curl_tvnow();
+      pp->response = Curl_now();
 
       free(eob);
     }
@@ -1245,9 +1255,6 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     */
     result = smtp_block_statemach(conn);
   }
-
-  /* Cleanup our per-request based variables */
-  Curl_safefree(smtp->custom);
 
   /* Clear the transfer mode for the next request */
   smtp->transfer = FTPTRANSFER_BODY;
@@ -1281,6 +1288,11 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
 
   /* Store the first recipient (or NULL if not specified) */
   smtp->rcpt = data->set.mail_rcpt;
+
+  /* Initial data character is the first character in line: it is implicitly
+     preceded by a virtual CRLF. */
+  smtp->trailing_crlf = TRUE;
+  smtp->eob = 2;
 
   /* Start the first command in the DO phase */
   if((data->set.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
