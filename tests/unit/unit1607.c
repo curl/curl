@@ -28,7 +28,7 @@
 #include "memdebug.h" /* LAST include file */
 
 static struct Curl_easy *easy;
-struct curl_hash *hostcache;
+static struct curl_hash *hostcache;
 
 static void unit_stop(void)
 {
