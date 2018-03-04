@@ -2,9 +2,9 @@ Curl and libcurl 7.59.0
 
  Public curl releases:         173
  Command line options:         213
- curl_easy_setopt() options:   251
+ curl_easy_setopt() options:   253
  Public functions in libcurl:  74
- Contributors:                 1698
+ Contributors:                 1700
 
 This release includes the following changes:
 
@@ -13,6 +13,7 @@ This release includes the following changes:
  o CURLOPT_RESOLVE: Add support for multiple IP addresses per entry [37]
  o Add option CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS [37]
  o Add new tool option --happy-eyeballs-timeout-ms [37]
+ o Add CURLOPT_RESOLVER_START_FUNCTION and CURLOPT_RESOLVER_START_DATA [39]
 
 This release includes the following bugfixes:
 
@@ -67,6 +68,21 @@ This release includes the following bugfixes:
  o curl --version: show PSL if the run-time lib has it enabled
  o examples/sftpuploadresume: resume upload via CURLOPT_APPEND [36]
  o Return error if called recursively from within callbacks [38]
+ o sasl: prefer PLAIN mechanism over LOGIN
+ o winbuild: Use CALL to run batch scripts [40]
+ o curl_share_setopt.3: connection cache is shared within multi handles
+ o winbuild: Use macros for the names of some build utilities [41]
+ o projects/README: remove reference to dead IDN link/package [42]
+ o lib655: silence compiler warning [43]
+ o configure: Fix version check for OpenSSL 1.1.1
+ o docs/MANUAL: formfind.pl is not accessible on the site anymore [44]
+ o unit1309: fix warning on Windows x64 [45]
+ o unit1307: proper cleanup on OOM to fix torture tests
+ o curl_ctype: fix macro redefinition warnings
+ o build: get CFLAGS (including -werror) used for examples and tests [46]
+ o NO_PROXY: fix for IPv6 numericals in the URL [47]
+ o krb5: use nondeprecated functions [48]
+ o winbuild: prefer documented zlib library names [49]
 
 This release includes the following known bugs:
 
@@ -76,14 +92,15 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Marcionek, Alessandro Ghedini, Anders Bakken, Ben Greear,
-  Björn Stenberg, Bruno Grasselli, Dair Grant, Daniel Stenberg,
-  Douglas Mencken, Earnestly on github, Erik Johansson, Gisle Vanem,
-  Guido Berhoerster, Henry Roeland, Kamil Dudka, Klaus Stein, Marcel Raad,
-  Martin Dreher, Max Dymond, Michael Kaufmann, Michał Janiszewski,
+  Björn Stenberg, Bruno Grasselli, Dair Grant, Dan Fandrich, Daniel Stenberg,
+  Douglas Mencken, Earnestly on github, Erik Johansson, Francisco Sedano,
+  Gisle Vanem, Guido Berhoerster, Henry Roeland, Kamil Dudka, Klaus Stein,
+  Marcel Raad, Martin Dreher, Max Dymond, Michael Kaufmann, Michał Janiszewski,
   Mohammad AlSaleh, Patrick Monnerat, Patrick Schlangen, Ray Satiro,
-  Rich Moore, Ruurd Beerstra, Sergio Borghese, Somnath Kundu, Steve Holme,
-  Travis Burtrum,
-  (31 contributors)
+  Richard Alcock, Richard Moore, Rod Widdowson, Ruurd Beerstra,
+  Sergio Borghese, Somnath Kundu, steelman on github, Stefan Kanthak,
+  Steve Holme, Travis Burtrum, Viktor Szakáts,
+  (38 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -127,3 +144,14 @@ References to bug reports and discussions on issues:
  [36] = https://curl.haxx.se/mail/lib-2018-02/0072.html
  [37] = https://curl.haxx.se/bug/?i=2260
  [38] = https://curl.haxx.se/bug/?i=2302
+ [39] = https://curl.haxx.se/bug/?i=2311
+ [40] = https://curl.haxx.se/bug/?i=2330
+ [41] = https://curl.haxx.se/bug/?i=2329
+ [42] = https://curl.haxx.se/bug/?i=2325
+ [43] = https://curl.haxx.se/bug/?i=2335
+ [44] = https://curl.haxx.se/bug/?i=2342
+ [45] = https://curl.haxx.se/bug/?i=2341
+ [46] = https://curl.haxx.se/bug/?i=2337
+ [47] = https://curl.haxx.se/bug/?i=2353
+ [48] = https://curl.haxx.se/bug/?i=2356
+ [49] = https://curl.haxx.se/bug/?i=2354
