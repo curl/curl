@@ -127,6 +127,7 @@ test1144 test1145 test1146 test1147 test1148 test1149 test1150 test1151 \
 test1152 test1153 test1154 \
 \
 test1160 test1161 test1162 test1163 \
+test1170 test1171 \
 test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
 test1208 test1209 test1210 test1211 test1212 test1213 test1214 test1215 \
 test1216 test1217 test1218 test1219 \
@@ -138,7 +139,7 @@ test1252 test1253 test1254 test1255 test1256 test1257 test1258 test1259 \
 test1260 test1261 test1262 test1263 test1264 test1265 \
 \
 test1280 test1281 test1282 test1283 test1284 test1285 test1286 test1287 \
-test1288 test1289 test1290 test1291 \
+test1288 test1289 test1290 test1291 test1292 \
 test1298 test1299 \
 test1300 test1301 test1302 test1303 test1304 test1305 test1306 test1307 \
 test1308 test1309 test1310 test1311 test1312 test1313 test1314 test1315 \
