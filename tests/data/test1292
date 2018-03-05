@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP added headers
+HTTP replaced headers
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Replaced internal headers with a blank one
+ </name>
+ <command>
+ -H "Host;" -H "Accept;" http://%HOSTIP:%HTTPPORT/1292
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1292 HTTP/1.1
+Host:
+Accept:
+
+</protocol>
+</verify>
+</testcase>
