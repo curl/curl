@@ -330,7 +330,7 @@ if(CMAKE_USE_WINSSL)
   set(SSL_ENABLED ON)
   set(USE_SCHANNEL ON) # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON) # CMAKE_USE_WINSSL implies CURL_WINDOWS_SSPI
-  list(APPEND CURL_LIBS "crypt32")
+  list(APPEND CURL_LIBS "crypt32" "advapi32")
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
