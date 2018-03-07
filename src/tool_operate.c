@@ -113,6 +113,19 @@ static bool is_fatal_error(CURLcode code)
   return FALSE;
 }
 
+/*
+ * Check if a given string is a PKCS#11 URI
+ */
+static bool is_pkcs11_uri(const char *string)
+{
+  if(!strncmp(string, "pkcs11:", 7)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
 #ifdef __VMS
 /*
  * get_vms_file_size does what it takes to get the real size of the file
@@ -1060,8 +1073,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* Check if config->cert is a PKCS#11 URI and set the
            * config->cert_type if necessary */
           if(config->cert) {
-            if(!strncmp(config->cert, "pkcs11:", 7)) {
-              if(!config->cert_type) {
+            if(!config->cert_type) {
+              if(is_pkcs11_uri(config->cert)) {
                 config->cert_type = strdup("ENG");
               }
             }
@@ -1070,8 +1083,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* Check if config->key is a PKCS#11 URI and set the
            * config->key_type if necessary */
           if(config->key) {
-            if(!strncmp(config->key, "pkcs11:", 7)) {
-              if(!config->key_type) {
+            if(!config->key_type) {
+              if(is_pkcs11_uri(config->key)) {
                 config->key_type = strdup("ENG");
               }
             }
@@ -1080,8 +1093,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* Check if config->proxy_cert is a PKCS#11 URI and set the
            * config->proxy_type if necessary */
           if(config->proxy_cert) {
-            if(!strncmp(config->proxy_cert, "pkcs11:", 7)) {
-              if(!config->proxy_cert_type) {
+            if(!config->proxy_cert_type) {
+              if(is_pkcs11_uri(config->proxy_cert)) {
                 config->proxy_cert_type = strdup("ENG");
               }
             }
@@ -1090,8 +1103,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* Check if config->proxy_key is a PKCS#11 URI and set the
            * config->proxy_key_type if necessary */
           if(config->proxy_key) {
-            if(!strncmp(config->proxy_key, "pkcs11:", 7)) {
-              if(!config->proxy_key_type) {
+            if(!config->proxy_key_type) {
+              if(is_pkcs11_uri(config->proxy_key)) {
                 config->proxy_key_type = strdup("ENG");
               }
             }

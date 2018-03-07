@@ -532,6 +532,20 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
   }
   return (UI_method_get_writer(UI_OpenSSL()))(ui, uis);
 }
+
+/*
+ * Check if a given string is a PKCS#11 URI
+ */
+static bool is_pkcs11_uri(const char *string)
+{
+  if(!strncmp(string, "pkcs11:", 7)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
 #endif
 
 static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
@@ -602,7 +616,7 @@ int cert_stuff(struct connectdata *conn,
         /* Implicitly use pkcs11 engine if none was provided and the
          * cert_file is a PKCS#11 URI */
         if(!data->state.engine) {
-          if(!strncmp(cert_file, "pkcs11:", 7)) {
+          if(is_pkcs11_uri(cert_file)) {
             if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
               return 0;
             }
@@ -779,7 +793,7 @@ int cert_stuff(struct connectdata *conn,
         /* Implicitly use pkcs11 engine if none was provided and the
          * key_file is a PKCS#11 URI */
         if(!data->state.engine) {
-          if(!strncmp(key_file, "pkcs11:", 7)) {
+          if(is_pkcs11_uri(key_file)) {
             if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
               return 0;
             }
