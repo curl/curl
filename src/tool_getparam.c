@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -655,7 +655,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
 
       case 'j': /* --compressed */
-        if(toggle && !(curlinfo->features & CURL_VERSION_LIBZ))
+        if(toggle &&
+           !(curlinfo->features & (CURL_VERSION_LIBZ | CURL_VERSION_BROTLI)))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->encoding = toggle;
         break;
