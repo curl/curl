@@ -278,6 +278,9 @@ void Curl_freeset(struct Curl_easy *data)
   /* Free all dynamic strings stored in the data->set substructure. */
   enum dupstring i;
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
+    if(data->set.str[i])
+      /* clear them before free to make sure no sensitive data linger around */
+      memset(data->set.str[i], 0, strlen(data->set.str[i]));
     Curl_safefree(data->set.str[i]);
   }
 
