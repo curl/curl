@@ -64,7 +64,7 @@ announcement.
   [distros@openwall](http://oss-security.openwall.org/wiki/mailing-lists/distros)
   when also informing and preparing them for the upcoming public security
   vulnerability announcement - attach the advisory draft for information. Note
-  that 'distros' won't accept an embargo longer than 19 days and they do not
+  that 'distros' won't accept an embargo longer than 14 days and they do not
   care for Windows-specific flaws. For windows-specific flaws, request CVE
   directly from MITRE.
 
