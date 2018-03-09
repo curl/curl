@@ -1931,7 +1931,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     Curl_safefree(conn->allocptr.te);
 
     /* Create the (updated) Connection: header */
-    conn->allocptr.te = cptr? aprintf("%s, TE\r\n" TE_HEADER, cptr):
+    conn->allocptr.te = (cptr && cptr[11]) ?
+      aprintf("%s, TE\r\n" TE_HEADER, cptr) :
       strdup("Connection: TE\r\n" TE_HEADER);
 
     if(!conn->allocptr.te)

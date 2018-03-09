@@ -127,6 +127,7 @@ test1144 test1145 test1146 test1147 test1148 test1149 test1150 test1151 \
 test1152 test1153 test1154 \
 \
 test1160 test1161 test1162 test1163 \
+test1170 test1171 \
 test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
 test1208 test1209 test1210 test1211 test1212 test1213 test1214 test1215 \
 test1216 test1217 test1218 test1219 \
