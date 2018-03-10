@@ -238,8 +238,8 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
 }
 
 /*
- * This is used to handle speed limits, calculating how much milliseconds we
- * need to wait until we're back under the speed limit, if needed.
+ * This is used to handle speed limits, calculating how many milliseconds to
+ * wait until we're back under the speed limit, if needed.
  *
  * The way it works is by having a "starting point" (time & amount of data
  * transferred by then) used in the speed computation, to be used instead of
@@ -251,16 +251,15 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
  * the starting point, the limit (in bytes/s), the time of the starting point
  * and the current time.
  *
- * Returns -1 if no waiting is needed (not enough data transferred since
- * starting point yet), 0 when no waiting is needed but the starting point
- * should be reset (to current), or the number of milliseconds to wait to get
- * back under the speed limit.
+ * Returns 0 if no waiting is needed or when no waiting is needed but the
+ * starting point should be reset (to current); or the number of milliseconds
+ * to wait to get back under the speed limit.
  */
-long Curl_pgrsLimitWaitTime(curl_off_t cursize,
-                            curl_off_t startsize,
-                            curl_off_t limit,
-                            struct curltime start,
-                            struct curltime now)
+timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
+                                  curl_off_t startsize,
+                                  curl_off_t limit,
+                                  struct curltime start,
+                                  struct curltime now)
 {
   curl_off_t size = cursize - startsize;
   time_t minimum;
@@ -270,16 +269,23 @@ long Curl_pgrsLimitWaitTime(curl_off_t cursize,
   if(start.tv_sec == 0 && start.tv_usec == 0)
     return 0;
 
-  /* not enough data yet */
-  if(size < limit)
-    return -1;
+  if(!limit)
+    return 0;
 
-  minimum = (time_t) (CURL_OFF_T_C(1000) * size / limit);
+  if(size < CURL_OFF_T_MAX/1000)
+    minimum = (time_t) (CURL_OFF_T_C(1000) * size / limit);
+  else {
+    minimum = (time_t) (size / limit);
+    if(minimum < TIME_T_MAX/1000)
+      minimum *= CURL_OFF_T_C(1000);
+    else
+      minimum = TIME_T_MAX;
+  }
+
   actual = Curl_timediff(now, start);
 
   if(actual < minimum)
-    /* this is a conversion on some systems (64bit time_t => 32bit long) */
-    return (long)(minimum - actual);
+    return (minimum - actual);
 
   return 0;
 }
