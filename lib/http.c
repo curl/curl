@@ -1930,11 +1930,16 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     Curl_safefree(conn->allocptr.te);
 
+    cptr = Curl_copy_header_value(cptr);
+    if(!cptr)
+      return CURLE_OUT_OF_MEMORY;
+
     /* Create the (updated) Connection: header */
-    conn->allocptr.te = (cptr && cptr[11]) ?
+    conn->allocptr.te = (cptr && *cptr) ?
       aprintf("%s, TE\r\n" TE_HEADER, cptr) :
       strdup("Connection: TE\r\n" TE_HEADER);
 
+    free(cptr);
     if(!conn->allocptr.te)
       return CURLE_OUT_OF_MEMORY;
   }
