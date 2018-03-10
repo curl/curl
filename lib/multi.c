@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -538,11 +538,8 @@ static CURLcode multi_done(struct connectdata **connp,
       result = CURLE_ABORTED_BY_CALLBACK;
   }
 
-  if(conn->send_pipe.size + conn->recv_pipe.size != 0 &&
-     !data->set.reuse_forbid &&
-     !conn->bits.close) {
-    /* Stop if pipeline is not empty and we do not have to close
-       connection. */
+  if(conn->send_pipe.size || conn->recv_pipe.size) {
+    /* Stop if pipeline is not empty . */
     data->easy_conn = NULL;
     DEBUGF(infof(data, "Connection still in use, no more multi_done now!\n"));
     return CURLE_OK;
