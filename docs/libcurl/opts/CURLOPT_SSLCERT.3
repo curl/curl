@@ -38,6 +38,9 @@ you wish to authenticate with as it is named in the security database. If you
 want to use a file from the current directory, please precede it with "./"
 prefix, in order to avoid confusion with a nickname.
 
+With WinSSL, this can be expression like "CurrentUser\\MY\\<thumbprint>" to
+refer to a certificate in the system certificates store.
+
 When using a client certificate, you most likely also need to provide a
 private key with \fICURLOPT_SSLKEY(3)\fP.
 
