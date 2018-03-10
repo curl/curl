@@ -542,7 +542,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       if(max_conn != httpc->settings.max_concurrent_streams) {
         /* only signal change if the value actually changed */
         infof(conn->data,
-              "Connection state changed (MAX_CONCURRENT_STREAMS updated)!\n");
+              "Connection state changed (MAX_CONCURRENT_STREAMS == %d)!\n",
+              httpc->settings.max_concurrent_streams);
         Curl_multi_connchanged(conn->data->multi);
       }
     }
