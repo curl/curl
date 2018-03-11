@@ -1,8 +1,8 @@
-curl security for developers
-============================
+curl security process
+=====================
 
-This document is intended to provide guidance to curl developers on how
-security vulnerabilities should be handled.
+This document describes how security vulnerabilities should be handled in the
+curl project.
 
 Publishing Information
 ----------------------
