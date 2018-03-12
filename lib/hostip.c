@@ -835,7 +835,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *entry_id;
       size_t entry_len;
       char address[64];
-      char *addresses;
+      char *addresses = NULL;
       char *addr_begin;
       char *addr_end;
       char *port_ptr;
