@@ -277,7 +277,7 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
   else {
     minimum = (time_t) (size / limit);
     if(minimum < TIME_T_MAX/1000)
-      minimum *= CURL_OFF_T_C(1000);
+      minimum *= 1000;
     else
       minimum = TIME_T_MAX;
   }
