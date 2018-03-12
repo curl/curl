@@ -378,6 +378,8 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
    * potential multi's connection cache growing which won't be undone in this
    * function no matter what.
    */
+  if(data->set.errorbuffer)
+    data->set.errorbuffer[0] = 0;
 
   /* set the easy handle */
   multistate(data, CURLM_STATE_INIT);
