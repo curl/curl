@@ -998,7 +998,7 @@ FAQ
   compilers or prior curl versions it may set a time that appears one hour off.
   This happens due to a flaw in how Windows stores and uses file modification
   times and it is not easily worked around. For more details read this:
-  http://www.codeproject.com/datetime/dstbugs.asp
+  https://www.codeproject.com/Articles/1144/Beating-the-Daylight-Savings-Time-bug-and-getting
 
   4.14 Redirects work in browser but not with curl!
 
