@@ -4,7 +4,7 @@ Curl and libcurl 7.59.0
  Command line options:         213
  curl_easy_setopt() options:   253
  Public functions in libcurl:  74
- Contributors:                 1700
+ Contributors:                 1705
 
 This release includes the following changes:
 
@@ -17,6 +17,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o openldap: check ldap_get_attribute_ber() results for NULL before using [50]
+ o FTP: reject path components with control codes [51]
+ o readwrite: make sure excess reads don't go beyond buffer end [52]
  o lib555: drop text conversion and encode data as ascii codes [1]
  o lib517: make variable static to avoid compiler warning
  o lib544: sync ascii code data with textual data [1]
@@ -83,6 +86,15 @@ This release includes the following bugfixes:
  o NO_PROXY: fix for IPv6 numericals in the URL [47]
  o krb5: use nondeprecated functions [48]
  o winbuild: prefer documented zlib library names [49]
+ o http2: mark the connection for close on GOAWAY [53]
+ o limit-rate: kick in even before "limit" data has been received [54]
+ o HTTP: allow "header;" to replace an internal header with a blank one [55]
+ o http2: verbose output new MAX_CONCURRENT_STREAMS values
+ o SECURITY: distros' max embargo time is 14 days
+ o curl tool: accept --compressed also if Brotli is enabled and zlib is not
+ o WolfSSL: adding TLSv1.3 [56]
+ o checksrc.pl: add -i and -m options
+ o CURLOPT_COOKIEFILE.3: "-" as file name means stdin
 
 This release includes the following known bugs:
 
@@ -91,16 +103,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Marcionek, Alessandro Ghedini, Anders Bakken, Ben Greear,
+  Adam Marcionek, Alessandro Ghedini, Anders Bakken, Aron Bergman, Ben Greear,
   Björn Stenberg, Bruno Grasselli, Dair Grant, Dan Fandrich, Daniel Stenberg,
-  Douglas Mencken, Earnestly on github, Erik Johansson, Francisco Sedano,
-  Gisle Vanem, Guido Berhoerster, Henry Roeland, Kamil Dudka, Klaus Stein,
-  Marcel Raad, Martin Dreher, Max Dymond, Michael Kaufmann, Michał Janiszewski,
+  Dario Weisser, Douglas Mencken, Duy Phan Thanh, Earnestly on github,
+  Erik Johansson, Francisco Sedano, Gisle Vanem, Guido Berhoerster,
+  Henry Roeland, Kamil Dudka, Klaus Stein, Łukasz Domeradzki, Marcel Raad,
+  Martin Dreher, Max Dymond, Michael Kaufmann, Michał Janiszewski,
   Mohammad AlSaleh, Patrick Monnerat, Patrick Schlangen, Ray Satiro,
   Richard Alcock, Richard Moore, Rod Widdowson, Ruurd Beerstra,
-  Sergio Borghese, Somnath Kundu, steelman on github, Stefan Kanthak,
-  Steve Holme, Travis Burtrum, Viktor Szakáts,
-  (38 contributors)
+  Sergii Kavunenko, Sergio Borghese, Somnath Kundu, steelman on github,
+  Stefan Kanthak, Steve Holme, Tim Mcdonough, Travis Burtrum, Viktor Szakats,
+  刘佩东,
+  (45 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -155,3 +169,10 @@ References to bug reports and discussions on issues:
  [47] = https://curl.haxx.se/bug/?i=2353
  [48] = https://curl.haxx.se/bug/?i=2356
  [49] = https://curl.haxx.se/bug/?i=2354
+ [50] = https://curl.haxx.se/docs/adv_2018-97a2.html
+ [51] = https://curl.haxx.se/docs/adv_2018-9cd6.html
+ [52] = https://curl.haxx.se/docs/adv_2018-b047.html
+ [53] = https://curl.haxx.se/bug/?i=2365
+ [54] = https://curl.haxx.se/bug/?i=2371
+ [55] = https://curl.haxx.se/bug/?i=2357
+ [56] = https://curl.haxx.se/bug/?i=2349
