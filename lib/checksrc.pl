@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -35,10 +35,10 @@ my $verbose;
 my %whitelist;
 
 my %warnings = (
-    'LONGLINE' =>         "Line longer than $max_column",
-    'TABS' =>             'TAB characters not allowed',
-    'TRAILINGSPACE' =>    'Trailing white space on the line',
-    'CPPCOMMENTS' =>      '// comment detected',
+    'LONGLINE'         => "Line longer than $max_column",
+    'TABS'             => 'TAB characters not allowed',
+    'TRAILINGSPACE'    => 'Trailing white space on the line',
+    'CPPCOMMENTS'      => '// comment detected',
     'SPACEBEFOREPAREN' => 'space before an open parenthesis',
     'SPACEAFTERPAREN'  => 'space after open parenthesis',
     'SPACEBEFORECLOSE' => 'space before a close parenthesis',
@@ -58,7 +58,7 @@ my %warnings = (
     'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
     'ASTERISKSPACE'    => 'pointer declared with space after asterisk',
     'ASTERISKNOSPACE'  => 'pointer declared without space before asterisk',
-    'ASSIGNWITHINCONDITION'  => 'assignment within conditional expression',
+    'ASSIGNWITHINCONDITION' => 'assignment within conditional expression',
     'EQUALSNOSPACE'    => 'equals sign without following space',
     'NOSPACEEQUALS'    => 'equals sign without preceding space',
     'SEMINOSPACE'      => 'semicolon without following space',
@@ -142,6 +142,16 @@ while(1) {
         $file = shift @ARGV;
         next;
     }
+    elsif($file =~ /-i([1-9])/) {
+        $indent = $1 + 0;
+        $file = shift @ARGV;
+        next;
+    }
+    elsif($file =~ /-m([0-9]+)/) {
+        $max_column = $1 + 0;
+        $file = shift @ARGV;
+        next;
+    }
     elsif($file =~ /^(-h|--help)/) {
         undef $file;
         last;
@@ -156,6 +166,8 @@ if(!$file) {
     print "  -D[DIR]   Directory to prepend file names\n";
     print "  -h        Show help output\n";
     print "  -W[file]  Whitelist the given file - ignore all its flaws\n";
+    print "  -i<n>     Indent spaces. Default: 2\n";
+    print "  -m<n>     Maximum line length. Default: 79\n";
     print "\nDetects and warns for these problems:\n";
     for(sort keys %warnings) {
         printf (" %-18s: %s\n", $_, $warnings{$_});
