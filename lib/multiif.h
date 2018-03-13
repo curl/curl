@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,8 +57,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
   */
 void Curl_multi_dump(struct Curl_multi *multi);
 #endif
-
-void Curl_multi_process_pending_handles(struct Curl_multi *multi);
 
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
