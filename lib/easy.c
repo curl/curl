@@ -743,12 +743,12 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   CURLcode result = CURLE_OK;
   SIGPIPE_VARIABLE(pipe_st);
 
+  if(!data)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   if(data->set.errorbuffer)
     /* clear this as early as possible */
     data->set.errorbuffer[0] = 0;
-
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(data->multi) {
     failf(data, "easy handle already used in multi handle");
