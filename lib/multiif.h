@@ -59,8 +59,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
 void Curl_multi_dump(struct Curl_multi *multi);
 #endif
 
-void Curl_multi_process_pending_handles(struct Curl_multi *multi);
-
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
 
