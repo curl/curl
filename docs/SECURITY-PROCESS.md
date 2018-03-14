@@ -56,9 +56,9 @@ announcement.
   then a separate earlier release for security reasons should be considered.
 
 - Write a security advisory draft about the problem that explains what the
-  problem is, its impact, which versions it affects, solutions or
-  workarounds, when the release is out and make sure to credit all
-  contributors properly.
+  problem is, its impact, which versions it affects, solutions or workarounds,
+  when the release is out and make sure to credit all contributors properly.
+  Figure out the CWE (Common Weakness Enumeration) number for the flaw.
 
 - Request a CVE number from
   [distros@openwall](http://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -114,3 +114,26 @@ plans in vanishing in the near future.
 
 We do not make the list of participants public mostly because it tends to vary
 somewhat over time and a list somewhere will only risk getting outdated.
+
+Publishing Security Advisories
+------------------------------
+
+1. Write up the security advisory, using markdown syntax. Use the same
+   subtitles as last time to maintain consistency.
+
+2. Name the advisory file (and ultimately the URL to be used when the flaw
+   gets published), using a randomized component so that third parties that
+   are involved in the process for each individual flaw will not be given
+   insights about possible *other* flaws worked on in parallel.
+   `adv_YEAR_RANDOM.md` has been used before.
+
+3. Add a line on the top of the array in `curl-www/docs/vuln.pm'.
+
+4. Put the new advisory markdown file in the curl-www/docs/ directory. Add it
+   to the git repo.  Update the Makefile in the same directory to build the
+   HTML representation.
+
+5. Run `make` in your local web checkout and verify that things look fine.
+
+6. On security advisory release day, push the changes on the curl-www
+   repository's remote master branch.
