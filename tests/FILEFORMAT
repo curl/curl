@@ -293,8 +293,8 @@ command is run. They are cleared again after the command has been run.
 Variables are first substituted as in the <command> section.
 </setenv>
 
-<command [option="no-output/no-include"] [timeout="secs"] [delay="secs"]
-         [type="perl"]>
+<command [option="no-output/no-include/force-output"] [timeout="secs"]
+         [delay="secs"][type="perl"]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly.
 
@@ -316,6 +316,9 @@ there's no memory debugging and valgrind gets shut off for this test.
 Set option="no-output" to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
 the verify/stdout section is used.
+
+Set option="force-output" to make use of --output even when the test is
+otherwise written to verify stdout.
 
 Set option="no-include" to prevent the test script to slap on the --include
 argument.
