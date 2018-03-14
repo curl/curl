@@ -1621,7 +1621,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
       Curl_set_in_callback(data, true);
       seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,
                                 SEEK_SET);
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, false);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
