@@ -90,11 +90,11 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
                 response_data = response.encode('ascii')
             else:
                 log.debug("Received normal request - echoing back")
-                response_data = data.strip()
+                response_data = data.decode('utf8').strip()
 
             if response_data:
                 log.debug("Sending %r", response_data)
-                self.request.sendall(response_data)
+                self.request.sendall(response_data.encode('utf8'))
 
         except IOError:
             log.exception("IOError hit during request")
