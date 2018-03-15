@@ -28,6 +28,9 @@
 #include "progress.h"
 #include "curl_printf.h"
 
+/* check rate limits within this many recent milliseconds, at minimum. */
+#define MIN_RATE_LIMIT_PERIOD 3000
+
 /* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
    byte) */
 static void time2str(char *r, curl_off_t seconds)
@@ -235,6 +238,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.dl_limit_start.tv_usec = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
   data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
+  Curl_ratelimit(data, data->progress.start);
 }
 
 /*
@@ -265,13 +269,13 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
   time_t minimum;
   time_t actual;
 
-  /* we don't have a starting point yet -- return 0 so it gets (re)set */
-  if(start.tv_sec == 0 && start.tv_usec == 0)
+  if(!limit || !size)
     return 0;
 
-  if(!limit)
-    return 0;
-
+  /*
+   * 'minimum' is the number of milliseconds 'size' should take to download to
+   * stay below 'limit'.
+   */
   if(size < CURL_OFF_T_MAX/1000)
     minimum = (time_t) (CURL_OFF_T_C(1000) * size / limit);
   else {
@@ -282,48 +286,56 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
       minimum = TIME_T_MAX;
   }
 
+  /*
+   * 'actual' is the time in milliseconds it took to actually download the
+   * last 'size' bytes.
+   */
   actual = Curl_timediff(now, start);
-
-  if(actual < minimum)
+  if(actual < minimum) {
+    /* if it downloaded the data faster than the limit, make it wait the
+       difference */
     return (minimum - actual);
+  }
 
   return 0;
 }
 
+/*
+ * Set the number of downloaded bytes so far.
+ */
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct curltime now = Curl_now();
-
   data->progress.downloaded = size;
+}
 
-  /* download speed limit */
-  if((data->set.max_recv_speed > 0) &&
-     (Curl_pgrsLimitWaitTime(data->progress.downloaded,
-                             data->progress.dl_limit_size,
-                             data->set.max_recv_speed,
-                             data->progress.dl_limit_start,
-                             now) == 0)) {
-    data->progress.dl_limit_start = now;
-    data->progress.dl_limit_size = size;
+/*
+ * Update the timestamp and sizestamp to use for rate limit calculations.
+ */
+void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
+{
+  /* don't set a new stamp unless the time since last update is long enough */
+  if(data->set.max_recv_speed > 0) {
+    if(Curl_timediff(now, data->progress.dl_limit_start) >=
+       MIN_RATE_LIMIT_PERIOD) {
+      data->progress.dl_limit_start = now;
+      data->progress.dl_limit_size = data->progress.downloaded;
+    }
+  }
+  if(data->set.max_send_speed > 0) {
+    if(Curl_timediff(now, data->progress.ul_limit_start) >=
+       MIN_RATE_LIMIT_PERIOD) {
+      data->progress.ul_limit_start = now;
+      data->progress.ul_limit_size = data->progress.uploaded;
+    }
   }
 }
 
+/*
+ * Set the number of uploaded bytes so far.
+ */
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  struct curltime now = Curl_now();
-
   data->progress.uploaded = size;
-
-  /* upload speed limit */
-  if((data->set.max_send_speed > 0) &&
-     (Curl_pgrsLimitWaitTime(data->progress.uploaded,
-                             data->progress.ul_limit_size,
-                             data->set.max_send_speed,
-                             data->progress.ul_limit_start,
-                             now) == 0)) {
-    data->progress.ul_limit_start = now;
-    data->progress.ul_limit_size = size;
-  }
 }
 
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)
