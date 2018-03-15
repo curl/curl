@@ -717,7 +717,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 #endif   /* CURL_DISABLE_HTTP */
 
       /* Account for body content stored in the header buffer */
-      if(k->badheader && !k->ignorebody) {
+      if((k->badheader == HEADER_PARTHEADER) && !k->ignorebody) {
         DEBUGF(infof(data, "Increasing bytecount by %zu from hbuflen\n",
                      k->hbuflen));
         k->bytecount += k->hbuflen;

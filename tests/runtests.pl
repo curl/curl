@@ -3909,7 +3909,7 @@ sub singletest {
 
     if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-output/)) {
         #We may slap on --output!
-        if (!@validstdout) {
+        if (!@validstdout || $cmdhash{'option'} =~ /force-output/) {
             $out=" --output $CURLOUT ";
         }
     }
