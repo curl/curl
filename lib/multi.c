@@ -3071,17 +3071,19 @@ struct curl_llist *Curl_multi_pipelining_server_bl(struct Curl_multi *multi)
 static void process_pending_handles(struct Curl_multi *multi)
 {
   struct curl_llist_element *e = multi->pending.head;
-  struct Curl_easy *data = e->ptr;
+  if(e) {
+    struct Curl_easy *data = e->ptr;
 
-  DEBUGASSERT(data->mstate == CURLM_STATE_CONNECT_PEND);
+    DEBUGASSERT(data->mstate == CURLM_STATE_CONNECT_PEND);
 
-  multistate(data, CURLM_STATE_CONNECT);
+    multistate(data, CURLM_STATE_CONNECT);
 
-  /* Remove this node from the list */
-  Curl_llist_remove(&multi->pending, e, NULL);
+    /* Remove this node from the list */
+    Curl_llist_remove(&multi->pending, e, NULL);
 
-  /* Make sure that the handle will be processed soonish. */
-  Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    /* Make sure that the handle will be processed soonish. */
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  }
 }
 
 void Curl_set_in_callback(struct Curl_easy *easy, bool value)
