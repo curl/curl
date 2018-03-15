@@ -1361,7 +1361,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
 
   if(!stream->bodystarted) {
     failf(data, "HTTP/2 stream %u was closed cleanly, but before getting "
-          " all response header fields, teated as error",
+          " all response header fields, treated as error",
           stream->stream_id);
     *err = CURLE_HTTP2_STREAM;
     return -1;
