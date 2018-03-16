@@ -1,6 +1,6 @@
-Curl and libcurl 7.59.0
+Curl and libcurl 7.60.0
 
- Public curl releases:         173
+ Public curl releases:         174
  Command line options:         213
  curl_easy_setopt() options:   253
  Public functions in libcurl:  74
@@ -8,93 +8,15 @@ Curl and libcurl 7.59.0
 
 This release includes the following changes:
 
- o curl: add --proxy-pinnedpubkey [10]
- o added: CURLOPT_TIMEVALUE_LARGE and CURLINFO_FILETIME_T [13]
- o CURLOPT_RESOLVE: Add support for multiple IP addresses per entry [37]
- o Add option CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS [37]
- o Add new tool option --happy-eyeballs-timeout-ms [37]
- o Add CURLOPT_RESOLVER_START_FUNCTION and CURLOPT_RESOLVER_START_DATA [39]
+ o
 
 This release includes the following bugfixes:
 
- o openldap: check ldap_get_attribute_ber() results for NULL before using [50]
- o FTP: reject path components with control codes [51]
- o readwrite: make sure excess reads don't go beyond buffer end [52]
- o lib555: drop text conversion and encode data as ascii codes [1]
- o lib517: make variable static to avoid compiler warning
- o lib544: sync ascii code data with textual data [1]
- o GSKit: restore pinnedpubkey functionality [2]
- o darwinssl: Don't import client certificates into Keychain on macOS [3]
- o parsedate: fix date parsing for systems with 32 bit long [4]
- o openssl: fix pinned public key build error in FIPS mode [5]
- o SChannel/WinSSL: Implement public key pinning [6]
- o cookies: remove verbose "cookie size:" output
- o progress-bar: don't use stderr explicitly, use bar->out [7]
- o Fixes for MSDOS
- o build: open VC15 projects with VS 2017
- o curl_ctype: private is*() type macros and functions [8]
- o configure: set PATH_SEPARATOR to colon for PATH w/o separator [9]
- o winbuild: make linker generate proper PDB [11]
- o curl_easy_reset: clear digest auth state [12]
- o curl/curl.h: fix comment typo for CURLOPT_DNS_LOCAL_IP6 [14]
- o range: commonize FTP and FILE range handling [15]
- o progress-bar docs: update to match implementation [16]
- o fnmatch: do not match the empty string with a character set
- o fnmatch: accept an alphanum to be followed by a non-alphanum in char set [17]
- o build: fix termios issue on android cross-compile [18]
- o getdate: return -1 for out of range [19]
- o formdata: use the mime-content type function [20]
- o time-cond: fix reading the file modification time on Windows [21]
- o build-openssl.bat: Extend VC15 support to include Enterprise and Professional
- o build-wolfssl.bat: Extend VC15 support to include Enterprise and Professional
- o openssl: Don't add verify locations when verifypeer==0
- o fnmatch: optimize processing of consecutive *s and ?s pattern characters [22]
- o schannel: fix compiler warnings [23]
- o content_encoding: Add "none" alias to "identity" [24]
- o get_posix_time: only check for overflows if they can happen
- o http_chunks: don't write chunks twice with CURLOPT_HTTP_TRANSFER_DECODING [25]
- o README: language fix [26]
- o sha256: build with OpenSSL < 0.9.8 [27]
- o smtp: fix processing of initial dot in data [28]
- o --tlsauthtype: works only if libcurl is built with TLS-SRP support [29]
- o tests: new tests for http raw mode [30]
- o libcurl-security.3: man page discussion security concerns when using libcurl
- o curl_gssapi: make sure this file too uses our *printf()
- o BINDINGS: fix curb link (and remove ruby-curl-multi)
- o nss: use PK11_CreateManagedGenericObject() if available [31]
- o travis: add build with iconv enabled [32]
- o ssh: add two missing state names [33]
- o CURLOPT_HEADERFUNCTION.3: mention folded headers
- o http: fix the max header length detection logic [34]
- o header callback: don't chop headers into smaller pieces [35]
- o CURLOPT_HEADER.3: clarify problems with different data sizes
- o curl --version: show PSL if the run-time lib has it enabled
- o examples/sftpuploadresume: resume upload via CURLOPT_APPEND [36]
- o Return error if called recursively from within callbacks [38]
- o sasl: prefer PLAIN mechanism over LOGIN
- o winbuild: Use CALL to run batch scripts [40]
- o curl_share_setopt.3: connection cache is shared within multi handles
- o winbuild: Use macros for the names of some build utilities [41]
- o projects/README: remove reference to dead IDN link/package [42]
- o lib655: silence compiler warning [43]
- o configure: Fix version check for OpenSSL 1.1.1
- o docs/MANUAL: formfind.pl is not accessible on the site anymore [44]
- o unit1309: fix warning on Windows x64 [45]
- o unit1307: proper cleanup on OOM to fix torture tests
- o curl_ctype: fix macro redefinition warnings
- o build: get CFLAGS (including -werror) used for examples and tests [46]
- o NO_PROXY: fix for IPv6 numericals in the URL [47]
- o krb5: use nondeprecated functions [48]
- o winbuild: prefer documented zlib library names [49]
- o http2: mark the connection for close on GOAWAY [53]
- o limit-rate: kick in even before "limit" data has been received [54]
- o HTTP: allow "header;" to replace an internal header with a blank one [55]
- o http2: verbose output new MAX_CONCURRENT_STREAMS values
- o SECURITY: distros' max embargo time is 14 days
- o curl tool: accept --compressed also if Brotli is enabled and zlib is not
- o WolfSSL: adding TLSv1.3 [56]
- o checksrc.pl: add -i and -m options
- o CURLOPT_COOKIEFILE.3: "-" as file name means stdin
+ o FTP: fix typo in recursive callback detection for seeking [1]
+ o test1208: marked flaky
+ o HTTP: make header-less responses still count correct body size [2]
+ o user-agent.d:: mention --proxy-header as well [3]
+ o http2: fixes typo [4]
 
 This release includes the following known bugs:
 
@@ -103,76 +25,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Marcionek, Alessandro Ghedini, Anders Bakken, Aron Bergman, Ben Greear,
-  Björn Stenberg, Bruno Grasselli, Dair Grant, Dan Fandrich, Daniel Stenberg,
-  Dario Weisser, Douglas Mencken, Duy Phan Thanh, Earnestly on github,
-  Erik Johansson, Francisco Sedano, Gisle Vanem, Guido Berhoerster,
-  Henry Roeland, Kamil Dudka, Klaus Stein, Łukasz Domeradzki, Marcel Raad,
-  Martin Dreher, Max Dymond, Michael Kaufmann, Michał Janiszewski,
-  Mohammad AlSaleh, Patrick Monnerat, Patrick Schlangen, Ray Satiro,
-  Richard Alcock, Richard Moore, Rod Widdowson, Ruurd Beerstra,
-  Sergii Kavunenko, Sergio Borghese, Somnath Kundu, steelman on github,
-  Stefan Kanthak, Steve Holme, Tim Mcdonough, Travis Burtrum, Viktor Szakats,
-  刘佩东,
-  (45 contributors)
+  Adam Brown, Daniel Stenberg, dasimx on github, Kobi Gurkan,
+  (4 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=1872
- [2] = https://curl.haxx.se/bug/?i=2263
- [3] = https://curl.haxx.se/bug/?i=2085
- [4] = https://curl.haxx.se/bug/?i=2250
- [5] = https://curl.haxx.se/bug/?i=2258
- [6] = https://curl.haxx.se/bug/?i=1429
- [7] = https://github.com/curl/curl/commit/993dd5651a6c853bfe3870f6a69c7b329fa4e8ce#commitcomment-27070080
- [8] = https://curl.haxx.se/bug/?i=2269
- [9] = https://curl.haxx.se/bug/?i=2202
- [10] = https://curl.haxx.se/bug/?i=2268
- [11] = https://curl.haxx.se/bug/?i=2274
- [12] = https://curl.haxx.se/mail/lib-2018-01/0074.html
- [13] = https://curl.haxx.se/bug/?i=2238
- [14] = https://curl.haxx.se/bug/?i=2275
- [15] = https://curl.haxx.se/bug/?i=2205
- [16] = https://curl.haxx.se/bug/?i=2271
- [17] = https://curl.haxx.se/mail/lib-2018-01/0114.html
- [18] = https://curl.haxx.se/mail/lib-2018-01/0122.html
- [19] = https://curl.haxx.se/bug/?i=2278
- [20] = https://curl.haxx.se/bug/?i=2282
- [21] = https://curl.haxx.se/bug/?i=2164
- [22] = https://curl.haxx.se/bug/?i=2291
- [23] = https://curl.haxx.se/bug/?i=2296
- [24] = https://curl.haxx.se/bug/?i=2298
- [25] = https://curl.haxx.se/bug/?i=2303
- [26] = https://curl.haxx.se/bug/?i=2300
- [27] = https://curl.haxx.se/bug/?i=2305
- [28] = https://curl.haxx.se/bug/?i=2304
- [29] = https://bugzilla.redhat.com/1542256
- [30] = https://curl.haxx.se/bug/?i=2303
- [31] = https://bugzilla.redhat.com/1510247
- [32] = https://curl.haxx.se/bug/?i=1872
- [33] = https://curl.haxx.se/bug/?i=2312
- [34] = https://curl.haxx.se/mail/lib-2018-02/0056.html
- [35] = https://curl.haxx.se/bug/?i=2314
- [36] = https://curl.haxx.se/mail/lib-2018-02/0072.html
- [37] = https://curl.haxx.se/bug/?i=2260
- [38] = https://curl.haxx.se/bug/?i=2302
- [39] = https://curl.haxx.se/bug/?i=2311
- [40] = https://curl.haxx.se/bug/?i=2330
- [41] = https://curl.haxx.se/bug/?i=2329
- [42] = https://curl.haxx.se/bug/?i=2325
- [43] = https://curl.haxx.se/bug/?i=2335
- [44] = https://curl.haxx.se/bug/?i=2342
- [45] = https://curl.haxx.se/bug/?i=2341
- [46] = https://curl.haxx.se/bug/?i=2337
- [47] = https://curl.haxx.se/bug/?i=2353
- [48] = https://curl.haxx.se/bug/?i=2356
- [49] = https://curl.haxx.se/bug/?i=2354
- [50] = https://curl.haxx.se/docs/adv_2018-97a2.html
- [51] = https://curl.haxx.se/docs/adv_2018-9cd6.html
- [52] = https://curl.haxx.se/docs/adv_2018-b047.html
- [53] = https://curl.haxx.se/bug/?i=2365
- [54] = https://curl.haxx.se/bug/?i=2371
- [55] = https://curl.haxx.se/bug/?i=2357
- [56] = https://curl.haxx.se/bug/?i=2349
+ [1] = https://curl.haxx.se/bug/?i=2380
+ [2] = https://curl.haxx.se/bug/?i=2382
+ [3] = https://curl.haxx.se/bug/?i=2381
+ [4] = https://curl.haxx.se/bug/?i=2387
+
