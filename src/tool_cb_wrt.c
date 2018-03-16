@@ -147,9 +147,15 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
     /* binary output to terminal? */
     if(memchr(buffer, 0, bytes)) {
-      warnf(config->global, "Binary output can mess up your terminal. "
+      warnf(config->global,
+            "Binary output detected; this can mess up your terminal. "
             "Use \"--output -\" to tell curl to output it to your terminal "
-            "anyway, or consider \"--output <FILE>\" to save to a file.\n");
+            "anyway, or consider \"--output <FILE>\" to save to a file."
+#ifdef HAVE_ZLIB_H
+            " If the response is compressed using gzip or deflate, you can "
+            "also use the --compressed flag to enable automatic decompression."
+#endif
+            "\n");
       config->synthetic_error = ERR_BINARY_TERMINAL;
       return failure;
     }
