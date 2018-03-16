@@ -2421,6 +2421,12 @@ static void singlesocket(struct Curl_multi *multi,
   data->numsocks = num;
 }
 
+void Curl_updatesocket(struct Curl_easy *data)
+{
+  singlesocket(data->multi, data);
+}
+
+
 /*
  * Curl_multi_closed()
  *
