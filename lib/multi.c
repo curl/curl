@@ -1823,22 +1823,26 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(!result) {
         send_timeout_ms = 0;
         if(data->set.max_send_speed > 0)
-          send_timeout_ms = Curl_pgrsLimitWaitTime(data->progress.uploaded,
-                                data->progress.ul_limit_size,
-                                data->set.max_send_speed,
-                                data->progress.ul_limit_start,
-                                now);
+          send_timeout_ms =
+            Curl_pgrsLimitWaitTime(data->progress.uploaded,
+                                   data->progress.ul_limit_size,
+                                   data->set.max_send_speed,
+                                   data->progress.ul_limit_start,
+                                   now);
 
         recv_timeout_ms = 0;
         if(data->set.max_recv_speed > 0)
-          recv_timeout_ms = Curl_pgrsLimitWaitTime(data->progress.downloaded,
-                                data->progress.dl_limit_size,
-                                data->set.max_recv_speed,
-                                data->progress.dl_limit_start,
-                                now);
+          recv_timeout_ms =
+            Curl_pgrsLimitWaitTime(data->progress.downloaded,
+                                   data->progress.dl_limit_size,
+                                   data->set.max_recv_speed,
+                                   data->progress.dl_limit_start,
+                                   now);
 
-        if(send_timeout_ms <= 0 && recv_timeout_ms <= 0)
+        if(!send_timeout_ms && !recv_timeout_ms) {
           multistate(data, CURLM_STATE_PERFORM);
+          Curl_ratelimit(data, now);
+        }
         else if(send_timeout_ms >= recv_timeout_ms)
           Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
         else
@@ -1870,7 +1874,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                                  data->progress.dl_limit_start,
                                                  now);
 
-      if(send_timeout_ms > 0 || recv_timeout_ms > 0) {
+      if(send_timeout_ms || recv_timeout_ms) {
+        Curl_ratelimit(data, now);
         multistate(data, CURLM_STATE_TOOFAST);
         if(send_timeout_ms >= recv_timeout_ms)
           Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
