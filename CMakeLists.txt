@@ -521,6 +521,18 @@ if(CURL_ZLIB)
   endif()
 endif()
 
+option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)
+set(HAVE_BROTLI OFF)
+if(CURL_BROTLI)
+  find_package(BROTLI QUIET)
+  if(BROTLI_FOUND)
+    set(HAVE_BROTLI ON)
+    list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
+    include_directories(${BROTLI_INCLUDE_DIRS})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${BROTLI_INCLUDE_DIRS})
+  endif()
+endif()
+
 #libSSH2
 option(CMAKE_USE_LIBSSH2 "Use libSSH2" ON)
 mark_as_advanced(CMAKE_USE_LIBSSH2)

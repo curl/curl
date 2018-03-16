@@ -398,6 +398,9 @@
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
 
+/* if brotli is available */
+#cmakedefine HAVE_BROTLI 1
+
 /* if your compiler supports LL */
 #cmakedefine HAVE_LL 1
 
