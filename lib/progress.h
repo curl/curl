@@ -72,6 +72,8 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
 
 #define PGRS_HEADERS_OUT (1<<7) /* set when the headers have been written */
 
+#define MIN_UPDATE_LIMIT_START_TIME 3
+
 
 #endif /* HEADER_CURL_PROGRESS_H */
 

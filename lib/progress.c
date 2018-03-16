@@ -292,6 +292,8 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
+  curl_off_t timespent;
+  time_t time_diff;
   struct curltime now = Curl_now();
 
   data->progress.downloaded = size;
@@ -303,6 +305,12 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
                              data->set.max_recv_speed,
                              data->progress.dl_limit_start,
                              now) == 0)) {
+    /* Limit frequent update 'dl_limit_start' */
+    time_diff = Curl_timediff_us(now, data->progress.dl_limit_start);
+    timespent = (curl_off_t)time_diff/1000000;
+    if((size > 0) && (timespent < MIN_UPDATE_LIMIT_START_TIME)) {
+      return;
+    }
     data->progress.dl_limit_start = now;
     data->progress.dl_limit_size = size;
   }
@@ -310,6 +318,8 @@ void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
+  curl_off_t timespent;
+  time_t time_diff;
   struct curltime now = Curl_now();
 
   data->progress.uploaded = size;
@@ -321,6 +331,12 @@ void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
                              data->set.max_send_speed,
                              data->progress.ul_limit_start,
                              now) == 0)) {
+    /* Limit frequent update 'ul_limit_start' */
+    time_diff = Curl_timediff_us(now, data->progress.ul_limit_start);
+    timespent = (curl_off_t)time_diff/1000000;
+    if((size > 0) && (timespent < MIN_UPDATE_LIMIT_START_TIME)) {
+      return;
+    }
     data->progress.ul_limit_start = now;
     data->progress.ul_limit_size = size;
   }
