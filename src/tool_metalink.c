@@ -243,7 +243,7 @@ static int nss_hash_init(void **pctx, SECOidTag hash_alg)
 {
   PK11Context *ctx;
 
-  /* we have to initialize NSS if not initialized alraedy */
+  /* we have to initialize NSS if not initialized already */
   if(!NSS_IsInitialized() && !nss_context) {
     static NSSInitParameters params;
     params.length = sizeof params;

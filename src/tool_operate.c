@@ -1973,7 +1973,7 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
         size_t count = 0;
         struct OperationConfig *operation = config->first;
 
-        /* Get the required aguments for each operation */
+        /* Get the required arguments for each operation */
         while(!result && operation) {
           result = get_args(operation, count++);
 

@@ -710,7 +710,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  You can specify the private and public keys for SSH/SSL as file paths. Some
  programs want to avoid using files and instead just pass them as in-memory
  data blobs. There's probably a challenge to make this work across the
- plethory of different TLS and SSH backends that curl suppports.
+ plethory of different TLS and SSH backends that curl supports.
  https://github.com/curl/curl/issues/2310
 
 13.4 Cache/share OpenSSL contexts

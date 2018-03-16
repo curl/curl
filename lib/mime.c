@@ -241,7 +241,7 @@ static FILE * vmsfopenread(const char *file, const char *mode)
 static char *Curl_basename(char *path)
 {
   /* Ignore all the details above for now and make a quick and simple
-     implementaion here */
+     implementation here */
   char *s1;
   char *s2;
 
