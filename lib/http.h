@@ -104,7 +104,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
    This value used to be fairly big (100K), but we must take into account that
    if the server rejects the POST due for authentication reasons, this data
-   will always be uncondtionally sent and thus it may not be larger than can
+   will always be unconditionally sent and thus it may not be larger than can
    always be afforded to send twice.
 
    It must not be greater than 64K to work on VMS.
