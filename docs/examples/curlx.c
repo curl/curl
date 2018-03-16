@@ -183,7 +183,7 @@ static unsigned char *my_get_ext(X509 *cert, const int type,
 
 /* This is an application verification call back, it does not
    perform any addition verification but tries to find a URL
-   in the presented certificat. If found, this will become
+   in the presented certificate. If found, this will become
    the URL to be used in the POST.
 */
 
