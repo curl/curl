@@ -1445,6 +1445,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                     config->happy_eyeballs_timeout_ms);
 
+        /* new in 7.60.0 */
+        if(config->haproxy_protocol)
+          my_setopt(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
