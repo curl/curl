@@ -1330,6 +1330,8 @@
      d                 c                   20272
      d  CURLOPT_RESOLVER_START_DATA...
      d                 c                   10273
+     d  CURLOPT_DNS_SHUFFLE_ADDRESSES...
+     d                 c                   00274
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001

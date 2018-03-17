@@ -1844,6 +1844,9 @@ typedef enum {
   /* send HAProxy PROXY protocol header? */
   CINIT(HAPROXYPROTOCOL, LONG, 274),
 
+  /* shuffle addresses before use when DNS returns multiple */
+  CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 275),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
