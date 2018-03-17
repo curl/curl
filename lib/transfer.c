@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,7 +85,7 @@
     !defined(CURL_DISABLE_IMAP)
 /*
  * checkheaders() checks the linked list of custom headers for a
- * particular header (prefix).
+ * particular header (prefix). Provide the prefix without colon!
  *
  * Returns a pointer to the first matching header or NULL if none matched.
  */
@@ -97,7 +97,8 @@ char *Curl_checkheaders(const struct connectdata *conn,
   struct Curl_easy *data = conn->data;
 
   for(head = data->set.headers; head; head = head->next) {
-    if(strncasecompare(head->data, thisheader, thislen))
+    if(strncasecompare(head->data, thisheader, thislen) &&
+       Curl_headersep(head->data[thislen]) )
       return head->data;
   }
 
@@ -716,7 +717,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 #endif   /* CURL_DISABLE_HTTP */
 
       /* Account for body content stored in the header buffer */
-      if(k->badheader && !k->ignorebody) {
+      if((k->badheader == HEADER_PARTHEADER) && !k->ignorebody) {
         DEBUGF(infof(data, "Increasing bytecount by %zu from hbuflen\n",
                      k->hbuflen));
         k->bytecount += k->hbuflen;
@@ -807,10 +808,15 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     } /* if(!header and data to read) */
 
-    if(conn->handler->readwrite &&
-       (excess > 0 && !conn->bits.stream_was_rewound)) {
+    if(conn->handler->readwrite && excess && !conn->bits.stream_was_rewound) {
       /* Parse the excess data */
       k->str += nread;
+
+      if(&k->str[excess] > &k->buf[data->set.buffer_size]) {
+        /* the excess amount was too excessive(!), make sure
+           it doesn't read out of buffer */
+        excess = &k->buf[data->set.buffer_size] - k->str;
+      }
       nread = (ssize_t)excess;
 
       result = conn->handler->readwrite(data, conn, &nread, &readmore);

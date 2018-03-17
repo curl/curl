@@ -1603,6 +1603,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.crlf = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
+  case CURLOPT_HAPROXYPROTOCOL:
+    /*
+     * Set to send the HAProxy Proxy Protocol header
+     */
+    data->set.haproxyprotocol = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
   case CURLOPT_INTERFACE:
     /*
      * Set what interface or address/hostname to bind the socket to when

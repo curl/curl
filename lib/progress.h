@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,14 +46,15 @@ void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
+void Curl_ratelimit(struct Curl_easy *data, struct curltime now);
 int Curl_pgrsUpdate(struct connectdata *);
 void Curl_pgrsResetTransferSizes(struct Curl_easy *data);
 void Curl_pgrsTime(struct Curl_easy *data, timerid timer);
-long Curl_pgrsLimitWaitTime(curl_off_t cursize,
-                            curl_off_t startsize,
-                            curl_off_t limit,
-                            struct curltime start,
-                            struct curltime now);
+timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
+                                  curl_off_t startsize,
+                                  curl_off_t limit,
+                                  struct curltime start,
+                                  struct curltime now);
 
 /* Don't show progress for sizes smaller than: */
 #define LEAST_SIZE_PROGRESS BUFSIZE

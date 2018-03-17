@@ -895,7 +895,7 @@ struct connectdata {
                                 well be the same we read from.
                                 CURL_SOCKET_BAD disables */
 
-  /** Dynamicly allocated strings, MUST be freed before this **/
+  /** Dynamically allocated strings, MUST be freed before this **/
   /** struct is killed.                                      **/
   struct dynamically_allocated_data {
     char *proxyuserpwd;
@@ -1679,6 +1679,8 @@ struct UserDefined {
   struct Curl_easy *stream_depends_on;
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
+
+  bool haproxyprotocol; /* whether to send HAProxy PROXY protocol header */
 
   struct Curl_http2_dep *stream_dependents;
 

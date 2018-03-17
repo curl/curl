@@ -68,7 +68,7 @@ BUGS
   The curl project's process for handling security related issues is
   documented here:
 
-        https://curl.haxx.se/dev/security.html
+        https://curl.haxx.se/dev/secprocess.html
 
 1.4 What to report
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,6 +112,7 @@ static const struct LongShort aliases[]= {
   {"*x", "krb",                      ARG_STRING},
   {"*x", "krb4",                     ARG_STRING},
          /* 'krb4' is the previous name */
+  {"*X", "haproxy-protocol",         ARG_BOOL},
   {"*y", "max-filesize",             ARG_STRING},
   {"*z", "disable-eprt",             ARG_BOOL},
   {"*Z", "eprt",                     ARG_BOOL},
@@ -655,7 +656,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
 
       case 'j': /* --compressed */
-        if(toggle && !(curlinfo->features & CURL_VERSION_LIBZ))
+        if(toggle &&
+           !(curlinfo->features & (CURL_VERSION_LIBZ | CURL_VERSION_BROTLI)))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->encoding = toggle;
         break;
@@ -777,6 +779,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'X': /* --haproxy-protocol */
+        config->haproxy_protocol = toggle;
         break;
       case 'y': /* --max-filesize */
         {

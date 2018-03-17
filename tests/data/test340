@@ -3,16 +3,14 @@
 <keywords>
 FTP
 PASV
-RETR
-PRET
+CWD
+--ftp-method
+singlecwd
 </keywords>
 </info>
+#
 # Server-side
 <reply>
-
-<servercmd>
-REPLY PRET 550 unknown command
-</servercmd>
 </reply>
 
 # Client-side
@@ -21,12 +19,11 @@ REPLY PRET 550 unknown command
 ftp
 </server>
  <name>
-FTP RETR PASV with PRET not supported
+FTP using %00 in path with singlecwd
  </name>
  <command>
-ftp://%HOSTIP:%FTPPORT/1108 --ftp-pret
+--ftp-method singlecwd ftp://%HOSTIP:%FTPPORT/%00first/second/third/340
 </command>
-
 </client>
 
 # Verify data after the test has been "shot"
@@ -35,11 +32,9 @@ ftp://%HOSTIP:%FTPPORT/1108 --ftp-pret
 USER anonymous
 PASS ftp@example.com
 PWD
-PRET RETR 1108
 </protocol>
-# we expect that the server doesn't understand PRET
 <errorcode>
-84
+3
 </errorcode>
 </verify>
 </testcase>

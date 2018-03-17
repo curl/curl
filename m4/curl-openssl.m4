@@ -103,7 +103,7 @@ dnl Find out OpenSSL library API version, performing
 dnl only link tests in order to avoid getting fooled
 dnl by mismatched OpenSSL headers. No runtime checks
 dnl allowed here for cross-compilation support.
-dnl HAVE_OPENSSL_API_LIBRARY is defined as apprpriate
+dnl HAVE_OPENSSL_API_LIBRARY is defined as appropriate
 dnl only for systems which actually run the configure
 dnl script. Config files generated manually or in any
 dnl other way shall not define this.

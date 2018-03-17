@@ -39,7 +39,7 @@ This is not the real page either!
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
 <data1002>
-HTTP/1.1 200 Type-3 Recevied and all Things are fine swsclose
+HTTP/1.1 200 Type-3 Received and all Things are fine swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 32
@@ -62,7 +62,7 @@ Content-Length: 34
 Content-Type: text/html; charset=iso-8859-1
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 
-HTTP/1.1 200 Type-3 Recevied and all Things are fine swsclose
+HTTP/1.1 200 Type-3 Received and all Things are fine swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 32

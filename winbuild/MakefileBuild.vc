@@ -181,12 +181,26 @@ CARES          = static
 CARES_CFLAGS   = /DUSE_ARES /I"$(DEVEL_INCLUDE)/cares"
 !ENDIF
 
+# Depending on how zlib is built the libraries have different names, we 
+# try to handle them all. 
 !IF "$(WITH_ZLIB)"=="dll"
+!IF EXISTS("$(DEVEL_LIB)\zlibwapi.lib")
+ZLIB_LIBS = zlibwapi.lib
+!ELSEIF EXISTS("$(DEVEL_LIB)\zdll.lib")
+ZLIB_LIBS   = zdll.lib
+!ELSE
 ZLIB_LIBS   = zlib.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
+!IF EXISTS("$(DEVEL_LIB)\zlibstat.lib")
+ZLIB_LIBS   = zlibstat.lib
+!ELSEIF EXISTS("$(DEVEL_LIB)\zlib.lib")
+ZLIB_LIBS   = zlib.lib
+!ELSE
 ZLIB_LIBS   = zlib_a.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = static
 !ENDIF

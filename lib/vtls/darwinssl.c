@@ -1389,7 +1389,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* CURL_BUILD_MAC */
 
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-  if(SSLCreateContext != NULL) {  /* use the newer API if avaialble */
+  if(SSLCreateContext != NULL) {  /* use the newer API if available */
     if(BACKEND->ssl_ctx)
       CFRelease(BACKEND->ssl_ctx);
     BACKEND->ssl_ctx = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
