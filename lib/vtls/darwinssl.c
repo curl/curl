@@ -1195,12 +1195,14 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
           *out_cert_and_key = (SecIdentityRef) identity;
           break;
         }
+#if CURL_BUILD_MAC_10_7
         else if(itemID == SecCertificateGetTypeID()) {
           status = SecIdentityCreateWithCertificate(NULL,
                                                  (SecCertificateRef) item,
                                                  out_cert_and_key);
           break;
         }
+#endif
       }
     }
 
