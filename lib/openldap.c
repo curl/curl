@@ -536,7 +536,7 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
     data->req.bytecount += bv.bv_len + 5;
 
     for(rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, &bvals);
-        (rc == LDAP_SUCCESS) && bvals;
+        rc == LDAP_SUCCESS;
         rc = ldap_get_attribute_ber(li->ld, ent, ber, &bv, &bvals)) {
       int i;
 
@@ -547,6 +547,27 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
         binary = 1;
       else
         binary = 0;
+
+      if(bvals == NULL) {
+        writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\t", 1);
+        if(writeerr) {
+          *err = writeerr;
+          return -1;
+        }
+        writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)bv.bv_val,
+                                     bv.bv_len);
+        if(writeerr) {
+          *err = writeerr;
+          return -1;
+        }
+        writeerr = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)":\n", 2);
+        if(writeerr) {
+          *err = writeerr;
+          return -1;
+        }
+        data->req.bytecount += bv.bv_len + 3;
+        continue;
+      }
 
       for(i = 0; bvals[i].bv_val != NULL; i++) {
         int binval = 0;
