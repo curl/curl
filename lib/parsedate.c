@@ -119,6 +119,7 @@ static int parsedate(const char *date, time_t *output);
 #define tDAYZONE -60       /* offset for daylight savings time */
 static const struct tzinfo tz[]= {
   {"GMT", 0},              /* Greenwich Mean */
+  {"UT",  0},              /* Universal Time */
   {"UTC", 0},              /* Universal (Coordinated) */
   {"WET", 0},              /* Western European */
   {"BST", 0 tDAYZONE},     /* British Summer */
