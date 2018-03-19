@@ -41,6 +41,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#define H2_BUFSIZE 32768
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
 #if (NGHTTP2_VERSION_NUM < 0x010000)
@@ -70,6 +71,16 @@
 #else
 #define H2BUGF(x) do { } WHILE_FALSE
 #endif
+
+
+static ssize_t http2_recv(struct connectdata *conn, int sockindex,
+                          char *mem, size_t len, CURLcode *err);
+static bool http2_connisdead(struct connectdata *conn);
+static int h2_session_send(struct Curl_easy *data,
+                           nghttp2_session *h2);
+static int h2_process_pending_input(struct connectdata *conn,
+                                    struct http_conn *httpc,
+                                    CURLcode *err);
 
 /*
  * Curl_http2_init_state() is called when the easy handle is created and
@@ -164,28 +175,50 @@ static CURLcode http2_disconnect(struct connectdata *conn,
  * Instead, if it is readable, run Curl_connalive() to peek at the socket
  * and distinguish between closed and data.
  */
-static bool http2_connisdead(struct connectdata *check)
+static bool http2_connisdead(struct connectdata *conn)
 {
   int sval;
-  bool ret_val = TRUE;
+  bool dead = TRUE;
 
-  sval = SOCKET_READABLE(check->sock[FIRSTSOCKET], 0);
+  if(conn->bits.close)
+    return TRUE;
+
+  sval = SOCKET_READABLE(conn->sock[FIRSTSOCKET], 0);
   if(sval == 0) {
     /* timeout */
-    ret_val = FALSE;
+    dead = FALSE;
   }
   else if(sval & CURL_CSELECT_ERR) {
     /* socket is in an error state */
-    ret_val = TRUE;
+    dead = TRUE;
   }
   else if(sval & CURL_CSELECT_IN) {
     /* readable with no error. could still be closed */
-    ret_val = !Curl_connalive(check);
+    dead = !Curl_connalive(conn);
+    if(!dead) {
+      /* This happens before we've sent off a request and the connection is
+         not in use by any other thransfer, there shouldn't be any data here,
+         only "protocol frames" */
+      CURLcode result;
+      struct http_conn *httpc = &conn->proto.httpc;
+      ssize_t nread = ((Curl_recv *)httpc->recv_underlying)(
+        conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
+      if(nread != -1) {
+        infof(conn->data,
+              "%d bytes stray data read before trying h2 connection\n",
+              (int)nread);
+        httpc->nread_inbuf = 0;
+        httpc->inbuflen = nread;
+        (void)h2_process_pending_input(conn, httpc, &result);
+      }
+      else
+        /* the read failed so let's say this is dead anyway */
+        dead = TRUE;
+    }
   }
 
-  return ret_val;
+  return dead;
 }
-
 
 static unsigned int http2_conncheck(struct connectdata *check,
                                     unsigned int checks_to_perform)
@@ -1039,8 +1072,6 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   return nread;
 }
 
-#define H2_BUFSIZE 32768
-
 #ifdef NGHTTP2_HAS_ERROR_CALLBACK
 static int error_callback(nghttp2_session *session,
                           const char *msg,
@@ -1226,9 +1257,6 @@ static int should_close_session(struct http_conn *httpc)
   return httpc->drain_total == 0 && !nghttp2_session_want_read(httpc->h2) &&
     !nghttp2_session_want_write(httpc->h2);
 }
-
-static int h2_session_send(struct Curl_easy *data,
-                           nghttp2_session *h2);
 
 /*
  * h2_process_pending_input() processes pending input left in
