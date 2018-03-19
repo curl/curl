@@ -47,6 +47,14 @@ exception in the case of Windows' Untrusted Publishers blacklist which it seems
 can't be bypassed.\fP This option may have broader support to accommodate other
 SSL backends in the future.
 https://curl.haxx.se/docs/ssl-compared.html
+
+Added in ?.??.?:
+
+\fICURLSSLOPT_NO_DATE_CHECK\fP tells libcurl to ignore date range failures
+(X509_V_ERR_CERT_HAS_EXPIRED and X509_V_ERR_CERT_NOT_YET_VALID) during
+certificate verification. \fBCurrently this option is only supported for
+OpenSSL. \fP This option may have broader support to accommodate other SSL
+backends in the future.
 .SH DEFAULT
 0
 .SH PROTOCOLS

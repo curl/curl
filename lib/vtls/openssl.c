@@ -2029,6 +2029,20 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
   return CURLE_OK;
 }
 
+static int _verify_no_date_check(int preverify_ok, X509_STORE_CTX *x509_ctx)
+{
+  /* If we have an error related to the validity period, then unset the error.
+     and return success */
+  if(X509_STORE_CTX_get_error(x509_ctx) == X509_V_ERR_CERT_HAS_EXPIRED ||
+     X509_STORE_CTX_get_error(x509_ctx) == X509_V_ERR_CERT_NOT_YET_VALID) {
+     X509_STORE_CTX_set_error(x509_ctx, X509_V_OK); /* Clear "expired" error */
+      return 1;
+  }
+
+  /* In all other cases, return the default OpenSSL result */
+  return preverify_ok;
+}
+
 static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
@@ -2408,7 +2422,9 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
   SSL_CTX_set_verify(BACKEND->ctx,
-                     verifypeer ? SSL_VERIFY_PEER : SSL_VERIFY_NONE, NULL);
+                     verifypeer ? SSL_VERIFY_PEER : SSL_VERIFY_NONE,
+                     (data->set.ssl.no_date_check ? _verify_no_date_check
+                      : NULL));
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
 #if defined(ENABLE_SSLKEYLOGFILE) && defined(HAVE_KEYLOG_CALLBACK)
