@@ -1,14 +1,16 @@
 Curl and libcurl 7.60.0
 
  Public curl releases:         174
- Command line options:         213
- curl_easy_setopt() options:   253
+ Command line options:         214
+ curl_easy_setopt() options:   255
  Public functions in libcurl:  74
  Contributors:                 1705
 
 This release includes the following changes:
 
- o
+ o Add CURLOPT_HAPROXYPROTOCOL, support for the HAProxy PROXY protocol [10]
+ o Add --haproxy-protocol for the command line tool [10]
+ o Add CURLOPT_DNS_SHUFFLE_ADDRESSES, shuffle returned IP addresses [12]
 
 This release includes the following bugfixes:
 
@@ -17,6 +19,15 @@ This release includes the following bugfixes:
  o HTTP: make header-less responses still count correct body size [2]
  o user-agent.d:: mention --proxy-header as well [3]
  o http2: fixes typo [4]
+ o cleanup: misc typos in strings and comments [5]
+ o rate-limit: use three second window to better handle high speeds [6]
+ o examples/hiperfifo.c: improved
+ o pause: when changing pause state, update socket state [7]
+ o multi: improved pending transfers handling => improved performance [8]
+ o curl_version_info.3: fix ssl_version description [9]
+ o add_handle/easy_perform: clear errorbuffer on start if set [11]
+ o darwinssl: fix iOS build [13]
+ o cmake: add support for brotli [14]
 
 This release includes the following known bugs:
 
@@ -25,8 +36,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Brown, Daniel Stenberg, dasimx on github, Kobi Gurkan,
-  (4 contributors)
+  Adam Brown, Chris Araman, Cyril B, Daniel Stenberg, dasimx on github,
+  Don J Olmstead, Kobi Gurkan, Lawrence Matthews, Luz Paz, Patrick Monnerat,
+  Philip Prindeville, Ray Satiro, Rick Deist, Vincas Razma, 刘佩东,
+  (15 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,4 +49,13 @@ References to bug reports and discussions on issues:
  [2] = https://curl.haxx.se/bug/?i=2382
  [3] = https://curl.haxx.se/bug/?i=2381
  [4] = https://curl.haxx.se/bug/?i=2387
-
+ [5] = https://curl.haxx.se/bug/?i=2389
+ [6] = https://curl.haxx.se/bug/?i=2386
+ [7] = https://curl.haxx.se/mail/lib-2018-03/0048.html
+ [8] = https://curl.haxx.se/bug/?i=2369
+ [9] = https://curl.haxx.se/bug/?i=2364
+ [10] = https://curl.haxx.se/bug/?i=2162
+ [11] = https://curl.haxx.se/bug/?i=2190
+ [12] = https://curl.haxx.se/bug/?i=1694
+ [13] = https://curl.haxx.se/bug/?i=2397
+ [14] = https://curl.haxx.se/bug/?i=2392
