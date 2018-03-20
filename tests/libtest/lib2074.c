@@ -19,8 +19,6 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include <openssl/ssl.h>
-
 #include "test.h"
 
 #include "testutil.h"
