@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -231,16 +231,6 @@ endif()
 if(BORLAND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
 endif(BORLAND)
-
-if(CURL_WERROR)
-  if(MSVC_VERSION)
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /WX")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /WX")
-  else()
-    # this assumes clang or gcc style options
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-  endif()
-endif(CURL_WERROR)
 
 # If we are on AIX, do the _ALL_SOURCE magic
 if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
@@ -1126,6 +1116,15 @@ if(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
   endif(CMAKE_C_FLAGS MATCHES "/W[0-4]")
 endif(MSVC)
+
+if(CURL_WERROR)
+  if(MSVC_VERSION)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
+  else()
+    # this assumes clang or gcc style options
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  endif()
+endif(CURL_WERROR)
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
 function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
