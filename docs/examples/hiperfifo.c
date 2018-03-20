@@ -116,7 +116,7 @@ typedef struct _SockInfo
 } SockInfo;
 
 #define __case(code) \
-	case code: s = __STRING(code)
+  case code: s = __STRING(code)
 
 /* Die if we get a bad CURLMcode somewhere */
 static void mcode_or_die(const char *where, CURLMcode code)
@@ -161,11 +161,12 @@ static int multi_timer_cb(CURLM *multi _Unused, long timeout_ms, GlobalInfo *g)
    * for all other values of timeout_ms, this should set or *update*
    * the timer to the new value
    */
-  if (timeout_ms == 0) {
+  if(timeout_ms == 0) {
     rc = curl_multi_socket_action(g->multi,
                                   CURL_SOCKET_TIMEOUT, 0, &g->still_running);
     mcode_or_die("multi_timer_cb: curl_multi_socket_action", rc);
-  } else if (timeout_ms == -1)
+  }
+  else if(timeout_ms == -1)
     evtimer_del(&g->timer_event);
   else
     evtimer_add(&g->timer_event, &timeout);
@@ -197,7 +198,7 @@ static void check_multi_info(GlobalInfo *g)
       free(conn);
     }
   }
-  if (g->still_running == 0 && g->stopped)
+  if(g->still_running == 0 && g->stopped)
     event_base_loopbreak(g->evbase);
 }
 
@@ -310,7 +311,8 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 
 
 /* CURLOPT_WRITEFUNCTION */
-static size_t write_cb(void *ptr _Unused, size_t size, size_t nmemb, void *data)
+static size_t write_cb(void *ptr _Unused, size_t size, size_t nmemb,
+                       void *data)
 {
   size_t realsize = size * nmemb;
   ConnInfo *conn _Unused = (ConnInfo*) data;
@@ -379,11 +381,12 @@ static void fifo_cb(int fd _Unused, short event _Unused, void *arg)
     rv = fscanf(g->input, "%1023s%n", s, &n);
     s[n]='\0';
     if(n && s[0]) {
-      if (!strcmp(s, "stop")) {
+      if(!strcmp(s, "stop")) {
         g->stopped = 1;
-	if (g->still_running == 0)
+        if(g->still_running == 0)
           event_base_loopbreak(g->evbase);
-      } else
+      }
+      else
         new_conn(s, arg);  /* if we read a URL, go get it! */
     }
     else
@@ -419,7 +422,8 @@ static int init_fifo(GlobalInfo *g)
   g->input = fdopen(sockfd, "r");
 
   fprintf(MSG_OUT, "Now, pipe some URL's into > %s\n", fifo);
-  event_assign(&g->fifo_event, g->evbase, sockfd, EV_READ|EV_PERSIST, fifo_cb, g);
+  event_assign(&g->fifo_event, g->evbase, sockfd, EV_READ|EV_PERSIST,
+               fifo_cb, g);
   event_add(&g->fifo_event, NULL);
   return (0);
 }
