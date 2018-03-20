@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -645,15 +645,6 @@ CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
 
   return CURLE_OK;
 }
-
-#ifndef SIZE_T_MAX
-/* some limits.h headers have this defined, some don't */
-#if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
-#define SIZE_T_MAX 18446744073709551615U
-#else
-#define SIZE_T_MAX 4294967295U
-#endif
-#endif
 
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
  * (uppercase UserName + Domain) as the data
