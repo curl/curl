@@ -28,7 +28,8 @@ CERTCONFIGS = \
   EdelCurlRoot-ca.cnf \
   Server-localhost-sv.prm \
   Server-localhost.nn-sv.prm \
-  Server-localhost0h-sv.prm
+  Server-localhost0h-sv.prm \
+  Server-localhost.exp-sv.prm
 
 GENERATEDCERTS = \
   EdelCurlRoot-ca.cacert \
@@ -62,7 +63,16 @@ GENERATEDCERTS = \
   Server-localhost0h-sv.key \
   Server-localhost0h-sv.pem \
   Server-localhost0h-sv.pub.der \
-  Server-localhost0h-sv.pub.pem
+  Server-localhost0h-sv.pub.pem \
+  Server-localhost.exp-sv.crl \
+  Server-localhost.exp-sv.crt \
+  Server-localhost.exp-sv.csr \
+  Server-localhost.exp-sv.der \
+  Server-localhost.exp-sv.dhp \
+  Server-localhost.exp-sv.key \
+  Server-localhost.exp-sv.pem \
+  Server-localhost.exp-sv.pub.der \
+  Server-localhost.exp-sv.pub.pem
 
 SRPFILES = \
   srp-verifier-conf \
@@ -76,7 +86,8 @@ clean-certs:
 	cd $(srcdir); rm -f $(GENERATEDCERTS)
 
 build-certs: $(srcdir)/EdelCurlRoot-ca.cacert $(srcdir)/Server-localhost-sv.pem \
-	$(srcdir)/Server-localhost.nn-sv.pem $(srcdir)/Server-localhost0h-sv.pem
+	$(srcdir)/Server-localhost.nn-sv.pem $(srcdir)/Server-localhost0h-sv.pem \
+	$(srcdir)/Server-localhost.exp-sv.pem
 
 $(srcdir)/EdelCurlRoot-ca.cacert:
 	cd $(srcdir); scripts/genroot.sh EdelCurlRoot
@@ -89,3 +100,6 @@ $(srcdir)/Server-localhost.nn-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
 
 $(srcdir)/Server-localhost0h-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
 	cd $(srcdir); scripts/genserv.sh Server-localhost0h EdelCurlRoot
+
+$(srcdir)/Server-localhost.exp-sv.pem: $(srcdir)/EdelCurlRoot-ca.cacert
+	cd $(srcdir); scripts/genserv.sh Server-localhost.exp EdelCurlRoot

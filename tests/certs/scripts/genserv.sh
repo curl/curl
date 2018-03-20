@@ -59,6 +59,13 @@ if [ ".$SERIAL" = . ] ; then
 	SERIAL=`/usr/bin/env perl -e "$GETSERIAL"`
 fi
 
+# A hack for the expired certificate test case. We could do better, but it would
+# require using "openssl ca" instead of "openssl x509" for creating the server
+# certificates, as "openssl ca" lets you precisely specify start and end dates.
+if grep -qe "exp$" <<< "$PREFIX"; then
+  DURATION=-$DURATION
+fi
+
 echo SERIAL=$SERIAL PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE
 
 if [ "$DHP." = YES. ] ; then
