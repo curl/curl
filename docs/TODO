@@ -154,6 +154,7 @@
  18.16 send only part of --data
  18.17 consider file name from the redirected URL with -O ?
  18.18 retry on network is unreachable
+ 18.19 expand ~/ in config files
 
  19. Build
  19.1 roffit
@@ -1062,6 +1063,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  want to retry for?
 
  https://github.com/curl/curl/issues/1603
+
+18.19 expand ~/ in config files
+
+ For example .curlrc could benefit from being able to do this.
+
+ See https://github.com/curl/curl/issues/2317
+
 
 19. Build
 
