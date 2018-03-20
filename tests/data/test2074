@@ -24,8 +24,7 @@ MooMoo
 # Client-side
 <client>
 <features>
-SSL
-SSLpinning
+OpenSSL
 </features>
 <server>
 https Server-localhost.exp-sv.pem
