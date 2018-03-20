@@ -59,5 +59,9 @@ int test(char *URL)
   }
 
 test_cleanup:
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
   return res;
 }
