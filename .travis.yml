@@ -187,7 +187,7 @@ script:
         if [ "$T" = "cmake" ]; then
              mkdir build
              cd build
-             cmake ..
+             cmake .. -DCURL_WERROR=ON
              make
         fi
     - |
