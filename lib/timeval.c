@@ -128,7 +128,7 @@ struct curltime Curl_now(void)
   struct curltime ret;
   (void)gettimeofday(&now, NULL);
   ret.tv_sec = now.tv_sec;
-  ret.tv_usec = now.tv_usec;
+  ret.tv_usec = (int)now.tv_usec;
   return ret;
 }
 
