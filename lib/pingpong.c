@@ -304,7 +304,10 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
        * it would have been populated with something of size int to begin
        * with, even though its datatype may be larger than an int.
        */
-      DEBUGASSERT((ptr + pp->cache_size) <= (buf + data->set.buffer_size + 1));
+      if((ptr + pp->cache_size) > (buf + data->set.buffer_size + 1)) {
+        failf(data, "cached response data too big to handle");
+        return CURLE_RECV_ERROR;
+      }
       memcpy(ptr, pp->cache, pp->cache_size);
       gotbytes = (ssize_t)pp->cache_size;
       free(pp->cache);    /* free the cache */
