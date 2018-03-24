@@ -142,10 +142,6 @@
 #endif
 #endif
 
-#ifdef LIBRESSL_VERSION_NUMBER
-#define OpenSSL_version_num() LIBRESSL_VERSION_NUMBER
-#endif
-
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
     !(defined(LIBRESSL_VERSION_NUMBER) && \
       LIBRESSL_VERSION_NUMBER < 0x20700000L)
@@ -3975,13 +3971,35 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
 
 static size_t Curl_ossl_version(char *buffer, size_t size)
 {
-#ifdef OPENSSL_IS_BORINGSSL
+#ifdef LIBRESSL_VERSION_NUMBER
+#if LIBRESSL_VERSION_NUMBER < 0x2070100fL
+  return msnprintf(buffer, size, "%s/%lx.%lx.%lx",
+                   OSSL_PACKAGE,
+                   (LIBRESSL_VERSION_NUMBER>>28)&0xf,
+                   (LIBRESSL_VERSION_NUMBER>>20)&0xff,
+                   (LIBRESSL_VERSION_NUMBER>>12)&0xff);
+#else /* OpenSSL_version() first appeared in LibreSSL 2.7.1 */
+  char *p;
+  int count;
+  const char *ver = OpenSSL_version(OPENSSL_VERSION);
+  const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
+  if(Curl_strncasecompare(ver, expected, sizeof(expected) - 1)) {
+    ver += sizeof(expected) - 1;
+  }
+  count = msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
+  for(p = buffer; *p; ++p) {
+    if(ISSPACE(*p))
+      *p = '_';
+  }
+  return count;
+#endif
+#elif defined(OPENSSL_IS_BORINGSSL)
   return msnprintf(buffer, size, OSSL_PACKAGE);
 #elif defined(HAVE_OPENSSL_VERSION) && defined(OPENSSL_VERSION_STRING)
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
 #else
-  /* not BoringSSL and not using OpenSSL_version */
+  /* not LibreSSL, BoringSSL and not using OpenSSL_version */
 
   char sub[3];
   unsigned long ssleay_value;
