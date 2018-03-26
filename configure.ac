@@ -3492,6 +3492,26 @@ AC_CHECK_TYPE([bool],[
 #endif
 ])
 
+# check for sa_family_t
+AC_CHECK_TYPE(sa_family_t,
+   AC_DEFINE(CURL_SA_FAMILY_T, sa_family_t, [IP address type in sockaddr]),
+   [
+   # The windows name?
+   AC_CHECK_TYPE(ADDRESS_FAMILY,
+     AC_DEFINE(CURL_SA_FAMILY_T, ADDRESS_FAMILY, [IP address type in sockaddr]),
+     AC_DEFINE(CURL_SA_FAMILY_T, unsigned short, [IP address type in sockaddr]),
+    [
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+    ])
+   ],
+[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+])
+
 AC_MSG_CHECKING([if time_t is unsigned])
 AC_RUN_IFELSE([
   AC_LANG_SOURCE([[
