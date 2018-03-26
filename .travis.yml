@@ -2,6 +2,8 @@ language: c
 sudo: required
 addons:
     apt:
+        config:
+            retries: true
         sources:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.9
