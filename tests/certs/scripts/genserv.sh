@@ -62,9 +62,11 @@ fi
 # A hack for the expired certificate test case. We could do better, but it would
 # require using "openssl ca" instead of "openssl x509" for creating the server
 # certificates, as "openssl ca" lets you precisely specify start and end dates.
-if grep -qe "exp$" <<< "$PREFIX"; then
-  DURATION=-$DURATION
-fi
+case "$PREFIX" in
+*exp)
+    DURATION=-$DURATION
+    ;;
+esac
 
 echo SERIAL=$SERIAL PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE
 
@@ -121,5 +123,3 @@ cat $PREFIX-sv.prm $PREFIX-sv.key  $PREFIX-sv.crt $PREFIX-sv.dhp >$PREFIX-sv.pem
 chmod o-r $PREFIX-sv.prm
 
 echo "$PREFIX-sv.pem done"
-
-

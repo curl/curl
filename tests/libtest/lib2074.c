@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2017, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2018, Tabor Kelly, <taborkelly@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
