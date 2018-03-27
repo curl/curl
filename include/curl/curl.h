@@ -793,9 +793,9 @@ typedef enum {
    SSL backends where such behavior is present. */
 #define CURLSSLOPT_NO_REVOKE (1<<1)
 
-/* - NO_DATE_CHECK tells libcurl to disable validity date checking.
+/* - NO_DATE_VERIFY tells libcurl to disable validity date checking.
    currently supported in OpenSSL. */
-#define CURLSSLOPT_NO_DATE_CHECK (1<<2)
+#define CURLSSLOPT_NO_DATE_VERIFY (1<<2)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document

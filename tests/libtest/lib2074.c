@@ -49,7 +49,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
   /* Disable date check */
-  easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NO_DATE_CHECK);
+  easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NO_DATE_VERIFY);
 
   res = curl_easy_perform(curl);
   if(res) {
