@@ -2032,9 +2032,11 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
 static int _verify_no_date_check(int preverify_ok, X509_STORE_CTX *x509_ctx)
 {
   /* If we have an error related to the validity period, then unset the error.
-     and return success */
-  if(X509_STORE_CTX_get_error(x509_ctx) == X509_V_ERR_CERT_HAS_EXPIRED ||
-     X509_STORE_CTX_get_error(x509_ctx) == X509_V_ERR_CERT_NOT_YET_VALID) {
+     and return success. !preverify_ok is just to save a function call in the
+     normal happy-path case. */
+  if(!preverify_ok &&
+     (X509_STORE_CTX_get_error(x509_ctx) == X509_V_ERR_CERT_HAS_EXPIRED ||
+      X509_STORE_CTX_get_error(x509_ctx) == X509_V_ERR_CERT_NOT_YET_VALID)) {
      X509_STORE_CTX_set_error(x509_ctx, X509_V_OK); /* Clear "expired" error */
       return 1;
   }
