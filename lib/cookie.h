@@ -45,9 +45,11 @@ struct Cookie {
   bool httponly;     /* true if the httponly directive is present */
 };
 
+#define COOKIE_HASH_SIZE 256
+
 struct CookieInfo {
   /* linked list of cookies we know of */
-  struct Cookie *cookies;
+  struct Cookie *cookies[COOKIE_HASH_SIZE];
 
   char *filename;  /* file we read from/write to */
   bool running;    /* state info, for cookie adding information */
