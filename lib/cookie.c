@@ -143,6 +143,28 @@ static bool tailmatch(const char *cooke_domain, const char *hostname)
 }
 
 /*
+ * Return true if the given string is an IP(v4|v6) address.
+ */
+static bool isip(const char *domain)
+{
+  struct in_addr addr;
+#ifdef ENABLE_IPV6
+  struct in6_addr addr6;
+#endif
+
+  if(Curl_inet_pton(AF_INET, domain, &addr)
+#ifdef ENABLE_IPV6
+     || Curl_inet_pton(AF_INET6, domain, &addr6)
+#endif
+    ) {
+    /* domain name given as IP address */
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/*
  * matching cookie path and url path
  * RFC6265 5.1.4 Paths and Path-Match
  */
@@ -323,28 +345,6 @@ static void remove_expired(struct CookieInfo *cookies)
     }
     co = nx;
   }
-}
-
-/*
- * Return true if the given string is an IP(v4|v6) address.
- */
-static bool isip(const char *domain)
-{
-  struct in_addr addr;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr6;
-#endif
-
-  if(Curl_inet_pton(AF_INET, domain, &addr)
-#ifdef ENABLE_IPV6
-     || Curl_inet_pton(AF_INET6, domain, &addr6)
-#endif
-    ) {
-    /* domain name given as IP address */
-    return TRUE;
-  }
-
-  return FALSE;
 }
 
 /****************************************************************************
