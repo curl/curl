@@ -368,6 +368,7 @@ Curl_cookie_add(struct Curl_easy *data,
 
                 struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
+                bool noexpire, /* if TRUE, skip remove_expired() */
                 char *lineptr,   /* first character of the line */
                 const char *domain, /* default domain */
                 const char *path)   /* full path used when this cookie is set,
@@ -819,7 +820,8 @@ Curl_cookie_add(struct Curl_easy *data,
      the same domain and path as this */
 
   /* at first, remove expired cookies */
-  remove_expired(c);
+  if(!noexpire)
+    remove_expired(c);
 
 #ifdef USE_LIBPSL
   /* Check if the domain is a Public Suffix and if yes, ignore the cookie.
@@ -1026,9 +1028,10 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       while(*lineptr && ISBLANK(*lineptr))
         lineptr++;
 
-      Curl_cookie_add(data, c, headerline, lineptr, NULL, NULL);
+      Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL);
     }
     free(line); /* free the line buffer */
+    remove_expired(c); /* run this once, not on every cookie */
 
     if(fromfile)
       fclose(fp);
