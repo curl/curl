@@ -80,7 +80,8 @@ struct Curl_easy;
  */
 
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
-                               struct CookieInfo *, bool header, char *lineptr,
+                               struct CookieInfo *, bool header, bool noexpiry,
+                               char *lineptr,
                                const char *domain, const char *path);
 
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
