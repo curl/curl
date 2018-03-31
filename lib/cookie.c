@@ -243,9 +243,9 @@ pathmatched:
 /*
  * Return the top-level domain, for optimal hashing.
  */
-static const char *get_top_domain(const char * const in, unsigned *outlen)
+static const char *get_top_domain(const char * const in, size_t *outlen)
 {
-  unsigned len;
+  size_t len;
   const char *first, *last;
 
   if(!in)
@@ -261,9 +261,9 @@ static const char *get_top_domain(const char * const in, unsigned *outlen)
   if(first == last)
     return in;
 
-  first = memrchr(in, '.', last - in - 1);
+  first = memrchr(in, '.', (size_t)(last - in - 1));
   if(outlen)
-    *outlen = len - (first - in) - 1;
+    *outlen = len - (size_t)(first - in) - 1;
 
   return first + 1;
 }
@@ -274,7 +274,7 @@ static const char *get_top_domain(const char * const in, unsigned *outlen)
 static size_t cookiehash(const char * const in)
 {
   const char *top;
-  unsigned len;
+  size_t len;
 
   if(!in || isip(in))
     return 0;
