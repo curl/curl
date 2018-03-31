@@ -902,7 +902,7 @@ endif()
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
   foreach(CURL_TEST HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
-    curl_internal_test_run(${CURL_TEST})
+    curl_internal_test(${CURL_TEST})
   endforeach(CURL_TEST)
 endif(HAVE_FSETXATTR)
 
@@ -982,7 +982,7 @@ foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
     )
-  curl_internal_test_run(${CURL_TEST})
+  curl_internal_test(${CURL_TEST})
 endforeach(CURL_TEST)
 
 # Check for reentrant
