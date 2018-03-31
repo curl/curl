@@ -781,11 +781,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 
         if(checkprefix("Set-Cookie:", argptr))
           /* HTTP Header format line */
-          Curl_cookie_add(data, data->cookies, TRUE, FALSE, argptr + 11, NULL, NULL);
+          Curl_cookie_add(data, data->cookies, TRUE, FALSE, argptr + 11, NULL,
+                          NULL);
 
         else
           /* Netscape format line */
-          Curl_cookie_add(data, data->cookies, FALSE, FALSE, argptr, NULL, NULL);
+          Curl_cookie_add(data, data->cookies, FALSE, FALSE, argptr, NULL,
+                          NULL);
 
         Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
         free(argptr);
