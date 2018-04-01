@@ -820,7 +820,8 @@ Curl_cookie_add(struct Curl_easy *data,
      the same domain and path as this */
 
   /* at first, remove expired cookies */
-  if(!noexpire) remove_expired(c);
+  if(!noexpire)
+    remove_expired(c);
 
 #ifdef USE_LIBPSL
   /* Check if the domain is a Public Suffix and if yes, ignore the cookie.
