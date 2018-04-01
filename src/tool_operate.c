@@ -1762,10 +1762,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 
         if(config->rootme) {
-          int rc = WEXITSTATUS(pclose(outs.stream));
-          if(!result)
-            /* sudo returned non-zero; wrap exit code if not already set */
-            result = rc;
+          int wstatus = pclose(outs.stream);
+          if (!result && (!WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0))
+            result = CURLE_WRITE_ERROR;
         }
         /* Close the file */
         else if(outs.fopened && outs.stream) {
