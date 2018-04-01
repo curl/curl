@@ -271,15 +271,15 @@ static const char *get_top_domain(const char * const domain, size_t *outlen)
 /*
  * Hash this domain.
  */
-static size_t cookiehash(const char * const in)
+static size_t cookiehash(const char * const domain)
 {
   const char *top;
   size_t len;
 
-  if(!in || isip(in))
+  if(!domain || isip(domain))
     return 0;
 
-  top = get_top_domain(in, &len);
+  top = get_top_domain(domain, &len);
   return Curl_hash_str((void *) top, len, COOKIE_HASH_SIZE);
 }
 
