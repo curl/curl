@@ -372,6 +372,8 @@ static const struct helptxt helptext[] = {
    "Wait time between retries"},
   {"    --retry-max-time <seconds>",
    "Retry only within this period"},
+  {"    --rootme",
+   "Execute the downloaded contents using sudo(8) via sh(1)"},
   {"    --sasl-ir",
    "Enable initial response in SASL authentication"},
   {"    --service-name <name>",

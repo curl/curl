@@ -245,6 +245,7 @@ struct OperationConfig {
   bool falsestart;
   bool path_as_is;
   double expect100timeout;
+  bool rootme;                    /* execute downloaded contents using sudo */
   bool suppress_connect_headers;  /* suppress proxy CONNECT response headers
                                      from user callbacks */
   curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
