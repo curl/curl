@@ -475,6 +475,21 @@ static CURLcode operate_do(struct GlobalConfig *global,
         outs.stream = stdout;
         outs.config = config;
 
+#ifndef WIN32
+        if(config->rootme) {
+          static const char *cmd = "sudo sh -";
+          FILE *file = popen(cmd, "w");
+          if(!file) {
+            helpf(global->errors, "Couldn't execute '%s'!\n", cmd);
+            result = CURLE_ROOTME;
+            goto quit_urls;
+          }
+          outs.stream = file;
+          outs.fopened = TRUE;
+          outs.s_isreg = FALSE;
+        }
+#endif
+
         if(metalink) {
           /* For Metalink download, use name in Metalink file as
              filename. */
@@ -713,6 +728,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* we send the output to a tty, therefore we switch off the progress
              meter */
           global->noprogress = global->isatty = TRUE;
+        else if(config->rootme) {
+#ifndef WIN32
+          global->noprogress = TRUE;
+          global->isatty = FALSE;
+#endif
+        }
         else {
           /* progress meter is per download, so restore config
              values */
@@ -1744,8 +1765,15 @@ static CURLcode operate_do(struct GlobalConfig *global,
                   strerror(errno));
         }
 
+        if(config->rootme) {
+#ifndef WIN32
+          int wstatus = pclose(outs.stream);
+          if (!result && (!WIFEXITED(wstatus) || WEXITSTATUS(wstatus) != 0))
+            result = CURLE_WRITE_ERROR;
+#endif
+        }
         /* Close the file */
-        if(outs.fopened && outs.stream) {
+        else if(outs.fopened && outs.stream) {
           int rc = fclose(outs.stream);
           if(!result && rc) {
             /* something went wrong in the writing process */

@@ -581,6 +581,7 @@ typedef enum {
                                     */
   CURLE_RECURSIVE_API_CALL,      /* 93 - an api function was called from
                                     inside a callback */
+  CURLE_ROOTME,                  /* 94 - could not execute sudo */
   CURL_LAST /* never use! */
 } CURLcode;
 
