@@ -315,6 +315,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_RECURSIVE_API_CALL:
     return "API function called from within callback";
 
+  case CURLE_ROOTME:
+    return "Could not execute sudo(8)";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:
