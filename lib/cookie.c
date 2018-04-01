@@ -243,27 +243,27 @@ pathmatched:
 /*
  * Return the top-level domain, for optimal hashing.
  */
-static const char *get_top_domain(const char * const in, size_t *outlen)
+static const char *get_top_domain(const char * const domain, size_t *outlen)
 {
   size_t len;
   const char *first, *last;
 
-  if(!in)
+  if(!domain)
     return NULL;
 
-  len = strlen(in);
-  first = memchr(in, '.', len);
-  last = memrchr(in, '.', len);
+  len = strlen(domain);
+  first = memchr(domain, '.', len);
+  last = memrchr(domain, '.', len);
 
   if(outlen)
     *outlen = len;
 
   if(first == last)
-    return in;
+    return domain;
 
-  first = memrchr(in, '.', (size_t)(last - in - 1));
+  first = memrchr(domain, '.', (size_t)(last - domain - 1));
   if(outlen)
-    *outlen = len - (size_t)(first - in) - 1;
+    *outlen = len - (size_t)(first - domain) - 1;
 
   return first + 1;
 }
