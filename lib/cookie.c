@@ -369,7 +369,7 @@ static void remove_expired(struct CookieInfo *cookies)
 {
   struct Cookie *co, *nx, *pv;
   curl_off_t now = (curl_off_t)time(NULL);
-  unsigned i;
+  unsigned int i;
 
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {
     co = cookies->cookies[i];
@@ -1282,7 +1282,7 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 void Curl_cookie_clearall(struct CookieInfo *cookies)
 {
   if(cookies) {
-    unsigned i;
+    unsigned int i;
     for(i = 0; i < COOKIE_HASH_SIZE; i++) {
       Curl_cookie_freelist(cookies->cookies[i]);
       cookies->cookies[i] = NULL;
@@ -1320,7 +1320,7 @@ void Curl_cookie_freelist(struct Cookie *co)
 void Curl_cookie_clearsess(struct CookieInfo *cookies)
 {
   struct Cookie *first, *curr, *next, *prev = NULL;
-  unsigned i;
+  unsigned int i;
 
   if(!cookies)
     return;
@@ -1363,7 +1363,7 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies)
  ****************************************************************************/
 void Curl_cookie_cleanup(struct CookieInfo *c)
 {
-  unsigned i;
+  unsigned int i;
 
   if(c) {
     free(c->filename);
@@ -1417,7 +1417,7 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   FILE *out;
   bool use_stdout = FALSE;
   char *format_ptr;
-  unsigned i;
+  unsigned int i;
 
   if((NULL == c) || (0 == c->numcookies))
     /* If there are no known cookies, we don't write or even create any
@@ -1471,7 +1471,7 @@ static struct curl_slist *cookie_list(struct Curl_easy *data)
   struct curl_slist *beg;
   struct Cookie *c;
   char *line;
-  unsigned i;
+  unsigned int i;
 
   if((data->cookies == NULL) ||
       (data->cookies->numcookies == 0))
