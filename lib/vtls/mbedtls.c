@@ -1023,13 +1023,20 @@ static bool Curl_mbedtls_data_pending(const struct connectdata *conn,
   return mbedtls_ssl_get_bytes_avail(&BACKEND->ssl) != 0;
 }
 
-static void Curl_mbedtls_sha256sum(const unsigned char *input,
+static CURLcode Curl_mbedtls_sha256sum(const unsigned char *input,
                                     size_t inputlen,
                                     unsigned char *sha256sum,
                                     size_t sha256len UNUSED_PARAM)
 {
   (void)sha256len;
+#if MBEDTLS_VERSION_NUMBER < 0x02070000
   mbedtls_sha256(input, inputlen, sha256sum, 0);
+#else
+  /* returns 0 on success, otherwise failure */
+  if (mbedtls_sha256_ret(input, inputlen, sha256sum, 0) != 0)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#endif
+  return CURLE_OK;
 }
 
 static void *Curl_mbedtls_get_internals(struct ssl_connect_data *connssl,

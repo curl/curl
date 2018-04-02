@@ -882,13 +882,14 @@ static bool Curl_polarssl_data_pending(const struct connectdata *conn,
   return ssl_get_bytes_avail(&BACKEND->ssl) != 0;
 }
 
-static void Curl_polarssl_sha256sum(const unsigned char *input,
+static CURLcode Curl_polarssl_sha256sum(const unsigned char *input,
                                     size_t inputlen,
                                     unsigned char *sha256sum,
                                     size_t sha256len UNUSED_PARAM)
 {
   (void)sha256len;
   sha256(input, inputlen, sha256sum, 0);
+  return CURLE_OK;
 }
 
 static void *Curl_polarssl_get_internals(struct ssl_connect_data *connssl,

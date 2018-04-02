@@ -1949,13 +1949,14 @@ static CURLcode Curl_schannel_md5sum(unsigned char *input,
     return CURLE_OK;
 }
 
-static void Curl_schannel_sha256sum(const unsigned char *input,
+static CURLcode Curl_schannel_sha256sum(const unsigned char *input,
                                     size_t inputlen,
                                     unsigned char *sha256sum,
                                     size_t sha256len)
 {
     Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
                            PROV_RSA_AES, CALG_SHA_256);
+    return CURLE_OK;
 }
 
 static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
