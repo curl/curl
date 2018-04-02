@@ -3603,7 +3603,7 @@ static CURLcode Curl_ossl_md5sum(unsigned char *tmp, /* input */
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-static void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
+static CURLcode Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
                                 size_t tmplen,
                                 unsigned char *sha256sum /* output */,
                                 size_t unused)
@@ -3617,6 +3617,7 @@ static void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
   EVP_DigestUpdate(mdctx, tmp, tmplen);
   EVP_DigestFinal_ex(mdctx, sha256sum, &len);
   EVP_MD_CTX_destroy(mdctx);
+  return CURLE_OK;
 }
 #endif
 

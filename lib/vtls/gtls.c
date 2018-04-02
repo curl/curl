@@ -1761,7 +1761,7 @@ static CURLcode Curl_gtls_md5sum(unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
+static CURLcode Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
                                 size_t tmplen,
                                 unsigned char *sha256sum, /* output */
                                 size_t sha256len)
@@ -1778,6 +1778,7 @@ static void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
   memcpy(sha256sum, gcry_md_read(SHA256pw, 0), sha256len);
   gcry_md_close(SHA256pw);
 #endif
+  return CURLE_OK;
 }
 
 static bool Curl_gtls_cert_status_request(void)
