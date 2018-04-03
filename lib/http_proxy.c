@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -137,7 +137,7 @@ CURLcode Curl_proxy_connect(struct connectdata *conn, int sockindex)
 
 bool Curl_connect_complete(struct connectdata *conn)
 {
-  return conn->connect_state &&
+  return !conn->connect_state ||
     (conn->connect_state->tunnel_state == TUNNEL_COMPLETE);
 }
 
@@ -163,10 +163,11 @@ static CURLcode connect_init(struct connectdata *conn, bool reinit)
     s = conn->connect_state;
   }
   s->tunnel_state = TUNNEL_INIT;
-  s->keepon=TRUE;
+  s->keepon = TRUE;
   s->line_start = s->connect_buffer;
   s->ptr = s->line_start;
-  s->cl=0;
+  s->cl = 0;
+  s->close_connection = FALSE;
   return CURLE_OK;
 }
 
@@ -182,13 +183,12 @@ static CURLcode CONNECT(struct connectdata *conn,
                         const char *hostname,
                         int remote_port)
 {
-  int subversion=0;
-  struct Curl_easy *data=conn->data;
+  int subversion = 0;
+  struct Curl_easy *data = conn->data;
   struct SingleRequest *k = &data->req;
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
-  bool closeConnection = FALSE;
-  time_t check;
+  timediff_t check;
   struct http_connect_state *s = conn->connect_state;
 
 #define SELECT_OK      0
@@ -234,8 +234,8 @@ static CURLcode CONNECT(struct connectdata *conn,
 
       if(!result) {
         char *host = NULL;
-        const char *proxyconn="";
-        const char *useragent="";
+        const char *proxyconn = "";
+        const char *useragent = "";
         const char *http = (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
         bool ipv6_ip = conn->bits.ipv6_ip;
@@ -244,7 +244,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         /* the hostname may be different */
         if(hostname != conn->host.name)
           ipv6_ip = (strchr(hostname, ':') != NULL);
-        hostheader= /* host:port with IPv6 support */
+        hostheader = /* host:port with IPv6 support */
           aprintf("%s%s%s:%hu", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
                   remote_port);
         if(!hostheader) {
@@ -252,7 +252,7 @@ static CURLcode CONNECT(struct connectdata *conn,
           return CURLE_OUT_OF_MEMORY;
         }
 
-        if(!Curl_checkProxyheaders(conn, "Host:")) {
+        if(!Curl_checkProxyheaders(conn, "Host")) {
           host = aprintf("Host: %s\r\n", hostheader);
           if(!host) {
             free(hostheader);
@@ -260,10 +260,10 @@ static CURLcode CONNECT(struct connectdata *conn,
             return CURLE_OUT_OF_MEMORY;
           }
         }
-        if(!Curl_checkProxyheaders(conn, "Proxy-Connection:"))
+        if(!Curl_checkProxyheaders(conn, "Proxy-Connection"))
           proxyconn = "Proxy-Connection: Keep-Alive\r\n";
 
-        if(!Curl_checkProxyheaders(conn, "User-Agent:") &&
+        if(!Curl_checkProxyheaders(conn, "User-Agent") &&
            data->set.str[STRING_USERAGENT])
           useragent = conn->allocptr.uagent;
 
@@ -410,7 +410,8 @@ static CURLcode CONNECT(struct connectdata *conn,
         }
 
         /* convert from the network encoding */
-        result = Curl_convert_from_network(data, line_start, perline);
+        result = Curl_convert_from_network(data, s->line_start,
+                                           (size_t)s->perline);
         /* Curl_convert_from_network calls failf if unsuccessful */
         if(result)
           return result;
@@ -523,12 +524,12 @@ static CURLcode CONNECT(struct connectdata *conn,
                   k->httpcode);
           }
           else {
-            s->cl = curlx_strtoofft(s->line_start +
-                                    strlen("Content-Length:"), NULL, 10);
+            (void)curlx_strtoofft(s->line_start +
+                                  strlen("Content-Length:"), NULL, 10, &s->cl);
           }
         }
         else if(Curl_compareheader(s->line_start, "Connection:", "close"))
-          closeConnection = TRUE;
+          s->close_connection = TRUE;
         else if(checkprefix("Transfer-Encoding:", s->line_start)) {
           if(k->httpcode/100 == 2) {
             /* A client MUST ignore any Content-Length or Transfer-Encoding
@@ -547,7 +548,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         }
         else if(Curl_compareheader(s->line_start,
                                    "Proxy-Connection:", "close"))
-          closeConnection = TRUE;
+          s->close_connection = TRUE;
         else if(2 == sscanf(s->line_start, "HTTP/1.%d %d",
                             &subversion,
                             &k->httpcode)) {
@@ -566,7 +567,7 @@ static CURLcode CONNECT(struct connectdata *conn,
       if(error)
         return CURLE_RECV_ERROR;
 
-      if(data->info.httpproxycode != 200) {
+      if(data->info.httpproxycode/100 != 2) {
         /* Deal with the possibly already received authenticate
            headers. 'newurl' is set to a new URL if we must loop. */
         result = Curl_http_auth_act(conn);
@@ -577,10 +578,10 @@ static CURLcode CONNECT(struct connectdata *conn,
           /* the connection has been marked for closure, most likely in the
              Curl_http_auth_act() function and thus we can kill it at once
              below */
-          closeConnection = TRUE;
+          s->close_connection = TRUE;
       }
 
-      if(closeConnection && data->req.newurl) {
+      if(s->close_connection && data->req.newurl) {
         /* Connection closed by server. Don't use it anymore */
         Curl_closesocket(conn, conn->sock[sockindex]);
         conn->sock[sockindex] = CURL_SOCKET_BAD;
@@ -597,8 +598,8 @@ static CURLcode CONNECT(struct connectdata *conn,
 
   } while(data->req.newurl);
 
-  if(200 != data->req.httpcode) {
-    if(closeConnection && data->req.newurl) {
+  if(data->info.httpproxycode/100 != 2) {
+    if(s->close_connection && data->req.newurl) {
       conn->bits.proxy_connect_closed = TRUE;
       infof(data, "Connect me again please\n");
       connect_done(conn);
@@ -633,7 +634,8 @@ static CURLcode CONNECT(struct connectdata *conn,
 
   data->state.authproxy.done = TRUE;
 
-  infof(data, "Proxy replied OK to CONNECT request\n");
+  infof(data, "Proxy replied %d to CONNECT request\n",
+        data->info.httpproxycode);
   data->req.ignorebody = FALSE; /* put it (back) to non-ignore state */
   conn->bits.rewindaftersend = FALSE; /* make sure this isn't set for the
                                          document request  */

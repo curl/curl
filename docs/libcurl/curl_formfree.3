@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,6 +28,8 @@ curl_formfree - free a previously build multipart/formdata HTTP POST chain
 .BI "void curl_formfree(struct curl_httppost *" form);
 .ad
 .SH DESCRIPTION
+This function is deprecated. Do not use! See \fIcurl_mime_init(3)\fP instead!
+
 curl_formfree() is used to clean up data previously built/appended with
 \fIcurl_formadd(3)\fP. This must be called when the data has been used, which
 typically means after \fIcurl_easy_perform(3)\fP has been called.
@@ -38,7 +40,9 @@ the \fIcurl_formadd(3)\fP invoke(s).
 
 \fBform\fP is the pointer as returned from a previous call to
 \fIcurl_formadd(3)\fP and may be NULL.
+.SH AVAILABILITY
+Deprecated in 7.56.0.
 .SH RETURN VALUE
 None
 .SH "SEE ALSO"
-.BR curl_formadd "(3) "
+.BR curl_formadd "(3), " curl_mime_init "(3), " curl_mime_free "(3)"

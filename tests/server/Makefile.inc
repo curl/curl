@@ -4,15 +4,15 @@ CURLX_SRCS = \
  ../../lib/mprintf.c \
  ../../lib/nonblock.c \
  ../../lib/strtoofft.c \
- ../../lib/timeval.c \
- ../../lib/warnless.c
+ ../../lib/warnless.c \
+ ../../lib/curl_ctype.c
 
 CURLX_HDRS = \
  ../../lib/curlx.h \
  ../../lib/nonblock.h \
  ../../lib/strtoofft.h \
- ../../lib/timeval.h \
- ../../lib/warnless.h
+ ../../lib/warnless.h \
+ ../../lib/curl_ctype.h
 
 USEFUL = \
  getpart.c \

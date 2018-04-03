@@ -30,7 +30,8 @@ CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in      \
  CMake/Macros.cmake              \
  CMake/CurlSymbolHiding.cmake CMake/FindCARES.cmake             \
  CMake/FindLibSSH2.cmake CMake/FindNGHTTP2.cmake                \
- CMake/FindMbedTLS.cmake
+ CMake/FindMbedTLS.cmake CMake/cmake_uninstall.cmake.in         \
+ CMake/curl-config.cmake
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist
@@ -95,6 +96,13 @@ VC14_SRCTMPL = projects/Windows/VC14/src/curl.tmpl
 VC14_SRCVCXPROJ = projects/Windows/VC14/src/curl.vcxproj.dist
 VC14_SRCVCXPROJ_DEPS = $(VC14_SRCTMPL) Makefile.am src/Makefile.inc
 
+VC15_LIBTMPL = projects/Windows/VC15/lib/libcurl.tmpl
+VC15_LIBVCXPROJ = projects/Windows/VC15/lib/libcurl.vcxproj.dist
+VC15_LIBVCXPROJ_DEPS = $(VC15_LIBTMPL) Makefile.am lib/Makefile.inc
+VC15_SRCTMPL = projects/Windows/VC15/src/curl.tmpl
+VC15_SRCVCXPROJ = projects/Windows/VC15/src/curl.vcxproj.dist
+VC15_SRCVCXPROJ_DEPS = $(VC15_SRCTMPL) Makefile.am src/Makefile.inc
+
 VC_DIST = projects/README                           \
  projects/build-openssl.bat                         \
  projects/build-wolfssl.bat                         \
@@ -134,6 +142,11 @@ VC_DIST = projects/README                           \
  projects/Windows/VC14/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC14/src/curl.sln                 \
  projects/Windows/VC14/src/curl.vcxproj.filters     \
+ projects/Windows/VC15/curl-all.sln                 \
+ projects/Windows/VC15/lib/libcurl.sln              \
+ projects/Windows/VC15/lib/libcurl.vcxproj.filters  \
+ projects/Windows/VC15/src/curl.sln                 \
+ projects/Windows/VC15/src/curl.vcxproj.filters     \
  projects/generate.bat                              \
  projects/wolfssl_options.h                         \
  projects/wolfssl_override.props
@@ -150,7 +163,7 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ)	\
  $(VC71_LIBVCPROJ) $(VC71_SRCVCPROJ) $(VC8_LIBVCPROJ) $(VC8_SRCVCPROJ)	\
  $(VC9_LIBVCPROJ) $(VC9_SRCVCPROJ) $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ)	\
  $(VC11_LIBVCXPROJ) $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ)	\
- $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ)
+ $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) $(VC15_LIBVCXPROJ) $(VC15_SRCVCXPROJ)
 
 bin_SCRIPTS = curl-config
 
@@ -216,15 +229,6 @@ examples:
 check-docs:
 	@(cd docs/libcurl; $(MAKE) check)
 
-# This is a hook to have 'make clean' also clean up the docs and the tests
-# dir. The extra check for the Makefiles being present is necessary because
-# 'make distcheck' will make clean first in these directories _before_ it runs
-# this hook.
-clean-local:
-	@(if test -f tests/Makefile; then cd tests; $(MAKE) clean; fi)
-	@(if test -f docs/Makefile; then cd docs; $(MAKE) clean; fi)
-
-#
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
 # must contain the following line:
 # %_topdir /home/loic/local/rpm
@@ -276,11 +280,13 @@ cygwinbin:
 install-data-hook:
 	cd include && $(MAKE) install
 	cd docs && $(MAKE) install
+	cd docs/libcurl && $(MAKE) install
 
 # We extend the standard uninstall with a custom hook:
 uninstall-hook:
 	cd include && $(MAKE) uninstall
 	cd docs && $(MAKE) uninstall
+	cd docs/libcurl && $(MAKE) uninstall
 
 ca-bundle: lib/mk-ca-bundle.pl
 	@echo "generating a fresh ca-bundle.crt"
@@ -304,7 +310,8 @@ vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS)	\
  $(VC8_LIBVCPROJ_DEPS) $(VC8_SRCVCPROJ_DEPS) $(VC9_LIBVCPROJ_DEPS)	\
  $(VC9_SRCVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS)	\
  $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS)	\
- $(VC12_SRCVCXPROJ_DEPS) $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS)
+ $(VC12_SRCVCXPROJ_DEPS) $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS)	\
+ $(VC15_LIBVCXPROJ_DEPS) $(VC15_SRCVCXPROJ_DEPS)
 	@(win32_lib_srcs='$(LIB_CFILES)'; \
 	win32_lib_hdrs='$(LIB_HFILES) config-win32.h'; \
 	win32_lib_rc='$(LIB_RCFILES)'; \
@@ -614,4 +621,24 @@ function gen_element(type, dir, file)\
 		-v src_rc="$$win32_src_rc" \
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC14_SRCTMPL) > $(VC14_SRCVCXPROJ) || { exit 1; };)
+		"$$awk_code" $(srcdir)/$(VC14_SRCTMPL) > $(VC14_SRCVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC15_LIBVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
+		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC15_LIBTMPL) > $(VC15_LIBVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC15_SRCVCXPROJ)'"; \
+	awk -v proj_type=vcxproj \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC15_SRCTMPL) > $(VC15_SRCVCXPROJ) || { exit 1; };)

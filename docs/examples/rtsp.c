@@ -63,13 +63,13 @@ static int _getch(void)
 /* error handling macros */
 #define my_curl_easy_setopt(A, B, C)                             \
   res = curl_easy_setopt((A), (B), (C));                         \
-  if(!res)                                                       \
+  if(res != CURLE_OK)                                            \
     fprintf(stderr, "curl_easy_setopt(%s, %s, %s) failed: %d\n", \
             #A, #B, #C, res);
 
 #define my_curl_easy_perform(A)                                     \
   res = curl_easy_perform(A);                                       \
-  if(!res)                                                          \
+  if(res != CURLE_OK)                                               \
     fprintf(stderr, "curl_easy_perform(%s) failed: %d\n", #A, res);
 
 
@@ -129,6 +129,9 @@ static void rtsp_play(CURL *curl, const char *uri, const char *range)
   my_curl_easy_setopt(curl, CURLOPT_RANGE, range);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_PLAY);
   my_curl_easy_perform(curl);
+
+  /* switch off using range again */
+  my_curl_easy_setopt(curl, CURLOPT_RANGE, NULL);
 }
 
 

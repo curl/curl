@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -52,7 +52,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       TidyAttr attr;
       printf("%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
-      for(attr=tidyAttrFirst(child); attr; attr=tidyAttrNext(attr) ) {
+      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
         printf(tidyAttrName(attr));
         tidyAttrValue(attr)?printf("=\"%s\" ",
                                    tidyAttrValue(attr)):printf(" ");
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     tidyBufInit(&docbuf);
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
-    err=curl_easy_perform(curl);
+    err = curl_easy_perform(curl);
     if(!err) {
       err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
       if(err >= 0) {

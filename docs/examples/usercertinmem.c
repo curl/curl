@@ -200,7 +200,7 @@ int main(void)
   /* first try: retrieve page without user certificate and key -> will fail
    */
   rv = curl_easy_perform(ch);
-  if(rv==CURLE_OK) {
+  if(rv == CURLE_OK) {
     printf("*** transfer succeeded ***\n");
   }
   else {
@@ -213,7 +213,7 @@ int main(void)
    */
   rv = curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   rv = curl_easy_perform(ch);
-  if(rv==CURLE_OK) {
+  if(rv == CURLE_OK) {
     printf("*** transfer succeeded ***\n");
   }
   else {

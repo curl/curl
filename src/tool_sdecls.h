@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -135,7 +135,7 @@ typedef enum {
   HTTPREQ_UNSPEC,  /* first in list */
   HTTPREQ_GET,
   HTTPREQ_HEAD,
-  HTTPREQ_FORMPOST,
+  HTTPREQ_MIMEPOST,
   HTTPREQ_SIMPLEPOST
 } HttpReq;
 

@@ -35,12 +35,13 @@ fi
 cat ./docs/THANKS
 
 (
-git log $start..HEAD | \
+git log --use-mailmap $start..HEAD | \
 egrep -ai '(^Author|^Commit|by):' | \
 cut -d: -f2- | \
 cut '-d(' -f1 | \
 cut '-d<' -f1 | \
 tr , '\012' | \
+sed 's/ at github/ on github/' | \
 sed 's/ and /\n/' | \
 sed -e 's/^ //' -e 's/ $//g' -e 's/@users.noreply.github.com$/ on github/'
 

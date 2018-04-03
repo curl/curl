@@ -146,7 +146,7 @@ static char *parse_filename(const char *ptr, size_t len)
   char  stop = '\0';
 
   /* simple implementation of strndup() */
-  copy = malloc(len+1);
+  copy = malloc(len + 1);
   if(!copy)
     return NULL;
   memcpy(copy, ptr, len);
@@ -161,8 +161,13 @@ static char *parse_filename(const char *ptr, size_t len)
   else
     stop = ';';
 
+  /* scan for the end letter and stop there */
+  q = strchr(p, stop);
+  if(q)
+    *q = '\0';
+
   /* if the filename contains a path, only use filename portion */
-  q = strrchr(copy, '/');
+  q = strrchr(p, '/');
   if(q) {
     p = q + 1;
     if(!*p) {
@@ -180,14 +185,6 @@ static char *parse_filename(const char *ptr, size_t len)
     if(!*p) {
       Curl_safefree(copy);
       return NULL;
-    }
-  }
-
-  /* scan for the end letter and stop there */
-  for(q = p; *q; ++q) {
-    if(*q == stop) {
-      *q = '\0';
-      break;
     }
   }
 

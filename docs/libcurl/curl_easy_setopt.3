@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -139,6 +139,10 @@ Callback for wildcard matching. See \fICURLOPT_FNMATCH_FUNCTION(3)\fP
 Data pointer to pass to the wildcard matching callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
 .IP CURLOPT_SUPPRESS_CONNECT_HEADERS
 Suppress proxy CONNECT response headers from user callbacks. See \fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP
+.IP CURLOPT_RESOLVER_START_FUNCTION
+Callback to be called before a new resolve request is started. See \fICURLOPT_RESOLVER_START_FUNCTION(3)\fP
+.IP CURLOPT_RESOLVER_START_DATA
+Data pointer to pass to resolver start callback. See \fICURLOPT_RESOLVER_START_DATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
@@ -181,6 +185,8 @@ Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 Socks5 GSSAPI NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
 .IP CURLOPT_PROXY_SERVICE_NAME
 Proxy authentication service name. \fICURLOPT_PROXY_SERVICE_NAME(3)\fP
+.IP CURLOPT_HAPROXYPROTOCOL
+Send an HAProxy PROXY protocol header. See \fICURLOPT_HAPROXYPROTOCOL(3)\fP
 .IP CURLOPT_SERVICE_NAME
 Authentication service name. \fICURLOPT_SERVICE_NAME(3)\fP
 .IP CURLOPT_INTERFACE
@@ -411,6 +417,8 @@ Size of file to send. \fICURLOPT_INFILESIZE(3)\fP
 Size of file to send. \fICURLOPT_INFILESIZE_LARGE(3)\fP
 .IP CURLOPT_UPLOAD
 Upload data. See \fICURLOPT_UPLOAD(3)\fP
+.IP CURLOPT_MIMEPOST
+Post/send MIME data. See \fICURLOPT_MIMEPOST(3)\fP
 .IP CURLOPT_MAXFILESIZE
 Maximum file size to get. See \fICURLOPT_MAXFILESIZE(3)\fP
 .IP CURLOPT_MAXFILESIZE_LARGE
@@ -419,6 +427,8 @@ Maximum file size to get. See \fICURLOPT_MAXFILESIZE_LARGE(3)\fP
 Make a time conditional request. See \fICURLOPT_TIMECONDITION(3)\fP
 .IP CURLOPT_TIMEVALUE
 Time value for the time conditional request. See \fICURLOPT_TIMEVALUE(3)\fP
+.IP CURLOPT_TIMEVALUE_LARGE
+Time value for the time conditional request. See \fICURLOPT_TIMEVALUE_LARGE(3)\fP
 .SH CONNECTION OPTIONS
 .IP CURLOPT_TIMEOUT
 Timeout for the entire request. See \fICURLOPT_TIMEOUT(3)\fP
@@ -458,8 +468,12 @@ Bind name resolves to this IP4 address. See \fICURLOPT_DNS_LOCAL_IP4(3)\fP
 Bind name resolves to this IP6 address. See \fICURLOPT_DNS_LOCAL_IP6(3)\fP
 .IP CURLOPT_DNS_SERVERS
 Preferred DNS servers. See \fICURLOPT_DNS_SERVERS(3)\fP
+.IP CURLOPT_DNS_SHUFFLE_ADDRESSES
+Shuffle addresses before use. See \fICURLOPT_DNS_SHUFFLE_ADDRESSES(3)\fP
 .IP CURLOPT_ACCEPTTIMEOUT_MS
 Timeout for waiting for the server's connect back to be accepted. See \fICURLOPT_ACCEPTTIMEOUT_MS(3)\fP
+.IP CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
+Timeout for happy eyeballs. See \fICURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)\fP
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Client cert. See \fICURLOPT_SSLCERT(3)\fP
@@ -547,6 +561,8 @@ Disable GSS-API delegation. See \fICURLOPT_GSSAPI_DELEGATION(3)\fP
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES
 SSH authentication types. See \fICURLOPT_SSH_AUTH_TYPES(3)\fP
+.IP CURLOPT_SSH_COMPRESSION
+Enable SSH compression. See \fICURLOPT_SSH_COMPRESSION(3)\fP
 .IP CURLOPT_SSH_HOST_PUBLIC_KEY_MD5
 MD5 of host's public key. See \fICURLOPT_SSH_HOST_PUBLIC_KEY_MD5(3)\fP
 .IP CURLOPT_SSH_PUBLIC_KEYFILE

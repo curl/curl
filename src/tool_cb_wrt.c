@@ -78,7 +78,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OutStruct *outs = userdata;
   struct OperationConfig *config = outs->config;
   size_t bytes = sz * nmemb;
-  bool isatty = config->global->isatty;
+  bool is_tty = config->global->isatty;
 
   /*
    * Once that libcurl has called back tool_write_cb() the returned value
@@ -92,7 +92,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   {
     char *tty = curlx_getenv("CURL_ISATTY");
     if(tty) {
-      isatty = TRUE;
+      is_tty = TRUE;
       curl_free(tty);
     }
   }
@@ -144,7 +144,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   if(!outs->stream && !tool_create_output_file(outs))
     return failure;
 
-  if(isatty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
+  if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
     /* binary output to terminal? */
     if(memchr(buffer, 0, bytes)) {
       warnf(config->global, "Binary output can mess up your terminal. "

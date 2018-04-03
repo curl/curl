@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -114,6 +114,7 @@ struct OperationConfig {
   struct getout *url_last;  /* point to the last/current node */
   struct getout *url_get;   /* point to the node to fill in URL */
   struct getout *url_out;   /* point to the node to fill in outfile */
+  struct getout *url_ul;    /* point to the node to fill in upload */
   char *cipher_list;
   char *proxy_cipher_list;
   char *cert;
@@ -127,6 +128,7 @@ struct OperationConfig {
   char *crlfile;
   char *proxy_crlfile;
   char *pinnedpubkey;
+  char *proxy_pinnedpubkey;
   char *key;
   char *proxy_key;
   char *key_type;
@@ -167,11 +169,11 @@ struct OperationConfig {
   long proxy_ssl_version;
   long ip_version;
   curl_TimeCond timecond;
-  time_t condtime;
+  curl_off_t condtime;
   struct curl_slist *headers;
   struct curl_slist *proxyheaders;
-  struct curl_httppost *httppost;
-  struct curl_httppost *last_post;
+  curl_mime *mimepost;
+  curl_mime *mimecurrent;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
   struct curl_slist *connect_to;
@@ -247,6 +249,10 @@ struct OperationConfig {
                                      from user callbacks */
   curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
                                      error */
+  bool ssh_compression;           /* enable/disable SSH compression */
+  long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
+                                     0 is valid. default: CURL_HET_DEFAULT. */
+  bool haproxy_protocol;          /* whether to send HAProxy PROXY protocol */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */

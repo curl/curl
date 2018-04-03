@@ -8,6 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
+ * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -165,11 +166,7 @@ struct smb_nt_create {
   unsigned int flags;
   unsigned int root_fid;
   unsigned int access;
-#ifdef HAVE_LONGLONG
-  unsigned long long allocation_size;
-#else
-  unsigned __int64 allocation_size;
-#endif
+  curl_off_t allocation_size;
   unsigned int ext_file_attributes;
   unsigned int share_access;
   unsigned int create_disposition;
@@ -187,25 +184,15 @@ struct smb_nt_create_response {
   unsigned char op_lock_level;
   unsigned short fid;
   unsigned int create_disposition;
-#ifdef HAVE_LONGLONG
-  unsigned long long create_time;
-  unsigned long long last_access_time;
-  unsigned long long last_write_time;
-  unsigned long long last_change_time;
-#else
-  unsigned __int64 create_time;
-  unsigned __int64 last_access_time;
-  unsigned __int64 last_write_time;
-  unsigned __int64 last_change_time;
-#endif
+
+  curl_off_t create_time;
+  curl_off_t last_access_time;
+  curl_off_t last_write_time;
+  curl_off_t last_change_time;
   unsigned int ext_file_attributes;
-#ifdef HAVE_LONGLONG
-  unsigned long long allocation_size;
-  unsigned long long end_of_file;
-#else
-  unsigned __int64 allocation_size;
-  unsigned __int64 end_of_file;
-#endif
+  curl_off_t allocation_size;
+  curl_off_t end_of_file;
+
 } PACK;
 
 struct smb_read {

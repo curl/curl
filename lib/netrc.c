@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,14 +56,15 @@ int Curl_parsenetrc(const char *host,
                     char *netrcfile)
 {
   FILE *file;
-  int retcode=1;
+  int retcode = 1;
   int specific_login = (*loginp && **loginp != 0);
   bool netrc_alloc = FALSE;
-  enum host_lookup_state state=NOTHING;
+  enum host_lookup_state state = NOTHING;
 
-  char state_login=0;      /* Found a login keyword */
-  char state_password=0;   /* Found a password keyword */
-  int state_our_login=FALSE;  /* With specific_login, found *our* login name */
+  char state_login = 0;      /* Found a login keyword */
+  char state_password = 0;   /* Found a password keyword */
+  int state_our_login = FALSE;  /* With specific_login, found *our* login
+                                   name */
 
 #define NETRC DOT_CHAR "netrc"
 
@@ -88,7 +89,7 @@ int Curl_parsenetrc(const char *host,
     }
     else {
       struct passwd *pw;
-      pw= getpwuid(geteuid());
+      pw = getpwuid(geteuid());
       if(pw) {
         home = pw->pw_dir;
       }
@@ -113,16 +114,19 @@ int Curl_parsenetrc(const char *host,
   if(file) {
     char *tok;
     char *tok_buf;
-    bool done=FALSE;
+    bool done = FALSE;
     char netrcbuffer[256];
     int  netrcbuffsize = (int)sizeof(netrcbuffer);
 
     while(!done && fgets(netrcbuffer, netrcbuffsize, file)) {
-      tok=strtok_r(netrcbuffer, " \t\n", &tok_buf);
+      tok = strtok_r(netrcbuffer, " \t\n", &tok_buf);
+      if(tok && *tok == '#')
+        /* treat an initial hash as a comment line */
+        continue;
       while(!done && tok) {
 
         if((*loginp && **loginp) && (*passwordp && **passwordp)) {
-          done=TRUE;
+          done = TRUE;
           break;
         }
 
@@ -133,22 +137,22 @@ int Curl_parsenetrc(const char *host,
                delimiter that starts the stuff entered for this machine,
                after this we need to search for 'login' and
                'password'. */
-            state=HOSTFOUND;
+            state = HOSTFOUND;
           }
           else if(strcasecompare("default", tok)) {
-            state=HOSTVALID;
-            retcode=0; /* we did find our host */
+            state = HOSTVALID;
+            retcode = 0; /* we did find our host */
           }
           break;
         case HOSTFOUND:
           if(strcasecompare(host, tok)) {
             /* and yes, this is our host! */
-            state=HOSTVALID;
-            retcode=0; /* we did find our host */
+            state = HOSTVALID;
+            retcode = 0; /* we did find our host */
           }
           else
             /* not our host */
-            state=NOTHING;
+            state = NOTHING;
           break;
         case HOSTVALID:
           /* we are now parsing sub-keywords concerning "our" host */
@@ -164,7 +168,7 @@ int Curl_parsenetrc(const char *host,
                 goto out;
               }
             }
-            state_login=0;
+            state_login = 0;
           }
           else if(state_password) {
             if(state_our_login || !specific_login) {
@@ -175,12 +179,12 @@ int Curl_parsenetrc(const char *host,
                 goto out;
               }
             }
-            state_password=0;
+            state_password = 0;
           }
           else if(strcasecompare("login", tok))
-            state_login=1;
+            state_login = 1;
           else if(strcasecompare("password", tok))
-            state_password=1;
+            state_password = 1;
           else if(strcasecompare("machine", tok)) {
             /* ok, there's machine here go => */
             state = HOSTFOUND;

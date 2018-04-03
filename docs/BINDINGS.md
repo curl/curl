@@ -65,7 +65,7 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [Object-Pascal](http://www.tekool.com/opcurl) Free Pascal, Delphi and Kylix binding written by Christophe Espern.
 
-[OCaml](http://opam.ocaml.org/packages/ocurl/) Written by Lars Nilsson and ygrek
+[OCaml](https://opam.ocaml.org/packages/ocurl/) Written by Lars Nilsson and ygrek
 
 [Pascal](http://houston.quik.com/jkp/curlpas/) Free Pascal, Delphi and Kylix binding written by Jeffrey Pohlmeyer.
 
@@ -75,7 +75,7 @@ Bailiff and Bálint Szilakszi,
 
 [PHP](https://php.net/curl) Originally written by Sterling Hughes
 
-[PostgreSQL](http://gborg.postgresql.org/project/pgcurl/projdisplay.php) Written by Gian Paolo Ciceri
+[PostgreSQL](https://github.com/pramsey/pgsql-http) - HTTP client for PostgreSQL
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
@@ -83,11 +83,11 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxcurl.sourceforge.io/) Written Mark Hessling
 
-[Ring](http://ring-lang.sourceforge.net/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+[Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
-Ruby: [curb](http://curb.rubyforge.org/) written by Ross Bamford, [ruby-curl-multi](http://curl-multi.rubyforge.org/) written by Kristjan Petursson and Keith Rarick
+Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford
 
 [Rust](https://github.com/carllerche/curl-rust) curl-rust - by Carl Lerche
 
@@ -95,11 +95,11 @@ Ruby: [curb](http://curb.rubyforge.org/) written by Ross Bamford, [ruby-curl-mul
 
 [Scilab](https://help.scilab.org/docs/current/fr_FR/getURL.html) binding by Sylvestre Ledru
 
-[S-Lang](http://www.jedsoft.org/slang/modules/curl.html) by John E Davis
+[S-Lang](https://www.jedsoft.org/slang/modules/curl.html) by John E Davis
 
 [Smalltalk](http://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
 
-[SP-Forth](http://spf.cvs.sourceforge.net/viewvc/spf/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
+[SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
 
 [SPL](http://www.clifford.at/spl/) Written by Clifford Wolf
 

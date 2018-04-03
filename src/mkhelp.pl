@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -102,11 +102,9 @@ while(<READ>) {
 }
 close(READ);
 
-$now = localtime;
 print <<HEAD
 /*
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
- * Generation time: $now
  */
 #ifdef USE_MANUAL
 #include "tool_hugehelp.h"

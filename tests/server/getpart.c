@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,6 +65,35 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
+
+
+/*
+ * Curl_convert_clone() returns a malloced copy of the source string (if
+ * returning CURLE_OK), with the data converted to network format. This
+ * function is used by base64 code in libcurl built to support data
+ * conversion. This is a DUMMY VERSION that returns data unmodified - for
+ * use by the test server only.
+ */
+CURLcode Curl_convert_clone(struct Curl_easy *data,
+                            const char *indata,
+                            size_t insize,
+                            char **outbuf);
+CURLcode Curl_convert_clone(struct Curl_easy *data,
+                            const char *indata,
+                            size_t insize,
+                            char **outbuf)
+{
+  char *convbuf;
+  (void)data;
+
+  convbuf = malloc(insize);
+  if(!convbuf)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy(convbuf, indata, insize);
+  *outbuf = convbuf;
+  return CURLE_OK;
+}
 
 /*
  * readline()
@@ -250,11 +279,11 @@ int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
 # define MAX_TAG_LEN 79
-  char couter[MAX_TAG_LEN+1]; /* current outermost section */
-  char cmain[MAX_TAG_LEN+1];  /* current main section */
-  char csub[MAX_TAG_LEN+1];   /* current sub section */
-  char ptag[MAX_TAG_LEN+1];   /* potential tag */
-  char patt[MAX_TAG_LEN+1];   /* potential attributes */
+  char couter[MAX_TAG_LEN + 1]; /* current outermost section */
+  char cmain[MAX_TAG_LEN + 1];  /* current main section */
+  char csub[MAX_TAG_LEN + 1];   /* current sub section */
+  char ptag[MAX_TAG_LEN + 1];   /* potential tag */
+  char patt[MAX_TAG_LEN + 1];   /* potential attributes */
   char *buffer = NULL;
   char *ptr;
   char *end;
@@ -451,4 +480,3 @@ int getpart(char **outbuf, size_t *outlen,
 
   return error;
 }
-

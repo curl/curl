@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -77,6 +77,16 @@ the headers. They may be private or otherwise sensitive to leak.
 
 Use \fICURLOPT_HEADEROPT(3)\fP to make the headers only get sent to where you
 intend them to get sent.
+
+Custom headers are sent in all requests done by the easy handles, which
+implies that if you tell libcurl to follow redirects
+(\fICURLOPT_FOLLOWLOCATION(3)\fP), the same set of custom headers will be sent
+in the subsequent request. Redirects can of course go to other hosts and thus
+those servers will get all the contents of your custom headers too.
+
+Starting in 7.58.0, libcurl will specifically prevent "Authorization:" headers
+from being sent to other hosts than the first used one, unless specifically
+permitted with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

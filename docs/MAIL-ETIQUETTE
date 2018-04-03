@@ -15,6 +15,7 @@ MAIL ETIQUETTE
   1.6 Handling trolls and spam
   1.7 How to unsubscribe
   1.8 I posted, now what?
+  1.9 Your emails are public
 
  2. Sending mail
   2.1 Reply or New Mail
@@ -118,9 +119,9 @@ MAIL ETIQUETTE
   to the page for the particular mailing list you're subscribed to and you enter
   your email address and password and press the unsubscribe button.
 
-  Also, the instructions to unsubscribe are included in the headers of every 
-  mail that is sent out to all curl related mailing lists and there's a footer 
-  in each mail that links to the "admin" page on which you can unsubscribe and 
+  Also, the instructions to unsubscribe are included in the headers of every
+  mail that is sent out to all curl related mailing lists and there's a footer
+  in each mail that links to the "admin" page on which you can unsubscribe and
   change other options.
 
   You NEVER EVER email the mailing list requesting someone else to take you off
@@ -151,7 +152,7 @@ MAIL ETIQUETTE
   or repeat the same steps in their locations.
 
   Failing to include details will only delay responses and make people respond
-  and ask for more details and you will have to send a follow-up email that 
+  and ask for more details and you will have to send a follow-up email that
   includes them.
 
   Expect the responses to primarily help YOU debug the issue, or ask YOU
@@ -161,6 +162,27 @@ MAIL ETIQUETTE
   If you are a repeat offender to the guidelines outlined in this document,
   chances are that people will ignore you at will and your chances to get
   responses in the future will greatly diminish.
+
+  1.9 Your emails are public
+
+  Your email, its contents and all its headers and the details in those
+  headers will be received by every subscriber of the mailing list that you
+  send your email to.
+
+  Your email as sent to a curl mailing list will end up in mail archives, on
+  the curl web site and elsewhere, for others to see and read. Today and in
+  the future. In addition to the archives, the mail is sent out to thousands
+  of individuals. There is no way to undo a sent email.
+
+  When sending emails to a curl mailing list, do not include sensitive
+  information such as user names and passwords; use fake ones, temporary ones
+  or just remove them completely from the mail. Note that this includes base64
+  encoded HTTP Basic auth headers.
+
+  This public nature of the curl mailing lists makes automatically inserted mail
+  footers about mails being "private" or "only meant for the receipient" or
+  similar even more silly than usual. Because they are absolutely not private
+  when sent to a public mailing list.
 
 
 2. Sending mail
@@ -261,4 +283,3 @@ MAIL ETIQUETTE
   Getting the solution posted also helps other users that experience the same
   problem(s). They get to see (possibly in the web archives) that the
   suggested fixes actually has helped at least one person.
-

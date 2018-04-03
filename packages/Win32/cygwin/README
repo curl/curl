@@ -40,7 +40,7 @@ Build Instructions (to recompile from the cygwin source tarball):
 
   (**) LibTool 1.4.2 had a bug related to cygwin's use of ".exe" extensions,
       such that "make install" blew up at curl.exe. See this URL for details:
-         http://mail.gnu.org/pipermail/libtool/2001-September/005549.html
+         https://lists.gnu.org/archive/html/libtool/2001-09/msg00101.html
       The copy of ltmain.sh that is distributed with curl includes this patch.
 
   As of curl 7.9.1, the official source compiles (under Cygwin) and tests

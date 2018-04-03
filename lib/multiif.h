@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,11 +26,14 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 
+void Curl_updatesocket(struct Curl_easy *data);
 void Curl_expire(struct Curl_easy *data, time_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
 void Curl_multi_handlePipeBreak(struct Curl_easy *data);
+void Curl_set_in_callback(struct Curl_easy *data, bool value);
+bool Curl_is_in_callback(struct Curl_easy *easy);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket and connection hashes */
@@ -55,8 +58,6 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
   */
 void Curl_multi_dump(struct Curl_multi *multi);
 #endif
-
-void Curl_multi_process_pending_handles(struct Curl_multi *multi);
 
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);

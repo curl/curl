@@ -131,7 +131,7 @@ static void *fire(void *ptr)
   struct curl_slist *headers;
   struct Tdata *tdata = (struct Tdata*)ptr;
   CURL *curl;
-  int i=0;
+  int i = 0;
 
   curl = curl_easy_init();
   if(!curl) {
@@ -261,7 +261,7 @@ int test(char *URL)
   res = 0;
 
   /* start treads */
-  for(i=1; i<=THREADS; i++) {
+  for(i = 1; i <= THREADS; i++) {
 
     /* set thread data */
     tdata.url   = suburl(URL, i); /* must be curl_free()d */
@@ -349,7 +349,7 @@ int test(char *URL)
   /* try to free share, expect to fail because share is in use*/
   printf("try SHARE_CLEANUP...\n");
   scode = curl_share_cleanup(share);
-  if(scode==CURLSHE_OK) {
+  if(scode == CURLSHE_OK) {
     fprintf(stderr, "curl_share_cleanup succeed but error expected\n");
     share = NULL;
   }
@@ -368,7 +368,7 @@ test_cleanup:
   /* free share */
   printf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
-  if(scode!=CURLSHE_OK)
+  if(scode != CURLSHE_OK)
     fprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
             (int)scode);
 

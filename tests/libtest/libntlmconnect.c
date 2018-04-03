@@ -21,9 +21,7 @@
  ***************************************************************************/
 #include "test.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #include <assert.h>
 
 #include "testutil.h"
@@ -196,7 +194,7 @@ int test(char *url)
       interval.tv_usec = (itimeout%1000)*1000;
     }
     else {
-      interval.tv_sec = TEST_HANG_TIMEOUT/1000+1;
+      interval.tv_sec = TEST_HANG_TIMEOUT/1000 + 1;
       interval.tv_usec = 0;
 
       /* if there's no timeout and we get here on the last handle, we may
@@ -207,7 +205,7 @@ int test(char *url)
       }
     }
 
-    select_test(maxfd+1, &fdread, &fdwrite, &fdexcep, &interval);
+    select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &interval);
 
     abort_on_test_timeout();
   }

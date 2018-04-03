@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,8 +41,18 @@ If the name in the noproxy list has a leading period, it is a domain match
 against the provided host name. This way ".example.com" will switch off proxy
 use for both "www.example.com" as well as for "foo.example.com".
 
+Setting the noproxy string to "" (an empty string) will explicitly enable the
+proxy for all host names, even if there is an environment variable set for it.
+
+Enter IPv6 numerical addresses in the list of host names without enclosing
+brackets:
+
+ "example.com,::1,localhost"
+
 The application does not have to keep the string around after setting this
 option.
+.SH "Environment variables"
+See \fICURLOPT_PROXY(3)\fP
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 
 ###########################################################################
 #
-# Makefile for building libcurl with MSVC 6, 7, 8, 9, 10, 11, 12 and 14
+# Makefile for building libcurl with MSVC 6 through to 15
 #
 # Usage: see usage message below
 #        Should be invoked from winbuild directory
@@ -45,6 +45,11 @@
 
 CFGSET=FALSE
 WINBUILD_DIR=`cd`
+
+# Utilities.
+# If a path is required that contains characters such as space, quote the path.
+MT         = mt.exe
+RC         = rc.exe
 ZIP        = zip.exe
 
 # Allow changing C compiler via environment variable CC (default cl.exe)
@@ -56,11 +61,11 @@ CC = cl.exe
 !IF "$(VC)"=="6"
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /Gm /Zi /D_DEBUG /GZ
-CFLAGS     = /I. /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I../lib /I../include /nologo /W4 /wd4127 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 !ELSE
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
-CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd /W3
-CFLAGS      = /I. /I ../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL /DWIN32_LEAN_AND_MEAN
+CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd
+CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /wd4127 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
 LFLAGS     = /nologo /machine:$(MACHINE)
@@ -68,7 +73,7 @@ LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 
 CFLAGS_PDB = /Zi
-LFLAGS_PDB = /incremental:no /opt:ref,icf
+LFLAGS_PDB = /incremental:no /opt:ref,icf /DEBUG
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
@@ -93,7 +98,7 @@ PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
 PROGRAM_NAME = curl.exe
-CURL_CFLAGS   =  /I../lib /I../include /nologo /W3 /EHsc /DWIN32 /FD /c
+CURL_CFLAGS   =  /I../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c
 CURL_LFLAGS   = /nologo /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
 CURL_RESFLAGS = /i../include
 
@@ -176,12 +181,26 @@ CARES          = static
 CARES_CFLAGS   = /DUSE_ARES /I"$(DEVEL_INCLUDE)/cares"
 !ENDIF
 
+# Depending on how zlib is built the libraries have different names, we 
+# try to handle them all. 
 !IF "$(WITH_ZLIB)"=="dll"
+!IF EXISTS("$(DEVEL_LIB)\zlibwapi.lib")
+ZLIB_LIBS = zlibwapi.lib
+!ELSEIF EXISTS("$(DEVEL_LIB)\zdll.lib")
+ZLIB_LIBS   = zdll.lib
+!ELSE
 ZLIB_LIBS   = zlib.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
+!IF EXISTS("$(DEVEL_LIB)\zlibstat.lib")
+ZLIB_LIBS   = zlibstat.lib
+!ELSEIF EXISTS("$(DEVEL_LIB)\zlib.lib")
+ZLIB_LIBS   = zlib.lib
+!ELSE
 ZLIB_LIBS   = zlib_a.lib
+!ENDIF
 USE_ZLIB    = true
 ZLIB        = static
 !ENDIF
@@ -267,7 +286,7 @@ GEN_PDB = true
 
 
 !IFDEF EMBED_MANIFEST
-MANIFESTTOOL = mt -manifest $(DIRDIST)\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\$(PROGRAM_NAME);1
+MANIFESTTOOL = $(MT) -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
 !ENDIF
 
 # Runtime library configuration
@@ -496,7 +515,7 @@ $(CURL_DIROBJ):
 	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 $(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
-	rc $(RC_FLAGS)
+	$(RC) $(RC_FLAGS)
 
 #
 # curl.exe
@@ -520,7 +539,8 @@ CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
- $(CURL_DIROBJ)\warnless.obj
+ $(CURL_DIROBJ)\warnless.obj \
+ $(CURL_DIROBJ)\curl_ctype.obj
  
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
@@ -537,6 +557,8 @@ $(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
 $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
+$(CURL_DIROBJ)\curl_ctype.obj: ../lib/curl_ctype.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_ctype.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	rc $(CURL_RC_FLAGS)
 

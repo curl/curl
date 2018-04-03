@@ -36,6 +36,20 @@ static void unit_stop(void)
 
 }
 
+/*
+ * Invoke Curl_pgrsTime for TIMER_STARTSINGLE to trigger the behavior that
+ * manages is_t_startransfer_set, but fake the t_startsingle time for purposes
+ * of the test.
+ */
+static void fake_t_startsingle_time(struct Curl_easy *data,
+                                    struct curltime fake_now,
+                                    int seconds_offset)
+{
+  Curl_pgrsTime(data, TIMER_STARTSINGLE);
+  data->progress.t_startsingle.tv_sec = fake_now.tv_sec + seconds_offset;
+  data->progress.t_startsingle.tv_usec = fake_now.tv_usec;
+}
+
 static bool usec_matches_seconds(time_t time_usec, int expected_seconds)
 {
   int time_sec = (int)(time_usec / usec_magnitude);
@@ -46,55 +60,58 @@ static bool usec_matches_seconds(time_t time_usec, int expected_seconds)
   return same;
 }
 
+static void expect_timer_seconds(struct Curl_easy *data, int seconds)
+{
+  char msg[64];
+  snprintf(msg, sizeof(msg), "about %d seconds should have passed", seconds);
+  fail_unless(usec_matches_seconds(data->progress.t_nslookup, seconds), msg);
+  fail_unless(usec_matches_seconds(data->progress.t_connect, seconds), msg);
+  fail_unless(usec_matches_seconds(data->progress.t_appconnect, seconds), msg);
+  fail_unless(usec_matches_seconds(data->progress.t_pretransfer, seconds),
+              msg);
+  fail_unless(usec_matches_seconds(data->progress.t_starttransfer, seconds),
+              msg);
+}
+
+/* Scenario: simulate a redirect. When a redirect occurs, t_nslookup,
+ * t_connect, t_appconnect, t_pretransfer, and t_starttransfer are addative.
+ * E.g., if t_starttransfer took 2 seconds initially and took another 1
+ * second for the redirect request, then the resulting t_starttransfer should
+ * be 3 seconds. */
 UNITTEST_START
   struct Curl_easy data;
-  struct timeval now = Curl_tvnow();
+  struct curltime now = Curl_now();
 
+  data.progress.t_nslookup = 0;
+  data.progress.t_connect = 0;
+  data.progress.t_appconnect = 0;
+  data.progress.t_pretransfer = 0;
   data.progress.t_starttransfer = 0;
   data.progress.t_redirect = 0;
+  data.progress.start.tv_sec = now.tv_sec - 2;
+  data.progress.start.tv_usec = now.tv_usec;
+  fake_t_startsingle_time(&data, now, -2);
 
-  /*
-  * Set the startsingle time to a second ago. This time is used by
-  * Curl_pgrsTime to calculate how much time the events takes.
-  * t_starttransfer should be updated to reflect the difference from this time
-  * when `Curl_pgrsTime is invoked.
-  */
-  data.progress.t_startsingle.tv_sec = now.tv_sec - 1;
-  data.progress.t_startsingle.tv_usec = now.tv_usec;
-
+  Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
+  Curl_pgrsTime(&data, TIMER_CONNECT);
+  Curl_pgrsTime(&data, TIMER_APPCONNECT);
+  Curl_pgrsTime(&data, TIMER_PRETRANSFER);
   Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
-  fail_unless(usec_matches_seconds(data.progress.t_starttransfer, 1),
-              "about 1 second should have passed");
+  expect_timer_seconds(&data, 2);
 
-  /*
-  * Update the startsingle time to a second ago to simulate another second has
-  * passed.
-  * Now t_starttransfer should not be changed, as t_starttransfer has already
-  * occurred and another invocation of `Curl_pgrsTime` for TIMER_STARTTRANSFER
-  * is superfluous.
-  */
-  data.progress.t_startsingle.tv_sec = now.tv_sec - 2;
-  data.progress.t_startsingle.tv_usec = now.tv_usec;
-
-  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
-
-  fail_unless(usec_matches_seconds(data.progress.t_starttransfer, 1),
-              "about 1 second should have passed");
-
-  /*
-  * Simulate what happens after a redirect has occurred.
-  *
-  * Since the value of t_starttransfer is set to the value from the first
-  * request, it should be updated when a transfer occurs such that
-  * t_starttransfer is the starttransfer time of the redirect request.
-  */
-  data.progress.t_startsingle.tv_sec = now.tv_sec - 3;
-  data.progress.t_startsingle.tv_usec = now.tv_usec;
+  /* now simulate the redirect */
   data.progress.t_redirect = data.progress.t_starttransfer + 1;
+  fake_t_startsingle_time(&data, now, -1);
 
+  Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
+  Curl_pgrsTime(&data, TIMER_CONNECT);
+  Curl_pgrsTime(&data, TIMER_APPCONNECT);
+  Curl_pgrsTime(&data, TIMER_PRETRANSFER);
+  /* ensure t_starttransfer is only set on the first invocation by attempting
+   * to set it twice */
+  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
   Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
-  fail_unless(usec_matches_seconds(data.progress.t_starttransfer, 3),
-              "about 3 second should have passed");
+  expect_timer_seconds(&data, 3);
 UNITTEST_STOP

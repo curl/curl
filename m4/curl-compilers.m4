@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -89,7 +89,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     if test -z "$clangver"; then
       if echo $fullclangver | grep "Apple LLVM version " >/dev/null; then
         dnl Starting with XCode 7 / clang 3.7, Apple clang won't tell its upstream version
-        clangver=`3.7`
+        clangver="3.7"
       else
         clangver=`echo $fullclangver | "$SED" 's/.*version \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*/\1/'`
       fi
@@ -903,7 +903,15 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only clang 3.2 or later
           if test "$compiler_num" -ge "302"; then
-            tmp_CFLAGS="$tmp_CFLAGS -Wmissing-variable-declarations"
+            case $host_os in
+            cygwin* | mingw*)
+              dnl skip missing-variable-declarations warnings for cygwin and
+              dnl mingw because the libtool wrapper executable causes them
+              ;;
+            *)
+              tmp_CFLAGS="$tmp_CFLAGS -Wmissing-variable-declarations"
+              ;;
+            esac
           fi
           #
           dnl Only clang 3.6 or later
@@ -914,6 +922,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 3.9 or later
           if test "$compiler_num" -ge "309"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wcomma"
+            # avoid the varargs warning, fixed in 4.0
+            # https://bugs.llvm.org/show_bug.cgi?id=29140
+            if test "$compiler_num" -lt "400"; then
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-varargs"
+            fi
           fi
         fi
         ;;

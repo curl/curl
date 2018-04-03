@@ -22,15 +22,16 @@
 .\"
 .TH CURLOPT_INTERLEAVEDATA 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_INTERLEAVEDATA \- custom pointer to RTSP interleave callback
+CURLOPT_INTERLEAVEDATA \- custom pointer passed to RTSP interleave callback
 .SH SYNOPSIS
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INTERLEAVEDATA, void *pointer);
 .SH DESCRIPTION
 This is the userdata \fIpointer\fP that will be passed to
-\fICURLOPT_INTERLEAVEFUNCTION(3)\fP when interleaved RTP data is
-received.
+\fICURLOPT_INTERLEAVEFUNCTION(3)\fP when interleaved RTP data is received. If
+the interleave function callback is not set, this pointer is not used
+anywhere.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

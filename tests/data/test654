@@ -1,0 +1,109 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP MIME POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib654
+</tool>
+
+ <name>
+HTTP duplicate easy handle with mime data
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/654
+</command>
+<file name="log/file654.txt">
+This is data from a file
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+# Note that the stripping above removes 12 bytes from every occurrence of the
+# boundary string and since 5 of them are in the body contents, we see
+# (5*12) == 60 bytes less
+<protocol>
+POST /654 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 0
+
+POST /654 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: multipart/form-data; boundary=----------------------------
+Expect: 100-continue
+
+20c
+------------------------------
+Content-Disposition: form-data; name="greeting"
+Content-Type: application/X-Greeting
+Content-Transfer-Encoding: base64
+X-Test-Number: 654
+
+aGVsbG8=
+------------------------------
+Content-Disposition: form-data; filename="file654.txt"
+Content-Type: text/plain
+
+This is data from a file
+
+------------------------------
+Content-Disposition: form-data
+
+this is what we post to the silly web server
+
+--------------------------------
+
+0
+
+</protocol>
+</verify>
+</testcase>

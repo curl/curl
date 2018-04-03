@@ -162,7 +162,7 @@ FAQ
   We pronounce curl with an initial k sound. It rhymes with words like girl
   and earl. This is a short WAV file to help you:
 
-     http://media.merriam-webster.com/soundc11/c/curl0001.wav
+     https://media.merriam-webster.com/soundc11/c/curl0001.wav
 
   There are numerous sub-projects and related projects that also use the word
   curl in the project names in various combinations, but you should take
@@ -218,9 +218,9 @@ FAQ
   very well at the side. Curl's output can be piped into another program or
   redirected to another file for the next program to interpret.
 
-  We focus on protocol related issues and improvements. If you wanna do more
+  We focus on protocol related issues and improvements. If you want to do more
   magic with the supported protocols than curl currently does, chances are good
-  we will agree. If you wanna add more protocols, we may very well agree.
+  we will agree. If you want to add more protocols, we may very well agree.
 
   If you want someone else to do all the work while you wait for us to
   implement it for you, that is not a very friendly attitude. We spend a
@@ -366,8 +366,8 @@ FAQ
   Comprehensible explanations of the meaning of such numbers and how to obtain
   them (resp.) are here
 
-  http://www.bis.doc.gov/licensing/exportingbasics.htm
-  http://www.bis.doc.gov/licensing/do_i_needaneccn.html
+  https://www.bis.doc.gov/licensing/exportingbasics.htm
+  https://www.bis.doc.gov/licensing/do_i_needaneccn.html
 
   An incomprehensible description of the two numbers above is here
   http://www.access.gpo.gov/bis/ear/pdf/ccl5-pt2.pdf
@@ -998,7 +998,7 @@ FAQ
   compilers or prior curl versions it may set a time that appears one hour off.
   This happens due to a flaw in how Windows stores and uses file modification
   times and it is not easily worked around. For more details read this:
-  http://www.codeproject.com/datetime/dstbugs.asp
+  https://www.codeproject.com/Articles/1144/Beating-the-Daylight-Savings-Time-bug-and-getting
 
   4.14 Redirects work in browser but not with curl!
 
@@ -1418,7 +1418,7 @@ FAQ
   timed out.
 
   The most flexible way is by writing your own time-out logic and using
-  CURLOPT_PROGRESSFUNCTION (perhaps in combination with other callbacks) and
+  CURLOPT_XFERINFOFUNCTION (perhaps in combination with other callbacks) and
   use that to figure out exactly when the right condition is met when the
   transfer should get stopped.
 

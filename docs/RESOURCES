@@ -7,13 +7,13 @@
 
 This document lists documents and standards used by curl.
 
-  RFC 959  - The FTP protocol
+  RFC 959  - FTP Protocol
 
   RFC 1635 - How to Use Anonymous FTP
 
   RFC 1738 - Uniform Resource Locators
 
-  RFC 1777 - defines the LDAP protocol
+  RFC 1777 - Lightweight Directory Access Protocol (LDAP)
 
   RFC 1808 - Relative Uniform Resource Locators
 
@@ -23,9 +23,9 @@ This document lists documents and standards used by curl.
 
   RFC 1951 - DEFLATE Compressed Data Format Specification
 
-  RFC 1952 - gzip compression format
+  RFC 1952 - GZIP File Format Specification
 
-  RFC 1959 - LDAP URL syntax
+  RFC 1959 - LDAP URL Syntax
 
   RFC 2045-2049 - Everything you need to know about MIME! (needed for form
                   based upload)
@@ -40,11 +40,11 @@ This document lists documents and standards used by curl.
 
   RFC 2183 - The Content-Disposition Header Field
 
-  RFC 2195 - CRAM-MD5 authentication
+  RFC 2195 - CRAM-MD5 Authentication
 
   RFC 2229 - A Dictionary Server Protocol
 
-  RFC 2255 - Newer LDAP URL syntax document.
+  RFC 2255 - Newer LDAP URL Format
 
   RFC 2231 - MIME Parameter Value and Encoded Word Extensions:
              Character Sets, Languages, and Continuations
@@ -70,14 +70,16 @@ This document lists documents and standards used by curl.
 
   RFC 2818 - HTTP Over TLS (TLS is the successor to SSL)
 
-  RFC 2821 - SMTP protocol
+  RFC 2821 - Simple Mail Transfer Protocol (SMTP)
 
   RFC 2964 - Use of HTTP State Management
 
   RFC 2965 - HTTP State Management Mechanism. Cookies. Obsoletes RFC2109
 
-  RFC 3207 - SMTP over TLS
+  RFC 3207 - SMTP Over TLS
 
-  RFC 4616 - PLAIN authentication
+  RFC 4616 - PLAIN Authentication
 
   RFC 4954 - SMTP Authentication
+
+  RFC 7932 - Brotli Compressed Data Format

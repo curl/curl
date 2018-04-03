@@ -13,24 +13,17 @@ config file
 #
 # Server-side
 <reply>
-<data>
-HTTP/1.0 503 Service Unavailable
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake swsclose
-Content-Type: text/html
-Funny-head: yesyes
-
-</data>
 </reply>
 
 #
 # Client-side
 <client>
 <server>
-http
+none
 </server>
 <features>
 idn
+http
 </features>
 <setenv>
 LC_ALL=
@@ -54,17 +47,9 @@ url = "http://invalid-utf8-‚ê.local/page/1034"
 </client>
 
 #
-# Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol>
-GET http://invalid-utf8-‚ê.local/page/1034 HTTP/1.1
-Host: invalid-utf8-‚ê.local
-Accept: */*
-Proxy-Connection: Keep-Alive
-
-</protocol>
+<errorcode>
+3
+</errorcode>
 </verify>
 </testcase>

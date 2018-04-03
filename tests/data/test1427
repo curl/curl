@@ -1,0 +1,29 @@
+<testcase>
+<info>
+<keywords>
+integer overflow
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+too large -m timeout value
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1427 -m 184467440737095510
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>

@@ -222,6 +222,9 @@ subdirectory run following command from mentioned subdirectory:
 In order to build sample program simplessl.c an SSL enabled libcurl is
 required, as well as the OpenSSL libeay32.lib and ssleay32.lib libraries.
 
+In order to build sample program `sslbackend.c`, an SSL enabled libcurl
+is required.
+
 ## Disabling Specific Protocols in Windows builds
 
 The configure utility, unfortunately, is not available for the Windows
@@ -278,8 +281,8 @@ before including any libcurl header. Your program does not need the
 `USE_LWIPSOCK` preprocessor definition which is for libcurl internals only.
 
 Compilation has been verified with [lwIP
-1.4.0](http://download.savannah.gnu.org/releases/lwip/lwip-1.4.0.zip) and
-[contrib-1.4.0](http://download.savannah.gnu.org/releases/lwip/contrib-1.4.0.zip).
+1.4.0](https://download.savannah.gnu.org/releases/lwip/lwip-1.4.0.zip) and
+[contrib-1.4.0](https://download.savannah.gnu.org/releases/lwip/contrib-1.4.0.zip).
 
 This BSD-style lwIP TCP/IP stack support must be considered experimental given
 that it has been verified that lwIP 1.4.0 still needs some polish, and libcurl

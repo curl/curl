@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,6 +67,7 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
+#include "mime.h"
 #include "socks.h"
 #include "smtp.h"
 #include "strtoofft.h"
@@ -231,23 +232,30 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
  */
 static void smtp_get_message(char *buffer, char **outptr)
 {
-  size_t len = 0;
+  size_t len = strlen(buffer);
   char *message = NULL;
 
-  /* Find the start of the message */
-  for(message = buffer + 4; *message == ' ' || *message == '\t'; message++)
-    ;
+  if(len > 4) {
+    /* Find the start of the message */
+    len -= 4;
+    for(message = buffer + 4; *message == ' ' || *message == '\t';
+        message++, len--)
+      ;
 
-  /* Find the end of the message */
-  for(len = strlen(message); len--;)
-    if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-       message[len] != '\t')
-      break;
+    /* Find the end of the message */
+    for(; len--;)
+      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
+         message[len] != '\t')
+        break;
 
-  /* Terminate the message */
-  if(++len) {
-    message[len] = '\0';
+    /* Terminate the message */
+    if(++len) {
+      message[len] = '\0';
+    }
   }
+  else
+    /* junk input => zero length output */
+    message = &buffer[len];
 
   *outptr = message;
 }
@@ -530,8 +538,40 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
     }
   }
 
+  /* Prepare the mime data if some. */
+  if(data->set.mimepost.kind != MIMEKIND_NONE) {
+    /* Use the whole structure as data. */
+    data->set.mimepost.flags &= ~MIME_BODY_ONLY;
+
+    /* Add external headers and mime version. */
+    curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
+    result = Curl_mime_prepare_headers(&data->set.mimepost, NULL,
+                                       NULL, MIMESTRATEGY_MAIL);
+
+    if(!result)
+      if(!Curl_checkheaders(conn, "Mime-Version"))
+        result = Curl_mime_add_header(&data->set.mimepost.curlheaders,
+                                      "Mime-Version: 1.0");
+
+    /* Make sure we will read the entire mime structure. */
+    if(!result)
+      result = Curl_mime_rewind(&data->set.mimepost);
+
+    if(result) {
+      free(from);
+      free(auth);
+      return result;
+    }
+
+    data->state.infilesize = Curl_mime_size(&data->set.mimepost);
+
+    /* Read from mime structure. */
+    data->state.fread_func = (curl_read_callback) Curl_mime_read;
+    data->state.in = (void *) &data->set.mimepost;
+  }
+
   /* Calculate the optional SIZE parameter */
-  if(conn->proto.smtpc.size_supported && conn->data->state.infilesize > 0) {
+  if(conn->proto.smtpc.size_supported && data->state.infilesize > 0) {
     size = aprintf("%" CURL_FORMAT_CURL_OFF_T, data->state.infilesize);
 
     if(!size) {
@@ -1155,11 +1195,15 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
   if(!smtp || !pp->conn)
     return CURLE_OK;
 
+  /* Cleanup our per-request based variables */
+  Curl_safefree(smtp->custom);
+
   if(status) {
     connclose(conn, "SMTP done with bad status"); /* marked for closure */
     result = status;         /* use the already set error code */
   }
-  else if(!data->set.connect_only && data->set.upload && data->set.mail_rcpt) {
+  else if(!data->set.connect_only && data->set.mail_rcpt &&
+          (data->set.upload || data->set.mimepost.kind)) {
     /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
        is "no mail data". RFC-5321, sect. 4.1.1.4.
@@ -1196,7 +1240,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     }
     else {
       /* Successfully sent so adjust the response timeout relative to now */
-      pp->response = Curl_tvnow();
+      pp->response = Curl_now();
 
       free(eob);
     }
@@ -1211,9 +1255,6 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
     */
     result = smtp_block_statemach(conn);
   }
-
-  /* Cleanup our per-request based variables */
-  Curl_safefree(smtp->custom);
 
   /* Clear the transfer mode for the next request */
   smtp->transfer = FTPTRANSFER_BODY;
@@ -1248,8 +1289,13 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
   /* Store the first recipient (or NULL if not specified) */
   smtp->rcpt = data->set.mail_rcpt;
 
+  /* Initial data character is the first character in line: it is implicitly
+     preceded by a virtual CRLF. */
+  smtp->trailing_crlf = TRUE;
+  smtp->eob = 2;
+
   /* Start the first command in the DO phase */
-  if(data->set.upload && data->set.mail_rcpt)
+  if((data->set.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(conn);
   else
