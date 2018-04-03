@@ -1791,6 +1791,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
         AC_MSG_RESULT([no])
     ])
 
+    AC_CHECK_FUNCS( OpenSSL_version_num )
     AC_MSG_CHECKING([for libressl])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
