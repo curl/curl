@@ -523,29 +523,6 @@ CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn, bool proxy)
     CURLcode result = Curl_input_ntlm(conn, proxy, "NTLM");
     if(!result) {
       data->state.authproblem = FALSE;
-#ifdef NTLM_WB_ENABLED
-      if(authp->picked == CURLAUTH_NTLM_WB) {
-        *availp &= ~CURLAUTH_NTLM;
-        authp->avail &= ~CURLAUTH_NTLM;
-        *availp |= CURLAUTH_NTLM_WB;
-        authp->avail |= CURLAUTH_NTLM_WB;
-
-        /* Get the challenge-message which will be passed to
-         * ntlm_auth for generating the type 3 message later */
-        while(*auth && ISSPACE(*auth))
-          auth++;
-        if(checkprefix("NTLM", auth)) {
-          auth += strlen("NTLM");
-          while(*auth && ISSPACE(*auth))
-            auth++;
-            if(*auth) {
-              conn->challenge_header = strdup(auth);
-              if(!conn->challenge_header)
-                return CURLE_OUT_OF_MEMORY;
-          }
-        }
-      }
-#endif
     }
     else {
       infof(data, "Authentication problem. Ignoring this.\n");
