@@ -498,6 +498,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         long retry_numretries;
         long retry_sleep_default;
         long retry_sleep;
+        int retry_resume = 1; /* be optimist */
         char *this_url = NULL;
         int metalink_next_res = 0;
 
@@ -1653,6 +1654,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 }
               }
             } /* if CURLE_OK */
+            else if(result == CURLE_RANGE_ERROR) {
+              /* Retry failed last time, don't retry with resume anymore */
+              retry_resume = 0;
+              retry = RETRY_HTTP;
+            }
             else if(result) {
               long protocol;
 
@@ -1670,6 +1676,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             }
 
             if(retry) {
+              long protocol;
               static const char * const m[]={
                 NULL,
                 "timeout",
@@ -1683,6 +1690,15 @@ static CURLcode operate_do(struct GlobalConfig *global,
                     "%ld retries left.\n",
                     m[retry], retry_sleep/1000L, retry_numretries);
 
+              /* Don't resume uploads */
+              if(uploadfile)
+                retry_resume = 0;
+
+              /* Only try resuming in case we deal with http(s) */
+              curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+              if (!(protocol == CURLPROTO_HTTP || protocol == CURLPROTO_HTTPS))
+                retry_resume = 0;
+
               tool_go_sleep(retry_sleep);
               retry_numretries--;
               if(!config->retry_delay) {
@@ -1690,7 +1706,21 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 if(retry_sleep > RETRY_SLEEP_MAX)
                   retry_sleep = RETRY_SLEEP_MAX;
               }
-              if(outs.bytes && outs.filename && outs.stream) {
+
+              /* If we attempt resume, retry starting from at last byte */
+              if(retry_resume) {
+                if(!global->mute)
+                  fprintf(global->errors, "Continuing at %"
+                                CURL_FORMAT_CURL_OFF_T " bytes\n",
+                                outs.bytes);
+                my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, outs.bytes);
+              }
+              else {
+                /* Clear resume position from potential previous try */
+                my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, 0);
+              }
+
+              if(!retry_resume && outs.bytes && outs.filename && outs.stream) {
                 int rc;
                 /* We have written data to a output file, we truncate file
                  */
