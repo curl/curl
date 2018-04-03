@@ -468,6 +468,95 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/* 
+ * Curl_http_input_auth_init(). Init auth context for output
+ *headers at next request. Uset for negotiate and ntlm auth
+ */
+
+CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn, bool proxy)
+{
+  /*
+   * This resource requires authentication
+   */
+  struct Curl_easy *data = conn->data;
+
+#ifdef USE_SPNEGO
+  struct negotiatedata *negdata = proxy ?
+    &data->state.proxyneg : &data->state.negotiate;
+#endif
+  unsigned long *availp;
+  struct auth *authp;
+
+  if(proxy) {
+    availp = &data->info.proxyauthavail;
+    authp = &data->state.authproxy;
+  }
+  else {
+    availp = &data->info.httpauthavail;
+    authp = &data->state.authhost;
+  }
+
+#ifdef USE_SPNEGO
+  if(authp->picked == CURLAUTH_NEGOTIATE) {
+    if(negdata->state == GSS_AUTHNONE) {
+      /* NULL. init without auth token */
+      CURLcode result = Curl_input_negotiate(conn, proxy, "Negotiate");
+      if(!result) {
+        DEBUGASSERT(!data->req.newurl);
+        data->req.newurl = strdup(data->change.url);
+        if(!data->req.newurl)
+          return CURLE_OUT_OF_MEMORY;
+        data->state.authproblem = FALSE;
+        /* we received a GSS auth token and we dealt with it fine */
+        negdata->state = GSS_AUTHRECV;
+      }
+      else
+        data->state.authproblem = TRUE;
+    }
+  }
+  else
+#endif
+#ifdef USE_NTLM
+  if(authp->picked == CURLAUTH_NTLM ||
+    authp->picked == CURLAUTH_NTLM_WB) {
+    /* NTLM authentication is picked and activated */
+    CURLcode result = Curl_input_ntlm(conn, proxy, "NTLM");
+    if(!result) {
+      data->state.authproblem = FALSE;
+#ifdef NTLM_WB_ENABLED
+      if(authp->picked == CURLAUTH_NTLM_WB) {
+        *availp &= ~CURLAUTH_NTLM;
+        authp->avail &= ~CURLAUTH_NTLM;
+        *availp |= CURLAUTH_NTLM_WB;
+        authp->avail |= CURLAUTH_NTLM_WB;
+
+        /* Get the challenge-message which will be passed to
+         * ntlm_auth for generating the type 3 message later */
+        while(*auth && ISSPACE(*auth))
+          auth++;
+        if(checkprefix("NTLM", auth)) {
+          auth += strlen("NTLM");
+          while(*auth && ISSPACE(*auth))
+            auth++;
+            if(*auth) {
+              conn->challenge_header = strdup(auth);
+              if(!conn->challenge_header)
+                return CURLE_OUT_OF_MEMORY;
+          }
+        }
+      }
+#endif
+    }
+    else {
+      infof(data, "Authentication problem. Ignoring this.\n");
+      data->state.authproblem = TRUE;
+    }
+  }
+#endif
+
+  return CURLE_OK;
+}
+
 /*
  * Curl_http_auth_act() gets called when all HTTP headers have been received
  * and it checks what authentication methods that are available and decides
@@ -505,6 +594,11 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   }
 
   if(pickhost || pickproxy) {
+    if(pickhost)
+      Curl_http_input_auth_init_ctx(conn, false);
+    if(pickproxy)
+      Curl_http_input_auth_init_ctx(conn, true);
+
     /* In case this is GSS auth, the newurl field is already allocated so
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
@@ -572,7 +666,8 @@ output_auth_headers(struct connectdata *conn,
 #endif
 
 #ifdef USE_SPNEGO
-  negdata->state = GSS_AUTHNONE;
+  if(negdata->state != GSS_AUTHCOMPLETE)
+    negdata->state = GSS_AUTHNONE;
   if((authstatus->picked == CURLAUTH_NEGOTIATE) &&
      negdata->context && !GSS_ERROR(negdata->status)) {
     auth = "Negotiate";
@@ -3467,6 +3562,20 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           nc = 0;
         }
       }
+
+#ifdef USE_SPNEGO
+      /* set state GSS_AUTHCOMPLETE for connection when
+       * picked auth is Negotiate and
+       * connection is no closed and
+       * http result code less 400 (is correct) */
+      if(k->httpcode < 400 &&
+         !conn->bits.close) {
+        if(data->state.authproxy.picked & CURLAUTH_NEGOTIATE)
+          data->state.proxyneg.state = GSS_AUTHCOMPLETE;
+        if(data->state.authhost.picked & CURLAUTH_NEGOTIATE)
+          data->state.negotiate.state = GSS_AUTHCOMPLETE;
+      }
+#endif
 
       if(nc) {
         data->info.httpcode = k->httpcode;

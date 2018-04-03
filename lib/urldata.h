@@ -341,7 +341,7 @@ struct ntlmdata {
 struct negotiatedata {
   /* When doing Negotiate (SPNEGO) auth, we first need to send a token
      and then validate the received one. */
-  enum { GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT } state;
+  enum { GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT, GSS_AUTHCOMPLETE } state;
 #ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;

@@ -4548,6 +4548,18 @@ static CURLcode create_conn(struct Curl_easy *data,
       data->state.authproxy.done = FALSE;
     }
 #endif
+#if defined(USE_SPNEGO)
+    /* If Negotiate is requested in a part of this connection,
+     * clear negotiate contexts for new auth requests */
+    if(((data->state.authhost.picked & CURLAUTH_NEGOTIATE) &&
+        data->state.negotiate.state == GSS_AUTHCOMPLETE) ||
+       ((data->state.authproxy.picked & CURLAUTH_NEGOTIATE) &&
+        data->state.proxyneg.state == GSS_AUTHCOMPLETE)) {
+      data->state.negotiate.state = GSS_AUTHNONE;
+      data->state.proxyneg.state = GSS_AUTHNONE;
+      Curl_cleanup_negotiate(data);
+    }
+#endif
   }
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */

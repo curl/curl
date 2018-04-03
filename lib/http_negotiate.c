@@ -34,6 +34,51 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+static CURLcode create_negotiate_ctx(struct connectdata *conn, bool proxy)
+{
+  CURLcode result;
+  struct Curl_easy *data = conn->data;
+  size_t len;
+
+  /* Point to the username, password, service and host */
+  const char *userp;
+  const char *passwdp;
+  const char *service;
+  const char *host;
+
+  /* Point to the correct struct with this */
+  struct negotiatedata *neg_ctx;
+
+  if(proxy) {
+    userp = conn->http_proxy.user;
+    passwdp = conn->http_proxy.passwd;
+    service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
+              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+    host = conn->http_proxy.host.name;
+    neg_ctx = &data->state.proxyneg;
+  }
+  else {
+    userp = conn->user;
+    passwdp = conn->passwd;
+    service = data->set.str[STRING_SERVICE_NAME] ?
+              data->set.str[STRING_SERVICE_NAME] : "HTTP";
+    host = conn->host.name;
+    neg_ctx = &data->state.negotiate;
+  }
+
+  /* Not set means empty */
+  if(!userp)
+    userp = "";
+
+  if(!passwdp)
+    passwdp = "";
+
+  result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
+                                           host, NULL, neg_ctx);
+
+  return result;
+}
+
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
                               const char *header)
 {
@@ -99,6 +144,19 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   return result;
 }
 
+static bool can_reuse_negotiate(struct connectdata *conn, bool proxy)
+{
+  /* connection can be reused if last auth is complete */
+
+  struct negotiatedata *neg_ctx = proxy ? &conn->data->state.proxyneg :
+    &conn->data->state.negotiate;
+
+  if(neg_ctx->state == GSS_AUTHCOMPLETE)
+    return true;
+
+  return false;
+}
+
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
 {
   struct negotiatedata *neg_ctx = proxy ? &conn->data->state.proxyneg :
@@ -107,6 +165,12 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   size_t len = 0;
   char *userp;
   CURLcode result;
+
+  if(can_reuse_negotiate(conn, proxy)) {
+    CURLcode res = create_negotiate_ctx(conn, proxy);
+    if(res)
+      return res;
+  }
 
   result = Curl_auth_create_spnego_message(conn->data, neg_ctx, &base64, &len);
   if(result)

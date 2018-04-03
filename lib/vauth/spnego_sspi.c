@@ -103,7 +103,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   (void) data;
 #endif
 
-  if(nego->context && nego->status == SEC_E_OK) {
+  if(nego->context && nego->status == SEC_E_OK
+    && nego->state != GSS_AUTHCOMPLETE) {
     /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
