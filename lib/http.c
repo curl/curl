@@ -475,15 +475,16 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
 
 CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn, bool proxy)
 {
-#if defined(USE_SPNEGO) || defined(USE_NTLM)
+  /*
+   * This resource requires authentication
+   */
   struct Curl_easy *data = conn->data;
-
-  struct auth *authp;
 
 #ifdef USE_SPNEGO
   struct negotiatedata *negdata = proxy ?
-      &data->state.proxyneg : &data->state.negotiate;
+    &data->state.proxyneg : &data->state.negotiate;
 #endif
+  struct auth *authp;
 
   if(proxy) {
     authp = &data->state.authproxy;
@@ -491,7 +492,7 @@ CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn, bool proxy)
   else {
     authp = &data->state.authhost;
   }
-#endif
+
 #ifdef USE_SPNEGO
   if(authp->picked == CURLAUTH_NEGOTIATE) {
     if(negdata->state == GSS_AUTHNONE) {
