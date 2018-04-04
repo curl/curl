@@ -270,3 +270,6 @@ $(MODE):
 copy_from_lib:
 	echo copying .c...
 	FOR %%i IN ($(CURLX_CFILES:/=\)) DO copy %%i ..\src\
+
+clean:
+	$(MAKE) /NOLOGO /F MakefileBuild.vc $@

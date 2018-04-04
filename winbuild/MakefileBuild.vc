@@ -426,17 +426,7 @@ CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
 #######################
 # Only the clean target can be used if a config was not provided.
 #
-!IF "$(CFGSET)" == "FALSE"
-clean:
-	@-erase /s *.dll 2> NUL
-	@-erase /s *.exp 2> NUL
-	@-erase /s *.idb 2> NUL
-	@-erase /s *.lib 2> NUL
-	@-erase /s *.obj 2> NUL
-	@-erase /s *.pch 2> NUL
-	@-erase /s *.pdb 2> NUL
-	@-erase /s *.res 2> NUL
-!ELSE
+!IF "$(CFGSET)" != "FALSE"
 # A mode was provided, so the library can be built.
 #
 !include CURL_OBJS.inc
@@ -563,3 +553,17 @@ $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	rc $(CURL_RC_FLAGS)
 
 !ENDIF  # End of case where a config was provided.
+
+clean:
+	@-erase /s *.dll 2> NUL
+	@-erase /s *.exp 2> NUL
+	@-erase /s *.idb 2> NUL
+	@-erase /s *.lib 2> NUL
+	@-erase /s *.obj 2> NUL
+	@-erase /s *.pch 2> NUL
+	@-erase /s *.pdb 2> NUL
+	@-erase /s *.res 2> NUL
+	@if exist $(LIB_DIROBJ) rd /s/q $(LIB_DIROBJ)
+	@if exist $(CURL_DIROBJ)rd /s/q $(CURL_DIROBJ)
+	@if exist $(DIRDIST) rd /s/q $(DIRDIST)
+
