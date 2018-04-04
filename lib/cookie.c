@@ -246,26 +246,23 @@ pathmatched:
 static const char *get_top_domain(const char * const domain, size_t *outlen)
 {
   size_t len;
-  const char *first, *last;
+  const char *first = NULL, *last;
 
   if(!domain)
     return NULL;
 
   len = strlen(domain);
-  first = memchr(domain, '.', len);
   last = memrchr(domain, '.', len);
+  if(last) {
+    first = memrchr(domain, '.', (size_t) (last - domain));
+    if(first)
+      len -= (size_t) (++first - domain);
+  }
 
   if(outlen)
     *outlen = len;
 
-  if(first == last)
-    return domain;
-
-  first = memrchr(domain, '.', (size_t)(last - domain - 1));
-  if(outlen)
-    *outlen = len - (size_t)(first - domain) - 1;
-
-  return first + 1;
+  return first? first: domain;
 }
 
 /*
