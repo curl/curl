@@ -38,7 +38,6 @@ static CURLcode create_negotiate_ctx(struct connectdata *conn, bool proxy)
 {
   CURLcode result;
   struct Curl_easy *data = conn->data;
-  size_t len;
 
   /* Point to the username, password, service and host */
   const char *userp;
