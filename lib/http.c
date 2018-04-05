@@ -473,7 +473,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
  *headers at next request. Uset for negotiate and ntlm auth
  */
 
-CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn, bool proxy)
+static CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn, bool proxy)
 {
   /*
    * This resource requires authentication
