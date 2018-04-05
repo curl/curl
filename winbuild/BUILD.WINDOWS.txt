@@ -12,7 +12,7 @@ Building with Visual C++, prerequisites
 
    The latest Platform SDK can be downloaded freely from:
 
-    https://developer.microsoft.com/nl-nl/windows/downloads/sdk-archive
+    https://msdn.microsoft.com/en-us/windows/bb980924
 
    If you are building with VC6 then you will also need the February 2003
    Edition of the Platform SDK which can be downloaded from:
@@ -49,23 +49,11 @@ Open a Visual Studio Command prompt or the SDK CMD shell.
     Using the CMD Shell:
      choose the right environment via the setenv command (see setenv /?)
      for the full list of options. setenv /xp /x86 /release for example.
-     See also:
-     https://msdn.microsoft.com/en-us/library/ff660764(v=vs.100).aspx.
-     Recent versions of the Windows SDK no longer contains a compiler
-     (cl.exe), but only header files and libraries. You need to install 
-     a (free) version of Visual Studio to get a compiler.
 
     Using the Visual Studio command prompt Shell:
+     Everything is already pre-configured by calling one of the command
+     prompt.
 
-     Using the 'Developer Command Prompt for VS <version>' menu entry:
-       where version is the Visual Studio version. See also: 
-       https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs
-
-     Using the 'VS <version> <platform> <type> Command Prompt' menu entry:
-       where version is the Visual Studio version, platform is e.g. x64
-       and type Native of Cross platform build. See also:
-       https://msdn.microsoft.com/en-us/library/f2ccy3wt.aspx
-  
 Once you are in the console, go to the winbuild directory in the Curl
 sources:
     cd curl-src\winbuild
