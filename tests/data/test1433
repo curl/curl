@@ -34,28 +34,13 @@ http
 HTTP GET with 100-digit subversion number in response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1433  --write-out '%{response_code}'
+http://%HOSTIP:%HTTPPORT/1433
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout nonewline="yes">
-HTTP/1.0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: "21025-dc7-39462498"
-Accept-Ranges: bytes
-Content-Length: 6
-Connection: close
-Content-Type: text/html
-Funny-head: yesyes
-
--foo-
-200
-</stdout>
 <strip>
 ^User-Agent:.*
 </strip>
@@ -65,5 +50,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<errorcode>
+1
+</errorcode>
 </verify>
 </testcase>

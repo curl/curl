@@ -1,6 +1,6 @@
 Long: mail-rcpt
 Arg: <address>
-Help: Mail from this address
+Help: Mail to this address
 Protocols: SMTP
 Added: 7.20.0
 ---

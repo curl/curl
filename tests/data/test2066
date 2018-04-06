@@ -1,0 +1,84 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Digest auth
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="2053604145", algorithm="SHA-512-256", userhash=true
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets a
+# Authorization: Digest line passed-in from the client
+<data1000>
+HTTP/1.1 401 Still a bad password you moron
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+
+This is not the real page either
+</data1000>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="testrealm", nonce="2053604145", algorithm="SHA-512-256", userhash=true
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+HTTP/1.1 401 Still a bad password you moron
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+
+This is not the real page either
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+</features>
+ <name>
+HTTP with RFC7616 Digest authorization with bad password, SHA-512-256 and userhash=true
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/2066 -u testuser:test2pass --digest
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2066 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /2066 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="75af8a3500f771e58a52093a25e7905d6e428a511285c12ea1420c73078dfd61", realm="testrealm", nonce="2053604145", uri="/2066", response="a2e2ae589f575fb132991d6f550ef14bf7ef697d2fef1242d2498f07eafc77dc", algorithm="SHA-512-256", userhash=true
+User-Agent: curl/7.10.5 (i686-pc-linux-gnu) libcurl/7.10.5 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

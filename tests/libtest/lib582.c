@@ -228,7 +228,6 @@ int test(char *URL)
   CURL *curl = NULL;
   FILE *hd_src = NULL;
   int hd;
-  int error;
   struct_stat file_info;
   CURLM *m = NULL;
   struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
@@ -244,9 +243,8 @@ int test(char *URL)
 
   hd_src = fopen(libtest_arg2, "rb");
   if(NULL == hd_src) {
-    error = ERRNO;
     fprintf(stderr, "fopen() failed with error: %d (%s)\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "Error opening file: (%s)\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
@@ -255,9 +253,8 @@ int test(char *URL)
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
-    error = ERRNO;
     fprintf(stderr, "fstat() failed with error: %d (%s)\n",
-            error, strerror(error));
+            errno, strerror(errno));
     fprintf(stderr, "ERROR: cannot open file (%s)\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;
@@ -287,6 +284,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_USERPWD, libtest_arg3);
   easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, "curl_client_key.pub");
   easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, "curl_client_key");
+  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 

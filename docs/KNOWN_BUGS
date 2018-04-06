@@ -18,7 +18,6 @@ problems may have been fixed or changed somewhat since this was written!
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
  1.6 Unnecessary close when 401 received waiting for 100
- 1.8 DNS timing is wrong for HTTP redirects
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
@@ -83,6 +82,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.1 Curl leaks .onion hostnames in DNS
  11.2 error buffer not set if connection to multiple addresses fails
  11.3 c-ares deviates from stock resolver on http://1346569778
+ 11.4 HTTP test server 'connection-monitor' problems
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -90,6 +90,8 @@ problems may have been fixed or changed somewhat since this was written!
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
 
+ 14 DICT
+ 14.1 DICT responses show the underlying protocol
 
 ==============================================================================
 
@@ -139,12 +141,6 @@ problems may have been fixed or changed somewhat since this was written!
  libcurl closes the connection if an HTTP 401 reply is received while it is
  waiting for the the 100-continue response.
  https://curl.haxx.se/mail/lib-2008-08/0462.html
-
-1.8 DNS timing is wrong for HTTP redirects
-
- When extracting timing information after HTTP redirects, only the last
- transfer's results are returned and not the totals:
- https://github.com/curl/curl/issues/522
 
 1.9 HTTP/2 frames while in the connection pool kill reuse
 
@@ -322,7 +318,6 @@ problems may have been fixed or changed somewhat since this was written!
  The cmake build setup lacks several features that the autoconf build
  offers. This includes:
 
-  - symbol hiding when the shared library is built
   - use of correct soname for the shared library build
   - support for several TLS backends are missing
   - the unit tests cause link failures in regular non-static builds
@@ -380,7 +375,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
  library header files exporting symbols/macros that should be kept private to
- the KfW library. See ticket #5601 at http://krbdev.mit.edu/rt/
+ the KfW library. See ticket #5601 at https://krbdev.mit.edu/rt/
 
 6.3 NTLM in system context uses wrong name
 
@@ -559,6 +554,13 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/893
 
+11.4 HTTP test server 'connection-monitor' problems
+
+ The 'connection-monitor' feature of the sws HTTP test server doesn't work
+ properly if some tests are run in unexpected order. Like 1509 and then 1525.
+
+ See https://github.com/curl/curl/issues/868
+
 
 12. LDAP and OpenLDAP
 
@@ -591,3 +593,12 @@ problems may have been fixed or changed somewhat since this was written!
  locally scoped address as that is bound to fail.
 
  https://github.com/curl/curl/issues/686
+
+14. DICT
+
+14.1 DICT responses show the underlying protocol
+
+ When getting a DICT response, the protocol parts of DICT aren't stripped off
+ from the output.
+
+ https://github.com/curl/curl/issues/1809

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -94,10 +94,11 @@ char Curl_raw_toupper(char in)
 }
 
 /*
- * Curl_raw_equal() is for doing "raw" case insensitive strings. This is meant
- * to be locale independent and only compare strings we know are safe for
- * this.  See https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for
- * some further explanation to why this function is necessary.
+ * Curl_strcasecompare() is for doing "raw" case insensitive strings. This is
+ * meant to be locale independent and only compare strings we know are safe
+ * for this.  See
+ * https://daniel.haxx.se/blog/2008/10/15/strcasecmp-in-turkish/ for some
+ * further explanation to why this function is necessary.
  *
  * The function is capable of comparing a-z case insensitively even for
  * non-ascii.

@@ -1,0 +1,93 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+MIME
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib653
+</tool>
+
+ <name>
+Reuse of handle after altering mime data
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/653
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+# Note that the stripping above removes 12 bytes from every occurrence of the
+# boundary string and since 5 of them are in the body contents, we see
+# (5*12) == 60 bytes less
+<protocol>
+POST /653 HTTP/1.1
+Host: 127.0.0.1:8990
+Accept: */*
+Content-Length: 150
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data; name="name"
+
+short value
+--------------------------------
+POST /653 HTTP/1.1
+Host: 127.0.0.1:8990
+Accept: */*
+Content-Length: 167
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data; name="name"
+
+long value for length change
+--------------------------------
+</protocol>
+</verify>
+</testcase>

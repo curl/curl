@@ -26,13 +26,19 @@
 
 #if defined(USE_NTLM)
 
+/* If NSS is the first available SSL backend (see order in curl_ntlm_core.c)
+   then it must be initialized to be used by NTLM. */
+#if !defined(USE_OPENSSL) && \
+    !defined(USE_GNUTLS_NETTLE) && \
+    !defined(USE_GNUTLS) && \
+    defined(USE_NSS)
+#define NTLM_NEEDS_NSS_INIT
+#endif
+
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
 #ifdef USE_OPENSSL
-#  if !defined(OPENSSL_VERSION_NUMBER) && \
-      !defined(HEADER_SSL_H) && !defined(HEADER_MD5_H)
-#    error "curl_ntlm_core.h shall not be included before OpenSSL headers."
-#  endif
+#  include <openssl/ssl.h>
 #endif
 
 /* Define USE_NTRESPONSES in order to make the type-3 message include

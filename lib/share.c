@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -102,6 +102,8 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:     /* not supported (yet) */
+      if(Curl_conncache_init(&share->conn_cache, 103))
+        res = CURLSHE_NOMEM;
       break;
 
     default:
@@ -186,6 +188,8 @@ curl_share_cleanup(struct Curl_share *share)
     return CURLSHE_IN_USE;
   }
 
+  Curl_conncache_close_all_connections(&share->conn_cache);
+  Curl_conncache_destroy(&share->conn_cache);
   Curl_hash_destroy(&share->hostcache);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)

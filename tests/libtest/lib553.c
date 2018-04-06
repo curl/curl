@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,7 @@
 
 static size_t myreadfunc(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  static size_t total=POSTLEN;
+  static size_t total = POSTLEN;
   static char buf[1024];
   (void)stream;
 
@@ -60,7 +60,7 @@ int test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_FAILED_INIT;
   int i;
-  struct curl_slist *headerlist=NULL, *hl;
+  struct curl_slist *headerlist = NULL, *hl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -77,7 +77,7 @@ int test(char *URL)
   for(i = 0; i < NUM_HEADERS; i++) {
     int len = snprintf(buf, sizeof(buf), "Header%d: ", i);
     memset(&buf[len], 'A', SIZE_HEADERS);
-    buf[len + SIZE_HEADERS]=0; /* zero terminate */
+    buf[len + SIZE_HEADERS] = 0; /* zero terminate */
     hl = curl_slist_append(headerlist,  buf);
     if(!hl)
       goto test_cleanup;

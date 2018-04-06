@@ -300,10 +300,10 @@ Curl_hash_next_element(struct curl_hash_iterator *iter)
 
   /* If we have reached the end of the list, find the next one */
   if(!iter->current_element) {
-    for(i = iter->slot_index;i < h->slots;i++) {
+    for(i = iter->slot_index; i < h->slots; i++) {
       if(h->table[i].head) {
         iter->current_element = h->table[i].head;
-        iter->slot_index = i+1;
+        iter->slot_index = i + 1;
         break;
       }
     }

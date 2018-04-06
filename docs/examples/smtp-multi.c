@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,8 +44,8 @@
 static const char *payload_text[] = {
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
   "To: " TO "\r\n",
-  "From: " FROM "(Example User)\r\n",
-  "Cc: " CC "(Another example User)\r\n",
+  "From: " FROM " (Example User)\r\n",
+  "Cc: " CC " (Another example User)\r\n",
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
   "rfcpedant.example.org>\r\n",
   "Subject: SMTP multi example message\r\n",
@@ -211,7 +211,7 @@ int main(void)
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
     if(tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {

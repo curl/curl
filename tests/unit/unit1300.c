@@ -145,7 +145,7 @@ UNITTEST_START
    * 3: "new" head's previous will be NULL
    */
 
-  head=llist.head;
+  head = llist.head;
   abort_unless(head, "llist.head is NULL");
   element_next = head->next;
   llist_size = Curl_llist_count(&llist);

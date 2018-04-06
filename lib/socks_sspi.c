@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -108,7 +108,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     if(!service_name)
       return CURLE_OUT_OF_MEMORY;
     snprintf(service_name, service_length +
-             strlen(conn->socks_proxy.host.name)+2, "%s/%s",
+             strlen(conn->socks_proxy.host.name) + 2, "%s/%s",
              service, conn->socks_proxy.host.name);
   }
 
@@ -199,7 +199,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       socksreq[0] = 1;    /* GSS-API subnegotiation version */
       socksreq[1] = 1;    /* authentication message type */
       us_length = htons((short)sspi_send_token.cbBuffer);
-      memcpy(socksreq+2, &us_length, sizeof(short));
+      memcpy(socksreq + 2, &us_length, sizeof(short));
 
       code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
       if(code || (4 != written)) {
@@ -283,7 +283,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
       return CURLE_COULDNT_CONNECT;
     }
 
-    memcpy(&us_length, socksreq+2, sizeof(short));
+    memcpy(&us_length, socksreq + 2, sizeof(short));
     us_length = ntohs(us_length);
 
     sspi_recv_token.cbBuffer = us_length;
@@ -341,7 +341,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     gss_enc = 1;
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.\n",
-        (gss_enc==0)?"no":((gss_enc==1)?"integrity":"confidentiality") );
+        (gss_enc == 0)?"no":((gss_enc == 1)?"integrity":"confidentiality") );
   /* force to no data protection, avoid encryption/decryption for now */
   gss_enc = 0;
   /*
@@ -377,7 +377,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
   if(data->set.socks5_gssapi_nec) {
     us_length = htons((short)1);
-    memcpy(socksreq+2, &us_length, sizeof(short));
+    memcpy(socksreq + 2, &us_length, sizeof(short));
   }
   else {
     status = s_pSecFn->QueryContextAttributes(&sspi_context,
@@ -445,8 +445,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy((PUCHAR) sspi_send_token.pvBuffer +(int)sspi_w_token[0].cbBuffer,
            sspi_w_token[1].pvBuffer, sspi_w_token[1].cbBuffer);
     memcpy((PUCHAR) sspi_send_token.pvBuffer
-           +sspi_w_token[0].cbBuffer
-           +sspi_w_token[1].cbBuffer,
+           + sspi_w_token[0].cbBuffer
+           + sspi_w_token[1].cbBuffer,
            sspi_w_token[2].pvBuffer, sspi_w_token[2].cbBuffer);
 
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
@@ -460,7 +460,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     sspi_w_token[2].cbBuffer = 0;
 
     us_length = htons((short)sspi_send_token.cbBuffer);
-    memcpy(socksreq+2, &us_length, sizeof(short));
+    memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
   code = Curl_write_plain(conn, sock, (char *)socksreq, 4, &written);
@@ -517,7 +517,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     return CURLE_COULDNT_CONNECT;
   }
 
-  memcpy(&us_length, socksreq+2, sizeof(short));
+  memcpy(&us_length, socksreq + 2, sizeof(short));
   us_length = ntohs(us_length);
 
   sspi_w_token[0].cbBuffer = us_length;
@@ -588,8 +588,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
   }
 
   infof(data, "SOCKS5 access with%s protection granted.\n",
-        (socksreq[0]==0)?"out GSS-API data":
-        ((socksreq[0]==1)?" GSS-API integrity":" GSS-API confidentiality"));
+        (socksreq[0] == 0)?"out GSS-API data":
+        ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality"));
 
   /* For later use if encryption is required
      conn->socks5_gssapi_enctype = socksreq[0];

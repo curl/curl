@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013-2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013-2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -114,7 +114,7 @@ int Curl_polarsslthreadlock_lock_function(int n)
   }
 #elif defined(HAVE_PROCESS_H)
   if(n < NUMT) {
-    ret = (WaitForSingleObject(mutex_buf[n], INFINITE)==WAIT_FAILED?1:0);
+    ret = (WaitForSingleObject(mutex_buf[n], INFINITE) == WAIT_FAILED?1:0);
     if(ret) {
       DEBUGF(fprintf(stderr,
                      "Error: polarsslthreadlock_lock_function failed\n"));

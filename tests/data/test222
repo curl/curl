@@ -188,11 +188,14 @@ http://%HOSTIP:%HTTPPORT/222 --compressed
 <strip>
 ^User-Agent:.*
 </strip>
+<strippart>
+s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+</strippart>
 <protocol>
 GET /222 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Accept-Encoding: deflate, gzip
+Accept-Encoding: xxx
 
 </protocol>
 </verify>

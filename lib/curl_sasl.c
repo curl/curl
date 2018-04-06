@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -331,7 +331,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_NTLM;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
+        result = Curl_auth_create_ntlm_type1_message(data,
+													 conn->user, conn->passwd,
 													 service,
 													 hostname,
 													 &conn->ntlm, &resp, &len);
@@ -362,15 +363,6 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
                                                        conn->oauth_bearer,
                                                        &resp, &len);
     }
-    else if(enabledmechs & SASL_MECH_LOGIN) {
-      mech = SASL_MECH_STRING_LOGIN;
-      state1 = SASL_LOGIN;
-      state2 = SASL_LOGIN_PASSWD;
-      sasl->authused = SASL_MECH_LOGIN;
-
-      if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
-    }
     else if(enabledmechs & SASL_MECH_PLAIN) {
       mech = SASL_MECH_STRING_PLAIN;
       state1 = SASL_PLAIN;
@@ -379,6 +371,15 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_plain_message(data, conn->user, conn->passwd,
                                                 &resp, &len);
+    }
+    else if(enabledmechs & SASL_MECH_LOGIN) {
+      mech = SASL_MECH_STRING_LOGIN;
+      state1 = SASL_LOGIN;
+      state2 = SASL_LOGIN_PASSWD;
+      sasl->authused = SASL_MECH_LOGIN;
+
+      if(force_ir || data->set.sasl_ir)
+        result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
     }
   }
 
@@ -493,7 +494,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 #ifdef USE_NTLM
   case SASL_NTLM:
     /* Create the type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
+    result = Curl_auth_create_ntlm_type1_message(data,
+												 conn->user, conn->passwd,
 												 service, hostname,
                                                  &conn->ntlm, &resp, &len);
     newstate = SASL_NTLM_TYPE2MSG;

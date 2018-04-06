@@ -1,0 +1,51 @@
+# This test case is primarily meant to verify that parsing and adding the 100K
+# files is a swift operation.
+#
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+Attempt to upload 100K files but fail immediately
+</name>
+<command>
+-K log/cmd1291 --fail-early
+</command>
+<file name="log/upload-this">
+XXXXXXXx
+</file>
+# generate the config file
+<precheck>
+perl -e 'for(1 .. 100000) { printf("upload-file=log/upload-this\nurl=htttttp://non-existing-host.haxx.se/upload/1291\n", $_);}' > log/cmd1291;
+</precheck>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+1
+</errorcode>
+
+# we disable valgrind here since it takes 40+ seconds even on a fairly snappy
+# machine
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -84,14 +84,14 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   char *testing_ptr = NULL;
   unsigned char in; /* we need to treat the characters unsigned */
   size_t newlen;
-  size_t strindex=0;
+  size_t strindex = 0;
   size_t length;
   CURLcode result;
 
   if(inlength < 0)
     return NULL;
 
-  alloc = (inlength?(size_t)inlength:strlen(string))+1;
+  alloc = (inlength?(size_t)inlength:strlen(string)) + 1;
   newlen = alloc;
 
   ns = malloc(alloc);
@@ -104,7 +104,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
 
     if(Curl_isunreserved(in))
       /* just copy this */
-      ns[strindex++]=in;
+      ns[strindex++] = in;
     else {
       /* encode it */
       newlen += 2; /* the size grows with two, since this'll become a %XX */
@@ -116,7 +116,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
         ns = testing_ptr;
       }
 
-      result = Curl_convert_to_network(data, &in, 1);
+      result = Curl_convert_to_network(data, (char *)&in, 1);
       if(result) {
         /* Curl_convert_to_network calls failf if unsuccessful */
         free(ns);
@@ -125,11 +125,11 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
 
       snprintf(&ns[strindex], 4, "%%%02X", in);
 
-      strindex+=3;
+      strindex += 3;
     }
     string++;
   }
-  ns[strindex]=0; /* terminate it */
+  ns[strindex] = 0; /* terminate it */
   return ns;
 }
 
@@ -148,10 +148,10 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
                         char **ostring, size_t *olen,
                         bool reject_ctrl)
 {
-  size_t alloc = (length?length:strlen(string))+1;
+  size_t alloc = (length?length:strlen(string)) + 1;
   char *ns = malloc(alloc);
   unsigned char in;
-  size_t strindex=0;
+  size_t strindex = 0;
   unsigned long hex;
   CURLcode result;
 
@@ -173,15 +173,15 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
 
       in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
 
-      result = Curl_convert_from_network(data, &in, 1);
+      result = Curl_convert_from_network(data, (char *)&in, 1);
       if(result) {
         /* Curl_convert_from_network calls failf if unsuccessful */
         free(ns);
         return result;
       }
 
-      string+=2;
-      alloc-=2;
+      string += 2;
+      alloc -= 2;
     }
 
     if(reject_ctrl && (in < 0x20)) {
@@ -192,7 +192,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
     ns[strindex++] = in;
     string++;
   }
-  ns[strindex]=0; /* terminate it */
+  ns[strindex] = 0; /* terminate it */
 
   if(olen)
     /* store output size */

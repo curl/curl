@@ -9,12 +9,13 @@ BUGS
  1. Bugs
   1.1 There are still bugs
   1.2 Where to report
-  1.3 What to report
-  1.4 libcurl problems
-  1.5 Who will fix the problems
-  1.6 How to get a stack trace
-  1.7 Bugs in libcurl bindings
-  1.8 Bugs in old versions
+  1.3 Security bugs
+  1.4 What to report
+  1.5 libcurl problems
+  1.6 Who will fix the problems
+  1.7 How to get a stack trace
+  1.8 Bugs in libcurl bindings
+  1.9 Bugs in old versions
 
  2. Bug fixing procedure
  2.1 What happens on first filing
@@ -30,9 +31,8 @@ BUGS
 
 1.1 There are still bugs
 
-  Curl and libcurl have grown substantially since the beginning. At the time
-  of writing (January 2013), there are about 83,000 lines of source code, and
-  by the time you read this it has probably grown even more.
+  Curl and libcurl keep being developed. Adding features and changing code
+  means that bugs will sneak in, no matter how hard we try not to.
 
   Of course there are lots of bugs left. And lots of misfeatures.
 
@@ -53,7 +53,24 @@ BUGS
   If you feel you need to ask around first, find a suitable mailing list and
   post there. The lists are available on https://curl.haxx.se/mail/
 
-1.3 What to report
+1.3 Security bugs
+
+  If you find a bug or problem in curl or libcurl that you think has a
+  security impact, for example a bug that can put users in danger or make them
+  vulnerable if the bug becomes public knowledge, then please report that bug
+  using our security development process.
+
+  Security related bugs or bugs that are suspected to have a security impact,
+  should be reported by email to curl-security@haxx.se so that they first can
+  be dealt with away from the public to minimize the harm and impact it will
+  have on existing users out there who might be using the vulnerable versions.
+
+  The curl project's process for handling security related issues is
+  documented here:
+
+        https://curl.haxx.se/dev/secprocess.html
+
+1.4 What to report
 
   When reporting a bug, you should include all information that will help us
   understand what's wrong, what you expected to happen and how to repeat the
@@ -85,7 +102,7 @@ BUGS
   The address and how to subscribe to the mailing lists are detailed in the
   MANUAL file.
 
-1.4 libcurl problems
+1.5 libcurl problems
 
   When you've written your own application with libcurl to perform transfers,
   it is even more important to be specific and detailed when reporting bugs.
@@ -105,7 +122,7 @@ BUGS
   valgrind or similar before you post memory-related or "crashing" problems to
   us.
 
-1.5 Who will fix the problems
+1.6 Who will fix the problems
 
   If the problems or bugs you describe are considered to be bugs, we want to
   have the problems fixed.
@@ -124,7 +141,7 @@ BUGS
   We get reports from many people every month and each report can take a
   considerable amount of time to really go to the bottom with.
 
-1.6 How to get a stack trace
+1.7 How to get a stack trace
 
   First, you must make sure that you compile all sources with -g and that you
   don't 'strip' the final executable. Try to avoid optimizing the code as
@@ -144,7 +161,7 @@ BUGS
   crashed. Include the stack trace with your detailed bug report. It'll help a
   lot.
 
-1.7 Bugs in libcurl bindings
+1.8 Bugs in libcurl bindings
 
   There will of course pop up bugs in libcurl bindings. You should then
   primarily approach the team that works on that particular binding and see
@@ -154,7 +171,7 @@ BUGS
   please convert your program over to plain C and follow the steps outlined
   above.
 
-1.8 Bugs in old versions
+1.9 Bugs in old versions
 
   The curl project typically releases new versions every other month, and we
   fix several hundred bugs per year. For a huge table of releases, number of
@@ -169,7 +186,7 @@ BUGS
   include the version number of the curl you're using when you experience the
   issue. If that version number shows us that you're using an out-of-date
   curl, you should also try out a modern curl version to see if the problem
-  persists or how/if it has changed in apperance.
+  persists or how/if it has changed in appearance.
 
   Even if you cannot immediately upgrade your application/system to run the
   latest curl version, you can most often at least run a test version or
@@ -273,8 +290,8 @@ BUGS
   The issue and pull request trackers on https://github.com/curl/curl will
   only hold "active" entries (using a non-precise definition of what active
   actually is, but they're at least not completely dead). Those that are
-  abandonded or in other ways dormant will be closed and sometimes added to
+  abandoned or in other ways dormant will be closed and sometimes added to
   TODO and KNOWN_BUGS instead.
 
   This way, we only have "active" issues open on github. Irrelevant issues and
-  pull requests will not distract developes or casual visitors.
+  pull requests will not distract developers or casual visitors.

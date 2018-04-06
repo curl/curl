@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,8 +40,10 @@
 #define PACKAGE  "curl"
 
 #define HAVE_ARPA_INET_H       1
+#define HAVE_ASSERT_H          1
 #define HAVE_ERRNO_H           1
 #define HAVE_FCNTL_H           1
+#define HAVE_FREEADDRINFO      1
 #define HAVE_GETADDRINFO       1
 #define HAVE_GETNAMEINFO       1
 #define HAVE_GETPROTOBYNAME    1
@@ -51,7 +53,6 @@
 #define HAVE_IOCTL_FIONBIO     1
 #define HAVE_IOCTLSOCKET       1
 #define HAVE_IOCTLSOCKET_FIONBIO   1
-#define HAVE_LIMITS_H          1
 #define HAVE_LOCALE_H          1
 #define HAVE_LONGLONG          1
 #define HAVE_MEMORY_H          1
@@ -85,9 +86,11 @@
 
 #define RETSIGTYPE             void
 #define SIZEOF_INT             4
+#define SIZEOF_LONG            4
 #define SIZEOF_LONG_DOUBLE     16
 #define SIZEOF_SHORT           2
 #define SIZEOF_SIZE_T          4
+#define SIZEOF_CURL_OFF_T      4
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 

@@ -1,3 +1,25 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+#***************************************************************************
+
 !IF "$(MODE)"=="static"
 TARGET = $(LIB_NAME_STATIC)
 AS_DLL = false
@@ -15,7 +37,7 @@ CFGSET=true
 
 !MESSAGE Usage: nmake /f Makefile.vc mode=<static or dll> <options>
 !MESSAGE where <options> is one or many of:
-!MESSAGE   VC=<6,7,8,9,10,11,12,14>     - VC versions
+!MESSAGE   VC=<6,7,8,9,10,11,12,14,15>  - VC versions
 !MESSAGE   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
 !MESSAGE                                  Defaults to sibbling directory deps: ../deps
 !MESSAGE                                  Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
@@ -226,12 +248,12 @@ $(MODE):
 	@SET DIROBJ=$(LIBCURL_DIROBJ)
 	@SET MACRO_NAME=LIBCURL_OBJS
 	@SET OUTFILE=LIBCURL_OBJS.inc
-	@gen_resp_file.bat $(LIBCURL_OBJS)
+	@CALL gen_resp_file.bat $(LIBCURL_OBJS)
 
 	@SET DIROBJ=$(CURL_DIROBJ)
 	@SET MACRO_NAME=CURL_OBJS
 	@SET OUTFILE=CURL_OBJS.inc
-	@gen_resp_file.bat $(CURL_OBJS)
+	@CALL gen_resp_file.bat $(CURL_OBJS)
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
 	@SET MACHINE=$(MACHINE)

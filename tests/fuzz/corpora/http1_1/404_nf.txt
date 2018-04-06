@@ -1,9 +1,0 @@
-HTTP/1.1 404 Not Found
-Cache-Control: max-age=604800
-Content-Type: text/html
-Date: Mon, 08 May 2017 19:04:08 GMT
-Expires: Mon, 15 May 2017 19:04:08 GMT
-Server: EOS (lax004/28A3)
-Vary: Accept-Encoding
-Content-Length: 1270
-

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,6 +54,7 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   pro->t_starttransfer = 0;
   pro->timespent = 0;
   pro->t_redirect = 0;
+  pro->is_t_startransfer_set = false;
 
   info->httpcode = 0;
   info->httpproxycode = 0;
@@ -155,7 +156,12 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     *param_longp = data->info.httpproxycode;
     break;
   case CURLINFO_FILETIME:
-    *param_longp = data->info.filetime;
+    if(data->info.filetime > LONG_MAX)
+      *param_longp = LONG_MAX;
+    else if(data->info.filetime < LONG_MIN)
+      *param_longp = LONG_MIN;
+    else
+      *param_longp = (long)data->info.filetime;
     break;
   case CURLINFO_HEADER_SIZE:
     *param_longp = data->info.header_size;
@@ -252,6 +258,9 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
                              curl_off_t *param_offt)
 {
   switch(info) {
+  case CURLINFO_FILETIME_T:
+    *param_offt = (curl_off_t)data->info.filetime;
+    break;
   case CURLINFO_SIZE_UPLOAD_T:
     *param_offt = data->progress.uploaded;
     break;
@@ -359,46 +368,25 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
       struct curl_tlssessioninfo **tsip = (struct curl_tlssessioninfo **)
                                           param_slistp;
       struct curl_tlssessioninfo *tsi = &data->tsi;
+#ifdef USE_SSL
       struct connectdata *conn = data->easy_conn;
+#endif
 
       *tsip = tsi;
       tsi->backend = Curl_ssl_backend();
       tsi->internals = NULL;
 
+#ifdef USE_SSL
       if(conn && tsi->backend != CURLSSLBACKEND_NONE) {
         unsigned int i;
         for(i = 0; i < (sizeof(conn->ssl) / sizeof(conn->ssl[0])); ++i) {
           if(conn->ssl[i].use) {
-#if defined(USE_AXTLS)
-            tsi->internals = (void *)conn->ssl[i].ssl;
-#elif defined(USE_CYASSL)
-            tsi->internals = (void *)conn->ssl[i].handle;
-#elif defined(USE_DARWINSSL)
-            tsi->internals = (void *)conn->ssl[i].ssl_ctx;
-#elif defined(USE_GNUTLS)
-            tsi->internals = (void *)conn->ssl[i].session;
-#elif defined(USE_GSKIT)
-            tsi->internals = (void *)conn->ssl[i].handle;
-#elif defined(USE_MBEDTLS)
-            tsi->internals = (void *)&conn->ssl[i].ssl;
-#elif defined(USE_NSS)
-            tsi->internals = (void *)conn->ssl[i].handle;
-#elif defined(USE_OPENSSL)
-            /* Legacy: CURLINFO_TLS_SESSION must return an SSL_CTX pointer. */
-            tsi->internals = ((info == CURLINFO_TLS_SESSION) ?
-                              (void *)conn->ssl[i].ctx :
-                              (void *)conn->ssl[i].handle);
-#elif defined(USE_POLARSSL)
-            tsi->internals = (void *)&conn->ssl[i].ssl;
-#elif defined(USE_SCHANNEL)
-            tsi->internals = (void *)&conn->ssl[i].ctxt->ctxt_handle;
-#elif defined(USE_SSL)
-#error "SSL backend specific information missing for CURLINFO_TLS_SSL_PTR"
-#endif
+            tsi->internals = Curl_ssl->get_internals(&conn->ssl[i], info);
             break;
           }
         }
       }
+#endif
     }
     break;
   default:

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,14 @@
 
 #include "curl_setup.h"
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#ifdef HAVE_LINUX_TCP_H
+#include <linux/tcp.h>
+#endif
+
 #include <curl/curl.h>
 
 #include "urldata.h"
@@ -29,6 +37,7 @@
 #include "connect.h"
 #include "vtls/vtls.h"
 #include "ssh.h"
+#include "easyif.h"
 #include "multiif.h"
 #include "non-ascii.h"
 #include "strerror.h"
@@ -63,7 +72,7 @@ static size_t convert_lineends(struct Curl_easy *data,
     if(*startPtr == '\n') {
       /* This block of incoming data starts with the
          previous block's LF so get rid of it */
-      memmove(startPtr, startPtr+1, size-1);
+      memmove(startPtr, startPtr + 1, size-1);
       size--;
       /* and it wasn't a bare CR but a CRLF conversion instead */
       data->state.crlf_conversions++;
@@ -75,7 +84,7 @@ static size_t convert_lineends(struct Curl_easy *data,
   inPtr = outPtr = memchr(startPtr, '\r', size);
   if(inPtr) {
     /* at least one CR, now look for CRLF */
-    while(inPtr < (startPtr+size-1)) {
+    while(inPtr < (startPtr + size-1)) {
       /* note that it's size-1, so we'll never look past the last byte */
       if(memcmp(inPtr, "\r\n", 2) == 0) {
         /* CRLF found, bump past the CR and copy the NL */
@@ -98,7 +107,7 @@ static size_t convert_lineends(struct Curl_easy *data,
       inPtr++;
     } /* end of while loop */
 
-    if(inPtr < startPtr+size) {
+    if(inPtr < startPtr + size) {
       /* handle last byte */
       if(*inPtr == '\r') {
         /* deal with a CR at the end of the buffer */
@@ -112,7 +121,7 @@ static size_t convert_lineends(struct Curl_easy *data,
       }
       outPtr++;
     }
-    if(outPtr < startPtr+size)
+    if(outPtr < startPtr + size)
       /* tidy up by null terminating the now shorter data */
       *outPtr = '\0';
 
@@ -241,25 +250,25 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
 
 void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 {
-  va_list ap;
-  size_t len;
-  char error[CURL_ERROR_SIZE + 2];
-  va_start(ap, fmt);
+  if(data->set.verbose || data->set.errorbuffer) {
+    va_list ap;
+    size_t len;
+    char error[CURL_ERROR_SIZE + 2];
+    va_start(ap, fmt);
+    vsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
+    len = strlen(error);
 
-  vsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
-  len = strlen(error);
-
-  if(data->set.errorbuffer && !data->state.errorbuf) {
-    strcpy(data->set.errorbuffer, error);
-    data->state.errorbuf = TRUE; /* wrote error string */
+    if(data->set.errorbuffer && !data->state.errorbuf) {
+      strcpy(data->set.errorbuffer, error);
+      data->state.errorbuf = TRUE; /* wrote error string */
+    }
+    if(data->set.verbose) {
+      error[len] = '\n';
+      error[++len] = '\0';
+      Curl_debug(data, CURLINFO_TEXT, error, len, NULL);
+    }
+    va_end(ap);
   }
-  if(data->set.verbose) {
-    error[len] = '\n';
-    error[++len] = '\0';
-    Curl_debug(data, CURLINFO_TEXT, error, len, NULL);
-  }
-
-  va_end(ap);
 }
 
 /* Curl_sendf() sends formatted data to the server */
@@ -279,7 +288,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */
 
-  bytes_written=0;
+  bytes_written = 0;
   write_len = strlen(s);
   sptr = s;
 
@@ -360,7 +369,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
      available. */
   pre_receive_plain(conn, num);
 
-#ifdef MSG_FASTOPEN /* Linux */
+#if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(conn->bits.tcp_fastopen) {
     bytes_written = sendto(sockfd, mem, len, MSG_FASTOPEN,
                            conn->ip_addr->ai_addr, conn->ip_addr->ai_addrlen);
@@ -380,14 +389,14 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       (WSAEWOULDBLOCK == err)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefor
+         due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err) ||
       (EINPROGRESS == err)
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
-      bytes_written=0;
+      bytes_written = 0;
       *code = CURLE_AGAIN;
     }
     else {
@@ -447,7 +456,7 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
       (WSAEWOULDBLOCK == err)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefor
+         due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err)
 #endif
@@ -480,7 +489,7 @@ static CURLcode pausewrite(struct Curl_easy *data,
   bool newtype = TRUE;
 
   if(s->tempcount) {
-    for(i=0; i< s->tempcount; i++) {
+    for(i = 0; i< s->tempcount; i++) {
       if(s->tempwrite[i].type == type) {
         /* data for this type exists */
         newtype = FALSE;
@@ -532,18 +541,20 @@ static CURLcode pausewrite(struct Curl_easy *data,
 }
 
 
-/* Curl_client_chop_write() writes chunks of data not larger than
- * CURL_MAX_WRITE_SIZE via client write callback(s) and
- * takes care of pause requests from the callbacks.
+/* chop_write() writes chunks of data not larger than CURL_MAX_WRITE_SIZE via
+ * client write callback(s) and takes care of pause requests from the
+ * callbacks.
  */
-CURLcode Curl_client_chop_write(struct connectdata *conn,
-                                int type,
-                                char *ptr,
-                                size_t len)
+static CURLcode chop_write(struct connectdata *conn,
+                           int type,
+                           char *optr,
+                           size_t olen)
 {
   struct Curl_easy *data = conn->data;
   curl_write_callback writeheader = NULL;
   curl_write_callback writebody = NULL;
+  char *ptr = optr;
+  size_t len = olen;
 
   if(!len)
     return CURLE_OK;
@@ -589,23 +600,28 @@ CURLcode Curl_client_chop_write(struct connectdata *conn,
       }
     }
 
-    if(writeheader) {
-      size_t wrote = writeheader(ptr, 1, chunklen, data->set.writeheader);
-
-      if(CURL_WRITEFUNC_PAUSE == wrote)
-        /* here we pass in the HEADER bit only since if this was body as well
-           then it was passed already and clearly that didn't trigger the
-           pause, so this is saved for later with the HEADER bit only */
-        return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
-
-      if(wrote != chunklen) {
-        failf(data, "Failed writing header");
-        return CURLE_WRITE_ERROR;
-      }
-    }
-
     ptr += chunklen;
     len -= chunklen;
+  }
+
+  if(writeheader) {
+    size_t wrote;
+    ptr = optr;
+    len = olen;
+    Curl_set_in_callback(data, true);
+    wrote = writeheader(ptr, 1, len, data->set.writeheader);
+    Curl_set_in_callback(data, false);
+
+    if(CURL_WRITEFUNC_PAUSE == wrote)
+      /* here we pass in the HEADER bit only since if this was body as well
+         then it was passed already and clearly that didn't trigger the
+         pause, so this is saved for later with the HEADER bit only */
+      return pausewrite(data, CLIENTWRITE_HEADER, ptr, len);
+
+    if(wrote != len) {
+      failf(data, "Failed writing header");
+      return CURLE_WRITE_ERROR;
+    }
   }
 
   return CURLE_OK;
@@ -649,7 +665,7 @@ CURLcode Curl_client_write(struct connectdata *conn,
 #endif /* CURL_DO_LINEEND_CONV */
     }
 
-  return Curl_client_chop_write(conn, type, ptr, len);
+  return chop_write(conn, type, ptr, len);
 }
 
 CURLcode Curl_read_plain(curl_socket_t sockfd,
@@ -704,7 +720,7 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
      us use the correct ssl handle. */
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
 
-  *n=0; /* reset amount to zero */
+  *n = 0; /* reset amount to zero */
 
   /* If session can pipeline, check connection buffer  */
   if(pipelining) {
@@ -790,8 +806,11 @@ static int showit(struct Curl_easy *data, curl_infotype type,
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
-  if(data->set.fdebug)
+  if(data->set.fdebug) {
+    Curl_set_in_callback(data, true);
     rc = (*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+    Curl_set_in_callback(data, false);
+  }
   else {
     switch(type) {
     case CURLINFO_TEXT:
@@ -823,8 +842,8 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
   int rc;
   if(data->set.printhost && conn && conn->host.dispname) {
     char buffer[160];
-    const char *t=NULL;
-    const char *w="Data";
+    const char *t = NULL;
+    const char *w = "Data";
     switch(type) {
     case CURLINFO_HEADER_IN:
       w = "Header";

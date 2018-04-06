@@ -71,7 +71,7 @@ struct data {
 /* Unexpected error.
     CURLE_NOT_BUILT_IN   - means disabled at build
     CURLE_UNKNOWN_OPTION - means no such option (anymore?)
-    CURLE_SSL_ENGINE_NOTFOUND - set unkown ssl engine
+    CURLE_SSL_ENGINE_NOTFOUND - set unknown ssl engine
     CURLE_UNSUPPORTED_PROTOCOL - set bad HTTP version
     CURLE_BAD_FUNCTION_ARGUMENT - unsupported value
    */
@@ -132,6 +132,7 @@ static curl_chunk_end_callback chunk_end_cb;
 static curl_fnmatch_callback fnmatch_cb;
 static curl_closesocket_callback closesocketcb;
 static curl_xferinfo_callback xferinfocb;
+static curl_resolver_start_callback resolver_start_cb;
 
 int test(char *URL)
 {
@@ -143,9 +144,10 @@ int test(char *URL)
   void *conv_to_network_cb = NULL;
   void *conv_from_utf8_cb = NULL;
   void *interleavecb = NULL;
-  char *stringpointerextra=(char *)"moooo";
-  struct curl_slist *slist=NULL;
-  struct curl_httppost *httppost=NULL;
+  char *stringpointerextra = (char *)"moooo";
+  struct curl_slist *slist = NULL;
+  struct curl_httppost *httppost = NULL;
+  curl_mime *mimepost = NULL;
   FILE *stream = stderr;
   struct data object;
   char *charp;
@@ -157,6 +159,7 @@ int test(char *URL)
   struct curl_tlssessioninfo *tlssession;
   CURLcode res = CURLE_OK;
   (void)URL; /* not used */
+  global_init(CURL_GLOBAL_ALL);
   easy_init(dep);
   easy_init(curl);
   share = curl_share_init();
@@ -214,6 +217,9 @@ while(<STDIN>) {
             }
             elsif($name eq "HTTPPOST") {
               print "${pref} httppost);\n$check";
+            }
+            elsif($name eq "MIMEPOST") {
+              print "${pref} mimepost);\n$check";
             }
             elsif($name eq "STDERR") {
               print "${pref} stream);\n$check";
@@ -296,6 +302,7 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_easy_cleanup(dep);
   curl_share_cleanup(share);
+  curl_global_cleanup();
 
   return (int)res;
 }

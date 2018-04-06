@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -43,10 +43,10 @@ CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 EXTRA_DIST = MANUAL BUGS CONTRIBUTE.md FAQ FEATURES INTERNALS.md SSLCERTS.md    \
  README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS VERSIONS KNOWN_BUGS   \
  BINDINGS.md HISTORY.md INSTALL INSTALL.md LICENSE-MIXING.md     \
- README.netware MAIL-ETIQUETTE HTTP-COOKIES.md SECURITY.md RELEASE-PROCEDURE    \
+ README.netware MAIL-ETIQUETTE HTTP-COOKIES.md SECURITY-PROCESS.md RELEASE-PROCEDURE    \
  SSL-PROBLEMS.md HTTP2.md ROADMAP.md CODE_OF_CONDUCT.md CODE_STYLE.md           \
  CHECKSRC.md CMakeLists.txt README.md CIPHERS.md INSTALL.cmake README.cmake     \
- $(noinst_man_MANS)
+ $(noinst_man_MANS) HELP-US.md
 
 MAN2HTML= roffit $< >$@
 
@@ -80,4 +80,7 @@ pdf: $(PDFPAGES)
 	ps2pdf $$foo.ps $@; \
 	rm $$foo.ps; \
 	echo "converted $< to $@")
+
+distclean:
+	rm -f $(CLEANFILES)
 

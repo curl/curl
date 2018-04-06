@@ -30,4 +30,4 @@ NOTE FOR LIBCURL HACKERS
 
 To figure out how to do good and portable checks for features, operating
 systems or specific hardwarare, a very good resource is Bjorn Reese's
-collection at http://predef.sf.net/
+collection at https://sourceforge.net/p/predef/wiki/

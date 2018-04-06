@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,6 +37,9 @@ int test(char *URL)
   int still_running; /* keep number of running handles */
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
+  int res = CURLE_OK;
+
+  global_init(CURL_GLOBAL_ALL);
 
   /* Allocate one CURL handle per transfer */
   easy = curl_easy_init();
@@ -112,7 +115,7 @@ int test(char *URL)
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
          If you need access to the original value save a copy beforehand. */
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
     }
 
     switch(rc) {
@@ -127,17 +130,19 @@ int test(char *URL)
   } while(still_running);
 
   /* See how the transfers went */
-  while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
-    if(msg->msg == CURLMSG_DONE) {
+  do {
+    msg = curl_multi_info_read(multi_handle, &msgs_left);
+    if(msg && msg->msg == CURLMSG_DONE) {
       printf("HTTP transfer completed with status %d\n", msg->data.result);
       break;
     }
-  }
+  } while(msg);
 
   curl_multi_cleanup(multi_handle);
 
   /* Free the CURL handles */
   curl_easy_cleanup(easy);
+  curl_global_cleanup();
 
   return 0;
 }

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,7 +44,9 @@
 #include "rand.h"
 #include "vtls/vtls.h"
 
-#ifdef USE_NSS
+/* SSL backend-specific #if branches in this file must be kept in the order
+   documented in curl_ntlm_core. */
+#if defined(NTLM_NEEDS_NSS_INIT)
 #include "vtls/nssg.h" /* for Curl_nss_force_init() */
 #endif
 
@@ -272,7 +274,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   unsigned char *type2 = NULL;
   size_t type2_len = 0;
 
-#if defined(USE_NSS)
+#if defined(NTLM_NEEDS_NSS_INIT)
   /* Make sure the crypto backend is initialized */
   result = Curl_nss_force_init(data);
   if(result)
@@ -350,6 +352,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * Parameters:
  *
+ * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * service [in]     - The service type such as http, smtp, pop or imap.
@@ -361,7 +364,8 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
+CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
+                                             const char *userp,
                                              const char *passwdp,
 											 const char *service,
 											 const char *hostname,
@@ -465,7 +469,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
   });
 
   /* Return with binary blob encoded into base64 */
-  return Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+  return Curl_base64_encode(data, (char *)ntlmbuf, size, outptr, outlen);
 }
 
 /*
@@ -546,8 +550,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   else
     user = userp;
 
-  if(user)
-    userlen = strlen(user);
+  userlen = strlen(user);
 
   /* Get the machine's un-qualified host name as NTLM doesn't like the fully
      qualified domain name */
@@ -834,7 +837,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     return CURLE_CONV_FAILED;
 
   /* Return with binary blob encoded into base64 */
-  result = Curl_base64_encode(NULL, (char *)ntlmbuf, size, outptr, outlen);
+  result = Curl_base64_encode(data, (char *)ntlmbuf, size, outptr, outlen);
 
   Curl_auth_ntlm_cleanup(ntlm);
 
