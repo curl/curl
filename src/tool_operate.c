@@ -118,7 +118,7 @@ static bool is_fatal_error(CURLcode code)
  */
 static bool is_pkcs11_uri(const char *string)
 {
-  if(!strncmp(string, "pkcs11:", 7)) {
+  if(curl_strnequal(string, "pkcs11:", 7)) {
     return TRUE;
   }
   else {
