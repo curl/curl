@@ -143,8 +143,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
-    service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
+  defined(USE_SPNEGO) || defined(HAVE_GSSAPI)
+	service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
               conn->data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+#endif
     hostname = conn->http_proxy.host.name;
     ntlm = &conn->proxyntlm;
     authp = &conn->data->state.authproxy;
@@ -153,9 +156,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
-    service = conn->data->set.str[STRING_SERVICE_NAME] ?
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
+  defined(USE_SPNEGO) || defined(HAVE_GSSAPI)
+	service = conn->data->set.str[STRING_SERVICE_NAME] ?
               conn->data->set.str[STRING_SERVICE_NAME] : "HTTP";
-    hostname = conn->host.name;
+#endif
+	hostname = conn->host.name;
     ntlm = &conn->ntlm;
     authp = &conn->data->state.authhost;
   }
