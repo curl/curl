@@ -477,6 +477,7 @@ struct ntlmdata {
   BYTE *output_token;
   BYTE *input_token;
   size_t input_token_len;
+  TCHAR *spn;
 #else
   unsigned int flags;
   unsigned char nonce[8];

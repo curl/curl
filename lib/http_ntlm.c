@@ -140,11 +140,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
-#if defined(USE_WINDOWS_SSPI)
     service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
               conn->data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
-#endif
     ntlm = &conn->proxyntlm;
     authp = &conn->data->state.authproxy;
   }
@@ -152,11 +150,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
-#if defined(USE_WINDOWS_SSPI)
     service = conn->data->set.str[STRING_SERVICE_NAME] ?
               conn->data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
-#endif
     ntlm = &conn->ntlm;
     authp = &conn->data->state.authhost;
   }
@@ -182,7 +178,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(userp, passwdp, ntlm, &base64,
+    result = Curl_auth_create_ntlm_type1_message(userp, passwdp,
+												 service, hostname,
+												 ntlm, &base64,
                                                  &len);
     if(result)
       return result;
@@ -203,7 +201,6 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
     result = Curl_auth_create_ntlm_type3_message(conn->data, userp, passwdp,
-                                                 service, hostname,
                                                  ntlm, &base64, &len);
     if(result)
       return result;

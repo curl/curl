@@ -265,7 +265,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
-#if defined(USE_KERBEROS5)
+#if defined(USE_KERBEROS5) || defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
@@ -332,7 +332,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
-                                                     &conn->ntlm, &resp, &len);
+													 service,
+													 hostname,
+													 &conn->ntlm, &resp, &len);
       }
     else
 #endif
@@ -423,9 +425,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
                         data->set.str[STRING_SERVICE_NAME] :
                         sasl->params->service;
-#endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-    defined(USE_NTLM)
   char *serverdata;
 #endif
   size_t len = 0;
@@ -495,6 +494,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   case SASL_NTLM:
     /* Create the type-1 message */
     result = Curl_auth_create_ntlm_type1_message(conn->user, conn->passwd,
+												 service, hostname,
                                                  &conn->ntlm, &resp, &len);
     newstate = SASL_NTLM_TYPE2MSG;
     break;
@@ -505,9 +505,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
                                                  &conn->ntlm);
     if(!result)
       result = Curl_auth_create_ntlm_type3_message(data, conn->user,
-                                                   conn->passwd,
-                                                   service,
-                                                   hostname, &conn->ntlm,
+                                                   conn->passwd, &conn->ntlm,
                                                    &resp, &len);
     break;
 #endif

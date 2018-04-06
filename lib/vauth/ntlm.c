@@ -352,6 +352,8 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
+ * service [in]     - The service type such as http, smtp, pop or imap.
+ * host    [in]     - The host name.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -361,7 +363,9 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  */
 CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
                                              const char *passwdp,
-                                             struct ntlmdata *ntlm,
+											 const char *service,
+											 const char *hostname,
+											 struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 {
   /* NTLM type-1 message structure:
@@ -390,6 +394,9 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
                                          domain are empty */
   (void)userp;
   (void)passwdp;
+  (void)service,
+  (void)hostname,
+
 
   /* Clean up any former leftovers and initialise to defaults */
   Curl_auth_ntlm_cleanup(ntlm);
@@ -472,8 +479,6 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
  * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
- * service [in]     - The service type such as http, smtp, pop or imap.
- * host    [in]     - The host name.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -484,8 +489,6 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
-                                             const char *service,
-                                             const char *hostname,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 
@@ -530,9 +533,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size_t hostlen = 0;
   size_t userlen = 0;
   size_t domlen = 0;
-
-  (void)service;
-  (void)hostname;
 
   user = strchr(userp, '\\');
   if(!user)

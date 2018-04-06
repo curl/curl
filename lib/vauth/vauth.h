@@ -121,6 +121,8 @@ bool Curl_auth_is_ntlm_supported(void);
 /* This is used to generate a base64 encoded NTLM type-1 message */
 CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
                                              const char *passwdp,
+                                             const char *service,
+                                             const char *host,
                                              struct ntlmdata *ntlm,
                                              char **outptr,
                                              size_t *outlen);
@@ -134,8 +136,6 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
-                                             const char *service,
-                                             const char *host,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen);
 
