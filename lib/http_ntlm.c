@@ -182,8 +182,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
     result = Curl_auth_create_ntlm_type1_message(conn->data, userp, passwdp,
-												 service, hostname,
-												 ntlm, &base64,
+                                                 service, hostname,
+                                                 ntlm, &base64,
                                                  &len);
     if(result)
       return result;

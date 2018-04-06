@@ -82,9 +82,9 @@ bool Curl_auth_is_ntlm_supported(void)
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
-											 const char *service,
-											 const char *host,
-											 struct ntlmdata *ntlm,
+                                             const char *service,
+                                             const char *host,
+                                             struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 {
   PSecPkgInfo SecurityPackage;
@@ -153,7 +153,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   ntlm->spn = Curl_auth_build_spn(service, host, NULL);
   if (!ntlm->spn)
-	  return CURLE_OUT_OF_MEMORY;
+    return CURLE_OUT_OF_MEMORY;
 
   /* Setup the type-1 "output" security buffer */
   type_1_desc.ulVersion = SECBUFFER_VERSION;
