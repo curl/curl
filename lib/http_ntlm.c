@@ -143,8 +143,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-  defined(USE_SPNEGO) || defined(HAVE_GSSAPI)
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
 	service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
               conn->data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
 #endif
