@@ -401,7 +401,6 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   (void)service,
   (void)hostname,
 
-
   /* Clean up any former leftovers and initialise to defaults */
   Curl_auth_ntlm_cleanup(ntlm);
 
