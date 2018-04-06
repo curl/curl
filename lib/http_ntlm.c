@@ -124,7 +124,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   /* point to the username, password, service and host */
   const char *userp;
   const char *passwdp;
-  const char *service = NULL;
+  const char *service = "";
   const char *hostname = NULL;
 
   /* point to the correct struct with this */
