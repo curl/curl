@@ -70,7 +70,12 @@ CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /wd4127 /EHsc /DWIN32 /FD /
 
 LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
-LNKLIB     = link.exe /lib
+# Use lib.exe instead of link.exe as link.exe /lib has the following bad habits:
+# - optimizing options like /opt:ref raises warnings (at least in Visual Studio 2015)
+# - all (including Windows) dependencies are aggregated (as static parts) 
+# - link.exe /lib is not documented (anymore) at MSDN
+# Instead of id: just create an archive, that contains all objects
+LNKLIB     = lib.exe
 
 CFLAGS_PDB = /Zi
 LFLAGS_PDB = /incremental:no /opt:ref,icf /DEBUG
@@ -129,7 +134,7 @@ SSL_INC_DIR=$(DEVEL_INCLUDE)\openssl
 SSL_LIB_DIR=$(DEVEL_LIB)
 !ENDIF
 
-!IF "$(WITH_SSL)"=="dll" || "$(WITH_SLL)"=="static"
+!IF "$(WITH_SSL)"=="dll" || "$(WITH_SSL)"=="static"
 !IF EXISTS("$(SSL_LIB_DIR)\libssl.lib")
 SSL_LIBS     = libssl.lib libcrypto.lib
 !ELSE
@@ -249,7 +254,12 @@ SSH2_LIBS   = libssh2.lib
 USE_SSH2    = true
 SSH2        = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
+# libssh2 NMakefile on Windows at default creates a static library without _a suffix
+!IF EXISTS("$(SSH2_LIB_DIR)\libssh2.lib")
+SSH2_LIBS   = libssh2.lib
+!ELSE
 SSH2_LIBS   = libssh2_a.lib
+!ENDIF
 WIN_LIBS     = $(WIN_LIBS) user32.lib
 USE_SSH2    = true
 SSH2        = static
@@ -365,7 +375,7 @@ CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 
 !IF "$(AS_DLL)" == "true"
 
-LNK       = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+LNK       = $(LNKDLL) $(LFLAGS) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 !IF "$(DEBUG)"=="yes"
 TARGET    = $(LIB_NAME_DLL_DEBUG)
 LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
@@ -487,7 +497,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo GenPDB:     $(GEN_PDB)
 	@echo Debug:      $(DEBUG)
 	@echo Machine:    $(MACHINE)
-	$(LNK) $(LFLAGS) $(LIB_OBJS)
+	$(LNK) $(LIB_OBJS)
 	@echo Copying libs...
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_DLL) copy $(LIB_DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_STATIC) copy $(LIB_DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
