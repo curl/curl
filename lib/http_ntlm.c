@@ -144,7 +144,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-	service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
+    service = conn->data->set.str[STRING_PROXY_SERVICE_NAME] ?
               conn->data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
 #endif
     hostname = conn->http_proxy.host.name;
@@ -157,10 +157,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     passwdp = conn->passwd;
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
   defined(USE_SPNEGO) || defined(HAVE_GSSAPI)
-	service = conn->data->set.str[STRING_SERVICE_NAME] ?
+    service = conn->data->set.str[STRING_SERVICE_NAME] ?
               conn->data->set.str[STRING_SERVICE_NAME] : "HTTP";
 #endif
-	hostname = conn->host.name;
+    hostname = conn->host.name;
     ntlm = &conn->ntlm;
     authp = &conn->data->state.authhost;
   }
