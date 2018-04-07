@@ -1522,7 +1522,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
               RETRY_FTP,
               RETRY_LAST /* not used */
             } retry = RETRY_NO;
-            long response;
+            long response, protocol;
             if((CURLE_OPERATION_TIMEDOUT == result) ||
                (CURLE_COULDNT_RESOLVE_HOST == result) ||
                (CURLE_COULDNT_RESOLVE_PROXY == result) ||
@@ -1570,9 +1570,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
               }
             } /* if CURLE_OK */
             else if(result) {
-              curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+              long protocol;
 
-              if(response/100 == 4)
+              curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+              curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
+              if((protocol == CURLPROTO_FTP || protocol == CURLPROTO_FTPS)
+                 && response/100 == 4)
                 /*
                  * This is typically when the FTP server only allows a certain
                  * amount of users and we are not one of them.  All 4xx codes
