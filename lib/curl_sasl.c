@@ -335,7 +335,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
                                                      conn->user, conn->passwd,
                                                      service,
                                                      hostname,
-                                                     &conn->ntlm, &resp, &len);
+                                                     &conn->ntlm, &resp,
+                                                     &len);
       }
     else
 #endif

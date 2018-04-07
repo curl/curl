@@ -152,7 +152,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   memset(ntlm->context, 0, sizeof(CtxtHandle));
 
   ntlm->spn = Curl_auth_build_spn(service, host, NULL);
-  if (!ntlm->spn)
+  if(!ntlm->spn)
     return CURLE_OUT_OF_MEMORY;
 
   /* Setup the type-1 "output" security buffer */
