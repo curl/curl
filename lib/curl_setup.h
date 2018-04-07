@@ -795,4 +795,9 @@ endings either CRLF or LF so 't' is appropriate.
 #  endif
 # endif
 
+/* for systems that don't detect this in configure, use a sensible default */
+#ifndef CURL_SA_FAMILY_T
+#define CURL_SA_FAMILY_T unsigned short
+#endif
+
 #endif /* HEADER_CURL_SETUP_H */
