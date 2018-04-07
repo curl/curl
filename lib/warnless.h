@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,11 +25,6 @@
 #ifdef USE_WINSOCK
 #include <curl/curl.h> /* for curl_socket_t */
 #endif
-
-#define CURLX_POINTER_TO_INTEGER_CAST(p) \
-  ((char *)(p) - (char *)NULL)
-#define CURLX_INTEGER_TO_POINTER_CAST(i) \
-  ((void *)((char *)NULL + (i)))
 
 unsigned short curlx_ultous(unsigned long ulnum);
 
