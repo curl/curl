@@ -1,5 +1,14 @@
 language: c
 sudo: required
+cache:
+    directories:
+        - $HOME/libpsl-0.20.1
+        - $HOME/libidn2-2.0.4
+
+env:
+    global:
+        - LD_LIBRARY_PATH=/usr/local/lib
+
 addons:
     apt:
         config:
@@ -22,6 +31,8 @@ addons:
             - libssh2-1-dev
             - libssh-dev
             - krb5-user
+            - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
+            - libunistring-dev # for libidn2 neeed by libpsl
 
 matrix:
     include:
@@ -48,7 +59,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=novalgrind BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib
+          env: T=novalgrind BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
         - os: linux
           compiler: clang
           dist: trusty
@@ -123,22 +134,51 @@ before_script:
                   sudo make install
               )
           fi
-          if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
-            (cd $HOME &&
-            git clone --depth=1 https://boringssl.googlesource.com/boringssl &&
-            cd boringssl &&
-            mkdir build &&
-            cd build &&
-            cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
-            make &&
-            cd .. &&
-            mkdir lib &&
-            cd lib &&
-            ln -s ../build/crypto/libcrypto.so . &&
-            ln -s ../build/ssl/libssl.so . &&
-            echo "BoringSSL lib dir: "`pwd` &&
-            export LIBS=-lpthread )
-          fi
+    - |
+      if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
+        (cd $HOME &&
+        git clone --depth=1 https://boringssl.googlesource.com/boringssl &&
+        cd boringssl &&
+        mkdir build &&
+        cd build &&
+        cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
+        make &&
+        cd .. &&
+        mkdir lib &&
+        cd lib &&
+        ln -s ../build/crypto/libcrypto.so . &&
+        ln -s ../build/ssl/libssl.so . &&
+        echo "BoringSSL lib dir: "`pwd` &&
+        export LIBS=-lpthread )
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
+        if [ ! -e $HOME/libidn2-2.0.4/Makefile ]; then
+          (cd $HOME && \
+          curl -LO https://ftp.gnu.org/gnu/libidn/libidn2-2.0.4.tar.gz && \
+          tar -xzf libidn2-2.0.4.tar.gz && \
+          cd libidn2-2.0.4 && \
+          ./configure && \
+          make)
+        fi
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
+        if [ ! -e $HOME/libpsl-0.20.1/Makefile ]; then
+          (cd $HOME && \
+          curl -LO https://github.com/rockdaboot/libpsl/releases/download/libpsl-0.20.1/libpsl-0.20.1.tar.gz && \
+          tar -xzf libpsl-0.20.1.tar.gz && \
+          cd libpsl-0.20.1 && \
+          autoreconf -i && \
+          ./configure && \
+          make)
+        fi
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
+        (cd $HOME/libidn2-2.0.4 && sudo make install)
+        (cd $HOME/libpsl-0.20.1 && sudo make install)
+      fi
 
 script:
     - |
