@@ -12,7 +12,7 @@ Building with Visual C++, prerequisites
 
    The latest Platform SDK can be downloaded freely from:
 
-    https://developer.microsoft.com/nl-nl/windows/downloads/sdk-archive
+    https://msdn.microsoft.com/en-us/windows/bb980924
 
    If you are building with VC6 then you will also need the February 2003
    Edition of the Platform SDK which can be downloaded from:
@@ -34,11 +34,6 @@ Building with Visual C++, prerequisites
    It is also possible to create the deps directory in some other random
    places and tell the Makefile its location using the WITH_DEVEL option.
 
-   Alternatively, if you cannot or don't want to copy deps to a fixed
-   location, you can use special environment variables, like INCLUDE, LIB,
-   LIBPATH, CL and _CL to set include and/or library paths and tell where
-   other deps reside.
-
 Building straight from git
 ==========================
 
@@ -49,13 +44,15 @@ Building straight from git
 Building with Visual C++
 ========================
 
-    Open Visual Studio command prompt Shell:
+Open a Visual Studio Command prompt or the SDK CMD shell.
+
+    Using the CMD Shell:
+     choose the right environment via the setenv command (see setenv /?)
+     for the full list of options. setenv /xp /x86 /release for example.
+
+    Using the Visual Studio command prompt Shell:
      Everything is already pre-configured by calling one of the command
      prompt.
-
-    Visual Studio comes with two different kinds of shells, either
-    related to VsDevCmd.bat or vcvarsall.bat. For more information,
-    please checkout related information on MSDN.
 
 Once you are in the console, go to the winbuild directory in the Curl
 sources:
