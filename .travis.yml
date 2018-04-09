@@ -6,17 +6,17 @@ addons:
             retries: true
         sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
+            - llvm-toolchain-trusty-6.0
         packages:
             - cmake
-            - gcc-6
+            - gcc-7
             - lcov
-            - clang-3.9
+            - clang-6.0
             - valgrind
             - libev-dev
             - libc-ares-dev
-            - g++-6
-            - libstdc++-6-dev
+            - g++-7
+            - libstdc++-7-dev
             - stunnel4
             - libidn2-0-dev
             - libssh2-1-dev
@@ -104,7 +104,7 @@ install:
   - if [ $TRAVIS_OS_NAME = linux ]; then
       curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
          tar xzf - &&
-         (cd nghttp2-1.24.0 && CXX="g++-6" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
+         (cd nghttp2-1.24.0 && CXX="g++-7" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
     fi
 
 before_script:
@@ -145,7 +145,7 @@ script:
         # Uncomment this when `coverage` runs on Trusty.
         # set -eo pipefail
         if [ "$T" = "coverage" ]; then
-             export CC="gcc-6"
+             export CC="gcc-7"
              ./configure --enable-debug --disable-shared --enable-code-coverage
              make
              make TFLAGS=-n test-nonflaky
