@@ -70,7 +70,12 @@ CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /wd4127 /EHsc /DWIN32 /FD /
 
 LFLAGS     = /nologo /machine:$(MACHINE)
 LNKDLL     = link.exe /DLL
-LNKLIB     = link.exe /lib
+# Use lib.exe instead of link.exe as link.exe /lib has the following bad habits:
+# - optimizing options like /opt:ref raises warnings (at least in Visual Studio 2015)
+# - all (including Windows) dependencies are aggregated (as static parts) 
+# - link.exe /lib is not documented (anymore) at MSDN
+# Instead of id: just create an archive, that contains all objects
+LNKLIB     = lib.exe
 
 CFLAGS_PDB = /Zi
 LFLAGS_PDB = /incremental:no /opt:ref,icf /DEBUG
@@ -97,9 +102,9 @@ PDB_NAME_DLL           = $(BASE_NAME).pdb
 PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
-PROGRAM_NAME = curl.exe
-CURL_CFLAGS   =  /I../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c
-CURL_LFLAGS   = /nologo /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console /machine:$(MACHINE)
+PROGRAM_NAME  = curl.exe
+CURL_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c
+CURL_LFLAGS   = /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console $(LFLAGS)
 CURL_RESFLAGS = /i../include
 
 #############################################################
@@ -108,37 +113,43 @@ LIBCURL_SRC_DIR = ..\lib
 CURL_SRC_DIR = ..\src
 
 !IFNDEF WITH_DEVEL
-WITH_DEVEL          = ../../deps
+WITH_DEVEL   = ../../deps
 !ENDIF
-DEVEL_INCLUDE  = $(WITH_DEVEL)/include
-DEVEL_LIB      = $(WITH_DEVEL)/lib
-DEVEL_BIN      = $(WITH_DEVEL)/bin
+DEVEL_INCLUDE= $(WITH_DEVEL)/include
+DEVEL_LIB    = $(WITH_DEVEL)/lib
 
-CFLAGS         = $(CFLAGS) /I"$(DEVEL_INCLUDE)"
-LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
+!IF EXISTS("$(DEVEL_INCLUDE)")
+CFLAGS       = $(CFLAGS) /I"$(DEVEL_INCLUDE)"
+!ENDIF
+!IF EXISTS("$(DEVEL_LIB)")
+LFLAGS       = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
+!ENDIF
 
+!IFDEF SSL_PATH
+SSL_INC_DIR  = $(SSL_PATH)\include
+SSL_LIB_DIR  = $(SSL_PATH)\lib
+SSL_LFLAGS   = $(SSL_LFLAGS) "/LIBPATH:$(SSL_LIB_DIR)"
+!ELSE
+SSL_INC_DIR=$(DEVEL_INCLUDE)\openssl
+SSL_LIB_DIR=$(DEVEL_LIB)
+!ENDIF
 
-!IF "$(WITH_SSL)"=="dll"
-!IF EXISTS("$(DEVEL_LIB)\libssl.lib")
+!IF "$(WITH_SSL)"=="dll" || "$(WITH_SSL)"=="static"
+!IF EXISTS("$(SSL_LIB_DIR)\libssl.lib")
 SSL_LIBS     = libssl.lib libcrypto.lib
 !ELSE
 SSL_LIBS     = libeay32.lib ssleay32.lib
 !ENDIF
 USE_SSL      = true
-SSL          = dll
-!ELSEIF "$(WITH_SSL)"=="static"
-!IF EXISTS("$(DEVEL_LIB)\libssl.lib")
-SSL_LIBS     = libssl.lib libcrypto.lib gdi32.lib user32.lib crypt32.lib
-!ELSE
-SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib crypt32.lib
+SSL          = $(WITH_SSL)
+!IF "$(WITH_SSL)"=="static"
+WIN_LIBS     = $(WIN_LIBS) gdi32.lib user32.lib crypt32.lib
 !ENDIF
-USE_SSL      = true
-SSL          = static
 !ENDIF
 
 !IFDEF USE_SSL
-SSL_CFLAGS   = /DUSE_OPENSSL /I"$(DEVEL_INCLUDE)/openssl"
-!IF EXISTS("$(DEVEL_INCLUDE)\openssl\is_boringssl.h")
+SSL_CFLAGS   = /DUSE_OPENSSL /I"$(SSL_INC_DIR)"
+!IF EXISTS("$(SSL_INC_DIR)\is_boringssl.h")
 SSL_CFLAGS   = $(SSL_CFLAGS) /DHAVE_BORINGSSL
 !ENDIF
 !ENDIF
@@ -159,6 +170,15 @@ MBEDTLS_LIBS   = mbedtls.lib mbedcrypto.lib mbedx509.lib
 !ENDIF
 
 
+!IFDEF CARES_PATH
+CARES_INC_DIR  = $(CARES_PATH)\include
+CARES_LIB_DIR  = $(CARES_PATH)\lib
+CARES_LFLAGS   = $(CARES_LFLAGS) "/LIBPATH:$(CARES_LIB_DIR)"
+!ELSE
+CARES_INC_DIR  = $(DEVEL_INCLUDE)/cares
+CARES_LIB_DIR  = $(DEVEL_LIB)
+!ENDIF
+
 !IF "$(WITH_CARES)"=="dll"
 !IF "$(DEBUG)"=="yes"
 CARES_LIBS     = caresd.lib
@@ -178,15 +198,25 @@ CARES          = static
 !ENDIF
 
 !IFDEF USE_CARES
-CARES_CFLAGS   = /DUSE_ARES /I"$(DEVEL_INCLUDE)/cares"
+CARES_CFLAGS   = /DUSE_ARES /I"$(CARES_INC_DIR)"
+!ENDIF
+
+
+!IFDEF ZLIB_PATH
+ZLIB_INC_DIR = $(ZLIB_PATH)\include
+ZLIB_LIB_DIR = $(ZLIB_PATH)\lib
+ZLIB_LFLAGS  = $(ZLIB_LFLAGS) "/LIBPATH:$(ZLIB_LIB_DIR)"
+!ELSE
+ZLIB_INC_DIR = $(DEVEL_INCLUDE)
+ZLIB_LIB_DIR = $(DEVEL_LIB)
 !ENDIF
 
 # Depending on how zlib is built the libraries have different names, we 
 # try to handle them all. 
 !IF "$(WITH_ZLIB)"=="dll"
-!IF EXISTS("$(DEVEL_LIB)\zlibwapi.lib")
+!IF EXISTS("$(ZLIB_LIB_DIR)\zlibwapi.lib")
 ZLIB_LIBS = zlibwapi.lib
-!ELSEIF EXISTS("$(DEVEL_LIB)\zdll.lib")
+!ELSEIF EXISTS("$(ZLIB_LIB_DIR)\zdll.lib")
 ZLIB_LIBS   = zdll.lib
 !ELSE
 ZLIB_LIBS   = zlib.lib
@@ -194,9 +224,9 @@ ZLIB_LIBS   = zlib.lib
 USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
-!IF EXISTS("$(DEVEL_LIB)\zlibstat.lib")
+!IF EXISTS("$(ZLIB_LIB_DIR)\zlibstat.lib")
 ZLIB_LIBS   = zlibstat.lib
-!ELSEIF EXISTS("$(DEVEL_LIB)\zlib.lib")
+!ELSEIF EXISTS("$(ZLIB_LIB_DIR)\zlib.lib")
 ZLIB_LIBS   = zlib.lib
 !ELSE
 ZLIB_LIBS   = zlib_a.lib
@@ -206,23 +236,38 @@ ZLIB        = static
 !ENDIF
 
 !IFDEF USE_ZLIB
-ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
+ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I"$(ZLIB_INC_DIR)"
 !ENDIF
 
+
+!IFDEF SSH2_PATH
+SSH2_INC_DIR= $(SSH2_PATH)\include
+SSH2_LIB_DIR= $(SSH2_PATH)\lib
+SSH2_LFLAGS = $(SSH2_LFLAGS) "/LIBPATH:$(SSH2_LIB_DIR)"
+!ELSE
+SSH2_LIB_DIR= $(DEVEL_LIB)
+SSH2_INC_DIR= $(DEVEL_INCLUDE)/libssh2
+!ENDIF
 
 !IF "$(WITH_SSH2)"=="dll"
 SSH2_LIBS   = libssh2.lib
 USE_SSH2    = true
 SSH2        = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
-SSH2_LIBS   = libssh2_a.lib user32.lib
+# libssh2 NMakefile on Windows at default creates a static library without _a suffix
+!IF EXISTS("$(SSH2_LIB_DIR)\libssh2.lib")
+SSH2_LIBS   = libssh2.lib
+!ELSE
+SSH2_LIBS   = libssh2_a.lib
+!ENDIF
+WIN_LIBS     = $(WIN_LIBS) user32.lib
 USE_SSH2    = true
 SSH2        = static
 !ENDIF
 
 !IFDEF USE_SSH2
 SSH2_CFLAGS = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
-SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
+SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(SSH2_INC_DIR)
 !ENDIF
 
 
@@ -330,7 +375,7 @@ CURL_RC_FLAGS = /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
 
 !IF "$(AS_DLL)" == "true"
 
-LNK       = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+LNK       = $(LNKDLL) $(LFLAGS) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 !IF "$(DEBUG)"=="yes"
 TARGET    = $(LIB_NAME_DLL_DEBUG)
 LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
@@ -354,7 +399,7 @@ PDB      = $(PDB_NAME_STATIC_DEBUG)
 TARGET   = $(LIB_NAME_STATIC)
 PDB      = $(PDB_NAME_STATIC)
 !ENDIF
-LNK      = $(LNKLIB) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+LNK      = $(LNKLIB) /out:$(LIB_DIROBJ)\$(TARGET)
 CURL_CC  = $(CURL_CC) $(CFLAGS_LIBCURL_STATIC)
 
 # AS_DLL
@@ -416,16 +461,6 @@ DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 #
 CURL_LINK = link.exe /incremental:no /libpath:"$(DIRDIST)\lib"
 
-#!IF "$(CFG)" == "release-ssh2-ssl-dll-zlib"
-#TARGET   = $(LIB_NAME_STATIC)
-#LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(ZLIBLIBS)  $(SSH2LIBS) $(SSL_LFLAGS) $(ZLIB_LFLAGS) $(LFLAGSSSH) /out:$(LIB_DIROBJ)\$(TARGET)
-#CC       = $(CCNODBG) $(RTLIB) $(SSL_CFLAGS) $(ZLIB_CFLAGS) $(CFLAGSLIB)  $(SSH2_CFLAGS)
-#CFGSET   = TRUE
-#!ENDIF
-
-#######################
-# Only the clean target can be used if a config was not provided.
-#
 !IF "$(CFGSET)" != "FALSE"
 # A mode was provided, so the library can be built.
 #
@@ -462,7 +497,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo GenPDB:     $(GEN_PDB)
 	@echo Debug:      $(DEBUG)
 	@echo Machine:    $(MACHINE)
-	$(LNK) $(LFLAGS) $(LIB_OBJS)
+	$(LNK) $(LIB_OBJS)
 	@echo Copying libs...
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_DLL) copy $(LIB_DIROBJ)\$(LIB_NAME_DLL)       $(DIRDIST)\bin\ /y >nul 2<&1
 	@if exist $(LIB_DIROBJ)\$(LIB_NAME_STATIC) copy $(LIB_DIROBJ)\$(LIB_NAME_STATIC)    $(DIRDIST)\lib\ /y >nul 2<&1
