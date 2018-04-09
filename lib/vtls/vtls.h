@@ -72,7 +72,7 @@ struct Curl_ssl {
 
   CURLcode (*md5sum)(unsigned char *input, size_t inputlen,
                      unsigned char *md5sum, size_t md5sumlen);
-  void (*sha256sum)(const unsigned char *input, size_t inputlen,
+  CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
 };
 

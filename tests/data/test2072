@@ -6,6 +6,13 @@ FILE
 </info>
 
 <reply>
+<data>
+foo
+   bar
+bar
+   foo
+moo
+</data>
 </reply>
 
 # Client-side
@@ -14,12 +21,15 @@ FILE
 file
 </server>
 <name>
-file:// with SMB path
+file:// with unix path resolution behavior for the case of extra slashes
 </name>
 <command>
-file:////bad-host%PWD/log/test1145.txt
+file:////%PWD/log/test2072.txt
 </command>
-<file name="log/test1145.txt">
+<precheck>
+perl -e "print 'Test requires a unix system' if ( $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos');"
+</precheck>
+<file name="log/test2072.txt">
 foo
    bar
 bar
@@ -30,9 +40,5 @@ moo
 
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_URL_MALFORMAT is error code 3
-<errorcode>
-3
-</errorcode>
 </verify>
 </testcase>

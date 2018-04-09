@@ -65,7 +65,7 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
     result = curl_easy_getinfo(curlHandlePtr,
                                CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                                &remoteFileSizeByte);
-    printf("filesize: %ld \n", remoteFileSizeByte);
+    printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
   }
   curl_easy_cleanup(curlHandlePtr);
 
@@ -96,7 +96,11 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
   curl_easy_setopt(curlhandle, CURLOPT_READFUNCTION, readfunc);
   curl_easy_setopt(curlhandle, CURLOPT_READDATA, f);
 
+#ifdef _WIN32
+  _fseeki64(f, remoteFileSizeByte, SEEK_SET);
+#else
   fseek(f, remoteFileSizeByte, SEEK_SET);
+#endif
   curl_easy_setopt(curlhandle, CURLOPT_APPEND, 1L);
   result = curl_easy_perform(curlhandle);
 

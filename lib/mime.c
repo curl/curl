@@ -1193,7 +1193,10 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
   }
 
   /* Duplicate other fields. */
-  dst->encoder = src->encoder;
+  if(dst != NULL)
+    dst->encoder = src->encoder;
+  else
+    res = CURLE_WRITE_ERROR;
   if(!res)
     res = curl_mime_type(dst, src->mimetype);
   if(!res)

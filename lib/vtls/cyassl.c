@@ -966,7 +966,7 @@ static CURLcode Curl_cyassl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
+static CURLcode Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
                                   size_t tmplen,
                                   unsigned char *sha256sum /* output */,
                                   size_t unused)
@@ -976,6 +976,7 @@ static void Curl_cyassl_sha256sum(const unsigned char *tmp, /* input */
   InitSha256(&SHA256pw);
   Sha256Update(&SHA256pw, tmp, (word32)tmplen);
   Sha256Final(&SHA256pw, sha256sum);
+  return CURLE_OK;
 }
 
 static void *Curl_cyassl_get_internals(struct ssl_connect_data *connssl,
