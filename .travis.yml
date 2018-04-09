@@ -85,7 +85,7 @@ matrix:
           env: T=cmake
         - os: linux
           compiler: gcc
-          dist: precise
+          dist: trusty
           env: T=coverage
         - os: linux
           compiler: gcc
