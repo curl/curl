@@ -12,7 +12,7 @@ Building with Visual C++, prerequisites
 
    The latest Platform SDK can be downloaded freely from:
 
-    https://developer.microsoft.com/nl-nl/windows/downloads/sdk-archive
+    https://developer.microsoft.com/en-us/windows/downloads/sdk-archive
 
    If you are building with VC6 then you will also need the February 2003
    Edition of the Platform SDK which can be downloaded from:
