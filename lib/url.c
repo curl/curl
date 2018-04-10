@@ -2667,10 +2667,10 @@ static char *detect_proxy(struct connectdata *conn)
     proxy = prox; /* use this */
   }
   else {
-    envp = "all_proxy";
+    envp = (char *)"all_proxy";
     proxy = curl_getenv(envp); /* default proxy to use */
     if(!proxy) {
-      envp = "ALL_PROXY";
+      envp = (char *)"ALL_PROXY";
       proxy = curl_getenv(envp);
     }
   }
