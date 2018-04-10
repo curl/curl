@@ -113,6 +113,17 @@ static bool is_fatal_error(CURLcode code)
   return FALSE;
 }
 
+static bool is_smtp_url(struct OperationConfig *config, char *this_url)
+{
+  return curl_strnequal(this_url, "smtp://", 7) ||
+         curl_strnequal(this_url, "smtps://", 8) ||
+         (!strstr(this_url, "://") &&
+          (config->proto_default ?
+           (curl_strequal(config->proto_default, "smtp") ||
+            curl_strequal(config->proto_default, "smtps")) :
+           curl_strnequal(this_url, "smtp.", 5)));
+}
+
 #ifdef __VMS
 /*
  * get_vms_file_size does what it takes to get the real size of the file
@@ -612,10 +623,15 @@ static CURLcode operate_do(struct GlobalConfig *global,
            */
           struct_stat fileinfo;
 
-          this_url = add_file_name_to_url(curl, this_url, uploadfile);
-          if(!this_url) {
-            result = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+          /* Append uploadfile to the URL if it does not already end in a
+             filename and it is not an SMTP URL. Any SMTP URL path is sent as
+             the EHLO and it's incorrect for uploadfile to be part of that. */
+          if(!is_smtp_url(config, this_url)) {
+            this_url = add_file_name_to_url(curl, this_url, uploadfile);
+            if(!this_url) {
+              result = CURLE_OUT_OF_MEMORY;
+              goto show_error;
+            }
           }
           /* VMS Note:
            *
