@@ -2662,13 +2662,19 @@ static char *detect_proxy(struct connectdata *conn)
     prox = curl_getenv(proxy_env);
   }
 
-  if(prox)
+  envp = proxy_env;
+  if(prox) {
     proxy = prox; /* use this */
-  else {
-    proxy = curl_getenv("all_proxy"); /* default proxy to use */
-    if(!proxy)
-      proxy = curl_getenv("ALL_PROXY");
   }
+  else {
+    envp = "all_proxy";
+    proxy = curl_getenv(envp); /* default proxy to use */
+    if(!proxy) {
+      envp = "ALL_PROXY";
+      proxy = curl_getenv(envp);
+    }
+  }
+  infof(conn->data, "Uses proxy env variable %s == '%s'\n", envp, proxy);
 
   return proxy;
 }
