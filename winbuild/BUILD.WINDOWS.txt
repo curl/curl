@@ -89,12 +89,24 @@ where <options> is one or many of:
   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
-                                 Requires Windows Vista or later, or installation from:
-                                 https://www.microsoft.com/downloads/details.aspx?FamilyID=AD6158D7-DDBA-416A-9109-07607425A815
+                                 Requires Windows Vista or later
   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
   DEBUG=<yes or no>            - Debug builds
   MACHINE=<x86 or x64>         - Target architecture (default is x86)
+  CARES_PATH=<path to cares>   - Alternative to the WITH_DEVEL option. 
+                                 Provided path should point to c-ares include
+                                 and lib sub directories.
+  SSH2_PATH=<path to libSSH2>  - Alternative to the WITH_DEVEL option. 
+                                 Provided path should point to libSSH2 include
+                                 and lib sub directories.
+  SSL_PATH=<path to OpenSSL>   - Alternative to the WITH_DEVEL option. 
+                                 Provided path should point to OpenSSL include
+                                 and lib sub directories.
+  ZLIB_PATH=<path to zlib>     - Alternative to the WITH_DEVEL option. 
+                                 Provided path should point to zlib include
+                                 and lib sub directories.
+
 
 Static linking of Microsoft's C RunTime (CRT):
 ==============================================

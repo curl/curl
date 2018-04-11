@@ -49,14 +49,25 @@ CFGSET=true
 !MESSAGE   WITH_SSH2=<dll or static>    - Enable libSSH2 support, DLL or static
 !MESSAGE   WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
 !MESSAGE   ENABLE_IDN=<yes or no>       - Enable use of Windows IDN APIs, defaults to yes
-!MESSAGE                                  Requires Windows Vista or later, or installation from:
-!MESSAGE                                  https://www.microsoft.com/en-us/download/details.aspx?id=734
+!MESSAGE                                  Requires Windows Vista or later
 !MESSAGE   ENABLE_IPV6=<yes or no>      - Enable IPv6, defaults to yes
 !MESSAGE   ENABLE_SSPI=<yes or no>      - Enable SSPI support, defaults to yes
 !MESSAGE   ENABLE_WINSSL=<yes or no>    - Enable native Windows SSL support, defaults to yes
 !MESSAGE   GEN_PDB=<yes or no>          - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>            - Debug builds
 !MESSAGE   MACHINE=<x86 or x64>         - Target architecture (default x64 on AMD64, x86 on others)
+!MESSAGE   CARES_PATH=<path to cares>   - Alternative to the WITH_DEVEL option. 
+!MESSAGE                                  Provided path should point to c-ares include
+!MESSAGE                                  and lib sub directories.
+!MESSAGE   SSH2_PATH=<path to libSSH2>  - Alternative to the WITH_DEVEL option. 
+!MESSAGE                                  Provided path should point to libSSH2 include
+!MESSAGE                                  and lib sub directories.
+!MESSAGE   SSL_PATH=<path to OpenSSL>   - Alternative to the WITH_DEVEL option. 
+!MESSAGE                                  Provided path should point to OpenSSL include
+!MESSAGE                                  and lib sub directories.
+!MESSAGE   ZLIB_PATH=<path to zlib>     - Alternative to the WITH_DEVEL option. 
+!MESSAGE                                  Provided path should point to zlib include
+!MESSAGE                                  and lib sub directories.
 !ERROR please choose a valid mode
 
 !ENDIF
