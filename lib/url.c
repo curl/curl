@@ -2959,9 +2959,15 @@ static CURLcode create_conn_helper_init_proxy(struct connectdata *conn)
   }
 
   if(!data->set.str[STRING_NOPROXY]) {
-    no_proxy = curl_getenv("no_proxy");
-    if(!no_proxy)
-      no_proxy = curl_getenv("NO_PROXY");
+    const char *p = "no_proxy";
+    no_proxy = curl_getenv(p);
+    if(!no_proxy) {
+      p = "NO_PROXY";
+      no_proxy = curl_getenv(p);
+    }
+    if(no_proxy) {
+      infof(conn->data, "Uses proxy env variable %s == '%s'\n", p, no_proxy);
+    }
   }
 
   if(check_noproxy(conn->host.name, data->set.str[STRING_NOPROXY] ?
