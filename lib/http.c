@@ -468,7 +468,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   return CURLE_OK;
 }
 
-/* 
+/*
  * Curl_http_input_auth_init(). Init auth context for output
  * headers at next request. Uset for negotiate and ntlm auth
  */
