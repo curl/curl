@@ -4,6 +4,7 @@
 [![Coverity passed](https://scan.coverity.com/projects/curl/badge.svg)](https://scan.coverity.com/projects/curl)
 [![Build Status](https://travis-ci.org/curl/curl.svg?branch=master)](https://travis-ci.org/curl/curl)
 [![Coverage Status](https://coveralls.io/repos/github/curl/curl/badge.svg)](https://coveralls.io/github/curl/curl)
+[![Backers on Open Collective](https://opencollective.com/curl/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/curl/sponsors/badge.svg)](#sponsors)
 
 Curl is a command-line tool for transferring data specified with URL
 syntax. Find out how to use curl by reading [the curl.1 man
@@ -49,3 +50,29 @@ To download the very latest source from the Git server do this:
 Curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
 Tekniska Högskolan. This notice is included here to comply with the
 distribution terms.
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/curl#backer)]
+
+<a href="https://opencollective.com/curl#backers" target="_blank"><img src="https://opencollective.com/curl/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a
+link to your website. [[Become a
+sponsor](https://opencollective.com/curl#sponsor)]
+
+<a href="https://opencollective.com/curl/sponsor/0/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/1/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/2/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/3/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/4/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/5/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/6/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/7/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/8/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/curl/sponsor/9/website" target="_blank"><img src="https://opencollective.com/curl/sponsor/9/avatar.svg"></a>
+
+
