@@ -431,7 +431,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 }
 
 /* Connects results to the list */
-static void compound_results(struct ResolverResults *res,
+static void compound_results(Curl_addrinfo **res,
                              Curl_addrinfo *ai)
 {
   Curl_addrinfo *ai_tail;
@@ -443,8 +443,8 @@ static void compound_results(struct ResolverResults *res,
     ai_tail = ai_tail->ai_next;
 
   /* Add the new results to the list of old results. */
-  ai_tail->ai_next = res->temp_ai;
-  res->temp_ai = ai;
+  ai_tail->ai_next = *res;
+  *res = ai;
 }
 
 /*
@@ -477,7 +477,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
   if(CURL_ASYNC_SUCCESS == status) {
     Curl_addrinfo *ai = Curl_he2ai(hostent, conn->async.port);
     if(ai) {
-      compound_results(res, ai);
+      compound_results(&res->temp_ai, ai);
     }
   }
   /* A successful result overwrites any previous error */
@@ -534,6 +534,31 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   case CURL_IPRESOLVE_V6:
     family = PF_INET6;
     break;
+  }
+
+  /* File Lookup, if successful we do not need make a DNS request */
+  struct ares_options opt = { 0 };
+  int optmask = ARES_OPT_LOOKUPS;
+  if(family == PF_UNSPEC && Curl_ipv6works() &&
+     ares_save_options((ares_channel)data->state.resolver, &opt,
+                       &optmask) == ARES_SUCCESS) {
+    Curl_addrinfo* ai = NULL;
+    if(opt.lookups && *(opt.lookups) == 'f') {
+      struct hostent* host;
+      if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
+                                 PF_INET, &host) == ARES_SUCCESS) {
+        ai = Curl_he2ai(host, port);
+        ares_free_hostent(host);
+      }
+      if(ares_gethostbyname_file((ares_channel)data->state.resolver, hostname,
+                                 PF_INET6, &host) == ARES_SUCCESS) {
+        compound_results(&ai, Curl_he2ai(host, port));
+        ares_free_hostent(host);
+      }
+    }
+    ares_delete_options(opt);
+    if(ai)
+      return ai;
   }
 #endif /* CURLRES_IPV6 */
 
