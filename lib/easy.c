@@ -892,6 +892,9 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* Duplicate mime data. */
   result = Curl_mime_duppart(&dst->set.mimepost, &src->set.mimepost);
 
+  if(src->set.resolve)
+    dst->change.resolve = dst->set.resolve;
+
   return result;
 }
 
