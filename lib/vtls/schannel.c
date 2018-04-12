@@ -46,9 +46,6 @@
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
-#include <schnlsp.h>
-#include <schannel.h>
-#include "curl_sspi.h"
 #include "schannel.h"
 #include "vtls.h"
 #include "sendf.h"
@@ -61,7 +58,6 @@
 #include "x509asn1.h"
 #include "curl_printf.h"
 #include "system_win32.h"
-#include "hostcheck.h"
 
  /* The last #include file should be: */
 #include "curl_memory.h"
@@ -133,48 +129,11 @@
 #  define CALG_SHA_256 0x0000800c
 #endif
 
-/* Structs to store Schannel handles */
-struct curl_schannel_cred {
-  CredHandle cred_handle;
-  TimeStamp time_stamp;
-  int refcount;
-};
-
-struct curl_schannel_ctxt {
-  CtxtHandle ctxt_handle;
-  TimeStamp time_stamp;
-};
-
-struct ssl_backend_data {
-  struct curl_schannel_cred *cred;
-  struct curl_schannel_ctxt *ctxt;
-  SecPkgContext_StreamSizes stream_sizes;
-  size_t encdata_length, decdata_length;
-  size_t encdata_offset, decdata_offset;
-  unsigned char *encdata_buffer, *decdata_buffer;
-  /* encdata_is_incomplete: if encdata contains only a partial record that
-     can't be decrypted without another Curl_read_plain (that is, status is
-     SEC_E_INCOMPLETE_MESSAGE) then set this true. after Curl_read_plain writes
-     more bytes into encdata then set this back to false. */
-  bool encdata_is_incomplete;
-  unsigned long req_flags, ret_flags;
-  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
-  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
-  bool recv_connection_closed; /* true if connection closed, regardless how */
-  bool use_alpn; /* true if ALPN is used for this connection */
-};
-
-#define BACKEND connssl->backend
-
 static Curl_recv schannel_recv;
 static Curl_send schannel_send;
 
 static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
                                     const char *pinnedpubkey);
-
-#ifdef _WIN32_WCE
-static CURLcode verify_certificate(struct connectdata *conn, int sockindex);
-#endif
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
                           void *BufDataPtr, unsigned long BufByteSize)
@@ -275,6 +234,24 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
   BACKEND->use_alpn = false;
 #endif
 
+#ifdef _WIN32_WCE
+  /* certificate validation on CE doesn't seem to work right; we'll
+   * do it following a more manual process. */
+  BACKEND->use_manual_cred_validation = true;
+#elif defined(HAVE_EXCLUSIVE_TRUST_MODE)
+  /* Using an application-specific certificate store is possible, manual
+   * credential validation will be performed if requested by the SSL config */
+  BACKEND->use_manual_cred_validation = SSL_CONN_CONFIG(CAfile) != NULL;
+#else
+  /* Using an application-specific certificate store is not possible, do
+   * not perform manual credential validation */
+  BACKEND->use_manual_cred_validation = false;
+  if(SSL_CONN_CONFIG(CAfile))
+      infof(data, "schannel: the WinSSL version does not support using the "
+            "CAINFO option, falling back to using the default WinSSL "
+            "certificate store configuration\n");
+#endif
+
   BACKEND->cred = NULL;
 
   /* check for an existing re-usable credential handle */
@@ -298,26 +275,23 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     schannel_cred.dwVersion = SCHANNEL_CRED_VERSION;
 
     if(conn->ssl_config.verifypeer) {
-#ifdef _WIN32_WCE
-      /* certificate validation on CE doesn't seem to work right; we'll
-         do it following a more manual process. */
-      schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
-        SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
-        SCH_CRED_IGNORE_REVOCATION_OFFLINE;
-#else
-      schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
+      if(BACKEND->use_manual_cred_validation)
+        schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION;
+      else
+        schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
+
       /* TODO s/data->set.ssl.no_revoke/SSL_SET_OPTION(no_revoke)/g */
-      if(data->set.ssl.no_revoke)
+      if(data->set.ssl.no_revoke) {
         schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                                  SCH_CRED_IGNORE_REVOCATION_OFFLINE;
-      else
-        schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
-#endif
-      if(data->set.ssl.no_revoke)
+
         infof(data, "schannel: disabled server certificate revocation "
                     "checks\n");
-      else
+      }
+      else {
+        schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
         infof(data, "schannel: checking server certificate revocation\n");
+      }
     }
     else {
       schannel_cred.dwFlags = SCH_CRED_MANUAL_CRED_VALIDATION |
@@ -780,12 +754,9 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     }
   }
 
-#ifdef _WIN32_WCE
-  /* Windows CE doesn't do any server certificate validation.
-     We have to do it manually. */
-  if(conn->ssl_config.verifypeer)
+  if(conn->ssl_config.verifypeer && BACKEND->use_manual_cred_validation) {
     return verify_certificate(conn, sockindex);
-#endif
+  }
 
   return CURLE_OK;
 }
@@ -1749,146 +1720,6 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
 
   return result;
 }
-
-#ifdef _WIN32_WCE
-static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
-{
-  SECURITY_STATUS status;
-  struct Curl_easy *data = conn->data;
-  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  CURLcode result = CURLE_OK;
-  CERT_CONTEXT *pCertContextServer = NULL;
-  const CERT_CHAIN_CONTEXT *pChainContext = NULL;
-  const char * const conn_hostname = SSL_IS_PROXY() ?
-    conn->http_proxy.host.name :
-    conn->host.name;
-
-  status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-                                            SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                            &pCertContextServer);
-
-  if((status != SEC_E_OK) || (pCertContextServer == NULL)) {
-    failf(data, "schannel: Failed to read remote certificate context: %s",
-          Curl_sspi_strerror(conn, status));
-    result = CURLE_PEER_FAILED_VERIFICATION;
-  }
-
-  if(result == CURLE_OK) {
-    CERT_CHAIN_PARA ChainPara;
-    memset(&ChainPara, 0, sizeof(ChainPara));
-    ChainPara.cbSize = sizeof(ChainPara);
-
-    if(!CertGetCertificateChain(NULL,
-                                pCertContextServer,
-                                NULL,
-                                pCertContextServer->hCertStore,
-                                &ChainPara,
-                                (data->set.ssl.no_revoke ? 0 :
-                                 CERT_CHAIN_REVOCATION_CHECK_CHAIN),
-                                NULL,
-                                &pChainContext)) {
-      failf(data, "schannel: CertGetCertificateChain failed: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
-      pChainContext = NULL;
-      result = CURLE_PEER_FAILED_VERIFICATION;
-    }
-
-    if(result == CURLE_OK) {
-      CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
-      DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
-      dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
-      if(dwTrustErrorMask) {
-        if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_REVOKED");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_PARTIAL_CHAIN");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_UNTRUSTED_ROOT");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_NOT_TIME_VALID");
-        else
-          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08x",
-                dwTrustErrorMask);
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-    }
-  }
-
-  if(result == CURLE_OK) {
-    if(conn->ssl_config.verifyhost) {
-      TCHAR cert_hostname_buff[256];
-      DWORD len;
-
-      /* TODO: Fix this for certificates with multiple alternative names.
-      Right now we're only asking for the first preferred alternative name.
-      Instead we'd need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
-      (if WinCE supports that?) and run this section in a loop for each.
-      https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
-      curl: (51) schannel: CertGetNameString() certificate hostname
-      (.google.com) did not match connection (google.com)
-      */
-      len = CertGetNameString(pCertContextServer,
-                              CERT_NAME_DNS_TYPE,
-                              CERT_NAME_DISABLE_IE4_UTF8_FLAG,
-                              NULL,
-                              cert_hostname_buff,
-                              256);
-      if(len > 0) {
-        const char *cert_hostname;
-
-        /* Comparing the cert name and the connection hostname encoded as UTF-8
-         * is acceptable since both values are assumed to use ASCII
-         * (or some equivalent) encoding
-         */
-        cert_hostname = Curl_convert_tchar_to_UTF8(cert_hostname_buff);
-        if(!cert_hostname) {
-          result = CURLE_OUT_OF_MEMORY;
-        }
-        else{
-          int match_result;
-
-          match_result = Curl_cert_hostcheck(cert_hostname, conn->host.name);
-          if(match_result == CURL_HOST_MATCH) {
-            infof(data,
-                  "schannel: connection hostname (%s) validated "
-                  "against certificate name (%s)\n",
-                  conn->host.name,
-                  cert_hostname);
-            result = CURLE_OK;
-          }
-          else{
-            failf(data,
-                  "schannel: connection hostname (%s) "
-                  "does not match certificate name (%s)",
-                  conn->host.name,
-                  cert_hostname);
-            result = CURLE_PEER_FAILED_VERIFICATION;
-          }
-          Curl_unicodefree(cert_hostname);
-        }
-      }
-      else {
-        failf(data,
-              "schannel: CertGetNameString did not provide any "
-              "certificate name information");
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-    }
-  }
-
-  if(pChainContext)
-    CertFreeCertificateChain(pChainContext);
-
-  if(pCertContextServer)
-    CertFreeCertificateContext(pCertContextServer);
-
-  return result;
-}
-#endif /* _WIN32_WCE */
 
 static void Curl_schannel_checksum(const unsigned char *input,
                       size_t inputlen,

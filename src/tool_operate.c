@@ -228,52 +228,67 @@ static CURLcode operate_do(struct GlobalConfig *global,
   if(!config->cacert &&
      !config->capath &&
      !config->insecure_ok) {
-    char *env;
-    env = curlx_getenv("CURL_CA_BUNDLE");
-    if(env) {
-      config->cacert = strdup(env);
-      if(!config->cacert) {
-        curl_free(env);
-        helpf(global->errors, "out of memory\n");
-        result = CURLE_OUT_OF_MEMORY;
-        goto quit_curl;
-      }
+    struct curl_tlssessioninfo *tls_backend_info = NULL;
+
+    /* With the addition of CAINFO support for Schannel, this search could find
+     * a certificate bundle that was previously ignored. To maintain backward
+     * compatibility, only perform this search if not using Schannel.
+     */
+    result = curl_easy_getinfo(config->easy,
+                               CURLINFO_TLS_SSL_PTR,
+                               &tls_backend_info);
+    if(result) {
+      goto quit_curl;
     }
-    else {
-      env = curlx_getenv("SSL_CERT_DIR");
+
+    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
+      char *env;
+      env = curlx_getenv("CURL_CA_BUNDLE");
       if(env) {
-        config->capath = strdup(env);
-        if(!config->capath) {
+        config->cacert = strdup(env);
+        if(!config->cacert) {
           curl_free(env);
           helpf(global->errors, "out of memory\n");
           result = CURLE_OUT_OF_MEMORY;
           goto quit_curl;
         }
-        capath_from_env = true;
       }
       else {
-        env = curlx_getenv("SSL_CERT_FILE");
+        env = curlx_getenv("SSL_CERT_DIR");
         if(env) {
-          config->cacert = strdup(env);
-          if(!config->cacert) {
+          config->capath = strdup(env);
+          if(!config->capath) {
             curl_free(env);
             helpf(global->errors, "out of memory\n");
             result = CURLE_OUT_OF_MEMORY;
             goto quit_curl;
           }
+          capath_from_env = true;
+        }
+        else {
+          env = curlx_getenv("SSL_CERT_FILE");
+          if(env) {
+            config->cacert = strdup(env);
+            if(!config->cacert) {
+              curl_free(env);
+              helpf(global->errors, "out of memory\n");
+              result = CURLE_OUT_OF_MEMORY;
+              goto quit_curl;
+            }
+          }
         }
       }
-    }
 
-    if(env)
-      curl_free(env);
+      if(env)
+        curl_free(env);
 #ifdef WIN32
-    else {
-      result = FindWin32CACert(config, "curl-ca-bundle.crt");
-      if(result)
-        goto quit_curl;
-    }
+      else {
+        result = FindWin32CACert(config, "curl-ca-bundle.crt");
+        if(result)
+          goto quit_curl;
+      }
 #endif
+    }
   }
 
   if(config->postfields) {

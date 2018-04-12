@@ -26,9 +26,59 @@
 
 #ifdef USE_SCHANNEL
 
+#include <schnlsp.h>
+#include <schannel.h>
+#include "curl_sspi.h"
+
 #include "urldata.h"
 
 extern const struct Curl_ssl Curl_ssl_schannel;
+
+/* Define whether the CERT_CHAIN_ENGINE_CONFIG structure has support for
+ * setting exclusive trust stores. This is used to implement the CAINFO easy
+ * option for Schannel.
+ */
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0601)
+#define HAVE_EXCLUSIVE_TRUST_MODE 1
+#endif
+
+CURLcode verify_certificate(struct connectdata *conn, int sockindex);
+
+/* Structs to store Schannel handles */
+
+struct curl_schannel_cred {
+  CredHandle cred_handle;
+  TimeStamp time_stamp;
+  int refcount;
+};
+
+struct curl_schannel_ctxt {
+  CtxtHandle ctxt_handle;
+  TimeStamp time_stamp;
+};
+
+struct ssl_backend_data {
+  struct curl_schannel_cred *cred;
+  struct curl_schannel_ctxt *ctxt;
+  SecPkgContext_StreamSizes stream_sizes;
+  size_t encdata_length, decdata_length;
+  size_t encdata_offset, decdata_offset;
+  unsigned char *encdata_buffer, *decdata_buffer;
+  /* encdata_is_incomplete: if encdata contains only a partial record that
+     can't be decrypted without another Curl_read_plain (that is, status is
+     SEC_E_INCOMPLETE_MESSAGE) then set this true. after Curl_read_plain writes
+     more bytes into encdata then set this back to false. */
+  bool encdata_is_incomplete;
+  unsigned long req_flags, ret_flags;
+  CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  bool recv_sspi_close_notify; /* true if connection closed by close_notify */
+  bool recv_connection_closed; /* true if connection closed, regardless how */
+  bool use_alpn; /* true if ALPN is used for this connection */
+  bool use_manual_cred_validation; /* true if manual cred validation is used */
+};
+
+/* Helper macro to reference the Schannel-specific data for the connection */
+#define BACKEND connssl->backend
 
 #endif /* USE_SCHANNEL */
 #endif /* HEADER_CURL_SCHANNEL_H */

@@ -25,4 +25,12 @@ should not be set. If the option is not set, then curl will use the
 certificates in the system and user Keychain to verify the peer, which is the
 preferred method of verifying the peer's certificate chain.
 
+(Windows only) If curl 7.60.0+ is built against the native SChannel SSL library
+(aka WinSSL) then this option may be available: If the build target was Windows
+7 or later then it is available, and if it was for an earlier version of
+Windows then it's not and SSL certificate validation with this option will
+fail. This option is for backward compatibility with other SSL engines; instead
+it is recommended to use Windows' store of root certificates (the default for
+WinSSL).
+
 If this option is used several times, the last one will be used.
