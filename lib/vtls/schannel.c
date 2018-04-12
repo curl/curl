@@ -306,14 +306,13 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 #else
       schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
-      /* TODO s/data->set.ssl.no_revoke/SSL_SET_OPTION(no_revoke)/g */
-      if(data->set.ssl.no_revoke)
+      if(SSL_SET_OPTION(no_revoke))
         schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                                  SCH_CRED_IGNORE_REVOCATION_OFFLINE;
       else
         schannel_cred.dwFlags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
 #endif
-      if(data->set.ssl.no_revoke)
+      if(SSL_SET_OPTION(no_revoke))
         infof(data, "schannel: disabled server certificate revocation "
                     "checks\n");
       else
@@ -1783,7 +1782,7 @@ static CURLcode verify_certificate(struct connectdata *conn, int sockindex)
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (data->set.ssl.no_revoke ? 0 :
+                                (SSL_SET_OPTION(no_revoke) ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {

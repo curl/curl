@@ -30,7 +30,8 @@ DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cer
   proxy-crlfile.d proxy.d proxy-digest.d proxy-header.d                 \
   proxy-insecure.d proxy-key.d proxy-key-type.d proxy-negotiate.d       \
   proxy-ntlm.d proxy-pass.d proxy-service-name.d                        \
-  proxy-ssl-allow-beast.d proxy-tlsauthtype.d proxy-tlspassword.d       \
+  proxy-ssl-allow-beast.d proxy-ssl-no-revoke.d                         \
+  proxy-tlsauthtype.d proxy-tlspassword.d                               \
   proxy-tlsuser.d proxy-tlsv1.d proxytunnel.d proxy-user.d pubkey.d     \
   quote.d random-file.d range.d raw.d referer.d remote-header-name.d    \
   remote-name-all.d remote-name.d remote-time.d request.d resolve.d     \
