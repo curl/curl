@@ -470,10 +470,11 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
 
 /* 
  * Curl_http_input_auth_init(). Init auth context for output
- *headers at next request. Uset for negotiate and ntlm auth
+ * headers at next request. Uset for negotiate and ntlm auth
  */
 
-static CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn, bool proxy)
+static CURLcode Curl_http_input_auth_init_ctx(struct connectdata *conn,
+                                              bool proxy)
 {
   /*
    * This resource requires authentication
