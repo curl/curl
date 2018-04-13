@@ -22,6 +22,8 @@
 
 #include "curl_setup.h"
 
+#ifndef CURL_DOES_CONVERSIONS
+
 #undef _U
 #define _U (1<<0) /* upper case */
 #undef _L
@@ -120,3 +122,5 @@ int Curl_islower(int c)
     return FALSE;
   return (ascii[c] & (_L));
 }
+
+#endif /* !CURL_DOES_CONVERSIONS */
