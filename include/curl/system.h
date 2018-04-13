@@ -300,7 +300,9 @@
 
 #elif defined(__SUNPRO_C) /* Oracle Solaris Studio */
 #  if !defined(__LP64) && (defined(__ILP32) ||                          \
-                           defined(__i386) || defined(__sparcv8))
+                           defined(__i386) ||                           \
+                           defined(__sparcv8) ||                        \
+                           defined(__sparcv8plus))
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
