@@ -1419,14 +1419,36 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
              "I checked the 0.9.6 and 0.9.8 sources before my patch and
              it always 0-terminates an IA5String."
           */
-          if((altlen == strlen(altptr)) &&
-             /* if this isn't true, there was an embedded zero in the name
-                string and we cannot match it. */
-             Curl_cert_hostcheck(altptr, hostname)) {
-            dnsmatched = TRUE;
-            infof(data,
-                  " subjectAltName: host \"%s\" matched cert's \"%s\"\n",
-                  dispname, altptr);
+          if(altlen == strlen(altptr)) {
+#ifdef CURL_DOES_CONVERSIONS
+            /* Curl_cert_hostcheck uses host encoding, but we get ASCII from
+               OpenSSl.
+             */
+            char *altptr2 = strdup(altptr);
+            if(altptr2) {
+              if(Curl_convert_from_network(data, altptr2, altlen) == CURLE_OK)
+                                                                          {
+#else
+                const char *altptr2 = altptr;
+#endif
+                /* if this isn't true, there was an embedded zero in the name
+                   string and we cannot match it. */
+                if(Curl_cert_hostcheck(altptr2, hostname)) {
+                  dnsmatched = TRUE;
+                  infof(data,
+                        " subjectAltName: host \"%s\" matched cert's \"%s\"\n",
+                        dispname, altptr2);
+                }
+#ifdef CURL_DOES_CONVERSIONS
+              }
+              free(altptr2);
+            }
+            else {
+              failf(data,
+                    "SSL: out of memory when allocating temporary for "
+                    "subjectAltName");
+            }
+#endif
           }
           break;
 
