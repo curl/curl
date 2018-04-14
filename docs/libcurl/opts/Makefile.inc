@@ -3,9 +3,11 @@
 man_MANS =                                      \
   CURLINFO_ACTIVESOCKET.3                       \
   CURLINFO_APPCONNECT_TIME.3                    \
+  CURLINFO_APPCONNECT_TIME_T.3                  \
   CURLINFO_CERTINFO.3                           \
   CURLINFO_CONDITION_UNMET.3                    \
   CURLINFO_CONNECT_TIME.3                       \
+  CURLINFO_CONNECT_TIME_T.3                     \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD.3            \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD_T.3          \
   CURLINFO_CONTENT_LENGTH_UPLOAD.3              \
@@ -24,9 +26,11 @@ man_MANS =                                      \
   CURLINFO_LOCAL_IP.3                           \
   CURLINFO_LOCAL_PORT.3                         \
   CURLINFO_NAMELOOKUP_TIME.3                    \
+  CURLINFO_NAMELOOKUP_TIME_T.3                  \
   CURLINFO_NUM_CONNECTS.3                       \
   CURLINFO_OS_ERRNO.3                           \
   CURLINFO_PRETRANSFER_TIME.3                   \
+  CURLINFO_PRETRANSFER_TIME_T.3                 \
   CURLINFO_PRIMARY_IP.3                         \
   CURLINFO_PRIMARY_PORT.3                       \
   CURLINFO_PRIVATE.3                            \
@@ -35,6 +39,7 @@ man_MANS =                                      \
   CURLINFO_PROXY_SSL_VERIFYRESULT.3             \
   CURLINFO_REDIRECT_COUNT.3                     \
   CURLINFO_REDIRECT_TIME.3                      \
+  CURLINFO_REDIRECT_TIME_T.3                    \
   CURLINFO_REDIRECT_URL.3                       \
   CURLINFO_REQUEST_SIZE.3                       \
   CURLINFO_RESPONSE_CODE.3                      \
@@ -54,9 +59,11 @@ man_MANS =                                      \
   CURLINFO_SSL_ENGINES.3                        \
   CURLINFO_SSL_VERIFYRESULT.3                   \
   CURLINFO_STARTTRANSFER_TIME.3                 \
+  CURLINFO_STARTTRANSFER_TIME_T.3               \
   CURLINFO_TLS_SESSION.3                        \
   CURLINFO_TLS_SSL_PTR.3                        \
   CURLINFO_TOTAL_TIME.3                         \
+  CURLINFO_TOTAL_TIME_T.3                       \
   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE.3          \
   CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE.3        \
   CURLMOPT_MAXCONNECTS.3                        \

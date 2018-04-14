@@ -2527,7 +2527,17 @@ typedef enum {
   CURLINFO_SCHEME           = CURLINFO_STRING + 49,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 49
+  /* Preferably these would be defined conditionally based on the
+     sizeof curl_off_t being 64-bits */
+  CURLINFO_TOTAL_TIME_T     = CURLINFO_OFF_T + 50,
+  CURLINFO_NAMELOOKUP_TIME_T = CURLINFO_OFF_T + 51,
+  CURLINFO_CONNECT_TIME_T   = CURLINFO_OFF_T + 52,
+  CURLINFO_PRETRANSFER_TIME_T = CURLINFO_OFF_T + 53,
+  CURLINFO_STARTTRANSFER_TIME_T = CURLINFO_OFF_T + 54,
+  CURLINFO_REDIRECT_TIME_T  = CURLINFO_OFF_T + 55,
+  CURLINFO_APPCONNECT_TIME_T = CURLINFO_OFF_T + 56,
+
+  CURLINFO_LASTONE          = 56
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
