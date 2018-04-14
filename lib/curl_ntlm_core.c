@@ -745,11 +745,9 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
 
   /* Allocate the response */
-  ptr = malloc(len);
+  ptr = calloc(1, len);
   if(!ptr)
     return CURLE_OUT_OF_MEMORY;
-
-  memset(ptr, 0, len);
 
   /* Create the BLOB structure */
   snprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,

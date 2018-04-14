@@ -186,11 +186,9 @@ int GetOrSetUpData(int id, libdata_t **appData,
 
     app_data = (libdata_t *) get_app_data(id);
     if(!app_data) {
-      app_data = malloc(sizeof(libdata_t));
+      app_data = calloc(1, sizeof(libdata_t));
 
       if(app_data) {
-        memset(app_data, 0, sizeof(libdata_t));
-
         app_data->tenbytes = malloc(10);
         app_data->lock     = NXMutexAlloc(0, 0, &liblock);
 

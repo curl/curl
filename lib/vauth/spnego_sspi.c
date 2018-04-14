@@ -153,11 +153,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       nego->p_identity = NULL;
 
     /* Allocate our credentials handle */
-    nego->credentials = malloc(sizeof(CredHandle));
+    nego->credentials = calloc(1, sizeof(CredHandle));
     if(!nego->credentials)
       return CURLE_OUT_OF_MEMORY;
-
-    memset(nego->credentials, 0, sizeof(CredHandle));
 
     /* Acquire our credentials handle */
     nego->status =
@@ -170,11 +168,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       return CURLE_LOGIN_DENIED;
 
     /* Allocate our new context handle */
-    nego->context = malloc(sizeof(CtxtHandle));
+    nego->context = calloc(1, sizeof(CtxtHandle));
     if(!nego->context)
       return CURLE_OUT_OF_MEMORY;
-
-    memset(nego->context, 0, sizeof(CtxtHandle));
   }
 
   if(chlg64 && *chlg64) {
