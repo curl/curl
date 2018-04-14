@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,8 +51,6 @@ void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 #define CLIENTWRITE_HEADER (1<<1)
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
-CURLcode Curl_client_chop_write(struct connectdata *conn, int type, char *ptr,
-                                size_t len) WARN_UNUSED_RESULT;
 CURLcode Curl_client_write(struct connectdata *conn, int type, char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 

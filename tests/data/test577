@@ -1,0 +1,55 @@
+<testcase>
+
+#Informational
+<info>
+<keywords>
+RTSP
+OPTIONS
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+RTSP/1.1234567 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Curl-Private: swsclose
+</data>
+<datacheck>
+</datacheck>
+</reply>
+
+# Client-Side
+<client>
+<server>
+rtsp
+</server>
+<tool>
+lib567
+</tool>
+
+<name>
+Funny RTSP version in response
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/577
+</command>
+</client>
+
+<verify>
+<protocol>
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/577 RTSP/1.0
+CSeq: 1
+User-Agent: test567
+Test-Number: 567
+
+</protocol>
+# 8 == CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
+</verify>
+
+</testcase>

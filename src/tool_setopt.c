@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,9 @@
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
 #include "tool_setopt.h"
+#include "tool_convert.h"
 
+#include "mime.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 /* Lookup tables for converting setopt values back to symbols */
@@ -170,6 +172,7 @@ static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   NV1(CURLOPT_TCP_NODELAY, 1),
   NV1(CURLOPT_PROXY_SSL_VERIFYPEER, 1),
   NV1(CURLOPT_PROXY_SSL_VERIFYHOST, 1),
+  NV1(CURLOPT_SOCKS5_AUTH, 1),
   NVEND
 };
 
@@ -207,37 +210,43 @@ static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 
 /* Escape string to C string syntax.  Return NULL if out of memory.
  * Is this correct for those wacky EBCDIC guys? */
-static char *c_escape(const char *str)
+static char *c_escape(const char *str, size_t len)
 {
-  size_t len = 0;
   const char *s;
   unsigned char c;
   char *escaped, *e;
+
+  if(len == CURL_ZERO_TERMINATED)
+    len = strlen(str);
+
+  /* Check for possible overflow. */
+  if(len > (~(size_t) 0) / 4)
+    return NULL;
+
   /* Allocate space based on worst-case */
-  len = strlen(str);
   escaped = malloc(4 * len + 1);
   if(!escaped)
     return NULL;
 
   e = escaped;
-  for(s=str; (c=*s) != '\0'; s++) {
-    if(c=='\n') {
+  for(s = str; (c = *s) != '\0'; s++) {
+    if(c == '\n') {
       strcpy(e, "\\n");
       e += 2;
     }
-    else if(c=='\r') {
+    else if(c == '\r') {
       strcpy(e, "\\r");
       e += 2;
     }
-    else if(c=='\t') {
+    else if(c == '\t') {
       strcpy(e, "\\t");
       e += 2;
     }
-    else if(c=='\\') {
+    else if(c == '\\') {
       strcpy(e, "\\\\");
       e += 2;
     }
-    else if(c=='"') {
+    else if(c == '"') {
       strcpy(e, "\\\"");
       e += 2;
     }
@@ -267,7 +276,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
   if(config->libcurl && !skip && !ret) {
     /* we only use this for real if --libcurl was used */
     const NameValue *nv = NULL;
-    for(nv=nvlist; nv->name; nv++) {
+    for(nv = nvlist; nv->name; nv++) {
       if(nv->value == lval) break; /* found it */
     }
     if(! nv->name) {
@@ -304,7 +313,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
     const NameValue *nv = NULL;
     snprintf(preamble, sizeof(preamble),
              "curl_easy_setopt(hnd, %s, ", name);
-    for(nv=nvlist; nv->name; nv++) {
+    for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
         rest &= ~ nv->value;    /* remove bits handled here */
@@ -347,7 +356,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
     const NameValueUnsigned *nv = NULL;
     snprintf(preamble, sizeof(preamble),
              "curl_easy_setopt(hnd, %s, ", name);
-    for(nv=nvlist; nv->name; nv++) {
+    for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
         rest &= ~ nv->value;    /* remove bits handled here */
@@ -370,79 +379,204 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
   return ret;
 }
 
-/* setopt wrapper for CURLOPT_HTTPPOST */
-CURLcode tool_setopt_httppost(CURL *curl, struct GlobalConfig *config,
-                              const char *name, CURLoption tag,
-                              struct curl_httppost *post)
+/* Generate code for a struct curl_slist. */
+static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
 {
   CURLcode ret = CURLE_OK;
   char *escaped = NULL;
-  bool skip = FALSE;
 
-  ret = curl_easy_setopt(curl, tag, post);
-  if(!post)
-    skip = TRUE;
+  /* May need several slist variables, so invent name */
+  *slistno = ++easysrc_slist_count;
 
-  if(config->libcurl && !skip && !ret) {
-    struct curl_httppost *pp, *p;
-    int i;
-    /* May use several httppost lists, if multiple POST actions */
-    i = ++ easysrc_form_count;
-    DECL1("struct curl_httppost *post%d;", i);
-    DATA1("post%d = NULL;", i);
-    CLEAN1("curl_formfree(post%d);", i);
-    CLEAN1("post%d = NULL;", i);
-    if(i == 1)
-      DECL0("struct curl_httppost *postend;");
-    DATA0("postend = NULL;");
-    for(p=post; p; p=p->next) {
-      DATA1("curl_formadd(&post%d, &postend,", i);
-      DATA1("             CURLFORM_COPYNAME, \"%s\",", p->name);
-      for(pp=p; pp; pp=pp->more) {
-        /* May be several files uploaded for one name;
-         * these are linked through the 'more' pointer */
-        Curl_safefree(escaped);
-        escaped = c_escape(pp->contents);
-        if(!escaped) {
-          ret = CURLE_OUT_OF_MEMORY;
-          goto nomem;
-        }
-        if(pp->flags & CURL_HTTPPOST_FILENAME) {
-          /* file upload as for -F @filename */
-          DATA1("             CURLFORM_FILE, \"%s\",", escaped);
-        }
-        else if(pp->flags & CURL_HTTPPOST_READFILE) {
-          /* content from file as for -F <filename */
-          DATA1("             CURLFORM_FILECONTENT, \"%s\",", escaped);
-        }
-        else
-          DATA1("             CURLFORM_COPYCONTENTS, \"%s\",", escaped);
-        if(pp->showfilename) {
-          Curl_safefree(escaped);
-          escaped = c_escape(pp->showfilename);
-          if(!escaped) {
-            ret = CURLE_OUT_OF_MEMORY;
-            goto nomem;
-          }
-          DATA1("             CURLFORM_FILENAME, \"%s\",", escaped);
-        }
-        if(pp->contenttype) {
-          Curl_safefree(escaped);
-          escaped = c_escape(pp->contenttype);
-          if(!escaped) {
-            ret = CURLE_OUT_OF_MEMORY;
-            goto nomem;
-          }
-          DATA1("             CURLFORM_CONTENTTYPE, \"%s\",", escaped);
-        }
-      }
-      DATA0("             CURLFORM_END);");
-    }
-    CODE2("curl_easy_setopt(hnd, %s, post%d);", name, i);
+  DECL1("struct curl_slist *slist%d;", *slistno);
+  DATA1("slist%d = NULL;", *slistno);
+  CLEAN1("curl_slist_free_all(slist%d);", *slistno);
+  CLEAN1("slist%d = NULL;", *slistno);
+  for(; slist; slist = slist->next) {
+    Curl_safefree(escaped);
+    escaped = c_escape(slist->data, CURL_ZERO_TERMINATED);
+    if(!escaped)
+      return CURLE_OUT_OF_MEMORY;
+    DATA3("slist%d = curl_slist_append(slist%d, \"%s\");",
+                                       *slistno, *slistno, escaped);
   }
 
  nomem:
   Curl_safefree(escaped);
+  return ret;
+}
+
+/* Generate source code for a mime structure. */
+static CURLcode libcurl_generate_mime(curl_mime *mime, int *mimeno)
+{
+  CURLcode ret = CURLE_OK;
+  int i;
+  curl_off_t size;
+  curl_mimepart *part;
+  char *filename;
+  char *escaped = NULL;
+  char *cp;
+  char *data;
+
+  /* May need several mime variables, so invent name */
+  *mimeno = ++easysrc_mime_count;
+
+  DECL1("curl_mime *mime%d;", *mimeno);
+  DATA1("mime%d = NULL;", *mimeno);
+  CODE1("mime%d = curl_mime_init(hnd);", *mimeno);
+  CLEAN1("curl_mime_free(mime%d);", *mimeno);
+  CLEAN1("mime%d = NULL;", *mimeno);
+  if(mime->firstpart) {
+    DECL1("curl_mimepart *part%d;", *mimeno);
+    for(part = mime->firstpart; part; part = part->nextpart) {
+      CODE2("part%d = curl_mime_addpart(mime%d);", *mimeno, *mimeno);
+      filename = part->filename;
+      switch(part->kind) {
+      case MIMEKIND_FILE:
+        Curl_safefree(escaped);
+        escaped = c_escape(part->data, CURL_ZERO_TERMINATED);
+        if(!escaped)
+          return CURLE_OUT_OF_MEMORY;
+        CODE2("curl_mime_filedata(part%d, \"%s\");", *mimeno, escaped);
+        if(!filename)
+          CODE1("curl_mime_filename(part%d, NULL);", *mimeno);
+        else {
+          /* Fast check to see if remote file name is base name. */
+          filename = part->data;
+          for(cp = filename; *cp; cp++)
+            if(*cp == '/' || *cp == '\\')
+              filename = cp + 1;
+          if(!part->filename || !strcmp(filename, part->filename))
+            filename = NULL;
+          else
+            filename = part->filename;
+        }
+        break;
+      case MIMEKIND_CALLBACK:
+        /* Can only be reading stdin in the current context. */
+        CODE1("curl_mime_data_cb(part%d, -1, (curl_read_callback) fread, \\",
+              *mimeno);
+        CODE0("                  (curl_seek_callback) fseek, NULL, stdin);");
+        break;
+      case MIMEKIND_DATA:
+#ifdef CURL_DOES_CONVERSIONS
+          /* Data is stored in ASCII and we want in in the host character
+             code. Convert it back for output. */
+          data = malloc(part->datasize + 1);
+          if(!data) {
+            ret = CURLE_OUT_OF_MEMORY;
+            goto nomem;
+          }
+          memcpy(data, part->data, part->datasize + 1);
+          ret = convert_from_network(data, strlen(data));
+          if(ret) {
+            Curl_safefree(data);
+            goto nomem;
+          }
+#else
+        data = part->data;
+#endif
+
+        /* Are there any nul byte in data? */
+        for(cp = data; *cp; cp++)
+          ;
+        size = (cp == data + part->datasize)? (curl_off_t) -1: part->datasize;
+        Curl_safefree(escaped);
+        escaped = c_escape(data, (size_t) part->datasize);
+#ifdef CURL_DOES_CONVERSIONS
+        Curl_safefree(data);
+#endif
+        if(!escaped)
+          return CURLE_OUT_OF_MEMORY;
+        if(size >= 0)
+          CODE3("curl_mime_data(part%d, \"%s\", %" CURL_FORMAT_CURL_OFF_T ");",
+                                *mimeno, escaped, size);
+        else
+          CODE2("curl_mime_data(part%d, \"%s\", CURL_ZERO_TERMINATED);",
+                                *mimeno, escaped);
+        break;
+      case MIMEKIND_MULTIPART:
+        ret = libcurl_generate_mime(part->arg, &i);
+        if(ret)
+          goto nomem;
+        CODE2("curl_mime_subparts(part%d, mime%d);", *mimeno, i);
+        CODE1("mime%d = NULL;", i);   /* Avoid freeing in CLEAN sequence. */
+        break;
+      default:
+        /* Other cases not possible in this context. */
+        break;
+      }
+
+      if(part->encoder) {
+        Curl_safefree(escaped);
+        escaped = c_escape(part->encoder->name, CURL_ZERO_TERMINATED);
+        if(!escaped)
+          return CURLE_OUT_OF_MEMORY;
+        CODE2("curl_mime_encoder(part%d, \"%s\");", *mimeno, escaped);
+      }
+
+      if(filename) {
+        Curl_safefree(escaped);
+        escaped = c_escape(filename, CURL_ZERO_TERMINATED);
+        if(!escaped)
+          return CURLE_OUT_OF_MEMORY;
+        CODE2("curl_mime_filename(part%d, \"%s\");", *mimeno, escaped);
+      }
+
+      if(part->name) {
+        Curl_safefree(escaped);
+        escaped = c_escape(part->name, CURL_ZERO_TERMINATED);
+        if(!escaped)
+          return CURLE_OUT_OF_MEMORY;
+        CODE2("curl_mime_name(part%d, \"%s\");", *mimeno, escaped);
+      }
+
+      if(part->mimetype) {
+        Curl_safefree(escaped);
+        escaped = c_escape(part->mimetype, CURL_ZERO_TERMINATED);
+        if(!escaped)
+          return CURLE_OUT_OF_MEMORY;
+        CODE2("curl_mime_type(part%d, \"%s\");", *mimeno, escaped);
+      }
+
+      if(part->userheaders) {
+        int ownership = part->flags & MIME_USERHEADERS_OWNER? 1: 0;
+
+        ret = libcurl_generate_slist(part->userheaders, &i);
+        if(ret)
+          goto nomem;
+        CODE3("curl_mime_headers(part%d, slist%d, %d);",
+              *mimeno, i, ownership);
+        if(ownership)
+          CODE1("slist%d = NULL;", i); /* Prevent freeing in CLEAN sequence. */
+      }
+    }
+  }
+
+nomem:
+  Curl_safefree(escaped);
+  return ret;
+}
+
+/* setopt wrapper for CURLOPT_MIMEPOST */
+CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
+                              const char *name, CURLoption tag,
+                              curl_mime *mimepost)
+{
+  CURLcode ret = CURLE_OK;
+
+  ret = curl_easy_setopt(curl, tag, mimepost);
+
+  if(config->libcurl && mimepost && !ret) {
+    int i;
+
+    ret = libcurl_generate_mime(mimepost, &i);
+
+    if(!ret)
+      CODE2("curl_easy_setopt(hnd, %s, mime%d);", name, i);
+  }
+
+nomem:
   return ret;
 }
 
@@ -452,36 +586,18 @@ CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
                            struct curl_slist *list)
 {
   CURLcode ret = CURLE_OK;
-  char *escaped = NULL;
-  bool skip = FALSE;
 
   ret = curl_easy_setopt(curl, tag, list);
-  if(!list)
-    skip = TRUE;
 
-  if(config->libcurl && !skip && !ret) {
-    struct curl_slist *s;
+  if(config->libcurl && list && !ret) {
     int i;
-    /* May need several slist variables, so invent name */
-    i = ++ easysrc_slist_count;
-    DECL1("struct curl_slist *slist%d;", i);
-    DATA1("slist%d = NULL;", i);
-    CLEAN1("curl_slist_free_all(slist%d);", i);
-    CLEAN1("slist%d = NULL;", i);
-    for(s=list; s; s=s->next) {
-      Curl_safefree(escaped);
-      escaped = c_escape(s->data);
-      if(!escaped) {
-        ret = CURLE_OUT_OF_MEMORY;
-        goto nomem;
-      }
-      DATA3("slist%d = curl_slist_append(slist%d, \"%s\");", i, i, escaped);
-    }
-    CODE2("curl_easy_setopt(hnd, %s, slist%d);", name, i);
+
+    ret = libcurl_generate_slist(list, &i);
+    if(!ret)
+      CODE2("curl_easy_setopt(hnd, %s, slist%d);", name, i);
   }
 
  nomem:
-  Curl_safefree(escaped);
   return ret;
 }
 
@@ -506,7 +622,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
     long lval = va_arg(arg, long);
     long defval = 0L;
     const NameValue *nv = NULL;
-    for(nv=setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
+    for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
       if(!strcmp(name, nv->name)) {
         defval = nv->value;
         break; /* found it */
@@ -568,7 +684,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
       REM2("%s set to a %s", name, value);
     else {
       if(escape) {
-        escaped = c_escape(value);
+        escaped = c_escape(value, CURL_ZERO_TERMINATED);
         if(!escaped) {
           ret = CURLE_OUT_OF_MEMORY;
           goto nomem;

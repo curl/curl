@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,7 +40,7 @@ static char *parse_filename(const char *ptr, size_t len);
 ** callback for CURLOPT_HEADERFUNCTION
 */
 
-size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
+size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct HdrCbData *hdrcbdata = userdata;
   struct OutStruct *outs = hdrcbdata->outs;
@@ -56,7 +56,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
    * it does not match then it fails with CURLE_WRITE_ERROR. So at this
    * point returning a value different from sz*nmemb indicates failure.
    */
-  size_t failure = (size * nmemb) ? 0 : 1;
+  size_t failure = (size && nmemb) ? 0 : 1;
 
   if(!heads->config)
     return failure;
@@ -128,8 +128,7 @@ size_t tool_header_cb(void *ptr, size_t size, size_t nmemb, void *userdata)
         hdrcbdata->honor_cd_filename = FALSE;
         break;
       }
-      else
-        return failure;
+      return failure;
     }
   }
 
@@ -147,7 +146,7 @@ static char *parse_filename(const char *ptr, size_t len)
   char  stop = '\0';
 
   /* simple implementation of strndup() */
-  copy = malloc(len+1);
+  copy = malloc(len + 1);
   if(!copy)
     return NULL;
   memcpy(copy, ptr, len);
@@ -162,8 +161,13 @@ static char *parse_filename(const char *ptr, size_t len)
   else
     stop = ';';
 
+  /* scan for the end letter and stop there */
+  q = strchr(p, stop);
+  if(q)
+    *q = '\0';
+
   /* if the filename contains a path, only use filename portion */
-  q = strrchr(copy, '/');
+  q = strrchr(p, '/');
   if(q) {
     p = q + 1;
     if(!*p) {
@@ -181,14 +185,6 @@ static char *parse_filename(const char *ptr, size_t len)
     if(!*p) {
       Curl_safefree(copy);
       return NULL;
-    }
-  }
-
-  /* scan for the end letter and stop there */
-  for(q = p; *q; ++q) {
-    if(*q == stop) {
-      *q = '\0';
-      break;
     }
   }
 
@@ -215,7 +211,7 @@ static char *parse_filename(const char *ptr, size_t len)
   }
 #endif /* MSDOS || WIN32 */
 
-  /* in case we built debug enabled, we allow an evironment variable
+  /* in case we built debug enabled, we allow an environment variable
    * named CURL_TESTDIR to prefix the given file name to put it into a
    * specific directory
    */

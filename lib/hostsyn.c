@@ -22,6 +22,11 @@
 
 #include "curl_setup.h"
 
+/***********************************************************************
+ * Only for builds using synchronous name resolves
+ **********************************************************************/
+#ifdef CURLRES_SYNCH
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -50,11 +55,6 @@
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
-
-/***********************************************************************
- * Only for builds using synchronous name resolves
- **********************************************************************/
-#ifdef CURLRES_SYNCH
 
 /*
  * Function provided by the resolver backend to set DNS servers to use.

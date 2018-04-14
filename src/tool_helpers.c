@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,6 +62,10 @@ const char *param2text(int res)
     return "a specified protocol is unsupported by libcurl";
   case PARAM_NO_MEM:
     return "out of memory";
+  case PARAM_NO_PREFIX:
+    return "the given option can't be reversed with a --no- prefix";
+  case PARAM_NUMBER_TOO_LARGE:
+    return "too large number";
   default:
     return "unknown error";
   }

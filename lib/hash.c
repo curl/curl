@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,8 +36,6 @@ hash_element_dtor(void *user, void *element)
 {
   struct curl_hash *h = (struct curl_hash *) user;
   struct curl_hash_element *e = (struct curl_hash_element *) element;
-
-  Curl_safefree(e->key);
 
   if(e->ptr) {
     h->dtor(e->ptr);
@@ -74,54 +72,32 @@ Curl_hash_init(struct curl_hash *h,
   h->size = 0;
   h->slots = slots;
 
-  h->table = malloc(slots * sizeof(struct curl_llist *));
+  h->table = malloc(slots * sizeof(struct curl_llist));
   if(h->table) {
-    for(i = 0; i < slots; ++i) {
-      h->table[i] = Curl_llist_alloc((curl_llist_dtor) hash_element_dtor);
-      if(!h->table[i]) {
-        while(i--) {
-          Curl_llist_destroy(h->table[i], NULL);
-          h->table[i] = NULL;
-        }
-        free(h->table);
-        h->table = NULL;
-        h->slots = 0;
-        return 1; /* failure */
-      }
-    }
+    for(i = 0; i < slots; ++i)
+      Curl_llist_init(&h->table[i], (curl_llist_dtor) hash_element_dtor);
     return 0; /* fine */
   }
-  else {
-    h->slots = 0;
-    return 1; /* failure */
-  }
+  h->slots = 0;
+  return 1; /* failure */
 }
 
 static struct curl_hash_element *
 mk_hash_element(const void *key, size_t key_len, const void *p)
 {
-  struct curl_hash_element *he = malloc(sizeof(struct curl_hash_element));
-
+  /* allocate the struct plus memory after it to store the key */
+  struct curl_hash_element *he = malloc(sizeof(struct curl_hash_element) +
+                                        key_len);
   if(he) {
-    void *dupkey = malloc(key_len);
-    if(dupkey) {
-      /* copy the key */
-      memcpy(dupkey, key, key_len);
-
-      he->key = dupkey;
-      he->key_len = key_len;
-      he->ptr = (void *) p;
-    }
-    else {
-      /* failed to duplicate the key, free memory and fail */
-      free(he);
-      he = NULL;
-    }
+    /* copy the key */
+    memcpy(he->key, key, key_len);
+    he->key_len = key_len;
+    he->ptr = (void *) p;
   }
   return he;
 }
 
-#define FETCH_LIST(x,y,z) x->table[x->hash_func(y, z, x->slots)]
+#define FETCH_LIST(x,y,z) &x->table[x->hash_func(y, z, x->slots)]
 
 /* Insert the data in the hash. If there already was a match in the hash,
  * that data is replaced.
@@ -148,18 +124,9 @@ Curl_hash_add(struct curl_hash *h, void *key, size_t key_len, void *p)
 
   he = mk_hash_element(key, key_len, p);
   if(he) {
-    if(Curl_llist_insert_next(l, l->tail, he)) {
-      ++h->size;
-      return p; /* return the new entry */
-    }
-    /*
-     * Couldn't insert it, destroy the 'he' element and the key again. We
-     * don't call hash_element_dtor() since that would also call the
-     * "destructor" for the actual data 'p'. When we fail, we shall not touch
-     * that data.
-     */
-    free(he->key);
-    free(he);
+    Curl_llist_insert_next(l, l->tail, he, &he->list);
+    ++h->size;
+    return p; /* return the new entry */
   }
 
   return NULL; /* failure */
@@ -243,8 +210,7 @@ Curl_hash_destroy(struct curl_hash *h)
   int i;
 
   for(i = 0; i < h->slots; ++i) {
-    Curl_llist_destroy(h->table[i], (void *) h);
-    h->table[i] = NULL;
+    Curl_llist_destroy(&h->table[i], (void *) h);
   }
 
   Curl_safefree(h->table);
@@ -276,7 +242,7 @@ Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,
     return;
 
   for(i = 0; i < h->slots; ++i) {
-    list = h->table[i];
+    list = &h->table[i];
     le = list->head; /* get first list entry */
     while(le) {
       struct curl_hash_element *he = le->ptr;
@@ -295,11 +261,11 @@ size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
 {
   const char *key_str = (const char *) key;
   const char *end = key_str + key_length;
-  unsigned long h = 5381;
+  size_t h = 5381;
 
   while(key_str < end) {
     h += h << 5;
-    h ^= (unsigned long) *key_str++;
+    h ^= *key_str++;
   }
 
   return (h % slots_num);
@@ -334,10 +300,10 @@ Curl_hash_next_element(struct curl_hash_iterator *iter)
 
   /* If we have reached the end of the list, find the next one */
   if(!iter->current_element) {
-    for(i = iter->slot_index;i < h->slots;i++) {
-      if(h->table[i]->head) {
-        iter->current_element = h->table[i]->head;
-        iter->slot_index = i+1;
+    for(i = iter->slot_index; i < h->slots; i++) {
+      if(h->table[i].head) {
+        iter->current_element = h->table[i].head;
+        iter->slot_index = i + 1;
         break;
       }
     }
@@ -347,10 +313,8 @@ Curl_hash_next_element(struct curl_hash_iterator *iter)
     struct curl_hash_element *he = iter->current_element->ptr;
     return he;
   }
-  else {
-    iter->current_element = NULL;
-    return NULL;
-  }
+  iter->current_element = NULL;
+  return NULL;
 }
 
 #if 0 /* useful function for debugging hashes and their contents */

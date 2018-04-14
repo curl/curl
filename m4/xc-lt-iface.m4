@@ -112,7 +112,7 @@ esac
 # of non-PIC compiled objects will fail with following linker error
 # "relocation R_X86_64_32 can not be used when making a shared object"
 # is to build PIC objects even for static libraries. This behavior may
-# be overriden using 'configure --disable-shared --without-pic'.
+# be overridden using 'configure --disable-shared --without-pic'.
 #
 
 if test "x$xc_lt_want_with_pic" = 'xdefault'; then
@@ -171,7 +171,7 @@ dnl _XC_CHECK_LT_BUILD_LIBRARIES
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Checks wether libtool shared and static libraries
+dnl Checks whether libtool shared and static libraries
 dnl are finally built depending on user input, default
 dnl behavior and knowledge that libtool has about host
 dnl characteristics.
@@ -306,7 +306,7 @@ dnl _XC_CHECK_LT_BUILD_WITH_PIC
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Checks wether libtool shared and static libraries
+dnl Checks whether libtool shared and static libraries
 dnl would be built with PIC depending on user input,
 dnl default behavior and knowledge that libtool has
 dnl about host characteristics.
@@ -317,7 +317,7 @@ dnl   xc_lt_build_static_with_pic
 m4_define([_XC_CHECK_LT_BUILD_WITH_PIC],
 [dnl
 #
-# Find out wether libtool libraries would be built wit PIC
+# Find out whether libtool libraries would be built wit PIC
 #
 
 case "x$pic_mode" in @%:@ ((((
@@ -352,7 +352,7 @@ dnl _XC_CHECK_LT_BUILD_SINGLE_VERSION
 dnl -------------------------------------------------
 dnl Private macro.
 dnl
-dnl Checks wether a libtool shared or static library
+dnl Checks whether a libtool shared or static library
 dnl is finally built exclusively without the other.
 dnl Results stored in following shell variables:
 dnl   xc_lt_build_shared_only

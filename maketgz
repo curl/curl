@@ -50,6 +50,13 @@ if test -z "$patch"; then
     exit
 fi
 
+#
+# As a precaution, remove all *.dist files that may be lying around, to reduce
+# the risk of old leftovers getting shipped. The root 'Makefile.dist' is the
+# exception.
+echo "removing all old *.dist files"
+find . -name "*.dist" -a ! -name Makefile.dist -exec rm {} \;
+
 numeric=`perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);"`
 
 HEADER=include/curl/curlver.h
@@ -67,8 +74,8 @@ if test -z "$only"; then
     PLIST="$PLIST$ext"
 fi
 
-# requires a date command that knows -u for UTC time zone
-datestamp=`LC_TIME=C date -u`
+# requires a date command that knows + for format
+datestamp=`date +"%F"`
 
 # Replace version number in header file:
 sed -i -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
@@ -133,6 +140,17 @@ fi
 
 ############################################################################
 #
+# Modify the man pages to display the version number and date.
+#
+
+echo "update man pages"
+./scripts/updatemanpages.pl $version
+
+# make the generated file newer than the man page
+touch src/tool_hugehelp.c
+
+############################################################################
+#
 # Update the IDE files
 echo "make vc-ide"
 make -s vc-ide
@@ -160,12 +178,12 @@ gzip -dc $targz | bzip2 --best > $bzip2
 
 ############################################################################
 #
-# Now make an lzma archive from the tar.gz original
+# Now make an xz archive from the tar.gz original
 #
 
-lzma="curl-$version.tar.lzma"
-echo "Generating $lzma"
-gzip -dc $targz | lzma --best - > $lzma
+xz="curl-$version.tar.xz"
+echo "Generating $xz"
+gzip -dc $targz | xz -6e - > $xz
 
 ############################################################################
 #
@@ -191,7 +209,7 @@ makezip
 echo "------------------"
 echo "maketgz report:"
 echo ""
-ls -l $targz $bzip2 $zip $lzma
+ls -l $targz $bzip2 $zip $xz
 
 echo "Run this:"
-echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip && gpg -b -a $lzma"
+echo "gpg -b -a $targz && gpg -b -a $bzip2 && gpg -b -a $zip && gpg -b -a $xz"

@@ -14,7 +14,9 @@ libcurl bindings
 
 [Basic](http://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-[C++](http://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre
+C++: [curlpp](http://curlpp.org/) Written by Jean-Philippe Barrette-LaPierre,
+[curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
+Requests](https://github.com/whoshuu/cpr) by Huu Nguyen
 
 [Ch](https://chcurl.sourceforge.io/) Written by Stephen Nestinger and Jonathan Rogado
 
@@ -22,6 +24,8 @@ Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de C
 [curlhandle](https://github.com/karelia/curlhandle) Written by Dan Wood
 
 [D](https://dlang.org/library/std/net/curl.html) Written by Kenneth Bogert
+
+[Delphi](https://github.com/Mercury13/curl4delphi) Written by Mikhail Merkuryev
 
 [Dylan](https://dylanlibs.sourceforge.io/) Written by Chris Double
 
@@ -37,6 +41,8 @@ Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de C
 
 [glib/GTK+](http://atterer.net/glibcurl/) Written by Richard Atterer
 
+Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
+
 [Guile](http://www.lonelycactus.com/guile-curl.html) Written by Michael L. Gran
 
 [Harbour](https://github.com/vszakats/harbour-core/tree/master/contrib/hbcurl) Written by Viktor Szakáts
@@ -49,7 +55,7 @@ Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de C
 
 [Lisp](https://common-lisp.net/project/cl-curl/) Written by Liam Healy
 
-Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](http://luaforge.net/projects/lua-curl/) by Jürgen Hötzel
+Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](https://github.com/Lua-cURL) by Jürgen Hötzel
 
 [Mono](https://forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
 
@@ -59,15 +65,17 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [Object-Pascal](http://www.tekool.com/opcurl) Free Pascal, Delphi and Kylix binding written by Christophe Espern.
 
-[O'Caml](https://sourceforge.net/projects/ocurl/) Written by Lars Nilsson
+[OCaml](https://opam.ocaml.org/packages/ocurl/) Written by Lars Nilsson and ygrek
 
 [Pascal](http://houston.quik.com/jkp/curlpas/) Free Pascal, Delphi and Kylix binding written by Jeffrey Pohlmeyer.
 
-[Perl](https://github.com/szbalint/WWW--Curl) Maintained by Cris Bailiff and Bálint Szilakszi
+Perl: [WWW--Curl](https://github.com/szbalint/WWW--Curl) Maintained by Cris
+Bailiff and Bálint Szilakszi,
+[perl6-net-curl](https://github.com/azawawi/perl6-net-curl) by Ahmad M. Zawawi
 
 [PHP](https://php.net/curl) Originally written by Sterling Hughes
 
-[PostgreSQL](http://gborg.postgresql.org/project/pgcurl/projdisplay.php) Written by Gian Paolo Ciceri
+[PostgreSQL](https://github.com/pramsey/pgsql-http) - HTTP client for PostgreSQL
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
@@ -75,19 +83,23 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [Rexx](https://rexxcurl.sourceforge.io/) Written Mark Hessling
 
+[Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
-Ruby: [curb](http://curb.rubyforge.org/) written by Ross Bamford, [ruby-curl-multi](http://curl-multi.rubyforge.org/) written by Kristjan Petursson and Keith Rarick
+Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford
 
 [Rust](https://github.com/carllerche/curl-rust) curl-rust - by Carl Lerche
 
 [Scheme](https://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
 
-[S-Lang](http://www.jedsoft.org/slang/modules/curl.html) by John E Davis
+[Scilab](https://help.scilab.org/docs/current/fr_FR/getURL.html) binding by Sylvestre Ledru
+
+[S-Lang](https://www.jedsoft.org/slang/modules/curl.html) by John E Davis
 
 [Smalltalk](http://www.squeaksource.com/CurlPlugin/) Written by Danil Osipchuk
 
-[SP-Forth](http://www.forth.org.ru/~ac/lib/lin/curl/) Written by ygrek
+[SP-Forth](https://sourceforge.net/p/spf/spf/ci/master/tree/devel/~ac/lib/lin/curl/) Written by Andrey Cherezov
 
 [SPL](http://www.clifford.at/spl/) Written by Clifford Wolf
 

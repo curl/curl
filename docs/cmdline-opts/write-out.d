@@ -65,8 +65,9 @@ The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
 .TP
 .B redirect_url
-When an HTTP request was made without -L to follow redirects, this variable
-will show the actual URL a redirect \fIwould\fP take you to. (Added in 7.18.2)
+When an HTTP request was made without --location to follow redirects (or when
+--max-redir is met), this variable will show the actual URL a redirect
+\fIwould\fP have gone to. (Added in 7.18.2)
 .TP
 .B remote_ip
 The remote IP address of the most recently done connection - can be either
@@ -120,7 +121,7 @@ about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
 .TP
 .B time_redirect
-The time, in seconds, it took for all redirection steps include name lookup,
+The time, in seconds, it took for all redirection steps including name lookup,
 connect, pretransfer and transfer before the final transaction was
 started. time_redirect shows the complete execution time for multiple
 redirections. (Added in 7.12.3)

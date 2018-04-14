@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -65,10 +65,6 @@ an impact on what other features of the library you can use, such as
 tunnel through the HTTP proxy. Such tunneling is activated with
 \fICURLOPT_HTTPPROXYTUNNEL(3)\fP.
 
-libcurl respects the environment variables \fBhttp_proxy\fP, \fBftp_proxy\fP,
-\fBall_proxy\fP etc, if any of those are set. The \fICURLOPT_PROXY(3)\fP
-option does however override any possibly set environment variables.
-
 Setting the proxy string to "" (an empty string) will explicitly disable the
 use of a proxy, even if there is an environment variable set for it.
 
@@ -77,6 +73,19 @@ user + password.
 
 The application does not have to keep the string around after setting this
 option.
+.SH "Environment variables"
+libcurl respects the proxy environment variables named \fBhttp_proxy\fP,
+\fBftp_proxy\fP, \fBsftp_proxy\fP etc. If set, libcurl will use the specified
+proxy for that URL scheme. So for a "FTP://" URL, the \fBftp_proxy\fP is
+considered. \fBall_proxy\fP is used if no protocol specific proxy was set.
+
+If \fBno_proxy\fP (or \fBNO_PROXY\fP) is set, it can specify a list of host
+names to not use a proxy for (even if one of the previous mention variables
+are set). That is the exact equivalent of setting the \fICURLOPT_NOPROXY(3)\fP
+option.
+
+The \fICURLOPT_PROXY(3)\fP and \fICURLOPT_NOPROXY(3)\fP options override
+environment variables.
 .SH DEFAULT
 Default is NULL, meaning no proxy is used.
 
@@ -85,7 +94,14 @@ single port number used widely for proxies. Specify it!
 .SH PROTOCOLS
 All except file://. Note that some protocols don't do very well over proxy.
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/file.txt");
+  curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
+  curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Since 7.14.1 the proxy environment variable names can include the protocol
 scheme.

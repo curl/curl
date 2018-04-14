@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+speedcheck
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+verify speedcheck
+ </name>
+<tool>
+unit1606
+</tool>
+</client>
+
+</testcase>

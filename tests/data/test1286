@@ -1,0 +1,110 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Digest auth
+followlocation
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", qop="auth"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+</data>
+<data1000>
+HTTP/1.1 302 Thanks for this, but we want to redir you!
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Location: /12860001
+Content-Length: 0
+
+</data1000>
+<data1001>
+HTTP/1.1 404 Not Found
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+</data1001>
+
+<datacheck>
+HTTP/1.1 401 authentication please swsbounce
+Server: Microsoft-IIS/6.0
+WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", qop="auth"
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+HTTP/1.1 302 Thanks for this, but we want to redir you!
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Location: /12860001
+Content-Length: 0
+
+HTTP/1.1 404 Not Found
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
+
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+#
+<server>
+http
+</server>
+<features>
+crypto
+</features>
+<name>
+HTTP GET --digest increasing nonce-count
+</name>
+# This test is to ensure the nonce-count (nc) increases
+# https://github.com/curl/curl/pull/1251
+<command>
+-u auser:apasswd --location --digest http://%HOSTIP:%HTTPPORT/1286
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+# Reorder the fields in 'Authorization: Digest' header.
+# Since regular and SSPI digest auth header fields may not have the same order
+# or whitespace we homogenize so that both may be tested. Also:
+# - Remove the unique value from cnonce if in RFC format
+# - Remove the unique value from response if in RFC format
+# - Remove quotes from qop="auth" used by SSPI
+# The if statement is one line because runtests evaluates one line at a time.
+<strippart>
+if(s/^(Authorization: Digest )([^\r\n]+)(\r?\n)$//) { $_ = $1 . join(', ', map { s/^(cnonce=)"[a-zA-Z0-9+\/=]+"$/$1REMOVED/; s/^(response=)"[a-f0-9]{32}"$/$1REMOVED/; s/^qop="auth"$/qop=auth/; $_ } sort split(/, */, $2)) . $3; }
+</strippart>
+<protocol>
+GET /1286 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /1286 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest cnonce=REMOVED, nc=00000001, nonce="1053604144", qop=auth, realm="testrealm", response=REMOVED, uri="/1286", username="auser"
+Accept: */*
+
+GET /12860001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest cnonce=REMOVED, nc=00000002, nonce="1053604144", qop=auth, realm="testrealm", response=REMOVED, uri="/12860001", username="auser"
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

@@ -10,7 +10,7 @@ TFTP RRQ
 # Server-side
 <reply>
 <servercmd>
-writedelay: 1
+writedelay: 2
 </servercmd>
 # ~1200 bytes (so that they don't fit in two 512 byte chunks)
 <data nocheck="yes">

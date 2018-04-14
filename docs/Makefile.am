@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,36 +22,54 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-man_MANS = curl.1 curl-config.1
-noinst_man_MANS = mk-ca-bundle.1
+# EXTRA_DIST breaks with $(abs_builddir) so build it using this variable
+# but distribute it (using the relative file name) in the next variable
+man_MANS = $(abs_builddir)/curl.1
+noinst_man_MANS = curl.1 mk-ca-bundle.1
+dist_man_MANS = curl-config.1
 GENHTMLPAGES = curl.html curl-config.html mk-ca-bundle.html
 PDFPAGES = curl.pdf curl-config.pdf mk-ca-bundle.pdf
+MANDISTPAGES = curl.1.dist curl-config.1.dist
 
 HTMLPAGES = $(GENHTMLPAGES) index.html
 
-SUBDIRS = examples libcurl cmdline-opts
+# Build targets in this file (.) before cmdline-opts to ensure that
+# the curl.1 rule below runs first
+SUBDIRS = . cmdline-opts
+DIST_SUBDIRS = $(SUBDIRS) examples libcurl
 
-CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) curl.1
+CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 
-EXTRA_DIST = MANUAL BUGS CONTRIBUTE.md FAQ FEATURES INTERNALS.md SSLCERTS.md  \
- README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS VERSIONS KNOWN_BUGS \
- BINDINGS.md $(man_MANS) HISTORY.md INSTALL INSTALL.md LICENSE-MIXING.md         \
- README.netware MAIL-ETIQUETTE HTTP-COOKIES.md SECURITY.md RELEASE-PROCEDURE  \
- SSL-PROBLEMS.md HTTP2.md ROADMAP.md CODE_OF_CONDUCT.md CODE_STYLE.md         \
- CHECKSRC.md
+EXTRA_DIST = MANUAL BUGS CONTRIBUTE.md FAQ FEATURES INTERNALS.md SSLCERTS.md    \
+ README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS VERSIONS KNOWN_BUGS   \
+ BINDINGS.md HISTORY.md INSTALL INSTALL.md LICENSE-MIXING.md     \
+ README.netware MAIL-ETIQUETTE HTTP-COOKIES.md SECURITY-PROCESS.md RELEASE-PROCEDURE    \
+ SSL-PROBLEMS.md HTTP2.md ROADMAP.md CODE_OF_CONDUCT.md CODE_STYLE.md           \
+ CHECKSRC.md CMakeLists.txt README.md CIPHERS.md INSTALL.cmake README.cmake     \
+ $(noinst_man_MANS) HELP-US.md
 
 MAN2HTML= roffit $< >$@
 
 SUFFIXES = .1 .html .pdf
 
-curl.1:
-	cd cmdline-opts && make
+# $(abs_builddir) is to disable VPATH when searching for this file, which
+# would otherwise find the copy in $(srcdir) which breaks the $(HUGE)
+# rule in src/Makefile.am in out-of-tree builds that references the file in the
+# build directory.
+#
+# First, seed the used copy of curl.1 with the prebuilt copy (in an out-of-tree
+# build), then run make recursively to rebuild it only if its dependencies
+# have changed.
+$(abs_builddir)/curl.1:
+	if test "$(top_builddir)x" != "$(top_srcdir)x" -a -e "$(srcdir)/curl.1"; then \
+		cp -fp "$(srcdir)/curl.1" $@; fi
+	cd cmdline-opts && $(MAKE)
 
 html: $(HTMLPAGES)
-	cd libcurl && make html
+	cd libcurl && $(MAKE) html
 
 pdf: $(PDFPAGES)
-	cd libcurl && make pdf
+	cd libcurl && $(MAKE) pdf
 
 .1.html:
 	$(MAN2HTML)
@@ -62,4 +80,7 @@ pdf: $(PDFPAGES)
 	ps2pdf $$foo.ps $@; \
 	rm $$foo.ps; \
 	echo "converted $< to $@")
+
+distclean:
+	rm -f $(CLEANFILES)
 

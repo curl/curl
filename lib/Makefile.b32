@@ -109,7 +109,7 @@ LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)\out32\ssleay32.lib $(OPENSSL_PATH)\out32\l
 !include Makefile.inc
 
 # Borland's command line librarian program TLIB version 4.5 is not capable
-# of building a library when any of its objects contains an hypen in its
+# of building a library when any of its objects contains an hyphen in its
 # name, due to a command line parsing bug. In order to workaround this, we
 # build source files with hyphens in their name as objects with underscores
 # using explicit compilation build rules instead of implicit ones.

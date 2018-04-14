@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@
 # at a regular interval. The output is suitable to be mailed to
 # curl-autocompile@haxx.se to be dealt with automatically (make sure the
 # subject includes the word "autobuild" as the mail gets silently discarded
-# otherwise).  The most current build status (with a resonable backlog) will
+# otherwise).  The most current build status (with a reasonable backlog) will
 # be published on the curl site, at https://curl.haxx.se/auto/
 
 # USAGE:
@@ -588,7 +588,6 @@ if ($configurebuild) {
   elsif ($^O eq 'linux') {
     system("cp -afr $CURLDIR/* .");
     system("cp -af $CURLDIR/Makefile.dist Makefile");
-    system("cp -af $CURLDIR/include/curl/curlbuild.h.dist ./include/curl/curlbuild.h");
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
     if (-d "$CURLDIR/ares") {
@@ -607,20 +606,6 @@ if(-f "./libcurl.pc") {
     }
     close(F);
   }
-}
-
-if(-f "./include/curl/curlbuild.h") {
-  logit_spaced "display include/curl/curlbuild.h";
-  if(open(F, "<./include/curl/curlbuild.h")) {
-    while(<F>) {
-      my $ll = $_;
-      print $ll if(($ll =~ /^ *# *define *CURL_/) && ($ll !~ /__CURL_CURLBUILD_H/));
-    }
-    close(F);
-  }
-}
-else {
-  mydie "no curlbuild.h created/found";
 }
 
 logit_spaced "display lib/$confheader";

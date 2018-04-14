@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 =begin comment
 
@@ -307,10 +307,12 @@ sub listhelp {
         if($arg) {
             $opt .= " $arg";
         }
+        my $desc = $helplong{$f};
+        $desc =~ s/\"/\\\"/g; # escape double quotes
 
-        my $line = sprintf " %-19s %s\n", $opt, $helplong{$f};
+        my $line = sprintf "  {\"%s\",\n   \"%s\"},\n", $opt, $desc;
 
-        if(length($line) > 79) {
+        if(length($opt) + length($desc) > 78) {
             print STDERR "WARN: the --$long line is too long\n";
         }
         print $line;

@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Location: /15510002
+
+-foo-
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 11
+
+redirected
+</data2>
+<datacheck>
+redirected
+redirected
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib1551
+</tool>
+
+ <name>
+re-run redirected transfer without setting URL again
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1551
+</command>
+</client>
+
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1551 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /15510002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /1551 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /15510002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

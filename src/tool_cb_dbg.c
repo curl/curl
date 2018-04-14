@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,6 +26,7 @@
 #include "curlx.h"
 
 #include "tool_cfgable.h"
+#include "tool_convert.h"
 #include "tool_msgs.h"
 #include "tool_cb_dbg.h"
 #include "tool_util.h"
@@ -41,7 +42,7 @@ static void dump(const char *timebuf, const char *text,
 */
 
 int tool_debug_cb(CURL *handle, curl_infotype type,
-                  unsigned char *data, size_t size,
+                  char *data, size_t size,
                   void *userdata)
 {
   struct OperationConfig *operation = userdata;
@@ -171,7 +172,8 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       if(memcmp(&data[i], "\r\n\r\n", 4) == 0) {
         /* dump everything through the CRLFCRLF as a sent header */
         text = "=> Send header";
-        dump(timebuf, text, output, data, i + 4, config->tracetype, type);
+        dump(timebuf, text, output, (unsigned char *)data, i + 4,
+             config->tracetype, type);
         data += i + 3;
         size -= i + 4;
         type = CURLINFO_DATA_OUT;
@@ -185,6 +187,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   switch(type) {
   case CURLINFO_TEXT:
     fprintf(output, "%s== Info: %s", timebuf, data);
+    /* FALLTHROUGH */
   default: /* in case a new one is introduced to shock us */
     return 0;
 
@@ -208,7 +211,8 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     break;
   }
 
-  dump(timebuf, text, output, data, size, config->tracetype, type);
+  dump(timebuf, text, output, (unsigned char *) data, size, config->tracetype,
+       type);
   return 0;
 }
 
@@ -234,37 +238,40 @@ static void dump(const char *timebuf, const char *text,
     if(tracetype == TRACE_BIN) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
-        if(i+c < size)
-          fprintf(stream, "%02x ", ptr[i+c]);
+        if(i + c < size)
+          fprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
 
-    for(c = 0; (c < width) && (i+c < size); c++) {
+    for(c = 0; (c < width) && (i + c < size); c++) {
       /* check for 0D0A; if found, skip past and start a new line of output */
       if((tracetype == TRACE_ASCII) &&
-         (i+c+1 < size) && (ptr[i+c] == 0x0D) && (ptr[i+c+1] == 0x0A)) {
-        i += (c+2-width);
+         (i + c + 1 < size) && (ptr[i + c] == 0x0D) &&
+         (ptr[i + c + 1] == 0x0A)) {
+        i += (c + 2 - width);
         break;
       }
 #ifdef CURL_DOES_CONVERSIONS
       /* repeat the 0D0A check above but use the host encoding for CRLF */
       if((tracetype == TRACE_ASCII) &&
-         (i+c+1 < size) && (ptr[i+c] == '\r') && (ptr[i+c+1] == '\n')) {
-        i += (c+2-width);
+         (i + c + 1 < size) && (ptr[i + c] == '\r') &&
+         (ptr[i + c + 1] == '\n')) {
+        i += (c + 2 - width);
         break;
       }
       /* convert to host encoding and print this character */
-      fprintf(stream, "%c", convert_char(infotype, ptr[i+c]));
+      fprintf(stream, "%c", convert_char(infotype, ptr[i + c]));
 #else
       (void)infotype;
-      fprintf(stream, "%c", ((ptr[i+c] >= 0x20) && (ptr[i+c] < 0x80)) ?
-              ptr[i+c] : UNPRINTABLE_CHAR);
+      fprintf(stream, "%c", ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
+              ptr[i + c] : UNPRINTABLE_CHAR);
 #endif /* CURL_DOES_CONVERSIONS */
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if((tracetype == TRACE_ASCII) &&
-         (i+c+2 < size) && (ptr[i+c+1] == 0x0D) && (ptr[i+c+2] == 0x0A)) {
-        i += (c+3-width);
+         (i + c + 2 < size) && (ptr[i + c + 1] == 0x0D) &&
+         (ptr[i + c + 2] == 0x0A)) {
+        i += (c + 3 - width);
         break;
       }
     }

@@ -1,2 +1,4 @@
 *.html
 *.pdf
+curl.1
+*.1.dist

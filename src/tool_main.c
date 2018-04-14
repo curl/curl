@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,6 +61,15 @@
  */
 int vms_show = 0;
 #endif
+
+#ifdef __MINGW32__
+/*
+ * There seems to be no way to escape "*" in command-line arguments with MinGW
+ * when command-line argument globbing is enabled under the MSYS shell, so turn
+ * it off.
+ */
+int _CRT_glob = 0;
+#endif /* __MINGW32__ */
 
 /* if we build a static library for unit tests, there is no main() function */
 #ifndef UNITTESTS

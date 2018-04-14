@@ -13,6 +13,10 @@
 # test 1801 causes problems on Mac OS X and github
 # https://github.com/curl/curl/issues/380
 1801
-# test 1510 casues problems on the CI on github
+# test 1510 causes problems on the CI on github
 # example: https://travis-ci.org/curl/curl/builds/81633600
 1510
+# Pipelining test that is causing false positives a little too often
+1903
+# causes memory leaks for now:
+1553

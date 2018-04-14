@@ -101,7 +101,7 @@
 static const char *curlx_usage[]={
   "usage: curlx args\n",
   " -p12 arg         - tia  file ",
-  " -envpass arg     - environement variable which content the tia private"
+  " -envpass arg     - environment variable which content the tia private"
   " key password",
   " -out arg         - output file (response)- default stdout",
   " -in arg          - input file (request)- default stdin",
@@ -183,7 +183,7 @@ static unsigned char *my_get_ext(X509 *cert, const int type,
 
 /* This is an application verification call back, it does not
    perform any addition verification but tries to find a URL
-   in the presented certificat. If found, this will become
+   in the presented certificate. If found, this will become
    the URL to be used in the POST.
 */
 
@@ -195,7 +195,8 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
   if(p->verbose > 2)
     BIO_printf(p->errorbio, "entering ssl_app_verify_callback\n");
 
-  if((ok= X509_verify_cert(ctx)) && ctx->cert) {
+  ok = X509_verify_cert(ctx);
+  if(ok && ctx->cert) {
     unsigned char *accessinfo;
     if(p->verbose > 1)
       X509_print_ex(p->errorbio, ctx->cert, 0, 0);
@@ -268,16 +269,16 @@ static CURLcode sslctxfun(CURL *curl, void *sslctx, void *parm)
 
 int main(int argc, char **argv)
 {
-  BIO* in=NULL;
-  BIO* out=NULL;
+  BIO* in = NULL;
+  BIO* out = NULL;
 
   char *outfile = NULL;
   char *infile = NULL;
 
-  int tabLength=100;
+  int tabLength = 100;
   char *binaryptr;
   char *mimetype;
-  char *mimetypeaccept=NULL;
+  char *mimetypeaccept = NULL;
   char *contenttype;
   const char **pp;
   unsigned char *hostporturl = NULL;
@@ -288,8 +289,8 @@ int main(int argc, char **argv)
   char *response;
 
   CURLcode res;
-  struct curl_slist *headers=NULL;
-  int badarg=0;
+  struct curl_slist *headers = NULL;
+  int badarg = 0;
 
   binaryptr = malloc(tabLength);
 
@@ -307,75 +308,75 @@ int main(int argc, char **argv)
   while(*args && *args[0] == '-') {
     if(!strcmp (*args, "-in")) {
       if(args[1]) {
-        infile=*(++args);
+        infile = *(++args);
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(!strcmp (*args, "-out")) {
       if(args[1]) {
-        outfile=*(++args);
+        outfile = *(++args);
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(!strcmp (*args, "-p12")) {
       if(args[1]) {
         p.p12file = *(++args);
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(strcmp(*args, "-envpass") == 0) {
       if(args[1]) {
         p.pst = getenv(*(++args));
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(strcmp(*args, "-connect") == 0) {
       if(args[1]) {
         hostporturl = *(++args);
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(strcmp(*args, "-mimetype") == 0) {
       if(args[1]) {
         mimetype = *(++args);
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(strcmp(*args, "-acceptmime") == 0) {
       if(args[1]) {
         mimetypeaccept = *(++args);
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(strcmp(*args, "-accesstype") == 0) {
       if(args[1]) {
         p.accesstype = OBJ_obj2nid(OBJ_txt2obj(*++args, 0));
         if(p.accesstype == 0)
-          badarg=1;
+          badarg = 1;
       }
       else
-        badarg=1;
+        badarg = 1;
     }
     else if(strcmp(*args, "-verbose") == 0) {
       p.verbose++;
     }
     else
-      badarg=1;
+      badarg = 1;
     args++;
   }
 
-  if(mimetype==NULL || mimetypeaccept == NULL)
+  if(mimetype == NULL || mimetypeaccept == NULL)
     badarg = 1;
 
   if(badarg) {
-    for(pp=curlx_usage; (*pp != NULL); pp++)
+    for(pp = curlx_usage; (*pp != NULL); pp++)
       BIO_printf(p.errorbio, "%s\n", *pp);
     BIO_printf(p.errorbio, "\n");
     goto err;
@@ -383,7 +384,8 @@ int main(int argc, char **argv)
 
   /* set input */
 
-  if((in=BIO_new(BIO_s_file())) == NULL) {
+  in = BIO_new(BIO_s_file());
+  if(in == NULL) {
     BIO_printf(p.errorbio, "Error setting input bio\n");
     goto err;
   }
@@ -397,7 +399,8 @@ int main(int argc, char **argv)
 
   /* set output  */
 
-  if((out=BIO_new(BIO_s_file())) == NULL) {
+  out = BIO_new(BIO_s_file());
+  if(out == NULL) {
     BIO_printf(p.errorbio, "Error setting output bio.\n");
     goto err;
   }
@@ -429,7 +432,7 @@ int main(int argc, char **argv)
     goto err;
   }
 
-  p.ca= NULL;
+  p.ca = NULL;
   if(!(PKCS12_parse (p.p12, p.pst, &(p.pkey), &(p.usercert), &(p.ca) ) )) {
     BIO_printf(p.errorbio, "Invalid P12 structure in %s\n", p.p12file);
     goto err;
@@ -454,10 +457,10 @@ int main(int argc, char **argv)
                                   given access type */
     serverurl = my_get_ext(p.usercert, p.accesstype, NID_info_access);
     if(!serverurl) {
-      int j=0;
+      int j = 0;
       BIO_printf(p.errorbio, "no service URL in user cert "
                  "cherching in others certificats\n");
-      for(j=0; j<sk_X509_num(p.ca); j++) {
+      for(j = 0; j<sk_X509_num(p.ca); j++) {
         serverurl = my_get_ext(sk_X509_value(p.ca, j), p.accesstype,
                                NID_info_access);
         if(serverurl)
@@ -489,8 +492,8 @@ int main(int argc, char **argv)
 
   /* pass our list of custom made headers */
 
-  contenttype = malloc(15+strlen(mimetype));
-  snprintf(contenttype, 15+strlen(mimetype), "Content-type: %s", mimetype);
+  contenttype = malloc(15 + strlen(mimetype));
+  snprintf(contenttype, 15 + strlen(mimetype), "Content-type: %s", mimetype);
   headers = curl_slist_append(headers, contenttype);
   curl_easy_setopt(p.curl, CURLOPT_HTTPHEADER, headers);
 
@@ -512,12 +515,12 @@ int main(int argc, char **argv)
   curl_easy_setopt(p.curl, CURLOPT_SSL_CTX_DATA, &p);
 
   {
-    int lu; int i=0;
+    int lu; int i = 0;
     while((lu = BIO_read(in, &binaryptr[i], tabLength-i)) >0) {
-      i+=lu;
-      if(i== tabLength) {
-        tabLength+=100;
-        binaryptr=realloc(binaryptr, tabLength); /* should be more careful */
+      i += lu;
+      if(i == tabLength) {
+        tabLength += 100;
+        binaryptr = realloc(binaryptr, tabLength); /* should be more careful */
       }
     }
     tabLength = i;
@@ -533,8 +536,8 @@ int main(int argc, char **argv)
   BIO_printf(p.errorbio, "%d %s %d\n", __LINE__, "curl_easy_perform",
              res = curl_easy_perform(p.curl));
   {
-    int result =curl_easy_getinfo(p.curl, CURLINFO_CONTENT_TYPE, &response);
-    if(mimetypeaccept && p.verbose)
+    int result = curl_easy_getinfo(p.curl, CURLINFO_CONTENT_TYPE, &response);
+    if(mimetypeaccept && p.verbose) {
       if(!strcmp(mimetypeaccept, response))
         BIO_printf(p.errorbio, "the response has a correct mimetype : %s\n",
                    response);
@@ -542,6 +545,7 @@ int main(int argc, char **argv)
         BIO_printf(p.errorbio, "the response doesn\'t have an acceptable "
                    "mime type, it is %s instead of %s\n",
                    response, mimetypeaccept);
+    }
   }
 
   /*** code d'erreur si accept mime ***, egalement code return HTTP != 200 ***/

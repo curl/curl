@@ -1,5 +1,9 @@
 set(TARGET_LABEL_PREFIX "Test server ")
 
+if(MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4127 /wd4306")
+endif()
+
 function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   add_executable( ${TEST_NAME} ${ARGN} )
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
@@ -7,7 +11,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   include_directories(
     ${CURL_SOURCE_DIR}/lib      # To be able to reach "curl_setup_once.h"
     ${CURL_BINARY_DIR}/lib      # To be able to reach "curl_config.h"
-    ${CURL_BINARY_DIR}/include  # To be able to reach "curl/curlbuild.h"
+    ${CURL_BINARY_DIR}/include  # To be able to reach "curl/curl.h"
     )
   if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
@@ -16,7 +20,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   target_link_libraries(${TEST_NAME} ${CURL_LIBS})
 
   # Test servers simply are standalone programs that do not use libcurl
-  # library.  For convinience and to ease portability of these servers,
+  # library.  For convenience and to ease portability of these servers,
   # some source code files from the libcurl subdirectory are also used
   # to build the servers.  In order to achieve proper linkage of these
   # files on Win32 targets it is necessary to build the test servers

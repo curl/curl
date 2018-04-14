@@ -1,6 +1,6 @@
 Long: netrc-file
 Help: Specify FILE for netrc
-Arg: <filemame>
+Arg: <filename>
 Added: 7.21.5
 Mutexed: netrc
 ---

@@ -1,0 +1,91 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+proxytunnel
+verbose logs
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</data>
+
+# The purpose of this test is to make sure curl ignores headers
+# Content-Length and Transfer-Encoding in a successful CONNECT 2xx reply.
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+Content-Length: 123
+Transfer-Encoding: chunked
+
+</connect>
+
+<datacheck>
+HTTP/1.1 200 Mighty fine indeed
+Content-Length: 123
+Transfer-Encoding: chunked
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<name>
+HTTP over proxy-tunnel ignore TE and CL in CONNECT 2xx responses
+</name>
+<command>
+-v --proxytunnel -x %HOSTIP:%PROXYPORT http://test.1287:%HTTPPORT/we/want/that/page/1287
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<proxy>
+CONNECT test.1287:%HTTPPORT HTTP/1.1
+Host: test.1287:%HTTPPORT
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+GET /we/want/that/page/1287 HTTP/1.1
+Host: test.1287:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file name="log/stderr1287" mode="text">
+* Ignoring Content-Length in CONNECT 200 response
+* Ignoring Transfer-Encoding in CONNECT 200 response
+</file>
+<stripfile>
+s/^.*(?=\* Ignoring (?:Content-Length|Transfer-Encoding) )// or $_ = ''
+</stripfile>
+</verify>
+</testcase>

@@ -67,7 +67,7 @@ extern void wait_ms(int ms); /* wait this many milliseconds */
 extern int test(char *URL); /* the actual test function provided by each
                                individual libXXX.c file */
 
-extern char *hexdump(unsigned char *buffer, size_t len);
+extern char *hexdump(const unsigned char *buffer, size_t len);
 
 #ifdef UNITTESTS
 extern int unitfail;

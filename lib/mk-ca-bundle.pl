@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 # ***************************************************************************
 # *                                  _   _ ____  _
 # *  Project                     ___| | | |  _ \| |
@@ -34,6 +34,7 @@ use Encode;
 use Getopt::Std;
 use MIME::Base64;
 use strict;
+use warnings;
 use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
@@ -47,11 +48,9 @@ eval "require LWP::UserAgent";
 
 my %urls = (
   'nss' =>
-    'https://hg.mozilla.org/projects/nss/raw-file/tip/lib/ckfw/builtins/certdata.txt',
+    'https://hg.mozilla.org/projects/nss/raw-file/default/lib/ckfw/builtins/certdata.txt',
   'central' =>
     'https://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
-  'aurora' =>
-    'https://hg.mozilla.org/releases/mozilla-aurora/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'beta' =>
     'https://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'release' =>
@@ -310,7 +309,7 @@ if(!$opt_n) {
         my $proto = !$opt_k ? "--proto =https" : "";
         my $quiet = $opt_q ? "-s" : "";
         my @out = `curl -w %{response_code} $proto $quiet -o "$txt" "$url"`;
-        if(@out && $out[0] == 200) {
+        if(!$? && @out && $out[0] == 200) {
           $fetched = 1;
           report "Downloaded $txt";
         }

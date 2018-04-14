@@ -42,7 +42,7 @@ static const struct xattr_mapping {
   CURLINFO info;
 } mappings[] = {
   /* mappings proposed by
-   * http://freedesktop.org/wiki/CommonExtendedAttributes
+   * https://freedesktop.org/wiki/CommonExtendedAttributes/
    */
   { "user.xdg.origin.url", CURLINFO_EFFECTIVE_URL },
   { "user.mime_type",      CURLINFO_CONTENT_TYPE },

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -174,7 +174,6 @@ my $exit_signal;         # first signal handled in exit_signal_handler
 #**********************************************************************
 # Mail related definitions
 #
-my $TEXT_USERNAME = "user";
 my $TEXT_PASSWORD = "secret";
 my $POP3_TIMESTAMP = "<1972.987654321\@curl>";
 
@@ -921,7 +920,7 @@ sub DATA_smtp {
                 print FILE $line if(!$nosave);
 
                 $raw .= $line;
-                if($raw =~ /\x0d\x0a\x2e\x0d\x0a/) {
+                if($raw =~ /(?:^|\x0d\x0a)\x2e\x0d\x0a/) {
                     # end of data marker!
                     $eob = 1;
                 }
@@ -1120,9 +1119,6 @@ sub LOGIN_imap {
 
     if ($user eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
-    }
-    elsif (($user ne $TEXT_USERNAME) || ($password ne $TEXT_PASSWORD)) {
-        sendcontrol "$cmdid NO LOGIN failed\r\n";
     }
     else {
         sendcontrol "$cmdid OK LOGIN completed\r\n";
@@ -1681,7 +1677,7 @@ sub APOP_pop3 {
     else {
         my $digest = Digest::MD5::md5_hex($POP3_TIMESTAMP, $TEXT_PASSWORD);
 
-        if (($user ne $TEXT_USERNAME) || ($secret ne $digest)) {
+        if ($secret ne $digest) {
             sendcontrol "-ERR Login failure\r\n";
         }
         else {
@@ -1740,12 +1736,7 @@ sub PASS_pop3 {
 
     logmsg "PASS_pop3 got $password\n";
 
-    if (($username ne $TEXT_USERNAME) || ($password ne $TEXT_PASSWORD)) {
-        sendcontrol "-ERR Login failure\r\n";
-    }
-    else {
-        sendcontrol "+OK Login successful\r\n";
-    }
+    sendcontrol "+OK Login successful\r\n";
 
     return 0;
 }
@@ -2717,7 +2708,7 @@ sub datasockf_state {
 }
 
 #**********************************************************************
-# nodataconn_str returns string of efective nodataconn command. Notice
+# nodataconn_str returns string of effective nodataconn command. Notice
 # that $nodataconn may be set alone or in addition to a $nodataconnXXX.
 #
 sub nodataconn_str {
@@ -2764,13 +2755,19 @@ sub customize {
             $fulltextreply{$1}=eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
         }
-        elsif($_ =~ /REPLY ([A-Za-z0-9+\/=\*]*) (.*)/) {
-            $commandreply{$1}=eval "qq{$2}";
-            if($1 eq "") {
+        elsif($_ =~ /REPLY(LF|) ([A-Za-z0-9+\/=\*]*) (.*)/) {
+            $commandreply{$2}=eval "qq{$3}";
+            if($1 ne "LF") {
+                $commandreply{$2}.="\r\n";
+            }
+            else {
+                $commandreply{$2}.="\n";
+            }
+            if($2 eq "") {
                 logmsg "FTPD: set custom reply for empty command\n";
             }
             else {
-                logmsg "FTPD: set custom reply for $1 command\n";
+                logmsg "FTPD: set custom reply for $2 command\n";
             }
         }
         elsif($_ =~ /COUNT ([A-Z]+) (.*)/) {
@@ -2937,7 +2934,7 @@ while(@ARGV) {
 }
 
 #***************************************************************************
-# Initialize command line option dependant variables
+# Initialize command line option dependent variables
 #
 
 if(!$srcdir) {
@@ -3032,7 +3029,7 @@ while(1) {
       undef $ftplistparserstate;
     }
     if($ftptargetdir) {
-      undef $ftptargetdir;
+      $ftptargetdir = "";
     }
 
     if($verbose) {
@@ -3184,7 +3181,7 @@ while(1) {
                     $commandreply{$FTPCMD}="";
                 }
 
-                sendcontrol "$text\r\n";
+                sendcontrol $text;
                 $check = 0;
             }
             else {
@@ -3202,7 +3199,7 @@ while(1) {
                 }
 
                 # only perform this if we're not faking a reply
-                my $func = $commandfunc{$FTPCMD};
+                my $func = $commandfunc{uc($FTPCMD)};
                 if($func) {
                     &$func($FTPARG, $FTPCMD);
                     $check = 0;

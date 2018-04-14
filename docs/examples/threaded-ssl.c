@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,7 +25,7 @@
  * </DESC>
  */
 /* A multi-threaded example that uses pthreads and fetches 4 remote files at
- * once over HTTPS. The lock callbacks and stuff assume OpenSSL or GnuTLS
+ * once over HTTPS. The lock callbacks and stuff assume OpenSSL <1.1 or GnuTLS
  * (libgcrypt) so far.
  *
  * OpenSSL docs for this:
@@ -63,7 +63,7 @@ static unsigned long thread_id(void)
 {
   unsigned long ret;
 
-  ret=(unsigned long)pthread_self();
+  ret = (unsigned long)pthread_self();
   return ret;
 }
 
@@ -71,9 +71,9 @@ static void init_locks(void)
 {
   int i;
 
-  lockarray=(pthread_mutex_t *)OPENSSL_malloc(CRYPTO_num_locks() *
-                                            sizeof(pthread_mutex_t));
-  for(i=0; i<CRYPTO_num_locks(); i++) {
+  lockarray = (pthread_mutex_t *)OPENSSL_malloc(CRYPTO_num_locks() *
+                                                sizeof(pthread_mutex_t));
+  for(i = 0; i<CRYPTO_num_locks(); i++) {
     pthread_mutex_init(&(lockarray[i]), NULL);
   }
 
@@ -86,7 +86,7 @@ static void kill_locks(void)
   int i;
 
   CRYPTO_set_locking_callback(NULL);
-  for(i=0; i<CRYPTO_num_locks(); i++)
+  for(i = 0; i<CRYPTO_num_locks(); i++)
     pthread_mutex_destroy(&(lockarray[i]));
 
   OPENSSL_free(lockarray);
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 
   init_locks();
 
-  for(i=0; i< NUMT; i++) {
+  for(i = 0; i< NUMT; i++) {
     error = pthread_create(&tid[i],
                            NULL, /* default attributes please */
                            pull_one_url,
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
   }
 
   /* now wait for all threads to terminate */
-  for(i=0; i< NUMT; i++) {
+  for(i = 0; i< NUMT; i++) {
     error = pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }

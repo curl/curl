@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -113,7 +113,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
   double doubleinfo;
 
   while(ptr && *ptr) {
-    if('%' == *ptr) {
+    if('%' == *ptr && ptr[1]) {
       if('%' == ptr[1]) {
         /* an escaped %-letter */
         fputc('%', stream);
@@ -341,7 +341,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
         }
       }
     }
-    else if('\\' == *ptr) {
+    else if('\\' == *ptr && ptr[1]) {
       switch(ptr[1]) {
       case 'r':
         fputc('\r', stream);

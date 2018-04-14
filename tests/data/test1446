@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+SFTP
+--remote-time
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+sftp
+</server>
+<precheck>
+perl %SRCDIR/libtest/test613.pl prepare %PWD/log/test1446.dir
+</precheck>
+ <name>
+SFTP with --remote-time
+ </name>
+ <command>
+--key curl_client_key --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%PWD/log/test1446.dir/rofile.txt --insecure --remote-time
+</command>
+<postcheck>
+perl %SRCDIR/libtest/test613.pl postprocess %PWD/log/test1446.dir && \
+perl -e 'exit((stat("log/curl1446.out"))[9] != 978264000)'
+</postcheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<valgrind>
+disable
+</valgrind>
+</verify>
+</testcase>

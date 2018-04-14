@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -255,7 +255,7 @@ echo "buildconf: libtoolize version $lt_version (ok)"
 #--------------------------------------------------------------------------
 # m4 check
 #
-m4=`(${M4:-m4} --version || ${M4:-gm4} --version) 2>/dev/null | head -n 1`;
+m4=`(${M4:-m4} --version 0<&- || ${M4:-gm4} --version) 2>/dev/null 0<&- | head -n 1`;
 m4_version=`echo $m4 | sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 
 if { echo $m4 | grep "GNU" >/dev/null 2>&1; } then
@@ -306,7 +306,6 @@ for fname in .deps \
     configure \
     configurehelp.pm \
     curl-config \
-    curlbuild.h \
     depcomp \
     libcares.pc \
     libcurl.pc \

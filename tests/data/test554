@@ -61,15 +61,14 @@ http://%HOSTIP:%HTTPPORT/554
 s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
-# Note that the stripping above removes 12 bytes from every occurance of the
+# Note that the stripping above removes 12 bytes from every occurrence of the
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
 POST /554 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 718
-Expect: 100-continue
+Content-Length: 744
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
@@ -88,6 +87,7 @@ Content-Disposition: form-data; name="filename"
 postit2.c
 ------------------------------
 Content-Disposition: form-data; name="submit"
+Content-Type: text/plain
 
 send
 ------------------------------
@@ -99,8 +99,7 @@ blah blah
 POST /554 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 732
-Expect: 100-continue
+Content-Length: 758
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
@@ -119,6 +118,7 @@ Content-Disposition: form-data; name="filename"
 postit2.c
 ------------------------------
 Content-Disposition: form-data; name="submit"
+Content-Type: text/plain
 
 send
 ------------------------------

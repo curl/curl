@@ -30,7 +30,6 @@ FAQ
   2.2 Does curl work/build with other SSL libraries?
   2.3 Where can I find a copy of LIBEAY32.DLL?
   2.4 Does curl support SOCKS (RFC 1928) ?
-  2.5 Install libcurl for both 32bit and 64bit?
 
  3. Usage Problems
   3.1 curl: (1) SSL is disabled, https: not supported
@@ -118,6 +117,7 @@ FAQ
   7.1 What is PHP/CURL?
   7.2 Who wrote PHP/CURL?
   7.3 Can I perform multiple requests using the same handle?
+  7.4 Does PHP/CURL have dependencies?
 
 ==============================================================================
 
@@ -162,7 +162,7 @@ FAQ
   We pronounce curl with an initial k sound. It rhymes with words like girl
   and earl. This is a short WAV file to help you:
 
-     http://media.merriam-webster.com/soundc11/c/curl0001.wav
+     https://media.merriam-webster.com/soundc11/c/curl0001.wav
 
   There are numerous sub-projects and related projects that also use the word
   curl in the project names in various combinations, but you should take
@@ -218,9 +218,9 @@ FAQ
   very well at the side. Curl's output can be piped into another program or
   redirected to another file for the next program to interpret.
 
-  We focus on protocol related issues and improvements. If you wanna do more
+  We focus on protocol related issues and improvements. If you want to do more
   magic with the supported protocols than curl currently does, chances are good
-  we will agree. If you wanna add more protocols, we may very well agree.
+  we will agree. If you want to add more protocols, we may very well agree.
 
   If you want someone else to do all the work while you wait for us to
   implement it for you, that is not a very friendly attitude. We spend a
@@ -324,7 +324,7 @@ FAQ
 
   1.11 Why don't you update ca-bundle.crt
 
-  The ca cert bundle that used to be shipped with curl was very outdated and 
+  The ca cert bundle that used to be shipped with curl was very outdated and
   must be replaced with an up-to-date version by anyone who wants to verify
   peers. It is no longer provided by curl. The last curl release that ever
   shipped a ca cert bundle was curl 7.18.0.
@@ -366,8 +366,8 @@ FAQ
   Comprehensible explanations of the meaning of such numbers and how to obtain
   them (resp.) are here
 
-  http://www.bis.doc.gov/licensing/exportingbasics.htm
-  http://www.bis.doc.gov/licensing/do_i_needaneccn.html
+  https://www.bis.doc.gov/licensing/exportingbasics.htm
+  https://www.bis.doc.gov/licensing/do_i_needaneccn.html
 
   An incomprehensible description of the two numbers above is here
   http://www.access.gpo.gov/bis/ear/pdf/ccl5-pt2.pdf
@@ -465,32 +465,6 @@ FAQ
 
   Yes, SOCKS 4 and 5 are supported.
 
-  2.5 Install libcurl for both 32bit and 64bit?
-
-  In curl's configure procedure one of the regular include files gets created
-  with platform specific information. The file 'curl/curlbuild.h' in the
-  installed libcurl file tree is therefore somewhat tied to that particular
-  platform.
-
-  To allow applications to get built for either 32bit or 64bit you need to
-  install libcurl headers for both setups and unfortunately curl doesn't do
-  this automatically.
-
-  A commonly used procedure is this:
-
-     $ ./configure [32bit platform]
-     $ mv curl/curlbuild.h curl/curlbuild-32bit.h
-     $ ./configure [64bit platform]
-     $ mv curl/curlbuild.h curl/curlbuild-64bit.h
-
-  Then you make a toplevel curl/curlbuild.h replacement that only does this:
-
-     #ifdef IS_32BIT
-     #include "curlbuild-32bit.h"
-     else
-     #include "curlbuild-64bit.h"
-     #endif
-
 
 3. Usage problems
 
@@ -520,13 +494,13 @@ FAQ
 
   3.3 Why doesn't my posting using -F work?
 
-  You can't arbitrarily use -F or -d, the choice between -F or -d depends on the 
-  HTTP operation you need curl to do and what the web server that will receive 
-  your post expects. 
+  You can't arbitrarily use -F or -d, the choice between -F or -d depends on the
+  HTTP operation you need curl to do and what the web server that will receive
+  your post expects.
 
-  If the form you're trying to submit uses the type 'multipart/form-data', then 
-  and only then you must use the -F type. In all the most common cases, you 
-  should use -d which then causes a posting with the type 
+  If the form you're trying to submit uses the type 'multipart/form-data', then
+  and only then you must use the -F type. In all the most common cases, you
+  should use -d which then causes a posting with the type
   'application/x-www-form-urlencoded'.
 
   This is described in some detail in the MANUAL and TheArtOfHttpScripting
@@ -602,7 +576,7 @@ FAQ
   In October 2009, there were interfaces available for the following
   languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Eiffel, Euphoria,
   Ferite, Gambas, glib/GTK+, Haskell, ILE/RPG, Java, Lisp, Lua, Mono, .NET,
-  Object-Pascal, O'Caml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
+  Object-Pascal, OCaml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
   Scheme, S-Lang, Smalltalk, SP-Forth, SPL, Tcl, Visual Basic, Visual FoxPro,
   Q, wxwidgets and XBLite. By the time you read this, additional ones may have
   appeared!
@@ -699,8 +673,8 @@ FAQ
 
   CLIENT CERTIFICATE
 
-  The server you communicate with may require that you can provide this in 
-  order to prove that you actually are who you claim to be.  If the server 
+  The server you communicate with may require that you can provide this in
+  order to prove that you actually are who you claim to be.  If the server
   doesn't require this, you don't need a client certificate.
 
   A client certificate is always used together with a private key, and the
@@ -1024,7 +998,7 @@ FAQ
   compilers or prior curl versions it may set a time that appears one hour off.
   This happens due to a flaw in how Windows stores and uses file modification
   times and it is not easily worked around. For more details read this:
-  http://www.codeproject.com/datetime/dstbugs.asp
+  https://www.codeproject.com/Articles/1144/Beating-the-Daylight-Savings-Time-bug-and-getting
 
   4.14 Redirects work in browser but not with curl!
 
@@ -1176,7 +1150,7 @@ FAQ
   The reason for this is that we first generate the request to send using the
   old 1.1 style and show that request in the verbose output, and then we
   convert it over to the binary header-compressed HTTP/2 style. The actual
-  "1.1" part from that request is then not actually used in the transfer. 
+  "1.1" part from that request is then not actually used in the transfer.
   The binary HTTP/2 headers are not human readable.
 
 5. libcurl Issues
@@ -1259,9 +1233,9 @@ FAQ
   libcurl will reuse connections for all transfers that are made using the
   same libcurl handle.
 
-  When you use the easy interface the connection cache is kept within the easy 
-  handle. If you instead use the multi interface, the connection cache will be 
-  kept within the multi handle and will be shared among all the easy handles 
+  When you use the easy interface the connection cache is kept within the easy
+  handle. If you instead use the multi interface, the connection cache will be
+  kept within the multi handle and will be shared among all the easy handles
   that are used within the same multi handle.
 
   5.7 Link errors when building libcurl on Windows!
@@ -1321,7 +1295,7 @@ FAQ
   you want to change name resolver function you must rebuild libcurl and tell
   it to use a different function.
 
-  - The non-IPv6 resolver that can use one of four different host name resolve 
+  - The non-IPv6 resolver that can use one of four different host name resolve
   calls (depending on what your system supports):
 
       A - gethostbyname()
@@ -1444,7 +1418,7 @@ FAQ
   timed out.
 
   The most flexible way is by writing your own time-out logic and using
-  CURLOPT_PROGRESSFUNCTION (perhaps in combination with other callbacks) and
+  CURLOPT_XFERINFOFUNCTION (perhaps in combination with other callbacks) and
   use that to figure out exactly when the right condition is met when the
   transfer should get stopped.
 

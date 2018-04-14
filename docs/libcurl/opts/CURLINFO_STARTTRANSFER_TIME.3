@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -37,7 +37,22 @@ See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+curl = curl_easy_init();
+if(curl) {
+  double start;
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  res = curl_easy_perform(curl);
+  if(CURLE_OK == res) {
+    res = curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME, &start);
+    if(CURLE_OK == res) {
+      printf("Time: %.1f", start);
+    }
+  }
+  /* always cleanup */
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.9.2
 .SH RETURN VALUE

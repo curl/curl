@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -30,7 +30,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NETRC, long level);
 .SH DESCRIPTION
 This parameter controls the preference \fIlevel\fP of libcurl between using
 user names and passwords from your \fI~/.netrc\fP file, relative to user names
-and passwords in the URL supplied with \fICURLOPT_URL(3)\fP.
+and passwords in the URL supplied with \fICURLOPT_URL(3)\fP. On Windows,
+libcurl will use the file as \fI%HOME%/_netrc\fP, but you can also tell
+libcurl a different file name to use with \fICURLOPT_NETRC_FILE(3)\fP.
 
 libcurl uses a user name (and supplied or prompted password) supplied with
 \fICURLOPT_USERPWD(3)\fP or \fICURLOPT_USERNAME(3)\fP in preference to any of
@@ -64,10 +66,18 @@ CURL_NETRC_IGNORED
 .SH PROTOCOLS
 Most
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/");
+  curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
+  ret = curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 Always
 .SH RETURN VALUE
 Returns CURLE_OK
 .SH "SEE ALSO"
-.BR CURLOPT_USERPWD "(3), " CURLOPT_USERNAME "(3), "
+.BR CURLOPT_USERPWD "(3), " CURLOPT_USERNAME "(3), ", CURLOPT_NETRC_FILE "(3), "

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,85 +24,103 @@
  * </DESC>
  */
 
+#include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <curl/curl.h>
 #include <stdio.h>
 
 size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  fwrite(ptr, size, nmemb, stream);
+  fwrite(ptr, size, nmemb, (FILE *)stream);
   return (nmemb*size);
 }
 
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 {
-  X509_STORE *store;
-  X509 *cert=NULL;
-  BIO *bio;
-  char *mypem = /* www.cacert.org */
-    "-----BEGIN CERTIFICATE-----\n"\
-    "MIIHPTCCBSWgAwIBAgIBADANBgkqhkiG9w0BAQQFADB5MRAwDgYDVQQKEwdSb290\n"\
-    "IENBMR4wHAYDVQQLExVodHRwOi8vd3d3LmNhY2VydC5vcmcxIjAgBgNVBAMTGUNB\n"\
-    "IENlcnQgU2lnbmluZyBBdXRob3JpdHkxITAfBgkqhkiG9w0BCQEWEnN1cHBvcnRA\n"\
-    "Y2FjZXJ0Lm9yZzAeFw0wMzAzMzAxMjI5NDlaFw0zMzAzMjkxMjI5NDlaMHkxEDAO\n"\
-    "BgNVBAoTB1Jvb3QgQ0ExHjAcBgNVBAsTFWh0dHA6Ly93d3cuY2FjZXJ0Lm9yZzEi\n"\
-    "MCAGA1UEAxMZQ0EgQ2VydCBTaWduaW5nIEF1dGhvcml0eTEhMB8GCSqGSIb3DQEJ\n"\
-    "ARYSc3VwcG9ydEBjYWNlcnQub3JnMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIIC\n"\
-    "CgKCAgEAziLA4kZ97DYoB1CW8qAzQIxL8TtmPzHlawI229Z89vGIj053NgVBlfkJ\n"\
-    "8BLPRoZzYLdufujAWGSuzbCtRRcMY/pnCujW0r8+55jE8Ez64AO7NV1sId6eINm6\n"\
-    "zWYyN3L69wj1x81YyY7nDl7qPv4coRQKFWyGhFtkZip6qUtTefWIonvuLwphK42y\n"\
-    "fk1WpRPs6tqSnqxEQR5YYGUFZvjARL3LlPdCfgv3ZWiYUQXw8wWRBB0bF4LsyFe7\n"\
-    "w2t6iPGwcswlWyCR7BYCEo8y6RcYSNDHBS4CMEK4JZwFaz+qOqfrU0j36NK2B5jc\n"\
-    "G8Y0f3/JHIJ6BVgrCFvzOKKrF11myZjXnhCLotLddJr3cQxyYN/Nb5gznZY0dj4k\n"\
-    "epKwDpUeb+agRThHqtdB7Uq3EvbXG4OKDy7YCbZZ16oE/9KTfWgu3YtLq1i6L43q\n"\
-    "laegw1SJpfvbi1EinbLDvhG+LJGGi5Z4rSDTii8aP8bQUWWHIbEZAWV/RRyH9XzQ\n"\
-    "QUxPKZgh/TMfdQwEUfoZd9vUFBzugcMd9Zi3aQaRIt0AUMyBMawSB3s42mhb5ivU\n"\
-    "fslfrejrckzzAeVLIL+aplfKkQABi6F1ITe1Yw1nPkZPcCBnzsXWWdsC4PDSy826\n"\
-    "YreQQejdIOQpvGQpQsgi3Hia/0PsmBsJUUtaWsJx8cTLc6nloQsCAwEAAaOCAc4w\n"\
-    "ggHKMB0GA1UdDgQWBBQWtTIb1Mfz4OaO873SsDrusjkY0TCBowYDVR0jBIGbMIGY\n"\
-    "gBQWtTIb1Mfz4OaO873SsDrusjkY0aF9pHsweTEQMA4GA1UEChMHUm9vdCBDQTEe\n"\
-    "MBwGA1UECxMVaHR0cDovL3d3dy5jYWNlcnQub3JnMSIwIAYDVQQDExlDQSBDZXJ0\n"\
-    "IFNpZ25pbmcgQXV0aG9yaXR5MSEwHwYJKoZIhvcNAQkBFhJzdXBwb3J0QGNhY2Vy\n"\
-    "dC5vcmeCAQAwDwYDVR0TAQH/BAUwAwEB/zAyBgNVHR8EKzApMCegJaAjhiFodHRw\n"\
-    "czovL3d3dy5jYWNlcnQub3JnL3Jldm9rZS5jcmwwMAYJYIZIAYb4QgEEBCMWIWh0\n"\
-    "dHBzOi8vd3d3LmNhY2VydC5vcmcvcmV2b2tlLmNybDA0BglghkgBhvhCAQgEJxYl\n"\
-    "aHR0cDovL3d3dy5jYWNlcnQub3JnL2luZGV4LnBocD9pZD0xMDBWBglghkgBhvhC\n"\
-    "AQ0ESRZHVG8gZ2V0IHlvdXIgb3duIGNlcnRpZmljYXRlIGZvciBGUkVFIGhlYWQg\n"\
-    "b3ZlciB0byBodHRwOi8vd3d3LmNhY2VydC5vcmcwDQYJKoZIhvcNAQEEBQADggIB\n"\
-    "ACjH7pyCArpcgBLKNQodgW+JapnM8mgPf6fhjViVPr3yBsOQWqy1YPaZQwGjiHCc\n"\
-    "nWKdpIevZ1gNMDY75q1I08t0AoZxPuIrA2jxNGJARjtT6ij0rPtmlVOKTV39O9lg\n"\
-    "18p5aTuxZZKmxoGCXJzN600BiqXfEVWqFcofN8CCmHBh22p8lqOOLlQ+TyGpkO/c\n"\
-    "gr/c6EWtTZBzCDyUZbAEmXZ/4rzCahWqlwQ3JNgelE5tDlG+1sSPypZt90Pf6DBl\n"\
-    "Jzt7u0NDY8RD97LsaMzhGY4i+5jhe1o+ATc7iwiwovOVThrLm82asduycPAtStvY\n"\
-    "sONvRUgzEv/+PDIqVPfE94rwiCPCR/5kenHA0R6mY7AHfqQv0wGP3J8rtsYIqQ+T\n"\
-    "SCX8Ev2fQtzzxD72V7DX3WnRBnc0CkvSyqD/HMaMyRa+xMwyN2hzXwj7UfdJUzYF\n"\
-    "CpUCTPJ5GhD22Dp1nPMd8aINcGeGG7MW9S/lpOt5hvk9C8JzC6WZrG/8Z7jlLwum\n"\
-    "GCSNe9FINSkYQKyTYOGWhlC0elnYjyELn8+CkcY7v2vcB5G5l1YjqrZslMZIBjzk\n"\
-    "zk6q5PYvCdxTby78dOs6Y5nCpqyJvKeyRKANihDjbPIky/qbn3BHLt4Ui9SyIAmW\n"\
-    "omTxJBzcoTWcFbLUvFUufQb1nA5V9FrWk9p2rSVzTMVD\n"\
+  CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
+  X509_STORE *store = NULL;
+  X509 *cert = NULL;
+  BIO *bio = NULL;
+  char *mypem =
+    /* CA for example.com. CN = DigiCert High Assurance EV Root CA */
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIDxTCCAq2gAwIBAgIQAqxcJmoLQJuPC3nyrkYldzANBgkqhkiG9w0BAQUFADBs\n"
+    "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n"
+    "d3cuZGlnaWNlcnQuY29tMSswKQYDVQQDEyJEaWdpQ2VydCBIaWdoIEFzc3VyYW5j\n"
+    "ZSBFViBSb290IENBMB4XDTA2MTExMDAwMDAwMFoXDTMxMTExMDAwMDAwMFowbDEL\n"
+    "MAkGA1UEBhMCVVMxFTATBgNVBAoTDERpZ2lDZXJ0IEluYzEZMBcGA1UECxMQd3d3\n"
+    "LmRpZ2ljZXJ0LmNvbTErMCkGA1UEAxMiRGlnaUNlcnQgSGlnaCBBc3N1cmFuY2Ug\n"
+    "RVYgUm9vdCBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMbM5XPm\n"
+    "+9S75S0tMqbf5YE/yc0lSbZxKsPVlDRnogocsF9ppkCxxLeyj9CYpKlBWTrT3JTW\n"
+    "PNt0OKRKzE0lgvdKpVMSOO7zSW1xkX5jtqumX8OkhPhPYlG++MXs2ziS4wblCJEM\n"
+    "xChBVfvLWokVfnHoNb9Ncgk9vjo4UFt3MRuNs8ckRZqnrG0AFFoEt7oT61EKmEFB\n"
+    "Ik5lYYeBQVCmeVyJ3hlKV9Uu5l0cUyx+mM0aBhakaHPQNAQTXKFx01p8VdteZOE3\n"
+    "hzBWBOURtCmAEvF5OYiiAhF8J2a3iLd48soKqDirCmTCv2ZdlYTBoSUeh10aUAsg\n"
+    "EsxBu24LUTi4S8sCAwEAAaNjMGEwDgYDVR0PAQH/BAQDAgGGMA8GA1UdEwEB/wQF\n"
+    "MAMBAf8wHQYDVR0OBBYEFLE+w2kD+L9HAdSYJhoIAu9jZCvDMB8GA1UdIwQYMBaA\n"
+    "FLE+w2kD+L9HAdSYJhoIAu9jZCvDMA0GCSqGSIb3DQEBBQUAA4IBAQAcGgaX3Nec\n"
+    "nzyIZgYIVyHbIUf4KmeqvxgydkAQV8GK83rZEWWONfqe/EW1ntlMMUu4kehDLI6z\n"
+    "eM7b41N5cdblIZQB2lWHmiRk9opmzN6cN82oNLFpmyPInngiK3BD41VHMWEZ71jF\n"
+    "hS9OMPagMRYjyOfiZRYzy78aG6A9+MpeizGLYAiJLQwGXFK3xPkKmNEVX58Svnw2\n"
+    "Yzi9RKR/5CYrCsSXaQ3pjOLAEFe4yHYSkVXySGnYvCoCWw9E1CAx2/S6cCZdkGCe\n"
+    "vEsXCS+0yx5DaMkHJ8HSXPfqIbloEpw8nL+e/IBcm2PN7EeqJSdnoDfzAIJ9VNep\n"
+    "+OkuE6N36B9K\n"
     "-----END CERTIFICATE-----\n";
+
+  /* clear the current thread's OpenSSL error queue */
+  ERR_clear_error();
+
   /* get a BIO */
-  bio=BIO_new_mem_buf(mypem, -1);
+  bio = BIO_new_mem_buf(mypem, -1);
+  if(!bio)
+    goto err;
+
   /* use it to read the PEM formatted certificate from memory into an X509
    * structure that SSL can use
    */
-  PEM_read_bio_X509(bio, &cert, 0, NULL);
-  if(cert == NULL)
-    printf("PEM_read_bio_X509 failed...\n");
+  if(!PEM_read_bio_X509(bio, &cert, 0, NULL))
+    goto err;
 
   /* get a pointer to the X509 certificate store (which may be empty!) */
-  store=SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  store = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  if(!store)
+    goto err;
 
   /* add our certificate to this store */
-  if(X509_STORE_add_cert(store, cert)==0)
-    printf("error adding certificate\n");
+  if(!X509_STORE_add_cert(store, cert)) {
+    unsigned long error = ERR_peek_last_error();
 
-  /* decrease reference counts */
+    /* Ignore error X509_R_CERT_ALREADY_IN_HASH_TABLE which means the
+     * certificate is already in the store. That could happen if
+     * libcurl already loaded the certificate from a ca cert bundle
+     * set at libcurl build-time or runtime.
+     */
+    if(ERR_GET_LIB(error) != ERR_LIB_X509 ||
+       ERR_GET_REASON(error) != X509_R_CERT_ALREADY_IN_HASH_TABLE)
+      goto err;
+
+    ERR_clear_error();
+  }
+
+  rv = CURLE_OK;
+
+err:
+  if(rv != CURLE_OK) {
+    char errbuf[256];
+    unsigned long error = ERR_peek_last_error();
+
+    fprintf(stderr, "error adding certificate\n");
+    if(error) {
+      ERR_error_string_n(error, errbuf, sizeof errbuf);
+      fprintf(stderr, "%s\n", errbuf);
+    }
+  }
+
   X509_free(cert);
   BIO_free(bio);
+  ERR_clear_error();
 
-  /* all set to go */
-  return CURLE_OK;
+  return rv;
 }
 
 int main(void)
@@ -110,35 +128,54 @@ int main(void)
   CURL *ch;
   CURLcode rv;
 
-  rv=curl_global_init(CURL_GLOBAL_ALL);
-  ch=curl_easy_init();
-  rv=curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
-  rv=curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
-  rv=curl_easy_setopt(ch, CURLOPT_NOPROGRESS, 1L);
-  rv=curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
-  rv=curl_easy_setopt(ch, CURLOPT_WRITEFUNCTION, *writefunction);
-  rv=curl_easy_setopt(ch, CURLOPT_WRITEDATA, stdout);
-  rv=curl_easy_setopt(ch, CURLOPT_HEADERFUNCTION, *writefunction);
-  rv=curl_easy_setopt(ch, CURLOPT_HEADERDATA, stderr);
-  rv=curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
-  rv=curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
-  rv=curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
+  rv = curl_global_init(CURL_GLOBAL_ALL);
+  ch = curl_easy_init();
+  rv = curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
+  rv = curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
+  rv = curl_easy_setopt(ch, CURLOPT_NOPROGRESS, 1L);
+  rv = curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
+  rv = curl_easy_setopt(ch, CURLOPT_WRITEFUNCTION, *writefunction);
+  rv = curl_easy_setopt(ch, CURLOPT_WRITEDATA, stdout);
+  rv = curl_easy_setopt(ch, CURLOPT_HEADERFUNCTION, *writefunction);
+  rv = curl_easy_setopt(ch, CURLOPT_HEADERDATA, stderr);
+  rv = curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
+  rv = curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 1L);
+  rv = curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
 
-  /* first try: retrieve page without cacerts' certificate -> will fail
+  /* turn off the default CA locations (optional)
+   * otherwise libcurl will load CA certificates from the locations that
+   * were detected/specified at build-time
    */
-  rv=curl_easy_perform(ch);
-  if(rv==CURLE_OK)
+  rv = curl_easy_setopt(ch, CURLOPT_CAINFO, NULL);
+  rv = curl_easy_setopt(ch, CURLOPT_CAPATH, NULL);
+
+  /* first try: retrieve page without ca certificates -> should fail
+   * unless libcurl was built --with-ca-fallback enabled at build-time
+   */
+  rv = curl_easy_perform(ch);
+  if(rv == CURLE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
+  /* use a fresh connection (optional)
+   * this option seriously impacts performance of multiple transfers but
+   * it is necessary order to demonstrate this example. recall that the
+   * ssl ctx callback is only called _before_ an SSL connection is
+   * established, therefore it will not affect existing verified SSL
+   * connections already in the connection cache associated with this
+   * handle. normally you would set the ssl ctx function before making
+   * any transfers, and not use this option.
+   */
+  rv = curl_easy_setopt(ch, CURLOPT_FRESH_CONNECT, 1L);
+
   /* second try: retrieve page using cacerts' certificate -> will succeed
-   * load the certificate by installing a function doing the nescessary
+   * load the certificate by installing a function doing the necessary
    * "modifications" to the SSL CONTEXT just before link init
    */
-  rv=curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
-  rv=curl_easy_perform(ch);
-  if(rv==CURLE_OK)
+  rv = curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
+  rv = curl_easy_perform(ch);
+  if(rv == CURLE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");

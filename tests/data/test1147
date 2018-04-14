@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-H
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Get -H headers from a file
+ </name>
+<file name="log/heads1147.txt">
+One: 1
+Two: 2
+no-colon
+
+ And A Funny One : wohoo
+User-Agent:
+</file>
+ <command>
+http://%HOSTIP:%HTTPPORT/1147 -H @log/heads1147.txt
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /1147 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+One: 1
+Two: 2
+ And A Funny One : wohoo
+
+</protocol>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -38,7 +38,8 @@ subsequent requests with this handle.
 
 Given an empty or non-existing file or by passing the empty string ("") to
 this option, you can enable the cookie engine without reading any initial
-cookies.
+cookies. If you tell libcurl the file name is "-" (just a single minus sign),
+libcurl will instead read from stdin.
 
 This option only \fBreads\fP cookies. To make libcurl write cookies to file,
 see \fICURLOPT_COOKIEJAR(3)\fP.
@@ -61,7 +62,19 @@ NULL
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/foo.bin");
+
+  /* get cookies from an existing file */
+  curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "/tmp/cookies.txt");
+
+  ret = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 As long as HTTP is supported
 .SH RETURN VALUE

@@ -23,10 +23,10 @@ blablabla
 http
 </server>
  <name>
-HTTP RFC1867-type formposting with filename contains ',', ';', '"'
+HTTP RFC1867-type formposting with filename/data contains ',', ';', '"'
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/we/want/1133 -F "file=@\"log/test1133,a\\\"nd;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"log/test1133,a\"nd;.txt"' -F 'file3=@"log/test1133,a\"nd;.txt";type=m/f,"log/test1133,a\"nd;.txt"'
+http://%HOSTIP:%HTTPPORT/we/want/1133 -F "file=@\"log/test1133,a\\\"nd;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"log/test1133,a\"nd;.txt"' -F 'file3=@"log/test1133,a\"nd;.txt";type=m/f,"log/test1133,a\"nd;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
 </command>
 # We create this file before the command is invoked!
 <file name=log/test1133,a"nd;.txt>
@@ -47,7 +47,7 @@ POST /we/want/1133 HTTP/1.1
 User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 967
+Content-Length: 1270
 Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
 
@@ -89,6 +89,14 @@ This is a bar foo
 bar
 foo
 
+
+Content-Disposition: form-data; name="a"
+
+{"field1":"value1","field2":"value2"}
+Content-Disposition: form-data; name="b"; filename="param_b"
+Content-Type: text/foo; charset=utf-8
+
+ \value1;type="whatever" 
 ------------------------------24e78000bd32--
 </protocol>
 </verify>

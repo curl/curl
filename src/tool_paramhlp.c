@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,13 +73,13 @@ ParameterError file2string(char **bufp, FILE *file)
       if(ptr)
         *ptr = '\0';
       buflen = strlen(buffer);
-      ptr = realloc(string, stringlen+buflen+1);
+      ptr = realloc(string, stringlen + buflen + 1);
       if(!ptr) {
         Curl_safefree(string);
         return PARAM_NO_MEM;
       }
       string = ptr;
-      strcpy(string+stringlen, buffer);
+      strcpy(string + stringlen, buffer);
       stringlen += buflen;
     }
   }
@@ -99,27 +99,27 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     do {
       if(!buffer || (alloc == nused)) {
         /* size_t overflow detection for huge files */
-        if(alloc+1 > ((size_t)-1)/2) {
+        if(alloc + 1 > ((size_t)-1)/2) {
           Curl_safefree(buffer);
           return PARAM_NO_MEM;
         }
         alloc *= 2;
         /* allocate an extra char, reserved space, for null termination */
-        newbuf = realloc(buffer, alloc+1);
+        newbuf = realloc(buffer, alloc + 1);
         if(!newbuf) {
           Curl_safefree(buffer);
           return PARAM_NO_MEM;
         }
         buffer = newbuf;
       }
-      nread = fread(buffer+nused, 1, alloc-nused, file);
+      nread = fread(buffer + nused, 1, alloc-nused, file);
       nused += nread;
     } while(nread);
     /* null terminate the buffer in case it's used as a string later */
     buffer[nused] = '\0';
     /* free trailing slack space, if possible */
     if(alloc != nused) {
-      newbuf = realloc(buffer, nused+1);
+      newbuf = realloc(buffer, nused + 1);
       if(!newbuf) {
         Curl_safefree(buffer);
         return PARAM_NO_MEM;
@@ -164,7 +164,11 @@ ParameterError str2num(long *val, const char *str)
 {
   if(str) {
     char *endptr;
-    long num = strtol(str, &endptr, 10);
+    long num;
+    errno = 0;
+    num = strtol(str, &endptr, 10);
+    if(errno == ERANGE)
+      return PARAM_NUMBER_TOO_LARGE;
     if((endptr != str) && (endptr == str + strlen(str))) {
       *val = num;
       return PARAM_OK;  /* Ok */
@@ -197,16 +201,27 @@ ParameterError str2unum(long *val, const char *str)
  * Parse the string and write the double in the given address. Return PARAM_OK
  * on success, otherwise a parameter specific error enum.
  *
+ * The 'max' argument is the maximum value allowed, as the numbers are often
+ * multiplied when later used.
+ *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
 
-ParameterError str2double(double *val, const char *str)
+static ParameterError str2double(double *val, const char *str, long max)
 {
   if(str) {
     char *endptr;
-    double num = strtod(str, &endptr);
+    double num;
+    errno = 0;
+    num = strtod(str, &endptr);
+    if(errno == ERANGE)
+      return PARAM_NUMBER_TOO_LARGE;
+    if(num > max) {
+      /* too large */
+      return PARAM_NUMBER_TOO_LARGE;
+    }
     if((endptr != str) && (endptr == str + strlen(str))) {
       *val = num;
       return PARAM_OK;  /* Ok */
@@ -219,19 +234,24 @@ ParameterError str2double(double *val, const char *str)
  * Parse the string and write the double in the given address. Return PARAM_OK
  * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
  *
+ * The 'max' argument is the maximum value allowed, as the numbers are often
+ * multiplied when later used.
+ *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
  * data.
  */
 
-ParameterError str2udouble(double *val, const char *str)
+ParameterError str2udouble(double *valp, const char *str, long max)
 {
-  ParameterError result = str2double(val, str);
+  double value;
+  ParameterError result = str2double(&value, str, max);
   if(result != PARAM_OK)
     return result;
-  if(*val < 0)
+  if(value < 0)
     return PARAM_NEGATIVE_NUMERIC;
 
+  *valp = value;
   return PARAM_OK;
 }
 
@@ -316,7 +336,7 @@ long proto2num(struct OperationConfig *config, long *val, const char *str)
       }
     }
 
-    for(pp=protos; pp->name; pp++) {
+    for(pp = protos; pp->name; pp++) {
       if(curl_strequal(token, pp->name)) {
         switch(action) {
         case deny:
@@ -381,14 +401,19 @@ ParameterError str2offset(curl_off_t *val, const char *str)
     /* offsets aren't negative, this indicates weird input */
     return PARAM_NEGATIVE_NUMERIC;
 
-#if(CURL_SIZEOF_CURL_OFF_T > CURL_SIZEOF_LONG)
-  *val = curlx_strtoofft(str, &endptr, 0);
-  if((*val == CURL_OFF_T_MAX || *val == CURL_OFF_T_MIN) && (ERRNO == ERANGE))
-    return PARAM_BAD_NUMERIC;
+#if(SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+  {
+    CURLofft offt = curlx_strtoofft(str, &endptr, 0, val);
+    if(CURL_OFFT_FLOW == offt)
+      return PARAM_NUMBER_TOO_LARGE;
+    else if(CURL_OFFT_INVAL == offt)
+      return PARAM_BAD_NUMERIC;
+  }
 #else
+  errno = 0;
   *val = strtol(str, &endptr, 0);
-  if((*val == LONG_MIN || *val == LONG_MAX) && ERRNO == ERANGE)
-    return PARAM_BAD_NUMERIC;
+  if((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)
+    return PARAM_NUMBER_TOO_LARGE;
 #endif
   if((endptr != str) && (endptr == str + strlen(str)))
     return PARAM_OK;
@@ -451,7 +476,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* append the password separated with a colon */
     passptr[userlen] = ':';
-    memcpy(&passptr[userlen+1], passwd, passwdlen+1);
+    memcpy(&passptr[userlen + 1], passwd, passwdlen + 1);
     *userpwd = passptr;
   }
 
@@ -549,4 +574,37 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
   }
 
   return result;
+}
+
+/*
+ * Parse the string and modify ssl_version in the val argument. Return PARAM_OK
+ * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ *
+ * Since this function gets called with the 'nextarg' pointer from within the
+ * getparameter a lot, we must check it for NULL before accessing the str
+ * data.
+ */
+
+ParameterError str2tls_max(long *val, const char *str)
+{
+   static struct s_tls_max {
+    const char *tls_max_str;
+    long tls_max;
+  } const tls_max_array[] = {
+    { "default", CURL_SSLVERSION_MAX_DEFAULT },
+    { "1.0",     CURL_SSLVERSION_MAX_TLSv1_0 },
+    { "1.1",     CURL_SSLVERSION_MAX_TLSv1_1 },
+    { "1.2",     CURL_SSLVERSION_MAX_TLSv1_2 },
+    { "1.3",     CURL_SSLVERSION_MAX_TLSv1_3 }
+  };
+  size_t i = 0;
+  if(!str)
+    return PARAM_REQUIRES_PARAMETER;
+  for(i = 0; i < sizeof(tls_max_array)/sizeof(tls_max_array[0]); i++) {
+    if(!strcmp(str, tls_max_array[i].tls_max_str)) {
+      *val = tls_max_array[i].tls_max;
+      return PARAM_OK;
+    }
+  }
+  return PARAM_BAD_USE;
 }

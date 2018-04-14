@@ -12,7 +12,7 @@ Building with Visual C++, prerequisites
 
    The latest Platform SDK can be downloaded freely from:
 
-    https://msdn.microsoft.com/en-us/windows/bb980924
+    https://developer.microsoft.com/en-us/windows/downloads/sdk-archive
 
    If you are building with VC6 then you will also need the February 2003
    Edition of the Platform SDK which can be downloaded from:
@@ -21,7 +21,7 @@ Building with Visual C++, prerequisites
 
    If you wish to support zlib, openssl, c-ares, ssh2, you will have to download
    them separately and copy them to the deps directory as shown below:
-   
+
    somedirectory\
     |_curl-src
     | |_winbuild
@@ -34,36 +34,54 @@ Building with Visual C++, prerequisites
    It is also possible to create the deps directory in some other random
    places and tell the Makefile its location using the WITH_DEVEL option.
 
+Building straight from git
+==========================
+
+ When you check out code git and build it, as opposed from a released source
+ code archive, you need to first run the "buildconf.bat" batch file (present
+ in the source code root directory) to set things up.
+
 Building with Visual C++
 ========================
 
-Open a Visual Studio Command prompt or the SDK CMD shell.
+Open a Visual Studio Command prompt:
 
-    Using the CMD Shell:
-     choose the right environment via the setenv command (see setenv /?)
-     for the full list of options. setenv /xp /x86 /release for example.
+     Using the 'Developer Command Prompt for VS <version>' menu entry:
+       where version is the Visual Studio version. The developer prompt at default
+       uses the x86 mode. It is required to call Vcvarsall.bat to setup the prompt
+       for the machine type you want, using Vcvarsall.bat.
+       This type of command prompt may not exist in all Visual Studio versions.
 
-    Using the Visual Studio command prompt Shell:
-     Everything is already pre-configured by calling one of the command
-     prompt.
+       For more information, check:
+         https://docs.microsoft.com/en-us/dotnet/framework/tools/developer-command-prompt-for-vs
+         https://docs.microsoft.com/en-us/cpp/build/how-to-enable-a-64-bit-visual-cpp-toolset-on-the-command-line
 
-Once you are in the console, go to the winbuild directory in the Curl 
+     Using the 'VS <version> <platform> <type> Command Prompt' menu entry:
+       where version is the Visual Studio version, platform is e.g. x64
+       and type Native of Cross platform build.  This type of command prompt
+       may not exist in all Visual Studio versions.
+
+       See also:
+         https://msdn.microsoft.com/en-us/library/f2ccy3wt.aspx
+
+Once you are in the console, go to the winbuild directory in the Curl
 sources:
     cd curl-src\winbuild
 
 Then you can call nmake /f Makefile.vc with the desired options (see below).
-The builds will be in the top src directory, builds\ directory, in 
+The builds will be in the top src directory, builds\ directory, in
 a directory named using the options given to the nmake call.
 
 nmake /f Makefile.vc mode=<static or dll> <options>
 
 where <options> is one or many of:
-  VC=<6,7,8,9,10,11,12,14>     - VC versions
+  VC=<6,7,8,9,10,11,12,14,15>  - VC versions
   WITH_DEVEL=<path>            - Paths for the development files (SSL, zlib, etc.)
                                  Defaults to sibbling directory deps: ../deps
                                  Libraries can be fetched at http://windows.php.net/downloads/php-sdk/deps/
                                  Uncompress them into the deps folder.
   WITH_SSL=<dll or static>     - Enable OpenSSL support, DLL or static
+  WITH_NGHTTP2=<dll or static> - Enable HTTP/2 support, DLL or static
   WITH_MBEDTLS=<dll or static> - Enable mbedTLS support, DLL or static
   WITH_CARES=<dll or static>   - Enable c-ares support, DLL or static
   WITH_ZLIB=<dll or static>    - Enable zlib support, DLL or static

@@ -1,0 +1,108 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP Negotiate auth (stub ntlm)
+</keywords>
+</info>
+# Server-side
+<reply>
+<!-- First request, expect 401 Negotiate -->
+<data>
+HTTP/1.1 401 Authorization Required
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate
+Content-Length: 13
+
+Not yet sir!
+</data>
+<!-- Second request, expect 401 (ntlm challenge) -->
+<data1>
+HTTP/1.1 401 Authorization Required
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate Qw==
+Content-Length: 19
+
+Still not yet sir!
+</data1>
+<!-- Third request, expect success  -->
+<data2>
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate RA==
+Content-Length: 15
+
+Nice auth sir!
+</data2>
+<datacheck>
+HTTP/1.1 401 Authorization Required
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate
+Content-Length: 13
+
+HTTP/1.1 401 Authorization Required
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate Qw==
+Content-Length: 19
+
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/7.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: Negotiate RA==
+Content-Length: 15
+
+Nice auth sir!
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP Negotiate authentication (stub ntlm)
+</name>
+<features>
+GSS-API
+ld_preload
+!debug
+</features>
+<setenv>
+LD_PRELOAD=%PWD/libtest/.libs/libstubgss.so
+CURL_STUB_GSS_CREDS="NTLM_Alice"
+</setenv>
+<command>
+-u: --negotiate http://%HOSTIP:%HTTPPORT/2057
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /2057 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /2057 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Negotiate Ik5UTE1fQWxpY2UiOkhUVFBAMTI3LjAuMC4xOjI6QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ==
+Accept: */*
+
+GET /2057 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Negotiate Ik5UTE1fQWxpY2UiOkhUVFBAMTI3LjAuMC4xOjM6QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ==
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

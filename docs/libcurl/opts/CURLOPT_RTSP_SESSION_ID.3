@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -42,7 +42,16 @@ NULL
 .SH PROTOCOLS
 RTSP
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  char *prev_id; /* saved from before somehow */
+  curl_easy_setopt(curl, CURLOPT_URL, "rtsp://example.com/");
+  curl_easy_setopt(curl, CURLOPT_RTSP_SESSION_ID, prev_id);
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.20.0
 .SH RETURN VALUE

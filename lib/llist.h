@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,7 +29,6 @@ typedef void (*curl_llist_dtor)(void *, void *);
 
 struct curl_llist_element {
   void *ptr;
-
   struct curl_llist_element *prev;
   struct curl_llist_element *next;
 };
@@ -37,21 +36,19 @@ struct curl_llist_element {
 struct curl_llist {
   struct curl_llist_element *head;
   struct curl_llist_element *tail;
-
   curl_llist_dtor dtor;
-
   size_t size;
 };
 
-struct curl_llist *Curl_llist_alloc(curl_llist_dtor);
-int Curl_llist_insert_next(struct curl_llist *, struct curl_llist_element *,
-                           const void *);
-int Curl_llist_remove(struct curl_llist *, struct curl_llist_element *,
-                      void *);
+void Curl_llist_init(struct curl_llist *, curl_llist_dtor);
+void Curl_llist_insert_next(struct curl_llist *, struct curl_llist_element *,
+                            const void *, struct curl_llist_element *node);
+void Curl_llist_remove(struct curl_llist *, struct curl_llist_element *,
+                       void *);
 size_t Curl_llist_count(struct curl_llist *);
 void Curl_llist_destroy(struct curl_llist *, void *);
-int Curl_llist_move(struct curl_llist *, struct curl_llist_element *,
-                    struct curl_llist *, struct curl_llist_element *);
+void Curl_llist_move(struct curl_llist *, struct curl_llist_element *,
+                     struct curl_llist *, struct curl_llist_element *);
 
 #endif /* HEADER_CURL_LLIST_H */
 

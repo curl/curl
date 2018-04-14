@@ -27,7 +27,7 @@
 ** callback for CURLOPT_WRITEFUNCTION
 */
 
-size_t tool_write_cb(void *buffer, size_t sz, size_t nmemb, void *userdata);
+size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata);
 
 /* create a local file for writing, return TRUE on success */
 bool tool_create_output_file(struct OutStruct *outs);

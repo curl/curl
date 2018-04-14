@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -29,6 +29,7 @@
 #include "vauth/vauth.h"
 #include "urldata.h"
 #include "curl_base64.h"
+#include "curl_ntlm_core.h"
 #include "warnless.h"
 #include "curl_multibyte.h"
 #include "sendf.h"
@@ -66,6 +67,7 @@ bool Curl_auth_is_ntlm_supported(void)
  *
  * Parameters:
  *
+ * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
@@ -75,7 +77,8 @@ bool Curl_auth_is_ntlm_supported(void)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
+CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
+                                             const char *userp,
                                              const char *passwdp,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
@@ -166,7 +169,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(const char *userp,
     return CURLE_RECV_ERROR;
 
   /* Base64 encode the response */
-  return Curl_base64_encode(NULL, (char *) ntlm->output_token,
+  return Curl_base64_encode(data, (char *) ntlm->output_token,
                             type_1_buf.cbBuffer, outptr, outlen);
 }
 

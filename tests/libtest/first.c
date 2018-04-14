@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,8 +72,8 @@ void wait_ms(int ms)
   select_wrapper(0, NULL, NULL, NULL, &t);
 }
 
-char *libtest_arg2=NULL;
-char *libtest_arg3=NULL;
+char *libtest_arg2 = NULL;
+char *libtest_arg3 = NULL;
 int test_argc;
 char **test_argv;
 
@@ -116,14 +116,14 @@ static void memory_tracking_init(void)
 #endif
 
 /* returns a hexdump in a static memory area */
-char *hexdump(unsigned char *buffer, size_t len)
+char *hexdump(const unsigned char *buffer, size_t len)
 {
-  static char dump[200*3+1];
+  static char dump[200 * 3 + 1];
   char *p = dump;
   size_t i;
   if(len > 200)
     return NULL;
-  for(i=0; i<len; i++, p += 3)
+  for(i = 0; i<len; i++, p += 3)
     snprintf(p, 4, "%02x ", buffer[i]);
   return dump;
 }
@@ -162,10 +162,10 @@ int main(int argc, char **argv)
   test_argv = argv;
 
   if(argc>2)
-    libtest_arg2=argv[2];
+    libtest_arg2 = argv[2];
 
   if(argc>3)
-    libtest_arg3=argv[3];
+    libtest_arg3 = argv[3];
 
   URL = argv[1]; /* provide this to the rest */
 

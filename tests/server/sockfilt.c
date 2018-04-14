@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,6 +88,9 @@
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -405,7 +408,8 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
   ssize_t nwrite = 0;
 
   do {
-    wc = write(filedes, (unsigned char *)buffer + nwrite, nbytes - nwrite);
+    wc = write(filedes, (const unsigned char *)buffer + nwrite,
+               nbytes - nwrite);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -477,26 +481,26 @@ static void lograw(unsigned char *buffer, ssize_t len)
   ssize_t i;
   unsigned char *ptr = buffer;
   char *optr = data;
-  ssize_t width=0;
+  ssize_t width = 0;
   int left = sizeof(data);
 
-  for(i=0; i<len; i++) {
+  for(i = 0; i<len; i++) {
     switch(ptr[i]) {
     case '\n':
       snprintf(optr, left, "\\n");
       width += 2;
       optr += 2;
-      left-=2;
+      left -= 2;
       break;
     case '\r':
       snprintf(optr, left, "\\r");
       width += 2;
       optr += 2;
-      left-=2;
+      left -= 2;
       break;
     default:
       snprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
-                                  ptr[i]==0x20) ?ptr[i]:'.');
+                                  ptr[i] == 0x20) ?ptr[i]:'.');
       width++;
       optr++;
       left--;
@@ -548,7 +552,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
     free(data);
   }
   else
-    return -1;
+    return (DWORD)-1;
 
   /* retrieve the type of file to wait on */
   type = GetFileType(handle);
@@ -1046,7 +1050,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
        Commands:
 
-       DATA - plain pass-thru data
+       DATA - plain pass-through data
     */
 
     if(!read_stdin(buffer, 5))
@@ -1199,7 +1203,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   int rc;
   int totdelay = 0;
   int maxretr = 10;
-  int delay= 20;
+  int delay = 20;
   int attempt = 0;
   int error = 0;
 
@@ -1338,11 +1342,11 @@ int main(int argc, char *argv[])
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
-  char *pidname= (char *)".sockfilt.pid";
+  const char *pidname = ".sockfilt.pid";
   bool juggle_again;
   int rc;
   int error;
-  int arg=1;
+  int arg = 1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
 

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,7 +42,7 @@ struct slist_wc *easysrc_data = NULL; /* Build slists, forms etc. */
 struct slist_wc *easysrc_code = NULL; /* Setopt calls */
 struct slist_wc *easysrc_toohard = NULL; /* Unconvertible setopt */
 struct slist_wc *easysrc_clean = NULL;  /* Clean up allocated data */
-int easysrc_form_count = 0;
+int easysrc_mime_count = 0;
 int easysrc_slist_count = 0;
 
 static const char *const srchead[]={
@@ -141,11 +141,11 @@ CURLcode easysrc_perform(void)
     const char *c;
     CHKRET(easysrc_add(&easysrc_code, ""));
     /* Preamble comment */
-    for(i=0; ((c = srchard[i]) != NULL); i++)
+    for(i = 0; ((c = srchard[i]) != NULL); i++)
       CHKRET(easysrc_add(&easysrc_code, c));
     /* Each unconverted option */
     if(easysrc_toohard) {
-      for(ptr=easysrc_toohard->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_toohard->first; ptr; ptr = ptr->next)
         CHKRET(easysrc_add(&easysrc_code, ptr->data));
     }
     CHKRET(easysrc_add(&easysrc_code, ""));
@@ -189,12 +189,12 @@ void dumpeasysrc(struct GlobalConfig *config)
     int i;
     const char *c;
 
-    for(i=0; ((c = srchead[i]) != NULL); i++)
+    for(i = 0; ((c = srchead[i]) != NULL); i++)
       fprintf(out, "%s\n", c);
 
     /* Declare variables used for complex setopt values */
     if(easysrc_decl) {
-      for(ptr=easysrc_decl->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_decl->first; ptr; ptr = ptr->next)
         fprintf(out, "  %s\n", ptr->data);
     }
 
@@ -202,13 +202,13 @@ void dumpeasysrc(struct GlobalConfig *config)
     if(easysrc_data) {
       fprintf(out, "\n");
 
-      for(ptr=easysrc_data->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_data->first; ptr; ptr = ptr->next)
         fprintf(out, "  %s\n", ptr->data);
     }
 
     fprintf(out, "\n");
     if(easysrc_code) {
-      for(ptr=easysrc_code->first; ptr; ptr = ptr->next) {
+      for(ptr = easysrc_code->first; ptr; ptr = ptr->next) {
         if(ptr->data[0]) {
           fprintf(out, "  %s\n", ptr->data);
         }
@@ -219,11 +219,11 @@ void dumpeasysrc(struct GlobalConfig *config)
     }
 
     if(easysrc_clean) {
-      for(ptr=easysrc_clean->first; ptr; ptr = ptr->next)
+      for(ptr = easysrc_clean->first; ptr; ptr = ptr->next)
         fprintf(out, "  %s\n", ptr->data);
     }
 
-    for(i=0; ((c = srcend[i]) != NULL); i++)
+    for(i = 0; ((c = srcend[i]) != NULL); i++)
       fprintf(out, "%s\n", c);
 
     if(fopened)

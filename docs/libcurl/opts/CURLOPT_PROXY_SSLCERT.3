@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -50,7 +50,18 @@ NULL
 .SH PROTOCOLS
 Used with HTTPS proxy
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+  curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT, "client.pem");
+  curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
+  curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.52.0
 .SH RETURN VALUE

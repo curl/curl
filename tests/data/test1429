@@ -31,7 +31,7 @@ http
 </server>
 
 <name>
-HTTP GET with 4-digit reponse code
+HTTP GET with 4-digit response code
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1429 --write-out '%{response_code}'
@@ -54,7 +54,7 @@ Content-Type: text/html
 Funny-head: yesyes
 
 -foo-
-1234
+123
 </stdout>
 <strip>
 ^User-Agent:.*

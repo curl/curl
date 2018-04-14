@@ -70,7 +70,7 @@ P.I.P.S. causes a USER:87 panic if certain timeouts much longer than
 half an hour are selected.
 
 LDAP, SCP or SFTP methods are not supported due to lack of support for
-the dependent libaries on Symbian.
+the dependent libraries on Symbian.
 
 gzip and deflate decompression is supported when the appropriate macro
 is uncommented in the libcurl.mmp file.

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -80,7 +80,23 @@ NULL
 .SH PROTOCOLS
 SFTP and FTP
 .SH EXAMPLE
-TODO
+.nf
+struct curl_slist *h = NULL;
+h = curl_slist_append(h, "RNFR source-name");
+h = curl_slist_append(h, "RNTO new-name");
+
+curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
+
+  /* pass in the FTP commands to run before the transfer */
+  curl_easy_setopt(curl, CURLOPT_QUOTE, headerlist);
+
+  ret = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 SFTP support added in 7.16.3. *-prefix for SFTP added in 7.24.0
 .SH RETURN VALUE

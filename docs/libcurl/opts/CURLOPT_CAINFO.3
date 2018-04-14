@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -40,6 +40,11 @@ is assumed to be stored, as established at build time.
 
 If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module
 (libnsspem.so) needs to be available for this option to work properly.
+Starting with curl-7.55.0, if both \fICURLOPT_CAINFO(3)\fP and
+\fICURLOPT_CAPATH(3)\fP are unset, NSS-linked libcurl tries to load
+libnssckbi.so, which contains a more comprehensive set of trust information
+than supported by nss-pem, because libnssckbi.so also includes information
+about distrusted certificates.
 
 (iOS and macOS only) If curl is built against Secure Transport, then this
 option is supported for backward compatibility with other SSL engines, but it
@@ -54,7 +59,15 @@ Built-in system specific
 .SH PROTOCOLS
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_CAINFO, "/etc/certs/cabundle.pem");
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 For SSL engines that don't support certificate files the CURLOPT_CAINFO option
 is ignored. Refer to https://curl.haxx.se/docs/ssl-compared.html

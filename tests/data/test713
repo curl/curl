@@ -1,0 +1,49 @@
+<testcase>
+#based off test 712
+<info>
+<keywords>
+FTP
+PASV
+RETR
+SOCKS5
+CURLOPT_CONNECT_TO
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+silly content
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+ftp
+socks5
+</server>
+ <name>
+FTP fetch with --proxy set to socks5:// and with --connect-to
+ </name>
+ <command>
+ftp://ftp.example.com/713 --connect-to ::%HOSTIP:%FTPPORT --proxy socks5://%HOSTIP:%SOCKSPORT 
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE 713
+RETR 713
+QUIT
+</protocol>
+</verify>
+</testcase>

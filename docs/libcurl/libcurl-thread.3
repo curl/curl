@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2015 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2015 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -53,7 +53,7 @@ https://www.openssl.org/docs/man1.0.2/crypto/threads.html#DESCRIPTION
 https://curl.haxx.se/libcurl/c/opensslthreadlock.html
 
 .IP GnuTLS
-http://gnutls.org/manual/html_node/Thread-safety.html
+https://gnutls.org/manual/html_node/Thread-safety.html
 .IP NSS
 thread-safe already without anything required.
 .IP PolarSSL
@@ -77,9 +77,10 @@ without using either the c-ares or threaded resolver backends. When using
 multiple threads you should set the \fICURLOPT_NOSIGNAL(3)\fP option to 1L for
 all handles. Everything will or might work fine except that timeouts are not
 honored during the DNS lookup - which you can work around by building libcurl
-with c-ares support. c-ares is a library that provides asynchronous name
-resolves. On some platforms, libcurl simply will not function properly
-multi-threaded unless this option is set.
+with c-ares or threaded-resolver support. c-ares is a library that provides
+asynchronous name resolves. On some platforms, libcurl simply will not
+function properly multi-threaded unless the \fICURLOPT_NOSIGNAL(3)\fP option is
+set.
 .IP "Name resolving"
 \fBgethostby* functions and other system calls.\fP These functions, provided
 by your operating system, must be thread safe. It is very important that

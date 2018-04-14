@@ -37,13 +37,26 @@ This is just treated as a request, not an order. You cannot be guaranteed to
 actually get the given size.
 
 This buffer size is by default \fICURL_MAX_WRITE_SIZE\fP (16kB). The maximum
-buffer size allowed to set is \fICURL_MAX_READ_SIZE\fP (512kB).
+buffer size allowed to be set is \fICURL_MAX_READ_SIZE\fP (512kB). The minimum
+buffer size allowed to be set is 1024.
 .SH DEFAULT
 CURL_MAX_WRITE_SIZE (16kB)
 .SH PROTOCOLS
 All
 .SH EXAMPLE
-TODO
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/foo.bin");
+
+  /* ask libcurl to allocate a larger receive buffer */
+  curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 120000L);
+
+  ret = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
+}
+.fi
 .SH AVAILABILITY
 Added in 7.10.  Growing the buffer was added in 7.53.0.
 .SH RETURN VALUE

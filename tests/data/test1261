@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+redirect_url
+followlocation
+--write-out
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 This is a weirdo text message swsclose
+Location: data/10290002.txt?coolsite=yes
+Content-Length: 62
+Connection: close
+
+This server reply is for testing a simple Location: following
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+'redirect_url' with --location and --max-redir
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/our/1261 -w '%{redirect_url}\n' --location --max-redir 0
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /we/want/our/1261 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+# CURLE_TOO_MANY_REDIRECTS
+<errorcode>
+47
+</errorcode>
+<stdout>
+HTTP/1.1 301 This is a weirdo text message swsclose
+Location: data/10290002.txt?coolsite=yes
+Content-Length: 62
+Connection: close
+
+http://%HOSTIP:%HTTPPORT/we/want/our/data/10290002.txt?coolsite=yes
+</stdout>
+</verify>
+</testcase>

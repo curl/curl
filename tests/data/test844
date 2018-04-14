@@ -32,7 +32,7 @@ IMAP OAuth 2.0 (OAUTHBEARER) failure as continuation
  <command>
 'imap://%HOSTIP:%IMAPPORT/844/;UID=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
-# The protocol section doesn't support ways of specifing the raw data in the
+# The protocol section doesn't support ways of specifying the raw data in the
 # base64 encoded message so we must assert this
 <precheck>
 perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%IMAPPORT' ne '9003' );"

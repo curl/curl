@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,23 +44,6 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_READFUNC_ABORT;
 }
 
-static struct timeval tvnow(void)
-{
-  /*
-  ** time() returns the value of time in seconds since the Epoch.
-  */
-  struct timeval now;
-  now.tv_sec = (long)time(NULL);
-  now.tv_usec = 0;
-  return now;
-}
-
-static long tvdiff(struct timeval newer, struct timeval older)
-{
-  return (newer.tv_sec-older.tv_sec)*1000+
-    (newer.tv_usec-older.tv_usec)/1000;
-}
-
 int test(char *URL)
 {
    int res = 0;
@@ -93,7 +76,7 @@ int test(char *URL)
    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
    multi_add_handle(mcurl, curl);
 
-   mp_start = tvnow();
+   mp_start = tutil_tvnow();
 
   /* we start some action by calling perform right away */
   curl_multi_perform(mcurl, &still_running);
@@ -135,9 +118,9 @@ int test(char *URL)
        case of (maxfd == -1), we call select(0, ...), which is basically equal
        to sleep. */
 
-    rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+    rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    if(tvdiff(tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
+    if(tutil_tvdiff(tutil_tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       fprintf(stderr, "ABORTING TEST, since it seems "
               "that it would have run forever.\n");
       break;

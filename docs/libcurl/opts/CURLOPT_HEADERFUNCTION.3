@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -74,6 +74,11 @@ the trailer.
 
 For non-HTTP protocols like FTP, POP3, IMAP and SMTP this function will get
 called with the server responses to the commands that libcurl sends.
+.SH LIMITATIONS
+libcurl does not unfold HTTP "folded headers" (deprecated since RFC 7230). A
+folded header is a header that continues on a subsequent line and starts with
+a whitespace. Such folds will be passed to the header callback as a separate
+one, although strictly it is just a continuation of the previous line.
 .SH DEFAULT
 Nothing.
 .SH PROTOCOLS

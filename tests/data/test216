@@ -18,7 +18,7 @@ ftp
 FTP upload two files to the same dir
  </name>
  <command>
--T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/ -T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/%2e%2eanotherup
+-T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/ -T log/upload.216 ftp://%HOSTIP:%FTPPORT/a/path/216/%2e%2eanotherup.216
 </command>
 <file name="log/upload.216">
 upload this file twice
@@ -38,7 +38,7 @@ EPSV
 TYPE I
 STOR upload.216
 EPSV
-STOR ..anotherup
+STOR ..anotherup.216
 QUIT
 </protocol>
 </verify>

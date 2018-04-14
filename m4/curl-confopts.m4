@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -37,13 +37,13 @@ AC_HELP_STRING([--enable-threaded-resolver],[Enable threaded resolver])
 AC_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
   OPT_THRES=$enableval)
   case "$OPT_THRES" in
-    yes)
-      dnl --enable-threaded-resolver option used
-      want_thres="yes"
+    no)
+      dnl --disable-threaded-resolver option used
+      want_thres="no"
       ;;
     *)
       dnl configure option not specified
-      want_thres="no"
+      want_thres="yes"
       ;;
   esac
   AC_MSG_RESULT([$want_thres])
@@ -346,10 +346,6 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
       AC_MSG_RESULT([no])
       ;;
   esac
-  dnl TODO: may require mutual exclusion
-  if test "$dontwant_rt" = "yes" && test "$want_thres" = "yes" ; then
-    AC_MSG_ERROR([options --disable-rt and --enable-thread-resolver are mutually exclusive, at most one can be selected.])
-  fi
 ])
  
 
@@ -520,8 +516,8 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       fi
     fi
     #
-    CPPFLAGS="$ares_CPPFLAGS $clean_CPPFLAGS"
-    LDFLAGS="$ares_LDFLAGS $clean_LDFLAGS"
+    CPPFLAGS="$clean_CPPFLAGS $ares_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS $ares_LDFLAGS"
     LIBS="$ares_LIBS $clean_LIBS"
     #
     if test "$embedded_ares" != "yes"; then

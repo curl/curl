@@ -28,7 +28,7 @@ tftp
 TFTP retrieve with mode=i
  </name>
  <command>
-"tftp://%HOSTIP:%TFTPPORT//1093;mode=i" --use-ascii --trace-ascii log/traceit
+"tftp://%HOSTIP:%TFTPPORT//1093;mode=i" --use-ascii
 </command>
 </client>
 

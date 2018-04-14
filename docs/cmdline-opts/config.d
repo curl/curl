@@ -3,11 +3,12 @@ Arg: <file>
 Help: Read config from a file
 Short: K
 ---
-Specify which config file to read curl arguments from. The config file is a
-text file in which command line arguments can be written which then will be
-used as if they were written on the actual command line.
 
-Options and their parameters must be specified on the same config file line,
+Specify a text file to read curl arguments from. The command line arguments
+found in the text file will be used as if they were provided on the command
+line.
+
+Options and their parameters must be specified on the same line in the file,
 separated by whitespace, colon, or the equals sign. Long option names can
 optionally be given in the config file without the initial double dashes and
 if so, the colon or equals characters can be used as separators. If the option
@@ -29,9 +30,9 @@ line. So, it could look similar to this:
 
 url = "https://curl.haxx.se/docs/"
 
-When curl is invoked, it always (unless --disable is used) checks for a
-default config file and uses it if found. The default config file is checked
-for in the following places in this order:
+When curl is invoked, it (unless --disable is used) checks for a default
+config file and uses it if found. The default config file is checked for in
+the following places in this order:
 
 1) curl tries to find the "home dir": It first checks for the CURL_HOME and
 then the HOME environment variables. Failing that, it uses getpwuid() on

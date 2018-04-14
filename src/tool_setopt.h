@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,6 +72,7 @@ extern const NameValueUnsigned setopt_nv_CURLAUTH[];
 #define setopt_nv_CURLOPT_REDIR_PROTOCOLS setopt_nv_CURLPROTO
 #define setopt_nv_CURLOPT_PROXYTYPE setopt_nv_CURLPROXY
 #define setopt_nv_CURLOPT_PROXYAUTH setopt_nv_CURLAUTH
+#define setopt_nv_CURLOPT_SOCKS5_AUTH setopt_nv_CURLAUTH
 
 /* Intercept setopt calls for --libcurl */
 
@@ -84,9 +85,9 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
 CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
                              const char *name, CURLoption tag,
                              const NameValueUnsigned *nv, long lval);
-CURLcode tool_setopt_httppost(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
                               const char *name, CURLoption tag,
-                              struct curl_httppost *httppost);
+                              curl_mime *mimepost);
 CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
                            struct curl_slist *list);
@@ -108,8 +109,8 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
 #define my_setopt_bitmask(x,y,z) \
   SETOPT_CHECK(tool_setopt_bitmask(x, global, #y, y, setopt_nv_ ## y, z))
 
-#define my_setopt_httppost(x,y,z) \
-  SETOPT_CHECK(tool_setopt_httppost(x, global, #y, y, z))
+#define my_setopt_mimepost(x,y,z) \
+  SETOPT_CHECK(tool_setopt_mimepost(x, global, #y, y, z))
 
 #define my_setopt_slist(x,y,z) \
   SETOPT_CHECK(tool_setopt_slist(x, global, #y, y, z))
@@ -137,7 +138,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
 #define my_setopt_bitmask(x,y,z) \
   SETOPT_CHECK(curl_easy_setopt(x, y, z))
 
-#define my_setopt_httppost(x,y,z) \
+#define my_setopt_mimepost(x,y,z) \
   SETOPT_CHECK(curl_easy_setopt(x, y, z))
 
 #define my_setopt_slist(x,y,z) \

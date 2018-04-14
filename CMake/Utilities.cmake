@@ -19,7 +19,7 @@ function(LIST_SPACES_APPEND_ONCE LIST_NAME)
   set(${LIST_NAME} "${NEW_LIST_SPACE}" PARENT_SCOPE)
 endfunction()
 
-# Convinience function that does the same as LIST(FIND ...) but with a TRUE/FALSE return value.
+# Convenience function that does the same as LIST(FIND ...) but with a TRUE/FALSE return value.
 # Ex: IN_STR_LIST(MY_LIST "Searched item" WAS_FOUND)
 function(IN_STR_LIST LIST_NAME ITEM_SEARCHED RETVAL)
   list(FIND ${LIST_NAME} ${ITEM_SEARCHED} FIND_POS)
@@ -28,4 +28,17 @@ function(IN_STR_LIST LIST_NAME ITEM_SEARCHED RETVAL)
   else()
     set(${RETVAL} TRUE PARENT_SCOPE)
   endif()
+endfunction()
+
+# Returns a list of arguments that evaluate to true
+function(collect_true output_var output_count_var)
+  set(${output_var})
+  foreach(option_var IN LISTS ARGN)
+    if(${option_var})
+      list(APPEND ${output_var} ${option_var})
+    endif()
+  endforeach()
+  set(${output_var} ${${output_var}} PARENT_SCOPE)
+  list(LENGTH ${output_var} ${output_count_var})
+  set(${output_count_var} ${${output_count_var}} PARENT_SCOPE)
 endfunction()

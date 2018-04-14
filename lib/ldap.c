@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -150,6 +150,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
   PROTOPT_NONE                          /* flags */
@@ -175,12 +176,89 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* connection_check */
   PORT_LDAPS,                           /* defport */
   CURLPROTO_LDAPS,                      /* protocol */
   PROTOPT_SSL                           /* flags */
 };
 #endif
 
+#if defined(USE_WIN32_LDAP)
+
+#if defined(USE_WINDOWS_SSPI)
+static int ldap_win_bind_auth(LDAP *server, const char *user,
+                              const char *passwd, unsigned long authflags)
+{
+  ULONG method = 0;
+  SEC_WINNT_AUTH_IDENTITY cred;
+  int rc = LDAP_AUTH_METHOD_NOT_SUPPORTED;
+
+  memset(&cred, 0, sizeof(cred));
+
+#if defined(USE_SPNEGO)
+  if(authflags & CURLAUTH_NEGOTIATE) {
+    method = LDAP_AUTH_NEGOTIATE;
+  }
+  else
+#endif
+#if defined(USE_NTLM)
+  if(authflags & CURLAUTH_NTLM) {
+    method = LDAP_AUTH_NTLM;
+  }
+  else
+#endif
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+  if(authflags & CURLAUTH_DIGEST) {
+    method = LDAP_AUTH_DIGEST;
+  }
+  else
+#endif
+  {
+    /* required anyway if one of upper preprocessor definitions enabled */
+  }
+
+  if(method && user && passwd) {
+    rc = Curl_create_sspi_identity(user, passwd, &cred);
+    if(!rc) {
+      rc = ldap_bind_s(server, NULL, (TCHAR *)&cred, method);
+      Curl_sspi_free_identity(&cred);
+    }
+  }
+  else {
+    /* proceed with current user credentials */
+    method = LDAP_AUTH_NEGOTIATE;
+    rc = ldap_bind_s(server, NULL, NULL, method);
+  }
+  return rc;
+}
+#endif /* #if defined(USE_WINDOWS_SSPI) */
+
+static int ldap_win_bind(struct connectdata *conn, LDAP *server,
+                         const char *user, const char *passwd)
+{
+  int rc = LDAP_INVALID_CREDENTIALS;
+
+  PTCHAR inuser = NULL;
+  PTCHAR inpass = NULL;
+
+  if(user && passwd && (conn->data->set.httpauth & CURLAUTH_BASIC)) {
+    inuser = Curl_convert_UTF8_to_tchar((char *) user);
+    inpass = Curl_convert_UTF8_to_tchar((char *) passwd);
+
+    rc = ldap_simple_bind_s(server, inuser, inpass);
+
+    Curl_unicodefree(inuser);
+    Curl_unicodefree(inpass);
+  }
+#if defined(USE_WINDOWS_SSPI)
+  else {
+    rc = ldap_win_bind_auth(server, user, passwd, conn->data->set.httpauth);
+  }
+#endif
+
+  return rc;
+}
+#endif /* #if defined(USE_WIN32_LDAP) */
 
 static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 {
@@ -191,7 +269,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   LDAPMessage *ldapmsg = NULL;
   LDAPMessage *entryIterator;
   int num = 0;
-  struct Curl_easy *data=conn->data;
+  struct Curl_easy *data = conn->data;
   int ldap_proto = LDAP_VERSION3;
   int ldap_ssl = 0;
   char *val_b64 = NULL;
@@ -202,13 +280,11 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 #endif
 #if defined(USE_WIN32_LDAP)
   TCHAR *host = NULL;
-  TCHAR *user = NULL;
-  TCHAR *passwd = NULL;
 #else
   char *host = NULL;
+#endif
   char *user = NULL;
   char *passwd = NULL;
-#endif
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d\n",
@@ -239,24 +315,14 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
     goto quit;
   }
-
-  if(conn->bits.user_passwd) {
-    user = Curl_convert_UTF8_to_tchar(conn->user);
-    passwd = Curl_convert_UTF8_to_tchar(conn->passwd);
-    if(!user || !passwd) {
-      result = CURLE_OUT_OF_MEMORY;
-
-      goto quit;
-    }
-  }
 #else
   host = conn->host.name;
+#endif
 
   if(conn->bits.user_passwd) {
     user = conn->user;
     passwd = conn->passwd;
   }
-#endif
 
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &ldap_timeout);
@@ -402,11 +468,19 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 #endif
 
+#ifdef USE_WIN32_LDAP
+  rc = ldap_win_bind(conn, server, user, passwd);
+#else
   rc = ldap_simple_bind_s(server, user, passwd);
+#endif
   if(!ldap_ssl && rc != 0) {
     ldap_proto = LDAP_VERSION2;
     ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
+#ifdef USE_WIN32_LDAP
+    rc = ldap_win_bind(conn, server, user, passwd);
+#else
     rc = ldap_simple_bind_s(server, user, passwd);
+#endif
   }
   if(rc != 0) {
     failf(data, "LDAP local: ldap_simple_bind_s %s", ldap_err2string(rc));
@@ -669,8 +743,6 @@ quit:
 #endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
 #if defined(USE_WIN32_LDAP)
-  Curl_unicodefree(passwd);
-  Curl_unicodefree(user);
   Curl_unicodefree(host);
 #endif
 

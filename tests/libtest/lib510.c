@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,6 +48,10 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 
   if(data) {
     size_t len = strlen(data);
+    if(size*nmemb < len) {
+      fprintf(stderr, "read buffer is too small to run test\n");
+      return 0;
+    }
     memcpy(ptr, data, len);
     pooh->counter++; /* advance pointer */
     return len;
@@ -58,7 +62,7 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
 int test(char *URL)
 {
   CURL *curl;
-  CURLcode res=CURLE_OK;
+  CURLcode res = CURLE_OK;
   struct curl_slist *slist = NULL;
   struct WriteThis pooh;
   pooh.counter = 0;

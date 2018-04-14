@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,9 +24,12 @@
 
 #include <curl/curl.h>
 
+#include "llist.h"
+
 /* list of wildcard process states */
 typedef enum {
-  CURLWC_INIT = 0,
+  CURLWC_CLEAR = 0,
+  CURLWC_INIT = 1,
   CURLWC_MATCHING, /* library is trying to get list of addresses for
                       downloading */
   CURLWC_DOWNLOADING,
@@ -44,7 +47,7 @@ struct WildcardData {
   curl_wildcard_states state;
   char *path; /* path to the directory, where we trying wildcard-match */
   char *pattern; /* wildcard pattern */
-  struct curl_llist *filelist; /* llist with struct Curl_fileinfo */
+  struct curl_llist filelist; /* llist with struct Curl_fileinfo */
   void *tmp; /* pointer to protocol specific temporary data */
   curl_wildcard_tmp_dtor tmp_dtor;
   void *customptr;  /* for CURLOPT_CHUNK_DATA pointer */

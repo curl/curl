@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PRIVATE, void *pointer);
 Pass a void * as parameter, pointing to data that should be associated with
 this curl handle.  The pointer can subsequently be retrieved using
 \fIcurl_easy_getinfo(3)\fP with the CURLINFO_PRIVATE option. libcurl itself
-never does nothing with this data.
+never does anything with this data.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

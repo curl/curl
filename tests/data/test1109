@@ -8,7 +8,7 @@ CURLOPT_URL
 </info>
 
 # Server-side
-<reply name="1">
+<reply>
 <data>
 HTTP/1.1 200 OK
 Content-Length: 6

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,13 +32,9 @@
 
 CURLcode Curl_wildcard_init(struct WildcardData *wc)
 {
-  DEBUGASSERT(wc->filelist == NULL);
-  /* now allocate only wc->filelist, everything else
-     will be allocated if it is needed. */
-  wc->filelist = Curl_llist_alloc(Curl_fileinfo_dtor);
-  if(!wc->filelist) {;
-    return CURLE_OUT_OF_MEMORY;
-  }
+  Curl_llist_init(&wc->filelist, Curl_fileinfo_dtor);
+  wc->state = CURLWC_INIT;
+
   return CURLE_OK;
 }
 
@@ -54,10 +50,8 @@ void Curl_wildcard_dtor(struct WildcardData *wc)
   }
   DEBUGASSERT(wc->tmp == NULL);
 
-  if(wc->filelist) {
-    Curl_llist_destroy(wc->filelist, NULL);
-    wc->filelist = NULL;
-  }
+  Curl_llist_destroy(&wc->filelist, NULL);
+
 
   free(wc->path);
   wc->path = NULL;

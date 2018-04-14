@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -95,13 +95,19 @@ footer:
 .SH AVAILABILITY
 PEM/DER support:
 
-  7.39.0: OpenSSL, GnuTLS and GSKit
+  7.39.0: OpenSSL, GnuTLS
+
+  7.39.0-7.48.0,7.58.1+: GSKit
 
   7.43.0: NSS and wolfSSL/CyaSSL
 
   7.47.0: mbedtls
 
   7.49.0: PolarSSL
+
+  7.54.1: SecureTransport/DarwinSSL on macOS 10.7+/iOS 10+
+
+  7.58.1: SChannel/WinSSL
 
 sha256 support:
 
@@ -110,6 +116,10 @@ sha256 support:
   7.47.0: mbedtls
 
   7.49.0: PolarSSL
+
+  7.54.1: SecureTransport/DarwinSSL on macOS 10.7+/iOS 10+
+
+  7.58.1: SChannel/WinSSL Windows XP SP3+
 
 Other SSL backends not supported.
 .SH RETURN VALUE

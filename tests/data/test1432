@@ -31,7 +31,7 @@ http
 </server>
 
 <name>
-HTTP GET with 100-digit reponse code and survive
+HTTP GET with 100-digit response code and survive
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1432

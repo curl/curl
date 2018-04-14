@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,11 +29,11 @@ curl_slist_append - add a string to an slist
 .BI "const char * "string ");"
 .ad
 .SH DESCRIPTION
-curl_slist_append() appends a specified string to a linked list of
-strings. The existing \fIlist\fP should be passed as the first argument while
-the new list is returned from this function. The specified \fIstring\fP has
-been appended when this function returns. curl_slist_append() copies the
-string.
+\fIcurl_slist_append(3)\fP appends a string to a linked list of strings. The
+existing \fBlist\fP should be passed as the first argument and the new list is
+returned from this function. Pass in NULL in the \fBlist\fP argument to create
+a new list. The specified \fBstring\fP has been appended when this function
+returns. \fIcurl_slist_append(3)\fP copies the string.
 
 The list should be freed again (after usage) with
 \fIcurl_slist_free_all(3)\fP.
@@ -42,19 +42,19 @@ A null pointer is returned if anything went wrong, otherwise the new list
 pointer is returned.
 .SH EXAMPLE
 .nf
- CURL handle;
- struct curl_slist *slist=NULL;
+CURL *handle;
+struct curl_slist *slist=NULL;
 
- slist = curl_slist_append(slist, "pragma:");
+slist = curl_slist_append(slist, "pragma:");
 
- if (slist == NULL)
-   return -1;
+if (slist == NULL)
+  return -1;
 
- curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
+curl_easy_setopt(handle, CURLOPT_HTTPHEADER, slist);
 
- curl_easy_perform(handle);
+curl_easy_perform(handle);
 
- curl_slist_free_all(slist); /* free the list again */
+curl_slist_free_all(slist); /* free the list again */
 .fi
 .SH "SEE ALSO"
 .BR curl_slist_free_all "(3), "

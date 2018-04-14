@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,7 +49,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   int res;
   FILE *file;
   char filebuffer[512];
-  bool usedarg;
+  bool usedarg = FALSE;
   char *home;
   int rc = 0;
   struct OperationConfig *operation = global->first;
@@ -79,7 +79,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            * already declared via inclusions done in setup header file.
            * We assume that we are using the ASCII version here.
            */
-          int n = GetModuleFileName(0, filebuffer, sizeof(filebuffer));
+          int n = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
           if(n > 0 && n < (int)sizeof(filebuffer)) {
             /* We got a valid filename - get the directory part */
             char *lastdirchar = strrchr(filebuffer, '\\');
@@ -131,7 +131,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     while(NULL != (aline = my_get_line(file))) {
       lineno++;
       line = aline;
-      alloced_param=FALSE;
+      alloced_param = FALSE;
 
       /* line with # in the first non-blank column is a comment! */
       while(*line && ISSPACE(*line))
@@ -220,7 +220,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
       res = getparameter(option, param, &usedarg, global, operation);
 
-      if(param && *param && !usedarg)
+      if(!res && param && *param && !usedarg)
         /* we passed in a parameter that wasn't used! */
         res = PARAM_GOT_EXTRA_PARAMETER;
 
@@ -253,7 +253,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(res != PARAM_OK && res != PARAM_NEXT_OPERATION) {
         /* the help request isn't really an error */
         if(!strcmp(filename, "-")) {
-          filename = (char *)"<stdin>";
+          filename = "<stdin>";
         }
         if(res != PARAM_HELP_REQUESTED &&
            res != PARAM_MANUAL_REQUESTED &&

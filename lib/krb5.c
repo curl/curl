@@ -2,7 +2,7 @@
  *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
- * Copyright (c) 2004 - 2016 Daniel Stenberg
+ * Copyright (c) 2004 - 2017 Daniel Stenberg
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ krb5_decode(void *app_data, void *buf, int len,
 
   enc.value = buf;
   enc.length = len;
-  maj = gss_unseal(&min, *context, &enc, &dec, NULL, NULL);
+  maj = gss_unwrap(&min, *context, &enc, &dec, NULL, NULL);
   if(maj != GSS_S_COMPLETE) {
     if(len >= 4)
       strcpy(buf, "599 ");
@@ -119,11 +119,11 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
   int len;
 
   /* NOTE that the cast is safe, neither of the krb5, gnu gss and heimdal
-   * libraries modify the input buffer in gss_seal()
+   * libraries modify the input buffer in gss_wrap()
    */
   dec.value = (void *)from;
   dec.length = length;
-  maj = gss_seal(&min, *context,
+  maj = gss_wrap(&min, *context,
                  level == PROT_PRIVATE,
                  GSS_C_QOP_DEFAULT,
                  &dec, &state, &enc);
@@ -164,6 +164,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
   size_t base64_sz = 0;
   struct sockaddr_in **remote_addr =
     (struct sockaddr_in **)&conn->ip_addr->ai_addr;
+  char *stringp;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
                  (struct sockaddr *)&conn->local_addr, &l) < 0)
@@ -193,16 +194,19 @@ krb5_auth(void *app_data, struct connectdata *conn)
         return -1;
     }
 
-    input_buffer.value = data->state.buffer;
-    input_buffer.length = snprintf(input_buffer.value, BUFSIZE, "%s@%s",
-                                   service, host);
+    stringp = aprintf("%s@%s", service, host);
+    if(!stringp)
+      return -2;
+
+    input_buffer.value = stringp;
+    input_buffer.length = strlen(stringp);
     maj = gss_import_name(&min, &input_buffer, GSS_C_NT_HOSTBASED_SERVICE,
                           &gssname);
+    free(stringp);
     if(maj != GSS_S_COMPLETE) {
       gss_release_name(&min, &gssname);
       if(service == srv_host) {
-        Curl_failf(data, "Error importing service name %s",
-                   input_buffer.value);
+        Curl_failf(data, "Error importing service name %s@%s", service, host);
         return AUTH_ERROR;
       }
       service = srv_host;
@@ -278,6 +282,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
           break;
         }
 
+        _gssresp.value = NULL; /* make sure it is initialized */
         p = data->state.buffer + 4;
         p = strstr(p, "ADAT=");
         if(p) {

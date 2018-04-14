@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@ int test(char *URL)
   char target_url[256];
   int handles_added = 0;
 
-  for(i=0; i < NUM_HANDLES; i++)
+  for(i = 0; i < NUM_HANDLES; i++)
     curl[i] = NULL;
 
   start_test_timing();
@@ -49,7 +49,7 @@ int test(char *URL)
   multi_init(m);
 
   /* get NUM_HANDLES easy handles */
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
@@ -101,7 +101,7 @@ int test(char *URL)
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
-    select_test(maxfd+1, &rd, &wr, &exc, &interval);
+    select_test(maxfd + 1, &rd, &wr, &exc, &interval);
 
     abort_on_test_timeout();
   }
@@ -110,7 +110,7 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i=0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < NUM_HANDLES; i++) {
     curl_multi_remove_handle(m, curl[i]);
     curl_easy_cleanup(curl[i]);
   }

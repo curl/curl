@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,6 +36,7 @@
 #include "slist.h"
 #include "urldata.h"
 #include "url.h"
+#include "setopt.h"
 #include "getinfo.h"
 #include "ccsidcurl.h"
 
@@ -797,7 +798,7 @@ curl_formadd_ccsid(struct curl_httppost * * httppost,
   unsigned int contentccsid;
   unsigned int nameccsid;
 
-  /* A single curl_formadd() call cannot be splitted in several calls to deal
+  /* A single curl_formadd() call cannot be split in several calls to deal
      with all parameters: the original parameters are thus copied to a local
      curl_forms array and converted to ASCII when needed.
      CURLFORM_PTRNAME is processed as if it were CURLFORM_COPYNAME.
@@ -1124,7 +1125,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-    if((int) STRING_LASTZEROTERMINATED != (int) STRING_UNIX_SOCKET_PATH + 1 ||
+    if((int) STRING_LASTZEROTERMINATED != (int) STRING_TARGET + 1 ||
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
@@ -1184,6 +1185,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_RANDOM_FILE:
   case CURLOPT_RANGE:
   case CURLOPT_REFERER:
+  case CURLOPT_REQUEST_TARGET:
   case CURLOPT_RTSP_SESSION_ID:
   case CURLOPT_RTSP_STREAM_URI:
   case CURLOPT_RTSP_TRANSPORT:
@@ -1287,7 +1289,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
 
   case CURLOPT_ERRORBUFFER:                     /* This is an output buffer. */
   default:
-    result = Curl_setopt(data, tag, arg);
+    result = Curl_vsetopt(data, tag, arg);
     break;
     }
 

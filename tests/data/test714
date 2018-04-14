@@ -1,0 +1,67 @@
+<testcase>
+#based off test 712
+<info>
+<keywords>
+FTP
+PASV
+RETR
+HTTP
+HTTP CONNECT
+proxytunnel
+CURLOPT_CONNECT_TO
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 200 Connection established
+
+</connect>
+
+<data nocheck="yes">
+silly content
+</data>
+
+<datacheck>
+HTTP/1.1 200 Connection established
+
+HTTP/1.1 200 Connection established
+
+silly content
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+ftp
+http-proxy
+</server>
+<features>
+http
+</features>
+ <name>
+FTP fetch with --proxy set to http:// and with --connect-to
+ </name>
+ <command>
+ftp://ftp.example.com.714/714 --connect-to ::connect.example.com.714:%FTPPORT --proxytunnel --proxy http://%HOSTIP:%PROXYPORT 
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE I
+SIZE 714
+RETR 714
+QUIT
+</protocol>
+</verify>
+</testcase>

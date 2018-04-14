@@ -16,7 +16,7 @@ tftp
 TFTP send without TFTP options requests
  </name>
  <command>
--T log/test1243.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options --trace-ascii log/traceit
+-T log/test1243.txt tftp://%HOSTIP:%TFTPPORT// --tftp-no-options
 </command>
 <file name="log/test1243.txt">
 a chunk of

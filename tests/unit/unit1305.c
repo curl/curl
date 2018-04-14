@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -76,9 +76,6 @@ static void unit_stop(void)
 static Curl_addrinfo *fake_ai(void)
 {
   static Curl_addrinfo *ai;
-  int ss_size;
-
-  ss_size = sizeof(struct sockaddr_in);
 
   ai = calloc(1, sizeof(Curl_addrinfo));
   if(!ai)
@@ -90,7 +87,7 @@ static Curl_addrinfo *fake_ai(void)
     return NULL;
   }
 
-  ai->ai_addr = calloc(1, ss_size);
+  ai->ai_addr = calloc(1, sizeof(struct sockaddr_in));
   if(!ai->ai_addr) {
     free(ai->ai_canonname);
     free(ai);
@@ -98,7 +95,7 @@ static Curl_addrinfo *fake_ai(void)
   }
 
   ai->ai_family = AF_INET;
-  ai->ai_addrlen = ss_size;
+  ai->ai_addrlen = sizeof(struct sockaddr_in);
 
   return ai;
 }
@@ -133,7 +130,7 @@ UNITTEST_START
     key_len = strlen(data_key);
 
     data_node->inuse = 1; /* hash will hold the reference */
-    nodep = Curl_hash_add(&hp, data_key, key_len+1, data_node);
+    nodep = Curl_hash_add(&hp, data_key, key_len + 1, data_node);
     abort_unless(nodep, "insertion into hash failed");
     /* Freeing will now be done by Curl_hash_destroy */
     data_node = NULL;

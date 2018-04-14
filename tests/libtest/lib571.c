@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
   int channel = RTP_PKT_CHANNEL(data);
   int message_size;
   int coded_size = RTP_PKT_LENGTH(data);
-  size_t failure = (size * nmemb) ? 0 : 1;
+  size_t failure = (size && nmemb) ? 0 : 1;
   int i;
   (void)stream;
 
@@ -70,7 +70,7 @@ static size_t rtp_write(void *ptr, size_t size, size_t nmemb, void *stream)
   }
 
   data += 4;
-  for(i = 0; i < message_size; i+= RTP_DATA_SIZE) {
+  for(i = 0; i < message_size; i += RTP_DATA_SIZE) {
     if(message_size - i > RTP_DATA_SIZE) {
       if(memcmp(RTP_DATA, data + i, RTP_DATA_SIZE) != 0) {
         printf("RTP PAYLOAD CORRUPTED [%s]\n", data + i);
@@ -103,7 +103,7 @@ int test(char *URL)
   int res;
   CURL *curl;
   char *stream_uri = NULL;
-  int request=1;
+  int request = 1;
   FILE *protofile = NULL;
 
   protofile = fopen(libtest_arg2, "wb");

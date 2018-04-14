@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,6 +32,9 @@
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -70,11 +73,11 @@ static int serverlogslocked = 0;
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
 
-static long prevtestno=-1;    /* previous test number we served */
-static long prevpartno=-1;    /* previous part number we served */
-static bool prevbounce=FALSE; /* instructs the server to increase the part
-                                 number for a test in case the identical
-                                 testno+partno request shows up again */
+static long prevtestno = -1;    /* previous test number we served */
+static long prevpartno = -1;    /* previous part number we served */
+static bool prevbounce = FALSE; /* instructs the server to increase the part
+                                   number for a test in case the identical
+                                   testno+partno request shows up again */
 
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
@@ -156,7 +159,7 @@ enum {
   DOCNUMBER_NOTHING = -7,
   DOCNUMBER_QUIT    = -6,
   DOCNUMBER_BADCONNECT = -5,
-  DOCNUMBER_INTERNAL= -4,
+  DOCNUMBER_INTERNAL = -4,
   DOCNUMBER_CONNECT = -3,
   DOCNUMBER_WERULEZ = -2,
   DOCNUMBER_404     = -1
@@ -332,7 +335,7 @@ static void restore_signal_handlers(void)
 
 static int ProcessRequest(struct httprequest *req)
 {
-  char *line=&req->reqbuf[req->checkindex];
+  char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
   static char doc[MAXDOCNAMELEN];
@@ -421,7 +424,7 @@ static int ProcessRequest(struct httprequest *req)
 
       filename = test2file(req->testno);
 
-      stream=fopen(filename, "rb");
+      stream = fopen(filename, "rb");
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -433,7 +436,7 @@ static int ProcessRequest(struct httprequest *req)
       else {
         char *cmd = NULL;
         size_t cmdsize = 0;
-        int num=0;
+        int num = 0;
 
         int rtp_channel = 0;
         int rtp_size = 0;
@@ -500,7 +503,7 @@ static int ProcessRequest(struct httprequest *req)
                 SET_RTP_PKT_LEN(rtp_scratch, rtp_size);
 
                 /* Fill it with junk data */
-                for(i = 0; i < rtp_size; i+= RTP_DATA_SIZE) {
+                for(i = 0; i < rtp_size; i += RTP_DATA_SIZE) {
                   memcpy(rtp_scratch + 4 + i, RTP_DATA, RTP_DATA_SIZE);
                 }
 
@@ -554,8 +557,8 @@ static int ProcessRequest(struct httprequest *req)
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
-          if(portp && (*(portp+1) != '\0') && ISDIGIT(*(portp+1)))
-            req->testno = strtol(portp+1, NULL, 10);
+          if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1)))
+            req->testno = strtol(portp + 1, NULL, 10);
           else
             req->testno = DOCNUMBER_CONNECT;
         }
@@ -596,7 +599,7 @@ static int ProcessRequest(struct httprequest *req)
     if(got_exit_signal)
       return 1; /* done */
 
-    if((req->cl==0) && strncasecompare("Content-Length:", line, 15)) {
+    if((req->cl == 0) && strncasecompare("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
@@ -896,10 +899,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   ssize_t written;
   size_t count;
   const char *buffer;
-  char *ptr=NULL;
+  char *ptr = NULL;
   FILE *stream;
-  char *cmd=NULL;
-  size_t cmdsize=0;
+  char *cmd = NULL;
+  size_t cmdsize = 0;
   FILE *dump;
   bool persistant = TRUE;
   bool sendfailure = FALSE;
@@ -988,7 +991,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     if(0 != req->partno)
       snprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
 
-    stream=fopen(filename, "rb");
+    stream = fopen(filename, "rb");
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1012,7 +1015,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     /* re-open the same file again */
-    stream=fopen(filename, "rb");
+    stream = fopen(filename, "rb");
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
@@ -1140,7 +1143,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     char command[32];
     int quarters;
     int num;
-    ptr=cmd;
+    ptr = cmd;
     do {
       if(2 == sscanf(ptr, "%31s %d", command, &num)) {
         if(!strcmp("wait", command)) {
@@ -1190,12 +1193,14 @@ int main(int argc, char *argv[])
   int wrotepidfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
-  char *pidname= (char *)".rtsp.pid";
+  const char *pidname = ".rtsp.pid";
   struct httprequest req;
   int rc;
   int error;
-  int arg=1;
+  int arg = 1;
   long pid;
+
+  memset(&req, 0, sizeof(req));
 
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {

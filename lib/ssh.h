@@ -24,9 +24,12 @@
 
 #include "curl_setup.h"
 
-#ifdef HAVE_LIBSSH2_H
+#if defined(HAVE_LIBSSH2_H)
 #include <libssh2.h>
 #include <libssh2_sftp.h>
+#elif defined(HAVE_LIBSSH_LIBSSH_H)
+#include <libssh/libssh.h>
+#include <libssh/sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
 /****************************************************************************
@@ -51,6 +54,7 @@ typedef enum {
   SSH_AUTH_HOST,
   SSH_AUTH_KEY_INIT,
   SSH_AUTH_KEY,
+  SSH_AUTH_GSSAPI,
   SSH_AUTH_DONE,
   SSH_SFTP_INIT,
   SSH_SFTP_REALPATH,   /* Last state in SSH-CONNECT */
@@ -86,6 +90,7 @@ typedef enum {
   SSH_SCP_TRANS_INIT, /* First state in SCP-DO */
   SSH_SCP_UPLOAD_INIT,
   SSH_SCP_DOWNLOAD_INIT,
+  SSH_SCP_DOWNLOAD,
   SSH_SCP_DONE,
   SSH_SCP_SEND_EOF,
   SSH_SCP_WAIT_EOF,
@@ -109,7 +114,8 @@ struct SSHPROTO {
    struct */
 struct ssh_conn {
   const char *authlist;       /* List of auth. methods, managed by libssh2 */
-#ifdef USE_LIBSSH2
+
+  /* common */
   const char *passphrase;     /* pass-phrase to use */
   char *rsa_pub;              /* path name */
   char *rsa;                  /* path name */
@@ -120,16 +126,11 @@ struct ssh_conn {
   struct curl_slist *quote_item; /* for the quote option */
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
-  LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
+
   bool acceptfail;            /* used by the SFTP_QUOTE (continue if
                                  quote command fails) */
   char *homedir;              /* when doing SFTP we figure out home dir in the
                                  connect phase */
-
-  /* Here's a set of struct members used by the SFTP_READDIR state */
-  LIBSSH2_SFTP_ATTRIBUTES readdir_attrs;
-  char *readdir_filename;
-  char *readdir_longentry;
   int readdir_len, readdir_totalLen, readdir_currLen;
   char *readdir_line;
   char *readdir_linkPath;
@@ -139,11 +140,42 @@ struct ssh_conn {
                                    second attempt has been made to change
                                    to/create a directory */
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
+
+  int orig_waitfor;             /* default READ/WRITE bits wait for */
+
+#if defined(USE_LIBSSH)
+/* our variables */
+  unsigned kbd_state; /* 0 or 1 */
+  ssh_key privkey;
+  ssh_key pubkey;
+  int auth_methods;
+  ssh_session ssh_session;
+  ssh_scp scp_session;
+  sftp_session sftp_session;
+  sftp_file sftp_file;
+  sftp_dir sftp_dir;
+
+  unsigned sftp_recv_state; /* 0 or 1 */
+  int sftp_file_index; /* for async read */
+  sftp_attributes readdir_attrs; /* used by the SFTP readdir actions */
+  sftp_attributes readdir_link_attrs; /* used by the SFTP readdir actions */
+  sftp_attributes quote_attrs; /* used by the SFTP_QUOTE state */
+
+  const char *readdir_filename; /* points within readdir_attrs */
+  const char *readdir_longentry;
+  char *readdir_tmp;
+#elif defined(USE_LIBSSH2)
+  char *readdir_filename;
+  char *readdir_longentry;
+
+  LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
+
+  /* Here's a set of struct members used by the SFTP_READDIR state */
+  LIBSSH2_SFTP_ATTRIBUTES readdir_attrs;
   LIBSSH2_SESSION *ssh_session; /* Secure Shell session */
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
   LIBSSH2_SFTP *sftp_session;   /* SFTP handle */
   LIBSSH2_SFTP_HANDLE *sftp_handle;
-  int orig_waitfor;             /* default READ/WRITE bits wait for */
 
 #ifdef HAVE_LIBSSH2_AGENT_API
   LIBSSH2_AGENT *ssh_agent;     /* proxy to ssh-agent/pageant */
@@ -156,10 +188,17 @@ struct ssh_conn {
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
   LIBSSH2_KNOWNHOSTS *kh;
 #endif
-#endif /* USE_LIBSSH2 */
+#endif /* USE_LIBSSH */
 };
 
-#ifdef USE_LIBSSH2
+#if defined(USE_LIBSSH)
+
+#define CURL_LIBSSH_VERSION ssh_version(0)
+
+extern const struct Curl_handler Curl_handler_scp;
+extern const struct Curl_handler Curl_handler_sftp;
+
+#elif defined(USE_LIBSSH2)
 
 /* Feature detection based on version numbers to better work with
    non-configure platforms */
@@ -188,6 +227,14 @@ struct ssh_conn {
 
 #if LIBSSH2_VERSION_NUM >= 0x010208
 #define HAVE_LIBSSH2_SESSION_HANDSHAKE 1
+#endif
+
+#ifdef HAVE_LIBSSH2_VERSION
+/* get it run-time if possible */
+#define CURL_LIBSSH2_VERSION libssh2_version(0)
+#else
+/* use build-time if run-time not possible */
+#define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
 #endif
 
 extern const struct Curl_handler Curl_handler_scp;

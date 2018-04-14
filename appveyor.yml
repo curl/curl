@@ -56,10 +56,20 @@ environment:
         OPENSSL: OFF
         TESTING: ON
         STATICLIB: ON
-
+      - PRJ_GEN: "Visual Studio 14 2015"
+        BDIR: msvc2015
+        PRJ_CFG: Release
+        OPENSSL: OFF
+        TESTING: ON
+        STATICLIB: ON
 
 build_script:
     - mkdir build.%BDIR%
     - cd build.%BDIR%
-    - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DCURL_STATICLIB=%STATICLIB% -DBUILD_TESTING=%TESTING%
+    - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DCURL_STATICLIB=%STATICLIB% -DBUILD_TESTING=%TESTING% -DCURL_WERROR=ON
     - cmake --build . --config %PRJ_CFG% --clean-first
+
+# whitelist branches to avoid testing feature branches twice (as branch and as pull request)
+branches:
+    only:
+        - master

@@ -32,6 +32,9 @@ ftp
  <name>
 --libcurl for FTP with quote ops
  </name>
+<setenv>
+SSL_CERT_FILE=
+</setenv>
  <command>
 ftp://%HOSTIP:%FTPPORT/1405 -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q "+*FAIL HARD" --libcurl log/test1405.c
 </command>
@@ -80,6 +83,7 @@ int main(int argc, char *argv[])
   slist3 = curl_slist_append(slist3, "*FAIL HARD");
 
   hnd = curl_easy_init();
+  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "ftp://%HOSTIP:%FTPPORT/1405");
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
   curl_easy_setopt(hnd, CURLOPT_QUOTE, slist1);
