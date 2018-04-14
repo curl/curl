@@ -47,7 +47,7 @@ my %warnings = (
     'COMMANOSPACE'     => 'comma without following space',
     'BRACEELSE'        => '} else on the same line',
     'PARENBRACE'       => '){ without sufficient space',
-    'SPACESEMILCOLON'  => 'space before semicolon',
+    'SPACESEMICOLON'   => 'space before semicolon',
     'BANNEDFUNC'       => 'a banned function was used',
     'FOPENMODE'        => 'fopen needs a macro for the mode string',
     'BRACEPOS'         => 'wrong position for an open brace',
@@ -462,14 +462,14 @@ sub scanfile {
 
         # check for space before the semicolon last in a line
         if($l =~ /^(.*[^ ].*) ;$/) {
-            checkwarn("SPACESEMILCOLON",
+            checkwarn("SPACESEMICOLON",
                       $line, length($1), $file, $ol, "space before last semicolon");
         }
 
         # scan for use of banned functions
         if($l =~ /^(.*\W)
                    (gets|
-	            strtok|
+                    strtok|
                     v?sprintf|
                     (str|_mbs|_tcs|_wcs)n?cat|
                     LoadLibrary(Ex)?(A|W)?)
@@ -573,7 +573,7 @@ sub scanfile {
         if($nostr =~ /(.*)\;[a-z0-9]/i) {
             checkwarn("SEMINOSPACE",
                       $line, length($1)+1, $file, $ol,
-                      "no space after semilcolon");
+                      "no space after semicolon");
         }
 
         # check for more than one consecutive space before open brace or

@@ -69,7 +69,7 @@ warnings are:
 - `SPACEBEFOREPAREN`: there was a space before an open parenthesis, `if (`,
    where one was not expected
 
-- `SPACESEMILCOLON`: there was a space before semicolon, ` ;`.
+- `SPACESEMICOLON`: there was a space before semicolon, ` ;`.
 
 - `TABS`: TAB characters are not allowed!
 
