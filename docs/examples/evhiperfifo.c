@@ -336,7 +336,6 @@ static void new_conn(char *url, GlobalInfo *g)
   CURLMcode rc;
 
   conn = calloc(1, sizeof(ConnInfo));
-  memset(conn, 0, sizeof(ConnInfo));
   conn->error[0]='\0';
 
   conn->easy = curl_easy_init();

@@ -363,12 +363,11 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
     /* allocate memory for the re-usable credential handle */
     BACKEND->cred = (struct curl_schannel_cred *)
-      malloc(sizeof(struct curl_schannel_cred));
+      calloc(1, sizeof(struct curl_schannel_cred));
     if(!BACKEND->cred) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
     }
-    memset(BACKEND->cred, 0, sizeof(struct curl_schannel_cred));
     BACKEND->cred->refcount = 1;
 
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa374716.aspx
@@ -466,12 +465,11 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
   /* allocate memory for the security context handle */
   BACKEND->ctxt = (struct curl_schannel_ctxt *)
-    malloc(sizeof(struct curl_schannel_ctxt));
+    calloc(1, sizeof(struct curl_schannel_ctxt));
   if(!BACKEND->ctxt) {
     failf(data, "schannel: unable to allocate memory");
     return CURLE_OUT_OF_MEMORY;
   }
-  memset(BACKEND->ctxt, 0, sizeof(struct curl_schannel_ctxt));
 
   host_name = Curl_convert_UTF8_to_tchar(hostname);
   if(!host_name)
