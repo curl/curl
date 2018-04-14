@@ -135,7 +135,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   }
 
   if(!krb5->credentials) {
-    /* Do we have credientials to use or are we using single sign-on? */
+    /* Do we have credentials to use or are we using single sign-on? */
     if(userp && *userp) {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(userp, passwdp, &krb5->identity);
