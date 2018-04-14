@@ -138,7 +138,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
  }
 
   if(!nego->credentials) {
-    /* Do we have credientials to use or are we using single sign-on? */
+    /* Do we have credentials to use or are we using single sign-on? */
     if(user && *user) {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(user, password, &nego->identity);

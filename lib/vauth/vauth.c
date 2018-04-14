@@ -115,8 +115,8 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
 * User@Domain (User Principal Name)
 *
 * Note: The user name may be empty when using a GSS-API library or Windows SSPI
-* as the user and domain are either obtained from the credientals cache when
-* using GSS-API or via the currently logged in user's credientals when using
+* as the user and domain are either obtained from the credentials cache when
+* using GSS-API or via the currently logged in user's credentials when using
 * Windows SSPI.
 *
 * Parameters:
@@ -138,7 +138,7 @@ bool Curl_auth_user_contains_domain(const char *user)
   }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   else
-    /* User and domain are obtained from the GSS-API credientials cache or the
+    /* User and domain are obtained from the GSS-API credentials cache or the
        currently logged in user from Windows */
     valid = TRUE;
 #endif
