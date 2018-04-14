@@ -620,11 +620,9 @@ polarssl_connect_step3(struct connectdata *conn,
     ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
 
-    our_ssl_sessionid = malloc(sizeof(ssl_session));
+    our_ssl_sessionid = calloc(1, sizeof(ssl_session));
     if(!our_ssl_sessionid)
       return CURLE_OUT_OF_MEMORY;
-
-    memset(our_ssl_sessionid, 0, sizeof(ssl_session));
 
     ret = ssl_get_session(&BACKEND->ssl, our_ssl_sessionid);
     if(ret) {

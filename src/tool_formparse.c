@@ -451,11 +451,10 @@ static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
   if(strcmp(file, "-"))
     return curl_mime_filedata(part, file);
 
-  sip = (standard_input *) malloc(sizeof *sip);
+  sip = (standard_input *) calloc(1, sizeof *sip);
   if(!sip)
     return CURLE_OUT_OF_MEMORY;
 
-  memset((char *) sip, 0, sizeof *sip);
   set_binmode(stdin);
 
   /* If stdin is a regular file, do not buffer data but read it when needed. */

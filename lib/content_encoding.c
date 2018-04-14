@@ -873,10 +873,9 @@ static contenc_writer *new_unencoding_writer(struct connectdata *conn,
                                              contenc_writer *downstream)
 {
   size_t sz = offsetof(contenc_writer, params) + handler->paramsize;
-  contenc_writer *writer = (contenc_writer *) malloc(sz);
+  contenc_writer *writer = (contenc_writer *) calloc(1, sz);
 
   if(writer) {
-    memset(writer, 0, sz);
     writer->handler = handler;
     writer->downstream = downstream;
     if(handler->init_writer(conn, writer)) {
