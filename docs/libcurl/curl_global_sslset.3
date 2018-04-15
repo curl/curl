@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -63,6 +63,9 @@ If neither \fIid\fP nor \fPname\fP are specified, the function will fail with
 CURLSSLSET_UNKNOWN_BACKEND and set the \fIavail\fP pointer to the
 NULL-terminated list of available backends. The available backends are those
 that this particular build of libcurl supports.
+
+Since libcurl 7.60.0, the \fIavail\fP pointer will always be set to the list
+of alternatives if non-NULL.
 
 Upon success, the function returns CURLSSLSET_OK.
 
