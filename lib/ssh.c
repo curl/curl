@@ -2495,7 +2495,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc) {
-          infof(data, "Failed to send libssh2 channel EOF\n");
+			char *err_msg = nil;
+        	(void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+  			infof(data, "Failed to send libssh2 channel EOF: %d %s\n", rc, err_msg);
         }
       }
       state(conn, SSH_SCP_WAIT_EOF);
@@ -2508,7 +2510,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc) {
-          infof(data, "Failed to get channel EOF: %d\n", rc);
+			char *err_msg = nil;
+        	(void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+  			infof(data, "Failed to get channel EOF: %d %s\n", rc, err_msg);
         }
       }
       state(conn, SSH_SCP_WAIT_CLOSE);
@@ -2536,7 +2540,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to free libssh2 scp subsystem\n");
+			char *err_msg = nil;
+        	(void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+  			infof(data, "Failed to free libssh2 scp subsystem: %d %s\n", rc, err_msg);
         }
         sshc->ssh_channel = NULL;
       }
@@ -2558,7 +2564,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to free libssh2 scp subsystem\n");
+			char *err_msg = nil;
+        	(void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+  			infof(data, "Failed to free libssh2 scp subsystem: %d %s\n", rc, err_msg);
         }
         sshc->ssh_channel = NULL;
       }
@@ -2569,7 +2577,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to disconnect libssh2 session\n");
+			char *err_msg = nil;
+        	(void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+  			infof(data, "Failed to disconnect libssh2 session: %d %s\n", rc, err_msg);
         }
       }
 
@@ -2594,7 +2604,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to disconnect from libssh2 agent\n");
+			char *err_msg = nil;
+        	(void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+  			infof(data, "Failed to disconnect from libssh2 agent: %d %s\n", rc, err_msg);
         }
         libssh2_agent_free(sshc->ssh_agent);
         sshc->ssh_agent = NULL;
@@ -2612,7 +2624,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to free libssh2 session\n");
+			char *err_msg = nil;
+        	(void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+  			infof(data, "Failed to free libssh2 session: %d %s\n", rc, err_msg);
         }
         sshc->ssh_session = NULL;
       }
