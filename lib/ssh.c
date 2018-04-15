@@ -2276,7 +2276,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to close libssh2 file\n");
+          infof(data, "Failed to close libssh2 file: %d\n", rc);
         }
         sshc->sftp_handle = NULL;
       }
@@ -2310,7 +2310,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(rc < 0) {
-          infof(data, "Failed to close libssh2 file\n");
+          infof(data, "Failed to close libssh2 file: %d\n", rc);
         }
         sshc->sftp_handle = NULL;
       }
