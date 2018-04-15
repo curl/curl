@@ -214,8 +214,6 @@ char *Curl_copy_header_value(const char *header)
   char *value;
   size_t len;
 
-  DEBUGASSERT(header);
-
   /* Find the end of the header name */
   while(*header && (*header != ':'))
     ++header;

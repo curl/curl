@@ -727,23 +727,19 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   /* allocate internal array for the internal data */
-  data = malloc(nfds * sizeof(struct select_ws_data));
+  data = calloc(nfds, sizeof(struct select_ws_data));
   if(data == NULL) {
     errno = ENOMEM;
     return -1;
   }
 
   /* allocate internal array for the internal event handles */
-  handles = malloc(nfds * sizeof(HANDLE));
+  handles = calloc(nfds, sizeof(HANDLE));
   if(handles == NULL) {
     free(data);
     errno = ENOMEM;
     return -1;
   }
-
-  /* clear internal arrays */
-  memset(data, 0, nfds * sizeof(struct select_ws_data));
-  memset(handles, 0, nfds * sizeof(HANDLE));
 
   /* loop over the handles in the input descriptor sets */
   for(fds = 0; fds < nfds; fds++) {

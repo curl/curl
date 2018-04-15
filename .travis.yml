@@ -1,27 +1,38 @@
 language: c
 sudo: required
+cache:
+    directories:
+        - $HOME/libpsl-0.20.1
+        - $HOME/libidn2-2.0.4
+
+env:
+    global:
+        - LD_LIBRARY_PATH=/usr/local/lib
+
 addons:
     apt:
         config:
             retries: true
         sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
+            - llvm-toolchain-trusty-6.0
         packages:
             - cmake
-            - gcc-6
+            - gcc-7
             - lcov
-            - clang-3.9
+            - clang-6.0
             - valgrind
             - libev-dev
             - libc-ares-dev
-            - g++-6
-            - libstdc++-6-dev
+            - g++-7
+            - libstdc++-7-dev
             - stunnel4
             - libidn2-0-dev
             - libssh2-1-dev
             - libssh-dev
             - krb5-user
+            - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
+            - libunistring-dev # for libidn2 neeed by libpsl
 
 matrix:
     include:
@@ -48,7 +59,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=novalgrind BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib
+          env: T=novalgrind BORINGSSL=yes -C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
         - os: linux
           compiler: clang
           dist: trusty
@@ -85,7 +96,7 @@ matrix:
           env: T=cmake
         - os: linux
           compiler: gcc
-          dist: precise
+          dist: trusty
           env: T=coverage
         - os: linux
           compiler: gcc
@@ -104,7 +115,7 @@ install:
   - if [ $TRAVIS_OS_NAME = linux ]; then
       curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
          tar xzf - &&
-         (cd nghttp2-1.24.0 && CXX="g++-6" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
+         (cd nghttp2-1.24.0 && CXX="g++-7" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
     fi
 
 before_script:
@@ -123,37 +134,66 @@ before_script:
                   sudo make install
               )
           fi
-          if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
-            (cd $HOME &&
-            git clone --depth=1 https://boringssl.googlesource.com/boringssl &&
-            cd boringssl &&
-            mkdir build &&
-            cd build &&
-            cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
-            make &&
-            cd .. &&
-            mkdir lib &&
-            cd lib &&
-            ln -s ../build/crypto/libcrypto.so . &&
-            ln -s ../build/ssl/libssl.so . &&
-            echo "BoringSSL lib dir: "`pwd` &&
-            export LIBS=-lpthread )
-          fi
+    - |
+      if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
+        (cd $HOME &&
+        git clone --depth=1 https://boringssl.googlesource.com/boringssl &&
+        cd boringssl &&
+        mkdir build &&
+        cd build &&
+        cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
+        make &&
+        cd .. &&
+        mkdir lib &&
+        cd lib &&
+        ln -s ../build/crypto/libcrypto.so . &&
+        ln -s ../build/ssl/libssl.so . &&
+        echo "BoringSSL lib dir: "`pwd` &&
+        export LIBS=-lpthread )
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
+        if [ ! -e $HOME/libidn2-2.0.4/Makefile ]; then
+          (cd $HOME && \
+          curl -LO https://ftp.gnu.org/gnu/libidn/libidn2-2.0.4.tar.gz && \
+          tar -xzf libidn2-2.0.4.tar.gz && \
+          cd libidn2-2.0.4 && \
+          ./configure && \
+          make)
+        fi
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
+        if [ ! -e $HOME/libpsl-0.20.1/Makefile ]; then
+          (cd $HOME && \
+          curl -LO https://github.com/rockdaboot/libpsl/releases/download/libpsl-0.20.1/libpsl-0.20.1.tar.gz && \
+          tar -xzf libpsl-0.20.1.tar.gz && \
+          cd libpsl-0.20.1 && \
+          autoreconf -i && \
+          ./configure && \
+          make)
+        fi
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
+        (cd $HOME/libidn2-2.0.4 && sudo make install)
+        (cd $HOME/libpsl-0.20.1 && sudo make install)
+      fi
 
 script:
     - |
         # Uncomment this when `coverage` runs on Trusty.
         # set -eo pipefail
         if [ "$T" = "coverage" ]; then
-             export CC="gcc-6"
+             export CC="gcc-7"
              ./configure --enable-debug --disable-shared --enable-code-coverage
              make
              make TFLAGS=-n test-nonflaky
              tests="1 2 3 4 5 6 7 8 9 10 200 201 202 300 301 302 500 501 502 503 504 506 507 508 509 510 511 512 513 514 515 516 517 518 519 600 601 800 801 802 803 900 901 902 903 1000 1001 1002 1004 1302 1303 1304 1305 1306 1308 1400 1401 1402 1404 1450 1451 1452 1502 1507 1508 1600 1602 1603 1605"
              make "TFLAGS=-n -e $tests" test-nonflaky
              make "TFLAGS=-n -t $tests" test-nonflaky
-             coveralls --gcov /usr/bin/gcov-6 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
-             coveralls --gcov /usr/bin/gcov-6 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
+             coveralls --gcov /usr/bin/gcov-7 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
+             coveralls --gcov /usr/bin/gcov-7 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
         fi
     - |
         set -eo pipefail

@@ -104,13 +104,22 @@
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && /* OpenSSL 1.1.0+ */ \
-  !defined(LIBRESSL_VERSION_NUMBER)
+    !(defined(LIBRESSL_VERSION_NUMBER) && \
+      LIBRESSL_VERSION_NUMBER < 0x20700000L)
 #define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
 #define HAVE_OPAQUE_RSA_DSA_DH 1 /* since 1.1.0 -pre5 */
 #define CONST_EXTS const
 #define HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED 1
+
+/* funny typecast define due to difference in API */
+#ifdef LIBRESSL_VERSION_NUMBER
+#define ARG2_X509_signature_print (X509_ALGOR *)
+#else
+#define ARG2_X509_signature_print
+#endif
+
 #else
 /* For OpenSSL before 1.1.0 */
 #define ASN1_STRING_get0_data(x) ASN1_STRING_data(x)
@@ -128,7 +137,8 @@ static unsigned long OpenSSL_version_num(void)
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
-  !defined(LIBRESSL_VERSION_NUMBER)
+    !(defined(LIBRESSL_VERSION_NUMBER) && \
+      LIBRESSL_VERSION_NUMBER < 0x20700000L)
 #define HAVE_X509_GET0_SIGNATURE 1
 #endif
 
@@ -147,7 +157,7 @@ static unsigned long OpenSSL_version_num(void)
  * Whether SSL_CTX_set_keylog_callback is available.
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
- * LibreSSL: unsupported in at least 2.5.1 (explicitly check for it since it
+ * LibreSSL: unsupported in at least 2.7.2 (explicitly check for it since it
  *           lies and pretends to be OpenSSL 2.0.0).
  */
 #if (OPENSSL_VERSION_NUMBER >= 0x10101000L && \
@@ -259,7 +269,9 @@ static void tap_ssl_key(const SSL *ssl, ssl_tap_state_t *state)
   if(!session || !keylog_file_fp)
     return;
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !(defined(LIBRESSL_VERSION_NUMBER) && \
+      LIBRESSL_VERSION_NUMBER < 0x20700000L)
   /* ssl->s3 is not checked in openssl 1.1.0-pre6, but let's assume that
    * we have a valid SSL context if we have a non-NULL session. */
   SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
@@ -2082,8 +2094,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
     /* it will be handled later with the context options */
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
-    !defined(LIBRESSL_VERSION_NUMBER)
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
     req_method = TLS_client_method();
 #else
     req_method = SSLv23_client_method();
@@ -2338,11 +2349,10 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 
   if(ssl_cafile || ssl_capath) {
-    if(verifypeer) {
-      /* tell SSL where to find CA certificates that are used to verify
-         the servers certificate. */
-      if(!SSL_CTX_load_verify_locations(BACKEND->ctx,
-                                        ssl_cafile, ssl_capath)) {
+    /* tell SSL where to find CA certificates that are used to verify
+       the servers certificate. */
+    if(!SSL_CTX_load_verify_locations(BACKEND->ctx, ssl_cafile, ssl_capath)) {
+      if(verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data, "error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s",
@@ -2350,18 +2360,20 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
               ssl_capath ? ssl_capath : "none");
         return CURLE_SSL_CACERT_BADFILE;
       }
-      else {
-        /* Everything is fine. */
-        infof(data, "successfully set certificate verify locations:\n"
-              "  CAfile: %s\n  CApath: %s\n",
-              ssl_cafile ? ssl_cafile : "none",
-              ssl_capath ? ssl_capath : "none");
-      }
+      /* Just continue with a warning if no strict  certificate verification
+         is required. */
+      infof(data, "error setting certificate verify locations,"
+            " continuing anyway:\n");
     }
     else {
-      infof(data, "ignoring certificate verify locations due to "
-            "disabled peer verification\n");
+      /* Everything is fine. */
+      infof(data, "successfully set certificate verify locations:\n");
     }
+    infof(data,
+          "  CAfile: %s\n"
+          "  CApath: %s\n",
+          ssl_cafile ? ssl_cafile : "none",
+          ssl_capath ? ssl_capath : "none");
   }
 #ifdef CURL_CA_FALLBACK
   else if(verifypeer) {
@@ -2799,7 +2811,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
       ASN1_STRING *a = ASN1_STRING_new();
       if(a) {
         X509_get0_signature(&psig, &palg, x);
-        X509_signature_print(mem, palg, a);
+        X509_signature_print(mem, ARG2_X509_signature_print palg, a);
         ASN1_STRING_free(a);
 
         if(palg) {
@@ -3592,7 +3604,7 @@ static CURLcode Curl_ossl_md5sum(unsigned char *tmp, /* input */
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-static void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
+static CURLcode Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
                                 size_t tmplen,
                                 unsigned char *sha256sum /* output */,
                                 size_t unused)
@@ -3606,6 +3618,7 @@ static void Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
   EVP_DigestUpdate(mdctx, tmp, tmplen);
   EVP_DigestFinal_ex(mdctx, sha256sum, &len);
   EVP_MD_CTX_destroy(mdctx);
+  return CURLE_OK;
 }
 #endif
 

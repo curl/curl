@@ -82,11 +82,11 @@ rem ***************************************************************************
     set VC_VER=14.0
     set VC_DESC=VC14
     set "VC_PATH=Microsoft Visual Studio 14.0\VC"
-  ) else if /i "%~1" == "vc15" (
-    set VC_VER=15.0
-    set VC_DESC=VC15
+  ) else if /i "%~1" == "vc14.1" (
+    set VC_VER=14.1
+    set VC_DESC=VC14.1
 
-    rem Determine the VC15 path based on the installed edition in decending
+    rem Determine the VC14.1 path based on the installed edition in descending
     rem order (Enterprise, then Professional and finally Community)
     if exist "%PF%\Microsoft Visual Studio\2017\Enterprise\VC" (
       set "VC_PATH=Microsoft Visual Studio\2017\Enterprise\VC"
@@ -109,6 +109,24 @@ rem ***************************************************************************
     goto syntax
   ) else if /i "%~1" == "-help" (
     goto syntax
+  ) else if /i "%~1" == "-VSpath" (
+	if "%~2" == "" (
+		echo.
+		echo Error. Please provide VS Path.
+		goto error
+	) else ( 
+		set "ABS_VC_PATH=%~2\VC"
+		shift
+	)
+  ) else if /i "%~1" == "-perlpath" (
+    if "%~2" == "" (
+		echo.
+		echo Error. Please provide Perl root Path.
+		goto error
+	) else (		
+		set "PERL_PATH=%~2"
+		shift
+	)
   ) else (
     if not defined START_DIR (
       set START_DIR=%~1%
@@ -126,25 +144,37 @@ rem ***************************************************************************
   rem Default the start directory if one isn't specified
   if not defined START_DIR set START_DIR=..\..\openssl
 
-  rem Check we have a program files directory
-  if not defined PF goto nopf
-
+  if not defined ABS_VC_PATH ( 
+    rem Check we have a program files directory
+	if not defined PF goto nopf
+	set "ABS_VC_PATH=%PF%\%VC_PATH%"
+  )
+  
   rem Check we have Visual Studio installed
-  if not exist "%PF%\%VC_PATH%" goto novc
+  if not exist "%ABS_VC_PATH%" goto novc
 
-  rem Check we have Perl in our path
-  echo %PATH% | findstr /I /C:"\Perl" 1>nul
-  if errorlevel 1 (
-    rem It isn't so check we have it installed and set the path if it is
-    if exist "%SystemDrive%\Perl" (
-      set "PATH=%SystemDrive%\Perl\bin;%PATH%"
-    ) else (
-      if exist "%SystemDrive%\Perl64" (
-        set "PATH=%SystemDrive%\Perl64\bin;%PATH%"
-      ) else (
-        goto noperl
-      )
-    )
+  
+  if not defined PERL_PATH (
+	rem Check we have Perl in our path 
+	rem using !! below as %% was having \Microsoft was unexecpted error.
+	echo !PATH! | findstr /I /C:"\Perl" 1>nul
+	if errorlevel 1 (
+		rem It isn't so check we have it installed and set the path if it is
+		if exist "%SystemDrive%\Perl" (
+		set "PATH=%SystemDrive%\Perl\bin;%PATH%"
+		) else (
+		if exist "%SystemDrive%\Perl64" (
+			set "PATH=%SystemDrive%\Perl64\bin;%PATH%"
+		) else (
+
+
+
+			goto noperl
+		)
+		)
+	)
+  ) else (
+    set "PATH=%PERL_PATH%\Perl\bin;%PATH%"
   )
 
   rem Check the start directory exists
@@ -178,7 +208,7 @@ rem ***************************************************************************
     if "%VC_VER%" == "11.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "12.0" set VCVARS_PLATFORM=amd64
     if "%VC_VER%" == "14.0" set VCVARS_PLATFORM=amd64
-    if "%VC_VER%" == "15.0" set VCVARS_PLATFORM=amd64
+    if "%VC_VER%" == "14.1" set VCVARS_PLATFORM=amd64
   )
 
 :start
@@ -186,20 +216,20 @@ rem ***************************************************************************
   set SAVED_PATH=%CD%
 
   if "%VC_VER%" == "6.0" (
-    call "%PF%\%VC_PATH%\bin\vcvars32"
+    call "%ABS_VC_PATH%\bin\vcvars32"
   ) else if "%VC_VER%" == "7.0" (
-    call "%PF%\%VC_PATH%\bin\vcvars32"
+    call "%ABS_VC_PATH%\bin\vcvars32"
   ) else if "%VC_VER%" == "7.1" (
-    call "%PF%\%VC_PATH%\bin\vcvars32"
-  ) else if "%VC_VER%" == "15.0" (
-    call "%PF%\%VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
+    call "%ABS_VC_PATH%\bin\vcvars32"
+  ) else if "%VC_VER%" == "14.1" (
+    call "%ABS_VC_PATH%\Auxiliary\Build\vcvarsall" %VCVARS_PLATFORM%
   ) else (
-    call "%PF%\%VC_PATH%\vcvarsall" %VCVARS_PLATFORM%
+    call "%ABS_VC_PATH%\vcvarsall" %VCVARS_PLATFORM%
   )
 
   echo.
-  cd %SAVED_PATH%
-  cd %START_DIR%
+  cd /d %SAVED_PATH%
+  if defined START_DIR cd /d %START_DIR%
   goto %BUILD_PLATFORM%
 
 :x64
@@ -351,7 +381,7 @@ rem ***************************************************************************
 :syntax
   rem Display the help
   echo.
-  echo Usage: build-openssl ^<compiler^> [platform] [configuration] [directory]
+  echo Usage: build-openssl ^<compiler^> [platform] [configuration] [directory] [-VSpath] ["VSpath"] [-perlpath] ["perlpath"]
   echo.
   echo Compiler:
   echo.
@@ -364,7 +394,7 @@ rem ***************************************************************************
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
   echo vc14      - Use Visual Studio 2015
-  echo vc15      - Use Visual Studio 2017
+  echo vc14.1    - Use Visual Studio 2017
   echo.
   echo Platform:
   echo.
@@ -379,6 +409,14 @@ rem ***************************************************************************
   echo Other:
   echo.
   echo directory - Specifies the OpenSSL source directory
+  echo.
+  echo -VSpath - Specify the custom VS path if Visual Studio is installed at other location 
+  echo           then "C:/<ProgramFiles>/Microsoft Visual Studio[version]
+  echo           For e.g. -VSpath "C:\apps\MVS14"
+  echo.
+  echo -perlpath - Specify the custom perl root path if perl is not located at "C:\Perl" and it is a
+  echo             portable copy of perl and not installed on the win system
+  echo			   For e.g. -perlpath "D:\strawberry-perl-5.24.3.1-64bit-portable"
   goto error
 
 :unknown
@@ -399,11 +437,15 @@ rem ***************************************************************************
 :novc
   echo.
   echo Error: %VC_DESC% is not installed
+  echo Error: Please check whether Visual compiler is installed at the path "%ABS_VC_PATH%"
+  echo Error: Please provide proper VS Path by using -VSpath
   goto error
 
 :noperl
   echo.
   echo Error: Perl is not installed
+  echo Error: Please check whether Perl is installed or it is at location "C:\Perl"
+  echo Error: If Perl is portable please provide perl root path by using -perlpath
   goto error
 
 :nox64
@@ -429,6 +471,6 @@ rem ***************************************************************************
   exit /B 1
 
 :success
-  cd %SAVED_PATH%
+  cd /d %SAVED_PATH%
   endlocal
   exit /B 0

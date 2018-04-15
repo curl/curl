@@ -28,6 +28,32 @@ This release includes the following bugfixes:
  o add_handle/easy_perform: clear errorbuffer on start if set [11]
  o darwinssl: fix iOS build [13]
  o cmake: add support for brotli [14]
+ o parsedate: support UT timezone [15]
+ o vauth/ntlm.h: fix the #ifdef header guard
+ o lib/curl_path.h: added #ifdef header guard
+ o vauth/cleartext: fix integer overflow check [16]
+ o CURLINFO_COOKIELIST.3: made the example not leak memory
+ o cookie.d: mention that "-" as filename means stdin [17]
+ o CURLINFO_SSL_VERIFYRESULT.3: fixed the example [18]
+ o http2: read pending frames (including GOAWAY) in connection-check [19]
+ o timeval: remove compilation warning by casting [20]
+ o cmake: avoid warn-as-error during config checks [21]
+ o travis-ci: enable -Werror for CMake builds [22]
+ o openldap: fix for NULL return from ldap_get_attribute_ber() [23]
+ o threaded resolver: track resolver time and set suitable timeout values [24]
+ o cmake: Add advapi32 as explicit link library for win32 [25]
+ o docs: fix CURLINFO_*_T examples use of CURL_FORMAT_CURL_OFF_T [26]
+ o test1148: set a fixed locale for the test [27]
+ o cookies: when reading from a file, only remove_expired once [28]
+ o cookie: store cookies per top-level-domain-specific hash table [29]
+ o openssl: fix build with LibreSSL 2.7 [30]
+ o tls: fix mbedTLS 2.7.0 build + handle sha256 failures [31]
+ o openssl: RESTORED verify locations when verifypeer==0 [32]
+ o file: restore old behavior for file:////foo/bar URLs [33]
+ o FTP: allow PASV on IPv6 connections when a proxy is being used [34]
+ o build-openssl.bat: allow custom paths for VS and perl [35]
+ o winbuild: make the clean target work without build-type [36]
+ o build-openssl.bat: Refer to VS2017 as VC14.1 instead of VC15 [37]
 
 This release includes the following known bugs:
 
@@ -36,10 +62,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Brown, Chris Araman, Cyril B, Daniel Stenberg, dasimx on github,
-  Don J Olmstead, Kobi Gurkan, Lawrence Matthews, Luz Paz, Patrick Monnerat,
-  Philip Prindeville, Ray Satiro, Rick Deist, Vincas Razma, 刘佩东,
-  (15 contributors)
+  Adam Brown, Alex Baines, Bas van Schaik, Bernard Spil, Chris Araman, Cyril B,
+  Daniel Stenberg, dasimx on github, David L., Dongliang Mu, Don J Olmstead,
+  Gaurav Malhotra, Howard Chu, Jon DeVree, Kees Dekker, Kobi Gurkan,
+  Laurie Clark-Michalek, Lauri Kasanen, Lawrence Matthews, Luz Paz,
+  Michael Kaufmann, Michał Janiszewski, Michal Trybus, Muz Dima,
+  Nikos Tsipinakis, Oumph on github, patelvivekv1993 on github,
+  Patrick Monnerat, Philip Prindeville, Ray Satiro, Rick Deist, Sergei Nikulov,
+  Vincas Razma, Wyatt O'Day, 刘佩东,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -59,3 +90,26 @@ References to bug reports and discussions on issues:
  [12] = https://curl.haxx.se/bug/?i=1694
  [13] = https://curl.haxx.se/bug/?i=2397
  [14] = https://curl.haxx.se/bug/?i=2392
+ [15] = https://curl.haxx.se/bug/?i=2401
+ [16] = https://curl.haxx.se/bug/?i=2408
+ [17] = https://curl.haxx.se/bug/?i=2410
+ [18] = https://curl.haxx.se/bug/?i=2400
+ [19] = https://curl.haxx.se/bug/?i=1967
+ [20] = https://curl.haxx.se/bug/?i=2358
+ [21] = https://curl.haxx.se/bug/?i=2358
+ [22] = https://curl.haxx.se/bug/?i=2418
+ [23] = https://curl.haxx.se/bug/?i=2399
+ [24] = https://curl.haxx.se/bug/?i=2419
+ [25] = https://curl.haxx.se/bug/?i=2363
+ [26] = https://curl.haxx.se/mail/lib-2018-03/0140.html
+ [27] = https://curl.haxx.se/bug/?i=2436
+ [28] = https://curl.haxx.se/bug/?i=2441
+ [29] = https://curl.haxx.se/bug/?i=2440
+ [30] = https://curl.haxx.se/bug/?i=2319
+ [31] = https://curl.haxx.se/bug/?i=2453
+ [32] = https://curl.haxx.se/bug/?i=2451
+ [33] = https://curl.haxx.se/bug/?i=2438
+ [34] = https://curl.haxx.se/bug/?i=2432
+ [35] = https://curl.haxx.se/bug/?i=2430
+ [36] = https://curl.haxx.se/bug/?i=2455
+ [37] = https://curl.haxx.se/bug/?i=2189

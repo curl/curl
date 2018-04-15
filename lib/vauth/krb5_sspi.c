@@ -135,7 +135,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   }
 
   if(!krb5->credentials) {
-    /* Do we have credientials to use or are we using single sign-on? */
+    /* Do we have credentials to use or are we using single sign-on? */
     if(userp && *userp) {
       /* Populate our identity structure */
       result = Curl_create_sspi_identity(userp, passwdp, &krb5->identity);
@@ -150,11 +150,9 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       krb5->p_identity = NULL;
 
     /* Allocate our credentials handle */
-    krb5->credentials = malloc(sizeof(CredHandle));
+    krb5->credentials = calloc(1, sizeof(CredHandle));
     if(!krb5->credentials)
       return CURLE_OUT_OF_MEMORY;
-
-    memset(krb5->credentials, 0, sizeof(CredHandle));
 
     /* Acquire our credentials handle */
     status = s_pSecFn->AcquireCredentialsHandle(NULL,
@@ -167,11 +165,9 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       return CURLE_LOGIN_DENIED;
 
     /* Allocate our new context handle */
-    krb5->context = malloc(sizeof(CtxtHandle));
+    krb5->context = calloc(1, sizeof(CtxtHandle));
     if(!krb5->context)
       return CURLE_OUT_OF_MEMORY;
-
-    memset(krb5->context, 0, sizeof(CtxtHandle));
   }
 
   if(chlg64 && *chlg64) {

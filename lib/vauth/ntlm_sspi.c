@@ -129,11 +129,9 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
     ntlm->p_identity = NULL;
 
   /* Allocate our credentials handle */
-  ntlm->credentials = malloc(sizeof(CredHandle));
+  ntlm->credentials = calloc(1, sizeof(CredHandle));
   if(!ntlm->credentials)
     return CURLE_OUT_OF_MEMORY;
-
-  memset(ntlm->credentials, 0, sizeof(CredHandle));
 
   /* Acquire our credentials handle */
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
@@ -145,7 +143,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
     return CURLE_LOGIN_DENIED;
 
   /* Allocate our new context handle */
-  ntlm->context = malloc(sizeof(CtxtHandle));
+  ntlm->context = calloc(1, sizeof(CtxtHandle));
   if(!ntlm->context)
     return CURLE_OUT_OF_MEMORY;
 

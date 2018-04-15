@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -152,7 +152,8 @@ static int gtls_mapped_sockerrno(void)
 
 static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 {
-  ssize_t ret = swrite(CURLX_POINTER_TO_INTEGER_CAST(s), buf, len);
+  curl_socket_t sock = *(curl_socket_t *)s;
+  ssize_t ret = swrite(sock, buf, len);
 #if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
@@ -162,7 +163,8 @@ static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 
 static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 {
-  ssize_t ret = sread(CURLX_POINTER_TO_INTEGER_CAST(s), buf, len);
+  curl_socket_t sock = *(curl_socket_t *)s;
+  ssize_t ret = sread(sock, buf, len);
 #if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
@@ -848,7 +850,7 @@ gtls_connect_step1(struct connectdata *conn,
   }
   else {
     /* file descriptor for the socket */
-    transport_ptr = CURLX_INTEGER_TO_POINTER_CAST(conn->sock[sockindex]);
+    transport_ptr = &conn->sock[sockindex];
     gnutls_transport_push = Curl_gtls_push;
     gnutls_transport_pull = Curl_gtls_pull;
   }
@@ -1761,7 +1763,7 @@ static CURLcode Curl_gtls_md5sum(unsigned char *tmp, /* input */
   return CURLE_OK;
 }
 
-static void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
+static CURLcode Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
                                 size_t tmplen,
                                 unsigned char *sha256sum, /* output */
                                 size_t sha256len)
@@ -1778,6 +1780,7 @@ static void Curl_gtls_sha256sum(const unsigned char *tmp, /* input */
   memcpy(sha256sum, gcry_md_read(SHA256pw, 0), sha256len);
   gcry_md_close(SHA256pw);
 #endif
+  return CURLE_OK;
 }
 
 static bool Curl_gtls_cert_status_request(void)
