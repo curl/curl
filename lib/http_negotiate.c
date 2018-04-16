@@ -67,6 +67,12 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     neg_ctx = &data->state.negotiate;
   }
 
+  /* If the authentication will canonicalize the host ip, we must give
+     it the ip address to prevent inconsistent resolution */
+  if(Curl_auth_will_canonicalize_spnego_host()) {
+    host = conn->primary_ip;
+  }
+
   /* Not set means empty */
   if(!userp)
     userp = "";

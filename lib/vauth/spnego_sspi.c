@@ -63,6 +63,25 @@ bool Curl_auth_is_spnego_supported(void)
 }
 
 /*
+ * Curl_auth_will_canonicalize_spnego_host()
+ *
+ * This method returns whether or not the authentication will
+ * canonicalize the host. This is important because if the
+ * canonicalization happens on a round-robin DNS record, the
+ * authentication may canonicalize to a different host than what we're
+ * connecting to.
+ *
+ * This is currently not supported on SSPI, pending implementation.
+ * Returns FALSE.
+ */
+bool Curl_auth_will_canonicalize_spnego_host(void)
+{
+  /* This is the old behavior, someone may be interested in adding
+     this support on the windows API. */
+  return FALSE;
+}
+
+/*
  * Curl_auth_decode_spnego_message()
  *
  * This is used to decode an already encoded SPNEGO (Negotiate) challenge

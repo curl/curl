@@ -181,6 +181,13 @@ void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5);
 /* This is used to evaluate if SPNEGO (Negotiate) is supported */
 bool Curl_auth_is_spnego_supported(void);
 
+/* This method returns whether or not the authentication will
+   canonicalize the host. This is important because if the
+   canonicalization happens on a round-robin DNS record, the
+   authentication may canonicalize to a different host than what we're
+   connecting to. */
+bool Curl_auth_will_canonicalize_spnego_host(void);
+
 /* This is used to decode a base64 encoded SPNEGO (Negotiate) challenge
    message */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,

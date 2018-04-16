@@ -28,6 +28,11 @@
 
 #include <curl/curl.h>
 
+#ifdef HAVE_GSSAPI_GSSAPI_KRB5_H
+#include <krb5/krb5.h>
+#include <profile.h>
+#endif
+
 #include "vauth/vauth.h"
 #include "urldata.h"
 #include "curl_base64.h"
@@ -52,6 +57,56 @@
 bool Curl_auth_is_spnego_supported(void)
 {
   return TRUE;
+}
+
+/*
+ * Curl_auth_will_canonicalize_spnego_host()
+ *
+ * This method returns whether or not the authentication will
+ * canonicalize the host. This is important because if the
+ * canonicalization happens on a round-robin DNS record, the
+ * authentication may canonicalize to a different host than what we're
+ * connecting to.
+ *
+ * Returns TRUE if kerberos is configured to do reverse dns (default)
+ */
+bool Curl_auth_will_canonicalize_spnego_host(void)
+{
+#ifdef HAVE_GSSAPI_GSSAPI_KRB5_H
+  krb5_error_code rc;
+  long irc;
+  krb5_context ctx;
+  profile_t profile;
+  int value;
+  rc = krb5_init_context(&ctx);
+  if(rc) {
+    /* Default to old behavior */
+    return FALSE;
+  }
+  rc = krb5_get_profile(ctx, &profile);
+  if(rc) {
+    /* Default to old behavior */
+    krb5_free_context(ctx);
+    return FALSE;
+  }
+  irc = profile_get_boolean(
+    profile, "libdefaults", "rdns", NULL, 1, &value);
+  krb5_free_context(ctx);
+  profile_release(profile);
+  if(irc) {
+    /* Default to old behavior */
+    return FALSE;
+  }
+  return value;
+#else
+  /* The gssapi standard api doesn't offer a way to know whether or
+     not the host will be canonicalized. The standard says it always
+     should be, however, that'd be a breaking change for people that
+     have explicitly disabled reverse dns in some other
+     implementation. We support checking that config if the underlying
+     implementation is the MIT kerberos */
+  return FALSE;
+#endif
 }
 
 /*
