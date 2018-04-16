@@ -1053,13 +1053,13 @@ if test X"$OPT_BROTLI" != Xno; then
   if test "$HAVE_BROTLI" = "1"; then
     if test -n "$DIR_BROTLI"; then
        dnl when the brotli shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
        dnl to prevent further configure tests to fail due to this
 
        if test "x$cross_compiling" != "xyes"; then
-         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_BROTLI"
-         export LD_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $DIR_BROTLI to LD_LIBRARY_PATH])
+         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_BROTLI"
+         export CURL_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_BROTLI to CURL_LIBRARY_PATH])
        fi
     fi
   else
@@ -1230,13 +1230,11 @@ dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
 AC_MSG_CHECKING([if argv can be written to])
-AC_RUN_IFELSE([
-  AC_LANG_SOURCE([[
+CURL_RUN_IFELSE([
 int main(int argc, char ** argv) {
     argv[0][0] = ' ';
     return (argv[0][0] == ' ')?0:1;
 }
-  ]])
 ],[
   curl_cv_writable_argv=yes
 ],[
@@ -1811,12 +1809,12 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
        dnl when the ssl shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
        dnl to prevent further configure tests to fail due to this
        if test "x$cross_compiling" != "xyes"; then
-         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_OPENSSL"
-         export LD_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $LIB_OPENSSL to LD_LIBRARY_PATH])
+         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
+         export CURL_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $LIB_OPENSSL to CURL_LIBRARY_PATH])
        fi
     fi
     CURL_CHECK_OPENSSL_API
@@ -1973,12 +1971,12 @@ if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
         if test -n "$gtlslib"; then
           dnl when shared libs were found in a path that the run-time
           dnl linker doesn't search through, we need to add it to
-          dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+          dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
           dnl due to this
           if test "x$cross_compiling" != "xyes"; then
-            LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlslib"
-            export LD_LIBRARY_PATH
-            AC_MSG_NOTICE([Added $gtlslib to LD_LIBRARY_PATH])
+            CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$gtlslib"
+            export CURL_LIBRARY_PATH
+            AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])
           fi
         fi
         AC_CHECK_FUNCS([gnutls_certificate_set_x509_key_file2 gnutls_alpn_set_protocols gnutls_ocsp_req_init])
@@ -2109,12 +2107,12 @@ if test -z "$ssl_backends" -o "x$OPT_POLARSSL" != xno; then
       if test -n "$polarssllib"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
-        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
-          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$polarssllib"
-          export LD_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $polarssllib to LD_LIBRARY_PATH])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$polarssllib"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $polarssllib to CURL_LIBRARY_PATH])
         fi
       fi
     fi
@@ -2200,12 +2198,12 @@ if test -z "$ssl_backends" -o "x$OPT_MBEDTLS" != xno; then
       if test -n "$mbedtlslib"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
-        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
-          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$mbedtlslib"
-          export LD_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $mbedtlslib to LD_LIBRARY_PATH])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$mbedtlslib"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])
         fi
       fi
     fi
@@ -2367,12 +2365,12 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
       if test -n "$cyassllib"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
-        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
-          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$cyassllib"
-          export LD_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $cyassllib to LD_LIBRARY_PATH])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$cyassllib"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $cyassllib to CURL_LIBRARY_PATH])
         fi
       fi
 
@@ -2498,12 +2496,12 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
 
       dnl when shared libs were found in a path that the run-time
       dnl linker doesn't search through, we need to add it to
-      dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+      dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
       dnl due to this
       if test "x$cross_compiling" != "xyes"; then
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
-        export LD_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$nssprefix/lib$libsuff"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to CURL_LIBRARY_PATH])
       fi
 
     fi dnl NSS found
@@ -2559,9 +2557,9 @@ if test -z "$ssl_backends" -o "x$OPT_AXTLS" != xno; then
       test axtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
 
       if test "x$cross_compiling" != "xyes"; then
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
-        export LD_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $LIB_AXTLS to LD_LIBRARY_PATH])
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_AXTLS"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $LIB_AXTLS to CURL_LIBRARY_PATH])
       fi
       ],[
       LDFLAGS="$CLEANLDFLAGS"
@@ -2802,13 +2800,13 @@ if test X"$OPT_LIBSSH2" != Xno; then
   if test "$LIBSSH2_ENABLED" = "1"; then
     if test -n "$DIR_SSH2"; then
        dnl when the libssh2 shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
        dnl to prevent further configure tests to fail due to this
 
        if test "x$cross_compiling" != "xyes"; then
-         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
-         export LD_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $DIR_SSH2 to LD_LIBRARY_PATH])
+         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_SSH2"
+         export CURL_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_SSH2 to CURL_LIBRARY_PATH])
        fi
     fi
   else
@@ -2875,13 +2873,13 @@ elif test X"$OPT_LIBSSH" != Xno; then
   if test "$LIBSSH_ENABLED" = "1"; then
     if test -n "$DIR_SSH"; then
        dnl when the libssh shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
        dnl to prevent further configure tests to fail due to this
 
        if test "x$cross_compiling" != "xyes"; then
-         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH"
-         export LD_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $DIR_SSH to LD_LIBRARY_PATH])
+         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_SSH"
+         export CURL_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_SSH to CURL_LIBRARY_PATH])
        fi
     fi
   else
@@ -3217,9 +3215,9 @@ if test "$want_idn" = "yes"; then
     AC_SUBST([IDN_ENABLED], [1])
     curl_idn_msg="enabled (libidn2)"
     if test -n "$IDN_DIR" -a "x$cross_compiling" != "xyes"; then
-      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
-      export LD_LIBRARY_PATH
-      AC_MSG_NOTICE([Added $IDN_DIR to LD_LIBRARY_PATH])
+      CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$IDN_DIR"
+      export CURL_LIBRARY_PATH
+      AC_MSG_NOTICE([Added $IDN_DIR to CURL_LIBRARY_PATH])
     fi
   else
     AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
@@ -3513,13 +3511,13 @@ AC_CHECK_TYPE(sa_family_t,
 ])
 
 AC_MSG_CHECKING([if time_t is unsigned])
-AC_RUN_IFELSE([
-  AC_LANG_SOURCE([[
+CURL_RUN_IFELSE(
+  [
   #include <time.h>
   #include <limits.h>
   time_t t = -1;
   return (t > 0);
-  ]])] ,[
+  ],[
   AC_MSG_RESULT([yes])
   AC_DEFINE(HAVE_TIME_T_UNSIGNED, 1, [Define this if time_t is unsigned])
 ],[
