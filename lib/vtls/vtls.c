@@ -1303,7 +1303,7 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
                               const curl_ssl_backend ***avail)
 {
   int i;
-  
+ 
   if(avail)
     *avail = (const curl_ssl_backend **)&available_backends;
 
