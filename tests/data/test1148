@@ -54,8 +54,13 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+# This allows the last 4 letters of the bar to get updated without it
+# matters. We're mostly checking the width of it anyway.
 <file name="log/stderrlog1148">
-######################################################################## 100.0%
+bar 100.0%
 </file>
+<stripfile>
+s/####################################################################..../bar/
+</stripfile>
 </verify>
 </testcase>
