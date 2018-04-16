@@ -1422,13 +1422,8 @@ enum dupstring {
   STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
   STRING_SSH_KNOWNHOSTS,  /* file name of knownhosts file */
 #endif
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   STRING_PROXY_SERVICE_NAME, /* Proxy service name */
-#endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-  defined(USE_SPNEGO) || defined(HAVE_GSSAPI)
   STRING_SERVICE_NAME,    /* Service name */
-#endif
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
 
