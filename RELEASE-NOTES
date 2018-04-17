@@ -54,6 +54,27 @@ This release includes the following bugfixes:
  o build-openssl.bat: allow custom paths for VS and perl [35]
  o winbuild: make the clean target work without build-type [36]
  o build-openssl.bat: Refer to VS2017 as VC14.1 instead of VC15 [37]
+ o curl: retry on FTP 4xx, ignore other protocols [38]
+ o configure: detect (and use) sa_family_t [39]
+ o examples/sftpuploadresmue: Fix Windows large file seek
+ o build: cleanup to fix clang warnings/errors [40]
+ o winbuild: updated the documentation [41]
+ o lib: silence null-dereference warnings [42]
+ o travis: bump to clang 6 and gcc 7 [43]
+ o travis: build libpsl and make builds use it [44]
+ o proxy: show getenv proxy use in verbose output [45]
+ o duphandle: make sure CURLOPT_RESOLVE is duplicated [46]
+ o all: Refactor malloc+memset to use calloc [47]
+ o checksrc: Fix typo [48]
+ o system.h: Add sparcv8plus to oracle/sunpro 32-bit detection [49]
+ o vauth: Fix typo [50]
+ o ssh: show libSSH2 error code when closing fails [51]
+ o test1148: tolerate progress updates better [52]
+ o urldata: make service names unconditional [53]
+ o configure: keep LD_LIBRARY_PATH changes local [54]
+ o ntlm_sspi: fix authentication using Credential Manager [55]
+ o schannel: add client certificate authentication [56]
+ o winbuild: Support custom devel paths for each dependency [57]
 
 This release includes the following known bugs:
 
@@ -62,15 +83,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Brown, Alex Baines, Bas van Schaik, Bernard Spil, Chris Araman, Cyril B,
-  Daniel Stenberg, dasimx on github, David L., Dongliang Mu, Don J Olmstead,
-  Gaurav Malhotra, Howard Chu, Jon DeVree, Kees Dekker, Kobi Gurkan,
-  Laurie Clark-Michalek, Lauri Kasanen, Lawrence Matthews, Luz Paz,
-  Michael Kaufmann, Michał Janiszewski, Michal Trybus, Muz Dima,
-  Nikos Tsipinakis, Oumph on github, patelvivekv1993 on github,
-  Patrick Monnerat, Philip Prindeville, Ray Satiro, Rick Deist, Sergei Nikulov,
-  Vincas Razma, Wyatt O'Day, 刘佩东,
-  (35 contributors)
+  Adam Brown, Alex Baines, Bas van Schaik, Bernard Spil, Chris Araman,
+  Christian Schmitz, Cyril B, Dagobert Michelsen, Daniel Gustafsson,
+  Daniel Stenberg, dasimx on github, David L., Dmitry Mikhirev, Dongliang Mu,
+  Don J Olmstead, Eric Gallager, Ernst Sjöstrand, Gaurav Malhotra, Howard Chu,
+  Jon DeVree, Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek, Lauri Kasanen,
+  Lawrence Matthews, Luz Paz, Marcel Raad, Michael Kaufmann,
+  Michał Janiszewski, Michal Trybus, Muz Dima, Nikos Tsipinakis,
+  Oumph on github, patelvivekv1993 on github, Patrick Monnerat,
+  Philip Prindeville, Ray Satiro, Rick Deist, Rikard Falkeborn, Sergei Nikulov,
+  Stefan Agner, Vincas Razma, Wyatt O'Day, 刘佩东,
+  (44 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -113,3 +136,23 @@ References to bug reports and discussions on issues:
  [35] = https://curl.haxx.se/bug/?i=2430
  [36] = https://curl.haxx.se/bug/?i=2455
  [37] = https://curl.haxx.se/bug/?i=2189
+ [38] = https://curl.haxx.se/bug/?i=2462
+ [39] = https://curl.haxx.se/bug/?i=2463
+ [40] = https://curl.haxx.se/bug/?i=2466
+ [41] = https://curl.haxx.se/bug/?i=2472
+ [42] = https://curl.haxx.se/bug/?i=2463
+ [43] = https://curl.haxx.se/bug/?i=2478
+ [44] = https://curl.haxx.se/bug/?i=2471
+ [45] = https://curl.haxx.se/bug/?i=2480
+ [46] = https://curl.haxx.se/bug/?i=2485
+ [47] = https://curl.haxx.se/bug/?i=2497
+ [48] = https://curl.haxx.se/bug/?i=2498
+ [49] = https://curl.haxx.se/bug/?i=2491
+ [50] = https://curl.haxx.se/bug/?i=2496
+ [51] = https://curl.haxx.se/bug/?i=2500
+ [52] = https://curl.haxx.se/bug/?i=2446
+ [53] = https://curl.haxx.se/bug/?i=2479
+ [54] = https://curl.haxx.se/bug/?i=2490
+ [55] = https://curl.haxx.se/bug/?i=1622
+ [56] = https://curl.haxx.se/bug/?i=2376
+ [57] = https://curl.haxx.se/bug/?i=2474
