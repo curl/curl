@@ -441,7 +441,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         return result;
       }
 
-      cert_store = CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0, NULL,
+      cert_store = CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
+                                 (HCRYPTPROV)NULL,
                                  cert_store_name, cert_store_path);
       if(!cert_store) {
         Curl_unicodefree(cert_path);
