@@ -72,7 +72,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
   ret = curl_easy_perform(curl);
   if(ret == CURLE_HTTP_RETURNED_ERROR) {
-    /* a HTTP response error problem */
+    /* an HTTP response error problem */
   }
 }
 .fi

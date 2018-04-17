@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPT_ENCODING, char *enc);
 .SH DESCRIPTION
 Pass a char * argument specifying what encoding you'd like.
 
-Sets the contents of the Accept-Encoding: header sent in a HTTP request, and
+Sets the contents of the Accept-Encoding: header sent in an HTTP request, and
 enables decoding of a response when a Content-Encoding: header is received.
 Three encodings are supported: \fIidentity\fP, meaning non-compressed,
 \fIdeflate\fP which requests the server to compress its response using the

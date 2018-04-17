@@ -37,7 +37,7 @@ the PUT request unless you tell libcurl otherwise.
 Using PUT with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
-If you use PUT to a HTTP 1.1 server, you can upload data without knowing the
+If you use PUT to an HTTP 1.1 server, you can upload data without knowing the
 size before starting the transfer if you use chunked encoding. You enable this
 by adding a header like "Transfer-Encoding: chunked" with
 \fICURLOPT_HTTPHEADER(3)\fP. With HTTP 1.0 or without chunked transfer, you

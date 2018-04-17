@@ -65,7 +65,7 @@ response, you will need to collect headers in the callback yourself and use
 HTTP status lines, for example, to delimit response boundaries.
 
 When a server sends a chunked encoded transfer, it may contain a trailer. That
-trailer is identical to a HTTP header and if such a trailer is received it is
+trailer is identical to an HTTP header and if such a trailer is received it is
 passed to the application using this callback as well. There are several ways
 to detect it being a trailer and not an ordinary header: 1) it comes after the
 response-body. 2) it comes after the final header line (CR LF) 3) a Trailer:

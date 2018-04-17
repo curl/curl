@@ -1,6 +1,6 @@
 Long: proxytunnel
 Short: p
-Help: Operate through a HTTP proxy tunnel (using CONNECT)
+Help: Operate through an HTTP proxy tunnel (using CONNECT)
 See-also: proxy
 ---
 When an HTTP proxy is used --proxy, this option will cause non-HTTP protocols

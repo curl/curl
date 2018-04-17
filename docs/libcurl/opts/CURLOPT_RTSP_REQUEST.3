@@ -46,7 +46,7 @@ not needed for this method)\fP
 When sent by a client, this method changes the description of the session. For
 example, if a client is using the server to record a meeting, the client can
 use Announce to inform the server of all the meta-information about the
-session.  ANNOUNCE acts like a HTTP PUT or POST just like
+session.  ANNOUNCE acts like an HTTP PUT or POST just like
 \fICURL_RTSPREQ_SET_PARAMETER\fP
 .IP CURL_RTSPREQ_SETUP
 Setup is used to initialize the transport layer for the session. The
@@ -68,16 +68,16 @@ different connections.
 .IP CURL_RTSPREQ_GET_PARAMETER
 Retrieve a parameter from the server. By default, libcurl will automatically
 include a \fIContent-Type: text/parameters\fP header on all non-empty requests
-unless a custom one is set. GET_PARAMETER acts just like a HTTP PUT or POST
+unless a custom one is set. GET_PARAMETER acts just like an HTTP PUT or POST
 (see \fICURL_RTSPREQ_SET_PARAMETER\fP).
 Applications wishing to send a heartbeat message (e.g. in the presence of a
 server-specified timeout) should send use an empty GET_PARAMETER request.
 .IP CURL_RTSPREQ_SET_PARAMETER
 Set a parameter on the server. By default, libcurl will automatically include
 a \fIContent-Type: text/parameters\fP header unless a custom one is set. The
-interaction with SET_PARAMETER is much like a HTTP PUT or POST. An application
+interaction with SET_PARAMETER is much like an HTTP PUT or POST. An application
 may either use \fICURLOPT_UPLOAD(3)\fP with \fICURLOPT_READDATA(3)\fP like a
-HTTP PUT, or it may use \fICURLOPT_POSTFIELDS(3)\fP like a HTTP POST. No
+HTTP PUT, or it may use \fICURLOPT_POSTFIELDS(3)\fP like an HTTP POST. No
 chunked transfers are allowed, so the application must set the
 \fICURLOPT_INFILESIZE(3)\fP in the former and \fICURLOPT_POSTFIELDSIZE(3)\fP
 in the latter. Also, there is no use of multi-part POSTs within RTSP.
