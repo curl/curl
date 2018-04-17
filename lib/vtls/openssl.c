@@ -661,18 +661,17 @@ int cert_stuff(struct connectdata *conn,
 
     case SSL_FILETYPE_PKCS12:
     {
-      FILE *f;
-      PKCS12 *p12;
+      BIO *fp = BIO_new(BIO_s_file());
+      PKCS12 *p12 = NULL;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
-
-      f = fopen(cert_file, "rb");
-      if(!f) {
+ 
+      if(BIO_read_filename(fp, cert_file) <= 0) {
         failf(data, "could not open PKCS12 file '%s'", cert_file);
         return 0;
       }
-      p12 = d2i_PKCS12_fp(f, NULL);
-      fclose(f);
+      p12 = d2i_PKCS12_bio(fp, NULL);
+      BIO_free(fp);
 
       if(!p12) {
         failf(data, "error reading PKCS12 file '%s'", cert_file);
@@ -3046,7 +3045,7 @@ static CURLcode servercert(struct connectdata *conn,
   long lerr, len;
   struct Curl_easy *data = conn->data;
   X509 *issuer;
-  FILE *fp;
+  BIO *fp = BIO_new(BIO_s_file());
   char buffer[2048];
   const char *ptr;
   long * const certverifyresult = SSL_IS_PROXY() ?
@@ -3109,8 +3108,7 @@ static CURLcode servercert(struct connectdata *conn,
 
     /* e.g. match issuer name with provided issuer certificate */
     if(SSL_SET_OPTION(issuercert)) {
-      fp = fopen(SSL_SET_OPTION(issuercert), FOPEN_READTEXT);
-      if(!fp) {
+      if(BIO_read_filename(fp, SSL_SET_OPTION(issuercert)) <= 0) {
         if(strict)
           failf(data, "SSL: Unable to open issuer cert (%s)",
                 SSL_SET_OPTION(issuercert));
@@ -3119,18 +3117,18 @@ static CURLcode servercert(struct connectdata *conn,
         return CURLE_SSL_ISSUER_ERROR;
       }
 
-      issuer = PEM_read_X509(fp, NULL, ZERO_NULL, NULL);
+      issuer = PEM_read_bio_X509(fp, NULL, ZERO_NULL, NULL);
       if(!issuer) {
         if(strict)
           failf(data, "SSL: Unable to read issuer cert (%s)",
                 SSL_SET_OPTION(issuercert));
         X509_free(BACKEND->server_cert);
         X509_free(issuer);
-        fclose(fp);
+        BIO_free(fp);
         return CURLE_SSL_ISSUER_ERROR;
       }
 
-      fclose(fp);
+      BIO_free(fp);
 
       if(X509_check_issued(issuer, BACKEND->server_cert) != X509_V_OK) {
         if(strict)
