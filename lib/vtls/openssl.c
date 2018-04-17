@@ -1426,8 +1426,8 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
              */
             char *altptr2 = strdup(altptr);
             if(altptr2) {
-              if(Curl_convert_from_network(data, altptr2, altlen) == CURLE_OK)
-                                                                          {
+              if(Curl_convert_from_network(data, altptr2, altlen)
+                                                            == CURLE_OK) {
 #else
                 const char *altptr2 = altptr;
 #endif
