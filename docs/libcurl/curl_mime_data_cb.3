@@ -68,7 +68,7 @@ Your read function must then return the actual number of bytes that it stored
 in that memory area. Returning 0 will signal end-of-file to the library and
 cause it to stop the current transfer.
 
-If you stop the current transfer by returning 0 "pre-maturely" (i.e before the
+If you stop the current transfer by returning 0 "pre-maturely" (i.e. before the
 server expected it, like when you've said you will upload N bytes and you
 upload less than N bytes), you may experience that the server "hangs" waiting
 for the rest of the data that won't come.

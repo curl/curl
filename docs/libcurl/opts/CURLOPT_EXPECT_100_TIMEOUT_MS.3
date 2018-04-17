@@ -32,7 +32,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_EXPECT_100_TIMEOUT_MS,
 .SH DESCRIPTION
 Pass a long to tell libcurl the number of \fImilliseconds\fP to wait for a
 server response with the HTTP status 100 (Continue), 417 (Expectation Failed)
-or similar after sending a HTTP request containing an Expect: 100-continue
+or similar after sending an HTTP request containing an Expect: 100-continue
 header. If this times out before a response is received, the request body is
 sent anyway.
 .SH DEFAULT

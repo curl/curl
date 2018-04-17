@@ -56,7 +56,7 @@ All protocols except for file:// and FTP are supported in theory. HTTP, IMAP,
 POP3 and SMTP should in particular work (including their SSL/TLS variants).
 .SH EXAMPLE
 Given that you have an nginx server running, listening on /tmp/nginx.sock, you
-can request a HTTP resource with:
+can request an HTTP resource with:
 
 .nf
     curl_easy_setopt(curl_handle, CURLOPT_UNIX_SOCKET_PATH, "/tmp/nginx.sock");

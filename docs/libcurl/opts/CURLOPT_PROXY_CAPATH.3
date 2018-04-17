@@ -45,7 +45,7 @@ Everything used over an HTTPS proxy
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* using a HTTPS proxy */
+  /* using an HTTPS proxy */
   curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
   curl_easy_setopt(curl, CURLOPT_PROXY_CAPATH, "/etc/cert-dir");
   ret = curl_easy_perform(curl);
