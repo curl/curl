@@ -29,4 +29,15 @@ system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please
 precede it with "./" prefix, in order to avoid confusion with a nickname.
 
+(Schannel/WinSSL only) Client certificates must be specified by a path
+expression to a certificate store. (Loading PFX is not supported; you can
+import it to a store first). You can use
+"<store location>\\<store name>\\<thumbprint>" to refer to a certificate
+in the system certificates store, for example,
+"CurrentUser\\MY\\934a7ac6f8a5d579285a74fa61e19f23ddfe8d7a". Thumbprint is
+usually a SHA-1 hex string which you can see in certificate details. Following
+store locations are supported: CurrentUser, LocalMachine, CurrentService,
+Services, CurrentUserGroupPolicy, LocalMachineGroupPolicy,
+LocalMachineEnterprise.
+
 If this option is used several times, the last one will be used.
