@@ -870,16 +870,12 @@ static int on_begin_headers(nghttp2_session *session,
     return 0;
   }
 
-  /* This is trailer HEADERS started.  Allocate buffer for them. */
-  H2BUGF(infof(data_s, "trailer field started\n"));
-
-  DEBUGASSERT(stream->trailer_recvbuf == NULL);
-
-  stream->trailer_recvbuf = Curl_add_buffer_init();
   if(!stream->trailer_recvbuf) {
-    return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+    stream->trailer_recvbuf = Curl_add_buffer_init();
+    if(!stream->trailer_recvbuf) {
+      return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+    }
   }
-
   return 0;
 }
 
