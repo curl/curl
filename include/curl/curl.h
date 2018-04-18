@@ -803,6 +803,9 @@ typedef enum {
    this value, keep them in sync. */
 #define CURL_HET_DEFAULT 200L
 
+/* The default connection upkeep interval in milliseconds. */
+#define CURL_UPKEEP_INTERVAL_DEFAULT 60000L
+
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
 
@@ -1864,6 +1867,9 @@ typedef enum {
 
   /* Preferred buffer size to use for uploads */
   CINIT(UPLOAD_BUFFERSIZE, LONG, 280),
+
+  /* Time in ms between connection upkeep calls for long-lived connections. */
+  CINIT(CONN_UPKEEP_INTERVAL_MS, LONG, 281),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
