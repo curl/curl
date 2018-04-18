@@ -233,10 +233,41 @@ static unsigned int http2_conncheck(struct connectdata *check,
                                     unsigned int checks_to_perform)
 {
   unsigned int ret_val = CONNRESULT_NONE;
+  struct http_conn *c = &check->proto.httpc;
+  int rc;
+  bool send_frames = false;
 
   if(checks_to_perform & CONNCHECK_ISDEAD) {
     if(http2_connisdead(check))
       ret_val |= CONNRESULT_DEAD;
+  }
+
+  if(checks_to_perform & CONNCHECK_KEEPALIVE) {
+    struct curltime now = Curl_now();
+    time_t elapsed = Curl_timediff(now, check->keepalive);
+
+    if(elapsed > check->upkeep_interval_ms) {
+      /* Perform an HTTP/2 PING */
+      rc = nghttp2_submit_ping(c->h2, 0, ZERO_NULL);
+      if(!rc) {
+        /* Successfully added a PING frame to the session. Need to flag this
+           so the frame is sent. */
+        send_frames = true;
+      }
+      else {
+       failf(check->data, "nghttp2_submit_ping() failed: %s(%d)",
+             nghttp2_strerror(rc), rc);
+      }
+
+      check->keepalive = now;
+    }
+  }
+
+  if(send_frames) {
+    rc = nghttp2_session_send(c->h2);
+    if(rc)
+      failf(check->data, "nghttp2_session_send() failed: %s(%d)",
+            nghttp2_strerror(rc), rc);
   }
 
   return ret_val;

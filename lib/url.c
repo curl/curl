@@ -529,6 +529,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->upload_buffer_size = UPLOADBUFFER_DEFAULT;
   set->happy_eyeballs_timeout = CURL_HET_DEFAULT;
   set->fnmatch = ZERO_NULL;
+  set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
   set->httpversion =
 #ifdef USE_NGHTTP2
@@ -1830,6 +1831,12 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   /* Store creation time to help future close decision making */
   conn->created = Curl_now();
+
+  /* Store current time to give a baseline to keepalive connection times. */
+  conn->keepalive = Curl_now();
+
+  /* Store off the configured connection upkeep time. */
+  conn->upkeep_interval_ms = data->set.upkeep_interval_ms;
 
   conn->data = data; /* Setup the association between this connection
                         and the Curl_easy */
@@ -4842,4 +4849,35 @@ static unsigned int get_protocol_family(unsigned int protocol)
   }
 
   return family;
+}
+
+
+/*
+ * Wrapper to call functions in Curl_conncache_foreach()
+ *
+ * Returns always 0.
+ */
+static int conn_upkeep(struct connectdata *conn,
+                       void *param)
+{
+  /* Param is unused. */
+  (void)param;
+
+  if(conn->handler->connection_check) {
+    /* Do a protocol-specific keepalive check on the connection. */
+    conn->handler->connection_check(conn, CONNCHECK_KEEPALIVE);
+  }
+
+  return 0; /* continue iteration */
+}
+
+CURLcode Curl_conn_upkeep(struct conncache *conn_cache,
+                          void *data)
+{
+  /* Loop over every connection and make connection alive. */
+  Curl_conncache_foreach(data,
+                         conn_cache,
+                         data,
+                         conn_upkeep);
+  return CURLE_OK;
 }
