@@ -433,7 +433,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       cert_thumbprint.cbData = CERT_THUMBPRINT_DATA_LEN;
 
       if(!CryptStringToBinary(cert_thumbprint_str, CERT_THUMBPRINT_STR_LEN,
-                              CRYPT_STRING_HEXRAW,
+                              CRYPT_STRING_HEX,
                               cert_thumbprint_data, &cert_thumbprint.cbData,
                               NULL, NULL)) {
         Curl_unicodefree(cert_path);
