@@ -2682,7 +2682,8 @@ static char *detect_proxy(struct connectdata *conn)
       proxy = curl_getenv(envp);
     }
   }
-  infof(conn->data, "Uses proxy env variable %s == '%s'\n", envp, proxy);
+  if(proxy)
+    infof(conn->data, "Uses proxy env variable %s == '%s'\n", envp, proxy);
 
   return proxy;
 }
