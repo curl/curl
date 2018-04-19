@@ -1927,9 +1927,6 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   bool retry = FALSE;
-
-  infof(data, "%s:%d\n", __func__, __LINE__);
-
   *url = NULL;
 
   /* if we're talking upload, we can't do the checks below, unless the protocol
