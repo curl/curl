@@ -162,6 +162,7 @@ static CURLcode http2_disconnect(struct connectdata *conn,
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
   http2_stream_free(conn->data->req.protop);
+  conn->data->state.drain = 0;
 
   H2BUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
