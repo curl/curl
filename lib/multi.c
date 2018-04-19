@@ -546,7 +546,9 @@ static CURLcode multi_done(struct connectdata **connp,
   if(conn->send_pipe.size || conn->recv_pipe.size) {
     /* Stop if pipeline is not empty . */
     data->easy_conn = NULL;
-    DEBUGF(infof(data, "Connection still in use, no more multi_done now!\n"));
+    DEBUGF(infof(data, "Connection still in use %d/%d, "
+                 "no more multi_done now!\n",
+                 conn->send_pipe.size, conn->recv_pipe.size));
     return CURLE_OK;
   }
 
