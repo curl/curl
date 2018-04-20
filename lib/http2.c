@@ -1851,8 +1851,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     return -1;
   }
 
-  /* Extract :method, :path from request line */
-  line_end = strstr(hdbuf, "\r\n");
+  /* Extract :method, :path from request line
+     We do line endings with CRLF so checking for CR is enough */
+  line_end = memchr(hdbuf, '\r', len);
+  if(!line_end)
+    goto fail;
 
   /* Method does not contain spaces */
   end = memchr(hdbuf, ' ', line_end - hdbuf);
