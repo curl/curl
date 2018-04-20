@@ -185,10 +185,12 @@ struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 }
 
 
-void Curl_ftp_parselist_data_free(struct ftp_parselist_data **pl_data)
+void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
 {
-  free(*pl_data);
-  *pl_data = NULL;
+  Curl_fileinfo_dtor(NULL, (*parserp)->file_data);
+
+  free(*parserp);
+  *parserp = NULL;
 }
 
 
