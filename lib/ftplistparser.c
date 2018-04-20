@@ -187,7 +187,7 @@ struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 
 void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
 {
-  Curl_fileinfo_dtor(NULL, (*parserp)->file_data);
+  Curl_fileinfo_cleanup((*parserp)->file_data);
 
   free(*parserp);
   *parserp = NULL;
@@ -315,7 +315,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
     Curl_llist_insert_next(llist, llist->tail, finfo, &infop->list);
   }
   else {
-    Curl_fileinfo_dtor(NULL, finfo);
+    Curl_fileinfo_cleanup(infop);
   }
 
   ftpwc->parser->file_data = NULL;
@@ -383,7 +383,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         finfo->b_data = tmp;
       }
       else {
-        Curl_fileinfo_dtor(NULL, parser->file_data);
+        Curl_fileinfo_cleanup(parser->file_data);
         parser->file_data = NULL;
         parser->error = CURLE_OUT_OF_MEMORY;
         goto fail;
@@ -1011,7 +1011,7 @@ fail:
 
   /* Clean up any allocated memory. */
   if(parser->file_data) {
-    Curl_fileinfo_dtor(NULL, parser->file_data);
+    Curl_fileinfo_cleanup(parser->file_data);
     parser->file_data = NULL;
   }
 
