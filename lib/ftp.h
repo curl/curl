@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,7 +81,7 @@ typedef enum {
 
 struct ftp_parselist_data; /* defined later in ftplistparser.c */
 
-struct ftp_wc_tmpdata {
+struct ftp_wc {
   struct ftp_parselist_data *parser;
 
   struct {
