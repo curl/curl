@@ -3687,10 +3687,10 @@ CURLcode ftp_perform(struct connectdata *conn,
 
 static void wc_data_dtor(void *ptr)
 {
-  struct ftp_wc_tmpdata *tmp = ptr;
-  if(tmp)
-    Curl_ftp_parselist_data_free(&tmp->parser);
-  free(tmp);
+  struct ftp_wc *ftpwc = ptr;
+  if(ftpwc)
+    Curl_ftp_parselist_data_free(&ftpwc->parser);
+  free(ftpwc);
 }
 
 static CURLcode init_wc_data(struct connectdata *conn)
@@ -3699,7 +3699,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
   char *path = conn->data->state.path;
   struct WildcardData *wildcard = &(conn->data->wildcard);
   CURLcode result = CURLE_OK;
-  struct ftp_wc_tmpdata *ftp_tmp;
+  struct ftp_wc *ftpwc;
 
   last_slash = strrchr(conn->data->state.path, '/');
   if(last_slash) {
@@ -3731,23 +3731,23 @@ static CURLcode init_wc_data(struct connectdata *conn)
   /* program continues only if URL is not ending with slash, allocate needed
      resources for wildcard transfer */
 
-  /* allocate ftp protocol specific temporary wildcard data */
-  ftp_tmp = calloc(1, sizeof(struct ftp_wc_tmpdata));
-  if(!ftp_tmp) {
+  /* allocate ftp protocol specific wildcard data */
+  ftpwc = calloc(1, sizeof(struct ftp_wc));
+  if(!ftpwc) {
     Curl_safefree(wildcard->pattern);
     return CURLE_OUT_OF_MEMORY;
   }
 
   /* INITIALIZE parselist structure */
-  ftp_tmp->parser = Curl_ftp_parselist_data_alloc();
-  if(!ftp_tmp->parser) {
+  ftpwc->parser = Curl_ftp_parselist_data_alloc();
+  if(!ftpwc->parser) {
     Curl_safefree(wildcard->pattern);
-    free(ftp_tmp);
+    free(ftpwc);
     return CURLE_OUT_OF_MEMORY;
   }
 
-  wildcard->tmp = ftp_tmp; /* put it to the WildcardData tmp pointer */
-  wildcard->tmp_dtor = wc_data_dtor;
+  wildcard->protdata = ftpwc; /* put it to the WildcardData tmp pointer */
+  wildcard->dtor = wc_data_dtor;
 
   /* wildcard does not support NOCWD option (assert it?) */
   if(conn->data->set.ftp_filemethod == FTPFILE_NOCWD)
@@ -3757,27 +3757,27 @@ static CURLcode init_wc_data(struct connectdata *conn)
   result = ftp_parse_url_path(conn);
   if(result) {
     Curl_safefree(wildcard->pattern);
-    wildcard->tmp_dtor(wildcard->tmp);
-    wildcard->tmp_dtor = ZERO_NULL;
-    wildcard->tmp = NULL;
+    wildcard->dtor(wildcard->protdata);
+    wildcard->dtor = ZERO_NULL;
+    wildcard->protdata = NULL;
     return result;
   }
 
   wildcard->path = strdup(conn->data->state.path);
   if(!wildcard->path) {
     Curl_safefree(wildcard->pattern);
-    wildcard->tmp_dtor(wildcard->tmp);
-    wildcard->tmp_dtor = ZERO_NULL;
-    wildcard->tmp = NULL;
+    wildcard->dtor(wildcard->protdata);
+    wildcard->dtor = ZERO_NULL;
+    wildcard->protdata = NULL;
     return CURLE_OUT_OF_MEMORY;
   }
 
   /* backup old write_function */
-  ftp_tmp->backup.write_function = conn->data->set.fwrite_func;
+  ftpwc->backup.write_function = conn->data->set.fwrite_func;
   /* parsing write function */
   conn->data->set.fwrite_func = Curl_ftp_parselist;
   /* backup old file descriptor */
-  ftp_tmp->backup.file_descriptor = conn->data->set.out;
+  ftpwc->backup.file_descriptor = conn->data->set.out;
   /* let the writefunc callback know what curl pointer is working with */
   conn->data->set.out = conn;
 
@@ -3803,14 +3803,14 @@ static CURLcode wc_statemach(struct connectdata *conn)
   case CURLWC_MATCHING: {
     /* In this state is LIST response successfully parsed, so lets restore
        previous WRITEFUNCTION callback and WRITEDATA pointer */
-    struct ftp_wc_tmpdata *ftp_tmp = wildcard->tmp;
-    conn->data->set.fwrite_func = ftp_tmp->backup.write_function;
-    conn->data->set.out = ftp_tmp->backup.file_descriptor;
-    ftp_tmp->backup.write_function = ZERO_NULL;
-    ftp_tmp->backup.file_descriptor = NULL;
+    struct ftp_wc *ftpwc = wildcard->protdata;
+    conn->data->set.fwrite_func = ftpwc->backup.write_function;
+    conn->data->set.out = ftpwc->backup.file_descriptor;
+    ftpwc->backup.write_function = ZERO_NULL;
+    ftpwc->backup.file_descriptor = NULL;
     wildcard->state = CURLWC_DOWNLOADING;
 
-    if(Curl_ftp_parselist_geterror(ftp_tmp->parser)) {
+    if(Curl_ftp_parselist_geterror(ftpwc->parser)) {
       /* error found in LIST parsing */
       wildcard->state = CURLWC_CLEAN;
       return wc_statemach(conn);
@@ -3892,10 +3892,10 @@ static CURLcode wc_statemach(struct connectdata *conn)
   }
 
   case CURLWC_CLEAN: {
-    struct ftp_wc_tmpdata *ftp_tmp = wildcard->tmp;
+    struct ftp_wc *ftpwc = wildcard->protdata;
     result = CURLE_OK;
-    if(ftp_tmp)
-      result = Curl_ftp_parselist_geterror(ftp_tmp->parser);
+    if(ftpwc)
+      result = Curl_ftp_parselist_geterror(ftpwc->parser);
 
     wildcard->state = result ? CURLWC_ERROR : CURLWC_DONE;
   } break;
