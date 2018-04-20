@@ -271,6 +271,7 @@ script:
           ./tests/fuzz/download_fuzzer.sh /tmp/curl_fuzzer
 
           export CURLSRC=$PWD
+          export DEBUG=1
 
           # Run the mainline fuzzer test
           pushd /tmp/curl_fuzzer
