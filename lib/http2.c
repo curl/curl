@@ -624,8 +624,10 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
 
     /* nghttp2 guarantees that :status is received, and we store it to
-       stream->status_code */
-    DEBUGASSERT(stream->status_code != -1);
+       stream->status_code. Fuzzing has proven this can still be reached
+       without status code having been set. */
+    if(stream->status_code == -1)
+      return NGHTTP2_ERR_CALLBACK_FAILURE;
 
     /* Only final status code signals the end of header */
     if(stream->status_code / 100 != 1) {
