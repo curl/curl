@@ -228,7 +228,7 @@ static const struct helptxt helptext[] = {
    "Maximum file size to download"},
   {"    --max-redirs <num>",
    "Maximum number of redirects allowed"},
-  {"-m, --max-time <time>",
+  {"-m, --max-time <seconds>",
    "Maximum time allowed for the transfer"},
   {"    --metalink",
    "Process given URLs as metalink XML file"},
