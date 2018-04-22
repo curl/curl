@@ -4065,6 +4065,8 @@ static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection)
   /* The FTP session may or may not have been allocated/setup at this point! */
   (void)ftp_quit(conn); /* ignore errors on the QUIT */
 
+  if(conn->data->state.wildcardmatch)
+    conn->data->wildcard.dtor(conn->data->wildcard.protdata);
   if(ftpc->entrypath) {
     struct Curl_easy *data = conn->data;
     if(data->state.most_recent_ftp_entrypath == ftpc->entrypath) {
