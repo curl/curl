@@ -75,6 +75,17 @@ This release includes the following bugfixes:
  o ntlm_sspi: fix authentication using Credential Manager [55]
  o schannel: add client certificate authentication [56]
  o winbuild: Support custom devel paths for each dependency [57]
+ o schannel: add support for CURLOPT_CAINFO [58]
+ o http2: handle on_begin_headers() called more than once [59]
+ o openssl: support OpenSSL 1.1.1 verbose-mode trace messages [60]
+ o openssl: fix subjectAltName check on non-ASCII platforms [61]
+ o http2: avoid strstr() on data not zero terminated [62]
+ o http2: clear the "drain counter" when a stream is closed [63]
+ o http2: handle GOAWAY properly [64]
+ o tool_help: clarify --max-time unit of time is seconds
+ o curl.1: clarify that options and URLs can be mixed [65]
+ o http2: convert an assert to run-time check [66]
+ o curl_global_sslset: always provide available backends [67]
 
 This release includes the following known bugs:
 
@@ -83,17 +94,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Brown, Alex Baines, Bas van Schaik, Bernard Spil, Chris Araman,
-  Christian Schmitz, Cyril B, Dagobert Michelsen, Daniel Gustafsson,
-  Daniel Stenberg, dasimx on github, David L., Dmitry Mikhirev, Dongliang Mu,
-  Don J Olmstead, Eric Gallager, Ernst Sjöstrand, Gaurav Malhotra, Howard Chu,
+  Adam Brown, Alex Baines, Anders Bakken, Bas van Schaik, Bernard Spil,
+  Chris Araman, Christian Schmitz, Cyril B, Dagobert Michelsen,
+  Daniel Gustafsson, Daniel Stenberg, Dan McNulty, dasimx on github, David L.,
+  Dmitry Mikhirev, Dongliang Mu, Don J Olmstead, Eric Gallager,
+  Ernst Sjöstrand, Gaurav Malhotra, Howard Chu, iz8mbw on github, Jakub Wilk,
   Jon DeVree, Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek, Lauri Kasanen,
   Lawrence Matthews, Luz Paz, Marcel Raad, Michael Kaufmann,
-  Michał Janiszewski, Michal Trybus, Muz Dima, Nikos Tsipinakis,
+  Michał Janiszewski, Michal Trybus, Muz Dima, Nikos Tsipinakis, Ori Avtalion,
   Oumph on github, patelvivekv1993 on github, Patrick Monnerat,
   Philip Prindeville, Ray Satiro, Rick Deist, Rikard Falkeborn, Sergei Nikulov,
-  Stefan Agner, Vincas Razma, Wyatt O'Day, 刘佩东,
-  (44 contributors)
+  Stefan Agner, Stephan Mühlstrasser, Terry Wu, Vincas Razma, wncboy on github,
+  Wyatt O'Day, 刘佩东,
+  (52 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -156,3 +169,13 @@ References to bug reports and discussions on issues:
  [55] = https://curl.haxx.se/bug/?i=1622
  [56] = https://curl.haxx.se/bug/?i=2376
  [57] = https://curl.haxx.se/bug/?i=2474
+ [58] = https://curl.haxx.se/bug/?i=1325
+ [59] = https://curl.haxx.se/bug/?i=2507
+ [60] = https://curl.haxx.se/bug/?i=2403
+ [61] = https://curl.haxx.se/bug/?i=2493
+ [62] = https://curl.haxx.se/bug/?i=2513
+ [63] = https://curl.haxx.se/bug/?i=1680
+ [64] = https://curl.haxx.se/bug/?i=2416
+ [65] = https://curl.haxx.se/bug/?i=2515
+ [66] = https://curl.haxx.se/bug/?i=2514
+ [67] = https://curl.haxx.se/bug/?i=2499
