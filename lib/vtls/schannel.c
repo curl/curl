@@ -90,10 +90,16 @@
 #endif
 #endif
 
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)
+#define HAS_CLIENT_CERT_PATH
+#endif
+
+#ifdef HAS_CLIENT_CERT_PATH
 #ifdef UNICODE
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_W
 #else
 #define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_A
+#endif
 #endif
 
 #ifndef SP_PROT_SSL2_CLIENT
@@ -199,6 +205,7 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
   return CURLE_OK;
 }
 
+#ifdef HAS_CLIENT_CERT_PATH
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
                   TCHAR **thumbprint)
@@ -248,6 +255,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 
   return CURLE_OK;
 }
+#endif
 
 static CURLcode
 schannel_connect_step1(struct connectdata *conn, int sockindex)
@@ -401,6 +409,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       return CURLE_SSL_CONNECT_ERROR;
     }
 
+#ifdef HAS_CLIENT_CERT_PATH
     /* client certificate */
     if(data->set.ssl.cert) {
       DWORD cert_store_name;
@@ -453,6 +462,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
       CertCloseStore(cert_store, 0);
     }
+#else
+    if(data->set.ssl.cert) {
+      failf(data, "schannel: client cert support not built in");
+      return CURLE_NOT_BUILT_IN;
+    }
+#endif
 
     /* allocate memory for the re-usable credential handle */
     BACKEND->cred = (struct curl_schannel_cred *)
