@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -26,8 +26,7 @@
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
-.B curl [options]
-.I [URL...]
+.B curl [options / URLs]
 .SH DESCRIPTION
 .B curl
 is a tool to transfer data from or to a server, using one of the supported
@@ -65,7 +64,8 @@ other:
   http://example.com/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
 
 You can specify any amount of URLs on the command line. They will be fetched
-in a sequential manner in the specified order.
+in a sequential manner in the specified order. You can specify command line
+options and URLs mixed and in any order on the command line.
 
 You can specify a step counter for the ranges to get every Nth number or
 letter:
