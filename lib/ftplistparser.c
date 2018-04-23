@@ -185,10 +185,12 @@ struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 }
 
 
-void Curl_ftp_parselist_data_free(struct ftp_parselist_data **pl_data)
+void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
 {
-  free(*pl_data);
-  *pl_data = NULL;
+  Curl_fileinfo_cleanup((*parserp)->file_data);
+
+  free(*parserp);
+  *parserp = NULL;
 }
 
 
@@ -270,9 +272,9 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
 {
   curl_fnmatch_callback compare;
   struct WildcardData *wc = &conn->data->wildcard;
-  struct ftp_wc_tmpdata *tmpdata = wc->tmp;
+  struct ftp_wc *ftpwc = wc->protdata;
   struct curl_llist *llist = &wc->filelist;
-  struct ftp_parselist_data *parser = tmpdata->parser;
+  struct ftp_parselist_data *parser = ftpwc->parser;
   bool add = TRUE;
   struct curl_fileinfo *finfo = &infop->info;
 
@@ -313,10 +315,10 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
     Curl_llist_insert_next(llist, llist->tail, finfo, &infop->list);
   }
   else {
-    Curl_fileinfo_dtor(NULL, finfo);
+    Curl_fileinfo_cleanup(infop);
   }
 
-  tmpdata->parser->file_data = NULL;
+  ftpwc->parser->file_data = NULL;
   return CURLE_OK;
 }
 
@@ -325,8 +327,8 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
 {
   size_t bufflen = size*nmemb;
   struct connectdata *conn = (struct connectdata *)connptr;
-  struct ftp_wc_tmpdata *tmpdata = conn->data->wildcard.tmp;
-  struct ftp_parselist_data *parser = tmpdata->parser;
+  struct ftp_wc *ftpwc = conn->data->wildcard.protdata;
+  struct ftp_parselist_data *parser = ftpwc->parser;
   struct fileinfo *infop;
   struct curl_fileinfo *finfo;
   unsigned long i = 0;
@@ -381,7 +383,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         finfo->b_data = tmp;
       }
       else {
-        Curl_fileinfo_dtor(NULL, parser->file_data);
+        Curl_fileinfo_cleanup(parser->file_data);
         parser->file_data = NULL;
         parser->error = CURLE_OUT_OF_MEMORY;
         goto fail;
@@ -1008,7 +1010,7 @@ fail:
 
   /* Clean up any allocated memory. */
   if(parser->file_data) {
-    Curl_fileinfo_dtor(NULL, parser->file_data);
+    Curl_fileinfo_cleanup(parser->file_data);
     parser->file_data = NULL;
   }
 
