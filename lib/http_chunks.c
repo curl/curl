@@ -74,6 +74,7 @@
 
  */
 
+#ifdef CURL_DOES_CONVERSIONS
 /* Check for an ASCII hex digit.
    We avoid the use of ISXDIGIT to accommodate non-ASCII hosts. */
 static bool Curl_isxdigit_ascii(char digit)
@@ -82,6 +83,9 @@ static bool Curl_isxdigit_ascii(char digit)
         || (digit >= 0x41 && digit <= 0x46) /* A-F */
         || (digit >= 0x61 && digit <= 0x66); /* a-f */
 }
+#else
+#define Curl_isxdigit_ascii(x) Curl_isxdigit(x)
+#endif
 
 void Curl_httpchunk_init(struct connectdata *conn)
 {
