@@ -1442,6 +1442,10 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   /* at first, remove expired cookies */
   remove_expired(c);
 
+  /* make sure we still have cookies after expiration */
+  if(0 == c->numcookies)
+    return 0;
+
   if(!strcmp("-", dumphere)) {
     /* use stdout */
     out = stdout;
