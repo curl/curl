@@ -99,7 +99,7 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
 #ifdef _WIN32
   _fseeki64(f, remoteFileSizeByte, SEEK_SET);
 #else
-  fseek(f, remoteFileSizeByte, SEEK_SET);
+  fseek(f, (long)remoteFileSizeByte, SEEK_SET);
 #endif
   curl_easy_setopt(curlhandle, CURLOPT_APPEND, 1L);
   result = curl_easy_perform(curlhandle);
