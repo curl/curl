@@ -1205,7 +1205,7 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
     res = curl_mime_filename(dst, src->filename);
 
   /* If an error occurred, rollback. */
-  if(res)
+  if(res && dst)
     Curl_mime_cleanpart(dst);
 
   return res;
