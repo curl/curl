@@ -30,15 +30,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-static void fileinfo_dtor(void *user, void *element)
-{
-  (void)user;
-  Curl_fileinfo_cleanup(element);
-}
-
 CURLcode Curl_wildcard_init(struct WildcardData *wc)
 {
-  Curl_llist_init(&wc->filelist, fileinfo_dtor);
+  Curl_llist_init(&wc->filelist, Curl_fileinfo_dtor);
   wc->state = CURLWC_INIT;
 
   return CURLE_OK;
