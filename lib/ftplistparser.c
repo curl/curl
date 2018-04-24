@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -185,10 +185,13 @@ struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 }
 
 
-void Curl_ftp_parselist_data_free(struct ftp_parselist_data **pl_data)
+void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
 {
-  free(*pl_data);
-  *pl_data = NULL;
+  struct ftp_parselist_data *parser = *parserp;
+  if(parser)
+    Curl_fileinfo_cleanup(parser->file_data);
+  free(parser);
+  *parserp = NULL;
 }
 
 
@@ -313,7 +316,7 @@ static CURLcode ftp_pl_insert_finfo(struct connectdata *conn,
     Curl_llist_insert_next(llist, llist->tail, finfo, &infop->list);
   }
   else {
-    Curl_fileinfo_dtor(NULL, finfo);
+    Curl_fileinfo_cleanup(infop);
   }
 
   ftpwc->parser->file_data = NULL;
@@ -381,7 +384,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
         finfo->b_data = tmp;
       }
       else {
-        Curl_fileinfo_dtor(NULL, parser->file_data);
+        Curl_fileinfo_cleanup(parser->file_data);
         parser->file_data = NULL;
         parser->error = CURLE_OUT_OF_MEMORY;
         goto fail;
@@ -1003,12 +1006,13 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
 
     i++;
   }
+  return retsize;
 
 fail:
 
   /* Clean up any allocated memory. */
   if(parser->file_data) {
-    Curl_fileinfo_dtor(NULL, parser->file_data);
+    Curl_fileinfo_cleanup(parser->file_data);
     parser->file_data = NULL;
   }
 

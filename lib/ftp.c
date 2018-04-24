@@ -3688,7 +3688,7 @@ CURLcode ftp_perform(struct connectdata *conn,
 static void wc_data_dtor(void *ptr)
 {
   struct ftp_wc *ftpwc = ptr;
-  if(ftpwc)
+  if(ftpwc && ftpwc->parser)
     Curl_ftp_parselist_data_free(&ftpwc->parser);
   free(ftpwc);
 }
@@ -3699,7 +3699,7 @@ static CURLcode init_wc_data(struct connectdata *conn)
   char *path = conn->data->state.path;
   struct WildcardData *wildcard = &(conn->data->wildcard);
   CURLcode result = CURLE_OK;
-  struct ftp_wc *ftpwc;
+  struct ftp_wc *ftpwc = NULL;
 
   last_slash = strrchr(conn->data->state.path, '/');
   if(last_slash) {
@@ -3734,16 +3734,15 @@ static CURLcode init_wc_data(struct connectdata *conn)
   /* allocate ftp protocol specific wildcard data */
   ftpwc = calloc(1, sizeof(struct ftp_wc));
   if(!ftpwc) {
-    Curl_safefree(wildcard->pattern);
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
   }
 
   /* INITIALIZE parselist structure */
   ftpwc->parser = Curl_ftp_parselist_data_alloc();
   if(!ftpwc->parser) {
-    Curl_safefree(wildcard->pattern);
-    free(ftpwc);
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
   }
 
   wildcard->protdata = ftpwc; /* put it to the WildcardData tmp pointer */
@@ -3756,20 +3755,13 @@ static CURLcode init_wc_data(struct connectdata *conn)
   /* try to parse ftp url */
   result = ftp_parse_url_path(conn);
   if(result) {
-    Curl_safefree(wildcard->pattern);
-    wildcard->dtor(wildcard->protdata);
-    wildcard->dtor = ZERO_NULL;
-    wildcard->protdata = NULL;
-    return result;
+    goto fail;
   }
 
   wildcard->path = strdup(conn->data->state.path);
   if(!wildcard->path) {
-    Curl_safefree(wildcard->pattern);
-    wildcard->dtor(wildcard->protdata);
-    wildcard->dtor = ZERO_NULL;
-    wildcard->protdata = NULL;
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
   }
 
   /* backup old write_function */
@@ -3783,6 +3775,16 @@ static CURLcode init_wc_data(struct connectdata *conn)
 
   infof(conn->data, "Wildcard - Parsing started\n");
   return CURLE_OK;
+
+  fail:
+  if(ftpwc) {
+    Curl_ftp_parselist_data_free(&ftpwc->parser);
+    free(ftpwc);
+  }
+  Curl_safefree(wildcard->pattern);
+  wildcard->dtor = ZERO_NULL;
+  wildcard->protdata = NULL;
+  return result;
 }
 
 /* This is called recursively */
@@ -3903,6 +3905,8 @@ static CURLcode wc_statemach(struct connectdata *conn)
   case CURLWC_DONE:
   case CURLWC_ERROR:
   case CURLWC_CLEAR:
+    if(wildcard->dtor)
+      wildcard->dtor(wildcard->protdata);
     break;
   }
 
