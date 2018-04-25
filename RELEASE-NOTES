@@ -86,6 +86,14 @@ This release includes the following bugfixes:
  o curl.1: clarify that options and URLs can be mixed [65]
  o http2: convert an assert to run-time check [66]
  o curl_global_sslset: always provide available backends [67]
+ o ftplistparser: keep state between invokes [68]
+ o Curl_memchr: zero length input can't match
+ o examples/sftpuploadresume: typecast fseek argument to long
+ o examples/http2-upload: expand buffer to avoid silly warning
+ o ctype: restore character classification for non-ASCII platforms [69]
+ o mime: avoid NULL pointer dereference risk [70]
+ o cookies: ensure that we have cookies before writing jar [71]
+ o os400.c: fix checksrc warnings [72]
 
 This release includes the following known bugs:
 
@@ -98,15 +106,15 @@ advice from friends like these:
   Chris Araman, Christian Schmitz, Cyril B, Dagobert Michelsen,
   Daniel Gustafsson, Daniel Stenberg, Dan McNulty, dasimx on github, David L.,
   Dmitry Mikhirev, Dongliang Mu, Don J Olmstead, Eric Gallager,
-  Ernst Sjöstrand, Gaurav Malhotra, Howard Chu, iz8mbw on github, Jakub Wilk,
-  Jon DeVree, Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek, Lauri Kasanen,
-  Lawrence Matthews, Luz Paz, Marcel Raad, Michael Kaufmann,
+  Ernst Sjöstrand, Gaurav Malhotra, Geeknik Labs, Howard Chu, iz8mbw on github,
+  Jakub Wilk, Jon DeVree, Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek,
+  Lauri Kasanen, Lawrence Matthews, Luz Paz, Marcel Raad, Michael Kaufmann,
   Michał Janiszewski, Michal Trybus, Muz Dima, Nikos Tsipinakis, Ori Avtalion,
   Oumph on github, patelvivekv1993 on github, Patrick Monnerat,
   Philip Prindeville, Ray Satiro, Rick Deist, Rikard Falkeborn, Sergei Nikulov,
   Stefan Agner, Stephan Mühlstrasser, Terry Wu, Vincas Razma, wncboy on github,
   Wyatt O'Day, 刘佩东,
-  (52 contributors)
+  (53 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -179,3 +187,8 @@ References to bug reports and discussions on issues:
  [65] = https://curl.haxx.se/bug/?i=2515
  [66] = https://curl.haxx.se/bug/?i=2514
  [67] = https://curl.haxx.se/bug/?i=2499
+ [68] = https://curl.haxx.se/bug/?i=2445
+ [69] = https://curl.haxx.se/bug/?i=2494
+ [70] = https://curl.haxx.se/bug/?i=2527
+ [71] = https://curl.haxx.se/bug/?i=2529
+ [72] = https://curl.haxx.se/bug/?i=2525
