@@ -1519,7 +1519,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
       left = FALSE;
       /* fall through */
     default:
-      if(!ISPRINT(*iptr)) {
+      if(*iptr >= 0x80) {
         snprintf(optr, 4, "%%%02x", *iptr);
         optr += 3;
       }
