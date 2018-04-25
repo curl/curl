@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -187,8 +187,13 @@ cyassl_connect_step1(struct connectdata *conn,
     use_sni(TRUE);
     break;
   case CURL_SSLVERSION_TLSv1_0:
+#ifdef WOLFSSL_ALLOW_TLSV10
     req_method = TLSv1_client_method();
     use_sni(TRUE);
+#else
+    failf(data, "CyaSSL does not support TLS 1.0");
+    return CURLE_NOT_BUILT_IN;
+#endif
     break;
   case CURL_SSLVERSION_TLSv1_1:
     req_method = TLSv1_1_client_method();
