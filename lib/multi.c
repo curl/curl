@@ -1798,8 +1798,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if((data->easy_conn->sockfd != CURL_SOCKET_BAD) ||
          (data->easy_conn->writesockfd != CURL_SOCKET_BAD))
         multistate(data, CURLM_STATE_WAITPERFORM);
-      else
-      {
+      else {
         if(data->state.wildcardmatch &&
            ((data->easy_conn->handler->flags & PROTOPT_WILDCARD) == 0)) {
            data->wildcard.state = CURLWC_DONE;

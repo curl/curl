@@ -324,7 +324,7 @@ OM_uint32 gss_display_status(OM_uint32 *min,
     if(status_string->value)
       status_string->length = strlen(status_string->value);
     else
-       return GSS_S_FAILURE;
+      return GSS_S_FAILURE;
   }
 
   return GSS_S_COMPLETE;

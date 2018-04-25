@@ -764,8 +764,7 @@ CURLcode rtp_client_write(struct connectdata *conn, char *ptr, size_t len)
     writeit = data->set.fwrite_rtp;
     user_ptr = data->set.rtp_out;
   }
-  else
-  {
+  else {
     writeit = data->set.fwrite_func;
     user_ptr = data->set.out;
   }

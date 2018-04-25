@@ -456,8 +456,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
            the number of resources as urlnum. */
         urlnum = count_next_metalink_resource(mlfile);
       }
-      else
-      if(!config->globoff) {
+      else if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         result = glob_url(&urls, urlnode->url, &urlnum,
@@ -1858,8 +1857,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
              */
             break;
         }
-        else
-        if(urlnum > 1) {
+        else if(urlnum > 1) {
           /* when url globbing, exit loop upon critical error */
           if(is_fatal_error(result))
             break;

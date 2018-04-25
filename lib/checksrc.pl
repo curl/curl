@@ -499,9 +499,9 @@ sub scanfile {
         }
 
         # if the previous line starts with if/while/for AND ends with an open
-        # brace, check that this line is indented $indent more steps, if not
-        # a cpp line
-        if($prevl =~ /^( *)(if|while|for)\(.*\{\z/) {
+        # brace, or an else statement, check that this line is indented $indent
+        # more steps, if not a cpp line
+        if($prevl =~ /^( *)((if|while|for)\(.*\{|else)\z/) {
             my $first = length($1);
 
             # this line has some character besides spaces
@@ -511,7 +511,7 @@ sub scanfile {
                 if($expect != $second) {
                     my $diff = $second - $first;
                     checkwarn("INDENTATION", $line, length($1), $file, $ol,
-                              "not indented $indent steps, uses $diff)");
+                              "not indented $indent steps (uses $diff)");
 
                 }
             }
