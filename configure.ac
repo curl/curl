@@ -2227,6 +2227,12 @@ AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to th
 AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
   OPT_CYASSL=$withval)
 
+dnl provide --with-wolfssl as an alias for --with-cyassl
+AC_ARG_WITH(wolfssl,dnl
+AC_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)])
+AC_HELP_STRING([--without-wolfssl], [disable WolfSSL detection]),
+  OPT_CYASSL=$withval)
+
 if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
   ssl_msg=
 
