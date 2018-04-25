@@ -3,6 +3,7 @@ sudo: required
 cache:
     directories:
         - $HOME/libpsl-0.20.1
+        - $HOME/mbedtls-mbedtls-2.8.0
         - $HOME/libidn2-2.0.4
 
 env:
@@ -64,6 +65,10 @@ matrix:
           compiler: clang
           dist: trusty
           env: T=debug
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=debug C="--with-mbedtls --without-ssl"
         - os: linux
           compiler: gcc
           dist: trusty
@@ -176,8 +181,20 @@ before_script:
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
+        if [ ! -e $HOME/mbedtls-mbedtls-2.8.0/library/libmbedtls.a ]; then
+          (cd $HOME && \
+          curl -LO https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.8.0.tar.gz && \
+          tar -xzf mbedtls-2.8.0.tar.gz && \
+          cd mbedtls-mbedtls-2.8.0 && \
+          cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_FLAGS=-fPIC && \
+          make)
+        fi
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
         (cd $HOME/libidn2-2.0.4 && sudo make install)
         (cd $HOME/libpsl-0.20.1 && sudo make install)
+        (cd $HOME/mbedtls-mbedtls-2.8.0 && sudo make install)
       fi
 
 script:
