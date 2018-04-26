@@ -1447,6 +1447,16 @@ static const char *find_host_sep(const char *url)
 }
 
 /*
+ * Decide in an encoding-independent manner whether a character in an
+ * URL must be escaped. The same criterion must be used in strlen_url()
+ * and strcpy_url().
+ */
+static bool urlchar_needs_escaping(int c)
+{
+    return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
+}
+
+/*
  * strlen_url() returns the length of the given URL if the spaces within the
  * URL were properly URL encoded.
  * URL encoding should be skipped for host names, otherwise IDN resolution
@@ -1474,7 +1484,7 @@ static size_t strlen_url(const char *url, bool relative)
       left = FALSE;
       /* fall through */
     default:
-      if(*ptr >= 0x80)
+      if(urlchar_needs_escaping(*ptr))
         newlen += 2;
       newlen++;
       break;
@@ -1519,7 +1529,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
       left = FALSE;
       /* fall through */
     default:
-      if(*iptr >= 0x80) {
+      if(urlchar_needs_escaping(*iptr)) {
         snprintf(optr, 4, "%%%02x", *iptr);
         optr += 3;
       }
