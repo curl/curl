@@ -202,8 +202,11 @@ static bool http2_connisdead(struct connectdata *conn)
          only "protocol frames" */
       CURLcode result;
       struct http_conn *httpc = &conn->proto.httpc;
-      ssize_t nread = ((Curl_recv *)httpc->recv_underlying)(
-        conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
+      ssize_t nread = -1;
+      if(httpc->recv_underlying)
+        /* if called "too early", this pointer isn't setup yet! */
+        nread = ((Curl_recv *)httpc->recv_underlying)(
+          conn, FIRSTSOCKET, httpc->inbuf, H2_BUFSIZE, &result);
       if(nread != -1) {
         infof(conn->data,
               "%d bytes stray data read before trying h2 connection\n",
