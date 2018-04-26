@@ -1923,8 +1923,10 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
     hdbuf = line_end + 2;
 
-    line_end = strstr(hdbuf, "\r\n");
-    if(line_end == hdbuf)
+    /* check for next CR, but only within the piece of data left in the given
+       buffer */
+    line_end = memchr(hdbuf, '\r', len - (hdbuf - (char *)mem));
+    if(!line_end || (line_end == hdbuf))
       goto fail;
 
     /* header continuation lines are not supported */
