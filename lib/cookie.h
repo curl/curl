@@ -69,7 +69,6 @@ struct CookieInfo {
 
 */
 #define MAX_COOKIE_LINE 5000
-#define MAX_COOKIE_LINE_TXT "4999"
 
 /* This is the maximum length of a cookie name or content we deal with: */
 #define MAX_NAME 4096
