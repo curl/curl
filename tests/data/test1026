@@ -13,6 +13,9 @@
 #
 # Client-side
 <client>
+<features>
+manual
+</features>
 <server>
 none
 </server>
