@@ -94,6 +94,9 @@ bool Curl_ossl_cert_status_request(void);
 /* this backend supports CURLOPT_SSL_CTX_* */
 #define have_curlssl_ssl_ctx 1
 
+/* this backend supports CURLOPT_SSL_CERT_* */
+#define have_curlssl_ssl_cert 1
+
 /* this backend supports CURLOPT_PINNEDPUBLICKEY */
 #define have_curlssl_pinnedpubkey 1
 

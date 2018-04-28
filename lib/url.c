@@ -2853,6 +2853,28 @@ CURLcode Curl_setopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_CONNECT_TO:
     data->set.connect_to = va_arg(param, struct curl_slist *);
     break;
+
+  case CURLOPT_SSL_CERT_FUNCTION:
+#ifdef have_curlssl_ssl_cert
+	  /*
+	  * Set a SSL_CERT callback
+	  */
+	  data->set.ssl.fsslcert = va_arg(param, curl_ssl_cert_callback);
+#else
+	  result = CURLE_NOT_BUILT_IN;
+#endif
+	  break;
+
+  case CURLOPT_SSL_CERT_DATA:
+#ifdef have_curlssl_ssl_cert
+	  /*
+	  * Set a SSL_CTX callback parameter pointer
+	  */
+	  data->set.ssl.fsslcertp = va_arg(param, void *);
+#else
+	  result = CURLE_NOT_BUILT_IN;
+#endif
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

@@ -32,6 +32,8 @@
 
 #include "curl_setup.h"
 
+#define USE_OPENSSL 1
+
 #ifdef USE_OPENSSL
 
 #ifdef HAVE_LIMITS_H
@@ -2768,6 +2770,15 @@ static CURLcode servercert(struct connectdata *conn,
     (void)get_cert_chain(conn, connssl);
 
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
+
+  if (data->set.ssl.fsslcert) {
+	  rc = (*data->set.ssl.fsslcert)(data, connssl->server_cert, data->set.ssl.fsslcertp);
+	  if (rc) {
+		  failf(data, "error signaled by ssl cert callback");
+		  return rc;
+	  }
+  }
+
   if(!connssl->server_cert) {
     if(!strict)
       return CURLE_OK;
