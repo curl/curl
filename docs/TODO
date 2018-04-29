@@ -43,6 +43,7 @@
  1.25 Expose tried IP addresses that failed
  1.26 CURL_REFUSE_CLEARTEXT
  1.27 hardcode the "localhost" addresses
+ 1.28 FD_CLOEXEC
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -429,6 +430,14 @@
  https://bugzilla.mozilla.org/show_bug.cgi?id=1220810
 
  https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
+
+1.28 FD_CLOEXEC
+
+ It sets the close-on-exec flag for the file descriptor, which causes the file
+ descriptor to be automatically (and atomically) closed when any of the
+ exec-family functions succeed. Should probably be set by default?
+
+ https://github.com/curl/curl/issues/2252
 
 2. libcurl - multi interface
 
