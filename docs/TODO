@@ -115,6 +115,7 @@
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
  13.13 Support HPKP
+ 13.14 Support the clienthello extension
 
  14. GnuTLS
  14.1 SSL engine stuff
@@ -806,6 +807,16 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  OWASP: https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning
  Doc: https://developer.mozilla.org/de/docs/Web/Security/Public_Key_Pinning
  RFC: https://tools.ietf.org/html/draft-ietf-websec-key-pinning-21
+
+13.14 Support the clienthello extension
+
+ Certain stupid networks and middle boxes have a problem with SSL handshake
+ pakets that are within a certain size range because how that sets some bits
+ that previously (in older TLS version) were not set. The clienthello
+ extension adds padding to avoid that size range.
+
+ https://tools.ietf.org/html/rfc7685
+ https://github.com/curl/curl/issues/2299
 
 14. GnuTLS
 
