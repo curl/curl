@@ -39,7 +39,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C="--with-gssapi"
+          env: T=normal C="--with-gssapi --with-libssh2"
         - os: linux
           compiler: gcc
           dist: trusty
@@ -70,7 +70,7 @@ matrix:
           env: T=iconv
         - os: osx
           compiler: gcc
-          env: T=debug
+          env: T=debug C=--with-libssh2
         - os: osx
           compiler: gcc
           env: T=debug C=--enable-ares
