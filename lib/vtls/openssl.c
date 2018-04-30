@@ -665,7 +665,7 @@ int cert_stuff(struct connectdata *conn,
       PKCS12 *p12 = NULL;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
- 
+
       fp = BIO_new(BIO_s_file());
       if(fp == NULL) {
         failf(data,
@@ -3149,7 +3149,7 @@ static CURLcode servercert(struct connectdata *conn,
           failf(data, "SSL: Unable to read issuer cert (%s)",
                 SSL_SET_OPTION(issuercert));
         BIO_free(fp);
-        X509_free(issuer);        
+        X509_free(issuer);
         X509_free(BACKEND->server_cert);
         BACKEND->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
