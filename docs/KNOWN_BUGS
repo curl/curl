@@ -65,6 +65,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.6 FTP with NULs in URL parts
  7.7 FTP and empty path parts in the URL
  7.8 Premature transfer end but healthy control channel
+ 7.9 Passive transfer tries only one IP address
 
  8. TELNET
  8.1 TELNET and time limtiations don't work
@@ -482,6 +483,18 @@ problems may have been fixed or changed somewhat since this was written!
  situations (listed in the ftp_done code) where it *could* keep the connection
  alive even in this situation - but the current code doesn't. Fixing this would
  allow libcurl to reuse FTP connections better.
+
+7.9 Passive transfer tries only one IP address
+
+ When doing FTP operations through a proxy at localhost, the reported spotted
+ that curl only tried to connect once to the proxy, while it had mulitiple
+ addresses and a failed connect on one address should make it try the next.
+
+ After switching to passive mode (EPSV), curl should try all IP addresses for
+ "localhost". Currently it tries ::1, but it should also try 127.0.0.1.
+
+ See https://github.com/curl/curl/issues/1508
+
 
 8. TELNET
 
