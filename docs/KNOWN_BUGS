@@ -27,6 +27,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.2 DER in keychain
  2.3 GnuTLS backend skips really long certificate fields
  2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+ 2.5 Client cert handling with Issuer DN differs between backends
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -226,6 +227,13 @@ problems may have been fixed or changed somewhat since this was written!
  function rejects certificates that do not have a password.
  https://github.com/curl/curl/issues/1308
 
+2.5 Client cert handling with Issuer DN differs between backends
+
+ When the specified client certificate doesn't match any of the
+ server-specified DNs, the OpenSSL and GnuTLS backends behave differently.
+ The github discussion may contain a solution.
+
+ See https://github.com/curl/curl/issues/1411
 
 3. Email protocols
 
