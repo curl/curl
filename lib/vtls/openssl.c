@@ -678,6 +678,7 @@ int cert_stuff(struct connectdata *conn,
 
       if(BIO_read_filename(fp, cert_file) <= 0) {
         failf(data, "could not open PKCS12 file '%s'", cert_file);
+        BIO_free(fp);
         return 0;
       }
       p12 = d2i_PKCS12_bio(fp, NULL);
@@ -3056,6 +3057,7 @@ static CURLcode servercert(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   X509 *issuer;
   BIO *fp = NULL;
+  char error_buffer[256]="";
   char buffer[2048];
   const char *ptr;
   long * const certverifyresult = SSL_IS_PROXY() ?
