@@ -661,11 +661,21 @@ int cert_stuff(struct connectdata *conn,
 
     case SSL_FILETYPE_PKCS12:
     {
-      BIO *fp = BIO_new(BIO_s_file());
+      BIO *fp = NULL;
       PKCS12 *p12 = NULL;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
  
+      fp = BIO_new(BIO_s_file());
+      if(fp == NULL) {
+        failf(data,
+              "BIO_new return NULL, " OSSL_PACKAGE
+              " error %s",
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)) );
+        return 0;
+      }
+
       if(BIO_read_filename(fp, cert_file) <= 0) {
         failf(data, "could not open PKCS12 file '%s'", cert_file);
         return 0;
@@ -3045,7 +3055,7 @@ static CURLcode servercert(struct connectdata *conn,
   long lerr, len;
   struct Curl_easy *data = conn->data;
   X509 *issuer;
-  BIO *fp = BIO_new(BIO_s_file());
+  BIO *fp = NULL;
   char buffer[2048];
   const char *ptr;
   long * const certverifyresult = SSL_IS_PROXY() ?
@@ -3056,8 +3066,20 @@ static CURLcode servercert(struct connectdata *conn,
     /* we've been asked to gather certificate info! */
     (void)get_cert_chain(conn, connssl);
 
+  fp = BIO_new(BIO_s_file());
+  if(fp == NULL) {
+    failf(data,
+          "BIO_new return NULL, " OSSL_PACKAGE
+          " error %s",
+          ossl_strerror(ERR_get_error(), error_buffer,
+                        sizeof(error_buffer)) );
+    BIO_free(mem);
+    return 0;
+  }
+
   BACKEND->server_cert = SSL_get_peer_certificate(BACKEND->handle);
   if(!BACKEND->server_cert) {
+    BIO_free(fp);
     BIO_free(mem);
     if(!strict)
       return CURLE_OK;
@@ -3087,6 +3109,7 @@ static CURLcode servercert(struct connectdata *conn,
   if(SSL_CONN_CONFIG(verifyhost)) {
     result = verifyhost(conn, BACKEND->server_cert);
     if(result) {
+      BIO_free(fp);
       X509_free(BACKEND->server_cert);
       BACKEND->server_cert = NULL;
       return result;
@@ -3112,6 +3135,7 @@ static CURLcode servercert(struct connectdata *conn,
         if(strict)
           failf(data, "SSL: Unable to open issuer cert (%s)",
                 SSL_SET_OPTION(issuercert));
+        BIO_free(fp);
         X509_free(BACKEND->server_cert);
         BACKEND->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
@@ -3122,20 +3146,20 @@ static CURLcode servercert(struct connectdata *conn,
         if(strict)
           failf(data, "SSL: Unable to read issuer cert (%s)",
                 SSL_SET_OPTION(issuercert));
-        X509_free(BACKEND->server_cert);
-        X509_free(issuer);
         BIO_free(fp);
+        X509_free(issuer);        
+        X509_free(BACKEND->server_cert);
+        BACKEND->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
       }
-
-      BIO_free(fp);
 
       if(X509_check_issued(issuer, BACKEND->server_cert) != X509_V_OK) {
         if(strict)
           failf(data, "SSL: Certificate issuer check failed (%s)",
                 SSL_SET_OPTION(issuercert));
-        X509_free(BACKEND->server_cert);
+        BIO_free(fp);
         X509_free(issuer);
+        X509_free(BACKEND->server_cert);
         BACKEND->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
       }
@@ -3170,6 +3194,7 @@ static CURLcode servercert(struct connectdata *conn,
   if(SSL_CONN_CONFIG(verifystatus)) {
     result = verifystatus(conn, connssl);
     if(result) {
+      BIO_free(fp);
       X509_free(BACKEND->server_cert);
       BACKEND->server_cert = NULL;
       return result;
@@ -3189,6 +3214,7 @@ static CURLcode servercert(struct connectdata *conn,
       failf(data, "SSL: public key does not match pinned public key!");
   }
 
+  BIO_free(fp);
   X509_free(BACKEND->server_cert);
   BACKEND->server_cert = NULL;
   connssl->connecting_state = ssl_connect_done;
