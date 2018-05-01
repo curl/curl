@@ -110,7 +110,6 @@
  13.4 Cache/share OpenSSL contexts
  13.5 Export session ids
  13.6 Provide callback for cert verification
- 13.7 improve configure --with-ssl
  13.8 Support DANE
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
@@ -160,6 +159,8 @@
  19. Build
  19.1 roffit
  19.2 Enable PIE and RELRO by default
+ 19.3 improve configure --with-ssl
+ 19.4 remove configure --disable-pthreads
 
  20. Test suite
  20.1 SSL tunnel
@@ -752,11 +753,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
  it be? There's so much that could be done if it were!
 
-13.7 improve configure --with-ssl
-
- make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
- then NSS...
-
 13.8 Support DANE
 
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
@@ -1097,6 +1093,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  to no impact, neither on the performance nor on the general functionality of
  curl.
 
+19.3 improve configure --with-ssl
+
+ make the configure --with-ssl option first check for OpenSSL, then GnuTLS,
+ then NSS...
+
+19.4 remove configure --disable-pthreads
+
+ That option that work. We have --disable-threaded-resolver already that works
+ and is more specific and preferable.
 
 20. Test suite
 
