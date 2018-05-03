@@ -94,6 +94,17 @@ This release includes the following bugfixes:
  o mime: avoid NULL pointer dereference risk [70]
  o cookies: ensure that we have cookies before writing jar [71]
  o os400.c: fix checksrc warnings [72]
+ o configure: provide --with-wolfssl as an alias for --with-cyassl
+ o cyassl: adapt to libraries without TLS 1.0 support built-in
+ o http2: get rid of another strstr [73]
+ o checksrc: force indentation of lines after an else [74]
+ o cookies: remove unused macro [75]
+ o CURLINFO_PROTOCOL.3: mention the existing defined names
+ o tests: provide 'manual' as a feature to optionally require [76]
+ o travis: enable libssh2 on both macos and Linux [77]
+ o CURLOPT_URL.3: added ENCODING section
+ o wolfssl: Fix non-blocking connect [78]
+ o vtls: don't define MD5_DIGEST_LENGTH for wolfssl
 
 This release includes the following known bugs:
 
@@ -102,19 +113,20 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Brown, Alex Baines, Anders Bakken, Bas van Schaik, Bernard Spil,
-  Chris Araman, Christian Schmitz, Cyril B, Dagobert Michelsen,
-  Daniel Gustafsson, Daniel Stenberg, Dan McNulty, dasimx on github, David L.,
-  Dmitry Mikhirev, Dongliang Mu, Don J Olmstead, Eric Gallager,
-  Ernst Sjöstrand, Gaurav Malhotra, Geeknik Labs, Howard Chu, iz8mbw on github,
-  Jakub Wilk, Jon DeVree, Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek,
-  Lauri Kasanen, Lawrence Matthews, Luz Paz, Marcel Raad, Michael Kaufmann,
-  Michał Janiszewski, Michal Trybus, Muz Dima, Nikos Tsipinakis, Ori Avtalion,
-  Oumph on github, patelvivekv1993 on github, Patrick Monnerat,
-  Philip Prindeville, Ray Satiro, Rick Deist, Rikard Falkeborn, Sergei Nikulov,
-  Stefan Agner, Stephan Mühlstrasser, Terry Wu, Vincas Razma, wncboy on github,
-  Wyatt O'Day, 刘佩东,
-  (53 contributors)
+  Adam Brown, Alex Baines, Anders Bakken, Anders Roxell, Bas van Schaik,
+  Bernard Spil, Chris Araman, Christian Schmitz, Cyril B, Dagobert Michelsen,
+  Daniel Gustafsson, Daniel Stenberg, Dan McNulty, Dario Weisser,
+  dasimx on github, David Garske, David L., Dmitry Mikhirev, Dongliang Mu,
+  Don J Olmstead, Eric Gallager, Ernst Sjöstrand, Gaurav Malhotra,
+  Geeknik Labs, Howard Chu, iz8mbw on github, Jakub Wilk, Jon DeVree,
+  Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek, Lauri Kasanen,
+  Lawrence Matthews, Luz Paz, Marcel Raad, Max Dymond, Michael Kaufmann,
+  Michael Kilburn, Michał Janiszewski, Michal Trybus, Muz Dima,
+  Nikos Tsipinakis, Ori Avtalion, Oumph on github, patelvivekv1993 on github,
+  Patrick Monnerat, Philip Prindeville, Ray Satiro, Rick Deist,
+  Rikard Falkeborn, Sergei Nikulov, Stefan Agner, Stephan Mühlstrasser,
+  Terry Wu, Vincas Razma, wncboy on github, Wyatt O'Day, 刘佩东,
+  (58 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -192,3 +204,9 @@ References to bug reports and discussions on issues:
  [70] = https://curl.haxx.se/bug/?i=2527
  [71] = https://curl.haxx.se/bug/?i=2529
  [72] = https://curl.haxx.se/bug/?i=2525
+ [73] = https://curl.haxx.se/bug/?i=2534
+ [74] = https://curl.haxx.se/bug/?i=2532
+ [75] = https://curl.haxx.se/bug/?i=2537
+ [76] = https://curl.haxx.se/bug/?i=2533
+ [77] = https://curl.haxx.se/bug/?i=2541
+ [78] = https://curl.haxx.se/bug/?i=2542
