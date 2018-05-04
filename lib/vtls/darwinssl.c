@@ -3030,9 +3030,9 @@ const struct Curl_ssl Curl_ssl_darwinssl = {
   { CURLSSLBACKEND_DARWINSSL, "darwinssl" }, /* info */
 
 #ifdef DARWIN_SSL_PINNEDPUBKEY
-  SSLSUPP_PINNEDPUBKEY
+  SSLSUPP_PINNEDPUBKEY,
 #else
-  0
+  0,
 #endif /* DARWIN_SSL_PINNEDPUBKEY */
 
   sizeof(struct ssl_backend_data),

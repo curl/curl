@@ -1051,7 +1051,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
 
   SSLSUPP_CA_PATH |
   SSLSUPP_PINNEDPUBKEY |
-  SSLSUPP_SSL_CTX
+  SSLSUPP_SSL_CTX,
 
   sizeof(struct ssl_backend_data),
 
