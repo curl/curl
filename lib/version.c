@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -399,7 +399,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
   version_info.ssl_version = ssl_buffer;
-  if(Curl_ssl->support_https_proxy)
+  if(Curl_ssl->supports & SSLSUPP_HTTPS_PROXY)
     version_info.features |= CURL_VERSION_HTTPS_PROXY;
   else
     version_info.features &= ~CURL_VERSION_HTTPS_PROXY;
