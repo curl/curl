@@ -3732,12 +3732,12 @@ static void *Curl_ossl_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_openssl = {
   { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
-  1, /* have_ca_path */
-  1, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  1, /* have_ssl_ctx */
-  1, /* have_ssl_cert */
-  1, /* support_https_proxy */
+  SSLSUPP_CA_PATH |
+  SSLSUPP_CERTINFO |
+  SSLSUPP_PINNEDPUBKEY |
+  SSLSUPP_SSL_CTX |
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_SSL_CERT,
 
   sizeof(struct ssl_backend_data),
 

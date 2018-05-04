@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -211,7 +211,7 @@ ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
      !conn->proxy_ssl[sockindex].use) {
     struct ssl_backend_data *pbdata;
 
-    if(!Curl_ssl->support_https_proxy)
+    if(!(Curl_ssl->supports & SSLSUPP_HTTPS_PROXY))
       return CURLE_NOT_BUILT_IN;
 
     /* The pointers to the ssl backend data, which is opaque here, are swapped
@@ -1132,13 +1132,7 @@ static void Curl_multissl_close(struct connectdata *conn, int sockindex)
 static const struct Curl_ssl Curl_ssl_multi = {
   { CURLSSLBACKEND_NONE, "multi" },  /* info */
 
-  0, /* have_ca_path */
-  0, /* have_certinfo */
-  0, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  0, /* have_ssl_cert */
-  0, /* support_https_proxy */
-
+  0, /* supports nothing */
   (size_t)-1, /* something insanely large to be on the safe side */
 
   Curl_multissl_init,                /* init */

@@ -1923,12 +1923,8 @@ static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
-  0, /* have_ca_path */
-  1, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  0, /* have_ssl_cert */
-  0, /* support_https_proxy */
+  SSLSUPP_CERTINFO |
+  SSLSUPP_PINNEDPUBKEY
 
   sizeof(struct ssl_backend_data),
 

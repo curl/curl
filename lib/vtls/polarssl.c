@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -900,12 +900,8 @@ static void *Curl_polarssl_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_polarssl = {
   { CURLSSLBACKEND_POLARSSL, "polarssl" }, /* info */
 
-  1, /* have_ca_path */
-  0, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  0, /* have_ssl_cert */
-  0, /* support_https_proxy */
+  SSLSUPP_CA_PATH |
+  SSLSUPP_PINNEDPUBKEY,
 
   sizeof(struct ssl_backend_data),
 

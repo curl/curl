@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3029,16 +3029,9 @@ static void *Curl_darwinssl_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_darwinssl = {
   { CURLSSLBACKEND_DARWINSSL, "darwinssl" }, /* info */
 
-  0, /* have_ca_path */
-  0, /* have_certinfo */
 #ifdef DARWIN_SSL_PINNEDPUBKEY
-  1, /* have_pinnedpubkey */
-#else
-  0, /* have_pinnedpubkey */
+  SSLSUPP_PINNEDPUBKEY,
 #endif /* DARWIN_SSL_PINNEDPUBKEY */
-  0, /* have_ssl_ctx */
-  0, /* have_ssl_cert */
-  0, /* support_https_proxy */
 
   sizeof(struct ssl_backend_data),
 

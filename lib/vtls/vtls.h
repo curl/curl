@@ -26,6 +26,12 @@
 struct connectdata;
 struct ssl_connect_data;
 
+#define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
+#define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
+#define SSLSUPP_PINNEDPUBKEY (1<<2) /* supports CURLOPT_PINNEDPUBLICKEY */
+#define SSLSUPP_SSL_CTX      (1<<3) /* supports CURLOPT_SSL_CTX */
+#define SSLSUPP_HTTPS_PROXY  (1<<4) /* supports access via HTTPS proxies */
+
 struct Curl_ssl {
   /*
    * This *must* be the first entry to allow returning the list of available
@@ -33,14 +39,7 @@ struct Curl_ssl {
    */
   curl_ssl_backend info;
 
-  unsigned have_ca_path:1;      /* supports CAPATH */
-  unsigned have_certinfo:1;     /* supports CURLOPT_CERTINFO */
-  unsigned have_pinnedpubkey:1; /* supports CURLOPT_PINNEDPUBLICKEY */
-  unsigned have_ssl_ctx:1;      /* supports CURLOPT_SSL_CTX_* */
-  unsigned have_ssl_cert:1;     /* support CURLOPT_SSL_CERT_* */
-
-  unsigned support_https_proxy:1; /* supports access via HTTPS proxies */
-
+  unsigned int supports; /* bitfield, see above */
   size_t sizeof_ssl_backend_data;
 
   int (*init)(void);

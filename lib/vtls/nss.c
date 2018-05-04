@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2357,12 +2357,10 @@ static void *Curl_nss_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_nss = {
   { CURLSSLBACKEND_NSS, "nss" }, /* info */
 
-  1, /* have_ca_path */
-  1, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  0, /* have_ssl_cert */
-  1, /* support_https_proxy */
+  SSLSUPP_CA_PATH |
+  SSLSUPP_CERTINFO |
+  SSLSUPP_PINNEDPUBKEY |
+  SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),
 

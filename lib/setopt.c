@@ -1748,7 +1748,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ssl_ctx)
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
       data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
     else
 #endif
@@ -1759,7 +1759,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ssl_ctx)
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
       data->set.ssl.fsslctxp = va_arg(param, void *);
     else
 #endif
