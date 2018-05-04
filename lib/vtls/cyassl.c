@@ -997,7 +997,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
 #ifdef KEEP_PEER_CERT
   SSLSUPP_PINNEDPUBKEY |
 #endif
-  SSLSUPP_SSL_CTX
+  SSLSUPP_SSL_CTX,
 
   sizeof(struct ssl_backend_data),
 
