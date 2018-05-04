@@ -1748,7 +1748,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ssl_ctx)
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
       data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
     else
 #endif
@@ -1759,7 +1759,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ssl_ctx)
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
       data->set.ssl.fsslctxp = va_arg(param, void *);
     else
 #endif
@@ -1778,7 +1778,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
-    if(Curl_ssl->have_certinfo)
+    if(Curl_ssl->supports & SSLSUPP_CERTINFO)
       data->set.ssl.certinfo = (0 != va_arg(param, long)) ? TRUE : FALSE;
     else
 #endif
@@ -1790,7 +1790,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Specify file name of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_pinnedpubkey)
+    if(Curl_ssl->supports & SSLSUPP_PINNEDPUBKEY)
       result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG],
                               va_arg(param, char *));
     else
@@ -1803,7 +1803,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Specify file name of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_pinnedpubkey)
+    if(Curl_ssl->supports & SSLSUPP_PINNEDPUBKEY)
       result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
                               va_arg(param, char *));
     else
@@ -1831,7 +1831,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ca_path)
+    if(Curl_ssl->supports & SSLSUPP_CA_PATH)
       /* This does not work on windows. */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
                               va_arg(param, char *));
@@ -1845,7 +1845,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ca_path)
+    if(Curl_ssl->supports & SSLSUPP_CA_PATH)
       /* This does not work on windows. */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY],
                               va_arg(param, char *));

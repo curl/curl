@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, DirecTV, Contact: Eric Hu, <ehu@directv.com>.
- * Copyright (C) 2010 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -703,13 +703,7 @@ static void *Curl_axtls_get_internals(struct ssl_connect_data *connssl,
 
 const struct Curl_ssl Curl_ssl_axtls = {
   { CURLSSLBACKEND_AXTLS, "axtls" }, /* info */
-
-  0, /* have_ca_path */
-  0, /* have_certinfo */
-  0, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  0, /* support_https_proxy */
-
+  0, /* no fancy stuff */
   sizeof(struct ssl_backend_data),
 
   /*
