@@ -63,9 +63,9 @@
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
-#define SHORTPAIR(x) ((x) & 0xff), (((x) >> 8) & 0xff)
-#define LONGQUARTET(x) ((x) & 0xff), (((x) >> 8) & 0xff), \
-  (((x) >> 16) & 0xff), (((x) >> 24) & 0xff)
+#define SHORTPAIR(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff))
+#define LONGQUARTET(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff)), \
+  ((int)(((x) >> 16) & 0xff)), ((int)(((x) >> 24) & 0xff))
 
 #if DEBUG_ME
 # define DEBUG_OUT(x) x
