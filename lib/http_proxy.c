@@ -221,7 +221,7 @@ static CURLcode CONNECT(struct connectdata *conn,
       if(!req_buffer)
         return CURLE_OUT_OF_MEMORY;
 
-      host_port = aprintf("%s:%hu", hostname, remote_port);
+      host_port = aprintf("%s:%d", hostname, remote_port);
       if(!host_port) {
         Curl_add_buffer_free(req_buffer);
         return CURLE_OUT_OF_MEMORY;
@@ -245,7 +245,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         if(hostname != conn->host.name)
           ipv6_ip = (strchr(hostname, ':') != NULL);
         hostheader = /* host:port with IPv6 support */
-          aprintf("%s%s%s:%hu", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
+          aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
                   remote_port);
         if(!hostheader) {
           Curl_add_buffer_free(req_buffer);
