@@ -46,11 +46,11 @@ void dump(const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %d bytes (0x%x)\n", text, (int)size, (int)size);
+  fprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stream, "%04x: ", (int)i);
+    fprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
