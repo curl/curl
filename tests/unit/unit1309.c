@@ -97,7 +97,7 @@ UNITTEST_START
     int rem = (i + 7)%NUM_NODES;
     printf("Tree look:\n");
     splayprint(root, 0, 1);
-    printf("remove pointer %d, payload %zd\n", rem,
+    printf("remove pointer %d, payload %zu\n", rem,
            *(size_t *)nodes[rem].payload);
     rc = Curl_splayremovebyaddr(root, &nodes[rem], &root);
     if(rc) {
@@ -130,7 +130,7 @@ UNITTEST_START
     tv_now.tv_usec = i;
     root = Curl_splaygetbest(tv_now, root, &removed);
     while(removed != NULL) {
-      printf("removed payload %zd[%zd]\n",
+      printf("removed payload %zu[%zu]\n",
              (*(size_t *)removed->payload) / 10,
              (*(size_t *)removed->payload) % 10);
       root = Curl_splaygetbest(tv_now, root, &removed);

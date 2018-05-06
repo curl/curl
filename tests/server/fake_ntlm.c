@@ -37,7 +37,7 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define LOGFILE "log/fake_ntlm%d.log"
+#define LOGFILE "log/fake_ntlm%ld.log"
 
 const char *serverlogfile;
 
