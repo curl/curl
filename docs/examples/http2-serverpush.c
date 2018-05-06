@@ -51,12 +51,12 @@ void dump(const char *text, unsigned char *ptr, size_t size,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%s, %ld bytes (0x%lx)\n",
-          text, (long)size, (long)size);
+  fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
+          text, size, size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stderr, "%4.4lx: ", (long)i);
+    fprintf(stderr, "%4.4lx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -180,12 +180,12 @@ static int server_push_callback(CURL *parent,
   /* write to this file */
   curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
 
-  fprintf(stderr, "**** push callback approves stream %u, got %d headers!\n",
-          count, (int)num_headers);
+  fprintf(stderr, "**** push callback approves stream %u, got %lu headers!\n",
+          count, num_headers);
 
   for(i = 0; i<num_headers; i++) {
     headp = curl_pushheader_bynum(headers, i);
-    fprintf(stderr, "**** header %u: %s\n", (int)i, headp);
+    fprintf(stderr, "**** header %lu: %s\n", i, headp);
   }
 
   headp = curl_pushheader_byname(headers, ":path");
