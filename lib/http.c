@@ -1407,7 +1407,7 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
 
   snprintf(proxy_header,
            sizeof proxy_header,
-           "PROXY %s %s %s %i %i\r\n",
+           "PROXY %s %s %s %li %li\r\n",
            tcp_version,
            conn->data->info.conn_local_ip,
            conn->data->info.conn_primary_ip,
@@ -2132,7 +2132,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                     host,
                                     conn->bits.ipv6_ip?"]":"");
     else
-      conn->allocptr.host = aprintf("Host: %s%s%s:%hu\r\n",
+      conn->allocptr.host = aprintf("Host: %s%s%s:%d\r\n",
                                     conn->bits.ipv6_ip?"[":"",
                                     host,
                                     conn->bits.ipv6_ip?"]":"",
