@@ -56,7 +56,7 @@ This release includes the following bugfixes:
  o build-openssl.bat: Refer to VS2017 as VC14.1 instead of VC15 [37]
  o curl: retry on FTP 4xx, ignore other protocols [38]
  o configure: detect (and use) sa_family_t [39]
- o examples/sftpuploadresmue: Fix Windows large file seek
+ o examples/sftpuploadresume: Fix Windows large file seek
  o build: cleanup to fix clang warnings/errors [40]
  o winbuild: updated the documentation [41]
  o lib: silence null-dereference warnings [42]
