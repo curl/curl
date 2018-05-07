@@ -105,6 +105,16 @@ This release includes the following bugfixes:
  o CURLOPT_URL.3: added ENCODING section
  o wolfssl: Fix non-blocking connect [78]
  o vtls: don't define MD5_DIGEST_LENGTH for wolfssl
+ o docs: remove extraneous commas in man pages [79]
+ o URL: fix ASCII dependency in strcpy_url and strlen_url [80]
+ o ssh-libssh.c: fix left shift compiler warning
+ o configure: only check for CA bundle for file-using SSL backends [81]
+ o travis: add an mbedtls build [82]
+ o http: don't set the "rewind" flag when not uploading anything [83]
+ o configure: put CURLDEBUG and DEBUGBUILD in lib/curl_config.h [84]
+ o transfer: don't unset writesockfd on setup of multiplexed conns [85]
+ o vtls: use unified "supports" bitfield member in backends [86]
+ o URLs: fix one more http url [87]
 
 This release includes the following known bugs:
 
@@ -116,17 +126,17 @@ advice from friends like these:
   Adam Brown, Alex Baines, Anders Bakken, Anders Roxell, Bas van Schaik,
   Bernard Spil, Chris Araman, Christian Schmitz, Cyril B, Dagobert Michelsen,
   Daniel Gustafsson, Daniel Stenberg, Dan McNulty, Dario Weisser,
-  dasimx on github, David Garske, David L., Dmitry Mikhirev, Dongliang Mu,
-  Don J Olmstead, Eric Gallager, Ernst Sjöstrand, Gaurav Malhotra,
-  Geeknik Labs, Howard Chu, iz8mbw on github, Jakub Wilk, Jon DeVree,
-  Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek, Lauri Kasanen,
+  dasimx on github, David Garske, David L., Denis Ollier, Dmitry Mikhirev,
+  Dongliang Mu, Don J Olmstead, Eric Gallager, Ernst Sjöstrand, Frank Gevaerts,
+  Gaurav Malhotra, Geeknik Labs, Howard Chu, iz8mbw on github, Jakub Wilk,
+  Jon DeVree, Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek, Lauri Kasanen,
   Lawrence Matthews, Luz Paz, Marcel Raad, Max Dymond, Michael Kaufmann,
   Michael Kilburn, Michał Janiszewski, Michal Trybus, Muz Dima,
   Nikos Tsipinakis, Ori Avtalion, Oumph on github, patelvivekv1993 on github,
   Patrick Monnerat, Philip Prindeville, Ray Satiro, Rick Deist,
   Rikard Falkeborn, Sergei Nikulov, Stefan Agner, Stephan Mühlstrasser,
   Terry Wu, Vincas Razma, wncboy on github, Wyatt O'Day, 刘佩东,
-  (58 contributors)
+  (60 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -210,3 +220,12 @@ References to bug reports and discussions on issues:
  [76] = https://curl.haxx.se/bug/?i=2533
  [77] = https://curl.haxx.se/bug/?i=2541
  [78] = https://curl.haxx.se/bug/?i=2542
+ [79] = https://curl.haxx.se/bug/?i=2544
+ [80] = https://curl.haxx.se/bug/?i=2535
+ [81] = https://curl.haxx.se/bug/?i=2180
+ [82] = https://curl.haxx.se/bug/?i=2531
+ [83] = https://curl.haxx.se/bug/?i=2546
+ [84] = https://curl.haxx.se/bug/?i=2548
+ [85] = https://curl.haxx.se/bug/?i=2520
+ [86] = https://curl.haxx.se/bug/?i=2547
+ [87] = https://curl.haxx.se/bug/?i=2550
