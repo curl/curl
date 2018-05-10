@@ -35,6 +35,7 @@ addons:
             - krb5-user
             - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
             - libunistring-dev # for libidn2 neeed by libpsl
+            - libnss3-dev
 
 matrix:
     include:
@@ -74,6 +75,10 @@ matrix:
           compiler: clang
           dist: trusty
           env: T=debug C="--with-mbedtls --without-ssl"
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
         - os: linux
           compiler: gcc
           dist: trusty
@@ -236,7 +241,9 @@ script:
         if [ "$T" = "debug" ]; then
              ./configure --enable-debug --enable-werror $C
              make && make examples
-             make TFLAGS=-n test-nonflaky
+             if [ -z $NOTESTS ]; then
+                make TFLAGS=-n test-nonflaky
+             fi
         fi
     - |
         set -eo pipefail
