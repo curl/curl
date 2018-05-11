@@ -2021,7 +2021,8 @@ Curl_setup_transfer(
   if(conn->bits.multiplex || conn->httpversion == 20) {
     /* when multiplexing, the read/write sockets need to be the same! */
     conn->sockfd = sockindex == -1 ?
-      conn->sock[writesockindex] : conn->sock[sockindex];
+      ((writesockindex == -1 ? CURL_SOCKET_BAD : conn->sock[writesockindex])) :
+      conn->sock[sockindex];
     conn->writesockfd = conn->sockfd;
   }
   else {
