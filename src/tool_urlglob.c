@@ -579,7 +579,7 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
       }
       break;
     case UPTNumRange:
-      snprintf(buf, buflen, "%0*ld",
+      snprintf(buf, buflen, "%0*lu",
                pat->content.NumRange.padlength,
                pat->content.NumRange.ptr_n);
       len = strlen(buf);
