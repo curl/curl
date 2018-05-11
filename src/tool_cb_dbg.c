@@ -146,7 +146,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
         if(!config->isatty || ((output != stderr) && (output != stdout))) {
           if(!newl)
             fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-          fprintf(output, "[%zd bytes data]\n", size);
+          fprintf(output, "[%zu bytes data]\n", size);
           newl = FALSE;
           traced_data = TRUE;
         }
@@ -229,7 +229,7 @@ static void dump(const char *timebuf, const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s%s, %zd bytes (0x%zx)\n", timebuf, text, size, size);
+  fprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text, size, size);
 
   for(i = 0; i < size; i += width) {
 
