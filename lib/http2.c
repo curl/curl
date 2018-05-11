@@ -345,7 +345,7 @@ const char *Curl_http2_strerror(uint32_t err)
     "INADEQUATE_SECURITY",  /* 0xC */
     "HTTP_1_1_REQUIRED"     /* 0xD */
   };
-  return (err < sizeof str / sizeof str[0]) ? str[err] : "unknown";
+  return (err < sizeof(str) / sizeof(str[0])) ? str[err] : "unknown";
 #else
   return nghttp2_http2_strerror(err);
 #endif

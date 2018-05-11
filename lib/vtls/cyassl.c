@@ -569,7 +569,7 @@ cyassl_connect_step2(struct connectdata *conn,
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
 
-    memset(&x509_parsed, 0, sizeof x509_parsed);
+    memset(&x509_parsed, 0, sizeof(x509_parsed));
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 

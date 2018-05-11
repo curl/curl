@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -185,7 +185,7 @@ int test(char *URL)
 
   /* setup repeated data string */
   for(i = 0; i < sizeof(databuf); ++i)
-      databuf[i] = fill[i % sizeof fill];
+    databuf[i] = fill[i % sizeof(fill)];
 
   /* Post */
   test_setopt(curl, CURLOPT_POST, 1L);
