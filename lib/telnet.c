@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,10 +74,10 @@
     x->subend = x->subpointer;                          \
     CURL_SB_CLEAR(x);                                   \
   } WHILE_FALSE
-#define CURL_SB_ACCUM(x,c)                                   \
-  do {                                                       \
-    if(x->subpointer < (x->subbuffer + sizeof x->subbuffer)) \
-      *x->subpointer++ = (c);                                \
+#define CURL_SB_ACCUM(x,c)                                      \
+  do {                                                          \
+    if(x->subpointer < (x->subbuffer + sizeof(x->subbuffer)))   \
+      *x->subpointer++ = (c);                                   \
   } WHILE_FALSE
 
 #define  CURL_SB_GET(x) ((*x->subpointer++)&0xff)

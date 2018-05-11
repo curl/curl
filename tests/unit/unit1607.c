@@ -120,7 +120,7 @@ UNITTEST_START
 
   for(i = 0; i < testnum; ++i, curl_easy_reset(easy)) {
     int j;
-    int addressnum = sizeof tests[i].address / sizeof *tests[i].address;
+    int addressnum = sizeof(tests[i].address) / sizeof(*tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     struct curl_slist *list;

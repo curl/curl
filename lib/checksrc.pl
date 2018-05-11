@@ -63,6 +63,7 @@ my %warnings = (
     'NOSPACEEQUALS'    => 'equals sign without preceding space',
     'SEMINOSPACE'      => 'semicolon without following space',
     'MULTISPACE'       => 'multiple spaces used when not suitable',
+    'SIZEOFNOPAREN'    => 'use of sizeof without parentheses',
     );
 
 sub readwhitelist {
@@ -414,6 +415,17 @@ sub scanfile {
             else {
                 checkwarn("RETURNNOSPACE", $line, length($1)+6, $file, $l,
                           "return without space before paren");
+            }
+        }
+
+        # check for "sizeof" without parenthesis
+        if(($l =~ /^(.*)sizeof *([ (])/) && ($2 ne "(")) {
+            if($1 =~ / *\#/) {
+                # this is a #if, treat it differently
+            }
+            else {
+                checkwarn("SIZEOFNOPAREN", $line, length($1)+6, $file, $l,
+                          "sizeof without parenthesis");
             }
         }
 
