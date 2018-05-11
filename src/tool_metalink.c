@@ -246,7 +246,7 @@ static int nss_hash_init(void **pctx, SECOidTag hash_alg)
   /* we have to initialize NSS if not initialized already */
   if(!NSS_IsInitialized() && !nss_context) {
     static NSSInitParameters params;
-    params.length = sizeof params;
+    params.length = sizeof(params);
     nss_context = NSS_InitContext("", "", "", "", &params, NSS_INIT_READONLY
         | NSS_INIT_NOCERTDB   | NSS_INIT_NOMODDB       | NSS_INIT_FORCEOPEN
         | NSS_INIT_NOROOTINIT | NSS_INIT_OPTIMIZESPACE | NSS_INIT_PK11RELOAD);
@@ -529,7 +529,7 @@ digest_context *Curl_digest_init(const digest_params *dparams)
   digest_context *ctxt;
 
   /* Create digest context */
-  ctxt = malloc(sizeof *ctxt);
+  ctxt = malloc(sizeof(*ctxt));
 
   if(!ctxt)
     return ctxt;

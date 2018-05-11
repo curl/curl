@@ -394,7 +394,7 @@ static PK11SlotInfo* nss_find_slot_by_name(const char *slot_name)
 /* wrap 'ptr' as list node and tail-insert into 'list' */
 static CURLcode insert_wrapped_ptr(struct curl_llist *list, void *ptr)
 {
-  struct ptr_list_wrap *wrap = malloc(sizeof *wrap);
+  struct ptr_list_wrap *wrap = malloc(sizeof(*wrap));
   if(!wrap)
     return CURLE_OUT_OF_MEMORY;
 
@@ -914,11 +914,11 @@ static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
   PRTime now;
   int i;
 
-  if(SSL_GetChannelInfo(sock, &channel, sizeof channel) ==
-     SECSuccess && channel.length == sizeof channel &&
+  if(SSL_GetChannelInfo(sock, &channel, sizeof(channel)) ==
+     SECSuccess && channel.length == sizeof(channel) &&
      channel.cipherSuite) {
     if(SSL_GetCipherSuiteInfo(channel.cipherSuite,
-                              &suite, sizeof suite) == SECSuccess) {
+                              &suite, sizeof(suite)) == SECSuccess) {
       infof(conn->data, "SSL connection using %s\n", suite.cipherSuiteName);
     }
   }
@@ -1345,7 +1345,8 @@ static CURLcode nss_init(struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
 
     /* the default methods just call down to the lower I/O layer */
-    memcpy(&nspr_io_methods, PR_GetDefaultIOMethods(), sizeof nspr_io_methods);
+    memcpy(&nspr_io_methods, PR_GetDefaultIOMethods(),
+           sizeof(nspr_io_methods));
 
     /* override certain methods in the table by our wrappers */
     nspr_io_methods.recv  = nspr_io_recv;

@@ -49,7 +49,7 @@
  */
 static char *inet_ntop4 (const unsigned char *src, char *dst, size_t size)
 {
-  char tmp[sizeof "255.255.255.255"];
+  char tmp[sizeof("255.255.255.255")];
   size_t len;
 
   DEBUGASSERT(size >= 16);

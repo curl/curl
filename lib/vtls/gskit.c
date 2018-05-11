@@ -328,7 +328,7 @@ static CURLcode set_ciphers(struct connectdata *conn,
      GSKit tokens are always shorter than their cipher names, allocated buffers
      will always be large enough to accommodate the result. */
   l = strlen(cipherlist) + 1;
-  memset((char *) ciphers, 0, sizeof ciphers);
+  memset((char *) ciphers, 0, sizeof(ciphers));
   for(i = 0; i < CURL_GSKPROTO_LAST; i++) {
     ciphers[i].buf = malloc(l);
     if(!ciphers[i].buf) {
@@ -536,18 +536,18 @@ inetsocketpair(int sv[2])
   lfd = socket(AF_INET, SOCK_STREAM, 0);
   if(lfd < 0)
     return -1;
-  memset((char *) &addr1, 0, sizeof addr1);
+  memset((char *) &addr1, 0, sizeof(addr1));
   addr1.sin_family = AF_INET;
   addr1.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   addr1.sin_port = 0;
-  if(bind(lfd, (struct sockaddr *) &addr1, sizeof addr1) ||
+  if(bind(lfd, (struct sockaddr *) &addr1, sizeof(addr1)) ||
      listen(lfd, 2) < 0) {
     close(lfd);
     return -1;
   }
 
   /* Get the allocated port. */
-  len = sizeof addr1;
+  len = sizeof(addr1);
   if(getsockname(lfd, (struct sockaddr *) &addr1, &len) < 0) {
     close(lfd);
     return -1;
@@ -562,7 +562,7 @@ inetsocketpair(int sv[2])
 
   /* Request unblocking connection to the listening socket. */
   curlx_nonblock(cfd, TRUE);
-  if(connect(cfd, (struct sockaddr *) &addr1, sizeof addr1) < 0 &&
+  if(connect(cfd, (struct sockaddr *) &addr1, sizeof(addr1)) < 0 &&
      errno != EINPROGRESS) {
     close(lfd);
     close(cfd);
@@ -570,7 +570,7 @@ inetsocketpair(int sv[2])
   }
 
   /* Get the client dynamic port for intrusion check below. */
-  len = sizeof addr2;
+  len = sizeof(addr2);
   if(getsockname(cfd, (struct sockaddr *) &addr2, &len) < 0) {
     close(lfd);
     close(cfd);
@@ -580,7 +580,7 @@ inetsocketpair(int sv[2])
   /* Accept the incoming connection and get the server socket. */
   curlx_nonblock(lfd, TRUE);
   for(;;) {
-    len = sizeof addr1;
+    len = sizeof(addr1);
     sfd = accept(lfd, (struct sockaddr *) &addr1, &len);
     if(sfd < 0) {
       close(lfd);
@@ -644,7 +644,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
     /* Try getting data from HTTPS proxy and pipe it upstream. */
     n = 0;
     i = gsk_secure_soc_read(connproxyssl->backend->handle,
-                            buf, sizeof buf, &n);
+                            buf, sizeof(buf), &n);
     switch(i) {
     case GSK_OK:
       if(n) {
@@ -665,7 +665,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
   if(FD_ISSET(BACKEND->remotefd, &fds_read) &&
      FD_ISSET(conn->sock[sockindex], &fds_write)) {
     /* Pipe data to HTTPS proxy. */
-    n = read(BACKEND->remotefd, buf, sizeof buf);
+    n = read(BACKEND->remotefd, buf, sizeof(buf));
     if(n < 0)
       return -1;
     if(n) {
@@ -864,13 +864,13 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     BACKEND->localfd = sockpair[0];
     BACKEND->remotefd = sockpair[1];
     setsockopt(BACKEND->localfd, SOL_SOCKET, SO_RCVBUF,
-               (void *) sobufsize, sizeof sobufsize);
+               (void *) sobufsize, sizeof(sobufsize));
     setsockopt(BACKEND->remotefd, SOL_SOCKET, SO_RCVBUF,
-               (void *) sobufsize, sizeof sobufsize);
+               (void *) sobufsize, sizeof(sobufsize));
     setsockopt(BACKEND->localfd, SOL_SOCKET, SO_SNDBUF,
-               (void *) sobufsize, sizeof sobufsize);
+               (void *) sobufsize, sizeof(sobufsize));
     setsockopt(BACKEND->remotefd, SOL_SOCKET, SO_SNDBUF,
-               (void *) sobufsize, sizeof sobufsize);
+               (void *) sobufsize, sizeof(sobufsize));
     curlx_nonblock(BACKEND->localfd, TRUE);
     curlx_nonblock(BACKEND->remotefd, TRUE);
   }
@@ -977,7 +977,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
 
   if(!result) {
     /* Start handshake. Try asynchronous first. */
-    memset(&commarea, 0, sizeof commarea);
+    memset(&commarea, 0, sizeof(commarea));
     BACKEND->iocport = QsoCreateIOCompletionPort();
     if(BACKEND->iocport != -1) {
       result = gskit_status(data,
@@ -1333,11 +1333,11 @@ static int Curl_gskit_check_cxn(struct connectdata *cxn)
     return 0; /* connection has been closed */
 
   err = 0;
-  errlen = sizeof err;
+  errlen = sizeof(err);
 
   if(getsockopt(cxn->sock[FIRSTSOCKET], SOL_SOCKET, SO_ERROR,
                  (unsigned char *) &err, &errlen) ||
-     errlen != sizeof err || err)
+     errlen != sizeof(err) || err)
     return 0; /* connection has been closed */
 
   return -1;  /* connection status unknown */

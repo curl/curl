@@ -1406,7 +1406,7 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
   }
 
   snprintf(proxy_header,
-           sizeof proxy_header,
+           sizeof(proxy_header),
            "PROXY %s %s %s %li %li\r\n",
            tcp_version,
            conn->data->info.conn_local_ip,

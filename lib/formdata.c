@@ -725,7 +725,7 @@ int curl_formget(struct curl_httppost *form, void *arg,
 
   while(!result) {
     char buffer[8192];
-    size_t nread = Curl_mime_read(buffer, 1, sizeof buffer, &toppart);
+    size_t nread = Curl_mime_read(buffer, 1, sizeof(buffer), &toppart);
 
     if(!nread)
       break;

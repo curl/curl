@@ -527,7 +527,7 @@ MD5_context *Curl_MD5_init(const MD5_params *md5params)
   MD5_context *ctxt;
 
   /* Create MD5 context */
-  ctxt = malloc(sizeof *ctxt);
+  ctxt = malloc(sizeof(*ctxt));
 
   if(!ctxt)
     return ctxt;
