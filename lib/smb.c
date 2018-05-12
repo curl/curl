@@ -790,10 +790,16 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
     else {
       smb_m = (const struct smb_nt_create_response*) msg;
       conn->data->req.size = smb_swap64(smb_m->end_of_file);
-      Curl_pgrsSetDownloadSize(conn->data, conn->data->req.size);
-      if(conn->data->set.get_filetime)
-        get_posix_time(&conn->data->info.filetime, smb_m->last_change_time);
-      next_state = SMB_DOWNLOAD;
+      if(conn->data->req.size < 0) {
+        req->result = CURLE_WEIRD_SERVER_REPLY;
+        next_state = SMB_CLOSE;
+      }
+      else {
+        Curl_pgrsSetDownloadSize(conn->data, conn->data->req.size);
+        if(conn->data->set.get_filetime)
+          get_posix_time(&conn->data->info.filetime, smb_m->last_change_time);
+        next_state = SMB_DOWNLOAD;
+      }
     }
     break;
 
