@@ -528,10 +528,16 @@ Curl_cookie_add(struct Curl_easy *data,
         while(*whatptr && ISBLANK(*whatptr))
           whatptr++;
 
-        if(!co->name && sep) {
+        if(!co->name) {
           /* The very first name/value pair is the actual cookie name */
+          if(!sep) {
+            /* Bad name/value pair. */
+            badcookie = TRUE;
+            break;
+          }
           co->name = strdup(name);
           co->value = strdup(whatptr);
+          done = TRUE;
           if(!co->name || !co->value) {
             badcookie = TRUE;
             break;
