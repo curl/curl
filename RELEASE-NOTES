@@ -4,7 +4,7 @@ Curl and libcurl 7.60.0
  Command line options:         214
  curl_easy_setopt() options:   255
  Public functions in libcurl:  74
- Contributors:                 1705
+ Contributors:                 1741
 
 This release includes the following changes:
 
@@ -14,6 +14,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTP: shutdown response buffer overflow CVE-2018-1000300 [88]
+ o RTSP: bad headers buffer over-read CVE-2018-1000301 [89]
  o FTP: fix typo in recursive callback detection for seeking [1]
  o test1208: marked flaky
  o HTTP: make header-less responses still count correct body size [2]
@@ -115,6 +117,14 @@ This release includes the following bugfixes:
  o transfer: don't unset writesockfd on setup of multiplexed conns [85]
  o vtls: use unified "supports" bitfield member in backends [86]
  o URLs: fix one more http url [87]
+ o travis: add a build using WolfSSL [90]
+ o openssl: change FILE ops to BIO ops [91]
+ o travis: add build using NSS [92]
+ o smb: reject negative file sizes [93]
+ o cookies: accept parameter names as cookie name [94]
+ o http2: getsock fix for uploads [95]
+ o all over: fixed format specifiers [96]
+ o http2: use the correct function pointer typedef [97]
 
 This release includes the following known bugs:
 
@@ -123,20 +133,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Brown, Alex Baines, Anders Bakken, Anders Roxell, Bas van Schaik,
-  Bernard Spil, Chris Araman, Christian Schmitz, Cyril B, Dagobert Michelsen,
-  Daniel Gustafsson, Daniel Stenberg, Dan McNulty, Dario Weisser,
-  dasimx on github, David Garske, David L., Denis Ollier, Dmitry Mikhirev,
-  Dongliang Mu, Don J Olmstead, Eric Gallager, Ernst Sjöstrand, Frank Gevaerts,
-  Gaurav Malhotra, Geeknik Labs, Howard Chu, iz8mbw on github, Jakub Wilk,
-  Jon DeVree, Kees Dekker, Kobi Gurkan, Laurie Clark-Michalek, Lauri Kasanen,
-  Lawrence Matthews, Luz Paz, Marcel Raad, Max Dymond, Michael Kaufmann,
-  Michael Kilburn, Michał Janiszewski, Michal Trybus, Muz Dima,
-  Nikos Tsipinakis, Ori Avtalion, Oumph on github, patelvivekv1993 on github,
-  Patrick Monnerat, Philip Prindeville, Ray Satiro, Rick Deist,
-  Rikard Falkeborn, Sergei Nikulov, Stefan Agner, Stephan Mühlstrasser,
+  Adam Brown, Alex Baines, Anders Bakken, Anders Roxell, anshnd on github,
+  Bas van Schaik, Bernard Spil, Chris Araman, Christian Schmitz, Cyril B,
+  Dagobert Michelsen, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Dan McNulty, Dario Weisser, dasimx on github, David Garske, David L.,
+  Denis Ollier, Dmitry Mikhirev, Dongliang Mu, Don J Olmstead, Eric Gallager,
+  Ernst Sjöstrand, Frank Gevaerts, Gaurav Malhotra, Geeknik Labs, Howard Chu,
+  iz8mbw on github, Jakub Wilk, Jon DeVree, Kees Dekker, Kobi Gurkan,
+  Laurie Clark-Michalek, Lauri Kasanen, Lawrence Matthews, Luz Paz,
+  Marcel Raad, Max Dymond, Michael Kaufmann, Michael Kilburn,
+  Michał Janiszewski, Michal Trybus, Muz Dima, Nikos Tsipinakis, Ori Avtalion,
+  Oumph on github, patelvivekv1993 on github, Patrick Monnerat,
+  Philip Prindeville, Ray Satiro, Rick Deist, Rikard Falkeborn, Sergei Nikulov,
+  Stefan Agner, steini2000 on github, Stephan Mühlstrasser, Sunny Purushe,
   Terry Wu, Vincas Razma, wncboy on github, Wyatt O'Day, 刘佩东,
-  (60 contributors)
+  (64 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -229,3 +240,13 @@ References to bug reports and discussions on issues:
  [85] = https://curl.haxx.se/bug/?i=2520
  [86] = https://curl.haxx.se/bug/?i=2547
  [87] = https://curl.haxx.se/bug/?i=2550
+ [88] = https://curl.haxx.se/docs/adv_2018-82c2.html
+ [89] = https://curl.haxx.se/docs/adv_2018-b138.html
+ [90] = https://curl.haxx.se/bug/?i=2528
+ [91] = https://curl.haxx.se/bug/?i=2512
+ [92] = https://curl.haxx.se/bug/?i=2558
+ [93] = https://curl.haxx.se/bug/?i=2558
+ [94] = https://curl.haxx.se/bug/?i=2564
+ [95] = https://curl.haxx.se/bug/?i=2520
+ [96] = https://curl.haxx.se/bug/?i=2561
+ [97] = https://curl.haxx.se/bug/?i=2560
