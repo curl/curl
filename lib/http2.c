@@ -121,8 +121,8 @@ static int http2_perform_getsock(const struct connectdata *conn,
   bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
   /* we're still uploading or the HTTP/2 layer wants to send data */
-  if((k->keepon & KEEP_SEND|KEEP_SEND_PAUSE) == KEEP_SEND) ||
-    nghttp2_session_want_write(c->h2))
+  if(((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND) ||
+     nghttp2_session_want_write(c->h2))
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
