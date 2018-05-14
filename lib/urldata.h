@@ -98,6 +98,20 @@
 #include "hash.h"
 #include "splay.h"
 
+/* return the count of bytes sent, or -1 on error */
+typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
+                            int sockindex,            /* socketindex */
+                            const void *buf,          /* data to write */
+                            size_t len,               /* max amount to write */
+                            CURLcode *err);           /* error to return */
+
+/* return the count of bytes read, or -1 on error */
+typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
+                            int sockindex,            /* socketindex */
+                            char *buf,                /* store data here */
+                            size_t len,               /* max amount to read */
+                            CURLcode *err);           /* error to return */
+
 #include "mime.h"
 #include "imap.h"
 #include "pop3.h"
@@ -705,20 +719,6 @@ struct Curl_handler {
 
 #define CONNRESULT_NONE 0                /* No extra information. */
 #define CONNRESULT_DEAD (1<<0)           /* The connection is dead. */
-
-/* return the count of bytes sent, or -1 on error */
-typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
-                            int sockindex,            /* socketindex */
-                            const void *buf,          /* data to write */
-                            size_t len,               /* max amount to write */
-                            CURLcode *err);           /* error to return */
-
-/* return the count of bytes read, or -1 on error */
-typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
-                            int sockindex,            /* socketindex */
-                            char *buf,                /* store data here */
-                            size_t len,               /* max amount to read */
-                            CURLcode *err);           /* error to return */
 
 #ifdef USE_RECV_BEFORE_SEND_WORKAROUND
 struct postponed_data {
