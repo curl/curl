@@ -2141,8 +2141,8 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   if(result)
     return result;
 
-  httpc->recv_underlying = (recving)conn->recv[FIRSTSOCKET];
-  httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
+  httpc->recv_underlying = conn->recv[FIRSTSOCKET];
+  httpc->send_underlying = conn->send[FIRSTSOCKET];
   conn->recv[FIRSTSOCKET] = http2_recv;
   conn->send[FIRSTSOCKET] = http2_send;
 
