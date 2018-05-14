@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -483,6 +483,11 @@ static void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 }
 
 #endif /* CRYPTO LIBS */
+
+/* Disable this picky gcc-8 compiler warning */
+#if defined(__GNUC__) && (__GNUC__ >= 8)
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 
 const HMAC_params Curl_HMAC_MD5[] = {
   {
