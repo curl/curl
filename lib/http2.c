@@ -559,7 +559,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   struct http_conn *httpc = &conn->proto.httpc;
   struct Curl_easy *data_s = NULL;
   struct HTTP *stream = NULL;
-  static int lastStream = -1;
   int rv;
   size_t left, ncopy;
   int32_t stream_id = frame->hd.stream_id;
@@ -590,9 +589,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-  if(lastStream != stream_id) {
-    lastStream = stream_id;
-  }
   if(!data_s) {
     H2BUGF(infof(conn->data,
                  "No Curl_easy associated with stream: %x\n",
