@@ -602,7 +602,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
   stream = data_s->req.protop;
   if(!stream) {
-    H2BUGF(infof(conn->data, "No proto pointer for stream: %x\n",
+    H2BUGF(infof(data_s, "No proto pointer for stream: %x\n",
                  stream_id));
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
@@ -680,7 +680,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     break;
   default:
-    H2BUGF(infof(conn->data, "Got frame type %x for stream %u!\n",
+    H2BUGF(infof(data_s, "Got frame type %x for stream %u!\n",
                  frame->hd.type, stream_id));
     break;
   }
