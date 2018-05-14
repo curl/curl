@@ -373,11 +373,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   char max5[6][10];
   curl_off_t dlpercen = 0;
   curl_off_t ulpercen = 0;
-  curl_off_t total_percen = 0;
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
   curl_off_t timespent;
   curl_off_t timespent_ms; /* milliseconds */
+  curl_off_t total_file_size = 0;
+  curl_off_t already_dl_size = 0;
   struct Curl_easy *data = conn->data;
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
@@ -526,6 +527,23 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
     }
 
+    /* Get the total amount of data expected to get transferred */
+    total_expected_transfer =
+      (data->progress.flags & PGRS_UL_SIZE_KNOWN?
+       data->progress.size_ul:data->progress.uploaded)+
+      (data->progress.flags & PGRS_DL_SIZE_KNOWN?
+       data->progress.size_dl:data->progress.downloaded);
+
+    /* We have transferred this much so far */
+    total_transfer = data->progress.downloaded + data->progress.uploaded;
+
+    /* Calculate total file size of the file that is being downloaded */
+    total_file_size = data->state.resume_from + total_expected_transfer;
+
+    /* Find out how much has already been
+       downloaded (Used in received field) */
+    already_dl_size = data->progress.downloaded + data->state.resume_from;
+
     /* Figure out the estimated time of arrival for the upload */
     if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
        (data->progress.ulspeed > CURL_OFF_T_C(0))) {
@@ -545,11 +563,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       dlestimate = data->progress.size_dl / data->progress.dlspeed;
 
       if(data->progress.size_dl > CURL_OFF_T_C(10000))
-        dlpercen = data->progress.downloaded /
-          (data->progress.size_dl/CURL_OFF_T_C(100));
+        dlpercen = already_dl_size / (total_file_size / CURL_OFF_T_C(100));
       else if(data->progress.size_dl > CURL_OFF_T_C(0))
-        dlpercen = (data->progress.downloaded*100) /
-          data->progress.size_dl;
+        dlpercen = (already_dl_size * CURL_OFF_T_C(100)) / total_file_size;
     }
 
     /* Now figure out which of them is slower and use that one for the
@@ -561,32 +577,15 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     time2str(time_total, total_estimate);
     time2str(time_spent, timespent);
 
-    /* Get the total amount of data expected to get transferred */
-    total_expected_transfer =
-      (data->progress.flags & PGRS_UL_SIZE_KNOWN?
-       data->progress.size_ul:data->progress.uploaded)+
-      (data->progress.flags & PGRS_DL_SIZE_KNOWN?
-       data->progress.size_dl:data->progress.downloaded);
-
-    /* We have transferred this much so far */
-    total_transfer = data->progress.downloaded + data->progress.uploaded;
-
-    /* Get the percentage of data transferred so far */
-    if(total_expected_transfer > CURL_OFF_T_C(10000))
-      total_percen = total_transfer /
-        (total_expected_transfer/CURL_OFF_T_C(100));
-    else if(total_expected_transfer > CURL_OFF_T_C(0))
-      total_percen = (total_transfer*100) / total_expected_transfer;
-
     fprintf(data->set.err,
             "\r"
             "%3" CURL_FORMAT_CURL_OFF_T " %s  "
             "%3" CURL_FORMAT_CURL_OFF_T " %s  "
             "%3" CURL_FORMAT_CURL_OFF_T " %s  %s  %s %s %s %s %s",
-            total_percen,  /* 3 letters */                /* total % */
-            max5data(total_expected_transfer, max5[2]),   /* total size */
+            dlpercen,                                     /* received % */
+            max5data(total_file_size, max5[2]),           /* total size */
             dlpercen,      /* 3 letters */                /* rcvd % */
-            max5data(data->progress.downloaded, max5[0]), /* rcvd size */
+            max5data(already_dl_size, max5[0]),           /* rcvd size */
             ulpercen,      /* 3 letters */                /* xfer % */
             max5data(data->progress.uploaded, max5[1]),   /* xfer size */
             max5data(data->progress.dlspeed, max5[3]),    /* avrg dl speed */
