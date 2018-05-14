@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -460,6 +460,11 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 }
 
 #endif /* CRYPTO LIBS */
+
+/* Disable this picky gcc-8 compiler warning */
+#if defined(__GNUC__) && (__GNUC__ >= 8)
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
 
 const digest_params MD5_DIGEST_PARAMS[] = {
   {
