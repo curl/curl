@@ -117,7 +117,7 @@ noinst_LTLIBRARIES += libstubgss.la
 
 libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
 libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
-libstubgss_la_CFLAGS = $(AM_CFLAGS) -g -Wno-unused-parameter
+libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
 
 libstubgss_la_SOURCES = stub_gssapi.c stub_gssapi.h
 
