@@ -165,7 +165,7 @@ static const struct helptxt helptext[] = {
   {"-I, --head",
    "Show document info only"},
   {"    --haproxy-protocol",
-   "Send HAProxy PROXY protocol header"},
+   "Send HAProxy PROXY protocol v1 header"},
   {"-H, --header <header/@file>",
    "Pass custom header(s) to server"},
   {"-h, --help",

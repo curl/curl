@@ -35,7 +35,7 @@ ipv6
 http-ipv6
 </server>
  <name>
-HTTP-IPv6 GET with PROXY protocol
+HTTP-IPv6 GET with PROXY protocol v1
  </name>
  <command>
 -g "http://%HOST6IP:%HTTP6PORT/1456" --local-port 44444 --haproxy-protocol

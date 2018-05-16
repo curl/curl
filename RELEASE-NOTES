@@ -8,7 +8,7 @@ Curl and libcurl 7.60.0
 
 This release includes the following changes:
 
- o Add CURLOPT_HAPROXYPROTOCOL, support for the HAProxy PROXY protocol [10]
+ o Add CURLOPT_HAPROXYPROTOCOL, support for the HAProxy PROXY protocol v1 [10]
  o Add --haproxy-protocol for the command line tool [10]
  o Add CURLOPT_DNS_SHUFFLE_ADDRESSES, shuffle returned IP addresses [12]
 

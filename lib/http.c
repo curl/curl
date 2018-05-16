@@ -1359,7 +1359,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
     return CURLE_OK;
 
   if(conn->data->set.haproxyprotocol) {
-    /* add HAProxy PROXY protocol header */
+    /* add HAProxy PROXY protocol v1 header */
     result = add_haproxy_protocol_header(conn);
     if(result)
       return result;

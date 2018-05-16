@@ -1,9 +1,9 @@
 Long: haproxy-protocol
-Help: Send HAProxy PROXY protocol header
+Help: Send HAProxy PROXY protocol header v1
 Protocols: HTTP
 Added: 7.60.0
 ---
-Send a HAProxy PROXY protocol header at the beginning of the connection. This
+Send a HAProxy PROXY protocol v1 header at the beginning of the connection. This
 is used by some load balancers and reverse proxies to indicate the client's
 true IP address and port.
 
