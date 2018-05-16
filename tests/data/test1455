@@ -32,7 +32,7 @@ Funny-head: barkbark
 http
 </server>
 <name>
-HTTP GET when PROXY Protocol enabled
+HTTP GET when PROXY Protocol v1 enabled
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/1455 --haproxy-protocol --local-port 37756

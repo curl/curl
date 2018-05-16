@@ -1603,7 +1603,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 
   case CURLOPT_HAPROXYPROTOCOL:
     /*
-     * Set to send the HAProxy Proxy Protocol header
+     * Set to send the HAProxy Proxy Protocol v1 header
      */
     data->set.haproxyprotocol = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;

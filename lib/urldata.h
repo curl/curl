@@ -1676,7 +1676,7 @@ struct UserDefined {
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
 
-  bool haproxyprotocol; /* whether to send HAProxy PROXY protocol header */
+  bool haproxyprotocol; /* whether to send HAProxy PROXY protocol v1 header */
 
   struct Curl_http2_dep *stream_dependents;
 

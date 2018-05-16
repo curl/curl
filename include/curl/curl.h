@@ -1841,7 +1841,7 @@ typedef enum {
   /* User data to pass to the resolver start callback. */
   CINIT(RESOLVER_START_DATA, OBJECTPOINT, 273),
 
-  /* send HAProxy PROXY protocol header? */
+  /* send HAProxy PROXY protocol v1 header? */
   CINIT(HAPROXYPROTOCOL, LONG, 274),
 
   /* shuffle addresses before use when DNS returns multiple */
