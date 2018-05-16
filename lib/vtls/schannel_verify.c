@@ -29,15 +29,17 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_SCHANNEL
-
-#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
-
 #ifndef USE_WINDOWS_SSPI
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
+#ifdef USE_SCHANNEL
+
+#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 #include "schannel.h"
+
+#ifdef HAS_MANUAL_VERIFY_API
+
 #include "vtls.h"
 #include "sendf.h"
 #include "strerror.h"
@@ -548,4 +550,5 @@ CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   return result;
 }
 
+#endif /* HAS_MANUAL_VERIFY_API */
 #endif /* USE_SCHANNEL */
