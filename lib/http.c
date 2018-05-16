@@ -3487,21 +3487,18 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * depending on how authentication is working.  Other codes
          * are definitely errors, so give up here.
          */
-        if(data->set.http_fail_on_error && (k->httpcode >= 400) &&
+        if(data->state.resume_from && data->set.httpreq == HTTPREQ_GET &&
+             k->httpcode == 416) {
+          /* "Requested Range Not Satisfiable", just proceed and
+             pretend this is no error */
+          k->ignorebody = TRUE; /* Avoid appending error msg to good data. */
+        }
+        else if(data->set.http_fail_on_error && (k->httpcode >= 400) &&
            ((k->httpcode != 401) || !conn->bits.user_passwd) &&
            ((k->httpcode != 407) || !conn->bits.proxy_user_passwd) ) {
-
-          if(data->state.resume_from &&
-             (data->set.httpreq == HTTPREQ_GET) &&
-             (k->httpcode == 416)) {
-            /* "Requested Range Not Satisfiable", just proceed and
-               pretend this is no error */
-          }
-          else {
-            /* serious error, go home! */
-            print_http_error(data);
-            return CURLE_HTTP_RETURNED_ERROR;
-          }
+          /* serious error, go home! */
+          print_http_error(data);
+          return CURLE_HTTP_RETURNED_ERROR;
         }
 
         if(conn->httpversion == 10) {
