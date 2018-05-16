@@ -29,11 +29,10 @@
 
 #include "curl_setup.h"
 
+#ifdef USE_SCHANNEL
 #ifndef USE_WINDOWS_SSPI
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
-
-#ifdef USE_SCHANNEL
 
 #define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 #include "schannel.h"
