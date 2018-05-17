@@ -1722,24 +1722,22 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case 'i':
-      config->include_headers = toggle; /* include the headers as well in the
-                                           general output stream */
+      config->show_headers = toggle; /* show the headers as well in the
+                                        general output stream */
       break;
     case 'j':
       config->cookiesession = toggle;
       break;
-    case 'I':
-      /*
-       * no_body will imply include_headers later on
-       */
+    case 'I': /* --head */
       config->no_body = toggle;
+      config->show_headers = toggle;
       if(SetHTTPrequest(config,
                         (config->no_body)?HTTPREQ_HEAD:HTTPREQ_GET,
                         &config->httpreq))
         return PARAM_BAD_USE;
       break;
     case 'J': /* --remote-header-name */
-      if(config->include_headers) {
+      if(config->show_headers) {
         warnf(global,
               "--include and --remote-header-name cannot be combined.\n");
         return PARAM_BAD_USE;

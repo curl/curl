@@ -35,10 +35,10 @@ Metalink
 http
 </server>
  <name>
-Metalink local XML file, HTTP resource, using -o fname -i -D file
+Metalink local XML file, HTTP resource, using -o fname -D file
  </name>
 <command option="no-output,no-include">
---metalink file://%PWD/log/test2010.metalink -i -o log/outfile2010 -D log/heads2010
+--metalink file://%PWD/log/test2010.metalink -o log/outfile2010 -D log/heads2010
 </command>
 # local metalink file written before test command runs
 <file name="log/test2010.metalink">

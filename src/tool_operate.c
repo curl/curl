@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -851,15 +851,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt_str(curl, CURLOPT_URL, this_url);     /* what to fetch */
         my_setopt(curl, CURLOPT_NOPROGRESS, global->noprogress?1L:0L);
-        if(config->no_body) {
+        if(config->no_body)
           my_setopt(curl, CURLOPT_NOBODY, 1L);
-          my_setopt(curl, CURLOPT_HEADER, 1L);
-        }
-        /* If --metalink is used, we ignore --include (headers in
-           output) option because mixing headers to the body will
-           confuse XML parser and/or hash check will fail. */
-        else if(!config->use_metalink)
-          my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
 
         if(config->oauth_bearer)
           my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
@@ -1373,6 +1366,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         hdrcbdata.outs = &outs;
         hdrcbdata.heads = &heads;
+        hdrcbdata.global = global;
+        hdrcbdata.config = config;
 
         my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
         my_setopt(curl, CURLOPT_HEADERDATA, &hdrcbdata);
@@ -1523,7 +1518,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             /* do not create (or even overwrite) the file in case we get no
                data because of unmet condition */
             curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
-            if(!cond_unmet && !tool_create_output_file(&outs))
+            if(!cond_unmet && !tool_create_output_file(&outs, FALSE))
               result = CURLE_WRITE_ERROR;
           }
 
