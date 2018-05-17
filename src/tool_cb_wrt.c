@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,7 +32,8 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /* create a local file for writing, return TRUE on success */
-bool tool_create_output_file(struct OutStruct *outs)
+bool tool_create_output_file(struct OutStruct *outs,
+                             bool append)
 {
   struct GlobalConfig *global = outs->config->global;
   FILE *file;
@@ -42,7 +43,7 @@ bool tool_create_output_file(struct OutStruct *outs)
     return FALSE;
   }
 
-  if(outs->is_cd_filename) {
+  if(outs->is_cd_filename && !append) {
     /* don't overwrite existing files */
     file = fopen(outs->filename, "rb");
     if(file) {
@@ -54,7 +55,7 @@ bool tool_create_output_file(struct OutStruct *outs)
   }
 
   /* open file for writing */
-  file = fopen(outs->filename, "wb");
+  file = fopen(outs->filename, append?"ab":"wb");
   if(!file) {
     warnf(global, "Failed to create the file %s: %s\n", outs->filename,
           strerror(errno));
@@ -97,7 +98,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-  if(config->include_headers) {
+  if(config->show_headers) {
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
       warnf(config->global, "Header data size exceeds single call write "
             "limit!\n");
@@ -141,7 +142,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 #endif
 
-  if(!outs->stream && !tool_create_output_file(outs))
+  if(!outs->stream && !tool_create_output_file(outs, FALSE))
     return failure;
 
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {

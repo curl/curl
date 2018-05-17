@@ -27,9 +27,6 @@ body
   yours sincerely
 </data>
 <datacheck>
-HTTP/1.1 200 Mighty fine indeed
-imap: sure hit me
-
 From: me@somewhere
 To: fake@nowhere
 
