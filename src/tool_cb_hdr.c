@@ -163,7 +163,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if(!outs->stream && !tool_create_output_file(outs, FALSE))
       return failure;
 
-    if(hdrcbdata->global->isatty)
+    if(hdrcbdata->global->isatty && hdrcbdata->global->styled_output)
       value = memchr(ptr, ':', cb);
     if(value) {
       size_t namelen = value - ptr;
