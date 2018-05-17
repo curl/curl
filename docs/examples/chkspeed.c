@@ -165,33 +165,37 @@ int main(int argc, char *argv[])
   res = curl_easy_perform(curl_handle);
 
   if(CURLE_OK == res) {
-    double val;
+    curl_off_t val;
 
     /* check for bytes downloaded */
-    res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD, &val);
+    res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Data downloaded: %0.0f bytes.\n", val);
+      printf("Data downloaded: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", val);
 
     /* check for total download time */
-    res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME, &val);
+    res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Total download time: %0.3f sec.\n", val);
+      printf("Total download time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
+             (val / 1000000), (long)(val % 1000000));
 
     /* check for average download speed */
-    res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD, &val);
+    res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD_T, &val);
     if((CURLE_OK == res) && (val>0))
-      printf("Average download speed: %0.3f kbyte/sec.\n", val / 1024);
+      printf("Average download speed: %" CURL_FORMAT_CURL_OFF_T
+             " kbyte/sec.\n", val / 1024);
 
     if(prtall) {
       /* check for name resolution time */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME, &val);
+      res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME_T, &val);
       if((CURLE_OK == res) && (val>0))
-        printf("Name lookup time: %0.3f sec.\n", val);
+        printf("Name lookup time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
+               (val / 1000000), (long)(val % 1000000));
 
       /* check for connect time */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME, &val);
+      res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME_T, &val);
       if((CURLE_OK == res) && (val>0))
-        printf("Connect time: %0.3f sec.\n", val);
+        printf("Connect time: %" CURL_FORMAT_CURL_OFF_T ".%06ld sec.\n",
+               (val / 1000000), (long)(val % 1000000));
     }
   }
   else {
