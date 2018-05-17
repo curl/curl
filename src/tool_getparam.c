@@ -260,6 +260,7 @@ static const struct LongShort aliases[]= {
   {"EB", "socks5-gssapi",            ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
+  {"fb", "styled-output",            ARG_BOOL},
   {"F",  "form",                     ARG_STRING},
   {"Fs", "form-string",              ARG_STRING},
   {"g",  "globoff",                  ARG_BOOL},
@@ -1643,8 +1644,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'a': /* --fail-early */
         global->fail_early = toggle;
         break;
-      default:
-        /* fail hard on errors  */
+      case 'b': /* --styled-output */
+        global->styled_output = toggle;
+        break;
+      default: /* --fail (hard on errors)  */
         config->failonerror = toggle;
       }
       break;

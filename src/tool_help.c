@@ -414,6 +414,8 @@ static const struct helptxt helptext[] = {
    "Use SSLv3"},
   {"    --stderr",
    "Where to redirect stderr"},
+  {"    --styled-output",
+   "Enable styled output for HTTP headers"},
   {"    --suppress-connect-headers",
    "Suppress proxy CONNECT response headers"},
   {"    --tcp-fastopen",
