@@ -281,6 +281,28 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN)?
       data->progress.size_ul:-1;
     break;
+  case CURLINFO_TOTAL_TIME_T:
+    *param_offt = data->progress.timespent;
+    break;
+  case CURLINFO_NAMELOOKUP_TIME_T:
+    *param_offt = data->progress.t_nslookup;
+    break;
+  case CURLINFO_CONNECT_TIME_T:
+    *param_offt = data->progress.t_connect;
+    break;
+  case CURLINFO_APPCONNECT_TIME_T:
+    *param_offt = data->progress.t_appconnect;
+    break;
+  case CURLINFO_PRETRANSFER_TIME_T:
+    *param_offt = data->progress.t_pretransfer;
+    break;
+  case CURLINFO_STARTTRANSFER_TIME_T:
+    *param_offt = data->progress.t_starttransfer;
+    break;
+  case CURLINFO_REDIRECT_TIME_T:
+    *param_offt = data->progress.t_redirect;
+    break;
+
   default:
     return CURLE_UNKNOWN_OPTION;
   }

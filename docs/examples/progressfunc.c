@@ -28,10 +28,10 @@
 #include <curl/curl.h>
 
 #define STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES         6000
-#define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3
+#define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3000000
 
 struct myprogress {
-  double lastruntime;
+  curl_off_t lastruntime;
   CURL *curl;
 };
 
@@ -42,16 +42,17 @@ static int xferinfo(void *p,
 {
   struct myprogress *myp = (struct myprogress *)p;
   CURL *curl = myp->curl;
-  double curtime = 0;
+  curl_off_t curtime = 0;
 
-  curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &curtime);
+  curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &curtime);
 
   /* under certain circumstances it may be desirable for certain functionality
      to only run every N seconds, in order to do this the transaction time can
      be used */
   if((curtime - myp->lastruntime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL) {
     myp->lastruntime = curtime;
-    fprintf(stderr, "TOTAL TIME: %f \r\n", curtime);
+    fprintf(stderr, "TOTAL TIME: %" CURL_FORMAT_CURL_OFF_T ".%06ld\r\n",
+            (curtime / 1000000), (long)(curtime % 1000000));
   }
 
   fprintf(stderr, "UP: %" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T
