@@ -252,7 +252,7 @@ struct OperationConfig {
   bool ssh_compression;           /* enable/disable SSH compression */
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
-  bool haproxy_protocol;          /* whether to send HAProxy PROXY protocol */
+  bool haproxy_protocol;          /* whether to send HAProxy PROXY protocol v1 */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
