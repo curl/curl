@@ -355,5 +355,5 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   if(!pattern || !string) {
     return CURL_FNMATCH_FAIL;
   }
-  return loop((unsigned char *)pattern, (unsigned char *)string, 5);
+  return loop((unsigned char *)pattern, (unsigned char *)string, 2);
 }
