@@ -1,20 +1,30 @@
 Curl and libcurl 7.61.0
 
  Public curl releases:         175
- Command line options:         214
+ Command line options:         215
  curl_easy_setopt() options:   255
  Public functions in libcurl:  74
  Contributors:                 1741
 
 This release includes the following changes:
 
- o
+ o getinfo: add microsecond precise timers for seven intervals [3]
+ o curl: show headers in bold, switch off with --no-styled-output [10]
 
 This release includes the following bugfixes:
 
  o schannel: disable client cert option if APIs not available [1]
  o schannel: disable manual verify if APIs not available
  o tests/libtest/Makefile: Do not unconditionally add gcc-specific flags [2]
+ o openssl: acknowledge --tls-max for default version too [4]
+ o stub_gssapi: fix 'unused parameter' warnings
+ o examples/progressfunc: make it build on both new and old libcurls [5]
+ o docs: mention it is HA Proxy protocol "version 1" [6]
+ o curl_fnmatch: only allow two asterisks for matching [7]
+ o docs: clarify CURLOPT_HTTPGET [8]
+ o configure: replace a AC_TRY_RUN with CURL_RUN_IFELSE [9]
+ o configure: do compile-time SIZEOF checks instead of run-time [9]
+ o checksrc: make sure sizeof() is used *with* parentheses [11]
 
 This release includes the following known bugs:
 
@@ -23,7 +33,9 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Archangel_SDY on github
+  Archangel_SDY on github, Bernhard Walle, bsammon on github,
+  Dagobert Michelsen, Daniel Stenberg, Philip Prindeville, Ray Satiro,
+  (7 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -31,4 +43,12 @@ References to bug reports and discussions on issues:
 
  [1] = https://curl.haxx.se/bug/?i=2522
  [2] = https://curl.haxx.se/bug/?i=2576
-
+ [3] = https://curl.haxx.se/bug/?i=2495
+ [4] = https://curl.haxx.se/bug/?i=2571
+ [5] = https://curl.haxx.se/bug/?i=2584
+ [6] = https://curl.haxx.se/bug/?i=2579
+ [7] = https://curl.haxx.se/bug/?i=2587
+ [8] = https://curl.haxx.se/bug/?i=2590
+ [9] = https://curl.haxx.se/bug/?i=2586
+ [10] = https://curl.haxx.se/bug/?i=2538
+ [11] = https://curl.haxx.se/bug/?i=2563
