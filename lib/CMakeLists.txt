@@ -77,6 +77,19 @@ if(MSVC AND CURL_STATICLIB)
   set_target_properties(${LIB_NAME} PROPERTIES STATIC_LIBRARY_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 endif()
 
+if(NOT CURL_STATICLIB)
+  include(Version)
+  file(STRINGS "Makefile.am" _line REGEX "^VERSIONINFO=")
+  string(REGEX MATCH "[0-9]+:[0-9]+:[0-9]+$" _versioninfo_string "${_line}")
+  parse_versioninfo("${_versioninfo_string}" _version _soversion)
+  if(_version)
+    set_target_properties(${LIB_NAME} PROPERTIES VERSION ${_version})
+  endif()
+  if(_soversion)
+    set_target_properties(${LIB_NAME} PROPERTIES SOVERSION ${_soversion})
+  endif()
+endif()
+
 target_link_libraries(${LIB_NAME} ${CURL_LIBS})
 
 if(WIN32)
@@ -100,7 +113,7 @@ if(WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
 
     set_target_properties (${LIB_NAME} PROPERTIES
-       DEBUG_POSTFIX "-d"
+       DEBUG_POSTFIX "d"
        # Note: no postfix for release variants, let user choose what style of release he wants
        # MINSIZEREL_POSTFIX "-z"
        # RELWITHDEBINFO_POSTFIX "-g"

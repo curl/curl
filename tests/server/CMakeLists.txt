@@ -32,11 +32,6 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   set_target_properties(${TEST_NAME} PROPERTIES
     PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
 
-  # Add the postfix to the executable since it is not added
-  # automatically as for modules and shared libraries
-  set_target_properties(${TEST_NAME} PROPERTIES
-    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
-
 endfunction()
 
 
