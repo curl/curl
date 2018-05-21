@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,7 +75,7 @@ int test(char *URL)
     fprintf(stderr, "curl_mime_type() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_data(part, buffer, sizeof buffer);
+  res = curl_mime_data(part, buffer, sizeof(buffer));
   if(res) {
     fprintf(stderr, "curl_mime_data() failed\n");
     goto test_cleanup;

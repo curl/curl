@@ -445,7 +445,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 
 #ifdef HAVE_BROTLI
   version_info.brotli_ver_num = BrotliDecoderVersion();
-  brotli_version(brotli_buffer, sizeof brotli_buffer);
+  brotli_version(brotli_buffer, sizeof(brotli_buffer));
   version_info.brotli_version = brotli_buffer;
 #endif
 

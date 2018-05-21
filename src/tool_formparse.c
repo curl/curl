@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -168,12 +168,12 @@ static int read_field_headers(struct OperationConfig *config,
 
     pos++;
     if(!incomment) {
-      if(hdrlen == sizeof hdrbuf - 1) {
+      if(hdrlen == sizeof(hdrbuf) - 1) {
         warnf(config->global, "File %s line %d: header too long (truncated)\n",
               filename, lineno);
         c = ' ';
       }
-      if(hdrlen <= sizeof hdrbuf - 1)
+      if(hdrlen <= sizeof(hdrbuf) - 1)
         hdrbuf[hdrlen++] = (char) c;
     }
   }
@@ -451,7 +451,7 @@ static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
   if(strcmp(file, "-"))
     return curl_mime_filedata(part, file);
 
-  sip = (standard_input *) calloc(1, sizeof *sip);
+  sip = (standard_input *) calloc(1, sizeof(*sip));
   if(!sip)
     return CURLE_OUT_OF_MEMORY;
 
