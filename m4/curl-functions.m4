@@ -7020,7 +7020,25 @@ AC_DEFUN([CURL_RUN_IFELSE], [
    AC_REQUIRE([AC_RUN_IFELSE])dnl
 
    old=$LD_LIBRARY_PATH
-   LD_LIBRARY_PATH=$CURL_LIBRARY_PATH
+   LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+   export LD_LIBRARY_PATH
    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
+   LD_LIBRARY_PATH=$old # restore
+])
+
+dnl CURL_CHECK_SIZEOF
+dnl -------------------------------------------------
+dnl Wrapper macro to use instead of AC_CHECK_SIZEOF. It
+dnl sets LD_LIBRARY_PATH locally for this run only, from the
+dnl CURL_LIBRARY_PATH variable. It keeps LD_LIBRARY_PATH
+dnl changes contained.
+
+AC_DEFUN([CURL_CHECK_SIZEOF], [
+   AC_REQUIRE([AC_CHECK_SIZEOF])dnl
+
+   old=$LD_LIBRARY_PATH
+   LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+   export LD_LIBRARY_PATH
+   AC_CHECK_SIZEOF([$1], [$2], [$3])
    LD_LIBRARY_PATH=$old # restore
 ])
