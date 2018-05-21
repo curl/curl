@@ -36,7 +36,7 @@ problems may have been fixed or changed somewhat since this was written!
  3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
 
  4. Command line
- 4.1 -J with %-encoded file nameas
+ 4.1 -J and -O with %-encoded file names
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
  4.4 --upload-file . hang if delay in STDIN
@@ -266,7 +266,7 @@ problems may have been fixed or changed somewhat since this was written!
 
 4. Command line
 
-4.1 -J with %-encoded file nameas
+4.1 -J and -O with %-encoded file names
 
  -J/--remote-header-name doesn't decode %-encoded file names. RFC6266 details
  how it should be done. The can of worm is basically that we have no charset
@@ -275,6 +275,13 @@ problems may have been fixed or changed somewhat since this was written!
  like "../" sequences and the like. Probably everything to the left of any
  embedded slashes should be cut off.
  https://curl.haxx.se/bug/view.cgi?id=1294
+
+ -O also doesn't decode %-encoded names, and while it has even less
+ information about the charset involved the process is similar to the -J case.
+
+ Note that we won't add decoding to -O without the user asking for it with
+ some other means as well, since -O has always been documented to use the name
+ exactly as specified in the URL.
 
 4.2 -J with -C - fails
 
