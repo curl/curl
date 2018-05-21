@@ -45,7 +45,7 @@ typedef struct {
   CURLcode result; /* Code that should be returned by curl_easy_perform(). */
 }  testparams;
 
-const testparams params[] = {
+static const testparams params[] = {
   { 0,                                                             CURLE_OK },
   {                                 F_CONTENTRANGE,                CURLE_OK },
   {                        F_FAIL,                                 CURLE_OK },
