@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -57,8 +57,8 @@ adding a header like "Transfer-Encoding: chunked" with
 \fICURLOPT_HTTPHEADER(3)\fP. With HTTP 1.0 or without chunked transfer, you
 must specify the size in the request.
 
-When setting \fICURLOPT_POST(3)\fP to 1, it will automatically set
-\fICURLOPT_NOBODY(3)\fP to 0.
+When setting \fICURLOPT_POST(3)\fP to 1, libcurl will automatically set
+\fICURLOPT_NOBODY(3)\fP and \fICURLOPT_HTTPGET(3)\fP to 0.
 
 If you issue a POST request and then want to make a HEAD or GET using the same
 re-used handle, you must explicitly set the new request type using
