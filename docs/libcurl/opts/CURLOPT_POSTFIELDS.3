@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -45,7 +45,7 @@ used by HTML forms. Change Content-Type with \fICURLOPT_HTTPHEADER(3)\fP.
 You can use \fIcurl_easy_escape(3)\fP to url-encode your data, if necessary. It
 returns a pointer to an encoded string that can be passed as \fIpostdata\fP.
 
-Using \fICURLOPT_POSTFIELDS(3)\fP implies \fICURLOPT_POST(3)\fP.
+Using \fICURLOPT_POSTFIELDS(3)\fP implies setting \fICURLOPT_POST(3)\fP to 1.
 
 If \fICURLOPT_POSTFIELDS(3)\fP is explicitly set to NULL then libcurl will get
 the POST data from the read callback. If you want to send a zero-byte POST set
