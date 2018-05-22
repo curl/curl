@@ -15,6 +15,7 @@
 CURLAUTH_ANY                    7.10.6
 CURLAUTH_ANYSAFE                7.10.6
 CURLAUTH_BASIC                  7.10.6
+CURLAUTH_BEARER                 7.61.0
 CURLAUTH_DIGEST                 7.10.6
 CURLAUTH_DIGEST_IE              7.19.3
 CURLAUTH_GSSAPI                 7.55.0

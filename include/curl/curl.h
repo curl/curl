@@ -691,6 +691,7 @@ typedef enum {
  * CURLAUTH_NTLM         - HTTP NTLM authentication
  * CURLAUTH_DIGEST_IE    - HTTP Digest authentication with IE flavour
  * CURLAUTH_NTLM_WB      - HTTP NTLM authentication delegated to winbind helper
+ * CURLAUTH_BEARER       - HTTP Bearer token authentication
  * CURLAUTH_ONLY         - Use together with a single other type to force no
  *                         authentication or just that single type
  * CURLAUTH_ANY          - All fine types set
@@ -708,6 +709,7 @@ typedef enum {
 #define CURLAUTH_NTLM         (((unsigned long)1)<<3)
 #define CURLAUTH_DIGEST_IE    (((unsigned long)1)<<4)
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
+#define CURLAUTH_BEARER       (((unsigned long)1)<<6)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
 #define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
