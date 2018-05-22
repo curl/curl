@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -32,12 +32,20 @@ Pass a char * argument specifying what encoding you'd like.
 
 Sets the contents of the Accept-Encoding: header sent in an HTTP request, and
 enables decoding of a response when a Content-Encoding: header is received.
-Three encodings are supported: \fIidentity\fP, meaning non-compressed,
-\fIdeflate\fP which requests the server to compress its response using the
-zlib algorithm, and \fIgzip\fP which requests the gzip algorithm.
 
-If a zero-length string is set like "", then an Accept-Encoding: header
-containing all built-in supported encodings is sent.
+libcurl potentially supports several different compressed encodings depending
+on what support that has been built-in.
+
+To aid applications not having to bother about what specific algorithms this
+particular libcurl build supports, libcurl allows a zero-length string to be
+set ("") to ask for an Accept-Encoding: header to be used that contains all
+built-in supported encodings.
+
+Alternatively, you can specify exactly the encoding or list of encodings you
+want in the response. Four encodings are supported: \fIidentity\fP, meaning
+non-compressed, \fIdeflate\fP which requests the server to compress its
+response using the zlib algorithm, \fIgzip\fP which requests the gzip
+algorithm and (since curl 7.57.0) \fIbr\fP which is brotli.
 
 Set this option to NULL to explicitly disable it, which makes libcurl not send
 an Accept-Encoding: header and not decompress contents automatically.
