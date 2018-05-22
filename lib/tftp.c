@@ -1148,8 +1148,11 @@ static CURLcode tftp_receive_packet(struct connectdata *conn)
     case TFTP_EVENT_ERROR:
     {
       unsigned short error = getrpacketblock(&state->rpacket);
+      char *str = (char *)state->rpacket.data + 4;
+      size_t strn = state->rbytes - 4;
       state->error = (tftp_error_t)error;
-      infof(data, "%s\n", (const char *)state->rpacket.data + 4);
+      if(Curl_strnlen(str, strn) < strn)
+        infof(data, "TFTP error: %s\n", str);
       break;
     }
     case TFTP_EVENT_ACK:
