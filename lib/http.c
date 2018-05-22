@@ -310,6 +310,31 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
   return result;
 }
 
+/*
+ * http_output_bearer() sets up an Authorization: header
+ * for HTTP Bearer authentication.
+ *
+ * Returns CURLcode.
+ */
+static CURLcode http_output_bearer(struct connectdata *conn)
+{
+  char **userp;
+  CURLcode result = CURLE_OK;
+
+  userp = &conn->allocptr.userpwd;
+  free(*userp);
+  *userp = aprintf("Authorization: Bearer %s\r\n",
+                   conn->oauth_bearer);
+
+  if(!*userp) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
+
+  fail:
+  return result;
+}
+
 /* pickoneauth() selects the most favourable authentication method from the
  * ones available and the ones we want.
  *
@@ -326,6 +351,8 @@ static bool pickoneauth(struct auth *pick)
      of preference in case of the existence of multiple accepted types. */
   if(avail & CURLAUTH_NEGOTIATE)
     pick->picked = CURLAUTH_NEGOTIATE;
+  else if(avail & CURLAUTH_BEARER)
+    pick->picked = CURLAUTH_BEARER;
   else if(avail & CURLAUTH_DIGEST)
     pick->picked = CURLAUTH_DIGEST;
   else if(avail & CURLAUTH_NTLM)
@@ -628,6 +655,20 @@ output_auth_headers(struct connectdata *conn,
        functions work that way */
     authstatus->done = TRUE;
   }
+  if(authstatus->picked == CURLAUTH_BEARER) {
+    /* Bearer */
+    if((!proxy && conn->oauth_bearer &&
+        !Curl_checkheaders(conn, "Authorization:"))) {
+      auth = "Bearer";
+      result = http_output_bearer(conn);
+      if(result)
+        return result;
+    }
+
+    /* NOTE: this function should set 'done' TRUE, as the other auth
+       functions work that way */
+    authstatus->done = TRUE;
+  }
 
   if(auth) {
     infof(data, "%s auth using %s with user '%s'\n",
@@ -674,7 +715,7 @@ Curl_http_output_auth(struct connectdata *conn,
   authproxy = &data->state.authproxy;
 
   if((conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
-     conn->bits.user_passwd)
+     conn->bits.user_passwd || conn->oauth_bearer)
     /* continue please */;
   else {
     authhost->done = TRUE;
@@ -883,6 +924,18 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
               data->state.authproblem = TRUE;
             }
           }
+          else
+            if(checkprefix("Bearer", auth)) {
+              *availp |= CURLAUTH_BEARER;
+              authp->avail |= CURLAUTH_BEARER;
+              if(authp->picked == CURLAUTH_BEARER) {
+                /* We asked for Bearer authentication but got a 40X back
+                  anyway, which basically means our token isn't valid. */
+                authp->avail = CURLAUTH_NONE;
+                infof(data, "Authentication problem. Ignoring this.\n");
+                data->state.authproblem = TRUE;
+              }
+            }
 
     /* there may be multiple methods on one line, so keep reading */
     while(*auth && *auth != ',') /* read up to the next comma */
