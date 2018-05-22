@@ -2348,7 +2348,7 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
       check_for_ca_bundle=1
 
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
-      AX_COMPILE_CHECK_SIZEOF(long long)
+      AX_COMPILE_CHECK_SIZEOF([long long])
 
       dnl Versions since at least 2.6.0 may have options.h
       AC_CHECK_HEADERS(cyassl/options.h)
