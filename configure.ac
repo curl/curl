@@ -1591,9 +1591,11 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
     dnl specify PKG_CONFIG_LIBDIR we're only looking where
     dnl the user told us to look
     OPENSSL_PCDIR="$OPT_SSL/lib/pkgconfig"
-    AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
     if test -f "$OPENSSL_PCDIR/openssl.pc"; then
+      AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
       PKGTEST="yes"
+    elif test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
+      AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-ssl prefix!])
     fi
 
     dnl in case pkg-config comes up empty, use what we got
