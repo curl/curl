@@ -98,13 +98,6 @@ if(WIN32)
   if(NOT CURL_STATICLIB)
     # Add "_imp" as a suffix before the extension to avoid conflicting with the statically linked "libcurl.lib"
     set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
-
-    set_target_properties (${LIB_NAME} PROPERTIES
-       DEBUG_POSTFIX "-d"
-       # Note: no postfix for release variants, let user choose what style of release he wants
-       # MINSIZEREL_POSTFIX "-z"
-       # RELWITHDEBINFO_POSTFIX "-g"
-       )
   endif()
 endif()
 
