@@ -100,7 +100,7 @@ if(WIN32)
     set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
 
     set_target_properties (${LIB_NAME} PROPERTIES
-       DEBUG_POSTFIX "-d"
+       DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
        # Note: no postfix for release variants, let user choose what style of release he wants
        # MINSIZEREL_POSTFIX "-z"
        # RELWITHDEBINFO_POSTFIX "-g"
