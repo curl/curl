@@ -1559,7 +1559,6 @@ struct UserDefined {
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
-  long pslttl; /* PSL time to live. */
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
 

@@ -55,7 +55,6 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
 {
   struct PslCache *pslcache = easy->psl;
   const psl_ctx_t *psl;
-  time_t expires;
   time_t now;
 
   if(!pslcache)
@@ -63,19 +62,16 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
 
   Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
   now = now_seconds();
-  expires = pslcache->since + easy->set.pslttl;
-  if(!pslcache->psl ||
-     (easy->set.pslttl >= 0 && expires >= pslcache->since && expires <= now)) {
+  if(!pslcache->psl || pslcache->expires <= now) {
     /* Let a chance to other threads to do the job: avoids deadlock. */
     Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);
 
+    /* Update cache: this needs an exclusive lock. */
     Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SINGLE);
 
     /* Recheck in case another thread did the job. */
     now = now_seconds();
-    expires = pslcache->since + easy->set.pslttl;
-    if(!pslcache->psl || (easy->set.pslttl >= 0 &&
-                          expires >= pslcache->since && expires <= now)) {
+    if(!pslcache->psl || pslcache->expires <= now) {
       psl = psl_latest(NULL);
       bool dynamic = TRUE;
 
@@ -89,9 +85,12 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
         Curl_psl_destroy(pslcache);
         pslcache->psl = psl;
         pslcache->dynamic = dynamic;
-        pslcache->since = now;
+        pslcache->expires = now + PSL_TTL;
+        if(pslcache->expires < now)     /* Overflow? */
+          pslcache->expires = TIME_T_MAX;
       }
     }
+    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
     Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
   }
   psl = pslcache->psl;

@@ -22,14 +22,14 @@
  *
  ***************************************************************************/
 
-#define PSL_DEFAULT_TTL 3600
-
 #ifdef USE_LIBPSL
 #include <libpsl.h>
 
+#define PSL_TTL (72 * 3600)     /* PSL time to live before a refresh. */
+
 struct PslCache {
   const psl_ctx_t *psl; /* The PSL. */
-  time_t since; /* Time this PSL has been set up. */
+  time_t expires; /* Time this PSL life expires. */
   bool dynamic; /* PSL should be released when no longer needed. */
 };
 
