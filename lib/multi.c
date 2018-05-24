@@ -31,6 +31,7 @@
 #include "progress.h"
 #include "easyif.h"
 #include "share.h"
+#include "psl.h"
 #include "multiif.h"
 #include "sendf.h"
 #include "timeval.h"
@@ -409,6 +410,14 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   else
     data->state.conn_cache = &multi->conn_cache;
 
+#ifdef USE_LIBPSL
+  /* Do the same for PSL. */
+  if(data->share && (data->share->specifier & (1 << CURL_LOCK_DATA_PSL)))
+    data->psl = &data->share->psl;
+  else
+    data->psl = &multi->psl;
+#endif
+
   /* This adds the new entry at the 'end' of the doubly-linked circular
      list of Curl_easy structs to try and maintain a FIFO queue so
      the pipelined requests are in order. */
@@ -726,6 +735,12 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     data->easy_conn->data = NULL;
     data->easy_conn = NULL;
   }
+
+#ifdef USE_LIBPSL
+  /* Remove the PSL association. */
+  if(data->psl == &multi->psl)
+    data->psl = NULL;
+#endif
 
   data->multi = NULL; /* clear the association to this multi handle */
 
@@ -2220,6 +2235,11 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
       data->state.conn_cache = NULL;
       data->multi = NULL; /* clear the association */
 
+#ifdef USE_LIBPSL
+      if(data->psl == &multi->psl)
+        data->psl = NULL;
+#endif
+
       data = nextdata;
     }
 
@@ -2232,6 +2252,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_llist_destroy(&multi->pending, NULL);
 
     Curl_hash_destroy(&multi->hostcache);
+    Curl_psl_destroy(&multi->psl);
 
     /* Free the blacklists by setting them to NULL */
     Curl_pipeline_set_site_blacklist(NULL, &multi->pipelining_site_bl);

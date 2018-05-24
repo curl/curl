@@ -80,6 +80,7 @@
 #define RESP_TIMEOUT (1800*1000)
 
 #include "cookie.h"
+#include "psl.h"
 #include "formdata.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -1558,6 +1559,7 @@ struct UserDefined {
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
+  long pslttl; /* PSL time to live. */
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
 
@@ -1736,6 +1738,9 @@ struct Curl_easy {
                                     struct to which this "belongs" when used
                                     by the easy interface */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
+#ifdef USE_LIBPSL
+  struct PslCache *psl;        /* The associated PSL cache. */
+#endif
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */

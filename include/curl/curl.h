@@ -1847,6 +1847,9 @@ typedef enum {
   /* shuffle addresses before use when DNS returns multiple */
   CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 275),
 
+  /* Set PSL time to live (seconds). */
+  CINIT(PSL_TTL, LONG, 276),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2580,6 +2583,7 @@ typedef enum {
   CURL_LOCK_DATA_DNS,
   CURL_LOCK_DATA_SSL_SESSION,
   CURL_LOCK_DATA_CONNECT,
+  CURL_LOCK_DATA_PSL,
   CURL_LOCK_DATA_LAST
 } curl_lock_data;
 

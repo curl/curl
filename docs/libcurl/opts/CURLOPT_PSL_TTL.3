@@ -1,0 +1,73 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_PSL_TTL 3 "24 May 2018" "libcurl 7.61.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_PSL_TTL \- set life-time of cached Public Suffix List
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PSL_TTL, long seconds);
+.SH DESCRIPTION
+Pass a long, this sets the time to live in seconds. PSL associated with the
+handle will be refreshed after this number of seconds. Set to zero to
+completely disable PSL caching, or set to -1 to make it remain forever.
+By default, libcurl caches this info for 1 hour.
+
+If the handle uses a PSL cache in a shared object, all easy handle using
+the same shared object may be affected when a PSL cache refresh occurs.
+Similarly, If the handle has been attached to a multi handle, all sibling
+handles share the same PSL cache, thus refreshing the PSL cache may also have
+an impact on these siblings.
+
+Currently, Public Suffix List is only used to check cookies domain.
+.SH DEFAULT
+3600
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/foo.bin");
+
+  /* export cookies to this file when closing the handle */
+  curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "/tmp/cookies.txt");
+
+  /* Only reuse cached PSL for a very short time */
+  curl_easy_setopt(curl, CURLOPT_PSL_TTL, 2L);
+
+  ret = curl_easy_perform(curl);
+
+  /* in this second request, the PSL cache will be refreshed if more than
+     two seconds have passed since the previous request's cookie reception. */
+  ret = curl_easy_perform(curl);
+
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Only if PSL feature is compiled-in. Since 7.61.0.
+.SH RETURN VALUE
+Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_COOKIEJAR "(3)"

@@ -1942,6 +1942,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       if(data->share->sslsession == data->state.session)
         data->state.session = NULL;
 
+#ifdef USE_LIBPSL
+      if(data->psl == &data->share->psl)
+        data->psl = data->multi? &data->multi->psl: NULL;
+#endif
+
       data->share->dirty--;
 
       Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
@@ -1973,8 +1978,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
         data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
       }
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+#ifdef USE_LIBPSL
+      if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
+        data->psl = &data->share->psl;
+#endif
 
+      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
     }
     /* check for host cache not needed,
      * it will be done by curl_easy_perform */
@@ -2562,6 +2571,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
     data->set.dns_shuffle_addresses = (0 != va_arg(param, long)) ? TRUE:FALSE;
     break;
+  case CURLOPT_PSL_TTL:
+    arg = va_arg(param, long);
+    if(arg < -1)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+#ifdef USE_LIBPSL
+    data->set.pslttl = arg;
+    break;
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

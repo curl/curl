@@ -76,6 +76,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "sendf.h"
 #include "progress.h"
 #include "cookie.h"
+#include "psl.h"
 #include "strcase.h"
 #include "strerror.h"
 #include "escape.h"
@@ -598,6 +599,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
       data->state.current_speed = -1; /* init to negative == impossible */
       data->set.fnmatch = ZERO_NULL;
       data->set.maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+      data->set.pslttl = PSL_DEFAULT_TTL;
 
       Curl_http2_init_state(&data->state);
     }
