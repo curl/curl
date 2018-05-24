@@ -56,6 +56,10 @@ defined in RFC2617 and is a more secure way to do authentication over public
 networks than the regular old-fashioned Basic method. The IE flavor is simply
 that libcurl will use a special "quirk" that IE is known to have used before
 version 7 and that some servers require the client to use.
+.IP CURLAUTH_BEARER
+HTTP Bearer token authentication, used primarily in OAuth 2.0 protocol.
+
+You can set the Bearer token to use with \fICURLOPT_XOAUTH2_BEARER(3)\fP.
 .IP CURLAUTH_NEGOTIATE
 HTTP Negotiate (SPNEGO) authentication. Negotiate authentication is defined
 in RFC 4559 and is the most secure way to perform authentication over HTTP.
