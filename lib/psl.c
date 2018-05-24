@@ -85,9 +85,9 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
         Curl_psl_destroy(pslcache);
         pslcache->psl = psl;
         pslcache->dynamic = dynamic;
-        pslcache->expires = now + PSL_TTL;
-        if(pslcache->expires < now)     /* Overflow? */
-          pslcache->expires = TIME_T_MAX;
+        /* Take care of possible overflow. */
+        pslcache->expires = now < TIME_T_MAX - PSL_TTL? now + PSL_TTL:
+                                                        TIME_T_MAX;
       }
     }
     Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
