@@ -38,6 +38,7 @@
  1.19 Timeout idle connections from the pool
  1.20 SRV and URI DNS records
  1.21 API for URL parsing/splitting
+ 1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
  1.25 Expose tried IP addresses that failed
@@ -386,6 +387,11 @@
  features to allow applications to do it. Still most or many applications
  using libcurl need that ability. In polls to users, we've learned that many
  libcurl users would like to see and use such an API.
+
+1.22 CURLINFO_PAUSE_STATE
+
+ Return information about the transfer's current pause state, in both
+ directions. https://github.com/curl/curl/issues/2588
 
 1.23 Offer API to flush the connection pool
 
