@@ -439,7 +439,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       result = get_cert_location(cert_path, &cert_store_name,
                                  &cert_store_path, &cert_thumbprint_str);
       if(result != CURLE_OK) {
-        failf(data, "schannel: Failed to get certificate location for %s", cert_path);
+        failf(data, "schannel: Failed to get certificate location for %s",
+              cert_path);
         Curl_unicodefree(cert_path);
         return result;
       }
@@ -448,7 +449,8 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                                  (HCRYPTPROV)NULL,
                                  cert_store_name, cert_store_path);
       if(!cert_store) {
-        failf(data, "schannel: Failed to open cert store %s %s", cert_store_name, cert_store_path);
+        failf(data, "schannel: Failed to open cert store %s %s",
+              cert_store_name, cert_store_path);
         Curl_unicodefree(cert_path);
         return CURLE_SSL_CONNECT_ERROR;
       }
