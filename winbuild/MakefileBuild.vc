@@ -502,7 +502,7 @@ package: $(TARGET)
 	@-$(ZIP) -9 -q -r ..\$(CONFIG_NAME_LIB).zip .>nul 2<&1
 	@cd $(MAKEDIR)
 
-$(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
+$(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DIRDIST)
 	@echo Using SSL: $(USE_SSL)
 	@echo Using NGHTTP2: $(USE_NGHTTP2)
 	@echo Using c-ares: $(USE_CARES)
