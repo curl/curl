@@ -800,4 +800,11 @@ endings either CRLF or LF so 't' is appropriate.
 #define CURL_SA_FAMILY_T unsigned short
 #endif
 
+/* Some versions of the Android SDK is missing the declaration */
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
+struct passwd;
+int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
+               size_t buflen, struct passwd **result);
+#endif
+
 #endif /* HEADER_CURL_SETUP_H */
