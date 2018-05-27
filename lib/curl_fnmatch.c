@@ -334,9 +334,9 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
         s++;
         break;
       }
+      /* Syntax error in set; mismatch! */
+      return CURL_FNMATCH_NOMATCH;
 
-      /* Syntax error in set: this must be taken as a regular character. */
-      /* FALLTHROUGH */
     default:
       if(*p++ != *s++)
         return CURL_FNMATCH_NOMATCH;
