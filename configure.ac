@@ -3617,6 +3617,11 @@ case $host in
     ;;
 esac
 
+AC_CHECK_DECLS([getpwuid_r], [], [AC_DEFINE(HAVE_DECL_GETPWUID_R_MISSING, 1, "Set if getpwuid_r() declaration is missing")],
+        [[#include <pwd.h>
+          #include <sys/types.h>]])
+
+
 AC_CHECK_FUNCS([geteuid \
   getpass_r \
   getppid \
