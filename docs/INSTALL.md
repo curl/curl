@@ -72,10 +72,9 @@ work:
 
 If you have shared SSL libs installed in a directory where your run-time
 linker doesn't find them (which usually causes configure failures), you can
-provide the -R option to ld on some operating systems to set a hard-coded
-path to the run-time linker:
+provide this option to gcc to set a hard-coded path to the run-time linker:
 
-    LDFLAGS=-R/usr/local/ssl/lib ./configure --with-ssl
+    LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-ssl
 
 ## More Options
 
