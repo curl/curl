@@ -1,4 +1,4 @@
-long: show-error
+Long: show-error
 Short: S
 Help: Show error even when -s is used
 ---
