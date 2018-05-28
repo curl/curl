@@ -202,6 +202,9 @@ sub single {
         my @m=split(/ /, $seealso);
         my $mstr;
         for my $k (@m) {
+            if(!$helplong{$k}) {
+                print STDERR "WARN: $f see-alsos a non-existing option: $k\n";
+            }
             my $l = manpageify($k);
             $mstr .= sprintf "%s$l", $mstr?" and ":"";
         }
@@ -216,6 +219,9 @@ sub single {
         my @m=split(/ /, $mutexed);
         my $mstr;
         for my $k (@m) {
+            if(!$helplong{$k}) {
+                print STDERR "WARN: $f mutexes a non-existing option: $k\n";
+            }
             my $l = manpageify($k);
             $mstr .= sprintf "%s$l", $mstr?" and ":"";
         }
