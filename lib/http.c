@@ -2992,7 +2992,7 @@ static CURLcode header_append(struct Curl_easy *data,
     /* The reason to have a max limit for this is to avoid the risk of a bad
        server feeding libcurl with a never-ending header that will cause
        reallocs infinitely */
-    failf(data, "Rejected %zd bytes header (max is %d)!", newsize,
+    failf(data, "Rejected %zu bytes header (max is %d)!", newsize,
           CURL_MAX_HTTP_HEADER);
     return CURLE_OUT_OF_MEMORY;
   }

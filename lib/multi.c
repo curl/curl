@@ -555,7 +555,7 @@ static CURLcode multi_done(struct connectdata **connp,
   if(conn->send_pipe.size || conn->recv_pipe.size) {
     /* Stop if pipeline is not empty . */
     data->easy_conn = NULL;
-    DEBUGF(infof(data, "Connection still in use %d/%d, "
+    DEBUGF(infof(data, "Connection still in use %zu/%zu, "
                  "no more multi_done now!\n",
                  conn->send_pipe.size, conn->recv_pipe.size));
     return CURLE_OK;
@@ -1083,7 +1083,7 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
     int pollrc;
     /* wait... */
     pollrc = Curl_poll(ufds, nfds, timeout_ms);
-    DEBUGF(infof(data, "Curl_poll(%d ds, %d ms) == %d\n",
+    DEBUGF(infof(data, "Curl_poll(%u ds, %d ms) == %d\n",
                  nfds, timeout_ms, pollrc));
 
     if(pollrc > 0) {
