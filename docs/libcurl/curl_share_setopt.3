@@ -87,6 +87,15 @@ existed before this.
 
 Note that when you use the multi interface, all easy handles added to the same
 multi handle will share connection cache by default without using this option.
+.IP CURL_LOCK_DATA_PSL
+The Public Suffix List stored in the share object is made available to all
+easy handle bound to the later. Since the Public Suffix List is periodically
+refreshed, this avoids updates in too many different contexts.
+
+\fBCURL_LOCK_DATA_PSL\fP exists since 7.61.0.
+
+Note that when you use the multi interface, all easy handles added to the same
+multi handle will share PSL cache by default without using this option.
 .RE
 .IP CURLSHOPT_UNSHARE
 This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that
