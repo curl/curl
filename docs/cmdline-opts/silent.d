@@ -1,4 +1,4 @@
-long: silent
+Long: silent
 Short: s
 Help: Silent mode
 See-also: verbose stderr
