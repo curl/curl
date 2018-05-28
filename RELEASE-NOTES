@@ -10,6 +10,7 @@ This release includes the following changes:
 
  o getinfo: add microsecond precise timers for seven intervals [3]
  o curl: show headers in bold, switch off with --no-styled-output [10]
+ o httpauth: add support for Bearer tokens [16]
 
 This release includes the following bugfixes:
 
@@ -25,6 +26,21 @@ This release includes the following bugfixes:
  o configure: replace a AC_TRY_RUN with CURL_RUN_IFELSE [9]
  o configure: do compile-time SIZEOF checks instead of run-time [9]
  o checksrc: make sure sizeof() is used *with* parentheses [11]
+ o CURLOPT_ACCEPT_ENCODING.3: add brotli and clarify a bit
+ o schannel: make CAinfo parsing resilient to CR/LF [12]
+ o tftp: make sure error is zero terminated before printfing it
+ o http resume: skip body if http code 416 (range error) is ignored [13]
+ o configure: add basic test of --with-ssl prefix [14]
+ o cmake: set -d postfix for debug builds [15]
+ o multi: provide a socket to wait for in Curl_protocol_getsock [17]
+ o content_encoding: handle zlib versions too old for Z_BLOCK [18]
+ o winbuild: only delete OUTFILE if it exists [19]
+ o winbuild: In MakefileBuild.vc fix typo DISTDIR->DIRDIST [20]
+ o schannel: add failf calls for client certificate failures [21]
+ o cmake: Fix the test for fsetxattr and strerror_r
+ o curl.1: Fix cmdline-opts reference errors [22]
+ o cmdline-opts/gen.pl: warn if mutexes: or see-also: list non-existing options
+ o cmake: check for getpwuid_r [23]
 
 This release includes the following known bugs:
 
@@ -33,9 +49,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Archangel_SDY on github, Bernhard Walle, bsammon on github,
-  Dagobert Michelsen, Daniel Stenberg, Philip Prindeville, Ray Satiro,
-  (7 contributors)
+  Alejandro R. Sedeño, Archangel_SDY on github, Bernhard Walle,
+  bsammon on github, Dagobert Michelsen, Daniel Stenberg, Frank Gevaerts,
+  Ithubg on github, Johannes Schindelin, Linus Lewandowski, Max Savenkov,
+  Oleg Pudeyev, Patrick Monnerat, Per Malmberg, Philip Prindeville, Ray Satiro,
+  Richard Alcock, Sean Miller, Sergei Nikulov,
+  (19 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -52,3 +71,15 @@ References to bug reports and discussions on issues:
  [9] = https://curl.haxx.se/bug/?i=2586
  [10] = https://curl.haxx.se/bug/?i=2538
  [11] = https://curl.haxx.se/bug/?i=2563
+ [12] = https://curl.haxx.se/bug/?i=2592
+ [13] = https://curl.haxx.se/bug/?i=1163
+ [14] = https://curl.haxx.se/bug/?i=2580
+ [15] = https://curl.haxx.se/bug/?i=2121
+ [16] = https://curl.haxx.se/bug/?i=2102
+ [17] = https://curl.haxx.se/mail/lib-2018-05/0062.html
+ [18] = https://curl.haxx.se/bug/?i=2606
+ [19] = https://curl.haxx.se/bug/?i=2602
+ [20] = https://curl.haxx.se/bug/?i=2603
+ [21] = https://curl.haxx.se/bug/?i=2604
+ [22] = https://curl.haxx.se/bug/?i=2612
+ [23] = https://curl.haxx.se/bug/?i=2609
