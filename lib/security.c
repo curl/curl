@@ -488,7 +488,7 @@ static CURLcode choose_mech(struct connectdata *conn)
 
   tmp_allocation = realloc(conn->app_data, mech->size);
   if(tmp_allocation == NULL) {
-    failf(data, "Failed realloc of size %u", mech->size);
+    failf(data, "Failed realloc of size %zu", mech->size);
     mech = NULL;
     return CURLE_OUT_OF_MEMORY;
   }

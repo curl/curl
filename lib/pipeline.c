@@ -82,7 +82,8 @@ bool Curl_pipeline_penalized(struct Curl_easy *data,
       penalized = TRUE;
 
     infof(data, "Conn: %ld (%p) Receive pipe weight: (%"
-          CURL_FORMAT_CURL_OFF_T "/%zu), penalized: %s\n",
+          CURL_FORMAT_CURL_OFF_T "/%" CURL_FORMAT_CURL_OFF_T
+          "), penalized: %s\n",
           conn->connection_id, (void *)conn, recv_size,
           conn->chunk.datasize, penalized?"TRUE":"FALSE");
     return penalized;

@@ -206,7 +206,7 @@ static CURLcode CONNECT(struct connectdata *conn,
       char *host_port;
       Curl_send_buffer *req_buffer;
 
-      infof(data, "Establish HTTP proxy tunnel to %s:%hu\n",
+      infof(data, "Establish HTTP proxy tunnel to %s:%d\n",
             hostname, remote_port);
 
         /* This only happens if we've looped here due to authentication

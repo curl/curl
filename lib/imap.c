@@ -1119,7 +1119,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   }
 
   if(parsed) {
-    infof(data, "Found %" CURL_FORMAT_CURL_OFF_TU " bytes to download\n",
+    infof(data, "Found %" CURL_FORMAT_CURL_OFF_T " bytes to download\n",
           size);
     Curl_pgrsSetDownloadSize(data, size);
 
@@ -1144,10 +1144,8 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
 
       data->req.bytecount += chunk;
 
-      infof(data, "Written %" CURL_FORMAT_CURL_OFF_TU
-            " bytes, %" CURL_FORMAT_CURL_OFF_TU
-            " bytes are left for transfer\n", (curl_off_t)chunk,
-            size - chunk);
+      infof(data, "Written %zu bytes, %" CURL_FORMAT_CURL_OFF_TU
+            " bytes are left for transfer\n", chunk, size - chunk);
 
       /* Have we used the entire cache or just part of it?*/
       if(pp->cache_size > chunk) {
