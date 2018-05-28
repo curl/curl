@@ -757,7 +757,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
    */
   if(!conn->bits.close &&
      (conn->send_pipe.size + conn->recv_pipe.size)) {
-    DEBUGF(infof(data, "Curl_disconnect, usecounter: %d\n",
+    DEBUGF(infof(data, "Curl_disconnect, usecounter: %zu\n",
                  conn->send_pipe.size + conn->recv_pipe.size));
     return CURLE_OK;
   }
@@ -2207,7 +2207,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       size_t s = strlen(slashbuf);
       protop = protobuf;
       if(s != 2) {
-        infof(data, "Unwillingly accepted illegal URL using %d slash%s!\n",
+        infof(data, "Unwillingly accepted illegal URL using %zu slash%s!\n",
               s, s>1?"es":"");
 
         if(data->change.url_alloc)
@@ -2453,7 +2453,7 @@ static CURLcode setup_range(struct Curl_easy *data)
       free(s->range);
 
     if(s->resume_from)
-      s->range = aprintf("%" CURL_FORMAT_CURL_OFF_TU "-", s->resume_from);
+      s->range = aprintf("%" CURL_FORMAT_CURL_OFF_T "-", s->resume_from);
     else
       s->range = strdup(data->set.str[STRING_SET_RANGE]);
 
@@ -4485,7 +4485,7 @@ static CURLcode create_conn(struct Curl_easy *data,
           (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
         }
         else {
-          infof(data, "No more connections allowed to host: %d\n",
+          infof(data, "No more connections allowed to host: %zu\n",
                 max_host_connections);
           connections_available = FALSE;
         }

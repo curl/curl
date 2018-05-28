@@ -764,7 +764,7 @@ static void printsub(struct Curl_easy *data,
     switch(pointer[0]) {
     case CURL_TELOPT_NAWS:
       if(length > 4)
-        infof(data, "Width: %hu ; Height: %hu", (pointer[1]<<8) | pointer[2],
+        infof(data, "Width: %d ; Height: %d", (pointer[1]<<8) | pointer[2],
               (pointer[3]<<8) | pointer[4]);
       break;
     default:

@@ -301,8 +301,8 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   connc->num_conn++;
 
   DEBUGF(infof(conn->data, "Added connection %ld. "
-               "The cache now contains %" CURL_FORMAT_CURL_OFF_TU " members\n",
-               conn->connection_id, (curl_off_t) connc->num_conn));
+               "The cache now contains %zu members\n",
+               conn->connection_id, connc->num_conn));
 
   unlock:
   CONN_UNLOCK(data);
@@ -328,9 +328,8 @@ void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
     conn->bundle = NULL; /* removed from it */
     if(connc) {
       connc->num_conn--;
-      DEBUGF(infof(conn->data, "The cache now contains %"
-                   CURL_FORMAT_CURL_OFF_TU " members\n",
-                   (curl_off_t) connc->num_conn));
+      DEBUGF(infof(conn->data, "The cache now contains %zu members\n",
+                   connc->num_conn));
     }
     if(lock) {
       CONN_UNLOCK(conn->data);
@@ -501,9 +500,8 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
     /* remove it to prevent another thread from nicking it */
     bundle_remove_conn(bundle, conn_candidate);
     data->state.conn_cache->num_conn--;
-    DEBUGF(infof(data, "The cache now contains %"
-                 CURL_FORMAT_CURL_OFF_TU " members\n",
-                 (curl_off_t) data->state.conn_cache->num_conn));
+    DEBUGF(infof(data, "The cache now contains %zu members\n",
+                 data->state.conn_cache->num_conn));
   }
 
   return conn_candidate;
@@ -563,9 +561,8 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     /* remove it to prevent another thread from nicking it */
     bundle_remove_conn(bundle_candidate, conn_candidate);
     connc->num_conn--;
-    DEBUGF(infof(data, "The cache now contains %"
-                 CURL_FORMAT_CURL_OFF_TU " members\n",
-                 (curl_off_t) connc->num_conn));
+    DEBUGF(infof(data, "The cache now contains %zu members\n",
+                 connc->num_conn));
   }
   CONN_UNLOCK(data);
 

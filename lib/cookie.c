@@ -496,7 +496,7 @@ Curl_cookie_add(struct Curl_easy *data,
              name + contents. Chrome and Firefox support 4095 or 4096 bytes
              combo. */
           freecookie(co);
-          infof(data, "oversized cookie dropped, name/val %d + %d bytes\n",
+          infof(data, "oversized cookie dropped, name/val %zu + %zu bytes\n",
                 nlen, len);
           return NULL;
         }
