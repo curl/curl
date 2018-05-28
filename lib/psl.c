@@ -72,22 +72,26 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
     /* Recheck in case another thread did the job. */
     now = now_seconds();
     if(!pslcache->psl || pslcache->expires <= now) {
+      bool dynamic = FALSE;
+      time_t expires = TIME_T_MAX;
+
+#if defined(PSL_VERSION_NUMBER) && PSL_VERSION_NUMBER >= 0x001000
       psl = psl_latest(NULL);
-      bool dynamic = TRUE;
+      dynamic = psl != NULL;
+      /* Take care of possible time computation overflow. */
+      expires = now < TIME_T_MAX - PSL_TTL? now + PSL_TTL: TIME_T_MAX;
 
       /* Only get the built-in PSL if we do not already have the "latest". */
-      if(!psl && !pslcache->dynamic) {
+      if(!psl && !pslcache->dynamic)
+#endif
+
         psl = psl_builtin();
-        dynamic = FALSE;
-      }
 
       if(psl) {
         Curl_psl_destroy(pslcache);
         pslcache->psl = psl;
         pslcache->dynamic = dynamic;
-        /* Take care of possible overflow. */
-        pslcache->expires = now < TIME_T_MAX - PSL_TTL? now + PSL_TTL:
-                                                        TIME_T_MAX;
+        pslcache->expires = expires;
       }
     }
     Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
