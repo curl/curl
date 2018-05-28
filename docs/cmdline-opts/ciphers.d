@@ -1,6 +1,6 @@
 Long: ciphers
 Arg: <list of ciphers>
-help: SSL ciphers to use
+Help: SSL ciphers to use
 Protocols: TLS
 ---
 Specifies which ciphers to use in the connection. The list of ciphers must
