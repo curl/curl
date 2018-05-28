@@ -1,4 +1,4 @@
-long: url
+Long: url
 Arg: <url>
 Help: URL to work with
 ---
