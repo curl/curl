@@ -291,6 +291,9 @@
      d CURL_REDIR_POST_ALL...
      d                 c                   7
       *
+     d CURL_ZERO_TERMINATED...
+     d                 c                   -1
+      *
      d CURL_POLL_NONE  c                   0
      d CURL_POLL_IN    c                   1
      d CURL_POLL_OUT   c                   2
@@ -1981,6 +1984,74 @@
       *                              Prototypes
       **************************************************************************
       *
+     d curl_mime_init  pr              *   extproc('curl_mime_init')            curl_mime *
+     d  easy                           *   value                                CURL *
+      *
+     d curl_mime_free  pr                  extproc('curl_mime_free')
+     d  mime                           *   value                                curl_mime *
+      *
+     d curl_mime_addpart...
+     d                 pr              *   extproc('curl_mime_addpart')         curl_mimepart *
+     d  mime                           *   value                                curl_mime *
+      *
+     d curl_mime_name  pr                  extproc('curl_mime_name')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  name                           *   value options(*string)
+      *
+     d curl_mime_filename...
+     d                 pr                  extproc('curl_mime_filename')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+      *
+     d curl_mime_type  pr                  extproc('curl_mime_type')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  mimetype                       *   value options(*string)
+      *
+     d curl_mime_encoder...
+     d                 pr                  extproc('curl_mime_encoder')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  encoding                       *   value options(*string)
+      *
+     d curl_mime_data  pr                  extproc('curl_mime_data')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  data                           *   value options(*string)
+     d  datasize                     10u 0                                      size_t
+      *
+     d curl_mime_filedata...
+     d                 pr                  extproc('curl_mime_filedata')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+      *
+     d curl_mime_data_cb...
+     d                 pr                  extproc('curl_mime_data_cb')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  datasize                           value like(curl_off_t)
+     d  readfunc                           value like(curl_read_callback)
+     d  seekfunc                           value like(curl_seek_callback)
+     d  freefunc                           value like(curl_free_callback)
+     d  arg                            *   value                                void *
+      *
+     d curl_mime_subparts...
+     d                 pr                  extproc('curl_mime_subparts')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  subparts                       *   value                                curl_mime *
+      *
+     d curl_mime_headers...
+     d                 pr                  extproc('curl_mime_headers')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  headers                        *   value                                curl_slist *
+     d  take_ownership...
+     d                               10i 0 value
+      *
       *  This procedure as a variable parameter list.
       *  This prototype allows use of an option array, or a single "object"
       *    option. Other argument lists may be implemented by alias procedure
@@ -2465,5 +2536,48 @@
      d  header                         *   value options(*string)               const char *
      d  ccsidin                      10u 0 value
      d  ccsidout                     10u 0 value
+      *
+     d curl_mime_name_ccsid...
+     d                 pr                  extproc('curl_mime_name_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  name                           *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_filename_ccsid...
+     d                 pr                  extproc('curl_mime_filename_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_type_ccsid...
+     d                 pr                  extproc('curl_mime_type_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  mimetype                       *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_encoder_ccsid...
+     d                 pr                  extproc('curl_mime_encoder_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  encoding                       *   value options(*string)
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_data_ccsid...
+     d                 pr                  extproc('curl_mime_data_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  data                           *   value options(*string)
+     d  datasize                     10u 0                                      size_t
+     d  ccsid                        10u 0 value
+      *
+     d curl_mime_filedata_ccsid...
+     d                 pr                  extproc('curl_mime_filedata_ccsid')
+     d                                     like(CURLcode)
+     d  part                           *   value                                curl_mimepart *
+     d  filename                       *   value options(*string)
+     d  ccsid                        10u 0 value
       *
       /endif
