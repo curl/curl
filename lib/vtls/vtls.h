@@ -31,6 +31,7 @@ struct ssl_connect_data;
 #define SSLSUPP_PINNEDPUBKEY (1<<2) /* supports CURLOPT_PINNEDPUBLICKEY */
 #define SSLSUPP_SSL_CTX      (1<<3) /* supports CURLOPT_SSL_CTX */
 #define SSLSUPP_HTTPS_PROXY  (1<<4) /* supports access via HTTPS proxies */
+#define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
 
 struct Curl_ssl {
   /*
@@ -93,6 +94,7 @@ CURLcode Curl_none_set_engine(struct Curl_easy *data, const char *engine);
 CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
 struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
 bool Curl_none_false_start(void);
+bool Curl_ssl_tls13_ciphersuites(void);
 CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
                           unsigned char *md5sum, size_t md5len);
 
@@ -246,7 +248,7 @@ bool Curl_ssl_false_start(void);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
-#else
+#else /* if not USE_SSL */
 
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1
@@ -270,6 +272,7 @@ bool Curl_ssl_false_start(void);
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start() FALSE
+#define Curl_ssl_tls13_ciphersuites() FALSE
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */
