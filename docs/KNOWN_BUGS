@@ -115,6 +115,9 @@ problems may have been fixed or changed somewhat since this was written!
  Disabling HTTP Pipelining when there are ongoing transfers can lead to
  heap corruption and crash. https://curl.haxx.se/bug/view.cgi?id=1411
 
+ Similarly, removing a handle when pipelining corrupts data:
+ https://github.com/curl/curl/issues/2101
+
 1.3 STARTTRANSFER time is wrong for HTTP POSTs
 
  Wrong STARTTRANSFER timer accounting for POST requests Timer works fine with
