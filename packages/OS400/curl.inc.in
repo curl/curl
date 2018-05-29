@@ -66,8 +66,11 @@
      d CURLINFO_DOUBLE...
      d                 c                   X'00300000'
      d CURLINFO_SLIST  c                   X'00400000'
+     d CURLINFO_PTR    c                   X'00400000'
      d CURLINFO_SOCKET...
      d                 c                   X'00500000'
+     d CURLINFO_OFF_T...
+     d                 c                   X'00600000'
      d CURLINFO_MASK   c                   X'000FFFFF'
      d CURLINFO_TYPEMASK...
      d                 c                   X'00F00000'
@@ -175,6 +178,8 @@
      d                 c                   X'00000010'
      d CURLAUTH_NTLM_WB...
      d                 c                   X'00000020'
+     d CURLAUTH_BEARER...
+     d                 c                   X'00000040'
      d CURLAUTH_ONLY...
      d                 c                   X'80000000'
      d CURLAUTH_ANY    c                   X'7FFFFFEF'
@@ -1337,6 +1342,10 @@
      d                 c                   00274
      d  CURLOPT_DNS_SHUFFLE_ADDRESSES...
      d                 c                   00275
+     d  CURLOPT_TLS13_CIPHERS...
+     d                 c                   10276
+     d  CURLOPT_PROXY_TLS13_CIPHERS...
+     d                 c                   10277
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1445,12 +1454,20 @@
      d                 c                   X'00300006'
      d  CURLINFO_SIZE_UPLOAD...                                                 CURLINFO_DOUBLE + 7
      d                 c                   X'00300007'
+     d  CURLINFO_SIZE_UPLOAD_T...                                               CURLINFO_OFF_T  + 7
+     d                 c                   X'00600007'
      d  CURLINFO_SIZE_DOWNLOAD...                                               CURLINFO_DOUBLE + 8
      d                 c                   X'00300008'
+     d  CURLINFO_SIZE_DOWNLOAD_T...                                             CURLINFO_OFF_T  + 8
+     d                 c                   X'00600008'
      d  CURLINFO_SPEED_DOWNLOAD...                                              CURLINFO_DOUBLE + 9
      d                 c                   X'00300009'
+     d  CURLINFO_SPEED_DOWNLOAD_T...                                            CURLINFO_OFF_T  + 9
+     d                 c                   X'00600009'
      d  CURLINFO_SPEED_UPLOAD...                                                CURLINFO_DOUBLE + 10
      d                 c                   X'0030000A'
+     d  CURLINFO_SPEED_UPLOAD_T...                                              CURLINFO_OFF_T  + 10
+     d                 c                   X'0060000A'
      d  CURLINFO_HEADER_SIZE...                                                 CURLINFO_LONG   + 11
      d                 c                   X'0020000B'
      d  CURLINFO_REQUEST_SIZE...                                                CURLINFO_LONG   + 12
@@ -1459,10 +1476,16 @@
      d                 c                   X'0020000D'
      d  CURLINFO_FILETIME...                                                    CURLINFO_LONG   + 14
      d                 c                   X'0020000E'
+     d  CURLINFO_FILETIME_T...                                                  CURLINFO_OFF_T  + 14
+     d                 c                   X'0060000E'
      d  CURLINFO_CONTENT_LENGTH_DOWNLOAD...                                     CURLINFO_DOUBLE + 15
      d                 c                   X'0030000F'
+     d  CURLINFO_CONTENT_LENGTH_DOWNLOAD_T...                                   CURLINFO_OFF_T  + 15
+     d                 c                   X'0060000F'
      d  CURLINFO_CONTENT_LENGTH_UPLOAD...                                       CURLINFO_DOUBLE + 16
      d                 c                   X'00300010'
+     d  CURLINFO_CONTENT_LENGTH_UPLOAD_T...                                     CURLINFO_OFF_T  + 16
+     d                 c                   X'00600010'
      d  CURLINFO_STARTTRANSFER_TIME...                                          CURLINFO_DOUBLE + 17
      d                 c                   X'00300011'
      d  CURLINFO_CONTENT_TYPE...                                                CURLINFO_STRING + 18
@@ -1529,6 +1552,20 @@
      d                 c                   X'00200030'
      d  CURLINFO_SCHEME...                                                      CURLINFO_STRING + 49
      d                 c                   X'00100031'
+     d  CURLINFO_TOTAL_TIME_T...                                                CURLINFO_OFF_T  + 50
+     d                 c                   X'00600032'
+     d  CURLINFO_NAMELOOKUP_TIME_T...                                           CURLINFO_OFF_T  + 51
+     d                 c                   X'00600033'
+     d  CURLINFO_CONNECT_TIME_T...                                              CURLINFO_OFF_T  + 52
+     d                 c                   X'00600034'
+     d  CURLINFO_PRETRANSFER_TIME_T...                                          CURLINFO_OFF_T  + 53
+     d                 c                   X'00600035'
+     d  CURLINFO_STARTTRANSFER_TIME_T...                                        CURLINFO_OFF_T  + 54
+     d                 c                   X'00600036'
+     d  CURLINFO_REDIRECT_TIME_T...                                             CURLINFO_OFF_T  + 55
+     d                 c                   X'00600037'
+     d  CURLINFO_APPCONNECT_TIME_T...                                           CURLINFO_OFF_T  + 56
+     d                 c                   X'00600036'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -2260,6 +2297,27 @@
      d  curl                           *   value                                CURL *
      d  info                               value like(CURLINFO)
      d  slistarg                       *   options(*nopass)                     struct curl_slist *
+      *
+     d curl_easy_getinfo_ptr...
+     d                 pr                  extproc('curl_easy_getinfo')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  info                               value like(CURLINFO)
+     d  ptrarg                         *   options(*nopass)                     void *
+      *
+     d curl_easy_getinfo_socket...
+     d                 pr                  extproc('curl_easy_getinfo')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  info                               value like(CURLINFO)
+     d  socketarg                          like(curl_socket_t) options(*nopass)
+      *
+     d curl_easy_getinfo_off_t...
+     d                 pr                  extproc('curl_easy_getinfo')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+     d  info                               value like(CURLINFO)
+     d  offsetarg                          like(curl_off_t) options(*nopass)
       *
       *
      d curl_easy_duphandle...
