@@ -1849,6 +1849,10 @@ typedef enum {
   /* shuffle addresses before use when DNS returns multiple */
   CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 275),
 
+  /* Specify which TLS 1.3 ciphers suites to use */
+  CINIT(TLS13_CIPHERS, STRINGPOINT, 276),
+  CINIT(PROXY_TLS13_CIPHERS, STRINGPOINT, 277),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
