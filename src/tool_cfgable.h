@@ -117,6 +117,8 @@ struct OperationConfig {
   struct getout *url_ul;    /* point to the node to fill in upload */
   char *cipher_list;
   char *proxy_cipher_list;
+  char *cipher13_list;
+  char *proxy_cipher13_list;
   char *cert;
   char *proxy_cert;
   char *cert_type;
