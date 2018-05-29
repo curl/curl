@@ -1855,14 +1855,18 @@ typedef enum {
   /* shuffle addresses before use when DNS returns multiple */
   CINIT(DNS_SHUFFLE_ADDRESSES, LONG, 275),
 
+  /* Specify which TLS 1.3 ciphers suites to use */
+  CINIT(TLS13_CIPHERS, STRINGPOINT, 276),
+  CINIT(PROXY_TLS13_CIPHERS, STRINGPOINT, 277),
+
   /* Set the ssl context callback function, currently only for OpenSSL ssl_ctx
      second argument. The function must be matching the
      curl_ssl_ctx_callback proto. */
-  CINIT(SSL_CERT_FUNCTION, FUNCTIONPOINT, 276),
+  CINIT(SSL_CERT_FUNCTION, FUNCTIONPOINT, 278),
 
   /* Set the userdata for the ssl context callback function's third
      argument */
-  CINIT(SSL_CERT_DATA, OBJECTPOINT, 277),
+  CINIT(SSL_CERT_DATA, OBJECTPOINT, 279),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

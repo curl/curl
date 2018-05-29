@@ -166,6 +166,17 @@ static unsigned long OpenSSL_version_num(void)
 #define HAVE_KEYLOG_CALLBACK
 #endif
 
+/* Whether SSL_CTX_set_ciphersuites is available.
+ * OpenSSL: supported since 1.1.1 (commit a53b5be6a05)
+ * BoringSSL: no
+ * LibreSSL: no
+ */
+#if ((OPENSSL_VERSION_NUMBER >= 0x10101000L) && \
+     !defined(LIBRESSL_VERSION_NUMBER) &&       \
+     !defined(OPENSSL_IS_BORINGSSL))
+#define HAVE_SSL_CTX_SET_CIPHERSUITES
+#endif
+
 #if defined(LIBRESSL_VERSION_NUMBER)
 #define OSSL_PACKAGE "LibreSSL"
 #elif defined(OPENSSL_IS_BORINGSSL)
@@ -2412,6 +2423,19 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     }
     infof(data, "Cipher selection: %s\n", ciphers);
   }
+
+#ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
+  {
+    char *ciphers13 = SSL_CONN_CONFIG(cipher_list13);
+    if(ciphers13) {
+      if(!SSL_CTX_set_ciphersuites(BACKEND->ctx, ciphers13)) {
+        failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers);
+        return CURLE_SSL_CIPHER;
+      }
+      infof(data, "TLS 1.3 cipher selection: %s\n", ciphers13);
+    }
+  }
+#endif
 
 #ifdef USE_TLS_SRP
   if(ssl_authtype == CURL_TLSAUTH_SRP) {

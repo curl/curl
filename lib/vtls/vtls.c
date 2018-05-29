@@ -980,6 +980,14 @@ bool Curl_ssl_false_start(void)
 }
 
 /*
+ * Check whether the SSL backend supports setting TLS 1.3 cipher suites
+ */
+bool Curl_ssl_tls13_ciphersuites(void)
+{
+  return Curl_ssl->supports & SSLSUPP_TLS13_CIPHERSUITES;
+}
+
+/*
  * Default implementations for unsupported functions.
  */
 
