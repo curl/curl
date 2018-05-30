@@ -34,9 +34,17 @@ struct testcase {
 
 static const struct testcase tests[] = {
   /* brackets syntax */
+  {"*[*[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+   "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+   "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[\001\177[[[[[[[[[[[[[[[[[[[[[",
+   "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+   "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
+   "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[",
+   NOMATCH},
+
   { "\\[",                      "[",                      MATCH },
-  { "[",                        "[",                      MATCH },
-  { "[]",                       "[]",                     MATCH },
+  { "[",                        "[",                      NOMATCH },
+  { "[]",                       "[]",                     NOMATCH },
   { "[][]",                     "[",                      MATCH },
   { "[][]",                     "]",                      MATCH },
   { "[[]",                      "[",                      MATCH },
@@ -185,11 +193,7 @@ static const struct testcase tests[] = {
   { "\\?.txt",                  "x.txt",                  NOMATCH },
   { "\\*.txt",                  "x.txt",                  NOMATCH },
   { "\\*\\\\.txt",              "*\\.txt",                MATCH },
-  { "*\\**\\?*\\\\*",           "cc*cc?cc\\cc*cc",        MATCH },
   { "*\\**\\?*\\\\*",           "cc*cc?cccc",             NOMATCH },
-  { "*\\**\\?*\\\\*",           "cc*cc?cc\\cc*cc",        MATCH },
-  { "*\\?*\\**",                "cc?c*c",                 MATCH },
-  { "*\\?*\\**curl*",           "cc?c*curl",              MATCH },
   { "*\\?*\\**",                "cc?cc",                  NOMATCH },
   { "\\\"\\$\\&\\'\\(\\)",      "\"$&'()",                MATCH },
   { "\\*\\?\\[\\\\\\`\\|",      "*?[\\`|",                MATCH },
@@ -234,8 +238,9 @@ UNITTEST_START
   for(i = 0; i < testnum; i++) {
     rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
     if(rc != tests[i].result) {
-      printf("Curl_fnmatch(\"%s\", \"%s\") should return %d (returns %d)\n",
-             tests[i].pattern, tests[i].string, tests[i].result, rc);
+      printf("Curl_fnmatch(\"%s\", \"%s\") should return %d (returns %d)"
+             " [%d]\n",
+             tests[i].pattern, tests[i].string, tests[i].result, rc, i);
       fail("pattern mismatch");
     }
   }

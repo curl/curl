@@ -107,6 +107,7 @@ options:
         CURLOPT_PROXY_SSLKEY
         CURLOPT_PROXY_SSLKEYTYPE
         CURLOPT_PROXY_SSL_CIPHER_LIST
+        CURLOPT_PROXY_TLS13_CIPHERS
         CURLOPT_PROXY_TLSAUTH_PASSWORD
         CURLOPT_PROXY_TLSAUTH_TYPE
         CURLOPT_PROXY_TLSAUTH_USERNAME
@@ -129,6 +130,7 @@ options:
         CURLOPT_SSLKEY
         CURLOPT_SSLKEYTYPE
         CURLOPT_SSL_CIPHER_LIST
+        CURLOPT_TLS13_CIPHERS
         CURLOPT_TLSAUTH_PASSWORD
         CURLOPT_TLSAUTH_TYPE
         CURLOPT_TLSAUTH_USERNAME
@@ -318,8 +320,10 @@ _ Procedures curl_easy_setopt_long(), curl_easy_setopt_object(),
   curl_easy_setopt_function() and curl_easy_setopt_offset() are all alias
   prototypes to curl_easy_setopt(), but with different parameter lists.
 _ Procedures curl_easy_getinfo_string(), curl_easy_getinfo_long(),
-  curl_easy_getinfo_double() and curl_easy_getinfo_slist() are all alias
-  prototypes to curl_easy_getinfo(), but with different parameter lists.
+  curl_easy_getinfo_double(), curl_easy_getinfo_slist(),
+  curl_easy_getinfo_ptr(), curl_easy_getinfo_socket() and
+  curl_easy_getinfo_off_t() are all alias prototypes to curl_easy_getinfo(),
+  but with different parameter lists.
 _ Procedures curl_multi_setopt_long(), curl_multi_setopt_object(),
   curl_multi_setopt_function() and curl_multi_setopt_offset() are all alias
   prototypes to curl_multi_setopt(), but with different parameter lists.

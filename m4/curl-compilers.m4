@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -1298,15 +1298,6 @@ AC_DEFUN([CURL_CHECK_CURLDEBUG], [
       AC_MSG_WARN([cannot enable curl debug memory tracking.])
       want_curldebug="no"
     fi
-  fi
-  #
-  if test "$want_curldebug" = "yes"; then
-    CPPFLAGS="-DCURLDEBUG $CPPFLAGS"
-    squeeze CPPFLAGS
-  fi
-  if test "$want_debug" = "yes"; then
-    CPPFLAGS="-DDEBUGBUILD $CPPFLAGS"
-    squeeze CPPFLAGS
   fi
 ])
 

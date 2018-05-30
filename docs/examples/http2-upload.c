@@ -72,12 +72,12 @@ void dump(const char *text, int num, unsigned char *ptr, size_t size,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%d %s, %ld bytes (0x%lx)\n",
-          num, text, (long)size, (long)size);
+  fprintf(stderr, "%d %s, %lu bytes (0x%lx)\n",
+          num, text, size, size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stderr, "%4.4lx: ", (long)i);
+    fprintf(stderr, "%4.4lx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */

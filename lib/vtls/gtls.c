@@ -1802,11 +1802,10 @@ static void *Curl_gtls_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_gnutls = {
   { CURLSSLBACKEND_GNUTLS, "gnutls" }, /* info */
 
-  1, /* have_ca_path */
-  1, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  1, /* support_https_proxy */
+  SSLSUPP_CA_PATH  |
+  SSLSUPP_CERTINFO |
+  SSLSUPP_PINNEDPUBKEY |
+  SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),
 

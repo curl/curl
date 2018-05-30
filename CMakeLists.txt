@@ -118,7 +118,9 @@ if (ENABLE_CURLDEBUG)
 endif()
 
 # For debug libs and exes, add "-d" postfix
-set(CMAKE_DEBUG_POSTFIX "-d" CACHE STRING "Set debug library postfix")
+if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
+  set(CMAKE_DEBUG_POSTFIX "-d")
+endif()
 
 # initialize CURL_LIBS
 set(CURL_LIBS "")
@@ -848,6 +850,7 @@ check_symbol_exists(sigsetjmp     "${CURL_INCLUDES}" HAVE_SIGSETJMP)
 check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)
 check_symbol_exists(strlcat       "${CURL_INCLUDES}" HAVE_STRLCAT)
 check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
+check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
 check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
 check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
@@ -900,7 +903,7 @@ endif()
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
   foreach(CURL_TEST HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
-    curl_internal_test_run(${CURL_TEST})
+    curl_internal_test(${CURL_TEST})
   endforeach(CURL_TEST)
 endif(HAVE_FSETXATTR)
 
@@ -980,7 +983,7 @@ foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
     )
-  curl_internal_test_run(${CURL_TEST})
+  curl_internal_test(${CURL_TEST})
 endforeach(CURL_TEST)
 
 # Check for reentrant
@@ -1104,12 +1107,18 @@ include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
 
-# For windows, all compilers used by cmake should support large files
+# For Windows, all compilers used by CMake should support large files
 if(WIN32)
   set(USE_WIN32_LARGE_FILES ON)
+
+  # Use the manifest embedded in the Windows Resource
+  set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
 endif(WIN32)
 
 if(MSVC)
+  # Disable default manifest added by CMake
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
   if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
     string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")

@@ -80,6 +80,7 @@
 #define RESP_TIMEOUT (1800*1000)
 
 #include "cookie.h"
+#include "psl.h"
 #include "formdata.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -97,6 +98,20 @@
 #include "hostip.h"
 #include "hash.h"
 #include "splay.h"
+
+/* return the count of bytes sent, or -1 on error */
+typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
+                            int sockindex,            /* socketindex */
+                            const void *buf,          /* data to write */
+                            size_t len,               /* max amount to write */
+                            CURLcode *err);           /* error to return */
+
+/* return the count of bytes read, or -1 on error */
+typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
+                            int sockindex,            /* socketindex */
+                            char *buf,                /* store data here */
+                            size_t len,               /* max amount to read */
+                            CURLcode *err);           /* error to return */
 
 #include "mime.h"
 #include "imap.h"
@@ -212,6 +227,7 @@ struct ssl_primary_config {
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
+  char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
 };
 
 struct ssl_config_data {
@@ -703,20 +719,6 @@ struct Curl_handler {
 
 #define CONNRESULT_NONE 0                /* No extra information. */
 #define CONNRESULT_DEAD (1<<0)           /* The connection is dead. */
-
-/* return the count of bytes sent, or -1 on error */
-typedef ssize_t (Curl_send)(struct connectdata *conn, /* connection data */
-                            int sockindex,            /* socketindex */
-                            const void *buf,          /* data to write */
-                            size_t len,               /* max amount to write */
-                            CURLcode *err);           /* error to return */
-
-/* return the count of bytes read, or -1 on error */
-typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
-                            int sockindex,            /* socketindex */
-                            char *buf,                /* store data here */
-                            size_t len,               /* max amount to read */
-                            CURLcode *err);           /* error to return */
 
 #ifdef USE_RECV_BEFORE_SEND_WORKAROUND
 struct postponed_data {
@@ -1400,6 +1402,8 @@ enum dupstring {
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_ORIG, /* list of ciphers to use */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
+  STRING_SSL_CIPHER13_LIST_ORIG, /* list of TLS 1.3 ciphers to use */
+  STRING_SSL_CIPHER13_LIST_PROXY, /* list of TLS 1.3 ciphers to use */
   STRING_SSL_EGDSOCKET,   /* path to file containing the EGD daemon socket */
   STRING_SSL_RANDOM_FILE, /* path to file containing "random" data */
   STRING_USERAGENT,       /* User-Agent string */
@@ -1676,7 +1680,7 @@ struct UserDefined {
   bool stream_depends_e; /* set or don't set the Exclusive bit */
   int stream_weight;
 
-  bool haproxyprotocol; /* whether to send HAProxy PROXY protocol header */
+  bool haproxyprotocol; /* whether to send HAProxy PROXY protocol v1 header */
 
   struct Curl_http2_dep *stream_dependents;
 
@@ -1736,6 +1740,9 @@ struct Curl_easy {
                                     struct to which this "belongs" when used
                                     by the easy interface */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
+#ifdef USE_LIBPSL
+  struct PslCache *psl;        /* The associated PSL cache. */
+#endif
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */

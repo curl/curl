@@ -30,14 +30,15 @@
 #include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
-
-#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
-
 #ifndef USE_WINDOWS_SSPI
 #  error "Can't compile SCHANNEL support without SSPI."
 #endif
 
+#define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 #include "schannel.h"
+
+#ifdef HAS_MANUAL_VERIFY_API
+
 #include "vtls.h"
 #include "sendf.h"
 #include "strerror.h"
@@ -53,7 +54,7 @@
 #define BACKEND connssl->backend
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
-#define BEGIN_CERT "-----BEGIN CERTIFICATE-----\n"
+#define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
 #define END_CERT "\n-----END CERTIFICATE-----"
 
 typedef struct {
@@ -71,6 +72,10 @@ typedef struct {
   HCERTSTORE hExclusiveTrustedPeople;
 } CERT_CHAIN_ENGINE_CONFIG_WIN7, *PCERT_CHAIN_ENGINE_CONFIG_WIN7;
 
+static int is_cr_or_lf(char c)
+{
+  return c == '\r' || c == '\n';
+}
 
 static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                                    const char *ca_file,
@@ -177,7 +182,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
   current_ca_file_ptr = ca_file_buffer;
   while(more_certs && *current_ca_file_ptr != '\0') {
     char *begin_cert_ptr = strstr(current_ca_file_ptr, BEGIN_CERT);
-    if(!begin_cert_ptr) {
+    if(!begin_cert_ptr || !is_cr_or_lf(begin_cert_ptr[strlen(BEGIN_CERT)])) {
       more_certs = 0;
     }
     else {
@@ -548,4 +553,5 @@ CURLcode verify_certificate(struct connectdata *conn, int sockindex)
   return result;
 }
 
+#endif /* HAS_MANUAL_VERIFY_API */
 #endif /* USE_SCHANNEL */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,5 +67,23 @@ CURL_EXTERN char *curl_pushheader_byname_ccsid(struct curl_pushheaders *h,
                                                const char *header,
                                                unsigned int ccsidin,
                                                unsigned int ccsidout);
+CURL_EXTERN CURLcode curl_mime_name_ccsid(curl_mimepart *part,
+                                          const char *name,
+                                          unsigned int ccsid);
+CURL_EXTERN CURLcode curl_mime_filename_ccsid(curl_mimepart *part,
+                                              const char *filename,
+                                              unsigned int ccsid);
+CURL_EXTERN CURLcode curl_mime_type_ccsid(curl_mimepart *part,
+                                          const char *mimetype,
+                                          unsigned int ccsid);
+CURL_EXTERN CURLcode curl_mime_encoder_ccsid(curl_mimepart *part,
+                                             const char *encoding,
+                                             unsigned int ccsid);
+CURL_EXTERN CURLcode curl_mime_filedata_ccsid(curl_mimepart *part,
+                                              const char *filename,
+                                              unsigned int ccsid);
+CURL_EXTERN CURLcode curl_mime_data_ccsid(curl_mimepart *part,
+                                          const char *data, size_t datasize,
+                                          unsigned int ccsid);
 
 #endif

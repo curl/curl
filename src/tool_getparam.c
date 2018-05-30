@@ -201,6 +201,8 @@ static const struct LongShort aliases[]= {
   {"11",  "tlsv1.1",                 ARG_NONE},
   {"12",  "tlsv1.2",                 ARG_NONE},
   {"13",  "tlsv1.3",                 ARG_NONE},
+  {"1A", "tls13-ciphers",            ARG_STRING},
+  {"1B", "proxy-tls13-ciphers",      ARG_STRING},
   {"2",  "sslv2",                    ARG_NONE},
   {"3",  "sslv3",                    ARG_NONE},
   {"4",  "ipv4",                     ARG_NONE},
@@ -260,6 +262,7 @@ static const struct LongShort aliases[]= {
   {"EB", "socks5-gssapi",            ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
+  {"fb", "styled-output",            ARG_BOOL},
   {"F",  "form",                     ARG_STRING},
   {"Fs", "form-string",              ARG_STRING},
   {"g",  "globoff",                  ARG_BOOL},
@@ -600,6 +603,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'B': /* OAuth 2.0 bearer token */
         GetStr(&config->oauth_bearer, nextarg);
+        config->authtype |= CURLAUTH_BEARER;
         break;
       case 'c': /* connect-timeout */
         err = str2udouble(&config->connecttimeout, nextarg,
@@ -1175,6 +1179,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         /* TLS version 1.3 */
         config->ssl_version = CURL_SSLVERSION_TLSv1_3;
         break;
+      case 'A': /* --tls13-ciphers */
+        GetStr(&config->cipher13_list, nextarg);
+        break;
+      case 'B': /* --proxy-tls13-ciphers */
+        GetStr(&config->proxy_cipher13_list, nextarg);
+        break;
       }
       break;
     case '2':
@@ -1643,8 +1653,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'a': /* --fail-early */
         global->fail_early = toggle;
         break;
-      default:
-        /* fail hard on errors  */
+      case 'b': /* --styled-output */
+        global->styled_output = toggle;
+        break;
+      default: /* --fail (hard on errors)  */
         config->failonerror = toggle;
       }
       break;
@@ -1722,24 +1734,22 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case 'i':
-      config->include_headers = toggle; /* include the headers as well in the
-                                           general output stream */
+      config->show_headers = toggle; /* show the headers as well in the
+                                        general output stream */
       break;
     case 'j':
       config->cookiesession = toggle;
       break;
-    case 'I':
-      /*
-       * no_body will imply include_headers later on
-       */
+    case 'I': /* --head */
       config->no_body = toggle;
+      config->show_headers = toggle;
       if(SetHTTPrequest(config,
                         (config->no_body)?HTTPREQ_HEAD:HTTPREQ_GET,
                         &config->httpreq))
         return PARAM_BAD_USE;
       break;
     case 'J': /* --remote-header-name */
-      if(config->include_headers) {
+      if(config->show_headers) {
         warnf(global,
               "--include and --remote-header-name cannot be combined.\n");
         return PARAM_BAD_USE;

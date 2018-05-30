@@ -1,6 +1,6 @@
 Long: ntlm
 Help: Use HTTP NTLM authentication
-Mutexed: basic negotiated digest anyauth
+Mutexed: basic negotiate digest anyauth
 See-also: proxy-ntlm
 Protocols: HTTP
 Requires: TLS

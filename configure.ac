@@ -188,7 +188,8 @@ AC_CANONICAL_HOST
 dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
-dnl Checks for programs.
+# Silence warning: ar: 'u' modifier ignored since 'D' is the default
+AC_SUBST(AR_FLAGS, [cr])
 
 dnl This defines _ALL_SOURCE for AIX
 CURL_CHECK_AIX_ALL_SOURCE
@@ -1591,9 +1592,11 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
     dnl specify PKG_CONFIG_LIBDIR we're only looking where
     dnl the user told us to look
     OPENSSL_PCDIR="$OPT_SSL/lib/pkgconfig"
-    AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
     if test -f "$OPENSSL_PCDIR/openssl.pc"; then
+      AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
       PKGTEST="yes"
+    elif test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
+      AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-ssl prefix!])
     fi
 
     dnl in case pkg-config comes up empty, use what we got
@@ -1818,6 +1821,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
        fi
     fi
     CURL_CHECK_OPENSSL_API
+    check_for_ca_bundle=1
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
@@ -1967,7 +1971,7 @@ if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
 
       if test "x$USE_GNUTLS" = "xyes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
-
+        check_for_ca_bundle=1
         if test -n "$gtlslib"; then
           dnl when shared libs were found in a path that the run-time
           dnl linker doesn't search through, we need to add it to
@@ -2101,7 +2105,7 @@ if test -z "$ssl_backends" -o "x$OPT_POLARSSL" != xno; then
 
     if test "x$USE_POLARSSL" = "xyes"; then
       AC_MSG_NOTICE([detected PolarSSL])
-
+      check_for_ca_bundle=1
       LIBS="-lpolarssl $LIBS"
 
       if test -n "$polarssllib"; then
@@ -2192,6 +2196,7 @@ if test -z "$ssl_backends" -o "x$OPT_MBEDTLS" != xno; then
 
     if test "x$USE_MBEDTLS" = "xyes"; then
       AC_MSG_NOTICE([detected mbedTLS])
+      check_for_ca_bundle=1
 
       LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
 
@@ -2343,9 +2348,10 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 
     if test "x$USE_CYASSL" = "xyes"; then
       AC_MSG_NOTICE([detected $cyassllibname])
+      check_for_ca_bundle=1
 
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
-      AC_CHECK_SIZEOF(long long)
+      AX_COMPILE_CHECK_SIZEOF(long long)
 
       dnl Versions since at least 2.6.0 may have options.h
       AC_CHECK_HEADERS(cyassl/options.h)
@@ -2558,6 +2564,7 @@ if test -z "$ssl_backends" -o "x$OPT_AXTLS" != xno; then
       AC_DEFINE(USE_AXTLS, 1, [if axTLS is enabled])
       AC_SUBST(USE_AXTLS, [1])
       AXTLS_ENABLED=1
+      check_for_ca_bundle=1
       USE_AXTLS="yes"
       ssl_msg="axTLS"
       test axtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
@@ -2619,7 +2626,9 @@ dnl **********************************************************************
 dnl Check for the CA bundle
 dnl **********************************************************************
 
-CURL_CHECK_CA_BUNDLE
+if test "$check_for_ca_bundle" -gt 0; then
+  CURL_CHECK_CA_BUNDLE
+fi
 
 dnl **********************************************************************
 dnl Check for libpsl
@@ -2760,7 +2769,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
     CURL_CHECK_PKGCONFIG(libssh2)
 
     if test "$PKGCONFIG" != "no" ; then
-      LIB_SSH2=`$PKGCONFIG --libs-only-l libssh2`
+      LIB_SSH2=`$PKGCONFIG --libs libssh2`
       LD_SSH2=`$PKGCONFIG --libs-only-L libssh2`
       CPP_SSH2=`$PKGCONFIG --cflags-only-I libssh2`
       version=`$PKGCONFIG --modversion libssh2`
@@ -3443,16 +3452,16 @@ AC_HEADER_TIME
 CURL_CHECK_STRUCT_TIMEVAL
 CURL_VERIFY_RUNTIMELIBS
 
-AC_CHECK_SIZEOF(size_t)
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(time_t)
-AC_CHECK_SIZEOF(off_t)
+AX_COMPILE_CHECK_SIZEOF(size_t)
+AX_COMPILE_CHECK_SIZEOF(long)
+AX_COMPILE_CHECK_SIZEOF(int)
+AX_COMPILE_CHECK_SIZEOF(short)
+AX_COMPILE_CHECK_SIZEOF(time_t)
+AX_COMPILE_CHECK_SIZEOF(off_t)
 
 o=$CPPFLAGS
 CPPFLAGS="-I$srcdir/include $CPPFLAGS"
-AC_CHECK_SIZEOF(curl_off_t, unused , [
+AX_COMPILE_CHECK_SIZEOF(curl_off_t, [
 #include <curl/system.h>
 ])
 CPPFLAGS=$o

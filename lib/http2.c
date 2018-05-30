@@ -108,6 +108,7 @@ static int http2_perform_getsock(const struct connectdata *conn,
                                  int numsocks)
 {
   const struct http_conn *c = &conn->proto.httpc;
+  struct SingleRequest *k = &conn->data->req;
   int bitmap = GETSOCK_BLANK;
   (void)numsocks;
 
@@ -119,7 +120,9 @@ static int http2_perform_getsock(const struct connectdata *conn,
      always be ready for one */
   bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
 
-  if(nghttp2_session_want_write(c->h2))
+  /* we're still uploading or the HTTP/2 layer wants to send data */
+  if(((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND) ||
+     nghttp2_session_want_write(c->h2))
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
@@ -342,7 +345,7 @@ const char *Curl_http2_strerror(uint32_t err)
     "INADEQUATE_SECURITY",  /* 0xC */
     "HTTP_1_1_REQUIRED"     /* 0xD */
   };
-  return (err < sizeof str / sizeof str[0]) ? str[err] : "unknown";
+  return (err < sizeof(str) / sizeof(str[0])) ? str[err] : "unknown";
 #else
   return nghttp2_http2_strerror(err);
 #endif
@@ -556,7 +559,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   struct http_conn *httpc = &conn->proto.httpc;
   struct Curl_easy *data_s = NULL;
   struct HTTP *stream = NULL;
-  static int lastStream = -1;
   int rv;
   size_t left, ncopy;
   int32_t stream_id = frame->hd.stream_id;
@@ -587,9 +589,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-  if(lastStream != stream_id) {
-    lastStream = stream_id;
-  }
   if(!data_s) {
     H2BUGF(infof(conn->data,
                  "No Curl_easy associated with stream: %x\n",
@@ -599,7 +598,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
 
   stream = data_s->req.protop;
   if(!stream) {
-    H2BUGF(infof(conn->data, "No proto pointer for stream: %x\n",
+    H2BUGF(infof(data_s, "No proto pointer for stream: %x\n",
                  stream_id));
     return NGHTTP2_ERR_CALLBACK_FAILURE;
   }
@@ -677,7 +676,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     break;
   default:
-    H2BUGF(infof(conn->data, "Got frame type %x for stream %u!\n",
+    H2BUGF(infof(data_s, "Got frame type %x for stream %u!\n",
                  frame->hd.type, stream_id));
     break;
   }
@@ -2138,8 +2137,8 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   if(result)
     return result;
 
-  httpc->recv_underlying = (recving)conn->recv[FIRSTSOCKET];
-  httpc->send_underlying = (sending)conn->send[FIRSTSOCKET];
+  httpc->recv_underlying = conn->recv[FIRSTSOCKET];
+  httpc->send_underlying = conn->send[FIRSTSOCKET];
   conn->recv[FIRSTSOCKET] = http2_recv;
   conn->send[FIRSTSOCKET] = http2_send;
 

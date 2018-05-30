@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -394,7 +394,7 @@ static PK11SlotInfo* nss_find_slot_by_name(const char *slot_name)
 /* wrap 'ptr' as list node and tail-insert into 'list' */
 static CURLcode insert_wrapped_ptr(struct curl_llist *list, void *ptr)
 {
-  struct ptr_list_wrap *wrap = malloc(sizeof *wrap);
+  struct ptr_list_wrap *wrap = malloc(sizeof(*wrap));
   if(!wrap)
     return CURLE_OUT_OF_MEMORY;
 
@@ -914,11 +914,11 @@ static CURLcode display_conn_info(struct connectdata *conn, PRFileDesc *sock)
   PRTime now;
   int i;
 
-  if(SSL_GetChannelInfo(sock, &channel, sizeof channel) ==
-     SECSuccess && channel.length == sizeof channel &&
+  if(SSL_GetChannelInfo(sock, &channel, sizeof(channel)) ==
+     SECSuccess && channel.length == sizeof(channel) &&
      channel.cipherSuite) {
     if(SSL_GetCipherSuiteInfo(channel.cipherSuite,
-                              &suite, sizeof suite) == SECSuccess) {
+                              &suite, sizeof(suite)) == SECSuccess) {
       infof(conn->data, "SSL connection using %s\n", suite.cipherSuiteName);
     }
   }
@@ -1345,7 +1345,8 @@ static CURLcode nss_init(struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
 
     /* the default methods just call down to the lower I/O layer */
-    memcpy(&nspr_io_methods, PR_GetDefaultIOMethods(), sizeof nspr_io_methods);
+    memcpy(&nspr_io_methods, PR_GetDefaultIOMethods(),
+           sizeof(nspr_io_methods));
 
     /* override certain methods in the table by our wrappers */
     nspr_io_methods.recv  = nspr_io_recv;
@@ -2357,11 +2358,10 @@ static void *Curl_nss_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_nss = {
   { CURLSSLBACKEND_NSS, "nss" }, /* info */
 
-  1, /* have_ca_path */
-  1, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  1, /* support_https_proxy */
+  SSLSUPP_CA_PATH |
+  SSLSUPP_CERTINFO |
+  SSLSUPP_PINNEDPUBKEY |
+  SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),
 

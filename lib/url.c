@@ -1554,7 +1554,11 @@ int Curl_protocol_getsock(struct connectdata *conn,
 {
   if(conn->handler->proto_getsock)
     return conn->handler->proto_getsock(conn, socks, numsocks);
-  return GETSOCK_BLANK;
+  /* Backup getsock logic. Since there is a live socket in use, we must wait
+     for it or it will be removed from watching when the multi_socket API is
+     used. */
+  socks[0] = conn->sock[FIRSTSOCKET];
+  return GETSOCK_READSOCK(0) | GETSOCK_WRITESOCK(0);
 }
 
 int Curl_doing_getsock(struct connectdata *conn,
@@ -2740,7 +2744,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     proxyptr = proxy; /* No xxx:// head: It's a HTTP proxy */
 
 #ifdef USE_SSL
-  if(!Curl_ssl->support_https_proxy)
+  if(!(Curl_ssl->supports & SSLSUPP_HTTPS_PROXY))
 #endif
     if(proxytype == CURLPROXY_HTTPS) {
       failf(data, "Unsupported proxy \'%s\', libcurl is built without the "
@@ -3419,7 +3423,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
        * stripped off. It would be better to work directly from the original
        * URL and simply replace the port part of it.
        */
-      url = aprintf("%s://%s%s%s:%hu%s%s%s", conn->given->scheme,
+      url = aprintf("%s://%s%s%s:%d%s%s%s", conn->given->scheme,
                     conn->bits.ipv6_ip?"[":"", conn->host.name,
                     conn->bits.ipv6_ip?"]":"", conn->remote_port,
                     data->state.slash_removed?"/":"", data->state.path,

@@ -1910,13 +1910,13 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     if(data->set.ftp_skip_ip) {
       /* told to ignore the remotely given IP but instead use the host we used
          for the control connection */
-      infof(data, "Skip %d.%d.%d.%d for data connection, re-use %s instead\n",
+      infof(data, "Skip %u.%u.%u.%u for data connection, re-use %s instead\n",
             ip[0], ip[1], ip[2], ip[3],
             conn->host.name);
       ftpc->newhost = strdup(control_address(conn));
     }
     else
-      ftpc->newhost = aprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+      ftpc->newhost = aprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 
     if(!ftpc->newhost)
       return CURLE_OUT_OF_MEMORY;

@@ -2425,8 +2425,7 @@ static ssize_t sftp_recv(struct connectdata *conn, int sockindex,
   ssize_t nread;
   (void)sockindex;
 
-  if(len >= (size_t)1<<32)
-    len = (size_t)(1<<31)-1;
+  DEBUGASSERT(len < CURL_MAX_READ_SIZE);
 
   switch(conn->proto.sshc.sftp_recv_state) {
     case 0:

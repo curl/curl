@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -815,7 +815,7 @@ static void Curl_mbedtls_session_free(void *ptr)
 static size_t Curl_mbedtls_version(char *buffer, size_t size)
 {
   unsigned int version = mbedtls_version_get_number();
-  return snprintf(buffer, size, "mbedTLS/%d.%d.%d", version>>24,
+  return snprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
                   (version>>16)&0xff, (version>>8)&0xff);
 }
 
@@ -1049,11 +1049,9 @@ static void *Curl_mbedtls_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_mbedtls = {
   { CURLSSLBACKEND_MBEDTLS, "mbedtls" }, /* info */
 
-  1, /* have_ca_path */
-  0, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  1, /* have_ssl_ctx */
-  0, /* support_https_proxy */
+  SSLSUPP_CA_PATH |
+  SSLSUPP_PINNEDPUBKEY |
+  SSLSUPP_SSL_CTX,
 
   sizeof(struct ssl_backend_data),
 

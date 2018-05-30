@@ -142,6 +142,16 @@ libcurl was built to use. This is an attempt to list known cipher names.
 `ECDHE-RSA-CAMELLIA128-SHA256`
 `ECDHE-RSA-CAMELLIA256-SHA384`
 
+### TLS 1.3 cipher suites
+
+(Note: the TLS 1.3 cipher suites are set with a separate option.)
+
+`TLS13-AES-256-GCM-SHA384`
+`TLS13-CHACHA20-POLY1305-SHA256`
+`TLS13-AES-128-GCM-SHA256`
+`TLS13-AES-128-CCM-8-SHA256`
+`TLS13-AES-128-CCM-SHA256`
+
 ## NSS
 
 ### Totally insecure

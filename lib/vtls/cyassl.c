@@ -569,7 +569,7 @@ cyassl_connect_step2(struct connectdata *conn,
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
 
-    memset(&x509_parsed, 0, sizeof x509_parsed);
+    memset(&x509_parsed, 0, sizeof(x509_parsed));
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
@@ -994,15 +994,10 @@ static void *Curl_cyassl_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_cyassl = {
   { CURLSSLBACKEND_WOLFSSL, "WolfSSL" }, /* info */
 
-  0, /* have_ca_path */
-  0, /* have_certinfo */
 #ifdef KEEP_PEER_CERT
-  1, /* have_pinnedpubkey */
-#else
-  0, /* have_pinnedpubkey */
+  SSLSUPP_PINNEDPUBKEY |
 #endif
-  1, /* have_ssl_ctx */
-  0, /* support_https_proxy */
+  SSLSUPP_SSL_CTX,
 
   sizeof(struct ssl_backend_data),
 

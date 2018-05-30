@@ -310,6 +310,31 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
   return result;
 }
 
+/*
+ * http_output_bearer() sets up an Authorization: header
+ * for HTTP Bearer authentication.
+ *
+ * Returns CURLcode.
+ */
+static CURLcode http_output_bearer(struct connectdata *conn)
+{
+  char **userp;
+  CURLcode result = CURLE_OK;
+
+  userp = &conn->allocptr.userpwd;
+  free(*userp);
+  *userp = aprintf("Authorization: Bearer %s\r\n",
+                   conn->oauth_bearer);
+
+  if(!*userp) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
+
+  fail:
+  return result;
+}
+
 /* pickoneauth() selects the most favourable authentication method from the
  * ones available and the ones we want.
  *
@@ -326,6 +351,8 @@ static bool pickoneauth(struct auth *pick)
      of preference in case of the existence of multiple accepted types. */
   if(avail & CURLAUTH_NEGOTIATE)
     pick->picked = CURLAUTH_NEGOTIATE;
+  else if(avail & CURLAUTH_BEARER)
+    pick->picked = CURLAUTH_BEARER;
   else if(avail & CURLAUTH_DIGEST)
     pick->picked = CURLAUTH_DIGEST;
   else if(avail & CURLAUTH_NTLM)
@@ -433,7 +460,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
            data left to send, keep on sending. */
 
         /* rewind data when completely done sending! */
-        if(!conn->bits.authneg) {
+        if(!conn->bits.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
           conn->bits.rewindaftersend = TRUE;
           infof(data, "Rewind stream after send\n");
         }
@@ -628,6 +655,20 @@ output_auth_headers(struct connectdata *conn,
        functions work that way */
     authstatus->done = TRUE;
   }
+  if(authstatus->picked == CURLAUTH_BEARER) {
+    /* Bearer */
+    if((!proxy && conn->oauth_bearer &&
+        !Curl_checkheaders(conn, "Authorization:"))) {
+      auth = "Bearer";
+      result = http_output_bearer(conn);
+      if(result)
+        return result;
+    }
+
+    /* NOTE: this function should set 'done' TRUE, as the other auth
+       functions work that way */
+    authstatus->done = TRUE;
+  }
 
   if(auth) {
     infof(data, "%s auth using %s with user '%s'\n",
@@ -674,7 +715,7 @@ Curl_http_output_auth(struct connectdata *conn,
   authproxy = &data->state.authproxy;
 
   if((conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
-     conn->bits.user_passwd)
+     conn->bits.user_passwd || conn->oauth_bearer)
     /* continue please */;
   else {
     authhost->done = TRUE;
@@ -883,6 +924,18 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
               data->state.authproblem = TRUE;
             }
           }
+          else
+            if(checkprefix("Bearer", auth)) {
+              *availp |= CURLAUTH_BEARER;
+              authp->avail |= CURLAUTH_BEARER;
+              if(authp->picked == CURLAUTH_BEARER) {
+                /* We asked for Bearer authentication but got a 40X back
+                  anyway, which basically means our token isn't valid. */
+                authp->avail = CURLAUTH_NONE;
+                infof(data, "Authentication problem. Ignoring this.\n");
+                data->state.authproblem = TRUE;
+              }
+            }
 
     /* there may be multiple methods on one line, so keep reading */
     while(*auth && *auth != ',') /* read up to the next comma */
@@ -1406,8 +1459,8 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
   }
 
   snprintf(proxy_header,
-           sizeof proxy_header,
-           "PROXY %s %s %s %i %i\r\n",
+           sizeof(proxy_header),
+           "PROXY %s %s %s %li %li\r\n",
            tcp_version,
            conn->data->info.conn_local_ip,
            conn->data->info.conn_primary_ip,
@@ -2132,7 +2185,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                     host,
                                     conn->bits.ipv6_ip?"]":"");
     else
-      conn->allocptr.host = aprintf("Host: %s%s%s:%hu\r\n",
+      conn->allocptr.host = aprintf("Host: %s%s%s:%d\r\n",
                                     conn->bits.ipv6_ip?"[":"",
                                     host,
                                     conn->bits.ipv6_ip?"]":"",
@@ -3014,6 +3067,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 {
   CURLcode result;
   struct SingleRequest *k = &data->req;
+  ssize_t onread = *nread;
+  char *ostr = k->str;
 
   /* header line within buffer loop */
   do {
@@ -3078,7 +3133,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         else {
           /* this was all we read so it's all a bad header */
           k->badheader = HEADER_ALLBAD;
-          *nread = (ssize_t)rest_length;
+          *nread = onread;
+          k->str = ostr;
+          return CURLE_OK;
         }
         break;
       }
@@ -3483,21 +3540,18 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * depending on how authentication is working.  Other codes
          * are definitely errors, so give up here.
          */
-        if(data->set.http_fail_on_error && (k->httpcode >= 400) &&
+        if(data->state.resume_from && data->set.httpreq == HTTPREQ_GET &&
+             k->httpcode == 416) {
+          /* "Requested Range Not Satisfiable", just proceed and
+             pretend this is no error */
+          k->ignorebody = TRUE; /* Avoid appending error msg to good data. */
+        }
+        else if(data->set.http_fail_on_error && (k->httpcode >= 400) &&
            ((k->httpcode != 401) || !conn->bits.user_passwd) &&
            ((k->httpcode != 407) || !conn->bits.proxy_user_passwd) ) {
-
-          if(data->state.resume_from &&
-             (data->set.httpreq == HTTPREQ_GET) &&
-             (k->httpcode == 416)) {
-            /* "Requested Range Not Satisfiable", just proceed and
-               pretend this is no error */
-          }
-          else {
-            /* serious error, go home! */
-            print_http_error(data);
-            return CURLE_HTTP_RETURNED_ERROR;
-          }
+          /* serious error, go home! */
+          print_http_error(data);
+          return CURLE_HTTP_RETURNED_ERROR;
         }
 
         if(conn->httpversion == 10) {

@@ -158,7 +158,7 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   DEBUGASSERT(num > 1);
 
 #ifdef __clang_analyzer__
-  /* This silences a scan-build warning about accesssing this buffer with
+  /* This silences a scan-build warning about accessing this buffer with
      uninitialized memory. */
   memset(buffer, 0, sizeof(buffer));
 #endif

@@ -1447,6 +1447,16 @@ static const char *find_host_sep(const char *url)
 }
 
 /*
+ * Decide in an encoding-independent manner whether a character in an
+ * URL must be escaped. The same criterion must be used in strlen_url()
+ * and strcpy_url().
+ */
+static bool urlchar_needs_escaping(int c)
+{
+    return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
+}
+
+/*
  * strlen_url() returns the length of the given URL if the spaces within the
  * URL were properly URL encoded.
  * URL encoding should be skipped for host names, otherwise IDN resolution
@@ -1474,7 +1484,7 @@ static size_t strlen_url(const char *url, bool relative)
       left = FALSE;
       /* fall through */
     default:
-      if(*ptr >= 0x80)
+      if(urlchar_needs_escaping(*ptr))
         newlen += 2;
       newlen++;
       break;
@@ -1519,7 +1529,7 @@ static void strcpy_url(char *output, const char *url, bool relative)
       left = FALSE;
       /* fall through */
     default:
-      if(*iptr >= 0x80) {
+      if(urlchar_needs_escaping(*iptr)) {
         snprintf(optr, 4, "%%%02x", *iptr);
         optr += 3;
       }
@@ -2008,11 +2018,19 @@ Curl_setup_transfer(
 
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
-  /* now copy all input parameters */
-  conn->sockfd = sockindex == -1 ?
+  if(conn->bits.multiplex || conn->httpversion == 20) {
+    /* when multiplexing, the read/write sockets need to be the same! */
+    conn->sockfd = sockindex == -1 ?
+      ((writesockindex == -1 ? CURL_SOCKET_BAD : conn->sock[writesockindex])) :
+      conn->sock[sockindex];
+    conn->writesockfd = conn->sockfd;
+  }
+  else {
+    conn->sockfd = sockindex == -1 ?
       CURL_SOCKET_BAD : conn->sock[sockindex];
-  conn->writesockfd = writesockindex == -1 ?
+    conn->writesockfd = writesockindex == -1 ?
       CURL_SOCKET_BAD:conn->sock[writesockindex];
+  }
   k->getheader = getheader;
 
   k->size = size;
@@ -2031,10 +2049,10 @@ Curl_setup_transfer(
   /* we want header and/or body, if neither then don't do this! */
   if(k->getheader || !data->set.opt_no_body) {
 
-    if(conn->sockfd != CURL_SOCKET_BAD)
+    if(sockindex != -1)
       k->keepon |= KEEP_RECV;
 
-    if(conn->writesockfd != CURL_SOCKET_BAD) {
+    if(writesockindex != -1) {
       struct HTTP *http = data->req.protop;
       /* HTTP 1.1 magic:
 
@@ -2065,7 +2083,7 @@ Curl_setup_transfer(
         /* enable the write bit when we're not waiting for continue */
         k->keepon |= KEEP_SEND;
       }
-    } /* if(conn->writesockfd != CURL_SOCKET_BAD) */
+    } /* if(writesockindex != -1) */
   } /* if(k->getheader || !data->set.opt_no_body) */
 
 }

@@ -142,6 +142,25 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
                             va_arg(param, char *));
     break;
 
+  case CURLOPT_TLS13_CIPHERS:
+    if(Curl_ssl_tls13_ciphersuites()) {
+      /* set preferred list of TLS 1.3 cipher suites */
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_ORIG],
+                              va_arg(param, char *));
+    }
+    else
+      return CURLE_NOT_BUILT_IN;
+    break;
+  case CURLOPT_PROXY_TLS13_CIPHERS:
+    if(Curl_ssl_tls13_ciphersuites()) {
+      /* set preferred list of TLS 1.3 cipher suites for proxy */
+      result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER13_LIST_PROXY],
+                              va_arg(param, char *));
+    }
+    else
+      return CURLE_NOT_BUILT_IN;
+    break;
+
   case CURLOPT_RANDOM_FILE:
     /*
      * This is the path name to a file that contains random data to seed
@@ -1748,7 +1767,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ssl_ctx)
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
       data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
     else
 #endif
@@ -1759,7 +1778,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ssl_ctx)
+    if(Curl_ssl->supports & SSLSUPP_SSL_CTX)
       data->set.ssl.fsslctxp = va_arg(param, void *);
     else
 #endif
@@ -1778,7 +1797,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
-    if(Curl_ssl->have_certinfo)
+    if(Curl_ssl->supports & SSLSUPP_CERTINFO)
       data->set.ssl.certinfo = (0 != va_arg(param, long)) ? TRUE : FALSE;
     else
 #endif
@@ -1790,7 +1809,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Specify file name of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_pinnedpubkey)
+    if(Curl_ssl->supports & SSLSUPP_PINNEDPUBKEY)
       result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG],
                               va_arg(param, char *));
     else
@@ -1803,7 +1822,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Specify file name of the public key in DER format.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_pinnedpubkey)
+    if(Curl_ssl->supports & SSLSUPP_PINNEDPUBKEY)
       result = Curl_setstropt(&data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
                               va_arg(param, char *));
     else
@@ -1831,7 +1850,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ca_path)
+    if(Curl_ssl->supports & SSLSUPP_CA_PATH)
       /* This does not work on windows. */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_ORIG],
                               va_arg(param, char *));
@@ -1845,7 +1864,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl->have_ca_path)
+    if(Curl_ssl->supports & SSLSUPP_CA_PATH)
       /* This does not work on windows. */
       result = Curl_setstropt(&data->set.str[STRING_SSL_CAPATH_PROXY],
                               va_arg(param, char *));
@@ -1942,6 +1961,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       if(data->share->sslsession == data->state.session)
         data->state.session = NULL;
 
+#ifdef USE_LIBPSL
+      if(data->psl == &data->share->psl)
+        data->psl = data->multi? &data->multi->psl: NULL;
+#endif
+
       data->share->dirty--;
 
       Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
@@ -1973,8 +1997,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
         data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
         data->state.session = data->share->sslsession;
       }
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+#ifdef USE_LIBPSL
+      if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))
+        data->psl = &data->share->psl;
+#endif
 
+      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
     }
     /* check for host cache not needed,
      * it will be done by curl_easy_perform */

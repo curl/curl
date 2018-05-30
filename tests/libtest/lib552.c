@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,11 +46,11 @@ void dump(const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %d bytes (0x%x)\n", text, (int)size, (int)size);
+  fprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stream, "%04x: ", (int)i);
+    fprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -185,7 +185,7 @@ int test(char *URL)
 
   /* setup repeated data string */
   for(i = 0; i < sizeof(databuf); ++i)
-      databuf[i] = fill[i % sizeof fill];
+    databuf[i] = fill[i % sizeof(fill)];
 
   /* Post */
   test_setopt(curl, CURLOPT_POST, 1L);

@@ -31,9 +31,6 @@ body
 </data>
 
 <datacheck>
-HTTP/1.1 200 Mighty fine indeed
-pop3: sure hit me
-
 From: me@somewhere
 To: fake@nowhere
 
