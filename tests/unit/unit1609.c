@@ -70,47 +70,45 @@ struct testcase {
 };
 
 
-/* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
-   addresses, so we have to do that as well. */
-static const char skip = 0;
-#ifdef ENABLE_IPV6
-#define IPV6ONLY(x) x
-#else
-#define IPV6ONLY(x) &skip
-#endif
+/* CURLOPT_RESOLVE address parsing test - to test the following defect fix:
 
-/* CURLOPT_RESOLVE address parsing tests */
+ 1) if there is already existing host:port pair in the DNS cache and
+ we call CURLOPT_RESOLVE, it should also replace addresses.
+ for example, if there is "test.com:80" with address "1.1.1.1"
+ and we called CURLOPT_RESOLVE with address "2.2.2.2", then DNS entry needs to
+ reflect that.
+
+ 2) when cached address is already there and close to expire, then by the
+ time request is made, it can get expired.  This happens because, when
+ we set address using CURLOPT_RESOLVE,
+ it usually marks as permanent (by setting timestamp to zero). However,
+ if address already exists
+in the cache, then it does not mark it, but just leaves it as it is.
+ So we fixing this by timestamp to zero if address already exists too.
+
+Test:
+
+ - insert new entry
+ - verify that timestamp is not zero
+ - call set options with CURLOPT_RESOLVE
+ - then, call Curl_loadhostpairs
+
+ expected result: cached address has zero timestamp.
+
+ - call set options with CURLOPT_RESOLVE with same host:port pair,
+   different address.
+ - then, call Curl_loadhostpairs
+
+ expected result: cached address has zero timestamp and new address
+*/
+
 static const struct testcase tests[] = {
   /* spaces aren't allowed, for now */
-  { "test.com:80:127.0.0.1, 127.0.0.2",
-    "test.com", 80, { NULL, }
-  },
-  { "TEST.com:80:,,127.0.0.1,,,127.0.0.2,,,,::1,,,",
-    "test.com", 80, { "127.0.0.1", "127.0.0.2", IPV6ONLY("::1"), }
-  },
-  { "test.com:80:::1,127.0.0.1",
-    "test.com", 80, { IPV6ONLY("::1"), "127.0.0.1", }
-  },
-  { "test.com:80:[::1],127.0.0.1",
-    "test.com", 80, { IPV6ONLY("::1"), "127.0.0.1", }
-  },
-  { "test.com:80:::1",
-    "test.com", 80, { IPV6ONLY("::1"), }
-  },
-  { "test.com:80:[::1]",
-    "test.com", 80, { IPV6ONLY("::1"), }
-  },
   { "test.com:80:127.0.0.1",
     "test.com", 80, { "127.0.0.1", }
   },
-  { "test.com:80:,127.0.0.1",
-    "test.com", 80, { "127.0.0.1", }
-  },
-  { "test.com:80:127.0.0.1,",
-    "test.com", 80, { "127.0.0.1", }
-  },
-  { "test.com:0:127.0.0.1",
-    "test.com", 0, { "127.0.0.1", }
+  { "test.com:80:127.0.0.2",
+    "test.com", 80, { "127.0.0.2", }
   },
 };
 
@@ -118,22 +116,26 @@ UNITTEST_START
   int i;
   int testnum = sizeof(tests) / sizeof(struct testcase);
 
+/* important: we setup cache outside of the loop
+  and also clean cache after the loop. In contrast,for example,
+  test 1607 sets up and cleans cache on each iteration. */
+  Curl_hostcache_clean(easy, hostcache);
+  easy->dns.hostcache = hostcache;
+  easy->dns.hostcachetype = HCACHE_GLOBAL;
+
   for(i = 0; i < testnum; ++i, curl_easy_reset(easy)) {
     int j;
-    int addressnum = sizeof(tests[i].address) / sizeof(*tests[i].address);
+    int addressnum = sizeof (tests[i].address) / sizeof (*tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     struct curl_slist *list;
     void *entry_id;
     bool problem = false;
 
-    Curl_hostcache_clean(easy, hostcache);
-    easy->dns.hostcache = hostcache;
-    easy->dns.hostcachetype = HCACHE_GLOBAL;
-
     list = curl_slist_append(NULL, tests[i].optval);
     if(!list)
         goto unit_test_abort;
+
     curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
 
     Curl_loadhostpairs(easy);
@@ -155,9 +157,6 @@ UNITTEST_START
 
       if(!addr && !tests[i].address[j])
         break;
-
-      if(tests[i].address[j] == &skip)
-        continue;
 
       if(addr && !Curl_getaddressinfo(addr->ai_addr,
                                       ipaddress, &port)) {
@@ -199,18 +198,9 @@ UNITTEST_START
         break;
       }
 
-      if(dns->timestamp != 0) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is not zero. "
-                "for tests[%d].address[%d\n",
-                __FILE__, __LINE__, i, i, j);
-        problem = true;
-        break;
-      }
-
       addr = addr->ai_next;
     }
 
-    Curl_hostcache_clean(easy, easy->dns.hostcache);
     curl_slist_free_all(list);
 
     if(problem) {
@@ -218,4 +208,7 @@ UNITTEST_START
       continue;
     }
   }
+
+  Curl_hostcache_clean(easy, easy->dns.hostcache);
+
 UNITTEST_STOP
