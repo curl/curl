@@ -1010,24 +1010,28 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       /* See if its already in our dns cache */
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
+      if(dns) {
+        infof(data, "RESOLVE %s:%d is - old addresses discarded!\n",
+                hostname, port);
+        /* delete old entry entry, there are two reasons for this
+         1. old entry may have different addresses.
+         2. even if entry with correct addresses is already in the cache,
+            but if it is close to expire, then by the time next http
+            request is made, it can get expired and pruned because old
+            entry is not necessarily marked as added by CURLOPT_RESOLVE. */
+
+        Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
+      }
       /* free the allocated entry_id again */
       free(entry_id);
 
-      if(!dns) {
-        /* if not in the cache already, put this host in the cache */
-        dns = Curl_cache_addr(data, head, hostname, port);
-        if(dns) {
-          dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
-          /* release the returned reference; the cache itself will keep the
-           * entry alive: */
-          dns->inuse--;
-        }
-      }
-      else {
-        /* this is a duplicate, free it again */
-        infof(data, "RESOLVE %s:%d is already cached, %s not stored!\n",
-              hostname, port, addresses);
-        Curl_freeaddrinfo(head);
+      /* put this new host in the cache */
+      dns = Curl_cache_addr(data, head, hostname, port);
+      if(dns) {
+        dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
+        /* release the returned reference; the cache itself will keep the
+         * entry alive: */
+            dns->inuse--;
       }
 
       if(data->share)

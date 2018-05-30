@@ -17,8 +17,8 @@ Run Unit Tests
 
 Unit tests are run as part of the regular test suite. If you have built
 everything to run unit tests, to can do 'make test' at the root level. Or you
-can 'cd tests' and then invoke individual unit tests with ./runtests.pl NNNN
-where NNNN is the specific test number.
+can 'cd tests' and 'make' and then invoke individual unit tests with
+./runtests.pl NNNN where NNNN is the specific test number.
 
 Debug Unit Tests
 ================
