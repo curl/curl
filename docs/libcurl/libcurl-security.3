@@ -88,9 +88,11 @@ have been injected by an attacker. The data that curl sends might be modified
 before it reaches the intended server. If it even reaches the intended server
 at all.
 
-Remedies include:
- - Restrict operations to authenticated transfers
- - Make sure the server's certificate etc is verified
+Remedies:
+.IP "Restrict operations to authenticated transfers"
+Ie use authenticated protocols protected with HTTPS or SSH.
+.IP "Make sure the server's certificate etc is verified"
+Never ever switch off certificate verification.
 .SH "Redirects"
 The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
 redirects sent by a remote server.  These redirects can refer to any kind of
@@ -233,11 +235,13 @@ particular scheme in the URL but point to a server doing a different protocol
 on a non-standard port.
 
 Remedies:
-
- - curl command lines can use \fI--proto\fP to limit what schemes it accepts
- - libcurl programs can use \fICURLOPT_PROTOCOLS(3)\fP
- - consider not allowing the user to set the full URL
- - consider strictly filtering input to only allow specific choices
+.IP "Use --proto"
+curl command lines can use \fI--proto\fP to limit what URL schemes it accepts
+.IP "Use CURLOPT_PROTOCOLS"
+libcurl programs can use \fICURLOPT_PROTOCOLS(3)\fP to limit what URL schemes it accepts
+.IP "consider not allowing the user to set the full URL"
+Maybe just let the user provide data for parts of it? Or maybe filter input to
+only allow specific choices?
 .SH "RFC 3986 vs WHATWG URL"
 curl supports URLs mostly according to how they are defined in RFC 3986, and
 has done so since the beginning.
