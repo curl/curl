@@ -28,6 +28,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.3 GnuTLS backend skips really long certificate fields
  2.4 DarwinSSL won't import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
+ 2.6 CURL_GLOBAL_SSL
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -237,6 +238,35 @@ problems may have been fixed or changed somewhat since this was written!
  The github discussion may contain a solution.
 
  See https://github.com/curl/curl/issues/1411
+
+2.6 CURL_GLOBAL_SSL
+
+ Since libcurl 7.57.0, the flag CURL_GLOBAL_SSL is a no-op. The change was
+ merged in https://github.com/curl/curl/commit/d661b0afb571a
+
+ It was removed since it was
+
+ A) never clear for applications on how to deal with init in the light of
+    different SSL backends (the option was added back in the days when life
+    was simpler)
+
+ B) multissl introduced dynamic switching between SSL backends which
+    emphasized (A) even more
+
+ C) libcurl uses some TLS backend functionality even for non-TLS functions (to
+    get "good" random) so applications trying to avoid the init for
+    performance reasons would do wrong anyway
+
+ D) never very carefully documented so all this mostly just happened to work
+    for some users
+
+ However, in spite of the problems with the feature, there were some users who
+ apparently depended on this feature and who now claim libcurl is broken for
+ them. The fix for this situation is not obvious as a downright revert of the
+ patch is totally ruled out due to those reasons above.
+
+ https://github.com/curl/curl/issues/2276
+
 
 3. Email protocols
 
