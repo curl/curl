@@ -23,13 +23,23 @@
 
 #include "curl_fnmatch.h"
 
+/*
+   CURL_FNMATCH_MATCH    0
+   CURL_FNMATCH_NOMATCH  1
+   CURL_FNMATCH_FAIL     2
+ */
+
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
+#define DIFFER 0x80
+#define POSIX_MATCH ((CURL_FNMATCH_MATCH << 8) | DIFFER)
+#define POSIX_NOMATCH ((CURL_FNMATCH_NOMATCH << 8) | DIFFER)
+#define POSIX_FAIL ((CURL_FNMATCH_FAIL << 8) | DIFFER)
 
 struct testcase {
   const char *pattern;
   const char *string;
-  int  result;
+  int result;
 };
 
 static const struct testcase tests[] = {
@@ -43,8 +53,8 @@ static const struct testcase tests[] = {
    NOMATCH},
 
   { "\\[",                      "[",                      MATCH },
-  { "[",                        "[",                      NOMATCH },
-  { "[]",                       "[]",                     NOMATCH },
+  { "[",                        "[",                      NOMATCH|POSIX_MATCH},
+  { "[]",                       "[]",                     NOMATCH|POSIX_MATCH},
   { "[][]",                     "[",                      MATCH },
   { "[][]",                     "]",                      MATCH },
   { "[[]",                      "[",                      MATCH },
@@ -86,7 +96,7 @@ static const struct testcase tests[] = {
   { "[][?*-]",                  "*",                      MATCH },
   { "[][?*-]",                  "-",                      MATCH },
   { "[]?*-]",                   "-",                      MATCH },
-  { "[\xFF]",                   "\xFF",                   MATCH },
+  { "[\xFF]",                   "\xFF",                   MATCH | POSIX_FAIL},
   { "?/b/c",                    "a/b/c",                  MATCH },
   { "^_{}~",                    "^_{}~",                  MATCH },
   { "!#%+,-./01234567889",      "!#%+,-./01234567889",    MATCH },
@@ -108,9 +118,9 @@ static const struct testcase tests[] = {
   { "*[^a].t?t",                "ba.txt",                 NOMATCH },
   { "*[^a].t?t",                "ab.txt",                 MATCH },
   { "*[^a]",                    "",                       NOMATCH },
-  { "[!\xFF]",                  "",                       NOMATCH },
-  { "[!\xFF]",                  "\xFF",                   NOMATCH },
-  { "[!\xFF]",                  "a",                      MATCH },
+  { "[!\xFF]",                  "",                       NOMATCH|POSIX_FAIL},
+  { "[!\xFF]",                  "\xFF",                   NOMATCH|POSIX_FAIL},
+  { "[!\xFF]",                  "a",                      MATCH | POSIX_FAIL},
   { "[!?*[]",                   "?",                      NOMATCH },
   { "[!!]",                     "!",                      NOMATCH },
   { "[!!]",                     "x",                      MATCH },
@@ -143,7 +153,7 @@ static const struct testcase tests[] = {
   { "[^[:print:]]",             "\10",                    MATCH },
   { "[[:lower:]][[:lower:]]",   "ll",                     MATCH },
   { "[[:foo:]]",                "bar",                    NOMATCH },
-  { "[[:foo:]]",                "f]",                     MATCH },
+  { "[[:foo:]]",                "f]",                     MATCH|POSIX_NOMATCH},
 
   { "Curl[[:blank:]];-)",       "Curl ;-)",               MATCH },
   { "*[[:blank:]]*",            " ",                      MATCH },
@@ -181,7 +191,7 @@ static const struct testcase tests[] = {
   { "x",                        "",                       NOMATCH },
 
   /* backslash */
-  { "\\",                       "\\",                     MATCH },
+  { "\\",                       "\\",                     MATCH|POSIX_NOMATCH},
   { "\\\\",                     "\\",                     MATCH },
   { "\\\\",                     "\\\\",                   NOMATCH },
   { "\\?",                      "?",                      MATCH },
@@ -214,11 +224,11 @@ static const struct testcase tests[] = {
 
   { "Lindmätarv",               "Lindmätarv",             MATCH },
 
-  { "",                         "",                       MATCH },
+  { "",                         "",                       MATCH},
   {"**]*[*[\x13]**[*\x13)]*]*[**[*\x13~r-]*]**[.*]*[\xe3\xe3\xe3\xe3\xe3\xe3"
    "\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3"
    "\xe3\xe3\xe3\xe3\xe3*[\x13]**[*\x13)]*]*[*[\x13]*[~r]*]*\xba\x13\xa6~b-]*",
-                                "a",                      NOMATCH }
+                                "a",                      NOMATCH|POSIX_FAIL}
 };
 
 static CURLcode unit_setup(void)
@@ -230,17 +240,49 @@ static void unit_stop(void)
 {
 }
 
+static const char *ret2name(int i)
+{
+  switch(i) {
+  case 0:
+    return "MATCH";
+  case 1:
+    return "NOMATCH";
+  case 2:
+    return "FAIL";
+  default:
+    return "unknown";
+  }
+  /* not reached */
+}
+
 UNITTEST_START
 
   int testnum = sizeof(tests) / sizeof(struct testcase);
   int i, rc;
+  bool posix;
+
+#ifdef HAVE_FNMATCH
+  printf("Tested with system fnmatch()\n");
+  posix = TRUE;
+#else
+  printf("Tested with custom fnmatch()\n");
+  posix = FALSE;
+#endif
 
   for(i = 0; i < testnum; i++) {
+    int result = tests[i].result;
     rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
-    if(rc != tests[i].result) {
-      printf("Curl_fnmatch(\"%s\", \"%s\") should return %d (returns %d)"
+    if(result & DIFFER) {
+      if(posix)
+        result >>= 8;
+      else
+        result &= 0x7f;
+    }
+    if(rc != result) {
+      printf("Curl_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
              " [%d]\n",
-             tests[i].pattern, tests[i].string, tests[i].result, rc, i);
+             tests[i].pattern, tests[i].string, ret2name(result),
+             ret2name(rc), i);
       fail("pattern mismatch");
     }
   }
