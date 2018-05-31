@@ -1346,6 +1346,8 @@
      d                 c                   10276
      d  CURLOPT_PROXY_TLS13_CIPHERS...
      d                 c                   10277
+     d  CURLOPT_DISALLOW_USERNAME_IN_URL...
+     d                 c                   00278
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
