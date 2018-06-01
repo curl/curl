@@ -536,7 +536,8 @@ Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
 }
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
+#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) &&  \
+  defined(HAVE_FREEADDRINFO)
 /*
  * curl_dofreeaddrinfo()
  *
