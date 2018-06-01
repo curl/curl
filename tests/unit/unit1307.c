@@ -23,13 +23,31 @@
 
 #include "curl_fnmatch.h"
 
+/*
+   CURL_FNMATCH_MATCH    0
+   CURL_FNMATCH_NOMATCH  1
+   CURL_FNMATCH_FAIL     2
+ */
+
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
+
+#define LINUX_DIFFER 0x80
+#define LINUX_SHIFT 8
+#define LINUX_MATCH ((CURL_FNMATCH_MATCH << LINUX_SHIFT) | LINUX_DIFFER)
+#define LINUX_NOMATCH ((CURL_FNMATCH_NOMATCH << LINUX_SHIFT) | LINUX_DIFFER)
+#define LINUX_FAIL ((CURL_FNMATCH_FAIL << LINUX_SHIFT) | LINUX_DIFFER)
+
+#define MAC_DIFFER 0x40
+#define MAC_SHIFT 16
+#define MAC_MATCH ((CURL_FNMATCH_MATCH << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_NOMATCH ((CURL_FNMATCH_NOMATCH << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_FAIL ((CURL_FNMATCH_FAIL << MAC_SHIFT) | MAC_DIFFER)
 
 struct testcase {
   const char *pattern;
   const char *string;
-  int  result;
+  int result;
 };
 
 static const struct testcase tests[] = {
@@ -40,11 +58,11 @@ static const struct testcase tests[] = {
    "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
    "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
    "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[",
-   NOMATCH},
+   NOMATCH|MAC_FAIL},
 
   { "\\[",                      "[",                      MATCH },
-  { "[",                        "[",                      NOMATCH },
-  { "[]",                       "[]",                     NOMATCH },
+  { "[",                        "[",             NOMATCH|LINUX_MATCH|MAC_FAIL},
+  { "[]",                       "[]",            NOMATCH|LINUX_MATCH|MAC_FAIL},
   { "[][]",                     "[",                      MATCH },
   { "[][]",                     "]",                      MATCH },
   { "[[]",                      "[",                      MATCH },
@@ -86,7 +104,7 @@ static const struct testcase tests[] = {
   { "[][?*-]",                  "*",                      MATCH },
   { "[][?*-]",                  "-",                      MATCH },
   { "[]?*-]",                   "-",                      MATCH },
-  { "[\xFF]",                   "\xFF",                   MATCH },
+  { "[\xFF]",                   "\xFF", MATCH|LINUX_FAIL|MAC_FAIL},
   { "?/b/c",                    "a/b/c",                  MATCH },
   { "^_{}~",                    "^_{}~",                  MATCH },
   { "!#%+,-./01234567889",      "!#%+,-./01234567889",    MATCH },
@@ -108,9 +126,9 @@ static const struct testcase tests[] = {
   { "*[^a].t?t",                "ba.txt",                 NOMATCH },
   { "*[^a].t?t",                "ab.txt",                 MATCH },
   { "*[^a]",                    "",                       NOMATCH },
-  { "[!\xFF]",                  "",                       NOMATCH },
-  { "[!\xFF]",                  "\xFF",                   NOMATCH },
-  { "[!\xFF]",                  "a",                      MATCH },
+  { "[!\xFF]",                  "",             NOMATCH|LINUX_FAIL},
+  { "[!\xFF]",                  "\xFF",  NOMATCH|LINUX_FAIL|MAC_FAIL},
+  { "[!\xFF]",                  "a",      MATCH|LINUX_FAIL|MAC_FAIL},
   { "[!?*[]",                   "?",                      NOMATCH },
   { "[!!]",                     "!",                      NOMATCH },
   { "[!!]",                     "x",                      MATCH },
@@ -142,8 +160,8 @@ static const struct testcase tests[] = {
   { "[^[:blank:]]",             "\t",                     NOMATCH },
   { "[^[:print:]]",             "\10",                    MATCH },
   { "[[:lower:]][[:lower:]]",   "ll",                     MATCH },
-  { "[[:foo:]]",                "bar",                    NOMATCH },
-  { "[[:foo:]]",                "f]",                     MATCH },
+  { "[[:foo:]]",                "bar",                    NOMATCH|MAC_FAIL},
+  { "[[:foo:]]",                "f]",         MATCH|LINUX_NOMATCH|MAC_FAIL},
 
   { "Curl[[:blank:]];-)",       "Curl ;-)",               MATCH },
   { "*[[:blank:]]*",            " ",                      MATCH },
@@ -181,7 +199,7 @@ static const struct testcase tests[] = {
   { "x",                        "",                       NOMATCH },
 
   /* backslash */
-  { "\\",                       "\\",                     MATCH },
+  { "\\",                       "\\",                     MATCH|LINUX_NOMATCH},
   { "\\\\",                     "\\",                     MATCH },
   { "\\\\",                     "\\\\",                   NOMATCH },
   { "\\?",                      "?",                      MATCH },
@@ -214,11 +232,11 @@ static const struct testcase tests[] = {
 
   { "Lindmätarv",               "Lindmätarv",             MATCH },
 
-  { "",                         "",                       MATCH },
+  { "",                         "",                       MATCH},
   {"**]*[*[\x13]**[*\x13)]*]*[**[*\x13~r-]*]**[.*]*[\xe3\xe3\xe3\xe3\xe3\xe3"
    "\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3"
    "\xe3\xe3\xe3\xe3\xe3*[\x13]**[*\x13)]*]*[*[\x13]*[~r]*]*\xba\x13\xa6~b-]*",
-                                "a",                      NOMATCH }
+                                "a",                      NOMATCH|LINUX_FAIL}
 };
 
 static CURLcode unit_setup(void)
@@ -230,19 +248,63 @@ static void unit_stop(void)
 {
 }
 
-UNITTEST_START
+static const char *ret2name(int i)
+{
+  switch(i) {
+  case 0:
+    return "MATCH";
+  case 1:
+    return "NOMATCH";
+  case 2:
+    return "FAIL";
+  default:
+    return "unknown";
+  }
+  /* not reached */
+}
 
+enum system {
+  SYSTEM_CUSTOM,
+  SYSTEM_LINUX,
+  SYSTEM_MACOS
+};
+
+UNITTEST_START
+{
   int testnum = sizeof(tests) / sizeof(struct testcase);
   int i, rc;
+  enum system machine;
+
+#ifdef HAVE_FNMATCH
+  if(strstr(OS, "apple") || strstr(OS, "darwin")) {
+    machine = SYSTEM_MACOS;
+  }
+  else
+    machine = SYSTEM_LINUX;
+  printf("Tested with system fnmatch(), %s-style\n",
+         machine == SYSTEM_LINUX ? "linux" : "mac");
+#else
+  printf("Tested with custom fnmatch()\n");
+  machine = SYSTEM_CUSTOM;
+#endif
 
   for(i = 0; i < testnum; i++) {
+    int result = tests[i].result;
     rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
-    if(rc != tests[i].result) {
-      printf("Curl_fnmatch(\"%s\", \"%s\") should return %d (returns %d)"
+    if(result & (LINUX_DIFFER|MAC_DIFFER)) {
+      if((result & LINUX_DIFFER) && (machine == SYSTEM_LINUX))
+        result >>= LINUX_SHIFT;
+      else if((result & MAC_DIFFER) && (machine == SYSTEM_MACOS))
+        result >>= MAC_SHIFT;
+      result &= 0x03; /* filter off all high bits */
+    }
+    if(rc != result) {
+      printf("Curl_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
              " [%d]\n",
-             tests[i].pattern, tests[i].string, tests[i].result, rc, i);
+             tests[i].pattern, tests[i].string, ret2name(result),
+             ret2name(rc), i);
       fail("pattern mismatch");
     }
   }
-
+}
 UNITTEST_STOP
