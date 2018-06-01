@@ -1083,8 +1083,6 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
     int pollrc;
     /* wait... */
     pollrc = Curl_poll(ufds, nfds, timeout_ms);
-    DEBUGF(infof(data, "Curl_poll(%u ds, %d ms) == %d\n",
-                 nfds, timeout_ms, pollrc));
 
     if(pollrc > 0) {
       retcode = pollrc;
