@@ -729,6 +729,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the internal data */
   data = calloc(nfds, sizeof(struct select_ws_data));
   if(data == NULL) {
+    CloseHandle(waitevent);
     errno = ENOMEM;
     return -1;
   }
@@ -736,6 +737,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the internal event handles */
   handles = calloc(nfds, sizeof(HANDLE));
   if(handles == NULL) {
+    CloseHandle(waitevent);
     free(data);
     errno = ENOMEM;
     return -1;
