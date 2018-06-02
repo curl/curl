@@ -1237,8 +1237,6 @@ static int conn_is_conn(struct connectdata *conn, void *param)
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp)
 {
-  curl_socket_t sockfd;
-
   DEBUGASSERT(data);
 
   /* this works for an easy handle:
@@ -1264,12 +1262,10 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     if(connp)
       /* only store this if the caller cares for it */
       *connp = c;
-    sockfd = c->sock[FIRSTSOCKET];
+    return c->sock[FIRSTSOCKET];
   }
   else
     return CURL_SOCKET_BAD;
-
-  return sockfd;
 }
 
 /*
