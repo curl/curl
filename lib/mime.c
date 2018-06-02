@@ -505,9 +505,6 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
   mime_encoder_state *st = &part->encstate;
   char *ptr = buffer;
   size_t cursize = 0;
-  int i;
-  size_t len;
-  size_t consumed;
   int softlinebreak;
   char buf[4];
 
@@ -516,9 +513,9 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
      character constants that can be interpreted as non-ascii on some
      platforms. Preserve ASCII encoding on output too. */
   while(st->bufbeg < st->bufend) {
-    len = 1;
-    consumed = 1;
-    i = st->buf[st->bufbeg];
+    size_t len = 1;
+    size_t consumed = 1;
+    int i = st->buf[st->bufbeg];
     buf[0] = (char) i;
     buf[1] = aschex[(i >> 4) & 0xF];
     buf[2] = aschex[i & 0xF];
@@ -813,8 +810,6 @@ static size_t readback_part(curl_mimepart *part,
                             char *buffer, size_t bufsize)
 {
   size_t cursize = 0;
-  size_t sz;
-  struct curl_slist *hdr;
 #ifdef CURL_DOES_CONVERSIONS
   char *convbuf = buffer;
 #endif
@@ -822,8 +817,8 @@ static size_t readback_part(curl_mimepart *part,
   /* Readback from part. */
 
   while(bufsize) {
-    sz = 0;
-    hdr = (struct curl_slist *) part->state.ptr;
+    size_t sz = 0;
+    struct curl_slist *hdr = (struct curl_slist *) part->state.ptr;
     switch(part->state.state) {
     case MIMESTATE_BEGIN:
       mimesetstate(&part->state, part->flags & MIME_BODY_ONLY? MIMESTATE_BODY:
@@ -918,8 +913,6 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
 {
   curl_mime *mime = (curl_mime *) instream;
   size_t cursize = 0;
-  size_t sz;
-  curl_mimepart *part;
 #ifdef CURL_DOES_CONVERSIONS
   char *convbuf = buffer;
 #endif
@@ -927,8 +920,8 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
   (void) size;   /* Always 1. */
 
   while(nitems) {
-    sz = 0;
-    part = mime->state.ptr;
+    size_t sz = 0;
+    curl_mimepart *part = mime->state.ptr;
     switch(mime->state.state) {
     case MIMESTATE_BEGIN:
     case MIMESTATE_BODY:
@@ -1044,7 +1037,6 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
   curl_mime *mime = (curl_mime *) instream;
   curl_mimepart *part;
   int result = CURL_SEEKFUNC_OK;
-  int res;
 
   if(whence != SEEK_SET || offset)
     return CURL_SEEKFUNC_CANTSEEK;    /* Only support full rewind. */
@@ -1053,7 +1045,7 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
    return CURL_SEEKFUNC_OK;           /* Already rewound. */
 
   for(part = mime->firstpart; part; part = part->nextpart) {
-    res = mime_part_rewind(part);
+    int res = mime_part_rewind(part);
     if(res != CURL_SEEKFUNC_OK)
       result = res;
   }
@@ -1349,7 +1341,6 @@ CURLcode curl_mime_data(curl_mimepart *part,
 CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
 {
   CURLcode result = CURLE_OK;
-  char *base;
 
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1357,6 +1348,7 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
   cleanup_part_content(part);
 
   if(filename) {
+    char *base;
     struct_stat sbuf;
 
     if(stat(filename, &sbuf) || access(filename, R_OK))
@@ -1564,7 +1556,6 @@ static size_t slist_size(struct curl_slist *s,
 static curl_off_t multipart_size(curl_mime *mime)
 {
   curl_off_t size;
-  curl_off_t sz;
   size_t boundarysize;
   curl_mimepart *part;
 
@@ -1575,7 +1566,7 @@ static curl_off_t multipart_size(curl_mime *mime)
   size = boundarysize;  /* Final boundary - CRLF after headers. */
 
   for(part = mime->firstpart; part; part = part->nextpart) {
-    sz = Curl_mime_size(part);
+    curl_off_t sz = Curl_mime_size(part);
 
     if(sz < 0)
       size = sz;
@@ -1643,8 +1634,6 @@ static CURLcode add_content_type(struct curl_slist **slp,
 
 const char *Curl_mime_contenttype(const char *filename)
 {
-  unsigned int i;
-
   /*
    * If no content type was specified, we scan through a few well-known
    * extensions and pick the first we match!
@@ -1669,6 +1658,7 @@ const char *Curl_mime_contenttype(const char *filename)
   if(filename) {
     size_t len1 = strlen(filename);
     const char *nameend = filename + len1;
+    unsigned int i;
 
     for(i = 0; i < sizeof(ctts) / sizeof(ctts[0]); i++) {
       size_t len2 = strlen(ctts[i].extension);

@@ -101,7 +101,6 @@ void logmsg(const char *msg, ...)
   va_list ap;
   char buffer[2048 + 1];
   FILE *logfp;
-  int error;
   struct timeval tv;
   time_t sec;
   struct tm *now;
@@ -135,7 +134,7 @@ void logmsg(const char *msg, ...)
     fclose(logfp);
   }
   else {
-    error = errno;
+    int error = errno;
     fprintf(stderr, "fopen() failed with error: %d %s\n",
             error, strerror(error));
     fprintf(stderr, "Error opening file: %s\n", serverlogfile);
@@ -217,7 +216,6 @@ int wait_ms(int timeout_ms)
 #endif
   struct timeval initial_tv;
   int pending_ms;
-  int error;
 #endif
   int r = 0;
 
@@ -235,6 +233,7 @@ int wait_ms(int timeout_ms)
   pending_ms = timeout_ms;
   initial_tv = tvnow();
   do {
+    int error;
 #if defined(HAVE_POLL_FINE)
     r = poll(NULL, 0, pending_ms);
 #else

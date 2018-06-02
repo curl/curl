@@ -444,7 +444,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   ssize_t nread; /* number of bytes read */
   size_t excess = 0; /* excess bytes read */
-  bool is_empty_data = FALSE;
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
 
@@ -454,6 +453,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   /* This is where we loop until we have read everything there is to
      read or we get a CURLE_AGAIN */
   do {
+    bool is_empty_data = FALSE;
     size_t buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
 

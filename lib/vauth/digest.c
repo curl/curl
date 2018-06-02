@@ -158,7 +158,7 @@ static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
 /* Perform quoted-string escaping as described in RFC2616 and its errata */
 static char *auth_digest_string_quoted(const char *source)
 {
-  char *dest, *d;
+  char *dest;
   const char *s = source;
   size_t n = 1; /* null terminator */
 
@@ -173,8 +173,8 @@ static char *auth_digest_string_quoted(const char *source)
 
   dest = malloc(n);
   if(dest) {
+    char *d = dest;
     s = source;
-    d = dest;
     while(*s) {
       if(*s == '"' || *s == '\\') {
         *d++ = '\\';
@@ -696,7 +696,6 @@ static CURLcode _Curl_auth_create_digest_http_message(
   unsigned char ha1[65];    /* 64 digits and 1 zero byte */
   unsigned char ha2[65];    /* 64 digits and 1 zero byte */
   char userh[65];
-  char cnoncebuf[33];
   char *cnonce = NULL;
   size_t cnonce_sz = 0;
   char *userp_quoted;
@@ -707,6 +706,7 @@ static CURLcode _Curl_auth_create_digest_http_message(
     digest->nc = 1;
 
   if(!digest->cnonce) {
+    char cnoncebuf[33];
     result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
                            sizeof(cnoncebuf));
     if(result)

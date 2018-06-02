@@ -49,7 +49,6 @@ time_t Curl_pp_state_timeout(struct pingpong *pp)
   struct connectdata *conn = pp->conn;
   struct Curl_easy *data = conn->data;
   time_t timeout_ms; /* in milliseconds */
-  time_t timeout2_ms; /* in milliseconds */
   long response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
 
@@ -65,7 +64,7 @@ time_t Curl_pp_state_timeout(struct pingpong *pp)
 
   if(data->set.timeout) {
     /* if timeout is requested, find out how much remaining time we have */
-    timeout2_ms = data->set.timeout - /* timeout time */
+    time_t timeout2_ms = data->set.timeout - /* timeout time */
       Curl_timediff(Curl_now(), conn->now); /* spent time */
 
     /* pick the lowest number */

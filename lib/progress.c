@@ -35,22 +35,22 @@
    byte) */
 static void time2str(char *r, curl_off_t seconds)
 {
-  curl_off_t d, h, m, s;
+  curl_off_t h;
   if(seconds <= 0) {
     strcpy(r, "--:--:--");
     return;
   }
   h = seconds / CURL_OFF_T_C(3600);
   if(h <= CURL_OFF_T_C(99)) {
-    m = (seconds - (h*CURL_OFF_T_C(3600))) / CURL_OFF_T_C(60);
-    s = (seconds - (h*CURL_OFF_T_C(3600))) - (m*CURL_OFF_T_C(60));
+    curl_off_t m = (seconds - (h*CURL_OFF_T_C(3600))) / CURL_OFF_T_C(60);
+    curl_off_t s = (seconds - (h*CURL_OFF_T_C(3600))) - (m*CURL_OFF_T_C(60));
     snprintf(r, 9, "%2" CURL_FORMAT_CURL_OFF_T ":%02" CURL_FORMAT_CURL_OFF_T
              ":%02" CURL_FORMAT_CURL_OFF_T, h, m, s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
        format to fit within the limits. */
-    d = seconds / CURL_OFF_T_C(86400);
+    curl_off_t d = seconds / CURL_OFF_T_C(86400);
     h = (seconds - (d*CURL_OFF_T_C(86400))) / CURL_OFF_T_C(3600);
     if(d <= CURL_OFF_T_C(999))
       snprintf(r, 9, "%3" CURL_FORMAT_CURL_OFF_T
@@ -369,25 +369,10 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
 int Curl_pgrsUpdate(struct connectdata *conn)
 {
   struct curltime now;
-  int result;
-  char max5[6][10];
-  curl_off_t dlpercen = 0;
-  curl_off_t ulpercen = 0;
-  curl_off_t total_percen = 0;
-  curl_off_t total_transfer;
-  curl_off_t total_expected_transfer;
   curl_off_t timespent;
   curl_off_t timespent_ms; /* milliseconds */
   struct Curl_easy *data = conn->data;
   int nowindex = data->progress.speeder_c% CURR_TIME;
-  int checkindex;
-  int countindex; /* amount of seconds stored in the speeder array */
-  char time_left[10];
-  char time_total[10];
-  char time_spent[10];
-  curl_off_t ulestimate = 0;
-  curl_off_t dlestimate = 0;
-  curl_off_t total_estimate;
   bool shownow = FALSE;
   curl_off_t dl = data->progress.downloaded;
   curl_off_t ul = data->progress.uploaded;
@@ -413,6 +398,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* Calculations done at most once a second, unless end is reached */
   if(data->progress.lastshow != now.tv_sec) {
+    int countindex; /* amount of seconds stored in the speeder array */
     shownow = TRUE;
 
     data->progress.lastshow = now.tv_sec;
@@ -438,6 +424,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     /* first of all, we don't do this if there's no counted seconds yet */
     if(countindex) {
+      int checkindex;
       timediff_t span_ms;
 
       /* Get the index position to compare with the 'nowindex' position.
@@ -477,8 +464,21 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   if(!(data->progress.flags & PGRS_HIDE)) {
     /* progress meter has not been shut off */
+    char max5[6][10];
+    curl_off_t dlpercen = 0;
+    curl_off_t ulpercen = 0;
+    curl_off_t total_percen = 0;
+    curl_off_t total_transfer;
+    curl_off_t total_expected_transfer;
+    char time_left[10];
+    char time_total[10];
+    char time_spent[10];
+    curl_off_t ulestimate = 0;
+    curl_off_t dlestimate = 0;
+    curl_off_t total_estimate;
 
     if(data->set.fxferinfo) {
+      int result;
       /* There's a callback set, call that */
       Curl_set_in_callback(data, true);
       result = data->set.fxferinfo(data->set.progress_client,
@@ -492,6 +492,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       return result;
     }
     if(data->set.fprogress) {
+      int result;
       /* The older deprecated callback is set, call that */
       Curl_set_in_callback(data, true);
       result = data->set.fprogress(data->set.progress_client,

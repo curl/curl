@@ -146,7 +146,6 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
                                          const char *value, size_t len)
 {
   CURLcode result = CURLE_OK;
-  unsigned int mechbit;
   size_t mechlen;
 
   if(!len)
@@ -160,7 +159,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
   if(!strncmp(value, "*", len))
     sasl->prefmech = SASL_AUTH_DEFAULT;
   else {
-    mechbit = Curl_sasl_decode_mech(value, len, &mechlen);
+    unsigned int mechbit = Curl_sasl_decode_mech(value, len, &mechlen);
     if(mechbit && mechlen == len)
       sasl->prefmech |= mechbit;
     else

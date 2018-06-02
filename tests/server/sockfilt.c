@@ -358,11 +358,11 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
 static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 {
   int error;
-  ssize_t rc;
   ssize_t nread = 0;
 
   do {
-    rc = read(filedes, (unsigned char *)buffer + nread, nbytes - nread);
+    ssize_t rc = read(filedes,
+                      (unsigned char *)buffer + nread, nbytes - nread);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -404,12 +404,11 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
 {
   int error;
-  ssize_t wc;
   ssize_t nwrite = 0;
 
   do {
-    wc = write(filedes, (const unsigned char *)buffer + nwrite,
-               nbytes - nwrite);
+    ssize_t wc = write(filedes, (const unsigned char *)buffer + nwrite,
+                       nbytes - nwrite);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -699,8 +698,6 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   WSANETWORKEVENTS wsanetevents;
   struct select_ws_data *data;
   HANDLE handle, *handles;
-  curl_socket_t sock;
-  long networkevents;
   WSAEVENT wsaevent;
   int error, fds;
   HANDLE waitevent = NULL;
@@ -729,6 +726,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the internal data */
   data = calloc(nfds, sizeof(struct select_ws_data));
   if(data == NULL) {
+    CloseHandle(waitevent);
     errno = ENOMEM;
     return -1;
   }
@@ -736,6 +734,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* allocate internal array for the internal event handles */
   handles = calloc(nfds, sizeof(HANDLE));
   if(handles == NULL) {
+    CloseHandle(waitevent);
     free(data);
     errno = ENOMEM;
     return -1;
@@ -743,7 +742,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* loop over the handles in the input descriptor sets */
   for(fds = 0; fds < nfds; fds++) {
-    networkevents = 0;
+    long networkevents = 0;
     handles[nfd] = 0;
 
     if(FD_ISSET(fds, readfds))
@@ -812,8 +811,8 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* loop over the internal handles returned in the descriptors */
   for(idx = 0; idx < nfd; idx++) {
+    curl_socket_t sock = data[idx].fd;
     handle = handles[idx];
-    sock = data[idx].fd;
     fds = curlx_sktosi(sock);
 
     /* check if the current internal handle was triggered */
@@ -920,9 +919,6 @@ static bool juggle(curl_socket_t *sockfdp,
   curl_socket_t sockfd = CURL_SOCKET_BAD;
   int maxfd = -99;
   ssize_t rc;
-  ssize_t nread_socket;
-  ssize_t bytes_written;
-  ssize_t buffer_len;
   int error = 0;
 
  /* 'buffer' is this excessively large only to be able to support things like
@@ -1034,6 +1030,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
 
   if(FD_ISSET(fileno(stdin), &fds_read)) {
+    ssize_t buffer_len;
     /* read from stdin, commands/data to be dealt with and possibly passed on
        to the socket
 
@@ -1105,7 +1102,7 @@ static bool juggle(curl_socket_t *sockfdp,
       }
       else {
         /* send away on the socket */
-        bytes_written = swrite(sockfd, buffer, buffer_len);
+        ssize_t bytes_written = swrite(sockfd, buffer, buffer_len);
         if(bytes_written != buffer_len) {
           logmsg("Not all data was sent. Bytes to send: %zd sent: %zd",
                  buffer_len, bytes_written);
@@ -1133,13 +1130,11 @@ static bool juggle(curl_socket_t *sockfdp,
 
 
   if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read)) ) {
-
-    curl_socket_t newfd = CURL_SOCKET_BAD; /* newly accepted socket */
-
+    ssize_t nread_socket;
     if(*mode == PASSIVE_LISTEN) {
       /* there's no stream set up yet, this is an indication that there's a
          client connecting. */
-      newfd = accept(sockfd, NULL, NULL);
+      curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept(%d, NULL, NULL) failed with error: (%d) %s",

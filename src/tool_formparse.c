@@ -123,13 +123,12 @@ static int read_field_headers(struct OperationConfig *config,
 {
   size_t hdrlen = 0;
   size_t pos = 0;
-  int c;
   bool incomment = FALSE;
   int lineno = 1;
   char hdrbuf[999]; /* Max. header length + 1. */
 
   for(;;) {
-    c = getc(fp);
+    int c = getc(fp);
     if(c == EOF || (!pos && !ISSPACE(c))) {
       /* Strip and flush the current header. */
       while(hdrlen && ISSPACE(hdrbuf[hdrlen - 1]))
@@ -563,7 +562,6 @@ int formparse(struct OperationConfig *config,
   struct curl_slist *headers = NULL;
   curl_mimepart *part = NULL;
   CURLcode res;
-  int sep = '\0';
 
   /* Allocate the main mime structure if needed. */
   if(!*mimepost) {
@@ -585,6 +583,7 @@ int formparse(struct OperationConfig *config,
   /* Scan for the end of the name. */
   contp = strchr(contents, '=');
   if(contp) {
+    int sep = '\0';
     if(contp > contents)
       name = contents;
     *contp++ = '\0';
