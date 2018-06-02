@@ -506,8 +506,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
   *usedarg = FALSE; /* default is that we don't use the arg */
 
-  if(('-' != flag[0]) ||
-     (('-' == flag[0]) && ('-' == flag[1]))) {
+  if(('-' != flag[0]) || ('-' == flag[1])) {
     /* this should be a long name */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     size_t fnam = strlen(word);
