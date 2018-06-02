@@ -30,7 +30,7 @@
 
 #ifdef USE_AXTLS
 
-#error axTLS support has been disabled in curl due to doubts about quaility,
+#error axTLS support has been disabled in curl due to doubts about quality,
 #error user dedication and a lack of use/testing. We urge users to consider
 #error using a more established TLS backend instead.
 
