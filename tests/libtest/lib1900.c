@@ -63,14 +63,14 @@ static int parse_url_file(const char *filename)
     return 0;
 
   while(!feof(f)) {
-    if(fscanf(f, "%d %s\n", &filetime, buf)) {
+    if(fscanf(f, "%d %199s\n", &filetime, buf)) {
       urltime[num_handles] = filetime;
       urlstring[num_handles] = strdup(buf);
       num_handles++;
       continue;
     }
 
-    if(fscanf(f, "blacklist_site %s\n", buf)) {
+    if(fscanf(f, "blacklist_site %199s\n", buf)) {
       site_blacklist[blacklist_num_sites] = strdup(buf);
       blacklist_num_sites++;
       continue;
