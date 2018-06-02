@@ -111,7 +111,7 @@ int test(char *URL)
     res = curl_easy_perform(curl);
 
     /* Clear for the next go-round */
-    test_setopt(curl, CURLOPT_RTSP_SESSION_ID, NULL);
+    test_setopt(curl, CURLOPT_RTSP_SESSION_ID, (char *)NULL);
   }
 
 test_cleanup:

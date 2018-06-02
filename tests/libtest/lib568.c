@@ -142,8 +142,8 @@ int test(char *URL)
   if(res)
     goto test_cleanup;
 
-  test_setopt(curl, CURLOPT_POSTFIELDS, NULL);
-  test_setopt(curl, CURLOPT_RTSPHEADER, NULL);
+  test_setopt(curl, CURLOPT_POSTFIELDS, (void *)NULL);
+  test_setopt(curl, CURLOPT_RTSPHEADER, (struct curl_slist *)NULL);
   curl_slist_free_all(custom_headers);
   custom_headers = NULL;
 
