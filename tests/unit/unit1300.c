@@ -264,7 +264,7 @@ UNITTEST_START
   fail_unless(llist_destination.tail != NULL,
           "llist_destination tail set to null after moving an element");
 
-  fail_unless(llist_destination.tail == llist_destination.tail,
+  fail_unless(llist_destination.tail == llist_destination.head,
             "llist_destination tail doesn't equal llist_destination head");
 }
 UNITTEST_STOP
