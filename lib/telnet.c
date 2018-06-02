@@ -109,8 +109,8 @@ static void printoption(struct Curl_easy *data,
 
 static void negotiate(struct connectdata *);
 static void send_negotiation(struct connectdata *, int cmd, int option);
-static void set_local_option(struct connectdata *, int cmd, int option);
-static void set_remote_option(struct connectdata *, int cmd, int option);
+static void set_local_option(struct connectdata *conn, int option, int newstate);
+static void set_remote_option(struct connectdata *conn, int option, int newstate);
 
 static void printsub(struct Curl_easy *data,
                      int direction, unsigned char *pointer,
