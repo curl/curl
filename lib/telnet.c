@@ -109,8 +109,10 @@ static void printoption(struct Curl_easy *data,
 
 static void negotiate(struct connectdata *);
 static void send_negotiation(struct connectdata *, int cmd, int option);
-static void set_local_option(struct connectdata *, int cmd, int option);
-static void set_remote_option(struct connectdata *, int cmd, int option);
+static void set_local_option(struct connectdata *conn,
+                             int option, int newstate);
+static void set_remote_option(struct connectdata *conn,
+                              int option, int newstate);
 
 static void printsub(struct Curl_easy *data,
                      int direction, unsigned char *pointer,
@@ -311,9 +313,6 @@ static void negotiate(struct connectdata *conn)
 static void printoption(struct Curl_easy *data,
                         const char *direction, int cmd, int option)
 {
-  const char *fmt;
-  const char *opt;
-
   if(data->set.verbose) {
     if(cmd == CURL_IAC) {
       if(CURL_TELCMD_OK(option))
@@ -322,9 +321,12 @@ static void printoption(struct Curl_easy *data,
         infof(data, "%s IAC %d\n", direction, option);
     }
     else {
-      fmt = (cmd == CURL_WILL) ? "WILL" : (cmd == CURL_WONT) ? "WONT" :
-        (cmd == CURL_DO) ? "DO" : (cmd == CURL_DONT) ? "DONT" : 0;
+      const char *fmt = (cmd == CURL_WILL) ? "WILL" :
+                        (cmd == CURL_WONT) ? "WONT" :
+                        (cmd == CURL_DO) ? "DO" :
+                        (cmd == CURL_DONT) ? "DONT" : 0;
       if(fmt) {
+        const char *opt;
         if(CURL_TELOPT_OK(option))
           opt = CURL_TELOPT(option);
         else if(option == CURL_TELOPT_EXOPL)
@@ -348,7 +350,6 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
 {
    unsigned char buf[3];
    ssize_t bytes_written;
-   int err;
    struct Curl_easy *data = conn->data;
 
    buf[0] = CURL_IAC;
@@ -357,7 +358,7 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
 
    bytes_written = swrite(conn->sock[FIRSTSOCKET], buf, 3);
    if(bytes_written < 0) {
-     err = SOCKERRNO;
+     int err = SOCKERRNO;
      failf(data,"Sending data failed (%d)",err);
    }
 
@@ -710,9 +711,8 @@ static void printsub(struct Curl_easy *data,
                      unsigned char *pointer,    /* where suboption data is */
                      size_t length)             /* length of suboption data */
 {
-  unsigned int i = 0;
-
   if(data->set.verbose) {
+    unsigned int i = 0;
     if(direction) {
       infof(data, "%s IAC SB ", (direction == '<')? "RCVD":"SENT");
       if(length >= 3) {
@@ -928,7 +928,6 @@ static void suboption(struct connectdata *conn)
   unsigned char temp[2048];
   ssize_t bytes_written;
   size_t len;
-  size_t tmplen;
   int err;
   char varname[128] = "";
   char varval[128] = "";
@@ -968,7 +967,7 @@ static void suboption(struct connectdata *conn)
       len = 4;
 
       for(v = tn->telnet_vars; v; v = v->next) {
-        tmplen = (strlen(v->data) + 1);
+        size_t tmplen = (strlen(v->data) + 1);
         /* Add the variable only if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
           if(sscanf(v->data, "%127[^,],%127s", varname, varval)) {
@@ -1223,7 +1222,7 @@ CURLcode telrcv(struct connectdata *conn,
 static CURLcode send_telnet_data(struct connectdata *conn,
                                  char *buffer, ssize_t nread)
 {
-  ssize_t escapes, i, j, outlen;
+  ssize_t escapes, i, outlen;
   unsigned char *outbuf = NULL;
   CURLcode result = CURLE_OK;
   ssize_t bytes_written, total_written;
@@ -1238,6 +1237,7 @@ static CURLcode send_telnet_data(struct connectdata *conn,
   if(outlen == nread)
     outbuf = (unsigned char *)buffer;
   else {
+    ssize_t j;
     outbuf = malloc(nread + escapes + 1);
     if(!outbuf)
       return CURLE_OUT_OF_MEMORY;
@@ -1315,7 +1315,6 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   HANDLE objs[2];
   DWORD  obj_count;
   DWORD  wait_timeout;
-  DWORD waitret;
   DWORD readfile_read;
   int err;
 #else
@@ -1438,7 +1437,8 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   /* Keep on listening and act on events */
   while(keepon) {
     const DWORD buf_size = (DWORD)data->set.buffer_size;
-    waitret = WaitForMultipleObjects(obj_count, objs, FALSE, wait_timeout);
+    DWORD waitret = WaitForMultipleObjects(obj_count, objs,
+                                           FALSE, wait_timeout);
     switch(waitret) {
     case WAIT_TIMEOUT:
     {

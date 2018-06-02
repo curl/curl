@@ -506,8 +506,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
   *usedarg = FALSE; /* default is that we don't use the arg */
 
-  if(('-' != flag[0]) ||
-     (('-' == flag[0]) && ('-' == flag[1]))) {
+  if(('-' != flag[0]) || ('-' == flag[1])) {
     /* this should be a long name */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     size_t fnam = strlen(word);
@@ -2155,7 +2154,6 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
     orig_opt = argv[i];
 
     if(stillflags && ('-' == argv[i][0])) {
-      char *nextarg;
       bool passarg;
       char *flag = argv[i];
 
@@ -2164,7 +2162,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
            following (URL) argument to start with -. */
         stillflags = FALSE;
       else {
-        nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
+        char *nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
 
         result = getparameter(flag, nextarg, &passarg, config, operation);
         if(result == PARAM_NEXT_OPERATION) {

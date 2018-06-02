@@ -99,7 +99,6 @@ static void *fire(void *ptr)
   CURLcode code;
   struct Tdata *tdata = (struct Tdata*)ptr;
   CURL *curl;
-  int i = 0;
 
   curl = curl_easy_init();
   if(!curl) {
@@ -116,6 +115,7 @@ static void *fire(void *ptr)
   printf("PERFORM\n");
   code = curl_easy_perform(curl);
   if(code != CURLE_OK) {
+    int i = 0;
     fprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
             tdata->url, i, (int)code);
   }

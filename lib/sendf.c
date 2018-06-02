@@ -841,7 +841,6 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
 {
   int rc;
   if(data->set.printhost && conn && conn->host.dispname) {
-    char buffer[160];
     const char *t = NULL;
     const char *w = "Data";
     switch(type) {
@@ -862,6 +861,7 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
     }
 
     if(t) {
+      char buffer[160];
       snprintf(buffer, sizeof(buffer), "[%s %s %s]", w, t,
                conn->host.dispname);
       rc = showit(data, CURLINFO_TEXT, buffer, strlen(buffer));

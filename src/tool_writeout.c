@@ -122,9 +122,9 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
       else {
         /* this is meant as a variable to output */
         char *end;
-        char keepit;
-        int i;
         if('{' == ptr[1]) {
+          char keepit;
+          int i;
           bool match = FALSE;
           end = strchr(ptr, '}');
           ptr += 2; /* pass the % and the { */

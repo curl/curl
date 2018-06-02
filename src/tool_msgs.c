@@ -109,8 +109,8 @@ void warnf(struct GlobalConfig *config, const char *fmt, ...)
 
 void helpf(FILE *errors, const char *fmt, ...)
 {
-  va_list ap;
   if(fmt) {
+    va_list ap;
     va_start(ap, fmt);
     fputs("curl: ", errors); /* prefix it */
     vfprintf(errors, fmt, ap);

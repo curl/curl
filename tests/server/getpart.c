@@ -116,7 +116,6 @@ CURLcode Curl_convert_clone(struct Curl_easy *data,
 static int readline(char **buffer, size_t *bufsize, FILE *stream)
 {
   size_t offset = 0;
-  size_t length;
   char *newptr;
 
   if(!*buffer) {
@@ -127,6 +126,7 @@ static int readline(char **buffer, size_t *bufsize, FILE *stream)
   }
 
   for(;;) {
+    size_t length;
     int bytestoread = curlx_uztosi(*bufsize - offset);
 
     if(!fgets(*buffer + offset, bytestoread, stream))

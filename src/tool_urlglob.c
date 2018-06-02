@@ -622,12 +622,12 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
 
   while(*filename) {
     if(*filename == '#' && ISDIGIT(filename[1])) {
-      unsigned long i;
       char *ptr = filename;
       unsigned long num = strtoul(&filename[1], &filename, 10);
       URLPattern *pat = NULL;
 
       if(num < glob->size) {
+        unsigned long i;
         num--; /* make it zero based */
         /* find the correct glob entry */
         for(i = 0; i<glob->size; i++) {

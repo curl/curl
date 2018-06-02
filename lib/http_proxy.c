@@ -188,7 +188,6 @@ static CURLcode CONNECT(struct connectdata *conn,
   struct SingleRequest *k = &data->req;
   CURLcode result;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
-  timediff_t check;
   struct http_connect_state *s = conn->connect_state;
 
 #define SELECT_OK      0
@@ -201,6 +200,7 @@ static CURLcode CONNECT(struct connectdata *conn,
   conn->bits.proxy_connect_closed = FALSE;
 
   do {
+    timediff_t check;
     if(TUNNEL_INIT == s->tunnel_state) {
       /* BEGIN CONNECT PHASE */
       char *host_port;

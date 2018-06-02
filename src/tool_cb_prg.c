@@ -113,12 +113,6 @@ int tool_progress_cb(void *clientp,
   /* The original progress-bar source code was written for curl by Lars Aas,
      and this new edition inherits some of his concepts. */
 
-  char line[MAX_BARLENGTH + 1];
-  char format[40];
-  double frac;
-  double percent;
-  int barwidth;
-  int num;
   struct timeval now = tvnow();
   struct ProgressData *bar = (struct ProgressData *)clientp;
   curl_off_t total;
@@ -154,6 +148,12 @@ int tool_progress_cb(void *clientp,
   bar->calls++;
 
   if((total > 0) && (point != bar->prev)) {
+    char line[MAX_BARLENGTH + 1];
+    char format[40];
+    double frac;
+    double percent;
+    int barwidth;
+    int num;
     if(point > total)
       /* we have got more than the expected total! */
       total = point;
