@@ -205,6 +205,118 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*longest is 26, buffer is slightly bigger*/
+#define LONGEST_ALG_ID 32
+#define CIPHEROPTION(X) \
+if(strcmp(#X, tmp) == 0) \
+  return X
+
+static int
+get_alg_id_by_name(char *name)
+{
+  char tmp[LONGEST_ALG_ID] = { 0 };
+  char *nameEnd = strchr(name, ':');
+  size_t n = nameEnd ? min(nameEnd - name, LONGEST_ALG_ID - 1) : \
+    min(strlen(name), LONGEST_ALG_ID - 1);
+  strncpy(tmp, name, n);
+  tmp[n] = 0;
+  CIPHEROPTION(CALG_MD2);
+  CIPHEROPTION(CALG_MD4);
+  CIPHEROPTION(CALG_MD5);
+  CIPHEROPTION(CALG_SHA);
+  CIPHEROPTION(CALG_SHA1);
+  CIPHEROPTION(CALG_MAC);
+  CIPHEROPTION(CALG_RSA_SIGN);
+  CIPHEROPTION(CALG_DSS_SIGN);
+/*ifdefs for the options that are defined conditionally in wincrypt.h*/
+#ifdef CALG_NO_SIGN
+  CIPHEROPTION(CALG_NO_SIGN);
+#endif
+  CIPHEROPTION(CALG_RSA_KEYX);
+  CIPHEROPTION(CALG_DES);
+  CIPHEROPTION(CALG_3DES_112);
+  CIPHEROPTION(CALG_3DES);
+  CIPHEROPTION(CALG_DESX);
+  CIPHEROPTION(CALG_RC2);
+  CIPHEROPTION(CALG_RC4);
+  CIPHEROPTION(CALG_SEAL);
+  CIPHEROPTION(CALG_DH_SF);
+  CIPHEROPTION(CALG_DH_EPHEM);
+  CIPHEROPTION(CALG_AGREEDKEY_ANY);
+  CIPHEROPTION(CALG_HUGHES_MD5);
+  CIPHEROPTION(CALG_SKIPJACK);
+  CIPHEROPTION(CALG_TEK);
+  CIPHEROPTION(CALG_CYLINK_MEK);
+  CIPHEROPTION(CALG_SSL3_SHAMD5);
+  CIPHEROPTION(CALG_SSL3_MASTER);
+  CIPHEROPTION(CALG_SCHANNEL_MASTER_HASH);
+  CIPHEROPTION(CALG_SCHANNEL_MAC_KEY);
+  CIPHEROPTION(CALG_SCHANNEL_ENC_KEY);
+  CIPHEROPTION(CALG_PCT1_MASTER);
+  CIPHEROPTION(CALG_SSL2_MASTER);
+  CIPHEROPTION(CALG_TLS1_MASTER);
+  CIPHEROPTION(CALG_RC5);
+  CIPHEROPTION(CALG_HMAC);
+  CIPHEROPTION(CALG_TLS1PRF);
+#ifdef CALG_HASH_REPLACE_OWF
+  CIPHEROPTION(CALG_HASH_REPLACE_OWF);
+#endif
+#ifdef CALG_AES_128
+  CIPHEROPTION(CALG_AES_128);
+#endif
+#ifdef CALG_AES_192
+  CIPHEROPTION(CALG_AES_192);
+#endif
+#ifdef CALG_AES_256
+  CIPHEROPTION(CALG_AES_256);
+#endif
+#ifdef CALG_AES
+  CIPHEROPTION(CALG_AES);
+#endif
+#ifdef CALG_SHA_256
+  CIPHEROPTION(CALG_SHA_256);
+#endif
+#ifdef CALG_SHA_384
+  CIPHEROPTION(CALG_SHA_384);
+#endif
+#ifdef CALG_SHA_512
+  CIPHEROPTION(CALG_SHA_512);
+#endif
+#ifdef CALG_ECDH
+  CIPHEROPTION(CALG_ECDH);
+#endif
+#ifdef CALG_ECMQV
+  CIPHEROPTION(CALG_ECMQV);
+#endif
+#ifdef CALG_ECDSA
+  CIPHEROPTION(CALG_ECDSA);
+#endif
+  return 0;
+}
+
+static CURLcode
+set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
+{
+  char *startCur = ciphers;
+  int algCount = 0;
+  static ALG_ID algIds[45]; /*There are 45 listed in the MS headers*/
+  while(startCur && (0 != *startCur) && (algCount < 45)) {
+    long alg = strtol(startCur, 0, 0);
+    if(!alg)
+      alg = get_alg_id_by_name(startCur);
+    if(alg)
+      algIds[algCount++] = alg;
+    else
+      return CURLE_SSL_CIPHER;
+    startCur = strchr(startCur, ':');
+    if(startCur)
+      startCur++;
+  }
+    schannel_cred->palgSupportedAlgs = algIds;
+  schannel_cred->cSupportedAlgs = algCount;
+  return CURLE_OK;
+}
+
 #ifdef HAS_CLIENT_CERT_PATH
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
@@ -421,6 +533,15 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;
     }
+
+    if(SSL_CONN_CONFIG(cipher_list)) {
+      result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list));
+      if(CURLE_OK != result) {
+        failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
+        return result;
+      }
+    }
+
 
 #ifdef HAS_CLIENT_CERT_PATH
     /* client certificate */
