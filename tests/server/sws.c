@@ -555,7 +555,7 @@ static int ProcessRequest(struct httprequest *req)
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
         char *portp = NULL;
-        
+
         snprintf(logbuf, sizeof(logbuf),
                  "Received a CONNECT %s HTTP/%d.%d request",
                  doc, prot_major, prot_minor);

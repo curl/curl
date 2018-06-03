@@ -60,7 +60,7 @@ ParameterError file2string(char **bufp, FILE *file)
 {
   char *ptr;
   char *string = NULL;
-  
+
   if(file) {
     char buffer[256];
     size_t stringlen = 0;
@@ -92,7 +92,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
   char *newbuf;
   char *buffer = NULL;
   size_t nused = 0;
-  
+
   if(file) {
     size_t nread;
     size_t alloc = 512;

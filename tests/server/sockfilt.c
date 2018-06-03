@@ -361,7 +361,8 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
   ssize_t nread = 0;
 
   do {
-    ssize_t rc = read(filedes, (unsigned char *)buffer + nread, nbytes - nread);
+    ssize_t rc = read(filedes,
+                      (unsigned char *)buffer + nread, nbytes - nread);
 
     if(got_exit_signal) {
       logmsg("signalled to die");

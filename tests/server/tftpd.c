@@ -1136,7 +1136,7 @@ static int validate_access(struct testcase *test,
                            const char *filename, int mode)
 {
   char *ptr;
-  
+
   logmsg("trying to get file: %s mode %x", filename, mode);
 
   if(!strncmp("verifiedserver", filename, 14)) {

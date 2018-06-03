@@ -562,7 +562,7 @@ int formparse(struct OperationConfig *config,
   struct curl_slist *headers = NULL;
   curl_mimepart *part = NULL;
   CURLcode res;
-  
+
   /* Allocate the main mime structure if needed. */
   if(!*mimepost) {
     *mimepost = curl_mime_init(config->easy);

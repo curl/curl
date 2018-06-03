@@ -52,7 +52,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   struct timeval tv;
   char timebuf[20];
   time_t secs;
-  
+
   (void)handle; /* not used */
 
   if(config->tracetime) {
