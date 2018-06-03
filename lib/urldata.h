@@ -1350,7 +1350,7 @@ struct DynamicStatic {
   char *url;        /* work URL, copied from UserDefined */
   bool url_alloc;   /* URL string is malloc()'ed */
   char *referer;    /* referer string */
-  bool referer_alloc; /* referer sting is malloc()ed */
+  bool referer_alloc; /* referer string is malloc()ed */
   struct curl_slist *cookielist; /* list of cookie files set by
                                     curl_easy_setopt(COOKIEFILE) calls */
   struct curl_slist *resolve; /* set to point to the set.resolve list when

@@ -461,7 +461,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     return result;
 
   /* Adjust the start offset in case we want to get the N last bytes
-   * of the stream iff the filesize could be determined */
+   * of the stream if the filesize could be determined */
   if(data->state.resume_from < 0) {
     if(!fstated) {
       failf(data, "Can't get the size of file.");
