@@ -11,7 +11,7 @@ LIST
 # Server-side
 <reply>
 <servercmd>
-# include the '.\r\n' 3-byte trailer to end the transfer poperly!
+# include the '.\r\n' 3-byte trailer to end the transfer properly!
 REPLY LIST +OK 851 100\r\n.
 </servercmd>
 </reply>

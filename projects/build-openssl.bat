@@ -156,7 +156,7 @@ rem ***************************************************************************
   
   if not defined PERL_PATH (
 	rem Check we have Perl in our path 
-	rem using !! below as %% was having \Microsoft was unexecpted error.
+	rem using !! below as %% was having \Microsoft was unexpected error.
 	echo !PATH! | findstr /I /C:"\Perl" 1>nul
 	if errorlevel 1 (
 		rem It isn't so check we have it installed and set the path if it is

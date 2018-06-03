@@ -351,7 +351,7 @@ $           endif
 $       endif
 $   endif
 $!
-$!  Filenames with $ in them are VMS special and do not need to be lowercased.
+$!  Filenames with $ in them are VMS special and do not need to be lowercase.
 $!  --------------------------------------------------------------------------
 $   if f$locate("$", pathname) .lt. f$length(pathname) then goto inst_file_loop
 $!
