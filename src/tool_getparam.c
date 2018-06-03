@@ -2154,7 +2154,6 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
     orig_opt = argv[i];
 
     if(stillflags && ('-' == argv[i][0])) {
-      char *nextarg;
       bool passarg;
       char *flag = argv[i];
 
@@ -2163,7 +2162,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
            following (URL) argument to start with -. */
         stillflags = FALSE;
       else {
-        nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
+        char *nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
 
         result = getparameter(flag, nextarg, &passarg, config, operation);
         if(result == PARAM_NEXT_OPERATION) {

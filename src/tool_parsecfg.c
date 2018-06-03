@@ -46,11 +46,9 @@ static char *my_get_line(FILE *fp);
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
 {
-  int res;
   FILE *file;
   char filebuffer[512];
   bool usedarg = FALSE;
-  char *home;
   int rc = 0;
   struct OperationConfig *operation = global->first;
 
@@ -58,8 +56,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     /* NULL or no file name attempts to load .curlrc from the homedir! */
 
 #ifndef __AMIGA__
+    char *home = homedir();    /* portable homedir finder */
     filename = CURLRC;   /* sensible default */
-    home = homedir();    /* portable homedir finder */
     if(home) {
       if(strlen(home) < (sizeof(filebuffer) - strlen(CURLRC))) {
         snprintf(filebuffer, sizeof(filebuffer),
@@ -125,14 +123,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     char *option;
     char *param;
     int lineno = 0;
-    bool alloced_param;
     bool dashed_option;
 
     while(NULL != (aline = my_get_line(file))) {
+      int res;
+      bool alloced_param = FALSE;
       lineno++;
       line = aline;
-      alloced_param = FALSE;
-
+      
       /* line with # in the first non-blank column is a comment! */
       while(*line && ISSPACE(*line))
         line++;

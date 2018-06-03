@@ -192,11 +192,11 @@ int test(char *URL)
     do {
       msg = curl_multi_info_read(m, &msgs_left);
       if(msg && msg->msg == CURLMSG_DONE) {
-        int i, found = 0;
+        int i;
 
         /* Find out which handle this message is about */
         for(i = 0; i < num_handles; i++) {
-          found = (msg->easy_handle == handles[i]);
+          int found = (msg->easy_handle == handles[i]);
           if(found)
             break;
         }

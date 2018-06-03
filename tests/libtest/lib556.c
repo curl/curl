@@ -71,14 +71,14 @@ int test(char *URL)
       "Host: ninja\r\n\r\n";
 #endif
     size_t iolen;
-    char buf[1024];
-
+    
     res = curl_easy_send(curl, request, strlen(request), &iolen);
 
     if(!res) {
       /* we assume that sending always work */
 
       do {
+        char buf[1024];
         /* busy-read like crazy */
         res = curl_easy_recv(curl, buf, sizeof(buf), &iolen);
 

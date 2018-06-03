@@ -555,8 +555,7 @@ static int ProcessRequest(struct httprequest *req)
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
         char *portp = NULL;
-        unsigned long part = 0;
-
+        
         snprintf(logbuf, sizeof(logbuf),
                  "Received a CONNECT %s HTTP/%d.%d request",
                  doc, prot_major, prot_minor);
@@ -569,6 +568,7 @@ static int ProcessRequest(struct httprequest *req)
 
         if(doc[0] == '[') {
           char *p = &doc[1];
+          unsigned long part = 0;
           /* scan through the hexgroups and store the value of the last group
              in the 'part' variable and use as test case number!! */
           while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
@@ -954,7 +954,6 @@ static void init_httprequest(struct httprequest *req)
    is no data waiting, or < 0 if it should be closed */
 static int get_request(curl_socket_t sock, struct httprequest *req)
 {
-  int error;
   int fail = 0;
   char *reqbuf = req->reqbuf;
   ssize_t got = 0;
@@ -1000,7 +999,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       fail = 1;
     }
     else if(got < 0) {
-      error = SOCKERRNO;
+      int error = SOCKERRNO;
       if(EAGAIN == error || EWOULDBLOCK == error) {
         /* nothing to read at the moment */
         return 0;

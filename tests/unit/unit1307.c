@@ -272,7 +272,7 @@ enum system {
 UNITTEST_START
 {
   int testnum = sizeof(tests) / sizeof(struct testcase);
-  int i, rc;
+  int i;
   enum system machine;
 
 #ifdef HAVE_FNMATCH
@@ -290,7 +290,7 @@ UNITTEST_START
 
   for(i = 0; i < testnum; i++) {
     int result = tests[i].result;
-    rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
+    int rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
     if(result & (LINUX_DIFFER|MAC_DIFFER)) {
       if((result & LINUX_DIFFER) && (machine == SYSTEM_LINUX))
         result >>= LINUX_SHIFT;

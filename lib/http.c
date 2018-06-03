@@ -1276,8 +1276,7 @@ CURLcode Curl_add_bufferf(Curl_send_buffer *in, const char *fmt, ...)
 CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
 {
   char *new_rb;
-  size_t new_size;
-
+  
   if(~size < in->size_used) {
     /* If resulting used size of send buffer would wrap size_t, cleanup
        the whole buffer and return error. Otherwise the required buffer
@@ -1289,10 +1288,10 @@ CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
 
   if(!in->buffer ||
      ((in->size_used + size) > (in->size_max - 1))) {
-
     /* If current buffer size isn't enough to hold the result, use a
        buffer size that doubles the required size. If this new size
        would wrap size_t, then just use the largest possible one */
+    size_t new_size;
 
     if((size > (size_t)-1 / 2) || (in->size_used > (size_t)-1 / 2) ||
        (~(size * 2) < (in->size_used * 2)))
@@ -1627,7 +1626,6 @@ static CURLcode expect100(struct Curl_easy *data,
                           Curl_send_buffer *req_buffer)
 {
   CURLcode result = CURLE_OK;
-  const char *ptr;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
   if(use_http_1_1plus(data, conn) &&
@@ -1635,7 +1633,7 @@ static CURLcode expect100(struct Curl_easy *data,
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
        operations (as there is one packet coming back from the web server) */
-    ptr = Curl_checkheaders(conn, "Expect");
+    const char *ptr = Curl_checkheaders(conn, "Expect");
     if(ptr) {
       data->state.expect100header =
         Curl_compareheader(ptr, "Expect:", "100-continue");
@@ -1872,8 +1870,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *httpstring;
   Curl_send_buffer *req_buffer;
   curl_off_t postsize = 0; /* curl_off_t to handle large file sizes */
-  int seekerr = CURL_SEEKFUNC_CANTSEEK;
-
+  
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
@@ -2141,7 +2138,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     else {
       /* If the host begins with '[', we start searching for the port after
          the bracket has been closed */
-      int startsearch = 0;
       if(*cookiehost == '[') {
         char *closingbracket;
         /* since the 'cookiehost' is an allocated memory area that will be
@@ -2152,6 +2148,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           *closingbracket = 0;
       }
       else {
+        int startsearch = 0;
         char *colon = strchr(cookiehost + startsearch, ':');
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
@@ -2297,6 +2294,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
       /* Now, let's read off the proper amount of bytes from the
          input. */
+      int seekerr = CURL_SEEKFUNC_CANTSEEK;
       if(conn->seek_func) {
         Curl_set_in_callback(data, true);
         seekerr = conn->seek_func(conn->seek_client, data->state.resume_from,

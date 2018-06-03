@@ -340,11 +340,8 @@ static int ProcessRequest(struct httprequest *req)
   static char request[REQUEST_KEYWORD_SIZE];
   static char doc[MAXDOCNAMELEN];
   static char prot_str[5];
-  char logbuf[256];
   int prot_major, prot_minor;
-  char *end;
-  int error;
-  end = strstr(line, END_OF_HEADERS);
+  char *end = strstr(line, END_OF_HEADERS);
 
   logmsg("ProcessRequest() called with testno %ld and line [%s]",
          req->testno, line);
@@ -360,6 +357,7 @@ static int ProcessRequest(struct httprequest *req)
             &prot_major,
             &prot_minor) == 5) {
     char *ptr;
+    char logbuf[256];
 
     if(!strcmp(prot_str, "HTTP")) {
       req->protocol = RPROT_HTTP;
@@ -426,7 +424,7 @@ static int ProcessRequest(struct httprequest *req)
 
       stream = fopen(filename, "rb");
       if(!stream) {
-        error = errno;
+        int error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", req->testno);
@@ -441,11 +439,10 @@ static int ProcessRequest(struct httprequest *req)
         int rtp_channel = 0;
         int rtp_size = 0;
         int rtp_partno = -1;
-        int i = 0;
         char *rtp_scratch = NULL;
 
         /* get the custom server control "commands" */
-        error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
+        int error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
         fclose(stream);
         if(error) {
           logmsg("getpart() failed with error: %d", error);
@@ -486,6 +483,7 @@ static int ProcessRequest(struct httprequest *req)
                                 &rtp_partno, &rtp_channel, &rtp_size)) {
 
               if(rtp_partno == req->partno) {
+                int i = 0;
                 logmsg("RTP: part %d channel %d size %d",
                        rtp_partno, rtp_channel, rtp_size);
 
@@ -900,7 +898,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   size_t count;
   const char *buffer;
   char *ptr = NULL;
-  FILE *stream;
   char *cmd = NULL;
   size_t cmdsize = 0;
   FILE *dump;
@@ -911,8 +908,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   int res;
 
   static char weare[256];
-
-  char partbuf[80]="data";
 
   logmsg("Send response number %ld part %ld", req->testno, req->partno);
 
@@ -987,7 +982,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   }
   else {
     char *filename = test2file(req->testno);
-
+    char partbuf[80]="data";
+    FILE *stream;
     if(0 != req->partno)
       snprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
 

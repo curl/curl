@@ -256,8 +256,6 @@ static CURLcode file_upload(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
-  size_t nread;
-  size_t nwrite;
   curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *buf2;
@@ -306,6 +304,8 @@ static CURLcode file_upload(struct connectdata *conn)
   }
 
   while(!result) {
+    size_t nread;
+    size_t nwrite;
     int readcount;
     result = Curl_fillreadbuffer(conn, (int)data->set.buffer_size, &readcount);
     if(result)
@@ -378,7 +378,6 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   curl_off_t expected_size = 0;
   bool size_known;
   bool fstated = FALSE;
-  ssize_t nread;
   struct Curl_easy *data = conn->data;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
@@ -502,6 +501,7 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
   Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
   while(!result) {
+    ssize_t nread;
     /* Don't fill a whole buffer if we want less than all data */
     size_t bytestoread;
 

@@ -376,13 +376,13 @@ static void strstore(char **str, const char *newstr)
  */
 static void remove_expired(struct CookieInfo *cookies)
 {
-  struct Cookie *co, *nx, *pv;
+  struct Cookie *co, *nx;
   curl_off_t now = (curl_off_t)time(NULL);
   unsigned int i;
 
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {
+    struct Cookie *pv = NULL;
     co = cookies->cookies[i];
-    pv = NULL;
     while(co) {
       nx = co->next;
       if(co->expires && co->expires < now) {
@@ -1385,9 +1385,8 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies)
  ****************************************************************************/
 void Curl_cookie_cleanup(struct CookieInfo *c)
 {
-  unsigned int i;
-
   if(c) {
+    unsigned int i;
     free(c->filename);
     for(i = 0; i < COOKIE_HASH_SIZE; i++)
       Curl_cookie_freelist(c->cookies[i]);

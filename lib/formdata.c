@@ -812,7 +812,6 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   curl_mime *form = NULL;
-  curl_mime *multipart;
   curl_mimepart *part;
   struct curl_httppost *file;
 
@@ -831,7 +830,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
   /* Process each top part. */
   for(; !result && post; post = post->next) {
     /* If we have more than a file here, create a mime subpart and fill it. */
-    multipart = form;
+    curl_mime *multipart = form;
     if(post->more) {
       part = curl_mime_addpart(form);
       if(!part)

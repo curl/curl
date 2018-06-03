@@ -2003,7 +2003,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   char *fragment;
   char *path = data->state.path;
   char *query;
-  int i;
   int rc;
   const char *protop = "";
   CURLcode result;
@@ -2055,6 +2054,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     ; /* do nothing */
   }
   else { /* check for a scheme */
+    int i;
     for(i = 0; i < 16 && data->change.url[i]; ++i) {
       if(data->change.url[i] == '/')
         break;
@@ -2543,14 +2543,13 @@ static bool check_noproxy(const char *name, const char *no_proxy)
    *   not be proxied, or an asterisk to override
    *   all proxy variables)
    */
-  size_t tok_start;
-  size_t tok_end;
-  const char *separator = ", ";
-  size_t no_proxy_len;
-  size_t namelen;
-  char *endptr;
-
   if(no_proxy && no_proxy[0]) {
+    size_t tok_start;
+    size_t tok_end;
+    const char *separator = ", ";
+    size_t no_proxy_len;
+    size_t namelen;
+    char *endptr;
     if(strcasecompare("*", no_proxy)) {
       return TRUE;
     }

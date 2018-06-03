@@ -917,7 +917,6 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   struct Curl_easy *data;
   int this_max_fd = -1;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
-  int bitmap;
   int i;
   (void)exc_fd_set; /* not used */
 
@@ -929,7 +928,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
   data = multi->easyp;
   while(data) {
-    bitmap = multi_getsock(data, sockbunch, MAX_SOCKSPEREASYHANDLE);
+    int bitmap = multi_getsock(data, sockbunch, MAX_SOCKSPEREASYHANDLE);
 
     for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++) {
       curl_socket_t s = CURL_SOCKET_BAD;
@@ -2943,7 +2942,6 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
 {
   struct Curl_multi *multi = data->multi;
   struct curltime *nowp = &data->state.expiretime;
-  int rc;
   struct curltime set;
 
   /* this is only interesting while there is still an associated multi struct
@@ -2974,6 +2972,7 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
     timediff_t diff = Curl_timediff(set, *nowp);
+    int rc;
 
     if(diff > 0) {
       /* The current splay tree entry is sooner than this new expiry time.
@@ -3019,8 +3018,7 @@ void Curl_expire_clear(struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct curltime *nowp = &data->state.expiretime;
-  int rc;
-
+  
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
@@ -3030,6 +3028,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     /* Since this is an cleared time, we must remove the previous entry from
        the splay tree */
     struct curl_llist *list = &data->state.timeoutlist;
+    int rc;
 
     rc = Curl_splayremovebyaddr(multi->timetree,
                                 &data->state.timenode,
