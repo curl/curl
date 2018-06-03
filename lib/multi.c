@@ -458,7 +458,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      happens if the lastcall time is set to the same time when the handle is
      removed as when the next handle is added, as then the check in
      update_timer() that prevents calling the application multiple times with
-     the same timer infor will not trigger and then the new handle's timeout
+     the same timer info will not trigger and then the new handle's timeout
      will not be notified to the app.
 
      The work-around is thus simply to clear the 'lastcall' variable to force

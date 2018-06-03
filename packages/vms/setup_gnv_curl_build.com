@@ -60,7 +60,7 @@ $!
 $! We want detailed build logs.
 $ clist = "/list/show=(expan,includ)"
 $!
-$! We want full symbol names in exact case.  Need a commmon
+$! We want full symbol names in exact case.  Need a common
 $! repository for all directories.
 $ cnames = "/names=(shortened,as_is)/repository=''base_dir'"
 $!

@@ -107,7 +107,7 @@ int main(void)
     /* Build the mime message. */
     mime = curl_mime_init(curl);
 
-    /* The inline part is an alterative proposing the html and the text
+    /* The inline part is an alternative proposing the html and the text
        versions of the e-mail. */
     alt = curl_mime_init(curl);
 

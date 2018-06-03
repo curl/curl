@@ -159,7 +159,7 @@ static char *ia5string(ASN1_IA5STRING *ia5)
   return tmp;
 }
 
-/* A conveniance routine to get an access URI. */
+/* A convenience routine to get an access URI. */
 static unsigned char *my_get_ext(X509 *cert, const int type,
                                  int extensiontype)
 {

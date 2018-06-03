@@ -113,7 +113,7 @@ static CURLcode win32_init(void)
   res = WSAStartup(wVersionRequested, &wsaData);
 
   if(res != 0)
-    /* Tell the user that we couldn't find a useable */
+    /* Tell the user that we couldn't find a usable */
     /* winsock.dll.     */
     return CURLE_FAILED_INIT;
 
@@ -125,7 +125,7 @@ static CURLcode win32_init(void)
 
   if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
      HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-    /* Tell the user that we couldn't find a useable */
+    /* Tell the user that we couldn't find a usable */
 
     /* winsock.dll. */
     WSACleanup();
