@@ -71,7 +71,7 @@ int test(char *URL)
       "Host: ninja\r\n\r\n";
 #endif
     size_t iolen;
-    
+
     res = curl_easy_send(curl, request, strlen(request), &iolen);
 
     if(!res) {

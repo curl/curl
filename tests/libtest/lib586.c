@@ -99,7 +99,7 @@ static void *fire(void *ptr)
   CURLcode code;
   struct Tdata *tdata = (struct Tdata*)ptr;
   CURL *curl;
-  
+
   curl = curl_easy_init();
   if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");

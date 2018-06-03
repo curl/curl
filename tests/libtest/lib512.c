@@ -36,7 +36,7 @@ int test(char *URL)
     CURL *curl = curl_easy_init();
     if(curl) {
       CURL *curl2;
-  
+
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
       curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
