@@ -34,7 +34,7 @@ addons:
             - libssh-dev
             - krb5-user
             - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
-            - libunistring-dev # for libidn2 neeed by libpsl
+            - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
 
 matrix:

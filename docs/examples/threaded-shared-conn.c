@@ -107,7 +107,7 @@ static void *run_thread(void *ptr)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_db);
     curl_easy_perform(curl); /* ignores error */
     curl_easy_cleanup(curl);
-    fprintf(stderr, "Tread %d transfer %d\n", u->threadno, i);
+    fprintf(stderr, "Thread %d transfer %d\n", u->threadno, i);
   }
 
   return NULL;

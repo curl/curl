@@ -37,7 +37,7 @@
  *
  * Make this function match POSIX. Test 1307 includes a set of test patterns
  * that returns different results with a POSIX fnmatch() than with this
- * implemenation and this is considered a bug where POSIX is the guiding
+ * implementation and this is considered a bug where POSIX is the guiding
  * light.
  */
 

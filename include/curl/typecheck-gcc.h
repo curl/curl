@@ -428,7 +428,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
  * == or whatsoever.
  */
 
-/* XXX: should evaluate to true iff expr is a pointer */
+/* XXX: should evaluate to true if expr is a pointer */
 #define _curl_is_any_ptr(expr)                                                \
   (sizeof(expr) == sizeof(void *))
 
