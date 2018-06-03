@@ -96,7 +96,7 @@ static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
   char *newp = NULL;
   char *dictp;
   size_t len;
-  
+
   CURLcode result = Curl_urldecode(data, inputbuff, 0, &newp, &len, FALSE);
   if(!newp || result)
     return NULL;

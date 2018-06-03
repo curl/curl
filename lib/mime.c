@@ -1037,7 +1037,7 @@ static int mime_subparts_seek(void *instream, curl_off_t offset, int whence)
   curl_mime *mime = (curl_mime *) instream;
   curl_mimepart *part;
   int result = CURL_SEEKFUNC_OK;
-  
+
   if(whence != SEEK_SET || offset)
     return CURL_SEEKFUNC_CANTSEEK;    /* Only support full rewind. */
 
@@ -1341,7 +1341,7 @@ CURLcode curl_mime_data(curl_mimepart *part,
 CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
 {
   CURLcode result = CURLE_OK;
-  
+
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 

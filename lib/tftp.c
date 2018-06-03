@@ -1369,7 +1369,7 @@ static CURLcode tftp_setup_connection(struct connectdata * conn)
 {
   struct Curl_easy *data = conn->data;
   char *type;
-  
+
   conn->socktype = SOCK_DGRAM;   /* UDP datagram based */
 
   /* TFTP URLs support an extension like ";mode=<typecode>" that

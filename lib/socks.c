@@ -633,7 +633,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       }
 #ifdef ENABLE_IPV6
       else if(hp->ai_family == AF_INET6) {
-        int i;    
+        int i;
         struct sockaddr_in6 *saddr_in6;
         socksreq[len++] = 4; /* ATYP: IPv6 = 4 */
 

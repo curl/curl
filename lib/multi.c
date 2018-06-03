@@ -3018,7 +3018,7 @@ void Curl_expire_clear(struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct curltime *nowp = &data->state.expiretime;
-  
+
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)

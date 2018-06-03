@@ -1276,7 +1276,7 @@ CURLcode Curl_add_bufferf(Curl_send_buffer *in, const char *fmt, ...)
 CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size)
 {
   char *new_rb;
-  
+
   if(~size < in->size_used) {
     /* If resulting used size of send buffer would wrap size_t, cleanup
        the whole buffer and return error. Otherwise the required buffer
@@ -1870,7 +1870,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *httpstring;
   Curl_send_buffer *req_buffer;
   curl_off_t postsize = 0; /* curl_off_t to handle large file sizes */
-  
+
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */

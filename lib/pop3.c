@@ -613,7 +613,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  
+
   (void)instate; /* no use for this yet */
 
   if(pop3code != '+') {
@@ -664,7 +664,7 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  
+
   (void)instate; /* no use for this yet */
 
   /* Do we have a untagged continuation response? */

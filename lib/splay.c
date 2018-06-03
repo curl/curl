@@ -41,7 +41,7 @@ struct Curl_tree *Curl_splay(struct curltime i,
                              struct Curl_tree *t)
 {
   struct Curl_tree N, *l, *r, *y;
-  
+
   if(t == NULL)
     return t;
   N.smaller = N.larger = NULL;

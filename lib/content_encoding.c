@@ -761,7 +761,7 @@ char *Curl_all_content_encodings(void)
   const content_encoding * const *cep;
   const content_encoding *ce;
   char *ace;
-  
+
   for(cep = encodings; *cep; cep++) {
     ce = *cep;
     if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT))

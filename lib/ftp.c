@@ -657,7 +657,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
     /* check and reset timeout value every lap */
     time_t timeout = Curl_pp_state_timeout(pp); /* timeout in milliseconds */
     time_t interval_ms;
-  
+
     if(timeout <= 0) {
       failf(data, "FTP response timeout");
       return CURLE_OPERATION_TIMEDOUT; /* already too little time */
@@ -1588,7 +1588,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
   struct FTP *ftp = conn->data->req.protop;
   struct Curl_easy *data = conn->data;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  
+
   if((data->state.resume_from && !sizechecked) ||
      ((data->state.resume_from > 0) && sizechecked)) {
     /* we're about to continue the uploading of a file */

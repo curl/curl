@@ -704,7 +704,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  
+
   (void)instate; /* no use for this yet */
 
   if(smtpcode/100 != 2 && smtpcode != 1) {

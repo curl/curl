@@ -609,14 +609,15 @@ static CURLcode imap_perform_list(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
-  
+
   if(imap->custom)
     /* Send the custom request */
     result = imap_sendf(conn, "%s%s", imap->custom,
                         imap->custom_params ? imap->custom_params : "");
   else {
     /* Make sure the mailbox is in the correct atom format if necessary */
-    char *mailbox = imap->mailbox ? imap_atom(imap->mailbox, true) : strdup("");
+    char *mailbox = imap->mailbox ? imap_atom(imap->mailbox, true)
+                                  : strdup("");
     if(!mailbox)
       return CURLE_OUT_OF_MEMORY;
 
@@ -853,7 +854,7 @@ static CURLcode imap_state_capability_resp(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *line = data->state.buffer;
-  
+
   (void)instate; /* no use for this yet */
 
   /* Do we have a untagged response? */
@@ -1045,7 +1046,7 @@ static CURLcode imap_state_select_resp(struct connectdata *conn, int imapcode,
   struct IMAP *imap = conn->data->req.protop;
   struct imap_conn *imapc = &conn->proto.imapc;
   const char *line = data->state.buffer;
-  
+
   (void)instate; /* no use for this yet */
 
   if(imapcode == '*') {

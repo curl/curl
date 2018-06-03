@@ -218,7 +218,7 @@ static CURLcode rtsp_done(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct RTSP *rtsp = data->req.protop;
   CURLcode httpStatus;
-  
+
   /* Bypass HTTP empty-reply checks on receive */
   if(data->set.rtspreq == RTSPREQ_RECEIVE)
     premature = TRUE;
