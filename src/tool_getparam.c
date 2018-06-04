@@ -264,6 +264,7 @@ static const struct LongShort aliases[]= {
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
+  {"EC", "tls-session-tickets",      ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -1668,6 +1669,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->socks5_auth |= CURLAUTH_GSSAPI;
         else
           config->socks5_auth &= ~CURLAUTH_GSSAPI;
+        break;
+
+      case 'C':
+        /* --tls-session-tickets */
+        config->tls_session_ticket = toggle;
         break;
 
       default: /* unknown flag */

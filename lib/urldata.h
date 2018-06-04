@@ -234,6 +234,7 @@ struct ssl_config_data {
   void *fsslctxp;        /* parameter for call back */
   bool certinfo;         /* gather lots of certificate info */
   bool falsestart;
+  bool sessionticket;
 
   char *cert; /* client certificate file name */
   char *cert_type; /* format for certificate (default: PEM)*/

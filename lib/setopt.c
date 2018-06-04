@@ -2087,6 +2087,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     break;
 
 #endif
+
+  case CURLOPT_TLS_SESSION_TICKETS:
+    data->set.ssl.sessionticket = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+
   case CURLOPT_FTPSSLAUTH:
     /*
      * Set a specific auth for FTP-SSL transfers.

@@ -2070,6 +2070,11 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   }
 #endif
 
+   if (data->set.ssl.sessionticket) {
+           if (SSL_OptionSet(BACKEND->handle, SSL_ENABLE_SESSION_TICKETS, PR_TRUE) != SECSuccess) {
+               goto error;
+           }
+   }
 
   /* Force handshake on next I/O */
   if(SSL_ResetHandshake(BACKEND->handle, /* asServer */ PR_FALSE)

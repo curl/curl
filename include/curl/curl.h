@@ -1894,6 +1894,9 @@ typedef enum {
   /* set this to 1L to allow HTTP/0.9 responses or 0L to disallow */
   CINIT(HTTP09_ALLOWED, LONG, 285),
 
+  /* TLS session tickets*/
+  CINIT(TLS_SESSION_TICKETS, LONG, 286),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

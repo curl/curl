@@ -334,6 +334,8 @@ static const struct helptxt helptext[] = {
    "TLS 1.3 proxy cipher suites"},
   {"    --proxy-tlsauthtype <type>",
    "TLS authentication type for HTTPS proxy"},
+  {"    --tls-session-tickets",
+   "Enable TLS session tickets"},
   {"    --proxy-tlspassword <string>",
    "TLS password for HTTPS proxy"},
   {"    --proxy-tlsuser <name>",
