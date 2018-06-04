@@ -840,7 +840,7 @@ int Curl_debug(struct Curl_easy *data, curl_infotype type,
                struct connectdata *conn)
 {
   int rc;
-  if(handle->set.printhost && conn && conn->host.dispname) {
+  if(data->set.printhost && conn && conn->host.dispname) {
     const char *t = NULL;
     const char *w = "Data";
     switch(type) {
