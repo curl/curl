@@ -835,8 +835,8 @@ static int showit(struct Curl_easy *data, curl_infotype type,
   return rc;
 }
 
-int Curl_debug(struct Curl_easy *handle, curl_infotype type,
-               char *data, size_t size,
+int Curl_debug(struct Curl_easy *data, curl_infotype type,
+               char *ptr, size_t size,
                struct connectdata *conn)
 {
   int rc;
@@ -864,11 +864,11 @@ int Curl_debug(struct Curl_easy *handle, curl_infotype type,
       char buffer[160];
       snprintf(buffer, sizeof(buffer), "[%s %s %s]", w, t,
                conn->host.dispname);
-      rc = showit(handle, CURLINFO_TEXT, buffer, strlen(buffer));
+      rc = showit(data, CURLINFO_TEXT, buffer, strlen(buffer));
       if(rc)
         return rc;
     }
   }
-  rc = showit(handle, type, data, size);
+  rc = showit(data, type, ptr, size);
   return rc;
 }
