@@ -1426,6 +1426,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
                     (long)CURLSSLOPT_ALLOW_BEAST);
 
+	if (config->tls_use_session_ticket) {
+          my_setopt(curl, CURLOPT_TLS_USE_SESSION_TICKETS, 1L);
+        }
+
         if(config->mail_auth)
           my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
 
