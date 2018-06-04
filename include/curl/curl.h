@@ -1856,6 +1856,9 @@ typedef enum {
   /* Disallow specifying username/login in URL. */
   CINIT(DISALLOW_USERNAME_IN_URL, LONG, 278),
 
+  /* TLS session tickets*/
+  CINIT(TLS_USE_SESSION_TICKETS, LONG, 282),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
