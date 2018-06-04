@@ -151,7 +151,7 @@ int test(char *URL)
   if(res)
     goto test_cleanup;
 
-  test_setopt(curl, CURLOPT_POSTFIELDS, (void *)NULL);
+  test_setopt(curl, CURLOPT_POSTFIELDS, NULL);
 
   /* Make sure we can do a normal request now */
   stream_uri = suburl(URL, request++);

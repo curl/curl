@@ -61,7 +61,7 @@ int test(char *URL)
   easy_setopt(curl, CURLOPT_TIMEOUT, (long)7);
   easy_setopt(curl, CURLOPT_NOSIGNAL, (long)1);
   easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progressCallback);
-  easy_setopt(curl, CURLOPT_PROGRESSDATA, (void *)NULL);
+  easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
   easy_setopt(curl, CURLOPT_NOPROGRESS, (long)0);
 
   res = curl_easy_perform(curl);
