@@ -27,7 +27,11 @@ transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
 foreach(TEST_NAME ${noinst_PROGRAMS})
-  setup_test(${TEST_NAME} ${${TEST_NAME}_SOURCES})
+  if(DEFINED ${TEST_NAME}_SOURCES)
+    setup_test(${TEST_NAME} ${${TEST_NAME}_SOURCES})
+  else()
+    setup_test(${TEST_NAME} ${nodist_${TEST_NAME}_SOURCES})
+  endif()
 endforeach()
 
 # Allows for hostname override to make tests machine independent.
