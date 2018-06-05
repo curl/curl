@@ -208,15 +208,16 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
 /*longest is 26, buffer is slightly bigger*/
 #define LONGEST_ALG_ID 32
 #define CIPHEROPTION(X) \
-if (strcmp(#X, tmp) == 0) \
+if(strcmp(#X, tmp) == 0) \
   return X
 
 static int
-get_alg_id_by_name(char* name)
+get_alg_id_by_name(char *name)
 {
   char tmp[LONGEST_ALG_ID] = { 0 };
   char *nameEnd = strchr(name, ':');
-  size_t n = nameEnd ? min(nameEnd - name, LONGEST_ALG_ID - 1) : min(strlen(name), LONGEST_ALG_ID - 1);
+  size_t n = nameEnd ? min(nameEnd - name, LONGEST_ALG_ID - 1) : \
+    min(strlen(name), LONGEST_ALG_ID - 1);
   strncpy(tmp, name, n);
   tmp[n] = 0;
   CIPHEROPTION(CALG_MD2);
@@ -294,21 +295,21 @@ get_alg_id_by_name(char* name)
 }
 
 static CURLcode
-set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char* ciphers)
+set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
 {
   char *startCur = ciphers;
   int algCount = 0;
   static ALG_ID algIds[45]; /*There are 45 listed in the MS headers*/
   while(startCur && (0 != *startCur) && (algCount < 45)) {
     long alg = strtol(startCur, 0, 0);
-    if (!alg)
+    if(!alg)
       alg = get_alg_id_by_name(startCur);
-    if (alg)
+    if(alg)
       algIds[algCount++] = alg;
     else
       return CURLE_SSL_CIPHER;
     startCur = strchr(startCur, ':');
-    if (startCur)
+    if(startCur)
       startCur++;
   }
     schannel_cred->palgSupportedAlgs = algIds;
@@ -532,11 +533,11 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    
+
     if(SSL_CONN_CONFIG(cipher_list)) {
       result = set_ssl_ciphers(&schannel_cred, SSL_CONN_CONFIG(cipher_list));
       if(CURLE_OK != result) {
-        failf(data, "Unable to set ciphers to %s", SSL_CONN_CONFIG(cipher_list));
+        failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
         return result;
       }
     }
