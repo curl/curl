@@ -1856,6 +1856,9 @@ typedef enum {
   /* Disallow specifying username/login in URL. */
   CINIT(DISALLOW_USERNAME_IN_URL, LONG, 278),
 
+  /* SO_RCVBUF sockopt */
+  CINIT(SOCKOPT_RCVBUF, LONG, 279),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

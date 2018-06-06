@@ -193,6 +193,7 @@ static const struct LongShort aliases[]= {
   {"$Y", "suppress-connect-headers", ARG_BOOL},
   {"$Z", "compressed-ssh",           ARG_BOOL},
   {"$~", "happy-eyeballs-timeout-ms", ARG_STRING},
+  {"$@", "sockopt-rcvbuf",           ARG_STRING},
   {"0",   "http1.0",                 ARG_NONE},
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
@@ -1130,6 +1131,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(err)
           return err;
         /* 0 is a valid value for this timeout */
+        break;
+      case '@': /* --sockopt-rcvbuf */
+        err = str2unum(&config->sockopt_rcvbuf, nextarg);
+        if(err)
+          return err;
         break;
       }
       break;
