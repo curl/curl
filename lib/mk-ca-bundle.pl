@@ -136,6 +136,7 @@ if ($opt_i) {
   print "Perl Version                     : $]\n";
   print "Operating System Name            : $^O\n";
   print "Getopt::Std.pm Version           : ${Getopt::Std::VERSION}\n";
+  print "Encode::Encoding.pm Version      : ${Encode::Encoding::VERSION}\n";
   print "MIME::Base64.pm Version          : ${MIME::Base64::VERSION}\n";
   print "LWP::UserAgent.pm Version        : ${LWP::UserAgent::VERSION}\n" if($LWP::UserAgent::VERSION);
   print "LWP.pm Version                   : ${LWP::VERSION}\n" if($LWP::VERSION);
@@ -479,6 +480,7 @@ while (<TXT>) {
 
     if ( !should_output_cert(%trust_purposes_by_level) ) {
       $skipnum ++;
+      report "Skipping: $caname" if ($opt_v);
     } else {
       my $encoded = MIME::Base64::encode_base64($data, '');
       $encoded =~ s/(.{1,${opt_w}})/$1\n/g;
@@ -487,7 +489,7 @@ while (<TXT>) {
               . "-----END CERTIFICATE-----\n";
       print CRT "\n$caname\n";
       print CRT @precert if($opt_m);
-      my $maxStringLength = length(decode('UTF-8', $caname, Encode::FB_CROAK));
+      my $maxStringLength = length(decode('UTF-8', $caname, Encode::FB_CROAK | Encode::LEAVE_SRC));
       if ($opt_t) {
         foreach my $key (keys %trust_purposes_by_level) {
            my $string = $key . ": " . join(", ", @{$trust_purposes_by_level{$key}});
