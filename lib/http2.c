@@ -205,6 +205,7 @@ static bool http2_connisdead(struct connectdata *conn)
          only "protocol frames" */
       CURLcode result;
       struct http_conn *httpc = &conn->proto.httpc;
+      assert(httpc);
       ssize_t nread = -1;
       if(httpc->recv_underlying)
         /* if called "too early", this pointer isn't setup yet! */
