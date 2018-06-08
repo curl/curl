@@ -54,15 +54,6 @@
 # endif /* HAVE_LDAP_SSL && HAVE_LDAP_SSL_H */
 #endif
 
-/* These are macros in both <wincrypt.h> (in above <winldap.h>) and typedefs
- * in BoringSSL's <openssl/x509.h>
- */
-#ifdef HAVE_BORINGSSL
-# undef X509_NAME
-# undef X509_CERT_PAIR
-# undef X509_EXTENSIONS
-#endif
-
 #include "urldata.h"
 #include <curl/curl.h>
 #include "sendf.h"
