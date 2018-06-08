@@ -1273,6 +1273,12 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
  */
 bool Curl_connalive(struct connectdata *conn)
 {
+  /* kludge around use-after-free */
+  if(!conn->data || !GOOD_EASY_HANDLE(conn->data)
+     || conn->data->easy_conn != conn) {
+    return false;
+  }
+
   /* First determine if ssl */
   if(conn->ssl[FIRSTSOCKET].use) {
     /* use the SSL context */
