@@ -1756,14 +1756,6 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
   fi
 
   if test X"$OPENSSL_ENABLED" = X"1"; then
-    dnl If the ENGINE library seems to be around, check for the OpenSSL engine
-    dnl stuff, it is kind of "separated" from the main SSL check
-    AC_CHECK_FUNC(ENGINE_init,
-              [
-                AC_CHECK_HEADERS(openssl/engine.h)
-                AC_CHECK_FUNCS( ENGINE_load_builtin_engines )
-              ])
-
     dnl These can only exist if OpenSSL exists
     dnl Older versions of Cyassl (some time before 2.9.4) don't have
     dnl SSL_get_shutdown (but this check won't actually detect it there
