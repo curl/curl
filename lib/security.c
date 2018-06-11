@@ -390,7 +390,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 
   if(conn->data->set.verbose) {
     buf[decoded_len] = '\n';
-    Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1, conn);
+    Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
   }
 
   buf[decoded_len] = '\0';
