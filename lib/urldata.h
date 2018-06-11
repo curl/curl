@@ -1267,7 +1267,7 @@ struct UrlState {
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel f.e. */
 
-#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_ENGINE_H)
+#if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
   void *engine;
 #endif /* USE_OPENSSL */
