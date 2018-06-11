@@ -1587,8 +1587,6 @@ struct UserDefined {
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
-
-  bool printhost;        /* printing host name in debug info */
   bool get_filetime;     /* get the time and get of the remote file */
   bool tunnel_thru_httpproxy; /* use CONNECT through a HTTP proxy */
   bool prefer_ascii;     /* ASCII rather than binary */

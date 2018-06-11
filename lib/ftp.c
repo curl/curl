@@ -3991,8 +3991,7 @@ CURLcode Curl_ftpsend(struct connectdata *conn, const char *cmd)
       break;
 
     if(conn->data->set.verbose)
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT,
-                 sptr, (size_t)bytes_written, conn);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, (size_t)bytes_written);
 
     if(bytes_written != (ssize_t)write_len) {
       write_len -= bytes_written;

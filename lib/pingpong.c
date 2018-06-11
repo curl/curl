@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -221,8 +221,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   }
 
   if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_HEADER_OUT,
-               s, (size_t)bytes_written, conn);
+    Curl_debug(conn->data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
 
   if(bytes_written != (ssize_t)write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
@@ -370,7 +369,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 #endif
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
-                         pp->linestart_resp, (size_t)perline, conn);
+                         pp->linestart_resp, (size_t)perline);
 
           /*
            * We pass all response-lines to the callback function registered

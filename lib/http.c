@@ -1181,12 +1181,12 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
 
     if(conn->data->set.verbose) {
       /* this data _may_ contain binary stuff */
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, headlen, conn);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, headlen);
       if(bodylen) {
         /* there was body data sent beyond the initial header part, pass that
            on to the debug callback too */
         Curl_debug(conn->data, CURLINFO_DATA_OUT,
-                   ptr + headlen, bodylen, conn);
+                   ptr + headlen, bodylen);
       }
     }
 
@@ -3405,7 +3405,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
         if(data->set.verbose)
           Curl_debug(data, CURLINFO_HEADER_IN,
-                     k->str_start, headerlen, conn);
+                     k->str_start, headerlen);
         break;          /* exit header line loop */
       }
 
@@ -3860,8 +3860,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       writetype |= CLIENTWRITE_BODY;
 
     if(data->set.verbose)
-      Curl_debug(data, CURLINFO_HEADER_IN,
-                 k->p, (size_t)k->hbuflen, conn);
+      Curl_debug(data, CURLINFO_HEADER_IN, k->p, (size_t)k->hbuflen);
 
     result = Curl_client_write(conn, writetype, k->p, k->hbuflen);
     if(result)
