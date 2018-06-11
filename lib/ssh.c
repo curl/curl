@@ -1175,8 +1175,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
         if(data->set.verbose) {
-          Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4, conn);
-          Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp), conn);
+          Curl_debug(data, CURLINFO_HEADER_OUT, (char *)"PWD\n", 4);
+          Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
         }
         /* this sends an FTP-like "header" to the header callback so that the
            current directory can be read very similar to how it is read when
@@ -1970,7 +1970,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* output debug output if that is requested */
           if(data->set.verbose) {
             Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_filename,
-                       sshc->readdir_len, conn);
+                       sshc->readdir_len);
           }
         }
         else {
@@ -2079,7 +2079,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         /* output debug output if that is requested */
         if(data->set.verbose) {
           Curl_debug(data, CURLINFO_DATA_OUT, sshc->readdir_line,
-                     sshc->readdir_currLen, conn);
+                     sshc->readdir_currLen);
         }
         data->req.bytecount += sshc->readdir_currLen;
       }
