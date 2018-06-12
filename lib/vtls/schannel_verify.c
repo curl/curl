@@ -214,7 +214,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                              NULL,
                              NULL,
                              NULL,
-                             &cert_context)) {
+                             (const void **)&cert_context)) {
 
           failf(data,
                 "schannel: failed to extract certificate from CA file "
