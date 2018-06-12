@@ -4349,9 +4349,11 @@ sub singletest {
         # what parts to cut off from the protocol
         my @strippart = getpart("verify", "strippart");
         my $strip;
+        @strippart = fixarray(@strippart);
         for $strip (@strippart) {
             chomp $strip;
             for(@out) {
+                print STDERR ":::: $strip\n";
                 eval $strip;
             }
         }
