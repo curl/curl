@@ -419,7 +419,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         /* output debug if that is requested */
         if(data->set.verbose)
           Curl_debug(data, CURLINFO_HEADER_IN,
-                     s->line_start, (size_t)s->perline, conn);
+                     s->line_start, (size_t)s->perline);
 
         if(!data->set.suppress_connect_headers) {
           /* send the header to the callback */

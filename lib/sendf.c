@@ -240,7 +240,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
     vsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
     va_end(ap);
     len = strlen(print_buffer);
-    Curl_debug(data, CURLINFO_TEXT, print_buffer, len, NULL);
+    Curl_debug(data, CURLINFO_TEXT, print_buffer, len);
   }
 }
 
@@ -265,7 +265,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     if(data->set.verbose) {
       error[len] = '\n';
       error[++len] = '\0';
-      Curl_debug(data, CURLINFO_TEXT, error, len, NULL);
+      Curl_debug(data, CURLINFO_TEXT, error, len);
     }
     va_end(ap);
   }
@@ -300,7 +300,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
       break;
 
     if(data->set.verbose)
-      Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written, conn);
+      Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written);
 
     if((size_t)bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
@@ -762,8 +762,8 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
 }
 
 /* return 0 on success */
-static int showit(struct Curl_easy *data, curl_infotype type,
-                  char *ptr, size_t size)
+int Curl_debug(struct Curl_easy *data, curl_infotype type,
+               char *ptr, size_t size)
 {
   static const char s_infotype[CURLINFO_END][3] = {
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
@@ -832,43 +832,5 @@ static int showit(struct Curl_easy *data, curl_infotype type,
 #ifdef CURL_DOES_CONVERSIONS
   free(buf);
 #endif
-  return rc;
-}
-
-int Curl_debug(struct Curl_easy *data, curl_infotype type,
-               char *ptr, size_t size,
-               struct connectdata *conn)
-{
-  int rc;
-  if(data->set.printhost && conn && conn->host.dispname) {
-    const char *t = NULL;
-    const char *w = "Data";
-    switch(type) {
-    case CURLINFO_HEADER_IN:
-      w = "Header";
-      /* FALLTHROUGH */
-    case CURLINFO_DATA_IN:
-      t = "from";
-      break;
-    case CURLINFO_HEADER_OUT:
-      w = "Header";
-      /* FALLTHROUGH */
-    case CURLINFO_DATA_OUT:
-      t = "to";
-      break;
-    default:
-      break;
-    }
-
-    if(t) {
-      char buffer[160];
-      snprintf(buffer, sizeof(buffer), "[%s %s %s]", w, t,
-               conn->host.dispname);
-      rc = showit(data, CURLINFO_TEXT, buffer, strlen(buffer));
-      if(rc)
-        return rc;
-    }
-  }
-  rc = showit(data, type, ptr, size);
   return rc;
 }
