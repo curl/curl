@@ -4720,7 +4720,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 
   /* if the protocol used doesn't support wildcards, switch it off */
   if(data->state.wildcardmatch &&
-     conn != NULL &
+     conn != NULL &&
      !(conn->handler->flags & PROTOPT_WILDCARD))
     data->state.wildcardmatch = FALSE;
 
