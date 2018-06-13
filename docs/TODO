@@ -17,7 +17,6 @@
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
- 1.1 Option to refuse usernames in URLs
  1.2 More data sharing
  1.3 struct lifreq
  1.4 signal-based resolver timeouts
@@ -188,16 +187,6 @@
 ==============================================================================
 
 1. libcurl
-
-1.1 Option to refuse usernames in URLs
-
- There's a certain risk for application in allowing user names in URLs. For
- example: if the wrong person gets to set the URL and manages to set a user
- name in there when .netrc is used, the application may send along a password
- that otherwise the person couldn't provide.
-
- A new libcurl option could be added to allow applications to switch off this
- feature and thus avoid a potential risk.
 
 1.2 More data sharing
 
