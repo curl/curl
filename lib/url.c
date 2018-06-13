@@ -4711,14 +4711,16 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
   struct SingleRequest *k = &data->req;
 
-  conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to
-                                 use */
+  if(conn)
+    conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to
+                                   use */
 
   data->state.done = FALSE; /* *_done() is not called yet */
   data->state.expect100header = FALSE;
 
   /* if the protocol used doesn't support wildcards, switch it off */
   if(data->state.wildcardmatch &&
+     conn &&
      !(conn->handler->flags & PROTOPT_WILDCARD))
     data->state.wildcardmatch = FALSE;
 
