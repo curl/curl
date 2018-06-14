@@ -78,7 +78,7 @@ fi
 datestamp=`date +"%F"`
 
 # Replace version number in header file:
-sed -i -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
+sed -i.bak -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
     -e 's/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x'$numeric'/g' \
     -e 's/^#define LIBCURL_VERSION_MAJOR .*/#define LIBCURL_VERSION_MAJOR '$major'/g' \
     -e 's/^#define LIBCURL_VERSION_MINOR .*/#define LIBCURL_VERSION_MINOR '$minor'/g' \
@@ -87,10 +87,10 @@ sed -i -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"
  $HEADER
 
 # Replace version number in header file:
-sed -i 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER
+sed -i.bak 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER
 
 # Replace version number in plist file:
-sed -i "s/7\.12\.3/$libversion/g" $PLIST
+sed -i.bak "s/7\.12\.3/$libversion/g" $PLIST
 
 if test -n "$only"; then
     # done!
