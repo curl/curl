@@ -481,8 +481,10 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   DEBUGASSERT(conn && td);
 
   /* wait for the thread to resolve the name */
-  if(Curl_thread_join(&td->thread_hnd))
-    result = getaddrinfo_complete(conn);
+  if(Curl_thread_join(&td->thread_hnd)) {
+    if(entry)
+      result = getaddrinfo_complete(conn);
+  }
   else
     DEBUGASSERT(0);
 
