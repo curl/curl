@@ -88,6 +88,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.3 c-ares deviates from stock resolver on http://1346569778
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
+ 11.6 slow connect to localhost on Windows
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -638,6 +639,19 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/1332
 
+11.6 slow connect to localhost on Windows
+
+ When connecting to "localhost" on Windows, curl will resolve the name for
+ both ipv4 and ipv6 and try to connect to both happy eyeballs-style. Something
+ in there does however make it take 200 millseconds to succeed - which is the
+ HAPPY_EYEBALLS_TIMEOUT define exactly. Lowering that define speeds up the
+ connection, suggesting a problem in the HE handling.
+
+ If we can *know* that we're talking to a local host, we should lower the
+ happy eyeballs delay timeout for IPv6 (related: hardcode the "localhost"
+ addresses, mentioned in TODO). Possibly we should reduce that delay for all.
+
+ https://github.com/curl/curl/issues/2281
 
 12. LDAP and OpenLDAP
 
