@@ -1657,7 +1657,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
        dnl still no, but what about with -ldl?
        AC_MSG_CHECKING([OpenSSL linking with -ldl])
-       LIBS="$LIBS -ldl"
+       LIBS="$LIBS -ldl -lcrypto"
        AC_TRY_LINK(
        [
          #include <openssl/err.h>
@@ -1674,7 +1674,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
          dnl ok, so what about bouth -ldl and -lpthread?
 
          AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
-         LIBS="$LIBS -lpthread"
+         LIBS="$CLEANLIBS -ldl -lpthread -lcrypto"
          AC_TRY_LINK(
          [
            #include <openssl/err.h>
