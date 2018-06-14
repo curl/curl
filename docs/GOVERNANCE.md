@@ -28,11 +28,11 @@ that wrote those parts of the code.
 The curl project is not a democracy, but everyone is entitled to state their
 opinion and may argue for their sake within the community.
 
-All and any changes that have been done or will be done are eligable to bring
+All and any changes that have been done or will be done are eligible to bring
 up for discussion, to object to or to praise. Ideally, we find consensus for
 the appropriate way forward in any given situation or challenge.
 
-If there is no obvious consensus, a maintainer who's knowledable in the
+If there is no obvious consensus, a maintainer who's knowledgeable in the
 specific area will take an "executive" decision that they think is the right
 for the project.
 
@@ -56,7 +56,7 @@ make sure that we always have the list of maintainers as "the team that push
 stuff to curl".
 
 Getting push permissions removed is not a punishment. Everyone who ever worked
-on maintining curl is considered a hero, for all time hereafter.
+on maintaining curl is considered a hero, for all time hereafter.
 
 ### Security team members
 
