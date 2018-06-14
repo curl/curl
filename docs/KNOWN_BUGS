@@ -45,6 +45,7 @@ problems may have been fixed or changed somewhat since this was written!
  5. Build and portability issues
  5.1 Windows Borland compiler
  5.2 curl-config --libs contains private details
+ 5.3 Windows: No execute on suitable sections
  5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
@@ -57,6 +58,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.4 Negotiate and Kerberos V5 need a fake user name
+ 6.5 NTLM doen't support password with § character
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -454,6 +456,9 @@ problems may have been fixed or changed somewhat since this was written!
  new conn->bits.want_authentication which is set when any of the authentication
  options are set.
 
+6.5 NTLM doen't support password with § character
+
+ https://github.com/curl/curl/issues/2120
 
 7. FTP
 
