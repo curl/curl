@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -497,9 +497,24 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     embedded_ares_builddir="$configure_runpath/ares"
     if test -n "$want_ares_path"; then
       dnl c-ares library path has been specified
-      ares_CPPFLAGS="-I$want_ares_path/include"
-      ares_LDFLAGS="-L$want_ares_path/lib"
-      ares_LIBS="-lcares"
+      ARES_PCDIR="$want_ares_path/lib/pkgconfig"
+      CURL_CHECK_PKGCONFIG(libcares, [$ARES_PCIDR])
+      if test "$PKGCONFIG" != "no" ; then
+        ares_LIBS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
+          $PKGCONFIG --libs-only-l libcares`
+        ares_LDFLAGS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
+          $PKGCONFIG --libs-only-L libcares`
+        ares_CPPFLAGS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
+          $PKGCONFIG --cflags-only-I libcares`
+        AC_MSG_NOTICE([pkg-config: ares LIBS: "$ares_LIBS"])
+        AC_MSG_NOTICE([pkg-config: ares LDFLAGS: "$ares_LDFLAGS"])
+        AC_MSG_NOTICE([pkg-config: ares CPPFLAGS: "$ares_CPPFLAGS"])
+      else
+        dnl ... path without pkg-config
+        ares_CPPFLAGS="-I$want_ares_path/include"
+        ares_LDFLAGS="-L$want_ares_path/lib"
+        ares_LIBS="-lcares"
+      fi
     else
       dnl c-ares library path has not been given
       if test -d "$srcdir/ares"; then
@@ -513,9 +528,19 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
         ares_LIBS="-lcares"
       else
         dnl c-ares path not specified, use defaults
-        ares_CPPFLAGS=""
-        ares_LDFLAGS=""
-        ares_LIBS="-lcares"
+        CURL_CHECK_PKGCONFIG(libcares)
+        if test "$PKGCONFIG" != "no" ; then
+          ares_LIBS=`$PKGCONFIG --libs-only-l libcares`
+          ares_LDFLAGS=`$PKGCONFIG --libs-only-L libcares`
+          ares_CPPFLAGS=`$PKGCONFIG --cflags-only-I libcares`
+          AC_MSG_NOTICE([pkg-config: ares_LIBS: "$ares_LIBS"])
+          AC_MSG_NOTICE([pkg-config: ares_LDFLAGS: "$ares_LDFLAGS"])
+          AC_MSG_NOTICE([pkg-config: ares_CPPFLAGS: "$ares_CPPFLAGS"])
+        else
+          ares_CPPFLAGS=""
+          ares_LDFLAGS=""
+          ares_LIBS="-lcares"
+        fi
       fi
     fi
     #
