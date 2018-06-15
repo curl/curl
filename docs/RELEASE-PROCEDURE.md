@@ -11,7 +11,8 @@ in the source code repo
 - make sure all relevant changes are committed on the master branch
 
 - tag the git repo in this style: `git tag -a curl-7_34_0`. -a annotates the
-  tag and we use underscores instead of dots in the version number.
+  tag and we use underscores instead of dots in the version number. Make sure
+  the tag is GPG signed (using -s).
 
 - run "./maketgz 7.34.0" to build the release tarballs. It is important that
   you run this on a machine with the correct set of autotools etc installed
@@ -35,7 +36,7 @@ in the curl-www repo
 
 - commit all local changes
 
-- tag the repo with the same tag as used for the source repo
+- tag the repo with the same name as used for the source repo.
 
 - make sure all relevant changes are committed and pushed on the master branch
 
