@@ -67,6 +67,19 @@ This release includes the following bugfixes:
  o tests/libtest: Add lib1521 to nodist_SOURCES [42]
  o mk-ca-bundle.pl: leave certificate name untouched [43]
  o boringssl + schannel: undef X509_NAME in lib/schannel.h [44]
+ o openssl: assume engine support in 1.0.1 or later [45]
+ o cppcheck: fix warnings [46]
+ o test 46: make test pass after year 2025 [47]
+ o schannel: support selecting ciphers [48]
+ o Curl_debug: remove dead printhost code [49]
+ o test 1455: unflakified [50]
+ o Curl_init_do: handle NULL connection pointer passed in [51]
+ o progress: remove a set of unused defines [52]
+ o mk-ca-bundle.pl: make -u delete certdata.txt if found not changed [53]
+ o GOVERNANCE.md: explains how this project is run [54]
+ o configure: use pkg-config for c-ares detection [55]
+ o configure: enhance ability to build with static openssl [56]
+ o maketgz: fix sed issues on OSX [57]
 
 This release includes the following known bugs:
 
@@ -75,15 +88,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alejandro R. Sedeño, Archangel_SDY on github, Bernhard Walle, Björn Stenberg,
-  bsammon on github, Dagobert Michelsen, Daniel Stenberg, elephoenix on github,
-  Fabrice Fontaine, Frank Gevaerts, Gisle Vanem, Ithubg on github,
-  Johannes Schindelin, Linus Lewandowski, Max Savenkov, Oleg Pudeyev,
-  Patrick Monnerat, Per Malmberg, Peter Varga, Philip Prindeville, Ray Satiro,
-  Richard Alcock, Rikard Falkeborn, Sean Miller, Sergei Nikulov,
+  Alejandro R. Sedeño, Archangel_SDY on github, Bernhard M. Wiedemann,
+  Bernhard Walle, Björn Stenberg, bsammon on github, Dagobert Michelsen,
+  Daniel Stenberg, elephoenix on github, Fabrice Fontaine, Frank Gevaerts,
+  Gisle Vanem, Ithubg on github, Johannes Schindelin, Linus Lewandowski,
+  Lyman Epp, Mamta Upadhyay, Marcel Raad, Marian Klymov, Matteo Bignotti,
+  Max Savenkov, Oleg Pudeyev, Patrick Monnerat, Per Malmberg, Peter Varga,
+  Peter Wu, Philip Prindeville, pszemus on github, Ray Satiro, Richard Alcock,
+  Rikard Falkeborn, Robert Prag, Sean Miller, Sergei Nikulov,
   Stephan Mühlstrasser, Viktor Szakats, Vladimir Kotal, Will Dietz,
   Will Dietz , Yaakov Selkowitz, zzq1015 on github,
-  (32 contributors)
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -133,3 +148,16 @@ References to bug reports and discussions on issues:
  [42] = https://curl.haxx.se/bug/?i=2633
  [43] = https://curl.haxx.se/bug/?i=2640
  [44] = https://curl.haxx.se/bug/?i=2634
+ [45] = https://curl.haxx.se/bug/?i=2641
+ [46] = https://curl.haxx.se/bug/?i=2631
+ [47] = https://curl.haxx.se/bug/?i=2646
+ [48] = https://curl.haxx.se/bug/?i=2630
+ [49] = https://curl.haxx.se/bug/?i=2647
+ [50] = https://curl.haxx.se/bug/?i=2649
+ [51] = https://curl.haxx.se/bug/?i=2653
+ [52] = https://curl.haxx.se/bug/?i=2654
+ [53] = https://curl.haxx.se/bug/?i=2655
+ [54] = https://curl.haxx.se/bug/?i=2657
+ [55] = https://curl.haxx.se/bug/?i=2203
+ [56] = https://curl.haxx.se/bug/?i=2199
+ [57] = https://curl.haxx.se/bug/?i=2660
