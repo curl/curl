@@ -4353,7 +4353,6 @@ sub singletest {
         for $strip (@strippart) {
             chomp $strip;
             for(@out) {
-                print STDERR ":::: $strip\n";
                 eval $strip;
             }
         }
