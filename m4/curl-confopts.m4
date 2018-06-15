@@ -498,7 +498,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     if test -n "$want_ares_path"; then
       dnl c-ares library path has been specified
       ARES_PCDIR="$want_ares_path/lib/pkgconfig"
-      CURL_CHECK_PKGCONFIG(libcares, [$ARES_PCIDR])
+      CURL_CHECK_PKGCONFIG(libcares, [$ARES_PCDIR])
       if test "$PKGCONFIG" != "no" ; then
         ares_LIBS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
           $PKGCONFIG --libs-only-l libcares`
