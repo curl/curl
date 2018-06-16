@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -75,7 +75,7 @@ TEST_T = -a -t
 TEST_E = -a -e
 
 # !flaky means that it'll skip all tests using the flaky keyword
-TEST_NF = -a -p -r !flaky
+TEST_NF = -a -p !flaky
 endif
 
 # make sure that PERL is pointing to an executable
