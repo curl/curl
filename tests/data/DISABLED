@@ -18,5 +18,3 @@
 1510
 # Pipelining test that is causing false positives a little too often
 1903
-# causes memory leaks for now:
-1553

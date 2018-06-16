@@ -69,8 +69,8 @@
 #define GOOD_MULTI_HANDLE(x) \
   ((x) && (x)->type == CURL_MULTI_HANDLE)
 
-static void singlesocket(struct Curl_multi *multi,
-                         struct Curl_easy *data);
+static CURLMcode singlesocket(struct Curl_multi *multi,
+                              struct Curl_easy *data);
 static int update_timer(struct Curl_multi *multi);
 
 static CURLMcode add_next_timeout(struct curltime now,
@@ -514,6 +514,11 @@ static CURLcode multi_done(struct connectdata **connp,
   if(data->state.done)
     /* Stop if multi_done() has already been called */
     return CURLE_OK;
+
+  if(data->mstate == CURLM_STATE_WAITRESOLVE) {
+    /* still waiting for the resolve to complete */
+    (void)Curl_resolver_wait_resolv(conn, NULL);
+  }
 
   Curl_getoff_all_pipelines(data, conn);
 
@@ -2304,8 +2309,8 @@ CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
  * and if we have a different state in any of those sockets from last time we
  * call the callback accordingly.
  */
-static void singlesocket(struct Curl_multi *multi,
-                         struct Curl_easy *data)
+static CURLMcode singlesocket(struct Curl_multi *multi,
+                              struct Curl_easy *data)
 {
   curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
   int i;
@@ -2352,7 +2357,7 @@ static void singlesocket(struct Curl_multi *multi,
       entry = sh_addentry(&multi->sockhash, s, data);
       if(!entry)
         /* fatal */
-        return;
+        return CURLM_OUT_OF_MEMORY;
     }
 
     /* we know (entry != NULL) at this point, see the logic above */
@@ -2440,6 +2445,7 @@ static void singlesocket(struct Curl_multi *multi,
 
   memcpy(data->sockets, socks, num*sizeof(curl_socket_t));
   data->numsocks = num;
+  return CURLM_OK;
 }
 
 void Curl_updatesocket(struct Curl_easy *data)
@@ -2553,8 +2559,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
        and callbacks */
     if(result != CURLM_BAD_HANDLE) {
       data = multi->easyp;
-      while(data) {
-        singlesocket(multi, data);
+      while(data && !result) {
+        result = singlesocket(multi, data);
         data = data->next;
       }
     }
@@ -2608,10 +2614,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         /* clear the bitmask only if not locked */
         data->easy_conn->cselect_bits = 0;
 
-      if(CURLM_OK >= result)
+      if(CURLM_OK >= result) {
         /* get the socket(s) and check if the state has been changed since
            last */
-        singlesocket(multi, data);
+        result = singlesocket(multi, data);
+        if(result)
+          return result;
+      }
 
       /* Now we fall-through and do the timer-based stuff, since we don't want
          to force the user to have to deal with timeouts as long as at least
@@ -2645,10 +2654,13 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       result = multi_runsingle(multi, now, data);
       sigpipe_restore(&pipe_st);
 
-      if(CURLM_OK >= result)
+      if(CURLM_OK >= result) {
         /* get the socket(s) and check if the state has been changed since
            last */
-        singlesocket(multi, data);
+        result = singlesocket(multi, data);
+        if(result)
+          return result;
+      }
     }
 
     /* Check if there's one (more) expired timer to deal with! This function
