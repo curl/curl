@@ -1136,6 +1136,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   0, /* have_certinfo */
   0, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
+  0, /* have_ssl_cert */
   0, /* support_https_proxy */
 
   (size_t)-1, /* something insanely large to be on the safe side */

@@ -1002,6 +1002,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   0, /* have_pinnedpubkey */
 #endif
   1, /* have_ssl_ctx */
+  0, /* have_ssl_cert */
   0, /* support_https_proxy */
 
   sizeof(struct ssl_backend_data),

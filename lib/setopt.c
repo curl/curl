@@ -2547,6 +2547,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_CONNECT_TO:
     data->set.connect_to = va_arg(param, struct curl_slist *);
     break;
+
   case CURLOPT_SUPPRESS_CONNECT_HEADERS:
     data->set.suppress_connect_headers = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
@@ -2562,6 +2563,29 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
     data->set.dns_shuffle_addresses = (0 != va_arg(param, long)) ? TRUE:FALSE;
     break;
+  case CURLOPT_SSL_CERT_FUNCTION:
+#ifdef USE_SSL
+	  /*
+	  * Set a SSL_CERT callback
+	  */
+	  if (Curl_ssl->have_ssl_cert)
+		data->set.ssl.fsslcert = va_arg(param, curl_ssl_cert_callback);
+	  else
+#endif
+	  result = CURLE_NOT_BUILT_IN;
+	  break;
+
+  case CURLOPT_SSL_CERT_DATA:
+#ifdef USE_SSL
+	  /*
+	  * Set a SSL_CERT callback parameter pointer
+	  */
+	  if (Curl_ssl->have_ssl_cert)
+	    data->set.ssl.fsslcertp = va_arg(param, void *);
+	  else
+#endif
+	  result = CURLE_NOT_BUILT_IN;
+	  break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

@@ -1,0 +1,105 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSL_CERT_FUNCTION 3 "17 Jun 2018" "libcurl 7.61.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SSL_CERT_FUNCTION \- SSL server certificate callback for OpenSSL
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode ssl_cert_callback(CURL *curl, void *cert, void *userptr);
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CERT_FUNCTION,
+                          ssl_cert_callback);
+.SH DESCRIPTION
+This option only works for libcurl powered by OpenSSL.
+If libcurl was built against another SSL library this functionality is
+absent.
+
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+The \fIcert\fP parameter is actually a pointer to the SSL
+library's \fIX509\fP for OpenSSL. Set the \fIuserptr\fP argument with the
+\fICURLOPT_SSL_CERT_DATA(3)\fP option.
+
+This function will get called on all new connections made to a server, during
+the SSL negotiation. The function cab be used to implement a validation of the
+server certificate by comparing their fingerprints as shown in the example.
+
+To use this properly, a non-trivial amount of knowledge of your SSL library is
+necessary. For example, you can use this function to call library-specific
+callbacks to add additional validation code for certificates, and even to
+change the actual URI of an HTTPS request.
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+.SH EXAMPLE
+.nf
+static const char *get_cert_fingerprint(X509 *cert) {
+  unsigned char md[EVP_MAX_MD_SIZE];
+  unsigned int len;
+
+  if (!X509_digest(cert, EVP_sha256(), md, &len))
+     return NULL;
+
+  char *mds = (char *)malloc(2 * len + 1);
+  for (int i = 0; i < len; i++) {
+    snprintf(mds + i * 2, 2 * len + 1 - 2 * i, "%02x",  md[i]);
+  }
+  mds[2 * len] = '\0';
+
+ return mds;
+}
+
+CURLcode ssl_cert_callback(CURL *curl, void *cert, void *param) {
+
+  if (cert == NULL || param == NULL)
+    return CURLE_SSL_PEER_CERTIFICATE;
+
+  const char **stored_digest = (const char **)param;
+  const char *server_digest = get_cert_fingerprint((X509 *)cert);
+
+  if (server_digest == NULL)
+    return CURLE_SSL_PEER_CERTIFICATE;
+
+  int rc = *stored_digest != NULL
+           && strcmp(*stored_digest, server_digest) != 0
+             ? CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
+
+  *stored_digest = server_digest;
+	
+  return rc;
+}
+.fi
+.SH AVAILABILITY
+Added in 7.61.0 for OpenSSL. Other SSL backends not supported.
+.SH RETURN VALUE
+CURLE_OK if supported; or an error such as:
+
+CURLE_SSL_PEER_CERTIFICATE - If the server certificate is not available.
+
+CURLE_PEER_FAILED_VERIFICATION - If the fingerprints differ
+.SH "SEE ALSO"
+.BR CURLOPT_SSL_CERT_DATA "(3)"

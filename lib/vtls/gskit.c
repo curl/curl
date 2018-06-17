@@ -1357,6 +1357,7 @@ const struct Curl_ssl Curl_ssl_gskit = {
   1, /* have_certinfo */
   1, /* have_pinnedpubkey */
   0, /* have_ssl_ctx */
+  0, /* have_ssl_cert */
   /* TODO: convert to 1 and fix test #1014 (if need) */
   0, /* support_https_proxy */
 
