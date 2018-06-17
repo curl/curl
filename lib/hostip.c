@@ -60,6 +60,7 @@
 #include "url.h"
 #include "inet_ntop.h"
 #include "multiif.h"
+#include "doh.h"
 #include "warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -565,23 +566,27 @@ int Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
     }
 
-    /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
-       non-zero value indicating that we need to wait for the response to the
-       resolve call */
-    addr = Curl_getaddrinfo(conn,
+    if(data->set.doh) {
+      addr = Curl_doh(conn, hostname, port, &respwait);
+    }
+    else {
+      /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
+         non-zero value indicating that we need to wait for the response to the
+         resolve call */
+      addr = Curl_getaddrinfo(conn,
 #ifdef DEBUGBUILD
-                            (data->set.str[STRING_DEVICE]
-                             && !strcmp(data->set.str[STRING_DEVICE],
-                                        "LocalHost"))?"localhost":
+                              (data->set.str[STRING_DEVICE]
+                               && !strcmp(data->set.str[STRING_DEVICE],
+                                          "LocalHost"))?"localhost":
 #endif
-                            hostname, port, &respwait);
-
+                              hostname, port, &respwait);
+    }
     if(!addr) {
       if(respwait) {
         /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
-        result = Curl_resolver_is_resolved(conn, &dns);
+        result = Curl_resolv_check(conn, &dns);
         if(result) /* error detected */
           return CURLRESOLV_ERROR;
         if(dns)
@@ -1048,4 +1053,23 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   data->change.resolve = NULL; /* dealt with now */
 
   return CURLE_OK;
+}
+
+CURLcode Curl_resolv_check(struct connectdata *conn,
+                           struct Curl_dns_entry **dns)
+{
+  if(conn->data->set.doh)
+    return Curl_doh_is_resolved(conn, dns);
+  return Curl_resolver_is_resolved(conn, dns);
+}
+
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks)
+{
+  if(conn->data->set.doh)
+    /* nothing to wait for during DOH resolve, those handles have their own
+       sockets */
+    return GETSOCK_BLANK;
+  return Curl_resolver_getsock(conn, socks, numsocks);
 }

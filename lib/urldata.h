@@ -511,6 +511,28 @@ enum upgrade101 {
   UPGR101_WORKING             /* talking upgraded protocol */
 };
 
+struct dohresponse {
+  unsigned char *memory;
+  size_t size;
+};
+
+/* one of these for each DOH HTTP request */
+struct dnsprobe {
+  CURL *easy;
+  int dnstype;
+  unsigned char dohbuffer[512];
+  size_t dohlen;
+  struct dohresponse serverdoh;
+};
+
+struct dohdata {
+  struct curl_slist *headers;
+  struct dnsprobe probe[2];
+  unsigned int pending; /* still outstanding requests */
+  const char *host;
+  int port;
+};
+
 /*
  * Request specific data in the easy handle (Curl_easy).  Previously,
  * these members were on the connectdata struct but since a conn struct may
@@ -606,6 +628,7 @@ struct SingleRequest {
 
   void *protop;       /* Allocated protocol-specific data. Each protocol
                          handler makes sure this points to data it needs. */
+  struct dohdata doh; /* DOH specific data for this request */
 };
 
 /*
@@ -1193,6 +1216,7 @@ typedef enum {
   EXPIRE_SPEEDCHECK,
   EXPIRE_TIMEOUT,
   EXPIRE_TOOFAST,
+  EXPIRE_DOH_COMPLETE,
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
@@ -1443,6 +1467,7 @@ enum dupstring {
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
 #endif
   STRING_TARGET,                /* CURLOPT_REQUEST_TARGET */
+  STRING_DOH,                   /* CURLOPT_DOH_URL */
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
@@ -1454,6 +1479,11 @@ enum dupstring {
 
   STRING_LAST /* not used, just an end-of-list marker */
 };
+
+/* callback that gets called when this easy handle is completed within a multi
+   handle.  Only used for internally created transfers, like for example
+   DOH. */
+typedef int (*multidone_func)(struct Curl_easy *easy, CURLcode result);
 
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
@@ -1688,6 +1718,10 @@ struct UserDefined {
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   bool disallow_username_in_url; /* disallow username in url */
+  bool doh; /* DNS-over-HTTPS enabled */
+  bool doh_get; /* use GET for DOH requests, instead of POST */
+  multidone_func fmultidone;
+  struct Curl_easy *dohfor; /* this is a DOH request for that transfer */
 };
 
 struct Names {

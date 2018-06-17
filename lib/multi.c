@@ -888,7 +888,7 @@ static int multi_getsock(struct Curl_easy *data,
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
-    return Curl_resolver_getsock(data->easy_conn, socks, numsocks);
+    return Curl_resolv_getsock(data->easy_conn, socks, numsocks);
 
   case CURLM_STATE_PROTOCONNECT:
   case CURLM_STATE_SENDPROTOCONNECT:
@@ -1512,7 +1512,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       if(!dns)
-        result = Curl_resolver_is_resolved(data->easy_conn, &dns);
+        result = Curl_resolv_check(data->easy_conn, &dns);
 
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it
@@ -2139,15 +2139,20 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(CURLM_STATE_COMPLETED == data->mstate) {
-      /* now fill in the Curl_message with this info */
-      msg = &data->msg;
+      if(data->set.fmultidone) {
+        /* signal via callback instead */
+        data->set.fmultidone(data, result);
+      }
+      else {
+        /* now fill in the Curl_message with this info */
+        msg = &data->msg;
 
-      msg->extmsg.msg = CURLMSG_DONE;
-      msg->extmsg.easy_handle = data;
-      msg->extmsg.data.result = result;
+        msg->extmsg.msg = CURLMSG_DONE;
+        msg->extmsg.easy_handle = data;
+        msg->extmsg.data.result = result;
 
-      rc = multi_addmsg(multi, msg);
-
+        rc = multi_addmsg(multi, msg);
+      }
       multistate(data, CURLM_STATE_MSGSENT);
     }
   } while((rc == CURLM_CALL_MULTI_PERFORM) || multi_ischanged(multi, FALSE));
