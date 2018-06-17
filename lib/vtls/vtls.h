@@ -32,6 +32,7 @@ struct ssl_connect_data;
 #define SSLSUPP_SSL_CTX      (1<<3) /* supports CURLOPT_SSL_CTX */
 #define SSLSUPP_HTTPS_PROXY  (1<<4) /* supports access via HTTPS proxies */
 #define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
+#define SSLSUPP_SSL_CERT     (1<<6) /* supports CURLOPT_SSL_CERT */
 
 struct Curl_ssl {
   /*
