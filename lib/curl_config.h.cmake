@@ -966,6 +966,9 @@
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
 
+/* enable multiple SSL backends */
+#cmakedefine CURL_WITH_MULTI_SSL 1
+
 /* Define to 1 if using yaSSL in OpenSSL compatibility mode. */
 #cmakedefine USE_YASSLEMUL 1
 
