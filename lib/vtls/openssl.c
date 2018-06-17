@@ -3139,12 +3139,13 @@ static CURLcode servercert(struct connectdata *conn,
     (void)get_cert_chain(conn, connssl);
 
   BACKEND->server_cert = SSL_get_peer_certificate(BACKEND->handle);
-  if (data->set.ssl.fsslcert) {
-	  rc = (*data->set.ssl.fsslcert)(data, BACKEND->server_cert, data->set.ssl.fsslcertp);
-	  if (rc) {
-		  failf(data, "error signaled by ssl cert callback");
-		  return rc;
-	  }
+  if(data->set.ssl.fsslcert) {
+    rc = (*data->set.ssl.fsslcert)(data, BACKEND->server_cert,
+           data->set.ssl.fsslcertp);
+    if(rc) {
+      failf(data, "error signaled by ssl cert callback");
+      return rc;
+    }
   }
   if(!BACKEND->server_cert) {
     BIO_free(mem);
