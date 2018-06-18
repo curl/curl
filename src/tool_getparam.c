@@ -79,6 +79,7 @@ static const struct LongShort aliases[]= {
   {"*b", "egd-file",                 ARG_STRING},
   {"*B", "oauth2-bearer",            ARG_STRING},
   {"*c", "connect-timeout",          ARG_STRING},
+  {"*C", "doh-url"        ,          ARG_STRING},
   {"*d", "ciphers",                  ARG_STRING},
   {"*D", "dns-interface",            ARG_STRING},
   {"*e", "disable-epsv",             ARG_BOOL},
@@ -610,6 +611,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                           LONG_MAX/1000);
         if(err)
           return err;
+        break;
+      case 'C': /* doh-url */
+        GetStr(&config->doh_url, nextarg);
         break;
       case 'd': /* ciphers */
         GetStr(&config->cipher_list, nextarg);

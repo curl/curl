@@ -2,7 +2,7 @@
 
 DPAGES = abstract-unix-socket.d anyauth.d append.d basic.d cacert.d capath.d cert.d \
   cert-status.d cert-type.d ciphers.d compressed.d compressed-ssh.d     \
-  config.d                                                              \
+  config.d doh-url.d                                                    \
   connect-timeout.d connect-to.d continue-at.d cookie.d cookie-jar.d    \
   create-dirs.d crlf.d crlfile.d data-ascii.d data-binary.d data.d      \
   data-raw.d data-urlencode.d delegation.d digest.d disable.d           \
