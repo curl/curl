@@ -1262,6 +1262,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS,
                   (long)(config->connecttimeout * 1000));
 
+        if(config->doh_url)
+          my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
+
         if(config->cipher_list)
           my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);
 
