@@ -2601,7 +2601,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 	  /*
 	  * Set a SSL_CERT callback
 	  */
-	  if (Curl_ssl->have_ssl_cert)
+	  if (Curl_ssl->supports & SSLSUPP_SSL_CERT)
 		data->set.ssl.fsslcert = va_arg(param, curl_ssl_cert_callback);
 	  else
 #endif
@@ -2613,7 +2613,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 	  /*
 	  * Set a SSL_CERT callback parameter pointer
 	  */
-	  if (Curl_ssl->have_ssl_cert)
+	  if (Curl_ssl->supports & SSLSUPP_SSL_CERT)
 	    data->set.ssl.fsslcertp = va_arg(param, void *);
 	  else
 #endif
