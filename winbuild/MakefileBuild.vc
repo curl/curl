@@ -349,6 +349,9 @@ WIN_LIBS    = $(WIN_LIBS) Crypt32.lib
 GEN_PDB = true
 !ENDIF
 
+!IF "$(HTTP_ONLY)"=="yes"
+HTTP_ONLY = true
+!ENDIF
 
 !IFDEF EMBED_MANIFEST
 MANIFESTTOOL = $(MT) -manifest $(DIRDIST)\bin\$(PROGRAM_NAME).manifest -outputresource:$(DIRDIST)\bin\$(PROGRAM_NAME);1
@@ -474,6 +477,10 @@ CFLAGS = $(CFLAGS) $(CFLAGS_PDB) /Fd"$(LIB_DIROBJ)\$(PDB)"
 LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
 !ENDIF
 
+!IF "$(HTTP_ONLY)"=="true"
+CFLAGS = $(CFLAGS) /DHTTP_ONLY
+!ENDIF
+
 LIB_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
 CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
@@ -517,6 +524,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DIRDIST)
 	@echo CFLAGS:     $(CFLAGS)
 	@echo LFLAGS:     $(LFLAGS)
 	@echo GenPDB:     $(GEN_PDB)
+	@echo HTTP only:  $(HTTP_ONLY)
 	@echo Debug:      $(DEBUG)
 	@echo Machine:    $(MACHINE)
 	$(LNK) $(LIB_OBJS)

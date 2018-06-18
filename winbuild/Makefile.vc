@@ -54,6 +54,7 @@ CFGSET=true
 !MESSAGE   ENABLE_SSPI=<yes or no>        - Enable SSPI support, defaults to yes
 !MESSAGE   ENABLE_WINSSL=<yes or no>      - Enable native Windows SSL support, defaults to yes
 !MESSAGE   GEN_PDB=<yes or no>            - Generate Program Database (debug symbols for release build)
+!MESSAGE   HTTP_ONLY=<yes or no>          - Generate an HTTP only build
 !MESSAGE   DEBUG=<yes or no>              - Debug builds
 !MESSAGE   MACHINE=<x86 or x64>           - Target architecture (default x64 on AMD64, x86 on others)
 !MESSAGE   CARES_PATH=<path to cares>     - Custom path for c-ares
