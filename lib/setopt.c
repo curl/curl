@@ -2594,6 +2594,29 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.disallow_username_in_url =
       (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
+  case CURLOPT_SSL_CERT_FUNCTION:
+#ifdef USE_SSL
+	  /*
+	  * Set a SSL_CERT callback
+	  */
+	  if (Curl_ssl->supports & SSLSUPP_SSL_CERT)
+		data->set.ssl.fsslcert = va_arg(param, curl_ssl_cert_callback);
+	  else
+#endif
+	  result = CURLE_NOT_BUILT_IN;
+	  break;
+
+  case CURLOPT_SSL_CERT_DATA:
+#ifdef USE_SSL
+	  /*
+	  * Set a SSL_CERT callback parameter pointer
+	  */
+	  if (Curl_ssl->supports & SSLSUPP_SSL_CERT)
+	    data->set.ssl.fsslcertp = va_arg(param, void *);
+	  else
+#endif
+	  result = CURLE_NOT_BUILT_IN;
+	  break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

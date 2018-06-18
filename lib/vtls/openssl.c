@@ -3187,6 +3187,14 @@ static CURLcode servercert(struct connectdata *conn,
   }
 
   BACKEND->server_cert = SSL_get_peer_certificate(BACKEND->handle);
+  if(data->set.ssl.fsslcert) {
+    rc = (*data->set.ssl.fsslcert)(data, BACKEND->server_cert,
+           data->set.ssl.fsslcertp);
+    if(rc) {
+      failf(data, "error signaled by ssl cert callback");
+      return rc;
+    }
+  }
   if(!BACKEND->server_cert) {
     BIO_free(fp);
     BIO_free(mem);
@@ -3780,7 +3788,8 @@ const struct Curl_ssl Curl_ssl_openssl = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
-  SSLSUPP_HTTPS_PROXY,
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_SSL_CERT,
 
   sizeof(struct ssl_backend_data),
 

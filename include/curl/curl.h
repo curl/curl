@@ -665,6 +665,12 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                                             OpenSSL SSL_CTX */
                                           void *userptr);
 
+typedef CURLcode(*curl_ssl_cert_callback)(CURL *curl,  /* easy handle */
+	                                      void *cert, /* actually an
+				                                         OpenSSL X509 */
+                                          void *userptr);
+
+
 typedef enum {
   CURLPROXY_HTTP = 0,   /* added in 7.10, new in 7.19.4 default is to use
                            CONNECT HTTP/1.1 */
@@ -1855,6 +1861,15 @@ typedef enum {
 
   /* Disallow specifying username/login in URL. */
   CINIT(DISALLOW_USERNAME_IN_URL, LONG, 278),
+
+  /* Set the ssl context callback function, currently only for OpenSSL ssl_ctx
+     second argument. The function must be matching the
+     curl_ssl_ctx_callback proto. */
+  CINIT(SSL_CERT_FUNCTION, FUNCTIONPOINT, 279),
+
+  /* Set the userdata for the ssl context callback function's third
+     argument */
+  CINIT(SSL_CERT_DATA, OBJECTPOINT, 280),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
