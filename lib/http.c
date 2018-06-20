@@ -288,7 +288,7 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
   else {
     userp = &conn->allocptr.userpwd;
     if(data->set.fpassword) {
-      if((*data->set.fpassword)(data, &(char *)user, &(char *)pwd) != CURLE_OK)
+      if((*data->set.fpassword)(data, (char **)&(char *)user, (char **)&pwd) != CURLE_OK)
         return CURLE_LOGIN_DENIED;
     }
     else {
