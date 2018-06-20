@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2016, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -451,6 +451,7 @@ bool Curl_conncache_return_conn(struct connectdata *conn)
   }
   CONN_LOCK(data);
   conn->inuse = FALSE; /* Mark the connection unused */
+  conn->data = NULL; /* no owner */
   CONN_UNLOCK(data);
 
   return (conn_candidate == conn) ? FALSE : TRUE;
