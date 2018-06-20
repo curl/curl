@@ -666,9 +666,13 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                           void *userptr);
 
 typedef CURLcode(*curl_ssl_cert_callback)(CURL *curl,  /* easy handle */
-	                                      void *cert, /* actually an
-				                                         OpenSSL X509 */
+                                          void *cert, /* actually an
+                                                         OpenSSL X509 */
                                           void *userptr);
+
+typedef CURLcode(*curl_password_callback)(CURL *curl,  /* easy handle */
+    char **user,
+    char **password);
 
 
 typedef enum {
@@ -1870,6 +1874,9 @@ typedef enum {
   /* Set the userdata for the ssl context callback function's third
      argument */
   CINIT(SSL_CERT_DATA, OBJECTPOINT, 280),
+
+  /* Set the password callback function. */
+  CINIT(PASSWORD_FUNCTION, FUNCTIONPOINT, 281),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

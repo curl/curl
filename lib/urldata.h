@@ -1690,6 +1690,8 @@ struct UserDefined {
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   bool disallow_username_in_url; /* disallow username in url */
+
+  curl_password_callback fpassword; /* callback function retruning the password of the user. */
 };
 
 struct Names {
