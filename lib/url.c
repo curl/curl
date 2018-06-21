@@ -965,6 +965,7 @@ static bool extract_if_dead(struct connectdata *conn,
        use */
     bool dead;
 
+    conn->data = data;
     if(conn->handler->connection_check) {
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
@@ -979,7 +980,6 @@ static bool extract_if_dead(struct connectdata *conn,
     }
 
     if(dead) {
-      conn->data = data;
       infof(data, "Connection %ld seems to be dead!\n", conn->connection_id);
       Curl_conncache_remove_conn(conn, FALSE);
       return TRUE;
