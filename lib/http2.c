@@ -198,7 +198,8 @@ static bool http2_connisdead(struct connectdata *conn)
   }
   else if(sval & CURL_CSELECT_IN) {
     /* readable with no error. could still be closed */
-    dead = !Curl_connalive(conn);
+    dead = !conn->data || !GOOD_EASY_HANDLE(conn->data)
+           || !Curl_connalive(conn);
     if(!dead) {
       /* This happens before we've sent off a request and the connection is
          not in use by any other thransfer, there shouldn't be any data here,
@@ -206,6 +207,7 @@ static bool http2_connisdead(struct connectdata *conn)
       CURLcode result;
       struct http_conn *httpc = &conn->proto.httpc;
       ssize_t nread = -1;
+      assert(httpc);
       if(httpc->recv_underlying)
         /* if called "too early", this pointer isn't setup yet! */
         nread = ((Curl_recv *)httpc->recv_underlying)(
