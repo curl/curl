@@ -316,7 +316,7 @@ collect_true(enabled_ssl_options enabled_ssl_options_count
   CMAKE_USE_MBEDTLS
 )
 if(enabled_ssl_options_count GREATER 1)
-  message(FATAL_ERROR "Multiple SSL options specified: ${enabled_ssl_options}. Please pick at most one and disable the rest.")
+  set(CURL_WITH_MULTI_SSL ON)
 endif()
 
 if(CMAKE_USE_WINSSL)
