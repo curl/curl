@@ -362,7 +362,7 @@
 /*    KEEP GENERIC GCC THE LAST ENTRY    */
 /* ===================================== */
 
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && !defined(_SCO_DS)
 #  if !defined(__LP64__) &&                                             \
   (defined(__ILP32__) || defined(__i386__) || defined(__hppa__) ||      \
    defined(__ppc__) || defined(__powerpc__) || defined(__arm__) ||      \
