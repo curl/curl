@@ -1465,6 +1465,7 @@ ConnectionExists(struct Curl_easy *data,
   if(chosen) {
     /* mark it as used before releasing the lock */
     chosen->inuse = TRUE;
+    chosen->data = data; /* own it! */
     Curl_conncache_unlock(needle);
     *usethis = chosen;
     return TRUE; /* yes, we found one to use! */
