@@ -963,11 +963,12 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
 #define NUM_POLLS_ON_STACK 10
 
-CURLMcode curl_multi_wait(struct Curl_multi *multi,
-                          struct curl_waitfd extra_fds[],
-                          unsigned int extra_nfds,
-                          int timeout_ms,
-                          int *ret)
+static CURLMcode multi_wait(struct Curl_multi *multi,
+                            struct curl_waitfd extra_fds[],
+                            unsigned int extra_nfds,
+                            int timeout_ms,
+                            int *ret,
+                            bool waitextra)
 {
   struct Curl_easy *data;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
@@ -1108,12 +1109,33 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
       }
     }
   }
+  else if(waitextra)
+    Curl_wait_ms(timeout_ms);
 
   if(ufds_malloc)
     free(ufds);
   if(ret)
     *ret = retcode;
   return CURLM_OK;
+}
+
+
+CURLMcode curl_multi_wait(struct Curl_multi *multi,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret)
+{
+  return multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, FALSE);
+}
+
+CURLMcode curl_multi_poll(struct Curl_multi *multi,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret)
+{
+  return multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, TRUE);
 }
 
 /*
