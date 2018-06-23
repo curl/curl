@@ -712,6 +712,11 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
       Curl_getoff_all_pipelines(data, data->easy_conn);
   }
 
+  if(data->connect_queue.ptr)
+    /* the handle was in the pending list waiting for an available connection,
+       so go ahead and remove it */
+    Curl_llist_remove(&multi->pending, &data->connect_queue, NULL);
+
   if(data->dns.hostcachetype == HCACHE_MULTI) {
     /* stop using the multi handle's DNS cache, *after* the possible
        multi_done() call above */
