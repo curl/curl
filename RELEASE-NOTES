@@ -80,6 +80,15 @@ This release includes the following bugfixes:
  o configure: use pkg-config for c-ares detection [55]
  o configure: enhance ability to build with static openssl [56]
  o maketgz: fix sed issues on OSX [57]
+ o multi: fix memory leak when stopped during name resolve [58]
+ o CURLOPT_INTERFACE.3: interface names not supported on Windows
+ o url: fix dangling conn->data pointer [59]
+ o cmake: allow multiple SSL backends [60]
+ o system.h: fix for gcc on 32 bit OpenServer [61]
+ o ConnectionExists: make sure conn->data is set when "taking" a connection [62]
+ o multi: fix crash due to dangling entry in connect-pending list [63]
+ o CURLOPT_SSL_VERIFYPEER.3: Add performance note [64]
+ o netrc: use a larger buffer to support longer passwords  [65]
 
 This release includes the following known bugs:
 
@@ -90,15 +99,16 @@ advice from friends like these:
 
   Alejandro R. Sedeño, Archangel_SDY on github, Bernhard M. Wiedemann,
   Bernhard Walle, Björn Stenberg, bsammon on github, Dagobert Michelsen,
-  Daniel Stenberg, elephoenix on github, Fabrice Fontaine, Frank Gevaerts,
-  Gisle Vanem, Ithubg on github, Johannes Schindelin, Linus Lewandowski,
-  Lyman Epp, Mamta Upadhyay, Marcel Raad, Marian Klymov, Matteo Bignotti,
-  Max Savenkov, Oleg Pudeyev, Patrick Monnerat, Per Malmberg, Peter Varga,
-  Peter Wu, Philip Prindeville, pszemus on github, Ray Satiro, Richard Alcock,
-  Rikard Falkeborn, Robert Prag, Sean Miller, Sergei Nikulov,
+  Daniel Stenberg, Dario Nieuwenhuis, elephoenix on github, Fabrice Fontaine,
+  Frank Gevaerts, Gisle Vanem, Ithubg on github, Javier Blazquez,
+  Johannes Schindelin, Kevin R. Bulgrien, Linus Lewandowski, Lyman Epp,
+  Mamta Upadhyay, Marcel Raad, Marian Klymov, Matteo Bignotti, Max Savenkov,
+  Oleg Pudeyev, Patrick Monnerat, Patrick Schlangen, Per Malmberg, Peter Varga,
+  Peter Wu, Philip Prindeville, pszemus on github, Raphael Gozzo, Ray Satiro,
+  Richard Alcock, Rikard Falkeborn, Robert Prag, Sean Miller, Sergei Nikulov,
   Stephan Mühlstrasser, Viktor Szakats, Vladimir Kotal, Will Dietz,
-  Will Dietz , Yaakov Selkowitz, zzq1015 on github,
-  (41 contributors)
+  Yaakov Selkowitz, zzq1015 on github,
+  (45 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -161,3 +171,11 @@ References to bug reports and discussions on issues:
  [55] = https://curl.haxx.se/bug/?i=2203
  [56] = https://curl.haxx.se/bug/?i=2199
  [57] = https://curl.haxx.se/bug/?i=2660
+ [58] = https://curl.haxx.se/bug/?i=1968
+ [59] = https://curl.haxx.se/bug/?i=2669
+ [60] = https://curl.haxx.se/bug/?i=2665
+ [61] = https://curl.haxx.se/mail/lib-2018-06/0100.html
+ [62] = https://curl.haxx.se/bug/?i=2674
+ [63] = https://curl.haxx.se/bug/?i=2677
+ [64] = https://curl.haxx.se/bug/?i=2673
+ [65] = https://curl.haxx.se/bug/?i=2676
