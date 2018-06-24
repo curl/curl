@@ -96,14 +96,13 @@ static void bundle_destroy(struct connectbundle *cb_ptr)
 }
 
 /* Add a connection to a bundle */
-static CURLcode bundle_add_conn(struct connectbundle *cb_ptr,
-                                struct connectdata *conn)
+static void bundle_add_conn(struct connectbundle *cb_ptr,
+                            struct connectdata *conn)
 {
   Curl_llist_insert_next(&cb_ptr->conn_list, cb_ptr->conn_list.tail, conn,
                          &conn->bundle_node);
   conn->bundle = cb_ptr;
   cb_ptr->num_connections++;
-  return CURLE_OK;
 }
 
 /* Remove a connection from a bundle */
@@ -263,7 +262,7 @@ static void conncache_remove_bundle(struct conncache *connc,
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct connectbundle *bundle;
   struct connectbundle *new_bundle = NULL;
   struct Curl_easy *data = conn->data;
@@ -290,13 +289,7 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
     bundle = new_bundle;
   }
 
-  result = bundle_add_conn(bundle, conn);
-  if(result) {
-    if(new_bundle)
-      conncache_remove_bundle(data->state.conn_cache, new_bundle);
-    goto unlock;
-  }
-
+  bundle_add_conn(bundle, conn);
   conn->connection_id = connc->next_connection_id++;
   connc->num_conn++;
 

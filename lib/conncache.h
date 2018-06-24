@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -63,7 +63,7 @@ size_t Curl_conncache_bundle_size(struct connectdata *conn);
 
 bool Curl_conncache_return_conn(struct connectdata *conn);
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
-                                 struct connectdata *conn);
+                                 struct connectdata *conn) WARN_UNUSED_RESULT;
 void Curl_conncache_remove_conn(struct connectdata *conn,
                                 bool lock);
 bool Curl_conncache_foreach(struct Curl_easy *data,

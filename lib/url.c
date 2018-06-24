@@ -4308,7 +4308,9 @@ static CURLcode create_conn(struct Curl_easy *data,
       conn->data = data;
       conn->bits.tcpconnect[FIRSTSOCKET] = TRUE; /* we are "connected */
 
-      Curl_conncache_add_conn(data->state.conn_cache, conn);
+      result = Curl_conncache_add_conn(data->state.conn_cache, conn);
+      if(result)
+        goto out;
 
       /*
        * Setup whatever necessary for a resumed transfer
@@ -4531,7 +4533,9 @@ static CURLcode create_conn(struct Curl_easy *data,
        * This is a brand new connection, so let's store it in the connection
        * cache of ours!
        */
-      Curl_conncache_add_conn(data->state.conn_cache, conn);
+      result = Curl_conncache_add_conn(data->state.conn_cache, conn);
+      if(result)
+        goto out;
     }
 
 #if defined(USE_NTLM)
