@@ -1082,6 +1082,7 @@ struct Progress {
   curl_off_t ulspeed;
 
   time_t t_nslookup;
+  time_t t_nslookup_start;
   time_t t_connect;
   time_t t_appconnect;
   time_t t_pretransfer;

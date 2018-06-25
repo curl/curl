@@ -61,6 +61,7 @@
 #include "inet_ntop.h"
 #include "multiif.h"
 #include "warnless.h"
+#include "progress.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -668,8 +669,8 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
   volatile unsigned int prev_alarm = 0;
-  struct Curl_easy *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
+  struct Curl_easy *data = conn->data;
   int rc;
 
   *entry = NULL;
@@ -677,6 +678,8 @@ int Curl_resolv_timeout(struct connectdata *conn,
   if(timeoutms < 0)
     /* got an already expired timeout */
     return CURLRESOLV_TIMEDOUT;
+
+  Curl_pgrsTime(data, TIMER_NAMELOOKUP_START);
 
 #ifdef USE_ALARM_TIMEOUT
   if(data->set.no_signal)

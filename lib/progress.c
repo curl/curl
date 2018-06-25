@@ -188,6 +188,9 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
   case TIMER_NAMELOOKUP:
     delta = &data->progress.t_nslookup;
     break;
+  case TIMER_NAMELOOKUP_START:
+    delta = &data->progress.t_nslookup_start;
+    break;
   case TIMER_CONNECT:
     delta = &data->progress.t_connect;
     break;

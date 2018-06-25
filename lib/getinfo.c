@@ -317,6 +317,9 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_TOTAL_TIME:
     *param_doublep = DOUBLE_SECS(data->progress.timespent);
     break;
+  case CURLINFO_NAMELOOKUP_START_TIME:
+    *param_doublep = DOUBLE_SECS(data->progress.t_nslookup_start);
+    break;
   case CURLINFO_NAMELOOKUP_TIME:
     *param_doublep = DOUBLE_SECS(data->progress.t_nslookup);
     break;
