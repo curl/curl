@@ -476,7 +476,6 @@ struct hostname {
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
 
-#ifdef CURLRES_ASYNCH
 struct Curl_async {
   char *hostname;
   int port;
@@ -485,7 +484,6 @@ struct Curl_async {
   int status; /* if done is TRUE, this is the status from the callback */
   void *os_specific;  /* 'struct thread_data' for Windows */
 };
-#endif
 
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
@@ -991,11 +989,8 @@ struct connectdata {
 #endif
 
   char syserr_buf [256]; /* buffer for Curl_strerror() */
-
-#ifdef CURLRES_ASYNCH
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
-#endif
 
   /* These three are used for chunked-encoding trailer support */
   char *trailer; /* allocated buffer to store trailer in */
