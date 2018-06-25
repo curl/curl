@@ -262,7 +262,7 @@ static void conncache_remove_bundle(struct conncache *connc,
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct connectbundle *bundle;
   struct connectbundle *new_bundle = NULL;
   struct Curl_easy *data = conn->data;
