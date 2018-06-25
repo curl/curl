@@ -161,7 +161,7 @@ static int Curl_doh_done(struct Curl_easy *doh, CURLcode result)
     /* DOH completed */
     curl_slist_free_all(data->req.doh.headers);
     data->req.doh.headers = NULL;
-    Curl_expire(data, 0, EXPIRE_DOH_COMPLETE);
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
   return 0;
 }

@@ -1216,7 +1216,6 @@ typedef enum {
   EXPIRE_SPEEDCHECK,
   EXPIRE_TIMEOUT,
   EXPIRE_TOOFAST,
-  EXPIRE_DOH_COMPLETE,
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
