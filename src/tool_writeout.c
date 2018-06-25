@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,6 +31,7 @@
 typedef enum {
   VAR_NONE,       /* must be the first */
   VAR_TOTAL_TIME,
+  VAR_NAMELOOKUP_START_TIME,
   VAR_NAMELOOKUP_TIME,
   VAR_CONNECT_TIME,
   VAR_APPCONNECT_TIME,
@@ -76,6 +77,7 @@ static const struct variable replacements[]={
   {"http_connect", VAR_HTTP_CODE_PROXY},
   {"time_total", VAR_TOTAL_TIME},
   {"time_namelookup", VAR_NAMELOOKUP_TIME},
+  {"time_namelookup_start", VAR_NAMELOOKUP_START_TIME},
   {"time_connect", VAR_CONNECT_TIME},
   {"time_appconnect", VAR_APPCONNECT_TIME},
   {"time_pretransfer", VAR_PRETRANSFER_TIME},
@@ -184,6 +186,12 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
               case VAR_TOTAL_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &doubleinfo))
+                  fprintf(stream, "%.6f", doubleinfo);
+                break;
+              case VAR_NAMELOOKUP_START_TIME:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_START_TIME,
+                                     &doubleinfo))
                   fprintf(stream, "%.6f", doubleinfo);
                 break;
               case VAR_NAMELOOKUP_TIME:
