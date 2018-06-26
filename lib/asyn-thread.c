@@ -574,10 +574,10 @@ int Curl_resolver_getsock(struct connectdata *conn,
   (void)socks;
   (void)numsocks;
   ms = Curl_timediff(Curl_now(), reslv->start);
-  if(ms < 10)
-    milli = ms/3;
+  if(ms < 3)
+    milli = 0;
   else if(ms <= 50)
-    milli = 10;
+    milli = ms/3;
   else if(ms <= 250)
     milli = 50;
   else
