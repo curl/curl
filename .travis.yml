@@ -78,6 +78,10 @@ matrix:
         - os: linux
           compiler: clang
           dist: trusty
+          env: T=debug C="--disable-threaded-resolver"
+        - os: linux
+          compiler: clang
+          dist: trusty
           env: T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
         - os: linux
           compiler: gcc
