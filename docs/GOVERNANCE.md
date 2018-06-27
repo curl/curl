@@ -86,3 +86,62 @@ primary curl contact with Fastly.
 ### BDFL
 
 That's Daniel.
+
+
+# Maintainers
+
+A curl maintainer is a project volunteer who has the authority and rights to
+merge changes into a git repository in the curl project.
+
+Anyone can aspire to become a curl maintainer.
+
+## Maintainer duties
+
+There are no mandatory duties. We hope and wish that maintainers consider
+reviewing patches and help merching them, especially when the changes are
+within the area of personal expertise and experience.
+
+## Maintainer requirements
+
+- only merge code that meets our quality and style guide requirements.
+- *never* merge code without doing a PR first, unless the change is "trivial"
+- if in doubt, ask for input/feedback from others
+
+## Maintainer recommendations
+
+- please enable 2fa on your github account to reduce risk of malicious sourc
+  code tampering
+- consider enabling signed git commits for additional verification of changes
+
+## Merge advice
+
+When you're merging patches/PRs...
+
+- make sure the commit messages follow our template
+- squash patch sets into a few logical commits even if the PR didn't, if
+  necessary
+- avoid the "merge" button on github, do it "manually" instead to get full
+  control and full audit trail (github leaves out you as "Committer:")
+- remember to credit the reporter and the helpers!
+
+## Who are maintainers?
+
+The full list of maintainers can be seen on the following web page. Be aware
+that the level of presence and activity in the project vary greatly between
+different individuals.
+
+https://github.com/orgs/curl/people
+
+## Become a maintainer?
+
+If you think you can help making the project better by shouldering some
+maintaining responsibilities, then please get in touch.
+
+You will be expected to be familiar with the curl project and its ways of
+working. You need to have gotten a few quality patches merged as a proof of
+this.
+
+## Stop being a maintainer
+
+If you (appear to) not be active in the project anymore, you may be removed as
+a maintainer. Thank you for your service!
