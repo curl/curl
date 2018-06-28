@@ -149,6 +149,42 @@ static CURLcode main_init(struct GlobalConfig *config)
   config->errors = stderr;            /* Default errors to stderr */
   config->styled_output = TRUE;       /* enable detection */
 
+#if defined(_WIN32)
+  // If we're running Windows, enable VT input & output.
+  // Note: VT mode flag can be set on any version of Windows, but VT
+  // processing only performed on Win10 >= Creators Update)
+
+  // Define the VT flags in case we're building with an older SDK
+  #ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
+    #define ENABLE_VIRTUAL_TERMINAL_INPUT 0x0002
+  #endif
+
+  #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+  #endif
+
+  DWORD dwMode = 0;
+
+  // Enable VT Input
+  HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+  if (hStdIn != INVALID_HANDLE_VALUE 
+    && GetConsoleMode(hStdIn, &dwMode)) {
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
+
+    SetConsoleMode(hStdIn, dwMode);
+  }
+
+  // Enable VT output
+  dwMode = 0;
+  HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (hStdOut != INVALID_HANDLE_VALUE 
+    && GetConsoleMode(hStdOut, &dwMode)) {
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+
+    SetConsoleMode(hStdOut, dwMode);
+  }
+#endif
+
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
   if(config->first) {
