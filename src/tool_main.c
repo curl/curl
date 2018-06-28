@@ -236,6 +236,56 @@ static void main_free(struct GlobalConfig *config)
   config->last = NULL;
 }
 
+#ifdef _WIN32
+/* TerminalSettings for Windows */
+struct TerminalSettings {
+  HANDLE hStdOut;
+  DWORD dwOutputMode;
+  UINT nCodepage;
+}TerminalSettings;
+#endif
+
+static void configure_terminal(void)
+{
+#ifdef _WIN32
+  /*
+   * If we're running Windows, enable VT output & set codepage to UTF-8.
+   * Note: VT mode flag can be set on any version of Windows, but VT
+   * processing only performed on Win10 >= Creators Update)
+   */
+
+  /* Define the VT flags in case we're building with an older SDK */
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+
+  /* Cache current codepage (will restore on exit) & set codepage to UTF-8 */
+  memset(&TerminalSettings, 0, sizeof(TerminalSettings));
+  TerminalSettings.nCodepage = GetConsoleOutputCP();
+  SetConsoleOutputCP(65001);
+
+  /* Enable VT output */
+  TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  if((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE)
+    && (GetConsoleMode(TerminalSettings.hStdOut,
+                       &TerminalSettings.dwOutputMode))) {
+    SetConsoleMode(TerminalSettings.hStdOut,
+                   TerminalSettings.dwOutputMode
+                   | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+  }
+#endif
+}
+
+static void restore_terminal(void)
+{
+#ifdef _WIN32
+  /* Restore Console output mode and codepage to whatever they were
+   * when Curl started */
+  SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
+  SetConsoleOutputCP(TerminalSettings.nCodepage);
+#endif
+}
+
 /*
 ** curl tool main function.
 */
@@ -244,6 +294,9 @@ int main(int argc, char *argv[])
   CURLcode result = CURLE_OK;
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
+
+  /* Perform any platform-specific terminal configuration */
+  configure_terminal();
 
   main_checkfds();
 
@@ -269,6 +322,9 @@ int main(int argc, char *argv[])
     /* Perform the main cleanup */
     main_free(&global);
   }
+
+  /* Return the terminal to its original state */
+  restore_terminal();
 
 #ifdef __NOVELL_LIBC__
   if(getenv("_IN_NETWARE_BASH_") == NULL)
