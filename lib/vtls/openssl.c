@@ -2078,10 +2078,6 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
   long ssl_version = SSL_CONN_CONFIG(version);
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
 
-  if(ssl_version_max == CURL_SSLVERSION_MAX_NONE) {
-    ssl_version_max = ssl_version << 16;
-  }
-
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_3:
 #ifdef TLS1_3_VERSION
@@ -2113,6 +2109,7 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
 #endif
       /* FALLTHROUGH */
     case CURL_SSLVERSION_TLSv1_0:
+    case CURL_SSLVERSION_TLSv1:
       *ctx_options |= SSL_OP_NO_SSLv2;
       *ctx_options |= SSL_OP_NO_SSLv3;
       break;
@@ -2130,12 +2127,12 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
 #endif
       /* FALLTHROUGH */
     case CURL_SSLVERSION_MAX_TLSv1_2:
-    case CURL_SSLVERSION_MAX_DEFAULT:
 #ifdef TLS1_3_VERSION
       *ctx_options |= SSL_OP_NO_TLSv1_3;
 #endif
       break;
     case CURL_SSLVERSION_MAX_TLSv1_3:
+    case CURL_SSLVERSION_MAX_DEFAULT:
 #ifdef TLS1_3_VERSION
       break;
 #else
