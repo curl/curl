@@ -92,6 +92,7 @@ static const struct LongShort aliases[]= {
   {"*h", "trace-ascii",              ARG_STRING},
   {"*H", "alpn",                     ARG_BOOL},
   {"*i", "limit-rate",               ARG_STRING},
+  {"*I", "limit-rate-start-point",   ARG_STRING},
   {"*j", "compressed",               ARG_BOOL},
   {"*J", "tr-encoding",              ARG_BOOL},
   {"*k", "digest",                   ARG_BOOL},
@@ -659,6 +660,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
            return pe;
         config->recvpersecond = value;
         config->sendpersecond = value;
+      }
+      break;
+      case 'I': /* --limit-rate-start-point */
+      {
+        int value = 0;
+        value = limitratestartpoint(config, nextarg);
+        config->send_speed_start_point = value;
+        config->recv_speed_start_point = value;
       }
       break;
 

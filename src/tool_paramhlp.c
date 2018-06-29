@@ -494,6 +494,20 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
   return PARAM_OK;
 }
 
+int limitratestartpoint(struct OperationConfig *config, const char *str)
+{
+  if(curl_strequal("dnsok", str))
+    return CURLSPEEDLIMIT_NAMELOOKUP;
+  if(curl_strequal("appok", str))
+    return CURLSPEEDLIMIT_APPCONNECT;
+  if(curl_strequal("tcpok", str))
+    return CURLSPEEDLIMIT_CONNECT;
+  if(curl_strequal("ttfb", str))
+    return CURLSPEEDLIMIT_TTFB;
+
+  return CURLSPEEDLIMIT_DEFAULT;
+}
+
 int ftpfilemethod(struct OperationConfig *config, const char *str)
 {
   if(curl_strequal("singlecwd", str))
