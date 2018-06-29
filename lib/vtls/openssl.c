@@ -2110,8 +2110,6 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
       /* FALLTHROUGH */
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1:
-      *ctx_options |= SSL_OP_NO_SSLv2;
-      *ctx_options |= SSL_OP_NO_SSLv3;
       break;
   }
 
@@ -2334,13 +2332,14 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
-    ctx_options |= SSL_OP_NO_SSLv2;
-    ctx_options |= SSL_OP_NO_SSLv3;
-    /* FALLTHROUGH */
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
+    /* asking for any TLS version as the minimum, means no SSL versions
+       allowed */
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_SSLv3;
     result = set_ssl_version_min_max(&ctx_options, conn, sockindex);
     if(result != CURLE_OK)
        return result;
