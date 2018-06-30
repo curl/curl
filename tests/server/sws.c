@@ -93,6 +93,7 @@ static bool prevbounce = FALSE; /* instructs the server to increase the part
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
 #define RCMD_STREAM    2 /* told to stream */
+#define RCMD_ECHO      3 /* told to echo the request body */
 
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
@@ -168,6 +169,9 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 
 /* 'stream' means to send a never-ending stream of data */
 #define CMD_STREAM "stream"
+
+/* 'echo' will transmit request body as a response, and a basic header*/
+#define CMD_ECHO "echo"
 
 /* 'connection-monitor' will output when a server/proxy connection gets
    disconnected as for some cases it is important that it gets done at the
@@ -413,6 +417,10 @@ static int parse_servercmd(struct httprequest *req)
       else if(!strncmp(CMD_UPGRADE, cmd, strlen(CMD_UPGRADE))) {
         logmsg("enabled upgrade to http2");
         req->upgrade = TRUE;
+      }
+      else if(!strncmp(CMD_ECHO, cmd, strlen(CMD_ECHO))) {
+        logmsg("instructed to echo the request body");
+        req->rcmd = RCMD_ECHO;
       }
       else if(1 == sscanf(cmd, "pipe: %d", &num)) {
         logmsg("instructed to allow a pipe size of %d", num);
@@ -962,7 +970,6 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   char *pipereq = NULL;
   size_t pipereq_length = 0;
-
   if(req->pipelining) {
     pipereq = reqbuf + req->checkindex;
     pipereq_length = req->offset - req->checkindex;
@@ -1072,6 +1079,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   int res;
   const char *responsedump = is_proxy?RESPONSE_PROXY_DUMP:RESPONSE_DUMP;
   static char weare[256];
+  static char echobuf[4096];
 
   switch(req->rcmd) {
   default:
@@ -1093,6 +1101,12 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   case RCMD_IDLE:
     /* Do nothing. Sit idle. Pretend it rains. */
     return 0;
+  case RCMD_ECHO:
+    count = snprintf(echobuf, sizeof(echobuf),
+       "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
+       req->cl, &req->reqbuf[req->offset - req->cl]);
+    buffer = echobuf;
+    break;
   }
 
   req->open = FALSE;
@@ -1128,7 +1142,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     count = strlen(buffer);
   }
-  else {
+  else if(req->rcmd != RCMD_ECHO) {
     char partbuf[80];
     char *filename = test2file(req->testno);
 
