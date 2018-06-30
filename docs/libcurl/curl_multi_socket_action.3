@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -111,7 +111,7 @@ service to applications that want to keep certain data or structs that are
 strictly associated to the given socket.
 
 The \fIuserp\fP argument is a private pointer you have previously set with
-\fIcurl_multi_setopt(3)\fP and the CURLMOPT_SOCKETDATA option.
+\fIcurl_multi_setopt(3)\fP and the \fICURLMOPT_SOCKETDATA(3)\fP option.
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 
@@ -128,10 +128,10 @@ functions return OK.
 .SH "TYPICAL USAGE"
 1. Create a multi handle
 
-2. Set the socket callback with CURLMOPT_SOCKETFUNCTION
+2. Set the socket callback with \fICURLMOPT_SOCKETFUNCTION(3)\fP
 
-3. Set the timeout callback with CURLMOPT_TIMERFUNCTION, to get to know what
-timeout value to use when waiting for socket activities.
+3. Set the timeout callback with \fICURLMOPT_TIMERFUNCTION(3)\fP, to get to
+know what timeout value to use when waiting for socket activities.
 
 4. Add easy handles with curl_multi_add_handle()
 
