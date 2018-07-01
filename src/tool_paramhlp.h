@@ -45,6 +45,8 @@ CURLcode get_args(struct OperationConfig *config, const size_t i);
 
 ParameterError add2list(struct curl_slist **list, const char *ptr);
 
+int limitratestartpoint(struct OperationConfig *config, const char *str);
+
 int ftpfilemethod(struct OperationConfig *config, const char *str);
 
 int ftpcccmethod(struct OperationConfig *config, const char *str);

@@ -184,6 +184,8 @@ struct OperationConfig {
   /* for bandwidth limiting features: */
   curl_off_t sendpersecond; /* send to peer */
   curl_off_t recvpersecond; /* receive from peer */
+  int send_speed_start_point;
+  int recv_speed_start_point;
 
   bool ftp_ssl;
   bool ftp_ssl_reqd;

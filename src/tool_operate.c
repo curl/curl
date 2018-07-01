@@ -1003,6 +1003,14 @@ static CURLcode operate_do(struct GlobalConfig *global,
                   config->sendpersecond);
         my_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE,
                   config->recvpersecond);
+        if(config->sendpersecond > 0) {
+          my_setopt(curl, CURLOPT_SEND_SPEED_LIMIT_START_POINT,
+                    config->send_speed_start_point);
+        }
+        if(config->recvpersecond > 0) {
+          my_setopt(curl, CURLOPT_RECV_SPEED_LIMIT_START_POINT,
+                    config->send_speed_start_point);
+        }
 
         if(config->use_resume)
           my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, config->resume_from);

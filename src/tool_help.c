@@ -208,6 +208,8 @@ static const struct helptxt helptext[] = {
    "Dump libcurl equivalent code of this command line"},
   {"    --limit-rate <speed>",
    "Limit transfer speed to RATE"},
+  {"    --limit-rate-start-point <starting point>",
+   "Control where the speed limit begins"},
   {"-l, --list-only",
    "List only mode"},
   {"    --local-port <num/range>",

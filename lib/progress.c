@@ -168,6 +168,9 @@ void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
   struct curltime now = Curl_now();
   time_t *delta = NULL;
 
+  /* set the high speed limit starting point */
+  Curl_pgrsSetLimitStartTime(data, now, timer);
+
   switch(timer) {
   default:
   case TIMER_NONE:
@@ -298,6 +301,70 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
   }
 
   return 0;
+}
+
+/*
+ * Set the 'xx_limit_start' starting point.
+ */
+void Curl_pgrsSetLimitStartTime(struct Curl_easy *data,
+                                struct curltime now,
+                                timerid timer)
+{
+  curl_speedlimitstartpoint
+    send_speed_start = data->set.send_speed_start_point;
+  curl_speedlimitstartpoint
+    recv_speed_start = data->set.recv_speed_start_point;
+
+  if(data == NULL) {
+    return;
+  }
+
+  /* Set the 'dl_limit_start' starting point. */
+  if(send_speed_start != CURLSPEEDLIMIT_DEFAULT &&
+      data->set.max_recv_speed > 0 &&
+      data->progress.dl_limit_size == 0 &&
+      data->progress.downloaded == 0) {
+    if(timer == TIMER_NAMELOOKUP &&
+        send_speed_start == CURLSPEEDLIMIT_NAMELOOKUP) {
+      data->progress.dl_limit_start = now;
+    }
+    else if(timer == TIMER_CONNECT &&
+        send_speed_start == CURLSPEEDLIMIT_CONNECT) {
+      data->progress.dl_limit_start = now;
+    }
+    else if(timer == TIMER_APPCONNECT &&
+        send_speed_start == CURLSPEEDLIMIT_APPCONNECT) {
+      data->progress.dl_limit_start = now;
+    }
+    else if(timer == TIMER_STARTTRANSFER &&
+        send_speed_start == CURLSPEEDLIMIT_TTFB) {
+      data->progress.dl_limit_start = now;
+    }
+  }
+
+  /* Set the 'ul_limit_start' starting point. */
+  if(recv_speed_start != CURLSPEEDLIMIT_DEFAULT &&
+      data->set.max_send_speed > 0 &&
+      data->progress.ul_limit_size == 0 &&
+      data->progress.uploaded == 0) {
+    if(timer == TIMER_NAMELOOKUP &&
+        recv_speed_start == CURLSPEEDLIMIT_NAMELOOKUP) {
+      data->progress.ul_limit_start = now;
+    }
+    else if(timer == TIMER_CONNECT &&
+        recv_speed_start == CURLSPEEDLIMIT_CONNECT) {
+      data->progress.ul_limit_start = now;
+    }
+    else if(timer == TIMER_APPCONNECT &&
+        recv_speed_start == CURLSPEEDLIMIT_APPCONNECT) {
+      data->progress.ul_limit_start = now;
+    }
+    else if(timer == TIMER_STARTTRANSFER &&
+        recv_speed_start == CURLSPEEDLIMIT_TTFB) {
+      data->progress.ul_limit_start = now;
+    }
+  }
+
 }
 
 /*

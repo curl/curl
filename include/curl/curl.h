@@ -850,6 +850,25 @@ typedef enum {
   CURLFTPMETHOD_LAST       /* not an option, never use */
 } curl_ftpmethod;
 
+/* parameter for the CURLOPT_SEND_SPEED_LIMIT_START_POINT
+ * and CURLOPT_RECV_SPEED_LIMIT_START_POINT option.
+ *
+ *  |_______|_______|_______________|_____|
+ * (1) DNS (2) TCP (3) SSL/SSH/etc (4)   (5)TTFB
+ *
+ * If the starting point to be set does not exist,
+ * the default value will be used.
+ */
+typedef enum {
+    CURLSPEEDLIMIT_DEFAULT,     /* (1) before name resolve */
+    CURLSPEEDLIMIT_NAMELOOKUP,  /* (2) name resolving was completed */
+    CURLSPEEDLIMIT_CONNECT,     /* (3) TCP connetc completed */
+    CURLSPEEDLIMIT_APPCONNECT,  /* (4) SSL/SSH/etc
+                                   connect/handshake completed */
+    CURLSPEEDLIMIT_TTFB,        /* (5) time to first byte */
+    CURLSPEEDLIMIT_LAST         /* not an option, never use */
+} curl_speedlimitstartpoint;
+
 /* bitmask defines for CURLOPT_HEADEROPT */
 #define CURLHEADER_UNIFIED  0
 #define CURLHEADER_SEPARATE (1<<0)
@@ -1855,6 +1874,10 @@ typedef enum {
 
   /* Disallow specifying username/login in URL. */
   CINIT(DISALLOW_USERNAME_IN_URL, LONG, 278),
+
+  /* Set where the limit-rate parameter works */
+  CINIT(SEND_SPEED_LIMIT_START_POINT, LONG, 279),
+  CINIT(RECV_SPEED_LIMIT_START_POINT, LONG, 280),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

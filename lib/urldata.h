@@ -1530,6 +1530,10 @@ struct UserDefined {
   curl_off_t max_send_speed; /* high speed limit in bytes/second for upload */
   curl_off_t max_recv_speed; /* high speed limit in bytes/second for
                                 download */
+  curl_speedlimitstartpoint send_speed_start_point; /* high speed limit starting
+                                                       point for upload */
+  curl_speedlimitstartpoint recv_speed_start_point; /* high speed limit starting
+                                                       point for download */
   curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */

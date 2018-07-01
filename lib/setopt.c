@@ -1190,6 +1190,18 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.max_recv_speed = bigsize;
     break;
+  case CURLOPT_SEND_SPEED_LIMIT_START_POINT:
+    arg = va_arg(param, long);
+    if(arg < CURLSPEEDLIMIT_DEFAULT || arg > CURLSPEEDLIMIT_TTFB)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.send_speed_start_point = arg;
+    break;
+  case CURLOPT_RECV_SPEED_LIMIT_START_POINT:
+    arg = va_arg(param, long);
+    if(arg < CURLSPEEDLIMIT_DEFAULT || arg > CURLSPEEDLIMIT_TTFB)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.recv_speed_start_point = arg;
+    break;
   case CURLOPT_LOW_SPEED_TIME:
     /*
      * The low speed time that if transfers are below the set
