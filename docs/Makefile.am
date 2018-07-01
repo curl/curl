@@ -50,6 +50,7 @@ EXTRA_DIST =                                    \
  CODE_OF_CONDUCT.md                             \
  CODE_STYLE.md                                  \
  CONTRIBUTE.md                                  \
+ DEPRECATE.md                                   \
  FAQ                                            \
  FEATURES                                       \
  GOVERNANCE.md                                  \
