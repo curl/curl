@@ -1,9 +1,9 @@
 # Items to be removed from future curl releases
 
-If any of these deprecations is a cause for concern for you, please email the
-curl-library mailing list as soon as possible and explain to us why this is a
-problem for you and how your use case can't be satisfied properly using a work
-around.
+If any of these deprecated features is a cause for concern for you, please
+email the curl-library mailing list as soon as possible and explain to us why
+this is a problem for you and how your use case can't be satisfied properly
+using a work around.
 
 ## axTLS backend
 
@@ -18,11 +18,11 @@ Here are some complaints on axTLS.
 Combined, this list hints that this is not a library and project we should
 recommend to users.
 
-[1] = https://github.com/dsheets/axtls/issues/2
-[2] = https://sourceforge.net/p/axtls/bugs/
-[3] = https://sourceforge.net/p/axtls/discussion/
-[4] = https://sourceforge.net/p/axtls/mailman/axtls-general/
-[5] = https://github.com/micropython/micropython/issues/3198
+1. https://github.com/dsheets/axtls/issues/2
+2. https://sourceforge.net/p/axtls/bugs/
+3. https://sourceforge.net/p/axtls/discussion/
+4. https://sourceforge.net/p/axtls/mailman/axtls-general/
+5. https://github.com/micropython/micropython/issues/3198
 
 ### State
 
@@ -32,20 +32,20 @@ requires a small code change to build without errors.
 ### Removal
 
 Remove all axTLS related code from curl on December 1st, exactly six months
-after previouslt mentioned commit. To be shiped on December 26 (possibly
+after previously mentioned commit. To be shipped on December 26 (possibly
 called version 7.64.0)
 
-## HTTP Pipelining
+## HTTP pipelining
 
-HTTP Pipelining is badly supported by curl in the sense that we have bugs and
+HTTP pipelining is badly supported by curl in the sense that we have bugs and
 it is a fragile feature without enough tests. Also, when something turns out
-to have problems it is really tricky to debug due to the timing sensitivy so
+to have problems it is really tricky to debug due to the timing sensitivity so
 very often enabling debug outputs or similar completely changes the nature of
 the behavior and things are not reproducing anymore!
 
-HTTP Pipelining was never enabled by default by the large desktop browsers due
+HTTP pipelining was never enabled by default by the large desktop browsers due
 to all the issues with it. Both Firefox and Chrome have also dropped
-Pipelining support entirely since a long time back now. We are in fact over
+pipelining support entirely since a long time back now. We are in fact over
 time becoming more and more lonely in supporting pipelining.
 
 The bad state of HTTP pipelining was a primary driving factor behind HTTP/2
