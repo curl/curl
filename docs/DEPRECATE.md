@@ -10,25 +10,19 @@ using a work around.
 Here are some complaints on axTLS.
 
  - home page without HTTPS
- - doesn't support modern TLS features like SNI? [1]
- - lacks support for modern ciphers [5]
- - doesn't allow for outside bug report submissions [2]
- - there's virtually no discussion about it on [3] and [4]
+ - [doesn't support modern TLS features like SNI](https://github.com/dsheets/axtls/issues/2)
+ - [lacks support for modern ciphers](https://github.com/micropython/micropython/issues/3198)
+ - [doesn't allow for outside bug report submissions](https://sourceforge.net/p/axtls/bugs/)
+ - there's virtually no discussion about it in its [forum](https://sourceforge.net/p/axtls/discussion/)
+   nor [mailing list](https://sourceforge.net/p/axtls/mailman/axtls-general/)
 
 Combined, this list hints that this is not a library and project we should
 recommend to users.
 
-1. https://github.com/dsheets/axtls/issues/2
-2. https://sourceforge.net/p/axtls/bugs/
-3. https://sourceforge.net/p/axtls/discussion/
-4. https://sourceforge.net/p/axtls/mailman/axtls-general/
-5. https://github.com/micropython/micropython/issues/3198
-
 ### State
 
 Since June 1st (curl 7.61.0) axTLS support is disabled in code and requires a
-small code change to build without errors. (PR:
-https://github.com/curl/curl/pull/2628)
+small code change to build without errors. [PR](https://github.com/curl/curl/pull/2628)
 
 ### Removal
 
