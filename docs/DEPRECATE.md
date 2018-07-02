@@ -21,14 +21,15 @@ recommend to users.
 
 ### State
 
-Since June 1st (curl 7.61.0) axTLS support is disabled in code and requires a
-small code change to build without errors. [PR](https://github.com/curl/curl/pull/2628)
+Since June 1st, 2018 (curl 7.61.0) axTLS support is disabled in code and
+requires a small code change to build without errors. [See
+PR](https://github.com/curl/curl/pull/2628)
 
 ### Removal
 
 Remove all axTLS related code from curl on December 1st, exactly six months
-after previously mentioned commit. To be shipped on December 26 (possibly
-called version 7.64.0)
+after previously mentioned commit. To be shipped on December 26, 2018
+(possibly called version 7.64.0)
 
 ## HTTP pipelining
 
