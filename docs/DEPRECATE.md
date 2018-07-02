@@ -26,8 +26,9 @@ recommend to users.
 
 ### State
 
-Since June 1st (curl 7.61.0) axTLS support is disabled in code and
-requires a small code change to build without errors.
+Since June 1st (curl 7.61.0) axTLS support is disabled in code and requires a
+small code change to build without errors. (PR:
+https://github.com/curl/curl/pull/2628)
 
 ### Removal
 
