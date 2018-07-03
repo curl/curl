@@ -21,10 +21,11 @@
 
 /* Parameters */
 int max_con = 200;
-int max_total = 10000;
+int max_total = 20000;
 int max_requests = 500;
-int max_link_per_page = 10;
-char *start_page = "https://news.ycombinator.com";
+int max_link_per_page = 5;
+int follow_relative_links = 0;
+char *start_page = "https://www.reuters.com";
 
 #include <libxml/HTMLparser.h>
 #include <libxml/xpath.h>
@@ -114,16 +115,20 @@ size_t follow_links(CURLM *multi_handle, memory *mem, char *url)
     int x = r * nodeset->nodeNr / RAND_MAX;
     const xmlNode *node = nodeset->nodeTab[x]->xmlChildrenNode;
     xmlChar *href = xmlNodeListGetString(doc, node, 1);
-    char *absolute = (char *) xmlBuildURI(href, (xmlChar *) url);
-    if(!absolute || strlen(absolute) < 20)
+    if(follow_relative_links) {
+      xmlChar *orig = href;
+      href = xmlBuildURI(href, (xmlChar *) url);
+      xmlFree(orig);
+    }
+    char *link = (char *) href;
+    if(!link || strlen(link) < 20)
       continue;
-    if(!strncmp(absolute, "http://", 7) || !strncmp(absolute, "https://", 8)) {
-      curl_multi_add_handle(multi_handle, make_handle(absolute));
+    if(!strncmp(link, "http://", 7) || !strncmp(link, "https://", 8)) {
+      curl_multi_add_handle(multi_handle, make_handle(link));
       if(count++ == max_link_per_page)
         break;
     }
-    xmlFree(href);
-    xmlFree(absolute);
+    xmlFree(link);
   }
   xmlXPathFreeObject(result);
   return count;
