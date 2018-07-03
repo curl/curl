@@ -134,6 +134,7 @@ static curl_fnmatch_callback fnmatch_cb;
 static curl_closesocket_callback closesocketcb;
 static curl_xferinfo_callback xferinfocb;
 static curl_resolver_start_callback resolver_start_cb;
+static curl_password_callback password_cb;
 
 int test(char *URL)
 {
