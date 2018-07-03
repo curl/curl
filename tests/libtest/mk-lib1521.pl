@@ -122,6 +122,7 @@ static curl_progress_callback progresscb;
 static curl_write_callback headercb;
 static curl_debug_callback debugcb;
 static curl_ssl_ctx_callback ssl_ctx_cb;
+static curl_ssl_cert_callback ssl_cert_cb;
 static curl_ioctl_callback ioctlcb;
 static curl_sockopt_callback sockoptcb;
 static curl_opensocket_callback opensocketcb;
