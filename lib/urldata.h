@@ -781,11 +781,12 @@ struct connectdata {
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
 
-  bool inuse; /* This is a marker for the connection cache logic. If this is
-                 TRUE this handle is being used by one or more easy handles
-                 and can only used by any other easy handle without careful
-                 consideration (== only for pipelining/multiplexing) and it
-                 cannot be used by another multi handle! */
+  /* This is used by the connection cache logic. If this returns TRUE, this
+     handle is being used by one or more easy handles and can only used by any
+     other easy handle without careful consideration (== only for
+     pipelining/multiplexing) and it cannot be used by another multi
+     handle! */
+#define CONN_INUSE(c) ((c)->send_pipe.size || (c)->recv_pipe.size)
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to

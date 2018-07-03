@@ -604,7 +604,7 @@ static CURLcode multi_done(struct connectdata **connp,
 #endif
      ) || conn->bits.close
        || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
-    CURLcode res2 = Curl_disconnect(conn, premature); /* close connection */
+    CURLcode res2 = Curl_disconnect(data, conn, premature);
 
     /* If we had an error already, make sure we return that one. But
        if we got a new error, return that. */
@@ -622,7 +622,7 @@ static CURLcode multi_done(struct connectdata **connp,
              conn->bits.conn_to_host ? conn->conn_to_host.dispname :
              conn->host.dispname);
 
-    /* the connection is no longer in use */
+    /* the connection is no longer in use by this transfer */
     if(Curl_conncache_return_conn(conn)) {
       /* remember the most recently used connection */
       data->state.lastconnect = conn;
@@ -2109,7 +2109,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* Don't attempt to send data over a connection that timed out */
             bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
             /* disconnect properly */
-            Curl_disconnect(data->easy_conn, dead_connection);
+            Curl_disconnect(data, data->easy_conn, dead_connection);
 
             /* This is where we make sure that the easy_conn pointer is reset.
                We don't have to do this in every case block above where a
@@ -2471,20 +2471,23 @@ void Curl_updatesocket(struct Curl_easy *data)
 
 void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
 {
-  struct Curl_multi *multi = conn->data->multi;
-  if(multi) {
-    /* this is set if this connection is part of a handle that is added to
-       a multi handle, and only then this is necessary */
-    struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
+  if(conn->data) {
+    /* if there's still an easy handle associated with this connection */
+    struct Curl_multi *multi = conn->data->multi;
+    if(multi) {
+      /* this is set if this connection is part of a handle that is added to
+         a multi handle, and only then this is necessary */
+      struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
-    if(entry) {
-      if(multi->socket_cb)
-        multi->socket_cb(conn->data, s, CURL_POLL_REMOVE,
-                         multi->socket_userp,
-                         entry->socketp);
+      if(entry) {
+        if(multi->socket_cb)
+          multi->socket_cb(conn->data, s, CURL_POLL_REMOVE,
+                           multi->socket_userp,
+                           entry->socketp);
 
-      /* now remove it from the socket hash */
-      sh_delentry(&multi->sockhash, s);
+        /* now remove it from the socket hash */
+        sh_delentry(&multi->sockhash, s);
+      }
     }
   }
 }
@@ -3135,12 +3138,15 @@ static void process_pending_handles(struct Curl_multi *multi)
   }
 }
 
-void Curl_set_in_callback(struct Curl_easy *easy, bool value)
+void Curl_set_in_callback(struct Curl_easy *data, bool value)
 {
-  if(easy->multi_easy)
-    easy->multi_easy->in_callback = value;
-  else if(easy->multi)
-      easy->multi->in_callback = value;
+  /* might get called when there is no data pointer! */
+  if(data) {
+    if(data->multi_easy)
+      data->multi_easy->in_callback = value;
+    else if(data->multi)
+      data->multi->in_callback = value;
+  }
 }
 
 bool Curl_is_in_callback(struct Curl_easy *easy)
