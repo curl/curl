@@ -851,6 +851,7 @@ static int IsPipeliningPossible(const struct Curl_easy *handle,
   return avail;
 }
 
+/* Returns non-zero if a handle was removed */
 int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
                                   struct curl_llist *pipeline)
 {
@@ -899,15 +900,24 @@ static struct Curl_easy* gethandleathead(struct curl_llist *pipeline)
 void Curl_getoff_all_pipelines(struct Curl_easy *data,
                                struct connectdata *conn)
 {
-  bool recv_head = (conn->readchannel_inuse &&
-                    Curl_recvpipe_head(data, conn));
-  bool send_head = (conn->writechannel_inuse &&
-                    Curl_sendpipe_head(data, conn));
+  if(!conn->bundle)
+    return;
+  if(conn->bundle->multiuse == BUNDLE_PIPELINING) {
+    bool recv_head = (conn->readchannel_inuse &&
+                      Curl_recvpipe_head(data, conn));
+    bool send_head = (conn->writechannel_inuse &&
+                      Curl_sendpipe_head(data, conn));
 
-  if(Curl_removeHandleFromPipeline(data, &conn->recv_pipe) && recv_head)
-    Curl_pipeline_leave_read(conn);
-  if(Curl_removeHandleFromPipeline(data, &conn->send_pipe) && send_head)
-    Curl_pipeline_leave_write(conn);
+    if(Curl_removeHandleFromPipeline(data, &conn->recv_pipe) && recv_head)
+      Curl_pipeline_leave_read(conn);
+    if(Curl_removeHandleFromPipeline(data, &conn->send_pipe) && send_head)
+      Curl_pipeline_leave_write(conn);
+  }
+  else {
+    int rc;
+    rc = Curl_removeHandleFromPipeline(data, &conn->recv_pipe);
+    rc += Curl_removeHandleFromPipeline(data, &conn->send_pipe);
+  }
 }
 
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
