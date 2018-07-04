@@ -107,6 +107,16 @@ static const char * const statename[]={
 /* function pointer called once when switching TO a state */
 typedef void (*init_multistate_func)(struct Curl_easy *data);
 
+static void Curl_init_completed(struct Curl_easy *data)
+{
+  /* this is a completed transfer */
+
+  /* Important: reset the conn pointer so that we don't point to memory
+     that could be freed anytime */
+  data->easy_conn = NULL;
+  Curl_expire_clear(data); /* stop all timers */
+}
+
 /* always use this function to change state, to make debugging easier */
 static void mstate(struct Curl_easy *data, CURLMstate state
 #ifdef DEBUGBUILD
@@ -116,17 +126,25 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 {
   CURLMstate oldstate = data->mstate;
   static const init_multistate_func finit[CURLM_STATE_LAST] = {
-    NULL,
-    NULL,
+    NULL,              /* INIT */
+    NULL,              /* CONNECT_PEND */
     Curl_init_CONNECT, /* CONNECT */
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    Curl_connect_free /* DO */
-    /* the rest is NULL too */
+    NULL,              /* WAITRESOLVE */
+    NULL,              /* WAITCONNECT */
+    NULL,              /* WAITPROXYCONNECT */
+    NULL,              /* SENDPROTOCONNECT */
+    NULL,              /* PROTOCONNECT */
+    NULL,              /* WAITDO */
+    Curl_connect_free, /* DO */
+    NULL,              /* DOING */
+    NULL,              /* DO_MORE */
+    NULL,              /* DO_DONE */
+    NULL,              /* WAITPERFORM */
+    NULL,              /* PERFORM */
+    NULL,              /* TOOFAST */
+    NULL,              /* DONE */
+    Curl_init_completed, /* COMPLETED */
+    NULL               /* MSGSENT */
   };
 
 #if defined(DEBUGBUILD) && defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -2062,16 +2080,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_COMPLETED:
-      /* this is a completed transfer, it is likely to still be connected */
-
-      /* This node should be delinked from the list now and we should post
-         an information message that we are complete. */
-
-      /* Important: reset the conn pointer so that we don't point to memory
-         that could be freed anytime */
-      data->easy_conn = NULL;
-
-      Curl_expire_clear(data); /* stop all timers */
       break;
 
     case CURLM_STATE_MSGSENT:
@@ -2123,6 +2131,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
 
         multistate(data, CURLM_STATE_COMPLETED);
+        rc = CURLM_CALL_MULTI_PERFORM;
       }
       /* if there's still a connection to use, call the progress function */
       else if(data->easy_conn && Curl_pgrsUpdate(data->easy_conn)) {
@@ -2147,14 +2156,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       msg->extmsg.data.result = result;
 
       rc = multi_addmsg(multi, msg);
-
+      DEBUGASSERT(!data->easy_conn);
       multistate(data, CURLM_STATE_MSGSENT);
     }
   } while((rc == CURLM_CALL_MULTI_PERFORM) || multi_ischanged(multi, FALSE));
 
   data->result = result;
-
-
   return rc;
 }
 
