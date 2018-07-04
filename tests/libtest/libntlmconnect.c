@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -158,6 +158,9 @@ int test(char *url)
 
     multi_perform(multi, &running);
 
+    fprintf(stderr, "%s:%d running %ld state %d\n",
+            __FILE__, __LINE__, running, state);
+
     abort_on_test_timeout();
 
     if(!running && state == NoMoreHandles)
@@ -179,14 +182,16 @@ int test(char *url)
       }
       state = num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle
                                              : NoMoreHandles;
+      fprintf(stderr, "%s:%d new state %d\n",
+              __FILE__, __LINE__, state);
     }
 
     multi_timeout(multi, &timeout);
 
     /* At this point, timeout is guaranteed to be greater or equal than -1. */
 
-    fprintf(stderr, "%s:%d num_handles %d timeout %ld\n",
-            __FILE__, __LINE__, num_handles, timeout);
+    fprintf(stderr, "%s:%d num_handles %d timeout %ld running %d\n",
+            __FILE__, __LINE__, num_handles, timeout, running);
 
     if(timeout != -1L) {
       int itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
@@ -194,8 +199,8 @@ int test(char *url)
       interval.tv_usec = (itimeout%1000)*1000;
     }
     else {
-      interval.tv_sec = TEST_HANG_TIMEOUT/1000 + 1;
-      interval.tv_usec = 0;
+      interval.tv_sec = 0;
+      interval.tv_usec = 5000;
 
       /* if there's no timeout and we get here on the last handle, we may
          already have read the last part of the stream so waiting makes no
