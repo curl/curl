@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -61,7 +61,9 @@ connections that are already established and in use to hosts.
 If this bit is set, libcurl will try to multiplex the new transfer over an
 existing connection if possible. This requires HTTP/2.
 .SH DEFAULT
-0 (both pipeline and multiplexing are off)
+Since 7.62.0, \fBCURLPIPE_MULTIPLEX\bP is enabled by default.
+
+Before that, default was \fBCURLPIPE_NOTHING\fP.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE

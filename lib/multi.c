@@ -347,6 +347,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_llist_init(&multi->pending, multi_freeamsg);
 
   multi->max_pipeline_length = 5;
+  multi->pipelining = CURLPIPE_MULTIPLEX;
 
   /* -1 means it not set by user, use the default value */
   multi->maxconnects = -1;
