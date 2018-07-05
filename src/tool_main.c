@@ -163,25 +163,18 @@ static CURLcode main_init(struct GlobalConfig *config)
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
   #endif
 
-  DWORD dwMode = 0;
-
   // Enable VT Input
+  DWORD dwInputMode = 0;
   HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
-  if (hStdIn != INVALID_HANDLE_VALUE 
-    && GetConsoleMode(hStdIn, &dwMode)) {
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
-
-    SetConsoleMode(hStdIn, dwMode);
+  if (hStdIn != INVALID_HANDLE_VALUE && GetConsoleMode(hStdIn, &dwInputMode)) {
+    SetConsoleMode(hStdIn, dwInputMode | ENABLE_VIRTUAL_TERMINAL_INPUT);
   }
 
   // Enable VT output
-  dwMode = 0;
+  DWORD dwOutputMode = 0;
   HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (hStdOut != INVALID_HANDLE_VALUE 
-    && GetConsoleMode(hStdOut, &dwMode)) {
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-
-    SetConsoleMode(hStdOut, dwMode);
+  if (hStdOut != INVALID_HANDLE_VALUE && GetConsoleMode(hStdOut, &dwOutputMode)) {
+    SetConsoleMode(hStdOut, dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
   }
 #endif
 
@@ -223,6 +216,12 @@ static CURLcode main_init(struct GlobalConfig *config)
     helpf(stderr, "error initializing curl\n");
     result = CURLE_FAILED_INIT;
   }
+
+#if defined(_WIN32)
+  // Restore Console input & output modes to whatever they were when Curl started.
+    SetConsoleMode(hStdIn, dwInputMode);
+    SetConsoleMode(hStdOut, dwOutputMode);
+  #endif 
 
   return result;
 }
