@@ -204,11 +204,21 @@ static CURLcode sftp_error_to_CURLE(int err)
   return CURLE_SSH;
 }
 
+#ifndef DEBUGBUILD
+#define state(x,y) mystate(x,y)
+#else
+#define state(x,y) mystate(x,y, __LINE__)
+#endif
+
 /*
  * SSH State machine related code
  */
 /* This is the ONLY way to change SSH state! */
-static void state(struct connectdata *conn, sshstate nowstate)
+static void mystate(struct connectdata *conn, sshstate nowstate
+#ifdef DEBUGBUILD
+                    , int lineno
+#endif
+  )
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -278,8 +288,9 @@ static void state(struct connectdata *conn, sshstate nowstate)
 
 
   if(sshc->state != nowstate) {
-    infof(conn->data, "SSH %p state change from %s to %s\n",
-          (void *) sshc, names[sshc->state], names[nowstate]);
+    infof(conn->data, "SSH %p state change from %s to %s (line %d)\n",
+          (void *) sshc, names[sshc->state], names[nowstate],
+          lineno);
   }
 #endif
 
