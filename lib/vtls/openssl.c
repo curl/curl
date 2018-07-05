@@ -2078,10 +2078,6 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
   long ssl_version = SSL_CONN_CONFIG(version);
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
 
-  if(ssl_version_max == CURL_SSLVERSION_MAX_NONE) {
-    ssl_version_max = ssl_version << 16;
-  }
-
   switch(ssl_version) {
     case CURL_SSLVERSION_TLSv1_3:
 #ifdef TLS1_3_VERSION
@@ -2113,8 +2109,7 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
 #endif
       /* FALLTHROUGH */
     case CURL_SSLVERSION_TLSv1_0:
-      *ctx_options |= SSL_OP_NO_SSLv2;
-      *ctx_options |= SSL_OP_NO_SSLv3;
+    case CURL_SSLVERSION_TLSv1:
       break;
   }
 
@@ -2130,12 +2125,12 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
 #endif
       /* FALLTHROUGH */
     case CURL_SSLVERSION_MAX_TLSv1_2:
-    case CURL_SSLVERSION_MAX_DEFAULT:
 #ifdef TLS1_3_VERSION
       *ctx_options |= SSL_OP_NO_TLSv1_3;
 #endif
       break;
     case CURL_SSLVERSION_MAX_TLSv1_3:
+    case CURL_SSLVERSION_MAX_DEFAULT:
 #ifdef TLS1_3_VERSION
       break;
 #else
@@ -2319,11 +2314,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   switch(ssl_version) {
   case CURL_SSLVERSION_SSLv3:
-#ifdef USE_TLS_SRP
-    if(ssl_authtype == CURL_TLSAUTH_SRP) {
-      infof(data, "Set version TLSv1.x for SRP authorisation\n");
-    }
-#endif
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_TLSv1;
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
@@ -2337,20 +2327,20 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
-    ctx_options |= SSL_OP_NO_SSLv2;
-    ctx_options |= SSL_OP_NO_SSLv3;
-    /* FALLTHROUGH */
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
+    /* asking for any TLS version as the minimum, means no SSL versions
+       allowed */
+    ctx_options |= SSL_OP_NO_SSLv2;
+    ctx_options |= SSL_OP_NO_SSLv3;
     result = set_ssl_version_min_max(&ctx_options, conn, sockindex);
     if(result != CURLE_OK)
        return result;
     break;
 
   case CURL_SSLVERSION_SSLv2:
-#ifndef OPENSSL_NO_SSL2
     ctx_options |= SSL_OP_NO_SSLv3;
     ctx_options |= SSL_OP_NO_TLSv1;
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
@@ -2361,10 +2351,6 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 #endif
     break;
-#else
-    failf(data, OSSL_PACKAGE " was built without SSLv2 support");
-    return CURLE_NOT_BUILT_IN;
-#endif
 
   default:
     failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");

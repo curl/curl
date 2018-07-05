@@ -92,6 +92,7 @@
 #endif
 
 #ifdef USE_WINSOCK
+typedef WSAEVENT (WINAPI *WSOCK2_EVENT)(void);
 typedef FARPROC WSOCK2_FUNC;
 static CURLcode check_wsock2(struct Curl_easy *data);
 #endif
@@ -1306,7 +1307,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
 #ifdef USE_WINSOCK
   HMODULE wsock2;
   WSOCK2_FUNC close_event_func;
-  WSOCK2_FUNC create_event_func;
+  WSOCK2_EVENT create_event_func;
   WSOCK2_FUNC event_select_func;
   WSOCK2_FUNC enum_netevents_func;
   WSAEVENT event_handle;
@@ -1360,7 +1361,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   }
 
   /* Grab a pointer to WSACreateEvent */
-  create_event_func = GetProcAddress(wsock2, "WSACreateEvent");
+  create_event_func = (WSOCK2_EVENT) GetProcAddress(wsock2, "WSACreateEvent");
   if(create_event_func == NULL) {
     failf(data, "failed to find WSACreateEvent function (%u)", GetLastError());
     FreeLibrary(wsock2);
