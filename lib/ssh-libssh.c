@@ -418,7 +418,7 @@ cleanup:
 }
 
 #define MOVE_TO_ERROR_STATE(_r) { \
-  state(conn, SSH_SESSION_FREE); \
+  state(conn, SSH_SESSION_DISCONNECT); \
   sshc->actualcode = _r; \
   rc = SSH_ERROR; \
   break; \
