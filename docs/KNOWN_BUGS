@@ -43,10 +43,7 @@ problems may have been fixed or changed somewhat since this was written!
  4.4 --upload-file . hang if delay in STDIN
 
  5. Build and portability issues
- 5.1 Windows Borland compiler
  5.2 curl-config --libs contains private details
- 5.3 Windows: No execute on suitable sections
- 5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
@@ -346,22 +343,11 @@ problems may have been fixed or changed somewhat since this was written!
 
 5. Build and portability issues
 
-5.1 Windows Borland compiler
-
- When building with the Windows Borland compiler, it fails because the "tlib"
- tool doesn't support hyphens (minus signs) in file names and we have such in
- the build.  https://curl.haxx.se/bug/view.cgi?id=1222
-
 5.2 curl-config --libs contains private details
 
  "curl-config --libs" will include details set in LDFLAGS when configure is
  run that might be needed only for building libcurl. Further, curl-config
  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
-
-5.4 AIX shared build with c-ares fails
-
- curl version 7.12.2 fails on AIX if compiled with --enable-ares.  The
- workaround is to combine --enable-ares with --disable-shared
 
 5.5 can't handle Unicode arguments in Windows
 
