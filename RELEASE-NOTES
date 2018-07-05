@@ -96,6 +96,10 @@ This release includes the following bugfixes:
  o travis: add a build using the synchronous name resolver [70]
  o CURLINFO_TLS_SSL_PTR.3: improve the example [71]
  o openssl: allow TLS 1.3 by default [72]
+ o openssl: make the requested TLS version the *minimum* wanted [73]
+ o openssl: Remove some dead code [74]
+ o telnet: fix clang warnings [75]
+ o DEPRECATE: new doc describing planned item removals [76]
 
 This release includes the following known bugs:
 
@@ -107,15 +111,16 @@ advice from friends like these:
   Adrian Peniak, Alejandro R. Sedeño, Andreas Olsson, Archangel_SDY on github,
   Bernhard M. Wiedemann, Bernhard Walle, Björn Stenberg, bsammon on github,
   Dagobert Michelsen, Daniel Stenberg, Dario Nieuwenhuis, elephoenix on github,
-  Fabrice Fontaine, Frank Gevaerts, Gisle Vanem, Ithubg on github,
-  Javier Blazquez, Johannes Schindelin, Kevin R. Bulgrien, Linus Lewandowski,
-  Lyman Epp, Mamta Upadhyay, Marcel Raad, Marian Klymov, Matteo Bignotti,
-  Max Dymond, Max Savenkov, Oleg Pudeyev, Patrick Monnerat, Patrick Schlangen,
-  Per Malmberg, Peter Varga, Peter Wu, Philip Prindeville, pszemus on github,
-  Raphael Gozzo, Ray Satiro, Richard Alcock, Rikard Falkeborn, Robert Prag,
-  Sean Miller, Sergei Nikulov, Stephan Mühlstrasser, Viktor Szakats,
-  Vladimir Kotal, Will Dietz, Yaakov Selkowitz, zzq1015 on github,
-  (48 contributors)
+  Fabrice Fontaine, Frank Gevaerts, Gaurav Malhotra, Gisle Vanem,
+  Ithubg on github, Javier Blazquez, Johannes Schindelin, Kevin R. Bulgrien,
+  Linus Lewandowski, Lyman Epp, Mamta Upadhyay, Marcel Raad, Marian Klymov,
+  Matteo Bignotti, Max Dymond, Max Savenkov, Oleg Pudeyev, Patrick Monnerat,
+  Patrick Schlangen, Per Malmberg, Peter Varga, Peter Wu, Philip Prindeville,
+  pszemus on github, Raphael Gozzo, Ray Satiro, Richard Alcock,
+  Rikard Falkeborn, Robert Prag, Sean Miller, Sergei Nikulov,
+  Stephan Mühlstrasser, Viktor Szakats, Vladimir Kotal, Will Dietz,
+  Yaakov Selkowitz, zzq1015 on github,
+  (49 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -193,3 +198,7 @@ References to bug reports and discussions on issues:
  [70] = https://curl.haxx.se/bug/?i=2689
  [71] = https://curl.haxx.se/bug/?i=2690
  [72] = https://curl.haxx.se/bug/?i=2692
+ [73] = https://curl.haxx.se/bug/?i=2691
+ [74] = https://curl.haxx.se/bug/?i=2698
+ [75] = https://curl.haxx.se/bug/?i=2696
+ [76] = https://curl.haxx.se/dev/deprecate.html
