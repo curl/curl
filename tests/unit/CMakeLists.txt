@@ -21,6 +21,7 @@ set(UT_SRC
   unit1603.c
 # Broken link on Linux
 #  unit1604.c
+  unit1620.c
   )
 
 set(UT_COMMON_FILES ../libtest/first.c ../libtest/test.h curlcheck.h)
