@@ -1252,14 +1252,13 @@ static CURLcode darwinssl_version_from_curl(SSLProtocol *darwinver,
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_3:
       /* TLS 1.3 support first appeared in iOS 11 and macOS 10.13 */
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
-      /* We can assume __builtin_available() will always work in the
-         10.13/11.0 SDK: */
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
       if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
         *darwinver = kTLSProtocol13;
         return CURLE_OK;
       }
-#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
+#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
+          HAVE_BUILTIN_AVAILABLE == 1 */
       break;
   }
   return CURLE_SSL_CONNECT_ERROR;
@@ -1278,7 +1277,7 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   /* macOS 10.5-10.7 supported TLS 1.0 only.
      macOS 10.8 and later, and iOS 5 and later, added TLS 1.1 and 1.2.
      macOS 10.13 and later, and iOS 11 and later, added TLS 1.3. */
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
   if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
     max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_3;
   }
@@ -1287,7 +1286,8 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
   }
 #else
   max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_2;
-#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
+#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
+          HAVE_BUILTIN_AVAILABLE == 1 */
 
   switch(ssl_version) {
     case CURL_SSLVERSION_DEFAULT:
@@ -1430,7 +1430,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       (void)SSLSetProtocolVersionMin(BACKEND->ssl_ctx, kTLSProtocol1);
-#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
       if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
         (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, kTLSProtocol13);
       }
@@ -1439,7 +1439,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       }
 #else
       (void)SSLSetProtocolVersionMax(BACKEND->ssl_ctx, kTLSProtocol12);
-#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
+#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
+          HAVE_BUILTIN_AVAILABLE == 1 */
       break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
