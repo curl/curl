@@ -67,6 +67,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.7 FTP and empty path parts in the URL
  7.8 Premature transfer end but healthy control channel
  7.9 Passive transfer tries only one IP address
+ 7.10 Stick to same family over SOCKS proxy
 
  8. TELNET
  8.1 TELNET and time limtiations don't work
@@ -535,6 +536,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/1508
 
+7.10 Stick to same family over SOCKS proxy
+
+ When asked to do FTP over a SOCKS proxy, it might connect to the proxy (and
+ then subsequently to the remote server) using for example IPv4. When doing
+ the second connection, curl should make sure that the second connection is
+ using the same IP protocol version as the first connection did and not try
+ others, since the remote server will only accept the same.
+
+ See https://curl.haxx.se/mail/archive-2018-07/0000.html
 
 8. TELNET
 
