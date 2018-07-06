@@ -309,13 +309,13 @@ if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
-collect_true(enabled_ssl_options enabled_ssl_options_count
+count_true(enabled_ssl_options_count
   CMAKE_USE_WINSSL
   CMAKE_USE_DARWINSSL
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
 )
-if(enabled_ssl_options_count GREATER 1)
+if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
 endif()
 
