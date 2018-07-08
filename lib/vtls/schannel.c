@@ -2053,7 +2053,8 @@ static void Curl_schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-    if(!CryptHashData(hHash, (const BYTE*)input, (DWORD)inputlen, 0))
+    /* workaround for original MinGW, should be (const BYTE*) */
+    if(!CryptHashData(hHash, (BYTE*)input, (DWORD)inputlen, 0))
       break; /* failed */
 
     /* get hash size */
