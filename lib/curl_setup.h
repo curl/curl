@@ -1,4 +1,4 @@
-#ifndef HEADER_CURL_SETUP_H
+﻿#ifndef HEADER_CURL_SETUP_H
 #define HEADER_CURL_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
@@ -242,6 +242,7 @@
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    define UNICODE
 #  endif
+#  include <winerror.h>
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
