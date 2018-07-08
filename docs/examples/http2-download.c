@@ -72,11 +72,11 @@ void dump(const char *text, int num, unsigned char *ptr, size_t size,
     width = 0x40;
 
   fprintf(stderr, "%d %s, %lu bytes (0x%lx)\n",
-          num, text, size, size);
+          num, text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stderr, "%4.4lx: ", i);
+    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
