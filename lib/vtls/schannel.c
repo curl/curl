@@ -216,7 +216,7 @@ get_alg_id_by_name(char *name)
 {
   char tmp[LONGEST_ALG_ID] = { 0 };
   char *nameEnd = strchr(name, ':');
-  size_t n = nameEnd ? min(nameEnd - name, LONGEST_ALG_ID - 1) : \
+  size_t n = nameEnd ? min((size_t)(nameEnd - name), LONGEST_ALG_ID - 1) : \
     min(strlen(name), LONGEST_ALG_ID - 1);
   strncpy(tmp, name, n);
   tmp[n] = 0;
