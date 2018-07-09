@@ -1060,6 +1060,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Walloc-zero"
             tmp_CFLAGS="$tmp_CFLAGS -Wformat-overflow=2"
             tmp_CFLAGS="$tmp_CFLAGS -Wformat-truncation=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough=4"
           fi
           #
         fi
