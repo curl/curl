@@ -10,8 +10,8 @@ macro(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
     ${VARIABLE})
   if(${VARIABLE})
     set(CURL_LIBS ${LIBRARY} ${CURL_LIBS})
-  endif(${VARIABLE})
-endmacro(CHECK_LIBRARY_EXISTS_CONCAT)
+  endif()
+endmacro()
 
 # Check if header file exists and add it to the list.
 # This macro is intended to be called multiple times with a sequence of
@@ -22,8 +22,8 @@ macro(CHECK_INCLUDE_FILE_CONCAT FILE VARIABLE)
   if(${VARIABLE})
     set(CURL_INCLUDES ${CURL_INCLUDES} ${FILE})
     set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${VARIABLE}")
-  endif(${VARIABLE})
-endmacro(CHECK_INCLUDE_FILE_CONCAT)
+  endif()
+endmacro()
 
 # For other curl specific tests, use this macro.
 macro(CURL_INTERNAL_TEST CURL_TEST)
@@ -33,7 +33,7 @@ macro(CURL_INTERNAL_TEST CURL_TEST)
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CURL_TEST_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
 
     message(STATUS "Performing Curl Test ${CURL_TEST}")
     try_compile(${CURL_TEST}
@@ -48,15 +48,15 @@ macro(CURL_INTERNAL_TEST CURL_TEST)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing Curl Test ${CURL_TEST} passed with the following output:\n"
         "${OUTPUT}\n")
-    else(${CURL_TEST})
+    else()
       message(STATUS "Performing Curl Test ${CURL_TEST} - Failed")
       set(${CURL_TEST} "" CACHE INTERNAL "Curl test ${FUNCTION}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing Curl Test ${CURL_TEST} failed with the following output:\n"
         "${OUTPUT}\n")
-    endif(${CURL_TEST})
+    endif()
   endif()
-endmacro(CURL_INTERNAL_TEST)
+endmacro()
 
 macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
   if(NOT DEFINED "${CURL_TEST}_COMPILE")
@@ -65,7 +65,7 @@ macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CURL_TEST_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
 
     message(STATUS "Performing Curl Test ${CURL_TEST}")
     try_run(${CURL_TEST} ${CURL_TEST}_COMPILE
@@ -77,7 +77,7 @@ macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
     if(${CURL_TEST}_COMPILE AND NOT ${CURL_TEST})
       set(${CURL_TEST} 1 CACHE INTERNAL "Curl test ${FUNCTION}")
       message(STATUS "Performing Curl Test ${CURL_TEST} - Success")
-    else(${CURL_TEST}_COMPILE AND NOT ${CURL_TEST})
+    else()
       message(STATUS "Performing Curl Test ${CURL_TEST} - Failed")
       set(${CURL_TEST} "" CACHE INTERNAL "Curl test ${FUNCTION}")
       file(APPEND "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log"
@@ -87,12 +87,12 @@ macro(CURL_INTERNAL_TEST_RUN CURL_TEST)
         file(APPEND
           "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log"
           "There was a problem running this test\n")
-      endif(${CURL_TEST}_COMPILE)
+      endif()
       file(APPEND "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log"
         "\n\n")
-    endif(${CURL_TEST}_COMPILE AND NOT ${CURL_TEST})
+    endif()
   endif()
-endmacro(CURL_INTERNAL_TEST_RUN)
+endmacro()
 
 macro(CURL_NROFF_CHECK)
   find_program(NROFF NAMES gnroff nroff)
@@ -121,4 +121,4 @@ macro(CURL_NROFF_CHECK)
   else()
     message(WARNING "Found no *nroff program")
   endif()
-endmacro(CURL_NROFF_CHECK)
+endmacro()
