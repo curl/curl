@@ -62,6 +62,7 @@ int test(char *URL)
   struct curl_forms formarray[3];
   size_t formlength = 0;
   char flbuf[32];
+  long contentlength = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -94,11 +95,13 @@ int test(char *URL)
     goto test_cleanup;
   }
 
+  contentlength = (long)(strlen(data) - 1);
+
   /* Use a form array for the non-copy test. */
   formarray[0].option = CURLFORM_PTRCONTENTS;
   formarray[0].value = data;
   formarray[1].option = CURLFORM_CONTENTSLENGTH;
-  formarray[1].value = (char *) strlen(data) - 1;
+  formarray[1].value = (char *)(size_t)contentlength;
   formarray[2].option = CURLFORM_END;
   formarray[2].value = NULL;
   formrc = curl_formadd(&formpost,
