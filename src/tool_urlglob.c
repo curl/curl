@@ -34,8 +34,6 @@
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
 
-void glob_cleanup(URLGlob* glob);
-
 static CURLcode glob_fixed(URLGlob *glob, char *fixed, size_t len)
 {
   URLPattern *pat = &glob->pattern[glob->size];
