@@ -45,11 +45,11 @@ void dump(const char *text,
     width = 0x40;
 
   fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
-          text, size, size);
+          text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stream, "%4.4lx: ", i);
+    fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */

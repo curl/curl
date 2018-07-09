@@ -100,7 +100,7 @@ int main(void)
      * Do something nice with it!
      */
 
-    printf("%lu bytes retrieved\n", chunk.size);
+    printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
   }
 
   /* cleanup curl stuff */
