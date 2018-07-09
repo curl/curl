@@ -977,6 +977,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 2.95 or later
           if test "$compiler_num" -ge "295"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
+            tmp_CFLAGS="$tmp_CFLAGS -Wbad-function-cast"
           fi
           #
           dnl Only gcc 2.96 or later
