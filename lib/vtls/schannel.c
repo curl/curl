@@ -285,7 +285,11 @@ get_alg_id_by_name(char *name)
 #ifdef CALG_HMAC
   CIPHEROPTION(CALG_HMAC);
 #endif
+#if !defined(__W32API_VERSION) || defined(__MINGW64_VERSION_MAJOR)
+  /* CALG_TLS1PRF has a syntax error in MinGW's w32api,
+     see https://osdn.net/projects/mingw/ticket/38391 */
   CIPHEROPTION(CALG_TLS1PRF);
+#endif
 #ifdef CALG_HASH_REPLACE_OWF
   CIPHEROPTION(CALG_HASH_REPLACE_OWF);
 #endif
