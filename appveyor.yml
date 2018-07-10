@@ -7,66 +7,66 @@ environment:
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: OFF
-        STATICLIB: OFF
+        SHARED: ON
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
         BDIR: msvc2013
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: OFF
-        STATICLIB: OFF
+        SHARED: ON
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         BDIR: msvc2015
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: OFF
-        STATICLIB: OFF
+        SHARED: ON
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
         BDIR: msvc2012
         PRJ_CFG: Release
         OPENSSL: ON
         TESTING: OFF
-        STATICLIB: OFF
+        SHARED: ON
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
         BDIR: msvc2013
         PRJ_CFG: Release
         OPENSSL: ON
         TESTING: OFF
-        STATICLIB: OFF
+        SHARED: ON
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         BDIR: msvc2015
         PRJ_CFG: Release
         OPENSSL: ON
         TESTING: OFF
-        STATICLIB: OFF
+        SHARED: ON
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
         BDIR: msvc2012
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
-        STATICLIB: ON
+        SHARED: OFF
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
         BDIR: msvc2013
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
-        STATICLIB: ON
+        SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         BDIR: msvc2015
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
-        STATICLIB: ON
+        SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015"
         BDIR: msvc2015
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
-        STATICLIB: ON
+        SHARED: OFF
 
 build_script:
     - mkdir build.%BDIR%
     - cd build.%BDIR%
-    - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DCURL_STATICLIB=%STATICLIB% -DBUILD_TESTING=%TESTING% -DCURL_WERROR=ON
+    - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DBUILD_SHARED_LIBS=%SHARED% -DBUILD_TESTING=%TESTING% -DCURL_WERROR=ON
     - cmake --build . --config %PRJ_CFG% --clean-first
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
