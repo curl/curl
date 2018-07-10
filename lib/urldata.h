@@ -49,6 +49,7 @@
 #define PORT_RTMPT PORT_HTTP
 #define PORT_RTMPS PORT_HTTPS
 #define PORT_GOPHER 70
+#define PORT_NBD 10809
 
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
@@ -123,6 +124,7 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #include "http.h"
 #include "rtsp.h"
 #include "smb.h"
+#include "nbd.h"
 #include "wildcard.h"
 #include "multihandle.h"
 
@@ -990,6 +992,7 @@ struct connectdata {
     struct smtp_conn smtpc;
     struct rtsp_conn rtspc;
     struct smb_conn smbc;
+    struct nbd_conn nbdc;
     void *generic; /* RTMP and LDAP use this */
   } proto;
 

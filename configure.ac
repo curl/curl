@@ -631,6 +631,22 @@ AC_HELP_STRING([--disable-gopher],[Disable Gopher support]),
        AC_MSG_RESULT(yes)
 )
 
+AC_MSG_CHECKING([whether to support nbd])
+AC_ARG_ENABLE(nbd,
+AC_HELP_STRING([--enable-nbd],[Enable NBD client support])
+AC_HELP_STRING([--disable-nbd],[Disable NBD client support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_NBD, 1, [to disable NBD client support])
+       AC_SUBST(CURL_DISABLE_NBD, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 
 dnl **********************************************************************
 dnl Check for built-in manual
@@ -4132,6 +4148,9 @@ if test "x$CURL_DISABLE_IMAP" != "x1"; then
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAPS"
   fi
+fi
+if test "x$CURL_DISABLE_NBD" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS NBD"
 fi
 if test "x$CURL_DISABLE_SMB" != "x1" \
     -a "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" \
