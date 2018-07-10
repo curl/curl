@@ -112,6 +112,7 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
+ 13.9 Configurable loading of OpenSSL configuration file
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
  13.13 Support HPKP
@@ -766,6 +767,17 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
+
+13.9 Configurable loading of OpenSSL configuration file
+
+ libcurl calls the OpenSSL function CONF_modules_load_file() in openssl.c,
+ Curl_ossl_init(). "We regard any changes in the OpenSSL configuration as a
+ security risk or at least as unnecessary."
+
+ Please add a configuration switch or something similar to disable the
+ CONF_modules_load_file() call.
+
+ See https://github.com/curl/curl/issues/2724
 
 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
 
