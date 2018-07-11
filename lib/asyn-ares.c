@@ -475,17 +475,19 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
     return;
 
   res = (struct ResolverResults *)conn->async.os_specific;
-  res->num_pending--;
+  if(res) {
+    res->num_pending--;
 
-  if(CURL_ASYNC_SUCCESS == status) {
-    Curl_addrinfo *ai = Curl_he2ai(hostent, conn->async.port);
-    if(ai) {
-      compound_results(res, ai);
+    if(CURL_ASYNC_SUCCESS == status) {
+      Curl_addrinfo *ai = Curl_he2ai(hostent, conn->async.port);
+      if(ai) {
+        compound_results(res, ai);
+      }
     }
+    /* A successful result overwrites any previous error */
+    if(res->last_status != ARES_SUCCESS)
+      res->last_status = status;
   }
-  /* A successful result overwrites any previous error */
-  if(res->last_status != ARES_SUCCESS)
-    res->last_status = status;
 }
 
 /*
