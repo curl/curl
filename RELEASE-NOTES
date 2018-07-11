@@ -4,7 +4,7 @@ Curl and libcurl 7.61.0
  Command line options:         218
  curl_easy_setopt() options:   258
  Public functions in libcurl:  74
- Contributors:                 1741
+ Contributors:                 1766
 
 This release includes the following changes:
 
@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2018-0500: smtp: fix SMTP send buffer overflow [82]
  o schannel: disable client cert option if APIs not available [1]
  o schannel: disable manual verify if APIs not available
  o tests/libtest/Makefile: Do not unconditionally add gcc-specific flags [2]
@@ -100,6 +101,16 @@ This release includes the following bugfixes:
  o openssl: Remove some dead code [74]
  o telnet: fix clang warnings [75]
  o DEPRECATE: new doc describing planned item removals [76]
+ o example/crawler.c: simple crawler based on libxml2 [77]
+ o libssh: goto DISCONNECT state on error, not SESSION_FREE [78]
+ o CMake: Remove unused functions [79]
+ o darwinssl: allow High Sierra users to build the code using GCC [80]
+ o scripts: include _curl as part of CLEANFILES [81]
+ o examples: fix -Wformat warnings
+ o curl_setup: include <winerror.h> before <windows.h>
+ o schannel: make more cipher options conditional [83]
+ o CMake: remove redundant and old end-of-block syntax [84]
+ o post303.d: clarify that this is an RFC violation [85]
 
 This release includes the following known bugs:
 
@@ -110,17 +121,18 @@ advice from friends like these:
 
   Adrian Peniak, Alejandro R. Sedeño, Andreas Olsson, Archangel_SDY on github,
   Bernhard M. Wiedemann, Bernhard Walle, Björn Stenberg, bsammon on github,
-  Dagobert Michelsen, Daniel Stenberg, Dario Nieuwenhuis, elephoenix on github,
-  Fabrice Fontaine, Frank Gevaerts, Gaurav Malhotra, Gisle Vanem,
-  Ithubg on github, Javier Blazquez, Johannes Schindelin, Kevin R. Bulgrien,
-  Linus Lewandowski, Lyman Epp, Mamta Upadhyay, Marcel Raad, Marian Klymov,
-  Matteo Bignotti, Max Dymond, Max Savenkov, Oleg Pudeyev, Patrick Monnerat,
+  Dagobert Michelsen, Daniel Stenberg, Dario Nieuwenhuis, Dave Reisner,
+  elephoenix on github, Fabrice Fontaine, Frank Gevaerts, Gaurav Malhotra,
+  Gisle Vanem, Ithubg on github, Jakub Zakrzewski, Javier Blazquez,
+  Jeroen Ooms, Johannes Schindelin, Kevin R. Bulgrien, Linus Lewandowski,
+  Lyman Epp, Mamta Upadhyay, Marcel Raad, Marian Klymov, Matteo Bignotti,
+  Max Dymond, Max Savenkov, Nick Zitzmann, Oleg Pudeyev, Patrick Monnerat,
   Patrick Schlangen, Per Malmberg, Peter Varga, Peter Wu, Philip Prindeville,
   pszemus on github, Raphael Gozzo, Ray Satiro, Richard Alcock,
-  Rikard Falkeborn, Robert Prag, Sean Miller, Sergei Nikulov,
-  Stephan Mühlstrasser, Viktor Szakats, Vladimir Kotal, Will Dietz,
-  Yaakov Selkowitz, zzq1015 on github,
-  (49 contributors)
+  Rikard Falkeborn, Robert Prag, Ruslan Baratov, Sean Miller, Sergei Nikulov,
+  Stephan Mühlstrasser, Vasiliy Faronov, Viktor Szakats, Vladimir Kotal,
+  Will Dietz, Yaakov Selkowitz, zzq1015 on github,
+  (55 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -202,3 +214,12 @@ References to bug reports and discussions on issues:
  [74] = https://curl.haxx.se/bug/?i=2698
  [75] = https://curl.haxx.se/bug/?i=2696
  [76] = https://curl.haxx.se/dev/deprecate.html
+ [77] = https://curl.haxx.se/bug/?i=2706
+ [78] = https://curl.haxx.se/bug/?i=2708
+ [79] = https://curl.haxx.se/bug/?i=2711
+ [80] = https://curl.haxx.se/bug/?i=2656
+ [81] = https://curl.haxx.se/bug/?i=2718
+ [82] = https://curl.haxx.se/docs/adv_2018-70a2.html
+ [83] = https://curl.haxx.se/bug/?i=2721
+ [84] = https://curl.haxx.se/bug/?i=2715
+ [85] = https://curl.haxx.se/bug/?i=2723
