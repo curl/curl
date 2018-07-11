@@ -1573,6 +1573,35 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+  if(conn->bits.tls_enable_alpn) {
+    if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+      CFMutableArrayRef alpnArr = CFArrayCreateMutable(NULL, 0,
+                                                       &kCFTypeArrayCallBacks);
+
+#ifdef USE_NGHTTP2
+      if(data->set.httpversion >= CURL_HTTP_VERSION_2 &&
+         (!SSL_IS_PROXY() || !conn->bits.tunnel_proxy)) {
+        CFArrayAppendValue(alpnArr, CFSTR(NGHTTP2_PROTO_VERSION_ID));
+        infof(data, "ALPN, offering %s\n", NGHTTP2_PROTO_VERSION_ID);
+      }
+#endif
+
+      CFArrayAppendValue(alpnArr, CFSTR(ALPN_HTTP_1_1));
+      infof(data, "ALPN, offering %s\n", ALPN_HTTP_1_1);
+
+      /* expects length prefixed preference ordered list of protocols in wire
+       * format
+       */
+      err = SSLSetALPNProtocols(BACKEND->ssl_ctx, alpnArr);
+      if(err != noErr)
+        infof(data, "WARNING: failed to set ALPN protocols; OSStatus %d\n",
+              err);
+      CFRelease(alpnArr);
+    }
+  }
+#endif
+
   if(SSL_SET_OPTION(key)) {
     infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
           "Transport. The private key must be in the Keychain.\n");
@@ -2466,6 +2495,39 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         infof(data, "Unknown protocol connection\n");
         break;
     }
+
+#if(CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
+    if(conn->bits.tls_enable_alpn) {
+      if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+        CFArrayRef alpnArr = NULL;
+        CFStringRef chosenProtocol = NULL;
+        err = SSLCopyALPNProtocols(BACKEND->ssl_ctx, &alpnArr);
+
+        if(err == noErr && alpnArr && CFArrayGetCount(alpnArr) >= 1)
+          chosenProtocol = CFArrayGetValueAtIndex(alpnArr, 0);
+
+#ifdef USE_NGHTTP2
+        if(chosenProtocol &&
+           !CFStringCompare(chosenProtocol, CFSTR(NGHTTP2_PROTO_VERSION_ID),
+                            0)) {
+          conn->negnpn = CURL_HTTP_VERSION_2;
+        }
+        else
+#endif
+        if(chosenProtocol &&
+           !CFStringCompare(chosenProtocol, CFSTR(ALPN_HTTP_1_1), 0)) {
+          conn->negnpn = CURL_HTTP_VERSION_1_1;
+        }
+        else
+          infof(data, "ALPN, server did not agree to a protocol\n");
+
+        /* chosenProtocol is a reference to the string within alpnArr
+           and doesn't need to be freed separately */
+        if(alpnArr)
+          CFRelease(alpnArr);
+      }
+    }
+#endif
 
     return CURLE_OK;
   }
