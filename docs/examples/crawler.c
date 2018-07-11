@@ -149,9 +149,9 @@ int main(void)
   curl_multi_setopt(multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS, 6L);
 
   /* enables http/2 if available */
-  #ifdef CURLPIPE_MULTIPLEX
-    curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  #endif
+#ifdef CURLPIPE_MULTIPLEX
+  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+#endif
 
   /* sets html start page */
   curl_multi_add_handle(multi_handle, make_handle(start_page));
