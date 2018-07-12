@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,13 +71,13 @@
 #define RESERVED     0xE0 /* bits 5..7: reserved */
 
 typedef enum {
-  ZLIB_UNINIT,          /* uninitialized */
-  ZLIB_INIT,            /* initialized */
-  ZLIB_INFLATING,       /* Inflating started. */
-  ZLIB_GZIP_HEADER,     /* reading gzip header */
-  ZLIB_GZIP_TRAILER,    /* reading gzip trailer */
-  ZLIB_GZIP_INFLATING,  /* inflating gzip stream */
-  ZLIB_INIT_GZIP        /* initialized in transparent gzip mode */
+  ZLIB_UNINIT,               /* uninitialized */
+  ZLIB_INIT,                 /* initialized */
+  ZLIB_INFLATING,            /* inflating started. */
+  ZLIB_EXTERNAL_TRAILER,     /* reading external trailer */
+  ZLIB_GZIP_HEADER,          /* reading gzip header */
+  ZLIB_GZIP_INFLATING,       /* inflating gzip stream */
+  ZLIB_INIT_GZIP             /* initialized in transparent gzip mode */
 } zlibInitState;
 
 /* Writer parameters. */
@@ -150,8 +150,8 @@ static CURLcode process_trailer(struct connectdata *conn, zlib_params *zp)
   if(result || !zp->trailerlen)
     result = exit_zlib(conn, z, &zp->zlib_init, result);
   else {
-    /* Only occurs for gzip with zlib < 1.2.0.4. */
-    zp->zlib_init = ZLIB_GZIP_TRAILER;
+    /* Only occurs for gzip with zlib < 1.2.0.4 or raw deflate. */
+    zp->zlib_init = ZLIB_EXTERNAL_TRAILER;
   }
   return result;
 }
@@ -233,6 +233,7 @@ static CURLcode inflate_stream(struct connectdata *conn,
           z->next_in = orig_in;
           z->avail_in = nread;
           zp->zlib_init = ZLIB_INFLATING;
+          zp->trailerlen = 4; /* Tolerate up to 4 unknown trailer bytes. */
           done = FALSE;
           break;
         }
@@ -286,6 +287,9 @@ static CURLcode deflate_unencode_write(struct connectdata *conn,
   /* Set the compressed input when this function is called */
   z->next_in = (Bytef *) buf;
   z->avail_in = (uInt) nbytes;
+
+  if(zp->zlib_init == ZLIB_EXTERNAL_TRAILER)
+    return process_trailer(conn, zp);
 
   /* Now uncompress the data */
   return inflate_stream(conn, writer, ZLIB_INFLATING);
@@ -532,7 +536,7 @@ static CURLcode gzip_unencode_write(struct connectdata *conn,
   }
   break;
 
-  case ZLIB_GZIP_TRAILER:
+  case ZLIB_EXTERNAL_TRAILER:
     z->next_in = (Bytef *) buf;
     z->avail_in = (uInt) nbytes;
     return process_trailer(conn, zp);
