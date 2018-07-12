@@ -969,11 +969,9 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
 
   /* Parse the path for the share */
   req->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
-  if(!req->share) {
-    free(path);
-
+  free(path);
+  if(!req->share)
     return CURLE_OUT_OF_MEMORY;
-  }
 
   slash = strchr(req->share, '/');
   if(!slash)
@@ -981,8 +979,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
 
   /* The share must be present */
   if(!slash) {
-    free(path);
-
+    Curl_safefree(req->share);
     return CURLE_URL_MALFORMAT;
   }
 
@@ -994,8 +991,6 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
     if(*slash == '/')
       *slash = '\\';
   }
-
-  free(path);
 
   return CURLE_OK;
 }
