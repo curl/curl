@@ -90,18 +90,6 @@ announcement.
 - The security web page on the web site should get the new vulnerability
   mentioned.
 
-Pre-notification
-----------------
-
-If you think you are or should be eligible for a pre-notification about
-upcoming security announcements for curl, we urge OS distros and similar
-vendors to primarily join the distros@openwall list as that is one of the
-purposes of that list - and not just for curl of course.
-
-If you are not a distro or otherwise not suitable for distros@openwall and yet
-want pre-notifications from us, contact the curl security team with a detailed
-and clear explanation why this is the case.
-
 curl-security (at haxx dot se)
 ------------------------------
 
@@ -137,3 +125,16 @@ Publishing Security Advisories
 
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
+
+Hackerone Internet Bug Bounty
+-----------------------------
+
+The curl project does not run any bounty program on its own, but there are
+outside organizations that do. First report your issue the normal way and
+proceed as described in this document.
+
+Then, if the issue is [critical](https://hackerone.com/ibb-data), you are
+eligible to apply for a bounty from Hackerone for your find.
+
+Once your reported vulnerability has been publicly disclosed by the curl
+project, you can submit a [report to them](https://hackerone.com/ibb-data).
