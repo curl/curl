@@ -180,7 +180,7 @@ test1550 test1551 test1552 test1553 test1554 test1555 test1556 test1557 \
 \
 test1590 \
 test1600 test1601 test1602 test1603 test1604 test1605 test1606 test1607 \
-test1608 test1609 \
+test1608 test1609 test1620 \
 \
 test1700 test1701 test1702 \
 \

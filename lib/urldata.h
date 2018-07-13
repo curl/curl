@@ -1446,8 +1446,7 @@ enum dupstring {
 
   STRING_LASTZEROTERMINATED,
 
-  /* -- below this are pointers to binary data that cannot be strdup'ed.
-     Each such pointer must be added manually to Curl_dupset() --- */
+  /* -- below this are pointers to binary data that cannot be strdup'ed. --- */
 
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
 
