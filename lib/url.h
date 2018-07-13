@@ -34,7 +34,7 @@
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_open(struct Curl_easy **curl);
 CURLcode Curl_init_userdefined(struct Curl_easy *data);
-CURLcode Curl_dupset(struct Curl_easy * dst, struct Curl_easy * src);
+
 void Curl_freeset(struct Curl_easy * data);
 CURLcode Curl_close(struct Curl_easy *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, struct connectdata **,
@@ -57,9 +57,7 @@ int Curl_doing_getsock(struct connectdata *conn,
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
-bool Curl_isPipeliningEnabled(const struct Curl_easy *handle);
-CURLcode Curl_addHandleToPipeline(struct Curl_easy *handle,
-                                  struct curl_llist *pipeline);
+
 int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
                                   struct curl_llist *pipeline);
 /* remove the specified connection from all (possible) pipelines and related
@@ -67,7 +65,6 @@ int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
 void Curl_getoff_all_pipelines(struct Curl_easy *data,
                                struct connectdata *conn);
 
-void Curl_close_connections(struct Curl_easy *data);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
