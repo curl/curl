@@ -149,35 +149,6 @@ static CURLcode main_init(struct GlobalConfig *config)
   config->errors = stderr;            /* Default errors to stderr */
   config->styled_output = TRUE;       /* enable detection */
 
-#if defined(_WIN32)
-  // If we're running Windows, enable VT input & output.
-  // Note: VT mode flag can be set on any version of Windows, but VT
-  // processing only performed on Win10 >= Creators Update)
-
-  // Define the VT flags in case we're building with an older SDK
-  #ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
-    #define ENABLE_VIRTUAL_TERMINAL_INPUT 0x0002
-  #endif
-
-  #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-  #endif
-
-  // Enable VT Input
-  DWORD dwInputMode = 0;
-  HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
-  if (hStdIn != INVALID_HANDLE_VALUE && GetConsoleMode(hStdIn, &dwInputMode)) {
-    SetConsoleMode(hStdIn, dwInputMode | ENABLE_VIRTUAL_TERMINAL_INPUT);
-  }
-
-  // Enable VT output
-  DWORD dwOutputMode = 0;
-  HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (hStdOut != INVALID_HANDLE_VALUE && GetConsoleMode(hStdOut, &dwOutputMode)) {
-    SetConsoleMode(hStdOut, dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-  }
-#endif
-
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
   if(config->first) {
@@ -216,12 +187,6 @@ static CURLcode main_init(struct GlobalConfig *config)
     helpf(stderr, "error initializing curl\n");
     result = CURLE_FAILED_INIT;
   }
-
-#if defined(_WIN32)
-  // Restore Console input & output modes to whatever they were when Curl started.
-    SetConsoleMode(hStdIn, dwInputMode);
-    SetConsoleMode(hStdOut, dwOutputMode);
-  #endif 
 
   return result;
 }
@@ -271,6 +236,71 @@ static void main_free(struct GlobalConfig *config)
   config->last = NULL;
 }
 
+#define MSVTMODE
+
+#if defined(_WIN32) && defined(MSVTMODE)
+
+typedef struct {
+    DWORD dwInputMode;
+    DWORD dwOutputMode;
+    HANDLE hStdIn;
+    HANDLE hStdOut;
+} TerminalSettings;
+
+#else
+  typedef struct {} TerminalSettings;
+#endif
+
+void configure_terminal(TerminalSettings* ts)
+{
+  #if defined(_WIN32) && defined(MSVTMODE)
+  // If we're running Windows, enable VT input & output.
+  // Note: VT mode flag can be set on any version of Windows, but VT
+  // processing only performed on Win10 >= Creators Update)
+
+  // Define the VT flags in case we're building with an older SDK
+  #ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
+    #define ENABLE_VIRTUAL_TERMINAL_INPUT 0x0002
+  #endif
+
+  #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+  #endif
+
+  printf("Enabling Windows Console VT Mode");
+  
+  // Enable VT Input
+  ts->hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+  if ((ts->hStdIn != INVALID_HANDLE_VALUE) 
+    && (GetConsoleMode(ts->hStdIn, &ts->dwInputMode))) 
+  {
+    SetConsoleMode(ts->hStdIn, 
+                   ts->dwInputMode | ENABLE_VIRTUAL_TERMINAL_INPUT);
+  }
+
+  // Enable VT output
+  ts->hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  if ((ts->hStdOut != INVALID_HANDLE_VALUE) 
+    && (GetConsoleMode(ts->hStdOut, &ts->dwOutputMode))) 
+  {
+    SetConsoleMode(ts->hStdOut, 
+                   ts->dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+  }
+#endif
+}
+
+void restore_terminal(const TerminalSettings ts)
+{
+#if defined(_WIN32) && defined(MSVTMODE)
+  printf("Resetting Windows Console VT Mode");
+
+  // Restore Console input & output modes to whatever they were when Curl started.
+  SetConsoleMode(ts.hStdIn, ts.dwInputMode);
+  SetConsoleMode(ts.hStdOut, ts.dwOutputMode);
+  
+#endif 
+}
+
 /*
 ** curl tool main function.
 */
@@ -279,6 +309,11 @@ int main(int argc, char *argv[])
   CURLcode result = CURLE_OK;
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
+
+  TerminalSettings ts;
+  memset(&ts, 0, sizeof(TerminalSettings));
+
+  configure_terminal(&ts);
 
   main_checkfds();
 
@@ -304,6 +339,8 @@ int main(int argc, char *argv[])
     /* Perform the main cleanup */
     main_free(&global);
   }
+
+  restore_terminal(ts);
 
 #ifdef __NOVELL_LIBC__
   if(getenv("_IN_NETWARE_BASH_") == NULL)
