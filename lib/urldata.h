@@ -786,7 +786,7 @@ struct connectdata {
      other easy handle without careful consideration (== only for
      pipelining/multiplexing) and it cannot be used by another multi
      handle! */
-#define CONN_INUSE(c) ((c)->send_pipe.size || (c)->recv_pipe.size)
+#define CONN_INUSE(c) ((c)->send_pipe.size + (c)->recv_pipe.size)
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to

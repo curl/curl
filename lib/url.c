@@ -127,7 +127,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 
 static void conn_free(struct connectdata *conn);
 static void free_fixed_hostname(struct hostname *host);
-static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode parse_url_login(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 char **userptr, char **passwdptr,
@@ -750,7 +749,7 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
     return CURLE_OK; /* this is closed and fine already */
 
   if(!data) {
-    DEBUGF(fprintf(stderr, "DISCONNECT without easy handle, ignoring\n"));
+    DEBUGF(infof(data, "DISCONNECT without easy handle, ignoring\n"));
     return CURLE_OK;
   }
 
@@ -758,9 +757,8 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
    * If this connection isn't marked to force-close, leave it open if there
    * are other users of it
    */
-  if(!conn->bits.close && CONN_INUSE(conn)) {
-    DEBUGF(fprintf(stderr, "Curl_disconnect when inuse: %d\n",
-                   CONN_INUSE(conn)));
+  if(CONN_INUSE(conn) && !dead_connection) {
+    DEBUGF(infof(data, "Curl_disconnect when inuse: %d\n", CONN_INUSE(conn)));
     return CURLE_OK;
   }
 
@@ -792,14 +790,7 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
 
   Curl_ssl_close(conn, FIRSTSOCKET);
 
-  /* Indicate to all handles on the pipe that we're dead */
-  if(Curl_pipeline_wanted(data->multi, CURLPIPE_ANY)) {
-    signalPipeClose(&conn->send_pipe, TRUE);
-    signalPipeClose(&conn->recv_pipe, TRUE);
-  }
-
   conn_free(conn);
-
   return CURLE_OK;
 }
 
@@ -888,6 +879,16 @@ static void Curl_printPipeline(struct curl_llist *pipeline)
 static struct Curl_easy* gethandleathead(struct curl_llist *pipeline)
 {
   struct curl_llist_element *curr = pipeline->head;
+#ifdef DEBUGBUILD
+  {
+    struct curl_llist_element *p = pipeline->head;
+    while(p) {
+      struct Curl_easy *e = p->ptr;
+      DEBUGASSERT(GOOD_EASY_HANDLE(e));
+      p = p->next;
+    }
+  }
+#endif
   if(curr) {
     return (struct Curl_easy *) curr->ptr;
   }
@@ -917,33 +918,6 @@ void Curl_getoff_all_pipelines(struct Curl_easy *data,
     int rc;
     rc = Curl_removeHandleFromPipeline(data, &conn->recv_pipe);
     rc += Curl_removeHandleFromPipeline(data, &conn->send_pipe);
-  }
-}
-
-static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke)
-{
-  struct curl_llist_element *curr;
-
-  if(!pipeline)
-    return;
-
-  curr = pipeline->head;
-  while(curr) {
-    struct curl_llist_element *next = curr->next;
-    struct Curl_easy *data = (struct Curl_easy *) curr->ptr;
-
-#ifdef DEBUGBUILD /* debug-only code */
-    if(data->magic != CURLEASY_MAGIC_NUMBER) {
-      /* MAJOR BADNESS */
-      infof(data, "signalPipeClose() found BAAD easy handle\n");
-    }
-#endif
-
-    if(pipe_broke)
-      data->state.pipe_broke = TRUE;
-    Curl_multi_handlePipeBreak(data);
-    Curl_llist_remove(pipeline, curr, NULL);
-    curr = next;
   }
 }
 
@@ -2498,18 +2472,6 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 {
   const struct Curl_handler * p;
   CURLcode result;
-  struct Curl_easy *data = conn->data;
-
-  /* in some case in the multi state-machine, we go back to the CONNECT state
-     and then a second (or third or...) call to this function will be made
-     without doing a DISCONNECT or DONE in between (since the connection is
-     yet in place) and therefore this function needs to first make sure
-     there's no lingering previous data allocated. */
-  Curl_free_request_state(data);
-
-  memset(&data->req, 0, sizeof(struct SingleRequest));
-  data->req.maxdownload = -1;
-
   conn->socktype = SOCK_STREAM; /* most of them are TCP streams */
 
   /* Perform setup complement if some. */
@@ -4675,12 +4637,16 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
+  /* init the single-transfer specific data */
+  Curl_free_request_state(data);
+  memset(&data->req, 0, sizeof(struct SingleRequest));
+  data->req.maxdownload = -1;
+
   /* call the stuff that needs to be called */
   result = create_conn(data, in_connect, asyncp);
 
   if(!result) {
-    /* no error */
-    if((*in_connect)->send_pipe.size || (*in_connect)->recv_pipe.size)
+    if(CONN_INUSE(*in_connect))
       /* pipelining */
       *protocol_done = TRUE;
     else if(!*asyncp) {
@@ -4695,11 +4661,10 @@ CURLcode Curl_connect(struct Curl_easy *data,
     *in_connect = NULL;
     return result;
   }
-
-  if(result && *in_connect) {
+  else if(result && *in_connect) {
     /* We're not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
-    Curl_disconnect(data, *in_connect, FALSE);
+    Curl_disconnect(data, *in_connect, TRUE);
     *in_connect = NULL; /* return a NULL */
   }
 
