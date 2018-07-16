@@ -131,7 +131,7 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
   if(result)
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
-    Curl_disconnect(conn->data, conn, FALSE); /* close the connection */
+    Curl_disconnect(conn->data, conn, TRUE); /* close the connection */
 
   return result;
 }
