@@ -2120,6 +2120,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.sockopt_client = va_arg(param, void *);
     break;
 
+  case CURLOPT_SOCKOPT_RCVBUF:
+    /* SO_RCVBUF sockopt */
+    data->set.sockopt_rcvbuf = va_arg(param, long);
+    break;
+
   case CURLOPT_OPENSOCKETFUNCTION:
     /*
      * open/create socket callback function: called instead of socket(),

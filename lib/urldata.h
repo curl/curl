@@ -1661,6 +1661,7 @@ struct UserDefined {
   long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   long tcp_keepintvl;    /* seconds between TCP keepalive probes */
   bool tcp_fastopen;     /* use TCP Fast Open */
+  long sockopt_rcvbuf;   /* SO_RCVBUF sockopt */
 
   size_t maxconnects;  /* Max idle connections in the connection cache */
 

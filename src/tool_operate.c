@@ -807,6 +807,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->tcp_fastopen)
           my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
 
+        if(config->sockopt_rcvbuf)
+          my_setopt(curl, CURLOPT_SOCKOPT_RCVBUF, config->sockopt_rcvbuf);
+
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         my_setopt(curl, CURLOPT_INTERLEAVEDATA, &outs);

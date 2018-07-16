@@ -162,6 +162,19 @@ tcpkeepalive(struct Curl_easy *data,
   }
 }
 
+static void
+Curl_sockopt_rcvbuf(struct Curl_easy *data,
+             curl_socket_t sockfd)
+{
+  int val = data->set.sockopt_rcvbuf;
+  int len = sizeof(val);
+
+  if(!val)
+    return;
+
+  setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (const char *)&val, sizeof(val));
+}
+
 static CURLcode
 singleipconnect(struct connectdata *conn,
                 const Curl_addrinfo *ai, /* start connecting to this */
@@ -1028,6 +1041,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   nosigpipe(conn, sockfd);
 
   Curl_sndbufset(sockfd);
+  Curl_sockopt_rcvbuf(data, sockfd);
 
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(data, sockfd);
