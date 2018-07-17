@@ -1,6 +1,6 @@
 set(TARGET_LABEL_PREFIX "Test ")
 
-function(SETUP_TEST TEST_NAME)          # ARGN are the files in the test
+function(setup_test TEST_NAME)          # ARGN are the files in the test
   add_executable( ${TEST_NAME} ${ARGN} )
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
@@ -14,7 +14,7 @@ function(SETUP_TEST TEST_NAME)          # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries( ${TEST_NAME} libcurl ${CURL_LIBS})
+  target_link_libraries(${TEST_NAME} libcurl ${CURL_LIBS})
 
   set_target_properties(${TEST_NAME}
     PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
