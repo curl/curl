@@ -342,11 +342,11 @@ static CURLcode http_output_bearer(struct connectdata *conn)
  *
  * return TRUE if one was picked
  */
-static bool pickoneauth(struct auth *pick)
+static bool pickoneauth(struct auth *pick, unsigned long mask)
 {
   bool picked;
   /* only deal with authentication we want */
-  unsigned long avail = pick->avail & pick->want;
+  unsigned long avail = pick->avail & pick->want & mask;
   picked = TRUE;
 
   /* The order of these checks is highly relevant, as this will be the order
@@ -508,6 +508,10 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   bool pickhost = FALSE;
   bool pickproxy = FALSE;
   CURLcode result = CURLE_OK;
+  unsigned long authmask = ~0ul;
+
+  if(!conn->oauth_bearer)
+    authmask &= (unsigned long)~CURLAUTH_BEARER;
 
   if(100 <= data->req.httpcode && 199 >= data->req.httpcode)
     /* this is a transient response code, ignore */
@@ -519,14 +523,15 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   if(conn->bits.user_passwd &&
      ((data->req.httpcode == 401) ||
       (conn->bits.authneg && data->req.httpcode < 300))) {
-    pickhost = pickoneauth(&data->state.authhost);
+    pickhost = pickoneauth(&data->state.authhost, authmask);
     if(!pickhost)
       data->state.authproblem = TRUE;
   }
   if(conn->bits.proxy_user_passwd &&
      ((data->req.httpcode == 407) ||
       (conn->bits.authneg && data->req.httpcode < 300))) {
-    pickproxy = pickoneauth(&data->state.authproxy);
+    pickproxy = pickoneauth(&data->state.authproxy,
+                            authmask & ~CURLAUTH_BEARER);
     if(!pickproxy)
       data->state.authproblem = TRUE;
   }
