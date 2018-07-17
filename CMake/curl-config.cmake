@@ -9,6 +9,11 @@ if(NOT CURL_FIND_COMPONENTS)
   endif()
 endif()
 
+include(CMakeFindDependencyMacro)
+if(CURL_FIND_REQUIRED_libcurl)
+    find_dependency(OpenSSL)
+endif()
+
 set(_curl_missing_components)
 foreach(_comp ${CURL_FIND_COMPONENTS})
   if(EXISTS "${_DIR}/${_comp}-target.cmake")
