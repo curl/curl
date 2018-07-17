@@ -352,8 +352,8 @@ if(CMAKE_USE_OPENSSL)
   set(USE_OPENSSL ON)
   set(HAVE_LIBCRYPTO ON)
   set(HAVE_LIBSSL ON)
-  list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
-  include_directories(${OPENSSL_INCLUDE_DIR})
+  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
   check_include_file("openssl/err.h"    HAVE_OPENSSL_ERR_H)
@@ -1308,9 +1308,9 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
-configure_file(CMake/curl-config.cmake
+configure_file(CMake/curl-config.cmake.in
         "${PROJECT_BINARY_DIR}/curl-config.cmake"
-        COPYONLY
+        @ONLY
 )
 
 install(
