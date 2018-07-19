@@ -941,17 +941,11 @@ static CURLcode smb_disconnect(struct connectdata *conn, bool dead)
 static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
                        int numsocks)
 {
-  struct smb_conn *smbc = &conn->proto.smbc;
-
   if(!numsocks)
     return GETSOCK_BLANK;
 
   socks[0] = conn->sock[FIRSTSOCKET];
-
-  if(smbc->send_size || smbc->upload_size)
-    return GETSOCK_WRITESOCK(0);
-
-  return GETSOCK_READSOCK(0);
+  return GETSOCK_READSOCK(0) | GETSOCK_WRITESOCK(0);
 }
 
 static CURLcode smb_parse_url_path(struct connectdata *conn)
