@@ -99,9 +99,6 @@ int test(char *URL)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* detect HTTP error codes >= 400 */
-  /* test_setopt(curl, CURLOPT_FAILONERROR, 1L); */
-
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
