@@ -869,6 +869,22 @@ static CURLcode done_sending(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#if defined(WIN32) && defined(SIO_IDEAL_SEND_BACKLOG_QUERY)
+static void win_update_buffer_size(curl_socket_t sockfd)
+{
+  int result;
+  ULONG ideal;
+  DWORD ideallen;
+  result = WSAIoctl(sockfd, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
+                    &ideal, sizeof(ideal), &ideallen, 0, 0);
+  if(result == 0) {
+    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
+               (const char *)&ideal, sizeof(ideal));
+  }
+}
+#else
+#define win_update_buffer_size(x)
+#endif
 
 /*
  * Send data to upload to the server, when the socket is writable.
@@ -1020,9 +1036,10 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
                         k->upload_fromhere, /* buffer pointer */
                         k->upload_present,  /* buffer size */
                         &bytes_written);    /* actually sent */
-
     if(result)
       return result;
+
+    win_update_buffer_size(conn->writesockfd);
 
     if(data->set.verbose)
       /* show the data before we change the pointer upload_fromhere */
