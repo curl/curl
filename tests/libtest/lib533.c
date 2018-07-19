@@ -47,7 +47,6 @@ int test(char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 
   multi_init(m);
 
@@ -78,7 +77,6 @@ int test(char *URL)
         curl_easy_reset(curl);
         easy_setopt(curl, CURLOPT_URL, libtest_arg2);
         easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-        easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 
         /* re-add it */
         multi_add_handle(m, curl);

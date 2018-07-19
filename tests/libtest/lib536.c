@@ -92,7 +92,6 @@ int test(char *URL)
   multi_setopt(multi, CURLMOPT_PIPELINING, 1L);
 
   easy_setopt(easy, CURLOPT_WRITEFUNCTION, fwrite);
-  easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
   easy_setopt(easy, CURLOPT_URL, URL);
 
   res_multi_add_handle(multi, easy);
@@ -111,7 +110,6 @@ int test(char *URL)
 
   curl_easy_reset(easy);
 
-  easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
   easy_setopt(easy, CURLOPT_URL, libtest_arg2);
 
   res_multi_add_handle(multi, easy);

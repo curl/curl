@@ -900,7 +900,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
 #endif /* !CURL_DISABLE_PROXY */
 
-        my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
         my_setopt(curl, CURLOPT_REQUEST_TARGET, config->request_target);
         my_setopt(curl, CURLOPT_UPLOAD, uploadfile?1L:0L);
         my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly?1L:0L);
