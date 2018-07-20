@@ -154,6 +154,11 @@ static void http2_stream_free(struct HTTP *http)
   }
 }
 
+/*
+ * Disconnects *a* connection used for HTTP/2. It might be an old one from the
+ * connection cache and not the "main" one. Don't touch the easy handle!
+ */
+
 static CURLcode http2_disconnect(struct connectdata *conn,
                                  bool dead_connection)
 {
@@ -164,8 +169,6 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
-  http2_stream_free(conn->data->req.protop);
-  conn->data->state.drain = 0;
 
   H2BUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
@@ -520,6 +523,7 @@ static int push_promise(struct Curl_easy *data,
     if(rv) {
       /* denied, kill off the new handle again */
       http2_stream_free(newhandle->req.protop);
+      newhandle->req.protop = NULL;
       (void)Curl_close(newhandle);
       goto fail;
     }
@@ -535,6 +539,7 @@ static int push_promise(struct Curl_easy *data,
     if(rc) {
       infof(data, "failed to add handle to multi\n");
       http2_stream_free(newhandle->req.protop);
+      newhandle->req.protop = NULL;
       Curl_close(newhandle);
       rv = 1;
       goto fail;

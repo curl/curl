@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,7 +65,7 @@ void Curl_http2_cleanup_dependencies(struct Curl_easy *data);
 #define Curl_http2_request_upgrade(x,y) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_setup(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_switched(x,y,z) CURLE_UNSUPPORTED_PROTOCOL
-#define Curl_http2_setup_conn(x)
+#define Curl_http2_setup_conn(x) Curl_nop_stmt
 #define Curl_http2_setup_req(x)
 #define Curl_http2_init_state(x)
 #define Curl_http2_init_userset(x)

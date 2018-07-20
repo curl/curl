@@ -158,18 +158,20 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
   struct HTTP *http;
-  DEBUGASSERT(conn->data->req.protop == NULL);
+  struct Curl_easy *data = conn->data;
+  DEBUGASSERT(data->req.protop == NULL);
 
   http = calloc(1, sizeof(struct HTTP));
   if(!http)
     return CURLE_OUT_OF_MEMORY;
 
   Curl_mime_initpart(&http->form, conn->data);
-  conn->data->req.protop = http;
+  data->req.protop = http;
 
-  Curl_http2_setup_conn(conn);
-  Curl_http2_setup_req(conn->data);
-
+  if(!CONN_INUSE(conn))
+    /* if not alredy multi-using, setup connection details */
+    Curl_http2_setup_conn(conn);
+  Curl_http2_setup_req(data);
   return CURLE_OK;
 }
 
@@ -1913,6 +1915,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
   http = data->req.protop;
+  DEBUGASSERT(http);
 
   if(!data->state.this_is_a_follow) {
     /* Free to avoid leaking memory on multiple requests*/
