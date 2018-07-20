@@ -1310,7 +1310,7 @@ write_basic_package_version_file(
 
 configure_file(CMake/curl-config.cmake
         "${PROJECT_BINARY_DIR}/curl-config.cmake"
-        COPYONLY
+        @ONLY
 )
 
 install(
