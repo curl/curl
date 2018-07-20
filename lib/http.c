@@ -518,7 +518,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   if(data->state.authproblem)
     return data->set.http_fail_on_error?CURLE_HTTP_RETURNED_ERROR:CURLE_OK;
 
-  if(conn->bits.user_passwd &&
+  if((conn->bits.user_passwd || conn->oauth_bearer) &&
      ((data->req.httpcode == 401) ||
       (conn->bits.authneg && data->req.httpcode < 300))) {
     pickhost = pickoneauth(&data->state.authhost, authmask);
