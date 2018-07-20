@@ -941,8 +941,6 @@ static CURLcode smb_disconnect(struct connectdata *conn, bool dead)
 static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
                        int numsocks)
 {
-  struct smb_conn *smbc = &conn->proto.smbc;
-
   if(!numsocks)
     return GETSOCK_BLANK;
 
