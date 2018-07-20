@@ -314,7 +314,6 @@ void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
     if(lock) {
       CONN_LOCK(data);
     }
-    conn->data = NULL; /* detach */
     bundle_remove_conn(bundle, conn);
     if(bundle->num_connections == 0)
       conncache_remove_bundle(connc, bundle);
