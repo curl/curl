@@ -788,6 +788,9 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   free_fixed_hostname(&conn->http_proxy.host);
   free_fixed_hostname(&conn->socks_proxy.host);
 
+  DEBUGASSERT(conn->data == data);
+  /* this assumes that the pointer is still there after the connection was
+     detected from the cache */
   Curl_ssl_close(conn, FIRSTSOCKET);
 
   conn_free(conn);
@@ -969,6 +972,7 @@ static bool extract_if_dead(struct connectdata *conn,
     if(dead) {
       infof(data, "Connection %ld seems to be dead!\n", conn->connection_id);
       Curl_conncache_remove_conn(conn, FALSE);
+      conn->data = NULL; /* detach */
       return TRUE;
     }
   }
