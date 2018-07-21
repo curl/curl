@@ -56,7 +56,7 @@ Accept: */*
 </protocol>
 # This allows the last 4 letters of the bar to get updated without it
 # matters. We're mostly checking the width of it anyway.
-<file name="log/stderrlog1148">
+<file name="log/stderrlog1148" mode="text">
 bar 100.0%
 </file>
 <stripfile>
