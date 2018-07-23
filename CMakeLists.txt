@@ -1308,7 +1308,7 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
-configure_file(CMake/curl-config.cmake
+configure_file(CMake/curl-config.cmake.in
         "${PROJECT_BINARY_DIR}/curl-config.cmake"
         @ONLY
 )
