@@ -37,6 +37,9 @@ progress-bar
  <command>
 http://%HOSTIP:%HTTPPORT/1148 -# --stderr log/stderrlog1148
 </command>
+<precheck>
+perl -e '$ENV{"LC_NUMERIC"} = "en_US.UTF-8"; system("./libtest/chkdecimalpoint") and die("Test requires point as decimal separator");'
+</precheck>
 <setenv>
 LC_ALL=
 LC_NUMERIC=en_US.UTF-8
