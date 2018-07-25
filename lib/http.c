@@ -2489,8 +2489,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   /* clear userpwd and proxyuserpwd to avoid re-using old credentials
    * from re-used connections */
-  if(conn->allocptr.userpwd)
-    ZEROSTR(conn->allocptr.userpwd);
+  if (conn->allocptr.userpwd) {
+      ZEROSTR(conn->allocptr.userpwd);
+  }
   Curl_safefree(conn->allocptr.userpwd);
   Curl_safefree(conn->allocptr.proxyuserpwd);
 

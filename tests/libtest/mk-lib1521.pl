@@ -122,6 +122,7 @@ static curl_progress_callback progresscb;
 static curl_write_callback headercb;
 static curl_debug_callback debugcb;
 static curl_ssl_ctx_callback ssl_ctx_cb;
+static curl_ssl_cert_callback ssl_cert_cb;
 static curl_ioctl_callback ioctlcb;
 static curl_sockopt_callback sockoptcb;
 static curl_opensocket_callback opensocketcb;
@@ -133,6 +134,7 @@ static curl_fnmatch_callback fnmatch_cb;
 static curl_closesocket_callback closesocketcb;
 static curl_xferinfo_callback xferinfocb;
 static curl_resolver_start_callback resolver_start_cb;
+static curl_password_callback password_cb;
 
 int test(char *URL)
 {
