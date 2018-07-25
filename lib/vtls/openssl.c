@@ -994,9 +994,11 @@ static int Curl_ossl_init(void)
 #define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
 
+#ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
   CONF_modules_load_file(NULL, NULL,
                          CONF_MFLAGS_DEFAULT_SECTION|
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
+#endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !defined(LIBRESSL_VERSION_NUMBER)
