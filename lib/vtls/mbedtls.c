@@ -29,6 +29,8 @@
 
 #include "curl_setup.h"
 
+#define USE_MBEDTLS 1
+
 #ifdef USE_MBEDTLS
 
 #include <mbedtls/version.h>
@@ -596,6 +598,14 @@ mbed_connect_step2(struct connectdata *conn,
   }
 
   peercert = mbedtls_ssl_get_peer_cert(&BACKEND->ssl);
+  if(data->set.ssl.fsslcert) {
+    CURLcode rc = (*data->set.ssl.fsslcert)(data, (void *)peercert,
+    data->set.ssl.fsslcertp);
+    if(rc) {
+      failf(data, "error signaled by ssl cert callback");
+      return rc;
+    }
+  }
 
   if(peercert && data->set.verbose) {
     const size_t bufsize = 16384;
@@ -1051,7 +1061,8 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
 
   SSLSUPP_CA_PATH |
   SSLSUPP_PINNEDPUBKEY |
-  SSLSUPP_SSL_CTX,
+  SSLSUPP_SSL_CTX |
+  SSLSUPP_SSL_CERT,
 
   sizeof(struct ssl_backend_data),
 
@@ -1078,3 +1089,4 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
 };
 
 #endif /* USE_MBEDTLS */
+

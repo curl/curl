@@ -1881,7 +1881,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
 #endif /* CURL_DISABLE_PROXY */
 
-  conn->bits.user_passwd = (data->set.str[STRING_USERNAME] || data->set.fpassword) ? TRUE : FALSE;
+  conn->bits.user_passwd = (data->set.str[STRING_USERNAME]
+     || data->set.fpassword) ? TRUE : FALSE;
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
 
