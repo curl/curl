@@ -134,8 +134,9 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
       break;
 
     case VERSION_LESS_THAN_EQUAL:
-      if(osver.dwMajorVersion <= majorVersion &&
-         osver.dwMinorVersion <= minorVersion)
+      if(osver.dwMajorVersion < majorVersion ||
+        (osver.dwMajorVersion == majorVersion &&
+         osver.dwMinorVersion <= minorVersion))
         matched = TRUE;
       break;
 
@@ -146,8 +147,9 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
       break;
 
     case VERSION_GREATER_THAN_EQUAL:
-      if(osver.dwMajorVersion >= majorVersion &&
-         osver.dwMinorVersion >= minorVersion)
+      if(osver.dwMajorVersion > majorVersion ||
+        (osver.dwMajorVersion == majorVersion &&
+         osver.dwMinorVersion >= minorVersion))
         matched = TRUE;
       break;
 
