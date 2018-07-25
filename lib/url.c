@@ -3971,6 +3971,7 @@ static void reuse_conn(struct connectdata *old_conn,
 
   Curl_safefree(old_conn->user);
   Curl_safefree(old_conn->passwd);
+  Curl_safefree(old_conn->options);
   Curl_safefree(old_conn->http_proxy.user);
   Curl_safefree(old_conn->socks_proxy.user);
   Curl_safefree(old_conn->http_proxy.passwd);
