@@ -45,11 +45,11 @@ your own home directory:
 The configure script always tries to find a working SSL library unless
 explicitly told not to. If you have OpenSSL installed in the default search
 path for your compiler/linker, you don't need to do anything special. If you
-have OpenSSL installed in /usr/local/ssl, you can run configure like:
+have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
 
     ./configure --with-ssl
 
-If you have OpenSSL installed somewhere else (for example, /opt/OpenSSL) and
+If you have OpenSSL installed somewhere else (for example, `/opt/OpenSSL`) and
 you have pkg-config installed, set the pkg-config path first, like this:
 
     env PKG_CONFIG_PATH=/opt/OpenSSL/lib/pkgconfig ./configure --with-ssl
