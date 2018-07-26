@@ -968,6 +968,8 @@ static CURLcode Curl_cyassl_random(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
   if(RNG_GenerateBlock(&rng, entropy, (unsigned)length))
     return CURLE_FAILED_INIT;
+  if(FreeRng(&rng))
+    return CURLE_FAILED_INIT;
   return CURLE_OK;
 }
 
