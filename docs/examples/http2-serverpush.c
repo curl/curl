@@ -304,7 +304,7 @@ int main(void)
      */
 
     do {
-      int msgq = 0;;
+      int msgq;
       m = curl_multi_info_read(multi_handle, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
         CURL *e = m->easy_handle;
@@ -312,7 +312,7 @@ int main(void)
         curl_multi_remove_handle(multi_handle, e);
         curl_easy_cleanup(e);
       }
-    } while(m);
+    } while(msgq);
 
   } while(transfers); /* as long as we have transfers going */
 

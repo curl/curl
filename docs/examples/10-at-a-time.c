@@ -170,8 +170,9 @@ int main(void)
       }
     }
 
-    while((msg = curl_multi_info_read(cm, &Q))) {
-      if(msg->msg == CURLMSG_DONE) {
+    do {
+      if((msg = curl_multi_info_read(cm, &Q)) &&
+         (msg->msg == CURLMSG_DONE)) {
         char *url;
         CURL *e = msg->easy_handle;
         curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &url);
@@ -188,7 +189,7 @@ int main(void)
         U++; /* just to prevent it from remaining at 0 if there are more
                 URLs to get */
       }
-    }
+    } while(Q);
   }
 
   curl_multi_cleanup(cm);

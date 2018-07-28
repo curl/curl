@@ -154,8 +154,9 @@ static void check_multi_info(GlobalInfo *g)
 
   fprintf(MSG_OUT, "\nREMAINING: %d", g->still_running);
 
-  while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
-    if(msg->msg == CURLMSG_DONE) {
+  do {
+    if((msg = curl_multi_info_read(g->multi, &msgs_left)) &&
+       (msg->msg == CURLMSG_DONE)) {
       easy = msg->easy_handle;
       res = msg->data.result;
       curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
@@ -166,7 +167,7 @@ static void check_multi_info(GlobalInfo *g)
       curl_easy_cleanup(easy);
       free(conn);
     }
-  }
+  } while(msgs_left);
 }
 
 /* Called by asio when there is an action on a socket */

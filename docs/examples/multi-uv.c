@@ -101,32 +101,39 @@ static void check_multi_info(void)
   CURL *easy_handle;
   FILE *file;
 
-  while((message = curl_multi_info_read(curl_handle, &pending))) {
-    switch(message->msg) {
-    case CURLMSG_DONE:
-      /* Do not use message data after calling curl_multi_remove_handle() and
-         curl_easy_cleanup(). As per curl_multi_info_read() docs:
-         "WARNING: The data the returned pointer points to will not survive
-         calling curl_multi_cleanup, curl_multi_remove_handle or
-         curl_easy_cleanup." */
-      easy_handle = message->easy_handle;
+	/* While processing one handle, the application may cleanup the curl_handle
+	if it is the last one. Don't try another curl_multi_info_read after
+	that last queued handle, or curl_multi_info_read will be reading the
+	freed() curl_handle. That's what the pending counter is for. */
 
-      curl_easy_getinfo(easy_handle, CURLINFO_EFFECTIVE_URL, &done_url);
-      curl_easy_getinfo(easy_handle, CURLINFO_PRIVATE, &file);
-      printf("%s DONE\n", done_url);
-
-      curl_multi_remove_handle(curl_handle, easy_handle);
-      curl_easy_cleanup(easy_handle);
-      if(file) {
-        fclose(file);
+  do {
+    if((message = curl_multi_info_read(curl_handle, &pending))) {
+      switch(message->msg) {
+      case CURLMSG_DONE:
+        /* Do not use message data after calling curl_multi_remove_handle() and
+           curl_easy_cleanup(). As per curl_multi_info_read() docs:
+           "WARNING: The data the returned pointer points to will not survive
+           calling curl_multi_cleanup, curl_multi_remove_handle or
+           curl_easy_cleanup." */
+        easy_handle = message->easy_handle;
+  
+        curl_easy_getinfo(easy_handle, CURLINFO_EFFECTIVE_URL, &done_url);
+        curl_easy_getinfo(easy_handle, CURLINFO_PRIVATE, &file);
+        printf("%s DONE\n", done_url);
+  
+        curl_multi_remove_handle(curl_handle, easy_handle);
+        curl_easy_cleanup(easy_handle);
+        if(file) {
+          fclose(file);
+        }
+        break;
+  
+      default:
+        fprintf(stderr, "CURLMSG default\n");
+        break;
       }
-      break;
-
-    default:
-      fprintf(stderr, "CURLMSG default\n");
-      break;
     }
-  }
+  } while(pending);
 }
 
 static void curl_perform(uv_poll_t *req, int status, int events)

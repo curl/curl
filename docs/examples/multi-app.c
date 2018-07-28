@@ -145,8 +145,9 @@ int main(void)
   } while(still_running);
 
   /* See how the transfers went */
-  while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
-    if(msg->msg == CURLMSG_DONE) {
+  do {
+    if((msg = curl_multi_info_read(multi_handle, &msgs_left)) &&
+       (msg->msg == CURLMSG_DONE)) {
       int idx, found = 0;
 
       /* Find out which handle this message is about */
@@ -165,7 +166,7 @@ int main(void)
         break;
       }
     }
-  }
+  } while(msgs_left);
 
   curl_multi_cleanup(multi_handle);
 
