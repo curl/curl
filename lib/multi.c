@@ -575,6 +575,9 @@ static CURLcode multi_done(struct connectdata **connp,
 
   process_pending_handles(data->multi); /* connection / multiplex */
 
+  /* if not drained already here, something went wrong in HTTP/2 land */
+  DEBUGASSERT(data->state.drain == 0);
+
   if(conn->send_pipe.size || conn->recv_pipe.size) {
     /* Stop if pipeline is not empty . */
     data->easy_conn = NULL;
