@@ -1706,7 +1706,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           warnf(global, "Failed to open %s!\n", &nextarg[1]);
         else {
           err = file2memory(&string, &len, file);
-          if(!err) {
+          if(!err && string) {
             /* Allow strtok() here since this isn't used threaded */
             /* !checksrc! disable BANNEDFUNC 2 */
             char *h = strtok(string, "\r\n");
