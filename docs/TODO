@@ -113,6 +113,7 @@
  13.7 improve configure --with-ssl
  13.8 Support DANE
  13.9 Configurable loading of OpenSSL configuration file
+ 13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
  13.13 Support HPKP
@@ -778,6 +779,17 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  CONF_modules_load_file() call.
 
  See https://github.com/curl/curl/issues/2724
+
+13.10 Support Authority Information Access certificate extension (AIA)
+
+ AIA can provide various things like CRLs but more importantly information
+ about intermediate CA certificates that can allow validation path to be
+ fullfilled when the HTTPS server doesn't itself provide them.
+
+ Since AIA is about downloading certs on demand to complete a TLS handshake,
+ it is probably a bit tricky to get done right.
+
+ See https://github.com/curl/curl/issues/2793
 
 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
 
