@@ -735,7 +735,7 @@ static void conn_free(struct connectdata *conn)
  *
  * A connection needs an easy handle when closing down. We support this passed
  * in separately since the connection to get closed here is often already
- * disconnected from an easy handle.
+ * disassociated from an easy handle.
  *
  * This function MUST NOT reset state in the Curl_easy struct if that
  * isn't strictly bound to the life-time of *this* particular connection.
