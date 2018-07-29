@@ -154,17 +154,19 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
   timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
-  if (timeout_ms > 0) {
+  if(timeout_ms > 0) {
     its.it_interval.tv_sec = 1;
     its.it_interval.tv_nsec = 0;
     its.it_value.tv_sec = timeout_ms / 1000;
     its.it_value.tv_nsec = (timeout_ms % 1000) * 1000;
     timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
-  } else if (timeout_ms == 0) {
+  }
+  else if(timeout_ms == 0) {
     rc = curl_multi_socket_action(g->multi,
                                   CURL_SOCKET_TIMEOUT, 0, &g->still_running);
     mcode_or_die("multi_timer_cb: curl_multi_socket_action", rc);
-  } else {
+  }
+  else {
     memset(&its, 0, sizeof(struct itimerspec));
     timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
   }
@@ -232,12 +234,12 @@ static void timer_cb(GlobalInfo* g, int revents)
      * epoll buffer (i.e. the timer may have fired multiple times). The
      * event count is cleared after the first call so future events in the
      * epoll buffer will fail to read from the timer. */
-    if (errno == EAGAIN) {
+    if(errno == EAGAIN) {
       fprintf(MSG_OUT, "EAGAIN on tfd %d\n", g->tfd);
       return;
     }
   }
-  if(err != sizeof(uint64_t)){
+  if(err != sizeof(uint64_t)) {
     fprintf(stderr, "read(tfd) == %ld", err);
     perror("read(tfd)");
   }
@@ -268,10 +270,10 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
                     GlobalInfo *g)
 {
   struct epoll_event ev;
-  int kind =
-      (act & CURL_POLL_IN ? EPOLLIN : 0) | (act & CURL_POLL_OUT ? EPOLLOUT : 0);
+  int kind = (act & CURL_POLL_IN ? EPOLLIN : 0) |
+             (act & CURL_POLL_OUT ? EPOLLOUT : 0);
 
-  if(f->sockfd){
+  if(f->sockfd) {
     epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL);
   }
 
@@ -398,7 +400,8 @@ static void fifo_cb(GlobalInfo* g, int revents)
     s[n]='\0';
     if(n && s[0]) {
       new_conn(s, g); /* if we read a URL, go get it! */
-    } else
+    }
+    else
       break;
   } while(rv != EOF);
 }
@@ -451,8 +454,9 @@ static void clean_fifo(GlobalInfo *g)
 
 int g_should_exit_ = 0;
 
-void SignalHandler(int signo) {
-  if (signo == SIGINT) {
+void SignalHandler(int signo)
+{
+  if(signo == SIGINT) {
     g_should_exit_ = 1;
   }
 }
@@ -505,28 +509,31 @@ int main(int argc _Unused, char **argv _Unused)
 
   fprintf(MSG_OUT, "Entering wait loop\n");
   fflush(MSG_OUT);
-  while (!g_should_exit_) {
+  while(!g_should_exit_) {
     /* TODO(josh): use epoll_pwait to avoid a race on the signal. Mask the
      * signal before the while loop, and then re-enable the signal during
      * epoll wait. Mask at the end of the loop. */
     err = epoll_wait(g.epfd, events, sizeof(events)/sizeof(struct epoll_event),
                      10000);
-    if (err == -1) {
-      if (errno == EINTR) {
+    if(err == -1) {
+      if(errno == EINTR) {
         fprintf(MSG_OUT, "note: wait interrupted\n");
         continue;
-      } else {
+      }
+      else {
         perror("epoll_wait");
         exit(1);
       }
     }
 
-    for (idx = 0; idx < err; ++idx) {
-      if (events[idx].data.fd == g.fifofd) {
+    for(idx = 0; idx < err; ++idx) {
+      if(events[idx].data.fd == g.fifofd) {
         fifo_cb(&g, events[idx].events);
-      } else if (events[idx].data.fd == g.tfd) {
+      }
+      else if(events[idx].data.fd == g.tfd) {
         timer_cb(&g, events[idx].events);
-      } else {
+      }
+      else {
         event_cb(&g, events[idx].data.fd, events[idx].events);
       }
     }
