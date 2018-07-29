@@ -1536,17 +1536,17 @@ static void http_connect(curl_socket_t *infdp,
     if(got_exit_signal)
       break;
 
-    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    do {
+      rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+
+    if(got_exit_signal)
+      break;
 
     if(rc > 0) {
       /* socket action */
-      bool tcp_fin_wr;
+      bool tcp_fin_wr = FALSE;
       timeout_count = 0;
-
-      if(got_exit_signal)
-        break;
-
-      tcp_fin_wr = FALSE;
 
       /* ---------------------------------------------------------- */
 
@@ -2289,16 +2289,19 @@ int main(int argc, char *argv[])
     if(got_exit_signal)
       goto sws_cleanup;
 
-    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    do {
+      rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+
+    if(got_exit_signal)
+      goto sws_cleanup;
+
     if(rc < 0) {
       error = SOCKERRNO;
       logmsg("select() failed with error: (%d) %s",
              error, strerror(error));
       goto sws_cleanup;
     }
-
-    if(got_exit_signal)
-      goto sws_cleanup;
 
     if(rc == 0) {
       /* Timed out - try again */
