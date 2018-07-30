@@ -106,9 +106,6 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
      (protocol & (CURLPROTO_HTTPS|CURLPROTO_HTTP))) {
     const char *p = str + 20;
 
-    if(!outs->stream && !tool_create_output_file(outs, FALSE))
-      return failure;
-
     /* look for the 'filename=' parameter
        (encoded filenames (*=) are not supported) */
     for(;;) {
@@ -156,6 +153,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       }
       break;
     }
+    if(!outs->stream && !tool_create_output_file(outs, FALSE))
+      return failure;
   }
 
   if(hdrcbdata->config->show_headers &&
