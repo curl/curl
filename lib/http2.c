@@ -444,6 +444,28 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
   return NULL;
 }
 
+/*
+ * This specific transfer on this connection has been "drained".
+ */
+static void drained_transfer(struct Curl_easy *data,
+                             struct http_conn *httpc)
+{
+  DEBUGASSERT(httpc->drain_total >= data->state.drain);
+  httpc->drain_total -= data->state.drain;
+  data->state.drain = 0;
+}
+
+/*
+ * Mark this transfer to get "drained".
+ */
+static void drain_this(struct Curl_easy *data,
+                       struct http_conn *httpc)
+{
+  data->state.drain++;
+  httpc->drain_total++;
+  DEBUGASSERT(httpc->drain_total >= data->state.drain);
+}
+
 static struct Curl_easy *duphandle(struct Curl_easy *data)
 {
   struct Curl_easy *second = curl_easy_duphandle(data);
@@ -658,8 +680,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     stream->len -= ncopy;
     stream->memlen += ncopy;
 
-    data_s->state.drain++;
-    httpc->drain_total++;
+    drain_this(data_s, httpc);
     {
       /* get the pointer from userp again since it was re-assigned above */
       struct connectdata *conn_s = (struct connectdata *)userp;
@@ -738,8 +759,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   stream->len -= nread;
   stream->memlen += nread;
 
-  data_s->state.drain++;
-  conn->proto.httpc.drain_total++;
+  drain_this(data_s, &conn->proto.httpc);
 
   /* if we receive data for another handle, wake that up */
   if(conn->data != data_s)
@@ -845,9 +865,8 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
       return NGHTTP2_ERR_CALLBACK_FAILURE;
 
     stream->closed = TRUE;
-    data_s->state.drain++;
     httpc = &conn->proto.httpc;
-    httpc->drain_total++;
+    drain_this(data_s, httpc);
     httpc->error_code = error_code;
 
     /* remove the entry from the hash as the stream is now gone */
@@ -1114,6 +1133,9 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
   struct HTTP *http = data->req.protop;
   struct http_conn *httpc = &conn->proto.httpc;
 
+  if(data->state.drain)
+    drained_transfer(data, httpc);
+
   if(http->header_recvbuf) {
     Curl_add_buffer_free(http->header_recvbuf);
     http->header_recvbuf = NULL; /* clear the pointer */
@@ -1357,7 +1379,6 @@ CURLcode Curl_http2_done_sending(struct connectdata *conn)
   return result;
 }
 
-
 static ssize_t http2_handle_stream_close(struct connectdata *conn,
                                          struct Curl_easy *data,
                                          struct HTTP *stream, CURLcode *err)
@@ -1370,9 +1391,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
     httpc->pause_stream_id = 0;
   }
 
-  DEBUGASSERT(httpc->drain_total >= data->state.drain);
-  httpc->drain_total -= data->state.drain;
-  data->state.drain = 0;
+  drained_transfer(data, httpc);
 
   if(httpc->pause_stream_id == 0) {
     if(h2_process_pending_input(conn, httpc, err) != 0) {
@@ -1683,9 +1702,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
                    stream->stream_id));
     }
     else if(!stream->closed) {
-      DEBUGASSERT(httpc->drain_total >= data->state.drain);
-      httpc->drain_total -= data->state.drain;
-      data->state.drain = 0; /* this stream is hereby drained */
+      drained_transfer(data, httpc);
     }
 
     return retlen;
