@@ -59,6 +59,7 @@
 static CURLcode smb_setup_connection(struct connectdata *conn);
 static CURLcode smb_connect(struct connectdata *conn, bool *done);
 static CURLcode smb_connection_state(struct connectdata *conn, bool *done);
+static CURLcode smb_do(struct connectdata *conn, bool *done);
 static CURLcode smb_request_state(struct connectdata *conn, bool *done);
 static CURLcode smb_done(struct connectdata *conn, CURLcode status,
                          bool premature);
@@ -73,7 +74,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn);
 const struct Curl_handler Curl_handler_smb = {
   "SMB",                                /* scheme */
   smb_setup_connection,                 /* setup_connection */
-  ZERO_NULL,                            /* do_it */
+  smb_do,                               /* do_it */
   smb_done,                             /* done */
   ZERO_NULL,                            /* do_more */
   smb_connect,                          /* connect_it */
@@ -98,7 +99,7 @@ const struct Curl_handler Curl_handler_smb = {
 const struct Curl_handler Curl_handler_smbs = {
   "SMBS",                               /* scheme */
   smb_setup_connection,                 /* setup_connection */
-  ZERO_NULL,                            /* do_it */
+  smb_do,                               /* do_it */
   smb_done,                             /* done */
   ZERO_NULL,                            /* do_more */
   smb_connect,                          /* connect_it */
@@ -173,7 +174,6 @@ enum smb_req_state {
 /* SMB request data */
 struct smb_request {
   enum smb_req_state state;
-  char *share;
   char *path;
   unsigned short tid; /* Even if we connect to the same tree as another */
   unsigned short fid; /* request, the tid will be different */
@@ -182,7 +182,7 @@ struct smb_request {
 
 static void conn_state(struct connectdata *conn, enum smb_conn_state newstate)
 {
-  struct smb_conn *smb = &conn->proto.smbc;
+  struct smb_conn *smbc = &conn->proto.smbc;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* For debug purposes */
   static const char * const names[] = {
@@ -194,12 +194,12 @@ static void conn_state(struct connectdata *conn, enum smb_conn_state newstate)
     /* LAST */
   };
 
-  if(smb->state != newstate)
+  if(smbc->state != newstate)
     infof(conn->data, "SMB conn %p state change from %s to %s\n",
-          (void *)smb, names[smb->state], names[newstate]);
+          (void *)smbc, names[smbc->state], names[newstate]);
 #endif
 
-  smb->state = newstate;
+  smbc->state = newstate;
 }
 
 static void request_state(struct connectdata *conn,
@@ -228,6 +228,8 @@ static void request_state(struct connectdata *conn,
   req->state = newstate;
 }
 
+/* this should setup things in the connection, not in the easy
+   handle */
 static CURLcode smb_setup_connection(struct connectdata *conn)
 {
   struct smb_request *req;
@@ -253,7 +255,6 @@ static CURLcode smb_connect(struct connectdata *conn, bool *done)
     return CURLE_LOGIN_DENIED;
 
   /* Initialize the connection state */
-  memset(smbc, 0, sizeof(*smbc));
   smbc->state = SMB_CONNECTING;
   smbc->recv_buf = malloc(MAX_MESSAGE_SIZE);
   if(!smbc->recv_buf)
@@ -475,11 +476,11 @@ static CURLcode smb_send_setup(struct connectdata *conn)
 
 static CURLcode smb_send_tree_connect(struct connectdata *conn)
 {
-  struct smb_request *req = conn->data->req.protop;
   struct smb_tree_connect msg;
+  struct smb_conn *smbc = &conn->proto.smbc;
   char *p = msg.bytes;
 
-  size_t byte_count = strlen(conn->host.name) + strlen(req->share);
+  size_t byte_count = strlen(conn->host.name) + strlen(smbc->share);
   byte_count += strlen(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
@@ -491,7 +492,7 @@ static CURLcode smb_send_tree_connect(struct connectdata *conn)
   MSGCAT("\\\\");
   MSGCAT(conn->host.name);
   MSGCAT("\\");
-  MSGCATNULL(req->share);
+  MSGCATNULL(smbc->share);
   MSGCATNULL(SERVICENAME); /* Match any type of service */
   byte_count = p - msg.bytes;
   msg.byte_count = smb_swap16((unsigned short)byte_count);
@@ -910,31 +911,18 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
 static CURLcode smb_done(struct connectdata *conn, CURLcode status,
                          bool premature)
 {
-  struct smb_request *req = conn->data->req.protop;
-
   (void) premature;
-
-  Curl_safefree(req->share);
   Curl_safefree(conn->data->req.protop);
-
   return status;
 }
 
 static CURLcode smb_disconnect(struct connectdata *conn, bool dead)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
-  struct smb_request *req = conn->data->req.protop;
-
   (void) dead;
-
+  Curl_safefree(smbc->share);
   Curl_safefree(smbc->domain);
   Curl_safefree(smbc->recv_buf);
-
-  /* smb_done is not always called, so cleanup the request */
-  if(req) {
-    Curl_safefree(req->share);
-  }
-
   return CURLE_OK;
 }
 
@@ -948,11 +936,27 @@ static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
   return GETSOCK_READSOCK(0) | GETSOCK_WRITESOCK(0);
 }
 
+static CURLcode smb_do(struct connectdata *conn, bool *done)
+{
+  struct smb_conn *smbc = &conn->proto.smbc;
+  struct smb_request *req = conn->data->req.protop;
+
+  if(smbc->share) {
+    req->path = strchr(smbc->share, '\0');
+    if(req->path) {
+      req->path++;
+      *done = TRUE;
+      return CURLE_OK;
+    }
+  }
+  return CURLE_URL_MALFORMAT;
+}
+
 static CURLcode smb_parse_url_path(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct smb_request *req = data->req.protop;
+  struct smb_conn *smbc = &conn->proto.smbc;
   char *path;
   char *slash;
 
@@ -962,30 +966,29 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
     return result;
 
   /* Parse the path for the share */
-  req->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
+  smbc->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
   free(path);
-  if(!req->share)
+  if(!smbc->share)
     return CURLE_OUT_OF_MEMORY;
 
-  slash = strchr(req->share, '/');
+  slash = strchr(smbc->share, '/');
   if(!slash)
-    slash = strchr(req->share, '\\');
+    slash = strchr(smbc->share, '\\');
 
   /* The share must be present */
   if(!slash) {
-    Curl_safefree(req->share);
+    Curl_safefree(smbc->share);
     return CURLE_URL_MALFORMAT;
   }
 
   /* Parse the path for the file path converting any forward slashes into
      backslashes */
   *slash++ = 0;
-  req->path = slash;
+
   for(; *slash; slash++) {
     if(*slash == '/')
       *slash = '\\';
   }
-
   return CURLE_OK;
 }
 
