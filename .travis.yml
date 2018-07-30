@@ -42,7 +42,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C="--with-gssapi --with-libssh2"
+          env: T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
         - os: linux
           compiler: gcc
           dist: trusty
@@ -269,6 +269,9 @@ script:
              ./configure --enable-warnings --enable-werror $C
              make && make examples
              make test-nonflaky
+             if [ -n $CHECKSRC ]; then
+                make checksrc
+             fi
         fi
     - |
         set -eo pipefail
