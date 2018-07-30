@@ -1949,6 +1949,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         CURLcode ret = Curl_retry_request(data->easy_conn, &newurl);
         if(!ret)
           retry = (newurl)?TRUE:FALSE;
+        else if(!result)
+          result = ret;
 
         if(retry) {
           /* if we are to retry, set the result to OK and consider the
