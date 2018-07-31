@@ -1560,7 +1560,13 @@ sub UID_imap {
     if ($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
-    elsif (($command ne "COPY") && ($command ne "FETCH") &&
+    elsif (substr($command, 0, 5) eq "FETCH"){
+        my $func = $commandfunc{"FETCH"};
+        if($func) {
+            &$func($args, $command);
+        }
+    }
+    elsif (($command ne "COPY") &&
            ($command ne "STORE") && ($command ne "SEARCH")) {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
