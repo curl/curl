@@ -758,7 +758,7 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
    * are other users of it
    */
   if(CONN_INUSE(conn) && !dead_connection) {
-    DEBUGF(infof(data, "Curl_disconnect when inuse: %d\n", CONN_INUSE(conn)));
+    DEBUGF(infof(data, "Curl_disconnect when inuse: %zu\n", CONN_INUSE(conn)));
     return CURLE_OK;
   }
 
