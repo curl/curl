@@ -26,6 +26,30 @@ This release includes the following bugfixes:
  o darwinssl: add support for ALPN negotiation [7]
  o header output: switch off all styles, not just unbold [8]
  o CMake: Update scripts to use consistent style [9]
+ o test1143: disable MSYS2's POSIX path conversion [10]
+ o smb_getsock: always wait for write socket too [11]
+ o http2: separate easy handle from connections better [12]
+ o test214: disable MSYS2's POSIX path conversion for URL
+ o tests: fixes for Windows line endlings [13]
+ o test320: treat curl320.out file as binary [14]
+ o auth: only pick CURLAUTH_BEARER if we *have* a Bearer token [15]
+ o auth: pick Bearer authentication whenever a token is available [15]
+ o system_win32: fix version checking [16]
+ o reuse_conn(): memory leak - free old_conn->options [17]
+ o wolfSSL/CyaSSL: Fix memory leak in Curl_cyassl_random [18]
+ o docs/CURLOPT_WRITEFUNCTION: size is always 1 [19]
+ o docs/CURLOPT_URL: fix indentation [20]
+ o docs/examples: add hiperfifo example using linux epoll/timerfd [21]
+ o mime: check Curl_rand_hex's return code [22]
+ o curl: Fix segfault when -H @headerfile is empty [23]
+ o tests/http_pipe.py: Use /usr/bin/env to find python
+ o sws: handle EINTR when calling select() [24]
+ o travis: run a 'make checksrc' too [25]
+ o smb: fix memory leak on early failure [26]
+ o http2: clear the drain counter in Curl_http2_done [27]
+ o retry: return error if rewind was necessary but didn't happen [28]
+ o curl: use Content-Disposition before the "URL end" for -OJ [29]
+ o HTTP: Don't attempt to needlessly decompress redirect body [30]
 
 This release includes the following known bugs:
 
@@ -34,10 +58,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  clbr on github, Daniel Stenberg, Jeroen Ooms, Marcel Raad, Nick Zitzmann,
-  Patrick Monnerat, Paul Howarth, Rodger Combs, Ruslan Baratov, Sergei Nikulov,
-  Zero King,
-  (11 contributors)
+  Andrei Virtosu, Carie Pointer, Christopher Head, clbr on github,
+  Daniel Jelinski, Daniel Stenberg, Darío Hereñú, Even Rouault, Harry Sintonen,
+  Jeffrey Walton, Jeroen Ooms, Johannes Schindelin, Josh Bialkowski,
+  Marcel Raad, Michael Kaufmann, Nick Zitzmann, Patrick Monnerat, Paul Howarth,
+  Ray Satiro, Rodger Combs, Ruslan Baratov, Sergei Nikulov, Thomas Klausner,
+  Tobias Blomberg, Zero King,
+  (25 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -52,3 +79,24 @@ References to bug reports and discussions on issues:
  [7] = https://curl.haxx.se/bug/?i=2731
  [8] = https://curl.haxx.se/bug/?i=2736
  [9] = https://curl.haxx.se/bug/?i=2727
+ [10] = https://curl.haxx.se/bug/?i=2765
+ [11] = https://curl.haxx.se/bug/?i=2768
+ [12] = https://curl.haxx.se/bug/?i=2751
+ [13] = https://curl.haxx.se/bug/?i=2772
+ [14] = https://curl.haxx.se/bug/?i=2776
+ [15] = https://curl.haxx.se/bug/?i=2754
+ [16] = https://curl.haxx.se/bug/?i=2792
+ [17] = https://curl.haxx.se/bug/?i=2790
+ [18] = https://curl.haxx.se/bug/?i=2784
+ [19] = https://curl.haxx.se/bug/?i=2787
+ [20] = https://curl.haxx.se/bug/?i=2788
+ [21] = https://curl.haxx.se/bug/?i=2804
+ [22] = https://curl.haxx.se/bug/?i=2795
+ [23] = https://curl.haxx.se/bug/?i=2797
+ [24] = https://curl.haxx.se/bug/?i=2808
+ [25] = https://curl.haxx.se/bug/?i=2811
+ [26] = https://curl.haxx.se/bug/?i=2769
+ [27] = https://curl.haxx.se/bug/?i=2800
+ [28] = https://curl.haxx.se/bug/?i=2801
+ [29] = https://curl.haxx.se/bug/?i=2783
+ [30] = https://curl.haxx.se/bug/?i=2798
