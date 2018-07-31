@@ -44,7 +44,7 @@ crypto
 IMAP CRAM-MD5 authentication with SASL downgrade
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/833/;UID=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/833/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 

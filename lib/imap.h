@@ -58,6 +58,7 @@ struct IMAP {
   char *mailbox;          /* Mailbox to select */
   char *uidvalidity;      /* UIDVALIDITY to check in select */
   char *uid;              /* Message UID to fetch */
+  char *mindex;           /* Index in mail box of mail to fetch */
   char *section;          /* Message SECTION to fetch */
   char *partial;          /* Message PARTIAL to fetch */
   char *query;            /* Query to search for */
