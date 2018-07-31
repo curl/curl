@@ -158,7 +158,7 @@ int test(char *url)
 
     multi_perform(multi, &running);
 
-    fprintf(stderr, "%s:%d running %ld state %d\n",
+    fprintf(stderr, "%s:%d running %d state %d\n",
             __FILE__, __LINE__, running, state);
 
     abort_on_test_timeout();
