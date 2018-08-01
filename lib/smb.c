@@ -941,11 +941,11 @@ static CURLcode smb_do(struct connectdata *conn, bool *done)
   struct smb_conn *smbc = &conn->proto.smbc;
   struct smb_request *req = conn->data->req.protop;
 
+  *done = FALSE;
   if(smbc->share) {
     req->path = strchr(smbc->share, '\0');
     if(req->path) {
       req->path++;
-      *done = TRUE;
       return CURLE_OK;
     }
   }
