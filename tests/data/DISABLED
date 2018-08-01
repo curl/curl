@@ -18,3 +18,5 @@
 1510
 # Pipelining test that is causing false positives a little too often
 1903
+# fnmatch differences are just too common to make testing them sensible
+1307
