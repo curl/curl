@@ -107,7 +107,10 @@ endif
 if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
 libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
 else
+# if symbol-hiding is enabled, hide them!
+if DOING_CURL_SYMBOL_HIDING
 libcurl_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
+endif
 endif
 
 if USE_CPPFLAG_CURL_STATICLIB
