@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+pipelining
+multi
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+echo
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<tool>
+lib1950
+</tool>
+ <name>
+multi HTTP POST using pipelining
+ </name>nnnn
+ <command>
+http://%HOSTIP:%HTTPPORT/ log/urls1950.txt
+</command>
+<file name="log/urls1950.txt">
+0 1950.post.php
+0 1950.post.php
+0 1950.post.php
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes">
+POST /1950.post.php HTTP/1.1
+Host: 127.0.0.1:8990
+Accept: */*
+Content-Length: 8
+Content-Type: application/x-www-form-urlencoded
+
+00000000POST /1950.post.php HTTP/1.1
+Host: 127.0.0.1:8990
+Accept: */*
+Content-Length: 8
+Content-Type: application/x-www-form-urlencoded
+
+00000001POST /1950.post.php HTTP/1.1
+Host: 127.0.0.1:8990
+Accept: */*
+Content-Length: 8
+Content-Type: application/x-www-form-urlencoded
+
+00000002
+</protocol>
+</verify>
+</testcase>
