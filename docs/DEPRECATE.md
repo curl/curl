@@ -53,10 +53,9 @@ In 2018, pipelining *should* be abandoned and HTTP/2 should be used instead.
 
 ### State
 
-In 7.62.0 (release planned to happen in September 2018), we add code
-that ignores the "enable pipeline" option setting). The *setopt() function
-would still return "OK" though so the application couldn't tell that this is
-happening.
+In 7.62.0, we will add code that ignores the "enable pipeline" option
+setting). The *setopt() function would still return "OK" though so the
+application couldn't tell that this is happening.
 
 Users who truly need pipelining from that version will need to modify the code
 (ever so slightly) and rebuild.
