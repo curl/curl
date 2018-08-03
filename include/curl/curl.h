@@ -359,6 +359,11 @@ typedef size_t (*curl_read_callback)(char *buffer,
                                       size_t nitems,
                                       void *instream);
 
+typedef size_t (*curl_trailing_data_callback)(char *buffer,
+                                              size_t size,
+                                              size_t nitems,
+                                              void *instream);
+
 typedef enum {
   CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
   CURLSOCKTYPE_ACCEPT, /* socket created by accept() call */
@@ -1870,6 +1875,12 @@ typedef enum {
 
   /* Time in ms between connection upkeep calls for long-lived connections. */
   CINIT(UPKEEP_INTERVAL_MS, LONG, 281),
+
+  /* add trailing data just before after no more data is available */
+  CINIT(HTTP_TRAILINGDATA_FUNCTION, FUNCTIONPOINT, 282),
+
+  /* pointer to be passed to HTTP_TRAILINGDATA_FUNCTION */
+  CINIT(HTTP_TRAILINGDATA_DATA, OBJECTPOINT, 283),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

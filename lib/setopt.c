@@ -2629,6 +2629,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.upkeep_interval_ms = arg;
+  case CURLOPT_HTTP_TRAILINGDATA_FUNCTION:
+    data->set.trailing_data_callback = va_arg(param, curl_trailing_data_callback);
+    data->set.sending_trailing_headers = 0;
+    break;
+  case CURLOPT_HTTP_TRAILINGDATA_DATA:
+    data->set.trailing_client = va_arg(param, void *);
     break;
   default:
     /* unknown tag and its companion, just ignore: */

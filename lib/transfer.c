@@ -140,16 +140,29 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
   }
 #endif
 
-  if(data->req.upload_chunky) {
+  if (data->state.trailing_data_s == HTTP_TRAILINGDATA_INITIALIZED)
+    data->state.trailing_data_s = HTTP_TRAILINGDATA_SENDING;
+
+  if(data->req.upload_chunky && data->state.trailing_data_s == HTTP_TRAILINGDATA_NONE) {
     /* if chunked Transfer-Encoding */
     buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
 
-  Curl_set_in_callback(data, true);
-  nread = data->state.fread_func(data->req.upload_fromhere, 1,
-                                 buffersize, data->state.in);
-  Curl_set_in_callback(data, false);
+  if(data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING){
+    /* if we're here then that means that we already sent the last empty chunk
+       but we didn't send a final CR LF, so we sent 0 CR LF. So we start pulling
+       trailing data until we have no more */
+    Curl_set_in_callback(data, true);
+    nread = (int)data->set.trailing_data_callback(data->req.upload_fromhere, 1,
+                                                  buffersize, data->set.trailing_client);
+    Curl_set_in_callback(data, false);
+  }else{
+    Curl_set_in_callback(data, true);
+    nread = data->state.fread_func(data->req.upload_fromhere, 1,
+                                        buffersize, data->state.in);
+    Curl_set_in_callback(data, false);
+  }
 
   if(nread == CURL_READFUNC_ABORT) {
     failf(data, "operation aborted by callback");
@@ -218,20 +231,33 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
       endofline_native  = "\r\n";
       endofline_network = "\x0d\x0a";
     }
-    hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
-                      "%x%s", nread, endofline_native);
 
-    /* move buffer pointer */
-    data->req.upload_fromhere -= hexlen;
-    nread += hexlen;
+    bool added_final_cr_lf = FALSE;
 
-    /* copy the prefix to the buffer, leaving out the NUL */
-    memcpy(data->req.upload_fromhere, hexbuffer, hexlen);
+    if(data->state.trailing_data_s != HTTP_TRAILINGDATA_SENDING){
+      hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
+                        "%x%s", nread, endofline_native);
 
-    /* always append ASCII CRLF to the data */
-    memcpy(data->req.upload_fromhere + nread,
-           endofline_network,
-           strlen(endofline_network));
+      /* move buffer pointer */
+      data->req.upload_fromhere -= hexlen;
+      nread += hexlen;
+
+      /* copy the prefix to the buffer, leaving out the NUL */
+      memcpy(data->req.upload_fromhere, hexbuffer, hexlen);
+
+      /* always append ASCII CRLF to the data unless we have a valid trailer callback */
+      if((nread - hexlen) == 0 &&
+         data->set.trailing_data_callback != NULL &&
+         data->state.trailing_data_s == HTTP_TRAILINGDATA_NONE)
+      {
+        data->state.trailing_data_s = HTTP_TRAILINGDATA_INITIALIZED;
+      }else{
+        memcpy(data->req.upload_fromhere + nread,
+               endofline_network,
+               strlen(endofline_network));
+        added_final_cr_lf = TRUE;
+      }
+    }
 
 #ifdef CURL_DOES_CONVERSIONS
     {
@@ -251,13 +277,19 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
     }
 #endif /* CURL_DOES_CONVERSIONS */
 
-    if((nread - hexlen) == 0) {
+    if(nread == 0 && data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING){
+      /* mark the trailing data state as done */
+      data->state.trailing_data_s = HTTP_TRAILINGDATA_DONE;
+      data->req.upload_done = TRUE;
+      infof(data, "Signaling end of chunked upload via terminating chunk.\n");
+    } else if((nread - hexlen) == 0 && data->state.trailing_data_s != HTTP_TRAILINGDATA_INITIALIZED) {
       /* mark this as done once this chunk is transferred */
       data->req.upload_done = TRUE;
       infof(data, "Signaling end of chunked upload via terminating chunk.\n");
     }
 
-    nread += strlen(endofline_native); /* for the added end of line */
+    if(added_final_cr_lf)
+      nread += strlen(endofline_native); /* for the added end of line */
   }
 #ifdef CURL_DOES_CONVERSIONS
   else if((data->set.prefer_ascii) && (!sending_http_headers)) {

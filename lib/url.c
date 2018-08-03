@@ -3610,7 +3610,61 @@ static CURLcode create_conn(struct Curl_easy *data,
      any failure */
   *in_connect = conn;
 
+<<<<<<< HEAD
   result = parseurlandfillconn(data, conn);
+=======
+  /* This initing continues below, see the comment "Continue connectdata
+   * initialization here" */
+
+  /***********************************************************
+   * We need to allocate memory to store the path in. We get the size of the
+   * full URL to be sure, and we need to make it at least 256 bytes since
+   * other parts of the code will rely on this fact
+   ***********************************************************/
+#define LEAST_PATH_ALLOC 256
+  urllen = strlen(data->change.url);
+  if(urllen < LEAST_PATH_ALLOC)
+    urllen = LEAST_PATH_ALLOC;
+
+  /*
+   * We malloc() the buffers below urllen+2 to make room for 2 possibilities:
+   * 1 - an extra terminating zero
+   * 2 - an extra slash (in case a syntax like "www.host.com?moo" is used)
+   */
+
+  Curl_safefree(data->state.pathbuffer);
+  data->state.path = NULL;
+
+  data->state.pathbuffer = malloc(urllen + 2);
+  if(NULL == data->state.pathbuffer) {
+    result = CURLE_OUT_OF_MEMORY; /* really bad error */
+    goto out;
+  }
+  data->state.path = data->state.pathbuffer;
+  /* for the purpose of trailing headers*/
+  data->state.trailing_data_s = HTTP_TRAILINGDATA_NONE;
+
+  conn->host.rawalloc = malloc(urllen + 2);
+  if(NULL == conn->host.rawalloc) {
+    Curl_safefree(data->state.pathbuffer);
+    data->state.path = NULL;
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  conn->host.name = conn->host.rawalloc;
+  conn->host.name[0] = 0;
+
+  user = strdup("");
+  passwd = strdup("");
+  options = strdup("");
+  if(!user || !passwd || !options) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  result = parseurlandfillconn(data, conn, &prot_missing, &user, &passwd,
+                               &options);
   if(result)
     goto out;
 
