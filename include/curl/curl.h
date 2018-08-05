@@ -2779,6 +2779,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
   stuff before they can be included! */
 #include "easy.h" /* nothing in curl is fun without the easy stuff */
 #include "multi.h"
+#include "urlapi.h"
 
 /* the typechecker doesn't work in C++ (yet) */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && \

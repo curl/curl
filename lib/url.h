@@ -69,6 +69,8 @@ void Curl_getoff_all_pipelines(struct Curl_easy *data,
 
 void Curl_close_connections(struct Curl_easy *data);
 
+const struct Curl_handler *Curl_builtin_scheme(const char *scheme);
+
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */

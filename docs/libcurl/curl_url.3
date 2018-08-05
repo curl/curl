@@ -1,0 +1,87 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.TH curl_url 3 "6 Aug 2018" "libcurl" "libcurl Manual"
+.SH NAME
+curl_url - parse a URL and create a CURLURL handle
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+
+.nf
+CURLUcode curl_url(char *url,
+                   CURLURL **urlhandle,
+                   unsigned int flags)
+.fi
+.SH DESCRIPTION
+Pass a pointer to a zero terminated string to the \fIurl\fP parameter. The
+string must point to a correctly formatted "RFC 3986+" URL or be a NULL
+pointer.
+
+Pass a pointer to \fICURLURL *\fP handle in the second parameter and set the
+desired feature bits in the \fIflags\fP bitmask.
+
+This function will then allocate and make the \fIurlhandle\fP argument point
+to a fresh handle holding the details of the parsed URL. If a NULL pointer was
+passed instead of URL, the details of the URL can be subsequently filled in
+with calls to the \fIcurl_url_set(3)\fP function.
+
+Extract individual parts from the parsed URL with the \fIcurl_url_get(3)\fP
+function.
+
+The returned handle must be cleaned up with \fIcurl_url_cleanup(3)\fP when the
+application is done with it.
+.SH FLAGS
+The flags argument is zero, one or more bits set in a bitmask.
+.IP TODO
+.IP TODO
+.SH RETURN VALUE
+Returns a CURLUcode error value, which is CURLURLE_OK (0) if everything went
+fine.
+
+If this function returns an error, no CURLURL handle is returned.
+.SH "URL SYNTAX"
+This function understands and parses URLs exactly like libcurl does internally
+when told to transfer a URL.
+
+It mostly follows the RFC 3986 specification, with some minor alternations
+where adjustments have been made to better understand URLs that popular
+browsers accept.
+
+By default, this function will only accept URLs that uses a scheme that has
+built-in support in libcurl.
+.SH EXAMPLE
+.nf
+  CURLUcode rc;
+  CURLURL *url;
+  rc = curl_url("https://example.com", &url, 0);
+  if(!rc) {
+    char *scheme;
+    rc = curl_url_get(url, CURLUPART_SCHEME, &scheme, 0);
+    if(!rc) {
+      printf("the scheme is %s\n", scheme);
+      curl_free(scheme);
+    }
+    curl_url_cleanup(url);
+  }
+.fi
+.SH "SEE ALSO"
+.BR curl_url_cleanup "(3), " curl_url_get "(3), " curl_url_set "(3), "
+.BR curl_url_dup "(3), "
