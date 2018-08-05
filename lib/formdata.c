@@ -45,10 +45,6 @@
 #include "memdebug.h"
 
 
-/* What kind of Content-Type to use on un-specified files with unrecognized
-   extensions. */
-#define HTTPPOST_CONTENTTYPE_DEFAULT "application/octet-stream"
-
 #define HTTPPOST_PTRNAME CURL_HTTPPOST_PTRNAME
 #define HTTPPOST_FILENAME CURL_HTTPPOST_FILENAME
 #define HTTPPOST_PTRCONTENTS CURL_HTTPPOST_PTRCONTENTS
