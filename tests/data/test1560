@@ -1,0 +1,28 @@
+<testcase>
+<info>
+<keywords>
+unittest
+URL API
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+file
+https
+http
+</features>
+ <name>
+URL API
+ </name>
+<tool>
+lib1560
+</tool>
+</client>
+
+</testcase>
