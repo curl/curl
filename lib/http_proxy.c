@@ -192,7 +192,6 @@ static CURLcode CONNECT(struct connectdata *conn,
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
-#define SELECT_TIMEOUT 2
 
   if(Curl_connect_complete(conn))
     return CURLE_OK; /* CONNECT is already completed */
