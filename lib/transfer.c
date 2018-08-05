@@ -75,6 +75,7 @@
 #include "http2.h"
 #include "mime.h"
 #include "strcase.h"
+#include "urlapi-int.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1454,311 +1455,6 @@ CURLcode Curl_posttransfer(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_HTTP
-/*
- * Find the separator at the end of the host name, or the '?' in cases like
- * http://www.url.com?id=2380
- */
-static const char *find_host_sep(const char *url)
-{
-  const char *sep;
-  const char *query;
-
-  /* Find the start of the hostname */
-  sep = strstr(url, "//");
-  if(!sep)
-    sep = url;
-  else
-    sep += 2;
-
-  query = strchr(sep, '?');
-  sep = strchr(sep, '/');
-
-  if(!sep)
-    sep = url + strlen(url);
-
-  if(!query)
-    query = url + strlen(url);
-
-  return sep < query ? sep : query;
-}
-
-/*
- * Decide in an encoding-independent manner whether a character in an
- * URL must be escaped. The same criterion must be used in strlen_url()
- * and strcpy_url().
- */
-static bool urlchar_needs_escaping(int c)
-{
-    return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
-}
-
-/*
- * strlen_url() returns the length of the given URL if the spaces within the
- * URL were properly URL encoded.
- * URL encoding should be skipped for host names, otherwise IDN resolution
- * will fail.
- */
-static size_t strlen_url(const char *url, bool relative)
-{
-  const unsigned char *ptr;
-  size_t newlen = 0;
-  bool left = TRUE; /* left side of the ? */
-  const unsigned char *host_sep = (const unsigned char *) url;
-
-  if(!relative)
-    host_sep = (const unsigned char *) find_host_sep(url);
-
-  for(ptr = (unsigned char *)url; *ptr; ptr++) {
-
-    if(ptr < host_sep) {
-      ++newlen;
-      continue;
-    }
-
-    switch(*ptr) {
-    case '?':
-      left = FALSE;
-      /* FALLTHROUGH */
-    default:
-      if(urlchar_needs_escaping(*ptr))
-        newlen += 2;
-      newlen++;
-      break;
-    case ' ':
-      if(left)
-        newlen += 3;
-      else
-        newlen++;
-      break;
-    }
-  }
-  return newlen;
-}
-
-/* strcpy_url() copies a url to a output buffer and URL-encodes the spaces in
- * the source URL accordingly.
- * URL encoding should be skipped for host names, otherwise IDN resolution
- * will fail.
- */
-static void strcpy_url(char *output, const char *url, bool relative)
-{
-  /* we must add this with whitespace-replacing */
-  bool left = TRUE;
-  const unsigned char *iptr;
-  char *optr = output;
-  const unsigned char *host_sep = (const unsigned char *) url;
-
-  if(!relative)
-    host_sep = (const unsigned char *) find_host_sep(url);
-
-  for(iptr = (unsigned char *)url;    /* read from here */
-      *iptr;         /* until zero byte */
-      iptr++) {
-
-    if(iptr < host_sep) {
-      *optr++ = *iptr;
-      continue;
-    }
-
-    switch(*iptr) {
-    case '?':
-      left = FALSE;
-      /* FALLTHROUGH */
-    default:
-      if(urlchar_needs_escaping(*iptr)) {
-        snprintf(optr, 4, "%%%02x", *iptr);
-        optr += 3;
-      }
-      else
-        *optr++=*iptr;
-      break;
-    case ' ':
-      if(left) {
-        *optr++='%'; /* add a '%' */
-        *optr++='2'; /* add a '2' */
-        *optr++='0'; /* add a '0' */
-      }
-      else
-        *optr++='+'; /* add a '+' here */
-      break;
-    }
-  }
-  *optr = 0; /* zero terminate output buffer */
-
-}
-
-/*
- * Returns true if the given URL is absolute (as opposed to relative)
- */
-static bool is_absolute_url(const char *url)
-{
-  char prot[16]; /* URL protocol string storage */
-  char letter;   /* used for a silly sscanf */
-
-  return (2 == sscanf(url, "%15[^?&/:]://%c", prot, &letter)) ? TRUE : FALSE;
-}
-
-/*
- * Concatenate a relative URL to a base URL making it absolute.
- * URL-encodes any spaces.
- * The returned pointer must be freed by the caller unless NULL
- * (returns NULL on out of memory).
- */
-static char *concat_url(const char *base, const char *relurl)
-{
-  /***
-   TRY to append this new path to the old URL
-   to the right of the host part. Oh crap, this is doomed to cause
-   problems in the future...
-  */
-  char *newest;
-  char *protsep;
-  char *pathsep;
-  size_t newlen;
-  bool host_changed = FALSE;
-
-  const char *useurl = relurl;
-  size_t urllen;
-
-  /* we must make our own copy of the URL to play with, as it may
-     point to read-only data */
-  char *url_clone = strdup(base);
-
-  if(!url_clone)
-    return NULL; /* skip out of this NOW */
-
-  /* protsep points to the start of the host name */
-  protsep = strstr(url_clone, "//");
-  if(!protsep)
-    protsep = url_clone;
-  else
-    protsep += 2; /* pass the slashes */
-
-  if('/' != relurl[0]) {
-    int level = 0;
-
-    /* First we need to find out if there's a ?-letter in the URL,
-       and cut it and the right-side of that off */
-    pathsep = strchr(protsep, '?');
-    if(pathsep)
-      *pathsep = 0;
-
-    /* we have a relative path to append to the last slash if there's one
-       available, or if the new URL is just a query string (starts with a
-       '?')  we append the new one at the end of the entire currently worked
-       out URL */
-    if(useurl[0] != '?') {
-      pathsep = strrchr(protsep, '/');
-      if(pathsep)
-        *pathsep = 0;
-    }
-
-    /* Check if there's any slash after the host name, and if so, remember
-       that position instead */
-    pathsep = strchr(protsep, '/');
-    if(pathsep)
-      protsep = pathsep + 1;
-    else
-      protsep = NULL;
-
-    /* now deal with one "./" or any amount of "../" in the newurl
-       and act accordingly */
-
-    if((useurl[0] == '.') && (useurl[1] == '/'))
-      useurl += 2; /* just skip the "./" */
-
-    while((useurl[0] == '.') &&
-          (useurl[1] == '.') &&
-          (useurl[2] == '/')) {
-      level++;
-      useurl += 3; /* pass the "../" */
-    }
-
-    if(protsep) {
-      while(level--) {
-        /* cut off one more level from the right of the original URL */
-        pathsep = strrchr(protsep, '/');
-        if(pathsep)
-          *pathsep = 0;
-        else {
-          *protsep = 0;
-          break;
-        }
-      }
-    }
-  }
-  else {
-    /* We got a new absolute path for this server */
-
-    if((relurl[0] == '/') && (relurl[1] == '/')) {
-      /* the new URL starts with //, just keep the protocol part from the
-         original one */
-      *protsep = 0;
-      useurl = &relurl[2]; /* we keep the slashes from the original, so we
-                              skip the new ones */
-      host_changed = TRUE;
-    }
-    else {
-      /* cut off the original URL from the first slash, or deal with URLs
-         without slash */
-      pathsep = strchr(protsep, '/');
-      if(pathsep) {
-        /* When people use badly formatted URLs, such as
-           "http://www.url.com?dir=/home/daniel" we must not use the first
-           slash, if there's a ?-letter before it! */
-        char *sep = strchr(protsep, '?');
-        if(sep && (sep < pathsep))
-          pathsep = sep;
-        *pathsep = 0;
-      }
-      else {
-        /* There was no slash. Now, since we might be operating on a badly
-           formatted URL, such as "http://www.url.com?id=2380" which doesn't
-           use a slash separator as it is supposed to, we need to check for a
-           ?-letter as well! */
-        pathsep = strchr(protsep, '?');
-        if(pathsep)
-          *pathsep = 0;
-      }
-    }
-  }
-
-  /* If the new part contains a space, this is a mighty stupid redirect
-     but we still make an effort to do "right". To the left of a '?'
-     letter we replace each space with %20 while it is replaced with '+'
-     on the right side of the '?' letter.
-  */
-  newlen = strlen_url(useurl, !host_changed);
-
-  urllen = strlen(url_clone);
-
-  newest = malloc(urllen + 1 + /* possible slash */
-                  newlen + 1 /* zero byte */);
-
-  if(!newest) {
-    free(url_clone); /* don't leak this */
-    return NULL;
-  }
-
-  /* copy over the root url part */
-  memcpy(newest, url_clone, urllen);
-
-  /* check if we need to append a slash */
-  if(('/' == useurl[0]) || (protsep && !*protsep) || ('?' == useurl[0]))
-    ;
-  else
-    newest[urllen++]='/';
-
-  /* then append the new piece on the right side */
-  strcpy_url(&newest[urllen], useurl, !host_changed);
-
-  free(url_clone);
-
-  return newest;
-}
-#endif /* CURL_DISABLE_HTTP */
-
 /*
  * Curl_follow() handles the URL redirect magic. Pass in the 'newurl' string
  * as given by the remote server and set up the new URL to request.
@@ -1810,12 +1506,12 @@ CURLcode Curl_follow(struct Curl_easy *data,
     }
   }
 
-  if(!is_absolute_url(newurl)) {
+  if(!Curl_is_absolute_url(newurl, NULL, 8)) {
     /***
      *DANG* this is an RFC 2068 violation. The URL is supposed
      to be absolute and this doesn't seem to be that!
      */
-    char *absolute = concat_url(data->change.url, newurl);
+    char *absolute = Curl_concat_url(data->change.url, newurl);
     if(!absolute)
       return CURLE_OUT_OF_MEMORY;
     newurl = absolute;
@@ -1824,7 +1520,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     /* The new URL MAY contain space or high byte values, that means a mighty
        stupid redirect URL but we still make an effort to do "right". */
     char *newest;
-    size_t newlen = strlen_url(newurl, FALSE);
+    size_t newlen = Curl_strlen_url(newurl, FALSE);
 
     /* This is an absolute URL, don't allow the custom port number */
     disallowport = TRUE;
@@ -1833,7 +1529,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
     if(!newest)
       return CURLE_OUT_OF_MEMORY;
 
-    strcpy_url(newest, newurl, FALSE); /* create a space-free URL */
+    Curl_strcpy_url(newest, newurl, FALSE); /* create a space-free URL */
     newurl = newest; /* use this instead now */
 
   }
