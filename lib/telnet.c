@@ -52,10 +52,6 @@
 #include "connect.h"
 #include "progress.h"
 #include "system_win32.h"
-
-#define  TELOPTS
-#define  TELCMDS
-
 #include "arpa_telnet.h"
 #include "select.h"
 #include "strcase.h"
