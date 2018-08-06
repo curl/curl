@@ -140,22 +140,23 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
   }
 #endif
 
-  if (data->state.trailing_data_s == HTTP_TRAILINGDATA_INITIALIZED)
+  if(data->state.trailing_data_s == HTTP_TRAILINGDATA_INITIALIZED)
     data->state.trailing_data_s = HTTP_TRAILINGDATA_SENDING;
 
-  if(data->req.upload_chunky && data->state.trailing_data_s == HTTP_TRAILINGDATA_NONE) {
+  if(data->req.upload_chunky &&
+     data->state.trailing_data_s == HTTP_TRAILINGDATA_NONE) {
     /* if chunked Transfer-Encoding */
     buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
 
-  if(data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING){
+  if(data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING) {
     /* if we're here then that means that we already sent the last empty chunk
-       but we didn't send a final CR LF, so we sent 0 CR LF. So we start pulling
-       trailing data until we have no more */
+       but we didn't send a final CR LF, so we sent 0 CR LF. So we start
+       pulling trailing data until we have no more */
     Curl_set_in_callback(data, true);
-    nread = (int)data->set.trailing_data_callback(data->req.upload_fromhere, 1,
-                                                  buffersize, data->set.trailing_client);
+    nread = data->set.trailing_data_callback(data->req.upload_fromhere, 1,
+            buffersize, data->set.trailing_client);
     Curl_set_in_callback(data, false);
   }else{
     Curl_set_in_callback(data, true);
@@ -234,7 +235,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
 
     bool added_final_cr_lf = FALSE;
 
-    if(data->state.trailing_data_s != HTTP_TRAILINGDATA_SENDING){
+    if(data->state.trailing_data_s != HTTP_TRAILINGDATA_SENDING) {
       hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
                         "%x%s", nread, endofline_native);
 
@@ -245,13 +246,14 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
       /* copy the prefix to the buffer, leaving out the NUL */
       memcpy(data->req.upload_fromhere, hexbuffer, hexlen);
 
-      /* always append ASCII CRLF to the data unless we have a valid trailer callback */
+      /* always append ASCII CRLF to the data unless
+         we have a valid trailer callback */
       if((nread - hexlen) == 0 &&
          data->set.trailing_data_callback != NULL &&
-         data->state.trailing_data_s == HTTP_TRAILINGDATA_NONE)
-      {
+         data->state.trailing_data_s == HTTP_TRAILINGDATA_NONE) {
         data->state.trailing_data_s = HTTP_TRAILINGDATA_INITIALIZED;
-      }else{
+      }
+      else{
         memcpy(data->req.upload_fromhere + nread,
                endofline_network,
                strlen(endofline_network));
@@ -277,12 +279,15 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
     }
 #endif /* CURL_DOES_CONVERSIONS */
 
-    if(nread == 0 && data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING){
+    if(nread == 0 &&
+       data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING) {
       /* mark the trailing data state as done */
       data->state.trailing_data_s = HTTP_TRAILINGDATA_DONE;
       data->req.upload_done = TRUE;
       infof(data, "Signaling end of chunked upload via terminating chunk.\n");
-    } else if((nread - hexlen) == 0 && data->state.trailing_data_s != HTTP_TRAILINGDATA_INITIALIZED) {
+    }
+    else if((nread - hexlen) == 0 &&
+              data->state.trailing_data_s != HTTP_TRAILINGDATA_INITIALIZED) {
       /* mark this as done once this chunk is transferred */
       data->req.upload_done = TRUE;
       infof(data, "Signaling end of chunked upload via terminating chunk.\n");

@@ -1368,7 +1368,8 @@ struct UrlState {
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
-  trailing_data_state trailing_data_s; /* whether we are sending trailers or not */
+  trailing_data_state trailing_data_s; /* whether we are sending trailers
+                                          and what stage are we at */
 };
 
 
@@ -1543,8 +1544,8 @@ struct UserDefined {
                                            the address and opening the
                                            socket */
   void *trailing_client; /* pointer to pass to trailer data callback */
-  int sending_trailing_headers; /* are we in the process of sending trailing headers ? */
-  curl_trailing_data_callback trailing_data_callback; /* trailing data callback */
+  curl_trailing_data_callback trailing_data_callback; /* trailing data
+                                                              callback */
   void *opensocket_client;
   curl_closesocket_callback fclosesocket; /* function for closing the
                                              socket */

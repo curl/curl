@@ -3610,9 +3610,8 @@ static CURLcode create_conn(struct Curl_easy *data,
      any failure */
   *in_connect = conn;
 
-<<<<<<< HEAD
   result = parseurlandfillconn(data, conn);
-=======
+
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */
 
