@@ -143,6 +143,8 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
   if(data->state.trailing_data_s == HTTP_TRAILINGDATA_INITIALIZED)
     data->state.trailing_data_s = HTTP_TRAILINGDATA_SENDING;
 
+  /* if we are transmitting trailing data, we don't need to write
+     a chunk size so we skip this */
   if(data->req.upload_chunky &&
      data->state.trailing_data_s == HTTP_TRAILINGDATA_NONE) {
     /* if chunked Transfer-Encoding */
@@ -152,8 +154,10 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
 
   if(data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING) {
     /* if we're here then that means that we already sent the last empty chunk
-       but we didn't send a final CR LF, so we sent 0 CR LF. So we start
-       pulling trailing data until we have no more */
+       but we didn't send a final CR LF, so we sent 0 CR LF. We then start
+       pulling trailing data until we have no more at which point we
+       simply return to the previous point in the state machine as if
+       nothing happened. */
     Curl_set_in_callback(data, true);
     nread = data->set.trailing_data_callback(data->req.upload_fromhere, 1,
             buffersize, data->set.trailing_client);
@@ -233,8 +237,11 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
       endofline_network = "\x0d\x0a";
     }
 
+    /* we ony add the final CR LF in the case no trailing data is available
+       otherwise it is the callback's duty to append the final CR LF */
     bool added_final_cr_lf = FALSE;
 
+    /* if we're not handling trailing data, proceed as usual */
     if(data->state.trailing_data_s != HTTP_TRAILINGDATA_SENDING) {
       hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
                         "%x%s", nread, endofline_native);
@@ -283,6 +290,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
        data->state.trailing_data_s == HTTP_TRAILINGDATA_SENDING) {
       /* mark the trailing data state as done */
       data->state.trailing_data_s = HTTP_TRAILINGDATA_DONE;
+      /* mark the transfer as done */
       data->req.upload_done = TRUE;
       infof(data, "Signaling end of chunked upload via terminating chunk.\n");
     }

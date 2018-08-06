@@ -1879,8 +1879,11 @@ typedef enum {
   /* add trailing data just before after no more data is available */
   CINIT(HTTP_TRAILINGDATA_FUNCTION, FUNCTIONPOINT, 282),
 
+  /* add trailing data just after no more data is available */
+  CINIT(HTTP_TRAILINGDATA_FUNCTION, FUNCTIONPOINT, 283),
+
   /* pointer to be passed to HTTP_TRAILINGDATA_FUNCTION */
-  CINIT(HTTP_TRAILINGDATA_DATA, OBJECTPOINT, 283),
+  CINIT(HTTP_TRAILINGDATA_DATA, OBJECTPOINT, 284),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
