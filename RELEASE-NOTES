@@ -50,6 +50,16 @@ This release includes the following bugfixes:
  o retry: return error if rewind was necessary but didn't happen [28]
  o curl: use Content-Disposition before the "URL end" for -OJ [29]
  o HTTP: Don't attempt to needlessly decompress redirect body [30]
+ o test1307: (fnmatch testing) disabled [31]
+ o hostip: fix unused variable warning
+ o lib/Makefile: only do symbol hiding if told to [32]
+ o DEPRECATE: remove release date from 7.62.0
+ o travis: build darwinssl on macos 10.12 to fix linker errors [33]
+ o cmake: link curl to the OpenSSL targets instead of lib absolute paths [34]
+ o cmake: bumped minimum version to 3.4 [34]
+ o cmake: Respect BUILD_SHARED_LIBS [35]
+ o ssl: set engine implicitly when a PKCS#11 URI is provided [36]
+ o windows: implement send buffer tuning [37]
 
 This release includes the following known bugs:
 
@@ -58,13 +68,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Virtosu, Carie Pointer, Christopher Head, clbr on github,
-  Daniel Jelinski, Daniel Stenberg, Darío Hereñú, Even Rouault, Harry Sintonen,
-  Jeffrey Walton, Jeroen Ooms, Johannes Schindelin, Josh Bialkowski,
-  Marcel Raad, Michael Kaufmann, Nick Zitzmann, Patrick Monnerat, Paul Howarth,
-  Ray Satiro, Rodger Combs, Ruslan Baratov, Sergei Nikulov, Thomas Klausner,
-  Tobias Blomberg, Zero King,
-  (25 contributors)
+  Anderson Toshiyuki Sasaki, Andrei Virtosu, Carie Pointer, Christopher Head,
+  clbr on github, Dan Fandrich, Daniel Jelinski, Daniel Stenberg, Darío Hereñú,
+  Even Rouault, Harry Sintonen, Jakub Zakrzewski, Jeffrey Walton, Jeroen Ooms,
+  Johannes Schindelin, John Butterfield, Josh Bialkowski, Marcel Raad,
+  Michael Kaufmann, Nick Zitzmann, Nikos Mavrogiannopoulos, Patrick Monnerat,
+  Paul Howarth, Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs,
+  Ruslan Baratov, Sergei Nikulov, Thomas Klausner, Tobias Blomberg,
+  Viktor Szakats, Zero King,
+  (33 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -100,3 +112,10 @@ References to bug reports and discussions on issues:
  [28] = https://curl.haxx.se/bug/?i=2801
  [29] = https://curl.haxx.se/bug/?i=2783
  [30] = https://curl.haxx.se/bug/?i=2798
+ [31] = https://curl.haxx.se/bug/?i=2825
+ [32] = https://curl.haxx.se/bug/?i=2830
+ [33] = https://curl.haxx.se/bug/?i=2835
+ [34] = https://curl.haxx.se/bug/?i=2753
+ [35] = https://curl.haxx.se/bug/?i=2755
+ [36] = https://curl.haxx.se/bug/?i=2333
+ [37] = https://curl.haxx.se/mail/lib-2018-07/0080.html
