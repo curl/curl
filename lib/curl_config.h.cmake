@@ -903,9 +903,6 @@
 /* The size of `time_t', as computed by sizeof. */
 #cmakedefine SIZEOF_TIME_T ${SIZEOF_TIME_T}
 
-/* The size of `void*', as computed by sizeof. */
-#cmakedefine SIZEOF_VOIDP ${SIZEOF_VOIDP}
-
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS 1
 
