@@ -869,7 +869,11 @@ static CURLcode done_sending(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#if defined(WIN32) && defined(SIO_IDEAL_SEND_BACKLOG_QUERY)
+#ifdef WIN32
+#ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
+#define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
+#endif
+
 static void win_update_buffer_size(curl_socket_t sockfd)
 {
   int result;
