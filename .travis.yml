@@ -307,11 +307,12 @@ script:
             rm -rf curl-99.98.97
             # verify out-of-tree build
             (tar xf curl-99.98.97.tar.gz && \
+             touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc && \
              mkdir build && \
              cd build && \
              ../curl-99.98.97/configure && \
              make && \
-             make TFLAGS=1 test)
+             make TFLAGS='-p 1 1139' test)
             # verify cmake build
             rm -rf curl-99.98.97
             (tar xf curl-99.98.97.tar.gz && \
