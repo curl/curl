@@ -39,6 +39,7 @@
 #include "sendf.h"
 #include "strdup.h"
 #include "rand.h"
+#include "warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -878,7 +879,8 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
                compatibility: use of "-" pseudo file name should be avoided. */
             result = curl_mime_data_cb(part, (curl_off_t) -1,
                                        (curl_read_callback) fread,
-                                       (curl_seek_callback) fseek,
+                                       CURLX_FUNCTION_CAST(curl_seek_callback,
+                                                           fseek),
                                        NULL, (void *) stdin);
           }
           else
