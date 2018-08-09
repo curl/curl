@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -30,6 +30,9 @@ curl_slist_free_all - free an entire curl_slist list
 .SH DESCRIPTION
 curl_slist_free_all() removes all traces of a previously built curl_slist
 linked list.
+
+Passing in a NULL pointer in \fIlist\fP will make this function return
+immediately with no action.
 .SH RETURN VALUE
 Nothing.
 .SH EXAMPLE
