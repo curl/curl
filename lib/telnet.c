@@ -1357,7 +1357,9 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   }
 
   /* Grab a pointer to WSACreateEvent */
-  create_event_func = (WSOCK2_EVENT) GetProcAddress(wsock2, "WSACreateEvent");
+  create_event_func =
+    CURLX_FUNCTION_CAST(WSOCK2_EVENT,
+                        (GetProcAddress(wsock2, "WSACreateEvent")));
   if(create_event_func == NULL) {
     failf(data, "failed to find WSACreateEvent function (%u)", GetLastError());
     FreeLibrary(wsock2);
