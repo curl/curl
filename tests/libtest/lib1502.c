@@ -79,6 +79,8 @@ int test(char *URL)
     easy = dup;
   }
   else {
+    curl_slist_free_all(dns_cache_list);
+    curl_easy_cleanup(easy);
     return CURLE_OUT_OF_MEMORY;
   }
 
