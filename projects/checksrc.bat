@@ -73,7 +73,7 @@ rem ***************************************************************************
 
 :prerequisites
   rem Check we have Perl in our path
-  echo %PATH% | findstr /I /C:"\Perl" 1>nul
+  where /q perl
   if errorlevel 1 (
     rem It isn't so check we have it installed and set the path if it is
     if exist "%SystemDrive%\Perl" (
