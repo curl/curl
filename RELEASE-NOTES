@@ -60,6 +60,18 @@ This release includes the following bugfixes:
  o cmake: Respect BUILD_SHARED_LIBS [35]
  o ssl: set engine implicitly when a PKCS#11 URI is provided [36]
  o windows: implement send buffer tuning [37]
+ o configure: fix for -lpthread detection with OpenSSL and pkg-config [38]
+ o openssl: fix debug messages [39]
+ o telnet: Remove unused macros TELOPTS and TELCMDS [40]
+ o formdata: Remove unused macro HTTPPOST_CONTENTTYPE_DEFAULT [40]
+ o http_proxy: Remove unused macro SELECT_TIMEOUT [40]
+ o asyn-thread: Remove unused macro [40]
+ o test1540: Remove unused macro TEST_HANG_TIMEOUT [40]
+ o test1531: Add timeout [41]
+ o README.md: add LGTM.com code quality grade for C/C++ [42]
+ o docs: mention NULL is fine input to several functions [43]
+ o lib1502: fix memory leak in torture test [44]
+ o travis: execute "set -eo pipefail" for coverage build [45]
 
 This release includes the following known bugs:
 
@@ -68,15 +80,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anderson Toshiyuki Sasaki, Andrei Virtosu, Carie Pointer, Christopher Head,
-  clbr on github, Dan Fandrich, Daniel Jelinski, Daniel Stenberg, Darío Hereñú,
-  Even Rouault, Harry Sintonen, Jakub Zakrzewski, Jeffrey Walton, Jeroen Ooms,
-  Johannes Schindelin, John Butterfield, Josh Bialkowski, Marcel Raad,
+  Anderson Toshiyuki Sasaki, Andrei Virtosu, Bas van Schaik, Carie Pointer,
+  Christopher Head, clbr on github, Dan Fandrich, Daniel Jelinski,
+  Daniel Stenberg, Darío Hereñú, Even Rouault, Harry Sintonen,
+  Jakub Zakrzewski, Jeffrey Walton, Jeroen Ooms, Johannes Schindelin,
+  John Butterfield, Josh Bialkowski, Marcel Raad, Markus Elfring,
   Michael Kaufmann, Nick Zitzmann, Nikos Mavrogiannopoulos, Patrick Monnerat,
-  Paul Howarth, Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs,
-  Ruslan Baratov, Sergei Nikulov, Thomas Klausner, Tobias Blomberg,
-  Viktor Szakats, Zero King,
-  (33 contributors)
+  Paul Howarth, pszemus on github, Ran Mozes, Ray Satiro, Rikard Falkeborn,
+  Rodger Combs, Ruslan Baratov, Sergei Nikulov, Thomas Klausner,
+  Tobias Blomberg, Viktor Szakats, Zero King,
+  (36 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -119,3 +132,11 @@ References to bug reports and discussions on issues:
  [35] = https://curl.haxx.se/bug/?i=2755
  [36] = https://curl.haxx.se/bug/?i=2333
  [37] = https://curl.haxx.se/mail/lib-2018-07/0080.html
+ [38] = https://curl.haxx.se/bug/?i=2848
+ [39] = https://curl.haxx.se/bug/?i=2806
+ [40] = https://curl.haxx.se/bug/?i=2852
+ [41] = https://curl.haxx.se/bug/?i=2853
+ [42] = https://curl.haxx.se/bug/?i=2857
+ [43] = https://curl.haxx.se/bug/?i=2837
+ [44] = https://curl.haxx.se/bug/?i=2861
+ [45] = https://curl.haxx.se/bug/?i=2862
