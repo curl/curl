@@ -2887,6 +2887,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       data->req.exp100 = EXP100_SEND_DATA; /* already sent */
       Curl_expire_done(data, EXPIRE_100_TIMEOUT);
     }
+    else
+      data->req.writebytecount = http->writebytecount;
   }
 
   if((conn->httpversion == 20) && data->req.upload_chunky)
