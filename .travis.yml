@@ -228,8 +228,7 @@ before_script:
 
 script:
     - |
-        # Uncomment this when `coverage` runs on Trusty.
-        # set -eo pipefail
+        set -eo pipefail
         if [ "$T" = "coverage" ]; then
              export CC="gcc-7"
              ./configure --enable-debug --disable-shared --enable-code-coverage
