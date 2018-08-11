@@ -26,7 +26,7 @@ CURLOPT_READFUNCTION \- read callback for data uploads
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-size_t read_callback(char *buffer, size_t size, size_t nitems, void *instream);
+size_t read_callback(char *buffer, size_t size, size_t nitems, void *userdata);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READFUNCTION, read_callback);
 
@@ -39,9 +39,11 @@ the server. The data area pointed at by the pointer \fIbuffer\fP should be
 filled up with at most \fIsize\fP multiplied with \fInitems\fP number of bytes
 by your function.
 
-Your function must then return the actual number of bytes that it stored in
-that memory area. Returning 0 will signal end-of-file to the library and cause
-it to stop the current transfer.
+Set the \fIuserdata\fP argument with the \fICURLOPT_READDATA(3)\fP option.
+
+Your function must return the actual number of bytes that it stored in the data
+area pointed at by the pointer \fIbuffer\fP. Returning 0 will signal
+end-of-file to the library and cause it to stop the current transfer.
 
 If you stop the current transfer by returning 0 "pre-maturely" (i.e before the
 server expected it, like when you've said you will upload N bytes and you
