@@ -26,6 +26,7 @@
 
 #include <curl/curl.h>
 #include "system_win32.h"
+#include "warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -280,7 +281,9 @@ HMODULE Curl_load_library(LPCTSTR filename)
 
   /* Attempt to find LoadLibraryEx() which is only available on Windows 2000
      and above */
-  pLoadLibraryEx = (LOADLIBRARYEX_FN) GetProcAddress(hKernel32, LOADLIBARYEX);
+  pLoadLibraryEx =
+    CURLX_FUNCTION_CAST(LOADLIBRARYEX_FN,
+                        (GetProcAddress(hKernel32, LOADLIBARYEX)));
 
   /* Detect if there's already a path in the filename and load the library if
      there is. Note: Both back slashes and forward slashes have been supported
