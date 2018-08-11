@@ -153,26 +153,21 @@ rem ***************************************************************************
   rem Check we have Visual Studio installed
   if not exist "%ABS_VC_PATH%" goto novc
 
-  
   if not defined PERL_PATH (
-	rem Check we have Perl in our path 
-	rem using !! below as %% was having \Microsoft was unexpected error.
-	echo !PATH! | findstr /I /C:"\Perl" 1>nul
-	if errorlevel 1 (
-		rem It isn't so check we have it installed and set the path if it is
-		if exist "%SystemDrive%\Perl" (
-		set "PATH=%SystemDrive%\Perl\bin;%PATH%"
-		) else (
-		if exist "%SystemDrive%\Perl64" (
-			set "PATH=%SystemDrive%\Perl64\bin;%PATH%"
-		) else (
-
-
-
-			goto noperl
-		)
-		)
-	)
+    rem Check we have Perl in our path
+    perl --version <NUL 1>NUL 2>&1
+    if errorlevel 1 (
+      rem It isn't so check we have it installed and set the path if it is
+      if exist "%SystemDrive%\Perl" (
+        set "PATH=%SystemDrive%\Perl\bin;%PATH%"
+      ) else (
+        if exist "%SystemDrive%\Perl64" (
+          set "PATH=%SystemDrive%\Perl64\bin;%PATH%"
+        ) else (
+          goto noperl
+        )
+      )
+    )
   ) else (
     set "PATH=%PERL_PATH%\Perl\bin;%PATH%"
   )
