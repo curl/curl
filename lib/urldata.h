@@ -1282,9 +1282,6 @@ struct UrlState {
                             involved in this request */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
 
-  bool pipe_broke; /* TRUE if the connection we were pipelined on broke
-                      and we need to restart from the beginning */
-
 #if !defined(WIN32) && !defined(MSDOS) && !defined(__EMX__) && \
     !defined(__SYMBIAN32__)
 /* do FTP line-end conversions on most platforms */
