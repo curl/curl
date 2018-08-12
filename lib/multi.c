@@ -874,12 +874,10 @@ static int multi_getsock(struct Curl_easy *data,
                                                   of sockets */
                          int numsocks)
 {
-  /* If the pipe broke, or if there's no connection left for this easy handle,
-     then we MUST bail out now with no bitmask set. The no connection case can
-     happen when this is called from curl_multi_remove_handle() =>
-     singlesocket() => multi_getsock().
+  /* The no connection case can happen when this is called from
+     curl_multi_remove_handle() => singlesocket() => multi_getsock().
   */
-  if(data->state.pipe_broke || !data->easy_conn)
+  if(!data->easy_conn)
     return 0;
 
   if(data->mstate > CURLM_STATE_CONNECT &&
@@ -1351,24 +1349,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        (HTTP/2), or the full connection for older protocols */
     bool stream_error = FALSE;
     rc = CURLM_OK;
-
-    /* Handle the case when the pipe breaks, i.e., the connection
-       we're using gets cleaned up and we're left with nothing. */
-    if(data->state.pipe_broke) {
-      infof(data, "Pipe broke: handle %p, url = %s\n",
-            (void *)data, data->state.path);
-
-      if(data->mstate < CURLM_STATE_COMPLETED) {
-        /* Head back to the CONNECT state */
-        multistate(data, CURLM_STATE_CONNECT);
-        rc = CURLM_CALL_MULTI_PERFORM;
-        result = CURLE_OK;
-      }
-
-      data->state.pipe_broke = FALSE;
-      data->easy_conn = NULL;
-      continue;
-    }
 
     if(!data->easy_conn &&
        data->mstate > CURLM_STATE_CONNECT &&
@@ -2102,8 +2082,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         /* NOTE: no attempt to disconnect connections must be made
            in the case blocks above - cleanup happens only here */
-
-        data->state.pipe_broke = FALSE;
 
         /* Check if we can move pending requests to send pipe */
         process_pending_handles(multi); /* connection */
