@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Florin Petriuc, <petriuc.florin@gmail.com>
+ * Copyright (C) 1998 - 2018, Florin Petriuc, <petriuc.florin@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,9 +123,6 @@ static const unsigned long K[64] = {
 #define Sigma1(x)   (S(x, 6) ^ S(x, 11) ^ S(x, 25))
 #define Gamma0(x)   (S(x, 7) ^ S(x, 18) ^ R(x, 3))
 #define Gamma1(x)   (S(x, 17) ^ S(x, 19) ^ R(x, 10))
-#ifndef MIN
-#define MIN(x, y)   (((x) < (y)) ? (x) : (y))
-#endif
 /* compress 512-bits */
 static int sha256_compress(struct sha256_state *md,
                            unsigned char *buf)
@@ -200,7 +197,7 @@ static int SHA256_Update(struct sha256_state *md,
       inlen -= block_size;
     }
     else {
-      n = MIN(inlen, (block_size - md->curlen));
+      n = CURLMIN(inlen, (block_size - md->curlen));
       memcpy(md->buf + md->curlen, in, n);
       md->curlen += n;
       in += n;
