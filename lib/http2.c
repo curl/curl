@@ -42,7 +42,6 @@
 #include "memdebug.h"
 
 #define H2_BUFSIZE 32768
-#define MIN(x,y) ((x)<(y)?(x):(y))
 
 #if (NGHTTP2_VERSION_NUM < 0x010000)
 #error too old nghttp2 version, upgrade!
@@ -667,7 +666,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     Curl_add_buffer(stream->header_recvbuf, "\r\n", 2);
 
     left = stream->header_recvbuf->size_used - stream->nread_header_recvbuf;
-    ncopy = MIN(stream->len, left);
+    ncopy = CURLMIN(stream->len, left);
 
     memcpy(&stream->mem[stream->memlen],
            stream->header_recvbuf->buffer + stream->nread_header_recvbuf,
@@ -753,7 +752,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  nread = MIN(stream->len, len);
+  nread = CURLMIN(stream->len, len);
   memcpy(&stream->mem[stream->memlen], data, nread);
 
   stream->len -= nread;
@@ -1076,7 +1075,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   else
     return NGHTTP2_ERR_INVALID_ARGUMENT;
 
-  nread = MIN(stream->upload_len, length);
+  nread = CURLMIN(stream->upload_len, length);
   if(nread > 0) {
     memcpy(buf, stream->upload_mem, nread);
     stream->upload_mem += nread;
@@ -1534,7 +1533,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     /* If there is body data pending for this stream to return, do that */
     size_t left =
       stream->header_recvbuf->size_used - stream->nread_header_recvbuf;
-    size_t ncopy = MIN(len, left);
+    size_t ncopy = CURLMIN(len, left);
     memcpy(mem, stream->header_recvbuf->buffer + stream->nread_header_recvbuf,
            ncopy);
     stream->nread_header_recvbuf += ncopy;
@@ -1570,7 +1569,7 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   }
   else if(stream->pausedata) {
     DEBUGASSERT(httpc->pause_stream_id == stream->stream_id);
-    nread = MIN(len, stream->pauselen);
+    nread = CURLMIN(len, stream->pauselen);
     memcpy(mem, stream->pausedata, nread);
 
     stream->pausedata += nread;

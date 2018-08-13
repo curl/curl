@@ -169,6 +169,7 @@ connection-monitor When used, this will log [DISCONNECT] to the server.input
                log when the connection is disconnected.
 upgrade        when an HTTP upgrade header is found, the server will upgrade
                to http2
+swsclose       instruct server to close connection after response
 
 For TFTP:
 writedelay: [secs] delay this amount between reply packets (each packet being
