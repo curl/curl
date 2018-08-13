@@ -157,11 +157,6 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
 
-/* Some convenience macros to get the larger/smaller value out of two given.
-   We prefix with CURL to prevent name collisions. */
-#define CURLMAX(x,y) ((x)>(y)?(x):(y))
-#define CURLMIN(x,y) ((x)<(y)?(x):(y))
-
 #ifdef HAVE_GSSAPI
 /* Types needed for krb5-ftp connections */
 struct krb5buffer {
