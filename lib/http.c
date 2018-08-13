@@ -2899,17 +2899,32 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   return result;
 }
 
+typedef enum {
+  STATUS_UNKNOWN, /* not enough data to tell yet */
+  STATUS_DONE, /* a status line was read */
+  STATUS_BAD /* not a status line */
+} statusline;
+
+
+/* Check a string for a prefix. Check no more than 'len' bytes */
+static bool checkprefixmax(const char *prefix, const char *buffer, size_t len)
+{
+  size_t ch = CURLMIN(strlen(prefix), len);
+  return curl_strnequal(prefix, buffer, ch);
+}
+
 /*
  * checkhttpprefix()
  *
  * Returns TRUE if member of the list matches prefix of string
  */
-static bool
+static statusline
 checkhttpprefix(struct Curl_easy *data,
-                const char *s)
+                const char *s, size_t len)
 {
   struct curl_slist *head = data->set.http200aliases;
-  bool rc = FALSE;
+  statusline rc = STATUS_BAD;
+  statusline onmatch = len >= 5? STATUS_DONE : STATUS_UNKNOWN;
 #ifdef CURL_DOES_CONVERSIONS
   /* convert from the network encoding using a scratch area */
   char *scratch = strdup(s);
@@ -2926,15 +2941,15 @@ checkhttpprefix(struct Curl_easy *data,
 #endif /* CURL_DOES_CONVERSIONS */
 
   while(head) {
-    if(checkprefix(head->data, s)) {
-      rc = TRUE;
+    if(checkprefixmax(head->data, s, len)) {
+      rc = onmatch;
       break;
     }
     head = head->next;
   }
 
-  if(!rc && (checkprefix("HTTP/", s)))
-    rc = TRUE;
+  if((rc != STATUS_DONE) && (checkprefixmax("HTTP/", s, len)))
+    rc = onmatch;
 
 #ifdef CURL_DOES_CONVERSIONS
   free(scratch);
@@ -2943,11 +2958,12 @@ checkhttpprefix(struct Curl_easy *data,
 }
 
 #ifndef CURL_DISABLE_RTSP
-static bool
+static statusline
 checkrtspprefix(struct Curl_easy *data,
-                const char *s)
+                const char *s, size_t len)
 {
-  bool result = FALSE;
+  statusline result = STATUS_BAD;
+  statusline onmatch = len >= 5? STATUS_DONE : STATUS_UNKNOWN;
 
 #ifdef CURL_DOES_CONVERSIONS
   /* convert from the network encoding using a scratch area */
@@ -2960,30 +2976,31 @@ checkrtspprefix(struct Curl_easy *data,
     /* Curl_convert_from_network calls failf if unsuccessful */
     result = FALSE; /* can't return CURLE_foobar so return FALSE */
   }
-  else
-    result = checkprefix("RTSP/", scratch)? TRUE: FALSE;
+  else if(checkprefixmax("RTSP/", scratch, len))
+    result = onmatch;
   free(scratch);
 #else
   (void)data; /* unused */
-  result = checkprefix("RTSP/", s)? TRUE: FALSE;
+  if(checkprefixmax("RTSP/", s, len))
+    result = onmatch;
 #endif /* CURL_DOES_CONVERSIONS */
 
   return result;
 }
 #endif /* CURL_DISABLE_RTSP */
 
-static bool
+static statusline
 checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
-                 const char *s)
+                 const char *s, size_t len)
 {
 #ifndef CURL_DISABLE_RTSP
   if(conn->handler->protocol & CURLPROTO_RTSP)
-    return checkrtspprefix(data, s);
+    return checkrtspprefix(data, s, len);
 #else
   (void)conn;
 #endif /* CURL_DISABLE_RTSP */
 
-  return checkhttpprefix(data, s);
+  return checkhttpprefix(data, s, len);
 }
 
 /*
@@ -3097,12 +3114,15 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(result)
         return result;
 
-      if(!k->headerline && (k->hbuflen>5)) {
-        /* make a first check that this looks like a protocol header */
-        if(!checkprotoprefix(data, conn, data->state.headerbuff)) {
+      if(!k->headerline) {
+        /* check if this looks like a protocol header */
+        statusline st = checkprotoprefix(data, conn, data->state.headerbuff,
+                                         k->hbuflen);
+        if(st == STATUS_BAD) {
           /* this is not the beginning of a protocol first header line */
           k->header = FALSE;
           k->badheader = HEADER_ALLBAD;
+          streamclose(conn, "bad HTTP: No end-of-message indicator");
           break;
         }
       }
@@ -3131,8 +3151,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
     if(!k->headerline) {
       /* the first read header */
-      if((k->hbuflen>5) &&
-         !checkprotoprefix(data, conn, data->state.headerbuff)) {
+      statusline st = checkprotoprefix(data, conn, data->state.headerbuff,
+                                       k->hbuflen);
+      if(st == STATUS_BAD) {
+        streamclose(conn, "bad HTTP: No end-of-message indicator");
         /* this is not the beginning of a protocol first header line */
         k->header = FALSE;
         if(*nread)
@@ -3501,7 +3523,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              compare header line against list of aliases
           */
           if(!nc) {
-            if(checkhttpprefix(data, k->p)) {
+            if(checkhttpprefix(data, k->p, k->hbuflen) == STATUS_DONE) {
               nc = 1;
               k->httpcode = 200;
               conn->httpversion = 10;
