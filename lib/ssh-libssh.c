@@ -618,6 +618,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->auth_methods = ssh_userauth_list(sshc->ssh_session, NULL);
         if(sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) {
           state(conn, SSH_AUTH_PKEY_INIT);
+          infof(data, "Authentication using SSH public key file\n");
         }
         else if(sshc->auth_methods & SSH_AUTH_METHOD_GSSAPI_MIC) {
           state(conn, SSH_AUTH_GSSAPI);
@@ -662,6 +663,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         if(rc != SSH_OK) {
           failf(data, "Could not load private key file %s",
                 data->set.str[STRING_SSH_PRIVATE_KEY]);
+          MOVE_TO_ERROR_STATE(CURLE_LOGIN_DENIED);
           break;
         }
 
@@ -670,8 +672,6 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       }
       else {
-        infof(data, "Authentication using SSH public key file\n");
-
         rc = ssh_userauth_publickey_auto(sshc->ssh_session, NULL,
                                          data->set.ssl.key_passwd);
         if(rc == SSH_AUTH_AGAIN) {
