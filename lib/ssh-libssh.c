@@ -663,6 +663,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         if(rc != SSH_OK) {
           failf(data, "Could not load private key file %s",
                 data->set.str[STRING_SSH_PRIVATE_KEY]);
+          MOVE_TO_ERROR_STATE(CURLE_LOGIN_DENIED);
           break;
         }
 
