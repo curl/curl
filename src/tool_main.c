@@ -267,7 +267,7 @@ void configure_terminal(TerminalSettings* ts)
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
   #endif
 
-  printf("Enabling Windows Console VT Mode");
+  printf("Enabling Windows Console VT Mode\r\n");
   
   // Enable VT Input
   ts->hStdIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -286,6 +286,9 @@ void configure_terminal(TerminalSettings* ts)
     SetConsoleMode(ts->hStdOut, 
                    ts->dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
   }
+
+    printf("\x1b[92mSuccess: Enabled Windows Console VT Mode\x1b[0m\r\n\r\n");
+
 #endif
 }
 
