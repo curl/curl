@@ -945,7 +945,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
 
   if(!c) {
     failf(data, "SSL: invalid CA certificate subject");
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_SSL_CACERT;
   }
 
   /* If the subject is already available as UTF-8 encoded (ie 'direct') then
