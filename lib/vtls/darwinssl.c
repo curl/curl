@@ -1646,6 +1646,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         }
 
         CFRelease(cert);
+        if(result == CURLE_SSL_CACERT)
+          return CURLE_SSL_CERTPROBLEM;
         if(result)
           return result;
       }
