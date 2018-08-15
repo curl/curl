@@ -12,66 +12,77 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o schannel: fix MinGW compile break [1]
- o openssl: assume engine support in 1.0.0 or later [2]
- o conn: remove the boolean 'inuse' field [3]
- o ares: check for NULL in completed-callback [3]
+ o CURLINFO_SIZE_UPLOAD: fix missing counter update [46]
  o Curl_getoff_all_pipelines: improved for multiplexed [3]
- o multi: always do the COMPLETED procedure/state [3]
- o docs/SECURITY-PROCESS: mention bounty, drop pre-notify
- o schannel: enable CALG_TLS1PRF for w32api >= 5.1
- o smb: fix memory-leak in URL parse error path [4]
- o content_encoding: accept up to 4 unknown trailer bytes after raw deflate data [5]
- o test1422: add required file feature [6]
- o darwinssl: add support for ALPN negotiation [7]
- o header output: switch off all styles, not just unbold [8]
- o CMake: Update scripts to use consistent style [9]
- o test1143: disable MSYS2's POSIX path conversion [10]
- o smb_getsock: always wait for write socket too [11]
- o http2: separate easy handle from connections better [12]
- o test214: disable MSYS2's POSIX path conversion for URL
- o tests: fixes for Windows line endlings [13]
- o test320: treat curl320.out file as binary [14]
+ o DEPRECATE: remove release date from 7.62.0
+ o HTTP: Don't attempt to needlessly decompress redirect body [30]
+ o README.md: add LGTM.com code quality grade for C/C++ [42]
+ o Silence GCC 8 cast-function-type warnings [47]
+ o ares: check for NULL in completed-callback [3]
+ o asyn-thread: Remove unused macro [40]
  o auth: only pick CURLAUTH_BEARER if we *have* a Bearer token [15]
  o auth: pick Bearer authentication whenever a token is available [15]
- o system_win32: fix version checking [16]
- o reuse_conn(): memory leak - free old_conn->options [17]
- o wolfSSL/CyaSSL: Fix memory leak in Curl_cyassl_random [18]
- o docs/CURLOPT_WRITEFUNCTION: size is always 1 [19]
- o docs/CURLOPT_URL: fix indentation [20]
- o docs/examples: add hiperfifo example using linux epoll/timerfd [21]
- o mime: check Curl_rand_hex's return code [22]
- o curl: Fix segfault when -H @headerfile is empty [23]
- o tests/http_pipe.py: Use /usr/bin/env to find python
- o sws: handle EINTR when calling select() [24]
- o travis: run a 'make checksrc' too [25]
- o smb: fix memory leak on early failure [26]
- o http2: clear the drain counter in Curl_http2_done [27]
- o retry: return error if rewind was necessary but didn't happen [28]
- o curl: use Content-Disposition before the "URL end" for -OJ [29]
- o HTTP: Don't attempt to needlessly decompress redirect body [30]
- o test1307: (fnmatch testing) disabled [31]
- o hostip: fix unused variable warning
- o lib/Makefile: only do symbol hiding if told to [32]
- o DEPRECATE: remove release date from 7.62.0
- o travis: build darwinssl on macos 10.12 to fix linker errors [33]
- o cmake: link curl to the OpenSSL targets instead of lib absolute paths [34]
- o cmake: bumped minimum version to 3.4 [34]
+ o cmake: CMake config files are defining CURL_STATICLIB for static builds [54]
  o cmake: Respect BUILD_SHARED_LIBS [35]
- o ssl: set engine implicitly when a PKCS#11 URI is provided [36]
- o windows: implement send buffer tuning [37]
+ o cmake: Update scripts to use consistent style [9]
+ o cmake: bumped minimum version to 3.4 [34]
+ o cmake: link curl to the OpenSSL targets instead of lib absolute paths [34]
  o configure: fix for -lpthread detection with OpenSSL and pkg-config [38]
- o openssl: fix debug messages [39]
- o telnet: Remove unused macros TELOPTS and TELCMDS [40]
- o formdata: Remove unused macro HTTPPOST_CONTENTTYPE_DEFAULT [40]
- o http_proxy: Remove unused macro SELECT_TIMEOUT [40]
- o asyn-thread: Remove unused macro [40]
- o test1540: Remove unused macro TEST_HANG_TIMEOUT [40]
- o test1531: Add timeout [41]
- o README.md: add LGTM.com code quality grade for C/C++ [42]
+ o conn: remove the boolean 'inuse' field [3]
+ o content_encoding: accept up to 4 unknown trailer bytes after raw deflate data [5]
+ o curl: Fix segfault when -H @headerfile is empty [23]
+ o curl: use Content-Disposition before the "URL end" for -OJ [29]
+ o darwinssl: add support for ALPN negotiation [7]
+ o docs/CURLOPT_URL: fix indentation [20]
+ o docs/CURLOPT_WRITEFUNCTION: size is always 1 [19]
+ o docs/SECURITY-PROCESS: mention bounty, drop pre-notify
+ o docs/examples: add hiperfifo example using linux epoll/timerfd [21]
+ o docs: add disallow-username-in-url.d and haproxy-protocol.d to dist [50]
+ o docs: improved the manual pages of some callbacks [48]
  o docs: mention NULL is fine input to several functions [43]
+ o formdata: Remove unused macro HTTPPOST_CONTENTTYPE_DEFAULT [40]
+ o header output: switch off all styles, not just unbold [8]
+ o hostip: fix unused variable warning
+ o http2: clear the drain counter in Curl_http2_done [27]
+ o http2: separate easy handle from connections better [12]
+ o http: fix for tiny "HTTP/0.9" response [51]
+ o http_proxy: Remove unused macro SELECT_TIMEOUT [40]
+ o lib/Makefile: only do symbol hiding if told to [32]
  o lib1502: fix memory leak in torture test [44]
+ o mime: check Curl_rand_hex's return code [22]
+ o multi: always do the COMPLETED procedure/state [3]
+ o openssl: assume engine support in 1.0.0 or later [2]
+ o openssl: fix debug messages [39]
+ o projects: Improve Windows perl detection in batch scripts [49]
+ o retry: return error if rewind was necessary but didn't happen [28]
+ o reuse_conn(): memory leak - free old_conn->options [17]
+ o schannel: enable CALG_TLS1PRF for w32api >= 5.1
+ o schannel: fix MinGW compile break [1]
+ o smb: fix memory leak on early failure [26]
+ o smb: fix memory-leak in URL parse error path [4]
+ o smb_getsock: always wait for write socket too [11]
+ o ssh-libssh: fix infinite connect loop on invalid private key [53]
+ o ssh-libssh: reduce excessive verbose output about pubkey auth [53]
+ o ssl: set engine implicitly when a PKCS#11 URI is provided [36]
+ o sws: handle EINTR when calling select() [24]
+ o system_win32: fix version checking [16]
+ o telnet: Remove unused macros TELOPTS and TELCMDS [40]
+ o test1143: disable MSYS2's POSIX path conversion [10]
+ o test1307: (fnmatch testing) disabled [31]
+ o test1422: add required file feature [6]
+ o test1531: Add timeout [41]
+ o test1540: Remove unused macro TEST_HANG_TIMEOUT [40]
+ o test214: disable MSYS2's POSIX path conversion for URL
+ o test320: treat curl320.out file as binary [14]
+ o tests/http_pipe.py: Use /usr/bin/env to find python
+ o tests: fixes for Windows line endlings [13]
+ o travis: build darwinssl on macos 10.12 to fix linker errors [33]
  o travis: execute "set -eo pipefail" for coverage build [45]
+ o travis: run a 'make checksrc' too [25]
+ o travis: update to GCC [52]
+ o travis: verify that man pages can be regenerated [50]
+ o windows: implement send buffer tuning [37]
+ o wolfSSL/CyaSSL: Fix memory leak in Curl_cyassl_random [18]
 
 This release includes the following known bugs:
 
@@ -80,16 +91,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anderson Toshiyuki Sasaki, Andrei Virtosu, Bas van Schaik, Carie Pointer,
-  Christopher Head, clbr on github, Dan Fandrich, Daniel Jelinski,
-  Daniel Stenberg, Darío Hereñú, Even Rouault, Harry Sintonen,
-  Jakub Zakrzewski, Jeffrey Walton, Jeroen Ooms, Johannes Schindelin,
-  John Butterfield, Josh Bialkowski, Marcel Raad, Markus Elfring,
-  Michael Kaufmann, Nick Zitzmann, Nikos Mavrogiannopoulos, Patrick Monnerat,
-  Paul Howarth, pszemus on github, Ran Mozes, Ray Satiro, Rikard Falkeborn,
-  Rodger Combs, Ruslan Baratov, Sergei Nikulov, Thomas Klausner,
-  Tobias Blomberg, Viktor Szakats, Zero King,
-  (36 contributors)
+  adnn on github, Anderson Toshiyuki Sasaki, Andrei Virtosu, Bas van Schaik,
+  Carie Pointer, Christopher Head, clbr on github, Dan Fandrich,
+  Daniel Jelinski, Daniel Jeliński, Daniel Stenberg, Darío Hereñú,
+  Even Rouault, Harry Sintonen, Jakub Zakrzewski, Jeffrey Walton, Jeroen Ooms,
+  Johannes Schindelin, John Butterfield, Josh Bialkowski, Kamil Dudka,
+  Marcel Raad, Markus Elfring, Michael Kaufmann, Nick Zitzmann,
+  Nikos Mavrogiannopoulos, Patrick Monnerat, Paul Howarth, pszemus on github,
+  Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs, Ruslan Baratov,
+  Sergei Nikulov, Thomas Klausner, Tobias Blomberg, Viktor Szakats, Zero King,
+  (39 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -140,3 +151,12 @@ References to bug reports and discussions on issues:
  [43] = https://curl.haxx.se/bug/?i=2837
  [44] = https://curl.haxx.se/bug/?i=2861
  [45] = https://curl.haxx.se/bug/?i=2862
+ [46] = https://curl.haxx.se/bug/?i=2847
+ [47] = https://curl.haxx.se/bug/?i=2860
+ [48] = https://curl.haxx.se/bug/?i=2868
+ [49] = https://curl.haxx.se/bug/?i=2865
+ [50] = https://curl.haxx.se/bug/?i=2856
+ [51] = https://curl.haxx.se/bug/?i=2420
+ [52] = https://curl.haxx.se/bug/?i=2869
+ [53] = https://curl.haxx.se/bug/?i=2879
+ [54] = https://curl.haxx.se/bug/?i=2817
