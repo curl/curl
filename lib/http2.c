@@ -567,8 +567,15 @@ static int push_promise(struct Curl_easy *data,
     }
 
     httpc = &conn->proto.httpc;
-    nghttp2_session_set_stream_user_data(httpc->h2,
-                                         frame->promised_stream_id, newhandle);
+    rv = nghttp2_session_set_stream_user_data(httpc->h2,
+                                              frame->promised_stream_id,
+                                              newhandle);
+    if(rv) {
+      infof(data, "failed to set user_data for stream %u\n",
+            frame->promised_stream_id);
+      DEBUGASSERT(0);
+      goto fail;
+    }
   }
   else {
     H2BUGF(infof(data, "Got PUSH_PROMISE, ignore it!\n"));
@@ -844,6 +851,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   struct Curl_easy *data_s;
   struct HTTP *stream;
   struct connectdata *conn = (struct connectdata *)userp;
+  int rv;
   (void)session;
   (void)stream_id;
 
@@ -869,8 +877,14 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     httpc->error_code = error_code;
 
     /* remove the entry from the hash as the stream is now gone */
-    nghttp2_session_set_stream_user_data(session, stream_id, 0);
+    rv = nghttp2_session_set_stream_user_data(session, stream_id, 0);
+    if(rv) {
+      infof(data_s, "http/2: failed to clear user_data for stream %u!\n",
+            stream_id);
+      DEBUGASSERT(0);
+    }
     H2BUGF(infof(data_s, "Removed stream %u hash!\n", stream_id));
+    stream->stream_id = 0; /* cleared */
   }
   return 0;
 }
@@ -1160,7 +1174,13 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
     }
   }
   if(http->stream_id) {
-    nghttp2_session_set_stream_user_data(httpc->h2, http->stream_id, 0);
+    int rv = nghttp2_session_set_stream_user_data(httpc->h2,
+                                                  http->stream_id, 0);
+    if(rv) {
+      infof(data, "http/2: failed to clear user_data for stream %u!\n",
+            http->stream_id);
+      DEBUGASSERT(0);
+    }
     http->stream_id = 0;
   }
 }
@@ -2175,9 +2195,14 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
       return CURLE_HTTP2;
     }
 
-    nghttp2_session_set_stream_user_data(httpc->h2,
-                                         stream->stream_id,
-                                         conn->data);
+    rv = nghttp2_session_set_stream_user_data(httpc->h2,
+                                              stream->stream_id,
+                                              data);
+    if(rv) {
+      infof(data, "http/2: failed to set user_data for stream %u!\n",
+            stream->stream_id);
+      DEBUGASSERT(0);
+    }
   }
   else {
     populate_settings(conn, httpc);
