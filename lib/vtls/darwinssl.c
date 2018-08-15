@@ -2202,24 +2202,24 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   if(trust == NULL) {
     failf(data, "SSL: error getting certificate chain");
     CFRelease(array);
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
   else if(ret != noErr) {
     CFRelease(array);
-    return sslerr_to_curlerr(data, ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   ret = SecTrustSetAnchorCertificates(trust, array);
   if(ret != noErr) {
     CFRelease(array);
     CFRelease(trust);
-    return sslerr_to_curlerr(data, ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
   ret = SecTrustSetAnchorCertificatesOnly(trust, true);
   if(ret != noErr) {
     CFRelease(array);
     CFRelease(trust);
-    return sslerr_to_curlerr(data, ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   SecTrustResultType trust_eval = 0;
@@ -2227,7 +2227,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   CFRelease(array);
   CFRelease(trust);
   if(ret != noErr) {
-    return sslerr_to_curlerr(data, ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   switch(trust_eval) {
