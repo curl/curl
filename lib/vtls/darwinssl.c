@@ -2103,13 +2103,20 @@ static int append_cert_to_array(struct Curl_easy *data,
     CFRelease(certdata);
     if(!cacert) {
       failf(data, "SSL: failed to create SecCertificate from CA certificate");
-      return CURLE_SSL_CACERT;
+      return CURLE_SSL_CACERT_BADFILE;
     }
 
     /* Check if cacert is valid. */
     result = CopyCertSubject(data, cacert, &certp);
-    if(result)
-      return result;
+    switch(result) {
+      case CURLE_OK:
+        break;
+      case CURLE_SSL_CACERT:
+        return CURLE_SSL_CACERT_BADFILE;
+      case CURLE_OUT_OF_MEMORY:
+      default:
+        return result;
+    }
     free(certp);
 
     CFArrayAppendValue(array, cacert);
@@ -2128,7 +2135,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
 
   if(read_cert(cafile, &certbuf, &buflen) < 0) {
     failf(data, "SSL: failed to read or invalid CA certificate");
-    return CURLE_SSL_CACERT;
+    return CURLE_SSL_CACERT_BADFILE;
   }
 
   /*
@@ -2161,7 +2168,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
       CFRelease(array);
       failf(data, "SSL: invalid CA certificate #%d (offset %d) in bundle",
             n, offset);
-      return CURLE_SSL_CACERT;
+      return CURLE_SSL_CACERT_BADFILE;
     }
     offset += res;
 
