@@ -2211,11 +2211,13 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
 
   ret = SecTrustSetAnchorCertificates(trust, array);
   if(ret != noErr) {
+    CFRelease(array);
     CFRelease(trust);
     return sslerr_to_curlerr(data, ret);
   }
   ret = SecTrustSetAnchorCertificatesOnly(trust, true);
   if(ret != noErr) {
+    CFRelease(array);
     CFRelease(trust);
     return sslerr_to_curlerr(data, ret);
   }
