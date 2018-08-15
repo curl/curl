@@ -158,6 +158,7 @@
  18.17 consider file name from the redirected URL with -O ?
  18.18 retry on network is unreachable
  18.19 expand ~/ in config files
+ 18.20 host name sections in config files
 
  19. Build
  19.1 roffit
@@ -1095,6 +1096,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  For example .curlrc could benefit from being able to do this.
 
  See https://github.com/curl/curl/issues/2317
+
+18.20 host name sections in config files
+
+ config files would be more powerful if they could set different
+ configurations depending on used URLs, host name or possibly origin. Then a
+ default .curlrc could a specific user-agent only when doing requests against
+ a certain site.
 
 
 19. Build
