@@ -25,7 +25,7 @@ file name argument looks like a flag
 </client>
 
 <verify>
-<file name="log/moo1268">
+<file name="log/moo1268" mode="text">
 Warning: The file name argument '-k' looks like a flag.
 curl: (1) Protocol "hej" not supported or disabled in libcurl
 </file>
