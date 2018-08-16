@@ -2412,13 +2412,31 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         failf(data, "SSL certificate problem: No root certificate");
         return CURLE_SSL_CACERT;
       case errSSLCertExpired:
+      case errSSLPeerCertExpired:
         failf(data, "SSL certificate problem: Certificate chain had an "
               "expired certificate");
         return CURLE_SSL_CACERT;
       case errSSLBadCert:
+      case errSSLPeerBadCert:
         failf(data, "SSL certificate problem: Couldn't understand the server "
               "certificate format");
-        return CURLE_SSL_CONNECT_ERROR;
+        return CURLE_SSL_CACERT;
+      case errSSLCertNotYetValid:
+        fail(data, "The certificate chain had a certificate that is not yet valid.");
+        return CURLE_SSL_CACERT;
+      case errSSLPeerUnsupportedCert:
+        fail(data, "An unsupported certificate format was encountered.");
+        return CURLE_SSL_CACERT;
+      case errSSLPeerCertRevoked:
+        fail(data, "The certificate was revoked.");
+        return CURLE_SSL_CACERT;
+      case errSSLPeerCertUnknown:
+        fail(data, "The certificate is unknown.");
+        return CURLE_SSL_CACERT;
+
+      case errSSLBadCertificateStatusResponse:
+        fail(data, "Bad OCSP response.");
+        return CURLE_SSL_INVALIDCERTSTATUS;
 
       /* These are all certificate problems with the client: */
       case errSecAuthFailed:
