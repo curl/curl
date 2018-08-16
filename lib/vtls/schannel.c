@@ -1230,7 +1230,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
 
     if((sspi_status != SEC_E_OK) || (ccert_context == NULL)) {
       failf(data, "schannel: failed to retrieve remote cert context");
-      return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
 
     result = Curl_ssl_init_certinfo(data, 1);
