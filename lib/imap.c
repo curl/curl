@@ -627,7 +627,13 @@ static CURLcode imap_perform_list(struct connectdata *conn)
     free(mailbox);
   }
 
-  if(!result)
+  const char *p = imap->custom_params;
+  while(p && *p == ' ')
+    p++;
+  if(!result && imap->custom && (strcasecompare(imap->custom, "FETCH") ||
+    (strcasecompare(imap->custom, "UID") && p && strstr(p, "FETCH") == p)))
+    state(conn, IMAP_FETCH);/* [UID] FETCH is the only cmd needs deal payload */
+  else if(!result)
     state(conn, IMAP_LIST);
 
   return result;
@@ -692,12 +698,12 @@ static CURLcode imap_perform_fetch(struct connectdata *conn)
 
   /* Send the FETCH command */
   if(imap->partial)
-    result = imap_sendf(conn, "FETCH %s BODY[%s]<%s>",
+    result = imap_sendf(conn, "UID FETCH %s BODY[%s]<%s>",
                         imap->uid,
                         imap->section ? imap->section : "",
                         imap->partial);
   else
-    result = imap_sendf(conn, "FETCH %s BODY[%s]",
+    result = imap_sendf(conn, "UID FETCH %s BODY[%s]",
                         imap->uid,
                         imap->section ? imap->section : "");
 
