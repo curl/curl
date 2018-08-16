@@ -363,7 +363,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 
   sep = _tcschr(path, TEXT('\\'));
   if(sep == NULL)
-    return CURLE_SSL_CONNECT_ERROR;
+    return CURLE_SSL_CERTPROBLEM;
 
   store_name_len = sep - path;
 
@@ -387,19 +387,19 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
                     store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE;
   else
-    return CURLE_SSL_CONNECT_ERROR;
+    return CURLE_SSL_CERTPROBLEM;
 
   *store_path = sep + 1;
 
   sep = _tcschr(*store_path, TEXT('\\'));
   if(sep == NULL)
-    return CURLE_SSL_CONNECT_ERROR;
+    return CURLE_SSL_CERTPROBLEM;
 
   *sep = 0;
 
   *thumbprint = sep + 1;
   if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
-    return CURLE_SSL_CONNECT_ERROR;
+    return CURLE_SSL_CERTPROBLEM;
 
   return CURLE_OK;
 }
@@ -609,7 +609,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         failf(data, "schannel: Failed to open cert store %s %s",
               cert_store_name, cert_store_path);
         Curl_unicodefree(cert_path);
-        return CURLE_SSL_CONNECT_ERROR;
+        return CURLE_SSL_CERTPROBLEM;
       }
 
       cert_thumbprint.pbData = cert_thumbprint_data;
@@ -620,7 +620,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                               cert_thumbprint_data, &cert_thumbprint.cbData,
                               NULL, NULL)) {
         Curl_unicodefree(cert_path);
-        return CURLE_SSL_CONNECT_ERROR;
+        return CURLE_SSL_CERTPROBLEM;
       }
 
       client_certs[0] = CertFindCertificateInStore(
@@ -632,6 +632,10 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       if(client_certs[0]) {
         schannel_cred.cCreds = 1;
         schannel_cred.paCred = client_certs;
+      }
+      else {
+        /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
+        return CURLE_SSL_CERTPROBLEM;
       }
 
       CertCloseStore(cert_store, 0);
