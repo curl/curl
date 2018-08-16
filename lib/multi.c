@@ -592,6 +592,7 @@ static CURLcode multi_done(struct connectdata **connp,
     conn->dns_entry = NULL;
   }
   Curl_hostcache_prune(data);
+  Curl_safefree(data->state.ulbuf);
 
   /* if the transfer was completed in a paused state there can be buffered
      data left to free */
@@ -1575,6 +1576,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           multistate(data, CURLM_STATE_SENDPROTOCONNECT);
         }
       }
+      else if(result)
+        stream_error = TRUE;
       break;
 #endif
 

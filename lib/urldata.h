@@ -1220,7 +1220,7 @@ struct UrlState {
   size_t headersize;   /* size of the allocation */
 
   char *buffer; /* download buffer */
-  char uploadbuffer[UPLOAD_BUFSIZE + 1]; /* upload buffer */
+  char *ulbuf; /* alloced upload buffer or NULL */
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
@@ -1556,6 +1556,8 @@ struct UserDefined {
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
+  long upload_buffer_size; /* size of upload buffer to use,
+                              keep it >= CURL_MAX_WRITE_SIZE */
   void *private_data; /* application-private data */
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
