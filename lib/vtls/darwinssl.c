@@ -2401,6 +2401,14 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         /* the documentation says we need to call SSLHandshake() again */
         return darwinssl_connect_step2(conn, sockindex);
 
+      /* Treaing non-fatal error as fatal like before */
+      case errSSLPeerAuthCompleted:
+        fail(data, "A non-fatal result indicating the peer certificate is valid, or was ignored if verification is disabled.");
+        break;
+      case errSSLClientHelloReceived:
+        fail(data, "A non-fatal result for providing a server name indication.");
+        break;
+
       /* System error */
       case errSSLBufferOverflow:
         fail(data, "An insufficient buffer was provided.");
@@ -2408,6 +2416,66 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLNetworkTimeout:
         fail(data, "Network timeout triggered.");
         return CURLE_OPERATION_TIMEDOUT;
+
+      /* Problem with encrypt / decrypt */
+      case errSSLDecodeError:
+      case errSSLPeerDecodeError:
+        fail(data, "Decode failed.");
+        break;
+      case errSSLDecryptionFail:
+      case errSSLPeerDecryptionFail:
+        fail(data, "Decryption failed.");
+        break;
+      case errSSLPeerDecryptError:
+        fail(data, "A decryption error occurred.");
+        break;
+      case errSSLBadCipherSuite:
+        fail(data, "A bad SSL cipher suite was encountered.");
+        break;
+      case errSSLWeakPeerEphemeralDHKey:
+        fail(data, "Indicates a weak ephemeral dh key.");
+        break;
+      case errSSLUnknownPSKIdentity:
+        fail(data, "Unknown PSK identity.");
+        break;
+      case errSSLCrypto:
+        fail(data, "An underlying cryptographic error was encountered.");
+        break;
+
+      /* Problem with the message record validation */
+      case errSSLBadRecordMac:
+      case errSSLPeerBadRecordMac:
+        fail(data, "A record with a bad message authentication code (MAC) was encountered.");
+        break;
+      case errSSLRecordOverflow:
+      case errSSLPeerRecordOverflow:
+        fail(data, "A record overflow occurred.");
+        break;
+
+      /* Problem with zlib decompression */
+      case errSSLDecompressFail:
+      case errSSLPeerDecompressFail:
+        fail(data, "Decompression failed.");
+        break;
+
+      /* Problem with the extension */
+      case errSSLMissingExtension:
+        fail(data, "Missing extension.");
+        break;
+      case errSSLUnsupportedExtension:
+        fail(data, "Unsupported TLS extension.");
+        break;
+
+      /* Problem with access */
+      case errSSLPeerAccessDenied:
+        fail(data, "Access was denied.");
+        break;
+      case errSSLPeerInsufficientSecurity:
+        fail(data, "There is insufficient security for this operation.");
+        break;
+      case errSSLCertificateRequired:
+        fail(data, "Certificate required.");
+        break;
 
       /* These are all certificate problems with the server: */
       case errSSLXCertChainInvalid:
@@ -2450,6 +2518,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSecAuthFailed:
         failf(data, "SSL authentication failed");
         return CURLE_SSL_CONNECT_ERROR;
+      case errSSLHandshakeFail:
       case errSSLPeerHandshakeFail:
         failf(data, "SSL peer handshake failed, the server most likely "
               "requires a client certificate to connect");
@@ -2459,6 +2528,11 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
               "the certificate being signed by an unknown certificate "
               "authority");
         return CURLE_SSL_CONNECT_ERROR;
+      case errSSLClientCertRequested:
+        fail(data, "The server has requested a client certificate.");
+        /* This code should not be returned because
+           kSSLSessionOptionBreakOnCertRequested is never set */
+        break;
 
       /* This error is raised if the server's cert didn't match the server's
          host name: */
@@ -2467,6 +2541,29 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
               "certificate did not match \"%s\"\n", conn->host.dispname);
         return CURLE_PEER_FAILED_VERIFICATION;
 
+      /* Problem with SSL / TLS negotiation */
+      case errSSLNegotiation:
+        failf(data, "Could not negotiate an SSL cipher suite with the server");
+        break;
+      case errSSLInappropriateFallback:
+        fail(data, "Inappropriate fallback.");
+        break;
+      case errSSLBadConfiguration:
+        fail(data, "A configuration error occurred.");
+        break;
+      case errSSLConfigurationFailed:
+        fail(data, "TLS configuration failed.");
+        break;
+      case errSSLProtocol:
+        fail(data, "SSL protocol error.");
+        break;
+      case errSSLPeerProtocolVersion:
+        fail(data, "A bad protocol version was encountered.");
+        break;
+      case errSSLPeerNoRenegotiation:
+        fail(data, "No renegotiation is allowed.");
+        break;
+
       /* Generic handshake errors: */
       case errSSLConnectionRefused:
         failf(data, "Server dropped the connection during the SSL handshake");
@@ -2474,11 +2571,19 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLClosedAbort:
         failf(data, "Server aborted the SSL handshake");
         return CURLE_SSL_CONNECT_ERROR;
-      case errSSLNegotiation:
-        failf(data, "Could not negotiate an SSL cipher suite with the server");
-        return CURLE_SSL_CONNECT_ERROR;
+      case errSSLTransportReset:
+        fail(data, "Transport (socket) shutdown, for example, TCP, RST, or FIN.");
+        break;
+      case errSSLClosedGraceful:
+        fail(data, "The connection closed gracefully.");
+        break;
+      case errSSLClosedNoNotify:
+        fail(data, "The server closed the session with no notification.");
+        break;
       /* Sometimes paramErr happens with buggy ciphers: */
-      case paramErr: case errSSLInternal:
+      case paramErr:
+      case errSSLInternal:
+      case errSSLPeerInternalError:
         failf(data, "Internal SSL engine error encountered during the "
               "SSL handshake");
         return CURLE_SSL_CONNECT_ERROR;
@@ -2486,11 +2591,38 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         failf(data, "Fatal SSL engine error encountered during the SSL "
               "handshake");
         return CURLE_SSL_CONNECT_ERROR;
+      /* Unknown error */
+      case errSSLIllegalParam:
+        fail(data, "An illegal parameter was encountered.");
+        break;
+      case errSSLModuleAttach:
+        fail(data, "Module attach failure.");
+        break;
+      case errSSLSessionNotFound:
+        fail(data, "An attempt to restore an unknown session failed.");
+        break;
+      case errSSLUnrecognizedName:
+        fail(data, "Unknown or unrecognized name.");
+        break;
+      case errSSLPeerExportRestriction:
+        fail(data, "An export restriction occurred.");
+        break;
+      case errSSLPeerUserCancelled:
+        fail(data, "The user canceled the operation.");
+        break;
+      case errSSLUnexpectedMessage:
+        faile(data, "An unexpected message was received.");
+        break;
+      case errSSLPeerUnexpectedMsg:
+        fail(data, "Peer rejected unexpected message.");
+        break;
+      case errSSLUnexpectedRecord:
       default:
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
               hostname, err);
         return CURLE_SSL_CONNECT_ERROR;
     }
+    return CURLE_SSL_CONNECT_ERROR;
   }
   else {
     /* we have been connected fine, we're not waiting for anything else. */
