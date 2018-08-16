@@ -135,7 +135,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
     failf(data,
           "schannel: CA file exceeds max size of %u bytes",
           MAX_CAFILE_SIZE);
-    result = CURLE_OUT_OF_MEMORY;
+    result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
