@@ -1146,6 +1146,9 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
   struct HTTP *http = data->req.protop;
   struct http_conn *httpc = &conn->proto.httpc;
 
+  if(!httpc->h2) /* not HTTP/2 ? */
+    return;
+
   if(data->state.drain)
     drained_transfer(data, httpc);
 
@@ -1166,8 +1169,10 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
 
   if(premature) {
     /* RST_STREAM */
-    nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE, http->stream_id,
-                              NGHTTP2_STREAM_CLOSED);
+    if(!nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE,
+                                  http->stream_id, NGHTTP2_STREAM_CLOSED))
+      (void)nghttp2_session_send(httpc->h2);
+
     if(http->stream_id == httpc->pause_stream_id) {
       infof(data, "stopped the pause stream!\n");
       httpc->pause_stream_id = 0;
