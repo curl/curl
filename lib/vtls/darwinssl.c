@@ -2401,6 +2401,14 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         /* the documentation says we need to call SSLHandshake() again */
         return darwinssl_connect_step2(conn, sockindex);
 
+      /* System error */
+      case errSSLBufferOverflow:
+        fail(data, "An insufficient buffer was provided.");
+        return CURLE_OUT_OF_MEMORY;
+      case errSSLNetworkTimeout:
+        fail(data, "Network timeout triggered.");
+        return CURLE_OPERATION_TIMEDOUT;
+
       /* These are all certificate problems with the server: */
       case errSSLXCertChainInvalid:
         failf(data, "SSL certificate problem: Invalid certificate chain");
