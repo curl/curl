@@ -3257,7 +3257,7 @@ static CURLcode servercert(struct connectdata *conn,
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-issuer name!");
-    result = CURLE_SSL_CONNECT_ERROR;
+    result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
     infof(data, " issuer: %s\n", buffer);
