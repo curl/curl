@@ -673,14 +673,20 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       CertFreeCertificateContext(client_certs[0]);
 
     if(sspi_status != SEC_E_OK) {
-      if(sspi_status == SEC_E_WRONG_PRINCIPAL)
-        failf(data, "schannel: SNI or certificate check failed: %s",
-              Curl_sspi_strerror(conn, sspi_status));
-      else
-        failf(data, "schannel: AcquireCredentialsHandle failed: %s",
-              Curl_sspi_strerror(conn, sspi_status));
+      failf(data, "schannel: AcquireCredentialsHandle failed: %s",
+            Curl_sspi_strerror(conn, sspi_status));
       Curl_safefree(BACKEND->cred);
-      return CURLE_SSL_CONNECT_ERROR;
+      switch(sspi_status) {
+        case SEC_E_INSUFFICIENT_MEMORY:
+          return CURLE_OUT_OF_MEMORY;
+        case SEC_E_NO_CREDENTIALS:
+        case SEC_E_SECPKG_NOT_FOUND:
+        case SEC_E_NOT_OWNER:
+        case SEC_E_UNKNOWN_CREDENTIALS:
+        case SEC_E_INTERNAL_ERROR:
+        default:
+          return CURLE_SSL_CONNECT_ERROR;
+      }
     }
   }
 
