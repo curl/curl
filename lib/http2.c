@@ -81,6 +81,45 @@ static int h2_process_pending_input(struct connectdata *conn,
                                     struct http_conn *httpc,
                                     CURLcode *err);
 
+static struct easymap *add_easymap(struct Curl_easy *data,
+                                   struct http_conn *httpc,
+                                   uint32_t stream_id)
+{
+  struct easymap *m = malloc(sizeof(struct easymap));
+  struct HTTP *stream = data->req.protop;
+  if(m) {
+    Curl_llist_insert_next(&httpc->streamlist, NULL, m, &m->node);
+    m->easy = data;
+    m->stream_id = stream_id;
+    DEBUGASSERT(!stream->emap);
+    stream->emap = m;
+  }
+  return m;
+}
+
+static void del_easymap(struct http_conn *httpc,
+                        struct easymap *m)
+{
+  struct HTTP *http;
+  struct Curl_easy *easy = m->easy;
+  Curl_llist_remove(&httpc->streamlist, &m->node, NULL);
+  if(easy) {
+    /* if the association is already removed, this can't be done */
+    http = easy->req.protop;
+    http->emap = NULL;
+  }
+  free(m);
+}
+
+static void disassociate_easymap(struct easymap *m)
+{
+  struct HTTP *http;
+  DEBUGASSERT(m && m->easy);
+  http = m->easy->req.protop;
+  http->emap = NULL;
+  m->easy = NULL;
+}
+
 /*
  * Curl_http2_init_state() is called when the easy handle is created and
  * allows for HTTP/2 specific init of state.
@@ -168,7 +207,8 @@ static CURLcode http2_disconnect(struct connectdata *conn,
 
   nghttp2_session_del(c->h2);
   Curl_safefree(c->inbuf);
-
+  /* make sure there's no trailing stream nodes */
+  DEBUGASSERT(!Curl_llist_count(&c->streamlist));
   H2BUGF(infof(conn->data, "HTTP/2 DISCONNECT done\n"));
 
   return CURLE_OK;
@@ -507,6 +547,7 @@ static int push_promise(struct Curl_easy *data,
     CURLMcode rc;
     struct http_conn *httpc;
     size_t i;
+    struct easymap *m;
     /* clone the parent */
     struct Curl_easy *newhandle = duphandle(data);
     if(!newhandle) {
@@ -567,9 +608,15 @@ static int push_promise(struct Curl_easy *data,
     }
 
     httpc = &conn->proto.httpc;
+
+    m = add_easymap(newhandle, httpc, frame->promised_stream_id);
+    if(!m) {
+      rv = 1;
+      goto fail;
+    }
+
     rv = nghttp2_session_set_stream_user_data(httpc->h2,
-                                              frame->promised_stream_id,
-                                              newhandle);
+                                              frame->promised_stream_id, m);
     if(rv) {
       infof(data, "failed to set user_data for stream %u\n",
             frame->promised_stream_id);
@@ -591,6 +638,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   struct connectdata *conn = (struct connectdata *)userp;
   struct http_conn *httpc = &conn->proto.httpc;
   struct Curl_easy *data_s = NULL;
+  struct easymap *m;
   struct HTTP *stream = NULL;
   int rv;
   size_t left, ncopy;
@@ -621,13 +669,20 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
     }
     return 0;
   }
-  data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-  if(!data_s) {
+  m = nghttp2_session_get_stream_user_data(session, stream_id);
+  if(!m) {
     H2BUGF(infof(conn->data,
-                 "No Curl_easy associated with stream: %x\n",
+                 "No easy map associated with stream: %x\n",
                  stream_id));
     return 0;
   }
+  if(!m->easy) {
+    H2BUGF(infof(conn->data,
+                 "No easy handle associated with stream: %x\n",
+                 stream_id));
+    return 0;
+  }
+  data_s = m->easy;
 
   stream = data_s->req.protop;
   if(!stream) {
@@ -715,25 +770,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   return 0;
 }
 
-static int on_invalid_frame_recv(nghttp2_session *session,
-                                 const nghttp2_frame *frame,
-                                 int lib_error_code, void *userp)
-{
-  struct Curl_easy *data_s = NULL;
-  (void)userp;
-#if !defined(DEBUG_HTTP2) || defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void)lib_error_code;
-#endif
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s,
-                 "on_invalid_frame_recv() was called, error=%d:%s\n",
-                 lib_error_code, nghttp2_strerror(lib_error_code)));
-  }
-  return 0;
-}
-
 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                               int32_t stream_id,
                               const uint8_t *data, size_t len, void *userp)
@@ -742,6 +778,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   struct Curl_easy *data_s;
   size_t nread;
   struct connectdata *conn = (struct connectdata *)userp;
+  struct easymap *m;
   (void)session;
   (void)flags;
   (void)data;
@@ -749,12 +786,15 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
   /* get the stream from the hash based on Stream ID */
-  data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-  if(!data_s)
+  m = nghttp2_session_get_stream_user_data(session, stream_id);
+  if(!m)
     /* Receiving a Stream ID not in the hash should not happen, this is an
        internal error more than anything else! */
     return NGHTTP2_ERR_CALLBACK_FAILURE;
-
+  if(!m->easy)
+    /* Receiving a Stream ID with a cleared association, ignore it */
+    return 0;
+  data_s = m->easy;
   stream = data_s->req.protop;
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -799,59 +839,13 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   return 0;
 }
 
-static int before_frame_send(nghttp2_session *session,
-                             const nghttp2_frame *frame,
-                             void *userp)
-{
-  struct Curl_easy *data_s;
-  (void)userp;
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s, "before_frame_send() was called\n"));
-  }
-
-  return 0;
-}
-static int on_frame_send(nghttp2_session *session,
-                         const nghttp2_frame *frame,
-                         void *userp)
-{
-  struct Curl_easy *data_s;
-  (void)userp;
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s, "on_frame_send() was called, length = %zd\n",
-                 frame->hd.length));
-  }
-  return 0;
-}
-static int on_frame_not_send(nghttp2_session *session,
-                             const nghttp2_frame *frame,
-                             int lib_error_code, void *userp)
-{
-  struct Curl_easy *data_s;
-  (void)userp;
-#if !defined(DEBUG_HTTP2) || defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void)lib_error_code;
-#endif
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s,
-                 "on_frame_not_send() was called, lib_error_code = %d\n",
-                 lib_error_code));
-  }
-  return 0;
-}
 static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                            uint32_t error_code, void *userp)
 {
   struct Curl_easy *data_s;
   struct HTTP *stream;
   struct connectdata *conn = (struct connectdata *)userp;
-  int rv;
+  struct easymap *m;
   (void)session;
   (void)stream_id;
 
@@ -859,31 +853,28 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     struct http_conn *httpc;
     /* get the stream from the hash based on Stream ID, stream ID zero is for
        connection-oriented stuff */
-    data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-    if(!data_s) {
-      /* We could get stream ID not in the hash.  For example, if we
+    m = nghttp2_session_get_stream_user_data(session, stream_id);
+    if(!m)
+      /* We could get stream ID not in the map.  For example, if we
          decided to reject stream (e.g., PUSH_PROMISE). */
       return 0;
-    }
-    H2BUGF(infof(data_s, "on_stream_close(), %s (err %d), stream %u\n",
-                 Curl_http2_strerror(error_code), error_code, stream_id));
+    if(!m->easy)
+      /* already cleared mapping, just skip */
+      return 0;
+    data_s = m->easy;
+    infof(data_s, "on_stream_close(), %s (err %d), stream %u\n",
+          Curl_http2_strerror(error_code), error_code, stream_id);
     stream = data_s->req.protop;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
 
+    infof(data_s, "Removing stream %u, easy %p!\n", stream_id, m->easy);
     stream->closed = TRUE;
     httpc = &conn->proto.httpc;
     drain_this(data_s, httpc);
     httpc->error_code = error_code;
 
-    /* remove the entry from the hash as the stream is now gone */
-    rv = nghttp2_session_set_stream_user_data(session, stream_id, 0);
-    if(rv) {
-      infof(data_s, "http/2: failed to clear user_data for stream %u!\n",
-            stream_id);
-      DEBUGASSERT(0);
-    }
-    H2BUGF(infof(data_s, "Removed stream %u hash!\n", stream_id));
+    del_easymap(httpc, m); /* remove mapping node from stream list */
     stream->stream_id = 0; /* cleared */
   }
   return 0;
@@ -894,12 +885,14 @@ static int on_begin_headers(nghttp2_session *session,
 {
   struct HTTP *stream;
   struct Curl_easy *data_s = NULL;
+  struct easymap *m;
   (void)userp;
 
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(!data_s) {
+  m = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
+  if(!m || !m->easy) {
     return 0;
   }
+  data_s = m->easy;
 
   H2BUGF(infof(data_s, "on_begin_headers() was called\n"));
 
@@ -959,16 +952,20 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   struct Curl_easy *data_s;
   int32_t stream_id = frame->hd.stream_id;
   struct connectdata *conn = (struct connectdata *)userp;
+  struct easymap *m;
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
 
   /* get the stream from the hash based on Stream ID */
-  data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-  if(!data_s)
+  m = nghttp2_session_get_stream_user_data(session, stream_id);
+  if(!m)
     /* Receiving a Stream ID not in the hash should not happen, this is an
        internal error more than anything else! */
     return NGHTTP2_ERR_CALLBACK_FAILURE;
+  if(!m->easy)
+    return 0;
+  data_s = m->easy;
 
   stream = data_s->req.protop;
   if(!stream) {
@@ -1070,18 +1067,22 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   struct Curl_easy *data_s;
   struct HTTP *stream = NULL;
   size_t nread;
+  struct easymap *m;
   (void)source;
   (void)userp;
 
   if(stream_id) {
     /* get the stream from the hash based on Stream ID, stream ID zero is for
        connection-oriented stuff */
-    data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-    if(!data_s)
+    m = nghttp2_session_get_stream_user_data(session, stream_id);
+    if(!m)
       /* Receiving a Stream ID not in the hash should not happen, this is an
          internal error more than anything else! */
       return NGHTTP2_ERR_CALLBACK_FAILURE;
+    if(!m->easy)
+      return 0;
 
+    data_s = m->easy;
     stream = data_s->req.protop;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1173,16 +1174,9 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
       httpc->pause_stream_id = 0;
     }
   }
-  if(http->stream_id) {
-    int rv = nghttp2_session_set_stream_user_data(httpc->h2,
-                                                  http->stream_id, 0);
-    if(rv) {
-      infof(data, "http/2: failed to clear user_data for stream %u!\n",
-            http->stream_id);
-      DEBUGASSERT(0);
-    }
-    http->stream_id = 0;
-  }
+  if(http->emap)
+    /* remove stream <=> easy association */
+    disassociate_easymap(http->emap);
 }
 
 /*
@@ -1210,21 +1204,9 @@ CURLcode Curl_http2_init(struct connectdata *conn)
     /* nghttp2_on_frame_recv_callback */
     nghttp2_session_callbacks_set_on_frame_recv_callback
       (callbacks, on_frame_recv);
-    /* nghttp2_on_invalid_frame_recv_callback */
-    nghttp2_session_callbacks_set_on_invalid_frame_recv_callback
-      (callbacks, on_invalid_frame_recv);
     /* nghttp2_on_data_chunk_recv_callback */
     nghttp2_session_callbacks_set_on_data_chunk_recv_callback
       (callbacks, on_data_chunk_recv);
-    /* nghttp2_before_frame_send_callback */
-    nghttp2_session_callbacks_set_before_frame_send_callback
-      (callbacks, before_frame_send);
-    /* nghttp2_on_frame_send_callback */
-    nghttp2_session_callbacks_set_on_frame_send_callback
-      (callbacks, on_frame_send);
-    /* nghttp2_on_frame_not_send_callback */
-    nghttp2_session_callbacks_set_on_frame_not_send_callback
-      (callbacks, on_frame_not_send);
     /* nghttp2_on_stream_close_callback */
     nghttp2_session_callbacks_set_on_stream_close_callback
       (callbacks, on_stream_close);
@@ -1810,6 +1792,7 @@ static header_instruction inspect_header(const char *name, size_t namelen,
   }
 }
 
+
 static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
 {
@@ -1831,6 +1814,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
   int32_t stream_id;
   nghttp2_session *h2 = httpc->h2;
   nghttp2_priority_spec pri_spec;
+  struct easymap *m;
 
   (void)sockindex;
 
@@ -2049,6 +2033,12 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     }
   }
 
+  m = add_easymap(conn->data, httpc, 0 /* unknown still */);
+  if(!m) {
+    Curl_safefree(nva);
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   h2_pri_spec(conn->data, &pri_spec);
 
   switch(conn->data->set.httpreq) {
@@ -2065,13 +2055,13 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
     data_prd.read_callback = data_source_read_callback;
     data_prd.source.ptr = NULL;
     stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
-                                       &data_prd, conn->data);
+                                       &data_prd, m);
     break;
   default:
     stream_id = nghttp2_submit_request(h2, &pri_spec, nva, nheader,
-                                       NULL, conn->data);
+                                       NULL, m);
   }
-
+  m->stream_id = stream_id;
   Curl_safefree(nva);
 
   if(stream_id < 0) {
@@ -2160,6 +2150,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   infof(conn->data, "Connection state changed (HTTP/2 confirmed)\n");
   Curl_multi_connchanged(conn->data->multi);
+  Curl_llist_init(&httpc->streamlist, NULL);
 
   return CURLE_OK;
 }
@@ -2184,6 +2175,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
   conn->send[FIRSTSOCKET] = http2_send;
 
   if(conn->data->req.upgr101 == UPGR101_RECEIVED) {
+    struct easymap *m;
     /* stream 1 is opened implicitly on upgrade */
     stream->stream_id = 1;
     /* queue SETTINGS frame (again) */
@@ -2195,9 +2187,12 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
       return CURLE_HTTP2;
     }
 
+    m = add_easymap(data, httpc, stream->stream_id);
+    if(!m)
+      return CURLE_OUT_OF_MEMORY;
+
     rv = nghttp2_session_set_stream_user_data(httpc->h2,
-                                              stream->stream_id,
-                                              data);
+                                              stream->stream_id, m);
     if(rv) {
       infof(data, "http/2: failed to set user_data for stream %u!\n",
             stream->stream_id);
