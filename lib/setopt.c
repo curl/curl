@@ -1603,14 +1603,19 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * String that holds the SSL crypto engine.
      */
     argptr = va_arg(param, char *);
-    if(argptr && argptr[0])
-      result = Curl_ssl_set_engine(data, argptr);
+    if(argptr && argptr[0]) {
+      result = Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], argptr);
+      if(!result) {
+        result = Curl_ssl_set_engine(data, argptr);
+      }
+    }
     break;
 
   case CURLOPT_SSLENGINE_DEFAULT:
     /*
      * flag to set engine as default.
      */
+    Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], NULL);
     result = Curl_ssl_set_engine_default(data);
     break;
   case CURLOPT_CRLF:
