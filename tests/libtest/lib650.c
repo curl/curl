@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -153,7 +153,7 @@ int test(char *URL)
   curl_formget(formpost, (void *) &formlength, count_chars);
 
   /* Include length in data for external check. */
-  curl_msnprintf(flbuf, sizeof flbuf, "%lu", (unsigned long) formlength);
+  curl_msnprintf(flbuf, sizeof(flbuf), "%lu", (unsigned long) formlength);
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_COPYNAME, "formlength",

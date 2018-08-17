@@ -61,7 +61,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
 
 #ifdef LIB545
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof teststring);
+  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(teststring));
 #endif
 
   test_setopt(curl, CURLOPT_COPYPOSTFIELDS, teststring);

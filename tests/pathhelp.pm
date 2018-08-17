@@ -451,7 +451,7 @@ sub build_sys_abs_path {
         return $path;
     }
     elsif(should_use_cygpath()) {
-        # 'cygpath' is avalable - use it.
+        # 'cygpath' is available - use it.
 
         my $has_final_slash = ($path =~ m{[\\/]$});
 

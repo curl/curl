@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -620,11 +620,9 @@ polarssl_connect_step3(struct connectdata *conn,
     ssl_session *our_ssl_sessionid;
     void *old_ssl_sessionid = NULL;
 
-    our_ssl_sessionid = malloc(sizeof(ssl_session));
+    our_ssl_sessionid = calloc(1, sizeof(ssl_session));
     if(!our_ssl_sessionid)
       return CURLE_OUT_OF_MEMORY;
-
-    memset(our_ssl_sessionid, 0, sizeof(ssl_session));
 
     ret = ssl_get_session(&BACKEND->ssl, our_ssl_sessionid);
     if(ret) {
@@ -882,13 +880,14 @@ static bool Curl_polarssl_data_pending(const struct connectdata *conn,
   return ssl_get_bytes_avail(&BACKEND->ssl) != 0;
 }
 
-static void Curl_polarssl_sha256sum(const unsigned char *input,
+static CURLcode Curl_polarssl_sha256sum(const unsigned char *input,
                                     size_t inputlen,
                                     unsigned char *sha256sum,
                                     size_t sha256len UNUSED_PARAM)
 {
   (void)sha256len;
   sha256(input, inputlen, sha256sum, 0);
+  return CURLE_OK;
 }
 
 static void *Curl_polarssl_get_internals(struct ssl_connect_data *connssl,
@@ -901,11 +900,8 @@ static void *Curl_polarssl_get_internals(struct ssl_connect_data *connssl,
 const struct Curl_ssl Curl_ssl_polarssl = {
   { CURLSSLBACKEND_POLARSSL, "polarssl" }, /* info */
 
-  1, /* have_ca_path */
-  0, /* have_certinfo */
-  1, /* have_pinnedpubkey */
-  0, /* have_ssl_ctx */
-  0, /* support_https_proxy */
+  SSLSUPP_CA_PATH |
+  SSLSUPP_PINNEDPUBKEY,
 
   sizeof(struct ssl_backend_data),
 

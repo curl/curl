@@ -27,6 +27,8 @@ problems may have been fixed or changed somewhat since this was written!
  2.2 DER in keychain
  2.3 GnuTLS backend skips really long certificate fields
  2.4 DarwinSSL won't import PKCS#12 client certificates without a password
+ 2.5 Client cert handling with Issuer DN differs between backends
+ 2.6 CURL_GLOBAL_SSL
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -35,14 +37,13 @@ problems may have been fixed or changed somewhat since this was written!
  3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
 
  4. Command line
- 4.1 -J with %-encoded file nameas
+ 4.1 -J and -O with %-encoded file names
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
+ 4.4 --upload-file . hang if delay in STDIN
 
  5. Build and portability issues
- 5.1 Windows Borland compiler
  5.2 curl-config --libs contains private details
- 5.4 AIX shared build with c-ares fails
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
@@ -54,6 +55,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.4 Negotiate and Kerberos V5 need a fake user name
+ 6.5 NTLM doen't support password with § character
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -64,6 +66,8 @@ problems may have been fixed or changed somewhat since this was written!
  7.6 FTP with NULs in URL parts
  7.7 FTP and empty path parts in the URL
  7.8 Premature transfer end but healthy control channel
+ 7.9 Passive transfer tries only one IP address
+ 7.10 Stick to same family over SOCKS proxy
 
  8. TELNET
  8.1 TELNET and time limtiations don't work
@@ -83,6 +87,8 @@ problems may have been fixed or changed somewhat since this was written!
  11.2 error buffer not set if connection to multiple addresses fails
  11.3 c-ares deviates from stock resolver on http://1346569778
  11.4 HTTP test server 'connection-monitor' problems
+ 11.5 Connection information when using TCP Fast Open
+ 11.6 slow connect to localhost on Windows
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -110,6 +116,9 @@ problems may have been fixed or changed somewhat since this was written!
 
  Disabling HTTP Pipelining when there are ongoing transfers can lead to
  heap corruption and crash. https://curl.haxx.se/bug/view.cgi?id=1411
+
+ Similarly, removing a handle when pipelining corrupts data:
+ https://github.com/curl/curl/issues/2101
 
 1.3 STARTTRANSFER time is wrong for HTTP POSTs
 
@@ -223,6 +232,42 @@ problems may have been fixed or changed somewhat since this was written!
  function rejects certificates that do not have a password.
  https://github.com/curl/curl/issues/1308
 
+2.5 Client cert handling with Issuer DN differs between backends
+
+ When the specified client certificate doesn't match any of the
+ server-specified DNs, the OpenSSL and GnuTLS backends behave differently.
+ The github discussion may contain a solution.
+
+ See https://github.com/curl/curl/issues/1411
+
+2.6 CURL_GLOBAL_SSL
+
+ Since libcurl 7.57.0, the flag CURL_GLOBAL_SSL is a no-op. The change was
+ merged in https://github.com/curl/curl/commit/d661b0afb571a
+
+ It was removed since it was
+
+ A) never clear for applications on how to deal with init in the light of
+    different SSL backends (the option was added back in the days when life
+    was simpler)
+
+ B) multissl introduced dynamic switching between SSL backends which
+    emphasized (A) even more
+
+ C) libcurl uses some TLS backend functionality even for non-TLS functions (to
+    get "good" random) so applications trying to avoid the init for
+    performance reasons would do wrong anyway
+
+ D) never very carefully documented so all this mostly just happened to work
+    for some users
+
+ However, in spite of the problems with the feature, there were some users who
+ apparently depended on this feature and who now claim libcurl is broken for
+ them. The fix for this situation is not obvious as a downright revert of the
+ patch is totally ruled out due to those reasons above.
+
+ https://github.com/curl/curl/issues/2276
+
 
 3. Email protocols
 
@@ -255,7 +300,7 @@ problems may have been fixed or changed somewhat since this was written!
 
 4. Command line
 
-4.1 -J with %-encoded file nameas
+4.1 -J and -O with %-encoded file names
 
  -J/--remote-header-name doesn't decode %-encoded file names. RFC6266 details
  how it should be done. The can of worm is basically that we have no charset
@@ -264,6 +309,13 @@ problems may have been fixed or changed somewhat since this was written!
  like "../" sequences and the like. Probably everything to the left of any
  embedded slashes should be cut off.
  https://curl.haxx.se/bug/view.cgi?id=1294
+
+ -O also doesn't decode %-encoded names, and while it has even less
+ information about the charset involved the process is similar to the -J case.
+
+ Note that we won't add decoding to -O without the user asking for it with
+ some other means as well, since -O has always been documented to use the name
+ exactly as specified in the URL.
 
 4.2 -J with -C - fails
 
@@ -282,25 +334,21 @@ problems may have been fixed or changed somewhat since this was written!
  https://curl.haxx.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
 
+4.4 --upload-file . hangs if delay in STDIN
+
+ "(echo start; sleep 1; echo end) | curl --upload-file . http://mywebsite -vv"
+
+ ... causes a hang when it shouldn't.
+
+ See https://github.com/curl/curl/issues/2051
 
 5. Build and portability issues
-
-5.1 Windows Borland compiler
-
- When building with the Windows Borland compiler, it fails because the "tlib"
- tool doesn't support hyphens (minus signs) in file names and we have such in
- the build.  https://curl.haxx.se/bug/view.cgi?id=1222
 
 5.2 curl-config --libs contains private details
 
  "curl-config --libs" will include details set in LDFLAGS when configure is
  run that might be needed only for building libcurl. Further, curl-config
  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
-
-5.4 AIX shared build with c-ares fails
-
- curl version 7.12.2 fails on AIX if compiled with --enable-ares.  The
- workaround is to combine --enable-ares with --disable-shared
 
 5.5 can't handle Unicode arguments in Windows
 
@@ -395,6 +443,9 @@ problems may have been fixed or changed somewhat since this was written!
  new conn->bits.want_authentication which is set when any of the authentication
  options are set.
 
+6.5 NTLM doen't support password with § character
+
+ https://github.com/curl/curl/issues/2120
 
 7. FTP
 
@@ -473,6 +524,27 @@ problems may have been fixed or changed somewhat since this was written!
  situations (listed in the ftp_done code) where it *could* keep the connection
  alive even in this situation - but the current code doesn't. Fixing this would
  allow libcurl to reuse FTP connections better.
+
+7.9 Passive transfer tries only one IP address
+
+ When doing FTP operations through a proxy at localhost, the reported spotted
+ that curl only tried to connect once to the proxy, while it had mulitiple
+ addresses and a failed connect on one address should make it try the next.
+
+ After switching to passive mode (EPSV), curl should try all IP addresses for
+ "localhost". Currently it tries ::1, but it should also try 127.0.0.1.
+
+ See https://github.com/curl/curl/issues/1508
+
+7.10 Stick to same family over SOCKS proxy
+
+ When asked to do FTP over a SOCKS proxy, it might connect to the proxy (and
+ then subsequently to the remote server) using for example IPv4. When doing
+ the second connection, curl should make sure that the second connection is
+ using the same IP protocol version as the first connection did and not try
+ others, since the remote server will only accept the same.
+
+ See https://curl.haxx.se/mail/archive-2018-07/0000.html
 
 8. TELNET
 
@@ -561,6 +633,26 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/868
 
+11.5 Connection information when using TCP Fast Open
+
+ CURLINFO_LOCAL_PORT (and possibly a few other) fails when TCP Fast Open is
+ enabled.
+
+ See https://github.com/curl/curl/issues/1332
+
+11.6 slow connect to localhost on Windows
+
+ When connecting to "localhost" on Windows, curl will resolve the name for
+ both ipv4 and ipv6 and try to connect to both happy eyeballs-style. Something
+ in there does however make it take 200 millseconds to succeed - which is the
+ HAPPY_EYEBALLS_TIMEOUT define exactly. Lowering that define speeds up the
+ connection, suggesting a problem in the HE handling.
+
+ If we can *know* that we're talking to a local host, we should lower the
+ happy eyeballs delay timeout for IPv6 (related: hardcode the "localhost"
+ addresses, mentioned in TODO). Possibly we should reduce that delay for all.
+
+ https://github.com/curl/curl/issues/2281
 
 12. LDAP and OpenLDAP
 

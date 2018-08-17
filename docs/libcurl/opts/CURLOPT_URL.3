@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -108,7 +108,7 @@ The path part of the URL is protocol specific and whilst some examples are
 given below this list is not conclusive:
 
 .IP HTTP
-The path part of a HTTP request specifies the file to retrieve and from what
+The path part of an HTTP request specifies the file to retrieve and from what
 directory. If the directory is not specified then the web server's root
 directory is used. If the file is omitted then the default document will be
 retrieved for either the directory specified or the root directory. The exact
@@ -284,8 +284,19 @@ and get cut off by libcurl if provided literally. You will instead have to
 escape it by providing it as backslash and its ASCII value in hexadecimal:
 "\\23".
 
+.RS 0
 The application does not have to keep the string around after setting this
 option.
+.SH ENCODING
+The string pointed to in the \fICURLOPT_URL(3)\fP argument is generally
+expected to be a sequence of characters using an ASCII compatible encoding.
+
+If libcurl is built with IDN support, the server name part of the URL can use
+an "international name" by using the current encoding (according to locale) or
+UTF-8 (when winidn is used).
+
+If libcurl is built without IDN support, the server name is used exactly as
+specified when passed to the name resolver functions.
 .SH DEFAULT
 There is no default URL. If this option isn't set, no transfer can be
 performed.

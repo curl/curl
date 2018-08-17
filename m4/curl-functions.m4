@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -7007,4 +7007,21 @@ AC_DEFUN([CURL_CHECK_FUNC_WRITEV], [
     AC_MSG_RESULT([no])
     curl_cv_func_writev="no"
   fi
+])
+
+dnl CURL_RUN_IFELSE
+dnl -------------------------------------------------
+dnl Wrapper macro to use instead of AC_RUN_IFELSE. It
+dnl sets LD_LIBRARY_PATH locally for this run only, from the
+dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
+dnl changes contained within this macro.
+
+AC_DEFUN([CURL_RUN_IFELSE], [
+   AC_REQUIRE([AC_RUN_IFELSE])dnl
+
+   old=$LD_LIBRARY_PATH
+   LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+   export LD_LIBRARY_PATH
+   AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
+   LD_LIBRARY_PATH=$old # restore
 ])

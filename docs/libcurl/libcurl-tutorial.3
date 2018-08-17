@@ -290,7 +290,7 @@ at least briefly.
 
 .SH "Upload Data to a Remote Site"
 libcurl tries to keep a protocol independent approach to most transfers, thus
-uploading to a remote FTP site is very similar to uploading data to a HTTP
+uploading to a remote FTP site is very similar to uploading data to an HTTP
 server with a PUT request.
 
 Of course, first you either create an easy handle or you re-use one existing
@@ -517,7 +517,7 @@ and then a file with binary contents and uploads the whole thing.
 
 To post multiple files for a single form field, you must supply each file in
 a separate part, all with the same field name. Although function
-\fIcurl_mime_subparts(3)\fP implements nested muti-parts, this way of
+\fIcurl_mime_subparts(3)\fP implements nested multi-parts, this way of
 multiple files posting is deprecated by RFC 7578, chapter 4.3.
 
 To set the data source from an already opened FILE pointer, use:
@@ -791,12 +791,12 @@ identified in the URL.
 If you're using a SOCKS proxy, you may find that libcurl doesn't quite support
 all operations through it.
 
-For HTTP proxies: the fact that the proxy is a HTTP proxy puts certain
+For HTTP proxies: the fact that the proxy is an HTTP proxy puts certain
 restrictions on what can actually happen. A requested URL that might not be a
 HTTP URL will be still be passed to the HTTP proxy to deliver back to
 libcurl. This happens transparently, and an application may not need to
 know. I say "may", because at times it is very important to understand that
-all operations over a HTTP proxy use the HTTP protocol. For example, you
+all operations over an HTTP proxy use the HTTP protocol. For example, you
 can't invoke your own custom FTP commands or even proper FTP directory
 listings.
 
@@ -816,7 +816,7 @@ If you want to, you can specify the host name only in the
 \fICURLOPT_PROXYPORT(3)\fP.
 
 Tell libcurl what kind of proxy it is with \fICURLOPT_PROXYTYPE(3)\fP (if not,
-it will default to assume a HTTP proxy):
+it will default to assume an HTTP proxy):
 
  curl_easy_setopt(easyhandle, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
 
@@ -852,11 +852,11 @@ variables, set the proxy name to "" - an empty string - with
 SSL is for secure point-to-point connections. This involves strong encryption
 and similar things, which effectively makes it impossible for a proxy to
 operate as a "man in between" which the proxy's task is, as previously
-discussed. Instead, the only way to have SSL work over a HTTP proxy is to ask
+discussed. Instead, the only way to have SSL work over an HTTP proxy is to ask
 the proxy to tunnel trough everything without being able to check or fiddle
 with the traffic.
 
-Opening an SSL connection over a HTTP proxy is therefor a matter of asking the
+Opening an SSL connection over an HTTP proxy is therefore a matter of asking the
 proxy for a straight connection to the target host on a specified port. This
 is made with the HTTP request CONNECT. ("please mr proxy, connect me to that
 remote host").
@@ -876,7 +876,7 @@ you or your application.
 
 As tunneling opens a direct connection from your application to the remote
 machine, it suddenly also re-introduces the ability to do non-HTTP
-operations over a HTTP proxy. You can in fact use things such as FTP
+operations over an HTTP proxy. You can in fact use things such as FTP
 upload or FTP custom commands this way.
 
 Again, this is often prevented by the administrators of proxies and is
@@ -1056,7 +1056,7 @@ you can tell libcurl to use 1.0 instead by doing something like this:
 Not all protocols are HTTP-like, and thus the above may not help you when
 you want to make, for example, your FTP transfers to behave differently.
 
-Sending custom commands to a FTP server means that you need to send the
+Sending custom commands to an FTP server means that you need to send the
 commands exactly as the FTP server expects them (RFC959 is a good guide
 here), and you can only use commands that work on the control-connection
 alone. All kinds of commands that require data interchange and thus need
@@ -1100,7 +1100,7 @@ combine with \fICURLOPT_NOBODY(3)\fP. If this option is set, no actual file
 content transfer will be performed.
 
 .IP "FTP Custom CUSTOMREQUEST"
-If you do want to list the contents of a FTP directory using your own defined
+If you do want to list the contents of an FTP directory using your own defined
 FTP command, \fICURLOPT_CUSTOMREQUEST(3)\fP will do just that. "NLST" is the
 default one for listing directories but you're free to pass in your idea of a
 good alternative.

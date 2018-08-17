@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,10 +54,12 @@
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
+#include "rand.h"
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
+#include "multiif.h"
 #include "warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -384,6 +386,70 @@ Curl_fetch_addr(struct connectdata *conn,
 }
 
 /*
+ * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
+ * struct by re-linking its linked list.
+ *
+ * The addr argument should be the address of a pointer to the head node of a
+ * `Curl_addrinfo` list and it will be modified to point to the new head after
+ * shuffling.
+ *
+ * Not declared static only to make it easy to use in a unit test!
+ *
+ * @unittest: 1608
+ */
+CURLcode Curl_shuffle_addr(struct Curl_easy *data, Curl_addrinfo **addr)
+{
+  CURLcode result = CURLE_OK;
+  const int num_addrs = Curl_num_addresses(*addr);
+
+  if(num_addrs > 1) {
+    Curl_addrinfo **nodes;
+    infof(data, "Shuffling %i addresses", num_addrs);
+
+    nodes = malloc(num_addrs*sizeof(*nodes));
+    if(nodes) {
+      int i;
+      unsigned int *rnd;
+      const size_t rnd_size = num_addrs * sizeof(*rnd);
+
+      /* build a plain array of Curl_addrinfo pointers */
+      nodes[0] = *addr;
+      for(i = 1; i < num_addrs; i++) {
+        nodes[i] = nodes[i-1]->ai_next;
+      }
+
+      rnd = malloc(rnd_size);
+      if(rnd) {
+        /* Fisher-Yates shuffle */
+        if(Curl_rand(data, (unsigned char *)rnd, rnd_size) == CURLE_OK) {
+          Curl_addrinfo *swap_tmp;
+          for(i = num_addrs - 1; i > 0; i--) {
+            swap_tmp = nodes[rnd[i] % (i + 1)];
+            nodes[rnd[i] % (i + 1)] = nodes[i];
+            nodes[i] = swap_tmp;
+          }
+
+          /* relink list in the new order */
+          for(i = 1; i < num_addrs; i++) {
+            nodes[i-1]->ai_next = nodes[i];
+          }
+
+          nodes[num_addrs-1]->ai_next = NULL;
+          *addr = nodes[0];
+        }
+        free(rnd);
+      }
+      else
+        result = CURLE_OUT_OF_MEMORY;
+      free(nodes);
+    }
+    else
+      result = CURLE_OUT_OF_MEMORY;
+  }
+  return result;
+}
+
+/*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
  *
  * When calling Curl_resolv() has resulted in a response with a returned
@@ -402,6 +468,13 @@ Curl_cache_addr(struct Curl_easy *data,
   size_t entry_len;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
+
+  /* shuffle addresses if requested */
+  if(data->set.dns_shuffle_addresses) {
+    CURLcode result = Curl_shuffle_addr(data, &addr);
+    if(!result)
+      return NULL;
+  }
 
   /* Create an entry id, based upon the hostname and port */
   entry_id = create_hostcache_id(hostname, port);
@@ -498,6 +571,17 @@ int Curl_resolv(struct connectdata *conn,
      * If not, bail out. */
     if(!Curl_ipvalid(conn))
       return CURLRESOLV_ERROR;
+
+    /* notify the resolver start callback */
+    if(data->set.resolver_start) {
+      int st;
+      Curl_set_in_callback(data, true);
+      st = data->set.resolver_start(data->state.resolver, NULL,
+                                    data->set.resolver_start_client);
+      Curl_set_in_callback(data, false);
+      if(st)
+        return CURLRESOLV_ERROR;
+    }
 
     /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
        non-zero value indicating that we need to wait for the response to the
@@ -844,7 +928,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *entry_id;
       size_t entry_len;
       char address[64];
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       char *addresses = NULL;
+#endif
       char *addr_begin;
       char *addr_end;
       char *port_ptr;
@@ -867,7 +953,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         goto err;
 
       port = (int)tmp_port;
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       addresses = end_ptr + 1;
+#endif
 
       while(*end_ptr) {
         size_t alen;
@@ -947,24 +1035,28 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       /* See if its already in our dns cache */
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
+      if(dns) {
+        infof(data, "RESOLVE %s:%d is - old addresses discarded!\n",
+                hostname, port);
+        /* delete old entry entry, there are two reasons for this
+         1. old entry may have different addresses.
+         2. even if entry with correct addresses is already in the cache,
+            but if it is close to expire, then by the time next http
+            request is made, it can get expired and pruned because old
+            entry is not necessarily marked as added by CURLOPT_RESOLVE. */
+
+        Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
+      }
       /* free the allocated entry_id again */
       free(entry_id);
 
-      if(!dns) {
-        /* if not in the cache already, put this host in the cache */
-        dns = Curl_cache_addr(data, head, hostname, port);
-        if(dns) {
-          dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
-          /* release the returned reference; the cache itself will keep the
-           * entry alive: */
-          dns->inuse--;
-        }
-      }
-      else {
-        /* this is a duplicate, free it again */
-        infof(data, "RESOLVE %s:%d is already cached, %s not stored!\n",
-              hostname, port, addresses);
-        Curl_freeaddrinfo(head);
+      /* put this new host in the cache */
+      dns = Curl_cache_addr(data, head, hostname, port);
+      if(dns) {
+        dns->timestamp = 0; /* mark as added by CURLOPT_RESOLVE */
+        /* release the returned reference; the cache itself will keep the
+         * entry alive: */
+            dns->inuse--;
       }
 
       if(data->share)

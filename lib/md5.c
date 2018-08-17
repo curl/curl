@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -486,22 +486,33 @@ static void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 
 const HMAC_params Curl_HMAC_MD5[] = {
   {
-    (HMAC_hinit_func) MD5_Init,           /* Hash initialization function. */
-    (HMAC_hupdate_func) MD5_Update,       /* Hash update function. */
-    (HMAC_hfinal_func) MD5_Final,         /* Hash computation end function. */
-    sizeof(MD5_CTX),                      /* Size of hash context structure. */
-    64,                                   /* Maximum key length. */
-    16                                    /* Result size. */
+    /* Hash initialization function. */
+    CURLX_FUNCTION_CAST(HMAC_hinit_func, MD5_Init),
+    /* Hash update function. */
+    CURLX_FUNCTION_CAST(HMAC_hupdate_func, MD5_Update),
+    /* Hash computation end function. */
+    CURLX_FUNCTION_CAST(HMAC_hfinal_func, MD5_Final),
+    /* Size of hash context structure. */
+    sizeof(MD5_CTX),
+    /* Maximum key length. */
+    64,
+    /* Result size. */
+    16
   }
 };
 
 const MD5_params Curl_DIGEST_MD5[] = {
   {
-    (Curl_MD5_init_func) MD5_Init,      /* Digest initialization function */
-    (Curl_MD5_update_func) MD5_Update,  /* Digest update function */
-    (Curl_MD5_final_func) MD5_Final,    /* Digest computation end function */
-    sizeof(MD5_CTX),                    /* Size of digest context struct */
-    16                                  /* Result size */
+    /* Digest initialization function */
+    CURLX_FUNCTION_CAST(Curl_MD5_init_func, MD5_Init),
+    /* Digest update function */
+    CURLX_FUNCTION_CAST(Curl_MD5_update_func, MD5_Update),
+    /* Digest computation end function */
+    CURLX_FUNCTION_CAST(Curl_MD5_final_func, MD5_Final),
+    /* Size of digest context struct */
+    sizeof(MD5_CTX),
+    /* Result size */
+    16
   }
 };
 
@@ -522,7 +533,7 @@ MD5_context *Curl_MD5_init(const MD5_params *md5params)
   MD5_context *ctxt;
 
   /* Create MD5 context */
-  ctxt = malloc(sizeof *ctxt);
+  ctxt = malloc(sizeof(*ctxt));
 
   if(!ctxt)
     return ctxt;

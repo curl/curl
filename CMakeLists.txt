@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -38,24 +38,24 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
 include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
-project( CURL C )
+project(CURL C)
 
 message(WARNING "the curl cmake build system is poorly maintained. Be aware")
 
-file (READ ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS)
-string (REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
+file(READ ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS)
+string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
   CURL_VERSION ${CURL_VERSION_H_CONTENTS})
-string (REGEX REPLACE "[^\"]+\"" "" CURL_VERSION ${CURL_VERSION})
-string (REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+"
+string(REGEX REPLACE "[^\"]+\"" "" CURL_VERSION ${CURL_VERSION})
+string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+"
   CURL_VERSION_NUM ${CURL_VERSION_H_CONTENTS})
-string (REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
+string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
 include_regular_expression("^.*$")    # Sukender: Is it necessary?
 
@@ -71,19 +71,19 @@ set(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
 set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 
 include_directories(${PROJECT_BINARY_DIR}/include/curl)
-include_directories( ${CURL_SOURCE_DIR}/include )
+include_directories(${CURL_SOURCE_DIR}/include)
 
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
-option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
   option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
 endif()
 
-CMAKE_DEPENDENT_OPTION(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
+cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
         ON "NOT ENABLE_ARES"
         OFF)
 
@@ -91,19 +91,19 @@ option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
-  if (PICKY_COMPILER)
-    foreach (_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers)
+  if(PICKY_COMPILER)
+    foreach(_CCOPT -pedantic -Wall -W -Wpointer-arith -Wwrite-strings -Wunused -Wshadow -Winline -Wnested-externs -Wmissing-declarations -Wmissing-prototypes -Wno-long-long -Wfloat-equal -Wno-multichar -Wsign-compare -Wundef -Wno-format-nonliteral -Wendif-labels -Wstrict-prototypes -Wdeclaration-after-statement -Wstrict-aliasing=3 -Wcast-align -Wtype-limits -Wold-style-declaration -Wmissing-parameter-type -Wempty-body -Wclobbered -Wignored-qualifiers -Wconversion -Wno-sign-conversion -Wvla -Wdouble-promotion -Wno-system-headers)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
-      CHECK_C_COMPILER_FLAG(${_CCOPT} OPT${_CCOPT})
+      check_c_compiler_flag(${_CCOPT} OPT${_CCOPT})
       if(OPT${_CCOPT})
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_CCOPT}")
       endif()
     endforeach()
-  endif(PICKY_COMPILER)
-endif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+  endif()
+endif()
 
-if (ENABLE_DEBUG)
+if(ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
   if(NOT CMAKE_VERSION VERSION_LESS 3.0)
     set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
@@ -113,12 +113,14 @@ if (ENABLE_DEBUG)
   set(ENABLE_CURLDEBUG ON)
 endif()
 
-if (ENABLE_CURLDEBUG)
+if(ENABLE_CURLDEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS CURLDEBUG)
 endif()
 
 # For debug libs and exes, add "-d" postfix
-set(CMAKE_DEBUG_POSTFIX "-d" CACHE STRING "Set debug library postfix")
+if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
+  set(CMAKE_DEBUG_POSTFIX "-d")
+endif()
 
 # initialize CURL_LIBS
 set(CURL_LIBS "")
@@ -126,7 +128,7 @@ set(CURL_LIBS "")
 if(ENABLE_ARES)
   set(USE_ARES 1)
   find_package(CARES REQUIRED)
-  list(APPEND CURL_LIBS ${CARES_LIBRARY} )
+  list(APPEND CURL_LIBS ${CARES_LIBRARY})
   set(CURL_LIBS ${CURL_LIBS} ${CARES_LIBRARY})
 endif()
 
@@ -203,10 +205,10 @@ if(ENABLE_IPV6 AND NOT WIN32)
   endif()
 endif()
 
-CURL_NROFF_CHECK()
+curl_nroff_check()
 find_package(Perl)
 
-CMAKE_DEPENDENT_OPTION(ENABLE_MANUAL "to provide the built-in manual"
+cmake_dependent_option(ENABLE_MANUAL "to provide the built-in manual"
     ON "NROFF_USEFUL;PERL_FOUND"
     OFF)
 
@@ -230,38 +232,28 @@ endif()
 # Disable warnings on Borland to avoid changing 3rd party code.
 if(BORLAND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
-endif(BORLAND)
-
-if(CURL_WERROR)
-  if(MSVC_VERSION)
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /WX")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /WX")
-  else()
-    # this assumes clang or gcc style options
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-  endif()
-endif(CURL_WERROR)
+endif()
 
 # If we are on AIX, do the _ALL_SOURCE magic
 if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
   set(_ALL_SOURCE 1)
-endif(${CMAKE_SYSTEM_NAME} MATCHES AIX)
+endif()
 
 # Include all the necessary files for macros
-include (CheckFunctionExists)
-include (CheckIncludeFile)
-include (CheckIncludeFiles)
-include (CheckLibraryExists)
-include (CheckSymbolExists)
-include (CheckTypeSize)
-include (CheckCSourceCompiles)
-include (CMakeDependentOption)
+include(CheckFunctionExists)
+include(CheckIncludeFile)
+include(CheckIncludeFiles)
+include(CheckLibraryExists)
+include(CheckSymbolExists)
+include(CheckTypeSize)
+include(CheckCSourceCompiles)
+include(CMakeDependentOption)
 
 # On windows preload settings
 if(WIN32)
   set(CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_WINSOCKAPI_=")
   include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
-endif(WIN32)
+endif()
 
 if(ENABLE_THREADED_RESOLVER)
   find_package(Threads REQUIRED)
@@ -284,17 +276,18 @@ if(BEOS)
   set(NOT_NEED_LIBNSL 1)
   check_library_exists_concat("bind" gethostbyname HAVE_LIBBIND)
   check_library_exists_concat("bnetapi" closesocket HAVE_LIBBNETAPI)
-endif(BEOS)
+endif()
 
 if(NOT NOT_NEED_LIBNSL)
   check_library_exists_concat("nsl"    gethostbyname  HAVE_LIBNSL)
-endif(NOT NOT_NEED_LIBNSL)
+endif()
 
 check_function_exists(gethostname HAVE_GETHOSTNAME)
 
 if(WIN32)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
+  list(APPEND CURL_LIBS "advapi32")
 endif()
 
 # check SSL libraries
@@ -316,14 +309,14 @@ if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
-collect_true(enabled_ssl_options enabled_ssl_options_count
+count_true(enabled_ssl_options_count
   CMAKE_USE_WINSSL
   CMAKE_USE_DARWINSSL
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
 )
-if(enabled_ssl_options_count GREATER 1)
-  message(FATAL_ERROR "Multiple SSL options specified: ${enabled_ssl_options}. Please pick at most one and disable the rest.")
+if(enabled_ssl_options_count GREATER "1")
+  set(CURL_WITH_MULTI_SSL ON)
 endif()
 
 if(CMAKE_USE_WINSSL)
@@ -359,11 +352,10 @@ if(CMAKE_USE_OPENSSL)
   set(USE_OPENSSL ON)
   set(HAVE_LIBCRYPTO ON)
   set(HAVE_LIBSSL ON)
-  list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
-  include_directories(${OPENSSL_INCLUDE_DIR})
+  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
-  check_include_file("openssl/engine.h" HAVE_OPENSSL_ENGINE_H)
   check_include_file("openssl/err.h"    HAVE_OPENSSL_ERR_H)
   check_include_file("openssl/pem.h"    HAVE_OPENSSL_PEM_H)
   check_include_file("openssl/rsa.h"    HAVE_OPENSSL_RSA_H)
@@ -483,7 +475,6 @@ if(NOT CURL_DISABLE_LDAP)
       endif()
     endif()
   endif()
-
 endif()
 
 # No ldap, no ldaps.
@@ -521,6 +512,18 @@ if(CURL_ZLIB)
   endif()
 endif()
 
+option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)
+set(HAVE_BROTLI OFF)
+if(CURL_BROTLI)
+  find_package(BROTLI QUIET)
+  if(BROTLI_FOUND)
+    set(HAVE_BROTLI ON)
+    list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
+    include_directories(${BROTLI_INCLUDE_DIRS})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${BROTLI_INCLUDE_DIRS})
+  endif()
+endif()
+
 #libSSH2
 option(CMAKE_USE_LIBSSH2 "Use libSSH2" ON)
 mark_as_advanced(CMAKE_USE_LIBSSH2)
@@ -551,9 +554,8 @@ if(CMAKE_USE_LIBSSH2)
     check_function_exists(libssh2_scp_send64        HAVE_LIBSSH2_SCP_SEND64)
     check_function_exists(libssh2_session_handshake HAVE_LIBSSH2_SESSION_HANDSHAKE)
     set(CMAKE_EXTRA_INCLUDE_FILES "")
-
-  endif(LIBSSH2_FOUND)
-endif(CMAKE_USE_LIBSSH2)
+  endif()
+endif()
 
 option(CMAKE_USE_GSSAPI "Use GSSAPI implementation (right now only Heimdal is supported with CMake build)" OFF)
 mark_as_advanced(CMAKE_USE_GSSAPI)
@@ -622,7 +624,6 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
-
 #
 # CA handling
 #
@@ -634,66 +635,65 @@ set(CURL_CA_PATH "auto" CACHE STRING
     "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
 
 if("${CURL_CA_BUNDLE}" STREQUAL "")
-    message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
+  message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
 elseif("${CURL_CA_BUNDLE}" STREQUAL "none")
-    unset(CURL_CA_BUNDLE CACHE)
+  unset(CURL_CA_BUNDLE CACHE)
 elseif("${CURL_CA_BUNDLE}" STREQUAL "auto")
-    unset(CURL_CA_BUNDLE CACHE)
-    set(CURL_CA_BUNDLE_AUTODETECT TRUE)
+  unset(CURL_CA_BUNDLE CACHE)
+  set(CURL_CA_BUNDLE_AUTODETECT TRUE)
 else()
-    set(CURL_CA_BUNDLE_SET TRUE)
+  set(CURL_CA_BUNDLE_SET TRUE)
 endif()
 
 if("${CURL_CA_PATH}" STREQUAL "")
-    message(FATAL_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or directory path.")
+  message(FATAL_ERROR "Invalid value of CURL_CA_PATH. Use 'none', 'auto' or directory path.")
 elseif("${CURL_CA_PATH}" STREQUAL "none")
-    unset(CURL_CA_PATH CACHE)
+  unset(CURL_CA_PATH CACHE)
 elseif("${CURL_CA_PATH}" STREQUAL "auto")
-    unset(CURL_CA_PATH CACHE)
-    set(CURL_CA_PATH_AUTODETECT TRUE)
+  unset(CURL_CA_PATH CACHE)
+  set(CURL_CA_PATH_AUTODETECT TRUE)
 else()
-    set(CURL_CA_PATH_SET TRUE)
+  set(CURL_CA_PATH_SET TRUE)
 endif()
 
 if(CURL_CA_BUNDLE_SET AND CURL_CA_PATH_AUTODETECT)
-    # Skip autodetection of unset CA path because CA bundle is set explicitly
+  # Skip autodetection of unset CA path because CA bundle is set explicitly
 elseif(CURL_CA_PATH_SET AND CURL_CA_BUNDLE_AUTODETECT)
-    # Skip autodetection of unset CA bundle because CA path is set explicitly
+  # Skip autodetection of unset CA bundle because CA path is set explicitly
 elseif(CURL_CA_PATH_AUTODETECT OR CURL_CA_BUNDLE_AUTODETECT)
-    # first try autodetecting a CA bundle, then a CA path
+  # first try autodetecting a CA bundle, then a CA path
 
-    if(CURL_CA_BUNDLE_AUTODETECT)
-        set(SEARCH_CA_BUNDLE_PATHS
-            /etc/ssl/certs/ca-certificates.crt
-            /etc/pki/tls/certs/ca-bundle.crt
-            /usr/share/ssl/certs/ca-bundle.crt
-            /usr/local/share/certs/ca-root-nss.crt
-            /etc/ssl/cert.pem)
+  if(CURL_CA_BUNDLE_AUTODETECT)
+    set(SEARCH_CA_BUNDLE_PATHS
+        /etc/ssl/certs/ca-certificates.crt
+        /etc/pki/tls/certs/ca-bundle.crt
+        /usr/share/ssl/certs/ca-bundle.crt
+        /usr/local/share/certs/ca-root-nss.crt
+        /etc/ssl/cert.pem)
 
-        foreach(SEARCH_CA_BUNDLE_PATH ${SEARCH_CA_BUNDLE_PATHS})
-            if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
-                message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
-                set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}")
-                set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
-                break()
-            endif()
-        endforeach()
+    foreach(SEARCH_CA_BUNDLE_PATH ${SEARCH_CA_BUNDLE_PATHS})
+      if(EXISTS "${SEARCH_CA_BUNDLE_PATH}")
+        message(STATUS "Found CA bundle: ${SEARCH_CA_BUNDLE_PATH}")
+        set(CURL_CA_BUNDLE "${SEARCH_CA_BUNDLE_PATH}")
+        set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+        break()
+      endif()
+    endforeach()
+  endif()
+
+  if(CURL_CA_PATH_AUTODETECT AND (NOT CURL_CA_PATH_SET))
+    if(EXISTS "/etc/ssl/certs")
+      set(CURL_CA_PATH "/etc/ssl/certs")
+      set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
     endif()
-
-    if(CURL_CA_PATH_AUTODETECT AND (NOT CURL_CA_PATH_SET))
-        if(EXISTS "/etc/ssl/certs")
-            set(CURL_CA_PATH "/etc/ssl/certs")
-            set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
-        endif()
-    endif()
+  endif()
 endif()
 
 if(CURL_CA_PATH_SET AND NOT USE_OPENSSL AND NOT USE_MBEDTLS)
-    message(FATAL_ERROR
-            "CA path only supported by OpenSSL, GnuTLS or mbed TLS. "
-            "Set CURL_CA_PATH=none or enable one of those TLS backends.")
+  message(FATAL_ERROR
+          "CA path only supported by OpenSSL, GnuTLS or mbed TLS. "
+          "Set CURL_CA_PATH=none or enable one of those TLS backends.")
 endif()
-
 
 # Check for header files
 if(NOT UNIX)
@@ -704,7 +704,7 @@ if(NOT UNIX)
   if(NOT CURL_WINDOWS_SSPI AND USE_OPENSSL)
     set(CURL_LIBS ${CURL_LIBS} "crypt32")
   endif()
-endif(NOT UNIX)
+endif()
 
 check_include_file_concat("stdio.h"          HAVE_STDIO_H)
 check_include_file_concat("inttypes.h"       HAVE_INTTYPES_H)
@@ -787,17 +787,17 @@ check_type_size("time_t"  SIZEOF_TIME_T)
 if(NOT HAVE_SIZEOF_SSIZE_T)
   if(SIZEOF_LONG EQUAL SIZEOF_SIZE_T)
     set(ssize_t long)
-  endif(SIZEOF_LONG EQUAL SIZEOF_SIZE_T)
+  endif()
   if(NOT ssize_t AND SIZEOF___INT64 EQUAL SIZEOF_SIZE_T)
     set(ssize_t __int64)
-  endif(NOT ssize_t AND SIZEOF___INT64 EQUAL SIZEOF_SIZE_T)
-endif(NOT HAVE_SIZEOF_SSIZE_T)
+  endif()
+endif()
 # off_t is sized later, after the HAVE_FILE_OFFSET_BITS test
 
 if(HAVE_SIZEOF_LONG_LONG)
   set(HAVE_LONGLONG 1)
   set(HAVE_LL 1)
-endif(HAVE_SIZEOF_LONG_LONG)
+endif()
 
 find_file(RANDOM_FILE urandom /dev)
 mark_as_advanced(RANDOM_FILE)
@@ -829,7 +829,7 @@ check_symbol_exists(strncmpi      "${CURL_INCLUDES}" HAVE_STRNCMPI)
 check_symbol_exists(alarm         "${CURL_INCLUDES}" HAVE_ALARM)
 if(NOT HAVE_STRNCMPI)
   set(HAVE_STRCMPI)
-endif(NOT HAVE_STRNCMPI)
+endif()
 check_symbol_exists(gethostbyaddr "${CURL_INCLUDES}" HAVE_GETHOSTBYADDR)
 check_symbol_exists(gethostbyaddr_r "${CURL_INCLUDES}" HAVE_GETHOSTBYADDR_R)
 check_symbol_exists(gettimeofday  "${CURL_INCLUDES}" HAVE_GETTIMEOFDAY)
@@ -845,6 +845,7 @@ check_symbol_exists(sigsetjmp     "${CURL_INCLUDES}" HAVE_SIGSETJMP)
 check_symbol_exists(getpass_r     "${CURL_INCLUDES}" HAVE_GETPASS_R)
 check_symbol_exists(strlcat       "${CURL_INCLUDES}" HAVE_STRLCAT)
 check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
+check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
 check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
 check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
@@ -857,7 +858,7 @@ check_symbol_exists(signal        "${CURL_INCLUDES}" HAVE_SIGNAL_FUNC)
 check_symbol_exists(SIGALRM       "${CURL_INCLUDES}" HAVE_SIGNAL_MACRO)
 if(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
   set(HAVE_SIGNAL 1)
-endif(HAVE_SIGNAL_FUNC AND HAVE_SIGNAL_MACRO)
+endif()
 check_symbol_exists(uname          "${CURL_INCLUDES}" HAVE_UNAME)
 check_symbol_exists(strtoll        "${CURL_INCLUDES}" HAVE_STRTOLL)
 check_symbol_exists(_strtoi64      "${CURL_INCLUDES}" HAVE__STRTOI64)
@@ -891,35 +892,35 @@ if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0501)
   endif()
 else()
-    check_function_exists(inet_pton HAVE_INET_PTON)
+  check_function_exists(inet_pton HAVE_INET_PTON)
 endif()
 
 check_symbol_exists(fsetxattr "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
   foreach(CURL_TEST HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
-    curl_internal_test_run(${CURL_TEST})
-  endforeach(CURL_TEST)
-endif(HAVE_FSETXATTR)
+    curl_internal_test(${CURL_TEST})
+  endforeach()
+endif()
 
 # sigaction and sigsetjmp are special. Use special mechanism for
 # detecting those, but only if previous attempt failed.
 if(HAVE_SIGNAL_H)
   check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
-endif(HAVE_SIGNAL_H)
+endif()
 
 if(NOT HAVE_SIGSETJMP)
   if(HAVE_SETJMP_H)
     check_symbol_exists(sigsetjmp "setjmp.h" HAVE_MACRO_SIGSETJMP)
     if(HAVE_MACRO_SIGSETJMP)
       set(HAVE_SIGSETJMP 1)
-    endif(HAVE_MACRO_SIGSETJMP)
-  endif(HAVE_SETJMP_H)
-endif(NOT HAVE_SIGSETJMP)
+    endif()
+  endif()
+endif()
 
 # If there is no stricmp(), do not allow LDAP to parse URLs
 if(NOT HAVE_STRICMP)
   set(HAVE_LDAP_URL_PARSE 1)
-endif(NOT HAVE_STRICMP)
+endif()
 
 # Do curl specific tests
 foreach(CURL_TEST
@@ -957,12 +958,12 @@ foreach(CURL_TEST
     HAVE_FILE_OFFSET_BITS
     )
   curl_internal_test(${CURL_TEST})
-endforeach(CURL_TEST)
+endforeach()
 
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
   set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
-endif(HAVE_FILE_OFFSET_BITS)
+endif()
 check_type_size("off_t"  SIZEOF_OFF_T)
 
 # include this header to get the type
@@ -977,8 +978,8 @@ foreach(CURL_TEST
     HAVE_GLIBC_STRERROR_R
     HAVE_POSIX_STRERROR_R
     )
-  curl_internal_test_run(${CURL_TEST})
-endforeach(CURL_TEST)
+  curl_internal_test(${CURL_TEST})
+endforeach()
 
 # Check for reentrant
 foreach(CURL_TEST
@@ -992,9 +993,9 @@ foreach(CURL_TEST
   if(NOT ${CURL_TEST})
     if(${CURL_TEST}_REENTRANT)
       set(NEED_REENTRANT 1)
-    endif(${CURL_TEST}_REENTRANT)
-  endif(NOT ${CURL_TEST})
-endforeach(CURL_TEST)
+    endif()
+  endif()
+endforeach()
 
 if(NEED_REENTRANT)
   foreach(CURL_TEST
@@ -1007,32 +1008,32 @@ if(NEED_REENTRANT)
     set(${CURL_TEST} 0)
     if(${CURL_TEST}_REENTRANT)
       set(${CURL_TEST} 1)
-    endif(${CURL_TEST}_REENTRANT)
-  endforeach(CURL_TEST)
-endif(NEED_REENTRANT)
+    endif()
+  endforeach()
+endif()
 
 if(HAVE_INET_NTOA_R_DECL_REENTRANT)
   set(HAVE_INET_NTOA_R_DECL 1)
   set(NEED_REENTRANT 1)
-endif(HAVE_INET_NTOA_R_DECL_REENTRANT)
+endif()
 
 # Some other minor tests
 
 if(NOT HAVE_IN_ADDR_T)
   set(in_addr_t "unsigned long")
-endif(NOT HAVE_IN_ADDR_T)
+endif()
 
 # Fix libz / zlib.h
 
 if(NOT CURL_SPECIAL_LIBZ)
   if(NOT HAVE_LIBZ)
     set(HAVE_ZLIB_H 0)
-  endif(NOT HAVE_LIBZ)
+  endif()
 
   if(NOT HAVE_ZLIB_H)
     set(HAVE_LIBZ 0)
-  endif(NOT HAVE_ZLIB_H)
-endif(NOT CURL_SPECIAL_LIBZ)
+  endif()
+endif()
 
 # Check for nonblocking
 set(HAVE_DISABLED_NONBLOCKING 1)
@@ -1041,16 +1042,13 @@ if(HAVE_FIONBIO OR
     HAVE_IOCTLSOCKET_CASE OR
     HAVE_O_NONBLOCK)
   set(HAVE_DISABLED_NONBLOCKING)
-endif(HAVE_FIONBIO OR
-  HAVE_IOCTLSOCKET OR
-  HAVE_IOCTLSOCKET_CASE OR
-  HAVE_O_NONBLOCK)
+endif()
 
 if(RETSIGTYPE_TEST)
   set(RETSIGTYPE void)
-else(RETSIGTYPE_TEST)
+else()
   set(RETSIGTYPE int)
-endif(RETSIGTYPE_TEST)
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   include(CheckCCompilerFlag)
@@ -1060,13 +1058,13 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
     get_source_file_property(MPRINTF_COMPILE_FLAGS mprintf.c COMPILE_FLAGS)
     if(MPRINTF_COMPILE_FLAGS)
       set(MPRINTF_COMPILE_FLAGS "${MPRINTF_COMPILE_FLAGS} -Wno-long-double")
-    else(MPRINTF_COMPILE_FLAGS)
+    else()
       set(MPRINTF_COMPILE_FLAGS "-Wno-long-double")
-    endif(MPRINTF_COMPILE_FLAGS)
+    endif()
     set_source_files_properties(mprintf.c PROPERTIES
       COMPILE_FLAGS ${MPRINTF_COMPILE_FLAGS})
-  endif(HAVE_C_FLAG_Wno_long_double)
-endif(CMAKE_COMPILER_IS_GNUCC AND APPLE)
+  endif()
+endif()
 
 if(HAVE_SOCKLEN_T)
   set(CURL_TYPEOF_CURL_SOCKLEN_T "socklen_t")
@@ -1101,19 +1099,34 @@ include(CMake/OtherTests.cmake)
 
 add_definitions(-DHAVE_CONFIG_H)
 
-# For windows, all compilers used by cmake should support large files
+# For Windows, all compilers used by CMake should support large files
 if(WIN32)
   set(USE_WIN32_LARGE_FILES ON)
-endif(WIN32)
+
+  # Use the manifest embedded in the Windows Resource
+  set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
+endif()
 
 if(MSVC)
+  # Disable default manifest added by CMake
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
   if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
     string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-  else(CMAKE_C_FLAGS MATCHES "/W[0-4]")
+  else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
-  endif(CMAKE_C_FLAGS MATCHES "/W[0-4]")
-endif(MSVC)
+  endif()
+endif()
+
+if(CURL_WERROR)
+  if(MSVC_VERSION)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
+  else()
+    # this assumes clang or gcc style options
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  endif()
+endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
 function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
@@ -1132,9 +1145,9 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 endfunction()
 
 if(WIN32 AND NOT CYGWIN)
-    set(CURL_INSTALL_CMAKE_DIR CMake)
+  set(CURL_INSTALL_CMAKE_DIR CMake)
 else()
-    set(CURL_INSTALL_CMAKE_DIR lib/cmake/curl)
+  set(CURL_INSTALL_CMAKE_DIR lib/cmake/curl)
 endif()
 
 if(USE_MANUAL)
@@ -1234,11 +1247,12 @@ set(CONFIGURE_OPTIONS       "")
 # TODO when to set "-DCURL_STATICLIB" for CPPFLAG_CURL_STATICLIB?
 set(CPPFLAG_CURL_STATICLIB  "")
 set(CURLVERSION             "${CURL_VERSION}")
-set(ENABLE_SHARED           "yes")
-if(CURL_STATICLIB)
-  set(ENABLE_STATIC         "yes")
-else()
+if(BUILD_SHARED_LIBS)
+  set(ENABLE_SHARED         "yes")
   set(ENABLE_STATIC         "no")
+else()
+  set(ENABLE_SHARED         "no")
+  set(ENABLE_STATIC         "yes")
 endif()
 set(exec_prefix             "\${prefix}")
 set(includedir              "\${prefix}/include")
@@ -1262,6 +1276,9 @@ set(REQUIRE_LIB_DEPS        "no")
 set(VERSIONNUM              "${CURL_VERSION_NUM}")
 
 # Finally generate a "curl-config" matching this config
+# Use:
+# * ENABLE_SHARED
+# * ENABLE_STATIC
 configure_file("${CURL_SOURCE_DIR}/curl-config.in"
                "${CURL_BINARY_DIR}/curl-config" @ONLY)
 install(FILES "${CURL_BINARY_DIR}/curl-config"
@@ -1295,9 +1312,9 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
-configure_file(CMake/curl-config.cmake
+configure_file(CMake/curl-config.cmake.in
         "${PROJECT_BINARY_DIR}/curl-config.cmake"
-        COPYONLY
+        @ONLY
 )
 
 install(

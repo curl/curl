@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,7 +49,6 @@ time_t Curl_pp_state_timeout(struct pingpong *pp)
   struct connectdata *conn = pp->conn;
   struct Curl_easy *data = conn->data;
   time_t timeout_ms; /* in milliseconds */
-  time_t timeout2_ms; /* in milliseconds */
   long response_time = (data->set.server_response_timeout)?
     data->set.server_response_timeout: pp->response_time;
 
@@ -65,7 +64,7 @@ time_t Curl_pp_state_timeout(struct pingpong *pp)
 
   if(data->set.timeout) {
     /* if timeout is requested, find out how much remaining time we have */
-    timeout2_ms = data->set.timeout - /* timeout time */
+    time_t timeout2_ms = data->set.timeout - /* timeout time */
       Curl_timediff(Curl_now(), conn->now); /* spent time */
 
     /* pick the lowest number */
@@ -222,8 +221,7 @@ CURLcode Curl_pp_vsendf(struct pingpong *pp,
   }
 
   if(conn->data->set.verbose)
-    Curl_debug(conn->data, CURLINFO_HEADER_OUT,
-               s, (size_t)bytes_written, conn);
+    Curl_debug(conn->data, CURLINFO_HEADER_OUT, s, (size_t)bytes_written);
 
   if(bytes_written != (ssize_t)write_len) {
     /* the whole chunk was not sent, keep it around and adjust sizes */
@@ -304,7 +302,10 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
        * it would have been populated with something of size int to begin
        * with, even though its datatype may be larger than an int.
        */
-      DEBUGASSERT((ptr + pp->cache_size) <= (buf + data->set.buffer_size + 1));
+      if((ptr + pp->cache_size) > (buf + data->set.buffer_size + 1)) {
+        failf(data, "cached response data too big to handle");
+        return CURLE_RECV_ERROR;
+      }
       memcpy(ptr, pp->cache, pp->cache_size);
       gotbytes = (ssize_t)pp->cache_size;
       free(pp->cache);    /* free the cache */
@@ -368,7 +369,7 @@ CURLcode Curl_pp_readresp(curl_socket_t sockfd,
 #endif
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
-                         pp->linestart_resp, (size_t)perline, conn);
+                         pp->linestart_resp, (size_t)perline);
 
           /*
            * We pass all response-lines to the callback function registered

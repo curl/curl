@@ -29,8 +29,8 @@ LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
   vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c               \
-  vtls/cyassl.c vtls/schannel.c vtls/darwinssl.c vtls/gskit.c           \
-  vtls/mbedtls.c
+  vtls/cyassl.c vtls/schannel.c vtls/schannel_verify.c                  \
+  vtls/darwinssl.c vtls/gskit.c vtls/mbedtls.c
 
 LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h vtls/axtls.h   \
@@ -54,7 +54,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   http_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_sasl.c rand.c        \
   curl_multibyte.c hostcheck.c conncache.c pipeline.c dotdot.c          \
   x509asn1.c http2.c smb.c curl_endian.c curl_des.c system_win32.c      \
-  mime.c sha256.c setopt.c curl_path.c curl_ctype.c curl_range.c
+  mime.c sha256.c setopt.c curl_path.c curl_ctype.c curl_range.c psl.c
 
 LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
@@ -74,7 +74,7 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   curl_setup_once.h multihandle.h setup-vms.h pipeline.h dotdot.h       \
   x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h           \
   curl_printf.h system_win32.h rand.h mime.h curl_sha256.h setopt.h     \
-  curl_path.h curl_ctype.h curl_range.h
+  curl_path.h curl_ctype.h curl_range.h psl.h
 
 LIB_RCFILES = libcurl.rc
 

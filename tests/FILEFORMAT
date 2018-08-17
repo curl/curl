@@ -169,6 +169,7 @@ connection-monitor When used, this will log [DISCONNECT] to the server.input
                log when the connection is disconnected.
 upgrade        when an HTTP upgrade header is found, the server will upgrade
                to http2
+swsclose       instruct server to close connection after response
 
 For TFTP:
 writedelay: [secs] delay this amount between reply packets (each packet being
@@ -231,6 +232,7 @@ ipv6
 Kerberos
 large_file
 libz
+manual
 Metalink
 NSS
 NTLM
@@ -293,8 +295,8 @@ command is run. They are cleared again after the command has been run.
 Variables are first substituted as in the <command> section.
 </setenv>
 
-<command [option="no-output/no-include"] [timeout="secs"] [delay="secs"]
-         [type="perl"]>
+<command [option="no-output/no-include/force-output"] [timeout="secs"]
+         [delay="secs"][type="perl"]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly.
 
@@ -316,6 +318,9 @@ there's no memory debugging and valgrind gets shut off for this test.
 Set option="no-output" to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
 the verify/stdout section is used.
+
+Set option="force-output" to make use of --output even when the test is
+otherwise written to verify stdout.
 
 Set option="no-include" to prevent the test script to slap on the --include
 argument.

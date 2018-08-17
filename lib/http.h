@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -104,7 +104,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
    This value used to be fairly big (100K), but we must take into account that
    if the server rejects the POST due for authentication reasons, this data
-   will always be uncondtionally sent and thus it may not be larger than can
+   will always be unconditionally sent and thus it may not be larger than can
    always be afforded to send twice.
 
    It must not be greater than 64K to work on VMS.
@@ -172,8 +172,6 @@ struct HTTP {
   size_t pauselen; /* the number of bytes left in data */
   bool closed; /* TRUE on HTTP2 stream close */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
-  uint32_t error_code; /* HTTP/2 error code */
-
   char *mem;     /* points to a buffer in memory to store received data */
   size_t len;    /* size of the buffer 'mem' points to */
   size_t memlen; /* size of data copied to mem */
@@ -188,9 +186,6 @@ struct HTTP {
 #endif
 };
 
-typedef int (*sending)(void); /* Curl_send */
-typedef int (*recving)(void); /* Curl_recv */
-
 #ifdef USE_NGHTTP2
 /* h2 settings for this connection */
 struct h2settings {
@@ -199,15 +194,14 @@ struct h2settings {
 };
 #endif
 
-
 struct http_conn {
 #ifdef USE_NGHTTP2
 #define H2_BINSETTINGS_LEN 80
   nghttp2_session *h2;
   uint8_t binsettings[H2_BINSETTINGS_LEN];
   size_t  binlen; /* length of the binsettings data */
-  sending send_underlying; /* underlying send Curl_send callback */
-  recving recv_underlying; /* underlying recv Curl_recv callback */
+  Curl_send *send_underlying; /* underlying send Curl_send callback */
+  Curl_recv *recv_underlying; /* underlying recv Curl_recv callback */
   char *inbuf; /* buffer to receive data from underlying socket */
   size_t inbuflen; /* number of bytes filled in inbuf */
   size_t nread_inbuf; /* number of bytes read from in inbuf */
@@ -226,6 +220,7 @@ struct http_conn {
   /* list of settings that will be sent */
   nghttp2_settings_entry local_settings[3];
   size_t local_settings_num;
+  uint32_t error_code; /* HTTP/2 error code */
 #else
   int unused; /* prevent a compiler warning */
 #endif

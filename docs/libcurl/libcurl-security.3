@@ -75,7 +75,7 @@ doesn't let snoopers see your password: Digest, CRAM-MD5, Kerberos, SPNEGO or
 NTLM authentication. Or even better: use authenticated protocols that protect
 the entire connection and everything sent over it.
 .SH "Un-authenticated Connections"
-Protocols that don't have any form of cryptographic authentication can not
+Protocols that don't have any form of cryptographic authentication cannot
 with any certainty know that they communicate with the right remote server.
 
 If your application is using a fixed scheme or fixed host name, it is not safe
@@ -88,9 +88,11 @@ have been injected by an attacker. The data that curl sends might be modified
 before it reaches the intended server. If it even reaches the intended server
 at all.
 
-Remedies include:
- - Restrict operations to authenticated transfers
- - Make sure the server's certificate etc is verified
+Remedies:
+.IP "Restrict operations to authenticated transfers"
+Ie use authenticated protocols protected with HTTPS or SSH.
+.IP "Make sure the server's certificate etc is verified"
+Never ever switch off certificate verification.
 .SH "Redirects"
 The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
 redirects sent by a remote server.  These redirects can refer to any kind of
@@ -233,11 +235,13 @@ particular scheme in the URL but point to a server doing a different protocol
 on a non-standard port.
 
 Remedies:
-
- - curl command lines can use \fI--proto\fP to limit what schemes it accepts
- - libcurl programs can use \fICURLOPT_PROTOCOLS(3)\fP
- - consider not allowing the user to set the full URL
- - consider strictly filtering input to only allow specific choices
+.IP "Use --proto"
+curl command lines can use \fI--proto\fP to limit what URL schemes it accepts
+.IP "Use CURLOPT_PROTOCOLS"
+libcurl programs can use \fICURLOPT_PROTOCOLS(3)\fP to limit what URL schemes it accepts
+.IP "consider not allowing the user to set the full URL"
+Maybe just let the user provide data for parts of it? Or maybe filter input to
+only allow specific choices?
 .SH "RFC 3986 vs WHATWG URL"
 curl supports URLs mostly according to how they are defined in RFC 3986, and
 has done so since the beginning.
@@ -317,8 +321,8 @@ one. HTTPS without validated certificates is potentially as insecure as a
 plain HTTP connection.
 .SH "Report Security Problems"
 Should you detect or just suspect a security problem in libcurl or curl,
-contact the project curl security team immediately. See the separate
-SECURITY.md document for details.
+contact the project curl security team immediately. See
+https://curl.haxx.se/dev/secprocess.html for details.
 .SH "Showing What You Do"
 Relatedly, be aware that in situations when you have problems with libcurl and
 ask someone for help, everything you reveal in order to get best possible help

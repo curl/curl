@@ -100,7 +100,7 @@ struct OperationConfig {
   bool use_ascii;           /* select ascii or text transfer */
   bool autoreferer;         /* automatically set referer */
   bool failonerror;         /* fail on (HTTP) errors */
-  bool include_headers;     /* send headers to data output */
+  bool show_headers;        /* show headers to data output */
   bool no_body;             /* don't get the body */
   bool dirlistonly;         /* only get the FTP dir list */
   bool followlocation;      /* follow http redirects */
@@ -117,6 +117,8 @@ struct OperationConfig {
   struct getout *url_ul;    /* point to the node to fill in upload */
   char *cipher_list;
   char *proxy_cipher_list;
+  char *cipher13_list;
+  char *proxy_cipher13_list;
   char *cert;
   char *proxy_cert;
   char *cert_type;
@@ -252,6 +254,8 @@ struct OperationConfig {
   bool ssh_compression;           /* enable/disable SSH compression */
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
+  bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
+  bool disallow_username_in_url;  /* disallow usernames in URLs */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
@@ -275,6 +279,7 @@ struct GlobalConfig {
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
   char *libcurl;                  /* Output libcurl code to this file name */
   bool fail_early;                /* exit on first transfer error */
+  bool styled_output;             /* enable fancy output style detection */
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

@@ -45,11 +45,11 @@ your own home directory:
 The configure script always tries to find a working SSL library unless
 explicitly told not to. If you have OpenSSL installed in the default search
 path for your compiler/linker, you don't need to do anything special. If you
-have OpenSSL installed in /usr/local/ssl, you can run configure like:
+have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
 
     ./configure --with-ssl
 
-If you have OpenSSL installed somewhere else (for example, /opt/OpenSSL) and
+If you have OpenSSL installed somewhere else (for example, `/opt/OpenSSL`) and
 you have pkg-config installed, set the pkg-config path first, like this:
 
     env PKG_CONFIG_PATH=/opt/OpenSSL/lib/pkgconfig ./configure --with-ssl
@@ -72,10 +72,9 @@ work:
 
 If you have shared SSL libs installed in a directory where your run-time
 linker doesn't find them (which usually causes configure failures), you can
-provide the -R option to ld on some operating systems to set a hard-coded
-path to the run-time linker:
+provide this option to gcc to set a hard-coded path to the run-time linker:
 
-    LDFLAGS=-R/usr/local/ssl/lib ./configure --with-ssl
+    LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-ssl
 
 ## More Options
 
@@ -177,53 +176,6 @@ curl source tree root with `sh configure`. Make sure you have the sh
 executable in /bin/ or you'll see the configure fail toward the end.
 
 Run `make`
-
-## Borland C++ compiler
-
-Ensure that your build environment is properly set up to use the compiler and
-associated tools. PATH environment variable must include the path to bin
-subdirectory of your compiler installation, eg: `c:\Borland\BCC55\bin`
-
-It is advisable to set environment variable BCCDIR to the base path of the
-compiler installation.
-
-    set BCCDIR=c:\Borland\BCC55
-
-In order to build a plain vanilla version of curl and libcurl run the
-following command from curl's root directory:
-
-    make borland
-
-To build curl and libcurl with zlib and OpenSSL support set environment
-variables `ZLIB_PATH` and `OPENSSL_PATH` to the base subdirectories of the
-already built zlib and OpenSSL libraries and from curl's root directory run
-command:
-
-    make borland-ssl-zlib
-
-libcurl library will be built in 'lib' subdirectory while curl tool is built
-in 'src' subdirectory. In order to use libcurl library it is advisable to
-modify compiler's configuration file bcc32.cfg located in
-`c:\Borland\BCC55\bin` to reflect the location of libraries include paths for
-example the '-I' line could result in something like:
-
-    -I"c:\Borland\BCC55\include;c:\curl\include;c:\openssl\inc32"
-
-bcc3.cfg `-L` line could also be modified to reflect the location of of
-libcurl library resulting for example:
-
-    -L"c:\Borland\BCC55\lib;c:\curl\lib;c:\openssl\out32"
-
-In order to build sample program `simple.c` from the docs\examples
-subdirectory run following command from mentioned subdirectory:
-
-    bcc32 simple.c libcurl.lib cw32mt.lib
-
-In order to build sample program simplessl.c an SSL enabled libcurl is
-required, as well as the OpenSSL libeay32.lib and ssleay32.lib libraries.
-
-In order to build sample program `sslbackend.c`, an SSL enabled libcurl
-is required.
 
 ## Disabling Specific Protocols in Windows builds
 

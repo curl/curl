@@ -28,6 +28,11 @@ HTTP URL with http:/ (one slash!)
  <command>
 http:/%HOSTIP:%HTTPPORT/want/1143
 </command>
+<setenv>
+# Needed for MSYS2 to not treat the argument as a POSIX path list
+# that has to be converted to Windows paths
+MSYS2_ARG_CONV_EXCL=http:/
+</setenv>
 </client>
 
 # Verify data after the test has been "shot"

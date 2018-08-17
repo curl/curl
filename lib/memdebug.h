@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -136,13 +136,6 @@ CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
   curl_dogetaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #endif
 #endif /* HAVE_GETADDRINFO */
-
-#ifdef HAVE_GETNAMEINFO
-#undef getnameinfo
-#define getnameinfo(sa,salen,host,hostlen,serv,servlen,flags) \
-  curl_dogetnameinfo(sa, salen, host, hostlen, serv, servlen, flags, \
-                     __LINE__, __FILE__)
-#endif /* HAVE_GETNAMEINFO */
 
 #ifdef HAVE_FREEADDRINFO
 #undef freeaddrinfo

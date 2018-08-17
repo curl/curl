@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2015, 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,49 +28,55 @@ CURLOPT_SSLVERSION \- set preferred TLS/SSL version
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLVERSION, long version);
 .SH DESCRIPTION
-Pass a long as parameter to control which version of SSL/TLS to attempt to
+Pass a long as parameter to control which version range of SSL/TLS versions to
 use.
+
+The SSL and TLS versions have typically developed from the most insecure
+version to be more and more secure in this order through history: SSL v2,
+SSLv3, TLS v1.0, TSL v1.1, TSL v1.2 and the most recent TLS v1.3.
 
 Use one of the available defines for this purpose. The available options are:
 .RS
 .IP CURL_SSLVERSION_DEFAULT
-The default action. This will attempt to figure out the remote SSL protocol
-version.
+The default acceptable version range. The mimimum acceptable version is by
+default TLS 1.0 since 7.39.0 (unless the TLS library has a stricter rule).
 .IP CURL_SSLVERSION_TLSv1
-TLSv1.x
+TLS v1.0 or later
 .IP CURL_SSLVERSION_SSLv2
-SSLv2
+SSL v2 (but not SSLv3)
 .IP CURL_SSLVERSION_SSLv3
-SSLv3
+SSL v3 (but not SSLv2)
 .IP CURL_SSLVERSION_TLSv1_0
-TLSv1.0 (Added in 7.34.0)
+TLS v1.0 or later (Added in 7.34.0)
 .IP CURL_SSLVERSION_TLSv1_1
-TLSv1.1 (Added in 7.34.0)
+TLS v1.1 or later (Added in 7.34.0)
 .IP CURL_SSLVERSION_TLSv1_2
-TLSv1.2 (Added in 7.34.0)
+TLS v1.2 or later (Added in 7.34.0)
 .IP CURL_SSLVERSION_TLSv1_3
-TLSv1.3 (Added in 7.52.0)
+TLS v1.3 or later (Added in 7.52.0)
 .RE
+
 The maximum TLS version can be set by using \fIone\fP of the
 CURL_SSLVERSION_MAX_ macros below. It is also possible to OR \fIone\fP of the
 CURL_SSLVERSION_ macros with \fIone\fP of the CURL_SSLVERSION_MAX_ macros.
 The MAX macros are not supported for SSL backends axTLS or wolfSSL.
 .RS
 .IP CURL_SSLVERSION_MAX_DEFAULT
-The flag defines the maximum supported TLS version as TLSv1.2, or the default
-value from the SSL library.
-(Added in 7.54.0)
+The flag defines the maximum supported TLS version by libcurl, or the default
+value from the SSL library is used. libcurl will use a sensible default
+maximum, which was TLS 1.2 up to before 7.61.0 and is TLS 1.3 since then -
+assuming the TLS library support it. (Added in 7.54.0)
 .IP CURL_SSLVERSION_MAX_TLSv1_0
-The flag defines maximum supported TLS version as TLSv1.0.
+The flag defines maximum supported TLS version as TLS v1.0.
 (Added in 7.54.0)
 .IP CURL_SSLVERSION_MAX_TLSv1_1
-The flag defines maximum supported TLS version as TLSv1.1.
+The flag defines maximum supported TLS version as TLS v1.1.
 (Added in 7.54.0)
 .IP CURL_SSLVERSION_MAX_TLSv1_2
-The flag defines maximum supported TLS version as TLSv1.2.
+The flag defines maximum supported TLS version as TLS v1.2.
 (Added in 7.54.0)
 .IP CURL_SSLVERSION_MAX_TLSv1_3
-The flag defines maximum supported TLS version as TLSv1.3.
+The flag defines maximum supported TLS version as TLS v1.3.
 (Added in 7.54.0)
 .RE
 .SH DEFAULT

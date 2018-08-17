@@ -613,7 +613,6 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  size_t i;
 
   (void)instate; /* no use for this yet */
 
@@ -625,6 +624,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
     /* Does the server support APOP authentication? */
     if(len >= 4 && line[len - 2] == '>') {
       /* Look for the APOP timestamp */
+      size_t i;
       for(i = 3; i < len - 2; ++i) {
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
@@ -664,7 +664,6 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  size_t wordlen;
 
   (void)instate; /* no use for this yet */
 
@@ -689,6 +688,7 @@ static CURLcode pop3_state_capa_resp(struct connectdata *conn, int pop3code,
       /* Loop through the data line */
       for(;;) {
         size_t llen;
+        size_t wordlen;
         unsigned int mechbit;
 
         while(len &&

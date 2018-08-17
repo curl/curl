@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -65,7 +65,8 @@ struct LongShort {
   enum {
     ARG_NONE,   /* stand-alone but not a boolean */
     ARG_BOOL,   /* accepts a --no-[name] prefix */
-    ARG_STRING  /* requires an argument */
+    ARG_STRING, /* requires an argument */
+    ARG_FILENAME /* requires an argument, usually a file name */
   } desc;
 };
 
@@ -75,20 +76,21 @@ static const struct LongShort aliases[]= {
   {"*@", "url",                      ARG_STRING},
   {"*4", "dns-ipv4-addr",            ARG_STRING},
   {"*6", "dns-ipv6-addr",            ARG_STRING},
-  {"*a", "random-file",              ARG_STRING},
+  {"*a", "random-file",              ARG_FILENAME},
   {"*b", "egd-file",                 ARG_STRING},
   {"*B", "oauth2-bearer",            ARG_STRING},
   {"*c", "connect-timeout",          ARG_STRING},
   {"*d", "ciphers",                  ARG_STRING},
   {"*D", "dns-interface",            ARG_STRING},
   {"*e", "disable-epsv",             ARG_BOOL},
+  {"*f", "disallow-username-in-url", ARG_BOOL},
   {"*E", "epsv",                     ARG_BOOL},
          /* 'epsv' made like this to make --no-epsv and --epsv to work
              although --disable-epsv is the documented option */
   {"*F", "dns-servers",              ARG_STRING},
-  {"*g", "trace",                    ARG_STRING},
+  {"*g", "trace",                    ARG_FILENAME},
   {"*G", "npn",                      ARG_BOOL},
-  {"*h", "trace-ascii",              ARG_STRING},
+  {"*h", "trace-ascii",              ARG_FILENAME},
   {"*H", "alpn",                     ARG_BOOL},
   {"*i", "limit-rate",               ARG_STRING},
   {"*j", "compressed",               ARG_BOOL},
@@ -107,11 +109,12 @@ static const struct LongShort aliases[]= {
   {"*s", "max-redirs",               ARG_STRING},
   {"*t", "proxy-ntlm",               ARG_BOOL},
   {"*u", "crlf",                     ARG_BOOL},
-  {"*v", "stderr",                   ARG_STRING},
+  {"*v", "stderr",                   ARG_FILENAME},
   {"*w", "interface",                ARG_STRING},
   {"*x", "krb",                      ARG_STRING},
   {"*x", "krb4",                     ARG_STRING},
          /* 'krb4' is the previous name */
+  {"*X", "haproxy-protocol",         ARG_BOOL},
   {"*y", "max-filesize",             ARG_STRING},
   {"*z", "disable-eprt",             ARG_BOOL},
   {"*Z", "eprt",                     ARG_BOOL},
@@ -175,7 +178,7 @@ static const struct LongShort aliases[]= {
   {"$J", "metalink",                 ARG_BOOL},
   {"$K", "sasl-ir",                  ARG_BOOL},
   {"$L", "test-event",               ARG_BOOL},
-  {"$M", "unix-socket",              ARG_STRING},
+  {"$M", "unix-socket",              ARG_FILENAME},
   {"$N", "path-as-is",               ARG_BOOL},
   {"$O", "socks5-gssapi-service",    ARG_STRING},
          /* 'socks5-gssapi-service' merged with'proxy-service-name' and
@@ -186,7 +189,7 @@ static const struct LongShort aliases[]= {
   {"$R", "expect100-timeout",        ARG_STRING},
   {"$S", "tftp-no-options",          ARG_BOOL},
   {"$U", "connect-to",               ARG_STRING},
-  {"$W", "abstract-unix-socket",     ARG_STRING},
+  {"$W", "abstract-unix-socket",     ARG_FILENAME},
   {"$X", "tls-max",                  ARG_STRING},
   {"$Y", "suppress-connect-headers", ARG_BOOL},
   {"$Z", "compressed-ssh",           ARG_BOOL},
@@ -200,6 +203,8 @@ static const struct LongShort aliases[]= {
   {"11",  "tlsv1.1",                 ARG_NONE},
   {"12",  "tlsv1.2",                 ARG_NONE},
   {"13",  "tlsv1.3",                 ARG_NONE},
+  {"1A", "tls13-ciphers",            ARG_STRING},
+  {"1B", "proxy-tls13-ciphers",      ARG_STRING},
   {"2",  "sslv2",                    ARG_NONE},
   {"3",  "sslv3",                    ARG_NONE},
   {"4",  "ipv4",                     ARG_NONE},
@@ -215,19 +220,19 @@ static const struct LongShort aliases[]= {
   {"da", "data-ascii",               ARG_STRING},
   {"db", "data-binary",              ARG_STRING},
   {"de", "data-urlencode",           ARG_STRING},
-  {"D",  "dump-header",              ARG_STRING},
+  {"D",  "dump-header",              ARG_FILENAME},
   {"e",  "referer",                  ARG_STRING},
-  {"E",  "cert",                     ARG_STRING},
-  {"Ea", "cacert",                   ARG_STRING},
+  {"E",  "cert",                     ARG_FILENAME},
+  {"Ea", "cacert",                   ARG_FILENAME},
   {"Eb", "cert-type",                ARG_STRING},
-  {"Ec", "key",                      ARG_STRING},
+  {"Ec", "key",                      ARG_FILENAME},
   {"Ed", "key-type",                 ARG_STRING},
   {"Ee", "pass",                     ARG_STRING},
   {"Ef", "engine",                   ARG_STRING},
-  {"Eg", "capath",                   ARG_STRING},
+  {"Eg", "capath",                   ARG_FILENAME},
   {"Eh", "pubkey",                   ARG_STRING},
   {"Ei", "hostpubmd5",               ARG_STRING},
-  {"Ej", "crlfile",                  ARG_STRING},
+  {"Ej", "crlfile",                  ARG_FILENAME},
   {"Ek", "tlsuser",                  ARG_STRING},
   {"El", "tlspassword",              ARG_STRING},
   {"Em", "tlsauthtype",              ARG_STRING},
@@ -242,23 +247,24 @@ static const struct LongShort aliases[]= {
   {"Eu", "proxy-tlsuser",            ARG_STRING},
   {"Ev", "proxy-tlspassword",        ARG_STRING},
   {"Ew", "proxy-tlsauthtype",        ARG_STRING},
-  {"Ex", "proxy-cert",               ARG_STRING},
+  {"Ex", "proxy-cert",               ARG_FILENAME},
   {"Ey", "proxy-cert-type",          ARG_STRING},
-  {"Ez", "proxy-key",                ARG_STRING},
+  {"Ez", "proxy-key",                ARG_FILENAME},
   {"E0", "proxy-key-type",           ARG_STRING},
   {"E1", "proxy-pass",               ARG_STRING},
   {"E2", "proxy-ciphers",            ARG_STRING},
-  {"E3", "proxy-crlfile",            ARG_STRING},
+  {"E3", "proxy-crlfile",            ARG_FILENAME},
   {"E4", "proxy-ssl-allow-beast",    ARG_BOOL},
   {"E5", "login-options",            ARG_STRING},
-  {"E6", "proxy-cacert",             ARG_STRING},
-  {"E7", "proxy-capath",             ARG_STRING},
+  {"E6", "proxy-cacert",             ARG_FILENAME},
+  {"E7", "proxy-capath",             ARG_FILENAME},
   {"E8", "proxy-insecure",           ARG_BOOL},
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
+  {"fb", "styled-output",            ARG_BOOL},
   {"F",  "form",                     ARG_STRING},
   {"Fs", "form-string",              ARG_STRING},
   {"g",  "globoff",                  ARG_BOOL},
@@ -272,7 +278,7 @@ static const struct LongShort aliases[]= {
   {"j",  "junk-session-cookies",     ARG_BOOL},
   {"J",  "remote-header-name",       ARG_BOOL},
   {"k",  "insecure",                 ARG_BOOL},
-  {"K",  "config",                   ARG_STRING},
+  {"K",  "config",                   ARG_FILENAME},
   {"l",  "list-only",                ARG_BOOL},
   {"L",  "location",                 ARG_BOOL},
   {"Lt", "location-trusted",         ARG_BOOL},
@@ -280,10 +286,10 @@ static const struct LongShort aliases[]= {
   {"M",  "manual",                   ARG_BOOL},
   {"n",  "netrc",                    ARG_BOOL},
   {"no", "netrc-optional",           ARG_BOOL},
-  {"ne", "netrc-file",               ARG_STRING},
+  {"ne", "netrc-file",               ARG_FILENAME},
   {"N",  "buffer",                   ARG_BOOL},
          /* 'buffer' listed as --no-buffer in the help */
-  {"o",  "output",                   ARG_STRING},
+  {"o",  "output",                   ARG_FILENAME},
   {"O",  "remote-name",              ARG_NONE},
   {"Oa", "remote-name-all",          ARG_BOOL},
   {"p",  "proxytunnel",              ARG_BOOL},
@@ -295,7 +301,7 @@ static const struct LongShort aliases[]= {
   {"s",  "silent",                   ARG_BOOL},
   {"S",  "show-error",               ARG_BOOL},
   {"t",  "telnet-option",            ARG_STRING},
-  {"T",  "upload-file",              ARG_STRING},
+  {"T",  "upload-file",              ARG_FILENAME},
   {"u",  "user",                     ARG_STRING},
   {"U",  "proxy-user",               ARG_STRING},
   {"v",  "verbose",                  ARG_BOOL},
@@ -337,7 +343,7 @@ void parse_cert_parameter(const char *cert_parameter,
    * looks like a RFC7512 PKCS#11 URI which can be used as-is.
    * Also if cert_parameter contains no colon nor backslash, this
    * means no passphrase was given and no characters escaped */
-  if(!strncmp(cert_parameter, "pkcs11:", 7) ||
+  if(curl_strnequal(cert_parameter, "pkcs11:", 7) ||
      !strpbrk(cert_parameter, ":\\")) {
     *certname = strdup(cert_parameter);
     return;
@@ -501,8 +507,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
   *usedarg = FALSE; /* default is that we don't use the arg */
 
-  if(('-' != flag[0]) ||
-     (('-' == flag[0]) && ('-' == flag[1]))) {
+  if(('-' != flag[0]) || ('-' == flag[1])) {
     /* this should be a long name */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     size_t fnam = strlen(word);
@@ -566,7 +571,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
     }
 
-    if(aliases[hit].desc == ARG_STRING) {
+    if(aliases[hit].desc >= ARG_STRING) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
@@ -576,6 +581,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         return PARAM_REQUIRES_PARAMETER;
       else
         *usedarg = TRUE; /* mark it as used */
+
+      if((aliases[hit].desc == ARG_FILENAME) &&
+         (nextarg[0] == '-') && nextarg[1]) {
+        /* if the file name looks like a command line option */
+        warnf(global, "The file name argument '%s' looks like a flag.\n",
+              nextarg);
+      }
     }
     else if((aliases[hit].desc == ARG_NONE) && !toggle)
       return PARAM_NO_PREFIX;
@@ -599,6 +611,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'B': /* OAuth 2.0 bearer token */
         GetStr(&config->oauth_bearer, nextarg);
+        config->authtype |= CURLAUTH_BEARER;
         break;
       case 'c': /* connect-timeout */
         err = str2udouble(&config->connecttimeout, nextarg,
@@ -615,6 +628,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'e': /* --disable-epsv */
         config->disable_epsv = toggle;
+        break;
+      case 'f': /* --disallow-username-in-url */
+        config->disallow_username_in_url = toggle;
         break;
       case 'E': /* --epsv */
         config->disable_epsv = (!toggle)?TRUE:FALSE;
@@ -655,7 +671,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
 
       case 'j': /* --compressed */
-        if(toggle && !(curlinfo->features & CURL_VERSION_LIBZ))
+        if(toggle &&
+           !(curlinfo->features & (CURL_VERSION_LIBZ | CURL_VERSION_BROTLI)))
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         config->encoding = toggle;
         break;
@@ -777,6 +794,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'X': /* --haproxy-protocol */
+        config->haproxy_protocol = toggle;
         break;
       case 'y': /* --max-filesize */
         {
@@ -1169,6 +1189,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case '3':
         /* TLS version 1.3 */
         config->ssl_version = CURL_SSLVERSION_TLSv1_3;
+        break;
+      case 'A': /* --tls13-ciphers */
+        GetStr(&config->cipher13_list, nextarg);
+        break;
+      case 'B': /* --proxy-tls13-ciphers */
+        GetStr(&config->proxy_cipher13_list, nextarg);
         break;
       }
       break;
@@ -1638,8 +1664,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'a': /* --fail-early */
         global->fail_early = toggle;
         break;
-      default:
-        /* fail hard on errors  */
+      case 'b': /* --styled-output */
+        global->styled_output = toggle;
+        break;
+      default: /* --fail (hard on errors)  */
         config->failonerror = toggle;
       }
       break;
@@ -1686,7 +1714,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           warnf(global, "Failed to open %s!\n", &nextarg[1]);
         else {
           err = file2memory(&string, &len, file);
-          if(!err) {
+          if(!err && string) {
             /* Allow strtok() here since this isn't used threaded */
             /* !checksrc! disable BANNEDFUNC 2 */
             char *h = strtok(string, "\r\n");
@@ -1717,24 +1745,22 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case 'i':
-      config->include_headers = toggle; /* include the headers as well in the
-                                           general output stream */
+      config->show_headers = toggle; /* show the headers as well in the
+                                        general output stream */
       break;
     case 'j':
       config->cookiesession = toggle;
       break;
-    case 'I':
-      /*
-       * no_body will imply include_headers later on
-       */
+    case 'I': /* --head */
       config->no_body = toggle;
+      config->show_headers = toggle;
       if(SetHTTPrequest(config,
                         (config->no_body)?HTTPREQ_HEAD:HTTPREQ_GET,
                         &config->httpreq))
         return PARAM_BAD_USE;
       break;
     case 'J': /* --remote-header-name */
-      if(config->include_headers) {
+      if(config->show_headers) {
         warnf(global,
               "--include and --remote-header-name cannot be combined.\n");
         return PARAM_BAD_USE;
@@ -2136,7 +2162,6 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
     orig_opt = argv[i];
 
     if(stillflags && ('-' == argv[i][0])) {
-      char *nextarg;
       bool passarg;
       char *flag = argv[i];
 
@@ -2145,7 +2170,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
            following (URL) argument to start with -. */
         stillflags = FALSE;
       else {
-        nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
+        char *nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
 
         result = getparameter(flag, nextarg, &passarg, config, operation);
         if(result == PARAM_NEXT_OPERATION) {

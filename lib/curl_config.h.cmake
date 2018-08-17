@@ -235,6 +235,9 @@
 /* Define to 1 if you have the `getpwuid' function. */
 #cmakedefine HAVE_GETPWUID 1
 
+/* Define to 1 if you have the `getpwuid_r' function. */
+#cmakedefine HAVE_GETPWUID_R 1
+
 /* Define to 1 if you have the `getrlimit' function. */
 #cmakedefine HAVE_GETRLIMIT 1
 
@@ -397,6 +400,9 @@
 
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
+
+/* if brotli is available */
+#cmakedefine HAVE_BROTLI 1
 
 /* if your compiler supports LL */
 #cmakedefine HAVE_LL 1
@@ -959,6 +965,9 @@
 
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
+
+/* enable multiple SSL backends */
+#cmakedefine CURL_WITH_MULTI_SSL 1
 
 /* Define to 1 if using yaSSL in OpenSSL compatibility mode. */
 #cmakedefine USE_YASSLEMUL 1

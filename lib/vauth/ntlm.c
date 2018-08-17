@@ -63,9 +63,9 @@
 /* "NTLMSSP" signature is always in ASCII regardless of the platform */
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
-#define SHORTPAIR(x) ((x) & 0xff), (((x) >> 8) & 0xff)
-#define LONGQUARTET(x) ((x) & 0xff), (((x) >> 8) & 0xff), \
-  (((x) >> 16) & 0xff), (((x) >> 24) & 0xff)
+#define SHORTPAIR(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff))
+#define LONGQUARTET(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff)), \
+  ((int)(((x) >> 16) & 0xff)), ((int)(((x) >> 24) & 0xff))
 
 #if DEBUG_ME
 # define DEBUG_OUT(x) x
@@ -355,6 +355,8 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
  * passdwp [in]     - The user's password.
+ * service [in]     - The service type such as http, smtp, pop or imap.
+ * host    [in]     - The host name.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -365,6 +367,8 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
+                                             const char *service,
+                                             const char *hostname,
                                              struct ntlmdata *ntlm,
                                              char **outptr, size_t *outlen)
 {
@@ -394,6 +398,8 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                          domain are empty */
   (void)userp;
   (void)passwdp;
+  (void)service,
+  (void)hostname,
 
   /* Clean up any former leftovers and initialise to defaults */
   Curl_auth_ntlm_cleanup(ntlm);

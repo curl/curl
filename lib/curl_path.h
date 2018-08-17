@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_PATH_H
+#define HEADER_CURL_PATH_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -5,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,3 +44,4 @@ CURLcode Curl_getworkingpath(struct connectdata *conn,
                              char **path);
 
 CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir);
+#endif

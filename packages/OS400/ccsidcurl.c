@@ -1179,6 +1179,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_PROXY_SSLKEY:
   case CURLOPT_PROXY_SSLKEYTYPE:
   case CURLOPT_PROXY_SSL_CIPHER_LIST:
+  case CURLOPT_PROXY_TLS13_CIPHERS:
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
   case CURLOPT_PROXY_TLSAUTH_TYPE:
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
@@ -1201,6 +1202,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_SSLKEY:
   case CURLOPT_SSLKEYTYPE:
   case CURLOPT_SSL_CIPHER_LIST:
+  case CURLOPT_TLS13_CIPHERS:
   case CURLOPT_TLSAUTH_PASSWORD:
   case CURLOPT_TLSAUTH_TYPE:
   case CURLOPT_TLSAUTH_USERNAME:
@@ -1344,4 +1346,81 @@ curl_pushheader_byname_ccsid(struct curl_pushheaders *h, const char *header,
   }
 
   return d;
+}
+
+static CURLcode
+mime_string_call(curl_mimepart *part, const char *string, unsigned int ccsid,
+                 CURLcode (*mimefunc)(curl_mimepart *part, const char *string))
+
+{
+  char *s = (char *) NULL;
+  CURLcode result;
+
+  if(!string)
+    return mimefunc(part, string);
+  s = dynconvert(ASCII_CCSID, string, -1, ccsid);
+  if(!s)
+    return CURLE_OUT_OF_MEMORY;
+
+  result = mimefunc(part, s);
+  free(s);
+  return result;
+}
+
+CURLcode
+curl_mime_name_ccsid(curl_mimepart *part, const char *name, unsigned int ccsid)
+
+{
+  return mime_string_call(part, name, ccsid, curl_mime_name);
+}
+
+CURLcode
+curl_mime_filename_ccsid(curl_mimepart *part,
+                         const char *filename, unsigned int ccsid)
+
+{
+  return mime_string_call(part, filename, ccsid, curl_mime_filename);
+}
+
+CURLcode
+curl_mime_type_ccsid(curl_mimepart *part,
+                     const char *mimetype, unsigned int ccsid)
+
+{
+  return mime_string_call(part, mimetype, ccsid, curl_mime_type);
+}
+
+CURLcode
+curl_mime_encoder_ccsid(curl_mimepart *part,
+                       const char *encoding, unsigned int ccsid)
+
+{
+  return mime_string_call(part, encoding, ccsid, curl_mime_encoder);
+}
+
+CURLcode
+curl_mime_filedata_ccsid(curl_mimepart *part,
+                         const char *filename, unsigned int ccsid)
+
+{
+  return mime_string_call(part, filename, ccsid, curl_mime_filedata);
+}
+
+CURLcode
+curl_mime_data_ccsid(curl_mimepart *part,
+                     const char *data, size_t datasize, unsigned int ccsid)
+
+{
+  char *s = (char *) NULL;
+  CURLcode result;
+
+  if(!data)
+    return curl_mime_data(part, data, datasize);
+  s = dynconvert(ASCII_CCSID, data, datasize, ccsid);
+  if(!s)
+    return CURLE_OUT_OF_MEMORY;
+
+  result = curl_mime_data(part, s, datasize);
+  free(s);
+  return result;
 }

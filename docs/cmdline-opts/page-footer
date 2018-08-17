@@ -21,17 +21,20 @@ SMTP, LDAP etc.
 .IP "ALL_PROXY [protocol://]<host>[:port]"
 Sets the proxy server to use if no protocol-specific proxy is set.
 .IP "NO_PROXY <comma-separated list of hosts>"
-list of host names that shouldn't go through any proxy. If set to a asterisk
+list of host names that shouldn't go through any proxy. If set to an asterisk
 \&'*' only, it matches all hosts.
 
-Since 7.53.0, this environment variable disable the proxy even if specify
---proxy option. That is
+This environment variable disables use of the proxy even when specified with
+the --proxy option. That is
 .B NO_PROXY=direct.example.com curl -x http://proxy.example.com
 .B http://direct.example.com
 accesses the target URL directly, and
 .B NO_PROXY=direct.example.com curl -x http://proxy.example.com
 .B http://somewhere.example.com
-accesses the target URL through proxy.
+accesses the target URL through the proxy.
+
+The list of host names can also be include numerical IP addresses, and IPv6
+versions should then be given without enclosing brackets.
 
 .SH "PROXY PROTOCOL PREFIXES"
 Since curl version 7.21.7, the proxy string may be specified with a
@@ -42,9 +45,9 @@ a supported one, the proxy will be treated as an HTTP proxy.
 
 The supported proxy protocol prefixes are as follows:
 .IP "http://"
-Makes it use it as a HTTP proxy. The default if no scheme prefix is used.
+Makes it use it as an HTTP proxy. The default if no scheme prefix is used.
 .IP "https://"
-Makes it treated as a \fBHTTPS\fP proxy.
+Makes it treated as an \fBHTTPS\fP proxy.
 .IP "socks4://"
 Makes it the equivalent of --socks4
 .IP "socks4a://"

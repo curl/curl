@@ -31,6 +31,10 @@ HTTP URL with escaped { and }
 <command>
 "http://%HOSTIP:%HTTPPORT/\{\}\/214"
 </command>
+<setenv>
+# Needed for MSYS2 to not convert all backslashes to forward slashes
+MSYS2_ARG_CONV_EXCL=http://
+</setenv>
 </client>
 
 #

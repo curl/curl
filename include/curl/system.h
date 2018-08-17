@@ -300,7 +300,9 @@
 
 #elif defined(__SUNPRO_C) /* Oracle Solaris Studio */
 #  if !defined(__LP64) && (defined(__ILP32) ||                          \
-                           defined(__i386) || defined(__sparcv8))
+                           defined(__i386) ||                           \
+                           defined(__sparcv8) ||                        \
+                           defined(__sparcv8plus))
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -308,6 +310,24 @@
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  elif defined(__LP64) || \
         defined(__amd64) || defined(__sparcv9)
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#  endif
+#  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#  define CURL_PULL_SYS_TYPES_H      1
+#  define CURL_PULL_SYS_SOCKET_H     1
+
+#elif defined(__xlc__) /* IBM xlc compiler */
+#  if !defined(_LP64)
+#    define CURL_TYPEOF_CURL_OFF_T     long long
+#    define CURL_FORMAT_CURL_OFF_T     "lld"
+#    define CURL_FORMAT_CURL_OFF_TU    "llu"
+#    define CURL_SUFFIX_CURL_OFF_T     LL
+#    define CURL_SUFFIX_CURL_OFF_TU    ULL
+#  else
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
@@ -342,7 +362,7 @@
 /*    KEEP GENERIC GCC THE LAST ENTRY    */
 /* ===================================== */
 
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && !defined(_SCO_DS)
 #  if !defined(__LP64__) &&                                             \
   (defined(__ILP32__) || defined(__i386__) || defined(__hppa__) ||      \
    defined(__ppc__) || defined(__powerpc__) || defined(__arm__) ||      \

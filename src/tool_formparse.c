@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,13 +123,12 @@ static int read_field_headers(struct OperationConfig *config,
 {
   size_t hdrlen = 0;
   size_t pos = 0;
-  int c;
   bool incomment = FALSE;
   int lineno = 1;
   char hdrbuf[999]; /* Max. header length + 1. */
 
   for(;;) {
-    c = getc(fp);
+    int c = getc(fp);
     if(c == EOF || (!pos && !ISSPACE(c))) {
       /* Strip and flush the current header. */
       while(hdrlen && ISSPACE(hdrbuf[hdrlen - 1]))
@@ -168,12 +167,12 @@ static int read_field_headers(struct OperationConfig *config,
 
     pos++;
     if(!incomment) {
-      if(hdrlen == sizeof hdrbuf - 1) {
+      if(hdrlen == sizeof(hdrbuf) - 1) {
         warnf(config->global, "File %s line %d: header too long (truncated)\n",
               filename, lineno);
         c = ' ';
       }
-      if(hdrlen <= sizeof hdrbuf - 1)
+      if(hdrlen <= sizeof(hdrbuf) - 1)
         hdrbuf[hdrlen++] = (char) c;
     }
   }
@@ -451,11 +450,10 @@ static CURLcode file_or_stdin(curl_mimepart *part, const char *file)
   if(strcmp(file, "-"))
     return curl_mime_filedata(part, file);
 
-  sip = (standard_input *) malloc(sizeof *sip);
+  sip = (standard_input *) calloc(1, sizeof(*sip));
   if(!sip)
     return CURLE_OUT_OF_MEMORY;
 
-  memset((char *) sip, 0, sizeof *sip);
   set_binmode(stdin);
 
   /* If stdin is a regular file, do not buffer data but read it when needed. */
@@ -564,7 +562,6 @@ int formparse(struct OperationConfig *config,
   struct curl_slist *headers = NULL;
   curl_mimepart *part = NULL;
   CURLcode res;
-  int sep = '\0';
 
   /* Allocate the main mime structure if needed. */
   if(!*mimepost) {
@@ -586,6 +583,7 @@ int formparse(struct OperationConfig *config,
   /* Scan for the end of the name. */
   contp = strchr(contents, '=');
   if(contp) {
+    int sep = '\0';
     if(contp > contents)
       name = contents;
     *contp++ = '\0';

@@ -28,7 +28,13 @@
 #include "memdebug.h" /* LAST include file */
 
 static struct Curl_easy *easy;
-struct curl_hash *hostcache;
+static struct curl_hash *hostcache;
+
+static void unit_stop(void)
+{
+  curl_easy_cleanup(easy);
+  curl_global_cleanup();
+}
 
 static CURLcode unit_setup(void)
 {
@@ -37,20 +43,18 @@ static CURLcode unit_setup(void)
   global_init(CURL_GLOBAL_ALL);
 
   easy = curl_easy_init();
-  if(!easy)
+  if(!easy) {
+    curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
+  }
 
   hostcache = Curl_global_host_cache_init();
-  if(!hostcache)
+  if(!hostcache) {
+    unit_stop();
     return CURLE_OUT_OF_MEMORY;
+  }
 
   return res;
-}
-
-static void unit_stop(void)
-{
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
 }
 
 struct testcase {
@@ -116,7 +120,7 @@ UNITTEST_START
 
   for(i = 0; i < testnum; ++i, curl_easy_reset(easy)) {
     int j;
-    int addressnum = sizeof tests[i].address / sizeof *tests[i].address;
+    int addressnum = sizeof(tests[i].address) / sizeof(*tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     struct curl_slist *list;
@@ -128,11 +132,17 @@ UNITTEST_START
     easy->dns.hostcachetype = HCACHE_GLOBAL;
 
     list = curl_slist_append(NULL, tests[i].optval);
+    if(!list)
+        goto unit_test_abort;
     curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
 
     Curl_loadhostpairs(easy);
 
     entry_id = (void *)aprintf("%s:%d", tests[i].host, tests[i].port);
+    if(!entry_id) {
+      curl_slist_free_all(list);
+      goto unit_test_abort;
+    }
     dns = Curl_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
     free(entry_id);
     entry_id = NULL;
@@ -185,6 +195,14 @@ UNITTEST_START
         fprintf(stderr, "%s:%d tests[%d] failed. the retrieved port "
                 "for tests[%d].address[%d] is %ld but tests[%d].port is %d.\n",
                 __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
+        problem = true;
+        break;
+      }
+
+      if(dns->timestamp != 0) {
+        fprintf(stderr, "%s:%d tests[%d] failed. the timestamp is not zero. "
+                "for tests[%d].address[%d\n",
+                __FILE__, __LINE__, i, i, j);
         problem = true;
         break;
       }

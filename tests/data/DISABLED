@@ -18,5 +18,5 @@
 1510
 # Pipelining test that is causing false positives a little too often
 1903
-# causes memory leaks for now:
-1553
+# fnmatch differences are just too common to make testing them sensible
+1307

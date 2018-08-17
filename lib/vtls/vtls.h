@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,20 +26,20 @@
 struct connectdata;
 struct ssl_connect_data;
 
+#define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
+#define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
+#define SSLSUPP_PINNEDPUBKEY (1<<2) /* supports CURLOPT_PINNEDPUBLICKEY */
+#define SSLSUPP_SSL_CTX      (1<<3) /* supports CURLOPT_SSL_CTX */
+#define SSLSUPP_HTTPS_PROXY  (1<<4) /* supports access via HTTPS proxies */
+#define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
+
 struct Curl_ssl {
   /*
    * This *must* be the first entry to allow returning the list of available
    * backends in curl_global_sslset().
    */
   curl_ssl_backend info;
-
-  unsigned have_ca_path:1;      /* supports CAPATH */
-  unsigned have_certinfo:1;     /* supports CURLOPT_CERTINFO */
-  unsigned have_pinnedpubkey:1; /* supports CURLOPT_PINNEDPUBLICKEY */
-  unsigned have_ssl_ctx:1;      /* supports CURLOPT_SSL_CTX_* */
-
-  unsigned support_https_proxy:1; /* supports access via HTTPS proxies */
-
+  unsigned int supports; /* bitfield, see above */
   size_t sizeof_ssl_backend_data;
 
   int (*init)(void);
@@ -72,7 +72,7 @@ struct Curl_ssl {
 
   CURLcode (*md5sum)(unsigned char *input, size_t inputlen,
                      unsigned char *md5sum, size_t md5sumlen);
-  void (*sha256sum)(const unsigned char *input, size_t inputlen,
+  CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
 };
 
@@ -94,6 +94,7 @@ CURLcode Curl_none_set_engine(struct Curl_easy *data, const char *engine);
 CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
 struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
 bool Curl_none_false_start(void);
+bool Curl_ssl_tls13_ciphersuites(void);
 CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
                           unsigned char *md5sum, size_t md5len);
 
@@ -113,7 +114,9 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #endif
 
 #ifndef MD5_DIGEST_LENGTH
+#ifndef LIBWOLFSSL_VERSION_HEX /* because WolfSSL borks this */
 #define MD5_DIGEST_LENGTH 16 /* fixed size */
+#endif
 #endif
 
 #ifndef CURL_SHA256_DIGEST_LENGTH
@@ -245,7 +248,7 @@ bool Curl_ssl_false_start(void);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
-#else
+#else /* if not USE_SSL */
 
 /* When SSL support is not present, just define away these function calls */
 #define Curl_ssl_init() 1
@@ -269,6 +272,7 @@ bool Curl_ssl_false_start(void);
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start() FALSE
+#define Curl_ssl_tls13_ciphersuites() FALSE
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -20,36 +20,38 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_HAPPY_EYEBALLS_TIMEOUT 3 "1 Feb 2018" "libcurl 7.59.0" "curl_easy_setopt options"
+.TH CURLOPT_RESOLVER_START_DATA 3 "14 Feb 2018" "libcurl 7.59.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_HAPPY_EYEBALLS_TIMEOUT \- head start for ipv6 for happy eyeballs
+CURLOPT_RESOLVER_START_DATA \- custom pointer passed to the resolver start callback
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HAPPY_EYEBALLS_TIMEOUT, long timeout);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RESOLVER_START_DATA, void *pointer);
 .SH DESCRIPTION
-Happy eyeballs is an algorithm that attempts to connect to both IPv4 and IPv6
-addresses for dual-stack hosts, preferring IPv6 first for \fItimeout\fP
-milliseconds. If the IPv6 address cannot be connected to within that time then
-a connection attempt is made to the IPv4 address in parallel. The first
-connection to be established is the one that is used.
-
-The range of suggested useful values for \fItimeout\fP is limited. Happy
-Eyeballs RFC 6555 says "It is RECOMMENDED that connection attempts be paced
-150-250 ms apart to balance human factors against network load." libcurl
-currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
+Pass a \fIpointer\fP that will be untouched by libcurl and passed as the third
+argument in the resolver start callback set with
+\fICURLOPT_RESOLVER_START_FUNCTION(3)\fP.
 .SH DEFAULT
-CURL_HET_DEFAULT (currently defined as 200L)
+NULL
+.SH PROTOCOLS
+All
 .SH EXAMPLE
 .nf
+static int resolver_start_cb(void *resolver_state, void *reserved,
+                             void *userdata)
+{
+  (void)reserved;
+  printf("Received resolver_state=%p userdata=%p\\n",
+         resolver_state, userdata);
+  return 0;
+}
+
 CURL *curl = curl_easy_init();
 if(curl) {
-  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-  curl_easy_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT, 300L);
-
+  curl_easy_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, resolver_start_cb);
+  curl_easy_setopt(curl, CURLOPT_RESOLVER_START_DATA, curl);
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
   curl_easy_perform(curl);
-
-  /* always cleanup */
   curl_easy_cleanup(curl);
 }
 .fi
@@ -57,3 +59,5 @@ if(curl) {
 Added in 7.59.0
 .SH RETURN VALUE
 Returns CURLE_OK
+.SH "SEE ALSO"
+.BR CURLOPT_RESOLVER_START_FUNCTION "(3) "

@@ -58,14 +58,14 @@ struct getout *new_getout(struct OperationConfig *config)
 
 ParameterError file2string(char **bufp, FILE *file)
 {
-  char buffer[256];
   char *ptr;
   char *string = NULL;
-  size_t stringlen = 0;
-  size_t buflen;
 
   if(file) {
+    char buffer[256];
+    size_t stringlen = 0;
     while(fgets(buffer, sizeof(buffer), file)) {
+      size_t buflen;
       ptr = strchr(buffer, '\r');
       if(ptr)
         *ptr = '\0';
@@ -91,11 +91,11 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
 {
   char *newbuf;
   char *buffer = NULL;
-  size_t alloc = 512;
   size_t nused = 0;
-  size_t nread;
 
   if(file) {
+    size_t nread;
+    size_t alloc = 512;
     do {
       if(!buffer || (alloc == nused)) {
         /* size_t overflow detection for huge files */

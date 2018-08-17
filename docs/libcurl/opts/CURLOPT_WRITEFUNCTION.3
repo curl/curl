@@ -36,7 +36,7 @@ shown above.
 
 This callback function gets called by libcurl as soon as there is data
 received that needs to be saved.  \fIptr\fP points to the delivered data, and
-the size of that data is \fIsize\fP multiplied with \fInmemb\fP.
+the size of that data is \fInmemb\fP; \fIsize\fP is always 1.
 
 The callback function will be passed as much data as possible in all invokes,
 but you must not make any assumptions. It may be one byte, it may be

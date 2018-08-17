@@ -119,6 +119,7 @@ static int parsedate(const char *date, time_t *output);
 #define tDAYZONE -60       /* offset for daylight savings time */
 static const struct tzinfo tz[]= {
   {"GMT", 0},              /* Greenwich Mean */
+  {"UT",  0},              /* Universal Time */
   {"UTC", 0},              /* Universal (Coordinated) */
   {"WET", 0},              /* Western European */
   {"BST", 0 tDAYZONE},     /* British Summer */
@@ -433,7 +434,7 @@ static int parsedate(const char *date, time_t *output)
           tzoff = (val/100 * 60 + val%100)*60;
 
           /* the + and - prefix indicates the local time compared to GMT,
-             this we need ther reversed math to get what we want */
+             this we need their reversed math to get what we want */
           tzoff = date[-1]=='+'?-tzoff:tzoff;
         }
 

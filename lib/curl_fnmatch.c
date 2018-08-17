@@ -30,6 +30,17 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#ifndef HAVE_FNMATCH
+
+/*
+ * TODO:
+ *
+ * Make this function match POSIX. Test 1307 includes a set of test patterns
+ * that returns different results with a POSIX fnmatch() than with this
+ * implementation and this is considered a bug where POSIX is the guiding
+ * light.
+ */
+
 #define CURLFNM_CHARSET_LEN (sizeof(char) * 256)
 #define CURLFNM_CHSET_SIZE (CURLFNM_CHARSET_LEN + 15)
 
@@ -334,9 +345,9 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
         s++;
         break;
       }
+      /* Syntax error in set; mismatch! */
+      return CURL_FNMATCH_NOMATCH;
 
-      /* Syntax error in set: this must be taken as a regular character. */
-      /* FALLTHROUGH */
     default:
       if(*p++ != *s++)
         return CURL_FNMATCH_NOMATCH;
@@ -355,5 +366,31 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   if(!pattern || !string) {
     return CURL_FNMATCH_FAIL;
   }
-  return loop((unsigned char *)pattern, (unsigned char *)string, 5);
+  return loop((unsigned char *)pattern, (unsigned char *)string, 2);
 }
+#else
+#include <fnmatch.h>
+/*
+ * @unittest: 1307
+ */
+int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
+{
+  int rc;
+  (void)ptr; /* the argument is specified by the curl_fnmatch_callback
+                prototype, but not used by Curl_fnmatch() */
+  if(!pattern || !string) {
+    return CURL_FNMATCH_FAIL;
+  }
+  rc = fnmatch(pattern, string, 0);
+  switch(rc) {
+  case 0:
+    return CURL_FNMATCH_MATCH;
+  case FNM_NOMATCH:
+    return CURL_FNMATCH_NOMATCH;
+  default:
+    return CURL_FNMATCH_FAIL;
+  }
+  /* not reached */
+}
+
+#endif

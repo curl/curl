@@ -139,6 +139,10 @@ Callback for wildcard matching. See \fICURLOPT_FNMATCH_FUNCTION(3)\fP
 Data pointer to pass to the wildcard matching callback. See \fICURLOPT_FNMATCH_DATA(3)\fP
 .IP CURLOPT_SUPPRESS_CONNECT_HEADERS
 Suppress proxy CONNECT response headers from user callbacks. See \fICURLOPT_SUPPRESS_CONNECT_HEADERS(3)\fP
+.IP CURLOPT_RESOLVER_START_FUNCTION
+Callback to be called before a new resolve request is started. See \fICURLOPT_RESOLVER_START_FUNCTION(3)\fP
+.IP CURLOPT_RESOLVER_START_DATA
+Data pointer to pass to resolver start callback. See \fICURLOPT_RESOLVER_START_DATA(3)\fP
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Error message buffer. See \fICURLOPT_ERRORBUFFER(3)\fP
@@ -181,6 +185,8 @@ Socks5 GSSAPI service name. \fICURLOPT_SOCKS5_GSSAPI_SERVICE(3)\fP
 Socks5 GSSAPI NEC mode. See \fICURLOPT_SOCKS5_GSSAPI_NEC(3)\fP
 .IP CURLOPT_PROXY_SERVICE_NAME
 Proxy authentication service name. \fICURLOPT_PROXY_SERVICE_NAME(3)\fP
+.IP CURLOPT_HAPROXYPROTOCOL
+Send an HAProxy PROXY protocol v1 header. See \fICURLOPT_HAPROXYPROTOCOL(3)\fP
 .IP CURLOPT_SERVICE_NAME
 Authentication service name. \fICURLOPT_SERVICE_NAME(3)\fP
 .IP CURLOPT_INTERFACE
@@ -252,6 +258,8 @@ HTTP proxy authentication methods. See \fICURLOPT_PROXYAUTH(3)\fP
 Enable SASL initial response. See \fICURLOPT_SASL_IR(3)\fP
 .IP CURLOPT_XOAUTH2_BEARER
 OAuth2 bearer token. See \fICURLOPT_XOAUTH2_BEARER(3)\fP
+.IP CURLOPT_DISALLOW_USERNAME_IN_URL
+Don't allow username in URL. See \fICURLOPT_DISALLOW_USERNAME_IN_URL(3)\fP
 .SH HTTP OPTIONS
 .IP CURLOPT_AUTOREFERER
 Automatically set Referer: header. See \fICURLOPT_AUTOREFERER(3)\fP
@@ -268,9 +276,9 @@ Maximum number of redirects to follow. See \fICURLOPT_MAXREDIRS(3)\fP
 .IP CURLOPT_POSTREDIR
 How to act on redirects after POST. See \fICURLOPT_POSTREDIR(3)\fP
 .IP CURLOPT_PUT
-Issue a HTTP PUT request. See \fICURLOPT_PUT(3)\fP
+Issue an HTTP PUT request. See \fICURLOPT_PUT(3)\fP
 .IP CURLOPT_POST
-Issue a HTTP POST request. See \fICURLOPT_POST(3)\fP
+Issue an HTTP POST request. See \fICURLOPT_POST(3)\fP
 .IP CURLOPT_POSTFIELDS
 Send a POST with this data. See \fICURLOPT_POSTFIELDS(3)\fP
 .IP CURLOPT_POSTFIELDSIZE
@@ -304,7 +312,7 @@ Start a new cookie session. See \fICURLOPT_COOKIESESSION(3)\fP
 .IP CURLOPT_COOKIELIST
 Add or control cookies. See \fICURLOPT_COOKIELIST(3)\fP
 .IP CURLOPT_HTTPGET
-Do a HTTP GET request. See \fICURLOPT_HTTPGET(3)\fP
+Do an HTTP GET request. See \fICURLOPT_HTTPGET(3)\fP
 .IP CURLOPT_REQUEST_TARGET
 Set the request target. \fICURLOPT_REQUEST_TARGET(3)\fP
 .IP CURLOPT_HTTP_VERSION
@@ -462,8 +470,12 @@ Bind name resolves to this IP4 address. See \fICURLOPT_DNS_LOCAL_IP4(3)\fP
 Bind name resolves to this IP6 address. See \fICURLOPT_DNS_LOCAL_IP6(3)\fP
 .IP CURLOPT_DNS_SERVERS
 Preferred DNS servers. See \fICURLOPT_DNS_SERVERS(3)\fP
+.IP CURLOPT_DNS_SHUFFLE_ADDRESSES
+Shuffle addresses before use. See \fICURLOPT_DNS_SHUFFLE_ADDRESSES(3)\fP
 .IP CURLOPT_ACCEPTTIMEOUT_MS
 Timeout for waiting for the server's connect back to be accepted. See \fICURLOPT_ACCEPTTIMEOUT_MS(3)\fP
+.IP CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS
+Timeout for happy eyeballs. See \fICURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS(3)\fP
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Client cert. See \fICURLOPT_SSLCERT(3)\fP
@@ -538,6 +550,10 @@ Identify EGD socket for entropy. See \fICURLOPT_EGDSOCKET(3)\fP
 Ciphers to use. See \fICURLOPT_SSL_CIPHER_LIST(3)\fP
 .IP CURLOPT_PROXY_SSL_CIPHER_LIST
 Proxy ciphers to use. See \fICURLOPT_PROXY_SSL_CIPHER_LIST(3)\fP
+.IP CURLOPT_TLS13_CIPHERS
+TLS 1.3 cipher suites to use. See \fICURLOPT_TLS13_CIPHERS(3)\fP
+.IP CURLOPT_PROXY_TLS13_CIPHERS
+Proxy TLS 1.3 cipher suites to use. See \fICURLOPT_PROXY_TLS13_CIPHERS(3)\fP
 .IP CURLOPT_SSL_SESSIONID_CACHE
 Disable SSL session-id cache. See \fICURLOPT_SSL_SESSIONID_CACHE(3)\fP
 .IP CURLOPT_SSL_OPTIONS
@@ -577,8 +593,6 @@ Mode for creating new remote directories. See \fICURLOPT_NEW_DIRECTORY_PERMS(3)\
 .SH TELNET OPTIONS
 .IP CURLOPT_TELNETOPTIONS
 TELNET options. See \fICURLOPT_TELNETOPTIONS(3)\fP
-.IP CURLOPT_HAPPY_EYEBALLS_TIMEOUT
-Timeout for happy eyeballs. See \fICURLOPT_HAPPY_EYEBALLS_TIMEOUT(3)\fP
 .SH RETURN VALUE
 \fICURLE_OK\fP (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP

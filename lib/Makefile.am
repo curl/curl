@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -23,7 +23,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
-EXTRA_DIST = Makefile.b32 Makefile.m32 config-win32.h	\
+EXTRA_DIST = Makefile.m32 config-win32.h	                        \
  config-win32ce.h config-riscos.h config-mac.h curl_config.h.in		\
  makefile.dj config-dos.h libcurl.plist libcurl.rc config-amigaos.h	\
  makefile.amiga Makefile.netware nwlib.c nwos.c config-win32ce.h	\
@@ -107,7 +107,10 @@ endif
 if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
 libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
 else
+# if symbol-hiding is enabled, hide them!
+if DOING_CURL_SYMBOL_HIDING
 libcurl_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
+endif
 endif
 
 if USE_CPPFLAG_CURL_STATICLIB

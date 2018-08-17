@@ -3,9 +3,11 @@
 man_MANS =                                      \
   CURLINFO_ACTIVESOCKET.3                       \
   CURLINFO_APPCONNECT_TIME.3                    \
+  CURLINFO_APPCONNECT_TIME_T.3                  \
   CURLINFO_CERTINFO.3                           \
   CURLINFO_CONDITION_UNMET.3                    \
   CURLINFO_CONNECT_TIME.3                       \
+  CURLINFO_CONNECT_TIME_T.3                     \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD.3            \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD_T.3          \
   CURLINFO_CONTENT_LENGTH_UPLOAD.3              \
@@ -24,9 +26,11 @@ man_MANS =                                      \
   CURLINFO_LOCAL_IP.3                           \
   CURLINFO_LOCAL_PORT.3                         \
   CURLINFO_NAMELOOKUP_TIME.3                    \
+  CURLINFO_NAMELOOKUP_TIME_T.3                  \
   CURLINFO_NUM_CONNECTS.3                       \
   CURLINFO_OS_ERRNO.3                           \
   CURLINFO_PRETRANSFER_TIME.3                   \
+  CURLINFO_PRETRANSFER_TIME_T.3                 \
   CURLINFO_PRIMARY_IP.3                         \
   CURLINFO_PRIMARY_PORT.3                       \
   CURLINFO_PRIVATE.3                            \
@@ -35,6 +39,7 @@ man_MANS =                                      \
   CURLINFO_PROXY_SSL_VERIFYRESULT.3             \
   CURLINFO_REDIRECT_COUNT.3                     \
   CURLINFO_REDIRECT_TIME.3                      \
+  CURLINFO_REDIRECT_TIME_T.3                    \
   CURLINFO_REDIRECT_URL.3                       \
   CURLINFO_REQUEST_SIZE.3                       \
   CURLINFO_RESPONSE_CODE.3                      \
@@ -54,9 +59,11 @@ man_MANS =                                      \
   CURLINFO_SSL_ENGINES.3                        \
   CURLINFO_SSL_VERIFYRESULT.3                   \
   CURLINFO_STARTTRANSFER_TIME.3                 \
+  CURLINFO_STARTTRANSFER_TIME_T.3               \
   CURLINFO_TLS_SESSION.3                        \
   CURLINFO_TLS_SSL_PTR.3                        \
   CURLINFO_TOTAL_TIME.3                         \
+  CURLINFO_TOTAL_TIME_T.3                       \
   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE.3          \
   CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE.3        \
   CURLMOPT_MAXCONNECTS.3                        \
@@ -107,11 +114,13 @@ man_MANS =                                      \
   CURLOPT_DEBUGFUNCTION.3                       \
   CURLOPT_DEFAULT_PROTOCOL.3                    \
   CURLOPT_DIRLISTONLY.3                         \
+  CURLOPT_DISALLOW_USERNAME_IN_URL.3            \
   CURLOPT_DNS_CACHE_TIMEOUT.3                   \
   CURLOPT_DNS_INTERFACE.3                       \
   CURLOPT_DNS_LOCAL_IP4.3                       \
   CURLOPT_DNS_LOCAL_IP6.3                       \
   CURLOPT_DNS_SERVERS.3                         \
+  CURLOPT_DNS_SHUFFLE_ADDRESSES.3               \
   CURLOPT_DNS_USE_GLOBAL_CACHE.3                \
   CURLOPT_EGDSOCKET.3                           \
   CURLOPT_ERRORBUFFER.3                         \
@@ -136,7 +145,8 @@ man_MANS =                                      \
   CURLOPT_FTP_USE_EPSV.3                        \
   CURLOPT_FTP_USE_PRET.3                        \
   CURLOPT_GSSAPI_DELEGATION.3                   \
-  CURLOPT_HAPPY_EYEBALLS_TIMEOUT.3              \
+  CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3           \
+  CURLOPT_HAPROXYPROTOCOL.3                     \
   CURLOPT_HEADER.3                              \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
@@ -228,6 +238,7 @@ man_MANS =                                      \
   CURLOPT_PROXY_SSL_OPTIONS.3                   \
   CURLOPT_PROXY_SSL_VERIFYHOST.3                \
   CURLOPT_PROXY_SSL_VERIFYPEER.3                \
+  CURLOPT_PROXY_TLS13_CIPHERS.3                 \
   CURLOPT_PROXY_TLSAUTH_PASSWORD.3              \
   CURLOPT_PROXY_TLSAUTH_TYPE.3                  \
   CURLOPT_PROXY_TLSAUTH_USERNAME.3              \
@@ -242,6 +253,8 @@ man_MANS =                                      \
   CURLOPT_REFERER.3                             \
   CURLOPT_REQUEST_TARGET.3                      \
   CURLOPT_RESOLVE.3                             \
+  CURLOPT_RESOLVER_START_DATA.3                 \
+  CURLOPT_RESOLVER_START_FUNCTION.3             \
   CURLOPT_RESUME_FROM.3                         \
   CURLOPT_RESUME_FROM_LARGE.3                   \
   CURLOPT_RTSP_CLIENT_CSEQ.3                    \
@@ -304,6 +317,7 @@ man_MANS =                                      \
   CURLOPT_TIMEOUT_MS.3                          \
   CURLOPT_TIMEVALUE.3                           \
   CURLOPT_TIMEVALUE_LARGE.3                     \
+  CURLOPT_TLS13_CIPHERS.3                       \
   CURLOPT_TLSAUTH_PASSWORD.3                    \
   CURLOPT_TLSAUTH_TYPE.3                        \
   CURLOPT_TLSAUTH_USERNAME.3                    \

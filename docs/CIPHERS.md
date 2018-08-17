@@ -142,6 +142,16 @@ libcurl was built to use. This is an attempt to list known cipher names.
 `ECDHE-RSA-CAMELLIA128-SHA256`
 `ECDHE-RSA-CAMELLIA256-SHA384`
 
+### TLS 1.3 cipher suites
+
+(Note: the TLS 1.3 cipher suites are set with a separate option.)
+
+`TLS13-AES-256-GCM-SHA384`
+`TLS13-CHACHA20-POLY1305-SHA256`
+`TLS13-AES-128-GCM-SHA256`
+`TLS13-AES-128-CCM-8-SHA256`
+`TLS13-AES-128-CCM-SHA256`
+
 ## NSS
 
 ### Totally insecure
@@ -424,3 +434,54 @@ but libcurl maps them to the following case-insensitive names.
 `ECDHE-PSK-CHACHA20-POLY1305`,
 `DHE-PSK-CHACHA20-POLY1305`,
 `EDH-RSA-DES-CBC3-SHA`,
+
+## WinSSL
+
+WinSSL allows the enabling and disabling of encryption algorithms, but not specific ciphersuites. They are defined by Microsoft (https://msdn.microsoft.com/en-us/library/windows/desktop/aa375549(v=vs.85).aspx)
+
+`CALG_MD2`,
+`CALG_MD4`,
+`CALG_MD5`,
+`CALG_SHA`,
+`CALG_SHA1`,
+`CALG_MAC`,
+`CALG_RSA_SIGN`,
+`CALG_DSS_SIGN`,
+`CALG_NO_SIGN`,
+`CALG_RSA_KEYX`,
+`CALG_DES`,
+`CALG_3DES_112`,
+`CALG_3DES`,
+`CALG_DESX`,
+`CALG_RC2`,
+`CALG_RC4`,
+`CALG_SEAL`,
+`CALG_DH_SF`,
+`CALG_DH_EPHEM`,
+`CALG_AGREEDKEY_ANY`,
+`CALG_HUGHES_MD5`,
+`CALG_SKIPJACK`,
+`CALG_TEK`,
+`CALG_CYLINK_MEK`,
+`CALG_SSL3_SHAMD5`,
+`CALG_SSL3_MASTER`,
+`CALG_SCHANNEL_MASTER_HASH`,
+`CALG_SCHANNEL_MAC_KEY`,
+`CALG_SCHANNEL_ENC_KEY`,
+`CALG_PCT1_MASTER`,
+`CALG_SSL2_MASTER`,
+`CALG_TLS1_MASTER`,
+`CALG_RC5`,
+`CALG_HMAC`,
+`CALG_TLS1PRF`,
+`CALG_HASH_REPLACE_OWF`,
+`CALG_AES_128`,
+`CALG_AES_192`,
+`CALG_AES_256`,
+`CALG_AES`,
+`CALG_SHA_256`,
+`CALG_SHA_384`,
+`CALG_SHA_512`,
+`CALG_ECDH`,
+`CALG_ECMQV`,
+`CALG_ECDSA`,

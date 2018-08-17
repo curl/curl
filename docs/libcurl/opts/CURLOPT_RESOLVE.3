@@ -50,6 +50,11 @@ HOST+PORT will instead use your provided ADDRESS. Addresses set with
 \fICURLOPT_RESOLVE(3)\fP will not time-out from the DNS cache like ordinary
 entries.
 
+If the DNS cache already have an entry for the given host+port pair, then
+this entry will be removed and a new entry will be created. This is because
+old entry may have have different addresses or be ordinary entries with
+time-outs.
+
 The provided ADDRESS set by this option will be used even if
 \fICURLOPT_IPRESOLVE(3)\fP is set to make libcurl use another IP version.
 

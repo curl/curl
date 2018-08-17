@@ -37,6 +37,10 @@ progress-bar
  <command>
 http://%HOSTIP:%HTTPPORT/1148 -# --stderr log/stderrlog1148
 </command>
+<setenv>
+LC_ALL=
+LC_NUMERIC=en_US.UTF-8
+</setenv>
 </client>
 
 #
@@ -50,8 +54,13 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-<file name="log/stderrlog1148">
-######################################################################## 100.0%
+# This allows the last 4 letters of the bar to get updated without it
+# matters. We're mostly checking the width of it anyway.
+<file name="log/stderrlog1148" mode="text">
+bar 100.0%
 </file>
+<stripfile>
+s/####################################################################..../bar/
+</stripfile>
 </verify>
 </testcase>

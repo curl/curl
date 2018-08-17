@@ -1,0 +1,98 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP FORMPOST
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10
+
+blablabla
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP RFC1867-type formposting with filename containing '"'
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/1158 -F "file=@\"log/test1158\\\".txt\";type=mo/foo;filename=\"test1158\\\".txt\"" -F 'file2=@"log/test1158\".txt"' -F 'file3=@"log/test1158\".txt";type=m/f,"log/test1158\".txt"'
+</command>
+<precheck>
+perl -e "print 'Test requires a system supporting double quotes in file names' if ($^O eq 'msys');"
+</precheck>
+# We create this file before the command is invoked!
+<file name=log/test1158".txt>
+foo bar
+This is a bar foo
+bar
+foo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(User-Agent:|Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
+</strip>
+<protocol>
+POST /we/want/1158 HTTP/1.1
+User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 954
+Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file"; filename="test1158\".txt"
+Content-Type: mo/foo
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file2"; filename="test1158\".txt"
+Content-Type: text/plain
+
+foo bar
+This is a bar foo
+bar
+foo
+
+------------------------------24e78000bd32
+Content-Disposition: form-data; name="file3"
+Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
+
+Content-Disposition: attachment; filename="test1158\".txt"
+Content-Type: m/f
+
+foo bar
+This is a bar foo
+bar
+foo
+
+Content-Disposition: attachment; filename="test1158\".txt"
+Content-Type: text/plain
+
+foo bar
+This is a bar foo
+bar
+foo
+
+
+------------------------------24e78000bd32--
+</protocol>
+</verify>
+</testcase>

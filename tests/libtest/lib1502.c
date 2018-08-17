@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,6 +40,7 @@
 int test(char *URL)
 {
   CURL *easy = NULL;
+  CURL *dup;
   CURLM *multi = NULL;
   int still_running;
   int res = 0;
@@ -71,6 +72,17 @@ int test(char *URL)
   easy_setopt(easy, CURLOPT_URL, URL);
   easy_setopt(easy, CURLOPT_HEADER, 1L);
   easy_setopt(easy, CURLOPT_RESOLVE, dns_cache_list);
+
+  dup = curl_easy_duphandle(easy);
+  if(dup) {
+    curl_easy_cleanup(easy);
+    easy = dup;
+  }
+  else {
+    curl_slist_free_all(dns_cache_list);
+    curl_easy_cleanup(easy);
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   multi_init(multi);
 

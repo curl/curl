@@ -345,7 +345,7 @@ Curl_he2ai(const struct hostent *he, int port)
       addr = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr->sin_addr, curr, sizeof(struct in_addr));
-      addr->sin_family = (unsigned short)(he->h_addrtype);
+      addr->sin_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
       addr->sin_port = htons((unsigned short)port);
       break;
 
@@ -354,7 +354,7 @@ Curl_he2ai(const struct hostent *he, int port)
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr6->sin6_addr, curr, sizeof(struct in6_addr));
-      addr6->sin6_family = (unsigned short)(he->h_addrtype);
+      addr6->sin6_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
       addr6->sin6_port = htons((unsigned short)port);
       break;
 #endif
@@ -536,7 +536,8 @@ Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
 }
 #endif
 
-#if defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO)
+#if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) &&  \
+  defined(HAVE_FREEADDRINFO)
 /*
  * curl_dofreeaddrinfo()
  *

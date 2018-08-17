@@ -3,14 +3,13 @@
 <keywords>
 HTTP
 HTTP GET
---resolve
 </keywords>
 </info>
 
 #
 # Server-side
-<reply>
-<data>
+<reply name="1455">
+<data nocheck=yes>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -20,7 +19,7 @@ Accept-Ranges: bytes
 Content-Length: 6
 Connection: close
 Content-Type: text/html
-Funny-head: yesyes
+Funny-head: barkbark
 
 -foo-
 </data>
@@ -33,10 +32,10 @@ Funny-head: yesyes
 http
 </server>
 <name>
-HTTP with wildcard --resolve
+HTTP GET when PROXY Protocol enabled
 </name>
 <command>
---resolve *:%HTTPPORT:%HOSTIP http://example.com:%HTTPPORT/1455
+http://%HOSTIP:%HTTPPORT/1455 --haproxy-protocol
 </command>
 </client>
 
@@ -46,9 +45,13 @@ HTTP with wildcard --resolve
 <strip>
 ^User-Agent:.*
 </strip>
+<strippart>
+s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %HTTPPORT/proxy-line/
+</strippart>
 <protocol>
+proxy-line
 GET /1455 HTTP/1.1
-Host: example.com:%HTTPPORT
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>

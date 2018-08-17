@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,6 +79,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+struct resdata {
+  struct curltime start;
+};
+
 /*
  * Curl_resolver_global_init()
  * Called from curl_global_init() to initialize global resolver environment.
@@ -102,11 +106,13 @@ void Curl_resolver_global_cleanup(void)
  * Curl_resolver_init()
  * Called from curl_easy_init() -> Curl_open() to initialize resolver
  * URL-state specific environment ('resolver' member of the UrlState
- * structure).  Does nothing here.
+ * structure).
  */
 CURLcode Curl_resolver_init(void **resolver)
 {
-  (void)resolver;
+  *resolver = calloc(1, sizeof(struct resdata));
+  if(!*resolver)
+    return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
 
@@ -114,24 +120,22 @@ CURLcode Curl_resolver_init(void **resolver)
  * Curl_resolver_cleanup()
  * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
  * URL-state specific environment ('resolver' member of the UrlState
- * structure).  Does nothing here.
+ * structure).
  */
 void Curl_resolver_cleanup(void *resolver)
 {
-  (void)resolver;
+  free(resolver);
 }
 
 /*
  * Curl_resolver_duphandle()
  * Called from curl_easy_duphandle() to duplicate resolver URL state-specific
- * environment ('resolver' member of the UrlState structure).  Does nothing
- * here.
+ * environment ('resolver' member of the UrlState structure).
  */
 int Curl_resolver_duphandle(void **to, void *from)
 {
-  (void)to;
   (void)from;
-  return CURLE_OK;
+  return Curl_resolver_init(to);
 }
 
 static void destroy_async_data(struct Curl_async *);
@@ -177,8 +181,6 @@ static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
 {
   return &(((struct thread_data *)conn->async.os_specific)->tsd);
 }
-
-#define CONN_THREAD_SYNC_DATA(conn) &(((conn)->async.os_specific)->tsd);
 
 /* Destroy resolver thread synchronization data */
 static
@@ -477,8 +479,10 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   DEBUGASSERT(conn && td);
 
   /* wait for the thread to resolve the name */
-  if(Curl_thread_join(&td->thread_hnd))
-    result = getaddrinfo_complete(conn);
+  if(Curl_thread_join(&td->thread_hnd)) {
+    if(entry)
+      result = getaddrinfo_complete(conn);
+  }
   else
     DEBUGASSERT(0);
 
@@ -561,9 +565,22 @@ int Curl_resolver_getsock(struct connectdata *conn,
                           curl_socket_t *socks,
                           int numsocks)
 {
-  (void)conn;
+  time_t milli;
+  timediff_t ms;
+  struct Curl_easy *data = conn->data;
+  struct resdata *reslv = (struct resdata *)data->state.resolver;
   (void)socks;
   (void)numsocks;
+  ms = Curl_timediff(Curl_now(), reslv->start);
+  if(ms < 3)
+    milli = 0;
+  else if(ms <= 50)
+    milli = ms/3;
+  else if(ms <= 250)
+    milli = 50;
+  else
+    milli = 200;
+  Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
   return 0;
 }
 
@@ -577,6 +594,8 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
                                          int *waitp)
 {
   struct in_addr in;
+  struct Curl_easy *data = conn->data;
+  struct resdata *reslv = (struct resdata *)data->state.resolver;
 
   *waitp = 0; /* default to synchronous response */
 
@@ -584,14 +603,17 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, hostname, port);
 
+  reslv->start = Curl_now();
+
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, NULL)) {
     *waitp = 1; /* expect asynchronous response */
     return NULL;
   }
 
-  /* fall-back to blocking version */
-  return Curl_ipv4_resolve_r(hostname, port);
+  failf(conn->data, "getaddrinfo() thread failed\n");
+
+  return NULL;
 }
 
 #else /* !HAVE_GETADDRINFO */
@@ -605,10 +627,10 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
                                          int *waitp)
 {
   struct addrinfo hints;
-  Curl_addrinfo *res;
-  int error;
   char sbuf[12];
   int pf = PF_INET;
+  struct Curl_easy *data = conn->data;
+  struct resdata *reslv = (struct resdata *)data->state.resolver;
 
   *waitp = 0; /* default to synchronous response */
 
@@ -658,27 +680,16 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   snprintf(sbuf, sizeof(sbuf), "%d", port);
 
+  reslv->start = Curl_now();
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, &hints)) {
     *waitp = 1; /* expect asynchronous response */
     return NULL;
   }
 
-  /* fall-back to blocking version */
-  infof(conn->data, "init_resolve_thread() failed for %s; %s\n",
-        hostname, Curl_strerror(conn, errno));
+  failf(data, "getaddrinfo() thread failed to start\n");
+  return NULL;
 
-  error = Curl_getaddrinfo_ex(hostname, sbuf, &hints, &res);
-  if(error) {
-    infof(conn->data, "getaddrinfo() failed for %s:%d; %s\n",
-          hostname, port, Curl_strerror(conn, SOCKERRNO));
-    return NULL;
-  }
-  else {
-    Curl_addrinfo_set_port(res, port);
-  }
-
-  return res;
 }
 
 #endif /* !HAVE_GETADDRINFO */

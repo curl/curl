@@ -107,6 +107,7 @@ options:
         CURLOPT_PROXY_SSLKEY
         CURLOPT_PROXY_SSLKEYTYPE
         CURLOPT_PROXY_SSL_CIPHER_LIST
+        CURLOPT_PROXY_TLS13_CIPHERS
         CURLOPT_PROXY_TLSAUTH_PASSWORD
         CURLOPT_PROXY_TLSAUTH_TYPE
         CURLOPT_PROXY_TLSAUTH_USERNAME
@@ -129,6 +130,7 @@ options:
         CURLOPT_SSLKEY
         CURLOPT_SSLKEYTYPE
         CURLOPT_SSL_CIPHER_LIST
+        CURLOPT_TLS13_CIPHERS
         CURLOPT_TLSAUTH_PASSWORD
         CURLOPT_TLSAUTH_TYPE
         CURLOPT_TLSAUTH_USERNAME
@@ -183,8 +185,8 @@ CCSID.
         CURLINFO_COOKIELIST
 Lists returned should be released with curl_slist_free_all() after use.
   Option CURLINFO_CERTINFO is followed by a struct curl_certinfo * * and a
-CCSID. Returned structures sould be free'ed using curl_certinfo_free_all() after
-use.
+CCSID. Returned structures should be free'ed using curl_certinfo_free_all()
+after use.
   Other options are processed like in curl_easy_getinfo().
 
 _ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
@@ -243,7 +245,7 @@ _ If data compression has to be supported, ZLIB development environment must
 _ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
   developent environment must be installed.
 _ Install the curl source directory in IFS. Do NOT install it in the
-  installation target directory (wich defaults to /curl).
+  installation target directory (which defaults to /curl).
 _ Enter shell (QSH)
 _ Change current directory to the curl installation directory
 _ Change current directory to ./packages/OS400
@@ -318,8 +320,10 @@ _ Procedures curl_easy_setopt_long(), curl_easy_setopt_object(),
   curl_easy_setopt_function() and curl_easy_setopt_offset() are all alias
   prototypes to curl_easy_setopt(), but with different parameter lists.
 _ Procedures curl_easy_getinfo_string(), curl_easy_getinfo_long(),
-  curl_easy_getinfo_double() and curl_easy_getinfo_slist() are all alias
-  prototypes to curl_easy_getinfo(), but with different parameter lists.
+  curl_easy_getinfo_double(), curl_easy_getinfo_slist(),
+  curl_easy_getinfo_ptr(), curl_easy_getinfo_socket() and
+  curl_easy_getinfo_off_t() are all alias prototypes to curl_easy_getinfo(),
+  but with different parameter lists.
 _ Procedures curl_multi_setopt_long(), curl_multi_setopt_object(),
   curl_multi_setopt_function() and curl_multi_setopt_offset() are all alias
   prototypes to curl_multi_setopt(), but with different parameter lists.

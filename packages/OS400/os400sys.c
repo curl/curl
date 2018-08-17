@@ -140,11 +140,12 @@ get_buffer(buffer_t * buf, long size)
     return buf->buf;
 
   if(!buf->buf) {
-    if((buf->buf = malloc(size)))
+    buf->buf = malloc(size);
+    if(buf->buf)
       buf->size = size;
 
     return buf->buf;
-    }
+  }
 
   if((unsigned long) size <= buf->size) {
     /* Shorten the buffer only if it frees a significant byte count. This
@@ -152,14 +153,15 @@ get_buffer(buffer_t * buf, long size)
 
     if(buf->size - size < MIN_BYTE_GAIN)
       return buf->buf;
-    }
+  }
 
   /* Resize the buffer. */
 
-  if((cp = realloc(buf->buf, size))) {
+  cp = realloc(buf->buf, size);
+  if(cp) {
     buf->buf = cp;
     buf->size = size;
-    }
+  }
   else if(size <= buf->size)
     cp = buf->buf;
 
@@ -193,14 +195,15 @@ buffer_threaded(localkey_t key, long size)
 
     /* Allocate buffer descriptors for the current thread. */
 
-    if(!(bufs = calloc((size_t) LK_LAST, sizeof *bufs)))
+    bufs = calloc((size_t) LK_LAST, sizeof *bufs);
+    if(!bufs)
       return (char *) NULL;
 
     if(pthread_setspecific(thdkey, (void *) bufs)) {
       free(bufs);
       return (char *) NULL;
-      }
     }
+  }
 
   return get_buffer(bufs + key, size);
 }
@@ -273,15 +276,19 @@ Curl_getnameinfo_a(const struct sockaddr * sa, curl_socklen_t salen,
   enodename = (char *) NULL;
   eservname = (char *) NULL;
 
-  if(nodename && nodenamelen)
-    if(!(enodename = malloc(nodenamelen)))
+  if(nodename && nodenamelen) {
+    enodename = malloc(nodenamelen);
+    if(!enodename)
       return EAI_MEMORY;
+  }
 
-  if(servname && servnamelen)
-    if(!(eservname = malloc(servnamelen))) {
+  if(servname && servnamelen) {
+    eservname = malloc(servnamelen);
+    if(!eservname) {
       free(enodename);
       return EAI_MEMORY;
-      }
+    }
+  }
 
   status = getnameinfo(sa, salen, enodename, nodenamelen,
                        eservname, servnamelen, flags);
@@ -323,24 +330,26 @@ Curl_getaddrinfo_a(const char * nodename, const char * servname,
   if(nodename) {
     i = strlen(nodename);
 
-    if(!(enodename = malloc(i + 1)))
+    enodename = malloc(i + 1);
+    if(!enodename)
       return EAI_MEMORY;
 
     i = QadrtConvertA2E(enodename, nodename, i, i);
     enodename[i] = '\0';
-    }
+  }
 
   if(servname) {
     i = strlen(servname);
 
-    if(!(eservname = malloc(i + 1))) {
+    eservname = malloc(i + 1);
+    if(!eservname) {
       free(enodename);
       return EAI_MEMORY;
-      }
+    }
 
     QadrtConvertA2E(eservname, servname, i, i);
     eservname[i] = '\0';
-    }
+  }
 
   status = getaddrinfo(enodename, eservname, hints, res);
   free(enodename);
@@ -385,10 +394,12 @@ Curl_gsk_environment_open(gsk_handle * my_env_handle)
 
   if(!my_env_handle)
     return GSK_OS400_ERROR_INVALID_POINTER;
-  if(!(p = (struct Curl_gsk_descriptor *) malloc(sizeof *p)))
+  p = (struct Curl_gsk_descriptor *) malloc(sizeof *p);
+  if(!p)
     return GSK_INSUFFICIENT_STORAGE;
   p->strlist = (struct gskstrlist *) NULL;
-  if((rc = gsk_environment_open(&p->h)) != GSK_OK)
+  rc = gsk_environment_open(&p->h);
+  if(rc != GSK_OK)
     free(p);
   else
     *my_env_handle = (gsk_handle) p;
@@ -410,10 +421,12 @@ Curl_gsk_secure_soc_open(gsk_handle my_env_handle,
   if(!my_session_handle)
     return GSK_OS400_ERROR_INVALID_POINTER;
   h = ((struct Curl_gsk_descriptor *) my_env_handle)->h;
-  if(!(p = (struct Curl_gsk_descriptor *) malloc(sizeof *p)))
+  p = (struct Curl_gsk_descriptor *) malloc(sizeof *p);
+  if(!p)
     return GSK_INSUFFICIENT_STORAGE;
   p->strlist = (struct gskstrlist *) NULL;
-  if((rc = gsk_secure_soc_open(h, &p->h)) != GSK_OK)
+  rc = gsk_secure_soc_open(h, &p->h);
+  if(rc != GSK_OK)
     free(p);
   else
     *my_session_handle = (gsk_handle) p;
@@ -448,7 +461,8 @@ Curl_gsk_environment_close(gsk_handle * my_env_handle)
   if(!*my_env_handle)
     return GSK_INVALID_HANDLE;
   p = (struct Curl_gsk_descriptor *) *my_env_handle;
-  if((rc = gsk_environment_close(&p->h)) == GSK_OK) {
+  rc = gsk_environment_close(&p->h);
+  if(rc == GSK_OK) {
     gsk_free_handle(p);
     *my_env_handle = (gsk_handle) NULL;
   }
@@ -468,7 +482,8 @@ Curl_gsk_secure_soc_close(gsk_handle * my_session_handle)
   if(!*my_session_handle)
     return GSK_INVALID_HANDLE;
   p = (struct Curl_gsk_descriptor *) *my_session_handle;
-  if((rc = gsk_secure_soc_close(&p->h)) == GSK_OK) {
+  rc = gsk_secure_soc_close(&p->h);
+  if(rc == GSK_OK) {
     gsk_free_handle(p);
     *my_session_handle = (gsk_handle) NULL;
   }
@@ -520,8 +535,9 @@ Curl_gsk_attribute_set_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
   p = (struct Curl_gsk_descriptor *) my_gsk_handle;
   if(!bufSize)
     bufSize = strlen(buffer);
-  if(!(ebcdicbuf = malloc(bufSize + 1)))
-      return GSK_INSUFFICIENT_STORAGE;
+  ebcdicbuf = malloc(bufSize + 1);
+  if(!ebcdicbuf)
+    return GSK_INSUFFICIENT_STORAGE;
   QadrtConvertA2E(ebcdicbuf, buffer, bufSize, bufSize);
   ebcdicbuf[bufSize] = '\0';
   rc = gsk_attribute_set_buffer(p->h, bufID, ebcdicbuf, bufSize);
@@ -586,9 +602,11 @@ cachestring(struct Curl_gsk_descriptor * p,
     if(sp->ebcdicstr == ebcdicbuf)
       break;
   if(!sp) {
-    if(!(sp = (struct gskstrlist *) malloc(sizeof *sp)))
+    sp = (struct gskstrlist *) malloc(sizeof *sp);
+    if(!sp)
       return GSK_INSUFFICIENT_STORAGE;
-    if(!(asciibuf = malloc(bufsize + 1))) {
+    asciibuf = malloc(bufsize + 1);
+    if(!asciibuf) {
       free(sp);
       return GSK_INSUFFICIENT_STORAGE;
     }
@@ -619,9 +637,11 @@ Curl_gsk_attribute_get_buffer_a(gsk_handle my_gsk_handle, GSK_BUF_ID bufID,
   if(!buffer || !bufSize)
     return GSK_OS400_ERROR_INVALID_POINTER;
   p = (struct Curl_gsk_descriptor *) my_gsk_handle;
-  if((rc = gsk_attribute_get_buffer(p->h, bufID, &mybuf, &mylen)) != GSK_OK)
+  rc = gsk_attribute_get_buffer(p->h, bufID, &mybuf, &mylen);
+  if(rc != GSK_OK)
     return rc;
-  if((rc = cachestring(p, mybuf, mylen, buffer)) == GSK_OK)
+  rc = cachestring(p, mybuf, mylen, buffer);
+  if(rc == GSK_OK)
     *bufSize = mylen;
   return rc;
 }
@@ -756,19 +776,20 @@ Curl_gss_convert_in_place(OM_uint32 * minor_status, gss_buffer_t buf)
   i = buf->length;
 
   if(i) {
-    if(!(t = malloc(i))) {
+    t = malloc(i);
+    if(!t) {
       gss_release_buffer(minor_status, buf);
 
       if(minor_status)
         *minor_status = ENOMEM;
 
       return -1;
-      }
+    }
 
     QadrtConvertE2A(t, buf->value, i, i);
     memcpy(buf->value, t, i);
     free(t);
-    }
+  }
 
   return 0;
 }
@@ -789,12 +810,13 @@ Curl_gss_import_name_a(OM_uint32 * minor_status, gss_buffer_t in_name,
   memcpy((char *) &in, (char *) in_name, sizeof in);
   i = in.length;
 
-  if(!(in.value = malloc(i + 1))) {
+  in.value = malloc(i + 1);
+  if(!in.value) {
     if(minor_status)
       *minor_status = ENOMEM;
 
     return GSS_S_FAILURE;
-    }
+  }
 
   QadrtConvertA2E(in.value, in_name->value, i, i);
   ((char *) in.value)[i] = '\0';
@@ -849,23 +871,26 @@ Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
   gss_buffer_t inp;
 
   in.value = NULL;
+  inp = input_token;
 
-  if((inp = input_token))
+  if(inp) {
     if(inp->length && inp->value) {
       i = inp->length;
 
-      if(!(in.value = malloc(i + 1))) {
+      in.value = malloc(i + 1);
+      if(!in.value) {
         if(minor_status)
           *minor_status = ENOMEM;
 
         return GSS_S_FAILURE;
-        }
+      }
 
       QadrtConvertA2E(in.value, input_token->value, i, i);
       ((char *) in.value)[i] = '\0';
       in.length = i;
       inp = &in;
-      }
+    }
+  }
 
   rc = gss_init_sec_context(minor_status, cred_handle, context_handle,
                              target_name, mech_type, req_flags, time_req,
@@ -932,7 +957,8 @@ Curl_ldap_init_a(char * host, int port)
 
   i = strlen(host);
 
-  if(!(ehost = malloc(i + 1)))
+  ehost = malloc(i + 1);
+  if(!ehost)
     return (void *) NULL;
 
   QadrtConvertA2E(ehost, host, i, i);
@@ -957,24 +983,26 @@ Curl_ldap_simple_bind_s_a(void * ld, char * dn, char * passwd)
   if(dn) {
     i = strlen(dn);
 
-    if(!(edn = malloc(i + 1)))
+    edn = malloc(i + 1);
+    if(!edn)
       return LDAP_NO_MEMORY;
 
     QadrtConvertA2E(edn, dn, i, i);
     edn[i] = '\0';
-    }
+  }
 
   if(passwd) {
     i = strlen(passwd);
 
-    if(!(epasswd = malloc(i + 1))) {
+    epasswd = malloc(i + 1);
+    if(!epasswd) {
       free(edn);
       return LDAP_NO_MEMORY;
-      }
+    }
 
     QadrtConvertA2E(epasswd, passwd, i, i);
     epasswd[i] = '\0';
-    }
+  }
 
   i = ldap_simple_bind_s(ld, edn, epasswd);
   free(epasswd);
@@ -1003,39 +1031,43 @@ Curl_ldap_search_s_a(void * ld, char * base, int scope, char * filter,
   if(base) {
     i = strlen(base);
 
-    if(!(ebase = malloc(i + 1)))
+    ebase = malloc(i + 1);
+    if(!ebase)
       status = LDAP_NO_MEMORY;
     else {
       QadrtConvertA2E(ebase, base, i, i);
       ebase[i] = '\0';
-      }
     }
+  }
 
   if(filter && status == LDAP_SUCCESS) {
     i = strlen(filter);
 
-    if(!(efilter = malloc(i + 1)))
+    efilter = malloc(i + 1);
+    if(!efilter)
       status = LDAP_NO_MEMORY;
     else {
       QadrtConvertA2E(efilter, filter, i, i);
       efilter[i] = '\0';
-      }
     }
+  }
 
   if(attrs && status == LDAP_SUCCESS) {
     for(i = 0; attrs[i++];)
       ;
 
-    if(!(eattrs = calloc(i, sizeof *eattrs)))
+    eattrs = calloc(i, sizeof *eattrs);
+    if(!eattrs)
       status = LDAP_NO_MEMORY;
     else {
       for(j = 0; attrs[j]; j++) {
         i = strlen(attrs[j]);
 
-        if(!(eattrs[j] = malloc(i + 1))) {
+        eattrs[j] = malloc(i + 1);
+        if(!eattrs[j]) {
           status = LDAP_NO_MEMORY;
           break;
-          }
+        }
 
         QadrtConvertA2E(eattrs[j], attrs[j], i, i);
         eattrs[j][i] = '\0';
@@ -1073,15 +1105,16 @@ Curl_ldap_get_values_len_a(void * ld, LDAPMessage * entry, const char * attr)
   if(attr) {
     int i = strlen(attr);
 
-    if(!(cp = malloc(i + 1))) {
+    cp = malloc(i + 1);
+    if(!cp) {
       ldap_set_lderrno(ld, LDAP_NO_MEMORY, NULL,
                        ldap_err2string(LDAP_NO_MEMORY));
       return (struct berval * *) NULL;
-      }
+    }
 
     QadrtConvertA2E(cp, attr, i, i);
     cp[i] = '\0';
-    }
+  }
 
   result = ldap_get_values_len(ld, entry, cp);
   free(cp);
@@ -1116,7 +1149,8 @@ Curl_ldap_get_dn_a(void * ld, LDAPMessage * entry)
 
   i = strlen(cp);
 
-  if(!(cp2 = malloc(i + 1)))
+  cp2 = malloc(i + 1);
+  if(!cp2)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
@@ -1148,7 +1182,8 @@ Curl_ldap_first_attribute_a(void * ld,
 
   i = strlen(cp);
 
-  if(!(cp2 = malloc(i + 1)))
+  cp2 = malloc(i + 1);
+  if(!cp2)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);
@@ -1180,7 +1215,8 @@ Curl_ldap_next_attribute_a(void * ld,
 
   i = strlen(cp);
 
-  if(!(cp2 = malloc(i + 1)))
+  cp2 = malloc(i + 1);
+  if(!cp2)
     return cp2;
 
   QadrtConvertE2A(cp2, cp, i, i);

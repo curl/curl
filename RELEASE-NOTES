@@ -1,72 +1,88 @@
-Curl and libcurl 7.59.0
+Curl and libcurl 7.61.1
 
- Public curl releases:         173
- Command line options:         213
- curl_easy_setopt() options:   251
+ Public curl releases:         176
+ Command line options:         218
+ curl_easy_setopt() options:   258
  Public functions in libcurl:  74
- Contributors:                 1698
+ Contributors:                 1766
 
 This release includes the following changes:
 
- o curl: add --proxy-pinnedpubkey [10]
- o added: CURLOPT_TIMEVALUE_LARGE and CURLINFO_FILETIME_T [13]
- o CURLOPT_RESOLVE: Add support for multiple IP addresses per entry [37]
- o Add option CURLOPT_HAPPY_EYEBALLS_TIMEOUT [37]
- o Add new tool option --happy-eyeballs-timeout-ms [37]
+ o
 
 This release includes the following bugfixes:
 
- o lib555: drop text conversion and encode data as ascii codes [1]
- o lib517: make variable static to avoid compiler warning
- o lib544: sync ascii code data with textual data [1]
- o GSKit: restore pinnedpubkey functionality [2]
- o darwinssl: Don't import client certificates into Keychain on macOS [3]
- o parsedate: fix date parsing for systems with 32 bit long [4]
- o openssl: fix pinned public key build error in FIPS mode [5]
- o SChannel/WinSSL: Implement public key pinning [6]
- o cookies: remove verbose "cookie size:" output
- o progress-bar: don't use stderr explicitly, use bar->out [7]
- o Fixes for MSDOS
- o build: open VC15 projects with VS 2017
- o curl_ctype: private is*() type macros and functions [8]
- o configure: set PATH_SEPARATOR to colon for PATH w/o separator [9]
- o winbuild: make linker generate proper PDB [11]
- o curl_easy_reset: clear digest auth state [12]
- o curl/curl.h: fix comment typo for CURLOPT_DNS_LOCAL_IP6 [14]
- o range: commonize FTP and FILE range handling [15]
- o progress-bar docs: update to match implementation [16]
- o fnmatch: do not match the empty string with a character set
- o fnmatch: accept an alphanum to be followed by a non-alphanum in char set [17]
- o build: fix termios issue on android cross-compile [18]
- o getdate: return -1 for out of range [19]
- o formdata: use the mime-content type function [20]
- o time-cond: fix reading the file modification time on Windows [21]
- o build-openssl.bat: Extend VC15 support to include Enterprise and Professional
- o build-wolfssl.bat: Extend VC15 support to include Enterprise and Professional
- o openssl: Don't add verify locations when verifypeer==0
- o fnmatch: optimize processing of consecutive *s and ?s pattern characters [22]
- o schannel: fix compiler warnings [23]
- o content_encoding: Add "none" alias to "identity" [24]
- o get_posix_time: only check for overflows if they can happen
- o http_chunks: don't write chunks twice with CURLOPT_HTTP_TRANSFER_DECODING [25]
- o README: language fix [26]
- o sha256: build with OpenSSL < 0.9.8 [27]
- o smtp: fix processing of initial dot in data [28]
- o --tlsauthtype: works only if libcurl is built with TLS-SRP support [29]
- o tests: new tests for http raw mode [30]
- o libcurl-security.3: man page discussion security concerns when using libcurl
- o curl_gssapi: make sure this file too uses our *printf()
- o BINDINGS: fix curb link (and remove ruby-curl-multi)
- o nss: use PK11_CreateManagedGenericObject() if available [31]
- o travis: add build with iconv enabled [32]
- o ssh: add two missing state names [33]
- o CURLOPT_HEADERFUNCTION.3: mention folded headers
- o http: fix the max header length detection logic [34]
- o header callback: don't chop headers into smaller pieces [35]
- o CURLOPT_HEADER.3: clarify problems with different data sizes
- o curl --version: show PSL if the run-time lib has it enabled
- o examples/sftpuploadresume: resume upload via CURLOPT_APPEND [36]
- o Return error if called recursively from within callbacks [38]
+ o CURLINFO_SIZE_UPLOAD: fix missing counter update [46]
+ o Curl_getoff_all_pipelines: improved for multiplexed [3]
+ o DEPRECATE: remove release date from 7.62.0
+ o HTTP: Don't attempt to needlessly decompress redirect body [30]
+ o README.md: add LGTM.com code quality grade for C/C++ [42]
+ o Silence GCC 8 cast-function-type warnings [47]
+ o ares: check for NULL in completed-callback [3]
+ o asyn-thread: Remove unused macro [40]
+ o auth: only pick CURLAUTH_BEARER if we *have* a Bearer token [15]
+ o auth: pick Bearer authentication whenever a token is available [15]
+ o cmake: CMake config files are defining CURL_STATICLIB for static builds [54]
+ o cmake: Respect BUILD_SHARED_LIBS [35]
+ o cmake: Update scripts to use consistent style [9]
+ o cmake: bumped minimum version to 3.4 [34]
+ o cmake: link curl to the OpenSSL targets instead of lib absolute paths [34]
+ o configure: fix for -lpthread detection with OpenSSL and pkg-config [38]
+ o conn: remove the boolean 'inuse' field [3]
+ o content_encoding: accept up to 4 unknown trailer bytes after raw deflate data [5]
+ o curl: Fix segfault when -H @headerfile is empty [23]
+ o curl: use Content-Disposition before the "URL end" for -OJ [29]
+ o darwinssl: add support for ALPN negotiation [7]
+ o docs/CURLOPT_URL: fix indentation [20]
+ o docs/CURLOPT_WRITEFUNCTION: size is always 1 [19]
+ o docs/SECURITY-PROCESS: mention bounty, drop pre-notify
+ o docs/examples: add hiperfifo example using linux epoll/timerfd [21]
+ o docs: add disallow-username-in-url.d and haproxy-protocol.d to dist [50]
+ o docs: improved the manual pages of some callbacks [48]
+ o docs: mention NULL is fine input to several functions [43]
+ o formdata: Remove unused macro HTTPPOST_CONTENTTYPE_DEFAULT [40]
+ o header output: switch off all styles, not just unbold [8]
+ o hostip: fix unused variable warning
+ o http2: clear the drain counter in Curl_http2_done [27]
+ o http2: separate easy handle from connections better [12]
+ o http: fix for tiny "HTTP/0.9" response [51]
+ o http_proxy: Remove unused macro SELECT_TIMEOUT [40]
+ o lib/Makefile: only do symbol hiding if told to [32]
+ o lib1502: fix memory leak in torture test [44]
+ o mime: check Curl_rand_hex's return code [22]
+ o multi: always do the COMPLETED procedure/state [3]
+ o openssl: assume engine support in 1.0.0 or later [2]
+ o openssl: fix debug messages [39]
+ o projects: Improve Windows perl detection in batch scripts [49]
+ o retry: return error if rewind was necessary but didn't happen [28]
+ o reuse_conn(): memory leak - free old_conn->options [17]
+ o schannel: enable CALG_TLS1PRF for w32api >= 5.1
+ o schannel: fix MinGW compile break [1]
+ o smb: fix memory leak on early failure [26]
+ o smb: fix memory-leak in URL parse error path [4]
+ o smb_getsock: always wait for write socket too [11]
+ o ssh-libssh: fix infinite connect loop on invalid private key [53]
+ o ssh-libssh: reduce excessive verbose output about pubkey auth [53]
+ o ssl: set engine implicitly when a PKCS#11 URI is provided [36]
+ o sws: handle EINTR when calling select() [24]
+ o system_win32: fix version checking [16]
+ o telnet: Remove unused macros TELOPTS and TELCMDS [40]
+ o test1143: disable MSYS2's POSIX path conversion [10]
+ o test1307: (fnmatch testing) disabled [31]
+ o test1422: add required file feature [6]
+ o test1531: Add timeout [41]
+ o test1540: Remove unused macro TEST_HANG_TIMEOUT [40]
+ o test214: disable MSYS2's POSIX path conversion for URL
+ o test320: treat curl320.out file as binary [14]
+ o tests/http_pipe.py: Use /usr/bin/env to find python
+ o tests: fixes for Windows line endlings [13]
+ o travis: build darwinssl on macos 10.12 to fix linker errors [33]
+ o travis: execute "set -eo pipefail" for coverage build [45]
+ o travis: run a 'make checksrc' too [25]
+ o travis: update to GCC [52]
+ o travis: verify that man pages can be regenerated [50]
+ o windows: implement send buffer tuning [37]
+ o wolfSSL/CyaSSL: Fix memory leak in Curl_cyassl_random [18]
 
 This release includes the following known bugs:
 
@@ -75,55 +91,72 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Marcionek, Alessandro Ghedini, Anders Bakken, Ben Greear,
-  Björn Stenberg, Bruno Grasselli, Dair Grant, Daniel Stenberg,
-  Douglas Mencken, Earnestly on github, Erik Johansson, Gisle Vanem,
-  Guido Berhoerster, Henry Roeland, Kamil Dudka, Klaus Stein, Marcel Raad,
-  Martin Dreher, Max Dymond, Michael Kaufmann, Michał Janiszewski,
-  Mohammad AlSaleh, Patrick Monnerat, Patrick Schlangen, Ray Satiro,
-  Rich Moore, Ruurd Beerstra, Sergio Borghese, Somnath Kundu, Steve Holme,
-  Travis Burtrum,
-  (31 contributors)
+  adnn on github, Anderson Toshiyuki Sasaki, Andrei Virtosu, Bas van Schaik,
+  Carie Pointer, Christopher Head, clbr on github, Dan Fandrich,
+  Daniel Jelinski, Daniel Jeliński, Daniel Stenberg, Darío Hereñú,
+  Even Rouault, Harry Sintonen, Jakub Zakrzewski, Jeffrey Walton, Jeroen Ooms,
+  Johannes Schindelin, John Butterfield, Josh Bialkowski, Kamil Dudka,
+  Marcel Raad, Markus Elfring, Michael Kaufmann, Nick Zitzmann,
+  Nikos Mavrogiannopoulos, Patrick Monnerat, Paul Howarth, pszemus on github,
+  Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs, Ruslan Baratov,
+  Sergei Nikulov, Thomas Klausner, Tobias Blomberg, Viktor Szakats, Zero King,
+  (39 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=1872
- [2] = https://curl.haxx.se/bug/?i=2263
- [3] = https://curl.haxx.se/bug/?i=2085
- [4] = https://curl.haxx.se/bug/?i=2250
- [5] = https://curl.haxx.se/bug/?i=2258
- [6] = https://curl.haxx.se/bug/?i=1429
- [7] = https://github.com/curl/curl/commit/993dd5651a6c853bfe3870f6a69c7b329fa4e8ce#commitcomment-27070080
- [8] = https://curl.haxx.se/bug/?i=2269
- [9] = https://curl.haxx.se/bug/?i=2202
- [10] = https://curl.haxx.se/bug/?i=2268
- [11] = https://curl.haxx.se/bug/?i=2274
- [12] = https://curl.haxx.se/mail/lib-2018-01/0074.html
- [13] = https://curl.haxx.se/bug/?i=2238
- [14] = https://curl.haxx.se/bug/?i=2275
- [15] = https://curl.haxx.se/bug/?i=2205
- [16] = https://curl.haxx.se/bug/?i=2271
- [17] = https://curl.haxx.se/mail/lib-2018-01/0114.html
- [18] = https://curl.haxx.se/mail/lib-2018-01/0122.html
- [19] = https://curl.haxx.se/bug/?i=2278
- [20] = https://curl.haxx.se/bug/?i=2282
- [21] = https://curl.haxx.se/bug/?i=2164
- [22] = https://curl.haxx.se/bug/?i=2291
- [23] = https://curl.haxx.se/bug/?i=2296
- [24] = https://curl.haxx.se/bug/?i=2298
- [25] = https://curl.haxx.se/bug/?i=2303
- [26] = https://curl.haxx.se/bug/?i=2300
- [27] = https://curl.haxx.se/bug/?i=2305
- [28] = https://curl.haxx.se/bug/?i=2304
- [29] = https://bugzilla.redhat.com/1542256
- [30] = https://curl.haxx.se/bug/?i=2303
- [31] = https://bugzilla.redhat.com/1510247
- [32] = https://curl.haxx.se/bug/?i=1872
- [33] = https://curl.haxx.se/bug/?i=2312
- [34] = https://curl.haxx.se/mail/lib-2018-02/0056.html
- [35] = https://curl.haxx.se/bug/?i=2314
- [36] = https://curl.haxx.se/mail/lib-2018-02/0072.html
- [37] = https://curl.haxx.se/bug/?i=2260
- [38] = https://curl.haxx.se/bug/?i=2302
+ [1] = https://github.com/curl/curl/pull/2721#issuecomment-403636043
+ [2] = https://curl.haxx.se/bug/?i=2732
+ [3] = https://curl.haxx.se/bug/?i=2733
+ [4] = https://curl.haxx.se/bug/?i=2740
+ [5] = https://curl.haxx.se/bug/?i=2719
+ [6] = https://curl.haxx.se/bug/?i=2741
+ [7] = https://curl.haxx.se/bug/?i=2731
+ [8] = https://curl.haxx.se/bug/?i=2736
+ [9] = https://curl.haxx.se/bug/?i=2727
+ [10] = https://curl.haxx.se/bug/?i=2765
+ [11] = https://curl.haxx.se/bug/?i=2768
+ [12] = https://curl.haxx.se/bug/?i=2751
+ [13] = https://curl.haxx.se/bug/?i=2772
+ [14] = https://curl.haxx.se/bug/?i=2776
+ [15] = https://curl.haxx.se/bug/?i=2754
+ [16] = https://curl.haxx.se/bug/?i=2792
+ [17] = https://curl.haxx.se/bug/?i=2790
+ [18] = https://curl.haxx.se/bug/?i=2784
+ [19] = https://curl.haxx.se/bug/?i=2787
+ [20] = https://curl.haxx.se/bug/?i=2788
+ [21] = https://curl.haxx.se/bug/?i=2804
+ [22] = https://curl.haxx.se/bug/?i=2795
+ [23] = https://curl.haxx.se/bug/?i=2797
+ [24] = https://curl.haxx.se/bug/?i=2808
+ [25] = https://curl.haxx.se/bug/?i=2811
+ [26] = https://curl.haxx.se/bug/?i=2769
+ [27] = https://curl.haxx.se/bug/?i=2800
+ [28] = https://curl.haxx.se/bug/?i=2801
+ [29] = https://curl.haxx.se/bug/?i=2783
+ [30] = https://curl.haxx.se/bug/?i=2798
+ [31] = https://curl.haxx.se/bug/?i=2825
+ [32] = https://curl.haxx.se/bug/?i=2830
+ [33] = https://curl.haxx.se/bug/?i=2835
+ [34] = https://curl.haxx.se/bug/?i=2753
+ [35] = https://curl.haxx.se/bug/?i=2755
+ [36] = https://curl.haxx.se/bug/?i=2333
+ [37] = https://curl.haxx.se/mail/lib-2018-07/0080.html
+ [38] = https://curl.haxx.se/bug/?i=2848
+ [39] = https://curl.haxx.se/bug/?i=2806
+ [40] = https://curl.haxx.se/bug/?i=2852
+ [41] = https://curl.haxx.se/bug/?i=2853
+ [42] = https://curl.haxx.se/bug/?i=2857
+ [43] = https://curl.haxx.se/bug/?i=2837
+ [44] = https://curl.haxx.se/bug/?i=2861
+ [45] = https://curl.haxx.se/bug/?i=2862
+ [46] = https://curl.haxx.se/bug/?i=2847
+ [47] = https://curl.haxx.se/bug/?i=2860
+ [48] = https://curl.haxx.se/bug/?i=2868
+ [49] = https://curl.haxx.se/bug/?i=2865
+ [50] = https://curl.haxx.se/bug/?i=2856
+ [51] = https://curl.haxx.se/bug/?i=2420
+ [52] = https://curl.haxx.se/bug/?i=2869
+ [53] = https://curl.haxx.se/bug/?i=2879
+ [54] = https://curl.haxx.se/bug/?i=2817

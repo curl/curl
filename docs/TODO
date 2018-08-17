@@ -17,7 +17,6 @@
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
- 1.1 Option to refuse usernames in URLs
  1.2 More data sharing
  1.3 struct lifreq
  1.4 signal-based resolver timeouts
@@ -38,11 +37,13 @@
  1.19 Timeout idle connections from the pool
  1.20 SRV and URI DNS records
  1.21 API for URL parsing/splitting
+ 1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
  1.25 Expose tried IP addresses that failed
  1.26 CURL_REFUSE_CLEARTEXT
  1.27 hardcode the "localhost" addresses
+ 1.28 FD_CLOEXEC
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -68,7 +69,6 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
- 5.4 HTTP Digest using SHA-256
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 QUIC
@@ -112,9 +112,12 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
+ 13.9 Configurable loading of OpenSSL configuration file
+ 13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
  13.13 Support HPKP
+ 13.14 Support the clienthello extension
 
  14. GnuTLS
  14.1 SSL engine stuff
@@ -122,7 +125,6 @@
 
  15. WinSSL/SChannel
  15.1 Add support for client certificate authentication
- 15.2 Add support for custom server certificate validation
  15.3 Add support for the --ciphers option
 
  16. SASL
@@ -155,6 +157,8 @@
  18.16 send only part of --data
  18.17 consider file name from the redirected URL with -O ?
  18.18 retry on network is unreachable
+ 18.19 expand ~/ in config files
+ 18.20 host name sections in config files
 
  19. Build
  19.1 roffit
@@ -187,21 +191,10 @@
 
 1. libcurl
 
-1.1 Option to refuse usernames in URLs
-
- There's a certain risk for application in allowing user names in URLs. For
- example: if the wrong person gets to set the URL and manages to set a user
- name in there when .netrc is used, the application may send along a password
- that otherwise the person couldn't provide.
-
- A new libcurl option could be added to allow applications to switch off this
- feature and thus avoid a potential risk.
-
 1.2 More data sharing
 
  curl_share_* functions already exist and work, and they can be extended to
- share more. For example, enable sharing of the ares channel and the
- connection cache.
+ share more. For example, enable sharing of the ares channel.
 
 1.3 struct lifreq
 
@@ -387,6 +380,11 @@
  using libcurl need that ability. In polls to users, we've learned that many
  libcurl users would like to see and use such an API.
 
+1.22 CURLINFO_PAUSE_STATE
+
+ Return information about the transfer's current pause state, in both
+ directions. https://github.com/curl/curl/issues/2588
+
 1.23 Offer API to flush the connection pool
 
  Sometimes applications want to flush all the existing connections kept alive.
@@ -431,6 +429,14 @@
  https://bugzilla.mozilla.org/show_bug.cgi?id=1220810
 
  https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
+
+1.28 FD_CLOEXEC
+
+ It sets the close-on-exec flag for the file descriptor, which causes the file
+ descriptor to be automatically (and atomically) closed when any of the
+ exec-family functions succeed. Should probably be set by default?
+
+ https://github.com/curl/curl/issues/2252
 
 2. libcurl - multi interface
 
@@ -559,15 +565,6 @@
  sorts the headers based on that number. We could then have internally created
  headers use a default value so only headers that need to be moved have to be
  specified.
-
-5.4 HTTP Digest using SHA-256
-
- RFC 7616 introduces an update to the HTTP Digest authentication
- specification, which amongst other thing defines how new digest algorithms
- can be used instead of MD5 which is considered old and not recommended.
-
- See https://tools.ietf.org/html/rfc7616 and
- https://github.com/curl/curl/issues/1018
 
 5.5 auth= in URLs
 
@@ -720,7 +717,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  You can specify the private and public keys for SSH/SSL as file paths. Some
  programs want to avoid using files and instead just pass them as in-memory
  data blobs. There's probably a challenge to make this work across the
- plethory of different TLS and SSH backends that curl suppports.
+ plethory of different TLS and SSH backends that curl supports.
  https://github.com/curl/curl/issues/2310
 
 13.4 Cache/share OpenSSL contexts
@@ -773,6 +770,28 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
 
+13.9 Configurable loading of OpenSSL configuration file
+
+ libcurl calls the OpenSSL function CONF_modules_load_file() in openssl.c,
+ Curl_ossl_init(). "We regard any changes in the OpenSSL configuration as a
+ security risk or at least as unnecessary."
+
+ Please add a configuration switch or something similar to disable the
+ CONF_modules_load_file() call.
+
+ See https://github.com/curl/curl/issues/2724
+
+13.10 Support Authority Information Access certificate extension (AIA)
+
+ AIA can provide various things like CRLs but more importantly information
+ about intermediate CA certificates that can allow validation path to be
+ fullfilled when the HTTPS server doesn't itself provide them.
+
+ Since AIA is about downloading certs on demand to complete a TLS handshake,
+ it is probably a bit tricky to get done right.
+
+ See https://github.com/curl/curl/issues/2793
+
 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
 
  CURLOPT_PINNEDPUBLICKEY does not consider the hashes of intermediate & root
@@ -809,6 +828,16 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Doc: https://developer.mozilla.org/de/docs/Web/Security/Public_Key_Pinning
  RFC: https://tools.ietf.org/html/draft-ietf-websec-key-pinning-21
 
+13.14 Support the clienthello extension
+
+ Certain stupid networks and middle boxes have a problem with SSL handshake
+ pakets that are within a certain size range because how that sets some bits
+ that previously (in older TLS version) were not set. The clienthello
+ extension adds padding to avoid that size range.
+
+ https://tools.ietf.org/html/rfc7685
+ https://github.com/curl/curl/issues/2299
+
 14. GnuTLS
 
 14.1 SSL engine stuff
@@ -829,17 +858,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  or the user to supply a custom client certificate using curl or libcurl.
 
  Therefore support for the existing -E/--cert and --key options should be
- implemented by supplying a custom certificate to the SChannel APIs, see:
- - Getting a Certificate for Schannel
-   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
-
-15.2 Add support for custom server certificate validation
-
- WinSSL/SChannel currently makes use of the OS-level system and user
- certificate trust store. This does not allow the application or user to
- customize the server certificate validation process using curl or libcurl.
-
- Therefore support for the existing --cacert or --capath options should be
  implemented by supplying a custom certificate to the SChannel APIs, see:
  - Getting a Certificate for Schannel
    https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
@@ -1072,6 +1090,20 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  want to retry for?
 
  https://github.com/curl/curl/issues/1603
+
+18.19 expand ~/ in config files
+
+ For example .curlrc could benefit from being able to do this.
+
+ See https://github.com/curl/curl/issues/2317
+
+18.20 host name sections in config files
+
+ config files would be more powerful if they could set different
+ configurations depending on used URLs, host name or possibly origin. Then a
+ default .curlrc could a specific user-agent only when doing requests against
+ a certain site.
+
 
 19. Build
 

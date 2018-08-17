@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -64,6 +64,9 @@ CURLSSLSET_UNKNOWN_BACKEND and set the \fIavail\fP pointer to the
 NULL-terminated list of available backends. The available backends are those
 that this particular build of libcurl supports.
 
+Since libcurl 7.60.0, the \fIavail\fP pointer will always be set to the list
+of alternatives if non-NULL.
+
 Upon success, the function returns CURLSSLSET_OK.
 
 If the specified SSL backend is not available, the function returns
@@ -84,7 +87,7 @@ support for choosing SSL backends at runtime.
 .SH RETURN VALUE
 If this function returns CURLSSLSET_OK, the backend was successfully selected.
 
-If the chosen backend is unknown (or support for the chosed backend has not
+If the chosen backend is unknown (or support for the chosen backend has not
 been compiled into libcurl), the function returns \fICURLSSLSET_UNKNOWN_BACKEND\fP.
 
 If the backend had been configured previously, or if \fIcurl_global_init(3)\fP

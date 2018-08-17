@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,6 +124,8 @@ struct httprequest {
   bool connmon;   /* monitor the state of the connection, log disconnects */
   bool upgrade;   /* test case allows upgrade to http2 */
   bool upgrade_request; /* upgrade request found and allowed */
+  bool close;     /* similar to swsclose in response: close connection after
+                     response is sent */
   int done_processing;
 };
 
@@ -176,6 +178,9 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 
 /* upgrade to http2 */
 #define CMD_UPGRADE "upgrade"
+
+/* close connection */
+#define CMD_SWSCLOSE "swsclose"
 
 #define END_OF_HEADERS "\r\n\r\n"
 
@@ -361,7 +366,7 @@ static int parse_servercmd(struct httprequest *req)
   int error;
 
   filename = test2file(req->testno);
-
+  req->close = FALSE;
   stream = fopen(filename, "rb");
   if(!stream) {
     error = errno;
@@ -413,6 +418,10 @@ static int parse_servercmd(struct httprequest *req)
       else if(!strncmp(CMD_UPGRADE, cmd, strlen(CMD_UPGRADE))) {
         logmsg("enabled upgrade to http2");
         req->upgrade = TRUE;
+      }
+      else if(!strncmp(CMD_SWSCLOSE, cmd, strlen(CMD_SWSCLOSE))) {
+        logmsg("swsclose: close this connection after response");
+        req->close = TRUE;
       }
       else if(1 == sscanf(cmd, "pipe: %d", &num)) {
         logmsg("instructed to allow a pipe size of %d", num);
@@ -555,7 +564,6 @@ static int ProcessRequest(struct httprequest *req)
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
         char *portp = NULL;
-        unsigned long part = 0;
 
         snprintf(logbuf, sizeof(logbuf),
                  "Received a CONNECT %s HTTP/%d.%d request",
@@ -569,6 +577,7 @@ static int ProcessRequest(struct httprequest *req)
 
         if(doc[0] == '[') {
           char *p = &doc[1];
+          unsigned long part = 0;
           /* scan through the hexgroups and store the value of the last group
              in the 'part' variable and use as test case number!! */
           while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
@@ -954,7 +963,6 @@ static void init_httprequest(struct httprequest *req)
    is no data waiting, or < 0 if it should be closed */
 static int get_request(curl_socket_t sock, struct httprequest *req)
 {
-  int error;
   int fail = 0;
   char *reqbuf = req->reqbuf;
   ssize_t got = 0;
@@ -1000,7 +1008,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       fail = 1;
     }
     else if(got < 0) {
-      error = SOCKERRNO;
+      int error = SOCKERRNO;
       if(EAGAIN == error || EWOULDBLOCK == error) {
         /* nothing to read at the moment */
         return 0;
@@ -1065,7 +1073,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   char *cmd = NULL;
   size_t cmdsize = 0;
   FILE *dump;
-  bool persistant = TRUE;
+  bool persistent = TRUE;
   bool sendfailure = FALSE;
   size_t responsesize;
   int error = 0;
@@ -1195,8 +1203,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   /* If the word 'swsclose' is present anywhere in the reply chunk, the
      connection will be closed after the data has been sent to the requesting
      client... */
-  if(strstr(buffer, "swsclose") || !count) {
-    persistant = FALSE;
+  if(strstr(buffer, "swsclose") || !count || req->close) {
+    persistent = FALSE;
     logmsg("connection close instruction \"swsclose\" found in response");
   }
   if(strstr(buffer, "swsbounce")) {
@@ -1313,7 +1321,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     } while(ptr && *ptr);
   }
   free(cmd);
-  req->open = use_gopher?FALSE:persistant;
+  req->open = use_gopher?FALSE:persistent;
 
   prevtestno = req->testno;
   prevpartno = req->partno;
@@ -1347,7 +1355,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   serverfd = socket(socket_domain, SOCK_STREAM, 0);
   if(CURL_SOCKET_BAD == serverfd) {
     error = SOCKERRNO;
-    logmsg("Error creating socket for server conection: (%d) %s",
+    logmsg("Error creating socket for server connection: (%d) %s",
            error, strerror(error));
     return CURL_SOCKET_BAD;
   }
@@ -1358,7 +1366,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     curl_socklen_t flag = 1;
     if(0 != setsockopt(serverfd, IPPROTO_TCP, TCP_NODELAY,
                        (void *)&flag, sizeof(flag)))
-      logmsg("====> TCP_NODELAY for server conection failed");
+      logmsg("====> TCP_NODELAY for server connection failed");
   }
 #endif
 
@@ -1423,7 +1431,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
  * either end.
  *
  * When doing FTP through a CONNECT proxy, we expect that the data connection
- * will be setup while the first connect is still being kept up. Therefor we
+ * will be setup while the first connect is still being kept up. Therefore we
  * must accept a new connection and deal with it appropriately.
  */
 
@@ -1537,17 +1545,17 @@ static void http_connect(curl_socket_t *infdp,
     if(got_exit_signal)
       break;
 
-    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    do {
+      rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+
+    if(got_exit_signal)
+      break;
 
     if(rc > 0) {
       /* socket action */
-      bool tcp_fin_wr;
+      bool tcp_fin_wr = FALSE;
       timeout_count = 0;
-
-      if(got_exit_signal)
-        break;
-
-      tcp_fin_wr = FALSE;
 
       /* ---------------------------------------------------------- */
 
@@ -1567,7 +1575,7 @@ static void http_connect(curl_socket_t *infdp,
             curl_socklen_t flag = 1;
             if(0 != setsockopt(datafd, IPPROTO_TCP, TCP_NODELAY,
                                (void *)&flag, sizeof(flag)))
-              logmsg("====> TCP_NODELAY for client DATA conection failed");
+              logmsg("====> TCP_NODELAY for client DATA connection failed");
           }
 #endif
           req2.pipelining = FALSE;
@@ -1968,7 +1976,7 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
   /* if we got a CONNECT, loop and get another request as well! */
 
   if(req->open) {
-    logmsg("=> persistant connection request ended, awaits new request\n");
+    logmsg("=> persistent connection request ended, awaits new request\n");
     return 1;
   }
 
@@ -2290,16 +2298,19 @@ int main(int argc, char *argv[])
     if(got_exit_signal)
       goto sws_cleanup;
 
-    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    do {
+      rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+
+    if(got_exit_signal)
+      goto sws_cleanup;
+
     if(rc < 0) {
       error = SOCKERRNO;
       logmsg("select() failed with error: (%d) %s",
              error, strerror(error));
       goto sws_cleanup;
     }
-
-    if(got_exit_signal)
-      goto sws_cleanup;
 
     if(rc == 0) {
       /* Timed out - try again */

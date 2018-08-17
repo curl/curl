@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -111,6 +111,19 @@ static bool is_fatal_error(CURLcode code)
 
   /* no error or not critical */
   return FALSE;
+}
+
+/*
+ * Check if a given string is a PKCS#11 URI
+ */
+static bool is_pkcs11_uri(const char *string)
+{
+  if(curl_strnequal(string, "pkcs11:", 7)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
 }
 
 #ifdef __VMS
@@ -228,52 +241,76 @@ static CURLcode operate_do(struct GlobalConfig *global,
   if(!config->cacert &&
      !config->capath &&
      !config->insecure_ok) {
-    char *env;
-    env = curlx_getenv("CURL_CA_BUNDLE");
-    if(env) {
-      config->cacert = strdup(env);
-      if(!config->cacert) {
-        curl_free(env);
-        helpf(global->errors, "out of memory\n");
-        result = CURLE_OUT_OF_MEMORY;
-        goto quit_curl;
-      }
+    struct curl_tlssessioninfo *tls_backend_info = NULL;
+
+    /* With the addition of CAINFO support for Schannel, this search could find
+     * a certificate bundle that was previously ignored. To maintain backward
+     * compatibility, only perform this search if not using Schannel.
+     */
+    result = curl_easy_getinfo(config->easy,
+                               CURLINFO_TLS_SSL_PTR,
+                               &tls_backend_info);
+    if(result) {
+      goto quit_curl;
     }
-    else {
-      env = curlx_getenv("SSL_CERT_DIR");
+
+    /* Set the CA cert locations specified in the environment. For Windows if
+     * no environment-specified filename is found then check for CA bundle
+     * default filename curl-ca-bundle.crt in the user's PATH.
+     *
+     * If Schannel (WinSSL) is the selected SSL backend then these locations
+     * are ignored. We allow setting CA location for schannel only when
+     * explicitly specified by the user via CURLOPT_CAINFO / --cacert.
+     */
+    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
+      char *env;
+      env = curlx_getenv("CURL_CA_BUNDLE");
       if(env) {
-        config->capath = strdup(env);
-        if(!config->capath) {
+        config->cacert = strdup(env);
+        if(!config->cacert) {
           curl_free(env);
           helpf(global->errors, "out of memory\n");
           result = CURLE_OUT_OF_MEMORY;
           goto quit_curl;
         }
-        capath_from_env = true;
       }
       else {
-        env = curlx_getenv("SSL_CERT_FILE");
+        env = curlx_getenv("SSL_CERT_DIR");
         if(env) {
-          config->cacert = strdup(env);
-          if(!config->cacert) {
+          config->capath = strdup(env);
+          if(!config->capath) {
             curl_free(env);
             helpf(global->errors, "out of memory\n");
             result = CURLE_OUT_OF_MEMORY;
             goto quit_curl;
           }
+          capath_from_env = true;
+        }
+        else {
+          env = curlx_getenv("SSL_CERT_FILE");
+          if(env) {
+            config->cacert = strdup(env);
+            if(!config->cacert) {
+              curl_free(env);
+              helpf(global->errors, "out of memory\n");
+              result = CURLE_OUT_OF_MEMORY;
+              goto quit_curl;
+            }
+          }
         }
       }
-    }
 
-    if(env)
-      curl_free(env);
+      if(env)
+        curl_free(env);
 #ifdef WIN32
-    else {
-      result = FindWin32CACert(config, "curl-ca-bundle.crt");
-      if(result)
-        goto quit_curl;
-    }
+      else {
+        result = FindWin32CACert(config, tls_backend_info->backend,
+                                 "curl-ca-bundle.crt");
+        if(result)
+          goto quit_curl;
+      }
 #endif
+    }
   }
 
   if(config->postfields) {
@@ -432,8 +469,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
            the number of resources as urlnum. */
         urlnum = count_next_metalink_resource(mlfile);
       }
-      else
-      if(!config->globoff) {
+      else if(!config->globoff) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         result = glob_url(&urls, urlnode->url, &urlnum,
@@ -828,15 +864,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         my_setopt_str(curl, CURLOPT_URL, this_url);     /* what to fetch */
         my_setopt(curl, CURLOPT_NOPROGRESS, global->noprogress?1L:0L);
-        if(config->no_body) {
+        if(config->no_body)
           my_setopt(curl, CURLOPT_NOBODY, 1L);
-          my_setopt(curl, CURLOPT_HEADER, 1L);
-        }
-        /* If --metalink is used, we ignore --include (headers in
-           output) option because mixing headers to the body will
-           confuse XML parser and/or hash check will fail. */
-        else if(!config->use_metalink)
-          my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
 
         if(config->oauth_bearer)
           my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
@@ -1057,6 +1086,46 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
 
         if(curlinfo->features & CURL_VERSION_SSL) {
+          /* Check if config->cert is a PKCS#11 URI and set the
+           * config->cert_type if necessary */
+          if(config->cert) {
+            if(!config->cert_type) {
+              if(is_pkcs11_uri(config->cert)) {
+                config->cert_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->key is a PKCS#11 URI and set the
+           * config->key_type if necessary */
+          if(config->key) {
+            if(!config->key_type) {
+              if(is_pkcs11_uri(config->key)) {
+                config->key_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->proxy_cert is a PKCS#11 URI and set the
+           * config->proxy_type if necessary */
+          if(config->proxy_cert) {
+            if(!config->proxy_cert_type) {
+              if(is_pkcs11_uri(config->proxy_cert)) {
+                config->proxy_cert_type = strdup("ENG");
+              }
+            }
+          }
+
+          /* Check if config->proxy_key is a PKCS#11 URI and set the
+           * config->proxy_key_type if necessary */
+          if(config->proxy_key) {
+            if(!config->proxy_key_type) {
+              if(is_pkcs11_uri(config->proxy_key)) {
+                config->proxy_key_type = strdup("ENG");
+              }
+            }
+          }
+
           my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
           my_setopt_str(curl, CURLOPT_PROXY_SSLCERT, config->proxy_cert);
           my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
@@ -1199,6 +1268,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->proxy_cipher_list)
           my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
                         config->proxy_cipher_list);
+
+        if(config->cipher13_list)
+          my_setopt_str(curl, CURLOPT_TLS13_CIPHERS, config->cipher13_list);
+
+        if(config->proxy_cipher13_list)
+          my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
+                        config->proxy_cipher13_list);
 
         /* new in libcurl 7.9.2: */
         if(config->disable_epsv)
@@ -1350,6 +1426,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         hdrcbdata.outs = &outs;
         hdrcbdata.heads = &heads;
+        hdrcbdata.global = global;
+        hdrcbdata.config = config;
 
         my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
         my_setopt(curl, CURLOPT_HEADERDATA, &hdrcbdata);
@@ -1442,8 +1520,15 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* new in 7.59.0 */
         if(config->happy_eyeballs_timeout_ms != CURL_HET_DEFAULT)
-          my_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT,
+          my_setopt(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                     config->happy_eyeballs_timeout_ms);
+
+        /* new in 7.60.0 */
+        if(config->haproxy_protocol)
+          my_setopt(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
+
+        if(config->disallow_username_in_url)
+          my_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
 
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
@@ -1496,7 +1581,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             /* do not create (or even overwrite) the file in case we get no
                data because of unmet condition */
             curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
-            if(!cond_unmet && !tool_create_output_file(&outs))
+            if(!cond_unmet && !tool_create_output_file(&outs, FALSE))
               result = CURLE_WRITE_ERROR;
           }
 
@@ -1566,9 +1651,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
               }
             } /* if CURLE_OK */
             else if(result) {
-              curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+              long protocol;
 
-              if(response/100 == 4)
+              curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+              curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
+              if((protocol == CURLPROTO_FTP || protocol == CURLPROTO_FTPS) &&
+                 response / 100 == 4)
                 /*
                  * This is typically when the FTP server only allows a certain
                  * amount of users and we are not one of them.  All 4xx codes
@@ -1826,8 +1915,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
              */
             break;
         }
-        else
-        if(urlnum > 1) {
+        else if(urlnum > 1) {
           /* when url globbing, exit loop upon critical error */
           if(is_fatal_error(result))
             break;
@@ -1973,7 +2061,7 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
         size_t count = 0;
         struct OperationConfig *operation = config->first;
 
-        /* Get the required aguments for each operation */
+        /* Get the required arguments for each operation */
         while(!result && operation) {
           result = get_args(operation, count++);
 

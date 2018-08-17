@@ -704,7 +704,6 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   const char *line = data->state.buffer;
   size_t len = strlen(line);
-  size_t wordlen;
 
   (void)instate; /* no use for this yet */
 
@@ -739,6 +738,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
       /* Loop through the data line */
       for(;;) {
         size_t llen;
+        size_t wordlen;
         unsigned int mechbit;
 
         while(len &&
@@ -1563,13 +1563,14 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
   if(!scratch || data->set.crlf) {
     oldscratch = scratch;
 
-    scratch = newscratch = malloc(2 * data->set.buffer_size);
+    scratch = newscratch = malloc(2 * UPLOAD_BUFSIZE);
     if(!newscratch) {
       failf(data, "Failed to alloc scratch buffer!");
 
       return CURLE_OUT_OF_MEMORY;
     }
   }
+  DEBUGASSERT(UPLOAD_BUFSIZE >= nread);
 
   /* Have we already sent part of the EOB? */
   eob_sent = smtp->eob;

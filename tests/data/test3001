@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+PEM certificate
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+
+MooMoo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+SSL
+</features>
+<server>
+https Server-localhost-lastSAN-sv.pem
+</server>
+<name>
+HTTPS GET to localhost, last subject alt name matches, CN does not match
+</name>
+<command>
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/3001
+</command>
+# Ensure that we're running on localhost because we're checking the host name
+<precheck>
+perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
+</precheck>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /3001 HTTP/1.1
+Host: localhost:%HTTPSPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
