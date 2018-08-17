@@ -1404,6 +1404,7 @@ enum dupstring {
   STRING_SSL_CRLFILE_PROXY, /* crl file to check certificate */
   STRING_SSL_ISSUERCERT_ORIG, /* issuer cert file to check certificate */
   STRING_SSL_ISSUERCERT_PROXY, /* issuer cert file to check certificate */
+  STRING_SSL_ENGINE,      /* name of ssl engine */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
   STRING_OPTIONS,         /* <options>, if used */

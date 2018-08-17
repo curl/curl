@@ -958,6 +958,13 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     outcurl->change.referer_alloc = TRUE;
   }
 
+  /* Reinitialize an SSL engine for the new handle
+   * note: the engine name has already been copied by dupset */
+  if(outcurl->set.str[STRING_SSL_ENGINE]) {
+    if(Curl_ssl_set_engine(outcurl, outcurl->set.str[STRING_SSL_ENGINE]))
+      goto fail;
+  }
+
   /* Clone the resolver handle, if present, for the new handle */
   if(Curl_resolver_duphandle(&outcurl->state.resolver,
                              data->state.resolver))
