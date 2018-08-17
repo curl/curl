@@ -124,6 +124,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
 #endif /* CURL_DISABLE_HTTP */
 
+#ifdef USE_NGHTTP2
 /* Allocate one of these for each HTTP/2 stream we put on the connection.
    Tell nghttp2 to associate each stream_id with this node. To clear the
    association, blank the 'easy' field.
@@ -135,6 +136,7 @@ struct easymap {
   struct Curl_easy *easy;
   uint32_t stream_id;
 };
+#endif
 
 /****************************************************************************
  * HTTP unique setup
