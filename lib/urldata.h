@@ -143,8 +143,13 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #endif /* HAVE_LIBSSH2_H */
 
 /* The upload buffer size, should not be smaller than CURL_MAX_WRITE_SIZE, as
-   it needs to hold a full buffer as could be sent in a write callback */
-#define UPLOAD_BUFSIZE CURL_MAX_WRITE_SIZE
+   it needs to hold a full buffer as could be sent in a write callback.
+
+   The size was 16KB for many years but was bumped to 64KB because it makes
+   libcurl able to do significantly faster uploads in some circumstances. Even
+   larger buffers can help further, but this is deemed a fair memory/speed
+   compromise. */
+#define UPLOAD_BUFSIZE 65536
 
 /* The "master buffer" is for HTTP pipelining */
 #define MASTERBUF_SIZE 16384
