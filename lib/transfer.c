@@ -959,7 +959,8 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
             sending_http_headers = FALSE;
         }
 
-        result = Curl_fillreadbuffer(conn, UPLOAD_BUFSIZE, &fillcount);
+        result = Curl_fillreadbuffer(conn, data->set.upload_buffer_size,
+                                     &fillcount);
         if(result)
           return result;
 
@@ -991,7 +992,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          (data->set.crlf))) {
         /* Do we need to allocate a scratch buffer? */
         if(!data->state.scratch) {
-          data->state.scratch = malloc(2 * UPLOAD_BUFSIZE);
+          data->state.scratch = malloc(2 * data->set.upload_buffer_size);
           if(!data->state.scratch) {
             failf(data, "Failed to alloc scratch buffer!");
 

@@ -1563,14 +1563,14 @@ CURLcode Curl_smtp_escape_eob(struct connectdata *conn, const ssize_t nread)
   if(!scratch || data->set.crlf) {
     oldscratch = scratch;
 
-    scratch = newscratch = malloc(2 * UPLOAD_BUFSIZE);
+    scratch = newscratch = malloc(2 * data->set.upload_buffer_size);
     if(!newscratch) {
       failf(data, "Failed to alloc scratch buffer!");
 
       return CURLE_OUT_OF_MEMORY;
     }
   }
-  DEBUGASSERT(UPLOAD_BUFSIZE >= nread);
+  DEBUGASSERT(data->set.upload_buffer_size >= (size_t)nread);
 
   /* Have we already sent part of the EOB? */
   eob_sent = smtp->eob;

@@ -1862,6 +1862,9 @@ typedef enum {
   /* DNS-over-HTTPS URL */
   CINIT(DOH_URL, STRINGPOINT, 279),
 
+  /* Preferred buffer size to use for uploads */
+  CINIT(UPLOAD_BUFFERSIZE, LONG, 280),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
