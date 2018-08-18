@@ -367,11 +367,9 @@ CURLcode Curl_close(struct Curl_easy *data)
 
   Curl_safefree(data->state.buffer);
   Curl_safefree(data->state.headerbuff);
-
+  Curl_safefree(data->state.ulbuf);
   Curl_flush_cookies(data, 1);
-
   Curl_digest_cleanup(data);
-
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
@@ -534,6 +532,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
   set->buffer_size = READBUFFER_SIZE;
+  set->upload_buffer_size = UPLOAD_BUFSIZE;
   set->happy_eyeballs_timeout = CURL_HET_DEFAULT;
 
   Curl_http2_init_userset(set);
