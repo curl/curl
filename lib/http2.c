@@ -1178,7 +1178,8 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
       httpc->pause_stream_id = 0;
     }
   }
-  if(http->stream_id) {
+  /* -1 means unassigned and 0 means cleared */
+  if(http->stream_id > 0) {
     int rv = nghttp2_session_set_stream_user_data(httpc->h2,
                                                   http->stream_id, 0);
     if(rv) {
