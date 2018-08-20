@@ -56,6 +56,9 @@ add_custom_command(
     "${CMAKE_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
+set_property(TARGET chkdecimalpoint
+  APPEND PROPERTY COMPILE_DEFINITIONS "CURLX_NO_MEMORY_CALLBACKS;CURL_STATICLIB")
+
   # # files used only in some libcurl test programs
 # SET(TESTUTIL testutil.c testutil.h)
 
