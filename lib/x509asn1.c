@@ -896,7 +896,7 @@ CURLcode Curl_extract_certinfo(struct connectdata *conn,
 
   /* Extract the certificate ASN.1 elements. */
   if(Curl_parseX509(&cert, beg, end))
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_PEER_FAILED_VERIFICATION;
 
   /* Subject. */
   ccp = DNtostr(&cert.subject);
