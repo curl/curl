@@ -34,8 +34,6 @@
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
 
-void glob_cleanup(URLGlob* glob);
-
 static CURLcode glob_fixed(URLGlob *glob, char *fixed, size_t len)
 {
   URLPattern *pat = &glob->pattern[glob->size];
@@ -116,7 +114,7 @@ static CURLcode glob_set(URLGlob *glob, char **patternp,
       if(multiply(amount, pat->content.Set.size + 1))
         return GLOBERROR("range overflow", 0, CURLE_URL_MALFORMAT);
 
-      /* fall-through */
+      /* FALLTHROUGH */
     case ',':
 
       *buf = '\0';
@@ -159,7 +157,7 @@ static CURLcode glob_set(URLGlob *glob, char **patternp,
         ++pattern;
         ++(*posp);
       }
-      /* intentional fallthrough */
+      /* FALLTHROUGH */
     default:
       *buf++ = *pattern++;              /* copy character to set element */
       ++(*posp);

@@ -977,6 +977,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 2.95 or later
           if test "$compiler_num" -ge "295"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
+            tmp_CFLAGS="$tmp_CFLAGS -Wbad-function-cast"
           fi
           #
           dnl Only gcc 2.96 or later
@@ -1011,6 +1012,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 3.4 or later
           if test "$compiler_num" -ge "304"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
+            tmp_CFLAGS="$tmp_CFLAGS -Wold-style-definition"
           fi
           #
           dnl Only gcc 4.0 or later
@@ -1029,6 +1031,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wmissing-parameter-type -Wempty-body"
             tmp_CFLAGS="$tmp_CFLAGS -Wclobbered -Wignored-qualifiers"
             tmp_CFLAGS="$tmp_CFLAGS -Wconversion -Wno-sign-conversion -Wvla"
+            dnl required for -Warray-bounds, included in -Wall
+            tmp_CFLAGS="$tmp_CFLAGS -ftree-vrp"
           fi
           #
           dnl Only gcc 4.5 or later
@@ -1044,12 +1048,23 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wdouble-promotion"
           fi
           #
+          dnl only gcc 4.8 or later
+          if test "$compiler_num" -ge "408"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
+          fi
+          #
+          dnl Only gcc 5 or later
+          if test "$compiler_num" -ge "500"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Warray-bounds=2"
+          fi
+          #
           dnl Only gcc 6 or later
           if test "$compiler_num" -ge "600"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wshift-negative-value"
             tmp_CFLAGS="$tmp_CFLAGS -Wshift-overflow=2"
-            tmp_CFLAGS="$tmp_CFLAGS -Wnull-dereference"
+            tmp_CFLAGS="$tmp_CFLAGS -Wnull-dereference -fdelete-null-pointer-checks"
             tmp_CFLAGS="$tmp_CFLAGS -Wduplicated-cond"
+            tmp_CFLAGS="$tmp_CFLAGS -Wunused-const-variable"
           fi
           #
           dnl Only gcc 7 or later
@@ -1059,6 +1074,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Walloc-zero"
             tmp_CFLAGS="$tmp_CFLAGS -Wformat-overflow=2"
             tmp_CFLAGS="$tmp_CFLAGS -Wformat-truncation=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough=4"
           fi
           #
         fi

@@ -659,7 +659,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       libssh2_session_set_blocking(sshc->ssh_session, 0);
 
       state(conn, SSH_S_STARTUP);
-      /* fall-through */
+      /* FALLTHROUGH */
 
     case SSH_S_STARTUP:
       rc = libssh2_session_startup(sshc->ssh_session, (int)sock);
@@ -675,7 +675,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       state(conn, SSH_HOSTKEY);
 
-      /* fall-through */
+      /* FALLTHROUGH */
     case SSH_HOSTKEY:
       /*
        * Before we authenticate we should check the hostkey's fingerprint

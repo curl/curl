@@ -1606,7 +1606,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     case 0:                     /* timeout */
       pfd[0].revents = 0;
       pfd[1].revents = 0;
-      /* fall through */
+      /* FALLTHROUGH */
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */

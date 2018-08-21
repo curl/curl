@@ -302,7 +302,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
        * Set the contents property.
        */
     case CURLFORM_PTRCONTENTS:
-      current_form->flags |= HTTPPOST_PTRCONTENTS; /* fall through */
+      current_form->flags |= HTTPPOST_PTRCONTENTS;
+      /* FALLTHROUGH */
     case CURLFORM_COPYCONTENTS:
       if(current_form->value)
         return_value = CURL_FORMADD_OPTION_TWICE;

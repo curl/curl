@@ -1834,7 +1834,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
         break;
       }
-      /* fall-through! */
+      /* FALLTHROUGH */
     case 'o': /* --output */
       /* output file */
     {
