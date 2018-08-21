@@ -143,8 +143,13 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #endif /* HAVE_LIBSSH2_H */
 
 /* The upload buffer size, should not be smaller than CURL_MAX_WRITE_SIZE, as
-   it needs to hold a full buffer as could be sent in a write callback */
-#define UPLOAD_BUFSIZE CURL_MAX_WRITE_SIZE
+   it needs to hold a full buffer as could be sent in a write callback.
+
+   The size was 16KB for many years but was bumped to 64KB because it makes
+   libcurl able to do significantly faster uploads in some circumstances. Even
+   larger buffers can help further, but this is deemed a fair memory/speed
+   compromise. */
+#define UPLOAD_BUFSIZE 65536
 
 /* The "master buffer" is for HTTP pipelining */
 #define MASTERBUF_SIZE 16384
@@ -1220,7 +1225,7 @@ struct UrlState {
   size_t headersize;   /* size of the allocation */
 
   char *buffer; /* download buffer */
-  char uploadbuffer[UPLOAD_BUFSIZE + 1]; /* upload buffer */
+  char *ulbuf; /* alloced upload buffer or NULL */
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
@@ -1404,6 +1409,7 @@ enum dupstring {
   STRING_SSL_CRLFILE_PROXY, /* crl file to check certificate */
   STRING_SSL_ISSUERCERT_ORIG, /* issuer cert file to check certificate */
   STRING_SSL_ISSUERCERT_PROXY, /* issuer cert file to check certificate */
+  STRING_SSL_ENGINE,      /* name of ssl engine */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
   STRING_OPTIONS,         /* <options>, if used */
@@ -1556,6 +1562,8 @@ struct UserDefined {
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
+  long upload_buffer_size; /* size of upload buffer to use,
+                              keep it >= CURL_MAX_WRITE_SIZE */
   void *private_data; /* application-private data */
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */

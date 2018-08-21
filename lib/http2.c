@@ -1147,6 +1147,9 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
   struct HTTP *http = data->req.protop;
   struct http_conn *httpc = &conn->proto.httpc;
 
+  if(!httpc->h2) /* not HTTP/2 ? */
+    return;
+
   if(data->state.drain)
     drained_transfer(data, httpc);
 
@@ -1167,8 +1170,10 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
 
   if(premature) {
     /* RST_STREAM */
-    nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE, http->stream_id,
-                              NGHTTP2_STREAM_CLOSED);
+    if(!nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE,
+                                  http->stream_id, NGHTTP2_STREAM_CLOSED))
+      (void)nghttp2_session_send(httpc->h2);
+
     if(http->stream_id == httpc->pause_stream_id) {
       infof(data, "stopped the pause stream!\n");
       httpc->pause_stream_id = 0;
@@ -1177,6 +1182,17 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
   if(http->emap)
     /* remove stream <=> easy association */
     disassociate_easymap(http->emap);
+  /* -1 means unassigned and 0 means cleared */
+  if(http->stream_id > 0) {
+    int rv = nghttp2_session_set_stream_user_data(httpc->h2,
+                                                  http->stream_id, 0);
+    if(rv) {
+      infof(data, "http/2: failed to clear user_data for stream %u!\n",
+            http->stream_id);
+      DEBUGASSERT(0);
+    }
+    http->stream_id = 0;
+  }
 }
 
 /*

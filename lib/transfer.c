@@ -106,6 +106,16 @@ char *Curl_checkheaders(const struct connectdata *conn,
 }
 #endif
 
+CURLcode Curl_get_upload_buffer(struct Curl_easy *data)
+{
+  if(!data->state.ulbuf) {
+    data->state.ulbuf = malloc(data->set.upload_buffer_size);
+    if(!data->state.ulbuf)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
+}
+
 /*
  * This function will call the read callback to fill our buffer with data
  * to upload.
@@ -914,8 +924,11 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     /* only read more data if there's no upload data already
        present in the upload buffer */
     if(0 == k->upload_present) {
+      result = Curl_get_upload_buffer(data);
+      if(result)
+        return result;
       /* init the "upload from here" pointer */
-      k->upload_fromhere = data->state.uploadbuffer;
+      k->upload_fromhere = data->state.ulbuf;
 
       if(!k->upload_done) {
         /* HTTP pollution, this should be written nicer to become more
@@ -979,7 +992,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          (data->set.crlf))) {
         /* Do we need to allocate a scratch buffer? */
         if(!data->state.scratch) {
-          data->state.scratch = malloc(2 * data->set.buffer_size);
+          data->state.scratch = malloc(2 * UPLOAD_BUFSIZE);
           if(!data->state.scratch) {
             failf(data, "Failed to alloc scratch buffer!");
 
@@ -1071,7 +1084,10 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     }
     else {
       /* we've uploaded that buffer now */
-      k->upload_fromhere = data->state.uploadbuffer;
+      result = Curl_get_upload_buffer(data);
+      if(result)
+        return result;
+      k->upload_fromhere = data->state.ulbuf;
       k->upload_present = 0; /* no more bytes left */
 
       if(k->upload_done) {

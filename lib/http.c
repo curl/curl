@@ -1123,7 +1123,8 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
   CURLcode result;
   char *ptr;
   size_t size;
-  struct HTTP *http = conn->data->req.protop;
+  struct Curl_easy *data = conn->data;
+  struct HTTP *http = data->req.protop;
   size_t sendsize;
   curl_socket_t sockfd;
   size_t headersize;
@@ -1143,7 +1144,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
 
   DEBUGASSERT(size > included_body_bytes);
 
-  result = Curl_convert_to_network(conn->data, ptr, headersize);
+  result = Curl_convert_to_network(data, ptr, headersize);
   /* Curl_convert_to_network calls failf if unsuccessful */
   if(result) {
     /* conversion failed, free memory and return to the caller */
@@ -1168,8 +1169,14 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
        must copy the data to the uploadbuffer first, since that is the buffer
        we will be using if this send is retried later.
     */
-    memcpy(conn->data->state.uploadbuffer, ptr, sendsize);
-    ptr = conn->data->state.uploadbuffer;
+    result = Curl_get_upload_buffer(data);
+    if(result) {
+      /* malloc failed, free memory and return to the caller */
+      Curl_add_buffer_free(in);
+      return result;
+    }
+    memcpy(data->state.ulbuf, ptr, sendsize);
+    ptr = data->state.ulbuf;
   }
   else
     sendsize = size;
@@ -1186,13 +1193,13 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
     size_t headlen = (size_t)amount>headersize ? headersize : (size_t)amount;
     size_t bodylen = amount - headlen;
 
-    if(conn->data->set.verbose) {
+    if(data->set.verbose) {
       /* this data _may_ contain binary stuff */
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, headlen);
+      Curl_debug(data, CURLINFO_HEADER_OUT, ptr, headlen);
       if(bodylen) {
         /* there was body data sent beyond the initial header part, pass that
            on to the debug callback too */
-        Curl_debug(conn->data, CURLINFO_DATA_OUT,
+        Curl_debug(data, CURLINFO_DATA_OUT,
                    ptr + headlen, bodylen);
       }
     }
@@ -1217,14 +1224,14 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
         ptr = in->buffer + amount;
 
         /* backup the currently set pointers */
-        http->backup.fread_func = conn->data->state.fread_func;
-        http->backup.fread_in = conn->data->state.in;
+        http->backup.fread_func = data->state.fread_func;
+        http->backup.fread_in = data->state.in;
         http->backup.postdata = http->postdata;
         http->backup.postsize = http->postsize;
 
         /* set the new pointers for the request-sending */
-        conn->data->state.fread_func = (curl_read_callback)readmoredata;
-        conn->data->state.in = (void *)conn;
+        data->state.fread_func = (curl_read_callback)readmoredata;
+        data->state.in = (void *)conn;
         http->postdata = ptr;
         http->postsize = (curl_off_t)size;
 

@@ -32,6 +32,7 @@ This release includes the following bugfixes:
  o content_encoding: accept up to 4 unknown trailer bytes after raw deflate data [5]
  o curl: Fix segfault when -H @headerfile is empty [23]
  o curl: use Content-Disposition before the "URL end" for -OJ [29]
+ o curl: warn the user if a given file name looks like an option [56]
  o darwinssl: add support for ALPN negotiation [7]
  o docs/CURLOPT_URL: fix indentation [20]
  o docs/CURLOPT_WRITEFUNCTION: size is always 1 [19]
@@ -43,7 +44,9 @@ This release includes the following bugfixes:
  o formdata: Remove unused macro HTTPPOST_CONTENTTYPE_DEFAULT [40]
  o header output: switch off all styles, not just unbold [8]
  o hostip: fix unused variable warning
+ o http2: check nghttp2_session_set_stream_user_data return code [55]
  o http2: clear the drain counter in Curl_http2_done [27]
+ o http2: make sure to send after RST_STREAM [58]
  o http2: separate easy handle from connections better [12]
  o http: fix for tiny "HTTP/0.9" response [51]
  o http_proxy: Remove unused macro SELECT_TIMEOUT [40]
@@ -79,8 +82,12 @@ This release includes the following bugfixes:
  o travis: build darwinssl on macos 10.12 to fix linker errors [33]
  o travis: execute "set -eo pipefail" for coverage build [45]
  o travis: run a 'make checksrc' too [25]
- o travis: update to GCC [52]
+ o travis: update to GCC-8 [52]
  o travis: verify that man pages can be regenerated [50]
+ o upload: allocate upload buffer on-demand [60]
+ o upload: change default UPLOAD_BUFSIZE to 64KB [60]
+ o urldata: remove unused pipe_broke struct field [57]
+ o vtls: reinstantiate engine on duplicated handles [59]
  o windows: implement send buffer tuning [37]
  o wolfSSL/CyaSSL: Fix memory leak in Curl_cyassl_random [18]
 
@@ -91,16 +98,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  adnn on github, Anderson Toshiyuki Sasaki, Andrei Virtosu, Bas van Schaik,
-  Carie Pointer, Christopher Head, clbr on github, Dan Fandrich,
-  Daniel Jelinski, Daniel Jeliński, Daniel Stenberg, Darío Hereñú,
-  Even Rouault, Harry Sintonen, Jakub Zakrzewski, Jeffrey Walton, Jeroen Ooms,
-  Johannes Schindelin, John Butterfield, Josh Bialkowski, Kamil Dudka,
-  Marcel Raad, Markus Elfring, Michael Kaufmann, Nick Zitzmann,
-  Nikos Mavrogiannopoulos, Patrick Monnerat, Paul Howarth, pszemus on github,
-  Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs, Ruslan Baratov,
-  Sergei Nikulov, Thomas Klausner, Tobias Blomberg, Viktor Szakats, Zero King,
-  (39 contributors)
+  adnn on github, Anderson Toshiyuki Sasaki, Andrei Virtosu, Anton Gerasimov,
+  Bas van Schaik, Carie Pointer, Christopher Head, clbr on github,
+  Dan Fandrich, Daniel Jelinski, Daniel Jeliński, Daniel Stenberg,
+  Darío Hereñú, Even Rouault, Harry Sintonen, Jakub Zakrzewski, Jeffrey Walton,
+  Jeroen Ooms, Johannes Schindelin, John Butterfield, Josh Bialkowski,
+  Kamil Dudka, Laurent Bonnans, Marcel Raad, Markus Elfring, Michael Kaufmann,
+  Nick Zitzmann, Nikos Mavrogiannopoulos, Patrick Monnerat, Paul Howarth,
+  pszemus on github, Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs,
+  Ruslan Baratov, Sergei Nikulov, Thomas Klausner, Tobias Blomberg,
+  Viktor Szakats, Zero King,
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -160,3 +168,10 @@ References to bug reports and discussions on issues:
  [52] = https://curl.haxx.se/bug/?i=2869
  [53] = https://curl.haxx.se/bug/?i=2879
  [54] = https://curl.haxx.se/bug/?i=2817
+ [55] = https://curl.haxx.se/bug/?i=2880
+ [56] = https://curl.haxx.se/bug/?i=2885
+ [57] = https://curl.haxx.se/bug/?i=2871
+ [58] = https://curl.haxx.se/bug/?i=2882
+ [59] = https://curl.haxx.se/bug/?i=2829
+ [60] = https://curl.haxx.se/bug/?i=2892
+
