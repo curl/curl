@@ -340,4 +340,6 @@ man_MANS =                                      \
   CURLOPT_WRITEFUNCTION.3                       \
   CURLOPT_XFERINFODATA.3                        \
   CURLOPT_XFERINFOFUNCTION.3                    \
-  CURLOPT_XOAUTH2_BEARER.3
+  CURLOPT_XOAUTH2_BEARER.3                      \
+  CURLOPT_HTTPTRAILER_DATA.3                    \
+  CURLOPT_HTTPTRAILER_FUNCTION.3

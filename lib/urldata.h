@@ -1216,11 +1216,11 @@ typedef enum {
 } expire_id;
 
 typedef enum {
-    HTTP_TRAILINGDATA_NONE,
-    HTTP_TRAILINGDATA_INITIALIZED,
-    HTTP_TRAILINGDATA_SENDING,
-    HTTP_TRAILINGDATA_DONE
-} trailing_data_state;
+    HTTP_TRAILERS_NONE,
+    HTTP_TRAILERS_INITIALIZED,
+    HTTP_TRAILERS_SENDING,
+    HTTP_TRAILERS_DONE
+} http_trailers_state;
 
 /*
  * One instance for each timeout an easy handle can set.
@@ -1368,8 +1368,12 @@ struct UrlState {
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
-  trailing_data_state trailing_data_s; /* whether we are sending trailers
-                                          and what stage are we at */
+
+  size_t trailers_bytes_sent; /* no other way of keeping track of sent bytes */
+  Curl_send_buffer *trailers_buf; /* a buffer containing the compiled trailing
+                                    headers */
+  http_trailers_state trailers_state; /* whether we are sending trailers
+                                         and what stage are we at */
 };
 
 
@@ -1543,9 +1547,9 @@ struct UserDefined {
   curl_opensocket_callback fopensocket; /* function for checking/translating
                                            the address and opening the
                                            socket */
-  void *trailing_client; /* pointer to pass to trailer data callback */
-  curl_trailing_data_callback trailing_data_callback; /* trailing data
-                                                              callback */
+  void *trailer_data; /* pointer to pass to trailer data callback */
+  curl_trailer_callback trailer_callback; /* trailing data callback */
+
   void *opensocket_client;
   curl_closesocket_callback fclosesocket; /* function for closing the
                                              socket */

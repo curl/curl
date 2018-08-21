@@ -1676,6 +1676,50 @@ enum proxy_use {
   HEADER_CONNECT  /* sending CONNECT to a proxy */
 };
 
+/* used to compile the provided trailers into one buffer */
+CURLcode Curl_http_compile_trailers(struct connectdata *conn,
+                                    struct curl_slist *trailers,
+                                    Curl_send_buffer *buffer)
+{
+  char *ptr = NULL;
+  CURLcode result = CURLE_OK;
+  struct Curl_easy *data = conn->data;
+  const char *endofline_native = NULL;
+  const char *endofline_network = NULL;
+
+  /* basically, loop through trailers, make sure they all are in 'X: Y' format
+     and then push them into the buffer. */
+  /* TODO: Maybe divide Curl_add_custom_headers to make it reusable here */
+
+  /* The way we send trailing headers is no different from the way we send
+     normal data. So we have to check for this, as it can break the trailers
+     if the conversion happens later.*/
+
+  if(data->set.crlf) {
+    /* \n will become \r\n later on */
+    endofline_native  = "\n";
+    endofline_network = "\x0a";
+  }
+  else {
+    endofline_native  = "\r\n";
+    endofline_network = "\x0d\x0a";
+  }
+
+  while(trailers) {
+    /* only add correctly formatted trailers */
+    ptr = strchr(trailers->data, ':');
+    if(ptr) {
+      result = Curl_add_bufferf(buffer, "%s%s", trailers->data,
+              endofline_native);
+      if(result)
+        return result;
+    }
+    trailers = trailers->next;
+  }
+  Curl_add_buffer(buffer, endofline_network, 2);
+  return result;
+}
+
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
                                  Curl_send_buffer *req_buffer)
