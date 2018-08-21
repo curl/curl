@@ -715,25 +715,6 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
   return 0;
 }
 
-static int on_invalid_frame_recv(nghttp2_session *session,
-                                 const nghttp2_frame *frame,
-                                 int lib_error_code, void *userp)
-{
-  struct Curl_easy *data_s = NULL;
-  (void)userp;
-#if !defined(DEBUG_HTTP2) || defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void)lib_error_code;
-#endif
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s,
-                 "on_invalid_frame_recv() was called, error=%d:%s\n",
-                 lib_error_code, nghttp2_strerror(lib_error_code)));
-  }
-  return 0;
-}
-
 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
                               int32_t stream_id,
                               const uint8_t *data, size_t len, void *userp)
@@ -799,52 +780,6 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   return 0;
 }
 
-static int before_frame_send(nghttp2_session *session,
-                             const nghttp2_frame *frame,
-                             void *userp)
-{
-  struct Curl_easy *data_s;
-  (void)userp;
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s, "before_frame_send() was called\n"));
-  }
-
-  return 0;
-}
-static int on_frame_send(nghttp2_session *session,
-                         const nghttp2_frame *frame,
-                         void *userp)
-{
-  struct Curl_easy *data_s;
-  (void)userp;
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s, "on_frame_send() was called, length = %zd\n",
-                 frame->hd.length));
-  }
-  return 0;
-}
-static int on_frame_not_send(nghttp2_session *session,
-                             const nghttp2_frame *frame,
-                             int lib_error_code, void *userp)
-{
-  struct Curl_easy *data_s;
-  (void)userp;
-#if !defined(DEBUG_HTTP2) || defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void)lib_error_code;
-#endif
-
-  data_s = nghttp2_session_get_stream_user_data(session, frame->hd.stream_id);
-  if(data_s) {
-    H2BUGF(infof(data_s,
-                 "on_frame_not_send() was called, lib_error_code = %d\n",
-                 lib_error_code));
-  }
-  return 0;
-}
 static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                            uint32_t error_code, void *userp)
 {
@@ -1216,21 +1151,9 @@ CURLcode Curl_http2_init(struct connectdata *conn)
     /* nghttp2_on_frame_recv_callback */
     nghttp2_session_callbacks_set_on_frame_recv_callback
       (callbacks, on_frame_recv);
-    /* nghttp2_on_invalid_frame_recv_callback */
-    nghttp2_session_callbacks_set_on_invalid_frame_recv_callback
-      (callbacks, on_invalid_frame_recv);
     /* nghttp2_on_data_chunk_recv_callback */
     nghttp2_session_callbacks_set_on_data_chunk_recv_callback
       (callbacks, on_data_chunk_recv);
-    /* nghttp2_before_frame_send_callback */
-    nghttp2_session_callbacks_set_before_frame_send_callback
-      (callbacks, before_frame_send);
-    /* nghttp2_on_frame_send_callback */
-    nghttp2_session_callbacks_set_on_frame_send_callback
-      (callbacks, on_frame_send);
-    /* nghttp2_on_frame_not_send_callback */
-    nghttp2_session_callbacks_set_on_frame_not_send_callback
-      (callbacks, on_frame_not_send);
     /* nghttp2_on_stream_close_callback */
     nghttp2_session_callbacks_set_on_stream_close_callback
       (callbacks, on_stream_close);
