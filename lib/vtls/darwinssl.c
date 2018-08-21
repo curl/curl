@@ -72,6 +72,7 @@
 #define CURL_BUILD_MAC_10_7 MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 #define CURL_BUILD_MAC_10_8 MAC_OS_X_VERSION_MAX_ALLOWED >= 1080
 #define CURL_BUILD_MAC_10_9 MAC_OS_X_VERSION_MAX_ALLOWED >= 1090
+#define CURL_BUILD_MAC_10_11 MAC_OS_X_VERSION_MAX_ALLOWED >= 101100
 #define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300
 /* These macros mean "the following code is present to allow runtime backward
    compatibility with at least this cat or earlier":
@@ -2393,6 +2394,11 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLCrypto:
         failf(data, "An underlying cryptographic error was encountered");
         break;
+#if CURL_BUILD_MAC_10_11
+      case errSSLWeakPeerEphemeralDHKey:
+        failf(data, "Indicates a weak ephemeral dh key");
+        break;
+#endif
 
       /* Problem with the message record validation */
       case errSSLBadRecordMac:
@@ -2537,6 +2543,28 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLPeerUnexpectedMsg:
         failf(data, "Peer rejected unexpected message");
         break;
+#if CURL_BUILD_MAC_10_11
+      /* Treaing non-fatal error as fatal like before */
+      case errSSLClientHelloReceived:
+        failf(data, "A non-fatal result for providing a server name "
+                    "indication");
+        break;
+#endif
+
+      /* Error codes defined in the enum but should never be returned.
+         We list them here just in case. */
+#if CURL_BUILD_MAC_10_6
+      /* Only returned when kSSLSessionOptionBreakOnCertRequested is set */
+      case errSSLClientCertRequested:
+        failf(data, "The server has requested a client certificate");
+        break;
+#endif
+#if CURL_BUILD_MAC_10_9
+      /* Alias for errSSLLast, end of error range */
+      case errSSLUnexpectedRecord:
+        failf(data, "Unexpected (skipped) record in DTLS");
+        break;
+#endif
       default:
         /* May also return codes listed in Security Framework Result Codes */
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
