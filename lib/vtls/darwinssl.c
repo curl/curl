@@ -2190,6 +2190,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   }
   else if(ret != noErr) {
     CFRelease(array);
+    failf(data, "SSLCopyPeerTrust() returned error %d", ret);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -2197,12 +2198,14 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   if(ret != noErr) {
     CFRelease(array);
     CFRelease(trust);
+    failf(data, "SecTrustSetAnchorCertificates() returned error %d", ret);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
   ret = SecTrustSetAnchorCertificatesOnly(trust, true);
   if(ret != noErr) {
     CFRelease(array);
     CFRelease(trust);
+    failf(data, "SecTrustSetAnchorCertificatesOnly() returned error %d", ret);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -2211,6 +2214,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   CFRelease(array);
   CFRelease(trust);
   if(ret != noErr) {
+    failf(data, "SecTrustEvaluate() returned error %d", ret);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
