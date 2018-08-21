@@ -124,6 +124,20 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
 #endif /* CURL_DISABLE_HTTP */
 
+#ifdef USE_NGHTTP2
+/* Allocate one of these for each HTTP/2 stream we put on the connection.
+   Tell nghttp2 to associate each stream_id with this node. To clear the
+   association, blank the 'easy' field.
+
+   The node is removed again from the list when nghttp2 calls on_stream_close.
+*/
+struct easymap {
+  struct curl_llist_element node;
+  struct Curl_easy *easy;
+  uint32_t stream_id;
+};
+#endif
+
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
@@ -160,7 +174,7 @@ struct HTTP {
 #ifdef USE_NGHTTP2
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
-
+  struct easymap *emap; /* The map used for this stream */
   bool bodystarted;
   /* We store non-final and final response headers here, per-stream */
   Curl_send_buffer *header_recvbuf;
@@ -221,6 +235,7 @@ struct http_conn {
   nghttp2_settings_entry local_settings[3];
   size_t local_settings_num;
   uint32_t error_code; /* HTTP/2 error code */
+  struct curl_llist streamlist; /* a list of stream2easy nodes */
 #else
   int unused; /* prevent a compiler warning */
 #endif
@@ -253,4 +268,3 @@ Curl_http_output_auth(struct connectdata *conn,
                                             up the proxy tunnel */
 
 #endif /* HEADER_CURL_HTTP_H */
-
