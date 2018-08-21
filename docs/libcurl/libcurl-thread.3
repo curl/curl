@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2015 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2015 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -79,8 +79,14 @@ all handles. Everything will or might work fine except that timeouts are not
 honored during the DNS lookup - which you can work around by building libcurl
 with c-ares or threaded-resolver support. c-ares is a library that provides
 asynchronous name resolves. On some platforms, libcurl simply will not
-function properly multi-threaded unless the \fICURLOPT_NOSIGNAL(3)\fP option is
-set.
+function properly multi-threaded unless the \fICURLOPT_NOSIGNAL(3)\fP option
+is set.
+
+When \fICURLOPT_NOSIGNAL(3)\fP is set to 1L, your application needs to deal
+with the risk of a SIGPIPE (that at least the OpenSSL backend can
+trigger). Note that setting \fICURLOPT_NOSIGNAL(3)\fP to 0L will not work in a
+threaded situation as there will be race where libcurl risks restoring the
+former signal handler while another thread should still ignore it.
 .IP "Name resolving"
 \fBgethostby* functions and other system calls.\fP These functions, provided
 by your operating system, must be thread safe. It is very important that
