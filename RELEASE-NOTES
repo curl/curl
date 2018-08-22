@@ -16,7 +16,9 @@ This release includes the following bugfixes:
  o Curl_getoff_all_pipelines: improved for multiplexed [3]
  o DEPRECATE: remove release date from 7.62.0
  o HTTP: Don't attempt to needlessly decompress redirect body [30]
+ o INTERNALS: require GnuTLS >= 2.11.3 [62]
  o README.md: add LGTM.com code quality grade for C/C++ [42]
+ o SSLCERTS: improve the openssl command line
  o Silence GCC 8 cast-function-type warnings [47]
  o ares: check for NULL in completed-callback [3]
  o asyn-thread: Remove unused macro [40]
@@ -27,6 +29,7 @@ This release includes the following bugfixes:
  o cmake: Update scripts to use consistent style [9]
  o cmake: bumped minimum version to 3.4 [34]
  o cmake: link curl to the OpenSSL targets instead of lib absolute paths [34]
+ o configure: conditionally enable pedantic-errors [64]
  o configure: fix for -lpthread detection with OpenSSL and pkg-config [38]
  o conn: remove the boolean 'inuse' field [3]
  o content_encoding: accept up to 4 unknown trailer bytes after raw deflate data [5]
@@ -44,6 +47,8 @@ This release includes the following bugfixes:
  o formdata: Remove unused macro HTTPPOST_CONTENTTYPE_DEFAULT [40]
  o header output: switch off all styles, not just unbold [8]
  o hostip: fix unused variable warning
+ o http2: abort the send_callback if not setup yet [63]
+ o http2: avoid set_stream_user_data() before stream is assigned [61]
  o http2: check nghttp2_session_set_stream_user_data return code [55]
  o http2: clear the drain counter in Curl_http2_done [27]
  o http2: make sure to send after RST_STREAM [58]
@@ -71,6 +76,7 @@ This release includes the following bugfixes:
  o system_win32: fix version checking [16]
  o telnet: Remove unused macros TELOPTS and TELCMDS [40]
  o test1143: disable MSYS2's POSIX path conversion [10]
+ o test1148: disable if decimal separator is not point [65]
  o test1307: (fnmatch testing) disabled [31]
  o test1422: add required file feature [6]
  o test1531: Add timeout [41]
@@ -174,4 +180,8 @@ References to bug reports and discussions on issues:
  [58] = https://curl.haxx.se/bug/?i=2882
  [59] = https://curl.haxx.se/bug/?i=2829
  [60] = https://curl.haxx.se/bug/?i=2892
-
+ [61] = https://curl.haxx.se/bug/?i=2894
+ [62] = https://curl.haxx.se/bug/?i=2890
+ [63] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=10012
+ [64] = https://curl.haxx.se/bug/?i=2747
+ [65] = https://curl.haxx.se/bug/?i=2786
