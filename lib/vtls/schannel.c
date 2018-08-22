@@ -798,7 +798,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       case SEC_E_WRONG_PRINCIPAL:
         failf(data, "schannel: SNI or certificate check failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case SEC_E_INVALID_HANDLE:
       case SEC_E_INVALID_TOKEN:
       case SEC_E_LOGON_DENIED:
@@ -1035,7 +1035,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
         case SEC_E_WRONG_PRINCIPAL:
           failf(data, "schannel: SNI or certificate check failed: %s",
                 Curl_sspi_strerror(conn, sspi_status));
-          return CURLE_SSL_CACERT;
+          return CURLE_PEER_FAILED_VERIFICATION;
         case SEC_E_INVALID_HANDLE:
         case SEC_E_INVALID_TOKEN:
         case SEC_E_LOGON_DENIED:
