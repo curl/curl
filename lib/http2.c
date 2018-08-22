@@ -370,6 +370,10 @@ static ssize_t send_callback(nghttp2_session *h2,
   (void)h2;
   (void)flags;
 
+  if(!c->send_underlying)
+    /* called before setup properly! */
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+
   written = ((Curl_send*)c->send_underlying)(conn, FIRSTSOCKET,
                                              data, length, &result);
 
