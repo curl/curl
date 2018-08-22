@@ -113,7 +113,7 @@ CURLE_SEND_ERROR                7.10
 CURLE_SEND_FAIL_REWIND          7.12.3
 CURLE_SHARE_IN_USE              7.9.6         7.17.0
 CURLE_SSH                       7.16.1
-CURLE_SSL_CACERT                7.10
+CURLE_SSL_CACERT                7.10          7.62.0
 CURLE_SSL_CACERT_BADFILE        7.16.0
 CURLE_SSL_CERTPROBLEM           7.10
 CURLE_SSL_CIPHER                7.10
