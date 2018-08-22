@@ -83,7 +83,7 @@ e47: Number of redirects hit maximum amount
 e48: An unknown option was passed in to libcurl
 e49: Malformed telnet option
 e50: Unknown error
-e51: SSL peer certificate or SSH remote key was not OK
+e51: Unknown error
 e52: Server returned nothing (no headers, no data)
 e53: SSL crypto engine not found
 e54: Can not set SSL crypto engine as default
@@ -92,7 +92,7 @@ e56: Failure when receiving data from the peer
 e57: Unknown error
 e58: Problem with the local SSL certificate
 e59: Couldn't use specified SSL cipher
-e60: Peer certificate cannot be authenticated with given CA certificates
+e60: SSL peer certificate or SSH remote key was not OK
 e61: Unrecognized or bad HTTP Content or Transfer-Encoding
 e62: Invalid LDAP URL
 e63: Maximum file size exceeded

@@ -2099,7 +2099,7 @@ static int append_cert_to_array(struct Curl_easy *data,
     switch(result) {
       case CURLE_OK:
         break;
-      case CURLE_SSL_CACERT:
+      case CURLE_PEER_FAILED_VERIFICATION:
         return CURLE_SSL_CACERT_BADFILE;
       case CURLE_OUT_OF_MEMORY:
       default:
