@@ -108,7 +108,8 @@ curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
 #ifdef _WIN32_WCE
   t = CreateThread(NULL, 0, func, arg, 0, NULL);
 #else
-  t = (curl_thread_t)_beginthreadex(NULL, 0, func, arg, 0, NULL);
+  uintptr_t thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
+  t = (curl_thread_t)thread_handle;
 #endif
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef _WIN32_WCE
