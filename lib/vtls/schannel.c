@@ -602,12 +602,15 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         return result;
       }
 
-      cert_store = CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
-                                 (HCRYPTPROV)NULL,
-                                 cert_store_name, cert_store_path);
+      cert_store =
+        CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
+                      (HCRYPTPROV)NULL,
+                      CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
+                      cert_store_path);
       if(!cert_store) {
-        failf(data, "schannel: Failed to open cert store %s %s",
-              cert_store_name, cert_store_path);
+        failf(data, "schannel: Failed to open cert store %x %s, "
+              "last error is %x",
+              cert_store_name, cert_store_path, GetLastError());
         Curl_unicodefree(cert_path);
         return CURLE_SSL_CONNECT_ERROR;
       }
