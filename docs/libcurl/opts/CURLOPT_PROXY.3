@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -79,10 +79,8 @@ libcurl respects the proxy environment variables named \fBhttp_proxy\fP,
 proxy for that URL scheme. So for a "FTP://" URL, the \fBftp_proxy\fP is
 considered. \fBall_proxy\fP is used if no protocol specific proxy was set.
 
-If \fBno_proxy\fP (or \fBNO_PROXY\fP) is set, it can specify a list of host
-names to not use a proxy for (even if one of the previous mention variables
-are set). That is the exact equivalent of setting the \fICURLOPT_NOPROXY(3)\fP
-option.
+If \fBno_proxy\fP (or \fBNO_PROXY\fP) is set, it is the exact equivalent of
+setting the \fICURLOPT_NOPROXY(3)\fP option.
 
 The \fICURLOPT_PROXY(3)\fP and \fICURLOPT_NOPROXY(3)\fP options override
 environment variables.
