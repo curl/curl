@@ -20,9 +20,10 @@ protocol that curl supports and as specified in a URL. FTP, FTPS, POP3, IMAP,
 SMTP, LDAP etc.
 .IP "ALL_PROXY [protocol://]<host>[:port]"
 Sets the proxy server to use if no protocol-specific proxy is set.
-.IP "NO_PROXY <comma-separated list of hosts>"
-list of host names that shouldn't go through any proxy. If set to an asterisk
-\&'*' only, it matches all hosts.
+.IP "NO_PROXY <comma-separated list of hosts/domains>" list of host names that
+shouldn't go through any proxy. If set to an asterisk \&'*' only, it matches
+all hosts. Each name in this list is matched as either a domain name which
+contains the hostname, or the hostname itself.
 
 This environment variable disables use of the proxy even when specified with
 the --proxy option. That is
