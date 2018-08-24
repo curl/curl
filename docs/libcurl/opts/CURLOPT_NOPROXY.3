@@ -52,7 +52,9 @@ brackets:
 The application does not have to keep the string around after setting this
 option.
 .SH "Environment variables"
-See \fICURLOPT_PROXY(3)\fP
+If there's an environment variable called \fBno_proxy\fP (or \fBNO_PROXY\fP),
+it will be used if the \fICURLOPT_NOPROXY(3)\fP option is not set. It works
+exactly the same way.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
