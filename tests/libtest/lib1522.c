@@ -54,7 +54,7 @@ int test(char *URL)
   curl_easy_setopt(pCurl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
   curl_easy_setopt(pCurl, CURLOPT_URL, URL);
   curl_easy_setopt(pCurl, CURLOPT_POSTFIELDS, g_Data);
-  curl_easy_setopt(pCurl, CURLOPT_POSTFIELDSIZE, sizeof(g_Data));
+  curl_easy_setopt(pCurl, CURLOPT_POSTFIELDSIZE, (long)sizeof(g_Data));
 
   /* Remove "Expect: 100-continue" */
   pHeaderList = curl_slist_append(pHeaderList, "Expect:");
