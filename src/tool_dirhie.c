@@ -139,12 +139,10 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
         else
           snprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
       }
-      if(access(dirbuildup, F_OK) == -1) {
-        if(-1 == mkdir(dirbuildup, (mode_t)0000750)) {
-          show_dir_errno(errors, dirbuildup);
-          result = CURLE_WRITE_ERROR;
-          break; /* get out of loop */
-        }
+      if((-1 == mkdir(dirbuildup, (mode_t)0000750)) && (errno != EEXIST)) {
+        show_dir_errno(errors, dirbuildup);
+        result = CURLE_WRITE_ERROR;
+        break; /* get out of loop */
       }
     }
     tempdir = tempdir2;
