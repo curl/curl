@@ -64,6 +64,7 @@
 
 #define CURL_BUILD_IOS 0
 #define CURL_BUILD_IOS_7 0
+#define CURL_BUILD_IOS_9 0
 #define CURL_BUILD_IOS_11 0
 #define CURL_BUILD_MAC 1
 /* This is the maximum API level we are allowed to use when building: */
@@ -87,6 +88,7 @@
 #elif TARGET_OS_EMBEDDED || TARGET_OS_IPHONE
 #define CURL_BUILD_IOS 1
 #define CURL_BUILD_IOS_7 __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
+#define CURL_BUILD_IOS_9 __IPHONE_OS_VERSION_MAX_ALLOWED >= 90000
 #define CURL_BUILD_IOS_11 __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
 #define CURL_BUILD_MAC 0
 #define CURL_BUILD_MAC_10_5 0
@@ -94,6 +96,7 @@
 #define CURL_BUILD_MAC_10_7 0
 #define CURL_BUILD_MAC_10_8 0
 #define CURL_BUILD_MAC_10_9 0
+#define CURL_BUILD_MAC_10_11 0
 #define CURL_BUILD_MAC_10_13 0
 #define CURL_SUPPORT_MAC_10_5 0
 #define CURL_SUPPORT_MAC_10_6 0
@@ -2394,9 +2397,9 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLCrypto:
         failf(data, "An underlying cryptographic error was encountered");
         break;
-#if CURL_BUILD_MAC_10_11
+#if CURL_BUILD_MAC_10_11 || CURL_BUILD_IOS_9
       case errSSLWeakPeerEphemeralDHKey:
-        failf(data, "Indicates a weak ephemeral dh key");
+        failf(data, "Indicates a weak ephemeral Diffie-Hellman key");
         break;
 #endif
 
@@ -2543,7 +2546,7 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLPeerUnexpectedMsg:
         failf(data, "Peer rejected unexpected message");
         break;
-#if CURL_BUILD_MAC_10_11
+#if CURL_BUILD_MAC_10_11 || CURL_BUILD_IOS_9
       /* Treaing non-fatal error as fatal like before */
       case errSSLClientHelloReceived:
         failf(data, "A non-fatal result for providing a server name "
