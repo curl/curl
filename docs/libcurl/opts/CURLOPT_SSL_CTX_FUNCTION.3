@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,7 +41,7 @@ shown above.
 
 This callback function gets called by libcurl just before the initialization
 of an SSL connection after having processed all other SSL related options to
-give a last chance to an application to modify the behaviour of the SSL
+give a last chance to an application to modify the behavior of the SSL
 initialization. The \fIssl_ctx\fP parameter is actually a pointer to the SSL
 library's \fISSL_CTX\fP for OpenSSL or wolfSSL/CyaSSL, and a pointer to
 \fImbedtls_ssl_config\fP for mbedTLS. If an error is returned from the callback
@@ -57,6 +57,11 @@ To use this properly, a non-trivial amount of knowledge of your SSL library is
 necessary. For example, you can use this function to call library-specific
 callbacks to add additional validation code for certificates, and even to
 change the actual URI of an HTTPS request.
+
+WARNING: The \fICURLOPT_SSL_CTX_FUNCTION(3)\fP callback allows the application
+to reach in and modify SSL details in the connection without libcurl itself
+knowing anything about it, which then subsequently can lead to libcurl
+unknowingly reusing SSL connections with different properties.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
