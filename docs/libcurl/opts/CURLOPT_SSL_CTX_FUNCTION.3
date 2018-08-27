@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -57,6 +57,11 @@ To use this properly, a non-trivial amount of knowledge of your SSL library is
 necessary. For example, you can use this function to call library-specific
 callbacks to add additional validation code for certificates, and even to
 change the actual URI of an HTTPS request.
+
+WARNING: The \fICURLOPT_SSL_CTX_FUNCTION(3)\fP callback allows the application
+to reach in and modify SSL details in the connection without libcurl itself
+knowing anything about it, which then sunsequently can lead to libcurl
+unknowingly reusing SSL connections with different properties.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
