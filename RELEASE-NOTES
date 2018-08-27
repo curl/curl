@@ -13,6 +13,8 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o CURLINFO_SIZE_UPLOAD: fix missing counter update [46]
+ o CURLOPT_ACCEPT_ENCODING.3: list them comma-separated
+ o CURLOPT_SSL_CTX_FUNCTION.3: might cause accidental connection reuse [72]
  o Curl_getoff_all_pipelines: improved for multiplexed [3]
  o DEPRECATE: remove release date from 7.62.0
  o HTTP: Don't attempt to needlessly decompress redirect body [30]
@@ -33,18 +35,23 @@ This release includes the following bugfixes:
  o configure: fix for -lpthread detection with OpenSSL and pkg-config [38]
  o conn: remove the boolean 'inuse' field [3]
  o content_encoding: accept up to 4 unknown trailer bytes after raw deflate data [5]
+ o cookie tests: treat files as text
  o curl: Fix segfault when -H @headerfile is empty [23]
+ o curl: fix time-of-check, time-of-use race in dir creation [71]
  o curl: use Content-Disposition before the "URL end" for -OJ [29]
  o curl: warn the user if a given file name looks like an option [56]
+ o curl_threads: silence bad-function-cast warning [69]
  o darwinssl: add support for ALPN negotiation [7]
  o docs/CURLOPT_URL: fix indentation [20]
  o docs/CURLOPT_WRITEFUNCTION: size is always 1 [19]
  o docs/SECURITY-PROCESS: mention bounty, drop pre-notify
  o docs/examples: add hiperfifo example using linux epoll/timerfd [21]
  o docs: add disallow-username-in-url.d and haproxy-protocol.d to dist [50]
+ o docs: clarify NO_PROXY env variable functionality [70]
  o docs: improved the manual pages of some callbacks [48]
  o docs: mention NULL is fine input to several functions [43]
  o formdata: Remove unused macro HTTPPOST_CONTENTTYPE_DEFAULT [40]
+ o gopher: Do not translate `?' to `%09' [67]
  o header output: switch off all styles, not just unbold [8]
  o hostip: fix unused variable warning
  o http2: abort the send_callback if not setup yet [63]
@@ -57,6 +64,8 @@ This release includes the following bugfixes:
  o http_proxy: Remove unused macro SELECT_TIMEOUT [40]
  o lib/Makefile: only do symbol hiding if told to [32]
  o lib1502: fix memory leak in torture test [44]
+ o lib1522: fix curl_easy_setopt argument type
+ o libcurl-thread.3: expand somewhat on the NO_SIGNAL motivation [66]
  o mime: check Curl_rand_hex's return code [22]
  o multi: always do the COMPLETED procedure/state [3]
  o openssl: assume engine support in 1.0.0 or later [2]
@@ -64,6 +73,7 @@ This release includes the following bugfixes:
  o projects: Improve Windows perl detection in batch scripts [49]
  o retry: return error if rewind was necessary but didn't happen [28]
  o reuse_conn(): memory leak - free old_conn->options [17]
+ o schannel: client certificate store opening fix [68]
  o schannel: enable CALG_TLS1PRF for w32api >= 5.1
  o schannel: fix MinGW compile break [1]
  o smb: fix memory leak on early failure [26]
@@ -107,14 +117,15 @@ advice from friends like these:
   adnn on github, Anderson Toshiyuki Sasaki, Andrei Virtosu, Anton Gerasimov,
   Bas van Schaik, Carie Pointer, Christopher Head, clbr on github,
   Dan Fandrich, Daniel Jelinski, Daniel Jeliński, Daniel Stenberg,
-  Darío Hereñú, Even Rouault, Harry Sintonen, Jakub Zakrzewski, Jeffrey Walton,
-  Jeroen Ooms, Johannes Schindelin, John Butterfield, Josh Bialkowski,
-  Kamil Dudka, Laurent Bonnans, Marcel Raad, Markus Elfring, Michael Kaufmann,
+  Darío Hereñú, Even Rouault, Harry Sintonen, Ihor Karpenko, Jakub Zakrzewski,
+  Jeffrey Walton, Jeroen Ooms, Johannes Schindelin, John Butterfield,
+  Josh Bialkowski, Kamil Dudka, Kirill Marchuk, Laurent Bonnans,
+  Leonardo Taccari, Marcel Raad, Markus Elfring, Michael Kaufmann,
   Nick Zitzmann, Nikos Mavrogiannopoulos, Patrick Monnerat, Paul Howarth,
   pszemus on github, Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs,
   Ruslan Baratov, Sergei Nikulov, Thomas Klausner, Tobias Blomberg,
   Viktor Szakats, Zero King,
-  (41 contributors)
+  (44 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -185,3 +196,10 @@ References to bug reports and discussions on issues:
  [63] = https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=10012
  [64] = https://curl.haxx.se/bug/?i=2747
  [65] = https://curl.haxx.se/bug/?i=2786
+ [66] = https://curl.haxx.se/bug/?i=2904
+ [67] = https://curl.haxx.se/bug/?i=2910
+ [68] = https://curl.haxx.se/mail/lib-2018-08/0198.html
+ [69] = https://curl.haxx.se/bug/?i=2908
+ [70] = https://curl.haxx.se/bug/?i=2773
+ [71] = https://curl.haxx.se/bug/?i=2739
+ [72] = https://curl.haxx.se/bug/?i=2915
