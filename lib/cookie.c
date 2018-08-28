@@ -40,7 +40,7 @@ struct Cookie *Curl_cookie_add(struct Curl_easy *data,
         received from a server.
 
         The function need to replace previously stored lines that this new
-        line superceeds.
+        line supersedes.
 
         It may remove lines that are expired.
 
@@ -877,7 +877,7 @@ Curl_cookie_add(struct Curl_easy *data,
   co->creationtime = ++c->lastct;
 
   /* now, we have parsed the incoming line, we must now check if this
-     superceeds an already existing cookie, which it may if the previous have
+     supersedes an already existing cookie, which it may if the previous have
      the same domain and path as this */
 
   /* at first, remove expired cookies */
