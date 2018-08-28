@@ -34,7 +34,7 @@ struct Cookie {
   char *domain;      /* domain = <this> */
   curl_off_t expires;  /* expires = <this> */
   char *expirestr;   /* the plain text version */
-  bool tailmatch;    /* weather we do tail-matchning of the domain name */
+  bool tailmatch;    /* whether we do tail-matching of the domain name */
 
   /* RFC 2109 keywords. Version=1 means 2109-compliant cookie sending */
   char *version;     /* Version = <value> */
@@ -43,6 +43,7 @@ struct Cookie {
   bool secure;       /* whether the 'secure' keyword was used */
   bool livecookie;   /* updated from a server, not a stored file */
   bool httponly;     /* true if the httponly directive is present */
+  int creationtime;  /* time when the cookie was written */
 };
 
 #define COOKIE_HASH_SIZE 256
@@ -55,6 +56,7 @@ struct CookieInfo {
   bool running;    /* state info, for cookie adding information */
   long numcookies; /* number of cookies in the "jar" */
   bool newsession; /* new session, discard session cookies on load */
+  int lastct;      /* last creation-time used in the jar */
 };
 
 /* This is the maximum line length we accept for a cookie line. RFC 2109
