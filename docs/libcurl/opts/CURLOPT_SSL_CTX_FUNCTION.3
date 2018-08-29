@@ -61,7 +61,8 @@ change the actual URI of an HTTPS request.
 WARNING: The \fICURLOPT_SSL_CTX_FUNCTION(3)\fP callback allows the application
 to reach in and modify SSL details in the connection without libcurl itself
 knowing anything about it, which then subsequently can lead to libcurl
-unknowingly reusing SSL connections with different properties.
+unknowingly reusing SSL connections with different properties. To remedy this
+you may set \fICURLOPT_FORBID_REUSE(3)\fP from the callback function.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS
