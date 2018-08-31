@@ -3807,6 +3807,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
+#ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
+  SSLSUPP_TLS13_CIPHERSUITES |
+#endif
   SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),
