@@ -1273,7 +1273,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_TLS13_CIPHERS, config->cipher13_list);
 
         if(config->proxy_cipher13_list)
-          my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
+          my_setopt_str(curl, CURLOPT_PROXY_TLS13_CIPHERS,
                         config->proxy_cipher13_list);
 
         /* new in libcurl 7.9.2: */
