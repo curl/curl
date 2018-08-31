@@ -712,7 +712,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
   ssize_t sbytes;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  int cb; /* Bytes currently read */
+  size_t cb; /* Bytes currently read */
 
   switch(event) {
 
@@ -765,7 +765,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_DATA);
     setpacketblock(&state->spacket, state->block);
-    if(state->block > 1 && state->sbytes < (int)state->blksize) {
+    if(state->block > 1 && state->sbytes < state->blksize) {
       state->state = TFTP_STATE_FIN;
       return CURLE_OK;
     }
@@ -781,7 +781,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                                    &cb);
       if(result)
         return result;
-      state->sbytes += cb;
+      state->sbytes += (int)cb;
       state->conn->data->req.upload_fromhere += cb;
     } while(state->sbytes < state->blksize && cb != 0);
 

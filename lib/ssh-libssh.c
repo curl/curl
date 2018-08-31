@@ -1290,7 +1290,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       if(sshc->readdir_attrs) {
         sshc->readdir_filename = sshc->readdir_attrs->name;
         sshc->readdir_longentry = sshc->readdir_attrs->longname;
-        sshc->readdir_len = (int)strlen(sshc->readdir_filename);
+        sshc->readdir_len = strlen(sshc->readdir_filename);
 
         if(data->set.ftp_list_only) {
           char *tmpLine;
@@ -1321,7 +1321,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
           }
         }
         else {
-          sshc->readdir_currLen = (int)strlen(sshc->readdir_longentry);
+          sshc->readdir_currLen = strlen(sshc->readdir_longentry);
           sshc->readdir_totalLen = 80 + sshc->readdir_currLen;
           sshc->readdir_line = calloc(sshc->readdir_totalLen, 1);
           if(!sshc->readdir_line) {
@@ -1382,12 +1382,12 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         if(sshc->readdir_filename == NULL)
           sshc->readdir_len = 0;
         else
-          sshc->readdir_len = (int)strlen(sshc->readdir_tmp);
+          sshc->readdir_len = strlen(sshc->readdir_tmp);
         sshc->readdir_longentry = NULL;
         sshc->readdir_filename = sshc->readdir_tmp;
       }
       else {
-        sshc->readdir_len = (int)strlen(sshc->readdir_link_attrs->name);
+        sshc->readdir_len = strlen(sshc->readdir_link_attrs->name);
         sshc->readdir_filename = sshc->readdir_link_attrs->name;
         sshc->readdir_longentry = sshc->readdir_link_attrs->longname;
       }
