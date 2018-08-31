@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -131,7 +131,7 @@ struct ssh_conn {
                                  quote command fails) */
   char *homedir;              /* when doing SFTP we figure out home dir in the
                                  connect phase */
-  int readdir_len, readdir_totalLen, readdir_currLen;
+  size_t readdir_len, readdir_totalLen, readdir_currLen;
   char *readdir_line;
   char *readdir_linkPath;
   /* end of READDIR stuff */
