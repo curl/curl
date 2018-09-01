@@ -250,9 +250,9 @@ static const char *get_top_domain(const char * const domain, size_t *outlen)
   len = strlen(domain);
   last = memrchr(domain, '.', len);
   if(last) {
-    first = memrchr(domain, '.', (size_t) (last - domain));
+    first = memrchr(domain, '.', (last - domain));
     if(first)
-      len -= (size_t) (++first - domain);
+      len -= (++first - domain);
   }
 
   if(outlen)
@@ -717,9 +717,9 @@ Curl_cookie_add(struct Curl_easy *data,
       if(!queryp)
         endslash = strrchr(path, '/');
       else
-        endslash = memrchr(path, '/', (size_t)(queryp - path));
+        endslash = memrchr(path, '/', (queryp - path));
       if(endslash) {
-        size_t pathlen = (size_t)(endslash-path + 1); /* include end slash */
+        size_t pathlen = (endslash-path + 1); /* include end slash */
         co->path = malloc(pathlen + 1); /* one extra for the zero byte */
         if(co->path) {
           memcpy(co->path, path, pathlen);

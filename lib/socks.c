@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -222,8 +222,8 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     ssize_t actualread;
     ssize_t written;
     ssize_t hostnamelen = 0;
-    int packetsize = 9 +
-      (int)strlen((char *)socksreq + 8); /* size including NUL */
+    ssize_t packetsize = 9 +
+      strlen((char *)socksreq + 8); /* size including NUL */
 
     /* If SOCKS4a, set special invalid IP address 0.0.0.x */
     if(protocol4a) {

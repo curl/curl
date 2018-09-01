@@ -1933,17 +1933,17 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_SFTP_READDIR:
-      sshc->readdir_len = libssh2_sftp_readdir_ex(sshc->sftp_handle,
-                                                  sshc->readdir_filename,
-                                                  PATH_MAX,
-                                                  sshc->readdir_longentry,
-                                                  PATH_MAX,
-                                                  &sshc->readdir_attrs);
-      if(sshc->readdir_len == LIBSSH2_ERROR_EAGAIN) {
-        rc = LIBSSH2_ERROR_EAGAIN;
+      rc = libssh2_sftp_readdir_ex(sshc->sftp_handle,
+                                   sshc->readdir_filename,
+                                   PATH_MAX,
+                                   sshc->readdir_longentry,
+                                   PATH_MAX,
+                                   &sshc->readdir_attrs);
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      if(sshc->readdir_len > 0) {
+      if(rc > 0) {
+        sshc->readdir_len = (size_t) rc;
         sshc->readdir_filename[sshc->readdir_len] = '\0';
 
         if(data->set.ftp_list_only) {
@@ -1974,7 +1974,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           }
         }
         else {
-          sshc->readdir_currLen = (int)strlen(sshc->readdir_longentry);
+          sshc->readdir_currLen = strlen(sshc->readdir_longentry);
           sshc->readdir_totalLen = 80 + sshc->readdir_currLen;
           sshc->readdir_line = calloc(sshc->readdir_totalLen, 1);
           if(!sshc->readdir_line) {
@@ -2008,13 +2008,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
       }
-      else if(sshc->readdir_len == 0) {
+      else if(rc == 0) {
         Curl_safefree(sshc->readdir_filename);
         Curl_safefree(sshc->readdir_longentry);
         state(conn, SSH_SFTP_READDIR_DONE);
         break;
       }
-      else if(sshc->readdir_len <= 0) {
+      else if(rc < 0) {
         err = sftp_libssh2_last_error(sshc->sftp_session);
         result = sftp_libssh2_error_to_CURLE(err);
         sshc->actualcode = result?result:CURLE_SSH;
@@ -2029,16 +2029,16 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_SFTP_READDIR_LINK:
-      sshc->readdir_len =
+      rc =
         libssh2_sftp_symlink_ex(sshc->sftp_session,
                                 sshc->readdir_linkPath,
                                 curlx_uztoui(strlen(sshc->readdir_linkPath)),
                                 sshc->readdir_filename,
                                 PATH_MAX, LIBSSH2_SFTP_READLINK);
-      if(sshc->readdir_len == LIBSSH2_ERROR_EAGAIN) {
-        rc = LIBSSH2_ERROR_EAGAIN;
+      if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
+      sshc->readdir_len = (size_t) rc;
       Curl_safefree(sshc->readdir_linkPath);
 
       /* get room for the filename and extra output */
