@@ -96,6 +96,8 @@ static const struct helptxt helptext[] = {
    "HTTP POST binary data"},
   {"    --data-raw <data>",
    "HTTP POST data, '@' allowed"},
+  {"    --data-as-base64 <data_b64>",
+   "HTTP POST binary data, passed in as base64"},
   {"    --data-urlencode <data>",
    "HTTP POST data url encoded"},
   {"    --delegation <LEVEL>",

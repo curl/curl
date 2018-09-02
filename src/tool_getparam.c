@@ -26,6 +26,7 @@
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"
+#include "curl_base64.h"
 
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
@@ -219,6 +220,7 @@ static const struct LongShort aliases[]= {
   {"dr", "data-raw",                 ARG_STRING},
   {"da", "data-ascii",               ARG_STRING},
   {"db", "data-binary",              ARG_STRING},
+  {"d6", "data-as-base64",           ARG_STRING},
   {"de", "data-urlencode",           ARG_STRING},
   {"D",  "dump-header",              ARG_FILENAME},
   {"e",  "referer",                  ARG_STRING},
@@ -1346,6 +1348,27 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           }
           else
             return PARAM_NO_MEM;
+        }
+      }
+      else if(subletter == '6') { /* --data-as-base64 */
+        char *postdata_b64 = NULL;
+
+        GetStr(&postdata_b64, nextarg);
+        if(!postdata_b64)
+          return PARAM_NO_MEM;
+
+        if(!strlen(postdata_b64)) { /* Empty string */
+          postdata = postdata_b64;
+        }
+        else {
+          if(Curl_base64_decode(
+              postdata_b64, (unsigned char **) &postdata, &size) != CURLE_OK) {
+            warnf(global, "Invalid base64\n");
+            Curl_safefree(postdata_b64);
+            return PARAM_BAD_USE;
+          }
+
+          Curl_safefree(postdata_b64);
         }
       }
       else if('@' == *nextarg && !raw_mode) {
