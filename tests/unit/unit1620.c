@@ -55,7 +55,7 @@ UNITTEST_START
   fail_unless(empty->magic == CURLEASY_MAGIC_NUMBER,
               "empty->magic should be equal to CURLEASY_MAGIC_NUMBER");
 
-  // double invoke to ensure no dependency on internal state
+  /* double invoke to ensure no dependency on internal state */
   rc = Curl_connect(empty, &empty->easy_conn, &async, &protocol_connect);
   fail_unless(rc == CURLE_URL_MALFORMAT,
               "Curl_connect() failed to return CURLE_URL_MALFORMAT");
