@@ -4,14 +4,11 @@ Curl and libcurl 7.61.1
  Command line options:         218
  curl_easy_setopt() options:   258
  Public functions in libcurl:  74
- Contributors:                 1766
-
-This release includes the following changes:
-
- o
+ Contributors:                 1787
 
 This release includes the following bugfixes:
 
+ o security advisory (CVE-2018-14618): NTLM password overflow via integer overflow [73]
  o CURLINFO_SIZE_UPLOAD: fix missing counter update [46]
  o CURLOPT_ACCEPT_ENCODING.3: list them comma-separated
  o CURLOPT_SSL_CTX_FUNCTION.3: might cause accidental connection reuse [72]
@@ -36,7 +33,9 @@ This release includes the following bugfixes:
  o conn: remove the boolean 'inuse' field [3]
  o content_encoding: accept up to 4 unknown trailer bytes after raw deflate data [5]
  o cookie tests: treat files as text
+ o cookies: support creation-time attribute for cookies [75]
  o curl: Fix segfault when -H @headerfile is empty [23]
+ o curl: add http code 408 to transient list for --retry [78]
  o curl: fix time-of-check, time-of-use race in dir creation [71]
  o curl: use Content-Disposition before the "URL end" for -OJ [29]
  o curl: warn the user if a given file name looks like an option [56]
@@ -54,6 +53,7 @@ This release includes the following bugfixes:
  o gopher: Do not translate `?' to `%09' [67]
  o header output: switch off all styles, not just unbold [8]
  o hostip: fix unused variable warning
+ o http2: Use correct format identifier for stream_id [77]
  o http2: abort the send_callback if not setup yet [63]
  o http2: avoid set_stream_user_data() before stream is assigned [61]
  o http2: check nghttp2_session_set_stream_user_data return code [55]
@@ -76,11 +76,13 @@ This release includes the following bugfixes:
  o schannel: client certificate store opening fix [68]
  o schannel: enable CALG_TLS1PRF for w32api >= 5.1
  o schannel: fix MinGW compile break [1]
+ o sftp: don't send post-qoute sequence when retrying a connection [79]
  o smb: fix memory leak on early failure [26]
  o smb: fix memory-leak in URL parse error path [4]
  o smb_getsock: always wait for write socket too [11]
  o ssh-libssh: fix infinite connect loop on invalid private key [53]
  o ssh-libssh: reduce excessive verbose output about pubkey auth [53]
+ o ssh-libssh: use FALLTHROUGH to silence gcc8 [76]
  o ssl: set engine implicitly when a PKCS#11 URI is provided [36]
  o sws: handle EINTR when calling select() [24]
  o system_win32: fix version checking [16]
@@ -94,7 +96,9 @@ This release includes the following bugfixes:
  o test214: disable MSYS2's POSIX path conversion for URL
  o test320: treat curl320.out file as binary [14]
  o tests/http_pipe.py: Use /usr/bin/env to find python
+ o tests: Don't use Windows path %PWD for SSH tests [74]
  o tests: fixes for Windows line endlings [13]
+ o tool_operate: Fix setting proxy TLS 1.3 ciphers
  o travis: build darwinssl on macos 10.12 to fix linker errors [33]
  o travis: execute "set -eo pipefail" for coverage build [45]
  o travis: run a 'make checksrc' too [25]
@@ -116,16 +120,16 @@ advice from friends like these:
 
   adnn on github, Anderson Toshiyuki Sasaki, Andrei Virtosu, Anton Gerasimov,
   Bas van Schaik, Carie Pointer, Christopher Head, clbr on github,
-  Dan Fandrich, Daniel Jelinski, Daniel Jeliński, Daniel Stenberg,
+  Dan Fandrich, Daniel Gustafsson, Daniel Jeliński, Daniel Stenberg,
   Darío Hereñú, Even Rouault, Harry Sintonen, Ihor Karpenko, Jakub Zakrzewski,
   Jeffrey Walton, Jeroen Ooms, Johannes Schindelin, John Butterfield,
   Josh Bialkowski, Kamil Dudka, Kirill Marchuk, Laurent Bonnans,
   Leonardo Taccari, Marcel Raad, Markus Elfring, Michael Kaufmann,
   Nick Zitzmann, Nikos Mavrogiannopoulos, Patrick Monnerat, Paul Howarth,
-  pszemus on github, Ran Mozes, Ray Satiro, Rikard Falkeborn, Rodger Combs,
-  Ruslan Baratov, Sergei Nikulov, Thomas Klausner, Tobias Blomberg,
-  Viktor Szakats, Zero King,
-  (44 contributors)
+  Przemysław Tomaszewski, pszemus on github, Ran Mozes, Ray Satiro,
+  Rikard Falkeborn, Rodger Combs, Ruslan Baratov, Sergei Nikulov,
+  Thomas Klausner, Tobias Blomberg, Viktor Szakats, Zero King, Zhaoyang Wu,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -203,3 +207,10 @@ References to bug reports and discussions on issues:
  [70] = https://curl.haxx.se/bug/?i=2773
  [71] = https://curl.haxx.se/bug/?i=2739
  [72] = https://curl.haxx.se/bug/?i=2915
+ [73] = https://curl.haxx.se/docs/CVE-2018-14618.html
+ [74] = https://curl.haxx.se/bug/?i=2920
+ [75] = https://curl.haxx.se/bug/?i=2524
+ [76] = https://curl.haxx.se/bug/?i=2922
+ [77] = https://curl.haxx.se/bug/?i=2928
+ [78] = https://curl.haxx.se/bug/?i=2925
+ [79] = https://curl.haxx.se/bug/?i=2939
