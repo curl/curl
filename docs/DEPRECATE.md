@@ -70,3 +70,24 @@ libcurl code.
 Left to answer: should the *setopt() function start to return error when these
 options are set to be able to tell when they're trying to use options that are
 no longer around or should we maintain behavior as much as possible?
+
+## CURLOPT_DNS_USE_GLOBAL_CACHE
+
+This option makes libcurl use a global non-thread-safe cache for DNS if
+enabled. The option has been marked as "obsolete" in the header file and in
+documentation for several years already.
+
+There's proper and safe method alternative provided since many years: the
+share API.
+
+### State
+
+In curl 7.62.0 setting this option to TRUE will not have any effect. The
+global cache will not be enabled. The code still remains so it is easy to
+revert if need be.
+
+### Removal
+
+Remove all global-cache related code from curl around April 2019 (might be
+7.66.0).
+
