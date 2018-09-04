@@ -118,6 +118,8 @@ static const struct helptxt helptext[] = {
    "IPv6 address to use for DNS requests"},
   {"    --dns-servers <addresses>",
    "DNS server addrs to use"},
+  {"    --doh-url <URL>",
+   "Resolve host names over DOH"},
   {"-D, --dump-header <filename>",
    "Write the received headers to <filename>"},
   {"    --egd-file <file>",

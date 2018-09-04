@@ -2599,6 +2599,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.disallow_username_in_url =
       (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
+  case CURLOPT_DOH_URL:
+    result = Curl_setstropt(&data->set.str[STRING_DOH],
+                            va_arg(param, char *));
+    data->set.doh = data->set.str[STRING_DOH]?TRUE:FALSE;
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
