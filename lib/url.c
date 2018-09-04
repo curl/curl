@@ -917,9 +917,8 @@ void Curl_getoff_all_pipelines(struct Curl_easy *data,
       Curl_pipeline_leave_write(conn);
   }
   else {
-    int rc;
-    rc = Curl_removeHandleFromPipeline(data, &conn->recv_pipe);
-    rc += Curl_removeHandleFromPipeline(data, &conn->send_pipe);
+    (void)Curl_removeHandleFromPipeline(data, &conn->recv_pipe);
+    (void)Curl_removeHandleFromPipeline(data, &conn->send_pipe);
   }
 }
 
