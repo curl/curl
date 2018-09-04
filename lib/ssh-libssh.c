@@ -2392,7 +2392,7 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
        operation */
     if(!status && !premature && conn->data->set.postquote &&
        !conn->bits.retry) {
-        sshc->nextstate = SSH_SFTP_POSTQUOTE_INIT;
+      sshc->nextstate = SSH_SFTP_POSTQUOTE_INIT;
       state(conn, SSH_SFTP_CLOSE);
     }
     else
