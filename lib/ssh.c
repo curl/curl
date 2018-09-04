@@ -3219,7 +3219,8 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
     /* Post quote commands are executed after the SFTP_CLOSE state to avoid
        errors that could happen due to open file handles during POSTQUOTE
        operation */
-    if(!status && !premature && conn->data->set.postquote) {
+    if(!status && !premature && conn->data->set.postquote &&
+       !conn->bits.retry) {
       sshc->nextstate = SSH_SFTP_POSTQUOTE_INIT;
       state(conn, SSH_SFTP_CLOSE);
     }
