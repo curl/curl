@@ -841,6 +841,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 #else
     if(arg > CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
       return CURLE_UNSUPPORTED_PROTOCOL;
+    if(arg == CURL_HTTP_VERSION_NONE)
+      arg = CURL_HTTP_VERSION_2TLS;
 #endif
     data->set.httpversion = arg;
     break;
