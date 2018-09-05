@@ -532,7 +532,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
   set->buffer_size = READBUFFER_SIZE;
-  set->upload_buffer_size = UPLOAD_BUFSIZE;
+  set->upload_buffer_size = UPLOADBUFFER_DEFAULT;
   set->happy_eyeballs_timeout = CURL_HET_DEFAULT;
 
   Curl_http2_init_userset(set);

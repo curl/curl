@@ -1936,6 +1936,22 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 
     break;
 
+  case CURLOPT_UPLOAD_BUFFERSIZE:
+    /*
+     * The application kindly asks for a differently sized upload buffer.
+     * Cap it to sensible.
+     */
+    arg = va_arg(param, long);
+
+    if(arg > UPLOADBUFFER_MAX)
+      arg = UPLOADBUFFER_MAX;
+    else if(arg < UPLOADBUFFER_MIN)
+      arg = UPLOADBUFFER_MIN;
+
+    data->set.upload_buffer_size = arg;
+    Curl_safefree(data->state.ulbuf); /* force a realloc next opportunity */
+    break;
+
   case CURLOPT_NOSIGNAL:
     /*
      * The application asks not to set any signal() or alarm() handlers,

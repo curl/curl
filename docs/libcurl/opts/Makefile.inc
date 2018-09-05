@@ -326,6 +326,7 @@ man_MANS =                                      \
   CURLOPT_UNIX_SOCKET_PATH.3                    \
   CURLOPT_UNRESTRICTED_AUTH.3                   \
   CURLOPT_UPLOAD.3                              \
+  CURLOPT_UPLOAD_BUFFERSIZE.3                   \
   CURLOPT_URL.3                                 \
   CURLOPT_USERAGENT.3                           \
   CURLOPT_USERNAME.3                            \
