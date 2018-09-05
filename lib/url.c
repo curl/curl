@@ -516,25 +516,27 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;
   set->chunk_end      = ZERO_NULL;
-
-  /* tcp keepalives are disabled by default, but provide reasonable values for
-   * the interval and idle times.
-   */
   set->tcp_keepalive = FALSE;
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
   set->tcp_fastopen = FALSE;
   set->tcp_nodelay = TRUE;
-
   set->ssl_enable_npn = TRUE;
   set->ssl_enable_alpn = TRUE;
-
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
   set->buffer_size = READBUFFER_SIZE;
   set->upload_buffer_size = UPLOAD_BUFSIZE;
   set->happy_eyeballs_timeout = CURL_HET_DEFAULT;
-
+  set->fnmatch = ZERO_NULL;
+  set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+  set->httpversion =
+#ifdef USE_NGHTTP2
+    CURL_HTTP_VERSION_2TLS
+#else
+    CURL_HTTP_VERSION_1_1
+#endif
+    ;
   Curl_http2_init_userset(set);
   return result;
 }
@@ -594,8 +596,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
       data->progress.flags |= PGRS_HIDE;
       data->state.current_speed = -1; /* init to negative == impossible */
-      data->set.fnmatch = ZERO_NULL;
-      data->set.maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
 
       Curl_http2_init_state(&data->state);
     }

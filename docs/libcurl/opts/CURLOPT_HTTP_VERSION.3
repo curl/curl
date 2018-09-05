@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -60,7 +60,9 @@ prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
 will still do HTTP/2 the standard way with negotiated protocol version in the
 TLS handshake. (Added in 7.49.0)
 .SH DEFAULT
-CURL_HTTP_VERSION_NONE
+Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
+
+Before that: CURL_HTTP_VERSION_1_1
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE
