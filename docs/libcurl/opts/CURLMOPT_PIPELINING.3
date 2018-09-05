@@ -63,7 +63,9 @@ This bit is deprecated and has no effect since version 7.62.0.
 If this bit is set, libcurl will try to multiplex the new transfer over an
 existing connection if possible. This requires HTTP/2.
 .SH DEFAULT
-0 (both pipeline and multiplexing are off)
+Since 7.62.0, \fBCURLPIPE_MULTIPLEX\bP is enabled by default.
+
+Before that, default was \fBCURLPIPE_NOTHING\fP.
 .SH PROTOCOLS
 HTTP(S)
 .SH EXAMPLE
