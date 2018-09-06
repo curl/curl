@@ -36,7 +36,7 @@ imap
 IMAP multiple connection authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/836/;UID=1' -u user.one:secret -: 'imap://%HOSTIP:%IMAPPORT/836/;UID=2' -u user.two:secret
+'imap://%HOSTIP:%IMAPPORT/836/;MAILINDEX=1' -u user.one:secret -: 'imap://%HOSTIP:%IMAPPORT/836/;UID=2' -u user.two:secret
 </command>
 </client>
 

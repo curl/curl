@@ -36,7 +36,7 @@ imap
 SSL_CERT_FILE=
 </setenv>
 <command>
-'imap://%HOSTIP:%IMAPPORT/1420/;UID=1' -u user:secret --libcurl log/test1420.c
+'imap://%HOSTIP:%IMAPPORT/1420/;MAILINDEX=1' -u user:secret --libcurl log/test1420.c
 </command>
 </client>
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_URL, "imap://%HOSTIP:%IMAPPORT/1420/;UID=1");
+  curl_easy_setopt(hnd, CURLOPT_URL, "imap://%HOSTIP:%IMAPPORT/1420/;MAILINDEX=1");
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "user:secret");
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);

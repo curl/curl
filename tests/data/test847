@@ -2,20 +2,14 @@
 <info>
 <keywords>
 IMAP
-SASL
-SASL AUTH EXTERNAL
-RFC4422
+Clear Text
+FETCH
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<servercmd>
-AUTH EXTERNAL
-REPLY AUTHENTICATE +
-REPLY dXNlcg== A002 OK AUTHENTICATE completed
-</servercmd>
 <data>
 From: me@somewhere
 To: fake@nowhere
@@ -34,10 +28,10 @@ body
 imap
 </server>
  <name>
-IMAP external authentication
+IMAP FETCH message
  </name>
  <command>
-'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/837/;MAILINDEX=1'
+'imap://%HOSTIP:%IMAPPORT/847/;UID=1' -u '"user:sec"ret{'
 </command>
 </client>
 
@@ -46,10 +40,9 @@ IMAP external authentication
 <verify>
 <protocol>
 A001 CAPABILITY
-A002 AUTHENTICATE EXTERNAL
-dXNlcg==
-A003 SELECT 837
-A004 FETCH 1 BODY[]
+A002 LOGIN "\"user" "sec\"ret{"
+A003 SELECT 847
+A004 UID FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
 </verify>

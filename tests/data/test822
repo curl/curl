@@ -48,7 +48,7 @@ CURL_GETHOSTNAME=curlhost
 LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
  </setenv>
  <command>
-'imap://%HOSTIP:%IMAPPORT/822/;UID=1' -u testuser:testpass
+'imap://%HOSTIP:%IMAPPORT/822/;MAILINDEX=1' -u testuser:testpass
 </command>
 <precheck>
 chkhostname curlhost
