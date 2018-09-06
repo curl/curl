@@ -22,4 +22,5 @@ man_MANS = curl_easy_cleanup.3 curl_easy_getinfo.3 curl_easy_init.3      \
   curl_mime_data.3 curl_mime_data_cb.3 curl_mime_filedata.3              \
   curl_mime_filename.3 curl_mime_subparts.3                              \
   curl_mime_type.3 curl_mime_headers.3 curl_mime_encoder.3 libcurl-env.3 \
-  libcurl-security.3
+  libcurl-security.3 curl_url.3 curl_url_get.3 curl_url_set.3            \
+  curl_url_dup.3 curl_url_cleanup.3

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_ESCAPE_H
-#define HEADER_CURL_ESCAPE_H
+#ifndef HEADER_CURL_URLAPI_INT_H
+#define HEADER_CURL_URLAPI_INT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,14 +21,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* Escape and unescape URL encoding in strings. The functions return a new
- * allocated string or NULL if an error occurred.  */
-
-bool Curl_isunreserved(unsigned char in);
-CURLcode Curl_urldecode(struct Curl_easy *data,
-                        const char *string, size_t length,
-                        char **ostring, size_t *olen,
-                        bool reject_crlf);
-
-#endif /* HEADER_CURL_ESCAPE_H */
-
+#include "curl_setup.h"
+bool Curl_is_absolute_url(const char *url, char *scheme, size_t buflen);
+char *Curl_concat_url(const char *base, const char *relurl);
+size_t Curl_strlen_url(const char *url, bool relative);
+void Curl_strcpy_url(char *output, const char *url, bool relative);
+#endif
