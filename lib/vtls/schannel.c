@@ -802,6 +802,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         failf(data, "schannel: SNI or certificate check failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
         return CURLE_PEER_FAILED_VERIFICATION;
+        /*
       case SEC_E_INVALID_HANDLE:
       case SEC_E_INVALID_TOKEN:
       case SEC_E_LOGON_DENIED:
@@ -811,6 +812,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       case SEC_E_NO_CREDENTIALS:
       case SEC_E_UNSUPPORTED_FUNCTION:
       case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
+        */
       default:
         failf(data, "schannel: initial InitializeSecurityContext failed: %s",
               Curl_sspi_strerror(conn, sspi_status));
@@ -1039,6 +1041,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
           failf(data, "schannel: SNI or certificate check failed: %s",
                 Curl_sspi_strerror(conn, sspi_status));
           return CURLE_PEER_FAILED_VERIFICATION;
+          /*
         case SEC_E_INVALID_HANDLE:
         case SEC_E_INVALID_TOKEN:
         case SEC_E_LOGON_DENIED:
@@ -1048,6 +1051,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
         case SEC_E_NO_CREDENTIALS:
         case SEC_E_UNSUPPORTED_FUNCTION:
         case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
+          */
         default:
           failf(data, "schannel: next InitializeSecurityContext failed: %s",
                 Curl_sspi_strerror(conn, sspi_status));
