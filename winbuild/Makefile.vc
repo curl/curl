@@ -53,7 +53,7 @@ CFGSET=true
 !MESSAGE   ENABLE_IPV6=<yes or no>        - Enable IPv6, defaults to yes
 !MESSAGE   ENABLE_SSPI=<yes or no>        - Enable SSPI support, defaults to yes
 !MESSAGE   ENABLE_WINSSL=<yes or no>      - Enable native Windows SSL support, defaults to yes
-!MESSAGE   ENABLE_SSL_AUTO_LOAD_CONFIG=<yes or no>
+!MESSAGE   ENABLE_OPENSSL_AUTO_LOAD_CONFIG=<yes or no>
 !MESSAGE                                  - Whether the OpenSSL configuration will be loaded automatically, defaults to yes
 !MESSAGE   GEN_PDB=<yes or no>            - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>              - Debug builds
@@ -132,8 +132,8 @@ USE_WINSSL = true
 USE_WINSSL = false
 !ENDIF
 
-!IFNDEF ENABLE_SSL_AUTO_LOAD_CONFIG
-ENABLE_SSL_AUTO_LOAD_CONFIG = true
+!IFNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
+ENABLE_OPENSSL_AUTO_LOAD_CONFIG = true
 !ENDIF
 
 CONFIG_NAME_LIB = libcurl
