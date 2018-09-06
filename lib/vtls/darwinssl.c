@@ -64,6 +64,7 @@
 
 #define CURL_BUILD_IOS 0
 #define CURL_BUILD_IOS_7 0
+#define CURL_BUILD_IOS_9 0
 #define CURL_BUILD_IOS_11 0
 #define CURL_BUILD_MAC 1
 /* This is the maximum API level we are allowed to use when building: */
@@ -72,6 +73,7 @@
 #define CURL_BUILD_MAC_10_7 MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
 #define CURL_BUILD_MAC_10_8 MAC_OS_X_VERSION_MAX_ALLOWED >= 1080
 #define CURL_BUILD_MAC_10_9 MAC_OS_X_VERSION_MAX_ALLOWED >= 1090
+#define CURL_BUILD_MAC_10_11 MAC_OS_X_VERSION_MAX_ALLOWED >= 101100
 #define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300
 /* These macros mean "the following code is present to allow runtime backward
    compatibility with at least this cat or earlier":
@@ -86,6 +88,7 @@
 #elif TARGET_OS_EMBEDDED || TARGET_OS_IPHONE
 #define CURL_BUILD_IOS 1
 #define CURL_BUILD_IOS_7 __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000
+#define CURL_BUILD_IOS_9 __IPHONE_OS_VERSION_MAX_ALLOWED >= 90000
 #define CURL_BUILD_IOS_11 __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000
 #define CURL_BUILD_MAC 0
 #define CURL_BUILD_MAC_10_5 0
@@ -93,6 +96,7 @@
 #define CURL_BUILD_MAC_10_7 0
 #define CURL_BUILD_MAC_10_8 0
 #define CURL_BUILD_MAC_10_9 0
+#define CURL_BUILD_MAC_10_11 0
 #define CURL_BUILD_MAC_10_13 0
 #define CURL_SUPPORT_MAC_10_5 0
 #define CURL_SUPPORT_MAC_10_6 0
@@ -945,7 +949,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
 
   if(!c) {
     failf(data, "SSL: invalid CA certificate subject");
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_SSL_CACERT;
   }
 
   /* If the subject is already available as UTF-8 encoded (ie 'direct') then
@@ -1646,6 +1650,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         }
 
         CFRelease(cert);
+        if(result == CURLE_SSL_CACERT)
+          return CURLE_SSL_CERTPROBLEM;
         if(result)
           return result;
       }
@@ -1781,107 +1787,118 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
      higher priority, but it's probably better that we not connect at all than
      to give the user a false sense of security if the server only supports
      insecure ciphers. (Note: We don't care about SSLv2-only ciphers.) */
-  (void)SSLGetNumberSupportedCiphers(BACKEND->ssl_ctx, &all_ciphers_count);
-  all_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
-  allowed_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
-  if(all_ciphers && allowed_ciphers &&
-     SSLGetSupportedCiphers(BACKEND->ssl_ctx, all_ciphers,
-       &all_ciphers_count) == noErr) {
-    for(i = 0UL ; i < all_ciphers_count ; i++) {
-#if CURL_BUILD_MAC
-     /* There's a known bug in early versions of Mountain Lion where ST's ECC
-        ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
-        Work around the problem here by disabling those ciphers if we are
-        running in an affected version of OS X. */
-      if(darwinver_maj == 12 && darwinver_min <= 3 &&
-         all_ciphers[i] >= 0xC001 && all_ciphers[i] <= 0xC032) {
-        continue;
-      }
-#endif /* CURL_BUILD_MAC */
-      switch(all_ciphers[i]) {
-        /* Disable NULL ciphersuites: */
-        case SSL_NULL_WITH_NULL_NULL:
-        case SSL_RSA_WITH_NULL_MD5:
-        case SSL_RSA_WITH_NULL_SHA:
-        case 0x003B: /* TLS_RSA_WITH_NULL_SHA256 */
-        case SSL_FORTEZZA_DMS_WITH_NULL_SHA:
-        case 0xC001: /* TLS_ECDH_ECDSA_WITH_NULL_SHA */
-        case 0xC006: /* TLS_ECDHE_ECDSA_WITH_NULL_SHA */
-        case 0xC00B: /* TLS_ECDH_RSA_WITH_NULL_SHA */
-        case 0xC010: /* TLS_ECDHE_RSA_WITH_NULL_SHA */
-        case 0x002C: /* TLS_PSK_WITH_NULL_SHA */
-        case 0x002D: /* TLS_DHE_PSK_WITH_NULL_SHA */
-        case 0x002E: /* TLS_RSA_PSK_WITH_NULL_SHA */
-        case 0x00B0: /* TLS_PSK_WITH_NULL_SHA256 */
-        case 0x00B1: /* TLS_PSK_WITH_NULL_SHA384 */
-        case 0x00B4: /* TLS_DHE_PSK_WITH_NULL_SHA256 */
-        case 0x00B5: /* TLS_DHE_PSK_WITH_NULL_SHA384 */
-        case 0x00B8: /* TLS_RSA_PSK_WITH_NULL_SHA256 */
-        case 0x00B9: /* TLS_RSA_PSK_WITH_NULL_SHA384 */
-        /* Disable anonymous ciphersuites: */
-        case SSL_DH_anon_EXPORT_WITH_RC4_40_MD5:
-        case SSL_DH_anon_WITH_RC4_128_MD5:
-        case SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA:
-        case SSL_DH_anon_WITH_DES_CBC_SHA:
-        case SSL_DH_anon_WITH_3DES_EDE_CBC_SHA:
-        case TLS_DH_anon_WITH_AES_128_CBC_SHA:
-        case TLS_DH_anon_WITH_AES_256_CBC_SHA:
-        case 0xC015: /* TLS_ECDH_anon_WITH_NULL_SHA */
-        case 0xC016: /* TLS_ECDH_anon_WITH_RC4_128_SHA */
-        case 0xC017: /* TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA */
-        case 0xC018: /* TLS_ECDH_anon_WITH_AES_128_CBC_SHA */
-        case 0xC019: /* TLS_ECDH_anon_WITH_AES_256_CBC_SHA */
-        case 0x006C: /* TLS_DH_anon_WITH_AES_128_CBC_SHA256 */
-        case 0x006D: /* TLS_DH_anon_WITH_AES_256_CBC_SHA256 */
-        case 0x00A6: /* TLS_DH_anon_WITH_AES_128_GCM_SHA256 */
-        case 0x00A7: /* TLS_DH_anon_WITH_AES_256_GCM_SHA384 */
-        /* Disable weak key ciphersuites: */
-        case SSL_RSA_EXPORT_WITH_RC4_40_MD5:
-        case SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5:
-        case SSL_RSA_EXPORT_WITH_DES40_CBC_SHA:
-        case SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA:
-        case SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA:
-        case SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA:
-        case SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA:
-        case SSL_RSA_WITH_DES_CBC_SHA:
-        case SSL_DH_DSS_WITH_DES_CBC_SHA:
-        case SSL_DH_RSA_WITH_DES_CBC_SHA:
-        case SSL_DHE_DSS_WITH_DES_CBC_SHA:
-        case SSL_DHE_RSA_WITH_DES_CBC_SHA:
-        /* Disable IDEA: */
-        case SSL_RSA_WITH_IDEA_CBC_SHA:
-        case SSL_RSA_WITH_IDEA_CBC_MD5:
-        /* Disable RC4: */
-        case SSL_RSA_WITH_RC4_128_MD5:
-        case SSL_RSA_WITH_RC4_128_SHA:
-        case 0xC002: /* TLS_ECDH_ECDSA_WITH_RC4_128_SHA */
-        case 0xC007: /* TLS_ECDHE_ECDSA_WITH_RC4_128_SHA*/
-        case 0xC00C: /* TLS_ECDH_RSA_WITH_RC4_128_SHA */
-        case 0xC011: /* TLS_ECDHE_RSA_WITH_RC4_128_SHA */
-        case 0x008A: /* TLS_PSK_WITH_RC4_128_SHA */
-        case 0x008E: /* TLS_DHE_PSK_WITH_RC4_128_SHA */
-        case 0x0092: /* TLS_RSA_PSK_WITH_RC4_128_SHA */
-          break;
-        default: /* enable everything else */
-          allowed_ciphers[allowed_ciphers_count++] = all_ciphers[i];
-          break;
-      }
-    }
-    err = SSLSetEnabledCiphers(BACKEND->ssl_ctx, allowed_ciphers,
-                               allowed_ciphers_count);
-    if(err != noErr) {
-      failf(data, "SSL: SSLSetEnabledCiphers() failed: OSStatus %d", err);
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  err = SSLGetNumberSupportedCiphers(BACKEND->ssl_ctx, &all_ciphers_count);
+  if(err != noErr) {
+    failf(data, "SSL: SSLGetNumberSupportedCiphers() failed: OSStatus %d",
+          err);
+    return CURLE_SSL_CIPHER;
   }
-  else {
+  all_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
+  if(!all_ciphers) {
+    failf(data, "SSL: Failed to allocate memory for all ciphers");
+    return CURLE_OUT_OF_MEMORY;
+  }
+  allowed_ciphers = malloc(all_ciphers_count*sizeof(SSLCipherSuite));
+  if(!allowed_ciphers) {
     Curl_safefree(all_ciphers);
-    Curl_safefree(allowed_ciphers);
     failf(data, "SSL: Failed to allocate memory for allowed ciphers");
     return CURLE_OUT_OF_MEMORY;
   }
+  err = SSLGetSupportedCiphers(BACKEND->ssl_ctx, all_ciphers,
+                               &all_ciphers_count);
+  if(err != noErr) {
+    Curl_safefree(all_ciphers);
+    Curl_safefree(allowed_ciphers);
+    return CURLE_SSL_CIPHER;
+  }
+  for(i = 0UL ; i < all_ciphers_count ; i++) {
+#if CURL_BUILD_MAC
+   /* There's a known bug in early versions of Mountain Lion where ST's ECC
+      ciphers (cipher suite 0xC001 through 0xC032) simply do not work.
+      Work around the problem here by disabling those ciphers if we are
+      running in an affected version of OS X. */
+    if(darwinver_maj == 12 && darwinver_min <= 3 &&
+       all_ciphers[i] >= 0xC001 && all_ciphers[i] <= 0xC032) {
+      continue;
+    }
+#endif /* CURL_BUILD_MAC */
+    switch(all_ciphers[i]) {
+      /* Disable NULL ciphersuites: */
+      case SSL_NULL_WITH_NULL_NULL:
+      case SSL_RSA_WITH_NULL_MD5:
+      case SSL_RSA_WITH_NULL_SHA:
+      case 0x003B: /* TLS_RSA_WITH_NULL_SHA256 */
+      case SSL_FORTEZZA_DMS_WITH_NULL_SHA:
+      case 0xC001: /* TLS_ECDH_ECDSA_WITH_NULL_SHA */
+      case 0xC006: /* TLS_ECDHE_ECDSA_WITH_NULL_SHA */
+      case 0xC00B: /* TLS_ECDH_RSA_WITH_NULL_SHA */
+      case 0xC010: /* TLS_ECDHE_RSA_WITH_NULL_SHA */
+      case 0x002C: /* TLS_PSK_WITH_NULL_SHA */
+      case 0x002D: /* TLS_DHE_PSK_WITH_NULL_SHA */
+      case 0x002E: /* TLS_RSA_PSK_WITH_NULL_SHA */
+      case 0x00B0: /* TLS_PSK_WITH_NULL_SHA256 */
+      case 0x00B1: /* TLS_PSK_WITH_NULL_SHA384 */
+      case 0x00B4: /* TLS_DHE_PSK_WITH_NULL_SHA256 */
+      case 0x00B5: /* TLS_DHE_PSK_WITH_NULL_SHA384 */
+      case 0x00B8: /* TLS_RSA_PSK_WITH_NULL_SHA256 */
+      case 0x00B9: /* TLS_RSA_PSK_WITH_NULL_SHA384 */
+      /* Disable anonymous ciphersuites: */
+      case SSL_DH_anon_EXPORT_WITH_RC4_40_MD5:
+      case SSL_DH_anon_WITH_RC4_128_MD5:
+      case SSL_DH_anon_EXPORT_WITH_DES40_CBC_SHA:
+      case SSL_DH_anon_WITH_DES_CBC_SHA:
+      case SSL_DH_anon_WITH_3DES_EDE_CBC_SHA:
+      case TLS_DH_anon_WITH_AES_128_CBC_SHA:
+      case TLS_DH_anon_WITH_AES_256_CBC_SHA:
+      case 0xC015: /* TLS_ECDH_anon_WITH_NULL_SHA */
+      case 0xC016: /* TLS_ECDH_anon_WITH_RC4_128_SHA */
+      case 0xC017: /* TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA */
+      case 0xC018: /* TLS_ECDH_anon_WITH_AES_128_CBC_SHA */
+      case 0xC019: /* TLS_ECDH_anon_WITH_AES_256_CBC_SHA */
+      case 0x006C: /* TLS_DH_anon_WITH_AES_128_CBC_SHA256 */
+      case 0x006D: /* TLS_DH_anon_WITH_AES_256_CBC_SHA256 */
+      case 0x00A6: /* TLS_DH_anon_WITH_AES_128_GCM_SHA256 */
+      case 0x00A7: /* TLS_DH_anon_WITH_AES_256_GCM_SHA384 */
+      /* Disable weak key ciphersuites: */
+      case SSL_RSA_EXPORT_WITH_RC4_40_MD5:
+      case SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5:
+      case SSL_RSA_EXPORT_WITH_DES40_CBC_SHA:
+      case SSL_DH_DSS_EXPORT_WITH_DES40_CBC_SHA:
+      case SSL_DH_RSA_EXPORT_WITH_DES40_CBC_SHA:
+      case SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA:
+      case SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA:
+      case SSL_RSA_WITH_DES_CBC_SHA:
+      case SSL_DH_DSS_WITH_DES_CBC_SHA:
+      case SSL_DH_RSA_WITH_DES_CBC_SHA:
+      case SSL_DHE_DSS_WITH_DES_CBC_SHA:
+      case SSL_DHE_RSA_WITH_DES_CBC_SHA:
+      /* Disable IDEA: */
+      case SSL_RSA_WITH_IDEA_CBC_SHA:
+      case SSL_RSA_WITH_IDEA_CBC_MD5:
+      /* Disable RC4: */
+      case SSL_RSA_WITH_RC4_128_MD5:
+      case SSL_RSA_WITH_RC4_128_SHA:
+      case 0xC002: /* TLS_ECDH_ECDSA_WITH_RC4_128_SHA */
+      case 0xC007: /* TLS_ECDHE_ECDSA_WITH_RC4_128_SHA*/
+      case 0xC00C: /* TLS_ECDH_RSA_WITH_RC4_128_SHA */
+      case 0xC011: /* TLS_ECDHE_RSA_WITH_RC4_128_SHA */
+      case 0x008A: /* TLS_PSK_WITH_RC4_128_SHA */
+      case 0x008E: /* TLS_DHE_PSK_WITH_RC4_128_SHA */
+      case 0x0092: /* TLS_RSA_PSK_WITH_RC4_128_SHA */
+        break;
+      default: /* enable everything else */
+        allowed_ciphers[allowed_ciphers_count++] = all_ciphers[i];
+        break;
+    }
+  }
+  err = SSLSetEnabledCiphers(BACKEND->ssl_ctx, allowed_ciphers,
+                             allowed_ciphers_count);
   Curl_safefree(all_ciphers);
   Curl_safefree(allowed_ciphers);
+  if(err != noErr) {
+    failf(data, "SSL: SSLSetEnabledCiphers() failed: OSStatus %d", err);
+    return CURLE_SSL_CIPHER;
+  }
 
 #if CURL_BUILD_MAC_10_9 || CURL_BUILD_IOS_7
   /* We want to enable 1/n-1 when using a CBC cipher unless the user
@@ -2057,35 +2074,6 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
   return 0;
 }
 
-static int sslerr_to_curlerr(struct Curl_easy *data, int err)
-{
-  switch(err) {
-    case errSSLXCertChainInvalid:
-      failf(data, "SSL certificate problem: Invalid certificate chain");
-      return CURLE_SSL_CACERT;
-    case errSSLUnknownRootCert:
-      failf(data, "SSL certificate problem: Untrusted root certificate");
-      return CURLE_SSL_CACERT;
-    case errSSLNoRootCert:
-      failf(data, "SSL certificate problem: No root certificate");
-      return CURLE_SSL_CACERT;
-    case errSSLCertExpired:
-      failf(data, "SSL certificate problem: Certificate chain had an "
-            "expired certificate");
-      return CURLE_SSL_CACERT;
-    case errSSLBadCert:
-      failf(data, "SSL certificate problem: Couldn't understand the server "
-            "certificate format");
-      return CURLE_SSL_CONNECT_ERROR;
-    case errSSLHostNameMismatch:
-      failf(data, "SSL certificate peer hostname mismatch");
-      return CURLE_PEER_FAILED_VERIFICATION;
-    default:
-      failf(data, "SSL unexpected certificate error %d", err);
-      return CURLE_SSL_CACERT;
-  }
-}
-
 static int append_cert_to_array(struct Curl_easy *data,
                                 unsigned char *buf, size_t buflen,
                                 CFMutableArrayRef array)
@@ -2103,13 +2091,20 @@ static int append_cert_to_array(struct Curl_easy *data,
     CFRelease(certdata);
     if(!cacert) {
       failf(data, "SSL: failed to create SecCertificate from CA certificate");
-      return CURLE_SSL_CACERT;
+      return CURLE_SSL_CACERT_BADFILE;
     }
 
     /* Check if cacert is valid. */
     result = CopyCertSubject(data, cacert, &certp);
-    if(result)
-      return result;
+    switch(result) {
+      case CURLE_OK:
+        break;
+      case CURLE_PEER_FAILED_VERIFICATION:
+        return CURLE_SSL_CACERT_BADFILE;
+      case CURLE_OUT_OF_MEMORY:
+      default:
+        return result;
+    }
     free(certp);
 
     CFArrayAppendValue(array, cacert);
@@ -2128,7 +2123,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
 
   if(read_cert(cafile, &certbuf, &buflen) < 0) {
     failf(data, "SSL: failed to read or invalid CA certificate");
-    return CURLE_SSL_CACERT;
+    return CURLE_SSL_CACERT_BADFILE;
   }
 
   /*
@@ -2161,7 +2156,7 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
       CFRelease(array);
       failf(data, "SSL: invalid CA certificate #%d (offset %d) in bundle",
             n, offset);
-      return CURLE_SSL_CACERT;
+      return CURLE_SSL_CACERT_BADFILE;
     }
     offset += res;
 
@@ -2195,22 +2190,27 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   if(trust == NULL) {
     failf(data, "SSL: error getting certificate chain");
     CFRelease(array);
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
   else if(ret != noErr) {
     CFRelease(array);
-    return sslerr_to_curlerr(data, ret);
+    failf(data, "SSLCopyPeerTrust() returned error %d", ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   ret = SecTrustSetAnchorCertificates(trust, array);
   if(ret != noErr) {
+    CFRelease(array);
     CFRelease(trust);
-    return sslerr_to_curlerr(data, ret);
+    failf(data, "SecTrustSetAnchorCertificates() returned error %d", ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
   ret = SecTrustSetAnchorCertificatesOnly(trust, true);
   if(ret != noErr) {
+    CFRelease(array);
     CFRelease(trust);
-    return sslerr_to_curlerr(data, ret);
+    failf(data, "SecTrustSetAnchorCertificatesOnly() returned error %d", ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   SecTrustResultType trust_eval = 0;
@@ -2218,7 +2218,8 @@ static int verify_cert(const char *cafile, struct Curl_easy *data,
   CFRelease(array);
   CFRelease(trust);
   if(ret != noErr) {
-    return sslerr_to_curlerr(data, ret);
+    failf(data, "SecTrustEvaluate() returned error %d", ret);
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   switch(trust_eval) {
@@ -2379,6 +2380,53 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         /* the documentation says we need to call SSLHandshake() again */
         return darwinssl_connect_step2(conn, sockindex);
 
+      /* Problem with encrypt / decrypt */
+      case errSSLPeerDecodeError:
+        failf(data, "Decode failed");
+        break;
+      case errSSLDecryptionFail:
+      case errSSLPeerDecryptionFail:
+        failf(data, "Decryption failed");
+        break;
+      case errSSLPeerDecryptError:
+        failf(data, "A decryption error occurred");
+        break;
+      case errSSLBadCipherSuite:
+        failf(data, "A bad SSL cipher suite was encountered");
+        break;
+      case errSSLCrypto:
+        failf(data, "An underlying cryptographic error was encountered");
+        break;
+#if CURL_BUILD_MAC_10_11 || CURL_BUILD_IOS_9
+      case errSSLWeakPeerEphemeralDHKey:
+        failf(data, "Indicates a weak ephemeral Diffie-Hellman key");
+        break;
+#endif
+
+      /* Problem with the message record validation */
+      case errSSLBadRecordMac:
+      case errSSLPeerBadRecordMac:
+        failf(data, "A record with a bad message authentication code (MAC) "
+                    "was encountered");
+        break;
+      case errSSLRecordOverflow:
+      case errSSLPeerRecordOverflow:
+        failf(data, "A record overflow occurred");
+        break;
+
+      /* Problem with zlib decompression */
+      case errSSLPeerDecompressFail:
+        failf(data, "Decompression failed");
+        break;
+
+      /* Problem with access */
+      case errSSLPeerAccessDenied:
+        failf(data, "Access was denied");
+        break;
+      case errSSLPeerInsufficientSecurity:
+        failf(data, "There is insufficient security for this operation");
+        break;
+
       /* These are all certificate problems with the server: */
       case errSSLXCertChainInvalid:
         failf(data, "SSL certificate problem: Invalid certificate chain");
@@ -2389,28 +2437,44 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLNoRootCert:
         failf(data, "SSL certificate problem: No root certificate");
         return CURLE_SSL_CACERT;
+      case errSSLCertNotYetValid:
+        failf(data, "SSL certificate problem: The certificate chain had a "
+                    "certificate that is not yet valid");
+        return CURLE_SSL_CACERT;
       case errSSLCertExpired:
+      case errSSLPeerCertExpired:
         failf(data, "SSL certificate problem: Certificate chain had an "
               "expired certificate");
         return CURLE_SSL_CACERT;
       case errSSLBadCert:
+      case errSSLPeerBadCert:
         failf(data, "SSL certificate problem: Couldn't understand the server "
               "certificate format");
-        return CURLE_SSL_CONNECT_ERROR;
+        return CURLE_SSL_CACERT;
+      case errSSLPeerUnsupportedCert:
+        failf(data, "SSL certificate problem: An unsupported certificate "
+                    "format was encountered");
+        return CURLE_SSL_CACERT;
+      case errSSLPeerCertRevoked:
+        failf(data, "SSL certificate problem: The certificate was revoked");
+        return CURLE_SSL_CACERT;
+      case errSSLPeerCertUnknown:
+        failf(data, "SSL certificate problem: The certificate is unknown");
+        return CURLE_SSL_CACERT;
 
       /* These are all certificate problems with the client: */
       case errSecAuthFailed:
         failf(data, "SSL authentication failed");
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
       case errSSLPeerHandshakeFail:
         failf(data, "SSL peer handshake failed, the server most likely "
               "requires a client certificate to connect");
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
       case errSSLPeerUnknownCA:
         failf(data, "SSL server rejected the client certificate due to "
               "the certificate being signed by an unknown certificate "
               "authority");
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
 
       /* This error is raised if the server's cert didn't match the server's
          host name: */
@@ -2419,30 +2483,98 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
               "certificate did not match \"%s\"\n", conn->host.dispname);
         return CURLE_PEER_FAILED_VERIFICATION;
 
+      /* Problem with SSL / TLS negotiation */
+      case errSSLNegotiation:
+        failf(data, "Could not negotiate an SSL cipher suite with the server");
+        break;
+      case errSSLBadConfiguration:
+        failf(data, "A configuration error occurred");
+        break;
+      case errSSLProtocol:
+        failf(data, "SSL protocol error");
+        break;
+      case errSSLPeerProtocolVersion:
+        failf(data, "A bad protocol version was encountered");
+        break;
+      case errSSLPeerNoRenegotiation:
+        failf(data, "No renegotiation is allowed");
+        break;
+
       /* Generic handshake errors: */
       case errSSLConnectionRefused:
         failf(data, "Server dropped the connection during the SSL handshake");
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
       case errSSLClosedAbort:
         failf(data, "Server aborted the SSL handshake");
-        return CURLE_SSL_CONNECT_ERROR;
-      case errSSLNegotiation:
-        failf(data, "Could not negotiate an SSL cipher suite with the server");
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
+      case errSSLClosedGraceful:
+        failf(data, "The connection closed gracefully");
+        break;
+      case errSSLClosedNoNotify:
+        failf(data, "The server closed the session with no notification");
+        break;
       /* Sometimes paramErr happens with buggy ciphers: */
-      case paramErr: case errSSLInternal:
+      case paramErr:
+      case errSSLInternal:
+      case errSSLPeerInternalError:
         failf(data, "Internal SSL engine error encountered during the "
               "SSL handshake");
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
       case errSSLFatalAlert:
         failf(data, "Fatal SSL engine error encountered during the SSL "
               "handshake");
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
+      /* Unclassified error */
+      case errSSLBufferOverflow:
+        failf(data, "An insufficient buffer was provided");
+        break;
+      case errSSLIllegalParam:
+        failf(data, "An illegal parameter was encountered");
+        break;
+      case errSSLModuleAttach:
+        failf(data, "Module attach failure");
+        break;
+      case errSSLSessionNotFound:
+        failf(data, "An attempt to restore an unknown session failed");
+        break;
+      case errSSLPeerExportRestriction:
+        failf(data, "An export restriction occurred");
+        break;
+      case errSSLPeerUserCancelled:
+        failf(data, "The user canceled the operation");
+        break;
+      case errSSLPeerUnexpectedMsg:
+        failf(data, "Peer rejected unexpected message");
+        break;
+#if CURL_BUILD_MAC_10_11 || CURL_BUILD_IOS_9
+      /* Treaing non-fatal error as fatal like before */
+      case errSSLClientHelloReceived:
+        failf(data, "A non-fatal result for providing a server name "
+                    "indication");
+        break;
+#endif
+
+      /* Error codes defined in the enum but should never be returned.
+         We list them here just in case. */
+#if CURL_BUILD_MAC_10_6
+      /* Only returned when kSSLSessionOptionBreakOnCertRequested is set */
+      case errSSLClientCertRequested:
+        failf(data, "The server has requested a client certificate");
+        break;
+#endif
+#if CURL_BUILD_MAC_10_9
+      /* Alias for errSSLLast, end of error range */
+      case errSSLUnexpectedRecord:
+        failf(data, "Unexpected (skipped) record in DTLS");
+        break;
+#endif
       default:
+        /* May also return codes listed in Security Framework Result Codes */
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
               hostname, err);
-        return CURLE_SSL_CONNECT_ERROR;
+        break;
     }
+    return CURLE_SSL_CONNECT_ERROR;
   }
   else {
     /* we have been connected fine, we're not waiting for anything else. */
