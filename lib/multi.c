@@ -906,7 +906,7 @@ static int multi_getsock(struct Curl_easy *data,
     return 0;
 
   case CURLM_STATE_WAITRESOLVE:
-    return Curl_resolver_getsock(data->easy_conn, socks, numsocks);
+    return Curl_resolv_getsock(data->easy_conn, socks, numsocks);
 
   case CURLM_STATE_PROTOCONNECT:
   case CURLM_STATE_SENDPROTOCONNECT:
@@ -1236,7 +1236,7 @@ static CURLcode multi_reconnect_request(struct connectdata **connp)
           return result;
 
         /* Resolved, continue with the connection */
-        result = Curl_async_resolved(conn, &protocol_done);
+        result = Curl_once_resolved(conn, &protocol_done);
         if(result)
           return result;
       }
@@ -1512,7 +1512,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       if(!dns)
-        result = Curl_resolver_is_resolved(data->easy_conn, &dns);
+        result = Curl_resolv_check(data->easy_conn, &dns);
 
       /* Update sockets here, because the socket(s) may have been
          closed and the application thus needs to be told, even if it
@@ -1525,10 +1525,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(dns) {
         /* Perform the next step in the connection phase, and then move on
            to the WAITCONNECT state */
-        result = Curl_async_resolved(data->easy_conn, &protocol_connect);
+        result = Curl_once_resolved(data->easy_conn, &protocol_connect);
 
         if(result)
-          /* if Curl_async_resolved() returns failure, the connection struct
+          /* if Curl_once_resolved() returns failure, the connection struct
              is already freed and gone */
           data->easy_conn = NULL;           /* no more connection */
         else {
@@ -2132,15 +2132,21 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(CURLM_STATE_COMPLETED == data->mstate) {
-      /* now fill in the Curl_message with this info */
-      msg = &data->msg;
+      if(data->set.fmultidone) {
+        /* signal via callback instead */
+        data->set.fmultidone(data, result);
+      }
+      else {
+        /* now fill in the Curl_message with this info */
+        msg = &data->msg;
 
-      msg->extmsg.msg = CURLMSG_DONE;
-      msg->extmsg.easy_handle = data;
-      msg->extmsg.data.result = result;
+        msg->extmsg.msg = CURLMSG_DONE;
+        msg->extmsg.easy_handle = data;
+        msg->extmsg.data.result = result;
 
-      rc = multi_addmsg(multi, msg);
-      DEBUGASSERT(!data->easy_conn);
+        rc = multi_addmsg(multi, msg);
+        DEBUGASSERT(!data->easy_conn);
+      }
       multistate(data, CURLM_STATE_MSGSENT);
     }
   } while((rc == CURLM_CALL_MULTI_PERFORM) || multi_ischanged(multi, FALSE));

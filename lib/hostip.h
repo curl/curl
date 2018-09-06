@@ -145,12 +145,7 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
-CURLcode Curl_async_resolved(struct connectdata *conn,
-                             bool *protocol_connect);
-
-#ifndef CURLRES_ASYNCH
-#define Curl_async_resolved(x,y) CURLE_OK
-#endif
+CURLcode Curl_once_resolved(struct connectdata *conn, bool *protocol_connect);
 
 /*
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
@@ -257,5 +252,11 @@ void Curl_hostcache_destroy(struct Curl_easy *data);
  * Populate the cache with specified entries from CURLOPT_RESOLVE.
  */
 CURLcode Curl_loadhostpairs(struct Curl_easy *data);
+
+CURLcode Curl_resolv_check(struct connectdata *conn,
+                           struct Curl_dns_entry **dns);
+int Curl_resolv_getsock(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks);
 
 #endif /* HEADER_CURL_HOSTIP_H */

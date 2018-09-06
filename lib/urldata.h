@@ -476,7 +476,6 @@ struct hostname {
 #define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
 
 
-#ifdef CURLRES_ASYNCH
 struct Curl_async {
   char *hostname;
   int port;
@@ -485,7 +484,6 @@ struct Curl_async {
   int status; /* if done is TRUE, this is the status from the callback */
   void *os_specific;  /* 'struct thread_data' for Windows */
 };
-#endif
 
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
@@ -509,6 +507,28 @@ enum upgrade101 {
   UPGR101_REQUESTED,          /* upgrade requested */
   UPGR101_RECEIVED,           /* response received */
   UPGR101_WORKING             /* talking upgraded protocol */
+};
+
+struct dohresponse {
+  unsigned char *memory;
+  size_t size;
+};
+
+/* one of these for each DoH request */
+struct dnsprobe {
+  CURL *easy;
+  int dnstype;
+  unsigned char dohbuffer[512];
+  size_t dohlen;
+  struct dohresponse serverdoh;
+};
+
+struct dohdata {
+  struct curl_slist *headers;
+  struct dnsprobe probe[2];
+  unsigned int pending; /* still outstanding requests */
+  const char *host;
+  int port;
 };
 
 /*
@@ -606,6 +626,7 @@ struct SingleRequest {
 
   void *protop;       /* Allocated protocol-specific data. Each protocol
                          handler makes sure this points to data it needs. */
+  struct dohdata doh; /* DoH specific data for this request */
 };
 
 /*
@@ -969,11 +990,8 @@ struct connectdata {
 #endif
 
   char syserr_buf [256]; /* buffer for Curl_strerror() */
-
-#ifdef CURLRES_ASYNCH
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
-#endif
 
   /* These three are used for chunked-encoding trailer support */
   char *trailer; /* allocated buffer to store trailer in */
@@ -1442,6 +1460,7 @@ enum dupstring {
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
 #endif
   STRING_TARGET,                /* CURLOPT_REQUEST_TARGET */
+  STRING_DOH,                   /* CURLOPT_DOH_URL */
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
@@ -1452,6 +1471,11 @@ enum dupstring {
 
   STRING_LAST /* not used, just an end-of-list marker */
 };
+
+/* callback that gets called when this easy handle is completed within a multi
+   handle.  Only used for internally created transfers, like for example
+   DoH. */
+typedef int (*multidone_func)(struct Curl_easy *easy, CURLcode result);
 
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
@@ -1688,6 +1712,10 @@ struct UserDefined {
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   bool disallow_username_in_url; /* disallow username in url */
+  bool doh; /* DNS-over-HTTPS enabled */
+  bool doh_get; /* use GET for DoH requests, instead of POST */
+  multidone_func fmultidone;
+  struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
 };
 
 struct Names {
