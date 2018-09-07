@@ -51,7 +51,7 @@ int main(void)
   CURL *http_handle;
   CURLM *multi_handle;
 
-  int still_running; /* keep number of running handles */
+  int still_running = 0; /* keep number of running handles */
   int repeats = 0;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -70,7 +70,7 @@ int main(void)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     CURLMcode mc; /* curl_multi_wait() return code */
     int numfds;
 
@@ -97,7 +97,7 @@ int main(void)
       repeats = 0;
 
     curl_multi_perform(multi_handle, &still_running);
-  } while(still_running);
+  }
 
   curl_multi_remove_handle(multi_handle, http_handle);
 

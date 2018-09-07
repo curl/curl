@@ -35,7 +35,7 @@ int main(void)
   CURL *curl;
 
   CURLM *multi_handle;
-  int still_running;
+  int still_running = 0;
 
   curl_mime *form = NULL;
   curl_mimepart *field = NULL;
@@ -79,7 +79,7 @@ int main(void)
 
     curl_multi_perform(multi_handle, &still_running);
 
-    do {
+    while(still_running) {
       struct timeval timeout;
       int rc; /* select() return code */
       CURLMcode mc; /* curl_multi_fdset() return code */
@@ -150,7 +150,7 @@ int main(void)
         printf("running: %d!\n", still_running);
         break;
       }
-    } while(still_running);
+    }
 
     curl_multi_cleanup(multi_handle);
 
