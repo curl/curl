@@ -218,11 +218,14 @@ static CURLcode dohprobe(struct Curl_easy *data,
   /* Curl_open() is the internal version of curl_easy_init() */
   result = Curl_open(&doh);
   if(!result) {
+    /* pass in the struct pointer via a local variable to please coverity and
+       the gcc typecheck helpers */
+    struct dohresponse *resp = &p->serverdoh;
     ERROR_CHECK_SETOPT(CURLOPT_URL, url);
     ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_write_cb);
-    ERROR_CHECK_SETOPT(CURLOPT_WRITEDATA, (void *)&p->serverdoh);
+    ERROR_CHECK_SETOPT(CURLOPT_WRITEDATA, resp);
     if(!data->set.doh_get) {
-      ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDS, &p->dohbuffer[0]);
+      ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDS, p->dohbuffer);
       ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDSIZE, p->dohlen);
     }
     ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, headers);
