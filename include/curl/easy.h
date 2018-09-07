@@ -97,13 +97,13 @@ CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
 
 
 /*
- * NAME curl_easy_conn_upkeep()
+ * NAME curl_easy_upkeep()
  *
  * DESCRIPTION
  *
  * Performs connection upkeep for the given session handle.
  */
-CURL_EXTERN CURLcode curl_easy_conn_upkeep(CURL *curl);
+CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 
 #ifdef  __cplusplus
 }

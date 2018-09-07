@@ -1201,7 +1201,7 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
 /*
  * Performs connection upkeep for the given session handle.
  */
-CURLcode curl_easy_conn_upkeep(struct Curl_easy *data)
+CURLcode curl_easy_upkeep(struct Curl_easy *data)
 {
   /* Verify that we got an easy handle we can work with. */
   if(!GOOD_EASY_HANDLE(data))
@@ -1209,7 +1209,7 @@ CURLcode curl_easy_conn_upkeep(struct Curl_easy *data)
 
   if(data->multi_easy) {
     /* Use the common function to keep connections alive. */
-    return Curl_conn_upkeep(&data->multi_easy->conn_cache, data);
+    return Curl_upkeep(&data->multi_easy->conn_cache, data);
   }
   else {
     /* No connections, so just return success */

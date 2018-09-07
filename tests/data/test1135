@@ -75,7 +75,7 @@ CURL_EXTERN CURL *curl_easy_duphandle(CURL *curl);
 CURL_EXTERN void curl_easy_reset(CURL *curl);
 CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
 CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
-CURL_EXTERN CURLcode curl_easy_conn_upkeep(CURL *curl);
+CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 CURL_EXTERN int curl_mprintf(const char *format, ...);
 CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...);
 CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...);
