@@ -245,7 +245,7 @@ int main(int argc, char **argv)
   CURL *easy[NUM_HANDLES];
   CURLM *multi_handle;
   int i;
-  int still_running; /* keep number of running handles */
+  int still_running = 0; /* keep number of running handles */
   const char *filename = "index.html";
 
   if(argc > 1)
@@ -279,7 +279,7 @@ int main(int argc, char **argv)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     struct timeval timeout;
     int rc; /* select() return code */
     CURLMcode mc; /* curl_multi_fdset() return code */
@@ -348,7 +348,7 @@ int main(int argc, char **argv)
       curl_multi_perform(multi_handle, &still_running);
       break;
     }
-  } while(still_running);
+  }
 
   curl_multi_cleanup(multi_handle);
 
