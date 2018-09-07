@@ -77,7 +77,7 @@ int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
 void Curl_getoff_all_pipelines(struct Curl_easy *data,
                                struct connectdata *conn);
 
-CURLcode Curl_conn_upkeep(struct conncache *conn_cache, void *data);
+CURLcode Curl_upkeep(struct conncache *conn_cache, void *data);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
