@@ -20,13 +20,13 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_CONN_UPKEEP_INTERVAL_MS 3 "31 Oct 2018" "libcurl 7.62.0" "curl_easy_setopt options"
+.TH CURLOPT_UPKEEP_INTERVAL_MS 3 "31 Oct 2018" "libcurl 7.62.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_CONN_UPKEEP_INTERVAL_MS \- connection upkeep interval
+CURLOPT_UPKEEP_INTERVAL_MS \- connection upkeep interval
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONN_UPKEEP_INTERVAL_MS, long upkeep_interval_ms);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPKEEP_INTERVAL_MS, long upkeep_interval_ms);
 .SH DESCRIPTION
 Some protocols have "connection upkeep" mechanisms. These mechanisms usually
 send some traffic on existing connections in order to keep them alive; this
@@ -50,7 +50,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
   /* Set the interval to 30000ms / 30s */
-  curl_easy_setopt(curl, CURLOPT_CONN_UPKEEP_INTERVAL_MS, 30000L);
+  curl_easy_setopt(curl, CURLOPT_UPKEEP_INTERVAL_MS, 30000L);
 
   curl_easy_perform(curl);
 

@@ -4871,7 +4871,7 @@ static int conn_upkeep(struct connectdata *conn,
   return 0; /* continue iteration */
 }
 
-CURLcode Curl_conn_upkeep(struct conncache *conn_cache,
+CURLcode Curl_upkeep(struct conncache *conn_cache,
                           void *data)
 {
   /* Loop over every connection and make connection alive. */

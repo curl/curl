@@ -2624,7 +2624,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
                             va_arg(param, char *));
     data->set.doh = data->set.str[STRING_DOH]?TRUE:FALSE;
     break;
-  case CURLOPT_CONN_UPKEEP_INTERVAL_MS:
+  case CURLOPT_UPKEEP_INTERVAL_MS:
     arg = va_arg(param, long);
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;

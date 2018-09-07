@@ -1869,7 +1869,7 @@ typedef enum {
   CINIT(UPLOAD_BUFFERSIZE, LONG, 280),
 
   /* Time in ms between connection upkeep calls for long-lived connections. */
-  CINIT(CONN_UPKEEP_INTERVAL_MS, LONG, 281),
+  CINIT(UPKEEP_INTERVAL_MS, LONG, 281),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
