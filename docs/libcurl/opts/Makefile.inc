@@ -94,6 +94,7 @@ man_MANS =                                      \
   CURLOPT_CHUNK_END_FUNCTION.3                  \
   CURLOPT_CLOSESOCKETDATA.3                     \
   CURLOPT_CLOSESOCKETFUNCTION.3                 \
+  CURLOPT_CONN_UPKEEP_INTERVAL_MS.3             \
   CURLOPT_CONNECTTIMEOUT.3                      \
   CURLOPT_CONNECTTIMEOUT_MS.3                   \
   CURLOPT_CONNECT_ONLY.3                        \

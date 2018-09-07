@@ -729,6 +729,7 @@ struct Curl_handler {
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
+#define CONNCHECK_KEEPALIVE (1<<1)       /* Perform any keepalive function. */
 
 #define CONNRESULT_NONE 0                /* No extra information. */
 #define CONNRESULT_DEAD (1<<0)           /* The connection is dead. */
@@ -904,6 +905,13 @@ struct connectdata {
   const struct Curl_handler *given;   /* The protocol first given */
 
   long ip_version; /* copied from the Curl_easy at creation time */
+
+  /* Protocols can use a custom keepalive mechanism to keep connections alive.
+     This allows those protocols to track the last time the keepalive mechanism
+     was used on this connection. */
+  struct curltime keepalive;
+
+  long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
 
   /**** curl_get() phase fields */
 
@@ -1704,6 +1712,7 @@ struct UserDefined {
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   bool disallow_username_in_url; /* disallow username in url */
+  long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   bool doh; /* DNS-over-HTTPS enabled */
   bool doh_get; /* use GET for DoH requests, instead of POST */
   multidone_func fmultidone;
