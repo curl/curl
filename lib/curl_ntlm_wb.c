@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -249,6 +249,9 @@ done:
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
+/* if larger than this, something is seriously wrong */
+#define MAX_NTLM_WB_RESPONSE 100000
+
 static CURLcode ntlm_wb_response(struct connectdata *conn,
                                  const char *input, curlntlm state)
 {
@@ -289,6 +292,12 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
       buf[len_out - 1] = '\0';
       break;
     }
+
+    if(len_out > MAX_NTLM_WB_RESPONSE) {
+      failf(conn->data, "too large ntlm_wb response!");
+      return CURLE_OUT_OF_MEMORY;
+    }
+
     newbuf = Curl_saferealloc(buf, len_out + NTLM_BUFSIZE);
     if(!newbuf)
       return CURLE_OUT_OF_MEMORY;
