@@ -38,6 +38,7 @@ addons:
             - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
             - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
+            - gnutls-bin
 
 matrix:
     include:
