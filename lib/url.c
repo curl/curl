@@ -1944,7 +1944,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   return NULL;
 }
 
-/* returns the handdler if the given scheme is built-in */
+/* returns the handler if the given scheme is built-in */
 const struct Curl_handler *Curl_builtin_scheme(const char *scheme)
 {
   const struct Curl_handler * const *pp;
@@ -2250,7 +2250,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
        the host-name part */
     memmove(path + hostlen + 1, path, pathlen + 1);
 
-     /* now copy the trailing host part in front of the existing path */
+    /* now copy the trailing host part in front of the existing path */
     memcpy(path + 1, query, hostlen);
 
     path[0]='/'; /* prepend the missing slash */
