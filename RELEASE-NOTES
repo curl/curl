@@ -1,17 +1,34 @@
 Curl and libcurl 7.62.0
 
  Public curl releases:         177
- Command line options:         218
- curl_easy_setopt() options:   258
- Public functions in libcurl:  74
+ Command line options:         219
+ curl_easy_setopt() options:   261
+ Public functions in libcurl:  80
  Contributors:                 1787
 
 This release includes the following changes:
 
- o
+ o multiplex: enable by default [4]
+ o url: default to CURL_HTTP_VERSION_2TLS if built h2-enabled [4]
+ o setopt: add CURLOPT_DOH_URL [7]
+ o curl: --doh-url added [7]
+ o setopt: add CURLOPT_UPLOAD_BUFFERSIZE: set upload buffer size [8]
+ o imap: change from "FETCH" to "UID FETCH" [9]
+ o configure: add option to disable automatic OpenSSL config loading [10]
+ o upkeep: add a connection upkeep API: curl_easy_upkeep() [11]
+ o URL-API: added five new functions [12]
 
 This release includes the following bugfixes:
 
+ o pipelining: deprecated [1]
+ o test1452: mark as flaky [2]
+ o tests: add unit tests for url.c [3]
+ o CURLOPT_DNS_USE_GLOBAL_CACHE: deprecated [5]
+ o darwinssl: more specific and unified error codes [6]
+ o schannel: unified error code handling [6]
+ o openssl: return CURLE_PEER_FAILED_VERIFICATION on failure to parse issuer [6]
+ o x509asn1: return CURLE_PEER_FAILED_VERIFICATION on failure to parse cert [6]
+ o ssl: deprecate CURLE_SSL_CACERT in favour of a unified error code [6]
  o
 
 This release includes the following known bugs:
@@ -21,9 +38,23 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Daniel Gustafsson, Daniel Stenberg, Han Han, Jim Fuller, Marc Hörsken,
+  Max Dymond, Nicklas Avén, Philipp Waehnert, Thomas Glanzmann,
+  (9 contributors)
+
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=2705
+ [2] = https://curl.haxx.se/bug/?i=2941
+ [3] = https://curl.haxx.se/bug/?i=2937
+ [4] = https://curl.haxx.se/bug/?i=2709
+ [5] = https://curl.haxx.se/bug/?i=2942
+ [6] = https://curl.haxx.se/bug/?i=2901
+ [7] = https://curl.haxx.se/bug/?i=2668
+ [8] = https://curl.haxx.se/bug/?i=2896
+ [9] = https://curl.haxx.se/bug/?i=2789
+ [10] = https://curl.haxx.se/bug/?i=2724
+ [11] = https://curl.haxx.se/bug/?i=1641
+ [12] = https://curl.haxx.se/bug/?i=2842
