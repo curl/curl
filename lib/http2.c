@@ -203,7 +203,7 @@ static bool http2_connisdead(struct connectdata *conn)
     dead = !Curl_connalive(conn);
     if(!dead) {
       /* This happens before we've sent off a request and the connection is
-         not in use by any other thransfer, there shouldn't be any data here,
+         not in use by any other transfer, there shouldn't be any data here,
          only "protocol frames" */
       CURLcode result;
       struct http_conn *httpc = &conn->proto.httpc;
