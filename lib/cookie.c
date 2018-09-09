@@ -1266,12 +1266,8 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
             matches++;
           }
-          else {
-            fail:
-            /* failure, clear up the allocated chain and return NULL */
-            Curl_cookie_freelist(mainco);
-            return NULL;
-          }
+          else
+            goto fail;
         }
       }
     }
@@ -1309,6 +1305,11 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
   }
 
   return mainco; /* return the new list */
+
+fail:
+  /* failure, clear up the allocated chain and return NULL */
+  Curl_cookie_freelist(mainco);
+  return NULL;
 }
 
 /*****************************************************************************
