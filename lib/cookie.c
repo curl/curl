@@ -1218,7 +1218,6 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 {
   struct Cookie *newco;
   struct Cookie *co;
-  time_t now = time(NULL);
   struct Cookie *mainco = NULL;
   size_t matches = 0;
   bool is_ip;
@@ -1236,11 +1235,8 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
   co = c->cookies[myhash];
 
   while(co) {
-    /* only process this cookie if it is not expired or had no expire
-       date AND that if the cookie requires we're secure we must only
-       continue if we are! */
-    if((!co->expires || (co->expires > now)) &&
-       (co->secure?secure:TRUE)) {
+    /* if the cookie requires we're secure we must only continue if we are! */
+    if(co->secure?secure:TRUE) {
 
       /* now check if the domain is correct */
       if(!co->domain ||
