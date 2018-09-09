@@ -552,7 +552,7 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
       }
     }
     if(carry) {         /* first pattern ptr has run into overflow, done! */
-      /* TODO: verify if this should actally return CURLE_OK. */
+      /* TODO: verify if this should actually return CURLE_OK. */
       return CURLE_OK; /* CURLE_OK to match previous behavior */
     }
   }
