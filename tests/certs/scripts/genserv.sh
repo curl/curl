@@ -15,7 +15,7 @@ USAGE="echo Usage is genserv.sh <prefix> <caprefix>"
 HOME=`pwd`
 cd $HOME
 
-KEYSIZE=1024
+KEYSIZE=2048
 DURATION=3000
 
 REQ=YES
