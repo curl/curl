@@ -628,7 +628,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 
   /* handle the file: scheme */
   if(url_has_scheme && strcasecompare(schemebuf, "file")) {
-    /* path has been allocated large anough to hold this */
+    /* path has been allocated large enough to hold this */
     strcpy(path, &url[5]);
 
     hostname = NULL; /* no host for file: URLs */
