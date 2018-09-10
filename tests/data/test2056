@@ -8,17 +8,7 @@ HTTP Negotiate auth (stub krb5)
 </info>
 # Server-side
 <reply>
-<!-- First request, expect 401 Negotiate -->
-<data>
-HTTP/1.1 401 Authorization Required
-Server: Microsoft-IIS/7.0
-Content-Type: text/html; charset=iso-8859-1
-WWW-Authenticate: Negotiate
-Content-Length: 13
-
-Not yet sir!
-</data>
-<!-- Second request, expect success in one shot -->
+<!-- First request, expect success in one shot -->
 <data1>
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/7.0
@@ -29,12 +19,6 @@ Content-Length: 15
 Nice auth sir!
 </data1>
 <datacheck>
-HTTP/1.1 401 Authorization Required
-Server: Microsoft-IIS/7.0
-Content-Type: text/html; charset=iso-8859-1
-WWW-Authenticate: Negotiate
-Content-Length: 13
-
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/7.0
 Content-Type: text/html; charset=iso-8859-1
@@ -73,10 +57,6 @@ CURL_STUB_GSS_CREDS="KRB5_Alice"
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /2056 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-
 GET /2056 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Negotiate IktSQjVfQWxpY2UiOkhUVFBAMTI3LjAuMC4xOjE6QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ==

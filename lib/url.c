@@ -806,6 +806,10 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   /* Cleanup NTLM connection-related data */
   Curl_http_ntlm_cleanup(conn);
 #endif
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
+  /* Cleanup NEGOTIATE connection-related data */
+  Curl_cleanup_negotiate(conn);
+#endif
 
   /* the protocol specific disconnect handler and conn_shutdown need a transfer
      for the connection! */

@@ -481,8 +481,36 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
             (curl_off_t)(expectsend - bytessent));
     }
 #endif
+#if defined(USE_SPNEGO)
+    /* There is still data left to send */
+    if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
+       (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
+      if(((expectsend - bytessent) < 2000) ||
+         (conn->negotiate.state != GSS_AUTHNONE) ||
+         (conn->proxyneg.state != GSS_AUTHNONE)) {
+        /* The NEGOTIATE-negotiation has started *OR*
+        there is just a little (<2K) data left to send, keep on sending. */
 
-    /* This is not NTLM or many bytes left to send: close */
+        /* rewind data when completely done sending! */
+        if(!conn->bits.authneg && (conn->writesockfd != CURL_SOCKET_BAD)) {
+          conn->bits.rewindaftersend = TRUE;
+          infof(data, "Rewind stream after send\n");
+        }
+
+        return CURLE_OK;
+      }
+
+      if(conn->bits.close)
+        /* this is already marked to get closed */
+        return CURLE_OK;
+
+      infof(data, "NEGOTIATE send, close instead of sending %"
+        CURL_FORMAT_CURL_OFF_T " bytes\n",
+        (curl_off_t)(expectsend - bytessent));
+    }
+#endif
+
+    /* This is not NEGOTIATE/NTLM or many bytes left to send: close */
     streamclose(conn, "Mid-auth HTTP and much data left to send");
     data->req.size = 0; /* don't download any more than 0 bytes */
 
@@ -600,10 +628,6 @@ output_auth_headers(struct connectdata *conn,
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(USE_SPNEGO)
   struct Curl_easy *data = conn->data;
 #endif
-#ifdef USE_SPNEGO
-  struct negotiatedata *negdata = proxy ?
-    &data->state.proxyneg : &data->state.negotiate;
-#endif
 
 #ifdef CURL_DISABLE_CRYPTO_AUTH
   (void)request;
@@ -611,15 +635,11 @@ output_auth_headers(struct connectdata *conn,
 #endif
 
 #ifdef USE_SPNEGO
-  negdata->state = GSS_AUTHNONE;
-  if((authstatus->picked == CURLAUTH_NEGOTIATE) &&
-     negdata->context && !GSS_ERROR(negdata->status)) {
+  if((authstatus->picked == CURLAUTH_NEGOTIATE)) {
     auth = "Negotiate";
     result = Curl_output_negotiate(conn, proxy);
     if(result)
       return result;
-    authstatus->done = TRUE;
-    negdata->state = GSS_AUTHSENT;
   }
   else
 #endif
@@ -796,7 +816,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
 
 #ifdef USE_SPNEGO
   struct negotiatedata *negdata = proxy?
-    &data->state.proxyneg:&data->state.negotiate;
+    &conn->proxyneg:&conn->negotiate;
 #endif
   unsigned long *availp;
   struct auth *authp;
@@ -835,21 +855,18 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
         authp->avail |= CURLAUTH_NEGOTIATE;
 
         if(authp->picked == CURLAUTH_NEGOTIATE) {
-          if(negdata->state == GSS_AUTHSENT ||
-             negdata->state == GSS_AUTHNONE) {
-            CURLcode result = Curl_input_negotiate(conn, proxy, auth);
-            if(!result) {
-              DEBUGASSERT(!data->req.newurl);
-              data->req.newurl = strdup(data->change.url);
-              if(!data->req.newurl)
-                return CURLE_OUT_OF_MEMORY;
-              data->state.authproblem = FALSE;
-              /* we received a GSS auth token and we dealt with it fine */
-              negdata->state = GSS_AUTHRECV;
-            }
-            else
-              data->state.authproblem = TRUE;
+          CURLcode result = Curl_input_negotiate(conn, proxy, auth);
+          if(!result) {
+            DEBUGASSERT(!data->req.newurl);
+            data->req.newurl = strdup(data->change.url);
+            if(!data->req.newurl)
+              return CURLE_OUT_OF_MEMORY;
+            data->state.authproblem = FALSE;
+            /* we received a GSS auth token and we dealt with it fine */
+            negdata->state = GSS_AUTHRECV;
           }
+          else
+            data->state.authproblem = TRUE;
         }
       }
     }
@@ -1554,20 +1571,6 @@ CURLcode Curl_http_done(struct connectdata *conn,
   data->state.authproxy.multipass = FALSE;
 
   Curl_unencode_cleanup(conn);
-
-#ifdef USE_SPNEGO
-  if(data->state.proxyneg.state == GSS_AUTHSENT ||
-     data->state.negotiate.state == GSS_AUTHSENT) {
-    /* add forbid re-use if http-code != 401/407 as a WA only needed for
-     * 401/407 that signal auth failure (empty) otherwise state will be RECV
-     * with current code.
-     * Do not close CONNECT_ONLY connections. */
-    if((data->req.httpcode != 401) && (data->req.httpcode != 407) &&
-       !data->set.connect_only)
-      streamclose(conn, "Negotiate transfer completed");
-    Curl_cleanup_negotiate(data);
-  }
-#endif
 
   /* set the proper values (possibly modified on POST) */
   conn->seek_func = data->set.seek_func; /* restore */
@@ -3376,7 +3379,24 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         data->state.authproblem = TRUE;
       }
 #endif
-
+#if defined(USE_SPNEGO)
+      if(conn->bits.close &&
+        (((data->req.httpcode == 401) &&
+          (conn->negotiate.state == GSS_AUTHRECV)) ||
+         ((data->req.httpcode == 407) &&
+          (conn->proxyneg.state == GSS_AUTHRECV)))) {
+        infof(data, "Connection closure while negotiating auth (HTTP 1.0?)\n");
+        data->state.authproblem = TRUE;
+      }
+      if((conn->negotiate.state == GSS_AUTHDONE) &&
+         (data->req.httpcode != 401)) {
+        conn->negotiate.state = GSS_AUTHSUCC;
+      }
+      if((conn->proxyneg.state == GSS_AUTHDONE) &&
+         (data->req.httpcode != 407)) {
+        conn->proxyneg.state = GSS_AUTHSUCC;
+      }
+#endif
       /*
        * When all the headers have been parsed, see if we should give
        * up and return an error.
@@ -3953,6 +3973,22 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(result)
         return result;
     }
+  #ifdef USE_SPNEGO
+    else if(checkprefix("Persistent-Auth", k->p)) {
+      struct negotiatedata *negdata = &conn->negotiate;
+      struct auth *authp = &data->state.authhost;
+      if(authp->picked == CURLAUTH_NEGOTIATE) {
+        char *persistentauth = Curl_copy_header_value(k->p);
+        if(!persistentauth)
+          return CURLE_OUT_OF_MEMORY;
+        negdata->noauthpersist = checkprefix("false", persistentauth);
+        negdata->havenoauthpersist = TRUE;
+        infof(data, "Negotiate: noauthpersist -> %d, header part: %s",
+          negdata->noauthpersist, persistentauth);
+        free(persistentauth);
+      }
+    }
+  #endif
     else if((k->httpcode >= 300 && k->httpcode < 400) &&
             checkprefix("Location:", k->p) &&
             !data->req.location) {
