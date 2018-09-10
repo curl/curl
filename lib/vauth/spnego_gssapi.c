@@ -273,6 +273,11 @@ void Curl_auth_spnego_cleanup(struct negotiatedata *nego)
 
   /* Reset any variables */
   nego->status = 0;
+  nego->state = GSS_AUTHNONE;
+  nego->noauthpersist = FALSE;
+  nego->havenoauthpersist = FALSE;
+  nego->havenegdata = FALSE;
+  nego->havemultiplerequests = FALSE;
 }
 
 #endif /* HAVE_GSSAPI && USE_SPNEGO */
