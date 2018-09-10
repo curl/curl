@@ -22,6 +22,10 @@
 #include <winver.h>
 #include "tool_version.h"
 
+#if defined(CURL_EMBED_ICON) && !defined(UNDER_CE)
+1 ICON DISCARDABLE "curl.ico"
+#endif
+
 LANGUAGE  0x09,0x01
 
 #define RC_VERSION  CURL_VERSION_MAJOR, CURL_VERSION_MINOR, CURL_VERSION_PATCH, 0
