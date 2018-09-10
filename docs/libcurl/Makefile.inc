@@ -79,4 +79,5 @@ man_MANS =			\
  libcurl-symbols.3		\
  libcurl-thread.3		\
  libcurl-tutorial.3		\
+ libcurl-url.3                  \
  libcurl.3
