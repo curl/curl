@@ -251,6 +251,7 @@ my $has_darwinssl;  # built with DarwinSSL (Secure Transport)
 my $has_boringssl;  # built with BoringSSL
 my $has_libressl;   # built with libressl
 my $has_mbedtls;    # built with mbedTLS
+my $has_mesalink;   # built with MesaLink
 
 my $has_sslpinning; # built with a TLS backend that supports pinning
 
@@ -2746,6 +2747,10 @@ sub checksystem {
            if ($libcurl =~ /ares/i) {
                $has_cares=1;
                $resolver="c-ares";
+           }
+           if ($libcurl =~ /mesalink/i) {
+               $has_mesalink=1;
+               $ssllib="MesaLink";
            }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
