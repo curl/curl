@@ -393,7 +393,11 @@ set_ssl_version_min_max(int *list, size_t list_size, struct connectdata *conn)
       ssl_version_max = ssl_version << 16;
       break;
     case CURL_SSLVERSION_MAX_DEFAULT:
+#if GNUTLS_VERSION_NUMBER >= 0x030603
+      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
+#else
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
+#endif
       break;
   }
 
@@ -410,8 +414,13 @@ set_ssl_version_min_max(int *list, size_t list_size, struct connectdata *conn)
         protocol_priority[protocol_priority_idx++] = GNUTLS_TLS1_2;
         break;
       case CURL_SSLVERSION_TLSv1_3:
+#if GNUTLS_VERSION_NUMBER >= 0x030603
+        protocol_priority[protocol_priority_idx++] = GNUTLS_TLS1_3;
+        break;
+#else
         failf(data, "GnuTLS: TLS 1.3 is not yet supported");
         return CURLE_SSL_CONNECT_ERROR;
+#endif
     }
   }
   return CURLE_OK;
@@ -429,11 +438,7 @@ set_ssl_version_min_max(const char **prioritylist, struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   long ssl_version = SSL_CONN_CONFIG(version);
   long ssl_version_max = SSL_CONN_CONFIG(version_max);
-  if(ssl_version == CURL_SSLVERSION_TLSv1_3 ||
-     ssl_version_max == CURL_SSLVERSION_MAX_TLSv1_3) {
-    failf(data, "GnuTLS: TLS 1.3 is not yet supported");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+
   if(ssl_version_max == CURL_SSLVERSION_MAX_NONE) {
     ssl_version_max = ssl_version << 16;
   }
@@ -465,6 +470,16 @@ set_ssl_version_min_max(const char **prioritylist, struct connectdata *conn)
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
                       "+VERS-TLS1.2:" GNUTLS_SRP;
       return CURLE_OK;
+    case CURL_SSLVERSION_TLSv1_3 | CURL_SSLVERSION_MAX_TLSv1_3:
+    case CURL_SSLVERSION_TLSv1_3 | CURL_SSLVERSION_MAX_DEFAULT:
+#if GNUTLS_VERSION_NUMBER >= 0x030603
+       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
+                      "+VERS-TLS1.3:" GNUTLS_SRP;
+      return CURLE_OK;
+#else
+       failf(data, "GnuTLS: TLS 1.3 is not yet supported");
+      return CURLE_SSL_CONNECT_ERROR;
+#endif
   }
 
   failf(data, "GnuTLS: cannot set ssl protocol");
@@ -677,6 +692,9 @@ gtls_connect_step1(struct connectdata *conn,
       protocol_priority[0] = GNUTLS_TLS1_0;
       protocol_priority[1] = GNUTLS_TLS1_1;
       protocol_priority[2] = GNUTLS_TLS1_2;
+#if GNUTLS_VERSION_NUMBER >= 0x030603
+      protocol_priority[3] = GNUTLS_TLS1_3;
+#endif
       break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
@@ -713,7 +731,11 @@ gtls_connect_step1(struct connectdata *conn,
       break;
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
+#if GNUTLS_VERSION_NUMBER >= 0x030603
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:+VERS-TLS1.3:" GNUTLS_SRP;
+#else
       prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:" GNUTLS_SRP;
+#endif
       break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
