@@ -295,12 +295,13 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
 
     if(len_out > MAX_NTLM_WB_RESPONSE) {
       failf(conn->data, "too large ntlm_wb response!");
-      goto fail;
+      free(buf);
+      return CURLE_OUT_OF_MEMORY;
     }
 
     newbuf = Curl_saferealloc(buf, len_out + NTLM_BUFSIZE);
     if(!newbuf)
-      goto fail;
+      return CURLE_OUT_OF_MEMORY;
 
     buf = newbuf;
   }
@@ -327,9 +328,6 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
 done:
   free(buf);
   return CURLE_REMOTE_ACCESS_DENIED;
-fail:
-  free(buf);
-  return CURLE_OUT_OF_MEMORY;
 }
 
 /*
