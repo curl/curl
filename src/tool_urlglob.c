@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -459,18 +459,19 @@ CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
     *urlnum = amount;
   else {
     if(error && glob_expand->error) {
-      char text[128];
+      char text[512];
       const char *t;
       if(glob_expand->pos) {
-        snprintf(text, sizeof(text), "%s in column %zu", glob_expand->error,
-                 glob_expand->pos);
+        snprintf(text, sizeof(text), "%s in URL position %zu:\n%s\n%*s^",
+                 glob_expand->error,
+                 glob_expand->pos, url, glob_expand->pos - 1, " ");
         t = text;
       }
       else
         t = glob_expand->error;
 
       /* send error description to the error-stream */
-      fprintf(error, "curl: (%d) [globbing] %s\n", res, t);
+      fprintf(error, "curl: (%d) %s\n", res, t);
     }
     /* it failed, we cleanup */
     glob_cleanup(glob_expand);
