@@ -253,7 +253,7 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
       if(!buf)
         return;
     }
-    strncpy(buf, line, linelen);
+    memcpy(buf, line, linelen);
     buf[linelen] = '\n';
     buf[linelen + 1] = '\0';
 
