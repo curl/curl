@@ -916,7 +916,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  server's key. MD5 is generally being deprecated so we should implement
  support for stronger hashing algorithms. libssh2 itself is what provides this
  underlying functionality and it supports at least SHA-1 as an alternative.
- SHA-1 is also being deprecated these days so we should consider workign with
+ SHA-1 is also being deprecated these days so we should consider working with
  libssh2 to instead offer support for SHA-256 or similar.
 
 17.4 Support CURLOPT_PREQUOTE
