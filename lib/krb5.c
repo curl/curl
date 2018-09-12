@@ -265,6 +265,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
           result = CURLE_OUT_OF_MEMORY;
 
         free(p);
+        free(cmd);
 
         if(result) {
           ret = -2;
