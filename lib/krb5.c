@@ -206,7 +206,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
     if(maj != GSS_S_COMPLETE) {
       gss_release_name(&min, &gssname);
       if(service == srv_host) {
-        Curl_failf(data, "Error importing service name %s@%s", service, host);
+        failf(data, "Error importing service name %s@%s", service, host);
         return AUTH_ERROR;
       }
       service = srv_host;
@@ -290,8 +290,7 @@ krb5_auth(void *app_data, struct connectdata *conn)
                                       (unsigned char **)&_gssresp.value,
                                       &_gssresp.length);
           if(result) {
-            Curl_failf(data, "base64-decoding: %s",
-                       curl_easy_strerror(result));
+            failf(data, "base64-decoding: %s", curl_easy_strerror(result));
             ret = AUTH_CONTINUE;
             break;
           }
