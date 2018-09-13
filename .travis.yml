@@ -6,6 +6,7 @@ cache:
         - $HOME/mbedtls-mbedtls-2.8.0
         - $HOME/libidn2-2.0.4
         - $HOME/wolfssl-3.14.0-stable
+        - $HOME/mesalink-0.7.1
 
 env:
     global:
@@ -68,6 +69,10 @@ matrix:
           compiler: gcc
           dist: trusty
           env: T=debug-wolfssl C="--with-wolfssl --without-ssl"
+        - os: linux
+          compiler: gcc
+          dist: trusty
+          env: T=debug-mesalink C="--with-mesalink --without-ssl"
         - os: linux
           compiler: clang
           dist: trusty
@@ -221,10 +226,25 @@ before_script:
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
+        if [ ! -e $HOME/mesalink-0.7.1/Makefile ]; then
+          (cd $HOME && \
+          curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+          source $HOME/.cargo/env && \
+          curl -LO https://github.com/mesalock-linux/mesalink/archive/v0.7.1.tar.gz && \
+          tar -xzf v0.7.1.tar.gz && \
+          cd mesalink-0.7.1 && \
+          ./autogen.sh && \
+          ./configure --enable-tls13  && \
+          make)
+        fi
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
         (cd $HOME/libidn2-2.0.4 && sudo make install)
         (cd $HOME/libpsl-0.20.1 && sudo make install)
         (cd $HOME/mbedtls-mbedtls-2.8.0 && sudo make install)
         (cd $HOME/wolfssl-3.14.0-stable && sudo make install)
+        (cd $HOME/mesalink-0.7.1 && sudo make install)
       fi
 
 script:
@@ -256,6 +276,13 @@ script:
              ./configure --enable-debug --enable-werror $C
              make
              make "TFLAGS=-n !311 !313" test-nonflaky
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "debug-mesalink" ]; then
+             ./configure --enable-debug --enable-werror $C
+             make
+             make "TFLAGS=-n !313" test-nonflaky
         fi
     - |
         set -eo pipefail

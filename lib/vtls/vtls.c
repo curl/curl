@@ -1190,6 +1190,8 @@ const struct Curl_ssl *Curl_ssl =
   &Curl_ssl_polarssl;
 #elif defined(USE_SCHANNEL)
   &Curl_ssl_schannel;
+#elif defined(USE_MESALINK)
+  &Curl_ssl_mesalink;
 #else
 #error "Missing struct Curl_ssl for selected SSL backend"
 #endif
@@ -1224,6 +1226,9 @@ static const struct Curl_ssl *available_backends[] = {
 #endif
 #if defined(USE_SCHANNEL)
   &Curl_ssl_schannel,
+#endif
+#if defined(USE_MESALINK)
+  &Curl_ssl_mesalink,
 #endif
   NULL
 };
