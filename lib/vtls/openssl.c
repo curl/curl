@@ -69,7 +69,7 @@
 #include <openssl/ocsp.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10000000L) && /* 1.0.0 or later */     \
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && /* 0.9.8 or later */     \
   !defined(OPENSSL_NO_ENGINE)
 #define USE_OPENSSL_ENGINE
 #include <openssl/engine.h>
