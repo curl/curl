@@ -422,7 +422,7 @@ static int sec_set_protection_level(struct connectdata *conn)
 
   if(!conn->sec_complete) {
     infof(conn->data, "Trying to change the protection level after the"
-                      "completion of the data exchange.\n");
+                      " completion of the data exchange.\n");
     return -1;
   }
 
