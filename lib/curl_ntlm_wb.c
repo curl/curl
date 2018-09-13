@@ -295,6 +295,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
 
     if(len_out > MAX_NTLM_WB_RESPONSE) {
       failf(conn->data, "too large ntlm_wb response!");
+      free(buf);
       return CURLE_OUT_OF_MEMORY;
     }
 
