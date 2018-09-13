@@ -3963,10 +3963,14 @@ CURLcode Curl_ftpsend(struct connectdata *conn, const char *cmd)
   enum protection_level data_sec = conn->data_prot;
 #endif
 
-  write_len = strlen(cmd);
-  if(write_len > (sizeof(s) -3))
+  if(!cmd)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  write_len = strlen(cmd);
+  if(!write_len || write_len > (sizeof(s) -3))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  memcpy(&s, cmd, write_len);
   strcpy(&s[write_len], "\r\n"); /* append a trailing CRLF */
   write_len += 2;
   bytes_written = 0;
