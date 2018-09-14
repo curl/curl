@@ -1002,10 +1002,6 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
  */
 void curl_easy_reset(struct Curl_easy *data)
 {
-  Curl_safefree(data->state.pathbuffer);
-
-  data->state.path = NULL;
-
   Curl_free_request_state(data);
 
   /* zero out UserDefined data: */

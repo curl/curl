@@ -48,6 +48,8 @@ CURLcode Curl_open(struct Curl_easy **curl);
 CURLcode Curl_init_userdefined(struct Curl_easy *data);
 
 void Curl_freeset(struct Curl_easy * data);
+/* free the URL pieces */
+void Curl_up_free(struct Curl_easy *data);
 CURLcode Curl_close(struct Curl_easy *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, struct connectdata **,
                       bool *async, bool *protocol_connect);

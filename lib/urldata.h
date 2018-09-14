@@ -1224,6 +1224,18 @@ struct time_node {
   expire_id eid;
 };
 
+/* individual pieces of the URL */
+struct urlpieces {
+  char *scheme;
+  char *hostname;
+  char *port;
+  char *user;
+  char *password;
+  char *options;
+  char *path;
+  char *query;
+};
+
 struct UrlState {
 
   /* Points to the connection cache */
@@ -1314,9 +1326,6 @@ struct UrlState {
   /* for FTP downloads: how many CRLFs did we converted to LFs? */
   curl_off_t crlf_conversions;
 #endif
-  char *pathbuffer;/* allocated buffer to store the URL's path part in */
-  char *path;      /* path to use, points to somewhere within the pathbuffer
-                      area */
   bool slash_removed; /* set TRUE if the 'path' points to a path where the
                          initial URL slash separator has been taken off */
   bool use_range;
@@ -1350,6 +1359,8 @@ struct UrlState {
 #ifdef CURLDEBUG
   bool conncache_lock;
 #endif
+  CURLU *uh; /* URL handle for the current parsed URL */
+  struct urlpieces up;
 };
 
 

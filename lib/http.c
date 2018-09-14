@@ -1877,7 +1877,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
   struct HTTP *http;
-  const char *ppath = data->state.path;
+  const char *path = data->state.up.path;
+  const char *query = data->state.up.query;
   bool paste_ftp_userpwd = FALSE;
   char ftp_typecode[sizeof("/;type=?")] = "";
   const char *host = conn->host.name;
@@ -1995,7 +1996,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(conn, request, ppath, FALSE);
+  result = Curl_http_output_auth(conn, request, path, FALSE);
   if(result)
     return result;
 
@@ -2223,47 +2224,59 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     /* The path sent to the proxy is in fact the entire URL. But if the remote
        host is a IDN-name, we must make sure that the request we produce only
        uses the encoded host name! */
+
+    /* and no fragment part */
+    CURLUcode uc;
+    char *url;
+    CURLU *h = curl_url_dup(data->state.uh);
+    if(!h)
+      return CURLE_OUT_OF_MEMORY;
+
     if(conn->host.dispname != conn->host.name) {
-      char *url = data->change.url;
-      ptr = strstr(url, conn->host.dispname);
-      if(ptr) {
-        /* This is where the display name starts in the URL, now replace this
-           part with the encoded name. TODO: This method of replacing the host
-           name is rather crude as I believe there's a slight risk that the
-           user has entered a user name or password that contain the host name
-           string. */
-        size_t currlen = strlen(conn->host.dispname);
-        size_t newlen = strlen(conn->host.name);
-        size_t urllen = strlen(url);
-
-        char *newurl;
-
-        newurl = malloc(urllen + newlen - currlen + 1);
-        if(newurl) {
-          /* copy the part before the host name */
-          memcpy(newurl, url, ptr - url);
-          /* append the new host name instead of the old */
-          memcpy(newurl + (ptr - url), conn->host.name, newlen);
-          /* append the piece after the host name */
-          memcpy(newurl + newlen + (ptr - url),
-                 ptr + currlen, /* copy the trailing zero byte too */
-                 urllen - (ptr-url) - currlen + 1);
-          if(data->change.url_alloc) {
-            Curl_safefree(data->change.url);
-            data->change.url_alloc = FALSE;
-          }
-          data->change.url = newurl;
-          data->change.url_alloc = TRUE;
-        }
-        else
-          return CURLE_OUT_OF_MEMORY;
+      uc = curl_url_set(h, CURLUPART_HOST, conn->host.name, 0);
+      if(uc) {
+        curl_url_cleanup(h);
+        return CURLE_OUT_OF_MEMORY;
       }
     }
-    ppath = data->change.url;
-    if(checkprefix("ftp://", ppath)) {
+    uc = curl_url_set(h, CURLUPART_FRAGMENT, NULL, 0);
+    if(uc) {
+      curl_url_cleanup(h);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    if(strcasecompare("http", data->state.up.scheme)) {
+      /* when getting HTTP, we don't want the userinfo the URL */
+      uc = curl_url_set(h, CURLUPART_USER, NULL, 0);
+      if(uc) {
+        curl_url_cleanup(h);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      uc = curl_url_set(h, CURLUPART_PASSWORD, NULL, 0);
+      if(uc) {
+        curl_url_cleanup(h);
+        return CURLE_OUT_OF_MEMORY;
+      }
+    }
+    /* now extract the new version of the URL */
+    uc = curl_url_get(h, CURLUPART_URL, &url, 0);
+    if(uc) {
+      curl_url_cleanup(h);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    if(data->change.url_alloc)
+      free(data->change.url);
+
+    data->change.url = url;
+    data->change.url_alloc = TRUE;
+
+    curl_url_cleanup(h);
+
+    if(strcasecompare("ftp", data->state.up.scheme)) {
       if(data->set.proxy_transfer_mode) {
         /* when doing ftp, append ;type=<a|i> if not present */
-        char *type = strstr(ppath, ";type=");
+        char *type = strstr(path, ";type=");
         if(type && type[6] && type[7] == 0) {
           switch(Curl_raw_toupper(type[6])) {
           case 'A':
@@ -2278,7 +2291,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           char *p = ftp_typecode;
           /* avoid sending invalid URLs like ftp://example.com;type=i if the
            * user specified ftp://example.com without the slash */
-          if(!*data->state.path && ppath[strlen(ppath) - 1] != '/') {
+          if(!*data->state.up.path && path[strlen(path) - 1] != '/') {
             *p++ = '/';
           }
           snprintf(p, sizeof(ftp_typecode) - 1, ";type=%c",
@@ -2431,18 +2444,32 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  if(data->set.str[STRING_TARGET])
-    ppath = data->set.str[STRING_TARGET];
+  if(data->set.str[STRING_TARGET]) {
+    path = data->set.str[STRING_TARGET];
+    query = NULL;
+  }
 
   /* url */
-  if(paste_ftp_userpwd)
+  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+    char *url = data->change.url;
+    result = Curl_add_buffer(&req_buffer, url, strlen(url));
+    if(result)
+      return result;
+  }
+  else if(paste_ftp_userpwd)
     result = Curl_add_bufferf(&req_buffer, "ftp://%s:%s@%s",
                               conn->user, conn->passwd,
-                              ppath + sizeof("ftp://") - 1);
-  else
-    result = Curl_add_buffer(&req_buffer, ppath, strlen(ppath));
-  if(result)
-    return result;
+                              path + sizeof("ftp://") - 1);
+  else {
+    result = Curl_add_buffer(&req_buffer, path, strlen(path));
+    if(result)
+      return result;
+    if(query) {
+      result = Curl_add_bufferf(&req_buffer, "?%s", query);
+      if(result)
+        return result;
+    }
+  }
 
   result =
     Curl_add_bufferf(&req_buffer,
@@ -2515,7 +2542,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       co = Curl_cookie_getlist(data->cookies,
                                conn->allocptr.cookiehost?
                                conn->allocptr.cookiehost:host,
-                               data->state.path,
+                               data->state.up.path,
                                (conn->handler->protocol&CURLPROTO_HTTPS)?
                                TRUE:FALSE);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
@@ -3836,7 +3863,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                          here, or else use real peer host name. */
                       conn->allocptr.cookiehost?
                       conn->allocptr.cookiehost:conn->host.name,
-                      data->state.path);
+                      data->state.up.path);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
 #endif

@@ -78,7 +78,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   curl_off_t *bytecount = &data->req.bytecount;
-  char *path = data->state.path;
+  char *path = data->state.up.path;
   char *sel = NULL;
   char *sel_org = NULL;
   ssize_t amount, k;
