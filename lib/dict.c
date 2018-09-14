@@ -136,7 +136,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
-  char *path = data->state.path;
+  char *path = data->state.up.path;
   curl_off_t *bytecount = &data->req.bytecount;
 
   *done = TRUE; /* unconditionally */

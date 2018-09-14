@@ -567,7 +567,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             infof(data,
                   "Rewinding stream by : %zd"
                   " bytes on url %s (zero-length body)\n",
-                  nread, data->state.path);
+                  nread, data->state.up.path);
             read_rewind(conn, (size_t)nread);
           }
           else {
@@ -575,7 +575,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                   "Excess found in a non pipelined read:"
                   " excess = %zd"
                   " url = %s (zero-length body)\n",
-                  nread, data->state.path);
+                  nread, data->state.up.path);
           }
         }
 
@@ -744,7 +744,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                   " bytes on url %s (size = %" CURL_FORMAT_CURL_OFF_T
                   ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
                   ", bytecount = %" CURL_FORMAT_CURL_OFF_T ", nread = %zd)\n",
-                  excess, data->state.path,
+                  excess, data->state.up.path,
                   k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
           }
@@ -1474,6 +1474,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
   /* Location: redirect */
   bool disallowport = FALSE;
   bool reachedmax = FALSE;
+  CURLUcode uc;
 
   if(type == FOLLOW_REDIR) {
     if((data->set.maxredirs != -1) &&
@@ -1506,33 +1507,21 @@ CURLcode Curl_follow(struct Curl_easy *data,
     }
   }
 
-  if(!Curl_is_absolute_url(newurl, NULL, 8)) {
-    /***
-     *DANG* this is an RFC 2068 violation. The URL is supposed
-     to be absolute and this doesn't seem to be that!
-     */
-    char *absolute = Curl_concat_url(data->change.url, newurl);
-    if(!absolute)
-      return CURLE_OUT_OF_MEMORY;
-    newurl = absolute;
-  }
-  else {
-    /* The new URL MAY contain space or high byte values, that means a mighty
-       stupid redirect URL but we still make an effort to do "right". */
-    char *newest;
-    size_t newlen = Curl_strlen_url(newurl, FALSE);
-
+  if(Curl_is_absolute_url(newurl, NULL, MAX_SCHEME_LEN))
     /* This is an absolute URL, don't allow the custom port number */
     disallowport = TRUE;
 
-    newest = malloc(newlen + 1); /* get memory for this */
-    if(!newest)
-      return CURLE_OUT_OF_MEMORY;
+  DEBUGASSERT(data->state.uh);
+  uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl, 0);
+  free(newurl);
+  if(uc)
+    /* TODO: consider an error code remap here */
+    return CURLE_URL_MALFORMAT;
 
-    Curl_strcpy_url(newest, newurl, FALSE); /* create a space-free URL */
-    newurl = newest; /* use this instead now */
-
-  }
+  uc = curl_url_get(data->state.uh, CURLUPART_URL, &newurl, 0);
+  if(uc)
+    /* TODO: consider an error code remap here */
+    return CURLE_OUT_OF_MEMORY;
 
   if(type == FOLLOW_FAKE) {
     /* we're only figuring out the new url if we would've followed locations
@@ -1549,10 +1538,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
   if(disallowport)
     data->state.allow_port = FALSE;
 
-  if(data->change.url_alloc) {
+  if(data->change.url_alloc)
     Curl_safefree(data->change.url);
-    data->change.url_alloc = FALSE;
-  }
 
   data->change.url = newurl;
   data->change.url_alloc = TRUE;

@@ -128,6 +128,9 @@ struct querycase {
 };
 
 static struct testcase get_parts_list[] ={
+  {"https://[::1%252]:1234",
+   "https | [11] | [12] | [13] | [::1%252] | 1234 | / | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://127.0.0.1:443",
    "https | [11] | [12] | [13] | 127.0.0.1 | [15] | / | [16] | [17]",
    0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},

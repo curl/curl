@@ -542,10 +542,8 @@ static CURLcode multi_done(struct connectdata **connp,
   Curl_getoff_all_pipelines(data, conn);
 
   /* Cleanup possible redirect junk */
-  free(data->req.newurl);
-  data->req.newurl = NULL;
-  free(data->req.location);
-  data->req.location = NULL;
+  Curl_safefree(data->req.newurl);
+  Curl_safefree(data->req.location);
 
   switch(status) {
   case CURLE_ABORTED_BY_CALLBACK:
@@ -657,7 +655,6 @@ static CURLcode multi_done(struct connectdata **connp,
                     cache here, and therefore cannot be used from this point on
                  */
   Curl_free_request_state(data);
-
   return result;
 }
 
@@ -2015,8 +2012,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if(comeback)
         rc = CURLM_CALL_MULTI_PERFORM;
-
-      free(newurl);
       break;
     }
 

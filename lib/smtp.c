@@ -1441,7 +1441,6 @@ static CURLcode smtp_regular_transfer(struct connectdata *conn,
 
 static CURLcode smtp_setup_connection(struct connectdata *conn)
 {
-  struct Curl_easy *data = conn->data;
   CURLcode result;
 
   /* Clear the TLS upgraded flag */
@@ -1451,8 +1450,6 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
   result = smtp_init(conn);
   if(result)
     return result;
-
-  data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
 }
@@ -1507,7 +1504,7 @@ static CURLcode smtp_parse_url_path(struct connectdata *conn)
   /* The SMTP struct is already initialised in smtp_connect() */
   struct Curl_easy *data = conn->data;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  const char *path = data->state.path;
+  const char *path = &data->state.up.path[1]; /* skip leading path */
   char localhost[HOSTNAME_MAX + 1];
 
   /* Calculate the path if necessary */

@@ -53,10 +53,6 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
-/* scheme is not URL encoded, the longest libcurl supported ones are 6
-   letters */
-#define MAX_SCHEME_LEN 8
-
 static void free_urlhandle(struct Curl_URL *u)
 {
   free(u->scheme);
@@ -480,7 +476,7 @@ static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
   char endbracket;
   int len;
 
-  if((1 == sscanf(hostname, "[%*45[0123456789abcdefABCDEF:.]%c%n",
+  if((1 == sscanf(hostname, "[%*45[0123456789abcdefABCDEF:.%%]%c%n",
                   &endbracket, &len)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
@@ -561,7 +557,7 @@ static CURLUcode hostname_check(char *hostname, unsigned int flags)
 
   if(hostname[0] == '[') {
     hostname++;
-    l = "0123456789abcdefABCDEF::.";
+    l = "0123456789abcdefABCDEF::.%";
     hlen -= 2;
   }
 

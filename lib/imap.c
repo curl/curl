@@ -1717,8 +1717,6 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
 
 static CURLcode imap_setup_connection(struct connectdata *conn)
 {
-  struct Curl_easy *data = conn->data;
-
   /* Initialise the IMAP layer */
   CURLcode result = imap_init(conn);
   if(result)
@@ -1726,7 +1724,6 @@ static CURLcode imap_setup_connection(struct connectdata *conn)
 
   /* Clear the TLS upgraded flag */
   conn->tls_upgraded = FALSE;
-  data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
 }
@@ -1959,7 +1956,7 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
-  const char *begin = data->state.path;
+  const char *begin = &data->state.up.path[1]; /* skip leading slash */
   const char *ptr = begin;
 
   /* See how much of the URL is a valid path and decode it */
@@ -2065,17 +2062,10 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 
   /* Does the URL contain a query parameter? Only valid when we have a mailbox
      and no UID as per RFC-5092 */
-  if(imap->mailbox && !imap->uid && !imap->mindex && *ptr == '?') {
-    /* Find the length of the query parameter */
-    begin = ++ptr;
-    while(imap_is_bchar(*ptr))
-      ptr++;
-
-    /* Decode the query parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &imap->query, NULL,
-                            TRUE);
-    if(result)
-      return result;
+  if(imap->mailbox && !imap->uid && !imap->mindex) {
+    /* Get the query parameter, URL decoded */
+    (void)curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
+                       CURLU_URLDECODE);
   }
 
   /* Any extra stuff at the end of the URL is an error */
