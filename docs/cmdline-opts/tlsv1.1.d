@@ -1,5 +1,5 @@
 Long: tlsv1.1
-Help: Use TLSv1.1
+Help: Use TLSv1.1 or greater
 Protocols: TLS
 Added: 7.34.0
 ---
