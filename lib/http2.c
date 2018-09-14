@@ -2091,8 +2091,11 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
 
   stream->stream_id = -1;
 
-  if(!stream->header_recvbuf)
+  if(!stream->header_recvbuf) {
     stream->header_recvbuf = Curl_add_buffer_init();
+    if(!stream->header_recvbuf)
+      return CURLE_OUT_OF_MEMORY;
+  }
 
   if((conn->handler == &Curl_handler_http2_ssl) ||
      (conn->handler == &Curl_handler_http2))
@@ -2104,8 +2107,11 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
     conn->handler = &Curl_handler_http2;
 
   result = Curl_http2_init(conn);
-  if(result)
+  if(result) {
+    Curl_add_buffer_free(stream->header_recvbuf);
+    stream->header_recvbuf = NULL;
     return result;
+  }
 
   infof(conn->data, "Using HTTP2, server supports multi-use\n");
   stream->upload_left = 0;
