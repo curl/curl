@@ -156,10 +156,11 @@ struct HTTP {
     HTTPSEND_LAST     /* never use this */
   } sending;
 
+#ifndef CURL_DISABLE_HTTP
   Curl_send_buffer *send_buffer; /* used if the request couldn't be sent in
                                     one chunk, points to an allocated
                                     send_buffer struct */
-
+#endif
 #ifdef USE_NGHTTP2
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
