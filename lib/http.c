@@ -1570,7 +1570,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
     return CURLE_OK;
 
   if(http->send_buffer) {
-    Curl_add_buffer_free(http->send_buffer);
+    Curl_add_buffer_free(&http->send_buffer);
   }
 
   Curl_http2_done(conn, premature);
