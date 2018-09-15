@@ -515,12 +515,20 @@ int main(int argc, char **argv)
   curl_easy_setopt(p.curl, CURLOPT_SSL_CTX_DATA, &p);
 
   {
+    char *ptr;
     int lu; int i = 0;
     while((lu = BIO_read(in, &binaryptr[i], tabLength-i)) >0) {
       i += lu;
       if(i == tabLength) {
         tabLength += 100;
-        binaryptr = realloc(binaryptr, tabLength); /* should be more careful */
+        ptr = realloc(binaryptr, tabLength); /* should be more careful */
+        if(!ptr) {
+          /* out of memory */
+          BIO_printf(p.errorbio, "out of memory (realloc returned NULL)\n");
+          goto fail;
+        }
+        binaryptr = ptr;
+        ptr = NULL;
       }
     }
     tabLength = i;
@@ -551,7 +559,7 @@ int main(int argc, char **argv)
   /*** code d'erreur si accept mime ***, egalement code return HTTP != 200 ***/
 
 /* free the header list*/
-
+fail:
   curl_slist_free_all(headers);
 
   /* always cleanup */
