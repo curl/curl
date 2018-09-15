@@ -9,8 +9,8 @@ if(NOT CURL_FIND_COMPONENTS)
   endif()
 endif()
 
-include(CMakeFindDependencyMacro)
-if(CURL_FIND_REQUIRED_libcurl)
+if("@USE_OPENSSL@")
+    include(CMakeFindDependencyMacro)
     find_dependency(OpenSSL "@OPENSSL_VERSION_MAJOR@")
 endif()
 
