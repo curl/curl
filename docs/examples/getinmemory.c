@@ -42,7 +42,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
 
-  char* dummy = realloc(mem->memory, mem->size + realsize + 1);
+  char *dummy = realloc(mem->memory, mem->size + realsize + 1);
   if(dummy == NULL) {
     /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
