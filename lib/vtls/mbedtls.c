@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -373,7 +373,7 @@ mbed_connect_step1(struct connectdata *conn,
     }
   }
 
-  infof(data, "mbedTLS: Connecting to %s:%d\n", hostname, port);
+  infof(data, "mbedTLS: Connecting to %s:%ld\n", hostname, port);
 
   mbedtls_ssl_config_init(&BACKEND->config);
 
