@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2996,7 +2996,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     char portbuf[16];
     CURLUcode uc;
     conn->remote_port = (unsigned short)data->set.use_port;
-    msnprintf(portbuf, sizeof(portbuf), "%u", conn->remote_port);
+    msnprintf(portbuf, sizeof(portbuf), "%d", conn->remote_port);
     uc = curl_url_set(data->state.uh, CURLUPART_PORT, portbuf, 0);
     if(uc)
       return CURLE_OUT_OF_MEMORY;

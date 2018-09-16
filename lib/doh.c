@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -160,7 +160,7 @@ static int Curl_doh_done(struct Curl_easy *doh, CURLcode result)
   struct Curl_easy *data = doh->set.dohfor;
   /* so one of the DOH request done for the 'data' transfer is now complete! */
   data->req.doh.pending--;
-  infof(data, "a DOH request is completed, %d to go\n", data->req.doh.pending);
+  infof(data, "a DOH request is completed, %u to go\n", data->req.doh.pending);
   if(result)
     infof(data, "DOH request %s\n", curl_easy_strerror(result));
 

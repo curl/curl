@@ -160,13 +160,13 @@ UNITTEST_START
     int rc = doh_encode(req[i].name, req[i].type,
                         buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
-      fprintf(stderr, "req %d: Expected return code %d got %d\n", i,
+      fprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
               req[i].rc, rc);
       return 1;
     }
     else if(size != req[i].size) {
-      fprintf(stderr, "req %d: Expected size %d got %d\n", i,
-              (int)req[i].size, (int)size);
+      fprintf(stderr, "req %zu: Expected size %zu got %zu\n", i,
+              req[i].size, size);
       fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
       return 2;
     }
@@ -188,7 +188,7 @@ UNITTEST_START
     rc = doh_decode((unsigned char *)resp[i].packet, resp[i].size,
                     resp[i].type, &d);
     if(rc != resp[i].rc) {
-      fprintf(stderr, "resp %d: Expected return code %d got %d\n", i,
+      fprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
               resp[i].rc, rc);
       return 4;
     }
@@ -229,7 +229,7 @@ UNITTEST_START
     }
     de_cleanup(&d);
     if(resp[i].out && strcmp((char *)buffer, resp[i].out)) {
-      fprintf(stderr, "resp %d: Expected %s got %s\n", i,
+      fprintf(stderr, "resp %zu: Expected %s got %s\n", i,
               resp[i].out, buffer);
       return 1;
     }
@@ -244,7 +244,7 @@ UNITTEST_START
       rc = doh_decode((unsigned char *)full49, i, DNS_TYPE_A, &d);
       if(!rc) {
         /* none of them should work */
-        fprintf(stderr, "%d: %d\n", i, rc);
+        fprintf(stderr, "%zu: %d\n", i, rc);
         return 5;
       }
     }
@@ -257,7 +257,7 @@ UNITTEST_START
                       DNS_TYPE_A, &d);
       if(!rc) {
         /* none of them should work */
-        fprintf(stderr, "2 %d: %d\n", i, rc);
+        fprintf(stderr, "2 %zu: %d\n", i, rc);
         return 7;
       }
     }
