@@ -58,10 +58,12 @@ struct Curl_send_buffer {
 typedef struct Curl_send_buffer Curl_send_buffer;
 
 Curl_send_buffer *Curl_add_buffer_init(void);
-void Curl_add_buffer_free(Curl_send_buffer *buff);
-CURLcode Curl_add_bufferf(Curl_send_buffer *in, const char *fmt, ...);
-CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size);
-CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
+void Curl_add_buffer_free(Curl_send_buffer **inp);
+CURLcode Curl_add_bufferf(Curl_send_buffer **inp, const char *fmt, ...)
+  WARN_UNUSED_RESULT;
+CURLcode Curl_add_buffer(Curl_send_buffer **inp, const void *inptr,
+                         size_t size) WARN_UNUSED_RESULT;
+CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
                               struct connectdata *conn,
                               long *bytes_written,
                               size_t included_body_bytes,
@@ -154,9 +156,11 @@ struct HTTP {
     HTTPSEND_LAST     /* never use this */
   } sending;
 
-  void *send_buffer; /* used if the request couldn't be sent in one chunk,
-                        points to an allocated send_buffer struct */
-
+#ifndef CURL_DISABLE_HTTP
+  Curl_send_buffer *send_buffer; /* used if the request couldn't be sent in
+                                    one chunk, points to an allocated
+                                    send_buffer struct */
+#endif
 #ifdef USE_NGHTTP2
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
