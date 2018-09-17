@@ -61,7 +61,9 @@
 #include "strcase.h"
 #include "warnless.h"
 #include "strdup.h"
-/* The last #include file should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 static const struct {
