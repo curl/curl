@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -69,14 +69,15 @@ static void characterDataHandler(void *userData, const XML_Char *s, int len)
   struct ParserStruct *state = (struct ParserStruct *) userData;
   struct MemoryStruct *mem = &state->characters;
 
-  mem->memory = realloc(mem->memory, mem->size + len + 1);
-  if(mem->memory == NULL) {
+  char *ptr = realloc(mem->memory, mem->size + len + 1);
+  if(!ptr) {
     /* Out of memory. */
     fprintf(stderr, "Not enough memory (realloc returned NULL).\n");
     state->ok = 0;
     return;
   }
 
+  mem->memory = ptr;
   memcpy(&(mem->memory[mem->size]), s, len);
   mem->size += len;
   mem->memory[mem->size] = 0;
