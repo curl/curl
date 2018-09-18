@@ -1304,8 +1304,6 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
 
   switch(ssl_version_max) {
     case CURL_SSLVERSION_MAX_NONE:
-      ssl_version_max = ssl_version << 16;
-      break;
     case CURL_SSLVERSION_MAX_DEFAULT:
       ssl_version_max = max_supported_version_by_os;
       break;
