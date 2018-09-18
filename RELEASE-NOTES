@@ -17,19 +17,42 @@ This release includes the following changes:
  o configure: add option to disable automatic OpenSSL config loading [10]
  o upkeep: add a connection upkeep API: curl_easy_upkeep() [11]
  o URL-API: added five new functions [12]
+ o vtls: MesaLink is a new TLS backend [23]
 
 This release includes the following bugfixes:
 
+ o CURLOPT_DNS_USE_GLOBAL_CACHE: deprecated [5]
+ o anyauthput: fix compiler warning on 64-bit Windows [21]
+ o cmake: don't require OpenSSL if USE_OPENSSL=OFF [35]
+ o cookies: Remove redundant expired check [14]
+ o cookies: fix leak when writing cookies to file [15]
+ o curl: update the documentation of --tlsv1.0 [17]
+ o curl_multi_wait: call getsock before figuring out timeout [34]
+ o darwinssl: Fix realloc memleak [32]
+ o darwinssl: more specific and unified error codes [6]
+ o example/asiohiper: insert warning comment about its status [18]
+ o examples/http2-pushinmemory: receive HTTP/2 pushed files in memory [33]
+ o examples: Fix memory leaks from realloc errors [31]
+ o examples: do not wait when no transfers are running [16]
+ o ftp: include command in Curl_ftpsend sendbuffer [25]
+ o http2: fix memory leaks on error-path [29]
+ o krb5: fix memory leak in krb_auth [25]
+ o lib: fix gcc8 warning on Windows [20]
+ o memory: add missing curl_printf header [30]
+ o ntlm_wb: Fix memory leaks in ntlm_wb_response [24]
+ o ntlm_wb: bail out if the response gets overly large [13]
+ o openssl: assume engine support in 0.9.8 or later [27]
+ o openssl: fix gcc8 warning [19]
+ o openssl: return CURLE_PEER_FAILED_VERIFICATION on failure to parse issuer [6]
+ o openssl: show "proper" version number for libressl builds [28]
  o pipelining: deprecated [1]
+ o schannel: unified error code handling [6]
+ o sendf: Fix whitespace in infof/failf concatenation [26]
+ o ssl: deprecate CURLE_SSL_CACERT in favour of a unified error code [6]
  o test1452: mark as flaky [2]
  o tests: add unit tests for url.c [3]
- o CURLOPT_DNS_USE_GLOBAL_CACHE: deprecated [5]
- o darwinssl: more specific and unified error codes [6]
- o schannel: unified error code handling [6]
- o openssl: return CURLE_PEER_FAILED_VERIFICATION on failure to parse issuer [6]
+ o urlglob: improve error message on bad globs [22]
  o x509asn1: return CURLE_PEER_FAILED_VERIFICATION on failure to parse cert [6]
- o ssl: deprecate CURLE_SSL_CACERT in favour of a unified error code [6]
- o
 
 This release includes the following known bugs:
 
@@ -38,9 +61,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Gustafsson, Daniel Stenberg, Han Han, Jim Fuller, Marc Hörsken,
-  Max Dymond, Nicklas Avén, Philipp Waehnert, Thomas Glanzmann,
-  (9 contributors)
+  Daniel Gustafsson, Daniel Shahaf, Daniel Stenberg, Dave Reisner, Han Han,
+  Harry Sintonen, Jim Fuller, Kamil Dudka, Marcel Raad, Marc Hörsken,
+  Max Dymond, Nicklas Avén, Nick Zitzmann, Philipp Waehnert, Rainer Jung,
+  Ray Satiro, Rikard Falkeborn, Sergei Nikulov, Thomas Glanzmann,
+  Viktor Szakats, Yiming Jing,
+  (21 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -58,3 +84,26 @@ References to bug reports and discussions on issues:
  [10] = https://curl.haxx.se/bug/?i=2724
  [11] = https://curl.haxx.se/bug/?i=1641
  [12] = https://curl.haxx.se/bug/?i=2842
+ [13] = https://curl.haxx.se/bug/?i=2959
+ [14] = https://curl.haxx.se/bug/?i=2962
+ [15] = https://curl.haxx.se/bug/?i=2957
+ [16] = https://curl.haxx.se/bug/?i=2948
+ [17] = https://curl.haxx.se/bug/?i=2955
+ [18] = https://curl.haxx.se/bug/?i=2407
+ [19] = https://curl.haxx.se/bug/?i=2980
+ [20] = https://curl.haxx.se/bug/?i=2979
+ [21] = https://curl.haxx.se/bug/?i=2972
+ [22] = https://curl.haxx.se/bug/?i=2763
+ [23] = https://curl.haxx.se/bug/?i=2984
+ [24] = https://curl.haxx.se/bug/?i=2966
+ [25] = https://curl.haxx.se/bug/?i=2985
+ [26] = https://curl.haxx.se/bug/?i=2986
+ [27] = https://curl.haxx.se/bug/?i=2983
+ [28] = https://curl.haxx.se/bug/?i=2989
+ [29] = https://curl.haxx.se/bug/?i=2992
+ [30] = https://curl.haxx.se/bug/?i=2999
+ [31] = https://curl.haxx.se/bug/?i=2991
+ [32] = https://curl.haxx.se/bug/?i=3005
+ [33] = https://curl.haxx.se/bug/?i=3004
+ [34] = https://curl.haxx.se/bug/?i=2996
+ [35] = https://curl.haxx.se/bug/?i=3001
