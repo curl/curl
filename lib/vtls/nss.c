@@ -1715,8 +1715,6 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
       failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
       return result;
     }
-    if(max == CURL_SSLVERSION_MAX_NONE)
-      sslver->max = sslver->min;
   }
 
   switch(max) {
