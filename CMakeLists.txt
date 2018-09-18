@@ -82,6 +82,7 @@ include_directories( ${CURL_SOURCE_DIR}/include )
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
+option(CURL_ENABLE_UNINSTALL "Set to ON to generate the uninstall target" ON)
 option(CURL_STATICLIB "Set to ON to build libcurl with static linking." OFF)
 option(ENABLE_ARES "Set to ON to enable c-ares support" OFF)
 if(WIN32)
@@ -1348,13 +1349,16 @@ if(MSVC_VERSION EQUAL 1600)
   endif()
 endif()
 
-if(NOT TARGET uninstall)
-  configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
-      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
-      IMMEDIATE @ONLY)
 
-  add_custom_target(uninstall
-      COMMAND ${CMAKE_COMMAND} -P
-      ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
+if(CURL_ENABLE_UNINSTALL)
+	if(NOT TARGET uninstall)
+	  configure_file(
+		  ${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in
+		  ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake
+		  IMMEDIATE @ONLY)
+
+	  add_custom_target(uninstall
+		  COMMAND ${CMAKE_COMMAND} -P
+		  ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
+	endif()
 endif()
