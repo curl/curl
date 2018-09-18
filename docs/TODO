@@ -416,7 +416,8 @@
  used to also allow for example users to refuse libcurl to do transfers with
  HTTPS certificate checks disabled.
 
- It could also offer to refuse usernames in URLs (see TODO 1.1)
+ It could also automatically refuse usernames in URLs when set
+ (see CURLOPT_DISALLOW_USERNAME_IN_URL)
 
 1.27 hardcode the "localhost" addresses
 
