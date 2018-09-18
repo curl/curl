@@ -120,6 +120,7 @@
 #include "vtls.h"
 #include "darwinssl.h"
 #include "curl_printf.h"
+#include "strdup.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -2056,7 +2057,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
 
     if(len + n >= cap) {
       cap *= 2;
-      data = realloc(data, cap);
+      data = Curl_saferealloc(data, cap);
       if(!data) {
         close(fd);
         return -1;
