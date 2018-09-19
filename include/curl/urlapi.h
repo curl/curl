@@ -75,6 +75,7 @@ typedef enum {
 #define CURLU_URLDECODE (1<<6)          /* URL decode on get */
 #define CURLU_URLENCODE (1<<7)          /* URL encode on set */
 #define CURLU_APPENDQUERY (1<<8)        /* append a form style part */
+#define CURLU_GUESS_SCHEME (1<<9)       /* legacy curl-style guessing */
 
 typedef struct Curl_URL CURLU;
 

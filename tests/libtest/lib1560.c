@@ -247,7 +247,7 @@ static struct testcase get_parts_list[] ={
 
 static struct urltestcase get_url_list[] = {
   {"HTTP://test/", "http://test/", 0, 0, CURLUE_OK},
-  {"http://HO0_-st..~./", "", 0, 0, CURLUE_MALFORMED_INPUT},
+  {"http://HO0_-st..~./", "http://HO0_-st..~./", 0, 0, CURLUE_OK},
   {"http:/@example.com: 123/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
   {"http:/@example.com:123 /", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
   {"http:/@example.com:123a/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
