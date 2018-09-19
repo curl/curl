@@ -754,17 +754,17 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 
     if((flags & CURLU_GUESS_SCHEME) && !schemep) {
       /* legacy curl-style guess based on host name */
-      if(checkprefix("FTP.", hostname))
+      if(checkprefix("ftp.", hostname))
         schemep = (char *)"ftp";
-      else if(checkprefix("DICT.", hostname))
-        schemep = (char *)"DICT";
-      else if(checkprefix("LDAP.", hostname))
-        schemep = (char *)"LDAP";
-      else if(checkprefix("IMAP.", hostname))
-        schemep = (char *)"IMAP";
-      else if(checkprefix("SMTP.", hostname))
+      else if(checkprefix("dict.", hostname))
+        schemep = (char *)"dict";
+      else if(checkprefix("ldap.", hostname))
+        schemep = (char *)"ldap";
+      else if(checkprefix("imap.", hostname))
+        schemep = (char *)"imap";
+      else if(checkprefix("smtp.", hostname))
         schemep = (char *)"smtp";
-      else if(checkprefix("POP3.", hostname))
+      else if(checkprefix("pop3.", hostname))
         schemep = (char *)"pop3";
       else
         schemep = (char *)"http";
