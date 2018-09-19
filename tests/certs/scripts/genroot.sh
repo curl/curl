@@ -17,6 +17,8 @@ cd $HOME
 
 KEYSIZE=2048
 DURATION=6000
+# The -sha256 option was introduced in OpenSSL 1.0.1
+DIGESTALGO=-sha256
 
 PREFIX=$1
 if [ ".$PREFIX" = . ] ; then
@@ -46,9 +48,9 @@ openssl genrsa -out $PREFIX-ca.key $KEYSIZE -passout pass:secret
 echo "openssl req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr"
 $OPENSSL req -config $PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret
 
-echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL.ca-cacert -sha1 "
+echo "openssl x509 -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL.ca-cacert $DIGESTALGO "
 
-$OPENSSL x509  -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL-ca.cacert -sha1
+$OPENSSL x509  -set_serial $SERIAL -extfile $PREFIX-ca.prm -days $DURATION -req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-$SERIAL-ca.cacert $DIGESTALGO
 
 echo "openssl x509 -text -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline > $PREFIX-ca.cacert "
 $OPENSSL x509 -text -in $PREFIX-$SERIAL-ca.cacert -nameopt multiline > $PREFIX-ca.cacert
