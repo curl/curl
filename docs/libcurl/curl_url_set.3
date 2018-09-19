@@ -96,6 +96,16 @@ The query part gets space-to-plus conversion before the URL conversion.
 
 This URL encoding is charset unaware and will convert the input on a
 byte-by-byte manner.
+.IP CURLU_DEFAULT_SCHEME
+If set, will make libcurl allow the URL to be set without a scheme and then
+sets that to the default scheme: HTTPS. Overrides the \fICURLU_GUESS_SCHEME\fP
+option if both are set.
+.IP CURLU_GUESS_SCHEME
+If set, will make libcurl allow the URL to be set without a scheme and it
+instead "guesses" which scheme that was intended based on the host name.  If
+the outermost sub-domain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then
+that scheme will be used, otherwise it picks HTTP. Conflicts with the
+\fICURLU_DEFAULT_SCHEME\fP option which takes precendence if both are set.
 .SH RETURN VALUE
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
 fine.

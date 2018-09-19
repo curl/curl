@@ -554,7 +554,7 @@ static CURLUcode junkscan(char *part)
 
 static CURLUcode hostname_check(char *hostname, unsigned int flags)
 {
-  const char *l; /* accepted characters */
+  const char *l = NULL; /* accepted characters */
   size_t len;
   size_t hlen = strlen(hostname);
   (void)flags;
@@ -564,14 +564,21 @@ static CURLUcode hostname_check(char *hostname, unsigned int flags)
     l = "0123456789abcdefABCDEF::.";
     hlen -= 2;
   }
-  else /* % for URL escaped letters */
-    l = "0123456789abcdefghijklimnopqrstuvwxyz-_.ABCDEFGHIJKLIMNOPQRSTUVWXYZ%";
 
-  len = strspn(hostname, l);
-  if(hlen != len)
-    /* hostname with bad content */
-    return CURLUE_MALFORMED_INPUT;
-
+  if(l) {
+    /* only valid letters are ok */
+    len = strspn(hostname, l);
+    if(hlen != len)
+      /* hostname with bad content */
+      return CURLUE_MALFORMED_INPUT;
+  }
+  else {
+    /* letters from the second string is not ok */
+    len = strcspn(hostname, " ");
+    if(hlen != len)
+      /* hostname with bad content */
+      return CURLUE_MALFORMED_INPUT;
+  }
   return CURLUE_OK;
 }
 
@@ -587,7 +594,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   CURLUcode result;
   bool url_has_scheme = FALSE;
   char schemebuf[MAX_SCHEME_LEN];
-  char *schemep;
+  char *schemep = NULL;
   size_t schemelen = 0;
   size_t urllen;
   const struct Curl_handler *h = NULL;
@@ -723,9 +730,10 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     else {
       /* no scheme! */
 
-      if(!(flags & CURLU_DEFAULT_SCHEME))
+      if(!(flags & (CURLU_DEFAULT_SCHEME|CURLU_GUESS_SCHEME)))
         return CURLUE_MALFORMED_INPUT;
-      schemep = (char *) DEFAULT_SCHEME;
+      if(flags & CURLU_DEFAULT_SCHEME)
+        schemep = (char *) DEFAULT_SCHEME;
 
       /*
        * The URL was badly formatted, let's try without scheme specified.
@@ -743,6 +751,24 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 
     memcpy(hostname, hostp, len);
     hostname[len] = 0;
+
+    if((flags & CURLU_GUESS_SCHEME) && !schemep) {
+      /* legacy curl-style guess based on host name */
+      if(checkprefix("ftp.", hostname))
+        schemep = (char *)"ftp";
+      else if(checkprefix("dict.", hostname))
+        schemep = (char *)"dict";
+      else if(checkprefix("ldap.", hostname))
+        schemep = (char *)"ldap";
+      else if(checkprefix("imap.", hostname))
+        schemep = (char *)"imap";
+      else if(checkprefix("smtp.", hostname))
+        schemep = (char *)"smtp";
+      else if(checkprefix("pop3.", hostname))
+        schemep = (char *)"pop3";
+      else
+        schemep = (char *)"http";
+    }
 
     len = strlen(p);
     memcpy(path, p, len);
