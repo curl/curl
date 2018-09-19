@@ -970,7 +970,6 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     char *scheme;
     char *options = u->options;
     char *port = u->port;
-    urldecode = FALSE; /* not for the whole thing */
     if(u->scheme && strcasecompare("file", u->scheme)) {
       url = aprintf("file://%s%s%s",
                     u->path,
