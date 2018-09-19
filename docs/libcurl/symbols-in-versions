@@ -739,14 +739,12 @@ CURLUE_NO_FRAGMENT              7.62.0
 CURLUE_NO_HOST                  7.62.0
 CURLUE_NO_OPTIONS               7.62.0
 CURLUE_NO_PASSWORD              7.62.0
-CURLUE_NO_PATH                  7.62.0
 CURLUE_NO_PORT                  7.62.0
 CURLUE_NO_QUERY                 7.62.0
 CURLUE_NO_SCHEME                7.62.0
 CURLUE_NO_USER                  7.62.0
 CURLUE_OK                       7.62.0
 CURLUE_OUT_OF_MEMORY            7.62.0
-CURLUE_RELATIVE                 7.62.0
 CURLUE_UNKNOWN_PART             7.62.0
 CURLUE_UNSUPPORTED_SCHEME       7.62.0
 CURLUE_URLDECODE                7.62.0
