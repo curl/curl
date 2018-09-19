@@ -35,7 +35,7 @@ typedef enum {
   CURLUE_BAD_PORT_NUMBER,     /* 4 */
   CURLUE_UNSUPPORTED_SCHEME,  /* 5 */
   CURLUE_URLDECODE,           /* 6 */
-  CURLUE_RELATIVE,            /* 7 */
+  CURLUE_OUT_OF_MEMORY,       /* 7 */
   CURLUE_USER_NOT_ALLOWED,    /* 8 */
   CURLUE_UNKNOWN_PART,        /* 9 */
   CURLUE_NO_SCHEME,           /* 10 */
@@ -44,10 +44,8 @@ typedef enum {
   CURLUE_NO_OPTIONS,          /* 13 */
   CURLUE_NO_HOST,             /* 14 */
   CURLUE_NO_PORT,             /* 15 */
-  CURLUE_NO_PATH,             /* 16 */
-  CURLUE_NO_QUERY,            /* 17 */
-  CURLUE_NO_FRAGMENT,         /* 18 */
-  CURLUE_OUT_OF_MEMORY        /* 19 */
+  CURLUE_NO_QUERY,            /* 16 */
+  CURLUE_NO_FRAGMENT          /* 17 */
 } CURLUcode;
 
 typedef enum {
