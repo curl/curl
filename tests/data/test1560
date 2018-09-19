@@ -16,6 +16,12 @@ none
 file
 https
 http
+pop3
+smtp
+imap
+ldap
+dict
+ftp
 </features>
  <name>
 URL API
