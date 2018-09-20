@@ -28,7 +28,7 @@
  1.10 auto-detect proxy
  1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
- 1.13 DNS-over-HTTPS
+ 1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
  1.14 Typesafe curl_easy_setopt()
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
@@ -291,14 +291,15 @@
 
  https://github.com/curl/curl/issues/2251
 
-1.13 DNS-over-HTTPS
+1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
 
- By adding support for DNS-over-HTTPS curl could resolve host names using a
- totally separate name server than the standard system resolver, while at the
- same time doing so over a communication channel that enhances privacy and
- security.
+ curl will create most sockets via the CURLOPT_OPENSOCKETFUNCTION callback and
+ close them with the CURLOPT_CLOSESOCKETFUNCTION callback. However, c-ares
+ does not use those functions and instead opens and closes the sockets
+ itself. This means that when curl passes the c-ares socket to the
+ CURLMOPT_SOCKETFUNCTION it isn't owned by the application like other sockets.
 
- https://github.com/curl/curl/wiki/DNS-over-HTTPS
+ See https://github.com/curl/curl/issues/2734
 
 1.14 Typesafe curl_easy_setopt()
 
