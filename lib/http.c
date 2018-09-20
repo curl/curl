@@ -1215,7 +1215,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
     if(http) {
       /* if we sent a piece of the body here, up the byte counter for it
          accordingly */
-      http->writebytecount += bodylen;
+      http->writebytecount += amount;
 
       if((size_t)amount != size) {
         /* The whole request could not be sent in one system call. We must
