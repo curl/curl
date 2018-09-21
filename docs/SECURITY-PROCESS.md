@@ -121,15 +121,32 @@ Publishing Security Advisories
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
+Bountygraph Bug Bounty
+----------------------
+
+The curl project runs a bug bounty program in association with
+bountygraph.com.
+
+After you have reported a security issue to the curl project, it has been
+deemed credible and a patch and advisory has been made public you can be
+eligible for a bounty from this program.
+
+See all details at https://bountygraph.com/programs/curl
+
+This bounty is relying on funds from sponsors. If you use curl professionally,
+consider help funding this!
+
 Hackerone Internet Bug Bounty
 -----------------------------
 
-The curl project does not run any bounty program on its own, but there are
-outside organizations that do. First report your issue the normal way and
-proceed as described in this document.
+This bounty program is run by an independent outside organization: Hackerone.
+First report your issue the normal way and proceed as described in this
+document.
 
 Then, if the issue is [critical](https://hackerone.com/ibb-data), you are
 eligible to apply for a bounty from Hackerone for your find.
 
 Once your reported vulnerability has been publicly disclosed by the curl
 project, you can submit a [report to them](https://hackerone.com/ibb-data).
+
+You will not be able to claim bounties from more than one bounty program.
