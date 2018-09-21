@@ -3897,6 +3897,16 @@ if test "$want_pthreads" != "no"; then
       dnl first check for function without lib
       AC_CHECK_FUNC(pthread_create, [USE_THREADS_POSIX=1] )
 
+      dnl on HPUX, life is more complicated...
+      case $host in
+      *-hp-hpux*)
+         dnl it doesn't actually work without -lpthread
+         USE_THREADS_POSIX=""
+         ;;
+      *)
+         ;;
+      esac
+
       dnl if it wasn't found without lib, search for it in pthread lib
       if test "$USE_THREADS_POSIX" != "1"
       then
