@@ -1,4 +1,4 @@
-SUBDIRS = Win32 Linux Solaris EPM AIX vms
+SUBDIRS = Win32 Linux Solaris AIX vms
 
 EXTRA_DIST = README 			\
 	DOS/README 			\

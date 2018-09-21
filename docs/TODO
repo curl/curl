@@ -533,7 +533,7 @@
 
  Some FTP servers allow STAT for listing directories instead of using LIST,
  and the response is then sent over the control connection instead of as the
- otherwise usedw data connection: http://www.nsftools.com/tips/RawFTP.htm#STAT
+ otherwise usedw data connection: https://www.nsftools.com/tips/RawFTP.htm#STAT
 
  This is not detailed in any FTP specification.
 
