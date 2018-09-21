@@ -38,7 +38,7 @@
 # To check:
 # (From Daniel Stenberg) The cmake build selected to run gcc with -fPIC on my box while the plain configure script did not.
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
-cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
@@ -352,7 +352,16 @@ if(CMAKE_USE_OPENSSL)
   set(USE_OPENSSL ON)
   set(HAVE_LIBCRYPTO ON)
   set(HAVE_LIBSSL ON)
-  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+
+  # Depend on OpenSSL via imported targets if supported by the running
+  # version of CMake.  This allows our dependents to get our dependencies
+  # transitively.
+  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
+    list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
+  else()
+    list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
+    include_directories(${OPENSSL_INCLUDE_DIR})
+  endif()
 
   set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   check_include_file("openssl/crypto.h" HAVE_OPENSSL_CRYPTO_H)
