@@ -2234,26 +2234,36 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     if(conn->host.dispname != conn->host.name) {
       uc = curl_url_set(h, CURLUPART_HOST, conn->host.name, 0);
-      if(uc)
+      if(uc) {
+        curl_url_cleanup(h);
         return CURLE_OUT_OF_MEMORY;
+      }
     }
     uc = curl_url_set(h, CURLUPART_FRAGMENT, NULL, 0);
-    if(uc)
+    if(uc) {
+      curl_url_cleanup(h);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     if(strcasecompare("http", data->state.up.scheme)) {
       /* when getting HTTP, we don't want the userinfo the URL */
       uc = curl_url_set(h, CURLUPART_USER, NULL, 0);
-      if(uc)
+      if(uc) {
+        curl_url_cleanup(h);
         return CURLE_OUT_OF_MEMORY;
+      }
       uc = curl_url_set(h, CURLUPART_PASSWORD, NULL, 0);
-      if(uc)
+      if(uc) {
+        curl_url_cleanup(h);
         return CURLE_OUT_OF_MEMORY;
+      }
     }
     /* now extract the new version of the URL */
     uc = curl_url_get(h, CURLUPART_URL, &url, 0);
-    if(uc)
+    if(uc) {
+      curl_url_cleanup(h);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     if(data->change.url_alloc)
       free(data->change.url);
