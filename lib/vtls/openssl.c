@@ -177,6 +177,7 @@
      !defined(LIBRESSL_VERSION_NUMBER) &&       \
      !defined(OPENSSL_IS_BORINGSSL))
 #define HAVE_SSL_CTX_SET_CIPHERSUITES
+#define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
 #endif
 
 #if defined(LIBRESSL_VERSION_NUMBER)
@@ -2465,6 +2466,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       infof(data, "TLS 1.3 cipher selection: %s\n", ciphers13);
     }
   }
+#endif
+
+#ifdef HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+  /* OpenSSL 1.1.1 requires clients to opt-in for PHA */
+  SSL_CTX_set_post_handshake_auth(BACKEND->ctx, 1);
 #endif
 
 #ifdef USE_TLS_SRP
