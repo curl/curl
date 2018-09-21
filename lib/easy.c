@@ -958,6 +958,13 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     outcurl->change.referer_alloc = TRUE;
   }
 
+  /* Reinitialize an SSL engine for the new handle
+   * note: the engine name has already been copied by dupset */
+  if(outcurl->set.str[STRING_SSL_ENGINE]) {
+    if(Curl_ssl_set_engine(outcurl, outcurl->set.str[STRING_SSL_ENGINE]))
+      goto fail;
+  }
+
   /* Clone the resolver handle, if present, for the new handle */
   if(Curl_resolver_duphandle(&outcurl->state.resolver,
                              data->state.resolver))
@@ -1190,3 +1197,23 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
 
   return result;
 }
+
+/*
+ * Performs connection upkeep for the given session handle.
+ */
+CURLcode curl_easy_upkeep(struct Curl_easy *data)
+{
+  /* Verify that we got an easy handle we can work with. */
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(data->multi_easy) {
+    /* Use the common function to keep connections alive. */
+    return Curl_upkeep(&data->multi_easy->conn_cache, data);
+  }
+  else {
+    /* No connections, so just return success */
+    return CURLE_OK;
+  }
+}
+

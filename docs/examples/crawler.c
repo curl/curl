@@ -52,7 +52,13 @@ size_t grow_buffer(void *contents, size_t sz, size_t nmemb, void *ctx)
 {
   size_t realsize = sz * nmemb;
   memory *mem = (memory*) ctx;
-  mem->buf = realloc(mem->buf, mem->size + realsize);
+  char *ptr = realloc(mem->buf, mem->size + realsize);
+  if(!ptr) {
+    /* out of memory */
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+  mem->buf = ptr;
   memcpy(&(mem->buf[mem->size]), contents, realsize);
   mem->size += realsize;
   return realsize;

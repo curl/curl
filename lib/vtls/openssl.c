@@ -69,7 +69,7 @@
 #include <openssl/ocsp.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10000000L) && /* 1.0.0 or later */     \
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && /* 0.9.8 or later */     \
   !defined(OPENSSL_NO_ENGINE)
 #define USE_OPENSSL_ENGINE
 #include <openssl/engine.h>
@@ -129,14 +129,13 @@
 #define X509_get0_notBefore(x) X509_get_notBefore(x)
 #define X509_get0_notAfter(x) X509_get_notAfter(x)
 #define CONST_EXTS /* nope */
-#ifdef LIBRESSL_VERSION_NUMBER
-static unsigned long OpenSSL_version_num(void)
-{
-  return LIBRESSL_VERSION_NUMBER;
-}
-#else
+#ifndef LIBRESSL_VERSION_NUMBER
 #define OpenSSL_version_num() SSLeay()
 #endif
+#endif
+
+#ifdef LIBRESSL_VERSION_NUMBER
+#define OpenSSL_version_num() LIBRESSL_VERSION_NUMBER
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
@@ -253,7 +252,7 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
       if(!buf)
         return;
     }
-    strncpy(buf, line, linelen);
+    memcpy(buf, line, linelen);
     buf[linelen] = '\n';
     buf[linelen + 1] = '\0';
 
@@ -994,9 +993,11 @@ static int Curl_ossl_init(void)
 #define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
 
+#ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
   CONF_modules_load_file(NULL, NULL,
                          CONF_MFLAGS_DEFAULT_SECTION|
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
+#endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !defined(LIBRESSL_VERSION_NUMBER)
@@ -2171,7 +2172,6 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
 #endif
       break;
     case CURL_SSLVERSION_MAX_TLSv1_3:
-    case CURL_SSLVERSION_MAX_DEFAULT:
 #ifdef TLS1_3_VERSION
       break;
 #else
@@ -3210,7 +3210,7 @@ static CURLcode servercert(struct connectdata *conn,
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)) );
     BIO_free(mem);
-    return 0;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   BACKEND->server_cert = SSL_get_peer_certificate(BACKEND->handle);
@@ -3257,7 +3257,7 @@ static CURLcode servercert(struct connectdata *conn,
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-issuer name!");
-    result = CURLE_SSL_CONNECT_ERROR;
+    result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
     infof(data, " issuer: %s\n", buffer);
@@ -3807,6 +3807,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
+#ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
+  SSLSUPP_TLS13_CIPHERSUITES |
+#endif
   SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),

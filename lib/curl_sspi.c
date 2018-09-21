@@ -90,8 +90,9 @@ CURLcode Curl_sspi_global_init(void)
       return CURLE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
-    pInitSecurityInterface = (INITSECURITYINTERFACE_FN)
-      GetProcAddress(s_hSecDll, SECURITYENTRYPOINT);
+    pInitSecurityInterface =
+      CURLX_FUNCTION_CAST(INITSECURITYINTERFACE_FN,
+                          (GetProcAddress(s_hSecDll, SECURITYENTRYPOINT)));
     if(!pInitSecurityInterface)
       return CURLE_FAILED_INIT;
 

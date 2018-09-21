@@ -26,7 +26,7 @@ gopher
 Gopher query
  </name>
  <command>
-"gopher://%HOSTIP:%GOPHERPORT/7/the/search/engine?query%20succeeded/1202"
+"gopher://%HOSTIP:%GOPHERPORT/7/the/search/engine%09query%20succeeded/1202"
 </command>
 </client>
 

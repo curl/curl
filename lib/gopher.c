@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -89,21 +89,14 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
   if(strlen(path) <= 2) {
     sel = (char *)"";
-    len = (int)strlen(sel);
+    len = strlen(sel);
   }
   else {
     char *newp;
-    size_t j, i;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
     newp = path;
     newp += 2;
-
-    /* ... then turn ? into TAB for search servers, Veronica, etc. ... */
-    j = strlen(newp);
-    for(i = 0; i<j; i++)
-      if(newp[i] == '?')
-        newp[i] = '\x09';
 
     /* ... and finally unescape */
     result = Curl_urldecode(data, newp, 0, &sel, &len, FALSE);

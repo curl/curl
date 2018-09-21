@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -269,6 +269,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_DNS_LOCAL_IP4 ||                                       \
    (option) == CURLOPT_DNS_LOCAL_IP6 ||                                       \
    (option) == CURLOPT_DNS_SERVERS ||                                         \
+   (option) == CURLOPT_DOH_URL ||                                             \
    (option) == CURLOPT_EGDSOCKET ||                                           \
    (option) == CURLOPT_FTPPORT ||                                             \
    (option) == CURLOPT_FTP_ACCOUNT ||                                         \
@@ -500,7 +501,8 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
 /* evaluates to true if expr can be passed as POST data (void* or char*) */
 #define _curl_is_postfields(expr)                                             \
   (_curl_is_ptr((expr), void) ||                                              \
-   _curl_is_arr((expr), char))
+   _curl_is_arr((expr), char) ||                                              \
+   _curl_is_arr((expr), unsigned char))
 
 /* FIXME: the whole callback checking is messy...
  * The idea is to tolerate char vs. void and const vs. not const

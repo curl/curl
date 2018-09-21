@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -306,6 +306,41 @@ Not enough memory was available.
 .IP "CURLSHE_NOT_BUILT_IN (5)"
 The requested sharing could not be done because the library you use don't have
 that particular feature enabled. (Added in 7.23.0)
+.SH "CURLUcode"
+.IP "CURLUE_BAD_HANDLE (1)"
+An argument that should be a CURLU pointer was passed in as a NULL.
+.IP "CURLUE_BAD_PARTPOINTER (2)"
+A NULL pointer was passed to the 'part' argument of \fIcurl_url_get(3)\fP.
+.IP "CURLUE_MALFORMED_INPUT (3)"
+A malformed input was passed to a URL API function.
+.IP "CURLUE_BAD_PORT_NUMBER (4)"
+The port number was not a decimal number between 0 and 65535.
+.IP "CURLUE_UNSUPPORTED_SCHEME (5)"
+This libcurl build doesn't support the given URL scheme.
+.IP "CURLUE_URLDECODE (6)"
+URL decode error, most likely because of rubbish in the input.
+.IP "CURLUE_OUT_OF_MEMORY (7)"
+A memory function failed.
+.IP "CURLUE_USER_NOT_ALLOWED (8)"
+Credentials was passed in the URL when prohibited.
+.IP "CURLUE_UNKNOWN_PART (9)"
+An unknown part ID was passed to a URL API function.
+.IP "CURLUE_NO_SCHEME (10)"
+There is no scheme part in the URL.
+.IP "CURLUE_NO_USER (11)"
+There is no user part in the URL.
+.IP "CURLUE_NO_PASSWORD (12)"
+There is no password part in the URL.
+.IP "CURLUE_NO_OPTIONS (13)"
+There is no options part in the URL.
+.IP "CURLUE_NO_HOST (14)"
+There is no host part in the URL.
+.IP "CURLUE_NO_PORT (15)"
+There is no port part in the URL.
+.IP "CURLUE_NO_QUERY (16)"
+There is no query part in the URL.
+.IP "CURLUE_NO_FRAGMENT (17)"
+There is no fragment part in the URL.
 .SH "SEE ALSO"
 .BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
 .BR curl_share_strerror "(3), " CURLOPT_ERRORBUFFER "(3), "

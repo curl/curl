@@ -782,8 +782,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             wsa++;
           }
           else {
+            curl_socket_t socket = curlx_sitosk(fds);
             WSACloseEvent(wsaevent);
-            handle = (HANDLE) curlx_sitosk(fds);
+            handle = (HANDLE) socket;
             handle = select_ws_wait(handle, waitevent);
             handles[nfd] = handle;
             data[thd].thread = handle;

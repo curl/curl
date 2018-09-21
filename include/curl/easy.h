@@ -95,6 +95,16 @@ CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
 CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
                                     size_t buflen, size_t *n);
 
+
+/*
+ * NAME curl_easy_upkeep()
+ *
+ * DESCRIPTION
+ *
+ * Performs connection upkeep for the given session handle.
+ */
+CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
+
 #ifdef  __cplusplus
 }
 #endif

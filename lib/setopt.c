@@ -127,9 +127,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.dns_cache_timeout = arg;
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
+#if 0 /* deprecated */
     /* remember we want this enabled */
     arg = va_arg(param, long);
     data->set.global_dns_cache = (0 != arg) ? TRUE : FALSE;
+#endif
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
@@ -841,6 +843,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 #else
     if(arg > CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
       return CURLE_UNSUPPORTED_PROTOCOL;
+    if(arg == CURL_HTTP_VERSION_NONE)
+      arg = CURL_HTTP_VERSION_2TLS;
 #endif
     data->set.httpversion = arg;
     break;
@@ -1603,14 +1607,19 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * String that holds the SSL crypto engine.
      */
     argptr = va_arg(param, char *);
-    if(argptr && argptr[0])
-      result = Curl_ssl_set_engine(data, argptr);
+    if(argptr && argptr[0]) {
+      result = Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], argptr);
+      if(!result) {
+        result = Curl_ssl_set_engine(data, argptr);
+      }
+    }
     break;
 
   case CURLOPT_SSLENGINE_DEFAULT:
     /*
      * flag to set engine as default.
      */
+    Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], NULL);
     result = Curl_ssl_set_engine_default(data);
     break;
   case CURLOPT_CRLF:
@@ -1929,6 +1938,22 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     }
     data->set.buffer_size = arg;
 
+    break;
+
+  case CURLOPT_UPLOAD_BUFFERSIZE:
+    /*
+     * The application kindly asks for a differently sized upload buffer.
+     * Cap it to sensible.
+     */
+    arg = va_arg(param, long);
+
+    if(arg > UPLOADBUFFER_MAX)
+      arg = UPLOADBUFFER_MAX;
+    else if(arg < UPLOADBUFFER_MIN)
+      arg = UPLOADBUFFER_MIN;
+
+    data->set.upload_buffer_size = arg;
+    Curl_safefree(data->state.ulbuf); /* force a realloc next opportunity */
     break;
 
   case CURLOPT_NOSIGNAL:
@@ -2593,6 +2618,17 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_DISALLOW_USERNAME_IN_URL:
     data->set.disallow_username_in_url =
       (0 != va_arg(param, long)) ? TRUE : FALSE;
+    break;
+  case CURLOPT_DOH_URL:
+    result = Curl_setstropt(&data->set.str[STRING_DOH],
+                            va_arg(param, char *));
+    data->set.doh = data->set.str[STRING_DOH]?TRUE:FALSE;
+    break;
+  case CURLOPT_UPKEEP_INTERVAL_MS:
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.upkeep_interval_ms = arg;
     break;
   default:
     /* unknown tag and its companion, just ignore: */

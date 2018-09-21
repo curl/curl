@@ -61,7 +61,7 @@ announcement.
   Figure out the CWE (Common Weakness Enumeration) number for the flaw.
 
 - Request a CVE number from
-  [distros@openwall](http://oss-security.openwall.org/wiki/mailing-lists/distros)
+  [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
   when also informing and preparing them for the upcoming public security
   vulnerability announcement - attach the advisory draft for information. Note
   that 'distros' won't accept an embargo longer than 14 days and they do not
@@ -109,17 +109,12 @@ Publishing Security Advisories
 1. Write up the security advisory, using markdown syntax. Use the same
    subtitles as last time to maintain consistency.
 
-2. Name the advisory file (and ultimately the URL to be used when the flaw
-   gets published), using a randomized component so that third parties that
-   are involved in the process for each individual flaw will not be given
-   insights about possible *other* flaws worked on in parallel.
-   `adv_YEAR_RANDOM.md` has been used before.
+2. Name the advisory file after the allocated CVE id.
 
 3. Add a line on the top of the array in `curl-www/docs/vuln.pm'.
 
 4. Put the new advisory markdown file in the curl-www/docs/ directory. Add it
-   to the git repo.  Update the Makefile in the same directory to build the
-   HTML representation.
+   to the git repo.
 
 5. Run `make` in your local web checkout and verify that things look fine.
 

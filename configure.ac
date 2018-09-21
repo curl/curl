@@ -61,6 +61,13 @@ AC_SUBST(CONFIGURE_OPTIONS)
 CURL_CFLAG_EXTRAS=""
 if test X"$want_werror" = Xyes; then
   CURL_CFLAG_EXTRAS="-Werror"
+  if test "$compiler_id" = "GNU_C"; then
+    dnl enable -pedantic-errors for GCC 5 and later,
+    dnl as before that it was the same as -Werror=pedantic
+    if test "$compiler_num" -ge "500"; then
+      CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
+    fi
+  fi
 fi
 AC_SUBST(CURL_CFLAG_EXTRAS)
 
@@ -151,7 +158,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,axtls,winssl,darwinssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,axtls,winssl,darwinssl,mesalink} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -1869,6 +1876,20 @@ if test "$OPENSSL_ENABLED" = "1"; then
    ])
 fi
 
+dnl ---
+dnl Whether the OpenSSL configuration will be loaded automatically
+dnl ---
+if test X"$OPENSSL_ENABLED" = X"1"; then
+AC_ARG_ENABLE(openssl-auto-load-config,
+AC_HELP_STRING([--enable-openssl-auto-load-config],[Enable automatic loading of OpenSSL configuration])
+AC_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading of OpenSSL configuration]),
+[ if test X"$enableval" = X"no"; then
+    AC_MSG_NOTICE([automatic loading of OpenSSL configuration disabled])
+    AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration won't be loaded automatically])
+  fi
+])
+fi
+
 dnl ----------------------------------------------------
 dnl check for GnuTLS
 dnl ----------------------------------------------------
@@ -2389,6 +2410,98 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 fi
 
 dnl ----------------------------------------------------
+dnl check for MesaLink
+dnl ----------------------------------------------------
+
+dnl Default to compiler & linker defaults for MesaLink files & libraries.
+OPT_MESALINK=no
+
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+AC_ARG_WITH(mesalink,dnl
+AC_HELP_STRING([--with-mesalink=PATH],[where to look for MesaLink, PATH points to the installation root])
+AC_HELP_STRING([--without-mesalink], [disable MesaLink detection]),
+  OPT_MESALINK=$withval)
+
+if test -z "$ssl_backends" -o "x$OPT_MESALINK" != xno; then
+  ssl_msg=
+
+  if test X"$OPT_MESALINK" != Xno; then
+
+    if test "$OPT_MESALINK" = "yes"; then
+      OPT_MESALINK=""
+    fi
+
+    if test -z "$OPT_MESALINK" ; then
+      dnl check for lib first without setting any new path
+
+      AC_CHECK_LIB(mesalink, mesalink_library_init,
+      dnl libmesalink found, set the variable
+       [
+         AC_DEFINE(USE_MESALINK, 1, [if MesaLink is enabled])
+         AC_SUBST(USE_MESALINK, [1])
+         MESALINK_ENABLED=1
+         USE_MESALINK="yes"
+         ssl_msg="MesaLink"
+	 test mesalink != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        ])
+    fi
+
+    addld=""
+    addlib=""
+    addcflags=""
+    mesalinklib=""
+
+    if test "x$USE_MESALINK" != "xyes"; then
+      dnl add the path and test again
+      addld=-L$OPT_MESALINK/lib$libsuff
+      addcflags=-I$OPT_MESALINK/include
+      mesalinklib=$OPT_MESALINK/lib$libsuff
+
+      LDFLAGS="$LDFLAGS $addld"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
+      AC_CHECK_LIB(mesalink, mesalink_library_init,
+       [
+       AC_DEFINE(USE_MESALINK, 1, [if MesaLink is enabled])
+       AC_SUBST(USE_MESALINK, [1])
+       MESALINK_ENABLED=1
+       USE_MESALINK="yes"
+       ssl_msg="MesaLink"
+       test mesalink != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+       ],
+       [
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+       ])
+    fi
+
+    if test "x$USE_MESALINK" = "xyes"; then
+      AC_MSG_NOTICE([detected MesaLink])
+
+      LIBS="-lmesalink $LIBS"
+
+      if test -n "$mesalinklib"; then
+        dnl when shared libs were found in a path that the run-time
+        dnl linker doesn't search through, we need to add it to
+        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
+        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$mesalinklib"
+          export LD_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $mesalinklib to LD_LIBRARY_PATH])
+        fi
+      fi
+    fi
+
+  fi dnl MesaLink not disabled
+
+  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
+fi
+
+dnl ----------------------------------------------------
 dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
 dnl ----------------------------------------------------
 
@@ -2578,10 +2691,10 @@ if test -z "$ssl_backends" -o "x$OPT_AXTLS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED$MESALINK_ENABLED" in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls, --with-winssl, or --with-darwinssl to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls, --with-winssl, --with-darwinssl, or --with-mesalink to address this.])
   ;;
 x1)
   # one SSL backend is enabled

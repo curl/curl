@@ -367,11 +367,9 @@ CURLcode Curl_close(struct Curl_easy *data)
 
   Curl_safefree(data->state.buffer);
   Curl_safefree(data->state.headerbuff);
-
+  Curl_safefree(data->state.ulbuf);
   Curl_flush_cookies(data, 1);
-
   Curl_digest_cleanup(data);
-
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
@@ -518,24 +516,28 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;
   set->chunk_end      = ZERO_NULL;
-
-  /* tcp keepalives are disabled by default, but provide reasonable values for
-   * the interval and idle times.
-   */
   set->tcp_keepalive = FALSE;
   set->tcp_keepintvl = 60;
   set->tcp_keepidle = 60;
   set->tcp_fastopen = FALSE;
   set->tcp_nodelay = TRUE;
-
   set->ssl_enable_npn = TRUE;
   set->ssl_enable_alpn = TRUE;
-
   set->expect_100_timeout = 1000L; /* Wait for a second by default. */
   set->sep_headers = TRUE; /* separated header lists by default */
   set->buffer_size = READBUFFER_SIZE;
+  set->upload_buffer_size = UPLOADBUFFER_DEFAULT;
   set->happy_eyeballs_timeout = CURL_HET_DEFAULT;
-
+  set->fnmatch = ZERO_NULL;
+  set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
+  set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+  set->httpversion =
+#ifdef USE_NGHTTP2
+    CURL_HTTP_VERSION_2TLS
+#else
+    CURL_HTTP_VERSION_1_1
+#endif
+    ;
   Curl_http2_init_userset(set);
   return result;
 }
@@ -595,8 +597,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
       data->progress.flags |= PGRS_HIDE;
       data->state.current_speed = -1; /* init to negative == impossible */
-      data->set.fnmatch = ZERO_NULL;
-      data->set.maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
 
       Curl_http2_init_state(&data->state);
     }
@@ -918,9 +918,8 @@ void Curl_getoff_all_pipelines(struct Curl_easy *data,
       Curl_pipeline_leave_write(conn);
   }
   else {
-    int rc;
-    rc = Curl_removeHandleFromPipeline(data, &conn->recv_pipe);
-    rc += Curl_removeHandleFromPipeline(data, &conn->send_pipe);
+    (void)Curl_removeHandleFromPipeline(data, &conn->recv_pipe);
+    (void)Curl_removeHandleFromPipeline(data, &conn->send_pipe);
   }
 }
 
@@ -1833,6 +1832,12 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   /* Store creation time to help future close decision making */
   conn->created = Curl_now();
 
+  /* Store current time to give a baseline to keepalive connection times. */
+  conn->keepalive = Curl_now();
+
+  /* Store off the configured connection upkeep time. */
+  conn->upkeep_interval_ms = data->set.upkeep_interval_ms;
+
   conn->data = data; /* Setup the association between this connection
                         and the Curl_easy */
 
@@ -1939,30 +1944,37 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   return NULL;
 }
 
+/* returns the handler if the given scheme is built-in */
+const struct Curl_handler *Curl_builtin_scheme(const char *scheme)
+{
+  const struct Curl_handler * const *pp;
+  const struct Curl_handler *p;
+  /* Scan protocol handler table and match against 'scheme'. The handler may
+     be changed later when the protocol specific setup function is called. */
+  for(pp = protocols; (p = *pp) != NULL; pp++)
+    if(strcasecompare(p->scheme, scheme))
+      /* Protocol found in table. Check if allowed */
+      return p;
+  return NULL; /* not found */
+}
+
+
 static CURLcode findprotocol(struct Curl_easy *data,
                              struct connectdata *conn,
                              const char *protostr)
 {
-  const struct Curl_handler * const *pp;
-  const struct Curl_handler *p;
+  const struct Curl_handler *p = Curl_builtin_scheme(protostr);
 
-  /* Scan protocol handler table and match against 'protostr' to set a few
-     variables based on the URL. Now that the handler may be changed later
-     when the protocol specific setup function is called. */
-  for(pp = protocols; (p = *pp) != NULL; pp++) {
-    if(strcasecompare(p->scheme, protostr)) {
-      /* Protocol found in table. Check if allowed */
-      if(!(data->set.allowed_protocols & p->protocol))
-        /* nope, get out */
-        break;
+  if(p && /* Protocol found in table. Check if allowed */
+     (data->set.allowed_protocols & p->protocol)) {
 
-      /* it is allowed for "normal" request, now do an extra check if this is
-         the result of a redirect */
-      if(data->state.this_is_a_follow &&
-         !(data->set.redir_protocols & p->protocol))
-        /* nope, get out */
-        break;
-
+    /* it is allowed for "normal" request, now do an extra check if this is
+       the result of a redirect */
+    if(data->state.this_is_a_follow &&
+       !(data->set.redir_protocols & p->protocol))
+      /* nope, get out */
+      ;
+    else {
       /* Perform setup complement if some. */
       conn->handler = conn->given = p;
 
@@ -1970,7 +1982,6 @@ static CURLcode findprotocol(struct Curl_easy *data,
       return CURLE_OK;
     }
   }
-
 
   /* The protocol was not found in the table, but we don't have to assign it
      to anything since it is already assigned to a dummy-struct in the
@@ -2239,7 +2250,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
        the host-name part */
     memmove(path + hostlen + 1, path, pathlen + 1);
 
-     /* now copy the trailing host part in front of the existing path */
+    /* now copy the trailing host part in front of the existing path */
     memcpy(path + 1, query, hostlen);
 
     path[0]='/'; /* prepend the missing slash */
@@ -4335,6 +4346,10 @@ static CURLcode create_conn(struct Curl_easy *data,
     data->set.str[STRING_SSL_CIPHER_LIST_ORIG];
   data->set.proxy_ssl.primary.cipher_list =
     data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
+  data->set.ssl.primary.cipher_list13 =
+    data->set.str[STRING_SSL_CIPHER13_LIST_ORIG];
+  data->set.proxy_ssl.primary.cipher_list13 =
+    data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
 
   data->set.ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_ORIG];
   data->set.proxy_ssl.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
@@ -4840,4 +4855,35 @@ static unsigned int get_protocol_family(unsigned int protocol)
   }
 
   return family;
+}
+
+
+/*
+ * Wrapper to call functions in Curl_conncache_foreach()
+ *
+ * Returns always 0.
+ */
+static int conn_upkeep(struct connectdata *conn,
+                       void *param)
+{
+  /* Param is unused. */
+  (void)param;
+
+  if(conn->handler->connection_check) {
+    /* Do a protocol-specific keepalive check on the connection. */
+    conn->handler->connection_check(conn, CONNCHECK_KEEPALIVE);
+  }
+
+  return 0; /* continue iteration */
+}
+
+CURLcode Curl_upkeep(struct conncache *conn_cache,
+                          void *data)
+{
+  /* Loop over every connection and make connection alive. */
+  Curl_conncache_foreach(data,
+                         conn_cache,
+                         data,
+                         conn_upkeep);
+  return CURLE_OK;
 }

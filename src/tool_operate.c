@@ -1262,6 +1262,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS,
                   (long)(config->connecttimeout * 1000));
 
+        if(config->doh_url)
+          my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
+
         if(config->cipher_list)
           my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);
 
@@ -1273,7 +1276,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_TLS13_CIPHERS, config->cipher13_list);
 
         if(config->proxy_cipher13_list)
-          my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
+          my_setopt_str(curl, CURLOPT_PROXY_TLS13_CIPHERS,
                         config->proxy_cipher13_list);
 
         /* new in libcurl 7.9.2: */
@@ -1631,6 +1634,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
                 switch(response) {
+                case 408: /* Request Timeout */
                 case 500: /* Internal Server Error */
                 case 502: /* Bad Gateway */
                 case 503: /* Service Unavailable */
