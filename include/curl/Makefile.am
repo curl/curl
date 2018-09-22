@@ -20,8 +20,8 @@
 #
 ###########################################################################
 pkginclude_HEADERS = \
-	curl.h curlver.h easy.h mprintf.h stdcheaders.h multi.h \
-	typecheck-gcc.h system.h urlapi.h
+  curl.h curlver.h easy.h mprintf.h stdcheaders.h multi.h \
+  typecheck-gcc.h system.h urlapi.h
 
 pkgincludedir= $(includedir)/curl
 

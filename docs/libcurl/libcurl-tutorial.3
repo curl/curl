@@ -505,7 +505,7 @@ and then a file with binary contents and uploads the whole thing.
  part = curl_mime_addpart(mutipart);
  curl_mime_name(part, "logotype-image");
  curl_mime_filedata(part, "curl.png");
- 
+
  /* Set the form info */
  curl_easy_setopt(easyhandle, CURLOPT_MIMEPOST, multipart);
 

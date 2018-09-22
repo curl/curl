@@ -93,7 +93,7 @@ rem
 rem Returns:
 rem
 rem 0 - success
-rem 1 - success with simplified tool_hugehelp.c 
+rem 1 - success with simplified tool_hugehelp.c
 rem 2 - failed to generate Makefile
 rem 3 - failed to generate tool_hugehelp.c
 rem
@@ -193,7 +193,7 @@ rem
 
   if defined ROFFCMD (
     echo #include "tool_setup.h"> src\tool_hugehelp.c
-    echo #include "tool_hugehelp.h">> src\tool_hugehelp.c 
+    echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
 
     if defined HAVE_GZIP (
       echo #ifndef HAVE_LIBZ>> src\tool_hugehelp.c

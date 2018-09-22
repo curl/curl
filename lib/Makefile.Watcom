@@ -272,4 +272,3 @@ $(RESOURCE): libcurl.rc
 
 .c{$(OBJ_STAT)}.obj:
 	$(CC) $(CFLAGS) -DCURL_STATICLIB $[@ -fo=$^@
-	

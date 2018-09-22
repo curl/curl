@@ -14,7 +14,7 @@ sub nicedate {
     return $date;
 }
 
-print 
+print
 '                                  _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |

@@ -59,14 +59,14 @@ common_CFLAGS := -Wpointer-arith -Wwrite-strings -Wunused -Winline -Wnested-exte
 include $(CLEAR_VARS)
 include $(LOCAL_PATH)/lib/Makefile.inc
 CURL_HEADERS := \
-	curl.h \
-	system.h \
-	curlver.h \
-	easy.h \
-	mprintf.h \
-	multi.h \
-	stdcheaders.h \
-	typecheck-gcc.h
+  curl.h \
+  system.h \
+  curlver.h \
+  easy.h \
+  mprintf.h \
+  multi.h \
+  stdcheaders.h \
+  typecheck-gcc.h
 
 LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include/
@@ -108,4 +108,3 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/include $(LOCAL_PATH)/lib
 LOCAL_CFLAGS += $(common_CFLAGS)
 
 include $(BUILD_EXECUTABLE)
-
