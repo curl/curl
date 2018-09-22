@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,11 +30,11 @@
  * Set proxy as according to your network, but beware of proxy Cache-Control.
  *
  * To set your system clock, root access is required.
- * # date -s "`curl -sI http://nist.time.gov/timezone.cgi?UTC/s/0 \
+ * # date -s "`curl -sI https://nist.time.gov/timezone.cgi?UTC/s/0 \
  *        | awk -F': ' '/Date: / {print $2}'`"
  *
  * To view remote webserver date and time.
- * $ curl -sI http://nist.time.gov/timezone.cgi?UTC/s/0 \
+ * $ curl -sI https://nist.time.gov/timezone.cgi?UTC/s/0 \
  *        | awk -F': ' '/Date: / {print $2}'
  *
  * Synchronising your computer clock via Internet time server usually relies
@@ -63,8 +63,8 @@
  *    webserver provide Cache-Control to prevent caching.
  *
  * References:
- * http://tf.nist.gov/timefreq/service/its.htm
- * http://tf.nist.gov/timefreq/service/firewall.htm
+ * https://web.archive.org/web/20100228012139/tf.nist.gov/timefreq/service/its.htm
+ * https://web.archive.org/web/20100409024302/tf.nist.gov/timefreq/service/firewall.htm
  *
  * Usage:
  * This software will synchronise your computer clock only when you issue
@@ -88,6 +88,7 @@
 #include <stdio.h>
 #include <time.h>
 #ifndef __CYGWIN__
+#include <winsock2.h>
 #include <windows.h>
 #endif
 #include <curl/curl.h>
@@ -107,9 +108,8 @@ typedef struct
 
 const char DefaultTimeServer[3][MAX_STRING1] =
 {
-  "http://pool.ntp.org/",
-  "http://nist.time.gov/",
-  "http://www.google.com/"
+  "https://nist.time.gov/",
+  "https://www.google.com/"
 };
 
 const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -137,6 +137,8 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
 {
   int   i, RetVal;
   char  TmpStr1[26], TmpStr2[26];
+
+  (void)stream;
 
   if(ShowAllHeader == 1)
     fprintf(stderr, "%s", (char *)(ptr));
