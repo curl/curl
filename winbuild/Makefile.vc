@@ -40,7 +40,7 @@ CFGSET=true
 !MESSAGE   VC=<6,7,8,9,10,11,12,14,15>    - VC versions
 !MESSAGE   WITH_DEVEL=<path>              - Paths for the development files (SSL, zlib, etc.)
 !MESSAGE                                    Defaults to sibbling directory deps: ../deps
-!MESSAGE                                    Libraries can be fetched at http://pecl2.php.net/downloads/php-windows-builds/
+!MESSAGE                                    Libraries can be fetched at https://windows.php.net/downloads/php-sdk/deps/
 !MESSAGE                                    Uncompress them into the deps folder.
 !MESSAGE   WITH_SSL=<dll or static>       - Enable OpenSSL support, DLL or static
 !MESSAGE   WITH_NGHTTP2=<dll or static>   - Enable HTTP/2 support, DLL or static

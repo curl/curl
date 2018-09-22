@@ -78,7 +78,7 @@ where <options> is one or many of:
   VC=<6,7,8,9,10,11,12,14,15>    - VC versions
   WITH_DEVEL=<path>              - Paths for the development files (SSL, zlib, etc.)
                                    Defaults to sibbling directory deps: ../deps
-                                   Libraries can be fetched at http://windows.php.net/downloads/php-sdk/deps/
+                                   Libraries can be fetched at https://windows.php.net/downloads/php-sdk/deps/
                                    Uncompress them into the deps folder.
   WITH_SSL=<dll or static>       - Enable OpenSSL support, DLL or static
   WITH_NGHTTP2=<dll or static>   - Enable HTTP/2 support, DLL or static
