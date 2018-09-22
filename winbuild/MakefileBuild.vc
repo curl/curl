@@ -626,4 +626,3 @@ clean:
 	@if exist $(LIB_DIROBJ) rd /s/q $(LIB_DIROBJ)
 	@if exist $(CURL_DIROBJ)rd /s/q $(CURL_DIROBJ)
 	@if exist $(DIRDIST) rd /s/q $(DIRDIST)
-

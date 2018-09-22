@@ -31,4 +31,3 @@ extern const struct Curl_ssl Curl_ssl_axtls;
 
 #endif /* USE_AXTLS */
 #endif /* HEADER_CURL_AXTLS_H */
-

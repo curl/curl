@@ -28,4 +28,3 @@ void tool_list_engines(CURL *curl);
 void tool_version_info(void);
 
 #endif /* HEADER_CURL_TOOL_HELP_H */
-

@@ -648,4 +648,3 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
     NTLM_WB_ENABLED=1
   fi
 ])
-

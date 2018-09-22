@@ -221,4 +221,3 @@ functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
 
 
 #endif /* WOLFSSL_OPTIONS_H */
-

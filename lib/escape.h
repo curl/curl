@@ -31,4 +31,3 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
                         bool reject_crlf);
 
 #endif /* HEADER_CURL_ESCAPE_H */
-

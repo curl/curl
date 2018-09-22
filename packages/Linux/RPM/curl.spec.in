@@ -81,4 +81,3 @@ rm -rf %{builddir}
 
         - use _mandir instead of prefix to locate man pages because
 	  _mandir is not always prefix/man/man?.
-

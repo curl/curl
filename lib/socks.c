@@ -789,4 +789,3 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
 }
 
 #endif /* CURL_DISABLE_PROXY */
-

@@ -2425,4 +2425,3 @@ sws_cleanup:
   logmsg("========> sws quits");
   return 0;
 }
-

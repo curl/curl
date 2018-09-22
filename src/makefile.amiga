@@ -27,4 +27,3 @@ tool_hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
 
 install:
 	$(INSTALL) -c curl /c/curl
-

@@ -40,4 +40,3 @@ struct Curl_sockaddr_storage {
 };
 
 #endif /* HEADER_CURL_SOCKADDR_H */
-
