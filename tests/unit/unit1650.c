@@ -268,12 +268,12 @@ UNITTEST_START
       rc = doh_decode((unsigned char *)full49, sizeof(full49)-1,
                       DNS_TYPE_A, &d);
       fail_if(d.numaddr != 1, "missing address");
-      a = &d.addr[i];
-      snprintf((char *)buffer, sizeof(buffer), "%d.%d.%d.%d\n",
+      a = &d.addr[0];
+      snprintf((char *)buffer, sizeof(buffer), "%d.%d.%d.%d",
                a->ip.v4 & 0xff, (a->ip.v4>>8) & 0xff,
                (a->ip.v4>>16) & 0xff, a->ip.v4 >>24);
-      if(rc && strcmp((char *)buffer, "127.0.0.1")) {
-        fprintf(stderr, "bad address decoded\n");
+      if(rc || strcmp((char *)buffer, "127.0.0.1")) {
+        fprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
         return 7;
       }
       fail_if(d.numcname, "bad cname counter");
