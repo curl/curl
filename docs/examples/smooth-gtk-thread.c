@@ -64,7 +64,7 @@ size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
   return fwrite(ptr, size, nmemb, stream);
 }
 
-/* http://xoap.weather.com/weather/local/46214?cc=*&dayf=5&unit=i */
+/* https://weather.com/weather/today/l/46214?cc=*&dayf=5&unit=i */
 void *pull_one_url(void *NaN)
 {
   CURL *curl;

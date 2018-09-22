@@ -3,7 +3,7 @@
 ## Makefile for building curl.nlm (NetWare version - gnu make)
 ## Use: make -f Makefile.netware
 ##
-## Comments to: Guenter Knauf http://www.gknw.net/phpbb
+## Comments to: Guenter Knauf
 #
 #################################################################
 

@@ -14,7 +14,7 @@ The AIX Toolbox setup (installs into /opt/freeware, with symlinks in
 /usr/bin,/usr/lib,/usr/include) are based on IBM's aixtoolbox spec
 file written by David Clissold <cliss@austin.ibm.com>, see
 
-ftp://ftp.software.ibm.com/aixtoolbox/SPECS/curl-7.9.3-2.spec
+https://public.dhe.ibm.com/aix/freeSoftware/aixtoolbox/SPECS/curl-7.61.0-1.spec
 
 This spec file is designed to be a drop-in replacement for the
 old spec file found at the above link. Thus, like the old spec file
@@ -30,4 +30,3 @@ Lastly, the spec file expects the Curl source distribution file to be
 in .tar.bz2 format.
 
 The nifty curl header of this README is a ripoff of the vms/readme file.
-

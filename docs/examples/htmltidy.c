@@ -24,7 +24,7 @@
  * </DESC>
  */
 /*
- * LibTidy => http://tidy.sourceforge.net
+ * LibTidy => https://www.html-tidy.org/
  */
 
 #include <stdio.h>

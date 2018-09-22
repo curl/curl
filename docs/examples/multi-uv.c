@@ -29,7 +29,7 @@
 
    Requires libuv and (of course) libcurl.
 
-   See https://nikhilm.github.com/uvbook/ for more information on libuv.
+   See https://nikhilm.github.io/uvbook/ for more information on libuv.
 */
 
 #include <stdio.h>

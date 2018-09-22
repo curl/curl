@@ -63,8 +63,10 @@
  *    webserver provide Cache-Control to prevent caching.
  *
  * References:
- * https://web.archive.org/web/20100228012139/tf.nist.gov/timefreq/service/its.htm
- * https://web.archive.org/web/20100409024302/tf.nist.gov/timefreq/service/firewall.htm
+ * https://web.archive.org/web/20100228012139/ \
+ *    tf.nist.gov/timefreq/service/its.htm
+ * https://web.archive.org/web/20100409024302/ \
+ *    tf.nist.gov/timefreq/service/firewall.htm
  *
  * Usage:
  * This software will synchronise your computer clock only when you issue

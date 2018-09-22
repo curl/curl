@@ -46,7 +46,7 @@ multi-double
 multi-formadd
 multi-post
 multi-single
-persistant
+persistent
 pop3-dele
 pop3-list
 pop3-multi
