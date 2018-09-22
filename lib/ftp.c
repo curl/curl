@@ -3142,7 +3142,6 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   int ftpcode;
   CURLcode result = CURLE_OK;
   char *path = NULL;
-  const char *path_to_use = ftp->path;
 
   if(!ftp)
     return CURLE_OK;
@@ -3194,7 +3193,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(!result)
     /* get the "raw" path */
-    result = Curl_urldecode(data, path_to_use, 0, &path, NULL, TRUE);
+    result = Curl_urldecode(data, ftp->path, 0, &path, NULL, TRUE);
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
