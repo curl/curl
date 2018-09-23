@@ -25,7 +25,7 @@
  */
 /* Written by David Strauss
  *
- * Expat => http://www.libexpat.org/
+ * Expat => https://libexpat.github.io/
  *
  * gcc -Wall -I/usr/local/include xmlstream.c -lcurl -lexpat -o xmlstream
  *
@@ -131,7 +131,7 @@ int main(void)
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL,
-                   "http://www.w3schools.com/xml/simple.xml");
+                   "https://www.w3schools.com/xml/simple.xml");
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, parseStreamCallback);
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)parser);
 

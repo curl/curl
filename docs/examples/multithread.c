@@ -42,7 +42,7 @@
 const char * const urls[NUMT]= {
   "https://curl.haxx.se/",
   "ftp://cool.haxx.se/",
-  "http://www.contactor.se/",
+  "https://www.cag.se/",
   "www.haxx.se"
 };
 

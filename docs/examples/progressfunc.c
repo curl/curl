@@ -108,7 +108,7 @@ int main(void)
     prog.lastruntime = 0;
     prog.curl = curl;
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
 
 #if LIBCURL_VERSION_NUM >= 0x072000
     /* xferinfo was introduced in 7.32.0, no earlier libcurl versions will
