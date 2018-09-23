@@ -90,4 +90,3 @@ revert if need be.
 
 Remove all global-cache related code from curl around April 2019 (might be
 7.66.0).
-

@@ -1212,4 +1212,3 @@ CURLcode curl_easy_upkeep(struct Curl_easy *data)
     return CURLE_OK;
   }
 }
-

@@ -34,4 +34,3 @@ void tool_pressanykey(void);
 #endif
 
 #endif /* HEADER_CURL_TOOL_PANYKEY_H */
-

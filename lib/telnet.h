@@ -26,4 +26,3 @@ extern const struct Curl_handler Curl_handler_telnet;
 #endif
 
 #endif /* HEADER_CURL_TELNET_H */
-

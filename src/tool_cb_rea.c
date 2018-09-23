@@ -52,4 +52,3 @@ size_t tool_read_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
   in->config->readbusy = FALSE;
   return (size_t)rc;
 }
-

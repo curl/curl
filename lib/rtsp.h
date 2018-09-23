@@ -64,4 +64,3 @@ struct RTSP {
 
 
 #endif /* HEADER_CURL_RTSP_H */
-

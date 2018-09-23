@@ -45,4 +45,3 @@ void tool_pressanykey(void)
 }
 
 #endif /* __SYMBIAN32__ || NETWARE */
-

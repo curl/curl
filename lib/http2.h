@@ -77,4 +77,3 @@ void Curl_http2_cleanup_dependencies(struct Curl_easy *data);
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */
-

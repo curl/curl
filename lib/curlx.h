@@ -102,4 +102,3 @@
 #endif /* ENABLE_CURLX_PRINTF */
 
 #endif /* HEADER_CURL_CURLX_H */
-

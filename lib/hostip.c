@@ -1109,4 +1109,3 @@ CURLcode Curl_once_resolved(struct connectdata *conn,
 
   return result;
 }
-

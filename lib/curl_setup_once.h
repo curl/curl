@@ -515,4 +515,3 @@ typedef int sig_atomic_t;
 
 
 #endif /* HEADER_CURL_SETUP_ONCE_H */
-

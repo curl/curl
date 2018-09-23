@@ -22,19 +22,19 @@ DIGESTALGO=-sha256
 
 PREFIX=$1
 if [ ".$PREFIX" = . ] ; then
-	echo No configuration prefix
-	NOTOK=1
+   echo No configuration prefix
+   NOTOK=1
 else
-    if [ ! -f $PREFIX-ca.prm ] ; then
-	echo No configuration file $PREFIX-ca.prm
-	NOTOK=1
-    fi
+   if [ ! -f $PREFIX-ca.prm ] ; then
+      echo No configuration file $PREFIX-ca.prm
+      NOTOK=1
+   fi
 fi
 
 if [ ".$NOTOK" != . ] ; then
-    echo "Sorry, I can't do that for you."
-    $USAGE
-    exit
+   echo "Sorry, I can't do that for you."
+   $USAGE
+   exit
 fi
 
 GETSERIAL="\$t = time ;\$d =  \$t . substr(\$t+$$ ,-4,4)-1;print \$d"

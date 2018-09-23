@@ -153,4 +153,3 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
 
   return result;
 }
-

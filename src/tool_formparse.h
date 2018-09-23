@@ -30,4 +30,3 @@ int formparse(struct OperationConfig *config,
               bool literal_value);
 
 #endif /* HEADER_CURL_TOOL_FORMPARSE_H */
-

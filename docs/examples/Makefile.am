@@ -23,7 +23,7 @@
 AUTOMAKE_OPTIONS = foreign nostdinc
 
 EXTRA_DIST = README Makefile.example Makefile.inc Makefile.m32 \
-	Makefile.netware makefile.dj $(COMPLICATED_EXAMPLES)
+  Makefile.netware makefile.dj $(COMPLICATED_EXAMPLES)
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library

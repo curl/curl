@@ -350,7 +350,6 @@ AC_DEFUN([CURL_CHECK_OPTION_RT], [
       ;;
   esac
 ])
- 
 
 dnl CURL_CHECK_OPTION_WARNINGS
 dnl -------------------------------------------------
@@ -649,4 +648,3 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
     NTLM_WB_ENABLED=1
   fi
 ])
-

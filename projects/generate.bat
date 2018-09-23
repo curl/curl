@@ -77,7 +77,7 @@ rem ***************************************************************************
   )
 
   shift & goto parseArgs
- 
+
 :start
   if exist ..\buildconf.bat (
     if "%MODE%" == "GENERATE" (
@@ -264,7 +264,7 @@ rem
     exit /B
   )
 
-  if exist %3 (  
+  if exist %3 (
     del %3
   )
 
@@ -391,7 +391,7 @@ rem
 :clean
   echo * %CD%\%1
 
-  if exist %1 (  
+  if exist %1 (
     del %1
   )
 

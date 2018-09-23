@@ -113,4 +113,3 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
 #endif
 
 #endif /* HEADER_CURL_SELECT_H */
-
