@@ -2453,8 +2453,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
     char *url = data->change.url;
     result = Curl_add_buffer(&req_buffer, url, strlen(url));
-    if(result)
-      return result;
   }
   else if(paste_ftp_userpwd)
     result = Curl_add_bufferf(&req_buffer, "ftp://%s:%s@%s",
@@ -2464,12 +2462,11 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     result = Curl_add_buffer(&req_buffer, path, strlen(path));
     if(result)
       return result;
-    if(query) {
+    if(query)
       result = Curl_add_bufferf(&req_buffer, "?%s", query);
-      if(result)
-        return result;
-    }
   }
+  if(result)
+    return result;
 
   result =
     Curl_add_bufferf(&req_buffer,
