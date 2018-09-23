@@ -694,7 +694,7 @@ HTTPS
   included in recent versions of OpenSSL, and for older versions Dr Stephen
   N. Henson has written a patch for SSLeay that adds this functionality. You
   can get his patch (that requires an SSLeay installation) from his site at:
-  http://www.drh-consultancy.demon.co.uk/
+  https://web.archive.org/web/20170715155512/www.drh-consultancy.demon.co.uk/
 
   Example on how to automatically retrieve a document using a certificate with
   a personal password:
