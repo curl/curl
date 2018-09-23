@@ -110,23 +110,23 @@ rem ***************************************************************************
   ) else if /i "%~1" == "-help" (
     goto syntax
   ) else if /i "%~1" == "-VSpath" (
-	if "%~2" == "" (
-		echo.
-		echo Error. Please provide VS Path.
-		goto error
-	) else ( 
-		set "ABS_VC_PATH=%~2\VC"
-		shift
-	)
+    if "%~2" == "" (
+      echo.
+      echo Error. Please provide VS Path.
+      goto error
+    ) else (
+      set "ABS_VC_PATH=%~2\VC"
+      shift
+    )
   ) else if /i "%~1" == "-perlpath" (
     if "%~2" == "" (
-		echo.
-		echo Error. Please provide Perl root Path.
-		goto error
-	) else (		
-		set "PERL_PATH=%~2"
-		shift
-	)
+      echo.
+      echo Error. Please provide Perl root Path.
+      goto error
+    ) else (
+      set "PERL_PATH=%~2"
+      shift
+    )
   ) else (
     if not defined START_DIR (
       set START_DIR=%~1%
@@ -144,12 +144,12 @@ rem ***************************************************************************
   rem Default the start directory if one isn't specified
   if not defined START_DIR set START_DIR=..\..\openssl
 
-  if not defined ABS_VC_PATH ( 
+  if not defined ABS_VC_PATH (
     rem Check we have a program files directory
-	if not defined PF goto nopf
-	set "ABS_VC_PATH=%PF%\%VC_PATH%"
+    if not defined PF goto nopf
+    set "ABS_VC_PATH=%PF%\%VC_PATH%"
   )
-  
+
   rem Check we have Visual Studio installed
   if not exist "%ABS_VC_PATH%" goto novc
 
@@ -260,17 +260,17 @@ rem ***************************************************************************
   rem Move the PDB files
   move tmp32.dbg\lib.pdb "%OUTDIR%\LIB Debug" 1>nul
   move tmp32dll.dbg\lib.pdb "%OUTDIR%\DLL Debug" 1>nul
-  
+
   rem Remove the intermediate directories
   rd tmp32.dbg /s /q
   rd tmp32dll.dbg /s /q
 
   if "%BUILD_CONFIG%" == "debug" goto success
-  
+
 :x64release
   rem Configuring 64-bit Release Build
   perl Configure VC-WIN64A --prefix=%CD%
-  
+
   rem Perform the build
   call ms\do_win64a
   nmake -f ms\nt.mak
@@ -299,14 +299,14 @@ rem ***************************************************************************
   rd tmp32dll /s /q
 
   goto success
-  
+
 :x86
   rem Calculate our output directory
   set OUTDIR=build\Win32\%VC_DESC%
   if not exist %OUTDIR% md %OUTDIR%
 
   if "%BUILD_CONFIG%" == "release" goto x86release
-  
+
 :x86debug
   rem Configuring 32-bit Debug Build
   perl Configure debug-VC-WIN32 no-asm --prefix=%CD%
@@ -339,7 +339,7 @@ rem ***************************************************************************
   rd tmp32dll.dbg /s /q
 
   if "%BUILD_CONFIG%" == "debug" goto success
-  
+
 :x86release
   rem Configuring 32-bit Release Build
   perl Configure VC-WIN32 no-asm --prefix=%CD%
@@ -405,13 +405,13 @@ rem ***************************************************************************
   echo.
   echo directory - Specifies the OpenSSL source directory
   echo.
-  echo -VSpath - Specify the custom VS path if Visual Studio is installed at other location 
+  echo -VSpath - Specify the custom VS path if Visual Studio is installed at other location
   echo           then "C:/<ProgramFiles>/Microsoft Visual Studio[version]
   echo           For e.g. -VSpath "C:\apps\MVS14"
   echo.
   echo -perlpath - Specify the custom perl root path if perl is not located at "C:\Perl" and it is a
   echo             portable copy of perl and not installed on the win system
-  echo			   For e.g. -perlpath "D:\strawberry-perl-5.24.3.1-64bit-portable"
+  echo             For e.g. -perlpath "D:\strawberry-perl-5.24.3.1-64bit-portable"
   goto error
 
 :unknown

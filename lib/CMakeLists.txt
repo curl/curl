@@ -124,4 +124,3 @@ install(EXPORT libcurl-target
         NAMESPACE CURL::
         DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
-

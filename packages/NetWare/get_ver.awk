@@ -41,4 +41,3 @@ BEGIN {
   print "LIBCURL_VERSION_STR = " version_string
   print "LIBCURL_COPYRIGHT_STR = " copyright_string
 }
-

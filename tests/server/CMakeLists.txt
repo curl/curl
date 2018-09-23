@@ -57,4 +57,3 @@ endforeach()
 # SETUP_EXECUTABLE(sockfilt sockfilt.c util.c util.h ${useful} ${CURL_SOURCE_DIR}/lib/inet_pton.c)
 # SETUP_EXECUTABLE(getpart testpart.c ${useful})
 # SETUP_EXECUTABLE(tftpd tftpd.c util.c util.h ${useful} tftp.h)
-

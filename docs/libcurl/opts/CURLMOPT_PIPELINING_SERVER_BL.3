@@ -34,7 +34,7 @@ from pipelining, i.e server types that are known to not support HTTP
 pipelining. The array is copied by libcurl.
 
 Note that the comparison matches if the Server: header begins with the string
-in the blacklist, i.e "Server: Ninja 1.2.3" and "Server: Ninja 1.4.0" can 
+in the blacklist, i.e "Server: Ninja 1.2.3" and "Server: Ninja 1.4.0" can
 both be blacklisted by having "Ninja" in the backlist.
 
 Pass a NULL pointer to clear the blacklist.

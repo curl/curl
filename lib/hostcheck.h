@@ -29,4 +29,3 @@
 int Curl_cert_hostcheck(const char *match_pattern, const char *hostname);
 
 #endif /* HEADER_CURL_HOSTCHECK_H */
-

@@ -32,4 +32,3 @@ char *tool_basename(char *path);
 #endif /* HAVE_BASENAME */
 
 #endif /* HEADER_CURL_TOOL_BNAME_H */
-

@@ -71,4 +71,3 @@ Curl_setup_transfer (struct connectdata *data,
 );
 
 #endif /* HEADER_CURL_TRANSFER_H */
-

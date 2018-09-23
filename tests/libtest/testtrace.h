@@ -34,4 +34,3 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
                      void *userp);
 
 #endif /* HEADER_LIBTEST_TESTTRACE_H */
-

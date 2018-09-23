@@ -36,4 +36,3 @@ void Curl_amiga_cleanup();
 #endif
 
 #endif /* HEADER_CURL_AMIGAOS_H */
-

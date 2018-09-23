@@ -66,4 +66,3 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 #endif /* MSDOS || WIN32 */
 
 #endif /* HEADER_CURL_TOOL_DOSWIN_H */
-

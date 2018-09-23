@@ -35,4 +35,3 @@ void setfiletime(curl_off_t filetime, const char *filename,
           (defined(WIN32) && (SIZEOF_CURL_OFF_T >= 8)) */
 
 #endif /* HEADER_CURL_TOOL_FILETIME_H */
-

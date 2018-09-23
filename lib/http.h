@@ -257,4 +257,3 @@ Curl_http_output_auth(struct connectdata *conn,
                                             up the proxy tunnel */
 
 #endif /* HEADER_CURL_HTTP_H */
-

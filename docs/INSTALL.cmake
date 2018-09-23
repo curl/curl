@@ -88,4 +88,3 @@ cmake-gui
         GUI.  Once you have selected all the options you want, click the
         "Generate" button.
         6. Run the native build tool that you used CMake to generate.
-
