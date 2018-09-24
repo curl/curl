@@ -1705,8 +1705,13 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
     if(conn->handler->protocol&PROTO_FAMILY_HTTP) {
       struct HTTP *http = data->req.protop;
-      if(http->writebytecount)
-        return Curl_readrewind(conn);
+      if(http->writebytecount) {
+        CURLcode result = Curl_readrewind(conn);
+        if(result) {
+          Curl_safefree(*url);
+          return result;
+        }
+      }
     }
   }
   return CURLE_OK;
