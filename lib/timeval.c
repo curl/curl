@@ -62,8 +62,8 @@ struct curltime Curl_now(void)
   struct timespec tsnow;
 
   /*
-  ** clock_gettime() may be defined by Apple's SDK as weak symbol thus 
-  ** code compiles but fails during run-time if clock_gettime() is 
+  ** clock_gettime() may be defined by Apple's SDK as weak symbol thus
+  ** code compiles but fails during run-time if clock_gettime() is
   ** called on unsupported OS version.
   */
 #if defined(__APPLE__) && defined(__clang__) && defined(__has_attribute)
@@ -74,7 +74,7 @@ struct curltime Curl_now(void)
       have_clock_gettime = 1;
 #endif
 #endif
-    
+
   if(
 #ifdef HAVE_CLOCK_GETTIME_CHECK
      have_clock_gettime &&
