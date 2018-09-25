@@ -537,14 +537,6 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   }
 
   if(pickhost || pickproxy) {
-    /* In case this is GSS auth, the newurl field is already allocated so
-       we must make sure to free it before allocating a new one. As figured
-       out in bug #2284386 */
-    Curl_safefree(data->req.newurl);
-    data->req.newurl = strdup(data->change.url); /* clone URL */
-    if(!data->req.newurl)
-      return CURLE_OUT_OF_MEMORY;
-
     if((data->set.httpreq != HTTPREQ_GET) &&
        (data->set.httpreq != HTTPREQ_HEAD) &&
        !conn->bits.rewindaftersend) {
@@ -552,6 +544,13 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
       if(result)
         return result;
     }
+    /* In case this is GSS auth, the newurl field is already allocated so
+       we must make sure to free it before allocating a new one. As figured
+       out in bug #2284386 */
+    Curl_safefree(data->req.newurl);
+    data->req.newurl = strdup(data->change.url); /* clone URL */
+    if(!data->req.newurl)
+      return CURLE_OUT_OF_MEMORY;
   }
   else if((data->req.httpcode < 300) &&
           (!data->state.authhost.done) &&
