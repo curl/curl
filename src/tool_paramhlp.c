@@ -490,8 +490,6 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
     *list = newlist;
   else
     return PARAM_NO_MEM;
-
-  return PARAM_OK;
 }
 
 int ftpfilemethod(struct OperationConfig *config, const char *str)
