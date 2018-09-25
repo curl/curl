@@ -60,7 +60,26 @@ struct curltime Curl_now(void)
   struct timeval now;
   struct curltime cnow;
   struct timespec tsnow;
-  if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
+
+  /*
+  ** clock_gettime() may be defined by Apple's SDK as weak symbol thus 
+  ** code compiles but fails during run-time if clock_gettime() is 
+  ** called on unsupported OS version.
+  */
+#if defined(__APPLE__) && defined(__clang__) && defined(__has_attribute)
+#if __has_attribute(availability)
+#define HAVE_CLOCK_GETTIME_CHECK
+  static int have_clock_gettime = 0;
+  if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
+      have_clock_gettime = 1;
+#endif
+#endif
+    
+  if(
+#ifdef HAVE_CLOCK_GETTIME_CHECK
+     have_clock_gettime &&
+#endif
+     (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
   }
