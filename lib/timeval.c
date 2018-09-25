@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,7 +60,23 @@ struct curltime Curl_now(void)
   struct timeval now;
   struct curltime cnow;
   struct timespec tsnow;
-  if(0 == clock_gettime(CLOCK_MONOTONIC, &tsnow)) {
+
+  /*
+  ** clock_gettime() may be defined by Apple's SDK as weak symbol thus
+  ** code compiles but fails during run-time if clock_gettime() is
+  ** called on unsupported OS version.
+  */
+#if defined(__APPLE__) && (HAVE_BUILTIN_AVAILABLE == 1)
+  bool have_clock_gettime = FALSE;
+  if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
+    have_clock_gettime = TRUE;
+#endif
+
+  if(
+#if defined(__APPLE__) && (HAVE_BUILTIN_AVAILABLE == 1)
+    have_clock_gettime &&
+#endif
+    (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
   }
