@@ -1142,12 +1142,8 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
   struct HTTP *http = data->req.protop;
   struct http_conn *httpc = &conn->proto.httpc;
 
-  if(!httpc->h2) /* not HTTP/2 ? */
-    return;
-
-  if(data->state.drain)
-    drained_transfer(data, httpc);
-
+  /* there might be allocated resources done before this got the 'h2' pointer
+     setup */
   if(http->header_recvbuf) {
     Curl_add_buffer_free(&http->header_recvbuf);
     Curl_add_buffer_free(&http->trailer_recvbuf);
@@ -1160,6 +1156,12 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
       http->push_headers = NULL;
     }
   }
+
+  if(!httpc->h2) /* not HTTP/2 ? */
+    return;
+
+  if(data->state.drain)
+    drained_transfer(data, httpc);
 
   if(premature) {
     /* RST_STREAM */
