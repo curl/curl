@@ -1664,7 +1664,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     if test "x$cross_compiling" != "xyes" &&
       test "$curl_func_clock_gettime" = "yes"; then
       AC_MSG_CHECKING([if monotonic clock_gettime works])
-      AC_RUN_IFELSE([
+      CURL_RUN_IFELSE([
         AC_LANG_PROGRAM([[
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
