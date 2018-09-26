@@ -513,7 +513,7 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
   dnl only do runtime verification when not cross-compiling
   if test "x$cross_compiling" != "xyes" &&
     test "$tmp_compiler_works" = "yes"; then
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
 #       ifdef __STDC__
 #         include <stdlib.h>
