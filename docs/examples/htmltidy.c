@@ -28,8 +28,8 @@
  */
 
 #include <stdio.h>
-#include <tidy/tidy.h>
-#include <tidy/buffio.h>
+#include <tidy.h>
+#include <tidybuffio.h>
 #include <curl/curl.h>
 
 /* curl write callback, to fill tidy's input buffer...  */
