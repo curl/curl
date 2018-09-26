@@ -69,9 +69,9 @@ struct curltime Curl_now(void)
 #if defined(__APPLE__) && defined(__clang__) && defined(__has_attribute)
 #if __has_attribute(availability)
 #define HAVE_CLOCK_GETTIME_CHECK
-  static int have_clock_gettime = 0;
+  static bool have_clock_gettime = FALSE;
   if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
-      have_clock_gettime = 1;
+      have_clock_gettime = TRUE;
 #endif
 #endif
 
