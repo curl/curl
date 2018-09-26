@@ -104,13 +104,21 @@ int Curl_thread_join(curl_thread_t *hnd)
 curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
                                  void *arg)
 {
-  curl_thread_t t;
 #ifdef _WIN32_WCE
-  t = CreateThread(NULL, 0, func, arg, 0, NULL);
+  typedef HANDLE curl_win_thread_handle_t;
+#elif defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+  typedef unsigned long curl_win_thread_handle_t;
 #else
-  uintptr_t thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
-  t = (curl_thread_t)thread_handle;
+  typedef uintptr_t curl_win_thread_handle_t;
 #endif
+  curl_thread_t t;
+  curl_win_thread_handle_t thread_handle;
+#ifdef _WIN32_WCE
+  thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
+#else
+  thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
+#endif
+  t = (curl_thread_t)thread_handle;
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef _WIN32_WCE
     DWORD gle = GetLastError();
