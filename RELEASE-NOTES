@@ -59,6 +59,16 @@ This release includes the following bugfixes:
  o urlglob: improve error message on bad globs [22]
  o vtls: fix ssl version "or later" behavior change for many backends [38]
  o x509asn1: return CURLE_PEER_FAILED_VERIFICATION on failure to parse cert [6]
+ o SECURITY-PROCESS: mention the bountygraph program [42]
+ o examples/parseurl.c: show off the URL API [43]
+ o examples/Makefile.m32: sync with core [44]
+ p docs/examples: URL updates [45]
+ o Curl_dedotdotify(): always nul terminate returned string [46]
+ o openssl: enable TLS 1.3 post-handshake auth [47]
+ o openssl: load built-in engines too [48]
+ o Curl_retry_request: fix memory leak [49]
+ o http: fix memleak in rewind error path [50]
+ o Curl_http2_done: fix memleak in error path [51]
 
 This release includes the following known bugs:
 
@@ -67,13 +77,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Gustafsson, Daniel Shahaf, Daniel Stenberg, Dave Reisner,
-  Eason-Yu on github, Erik Minekus, Han Han, Harry Sintonen, Jim Fuller,
-  Kamil Dudka, Loganaden Velvindron, Marcel Raad, Marc Hörsken, Max Dymond,
-  Maxime Legros, Nicklas Avén, Nick Zitzmann, Philipp Waehnert, Rainer Jung,
-  Ray Satiro, Rikard Falkeborn, Sergei Nikulov, Thomas Glanzmann,
-  Viktor Szakats, Yiming Jing,
-  (25 contributors)
+  Christian Heimes, Daniel Gustafsson, Daniel Shahaf, Daniel Stenberg,
+  Dave Reisner, Eason-Yu on github, Erik Minekus, Even Rouault, Han Han,
+  Harry Sintonen, Jean Fabrice, Jim Fuller, Kamil Dudka, Loganaden Velvindron,
+  Marcel Raad, Marc Hörsken, Max Dymond, Maxime Legros, Nicklas Avén,
+  Nick Zitzmann, Philipp Waehnert, Rainer Jung, Ray Satiro, Rikard Falkeborn,
+  Sergei Nikulov, Thomas Glanzmann, Viktor Szakats, Yiming Jing,
+  (28 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -120,3 +130,13 @@ References to bug reports and discussions on issues:
  [39] = https://curl.haxx.se/bug/?i=2971
  [40] = https://curl.haxx.se/bug/?i=3029
  [41] = https://curl.haxx.se/bug/?i=2697
+ [42] = https://curl.haxx.se/bug/?i=3032
+ [43] = https://curl.haxx.se/bug/?i=3030
+ [44] = https://curl.haxx.se/bug/?i=3033
+ [45] = https://curl.haxx.se/bug/?i=3036
+ [46] = https://curl.haxx.se/bug/?i=3039
+ [47] = https://curl.haxx.se/bug/?i=3026
+ [48] = https://curl.haxx.se/bug/?i=3023
+ [49] = https://curl.haxx.se/bug/?i=3042
+ [50] = https://curl.haxx.se/bug/?i=3044
+ [51] = https://curl.haxx.se/bug/?i=3046
