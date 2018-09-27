@@ -881,6 +881,10 @@ check_symbol_exists(ioctl          "${CURL_INCLUDES}" HAVE_IOCTL)
 check_symbol_exists(setsockopt     "${CURL_INCLUDES}" HAVE_SETSOCKOPT)
 check_function_exists(mach_absolute_time HAVE_MACH_ABSOLUTE_TIME)
 
+check_c_source_compiles("${CURL_INCLUDES}
+  int main(int argc, char **argv) { struct timespec ts = {0, 0}; clock_gettime(CLOCK_MONOTONIC, &ts); return 0; }" HAVE_CLOCK_GETTIME_MONOTONIC)
+check_c_source_compiles("int main(int argc, char **argv) { if(__builtin_available(macOS 10.12, *)) {} return 0; }" HAVE_BUILTIN_AVAILABLE)
+
 # symbol exists in win32, but function does not.
 if(WIN32)
   if(ENABLE_INET_PTON)
