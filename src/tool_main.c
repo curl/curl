@@ -237,18 +237,15 @@ static void main_free(struct GlobalConfig *config)
 }
 
 #if defined(_WIN32)
-
-typedef struct {
+// TerminalSettings for Windows
+struct TerminalSettings {
     HANDLE hStdOut;
     DWORD dwOutputMode;
     UINT nCodepage;
-} TerminalSettings;
+}TerminalSettings;
+#endif 
 
-#else
-  typedef struct {} TerminalSettings;
-#endif
-
-void configure_terminal(TerminalSettings* ts)
+void configure_terminal()
 {
 #if defined(_WIN32)
   // If we're running Windows, enable VT output & set codepage to UTF-8.
@@ -262,26 +259,27 @@ void configure_terminal(TerminalSettings* ts)
 
   // Cache current codepage for now (will restore on exit) 
   // and set codepage to unicde
-  ts->nCodepage = GetConsoleOutputCP();
+  memset(&TerminalSettings, 0, sizeof(TerminalSettings));
+  TerminalSettings.nCodepage = GetConsoleOutputCP();
   SetConsoleOutputCP(65001);
 
   // Enable VT output
-  ts->hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if ((ts->hStdOut != INVALID_HANDLE_VALUE) 
-    && (GetConsoleMode(ts->hStdOut, &ts->dwOutputMode))) 
+  TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  if ((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE) 
+    && (GetConsoleMode(TerminalSettings.hStdOut, &TerminalSettings.dwOutputMode))) 
   {
-    SetConsoleMode(ts->hStdOut, 
-                   ts->dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    SetConsoleMode(TerminalSettings.hStdOut, 
+                   TerminalSettings.dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
   }
 #endif
 }
 
-void restore_terminal(const TerminalSettings ts)
+void restore_terminal()
 {
 #if defined(_WIN32)
   // Restore Console output mode and codepage to whatever they were when Curl started
-  SetConsoleMode(ts.hStdOut, ts.dwOutputMode);
-  SetConsoleOutputCP(ts.nCodepage);
+  SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
+  SetConsoleOutputCP(TerminalSettings.nCodepage);
 #endif 
 }
 
@@ -294,11 +292,8 @@ int main(int argc, char *argv[])
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
-  TerminalSettings ts;
-  memset(&ts, 0, sizeof(TerminalSettings));
-
   // Perform any platform-specific terminal configuration
-  configure_terminal(&ts);
+  configure_terminal();
 
   main_checkfds();
 
@@ -325,7 +320,7 @@ int main(int argc, char *argv[])
     main_free(&global);
   }
 
-  restore_terminal(ts);
+  restore_terminal();
 
 #ifdef __NOVELL_LIBC__
   if(getenv("_IN_NETWARE_BASH_") == NULL)
