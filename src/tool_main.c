@@ -236,15 +236,14 @@ static void main_free(struct GlobalConfig *config)
   config->last = NULL;
 }
 
-#define MSVTMODE
-
-#if defined(_WIN32) && defined(MSVTMODE)
+#if defined(_WIN32)
 
 typedef struct {
     DWORD dwInputMode;
     DWORD dwOutputMode;
     HANDLE hStdIn;
     HANDLE hStdOut;
+    UINT nCodepage;
 } TerminalSettings;
 
 #else
@@ -253,7 +252,7 @@ typedef struct {
 
 void configure_terminal(TerminalSettings* ts)
 {
-  #if defined(_WIN32) && defined(MSVTMODE)
+  #if defined(_WIN32)
   // If we're running Windows, enable VT input & output.
   // Note: VT mode flag can be set on any version of Windows, but VT
   // processing only performed on Win10 >= Creators Update)
@@ -267,8 +266,11 @@ void configure_terminal(TerminalSettings* ts)
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
   #endif
 
-  printf("Enabling Windows Console VT Mode\r\n");
-  
+  // Cache current codepage for now (will restore on exit) 
+  // and set codepage to unicde
+  ts->nCodepage = GetConsoleOutputCP();
+  SetConsoleOutputCP(65001);
+
   // Enable VT Input
   ts->hStdIn = GetStdHandle(STD_INPUT_HANDLE);
   if ((ts->hStdIn != INVALID_HANDLE_VALUE) 
@@ -287,20 +289,16 @@ void configure_terminal(TerminalSettings* ts)
                    ts->dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
   }
 
-    printf("\x1b[92mSuccess: Enabled Windows Console VT Mode\x1b[0m\r\n\r\n");
-
 #endif
 }
 
 void restore_terminal(const TerminalSettings ts)
 {
-#if defined(_WIN32) && defined(MSVTMODE)
-  printf("Resetting Windows Console VT Mode");
-
-  // Restore Console input & output modes to whatever they were when Curl started.
+#if defined(_WIN32)
+  // Restore Console input & output modes, and codepage to whatever they were when Curl started.
   SetConsoleMode(ts.hStdIn, ts.dwInputMode);
   SetConsoleMode(ts.hStdOut, ts.dwOutputMode);
-  
+  SetConsoleOutputCP(ts.nCodepage);
 #endif 
 }
 
@@ -316,6 +314,7 @@ int main(int argc, char *argv[])
   TerminalSettings ts;
   memset(&ts, 0, sizeof(TerminalSettings));
 
+  // Perform any platform-specific terminal configuration
   configure_terminal(&ts);
 
   main_checkfds();
