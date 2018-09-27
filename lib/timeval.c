@@ -68,7 +68,7 @@ struct curltime Curl_now(void)
   */
 #if defined(__APPLE__) && defined(__clang__) && defined(__has_attribute)
 #if __has_attribute(availability)
-#define HAVE_CLOCK_GETTIME_CHECK
+#define _USE_CLOCK_GETTIME_CHECK
   static bool have_clock_gettime = FALSE;
   if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
       have_clock_gettime = TRUE;
@@ -76,7 +76,7 @@ struct curltime Curl_now(void)
 #endif
 
   if(
-#ifdef HAVE_CLOCK_GETTIME_CHECK
+#ifdef _USE_CLOCK_GETTIME_CHECK
      have_clock_gettime &&
 #endif
      (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
