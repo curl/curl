@@ -66,14 +66,14 @@ struct curltime Curl_now(void)
   ** code compiles but fails during run-time if clock_gettime() is
   ** called on unsupported OS version.
   */
-#if HAVE_BUILTIN_AVAILABLE == 1
+#if defined(__APPLE__) && (HAVE_BUILTIN_AVAILABLE == 1)
   bool have_clock_gettime = FALSE;
   if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
       have_clock_gettime = TRUE;
 #endif
 
   if(
-#if HAVE_BUILTIN_AVAILABLE == 1
+#if defined(__APPLE__) && (HAVE_BUILTIN_AVAILABLE == 1)
      have_clock_gettime &&
 #endif
      (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
