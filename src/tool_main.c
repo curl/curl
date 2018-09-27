@@ -239,10 +239,8 @@ static void main_free(struct GlobalConfig *config)
 #if defined(_WIN32)
 
 typedef struct {
-    DWORD dwInputMode;
-    DWORD dwOutputMode;
-    HANDLE hStdIn;
     HANDLE hStdOut;
+    DWORD dwOutputMode;
     UINT nCodepage;
 } TerminalSettings;
 
@@ -252,33 +250,20 @@ typedef struct {
 
 void configure_terminal(TerminalSettings* ts)
 {
-  #if defined(_WIN32)
-  // If we're running Windows, enable VT input & output.
+#if defined(_WIN32)
+  // If we're running Windows, enable VT output & set codepage to UTF-8.
   // Note: VT mode flag can be set on any version of Windows, but VT
   // processing only performed on Win10 >= Creators Update)
 
   // Define the VT flags in case we're building with an older SDK
-  #ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
-    #define ENABLE_VIRTUAL_TERMINAL_INPUT 0x0200
-  #endif
-
-  #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-  #endif
+#endif
 
   // Cache current codepage for now (will restore on exit) 
   // and set codepage to unicde
   ts->nCodepage = GetConsoleOutputCP();
   SetConsoleOutputCP(65001);
-
-  // Enable VT Input
-  ts->hStdIn = GetStdHandle(STD_INPUT_HANDLE);
-  if ((ts->hStdIn != INVALID_HANDLE_VALUE) 
-    && (GetConsoleMode(ts->hStdIn, &ts->dwInputMode))) 
-  {
-    SetConsoleMode(ts->hStdIn, 
-                   ts->dwInputMode | ENABLE_VIRTUAL_TERMINAL_INPUT);
-  }
 
   // Enable VT output
   ts->hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -288,15 +273,13 @@ void configure_terminal(TerminalSettings* ts)
     SetConsoleMode(ts->hStdOut, 
                    ts->dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
   }
-
 #endif
 }
 
 void restore_terminal(const TerminalSettings ts)
 {
 #if defined(_WIN32)
-  // Restore Console input & output modes, and codepage to whatever they were when Curl started.
-  SetConsoleMode(ts.hStdIn, ts.dwInputMode);
+  // Restore Console output mode and codepage to whatever they were when Curl started
   SetConsoleMode(ts.hStdOut, ts.dwOutputMode);
   SetConsoleOutputCP(ts.nCodepage);
 #endif 
