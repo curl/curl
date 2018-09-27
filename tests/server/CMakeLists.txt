@@ -5,7 +5,7 @@ if(MSVC)
 endif()
 
 function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
-  add_executable( ${TEST_NAME} ${ARGN} )
+  add_executable(${TEST_NAME} ${ARGN})
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
   include_directories(
@@ -25,7 +25,7 @@ function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test
   # to build the servers.  In order to achieve proper linkage of these
   # files on Win32 targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
-  if(NOT CURL_STATICLIB)
+  if(BUILD_SHARED_LIBS)
     set_target_properties(${TEST_NAME} PROPERTIES
       COMPILE_DEFINITIONS CURL_STATICLIB)       # ${UPPER_TEST_NAME}
   endif()
@@ -57,4 +57,3 @@ endforeach()
 # SETUP_EXECUTABLE(sockfilt sockfilt.c util.c util.h ${useful} ${CURL_SOURCE_DIR}/lib/inet_pton.c)
 # SETUP_EXECUTABLE(getpart testpart.c ${useful})
 # SETUP_EXECUTABLE(tftpd tftpd.c util.c util.h ${useful} tftp.h)
-

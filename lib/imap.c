@@ -159,7 +159,8 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* connection_check */
   PORT_IMAPS,                       /* defport */
   CURLPROTO_IMAPS,                  /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
+  PROTOPT_URLOPTIONS
 };
 #endif
 
@@ -421,7 +422,6 @@ static CURLcode imap_perform_capability(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
-
   imapc->sasl.authmechs = SASL_AUTH_NONE; /* No known auth. mechanisms yet */
   imapc->sasl.authused = SASL_AUTH_NONE;  /* Clear the auth. mechanism used */
   imapc->tls_supported = FALSE;           /* Clear the TLS capability */
@@ -683,24 +683,37 @@ static CURLcode imap_perform_fetch(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct IMAP *imap = conn->data->req.protop;
-
   /* Check we have a UID */
-  if(!imap->uid) {
-    failf(conn->data, "Cannot FETCH without a UID.");
-    return CURLE_URL_MALFORMAT;
+  if(imap->uid) {
+
+    /* Send the FETCH command */
+    if(imap->partial)
+      result = imap_sendf(conn, "UID FETCH %s BODY[%s]<%s>",
+                            imap->uid,
+                            imap->section ? imap->section : "",
+                            imap->partial);
+    else
+      result = imap_sendf(conn, "UID FETCH %s BODY[%s]",
+                            imap->uid,
+                            imap->section ? imap->section : "");
   }
+  else if(imap->mindex) {
 
-  /* Send the FETCH command */
-  if(imap->partial)
-    result = imap_sendf(conn, "FETCH %s BODY[%s]<%s>",
-                        imap->uid,
-                        imap->section ? imap->section : "",
-                        imap->partial);
-  else
-    result = imap_sendf(conn, "FETCH %s BODY[%s]",
-                        imap->uid,
-                        imap->section ? imap->section : "");
-
+    /* Send the FETCH command */
+    if(imap->partial)
+      result = imap_sendf(conn, "FETCH %s BODY[%s]<%s>",
+                            imap->mindex,
+                            imap->section ? imap->section : "",
+                            imap->partial);
+    else
+      result = imap_sendf(conn, "FETCH %s BODY[%s]",
+                            imap->mindex,
+                            imap->section ? imap->section : "");
+  }
+  else {
+        failf(conn->data, "Cannot FETCH without a UID.");
+        return CURLE_URL_MALFORMAT;
+  }
   if(!result)
     state(conn, IMAP_FETCH);
 
@@ -1464,9 +1477,10 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && !imap->custom &&
-          (imap->uid || data->set.upload ||
+          (imap->uid || imap->mindex || data->set.upload ||
           data->set.mimepost.kind != MIMEKIND_NONE)) {
     /* Handle responses after FETCH or APPEND transfer has finished */
+
     if(!data->set.upload && data->set.mimepost.kind == MIMEKIND_NONE)
       state(conn, IMAP_FETCH_FINAL);
     else {
@@ -1490,6 +1504,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(imap->mailbox);
   Curl_safefree(imap->uidvalidity);
   Curl_safefree(imap->uid);
+  Curl_safefree(imap->mindex);
   Curl_safefree(imap->section);
   Curl_safefree(imap->partial);
   Curl_safefree(imap->query);
@@ -1543,14 +1558,14 @@ static CURLcode imap_perform(struct connectdata *conn, bool *connected,
   else if(imap->custom && (selected || !imap->mailbox))
     /* Custom command using the same mailbox or no mailbox */
     result = imap_perform_list(conn);
-  else if(!imap->custom && selected && imap->uid)
+  else if(!imap->custom && selected && (imap->uid || imap->mindex))
     /* FETCH from the same mailbox */
     result = imap_perform_fetch(conn);
   else if(!imap->custom && selected && imap->query)
     /* SEARCH the current mailbox */
     result = imap_perform_search(conn);
   else if(imap->mailbox && !selected &&
-         (imap->custom || imap->uid || imap->query))
+         (imap->custom || imap->uid || imap->mindex || imap->query))
     /* SELECT the mailbox */
     result = imap_perform_select(conn);
   else
@@ -1702,8 +1717,6 @@ static CURLcode imap_regular_transfer(struct connectdata *conn,
 
 static CURLcode imap_setup_connection(struct connectdata *conn)
 {
-  struct Curl_easy *data = conn->data;
-
   /* Initialise the IMAP layer */
   CURLcode result = imap_init(conn);
   if(result)
@@ -1711,7 +1724,6 @@ static CURLcode imap_setup_connection(struct connectdata *conn)
 
   /* Clear the TLS upgraded flag */
   conn->tls_upgraded = FALSE;
-  data->state.path++;   /* don't include the initial slash */
 
   return CURLE_OK;
 }
@@ -1944,7 +1956,7 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct IMAP *imap = data->req.protop;
-  const char *begin = data->state.path;
+  const char *begin = &data->state.up.path[1]; /* skip leading slash */
   const char *ptr = begin;
 
   /* See how much of the URL is a valid path and decode it */
@@ -2016,6 +2028,13 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
       imap->uid = value;
       value = NULL;
     }
+    else if(strcasecompare(name, "MAILINDEX") && !imap->mindex) {
+      if(valuelen > 0 && value[valuelen - 1] == '/')
+        value[valuelen - 1] = '\0';
+
+      imap->mindex = value;
+      value = NULL;
+    }
     else if(strcasecompare(name, "SECTION") && !imap->section) {
       if(valuelen > 0 && value[valuelen - 1] == '/')
         value[valuelen - 1] = '\0';
@@ -2043,17 +2062,10 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 
   /* Does the URL contain a query parameter? Only valid when we have a mailbox
      and no UID as per RFC-5092 */
-  if(imap->mailbox && !imap->uid && *ptr == '?') {
-    /* Find the length of the query parameter */
-    begin = ++ptr;
-    while(imap_is_bchar(*ptr))
-      ptr++;
-
-    /* Decode the query parameter */
-    result = Curl_urldecode(data, begin, ptr - begin, &imap->query, NULL,
-                            TRUE);
-    if(result)
-      return result;
+  if(imap->mailbox && !imap->uid && !imap->mindex) {
+    /* Get the query parameter, URL decoded */
+    (void)curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
+                       CURLU_URLDECODE);
   }
 
   /* Any extra stuff at the end of the URL is an error */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -101,7 +101,7 @@ static char *unescape_word(struct Curl_easy *data, const char *inputbuff)
   if(!newp || result)
     return NULL;
 
-  dictp = malloc(((size_t)len)*2 + 1); /* add one for terminating zero */
+  dictp = malloc(len*2 + 1); /* add one for terminating zero */
   if(dictp) {
     char *ptr;
     char ch;
@@ -136,7 +136,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
-  char *path = data->state.path;
+  char *path = data->state.up.path;
   curl_off_t *bytecount = &data->req.bytecount;
 
   *done = TRUE; /* unconditionally */

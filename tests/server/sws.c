@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,6 +124,8 @@ struct httprequest {
   bool connmon;   /* monitor the state of the connection, log disconnects */
   bool upgrade;   /* test case allows upgrade to http2 */
   bool upgrade_request; /* upgrade request found and allowed */
+  bool close;     /* similar to swsclose in response: close connection after
+                     response is sent */
   int done_processing;
 };
 
@@ -176,6 +178,9 @@ const char *serverlogfile = DEFAULT_LOGFILE;
 
 /* upgrade to http2 */
 #define CMD_UPGRADE "upgrade"
+
+/* close connection */
+#define CMD_SWSCLOSE "swsclose"
 
 #define END_OF_HEADERS "\r\n\r\n"
 
@@ -361,7 +366,7 @@ static int parse_servercmd(struct httprequest *req)
   int error;
 
   filename = test2file(req->testno);
-
+  req->close = FALSE;
   stream = fopen(filename, "rb");
   if(!stream) {
     error = errno;
@@ -413,6 +418,10 @@ static int parse_servercmd(struct httprequest *req)
       else if(!strncmp(CMD_UPGRADE, cmd, strlen(CMD_UPGRADE))) {
         logmsg("enabled upgrade to http2");
         req->upgrade = TRUE;
+      }
+      else if(!strncmp(CMD_SWSCLOSE, cmd, strlen(CMD_SWSCLOSE))) {
+        logmsg("swsclose: close this connection after response");
+        req->close = TRUE;
       }
       else if(1 == sscanf(cmd, "pipe: %d", &num)) {
         logmsg("instructed to allow a pipe size of %d", num);
@@ -1194,7 +1203,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   /* If the word 'swsclose' is present anywhere in the reply chunk, the
      connection will be closed after the data has been sent to the requesting
      client... */
-  if(strstr(buffer, "swsclose") || !count) {
+  if(strstr(buffer, "swsclose") || !count || req->close) {
     persistent = FALSE;
     logmsg("connection close instruction \"swsclose\" found in response");
   }
@@ -1536,17 +1545,17 @@ static void http_connect(curl_socket_t *infdp,
     if(got_exit_signal)
       break;
 
-    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    do {
+      rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+
+    if(got_exit_signal)
+      break;
 
     if(rc > 0) {
       /* socket action */
-      bool tcp_fin_wr;
+      bool tcp_fin_wr = FALSE;
       timeout_count = 0;
-
-      if(got_exit_signal)
-        break;
-
-      tcp_fin_wr = FALSE;
 
       /* ---------------------------------------------------------- */
 
@@ -2289,16 +2298,19 @@ int main(int argc, char *argv[])
     if(got_exit_signal)
       goto sws_cleanup;
 
-    rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    do {
+      rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
+    } while(rc < 0 && errno == EINTR && !got_exit_signal);
+
+    if(got_exit_signal)
+      goto sws_cleanup;
+
     if(rc < 0) {
       error = SOCKERRNO;
       logmsg("select() failed with error: (%d) %s",
              error, strerror(error));
       goto sws_cleanup;
     }
-
-    if(got_exit_signal)
-      goto sws_cleanup;
 
     if(rc == 0) {
       /* Timed out - try again */
@@ -2413,4 +2425,3 @@ sws_cleanup:
   logmsg("========> sws quits");
   return 0;
 }
-

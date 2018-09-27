@@ -63,10 +63,9 @@
 
 static void conn_llist_dtor(void *user, void *element)
 {
-  struct connectdata *data = element;
+  struct connectdata *conn = element;
   (void)user;
-
-  data->bundle = NULL;
+  conn->bundle = NULL;
 }
 
 static CURLcode bundle_create(struct Curl_easy *data,
@@ -313,7 +312,7 @@ void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
      due to a failed connection attempt, before being added to a bundle */
   if(bundle) {
     if(lock) {
-      CONN_LOCK(conn->data);
+      CONN_LOCK(data);
     }
     bundle_remove_conn(bundle, conn);
     if(bundle->num_connections == 0)
@@ -321,11 +320,11 @@ void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
     conn->bundle = NULL; /* removed from it */
     if(connc) {
       connc->num_conn--;
-      DEBUGF(infof(conn->data, "The cache now contains %zu members\n",
+      DEBUGF(infof(data, "The cache now contains %zu members\n",
                    connc->num_conn));
     }
     if(lock) {
-      CONN_UNLOCK(conn->data);
+      CONN_UNLOCK(data);
     }
   }
 }
@@ -433,19 +432,11 @@ bool Curl_conncache_return_conn(struct connectdata *conn)
     infof(data, "Connection cache is full, closing the oldest one.\n");
 
     conn_candidate = Curl_conncache_extract_oldest(data);
-
     if(conn_candidate) {
-      /* Set the connection's owner correctly */
-      conn_candidate->data = data;
-
       /* the winner gets the honour of being disconnected */
-      (void)Curl_disconnect(conn_candidate, /* dead_connection */ FALSE);
+      (void)Curl_disconnect(data, conn_candidate, /* dead_connection */ FALSE);
     }
   }
-  CONN_LOCK(data);
-  conn->inuse = FALSE; /* Mark the connection unused */
-  conn->data = NULL; /* no owner */
-  CONN_UNLOCK(data);
 
   return (conn_candidate == conn) ? FALSE : TRUE;
 
@@ -479,7 +470,7 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
   while(curr) {
     conn = curr->ptr;
 
-    if(!conn->inuse) {
+    if(!CONN_INUSE(conn)) {
       /* Set higher score for the age passed since the connection was used */
       score = Curl_timediff(now, conn->now);
 
@@ -496,6 +487,7 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
     data->state.conn_cache->num_conn--;
     DEBUGF(infof(data, "The cache now contains %zu members\n",
                  data->state.conn_cache->num_conn));
+    conn_candidate->data = data; /* associate! */
   }
 
   return conn_candidate;
@@ -536,7 +528,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     while(curr) {
       conn = curr->ptr;
 
-      if(!conn->inuse) {
+      if(!CONN_INUSE(conn)) {
         /* Set higher score for the age passed since the connection was used */
         score = Curl_timediff(now, conn->now);
 
@@ -557,6 +549,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     connc->num_conn--;
     DEBUGF(infof(data, "The cache now contains %zu members\n",
                  connc->num_conn));
+    conn_candidate->data = data; /* associate! */
   }
   CONN_UNLOCK(data);
 
@@ -577,7 +570,7 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
                                      pointer */
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
-    (void)Curl_disconnect(conn, FALSE);
+    (void)Curl_disconnect(connc->closure_handle, conn, FALSE);
     sigpipe_restore(&pipe_st);
 
     conn = Curl_conncache_find_first_connection(connc);

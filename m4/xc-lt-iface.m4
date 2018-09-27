@@ -462,4 +462,3 @@ m4_ifdef([LT_INIT],
 dnl
 m4_define([$0],[])dnl
 ])
-

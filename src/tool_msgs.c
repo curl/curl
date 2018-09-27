@@ -122,4 +122,3 @@ void helpf(FILE *errors, const char *fmt, ...)
 #endif
           "for more information\n");
 }
-

@@ -116,4 +116,3 @@ pdf: $(PDFPAGES)
 
 distclean:
 	rm -f $(CLEANFILES)
-

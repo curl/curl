@@ -388,4 +388,3 @@ sub getargs {
 indexoptions();
 
 getargs();
-

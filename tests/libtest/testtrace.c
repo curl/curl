@@ -142,4 +142,3 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   libtest_debug_dump(timebuf, text, stderr, data, size, trace_cfg->nohex);
   return 0;
 }
-

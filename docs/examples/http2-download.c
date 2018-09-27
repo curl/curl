@@ -72,11 +72,11 @@ void dump(const char *text, int num, unsigned char *ptr, size_t size,
     width = 0x40;
 
   fprintf(stderr, "%d %s, %lu bytes (0x%lx)\n",
-          num, text, size, size);
+          num, text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stderr, "%4.4lx: ", i);
+    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
   CURL *easy[NUM_HANDLES];
   CURLM *multi_handle;
   int i;
-  int still_running; /* keep number of running handles */
+  int still_running = 0; /* keep number of running handles */
 
   if(argc > 1)
     /* if given a number, do that many transfers */
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     struct timeval timeout;
     int rc; /* select() return code */
     CURLMcode mc; /* curl_multi_fdset() return code */
@@ -284,7 +284,7 @@ int main(int argc, char **argv)
       curl_multi_perform(multi_handle, &still_running);
       break;
     }
-  } while(still_running);
+  }
 
   curl_multi_cleanup(multi_handle);
 

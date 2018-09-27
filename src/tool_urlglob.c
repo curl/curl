@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,8 +33,6 @@
 
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
-
-void glob_cleanup(URLGlob* glob);
 
 static CURLcode glob_fixed(URLGlob *glob, char *fixed, size_t len)
 {
@@ -116,7 +114,7 @@ static CURLcode glob_set(URLGlob *glob, char **patternp,
       if(multiply(amount, pat->content.Set.size + 1))
         return GLOBERROR("range overflow", 0, CURLE_URL_MALFORMAT);
 
-      /* fall-through */
+      /* FALLTHROUGH */
     case ',':
 
       *buf = '\0';
@@ -159,7 +157,7 @@ static CURLcode glob_set(URLGlob *glob, char **patternp,
         ++pattern;
         ++(*posp);
       }
-      /* intentional fallthrough */
+      /* FALLTHROUGH */
     default:
       *buf++ = *pattern++;              /* copy character to set element */
       ++(*posp);
@@ -461,18 +459,19 @@ CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
     *urlnum = amount;
   else {
     if(error && glob_expand->error) {
-      char text[128];
+      char text[512];
       const char *t;
       if(glob_expand->pos) {
-        snprintf(text, sizeof(text), "%s in column %zu", glob_expand->error,
-                 glob_expand->pos);
+        snprintf(text, sizeof(text), "%s in URL position %zu:\n%s\n%*s^",
+                 glob_expand->error,
+                 glob_expand->pos, url, glob_expand->pos - 1, " ");
         t = text;
       }
       else
         t = glob_expand->error;
 
       /* send error description to the error-stream */
-      fprintf(error, "curl: (%d) [globbing] %s\n", res, t);
+      fprintf(error, "curl: (%d) %s\n", res, t);
     }
     /* it failed, we cleanup */
     glob_cleanup(glob_expand);
@@ -554,7 +553,7 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
       }
     }
     if(carry) {         /* first pattern ptr has run into overflow, done! */
-      /* TODO: verify if this should actally return CURLE_OK. */
+      /* TODO: verify if this should actually return CURLE_OK. */
       return CURLE_OK; /* CURLE_OK to match previous behavior */
     }
   }

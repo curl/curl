@@ -28,7 +28,7 @@
  1.10 auto-detect proxy
  1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
- 1.13 DNS-over-HTTPS
+ 1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
  1.14 Typesafe curl_easy_setopt()
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
@@ -112,6 +112,8 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
+ 13.9 Configurable loading of OpenSSL configuration file
+ 13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
  13.13 Support HPKP
@@ -156,6 +158,7 @@
  18.17 consider file name from the redirected URL with -O ?
  18.18 retry on network is unreachable
  18.19 expand ~/ in config files
+ 18.20 host name sections in config files
 
  19. Build
  19.1 roffit
@@ -288,14 +291,15 @@
 
  https://github.com/curl/curl/issues/2251
 
-1.13 DNS-over-HTTPS
+1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
 
- By adding support for DNS-over-HTTPS curl could resolve host names using a
- totally separate name server than the standard system resolver, while at the
- same time doing so over a communication channel that enhances privacy and
- security.
+ curl will create most sockets via the CURLOPT_OPENSOCKETFUNCTION callback and
+ close them with the CURLOPT_CLOSESOCKETFUNCTION callback. However, c-ares
+ does not use those functions and instead opens and closes the sockets
+ itself. This means that when curl passes the c-ares socket to the
+ CURLMOPT_SOCKETFUNCTION it isn't owned by the application like other sockets.
 
- https://github.com/curl/curl/wiki/DNS-over-HTTPS
+ See https://github.com/curl/curl/issues/2734
 
 1.14 Typesafe curl_easy_setopt()
 
@@ -413,7 +417,8 @@
  used to also allow for example users to refuse libcurl to do transfers with
  HTTPS certificate checks disabled.
 
- It could also offer to refuse usernames in URLs (see TODO 1.1)
+ It could also automatically refuse usernames in URLs when set
+ (see CURLOPT_DISALLOW_USERNAME_IN_URL)
 
 1.27 hardcode the "localhost" addresses
 
@@ -528,7 +533,7 @@
 
  Some FTP servers allow STAT for listing directories instead of using LIST,
  and the response is then sent over the control connection instead of as the
- otherwise usedw data connection: http://www.nsftools.com/tips/RawFTP.htm#STAT
+ otherwise usedw data connection: https://www.nsftools.com/tips/RawFTP.htm#STAT
 
  This is not detailed in any FTP specification.
 
@@ -767,6 +772,28 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
 
+13.9 Configurable loading of OpenSSL configuration file
+
+ libcurl calls the OpenSSL function CONF_modules_load_file() in openssl.c,
+ Curl_ossl_init(). "We regard any changes in the OpenSSL configuration as a
+ security risk or at least as unnecessary."
+
+ Please add a configuration switch or something similar to disable the
+ CONF_modules_load_file() call.
+
+ See https://github.com/curl/curl/issues/2724
+
+13.10 Support Authority Information Access certificate extension (AIA)
+
+ AIA can provide various things like CRLs but more importantly information
+ about intermediate CA certificates that can allow validation path to be
+ fullfilled when the HTTPS server doesn't itself provide them.
+
+ Since AIA is about downloading certs on demand to complete a TLS handshake,
+ it is probably a bit tricky to get done right.
+
+ See https://github.com/curl/curl/issues/2793
+
 13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
 
  CURLOPT_PINNEDPUBLICKEY does not consider the hashes of intermediate & root
@@ -891,7 +918,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  server's key. MD5 is generally being deprecated so we should implement
  support for stronger hashing algorithms. libssh2 itself is what provides this
  underlying functionality and it supports at least SHA-1 as an alternative.
- SHA-1 is also being deprecated these days so we should consider workign with
+ SHA-1 is also being deprecated these days so we should consider working with
  libssh2 to instead offer support for SHA-256 or similar.
 
 17.4 Support CURLOPT_PREQUOTE
@@ -1071,6 +1098,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  For example .curlrc could benefit from being able to do this.
 
  See https://github.com/curl/curl/issues/2317
+
+18.20 host name sections in config files
+
+ config files would be more powerful if they could set different
+ configurations depending on used URLs, host name or possibly origin. Then a
+ default .curlrc could a specific user-agent only when doing requests against
+ a certain site.
 
 
 19. Build

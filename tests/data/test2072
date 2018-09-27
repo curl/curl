@@ -27,7 +27,7 @@ file:// with unix path resolution behavior for the case of extra slashes
 file:////%PWD/log/test2072.txt
 </command>
 <precheck>
-perl -e "print 'Test requires a unix system' if ( $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos');"
+perl -e "print 'Test requires a unix system' if ( $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos' || $^O eq 'msys');"
 </precheck>
 <file name="log/test2072.txt">
 foo

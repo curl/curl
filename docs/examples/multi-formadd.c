@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,7 +35,7 @@ int main(void)
   CURL *curl;
 
   CURLM *multi_handle;
-  int still_running;
+  int still_running = 0;
 
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
@@ -73,7 +73,7 @@ int main(void)
   if(curl && multi_handle) {
 
     /* what URL that receives this POST */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.com/upload.cgi");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/upload.cgi");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
@@ -83,7 +83,7 @@ int main(void)
 
     curl_multi_perform(multi_handle, &still_running);
 
-    do {
+    while(still_running) {
       struct timeval timeout;
       int rc; /* select() return code */
       CURLMcode mc; /* curl_multi_fdset() return code */
@@ -154,7 +154,7 @@ int main(void)
         printf("running: %d!\n", still_running);
         break;
       }
-    } while(still_running);
+    }
 
     curl_multi_cleanup(multi_handle);
 

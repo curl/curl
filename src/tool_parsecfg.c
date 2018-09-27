@@ -356,4 +356,3 @@ static char *my_get_line(FILE *fp)
 
   return line;
 }
-

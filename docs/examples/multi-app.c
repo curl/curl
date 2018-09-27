@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,7 +48,7 @@ int main(void)
   CURL *handles[HANDLECOUNT];
   CURLM *multi_handle;
 
-  int still_running; /* keep number of running handles */
+  int still_running = 0; /* keep number of running handles */
   int i;
 
   CURLMsg *msg; /* for picking up messages with the transfer status */
@@ -59,7 +59,7 @@ int main(void)
     handles[i] = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "http://example.com");
+  curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "https://example.com");
 
   curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_URL, "ftp://example.com");
   curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_UPLOAD, 1L);
@@ -74,7 +74,7 @@ int main(void)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     struct timeval timeout;
     int rc; /* select() return code */
     CURLMcode mc; /* curl_multi_fdset() return code */
@@ -142,7 +142,7 @@ int main(void)
       curl_multi_perform(multi_handle, &still_running);
       break;
     }
-  } while(still_running);
+  }
 
   /* See how the transfers went */
   while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {

@@ -52,10 +52,6 @@
 #include "connect.h"
 #include "progress.h"
 #include "system_win32.h"
-
-#define  TELOPTS
-#define  TELCMDS
-
 #include "arpa_telnet.h"
 #include "select.h"
 #include "strcase.h"
@@ -1361,7 +1357,9 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   }
 
   /* Grab a pointer to WSACreateEvent */
-  create_event_func = (WSOCK2_EVENT) GetProcAddress(wsock2, "WSACreateEvent");
+  create_event_func =
+    CURLX_FUNCTION_CAST(WSOCK2_EVENT,
+                        (GetProcAddress(wsock2, "WSACreateEvent")));
   if(create_event_func == NULL) {
     failf(data, "failed to find WSACreateEvent function (%u)", GetLastError());
     FreeLibrary(wsock2);
@@ -1608,7 +1606,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
     case 0:                     /* timeout */
       pfd[0].revents = 0;
       pfd[1].revents = 0;
-      /* fall through */
+      /* FALLTHROUGH */
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */

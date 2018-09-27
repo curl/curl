@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,7 +40,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
     /* get the first document */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
@@ -51,7 +51,7 @@ int main(void)
 
     /* get another document from the same server using the same
        connection */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/docs/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/docs/");
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);

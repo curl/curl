@@ -24,7 +24,7 @@ imap
 IMAP SELECT UIDVALIDITY Failure
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/803;UIDVALIDITY=12345/;UID=123' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/803;UIDVALIDITY=12345/;MAILINDEX=123' -u user:secret
 </command>
 </client>
 

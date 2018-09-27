@@ -178,8 +178,8 @@ PROXY
  options:
 
    curl -u "Remote-FTP-Username@remote.ftp.server Proxy-Username:Remote-Pass" \
-    --ftp-account Proxy-Password --upload-file local-file \
-    ftp://my-ftp.proxy.server:21/remote/upload/path/
+        --ftp-account Proxy-Password --upload-file local-file \
+        ftp://my-ftp.proxy.server:21/remote/upload/path/
 
  See the manual for your FTP proxy to determine the form it expects to set up
  transfers, and curl's -v option to see exactly what curl is sending.
@@ -234,8 +234,8 @@ UPLOADING
 
 SMB / SMBS
 
-        curl -T file.txt -u "domain\username:passwd" 
-         smb://server.example.com/share/
+        curl -T file.txt -u "domain\username:passwd" \
+             smb://server.example.com/share/
 
  HTTP
 
@@ -294,7 +294,7 @@ POST (HTTP)
   Post a simple "name" and "phone" guestbook.
 
         curl -d "name=Rafael%20Sagula&phone=3320780" \
-                http://www.where.com/guest.cgi
+             http://www.where.com/guest.cgi
 
   How to post a form with curl, lesson #1:
 
@@ -326,8 +326,8 @@ POST (HTTP)
 
   To post to this, you enter a curl command line like:
 
-        curl -d "user=foobar&pass=12345&id=blablabla&ding=submit"  (continues)
-          http://www.formpost.com/getthis/post.cgi
+        curl -d "user=foobar&pass=12345&id=blablabla&ding=submit" \
+             http://www.formpost.com/getthis/post.cgi
 
 
   While -d uses the application/x-www-form-urlencoded mime-type, generally
@@ -342,7 +342,7 @@ POST (HTTP)
   with different content types using the following syntax:
 
         curl -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html" \
-        http://www.post.com/postit.cgi
+             http://www.post.com/postit.cgi
 
   If the content-type is not specified, curl will try to guess from the file
   extension (it only knows a few), or use the previously specified type (from
@@ -694,7 +694,7 @@ HTTPS
   included in recent versions of OpenSSL, and for older versions Dr Stephen
   N. Henson has written a patch for SSLeay that adds this functionality. You
   can get his patch (that requires an SSLeay installation) from his site at:
-  http://www.drh-consultancy.demon.co.uk/
+  https://web.archive.org/web/20170715155512/www.drh-consultancy.demon.co.uk/
 
   Example on how to automatically retrieve a document using a certificate with
   a personal password:
@@ -839,7 +839,7 @@ LDAP
       curl "ldap://user:passwd@ldap.frontec.se/o=frontec??sub?mail=*"
 
   By default, if user and password provided, OpenLDAP/WinLDAP will use basic
-  authentication. On Windows you can control this behavior by providing 
+  authentication. On Windows you can control this behavior by providing
   one of --basic, --ntlm or --digest option in curl command line
 
       curl --ntlm "ldap://user:passwd@ldap.frontec.se/o=frontec??sub?mail=*"

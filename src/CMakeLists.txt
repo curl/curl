@@ -62,7 +62,7 @@ include_directories(
   )
 
 #Build curl executable
-target_link_libraries( ${EXE_NAME} libcurl ${CURL_LIBS})
+target_link_libraries(${EXE_NAME} libcurl ${CURL_LIBS})
 
 ################################################################################
 
@@ -83,4 +83,3 @@ install(EXPORT curl-target
         NAMESPACE CURL::
         DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
-

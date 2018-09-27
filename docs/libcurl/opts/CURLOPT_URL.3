@@ -187,7 +187,10 @@ imap://user:password@mail.example.com/INBOX - Performs a folder list on the
 user's inbox
 
 imap://user:password@mail.example.com/INBOX/;UID=1 - Selects the user's inbox
-and fetches message 1
+and fetches message with uid = 1
+
+imap://user:password@mail.example.com/INBOX/;MAILINDEX=1 - Selects the user's inbox
+and fetches the first message in the mail box
 
 imap://user:password@mail.example.com/INBOX;UIDVALIDITY=50/;UID=2 - Selects
 the user's inbox, checks the UIDVALIDITY of the mailbox is 50 and fetches
@@ -284,6 +287,7 @@ and get cut off by libcurl if provided literally. You will instead have to
 escape it by providing it as backslash and its ASCII value in hexadecimal:
 "\\23".
 
+.RS 0
 The application does not have to keep the string around after setting this
 option.
 .SH ENCODING

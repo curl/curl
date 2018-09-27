@@ -52,7 +52,13 @@ size_t grow_buffer(void *contents, size_t sz, size_t nmemb, void *ctx)
 {
   size_t realsize = sz * nmemb;
   memory *mem = (memory*) ctx;
-  mem->buf = realloc(mem->buf, mem->size + realsize);
+  char *ptr = realloc(mem->buf, mem->size + realsize);
+  if(!ptr) {
+    /* out of memory */
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+  mem->buf = ptr;
   memcpy(&(mem->buf[mem->size]), contents, realsize);
   mem->size += realsize;
   return realsize;
@@ -149,9 +155,9 @@ int main(void)
   curl_multi_setopt(multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS, 6L);
 
   /* enables http/2 if available */
-  #ifdef CURLPIPE_MULTIPLEX
-    curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  #endif
+#ifdef CURLPIPE_MULTIPLEX
+  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+#endif
 
   /* sets html start page */
   curl_multi_add_handle(multi_handle, make_handle(start_page));

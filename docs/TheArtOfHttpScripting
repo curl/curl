@@ -150,7 +150,7 @@ The Art Of Scripting HTTP Requests Using Curl
  --resolve option:
 
       curl --resolve www.example.org:80:127.0.0.1 http://www.example.org/
- 
+
  2.3 Port number
 
  Each protocol curl supports operates on a default port number, be it over TCP

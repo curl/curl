@@ -61,7 +61,9 @@
 #include "strcase.h"
 #include "warnless.h"
 #include "strdup.h"
-/* The last #include file should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 static const struct {
@@ -422,7 +424,7 @@ static int sec_set_protection_level(struct connectdata *conn)
 
   if(!conn->sec_complete) {
     infof(conn->data, "Trying to change the protection level after the"
-                      "completion of the data exchange.\n");
+                      " completion of the data exchange.\n");
     return -1;
   }
 

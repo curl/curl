@@ -75,6 +75,7 @@
 #include "http2.h"
 #include "mime.h"
 #include "strcase.h"
+#include "urlapi-int.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -106,15 +107,26 @@ char *Curl_checkheaders(const struct connectdata *conn,
 }
 #endif
 
+CURLcode Curl_get_upload_buffer(struct Curl_easy *data)
+{
+  if(!data->state.ulbuf) {
+    data->state.ulbuf = malloc(data->set.upload_buffer_size);
+    if(!data->state.ulbuf)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
+}
+
 /*
  * This function will call the read callback to fill our buffer with data
  * to upload.
  */
-CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
+CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
+                             size_t *nreadp)
 {
   struct Curl_easy *data = conn->data;
-  size_t buffersize = (size_t)bytes;
-  int nread;
+  size_t buffersize = bytes;
+  size_t nread;
 #ifdef CURL_DOES_CONVERSIONS
   bool sending_http_headers = FALSE;
 
@@ -134,11 +146,9 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     data->req.upload_fromhere += (8 + 2); /* 32bit hex + CRLF */
   }
 
-  /* this function returns a size_t, so we typecast to int to prevent warnings
-     with picky compilers */
   Curl_set_in_callback(data, true);
-  nread = (int)data->state.fread_func(data->req.upload_fromhere, 1,
-                                      buffersize, data->state.in);
+  nread = data->state.fread_func(data->req.upload_fromhere, 1,
+                                 buffersize, data->state.in);
   Curl_set_in_callback(data, false);
 
   if(nread == CURL_READFUNC_ABORT) {
@@ -167,7 +177,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 
     return CURLE_OK; /* nothing was read */
   }
-  else if((size_t)nread > buffersize) {
+  else if(nread > buffersize) {
     /* the read function returned a too large value */
     *nreadp = 0;
     failf(data, "read function returned funny value");
@@ -226,13 +236,13 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 #ifdef CURL_DOES_CONVERSIONS
     {
       CURLcode result;
-      int length;
+      size_t length;
       if(data->set.prefer_ascii)
         /* translate the protocol and data */
         length = nread;
       else
         /* just translate the protocol portion */
-        length = (int)strlen(hexbuffer);
+        length = strlen(hexbuffer);
       result = Curl_convert_to_network(data, data->req.upload_fromhere,
                                        length);
       /* Curl_convert_to_network calls failf if unsuccessful */
@@ -247,7 +257,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       infof(data, "Signaling end of chunked upload via terminating chunk.\n");
     }
 
-    nread += (int)strlen(endofline_native); /* for the added end of line */
+    nread += strlen(endofline_native); /* for the added end of line */
   }
 #ifdef CURL_DOES_CONVERSIONS
   else if((data->set.prefer_ascii) && (!sending_http_headers)) {
@@ -557,7 +567,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             infof(data,
                   "Rewinding stream by : %zd"
                   " bytes on url %s (zero-length body)\n",
-                  nread, data->state.path);
+                  nread, data->state.up.path);
             read_rewind(conn, (size_t)nread);
           }
           else {
@@ -565,7 +575,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                   "Excess found in a non pipelined read:"
                   " excess = %zd"
                   " url = %s (zero-length body)\n",
-                  nread, data->state.path);
+                  nread, data->state.up.path);
           }
         }
 
@@ -734,7 +744,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                   " bytes on url %s (size = %" CURL_FORMAT_CURL_OFF_T
                   ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
                   ", bytecount = %" CURL_FORMAT_CURL_OFF_T ", nread = %zd)\n",
-                  excess, data->state.path,
+                  excess, data->state.up.path,
                   k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
           }
@@ -797,7 +807,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                                            nread);
             }
           }
-          else
+          else if(!k->ignorebody)
             result = Curl_unencode_write(conn, k->writer_stack, k->str, nread);
         }
         k->badheader = HEADER_NORMAL; /* taken care of now */
@@ -869,6 +879,26 @@ static CURLcode done_sending(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#ifdef WIN32
+#ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
+#define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
+#endif
+
+static void win_update_buffer_size(curl_socket_t sockfd)
+{
+  int result;
+  ULONG ideal;
+  DWORD ideallen;
+  result = WSAIoctl(sockfd, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
+                    &ideal, sizeof(ideal), &ideallen, 0, 0);
+  if(result == 0) {
+    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF,
+               (const char *)&ideal, sizeof(ideal));
+  }
+}
+#else
+#define win_update_buffer_size(x)
+#endif
 
 /*
  * Send data to upload to the server, when the socket is writable.
@@ -894,13 +924,16 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     /* only read more data if there's no upload data already
        present in the upload buffer */
     if(0 == k->upload_present) {
+      result = Curl_get_upload_buffer(data);
+      if(result)
+        return result;
       /* init the "upload from here" pointer */
-      k->upload_fromhere = data->state.uploadbuffer;
+      k->upload_fromhere = data->state.ulbuf;
 
       if(!k->upload_done) {
         /* HTTP pollution, this should be written nicer to become more
            protocol agnostic. */
-        int fillcount;
+        size_t fillcount;
         struct HTTP *http = k->protop;
 
         if((k->exp100 == EXP100_SENDING_REQUEST) &&
@@ -927,11 +960,12 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
             sending_http_headers = FALSE;
         }
 
-        result = Curl_fillreadbuffer(conn, UPLOAD_BUFSIZE, &fillcount);
+        result = Curl_fillreadbuffer(conn, data->set.upload_buffer_size,
+                                     &fillcount);
         if(result)
           return result;
 
-        nread = (ssize_t)fillcount;
+        nread = fillcount;
       }
       else
         nread = 0; /* we're done uploading/reading */
@@ -959,7 +993,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
          (data->set.crlf))) {
         /* Do we need to allocate a scratch buffer? */
         if(!data->state.scratch) {
-          data->state.scratch = malloc(2 * data->set.buffer_size);
+          data->state.scratch = malloc(2 * data->set.upload_buffer_size);
           if(!data->state.scratch) {
             failf(data, "Failed to alloc scratch buffer!");
 
@@ -1020,9 +1054,10 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
                         k->upload_fromhere, /* buffer pointer */
                         k->upload_present,  /* buffer size */
                         &bytes_written);    /* actually sent */
-
     if(result)
       return result;
+
+    win_update_buffer_size(conn->writesockfd);
 
     if(data->set.verbose)
       /* show the data before we change the pointer upload_fromhere */
@@ -1050,7 +1085,10 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     }
     else {
       /* we've uploaded that buffer now */
-      k->upload_fromhere = data->state.uploadbuffer;
+      result = Curl_get_upload_buffer(data);
+      if(result)
+        return result;
+      k->upload_fromhere = data->state.ulbuf;
       k->upload_present = 0; /* no more bytes left */
 
       if(k->upload_done) {
@@ -1417,311 +1455,6 @@ CURLcode Curl_posttransfer(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-#ifndef CURL_DISABLE_HTTP
-/*
- * Find the separator at the end of the host name, or the '?' in cases like
- * http://www.url.com?id=2380
- */
-static const char *find_host_sep(const char *url)
-{
-  const char *sep;
-  const char *query;
-
-  /* Find the start of the hostname */
-  sep = strstr(url, "//");
-  if(!sep)
-    sep = url;
-  else
-    sep += 2;
-
-  query = strchr(sep, '?');
-  sep = strchr(sep, '/');
-
-  if(!sep)
-    sep = url + strlen(url);
-
-  if(!query)
-    query = url + strlen(url);
-
-  return sep < query ? sep : query;
-}
-
-/*
- * Decide in an encoding-independent manner whether a character in an
- * URL must be escaped. The same criterion must be used in strlen_url()
- * and strcpy_url().
- */
-static bool urlchar_needs_escaping(int c)
-{
-    return !(ISCNTRL(c) || ISSPACE(c) || ISGRAPH(c));
-}
-
-/*
- * strlen_url() returns the length of the given URL if the spaces within the
- * URL were properly URL encoded.
- * URL encoding should be skipped for host names, otherwise IDN resolution
- * will fail.
- */
-static size_t strlen_url(const char *url, bool relative)
-{
-  const unsigned char *ptr;
-  size_t newlen = 0;
-  bool left = TRUE; /* left side of the ? */
-  const unsigned char *host_sep = (const unsigned char *) url;
-
-  if(!relative)
-    host_sep = (const unsigned char *) find_host_sep(url);
-
-  for(ptr = (unsigned char *)url; *ptr; ptr++) {
-
-    if(ptr < host_sep) {
-      ++newlen;
-      continue;
-    }
-
-    switch(*ptr) {
-    case '?':
-      left = FALSE;
-      /* fall through */
-    default:
-      if(urlchar_needs_escaping(*ptr))
-        newlen += 2;
-      newlen++;
-      break;
-    case ' ':
-      if(left)
-        newlen += 3;
-      else
-        newlen++;
-      break;
-    }
-  }
-  return newlen;
-}
-
-/* strcpy_url() copies a url to a output buffer and URL-encodes the spaces in
- * the source URL accordingly.
- * URL encoding should be skipped for host names, otherwise IDN resolution
- * will fail.
- */
-static void strcpy_url(char *output, const char *url, bool relative)
-{
-  /* we must add this with whitespace-replacing */
-  bool left = TRUE;
-  const unsigned char *iptr;
-  char *optr = output;
-  const unsigned char *host_sep = (const unsigned char *) url;
-
-  if(!relative)
-    host_sep = (const unsigned char *) find_host_sep(url);
-
-  for(iptr = (unsigned char *)url;    /* read from here */
-      *iptr;         /* until zero byte */
-      iptr++) {
-
-    if(iptr < host_sep) {
-      *optr++ = *iptr;
-      continue;
-    }
-
-    switch(*iptr) {
-    case '?':
-      left = FALSE;
-      /* fall through */
-    default:
-      if(urlchar_needs_escaping(*iptr)) {
-        snprintf(optr, 4, "%%%02x", *iptr);
-        optr += 3;
-      }
-      else
-        *optr++=*iptr;
-      break;
-    case ' ':
-      if(left) {
-        *optr++='%'; /* add a '%' */
-        *optr++='2'; /* add a '2' */
-        *optr++='0'; /* add a '0' */
-      }
-      else
-        *optr++='+'; /* add a '+' here */
-      break;
-    }
-  }
-  *optr = 0; /* zero terminate output buffer */
-
-}
-
-/*
- * Returns true if the given URL is absolute (as opposed to relative)
- */
-static bool is_absolute_url(const char *url)
-{
-  char prot[16]; /* URL protocol string storage */
-  char letter;   /* used for a silly sscanf */
-
-  return (2 == sscanf(url, "%15[^?&/:]://%c", prot, &letter)) ? TRUE : FALSE;
-}
-
-/*
- * Concatenate a relative URL to a base URL making it absolute.
- * URL-encodes any spaces.
- * The returned pointer must be freed by the caller unless NULL
- * (returns NULL on out of memory).
- */
-static char *concat_url(const char *base, const char *relurl)
-{
-  /***
-   TRY to append this new path to the old URL
-   to the right of the host part. Oh crap, this is doomed to cause
-   problems in the future...
-  */
-  char *newest;
-  char *protsep;
-  char *pathsep;
-  size_t newlen;
-  bool host_changed = FALSE;
-
-  const char *useurl = relurl;
-  size_t urllen;
-
-  /* we must make our own copy of the URL to play with, as it may
-     point to read-only data */
-  char *url_clone = strdup(base);
-
-  if(!url_clone)
-    return NULL; /* skip out of this NOW */
-
-  /* protsep points to the start of the host name */
-  protsep = strstr(url_clone, "//");
-  if(!protsep)
-    protsep = url_clone;
-  else
-    protsep += 2; /* pass the slashes */
-
-  if('/' != relurl[0]) {
-    int level = 0;
-
-    /* First we need to find out if there's a ?-letter in the URL,
-       and cut it and the right-side of that off */
-    pathsep = strchr(protsep, '?');
-    if(pathsep)
-      *pathsep = 0;
-
-    /* we have a relative path to append to the last slash if there's one
-       available, or if the new URL is just a query string (starts with a
-       '?')  we append the new one at the end of the entire currently worked
-       out URL */
-    if(useurl[0] != '?') {
-      pathsep = strrchr(protsep, '/');
-      if(pathsep)
-        *pathsep = 0;
-    }
-
-    /* Check if there's any slash after the host name, and if so, remember
-       that position instead */
-    pathsep = strchr(protsep, '/');
-    if(pathsep)
-      protsep = pathsep + 1;
-    else
-      protsep = NULL;
-
-    /* now deal with one "./" or any amount of "../" in the newurl
-       and act accordingly */
-
-    if((useurl[0] == '.') && (useurl[1] == '/'))
-      useurl += 2; /* just skip the "./" */
-
-    while((useurl[0] == '.') &&
-          (useurl[1] == '.') &&
-          (useurl[2] == '/')) {
-      level++;
-      useurl += 3; /* pass the "../" */
-    }
-
-    if(protsep) {
-      while(level--) {
-        /* cut off one more level from the right of the original URL */
-        pathsep = strrchr(protsep, '/');
-        if(pathsep)
-          *pathsep = 0;
-        else {
-          *protsep = 0;
-          break;
-        }
-      }
-    }
-  }
-  else {
-    /* We got a new absolute path for this server */
-
-    if((relurl[0] == '/') && (relurl[1] == '/')) {
-      /* the new URL starts with //, just keep the protocol part from the
-         original one */
-      *protsep = 0;
-      useurl = &relurl[2]; /* we keep the slashes from the original, so we
-                              skip the new ones */
-      host_changed = TRUE;
-    }
-    else {
-      /* cut off the original URL from the first slash, or deal with URLs
-         without slash */
-      pathsep = strchr(protsep, '/');
-      if(pathsep) {
-        /* When people use badly formatted URLs, such as
-           "http://www.url.com?dir=/home/daniel" we must not use the first
-           slash, if there's a ?-letter before it! */
-        char *sep = strchr(protsep, '?');
-        if(sep && (sep < pathsep))
-          pathsep = sep;
-        *pathsep = 0;
-      }
-      else {
-        /* There was no slash. Now, since we might be operating on a badly
-           formatted URL, such as "http://www.url.com?id=2380" which doesn't
-           use a slash separator as it is supposed to, we need to check for a
-           ?-letter as well! */
-        pathsep = strchr(protsep, '?');
-        if(pathsep)
-          *pathsep = 0;
-      }
-    }
-  }
-
-  /* If the new part contains a space, this is a mighty stupid redirect
-     but we still make an effort to do "right". To the left of a '?'
-     letter we replace each space with %20 while it is replaced with '+'
-     on the right side of the '?' letter.
-  */
-  newlen = strlen_url(useurl, !host_changed);
-
-  urllen = strlen(url_clone);
-
-  newest = malloc(urllen + 1 + /* possible slash */
-                  newlen + 1 /* zero byte */);
-
-  if(!newest) {
-    free(url_clone); /* don't leak this */
-    return NULL;
-  }
-
-  /* copy over the root url part */
-  memcpy(newest, url_clone, urllen);
-
-  /* check if we need to append a slash */
-  if(('/' == useurl[0]) || (protsep && !*protsep) || ('?' == useurl[0]))
-    ;
-  else
-    newest[urllen++]='/';
-
-  /* then append the new piece on the right side */
-  strcpy_url(&newest[urllen], useurl, !host_changed);
-
-  free(url_clone);
-
-  return newest;
-}
-#endif /* CURL_DISABLE_HTTP */
-
 /*
  * Curl_follow() handles the URL redirect magic. Pass in the 'newurl' string
  * as given by the remote server and set up the new URL to request.
@@ -1741,6 +1474,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
   /* Location: redirect */
   bool disallowport = FALSE;
   bool reachedmax = FALSE;
+  CURLUcode uc;
 
   if(type == FOLLOW_REDIR) {
     if((data->set.maxredirs != -1) &&
@@ -1773,33 +1507,21 @@ CURLcode Curl_follow(struct Curl_easy *data,
     }
   }
 
-  if(!is_absolute_url(newurl)) {
-    /***
-     *DANG* this is an RFC 2068 violation. The URL is supposed
-     to be absolute and this doesn't seem to be that!
-     */
-    char *absolute = concat_url(data->change.url, newurl);
-    if(!absolute)
-      return CURLE_OUT_OF_MEMORY;
-    newurl = absolute;
-  }
-  else {
-    /* The new URL MAY contain space or high byte values, that means a mighty
-       stupid redirect URL but we still make an effort to do "right". */
-    char *newest;
-    size_t newlen = strlen_url(newurl, FALSE);
-
+  if(Curl_is_absolute_url(newurl, NULL, MAX_SCHEME_LEN))
     /* This is an absolute URL, don't allow the custom port number */
     disallowport = TRUE;
 
-    newest = malloc(newlen + 1); /* get memory for this */
-    if(!newest)
-      return CURLE_OUT_OF_MEMORY;
+  DEBUGASSERT(data->state.uh);
+  uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl, 0);
+  free(newurl);
+  if(uc)
+    /* TODO: consider an error code remap here */
+    return CURLE_URL_MALFORMAT;
 
-    strcpy_url(newest, newurl, FALSE); /* create a space-free URL */
-    newurl = newest; /* use this instead now */
-
-  }
+  uc = curl_url_get(data->state.uh, CURLUPART_URL, &newurl, 0);
+  if(uc)
+    /* TODO: consider an error code remap here */
+    return CURLE_OUT_OF_MEMORY;
 
   if(type == FOLLOW_FAKE) {
     /* we're only figuring out the new url if we would've followed locations
@@ -1816,10 +1538,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
   if(disallowport)
     data->state.allow_port = FALSE;
 
-  if(data->change.url_alloc) {
+  if(data->change.url_alloc)
     Curl_safefree(data->change.url);
-    data->change.url_alloc = FALSE;
-  }
 
   data->change.url = newurl;
   data->change.url_alloc = TRUE;
@@ -1985,8 +1705,13 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
     if(conn->handler->protocol&PROTO_FAMILY_HTTP) {
       struct HTTP *http = data->req.protop;
-      if(http->writebytecount)
-        return Curl_readrewind(conn);
+      if(http->writebytecount) {
+        CURLcode result = Curl_readrewind(conn);
+        if(result) {
+          Curl_safefree(*url);
+          return result;
+        }
+      }
     }
   }
   return CURLE_OK;

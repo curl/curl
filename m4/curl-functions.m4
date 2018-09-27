@@ -2090,7 +2090,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_ws2tcpip
         $curl_includes_stdlib
@@ -3024,7 +3024,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_getifaddrs" = "yes"; then
     AC_MSG_CHECKING([if getifaddrs seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_ifaddrs
@@ -3402,7 +3402,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_gmtime_r" = "yes"; then
     AC_MSG_CHECKING([if gmtime_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_time
@@ -3643,7 +3643,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_inet_ntop" = "yes"; then
     AC_MSG_CHECKING([if inet_ntop seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_arpa_inet
@@ -3802,7 +3802,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_inet_pton" = "yes"; then
     AC_MSG_CHECKING([if inet_pton seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_arpa_inet
@@ -4563,7 +4563,7 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_localtime_r" = "yes"; then
     AC_MSG_CHECKING([if localtime_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_time
@@ -4802,7 +4802,7 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_compi_poll" = "yes"; then
     AC_MSG_CHECKING([if poll seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_poll
@@ -6181,7 +6181,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_glibc_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string
@@ -6242,7 +6242,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   if test "x$cross_compiling" != "xyes" &&
     test "$tst_posix_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_string

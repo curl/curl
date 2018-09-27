@@ -100,15 +100,15 @@ ifeq ($(CURL_AR),)
 CURL_AR := $(CROSSPREFIX)ar
 endif
 
-CC	= $(CURL_CC)
-CFLAGS	= $(CURL_CFLAG_EXTRAS) -g -O2 -Wall -W
-CFLAGS	+= -fno-strict-aliasing
+CC = $(CURL_CC)
+CFLAGS = $(CURL_CFLAG_EXTRAS) -g -O2 -Wall -W
+CFLAGS += -fno-strict-aliasing
 # comment LDFLAGS below to keep debug info
-LDFLAGS	= $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
-AR	= $(CURL_AR)
-RC	= $(CROSSPREFIX)windres
-RCFLAGS	= --include-dir=$(PROOT)/include -O COFF -DCURL_EMBED_MANIFEST
-STRIP	= $(CROSSPREFIX)strip -g
+LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
+AR = $(CURL_AR)
+RC = $(CROSSPREFIX)windres
+RCFLAGS = --include-dir=$(PROOT)/include -O COFF -DCURL_EMBED_MANIFEST
+STRIP   = $(CROSSPREFIX)strip -g
 
 # We may need these someday
 # PERL = perl
@@ -117,9 +117,9 @@ STRIP	= $(CROSSPREFIX)strip -g
 # Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
 ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
-ARCH	= w64
+ARCH = w64
 else
-ARCH	= w32
+ARCH = w32
 endif
 endif
 
@@ -135,30 +135,30 @@ endif
 
 # Platform-dependent helper tool macros
 ifeq ($(findstring /sh,$(SHELL)),/sh)
-DEL	= rm -f $1
-RMDIR	= rm -fr $1
-MKDIR	= mkdir -p $1
-COPY	= -cp -afv $1 $2
-#COPYR	= -cp -afr $1/* $2
-COPYR	= -rsync -aC $1/* $2
-TOUCH	= touch $1
-CAT	= cat
-ECHONL	= echo ""
-DL	= '
+DEL     = rm -f $1
+RMDIR   = rm -fr $1
+MKDIR   = mkdir -p $1
+COPY    = -cp -afv $1 $2
+#COPYR  = -cp -afr $1/* $2
+COPYR   = -rsync -aC $1/* $2
+TOUCH   = touch $1
+CAT     = cat
+ECHONL  = echo ""
+DL = '
 else
 ifeq "$(OS)" "Windows_NT"
-DEL	= -del 2>NUL /q /f $(subst /,\,$1)
-RMDIR	= -rd 2>NUL /q /s $(subst /,\,$1)
+DEL     = -del 2>NUL /q /f $(subst /,\,$1)
+RMDIR   = -rd 2>NUL /q /s $(subst /,\,$1)
 else
-DEL	= -del 2>NUL $(subst /,\,$1)
-RMDIR	= -deltree 2>NUL /y $(subst /,\,$1)
+DEL     = -del 2>NUL $(subst /,\,$1)
+RMDIR   = -deltree 2>NUL /y $(subst /,\,$1)
 endif
-MKDIR	= -md 2>NUL $(subst /,\,$1)
-COPY	= -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
-COPYR	= -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
-TOUCH	= copy 2>&1>NUL /b $(subst /,\,$1) +,,
-CAT	= type
-ECHONL	= $(ComSpec) /c echo.
+MKDIR   = -md 2>NUL $(subst /,\,$1)
+COPY    = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
+COPYR   = -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
+TOUCH   = copy 2>&1>NUL /b $(subst /,\,$1) +,,
+CAT     = type
+ECHONL  = $(ComSpec) /c echo.
 endif
 
 ########################################################

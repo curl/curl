@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+DOH
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+DOH
+ </name>
+<tool>
+unit1650
+</tool>
+</client>
+
+</testcase>

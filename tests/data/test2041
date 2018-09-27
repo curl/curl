@@ -34,7 +34,7 @@ https Server-localhost-sv.pem
 simple HTTPS GET with base64-sha256 public key pinning
  </name>
  <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//pyh+fICi9M8MFEZvherIT0cs3MN+cXNGoU9Giwyx1so= https://localhost:%HTTPSPORT/2041
+--cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//+JYNkp2GTGRgrvZMUkOxbFJQQqYpwNE6toGmBjz00D8= https://localhost:%HTTPSPORT/2041
 </command>
 # Ensure that we're running on localhost because we're checking the host name
 <precheck>

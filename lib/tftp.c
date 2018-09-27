@@ -485,7 +485,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
     /* As RFC3617 describes the separator slash is not actually part of the
        file name so we skip the always-present first letter of the path
        string. */
-    result = Curl_urldecode(data, &state->conn->data->state.path[1], 0,
+    result = Curl_urldecode(data, &state->conn->data->state.up.path[1], 0,
                             &filename, NULL, FALSE);
     if(result)
       return result;
@@ -712,7 +712,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
   ssize_t sbytes;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
-  int cb; /* Bytes currently read */
+  size_t cb; /* Bytes currently read */
 
   switch(event) {
 
@@ -765,7 +765,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
     state->retries = 0;
     setpacketevent(&state->spacket, TFTP_EVENT_DATA);
     setpacketblock(&state->spacket, state->block);
-    if(state->block > 1 && state->sbytes < (int)state->blksize) {
+    if(state->block > 1 && state->sbytes < state->blksize) {
       state->state = TFTP_STATE_FIN;
       return CURLE_OK;
     }
@@ -781,7 +781,7 @@ static CURLcode tftp_tx(tftp_state_data_t *state, tftp_event_t event)
                                    &cb);
       if(result)
         return result;
-      state->sbytes += cb;
+      state->sbytes += (int)cb;
       state->conn->data->req.upload_fromhere += cb;
     } while(state->sbytes < state->blksize && cb != 0);
 
@@ -1374,7 +1374,7 @@ static CURLcode tftp_setup_connection(struct connectdata * conn)
 
   /* TFTP URLs support an extension like ";mode=<typecode>" that
    * we'll try to get now! */
-  type = strstr(data->state.path, ";mode=");
+  type = strstr(data->state.up.path, ";mode=");
 
   if(!type)
     type = strstr(conn->host.rawalloc, ";mode=");

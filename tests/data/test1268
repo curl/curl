@@ -1,0 +1,41 @@
+<testcase>
+<info>
+<keywords>
+warning
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unix-sockets
+</features>
+ <name>
+file name argument looks like a flag
+ </name>
+ <command>
+--stderr log/moo1268 --unix-socket -k hej://moo
+</command>
+</client>
+
+<verify>
+<file name="log/moo1268" mode="text">
+Warning: The file name argument '-k' looks like a flag.
+curl: (1) Protocol "hej" not supported or disabled in libcurl
+</file>
+
+# we expect an error since we provide a weird URL
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>

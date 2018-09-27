@@ -26,7 +26,7 @@ TLS-SRP with server cert checking
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-51
+60
 </errorcode>
 </verify>
 

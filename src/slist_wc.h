@@ -53,4 +53,3 @@ void slist_wc_free_all(struct slist_wc *);
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 
 #endif /* HEADER_CURL_SLIST_WC_H */
-

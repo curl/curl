@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -47,6 +47,9 @@ Any use of the \fBhandle\fP after this function has been called and have
 returned, is illegal. \fIcurl_easy_cleanup(3)\fP kills the handle and all
 memory associated with it!
 
+Passing in a NULL pointer in \fIhandle\fP will make this function return
+immediately with no action.
+.SH "OLD TIMES"
 For libcurl versions before 7.17,: after you've called this function, you can
 safely remove all the strings you've previously told libcurl to use, as it
 won't use them anymore now.

@@ -177,7 +177,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
  * MD5 Message-Digest Algorithm (RFC 1321).
  *
  * Homepage:
- http://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
+ https://openwall.info/wiki/people/solar/software/public-domain-source-code/md5
  *
  * Author:
  * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>
@@ -484,29 +484,35 @@ static void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 
 #endif /* CRYPTO LIBS */
 
-/* Disable this picky gcc-8 compiler warning */
-#if defined(__GNUC__) && (__GNUC__ >= 8)
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-
 const HMAC_params Curl_HMAC_MD5[] = {
   {
-    (HMAC_hinit_func) MD5_Init,           /* Hash initialization function. */
-    (HMAC_hupdate_func) MD5_Update,       /* Hash update function. */
-    (HMAC_hfinal_func) MD5_Final,         /* Hash computation end function. */
-    sizeof(MD5_CTX),                      /* Size of hash context structure. */
-    64,                                   /* Maximum key length. */
-    16                                    /* Result size. */
+    /* Hash initialization function. */
+    CURLX_FUNCTION_CAST(HMAC_hinit_func, MD5_Init),
+    /* Hash update function. */
+    CURLX_FUNCTION_CAST(HMAC_hupdate_func, MD5_Update),
+    /* Hash computation end function. */
+    CURLX_FUNCTION_CAST(HMAC_hfinal_func, MD5_Final),
+    /* Size of hash context structure. */
+    sizeof(MD5_CTX),
+    /* Maximum key length. */
+    64,
+    /* Result size. */
+    16
   }
 };
 
 const MD5_params Curl_DIGEST_MD5[] = {
   {
-    (Curl_MD5_init_func) MD5_Init,      /* Digest initialization function */
-    (Curl_MD5_update_func) MD5_Update,  /* Digest update function */
-    (Curl_MD5_final_func) MD5_Final,    /* Digest computation end function */
-    sizeof(MD5_CTX),                    /* Size of digest context struct */
-    16                                  /* Result size */
+    /* Digest initialization function */
+    CURLX_FUNCTION_CAST(Curl_MD5_init_func, MD5_Init),
+    /* Digest update function */
+    CURLX_FUNCTION_CAST(Curl_MD5_update_func, MD5_Update),
+    /* Digest computation end function */
+    CURLX_FUNCTION_CAST(Curl_MD5_final_func, MD5_Final),
+    /* Size of digest context struct */
+    sizeof(MD5_CTX),
+    /* Result size */
+    16
   }
 };
 

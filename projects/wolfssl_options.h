@@ -47,7 +47,7 @@ create the thread local storage and that could be a problem for LoadLibrary.
 Regarding the options that were added via C_EXTRA_FLAGS:
 
 FP_MAX_BITS=16384
-https://web.archive.org/web/20150218183550/www.yassl.com/forums/topic423-cacertorgs-ca-cert-verify-failed-but-withdisablefastmath-it-works.html
+https://www.yassl.com/forums/topic423-cacertorgs-ca-cert-verify-failed-but-withdisablefastmath-it-works.html
 "Since root.crt uses a 4096-bit RSA key, you'll need to increase the fastmath
 buffer size.  You can do this using the define:
 FP_MAX_BITS and setting it to 8192."
@@ -221,4 +221,3 @@ functioning correctly yet. https://github.com/wolfSSL/wolfssl/pull/943
 
 
 #endif /* WOLFSSL_OPTIONS_H */
-

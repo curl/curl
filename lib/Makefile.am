@@ -23,13 +23,13 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
-EXTRA_DIST = Makefile.m32 config-win32.h	                        \
- config-win32ce.h config-riscos.h config-mac.h curl_config.h.in		\
- makefile.dj config-dos.h libcurl.plist libcurl.rc config-amigaos.h	\
- makefile.amiga Makefile.netware nwlib.c nwos.c config-win32ce.h	\
- config-os400.h setup-os400.h config-symbian.h Makefile.Watcom		\
- config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)	\
- firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
+EXTRA_DIST = Makefile.m32 config-win32.h                            \
+ config-win32ce.h config-riscos.h config-mac.h curl_config.h.in     \
+ makefile.dj config-dos.h libcurl.plist libcurl.rc config-amigaos.h \
+ makefile.amiga Makefile.netware nwlib.c nwos.c config-win32ce.h    \
+ config-os400.h setup-os400.h config-symbian.h Makefile.Watcom      \
+ config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)        \
+ firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl    \
  objnames-test08.sh objnames-test10.sh objnames.inc
 
 lib_LTLIBRARIES = libcurl.la
@@ -107,7 +107,10 @@ endif
 if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
 libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
 else
+# if symbol-hiding is enabled, hide them!
+if DOING_CURL_SYMBOL_HIDING
 libcurl_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
+endif
 endif
 
 if USE_CPPFLAG_CURL_STATICLIB

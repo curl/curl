@@ -1228,8 +1228,13 @@ curl_mime *curl_mime_init(struct Curl_easy *easy)
     }
 
     memset(mime->boundary, '-', 24);
-    Curl_rand_hex(easy, (unsigned char *) mime->boundary + 24,
-                  MIME_RAND_BOUNDARY_CHARS + 1);
+    if(Curl_rand_hex(easy, (unsigned char *) mime->boundary + 24,
+                     MIME_RAND_BOUNDARY_CHARS + 1)) {
+      /* failed to get random separator, bail out */
+      free(mime->boundary);
+      free(mime);
+      return NULL;
+    }
     mimesetstate(&mime->state, MIMESTATE_BEGIN, NULL);
   }
 

@@ -37,7 +37,7 @@ imap
 IMAP external authentication
  </name>
  <command>
-'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/837/;UID=1'
+'imap://user;AUTH=EXTERNAL@%HOSTIP:%IMAPPORT/837/;MAILINDEX=1'
 </command>
 </client>
 

@@ -69,7 +69,7 @@
 #include <openssl/ocsp.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10001000L) && /* 1.0.1 or later */     \
+#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && /* 0.9.8 or later */     \
   !defined(OPENSSL_NO_ENGINE)
 #define USE_OPENSSL_ENGINE
 #include <openssl/engine.h>
@@ -129,14 +129,13 @@
 #define X509_get0_notBefore(x) X509_get_notBefore(x)
 #define X509_get0_notAfter(x) X509_get_notAfter(x)
 #define CONST_EXTS /* nope */
-#ifdef LIBRESSL_VERSION_NUMBER
-static unsigned long OpenSSL_version_num(void)
-{
-  return LIBRESSL_VERSION_NUMBER;
-}
-#else
+#ifndef LIBRESSL_VERSION_NUMBER
 #define OpenSSL_version_num() SSLeay()
 #endif
+#endif
+
+#ifdef LIBRESSL_VERSION_NUMBER
+#define OpenSSL_version_num() LIBRESSL_VERSION_NUMBER
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
@@ -178,6 +177,7 @@ static unsigned long OpenSSL_version_num(void)
      !defined(LIBRESSL_VERSION_NUMBER) &&       \
      !defined(OPENSSL_IS_BORINGSSL))
 #define HAVE_SSL_CTX_SET_CIPHERSUITES
+#define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
 #endif
 
 #if defined(LIBRESSL_VERSION_NUMBER)
@@ -253,7 +253,7 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
       if(!buf)
         return;
     }
-    strncpy(buf, line, linelen);
+    memcpy(buf, line, linelen);
     buf[linelen] = '\n';
     buf[linelen + 1] = '\0';
 
@@ -558,7 +558,19 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
   }
   return (UI_method_get_writer(UI_OpenSSL()))(ui, uis);
 }
+
+/*
+ * Check if a given string is a PKCS#11 URI
+ */
+static bool is_pkcs11_uri(const char *string)
+{
+  return (string && strncasecompare(string, "pkcs11:", 7));
+}
+
 #endif
+
+static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
+                                     const char *engine);
 
 static
 int cert_stuff(struct connectdata *conn,
@@ -622,6 +634,16 @@ int cert_stuff(struct connectdata *conn,
     case SSL_FILETYPE_ENGINE:
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
       {
+        /* Implicitly use pkcs11 engine if none was provided and the
+         * cert_file is a PKCS#11 URI */
+        if(!data->state.engine) {
+          if(is_pkcs11_uri(cert_file)) {
+            if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+              return 0;
+            }
+          }
+        }
+
         if(data->state.engine) {
           const char *cmd_name = "LOAD_CERT_CTRL";
           struct {
@@ -798,6 +820,17 @@ int cert_stuff(struct connectdata *conn,
 #ifdef USE_OPENSSL_ENGINE
       {                         /* XXXX still needs some work */
         EVP_PKEY *priv_key = NULL;
+
+        /* Implicitly use pkcs11 engine if none was provided and the
+         * key_file is a PKCS#11 URI */
+        if(!data->state.engine) {
+          if(is_pkcs11_uri(key_file)) {
+            if(Curl_ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+              return 0;
+            }
+          }
+        }
+
         if(data->state.engine) {
           UI_METHOD *ui_method =
             UI_create_method((char *)"curl user interface");
@@ -945,7 +978,7 @@ static int Curl_ossl_init(void)
 
   OPENSSL_load_builtin_modules();
 
-#ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
+#ifdef USE_OPENSSL_ENGINE
   ENGINE_load_builtin_engines();
 #endif
 
@@ -961,9 +994,11 @@ static int Curl_ossl_init(void)
 #define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
 
+#ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
   CONF_modules_load_file(NULL, NULL,
                          CONF_MFLAGS_DEFAULT_SECTION|
                          CONF_MFLAGS_IGNORE_MISSING_FILE);
+#endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
     !defined(LIBRESSL_VERSION_NUMBER)
@@ -1936,7 +1971,15 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
     }
     else
 #endif
-    {
+    if(content_type == SSL3_RT_CHANGE_CIPHER_SPEC) {
+      msg_type = *(char *)buf;
+      msg_name = "Change cipher spec";
+    }
+    else if(content_type == SSL3_RT_ALERT) {
+      msg_type = (((char *)buf)[0] << 8) + ((char *)buf)[1];
+      msg_name = SSL_alert_desc_string_long(msg_type);
+    }
+    else {
       msg_type = *(char *)buf;
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
@@ -2130,7 +2173,6 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
 #endif
       break;
     case CURL_SSLVERSION_MAX_TLSv1_3:
-    case CURL_SSLVERSION_MAX_DEFAULT:
 #ifdef TLS1_3_VERSION
       break;
 #else
@@ -2424,6 +2466,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
       infof(data, "TLS 1.3 cipher selection: %s\n", ciphers13);
     }
   }
+#endif
+
+#ifdef HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+  /* OpenSSL 1.1.1 requires clients to opt-in for PHA */
+  SSL_CTX_set_post_handshake_auth(BACKEND->ctx, 1);
 #endif
 
 #ifdef USE_TLS_SRP
@@ -3169,7 +3216,7 @@ static CURLcode servercert(struct connectdata *conn,
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)) );
     BIO_free(mem);
-    return 0;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   BACKEND->server_cert = SSL_get_peer_certificate(BACKEND->handle);
@@ -3216,7 +3263,7 @@ static CURLcode servercert(struct connectdata *conn,
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-issuer name!");
-    result = CURLE_SSL_CONNECT_ERROR;
+    result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
     infof(data, " issuer: %s\n", buffer);
@@ -3766,6 +3813,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
+#ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
+  SSLSUPP_TLS13_CIPHERSUITES |
+#endif
   SSLSUPP_HTTPS_PROXY,
 
   sizeof(struct ssl_backend_data),

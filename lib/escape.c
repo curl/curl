@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,7 +41,7 @@
    its behavior is altered by the current locale.
    See https://tools.ietf.org/html/rfc3986#section-2.3
 */
-static bool Curl_isunreserved(unsigned char in)
+bool Curl_isunreserved(unsigned char in)
 {
   switch(in) {
     case '0': case '1': case '2': case '3': case '4':
@@ -141,6 +141,8 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
  * Returns a pointer to a malloced string in *ostring with length given in
  * *olen. If length == 0, the length is assumed to be strlen(string).
  *
+ * 'data' can be set to NULL but then this function can't convert network
+ * data to host for non-ascii.
  */
 CURLcode Curl_urldecode(struct Curl_easy *data,
                         const char *string, size_t length,
@@ -151,7 +153,7 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
   char *ns = malloc(alloc);
   size_t strindex = 0;
   unsigned long hex;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   if(!ns)
     return CURLE_OUT_OF_MEMORY;
@@ -171,11 +173,13 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
 
       in = curlx_ultouc(hex); /* this long is never bigger than 255 anyway */
 
-      result = Curl_convert_from_network(data, (char *)&in, 1);
-      if(result) {
-        /* Curl_convert_from_network calls failf if unsuccessful */
-        free(ns);
-        return result;
+      if(data) {
+        result = Curl_convert_from_network(data, (char *)&in, 1);
+        if(result) {
+          /* Curl_convert_from_network calls failf if unsuccessful */
+          free(ns);
+          return result;
+        }
       }
 
       string += 2;

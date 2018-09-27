@@ -1,0 +1,34 @@
+<testcase>
+<info>
+<keywords>
+unittest
+URL API
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+file
+https
+http
+pop3
+smtp
+imap
+ldap
+dict
+ftp
+</features>
+ <name>
+URL API
+ </name>
+<tool>
+lib1560
+</tool>
+</client>
+
+</testcase>

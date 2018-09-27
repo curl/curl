@@ -182,8 +182,6 @@ static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
   return &(((struct thread_data *)conn->async.os_specific)->tsd);
 }
 
-#define CONN_THREAD_SYNC_DATA(conn) &(((conn)->async.os_specific)->tsd);
-
 /* Destroy resolver thread synchronization data */
 static
 void destroy_thread_sync_data(struct thread_sync_data * tsd)

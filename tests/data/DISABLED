@@ -18,3 +18,13 @@
 1510
 # Pipelining test that is causing false positives a little too often
 1903
+# fnmatch differences are just too common to make testing them sensible
+1307
+# Pipelining is deprecated
+530
+536
+584
+1900
+1901
+1902
+2033

@@ -143,7 +143,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
 #endif
   size_t real_path_len;
 
-  CURLcode result = Curl_urldecode(data, data->state.path, 0, &real_path,
+  CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &real_path,
                                    &real_path_len, FALSE);
   if(result)
     return result;
@@ -197,7 +197,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
 
   file->fd = fd;
   if(!data->set.upload && (fd == -1)) {
-    failf(data, "Couldn't open file %s", data->state.path);
+    failf(data, "Couldn't open file %s", data->state.up.path);
     file_done(conn, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
@@ -306,15 +306,15 @@ static CURLcode file_upload(struct connectdata *conn)
   while(!result) {
     size_t nread;
     size_t nwrite;
-    int readcount;
-    result = Curl_fillreadbuffer(conn, (int)data->set.buffer_size, &readcount);
+    size_t readcount;
+    result = Curl_fillreadbuffer(conn, data->set.buffer_size, &readcount);
     if(result)
       break;
 
     if(readcount <= 0)  /* fix questionable compare error. curlvms */
       break;
 
-    nread = (size_t)readcount;
+    nread = readcount;
 
     /*skip bytes before resume point*/
     if(data->state.resume_from) {
