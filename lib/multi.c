@@ -1984,7 +1984,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else
             follow = FOLLOW_RETRY;
           result = multi_done(&data->easy_conn, CURLE_OK, FALSE);
-          if(!result) {
+          if(result)
+            /* Curl_follow() would otherwise free this */
+            free(newurl);
+          else {
             result = Curl_follow(data, newurl, follow);
             if(!result) {
               multistate(data, CURLM_STATE_CONNECT);
