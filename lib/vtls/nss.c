@@ -1497,6 +1497,7 @@ static void nss_close(struct ssl_connect_data *connssl)
 static void Curl_nss_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl_proxy = &conn->proxy_ssl[sockindex];
 
   if(BACKEND->handle || connssl_proxy->backend->handle) {
@@ -1506,7 +1507,7 @@ static void Curl_nss_close(struct connectdata *conn, int sockindex)
     conn->sock[sockindex] = CURL_SOCKET_BAD;
   }
 
-  if(BACKEND->handle)
+  if(BACKEND->handle && !data->set.ssl.sessionticket)
     /* nss_close(connssl) will transitively close also
        connssl_proxy->backend->handle if both are used. Clear it to avoid
        a double close leading to crash. */
@@ -1828,8 +1829,9 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   /* do not use SSL cache if disabled or we are not going to verify peer */
-  ssl_no_cache = (SSL_SET_OPTION(primary.sessionid)
-                  && SSL_CONN_CONFIG(verifypeer)) ? PR_FALSE : PR_TRUE;
+
+   ssl_no_cache = (data->set.ssl.primary.sessionid && data->set.ssl.primary.verifypeer) ?
+     PR_FALSE : PR_TRUE;
   if(SSL_OptionSet(model, SSL_NO_CACHE, ssl_no_cache) != SECSuccess)
     goto error;
 
@@ -2029,6 +2031,11 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   }
 #endif
 
+   if (data->set.ssl.sessionticket) {
+           if (SSL_OptionSet(BACKEND->handle, SSL_ENABLE_SESSION_TICKETS, PR_TRUE) != SECSuccess) {
+               goto error;
+           }
+   }
 
   /* Force handshake on next I/O */
   if(SSL_ResetHandshake(BACKEND->handle, /* asServer */ PR_FALSE)
