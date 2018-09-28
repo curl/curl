@@ -245,7 +245,7 @@ struct TerminalSettings {
 }TerminalSettings;
 #endif 
 
-void configure_terminal(void)
+static void configure_terminal(void)
 {
 #if defined(_WIN32)
   /*
@@ -275,7 +275,7 @@ void configure_terminal(void)
 #endif
 }
 
-void restore_terminal(void)
+static void restore_terminal(void)
 {
 #if defined(_WIN32)
   /* Restore Console output mode and codepage to whatever they were when Curl started */
