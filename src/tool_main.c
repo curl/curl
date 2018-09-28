@@ -237,7 +237,7 @@ static void main_free(struct GlobalConfig *config)
 }
 
 #if defined(_WIN32)
-// TerminalSettings for Windows
+/* TerminalSettings for Windows */
 struct TerminalSettings {
     HANDLE hStdOut;
     DWORD dwOutputMode;
@@ -248,22 +248,23 @@ struct TerminalSettings {
 void configure_terminal()
 {
 #if defined(_WIN32)
-  // If we're running Windows, enable VT output & set codepage to UTF-8.
-  // Note: VT mode flag can be set on any version of Windows, but VT
-  // processing only performed on Win10 >= Creators Update)
+  /*
+   * If we're running Windows, enable VT output & set codepage to UTF-8.
+   * Note: VT mode flag can be set on any version of Windows, but VT
+   * processing only performed on Win10 >= Creators Update) 
+   */
 
-  // Define the VT flags in case we're building with an older SDK
+  /* Define the VT flags in case we're building with an older SDK */
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-  // Cache current codepage for now (will restore on exit) 
-  // and set codepage to unicde
+  /* Cache current codepage for now (will restore on exit) and set codepage to unicde */
   memset(&TerminalSettings, 0, sizeof(TerminalSettings));
   TerminalSettings.nCodepage = GetConsoleOutputCP();
   SetConsoleOutputCP(65001);
 
-  // Enable VT output
+  /* Enable VT output */
   TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
   if ((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE) 
     && (GetConsoleMode(TerminalSettings.hStdOut, &TerminalSettings.dwOutputMode))) 
@@ -277,7 +278,7 @@ void configure_terminal()
 void restore_terminal()
 {
 #if defined(_WIN32)
-  // Restore Console output mode and codepage to whatever they were when Curl started
+  /* Restore Console output mode and codepage to whatever they were when Curl started */
   SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
   SetConsoleOutputCP(TerminalSettings.nCodepage);
 #endif 
@@ -292,7 +293,7 @@ int main(int argc, char *argv[])
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
-  // Perform any platform-specific terminal configuration
+  /* Perform any platform-specific terminal configuration */
   configure_terminal();
 
   main_checkfds();
@@ -320,6 +321,7 @@ int main(int argc, char *argv[])
     main_free(&global);
   }
 
+  /* Return the terminal to its original state */
   restore_terminal();
 
 #ifdef __NOVELL_LIBC__
