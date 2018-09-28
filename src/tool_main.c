@@ -259,8 +259,8 @@ static void configure_terminal(void)
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-  /* Cache current codepage (will restore on exit) & set codepage to UTF-8 */ 
-   emset(&TerminalSettings, 0, sizeof(TerminalSettings));
+  /* Cache current codepage (will restore on exit) & set codepage to UTF-8 */
+  emset(&TerminalSettings, 0, sizeof(TerminalSettings));
   TerminalSettings.nCodepage = GetConsoleOutputCP();
   SetConsoleOutputCP(65001);
 
@@ -280,7 +280,7 @@ static void configure_terminal(void)
 static void restore_terminal(void)
 {
 #if defined(_WIN32)
-  /* Restore Console output mode and codepage to whatever they were 
+  /* Restore Console output mode and codepage to whatever they were
    * when Curl started */
   SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
   SetConsoleOutputCP(TerminalSettings.nCodepage);
