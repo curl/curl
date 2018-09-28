@@ -268,8 +268,7 @@ static void configure_terminal(void)
   TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
   if((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE)
     && (GetConsoleMode(TerminalSettings.hStdOut,
-                       &TerminalSettings.dwOutputMode)))
-  {
+                       &TerminalSettings.dwOutputMode))) {
     SetConsoleMode(TerminalSettings.hStdOut,
                    TerminalSettings.dwOutputMode
                    | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
