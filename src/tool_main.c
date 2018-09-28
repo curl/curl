@@ -260,7 +260,7 @@ static void configure_terminal(void)
 #endif
 
   /* Cache current codepage (will restore on exit) & set codepage to UTF-8 */
-  emset(&TerminalSettings, 0, sizeof(TerminalSettings));
+  memset(&TerminalSettings, 0, sizeof(TerminalSettings));
   TerminalSettings.nCodepage = GetConsoleOutputCP();
   SetConsoleOutputCP(65001);
 
