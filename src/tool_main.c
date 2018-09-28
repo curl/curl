@@ -243,7 +243,7 @@ struct TerminalSettings {
     DWORD dwOutputMode;
     UINT nCodepage;
 }TerminalSettings;
-#endif 
+#endif
 
 static void configure_terminal(void)
 {
@@ -251,7 +251,7 @@ static void configure_terminal(void)
   /*
    * If we're running Windows, enable VT output & set codepage to UTF-8.
    * Note: VT mode flag can be set on any version of Windows, but VT
-   * processing only performed on Win10 >= Creators Update) 
+   * processing only performed on Win10 >= Creators Update)
    */
 
   /* Define the VT flags in case we're building with an older SDK */
@@ -259,18 +259,20 @@ static void configure_terminal(void)
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-  /* Cache current codepage for now (will restore on exit) and set codepage to unicde */
-  memset(&TerminalSettings, 0, sizeof(TerminalSettings));
+  /* Cache current codepage (will restore on exit) & set codepage to UTF-8 */ 
+   emset(&TerminalSettings, 0, sizeof(TerminalSettings));
   TerminalSettings.nCodepage = GetConsoleOutputCP();
   SetConsoleOutputCP(65001);
 
   /* Enable VT output */
   TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if ((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE) 
-    && (GetConsoleMode(TerminalSettings.hStdOut, &TerminalSettings.dwOutputMode))) 
+  if((TerminalSettings.hStdOut != INVALID_HANDLE_VALUE)
+    && (GetConsoleMode(TerminalSettings.hStdOut,
+                       &TerminalSettings.dwOutputMode)))
   {
-    SetConsoleMode(TerminalSettings.hStdOut, 
-                   TerminalSettings.dwOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    SetConsoleMode(TerminalSettings.hStdOut,
+                   TerminalSettings.dwOutputMode
+                   | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
   }
 #endif
 }
@@ -278,10 +280,11 @@ static void configure_terminal(void)
 static void restore_terminal(void)
 {
 #if defined(_WIN32)
-  /* Restore Console output mode and codepage to whatever they were when Curl started */
+  /* Restore Console output mode and codepage to whatever they were 
+   * when Curl started */
   SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
   SetConsoleOutputCP(TerminalSettings.nCodepage);
-#endif 
+#endif
 }
 
 /*
