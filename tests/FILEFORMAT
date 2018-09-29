@@ -226,7 +226,7 @@ debug
 getrlimit
 GnuTLS
 GSS-API
-http2
+http/2
 idn
 ipv6
 Kerberos
