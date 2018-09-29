@@ -107,7 +107,7 @@ matrix:
           env: T=debug C="--with-ssl=/usr/local/opt/libressl --with-libmetalink"
         - os: osx
           compiler: clang
-          osx_image: xcode9.2
+          osx_image: xcode10
           env: T=debug C="--without-ssl --with-darwinssl --with-libmetalink"
         - os: osx
           compiler: clang
