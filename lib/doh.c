@@ -21,15 +21,18 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #include "urldata.h"
 #include "curl_addrinfo.h"
+#include "doh.h"
+
+#ifdef USE_NGHTTP2
 #include "sendf.h"
 #include "multiif.h"
 #include "url.h"
 #include "share.h"
 #include "curl_base64.h"
 #include "connect.h"
-#include "doh.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -878,3 +881,28 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
 
   return CURLE_OK;
 }
+
+#else /* !USE_NGHTTP2 */
+/*
+ */
+Curl_addrinfo *Curl_doh(struct connectdata *conn,
+                        const char *hostname,
+                        int port,
+                        int *waitp)
+{
+  (void)conn;
+  (void)hostname;
+  (void)port;
+  (void)waitp;
+  return NULL;
+}
+
+CURLcode Curl_doh_is_resolved(struct connectdata *conn,
+                              struct Curl_dns_entry **dnsp)
+{
+  (void)conn;
+  (void)dnsp;
+  return CURLE_NOT_BUILT_IN;
+}
+
+#endif /* USE_NGHTTP2 */
