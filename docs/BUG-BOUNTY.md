@@ -30,7 +30,7 @@
 ## Who's eligable for a reward
 
  Everyone and anyone who reports a security problem in a released curl version
- - that hasn't already been reported - can ask for a bounty.
+ that hasn't already been reported can ask for a bounty.
 
  The vulnerability has to be fixed and publicly announced (by the curl
  project) before a bug bounty will be considered.
