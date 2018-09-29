@@ -2005,12 +2005,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             result = Curl_follow(data, newurl, FOLLOW_FAKE);
-            if(result)
+            if(result) {
               stream_error = TRUE;
+              result = multi_done(&data->easy_conn, result, TRUE);
+            }
           }
 
-          multistate(data, CURLM_STATE_DONE);
-          rc = CURLM_CALL_MULTI_PERFORM;
+          if(!result) {
+            multistate(data, CURLM_STATE_DONE);
+            rc = CURLM_CALL_MULTI_PERFORM;
+          }
         }
       }
       else if(comeback)
