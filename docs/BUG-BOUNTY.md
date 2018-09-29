@@ -27,7 +27,7 @@
  - High      $5,000
  - Critical $10,000
 
-## Who's eligable for a reward
+## Who's eligible for a reward
 
  Everyone and anyone who reports a security problem in a released curl version
  that hasn't already been reported can ask for a bounty.
@@ -49,8 +49,8 @@
 
 ## How are vulnerabilities graded
 
- The grading of each reported vulernability that makes a reward claim will be
- performed by the curl security team. The grading should be based on the CVSS
+ The grading of each reported vulnerability that makes a reward claim will be
+ performed by the curl security team. The grading will be based on the CVSS
  (Common Vulnerability Scoring System) 3.0.
 
 ## How are reward amounts determined
@@ -64,7 +64,7 @@
 
 ## What happens if the bounty fund is drained
 
- The boundy fund depends on sponsors. If we pay out more bounties than we add,
+ The bounty fund depends on sponsors. If we pay out more bounties than we add,
  the fund will eventually drain. If that end up happening, we will simply not
  be able to pay out as high bounties as we would like and hope that we can
  convince new sponsors to help us top up the fund again.
