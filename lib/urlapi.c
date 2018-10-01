@@ -35,6 +35,20 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+  /* MSDOS/Windows style drive prefix, eg c: in c:foo */
+#define STARTS_WITH_DRIVE_PREFIX(str) \
+  ((('a' <= str[0] && str[0] <= 'z') || \
+    ('A' <= str[0] && str[0] <= 'Z')) && \
+   (str[1] == ':'))
+
+  /* MSDOS/Windows style drive prefix, optionally with
+   * a '|' instead of ':', followed by a slash or NUL */
+#define STARTS_WITH_URL_DRIVE_PREFIX(str) \
+  ((('a' <= (str)[0] && (str)[0] <= 'z') || \
+    ('A' <= (str)[0] && (str)[0] <= 'Z')) && \
+   ((str)[1] == ':' || (str)[1] == '|') && \
+   ((str)[2] == '/' || (str)[2] == '\\' || (str)[2] == 0))
+
 /* Internal representation of CURLU. Point to URL-encoded strings. */
 struct Curl_URL {
   char *scheme;
@@ -218,6 +232,10 @@ void Curl_strcpy_url(char *output, const char *url, bool relative)
 bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
 {
   size_t i;
+#ifdef WIN32
+  if(STARTS_WITH_DRIVE_PREFIX(url))
+    return FALSE;
+#endif
   for(i = 0; i < buflen && url[i]; ++i) {
     char s = url[i];
     if(s == ':') {
@@ -609,20 +627,6 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 
   hostname = &path[urllen + 1];
   hostname[0] = 0;
-
-  /* MSDOS/Windows style drive prefix, eg c: in c:foo */
-#define STARTS_WITH_DRIVE_PREFIX(str) \
-  ((('a' <= str[0] && str[0] <= 'z') || \
-    ('A' <= str[0] && str[0] <= 'Z')) && \
-   (str[1] == ':'))
-
-  /* MSDOS/Windows style drive prefix, optionally with
-   * a '|' instead of ':', followed by a slash or NUL */
-#define STARTS_WITH_URL_DRIVE_PREFIX(str) \
-  ((('a' <= (str)[0] && (str)[0] <= 'z') || \
-    ('A' <= (str)[0] && (str)[0] <= 'Z')) && \
-   ((str)[1] == ':' || (str)[1] == '|') && \
-   ((str)[2] == '/' || (str)[2] == '\\' || (str)[2] == 0))
 
   if(Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf))) {
     url_has_scheme = TRUE;
