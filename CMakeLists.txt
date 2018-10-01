@@ -1153,11 +1153,13 @@ function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
 
 endfunction()
 
-if(WIN32 AND NOT CYGWIN)
-  set(CURL_INSTALL_CMAKE_DIR CMake)
-else()
-  set(CURL_INSTALL_CMAKE_DIR lib/cmake/curl)
-endif()
+include(GNUInstallDirs)
+
+set(CURL_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
 if(USE_MANUAL)
   add_subdirectory(docs)
@@ -1291,7 +1293,7 @@ set(VERSIONNUM              "${CURL_VERSION_NUM}")
 configure_file("${CURL_SOURCE_DIR}/curl-config.in"
                "${CURL_BINARY_DIR}/curl-config" @ONLY)
 install(FILES "${CURL_BINARY_DIR}/curl-config"
-        DESTINATION bin
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
         PERMISSIONS
           OWNER_READ OWNER_WRITE OWNER_EXECUTE
           GROUP_READ GROUP_EXECUTE
@@ -1301,7 +1303,7 @@ install(FILES "${CURL_BINARY_DIR}/curl-config"
 configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
                "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
 install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
-        DESTINATION lib/pkgconfig)
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
@@ -1310,25 +1312,32 @@ endif()
 
 # install headers
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
-    DESTINATION include
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
-
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-    "${PROJECT_BINARY_DIR}/curl-config-version.cmake"
+    "${version_config}"
     VERSION ${CURL_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
-configure_file(CMake/curl-config.cmake.in
-        "${PROJECT_BINARY_DIR}/curl-config.cmake"
-        @ONLY
+# Use:
+# * TARGETS_EXPORT_NAME
+# * PROJECT_NAME
+configure_package_config_file(CMake/curl-config.cmake.in
+        "${project_config}"
+        INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
 
 install(
-        FILES ${PROJECT_BINARY_DIR}/curl-config.cmake
-              ${PROJECT_BINARY_DIR}/curl-config-version.cmake
+        EXPORT "${TARGETS_EXPORT_NAME}"
+        NAMESPACE "${PROJECT_NAME}::"
+        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+)
+
+install(
+        FILES ${version_config} ${project_config}
         DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
 
