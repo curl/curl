@@ -22,32 +22,50 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o CURLOPT_DNS_USE_GLOBAL_CACHE: deprecated [5]
+ o Curl_dedotdotify(): always nul terminate returned string [46]
+ o Curl_http2_done: fix memleak in error path [51]
+ o Curl_retry_request: fix memory leak [49]
  o Curl_saferealloc: Fixed typo in docblock [40]
  o GnutTLS: TLS 1.3 support [39]
+ o SECURITY-PROCESS: mention the bountygraph program [42]
  o anyauthput: fix compiler warning on 64-bit Windows [21]
  o certs: generate tests certs with sha256 digest algorithm [37]
+ o cmake: Backport to work with CMake 3.0 again [55]
+ o cmake: Improve config installation [60]
  o cmake: don't require OpenSSL if USE_OPENSSL=OFF [35]
+ o cmake: fixed path used in generation of docs/tests [56]
  o configure: force-use -lpthreads on HPUX [41]
+ o configure: s/AC_RUN_IFELSE/CURL_RUN_IFELSE [53]
  o cookies: Remove redundant expired check [14]
  o cookies: fix leak when writing cookies to file [15]
+ o curl: enabled Windows VT Support and UTF-8 output [57]
  o curl: update the documentation of --tlsv1.0 [17]
  o curl_multi_wait: call getsock before figuring out timeout [34]
+ o curl_threads: fix classic MinGW compile break [54]
  o darwinssl: Fix realloc memleak [32]
  o darwinssl: more specific and unified error codes [6]
+ o docs/examples: URL updates [45]
  o example/asiohiper: insert warning comment about its status [18]
+ o example/htmltidy: fix include paths of tidy libraries [52]
+ o examples/Makefile.m32: sync with core [44]
  o examples/http2-pushinmemory: receive HTTP/2 pushed files in memory [33]
+ o examples/parseurl.c: show off the URL API [43]
  o examples: Fix memory leaks from realloc errors [31]
  o examples: do not wait when no transfers are running [16]
  o ftp: include command in Curl_ftpsend sendbuffer [25]
  o http2: fix memory leaks on error-path [29]
+ o http: fix memleak in rewind error path [50]
  o krb5: fix memory leak in krb_auth [25]
  o lib: fix gcc8 warning on Windows [20]
  o memory: add missing curl_printf header [30]
+ o multi: fix memory leak in content encoding related error path [59]
  o nss: try to connect even if libnssckbi.so fails to load [36]
  o ntlm_wb: Fix memory leaks in ntlm_wb_response [24]
  o ntlm_wb: bail out if the response gets overly large [13]
  o openssl: assume engine support in 0.9.8 or later [27]
+ o openssl: enable TLS 1.3 post-handshake auth [47]
  o openssl: fix gcc8 warning [19]
+ o openssl: load built-in engines too [48]
  o openssl: return CURLE_PEER_FAILED_VERIFICATION on failure to parse issuer [6]
  o openssl: show "proper" version number for libressl builds [28]
  o pipelining: deprecated [1]
@@ -56,19 +74,10 @@ This release includes the following bugfixes:
  o ssl: deprecate CURLE_SSL_CACERT in favour of a unified error code [6]
  o test1452: mark as flaky [2]
  o tests: add unit tests for url.c [3]
+ o travis: bump the Secure Transport build to use xcode [58]
  o urlglob: improve error message on bad globs [22]
  o vtls: fix ssl version "or later" behavior change for many backends [38]
  o x509asn1: return CURLE_PEER_FAILED_VERIFICATION on failure to parse cert [6]
- o SECURITY-PROCESS: mention the bountygraph program [42]
- o examples/parseurl.c: show off the URL API [43]
- o examples/Makefile.m32: sync with core [44]
- p docs/examples: URL updates [45]
- o Curl_dedotdotify(): always nul terminate returned string [46]
- o openssl: enable TLS 1.3 post-handshake auth [47]
- o openssl: load built-in engines too [48]
- o Curl_retry_request: fix memory leak [49]
- o http: fix memleak in rewind error path [50]
- o Curl_http2_done: fix memleak in error path [51]
 
 This release includes the following known bugs:
 
@@ -77,13 +86,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christian Heimes, Daniel Gustafsson, Daniel Shahaf, Daniel Stenberg,
-  Dave Reisner, Eason-Yu on github, Erik Minekus, Even Rouault, Han Han,
-  Harry Sintonen, Jean Fabrice, Jim Fuller, Kamil Dudka, Loganaden Velvindron,
-  Marcel Raad, Marc Hörsken, Max Dymond, Maxime Legros, Nicklas Avén,
-  Nick Zitzmann, Philipp Waehnert, Rainer Jung, Ray Satiro, Rikard Falkeborn,
-  Sergei Nikulov, Thomas Glanzmann, Viktor Szakats, Yiming Jing,
-  (28 contributors)
+  Brad King, Christian Heimes, Daniel Gustafsson, Daniel Shahaf,
+  Daniel Stenberg, Dave Reisner, Doron Behar, Eason-Yu on github, Erik Minekus,
+  Even Rouault, Han Han, Harry Sintonen, Jean Fabrice, Jim Fuller, Kamil Dudka,
+  Loganaden Velvindron, Marcel Raad, Marc Hörsken, Max Dymond, Maxime Legros,
+  Michael Kaufmann, Nate Prewitt, Nicklas Avén, Nick Zitzmann,
+  Philipp Waehnert, Rainer Jung, Ray Satiro, Rich Turner, Rikard Falkeborn,
+  Ruslan Baratov, Sergei Nikulov, Thomas Glanzmann, Viktor Szakats,
+  Yiming Jing,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -140,3 +151,12 @@ References to bug reports and discussions on issues:
  [49] = https://curl.haxx.se/bug/?i=3042
  [50] = https://curl.haxx.se/bug/?i=3044
  [51] = https://curl.haxx.se/bug/?i=3046
+ [52] = https://curl.haxx.se/bug/?i=3050
+ [53] = https://curl.haxx.se/bug/?i=3006
+ [54] = https://github.com/curl/curl/issues/2924#issuecomment-424334807
+ [55] = https://curl.haxx.se/bug/?i=3055
+ [56] = https://curl.haxx.se/bug/?i=3056
+ [57] = https://curl.haxx.se/bug/?i=3008
+ [58] = https://curl.haxx.se/bug/?i=3062
+ [59] = https://curl.haxx.se/bug/?i=3063
+ [60] = https://curl.haxx.se/bug/?i=2849
