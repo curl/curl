@@ -5215,6 +5215,12 @@ sub runtimestats {
     logmsg "\n";
 }
 
+# globally disabled tests
+disabledtests("$TESTDIR/DISABLED");
+
+# locally disabled tests, ignored by git etc
+disabledtests("$TESTDIR/DISABLED.local");
+
 #######################################################################
 # Check options to this test program
 #
@@ -5369,8 +5375,17 @@ EOHELP
     elsif($ARGV[0] =~ /^(\d+)/) {
         $number = $1;
         if($fromnum >= 0) {
-            for($fromnum .. $number) {
-                push @testthis, $_;
+            for my $n ($fromnum .. $number) {
+                if($disabled{$n}) {
+                    # skip disabled test cases
+                    my $why = "configured as DISABLED";
+                    $skipped++;
+                    $skipped{$why}++;
+                    $teststat[$n]=$why; # store reason for this test case
+                }
+                else {
+                    push @testthis, $n;
+                }
             }
             $fromnum = -1;
         }
@@ -5527,12 +5542,6 @@ sub disabledtests {
         close(D);
     }
 }
-
-# globally disabled tests
-disabledtests("$TESTDIR/DISABLED");
-
-# locally disabled tests, ignored by git etc
-disabledtests("$TESTDIR/DISABLED.local");
 
 #######################################################################
 # If 'all' tests are requested, find out all test numbers
