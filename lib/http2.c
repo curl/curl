@@ -957,6 +957,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       stream->push_headers_alloc = 10;
       stream->push_headers = malloc(stream->push_headers_alloc *
                                     sizeof(char *));
+      if(!stream->push_headers)
+        return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
       stream->push_headers_used = 0;
     }
     else if(stream->push_headers_used ==
