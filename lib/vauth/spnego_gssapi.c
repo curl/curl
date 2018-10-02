@@ -64,7 +64,7 @@ bool Curl_auth_is_spnego_supported(void)
  *
  * data        [in]     - The session handle.
  * userp       [in]     - The user name in the format User or Domain\User.
- * passdwp     [in]     - The user's password.
+ * passwdp     [in]     - The user's password.
  * service     [in]     - The service type such as http, smtp, pop or imap.
  * host        [in]     - The host name.
  * chlg64      [in]     - The optional base64 encoded challenge message.
