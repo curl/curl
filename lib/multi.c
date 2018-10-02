@@ -1707,7 +1707,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           char *newurl = NULL;
           followtype follow = FOLLOW_NONE;
           CURLcode drc;
-          bool retry = FALSE;
 
           drc = Curl_retry_request(data->easy_conn, &newurl);
           if(drc) {
@@ -1715,19 +1714,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             result = drc;
             stream_error = TRUE;
           }
-          else
-            retry = (newurl)?TRUE:FALSE;
 
           Curl_posttransfer(data);
           drc = multi_done(&data->easy_conn, result, FALSE);
 
           /* When set to retry the connection, we must to go back to
            * the CONNECT state */
-          if(retry) {
+          if(newurl) {
             if(!drc || (drc == CURLE_SEND_ERROR)) {
               follow = FOLLOW_RETRY;
               drc = Curl_follow(data, newurl, follow);
-              newurl = NULL; /* freed by Curl_follow() */
               if(!drc) {
                 multistate(data, CURLM_STATE_CONNECT);
                 rc = CURLM_CALL_MULTI_PERFORM;
@@ -1987,16 +1983,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else
             follow = FOLLOW_RETRY;
           result = multi_done(&data->easy_conn, CURLE_OK, FALSE);
-          if(result)
-            /* Curl_follow() would otherwise free this */
-            free(newurl);
-          else {
+          if(!result) {
             result = Curl_follow(data, newurl, follow);
             if(!result) {
               multistate(data, CURLM_STATE_CONNECT);
               rc = CURLM_CALL_MULTI_PERFORM;
             }
           }
+          free(newurl);
         }
         else {
           /* after the transfer is done, go DONE */
@@ -2008,6 +2002,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             newurl = data->req.location;
             data->req.location = NULL;
             result = Curl_follow(data, newurl, FOLLOW_FAKE);
+            free(newurl);
             if(result) {
               stream_error = TRUE;
               result = multi_done(&data->easy_conn, result, TRUE);

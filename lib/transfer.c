@@ -1458,6 +1458,8 @@ CURLcode Curl_posttransfer(struct Curl_easy *data)
 /*
  * Curl_follow() handles the URL redirect magic. Pass in the 'newurl' string
  * as given by the remote server and set up the new URL to request.
+ *
+ * This function DOES NOT FREE the given url.
  */
 CURLcode Curl_follow(struct Curl_easy *data,
                      char *newurl,    /* the Location: string */
@@ -1515,7 +1517,6 @@ CURLcode Curl_follow(struct Curl_easy *data,
 
   DEBUGASSERT(data->state.uh);
   uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl, 0);
-  free(newurl);
   if(uc)
     /* TODO: consider an error code remap here */
     return CURLE_URL_MALFORMAT;
