@@ -22,10 +22,10 @@
  solely and exclusively determine the exact amount for each reported flaw on a
  case by case basis and keep the rights to adjust the amount as it sees fit.
 
- - Low         $500
- - Medium    $1,000
- - High      $5,000
- - Critical $10,000
+ - Low      USD 500
+ - Medium   USD 1,000
+ - High     USD 5,000
+ - Critical USD 10,000
 
 ## Who's eligible for a reward
 
