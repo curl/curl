@@ -10,6 +10,8 @@ libcurl was built to use. This is an attempt to list known cipher names.
 
 (based on [OpenSSL docs](https://www.openssl.org/docs/man1.1.0/apps/ciphers.html))
 
+When specifying multiple cipher names, separate them with colon (`:`).
+
 ### SSL3 cipher suites
 
 `NULL-MD5`
