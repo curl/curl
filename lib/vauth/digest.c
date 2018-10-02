@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -781,6 +781,8 @@ static CURLcode _Curl_auth_create_digest_http_message(
   */
 
   hashthis = (unsigned char *) aprintf("%s:%s", request, uripath);
+  if(!hashthis)
+    return CURLE_OUT_OF_MEMORY;
 
   if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
     /* We don't support auth-int for PUT or POST at the moment.
