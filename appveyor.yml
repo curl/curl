@@ -69,6 +69,10 @@ build_script:
     - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DBUILD_SHARED_LIBS=%SHARED% -DBUILD_TESTING=%TESTING% -DCURL_WERROR=ON
     - cmake --build . --config %PRJ_CFG% --clean-first
 
+test_script:
+    - if %TESTING%==ON (
+        C:\msys64\usr\bin\bash.exe -e -l -c "cd build.%BDIR%/tests && ./runtests.pl -a -p -v" )
+
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
     only:
