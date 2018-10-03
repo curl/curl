@@ -21,7 +21,7 @@ IDENT = "NTEL"
 
 
 # The strings that indicate the test framework is checking our aliveness
-VERIFIED_REQ = b"verifiedserver"
+VERIFIED_REQ = "verifiedserver"
 VERIFIED_RSP = "WE ROOLZ: {pid}"
 
 
@@ -67,7 +67,7 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             data = neg.recv(1024)
             log.debug("Incoming data: %r", data)
 
-            if VERIFIED_REQ in data:
+            if VERIFIED_REQ.encode('ascii') in data:
                 log.debug("Received verification request from test framework")
                 response = VERIFIED_RSP.format(pid=os.getpid())
                 response_data = response.encode('ascii')
