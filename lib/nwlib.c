@@ -214,6 +214,8 @@ int GetOrSetUpData(int id, libdata_t **appData,
           err = set_app_data(gLibId, app_data);
 
           if(err) {
+            if(app_data->lock)
+              NXMutexFree(app_data->lock);
             free(app_data->tenbytes);
             free(app_data);
             app_data = (libdata_t *) NULL;
