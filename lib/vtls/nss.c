@@ -217,10 +217,15 @@ static const cipher_s cipherlist[] = {
 #endif
 };
 
+#ifdef WIN32
+static const char *pem_library = "nsspem.dll";
+static const char *trust_library = "nssckbi.dll";
+#else
 static const char *pem_library = "libnsspem.so";
-static SECMODModule *pem_module = NULL;
-
 static const char *trust_library = "libnssckbi.so";
+#endif
+
+static SECMODModule *pem_module = NULL;
 static SECMODModule *trust_module = NULL;
 
 /* NSPR I/O layer we use to detect blocking direction during SSL handshake */
