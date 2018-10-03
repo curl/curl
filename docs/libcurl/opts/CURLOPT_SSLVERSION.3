@@ -33,13 +33,13 @@ use.
 
 The SSL and TLS versions have typically developed from the most insecure
 version to be more and more secure in this order through history: SSL v2,
-SSLv3, TLS v1.0, TSL v1.1, TSL v1.2 and the most recent TLS v1.3.
+SSLv3, TLS v1.0, TLS v1.1, TLS v1.2 and the most recent TLS v1.3.
 
 Use one of the available defines for this purpose. The available options are:
 .RS
 .IP CURL_SSLVERSION_DEFAULT
-The default acceptable version range. The mimimum acceptable version is by
-default TLS 1.0 since 7.39.0 (unless the TLS library has a stricter rule).
+The default acceptable version range. The minimum acceptable version is by
+default TLS v1.0 since 7.39.0 (unless the TLS library has a stricter rule).
 .IP CURL_SSLVERSION_TLSv1
 TLS v1.0 or later
 .IP CURL_SSLVERSION_SSLv2
@@ -64,7 +64,7 @@ The MAX macros are not supported for SSL backends axTLS or wolfSSL.
 .IP CURL_SSLVERSION_MAX_DEFAULT
 The flag defines the maximum supported TLS version by libcurl, or the default
 value from the SSL library is used. libcurl will use a sensible default
-maximum, which was TLS 1.2 up to before 7.61.0 and is TLS 1.3 since then -
+maximum, which was TLS v1.2 up to before 7.61.0 and is TLS v1.3 since then -
 assuming the TLS library support it. (Added in 7.54.0)
 .IP CURL_SSLVERSION_MAX_TLSv1_0
 The flag defines maximum supported TLS version as TLS v1.0.
