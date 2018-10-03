@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012, Marc Hoersken, <info@marc-hoersken.de>, et al.
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
