@@ -2855,7 +2855,7 @@ out:
  * len      [in]     - The length of the login string.
  * userp    [in/out] - The address where a pointer to newly allocated memory
  *                     holding the user will be stored upon completion.
- * passdwp  [in/out] - The address where a pointer to newly allocated memory
+ * passwdp  [in/out] - The address where a pointer to newly allocated memory
  *                     holding the password will be stored upon completion.
  * optionsp [in/out] - The address where a pointer to newly allocated memory
  *                     holding the options will be stored upon completion.

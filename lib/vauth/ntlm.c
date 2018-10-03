@@ -354,7 +354,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * service [in]     - The service type such as http, smtp, pop or imap.
  * host    [in]     - The host name.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
@@ -481,7 +481,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name in the format User or Domain\User.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * ntlm    [in/out] - The NTLM data struct being used and modified.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.

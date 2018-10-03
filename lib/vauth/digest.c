@@ -342,7 +342,7 @@ bool Curl_auth_is_digest_supported(void)
  * data    [in]     - The session handle.
  * chlg64  [in]     - The base64 encoded challenge message.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * service [in]     - The service type such as http, smtp, pop or imap.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
@@ -668,7 +668,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * request [in]     - The HTTP request.
  * uripath [in]     - The path of the HTTP uri.
  * digest  [in/out] - The digest data struct being used and modified.
@@ -932,7 +932,7 @@ static CURLcode _Curl_auth_create_digest_http_message(
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * request [in]     - The HTTP request.
  * uripath [in]     - The path of the HTTP uri.
  * digest  [in/out] - The digest data struct being used and modified.

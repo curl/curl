@@ -50,7 +50,7 @@
  *
  * data    [in]     - The session handle.
  * userp   [in]     - The user name.
- * passdwp [in]     - The user's password.
+ * passwdp [in]     - The user's password.
  * outptr  [in/out] - The address where a pointer to newly allocated memory
  *                    holding the result will be stored upon completion.
  * outlen  [out]    - The length of the output message.
