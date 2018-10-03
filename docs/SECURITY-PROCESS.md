@@ -131,10 +131,11 @@ After you have reported a security issue to the curl project, it has been
 deemed credible and a patch and advisory has been made public you can be
 eligible for a bounty from this program.
 
-See all details at https://bountygraph.com/programs/curl
+See all details at [BountyGraph](https://bountygraph.com/programs/curl).
 
-This bounty is relying on funds from sponsors. If you use curl professionally,
-consider help funding this!
+This bounty is relying on funds from
+[sponsors](https://bountygraph.com/programs/curl#publicpledges). If you use
+curl professionally, consider help funding this!
 
 Hackerone Internet Bug Bounty
 -----------------------------
