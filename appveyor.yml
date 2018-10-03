@@ -64,9 +64,7 @@ environment:
         SHARED: OFF
 
 build_script:
-    - mkdir build.%BDIR%
-    - cd build.%BDIR%
-    - cmake .. -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DBUILD_SHARED_LIBS=%SHARED% -DBUILD_TESTING=%TESTING% -DCURL_WERROR=ON
+    - cmake . -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DBUILD_SHARED_LIBS=%SHARED% -DBUILD_TESTING=%TESTING% -DCURL_WERROR=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE="" -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
     - cmake --build . --config %PRJ_CFG% --clean-first
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
