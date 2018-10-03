@@ -319,6 +319,10 @@ static CURLcode verify_host(struct Curl_easy *data,
    * embedded null bytes. This appears to be undocumented behavior.
    */
   cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
+  if(!cert_hostname_buff) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto cleanup;
+  }
   actual_len = CertGetNameString(pCertContextServer,
                                  CERT_NAME_DNS_TYPE,
                                  name_flags,

@@ -3213,9 +3213,11 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
           ftpc->prevpath[dlen] = 0; /* terminate */
       }
       else {
+        free(path);
         /* we never changed dir */
         ftpc->prevpath = strdup("");
-        free(path);
+        if(!ftpc->prevpath)
+          return CURLE_OUT_OF_MEMORY;
       }
       if(ftpc->prevpath)
         infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
