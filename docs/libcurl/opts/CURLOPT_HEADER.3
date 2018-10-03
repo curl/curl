@@ -37,7 +37,7 @@ When asking to get the headers passed to the same callback as the body, it is
 not possible to accurately separate them again without detailed knowledge
 about the protocol in use.
 
-Further: the \fCURLOPT_WRITEFUNCTION(3)\fP callback is limited to only ever
+Further: the \fICURLOPT_WRITEFUNCTION(3)\fP callback is limited to only ever
 get a maximum of \fICURL_MAX_WRITE_SIZE\fP bytes passed to it (16KB), while a
 header can be longer and the \fICURLOPT_HEADERFUNCTION(3)\fP supports getting
 called with headers up to \fICURL_MAX_HTTP_HEADER\fP bytes big (100KB).
