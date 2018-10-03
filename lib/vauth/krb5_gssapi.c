@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2017, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2018, Steve Holme, <steve_holme@hotmail.com>.
  * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2013 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
