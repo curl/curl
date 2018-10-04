@@ -498,6 +498,13 @@ static DOHcode rdata(unsigned char *doh,
   return DOH_OK;
 }
 
+static void init_dohentry(struct dohentry *de)
+{
+  memset(de, 0, sizeof(*de));
+  de->ttl = INT_MAX;
+}
+
+
 UNITTEST DOHcode doh_decode(unsigned char *doh,
                             size_t dohlen,
                             DNStype dnstype,
@@ -513,8 +520,6 @@ UNITTEST DOHcode doh_decode(unsigned char *doh,
   unsigned short arcount;
   unsigned int index = 12;
   DOHcode rc;
-
-  d->ttl = INT_MAX;
 
   if(dohlen < 12)
     return DOH_TOO_SMALL_BUFFER; /* too small */
@@ -824,7 +829,7 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
     Curl_close(data->req.doh.probe[1].easy);
 
     /* parse the responses, create the struct and return it! */
-    memset(&de, 0, sizeof(de));
+    init_dohentry(&de);
     rc = doh_decode(data->req.doh.probe[0].serverdoh.memory,
                     data->req.doh.probe[0].serverdoh.size,
                     data->req.doh.probe[0].dnstype,
