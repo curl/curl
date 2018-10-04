@@ -198,9 +198,8 @@ UNITTEST_START
       struct dohaddr *a;
       a = &d.addr[u];
       if(resp[i].type == DNS_TYPE_A) {
-        snprintf(ptr, len, "%d.%d.%d.%d ",
-                 a->ip.v4 & 0xff, (a->ip.v4>>8) & 0xff,
-                 (a->ip.v4>>16) & 0xff, a->ip.v4 >>24);
+        char *p = (char *)&a->ip.v4;
+        snprintf(ptr, len, "%u.%u.%u.%u ", p[0], p[1], p[2], p[3]);
         o = strlen(ptr);
         len -= o;
         ptr += o;
@@ -209,8 +208,8 @@ UNITTEST_START
         int j;
         for(j = 0; j < 16; j += 2) {
           size_t l;
-          snprintf(ptr, len, "%s%02x%02x", j?":":"", a->ip.v6.byte[j],
-                   a->ip.v6.byte[j + 1]);
+          snprintf(ptr, len, "%s%02x%02x", j?":":"", a->ip.v6[j],
+                   a->ip.v6[j + 1]);
           l = strlen(ptr);
           len -= l;
           ptr += l;
@@ -265,14 +264,15 @@ UNITTEST_START
       int rc;
       struct dohentry d;
       struct dohaddr *a;
+      char *p;
       memset(&d, 0, sizeof(d));
       rc = doh_decode((unsigned char *)full49, sizeof(full49)-1,
                       DNS_TYPE_A, &d);
       fail_if(d.numaddr != 1, "missing address");
       a = &d.addr[0];
-      snprintf((char *)buffer, sizeof(buffer), "%d.%d.%d.%d",
-               a->ip.v4 & 0xff, (a->ip.v4>>8) & 0xff,
-               (a->ip.v4>>16) & 0xff, a->ip.v4 >>24);
+      p = (char *)&a->ip.v4;
+      snprintf((char *)buffer, sizeof(buffer),
+               "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
       if(rc || strcmp((char *)buffer, "127.0.0.1")) {
         fprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
         return 7;
