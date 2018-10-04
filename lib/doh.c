@@ -358,7 +358,7 @@ static DOHcode store_a(unsigned char *doh, int index, struct dohentry *d)
   if(d->numaddr < DOH_MAX_ADDR) {
     struct dohaddr *a = &d->addr[d->numaddr];
     a->type = DNS_TYPE_A;
-    a->ip.v4 = ntohl(get32bit(doh, index));
+    a->ip.v4 = get32bit(doh, index);
     d->numaddr++;
   }
   return DOH_OK;
@@ -645,8 +645,8 @@ static void showdoh(struct Curl_easy *data,
     struct dohaddr *a = &d->addr[i];
     if(a->type == DNS_TYPE_A) {
       infof(data, "DOH A: %d.%d.%d.%d\n",
-            a->ip.v4 & 0xff, (a->ip.v4>>8) & 0xff,
-            (a->ip.v4>>16) & 0xff, a->ip.v4 >>24);
+            a->ip.v4>>24, (a->ip.v4>>16) & 0xff,
+            (a->ip.v4>>8) & 0xff, a->ip.v4 & 0xff);
     }
     else if(a->type == DNS_TYPE_AAAA) {
       int j;
@@ -760,7 +760,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
     case AF_INET:
       addr = (void *)ai->ai_addr; /* storage area for this info */
 
-      memcpy(&addr->sin_addr, &de->addr[i].ip.v4, sizeof(struct in_addr));
+      addr->sin_addr.s_addr = htonl(de->addr[i].ip.v4);
       addr->sin_family = (CURL_SA_FAMILY_T)addrtype;
       addr->sin_port = htons((unsigned short)port);
       break;
