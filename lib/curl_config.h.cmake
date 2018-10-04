@@ -127,6 +127,9 @@
 /* Define to 1 if bool is an available type. */
 #cmakedefine HAVE_BOOL_T 1
 
+/* Define to 1 if you have the __builtin_available function. */
+#cmakedefine HAVE_BUILTIN_AVAILABLE 1
+
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
 #cmakedefine HAVE_CLOCK_GETTIME_MONOTONIC 1
 
