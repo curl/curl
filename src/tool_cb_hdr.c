@@ -157,24 +157,24 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       return failure;
   }
 
-  if(hdrcbdata->config->show_headers &&
-     (protocol & (CURLPROTO_HTTP|CURLPROTO_HTTPS|CURLPROTO_RTSP))) {
-    /* bold headers only happen for HTTP(S) and RTSP */
-    char *value = NULL;
-
-    if(!outs->stream && !tool_create_output_file(outs, FALSE))
-      return failure;
-
-    if(hdrcbdata->global->isatty && hdrcbdata->global->styled_output)
-      value = memchr(ptr, ':', cb);
-    if(value) {
-      size_t namelen = value - ptr;
-      fprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", namelen, ptr);
-      fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
+  if(hdrcbdata->config->show_headers) {
+    if(protocol &
+       (CURLPROTO_HTTP|CURLPROTO_HTTPS|CURLPROTO_RTSP|CURLPROTO_FILE)) {
+      /* bold headers only for selected protocols */
+      char *value = NULL;
+      if(!outs->stream && !tool_create_output_file(outs, FALSE))
+        return failure;
+      if(hdrcbdata->global->isatty && hdrcbdata->global->styled_output)
+        value = memchr(ptr, ':', cb);
+      if(value) {
+        size_t namelen = value - ptr;
+        fprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", namelen, ptr);
+        fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
+      }
+      else
+        /* not "handled", just show it */
+        fwrite(ptr, cb, 1, outs->stream);
     }
-    else
-      /* not "handled", just show it */
-      fwrite(ptr, cb, 1, outs->stream);
   }
   return cb;
 }

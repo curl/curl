@@ -57,8 +57,8 @@ tftp
  <name>
 HTTP GET followed by FTP RETR followed by FILE followed by TFTP RRQ then again in reverse order
  </name>
- <command>
-http://%HOSTIP:%HTTPPORT/20030001 ftp://%HOSTIP:%FTPPORT/20030002 file://localhost/%PWD/log/test2003.txt tftp://%HOSTIP:%TFTPPORT//20030003 tftp://%HOSTIP:%TFTPPORT//20030003 file://localhost/%PWD/log/test2003.txt ftp://%HOSTIP:%FTPPORT/20030002 http://%HOSTIP:%HTTPPORT/20030001 
+<command option="no-include">
+http://%HOSTIP:%HTTPPORT/20030001 ftp://%HOSTIP:%FTPPORT/20030002 file://localhost/%PWD/log/test2003.txt tftp://%HOSTIP:%TFTPPORT//20030003 tftp://%HOSTIP:%TFTPPORT//20030003 file://localhost/%PWD/log/test2003.txt ftp://%HOSTIP:%FTPPORT/20030002 http://%HOSTIP:%HTTPPORT/20030001
 </command>
 <file name="log/test2003.txt">
 foo
@@ -109,17 +109,6 @@ Accept: */*
 QUIT
 </protocol>
 <stdout>
-HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: "21025-dc7-39462498"
-Accept-Ranges: bytes
-Content-Length: 6
-Connection: close
-Content-Type: text/html
-Funny-head: yesyes
-
 -foo-
 data
     to
@@ -151,17 +140,6 @@ data
 that FTP
 works
   so does it?
-HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: "21025-dc7-39462498"
-Accept-Ranges: bytes
-Content-Length: 6
-Connection: close
-Content-Type: text/html
-Funny-head: yesyes
-
 -foo-
 </stdout>
 </verify>
