@@ -2685,7 +2685,7 @@ sub checksystem {
             if($curl =~ /linux|bsd|solaris|darwin/) {
                 $has_ldpreload = 1;
             }
-            if($curl =~ /win32|mingw(32|64)/) {
+            if($curl =~ /win32|Windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
                 # Win32-style path.
                 $pwd = pathhelp::sys_native_current_path();
