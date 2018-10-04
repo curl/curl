@@ -549,3 +549,19 @@ main() {
   return 0;
 }
 #endif
+#ifdef HAVE_CLOCK_GETTIME_MONOTONIC
+#include <time.h>
+int
+main() {
+  struct timespec ts = {0, 0}; 
+  clock_gettime(CLOCK_MONOTONIC, &ts); 
+  return 0;
+}
+#endif
+#ifdef HAVE_BUILTIN_AVAILABLE
+int
+main() {
+  if(__builtin_available(macOS 10.12, *)) {}
+  return 0;
+}
+#endif
