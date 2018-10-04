@@ -51,7 +51,7 @@ build_script:
 
 test_script:
     - if %TESTING%==ON (
-        C:\msys64\usr\bin\bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p -v !flaky !1139" )
+        C:\msys64\usr\bin\bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p -v !flaky !500 !1139" )
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
