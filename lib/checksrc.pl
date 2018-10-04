@@ -239,7 +239,16 @@ sub checksrc {
                 $scope=999999;
             }
 
-            if($ignore_set{$warn}) {
+            # Comparing for a literal zero rather than the scalar value zero
+            # covers the case where $scope contains the ending '*' from the
+            # comment. If we use a scalar comparison (==) we induce warnings
+            # on non-scalar contents.
+            if($scope eq "0") {
+                checkwarn("BADCOMMAND",
+                          $line, 0, $file, $l,
+                          "Disable zero not supported, did you mean to enable?");
+            }
+            elsif($ignore_set{$warn}) {
                 checkwarn("BADCOMMAND",
                           $line, 0, $file, $l,
                           "$warn already disabled from line $ignore_set{$warn}");
