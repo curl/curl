@@ -155,6 +155,7 @@ UNITTEST_START
   size_t size;
   unsigned char buffer[256];
   size_t i;
+  unsigned char *p;
   for(i = 0; i < sizeof(req) / sizeof(req[0]); i++) {
     int rc = doh_encode(req[i].name, req[i].type,
                         buffer, sizeof(buffer), &size);
@@ -198,7 +199,7 @@ UNITTEST_START
       struct dohaddr *a;
       a = &d.addr[u];
       if(resp[i].type == DNS_TYPE_A) {
-        char *p = (char *)&a->ip.v4;
+        p = &a->ip.v4[0];
         snprintf(ptr, len, "%u.%u.%u.%u ", p[0], p[1], p[2], p[3]);
         o = strlen(ptr);
         len -= o;
@@ -264,13 +265,12 @@ UNITTEST_START
       int rc;
       struct dohentry d;
       struct dohaddr *a;
-      char *p;
       memset(&d, 0, sizeof(d));
       rc = doh_decode((unsigned char *)full49, sizeof(full49)-1,
                       DNS_TYPE_A, &d);
       fail_if(d.numaddr != 1, "missing address");
       a = &d.addr[0];
-      p = (char *)&a->ip.v4;
+      p = &a->ip.v4[0];
       snprintf((char *)buffer, sizeof(buffer),
                "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
       if(rc || strcmp((char *)buffer, "127.0.0.1")) {
