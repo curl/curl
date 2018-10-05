@@ -53,6 +53,10 @@ test_script:
     - if %TESTING%==ON (
         C:\msys64\usr\bin\bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p !flaky !500 !1139" )
 
+artifacts:
+    - path: 'src\curl.exe'
+    - path: 'lib\libcurl.dll'
+
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
     only:
