@@ -6,42 +6,57 @@ environment:
         PRJ_CFG: Release
         OPENSSL: OFF
         WINSSL: ON
+        HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
         WINSSL: ON
+        HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
         OPENSSL: ON
         WINSSL: OFF
+        HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 10 2010 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
         WINSSL: OFF
+        HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
         WINSSL: OFF
+        HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
         WINSSL: OFF
+        HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
         WINSSL: OFF
+        HTTP_ONLY: OFF
+        TESTING: ON
+        SHARED: OFF
+      - PRJ_GEN: "Visual Studio 14 2015 Win64"
+        BDIR: msvc2015
+        PRJ_CFG: Release
+        OPENSSL: OFF
+        WINSSL: OFF
+        HTTP_ONLY: ON
         TESTING: ON
         SHARED: OFF
 
@@ -50,6 +65,7 @@ build_script:
       -G"%PRJ_GEN%"
       -DCMAKE_USE_OPENSSL=%OPENSSL%
       -DCMAKE_USE_WINSSL=%WINSSL%
+      -DHTTP_ONLY=%HTTP_ONLY%
       -DBUILD_SHARED_LIBS=%SHARED%
       -DBUILD_TESTING=%TESTING%
       -DCURL_WERROR=ON
