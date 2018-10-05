@@ -2,6 +2,11 @@ version: 7.50.0.{build}
 
 environment:
     matrix:
+      - PRJ_GEN: "Visual Studio 9 2008"
+        PRJ_CFG: Release
+        OPENSSL: ON
+        TESTING: OFF
+        SHARED: ON
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
         PRJ_CFG: Release
         OPENSSL: ON
@@ -17,6 +22,11 @@ environment:
         OPENSSL: ON
         TESTING: OFF
         SHARED: ON
+      - PRJ_GEN: "Visual Studio 10 2010 Win64"
+        PRJ_CFG: Release
+        OPENSSL: OFF
+        TESTING: ON
+        SHARED: OFF
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
@@ -28,11 +38,6 @@ environment:
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
-        PRJ_CFG: Release
-        OPENSSL: OFF
-        TESTING: ON
-        SHARED: OFF
-      - PRJ_GEN: "Visual Studio 14 2015"
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
