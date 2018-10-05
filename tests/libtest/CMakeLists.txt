@@ -1,5 +1,9 @@
 set(TARGET_LABEL_PREFIX "Test ")
 
+if(MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4127")
+endif()
+
 function(setup_test TEST_NAME)          # ARGN are the files in the test
   add_executable( ${TEST_NAME} ${ARGN} )
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
