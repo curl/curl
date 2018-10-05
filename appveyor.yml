@@ -4,42 +4,44 @@ environment:
     matrix:
       - PRJ_GEN: "Visual Studio 9 2008"
         PRJ_CFG: Release
-        OPENSSL: ON
+        OPENSSL: OFF
+        WINSSL: ON
         TESTING: OFF
         SHARED: ON
-      - PRJ_GEN: "Visual Studio 11 2012 Win64"
+      - PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
-        OPENSSL: ON
-        TESTING: OFF
-        SHARED: ON
-      - PRJ_GEN: "Visual Studio 12 2013 Win64"
-        PRJ_CFG: Release
-        OPENSSL: ON
+        OPENSSL: OFF
+        WINSSL: ON
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
         OPENSSL: ON
+        WINSSL: OFF
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 10 2010 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
+        WINSSL: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
+        WINSSL: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
+        WINSSL: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
+        WINSSL: OFF
         TESTING: ON
         SHARED: OFF
 
@@ -47,6 +49,7 @@ build_script:
     - cmake .
       -G"%PRJ_GEN%"
       -DCMAKE_USE_OPENSSL=%OPENSSL%
+      -DCMAKE_USE_WINSSL=%WINSSL%
       -DBUILD_SHARED_LIBS=%SHARED%
       -DBUILD_TESTING=%TESTING%
       -DCURL_WERROR=ON
