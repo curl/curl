@@ -78,6 +78,22 @@ This release includes the following bugfixes:
  o urlglob: improve error message on bad globs [22]
  o vtls: fix ssl version "or later" behavior change for many backends [38]
  o x509asn1: return CURLE_PEER_FAILED_VERIFICATION on failure to parse cert [6]
+ o timeval: fix use of weak symbol clock_gettime() on Apple platforms [61]
+ o checksrc: handle zero scoped ignore commands [62]
+ o checksrc: enable strict mode and warnings [63]
+ o cmake: suppress MSVC warning C4127 for libtest
+ o cmake: test and set missed defines during configuration [64]
+ o appveyor: run test suite (on Windows!) [65]
+ o test320: strip out more HTML when comparing [66]
+ o runtests: use Windows paths for Windows curl
+ o tests/negtelnetserver.py: fix Python2-ism in neg TELNET server [67]
+ o memory: ensure to check allocation results [68]
+ o comment: Fix multiple typos in function parameters [69]
+ o nss: fix nssckbi module loading on Windows [70]
+ o data-binary.d: clarify default content-type is x-www-form-urlencoded [71]
+ o test1299: use single quotes around asterisk [72]
+ o docs/CIPHERS: mention the colon separation for OpenSSL [73]
+ o runtests: ignore disabled even when ranges are given [74]
 
 This release includes the following known bugs:
 
@@ -86,15 +102,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad King, Christian Heimes, Daniel Gustafsson, Daniel Shahaf,
-  Daniel Stenberg, Dave Reisner, Doron Behar, Eason-Yu on github, Erik Minekus,
-  Even Rouault, Han Han, Harry Sintonen, Jean Fabrice, Jim Fuller, Kamil Dudka,
-  Loganaden Velvindron, Marcel Raad, Marc Hörsken, Max Dymond, Maxime Legros,
-  Michael Kaufmann, Nate Prewitt, Nicklas Avén, Nick Zitzmann,
-  Philipp Waehnert, Rainer Jung, Ray Satiro, Rich Turner, Rikard Falkeborn,
-  Ruslan Baratov, Sergei Nikulov, Thomas Glanzmann, Viktor Szakats,
-  Yiming Jing,
-  (34 contributors)
+  Brad King, Christian Heimes, Colin Hogben, Daniel Gustafsson, Daniel Shahaf,
+  Daniel Stenberg, Dave Reisner, Dmitry Kostjuchenko, Doron Behar,
+  Eason-Yu on github, Erik Minekus, Even Rouault, Han Han, Harry Sintonen,
+  Jean Fabrice, Jim Fuller, Kamil Dudka, Loganaden Velvindron, Marcel Raad,
+  Marc Hörsken, Max Dymond, Maxime Legros, Michael Kaufmann, Nate Prewitt,
+  Nicklas Avén, Nick Zitzmann, Philipp Waehnert, Rainer Jung, Ray Satiro,
+  Rich Turner, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov,
+  Thomas Glanzmann, Viktor Szakats, Yiming Jing,
+  (36 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -160,3 +176,17 @@ References to bug reports and discussions on issues:
  [58] = https://curl.haxx.se/bug/?i=3062
  [59] = https://curl.haxx.se/bug/?i=3063
  [60] = https://curl.haxx.se/bug/?i=2849
+ [61] = https://curl.haxx.se/bug/?i=3048
+ [62] = https://curl.haxx.se/bug/?i=3096
+ [63] = https://curl.haxx.se/bug/?i=3090
+ [64] = https://curl.haxx.se/bug/?i=3097
+ [65] = https://curl.haxx.se/bug/?i=3100
+ [66] = https://curl.haxx.se/bug/?i=3093
+ [67] = https://curl.haxx.se/bug/?i=2929
+ [68] = https://curl.haxx.se/bug/?i=3084
+ [69] = https://curl.haxx.se/bug/?i=3079
+ [70] = https://curl.haxx.se/bug/?i=3086
+ [71] = https://curl.haxx.se/bug/?i=3085
+ [72] = https://github.com/curl/curl/issues/1751#issuecomment-321522580
+ [73] = https://curl.haxx.se/bug/?i=3077
+ [74] = https://curl.haxx.se/bug/?i=3075
