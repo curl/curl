@@ -358,7 +358,7 @@ static DOHcode store_a(unsigned char *doh, int index, struct dohentry *d)
   if(d->numaddr < DOH_MAX_ADDR) {
     struct dohaddr *a = &d->addr[d->numaddr];
     a->type = DNS_TYPE_A;
-    a->ip.v4 = ntohl(get32bit(doh, index));
+    memcpy(&a->ip.v4, &doh[index], 4);
     d->numaddr++;
   }
   return DOH_OK;
@@ -369,9 +369,8 @@ static DOHcode store_aaaa(unsigned char *doh, int index, struct dohentry *d)
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
     struct dohaddr *a = &d->addr[d->numaddr];
-    struct addr6 *inet6p = &a->ip.v6;
     a->type = DNS_TYPE_AAAA;
-    memcpy(inet6p, &doh[index], 16);
+    memcpy(&a->ip.v6, &doh[index], 16);
     d->numaddr++;
   }
   return DOH_OK;
@@ -649,9 +648,9 @@ static void showdoh(struct Curl_easy *data,
   for(i = 0; i < d->numaddr; i++) {
     struct dohaddr *a = &d->addr[i];
     if(a->type == DNS_TYPE_A) {
-      infof(data, "DOH A: %d.%d.%d.%d\n",
-            a->ip.v4 & 0xff, (a->ip.v4>>8) & 0xff,
-            (a->ip.v4>>16) & 0xff, a->ip.v4 >>24);
+      infof(data, "DOH A: %u.%u.%u.%u\n",
+            a->ip.v4[0], a->ip.v4[1],
+            a->ip.v4[2], a->ip.v4[3]);
     }
     else if(a->type == DNS_TYPE_AAAA) {
       int j;
@@ -663,8 +662,8 @@ static void showdoh(struct Curl_easy *data,
       len = 118;
       for(j = 0; j < 16; j += 2) {
         size_t l;
-        snprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6.byte[j],
-                 d->addr[i].ip.v6.byte[j + 1]);
+        snprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6[j],
+                 d->addr[i].ip.v6[j + 1]);
         l = strlen(ptr);
         len -= l;
         ptr += l;
@@ -764,7 +763,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
     switch(ai->ai_family) {
     case AF_INET:
       addr = (void *)ai->ai_addr; /* storage area for this info */
-
+      DEBUGASSERT(sizeof(struct in_addr) == sizeof(de->addr[i].ip.v4));
       memcpy(&addr->sin_addr, &de->addr[i].ip.v4, sizeof(struct in_addr));
       addr->sin_family = (CURL_SA_FAMILY_T)addrtype;
       addr->sin_port = htons((unsigned short)port);
@@ -773,7 +772,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
 #ifdef ENABLE_IPV6
     case AF_INET6:
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
-
+      DEBUGASSERT(sizeof(struct in6_addr) == sizeof(de->addr[i].ip.v6));
       memcpy(&addr6->sin6_addr, &de->addr[i].ip.v6, sizeof(struct in6_addr));
       addr6->sin6_family = (CURL_SA_FAMILY_T)addrtype;
       addr6->sin6_port = htons((unsigned short)port);

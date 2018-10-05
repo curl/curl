@@ -67,10 +67,6 @@ typedef enum {
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
 
-struct addr6 {
-  unsigned char byte[16];
-};
-
 struct cnamestore {
   size_t len;       /* length of cname */
   char *alloc;      /* allocated pointer */
@@ -80,8 +76,8 @@ struct cnamestore {
 struct dohaddr {
   int type;
   union {
-    unsigned int v4;
-    struct addr6 v6;
+    unsigned char v4[4]; /* network byte order */
+    unsigned char v6[16];
   } ip;
 };
 
