@@ -1026,6 +1026,12 @@ if(HAVE_INET_NTOA_R_DECL_REENTRANT)
   set(NEED_REENTRANT 1)
 endif()
 
+# Check clock_gettime(CLOCK_MONOTONIC, x) support
+curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+
+# Check compiler support of __builtin_available()
+curl_internal_test(HAVE_BUILTIN_AVAILABLE)
+
 # Some other minor tests
 
 if(NOT HAVE_IN_ADDR_T)
