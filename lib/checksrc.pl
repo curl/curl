@@ -21,18 +21,28 @@
 #
 ###########################################################################
 
+use strict;
+use warnings;
+
 my $max_column = 79;
 my $indent = 2;
 
-my $warnings;
-my $errors;
+my $warnings = 0;
+my $swarnings = 0;
+my $errors = 0;
+my $serrors = 0;
 my $suppressed; # whitelisted problems
 my $file;
 my $dir=".";
-my $wlist;
+my $wlist="";
 my $windows_os = $^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin';
 my $verbose;
 my %whitelist;
+
+my %ignore;
+my %ignore_set;
+my %ignore_used;
+my @ignore_line;
 
 my %warnings = (
     'LONGLINE'         => "Line longer than $max_column",
@@ -67,7 +77,7 @@ my %warnings = (
     );
 
 sub readwhitelist {
-    open(W, "<$dir/checksrc.whitelist");
+    open(W, "<$dir/checksrc.whitelist") or return;
     my @all=<W>;
     for(@all) {
         $windows_os ? $_ =~ s/\r?\n$// : chomp;
@@ -97,7 +107,7 @@ sub checkwarn {
         $nowarn = 1;
         if(!$ignore{$name}) {
             # reached zero, enable again
-            enable_warn($name, $line, $file, $l);
+            enable_warn($name, $num, $file, $line);
         }
     }
 
@@ -271,7 +281,7 @@ sub scanfile {
     my ($file) = @_;
 
     my $line = 1;
-    my $prevl;
+    my $prevl="";
     my $l;
     open(R, "<$file") || die "failed to open $file";
 
@@ -359,10 +369,10 @@ sub scanfile {
             if($1 =~ / *\#/) {
                 # this is a #if, treat it differently
             }
-            elsif($3 eq "return") {
+            elsif(defined $3 && $3 eq "return") {
                 # return must have a space
             }
-            elsif($3 eq "case") {
+            elsif(defined $3 && $3 eq "case") {
                 # case must have a space
             }
             elsif($4 eq "*") {
