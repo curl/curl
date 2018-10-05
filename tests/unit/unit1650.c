@@ -199,8 +199,8 @@ UNITTEST_START
       a = &d.addr[u];
       if(resp[i].type == DNS_TYPE_A) {
         snprintf(ptr, len, "%d.%d.%d.%d ",
-                 a->ip.v4 & 0xff, (a->ip.v4>>8) & 0xff,
-                 (a->ip.v4>>16) & 0xff, a->ip.v4 >>24);
+                 a->ip.v4>>24, (a->ip.v4>>16) & 0xff,
+                 (a->ip.v4>>8) & 0xff, a->ip.v4 & 0xff);
         o = strlen(ptr);
         len -= o;
         ptr += o;
@@ -271,8 +271,8 @@ UNITTEST_START
       fail_if(d.numaddr != 1, "missing address");
       a = &d.addr[0];
       snprintf((char *)buffer, sizeof(buffer), "%d.%d.%d.%d",
-               a->ip.v4 & 0xff, (a->ip.v4>>8) & 0xff,
-               (a->ip.v4>>16) & 0xff, a->ip.v4 >>24);
+               a->ip.v4>>24, (a->ip.v4>>16) & 0xff,
+               (a->ip.v4>>8) & 0xff, a->ip.v4 & 0xff);
       if(rc || strcmp((char *)buffer, "127.0.0.1")) {
         fprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
         return 7;
