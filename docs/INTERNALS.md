@@ -301,7 +301,9 @@ HTTP(S)
 
  An interesting detail with the HTTP(S) request, is the `Curl_add_buffer()`
  series of functions we use. They append data to one single buffer, and when
- the building is finished the entire request is sent off in one single write. This is done this way to overcome problems with flawed firewalls and lame servers.
+ the building is finished the entire request is sent off in one single write.
+ This is done this way to overcome problems with flawed firewalls and lame
+ servers.
 
 <a name="ftp"></a>
 FTP
@@ -959,7 +961,8 @@ for older and later versions as things don't change drastically that often.
   to work with.
 
   `->scheme` is the URL scheme name, usually spelled out in uppercase. That's
-  "HTTP" or "FTP" etc. SSL versions of the protocol need their own `Curl_handler` setup so HTTPS separate from HTTP.
+  "HTTP" or "FTP" etc. SSL versions of the protocol need their own
+  `Curl_handler` setup so HTTPS separate from HTTP.
 
   `->setup_connection` is called to allow the protocol code to allocate
   protocol specific data that then gets associated with that `Curl_easy` for
