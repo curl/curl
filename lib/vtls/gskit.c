@@ -1314,8 +1314,7 @@ static int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
 
 static size_t Curl_gskit_version(char *buffer, size_t size)
 {
-  strncpy(buffer, "GSKit", size);
-  return strlen(buffer);
+  return snprintf(buffer, size, "GSKit");
 }
 
 
