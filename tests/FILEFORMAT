@@ -445,11 +445,30 @@ Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 Variables are substituted as in the <command> section.
 </file>
+<file1>
+1 to 4 can be appended to 'file' to compare more files.
+</file1>
+<file2>
+</file2>
+<file3>
+</file3>
+<file4>
+</file4>
 <stripfile>
 One perl op per line that operates on the output file or stdout before being
 compared with what is stored in the test file. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </stripfile>
+<stripfile1>
+1 to 4 can be appended to 'stripfile' to strip the correspending <fileN>
+content
+</stripfile1>
+<stripfile2>
+</stripfile2>
+<stripfile3>
+</stripfile3>
+<stripfile4>
+</stripfile4>
 <upload>
 the contents of the upload data curl should have sent
 </upload>
