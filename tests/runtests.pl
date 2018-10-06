@@ -2682,7 +2682,7 @@ sub checksystem {
             $curl =~ s/^(.*)(libcurl.*)/$1/g;
 
             $libcurl = $2;
-            if($curl =~ /linux|bsd|solaris|darwin/) {
+            if($curl =~ /linux|bsd|solaris/) {
                 $has_ldpreload = 1;
             }
             if($curl =~ /win32|Windows|mingw(32|64)/) {
