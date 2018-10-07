@@ -33,7 +33,8 @@ struct curltime Curl_now(void)
   */
   struct curltime now;
 #if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
-    (_WIN32_WINNT < _WIN32_WINNT_VISTA)
+    (_WIN32_WINNT < _WIN32_WINNT_VISTA) || \
+    (defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR))
   DWORD milliseconds = GetTickCount();
   now.tv_sec = milliseconds / 1000;
   now.tv_usec = (milliseconds % 1000) * 1000;

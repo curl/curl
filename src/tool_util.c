@@ -40,7 +40,8 @@ struct timeval tvnow(void)
   ** is typically in the range of 10 milliseconds to 16 milliseconds.
   */
   struct timeval now;
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600) && \
+    (!defined(__MINGW32__) || defined(__MINGW64_VERSION_MAJOR))
   ULONGLONG milliseconds = GetTickCount64();
 #else
   DWORD milliseconds = GetTickCount();
