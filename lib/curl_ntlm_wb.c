@@ -324,6 +324,8 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
 
   conn->response_header = aprintf("NTLM %.*s", len_out - 4, buf + 3);
   free(buf);
+  if(!conn->response_header)
+    return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 done:
   free(buf);
@@ -399,6 +401,8 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
                             conn->response_header);
     DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
     free(conn->response_header);
+    if(!*allocuserpwd)
+      return CURLE_OUT_OF_MEMORY;
     conn->response_header = NULL;
     break;
   case NTLMSTATE_TYPE2:
@@ -419,6 +423,8 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
     Curl_ntlm_wb_cleanup(conn);
+    if(!*allocuserpwd)
+      return CURLE_OUT_OF_MEMORY;
     break;
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
