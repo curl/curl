@@ -171,6 +171,7 @@
  20.4 more platforms supported
  20.5 Add support for concurrent connections
  20.6 Use the RFC6265 test suite
+ 20.7 Support LD_PRELOAD on macOS
 
  21. Next SONAME bump
  21.1 http-style HEAD output for FTP
@@ -1173,6 +1174,11 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  curl with that test suite and detect deviances. Ideally, that would even be
  incorporated into our regular test suite.
 
+20.7 Support LD_PRELOAD on macOS
+
+ LD_RELOAD doesn't work on macOS, but there are tests which require it to run
+ properly. Look into making the preload support in runtests.pl portable such
+ that it uses DYLD_INSERT_LIBRARIES on macOS.
 
 21. Next SONAME bump
 
