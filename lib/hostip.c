@@ -455,7 +455,7 @@ Curl_cache_addr(struct Curl_easy *data,
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses) {
     CURLcode result = Curl_shuffle_addr(data, &addr);
-    if(!result)
+    if(result)
       return NULL;
   }
 
