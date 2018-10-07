@@ -3,43 +3,36 @@ version: 7.50.0.{build}
 environment:
     matrix:
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
-        BDIR: msvc2012
         PRJ_CFG: Release
         OPENSSL: ON
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
-        BDIR: msvc2013
         PRJ_CFG: Release
         OPENSSL: ON
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
-        BDIR: msvc2015
         PRJ_CFG: Release
         OPENSSL: ON
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 11 2012 Win64"
-        BDIR: msvc2012
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
-        BDIR: msvc2013
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
-        BDIR: msvc2015
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015"
-        BDIR: msvc2015
         PRJ_CFG: Release
         OPENSSL: OFF
         TESTING: ON
