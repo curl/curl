@@ -2,51 +2,77 @@ version: 7.50.0.{build}
 
 environment:
     matrix:
-      - PRJ_GEN: "Visual Studio 11 2012 Win64"
-        BDIR: msvc2012
+      - PRJ_GEN: "Visual Studio 9 2008"
         PRJ_CFG: Release
-        OPENSSL: ON
-        TESTING: OFF
-        SHARED: ON
-      - PRJ_GEN: "Visual Studio 12 2013 Win64"
-        BDIR: msvc2013
-        PRJ_CFG: Release
-        OPENSSL: ON
+        OPENSSL: OFF
+        WINSSL: ON
+        HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
-        BDIR: msvc2015
-        PRJ_CFG: Release
-        OPENSSL: ON
-        TESTING: OFF
-        SHARED: ON
-      - PRJ_GEN: "Visual Studio 11 2012 Win64"
-        BDIR: msvc2012
         PRJ_CFG: Release
         OPENSSL: OFF
+        WINSSL: ON
+        HTTP_ONLY: OFF
+        TESTING: OFF
+        SHARED: ON
+      - PRJ_GEN: "Visual Studio 14 2015 Win64"
+        PRJ_CFG: Release
+        OPENSSL: ON
+        WINSSL: OFF
+        HTTP_ONLY: OFF
+        TESTING: OFF
+        SHARED: ON
+      - PRJ_GEN: "Visual Studio 10 2010 Win64"
+        PRJ_CFG: Debug
+        OPENSSL: OFF
+        WINSSL: OFF
+        HTTP_ONLY: OFF
+        TESTING: ON
+        SHARED: OFF
+      - PRJ_GEN: "Visual Studio 11 2012 Win64"
+        PRJ_CFG: Debug
+        OPENSSL: OFF
+        WINSSL: OFF
+        HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 12 2013 Win64"
-        BDIR: msvc2013
-        PRJ_CFG: Release
+        PRJ_CFG: Debug
         OPENSSL: OFF
+        WINSSL: OFF
+        HTTP_ONLY: OFF
+        TESTING: ON
+        SHARED: OFF
+      - PRJ_GEN: "Visual Studio 14 2015 Win64"
+        PRJ_CFG: Debug
+        OPENSSL: OFF
+        WINSSL: OFF
+        HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         BDIR: msvc2015
-        PRJ_CFG: Release
+        PRJ_CFG: Debug
         OPENSSL: OFF
-        TESTING: ON
-        SHARED: OFF
-      - PRJ_GEN: "Visual Studio 14 2015"
-        BDIR: msvc2015
-        PRJ_CFG: Release
-        OPENSSL: OFF
+        WINSSL: OFF
+        HTTP_ONLY: ON
         TESTING: ON
         SHARED: OFF
 
 build_script:
-    - cmake . -G"%PRJ_GEN%" -DCMAKE_USE_OPENSSL=%OPENSSL% -DBUILD_SHARED_LIBS=%SHARED% -DBUILD_TESTING=%TESTING% -DCURL_WERROR=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE="" -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG="" -DCMAKE_INSTALL_PREFIX="C:/CURL"
+    - cmake .
+      -G"%PRJ_GEN%"
+      -DCMAKE_USE_OPENSSL=%OPENSSL%
+      -DCMAKE_USE_WINSSL=%WINSSL%
+      -DHTTP_ONLY=%HTTP_ONLY%
+      -DBUILD_SHARED_LIBS=%SHARED%
+      -DBUILD_TESTING=%TESTING%
+      -DCURL_WERROR=ON
+      -DENABLE_DEBUG=ON
+      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
+      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
+      -DCMAKE_INSTALL_PREFIX="C:/CURL"
     - cmake --build . --config %PRJ_CFG% --clean-first
 
 test_script:
