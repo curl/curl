@@ -23,7 +23,7 @@ file
  <name>
 basic file:// file with no authority
  </name>
- <command>
+<command option="no-include">
 file:%PWD/log/test2070.txt
 </command>
 <file name="log/test2070.txt">

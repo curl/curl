@@ -16,7 +16,7 @@ file
  <name>
 "upload" with file://
  </name>
- <command>
+<command option="no-include">
 file://localhost/%PWD/log/nonexisting/result205.txt -T log/upload205.txt
 </command>
 <file name="log/upload205.txt">

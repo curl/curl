@@ -4,6 +4,7 @@
 Metalink
 HTTP
 HTTP GET
+FILE
 </keywords>
 </info>
 
@@ -77,7 +78,14 @@ Accept: */*
 <file1 name="log/download2008">
 Some stuff delivered from an HTTP resource
 </file1>
+<stripfile2>
+s/Last-Modified:.*//
+</stripfile2>
 <file2 name="log/heads2008">
+Content-Length: 496
+Accept-ranges: bytes
+
+
 HTTP/1.1 200 OK
 Date: Thu, 21 Jun 2012 15:23:48 GMT
 Server: test-server/fake

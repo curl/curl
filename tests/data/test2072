@@ -23,7 +23,7 @@ file
 <name>
 file:// with unix path resolution behavior for the case of extra slashes
 </name>
-<command>
+<command option="no-include">
 file:////%PWD/log/test2072.txt
 </command>
 <precheck>
