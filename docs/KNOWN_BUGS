@@ -55,7 +55,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.4 Negotiate and Kerberos V5 need a fake user name
- 6.5 NTLM doen't support password with § character
+ 6.5 NTLM doesn't support password with § character
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -70,7 +70,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.10 Stick to same family over SOCKS proxy
 
  8. TELNET
- 8.1 TELNET and time limtiations don't work
+ 8.1 TELNET and time limitations don't work
  8.2 Microsoft telnet server
 
  9. SFTP and SCP
@@ -443,7 +443,7 @@ problems may have been fixed or changed somewhat since this was written!
  new conn->bits.want_authentication which is set when any of the authentication
  options are set.
 
-6.5 NTLM doen't support password with § character
+6.5 NTLM doesn't support password with § character
 
  https://github.com/curl/curl/issues/2120
 
@@ -528,7 +528,7 @@ problems may have been fixed or changed somewhat since this was written!
 7.9 Passive transfer tries only one IP address
 
  When doing FTP operations through a proxy at localhost, the reported spotted
- that curl only tried to connect once to the proxy, while it had mulitiple
+ that curl only tried to connect once to the proxy, while it had multiple
  addresses and a failed connect on one address should make it try the next.
 
  After switching to passive mode (EPSV), curl should try all IP addresses for
@@ -548,7 +548,7 @@ problems may have been fixed or changed somewhat since this was written!
 
 8. TELNET
 
-8.1 TELNET and time limtiations don't work
+8.1 TELNET and time limitations don't work
 
  When using telnet, the time limitation options don't work.
  https://curl.haxx.se/bug/view.cgi?id=846
@@ -644,7 +644,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  When connecting to "localhost" on Windows, curl will resolve the name for
  both ipv4 and ipv6 and try to connect to both happy eyeballs-style. Something
- in there does however make it take 200 millseconds to succeed - which is the
+ in there does however make it take 200 milliseconds to succeed - which is the
  HAPPY_EYEBALLS_TIMEOUT define exactly. Lowering that define speeds up the
  connection, suggesting a problem in the HE handling.
 
