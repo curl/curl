@@ -874,7 +874,7 @@ FAQ
 
     4.5.3 "403 Forbidden"
 
-    The server understood the request, but is refusing to fulfil it.
+    The server understood the request, but is refusing to fulfill it.
     Authorization will not help and the request SHOULD NOT be repeated.
 
     4.5.4 "404 Not Found"

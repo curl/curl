@@ -168,7 +168,7 @@ ways. Every pull request is verfied that:
  - ... code coverage doesn't shrink drastically
 
 If the pull-request fails one of these tests, it will show up as a red X and
-you are expected to fix the problem. If you don't understand whan the issue is
+you are expected to fix the problem. If you don't understand when the issue is
 or have other problems to fix the complaint, just ask and other project
 members will likely be able to help out.
 

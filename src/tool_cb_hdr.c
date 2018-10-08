@@ -42,7 +42,7 @@ static char *parse_filename(const char *ptr, size_t len);
 #define BOLDOFF
 #else
 #define BOLD "\x1b[1m"
-/* Switch off bold by settting "all attributes off" since the explicit
+/* Switch off bold by setting "all attributes off" since the explicit
    bold-off code (21) isn't supported everywhere - like in the mac
    Terminal. */
 #define BOLDOFF "\x1b[0m"
