@@ -41,7 +41,7 @@
  *  typedef struct X509_name_st X509_NAME;
  *  etc.
  *
- * this wil cause all kinds of C-preprocessing paste errors in
+ * this will cause all kinds of C-preprocessing paste errors in
  * BoringSSL's <openssl/x509.h>: So just undefine those defines here
  * (and only here).
  */

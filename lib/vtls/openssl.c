@@ -2527,7 +2527,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 #ifdef CURL_CA_FALLBACK
   else if(verifypeer) {
-    /* verfying the peer without any CA certificates won't
+    /* verifying the peer without any CA certificates won't
        work so use openssl's built in default as fallback */
     SSL_CTX_set_default_verify_paths(BACKEND->ctx);
   }
