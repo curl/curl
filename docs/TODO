@@ -36,7 +36,6 @@
  1.18 try next proxy if one doesn't work
  1.19 Timeout idle connections from the pool
  1.20 SRV and URI DNS records
- 1.21 API for URL parsing/splitting
  1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
@@ -374,13 +373,6 @@
 
  Offer support for resolving SRV and URI DNS records for libcurl to know which
  server to connect to for various protocols (including HTTP!).
-
-1.21 API for URL parsing/splitting
-
- libcurl has always parsed URLs internally and never exposed any API or
- features to allow applications to do it. Still most or many applications
- using libcurl need that ability. In polls to users, we've learned that many
- libcurl users would like to see and use such an API.
 
 1.22 CURLINFO_PAUSE_STATE
 
