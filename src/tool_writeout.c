@@ -60,6 +60,8 @@ typedef enum {
   VAR_LOCAL_PORT,
   VAR_HTTP_VERSION,
   VAR_SCHEME,
+  VAR_STDOUT,
+  VAR_STDERR,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -101,6 +103,8 @@ static const struct variable replacements[]={
   {"local_port", VAR_LOCAL_PORT},
   {"http_version", VAR_HTTP_VERSION},
   {"scheme", VAR_SCHEME},
+  {"stdout", VAR_STDOUT},
+  {"stderr", VAR_STDERR},
   {NULL, VAR_NONE}
 };
 
@@ -320,6 +324,11 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                    curl_easy_getinfo(curl, CURLINFO_SCHEME,
                                      &stringp))
                   fprintf(stream, "%s", stringp);
+              case VAR_STDOUT:
+                stream = stdout;
+                break;
+              case VAR_STDERR:
+                stream = stderr;
                 break;
               default:
                 break;
