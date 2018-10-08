@@ -169,7 +169,7 @@ CURLcode Curl_http_setup_conn(struct connectdata *conn)
   data->req.protop = http;
 
   if(!CONN_INUSE(conn))
-    /* if not alredy multi-using, setup connection details */
+    /* if not already multi-using, setup connection details */
     Curl_http2_setup_conn(conn);
   Curl_http2_setup_req(data);
   return CURLE_OK;

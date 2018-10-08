@@ -3029,7 +3029,7 @@ static CURLcode override_login(struct Curl_easy *data,
     int ret;
 
     if(data->set.use_netrc == CURL_NETRC_OPTIONAL)
-      nuser = *userp; /* to separate otherwise indentical machines */
+      nuser = *userp; /* to separate otherwise identical machines */
 
     ret = Curl_parsenetrc(conn->host.name,
                           &nuser, &npasswd,
