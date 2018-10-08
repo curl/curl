@@ -150,7 +150,6 @@
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
- 18.11 -w output to stderr
  18.12 keep running, read instructions from pipe/socket
  18.13 support metalink in http headers
  18.14 --fail without --location should treat 3xx as a failure
@@ -1013,14 +1012,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  If you pull the scrollbar when transferring with curl in a Windows console
  window, the transfer is interrupted and can get disconnected. This can
  probably be improved. See https://github.com/curl/curl/issues/322
-
-18.11 -w output to stderr
-
- -w is quite useful, but not to those of us who use curl without -o or -O
- (such as for scripting through a higher level language). It would be nice to
- have an option that is exactly like -w but sends it to stderr
- instead. Proposed name: --write-stderr. See
- https://github.com/curl/curl/issues/613
 
 18.12 keep running, read instructions from pipe/socket
 
