@@ -71,7 +71,7 @@ Left to answer: should the *setopt() function start to return error when these
 options are set to be able to tell when they're trying to use options that are
 no longer around or should we maintain behavior as much as possible?
 
-## CURLOPT_DNS_USE_GLOBAL_CACHE
+## `CURLOPT_DNS_USE_GLOBAL_CACHE`
 
 This option makes libcurl use a global non-thread-safe cache for DNS if
 enabled. The option has been marked as "obsolete" in the header file and in
