@@ -52,7 +52,6 @@ environment:
         TESTING: ON
         SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
-        BDIR: msvc2015
         PRJ_CFG: Debug
         OPENSSL: OFF
         WINSSL: OFF
