@@ -1725,6 +1725,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             if(!drc || (drc == CURLE_SEND_ERROR)) {
               follow = FOLLOW_RETRY;
               drc = Curl_follow(data, newurl, follow);
+              newurl = NULL; /* freed by Curl_follow() */
               if(!drc) {
                 multistate(data, CURLM_STATE_CONNECT);
                 rc = CURLM_CALL_MULTI_PERFORM;
