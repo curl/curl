@@ -363,7 +363,7 @@ static int data_pending(const struct connectdata *conn)
   return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
 #if defined(USE_NGHTTP2)
     Curl_ssl_data_pending(conn, FIRSTSOCKET) ||
-    /* For HTTP/2, we may read up everything including responde body
+    /* For HTTP/2, we may read up everything including response body
        with header fields in Curl_http_readwrite_headers. If no
        content-length is provided, curl waits for the connection
        close, which we emulate it using conn->proto.httpc.closed =
