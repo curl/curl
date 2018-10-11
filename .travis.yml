@@ -320,8 +320,8 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "distcheck" ]; then
-            # find BOM markers
-            (grep `printf '\xef\xbb\xbf'` `git ls-files` && (echo "BOM marker found"; exit 22) )
+            # find BOM markers and exit if we do
+            ! git grep `printf '\xef\xbb\xbf'`
             ./configure
             make
             ./maketgz 99.98.97
