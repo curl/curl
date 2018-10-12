@@ -38,6 +38,10 @@
  Bounties need to be requested within twelve months from the publication of
  the vulnerability.
 
+ The vulnerabilities must not have been made public before August 1st, 2018.
+ We do not retroactively pay for old, already known and published security
+ problems.
+
 ## Product vulnerabilities only
 
  The bug bounty only concerns the curl and libcurl products and thus their
