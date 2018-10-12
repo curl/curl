@@ -1,4 +1,4 @@
-![curl logo](https://cdn.rawgit.com/curl/curl-www/master/logo/curl-logo.svg)
+![curl logo](https://curl.haxx.se/logo/curl-logo.svg)
 
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/63/badge)](https://bestpractices.coreinfrastructure.org/projects/63)
 [![Coverity passed](https://scan.coverity.com/projects/curl/badge.svg)](https://scan.coverity.com/projects/curl)

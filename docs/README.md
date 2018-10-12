@@ -1,4 +1,4 @@
-![curl logo](https://cdn.rawgit.com/curl/curl-www/master/logo/curl-logo.svg)
+![curl logo](https://curl.haxx.se/logo/curl-logo.svg)
 
 # Documentation
 
