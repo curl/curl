@@ -1196,7 +1196,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_LOW_SPEED_TIME:
     /*
-     * The low speed time that if transfers are below the set
+     * The low speed time that if transfers are below the setopt
      * CURLOPT_LOW_SPEED_LIMIT during this time, the transfer is aborted.
      */
     arg = va_arg(param, long);
@@ -2629,6 +2629,24 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.upkeep_interval_ms = arg;
+    break;
+  case CURLOPT_CURLU:
+    /*
+     * pass CURLU to set URL
+     */
+    if(data->change.url_alloc) {
+        /* the already set URL is allocated, free it first! */
+        Curl_safefree(data->change.url);
+        data->change.url_alloc = FALSE;
+      }
+    result = curl_url_get((CURLU *)va_arg(param, void *),
+                          CURLUPART_URL, &argptr, 0);
+    if(argptr) {
+      result = Curl_setstropt(&data->set.str[STRING_SET_URL],
+                            argptr);
+      data->change.url = data->set.str[STRING_SET_URL];
+      free(argptr);
+    }
     break;
   default:
     /* unknown tag and its companion, just ignore: */

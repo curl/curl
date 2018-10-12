@@ -1871,6 +1871,9 @@ typedef enum {
   /* Time in ms between connection upkeep calls for long-lived connections. */
   CINIT(UPKEEP_INTERVAL_MS, LONG, 281),
 
+  /* Specify URL using CURL URL API. */
+  CINIT(CURLU, OBJECTPOINT, 282),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
