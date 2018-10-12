@@ -1196,7 +1196,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_LOW_SPEED_TIME:
     /*
-     * The low speed time that if transfers are below the setopt
+     * The low speed time that if transfers are below the set
      * CURLOPT_LOW_SPEED_LIMIT during this time, the transfer is aborted.
      */
     arg = va_arg(param, long);
