@@ -691,6 +691,7 @@ Vista
 #define HAVE_LDAP_URL_PARSE 1
 #else
 #undef HAVE_LDAP_URL_PARSE
+#define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
 #endif
 
