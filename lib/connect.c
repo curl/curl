@@ -884,9 +884,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 {
 #if defined(TCP_NODELAY)
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
   struct Curl_easy *data = conn->data;
-#endif
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
 

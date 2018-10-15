@@ -912,9 +912,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *entry_id;
       size_t entry_len;
       char address[64];
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       char *addresses = NULL;
-#endif
+
       char *addr_begin;
       char *addr_end;
       char *port_ptr;
@@ -937,9 +936,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         goto err;
 
       port = (int)tmp_port;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
       addresses = end_ptr + 1;
-#endif
+
 
       while(*end_ptr) {
         size_t alen;
