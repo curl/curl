@@ -1131,8 +1131,8 @@ CURLcode Curl_verifyhost(struct connectdata *conn,
           break;
 
         case 7: /* IP address. */
-          matched = (size_t) (name.end - q) == addrlen &&
-                    !memcmp(&addr, q, addrlen);
+          matched = (size_t) (name.end - name.beg) == addrlen &&
+                    !memcmp(&addr, name.beg, addrlen);
           break;
         }
       }
