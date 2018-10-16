@@ -60,6 +60,10 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
+          env: T=normal C="--disable-verbose"
+        - os: linux
+          compiler: gcc
+          dist: trusty
           env: T=normal BROTLI=yes
         - os: linux
           compiler: gcc
