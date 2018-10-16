@@ -78,6 +78,10 @@
 #  include "config-vxworks.h"
 #endif
 
+#ifdef LUMIN
+#  include "config-lumin.h"
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 /* ================================================================ */
