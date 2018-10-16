@@ -41,6 +41,7 @@
 #define DNS_CLASS_IN 0x01
 #define DOH_MAX_RESPONSE_SIZE 3000 /* bytes */
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char * const errors[]={
   "",
   "Bad label",
@@ -63,6 +64,7 @@ static const char *doh_strerror(DOHcode code)
     return errors[code];
   return "bad error code";
 }
+#endif
 
 #ifdef DEBUGBUILD
 #define UNITTEST
@@ -640,6 +642,7 @@ UNITTEST DOHcode doh_decode(unsigned char *doh,
   return DOH_OK; /* ok */
 }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void showdoh(struct Curl_easy *data,
                     struct dohentry *d)
 {
@@ -675,6 +678,9 @@ static void showdoh(struct Curl_easy *data,
     infof(data, "CNAME: %s\n", d->cname[i].alloc);
   }
 }
+#else
+#define showdoh(x,y)
+#endif
 
 /*
  * doh2ai()
@@ -791,10 +797,12 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
   return firstai;
 }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char *type2name(DNStype dnstype)
 {
   return (dnstype == DNS_TYPE_A)?"A":"AAAA";
 }
+#endif
 
 UNITTEST void de_cleanup(struct dohentry *d)
 {

@@ -1108,7 +1108,8 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   return nread;
 }
 
-#ifdef NGHTTP2_HAS_ERROR_CALLBACK
+#if defined(NGHTTP2_HAS_ERROR_CALLBACK) &&      \
+  !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static int error_callback(nghttp2_session *session,
                           const char *msg,
                           size_t len,
@@ -1226,7 +1227,9 @@ CURLcode Curl_http2_init(struct connectdata *conn)
     /* nghttp2_on_header_callback */
     nghttp2_session_callbacks_set_on_header_callback(callbacks, on_header);
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
     nghttp2_session_callbacks_set_error_callback(callbacks, error_callback);
+#endif
 
     /* The nghttp2 session is not yet setup, do it */
     rc = nghttp2_session_client_new(&conn->proto.httpc.h2, callbacks, conn);

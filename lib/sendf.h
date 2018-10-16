@@ -36,7 +36,7 @@ void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 #elif defined(HAVE_VARIADIC_MACROS_GCC)
 #define infof(x...)  Curl_nop_stmt
 #else
-#define infof (void)
+#error "missing VARIADIC macro define, fix and rebuild!"
 #endif
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
