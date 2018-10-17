@@ -735,7 +735,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
           set_binmode(stdin);
           if(!strcmp(uploadfile, ".")) {
-            if(curlx_nonblock((curl_socket_t)infd, TRUE) < 0)
+            if(curlx_nonblock((curl_socket_t)infd, FALSE) < 0)
               warnf(config->global,
                     "fcntl failed on fd=%d: %s\n", infd, strerror(errno));
           }
