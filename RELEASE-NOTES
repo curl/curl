@@ -23,12 +23,14 @@ This release includes the following bugfixes:
 
  o CURLOPT_DNS_USE_GLOBAL_CACHE: deprecated [5]
  o Curl_dedotdotify(): always nul terminate returned string [46]
+ o Curl_follow: Always free the passed new URL [87]
  o Curl_http2_done: fix memleak in error path [51]
  o Curl_retry_request: fix memory leak [49]
  o Curl_saferealloc: Fixed typo in docblock [40]
  o FILE: fix CURLOPT_NOBODY and CURLOPT_HEADER output [78]
  o GnutTLS: TLS 1.3 support [39]
  o SECURITY-PROCESS: mention the bountygraph program [42]
+ o Windows: fixes for MinGW targeting Windows Vista [82]
  o anyauthput: fix compiler warning on 64-bit Windows [21]
  o appveyor: add WinSSL builds [81]
  o appveyor: run test suite (on Windows!) [65]
@@ -37,6 +39,7 @@ This release includes the following bugfixes:
  o checksrc: handle zero scoped ignore commands [62]
  o cmake: Backport to work with CMake 3.0 again [55]
  o cmake: Improve config installation [60]
+ o cmake: disable -Wpedantic-ms-format [84]
  o cmake: don't require OpenSSL if USE_OPENSSL=OFF [35]
  o cmake: fixed path used in generation of docs/tests [56]
  o cmake: suppress MSVC warning C4127 for libtest
@@ -57,6 +60,7 @@ This release includes the following bugfixes:
  o docs/BUG-BOUNTY: explain the bounty program [76]
  o docs/CIPHERS: mention the colon separation for OpenSSL [73]
  o docs/examples: URL updates [45]
+ o docs: add "see also" links for SSL options [85]
  o example/asiohiper: insert warning comment about its status [18]
  o example/htmltidy: fix include paths of tidy libraries [52]
  o examples/Makefile.m32: sync with core [44]
@@ -70,6 +74,7 @@ This release includes the following bugfixes:
  o http2: fix memory leaks on error-path [29]
  o http: fix memleak in rewind error path [50]
  o krb5: fix memory leak in krb_auth [25]
+ o ldap: show precise LDAP call in error message on Windows [83]
  o lib: fix gcc8 warning on Windows [20]
  o memory: add missing curl_printf header [30]
  o memory: ensure to check allocation results [68]
@@ -98,8 +103,10 @@ This release includes the following bugfixes:
  o tests: add unit tests for url.c [3]
  o timeval: fix use of weak symbol clock_gettime() on Apple platforms [61]
  o travis: bump the Secure Transport build to use xcode [58]
+ o travis: make distcheck scan for BOM markers [86]
  o urlglob: improve error message on bad globs [22]
  o vtls: fix ssl version "or later" behavior change for many backends [38]
+ o x509asn1: Fix SAN IP address verification [88]
  o x509asn1: return CURLE_PEER_FAILED_VERIFICATION on failure to parse cert [6]
 
 This release includes the following known bugs:
@@ -113,12 +120,12 @@ advice from friends like these:
   Daniel Stenberg, Dave Reisner, Dmitry Kostjuchenko, Doron Behar,
   Eason-Yu on github, Erik Minekus, Even Rouault, Github user @jakirkham,
   Han Han, Harry Sintonen, Jean Fabrice, Jim Fuller, Kamil Dudka,
-  Loganaden Velvindron, Marcel Raad, Marc Hörsken, Max Dymond, Maxime Legros,
-  Michael Kaufmann, Nate Prewitt, Nicklas Avén, Nick Zitzmann,
-  Philipp Waehnert, Rainer Jung, Ray Satiro, Rich Turner, Rick Deist,
-  Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov, Shaun Jackman,
+  Loganaden Velvindron, Marcel Raad, Marc Hörsken, Matthew Whitehead,
+  Max Dymond, Maxime Legros, Michael Kaufmann, Nate Prewitt, Nicklas Avén,
+  Nick Zitzmann, Philipp Waehnert, Rainer Jung, Ray Satiro, Rich Turner,
+  Rick Deist, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov, Shaun Jackman,
   Thomas Glanzmann, Viktor Szakats, Yiming Jing,
-  (39 contributors)
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -205,3 +212,10 @@ References to bug reports and discussions on issues:
  [79] = https://curl.haxx.se/bug/?i=3105
  [80] = https://curl.haxx.se/bug/?i=2394
  [81] = https://curl.haxx.se/bug/?i=3104
+ [82] = https://curl.haxx.se/bug/?i=3113
+ [83] = https://curl.haxx.se/bug/?i=3118
+ [84] = https://curl.haxx.se/bug/?i=3120
+ [85] = https://curl.haxx.se/bug/?i=3121
+ [86] = https://curl.haxx.se/bug/?i=3126
+ [87] = https://curl.haxx.se/bug/?i=3124
+ [88] = https://curl.haxx.se/bug/?i=3102
