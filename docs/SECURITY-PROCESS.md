@@ -137,17 +137,3 @@ This bounty is relying on funds from
 [sponsors](https://bountygraph.com/programs/curl#publicpledges). If you use
 curl professionally, consider help funding this!
 
-Hackerone Internet Bug Bounty
------------------------------
-
-This bounty program is run by an independent outside organization: Hackerone.
-First report your issue the normal way and proceed as described in this
-document.
-
-Then, if the issue is [critical](https://hackerone.com/ibb-data), you are
-eligible to apply for a bounty from Hackerone for your find.
-
-Once your reported vulnerability has been publicly disclosed by the curl
-project, you can submit a [report to them](https://hackerone.com/ibb-data).
-
-You will not be able to claim bounties from more than one bounty program.
