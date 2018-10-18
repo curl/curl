@@ -60,7 +60,7 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros"
+          env: T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
         - os: linux
           compiler: gcc
           dist: trusty
@@ -300,7 +300,9 @@ script:
         if [ "$T" = "normal" ]; then
              ./configure --enable-warnings --enable-werror $C
              make && make examples
-             make test-nonflaky
+             if [ -z $NOTESTS ]; then
+                make test-nonflaky
+             fi
              if [ -n $CHECKSRC ]; then
                 make checksrc
              fi
