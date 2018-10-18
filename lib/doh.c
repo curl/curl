@@ -41,6 +41,7 @@
 #define DNS_CLASS_IN 0x01
 #define DOH_MAX_RESPONSE_SIZE 3000 /* bytes */
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char * const errors[]={
   "",
   "Bad label",
@@ -57,7 +58,6 @@ static const char * const errors[]={
   "Bad ID"
 };
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char *doh_strerror(DOHcode code)
 {
   if((code >= DOH_OK) && (code <= DOH_DNS_BAD_ID))
