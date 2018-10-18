@@ -331,10 +331,12 @@ CURLcode Curl_close(struct Curl_easy *data)
        and detach this handle from there. */
     curl_multi_remove_handle(data->multi, data);
 
-  if(data->multi_easy)
+  if(data->multi_easy) {
     /* when curl_easy_perform() is used, it creates its own multi handle to
        use and this is the one */
     curl_multi_cleanup(data->multi_easy);
+    data->multi_easy = NULL;
+  }
 
   /* Destroy the timeout list that is held in the easy handle. It is
      /normally/ done by curl_multi_remove_handle() but this is "just in
