@@ -1418,6 +1418,10 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
 }
 #else
 {
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)dispname;
+  (void)data;
+#endif
   if(Curl_cert_hostcheck(match_pattern, hostname)) {
     infof(data, " subjectAltName: host \"%s\" matched cert's \"%s\"\n",
                   dispname, match_pattern);
@@ -2082,6 +2086,7 @@ select_next_proto_cb(SSL *ssl,
 }
 #endif /* HAS_NPN */
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char *
 get_ssl_version_txt(SSL *ssl)
 {
@@ -2108,6 +2113,7 @@ get_ssl_version_txt(SSL *ssl)
   }
   return "unknown";
 }
+#endif
 
 static CURLcode
 set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
@@ -3193,7 +3199,7 @@ static CURLcode servercert(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   int rc;
-  long lerr, len;
+  long lerr;
   struct Curl_easy *data = conn->data;
   X509 *issuer;
   BIO *fp = NULL;
@@ -3236,15 +3242,20 @@ static CURLcode servercert(struct connectdata *conn,
                          buffer, sizeof(buffer));
   infof(data, " subject: %s\n", rc?"[NONE]":buffer);
 
-  ASN1_TIME_print(mem, X509_get0_notBefore(BACKEND->server_cert));
-  len = BIO_get_mem_data(mem, (char **) &ptr);
-  infof(data, " start date: %.*s\n", len, ptr);
-  (void)BIO_reset(mem);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  {
+    long len;
+    ASN1_TIME_print(mem, X509_get0_notBefore(BACKEND->server_cert));
+    len = BIO_get_mem_data(mem, (char **) &ptr);
+    infof(data, " start date: %.*s\n", len, ptr);
+    (void)BIO_reset(mem);
 
-  ASN1_TIME_print(mem, X509_get0_notAfter(BACKEND->server_cert));
-  len = BIO_get_mem_data(mem, (char **) &ptr);
-  infof(data, " expire date: %.*s\n", len, ptr);
-  (void)BIO_reset(mem);
+    ASN1_TIME_print(mem, X509_get0_notAfter(BACKEND->server_cert));
+    len = BIO_get_mem_data(mem, (char **) &ptr);
+    infof(data, " expire date: %.*s\n", len, ptr);
+    (void)BIO_reset(mem);
+  }
+#endif
 
   BIO_free(mem);
 
