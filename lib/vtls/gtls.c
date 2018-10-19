@@ -1732,6 +1732,12 @@ static ssize_t gtls_recv(struct connectdata *conn, /* connection data */
     return -1;
   }
 
+  if(ret == GNUTLS_E_PREMATURE_TERMINATION) {
+    /* HTTPS connections without Content-Length can be terminated after
+       transfer */
+    return 0;
+  }
+
   if(ret < 0) {
     failf(conn->data, "GnuTLS recv error (%d): %s",
 
