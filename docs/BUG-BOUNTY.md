@@ -15,17 +15,12 @@
 ## How much money is the bounty at
 
  The curl projects offer monetary compensation for reported and published
- security vulnerabilities. The amount of money rewarded depends on how serious
- the flaw is determined to be.
+ security vulnerabilities. The amount of money that is rewarded depends on how
+ serious the flaw is determined to be.
 
- We offer reward money *up to* these amounts. The curl security team will
- solely and exclusively determine the exact amount for each reported flaw on a
- case by case basis and keep the rights to adjust the amount as it sees fit.
-
- - Low      USD 500
- - Medium   USD 1,000
- - High     USD 5,000
- - Critical USD 10,000
+ We offer reward money *up to* the total amount of the fund. The curl security
+ team determines the severity of each reported flaw on a case by case basis
+ and the exact amount rewarded to the reporter is then decided by the sponsor.
 
 ## Who's eligible for a reward
 
@@ -60,11 +55,10 @@
 ## How are reward amounts determined
 
  The curl security team first gives the vulnerability a score, as mentioned
- above, and based on that level the team may increase or decrease the bounty
- amount from the general template depending on the specifics of the individual
- case.
+ above, and based on that level the sponsor sets the bounty amount depending
+ on the specifics of the individual case.
 
- The curl security team will be the sole arbiter of the bounty amount.
+ The bounty fund sponsor is the arbiter of the bounty amount.
 
 ## What happens if the bounty fund is drained
 
