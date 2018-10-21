@@ -41,7 +41,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/src
 
-bin_PROGRAMS = curl
+bin_PROGRAMS = curl curlconfig
 
 SUBDIRS = ../docs
 
@@ -53,6 +53,8 @@ include Makefile.inc
 
 # CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES)
+
+curlconfig_SOURCES = curl-config.c
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@

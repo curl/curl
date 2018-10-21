@@ -1,0 +1,230 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static void
+usage(const char *program)
+{
+  printf("Usage: %s [OPTION]\n\n", program);
+  printf("Available values for OPTION include:\n\n");
+  printf("  --built-shared says 'yes' if libcurl was built shared\n");
+  printf("  --ca        ca bundle install path\n");
+  printf("  --cc        compiler\n");
+  printf("  --cflags    pre-processor and compiler flags\n");
+  printf("  --checkfor [version] check for (lib)curl of the specified "
+                       "version\n");
+  printf("  --configure the arguments given to configure when building "
+                        "curl\n");
+  printf("  --features  newline separated list of enabled features\n");
+  printf("  --help      display this help and exit\n");
+  printf("  --libs      library linking information\n");
+  printf("  --prefix    curl install prefix\n");
+  printf("  --protocols newline separated list of enabled protocols\n");
+  printf("  --ssl-backends output the SSL backends libcurl was built to "
+                           "support\n");
+  printf("  --static-libs static libcurl library linking information\n");
+  printf("  --version   output version information\n");
+  printf("  --vernum    output the version information as a number "
+                        "(hexadecimal)\n");
+}
+
+static char *
+expand_prefix(char *prefix, char *str)
+{
+  size_t plen;
+  size_t slen;
+  char *tmp;
+  char *new;
+
+  plen = strlen(prefix);
+  tmp = strchr(str, '}');
+
+  /* If the prefix is empty, we just fast-forward the pointer to str */
+  if(plen == 0) {
+    if(tmp)
+      str = tmp + 1;
+    return str;
+  }
+
+  slen = strlen(str);
+
+  new = (char *) malloc(slen - (tmp - str) + plen);
+
+  memcpy(new, prefix, plen);
+  memcpy(new + plen, tmp + 1, slen - (tmp - str) - 1);
+
+  return new;
+}
+
+int
+main(int argc, char *argv[])
+{
+  int i = 1;
+  int cmajor;
+  int cminor;
+  int cpatch = 0;
+
+  int versionnum = 0x073E00;
+  char *prefix = strdup("@prefix@");
+  char *_exec_prefix = strdup("@exec_prefix@");
+  char *_includedir = strdup("@includedir@");
+  char *_libdir = strdup("@libdir@");
+  /* !checksrc! disable LONGLINE 2 */
+  char *protocols = strdup("@SUPPORT_PROTOCOLS@");
+  char *features = strdup("@SUPPORT_FEATURES@");
+
+  char *exec_prefix = expand_prefix(prefix, _exec_prefix);
+  char *includedir = expand_prefix(prefix, _includedir);
+  char *libdir = expand_prefix(exec_prefix, _libdir);
+
+  if(argc == 1) {
+    usage(argv[0]);
+    return 1;
+  }
+
+  do {
+
+    if(i >= argc)
+      break;
+
+    /* Hunt for long opts */
+    if(*argv[i] == '-' && *(argv[i] + 1) == '-') {
+      argv[i] += 2;
+
+      if(strcmp(argv[i], "built-shared") == 0) {
+        printf("@ENABLE_SHARED@\n");
+      }
+      else if(strcmp(argv[i], "ca") == 0) {
+        printf(@CURL_CA_BUNDLE@ "\n");
+      }
+      else if(strcmp(argv[i], "cc") == 0) {
+        printf("@CC@\n");
+      }
+      else if(strcmp(argv[i], "prefix") == 0) {
+        printf("%s\n", prefix);
+      }
+      else if(strcmp(argv[i], "features") == 0
+               || strcmp(argv[i], "feature") == 0) {
+        char *tmp;
+        while((tmp = strchr(features, ' ')) != NULL)
+          *tmp = '\n';
+        printf("%s\n", features);
+      }
+      else if(strcmp(argv[i], "protocols") == 0) {
+        char *tmp;
+        while((tmp = strchr(protocols, ' ')) != NULL)
+          *tmp = '\n';
+        printf("%s\n", protocols);
+      }
+      else if(strcmp(argv[i], "version") == 0) {
+        printf("libcurl @CURLVERSION@\n");
+        return 0;
+      }
+      else if(strcmp(argv[i], "checkfor") == 0) {
+
+        if((i == argc - 1) || (*argv[i + 1] == '-')) {
+          printf("ERROR: --checkfor requires argument\n");
+          usage(argv[0]);
+          return 1;
+        }
+
+        if(sscanf(argv[++i], "%d.%d.%d%*s", &cmajor, &cminor, &cpatch) < 2) {
+          printf("ERROR: Invalid --checkfor argument\n");
+          usage(argv[0]);
+          return 1;
+        }
+
+        int checkfor = (cmajor * 256 * 256) + (cminor * 256) + cpatch;
+
+        if(versionnum >= checkfor)
+          return 0;
+        else {
+          printf("requested version %s is newer than existing @CURLVERSION@\n",
+                 argv[i]);
+          return 1;
+        }
+      }
+      else if(strcmp(argv[i], "vernum") == 0) {
+        printf("@VERSIONNUM@\n");
+        return 0;
+      }
+      else if(strcmp(argv[i], "help") == 0) {
+        usage(argv[0]);
+        return 0;
+      }
+      else if(strcmp(argv[i], "cflags") == 0) {
+        int staticlib = 0;
+
+        if(strcmp("@CPPFLAG_CURL_STATICLIB@", "-DCURL_STATICLIB") == 0)
+          staticlib = 1;
+
+        if(strcmp(includedir, "/usr/include") == 0)
+          printf("%s\n", (staticlib ? "-DCURL_STATICLIB" : ""));
+        else
+          printf("%s-I%s\n",
+                 (staticlib ? "-DCURL_STATICLIB " : ""), includedir);
+      }
+      else if(strcmp(argv[i], "libs") == 0) {
+        int have_libdir = 0;
+
+        if((strcmp(libdir, "/usr/lib") != 0)
+            && strcmp(libdir, "/usr/lib64") != 0)
+          have_libdir = 1;
+
+        if(strcmp("@REQUIRE_LIB_DEPS@", "yes") == 0) {
+          if(have_libdir)
+            printf("-L%s -lcurl @LIBCURL_LIBS@\n", libdir);
+          else
+            printf("-lcurl\n");
+        }
+      }
+      else if(strcmp(argv[i], "ssl-backends") == 0) {
+        printf("@SSL_BACKENDS@\n");
+      }
+      else if(strcmp(argv[i], "static-libs") == 0) {
+        if(strcmp("X@ENABLE_STATIC@", "Xno") != 0)
+          printf("%s/libcurl.@libext@ @LDFLAGS@ @LIBCURL_LIBS@\n", libdir);
+        else
+          printf("curl was built with static libraries disabled\n");
+
+        return 1;
+      }
+      else if(strcmp(argv[i], "configure") == 0) {
+        /* !checksrc! disable LONGLINE 1 */
+        printf(@CONFIGURE_OPTIONS@ "\n");
+      }
+    }
+    else {
+      printf("unknown option: \"%s\"\n", argv[i]);
+      usage(argv[0]);
+      return 1;
+    }
+
+    i++;
+  }
+  while(i < argc);
+
+  return 0;
+}

@@ -8,3 +8,4 @@ curl_config.h.in
 stamp-h2
 tool_hugehelp.c
 tool_version.h.dist
+curl-config.c

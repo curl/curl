@@ -305,7 +305,7 @@ for fname in .deps \
     config.sub \
     configure \
     configurehelp.pm \
-    curl-config \
+    src/curl-config.c \
     depcomp \
     libcares.pc \
     libcurl.pc \
