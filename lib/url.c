@@ -1996,7 +1996,7 @@ static CURLcode findprotocol(struct Curl_easy *data,
 }
 
 
-static CURLcode uc_to_curlcode(CURLUcode uc)
+CURLcode Curl_uc_to_curlcode(CURLUcode uc)
 {
   switch(uc) {
   default:
@@ -2048,11 +2048,11 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
                      CURLU_DISALLOW_USER : 0) |
                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
   if(uc)
-    return uc_to_curlcode(uc);
+    return Curl_uc_to_curlcode(uc);
 
   uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
   if(uc)
-    return uc_to_curlcode(uc);
+    return Curl_uc_to_curlcode(uc);
 
   result = findprotocol(data, conn, data->state.up.scheme);
   if(result)
@@ -2067,7 +2067,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     conn->bits.user_passwd = TRUE;
   }
   else if(uc != CURLUE_NO_USER)
-    return uc_to_curlcode(uc);
+    return Curl_uc_to_curlcode(uc);
 
   uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password,
                     CURLU_URLDECODE);
@@ -2078,7 +2078,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     conn->bits.user_passwd = TRUE;
   }
   else if(uc != CURLUE_NO_PASSWORD)
-    return uc_to_curlcode(uc);
+    return Curl_uc_to_curlcode(uc);
 
   uc = curl_url_get(uh, CURLUPART_OPTIONS, &data->state.up.options,
                     CURLU_URLDECODE);
@@ -2088,7 +2088,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
   }
   else if(uc != CURLUE_NO_OPTIONS)
-    return uc_to_curlcode(uc);
+    return Curl_uc_to_curlcode(uc);
 
   uc = curl_url_get(uh, CURLUPART_HOST, &data->state.up.hostname, 0);
   if(uc) {
@@ -2098,7 +2098,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   uc = curl_url_get(uh, CURLUPART_PATH, &data->state.up.path, 0);
   if(uc)
-    return uc_to_curlcode(uc);
+    return Curl_uc_to_curlcode(uc);
 
   uc = curl_url_get(uh, CURLUPART_PORT, &data->state.up.port,
                     CURLU_DEFAULT_PORT);
@@ -3082,12 +3082,12 @@ static CURLcode override_login(struct Curl_easy *data,
   if(user_changed) {
     uc = curl_url_set(data->state.uh, CURLUPART_USER, *userp, 0);
     if(uc)
-      return uc_to_curlcode(uc);
+      return Curl_uc_to_curlcode(uc);
   }
   if(passwd_changed) {
     uc = curl_url_set(data->state.uh, CURLUPART_PASSWORD, *passwdp, 0);
     if(uc)
-      return uc_to_curlcode(uc);
+      return Curl_uc_to_curlcode(uc);
   }
   return CURLE_OK;
 }
