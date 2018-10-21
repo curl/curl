@@ -1502,10 +1502,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
         }
 
         data->change.referer = strdup(data->change.url);
-        if(!data->change.referer) {
-          free(newurl);
+        if(!data->change.referer)
           return CURLE_OUT_OF_MEMORY;
-        }
         data->change.referer_alloc = TRUE; /* yes, free this later */
       }
     }
