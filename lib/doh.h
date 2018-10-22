@@ -102,4 +102,4 @@ DOHcode doh_decode(unsigned char *doh,
                    struct dohentry *d);
 void de_cleanup(struct dohentry *d);
 #endif
-#endif
+#endif /* HEADER_CURL_DOH_H */
