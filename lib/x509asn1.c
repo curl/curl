@@ -103,6 +103,9 @@ static const curl_OID   OIDtable[] = {
  * Please note there is no pretention here to rewrite a full SSL library.
  */
 
+static const char *getASN1Element(curl_asn1Element *elem,
+                                  const char *beg, const char *end)
+  WARN_UNUSED_RESULT;
 
 static const char *getASN1Element(curl_asn1Element *elem,
                                   const char *beg, const char *end)
@@ -602,10 +605,17 @@ static ssize_t encodeDN(char *buf, size_t n, curl_asn1Element *dn)
 
   for(p1 = dn->beg; p1 < dn->end;) {
     p1 = getASN1Element(&rdn, p1, dn->end);
+    if(!p1)
+      return -1;
     for(p2 = rdn.beg; p2 < rdn.end;) {
       p2 = getASN1Element(&atv, p2, rdn.end);
+      if(!p2)
+        return -1;
       p3 = getASN1Element(&oid, atv.beg, atv.end);
-      getASN1Element(&value, p3, atv.end);
+      if(!p3)
+        return -1;
+      if(!getASN1Element(&value, p3, atv.end))
+        return -1;
       str = ASN1tostr(&oid, 0);
       if(!str)
         return -1;
@@ -697,10 +707,15 @@ int Curl_parseX509(curl_X509certificate *cert,
 
   /* Get tbsCertificate. */
   beg = getASN1Element(&tbsCertificate, beg, end);
+  if(!beg)
+    return -1;
   /* Skip the signatureAlgorithm. */
   beg = getASN1Element(&cert->signatureAlgorithm, beg, end);
+  if(!beg)
+    return -1;
   /* Get the signatureValue. */
-  getASN1Element(&cert->signature, beg, end);
+  if(!getASN1Element(&cert->signature, beg, end))
+    return -1;
 
   /* Parse TBSCertificate. */
   beg = tbsCertificate.beg;
@@ -710,28 +725,47 @@ int Curl_parseX509(curl_X509certificate *cert,
   cert->version.beg = &defaultVersion;
   cert->version.end = &defaultVersion + sizeof(defaultVersion);
   beg = getASN1Element(&elem, beg, end);
+  if(!beg)
+    return -1;
   if(elem.tag == 0) {
-    getASN1Element(&cert->version, elem.beg, elem.end);
+    if(!getASN1Element(&cert->version, elem.beg, elem.end))
+      return -1;
     beg = getASN1Element(&elem, beg, end);
+    if(!beg)
+      return -1;
   }
   cert->serialNumber = elem;
   /* Get signature algorithm. */
   beg = getASN1Element(&cert->signatureAlgorithm, beg, end);
   /* Get issuer. */
   beg = getASN1Element(&cert->issuer, beg, end);
+  if(!beg)
+    return -1;
   /* Get notBefore and notAfter. */
   beg = getASN1Element(&elem, beg, end);
+  if(!beg)
+    return -1;
   ccp = getASN1Element(&cert->notBefore, elem.beg, elem.end);
-  getASN1Element(&cert->notAfter, ccp, elem.end);
+  if(!ccp)
+    return -1;
+  if(!getASN1Element(&cert->notAfter, ccp, elem.end))
+    return -1;
   /* Get subject. */
   beg = getASN1Element(&cert->subject, beg, end);
+  if(!beg)
+    return -1;
   /* Get subjectPublicKeyAlgorithm and subjectPublicKey. */
   beg = getASN1Element(&cert->subjectPublicKeyInfo, beg, end);
+  if(!beg)
+    return -1;
   ccp = getASN1Element(&cert->subjectPublicKeyAlgorithm,
-                            cert->subjectPublicKeyInfo.beg,
-                            cert->subjectPublicKeyInfo.end);
-  getASN1Element(&cert->subjectPublicKey, ccp,
-                      cert->subjectPublicKeyInfo.end);
+                       cert->subjectPublicKeyInfo.beg,
+                       cert->subjectPublicKeyInfo.end);
+  if(!ccp)
+    return -1;
+  if(!getASN1Element(&cert->subjectPublicKey, ccp,
+                     cert->subjectPublicKeyInfo.end))
+    return -1;
   /* Get optional issuerUiqueID, subjectUniqueID and extensions. */
   cert->issuerUniqueID.tag = cert->subjectUniqueID.tag = 0;
   cert->extensions.tag = elem.tag = 0;
@@ -740,20 +774,30 @@ int Curl_parseX509(curl_X509certificate *cert,
   cert->subjectUniqueID.beg = cert->subjectUniqueID.end = "";
   cert->extensions.header = NULL;
   cert->extensions.beg = cert->extensions.end = "";
-  if(beg < end)
+  if(beg < end) {
     beg = getASN1Element(&elem, beg, end);
+    if(!beg)
+      return -1;
+  }
   if(elem.tag == 1) {
     cert->issuerUniqueID = elem;
-    if(beg < end)
+    if(beg < end) {
       beg = getASN1Element(&elem, beg, end);
+      if(!beg)
+        return -1;
+    }
   }
   if(elem.tag == 2) {
     cert->subjectUniqueID = elem;
-    if(beg < end)
+    if(beg < end) {
       beg = getASN1Element(&elem, beg, end);
+      if(!beg)
+        return -1;
+    }
   }
   if(elem.tag == 3)
-    getASN1Element(&cert->extensions, elem.beg, elem.end);
+    if(!getASN1Element(&cert->extensions, elem.beg, elem.end))
+      return -1;
   return 0;
 }
 
@@ -782,11 +826,14 @@ static const char *dumpAlgo(curl_asn1Element *param,
   /* Get algorithm parameters and return algorithm name. */
 
   beg = getASN1Element(&oid, beg, end);
+  if(!beg)
+    return NULL;
   param->header = NULL;
   param->tag = 0;
   param->beg = param->end = end;
   if(beg < end)
-    getASN1Element(param, beg, end);
+    if(!getASN1Element(param, beg, end))
+      return NULL;
   return OID2str(oid.beg, oid.end, TRUE);
 }
 
@@ -821,10 +868,14 @@ static void do_pubkey(struct Curl_easy *data, int certnum,
   /* Generate all information records for the public key. */
 
   /* Get the public key (single element). */
-  getASN1Element(&pk, pubkey->beg + 1, pubkey->end);
+  if(!getASN1Element(&pk, pubkey->beg + 1, pubkey->end))
+    return;
 
   if(strcasecompare(algo, "rsaEncryption")) {
     p = getASN1Element(&elem, pk.beg, pk.end);
+    if(!p)
+      return;
+
     /* Compute key length. */
     for(q = elem.beg; !*q && q < elem.end; q++)
       ;
@@ -845,30 +896,34 @@ static void do_pubkey(struct Curl_easy *data, int certnum,
     }
     /* Generate coefficients. */
     do_pubkey_field(data, certnum, "rsa(n)", &elem);
-    getASN1Element(&elem, p, pk.end);
+    if(!getASN1Element(&elem, p, pk.end))
+      return;
     do_pubkey_field(data, certnum, "rsa(e)", &elem);
   }
   else if(strcasecompare(algo, "dsa")) {
     p = getASN1Element(&elem, param->beg, param->end);
-    do_pubkey_field(data, certnum, "dsa(p)", &elem);
-    p = getASN1Element(&elem, p, param->end);
-    do_pubkey_field(data, certnum, "dsa(q)", &elem);
-    getASN1Element(&elem, p, param->end);
-    do_pubkey_field(data, certnum, "dsa(g)", &elem);
-    do_pubkey_field(data, certnum, "dsa(pub_key)", &pk);
+    if(p) {
+      do_pubkey_field(data, certnum, "dsa(p)", &elem);
+      p = getASN1Element(&elem, p, param->end);
+      if(p) {
+        do_pubkey_field(data, certnum, "dsa(q)", &elem);
+        if(getASN1Element(&elem, p, param->end)) {
+          do_pubkey_field(data, certnum, "dsa(g)", &elem);
+          do_pubkey_field(data, certnum, "dsa(pub_key)", &pk);
+        }
+      }
+    }
   }
   else if(strcasecompare(algo, "dhpublicnumber")) {
     p = getASN1Element(&elem, param->beg, param->end);
-    do_pubkey_field(data, certnum, "dh(p)", &elem);
-    getASN1Element(&elem, param->beg, param->end);
-    do_pubkey_field(data, certnum, "dh(g)", &elem);
-    do_pubkey_field(data, certnum, "dh(pub_key)", &pk);
+    if(p) {
+      do_pubkey_field(data, certnum, "dh(p)", &elem);
+      if(getASN1Element(&elem, param->beg, param->end)) {
+        do_pubkey_field(data, certnum, "dh(g)", &elem);
+        do_pubkey_field(data, certnum, "dh(pub_key)", &pk);
+      }
+    }
   }
-#if 0 /* Patent-encumbered. */
-  else if(strcasecompare(algo, "ecPublicKey")) {
-    /* Left TODO. */
-  }
-#endif
 }
 
 CURLcode Curl_extract_certinfo(struct connectdata *conn,
@@ -1107,18 +1162,29 @@ CURLcode Curl_verifyhost(struct connectdata *conn,
   /* Process extensions. */
   for(p = cert.extensions.beg; p < cert.extensions.end && matched != 1;) {
     p = getASN1Element(&ext, p, cert.extensions.end);
+    if(!p)
+      return CURLE_PEER_FAILED_VERIFICATION;
+
     /* Check if extension is a subjectAlternativeName. */
     ext.beg = checkOID(ext.beg, ext.end, sanOID);
     if(ext.beg) {
       ext.beg = getASN1Element(&elem, ext.beg, ext.end);
+      if(!ext.beg)
+        return CURLE_PEER_FAILED_VERIFICATION;
       /* Skip critical if present. */
-      if(elem.tag == CURL_ASN1_BOOLEAN)
+      if(elem.tag == CURL_ASN1_BOOLEAN) {
         ext.beg = getASN1Element(&elem, ext.beg, ext.end);
+        if(!ext.beg)
+          return CURLE_PEER_FAILED_VERIFICATION;
+      }
       /* Parse the octet string contents: is a single sequence. */
-      getASN1Element(&elem, elem.beg, elem.end);
+      if(!getASN1Element(&elem, elem.beg, elem.end))
+        return CURLE_PEER_FAILED_VERIFICATION;
       /* Check all GeneralNames. */
       for(q = elem.beg; matched != 1 && q < elem.end;) {
         q = getASN1Element(&name, q, elem.end);
+        if(!q)
+          break;
         switch(name.tag) {
         case 2: /* DNS name. */
           len = utf8asn1str(&dnsname, CURL_ASN1_IA5_STRING,
@@ -1159,8 +1225,12 @@ CURLcode Curl_verifyhost(struct connectdata *conn,
      distinguished one to get the most significant one. */
   while(q < cert.subject.end) {
     q = getASN1Element(&dn, q, cert.subject.end);
+    if(!q)
+      break;
     for(p = dn.beg; p < dn.end;) {
       p = getASN1Element(&elem, p, dn.end);
+      if(!p)
+        return CURLE_PEER_FAILED_VERIFICATION;
       /* We have a DN's AttributeTypeAndValue: check it in case it's a CN. */
       elem.beg = checkOID(elem.beg, elem.end, cnOID);
       if(elem.beg)
