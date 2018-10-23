@@ -879,7 +879,7 @@ static CURLcode done_sending(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(USE_LWIPSOCK)
 #ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
 #define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
 #endif
