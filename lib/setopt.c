@@ -1204,6 +1204,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.low_speed_time = arg;
     break;
+  case CURLOPT_CURLU:
+    /*
+     * pass CURLU to set URL
+     */
+    data->set.uh = (CURLU*) va_arg(param, CURLU *);
+    result = curl_url_get(data->set.uh,
+                          CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
+    break;
   case CURLOPT_URL:
     /*
      * The URL to fetch.

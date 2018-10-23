@@ -1348,7 +1348,8 @@ void Curl_init_CONNECT(struct Curl_easy *data)
 CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result;
-  if(!data->change.url) {
+
+  if(!data->change.url && !data->set.uh) {
     /* we can't do anything without URL */
     failf(data, "No URL set!");
     return CURLE_URL_MALFORMAT;
