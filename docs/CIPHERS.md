@@ -1,7 +1,16 @@
 # Ciphers
 
-With curl's options `CURLOPT_SSL_CIPHER_LIST` and `--ciphers` users can
-control which ciphers to consider when negotiating TLS connections.
+With curl's options
+[`CURLOPT_SSL_CIPHER_LIST`](https://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+and
+[`--ciphers`](https://curl.haxx.se/docs/manpage.html#--ciphers)
+users can control which ciphers to consider when negotiating TLS connections.
+
+TLS 1.3 ciphers are supported since curl 7.61 with options
+[`CURLOPT_TLS13_CIPHERS`](https://curl.haxx.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
+and
+[`--tls13-ciphers`](https://curl.haxx.se/docs/manpage.html#--tls13-ciphers)
+.
 
 The names of the known ciphers differ depending on which TLS backend that
 libcurl was built to use. This is an attempt to list known cipher names.
@@ -146,7 +155,7 @@ When specifying multiple cipher names, separate them with colon (`:`).
 
 ### TLS 1.3 cipher suites
 
-(Note: the TLS 1.3 cipher suites are set with a separate option.)
+(Note these ciphers are set with `CURLOPT_TLS13_CIPHERS` and `--tls13-ciphers`)
 
 `TLS13-AES-256-GCM-SHA384`
 `TLS13-CHACHA20-POLY1305-SHA256`
