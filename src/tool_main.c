@@ -238,16 +238,14 @@ static void main_free(struct GlobalConfig *config)
 
 #ifdef _WIN32
 /* TerminalSettings for Windows */
-struct TerminalSettings {
+static struct TerminalSettings {
   HANDLE hStdOut;
   DWORD dwOutputMode;
   UINT nCodepage;
-}TerminalSettings;
-#endif
+} TerminalSettings;
 
 static void configure_terminal(void)
 {
-#ifdef _WIN32
   /*
    * If we're running Windows, enable VT output & set codepage to UTF-8.
    * Note: VT mode flag can be set on any version of Windows, but VT
@@ -273,8 +271,10 @@ static void configure_terminal(void)
                    TerminalSettings.dwOutputMode
                    | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
   }
-#endif
 }
+#else
+#define configure_terminal()
+#endif
 
 static void restore_terminal(void)
 {
