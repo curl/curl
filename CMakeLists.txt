@@ -956,7 +956,6 @@ foreach(CURL_TEST
     HAVE_GETHOSTBYNAME_R_3_REENTRANT
     HAVE_GETHOSTBYNAME_R_5_REENTRANT
     HAVE_GETHOSTBYNAME_R_6_REENTRANT
-    HAVE_SOCKLEN_T
     HAVE_IN_ADDR_T
     HAVE_BOOL_T
     STDC_HEADERS
@@ -1079,24 +1078,6 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
     set_source_files_properties(mprintf.c PROPERTIES
       COMPILE_FLAGS ${MPRINTF_COMPILE_FLAGS})
   endif()
-endif()
-
-if(HAVE_SOCKLEN_T)
-  set(CURL_TYPEOF_CURL_SOCKLEN_T "socklen_t")
-  if(WIN32)
-    set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h;ws2tcpip.h")
-  elseif(HAVE_SYS_SOCKET_H)
-    set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
-  endif()
-  check_type_size("socklen_t" CURL_SIZEOF_CURL_SOCKLEN_T)
-  set(CMAKE_EXTRA_INCLUDE_FILES)
-  if(NOT HAVE_CURL_SIZEOF_CURL_SOCKLEN_T)
-    message(FATAL_ERROR
-     "Check for sizeof socklen_t failed, see CMakeFiles/CMakerror.log")
-  endif()
-else()
-  set(CURL_TYPEOF_CURL_SOCKLEN_T int)
-  set(CURL_SIZEOF_CURL_SOCKLEN_T ${SIZEOF_INT})
 endif()
 
 # TODO test which of these headers are required
