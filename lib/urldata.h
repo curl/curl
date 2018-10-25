@@ -649,7 +649,7 @@ struct Curl_handler {
    */
   CURLcode (*connect_it)(struct connectdata *, bool *done);
 
-  /* See above. Currently only used for FTP. */
+  /* See above. */
   CURLcode (*connecting)(struct connectdata *, bool *done);
   CURLcode (*doing)(struct connectdata *, bool *done);
 
