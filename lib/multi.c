@@ -1608,7 +1608,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_SENDPROTOCONNECT:
       result = Curl_protocol_connect(data->easy_conn, &protocol_connect);
-      if(!protocol_connect)
+      if(!result && !protocol_connect)
         /* switch to waiting state */
         multistate(data, CURLM_STATE_PROTOCONNECT);
       else if(!result) {
