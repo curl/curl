@@ -2926,7 +2926,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     int rc;
     ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
     if(!ssh->kh) {
-      /* eeek. TODO: free the ssh_session! */
+      libssh2_session_free(ssh->ssh_session);
       return CURLE_FAILED_INIT;
     }
 
