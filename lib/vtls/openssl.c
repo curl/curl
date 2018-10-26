@@ -2466,7 +2466,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     char *ciphers13 = SSL_CONN_CONFIG(cipher_list13);
     if(ciphers13) {
       if(!SSL_CTX_set_ciphersuites(BACKEND->ctx, ciphers13)) {
-        failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers);
+        failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers13);
         return CURLE_SSL_CIPHER;
       }
       infof(data, "TLS 1.3 cipher selection: %s\n", ciphers13);
