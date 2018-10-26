@@ -1262,7 +1262,7 @@ static int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
   ssize_t nread;
   int buffsize;
   int err;
-  int done = 0;
+  bool done = FALSE;
 
   /* This has only been tested on the proftpd server, and the mod_tls code
      sends a close notify alert without waiting for a close notify alert in
@@ -1290,7 +1290,7 @@ static int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
         case SSL_ERROR_ZERO_RETURN: /* no more data */
           /* This is the expected response. There was no data but only
              the close notify alert */
-          done = 1;
+          done = TRUE;
           break;
         case SSL_ERROR_WANT_READ:
           /* there's data pending, re-invoke SSL_read() */
@@ -1299,7 +1299,7 @@ static int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
         case SSL_ERROR_WANT_WRITE:
           /* SSL wants a write. Really odd. Let's bail out. */
           infof(data, "SSL_ERROR_WANT_WRITE\n");
-          done = 1;
+          done = TRUE;
           break;
         default:
           /* openssl/ssl.h says "look at error stack/return value/errno" */
@@ -1309,20 +1309,20 @@ static int Curl_ossl_shutdown(struct connectdata *conn, int sockindex)
                  ossl_strerror(sslerror, buf, sizeof(buf)) :
                  SSL_ERROR_to_str(err)),
                 SOCKERRNO);
-          done = 1;
+          done = TRUE;
           break;
         }
       }
       else if(0 == what) {
         /* timeout */
         failf(data, "SSL shutdown timeout");
-        done = 1;
+        done = TRUE;
       }
       else {
         /* anything that gets here is fatally bad */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
         retval = -1;
-        done = 1;
+        done = TRUE;
       }
     } /* while()-loop for the select() */
 
