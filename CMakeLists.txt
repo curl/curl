@@ -508,13 +508,13 @@ check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 option(CURL_ZLIB "Set to ON to enable building curl with zlib support." ON)
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
-set(HAVE_ZLIB OFF)
+set(USE_ZLIB OFF)
 if(CURL_ZLIB)
   find_package(ZLIB QUIET)
   if(ZLIB_FOUND)
     set(HAVE_ZLIB_H ON)
-    set(HAVE_ZLIB ON)
     set(HAVE_LIBZ ON)
+    set(USE_ZLIB ON)
 
     # Depend on ZLIB via imported targets if supported by the running
     # version of CMake.  This allows our dependents to get our dependencies
