@@ -32,6 +32,8 @@ static void unit_stop(void)
 {
 
 }
+#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
+    defined(USE_CYASSL) || defined(USE_SCHANNEL)
 
 /* cert captured from gdb when connecting to curl.haxx.se on October 26
    2018 */
@@ -340,9 +342,6 @@ static unsigned char cert[] = {
   0xA7, 0xD7, 0xA9, 0xC4, 0xEC, 0x17, 0x17, 0x8D, 0x87, 0x70, 0x6B, 0x48, 0x88,
   0x61, 0x54, 0x4A, 0x2B, 0xB7, 0x6A, 0x12, 0x08, 0xFB,
 };
-
-#if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_CYASSL) || defined(USE_SCHANNEL)
 
 UNITTEST_START
 {
