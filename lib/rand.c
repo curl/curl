@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -174,6 +174,8 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
     return result;
 
   while(num) {
+    /* clang-tidy warns on this line without this comment: */
+    /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
     *rnd++ = hex[(*bufp & 0xF0)>>4];
     *rnd++ = hex[*bufp & 0x0F];
     bufp++;
