@@ -223,7 +223,7 @@ static const char *bit2str(const char *beg, const char *end)
 
 static const char *int2str(const char *beg, const char *end)
 {
-  long val = 0;
+  unsigned long val = 0;
   size_t n = end - beg;
 
   /* Convert an ASN.1 integer value into its string representation.
@@ -243,7 +243,7 @@ static const char *int2str(const char *beg, const char *end)
   do
     val = (val << 8) | *(const unsigned char *) beg++;
   while(beg < end);
-  return curl_maprintf("%s%lx", (val < 0 || val >= 10)? "0x": "", val);
+  return curl_maprintf("%s%lx", val >= 10? "0x": "", val);
 }
 
 static ssize_t
