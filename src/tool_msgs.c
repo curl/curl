@@ -67,7 +67,7 @@ static void voutf(struct GlobalConfig *config,
         (void)fwrite(ptr, cut + 1, 1, config->errors);
         fputs("\n", config->errors);
         ptr += cut + 1; /* skip the space too */
-        len -= cut;
+        len -= cut + 1;
       }
       else {
         fputs(ptr, config->errors);
