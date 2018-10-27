@@ -39,6 +39,7 @@ addons:
             - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
             - gnutls-bin
+            - clang-tidy-6.0
 
 matrix:
     include:
@@ -137,6 +138,10 @@ matrix:
           compiler: clang
           dist: trusty
           env: T=fuzzer
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=tidy
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
@@ -307,6 +312,12 @@ script:
              if [ -n $CHECKSRC ]; then
                 make checksrc
              fi
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "tidy" ]; then
+             ./configure --enable-warnings --enable-werror $C
+             make && make tidy
         fi
     - |
         set -eo pipefail
