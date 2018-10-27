@@ -298,7 +298,7 @@
 #  define CURL_PULL_SYS_TYPES_H      1
 #  define CURL_PULL_SYS_SOCKET_H     1
 
-#elif defined(__SUNPRO_C) /* Oracle Solaris Studio */
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC) /* Oracle Solaris Studio */
 #  if !defined(__LP64) && (defined(__ILP32) ||                          \
                            defined(__i386) ||                           \
                            defined(__sparcv8) ||                        \
