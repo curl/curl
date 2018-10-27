@@ -43,14 +43,19 @@ This release includes the following bugfixes:
  o cmake: disable -Wpedantic-ms-format [84]
  o cmake: don't require OpenSSL if USE_OPENSSL=OFF [35]
  o cmake: fixed path used in generation of docs/tests [56]
+ o cmake: remove unused *SOCKLEN_T variables [102]
  o cmake: suppress MSVC warning C4127 for libtest
  o cmake: test and set missed defines during configuration [64]
  o comment: Fix multiple typos in function parameters [69]
+ o config: Remove unused SIZEOF_VOIDP [104]
  o config_win32: enable LDAPS [92]
  o configure: force-use -lpthreads on HPUX [41]
+ o configure: remove CURL_CONFIGURE_CURL_SOCKLEN_T [101]
  o configure: s/AC_RUN_IFELSE/CURL_RUN_IFELSE [53]
  o cookies: Remove redundant expired check [14]
  o cookies: fix leak when writing cookies to file [15]
+ o curl-config.in: remove dependency on bc [99]
+ o curl.1: --ipv6 mutexes ipv4 (fixed typo) [98]
  o curl: enabled Windows VT Support and UTF-8 output [57]
  o curl: update the documentation of --tlsv1.0 [17]
  o curl_multi_wait: call getsock before figuring out timeout [34]
@@ -61,6 +66,7 @@ This release includes the following bugfixes:
  o data-binary.d: clarify default content-type is x-www-form-urlencoded [71]
  o docs/BUG-BOUNTY: explain the bounty program [76]
  o docs/CIPHERS: Mention the options used to set TLS 1.3 ciphers [89]
+ o docs/CIPHERS: fix the TLS 1.3 cipher names [95]
  o docs/CIPHERS: mention the colon separation for OpenSSL [73]
  o docs/examples: URL updates [45]
  o docs: add "see also" links for SSL options [85]
@@ -73,6 +79,7 @@ This release includes the following bugfixes:
  o examples: do not wait when no transfers are running [16]
  o ftp: include command in Curl_ftpsend sendbuffer [25]
  o gskit: make sure to terminate version string [79]
+ o gtls: Values stored to but never read [97]
  o hostip: fix check on Curl_shuffle_addr return value [77]
  o http2: fix memory leaks on error-path [29]
  o http: fix memleak in rewind error path [50]
@@ -83,6 +90,7 @@ This release includes the following bugfixes:
  o memory: ensure to check allocation results [68]
  o multi: fix memory leak in content encoding related error path [59]
  o multi: make the closure handle "inherit" CURLOPT_NOSIGNAL [90]
+ o netrc: free temporary strings if memory allocation fails [103]
  o nss: fix nssckbi module loading on Windows [70]
  o nss: try to connect even if libnssckbi.so fails to load [36]
  o ntlm_wb: Fix memory leaks in ntlm_wb_response [24]
@@ -91,14 +99,18 @@ This release includes the following bugfixes:
  o openssl: enable TLS 1.3 post-handshake auth [47]
  o openssl: fix gcc8 warning [19]
  o openssl: load built-in engines too [48]
+ o openssl: make 'done' a proper boolean [97]
+ o openssl: output the correct cipher list on TLS 1.3 error [95]
  o openssl: return CURLE_PEER_FAILED_VERIFICATION on failure to parse issuer [6]
  o openssl: show "proper" version number for libressl builds [28]
  o pipelining: deprecated [1]
+ o rtmp: fix for compiling with lwIP [100]
  o runtests: ignore disabled even when ranges are given [74]
  o runtests: skip ld_preload tests on macOS [80]
  o runtests: use Windows paths for Windows curl
  o schannel: unified error code handling [6]
  o sendf: Fix whitespace in infof/failf concatenation [26]
+ o ssh: free the session on init failures [96]
  o ssl: deprecate CURLE_SSL_CACERT in favour of a unified error code [6]
  o test1299: use single quotes around asterisk [72]
  o test1452: mark as flaky [2]
@@ -110,6 +122,7 @@ This release includes the following bugfixes:
  o travis: add build for "configure --disable-verbose" [93]
  o travis: bump the Secure Transport build to use xcode [58]
  o travis: make distcheck scan for BOM markers [86]
+ o urldata: Fix "connecting" comment
  o urlglob: improve error message on bad globs [22]
  o vtls: fix ssl version "or later" behavior change for many backends [38]
  o x509asn1: Fix SAN IP address verification [88]
@@ -122,16 +135,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad King, Christian Heimes, Colin Hogben, Daniel Gustafsson, Daniel Shahaf,
-  Daniel Stenberg, Dario Weißer, Dave Reisner, Dmitry Kostjuchenko,
-  Doron Behar, Eason-Yu on github, Erik Minekus, Even Rouault, Gisle Vanem,
+  Alexey Eremikhin, Brad King, Christian Heimes, Colin Hogben,
+  Daniel Gustafsson, Daniel Shahaf, Daniel Stenberg, Dario Weißer,
+  Dave Reisner, Dima Pasechnik, Dmitry Kostjuchenko, Doron Behar,
+  Eason-Yu on github, Erik Minekus, Even Rouault, Gisle Vanem,
   Github user @jakirkham, Han Han, Harry Sintonen, Jean Fabrice, Jim Fuller,
   Kamil Dudka, Loganaden Velvindron, Marcel Raad, Marc Hörsken, Martin Ankerl,
   Matthew Whitehead, Max Dymond, Maxime Legros, Michael Kaufmann, Nate Prewitt,
   Nicklas Avén, Nick Zitzmann, Philipp Waehnert, Rainer Jung, Ray Satiro,
-  Rich Turner, Rick Deist, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov,
-  Shaun Jackman, Thomas Glanzmann, Viktor Szakats, Yiming Jing,
-  (43 contributors)
+  Rich Turner, Rick Deist, Ricky-Tigg on github, Rikard Falkeborn,
+  Ruslan Baratov, Sergei Nikulov, Shaun Jackman, Thomas Glanzmann,
+  Viktor Szakats, Yiming Jing,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -231,3 +246,13 @@ References to bug reports and discussions on issues:
  [92] = https://curl.haxx.se/bug/?i=3137
  [93] = https://curl.haxx.se/bug/?i=3144
  [94] = https://curl.haxx.se/bug/?i=3140
+ [95] = https://curl.haxx.se/bug/?i=3178
+ [96] = https://curl.haxx.se/bug/?i=3179
+ [97] = https://curl.haxx.se/bug/?i=3176
+ [98] = https://curl.haxx.se/bug/?i=3171
+ [99] = https://curl.haxx.se/bug/?i=3143
+ [100] = https://curl.haxx.se/bug/?i=3155
+ [101] = https://curl.haxx.se/bug/?i=3168
+ [102] = https://curl.haxx.se/bug/?i=3166
+ [103] = https://curl.haxx.se/bug/?i=3122
+ [104] = https://curl.haxx.se/bug/?i=3162
