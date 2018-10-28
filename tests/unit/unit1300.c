@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,8 +43,6 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-  Curl_llist_destroy(&llist, NULL);
-  Curl_llist_destroy(&llist_destination, NULL);
 }
 
 UNITTEST_START
@@ -266,5 +264,8 @@ UNITTEST_START
 
   fail_unless(llist_destination.tail == llist_destination.head,
             "llist_destination tail doesn't equal llist_destination head");
+
+  Curl_llist_destroy(&llist, NULL);
+  Curl_llist_destroy(&llist_destination, NULL);
 }
 UNITTEST_STOP
