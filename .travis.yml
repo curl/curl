@@ -39,7 +39,7 @@ addons:
             - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
             - gnutls-bin
-            - clang-tidy-6
+            - clang-tidy-6.0
 
 matrix:
     include:
