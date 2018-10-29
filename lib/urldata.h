@@ -1728,6 +1728,7 @@ struct UserDefined {
   bool doh_get; /* use GET for DoH requests, instead of POST */
   multidone_func fmultidone;
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
+  CURLU *uh; /* URL handle for the current parsed URL */
 };
 
 struct Names {

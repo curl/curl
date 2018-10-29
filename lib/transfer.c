@@ -1348,17 +1348,24 @@ void Curl_init_CONNECT(struct Curl_easy *data)
 CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result;
-  if(!data->change.url) {
+
+  if(!data->change.url && !data->set.uh) {
     /* we can't do anything without URL */
     failf(data, "No URL set!");
     return CURLE_URL_MALFORMAT;
   }
+
   /* since the URL may have been redirected in a previous use of this handle */
   if(data->change.url_alloc) {
     /* the already set URL is allocated, free it first! */
     Curl_safefree(data->change.url);
     data->change.url_alloc = FALSE;
   }
+
+  if(!data->change.url && data->set.uh)
+    result = curl_url_get(data->set.uh,
+                        CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
+
   data->change.url = data->set.str[STRING_SET_URL];
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
