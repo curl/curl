@@ -47,8 +47,7 @@ int main(void)
                     "http://example.com/path/index.html", 0);
 
   if(uc) {
-    fprintf(stderr, "curl_url_set() failed: %s\n",
-              curl_easy_strerror(uc));
+    fprintf(stderr, "curl_url_set() failed: %in", uc);
     goto cleanup;
   }
 
