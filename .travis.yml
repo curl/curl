@@ -7,6 +7,7 @@ cache:
         - $HOME/libidn2-2.0.4
         - $HOME/wolfssl-3.14.0-stable
         - $HOME/mesalink-0.7.1
+        - $HOME/nghttp2-1.34.0
 
 env:
     global:
@@ -142,17 +143,16 @@ matrix:
           compiler: clang
           dist: trusty
           env: T=tidy
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
-  - if [ $TRAVIS_OS_NAME = linux ]; then
-      curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.24.0/nghttp2-1.24.0.tar.gz |
-         tar xzf - &&
-         (cd nghttp2-1.24.0 && CXX="g++-8" ./configure --prefix=/usr --disable-threads --enable-app && make && sudo make install);
-    fi
 
 before_script:
     - ./buildconf
@@ -250,11 +250,23 @@ before_script:
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
+        if [ ! -e $HOME/nghttp2-1.34.0/Makefile ]; then
+          (cd $HOME && \
+          curl -L https://github.com/nghttp2/nghttp2/releases/download/v1.34.0/nghttp2-1.34.0.tar.gz |
+          tar xzf - && \
+          cd nghttp2-1.34.0 && \
+          CXX="g++-8" CC="gcc-8" CFLAGS="" LDFLAGS="" LIBS="" ./configure --disable-threads --enable-app && \
+          make)
+        fi
+      fi
+    - |
+      if [ $TRAVIS_OS_NAME = linux ]; then
         (cd $HOME/libidn2-2.0.4 && sudo make install)
         (cd $HOME/libpsl-0.20.1 && sudo make install)
         (cd $HOME/mbedtls-mbedtls-2.8.0 && sudo make install)
         (cd $HOME/wolfssl-3.14.0-stable && sudo make install)
         (cd $HOME/mesalink-0.7.1 && sudo make install)
+        (cd $HOME/nghttp2-1.34.0 && sudo make install)
       fi
 
 script:
