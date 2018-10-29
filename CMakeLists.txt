@@ -1300,11 +1300,6 @@ configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
 install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-# This needs to be run very last so other parts of the scripts can take advantage of this.
-if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
-  set(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
-endif()
-
 # install headers
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
