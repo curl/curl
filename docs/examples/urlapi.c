@@ -43,9 +43,10 @@ int main(void)
 
   /* init Curl URL */
   urlp = curl_url();
-  uc = curl_url_set(urlp, CURLUPART_URL, "http://example.com/path/index.html", 0);
+  uc = curl_url_set(urlp, CURLUPART_URL,
+                    "http://example.com/path/index.html", 0);
 
-  if(uc){
+  if(uc) {
     fprintf(stderr, "curl_url_set() failed: %s\n",
               curl_easy_strerror(uc));
     goto cleanup;

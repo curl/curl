@@ -1348,6 +1348,7 @@ void Curl_init_CONNECT(struct Curl_easy *data)
 CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result;
+  CURLUcode uc;
 
   if(!data->change.url && !data->set.uh) {
     /* we can't do anything without URL */
@@ -1363,7 +1364,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   }
 
   if(!data->change.url && data->set.uh)
-    result = curl_url_get(data->set.uh,
+    uc = curl_url_get(data->set.uh,
                         CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
 
   data->change.url = data->set.str[STRING_SET_URL];
