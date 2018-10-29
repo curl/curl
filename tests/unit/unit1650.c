@@ -170,7 +170,7 @@ UNITTEST_START
       fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
       return 2;
     }
-    else if(memcmp(req[i].packet, buffer, size)) {
+    else if(req[i].packet && memcmp(req[i].packet, buffer, size)) {
       fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
       fprintf(stderr, "... instead of: %s\n",
              hexdump((unsigned char *)req[i].packet, size));
