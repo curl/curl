@@ -596,7 +596,7 @@ Curl_mesalink_get_internals(struct ssl_connect_data *connssl,
 }
 
 const struct Curl_ssl Curl_ssl_mesalink = {
-  { CURLSSLBACKEND_WOLFSSL, "MesaLink" }, /* info */
+  { CURLSSLBACKEND_MESALINK, "MesaLink" }, /* info */
 
   SSLSUPP_SSL_CTX,
 
