@@ -1130,33 +1130,20 @@ valid_cert_encoding(const CERT_CONTEXT *pCertContext)
     (pCertContext->cbCertEncoded > 0);
 }
 
-typedef bool(*Read_cert_function)(const CERT_CONTEXT *ccert_context, void* arg);
+typedef bool(*Read_crt_func)(const CERT_CONTEXT *ccert_context, void* arg);
 
 static void
-traverse_cert_chain(const CERT_CONTEXT *start_context, Read_cert_function func, void* arg)
+traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func, void* arg)
 {
-  DWORD dwVerificationFlags = 0;
-  const CERT_CONTEXT *pIssuerContext = NULL;
-  const CERT_CONTEXT *pCurrentContext = start_context;
-  bool shouldContinue;
-  do {
+  const CERT_CONTEXT *pCurrentContext = NULL;
+  bool shouldContinue = true;
+  while ((pCurrentContext = CertEnumCertificatesInStore(
+          context->hCertStore,
+          pCurrentContext)) &&
+          shouldContinue)
     shouldContinue = func(pCurrentContext, arg);
-    if(shouldContinue) {
-      pIssuerContext = CertGetIssuerCertificateFromStore(
-        start_context->hCertStore,
-        pCurrentContext,
-        NULL,
-        &dwVerificationFlags);
 
-      if(pCurrentContext != start_context)
-        CertFreeCertificateContext(pCurrentContext);
-
-      pCurrentContext = pIssuerContext;
-    }
-  }
-  while(pIssuerContext != NULL && shouldContinue);
-
-  if(pCurrentContext != NULL && pCurrentContext != start_context)
+  if(pCurrentContext != NULL)
     CertFreeCertificateContext(pCurrentContext);
 }
 
@@ -1305,14 +1292,14 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       return CURLE_PEER_FAILED_VERIFICATION;
     }
 
-    traverse_cert_chain(ccert_context, cert_counter_callback, &certs_count);
+    traverse_cert_store(ccert_context, cert_counter_callback, &certs_count);
 
     result = Curl_ssl_init_certinfo(data, certs_count);
     if(!result) {
       struct Adder_args args;
       args.conn = conn;
       args.idx = 0;
-      traverse_cert_chain(ccert_context, add_cert_to_certinfo, &args);
+      traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
       result = args.result;
     }
     CertFreeCertificateContext(ccert_context);
