@@ -1623,7 +1623,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
     if test "$PKGCONFIG" != "no" ; then
       SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
-        $PKGCONFIG --libs-only-l openssl 2>/dev/null`
+        $PKGCONFIG --libs-only-l --libs-only-other openssl 2>/dev/null`
 
       SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
         $PKGCONFIG --libs-only-L openssl 2>/dev/null`
