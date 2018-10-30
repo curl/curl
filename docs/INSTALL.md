@@ -105,7 +105,6 @@ libressl.
  - NSS: `--without-ssl --with-nss`
  - PolarSSL: `--without-ssl --with-polarssl`
  - mbedTLS: `--without-ssl --with-mbedtls`
- - axTLS: `--without-ssl --with-axtls`
  - schannel: `--without-ssl --with-winssl`
  - secure transport: `--without-ssl --with-darwinssl`
  - MesaLink: `--without-ssl --with-mesalink`

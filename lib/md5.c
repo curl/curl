@@ -163,13 +163,6 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
 
-#elif defined(USE_AXTLS)
-#include <axTLS/config.h>
-#include <axTLS/os_int.h>
-#include <axTLS/crypto.h>
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 #else
 /* When no other crypto library is available we use this code segment */
 /*

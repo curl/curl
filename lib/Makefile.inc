@@ -28,12 +28,12 @@ LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
 LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
-  vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c               \
+  vtls/polarssl.c vtls/polarssl_threadlock.c                            \
   vtls/cyassl.c vtls/schannel.c vtls/schannel_verify.c                  \
   vtls/darwinssl.c vtls/gskit.c vtls/mbedtls.c vtls/mesalink.c
 
 LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
-  vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h vtls/axtls.h   \
+  vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h                \
   vtls/cyassl.h vtls/schannel.h vtls/darwinssl.h vtls/gskit.h           \
   vtls/mbedtls.h vtls/mesalink.h
 

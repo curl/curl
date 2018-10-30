@@ -1170,8 +1170,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
 const struct Curl_ssl *Curl_ssl =
 #if defined(CURL_WITH_MULTI_SSL)
   &Curl_ssl_multi;
-#elif defined(USE_AXTLS)
-  &Curl_ssl_axtls;
 #elif defined(USE_CYASSL)
   &Curl_ssl_cyassl;
 #elif defined(USE_DARWINSSL)
@@ -1197,9 +1195,6 @@ const struct Curl_ssl *Curl_ssl =
 #endif
 
 static const struct Curl_ssl *available_backends[] = {
-#if defined(USE_AXTLS)
-  &Curl_ssl_axtls,
-#endif
 #if defined(USE_CYASSL)
   &Curl_ssl_cyassl,
 #endif

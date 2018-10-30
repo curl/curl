@@ -6,7 +6,7 @@
 #                             \___|\___/|_| \_\_____|
 #
 # Copyright (C) 2004 - 2015, Guenter Knauf
-# Copyright (C) 2001 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -47,11 +47,6 @@ endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-1.5.0
-endif
-
-# Edit the path below to point to the base of your axTLS package.
-ifndef AXTLS_PATH
-AXTLS_PATH = ../../axTLS-1.2.7
 endif
 
 # Edit the path below to point to the base of your libidn package.
@@ -230,16 +225,11 @@ WITH_SSH2 = 1
 WITH_SSL = 1
 WITH_ZLIB = 1
 endif
-ifeq ($(findstring -axtls,$(CFG)),-axtls)
-WITH_AXTLS = 1
-WITH_SSL =
-else
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
 WITH_SSL = 1
 ifeq ($(findstring -srp,$(CFG)),-srp)
 ifeq "$(wildcard $(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl/srp.h)" "$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)/openssl/srp.h"
 WITH_SRP = 1
-endif
 endif
 endif
 endif
@@ -280,16 +270,6 @@ ifdef WITH_SSL
   IMPORTS += GetProcessSwitchCount RunningProcess
   INSTDEP += ca-bundle.crt
 else
-ifdef WITH_AXTLS
-  INCLUDES += -I$(AXTLS_PATH)/inc
-  ifdef LINK_STATIC
-    LDLIBS += $(AXTLS_PATH)/lib/libaxtls.$(LIBEXT)
-  else
-    MODULES += libaxtls.nlm
-    IMPORTS += $(AXTLS_PATH)/lib/libaxtls.imp
-  endif
-  INSTDEP += ca-bundle.crt
-endif
 endif
 ifdef WITH_ZLIB
   INCLUDES += -I$(ZLIB_PATH)
@@ -672,9 +652,6 @@ ifdef WITH_SPNEGO
 	@echo $(DL)#define HAVE_SPNEGO 1$(DL) >> $@
 endif
 else
-ifdef WITH_AXTLS
-	@echo $(DL)#define USE_AXTLS 1$(DL) >> $@
-endif
 endif
 ifdef WITH_SSH2
 	@echo $(DL)#define USE_LIBSSH2 1$(DL) >> $@

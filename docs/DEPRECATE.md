@@ -5,32 +5,6 @@ email the curl-library mailing list as soon as possible and explain to us why
 this is a problem for you and how your use case can't be satisfied properly
 using a work around.
 
-## axTLS backend
-
-Here are some complaints on axTLS.
-
- - home page without HTTPS
- - [doesn't support modern TLS features like SNI](https://github.com/dsheets/axtls/issues/2)
- - [lacks support for modern ciphers](https://github.com/micropython/micropython/issues/3198)
- - [doesn't allow for outside bug report submissions](https://sourceforge.net/p/axtls/bugs/)
- - there's virtually no discussion about it in its [forum](https://sourceforge.net/p/axtls/discussion/)
-   nor [mailing list](https://sourceforge.net/p/axtls/mailman/axtls-general/)
-
-Combined, this list hints that this is not a library and project we should
-recommend to users.
-
-### State
-
-Since June 1st, 2018 (curl 7.61.0) axTLS support is disabled in code and
-requires a small code change to build without errors. [See
-PR](https://github.com/curl/curl/pull/2628)
-
-### Removal
-
-Remove all axTLS related code from curl on December 1st, exactly six months
-after previously mentioned commit. To be shipped on December 26, 2018
-(possibly called version 7.64.0)
-
 ## HTTP pipelining
 
 HTTP pipelining is badly supported by curl in the sense that we have bugs and

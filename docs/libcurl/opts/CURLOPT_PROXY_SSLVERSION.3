@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2016, 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -50,7 +50,7 @@ TLSv1.3
 The maximum TLS version can be set by using \fIone\fP of the
 CURL_SSLVERSION_MAX_ macros below. It is also possible to OR \fIone\fP of the
 CURL_SSLVERSION_ macros with \fIone\fP of the CURL_SSLVERSION_MAX_ macros.
-The MAX macros are not supported for SSL backends axTLS or wolfSSL.
+The MAX macros are not supported for WolfSSL.
 .RS
 .IP CURL_SSLVERSION_MAX_DEFAULT
 The flag defines the maximum supported TLS version as TLSv1.2, or the default
