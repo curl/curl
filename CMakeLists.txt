@@ -1133,7 +1133,7 @@ if(CURL_WERROR)
 endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
-function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
+function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   file(READ ${INPUT_FILE} MAKEFILE_INC_TEXT)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
