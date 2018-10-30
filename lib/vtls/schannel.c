@@ -1122,29 +1122,29 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 }
 
 static bool
-valid_cert_encoding(const CERT_CONTEXT *pCertContext)
+valid_cert_encoding(const CERT_CONTEXT *cert_context)
 {
-  return (pCertContext != NULL) &&
-    ((pCertContext->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-    (pCertContext->pbCertEncoded != NULL) &&
-    (pCertContext->cbCertEncoded > 0);
+  return (cert_context != NULL) &&
+    ((cert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+    (cert_context->pbCertEncoded != NULL) &&
+    (cert_context->cbCertEncoded > 0);
 }
 
-typedef bool(*Read_crt_func)(const CERT_CONTEXT *ccert_context, void* arg);
+typedef bool(*Read_crt_func)(const CERT_CONTEXT *ccert_context, void *arg);
 
 static void
-traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func, void* arg)
+traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func, void *arg)
 {
-  const CERT_CONTEXT *pCurrentContext = NULL;
-  bool shouldContinue = true;
-  while ((pCurrentContext = CertEnumCertificatesInStore(
-          context->hCertStore,
-          pCurrentContext)) &&
-          shouldContinue)
-    shouldContinue = func(pCurrentContext, arg);
+  const CERT_CONTEXT *current_context = NULL;
+  bool should_continue = true;
+  while(should_continue &&
+          (current_context = CertEnumCertificatesInStore(
+            context->hCertStore,
+            current_context)))
+    should_continue = func(current_context, arg);
 
-  if(pCurrentContext != NULL)
-    CertFreeCertificateContext(pCurrentContext);
+  if(current_context != NULL)
+    CertFreeCertificateContext(current_context);
 }
 
 static bool cert_counter_callback(const CERT_CONTEXT *ccert_context, void *certs_count)
@@ -1162,13 +1162,13 @@ struct Adder_args
 };
 
 static bool
-add_cert_to_certinfo(const CERT_CONTEXT *pCertContext, void *raw_arg)
+add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, void *raw_arg)
 {
   struct Adder_args *args = (struct Adder_args*)raw_arg;
   args->result = CURLE_OK;
-  if(valid_cert_encoding(pCertContext)) {
-    const char *beg = (const char *) pCertContext->pbCertEncoded;
-    const char *end = beg + pCertContext->cbCertEncoded;
+  if(valid_cert_encoding(ccert_context)) {
+    const char *beg = (const char *) ccert_context->pbCertEncoded;
+    const char *end = beg + ccert_context->cbCertEncoded;
     args->result = Curl_extract_certinfo(args->conn, (args->idx)++, beg, end);
   }
   return args->result == CURLE_OK;
