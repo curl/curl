@@ -27,11 +27,6 @@ ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../../libssh2-1.5.0
 endif
 
-# Edit the path below to point to the base of your axTLS package.
-ifndef AXTLS_PATH
-AXTLS_PATH = ../../../axTLS-1.2.7
-endif
-
 # Edit the path below to point to the base of your libidn package.
 ifndef LIBIDN_PATH
 LIBIDN_PATH = ../../../libidn-1.32
@@ -197,13 +192,8 @@ WITH_SSH2 = 1
 WITH_SSL = 1
 WITH_ZLIB = 1
 endif
-ifeq ($(findstring -axtls,$(CFG)),-axtls)
-WITH_AXTLS = 1
-WITH_SSL =
-else
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
 WITH_SSL = 1
-endif
 endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 WITH_ZLIB = 1
@@ -245,15 +235,6 @@ ifdef WITH_SSL
   LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
   IMPORTS += GetProcessSwitchCount RunningProcess
 else
-ifdef WITH_AXTLS
-  INCLUDES += -I$(AXTLS_PATH)/inc
-ifdef LINK_STATIC
-  LDLIBS += $(AXTLS_PATH)/lib/libaxtls.$(LIBEXT)
-else
-  MODULES += libaxtls.nlm
-  IMPORTS += $(AXTLS_PATH)/lib/libaxtls.imp
-endif
-endif
 endif
 ifdef WITH_ZLIB
   # INCLUDES += -I$(ZLIB_PATH)

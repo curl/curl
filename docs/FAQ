@@ -447,7 +447,7 @@ FAQ
   backends.
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
-  GnuTLS, yassl, NSS, PolarSSL, axTLS, Secure Transport (native iOS/OS X),
+  GnuTLS, yassl, NSS, PolarSSL, MesaLink, Secure Transport (native iOS/OS X),
   WinSSL (native Windows) or GSKit (native IBM i). They all have their pros
   and cons, and we try to maintain a comparison of them here:
   https://curl.haxx.se/docs/ssl-compared.html

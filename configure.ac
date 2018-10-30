@@ -158,7 +158,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,axtls,winssl,darwinssl,mesalink} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,winssl,darwinssl,mesalink} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -2631,70 +2631,10 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-OPT_AXTLS=off
-
-AC_ARG_WITH(axtls,dnl
-AC_HELP_STRING([--with-axtls=PATH],[Where to look for axTLS, PATH points to the axTLS installation prefix (default: /usr/local).  Ignored if another SSL engine is selected.])
-AC_HELP_STRING([--without-axtls], [disable axTLS]),
-  OPT_AXTLS=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_AXTLS" != xno; then
-  ssl_msg=
-  if test X"$OPT_AXTLS" != Xno; then
-    dnl backup the pre-axtls variables
-    CLEANLDFLAGS="$LDFLAGS"
-    CLEANCPPFLAGS="$CPPFLAGS"
-    CLEANLIBS="$LIBS"
-
-    case "$OPT_AXTLS" in
-    yes)
-      dnl --with-axtls (without path) used
-      PREFIX_AXTLS=/usr/local
-      LIB_AXTLS="$PREFIX_AXTLS/lib"
-      LDFLAGS="$LDFLAGS -L$LIB_AXTLS"
-      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/include"
-      ;;
-    off)
-      dnl no --with-axtls option given, just check default places
-      PREFIX_AXTLS=
-      ;;
-    *)
-      dnl check the given --with-axtls spot
-      PREFIX_AXTLS=$OPT_AXTLS
-      LIB_AXTLS="$PREFIX_AXTLS/lib"
-      LDFLAGS="$LDFLAGS -L$LIB_AXTLS"
-      CPPFLAGS="$CPPFLAGS -I$PREFIX_AXTLS/include"
-      ;;
-    esac
-
-    AC_CHECK_LIB(axtls, ssl_version,[
-      LIBS="-laxtls $LIBS"
-      AC_DEFINE(USE_AXTLS, 1, [if axTLS is enabled])
-      AC_SUBST(USE_AXTLS, [1])
-      AXTLS_ENABLED=1
-      check_for_ca_bundle=1
-      USE_AXTLS="yes"
-      ssl_msg="axTLS"
-      test axtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-
-      if test "x$cross_compiling" != "xyes"; then
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_AXTLS"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $LIB_AXTLS to CURL_LIBRARY_PATH])
-      fi
-      ],[
-      LDFLAGS="$CLEANLDFLAGS"
-      CPPFLAGS="$CLEANCPPFLAGS"
-      LIBS="$CLEANLIBS"
-    ])
-  fi
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
-
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED$MESALINK_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED$MESALINK_ENABLED" in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls, --with-winssl, --with-darwinssl, or --with-mesalink to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-winssl, --with-darwinssl, or --with-mesalink to address this.])
   ;;
 x1)
   # one SSL backend is enabled
@@ -3122,8 +3062,6 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="POLARSSL_"
         elif test "x$CYASSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="CYASSL_"
-        elif test "x$AXTLS_ENABLED" = "x1"; then
-          versioned_symbols_flavour="AXTLS_"
         elif test "x$WINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="WINSSL_"
         elif test "x$DARWINSSL_ENABLED" = "x1"; then

@@ -291,7 +291,7 @@ if(WIN32)
 endif()
 
 # check SSL libraries
-# TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL
+# TODO support GNUTLS, NSS, POLARSSL, CYASSL
 
 if(APPLE)
   option(CMAKE_USE_DARWINSSL "enable Apple OS native SSL/TLS" OFF)

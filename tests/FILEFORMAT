@@ -220,7 +220,6 @@ SKIPPED.
 
 Features testable here are:
 
-axTLS
 crypto
 debug
 getrlimit
