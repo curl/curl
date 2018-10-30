@@ -1121,6 +1121,72 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
+static bool
+valid_cert_encoding(const CERT_CONTEXT *pCertContext)
+{
+  return (pCertContext != NULL) &&
+    ((pCertContext->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
+    (pCertContext->pbCertEncoded != NULL) &&
+    (pCertContext->cbCertEncoded > 0);
+}
+
+typedef bool(*Read_cert_function)(const CERT_CONTEXT *ccert_context, void* arg);
+
+static void
+traverse_cert_chain(const CERT_CONTEXT *start_context, Read_cert_function func, void* arg)
+{
+  DWORD dwVerificationFlags = 0;
+  const CERT_CONTEXT *pIssuerContext = NULL;
+  const CERT_CONTEXT *pCurrentContext = start_context;
+  bool shouldContinue;
+  do {
+    shouldContinue = func(pCurrentContext, arg);
+    if(shouldContinue) {
+      pIssuerContext = CertGetIssuerCertificateFromStore(
+        start_context->hCertStore,
+        pCurrentContext,
+        NULL,
+        &dwVerificationFlags);
+
+      if(pCurrentContext != start_context)
+        CertFreeCertificateContext(pCurrentContext);
+
+      pCurrentContext = pIssuerContext;
+    }
+  }
+  while(pIssuerContext != NULL && shouldContinue);
+
+  if(pCurrentContext != NULL && pCurrentContext != start_context)
+    CertFreeCertificateContext(pCurrentContext);
+}
+
+static bool cert_counter_callback(const CERT_CONTEXT *ccert_context, void *certs_count)
+{
+  if(valid_cert_encoding(ccert_context))
+    (*(int*)certs_count)++;
+  return true;
+}
+
+struct Adder_args
+{
+  struct connectdata *conn;
+  CURLcode result;
+  int idx;
+};
+
+static bool
+add_cert_to_certinfo(const CERT_CONTEXT *pCertContext, void *raw_arg)
+{
+  struct Adder_args *args = (struct Adder_args*)raw_arg;
+  args->result = CURLE_OK;
+  if(valid_cert_encoding(pCertContext)) {
+    const char *beg = (const char *) pCertContext->pbCertEncoded;
+    const char *end = beg + pCertContext->cbCertEncoded;
+    args->result = Curl_extract_certinfo(args->conn, (args->idx)++, beg, end);
+  }
+  return args->result == CURLE_OK;
+}
+
 static CURLcode
 schannel_connect_step3(struct connectdata *conn, int sockindex)
 {
@@ -1230,6 +1296,7 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
   }
 
   if(data->set.ssl.certinfo) {
+    int certs_count = 0;
     sspi_status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
       SECPKG_ATTR_REMOTE_CERT_CONTEXT, &ccert_context);
 
@@ -1238,15 +1305,15 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
       return CURLE_PEER_FAILED_VERIFICATION;
     }
 
-    result = Curl_ssl_init_certinfo(data, 1);
-    if(!result) {
-      if(((ccert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-         (ccert_context->cbCertEncoded > 0)) {
+    traverse_cert_chain(ccert_context, cert_counter_callback, &certs_count);
 
-        const char *beg = (const char *) ccert_context->pbCertEncoded;
-        const char *end = beg + ccert_context->cbCertEncoded;
-        result = Curl_extract_certinfo(conn, 0, beg, end);
-      }
+    result = Curl_ssl_init_certinfo(data, certs_count);
+    if(!result) {
+      struct Adder_args args;
+      args.conn = conn;
+      args.idx = 0;
+      traverse_cert_chain(ccert_context, add_cert_to_certinfo, &args);
+      result = args.result;
     }
     CertFreeCertificateContext(ccert_context);
     if(result)
