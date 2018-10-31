@@ -1348,7 +1348,6 @@ void Curl_init_CONNECT(struct Curl_easy *data)
 CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result;
-  CURLUcode uc;
 
   if(!data->change.url && !data->set.uh) {
     /* we can't do anything without URL */
@@ -1363,9 +1362,15 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->change.url_alloc = FALSE;
   }
 
-  if(!data->change.url && data->set.uh)
+  if(!data->change.url && data->set.uh) {
+    CURLUcode uc;
     uc = curl_url_get(data->set.uh,
                         CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
+    if(uc) {
+      failf(data, "No URL set!");
+      return CURLE_URL_MALFORMAT;
+    }
+  }
 
   data->change.url = data->set.str[STRING_SET_URL];
 
