@@ -1114,7 +1114,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
 
 #ifdef HAS_MANUAL_VERIFY_API
   if(conn->ssl_config.verifypeer && BACKEND->use_manual_cred_validation) {
-    return verify_certificate(conn, sockindex);
+    return Curl_verify_certificate(conn, sockindex);
   }
 #endif
 
