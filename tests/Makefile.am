@@ -35,7 +35,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  FILEFORMAT README stunnel.pem memanalyze.pl testcurl.pl valgrind.pm ftp.pm   \
  sshserver.pl sshhelp.pm pathhelp.pm testcurl.1 runtests.1 \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl \
- CMakeLists.txt mem-include-scan.pl valgrind.supp http_pipe.py extern-scan.pl \
+ CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl \
  manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py \
  negtelnetserver.py $(SMBDEPS)
 
