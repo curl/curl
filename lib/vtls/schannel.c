@@ -1133,24 +1133,26 @@ valid_cert_encoding(const CERT_CONTEXT *cert_context)
 typedef bool(*Read_crt_func)(const CERT_CONTEXT *ccert_context, void *arg);
 
 static void
-traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func, void *arg)
+traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func,
+                    void *arg)
 {
   const CERT_CONTEXT *current_context = NULL;
   bool should_continue = true;
   while(should_continue &&
           (current_context = CertEnumCertificatesInStore(
             context->hCertStore,
-            current_context)))
+            current_context)) != NULL)
     should_continue = func(current_context, arg);
 
   if(current_context != NULL)
     CertFreeCertificateContext(current_context);
 }
 
-static bool cert_counter_callback(const CERT_CONTEXT *ccert_context, void *certs_count)
+static bool
+cert_counter_callback(const CERT_CONTEXT *ccert_context, void *certs_count)
 {
   if(valid_cert_encoding(ccert_context))
-    (*(int*)certs_count)++;
+    (*(int *)certs_count)++;
   return true;
 }
 
