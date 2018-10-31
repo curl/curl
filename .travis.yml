@@ -316,6 +316,7 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "normal" ]; then
+             sudo rm -f /usr/bin/curl
              ./configure --enable-warnings --enable-werror $C
              make && make examples
              if [ -z $NOTESTS ]; then
