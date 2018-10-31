@@ -406,7 +406,7 @@ cleanup:
   return result;
 }
 
-CURLcode verify_certificate(struct connectdata *conn, int sockindex)
+CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
 {
   SECURITY_STATUS status;
   struct Curl_easy *data = conn->data;
