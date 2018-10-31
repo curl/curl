@@ -151,7 +151,7 @@ my $NEGTELNETPORT;       # TELNET server port with negotiation
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
-my $VCURL="curl";   # what curl binary to use to verify the servers with
+my $VCURL=$CURL;   # what curl binary to use to verify the servers with
                    # VCURL is handy to set to the system one when the one you
                    # just built hangs or crashes and thus prevent verification
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
