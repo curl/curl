@@ -28,6 +28,7 @@
 #endif
 
 #ifdef WIN32
+#  include <tlhelp32.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
 #endif
@@ -668,6 +669,58 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   }
 
   return result;
+}
+
+
+/* Get a list of all loaded modules with full paths.
+ * Returns slist on success or NULL on error.
+ */
+struct curl_slist *GetLoadedModulePaths(void)
+{
+  HANDLE hnd = INVALID_HANDLE_VALUE;
+  MODULEENTRY32 mod = { sizeof(mod), };
+  struct curl_slist *slist = NULL;
+
+  do {
+    hnd = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
+  } while(hnd == INVALID_HANDLE_VALUE && GetLastError() == ERROR_BAD_LENGTH);
+
+  if(hnd == INVALID_HANDLE_VALUE)
+    goto error;
+
+  if(!Module32First(hnd, &mod))
+    goto error;
+
+  do {
+    char *path; /* points to stack allocated buffer */
+    struct curl_slist *temp;
+
+#ifdef UNICODE
+    /* sizeof(mod.szExePath) is the max total bytes of wchars. the max total
+       bytes of multibyte chars won't be more than twice that. */
+    char buffer[sizeof(mod.szExePath) * 2];
+    if(!WideCharToMultiByte(CP_ACP, 0, mod.szExePath, -1,
+                            buffer, sizeof(buffer), NULL, NULL))
+      goto error;
+    path = buffer;
+#else
+    path = mod.szExePath;
+#endif
+    temp = curl_slist_append(slist, path);
+    if(!temp)
+      goto error;
+    slist = temp;
+  } while(Module32Next(hnd, &mod));
+
+  goto cleanup;
+
+error:
+  curl_slist_free_all(slist);
+  slist = NULL;
+cleanup:
+  if(hnd != INVALID_HANDLE_VALUE)
+    CloseHandle(hnd);
+  return slist;
 }
 
 #endif /* WIN32 */

@@ -38,6 +38,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_convert.h"
+#include "tool_doswin.h"
 #include "tool_msgs.h"
 #include "tool_operate.h"
 #include "tool_panykey.h"
@@ -305,6 +306,21 @@ int main(int argc, char *argv[])
   /* Initialize the curl library - do not call any libcurl functions before
      this point */
   result = main_init(&global);
+
+#ifdef WIN32
+  /* Undocumented diagnostic option to list the full paths of all loaded
+     modules, regardless of whether or not initialization succeeded. */
+  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
+    struct curl_slist *item, *head = GetLoadedModulePaths();
+    for(item = head; item; item = item->next) {
+      printf("%s\n", item->data);
+    }
+    curl_slist_free_all(head);
+    if(!result)
+      main_free(&global);
+  }
+  else
+#endif /* WIN32 */
   if(!result) {
     /* Start our curl operation */
     result = operate(&global, argc, argv);
