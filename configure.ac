@@ -4300,10 +4300,15 @@ XC_AMEND_DISTCLEAN([lib src tests/unit tests/server tests/libtest docs/examples]
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
-  curl version:     ${CURLVERSION}
   Host setup:       ${host}
   Install prefix:   ${prefix}
   Compiler:         ${CC}
+   CFLAGS:          ${CFLAGS}
+   CPPFLAGS:        ${CPPFLAGS}
+   LDFLAGS:         ${LDFLAGS}
+   LIBS:            ${LIBS}
+
+  curl version:     ${CURLVERSION}
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
