@@ -1514,7 +1514,8 @@ CURLcode Curl_follow(struct Curl_easy *data,
     disallowport = TRUE;
 
   DEBUGASSERT(data->state.uh);
-  uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl, 0);
+  uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl,
+                    (type == FOLLOW_FAKE) ? CURLU_NON_SUPPORT_SCHEME : 0);
   if(uc)
     return Curl_uc_to_curlcode(uc);
 
