@@ -156,7 +156,36 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-  rc = fwrite(buffer, sz, nmemb, outs->stream);
+#ifdef _WIN32
+  if(isatty(fileno(outs->stream))) {
+    DWORD in_len = (DWORD)(sz * nmemb);
+    wchar_t* wc_buf;
+    DWORD wc_len;
+
+    /* calculate buffer size for wide characters */
+    wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len,  NULL, 0);
+    wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
+    if(!wc_buf)
+      return failure;
+
+    /* calculate buffer size for multi-byte characters */
+    wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len, wc_buf, wc_len);
+
+    if(!WriteConsoleW(
+        (HANDLE) _get_osfhandle(fileno(outs->stream)),
+        wc_buf,
+        wc_len,
+        &wc_len,
+        NULL)) {
+      free(wc_buf);
+      return failure;
+    }
+    free(wc_buf);
+    rc = bytes;
+  }
+  else
+#endif
+    rc = fwrite(buffer, sz, nmemb, outs->stream);
 
   if(bytes == rc)
     /* we added this amount of data to the output */

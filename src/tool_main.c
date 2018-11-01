@@ -241,13 +241,12 @@ static void main_free(struct GlobalConfig *config)
 static struct TerminalSettings {
   HANDLE hStdOut;
   DWORD dwOutputMode;
-  UINT nCodepage;
 } TerminalSettings;
 
 static void configure_terminal(void)
 {
   /*
-   * If we're running Windows, enable VT output & set codepage to UTF-8.
+   * If we're running Windows, enable VT output.
    * Note: VT mode flag can be set on any version of Windows, but VT
    * processing only performed on Win10 >= Creators Update)
    */
@@ -257,10 +256,7 @@ static void configure_terminal(void)
     #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-  /* Cache current codepage (will restore on exit) & set codepage to UTF-8 */
   memset(&TerminalSettings, 0, sizeof(TerminalSettings));
-  TerminalSettings.nCodepage = GetConsoleOutputCP();
-  SetConsoleOutputCP(65001);
 
   /* Enable VT output */
   TerminalSettings.hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -282,7 +278,6 @@ static void restore_terminal(void)
   /* Restore Console output mode and codepage to whatever they were
    * when Curl started */
   SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);
-  SetConsoleOutputCP(TerminalSettings.nCodepage);
 #endif
 }
 
