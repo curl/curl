@@ -2026,7 +2026,13 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   Curl_up_free(data); /* cleanup previous leftovers first */
 
   /* parse the URL */
-  uh = data->state.uh = curl_url();
+  if(data->set.uh) {
+    uh = data->set.uh;
+  }
+  else {
+    uh = data->state.uh = curl_url();
+  }
+
   if(!uh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -2043,15 +2049,17 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     data->change.url_alloc = TRUE;
   }
 
-  uc = curl_url_set(uh, CURLUPART_URL, data->change.url,
+  if(!data->set.uh) {
+    uc = curl_url_set(uh, CURLUPART_URL, data->change.url,
                     CURLU_GUESS_SCHEME |
                     CURLU_NON_SUPPORT_SCHEME |
                     (data->set.disallow_username_in_url ?
                      CURLU_DISALLOW_USER : 0) |
                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
-  if(uc) {
-    DEBUGF(infof(data, "curl_url_set rejected %s\n", data->change.url));
-    return Curl_uc_to_curlcode(uc);
+    if(uc) {
+      DEBUGF(infof(data, "curl_url_set rejected %s\n", data->change.url));
+      return Curl_uc_to_curlcode(uc);
+  }
   }
 
   uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
@@ -2192,6 +2200,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
 
 /*
  * If we're doing a resumed transfer, we need to setup our stuff
