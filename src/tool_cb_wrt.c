@@ -157,7 +157,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 
 #ifdef _WIN32
-  if(is_tty) {
+  if(isatty(fileno(outs->stream))) {
     DWORD in_len = (DWORD)(sz * nmemb);
     wchar_t* wc_buf;
     DWORD wc_len;
