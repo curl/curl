@@ -104,20 +104,30 @@ fail_unless(strcmp(result, input) == 0, "No truncation of infof input");
 fail_unless(result[sizeof(result) - 1] == '\0',
             "No truncation of infof input");
 
-/* Just over the limit for truncation */
+/* Just over the limit for truncation without newline */
 memset(input + 2047, 'A', 4);
 Curl_infof(data, "%s", input);
 fail_unless(strlen(result) == 2048, "Truncation of infof input 1");
 fail_unless(result[sizeof(result) - 1] == '\0', "Truncation of infof input 1");
-fail_unless(strncmp(result + 2044, "...", 3) == 0,
+fail_unless(strncmp(result + 2045, "...", 3) == 0,
             "Truncation of infof input 1");
 
-/* Way over the limit for truncation */
-memset(input, 'A', sizeof(input));
-Curl_infof(data, "%s", input);
+/* Just over the limit for truncation with newline */
+memset(input + 2047, 'A', 4);
+memset(input + 2047 + 4, '\n', 1);
+Curl_infof(data, "%s\n", input);
 fail_unless(strlen(result) == 2048, "Truncation of infof input 2");
 fail_unless(result[sizeof(result) - 1] == '\0', "Truncation of infof input 2");
 fail_unless(strncmp(result + 2044, "...", 3) == 0,
             "Truncation of infof input 2");
+
+/* Way over the limit for truncation with newline */
+memset(input, '\0', sizeof(input));
+memset(input, 'A', sizeof(input) - 1);
+Curl_infof(data, "%s\n", input);
+fail_unless(strlen(result) == 2048, "Truncation of infof input 3");
+fail_unless(result[sizeof(result) - 1] == '\0', "Truncation of infof input 3");
+fail_unless(strncmp(result + 2044, "...", 3) == 0,
+            "Truncation of infof input 3");
 
 UNITTEST_STOP
