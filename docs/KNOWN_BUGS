@@ -167,7 +167,8 @@ problems may have been fixed or changed somewhat since this was written!
  When given a URL with a trailing dot for the host name part:
  "https://example.com./", libcurl will strip off the dot and use the name
  without a dot internally and send it dot-less in HTTP Host: headers and in
- the TLS SNI field.
+ the TLS SNI field. For the purpose of resolving the name to an address
+ the hostname is used as is without any change.
 
  The HTTP part violates RFC 7230 section 5.4 but the SNI part is accordance
  with RFC 6066 section 3.
@@ -186,10 +187,10 @@ problems may have been fixed or changed somewhat since this was written!
  Our current approach allows a knowing client to send a custom HTTP header
  with the dot added.
 
- It can also be noted that while adding a trailing dot to the host name in
- most (all?) cases will make the name resolve to the same set of IP addresses,
- many HTTP servers will not happily accept the trailing dot there unless that
- has been specifically configured to be a fine virtual host.
+ In a few cases there is a difference in name resolving to IP addresses with
+ a trailing dot, but it can be noted that many HTTP servers will not happily
+ accept the trailing dot there unless that has been specifically configured
+ to be a fine virtual host.
 
  If URLs with trailing dots for host names become more popular or even just
  used more than for just plain fun experiments, I'm sure we will have reason
