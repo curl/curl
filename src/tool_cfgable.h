@@ -229,6 +229,8 @@ struct OperationConfig {
   bool xattr;               /* store metadata in extended attributes */
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
+  bool ssl_disable_tls13_middlebox; /* disable tls 1.3 middlebox */
+  bool proxy_ssl_disable_tls13_middlebox; /* disable tls 1.3 middlebox for proxy */
   bool proxy_ssl_allow_beast; /* allow this SSL vulnerability for proxy*/
 
   bool ssl_no_revoke;       /* disable SSL certificate revocation checks */

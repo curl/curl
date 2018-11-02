@@ -123,6 +123,7 @@ const NameValue setopt_nv_CURLUSESSL[] = {
 
 const NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
   NV(CURLSSLOPT_ALLOW_BEAST),
+  NV(CURLSSLOPT_TLS13_MIDDLEBOX),
   NV(CURLSSLOPT_NO_REVOKE),
   NVEND,
 };

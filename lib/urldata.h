@@ -226,6 +226,7 @@ struct ssl_config_data {
   struct ssl_primary_config primary;
   bool enable_beast; /* especially allow this flaw for interoperability's
                         sake*/
+  bool disable_tls13_middlebox; /* disable middleboxes */
   bool no_revoke;    /* disable SSL certificate revocation checks */
   long certverifyresult; /* result from the certificate verification */
   char *CRLfile;   /* CRL to check certificate revocation */

@@ -263,6 +263,7 @@ static const struct LongShort aliases[]= {
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
+  {"EC", "ssl-disable-tls13-middlebox", ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -1658,6 +1659,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else
           config->socks5_auth &= ~CURLAUTH_GSSAPI;
         break;
+      case 'C':
+	/* tls 1.3 disable middlebox */
+	if(curlinfo->features & CURL_VERSION_SSL)
+	  config->ssl_disable_tls13_middlebox = toggle;
+	break;
 
       default: /* unknown flag */
         return PARAM_OPTION_UNKNOWN;

@@ -410,6 +410,8 @@ static const struct helptxt helptext[] = {
    "Try SSL/TLS"},
   {"    --ssl-allow-beast",
    "Allow security flaw to improve interop"},
+  {"    --ssl-disable-tls13-middlebox",
+   "Disable middlebox for tls 1.3"},
   {"    --ssl-no-revoke",
    "Disable cert revocation checks (WinSSL)"},
   {"    --ssl-reqd",

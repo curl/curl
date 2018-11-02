@@ -2396,6 +2396,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     ctx_options |= SSL_OP_NO_TLSv1_2;
 #ifdef TLS1_3_VERSION
     ctx_options |= SSL_OP_NO_TLSv1_3;
+    if (SSL_SET_OPTION(disable_tls13_middlebox))
+    SSL_CTX_clear_options(BACKEND->ctx, SSL_OP_ENABLE_MIDDLEBOX_COMPAT);
 #endif
 #endif
     break;
