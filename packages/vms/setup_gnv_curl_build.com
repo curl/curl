@@ -207,7 +207,7 @@ $   example_apps = example_apps + ",ftpupload,getinfo,getinmemory"
 $   example_apps = example_apps + ",http-post,httpcustomheader,httpput"
 $   example_apps = example_apps + ",https,multi-app,multi-debugcallback"
 $   example_apps = example_apps + ",multi-double,multi-post,multi-single"
-$   example_apps = example_apps + ",persistant,post-callback,postit2"
+$   example_apps = example_apps + ",persistent,post-callback,postit2"
 $   example_apps = example_apps + ",sendrecv,sepheaders,simple,simplepost"
 $   example_apps = example_apps + ",simplessl"
 $!
