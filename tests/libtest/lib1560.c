@@ -128,6 +128,15 @@ struct querycase {
 };
 
 static struct testcase get_parts_list[] ={
+  {"http://[fd00:a41::50]:8080",
+   "http | [11] | [12] | [13] | [fd00:a41::50] | 8080 | / | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"http://[fd00:a41::50]/",
+   "http | [11] | [12] | [13] | [fd00:a41::50] | [15] | / | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"http://[fd00:a41::50]",
+   "http | [11] | [12] | [13] | [fd00:a41::50] | [15] | / | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://[::1%252]:1234",
    "https | [11] | [12] | [13] | [::1%252] | 1234 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
