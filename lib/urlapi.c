@@ -499,8 +499,12 @@ static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
     portptr = &hostname[len];
-    if (*portptr != ':')
-      return CURLUE_MALFORMED_INPUT;
+    if(*portptr) {
+      if(*portptr != ':')
+        return CURLUE_MALFORMED_INPUT;
+    }
+    else
+      portptr = NULL;
   }
   else
     portptr = strchr(hostname, ':');
