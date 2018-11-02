@@ -157,7 +157,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 
 #ifdef _WIN32
-  if (is_tty) {
+  if(is_tty) {
     DWORD in_len = (DWORD)(sz * nmemb);
     wchar_t* wc_buf;
     DWORD wc_len;
@@ -165,13 +165,13 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     /* calculate buffer size for wide characters */
     wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len,  NULL, 0);
     wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
-    if (!wc_buf)
+    if(!wc_buf)
       return failure;
 
     /* calculate buffer size for multi-byte characters */
     wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len, wc_buf, wc_len);
 
-    if (!WriteConsoleW(
+    if(!WriteConsoleW(
         (HANDLE) _get_osfhandle(fileno(outs->stream)),
         wc_buf,
         wc_len,
