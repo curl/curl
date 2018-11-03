@@ -1467,7 +1467,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
         break;
       case 'a': /* CA info PEM file */
-        /* CA info PEM file */
         GetStr(&config->cacert, nextarg);
         break;
       case 'b': /* cert file type */
@@ -1488,8 +1487,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(config->engine && curl_strequal(config->engine, "list"))
           return PARAM_ENGINES_REQUESTED;
         break;
-      case 'g': /* CA info PEM file */
-        /* CA cert directory */
+      case 'g': /* CA cert directory */
         GetStr(&config->capath, nextarg);
         break;
       case 'h': /* --pubkey public key file */
@@ -1500,8 +1498,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
           return PARAM_BAD_USE;
         break;
-      case 'j': /* CRL info PEM file */
-        /* CRL file */
+      case 'j': /* CRL file */
         GetStr(&config->crlfile, nextarg);
         break;
       case 'k': /* TLS username */
@@ -1535,7 +1532,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case 'p': /* Pinned public key DER file */
-        /* Pinned public key DER file */
         GetStr(&config->pinnedpubkey, nextarg);
         break;
 
@@ -1610,8 +1606,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         GetStr(&config->proxy_cipher_list, nextarg);
         break;
 
-      case '3': /* CRL info PEM file for proxy */
-        /* CRL file */
+      case '3': /* CRL file for proxy */
         GetStr(&config->proxy_crlfile, nextarg);
         break;
 
@@ -1625,12 +1620,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
 
       case '6': /* CA info PEM file for proxy */
-        /* CA info PEM file */
         GetStr(&config->proxy_cacert, nextarg);
         break;
 
-      case '7': /* CA info PEM file for proxy */
-        /* CA cert directory */
+      case '7': /* CA cert directory for proxy */
         GetStr(&config->proxy_capath, nextarg);
         break;
 
@@ -1811,8 +1804,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case 'n':
       switch(subletter) {
-      case 'o': /* CA info PEM file */
-        /* use .netrc or URL */
+      case 'o': /* use .netrc or URL */
         config->netrc_opt = toggle;
         break;
       case 'e': /* netrc-file */
