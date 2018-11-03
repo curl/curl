@@ -2999,6 +2999,20 @@ static CURLcode override_login(struct Curl_easy *data,
   bool user_changed = FALSE;
   bool passwd_changed = FALSE;
   CURLUcode uc;
+
+  if(data->set.use_netrc == CURL_NETRC_REQUIRED && conn->bits.user_passwd) {
+    /* ignore user+password in the URL */
+    if(*userp) {
+      Curl_safefree(*userp);
+      user_changed = TRUE;
+    }
+    if(*passwdp) {
+      Curl_safefree(*passwdp);
+      passwd_changed = TRUE;
+    }
+    conn->bits.user_passwd = FALSE; /* disable user+password */
+  }
+
   if(data->set.str[STRING_USERNAME]) {
     free(*userp);
     *userp = strdup(data->set.str[STRING_USERNAME]);
@@ -3025,16 +3039,15 @@ static CURLcode override_login(struct Curl_easy *data,
   }
 
   conn->bits.netrc = FALSE;
-  if(data->set.use_netrc != CURL_NETRC_IGNORED) {
-    char *nuser = NULL;
-    char *npasswd = NULL;
+  if(data->set.use_netrc != CURL_NETRC_IGNORED &&
+      (!*userp || !**userp || !*passwdp || !**passwdp)) {
+    bool netrc_user_changed = FALSE;
+    bool netrc_passwd_changed = FALSE;
     int ret;
 
-    if(data->set.use_netrc == CURL_NETRC_OPTIONAL)
-      nuser = *userp; /* to separate otherwise identical machines */
-
     ret = Curl_parsenetrc(conn->host.name,
-                          &nuser, &npasswd,
+                          userp, passwdp,
+                          &netrc_user_changed, &netrc_passwd_changed,
                           data->set.str[STRING_NETRC_FILE]);
     if(ret > 0) {
       infof(data, "Couldn't find host %s in the "
@@ -3051,31 +3064,11 @@ static CURLcode override_login(struct Curl_easy *data,
       conn->bits.netrc = TRUE;
       conn->bits.user_passwd = TRUE; /* enable user+password */
 
-      if(data->set.use_netrc == CURL_NETRC_OPTIONAL) {
-        /* prefer credentials outside netrc */
-        if(nuser && !*userp) {
-          free(*userp);
-          *userp = nuser;
-          user_changed = TRUE;
-        }
-        if(npasswd && !*passwdp) {
-          free(*passwdp);
-          *passwdp = npasswd;
-          passwd_changed = TRUE;
-        }
+      if(netrc_user_changed) {
+        user_changed = TRUE;
       }
-      else {
-        /* prefer netrc credentials */
-        if(nuser) {
-          free(*userp);
-          *userp = nuser;
-          user_changed = TRUE;
-        }
-        if(npasswd) {
-          free(*passwdp);
-          *passwdp = npasswd;
-          passwd_changed = TRUE;
-        }
+      if(netrc_passwd_changed) {
+        passwd_changed = TRUE;
       }
     }
   }

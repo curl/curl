@@ -47,20 +47,21 @@ standard Unix ftp client does). It should only be readable by user.
 \fIlevel\fP should be set to one of the values described below.
 
 .IP CURL_NETRC_OPTIONAL
-The use of your \fI~/.netrc\fP file is optional, and information in the URL is
-to be preferred.  The file will be scanned for the host and user name (to
-find the password only) or for the host only, to find the first user name and
-password after that \fImachine\fP, which ever information is not specified in
-the URL.
+The use of the \fI~/.netrc\fP file is optional, and information in the URL is
+to be preferred.  The file will be scanned for the host and user name (to find
+the password only) or for the host only, to find the first user name and
+password after that \fImachine\fP, which ever information is not specified.
 
 Undefined values of the option will have this effect.
 .IP CURL_NETRC_IGNORED
-The library will ignore the file and use only the information in the URL.
+The library will ignore the \fI~/.netrc\fP file.
 
 This is the default.
 .IP CURL_NETRC_REQUIRED
-This value tells the library that use of the file is required, to ignore the
-information in the URL, and to search the file for the host only.
+The use of the \fI~/.netrc\fP file is required, and information in the URL is
+to be ignored.  The file will be scanned for the host and user name (to find
+the password only) or for the host only, to find the first user name and
+password after that \fImachine\fP, which ever information is not specified.
 .SH DEFAULT
 CURL_NETRC_IGNORED
 .SH PROTOCOLS
