@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2010-2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2010-2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -53,6 +53,7 @@ my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
 
 my $h = "$root/include/curl/curl.h";
 my $mh = "$root/include/curl/multi.h";
+my $ua = "$root/include/curl/urlapi.h";
 
 my $verbose=0;
 my $summary=0;
@@ -87,6 +88,7 @@ sub scanheader {
 
 scanheader($h);
 scanheader($mh);
+scanheader($ua);
 
 open S, "<$root/docs/libcurl/symbols-in-versions";
 while(<S>) {
