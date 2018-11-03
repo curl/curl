@@ -796,7 +796,7 @@ typedef enum {
 #define CURLSSLOPT_ALLOW_BEAST (1<<0)
 
 /* - TLSv1.3 MIDDLEBOX mode */
-#define CURLSSLOPT_TLS13_MIDDLEBOX (1<<0)
+#define CURLSSLOPT_TLS13_MIDDLEBOX (1<<2)
 
 /* - NO_REVOKE tells libcurl to disable certificate revocation checks for those
    SSL backends where such behavior is present. */
