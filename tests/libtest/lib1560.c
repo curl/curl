@@ -128,6 +128,20 @@ struct querycase {
 };
 
 static struct testcase get_parts_list[] ={
+#ifdef WIN32
+  {"file:/C:\\programs\\foo",
+   "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"file://C:\\programs\\foo",
+   "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"file:///C:\\programs\\foo",
+   "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+#endif
+  {"boing:80",
+   "https | [11] | [12] | [13] | boing | 80 | / | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"http://[fd00:a41::50]:8080",
    "http | [11] | [12] | [13] | [fd00:a41::50] | 8080 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
