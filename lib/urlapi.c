@@ -238,7 +238,7 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
 #endif
   for(i = 0; i < buflen && url[i]; ++i) {
     char s = url[i];
-    if(s == ':') {
+    if((s == ':') && (url[i + 1] == '/')) {
       if(buf)
         buf[i] = 0;
       return TRUE;

@@ -365,6 +365,8 @@ Available substitute variables include:
 %POP3PORT  - Port number of the POP3 server
 %PROXYPORT - Port number of the HTTP proxy
 %PWD       - Current directory
+%POSIX_PWD - Current directory somewhat mingw friendly
+%FILE_PWD  - Current directory, on windows prefixed with a slash
 %RTSP6PORT - IPv6 port number of the RTSP server
 %RTSPPORT  - Port number of the RTSP server
 %SMTP6PORT - IPv6 port number of the SMTP server
