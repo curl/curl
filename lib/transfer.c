@@ -844,6 +844,11 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       k->keepon &= ~KEEP_RECV;
     }
 
+    if(k->keepon & KEEP_RECV_PAUSE) {
+      /* this is a paused transfer */
+      break;
+    }
+
   } while(data_pending(conn) && maxloops--);
 
   if(maxloops <= 0) {
