@@ -50,6 +50,7 @@
  2.3 Non-blocking curl_multi_remove_handle()
  2.4 Split connect and authentication process
  2.5 Edge-triggered sockets should work
+ 2.6 multi upkeep
 
  3. Documentation
  3.2 Provide cmake config-file
@@ -475,6 +476,15 @@
  The multi_socket API should work with edge-triggered socket events. One of
  the internal actions that need to be improved for this to work perfectly is
  the 'maxloops' handling in transfer.c:readwrite_data().
+
+2.6 multi upkeep
+
+ In libcurl 7.62.0 we introduced curl_easy_upkeep. It unfortunately only works
+ on easy handles. We should introduces a version of that for the multi handle,
+ and also consider doing "upkeep" automatically on connections in the
+ connection pool when the multi handle is in used.
+
+ See https://github.com/curl/curl/issues/3199
 
 3. Documentation
 
