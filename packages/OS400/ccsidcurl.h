@@ -85,5 +85,11 @@ CURL_EXTERN CURLcode curl_mime_filedata_ccsid(curl_mimepart *part,
 CURL_EXTERN CURLcode curl_mime_data_ccsid(curl_mimepart *part,
                                           const char *data, size_t datasize,
                                           unsigned int ccsid);
+CURL_EXTERN CURLUcode curl_url_get_ccsid(CURLU *handle, CURLUPart what,
+                                         char **part, unsigned int flags,
+                                         unsigned int ccsid);
+CURL_EXTERN CURLUcode curl_url_set_ccsid(CURLU *handle, CURLUPart what,
+                                         const char *part, unsigned int flags,
+                                         unsigned int ccsid);
 
 #endif

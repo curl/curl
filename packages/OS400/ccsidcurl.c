@@ -1125,7 +1125,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-    if((int) STRING_LASTZEROTERMINATED != (int) STRING_TARGET + 1 ||
+    if((int) STRING_LASTZEROTERMINATED != (int) STRING_DOH + 1 ||
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
@@ -1147,6 +1147,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   case CURLOPT_CUSTOMREQUEST:
   case CURLOPT_DEFAULT_PROTOCOL:
   case CURLOPT_DNS_SERVERS:
+  case CURLOPT_DOH_URL:
   case CURLOPT_EGDSOCKET:
   case CURLOPT_ENCODING:
   case CURLOPT_FTPPORT:
@@ -1422,5 +1423,48 @@ curl_mime_data_ccsid(curl_mimepart *part,
 
   result = curl_mime_data(part, s, datasize);
   free(s);
+  return result;
+}
+
+CURLUcode
+curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
+                   unsigned int flags, unsigned int ccsid)
+
+{
+  char *s = (char *)NULL;
+  CURLUcode result;
+
+  if(!part)
+    return CURLUE_BAD_PARTPOINTER;
+
+  *part = (char *)NULL;
+  result = curl_url_get(handle, what, &s, flags);
+  if(result == CURLUE_OK) {
+    if(s) {
+      *part = dynconvert(ccsid, s, -1, ccsid, ASCII_CCSID);
+      if(!*part)
+        result = CURLUE_OUT_OF_MEMORY;
+    }
+  if(s)
+    free(s);
+  return result;
+}
+
+CURLUcode
+curl_url_set_ccsid(CURLU *handle, CURLUPart what, const char *part,
+                   unsigned int flags, unsigned int ccsid)
+
+{
+  char *s = (char *)NULL;
+  CURLUcode result;
+
+  if(part) {
+    s = dynconvert(ASCII_CCSID, part, -1, ccsid);
+    if(!s)
+      return CURLUE_OUT_OF_MEMORY;
+  }
+  result = curl_url_set(handle, what, s, flags);
+  if(s)
+    free(s);
   return result;
 }
