@@ -257,7 +257,9 @@ static void remsock(SockInfo *f, GlobalInfo* g)
 {
   if(f) {
     if(f->sockfd) {
-      epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL);
+      if(epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL))
+        fprintf(stderr, "EPOLL_CTL_DEL failed for fd: %d : %s\n",
+                f->sockfd, strerror(errno));
     }
     free(f);
   }
@@ -274,7 +276,9 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
              (act & CURL_POLL_OUT ? EPOLLOUT : 0);
 
   if(f->sockfd) {
-    epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL);
+    if(epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL))
+      fprintf(stderr, "EPOLL_CTL_DEL failed for fd: %d : %s\n",
+              f->sockfd, strerror(errno));
   }
 
   f->sockfd = s;
@@ -283,7 +287,9 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 
   ev.events = kind;
   ev.data.fd = s;
-  epoll_ctl(g->epfd, EPOLL_CTL_ADD, s, &ev);
+  if(epoll_ctl(g->epfd, EPOLL_CTL_ADD, s, &ev))
+    fprintf(stderr, "EPOLL_CTL_ADD failed for fd: %d : %s\n",
+            s, strerror(errno));
 }
 
 
