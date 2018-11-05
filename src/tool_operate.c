@@ -1371,9 +1371,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* curl 7.15.2 */
         if(config->localport) {
-          my_setopt(curl, CURLOPT_LOCALPORT, (long)config->localport);
-          my_setopt_str(curl, CURLOPT_LOCALPORTRANGE,
-                        (long)config->localportrange);
+          my_setopt(curl, CURLOPT_LOCALPORT, config->localport);
+          my_setopt_str(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
         }
 
         /* curl 7.15.5 */
