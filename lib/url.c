@@ -570,7 +570,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  result = Curl_resolver_init(&data->state.resolver);
+  result = Curl_resolver_init(data, &data->state.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
     free(data);

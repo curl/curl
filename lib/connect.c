@@ -1314,7 +1314,7 @@ int Curl_closesocket(struct connectdata *conn,
       conn->sock_accepted[SECONDARYSOCKET] = FALSE;
     else {
       int rc;
-      Curl_multi_closed(conn, sock);
+      Curl_multi_closed(conn->data, sock);
       Curl_set_in_callback(conn->data, true);
       rc = conn->fclosesocket(conn->closesocket_client, sock);
       Curl_set_in_callback(conn->data, false);
@@ -1324,7 +1324,7 @@ int Curl_closesocket(struct connectdata *conn,
 
   if(conn)
     /* tell the multi-socket code about this */
-    Curl_multi_closed(conn, sock);
+    Curl_multi_closed(conn->data, sock);
 
   sclose(sock);
 

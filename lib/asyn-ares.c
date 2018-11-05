@@ -119,6 +119,17 @@ void Curl_resolver_global_cleanup(void)
 #endif
 }
 
+
+static void Curl_ares_sock_state_cb(void *data, ares_socket_t socket_fd,
+                                    int readable, int writable)
+{
+  struct Curl_easy *easy = data;
+  if(!readable && !writable) {
+    DEBUGASSERT(easy);
+    Curl_multi_closed(easy, socket_fd);
+  }
+}
+
 /*
  * Curl_resolver_init()
  *
@@ -126,9 +137,14 @@ void Curl_resolver_global_cleanup(void)
  * URL-state specific environment ('resolver' member of the UrlState
  * structure).  Fills the passed pointer by the initialized ares_channel.
  */
-CURLcode Curl_resolver_init(void **resolver)
+CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
 {
-  int status = ares_init((ares_channel*)resolver);
+  int status;
+  struct ares_options options;
+  int optmask = ARES_OPT_SOCK_STATE_CB;
+  options.sock_state_cb = Curl_ares_sock_state_cb;
+  options.sock_state_cb_data = easy;
+  status = ares_init_options((ares_channel*)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {
     if(status == ARES_ENOMEM)
       return CURLE_OUT_OF_MEMORY;
@@ -159,12 +175,15 @@ void Curl_resolver_cleanup(void *resolver)
  * environment ('resolver' member of the UrlState structure).  Duplicates the
  * 'from' ares channel and passes the resulting channel to the 'to' pointer.
  */
-int Curl_resolver_duphandle(void **to, void *from)
+CURLcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to, void *from)
 {
-  /* Clone the ares channel for the new handle */
-  if(ARES_SUCCESS != ares_dup((ares_channel*)to, (ares_channel)from))
-    return CURLE_FAILED_INIT;
-  return CURLE_OK;
+  (void)from;
+  /*
+   * it would be better to call ares_dup instead, but right now
+   * it is not possible to set 'sock_state_cb_data' outside of
+   * ares_init_options
+   */
+  return Curl_resolver_init(easy, to);
 }
 
 static void destroy_async_data(struct Curl_async *async);
