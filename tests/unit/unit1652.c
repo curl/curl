@@ -85,8 +85,8 @@ Curl_infof(data, "%s", input);
 fail_unless(strcmp(result, input) == 0, "Simple string test");
 
 /* Injecting a few different variables with a format */
-Curl_infof(data, "%s %u testing %.1f\n", input, 42, 43.0123324);
-fail_unless(strcmp(result, "Simple Test 42 testing 43.0\n") == 0,
+Curl_infof(data, "%s %u testing %lu\n", input, 42, 43L);
+fail_unless(strcmp(result, "Simple Test 42 testing 43\n") == 0,
             "Format string");
 
 /* Variations of empty strings */
