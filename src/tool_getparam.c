@@ -935,22 +935,35 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'r': /* --ftp-method (undocumented at this point) */
         config->ftp_filemethod = ftpfilemethod(config, nextarg);
         break;
-      case 's': /* --local-port */
-        rc = sscanf(nextarg, "%d - %d",
-                    &config->localport,
-                    &config->localportrange);
-        if(!rc)
+      case 's': { /* --local-port */
+        char lrange[7];  /* 16bit base 10 is 5 digits, but we allow 6 so that
+                            this catches overflows, not just truncates */
+        char *p = nextarg;
+        while(ISDIGIT(*p))
+          p++;
+        if(*p) {
+          /* if there's anything more than a plain decimal number */
+          *p++ = 0;
+          rc = sscanf(p, " - %6s", lrange);
+        }
+        else
+          rc = 0;
+
+        err = str2unum(&config->localport, nextarg);
+        if(err || (config->localport > 65535))
           return PARAM_BAD_USE;
-        if(rc == 1)
+        if(!rc)
           config->localportrange = 1; /* default number of ports to try */
         else {
-          config->localportrange -= config->localport;
-          if(config->localportrange < 1) {
-            warnf(global, "bad range input\n");
+          err = str2unum(&config->localportrange, lrange);
+          if(err || (config->localportrange > 65535))
             return PARAM_BAD_USE;
-          }
+          config->localportrange -= config->localport;
+          if(config->localportrange < 1)
+            return PARAM_BAD_USE;
         }
         break;
+      }
       case 'u': /* --ftp-alternative-to-user */
         GetStr(&config->ftp_alternative_to_user, nextarg);
         break;
