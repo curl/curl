@@ -1103,6 +1103,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   bool plusencode = FALSE;
   bool urlskipslash = FALSE;
   bool appendquery = FALSE;
+  bool equalsencode = FALSE;
 
   if(!u)
     return CURLUE_BAD_HANDLE;
@@ -1183,6 +1184,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   case CURLUPART_QUERY:
     plusencode = urlencode;
     appendquery = (flags & CURLU_APPENDQUERY)?1:0;
+    equalsencode = appendquery;
     storep = &u->query;
     break;
   case CURLUPART_FRAGMENT:
@@ -1276,8 +1278,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       for(i = part, o = enc; *i; i++) {
         if(Curl_isunreserved(*i) ||
            ((*i == '/') && urlskipslash) ||
-           ((*i == '=') && appendquery) ||
+           ((*i == '=') && equalsencode) ||
            ((*i == '+') && plusencode)) {
+          if((*i == '=') && equalsencode)
+            /* only skip the first equals sign */
+            equalsencode = FALSE;
           *o = *i;
           o++;
         }

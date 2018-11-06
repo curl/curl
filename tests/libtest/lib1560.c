@@ -723,7 +723,7 @@ static int get_parts(void)
 static struct querycase append_list[] = {
   {"HTTP://test/?s", "name=joe\x02", "http://test/?s&name=joe%02",
    0, CURLU_URLENCODE, CURLUE_OK},
-  {"HTTP://test/?size=2#f", "name=joe=", "http://test/?size=2&name=joe=#f",
+  {"HTTP://test/?size=2#f", "name=joe=", "http://test/?size=2&name=joe%3d#f",
    0, CURLU_URLENCODE, CURLUE_OK},
   {"HTTP://test/?size=2#f", "name=joe doe",
    "http://test/?size=2&name=joe+doe#f",
