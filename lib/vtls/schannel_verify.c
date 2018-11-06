@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /*
- * Source file for SChannel-specific certificate verification. This code should
+ * Source file for Schannel-specific certificate verification. This code should
  * only be invoked by code in schannel.c.
  */
 

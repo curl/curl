@@ -411,12 +411,12 @@ problems may have been fixed or changed somewhat since this was written!
 6.1 NTLM authentication and unicode
 
  NTLM authentication involving unicode user name or password only works
- properly if built with UNICODE defined together with the WinSSL/schannel
+ properly if built with UNICODE defined together with the WinSSL/Schannel
  backend. The original problem was mentioned in:
  https://curl.haxx.se/mail/lib-2009-10/0024.html
  https://curl.haxx.se/bug/view.cgi?id=896
 
- The WinSSL/schannel version verified to work as mentioned in
+ The WinSSL/Schannel version verified to work as mentioned in
  https://curl.haxx.se/mail/lib-2012-07/0073.html
 
 6.2 MIT Kerberos for Windows build
