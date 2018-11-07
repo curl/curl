@@ -324,7 +324,7 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                    curl_easy_getinfo(curl, CURLINFO_SCHEME,
                                      &stringp))
                   fprintf(stream, "%s", stringp);
-                /* FALLTHROUGH */
+                break;
               case VAR_STDOUT:
                 stream = stdout;
                 break;
