@@ -943,8 +943,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           p++;
         if(*p) {
           /* if there's anything more than a plain decimal number */
-          *p++ = 0;
           rc = sscanf(p, " - %6s", lrange);
+          *p = 0; /* zero terminate to make str2unum() work below */
         }
         else
           rc = 0;
