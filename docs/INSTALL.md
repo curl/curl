@@ -248,7 +248,7 @@ look for dynamic import symbols.
 
 ## Legacy Windows and SSL
 
-WinSSL (specifically SChannel from Windows SSPI), is the native SSL library in
+WinSSL (specifically Schannel from Windows SSPI), is the native SSL library in
 Windows. However, WinSSL in Windows <= XP is unable to connect to servers that
 no longer support the legacy handshakes and algorithms used by those
 versions. If you will be using curl in one of those earlier versions of

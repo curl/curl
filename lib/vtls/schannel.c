@@ -23,9 +23,8 @@
  ***************************************************************************/
 
 /*
- * Source file for all SChannel-specific code for the TLS/SSL layer. No code
+ * Source file for all Schannel-specific code for the TLS/SSL layer. No code
  * but vtls.c should ever call or use these functions.
- *
  */
 
 /*
@@ -196,7 +195,7 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
         schannel_cred->grbitEnabledProtocols |= SP_PROT_TLS1_2_CLIENT;
         break;
       case CURL_SSLVERSION_TLSv1_3:
-        failf(data, "Schannel: TLS 1.3 is not yet supported");
+        failf(data, "schannel: TLS 1.3 is not yet supported");
         return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -434,7 +433,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
   if(Curl_verify_windows_version(5, 1, PLATFORM_WINNT,
                                  VERSION_LESS_THAN_EQUAL)) {
-     /* SChannel in Windows XP (OS version 5.1) uses legacy handshakes and
+     /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
         algorithms that may not be supported by all servers. */
      infof(data, "schannel: WinSSL version is old and may not be able to "
            "connect to some servers due to lack of SNI, algorithms, etc.\n");
