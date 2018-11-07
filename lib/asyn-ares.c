@@ -125,12 +125,8 @@ static void Curl_ares_sock_state_cb(void *data, ares_socket_t socket_fd,
 {
   struct Curl_easy *easy = data;
   if(!readable && !writable) {
-    if(easy->easy_conn) {
-      Curl_multi_closed(easy->easy_conn, socket_fd);
-    }
-    else {
-      DEBUGASSERT(easy->easy_conn);
-    }
+    DEBUGASSERT(easy);
+    Curl_multi_closed(easy, socket_fd);
   }
 }
 

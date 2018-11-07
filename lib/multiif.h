@@ -89,7 +89,7 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
  * socket again and it gets the same file descriptor number.
  */
 
-void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
+void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
 
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.

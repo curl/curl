@@ -2466,11 +2466,11 @@ void Curl_updatesocket(struct Curl_easy *data)
  * socket again and it gets the same file descriptor number.
  */
 
-void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
+void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
 {
-  if(conn->data) {
+  if(data) {
     /* if there's still an easy handle associated with this connection */
-    struct Curl_multi *multi = conn->data->multi;
+    struct Curl_multi *multi = data->multi;
     if(multi) {
       /* this is set if this connection is part of a handle that is added to
          a multi handle, and only then this is necessary */
@@ -2478,7 +2478,7 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
 
       if(entry) {
         if(multi->socket_cb)
-          multi->socket_cb(conn->data, s, CURL_POLL_REMOVE,
+          multi->socket_cb(data, s, CURL_POLL_REMOVE,
                            multi->socket_userp,
                            entry->socketp);
 
