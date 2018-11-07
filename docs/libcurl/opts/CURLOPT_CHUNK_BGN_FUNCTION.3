@@ -70,20 +70,20 @@ static long file_is_coming(struct curl_fileinfo *finfo,
 
   switch(finfo->filetype) {
   case CURLFILETYPE_DIRECTORY:
-    printf(" DIR\n");
+    printf(" DIR\\n");
     break;
   case CURLFILETYPE_FILE:
     printf("FILE ");
     break;
   default:
-    printf("OTHER\n");
+    printf("OTHER\\n");
     break;
   }
 
   if(finfo->filetype == CURLFILETYPE_FILE) {
     /* do not transfer files >= 50B */
     if(finfo->size > 50) {
-      printf("SKIPPED\n");
+      printf("SKIPPED\\n");
       return CURL_CHUNK_BGN_FUNC_SKIP;
     }
 
