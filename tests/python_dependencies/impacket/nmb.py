@@ -815,7 +815,7 @@ class NetBIOSUDPSession(NetBIOSSession):
         # The next loop is a workaround for a bigger problem:
         # When data reaches higher layers, the lower headers are lost,
         # and with them, for example, the source IP. Hence, SMB users
-        # can't know where packets are comming from... we need a better
+        # can't know where packets are coming from... we need a better
         # solution, right now, we will filter everything except packets
         # coming from the remote_host specified in __init__()
 

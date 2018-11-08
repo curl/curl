@@ -122,7 +122,7 @@ struct curltime Curl_now(void)
     (void) mach_timebase_info(&timebase);
 
   usecs = mach_absolute_time();
-  usecs *= timebase.numer;
+  usecs *= timebase.number;
   usecs /= timebase.denom;
   usecs /= 1000;
 

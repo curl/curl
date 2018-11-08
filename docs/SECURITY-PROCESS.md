@@ -66,7 +66,7 @@ announcement.
   vulnerability announcement - attach the advisory draft for information. Note
   that 'distros' won't accept an embargo longer than 14 days and they do not
   care for Windows-specific flaws. For windows-specific flaws, request CVE
-  directly from MITRE.
+  directly from MITER.
 
 - Update the "security advisory" with the CVE number.
 

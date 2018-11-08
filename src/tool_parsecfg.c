@@ -119,17 +119,17 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
   if(file) {
     char *line;
-    char *aline;
+    char *align;
     char *option;
     char *param;
     int lineno = 0;
     bool dashed_option;
 
-    while(NULL != (aline = my_get_line(file))) {
+    while(NULL != (align = my_get_line(file))) {
       int res;
       bool alloced_param = FALSE;
       lineno++;
-      line = aline;
+      line = align;
 
       /* line with # in the first non-blank column is a comment! */
       while(*line && ISSPACE(*line))
@@ -142,7 +142,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       case '\n':
       case '*':
       case '\0':
-        Curl_safefree(aline);
+        Curl_safefree(align);
         continue;
       }
 
@@ -174,7 +174,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
         param = malloc(strlen(line) + 1); /* parameter */
         if(!param) {
           /* out of memory */
-          Curl_safefree(aline);
+          Curl_safefree(align);
           rc = 1;
           break;
         }
@@ -266,7 +266,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(alloced_param)
         Curl_safefree(param);
 
-      Curl_safefree(aline);
+      Curl_safefree(align);
     }
     if(file != stdin)
       fclose(file);

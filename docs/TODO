@@ -828,8 +828,8 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  "HTTP Public Key Pinning" is TOFU (trust on first use), time-based
  features indicated by a HTTP header send by the webserver. It's purpose is
- to prevent Man-in-the-middle attacks by trusted CAs by allowing webadmins
- to specify which CAs/certificates/public keys to trust when connection to
+ to prevent Man-in-the-middle attacks by trusted case by allowing webadmins
+ to specify which case/certificates/public keys to trust when connection to
  their websites.
 
  It can be build based on PINNEDPUBLICKEY.

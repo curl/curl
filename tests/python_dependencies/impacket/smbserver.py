@@ -3547,7 +3547,7 @@ class SMBSERVERHandler(SocketServer.BaseRequestHandler):
                    self.__request.send(r.rawData())
                 else:
                    resp = self.__SMB.processRequest(self.__connId, p.get_trailer())
-                   # Send all the packets recevied. Except for big transactions this should be
+                   # Send all the packets received. Except for big transactions this should be
                    # a single packet
                    for i in resp:
                        session.send_packet(str(i))
@@ -3775,7 +3775,7 @@ smb.SMB.TRANS_TRANSACT_NMPIPE          :self.__smbTransHandler.transactNamedPipe
         # recvPacket  : the full SMBPacket that triggered this command
         # parameters  : the transaction parameters
         # data        : the transaction data
-        # maxDataCount: the max amount of data that can be transfered agreed
+        # maxDataCount: the max amount of data that can be transferred agreed
         #               with the client
         #
         # and MUST return:
@@ -3785,7 +3785,7 @@ smb.SMB.TRANS_TRANSACT_NMPIPE          :self.__smbTransHandler.transactNamedPipe
         #
         # respSetup: the setup response of the transaction
         # respParameters: the parameters response of the transaction
-        # respData: the data reponse of the transaction
+        # respData: the data response of the transaction
         # errorCode: the NT error code
 
         if self.__smbTransCommands.has_key(transCommand):

@@ -9,7 +9,7 @@ FTP
 <reply>
 <servercmd>
 # Assuming there's nothing listening on port 1
-REPLY EPSV 229 Entering Passiv Mode (|||1|)
+REPLY EPSV 229 Entering Passive Mode (|||1|)
 </servercmd>
 <data>
 here are some bytes

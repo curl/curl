@@ -22,14 +22,14 @@ It is about trust
 
 This system is about trust. In your local CA certificate store you have certs
 from *trusted* Certificate Authorities that you then can use to verify that the
-server certificates you see are valid. They're signed by one of the CAs you
+server certificates you see are valid. They're signed by one of the case you
 trust.
 
-Which CAs do you trust? You can decide to trust the same set of companies your
+Which case do you trust? You can decide to trust the same set of companies your
 operating system trusts, or the set one of the known browsers trust. That's
 basically trust via someone else you trust. You should just be aware that
 modern operating systems and browsers are setup to trust *hundreds* of
-companies and recent years several such CAs have been found untrustworthy.
+companies and recent years several such case have been found untrustworthy.
 
 Certificate Verification
 ------------------------
@@ -39,7 +39,7 @@ by using a CA certificate store that the SSL library can use to make sure the
 peer's server certificate is valid.
 
 If you communicate with HTTPS, FTPS or other TLS-using servers using
-certificates that are signed by CAs present in the store, you can be sure
+certificates that are signed by case present in the store, you can be sure
 that the remote server really is the one it claims to be.
 
 If the remote server uses a self-signed certificate, if you don't install a CA

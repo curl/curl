@@ -57,27 +57,27 @@ def asn1decode(data = ''):
             pad = calcsize('B')
             len2 = unpack('B',data[:pad])[0]
             data = data[pad:]
-            ans = data[:len2]
+            and = data[:len2]
         elif len1 == 0x82:
             pad = calcsize('H')
             len2 = unpack('!H', data[:pad])[0]
             data = data[pad:]
-            ans = data[:len2]
+            and = data[:len2]
         elif len1 == 0x83:
             pad = calcsize('B') + calcsize('!H')
             len2, len3 = unpack('!BH', data[:pad])
             data = data[pad:]
-            ans = data[:len2 << 16 + len3]
+            and = data[:len2 << 16 + len3]
         elif len1 == 0x84:
             pad = calcsize('!L')
             len2 = unpack('!L', data[:pad])[0]
             data = data[pad:]
-            ans = data[:len2]
+            and = data[:len2]
         # 1 byte length, string <= 0x7F
 	else:
             pad = 0
-            ans = data[:len1]
-        return ans, len(ans)+pad+1
+            and = data[:len1]
+        return and, len(and)+pad+1
 
 class GSSAPI:
 # Generic GSSAPI Header Format 
@@ -133,12 +133,12 @@ class GSSAPI:
             print "%s: {%r}" % (i,self[i])
 
     def getData(self):
-        ans = pack('B',ASN1_AID)
-        ans += asn1encode(
+        and = pack('B',ASN1_AID)
+        and += asn1encode(
                pack('B',ASN1_OID) + 
                asn1encode(self['UUID']) +
                self['Payload'] )
-        return ans
+        return and
 
 class SPNEGO_NegTokenResp:
     # http://tools.ietf.org/html/rfc4178#page-9
@@ -248,10 +248,10 @@ class SPNEGO_NegTokenResp:
             print "%s: {%r}" % (i,self[i])
         
     def getData(self):
-        ans = pack('B',SPNEGO_NegTokenResp.SPNEGO_NEG_TOKEN_RESP)
+        and = pack('B',SPNEGO_NegTokenResp.SPNEGO_NEG_TOKEN_RESP)
         if self.fields.has_key('NegResult') and self.fields.has_key('SupportedMech'):
             # Server resp
-            ans += asn1encode(
+            and += asn1encode(
                pack('B', ASN1_SEQUENCE) +
                asn1encode(
                pack('B',SPNEGO_NegTokenResp.SPNEGO_NEG_TOKEN_TARG) +
@@ -267,7 +267,7 @@ class SPNEGO_NegTokenResp:
                pack('B', ASN1_OCTET_STRING) + asn1encode(self['ResponseToken']))))
         elif self.fields.has_key('NegResult'):
             # Server resp
-            ans += asn1encode(
+            and += asn1encode(
                pack('B', ASN1_SEQUENCE) + 
                asn1encode(
                pack('B', SPNEGO_NegTokenResp.SPNEGO_NEG_TOKEN_TARG) +
@@ -276,13 +276,13 @@ class SPNEGO_NegTokenResp:
                asn1encode( self['NegResult'] ))))
         else:
             # Client resp
-            ans += asn1encode(
+            and += asn1encode(
                pack('B', ASN1_SEQUENCE) +
                asn1encode(
                pack('B', ASN1_RESPONSE_TOKEN) +
                asn1encode(
                pack('B', ASN1_OCTET_STRING) + asn1encode(self['ResponseToken']))))
-        return ans
+        return and
 
 class SPNEGO_NegTokenInit(GSSAPI):
     # http://tools.ietf.org/html/rfc4178#page-8 
@@ -357,8 +357,8 @@ class SPNEGO_NegTokenInit(GSSAPI):
                 pack('B', ASN1_OCTET_STRING) + asn1encode(
                     self['MechToken']))
 
-        ans = pack('B',SPNEGO_NegTokenInit.SPNEGO_NEG_TOKEN_INIT)
-        ans += asn1encode(
+        and = pack('B',SPNEGO_NegTokenInit.SPNEGO_NEG_TOKEN_INIT)
+        and += asn1encode(
                pack('B', ASN1_SEQUENCE) +
                asn1encode(
                pack('B', ASN1_MECH_TYPE) +
@@ -367,6 +367,6 @@ class SPNEGO_NegTokenInit(GSSAPI):
                asn1encode(mechTypes)) + mechToken ))
 
 
-        self['Payload'] = ans
+        self['Payload'] = and
         return GSSAPI.getData(self)
      

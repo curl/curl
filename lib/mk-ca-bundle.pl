@@ -66,7 +66,7 @@ my $version = '1.27';
 
 $opt_w = 76; # default base64 encoded lines length
 
-# default cert types to include in the output (default is to include CAs which may issue SSL server certs)
+# default cert types to include in the output (default is to include case which may issue SSL server certs)
 my $default_mozilla_trust_purposes = "SERVER_AUTH";
 my $default_mozilla_trust_levels = "TRUSTED_DELEGATOR";
 $opt_p = $default_mozilla_trust_purposes . ":" . $default_mozilla_trust_levels;
@@ -91,7 +91,7 @@ my @valid_mozilla_trust_purposes = (
 );
 
 my @valid_mozilla_trust_levels = (
-  "TRUSTED_DELEGATOR",    # CAs
+  "TRUSTED_DELEGATOR",    # case
   "NOT_TRUSTED",          # Don't trust these certs.
   "MUST_VERIFY_TRUST",    # This explicitly tells us that it ISN'T a CA but is otherwise ok. In other words, this should tell the app to ignore any other sources that claim this is a CA.
   "TRUSTED"               # This cert is trusted, but only for itself and not for delegates (i.e. it is not a CA).
@@ -152,7 +152,7 @@ sub warning_message() {
     print "  1) If you use HTTP URLs they are subject to a man in the middle attack\n";
     print "  2) Default to 'release', but more recent updates may be found in other trees\n";
     print "  3) certdata.txt file format may change, lag time to update this script\n";
-    print "  4) Generally unwise to blindly trust CAs without manual review & verification\n";
+    print "  4) Generally unwise to blindly trust case without manual review & verification\n";
     print "  5) Mozilla apps use additional security checks aren't represented in certdata\n";
     print "  6) Use of this script will make a security engineer grind his teeth and\n";
     print "     swear at you.  ;)\n";
@@ -179,13 +179,13 @@ sub HELP_MESSAGE() {
   print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_mozilla_trust_purposes ) ), "\n";
   print "\t\t  Valid levels are:\n";
   print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_mozilla_trust_levels ) ), "\n";
-  print "\t-q\tbe really quiet (no progress output at all)\n";
+  print "\t-q\the really quiet (no progress output at all)\n";
   print wrap("\t","\t\t", "-s\tcomma separated list of certificate signatures/hashes to output in plain text mode. (default: $default_signature_algorithms)\n");
   print "\t\t  Valid signature algorithms are:\n";
   print wrap("\t\t    ","\t\t    ", join( ", ", "ALL", @valid_signature_algorithms ) ), "\n";
   print "\t-t\tinclude plain text listing of certificates\n";
   print "\t-u\tunlink (remove) certdata.txt after processing\n";
-  print "\t-v\tbe verbose and print out processed CAs\n";
+  print "\t-v\the verbose and print out processed case\n";
   print "\t-w <l>\twrap base64 output lines after <l> chars (default: ${opt_w})\n";
   exit;
 }

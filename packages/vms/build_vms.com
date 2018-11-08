@@ -42,7 +42,7 @@ $!              (Non-VAX, VMS >= V7.2.)
 $!    NOLDAP    Disable LDAP support if LDAP is available.
 $!    NOKERBEROS   Disable Kerberos support if Kerberos is available.
 $!    LIST      Create C compiler listings and linker maps.
-$!                 /list/show=(expan,includ)/machine
+$!                 /list/show=(expan,include)/machine
 $!    FULLLIST  Full detailed listing.
 $!                 /list/show=(all, nomessages)/machine
 $!    NOHPSSL   Don't use HP SSL, even if available.
@@ -279,7 +279,7 @@ $ nozlib = 0
 $ nokerberos = 0
 $ cc_names = "/names=(shortened, as_is)/repository='exedir'
 $ cc_defs = "HAVE_CONFIG_H=1"
-$ cc_list = "/list='objdir'/show=(expan, includ)/machine
+$ cc_list = "/list='objdir'/show=(expan, include)/machine
 $ cc_full_list = "/list='objdir'/show=(all, nomessages)/machine
 $ link_qual = ""
 $ if arch_name .eqs. "VAX"

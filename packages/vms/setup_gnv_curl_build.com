@@ -58,7 +58,7 @@ $   examples = 1
 $ endif
 $!
 $! We want detailed build logs.
-$ clist = "/list/show=(expan,includ)"
+$ clist = "/list/show=(expan,include)"
 $!
 $! We want full symbol names in exact case.  Need a common
 $! repository for all directories.

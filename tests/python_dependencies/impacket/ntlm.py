@@ -241,15 +241,15 @@ class AV_PAIRS():
     def getData(self):
         if self.fields.has_key(NTLMSSP_AV_EOL):
             del self.fields[NTLMSSP_AV_EOL]
-        ans = ''
+        and = ''
         for i in self.fields.keys():
-            ans+= struct.pack('<HH', i, self[i][0])
-            ans+= self[i][1]
+            and+= struct.pack('<HH', i, self[i][0])
+            and+= self[i][1]
  
         # end with a NTLMSSP_AV_EOL
-        ans += struct.pack('<HH', NTLMSSP_AV_EOL, 0)
+        and += struct.pack('<HH', NTLMSSP_AV_EOL, 0)
 
-        return ans
+        return and
 
 class NTLMAuthMixin:
     def get_os_version(self):
@@ -412,7 +412,7 @@ class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
         self['domain_name']='' #"CLON".encode('utf-16le')
         self['host_name']='' #"BETS".encode('utf-16le')
         self['flags'] = (   #authResp['flags']
-                # we think (beto & gera) that his flags force a memory conten leakage when a windows 2000 answers using uninitializaed verifiers
+                # we think (beto & gera) that his flags force a memory contain leakage when a windows 2000 answers using uninitializaed verifiers
            NTLMSSP_NEGOTIATE_128     |
            NTLMSSP_NEGOTIATE_KEY_EXCH|
            # NTLMSSP_LM_KEY      |
@@ -894,7 +894,7 @@ def computeResponseNTLMv2(flags, serverChallenge, clientChallenge,  serverName, 
     responseKeyNT = NTOWFv2(user, password, domain, nthash)
     responseKeyLM = LMOWFv2(user, password, domain, lmhash)
 
-    # If you're running test-ntlm, comment the following lines and uncoment the ones that are commented. Don't forget to turn it back after the tests!
+    # If you're running test-ntlm, comment the following lines and uncomment the ones that are commented. Don't forget to turn it back after the tests!
     ######################
     av_pairs = AV_PAIRS(serverName)
     # In order to support SPN target name validation, we have to add this to the serverName av_pairs. Otherwise we will get access denied

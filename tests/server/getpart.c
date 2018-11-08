@@ -279,7 +279,7 @@ int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
 # define MAX_TAG_LEN 79
-  char couter[MAX_TAG_LEN + 1]; /* current outermost section */
+  char counter[MAX_TAG_LEN + 1]; /* current outermost section */
   char cmain[MAX_TAG_LEN + 1];  /* current main section */
   char csub[MAX_TAG_LEN + 1];   /* current sub section */
   char ptag[MAX_TAG_LEN + 1];   /* potential tag */
@@ -311,7 +311,7 @@ int getpart(char **outbuf, size_t *outlen,
     return GPE_OUT_OF_MEMORY;
   *(*outbuf) = '\0';
 
-  couter[0] = cmain[0] = csub[0] = ptag[0] = patt[0] = '\0';
+  counter[0] = cmain[0] = csub[0] = ptag[0] = patt[0] = '\0';
 
   while((error = readline(&buffer, &bufsize, stream)) == GPE_OK) {
 
@@ -380,10 +380,10 @@ int getpart(char **outbuf, size_t *outlen,
           break;
         }
       }
-      else if((STATE_OUTER == state) && !strcmp(couter, ptag)) {
+      else if((STATE_OUTER == state) && !strcmp(counter, ptag)) {
         /* end of outermost file section */
         state = STATE_OUTSIDE;
-        couter[0] = '\0';
+        counter[0] = '\0';
         if(in_wanted_part) {
           /* end of wanted part */
           in_wanted_part = 0;
@@ -430,7 +430,7 @@ int getpart(char **outbuf, size_t *outlen,
 
       if(STATE_OUTSIDE == state) {
         /* outermost element (<testcase>) */
-        strcpy(couter, ptag);
+        strcpy(counter, ptag);
         state = STATE_OUTER;
         continue;
       }

@@ -87,7 +87,7 @@ static const char * const telnetcmds[]=
   "EOF",  "SUSP",  "ABORT", "EOR",  "SE",
   "NOP",  "DMARK", "BRK",   "IP",   "AO",
   "AYT",  "EC",    "EL",    "GA",   "SB",
-  "WILL", "WONT",  "DO",    "DONT", "IAC"
+  "WILL", "WONT",  "DO",    "DON'T", "IAC"
 };
 #endif
 

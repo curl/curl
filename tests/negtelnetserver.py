@@ -89,7 +89,7 @@ class Negotiator(object):
     WILL = 2
     WONT = 3
     DO = 4
-    DONT = 5
+    DON'T = 5
 
     def __init__(self, tcp):
         self.tcp = tcp
@@ -118,7 +118,7 @@ class Negotiator(object):
                     self.no_neg(byte_int, buffer)
                 elif self.state == self.START_NEG:
                     self.start_neg(byte_int)
-                elif self.state in [self.WILL, self.WONT, self.DO, self.DONT]:
+                elif self.state in [self.WILL, self.WONT, self.DO, self.DON'T]:
                     self.handle_option(byte_int)
                 else:
                     # Received an unexpected byte. Stop negotiations
@@ -158,10 +158,10 @@ class Negotiator(object):
             # Client is indicating they can do an option
             log.debug("Client can do")
             self.state = self.DO
-        elif byte_int == NegTokens.DONT:
+        elif byte_int == NegTokens.DON'T:
             # Client is indicating they can't do an option
             log.debug("Client can't do")
-            self.state = self.DONT
+            self.state = self.DON'T
         else:
             # Received an unexpected byte. Stop negotiations
             log.error("Unexpected byte %s in state %s",
@@ -200,8 +200,8 @@ class Negotiator(object):
         self.send_iac([NegTokens.DO, NegOptions.to_val(option_str)])
 
     def send_dont(self, option_str):
-        log.debug("Sending DONT %s", option_str)
-        self.send_iac([NegTokens.DONT, NegOptions.to_val(option_str)])
+        log.debug("Sending DON'T %s", option_str)
+        self.send_iac([NegTokens.DON'T, NegOptions.to_val(option_str)])
 
     def send_will(self, option_str):
         log.debug("Sending WILL %s", option_str)
@@ -236,7 +236,7 @@ class NegTokens(NegBase):
     # Indicate willingness to negotiate
     DO = 253
     # Indicate unwillingness to negotiate
-    DONT = 254
+    DON'T = 254
 
     # The start of sub-negotiation options.
     SB = 250

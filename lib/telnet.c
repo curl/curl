@@ -321,7 +321,7 @@ static void printoption(struct Curl_easy *data,
       const char *fmt = (cmd == CURL_WILL) ? "WILL" :
                         (cmd == CURL_WONT) ? "WONT" :
                         (cmd == CURL_DO) ? "DO" :
-                        (cmd == CURL_DONT) ? "DONT" : 0;
+                        (cmd == CURL_DONT) ? "DON'T" : 0;
       if(fmt) {
         const char *opt;
         if(CURL_TELOPT_OK(option))
@@ -458,11 +458,11 @@ void rec_will(struct connectdata *conn, int option)
   case CURL_WANTNO:
     switch(tn->himq[option]) {
     case CURL_EMPTY:
-      /* Error: DONT answered by WILL */
+      /* Error: DON'T answered by WILL */
       tn->him[option] = CURL_NO;
       break;
     case CURL_OPPOSITE:
-      /* Error: DONT answered by WILL */
+      /* Error: DON'T answered by WILL */
       tn->him[option] = CURL_YES;
       tn->himq[option] = CURL_EMPTY;
       break;
@@ -630,11 +630,11 @@ void rec_do(struct connectdata *conn, int option)
   case CURL_WANTNO:
     switch(tn->usq[option]) {
     case CURL_EMPTY:
-      /* Error: DONT answered by WILL */
+      /* Error: DON'T answered by WILL */
       tn->us[option] = CURL_NO;
       break;
     case CURL_OPPOSITE:
-      /* Error: DONT answered by WILL */
+      /* Error: DON'T answered by WILL */
       tn->us[option] = CURL_YES;
       tn->usq[option] = CURL_EMPTY;
       break;

@@ -83,7 +83,7 @@ $!
 $!
 $! Need to build the common init module.
 $!-------------------------------------------
-$ cflags = "/list/show=(expan,includ)"
+$ cflags = "/list/show=(expan,include)"
 $ init_obj = "[.packages.vms]curl_crtl_init.obj"
 $ if f$search(init_obj) .eqs. ""
 $ then

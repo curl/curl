@@ -301,7 +301,7 @@ class SMB3:
         # Connection.SupportsPersistentHandles is TRUE, the client MUST set ChannelSequence in the
         # SMB2 header to Session.ChannelSequence
 
-        # Check this is not a CANCEL request. If so, don't consume sequece numbers
+        # Check this is not a CANCEL request. If so, don't consume sequence numbers
         if packet['Command'] is not SMB2_CANCEL:
             packet['MessageID'] = self._Connection['SequenceWindow']
             self._Connection['SequenceWindow'] += 1
@@ -430,14 +430,14 @@ class SMB3:
         self._Connection['Capabilities']       = negSession['Capabilities']
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
-        if ans.isValidAnswer(STATUS_SUCCESS):
+        and = self.recvSMB(packetID)
+        if and.isValidAnswer(STATUS_SUCCESS):
              # ToDo this:
              # If the DialectRevision in the SMB2 NEGOTIATE Response is 0x02FF, the client MUST issue a new
              # SMB2 NEGOTIATE request as described in section 3.2.4.2.2.2 with the only exception 
              # that the client MUST allocate sequence number 1 from Connection.SequenceWindow, and MUST set
              # MessageId field of the SMB2 header to 1. Otherwise, the client MUST proceed as follows.
-            negResp = SMB2Negotiate_Response(ans['Data'])
+            negResp = SMB2Negotiate_Response(and['Data'])
             self._Connection['MaxTransactSize']   = min(0x100000,negResp['MaxTransactSize'])
             self._Connection['MaxReadSize']       = min(0x100000,negResp['MaxReadSize'])
             self._Connection['MaxWriteSize']      = min(0x100000,negResp['MaxWriteSize'])
@@ -605,9 +605,9 @@ class SMB3:
         packet['Data']    = sessionSetup
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            self._Session['SessionID']       = ans['SessionID']
+        and = self.recvSMB(packetID)
+        if and.isValidAnswer(STATUS_SUCCESS):
+            self._Session['SessionID']       = and['SessionID']
             self._Session['SigningRequired'] = self._Connection['RequireSigning']
             self._Session['UserCredentials'] = (user, password, domain, lmhash, nthash)
             self._Session['Connection']      = self._NetBIOSSession.get_socket()
@@ -693,13 +693,13 @@ class SMB3:
         packet['Data']    = sessionSetup
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
-        if ans.isValidAnswer(STATUS_MORE_PROCESSING_REQUIRED):
-            self._Session['SessionID']       = ans['SessionID']
+        and = self.recvSMB(packetID)
+        if and.isValidAnswer(STATUS_MORE_PROCESSING_REQUIRED):
+            self._Session['SessionID']       = and['SessionID']
             self._Session['SigningRequired'] = self._Connection['RequireSigning']
             self._Session['UserCredentials'] = (user, password, domain, lmhash, nthash)
             self._Session['Connection']      = self._NetBIOSSession.get_socket()
-            sessionSetupResponse = SMB2SessionSetup_Response(ans['Data'])
+            sessionSetupResponse = SMB2SessionSetup_Response(and['Data'])
             respToken = SPNEGO_NegTokenResp(sessionSetupResponse['Buffer'])
 
             # Let's parse some data and keep it to ourselves in case it is asked
@@ -927,9 +927,9 @@ class SMB3:
         packet['Data'] = smb2Create
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            createResponse = SMB2Create_Response(ans['Data'])
+        and = self.recvSMB(packetID)
+        if and.isValidAnswer(STATUS_SUCCESS):
+            createResponse = SMB2Create_Response(and['Data'])
 
             openFile = copy.deepcopy(OPEN)
             openFile['FileID']      = createResponse['FileID']
@@ -973,9 +973,9 @@ class SMB3:
         packet['Data'] = smbClose
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
+        if and.isValidAnswer(STATUS_SUCCESS):
             del(self.GlobalFileTable[self._Session['OpenTable'][fileId]['FileName']])
             del(self._Session['OpenTable'][fileId])
              
@@ -1015,10 +1015,10 @@ class SMB3:
         packet['Data'] = smbRead
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            readResponse = SMB2Read_Response(ans['Data'])
+        if and.isValidAnswer(STATUS_SUCCESS):
+            readResponse = SMB2Read_Response(and['Data'])
             retData = readResponse['Buffer']
             if readResponse['DataRemaining'] > 0:
                 retData += self.read(treeId, fileId, offset+len(retData), readResponse['DataRemaining'], waitAnswer)
@@ -1059,12 +1059,12 @@ class SMB3:
 
         packetID = self.sendSMB(packet)
         if waitAnswer is True:
-            ans = self.recvSMB(packetID)
+            and = self.recvSMB(packetID)
         else:
             return maxBytesToWrite
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            writeResponse = SMB2Write_Response(ans['Data'])
+        if and.isValidAnswer(STATUS_SUCCESS):
+            writeResponse = SMB2Write_Response(and['Data'])
             bytesWritten = writeResponse['Count']
             if bytesWritten < bytesToWrite:
                 bytesWritten += self.write(treeId, fileId, data[bytesWritten:], offset+bytesWritten, bytesToWrite-bytesWritten, waitAnswer)
@@ -1098,9 +1098,9 @@ class SMB3:
             packet['CreditCharge'] = ( 1 + (maxBufferSize - 1) / 65536)
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            queryDirectoryResponse = SMB2QueryDirectory_Response(ans['Data'])
+        and = self.recvSMB(packetID)
+        if and.isValidAnswer(STATUS_SUCCESS):
+            queryDirectoryResponse = SMB2QueryDirectory_Response(and['Data'])
             return queryDirectoryResponse['Buffer']
 
     def echo(self):
@@ -1109,8 +1109,8 @@ class SMB3:
         smbEcho = SMB2Echo()
         packet['Data'] = smbEcho
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
-        if ans.isValidAnswer(STATUS_SUCCESS):
+        and = self.recvSMB(packetID)
+        if and.isValidAnswer(STATUS_SUCCESS):
             return True
 
     def cancel(self, packetID):
@@ -1158,10 +1158,10 @@ class SMB3:
         if waitAnswer == 0:
             return True
 
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            smbIoctlResponse = SMB2Ioctl_Response(ans['Data'])
+        if and.isValidAnswer(STATUS_SUCCESS):
+            smbIoctlResponse = SMB2Ioctl_Response(and['Data'])
             return smbIoctlResponse['Buffer']
 
     def flush(self,treeId, fileId):
@@ -1180,9 +1180,9 @@ class SMB3:
         packet['Data'] = smbFlush
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
+        if and.isValidAnswer(STATUS_SUCCESS):
             return True
 
     def lock(self, treeId, fileId, locks, lockSequence = 0):
@@ -1204,10 +1204,10 @@ class SMB3:
         packet['Data'] = smbLock
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            smbFlushResponse = SMB2Lock_Response(ans['Data'])
+        if and.isValidAnswer(STATUS_SUCCESS):
+            smbFlushResponse = SMB2Lock_Response(and['Data'])
             return True
 
         # ToDo:
@@ -1233,9 +1233,9 @@ class SMB3:
         packet['Data'] = smbLogoff
 
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
+        if and.isValidAnswer(STATUS_SUCCESS):
             # We clean the stuff we used in case we want to authenticate again
             # within the same connection
             self._Session['UserCredentials']   = ''
@@ -1273,10 +1273,10 @@ class SMB3:
 
         packet['Data'] = queryInfo
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            queryResponse = SMB2QueryInfo_Response(ans['Data'])
+        if and.isValidAnswer(STATUS_SUCCESS):
+            queryResponse = SMB2QueryInfo_Response(and['Data'])
             return queryResponse['Buffer']
 
     def setInfo(self, treeId, fileId, inputBlob = '', infoType = SMB2_0_INFO_FILE, fileInfoClass = SMB2_FILE_STANDARD_INFO, additionalInformation = 0 ):
@@ -1299,9 +1299,9 @@ class SMB3:
 
         packet['Data'] = setInfo
         packetID = self.sendSMB(packet)
-        ans = self.recvSMB(packetID)
+        and = self.recvSMB(packetID)
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
+        if and.isValidAnswer(STATUS_SUCCESS):
             return True
 
     def getSessionKey(self):
@@ -1602,10 +1602,10 @@ class SMB3:
         return self.ioctl(tid, fid, FSCTL_PIPE_TRANSCEIVE, SMB2_0_IOCTL_IS_FSCTL, data, maxOutputResponse = 65535, waitAnswer = noAnswer | waitAnswer)
 
     def TransactNamedPipeRecv(self):
-        ans = self.recvSMB()
+        and = self.recvSMB()
 
-        if ans.isValidAnswer(STATUS_SUCCESS):
-            smbIoctlResponse = SMB2Ioctl_Response(ans['Data'])
+        if and.isValidAnswer(STATUS_SUCCESS):
+            smbIoctlResponse = SMB2Ioctl_Response(and['Data'])
             return smbIoctlResponse['Buffer']
 
 

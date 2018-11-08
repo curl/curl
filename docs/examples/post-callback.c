@@ -31,9 +31,9 @@
 static const char data[]="Lorem ipsum dolor sit amet, consectetur adipiscing "
   "elit. Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
   "laoreet rhoncus, odio ipsum semper metus, at tempus ante urna in mauris. "
-  "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a varius "
+  "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a various "
   "eget, mattis vitae ligula. Fusce ut pharetra est. Ut ullamcorper mi ac "
-  "sollicitudin semper. Praesent sit amet tellus varius, posuere nulla non, "
+  "sollicitudin semper. Praesent sit amet tellus various, posuere nulla non, "
   "rhoncus ipsum.";
 
 struct WriteThis {

@@ -480,7 +480,7 @@ static CURLcode init_environment(struct Curl_easy *data,
     result = set_buffer(data, h, GSK_KEYRING_PW, password, FALSE);
 
   if(!result) {
-    /* Locate CAs, Client certificate and key according to our settings.
+    /* Locate case, Client certificate and key according to our settings.
        Note: this call may be blocking for some tenths of seconds. */
     result = gskit_status(data, gsk_environment_init(h),
                           "gsk_environment_init()", CURLE_SSL_CERTPROBLEM);
@@ -824,7 +824,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
    * Local certificate name (CURLOPT_SSLCERT) is used to hold either the
    *  application identifier of the certificate label.
    * Key password (CURLOPT_KEYPASSWD) holds the keyring password.
-   * It is not possible to have different keyrings for the CAs and the
+   * It is not possible to have different keyrings for the case and the
    *  local certificate. We thus use the CA file (CURLOPT_CAINFO) to identify
    *  the keyring file.
    * If no key password is given and the keyring is the system keyring,

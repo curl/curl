@@ -44,7 +44,7 @@ class Structure:
             >       [big endian]
 
           usual printf like specifiers can be used (if started with %) 
-          [not recommeneded, there is no why to unpack this]
+          [not recommended, there is no why to unpack this]
 
             %08x    will output an 8 bytes hex
             %s      will output a string
@@ -57,8 +57,8 @@ class Structure:
             z       same as :, but adds a NUL byte at the end (asciiz) (for unpacking the first NUL byte is used as terminator)  [asciiz string]
             u       same as z, but adds two NUL bytes at the end (after padding to an even size with NULs). (same for unpacking) [unicode string]
             w       DCE-RPC/NDR string (it's a macro for [  '<L=(len(field)+1)/2','"\\x00\\x00\\x00\\x00','<L=(len(field)+1)/2',':' ]
-            ?-field length of field named 'field', formated as specified with ? ('?' may be '!H' for example). The input value overrides the real length
-            ?1*?2   array of elements. Each formated as '?2', the number of elements in the array is stored as specified by '?1' (?1 is optional, or can also be a constant (number), for unpacking)
+            ?-field length of field named 'field', formatted as specified with ? ('?' may be '!H' for example). The input value overrides the real length
+            ?1*?2   array of elements. Each formatted as '?2', the number of elements in the array is stored as specified by '?1' (?1 is optional, or can also be a constant (number), for unpacking)
             'xxxx   literal xxxx (field's value doesn't change the output. quotes must not be closed or escaped)
             "xxxx   literal xxxx (field's value doesn't change the output. quotes must not be closed or escaped)
             _       will not pack the field. Accepts a third argument, which is an unpack code. See _Test_UnpackCode for an example
@@ -103,14 +103,14 @@ class Structure:
             format = self.formatForField(fieldName)
 
         if self.fields.has_key(fieldName):
-            ans = self.pack(format, self.fields[fieldName], field = fieldName)
+            and = self.pack(format, self.fields[fieldName], field = fieldName)
         else:
-            ans = self.pack(format, None, field = fieldName)
+            and = self.pack(format, None, field = fieldName)
 
         if self.debug:
-            print "\tanswer %r" % ans
+            print "\tanswer %r" % and
 
-        return ans
+        return and
 
     def getData(self):
         if self.data is not None:

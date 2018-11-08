@@ -107,7 +107,7 @@ $!
 $ src_root = "src_root:"
 $ if f$trnlnm("src_root1") .nes. "" then src_root = "src_root1:"
 $ backup'interchange' 'src_root'[curl...]*.*;0 -
-           'filename_base'_original_src.bck/sav
+           'filename_base'_original_src.bck/save
 $ status = $status
 $!
 $! There may be a VMS specific source kit
@@ -123,7 +123,7 @@ $!
 $ if files_found .eq. 1
 $ then
 $   backup'interchange' 'vms_root'[curl...]*.*;0 -
-            'filename_base'_vms_src.bck/sav
+            'filename_base'_vms_src.bck/save
 $   status = $status
 $ endif
 $!
