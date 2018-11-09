@@ -247,6 +247,13 @@ August:
 
  Gopher support added (re-added actually, see January 2006)
 
+2011
+----
+
+February: added support for the axTLS backend
+
+April: added the cyassl backend (later renamed to WolfSSL)
+
 2012
 ----
 
@@ -276,10 +283,23 @@ August:
 
  September: Web site had 245,000 unique visitors and served 236GB data
 
+2015
+----
+
+ June: support for multiplexing with HTTP/2
+
+ August: support for HTTP/2 server push
+
+ December: Public Suffix List
+
 2016
 ----
 
+ January: the curl tool defaults to HTTP/2 for HTTPS URLs
+
  December: curl 7.52.0 introduced support for HTTPS-proxy!
+
+ First TLS 1.3 support
 
 2017
 ----
@@ -293,3 +313,34 @@ August:
     curl_easy_setopt() options:   249
     Public functions in libcurl:  74
     Contributors:                 1609
+
+ October: SSLKEYLOGFILE support, new MIME API
+
+ November: brotli
+
+2018
+----
+
+ January: new SSH backend powered by libssh
+
+ March: starting with the 1803 release of Windows 10, curl is shipped bundled
+ with Microsoft's operating system.
+
+ July: curl shows headers using bold type face
+
+ October: added DNS-over-HTTPS (DoH) and the URL API
+
+ MesaLink is a new supported TLS backend
+
+ libcurl now does HTTP/2 (and multiplexing) by default on HTTPS URLs
+
+ curl and libcurl are installed in an estimated 5 *billion* instances
+ world-wide.
+
+ October 31: Curl and libcurl 7.62.0
+
+    Public curl releases:         177
+    Command line options:         219
+    curl_easy_setopt() options:   261
+    Public functions in libcurl:  80
+    Contributors:                 1808
