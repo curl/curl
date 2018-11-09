@@ -2610,6 +2610,10 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     SSL_set_tlsext_status_type(BACKEND->handle, TLSEXT_STATUSTYPE_ocsp);
 #endif
 
+#ifdef OPENSSL_IS_BORINGSSL
+  SSL_set_renegotiate_mode(BACKEND->handle, ssl_renegotiate_freely);
+#endif
+
   SSL_set_connect_state(BACKEND->handle);
 
   BACKEND->server_cert = 0x0;
