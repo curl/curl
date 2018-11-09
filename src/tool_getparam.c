@@ -958,7 +958,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           err = str2unum(&config->localportrange, lrange);
           if(err || (config->localportrange > 65535))
             return PARAM_BAD_USE;
-          config->localportrange -= config->localport;
+          config->localportrange -= (config->localport-1);
           if(config->localportrange < 1)
             return PARAM_BAD_USE;
         }
