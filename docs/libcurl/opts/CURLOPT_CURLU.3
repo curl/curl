@@ -29,8 +29,16 @@ CURLOPT_CURLU \- set URL with CURLU *
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CURLU, void *pointer);
 .SH DESCRIPTION
 Pass in a pointer to the \fIURL\fP to work with. The parameter should be a
-CURLU *. Setting \fICURLOPT_CURLU(3)\fP will explicitly override \fICURLOPT_URL(3)\fP.
+CURLU *. Setting \fICURLOPT_CURLU(3)\fP will explicitly override
+\fICURLOPT_URL(3)\fP.
 
+\fICURLOPT_URL(3)\fP or \fICURLOPT_CURLU(3)\fP \fBmust\fP be set before a
+transfer is started.
+
+libcurl will use this handle and its contents read-only and will not change
+its contents. An application can very well update the contents of the URL
+handle after a transfer is done and if the same handle is then used in a
+subsequest request the updated contents will then be used.
 .SH DEFAULT
 The default value of this parameter is NULL.
 .SH PROTOCOLS
