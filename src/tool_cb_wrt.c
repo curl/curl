@@ -172,7 +172,14 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len, wc_buf, wc_len);
 
     if(!WriteConsoleW(
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbad-function-cast"
+#endif
         (HANDLE) _get_osfhandle(fileno(outs->stream)),
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
         wc_buf,
         wc_len,
         &wc_len,
