@@ -1792,7 +1792,11 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
 
   SSLVersionRange sslver = {
     SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
-    SSL_LIBRARY_VERSION_TLS_1_0   /* max */
+#ifdef SSL_LIBRARY_VERSION_TLS_1_3
+    SSL_LIBRARY_VERSION_TLS_1_3   /* max */
+#else
+    SSL_LIBRARY_VERSION_TLS_1_2
+#endif
   };
 
   BACKEND->data = data;
