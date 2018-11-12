@@ -161,6 +161,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     DWORD in_len = (DWORD)(sz * nmemb);
     wchar_t* wc_buf;
     DWORD wc_len;
+    intptr_t fhnd;
 
     /* calculate buffer size for wide characters */
     wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len,  NULL, 0);
@@ -170,9 +171,15 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
     /* calculate buffer size for multi-byte characters */
     wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len, wc_buf, wc_len);
+    if(!wc_len) {
+      free(wc_buf);
+      return failure;
+    }
+
+    fhnd = _get_osfhandle(fileno(outs->stream));
 
     if(!WriteConsoleW(
-        (HANDLE) _get_osfhandle(fileno(outs->stream)),
+        (HANDLE) fhnd,
         wc_buf,
         wc_len,
         &wc_len,
