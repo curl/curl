@@ -69,7 +69,7 @@
 #include <openssl/ocsp.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && /* 0.9.8 or later */     \
+#if (OPENSSL_VERSION_NUMBER >= 0x0090700fL) && /* 0.9.7 or later */     \
   !defined(OPENSSL_NO_ENGINE)
 #define USE_OPENSSL_ENGINE
 #include <openssl/engine.h>
@@ -1049,7 +1049,7 @@ static void Curl_ossl_cleanup(void)
   /* Free ciphers and digests lists */
   EVP_cleanup();
 
-#ifdef HAVE_ENGINE_CLEANUP
+#ifdef USE_OPENSSL_ENGINE
   /* Free engine list */
   ENGINE_cleanup();
 #endif
