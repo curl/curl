@@ -37,7 +37,7 @@ http
 HTTP with --resolve and hostname with trailing dot
 </name>
 <command>
---resolve example.com:%HTTPPORT:%HOSTIP http://example.com.:%HTTPPORT/1322
+--ipv4 --resolve example.com.:%HTTPPORT:%HOSTIP http://example.com.:%HTTPPORT/1322
 </command>
 </client>
 
