@@ -610,7 +610,6 @@ output_auth_headers(struct connectdata *conn,
     result = Curl_output_negotiate(conn, proxy);
     if(result)
       return result;
-    authstatus->done = TRUE;
     negdata->state = GSS_AUTHSENT;
   }
   else
