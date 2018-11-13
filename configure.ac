@@ -1772,7 +1772,6 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
     dnl as it's a macro that needs the header files be included)
 
     AC_CHECK_FUNCS( RAND_egd \
-                    ENGINE_cleanup \
                     SSL_get_shutdown \
                     SSLv2_client_method )
 
