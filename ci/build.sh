@@ -41,7 +41,37 @@ case ${BUILD_TARGERT} in
             PRJ_GEN="${PRJ_GEN} Win64"
         fi
     ;;
+    windows_mingw)
+        PRJ_GEN="MSYS Makefiles"
     
+        case ${TOOLCHAIN_VERSION} in
+            630)
+                if [ "${Platform}" = "x64" ]; then
+                    MINGW_PATH=/C/mingw-w64/x86_64-6.3.0-posix-seh-rt_v5-rev1/mingw64
+                else
+                    MINGW_PATH=/C/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32
+                fi
+            ;;
+            530)
+                if [ "${Platform}" = "x86" ]; then
+                    MINGW_PATH=/C/mingw-w64/i686-5.3.0-posix-dwarf-rt_v4-rev0/mingw32
+                else
+                    echo "Don't support ${TOOLCHAIN_VERSION} ${Platform} in appveyor."
+                    cd ${PROJECT_DIR}
+                    exit 0
+                fi
+            ;;
+        esac
+            
+        if [ "${Platform}" = "x64" ]; then
+             export CURL_BUILD_CROSS_HOST=x86_64-w64-mingw32
+        else
+             export CURL_BUILD_CROSS_HOST=i686-w64-mingw32
+        fi
+        export CURL_BUILD_CROSS_SYSROOT=${MINGW_PATH}/${CURL_BUILD_CROSS_HOST}
+        export PATH=${MINGW_PATH}/bin:$PATH
+        CMAKE_PARA="${CMAKE_PARA} -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR/ci/CMake/Platforms/toolchain-mingw.cmake"
+    ;;
 esac
 
 # Test cmake

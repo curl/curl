@@ -46,6 +46,20 @@ environment:
     TESTING: OFF
     SHARED: ON
     
+  - BUILD_TARGERT: windows_mingw
+    TOOLCHAIN_VERSION: 630
+    OPENSSL: OFF
+    WINSSL: ON
+    TESTING: OFF
+    SHARED: ON
+    
+  - BUILD_TARGERT: windows_mingw
+    TOOLCHAIN_VERSION: 530
+    OPENSSL: ON
+    WINSSL: OFF
+    TESTING: ON
+    SHARED: OFF
+    
 install:
   - for /f "delims=" %%i in ('git describe --tags') do (set BUILD_VERSION=%%i)
   - if "%BUILD_VERSION%" == "" for /f "delims=" %%i in ('git rev-parse HEAD') do (set BUILD_VERSION=%%i) 
