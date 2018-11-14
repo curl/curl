@@ -89,5 +89,26 @@ cmake .. \
     ${CMAKE_PARA}
 cmake --build . --config ${Configuration} --target install --clean-first
 
+# Test automake
+case ${BUILD_TARGERT} in
+    windows_mingw)
+        CONFIG_PARA="${CONFIG_PARA} --host=$CURL_BUILD_CROSS_HOST --target=$CURL_BUILD_CROSS_HOST"
+        if [ "$SHARED" = "OFF" ]; then
+            CONFIG_PARA="${CONFIG_PARA} --enable-static --disable-shared"
+        else
+            CONFIG_PARA="${CONFIG_PARA} --disable-static --enable-shared"
+        fi
+        
+        cd ${PROJECT_DIR}
+        bash buildconf
+        cd build
+        rm -fr *
+        ../configure ${CONFIG_PARA} \
+            CFLAGS="--sysroot=${CURL_BUILD_CROSS_SYSROOT}" \
+            LDFLAGS="--sysroot=${CURL_BUILD_CROSS_SYSROOT}"
+        make -j`cat /proc/cpuinfo |grep 'cpu cores' |wc -l`
+        rm -fr *
+    ;;
+esac
 
 cd ${PROJECT_DIR}
