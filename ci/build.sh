@@ -72,6 +72,47 @@ case ${BUILD_TARGERT} in
         export PATH=${MINGW_PATH}/bin:$PATH
         CMAKE_PARA="${CMAKE_PARA} -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR/ci/CMake/Platforms/toolchain-mingw.cmake"
     ;;
+    android*)
+        PRJ_GEN="MSYS Makefiles"
+        
+        if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = "Visual Studio 2017" ]; then
+            export ANDROID_NDK=/C/ProgramData/Microsoft/AndroidNDK64/android-ndk-r17
+            HOST=windows-x86_64
+        else
+            export ANDROID_NDK=/C/ProgramData/Microsoft/AndroidNDK/android-ndk-r10e
+            HOST=windows
+        fi
+        CMAKE_PARA="${CMAKE_PARA} -DCMAKE_TOOLCHAIN_FILE=$PROJECT_DIR/ci/CMake/Platforms/android.toolchain.cmake"
+    
+        case ${BUILD_TARGERT} in
+            android_arm)
+                if [ "${Platform}" = "x64" ]; then
+                    CMAKE_PARA="${CMAKE_PARA} -DANDROID_ABI=arm64-v8a"
+                    export CURL_BUILD_CROSS_HOST=aarch64-linux-android
+                    export CURL_BUILD_CROSS_SYSROOT=${ANDROID_NDK}/platforms/android-${ANDROID_API}/arch-arm64
+                else
+                    export CURL_BUILD_CROSS_HOST=arm-linux-androideabi
+                    CMAKE_PARA="${CMAKE_PARA} -DANDROID_ABI=armeabi-v7a"
+                    export CURL_BUILD_CROSS_SYSROOT=${ANDROID_NDK}/platforms/android-${ANDROID_API}/arch-arm
+                fi
+            ;;
+            android_x86)
+                if [ "${Platform}" = "x64" ]; then
+                    export CURL_BUILD_CROSS_HOST=x86_64
+                    CMAKE_PARA="${CMAKE_PARA} -DANDROID_ABI=x86_64"
+                    export CURL_BUILD_CROSS_SYSROOT=${ANDROID_NDK}/platforms/android-${ANDROID_API}/arch-x86_64
+                else
+                    export CURL_BUILD_CROSS_HOST=x86
+                    CMAKE_PARA="${CMAKE_PARA} -DANDROID_ABI=x86"
+                    export CURL_BUILD_CROSS_SYSROOT=${ANDROID_NDK}/platforms/android-${ANDROID_API}/arch-x86
+                fi
+            ;;
+        esac
+        ANDROID_TOOLCHAIN_NAME=${CURL_BUILD_CROSS_HOST}-${TOOLCHAIN_VERSION}
+        TOOLCHAIN_ROOT=${ANDROID_NDK}/toolchains/${ANDROID_TOOLCHAIN_NAME}/prebuilt/${HOST}
+        export PATH=${TOOLCHAIN_ROOT}/bin:$PATH
+        CMAKE_PARA="${CMAKE_PARA} -DANDROID_TOOLCHAIN_NAME=${ANDROID_TOOLCHAIN_NAME}"
+    ;;
 esac
 
 # Test cmake
@@ -91,7 +132,7 @@ cmake --build . --config ${Configuration} --target install --clean-first
 
 # Test automake
 case ${BUILD_TARGERT} in
-    windows_mingw)
+    windows_mingw|android*)
         CONFIG_PARA="${CONFIG_PARA} --host=$CURL_BUILD_CROSS_HOST --target=$CURL_BUILD_CROSS_HOST"
         if [ "$SHARED" = "OFF" ]; then
             CONFIG_PARA="${CONFIG_PARA} --enable-static --disable-shared"

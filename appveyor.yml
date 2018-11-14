@@ -10,6 +10,22 @@ configuration:
 
 environment:
   matrix:
+  - BUILD_TARGERT: android_arm
+    TOOLCHAIN_VERSION: 4.9
+    ANDROID_API: 18
+    OPENSSL: OFF
+    WINSSL: OFF
+    TESTING: OFF
+    SHARED: ON
+  
+  - BUILD_TARGERT: android_x86
+    TOOLCHAIN_VERSION: 4.9
+    ANDROID_API: 28
+    OPENSSL: OFF
+    WINSSL: OFF
+    TESTING: OFF
+    SHARED: OFF
+      
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     TOOLCHAIN_VERSION: 15
     OPENSSL: OFF
