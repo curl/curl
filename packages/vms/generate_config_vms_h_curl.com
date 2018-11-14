@@ -404,9 +404,6 @@ $!
 $   write cvh "#ifndef USE_OPENSSL"
 $   write cvh "#define USE_OPENSSL 1"
 $   write cvh "#endif"
-$   write cvh "#ifndef USE_SSLEAY"
-$   write cvh "#define USE_SSLEAY 1"
-$   write cvh "#endif"
 $   if arch_name .eqs. "VAX"
 $   then
 $       old_mes = f$enviroment("message")

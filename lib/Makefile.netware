@@ -632,7 +632,6 @@ ifdef WITH_ZLIB
 	@echo $(DL)#define HAVE_LIBZ 1$(DL) >> $@
 endif
 ifdef WITH_SSL
-	@echo $(DL)#define USE_SSLEAY 1$(DL) >> $@
 	@echo $(DL)#define USE_OPENSSL 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_X509_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_SSL_H 1$(DL) >> $@
@@ -645,7 +644,6 @@ ifdef WITH_SSL
 	@echo $(DL)#define HAVE_LIBCRYPTO 1$(DL) >> $@
 	@echo $(DL)#define OPENSSL_NO_KRB5 1$(DL) >> $@
 ifdef WITH_SRP
-	@echo $(DL)#define HAVE_SSLEAY_SRP 1$(DL) >> $@
 	@echo $(DL)#define USE_TLS_SRP 1$(DL) >> $@
 endif
 ifdef WITH_SPNEGO

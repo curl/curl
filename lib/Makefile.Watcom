@@ -157,7 +157,7 @@ CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H -I"$(LIBSSH2_ROOT)/include" -I"$(LIBSSH
 !endif
 
 !ifdef %use_ssl
-CFLAGS += -wcd=138 -dUSE_OPENSSL -dUSE_SSLEAY -I"$(OPENSSL_ROOT)/inc32"
+CFLAGS += -wcd=138 -dUSE_OPENSSL -I"$(OPENSSL_ROOT)/inc32"
 !endif
 
 !ifdef %use_ares
