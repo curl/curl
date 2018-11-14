@@ -52,15 +52,15 @@
 
 #if !defined(USE_WINDOWS_SSPI) || defined(USE_WIN32_CRYPTO)
 
-#  ifdef USE_OPENSSL
-#    include <openssl/des.h>
-#    ifndef OPENSSL_NO_MD4
-#      include <openssl/md4.h>
-#    endif
-#    include <openssl/md5.h>
-#    include <openssl/ssl.h>
-#    include <openssl/rand.h>
-#  endif
+#ifdef USE_OPENSSL
+#   include <openssl/des.h>
+#   ifndef OPENSSL_NO_MD4
+#     include <openssl/md4.h>
+#   endif
+#   include <openssl/md5.h>
+#   include <openssl/ssl.h>
+#   include <openssl/rand.h>
+# endif
 #  if (OPENSSL_VERSION_NUMBER < 0x00907001L)
 #    define DES_key_schedule des_key_schedule
 #    define DES_cblock des_cblock
