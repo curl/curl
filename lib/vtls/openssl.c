@@ -391,6 +391,31 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
   return buf;
 }
 
+/* Return an extra data index for the connection data.
+ * This index can be used with SSL_get_ex_data() and SSL_set_ex_data().
+ */
+static int ossl_get_ssl_conn_index(void)
+{
+  static int ssl_ex_data_conn_index = -1;
+  if(ssl_ex_data_conn_index < 0) {
+    ssl_ex_data_conn_index = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
+  }
+  return ssl_ex_data_conn_index;
+}
+
+/* Return an extra data index for the sockindex.
+ * This index can be used with SSL_get_ex_data() and SSL_set_ex_data().
+ */
+static int ossl_get_ssl_sockindex_index(void)
+{
+  static int ssl_ex_data_sockindex_index = -1;
+  if(ssl_ex_data_sockindex_index < 0) {
+    ssl_ex_data_sockindex_index = SSL_get_ex_new_index(0, NULL, NULL, NULL,
+        NULL);
+  }
+  return ssl_ex_data_sockindex_index;
+}
+
 static int passwd_callback(char *buf, int num, int encrypting,
                            void *global_passwd)
 {
@@ -1041,6 +1066,10 @@ static int Curl_ossl_init(void)
     }
   }
 #endif
+
+  /* Initialize the extra data indexes */
+  if(ossl_get_ssl_conn_index() < 0 || ossl_get_ssl_sockindex_index() < 0)
+    return 0;
 
   return 1;
 }
@@ -2190,6 +2219,62 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
   return CURLE_OK;
 }
 
+/* The "new session" callback must return zero if the session can be removed
+ * or non-zero if the session has been put into the session cache.
+ */
+static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
+{
+  int res = 0;
+  struct connectdata *conn;
+  struct Curl_easy *data;
+  int sockindex;
+  curl_socket_t *sockindex_ptr;
+  int connectdata_idx = ossl_get_ssl_conn_index();
+  int sockindex_idx = ossl_get_ssl_sockindex_index();
+
+  if(connectdata_idx < 0 || sockindex_idx < 0)
+    return 0;
+
+  conn = (struct connectdata*) SSL_get_ex_data(ssl, connectdata_idx);
+  if(!conn)
+    return 0;
+
+  data = conn->data;
+
+  /* The sockindex has been stored as a pointer to an array element */
+  sockindex_ptr = (curl_socket_t*) SSL_get_ex_data(ssl, sockindex_idx);
+  sockindex = (int)(sockindex_ptr - conn->sock);
+
+  if(SSL_SET_OPTION(primary.sessionid)) {
+    bool incache;
+    void *old_ssl_sessionid = NULL;
+
+    Curl_ssl_sessionid_lock(conn);
+    incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL,
+                                      sockindex));
+    if(incache) {
+      if(old_ssl_sessionid != ssl_sessionid) {
+        infof(data, "old SSL session ID is stale, removing\n");
+        Curl_ssl_delsessionid(conn, old_ssl_sessionid);
+        incache = FALSE;
+      }
+    }
+
+    if(!incache) {
+      if(!Curl_ssl_addsessionid(conn, ssl_sessionid,
+                                      0 /* unknown size */, sockindex)) {
+        /* the session has been put into the session cache */
+        res = 1;
+      }
+      else
+        failf(data, "failed to store ssl session");
+    }
+    Curl_ssl_sessionid_unlock(conn);
+  }
+
+  return res;
+}
+
 static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
@@ -2586,6 +2671,14 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 #endif
 
+  /* Enable the session cache because it's a prerequisite for the "new session"
+   * callback. Use the "external storage" mode to avoid that OpenSSL creates
+   * an internal session cache.
+   */
+  SSL_CTX_set_session_cache_mode(BACKEND->ctx,
+      SSL_SESS_CACHE_CLIENT | SSL_SESS_CACHE_NO_INTERNAL);
+  SSL_CTX_sess_set_new_cb(BACKEND->ctx, ossl_new_session_cb);
+
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
     result = (*data->set.ssl.fsslctx)(data, BACKEND->ctx,
@@ -2632,6 +2725,15 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   /* Check if there's a cached ID we can/should use here! */
   if(SSL_SET_OPTION(primary.sessionid)) {
     void *ssl_sessionid = NULL;
+    int connectdata_idx = ossl_get_ssl_conn_index();
+    int sockindex_idx = ossl_get_ssl_sockindex_index();
+
+    if(connectdata_idx >= 0 && sockindex_idx >= 0) {
+      /* Store the data needed for the "new session" callback.
+       * The sockindex is stored as a pointer to an array element. */
+      SSL_set_ex_data(BACKEND->handle, connectdata_idx, conn);
+      SSL_set_ex_data(BACKEND->handle, sockindex_idx, conn->sock + sockindex);
+    }
 
     Curl_ssl_sessionid_lock(conn);
     if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL, sockindex)) {
@@ -3383,51 +3485,9 @@ static CURLcode servercert(struct connectdata *conn,
 static CURLcode ossl_connect_step3(struct connectdata *conn, int sockindex)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
-
-  if(SSL_SET_OPTION(primary.sessionid)) {
-    bool incache;
-    SSL_SESSION *our_ssl_sessionid;
-    void *old_ssl_sessionid = NULL;
-
-    our_ssl_sessionid = SSL_get1_session(BACKEND->handle);
-
-    /* SSL_get1_session() will increment the reference count and the session
-        will stay in memory until explicitly freed with SSL_SESSION_free(3),
-        regardless of its state. */
-
-    Curl_ssl_sessionid_lock(conn);
-    incache = !(Curl_ssl_getsessionid(conn, &old_ssl_sessionid, NULL,
-                                      sockindex));
-    if(incache) {
-      if(old_ssl_sessionid != our_ssl_sessionid) {
-        infof(data, "old SSL session ID is stale, removing\n");
-        Curl_ssl_delsessionid(conn, old_ssl_sessionid);
-        incache = FALSE;
-      }
-    }
-
-    if(!incache) {
-      result = Curl_ssl_addsessionid(conn, our_ssl_sessionid,
-                                      0 /* unknown size */, sockindex);
-      if(result) {
-        Curl_ssl_sessionid_unlock(conn);
-        failf(data, "failed to store ssl session");
-        return result;
-      }
-    }
-    else {
-      /* Session was incache, so refcount already incremented earlier.
-        * Avoid further increments with each SSL_get1_session() call.
-        * This does not free the session as refcount remains > 0
-        */
-      SSL_SESSION_free(our_ssl_sessionid);
-    }
-    Curl_ssl_sessionid_unlock(conn);
-  }
 
   /*
    * We check certificates to authenticate the server; otherwise we risk
