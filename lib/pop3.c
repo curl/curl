@@ -629,6 +629,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
           size_t timestamplen = len - 1 - i;
+          char *at;
           if(!timestamplen)
             break;
 
@@ -642,8 +643,15 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
           memcpy(pop3c->apoptimestamp, line + i, timestamplen);
           pop3c->apoptimestamp[timestamplen] = '\0';
 
-          /* Store the APOP capability */
-          pop3c->authtypes |= POP3_TYPE_APOP;
+          /* If the timestamp does not contain '@' it is not (as required by
+             RFC-1939) conformant to the RFC-822 message id syntax, and we
+             therefore do not use APOP authentication. */
+          at = strchr(pop3c->apoptimestamp, '@');
+          if(!at)
+            Curl_safefree(pop3c->apoptimestamp);
+          else
+            /* Store the APOP capability */
+            pop3c->authtypes |= POP3_TYPE_APOP;
           break;
         }
       }
