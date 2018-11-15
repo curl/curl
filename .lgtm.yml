@@ -8,3 +8,6 @@ extraction:
       - ./buildconf
     configure: # enable as many optional features as possible
       command: ./configure --enable-ares --with-libssh2 --with-gssapi --with-librtmp --with-libmetalink --with-libmetalink
+  python:
+    python_setup:
+      version: 3
