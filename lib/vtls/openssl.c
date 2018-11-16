@@ -1867,15 +1867,8 @@ static const char *ssl_msg_type(int ssl_ver, int msg)
   return "Unknown";
 }
 
-static const char *tls_rt_type(int type, const void *buf, size_t buflen)
+static const char *tls_rt_type(int type)
 {
-  (void)buf;
-  (void)buflen;
-#ifdef SSL3_RT_INNER_CONTENT_TYPE
-  if(type == SSL3_RT_INNER_CONTENT_TYPE && buf && buflen >= 1)
-    type = *(unsigned char *)buf;
-#endif
-
   switch(type) {
 #ifdef SSL3_RT_HEADER
   case SSL3_RT_HEADER:
@@ -1950,7 +1943,15 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
     break;
   }
 
-  if(ssl_ver) {
+  /* Log progress for interesting records only (like Handshake or Alert), skip
+   * all raw record headers (content_type == SSL3_RT_HEADER or ssl_ver == 0).
+   * For TLS 1.3, skip notification of the decrypted inner Content Type.
+   */
+  if(ssl_ver
+#ifdef SSL3_RT_INNER_CONTENT_TYPE
+     && content_type != SSL3_RT_INNER_CONTENT_TYPE
+#endif
+    ) {
     const char *msg_name, *tls_rt_name;
     char ssl_buf[1024];
     int msg_type, txt_len;
@@ -1964,17 +1965,10 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
      * is at 'buf[0]'.
      */
     if(ssl_ver == SSL3_VERSION_MAJOR && content_type)
-      tls_rt_name = tls_rt_type(content_type, buf, len);
+      tls_rt_name = tls_rt_type(content_type);
     else
       tls_rt_name = "";
 
-#ifdef SSL3_RT_INNER_CONTENT_TYPE
-    if(content_type == SSL3_RT_INNER_CONTENT_TYPE) {
-      msg_type = 0;
-      msg_name = "[no content]";
-    }
-    else
-#endif
     if(content_type == SSL3_RT_CHANGE_CIPHER_SPEC) {
       msg_type = *(char *)buf;
       msg_name = "Change cipher spec";
