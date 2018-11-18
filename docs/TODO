@@ -73,7 +73,6 @@
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 QUIC
- 5.8 Leave secure cookies alone
 
  6. TELNET
  6.1 ditch stdin
@@ -604,13 +603,6 @@
  handle the binary/framing layer in a similar fashion to how HTTP/2 is
  implemented. This, to allow other projects to benefit from the work and to
  thus broaden the interest and chance of others to participate.
-
-5.8 Leave secure cookies alone
-
- Non-secure origins (HTTP sites) should not be allowed to set or modify
- cookies with the 'secure' property:
-
- https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01
 
 
 6. TELNET

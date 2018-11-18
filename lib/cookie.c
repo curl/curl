@@ -433,9 +433,10 @@ Curl_cookie_add(struct Curl_easy *data,
                 bool noexpire, /* if TRUE, skip remove_expired() */
                 char *lineptr,   /* first character of the line */
                 const char *domain, /* default domain */
-                const char *path)   /* full path used when this cookie is set,
+                const char *path,   /* full path used when this cookie is set,
                                        used to get default path for the cookie
                                        unless set */
+                bool secure)  /* TRUE if connection is over secure origin */
 {
   struct Cookie *clist;
   struct Cookie *co;
@@ -546,8 +547,20 @@ Curl_cookie_add(struct Curl_easy *data,
           /* this was a "<name>=" with no content, and we must allow
              'secure' and 'httponly' specified this weirdly */
           done = TRUE;
-          if(strcasecompare("secure", name))
-            co->secure = TRUE;
+          /*
+           * secure cookies are only allowed to be set when the connection is
+           * using a secure protocol, or when the cookie is being set by
+           * reading from file
+           */
+          if(strcasecompare("secure", name)) {
+            if(secure || !c->running) {
+              co->secure = TRUE;
+            }
+            else {
+              badcookie = TRUE;
+              break;
+            }
+          }
           else if(strcasecompare("httponly", name))
             co->httponly = TRUE;
           else if(sep)
@@ -831,7 +844,13 @@ Curl_cookie_add(struct Curl_easy *data,
         fields++; /* add a field and fall down to secure */
         /* FALLTHROUGH */
       case 3:
-        co->secure = strcasecompare(ptr, "TRUE")?TRUE:FALSE;
+        co->secure = FALSE;
+        if(strcasecompare(ptr, "TRUE")) {
+          if(secure || c->running)
+            co->secure = TRUE;
+          else
+            badcookie = TRUE;
+        }
         break;
       case 4:
         if(curlx_strtoofft(ptr, NULL, 10, &co->expires))
@@ -929,9 +948,31 @@ Curl_cookie_add(struct Curl_easy *data,
         /* the domains were identical */
 
         if(clist->spath && co->spath) {
-          if(strcasecompare(clist->spath, co->spath)) {
-            replace_old = TRUE;
+          if(clist->secure && !co->secure) {
+            size_t cllen;
+            const char *sep;
+
+            /*
+             * A non-secure cookie may not overlay an existing secure cookie.
+             * For an existing cookie "a" with path "/login", refuse a new
+             * cookie "a" with for example path "/login/en", while the path
+             * "/loginhelper" is ok.
+             */
+
+            sep = strchr(clist->spath + 1, '/');
+
+            if(sep)
+              cllen = sep - clist->spath;
+            else
+              cllen = strlen(clist->spath);
+
+            if(strncasecompare(clist->spath, co->spath, cllen)) {
+              freecookie(co);
+              return NULL;
+            }
           }
+          else if(strcasecompare(clist->spath, co->spath))
+            replace_old = TRUE;
           else
             replace_old = FALSE;
         }
@@ -1103,7 +1144,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       while(*lineptr && ISBLANK(*lineptr))
         lineptr++;
 
-      Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL);
+      Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL, TRUE);
     }
     free(line); /* free the line buffer */
     remove_expired(c); /* run this once, not on every cookie */
