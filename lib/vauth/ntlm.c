@@ -451,6 +451,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
             LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM |
                         NTLMFLAG_REQUEST_TARGET |
                         NTLMFLAG_NEGOTIATE_NTLM_KEY |
+                        NTLMFLAG_NEGOTIATE_NTLM2_KEY |
                         NTLM2FLAG |
                         NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
             NTLMFLAG_NEGOTIATE_OEM |
@@ -562,7 +563,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   }
 
 #if defined(USE_NTRESPONSES) && defined(USE_NTLM_V2)
-  if(ntlm->target_info_len) {
+  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {  
     unsigned char ntbuffer[0x18];
     unsigned char entropy[8];
     unsigned char ntlmv2hash[0x18];
@@ -599,7 +600,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
 #if defined(USE_NTRESPONSES) && defined(USE_NTLM2SESSION)
   /* We don't support NTLM2 if we don't have USE_NTRESPONSES */
-  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
+  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM_KEY) {
     unsigned char ntbuffer[0x18];
     unsigned char tmp[0x18];
     unsigned char md5sum[MD5_DIGEST_LENGTH];
