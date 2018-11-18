@@ -678,8 +678,10 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 struct curl_slist *GetLoadedModulePaths(void)
 {
   HANDLE hnd = INVALID_HANDLE_VALUE;
-  MODULEENTRY32 mod = { sizeof(mod), };
+  MODULEENTRY32 mod = {0};
   struct curl_slist *slist = NULL;
+
+  mod.dwSize = sizeof(MODULEENTRY32);
 
   do {
     hnd = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
