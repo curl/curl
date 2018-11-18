@@ -48,7 +48,7 @@ int main(void)
 
     /* This will fetch message 1 from the user's inbox */
     curl_easy_setopt(curl, CURLOPT_URL,
-                     "imap://imap.example.com/INBOX/;UID=1");
+                     "imaps://imap.example.com/INBOX/;UID=1");
 
     /* In this example, we'll start with a plain text connection, and upgrade
      * to Transport Layer Security (TLS) using the STARTTLS command. Be careful
