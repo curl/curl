@@ -563,7 +563,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   }
 
 #if defined(USE_NTRESPONSES) && defined(USE_NTLM_V2)
-  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {  
+  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
     unsigned char ntbuffer[0x18];
     unsigned char entropy[8];
     unsigned char ntlmv2hash[0x18];
