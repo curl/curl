@@ -1384,6 +1384,7 @@
      d                 c                   00280
      d  CURLOPT_UPKEEP_INTERVAL_MS...
      d                 c                   00281
+     d  CURLOPT_CURLU  c                   10282
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
