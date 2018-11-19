@@ -10,28 +10,44 @@ This release includes the following changes:
 
  o curl: add %{stderr} and %{stdout} for --write-out [24]
  o curl: add undocumented option --dump-module-paths for win32 [19]
+ o setopt: add CURLOPT_CURLU [27]
 
 This release includes the following bugfixes:
 
  o Curl_follow: accept non-supported schemes for "fake" redirects [9]
+ o KNOWN_BUGS: add --proxy-any connection issue [28]
  o OS400: add URL API ccsid wrappers and sync ILE/RPG bindings
  o TODO: Have the URL API offer IDN decoding [22]
  o axtls: removed [1]
  o configure: show CFLAGS, LDFLAGS etc in summary [7]
+ o curl: --local-port range was not "including" [29]
  o curl: fix --local-port integer overflow [25]
  o curl: fixed UTF-8 in current console code page (Windows) [16]
  o curl_multibyte: fix a malloc overcalculation [18]
+ o docs: escape "\n" codes [26]
+ o ftp: avoid two unsigned int overflows in FTP listing parser [30]
+ o http_negotiate: do not close connection until negotiation is completed [36]
+ o impacket: add LICENSE [39]
  o infof: clearly indicate truncation [14]
  o libcurl: stop reading from paused transfers [20]
  o mprintf: avoid unsigned integer overflow warning [10]
  o netrc: don't ignore the login name specified with "--user" [17]
+ o nss: fix fallthrough comment to fix picky compiler warning
+ o nss: remove version selecting dead code [33]
+ o nss: set default max-tls to 1.3/1.2 [32]
+ o openssl: Remove SSLEAY leftovers [37]
+ o openssl: do not log excess "TLS app data" lines for TLS 1.3 [34]
  o openvms: fix example name [8]
+ o pop3: only do APOP with a valid timestamp [35]
  o runtests: use the local curl for verifying [6]
  o schannel: be consistent in Schannel capitalization [23]
  o schannel: better CURLOPT_CERTINFO support [2]
  o schannel: use Curl_ prefix for global private symbols [4]
  o symbols-in-versions: add missing CURLU_ symbols [15]
+ o tests: disable SO_EXCLUSIVEADDRUSE for stunnel on Windows
  o tests: drop http_pipe.py script no longer used [5]
+ o tool_cb_wrt: Silence function cast compiler warning [31]
+ o tool_doswin: Fix uninitialized field warning [38]
  o travis: build with clang sanitizers [3]
  o travis: remove curl before a normal build [11]
  o url: a short host name + port is not a scheme [13]
@@ -45,12 +61,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alexey Melnichuk, Brad King, Brian Carpenter,
-  Daniel Gustafsson, Daniel Stenberg, Dheeraj Sangamkar, Frank Gevaerts,
-  Hagai Auro, Kamil Dudka, Marcel Raad, Marcos Diazr, Michael Kaufmann,
-  Patrick Monnerat, Ray Satiro, Sven Blumenstein, Tim Rühsen,
+  Alessandro Ghedini, Alexey Melnichuk, bobmitchell1956 on github, Brad King,
+  Brian Carpenter, Daniel Gustafsson, Daniel Stenberg, Dheeraj Sangamkar,
+  Elia Tufarolo, Frank Gevaerts, Gisle Vanem, Hagai Auro,
+  infinnovation-dev on github, Jérémy Rocher, Jim Fuller, Kamil Dudka,
+  Marcel Raad, Marc Hörsken, Marcos Diazr, Michael Kaufmann, NTMan on Github,
+  Patrick Monnerat, Peter Wu, Ray Satiro, Sven Blumenstein, Tim Rühsen,
   tpaukrt on github, Viktor Szakats, Yasuhiro Matsumoto,
-  (20 contributors)
+  (29 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -81,3 +99,17 @@ References to bug reports and discussions on issues:
  [23] = https://curl.haxx.se/bug/?i=3243
  [24] = https://curl.haxx.se/bug/?i=3115
  [25] = https://curl.haxx.se/bug/?i=3242
+ [26] = https://curl.haxx.se/bug/?i=3246
+ [27] = https://curl.haxx.se/bug/?i=3227
+ [28] = https://curl.haxx.se/bug/?i=876
+ [29] = https://curl.haxx.se/bug/?i=3251
+ [30] = https://curl.haxx.se/bug/?i=3225
+ [31] = https://curl.haxx.se/bug/?i=3263
+ [32] = https://curl.haxx.se/bug/?i=3261
+ [33] = https://curl.haxx.se/bug/?i=3262
+ [34] = https://curl.haxx.se/bug/?i=3281
+ [35] = https://curl.haxx.se/bug/?i=3278
+ [36] = https://curl.haxx.se/bug/?i=3275
+ [37] = https://curl.haxx.se/bug/?i=3270
+ [38] = https://curl.haxx.se/bug/?i=3254
+ [39] = https://curl.haxx.se/bug/?i=3276
