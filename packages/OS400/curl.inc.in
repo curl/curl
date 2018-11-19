@@ -2443,6 +2443,7 @@
       *
      d curl_easy_pause...
      d                 pr                  extproc('curl_easy_pause')
+     d                                     like(CURLcode)
      d  curl                           *   value                                CURL *
      d  bitmask                      10i 0 value
       *
