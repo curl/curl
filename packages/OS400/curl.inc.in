@@ -2447,6 +2447,11 @@
      d  curl                           *   value                                CURL *
      d  bitmask                      10i 0 value
       *
+     d curl_easy_conn_upkeep...
+     d                 pr                  extproc('curl_easy_conn_upkeep')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
+      *
      d curl_multi_init...
      d                 pr              *   extproc('curl_multi_init')           CURLM *
       *
