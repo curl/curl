@@ -53,6 +53,7 @@
 
 extern const struct Curl_ssl Curl_ssl_schannel;
 
+CURLcode Curl_verify_host(struct connectdata *conn, int sockindex);
 CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex);
 
 /* structs to expose only in schannel.c and schannel_verify.c */

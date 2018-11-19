@@ -37,8 +37,6 @@
 #define EXPOSE_SCHANNEL_INTERNAL_STRUCTS
 #include "schannel.h"
 
-#ifdef HAS_MANUAL_VERIFY_API
-
 #include "vtls.h"
 #include "sendf.h"
 #include "strerror.h"
@@ -52,6 +50,164 @@
 #include "memdebug.h"
 
 #define BACKEND connssl->backend
+
+#ifndef CERT_NAME_DISABLE_IE4_UTF8_FLAG
+#define CERT_NAME_DISABLE_IE4_UTF8_FLAG 0x00010000
+#endif
+
+#ifndef CERT_NAME_SEARCH_ALL_NAMES_FLAG
+#define CERT_NAME_SEARCH_ALL_NAMES_FLAG 0x2
+#endif
+
+CURLcode Curl_verify_host(struct connectdata *conn, int sockindex)
+{
+  SECURITY_STATUS status;
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  CURLcode result = CURLE_OK;
+  CERT_CONTEXT *pCertContextServer = NULL;
+  DWORD name_flags = 0;
+  TCHAR *cert_hostname_buff = NULL;
+  size_t cert_hostname_buff_index = 0;
+  DWORD len = 0;
+  DWORD actual_len = 0;
+  const char * const hostname = SSL_IS_PROXY() ?
+    conn->http_proxy.host.name : conn->host.name;
+  const char * const dispname = SSL_IS_PROXY() ?
+    conn->http_proxy.host.dispname : conn->host.dispname;
+
+  status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                            SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                            &pCertContextServer);
+
+  if((status != SEC_E_OK) || (pCertContextServer == NULL)) {
+    failf(data, "schannel: Failed to read remote certificate context: %s",
+          Curl_sspi_strerror(conn, status));
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto cleanup;
+  }
+
+  /* CertGetNameString will provide the 8-bit character string without
+   * any decoding */
+  name_flags = CERT_NAME_DISABLE_IE4_UTF8_FLAG;
+
+  /* Request all dNSNames. Supported by Windows 8 or later. */
+  if(Curl_verify_windows_version(6, 2, PLATFORM_WINNT,
+                                 VERSION_GREATER_THAN_EQUAL)) {
+    name_flags |= CERT_NAME_SEARCH_ALL_NAMES_FLAG;
+  }
+
+  /* Determine the size of the string needed for the cert hostname */
+  len = CertGetNameString(pCertContextServer,
+                          CERT_NAME_DNS_TYPE,
+                          name_flags,
+                          NULL,
+                          NULL,
+                          0);
+  if(len == 0) {
+    failf(data,
+          "schannel: CertGetNameString() returned no "
+          "certificate name information");
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto cleanup;
+  }
+
+  /* CertGetNameString guarantees that the returned name will not contain
+   * embedded null bytes. This appears to be undocumented behavior.
+   */
+  cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
+  if(!cert_hostname_buff) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+  actual_len = CertGetNameString(pCertContextServer,
+                                 CERT_NAME_DNS_TYPE,
+                                 name_flags,
+                                 NULL,
+                                 (LPTSTR) cert_hostname_buff,
+                                 len);
+
+  /* Sanity check */
+  if(actual_len != len) {
+    failf(data,
+          "schannel: CertGetNameString() returned certificate "
+          "name information of unexpected size");
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto cleanup;
+  }
+
+  /* If HAVE_CERT_NAME_SEARCH_ALL_NAMES is available, the output
+   * will contain all DNS names, where each name is null-terminated
+   * and the last DNS name is double null-terminated. Due to this
+   * encoding, use the length of the buffer to iterate over all names.
+   */
+  result = CURLE_PEER_FAILED_VERIFICATION;
+  while(cert_hostname_buff_index < len &&
+        cert_hostname_buff[cert_hostname_buff_index] != TEXT('\0') &&
+        result == CURLE_PEER_FAILED_VERIFICATION) {
+
+    char *cert_hostname;
+
+    /* Comparing the cert name and the connection hostname encoded as UTF-8
+     * is acceptable since both values are assumed to use ASCII
+     * (or some equivalent) encoding
+     */
+    cert_hostname = Curl_convert_tchar_to_UTF8(
+        &cert_hostname_buff[cert_hostname_buff_index]);
+    if(!cert_hostname) {
+      result = CURLE_OUT_OF_MEMORY;
+    }
+    else {
+      int match_result;
+
+      match_result = Curl_cert_hostcheck(cert_hostname, hostname);
+      if(match_result == CURL_HOST_MATCH) {
+        infof(data,
+              "schannel: connection hostname (%s) validated "
+              "against certificate name (%s)\n",
+              dispname, cert_hostname);
+        result = CURLE_OK;
+      }
+      else {
+        size_t cert_hostname_len;
+
+        infof(data,
+              "schannel: connection hostname (%s) did not match "
+              "against certificate name (%s)\n",
+              dispname, cert_hostname);
+
+        cert_hostname_len = _tcslen(
+            &cert_hostname_buff[cert_hostname_buff_index]);
+
+        /* Move on to next cert name */
+        cert_hostname_buff_index += cert_hostname_len + 1;
+
+        result = CURLE_PEER_FAILED_VERIFICATION;
+      }
+      Curl_unicodefree(cert_hostname);
+    }
+  }
+
+  if(result == CURLE_PEER_FAILED_VERIFICATION) {
+    failf(data,
+          "schannel: CertGetNameString() failed to match "
+          "connection hostname (%s) against server certificate names",
+          dispname);
+  }
+  else if(result != CURLE_OK)
+    failf(data, "schannel: server certificate name verification failed");
+
+cleanup:
+  if(pCertContextServer)
+    CertFreeCertificateContext(pCertContextServer);
+
+  Curl_unicodefree(cert_hostname_buff);
+
+  return result;
+}
+
+
+#ifdef HAS_MANUAL_VERIFY_API
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
@@ -282,129 +438,6 @@ cleanup:
   return result;
 }
 
-static CURLcode verify_host(struct Curl_easy *data,
-                            CERT_CONTEXT *pCertContextServer,
-                            const char * const conn_hostname)
-{
-  CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
-  TCHAR *cert_hostname_buff = NULL;
-  size_t cert_hostname_buff_index = 0;
-  DWORD len = 0;
-  DWORD actual_len = 0;
-
-  /* CertGetNameString will provide the 8-bit character string without
-   * any decoding */
-  DWORD name_flags = CERT_NAME_DISABLE_IE4_UTF8_FLAG;
-
-#ifdef CERT_NAME_SEARCH_ALL_NAMES_FLAG
-  name_flags |= CERT_NAME_SEARCH_ALL_NAMES_FLAG;
-#endif
-
-  /* Determine the size of the string needed for the cert hostname */
-  len = CertGetNameString(pCertContextServer,
-                          CERT_NAME_DNS_TYPE,
-                          name_flags,
-                          NULL,
-                          NULL,
-                          0);
-  if(len == 0) {
-    failf(data,
-          "schannel: CertGetNameString() returned no "
-          "certificate name information");
-    result = CURLE_PEER_FAILED_VERIFICATION;
-    goto cleanup;
-  }
-
-  /* CertGetNameString guarantees that the returned name will not contain
-   * embedded null bytes. This appears to be undocumented behavior.
-   */
-  cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
-  if(!cert_hostname_buff) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto cleanup;
-  }
-  actual_len = CertGetNameString(pCertContextServer,
-                                 CERT_NAME_DNS_TYPE,
-                                 name_flags,
-                                 NULL,
-                                 (LPTSTR) cert_hostname_buff,
-                                 len);
-
-  /* Sanity check */
-  if(actual_len != len) {
-    failf(data,
-          "schannel: CertGetNameString() returned certificate "
-          "name information of unexpected size");
-    result = CURLE_PEER_FAILED_VERIFICATION;
-    goto cleanup;
-  }
-
-  /* If HAVE_CERT_NAME_SEARCH_ALL_NAMES is available, the output
-   * will contain all DNS names, where each name is null-terminated
-   * and the last DNS name is double null-terminated. Due to this
-   * encoding, use the length of the buffer to iterate over all names.
-   */
-  result = CURLE_PEER_FAILED_VERIFICATION;
-  while(cert_hostname_buff_index < len &&
-        cert_hostname_buff[cert_hostname_buff_index] != TEXT('\0') &&
-        result == CURLE_PEER_FAILED_VERIFICATION) {
-
-    char *cert_hostname;
-
-    /* Comparing the cert name and the connection hostname encoded as UTF-8
-     * is acceptable since both values are assumed to use ASCII
-     * (or some equivalent) encoding
-     */
-    cert_hostname = Curl_convert_tchar_to_UTF8(
-        &cert_hostname_buff[cert_hostname_buff_index]);
-    if(!cert_hostname) {
-      result = CURLE_OUT_OF_MEMORY;
-    }
-    else {
-      int match_result;
-
-      match_result = Curl_cert_hostcheck(cert_hostname, conn_hostname);
-      if(match_result == CURL_HOST_MATCH) {
-        infof(data,
-              "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)\n",
-              conn_hostname, cert_hostname);
-        result = CURLE_OK;
-      }
-      else {
-        size_t cert_hostname_len;
-
-        infof(data,
-              "schannel: connection hostname (%s) did not match "
-              "against certificate name (%s)\n",
-              conn_hostname, cert_hostname);
-
-        cert_hostname_len = _tcslen(
-            &cert_hostname_buff[cert_hostname_buff_index]);
-
-        /* Move on to next cert name */
-        cert_hostname_buff_index += cert_hostname_len + 1;
-
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-      Curl_unicodefree(cert_hostname);
-    }
-  }
-
-  if(result == CURLE_PEER_FAILED_VERIFICATION) {
-    failf(data,
-          "schannel: CertGetNameString() failed to match "
-          "connection hostname (%s) against server certificate names",
-          conn_hostname);
-  }
-  else if(result != CURLE_OK)
-    failf(data, "schannel: server certificate name verification failed");
-
-cleanup:
-  Curl_unicodefree(cert_hostname_buff);
-
-  return result;
-}
 
 CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
 {
@@ -416,9 +449,11 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
   HCERTSTORE trust_store = NULL;
-  const char * const conn_hostname = SSL_IS_PROXY() ?
-    conn->http_proxy.host.name :
-    conn->host.name;
+  CERT_CHAIN_PARA ChainPara = { 0 };
+  CERT_SIMPLE_CHAIN *pSimpleChain = NULL;
+  DWORD dwTrustErrorMask = 0;
+
+  ChainPara.cbSize = sizeof(ChainPara);
 
   status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                             SECPKG_ATTR_REMOTE_CERT_CONTEXT,
@@ -428,10 +463,10 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
     failf(data, "schannel: Failed to read remote certificate context: %s",
           Curl_sspi_strerror(conn, status));
     result = CURLE_PEER_FAILED_VERIFICATION;
+    goto cleanup;
   }
 
-  if(result == CURLE_OK && SSL_CONN_CONFIG(CAfile) &&
-      BACKEND->use_manual_cred_validation) {
+  if(SSL_CONN_CONFIG(CAfile) && BACKEND->use_manual_cred_validation) {
     /*
      * Create a chain engine that uses the certificates in the CA file as
      * trusted certificates. This is only supported on Windows 7+.
@@ -441,26 +476,33 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
       failf(data, "schannel: this version of Windows is too old to support "
             "certificate verification via CA bundle file.");
       result = CURLE_SSL_CACERT_BADFILE;
-    }
-    else {
-      /* Open the certificate store */
-      trust_store = CertOpenStore(CERT_STORE_PROV_MEMORY,
-                                  0,
-                                  (HCRYPTPROV)NULL,
-                                  CERT_STORE_CREATE_NEW_FLAG,
-                                  NULL);
-      if(!trust_store) {
-        failf(data, "schannel: failed to create certificate store: %s",
-              Curl_strerror(conn, GetLastError()));
-        result = CURLE_SSL_CACERT_BADFILE;
-      }
-      else {
-        result = add_certs_to_store(trust_store, SSL_CONN_CONFIG(CAfile),
-                                    conn);
-      }
+      goto cleanup;
     }
 
-    if(result == CURLE_OK) {
+    /* Open the certificate store */
+    trust_store = CertOpenStore(CERT_STORE_PROV_MEMORY,
+                                0,
+                                (HCRYPTPROV)NULL,
+                                CERT_STORE_CREATE_NEW_FLAG,
+                                NULL);
+    if(!trust_store) {
+      failf(data, "schannel: failed to create certificate store: %s",
+            Curl_strerror(conn, GetLastError()));
+      result = CURLE_SSL_CACERT_BADFILE;
+      goto cleanup;
+    }
+
+    result = add_certs_to_store(trust_store, SSL_CONN_CONFIG(CAfile),
+                                conn);
+    if(result)
+      goto cleanup;
+
+    /* CertCreateCertificateChainEngine will check the expected size of the
+     * CERT_CHAIN_ENGINE_CONFIG structure and fail if the specified size
+     * does not match the expected size. When this occurs, it indicates that
+     * CAINFO is not supported on the version of Windows in use.
+     */
+    {
       CERT_CHAIN_ENGINE_CONFIG_WIN7 engine_config;
       BOOL create_engine_result;
 
@@ -468,11 +510,6 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
       engine_config.cbSize = sizeof(engine_config);
       engine_config.hExclusiveRoot = trust_store;
 
-      /* CertCreateCertificateChainEngine will check the expected size of the
-       * CERT_CHAIN_ENGINE_CONFIG structure and fail if the specified size
-       * does not match the expected size. When this occurs, it indicates that
-       * CAINFO is not supported on the version of Windows in use.
-       */
       create_engine_result =
         CertCreateCertificateChainEngine(
           (CERT_CHAIN_ENGINE_CONFIG *)&engine_config, &cert_chain_engine);
@@ -481,72 +518,65 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
               "schannel: failed to create certificate chain engine: %s",
               Curl_strerror(conn, GetLastError()));
         result = CURLE_SSL_CACERT_BADFILE;
+        goto cleanup;
       }
     }
   }
 
-  if(result == CURLE_OK) {
-    CERT_CHAIN_PARA ChainPara;
-
-    memset(&ChainPara, 0, sizeof(ChainPara));
-    ChainPara.cbSize = sizeof(ChainPara);
-
-    if(!CertGetCertificateChain(cert_chain_engine,
-                                pCertContextServer,
-                                NULL,
-                                pCertContextServer->hCertStore,
-                                &ChainPara,
-                                (data->set.ssl.no_revoke ? 0 :
-                                 CERT_CHAIN_REVOCATION_CHECK_CHAIN),
-                                NULL,
-                                &pChainContext)) {
-      failf(data, "schannel: CertGetCertificateChain failed: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
-      pChainContext = NULL;
-      result = CURLE_PEER_FAILED_VERIFICATION;
-    }
-
-    if(result == CURLE_OK) {
-      CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
-      DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
-      dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
-      if(dwTrustErrorMask) {
-        if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_REVOKED");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_PARTIAL_CHAIN");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_UNTRUSTED_ROOT");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_NOT_TIME_VALID");
-        else if(dwTrustErrorMask & CERT_TRUST_REVOCATION_STATUS_UNKNOWN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_REVOCATION_STATUS_UNKNOWN");
-        else
-          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08x",
-                dwTrustErrorMask);
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-    }
+  if(!CertGetCertificateChain(cert_chain_engine,
+                              pCertContextServer,
+                              NULL,
+                              pCertContextServer->hCertStore,
+                              &ChainPara,
+                              (data->set.ssl.no_revoke ? 0 :
+                               CERT_CHAIN_REVOCATION_CHECK_CHAIN),
+                              NULL,
+                              &pChainContext)) {
+    failf(data, "schannel: CertGetCertificateChain failed: %s",
+          Curl_sspi_strerror(conn, GetLastError()));
+    pChainContext = NULL;
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto cleanup;
   }
 
-  if(result == CURLE_OK) {
-    if(SSL_CONN_CONFIG(verifyhost)) {
-      result = verify_host(conn->data, pCertContextServer, conn_hostname);
-    }
+  pSimpleChain = pChainContext->rgpChain[0];
+  dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
+  dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
+  if(dwTrustErrorMask) {
+    if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
+      failf(data, "schannel: CertGetCertificateChain trust error"
+            " CERT_TRUST_IS_REVOKED");
+    else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
+      failf(data, "schannel: CertGetCertificateChain trust error"
+            " CERT_TRUST_IS_PARTIAL_CHAIN");
+    else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
+      failf(data, "schannel: CertGetCertificateChain trust error"
+            " CERT_TRUST_IS_UNTRUSTED_ROOT");
+    else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
+      failf(data, "schannel: CertGetCertificateChain trust error"
+            " CERT_TRUST_IS_NOT_TIME_VALID");
+    else if(dwTrustErrorMask & CERT_TRUST_REVOCATION_STATUS_UNKNOWN)
+      failf(data, "schannel: CertGetCertificateChain trust error"
+            " CERT_TRUST_REVOCATION_STATUS_UNKNOWN");
+    else
+      failf(data, "schannel: CertGetCertificateChain error mask: 0x%08x",
+            dwTrustErrorMask);
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto cleanup;
   }
 
-  if(cert_chain_engine) {
+  if(SSL_CONN_CONFIG(verifyhost)) {
+    result = Curl_verify_host(conn, sockindex);
+    if(result)
+      goto cleanup;
+  }
+
+cleanup:
+  if(cert_chain_engine)
     CertFreeCertificateChainEngine(cert_chain_engine);
-  }
 
-  if(trust_store) {
+  if(trust_store)
     CertCloseStore(trust_store, 0);
-  }
 
   if(pChainContext)
     CertFreeCertificateChain(pChainContext);

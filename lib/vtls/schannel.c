@@ -1106,16 +1106,27 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   if(pubkey_ptr) {
     result = pkp_pin_peer_pubkey(conn, sockindex, pubkey_ptr);
     if(result) {
-      failf(data, "SSL: public key does not match pinned public key!");
+      failf(data, "schannel: public key does not match pinned public key!");
       return result;
     }
   }
 
+  if(SSL_CONN_CONFIG(verifypeer)) {
+    /* If verifypeer is true then peer & host verify will be done automatically
+       by schannel except if use_manual_cred_validation is also true. */
 #ifdef HAS_MANUAL_VERIFY_API
-  if(conn->ssl_config.verifypeer && BACKEND->use_manual_cred_validation) {
-    return Curl_verify_certificate(conn, sockindex);
-  }
+    if(BACKEND->use_manual_cred_validation) {
+      result = Curl_verify_certificate(conn, sockindex);
+      if(result)
+        return result;
+    }
 #endif
+  }
+  else if(SSL_CONN_CONFIG(verifyhost)) {
+    result = Curl_verify_host(conn, sockindex);
+    if(result)
+      return result;
+  }
 
   return CURLE_OK;
 }
