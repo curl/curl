@@ -82,6 +82,13 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* Uncomment the ALLOW_RENEG line to a real #define if you want to allow TLS
+   renegotiations when built with BoringSSL. Renegotiating is non-compliant
+   with HTTP/2 and "an extremely dangerous protocol feature". Beware.
+
+#define ALLOW_RENEG 1
+ */
+
 #ifndef OPENSSL_VERSION_NUMBER
 #error "OPENSSL_VERSION_NUMBER not defined"
 #endif
@@ -2604,7 +2611,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
     SSL_set_tlsext_status_type(BACKEND->handle, TLSEXT_STATUSTYPE_ocsp);
 #endif
 
-#ifdef OPENSSL_IS_BORINGSSL
+#if defined(OPENSSL_IS_BORINGSSL) && defined(ALLOW_RENEG)
   SSL_set_renegotiate_mode(BACKEND->handle, ssl_renegotiate_freely);
 #endif
 
