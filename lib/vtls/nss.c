@@ -2081,7 +2081,7 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
     else if(*certverifyresult == SSL_ERROR_BAD_CERT_DOMAIN)
       result = CURLE_PEER_FAILED_VERIFICATION;
     else if(*certverifyresult != 0)
-      result = CURLE_SSL_CACERT;
+      result = CURLE_PEER_FAILED_VERIFICATION;
     goto error;
   }
 

@@ -497,7 +497,7 @@ polarssl_connect_step2(struct connectdata *conn,
 
     if(ret & BADCERT_REVOKED) {
       failf(data, "Cert verify failed: BADCERT_REVOKED");
-      return CURLE_SSL_CACERT;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
 
     if(ret & BADCERT_CN_MISMATCH)

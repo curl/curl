@@ -580,7 +580,7 @@ mbed_connect_step2(struct connectdata *conn,
 
     if(ret & MBEDTLS_X509_BADCERT_REVOKED) {
       failf(data, "Cert verify failed: BADCERT_REVOKED");
-      return CURLE_SSL_CACERT;
+      return CURLE_PEER_FAILED_VERIFICATION;
     }
 
     if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
