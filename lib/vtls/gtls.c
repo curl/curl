@@ -1110,7 +1110,7 @@ gtls_connect_step3(struct connectdata *conn,
               "CRLfile: %s", SSL_CONN_CONFIG(CAfile) ? SSL_CONN_CONFIG(CAfile):
               "none",
               SSL_SET_OPTION(CRLfile)?SSL_SET_OPTION(CRLfile):"none");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       }
       else
         infof(data, "\t server certificate verification FAILED\n");

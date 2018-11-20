@@ -97,7 +97,7 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 static bool is_fatal_error(CURLcode code)
 {
   switch(code) {
-  /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
+  /* TODO: Should CURLE_PEER_FAILED_VERIFICATION be a critical error? */
   case CURLE_FAILED_INIT:
   case CURLE_OUT_OF_MEMORY:
   case CURLE_UNKNOWN_OPTION:
@@ -1805,7 +1805,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         else if(result && global->showerror) {
           fprintf(global->errors, "curl: (%d) %s\n", result, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror(result));
-          if(result == CURLE_SSL_CACERT)
+          if(result == CURLE_PEER_FAILED_VERIFICATION)
             fputs(CURL_CA_CERT_ERRORMSG, global->errors);
         }
 

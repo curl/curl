@@ -2719,7 +2719,7 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
 
       if((lib == ERR_LIB_SSL) &&
          (reason == SSL_R_CERTIFICATE_VERIFY_FAILED)) {
-        result = CURLE_SSL_CACERT;
+        result = CURLE_PEER_FAILED_VERIFICATION;
 
         lerr = SSL_get_verify_result(BACKEND->handle);
         if(lerr != X509_V_OK) {
