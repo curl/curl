@@ -110,7 +110,7 @@ static void ntlm_print_flags(FILE *handle, unsigned long flags)
   if(flags & NTLMFLAG_TARGET_TYPE_SHARE)
     fprintf(handle, "NTLMFLAG_TARGET_TYPE_SHARE ");
   if(flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY)
-    fprintf(handle, "NTLMFLAG_NEGOTIATE_NTLM2_KEY ");
+    fprintf(handle, "NTLMFLAG_NEGOTIATE_KEY ");
   if(flags & NTLMFLAG_REQUEST_INIT_RESPONSE)
     fprintf(handle, "NTLMFLAG_REQUEST_INIT_RESPONSE ");
   if(flags & NTLMFLAG_REQUEST_ACCEPT_RESPONSE)
@@ -451,7 +451,6 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
             LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM |
                         NTLMFLAG_REQUEST_TARGET |
                         NTLMFLAG_NEGOTIATE_NTLM_KEY |
-                        NTLMFLAG_NEGOTIATE_NTLM2_KEY |
                         NTLM2FLAG |
                         NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
             NTLMFLAG_NEGOTIATE_OEM |
