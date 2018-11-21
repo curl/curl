@@ -110,7 +110,7 @@ static void ntlm_print_flags(FILE *handle, unsigned long flags)
   if(flags & NTLMFLAG_TARGET_TYPE_SHARE)
     fprintf(handle, "NTLMFLAG_TARGET_TYPE_SHARE ");
   if(flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY)
-    fprintf(handle, "NTLMFLAG_NEGOTIATE_KEY ");
+    fprintf(handle, "NTLMFLAG_NEGOTIATE_NTLM2_KEY ");
   if(flags & NTLMFLAG_REQUEST_INIT_RESPONSE)
     fprintf(handle, "NTLMFLAG_REQUEST_INIT_RESPONSE ");
   if(flags & NTLMFLAG_REQUEST_ACCEPT_RESPONSE)
