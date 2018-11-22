@@ -1479,7 +1479,8 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   if(c->numcookies) {
     array = malloc(sizeof(struct Cookie *) * c->numcookies);
     if(!array) {
-      fclose(out);
+      if(!use_stdout)
+        fclose(out);
       return 1;
     }
 
