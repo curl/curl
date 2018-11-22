@@ -660,13 +660,13 @@ static void showdoh(struct Curl_easy *data,
       char buffer[128];
       char *ptr;
       size_t len;
-      snprintf(buffer, 128, "DOH AAAA: ");
+      msnprintf(buffer, 128, "DOH AAAA: ");
       ptr = &buffer[10];
       len = 118;
       for(j = 0; j < 16; j += 2) {
         size_t l;
-        snprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6[j],
-                 d->addr[i].ip.v6[j + 1]);
+        msnprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6[j],
+                  d->addr[i].ip.v6[j + 1]);
         l = strlen(ptr);
         len -= l;
         ptr += l;

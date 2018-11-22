@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -382,11 +382,11 @@ static int ProcessRequest(struct httprequest *req)
       char *filename;
 
       if((strlen(doc) + strlen(request)) < 200)
-        snprintf(logbuf, sizeof(logbuf), "Got request: %s %s %s/%d.%d",
-                 request, doc, prot_str, prot_major, prot_minor);
+        msnprintf(logbuf, sizeof(logbuf), "Got request: %s %s %s/%d.%d",
+                  request, doc, prot_str, prot_major, prot_minor);
       else
-        snprintf(logbuf, sizeof(logbuf), "Got a *HUGE* request %s/%d.%d",
-                prot_str, prot_major, prot_minor);
+        msnprintf(logbuf, sizeof(logbuf), "Got a *HUGE* request %s/%d.%d",
+                  prot_str, prot_major, prot_minor);
       logmsg("%s", logbuf);
 
       if(!strncmp("/verifiedserver", ptr, 15)) {
@@ -416,8 +416,8 @@ static int ProcessRequest(struct httprequest *req)
       else
         req->partno = 0;
 
-      snprintf(logbuf, sizeof(logbuf), "Requested test number %ld part %ld",
-               req->testno, req->partno);
+      msnprintf(logbuf, sizeof(logbuf), "Requested test number %ld part %ld",
+                req->testno, req->partno);
       logmsg("%s", logbuf);
 
       filename = test2file(req->testno);
@@ -540,9 +540,9 @@ static int ProcessRequest(struct httprequest *req)
     else {
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
-        snprintf(logbuf, sizeof(logbuf),
-                 "Received a CONNECT %s HTTP/%d.%d request",
-                 doc, prot_major, prot_minor);
+        msnprintf(logbuf, sizeof(logbuf),
+                  "Received a CONNECT %s HTTP/%d.%d request",
+                  doc, prot_major, prot_minor);
         logmsg("%s", logbuf);
 
         if(req->prot_version == 10)
@@ -947,12 +947,12 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      snprintf(msgbuf, sizeof(msgbuf), "RTSP_SERVER WE ROOLZ: %ld\r\n",
-               (long)getpid());
+      msnprintf(msgbuf, sizeof(msgbuf), "RTSP_SERVER WE ROOLZ: %ld\r\n",
+                (long)getpid());
       msglen = strlen(msgbuf);
-      snprintf(weare, sizeof(weare),
-               "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
-               msglen, msgbuf);
+      msnprintf(weare, sizeof(weare),
+                "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
+                msglen, msgbuf);
       buffer = weare;
       break;
     case DOCNUMBER_INTERNAL:
@@ -985,7 +985,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     char partbuf[80]="data";
     FILE *stream;
     if(0 != req->partno)
-      snprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
+      msnprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
 
     stream = fopen(filename, "rb");
     if(!stream) {

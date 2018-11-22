@@ -1478,14 +1478,14 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
     strcpy(tcp_version, "TCP4");
   }
 
-  snprintf(proxy_header,
-           sizeof(proxy_header),
-           "PROXY %s %s %s %li %li\r\n",
-           tcp_version,
-           conn->data->info.conn_local_ip,
-           conn->data->info.conn_primary_ip,
-           conn->data->info.conn_local_port,
-           conn->data->info.conn_primary_port);
+  msnprintf(proxy_header,
+            sizeof(proxy_header),
+            "PROXY %s %s %s %li %li\r\n",
+            tcp_version,
+            conn->data->info.conn_local_ip,
+            conn->data->info.conn_primary_ip,
+            conn->data->info.conn_local_port,
+            conn->data->info.conn_primary_port);
 
   req_buffer = Curl_add_buffer_init();
   if(!req_buffer)
@@ -1849,16 +1849,16 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
    */
 
   /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-  snprintf(datestr, sizeof(datestr),
-           "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-           condp,
-           Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-           tm->tm_mday,
-           Curl_month[tm->tm_mon],
-           tm->tm_year + 1900,
-           tm->tm_hour,
-           tm->tm_min,
-           tm->tm_sec);
+  msnprintf(datestr, sizeof(datestr),
+            "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+            condp,
+            Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+            tm->tm_mday,
+            Curl_month[tm->tm_mon],
+            tm->tm_year + 1900,
+            tm->tm_hour,
+            tm->tm_min,
+            tm->tm_sec);
 
   result = Curl_add_buffer(&req_buffer, datestr, strlen(datestr));
 
@@ -2292,8 +2292,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           if(!*data->state.up.path && path[strlen(path) - 1] != '/') {
             *p++ = '/';
           }
-          snprintf(p, sizeof(ftp_typecode) - 1, ";type=%c",
-                   data->set.prefer_ascii ? 'a' : 'i');
+          msnprintf(p, sizeof(ftp_typecode) - 1, ";type=%c",
+                    data->set.prefer_ascii ? 'a' : 'i');
         }
       }
       if(conn->bits.user_passwd && !conn->bits.userpwd_in_url)

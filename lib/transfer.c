@@ -218,8 +218,8 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
       endofline_native  = "\r\n";
       endofline_network = "\x0d\x0a";
     }
-    hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
-                      "%x%s", nread, endofline_native);
+    hexlen = msnprintf(hexbuffer, sizeof(hexbuffer),
+                       "%x%s", nread, endofline_native);
 
     /* move buffer pointer */
     data->req.upload_fromhere -= hexlen;

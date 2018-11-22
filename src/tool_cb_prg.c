@@ -72,7 +72,7 @@ static void fly(struct ProgressData *bar, bool moved)
   int pos;
   int check = bar->width - 2;
 
-  snprintf(buf, sizeof(buf), "%*s\r", bar->width-1, " ");
+  msnprintf(buf, sizeof(buf), "%*s\r", bar->width-1, " ");
   memcpy(&buf[bar->bar], "-=O=-", 5);
 
   pos = sinus[bar->tick%200] / (10000 / check);
@@ -166,7 +166,7 @@ int tool_progress_cb(void *clientp,
       num = MAX_BARLENGTH;
     memset(line, '#', num);
     line[num] = '\0';
-    snprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
+    msnprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
     fprintf(bar->out, format, line, percent);
   }
   fflush(bar->out);

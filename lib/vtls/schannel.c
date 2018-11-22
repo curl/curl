@@ -2049,7 +2049,7 @@ static void Curl_schannel_cleanup(void)
 
 static size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  size = snprintf(buffer, size, "WinSSL");
+  size = msnprintf(buffer, size, "WinSSL");
 
   return size;
 }

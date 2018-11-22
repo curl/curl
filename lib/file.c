@@ -417,8 +417,9 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
     struct tm buffer;
     const struct tm *tm = &buffer;
     char header[80];
-    snprintf(header, sizeof(header),
-             "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", expected_size);
+    msnprintf(header, sizeof(header),
+              "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+              expected_size);
     result = Curl_client_write(conn, CLIENTWRITE_HEADER, header, 0);
     if(result)
       return result;
@@ -434,16 +435,16 @@ static CURLcode file_do(struct connectdata *conn, bool *done)
       return result;
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-    snprintf(header, sizeof(header),
-             "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
-             Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-             tm->tm_mday,
-             Curl_month[tm->tm_mon],
-             tm->tm_year + 1900,
-             tm->tm_hour,
-             tm->tm_min,
-             tm->tm_sec,
-             data->set.opt_no_body ? "": "\r\n");
+    msnprintf(header, sizeof(header),
+              "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
+              Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+              tm->tm_mday,
+              Curl_month[tm->tm_mon],
+              tm->tm_year + 1900,
+              tm->tm_hour,
+              tm->tm_min,
+              tm->tm_sec,
+              data->set.opt_no_body ? "": "\r\n");
     result = Curl_client_write(conn, CLIENTWRITE_HEADER, header, 0);
     if(result)
       return result;

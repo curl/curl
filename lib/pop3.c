@@ -443,7 +443,7 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
 
   /* Convert the calculated 16 octet digest into a 32 byte hex string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&secret[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
   result = Curl_pp_sendf(&pop3c->pp, "APOP %s %s", conn->user, secret);
 

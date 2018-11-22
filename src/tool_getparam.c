@@ -1351,7 +1351,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               return PARAM_NO_MEM;
             }
             if(nlen > 0) { /* only append '=' if we have a name */
-              snprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+              msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
               size = outlen-1;
             }
             else {
@@ -1935,7 +1935,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf(global,
               "A specified range MUST include at least one dash (-). "
               "Appending one for you!\n");
-        snprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
+        msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
         Curl_safefree(config->range);
         config->range = strdup(buffer);
         if(!config->range)

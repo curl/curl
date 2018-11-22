@@ -812,8 +812,8 @@ static void Curl_mbedtls_session_free(void *ptr)
 static size_t Curl_mbedtls_version(char *buffer, size_t size)
 {
   unsigned int version = mbedtls_version_get_number();
-  return snprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
-                  (version>>16)&0xff, (version>>8)&0xff);
+  return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
+                   (version>>16)&0xff, (version>>8)&0xff);
 }
 
 static CURLcode Curl_mbedtls_random(struct Curl_easy *data,

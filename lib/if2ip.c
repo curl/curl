@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -169,7 +169,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
               }
 #endif
               if(scopeid)
-                snprintf(scope, sizeof(scope), "%%%u", scopeid);
+                msnprintf(scope, sizeof(scope), "%%%u", scopeid);
             }
             else
 #endif
@@ -177,7 +177,7 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
                   &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
             ip = (char *) Curl_inet_ntop(af, addr, ipstr, sizeof(ipstr));
-            snprintf(buf, buf_size, "%s%s", ip, scope);
+            msnprintf(buf, buf_size, "%s%s", ip, scope);
             break;
           }
         }

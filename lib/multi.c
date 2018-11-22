@@ -634,13 +634,13 @@ static CURLcode multi_done(struct connectdata **connp,
   else {
     char buffer[256];
     /* create string before returning the connection */
-    snprintf(buffer, sizeof(buffer),
-             "Connection #%ld to host %s left intact",
-             conn->connection_id,
-             conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
-             conn->bits.httpproxy ? conn->http_proxy.host.dispname :
-             conn->bits.conn_to_host ? conn->conn_to_host.dispname :
-             conn->host.dispname);
+    msnprintf(buffer, sizeof(buffer),
+              "Connection #%ld to host %s left intact",
+              conn->connection_id,
+              conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
+              conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+              conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+              conn->host.dispname);
 
     /* the connection is no longer in use by this transfer */
     if(Curl_conncache_return_conn(conn)) {

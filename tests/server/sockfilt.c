@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -486,20 +486,20 @@ static void lograw(unsigned char *buffer, ssize_t len)
   for(i = 0; i<len; i++) {
     switch(ptr[i]) {
     case '\n':
-      snprintf(optr, left, "\\n");
+      msnprintf(optr, left, "\\n");
       width += 2;
       optr += 2;
       left -= 2;
       break;
     case '\r':
-      snprintf(optr, left, "\\r");
+      msnprintf(optr, left, "\\r");
       width += 2;
       optr += 2;
       left -= 2;
       break;
     default:
-      snprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
-                                  ptr[i] == 0x20) ?ptr[i]:'.');
+      msnprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
+                                   ptr[i] == 0x20) ?ptr[i]:'.');
       width++;
       optr++;
       left--;
@@ -1062,9 +1062,9 @@ static bool juggle(curl_socket_t *sockfdp,
     else if(!memcmp("PORT", buffer, 4)) {
       /* Question asking us what PORT number we are listening to.
          Replies to PORT with "IPv[num]/[port]" */
-      snprintf((char *)buffer, sizeof(buffer), "%s/%hu\n", ipv_inuse, port);
+      msnprintf((char *)buffer, sizeof(buffer), "%s/%hu\n", ipv_inuse, port);
       buffer_len = (ssize_t)strlen((char *)buffer);
-      snprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
+      msnprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, buffer_len))
@@ -1155,7 +1155,7 @@ static bool juggle(curl_socket_t *sockfdp,
     nread_socket = sread(sockfd, buffer, sizeof(buffer));
 
     if(nread_socket > 0) {
-      snprintf(data, sizeof(data), "DATA\n%04zx\n", nread_socket);
+      msnprintf(data, sizeof(data), "DATA\n%04zx\n", nread_socket);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, nread_socket))

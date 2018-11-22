@@ -2270,7 +2270,7 @@ static ssize_t nss_recv(struct connectdata *conn,  /* connection data */
 
 static size_t Curl_nss_version(char *buffer, size_t size)
 {
-  return snprintf(buffer, size, "NSS/%s", NSS_VERSION);
+  return msnprintf(buffer, size, "NSS/%s", NSS_VERSION);
 }
 
 /* data might be NULL */
