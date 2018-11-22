@@ -178,7 +178,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #endif
 
   if(port) {
-    snprintf(sbuf, sizeof(sbuf), "%d", port);
+    msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
   }
 

@@ -277,7 +277,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
   char service[12];
   int rc;
 
-  snprintf(service, sizeof(service), "%d", tsd->port);
+  msnprintf(service, sizeof(service), "%d", tsd->port);
 
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
@@ -679,7 +679,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   hints.ai_family = pf;
   hints.ai_socktype = conn->socktype;
 
-  snprintf(sbuf, sizeof(sbuf), "%d", port);
+  msnprintf(sbuf, sizeof(sbuf), "%d", port);
 
   reslv->start = Curl_now();
   /* fire up a new resolver thread! */

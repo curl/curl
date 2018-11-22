@@ -1974,7 +1974,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
   case 0:
     break;
   default:
-    snprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
+    msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
     verstr = unknown;
     break;
   }
@@ -2018,9 +2018,9 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
 
-    txt_len = snprintf(ssl_buf, sizeof(ssl_buf), "%s (%s), %s, %s (%d):\n",
-                       verstr, direction?"OUT":"IN",
-                       tls_rt_name, msg_name, msg_type);
+    txt_len = msnprintf(ssl_buf, sizeof(ssl_buf), "%s (%s), %s, %s (%d):\n",
+                        verstr, direction?"OUT":"IN",
+                        tls_rt_name, msg_name, msg_type);
     if(0 <= txt_len && (unsigned)txt_len < sizeof(ssl_buf)) {
       Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len);
     }
@@ -2833,9 +2833,9 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
         lerr = SSL_get_verify_result(BACKEND->handle);
         if(lerr != X509_V_OK) {
           *certverifyresult = lerr;
-          snprintf(error_buffer, sizeof(error_buffer),
-                   "SSL certificate problem: %s",
-                   X509_verify_cert_error_string(lerr));
+          msnprintf(error_buffer, sizeof(error_buffer),
+                    "SSL certificate problem: %s",
+                    X509_verify_cert_error_string(lerr));
         }
         else
           /* strcpy() is fine here as long as the string fits within
@@ -2946,7 +2946,7 @@ static void pubkey_show(struct Curl_easy *data,
   char *ptr;
   char namebuf[32];
 
-  snprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
+  msnprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
 
   if(bn)
     BN_print(mem, bn);
@@ -3007,8 +3007,8 @@ static int X509V3_ext(struct Curl_easy *data,
       while((j<(size_t)biomem->length) && (biomem->data[j] == ' '))
         j++;
       if(j<(size_t)biomem->length)
-        ptr += snprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
-                        biomem->data[j]);
+        ptr += msnprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
+                         biomem->data[j]);
     }
 
     Curl_ssl_push_certinfo(data, certnum, namebuf, buf);
@@ -3774,7 +3774,7 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
 static size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef OPENSSL_IS_BORINGSSL
-  return snprintf(buffer, size, OSSL_PACKAGE);
+  return msnprintf(buffer, size, OSSL_PACKAGE);
 #else /* OPENSSL_IS_BORINGSSL */
   char sub[3];
   unsigned long ssleay_value;
@@ -3801,12 +3801,12 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
       sub[0]='\0';
   }
 
-  return snprintf(buffer, size, "%s/%lx.%lx.%lx%s",
-                  OSSL_PACKAGE,
-                  (ssleay_value>>28)&0xf,
-                  (ssleay_value>>20)&0xff,
-                  (ssleay_value>>12)&0xff,
-                  sub);
+  return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s",
+                   OSSL_PACKAGE,
+                   (ssleay_value>>28)&0xf,
+                   (ssleay_value>>20)&0xff,
+                   (ssleay_value>>12)&0xff,
+                   sub);
 #endif /* OPENSSL_IS_BORINGSSL */
 }
 

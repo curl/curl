@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -233,24 +233,24 @@ static CURLcode base64_encode(const char *table64,
 
     switch(inputparts) {
     case 1: /* only one byte read */
-      snprintf(output, 5, "%c%c==",
-               table64[obuf[0]],
-               table64[obuf[1]]);
+      msnprintf(output, 5, "%c%c==",
+                table64[obuf[0]],
+                table64[obuf[1]]);
       break;
 
     case 2: /* two bytes read */
-      snprintf(output, 5, "%c%c%c=",
-               table64[obuf[0]],
-               table64[obuf[1]],
-               table64[obuf[2]]);
+      msnprintf(output, 5, "%c%c%c=",
+                table64[obuf[0]],
+                table64[obuf[1]],
+                table64[obuf[2]]);
       break;
 
     default:
-      snprintf(output, 5, "%c%c%c%c",
-               table64[obuf[0]],
-               table64[obuf[1]],
-               table64[obuf[2]],
-               table64[obuf[3]]);
+      msnprintf(output, 5, "%c%c%c%c",
+                table64[obuf[0]],
+                table64[obuf[1]],
+                table64[obuf[2]],
+                table64[obuf[3]]);
       break;
     }
     output += 4;

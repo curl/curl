@@ -203,7 +203,7 @@ void Curl_strcpy_url(char *output, const char *url, bool relative)
       /* FALLTHROUGH */
     default:
       if(urlchar_needs_escaping(*iptr)) {
-        snprintf(optr, 4, "%%%02x", *iptr);
+        msnprintf(optr, 4, "%%%02x", *iptr);
         optr += 3;
       }
       else
@@ -531,7 +531,7 @@ static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
       *portptr++ = '\0'; /* cut off the name there */
       *rest = 0;
       /* generate a new to get rid of leading zeroes etc */
-      snprintf(portbuf, sizeof(portbuf), "%ld", port);
+      msnprintf(portbuf, sizeof(portbuf), "%ld", port);
       u->portnum = port;
       u->port = strdup(portbuf);
       if(!u->port)
@@ -964,7 +964,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       const struct Curl_handler *h =
         Curl_builtin_scheme(u->scheme);
       if(h) {
-        snprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
+        msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
         ptr = portbuf;
       }
     }
@@ -1023,7 +1023,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
           /* there's no stored port number, but asked to deliver
              a default one for the scheme */
           if(h) {
-            snprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
+            msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
             port = portbuf;
           }
         }
@@ -1287,7 +1287,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
           o++;
         }
         else {
-          snprintf(o, 4, "%%%02x", *i);
+          msnprintf(o, 4, "%%%02x", *i);
           o += 3;
         }
       }

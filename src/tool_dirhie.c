@@ -131,13 +131,13 @@ CURLcode create_dir_hierarchy(const char *outfile, FILE *errors)
     if(tempdir2 != NULL) {
       size_t dlen = strlen(dirbuildup);
       if(dlen)
-        snprintf(&dirbuildup[dlen], outlen - dlen, "%s%s", DIR_CHAR, tempdir);
+        msnprintf(&dirbuildup[dlen], outlen - dlen, "%s%s", DIR_CHAR, tempdir);
       else {
         if(outdup == tempdir)
           /* the output string doesn't start with a separator */
           strcpy(dirbuildup, tempdir);
         else
-          snprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
+          msnprintf(dirbuildup, outlen, "%s%s", DIR_CHAR, tempdir);
       }
       if((-1 == mkdir(dirbuildup, (mode_t)0000750)) && (errno != EEXIST)) {
         show_dir_errno(errors, dirbuildup);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ char *data_to_hex(char *data, size_t len)
     if((data[i] >= 0x20) && (data[i] < 0x7f))
       *optr++ = *iptr++;
     else {
-      snprintf(optr, 4, "%%%02x", *iptr++);
+      msnprintf(optr, 4, "%%%02x", *iptr++);
       optr += 3;
     }
   }
@@ -121,11 +121,12 @@ void logmsg(const char *msg, ...)
   sec = epoch_offset + tv.tv_sec;
   now = localtime(&sec); /* not thread safe but we don't care */
 
-  snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-    (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec, (long)tv.tv_usec);
+  msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
+            (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
+            (long)tv.tv_usec);
 
   va_start(ap, msg);
-  vsnprintf(buffer, sizeof(buffer), msg, ap);
+  mvsnprintf(buffer, sizeof(buffer), msg, ap);
   va_end(ap);
 
   logfp = fopen(serverlogfile, "ab");
@@ -151,7 +152,7 @@ void win32_perror(const char *msg)
 
   if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
                     LANG_NEUTRAL, buf, sizeof(buf), NULL))
-     snprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
+    msnprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
   if(msg)
     fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
@@ -195,7 +196,7 @@ const char *path = ".";
 char *test2file(long testno)
 {
   static char filename[256];
-  snprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
+  msnprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
   return filename;
 }
 

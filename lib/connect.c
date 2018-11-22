@@ -655,7 +655,7 @@ bool Curl_getaddressinfo(struct sockaddr *sa, char *addr,
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
     case AF_UNIX:
       su = (struct sockaddr_un*)sa;
-      snprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+      msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
       *port = 0;
       return TRUE;
 #endif

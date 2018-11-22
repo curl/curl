@@ -209,7 +209,7 @@ static const char *octet2str(const char *beg, const char *end)
     buf = malloc(3 * n + 1);
     if(buf)
       for(n = 0; beg < end; n += 3)
-        snprintf(buf + n, 4, "%02x:", *(const unsigned char *) beg++);
+        msnprintf(buf + n, 4, "%02x:", *(const unsigned char *) beg++);
   }
   return buf;
 }

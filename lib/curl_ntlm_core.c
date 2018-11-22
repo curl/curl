@@ -743,12 +743,12 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
     return CURLE_OUT_OF_MEMORY;
 
   /* Create the BLOB structure */
-  snprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,
-           "%c%c%c%c"   /* NTLMv2_BLOB_SIGNATURE */
-           "%c%c%c%c",  /* Reserved = 0 */
-           NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
-           NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
-           0, 0, 0, 0);
+  msnprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,
+            "%c%c%c%c"   /* NTLMv2_BLOB_SIGNATURE */
+            "%c%c%c%c",  /* Reserved = 0 */
+            NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
+            NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
+            0, 0, 0, 0);
 
   Curl_write64_le(tw, ptr + 24);
   memcpy(ptr + 32, challenge_client, 8);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -409,38 +409,38 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 #else
 #define NTLM2FLAG 0
 #endif
-  snprintf((char *)ntlmbuf, NTLM_BUFSIZE,
-           NTLMSSP_SIGNATURE "%c"
-           "\x01%c%c%c" /* 32-bit type = 1 */
-           "%c%c%c%c"   /* 32-bit NTLM flag field */
-           "%c%c"       /* domain length */
-           "%c%c"       /* domain allocated space */
-           "%c%c"       /* domain name offset */
-           "%c%c"       /* 2 zeroes */
-           "%c%c"       /* host length */
-           "%c%c"       /* host allocated space */
-           "%c%c"       /* host name offset */
-           "%c%c"       /* 2 zeroes */
-           "%s"         /* host name */
-           "%s",        /* domain string */
-           0,           /* trailing zero */
-           0, 0, 0,     /* part of type-1 long */
+  msnprintf((char *)ntlmbuf, NTLM_BUFSIZE,
+            NTLMSSP_SIGNATURE "%c"
+            "\x01%c%c%c" /* 32-bit type = 1 */
+            "%c%c%c%c"   /* 32-bit NTLM flag field */
+            "%c%c"       /* domain length */
+            "%c%c"       /* domain allocated space */
+            "%c%c"       /* domain name offset */
+            "%c%c"       /* 2 zeroes */
+            "%c%c"       /* host length */
+            "%c%c"       /* host allocated space */
+            "%c%c"       /* host name offset */
+            "%c%c"       /* 2 zeroes */
+            "%s"         /* host name */
+            "%s",        /* domain string */
+            0,           /* trailing zero */
+            0, 0, 0,     /* part of type-1 long */
 
-           LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM |
-                       NTLMFLAG_REQUEST_TARGET |
-                       NTLMFLAG_NEGOTIATE_NTLM_KEY |
-                       NTLM2FLAG |
-                       NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
-           SHORTPAIR(domlen),
-           SHORTPAIR(domlen),
-           SHORTPAIR(domoff),
-           0, 0,
-           SHORTPAIR(hostlen),
-           SHORTPAIR(hostlen),
-           SHORTPAIR(hostoff),
-           0, 0,
-           host,  /* this is empty */
-           domain /* this is empty */);
+            LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM |
+                        NTLMFLAG_REQUEST_TARGET |
+                        NTLMFLAG_NEGOTIATE_NTLM_KEY |
+                        NTLM2FLAG |
+                        NTLMFLAG_NEGOTIATE_ALWAYS_SIGN),
+            SHORTPAIR(domlen),
+            SHORTPAIR(domlen),
+            SHORTPAIR(domoff),
+            0, 0,
+            SHORTPAIR(hostlen),
+            SHORTPAIR(hostlen),
+            SHORTPAIR(hostoff),
+            0, 0,
+            host,  /* this is empty */
+            domain /* this is empty */);
 
   /* Initial packet length */
   size = 32 + hostlen + domlen;
@@ -678,88 +678,88 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   hostoff = useroff + userlen;
 
   /* Create the big type-3 message binary blob */
-  size = snprintf((char *)ntlmbuf, NTLM_BUFSIZE,
-                  NTLMSSP_SIGNATURE "%c"
-                  "\x03%c%c%c"  /* 32-bit type = 3 */
+  size = msnprintf((char *)ntlmbuf, NTLM_BUFSIZE,
+                   NTLMSSP_SIGNATURE "%c"
+                   "\x03%c%c%c"  /* 32-bit type = 3 */
 
-                  "%c%c"  /* LanManager length */
-                  "%c%c"  /* LanManager allocated space */
-                  "%c%c"  /* LanManager offset */
-                  "%c%c"  /* 2 zeroes */
+                   "%c%c"  /* LanManager length */
+                   "%c%c"  /* LanManager allocated space */
+                   "%c%c"  /* LanManager offset */
+                   "%c%c"  /* 2 zeroes */
 
-                  "%c%c"  /* NT-response length */
-                  "%c%c"  /* NT-response allocated space */
-                  "%c%c"  /* NT-response offset */
-                  "%c%c"  /* 2 zeroes */
+                   "%c%c"  /* NT-response length */
+                   "%c%c"  /* NT-response allocated space */
+                   "%c%c"  /* NT-response offset */
+                   "%c%c"  /* 2 zeroes */
 
-                  "%c%c"  /* domain length */
-                  "%c%c"  /* domain allocated space */
-                  "%c%c"  /* domain name offset */
-                  "%c%c"  /* 2 zeroes */
+                   "%c%c"  /* domain length */
+                   "%c%c"  /* domain allocated space */
+                   "%c%c"  /* domain name offset */
+                   "%c%c"  /* 2 zeroes */
 
-                  "%c%c"  /* user length */
-                  "%c%c"  /* user allocated space */
-                  "%c%c"  /* user offset */
-                  "%c%c"  /* 2 zeroes */
+                   "%c%c"  /* user length */
+                   "%c%c"  /* user allocated space */
+                   "%c%c"  /* user offset */
+                   "%c%c"  /* 2 zeroes */
 
-                  "%c%c"  /* host length */
-                  "%c%c"  /* host allocated space */
-                  "%c%c"  /* host offset */
-                  "%c%c"  /* 2 zeroes */
+                   "%c%c"  /* host length */
+                   "%c%c"  /* host allocated space */
+                   "%c%c"  /* host offset */
+                   "%c%c"  /* 2 zeroes */
 
-                  "%c%c"  /* session key length (unknown purpose) */
-                  "%c%c"  /* session key allocated space (unknown purpose) */
-                  "%c%c"  /* session key offset (unknown purpose) */
-                  "%c%c"  /* 2 zeroes */
+                   "%c%c"  /* session key length (unknown purpose) */
+                   "%c%c"  /* session key allocated space (unknown purpose) */
+                   "%c%c"  /* session key offset (unknown purpose) */
+                   "%c%c"  /* 2 zeroes */
 
-                  "%c%c%c%c",  /* flags */
+                   "%c%c%c%c",  /* flags */
 
-                  /* domain string */
-                  /* user string */
-                  /* host string */
-                  /* LanManager response */
-                  /* NT response */
+                   /* domain string */
+                   /* user string */
+                   /* host string */
+                   /* LanManager response */
+                   /* NT response */
 
-                  0,                /* zero termination */
-                  0, 0, 0,          /* type-3 long, the 24 upper bits */
+                   0,                /* zero termination */
+                   0, 0, 0,          /* type-3 long, the 24 upper bits */
 
-                  SHORTPAIR(0x18),  /* LanManager response length, twice */
-                  SHORTPAIR(0x18),
-                  SHORTPAIR(lmrespoff),
-                  0x0, 0x0,
+                   SHORTPAIR(0x18),  /* LanManager response length, twice */
+                   SHORTPAIR(0x18),
+                   SHORTPAIR(lmrespoff),
+                   0x0, 0x0,
 
 #ifdef USE_NTRESPONSES
-                  SHORTPAIR(ntresplen),  /* NT-response length, twice */
-                  SHORTPAIR(ntresplen),
-                  SHORTPAIR(ntrespoff),
-                  0x0, 0x0,
+                   SHORTPAIR(ntresplen),  /* NT-response length, twice */
+                   SHORTPAIR(ntresplen),
+                   SHORTPAIR(ntrespoff),
+                   0x0, 0x0,
 #else
-                  0x0, 0x0,
-                  0x0, 0x0,
-                  0x0, 0x0,
-                  0x0, 0x0,
+                   0x0, 0x0,
+                   0x0, 0x0,
+                   0x0, 0x0,
+                   0x0, 0x0,
 #endif
-                  SHORTPAIR(domlen),
-                  SHORTPAIR(domlen),
-                  SHORTPAIR(domoff),
-                  0x0, 0x0,
+                   SHORTPAIR(domlen),
+                   SHORTPAIR(domlen),
+                   SHORTPAIR(domoff),
+                   0x0, 0x0,
 
-                  SHORTPAIR(userlen),
-                  SHORTPAIR(userlen),
-                  SHORTPAIR(useroff),
-                  0x0, 0x0,
+                   SHORTPAIR(userlen),
+                   SHORTPAIR(userlen),
+                   SHORTPAIR(useroff),
+                   0x0, 0x0,
 
-                  SHORTPAIR(hostlen),
-                  SHORTPAIR(hostlen),
-                  SHORTPAIR(hostoff),
-                  0x0, 0x0,
+                   SHORTPAIR(hostlen),
+                   SHORTPAIR(hostlen),
+                   SHORTPAIR(hostoff),
+                   0x0, 0x0,
 
-                  0x0, 0x0,
-                  0x0, 0x0,
-                  0x0, 0x0,
-                  0x0, 0x0,
+                   0x0, 0x0,
+                   0x0, 0x0,
+                   0x0, 0x0,
+                   0x0, 0x0,
 
-                  LONGQUARTET(ntlm->flags));
+                   LONGQUARTET(ntlm->flags));
 
   DEBUGASSERT(size == 64);
   DEBUGASSERT(size == (size_t)lmrespoff);

@@ -143,7 +143,7 @@ static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
 {
   int i;
   for(i = 0; i < 16; i++)
-    snprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
+    msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
 }
 
 /* Convert sha256 chunk to RFC7616 -suitable ascii string*/
@@ -152,7 +152,7 @@ static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
 {
   int i;
   for(i = 0; i < 32; i++)
-    snprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
+    msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
 }
 
 /* Perform quoted-string escaping as described in RFC2616 and its errata */
@@ -432,7 +432,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* Convert calculated 16 octet hex into 32 bytes string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate our SPN */
   spn = Curl_auth_build_spn(service, realm, NULL);
@@ -455,7 +455,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
@@ -485,7 +485,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&resp_hash_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate the response */
   response = aprintf("username=\"%s\",realm=\"%s\",nonce=\"%s\","

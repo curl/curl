@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -251,7 +251,7 @@ static char *c_escape(const char *str, size_t len)
       e += 2;
     }
     else if(! isprint(c)) {
-      snprintf(e, 5, "\\%03o", (unsigned)c);
+      msnprintf(e, 5, "\\%03o", (unsigned)c);
       e += 4;
     }
     else
@@ -311,8 +311,8 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
     char preamble[80];          /* should accommodate any symbol name */
     long rest = lval;           /* bits not handled yet */
     const NameValue *nv = NULL;
-    snprintf(preamble, sizeof(preamble),
-             "curl_easy_setopt(hnd, %s, ", name);
+    msnprintf(preamble, sizeof(preamble),
+              "curl_easy_setopt(hnd, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
@@ -322,7 +322,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        snprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
+        msnprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
       }
     }
     /* If any bits have no definition, output an explicit value.
@@ -354,8 +354,8 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
     char preamble[80];
     unsigned long rest = (unsigned long)lval;
     const NameValueUnsigned *nv = NULL;
-    snprintf(preamble, sizeof(preamble),
-             "curl_easy_setopt(hnd, %s, ", name);
+    msnprintf(preamble, sizeof(preamble),
+              "curl_easy_setopt(hnd, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
@@ -365,7 +365,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
         if(!rest)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        snprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
+        msnprintf(preamble, sizeof(preamble), "%*s", strlen(preamble), "");
       }
     }
     /* If any bits have no definition, output an explicit value.
@@ -629,7 +629,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
       }
     }
 
-    snprintf(buf, sizeof(buf), "%ldL", lval);
+    msnprintf(buf, sizeof(buf), "%ldL", lval);
     value = buf;
     ret = curl_easy_setopt(curl, tag, lval);
     if(lval == defval)
@@ -666,8 +666,8 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
   else {
     /* Value is expected to be curl_off_t */
     curl_off_t oval = va_arg(arg, curl_off_t);
-    snprintf(buf, sizeof(buf),
-             "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
+    msnprintf(buf, sizeof(buf),
+              "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
     value = buf;
     ret = curl_easy_setopt(curl, tag, oval);
 

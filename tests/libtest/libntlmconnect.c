@@ -135,11 +135,11 @@ int test(char *url)
       easy_init(easy[num_handles]);
 
       if(num_handles % 3 == 2) {
-        snprintf(full_url, urllen, "%s0200", url);
+        msnprintf(full_url, urllen, "%s0200", url);
         easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
       }
       else {
-        snprintf(full_url, urllen, "%s0100", url);
+        msnprintf(full_url, urllen, "%s0100", url);
         easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
       }
       easy_setopt(easy[num_handles], CURLOPT_FRESH_CONNECT, 1L);

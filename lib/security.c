@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -120,7 +120,7 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
   char print_buffer[50];
 
   va_start(args, message);
-  vsnprintf(print_buffer, sizeof(print_buffer), message, args);
+  mvsnprintf(print_buffer, sizeof(print_buffer), message, args);
   va_end(args);
 
   if(Curl_ftpsend(conn, print_buffer)) {

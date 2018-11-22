@@ -1342,8 +1342,8 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
               break;
             }
 
-            snprintf(sshc->readdir_linkPath, PATH_MAX, "%s%s", protop->path,
-                     sshc->readdir_filename);
+            msnprintf(sshc->readdir_linkPath, PATH_MAX, "%s%s", protop->path,
+                      sshc->readdir_filename);
 
             state(conn, SSH_SFTP_READDIR_LINK);
             break;
@@ -1406,12 +1406,12 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       }
       sshc->readdir_line = new_readdir_line;
 
-      sshc->readdir_currLen += snprintf(sshc->readdir_line +
-                                        sshc->readdir_currLen,
-                                        sshc->readdir_totalLen -
-                                        sshc->readdir_currLen,
-                                        " -> %s",
-                                        sshc->readdir_filename);
+      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
+                                         sshc->readdir_currLen,
+                                         sshc->readdir_totalLen -
+                                         sshc->readdir_currLen,
+                                         " -> %s",
+                                         sshc->readdir_filename);
 
       sftp_attributes_free(sshc->readdir_link_attrs);
       sshc->readdir_link_attrs = NULL;
@@ -1421,10 +1421,10 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       state(conn, SSH_SFTP_READDIR_BOTTOM);
       /* FALLTHROUGH */
     case SSH_SFTP_READDIR_BOTTOM:
-      sshc->readdir_currLen += snprintf(sshc->readdir_line +
-                                        sshc->readdir_currLen,
-                                        sshc->readdir_totalLen -
-                                        sshc->readdir_currLen, "\n");
+      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
+                                         sshc->readdir_currLen,
+                                         sshc->readdir_totalLen -
+                                         sshc->readdir_currLen, "\n");
       result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                  sshc->readdir_line,
                                  sshc->readdir_currLen);

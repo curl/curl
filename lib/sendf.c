@@ -237,7 +237,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char print_buffer[2048 + 1];
     va_start(ap, fmt);
-    len = vsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
+    len = mvsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
     /*
      * Indicate truncation of the input by replacing the last 3 characters
      * with "...", and transfer the newline over in case the format had one.
@@ -245,9 +245,9 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
     if(len >= sizeof(print_buffer)) {
       len = strlen(fmt);
       if(fmt[--len] == '\n')
-        snprintf(print_buffer + (sizeof(print_buffer) - 5), 5, "...\n");
+        msnprintf(print_buffer + (sizeof(print_buffer) - 5), 5, "...\n");
       else
-        snprintf(print_buffer + (sizeof(print_buffer) - 4), 4, "...");
+        msnprintf(print_buffer + (sizeof(print_buffer) - 4), 4, "...");
     }
     va_end(ap);
     len = strlen(print_buffer);
@@ -266,7 +266,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char error[CURL_ERROR_SIZE + 2];
     va_start(ap, fmt);
-    vsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
+    mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
     len = strlen(error);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {

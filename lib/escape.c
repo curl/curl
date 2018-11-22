@@ -122,7 +122,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
         return NULL;
       }
 
-      snprintf(&ns[strindex], 4, "%%%02X", in);
+      msnprintf(&ns[strindex], 4, "%%%02X", in);
 
       strindex += 3;
     }

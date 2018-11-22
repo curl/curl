@@ -274,7 +274,7 @@ static char *parse_filename(const char *ptr, size_t len)
     char *tdir = curlx_getenv("CURL_TESTDIR");
     if(tdir) {
       char buffer[512]; /* suitably large */
-      snprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);
+      msnprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);
       Curl_safefree(copy);
       copy = strdup(buffer); /* clone the buffer, we don't use the libcurl
                                 aprintf() or similar since we want to use the
