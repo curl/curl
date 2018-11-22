@@ -35,6 +35,7 @@ my $suppressed; # whitelisted problems
 my $file;
 my $dir=".";
 my $wlist="";
+my @alist;
 my $windows_os = $^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin';
 my $verbose;
 my %whitelist;
@@ -74,6 +75,7 @@ my %warnings = (
     'SEMINOSPACE'      => 'semicolon without following space',
     'MULTISPACE'       => 'multiple spaces used when not suitable',
     'SIZEOFNOPAREN'    => 'use of sizeof without parentheses',
+    'SNPRINTF'         => 'use of snprintf',
     );
 
 sub readwhitelist {
@@ -153,6 +155,11 @@ while(1) {
         $file = shift @ARGV;
         next;
     }
+    elsif($file =~ /-A(.+)/) {
+        push @alist, $1;
+        $file = shift @ARGV;
+        next;
+    }
     elsif($file =~ /-i([1-9])/) {
         $indent = $1 + 0;
         $file = shift @ARGV;
@@ -174,6 +181,7 @@ while(1) {
 if(!$file) {
     print "checksrc.pl [option] <file1> [file2] ...\n";
     print " Options:\n";
+    print "  -A[rule]  Accept this violation, can be used multiple times\n";
     print "  -D[DIR]   Directory to prepend file names\n";
     print "  -h        Show help output\n";
     print "  -W[file]  Whitelist the given file - ignore all its flaws\n";
@@ -197,6 +205,17 @@ do {
     $file = shift @ARGV;
 
 } while($file);
+
+sub accept_violations {
+    for my $r (@alist) {
+        if(!$warnings{$r}) {
+            print "'$r' is not a warning to accept!\n";
+            exit;
+        }
+        $ignore{$r}=999999;
+        $ignore_used{$r}=0;
+    }
+}
 
 sub checksrc_clear {
     undef %ignore;
@@ -297,6 +316,7 @@ sub scanfile {
     my $incomment=0;
     my $copyright=0;
     checksrc_clear(); # for file based ignores
+    accept_violations();
 
     while(<R>) {
         $windows_os ? $_ =~ s/\r?\n$// : chomp;
@@ -507,6 +527,13 @@ sub scanfile {
                    \s*\(
                  /x) {
             checkwarn("BANNEDFUNC",
+                      $line, length($1), $file, $ol,
+                      "use of $2 is banned");
+        }
+
+        # scan for use of snprintf for curl-internals reasons
+        if($l =~ /^(.*\W)(v?snprintf)\s*\(/x) {
+            checkwarn("SNPRINTF",
                       $line, length($1), $file, $ol,
                       "use of $2 is banned");
         }
