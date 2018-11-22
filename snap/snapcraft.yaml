@@ -1,0 +1,41 @@
+name: curl
+version: '0.1'
+summary: command line tool for transferring data with URL syntax
+description: |
+  A command line tool and library for transferring data with URL syntax,
+  supporting HTTP, HTTPS, FTP, FTPS, GOPHER, TFTP, SCP, SFTP, SMB, TELNET,
+  DICT, LDAP, LDAPS, FILE, IMAP, SMTP, POP3, RTSP and RTMP.
+  libcurl offers a myriad of powerful features
+grade: devel
+confinement: classic
+
+apps:
+  curl:
+    command: usr/local/bin/curl
+
+parts:
+  curl:
+    source: https://curl.haxx.se/download/curl-7.62.0.tar.bz2
+    plugin: make
+    build-packages:
+      - ca-certificates
+      - groff-base
+      - libgnutls28-dev
+      - libidn2-0-dev
+      - libkrb5-dev
+      - libldap2-dev
+      - libnghttp2-dev
+      - libnss3-dev
+      - libpsl-dev
+      - librtmp-dev
+      - libssh2-1-dev
+      - libssl-dev
+      - libtool
+      - openssh-server
+      - python
+      - stunnel4
+      - zlib1g-dev
+    stage-packages: 
+      - libc6
+      - libcurl3-gnutls
+      - zlib1g
