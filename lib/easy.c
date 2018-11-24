@@ -661,25 +661,30 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
   bool done = FALSE;
   CURLMcode mcode = CURLM_OK;
   CURLcode result = CURLE_OK;
+  struct curltime before;
 
   while(!done && !mcode) {
     int still_running = 0;
     int rc;
 
+    before = Curl_now();
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
 
     if(!mcode) {
       if(!rc) {
         long sleep_ms;
+        struct curltime after = Curl_now();
 
         /* If it returns without any filedescriptor instantly, we need to
            avoid busy-looping during periods where it has nothing particular
            to wait for */
-        curl_multi_timeout(multi, &sleep_ms);
-        if(sleep_ms) {
-          if(sleep_ms > 1000)
-            sleep_ms = 1000;
-          Curl_wait_ms((int)sleep_ms);
+        if(Curl_timediff(after, before) <= 10) {
+          curl_multi_timeout(multi, &sleep_ms);
+          if(sleep_ms) {
+            if(sleep_ms > 1000)
+              sleep_ms = 1000;
+            Curl_wait_ms((int)sleep_ms);
+          }
         }
       }
 
