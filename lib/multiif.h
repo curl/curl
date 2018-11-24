@@ -97,4 +97,12 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
+
+CURLMcode Curl_multi_wait(struct Curl_multi *multi,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret,
+                          bool *gotsocket); /* if any socket was checked */
+
 #endif /* HEADER_CURL_MULTIIF_H */
