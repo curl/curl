@@ -148,6 +148,7 @@ man_MANS =                                      \
   CURLOPT_FTP_USE_EPSV.3                        \
   CURLOPT_FTP_USE_PRET.3                        \
   CURLOPT_GSSAPI_DELEGATION.3                   \
+  CURLOPT_H3.3                                  \
   CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3           \
   CURLOPT_HAPROXYPROTOCOL.3                     \
   CURLOPT_HEADER.3                              \

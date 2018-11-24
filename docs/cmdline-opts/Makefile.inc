@@ -64,6 +64,7 @@ DPAGES =					\
   http1.0.d					\
   http1.1.d http2.d				\
   http2-prior-knowledge.d			\
+  http3-direct.d                                \
   ignore-content-length.d			\
   include.d					\
   insecure.d					\

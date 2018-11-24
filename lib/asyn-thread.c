@@ -698,7 +698,8 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = conn->socktype;
+  hints.ai_socktype = (conn->transport == TRNSPRT_TCP)?
+    SOCK_STREAM : SOCK_DGRAM;
 
   msnprintf(sbuf, sizeof(sbuf), "%d", port);
 

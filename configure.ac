@@ -3382,6 +3382,97 @@ if test X"$want_h2" != Xno; then
 fi
 
 dnl **********************************************************************
+dnl Check for ngtcp2
+dnl **********************************************************************
+
+OPT_TCP2="yes"
+curl_h3_msg="disabled (--with-ngtcp2)"
+
+if test "x$disable_http" = "xyes"; then
+  # without HTTP, ngtcp2 is no use
+  OPT_TCP2="no"
+fi
+
+AC_ARG_WITH(ngtcp2,
+AC_HELP_STRING([--with-ngtcp2=PATH],[Enable ngtcp2 usage])
+AC_HELP_STRING([--without-ngtcp2],[Disable ngtcp2 usage]),
+  [OPT_TCP2=$withval])
+case "$OPT_TCP2" in
+  no)
+    dnl --without-ngtcp2 option used
+    want_tcp2="no"
+    ;;
+  yes)
+    dnl --with-ngtcp2 option used without path
+    want_tcp2="default"
+    want_tcp2_path=""
+    ;;
+  *)
+    dnl --with-ngtcp2 option used with path
+    want_tcp2="yes"
+    want_tcp2_path="$withval/lib/pkgconfig"
+    ;;
+esac
+
+curl_tcp2_msg="disabled (--with-ngtcp2)"
+if test X"$want_tcp2" != Xno; then
+  dnl backup the pre-ngtcp2 variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  CURL_CHECK_PKGCONFIG(libngtcp2, $want_tcp2_path)
+
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+      $PKGCONFIG --libs-only-l libngtcp2`
+    AC_MSG_NOTICE([-l is $LIB_TCP2])
+
+    CPP_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+      $PKGCONFIG --cflags-only-I libngtcp2`
+    AC_MSG_NOTICE([-I is $CPP_TCP2])
+
+    LD_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+      $PKGCONFIG --libs-only-L libngtcp2`
+    AC_MSG_NOTICE([-L is $LD_TCP2])
+
+    LDFLAGS="$LDFLAGS $LD_TCP2"
+    CPPFLAGS="$CPPFLAGS $CPP_TCP2"
+    LIBS="$LIB_TCP2 $LIBS"
+
+    if test "x$cross_compiling" != "xyes"; then
+      DIR_TCP2=`echo $LD_TCP2 | $SED -e 's/-L//'`
+    fi
+    AC_CHECK_LIB(ngtcp2, ngtcp2_conn_client_new,
+      [
+       AC_CHECK_HEADERS(ngtcp2/ngtcp2.h,
+          curl_h3_msg="enabled (ngtcp2)"
+          NGTCP2_ENABLED=1
+          AC_DEFINE(USE_NGTCP2, 1, [if ngtcp2 is in use])
+          AC_SUBST(USE_NGTCP2, [1])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_TCP2"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_TCP2 to CURL_LIBRARY_PATH])
+       )
+      ],
+        dnl not found, revert back to clean variables
+        LDFLAGS=$CLEANLDFLAGS
+        CPPFLAGS=$CLEANCPPFLAGS
+        LIBS=$CLEANLIBS
+    )
+
+  else
+    dnl no ngtcp2 pkg-config found, deal with it
+    if test X"$want_tcp2" != Xdefault; then
+      dnl To avoid link errors, we do not allow --with-ngtcp2 without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--with-ngtcp2 was specified but could not find ngtcp2 pkg-config file.])
+    fi
+  fi
+
+fi
+
+dnl **********************************************************************
 dnl Check for zsh completion path
 dnl **********************************************************************
 
@@ -4136,6 +4227,10 @@ if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
 fi
 
+if test "x$USE_NGTCP2" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP3"
+fi
+
 if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES MultiSSL"
 fi
@@ -4325,5 +4420,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   metalink support: ${curl_mtlnk_msg}
   PSL support:      ${curl_psl_msg}
   HTTP2 support:    ${curl_h2_msg}
+  HTTP3 support:    ${curl_h3_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 ])

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -901,6 +901,10 @@ typedef enum {
 #define CURLPROTO_SMB    (1<<26)
 #define CURLPROTO_SMBS   (1<<27)
 #define CURLPROTO_ALL    (~0) /* enable everything */
+
+/* bitmask defines for CURLOPT_H3 */
+#define CURLH3_DIRECT (1<<0) /* go QUIC + HTTP/3 directly to the given host +
+                                port */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
@@ -1894,6 +1898,9 @@ typedef enum {
   /* set this to 1L to allow HTTP/0.9 responses or 0L to disallow */
   CINIT(HTTP09_ALLOWED, LONG, 285),
 
+  /* Bitmask to control HTTP/3 behavior. See CURLH3_* */
+  CINIT(H3, LONG, 999),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2756,6 +2763,7 @@ typedef struct {
 #define CURL_VERSION_HTTPS_PROXY  (1<<21) /* HTTPS-proxy support built-in */
 #define CURL_VERSION_MULTI_SSL    (1<<22) /* Multiple SSL backends available */
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
+#define CURL_VERSION_HTTP3        (1<<24) /* HTTP3 support built-in */
 
  /*
  * NAME curl_version_info()

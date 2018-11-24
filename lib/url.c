@@ -2253,7 +2253,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 {
   const struct Curl_handler * p;
   CURLcode result;
-  conn->socktype = SOCK_STREAM; /* most of them are TCP streams */
+  conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Perform setup complement if some. */
   p = conn->handler;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,7 @@
 #include "vtls/vtls.h"
 #include "http2.h"
 #include "ssh.h"
+#include "quic.h"
 #include "curl_printf.h"
 
 #ifdef USE_ARES
@@ -184,6 +185,11 @@ char *curl_version(void)
 #endif
 #ifdef USE_NGHTTP2
   len = Curl_http2_ver(ptr, left);
+  left -= len;
+  ptr += len;
+#endif
+#ifdef USE_NGTCP2
+  len = Curl_quic_ver(ptr, left);
   left -= len;
   ptr += len;
 #endif
@@ -353,6 +359,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(USE_NGHTTP2)
   | CURL_VERSION_HTTP2
+#endif
+#if defined(USE_NGTCP2)
+  | CURL_VERSION_HTTP3
 #endif
 #if defined(USE_UNIX_SOCKETS)
   | CURL_VERSION_UNIX_SOCKETS

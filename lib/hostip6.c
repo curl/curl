@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -163,7 +163,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = conn->socktype;
+  hints.ai_socktype = (conn->transport == TRNSPRT_TCP) ?
+    SOCK_STREAM : SOCK_DGRAM;
 
 #ifndef USE_RESOLVE_ON_IPS
   /*

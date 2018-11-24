@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -186,6 +186,8 @@ static const struct helptxt helptext[] = {
    "Use HTTP 2"},
   {"    --http2-prior-knowledge",
    "Use HTTP 2 without HTTP/1.1 Upgrade"},
+  {"    --http3-direct",
+   "Use HTTP v3"},
   {"    --ignore-content-length",
    "Ignore the size of the remote resource"},
   {"-i, --include",
@@ -521,6 +523,7 @@ static const struct feat feats[] = {
   {"CharConv",       CURL_VERSION_CONV},
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
   {"HTTP2",          CURL_VERSION_HTTP2},
+  {"HTTP3",          CURL_VERSION_HTTP3},
   {"UnixSockets",    CURL_VERSION_UNIX_SOCKETS},
   {"HTTPS-proxy",    CURL_VERSION_HTTPS_PROXY},
   {"MultiSSL",       CURL_VERSION_MULTI_SSL},
