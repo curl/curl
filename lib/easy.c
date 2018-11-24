@@ -664,12 +664,12 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
   while(!done && !mcode) {
     int still_running = 0;
-    int rc;
+    bool gotsocket = FALSE;
 
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
+    mcode = Curl_multi_wait(multi, NULL, 0, 1000, NULL, &gotsocket);
 
     if(!mcode) {
-      if(!rc) {
+      if(!gotsocket) {
         long sleep_ms;
 
         /* If it returns without any filedescriptor instantly, we need to
@@ -688,6 +688,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
     /* only read 'still_running' if curl_multi_perform() return OK */
     if(!mcode && !still_running) {
+      int rc;
       CURLMsg *msg = curl_multi_info_read(multi, &rc);
       if(msg) {
         result = msg->data.result;

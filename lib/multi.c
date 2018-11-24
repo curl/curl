@@ -985,11 +985,12 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
 #define NUM_POLLS_ON_STACK 10
 
-CURLMcode curl_multi_wait(struct Curl_multi *multi,
+CURLMcode Curl_multi_wait(struct Curl_multi *multi,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
-                          int *ret)
+                          int *ret,
+                          bool *gotsocket) /* if any socket was checked */
 {
   struct Curl_easy *data;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
@@ -1002,6 +1003,9 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   long timeout_internal;
   int retcode = 0;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
+
+  if(gotsocket)
+    *gotsocket = FALSE;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1135,9 +1139,21 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
     free(ufds);
   if(ret)
     *ret = retcode;
+  if(gotsocket && (extra_fds || curlfds))
+    /* if any socket was checked */
+    *gotsocket = TRUE;
+
   return CURLM_OK;
 }
 
+CURLMcode curl_multi_wait(struct Curl_multi *multi,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret)
+{
+  return Curl_multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, NULL);
+}
 /*
  * Curl_multi_connchanged() is called to tell that there is a connection in
  * this multi handle that has changed state (pipelining become possible, the
