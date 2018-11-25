@@ -14,18 +14,26 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_HEADERFUNCTION.3: match 'nitems' name in synopsis and description [45]
+ o CURLOPT_WRITEFUNCTION.3: spell out that it gets called many times
  o Curl_follow: accept non-supported schemes for "fake" redirects [9]
  o KNOWN_BUGS: add --proxy-any connection issue [28]
  o OS400: add URL API ccsid wrappers and sync ILE/RPG bindings
  o TODO: Have the URL API offer IDN decoding [22]
+ o ares: remove fd from multi fd set when ares is about to close the fd [42]
  o axtls: removed [1]
  o configure: show CFLAGS, LDFLAGS etc in summary [7]
+ o cookies: create the cookiejar even if no cookies to save [48]
  o curl: --local-port range was not "including" [29]
  o curl: fix --local-port integer overflow [25]
  o curl: fixed UTF-8 in current console code page (Windows) [16]
+ o curl_easy_perform: fix timeout handling [49]
  o curl_multibyte: fix a malloc overcalculation [18]
+ o curle: move deprecated error code to ifndef block [40]
  o docs: escape "\n" codes [26]
+ o examples/ephiperfifo: report error when epoll_ctl fails
  o ftp: avoid two unsigned int overflows in FTP listing parser [30]
+ o host names: allow trailing dot in name resolve, then strip it [46]
  o http_negotiate: do not close connection until negotiation is completed [36]
  o impacket: add LICENSE [39]
  o infof: clearly indicate truncation [14]
@@ -35,14 +43,22 @@ This release includes the following bugfixes:
  o nss: fix fallthrough comment to fix picky compiler warning
  o nss: remove version selecting dead code [33]
  o nss: set default max-tls to 1.3/1.2 [32]
+ o ntlm: Remove redundant ifdef USE_OPENSSL [41]
  o openssl: Remove SSLEAY leftovers [37]
  o openssl: do not log excess "TLS app data" lines for TLS 1.3 [34]
+ o openssl: support session resume with TLS 1.3 [44]
  o openvms: fix example name [8]
+ o os400: Add curl_easy_conn_upkeep() to ILE/RPG binding
+ o os400: add CURLOPT_CURLU to ILE/RPG binding
+ o os400: fix return type of curl_easy_pause() in ILE/RPG binding
  o pop3: only do APOP with a valid timestamp [35]
  o runtests: use the local curl for verifying [6]
  o schannel: be consistent in Schannel capitalization [23]
  o schannel: better CURLOPT_CERTINFO support [2]
  o schannel: use Curl_ prefix for global private symbols [4]
+ o snprintf: renamed and we now only use msnprintf() [47]
+ o ssl: fix compilation with OpenSSL 0.9.7 [43]
+ o ssl: replace all internal uses of CURLE_SSL_CACERT [40]
  o symbols-in-versions: add missing CURLU_ symbols [15]
  o tests: disable SO_EXCLUSIVEADDRUSE for stunnel on Windows
  o tests: drop http_pipe.py script no longer used [5]
@@ -61,14 +77,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alexey Melnichuk, bobmitchell1956 on github, Brad King,
-  Brian Carpenter, Daniel Gustafsson, Daniel Stenberg, Dheeraj Sangamkar,
-  Elia Tufarolo, Frank Gevaerts, Gisle Vanem, Hagai Auro,
+  Alessandro Ghedini, Alexey Melnichuk, Antoni Villalonga,
+  bobmitchell1956 on github, Brad King, Brian Carpenter, daboul on github,
+  Daniel Gustafsson, Daniel Stenberg, David Benjamin, Dheeraj Sangamkar,
+  Elia Tufarolo, Frank Gevaerts, Gisle Vanem, Hagai Auro, Han Han,
   infinnovation-dev on github, Jérémy Rocher, Jim Fuller, Kamil Dudka,
   Marcel Raad, Marc Hörsken, Marcos Diazr, Michael Kaufmann, NTMan on Github,
-  Patrick Monnerat, Peter Wu, Ray Satiro, Sven Blumenstein, Tim Rühsen,
-  tpaukrt on github, Viktor Szakats, Yasuhiro Matsumoto,
-  (29 contributors)
+  Patrick Monnerat, Peter Wu, Ray Satiro, Romain Fliedel, Sven Blumenstein,
+  Tim Rühsen, Tobias Hintze, Tomas Hoger, tpaukrt on github, Viktor Szakats,
+  Yasuhiro Matsumoto,
+  (36 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -113,3 +131,13 @@ References to bug reports and discussions on issues:
  [37] = https://curl.haxx.se/bug/?i=3270
  [38] = https://curl.haxx.se/bug/?i=3254
  [39] = https://curl.haxx.se/bug/?i=3276
+ [40] = https://curl.haxx.se/bug/?i=3291
+ [41] = https://curl.haxx.se/bug/?i=3269
+ [42] = https://curl.haxx.se/bug/?i=3238
+ [43] = https://curl.haxx.se/bug/?i=3266
+ [44] = https://curl.haxx.se/bug/?i=3202
+ [45] = https://curl.haxx.se/bug/?i=3295
+ [46] = https://curl.haxx.se/bug/?i=3022
+ [47] = https://curl.haxx.se/bug/?i=3296
+ [48] = https://curl.haxx.se/bug/?i=3299
+ [49] = https://curl.haxx.se/bug/?i=3305
