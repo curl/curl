@@ -853,7 +853,7 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
                      &de);
     free(data->req.doh.probe[1].serverdoh.memory);
     if(rc2) {
-      infof(data, "DOG: %s type %s for %s\n", doh_strerror(rc2),
+      infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc2),
             type2name(data->req.doh.probe[1].dnstype),
             data->req.doh.host);
     }
