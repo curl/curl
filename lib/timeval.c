@@ -26,24 +26,14 @@
 
 struct curltime Curl_now(void)
 {
-  /*
-  ** GetTickCount() is available on _all_ Windows versions from W95 up
-  ** to nowadays. Returns milliseconds elapsed since last system boot,
-  ** increases monotonically and wraps once 49.7 days have elapsed.
-  */
+  LARGE_INTEGER freq, count;
+  QueryPerformanceFrequency(&freq);
+  QueryPerformanceCounter(&count);
+  time_t sec = (time_t)(count.QuadPart / freq.QuadPart);
+  int usec = (int)((count.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart);
   struct curltime now;
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
-    (_WIN32_WINNT < _WIN32_WINNT_VISTA) || \
-    (defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR))
-  DWORD milliseconds = GetTickCount();
-  now.tv_sec = milliseconds / 1000;
-  now.tv_usec = (milliseconds % 1000) * 1000;
-#else
-  ULONGLONG milliseconds = GetTickCount64();
-  now.tv_sec = (time_t) (milliseconds / 1000);
-  now.tv_usec = (unsigned int) (milliseconds % 1000) * 1000;
-#endif
-
+  now.tv_sec = sec;
+  now.tv_usec = usec;
   return now;
 }
 
