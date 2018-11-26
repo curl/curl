@@ -11,6 +11,14 @@ cd ${PROJECT_DIR}
 mkdir build
 cd build
 
+if [ "$appveyor_repo_tag" != "true" ]; then
+    if [ "${Platform}" = "x64" -o "${Configuration}" = "Release" -o "${Configuration}" = "release" ]; then
+        echo "Don't test, When x64 and release, appveyor_repo_tag = false"
+        cd ${PROJECT_DIR}
+        exit 0
+    fi
+fi
+    
 #TODO: Download or build dependent librarys
 
 case ${BUILD_TARGERT} in

@@ -25,7 +25,7 @@ environment:
     WINSSL: OFF
     TESTING: OFF
     SHARED: OFF
-      
+
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     TOOLCHAIN_VERSION: 15
     OPENSSL: OFF
