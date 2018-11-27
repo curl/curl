@@ -328,6 +328,12 @@ struct kerberos5data {
 struct ntlmdata {
   curlntlm state;
 #ifdef USE_WINDOWS_SSPI
+/* The sslContext is used for the Schannel bindings. The
+ * api is available on the Windows 7 SDK and later.
+ */
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+  CtxtHandle *sslContext;
+#endif
   CredHandle *credentials;
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;

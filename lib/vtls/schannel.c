@@ -1414,6 +1414,16 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = schannel_recv;
     conn->send[sockindex] = schannel_send;
+
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+    /* When SSPI is used in combination with Schannel
+     * we need the Schannel context to create the Schannel
+     * binding to pass the IIS extended protection checks.
+     * Available on Windows 7 or later.
+     */
+    conn->ntlm.sslContext = &BACKEND->ctxt->ctxt_handle;
+#endif
+
     *done = TRUE;
   }
   else
