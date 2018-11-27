@@ -1396,7 +1396,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
      * have a valid fdset to wait on.
      */
     result = schannel_connect_step2(conn, sockindex);
-    if(result || (nonblocking &&
+    if(result || (nonblocking &&  
                   (ssl_connect_2 == connssl->connecting_state ||
                    ssl_connect_2_reading == connssl->connecting_state ||
                    ssl_connect_2_writing == connssl->connecting_state)))
@@ -1414,6 +1414,13 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = schannel_recv;
     conn->send[sockindex] = schannel_send;
+#if defined(USE_WINDOWS_SSPI)
+    /* When SSPI is used in combination with scannel
+     * we need the scannel context to create the channel
+     * binding to pass the IIS extended protection checks.
+     */
+    conn->ntlm.sslContext = &BACKEND->ctxt->ctxt_handle;
+#endif
     *done = TRUE;
   }
   else
@@ -1421,7 +1428,6 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
 
   /* reset our connection state machine */
   connssl->connecting_state = ssl_connect_1;
-
   return CURLE_OK;
 }
 
