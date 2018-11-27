@@ -12,13 +12,13 @@ mkdir build
 cd build
 
 if [ "$appveyor_repo_tag" != "true" ]; then
-    if [ "${Platform}" = "x64" -o "${Configuration}" = "Release" -o "${Configuration}" = "release" ]; then
-        echo "Don't test, When x64 and release, appveyor_repo_tag = false"
+    if [ "${Platform}" = "64" -o "${Configuration}" = "Release" -o "${Configuration}" = "release" ]; then
+        echo "Don't test, When 64 bits and release, appveyor_repo_tag = false"
         cd ${PROJECT_DIR}
         exit 0
     fi
 fi
-    
+
 #TODO: Download or build dependent librarys
 
 case ${BUILD_TARGERT} in
@@ -38,14 +38,14 @@ case ${BUILD_TARGERT} in
             ;;
             9)
                 PRJ_GEN="Visual Studio 9 2008"
-                if [ "${Platform}" = "x64" ]; then
-                    echo "Don't support Visual Studio 9 2008 for x64 in appveyor"
+                if [ "${Platform}" = "64" ]; then
+                    echo "Don't support Visual Studio 9 2008 for 64 bits in appveyor"
                     cd ${PROJECT_DIR}
                     exit 0
                 fi
             ;;
         esac
-        if [ "${Platform}" = "x64" ]; then
+        if [ "${Platform}" = "64" ]; then
             PRJ_GEN="${PRJ_GEN} Win64"
         fi
     ;;
@@ -54,14 +54,14 @@ case ${BUILD_TARGERT} in
     
         case ${TOOLCHAIN_VERSION} in
             630)
-                if [ "${Platform}" = "x64" ]; then
+                if [ "${Platform}" = "64" ]; then
                     MINGW_PATH=/C/mingw-w64/x86_64-6.3.0-posix-seh-rt_v5-rev1/mingw64
                 else
                     MINGW_PATH=/C/mingw-w64/i686-6.3.0-posix-dwarf-rt_v5-rev1/mingw32
                 fi
             ;;
             530)
-                if [ "${Platform}" = "x86" ]; then
+                if [ "${Platform}" = "32" ]; then
                     MINGW_PATH=/C/mingw-w64/i686-5.3.0-posix-dwarf-rt_v4-rev0/mingw32
                 else
                     echo "Don't support ${TOOLCHAIN_VERSION} ${Platform} in appveyor."
@@ -71,7 +71,7 @@ case ${BUILD_TARGERT} in
             ;;
         esac
             
-        if [ "${Platform}" = "x64" ]; then
+        if [ "${Platform}" = "64" ]; then
              export CURL_BUILD_CROSS_HOST=x86_64-w64-mingw32
         else
              export CURL_BUILD_CROSS_HOST=i686-w64-mingw32
@@ -94,7 +94,7 @@ case ${BUILD_TARGERT} in
     
         case ${BUILD_TARGERT} in
             android_arm)
-                if [ "${Platform}" = "x64" ]; then
+                if [ "${Platform}" = "64" ]; then
                     CMAKE_PARA="${CMAKE_PARA} -DANDROID_ABI=arm64-v8a"
                     export CURL_BUILD_CROSS_HOST=aarch64-linux-android
                     export CURL_BUILD_CROSS_SYSROOT=${ANDROID_NDK}/platforms/android-${ANDROID_API}/arch-arm64
@@ -105,7 +105,7 @@ case ${BUILD_TARGERT} in
                 fi
             ;;
             android_x86)
-                if [ "${Platform}" = "x64" ]; then
+                if [ "${Platform}" = "64" ]; then
                     export CURL_BUILD_CROSS_HOST=x86_64
                     CMAKE_PARA="${CMAKE_PARA} -DANDROID_ABI=x86_64"
                     export CURL_BUILD_CROSS_SYSROOT=${ANDROID_NDK}/platforms/android-${ANDROID_API}/arch-x86_64
@@ -141,6 +141,7 @@ cmake --build . --config ${Configuration} --target install --clean-first
 # Test automake
 case ${BUILD_TARGERT} in
     windows_mingw|android*)
+        echo "Test automake ......"
         CONFIG_PARA="${CONFIG_PARA} --host=$CURL_BUILD_CROSS_HOST --target=$CURL_BUILD_CROSS_HOST"
         if [ "$SHARED" = "OFF" ]; then
             CONFIG_PARA="${CONFIG_PARA} --enable-static --disable-shared"

@@ -1,31 +1,15 @@
 version: 7.50.0.{build}
 
 platform:
-  - x86
-  - x64
+  - 32
+  - 64
 
 configuration:
-  - Release
   - Debug
-
+  - Release
+  
 environment:
   matrix:
-  - BUILD_TARGERT: android_arm
-    TOOLCHAIN_VERSION: 4.9
-    ANDROID_API: 18
-    OPENSSL: OFF
-    WINSSL: OFF
-    TESTING: OFF
-    SHARED: ON
-  
-  - BUILD_TARGERT: android_x86
-    TOOLCHAIN_VERSION: 4.9
-    ANDROID_API: 28
-    OPENSSL: OFF
-    WINSSL: OFF
-    TESTING: OFF
-    SHARED: OFF
-
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     TOOLCHAIN_VERSION: 15
     OPENSSL: OFF
@@ -75,6 +59,22 @@ environment:
     WINSSL: OFF
     TESTING: ON
     SHARED: OFF
+  
+  - BUILD_TARGERT: android_arm
+    TOOLCHAIN_VERSION: 4.9
+    ANDROID_API: 18
+    OPENSSL: OFF
+    WINSSL: OFF
+    TESTING: OFF
+    SHARED: ON
+  
+  - BUILD_TARGERT: android_x86
+    TOOLCHAIN_VERSION: 4.9
+    ANDROID_API: 28
+    OPENSSL: OFF
+    WINSSL: OFF
+    TESTING: OFF
+    SHARED: OFF
     
 install:
   - for /f "delims=" %%i in ('git describe --tags') do (set BUILD_VERSION=%%i)
@@ -97,8 +97,8 @@ artifacts:
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
-    only:
-        - master
+  only:
+    - master
 
 deploy:
   provider: GitHub
