@@ -1396,7 +1396,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
      * have a valid fdset to wait on.
      */
     result = schannel_connect_step2(conn, sockindex);
-    if(result || (nonblocking &&  
+    if(result || (nonblocking &&
                   (ssl_connect_2 == connssl->connecting_state ||
                    ssl_connect_2_reading == connssl->connecting_state ||
                    ssl_connect_2_writing == connssl->connecting_state)))

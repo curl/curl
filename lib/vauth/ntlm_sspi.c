@@ -274,7 +274,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   * When extended protection is used in IIS server,
   * we have to pass a second SecBuffer to the SecBufferDesc
   * otherwise ISS will not pass the authentication (401 response)
-  * https://docs.microsoft.com/en-us/security-updates/SecurityAdvisories/2009/973811
+  * https://docs.microsoft.com/en-us/security-updates
+  * /SecurityAdvisories/2009/973811
   */
   if(ntlm->sslContext) {
     SEC_CHANNEL_BINDINGS channelBindings;
