@@ -2167,6 +2167,7 @@ set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
     }
 #else
       (void)sockindex;
+      (void)ctx_options;
       failf(data, OSSL_PACKAGE " was built without TLS 1.3 support");
       return CURLE_NOT_BUILT_IN;
 #endif
