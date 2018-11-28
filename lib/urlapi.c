@@ -1265,8 +1265,12 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       if(plusencode) {
         /* space to plus */
         i = part;
-        for(o = enc; *i; ++o, ++i)
-          *o = (*i == ' ') ? '+' : *i;
+        for(o = enc; *i; ++o, ++i) {
+          if (*i == ' ')
+            *o = '+';
+          else
+            *o = *i;
+        }
         *o = 0; /* zero terminate */
         part = strdup(enc);
         if(!part) {
