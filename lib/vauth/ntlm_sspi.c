@@ -270,10 +270,12 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   type_2_bufs[0].pvBuffer = ntlm->input_token;
   type_2_bufs[0].cbBuffer = curlx_uztoul(ntlm->input_token_len);
 
+#if defined(USE_WINDOWS_SSPI) && defined(_MSC_VER) && (_MSC_VER >= 1600)
   /* ssl context comes from schannel.
   * When extended protection is used in IIS server,
   * we have to pass a second SecBuffer to the SecBufferDesc
-  * otherwise ISS will not pass the authentication (401 response)
+  * otherwise ISS will not pass the authentication (401 response).
+  * Minimum supported version is Windows 7.
   * https://docs.microsoft.com/en-us/security-updates
   * /SecurityAdvisories/2009/973811
   */
@@ -293,7 +295,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
       type_2_bufs[1].pvBuffer = pkgBindings.Bindings;
     }
   }
-
+#endif
 
   /* Setup the type-3 "output" security buffer */
   type_3_desc.ulVersion = SECBUFFER_VERSION;

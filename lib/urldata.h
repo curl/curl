@@ -327,8 +327,10 @@ struct kerberos5data {
 #if defined(USE_NTLM)
 struct ntlmdata {
   curlntlm state;
-#ifdef USE_WINDOWS_SSPI
+#if defined(USE_WINDOWS_SSPI)
+#if defined(_MSC_VER) && (_MSC_VER >= 1600)
   CtxtHandle *sslContext;
+#endif
   CredHandle *credentials;
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;

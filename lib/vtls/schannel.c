@@ -1414,13 +1414,15 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
     connssl->state = ssl_connection_complete;
     conn->recv[sockindex] = schannel_recv;
     conn->send[sockindex] = schannel_send;
-#if defined(USE_WINDOWS_SSPI)
+
+#if defined(USE_WINDOWS_SSPI) && defined(_MSC_VER) && (_MSC_VER > 1500)
     /* When SSPI is used in combination with scannel
      * we need the scannel context to create the channel
      * binding to pass the IIS extended protection checks.
      */
     conn->ntlm.sslContext = &BACKEND->ctxt->ctxt_handle;
 #endif
+
     *done = TRUE;
   }
   else
