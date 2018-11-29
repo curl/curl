@@ -184,7 +184,6 @@
  22.3 size_t
  22.4 remove several functions
  22.5 remove CURLOPT_FAILONERROR
- 22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
  22.7 remove progress meter from libcurl
  22.8 remove 'curl_httppost' from public
 
@@ -1259,12 +1258,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
  internally. Let the app judge success or not for itself.
-
-22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
-
- Remove support for a global DNS cache. Anything global is silly, and we
- already offer the share interface for the same functionality but done
- "right".
 
 22.7 remove progress meter from libcurl
 
