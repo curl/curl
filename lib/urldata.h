@@ -1035,6 +1035,11 @@ struct connectdata {
   char *unix_domain_socket;
   bool abstract_unix_socket;
 #endif
+
+#ifdef HAVE_CONNECTEX
+  bool fastopen_connected; /* is socket actually connected (via ConnectEx)? */
+  OVERLAPPED fastopen_state; /* state used by a Windows overlapped-I/O func */
+#endif
 };
 
 /* The end of connectdata. */

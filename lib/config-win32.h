@@ -609,6 +609,12 @@ Vista
 #  endif
 #endif
 
+/* Define if you have the ConnectEx WinSock 2 extension */
+/* This requires a build target of WinXP or newer */
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
+#define HAVE_CONNECTEX 1
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */

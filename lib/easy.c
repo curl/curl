@@ -104,6 +104,12 @@ static CURLcode win32_init(void)
   WSADATA wsaData;
   int res;
 
+#ifdef HAVE_CONNECTEX
+  curl_socket_t sockfd;
+  GUID guid = WSAID_CONNECTEX;
+  DWORD dummy_val;
+#endif
+
 #if defined(ENABLE_IPV6) && (USE_WINSOCK < 2)
   Error IPV6_requires_winsock2
 #endif
@@ -132,9 +138,31 @@ static CURLcode win32_init(void)
     return CURLE_FAILED_INIT;
   }
   /* The Windows Sockets DLL is acceptable. Proceed. */
+
+  /* Init pointer to ConnectEx(), a Winsock 2 function needed */
+  /* for TCP Fast Open support */
+#ifdef HAVE_CONNECTEX
+  Curl_ConnectEx = NULL;
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+  if(sockfd != CURL_SOCKET_BAD) {
+    if(WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                &guid, sizeof(guid),
+                &Curl_ConnectEx, sizeof(Curl_ConnectEx),
+                &dummy_val, NULL, NULL)) {
+      DEBUGF(fprintf(stderr,
+                     "WSAIoctl() failed to return ConnectEx() ptr, err #%d\n",
+                     WSAGetLastError()));
+      Curl_ConnectEx = NULL;
+    }
+
+    sclose(sockfd);
+  }
+
+#endif /* HAVE_CONNECTEX */
 #elif defined(USE_LWIPSOCK)
   lwip_init();
-#endif
+#endif /* USE_WINSOCK */
 
 #ifdef USE_WINDOWS_SSPI
   {
@@ -180,6 +208,12 @@ curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 #if defined(WIN32) && defined(UNICODE)
 curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
+#endif
+#ifdef HAVE_CONNECTEX
+/*
+ * ConnectEx pointer is initialized by win32_init() after Winsock init
+ */
+curl_ConnectEx_callback Curl_ConnectEx;
 #endif
 #else
 /*
