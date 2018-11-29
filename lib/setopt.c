@@ -2547,7 +2547,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_TCP_FASTOPEN:
 #if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) || \
    defined(TCP_FASTOPEN_CONNECT)
-    data->set.tcp_fastopen = (0 != va_arg(param, long))?TRUE:FALSE;
+    data->set.tcp_fastopen = (0 != va_arg(param, long)) ? TRUE : FALSE;
+#elif defined(HAVE_CONNECTEX)
+    if(Curl_ConnectEx != NULL)
+      data->set.tcp_fastopen = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    else
+      result = CURLE_FAILED_INIT;
 #else
     result = CURLE_NOT_BUILT_IN;
 #endif

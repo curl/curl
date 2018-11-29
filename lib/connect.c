@@ -770,8 +770,16 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     (void)verifyconnect(conn->tempsock[i], NULL);
 #endif
 
-    /* check socket for connect */
-    rc = SOCKET_WRITABLE(conn->tempsock[i], 0);
+#ifdef HAVE_CONNECTEX
+    /* socket isn't actually connected until the first attempted write,
+       so it doesn't appear writable here yet; spoof rc to fall into the
+       good branch (socket errors will be detected after the second pass) */
+    if(conn->bits.tcp_fastopen && !conn->fastopen_connected)
+      rc = 1;
+    else
+#endif
+      /* check socket for connect */
+      rc = SOCKET_WRITABLE(conn->tempsock[i], 0);
 
     if(rc == 0) { /* no connection yet */
       error = 0;
@@ -994,6 +1002,13 @@ static CURLcode singleipconnect(struct connectdata *conn,
   bool is_tcp;
 #ifdef TCP_FASTOPEN_CONNECT
   int optval = 1;
+#elif defined(HAVE_CONNECTEX)
+  int optval = 1;
+  struct sockaddr_storage ss;
+  struct sockaddr_in *si4 = (struct sockaddr_in *)&ss;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&ss;
+#endif
 #endif
 
   *sockp = CURL_SOCKET_BAD;
@@ -1113,7 +1128,43 @@ static CURLcode singleipconnect(struct connectdata *conn,
         rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
       else
         rc = 0; /* Do nothing */
+#elif defined(HAVE_CONNECTEX) /* Windows 10 (ver 1607+) */
+      /* Windows uses ConnectEx() which must be called when the first data */
+      /* is ready to be sent. For now, just set up the socket as needed but */
+	  /* don't actually connect */
+      if(setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN,
+                    (void *)&optval, sizeof(optval)) == SOCKET_ERROR) {
+        infof(data, "Failed to enable TCP Fast Open on fd %d, errno: %d\n", sockfd, SOCKERRNO);
+        return CURLE_FAILED_INIT;
+      }
+      else
+        infof(data, "TCP_FASTOPEN set\n");
+
+      /* ConnectEx() requires a bound socket */
+      if(!conn->bits.bound) {
+        memset(&ss, 0, sizeof(ss));
+
+        if(addr.family == AF_INET) {
+          si4->sin_family = AF_INET;
+          si4->sin_addr.s_addr = INADDR_ANY;
+        }
+#if defined(USE_IPV6)
+        else if(addr.family == AF_INET6) {
+          si6->sin6_family = AF_INET6;
+          si6->sin6_addr = in6addr_any;
+        }
 #endif
+        else {
+          infof(data, "Unknown protocol used with TCP Fast Open: %d\n", addr.family);
+          return CURLE_UNSUPPORTED_PROTOCOL;
+        }
+
+        if(bind(sockfd, (struct sockaddr *)&ss, sizeof(ss)) == 0)
+          rc = 0;
+      }
+      else
+        rc = 0;
+#endif /* defined(HAVE_CONNECTEX) */
     }
     else {
       rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
