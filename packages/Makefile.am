@@ -1,10 +1,8 @@
-SUBDIRS = Win32 Linux Solaris AIX vms
+SUBDIRS = vms
 
 EXTRA_DIST = README \
   DOS/README \
   DOS/common.dj \
-  NetWare/get_ver.awk \
-  NetWare/get_exp.awk \
   OS400/README.OS400 \
   OS400/ccsidcurl.c \
   OS400/ccsidcurl.h \

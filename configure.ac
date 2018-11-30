@@ -4277,17 +4277,7 @@ AC_CONFIG_FILES([Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
            packages/Makefile \
-           packages/Win32/Makefile \
-           packages/Win32/cygwin/Makefile \
-           packages/Linux/Makefile \
-           packages/Linux/RPM/Makefile \
-           packages/Linux/RPM/curl.spec \
-           packages/Linux/RPM/curl-ssl.spec \
-           packages/Solaris/Makefile \
            packages/vms/Makefile \
-           packages/AIX/Makefile \
-           packages/AIX/RPM/Makefile \
-           packages/AIX/RPM/curl.spec \
            curl-config \
            libcurl.pc
 ])
