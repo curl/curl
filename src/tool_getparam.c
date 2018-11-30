@@ -2066,6 +2066,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           fname = nextarg;
           file = fopen(nextarg, FOPEN_READTEXT);
         }
+        Curl_safefree(config->writeout);
         err = file2string(&config->writeout, file);
         if(file && (file != stdin))
           fclose(file);
