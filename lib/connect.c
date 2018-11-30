@@ -1131,10 +1131,11 @@ static CURLcode singleipconnect(struct connectdata *conn,
 #elif defined(HAVE_CONNECTEX) /* Windows 10 (ver 1607+) */
       /* Windows uses ConnectEx() which must be called when the first data */
       /* is ready to be sent. For now, just set up the socket as needed but */
-	  /* don't actually connect */
+      /* don't actually connect */
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN,
                     (void *)&optval, sizeof(optval)) == SOCKET_ERROR) {
-        infof(data, "Failed to enable TCP Fast Open on fd %d, errno: %d\n", sockfd, SOCKERRNO);
+        infof(data, "Failed to enable TCP Fast Open on fd %d, errno: %d\n",
+              sockfd, SOCKERRNO);
         return CURLE_FAILED_INIT;
       }
       else
@@ -1155,7 +1156,8 @@ static CURLcode singleipconnect(struct connectdata *conn,
         }
 #endif
         else {
-          infof(data, "Unknown protocol used with TCP Fast Open: %d\n", addr.family);
+          infof(data, "Unknown protocol used with TCP Fast Open: %d\n",
+                addr.family);
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
 

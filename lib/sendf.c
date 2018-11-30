@@ -392,15 +392,16 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
     conn->fastopen_connected = TRUE;
     bytes_written = 0;
 
-    if(!Curl_ConnectEx(sockfd, conn->ip_addr->ai_addr, conn->ip_addr->ai_addrlen,
-                       (void*)mem, (DWORD)len,
+    if(!Curl_ConnectEx(sockfd,
+                       conn->ip_addr->ai_addr, conn->ip_addr->ai_addrlen,
+                       (void *)mem, (DWORD)len,
                        (LPDWORD)&bytes_written,
                        &conn->fastopen_state)) {
       if(SOCKERRNO != WSA_IO_PENDING)
         bytes_written = -1;
       else
         if(!GetOverlappedResult((HANDLE)sockfd, &conn->fastopen_state,
-		                        (LPDWORD)&bytes_written, TRUE)) {
+                                (LPDWORD)&bytes_written, TRUE)) {
           int err = GetLastError();
           failf(conn->data, "Send failure: %s",
                 Curl_strerror(conn, err));
@@ -412,7 +413,8 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
 
     /* socket in default state; enable previously-set socket params */
     if(setsockopt(sockfd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0))
-      infof(conn->data, "setsockopt() failed after TCP Fast Open for fd %d, errno: %d",
+      infof(conn->data,
+            "setsockopt() failed after TCP Fast Open for fd %d, errno: %d",
             sockfd, SOCKERRNO);
   }
   else

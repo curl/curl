@@ -150,7 +150,9 @@ static CURLcode win32_init(void)
                 &guid, sizeof(guid),
                 &Curl_ConnectEx, sizeof(Curl_ConnectEx),
                 &dummy_val, NULL, NULL)) {
-      DEBUGF(fprintf(stderr, "Error: WSAIoctl() failed to return ConnectEx() func ptr, error #%d\n", WSAGetLastError()));
+      DEBUGF(fprintf(stderr,
+                     "WSAIoctl() failed to return ConnectEx() ptr, err #%d\n",
+                     WSAGetLastError()));
       Curl_ConnectEx = NULL;
     }
 
@@ -208,7 +210,7 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
 #ifdef HAVE_CONNECTEX
-/* 
+/*
  * ConnectEx pointer is initialized by win32_init() after Winsock init
  */
 curl_ConnectEx_callback Curl_ConnectEx;

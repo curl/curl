@@ -356,9 +356,6 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
 
-/* Define if you have the ConnectEx WinSock 2 function */
-#define HAVE_CONNECTEX 1
-
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
@@ -610,6 +607,11 @@ Vista
 #  ifndef __POCC__OLDNAMES
 #    error Compatibility names /Go compiler option is required
 #  endif
+#endif
+
+/* Define if you have the ConnectEx WinSock 2 extension (Win 10 or newer) */
+#if defined(WINVER) && (WINVER >= 0x0A00)
+#define HAVE_CONNECTEX 1
 #endif
 
 /* ---------------------------------------------------------------- */

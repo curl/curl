@@ -249,12 +249,14 @@
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
-#    include <MSWSock.h>
-#    ifdef WSAID_CONNECTEX
-       typedef LPFN_CONNECTEX curl_ConnectEx_callback;
-	   extern curl_ConnectEx_callback Curl_ConnectEx;
-#    else
-#      undef HAVE_CONNECTEX
+#    ifdef HAVE_CONNECTEX
+#      include <MSWSock.h>
+#      ifdef WSAID_CONNECTEX
+         typedef LPFN_CONNECTEX curl_ConnectEx_callback;
+         extern curl_ConnectEx_callback Curl_ConnectEx;
+#      else
+#        undef HAVE_CONNECTEX
+#      endif
 #    endif
 #    ifdef HAVE_WS2TCPIP_H
 #      include <ws2tcpip.h>
