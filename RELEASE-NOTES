@@ -19,13 +19,18 @@ This release includes the following bugfixes:
  o Curl_follow: accept non-supported schemes for "fake" redirects [9]
  o KNOWN_BUGS: add --proxy-any connection issue [28]
  o OS400: add URL API ccsid wrappers and sync ILE/RPG bindings
+ o SECURITY-PROCESS: bountygraph shuts down again [50]
  o TODO: Have the URL API offer IDN decoding [22]
  o ares: remove fd from multi fd set when ares is about to close the fd [42]
  o axtls: removed [1]
+ o cmake: fix MIT/Heimdal Kerberos detection [53]
+ o configure: include all libraries in ssl-libs fetch [55]
  o configure: show CFLAGS, LDFLAGS etc in summary [7]
+ o connect: fix building for recent versions of Minix [52]
  o cookies: create the cookiejar even if no cookies to save [48]
  o curl: --local-port range was not "including" [29]
  o curl: fix --local-port integer overflow [25]
+ o curl: fix memory leak reading --writeout from file [51]
  o curl: fixed UTF-8 in current console code page (Windows) [16]
  o curl_easy_perform: fix timeout handling [49]
  o curl_multibyte: fix a malloc overcalculation [18]
@@ -60,6 +65,7 @@ This release includes the following bugfixes:
  o ssl: fix compilation with OpenSSL 0.9.7 [43]
  o ssl: replace all internal uses of CURLE_SSL_CACERT [40]
  o symbols-in-versions: add missing CURLU_ symbols [15]
+ o test328: verify Content-Encoding: none [54]
  o tests: disable SO_EXCLUSIVEADDRUSE for stunnel on Windows
  o tests: drop http_pipe.py script no longer used [5]
  o tool_cb_wrt: Silence function cast compiler warning [31]
@@ -81,12 +87,12 @@ advice from friends like these:
   bobmitchell1956 on github, Brad King, Brian Carpenter, daboul on github,
   Daniel Gustafsson, Daniel Stenberg, David Benjamin, Dheeraj Sangamkar,
   Elia Tufarolo, Frank Gevaerts, Gisle Vanem, Hagai Auro, Han Han,
-  infinnovation-dev on github, Jérémy Rocher, Jim Fuller, Kamil Dudka,
-  Marcel Raad, Marc Hörsken, Marcos Diazr, Michael Kaufmann, NTMan on Github,
-  Patrick Monnerat, Peter Wu, Ray Satiro, Romain Fliedel, Sven Blumenstein,
-  Tim Rühsen, Tobias Hintze, Tomas Hoger, tpaukrt on github, Viktor Szakats,
-  Yasuhiro Matsumoto,
-  (36 contributors)
+  infinnovation-dev on github, James Knight, Jérémy Rocher, Jim Fuller,
+  Kamil Dudka, Konstantin Kushnir, Marcel Raad, Marc Hörsken, Marcos Diazr,
+  Michael Kaufmann, NTMan on Github, Patrick Monnerat, Peter Wu, Ray Satiro,
+  Romain Fliedel, Sevan Janiyan, Sven Blumenstein, Tim Rühsen, Tobias Hintze,
+  Tomas Hoger, tpaukrt on github, Viktor Szakats, Yasuhiro Matsumoto,
+  (39 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -141,3 +147,9 @@ References to bug reports and discussions on issues:
  [47] = https://curl.haxx.se/bug/?i=3296
  [48] = https://curl.haxx.se/bug/?i=3299
  [49] = https://curl.haxx.se/bug/?i=3305
+ [50] = https://curl.haxx.se/bug/?i=3311
+ [51] = https://curl.haxx.se/bug/?i=3322
+ [52] = https://curl.haxx.se/bug/?i=3323
+ [53] = https://curl.haxx.se/bug/?i=3316
+ [54] = https://curl.haxx.se/bug/?i=3317
+ [55] = https://curl.haxx.se/bug/?i=3193
