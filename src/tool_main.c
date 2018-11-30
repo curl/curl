@@ -192,7 +192,7 @@ static CURLcode main_init(struct GlobalConfig *config)
   return result;
 }
 
-static void free_config_fields(struct GlobalConfig *config)
+static void free_globalconfig(struct GlobalConfig *config)
 {
   Curl_safefree(config->trace_dump);
 
@@ -229,7 +229,7 @@ static void main_free(struct GlobalConfig *config)
     PR_Cleanup();
   }
 #endif
-  free_config_fields(config);
+  free_globalconfig(config);
 
   /* Free the config structures */
   config_free(config->last);
