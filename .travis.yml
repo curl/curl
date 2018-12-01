@@ -327,6 +327,9 @@ script:
                 make test-nonflaky
              fi
              if [ -n $CHECKSRC ]; then
+                echo "enable COPYRIGHTYEAR" > "lib/.checksrc"
+                echo "enable COPYRIGHTYEAR" > "src/.checksrc"
+                echo "enable COPYRIGHTYEAR" > "include/curl/.checksrc"
                 make checksrc
              fi
         fi
