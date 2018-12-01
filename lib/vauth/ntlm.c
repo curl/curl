@@ -631,7 +631,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     Curl_ntlm_core_lm_resp(ntbuffer, md5sum, ntresp);
 
     /* End of NTLM2 Session code */
-
+    /* NTLM v2 session security is a misnomer because it is not NTLM v2. 
+       It is NTLM v1 using the extended session security that is also in NTLM v2 */
   }
   else
 #endif
