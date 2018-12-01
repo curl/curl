@@ -315,6 +315,18 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
   return global_init(flags, FALSE);
 }
 
+//	free openssl
+void free_openssl()
+{
+	//sk_SSL_COMP_free(SSL_COMP_get_compression_methods());
+	CRYPTO_cleanup_all_ex_data();
+	CONF_modules_free();
+	ERR_remove_state(0);
+	CONF_modules_unload(1);
+	ERR_free_strings();
+	ERR_remove_thread_state(NULL);
+	EVP_cleanup();
+}
 /**
  * curl_global_cleanup() globally cleanups curl, uses the value of
  * "init_flags" to determine what needs to be cleaned up and what doesn't.
@@ -329,6 +341,7 @@ void curl_global_cleanup(void)
 
   Curl_global_host_cache_dtor();
   Curl_ssl_cleanup();
+  free_openssl();
   Curl_resolver_global_cleanup();
 
   if(init_flags & CURL_GLOBAL_WIN32)
