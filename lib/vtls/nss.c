@@ -1776,6 +1776,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result;
   bool second_layer = FALSE;
+  int rc;
 
   SSLVersionRange sslver = {
     SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
@@ -1832,7 +1833,18 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   /* enable/disable the requested SSL version(s) */
   if(nss_init_sslver(&sslver, data, conn) != CURLE_OK)
     goto error;
-  if(SSL_VersionRangeSet(model, &sslver) != SECSuccess)
+
+  rc = SSL_VersionRangeSet(model, &sslver);
+#ifdef SSL_LIBRARY_VERSION_TLS_1_3
+  if((sslver.max == SSL_LIBRARY_VERSION_TLS_1_3) &&
+     (sslver.min < SSL_LIBRARY_VERSION_TLS_1_3) &&
+     (rc == SSL_ERROR_INVALID_VERSION_RANGE)) {
+    infof(data, "TLS 1.3 as max failed, trying with max set to TLS 1.2\n");
+    sslver.max = SSL_LIBRARY_VERSION_TLS_1_2;
+    rc = SSL_VersionRangeSet(model, &sslver);
+  }
+#endif
+  if(rc != SECSuccess)
     goto error;
 
   ssl_cbc_random_iv = !SSL_SET_OPTION(enable_beast);
