@@ -264,8 +264,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   type_2_desc.ulVersion = SECBUFFER_VERSION;
   type_2_desc.cBuffers = 1;
   type_2_desc.pBuffers = &type_2_bufs[0];
-
-
   type_2_bufs[0].BufferType = SECBUFFER_TOKEN;
   type_2_bufs[0].pvBuffer = ntlm->input_token;
   type_2_bufs[0].cbBuffer = curlx_uztoul(ntlm->input_token_len);

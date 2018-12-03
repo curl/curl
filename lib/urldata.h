@@ -328,6 +328,10 @@ struct kerberos5data {
 struct ntlmdata {
   curlntlm state;
 #if defined(USE_WINDOWS_SSPI)
+/* The sslContext is used for the Schannel bindings. The
+ * api is available on the Windows 7 SDK and later.
+ * Visual Studio 2008 and older build against older SDKs.
+ */
 #if defined(_MSC_VER) && (_MSC_VER >= 1600)
   CtxtHandle *sslContext;
 #endif

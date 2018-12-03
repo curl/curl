@@ -1416,8 +1416,8 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
     conn->send[sockindex] = schannel_send;
 
 #if defined(USE_WINDOWS_SSPI) && defined(_MSC_VER) && (_MSC_VER > 1500)
-    /* When SSPI is used in combination with scannel
-     * we need the scannel context to create the channel
+    /* When SSPI is used in combination with Schannel
+     * we need the Schannel context to create the Schannel
      * binding to pass the IIS extended protection checks.
      */
     conn->ntlm.sslContext = &BACKEND->ctxt->ctxt_handle;
