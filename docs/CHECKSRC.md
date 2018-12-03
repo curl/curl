@@ -103,6 +103,19 @@ warnings are:
 - `UNUSEDIGNORE`: a checksrc inlined warning ignore was asked for but not used,
    that's an ignore that should be removed or changed to get used.
 
+### Extended warnings
+
+Some warnings are quite computationally expensive to perform, so they are
+turned off by default. To enable these warnings, place a `.checksrc` file in
+the directory where they should be activated with commands to enable the
+warnings you are interested in. The format of the file is to enable one
+warning per line like so: `enable <EXTENDEDWARNING>`
+
+Currently there is one extended warning which can be enabled:
+
+- `COPYRIGHTYEAR`: the current changeset hasn't updated the copyright year in
+   the source file
+
 ## Ignore certain warnings
 
 Due to the nature of the source code and the flaws of the checksrc tool, there
