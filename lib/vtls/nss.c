@@ -1776,6 +1776,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result;
   bool second_layer = FALSE;
+  SSLVersionRange sslver_supported;
 
   SSLVersionRange sslver = {
     SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
@@ -1832,6 +1833,14 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   /* enable/disable the requested SSL version(s) */
   if(nss_init_sslver(&sslver, data, conn) != CURLE_OK)
     goto error;
+  if(SSL_VersionRangeGetSupported(ssl_variant_stream,
+                                  &sslver_supported) != SECSuccess)
+    goto error;
+  if(sslver_supported.max < sslver.max && sslver_supported.max >= sslver.min) {
+    infof(data, "Falling back (from %d) to max supported SSL version (%d)\n",
+                sslver.max, sslver_supported.max);
+    sslver.max = sslver_supported.max;
+  }
   if(SSL_VersionRangeSet(model, &sslver) != SECSuccess)
     goto error;
 
