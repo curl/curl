@@ -4277,6 +4277,7 @@ AC_CONFIG_FILES([Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
            packages/Makefile \
+           packages/vms/Makefile \
            curl-config \
            libcurl.pc
 ])
