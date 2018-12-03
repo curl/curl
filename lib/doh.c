@@ -26,7 +26,6 @@
 #include "curl_addrinfo.h"
 #include "doh.h"
 
-#ifdef USE_NGHTTP2
 #include "sendf.h"
 #include "multiif.h"
 #include "url.h"
@@ -234,7 +233,9 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDSIZE, (long)p->dohlen);
     }
     ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, headers);
+#ifdef USE_NGHTTP2
     ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+#endif
 #ifndef CURLDEBUG
     /* enforce HTTPS if not debug */
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
@@ -893,28 +894,3 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
 
   return CURLE_OK;
 }
-
-#else /* !USE_NGHTTP2 */
-/*
- */
-Curl_addrinfo *Curl_doh(struct connectdata *conn,
-                        const char *hostname,
-                        int port,
-                        int *waitp)
-{
-  (void)conn;
-  (void)hostname;
-  (void)port;
-  (void)waitp;
-  return NULL;
-}
-
-CURLcode Curl_doh_is_resolved(struct connectdata *conn,
-                              struct Curl_dns_entry **dnsp)
-{
-  (void)conn;
-  (void)dnsp;
-  return CURLE_NOT_BUILT_IN;
-}
-
-#endif /* USE_NGHTTP2 */
