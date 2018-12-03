@@ -3321,20 +3321,8 @@ static CURLcode servercert(struct connectdata *conn,
     /* we've been asked to gather certificate info! */
     (void)get_cert_chain(conn, connssl);
 
-  fp = BIO_new(BIO_s_file());
-  if(fp == NULL) {
-    failf(data,
-          "BIO_new return NULL, " OSSL_PACKAGE
-          " error %s",
-          ossl_strerror(ERR_get_error(), error_buffer,
-                        sizeof(error_buffer)) );
-    BIO_free(mem);
-    return CURLE_OUT_OF_MEMORY;
-  }
-
   BACKEND->server_cert = SSL_get_peer_certificate(BACKEND->handle);
   if(!BACKEND->server_cert) {
-    BIO_free(fp);
     BIO_free(mem);
     if(!strict)
       return CURLE_OK;
@@ -3369,7 +3357,6 @@ static CURLcode servercert(struct connectdata *conn,
   if(SSL_CONN_CONFIG(verifyhost)) {
     result = verifyhost(conn, BACKEND->server_cert);
     if(result) {
-      BIO_free(fp);
       X509_free(BACKEND->server_cert);
       BACKEND->server_cert = NULL;
       return result;
@@ -3391,6 +3378,18 @@ static CURLcode servercert(struct connectdata *conn,
 
     /* e.g. match issuer name with provided issuer certificate */
     if(SSL_SET_OPTION(issuercert)) {
+      fp = BIO_new(BIO_s_file());
+      if(fp == NULL) {
+        failf(data,
+              "BIO_new return NULL, " OSSL_PACKAGE
+              " error %s",
+              ossl_strerror(ERR_get_error(), error_buffer,
+                            sizeof(error_buffer)) );
+        X509_free(BACKEND->server_cert);
+        BACKEND->server_cert = NULL;
+        return CURLE_OUT_OF_MEMORY;
+      }
+
       if(BIO_read_filename(fp, SSL_SET_OPTION(issuercert)) <= 0) {
         if(strict)
           failf(data, "SSL: Unable to open issuer cert (%s)",
@@ -3426,6 +3425,7 @@ static CURLcode servercert(struct connectdata *conn,
 
       infof(data, " SSL certificate issuer check ok (%s)\n",
             SSL_SET_OPTION(issuercert));
+      BIO_free(fp);
       X509_free(issuer);
     }
 
@@ -3454,7 +3454,6 @@ static CURLcode servercert(struct connectdata *conn,
   if(SSL_CONN_CONFIG(verifystatus)) {
     result = verifystatus(conn, connssl);
     if(result) {
-      BIO_free(fp);
       X509_free(BACKEND->server_cert);
       BACKEND->server_cert = NULL;
       return result;
@@ -3474,7 +3473,6 @@ static CURLcode servercert(struct connectdata *conn,
       failf(data, "SSL: public key does not match pinned public key!");
   }
 
-  BIO_free(fp);
   X509_free(BACKEND->server_cert);
   BACKEND->server_cert = NULL;
   connssl->connecting_state = ssl_connect_done;
