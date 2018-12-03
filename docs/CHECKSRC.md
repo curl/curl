@@ -30,6 +30,16 @@ Lists how to use the script and it lists all existing warnings it has and
 problems it detects. At the time of this writing, the existing checksrc
 warnings are:
 
+- `ASSIGNWITHINCONDITION`: Assignment within a conditional expression. The
+  code style mandates the assignment to be done outside of it.
+
+- `ASTERISKNOSPACE`: A pointer was declared like `char* name` instead of the more
+   appropriate `char *name` style. The asterisk should sit next to the name.
+
+- `ASTERISKSPACE`: A pointer was declared like `char * name` instead of the
+   more appropriate `char *name` style. The asterisk should sit right next to
+   the name without a space in between.
+
 - `BADCOMMAND`: There's a bad !checksrc! instruction in the code. See the
    **Ignore certain warnings** section below for details.
 
@@ -49,16 +59,31 @@ warnings are:
 
 - `FOPENMODE`: `fopen()` needs a macro for the mode string, use it
 
-- `INDENTATION`: detected a wrong start column for code. Note that this warning
-   only checks some specific places and will certainly miss many bad
+- `INDENTATION`: detected a wrong start column for code. Note that this
+   warning only checks some specific places and will certainly miss many bad
    indentations.
 
 - `LONGLINE`: A line is longer than 79 columns.
+
+- `MULTISPACE`: Multiple spaces were found where only one should be used.
+
+- `NOSPACEEQUALS`: An equals sign was found without preceding space. We prefer
+  `a = 2` and *not* `a=2`.
+
+- `OPENCOMMENT`: File ended with a comment (`/*`) still "open".
 
 - `PARENBRACE`: `){` was used without sufficient space in between.
 
 - `RETURNNOSPACE`: `return` was used without space between the keyword and the
    following value.
+
+- `SEMINOSPACE`: There was no space (or newline) following a semicolon.
+
+- `SIZEOFNOPAREN`: Found use of sizeof without parentheses. We prefer
+  `sizeof(int)` style.
+
+- `SNPRINTF` - Found use of `snprintf()`. Since we use an internal replacement
+   with a different return code etc, we prefer `msnprintf()`.
 
 - `SPACEAFTERPAREN`: there was a space after open parenthesis, `( text`.
 
