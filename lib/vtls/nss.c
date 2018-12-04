@@ -1808,8 +1808,12 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
     SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
 #ifdef SSL_LIBRARY_VERSION_TLS_1_3
     SSL_LIBRARY_VERSION_TLS_1_3   /* max */
-#else
+#elif defined SSL_LIBRARY_VERSION_TLS_1_2
     SSL_LIBRARY_VERSION_TLS_1_2
+#elif defined SSL_LIBRARY_VERSION_TLS_1_1
+    SSL_LIBRARY_VERSION_TLS_1_1
+#else
+    SSL_LIBRARY_VERSION_TLS_1_0
 #endif
   };
 
