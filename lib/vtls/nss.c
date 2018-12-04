@@ -246,6 +246,32 @@ static void nss_print_error_message(struct Curl_easy *data, PRUint32 err)
   failf(data, "%s", PR_ErrorToString(err, PR_LANGUAGE_I_DEFAULT));
 }
 
+static char *nss_sslver_to_name(PRUint16 nssver)
+{
+  switch(nssver) {
+  case SSL_LIBRARY_VERSION_2:
+    return strdup("SSLv2");
+  case SSL_LIBRARY_VERSION_3_0:
+    return strdup("SSLv3");
+  case SSL_LIBRARY_VERSION_TLS_1_0:
+    return strdup("TLSv1.0");
+#ifdef SSL_LIBRARY_VERSION_TLS_1_1
+  case SSL_LIBRARY_VERSION_TLS_1_1:
+    return strdup("TLSv1.1");
+#endif
+#ifdef SSL_LIBRARY_VERSION_TLS_1_2
+  case SSL_LIBRARY_VERSION_TLS_1_2:
+    return strdup("TLSv1.2");
+#endif
+#ifdef SSL_LIBRARY_VERSION_TLS_1_3
+  case SSL_LIBRARY_VERSION_TLS_1_3:
+    return strdup("TLSv1.3");
+#endif
+  default:
+    return curl_maprintf("0x%04x", nssver);
+  }
+}
+
 static SECStatus set_ciphers(struct Curl_easy *data, PRFileDesc * model,
                              char *cipher_list)
 {
@@ -1837,8 +1863,14 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
                                   &sslver_supported) != SECSuccess)
     goto error;
   if(sslver_supported.max < sslver.max && sslver_supported.max >= sslver.min) {
-    infof(data, "Falling back (from %d) to max supported SSL version (%d)\n",
-                sslver.max, sslver_supported.max);
+    char *sslver_req_str, *sslver_supp_str;
+    sslver_req_str = nss_sslver_to_name(sslver.max);
+    sslver_supp_str = nss_sslver_to_name(sslver_supported.max);
+    if(sslver_req_str && sslver_supp_str)
+      infof(data, "Falling back from %s to max supported SSL version (%s)\n",
+                  sslver_req_str, sslver_supp_str);
+    free(sslver_req_str);
+    free(sslver_supp_str);
     sslver.max = sslver_supported.max;
   }
   if(SSL_VersionRangeSet(model, &sslver) != SECSuccess)
