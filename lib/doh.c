@@ -32,6 +32,7 @@
 #include "share.h"
 #include "curl_base64.h"
 #include "connect.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -142,8 +143,8 @@ doh_write_cb(void *contents, size_t size, size_t nmemb, void *userp)
     /* suspiciously much for us */
     return 0;
 
-  mem->memory = realloc(mem->memory, mem->size + realsize);
-  if(mem->memory == NULL)
+  mem->memory = Curl_saferealloc(mem->memory, mem->size + realsize);
+  if(!mem->memory)
     /* out of memory! */
     return 0;
 
@@ -525,7 +526,7 @@ UNITTEST DOHcode doh_decode(unsigned char *doh,
 
   if(dohlen < 12)
     return DOH_TOO_SMALL_BUFFER; /* too small */
-  if(doh[0] || doh[1])
+  if(!doh || doh[0] || doh[1])
     return DOH_DNS_BAD_ID; /* bad ID */
   rcode = doh[3] & 0x0f;
   if(rcode)
