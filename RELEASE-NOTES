@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o TODO: Have the URL API offer IDN decoding [22]
  o ares: remove fd from multi fd set when ares is about to close the fd [42]
  o axtls: removed [1]
+ o checksrc: add COPYRIGHTYEAR check [62]
  o cmake: fix MIT/Heimdal Kerberos detection [53]
  o configure: include all libraries in ssl-libs fetch [55]
  o configure: show CFLAGS, LDFLAGS etc in summary [7]
@@ -36,6 +37,8 @@ This release includes the following bugfixes:
  o curl_multibyte: fix a malloc overcalculation [18]
  o curle: move deprecated error code to ifndef block [40]
  o docs: escape "\n" codes [26]
+ o doh: fix memory leak in OOM situation [56]
+ o doh: make it work for h2-disabled builds too [57]
  o examples/ephiperfifo: report error when epoll_ctl fails
  o ftp: avoid two unsigned int overflows in FTP listing parser [30]
  o host names: allow trailing dot in name resolve, then strip it [46]
@@ -45,17 +48,21 @@ This release includes the following bugfixes:
  o libcurl: stop reading from paused transfers [20]
  o mprintf: avoid unsigned integer overflow warning [10]
  o netrc: don't ignore the login name specified with "--user" [17]
+ o nss: Fall back to latest supported SSL version [60]
+ o nss: Fix compatibility with nss versions 3.14 to 3.15 [61]
  o nss: fix fallthrough comment to fix picky compiler warning
  o nss: remove version selecting dead code [33]
  o nss: set default max-tls to 1.3/1.2 [32]
  o ntlm: Remove redundant ifdef USE_OPENSSL [41]
  o openssl: Remove SSLEAY leftovers [37]
  o openssl: do not log excess "TLS app data" lines for TLS 1.3 [34]
+ o openssl: do not use file BIOs if not requested [59]
  o openssl: support session resume with TLS 1.3 [44]
  o openvms: fix example name [8]
  o os400: Add curl_easy_conn_upkeep() to ILE/RPG binding
  o os400: add CURLOPT_CURLU to ILE/RPG binding
  o os400: fix return type of curl_easy_pause() in ILE/RPG binding
+ o packages: remove old leftover files and dirs [58]
  o pop3: only do APOP with a valid timestamp [35]
  o runtests: use the local curl for verifying [6]
  o schannel: be consistent in Schannel capitalization [23]
@@ -86,13 +93,14 @@ advice from friends like these:
   Alessandro Ghedini, Alexey Melnichuk, Antoni Villalonga,
   bobmitchell1956 on github, Brad King, Brian Carpenter, daboul on github,
   Daniel Gustafsson, Daniel Stenberg, David Benjamin, Dheeraj Sangamkar,
-  Elia Tufarolo, Frank Gevaerts, Gisle Vanem, Hagai Auro, Han Han,
-  infinnovation-dev on github, James Knight, Jérémy Rocher, Jim Fuller,
-  Kamil Dudka, Konstantin Kushnir, Marcel Raad, Marc Hörsken, Marcos Diazr,
-  Michael Kaufmann, NTMan on Github, Patrick Monnerat, Peter Wu, Ray Satiro,
-  Romain Fliedel, Sevan Janiyan, Sven Blumenstein, Tim Rühsen, Tobias Hintze,
-  Tomas Hoger, tpaukrt on github, Viktor Szakats, Yasuhiro Matsumoto,
-  (39 contributors)
+  dtmsecurity on github, Elia Tufarolo, Frank Gevaerts, Gergely Nagy,
+  Gisle Vanem, Hagai Auro, Han Han, infinnovation-dev on github, James Knight,
+  Jérémy Rocher, Jim Fuller, Kamil Dudka, Konstantin Kushnir, Marcel Raad,
+  Marc Hörsken, Marcos Diazr, Michael Kaufmann, NTMan on Github,
+  Patrick Monnerat, Paul Howarth, Peter Wu, Ray Satiro, Romain Fliedel,
+  Sevan Janiyan, Sven Blumenstein, Tim Rühsen, Tobias Hintze, Tomas Hoger,
+  tpaukrt on github, Viktor Szakats, Yasuhiro Matsumoto,
+  (42 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -153,3 +161,10 @@ References to bug reports and discussions on issues:
  [53] = https://curl.haxx.se/bug/?i=3316
  [54] = https://curl.haxx.se/bug/?i=3317
  [55] = https://curl.haxx.se/bug/?i=3193
+ [56] = https://curl.haxx.se/bug/?i=3342
+ [57] = https://curl.haxx.se/bug/?i=3325
+ [58] = https://curl.haxx.se/bug/?i=3331
+ [59] = https://curl.haxx.se/bug/?i=3339
+ [60] = https://curl.haxx.se/bug/?i=3261
+ [61] = https://curl.haxx.se/bug/?i=3337
+ [62] = https://curl.haxx.se/bug/?i=3303
