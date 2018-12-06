@@ -1313,7 +1313,14 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
     *avail = (const curl_ssl_backend **)&available_backends;
 
   if(Curl_ssl != &Curl_ssl_multi)
-    return id == Curl_ssl->info.id ? CURLSSLSET_OK : CURLSSLSET_TOO_LATE;
+    return id == Curl_ssl->info.id ||
+           (name && strcasecompare(name, Curl_ssl->info.name)) ?
+           CURLSSLSET_OK :
+#if defined(CURL_WITH_MULTI_SSL)
+           CURLSSLSET_TOO_LATE;
+#else
+           CURLSSLSET_UNKNOWN_BACKEND;
+#endif
 
   for(i = 0; available_backends[i]; i++) {
     if(available_backends[i]->info.id == id ||
