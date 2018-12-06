@@ -74,6 +74,9 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
                                  Curl_send_buffer *req_buffer);
+CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
+                                    Curl_send_buffer *buffer,
+                                    struct Curl_easy *handle);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);

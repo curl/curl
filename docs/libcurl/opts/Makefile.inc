@@ -163,6 +163,8 @@ man_MANS =                                      \
   CURLOPT_HTTP_CONTENT_DECODING.3               \
   CURLOPT_HTTP_TRANSFER_DECODING.3              \
   CURLOPT_HTTP_VERSION.3                        \
+  CURLOPT_TRAILERFUNCTION.3                     \
+  CURLOPT_TRAILERDATA.3                         \
   CURLOPT_IGNORE_CONTENT_LENGTH.3               \
   CURLOPT_INFILESIZE.3                          \
   CURLOPT_INFILESIZE_LARGE.3                    \

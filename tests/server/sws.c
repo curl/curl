@@ -253,6 +253,9 @@ SIG_ATOMIC_T got_exit_signal = 0;
 
 static volatile int exit_signal = 0;
 
+/* work around for handling trailing headers */
+static int already_recv_zeroed_chunk = FALSE;
+
 /* signal handler that will be triggered to indicate that the program
   should finish its execution in a controlled manner as soon as possible.
   The first time this is called it will set got_exit_signal to one and
@@ -755,10 +758,27 @@ static int ProcessRequest(struct httprequest *req)
       chunked = TRUE;
     }
 
+
     if(chunked) {
-      if(strstr(req->reqbuf, "\r\n0\r\n\r\n"))
+      if(strstr(req->reqbuf, "\r\n0\r\n\r\n")) {
         /* end of chunks reached */
         return 1; /* done */
+      }
+      else if(strstr(req->reqbuf, "\r\n0\r\n")) {
+        char *last_crlf_char = strstr(req->reqbuf, "\r\n\r\n");
+        while(TRUE) {
+          if(!strstr(last_crlf_char + 4, "\r\n\r\n"))
+            break;
+          last_crlf_char = strstr(last_crlf_char + 4, "\r\n\r\n");
+        }
+        if(last_crlf_char &&
+           last_crlf_char > strstr(req->reqbuf, "\r\n0\r\n"))
+          return 1;
+        already_recv_zeroed_chunk = TRUE;
+        return 0;
+      }
+      else if(already_recv_zeroed_chunk && strstr(req->reqbuf, "\r\n\r\n"))
+        return 1;
       else
         return 0; /* not done */
     }
