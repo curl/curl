@@ -121,6 +121,7 @@ static int geterr(const char *name, CURLcode val, int lineno)
 static curl_progress_callback progresscb;
 static curl_write_callback headercb;
 static curl_debug_callback debugcb;
+static curl_trailer_callback trailercb;
 static curl_ssl_ctx_callback ssl_ctx_cb;
 static curl_ioctl_callback ioctlcb;
 static curl_sockopt_callback sockoptcb;
