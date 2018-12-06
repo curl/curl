@@ -526,6 +526,12 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     pickhost = pickoneauth(&data->state.authhost, authmask);
     if(!pickhost)
       data->state.authproblem = TRUE;
+    if(data->state.authhost.picked == CURLAUTH_NTLM &&
+       conn->httpversion > 11) {
+      infof(data, "Forcing HTTP/1.1 for NTLM");
+      connclose(conn, "Force HTTP/1.1 connection");
+      conn->data->set.httpversion = CURL_HTTP_VERSION_1_1;
+    }
   }
   if(conn->bits.proxy_user_passwd &&
      ((data->req.httpcode == 407) ||
