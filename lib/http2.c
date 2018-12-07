@@ -2367,6 +2367,14 @@ void Curl_http2_cleanup_dependencies(struct Curl_easy *data)
     Curl_http2_remove_child(data->set.stream_depends_on, data);
 }
 
+/* Only call this function for a transfer that already got a HTTP/2
+   CURLE_HTTP2_STREAM error! */
+bool Curl_h2_http_1_1_error(struct connectdata *conn)
+{
+  struct http_conn *httpc = &conn->proto.httpc;
+  return (httpc->error_code == NGHTTP2_HTTP_1_1_REQUIRED);
+}
+
 #else /* !USE_NGHTTP2 */
 
 /* Satisfy external references even if http2 is not compiled in. */

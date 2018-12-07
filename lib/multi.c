@@ -46,6 +46,7 @@
 #include "vtls/vtls.h"
 #include "connect.h"
 #include "http_proxy.h"
+#include "http2.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -1946,6 +1947,25 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(!ret)
           retry = (newurl)?TRUE:FALSE;
         else if(!result)
+          result = ret;
+
+        if(retry) {
+          /* if we are to retry, set the result to OK and consider the
+             request as done */
+          result = CURLE_OK;
+          done = TRUE;
+        }
+      }
+      else if((CURLE_HTTP2_STREAM == result) &&
+                Curl_h2_http_1_1_error(data->easy_conn)) {
+        CURLcode ret = Curl_retry_request(data->easy_conn, &newurl);
+
+        infof(data, "Forcing HTTP/1.1 for NTLM");
+        data->set.httpversion = CURL_HTTP_VERSION_1_1;
+
+        if(!ret)
+          retry = (newurl)?TRUE:FALSE;
+        else
           result = ret;
 
         if(retry) {
