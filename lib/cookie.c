@@ -675,7 +675,10 @@ Curl_cookie_add(struct Curl_easy *data,
         /* overflow, used max value */
         co->expires = CURL_OFF_T_MAX;
       else if(!offt) {
-        if(CURL_OFF_T_MAX - now < co->expires)
+        if(!co->expires)
+          /* already expired */
+          co->expires = 1;
+        else if(CURL_OFF_T_MAX - now < co->expires)
           /* would overflow */
           co->expires = CURL_OFF_T_MAX;
         else
