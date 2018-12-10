@@ -3657,13 +3657,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
 
         switch(k->httpcode) {
-        case 204:
-          /* (quote from RFC2616, section 10.2.5): The server has
-           * fulfilled the request but does not need to return an
-           * entity-body ... The 204 response MUST NOT include a
-           * message-body, and thus is always terminated by the first
-           * empty line after the header fields. */
-          /* FALLTHROUGH */
         case 304:
           /* (quote from RFC2616, section 10.3.5): The 304 response
            * MUST NOT contain a message-body, and thus is always
@@ -3671,6 +3664,13 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            * fields.  */
           if(data->set.timecondition)
             data->info.timecond = TRUE;
+          /* FALLTHROUGH */
+        case 204:
+          /* (quote from RFC2616, section 10.2.5): The server has
+           * fulfilled the request but does not need to return an
+           * entity-body ... The 204 response MUST NOT include a
+           * message-body, and thus is always terminated by the first
+           * empty line after the header fields. */
           k->size = 0;
           k->maxdownload = 0;
           k->ignorecl = TRUE; /* ignore Content-Length headers */
