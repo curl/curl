@@ -702,7 +702,7 @@ output_auth_headers(struct connectdata *conn,
  *
  * @param conn all information about the current connection
  * @param request pointer to the request keyword
- * @param path pointer to the requested path
+ * @param path pointer to the requested path; should include query part
  * @param proxytunnel boolean if this is the request setting up a "proxy
  * tunnel"
  *
@@ -2000,9 +2000,18 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(conn, request, path, FALSE);
-  if(result)
-    return result;
+  {
+    char *pq = NULL;
+    if(query && *query) {
+      pq = aprintf("%s?%s", path, query);
+      if(!pq)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    result = Curl_http_output_auth(conn, request, (pq ? pq : path), FALSE);
+    free(pq);
+    if(result)
+      return result;
+  }
 
   if((data->state.authhost.multipass || data->state.authproxy.multipass) &&
      (httpreq != HTTPREQ_GET) &&
