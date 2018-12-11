@@ -64,8 +64,8 @@ $noptions=$aoptions - $boptions;
 
 # Number of files in git
 $afiles=`git ls-files | wc -l`;
-$deletes=`git diff-tree -r --summary origin/master $start | grep -c create`;
-$creates=`git diff-tree -r --summary origin/master $start | grep -c delete`;
+$deletes=`git diff-tree --diff-filter=A -r --summary origin/master $start | wc -l`;
+$creates=`git diff-tree --diff-filter=D -r --summary origin/master $start | wc -l`;
 
 # Time since that tag
 $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # unix timestamp
