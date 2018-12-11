@@ -67,6 +67,12 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
+#ifdef DEBUGBUILD
+#define UNITTEST
+#else
+#define UNITTEST static
+#endif
+
 static void free_urlhandle(struct Curl_URL *u)
 {
   free(u->scheme);
@@ -488,7 +494,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   return result;
 }
 
-static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
+UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
 {
   char *portptr = NULL;
   char endbracket;
@@ -845,7 +851,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       return result;
 
-    result = parse_port(u, hostname);
+    result = Curl_parse_port(u, hostname);
     if(result)
       return result;
 
