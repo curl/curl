@@ -490,16 +490,30 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
 static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
 {
-  char *portptr;
+  char *portptr = NULL;
   char endbracket;
   int len;
 
-  if((1 == sscanf(hostname, "[%*45[0123456789abcdefABCDEF:.%%]%c%n",
-                  &endbracket, &len)) &&
-     (']' == endbracket)) {
+  /*
+   * Find the end of an IPv6 address, either on the ']' ending bracket or
+   * a percent-encoded zone index.
+   */
+  if(1 == sscanf(hostname, "[%*45[0123456789abcdefABCDEF:.]%c%n",
+                 &endbracket, &len)) {
+    if(']' == endbracket)
+      portptr = &hostname[len];
+    else if('%' == endbracket) {
+      int zonelen = len;
+      if(1 == sscanf(hostname + zonelen, "25%*[^]]]%c%n", &endbracket, &len))
+        portptr = &hostname[--zonelen + len];
+      else
+        return CURLUE_MALFORMED_INPUT;
+    }
+    else
+      return CURLUE_MALFORMED_INPUT;
+
     /* this is a RFC2732-style specified IP-address */
-    portptr = &hostname[len];
-    if(*portptr) {
+    if(portptr && *portptr) {
       if(*portptr != ':')
         return CURLUE_MALFORMED_INPUT;
     }
