@@ -839,6 +839,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
   char *path;
+  char *query;
   char *p;
   char *q;
   size_t i;
@@ -846,7 +847,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!conn->data ||
      !conn->data->state.up.path ||
      conn->data->state.up.path[0] != '/' ||
-     !strcasecompare("LDAP", conn->data->state.up.scheme))
+     !strncasecompare("LDAP", conn->data->state.up.scheme, 4))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
@@ -858,11 +859,14 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!path)
     return LDAP_NO_MEMORY;
 
-  /* Parse the DN (Distinguished Name) */
-  q = strchr(p, '?');
-  if(q)
-    *q++ = '\0';
+  /* Duplicate the query */
+  q = query = strdup(conn->data->state.up.query);
+  if(!query) {
+    free(path);
+    return LDAP_NO_MEMORY;
+  }
 
+  /* Parse the DN (Distinguished Name) */
   if(*p) {
     char *dn = p;
     char *unescaped;
@@ -1039,6 +1043,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 
 quit:
   free(path);
+  free(query);
 
   return rc;
 }
