@@ -2,9 +2,9 @@ curl and libcurl 7.63.0
 
  Public curl releases:         178
  Command line options:         219
- curl_easy_setopt() options:   261
+ curl_easy_setopt() options:   262
  Public functions in libcurl:  80
- Contributors:                 1808
+ Contributors:                 1829
 
 This release includes the following changes:
 
@@ -15,10 +15,12 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o (lib)curl.rc: fixup for minor bugs [63]
+ o CURLINFO_REDIRECT_URL: extract the Location: header field unvalidated [73]
  o CURLOPT_HEADERFUNCTION.3: match 'nitems' name in synopsis and description [45]
  o CURLOPT_WRITEFUNCTION.3: spell out that it gets called many times
  o Curl_follow: accept non-supported schemes for "fake" redirects [9]
  o KNOWN_BUGS: add --proxy-any connection issue [28]
+ o NTLM: Remove redundant ifdef USE_OPENSSL [41]
  o NTLM: force the connection to HTTP/1.1 [67]
  o OS400: add URL API ccsid wrappers and sync ILE/RPG bindings
  o SECURITY-PROCESS: bountygraph shuts down again [50]
@@ -40,6 +42,7 @@ This release includes the following bugfixes:
  o curl_global_sslset(): id == -1 is not necessarily an error [68]
  o curl_multibyte: fix a malloc overcalculation [18]
  o curle: move deprecated error code to ifndef block [40]
+ o docs: curl_formadd field and file names are now escaped [72]
  o docs: escape "\n" codes [26]
  o doh: fix memory leak in OOM situation [56]
  o doh: make it work for h2-disabled builds too [57]
@@ -47,9 +50,12 @@ This release includes the following bugfixes:
  o ftp: avoid two unsigned int overflows in FTP listing parser [30]
  o host names: allow trailing dot in name resolve, then strip it [46]
  o http2: Upon HTTP_1_1_REQUIRED, retry the request with HTTP/1.1 [65]
+ o http: don't set CURLINFO_CONDITION_UNMET for http status code 204 [70]
+ o http: fix HTTP Digest auth to include query in URI [69]
  o http_negotiate: do not close connection until negotiation is completed [36]
  o impacket: add LICENSE [39]
  o infof: clearly indicate truncation [14]
+ o ldap: fix LDAP URL parsing regressions [71]
  o libcurl: stop reading from paused transfers [20]
  o mprintf: avoid unsigned integer overflow warning [10]
  o netrc: don't ignore the login name specified with "--user" [17]
@@ -58,7 +64,6 @@ This release includes the following bugfixes:
  o nss: fix fallthrough comment to fix picky compiler warning
  o nss: remove version selecting dead code [33]
  o nss: set default max-tls to 1.3/1.2 [32]
- o ntlm: Remove redundant ifdef USE_OPENSSL [41]
  o openssl: Remove SSLEAY leftovers [37]
  o openssl: do not log excess "TLS app data" lines for TLS 1.3 [34]
  o openssl: do not use file BIOs if not requested [59]
@@ -98,16 +103,17 @@ advice from friends like these:
 
   Alessandro Ghedini, Alexey Melnichuk, Antoni Villalonga, Ben Greear,
   bobmitchell1956 on github, Brad King, Brian Carpenter, daboul on github,
-  Daniel Gustafsson, Daniel Stenberg, David Benjamin, Dheeraj Sangamkar,
-  dtmsecurity on github, Elia Tufarolo, Frank Gevaerts, Gergely Nagy,
-  Gisle Vanem, Hagai Auro, Han Han, infinnovation-dev on github, James Knight,
-  Jérémy Rocher, Jeroen Ooms, Jim Fuller, Johannes Schindelin, Kamil Dudka,
-  Konstantin Kushnir, Marcel Raad, Marc Hörsken, Marcos Diazr,
-  Michael Kaufmann, NTMan on Github, Patrick Monnerat, Paul Howarth, Peter Wu,
-  Ray Satiro, Rod Widdowson, Romain Fliedel, Sevan Janiyan, Stefan Kanthak,
-  Sven Blumenstein, Tim Rühsen, Tobias Hintze, Tomas Hoger, tpaukrt on github,
+  Daniel Gustafsson, Daniel Stenberg, Dave Reisner, David Benjamin,
+  Dheeraj Sangamkar, dtmsecurity on github, Elia Tufarolo, Frank Gevaerts,
+  Gergely Nagy, Gisle Vanem, Hagai Auro, Han Han, infinnovation-dev on github,
+  James Knight, Jérémy Rocher, Jeroen Ooms, Jim Fuller, Johannes Schindelin,
+  Kamil Dudka, Konstantin Kushnir, Marcel Raad, Marc Hörsken, Marcos Diazr,
+  Michael Kaufmann, NTMan on Github, Patrick Monnerat, Paul Howarth,
+  Pavel Pavlov, Peter Wu, Ray Satiro, Rod Widdowson, Romain Fliedel,
+  Samuel Surtees, Sevan Janiyan, Stefan Kanthak, Sven Blumenstein, Tim Rühsen,
+  Tobias Hintze, Tomas Hoger, tonystz on Github, tpaukrt on github,
   Viktor Szakats, Yasuhiro Matsumoto,
-  (47 contributors)
+  (51 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -181,3 +187,8 @@ References to bug reports and discussions on issues:
  [66] = https://curl.haxx.se/bug/?i=3337
  [67] = https://curl.haxx.se/bug/?i=3345
  [68] = https://curl.haxx.se/bug/?i=3346
+ [69] = https://curl.haxx.se/bug/?i=3353
+ [70] = https://curl.haxx.se/bug/?i=3359
+ [71] = https://curl.haxx.se/bug/?i=3362
+ [72] = https://curl.haxx.se/bug/?i=3361
+ [73] = https://curl.haxx.se/bug/?i=3340
