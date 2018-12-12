@@ -864,7 +864,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
       return CURLUE_OUT_OF_MEMORY;
   }
 
-  if(query && query[0]) {
+  if(query) {
     u->query = strdup(query);
     if(!u->query)
       return CURLUE_OUT_OF_MEMORY;
@@ -1071,8 +1071,8 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
                     port ? port : "",
                     (u->path && (u->path[0] != '/')) ? "/": "",
                     u->path ? u->path : "/",
-                    u->query? "?": "",
-                    u->query? u->query : "",
+                    (u->query && u->query[0]) ? "?": "",
+                    (u->query && u->query[0]) ? u->query : "",
                     u->fragment? "#": "",
                     u->fragment? u->fragment : "");
     }
