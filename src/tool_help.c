@@ -437,7 +437,7 @@ static const struct helptxt helptext[] = {
   {"-z, --time-cond <time>",
    "Transfer based on a time condition"},
   {"    --tls-max <VERSION>",
-   "Use TLSv1.0 or greater"},
+   "Set maximum allowed TLS version"},
   {"    --tls13-ciphers <list of TLS 1.3 ciphersuites>",
    "TLS 1.3 cipher suites to use"},
   {"    --tlsauthtype <type>",
