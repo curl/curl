@@ -219,13 +219,20 @@ slist_convert(int dccsid, struct curl_slist * from, int sccsid)
   struct curl_slist * to = (struct curl_slist *) NULL;
 
   for(; from; from = from->next) {
+    struct curl_slist *nl;
     char * cp = dynconvert(dccsid, from->data, -1, sccsid);
 
     if(!cp) {
       curl_slist_free_all(to);
       return (struct curl_slist *) NULL;
     }
-    to = Curl_slist_append_nodup(to, cp);
+    nl = Curl_slist_append_nodup(to, cp);
+    if(!nl) {
+      curl_slist_free_all(to);
+      free(cp);
+      return NULL;
+    }
+    to = nl;
   }
   return to;
 }
