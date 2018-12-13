@@ -3873,7 +3873,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                          here, or else use real peer host name. */
                       conn->allocptr.cookiehost?
                       conn->allocptr.cookiehost:conn->host.name,
-                      data->state.up.path);
+                      data->state.up.path,
+                      (conn->handler->protocol&CURLPROTO_HTTPS)?
+                      TRUE:FALSE);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
 #endif

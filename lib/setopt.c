@@ -803,12 +803,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
         if(checkprefix("Set-Cookie:", argptr))
           /* HTTP Header format line */
           Curl_cookie_add(data, data->cookies, TRUE, FALSE, argptr + 11, NULL,
-                          NULL);
+                          NULL, TRUE);
 
         else
           /* Netscape format line */
           Curl_cookie_add(data, data->cookies, FALSE, FALSE, argptr, NULL,
-                          NULL);
+                          NULL, TRUE);
 
         Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
         free(argptr);

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,7 +85,8 @@ struct Curl_easy;
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                struct CookieInfo *, bool header, bool noexpiry,
                                char *lineptr,
-                               const char *domain, const char *path);
+                               const char *domain, const char *path,
+                               bool secure);
 
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
                                    const char *, bool);
