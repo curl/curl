@@ -1298,7 +1298,6 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       ssl_version = CURL_SSLVERSION_TLSv1_0;
-      ssl_version_max = max_supported_version_by_os;
       break;
   }
 
@@ -1430,7 +1429,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
     switch(conn->ssl_config.version) {
-    case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       (void)SSLSetProtocolVersionMin(BACKEND->ssl_ctx, kTLSProtocol1);
 #if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
@@ -1445,6 +1443,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
           HAVE_BUILTIN_AVAILABLE == 1 */
       break;
+    case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
