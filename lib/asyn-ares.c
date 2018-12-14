@@ -199,6 +199,17 @@ void Curl_resolver_cancel(struct connectdata *conn)
 }
 
 /*
+ * We're equivalent to Curl_resolver_cancel() for the c-ares resolver.  We
+ * never block.
+ */
+void Curl_resolver_kill(struct connectdata *conn)
+{
+  /* We don't need to check the resolver state because we can be called safely
+     at any time and we always do the same thing. */
+  Curl_resolver_cancel(conn);
+}
+
+/*
  * destroy_async_data() cleans up async resolver data.
  */
 static void destroy_async_data(struct Curl_async *async)
@@ -361,10 +372,12 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 /*
  * Curl_resolver_wait_resolv()
  *
- * waits for a resolve to finish. This function should be avoided since using
+ * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
+ *
+ * This should only be called when 'conn' is in CURLM_STATE_WAITRESOLVE.
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
@@ -377,6 +390,8 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   timediff_t timeout;
   struct curltime now = Curl_now();
   struct Curl_dns_entry *temp_entry;
+
+  DEBUGASSERT(data->mstate == CURLM_STATE_WAITRESOLVE);
 
   if(entry)
     *entry = NULL; /* clear on entry */

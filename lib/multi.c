@@ -537,10 +537,8 @@ static CURLcode multi_done(struct connectdata **connp,
     /* Stop if multi_done() has already been called */
     return CURLE_OK;
 
-  if(data->mstate == CURLM_STATE_WAITRESOLVE) {
-    /* still waiting for the resolve to complete */
-    (void)Curl_resolver_wait_resolv(conn, NULL);
-  }
+  /* Stop the resolver and free its own resources (but not dns_entry yet). */
+  Curl_resolver_kill(conn);
 
   Curl_getoff_all_pipelines(data, conn);
 
@@ -587,7 +585,6 @@ static CURLcode multi_done(struct connectdata **connp,
   }
 
   data->state.done = TRUE; /* called just now! */
-  Curl_resolver_cancel(conn);
 
   if(conn->dns_entry) {
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
