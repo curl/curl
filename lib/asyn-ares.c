@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -199,6 +199,17 @@ void Curl_resolver_cancel(struct connectdata *conn)
 }
 
 /*
+ * We're equivalent to Curl_resolver_cancel() for the c-ares resolver.  We
+ * never block.
+ */
+void Curl_resolver_kill(struct connectdata *conn)
+{
+  /* We don't need to check the resolver state because we can be called safely
+     at any time and we always do the same thing. */
+  Curl_resolver_cancel(conn);
+}
+
+/*
  * destroy_async_data() cleans up async resolver data.
  */
 static void destroy_async_data(struct Curl_async *async)
@@ -361,13 +372,13 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 /*
  * Curl_resolver_wait_resolv()
  *
- * waits for a resolve to finish. This function should be avoided since using
+ * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
  *
- * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
- * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
 CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **entry)
