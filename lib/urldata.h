@@ -77,7 +77,7 @@
 /* Default FTP/IMAP etc response timeout in milliseconds.
    Symbian OS panics when given a timeout much greater than 1/2 hour.
 */
-#define RESP_TIMEOUT (1800*1000)
+#define RESP_TIMEOUT (120*1000)
 
 #include "cookie.h"
 #include "psl.h"
