@@ -21,17 +21,14 @@
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TRAILERFUNCTION 3 "14 Aug 2018" "libcurl 7.64.0" "curl_easy_setopt options"
-
 .SH NAME:
 CURLOPT_TRAILERFUNCTION \- Set callback for sending trailing headers
-
 .SH SYNOPSIS:
 #include <curl.h>
 
 int curl_trailer_callback(struct curl_slist ** list, void *userdata);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERFUNCTION, curl_trailer_callback *func);
-
 .SH DESCRIPTION:
 Pass a pointer to a callback function.
 
@@ -59,54 +56,46 @@ trailers or to abort the request.
 
 If you set this option to NULL, then the transfer proceeds as usual
 without any interruptions.
-
 .SH DEFAULT:
 NULL
-
 .SH PROTOCOLS:
 HTTP
-
 .SH EXAMPLE:
 #include <curl/curl.h>
 
 static int trailer_cb(struct curl_slist **tr, void *data)
 {
-    /* libcurl will free the list */
-	*tr = curl_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
-	(void)data;
-	return CURL_TRAILERFUNC_OK;
+  /* libcurl will free the list */
+  tr = curl_slist_append(*tr, "My-super-awesome-trailer: trailer-stuff");
+  return CURL_TRAILERFUNC_OK;
 }
 
 CURL *curl = curl_easy_init();
 if(curl) {
+  /* Set the URL of the request */
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+  /* Now set it as a put */
+  curl_easy_setopt(curl, CURLOPT_PUT, 1L);
 
-    /* Set the URL of the request */
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
-    /* Now set it as a put */
-    curl_easy_setopt(curl, CURLOPT_PUT, 1L);
-    
-    /* Assuming we have a function that will return the data to be pushed 
-       Let that function be read_cb */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
+  /* Assuming we have a function that will return the data to be pushed
+     Let that function be read_cb */
+  curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
-    struct curl_slist *headers = NULL;
-    headers = curl_slist_append(headers, "Trailer: My-super-awsome-trailer");
-    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Trailer: My-super-awsome-trailer");
+  res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    /* Set the trailers filling callback */
-    curl_easy_setopt(curl, CURLOPT_TRAILERFUNCTION, (curl_trailer_callback)trailer_cb);
+  /* Set the trailers filling callback */
+  curl_easy_setopt(curl, CURLOPT_TRAILERFUNCTION, trailer_cb);
 
-    /* Perform the request, res will get the return code */ 
-    res = curl_easy_perform(curl);
+  /* Perform the request, res will get the return code */
+  res = curl_easy_perform(curl);
 
-    curl_easy_cleanup(curl);
+  curl_easy_cleanup(curl);
 
-    curl_slist_free_all(headers);
+  curl_slist_free_all(headers);
 }
-
-
 .SH AVAILABILITY:
 This option was added in curl 7.64.0 and is present if HTTP support is enabled
-
 .SH "SEE ALSO"
 .BR CURLOPT_TRAILERDATA "(3), "
