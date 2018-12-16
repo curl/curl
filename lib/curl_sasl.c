@@ -358,8 +358,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_XOAUTH2;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                       NULL, 0,
+        result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
                                                        conn->oauth_bearer,
                                                        &resp, &len);
     }
@@ -563,8 +562,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
       newstate = SASL_OAUTH2_RESP;
     }
     else
-      result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                     NULL, 0,
+      result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
                                                      conn->oauth_bearer,
                                                      &resp, &len);
     break;
