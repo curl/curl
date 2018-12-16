@@ -151,6 +151,13 @@ CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_easy *data,
                                                const long port,
                                                const char *bearer,
                                                char **outptr, size_t *outlen);
+
+/* This is used to generate a base64 encoded XOAuth 2.0 message */
+CURLcode Curl_auth_create_xoauth_bearer_message(struct Curl_easy *data,
+                                                const char *user,
+                                                const char *bearer,
+                                                char **outptr, size_t *outlen);
+
 #if defined(USE_KERBEROS5)
 /* This is used to evaluate if GSSAPI (Kerberos V5) is supported */
 bool Curl_auth_is_gssapi_supported(void);

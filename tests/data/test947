@@ -47,7 +47,7 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <verify>
 <protocol>
 EHLO 947
-AUTH OAUTHBEARER dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+AUTH OAUTHBEARER bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
