@@ -350,7 +350,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
 int Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
-  return snprintf(p, len, " nghttp2/%s", h2->version_str);
+  return msnprintf(p, len, " nghttp2/%s", h2->version_str);
 }
 
 /* HTTP/2 error code to name based on the Error Code Registry.
@@ -2365,6 +2365,14 @@ void Curl_http2_cleanup_dependencies(struct Curl_easy *data)
 
   if(data->set.stream_depends_on)
     Curl_http2_remove_child(data->set.stream_depends_on, data);
+}
+
+/* Only call this function for a transfer that already got a HTTP/2
+   CURLE_HTTP2_STREAM error! */
+bool Curl_h2_http_1_1_error(struct connectdata *conn)
+{
+  struct http_conn *httpc = &conn->proto.httpc;
+  return (httpc->error_code == NGHTTP2_HTTP_1_1_REQUIRED);
 }
 
 #else /* !USE_NGHTTP2 */

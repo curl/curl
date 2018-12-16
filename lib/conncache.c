@@ -175,7 +175,7 @@ static void hashkey(struct connectdata *conn, char *buf,
   DEBUGASSERT(len > 32);
 
   /* put the number first so that the hostname gets cut off if too long */
-  snprintf(buf, len, "%ld%s", conn->port, hostname);
+  msnprintf(buf, len, "%ld%s", conn->port, hostname);
 }
 
 void Curl_conncache_unlock(struct connectdata *conn)

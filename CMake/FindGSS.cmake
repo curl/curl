@@ -68,7 +68,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
       # should also work in an odd case when multiple directories are given
       string(STRIP "${_GSS_CFLAGS}" _GSS_CFLAGS)
       string(REGEX REPLACE " +-I" ";" _GSS_CFLAGS "${_GSS_CFLAGS}")
-      string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1"_GSS_CFLAGS "${_GSS_CFLAGS}")
+      string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _GSS_CFLAGS "${_GSS_CFLAGS}")
 
       foreach(_flag ${_GSS_CFLAGS})
         if(_flag MATCHES "^-I.*")
@@ -91,7 +91,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
       # this script gives us libraries and link directories. Blah. We have to deal with it.
       string(STRIP "${_GSS_LIB_FLAGS}" _GSS_LIB_FLAGS)
       string(REGEX REPLACE " +-(L|l)" ";-\\1" _GSS_LIB_FLAGS "${_GSS_LIB_FLAGS}")
-      string(REGEX REPLACE " +-([^Ll][^ \\t;]*)" ";-\\1"_GSS_LIB_FLAGS "${_GSS_LIB_FLAGS}")
+      string(REGEX REPLACE " +-([^Ll][^ \\t;]*)" ";-\\1" _GSS_LIB_FLAGS "${_GSS_LIB_FLAGS}")
 
       foreach(_flag ${_GSS_LIB_FLAGS})
         if(_flag MATCHES "^-l.*")

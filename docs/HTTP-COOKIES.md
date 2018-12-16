@@ -18,7 +18,9 @@
   original [Netscape spec from 1994](https://curl.haxx.se/rfc/cookie_spec.html).
 
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
-  published and details how cookies work within HTTP.
+  published and details how cookies work within HTTP. In 2017, an update was
+  [drafted](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01)
+  to deprecate modification of 'secure' cookies from non-secure origins.
 
 ## Cookies saved to disk
 

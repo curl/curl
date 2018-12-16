@@ -828,6 +828,7 @@ struct connectdata {
   int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
   struct hostname host;
+  char *hostname_resolve; /* host name to resolve to address, allocated */
   char *secondaryhostname; /* secondary socket host name (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
@@ -1215,6 +1216,15 @@ typedef enum {
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
+
+typedef enum {
+  TRAILERS_NONE,
+  TRAILERS_INITIALIZED,
+  TRAILERS_SENDING,
+  TRAILERS_DONE
+} trailers_state;
+
+
 /*
  * One instance for each timeout an easy handle can set.
  */
@@ -1361,6 +1371,13 @@ struct UrlState {
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
+#ifndef CURL_DISABLE_HTTP
+  size_t trailers_bytes_sent;
+  Curl_send_buffer *trailers_buf; /* a buffer containing the compiled trailing
+                                  headers */
+#endif
+  trailers_state trailers_state; /* whether we are sending trailers
+                                       and what stage are we at */
 };
 
 
@@ -1729,6 +1746,8 @@ struct UserDefined {
   multidone_func fmultidone;
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
   CURLU *uh; /* URL handle for the current parsed URL */
+  void *trailer_data; /* pointer to pass to trailer data callback */
+  curl_trailer_callback trailer_callback; /* trailing data callback */
 };
 
 struct Names {

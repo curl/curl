@@ -162,8 +162,6 @@ libcurl. The error buffer might contain more specific information about which
 exact option it concerns.
 .IP "CURLE_TELNET_OPTION_SYNTAX (49)"
 A telnet option string was Illegally formatted.
-.IP "CURLE_PEER_FAILED_VERIFICATION (51)"
-The remote server's SSL certificate or SSH md5 fingerprint was deemed not OK.
 .IP "CURLE_GOT_NOTHING (52)"
 Nothing was returned from the server, and under the circumstances, getting
 nothing is considered an error.
@@ -179,8 +177,10 @@ Failure with receiving network data.
 problem with the local client certificate.
 .IP "CURLE_SSL_CIPHER (59)"
 Couldn't use specified cipher.
-.IP "CURLE_SSL_CACERT (60)"
-Peer certificate cannot be authenticated with known CA certificates.
+.IP "CURLE_PEER_FAILED_VERIFICATION (60)"
+The remote server's SSL certificate or SSH md5 fingerprint was deemed not OK.
+This error code has been unified with CURLE_SSL_CACERT since 7.62.0. Its
+previous value was 51.
 .IP "CURLE_BAD_CONTENT_ENCODING (61)"
 Unrecognized transfer encoding.
 .IP "CURLE_LDAP_INVALID_URL (62)"

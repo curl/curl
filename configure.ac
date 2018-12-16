@@ -1623,7 +1623,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
     if test "$PKGCONFIG" != "no" ; then
       SSL_LIBS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
-        $PKGCONFIG --libs-only-l openssl 2>/dev/null`
+        $PKGCONFIG --libs-only-l --libs-only-other openssl 2>/dev/null`
 
       SSL_LDFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
         $PKGCONFIG --libs-only-L openssl 2>/dev/null`
@@ -1772,7 +1772,6 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
     dnl as it's a macro that needs the header files be included)
 
     AC_CHECK_FUNCS( RAND_egd \
-                    ENGINE_cleanup \
                     SSL_get_shutdown \
                     SSLv2_client_method )
 
@@ -4278,17 +4277,7 @@ AC_CONFIG_FILES([Makefile \
            tests/libtest/Makefile \
            tests/unit/Makefile \
            packages/Makefile \
-           packages/Win32/Makefile \
-           packages/Win32/cygwin/Makefile \
-           packages/Linux/Makefile \
-           packages/Linux/RPM/Makefile \
-           packages/Linux/RPM/curl.spec \
-           packages/Linux/RPM/curl-ssl.spec \
-           packages/Solaris/Makefile \
            packages/vms/Makefile \
-           packages/AIX/Makefile \
-           packages/AIX/RPM/Makefile \
-           packages/AIX/RPM/curl.spec \
            curl-config \
            libcurl.pc
 ])

@@ -950,7 +950,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
 
   if(!c) {
     failf(data, "SSL: invalid CA certificate subject");
-    return CURLE_SSL_CACERT;
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
 
   /* If the subject is already available as UTF-8 encoded (ie 'direct') then
@@ -970,7 +970,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
       if(!CFStringGetCString(c, cbuf, cbuf_size,
                              kCFStringEncodingUTF8)) {
         failf(data, "SSL: invalid CA certificate subject");
-        result = CURLE_SSL_CACERT;
+        result = CURLE_PEER_FAILED_VERIFICATION;
       }
       else
         /* pass back the buffer */
@@ -1298,7 +1298,6 @@ set_ssl_version_min_max(struct connectdata *conn, int sockindex)
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       ssl_version = CURL_SSLVERSION_TLSv1_0;
-      ssl_version_max = max_supported_version_by_os;
       break;
   }
 
@@ -1430,7 +1429,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
   if(SSLSetProtocolVersionMax != NULL) {
     switch(conn->ssl_config.version) {
-    case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
       (void)SSLSetProtocolVersionMin(BACKEND->ssl_ctx, kTLSProtocol1);
 #if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
@@ -1445,6 +1443,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
 #endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
           HAVE_BUILTIN_AVAILABLE == 1 */
       break;
+    case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
@@ -1649,7 +1648,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
         }
 
         CFRelease(cert);
-        if(result == CURLE_SSL_CACERT)
+        if(result == CURLE_PEER_FAILED_VERIFICATION)
           return CURLE_SSL_CERTPROBLEM;
         if(result)
           return result;
@@ -2429,37 +2428,37 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       /* These are all certificate problems with the server: */
       case errSSLXCertChainInvalid:
         failf(data, "SSL certificate problem: Invalid certificate chain");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLUnknownRootCert:
         failf(data, "SSL certificate problem: Untrusted root certificate");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLNoRootCert:
         failf(data, "SSL certificate problem: No root certificate");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLCertNotYetValid:
         failf(data, "SSL certificate problem: The certificate chain had a "
                     "certificate that is not yet valid");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLCertExpired:
       case errSSLPeerCertExpired:
         failf(data, "SSL certificate problem: Certificate chain had an "
               "expired certificate");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLBadCert:
       case errSSLPeerBadCert:
         failf(data, "SSL certificate problem: Couldn't understand the server "
               "certificate format");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLPeerUnsupportedCert:
         failf(data, "SSL certificate problem: An unsupported certificate "
                     "format was encountered");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLPeerCertRevoked:
         failf(data, "SSL certificate problem: The certificate was revoked");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
       case errSSLPeerCertUnknown:
         failf(data, "SSL certificate problem: The certificate is unknown");
-        return CURLE_SSL_CACERT;
+        return CURLE_PEER_FAILED_VERIFICATION;
 
       /* These are all certificate problems with the client: */
       case errSecAuthFailed:
@@ -3015,7 +3014,7 @@ static void Curl_darwinssl_session_free(void *ptr)
 
 static size_t Curl_darwinssl_version(char *buffer, size_t size)
 {
-  return snprintf(buffer, size, "SecureTransport");
+  return msnprintf(buffer, size, "SecureTransport");
 }
 
 /*

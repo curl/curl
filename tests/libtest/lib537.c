@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -56,10 +56,10 @@ static char msgbuff[256];
 static void store_errmsg(const char *msg, int err)
 {
   if(!err)
-    snprintf(msgbuff, sizeof(msgbuff), "%s", msg);
+    msnprintf(msgbuff, sizeof(msgbuff), "%s", msg);
   else
-    snprintf(msgbuff, sizeof(msgbuff), "%s, errno %d, %s", msg, err,
-             strerror(err));
+    msnprintf(msgbuff, sizeof(msgbuff), "%s, errno %d, %s", msg, err,
+              strerror(err));
 }
 
 static void close_file_descriptors(void)
@@ -133,7 +133,7 @@ static int rlimit(int keep_open)
     strcpy(strbuff, "INFINITY");
   else
 #endif
-    snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
+    msnprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
   fprintf(stderr, "initial soft limit: %s\n", strbuff);
 
 #ifdef RLIM_INFINITY
@@ -141,7 +141,7 @@ static int rlimit(int keep_open)
     strcpy(strbuff, "INFINITY");
   else
 #endif
-    snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
+    msnprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
   fprintf(stderr, "initial hard limit: %s\n", strbuff);
 
   /*
@@ -193,7 +193,7 @@ static int rlimit(int keep_open)
       strcpy(strbuff, "INFINITY");
     else
 #endif
-      snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
+      msnprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_cur);
     fprintf(stderr, "current soft limit: %s\n", strbuff);
 
 #ifdef RLIM_INFINITY
@@ -201,7 +201,7 @@ static int rlimit(int keep_open)
       strcpy(strbuff, "INFINITY");
     else
 #endif
-      snprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
+      msnprintf(strbuff, sizeof(strbuff), fmt, rl.rlim_max);
     fprintf(stderr, "current hard limit: %s\n", strbuff);
 
   } /* (rl.rlim_cur != rl.rlim_max) */
@@ -231,7 +231,7 @@ static int rlimit(int keep_open)
     nitems = 0x40000;
   do {
     num_open.rlim_max = sizeof(*memchunk) * nitems;
-    snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
+    msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
     fprintf(stderr, "allocating memchunk %s byte array\n", strbuff);
     memchunk = malloc(sizeof(*memchunk) * (size_t)nitems);
     if(!memchunk) {
@@ -274,9 +274,9 @@ static int rlimit(int keep_open)
   /* verify that we won't overflow size_t in malloc() */
 
   if((size_t)(num_open.rlim_max) > ((size_t)-1) / sizeof(*fd)) {
-    snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
-    snprintf(strbuff, sizeof(strbuff), "unable to allocate an array for %s "
-             "file descriptors, would overflow size_t", strbuff1);
+    msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
+    msnprintf(strbuff, sizeof(strbuff), "unable to allocate an array for %s "
+              "file descriptors, would overflow size_t", strbuff1);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     free(memchunk);
@@ -286,7 +286,7 @@ static int rlimit(int keep_open)
   /* allocate array for file descriptors */
 
   do {
-    snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
+    msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
     fprintf(stderr, "allocating array for %s file descriptors\n", strbuff);
     fd = malloc(sizeof(*fd) * (size_t)(num_open.rlim_max));
     if(!fd) {
@@ -310,14 +310,14 @@ static int rlimit(int keep_open)
       num_open.rlim_cur++)
     fd[num_open.rlim_cur] = -1;
 
-  snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
+  msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
   fprintf(stderr, "trying to open %s file descriptors\n", strbuff);
 
   /* open a dummy descriptor */
 
   fd[0] = open(DEV_NULL, O_RDONLY);
   if(fd[0] < 0) {
-    snprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
+    msnprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
     store_errmsg(strbuff, errno);
     fprintf(stderr, "%s\n", msgbuff);
     free(fd);
@@ -338,21 +338,21 @@ static int rlimit(int keep_open)
 
       fd[num_open.rlim_cur] = -1;
 
-      snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-      snprintf(strbuff, sizeof(strbuff), "dup() attempt %s failed", strbuff1);
+      msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
+      msnprintf(strbuff, sizeof(strbuff), "dup() attempt %s failed", strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
-      snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-      snprintf(strbuff, sizeof(strbuff), "fds system limit seems close to %s",
-               strbuff1);
+      msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
+      msnprintf(strbuff, sizeof(strbuff), "fds system limit seems close to %s",
+                strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
       num_open.rlim_max = num_open.rlim_cur - SAFETY_MARGIN;
 
       num_open.rlim_cur -= num_open.rlim_max;
-      snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
-      snprintf(strbuff, sizeof(strbuff), "closing %s file descriptors",
-               strbuff1);
+      msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_cur);
+      msnprintf(strbuff, sizeof(strbuff), "closing %s file descriptors",
+                strbuff1);
       fprintf(stderr, "%s\n", strbuff);
 
       for(num_open.rlim_cur = num_open.rlim_max;
@@ -362,7 +362,7 @@ static int rlimit(int keep_open)
         fd[num_open.rlim_cur] = -1;
       }
 
-      snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
+      msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
       fprintf(stderr, "shrinking array for %s file descriptors\n", strbuff);
 
       /* we don't care if we can't shrink it */
@@ -379,7 +379,7 @@ static int rlimit(int keep_open)
 
   }
 
-  snprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
+  msnprintf(strbuff, sizeof(strbuff), fmt, num_open.rlim_max);
   fprintf(stderr, "%s file descriptors open\n", strbuff);
 
 #if !defined(HAVE_POLL_FINE)    && \
@@ -399,8 +399,8 @@ static int rlimit(int keep_open)
 
   num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
   if(num_open.rlim_max > num_open.rlim_cur) {
-    snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
-             FD_SETSIZE);
+    msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
+              FD_SETSIZE);
     store_errmsg(strbuff, 0);
     fprintf(stderr, "%s\n", msgbuff);
     close_file_descriptors();
@@ -414,8 +414,8 @@ static int rlimit(int keep_open)
       rl.rlim_cur++) {
     if((fd[rl.rlim_cur] > 0) &&
        ((unsigned int)fd[rl.rlim_cur] > num_open.rlim_cur)) {
-      snprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
-               FD_SETSIZE);
+      msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
+                FD_SETSIZE);
       store_errmsg(strbuff, 0);
       fprintf(stderr, "%s\n", msgbuff);
       close_file_descriptors();
@@ -436,11 +436,11 @@ static int rlimit(int keep_open)
    */
 
   if(!fopen_works()) {
-    snprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
-    snprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open",
-            strbuff1);
+    msnprintf(strbuff1, sizeof(strbuff1), fmt, num_open.rlim_max);
+    msnprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open",
+              strbuff1);
     fprintf(stderr, "%s\n", msgbuff);
-    snprintf(strbuff, sizeof(strbuff), "fopen fails with lots of fds open");
+    msnprintf(strbuff, sizeof(strbuff), "fopen fails with lots of fds open");
     store_errmsg(strbuff, 0);
     close_file_descriptors();
     free(memchunk);

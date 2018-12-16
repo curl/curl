@@ -803,12 +803,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
         if(checkprefix("Set-Cookie:", argptr))
           /* HTTP Header format line */
           Curl_cookie_add(data, data->cookies, TRUE, FALSE, argptr + 11, NULL,
-                          NULL);
+                          NULL, TRUE);
 
         else
           /* Netscape format line */
           Curl_cookie_add(data, data->cookies, FALSE, FALSE, argptr, NULL,
-                          NULL);
+                          NULL, TRUE);
 
         Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
         free(argptr);
@@ -2635,6 +2635,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.upkeep_interval_ms = arg;
+    break;
+  case CURLOPT_TRAILERFUNCTION:
+#ifndef CURL_DISABLE_HTTP
+    data->set.trailer_callback = va_arg(param, curl_trailer_callback);
+#endif
+    break;
+  case CURLOPT_TRAILERDATA:
+#ifndef CURL_DISABLE_HTTP
+    data->set.trailer_data = va_arg(param, void *);
+#endif
     break;
   default:
     /* unknown tag and its companion, just ignore: */

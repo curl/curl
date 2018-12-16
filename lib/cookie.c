@@ -433,9 +433,10 @@ Curl_cookie_add(struct Curl_easy *data,
                 bool noexpire, /* if TRUE, skip remove_expired() */
                 char *lineptr,   /* first character of the line */
                 const char *domain, /* default domain */
-                const char *path)   /* full path used when this cookie is set,
+                const char *path,   /* full path used when this cookie is set,
                                        used to get default path for the cookie
                                        unless set */
+                bool secure)  /* TRUE if connection is over secure origin */
 {
   struct Cookie *clist;
   struct Cookie *co;
@@ -546,8 +547,20 @@ Curl_cookie_add(struct Curl_easy *data,
           /* this was a "<name>=" with no content, and we must allow
              'secure' and 'httponly' specified this weirdly */
           done = TRUE;
-          if(strcasecompare("secure", name))
-            co->secure = TRUE;
+          /*
+           * secure cookies are only allowed to be set when the connection is
+           * using a secure protocol, or when the cookie is being set by
+           * reading from file
+           */
+          if(strcasecompare("secure", name)) {
+            if(secure || !c->running) {
+              co->secure = TRUE;
+            }
+            else {
+              badcookie = TRUE;
+              break;
+            }
+          }
           else if(strcasecompare("httponly", name))
             co->httponly = TRUE;
           else if(sep)
@@ -675,7 +688,10 @@ Curl_cookie_add(struct Curl_easy *data,
         /* overflow, used max value */
         co->expires = CURL_OFF_T_MAX;
       else if(!offt) {
-        if(CURL_OFF_T_MAX - now < co->expires)
+        if(!co->expires)
+          /* already expired */
+          co->expires = 1;
+        else if(CURL_OFF_T_MAX - now < co->expires)
           /* would overflow */
           co->expires = CURL_OFF_T_MAX;
         else
@@ -828,7 +844,13 @@ Curl_cookie_add(struct Curl_easy *data,
         fields++; /* add a field and fall down to secure */
         /* FALLTHROUGH */
       case 3:
-        co->secure = strcasecompare(ptr, "TRUE")?TRUE:FALSE;
+        co->secure = FALSE;
+        if(strcasecompare(ptr, "TRUE")) {
+          if(secure || c->running)
+            co->secure = TRUE;
+          else
+            badcookie = TRUE;
+        }
         break;
       case 4:
         if(curlx_strtoofft(ptr, NULL, 10, &co->expires))
@@ -926,9 +948,31 @@ Curl_cookie_add(struct Curl_easy *data,
         /* the domains were identical */
 
         if(clist->spath && co->spath) {
-          if(strcasecompare(clist->spath, co->spath)) {
-            replace_old = TRUE;
+          if(clist->secure && !co->secure) {
+            size_t cllen;
+            const char *sep;
+
+            /*
+             * A non-secure cookie may not overlay an existing secure cookie.
+             * For an existing cookie "a" with path "/login", refuse a new
+             * cookie "a" with for example path "/login/en", while the path
+             * "/loginhelper" is ok.
+             */
+
+            sep = strchr(clist->spath + 1, '/');
+
+            if(sep)
+              cllen = sep - clist->spath;
+            else
+              cllen = strlen(clist->spath);
+
+            if(strncasecompare(clist->spath, co->spath, cllen)) {
+              freecookie(co);
+              return NULL;
+            }
           }
+          else if(strcasecompare(clist->spath, co->spath))
+            replace_old = TRUE;
           else
             replace_old = FALSE;
         }
@@ -1100,7 +1144,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       while(*lineptr && ISBLANK(*lineptr))
         lineptr++;
 
-      Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL);
+      Curl_cookie_add(data, c, headerline, TRUE, lineptr, NULL, NULL, TRUE);
     }
     free(line); /* free the line buffer */
     remove_expired(c); /* run this once, not on every cookie */
@@ -1456,21 +1500,8 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   unsigned int j;
   struct Cookie **array;
 
-  if((NULL == c) || (0 == c->numcookies))
-    /* If there are no known cookies, we don't write or even create any
-       destination file */
-    return 0;
-
   /* at first, remove expired cookies */
   remove_expired(c);
-
-  /* make sure we still have cookies after expiration */
-  if(0 == c->numcookies)
-    return 0;
-
-  array = malloc(sizeof(struct Cookie *) * c->numcookies);
-  if(!array)
-    return 1;
 
   if(!strcmp("-", dumphere)) {
     /* use stdout */
@@ -1480,7 +1511,6 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   else {
     out = fopen(dumphere, FOPEN_WRITETEXT);
     if(!out) {
-      free(array);
       return 1; /* failure */
     }
   }
@@ -1490,32 +1520,40 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
         "# This file was generated by libcurl! Edit at your own risk.\n\n",
         out);
 
-  j = 0;
-  for(i = 0; i < COOKIE_HASH_SIZE; i++) {
-    for(co = c->cookies[i]; co; co = co->next) {
-      if(!co->domain)
-        continue;
-      array[j++] = co;
-    }
-  }
-
-  qsort(array, c->numcookies, sizeof(struct Cookie *), cookie_sort_ct);
-
-  for(i = 0; i < j; i++) {
-    format_ptr = get_netscape_format(array[i]);
-    if(format_ptr == NULL) {
-      fprintf(out, "#\n# Fatal libcurl error\n");
-      free(array);
+  if(c->numcookies) {
+    array = malloc(sizeof(struct Cookie *) * c->numcookies);
+    if(!array) {
       if(!use_stdout)
         fclose(out);
       return 1;
     }
-    fprintf(out, "%s\n", format_ptr);
-    free(format_ptr);
+
+    j = 0;
+    for(i = 0; i < COOKIE_HASH_SIZE; i++) {
+      for(co = c->cookies[i]; co; co = co->next) {
+        if(!co->domain)
+          continue;
+        array[j++] = co;
+      }
+    }
+
+    qsort(array, c->numcookies, sizeof(struct Cookie *), cookie_sort_ct);
+
+    for(i = 0; i < j; i++) {
+      format_ptr = get_netscape_format(array[i]);
+      if(format_ptr == NULL) {
+        fprintf(out, "#\n# Fatal libcurl error\n");
+        free(array);
+        if(!use_stdout)
+          fclose(out);
+        return 1;
+      }
+      fprintf(out, "%s\n", format_ptr);
+      free(format_ptr);
+    }
+
+    free(array);
   }
-
-  free(array);
-
   if(!use_stdout)
     fclose(out);
 

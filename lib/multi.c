@@ -46,6 +46,7 @@
 #include "vtls/vtls.h"
 #include "connect.h"
 #include "http_proxy.h"
+#include "http2.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -634,13 +635,13 @@ static CURLcode multi_done(struct connectdata **connp,
   else {
     char buffer[256];
     /* create string before returning the connection */
-    snprintf(buffer, sizeof(buffer),
-             "Connection #%ld to host %s left intact",
-             conn->connection_id,
-             conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
-             conn->bits.httpproxy ? conn->http_proxy.host.dispname :
-             conn->bits.conn_to_host ? conn->conn_to_host.dispname :
-             conn->host.dispname);
+    msnprintf(buffer, sizeof(buffer),
+              "Connection #%ld to host %s left intact",
+              conn->connection_id,
+              conn->bits.socksproxy ? conn->socks_proxy.host.dispname :
+              conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+              conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+              conn->host.dispname);
 
     /* the connection is no longer in use by this transfer */
     if(Curl_conncache_return_conn(conn)) {
@@ -985,11 +986,12 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
 #define NUM_POLLS_ON_STACK 10
 
-CURLMcode curl_multi_wait(struct Curl_multi *multi,
+CURLMcode Curl_multi_wait(struct Curl_multi *multi,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
-                          int *ret)
+                          int *ret,
+                          bool *gotsocket) /* if any socket was checked */
 {
   struct Curl_easy *data;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
@@ -1002,6 +1004,9 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
   long timeout_internal;
   int retcode = 0;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
+
+  if(gotsocket)
+    *gotsocket = FALSE;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1135,9 +1140,21 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
     free(ufds);
   if(ret)
     *ret = retcode;
+  if(gotsocket && (extra_fds || curlfds))
+    /* if any socket was checked */
+    *gotsocket = TRUE;
+
   return CURLM_OK;
 }
 
+CURLMcode curl_multi_wait(struct Curl_multi *multi,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret)
+{
+  return Curl_multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, NULL);
+}
 /*
  * Curl_multi_connchanged() is called to tell that there is a connection in
  * this multi handle that has changed state (pipelining become possible, the
@@ -1337,8 +1354,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   CURLMcode rc;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k;
-  time_t timeout_ms;
-  time_t recv_timeout_ms;
+  timediff_t timeout_ms;
+  timediff_t recv_timeout_ms;
   timediff_t send_timeout_ms;
   int control;
 
@@ -1939,6 +1956,25 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           done = TRUE;
         }
       }
+      else if((CURLE_HTTP2_STREAM == result) &&
+                Curl_h2_http_1_1_error(data->easy_conn)) {
+        CURLcode ret = Curl_retry_request(data->easy_conn, &newurl);
+
+        infof(data, "Forcing HTTP/1.1 for NTLM");
+        data->set.httpversion = CURL_HTTP_VERSION_1_1;
+
+        if(!ret)
+          retry = (newurl)?TRUE:FALSE;
+        else
+          result = ret;
+
+        if(retry) {
+          /* if we are to retry, set the result to OK and consider the
+             request as done */
+          result = CURLE_OK;
+          done = TRUE;
+        }
+      }
 
       if(result) {
         /*
@@ -2466,11 +2502,11 @@ void Curl_updatesocket(struct Curl_easy *data)
  * socket again and it gets the same file descriptor number.
  */
 
-void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
+void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
 {
-  if(conn->data) {
+  if(data) {
     /* if there's still an easy handle associated with this connection */
-    struct Curl_multi *multi = conn->data->multi;
+    struct Curl_multi *multi = data->multi;
     if(multi) {
       /* this is set if this connection is part of a handle that is added to
          a multi handle, and only then this is necessary */
@@ -2478,7 +2514,7 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
 
       if(entry) {
         if(multi->socket_cb)
-          multi->socket_cb(conn->data, s, CURL_POLL_REMOVE,
+          multi->socket_cb(data, s, CURL_POLL_REMOVE,
                            multi->socket_userp,
                            entry->socketp);
 

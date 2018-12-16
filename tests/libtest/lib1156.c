@@ -91,7 +91,7 @@ static int onetest(CURL *curl, const char *url, const testparams *p)
   replyselector = p->flags & F_CONTENTRANGE? 1: 0;
   if(p->flags & F_HTTP416)
     replyselector += 2;
-  snprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
+  msnprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
   test_setopt(curl, CURLOPT_URL, urlbuf);
   test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME)? 3: 0);
   test_setopt(curl, CURLOPT_RANGE, !(p->flags & F_RESUME)?

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2017, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2013 - 2018, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -113,7 +113,7 @@ static void setup_handle(char *base_url, CURLM *m, int handlenum)
 {
   char urlbuf[256];
 
-  snprintf(urlbuf, sizeof(urlbuf), "%s%s", base_url, urlstring[handlenum]);
+  msnprintf(urlbuf, sizeof(urlbuf), "%s%s", base_url, urlstring[handlenum]);
   curl_easy_setopt(handles[handlenum], CURLOPT_URL, urlbuf);
   curl_easy_setopt(handles[handlenum], CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(handles[handlenum], CURLOPT_FAILONERROR, 1L);

@@ -67,10 +67,10 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
     size_t n;
     rc = curl_url_get(u, parts[i].part, &p, getflags);
     if(!rc && p) {
-      snprintf(bufp, len, "%s%s", buf[0]?" | ":"", p);
+      msnprintf(bufp, len, "%s%s", buf[0]?" | ":"", p);
     }
     else
-      snprintf(bufp, len, "%s[%d]", buf[0]?" | ":"", (int)rc);
+      msnprintf(bufp, len, "%s[%d]", buf[0]?" | ":"", (int)rc);
 
     n = strlen(bufp);
     bufp += n;

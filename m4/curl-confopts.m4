@@ -321,7 +321,7 @@ dnl ])
 
 dnl CURL_CHECK_OPTION_RT
 dnl -------------------------------------------------
-dnl Verify if configure has been involed with option
+dnl Verify if configure has been invoked with option
 dnl --disable-rt and set shell variable dontwant_rt
 dnl as appropriate.
 

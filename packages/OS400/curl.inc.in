@@ -586,7 +586,7 @@
      d  CURLE_HTTP2_STREAM...
      d                 c                   92
       *
-     d  CURLE_SSL_CACERT...
+     d  CURLE_PEER_FAILED_VERIFICATION...
      d                 c                   60
       *
       /if not defined(CURL_NO_OLDIES)
@@ -1384,6 +1384,7 @@
      d                 c                   00280
      d  CURLOPT_UPKEEP_INTERVAL_MS...
      d                 c                   00281
+     d  CURLOPT_CURLU  c                   10282
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -2443,8 +2444,14 @@
       *
      d curl_easy_pause...
      d                 pr                  extproc('curl_easy_pause')
+     d                                     like(CURLcode)
      d  curl                           *   value                                CURL *
      d  bitmask                      10i 0 value
+      *
+     d curl_easy_conn_upkeep...
+     d                 pr                  extproc('curl_easy_conn_upkeep')
+     d                                     like(CURLcode)
+     d  curl                           *   value                                CURL *
       *
      d curl_multi_init...
      d                 pr              *   extproc('curl_multi_init')           CURLM *

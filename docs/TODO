@@ -73,7 +73,6 @@
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 QUIC
- 5.8 Leave secure cookies alone
 
  6. TELNET
  6.1 ditch stdin
@@ -150,6 +149,7 @@
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
+ 18.11 Windows: set attribute 'archive' for completed downloads
  18.12 keep running, read instructions from pipe/socket
  18.13 support metalink in http headers
  18.14 --fail without --location should treat 3xx as a failure
@@ -184,7 +184,6 @@
  22.3 size_t
  22.4 remove several functions
  22.5 remove CURLOPT_FAILONERROR
- 22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
  22.7 remove progress meter from libcurl
  22.8 remove 'curl_httppost' from public
 
@@ -606,13 +605,6 @@
  implemented. This, to allow other projects to benefit from the work and to
  thus broaden the interest and chance of others to participate.
 
-5.8 Leave secure cookies alone
-
- Non-secure origins (HTTP sites) should not be allowed to set or modify
- cookies with the 'secure' property:
-
- https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01
-
 
 6. TELNET
 
@@ -1013,6 +1005,17 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  window, the transfer is interrupted and can get disconnected. This can
  probably be improved. See https://github.com/curl/curl/issues/322
 
+18.11 Windows: set attribute 'archive' for completed downloads
+
+ The archive bit (FILE_ATTRIBUTE_ARCHIVE, 0x20) separates files that shall be
+ backed up from those that are either not ready or have not changed.
+
+ Downloads in progress are neither ready to be backed up, nor should they be
+ opened by a different process. Only after a download has been completed it's
+ sensible to include it in any integer snapshot or backup of the system.
+
+ See https://github.com/curl/curl/issues/3354
+
 18.12 keep running, read instructions from pipe/socket
 
  Provide an option that makes curl not exit after the last URL (or even work
@@ -1259,12 +1262,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
  internally. Let the app judge success or not for itself.
-
-22.6 remove CURLOPT_DNS_USE_GLOBAL_CACHE
-
- Remove support for a global DNS cache. Anything global is silly, and we
- already offer the share interface for the same functionality but done
- "right".
 
 22.7 remove progress meter from libcurl
 

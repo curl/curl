@@ -28,6 +28,11 @@
 
 #include "stub_gssapi.h"
 
+#define ENABLE_CURLX_PRINTF
+/* make the curlx header define all printf() functions to use the curlx_*
+   versions instead */
+#include "curlx.h" /* from the private lib dir */
+
 #define MAX_CREDS_LENGTH 250
 #define APPROX_TOKEN_LEN 250
 
@@ -202,8 +207,8 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   }
 
   /* Token format: creds:target:type:padding */
-  used = snprintf(token, length, "%s:%s:%d:", creds,
-                  (char *) target_name, ctx->sent);
+  used = msnprintf(token, length, "%s:%s:%d:", creds,
+                   (char *) target_name, ctx->sent);
 
   if(used >= length) {
     free(token);

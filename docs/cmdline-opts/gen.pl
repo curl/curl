@@ -158,7 +158,7 @@ sub single {
             print STDERR "WARN: unrecognized line in $f, ignoring:\n:'$_';"
         }
     }
-    my @dest;
+    my @desc;
     while(<F>) {
         push @desc, $_;
     }

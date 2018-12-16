@@ -26,13 +26,13 @@
 #include "curl_addrinfo.h"
 #include "doh.h"
 
-#ifdef USE_NGHTTP2
 #include "sendf.h"
 #include "multiif.h"
 #include "url.h"
 #include "share.h"
 #include "curl_base64.h"
 #include "connect.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -143,8 +143,8 @@ doh_write_cb(void *contents, size_t size, size_t nmemb, void *userp)
     /* suspiciously much for us */
     return 0;
 
-  mem->memory = realloc(mem->memory, mem->size + realsize);
-  if(mem->memory == NULL)
+  mem->memory = Curl_saferealloc(mem->memory, mem->size + realsize);
+  if(!mem->memory)
     /* out of memory! */
     return 0;
 
@@ -234,7 +234,9 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDSIZE, (long)p->dohlen);
     }
     ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, headers);
+#ifdef USE_NGHTTP2
     ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+#endif
 #ifndef CURLDEBUG
     /* enforce HTTPS if not debug */
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
@@ -524,7 +526,7 @@ UNITTEST DOHcode doh_decode(unsigned char *doh,
 
   if(dohlen < 12)
     return DOH_TOO_SMALL_BUFFER; /* too small */
-  if(doh[0] || doh[1])
+  if(!doh || doh[0] || doh[1])
     return DOH_DNS_BAD_ID; /* bad ID */
   rcode = doh[3] & 0x0f;
   if(rcode)
@@ -660,13 +662,13 @@ static void showdoh(struct Curl_easy *data,
       char buffer[128];
       char *ptr;
       size_t len;
-      snprintf(buffer, 128, "DOH AAAA: ");
+      msnprintf(buffer, 128, "DOH AAAA: ");
       ptr = &buffer[10];
       len = 118;
       for(j = 0; j < 16; j += 2) {
         size_t l;
-        snprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6[j],
-                 d->addr[i].ip.v6[j + 1]);
+        msnprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6[j],
+                  d->addr[i].ip.v6[j + 1]);
         l = strlen(ptr);
         len -= l;
         ptr += l;
@@ -853,7 +855,7 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
                      &de);
     free(data->req.doh.probe[1].serverdoh.memory);
     if(rc2) {
-      infof(data, "DOG: %s type %s for %s\n", doh_strerror(rc2),
+      infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc2),
             type2name(data->req.doh.probe[1].dnstype),
             data->req.doh.host);
     }
@@ -893,28 +895,3 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
 
   return CURLE_OK;
 }
-
-#else /* !USE_NGHTTP2 */
-/*
- */
-Curl_addrinfo *Curl_doh(struct connectdata *conn,
-                        const char *hostname,
-                        int port,
-                        int *waitp)
-{
-  (void)conn;
-  (void)hostname;
-  (void)port;
-  (void)waitp;
-  return NULL;
-}
-
-CURLcode Curl_doh_is_resolved(struct connectdata *conn,
-                              struct Curl_dns_entry **dnsp)
-{
-  (void)conn;
-  (void)dnsp;
-  return CURLE_NOT_BUILT_IN;
-}
-
-#endif /* USE_NGHTTP2 */
