@@ -157,12 +157,12 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         outs->filename = filename;
         outs->alloc_filename = TRUE;
         hdrcbdata->honor_cd_filename = FALSE; /* done now! */
-        if(!tool_create_output_file(outs, TRUE))
+        if(!tool_create_output_file(outs))
           return failure;
       }
       break;
     }
-    if(!outs->stream && !tool_create_output_file(outs, FALSE))
+    if(!outs->stream && !tool_create_output_file(outs))
       return failure;
   }
 
@@ -172,7 +172,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     /* bold headers only for selected protocols */
     char *value = NULL;
 
-    if(!outs->stream && !tool_create_output_file(outs, FALSE))
+    if(!outs->stream && !tool_create_output_file(outs))
       return failure;
 
     if(hdrcbdata->global->isatty && hdrcbdata->global->styled_output)
