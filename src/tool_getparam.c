@@ -199,6 +199,7 @@ static const struct LongShort aliases[]= {
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
   {"03",  "http2-prior-knowledge",   ARG_NONE},
+  {"09",  "http0.9",                 ARG_BOOL},
   {"1",  "tlsv1",                    ARG_NONE},
   {"10",  "tlsv1.0",                 ARG_NONE},
   {"11",  "tlsv1.1",                 ARG_NONE},
@@ -1182,6 +1183,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case '3':
         /* HTTP version 2.0 over clean TCP*/
         config->httpversion = CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE;
+        break;
+      case '9':
+        /* Allow HTTP/0.9 responses! */
+        config->http09_allowed = toggle;
         break;
       }
       break;

@@ -1743,6 +1743,7 @@ struct UserDefined {
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   bool doh; /* DNS-over-HTTPS enabled */
   bool doh_get; /* use GET for DoH requests, instead of POST */
+  bool http09_allowed; /* allow HTTP/0.9 responses */
   multidone_func fmultidone;
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
   CURLU *uh; /* URL handle for the current parsed URL */
