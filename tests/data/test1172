@@ -1,8 +1,8 @@
 <testcase>
 <info>
 <keywords>
-HTTPS
-HTTP GET
+HTTP
+HTTP/0.9
 </keywords>
 </info>
 
@@ -10,42 +10,23 @@ HTTP GET
 # Server-side
 <reply>
 <data>
-No headers at all, just data swsclose
-
-Let's get
-
-a little
-
-so that
-
-we
-
-have
-
-some
-
-test
-
-data to
-
-verify
+-foo- swsclose
 </data>
+<datacheck>
+</datacheck>
 </reply>
 
 #
 # Client-side
 <client>
-<features>
-SSL
-</features>
 <server>
-https
+http
 </server>
  <name>
-HTTPS GET, receive no headers only data!
+HTTP/0.9 GET response denied
  </name>
  <command>
--k https://%HOSTIP:%HTTPSPORT/306 --http0.9
+http://%HOSTIP:%HTTPPORT/1172 --no-http0.9
 </command>
 </client>
 
@@ -56,10 +37,14 @@ HTTPS GET, receive no headers only data!
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /306 HTTP/1.1
-Host: %HOSTIP:%HTTPSPORT
+GET /1172 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+# unsupported protocol
+<errorcode>
+1
+</errorcode>
 </verify>
 </testcase>

@@ -176,6 +176,8 @@ static const struct helptxt helptext[] = {
    "This help text"},
   {"    --hostpubmd5 <md5>",
    "Acceptable MD5 hash of the host public key"},
+  {"    --http0.9",
+   "Allow HTTP 0.9 responses"},
   {"-0, --http1.0",
    "Use HTTP 1.0"},
   {"    --http1.1",
