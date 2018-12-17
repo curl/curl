@@ -583,12 +583,14 @@ mbed_connect_step2(struct connectdata *conn,
       return CURLE_PEER_FAILED_VERIFICATION;
     }
 
-    if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
-      failf(data, "Cert verify failed: BADCERT_CN_MISMATCH");
-
     if(ret & MBEDTLS_X509_BADCERT_NOT_TRUSTED)
       failf(data, "Cert verify failed: BADCERT_NOT_TRUSTED");
 
+    return CURLE_PEER_FAILED_VERIFICATION;
+  }
+  if(ret && SSL_CONN_CONFIG(verifyhost)) {
+    if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
+      failf(data, "Cert verify failed: BADCERT_CN_MISMATCH");
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
