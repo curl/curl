@@ -794,7 +794,7 @@ static int Curl_cyassl_init(void)
 }
 
 
-void Curl_cyassl_cleanup(void)
+static void Curl_cyassl_cleanup(void)
 {
   CyaSSL_Cleanup();
 }
