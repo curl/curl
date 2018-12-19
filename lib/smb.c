@@ -947,15 +947,10 @@ static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
 static CURLcode smb_do(struct connectdata *conn, bool *done)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
-  struct smb_request *req = conn->data->req.protop;
 
   *done = FALSE;
   if(smbc->share) {
-    req->path = strchr(smbc->share, '\0');
-    if(req->path) {
-      req->path++;
-      return CURLE_OK;
-    }
+    return CURLE_OK;
   }
   return CURLE_URL_MALFORMAT;
 }
@@ -964,6 +959,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
+  struct smb_request *req = data->req.protop;
   struct smb_conn *smbc = &conn->proto.smbc;
   char *path;
   char *slash;
@@ -992,6 +988,7 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
   /* Parse the path for the file path converting any forward slashes into
      backslashes */
   *slash++ = 0;
+  req->path = slash;
 
   for(; *slash; slash++) {
     if(*slash == '/')
