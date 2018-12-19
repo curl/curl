@@ -1362,19 +1362,20 @@ static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done)
       return result;
   }
 
-  result = Curl_pp_statemach(&imapc->pp, FALSE);
+  result = Curl_pp_statemach(&imapc->pp, FALSE, FALSE);
   *done = (imapc->state == IMAP_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode imap_block_statemach(struct connectdata *conn)
+static CURLcode imap_block_statemach(struct connectdata *conn,
+                                     bool disconnecting)
 {
   CURLcode result = CURLE_OK;
   struct imap_conn *imapc = &conn->proto.imapc;
 
   while(imapc->state != IMAP_STOP && !result)
-    result = Curl_pp_statemach(&imapc->pp, TRUE);
+    result = Curl_pp_statemach(&imapc->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -1497,7 +1498,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
        non-blocking DONE operations!
     */
     if(!result)
-      result = imap_block_statemach(conn);
+      result = imap_block_statemach(conn, FALSE);
   }
 
   /* Cleanup our per-request based variables */
@@ -1635,7 +1636,7 @@ static CURLcode imap_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && imapc->pp.conn && imapc->pp.conn->bits.protoconnstart)
     if(!imap_perform_logout(conn))
-      (void)imap_block_statemach(conn); /* ignore errors on LOGOUT */
+      (void)imap_block_statemach(conn, TRUE); /* ignore errors on LOGOUT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&imapc->pp);

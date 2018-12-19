@@ -655,7 +655,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   while(!*ftpcode && !result) {
     /* check and reset timeout value every lap */
-    time_t timeout = Curl_pp_state_timeout(pp); /* timeout in milliseconds */
+    time_t timeout = Curl_pp_state_timeout(pp, FALSE);
     time_t interval_ms;
 
     if(timeout <= 0) {
@@ -3054,7 +3054,7 @@ static CURLcode ftp_multi_statemach(struct connectdata *conn,
                                     bool *done)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  CURLcode result = Curl_pp_statemach(&ftpc->pp, FALSE);
+  CURLcode result = Curl_pp_statemach(&ftpc->pp, FALSE, FALSE);
 
   /* Check for the state outside of the Curl_socket_check() return code checks
      since at times we are in fact already in this state when this function
@@ -3071,7 +3071,7 @@ static CURLcode ftp_block_statemach(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   while(ftpc->state != FTP_STOP) {
-    result = Curl_pp_statemach(pp, TRUE);
+    result = Curl_pp_statemach(pp, TRUE, TRUE /* disconnecting */);
     if(result)
       break;
   }
