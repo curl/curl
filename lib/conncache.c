@@ -178,9 +178,9 @@ static void hashkey(struct connectdata *conn, char *buf,
   msnprintf(buf, len, "%ld%s", conn->port, hostname);
 }
 
-void Curl_conncache_unlock(struct connectdata *conn)
+void Curl_conncache_unlock(struct Curl_easy *data)
 {
-  CONN_UNLOCK(conn->data);
+  CONN_UNLOCK(data);
 }
 
 /* Returns number of connections currently held in the connection cache.

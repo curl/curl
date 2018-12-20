@@ -1097,7 +1097,7 @@ ConnectionExists(struct Curl_easy *data,
         if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
           infof(data, "Server doesn't support multi-use yet, wait\n");
           *waitpipe = TRUE;
-          Curl_conncache_unlock(needle);
+          Curl_conncache_unlock(data);
           return FALSE; /* no re-use */
         }
 
@@ -1457,11 +1457,11 @@ ConnectionExists(struct Curl_easy *data,
   if(chosen) {
     /* mark it as used before releasing the lock */
     chosen->data = data; /* own it! */
-    Curl_conncache_unlock(needle);
+    Curl_conncache_unlock(data);
     *usethis = chosen;
     return TRUE; /* yes, we found one to use! */
   }
-  Curl_conncache_unlock(needle);
+  Curl_conncache_unlock(data);
 
   if(foundPendingCandidate && data->set.pipewait) {
     infof(data,
@@ -3950,7 +3950,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
         /* The bundle is full. Extract the oldest connection. */
         conn_candidate = Curl_conncache_extract_bundle(data, bundle);
-        Curl_conncache_unlock(conn);
+        Curl_conncache_unlock(data);
 
         if(conn_candidate)
           (void)Curl_disconnect(data, conn_candidate,
@@ -3962,7 +3962,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         }
       }
       else
-        Curl_conncache_unlock(conn);
+        Curl_conncache_unlock(data);
 
     }
 
