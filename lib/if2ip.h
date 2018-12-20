@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,8 +31,6 @@
 #define IPV6_SCOPE_NODELOCAL    4       /* Loopback. */
 
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa);
-
-bool Curl_if_is_interface_name(const char *interf);
 
 typedef enum {
   IF2IP_NOT_FOUND = 0, /* Interface not found */
