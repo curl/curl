@@ -567,7 +567,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     unsigned char entropy[8];
     unsigned char ntlmv2hash[0x18];
 
-    infof(data, "NTLM type-2 message NTLM2_KEY\n");
+//    infof(data, "NTLM type-2 message NTLM2_KEY\n");
 
     result = Curl_rand(data, entropy, 8);
     if(result)
@@ -607,7 +607,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     unsigned char md5sum[MD5_DIGEST_LENGTH];
     unsigned char entropy[8];
 
-    infof(data, "NTLM type-2 message NTLM_KEY\n");
+//    infof(data, "NTLM type-2 message NTLM_KEY\n");
 
     /* Need to create 8 bytes random data */
     result = Curl_rand(data, entropy, 8);
@@ -648,7 +648,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 #endif
     unsigned char lmbuffer[0x18];
 
-    infof(data, "NTLM type-2 message LM_KEY\n");
+//    infof(data, "NTLM type-2 message LM_KEY\n");
 
 #ifdef USE_NTRESPONSES
     result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
