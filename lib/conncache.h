@@ -64,7 +64,8 @@ size_t Curl_conncache_bundle_size(struct connectdata *conn);
 bool Curl_conncache_return_conn(struct connectdata *conn);
 CURLcode Curl_conncache_add_conn(struct conncache *connc,
                                  struct connectdata *conn) WARN_UNUSED_RESULT;
-void Curl_conncache_remove_conn(struct connectdata *conn,
+void Curl_conncache_remove_conn(struct Curl_easy *data,
+                                struct connectdata *conn,
                                 bool lock);
 bool Curl_conncache_foreach(struct Curl_easy *data,
                             struct conncache *connc,
