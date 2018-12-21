@@ -96,24 +96,6 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 
 #if defined(HAVE_GETIFADDRS)
 
-bool Curl_if_is_interface_name(const char *interf)
-{
-  bool result = FALSE;
-
-  struct ifaddrs *iface, *head;
-
-  if(getifaddrs(&head) >= 0) {
-    for(iface = head; iface != NULL; iface = iface->ifa_next) {
-      if(strcasecompare(iface->ifa_name, interf)) {
-        result = TRUE;
-        break;
-      }
-    }
-    freeifaddrs(head);
-  }
-  return result;
-}
-
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
                           unsigned int remote_scope_id, const char *interf,
                           char *buf, int buf_size)
@@ -196,15 +178,6 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
 #elif defined(HAVE_IOCTL_SIOCGIFADDR)
 
-bool Curl_if_is_interface_name(const char *interf)
-{
-  /* This is here just to support the old interfaces */
-  char buf[256];
-
-  return (Curl_if2ip(AF_INET, 0 /* unused */, 0, interf, buf, sizeof(buf)) ==
-          IF2IP_NOT_FOUND) ? FALSE : TRUE;
-}
-
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
                           unsigned int remote_scope_id, const char *interf,
                           char *buf, int buf_size)
@@ -250,13 +223,6 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 }
 
 #else
-
-bool Curl_if_is_interface_name(const char *interf)
-{
-  (void) interf;
-
-  return FALSE;
-}
 
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
                           unsigned int remote_scope_id, const char *interf,

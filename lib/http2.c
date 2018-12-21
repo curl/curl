@@ -854,6 +854,10 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
             stream_id);
       DEBUGASSERT(0);
     }
+    if(stream_id == httpc->pause_stream_id) {
+      H2BUGF(infof(data_s, "Stopped the pause stream!\n"));
+      httpc->pause_stream_id = 0;
+    }
     H2BUGF(infof(data_s, "Removed stream %u hash!\n", stream_id));
     stream->stream_id = 0; /* cleared */
   }

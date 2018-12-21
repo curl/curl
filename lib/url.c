@@ -536,6 +536,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->fnmatch = ZERO_NULL;
   set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+  set->http09_allowed = TRUE;
   set->httpversion =
 #ifdef USE_NGHTTP2
     CURL_HTTP_VERSION_2TLS

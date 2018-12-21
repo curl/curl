@@ -794,6 +794,12 @@ static int Curl_cyassl_init(void)
 }
 
 
+static void Curl_cyassl_cleanup(void)
+{
+  CyaSSL_Cleanup();
+}
+
+
 static bool Curl_cyassl_data_pending(const struct connectdata* conn,
                                      int connindex)
 {
@@ -1004,7 +1010,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   sizeof(struct ssl_backend_data),
 
   Curl_cyassl_init,                /* init */
-  Curl_none_cleanup,               /* cleanup */
+  Curl_cyassl_cleanup,             /* cleanup */
   Curl_cyassl_version,             /* version */
   Curl_none_check_cxn,             /* check_cxn */
   Curl_cyassl_shutdown,            /* shutdown */
