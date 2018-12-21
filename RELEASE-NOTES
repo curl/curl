@@ -10,15 +10,25 @@ This release includes the following changes:
 
  o cookies: leave secure cookies alone [3]
  o http: Implement trailing headers for chunked transfers [7]
+ o http: added options for allowing HTTP/0.9 responses [10]
 
 This release includes the following bugfixes:
 
- o urlapi: Fix port parsing of eol colon [1]
- o docs: fix the --tls-max description [2]
  o OS400: handle memory error in list conversion [4]
- o urlapi: distinguish possibly empty query [5]
- o gopher: always include the entire gopher-path in request [5]
+ o cookies: extend domain checks to non psl builds [12]
+ o curl -J: refuse to append to the destination file [14]
  o darwinssl: accept setting max-tls with default min-tls [6]
+ o docs: fix the --tls-max description [2]
+ o gopher: always include the entire gopher-path in request [5]
+ o http2: clear pause stream id if it gets closed [8]
+ o if2ip: remove unused function Curl_if_is_interface_name [9]
+ o mbedtls: use VERIFYHOST [15]
+ o pingpong: change default response timeout to 120 seconds
+ o pingpong: ignore regular timeout in disconnect phase [16]
+ o smb: fix incorrect path in request if connection reused [13]
+ o urlapi: Fix port parsing of eol colon [1]
+ o urlapi: distinguish possibly empty query [5]
+ o wolfssl: fix memory-leak in threaded use [11]
 
 This release includes the following known bugs:
 
@@ -28,8 +38,9 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andrei Neculau, Ayoub Boudhar, Daniel Gustafsson, Daniel Stenberg,
-  Leonardo Taccari, Tobias Lindgren,
-  (6 contributors)
+  David Garske, Eric Rosenquist, Florian Pritz, jasal82 on github, Kamil Dudka,
+  Leonardo Taccari, Matus Uzak, Tobias Lindgren,
+  (12 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -42,3 +53,12 @@ References to bug reports and discussions on issues:
  [5] = https://curl.haxx.se/bug/?i=3369
  [6] = https://curl.haxx.se/bug/?i=3367
  [7] = https://curl.haxx.se/bug/?i=3350
+ [8] = https://curl.haxx.se/bug/?i=3392
+ [9] = https://curl.haxx.se/bug/?i=3401
+ [10] = https://curl.haxx.se/bug/?i=2873
+ [11] = https://curl.haxx.se/bug/?i=3395
+ [12] = https://curl.haxx.se/bug/?i=2964
+ [13] = https://curl.haxx.se/bug/?i=3388
+ [14] = https://curl.haxx.se/bug/?i=3380
+ [15] = https://curl.haxx.se/bug/?i=3376
+ [16] = https://curl.haxx.se/bug/?i=3264
