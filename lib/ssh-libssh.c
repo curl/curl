@@ -554,14 +554,19 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-  struct SSHPROTO *protop = data->req.protop;
+  struct SSHPROTO *protop;
   struct ssh_conn *sshc = &conn->proto.sshc;
   int rc = SSH_NO_ERROR, err;
   char *new_readdir_line;
   int seekerr = CURL_SEEKFUNC_OK;
   const char *err_msg;
   *block = 0;                   /* we're not blocking by default */
+  if(!data) {
+    state(conn, SSH_STOP);
+    return CURLE_OK;
+  }
 
+  protop = data->req.protop;
   do {
 
     switch(sshc->state) {
@@ -1988,6 +1993,10 @@ static CURLcode myssh_block_statemach(struct connectdata *conn,
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
+  if(!data) {
+    state(conn, SSH_STOP);
+    return CURLE_OK;
+  }
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
