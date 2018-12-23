@@ -781,6 +781,9 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   Curl_http_ntlm_cleanup(conn);
 #endif
 
+  /* the protocol specific disconnect handler needs a transfer for its
+     connection! */
+  conn->data = data;
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn, dead_connection);
