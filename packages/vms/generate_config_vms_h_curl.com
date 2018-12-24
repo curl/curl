@@ -406,7 +406,7 @@ $   write cvh "#define USE_OPENSSL 1"
 $   write cvh "#endif"
 $   if arch_name .eqs. "VAX"
 $   then
-$       old_mes = f$enviroment("message")
+$       old_mes = f$environment("message")
 $       set message/notext/nofaci/noseve/noident
 $       search/output=nla0: ssl$include:*.h CONF_MFLAGS_IGNORE_MISSING_FILE
 $       status = $severity
