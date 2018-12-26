@@ -83,6 +83,14 @@ UNITTEST_START
   free(ipv6port);
   curl_url_cleanup(u);
 
+  /* Valid IPv6 with zone index without port number */
+  u = curl_url();
+  ipv6port = strdup("[fe80::250:56ff:fea7:da15%25eth3]");
+  ret = Curl_parse_port(u, ipv6port);
+  fail_unless(ret == CURLUE_OK, "Curl_parse_port returned error");
+  free(ipv6port);
+  curl_url_cleanup(u);
+
   /* Valid IPv6 with port number */
   u = curl_url();
   ipv6port = strdup("[fe80::250:56ff:fea7:da15]:81");
