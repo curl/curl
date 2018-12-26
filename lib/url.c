@@ -2065,7 +2065,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     if(uc) {
       DEBUGF(infof(data, "curl_url_set rejected %s\n", data->change.url));
       return Curl_uc_to_curlcode(uc);
-  }
+    }
   }
 
   uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
