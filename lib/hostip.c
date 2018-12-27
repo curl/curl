@@ -312,6 +312,26 @@ fetch_addr(struct connectdata *conn,
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
+  /* No entry found in cache, check if we might have a wildcard entry */
+  if(!dns && data->change.wildcard_resolve) {
+    /*
+     * Free the previous entry_id before requesting a new one to avoid leaking
+     * memory
+     */
+    free(entry_id);
+
+    entry_id = create_hostcache_id("*", port);
+
+    /* If we can't create the entry id, fail */
+    if(!entry_id)
+      return dns;
+
+    entry_len = strlen(entry_id);
+
+    /* See if it's already in our dns cache */
+    dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
+  }
+
   if(dns && (data->set.dns_cache_timeout != -1)) {
     /* See whether the returned entry is stale. Done before we release lock */
     struct hostcache_prune_data user;
@@ -872,6 +892,9 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   char hostname[256];
   int port = 0;
 
+  /* Default is no wildcard found */
+  data->change.wildcard_resolve = false;
+
   for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
     if(!hostp->data)
       continue;
@@ -1052,6 +1075,13 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       }
       infof(data, "Added %s:%d:%s to DNS cache\n",
             hostname, port, addresses);
+
+      /* Wildcard hostname */
+      if(hostname[0] == '*' && hostname[1] == '\0') {
+        infof(data, "RESOLVE %s:%d is wildcard, enabling wildcard checks\n",
+              hostname, port);
+        data->change.wildcard_resolve = true;
+      }
     }
   }
   data->change.resolve = NULL; /* dealt with now */
