@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -264,6 +264,7 @@ static const struct LongShort aliases[]= {
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
+  {"EC", "tls13-middlebox",          ARG_BOOL},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -1668,6 +1669,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->socks5_auth |= CURLAUTH_GSSAPI;
         else
           config->socks5_auth &= ~CURLAUTH_GSSAPI;
+        break;
+
+      case 'C':
+        /* TLS 1.3 disable middlebox */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->tls13_middlebox_mode = toggle;
         break;
 
       default: /* unknown flag */

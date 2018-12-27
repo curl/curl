@@ -182,6 +182,7 @@ DPAGES =					\
   time-cond.d					\
   tls-max.d					\
   tls13-ciphers.d				\
+  tls13-middlebox.d				\
   tlsauthtype.d					\
   tlspassword.d					\
   tlsuser.d					\

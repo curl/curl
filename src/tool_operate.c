@@ -1472,9 +1472,11 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_GSSAPI_DELEGATION,
                         config->gssapi_delegation);
 
-        /* new in 7.25.0 and 7.44.0 */
+        /* new in 7.25.0, 7.44.0 and 7.65.0 */
         {
           long mask = (config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
+                      (config->tls13_middlebox_mode ?
+                        CURLSSLOPT_TLS13_MIDDLEBOX: 0) |
                       (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
           if(mask)
             my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);

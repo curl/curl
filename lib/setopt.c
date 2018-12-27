@@ -2077,12 +2077,16 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
     data->set.ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.ssl.disable_tls13_middlebox =
+      arg&CURLSSLOPT_TLS13_MIDDLEBOX?FALSE:TRUE;
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
   case CURLOPT_PROXY_SSL_OPTIONS:
     arg = va_arg(param, long);
     data->set.proxy_ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.proxy_ssl.disable_tls13_middlebox =
+      arg&CURLSSLOPT_TLS13_MIDDLEBOX?FALSE:TRUE;
     data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 

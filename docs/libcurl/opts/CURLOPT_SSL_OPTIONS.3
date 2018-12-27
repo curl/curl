@@ -47,6 +47,11 @@ exception in the case of Windows' Untrusted Publishers blacklist which it seems
 can't be bypassed.\fP This option may have broader support to accommodate other
 SSL backends in the future.
 https://curl.haxx.se/docs/ssl-compared.html
+
+Added in 7.65.0:
+
+\fICURLSSLOPT_TLS13_MIDDLEBOX\fP tells libcurl to enable or disable TLS 1.3
+middlebox compatibility mode. This option is only supported for OpenSSL.
 .SH DEFAULT
 0
 .SH PROTOCOLS
