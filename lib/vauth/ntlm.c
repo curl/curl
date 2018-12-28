@@ -562,7 +562,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   }
 
 #if defined(USE_NTRESPONSES) && defined(USE_NTLM_V2)
-  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
+  if(ntlm->target_info_len) {
     unsigned char ntbuffer[0x18];
     unsigned char entropy[8];
     unsigned char ntlmv2hash[0x18];
@@ -599,7 +599,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
 #if defined(USE_NTRESPONSES) && defined(USE_NTLM2SESSION)
   /* We don't support NTLM2 if we don't have USE_NTRESPONSES */
-  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM_KEY) {
+  if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
     unsigned char ntbuffer[0x18];
     unsigned char tmp[0x18];
     unsigned char md5sum[MD5_DIGEST_LENGTH];
@@ -631,17 +631,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     Curl_ntlm_core_lm_resp(ntbuffer, md5sum, ntresp);
 
     /* End of NTLM2 Session code */
-    /* NTLM v2 session security is a misnomer because it is not NTLM v2.
-<<<<<<< HEAD
-<<<<<<< HEAD
-       It is NTLM v1 using the extended session security that is also in
-=======
-       It is NTLM v1 using the extended session security that is also in 
->>>>>>> a1add86ac... Fix whitespace and long line
-=======
-       It is NTLM v1 using the extended session security that is also in
->>>>>>> a21f49146... Remove trailing whitespace
-       NTLM v2 */
+
   }
   else
 #endif
