@@ -632,7 +632,11 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
     /* End of NTLM2 Session code */
     /* NTLM v2 session security is a misnomer because it is not NTLM v2.
+<<<<<<< HEAD
        It is NTLM v1 using the extended session security that is also in
+=======
+       It is NTLM v1 using the extended session security that is also in 
+>>>>>>> a1add86ac... Fix whitespace and long line
        NTLM v2 */
   }
   else
