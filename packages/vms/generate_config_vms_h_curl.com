@@ -223,7 +223,7 @@ $write cvh "/* Location of default ca path */"
 $write cvh "#define curl_ca_path ""gnv$curl_ca_path"""
 $!
 $! NTLM_WB_ENABLED requires fork() but configure does not know this
-$! We have to disble this in th configure command line.
+$! We have to disable this in the configure command line.
 $! config_h.com finds that configure defaults to it being enabled so
 $! reports it.  So we need to turn it off here.
 $!
@@ -406,7 +406,7 @@ $   write cvh "#define USE_OPENSSL 1"
 $   write cvh "#endif"
 $   if arch_name .eqs. "VAX"
 $   then
-$       old_mes = f$enviroment("message")
+$       old_mes = f$environment("message")
 $       set message/notext/nofaci/noseve/noident
 $       search/output=nla0: ssl$include:*.h CONF_MFLAGS_IGNORE_MISSING_FILE
 $       status = $severity

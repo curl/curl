@@ -9,20 +9,31 @@ curl and libcurl 7.64.0
 This release includes the following changes:
 
  o cookies: leave secure cookies alone [3]
+ o hostip: support wildcard hosts [23]
  o http: Implement trailing headers for chunked transfers [7]
  o http: added options for allowing HTTP/0.9 responses [10]
+ o timeval: Use high resolution timestamps on Windows [19]
 
 This release includes the following bugfixes:
 
+ o FAQ: remove mention of sourceforge for github [22]
  o OS400: handle memory error in list conversion [4]
+ o OS400: upgrade ILE/RPG binding.
+ o cmake: use lowercase for function name like the rest of the code [20]
+ o conncache_unlock: avoid indirection by changing input argument type
  o cookies: extend domain checks to non psl builds [12]
  o curl -J: refuse to append to the destination file [14]
  o darwinssl: accept setting max-tls with default min-tls [6]
+ o disconnect: separate connections and easy handles better [18]
+ o disconnect: set conn->data for protocol disconnect
  o docs: fix the --tls-max description [2]
  o gopher: always include the entire gopher-path in request [5]
  o http2: clear pause stream id if it gets closed [8]
  o if2ip: remove unused function Curl_if_is_interface_name [9]
+ o libssh: free sftp_canonicalize_path() data correctly [17]
  o mbedtls: use VERIFYHOST [15]
+ o openvms: fix OpenSSL discovery on VAX [21]
+ o openvms: fix typos in documentation
  o pingpong: change default response timeout to 120 seconds
  o pingpong: ignore regular timeout in disconnect phase [16]
  o smb: fix incorrect path in request if connection reused [13]
@@ -37,10 +48,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Neculau, Ayoub Boudhar, Daniel Gustafsson, Daniel Stenberg,
-  David Garske, Eric Rosenquist, Florian Pritz, jasal82 on github, Kamil Dudka,
-  Leonardo Taccari, Matus Uzak, Tobias Lindgren,
-  (12 contributors)
+  Andrei Neculau, Ayoub Boudhar, Claes Jakobsson, Daniel Gustafsson, Daniel
+  Stenberg, David Garske, Eric Rosenquist, Harry Sintonen, Florian Pritz,
+  jasal82 on github, Kamil Dudka, Leonardo Taccari, masbug on github, Matus
+  Uzak, Patrick Monnerat, Pavel P, Ruslan Baratov, Sergei Nikulov, Tobias
+  Lindgren, Viktor Szakats
+  (20 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -62,3 +75,10 @@ References to bug reports and discussions on issues:
  [14] = https://curl.haxx.se/bug/?i=3380
  [15] = https://curl.haxx.se/bug/?i=3376
  [16] = https://curl.haxx.se/bug/?i=3264
+ [17] = https://curl.haxx.se/bug/?i=3402
+ [18] = https://curl.haxx.se/bug/?i=3400
+ [19] = https://curl.haxx.se/bug/?i=3318
+ [20] = https://curl.haxx.se/bug/?i=3196
+ [21] = https://curl.haxx.se/bug/?i=3407
+ [22] = https://curl.haxx.se/bug/?i=3410
+ [23] = https://curl.haxx.se/bug/?i=3406

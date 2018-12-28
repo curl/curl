@@ -761,10 +761,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
                                 vanish with this handle */
 
   /* Remove the association between the connection and the handle */
-  if(data->easy_conn) {
-    data->easy_conn->data = NULL;
+  if(data->easy_conn)
     data->easy_conn = NULL;
-  }
 
 #ifdef USE_LIBPSL
   /* Remove the PSL association. */
