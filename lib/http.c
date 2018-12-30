@@ -1835,7 +1835,8 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                   checkprefix("Transfer-Encoding:", headers->data))
             /* HTTP/2 doesn't support chunked requests */
             ;
-          else if(checkprefix("Authorization:", headers->data) &&
+          else if((checkprefix("Authorization:", headers->data) ||
+                   checkprefix("Cookie:", headers->data)) &&
                   /* be careful of sending this potentially sensitive header to
                      other hosts */
                   (data->state.this_is_a_follow &&
