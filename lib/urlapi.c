@@ -510,8 +510,11 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
       portptr = &hostname[len];
     else if('%' == endbracket) {
       int zonelen = len;
-      if(1 == sscanf(hostname + zonelen, "25%*[^]]]%c%n", &endbracket, &len))
-        portptr = &hostname[--zonelen + len];
+      if(1 == sscanf(hostname + zonelen, "25%*[^]]%c%n", &endbracket, &len)) {
+        if(']' != endbracket)
+          return CURLUE_MALFORMED_INPUT;
+        portptr = &hostname[--zonelen + len + 1];
+      }
       else
         return CURLUE_MALFORMED_INPUT;
     }
