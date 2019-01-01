@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1399,23 +1399,26 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(timeout_ms < 0) {
         /* Handle timed out */
         if(data->mstate == CURLM_STATE_WAITRESOLVE)
-          failf(data, "Resolving timed out after %ld milliseconds",
+          failf(data, "Resolving timed out after %" CURL_FORMAT_TIMEDIFF_T
+                " milliseconds",
                 Curl_timediff(now, data->progress.t_startsingle));
         else if(data->mstate == CURLM_STATE_WAITCONNECT)
-          failf(data, "Connection timed out after %ld milliseconds",
+          failf(data, "Connection timed out after %" CURL_FORMAT_TIMEDIFF_T
+                " milliseconds",
                 Curl_timediff(now, data->progress.t_startsingle));
         else {
           k = &data->req;
           if(k->size != -1) {
-            failf(data, "Operation timed out after %ld milliseconds with %"
-                  CURL_FORMAT_CURL_OFF_T " out of %"
+            failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
+                  " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
                   CURL_FORMAT_CURL_OFF_T " bytes received",
                   Curl_timediff(now, data->progress.t_startsingle),
                   k->bytecount, k->size);
           }
           else {
-            failf(data, "Operation timed out after %ld milliseconds with %"
-                  CURL_FORMAT_CURL_OFF_T " bytes received",
+            failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
+                  " milliseconds with %" CURL_FORMAT_CURL_OFF_T
+                  " bytes received",
                   Curl_timediff(now, data->progress.t_startsingle),
                   k->bytecount);
           }
