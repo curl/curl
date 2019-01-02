@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -643,7 +643,7 @@ static CURLcode CONNECT(struct connectdata *conn,
 
 void Curl_connect_free(struct Curl_easy *data)
 {
-  struct connectdata *conn = data->easy_conn;
+  struct connectdata *conn = data->conn;
   struct http_connect_state *s = conn->connect_state;
   if(s) {
     free(s);

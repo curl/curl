@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014 - 2016, Steve Holme, <steve_holme@hotmail.com>.
- * Copyright (C) 2015 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -146,7 +146,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   }
 
   /* Generate our SPN */
-  spn = Curl_auth_build_spn(service, data->easy_conn->host.name, NULL);
+  spn = Curl_auth_build_spn(service, data->conn->host.name, NULL);
   if(!spn) {
     free(output_token);
     free(input_token);
