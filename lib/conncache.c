@@ -178,9 +178,9 @@ static void hashkey(struct connectdata *conn, char *buf,
   msnprintf(buf, len, "%ld%s", conn->port, hostname);
 }
 
-void Curl_conncache_unlock(struct connectdata *conn)
+void Curl_conncache_unlock(struct Curl_easy *data)
 {
-  CONN_UNLOCK(conn->data);
+  CONN_UNLOCK(data);
 }
 
 /* Returns number of connections currently held in the connection cache.
@@ -302,9 +302,14 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   return result;
 }
 
-void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
+/*
+ * Removes the connectdata object from the connection cache *and* clears the
+ * ->data pointer association. Pass TRUE/FALSE in the 'lock' argument
+ * depending on if the parent function already holds the lock or not.
+ */
+void Curl_conncache_remove_conn(struct Curl_easy *data,
+                                struct connectdata *conn, bool lock)
 {
-  struct Curl_easy *data = conn->data;
   struct connectbundle *bundle = conn->bundle;
   struct conncache *connc = data->state.conn_cache;
 
@@ -323,6 +328,7 @@ void Curl_conncache_remove_conn(struct connectdata *conn, bool lock)
       DEBUGF(infof(data, "The cache now contains %zu members\n",
                    connc->num_conn));
     }
+    conn->data = NULL; /* clear the association */
     if(lock) {
       CONN_UNLOCK(data);
     }

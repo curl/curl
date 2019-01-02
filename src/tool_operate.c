@@ -1005,6 +1005,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* new in libcurl 7.21.6 */
           if(config->tr_encoding)
             my_setopt(curl, CURLOPT_TRANSFER_ENCODING, 1L);
+          /* new in libcurl 7.64.0 */
+          my_setopt(curl, CURLOPT_HTTP09_ALLOWED, config->http09_allowed);
 
         } /* (built_in_protos & CURLPROTO_HTTP) */
 
@@ -1583,7 +1585,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             /* do not create (or even overwrite) the file in case we get no
                data because of unmet condition */
             curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
-            if(!cond_unmet && !tool_create_output_file(&outs, FALSE))
+            if(!cond_unmet && !tool_create_output_file(&outs))
               result = CURLE_WRITE_ERROR;
           }
 

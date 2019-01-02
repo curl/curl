@@ -32,8 +32,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /* create a local file for writing, return TRUE on success */
-bool tool_create_output_file(struct OutStruct *outs,
-                             bool append)
+bool tool_create_output_file(struct OutStruct *outs)
 {
   struct GlobalConfig *global = outs->config->global;
   FILE *file;
@@ -43,7 +42,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     return FALSE;
   }
 
-  if(outs->is_cd_filename && !append) {
+  if(outs->is_cd_filename) {
     /* don't overwrite existing files */
     file = fopen(outs->filename, "rb");
     if(file) {
@@ -55,7 +54,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   }
 
   /* open file for writing */
-  file = fopen(outs->filename, append?"ab":"wb");
+  file = fopen(outs->filename, "wb");
   if(!file) {
     warnf(global, "Failed to create the file %s: %s\n", outs->filename,
           strerror(errno));
@@ -142,7 +141,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 #endif
 
-  if(!outs->stream && !tool_create_output_file(outs, FALSE))
+  if(!outs->stream && !tool_create_output_file(outs))
     return failure;
 
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {

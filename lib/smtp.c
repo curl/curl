@@ -1080,19 +1080,20 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done)
       return result;
   }
 
-  result = Curl_pp_statemach(&smtpc->pp, FALSE);
+  result = Curl_pp_statemach(&smtpc->pp, FALSE, FALSE);
   *done = (smtpc->state == SMTP_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode smtp_block_statemach(struct connectdata *conn)
+static CURLcode smtp_block_statemach(struct connectdata *conn,
+                                     bool disconnecting)
 {
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   while(smtpc->state != SMTP_STOP && !result)
-    result = Curl_pp_statemach(&smtpc->pp, TRUE);
+    result = Curl_pp_statemach(&smtpc->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -1253,7 +1254,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
        the smtp_multi_statemach function but we have no general support for
        non-blocking DONE operations!
     */
-    result = smtp_block_statemach(conn);
+    result = smtp_block_statemach(conn, FALSE);
   }
 
   /* Clear the transfer mode for the next request */
@@ -1360,7 +1361,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && smtpc->pp.conn && smtpc->pp.conn->bits.protoconnstart)
     if(!smtp_perform_quit(conn))
-      (void)smtp_block_statemach(conn); /* ignore errors on QUIT */
+      (void)smtp_block_statemach(conn, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);

@@ -64,3 +64,18 @@ revert if need be.
 
 Remove all global-cache related code from curl around April 2019 (might be
 7.66.0).
+
+## HTTP/0.9
+
+Supporting this is non-obvious and might even come as a surprise to some
+users. Potentially even being a security risk in some cases.
+
+### State
+
+curl 7.64.0 introduces options to disable/enable support for this protocol
+version. The default remains supported for now.
+
+### Removal
+
+The support for HTTP/0.9 will be switched to disabled by default in 6 months,
+in the September 2019 release (possibly called curl 7.68.0).

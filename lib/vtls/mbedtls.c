@@ -574,19 +574,21 @@ mbed_connect_step2(struct connectdata *conn,
 
   ret = mbedtls_ssl_get_verify_result(&BACKEND->ssl);
 
+  if(!SSL_CONN_CONFIG(verifyhost))
+    /* Ignore hostname errors if verifyhost is disabled */
+    ret &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
+
   if(ret && SSL_CONN_CONFIG(verifypeer)) {
     if(ret & MBEDTLS_X509_BADCERT_EXPIRED)
       failf(data, "Cert verify failed: BADCERT_EXPIRED");
 
-    if(ret & MBEDTLS_X509_BADCERT_REVOKED) {
+    else if(ret & MBEDTLS_X509_BADCERT_REVOKED)
       failf(data, "Cert verify failed: BADCERT_REVOKED");
-      return CURLE_PEER_FAILED_VERIFICATION;
-    }
 
-    if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
+    else if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
       failf(data, "Cert verify failed: BADCERT_CN_MISMATCH");
 
-    if(ret & MBEDTLS_X509_BADCERT_NOT_TRUSTED)
+    else if(ret & MBEDTLS_X509_BADCERT_NOT_TRUSTED)
       failf(data, "Cert verify failed: BADCERT_NOT_TRUSTED");
 
     return CURLE_PEER_FAILED_VERIFICATION;

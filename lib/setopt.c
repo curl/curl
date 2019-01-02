@@ -860,6 +860,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.expect_100_timeout = arg;
     break;
 
+  case CURLOPT_HTTP09_ALLOWED:
+    arg = va_arg(param, unsigned long);
+    if(arg > 1L)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.http09_allowed = arg ? TRUE : FALSE;
+    break;
 #endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_HTTPAUTH:

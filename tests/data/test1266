@@ -26,7 +26,7 @@ http
 HTTP GET with a single-byte HTTP/0.9 response
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1266
+http://%HOSTIP:%HTTPPORT/1266 --http0.9
 </command>
 </client>
 

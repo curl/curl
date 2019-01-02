@@ -77,7 +77,7 @@
 /* Default FTP/IMAP etc response timeout in milliseconds.
    Symbian OS panics when given a timeout much greater than 1/2 hour.
 */
-#define RESP_TIMEOUT (1800*1000)
+#define RESP_TIMEOUT (120*1000)
 
 #include "cookie.h"
 #include "psl.h"
@@ -1397,6 +1397,7 @@ struct DynamicStatic {
                                     curl_easy_setopt(COOKIEFILE) calls */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
+  bool wildcard_resolve; /* Set to true if any resolve change is a wildcard */
 };
 
 /*
@@ -1743,6 +1744,7 @@ struct UserDefined {
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   bool doh; /* DNS-over-HTTPS enabled */
   bool doh_get; /* use GET for DoH requests, instead of POST */
+  bool http09_allowed; /* allow HTTP/0.9 responses */
   multidone_func fmultidone;
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
   CURLU *uh; /* URL handle for the current parsed URL */
