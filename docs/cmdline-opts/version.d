@@ -55,4 +55,6 @@ there are errors (such as the file or server not being available).
 .IP "PSL"
 PSL is short for Public Suffix List and means that this curl has been built
 with knowledge about "public suffixes".
+.IP "MultiSSL"
+This curl supports multiple TLS backends.
 .RE
