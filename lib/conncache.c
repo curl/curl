@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2016, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -572,8 +572,6 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
     conn->data = connc->closure_handle;
 
     sigpipe_ignore(conn->data, &pipe_st);
-    conn->data->easy_conn = NULL; /* clear the easy handle's connection
-                                     pointer */
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
     (void)Curl_disconnect(connc->closure_handle, conn, FALSE);

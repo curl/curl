@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -222,7 +222,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(GSS_ERROR(nego->status)) {
     failf(data, "InitializeSecurityContext failed: %s",
-          Curl_sspi_strerror(data->easy_conn, nego->status));
+          Curl_sspi_strerror(data->conn, nego->status));
     return CURLE_OUT_OF_MEMORY;
   }
 
