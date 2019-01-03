@@ -779,11 +779,14 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   });
 
 #ifdef USE_NTRESPONSES
-  if(size < (NTLM_BUFSIZE - ntresplen)) {
-    DEBUGASSERT(size == (size_t)ntrespoff);
-    memcpy(&ntlmbuf[size], ptr_ntresp, ntresplen);
-    size += ntresplen;
+  /* ntresplen + size should not be risking an integer overflow here */
+  if(ntresplen + size > sizeof(ntlmbuf)) {
+    failf(data, "incoming NTLM message too big");
+    return CURLE_OUT_OF_MEMORY;
   }
+  DEBUGASSERT(size == (size_t)ntrespoff);
+  memcpy(&ntlmbuf[size], ptr_ntresp, ntresplen);
+  size += ntresplen;
 
   DEBUG_OUT({
     fprintf(stderr, "\n   ntresp=");
