@@ -87,14 +87,14 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
   LARGE_INTEGER file_size;
   char *ca_file_buffer = NULL;
   char *current_ca_file_ptr = NULL;
-  const TCHAR *ca_file_tstr = NULL;
+  TCHAR *ca_file_tstr = NULL;
   size_t ca_file_bufsize = 0;
   DWORD total_bytes_read = 0;
   bool more_certs = 0;
   int num_certs = 0;
   size_t END_CERT_LEN;
 
-  ca_file_tstr = Curl_convert_UTF8_to_tchar(ca_file);
+  ca_file_tstr = Curl_convert_UTF8_to_tchar((char *)ca_file);
   if(!ca_file_tstr) {
     failf(data,
           "schannel: invalid path name for CA file '%s': %s",
