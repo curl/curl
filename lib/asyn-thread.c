@@ -486,10 +486,8 @@ void Curl_resolver_kill(struct connectdata *conn)
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
  *
- * This should only be called when 'conn' has an outstanding resolver.
- *
- * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
- * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  *
  * This is the version for resolves-in-a-thread.
  */

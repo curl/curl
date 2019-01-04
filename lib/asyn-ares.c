@@ -377,9 +377,8 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
  *
- * This should only be called when 'conn' is in CURLM_STATE_WAITRESOLVE.
- *
- * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * CURLE_ABORTED_BY_CALLBACK when aborted by the application, or
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
  */
 CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
@@ -390,8 +389,6 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   timediff_t timeout;
   struct curltime now = Curl_now();
   struct Curl_dns_entry *temp_entry;
-
-  DEBUGASSERT(data->mstate == CURLM_STATE_WAITRESOLVE);
 
   if(entry)
     *entry = NULL; /* clear on entry */
