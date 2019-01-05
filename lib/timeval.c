@@ -47,7 +47,23 @@ struct curltime Curl_now(void)
       (int)((count.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart);
   }
   else {
+    /* 
+    ** In later Windows SDK versions, when compiling with msvc /analyze,
+    ** the compiler will warn about GetTickCount instead of GetTickCount64.
+    ** GetTickCount is not a good monotonic time source, as it wraps when
+    ** the system has been up for around 49 days.  But this is good enough
+    ** most of the time, and running on <= XP is becoming vanishingly rare.
+    ** https://github.com/curl/curl/issues/3437
+    */
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:28159)
+#endif
     DWORD milliseconds = GetTickCount();
+#if defined(_MSC_VER) 
+#pragma warning(pop)
+#endif
+
     now.tv_sec = milliseconds / 1000;
     now.tv_usec = (milliseconds % 1000) * 1000;
   }
