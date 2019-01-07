@@ -40,6 +40,16 @@ This release includes the following bugfixes:
  o urlapi: Fix port parsing of eol colon [1]
  o urlapi: distinguish possibly empty query [5]
  o wolfssl: fix memory-leak in threaded use [11]
+ o urlapi: fix parsing ipv6 with zone index [24]
+ o THANKS: added several missing names from year <= 2000
+ o ntlm: fix NTMLv2 compliance [25]
+ o docs/version.d: mention MultiSSL [26]
+ o libtest/stub_gssapi: use "real" snprintf [27]
+ o printf: fix format specifiers [28]
+ o schannel: fix compiler warning [29]
+ o curl/urlapi.h: include "curl.h" first [30]
+ o Revert http_negotiate: do not close connection [31]
+ o curl_multi_remove_handle() don't block terminating c-ares requests [32]
 
 This release includes the following known bugs:
 
@@ -48,12 +58,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Neculau, Ayoub Boudhar, Claes Jakobsson, Daniel Gustafsson, Daniel
-  Stenberg, David Garske, Eric Rosenquist, Harry Sintonen, Florian Pritz,
-  jasal82 on github, Kamil Dudka, Leonardo Taccari, masbug on github, Matus
-  Uzak, Patrick Monnerat, Pavel P, Ruslan Baratov, Sergei Nikulov, Tobias
-  Lindgren, Viktor Szakats
-  (20 contributors)
+  Andrei Neculau, Ayoub Boudhar, Ben Kohler, Brad Spencer, Claes Jakobsson,
+  Daniel Gustafsson, Daniel Stenberg, David Garske, dnivras on github,
+  Eric Rosenquist, Florian Pritz, GitYuanQu on github, Harry Sintonen,
+  jasal82 on github, Kamil Dudka, Leonardo Taccari, Marcel Raad,
+  Markus Moeller, masbug on github, Matus Uzak, Patrick Monnerat, Pavel Pavlov,
+  Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov, Shlomi Fish, Tae Wong,
+  Tobias Lindgren, Viktor Szakats,
+  (29 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -82,3 +94,12 @@ References to bug reports and discussions on issues:
  [21] = https://curl.haxx.se/bug/?i=3407
  [22] = https://curl.haxx.se/bug/?i=3410
  [23] = https://curl.haxx.se/bug/?i=3406
+ [24] = https://curl.haxx.se/bug/?i=3411
+ [25] = https://curl.haxx.se/bug/?i=3286
+ [26] = https://curl.haxx.se/bug/?i=3432
+ [27] = https://curl.haxx.se/mail/lib-2019-01/0000.html
+ [28] = https://curl.haxx.se/bug/?i=3426
+ [29] = https://curl.haxx.se/bug/?i=3435
+ [30] = https://curl.haxx.se/bug/?i=3438
+ [31] = https://curl.haxx.se/bug/?i=3384
+ [32] = https://curl.haxx.se/bug/?i=3371
