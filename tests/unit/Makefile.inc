@@ -102,8 +102,7 @@ unit1620_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1621_SOURCES = unit1621.c $(UNITFILES)
 unit1621_CPPFLAGS = $(AM_CPPFLAGS)
-unit1621_LDADD = @LIBMETALINK_LIBS@ $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
-unit1621_LDFLAGS = @LIBMETALINK_LDFLAGS@ $(top_builddir)/src/libcurltool.la
+unit1621_LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
 
 unit1650_SOURCES = unit1650.c $(UNITFILES)
 unit1650_CPPFLAGS = $(AM_CPPFLAGS)
