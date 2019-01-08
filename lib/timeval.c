@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -187,7 +187,7 @@ struct curltime Curl_now(void)
  */
 timediff_t Curl_timediff(struct curltime newer, struct curltime older)
 {
-  timediff_t diff = newer.tv_sec-older.tv_sec;
+  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIME_MAX/1000))
     return TIME_MAX;
   else if(diff <= (TIME_MIN/1000))
@@ -201,7 +201,7 @@ timediff_t Curl_timediff(struct curltime newer, struct curltime older)
  */
 timediff_t Curl_timediff_us(struct curltime newer, struct curltime older)
 {
-  timediff_t diff = newer.tv_sec-older.tv_sec;
+  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIME_MAX/1000000))
     return TIME_MAX;
   else if(diff <= (TIME_MIN/1000000))
