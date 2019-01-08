@@ -36,12 +36,18 @@ int test(char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   res = curl_easy_perform(curl);
-  if(res)
+  if(res) {
+    fprintf(stderr, "curl_easy_perform() returned %d (%s)\n",
+            res, curl_easy_strerror(res));
     goto test_cleanup;
+  }
 
   res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
-  if(res)
+  if(res) {
+    fprintf(stderr, "curl_easy_getinfo() returned %d (%s)\n",
+            res, curl_easy_strerror(res));
     goto test_cleanup;
+  }
 
   printf("Protocol: %x\n", protocol);
 
