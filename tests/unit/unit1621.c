@@ -35,6 +35,13 @@ static void unit_stop(void)
 {
 }
 
+#ifdef __MINGW32__
+UNITTEST_START
+{
+  return 0;
+}
+#else
+
 bool stripcredentials(char **url);
 
 struct checkthis {
@@ -76,5 +83,6 @@ UNITTEST_START
       curl_free(url);
   }
   return rc;
+#endif
 }
 UNITTEST_STOP
