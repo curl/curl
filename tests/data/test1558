@@ -21,7 +21,7 @@ lib1558
 CURLINFO_PROTOCOL for file:// transfer
 </name>
 <command>
-file:///%FILE_PWD/log/data1558
+file:%FILE_PWD/log/data1558
 </command>
 <file name="log/data1558">
 hello
