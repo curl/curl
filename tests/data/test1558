@@ -13,6 +13,9 @@ CURLINFO_PROTOCOL
 <server>
 none
 </server>
+<features>
+file
+</features>
 <tool>
 lib1558
 </tool>
