@@ -49,7 +49,7 @@ http
 https
 </server>
 <name>
-HTTP
+Cookies set over HTTP can't override secure ones
 </name>
 <command>
 -k https://%HOSTIP:%HTTPSPORT/15610001 -L -c log/jar1561.txt -H "Host: www.example.com"  http://%HOSTIP:%HTTPPORT/15610002 -L -c log/jar1561.txt -H "Host: www.example.com"
