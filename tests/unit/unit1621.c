@@ -40,6 +40,7 @@ UNITTEST_START
 {
   return 0;
 }
+UNITTEST_STOP
 #else
 
 bool stripcredentials(char **url);
@@ -83,6 +84,6 @@ UNITTEST_START
       curl_free(url);
   }
   return rc;
-#endif
 }
 UNITTEST_STOP
+#endif
