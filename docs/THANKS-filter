@@ -14,7 +14,7 @@ s/John Malmberg/John E. Malmberg/
 s/Luca Alteas/Luca Altea/
 s/Michal Gorny/Michał Górny/
 s/Michal Górny/Michał Górny/
-s/Moonesamy/S. Moonesamy/
+s/^Moonesamy$/S. Moonesamy/
 s/Pete Su$/Peter Su/
 s/Sam Listopad/Samuel Listopad/
 s/Sebastien Willemijns/Sébastien Willemijns/
@@ -83,7 +83,7 @@ s/Daniel Jelinski/Daniel Jeliński/
 s/Dario Weisser/Dario Weißer/
 s/Github user @jakirkham/jakirkham on github/
 s/Guenter Knauf/Gunter Knauf/
-s/Matteo B./Matteo Bignotti/
+s/Matteo B.$/Matteo Bignotti/
 s/Dan C$/Dan Cristian/
 s/Mark Eichin/Mark W. Eichin/
 s/Andreas Faerber/Andreas Farber/
@@ -97,3 +97,4 @@ s/wyattoday on github/Wyatt O'Day/
 s/Jason Priebe/Jason S. Priebe/
 s/Ale Vesely/Alessandro Vesely/
 s/Yamada Yasuharu/Yasuharu Yamada/
+s/Jim Gallagher/James Gallagher/
