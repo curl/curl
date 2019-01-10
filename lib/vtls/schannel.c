@@ -339,7 +339,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
     long alg = strtol(startCur, 0, 0);
     if(!alg)
       alg = get_alg_id_by_name(startCur);
-    if(alg == -1) {
+    if(eNULL == alg) {
         /* this is the eNULL case
             to force Null encryption in schannel
             we need to pass
