@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1448,7 +1448,7 @@ curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
   result = curl_url_get(handle, what, &s, flags);
   if(result == CURLUE_OK) {
     if(s) {
-      *part = dynconvert(ccsid, s, -1, ccsid, ASCII_CCSID);
+      *part = dynconvert(ccsid, s, -1, ASCII_CCSID);
       if(!*part)
         result = CURLUE_OUT_OF_MEMORY;
     }
