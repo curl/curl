@@ -41,6 +41,7 @@ problems may have been fixed or changed somewhat since this was written!
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
  4.4 --upload-file . hang if delay in STDIN
+ 4.5 Improve --data-urlencode space encoding
 
  5. Build and portability issues
  5.2 curl-config --libs contains private details
@@ -343,6 +344,13 @@ problems may have been fixed or changed somewhat since this was written!
  ... causes a hang when it shouldn't.
 
  See https://github.com/curl/curl/issues/2051
+
+4.5 Improve --data-urlencode space encoding
+
+ ASCII space characters in --data-urlencode are currently encoded as %20
+ rather than +, which RFC 1866 says should be used.
+
+ See https://github.com/curl/curl/issues/3229
 
 5. Build and portability issues
 
