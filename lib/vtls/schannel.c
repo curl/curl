@@ -352,7 +352,6 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
         */
          schannel_cred->dwMinimumCipherStrength = -1;
          schannel_cred->dwMaximumCipherStrength = -1;
-         break;
     }
     if(alg)
       algIds[algCount++] = alg;
