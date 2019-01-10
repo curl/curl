@@ -207,6 +207,7 @@ set_ssl_version_min_max(SCHANNEL_CRED *schannel_cred, struct connectdata *conn)
 #define CIPHEROPTION(X) \
 if(strcmp(#X, tmp) == 0) \
   return X
+#define eNULL -1
 
 static int
 get_alg_id_by_name(char *name)
@@ -217,6 +218,7 @@ get_alg_id_by_name(char *name)
     min(strlen(name), LONGEST_ALG_ID - 1);
   strncpy(tmp, name, n);
   tmp[n] = 0;
+  CIPHEROPTION(eNULL);
   CIPHEROPTION(CALG_MD2);
   CIPHEROPTION(CALG_MD4);
   CIPHEROPTION(CALG_MD5);
@@ -337,6 +339,17 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
     long alg = strtol(startCur, 0, 0);
     if(!alg)
       alg = get_alg_id_by_name(startCur);
+    if(alg == -1) {
+        /* this is the eNULL case
+            to force Null encryption in schannel
+            we need to pass
+            dwMinimumCipherStrength & dwMaximumCipherStrength to -1
+            since this is a force case we ignore other algorithms
+        */
+         schannel_cred->dwMinimumCipherStrength = -1;
+         schannel_cred->dwMaximumCipherStrength = -1;
+         break;
+    }
     if(alg)
       algIds[algCount++] = alg;
     else
