@@ -1452,6 +1452,7 @@ curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
       if(!*part)
         result = CURLUE_OUT_OF_MEMORY;
     }
+  }
   if(s)
     free(s);
   return result;
