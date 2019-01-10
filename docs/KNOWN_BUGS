@@ -377,9 +377,18 @@ problems may have been fixed or changed somewhat since this was written!
  offers. This includes:
 
   - use of correct soname for the shared library build
+
   - support for several TLS backends are missing
+
   - the unit tests cause link failures in regular non-static builds
+
   - no nghttp2 check
+
+  - no check for what variadic macros that are supported. See
+    https://github.com/curl/curl/pull/3452
+
+  - unusable tool_hugehelp.c with MinGW, see
+    https://github.com/curl/curl/issues/3125
 
 5.7 Visual Studio project gaps
 
