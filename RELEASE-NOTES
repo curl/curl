@@ -1,10 +1,10 @@
 curl and libcurl 7.64.0
 
  Public curl releases:         179
- Command line options:         219
- curl_easy_setopt() options:   262
+ Command line options:         220
+ curl_easy_setopt() options:   265
  Public functions in libcurl:  80
- Contributors:                 1829
+ Contributors:                 1875
 
 This release includes the following changes:
 
@@ -19,37 +19,44 @@ This release includes the following bugfixes:
  o FAQ: remove mention of sourceforge for github [22]
  o OS400: handle memory error in list conversion [4]
  o OS400: upgrade ILE/RPG binding.
+ o Revert http_negotiate: do not close connection [31]
+ o THANKS: added several missing names from year <= 2000
  o cmake: use lowercase for function name like the rest of the code [20]
  o conncache_unlock: avoid indirection by changing input argument type
+ o cookies: allow secure override when done over HTTPS [34]
  o cookies: extend domain checks to non psl builds [12]
+ o cookies: skip custom cookies when redirecting cross-site [36]
+ o curl --xattr: strip credentials from any URL that is stored [33]
  o curl -J: refuse to append to the destination file [14]
+ o curl/urlapi.h: include "curl.h" first [30]
+ o curl_multi_remove_handle() don't block terminating c-ares requests [32]
  o darwinssl: accept setting max-tls with default min-tls [6]
  o disconnect: separate connections and easy handles better [18]
  o disconnect: set conn->data for protocol disconnect
+ o docs/version.d: mention MultiSSL [26]
  o docs: fix the --tls-max description [2]
  o gopher: always include the entire gopher-path in request [5]
  o http2: clear pause stream id if it gets closed [8]
  o if2ip: remove unused function Curl_if_is_interface_name [9]
  o libssh: free sftp_canonicalize_path() data correctly [17]
+ o libtest/stub_gssapi: use "real" snprintf [27]
  o mbedtls: use VERIFYHOST [15]
+ o multi: multiplexing improvements [35]
+ o ntlm: fix NTMLv2 compliance [25]
  o openvms: fix OpenSSL discovery on VAX [21]
  o openvms: fix typos in documentation
  o pingpong: change default response timeout to 120 seconds
  o pingpong: ignore regular timeout in disconnect phase [16]
- o smb: fix incorrect path in request if connection reused [13]
- o urlapi: Fix port parsing of eol colon [1]
- o urlapi: distinguish possibly empty query [5]
- o wolfssl: fix memory-leak in threaded use [11]
- o urlapi: fix parsing ipv6 with zone index [24]
- o THANKS: added several missing names from year <= 2000
- o ntlm: fix NTMLv2 compliance [25]
- o docs/version.d: mention MultiSSL [26]
- o libtest/stub_gssapi: use "real" snprintf [27]
  o printf: fix format specifiers [28]
  o schannel: fix compiler warning [29]
- o curl/urlapi.h: include "curl.h" first [30]
- o Revert http_negotiate: do not close connection [31]
- o curl_multi_remove_handle() don't block terminating c-ares requests [32]
+ o smb: fix incorrect path in request if connection reused [13]
+ o test1561: improve test name
+ o tests: allow tests to pass by 2037-02-12 [38]
+ o timediff: fix math for unsigned time_t [37]
+ o urlapi: Fix port parsing of eol colon [1]
+ o urlapi: distinguish possibly empty query [5]
+ o urlapi: fix parsing ipv6 with zone index [24]
+ o wolfssl: fix memory-leak in threaded use [11]
 
 This release includes the following known bugs:
 
@@ -58,14 +65,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Neculau, Ayoub Boudhar, Ben Kohler, Brad Spencer, Claes Jakobsson,
-  Daniel Gustafsson, Daniel Stenberg, David Garske, dnivras on github,
-  Eric Rosenquist, Florian Pritz, GitYuanQu on github, Harry Sintonen,
-  jasal82 on github, Kamil Dudka, Leonardo Taccari, Marcel Raad,
+  Andrei Neculau, Ayoub Boudhar, Ben Kohler, Bernhard M. Wiedemann,
+  Brad Spencer, Claes Jakobsson, Daniel Gustafsson, Daniel Stenberg,
+  David Garske, dnivras on github, Eric Rosenquist, Florian Pritz,
+  GitYuanQu on github, Harry Sintonen, Huzaifa Sidhpurwala, jasal82 on github,
+  Jeroen Ooms, Kamil Dudka, Katsuhiko YOSHIDA, Leonardo Taccari, Marcel Raad,
   Markus Moeller, masbug on github, Matus Uzak, Patrick Monnerat, Pavel Pavlov,
   Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov, Shlomi Fish,
-  Tobias Lindgren, Viktor Szakats,
-  (28 contributors)
+  Tobias Lindgren, Tom van der Woerdt, Viktor Szakats,
+  (33 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -103,3 +111,9 @@ References to bug reports and discussions on issues:
  [30] = https://curl.haxx.se/bug/?i=3438
  [31] = https://curl.haxx.se/bug/?i=3384
  [32] = https://curl.haxx.se/bug/?i=3371
+ [33] = https://curl.haxx.se/bug/?i=3423
+ [34] = https://curl.haxx.se/bug/?i=3445
+ [35] = https://curl.haxx.se/bug/?i=3436
+ [36] = https://curl.haxx.se/bug/?i=3417
+ [37] = https://curl.haxx.se/bug/?i=3449
+ [38] = https://curl.haxx.se/bug/?i=3443
