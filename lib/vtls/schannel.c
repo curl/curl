@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -348,7 +348,6 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
         */
          schannel_cred->dwMinimumCipherStrength = -1;
          schannel_cred->dwMaximumCipherStrength = -1;
-         break;
     }
     if(alg)
       algIds[algCount++] = alg;
