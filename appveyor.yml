@@ -46,35 +46,35 @@ environment:
     TESTING: OFF
     SHARED: ON
     
-  - BUILD_TARGERT: windows_mingw
-    TOOLCHAIN_VERSION: 630
-    OPENSSL: OFF
-    WINSSL: ON
-    TESTING: OFF
-    SHARED: ON
+  #- BUILD_TARGERT: windows_mingw
+  #  TOOLCHAIN_VERSION: 630
+  #  OPENSSL: OFF
+  #  WINSSL: ON
+  #  TESTING: OFF
+  #  SHARED: ON
     
-  - BUILD_TARGERT: windows_mingw
-    TOOLCHAIN_VERSION: 530
-    OPENSSL: ON
-    WINSSL: OFF
-    TESTING: ON
-    SHARED: OFF
+  #- BUILD_TARGERT: windows_mingw
+  #  TOOLCHAIN_VERSION: 530
+  #  OPENSSL: ON
+  #  WINSSL: OFF
+  #  TESTING: ON
+  #  SHARED: OFF
   
-  - BUILD_TARGERT: android_arm
-    TOOLCHAIN_VERSION: 4.9
-    ANDROID_API: 18
-    OPENSSL: OFF
-    WINSSL: OFF
-    TESTING: OFF
-    SHARED: ON
+  #- BUILD_TARGERT: android_arm
+  #  TOOLCHAIN_VERSION: 4.9
+  #  ANDROID_API: 18
+  #  OPENSSL: OFF
+  #  WINSSL: OFF
+  #  TESTING: OFF
+  #  SHARED: ON
   
-  - BUILD_TARGERT: android_x86
-    TOOLCHAIN_VERSION: 4.9
-    ANDROID_API: 28
-    OPENSSL: OFF
-    WINSSL: OFF
-    TESTING: OFF
-    SHARED: OFF
+  #- BUILD_TARGERT: android_x86
+  #  TOOLCHAIN_VERSION: 4.9
+  #  ANDROID_API: 28
+  #  OPENSSL: OFF
+  #  WINSSL: OFF
+  #  TESTING: OFF
+  #  SHARED: OFF
     
 install:
   - for /f "delims=" %%i in ('git describe --tags') do (set BUILD_VERSION=%%i)
