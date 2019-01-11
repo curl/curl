@@ -18,6 +18,7 @@ proceed.
 A normal Unix installation is made in three or four steps (after you've
 unpacked the source archive):
 
+    ./buildconf
     ./configure
     make
     make test (optional)
