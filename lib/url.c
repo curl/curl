@@ -965,8 +965,9 @@ static bool extract_if_dead(struct connectdata *conn,
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
       unsigned int state;
-
+      conn->data = data; /* temporary transfer for this connection to use */
       state = conn->handler->connection_check(conn, CONNCHECK_ISDEAD);
+      conn->data = NULL; /* clear transfer again */
       dead = (state & CONNRESULT_DEAD);
     }
     else {
@@ -3773,7 +3774,6 @@ static CURLcode create_conn(struct Curl_easy *data,
 
     /* Setup a "faked" transfer that'll do nothing */
     if(!result) {
-      conn->data = data;
       conn->bits.tcpconnect[FIRSTSOCKET] = TRUE; /* we are "connected */
 
       result = Curl_conncache_add_conn(data->state.conn_cache, conn);
