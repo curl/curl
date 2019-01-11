@@ -3774,7 +3774,7 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef OPENSSL_IS_BORINGSSL
   return msnprintf(buffer, size, OSSL_PACKAGE);
-#elif HAVE_OPENSSL_VERSION
+#elif defined(HAVE_OPENSSL_VERSION)
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
 #else
