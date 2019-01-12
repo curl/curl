@@ -777,13 +777,13 @@ static void Curl_cyassl_session_free(void *ptr)
 static size_t Curl_cyassl_version(char *buffer, size_t size)
 {
 #if LIBCYASSL_VERSION_HEX >= 0x03006000
-  return snprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
+  return msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
 #elif defined(WOLFSSL_VERSION)
-  return snprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
+  return msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
 #elif defined(CYASSL_VERSION)
-  return snprintf(buffer, size, "CyaSSL/%s", CYASSL_VERSION);
+  return msnprintf(buffer, size, "CyaSSL/%s", CYASSL_VERSION);
 #else
-  return snprintf(buffer, size, "CyaSSL/%s", "<1.8.8");
+  return msnprintf(buffer, size, "CyaSSL/%s", "<1.8.8");
 #endif
 }
 
@@ -791,6 +791,12 @@ static size_t Curl_cyassl_version(char *buffer, size_t size)
 static int Curl_cyassl_init(void)
 {
   return (CyaSSL_Init() == SSL_SUCCESS);
+}
+
+
+static void Curl_cyassl_cleanup(void)
+{
+  CyaSSL_Cleanup();
 }
 
 
@@ -1004,7 +1010,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   sizeof(struct ssl_backend_data),
 
   Curl_cyassl_init,                /* init */
-  Curl_none_cleanup,               /* cleanup */
+  Curl_cyassl_cleanup,             /* cleanup */
   Curl_cyassl_version,             /* version */
   Curl_none_check_cxn,             /* check_cxn */
   Curl_cyassl_shutdown,            /* shutdown */

@@ -26,7 +26,7 @@ http
 HTTP GET with a invalid HTTP/1 response line start
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1267
+http://%HOSTIP:%HTTPPORT/1267 --http0.9
 </command>
 </client>
 

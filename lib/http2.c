@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -350,7 +350,7 @@ static const struct Curl_handler Curl_handler_http2_ssl = {
 int Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
-  return snprintf(p, len, " nghttp2/%s", h2->version_str);
+  return msnprintf(p, len, " nghttp2/%s", h2->version_str);
 }
 
 /* HTTP/2 error code to name based on the Error Code Registry.
@@ -800,7 +800,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
     H2BUGF(infof(data_s, "NGHTTP2_ERR_PAUSE - %zu bytes out of buffer"
                  ", stream %u\n",
                  len - nread, stream_id));
-    data_s->easy_conn->proto.httpc.pause_stream_id = stream_id;
+    data_s->conn->proto.httpc.pause_stream_id = stream_id;
 
     return NGHTTP2_ERR_PAUSE;
   }
@@ -808,7 +808,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   /* pause execution of nghttp2 if we received data for another handle
      in order to process them first. */
   if(conn->data != data_s) {
-    data_s->easy_conn->proto.httpc.pause_stream_id = stream_id;
+    data_s->conn->proto.httpc.pause_stream_id = stream_id;
 
     return NGHTTP2_ERR_PAUSE;
   }
@@ -853,6 +853,10 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
       infof(data_s, "http/2: failed to clear user_data for stream %d!\n",
             stream_id);
       DEBUGASSERT(0);
+    }
+    if(stream_id == httpc->pause_stream_id) {
+      H2BUGF(infof(data_s, "Stopped the pause stream!\n"));
+      httpc->pause_stream_id = 0;
     }
     H2BUGF(infof(data_s, "Removed stream %u hash!\n", stream_id));
     stream->stream_id = 0; /* cleared */
@@ -2365,6 +2369,14 @@ void Curl_http2_cleanup_dependencies(struct Curl_easy *data)
 
   if(data->set.stream_depends_on)
     Curl_http2_remove_child(data->set.stream_depends_on, data);
+}
+
+/* Only call this function for a transfer that already got a HTTP/2
+   CURLE_HTTP2_STREAM error! */
+bool Curl_h2_http_1_1_error(struct connectdata *conn)
+{
+  struct http_conn *httpc = &conn->proto.httpc;
+  return (httpc->error_code == NGHTTP2_HTTP_1_1_REQUIRED);
 }
 
 #else /* !USE_NGHTTP2 */

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,7 +77,7 @@
 /* Default FTP/IMAP etc response timeout in milliseconds.
    Symbian OS panics when given a timeout much greater than 1/2 hour.
 */
-#define RESP_TIMEOUT (1800*1000)
+#define RESP_TIMEOUT (120*1000)
 
 #include "cookie.h"
 #include "psl.h"
@@ -828,6 +828,7 @@ struct connectdata {
   int socktype;  /* SOCK_STREAM or SOCK_DGRAM */
 
   struct hostname host;
+  char *hostname_resolve; /* host name to resolve to address, allocated */
   char *secondaryhostname; /* secondary socket host name (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
@@ -1215,6 +1216,15 @@ typedef enum {
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
+
+typedef enum {
+  TRAILERS_NONE,
+  TRAILERS_INITIALIZED,
+  TRAILERS_SENDING,
+  TRAILERS_DONE
+} trailers_state;
+
+
 /*
  * One instance for each timeout an easy handle can set.
  */
@@ -1361,6 +1371,13 @@ struct UrlState {
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
+#ifndef CURL_DISABLE_HTTP
+  size_t trailers_bytes_sent;
+  Curl_send_buffer *trailers_buf; /* a buffer containing the compiled trailing
+                                  headers */
+#endif
+  trailers_state trailers_state; /* whether we are sending trailers
+                                       and what stage are we at */
 };
 
 
@@ -1380,6 +1397,7 @@ struct DynamicStatic {
                                     curl_easy_setopt(COOKIEFILE) calls */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
+  bool wildcard_resolve; /* Set to true if any resolve change is a wildcard */
 };
 
 /*
@@ -1726,8 +1744,12 @@ struct UserDefined {
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   bool doh; /* DNS-over-HTTPS enabled */
   bool doh_get; /* use GET for DoH requests, instead of POST */
+  bool http09_allowed; /* allow HTTP/0.9 responses */
   multidone_func fmultidone;
   struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
+  CURLU *uh; /* URL handle for the current parsed URL */
+  void *trailer_data; /* pointer to pass to trailer data callback */
+  curl_trailer_callback trailer_callback; /* trailing data callback */
 };
 
 struct Names {
@@ -1755,9 +1777,10 @@ struct Curl_easy {
   struct Curl_easy *next;
   struct Curl_easy *prev;
 
-  struct connectdata *easy_conn;     /* the "unit's" connection */
+  struct connectdata *conn;
   struct curl_llist_element connect_queue;
   struct curl_llist_element pipeline_queue;
+  struct curl_llist_element sh_queue; /* list per Curl_sh_entry */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
@@ -1769,6 +1792,8 @@ struct Curl_easy {
      the state etc are also kept. This array is mostly used to detect when a
      socket is to be removed from the hash. See singlesocket(). */
   curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
+  int actions[MAX_SOCKSPEREASYHANDLE]; /* action for each socket in
+                                          sockets[] */
   int numsocks;
 
   struct Names dns;

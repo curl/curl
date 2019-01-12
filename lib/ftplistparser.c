@@ -405,7 +405,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             parser->state.UNIX.main = PL_UNIX_FILETYPE;
             /* start FSM again not considering size of directory */
             finfo->b_used = 0;
-            i--;
+            continue;
           }
           break;
         case PL_UNIX_TOTALSIZE_READING:

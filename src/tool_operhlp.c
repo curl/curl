@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -176,7 +176,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
     char *tdir = curlx_getenv("CURL_TESTDIR");
     if(tdir) {
       char buffer[512]; /* suitably large */
-      snprintf(buffer, sizeof(buffer), "%s/%s", tdir, *filename);
+      msnprintf(buffer, sizeof(buffer), "%s/%s", tdir, *filename);
       Curl_safefree(*filename);
       *filename = strdup(buffer); /* clone the buffer */
       curl_free(tdir);

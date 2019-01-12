@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -219,13 +219,20 @@ slist_convert(int dccsid, struct curl_slist * from, int sccsid)
   struct curl_slist * to = (struct curl_slist *) NULL;
 
   for(; from; from = from->next) {
+    struct curl_slist *nl;
     char * cp = dynconvert(dccsid, from->data, -1, sccsid);
 
     if(!cp) {
       curl_slist_free_all(to);
       return (struct curl_slist *) NULL;
     }
-    to = Curl_slist_append_nodup(to, cp);
+    nl = Curl_slist_append_nodup(to, cp);
+    if(!nl) {
+      curl_slist_free_all(to);
+      free(cp);
+      return NULL;
+    }
+    to = nl;
   }
   return to;
 }
@@ -1441,10 +1448,11 @@ curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
   result = curl_url_get(handle, what, &s, flags);
   if(result == CURLUE_OK) {
     if(s) {
-      *part = dynconvert(ccsid, s, -1, ccsid, ASCII_CCSID);
+      *part = dynconvert(ccsid, s, -1, ASCII_CCSID);
       if(!*part)
         result = CURLUE_OUT_OF_MEMORY;
     }
+  }
   if(s)
     free(s);
   return result;

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ test289 test290 test291 test292 test293 test294 test295 test296 test297 \
 test298 test299 test300 test301 test302 test303 test304 test305 test306 \
 test307 test308 test309 test310 test311 test312 test313 test314 test315 \
 test316 test317 test318 test319 test320 test321 test322 test323 test324 \
-test325 test326 \
+test325 test326 test327 test328 test329 test330 \
 \
 test340 \
 \
@@ -83,7 +83,7 @@ test617 test618 test619 test620 test621 test622 test623 test624 test625 \
 test626 test627 test628 test629 test630 test631 test632 test633 test634 \
 test635 test636 test637 test638 test639 test640 test641 test642 \
 test643 test644 test645 test646 test647 test648 test649 test650 test651 \
-test652 test653 test654 test655 test656 \
+test652 test653 test654 test655 test656 test658 \
 \
 test700 test701 test702 test703 test704 test705 test706 test707 test708 \
 test709 test710 test711 test712 test713 test714 test715 \
@@ -130,7 +130,8 @@ test1144 test1145 test1146 test1147 test1148 test1149 test1150 test1151 \
 test1152 test1153 test1154 test1155 test1156 test1157 test1158 test1159 \
 \
 test1160 test1161 test1162 test1163 test1164 \
-test1170 test1171 \
+test1170 test1171 test1172 \
+\
 test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
 test1208 test1209 test1210 test1211 test1212 test1213 test1214 test1215 \
 test1216 test1217 test1218 test1219 \
@@ -166,25 +167,23 @@ test1424 test1425 test1426 test1427 \
 test1428 test1429 test1430 test1431 test1432 test1433 test1434 test1435 \
 test1436 test1437 test1438 test1439 test1440 test1441 test1442 test1443 \
 test1444 test1445 test1446 test1447 test1448 test1449 test1450 test1451 \
-test1452 test1453 test1454 test1455 test1456 \
+test1452 test1453 test1454 test1455 test1456 test1457 test1458\
 test1500 test1501 test1502 test1503 test1504 test1505 test1506 test1507 \
 test1508 test1509 test1510 test1511 test1512 test1513 test1514 test1515 \
-test1516 test1517 \
-\
-test1520 test1521 test1522 \
+test1516 test1517 test1518 test1519 test1520 test1521 test1522 \
 \
 test1525 test1526 test1527 test1528 test1529 test1530 test1531 test1532 \
 test1533 test1534 test1535 test1536 test1537 test1538 \
 test1540 \
 test1550 test1551 test1552 test1553 test1554 test1555 test1556 test1557 \
+test1558          test1560 test1561 test1562 \
 \
-test1560 \
+test1590 test1591 test1592 \
 \
-test1590 \
 test1600 test1601 test1602 test1603 test1604 test1605 test1606 test1607 \
-test1608 test1609 test1620 \
+test1608 test1609 test1620 test1621 \
 \
-test1650 test1651 test1652 \
+test1650 test1651 test1652 test1653 \
 \
 test1700 test1701 test1702 \
 \
@@ -201,7 +200,7 @@ test2040 test2041 test2042 test2043 test2044 test2045 test2046 test2047 \
 test2048 test2049 test2050 test2051 test2052 test2053 test2054 test2055 \
 test2056 test2057 test2058 test2059 test2060 test2061 test2062 test2063 \
 test2064 test2065 test2066 test2067 test2068 test2069 \
-test2070 test2071 test2072 test2073 test2074 test2075 \
+         test2071 test2072 test2073 test2074 test2075 test2076 \
 test2080 \
 test2100 \
 \

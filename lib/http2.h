@@ -59,6 +59,9 @@ CURLcode Curl_http2_add_child(struct Curl_easy *parent,
 void Curl_http2_remove_child(struct Curl_easy *parent,
                              struct Curl_easy *child);
 void Curl_http2_cleanup_dependencies(struct Curl_easy *data);
+
+/* returns true if the HTTP/2 stream error was HTTP_1_1_REQUIRED */
+bool Curl_h2_http_1_1_error(struct connectdata *conn);
 #else /* USE_NGHTTP2 */
 #define Curl_http2_init(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_send_request(x) CURLE_UNSUPPORTED_PROTOCOL
@@ -74,6 +77,7 @@ void Curl_http2_cleanup_dependencies(struct Curl_easy *data);
 #define Curl_http2_add_child(x, y, z)
 #define Curl_http2_remove_child(x, y)
 #define Curl_http2_cleanup_dependencies(x)
+#define Curl_h2_http_1_1_error(x) 0
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */

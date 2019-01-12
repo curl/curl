@@ -69,8 +69,8 @@ struct OperationConfig {
   char *headerfile;
   char *ftpport;
   char *iface;
-  int localport;
-  int localportrange;
+  long localport;
+  long localportrange;
   unsigned short porttouse;
   char *range;
   long low_speed_limit;
@@ -146,6 +146,7 @@ struct OperationConfig {
   char *krblevel;
   char *request_target;
   long httpversion;
+  bool http09_allowed;
   bool nobuffer;
   bool readbusy;            /* set when reading input returns EAGAIN */
   bool globoff;

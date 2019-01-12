@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -127,7 +127,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "memdebug.h"
 
 static void conn_free(struct connectdata *conn);
-static void free_fixed_hostname(struct hostname *host);
+static void free_idnconverted_hostname(struct hostname *host);
 static unsigned int get_protocol_family(unsigned int protocol);
 
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has at
@@ -536,6 +536,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->fnmatch = ZERO_NULL;
   set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
+  set->http09_allowed = TRUE;
   set->httpversion =
 #ifdef USE_NGHTTP2
     CURL_HTTP_VERSION_2TLS
@@ -570,7 +571,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
-  result = Curl_resolver_init(&data->state.resolver);
+  result = Curl_resolver_init(data, &data->state.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
     free(data);
@@ -708,6 +709,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->trailer);
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* host name buffer */
+  Curl_safefree(conn->hostname_resolve);
   Curl_safefree(conn->secondaryhostname);
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
@@ -767,7 +769,6 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  conn->data = data;
   if(conn->dns_entry != NULL) {
     Curl_resolv_unlock(data, conn->dns_entry);
     conn->dns_entry = NULL;
@@ -780,20 +781,22 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   Curl_http_ntlm_cleanup(conn);
 #endif
 
+  /* the protocol specific disconnect handler needs a transfer for its
+     connection! */
+  conn->data = data;
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn, dead_connection);
 
     /* unlink ourselves! */
   infof(data, "Closing connection %ld\n", conn->connection_id);
-  Curl_conncache_remove_conn(conn, TRUE);
+  Curl_conncache_remove_conn(data, conn, TRUE);
 
-  free_fixed_hostname(&conn->host);
-  free_fixed_hostname(&conn->conn_to_host);
-  free_fixed_hostname(&conn->http_proxy.host);
-  free_fixed_hostname(&conn->socks_proxy.host);
+  free_idnconverted_hostname(&conn->host);
+  free_idnconverted_hostname(&conn->conn_to_host);
+  free_idnconverted_hostname(&conn->http_proxy.host);
+  free_idnconverted_hostname(&conn->socks_proxy.host);
 
-  DEBUGASSERT(conn->data == data);
   /* this assumes that the pointer is still there after the connection was
      detected from the cache */
   Curl_ssl_close(conn, FIRSTSOCKET);
@@ -958,8 +961,6 @@ static bool extract_if_dead(struct connectdata *conn,
        handles in pipeline and the connection isn't already marked in
        use */
     bool dead;
-
-    conn->data = data;
     if(conn->handler->connection_check) {
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
@@ -975,8 +976,7 @@ static bool extract_if_dead(struct connectdata *conn,
 
     if(dead) {
       infof(data, "Connection %ld seems to be dead!\n", conn->connection_id);
-      Curl_conncache_remove_conn(conn, FALSE);
-      conn->data = NULL; /* detach */
+      Curl_conncache_remove_conn(data, conn, FALSE);
       return TRUE;
     }
   }
@@ -1100,7 +1100,7 @@ ConnectionExists(struct Curl_easy *data,
         if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
           infof(data, "Server doesn't support multi-use yet, wait\n");
           *waitpipe = TRUE;
-          Curl_conncache_unlock(needle);
+          Curl_conncache_unlock(data);
           return FALSE; /* no re-use */
         }
 
@@ -1460,11 +1460,11 @@ ConnectionExists(struct Curl_easy *data,
   if(chosen) {
     /* mark it as used before releasing the lock */
     chosen->data = data; /* own it! */
-    Curl_conncache_unlock(needle);
+    Curl_conncache_unlock(data);
     *usethis = chosen;
     return TRUE; /* yes, we found one to use! */
   }
-  Curl_conncache_unlock(needle);
+  Curl_conncache_unlock(data);
 
   if(foundPendingCandidate && data->set.pipewait) {
     infof(data,
@@ -1679,11 +1679,23 @@ static bool is_ASCII_name(const char *hostname)
 }
 
 /*
- * Perform any necessary IDN conversion of hostname
+ * Strip single trailing dot in the hostname,
+ * primarily for SNI and http host header.
  */
-static CURLcode fix_hostname(struct connectdata *conn, struct hostname *host)
+static void strip_trailing_dot(struct hostname *host)
 {
   size_t len;
+  len = strlen(host->name);
+  if(len && (host->name[len-1] == '.'))
+    host->name[len-1] = 0;
+}
+
+/*
+ * Perform any necessary IDN conversion of hostname
+ */
+static CURLcode idnconvert_hostname(struct connectdata *conn,
+                                    struct hostname *host)
+{
   struct Curl_easy *data = conn->data;
 
 #ifndef USE_LIBIDN2
@@ -1695,12 +1707,6 @@ static CURLcode fix_hostname(struct connectdata *conn, struct hostname *host)
 
   /* set the name we use to display the host name */
   host->dispname = host->name;
-
-  len = strlen(host->name);
-  if(len && (host->name[len-1] == '.'))
-    /* strip off a single trailing dot if present, primarily for SNI but
-       there's no use for it */
-    host->name[len-1] = 0;
 
   /* Check name for non-ASCII and convert hostname to ACE form if we can */
   if(!is_ASCII_name(host->name)) {
@@ -1756,9 +1762,9 @@ static CURLcode fix_hostname(struct connectdata *conn, struct hostname *host)
 }
 
 /*
- * Frees data allocated by fix_hostname()
+ * Frees data allocated by idnconvert_hostname()
  */
-static void free_fixed_hostname(struct hostname *host)
+static void free_idnconverted_hostname(struct hostname *host)
 {
 #if defined(USE_LIBIDN2)
   if(host->encalloc) {
@@ -2026,7 +2032,13 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   Curl_up_free(data); /* cleanup previous leftovers first */
 
   /* parse the URL */
-  uh = data->state.uh = curl_url();
+  if(data->set.uh) {
+    uh = data->set.uh;
+  }
+  else {
+    uh = data->state.uh = curl_url();
+  }
+
   if(!uh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -2043,14 +2055,18 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     data->change.url_alloc = TRUE;
   }
 
-  uc = curl_url_set(uh, CURLUPART_URL, data->change.url,
+  if(!data->set.uh) {
+    uc = curl_url_set(uh, CURLUPART_URL, data->change.url,
                     CURLU_GUESS_SCHEME |
                     CURLU_NON_SUPPORT_SCHEME |
                     (data->set.disallow_username_in_url ?
                      CURLU_DISALLOW_USER : 0) |
                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0));
-  if(uc)
-    return Curl_uc_to_curlcode(uc);
+    if(uc) {
+      DEBUGF(infof(data, "curl_url_set rejected %s\n", data->change.url));
+      return Curl_uc_to_curlcode(uc);
+    }
+  }
 
   uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
   if(uc)
@@ -2190,6 +2206,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   return CURLE_OK;
 }
+
 
 /*
  * If we're doing a resumed transfer, we need to setup our stuff
@@ -2979,7 +2996,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     char portbuf[16];
     CURLUcode uc;
     conn->remote_port = (unsigned short)data->set.use_port;
-    snprintf(portbuf, sizeof(portbuf), "%u", conn->remote_port);
+    msnprintf(portbuf, sizeof(portbuf), "%d", conn->remote_port);
     uc = curl_url_set(data->state.uh, CURLUPART_PORT, portbuf, 0);
     if(uc)
       return CURLE_OUT_OF_MEMORY;
@@ -3362,7 +3379,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
    *************************************************************/
   if(conn->bits.reuse)
     /* We're reusing the connection - no need to resolve anything, and
-       fix_hostname() was called already in create_conn() for the re-use
+       idnconvert_hostname() was called already in create_conn() for the re-use
        case. */
     *async = FALSE;
 
@@ -3417,7 +3434,10 @@ static CURLcode resolve_server(struct Curl_easy *data,
         conn->port = conn->remote_port;
 
       /* Resolve target host right on */
-      rc = Curl_resolv_timeout(conn, connhost->name, (int)conn->port,
+      conn->hostname_resolve = strdup(connhost->name);
+      if(!conn->hostname_resolve)
+        return CURLE_OUT_OF_MEMORY;
+      rc = Curl_resolv_timeout(conn, conn->hostname_resolve, (int)conn->port,
                                &hostaddr, timeout_ms);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
@@ -3438,7 +3458,10 @@ static CURLcode resolve_server(struct Curl_easy *data,
         &conn->socks_proxy.host : &conn->http_proxy.host;
 
       /* resolve proxy */
-      rc = Curl_resolv_timeout(conn, host->name, (int)conn->port,
+      conn->hostname_resolve = strdup(host->name);
+      if(!conn->hostname_resolve)
+        return CURLE_OUT_OF_MEMORY;
+      rc = Curl_resolv_timeout(conn, conn->hostname_resolve, (int)conn->port,
                                &hostaddr, timeout_ms);
 
       if(rc == CURLRESOLV_PENDING)
@@ -3468,8 +3491,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
 static void reuse_conn(struct connectdata *old_conn,
                        struct connectdata *conn)
 {
-  free_fixed_hostname(&old_conn->http_proxy.host);
-  free_fixed_hostname(&old_conn->socks_proxy.host);
+  free_idnconverted_hostname(&old_conn->http_proxy.host);
+  free_idnconverted_hostname(&old_conn->socks_proxy.host);
 
   free(old_conn->http_proxy.host.rawalloc);
   free(old_conn->socks_proxy.host.rawalloc);
@@ -3513,14 +3536,18 @@ static void reuse_conn(struct connectdata *old_conn,
 
   /* host can change, when doing keepalive with a proxy or if the case is
      different this time etc */
-  free_fixed_hostname(&conn->host);
-  free_fixed_hostname(&conn->conn_to_host);
+  free_idnconverted_hostname(&conn->host);
+  free_idnconverted_hostname(&conn->conn_to_host);
   Curl_safefree(conn->host.rawalloc);
   Curl_safefree(conn->conn_to_host.rawalloc);
   conn->host = old_conn->host;
   conn->conn_to_host = old_conn->conn_to_host;
   conn->conn_to_port = old_conn->conn_to_port;
   conn->remote_port = old_conn->remote_port;
+  Curl_safefree(conn->hostname_resolve);
+
+  conn->hostname_resolve = old_conn->hostname_resolve;
+  old_conn->hostname_resolve = NULL;
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
@@ -3580,6 +3607,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   size_t max_total_connections = Curl_multi_max_total_connections(data->multi);
 
   *async = FALSE;
+  *in_connect = NULL;
 
   /*************************************************************
    * Check input data
@@ -3670,30 +3698,30 @@ static CURLcode create_conn(struct Curl_easy *data,
     goto out;
 
   /*************************************************************
-   * IDN-fix the hostnames
+   * IDN-convert the hostnames
    *************************************************************/
-  result = fix_hostname(conn, &conn->host);
+  result = idnconvert_hostname(conn, &conn->host);
   if(result)
     goto out;
   if(conn->bits.conn_to_host) {
-    result = fix_hostname(conn, &conn->conn_to_host);
+    result = idnconvert_hostname(conn, &conn->conn_to_host);
     if(result)
       goto out;
   }
   if(conn->bits.httpproxy) {
-    result = fix_hostname(conn, &conn->http_proxy.host);
+    result = idnconvert_hostname(conn, &conn->http_proxy.host);
     if(result)
       goto out;
   }
   if(conn->bits.socksproxy) {
-    result = fix_hostname(conn, &conn->socks_proxy.host);
+    result = idnconvert_hostname(conn, &conn->socks_proxy.host);
     if(result)
       goto out;
   }
 
   /*************************************************************
    * Check whether the host and the "connect to host" are equal.
-   * Do this after the hostnames have been IDN-fixed.
+   * Do this after the hostnames have been IDN-converted.
    *************************************************************/
   if(conn->bits.conn_to_host &&
      strcasecompare(conn->conn_to_host.name, conn->host.name)) {
@@ -3926,7 +3954,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
         /* The bundle is full. Extract the oldest connection. */
         conn_candidate = Curl_conncache_extract_bundle(data, bundle);
-        Curl_conncache_unlock(conn);
+        Curl_conncache_unlock(data);
 
         if(conn_candidate)
           (void)Curl_disconnect(data, conn_candidate,
@@ -3938,7 +3966,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         }
       }
       else
-        Curl_conncache_unlock(conn);
+        Curl_conncache_unlock(data);
 
     }
 
@@ -4021,6 +4049,15 @@ static CURLcode create_conn(struct Curl_easy *data,
    *************************************************************/
   result = resolve_server(data, conn, async);
 
+  /* Strip trailing dots. resolve_server copied the name. */
+  strip_trailing_dot(&conn->host);
+  if(conn->bits.httpproxy)
+    strip_trailing_dot(&conn->http_proxy.host);
+  if(conn->bits.socksproxy)
+    strip_trailing_dot(&conn->socks_proxy.host);
+  if(conn->bits.conn_to_host)
+    strip_trailing_dot(&conn->conn_to_host);
+
 out:
   return result;
 }
@@ -4098,11 +4135,11 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
 }
 
 CURLcode Curl_connect(struct Curl_easy *data,
-                      struct connectdata **in_connect,
                       bool *asyncp,
                       bool *protocol_done)
 {
   CURLcode result;
+  struct connectdata *conn;
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
@@ -4112,30 +4149,30 @@ CURLcode Curl_connect(struct Curl_easy *data,
   data->req.maxdownload = -1;
 
   /* call the stuff that needs to be called */
-  result = create_conn(data, in_connect, asyncp);
+  result = create_conn(data, &conn, asyncp);
 
   if(!result) {
-    if(CONN_INUSE(*in_connect))
+    if(CONN_INUSE(conn))
       /* pipelining */
       *protocol_done = TRUE;
     else if(!*asyncp) {
       /* DNS resolution is done: that's either because this is a reused
          connection, in which case DNS was unnecessary, or because DNS
          really did finish already (synch resolver/fast async resolve) */
-      result = Curl_setup_conn(*in_connect, protocol_done);
+      result = Curl_setup_conn(conn, protocol_done);
     }
   }
 
   if(result == CURLE_NO_CONNECTION_AVAILABLE) {
-    *in_connect = NULL;
     return result;
   }
-  else if(result && *in_connect) {
+  else if(result && conn) {
     /* We're not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
-    Curl_disconnect(data, *in_connect, TRUE);
-    *in_connect = NULL; /* return a NULL */
+    Curl_disconnect(data, conn, TRUE);
   }
+  else
+    Curl_attach_connnection(data, conn);
 
   return result;
 }

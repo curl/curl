@@ -594,7 +594,7 @@ if(CMAKE_USE_GSSAPI)
 
     message(STATUS "Found ${GSS_FLAVOUR} GSSAPI version: \"${GSS_VERSION}\"")
 
-    list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIRECTORIES})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIR})
     check_include_file_concat("gssapi/gssapi.h"  HAVE_GSSAPI_GSSAPI_H)
     check_include_file_concat("gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
     check_include_file_concat("gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
@@ -630,7 +630,7 @@ if(CMAKE_USE_GSSAPI)
 
     endif()
 
-    include_directories(${GSS_INCLUDE_DIRECTORIES})
+    include_directories(${GSS_INCLUDE_DIR})
     link_directories(${GSS_LINK_DIRECTORIES})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_COMPILER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
@@ -981,6 +981,8 @@ foreach(CURL_TEST
     HAVE_INET_NTOA_R_DECL_REENTRANT
     HAVE_GETADDRINFO
     HAVE_FILE_OFFSET_BITS
+    HAVE_VARIADIC_MACROS_C99
+    HAVE_VARIADIC_MACROS_GCC
     )
   curl_internal_test(${CURL_TEST})
 endforeach()
@@ -1142,7 +1144,7 @@ if(CURL_WERROR)
 endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
-function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
+function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   file(READ ${INPUT_FILE} MAKEFILE_INC_TEXT)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})

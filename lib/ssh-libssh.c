@@ -95,6 +95,13 @@
 #include "memdebug.h"
 #include "curl_path.h"
 
+/* A recent macro provided by libssh. Or make our own. */
+#ifndef SSH_STRING_FREE_CHAR
+/* !checksrc! disable ASSIGNWITHINCONDITION 1 */
+#define SSH_STRING_FREE_CHAR(x) \
+    do { if((x) != NULL) { ssh_string_free_char(x); x = NULL; } } while(0)
+#endif
+
 /* Local functions: */
 static CURLcode myssh_connect(struct connectdata *conn, bool *done);
 static CURLcode myssh_multi_statemach(struct connectdata *conn,
@@ -1342,8 +1349,8 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
               break;
             }
 
-            snprintf(sshc->readdir_linkPath, PATH_MAX, "%s%s", protop->path,
-                     sshc->readdir_filename);
+            msnprintf(sshc->readdir_linkPath, PATH_MAX, "%s%s", protop->path,
+                      sshc->readdir_filename);
 
             state(conn, SSH_SFTP_READDIR_LINK);
             break;
@@ -1406,12 +1413,12 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       }
       sshc->readdir_line = new_readdir_line;
 
-      sshc->readdir_currLen += snprintf(sshc->readdir_line +
-                                        sshc->readdir_currLen,
-                                        sshc->readdir_totalLen -
-                                        sshc->readdir_currLen,
-                                        " -> %s",
-                                        sshc->readdir_filename);
+      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
+                                         sshc->readdir_currLen,
+                                         sshc->readdir_totalLen -
+                                         sshc->readdir_currLen,
+                                         " -> %s",
+                                         sshc->readdir_filename);
 
       sftp_attributes_free(sshc->readdir_link_attrs);
       sshc->readdir_link_attrs = NULL;
@@ -1421,10 +1428,10 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       state(conn, SSH_SFTP_READDIR_BOTTOM);
       /* FALLTHROUGH */
     case SSH_SFTP_READDIR_BOTTOM:
-      sshc->readdir_currLen += snprintf(sshc->readdir_line +
-                                        sshc->readdir_currLen,
-                                        sshc->readdir_totalLen -
-                                        sshc->readdir_currLen, "\n");
+      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
+                                         sshc->readdir_currLen,
+                                         sshc->readdir_totalLen -
+                                         sshc->readdir_currLen, "\n");
       result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                  sshc->readdir_line,
                                  sshc->readdir_currLen);
@@ -1661,7 +1668,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->sftp_session = NULL;
       }
 
-      Curl_safefree(sshc->homedir);
+      SSH_STRING_FREE_CHAR(sshc->homedir);
       conn->data->state.most_recent_ftp_entrypath = NULL;
 
       state(conn, SSH_SESSION_DISCONNECT);
@@ -1829,7 +1836,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       ssh_disconnect(sshc->ssh_session);
 
-      Curl_safefree(sshc->homedir);
+      SSH_STRING_FREE_CHAR(sshc->homedir);
       conn->data->state.most_recent_ftp_entrypath = NULL;
 
       state(conn, SSH_SESSION_FREE);
@@ -1866,14 +1873,11 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       Curl_safefree(sshc->rsa_pub);
       Curl_safefree(sshc->rsa);
-
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
-
-      Curl_safefree(sshc->homedir);
-
       Curl_safefree(sshc->readdir_line);
       Curl_safefree(sshc->readdir_linkPath);
+      SSH_STRING_FREE_CHAR(sshc->homedir);
 
       /* the code we are about to return */
       result = sshc->actualcode;

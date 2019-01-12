@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,8 +60,8 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     filename = CURLRC;   /* sensible default */
     if(home) {
       if(strlen(home) < (sizeof(filebuffer) - strlen(CURLRC))) {
-        snprintf(filebuffer, sizeof(filebuffer),
-                 "%s%s%s", home, DIR_CHAR, CURLRC);
+        msnprintf(filebuffer, sizeof(filebuffer),
+                  "%s%s%s", home, DIR_CHAR, CURLRC);
 
 #ifdef WIN32
         /* Check if the file exists - if not, try CURLRC in the same
@@ -87,11 +87,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
               /* If we have enough space, build the RC filename */
               remaining = sizeof(filebuffer) - strlen(filebuffer);
               if(strlen(CURLRC) < remaining - 1) {
-                snprintf(lastdirchar, remaining,
-                         "%s%s", DIR_CHAR, CURLRC);
-                /* Don't bother checking if it exists - we do
-                 * that later
-                 */
+                msnprintf(lastdirchar, remaining,
+                          "%s%s", DIR_CHAR, CURLRC);
+                /* Don't bother checking if it exists - we do that later */
                 filename = filebuffer;
               }
             }

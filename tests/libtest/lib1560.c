@@ -67,10 +67,10 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
     size_t n;
     rc = curl_url_get(u, parts[i].part, &p, getflags);
     if(!rc && p) {
-      snprintf(bufp, len, "%s%s", buf[0]?" | ":"", p);
+      msnprintf(bufp, len, "%s%s", buf[0]?" | ":"", p);
     }
     else
-      snprintf(bufp, len, "%s[%d]", buf[0]?" | ":"", (int)rc);
+      msnprintf(bufp, len, "%s[%d]", buf[0]?" | ":"", (int)rc);
 
     n = strlen(bufp);
     bufp += n;
@@ -128,6 +128,20 @@ struct querycase {
 };
 
 static struct testcase get_parts_list[] ={
+#ifdef WIN32
+  {"file:/C:\\programs\\foo",
+   "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"file://C:\\programs\\foo",
+   "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"file:///C:\\programs\\foo",
+   "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+#endif
+  {"boing:80",
+   "https | [11] | [12] | [13] | boing | 80 | / | [16] | [17]",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"http://[fd00:a41::50]:8080",
    "http | [11] | [12] | [13] | [fd00:a41::50] | 8080 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
@@ -709,7 +723,7 @@ static int get_parts(void)
 static struct querycase append_list[] = {
   {"HTTP://test/?s", "name=joe\x02", "http://test/?s&name=joe%02",
    0, CURLU_URLENCODE, CURLUE_OK},
-  {"HTTP://test/?size=2#f", "name=joe=", "http://test/?size=2&name=joe=#f",
+  {"HTTP://test/?size=2#f", "name=joe=", "http://test/?size=2&name=joe%3d#f",
    0, CURLU_URLENCODE, CURLUE_OK},
   {"HTTP://test/?size=2#f", "name=joe doe",
    "http://test/?size=2&name=joe+doe#f",

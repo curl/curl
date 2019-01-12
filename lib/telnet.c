@@ -829,7 +829,7 @@ static CURLcode check_telnet_options(struct connectdata *conn)
   /* Add the user name as an environment variable if it
      was given on the command line */
   if(conn->bits.user_passwd) {
-    snprintf(option_arg, sizeof(option_arg), "USER,%s", conn->user);
+    msnprintf(option_arg, sizeof(option_arg), "USER,%s", conn->user);
     beg = curl_slist_append(tn->telnet_vars, option_arg);
     if(!beg) {
       curl_slist_free_all(tn->telnet_vars);
@@ -935,9 +935,9 @@ static void suboption(struct connectdata *conn)
   switch(CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
       len = strlen(tn->subopt_ttype) + 4 + 2;
-      snprintf((char *)temp, sizeof(temp),
-               "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
-               CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
+      msnprintf((char *)temp, sizeof(temp),
+                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
+                CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
         err = SOCKERRNO;
@@ -947,9 +947,9 @@ static void suboption(struct connectdata *conn)
       break;
     case CURL_TELOPT_XDISPLOC:
       len = strlen(tn->subopt_xdisploc) + 4 + 2;
-      snprintf((char *)temp, sizeof(temp),
-               "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
-               CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
+      msnprintf((char *)temp, sizeof(temp),
+                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
+                CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
         err = SOCKERRNO;
@@ -958,9 +958,9 @@ static void suboption(struct connectdata *conn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
-      snprintf((char *)temp, sizeof(temp),
-               "%c%c%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
-               CURL_TELQUAL_IS);
+      msnprintf((char *)temp, sizeof(temp),
+                "%c%c%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
+                CURL_TELQUAL_IS);
       len = 4;
 
       for(v = tn->telnet_vars; v; v = v->next) {
@@ -968,15 +968,15 @@ static void suboption(struct connectdata *conn)
         /* Add the variable only if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
           if(sscanf(v->data, "%127[^,],%127s", varname, varval)) {
-            snprintf((char *)&temp[len], sizeof(temp) - len,
-                     "%c%s%c%s", CURL_NEW_ENV_VAR, varname,
-                     CURL_NEW_ENV_VALUE, varval);
+            msnprintf((char *)&temp[len], sizeof(temp) - len,
+                      "%c%s%c%s", CURL_NEW_ENV_VAR, varname,
+                      CURL_NEW_ENV_VALUE, varval);
             len += tmplen;
           }
         }
       }
-      snprintf((char *)&temp[len], sizeof(temp) - len,
-               "%c%c", CURL_IAC, CURL_SE);
+      msnprintf((char *)&temp[len], sizeof(temp) - len,
+                "%c%c", CURL_IAC, CURL_SE);
       len += 2;
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {

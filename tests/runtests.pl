@@ -3113,6 +3113,13 @@ sub subVariables {
   $$thing =~ s/%CURL/$CURL/g;
   $$thing =~ s/%PWD/$pwd/g;
   $$thing =~ s/%POSIX_PWD/$posix_pwd/g;
+
+  my $file_pwd = $pwd;
+  if($file_pwd !~ /^\//) {
+      $file_pwd = "/$file_pwd";
+  }
+
+  $$thing =~ s/%FILE_PWD/$file_pwd/g;
   $$thing =~ s/%SRCDIR/$srcdir/g;
   $$thing =~ s/%USER/$USER/g;
 

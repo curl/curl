@@ -41,6 +41,7 @@ problems may have been fixed or changed somewhat since this was written!
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
  4.4 --upload-file . hang if delay in STDIN
+ 4.5 Improve --data-urlencode space encoding
 
  5. Build and portability issues
  5.2 curl-config --libs contains private details
@@ -56,6 +57,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.3 NTLM in system context uses wrong name
  6.4 Negotiate and Kerberos V5 need a fake user name
  6.5 NTLM doesn't support password with § character
+ 6.6 libcurl can fail to try alternatives with --proxy-any
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -166,7 +168,8 @@ problems may have been fixed or changed somewhat since this was written!
  When given a URL with a trailing dot for the host name part:
  "https://example.com./", libcurl will strip off the dot and use the name
  without a dot internally and send it dot-less in HTTP Host: headers and in
- the TLS SNI field.
+ the TLS SNI field. For the purpose of resolving the name to an address
+ the hostname is used as is without any change.
 
  The HTTP part violates RFC 7230 section 5.4 but the SNI part is accordance
  with RFC 6066 section 3.
@@ -185,10 +188,10 @@ problems may have been fixed or changed somewhat since this was written!
  Our current approach allows a knowing client to send a custom HTTP header
  with the dot added.
 
- It can also be noted that while adding a trailing dot to the host name in
- most (all?) cases will make the name resolve to the same set of IP addresses,
- many HTTP servers will not happily accept the trailing dot there unless that
- has been specifically configured to be a fine virtual host.
+ In a few cases there is a difference in name resolving to IP addresses with
+ a trailing dot, but it can be noted that many HTTP servers will not happily
+ accept the trailing dot there unless that has been specifically configured
+ to be a fine virtual host.
 
  If URLs with trailing dots for host names become more popular or even just
  used more than for just plain fun experiments, I'm sure we will have reason
@@ -342,6 +345,13 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/2051
 
+4.5 Improve --data-urlencode space encoding
+
+ ASCII space characters in --data-urlencode are currently encoded as %20
+ rather than +, which RFC 1866 says should be used.
+
+ See https://github.com/curl/curl/issues/3229
+
 5. Build and portability issues
 
 5.2 curl-config --libs contains private details
@@ -367,9 +377,18 @@ problems may have been fixed or changed somewhat since this was written!
  offers. This includes:
 
   - use of correct soname for the shared library build
+
   - support for several TLS backends are missing
+
   - the unit tests cause link failures in regular non-static builds
+
   - no nghttp2 check
+
+  - no check for what variadic macros that are supported. See
+    https://github.com/curl/curl/pull/3452
+
+  - unusable tool_hugehelp.c with MinGW, see
+    https://github.com/curl/curl/issues/3125
 
 5.7 Visual Studio project gaps
 
@@ -411,12 +430,12 @@ problems may have been fixed or changed somewhat since this was written!
 6.1 NTLM authentication and unicode
 
  NTLM authentication involving unicode user name or password only works
- properly if built with UNICODE defined together with the WinSSL/schannel
+ properly if built with UNICODE defined together with the WinSSL/Schannel
  backend. The original problem was mentioned in:
  https://curl.haxx.se/mail/lib-2009-10/0024.html
  https://curl.haxx.se/bug/view.cgi?id=896
 
- The WinSSL/schannel version verified to work as mentioned in
+ The WinSSL/Schannel version verified to work as mentioned in
  https://curl.haxx.se/mail/lib-2012-07/0073.html
 
 6.2 MIT Kerberos for Windows build
@@ -446,6 +465,17 @@ problems may have been fixed or changed somewhat since this was written!
 6.5 NTLM doesn't support password with § character
 
  https://github.com/curl/curl/issues/2120
+
+6.6 libcurl can fail to try alternatives with --proxy-any
+
+ When connecting via a proxy using --proxy-any, a failure to establish an
+ authentication will cause libcurl to abort trying other options if the
+ failed method has a higher preference than the alternatives. As an example,
+ --proxy-any against a proxy which advertise Negotiate and NTLM, but which
+ fails to set up Kerberos authentication won't proceed to try authentication
+ using NTLM.
+
+ https://github.com/curl/curl/issues/876
 
 7. FTP
 

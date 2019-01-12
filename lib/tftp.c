@@ -496,9 +496,9 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       return CURLE_TFTP_ILLEGAL; /* too long file name field */
     }
 
-    snprintf((char *)state->spacket.data + 2,
-             state->blksize,
-             "%s%c%s%c", filename, '\0',  mode, '\0');
+    msnprintf((char *)state->spacket.data + 2,
+              state->blksize,
+              "%s%c%s%c", filename, '\0',  mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
 
     /* optional addition of TFTP options */
@@ -506,8 +506,8 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       char buf[64];
       /* add tsize option */
       if(data->set.upload && (data->state.infilesize != -1))
-        snprintf(buf, sizeof(buf), "%" CURL_FORMAT_CURL_OFF_T,
-                 data->state.infilesize);
+        msnprintf(buf, sizeof(buf), "%" CURL_FORMAT_CURL_OFF_T,
+                  data->state.infilesize);
       else
         strcpy(buf, "0"); /* the destination is large enough */
 
@@ -517,7 +517,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       sbytes += tftp_option_add(state, sbytes,
                                 (char *)state->spacket.data + sbytes, buf);
       /* add blksize option */
-      snprintf(buf, sizeof(buf), "%d", state->requested_blksize);
+      msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
       sbytes += tftp_option_add(state, sbytes,
                                 (char *)state->spacket.data + sbytes,
                                 TFTP_OPTION_BLKSIZE);
@@ -525,7 +525,7 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
                                 (char *)state->spacket.data + sbytes, buf);
 
       /* add timeout option */
-      snprintf(buf, sizeof(buf), "%d", state->retry_time);
+      msnprintf(buf, sizeof(buf), "%d", state->retry_time);
       sbytes += tftp_option_add(state, sbytes,
                                 (char *)state->spacket.data + sbytes,
                                 TFTP_OPTION_INTERVAL);

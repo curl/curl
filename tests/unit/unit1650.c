@@ -160,13 +160,13 @@ UNITTEST_START
     int rc = doh_encode(req[i].name, req[i].type,
                         buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
-      fprintf(stderr, "req %d: Expected return code %d got %d\n", i,
+      fprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
               req[i].rc, rc);
       return 1;
     }
     else if(size != req[i].size) {
-      fprintf(stderr, "req %d: Expected size %d got %d\n", i,
-              (int)req[i].size, (int)size);
+      fprintf(stderr, "req %zu: Expected size %zu got %zu\n", i,
+              req[i].size, size);
       fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
       return 2;
     }
@@ -188,7 +188,7 @@ UNITTEST_START
     rc = doh_decode((unsigned char *)resp[i].packet, resp[i].size,
                     resp[i].type, &d);
     if(rc != resp[i].rc) {
-      fprintf(stderr, "resp %d: Expected return code %d got %d\n", i,
+      fprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
               resp[i].rc, rc);
       return 4;
     }
@@ -200,7 +200,7 @@ UNITTEST_START
       a = &d.addr[u];
       if(resp[i].type == DNS_TYPE_A) {
         p = &a->ip.v4[0];
-        snprintf(ptr, len, "%u.%u.%u.%u ", p[0], p[1], p[2], p[3]);
+        msnprintf(ptr, len, "%u.%u.%u.%u ", p[0], p[1], p[2], p[3]);
         o = strlen(ptr);
         len -= o;
         ptr += o;
@@ -209,27 +209,27 @@ UNITTEST_START
         int j;
         for(j = 0; j < 16; j += 2) {
           size_t l;
-          snprintf(ptr, len, "%s%02x%02x", j?":":"", a->ip.v6[j],
+          msnprintf(ptr, len, "%s%02x%02x", j?":":"", a->ip.v6[j],
                    a->ip.v6[j + 1]);
           l = strlen(ptr);
           len -= l;
           ptr += l;
         }
-        snprintf(ptr, len, " ");
+        msnprintf(ptr, len, " ");
         len--;
         ptr++;
       }
     }
     for(u = 0; u < d.numcname; u++) {
       size_t o;
-      snprintf(ptr, len, "%s ", d.cname[u].alloc);
+      msnprintf(ptr, len, "%s ", d.cname[u].alloc);
       o = strlen(ptr);
       len -= o;
       ptr += o;
     }
     de_cleanup(&d);
     if(resp[i].out && strcmp((char *)buffer, resp[i].out)) {
-      fprintf(stderr, "resp %d: Expected %s got %s\n", i,
+      fprintf(stderr, "resp %zu: Expected %s got %s\n", i,
               resp[i].out, buffer);
       return 1;
     }
@@ -244,7 +244,7 @@ UNITTEST_START
       rc = doh_decode((unsigned char *)full49, i, DNS_TYPE_A, &d);
       if(!rc) {
         /* none of them should work */
-        fprintf(stderr, "%d: %d\n", i, rc);
+        fprintf(stderr, "%zu: %d\n", i, rc);
         return 5;
       }
     }
@@ -257,7 +257,7 @@ UNITTEST_START
                       DNS_TYPE_A, &d);
       if(!rc) {
         /* none of them should work */
-        fprintf(stderr, "2 %d: %d\n", i, rc);
+        fprintf(stderr, "2 %zu: %d\n", i, rc);
         return 7;
       }
     }
@@ -271,8 +271,8 @@ UNITTEST_START
       fail_if(d.numaddr != 1, "missing address");
       a = &d.addr[0];
       p = &a->ip.v4[0];
-      snprintf((char *)buffer, sizeof(buffer),
-               "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
+      msnprintf((char *)buffer, sizeof(buffer),
+                "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
       if(rc || strcmp((char *)buffer, "127.0.0.1")) {
         fprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
         return 7;

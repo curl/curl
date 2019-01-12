@@ -87,6 +87,10 @@ those servers will get all the contents of your custom headers too.
 Starting in 7.58.0, libcurl will specifically prevent "Authorization:" headers
 from being sent to other hosts than the first used one, unless specifically
 permitted with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
+
+Starting in 7.64.0, libcurl will specifically prevent "Cookie:" headers
+from being sent to other hosts than the first used one, unless specifically
+permitted with the \fICURLOPT_UNRESTRICTED_AUTH(3)\fP option.
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

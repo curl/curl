@@ -599,7 +599,7 @@ static CURLcode ssh_check_fingerprint(struct connectdata *conn)
   if(fingerprint) {
     /* The fingerprint points to static storage (!), don't free() it. */
     for(i = 0; i < 16; i++)
-      snprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
+      msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
     infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
   }
 
@@ -1999,8 +1999,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
               break;
             }
 
-            snprintf(sshc->readdir_linkPath, PATH_MAX, "%s%s", sftp_scp->path,
-                     sshc->readdir_filename);
+            msnprintf(sshc->readdir_linkPath, PATH_MAX, "%s%s", sftp_scp->path,
+                      sshc->readdir_filename);
             state(conn, SSH_SFTP_READDIR_LINK);
             break;
           }
@@ -2055,21 +2055,21 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
       sshc->readdir_line = new_readdir_line;
 
-      sshc->readdir_currLen += snprintf(sshc->readdir_line +
-                                        sshc->readdir_currLen,
-                                        sshc->readdir_totalLen -
-                                        sshc->readdir_currLen,
-                                        " -> %s",
-                                        sshc->readdir_filename);
+      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
+                                         sshc->readdir_currLen,
+                                         sshc->readdir_totalLen -
+                                         sshc->readdir_currLen,
+                                         " -> %s",
+                                         sshc->readdir_filename);
 
       state(conn, SSH_SFTP_READDIR_BOTTOM);
       break;
 
     case SSH_SFTP_READDIR_BOTTOM:
-      sshc->readdir_currLen += snprintf(sshc->readdir_line +
-                                        sshc->readdir_currLen,
-                                        sshc->readdir_totalLen -
-                                        sshc->readdir_currLen, "\n");
+      sshc->readdir_currLen += msnprintf(sshc->readdir_line +
+                                         sshc->readdir_currLen,
+                                         sshc->readdir_totalLen -
+                                         sshc->readdir_currLen, "\n");
       result = Curl_client_write(conn, CLIENTWRITE_BODY,
                                  sshc->readdir_line,
                                  sshc->readdir_currLen);

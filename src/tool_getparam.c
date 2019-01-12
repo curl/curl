@@ -199,6 +199,7 @@ static const struct LongShort aliases[]= {
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
   {"03",  "http2-prior-knowledge",   ARG_NONE},
+  {"09",  "http0.9",                 ARG_BOOL},
   {"1",  "tlsv1",                    ARG_NONE},
   {"10",  "tlsv1.0",                 ARG_NONE},
   {"11",  "tlsv1.1",                 ARG_NONE},
@@ -935,22 +936,35 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 'r': /* --ftp-method (undocumented at this point) */
         config->ftp_filemethod = ftpfilemethod(config, nextarg);
         break;
-      case 's': /* --local-port */
-        rc = sscanf(nextarg, "%d - %d",
-                    &config->localport,
-                    &config->localportrange);
-        if(!rc)
+      case 's': { /* --local-port */
+        char lrange[7];  /* 16bit base 10 is 5 digits, but we allow 6 so that
+                            this catches overflows, not just truncates */
+        char *p = nextarg;
+        while(ISDIGIT(*p))
+          p++;
+        if(*p) {
+          /* if there's anything more than a plain decimal number */
+          rc = sscanf(p, " - %6s", lrange);
+          *p = 0; /* zero terminate to make str2unum() work below */
+        }
+        else
+          rc = 0;
+
+        err = str2unum(&config->localport, nextarg);
+        if(err || (config->localport > 65535))
           return PARAM_BAD_USE;
-        if(rc == 1)
+        if(!rc)
           config->localportrange = 1; /* default number of ports to try */
         else {
-          config->localportrange -= config->localport;
-          if(config->localportrange < 1) {
-            warnf(global, "bad range input\n");
+          err = str2unum(&config->localportrange, lrange);
+          if(err || (config->localportrange > 65535))
             return PARAM_BAD_USE;
-          }
+          config->localportrange -= (config->localport-1);
+          if(config->localportrange < 1)
+            return PARAM_BAD_USE;
         }
         break;
+      }
       case 'u': /* --ftp-alternative-to-user */
         GetStr(&config->ftp_alternative_to_user, nextarg);
         break;
@@ -1170,6 +1184,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         /* HTTP version 2.0 over clean TCP*/
         config->httpversion = CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE;
         break;
+      case '9':
+        /* Allow HTTP/0.9 responses! */
+        config->http09_allowed = toggle;
+        break;
       }
       break;
     case '1': /* --tlsv1* options */
@@ -1338,7 +1356,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               return PARAM_NO_MEM;
             }
             if(nlen > 0) { /* only append '=' if we have a name */
-              snprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+              msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
               size = outlen-1;
             }
             else {
@@ -1922,7 +1940,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf(global,
               "A specified range MUST include at least one dash (-). "
               "Appending one for you!\n");
-        snprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
+        msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-", off);
         Curl_safefree(config->range);
         config->range = strdup(buffer);
         if(!config->range)
@@ -2053,6 +2071,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           fname = nextarg;
           file = fopen(nextarg, FOPEN_READTEXT);
         }
+        Curl_safefree(config->writeout);
         err = file2string(&config->writeout, file);
         if(file && (file != stdin))
           fclose(file);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -803,12 +803,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
         if(checkprefix("Set-Cookie:", argptr))
           /* HTTP Header format line */
           Curl_cookie_add(data, data->cookies, TRUE, FALSE, argptr + 11, NULL,
-                          NULL);
+                          NULL, TRUE);
 
         else
           /* Netscape format line */
           Curl_cookie_add(data, data->cookies, FALSE, FALSE, argptr, NULL,
-                          NULL);
+                          NULL, TRUE);
 
         Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
         free(argptr);
@@ -860,6 +860,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.expect_100_timeout = arg;
     break;
 
+  case CURLOPT_HTTP09_ALLOWED:
+    arg = va_arg(param, unsigned long);
+    if(arg > 1L)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.http09_allowed = arg ? TRUE : FALSE;
+    break;
 #endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_HTTPAUTH:
@@ -1203,6 +1209,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.low_speed_time = arg;
+    break;
+  case CURLOPT_CURLU:
+    /*
+     * pass CURLU to set URL
+     */
+    data->set.uh = va_arg(param, CURLU *);
     break;
   case CURLOPT_URL:
     /*
@@ -1687,8 +1699,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->ssl_config.verifypeer =
+    if(data->conn) {
+      data->conn->ssl_config.verifypeer =
         data->set.ssl.primary.verifypeer;
     }
     break;
@@ -1700,8 +1712,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       (0 != va_arg(param, long))?TRUE:FALSE;
 
     /* Update the current connection proxy_ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->proxy_ssl_config.verifypeer =
+    if(data->conn) {
+      data->conn->proxy_ssl_config.verifypeer =
         data->set.proxy_ssl.primary.verifypeer;
     }
     break;
@@ -1724,8 +1736,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.ssl.primary.verifyhost = (0 != arg) ? TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->ssl_config.verifyhost =
+    if(data->conn) {
+      data->conn->ssl_config.verifyhost =
         data->set.ssl.primary.verifyhost;
     }
     break;
@@ -1748,8 +1760,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.proxy_ssl.primary.verifyhost = (0 != arg)?TRUE:FALSE;
 
     /* Update the current connection proxy_ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->proxy_ssl_config.verifyhost =
+    if(data->conn) {
+      data->conn->proxy_ssl_config.verifyhost =
         data->set.proxy_ssl.primary.verifyhost;
     }
     break;
@@ -1766,8 +1778,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->ssl_config.verifystatus =
+    if(data->conn) {
+      data->conn->ssl_config.verifystatus =
         data->set.ssl.primary.verifystatus;
     }
     break;
@@ -2629,6 +2641,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.upkeep_interval_ms = arg;
+    break;
+  case CURLOPT_TRAILERFUNCTION:
+#ifndef CURL_DISABLE_HTTP
+    data->set.trailer_callback = va_arg(param, curl_trailer_callback);
+#endif
+    break;
+  case CURLOPT_TRAILERDATA:
+#ifndef CURL_DISABLE_HTTP
+    data->set.trailer_data = va_arg(param, void *);
+#endif
     break;
   default:
     /* unknown tag and its companion, just ignore: */

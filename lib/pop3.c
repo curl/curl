@@ -443,7 +443,7 @@ static CURLcode pop3_perform_apop(struct connectdata *conn)
 
   /* Convert the calculated 16 octet digest into a 32 byte hex string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    snprintf(&secret[2 * i], 3, "%02x", digest[i]);
+    msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
   result = Curl_pp_sendf(&pop3c->pp, "APOP %s %s", conn->user, secret);
 
@@ -629,6 +629,7 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
         if(line[i] == '<') {
           /* Calculate the length of the timestamp */
           size_t timestamplen = len - 1 - i;
+          char *at;
           if(!timestamplen)
             break;
 
@@ -642,8 +643,15 @@ static CURLcode pop3_state_servergreet_resp(struct connectdata *conn,
           memcpy(pop3c->apoptimestamp, line + i, timestamplen);
           pop3c->apoptimestamp[timestamplen] = '\0';
 
-          /* Store the APOP capability */
-          pop3c->authtypes |= POP3_TYPE_APOP;
+          /* If the timestamp does not contain '@' it is not (as required by
+             RFC-1939) conformant to the RFC-822 message id syntax, and we
+             therefore do not use APOP authentication. */
+          at = strchr(pop3c->apoptimestamp, '@');
+          if(!at)
+            Curl_safefree(pop3c->apoptimestamp);
+          else
+            /* Store the APOP capability */
+            pop3c->authtypes |= POP3_TYPE_APOP;
           break;
         }
       }
@@ -1017,19 +1025,20 @@ static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
       return result;
   }
 
-  result = Curl_pp_statemach(&pop3c->pp, FALSE);
+  result = Curl_pp_statemach(&pop3c->pp, FALSE, FALSE);
   *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode pop3_block_statemach(struct connectdata *conn)
+static CURLcode pop3_block_statemach(struct connectdata *conn,
+                                     bool disconnecting)
 {
   CURLcode result = CURLE_OK;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   while(pop3c->state != POP3_STOP && !result)
-    result = Curl_pp_statemach(&pop3c->pp, TRUE);
+    result = Curl_pp_statemach(&pop3c->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -1227,7 +1236,7 @@ static CURLcode pop3_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && pop3c->pp.conn && pop3c->pp.conn->bits.protoconnstart)
     if(!pop3_perform_quit(conn))
-      (void)pop3_block_statemach(conn); /* ignore errors on QUIT */
+      (void)pop3_block_statemach(conn, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);

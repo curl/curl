@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -108,8 +108,9 @@ void Curl_resolver_global_cleanup(void)
  * URL-state specific environment ('resolver' member of the UrlState
  * structure).
  */
-CURLcode Curl_resolver_init(void **resolver)
+CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
 {
+  (void)easy;
   *resolver = calloc(1, sizeof(struct resdata));
   if(!*resolver)
     return CURLE_OUT_OF_MEMORY;
@@ -132,10 +133,10 @@ void Curl_resolver_cleanup(void *resolver)
  * Called from curl_easy_duphandle() to duplicate resolver URL state-specific
  * environment ('resolver' member of the UrlState structure).
  */
-int Curl_resolver_duphandle(void **to, void *from)
+CURLcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to, void *from)
 {
   (void)from;
-  return Curl_resolver_init(to);
+  return Curl_resolver_init(easy, to);
 }
 
 static void destroy_async_data(struct Curl_async *);
@@ -276,7 +277,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
   char service[12];
   int rc;
 
-  snprintf(service, sizeof(service), "%d", tsd->port);
+  msnprintf(service, sizeof(service), "%d", tsd->port);
 
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
@@ -461,12 +462,32 @@ static CURLcode resolver_error(struct connectdata *conn)
 }
 
 /*
+ * Until we gain a way to signal the resolver threads to stop early, we must
+ * simply wait for them and ignore their results.
+ */
+void Curl_resolver_kill(struct connectdata *conn)
+{
+  struct thread_data *td = (struct thread_data*) conn->async.os_specific;
+
+  /* If we're still resolving, we must wait for the threads to fully clean up,
+     unfortunately.  Otherwise, we can simply cancel to clean up any resolver
+     data. */
+  if(td && td->thread_hnd != curl_thread_t_null)
+    (void)Curl_resolver_wait_resolv(conn, NULL);
+  else
+    Curl_resolver_cancel(conn);
+}
+
+/*
  * Curl_resolver_wait_resolv()
  *
- * waits for a resolve to finish. This function should be avoided since using
+ * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
+ *
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  *
  * This is the version for resolves-in-a-thread.
  */
@@ -477,6 +498,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(conn && td);
+  DEBUGASSERT(td->thread_hnd != curl_thread_t_null);
 
   /* wait for the thread to resolve the name */
   if(Curl_thread_join(&td->thread_hnd)) {
@@ -678,7 +700,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   hints.ai_family = pf;
   hints.ai_socktype = conn->socktype;
 
-  snprintf(sbuf, sizeof(sbuf), "%d", port);
+  msnprintf(sbuf, sizeof(sbuf), "%d", port);
 
   reslv->start = Curl_now();
   /* fire up a new resolver thread! */

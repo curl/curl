@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,29 +21,36 @@
  ***************************************************************************/
 
 #include "timeval.h"
+#include "system_win32.h"
 
 #if defined(WIN32) && !defined(MSDOS)
 
 struct curltime Curl_now(void)
 {
-  /*
-  ** GetTickCount() is available on _all_ Windows versions from W95 up
-  ** to nowadays. Returns milliseconds elapsed since last system boot,
-  ** increases monotonically and wraps once 49.7 days have elapsed.
-  */
   struct curltime now;
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
-    (_WIN32_WINNT < _WIN32_WINNT_VISTA) || \
-    (defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR))
-  DWORD milliseconds = GetTickCount();
-  now.tv_sec = milliseconds / 1000;
-  now.tv_usec = (milliseconds % 1000) * 1000;
-#else
-  ULONGLONG milliseconds = GetTickCount64();
-  now.tv_sec = (time_t) (milliseconds / 1000);
-  now.tv_usec = (unsigned int) (milliseconds % 1000) * 1000;
-#endif
-
+  static LARGE_INTEGER freq;
+  static int isVistaOrGreater = -1;
+  if(isVistaOrGreater == -1) {
+    if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
+                                   VERSION_GREATER_THAN_EQUAL)) {
+      isVistaOrGreater = 1;
+      QueryPerformanceFrequency(&freq);
+    }
+    else
+      isVistaOrGreater = 0;
+  }
+  if(isVistaOrGreater == 1) { /* QPC timer might have issues pre-Vista */
+    LARGE_INTEGER count;
+    QueryPerformanceCounter(&count);
+    now.tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
+    now.tv_usec =
+      (int)((count.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart);
+  }
+  else {
+    DWORD milliseconds = GetTickCount();
+    now.tv_sec = milliseconds / 1000;
+    now.tv_usec = (milliseconds % 1000) * 1000;
+  }
   return now;
 }
 
@@ -180,7 +187,7 @@ struct curltime Curl_now(void)
  */
 timediff_t Curl_timediff(struct curltime newer, struct curltime older)
 {
-  timediff_t diff = newer.tv_sec-older.tv_sec;
+  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIME_MAX/1000))
     return TIME_MAX;
   else if(diff <= (TIME_MIN/1000))
@@ -194,7 +201,7 @@ timediff_t Curl_timediff(struct curltime newer, struct curltime older)
  */
 timediff_t Curl_timediff_us(struct curltime newer, struct curltime older)
 {
-  timediff_t diff = newer.tv_sec-older.tv_sec;
+  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIME_MAX/1000000))
     return TIME_MAX;
   else if(diff <= (TIME_MIN/1000000))

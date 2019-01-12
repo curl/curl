@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,7 +72,7 @@ static void fly(struct ProgressData *bar, bool moved)
   int pos;
   int check = bar->width - 2;
 
-  snprintf(buf, sizeof(buf), "%*s\r", bar->width-1, " ");
+  msnprintf(buf, sizeof(buf), "%*s\r", bar->width-1, " ");
   memcpy(&buf[bar->bar], "-=O=-", 5);
 
   pos = sinus[bar->tick%200] / (10000 / check);
@@ -106,6 +106,13 @@ static void fly(struct ProgressData *bar, bool moved)
 
 #define MAX_BARLENGTH 256
 
+#if (SIZEOF_CURL_OFF_T == 4)
+#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFF)
+#else
+   /* assume CURL_SIZEOF_CURL_OFF_T == 8 */
+#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#endif
+
 int tool_progress_cb(void *clientp,
                      curl_off_t dltotal, curl_off_t dlnow,
                      curl_off_t ultotal, curl_off_t ulnow)
@@ -119,10 +126,16 @@ int tool_progress_cb(void *clientp,
   curl_off_t point;
 
   /* expected transfer size */
-  total = dltotal + ultotal + bar->initial_size;
+  if((CURL_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal))
+    total = CURL_OFF_T_MAX;
+  else
+    total = dltotal + ultotal + bar->initial_size;
 
   /* we've come this far */
-  point = dlnow + ulnow + bar->initial_size;
+  if((CURL_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow))
+    point = CURL_OFF_T_MAX;
+  else
+    point = dlnow + ulnow + bar->initial_size;
 
   if(bar->calls) {
     /* after first call... */
@@ -166,7 +179,7 @@ int tool_progress_cb(void *clientp,
       num = MAX_BARLENGTH;
     memset(line, '#', num);
     line[num] = '\0';
-    snprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
+    msnprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
     fprintf(bar->out, format, line, percent);
   }
   fflush(bar->out);

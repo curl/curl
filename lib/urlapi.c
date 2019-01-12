@@ -67,6 +67,12 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
+#ifdef DEBUGBUILD
+#define UNITTEST
+#else
+#define UNITTEST static
+#endif
+
 static void free_urlhandle(struct Curl_URL *u)
 {
   free(u->scheme);
@@ -203,7 +209,7 @@ void Curl_strcpy_url(char *output, const char *url, bool relative)
       /* FALLTHROUGH */
     default:
       if(urlchar_needs_escaping(*iptr)) {
-        snprintf(optr, 4, "%%%02x", *iptr);
+        msnprintf(optr, 4, "%%%02x", *iptr);
         optr += 3;
       }
       else
@@ -238,7 +244,7 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
 #endif
   for(i = 0; i < buflen && url[i]; ++i) {
     char s = url[i];
-    if(s == ':') {
+    if((s == ':') && (url[i + 1] == '/')) {
       if(buf)
         buf[i] = 0;
       return TRUE;
@@ -488,18 +494,35 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   return result;
 }
 
-static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
+UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
 {
-  char *portptr;
+  char *portptr = NULL;
   char endbracket;
   int len;
 
-  if((1 == sscanf(hostname, "[%*45[0123456789abcdefABCDEF:.%%]%c%n",
-                  &endbracket, &len)) &&
-     (']' == endbracket)) {
+  /*
+   * Find the end of an IPv6 address, either on the ']' ending bracket or
+   * a percent-encoded zone index.
+   */
+  if(1 == sscanf(hostname, "[%*45[0123456789abcdefABCDEF:.]%c%n",
+                 &endbracket, &len)) {
+    if(']' == endbracket)
+      portptr = &hostname[len];
+    else if('%' == endbracket) {
+      int zonelen = len;
+      if(1 == sscanf(hostname + zonelen, "25%*[^]]%c%n", &endbracket, &len)) {
+        if(']' != endbracket)
+          return CURLUE_MALFORMED_INPUT;
+        portptr = &hostname[--zonelen + len + 1];
+      }
+      else
+        return CURLUE_MALFORMED_INPUT;
+    }
+    else
+      return CURLUE_MALFORMED_INPUT;
+
     /* this is a RFC2732-style specified IP-address */
-    portptr = &hostname[len];
-    if(*portptr) {
+    if(portptr && *portptr) {
       if(*portptr != ':')
         return CURLUE_MALFORMED_INPUT;
     }
@@ -514,6 +537,14 @@ static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
     long port;
     char portbuf[7];
 
+    /* Browser behavior adaptation. If there's a colon with no digits after,
+       just cut off the name there which makes us ignore the colon and just
+       use the default port. Firefox, Chrome and Safari all do that. */
+    if(!portptr[1]) {
+      *portptr = '\0';
+      return CURLUE_OK;
+    }
+
     if(!ISDIGIT(portptr[1]))
       return CURLUE_BAD_PORT_NUMBER;
 
@@ -527,22 +558,14 @@ static CURLUcode parse_port(struct Curl_URL *u, char *hostname)
     if(rest[0])
       return CURLUE_BAD_PORT_NUMBER;
 
-    if(rest != &portptr[1]) {
-      *portptr++ = '\0'; /* cut off the name there */
-      *rest = 0;
-      /* generate a new to get rid of leading zeroes etc */
-      snprintf(portbuf, sizeof(portbuf), "%ld", port);
-      u->portnum = port;
-      u->port = strdup(portbuf);
-      if(!u->port)
-        return CURLUE_OUT_OF_MEMORY;
-    }
-    else {
-      /* Browser behavior adaptation. If there's a colon with no digits after,
-         just cut off the name there which makes us ignore the colon and just
-         use the default port. Firefox and Chrome both do that. */
-      *portptr = '\0';
-    }
+    *portptr++ = '\0'; /* cut off the name there */
+    *rest = 0;
+    /* generate a new port number string to get rid of leading zeroes etc */
+    msnprintf(portbuf, sizeof(portbuf), "%ld", port);
+    u->portnum = port;
+    u->port = strdup(portbuf);
+    if(!u->port)
+      return CURLUE_OUT_OF_MEMORY;
   }
 
   return CURLUE_OK;
@@ -831,7 +854,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       return result;
 
-    result = parse_port(u, hostname);
+    result = Curl_parse_port(u, hostname);
     if(result)
       return result;
 
@@ -844,7 +867,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
       return CURLUE_OUT_OF_MEMORY;
   }
 
-  if(query && query[0]) {
+  if(query) {
     u->query = strdup(query);
     if(!u->query)
       return CURLUE_OUT_OF_MEMORY;
@@ -964,7 +987,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       const struct Curl_handler *h =
         Curl_builtin_scheme(u->scheme);
       if(h) {
-        snprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
+        msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
         ptr = portbuf;
       }
     }
@@ -1023,7 +1046,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
           /* there's no stored port number, but asked to deliver
              a default one for the scheme */
           if(h) {
-            snprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
+            msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
             port = portbuf;
           }
         }
@@ -1051,8 +1074,8 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
                     port ? port : "",
                     (u->path && (u->path[0] != '/')) ? "/": "",
                     u->path ? u->path : "/",
-                    u->query? "?": "",
-                    u->query? u->query : "",
+                    (u->query && u->query[0]) ? "?": "",
+                    (u->query && u->query[0]) ? u->query : "",
                     u->fragment? "#": "",
                     u->fragment? u->fragment : "");
     }
@@ -1103,6 +1126,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   bool plusencode = FALSE;
   bool urlskipslash = FALSE;
   bool appendquery = FALSE;
+  bool equalsencode = FALSE;
 
   if(!u)
     return CURLUE_BAD_HANDLE;
@@ -1183,6 +1207,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   case CURLUPART_QUERY:
     plusencode = urlencode;
     appendquery = (flags & CURLU_APPENDQUERY)?1:0;
+    equalsencode = appendquery;
     storep = &u->query;
     break;
   case CURLUPART_FRAGMENT:
@@ -1276,13 +1301,16 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       for(i = part, o = enc; *i; i++) {
         if(Curl_isunreserved(*i) ||
            ((*i == '/') && urlskipslash) ||
-           ((*i == '=') && appendquery) ||
+           ((*i == '=') && equalsencode) ||
            ((*i == '+') && plusencode)) {
+          if((*i == '=') && equalsencode)
+            /* only skip the first equals sign */
+            equalsencode = FALSE;
           *o = *i;
           o++;
         }
         else {
-          snprintf(o, 4, "%%%02x", *i);
+          msnprintf(o, 4, "%%%02x", *i);
           o += 3;
         }
       }

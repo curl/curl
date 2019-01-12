@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -664,12 +664,12 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
   while(!done && !mcode) {
     int still_running = 0;
-    int rc;
+    bool gotsocket = FALSE;
 
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
+    mcode = Curl_multi_wait(multi, NULL, 0, 1000, NULL, &gotsocket);
 
     if(!mcode) {
-      if(!rc) {
+      if(!gotsocket) {
         long sleep_ms;
 
         /* If it returns without any filedescriptor instantly, we need to
@@ -688,6 +688,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
     /* only read 'still_running' if curl_multi_perform() return OK */
     if(!mcode && !still_running) {
+      int rc;
       CURLMsg *msg = curl_multi_info_read(multi, &rc);
       if(msg) {
         result = msg->data.result;
@@ -966,7 +967,8 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   }
 
   /* Clone the resolver handle, if present, for the new handle */
-  if(Curl_resolver_duphandle(&outcurl->state.resolver,
+  if(Curl_resolver_duphandle(outcurl,
+                             &outcurl->state.resolver,
                              data->state.resolver))
     goto fail;
 
@@ -1058,7 +1060,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     unsigned int i;
     unsigned int count = data->state.tempcount;
     struct tempbuf writebuf[3]; /* there can only be three */
-    struct connectdata *conn = data->easy_conn;
+    struct connectdata *conn = data->conn;
     struct Curl_easy *saved_data = NULL;
 
     /* copy the structs to allow for immediate re-pausing */

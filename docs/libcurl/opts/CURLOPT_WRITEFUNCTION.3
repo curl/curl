@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -35,8 +35,10 @@ Pass a pointer to your callback function, which should match the prototype
 shown above.
 
 This callback function gets called by libcurl as soon as there is data
-received that needs to be saved.  \fIptr\fP points to the delivered data, and
-the size of that data is \fInmemb\fP; \fIsize\fP is always 1.
+received that needs to be saved. For most transfers, this callback gets called
+many times and each invoke delivers another chunk of data. \fIptr\fP points to
+the delivered data, and the size of that data is \fInmemb\fP; \fIsize\fP is
+always 1.
 
 The callback function will be passed as much data as possible in all invokes,
 but you must not make any assumptions. It may be one byte, it may be

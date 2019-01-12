@@ -40,7 +40,7 @@ This function gets called by libcurl as soon as it has received header
 data. The header callback will be called once for each header and only
 complete header lines are passed on to the callback. Parsing headers is very
 easy using this. The size of the data pointed to by \fIbuffer\fP is \fIsize\fP
-multiplied with \fInmemb\fP. Do not assume that the header line is zero
+multiplied with \fInitems\fP. Do not assume that the header line is zero
 terminated!
 
 The pointer named \fIuserdata\fP is the one you set with the

@@ -522,7 +522,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
     err = 0;
   }
 #endif
-#ifdef __minix
+#if defined(EBADIOCTL) && defined(__minix)
   /* Minix 3.1.x doesn't support getsockopt on UDP sockets */
   if(EBADIOCTL == err) {
     SET_SOCKERRNO(0);
@@ -655,7 +655,7 @@ bool Curl_getaddressinfo(struct sockaddr *sa, char *addr,
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
     case AF_UNIX:
       su = (struct sockaddr_un*)sa;
-      snprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+      msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
       *port = 0;
       return TRUE;
 #endif
@@ -1314,7 +1314,7 @@ int Curl_closesocket(struct connectdata *conn,
       conn->sock_accepted[SECONDARYSOCKET] = FALSE;
     else {
       int rc;
-      Curl_multi_closed(conn, sock);
+      Curl_multi_closed(conn->data, sock);
       Curl_set_in_callback(conn->data, true);
       rc = conn->fclosesocket(conn->closesocket_client, sock);
       Curl_set_in_callback(conn->data, false);
@@ -1324,7 +1324,7 @@ int Curl_closesocket(struct connectdata *conn,
 
   if(conn)
     /* tell the multi-socket code about this */
-    Curl_multi_closed(conn, sock);
+    Curl_multi_closed(conn->data, sock);
 
   sclose(sock);
 

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,9 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
-void Curl_multi_handlePipeBreak(struct Curl_easy *data);
+void Curl_detach_connnection(struct Curl_easy *data);
+void Curl_attach_connnection(struct Curl_easy *data,
+                             struct connectdata *conn);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
 
@@ -89,7 +91,7 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
  * socket again and it gets the same file descriptor number.
  */
 
-void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
+void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
 
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.
@@ -97,4 +99,12 @@ void Curl_multi_closed(struct connectdata *conn, curl_socket_t s);
 CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
+
+CURLMcode Curl_multi_wait(struct Curl_multi *multi,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret,
+                          bool *gotsocket); /* if any socket was checked */
+
 #endif /* HEADER_CURL_MULTIIF_H */

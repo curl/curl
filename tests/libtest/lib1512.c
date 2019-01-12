@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2017, Linus Nielsen Feltzing <linus@haxx.se>
+ * Copyright (C) 2013 - 2018, Linus Nielsen Feltzing <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,8 +49,8 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  snprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
-           port, address);
+  msnprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
+            port, address);
   printf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
 
@@ -59,9 +59,9 @@ int test(char *URL)
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    snprintf(target_url, sizeof(target_url),
-             "http://server.example.curl:%s/path/1512%04i",
-             port, i + 1);
+    msnprintf(target_url, sizeof(target_url),
+              "http://server.example.curl:%s/path/1512%04i",
+              port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */

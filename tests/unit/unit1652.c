@@ -80,7 +80,7 @@ unit_stop(void)
 UNITTEST_START
 
 /* Injecting a simple short string via a format */
-snprintf(input, sizeof(input), "Simple Test");
+msnprintf(input, sizeof(input), "Simple Test");
 Curl_infof(data, "%s", input);
 fail_unless(strcmp(result, input) == 0, "Simple string test");
 

@@ -97,7 +97,7 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 static bool is_fatal_error(CURLcode code)
 {
   switch(code) {
-  /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
+  /* TODO: Should CURLE_PEER_FAILED_VERIFICATION be a critical error? */
   case CURLE_FAILED_INIT:
   case CURLE_OUT_OF_MEMORY:
   case CURLE_UNKNOWN_OPTION:
@@ -1005,6 +1005,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           /* new in libcurl 7.21.6 */
           if(config->tr_encoding)
             my_setopt(curl, CURLOPT_TRANSFER_ENCODING, 1L);
+          /* new in libcurl 7.64.0 */
+          my_setopt(curl, CURLOPT_HTTP09_ALLOWED, config->http09_allowed);
 
         } /* (built_in_protos & CURLPROTO_HTTP) */
 
@@ -1371,9 +1373,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* curl 7.15.2 */
         if(config->localport) {
-          my_setopt(curl, CURLOPT_LOCALPORT, (long)config->localport);
-          my_setopt_str(curl, CURLOPT_LOCALPORTRANGE,
-                        (long)config->localportrange);
+          my_setopt(curl, CURLOPT_LOCALPORT, config->localport);
+          my_setopt_str(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
         }
 
         /* curl 7.15.5 */
@@ -1584,7 +1585,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
             /* do not create (or even overwrite) the file in case we get no
                data because of unmet condition */
             curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &cond_unmet);
-            if(!cond_unmet && !tool_create_output_file(&outs, FALSE))
+            if(!cond_unmet && !tool_create_output_file(&outs))
               result = CURLE_WRITE_ERROR;
           }
 
@@ -1806,7 +1807,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         else if(result && global->showerror) {
           fprintf(global->errors, "curl: (%d) %s\n", result, (errorbuffer[0]) ?
                   errorbuffer : curl_easy_strerror(result));
-          if(result == CURLE_SSL_CACERT)
+          if(result == CURLE_PEER_FAILED_VERIFICATION)
             fputs(CURL_CA_CERT_ERRORMSG, global->errors);
         }
 

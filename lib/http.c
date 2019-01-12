@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -526,6 +526,12 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     pickhost = pickoneauth(&data->state.authhost, authmask);
     if(!pickhost)
       data->state.authproblem = TRUE;
+    if(data->state.authhost.picked == CURLAUTH_NTLM &&
+       conn->httpversion > 11) {
+      infof(data, "Forcing HTTP/1.1 for NTLM");
+      connclose(conn, "Force HTTP/1.1 connection");
+      conn->data->set.httpversion = CURL_HTTP_VERSION_1_1;
+    }
   }
   if(conn->bits.proxy_user_passwd &&
      ((data->req.httpcode == 407) ||
@@ -697,7 +703,7 @@ output_auth_headers(struct connectdata *conn,
  *
  * @param conn all information about the current connection
  * @param request pointer to the request keyword
- * @param path pointer to the requested path
+ * @param path pointer to the requested path; should include query part
  * @param proxytunnel boolean if this is the request setting up a "proxy
  * tunnel"
  *
@@ -1479,14 +1485,14 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
     strcpy(tcp_version, "TCP4");
   }
 
-  snprintf(proxy_header,
-           sizeof(proxy_header),
-           "PROXY %s %s %s %li %li\r\n",
-           tcp_version,
-           conn->data->info.conn_local_ip,
-           conn->data->info.conn_primary_ip,
-           conn->data->info.conn_local_port,
-           conn->data->info.conn_primary_port);
+  msnprintf(proxy_header,
+            sizeof(proxy_header),
+            "PROXY %s %s %s %li %li\r\n",
+            tcp_version,
+            conn->data->info.conn_local_ip,
+            conn->data->info.conn_primary_ip,
+            conn->data->info.conn_local_port,
+            conn->data->info.conn_primary_port);
 
   req_buffer = Curl_add_buffer_init();
   if(!req_buffer)
@@ -1676,6 +1682,52 @@ enum proxy_use {
   HEADER_CONNECT  /* sending CONNECT to a proxy */
 };
 
+/* used to compile the provided trailers into one buffer
+   will return an error code if one of the headers is
+   not formatted correctly */
+CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
+                                    Curl_send_buffer *buffer,
+                                    struct Curl_easy *handle)
+{
+  char *ptr = NULL;
+  CURLcode result = CURLE_OK;
+  const char *endofline_native = NULL;
+  const char *endofline_network = NULL;
+
+  /* TODO: Maybe split Curl_add_custom_headers to make it reusable here */
+
+  if(
+#ifdef CURL_DO_LINEEND_CONV
+     (handle->set.prefer_ascii) ||
+#endif
+     (handle->set.crlf)) {
+    /* \n will become \r\n later on */
+    endofline_native  = "\n";
+    endofline_network = "\x0a";
+  }
+  else {
+    endofline_native  = "\r\n";
+    endofline_network = "\x0d\x0a";
+  }
+
+  while(trailers) {
+    /* only add correctly formatted trailers */
+    ptr = strchr(trailers->data, ':');
+    if(ptr && *(ptr + 1) == ' ') {
+      result = Curl_add_bufferf(&buffer, "%s%s", trailers->data,
+                                endofline_native);
+      if(result)
+        return result;
+    }
+    else
+      infof(handle, "Malformatted trailing header ! Skipping trailer.");
+    trailers = trailers->next;
+  }
+  result = Curl_add_buffer(&buffer, endofline_network,
+                           strlen(endofline_network));
+  return result;
+}
+
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
                                  Curl_send_buffer *req_buffer)
@@ -1783,7 +1835,8 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                   checkprefix("Transfer-Encoding:", headers->data))
             /* HTTP/2 doesn't support chunked requests */
             ;
-          else if(checkprefix("Authorization:", headers->data) &&
+          else if((checkprefix("Authorization:", headers->data) ||
+                   checkprefix("Cookie:", headers->data)) &&
                   /* be careful of sending this potentially sensitive header to
                      other hosts */
                   (data->state.this_is_a_follow &&
@@ -1850,16 +1903,16 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
    */
 
   /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-  snprintf(datestr, sizeof(datestr),
-           "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-           condp,
-           Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-           tm->tm_mday,
-           Curl_month[tm->tm_mon],
-           tm->tm_year + 1900,
-           tm->tm_hour,
-           tm->tm_min,
-           tm->tm_sec);
+  msnprintf(datestr, sizeof(datestr),
+            "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+            condp,
+            Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+            tm->tm_mday,
+            Curl_month[tm->tm_mon],
+            tm->tm_year + 1900,
+            tm->tm_hour,
+            tm->tm_min,
+            tm->tm_sec);
 
   result = Curl_add_buffer(&req_buffer, datestr, strlen(datestr));
 
@@ -1995,9 +2048,18 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(conn, request, path, FALSE);
-  if(result)
-    return result;
+  {
+    char *pq = NULL;
+    if(query && *query) {
+      pq = aprintf("%s?%s", path, query);
+      if(!pq)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    result = Curl_http_output_auth(conn, request, (pq ? pq : path), FALSE);
+    free(pq);
+    if(result)
+      return result;
+  }
 
   if((data->state.authhost.multipass || data->state.authproxy.multipass) &&
      (httpreq != HTTPREQ_GET) &&
@@ -2293,8 +2355,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           if(!*data->state.up.path && path[strlen(path) - 1] != '/') {
             *p++ = '/';
           }
-          snprintf(p, sizeof(ftp_typecode) - 1, ";type=%c",
-                   data->set.prefer_ascii ? 'a' : 'i');
+          msnprintf(p, sizeof(ftp_typecode) - 1, ";type=%c",
+                    data->set.prefer_ascii ? 'a' : 'i');
         }
       }
       if(conn->bits.user_passwd && !conn->bits.userpwd_in_url)
@@ -3161,6 +3223,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           k->header = FALSE;
           k->badheader = HEADER_ALLBAD;
           streamclose(conn, "bad HTTP: No end-of-message indicator");
+          if(!data->set.http09_allowed) {
+            failf(data, "Received HTTP/0.9 when not allowed\n");
+            return CURLE_UNSUPPORTED_PROTOCOL;
+          }
           break;
         }
       }
@@ -3194,6 +3260,10 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(st == STATUS_BAD) {
         streamclose(conn, "bad HTTP: No end-of-message indicator");
         /* this is not the beginning of a protocol first header line */
+        if(!data->set.http09_allowed) {
+          failf(data, "Received HTTP/0.9 when not allowed\n");
+          return CURLE_UNSUPPORTED_PROTOCOL;
+        }
         k->header = FALSE;
         if(*nread)
           /* since there's more, this is a partial bad header */
@@ -3652,13 +3722,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
 
         switch(k->httpcode) {
-        case 204:
-          /* (quote from RFC2616, section 10.2.5): The server has
-           * fulfilled the request but does not need to return an
-           * entity-body ... The 204 response MUST NOT include a
-           * message-body, and thus is always terminated by the first
-           * empty line after the header fields. */
-          /* FALLTHROUGH */
         case 304:
           /* (quote from RFC2616, section 10.3.5): The 304 response
            * MUST NOT contain a message-body, and thus is always
@@ -3666,6 +3729,13 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            * fields.  */
           if(data->set.timecondition)
             data->info.timecond = TRUE;
+          /* FALLTHROUGH */
+        case 204:
+          /* (quote from RFC2616, section 10.2.5): The server has
+           * fulfilled the request but does not need to return an
+           * entity-body ... The 204 response MUST NOT include a
+           * message-body, and thus is always terminated by the first
+           * empty line after the header fields. */
           k->size = 0;
           k->maxdownload = 0;
           k->ignorecl = TRUE; /* ignore Content-Length headers */
@@ -3859,7 +3929,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                          here, or else use real peer host name. */
                       conn->allocptr.cookiehost?
                       conn->allocptr.cookiehost:conn->host.name,
-                      data->state.up.path);
+                      data->state.up.path,
+                      (conn->handler->protocol&CURLPROTO_HTTPS)?
+                      TRUE:FALSE);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
 #endif

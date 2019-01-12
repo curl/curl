@@ -30,4 +30,9 @@ bool Curl_is_absolute_url(const char *url, char *scheme, size_t buflen);
 char *Curl_concat_url(const char *base, const char *relurl);
 size_t Curl_strlen_url(const char *url, bool relative);
 void Curl_strcpy_url(char *output, const char *url, bool relative);
+
+#ifdef DEBUGBUILD
+CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname);
+#endif
+
 #endif /* HEADER_CURL_URLAPI_INT_H */

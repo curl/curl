@@ -58,7 +58,10 @@ use for this transfer, independent of what libcurl has been compiled to
 support. That may be useful if you accept the URL from an external source and
 want to limit the accessibility.
 
-\fICURLOPT_URL(3)\fP is the only option that \fBmust\fP be set before a
+The \fICURLOPT_URL(3)\fP string will be ignored if \fICURLOPT_CURLU(3)\fP is
+set.
+
+\fICURLOPT_URL(3)\fP or \fICURLOPT_CURLU(3)\fP \fBmust\fP be set before a
 transfer is started.
 
 The host part of the URL contains the address of the server that you want to
@@ -350,4 +353,4 @@ similar is called.
 .BR CURLOPT_VERBOSE "(3), " CURLOPT_PROTOCOLS "(3), "
 .BR CURLOPT_FORBID_REUSE "(3), " CURLOPT_FRESH_CONNECT "(3), "
 .BR curl_easy_perform "(3), "
-.BR CURLINFO_REDIRECT_URL "(3), " CURLOPT_PATH_AS_IS "(3), "
+.BR CURLINFO_REDIRECT_URL "(3), " CURLOPT_PATH_AS_IS "(3), " CURLOPT_CURLU "(3), "

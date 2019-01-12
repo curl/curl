@@ -655,7 +655,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   while(!*ftpcode && !result) {
     /* check and reset timeout value every lap */
-    time_t timeout = Curl_pp_state_timeout(pp); /* timeout in milliseconds */
+    time_t timeout = Curl_pp_state_timeout(pp, FALSE);
     time_t interval_ms;
 
     if(timeout <= 0) {
@@ -1272,7 +1272,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         source++;
       }
       *dest = 0;
-      snprintf(dest, 20, ",%d,%d", (int)(port>>8), (int)(port&0xff));
+      msnprintf(dest, 20, ",%d,%d", (int)(port>>8), (int)(port&0xff));
 
       result = Curl_pp_sendf(&ftpc->pp, "%s %s", mode[fcmd], tmp);
       if(result) {
@@ -2061,9 +2061,9 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
         char timebuf[24];
         time_t secs = time(NULL);
 
-        snprintf(timebuf, sizeof(timebuf),
-                 "%04d%02d%02d %02d:%02d:%02d GMT",
-                 year, month, day, hour, minute, second);
+        msnprintf(timebuf, sizeof(timebuf),
+                  "%04d%02d%02d %02d:%02d:%02d GMT",
+                  year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
         data->info.filetime = curl_getdate(timebuf, &secs);
       }
@@ -2086,15 +2086,15 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
           return result;
 
         /* format: "Tue, 15 Nov 1994 12:45:26" */
-        snprintf(headerbuf, sizeof(headerbuf),
-                 "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                 Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-                 tm->tm_mday,
-                 Curl_month[tm->tm_mon],
-                 tm->tm_year + 1900,
-                 tm->tm_hour,
-                 tm->tm_min,
-                 tm->tm_sec);
+        msnprintf(headerbuf, sizeof(headerbuf),
+                  "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                  Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+                  tm->tm_mday,
+                  Curl_month[tm->tm_mon],
+                  tm->tm_year + 1900,
+                  tm->tm_hour,
+                  tm->tm_min,
+                  tm->tm_sec);
         result = Curl_client_write(conn, CLIENTWRITE_BOTH, headerbuf, 0);
         if(result)
           return result;
@@ -2276,8 +2276,8 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(-1 != filesize) {
       char clbuf[128];
-      snprintf(clbuf, sizeof(clbuf),
-               "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
+      msnprintf(clbuf, sizeof(clbuf),
+                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
       result = Curl_client_write(conn, CLIENTWRITE_BOTH, clbuf, 0);
       if(result)
         return result;
@@ -3054,7 +3054,7 @@ static CURLcode ftp_multi_statemach(struct connectdata *conn,
                                     bool *done)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  CURLcode result = Curl_pp_statemach(&ftpc->pp, FALSE);
+  CURLcode result = Curl_pp_statemach(&ftpc->pp, FALSE, FALSE);
 
   /* Check for the state outside of the Curl_socket_check() return code checks
      since at times we are in fact already in this state when this function
@@ -3071,7 +3071,7 @@ static CURLcode ftp_block_statemach(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   while(ftpc->state != FTP_STOP) {
-    result = Curl_pp_statemach(pp, TRUE);
+    result = Curl_pp_statemach(pp, TRUE, TRUE /* disconnecting */);
     if(result)
       break;
   }
