@@ -2386,8 +2386,6 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       action |= CURL_POLL_OUT;
 
     actions[i] = action;
-
-    comboaction = action;
     if(entry) {
       /* check if new for this transfer */
       for(i = 0; i< data->numsocks; i++) {
