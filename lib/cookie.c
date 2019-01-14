@@ -223,7 +223,7 @@ static bool pathmatch(const char *cookie_path, const char *request_uri)
     goto pathmatched;
   }
 
-  /* here, cookie_path_len < url_path_len */
+  /* here, cookie_path_len < uri_path_len */
   if(uri_path[cookie_path_len] == '/') {
     ret = TRUE;
     goto pathmatched;
