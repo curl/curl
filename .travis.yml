@@ -119,6 +119,9 @@ matrix:
         - os: osx
           compiler: clang
           env: T=normal
+        - os: osx
+          compiler: clang
+          env: T=cmake
         - os: linux
           compiler: gcc
           dist: trusty
