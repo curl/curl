@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_getinfo
+CURLINFO_PROTOCOL
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<server>
+none
+</server>
+<features>
+file
+</features>
+<tool>
+lib1558
+</tool>
+
+<name>
+CURLINFO_PROTOCOL for file:// transfer
+</name>
+<setenv>
+# force MSYS2 to not convert the file: URL
+MSYS2_ARG_CONV_EXCL=file:
+</setenv>
+<command>
+file:%FILE_PWD/log/data1558
+</command>
+<file name="log/data1558">
+hello
+</file>
+</client>
+
+#
+# Verify that the test runs to completion without crashing
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout>
+hello
+Protocol: 400
+</stdout>
+</verify>
+
+</testcase>

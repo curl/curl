@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017-2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2017-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,10 +28,7 @@
 
 #include "stub_gssapi.h"
 
-#define ENABLE_CURLX_PRINTF
-/* make the curlx header define all printf() functions to use the curlx_*
-   versions instead */
-#include "curlx.h" /* from the private lib dir */
+/* !checksrc! disable SNPRINTF all */
 
 #define MAX_CREDS_LENGTH 250
 #define APPROX_TOKEN_LEN 250
@@ -207,8 +204,10 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   }
 
   /* Token format: creds:target:type:padding */
-  used = msnprintf(token, length, "%s:%s:%d:", creds,
-                   (char *) target_name, ctx->sent);
+  /* Note: this is using the *real* snprintf() and not the curl provided
+     one */
+  used = snprintf(token, length, "%s:%s:%d:", creds,
+                  (char *) target_name, ctx->sent);
 
   if(used >= length) {
     free(token);

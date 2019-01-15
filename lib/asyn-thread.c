@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -462,12 +462,32 @@ static CURLcode resolver_error(struct connectdata *conn)
 }
 
 /*
+ * Until we gain a way to signal the resolver threads to stop early, we must
+ * simply wait for them and ignore their results.
+ */
+void Curl_resolver_kill(struct connectdata *conn)
+{
+  struct thread_data *td = (struct thread_data*) conn->async.os_specific;
+
+  /* If we're still resolving, we must wait for the threads to fully clean up,
+     unfortunately.  Otherwise, we can simply cancel to clean up any resolver
+     data. */
+  if(td && td->thread_hnd != curl_thread_t_null)
+    (void)Curl_resolver_wait_resolv(conn, NULL);
+  else
+    Curl_resolver_cancel(conn);
+}
+
+/*
  * Curl_resolver_wait_resolv()
  *
- * waits for a resolve to finish. This function should be avoided since using
+ * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
+ *
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  *
  * This is the version for resolves-in-a-thread.
  */
@@ -478,6 +498,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(conn && td);
+  DEBUGASSERT(td->thread_hnd != curl_thread_t_null);
 
   /* wait for the thread to resolve the name */
   if(Curl_thread_join(&td->thread_hnd)) {

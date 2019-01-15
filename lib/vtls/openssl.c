@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3774,7 +3774,12 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef OPENSSL_IS_BORINGSSL
   return msnprintf(buffer, size, OSSL_PACKAGE);
-#else /* OPENSSL_IS_BORINGSSL */
+#elif defined(HAVE_OPENSSL_VERSION) && defined(OPENSSL_VERSION_STRING)
+  return msnprintf(buffer, size, "%s/%s",
+                   OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
+#else
+  /* not BoringSSL and not using OpenSSL_version */
+
   char sub[3];
   unsigned long ssleay_value;
   sub[2]='\0';

@@ -6,7 +6,7 @@
 # *                            | (__| |_| |  _ <| |___
 # *                             \___|\___/|_| \_\_____|
 # *
-# * Copyright (C) 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+# * Copyright (C) 2013 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 # *
 # * This software is licensed as described in the file COPYING, which
 # * you should have received as part of this distribution. The terms
@@ -48,7 +48,7 @@ fi
 
 srcdir=${1}
 
-if test -f "$srcdir/../lib/objnames.inc"; then
+if test -f "$srcdir/objnames.inc"; then
   :
 else
   echo "$0: Missing objnames.inc"
@@ -72,7 +72,7 @@ list_obj_uniq=$logdir/${tstnum}_list_obj_uniq
 # Source curl_8char_object_name() function definition
 #
 
-. $srcdir/../lib/objnames.inc
+. $srcdir/objnames.inc
 
 #
 # Some curl_8char_object_name() unit tests

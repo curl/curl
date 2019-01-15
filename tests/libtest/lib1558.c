@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TIMEVAL_H
-#define HEADER_CURL_TIMEVAL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,38 +19,47 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+#include "test.h"
 
-#include "curl_setup.h"
+#include "testutil.h"
+#include "warnless.h"
+#include "memdebug.h"
 
-#if SIZEOF_TIME_T < 8
-typedef int timediff_t;
-#define CURL_FORMAT_TIMEDIFF_T "d"
-#else
-typedef curl_off_t timediff_t;
-#define CURL_FORMAT_TIMEDIFF_T CURL_FORMAT_CURL_OFF_T
-#endif
+int test(char *URL)
+{
+  CURLcode res = 0;
+  CURL *curl = NULL;
+  long protocol = 0;
 
-struct curltime {
-  time_t tv_sec; /* seconds */
-  int tv_usec;   /* microseconds */
-};
+  global_init(CURL_GLOBAL_ALL);
+  easy_init(curl);
 
-struct curltime Curl_now(void);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  res = curl_easy_perform(curl);
+  if(res) {
+    fprintf(stderr, "curl_easy_perform() returned %d (%s)\n",
+            res, curl_easy_strerror(res));
+    goto test_cleanup;
+  }
 
-/*
- * Make sure that the first argument (t1) is the more recent time and t2 is
- * the older time, as otherwise you get a weird negative time-diff back...
- *
- * Returns: the time difference in number of milliseconds.
- */
-timediff_t Curl_timediff(struct curltime t1, struct curltime t2);
+  res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+  if(res) {
+    fprintf(stderr, "curl_easy_getinfo() returned %d (%s)\n",
+            res, curl_easy_strerror(res));
+    goto test_cleanup;
+  }
 
-/*
- * Make sure that the first argument (t1) is the more recent time and t2 is
- * the older time, as otherwise you get a weird negative time-diff back...
- *
- * Returns: the time difference in number of microseconds.
- */
-timediff_t Curl_timediff_us(struct curltime newer, struct curltime older);
+  printf("Protocol: %x\n", protocol);
 
-#endif /* HEADER_CURL_TIMEVAL_H */
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return 0;
+
+test_cleanup:
+
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return res; /* return the final return code */
+}

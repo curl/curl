@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -318,7 +318,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
     /* if we're not handling trailing data, proceed as usual */
     if(data->state.trailers_state != TRAILERS_SENDING) {
       hexlen = msnprintf(hexbuffer, sizeof(hexbuffer),
-                         "%x%s", nread, endofline_native);
+                         "%zx%s", nread, endofline_native);
 
       /* move buffer pointer */
       data->req.upload_fromhere -= hexlen;
@@ -1350,15 +1350,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if(k->keepon) {
     if(0 > Curl_timeleft(data, &k->now, FALSE)) {
       if(k->size != -1) {
-        failf(data, "Operation timed out after %ld milliseconds with %"
-              CURL_FORMAT_CURL_OFF_T " out of %"
+        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
+              " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
               CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_timediff(k->now, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
-        failf(data, "Operation timed out after %ld milliseconds with %"
-              CURL_FORMAT_CURL_OFF_T " bytes received",
+        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
+              " milliseconds with %" CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_timediff(k->now, data->progress.t_startsingle),
               k->bytecount);
       }

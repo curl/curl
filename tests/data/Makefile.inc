@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -56,7 +56,7 @@ test289 test290 test291 test292 test293 test294 test295 test296 test297 \
 test298 test299 test300 test301 test302 test303 test304 test305 test306 \
 test307 test308 test309 test310 test311 test312 test313 test314 test315 \
 test316 test317 test318 test319 test320 test321 test322 test323 test324 \
-test325 test326 test327 test328 test329 \
+test325 test326 test327 test328 test329 test330 \
 \
 test340 \
 \
@@ -176,13 +176,12 @@ test1525 test1526 test1527 test1528 test1529 test1530 test1531 test1532 \
 test1533 test1534 test1535 test1536 test1537 test1538 \
 test1540 \
 test1550 test1551 test1552 test1553 test1554 test1555 test1556 test1557 \
+test1558          test1560 test1561 test1562 \
 \
-test1560 test1561 \
+test1590 test1591 test1592 \
 \
-test1590 \
-test1591 \
 test1600 test1601 test1602 test1603 test1604 test1605 test1606 test1607 \
-test1608 test1609 test1620 \
+test1608 test1609 test1620 test1621 \
 \
 test1650 test1651 test1652 test1653 \
 \

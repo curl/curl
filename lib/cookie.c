@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -223,7 +223,7 @@ static bool pathmatch(const char *cookie_path, const char *request_uri)
     goto pathmatched;
   }
 
-  /* here, cookie_path_len < url_path_len */
+  /* here, cookie_path_len < uri_path_len */
   if(uri_path[cookie_path_len] == '/') {
     ret = TRUE;
     goto pathmatched;
@@ -951,7 +951,7 @@ Curl_cookie_add(struct Curl_easy *data,
         /* the domains were identical */
 
         if(clist->spath && co->spath) {
-          if(clist->secure && !co->secure) {
+          if(clist->secure && !co->secure && !secure) {
             size_t cllen;
             const char *sep;
 

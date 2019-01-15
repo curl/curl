@@ -7,9 +7,9 @@ curl internals
  - [Windows vs Unix](#winvsunix)
  - [Library](#Library)
    - [`Curl_connect`](#Curl_connect)
-   - [`Curl_do`](#Curl_do)
+   - [`multi_do`](#multi_do)
    - [`Curl_readwrite`](#Curl_readwrite)
-   - [`Curl_done`](#Curl_done)
+   - [`multi_done`](#multi_done)
    - [`Curl_disconnect`](#Curl_disconnect)
  - [HTTP(S)](#http)
  - [FTP](#ftp)
@@ -219,29 +219,25 @@ Curl_connect()
    be several requests performed on the same connect). A bunch of things are
    inited/inherited from the `Curl_easy` struct.
 
-<a name="Curl_do"></a>
-Curl_do()
+<a name="multi_do"></a>
+multi_do()
 ---------
 
-   `Curl_do()` makes sure the proper protocol-specific function is called. The
+   `multi_do()` makes sure the proper protocol-specific function is called. The
    functions are named after the protocols they handle.
 
    The protocol-specific functions of course deal with protocol-specific
    negotiations and setup. They have access to the `Curl_sendf()` (from
    lib/sendf.c) function to send printf-style formatted data to the remote
    host and when they're ready to make the actual file transfer they call the
-   `Curl_Transfer()` function (in lib/transfer.c) to setup the transfer and
-   returns.
+   `Curl_setup_transfer()` function (in lib/transfer.c) to setup the transfer
+   and returns.
 
    If this DO function fails and the connection is being re-used, libcurl will
    then close this connection, setup a new connection and re-issue the DO
    request on that. This is because there is no way to be perfectly sure that
    we have discovered a dead connection before the DO function and thus we
    might wrongly be re-using a connection that was closed by the remote peer.
-
-   Some time during the DO function, the `Curl_setup_transfer()` function must
-   be called with some basic info about the upcoming transfer: what socket(s)
-   to read/write and the expected file transfer sizes (if known).
 
 <a name="Curl_readwrite"></a>
 Curl_readwrite()
@@ -254,13 +250,13 @@ Curl_readwrite()
    called). The speedcheck functions in lib/speedcheck.c are also used to
    verify that the transfer is as fast as required.
 
-<a name="Curl_done"></a>
-Curl_done()
+<a name="multi_done"></a>
+multi_done()
 -----------
 
    Called after a transfer is done. This function takes care of everything
    that has to be done after a transfer. This function attempts to leave
-   matters in a state so that `Curl_do()` should be possible to call again on
+   matters in a state so that `multi_do()` should be possible to call again on
    the same connection (in a persistent connection case). It might also soon
    be closed with `Curl_disconnect()`.
 
