@@ -177,20 +177,48 @@ int main(void) {
   return 0;
 }" HAVE_STRUCT_TIMEVAL)
 
-
-include(CheckCSourceRuns)
-# See HAVE_POLL in CMakeLists.txt for why poll is disabled on macOS
-if(NOT APPLE)
-  set(CMAKE_REQUIRED_FLAGS)
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  # if not cross-compilation...
+  include(CheckCSourceRuns)
+  set(CMAKE_REQUIRED_FLAGS "")
   if(HAVE_SYS_POLL_H)
     set(CMAKE_REQUIRED_FLAGS "-DHAVE_SYS_POLL_H")
+  elseif(HAVE_POLL_H)
+    set(CMAKE_REQUIRED_FLAGS "-DHAVE_POLL_H")
   endif()
   check_c_source_runs("
+    #include <stdlib.h>
+    #include <sys/time.h>
+
     #ifdef HAVE_SYS_POLL_H
     #  include <sys/poll.h>
+    #elif  HAVE_POLL_H
+    #  include <poll.h>
     #endif
-    int main(void) {
-      return poll((void *)0, 0, 10 /*ms*/);
+
+    int main(void)
+    {
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
+        }
+        else {
+          /* detect the 10.12 poll() breakage */
+          struct timeval before, after;
+          int rc;
+          size_t us;
+
+          gettimeofday(&before, NULL);
+          rc = poll(NULL, 0, 500);
+          gettimeofday(&after, NULL);
+
+          us = (after.tv_sec - before.tv_sec) * 1000000 +
+            (after.tv_usec - before.tv_usec);
+
+          if(us < 400000) {
+            return 1;
+          }
+        }
+        return 0;
     }" HAVE_POLL_FINE)
 endif()
 
