@@ -1692,6 +1692,7 @@ static CURLcode verifystatus(struct connectdata *conn,
                              struct ssl_connect_data *connssl)
 {
   int i, ocsp_status;
+  unsigned char *status;
   const unsigned char *p;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
@@ -1701,14 +1702,14 @@ static CURLcode verifystatus(struct connectdata *conn,
   X509_STORE     *st = NULL;
   STACK_OF(X509) *ch = NULL;
 
-  long len = SSL_get_tlsext_status_ocsp_resp(BACKEND->handle, &p);
+  long len = SSL_get_tlsext_status_ocsp_resp(BACKEND->handle, &status);
 
-  if(!p) {
+  if(!status) {
     failf(data, "No OCSP response received");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
-
+  p = status;
   rsp = d2i_OCSP_RESPONSE(NULL, &p, len);
   if(!rsp) {
     failf(data, "Invalid OCSP response");
