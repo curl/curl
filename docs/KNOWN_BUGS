@@ -384,9 +384,6 @@ problems may have been fixed or changed somewhat since this was written!
 
   - no nghttp2 check
 
-  - no check for what variadic macros that are supported. See
-    https://github.com/curl/curl/pull/3452
-
   - unusable tool_hugehelp.c with MinGW, see
     https://github.com/curl/curl/issues/3125
 
