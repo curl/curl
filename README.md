@@ -8,6 +8,7 @@
 [![Backers on Open Collective](https://opencollective.com/curl/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/curl/sponsors/badge.svg)](#sponsors)
 [![Language Grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/curl/curl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/curl/curl/context:cpp)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d11483a0cc5c4ebd9da4ff9f7cd56690)](https://www.codacy.com/app/curl/curl?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=curl/curl&amp;utm_campaign=Badge_Grade)
 
 Curl is a command-line tool for transferring data specified with URL
 syntax. Find out how to use curl by reading [the curl.1 man
