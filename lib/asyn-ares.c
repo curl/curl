@@ -89,7 +89,19 @@ struct ResolverResults {
   int num_pending; /* number of ares_gethostbyname() requests */
   Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares parts */
   int last_status;
+  struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 };
+
+/* How long we are willing to wait for additional parallel responses after
+   obtaining a "definitive" one.
+
+   This is intended to equal the c-ares default timeout.  cURL always uses that
+   default value.  Unfortunately, c-ares doesn't expose its default timeout in
+   its API, but it is officially documented as 5 seconds.
+
+   See query_completed_cb() for an explanation of how this is used.
+ */
+#define HAPPY_EYEBALLS_DNS_TIMEOUT 5000
 
 /*
  * Curl_resolver_global_init() - the generic low-level asynchronous name
@@ -347,6 +359,29 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 
   waitperform(conn, 0);
 
+  /* Now that we've checked for any last minute results above, see if there are
+     any responses still pending when the EXPIRE_HAPPY_EYEBALLS_DNS timer
+     expires. */
+  if(res
+     && res->num_pending
+     /* This is only set to non-zero if the timer was started. */
+     && (res->happy_eyeballs_dns_time.tv_sec
+         || res->happy_eyeballs_dns_time.tv_usec)
+     && (Curl_timediff(Curl_now(), res->happy_eyeballs_dns_time)
+         >= HAPPY_EYEBALLS_DNS_TIMEOUT)) {
+    /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
+       running. */
+    memset(
+      &res->happy_eyeballs_dns_time, 0, sizeof(res->happy_eyeballs_dns_time));
+
+    /* Cancel the raw c-ares request, which will fire query_completed_cb() with
+       ARES_ECANCELLED synchronously for all pending responses.  This will
+       leave us with res->num_pending == 0, which is perfect for the next
+       block. */
+    ares_cancel((ares_channel)data->state.resolver);
+    DEBUGASSERT(res->num_pending == 0);
+  }
+
   if(res && !res->num_pending) {
     if(dns) {
       (void)Curl_addrinfo_callback(conn, res->last_status, res->temp_ai);
@@ -517,6 +552,66 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
     /* A successful result overwrites any previous error */
     if(res->last_status != ARES_SUCCESS)
       res->last_status = status;
+
+    /* If there are responses still pending, we presume they must be the
+       complementary IPv4 or IPv6 lookups that we started in parallel in
+       Curl_resolver_getaddrinfo() (for Happy Eyeballs).  If we've got a
+       "definitive" response from one of a set of parallel queries, we need to
+       think about how long we're willing to wait for more responses. */
+    if(res->num_pending
+       /* Only these c-ares status values count as "definitive" for these
+          purposes.  For example, ARES_ENODATA is what we expect when there is
+          no IPv6 entry for a domain name, and that's not a reason to get more
+          aggressive in our timeouts for the other response.  Other errors are
+          either a result of bad input (which should affect all parallel
+          requests), local or network conditions, non-definitive server
+          responses, or us cancelling the request. */
+       && (status == ARES_SUCCESS || status == ARES_ENOTFOUND)) {
+      /* Right now, there can only be up to two parallel queries, so don't
+         bother handling any other cases. */
+      DEBUGASSERT(res->num_pending == 1);
+
+      /* It's possible that one of these parallel queries could succeed
+         quickly, but the other could always fail or timeout (when we're
+         talking to a pool of DNS servers that can only successfully resolve
+         IPv4 address, for example).
+
+         It's also possible that the other request could always just take
+         longer because it needs more time or only the second DNS server can
+         fulfill it successfully.  But, to align with the philosophy of Happy
+         Eyeballs, we don't want to wait _too_ long or users will think
+         requests are slow when IPv6 lookups don't actually work (but IPv4 ones
+         do).
+
+         So, now that we have a usable answer (some IPv4 addresses, some IPv6
+         addresses, or "no such domain"), we start a timeout for the remaining
+         pending responses.  Even though it is typical that this resolved
+         request came back quickly, that needn't be the case.  It might be that
+         this completing request didn't get a result from the first DNS server
+         or even the first round of the whole DNS server pool.  So it could
+         already be quite some time after we issued the DNS queries in the
+         first place.  Without modifying c-ares, we can't know exactly where in
+         its retry cycle we are.  We could guess based on how much time has
+         gone by, but it doesn't really matter.  Happy Eyeballs tells us that,
+         given usable information in hand, we simply don't want to wait "too
+         much longer" after we get a result.
+
+         We simply wait an additional amount of time equal to the default
+         c-ares query timeout.  That is enough time for a typical parallel
+         response to arrive without being "too long".  Even on a network
+         where one of the two types of queries is failing or timing out
+         constantly, this will usually mean we wait a total of the default
+         c-ares timeout (5 seconds) plus the round trip time for the successful
+         request, which seems bearable.  The downside is that c-ares might race
+         with us to issue one more retry just before we give up, but it seems
+         better to "waste" that request instead of trying to guess the perfect
+         timeout to prevent it.  After all, we don't even know where in the
+         c-ares retry cycle each request is.
+      */
+      res->happy_eyeballs_dns_time = Curl_now();
+      Curl_expire(
+        conn->data, HAPPY_EYEBALLS_DNS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS_DNS);
+    }
   }
 }
 
