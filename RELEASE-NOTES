@@ -19,10 +19,16 @@ This release includes the following bugfixes:
  o FAQ: remove mention of sourceforge for github [22]
  o OS400: handle memory error in list conversion [4]
  o OS400: upgrade ILE/RPG binding.
+ o README: add codacy code quality badge
  o Revert http_negotiate: do not close connection [31]
  o THANKS: added several missing names from year <= 2000
+ o build: make 'tidy' target work for metalink builds
+ o cmake: added checks for variadic macros [47]
+ o cmake: updated check for HAVE_POLL_FINE to match autotools [39]
  o cmake: use lowercase for function name like the rest of the code [20]
+ o configure: detect xlclang separately from clang [41]
  o conncache_unlock: avoid indirection by changing input argument type
+ o cookie: fix comment typo [44]
  o cookies: allow secure override when done over HTTPS [34]
  o cookies: extend domain checks to non psl builds [12]
  o cookies: skip custom cookies when redirecting cross-site [36]
@@ -43,19 +49,29 @@ This release includes the following bugfixes:
  o mbedtls: use VERIFYHOST [15]
  o multi: multiplexing improvements [35]
  o ntlm: fix NTMLv2 compliance [25]
+ o openssl: adapt to 3.0.0, OpenSSL_version_num() is deprecated [46]
+ o openssl: fix the SSL_get_tlsext_status_ocsp_resp call [40]
  o openvms: fix OpenSSL discovery on VAX [21]
  o openvms: fix typos in documentation
+ o os400: add a missing closing bracket [50]
+ o os400: fix extra parameter syntax error [50]
  o pingpong: change default response timeout to 120 seconds
  o pingpong: ignore regular timeout in disconnect phase [16]
  o printf: fix format specifiers [28]
  o schannel: fix compiler warning [29]
  o smb: fix incorrect path in request if connection reused [13]
+ o test1558: verify CURLINFO_PROTOCOL on file:// transfer [51]
  o test1561: improve test name
  o tests: allow tests to pass by 2037-02-12 [38]
+ o tests: move objnames-* from lib into tests [42]
  o timediff: fix math for unsigned time_t [37]
+ o tool_cb_prg: avoid integer overflow [49]
+ o travis: added cmake build for osx [43]
  o urlapi: Fix port parsing of eol colon [1]
  o urlapi: distinguish possibly empty query [5]
  o urlapi: fix parsing ipv6 with zone index [24]
+ o urldata: rename easy_conn to just conn [48]
+ o winbuild: conditionally use /DZLIB_WINAPI [45]
  o wolfssl: fix memory-leak in threaded use [11]
 
 This release includes the following known bugs:
@@ -68,12 +84,13 @@ advice from friends like these:
   Andrei Neculau, Ayoub Boudhar, Ben Kohler, Bernhard M. Wiedemann,
   Brad Spencer, Claes Jakobsson, Daniel Gustafsson, Daniel Stenberg,
   David Garske, dnivras on github, Eric Rosenquist, Florian Pritz,
-  GitYuanQu on github, Harry Sintonen, Huzaifa Sidhpurwala, jasal82 on github,
-  Jeroen Ooms, Kamil Dudka, Katsuhiko YOSHIDA, Leonardo Taccari, Marcel Raad,
+  Frank Gevaerts, GitYuanQu on github, Harry Sintonen, Huzaifa Sidhpurwala,
+  jasal82 on github, Jeroen Ooms, jonrumsey on github, Kamil Dudka,
+  Katsuhiko YOSHIDA, Kees Dekker, Leonardo Taccari, Marcel Raad,
   Markus Moeller, masbug on github, Matus Uzak, Patrick Monnerat, Pavel Pavlov,
-  Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov, Shlomi Fish,
+  Peng Li, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov, Shlomi Fish,
   Tobias Lindgren, Tom van der Woerdt, Viktor Szakats,
-  (33 contributors)
+  (37 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -117,3 +134,16 @@ References to bug reports and discussions on issues:
  [36] = https://curl.haxx.se/bug/?i=3417
  [37] = https://curl.haxx.se/bug/?i=3449
  [38] = https://curl.haxx.se/bug/?i=3443
+ [39] = https://curl.haxx.se/bug/?i=3292
+ [40] = https://curl.haxx.se/bug/?i=3477
+ [41] = https://curl.haxx.se/bug/?i=3474
+ [42] = https://curl.haxx.se/bug/?i=3470
+ [43] = https://curl.haxx.se/bug/?i=3468
+ [44] = https://curl.haxx.se/bug/?i=3469
+ [45] = https://curl.haxx.se/bug/?i=3133
+ [46] = https://curl.haxx.se/bug/?i=3462
+ [47] = https://curl.haxx.se/bug/?i=3459
+ [48] = https://curl.haxx.se/bug/?i=3442
+ [49] = https://curl.haxx.se/bug/?i=3456
+ [50] = https://curl.haxx.se/bug/?i=3453
+ [51] = https://curl.haxx.se/bug/?i=3447
