@@ -346,10 +346,16 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
             dwMinimumCipherStrength & dwMaximumCipherStrength to -1
             since this is a force case we ignore other algorithms
         */
-         schannel_cred->dwMinimumCipherStrength = -1;
+#if defined(__MINGW32__) || defined(__MINGW64__)
+        schannel_cred->dwMinimumCypherStrength = -1;
+         schannel_cred->dwMaximumCypherStrength = -1;
+
+#else
+        schannel_cred->dwMinimumCipherStrength = -1;
          schannel_cred->dwMaximumCipherStrength = -1;
+#endif
     }
-    if(alg)
+    else if(alg)
       algIds[algCount++] = alg;
     else
       return CURLE_SSL_CIPHER;
