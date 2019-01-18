@@ -906,6 +906,24 @@ static int cb_extend_max_streams_bidi(ngtcp2_conn *tconn, uint64_t max_streams,
   return 0;
 }
 
+static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
+                                    uint8_t *token, size_t cidlen,
+                                    void *user_data)
+{
+  struct connectdata *conn = (struct connectdata *)user_data;
+  CURLcode result;
+  (void)tconn;
+
+  result = Curl_rand(conn->data, cid->data, cidlen);
+  if(result)
+    return 1;
+
+  result = Curl_rand(conn->data, token, NGTCP2_STATELESS_RESET_TOKENLEN);
+  if(result)
+    return 1;
+
+  return 0;
+}
 
 static void quic_callbacks(ngtcp2_conn_callbacks *c)
 {
@@ -931,9 +949,8 @@ static void quic_callbacks(ngtcp2_conn_callbacks *c)
   c->extend_max_streams_bidi = cb_extend_max_streams_bidi;
   /* extend_max_streams_uni = NULL */
   /* rand = NULL */
-  /* ADD: get_new_connection_id */
-  /* ADD: remove_connection_id */
-
+  c->get_new_connection_id = cb_get_new_connection_id;
+  /* remove_connection_id = NULL */
 }
 
 
