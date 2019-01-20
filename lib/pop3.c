@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -208,7 +208,7 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
   /* Are we processing CAPA command responses? */
   if(pop3c->state == POP3_CAPA) {
     /* Do we have the terminating line? */
-    if(len >= 1 && !memcmp(line, ".", 1))
+    if(len >= 1 && line[0] == '.')
       /* Treat the response as a success */
       *resp = '+';
     else
@@ -226,7 +226,7 @@ static bool pop3_endofresp(struct connectdata *conn, char *line, size_t len,
   }
 
   /* Do we have a continuation response? */
-  if(len >= 1 && !memcmp("+", line, 1)) {
+  if(len >= 1 && line[0] == '+') {
     *resp = '*';
 
     return TRUE;
