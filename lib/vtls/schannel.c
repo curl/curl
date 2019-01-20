@@ -356,6 +356,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
                   TCHAR **thumbprint)
 {
   TCHAR *sep;
+  TCHAR *store_path_start;
   size_t store_name_len;
 
   sep = _tcschr(path, TEXT('\\'));
@@ -386,13 +387,17 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   else
     return CURLE_SSL_CERTPROBLEM;
 
-  *store_path = sep + 1;
+  store_path_start = sep + 1;
 
-  sep = _tcschr(*store_path, TEXT('\\'));
+  sep = _tcschr(store_path_start, TEXT('\\'));
   if(sep == NULL)
     return CURLE_SSL_CERTPROBLEM;
 
-  *sep = 0;
+  *sep = TEXT('\0');
+  *store_path = _tcsdup(store_path_start);
+  *sep = TEXT('\\');
+  if(*store_path == NULL)
+    return CURLE_OUT_OF_MEMORY;
 
   *thumbprint = sep + 1;
   if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
@@ -608,9 +613,11 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         failf(data, "schannel: Failed to open cert store %x %s, "
               "last error is %x",
               cert_store_name, cert_store_path, GetLastError());
+        free(cert_store_path);
         Curl_unicodefree(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
+      free(cert_store_path);
 
       cert_thumbprint.pbData = cert_thumbprint_data;
       cert_thumbprint.cbData = CERT_THUMBPRINT_DATA_LEN;
