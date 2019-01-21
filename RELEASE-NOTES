@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o cmake: updated check for HAVE_POLL_FINE to match autotools [39]
  o cmake: use lowercase for function name like the rest of the code [20]
  o configure: detect xlclang separately from clang [41]
+ o configure: fix recv/send/select detection on Android [53]
  o conncache_unlock: avoid indirection by changing input argument type
  o cookie: fix comment typo [44]
  o cookies: allow secure override when done over HTTPS [34]
@@ -49,6 +50,7 @@ This release includes the following bugfixes:
  o mbedtls: use VERIFYHOST [15]
  o multi: multiplexing improvements [35]
  o ntlm: fix NTMLv2 compliance [25]
+ o ntlm_sspi: add support for channel binding [54]
  o openssl: adapt to 3.0.0, OpenSSL_version_num() is deprecated [46]
  o openssl: fix the SSL_get_tlsext_status_ocsp_resp call [40]
  o openvms: fix OpenSSL discovery on VAX [21]
@@ -59,7 +61,9 @@ This release includes the following bugfixes:
  o pingpong: ignore regular timeout in disconnect phase [16]
  o printf: fix format specifiers [28]
  o schannel: fix compiler warning [29]
+ o schannel: preserve original certificate path parameter [52]
  o smb: fix incorrect path in request if connection reused [13]
+ o ssh: log the libssh2 error message when ssh session startup fails [55]
  o test1558: verify CURLINFO_PROTOCOL on file:// transfer [51]
  o test1561: improve test name
  o tests: allow tests to pass by 2037-02-12 [38]
@@ -81,16 +85,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrei Neculau, Ayoub Boudhar, Ben Kohler, Bernhard M. Wiedemann,
-  Brad Spencer, Claes Jakobsson, Daniel Gustafsson, Daniel Stenberg,
-  David Garske, dnivras on github, Eric Rosenquist, Florian Pritz,
-  Frank Gevaerts, GitYuanQu on github, Harry Sintonen, Huzaifa Sidhpurwala,
-  jasal82 on github, Jeroen Ooms, jonrumsey on github, Kamil Dudka,
-  Katsuhiko YOSHIDA, Kees Dekker, Leonardo Taccari, Marcel Raad,
+  Alessandro Ghedini, Andrei Neculau, Archangel SDY, Ayoub Boudhar, Ben Kohler,
+  Bernhard M. Wiedemann, Brad Spencer, Claes Jakobsson, Daniel Gustafsson,
+  Daniel Stenberg, David Garske, dnivras on github, Eric Rosenquist,
+  Florian Pritz, Frank Gevaerts, Giorgos Oikonomou, GitYuanQu on github,
+  Haibo Huang, Harry Sintonen, Helge Klein, Huzaifa Sidhpurwala,
+  jasal82 on github, Jeroen Ooms, Joel Depooter, jonrumsey on github,
+  Kamil Dudka, Katsuhiko YOSHIDA, Kees Dekker, Leonardo Taccari, Marcel Raad,
   Markus Moeller, masbug on github, Matus Uzak, Patrick Monnerat, Pavel Pavlov,
-  Peng Li, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov, Shlomi Fish,
-  Tobias Lindgren, Tom van der Woerdt, Viktor Szakats,
-  (37 contributors)
+  Peng Li, Ray Satiro, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov,
+  Shlomi Fish, Tobias Lindgren, Tom van der Woerdt, Viktor Szakats,
+  (44 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -147,3 +152,7 @@ References to bug reports and discussions on issues:
  [49] = https://curl.haxx.se/bug/?i=3456
  [50] = https://curl.haxx.se/bug/?i=3453
  [51] = https://curl.haxx.se/bug/?i=3447
+ [52] = https://curl.haxx.se/bug/?i=3480
+ [53] = https://curl.haxx.se/bug/?i=3484
+ [54] = https://curl.haxx.se/bug/?i=3280
+ [55] = https://curl.haxx.se/bug/?i=3481
