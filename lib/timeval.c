@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,20 +47,13 @@ struct curltime Curl_now(void)
       (int)((count.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart);
   }
   else {
-    /* 
-    ** In later Windows SDK versions, when compiling with msvc /analyze,
-    ** the compiler will warn about GetTickCount instead of GetTickCount64.
-    ** GetTickCount is not a good monotonic time source, as it wraps when
-    ** the system has been up for around 49 days.  But this is good enough
-    ** most of the time, and running on <= XP is becoming vanishingly rare.
-    ** https://github.com/curl/curl/issues/3437
-    */
+    /* Disable /analyze warning that GetTickCount64 is preferred  */
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:28159)
 #endif
     DWORD milliseconds = GetTickCount();
-#if defined(_MSC_VER) 
+#if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
 
