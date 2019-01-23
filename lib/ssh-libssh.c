@@ -556,6 +556,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
   struct Curl_easy *data = conn->data;
   struct SSHPROTO *protop = data->req.protop;
   struct ssh_conn *sshc = &conn->proto.sshc;
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc = SSH_NO_ERROR, err;
   char *new_readdir_line;
   int seekerr = CURL_SEEKFUNC_OK;
@@ -799,7 +800,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       Curl_pgrsTime(conn->data, TIMER_APPCONNECT);      /* SSH is connected */
 
-      conn->sockfd = ssh_get_fd(sshc->ssh_session);
+      conn->sockfd = sock;
       conn->writesockfd = CURL_SOCKET_BAD;
 
       if(conn->handler->protocol == CURLPROTO_SFTP) {
@@ -2052,6 +2053,7 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
 {
   struct ssh_conn *ssh;
   CURLcode result;
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   struct Curl_easy *data = conn->data;
   int rc;
 
@@ -2079,6 +2081,8 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
     failf(data, "Failure initialising ssh session");
     return CURLE_FAILED_INIT;
   }
+
+  ssh_options_set(ssh->ssh_session, SSH_OPTIONS_FD, &sock);
 
   if(conn->user) {
     infof(data, "User: %s\n", conn->user);
