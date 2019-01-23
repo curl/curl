@@ -2237,7 +2237,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     result = Curl_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5],
                             va_arg(param, char *));
     break;
-#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+
   case CURLOPT_SSH_KNOWNHOSTS:
     /*
      * Store the file name to read known hosts from.
@@ -2258,7 +2258,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      */
     data->set.ssh_keyfunc_userp = va_arg(param, void *);
     break;
-#endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 #endif /* USE_LIBSSH2 */
 
   case CURLOPT_HTTP_TRANSFER_DECODING:
