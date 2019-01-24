@@ -3865,7 +3865,7 @@ sub singletest {
     if($cmdtype eq "perl") {
         # run the command line prepended with "perl"
         $cmdargs ="$cmd";
-        $CMDLINE = "perl ";
+        $CMDLINE = "$perl ";
         $tool=$CMDLINE;
         $disablevalgrind=1;
     }
