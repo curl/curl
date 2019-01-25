@@ -136,6 +136,7 @@
 #define CERT_THUMBPRINT_STR_LEN 40
 #define CERT_THUMBPRINT_DATA_LEN 20
 
+
 /* Uncomment to force verbose output
  * #define infof(x, y, ...) printf(y, __VA_ARGS__)
  * #define failf(x, y, ...) printf(y, __VA_ARGS__)
@@ -344,15 +345,15 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
             to force Null encryption in schannel
             we need to pass
             dwMinimumCipherStrength & dwMaximumCipherStrength to -1
-            since this is a force case we ignore other algorithms
         */
-#if defined(__MINGW32__) || defined(__MINGW64__)
-        schannel_cred->dwMinimumCypherStrength = -1;
-         schannel_cred->dwMaximumCypherStrength = -1;
+/* this should be enought mingw and visual studio define __SCHANNEL_H__*/        
+#if defined(_SCHANNEL_H)
+        schannel_cred->dwMinimumCypherStrength = (DWORD) -1;
+        schannel_cred->dwMaximumCypherStrength = (DWORD) -1;
 
 #else
-        schannel_cred->dwMinimumCipherStrength = -1;
-         schannel_cred->dwMaximumCipherStrength = -1;
+        schannel_cred->dwMinimumCipherStrength = (DWORD) -1;
+        schannel_cred->dwMaximumCipherStrength = (DWORD) -1;
 #endif
     }
     else if(alg)
@@ -363,7 +364,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
     if(startCur)
       startCur++;
   }
-    schannel_cred->palgSupportedAlgs = algIds;
+  schannel_cred->palgSupportedAlgs = algIds;
   schannel_cred->cSupportedAlgs = algCount;
   return CURLE_OK;
 }
@@ -590,6 +591,9 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       if(CURLE_OK != result) {
         failf(data, "Unable to set ciphers to passed via SSL_CONN_CONFIG");
         return result;
+      }
+      else{
+         infof(data,"schannel: Warning cipher used were manually set.\n"); 
       }
     }
 
