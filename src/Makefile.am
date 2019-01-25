@@ -69,10 +69,6 @@ endif
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 curl_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
 
-@CODE_COVERAGE_RULES@
-curl_LDFLAGS += $(CODE_COVERAGE_LDFLAGS)
-CFLAGS += $(CODE_COVERAGE_CFLAGS)
-
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
