@@ -31,7 +31,7 @@ XC_OVR_ZZ60
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
-AC_COPYRIGHT([Copyright (c) 1998 - 2017 Daniel Stenberg, <daniel@haxx.se>
+AC_COPYRIGHT([Copyright (c) 1998 - 2019 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
@@ -131,11 +131,8 @@ dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`
 XC_CHECK_PROG_CC
 
-dnl Check if gcc is being used before adding AX_CODE_COVERAGE
-AS_IF([ test "$GCC" = "yes" ], [AX_CODE_COVERAGE],
-  # not using GCC so pass a test below - CODE_COVERAGE_ENABLED_TRUE is not zero length
-  CODE_COVERAGE_ENABLED_TRUE='#'
-)
+dnl for --enable-code-coverage
+CURL_COVERAGE
 
 XC_AUTOMAKE
 AC_MSG_CHECKING([curl version])
@@ -4314,6 +4311,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Built-in manual:  ${curl_manual_msg}
   --libcurl option: ${curl_libcurl_msg}
   Verbose errors:   ${curl_verbose_msg}
+  Code coverage:    ${curl_coverage_msg}
   SSPI support:     ${curl_sspi_msg}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
