@@ -349,8 +349,9 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
             to force Null encryption in schannel
             we need to pass
             dwMinimumCipherStrength & dwMaximumCipherStrength to -1
-        */
-/* this should be enought mingw and visual studio define __SCHANNEL_H__*/        
+            */
+/* this should be enough
+mingw and visual studio define __SCHANNEL_H__*/
 #if defined(_SCHANNEL_H)
         schannel_cred->dwMinimumCypherStrength = (DWORD) -1;
         schannel_cred->dwMaximumCypherStrength = (DWORD) -1;
@@ -542,6 +543,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
         schannel_cred.dwFlags = SCH_CRED_AUTO_CRED_VALIDATION;
 
+      /* TODO s/data->set.ssl.no_revoke/SSL_SET_OPTION(no_revoke)/g */
       if(data->set.ssl.no_revoke) {
         schannel_cred.dwFlags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
           SCH_CRED_IGNORE_REVOCATION_OFFLINE;
@@ -605,7 +607,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         return result;
       }
       else{
-         infof(data,"schannel: Warning cipher used were manually set.\n"); 
+         infof(data, "schannel: Warning cipher used were manually set.\n");
       }
     }
 
@@ -890,11 +892,13 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   unsigned char *reallocated_buffer;
+  size_t reallocated_length;
   SecBuffer outbuf[3];
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf[2];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
+  TCHAR *host_name;
   CURLcode result;
   bool doread;
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
@@ -937,7 +941,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   if(BACKEND->encdata_length - BACKEND->encdata_offset <
      CURL_SCHANNEL_BUFFER_FREE_SIZE) {
     /* increase internal encrypted data buffer */
-    size_t reallocated_length = BACKEND->encdata_offset +
+    reallocated_length = BACKEND->encdata_offset +
       CURL_SCHANNEL_BUFFER_FREE_SIZE;
     reallocated_buffer = realloc(BACKEND->encdata_buffer,
                                  reallocated_length);
@@ -953,7 +957,6 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   }
 
   for(;;) {
-    TCHAR *host_name;
     if(doread) {
       /* read encrypted handshake data from socket */
       result = Curl_read_plain(conn->sock[sockindex],
@@ -2152,9 +2155,14 @@ static CURLcode Curl_schannel_random(struct Curl_easy *data UNUSED_PARAM,
 static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
                                     const char *pinnedpubkey)
 {
+  SECURITY_STATUS sspi_status;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CERT_CONTEXT *pCertContextServer = NULL;
+  const char *x509_der;
+  DWORD x509_der_len;
+  curl_X509certificate x509_parsed;
+  curl_asn1Element *pubkey;
 
   /* Result is returned to caller */
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
@@ -2164,12 +2172,6 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
     return CURLE_OK;
 
   do {
-    SECURITY_STATUS sspi_status;
-    const char *x509_der;
-    DWORD x509_der_len;
-    curl_X509certificate x509_parsed;
-    curl_asn1Element *pubkey;
-
     sspi_status =
       s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
