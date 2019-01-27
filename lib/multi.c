@@ -1454,6 +1454,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case CURLM_STATE_CONNECT:
       /* Connect. We want to get a connection identifier filled in. */
       Curl_pgrsTime(data, TIMER_STARTSINGLE);
+      if(data->set.timeout)
+        Curl_expire(data, data->set.timeout, EXPIRE_TIMEOUT);
+
+      if(data->set.connecttimeout)
+        Curl_expire(data, data->set.connecttimeout, EXPIRE_CONNECTTIMEOUT);
+
       result = Curl_connect(data, &async, &protocol_connect);
       if(CURLE_NO_CONNECTION_AVAILABLE == result) {
         /* There was no connection available. We will go to the pending
