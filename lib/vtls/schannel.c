@@ -346,7 +346,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers)
             we need to pass
             dwMinimumCipherStrength & dwMaximumCipherStrength to -1
             */
-/* this should be enought
+/* this should be enough
 mingw and visual studio define __SCHANNEL_H__*/
 #if defined(_SCHANNEL_H)
         schannel_cred->dwMinimumCypherStrength = (DWORD) -1;
