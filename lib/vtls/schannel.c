@@ -1428,7 +1428,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
-    conn->ntlm.sslContext = &BACKEND->ctxt->ctxt_handle;
+    conn->sslContext = &BACKEND->ctxt->ctxt_handle;
 #endif
 
     *done = TRUE;
