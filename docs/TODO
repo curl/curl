@@ -126,6 +126,7 @@
  15. WinSSL/SChannel
  15.1 Add support for client certificate authentication
  15.3 Add support for the --ciphers option
+ 15.4 Add option to disable client certificate auto-send
 
  16. SASL
  16.1 Other authentication mechanisms
@@ -875,6 +876,19 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  by mapping the OpenSSL/GnuTLS cipher suites to the SChannel APIs, see
  - Specifying Schannel Ciphers and Cipher Strengths
    https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
+
+15.4 Add option to disable client certificate auto-send
+
+ Microsoft says "By default, Schannel will, with no notification to the client,
+ attempt to locate a client certificate and send it to the server." That could
+ be considered a privacy violation and unexpected.
+
+ Some Windows users have come to expect that default behavior and to change the
+ default to make it consistent with other SSL backends would be a breaking
+ change. An option should be added that can be used to disable the default
+ Schannel auto-send behavior.
+
+ https://github.com/curl/curl/issues/2262
 
 16. SASL
 
