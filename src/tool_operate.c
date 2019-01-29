@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -258,9 +258,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
      * no environment-specified filename is found then check for CA bundle
      * default filename curl-ca-bundle.crt in the user's PATH.
      *
-     * If Schannel (WinSSL) is the selected SSL backend then these locations
-     * are ignored. We allow setting CA location for schannel only when
-     * explicitly specified by the user via CURLOPT_CAINFO / --cacert.
+     * If Schannel is the selected SSL backend then these locations are
+     * ignored. We allow setting CA location for schannel only when explicitly
+     * specified by the user via CURLOPT_CAINFO / --cacert.
      */
     if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
       char *env;
