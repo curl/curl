@@ -175,6 +175,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     if(s_hSecDll == NULL)
       return err;
   }
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+  ntlm->sslContext = conn->sslContext;
+#endif
 #endif
 
   switch(ntlm->state) {

@@ -89,6 +89,11 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
     }
   }
 
+  /* Supports SSL channel binding for Windows ISS extended protection */
+#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
+  neg_ctx->sslContext = conn->sslContext;
+#endif
+
   /* Initialize the security context and decode our challenge */
   result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
                                            host, header, neg_ctx);

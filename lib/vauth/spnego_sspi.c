@@ -92,7 +92,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   size_t chlglen = 0;
   unsigned char *chlg = NULL;
   PSecPkgInfo SecurityPackage;
-  SecBuffer chlg_buf;
+  SecBuffer chlg_buf[2];
   SecBuffer resp_buf;
   SecBufferDesc chlg_desc;
   SecBufferDesc resp_desc;
@@ -189,12 +189,39 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     }
 
     /* Setup the challenge "input" security buffer */
-    chlg_desc.ulVersion = SECBUFFER_VERSION;
-    chlg_desc.cBuffers  = 1;
-    chlg_desc.pBuffers  = &chlg_buf;
-    chlg_buf.BufferType = SECBUFFER_TOKEN;
-    chlg_buf.pvBuffer   = chlg;
-    chlg_buf.cbBuffer   = curlx_uztoul(chlglen);
+    chlg_desc.ulVersion    = SECBUFFER_VERSION;
+    chlg_desc.cBuffers     = 1;
+    chlg_desc.pBuffers     = &chlg_buf[0];
+    chlg_buf[0].BufferType = SECBUFFER_TOKEN;
+    chlg_buf[0].pvBuffer   = chlg;
+    chlg_buf[0].cbBuffer   = curlx_uztoul(chlglen);
+
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+    /* ssl context comes from Schannel.
+    * When extended protection is used in IIS server,
+    * we have to pass a second SecBuffer to the SecBufferDesc
+    * otherwise IIS will not pass the authentication (401 response).
+    * Minimum supported version is Windows 7.
+    * https://docs.microsoft.com/en-us/security-updates
+    * /SecurityAdvisories/2009/973811
+    */
+    if(nego->sslContext) {
+      SEC_CHANNEL_BINDINGS channelBindings;
+      SecPkgContext_Bindings pkgBindings;
+      pkgBindings.Bindings = &channelBindings;
+      nego->status = s_pSecFn->QueryContextAttributes(
+          nego->sslContext,
+          SECPKG_ATTR_ENDPOINT_BINDINGS,
+          &pkgBindings
+      );
+      if(nego->status == SEC_E_OK) {
+        chlg_desc.cBuffers++;
+        chlg_buf[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
+        chlg_buf[1].cbBuffer   = pkgBindings.BindingsLength;
+        chlg_buf[1].pvBuffer   = pkgBindings.Bindings;
+      }
+    }
+#endif
   }
 
   /* Setup the response "output" security buffer */
