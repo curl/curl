@@ -1480,6 +1480,11 @@ AC_HELP_STRING([--with-winssl],[enable Windows native SSL/TLS])
 AC_HELP_STRING([--without-winssl], [disable Windows native SSL/TLS]),
   OPT_WINSSL=$withval)
 
+AC_ARG_WITH(schannel,dnl
+AC_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS])
+AC_HELP_STRING([--without-schannel], [disable Windows native SSL/TLS]),
+  OPT_WINSSL=$withval)
+
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS (Windows native builds only)])
 if test -z "$ssl_backends" -o "x$OPT_WINSSL" != xno; then
   ssl_msg=

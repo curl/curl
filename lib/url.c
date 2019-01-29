@@ -492,9 +492,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   /* Set the default CA cert bundle/path detected/specified at build time.
    *
-   * If Schannel (WinSSL) is the selected SSL backend then these locations
-   * are ignored. We allow setting CA location for schannel only when
-   * explicitly specified by the user via CURLOPT_CAINFO / --cacert.
+   * If Schannel is the selected SSL backend then these locations are
+   * ignored. We allow setting CA location for schannel only when explicitly
+   * specified by the user via CURLOPT_CAINFO / --cacert.
    */
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(CURL_CA_BUNDLE)

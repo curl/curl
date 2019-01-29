@@ -36,7 +36,7 @@ system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please
 precede it with "./" prefix, in order to avoid confusion with a nickname.
 
-(Schannel/WinSSL only) Client certificates must be specified by a path
+(Schannel only) Client certificates must be specified by a path
 expression to a certificate store. (Loading PFX is not supported; you can
 import it to a store first). You can use
 "<store location>\\<store name>\\<thumbprint>" to refer to a certificate
