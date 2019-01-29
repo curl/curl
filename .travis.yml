@@ -119,6 +119,9 @@ matrix:
         - os: osx
           compiler: clang
           env: T=normal
+        - os: osx
+          compiler: clang
+          env: T=cmake
         - os: linux
           compiler: gcc
           dist: trusty
@@ -327,9 +330,6 @@ script:
                 make test-nonflaky
              fi
              if [ -n $CHECKSRC ]; then
-                echo "enable COPYRIGHTYEAR" > "lib/.checksrc"
-                echo "enable COPYRIGHTYEAR" > "src/.checksrc"
-                echo "enable COPYRIGHTYEAR" > "include/curl/.checksrc"
                 make checksrc
              fi
         fi
@@ -350,10 +350,11 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "cmake" ]; then
-             mkdir build
-             cd build
-             cmake .. -DCURL_WERROR=ON
-             make
+             if [ $TRAVIS_OS_NAME = linux ]; then
+                cmake -H. -Bbuild -DCURL_WERROR=ON && cmake --build build
+             else
+                cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON && cmake --build build
+             fi
         fi
     - |
         set -eo pipefail

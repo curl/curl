@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1692,6 +1692,7 @@ static CURLcode verifystatus(struct connectdata *conn,
                              struct ssl_connect_data *connssl)
 {
   int i, ocsp_status;
+  unsigned char *status;
   const unsigned char *p;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
@@ -1701,14 +1702,14 @@ static CURLcode verifystatus(struct connectdata *conn,
   X509_STORE     *st = NULL;
   STACK_OF(X509) *ch = NULL;
 
-  long len = SSL_get_tlsext_status_ocsp_resp(BACKEND->handle, &p);
+  long len = SSL_get_tlsext_status_ocsp_resp(BACKEND->handle, &status);
 
-  if(!p) {
+  if(!status) {
     failf(data, "No OCSP response received");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto end;
   }
-
+  p = status;
   rsp = d2i_OCSP_RESPONSE(NULL, &p, len);
   if(!rsp) {
     failf(data, "Invalid OCSP response");
@@ -3774,7 +3775,12 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef OPENSSL_IS_BORINGSSL
   return msnprintf(buffer, size, OSSL_PACKAGE);
-#else /* OPENSSL_IS_BORINGSSL */
+#elif defined(HAVE_OPENSSL_VERSION) && defined(OPENSSL_VERSION_STRING)
+  return msnprintf(buffer, size, "%s/%s",
+                   OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
+#else
+  /* not BoringSSL and not using OpenSSL_version */
+
   char sub[3];
   unsigned long ssleay_value;
   sub[2]='\0';

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -7024,4 +7024,44 @@ AC_DEFUN([CURL_RUN_IFELSE], [
    export LD_LIBRARY_PATH
    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
    LD_LIBRARY_PATH=$old # restore
+])
+
+dnl CURL_COVERAGE
+dnl --------------------------------------------------
+dnl Switch on options and libs to build with gcc's code coverage.
+dnl
+
+AC_DEFUN([CURL_COVERAGE],[
+  AC_REQUIRE([AC_PROG_SED])
+  AC_REQUIRE([AC_ARG_ENABLE])
+  AC_MSG_CHECKING([for code coverage support])
+  coverage="no"
+  curl_coverage_msg="disabled"
+
+  dnl check if enabled by argument
+  AC_ARG_ENABLE(code-coverage,
+     AC_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
+     coverage="yes",
+     coverage="no")
+
+  dnl if not gcc switch off again
+  AS_IF([ test "$GCC" != "yes" ], coverage="no" )
+  AC_MSG_RESULT($coverage)
+
+  if test "x$coverage" = "xyes"; then
+    curl_coverage_msg="enabled"
+
+    AC_CHECK_TOOL([GCOV], [gcov], [gcov])
+    if test -z "$GCOV"; then
+      AC_MSG_ERROR([needs gcov for code coverage])
+    fi
+    AC_CHECK_PROG([LCOV], [lcov], [lcov])
+    if test -z "$LCOV"; then
+      AC_MSG_ERROR([needs lcov for code coverage])
+    fi
+
+    CPPFLAGS="$CPPFLAGS -DNDEBUG"
+    CFLAGS="$CLAGS -O0 -g -fprofile-arcs -ftest-coverage"
+    LIBS="$LIBS -lgcov"
+  fi
 ])

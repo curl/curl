@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@ XC_OVR_ZZ60
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
-AC_COPYRIGHT([Copyright (c) 1998 - 2017 Daniel Stenberg, <daniel@haxx.se>
+AC_COPYRIGHT([Copyright (c) 1998 - 2019 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
@@ -131,11 +131,8 @@ dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/include/curl/curlver.h`
 XC_CHECK_PROG_CC
 
-dnl Check if gcc is being used before adding AX_CODE_COVERAGE
-AS_IF([ test "$GCC" = "yes" ], [AX_CODE_COVERAGE],
-  # not using GCC so pass a test below - CODE_COVERAGE_ENABLED_TRUE is not zero length
-  CODE_COVERAGE_ENABLED_TRUE='#'
-)
+dnl for --enable-code-coverage
+CURL_COVERAGE
 
 XC_AUTOMAKE
 AC_MSG_CHECKING([curl version])
@@ -1770,10 +1767,12 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
     dnl Older versions of Cyassl (some time before 2.9.4) don't have
     dnl SSL_get_shutdown (but this check won't actually detect it there
     dnl as it's a macro that needs the header files be included)
+    dnl OpenSSL_version is introduced in 3.0.0
 
     AC_CHECK_FUNCS( RAND_egd \
                     SSL_get_shutdown \
-                    SSLv2_client_method )
+                    SSLv2_client_method \
+                    OpenSSL_version )
 
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([
@@ -4312,6 +4311,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Built-in manual:  ${curl_manual_msg}
   --libcurl option: ${curl_libcurl_msg}
   Verbose errors:   ${curl_verbose_msg}
+  Code coverage:    ${curl_coverage_msg}
   SSPI support:     ${curl_sspi_msg}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}

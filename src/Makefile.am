@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -68,10 +68,6 @@ endif
 
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 curl_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
-
-@CODE_COVERAGE_RULES@
-curl_LDFLAGS += $(CODE_COVERAGE_LDFLAGS)
-CFLAGS += $(CODE_COVERAGE_CFLAGS)
 
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
@@ -147,4 +143,4 @@ TIDYFLAGS=-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-op
 TIDY:=clang-tidy
 
 tidy:
-	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
