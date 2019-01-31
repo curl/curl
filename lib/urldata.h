@@ -983,7 +983,7 @@ struct connectdata {
   void *seek_client;            /* pointer to pass to the seek() above */
 
   /*************** Request - specific items ************/
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
   CtxtHandle *sslContext;
 #endif
 
