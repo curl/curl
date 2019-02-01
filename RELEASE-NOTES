@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o cmake: use lowercase for function name like the rest of the code [20]
  o configure: detect xlclang separately from clang [41]
  o configure: fix recv/send/select detection on Android [53]
+ o configure: rewrite --enable-code-coverage [61]
  o conncache_unlock: avoid indirection by changing input argument type
  o cookie: fix comment typo [44]
  o cookies: allow secure override when done over HTTPS [34]
@@ -42,13 +43,17 @@ This release includes the following bugfixes:
  o disconnect: set conn->data for protocol disconnect
  o docs/version.d: mention MultiSSL [26]
  o docs: fix the --tls-max description [2]
+ o docs: use meaningless port number in CURLOPT_LOCALPORT example [58]
  o gopher: always include the entire gopher-path in request [5]
  o http2: clear pause stream id if it gets closed [8]
  o if2ip: remove unused function Curl_if_is_interface_name [9]
+ o libssh: do not let libssh create socket [63]
+ o libssh: enable CURLOPT_SSH_KNOWNHOSTS and CURLOPT_SSH_KEYFUNCTION for libssh [62]
  o libssh: free sftp_canonicalize_path() data correctly [17]
  o libtest/stub_gssapi: use "real" snprintf [27]
  o mbedtls: use VERIFYHOST [15]
  o multi: multiplexing improvements [35]
+ o multi: set the EXPIRE_*TIMEOUT timers at TIMER_STARTSINGLE time [57]
  o ntlm: fix NTMLv2 compliance [25]
  o ntlm_sspi: add support for channel binding [54]
  o openssl: adapt to 3.0.0, OpenSSL_version_num() is deprecated [46]
@@ -62,13 +67,17 @@ This release includes the following bugfixes:
  o printf: fix format specifiers [28]
  o schannel: fix compiler warning [29]
  o schannel: preserve original certificate path parameter [52]
+ o schannel: stop calling it "winssl" [56]
+ o sigpipe: if mbedTLS is used, ignore SIGPIPE [59]
  o smb: fix incorrect path in request if connection reused [13]
  o ssh: log the libssh2 error message when ssh session startup fails [55]
  o test1558: verify CURLINFO_PROTOCOL on file:// transfer [51]
  o test1561: improve test name
+ o test1653: make it survive torture tests
  o tests: allow tests to pass by 2037-02-12 [38]
  o tests: move objnames-* from lib into tests [42]
  o timediff: fix math for unsigned time_t [37]
+ o timeval: Disable MSVC Analyzer GetTickCount warning [60]
  o tool_cb_prg: avoid integer overflow [49]
  o travis: added cmake build for osx [43]
  o urlapi: Fix port parsing of eol colon [1]
@@ -88,14 +97,16 @@ advice from friends like these:
   Alessandro Ghedini, Andrei Neculau, Archangel SDY, Ayoub Boudhar, Ben Kohler,
   Bernhard M. Wiedemann, Brad Spencer, Claes Jakobsson, Daniel Gustafsson,
   Daniel Stenberg, David Garske, dnivras on github, Eric Rosenquist,
-  Florian Pritz, Frank Gevaerts, Giorgos Oikonomou, GitYuanQu on github,
-  Haibo Huang, Harry Sintonen, Helge Klein, Huzaifa Sidhpurwala,
-  jasal82 on github, Jeroen Ooms, Joel Depooter, jonrumsey on github,
-  Kamil Dudka, Katsuhiko YOSHIDA, Kees Dekker, Leonardo Taccari, Marcel Raad,
-  Markus Moeller, masbug on github, Matus Uzak, Patrick Monnerat, Pavel Pavlov,
-  Peng Li, Ray Satiro, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov,
-  Shlomi Fish, Tobias Lindgren, Tom van der Woerdt, Viktor Szakats,
-  (44 contributors)
+  Felix Hädicke, Florian Pritz, Frank Gevaerts, Giorgos Oikonomou, Gisle Vanem,
+  GitYuanQu on github, Haibo Huang, Harry Sintonen, Helge Klein,
+  Huzaifa Sidhpurwala, jasal82 on github, Jeremie Rapin, Jeroen Ooms,
+  Joel Depooter, John Marshall, jonrumsey on github, Kamil Dudka,
+  Katsuhiko YOSHIDA, Kees Dekker, Leonardo Taccari, Marcel Raad,
+  Markus Moeller, masbug on github, Matus Uzak, Michael Kujawa,
+  Patrick Monnerat, Pavel Pavlov, Peng Li, Ray Satiro, Rikard Falkeborn,
+  Ruslan Baratov, Sergei Nikulov, Shlomi Fish, Tobias Lindgren,
+  Tom van der Woerdt, Viktor Szakats, William A. Rowe Jr, Zhao Yisha,
+  (51 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -156,3 +167,11 @@ References to bug reports and discussions on issues:
  [53] = https://curl.haxx.se/bug/?i=3484
  [54] = https://curl.haxx.se/bug/?i=3280
  [55] = https://curl.haxx.se/bug/?i=3481
+ [56] = https://curl.haxx.se/bug/?i=3504
+ [57] = https://curl.haxx.se/mail/lib-2019-01/0073.html
+ [58] = https://curl.haxx.se/bug/?i=3513
+ [59] = https://curl.haxx.se/bug/?i=3502
+ [60] = https://curl.haxx.se/bug/?i=3437
+ [61] = https://curl.haxx.se/bug/?i=3497
+ [62] = https://curl.haxx.se/bug/?i=3493
+ [63] = https://curl.haxx.se/bug/?i=3491
