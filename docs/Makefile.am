@@ -95,7 +95,7 @@ SUFFIXES = .1 .html .pdf
 # have changed.
 $(abs_builddir)/curl.1:
 	if test "$(top_builddir)x" != "$(top_srcdir)x" -a -e "$(srcdir)/curl.1"; then \
-		cp -fp "$(srcdir)/curl.1" $@; fi
+		$(INSTALL_DATA) "$(srcdir)/curl.1" $@; fi
 	cd cmdline-opts && $(MAKE)
 
 html: $(HTMLPAGES)
