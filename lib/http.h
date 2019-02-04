@@ -124,7 +124,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
  *
  */
 #ifndef EXPECT_100_THRESHOLD
-#define EXPECT_100_THRESHOLD 1024
+#define EXPECT_100_THRESHOLD (1024*1024)
 #endif
 
 #endif /* CURL_DISABLE_HTTP */
