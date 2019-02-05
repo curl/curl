@@ -13,11 +13,8 @@ QUIC
 HTTP cookies
 ------------
 
-Two cookie drafts have been adopted by the httpwg in IETF and we should
-support them as the popular browsers will as well:
-
-[Deprecate modification of 'secure' cookies from non-secure
-origins](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-00)
+On top of what we already support, the prefix cookie draft has been adopted by
+the httpwg in IETF and we should support it as the popular browsers will:
 
 [Cookie Prefixes](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00)
 
