@@ -16,6 +16,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2018-16890: NTLM type-2 out-of-bounds buffer read [67]
+ o CVE-2019-3822: NTLMv2 type-3 header stack buffer overflow [68]
+ o CVE-2019-3823: SMTP end-of-response out-of-bounds read [66]
  o FAQ: remove mention of sourceforge for github [22]
  o OS400: handle memory error in list conversion [4]
  o OS400: upgrade ILE/RPG binding.
@@ -43,6 +46,7 @@ This release includes the following bugfixes:
  o disconnect: set conn->data for protocol disconnect
  o docs/version.d: mention MultiSSL [26]
  o docs: fix the --tls-max description [2]
+ o docs: use $(INSTALL_DATA) to install man page [64]
  o docs: use meaningless port number in CURLOPT_LOCALPORT example [58]
  o gopher: always include the entire gopher-path in request [5]
  o http2: clear pause stream id if it gets closed [8]
@@ -65,6 +69,7 @@ This release includes the following bugfixes:
  o pingpong: change default response timeout to 120 seconds
  o pingpong: ignore regular timeout in disconnect phase [16]
  o printf: fix format specifiers [28]
+ o runtests.pl: Fix perl call to include srcdir [65]
  o schannel: fix compiler warning [29]
  o schannel: preserve original certificate path parameter [52]
  o schannel: stop calling it "winssl" [56]
@@ -86,6 +91,7 @@ This release includes the following bugfixes:
  o urldata: rename easy_conn to just conn [48]
  o winbuild: conditionally use /DZLIB_WINAPI [45]
  o wolfssl: fix memory-leak in threaded use [11]
+ o spnego_sspi: add support for channel binding [69]
 
 This release includes the following known bugs:
 
@@ -95,18 +101,19 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Andrei Neculau, Archangel SDY, Ayoub Boudhar, Ben Kohler,
-  Bernhard M. Wiedemann, Brad Spencer, Claes Jakobsson, Daniel Gustafsson,
-  Daniel Stenberg, David Garske, dnivras on github, Eric Rosenquist,
-  Felix Hädicke, Florian Pritz, Frank Gevaerts, Giorgos Oikonomou, Gisle Vanem,
-  GitYuanQu on github, Haibo Huang, Harry Sintonen, Helge Klein,
-  Huzaifa Sidhpurwala, jasal82 on github, Jeremie Rapin, Jeroen Ooms,
-  Joel Depooter, John Marshall, jonrumsey on github, Kamil Dudka,
-  Katsuhiko YOSHIDA, Kees Dekker, Leonardo Taccari, Marcel Raad,
-  Markus Moeller, masbug on github, Matus Uzak, Michael Kujawa,
-  Patrick Monnerat, Pavel Pavlov, Peng Li, Ray Satiro, Rikard Falkeborn,
-  Ruslan Baratov, Sergei Nikulov, Shlomi Fish, Tobias Lindgren,
-  Tom van der Woerdt, Viktor Szakats, William A. Rowe Jr, Zhao Yisha,
-  (51 contributors)
+  Bernhard M. Wiedemann, Brad Spencer, Brian Carpenter, Claes Jakobsson,
+  Daniel Gustafsson, Daniel Stenberg, David Garske, dnivras on github,
+  Eric Rosenquist, Etienne Simard, Felix Hädicke, Florian Pritz,
+  Frank Gevaerts, Giorgos Oikonomou, Gisle Vanem, GitYuanQu on github,
+  Haibo Huang, Harry Sintonen, Helge Klein, Huzaifa Sidhpurwala,
+  jasal82 on github, Jeremie Rapin, Jeroen Ooms, Joel Depooter, John Marshall,
+  jonrumsey on github, Julian Z, Kamil Dudka, Katsuhiko YOSHIDA, Kees Dekker,
+  Ladar Levison, Leonardo Taccari, Marcel Raad, Markus Moeller,
+  masbug on github, Matus Uzak, Michael Kujawa, Patrick Monnerat, Pavel Pavlov,
+  Peng Li, Ray Satiro, Rikard Falkeborn, Ruslan Baratov, Sergei Nikulov,
+  Shlomi Fish, Tobias Lindgren, Tom van der Woerdt, Viktor Szakats,
+  Wenxiang Qian, William A. Rowe Jr, Zhao Yisha,
+  (56 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -175,3 +182,9 @@ References to bug reports and discussions on issues:
  [61] = https://curl.haxx.se/bug/?i=3497
  [62] = https://curl.haxx.se/bug/?i=3493
  [63] = https://curl.haxx.se/bug/?i=3491
+ [64] = https://curl.haxx.se/bug/?i=3518
+ [65] = https://curl.haxx.se/bug/?i=3496
+ [66] = https://curl.haxx.se/docs/CVE-2019-3823.html
+ [67] = https://curl.haxx.se/docs/CVE-2018-16890.html
+ [68] = https://curl.haxx.se/docs/CVE-2019-3822.html
+ [69] = https://curl.haxx.se/bug/?i=3503
