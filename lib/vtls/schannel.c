@@ -2035,11 +2035,9 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
      * might not have an associated transfer so the check for conn->data is
      * necessary.
      */
-    if(conn->data)
-      Curl_ssl_sessionid_lock(conn);
+    Curl_ssl_sessionid_lock(conn);
     Curl_schannel_session_free(BACKEND->cred);
-    if(conn->data)
-      Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(conn);
     BACKEND->cred = NULL;
   }
 
