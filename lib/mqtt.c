@@ -192,7 +192,7 @@ static CURLcode mqtt_subscribe(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   char *topic = NULL;
   size_t topiclen;
-  unsigned char *packet;
+  unsigned char *packet = NULL;
   size_t packetlen;
 
   result = mqtt_get_topic(conn, &topic, &topiclen);
@@ -278,9 +278,9 @@ static CURLcode mqtt_publish(struct connectdata *conn)
   CURLcode result;
   char *payload = conn->data->set.postfields;
   size_t payloadlen = conn->data->set.postfieldsize;
-  char *topic;
+  char *topic = NULL;
   size_t topiclen;
-  unsigned char *pkt;
+  unsigned char *pkt = NULL;
   size_t i = 0;
 
   pkt = malloc(payloadlen + 10);
@@ -337,7 +337,7 @@ static CURLcode mqtt_read_publish(struct connectdata *conn)
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   ssize_t nread;
   char *pkt = NULL;
-  size_t pktlen, lenbytes;
+  size_t remlen, lenbytes;
   char *ptr;
   size_t topiclen;
   size_t payloadlen;
@@ -352,12 +352,11 @@ static CURLcode mqtt_read_publish(struct connectdata *conn)
 
   /* packet header is 2-5 bytes long, read 5 to be sure we get all of it */
   result = Curl_read(conn, sockfd, pkt, 5, &nread);
-  if(result) {
+  if(result)
     goto fail;
-  }
 
   /* we are expecting a PUBLISH message */
-  if((pkt[0] & 0xf0) != 0x30) {
+  if((pkt[0] & 0xf0) != MQTT_MSG_PUBLISH) {
     result = CURLE_WEIRD_SERVER_REPLY;
     goto fail;
   }
@@ -366,28 +365,35 @@ static CURLcode mqtt_read_publish(struct connectdata *conn)
   if(pkt[0] & 6)
     packetidlen = 2;
 
-  pktlen = mqtt_decode_len(pkt + 1, 4, &lenbytes);
+  remlen = mqtt_decode_len(pkt + 1, 4, &lenbytes);
 
   /* reallocate a bigger buffer if necessary */
-  if(pktlen > 128) {
-    pkt = realloc(pkt, pktlen + 2); /* one extra for payload termination */
-    if(!pkt) {
+  if(remlen > 125) {
+    char *newpkt = Curl_saferealloc(pkt, remlen + lenbytes + 1);
+    if(!newpkt) {
       result = CURLE_OUT_OF_MEMORY;
       goto fail;
     }
+    else
+      pkt = newpkt;
   }
 
   /* read rest of packet */
   result = Curl_read(conn, sockfd,
                      (char *)(pkt + 5),
-                     pktlen - lenbytes - 1,
+                     1 + lenbytes + remlen - 5,
                      &nread);
   if(result)
     goto fail;
 
   ptr = pkt + 1 + lenbytes; /* skip header + lenbytes */
   topiclen = (ptr[0] << 8) + ptr[1];
-  payloadlen = pktlen - 2 - topiclen - packetidlen;
+  payloadlen = remlen - 2 - topiclen - packetidlen;
+  /* sanity check lengths */
+  if(2 + topiclen + payloadlen + packetidlen > remlen) {
+    result = CURLE_WEIRD_SERVER_REPLY;
+    goto fail;
+  }
   ptr += 2; /* skip topic length bytes */
   ptr += topiclen + packetidlen; /* skip topic + packet id */
   result = Curl_client_write(conn, CLIENTWRITE_BODY, ptr, payloadlen);
@@ -463,8 +469,7 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
     *done = TRUE;
     break;
   }
-  if(result)
-    infof(conn->data, "=== %s result: %d\n", __func__, result);
+
   if(result == CURLE_AGAIN)
     result = CURLE_OK;
   return result;

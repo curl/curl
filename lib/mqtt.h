@@ -30,7 +30,7 @@ struct mqtt_conn {
   enum {
     MQTT_CONNACK,
     MQTT_SUBACK,
-    MQTT_SUBWAIT,
+    MQTT_SUBWAIT
   } state;
   unsigned int packetid;
 };
