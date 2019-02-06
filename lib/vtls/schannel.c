@@ -1960,6 +1960,8 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
 
+  DEBUGASSERT(data);
+
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
         hostname, conn->remote_port);
 
@@ -2035,11 +2037,9 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
      * might not have an associated transfer so the check for conn->data is
      * necessary.
      */
-    if(conn->data)
-      Curl_ssl_sessionid_lock(conn);
+    Curl_ssl_sessionid_lock(conn);
     Curl_schannel_session_free(BACKEND->cred);
-    if(conn->data)
-      Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(conn);
     BACKEND->cred = NULL;
   }
 

@@ -788,18 +788,17 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn, dead_connection);
 
-    /* unlink ourselves! */
   infof(data, "Closing connection %ld\n", conn->connection_id);
+  Curl_ssl_close(conn, FIRSTSOCKET);
+  Curl_ssl_close(conn, SECONDARYSOCKET);
+
+  /* unlink ourselves! */
   Curl_conncache_remove_conn(data, conn, TRUE);
 
   free_idnconverted_hostname(&conn->host);
   free_idnconverted_hostname(&conn->conn_to_host);
   free_idnconverted_hostname(&conn->http_proxy.host);
   free_idnconverted_hostname(&conn->socks_proxy.host);
-
-  /* this assumes that the pointer is still there after the connection was
-     detected from the cache */
-  Curl_ssl_close(conn, FIRSTSOCKET);
 
   conn_free(conn);
   return CURLE_OK;
