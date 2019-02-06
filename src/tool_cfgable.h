@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,9 +22,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-
 #include "tool_sdecls.h"
-
 #include "tool_metalink.h"
 
 typedef enum {
@@ -34,6 +32,12 @@ typedef enum {
 } curl_error;
 
 struct GlobalConfig;
+
+#define MAX_PARENTS 5
+struct mimeparent {
+  curl_mime *p[MAX_PARENTS];
+  int numparents; /* number of parents stored */
+};
 
 struct OperationConfig {
   CURL *easy;               /* A copy of the handle from GlobalConfig */
@@ -178,6 +182,7 @@ struct OperationConfig {
   struct curl_slist *proxyheaders;
   curl_mime *mimepost;
   curl_mime *mimecurrent;
+  struct mimeparent mimeparent; /* for remembering parents */
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
   struct curl_slist *connect_to;

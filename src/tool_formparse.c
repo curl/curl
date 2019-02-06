@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,9 +20,6 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-
-#include "mime.h"
-#include "strcase.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -44,7 +41,7 @@ typedef struct {
   curl_off_t origin;  /* File read origin offset. */
   curl_off_t size; /* Data size. */
   curl_off_t curpos; /* Current read position. */
-}  standard_input;
+} standard_input;
 
 
 /*
@@ -548,6 +545,7 @@ int formparse(struct OperationConfig *config,
               const char *input,
               curl_mime **mimepost,
               curl_mime **mimecurrent,
+              struct mimeparent *parent,
               bool literal_value)
 {
   /* input MUST be a string in the format 'name=contents' and we'll
@@ -591,6 +589,9 @@ int formparse(struct OperationConfig *config,
     if(*contp == '(' && !literal_value) {
       curl_mime *subparts;
 
+      if(parent->numparents >= (MAX_PARENTS-1))
+        return 1; /* too many nested levels! */
+
       /* Starting a multipart. */
       sep = get_param_part(config, '\0',
                            &contp, &data, &type, NULL, NULL, &headers);
@@ -620,6 +621,7 @@ int formparse(struct OperationConfig *config,
         Curl_safefree(contents);
         return 6;
       }
+      parent->p[parent->numparents++] = *mimecurrent;
       *mimecurrent = subparts;
       if(curl_mime_headers(part, headers, 1)) {
         warnf(config->global, "curl_mime_headers failed!\n");
@@ -634,13 +636,15 @@ int formparse(struct OperationConfig *config,
       }
     }
     else if(!name && !strcmp(contp, ")") && !literal_value) {
-      /* Ending a mutipart. */
+      /* Ending a multipart. */
       if(*mimecurrent == *mimepost) {
         warnf(config->global, "no multipart to terminate!\n");
         Curl_safefree(contents);
         return 9;
-        }
-      *mimecurrent = (*mimecurrent)->parent->parent;
+      }
+      if(!parent->numparents)
+        return 9;
+      *mimecurrent = parent->p[--parent->numparents];
     }
     else if('@' == contp[0] && !literal_value) {
 
