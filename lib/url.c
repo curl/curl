@@ -1748,15 +1748,6 @@ static CURLcode idnconvert_hostname(struct connectdata *conn,
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
   }
-  {
-    char *hostp;
-    for(hostp = host->name; *hostp; hostp++) {
-      if(*hostp <= 32) {
-        failf(data, "Host name '%s' contains bad letter", host->name);
-        return CURLE_URL_MALFORMAT;
-      }
-    }
-  }
   return CURLE_OK;
 }
 
