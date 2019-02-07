@@ -117,8 +117,9 @@ static CURLcode mqtt_connect(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
   const char clientid[] = "curl1234abcd";
+  const char clientidlen = strlen(clientid) & 0x7f;
   const size_t client_id_offset = 14;
-  const size_t packetlen = client_id_offset + strlen(clientid);
+  const size_t packetlen = client_id_offset + clientidlen;
   char packet[32] = {
     MQTT_MSG_CONNECT,       /* packet type */
     (packetlen - 2) & 0x7f, /* remaining length */
@@ -127,7 +128,7 @@ static CURLcode mqtt_connect(struct connectdata *conn)
     0x04,                   /* protocol level */
     0x02,                   /* CONNECT flag: CleanSession */
     0x00, 0x3c,             /* keep-alive 0 = disabled */
-    0x00, strlen(clientid) & 0x7f, /* payload1 length */
+    0x00, clientidlen       /* payload1 length */
   };
 
   msnprintf(packet + client_id_offset, sizeof(packet), "curl%08x", rand());
