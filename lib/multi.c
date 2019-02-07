@@ -1934,13 +1934,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       k = &data->req;
 
-      if(!(k->keepon & KEEP_RECV))
+      if(!(k->keepon & KEEP_RECV)) {
         /* We're done receiving */
         Curl_pipeline_leave_read(data->conn);
+      }
 
-      if(!(k->keepon & KEEP_SEND))
+      if(!(k->keepon & KEEP_SEND)) {
         /* We're done sending */
         Curl_pipeline_leave_write(data->conn);
+      }
 
       if(done || (result == CURLE_RECV_ERROR)) {
         /* If CURLE_RECV_ERROR happens early enough, we assume it was a race
@@ -2299,8 +2301,9 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_psl_destroy(&multi->psl);
 
     /* Free the blacklists by setting them to NULL */
-    Curl_pipeline_set_site_blacklist(NULL, &multi->pipelining_site_bl);
-    Curl_pipeline_set_server_blacklist(NULL, &multi->pipelining_server_bl);
+    (void)Curl_pipeline_set_site_blacklist(NULL, &multi->pipelining_site_bl);
+    (void)Curl_pipeline_set_server_blacklist(NULL,
+                                             &multi->pipelining_server_bl);
 
     free(multi);
 
