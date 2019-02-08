@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -617,10 +617,13 @@ void Curl_persistconninfo(struct connectdata *conn)
   conn->data->info.conn_local_port = conn->local_port;
 }
 
+UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
+                             long *port);
+
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool Curl_getaddressinfo(struct sockaddr *sa, char *addr,
-                         long *port)
+UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
+                             long *port)
 {
   unsigned short us_port;
   struct sockaddr_in *si = NULL;
@@ -700,16 +703,16 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
       return;
     }
 
-    if(!Curl_getaddressinfo((struct sockaddr*)&ssrem,
-                            conn->primary_ip, &conn->primary_port)) {
+    if(!getaddressinfo((struct sockaddr*)&ssrem,
+                       conn->primary_ip, &conn->primary_port)) {
       failf(data, "ssrem inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(conn, errno));
       return;
     }
     memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 
-    if(!Curl_getaddressinfo((struct sockaddr*)&ssloc,
-                            conn->local_ip, &conn->local_port)) {
+    if(!getaddressinfo((struct sockaddr*)&ssloc,
+                       conn->local_ip, &conn->local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(conn, errno));
       return;
@@ -881,7 +884,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   return result;
 }
 
-void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
+static void tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 {
 #if defined(TCP_NODELAY)
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -1006,8 +1009,8 @@ static CURLcode singleipconnect(struct connectdata *conn,
     return CURLE_OK;
 
   /* store remote address and port used in this connection attempt */
-  if(!Curl_getaddressinfo((struct sockaddr*)&addr.sa_addr,
-                          ipaddress, &port)) {
+  if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
+                     ipaddress, &port)) {
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
           errno, Curl_strerror(conn, errno));
@@ -1023,7 +1026,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   is_tcp = (addr.family == AF_INET) && addr.socktype == SOCK_STREAM;
 #endif
   if(is_tcp && data->set.tcp_nodelay)
-    Curl_tcpnodelay(conn, sockfd);
+    tcpnodelay(conn, sockfd);
 
   nosigpipe(conn, sockfd);
 

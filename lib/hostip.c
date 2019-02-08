@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -388,6 +388,9 @@ Curl_fetch_addr(struct connectdata *conn,
   return dns;
 }
 
+UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
+                                    Curl_addrinfo **addr);
+
 /*
  * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
@@ -400,7 +403,8 @@ Curl_fetch_addr(struct connectdata *conn,
  *
  * @unittest: 1608
  */
-CURLcode Curl_shuffle_addr(struct Curl_easy *data, Curl_addrinfo **addr)
+UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
+                                    Curl_addrinfo **addr)
 {
   CURLcode result = CURLE_OK;
   const int num_addrs = Curl_num_addresses(*addr);

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -814,6 +814,12 @@ endings either CRLF or LF so 't' is appropriate.
 struct passwd;
 int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
                size_t buflen, struct passwd **result);
+#endif
+
+#ifdef DEBUGBUILD
+#define UNITTEST
+#else
+#define UNITTEST static
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */

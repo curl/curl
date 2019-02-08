@@ -67,12 +67,6 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
-#ifdef DEBUGBUILD
-#define UNITTEST
-#else
-#define UNITTEST static
-#endif
-
 static void free_urlhandle(struct Curl_URL *u)
 {
   free(u->scheme);
@@ -141,7 +135,7 @@ static bool urlchar_needs_escaping(int c)
  * URL encoding should be skipped for host names, otherwise IDN resolution
  * will fail.
  */
-size_t Curl_strlen_url(const char *url, bool relative)
+static size_t strlen_url(const char *url, bool relative)
 {
   const unsigned char *ptr;
   size_t newlen = 0;
@@ -183,7 +177,7 @@ size_t Curl_strlen_url(const char *url, bool relative)
  * URL encoding should be skipped for host names, otherwise IDN resolution
  * will fail.
  */
-void Curl_strcpy_url(char *output, const char *url, bool relative)
+static void strcpy_url(char *output, const char *url, bool relative)
 {
   /* we must add this with whitespace-replacing */
   bool left = TRUE;
@@ -268,7 +262,7 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
  * The returned pointer must be freed by the caller unless NULL
  * (returns NULL on out of memory).
  */
-char *Curl_concat_url(const char *base, const char *relurl)
+static char *concat_url(const char *base, const char *relurl)
 {
   /***
    TRY to append this new path to the old URL
@@ -392,7 +386,7 @@ char *Curl_concat_url(const char *base, const char *relurl)
      letter we replace each space with %20 while it is replaced with '+'
      on the right side of the '?' letter.
   */
-  newlen = Curl_strlen_url(useurl, !host_changed);
+  newlen = strlen_url(useurl, !host_changed);
 
   urllen = strlen(url_clone);
 
@@ -414,7 +408,7 @@ char *Curl_concat_url(const char *base, const char *relurl)
     newest[urllen++]='/';
 
   /* then append the new piece on the right side */
-  Curl_strcpy_url(&newest[urllen], useurl, !host_changed);
+  strcpy_url(&newest[urllen], useurl, !host_changed);
 
   free(url_clone);
 
@@ -1252,7 +1246,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     }
 
     /* apply the relative part to create a new URL */
-    redired_url = Curl_concat_url(oldurl, part);
+    redired_url = concat_url(oldurl, part);
     free(oldurl);
     if(!redired_url)
       return CURLUE_OUT_OF_MEMORY;

@@ -80,6 +80,7 @@ static CURLMcode add_next_timeout(struct curltime now,
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms);
 static void process_pending_handles(struct Curl_multi *multi);
+static void detach_connnection(struct Curl_easy *data);
 
 #ifdef DEBUGBUILD
 static const char * const statename[]={
@@ -114,7 +115,7 @@ static void Curl_init_completed(struct Curl_easy *data)
 
   /* Important: reset the conn pointer so that we don't point to memory
      that could be freed anytime */
-  Curl_detach_connnection(data);
+  detach_connnection(data);
   Curl_expire_clear(data); /* stop all timers */
 }
 
@@ -572,7 +573,7 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   if(conn->send_pipe.size || conn->recv_pipe.size) {
     /* Stop if pipeline is not empty . */
-    Curl_detach_connnection(data);
+    detach_connnection(data);
     DEBUGF(infof(data, "Connection still in use %zu/%zu, "
                  "no more multi_done now!\n",
                  conn->send_pipe.size, conn->recv_pipe.size));
@@ -645,7 +646,7 @@ static CURLcode multi_done(struct Curl_easy *data,
       data->state.lastconnect = NULL;
   }
 
-  Curl_detach_connnection(data);
+  detach_connnection(data);
   Curl_free_request_state(data);
   return result;
 }
@@ -752,7 +753,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* Remove the association between the connection and the handle */
   if(data->conn) {
     data->conn->data = NULL;
-    Curl_detach_connnection(data);
+    detach_connnection(data);
   }
 
 #ifdef USE_LIBPSL
@@ -804,7 +805,7 @@ bool Curl_pipeline_wanted(const struct Curl_multi *multi, int bits)
 
 /* This is the only function that should clear data->conn. This will
    occasionally be called with the pointer already cleared. */
-void Curl_detach_connnection(struct Curl_easy *data)
+static void detach_connnection(struct Curl_easy *data)
 {
   data->conn = NULL;
 }
@@ -1549,7 +1550,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(result)
           /* if Curl_once_resolved() returns failure, the connection struct
              is already freed and gone */
-          Curl_detach_connnection(data); /* no more connection */
+          detach_connnection(data); /* no more connection */
         else {
           /* call again please so that we get the next socket setup */
           rc = CURLM_CALL_MULTI_PERFORM;
@@ -2087,7 +2088,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * removed before we perform the processing in CURLM_STATE_COMPLETED
          */
         if(data->conn)
-          Curl_detach_connnection(data);
+          detach_connnection(data);
       }
 
       if(data->state.wildcardmatch) {
@@ -2145,7 +2146,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* This is where we make sure that the conn pointer is reset.
                We don't have to do this in every case block above where a
                failure is detected */
-            Curl_detach_connnection(data);
+            detach_connnection(data);
           }
         }
         else if(data->mstate == CURLM_STATE_CONNECT) {

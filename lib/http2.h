@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -63,7 +63,6 @@ void Curl_http2_cleanup_dependencies(struct Curl_easy *data);
 /* returns true if the HTTP/2 stream error was HTTP_1_1_REQUIRED */
 bool Curl_h2_http_1_1_error(struct connectdata *conn);
 #else /* USE_NGHTTP2 */
-#define Curl_http2_init(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_send_request(x) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_request_upgrade(x,y) CURLE_UNSUPPORTED_PROTOCOL
 #define Curl_http2_setup(x) CURLE_UNSUPPORTED_PROTOCOL

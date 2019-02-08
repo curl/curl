@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -426,7 +426,7 @@ curl_socket_t curl_accept(curl_socket_t s, void *saddr, void *saddrlen,
 }
 
 /* separate function to allow libcurl to mark a "faked" close */
-void curl_mark_sclose(curl_socket_t sockfd, int line, const char *source)
+static void mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
     "FD %s:%d sclose(%d)\n":
@@ -442,7 +442,7 @@ void curl_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 int curl_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   int res = sclose(sockfd);
-  curl_mark_sclose(sockfd, line, source);
+  mark_sclose(sockfd, line, source);
   return res;
 }
 
@@ -457,20 +457,6 @@ FILE *curl_fopen(const char *file, const char *mode,
 
   return res;
 }
-
-#ifdef HAVE_FDOPEN
-FILE *curl_fdopen(int filedes, const char *mode,
-                  int line, const char *source)
-{
-  FILE *res = fdopen(filedes, mode);
-
-  if(source)
-    curl_memlog("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
-                source, line, filedes, mode, (void *)res);
-
-  return res;
-}
-#endif
 
 int curl_fclose(FILE *file, int line, const char *source)
 {

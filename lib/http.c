@@ -102,13 +102,14 @@ static int https_getsock(struct connectdata *conn,
 #else
 #define https_connecting(x,y) CURLE_COULDNT_CONNECT
 #endif
+static CURLcode http_setup_conn(struct connectdata *conn);
 
 /*
  * HTTP handler interface.
  */
 const struct Curl_handler Curl_handler_http = {
   "HTTP",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
+  http_setup_conn,                      /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -133,7 +134,7 @@ const struct Curl_handler Curl_handler_http = {
  */
 const struct Curl_handler Curl_handler_https = {
   "HTTPS",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
+  http_setup_conn,                      /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -153,7 +154,7 @@ const struct Curl_handler Curl_handler_https = {
 };
 #endif
 
-CURLcode Curl_http_setup_conn(struct connectdata *conn)
+static CURLcode http_setup_conn(struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */

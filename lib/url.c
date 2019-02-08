@@ -292,7 +292,7 @@ void Curl_freeset(struct Curl_easy *data)
 }
 
 /* free the URL pieces */
-void Curl_up_free(struct Curl_easy *data)
+static void up_free(struct Curl_easy *data)
 {
   struct urlpieces *up = &data->state.up;
   Curl_safefree(up->scheme);
@@ -369,7 +369,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   }
   data->change.referer = NULL;
 
-  Curl_up_free(data);
+  up_free(data);
   Curl_safefree(data->state.buffer);
   Curl_safefree(data->state.headerbuff);
   Curl_safefree(data->state.ulbuf);
@@ -2019,7 +2019,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   CURLUcode uc;
   char *hostname;
 
-  Curl_up_free(data); /* cleanup previous leftovers first */
+  up_free(data); /* cleanup previous leftovers first */
 
   /* parse the URL */
   if(data->set.uh) {
