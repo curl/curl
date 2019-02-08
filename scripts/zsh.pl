@@ -7,7 +7,7 @@ use warnings;
 
 my $curl = $ARGV[0] || 'curl';
 
-my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s([^\s.]+)?\s+(.*)';
+my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s*(\<.+?\>)?\s+(.*)';
 my @opts = parse_main_opts('--help', $regex);
 
 my $opts_str;
@@ -45,9 +45,12 @@ sub parse_main_opts {
 
         my $option = '';
 
+        $arg =~ s/\:/\\\:/g if defined $arg;
+
         $desc =~ s/'/'\\''/g if defined $desc;
         $desc =~ s/\[/\\\[/g if defined $desc;
         $desc =~ s/\]/\\\]/g if defined $desc;
+        $desc =~ s/\:/\\\:/g if defined $desc;
 
         $option .= '{' . trim($short) . ',' if defined $short;
         $option .= trim($long)  if defined $long;

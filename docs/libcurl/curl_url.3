@@ -48,7 +48,7 @@ Returns a \fBCURLU *\fP if successful, or NULL if out of memory.
     char *scheme;
     rc = curl_url_get(url, CURLUPART_SCHEME, &scheme, 0);
     if(!rc) {
-      printf("the scheme is %s\n", scheme);
+      printf("the scheme is %s\\n", scheme);
       curl_free(scheme);
     }
     curl_url_cleanup(url);

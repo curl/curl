@@ -460,7 +460,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                                  VERSION_LESS_THAN_EQUAL)) {
      /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
         algorithms that may not be supported by all servers. */
-     infof(data, "schannel: WinSSL version is old and may not be able to "
+     infof(data, "schannel: Windows version is old and may not be able to "
            "connect to some servers due to lack of SNI, algorithms, etc.\n");
   }
 
@@ -1451,7 +1451,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
-    conn->ntlm.sslContext = &BACKEND->ctxt->ctxt_handle;
+    conn->sslContext = &BACKEND->ctxt->ctxt_handle;
 #endif
 
     *done = TRUE;
@@ -1983,6 +1983,8 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
 
+  DEBUGASSERT(data);
+
   infof(data, "schannel: shutting down SSL/TLS connection with %s port %hu\n",
         hostname, conn->remote_port);
 
@@ -2058,11 +2060,9 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
      * might not have an associated transfer so the check for conn->data is
      * necessary.
      */
-    if(conn->data)
-      Curl_ssl_sessionid_lock(conn);
+    Curl_ssl_sessionid_lock(conn);
     Curl_schannel_session_free(BACKEND->cred);
-    if(conn->data)
-      Curl_ssl_sessionid_unlock(conn);
+    Curl_ssl_sessionid_unlock(conn);
     BACKEND->cred = NULL;
   }
 
@@ -2096,7 +2096,7 @@ static void Curl_schannel_cleanup(void)
 
 static size_t Curl_schannel_version(char *buffer, size_t size)
 {
-  size = msnprintf(buffer, size, "WinSSL");
+  size = msnprintf(buffer, size, "Schannel");
 
   return size;
 }
@@ -2184,11 +2184,11 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
 }
 
 static void Curl_schannel_checksum(const unsigned char *input,
-                      size_t inputlen,
-                      unsigned char *checksum,
-                      size_t checksumlen,
-                      DWORD provType,
-                      const unsigned int algId)
+                                   size_t inputlen,
+                                   unsigned char *checksum,
+                                   size_t checksumlen,
+                                   DWORD provType,
+                                   const unsigned int algId)
 {
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
@@ -2238,9 +2238,9 @@ static CURLcode Curl_schannel_md5sum(unsigned char *input,
                                      unsigned char *md5sum,
                                      size_t md5len)
 {
-    Curl_schannel_checksum(input, inputlen, md5sum, md5len,
-                           PROV_RSA_FULL, CALG_MD5);
-    return CURLE_OK;
+  Curl_schannel_checksum(input, inputlen, md5sum, md5len,
+                         PROV_RSA_FULL, CALG_MD5);
+  return CURLE_OK;
 }
 
 static CURLcode Curl_schannel_sha256sum(const unsigned char *input,
@@ -2248,9 +2248,9 @@ static CURLcode Curl_schannel_sha256sum(const unsigned char *input,
                                     unsigned char *sha256sum,
                                     size_t sha256len)
 {
-    Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
-                           PROV_RSA_AES, CALG_SHA_256);
-    return CURLE_OK;
+  Curl_schannel_checksum(input, inputlen, sha256sum, sha256len,
+                         PROV_RSA_AES, CALG_SHA_256);
+  return CURLE_OK;
 }
 
 static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
