@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -3746,6 +3746,7 @@ sub singletest {
 
     # if this section exists, we verify that the stdout contained this:
     my @validstdout = fixarray ( getpart("verify", "stdout") );
+    my @validstderr = fixarray ( getpart("verify", "stderr") );
 
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
@@ -4227,6 +4228,57 @@ sub singletest {
     }
     else {
         $ok .= "-"; # stdout not checked
+    }
+
+    if (@validstderr) {
+        # verify redirected stderr
+        my @actual = loadarray($STDERR);
+
+        # what parts to cut off from stderr
+        my @stripfile = getpart("verify", "stripfile");
+
+        foreach my $strip (@stripfile) {
+            chomp $strip;
+            my @newgen;
+            for(@actual) {
+                eval $strip;
+                if($_) {
+                    push @newgen, $_;
+                }
+            }
+            # this is to get rid of array entries that vanished (zero
+            # length) because of replacements
+            @actual = @newgen;
+        }
+
+        # variable-replace in the stderr we have from the test case file
+        @validstderr = fixarray(@validstderr);
+
+        # get all attributes
+        my %hash = getpartattr("verify", "stderr");
+
+        # get the mode attribute
+        my $filemode=$hash{'mode'};
+        if($filemode && ($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @validstderr;
+            map s/\n/\r\n/g, @validstderr;
+        }
+
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the protocol data
+            chomp($validstderr[$#validstderr]);
+        }
+
+        $res = compare($testnum, $testname, "stderr", \@actual, \@validstderr);
+        if($res) {
+            return 1;
+        }
+        $ok .= "r";
+    }
+    else {
+        $ok .= "-"; # stderr not checked
     }
 
     if(@protocol) {
