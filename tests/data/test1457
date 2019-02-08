@@ -29,7 +29,7 @@ http
 Check if %{stderr} and %{stdout} switch between stdout and stderr.
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1457 --write-out 'line1%{stderr}line2%{stdout}line3'
+http://%HOSTIP:%HTTPPORT/1457 --silent --write-out 'line1%{stderr}line2%{stdout}line3'
 </command>
 </client>
 
