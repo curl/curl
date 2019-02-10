@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Generate ZSH or FISH completion
-# Usage: zsh.pl [path to curl] [fish|zsh]
+# Usage: completion.pl [path to curl] [fish|zsh]
 
 use strict;
 use warnings;

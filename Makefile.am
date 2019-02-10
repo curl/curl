@@ -155,9 +155,9 @@ WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat \
  winbuild/MakefileBuild.vc winbuild/Makefile.vc
 
 EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in \
- RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework scripts/zsh.pl \
+ RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework \
  scripts/updatemanpages.pl $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST) \
- lib/libcurl.vers.in buildconf.bat scripts/coverage.sh
+ lib/libcurl.vers.in buildconf.bat scripts/coverage.sh scripts/completion.pl
 
 CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ) \
  $(VC71_LIBVCPROJ) $(VC71_SRCVCPROJ) $(VC8_LIBVCPROJ) $(VC8_SRCVCPROJ) \
