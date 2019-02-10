@@ -1,19 +1,25 @@
 #!/usr/bin/env perl
 
-# Generate ZSH completion
+# Generate ZSH or FISH completion
+# Usage: zsh.pl [path to curl] [fish|zsh]
 
 use strict;
 use warnings;
 
 my $curl = $ARGV[0] || 'curl';
+my $shell = $ARGV[1] || 'zsh';  # zsh or fish
 
 my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s*(\<.+?\>)?\s+(.*)';
 my @opts = parse_main_opts('--help', $regex);
 
-my $opts_str;
+if ($shell eq 'fish') {
+    print "# curl fish completion\n\n";
+    print qq{$_ \n} foreach (@opts);
+} elsif ($shell eq 'zsh') {
+    my $opts_str;
 
-$opts_str .= qq{  $_ \\\n} foreach (@opts);
-chomp $opts_str;
+    $opts_str .= qq{  $_ \\\n} foreach (@opts);
+    chomp $opts_str;
 
 my $tmpl = <<"EOS";
 #compdef curl
@@ -32,7 +38,8 @@ $opts_str
 return rc
 EOS
 
-print $tmpl;
+    print $tmpl;
+}
 
 sub parse_main_opts {
     my ($cmd, $regex) = @_;
@@ -52,16 +59,26 @@ sub parse_main_opts {
         $desc =~ s/\]/\\\]/g if defined $desc;
         $desc =~ s/\:/\\\:/g if defined $desc;
 
-        $option .= '{' . trim($short) . ',' if defined $short;
-        $option .= trim($long)  if defined $long;
-        $option .= '}' if defined $short;
-        $option .= '\'[' . trim($desc) . ']\'' if defined $desc;
+        if ($shell eq 'fish') {
+            $option .= "complete --command curl";
+            $option .= " --short-option '" . strip_dash(trim($short)) . "'"
+                if defined $short;
+            $option .= " --long-option '" . strip_dash(trim($long)) . "'"
+                if defined $long;
+            $option .= " --description '" . strip_dash(trim($desc)) . "'"
+                if defined $desc;
+        } elsif ($shell eq 'zsh') {
+            $option .= '{' . trim($short) . ',' if defined $short;
+            $option .= trim($long)  if defined $long;
+            $option .= '}' if defined $short;
+            $option .= '\'[' . trim($desc) . ']\'' if defined $desc;
 
-        $option .= ":'$arg'" if defined $arg;
+            $option .= ":'$arg'" if defined $arg;
 
-        $option .= ':_files'
-            if defined $arg and ($arg eq '<file>' || $arg eq '<filename>'
-                || $arg eq '<dir>');
+            $option .= ':_files'
+                if defined $arg and ($arg eq '<file>' || $arg eq '<filename>'
+                    || $arg eq '<dir>');
+        }
 
         push @list, $option;
     }
@@ -73,12 +90,13 @@ sub parse_main_opts {
         $b =~ /([^=]*)/; my $mb = $1;
 
         length($mb) <=> length($ma)
-    } @list;
+    } @list if $shell eq 'zsh';
 
     return @list;
 }
 
 sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+sub strip_dash { my $s = shift; $s =~ s/^-+//g; return $s };
 
 sub call_curl {
     my ($cmd) = @_;
