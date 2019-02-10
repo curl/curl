@@ -35,7 +35,7 @@ if CROSSCOMPILING
 	@echo "NOTICE: we can't generate zsh completion when cross-compiling!"
 else # if not cross-compiling:
 	@if ! test -x "$(PERL)"; then echo "No perl: can't install completion.pl"; exit 0; fi
-	$(PERL) $(srcdir)/completion.pl $(top_builddir)/src/curl$(EXEEXT) > $@
+	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell zsh > $@
 endif
 
 $(FISH_COMPLETION_FUNCTION_FILENAME): completion.pl
@@ -43,7 +43,7 @@ if CROSSCOMPILING
 	@echo "NOTICE: we can't generate fish completion when cross-compiling!"
 else # if not cross-compiling:
 	@if ! test -x "$(PERL)"; then echo "No perl: can't install completion.pl"; exit 0; fi
-	$(PERL) $(srcdir)/completion.pl $(top_builddir)/src/curl$(EXEEXT) fish > $@
+	$(PERL) $(srcdir)/completion.pl --curl $(top_builddir)/src/curl$(EXEEXT) --shell fish > $@
 endif
 
 install-data-local:

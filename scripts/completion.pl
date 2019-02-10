@@ -1,13 +1,19 @@
 #!/usr/bin/env perl
 
-# Generate ZSH or FISH completion
-# Usage: completion.pl [path to curl] [fish|zsh]
-
 use strict;
 use warnings;
+use Getopt::Long();
+use Pod::Usage();
 
-my $curl = $ARGV[0] || 'curl';
-my $shell = $ARGV[1] || 'zsh';  # zsh or fish
+my $curl = 'curl';
+my $shell = 'zsh';
+my $help = 0;
+Getopt::Long::GetOptions(
+    'curl=s' => \$curl,
+    'shell=s' => \$shell,
+    'help' => \$help,
+) or Pod::Usage::pod2usage();
+Pod::Usage::pod2usage() if $help;
 
 my $regex = '\s+(?:(-[^\s]+),\s)?(--[^\s]+)\s*(\<.+?\>)?\s+(.*)';
 my @opts = parse_main_opts('--help', $regex);
@@ -108,3 +114,19 @@ sub call_curl {
     }
     return split /\n/, $output;
 }
+
+__END__
+
+=head1 NAME
+
+completion.pl - Generates tab-completion files for various shells
+
+=head1 SYNOPSIS
+
+completion.pl [options...]
+
+    --curl   path to curl executable
+    --shell  zsh/fish
+    --help   prints this help
+
+=cut
