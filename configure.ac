@@ -3413,6 +3413,31 @@ case "$OPT_ZSH_FPATH" in
 esac
 
 dnl **********************************************************************
+dnl Check for fish completion path
+dnl **********************************************************************
+
+OPT_FISH_FPATH=default
+AC_ARG_WITH(fish-functions-dir,
+AC_HELP_STRING([--with-fish-functions-dir=PATH],[Install fish completions to PATH])
+AC_HELP_STRING([--without-fish-functions-dir],[Do not install fish completions]),
+  [OPT_FISH_FPATH=$withval])
+case "$OPT_FISH_FPATH" in
+  no)
+    dnl --without-fish-functions-dir option used
+    ;;
+  default|yes)
+    dnl --with-fish-functions-dir option used without path
+    FISH_FUNCTIONS_DIR="$datarootdir/fish/completions"
+    AC_SUBST(FISH_FUNCTIONS_DIR)
+    ;;
+  *)
+    dnl --with-fish-functions-dir option used with path
+    FISH_FUNCTIONS_DIR="$withval"
+    AC_SUBST(FISH_FUNCTIONS_DIR)
+    ;;
+esac
+
+dnl **********************************************************************
 dnl Back to "normal" configuring
 dnl **********************************************************************
 
