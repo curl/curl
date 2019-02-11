@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
+#include "tool_formparse.h"
 
 /*
  * Macros used in operate()
@@ -87,7 +89,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
                              const NameValueUnsigned *nv, long lval);
 CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
                               const char *name, CURLoption tag,
-                              curl_mime *mimepost);
+                              tool_mime *mimepost);
 CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
                            struct curl_slist *list);
