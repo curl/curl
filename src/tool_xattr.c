@@ -111,11 +111,13 @@ int fwrite_xattr(CURL *curl, int fd)
 #elif defined(HAVE_FSETXATTR_5)
         err = fsetxattr(fd, mappings[i].attr, value, strlen(value), 0);
 #elif defined(__FreeBSD_version)
-        err = extattr_set_fd(fd, EXTATTR_NAMESPACE_USER, mappings[i].attr,
-                             value, strlen(value));
-        /* FreeBSD's extattr_set_fd returns the length of the extended
-           attribute */
-        err = err < 0 ? err : 0;
+        {
+          ssize_t rc = extattr_set_fd(fd, EXTATTR_NAMESPACE_USER,
+                                      mappings[i].attr, value, strlen(value));
+          /* FreeBSD's extattr_set_fd returns the length of the extended
+             attribute */
+          err = (int)rc;
+        }
 #endif
         if(freeptr)
           curl_free(value);
