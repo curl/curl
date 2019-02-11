@@ -1150,7 +1150,6 @@ typedef enum {
   HTTPREQ_PUT,
   HTTPREQ_HEAD,
   HTTPREQ_OPTIONS,
-  HTTPREQ_CUSTOM,
   HTTPREQ_LAST /* last in list */
 } Curl_HttpReq;
 

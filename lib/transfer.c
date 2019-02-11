@@ -1526,7 +1526,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   if(data->set.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;
-  else {
+  else if((data->set.httpreq != HTTPREQ_GET) &&
+          (data->set.httpreq != HTTPREQ_HEAD)) {
     data->state.infilesize = data->set.postfieldsize;
     if(data->set.postfields && (data->state.infilesize == -1))
       data->state.infilesize = (curl_off_t)strlen(data->set.postfields);
