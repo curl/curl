@@ -116,7 +116,7 @@ int fwrite_xattr(CURL *curl, int fd)
                                       mappings[i].attr, value, strlen(value));
           /* FreeBSD's extattr_set_fd returns the length of the extended
              attribute */
-          err = (rc < 0 : -1 : 0);
+          err = (rc < 0 ? -1 : 0);
         }
 #endif
         if(freeptr)
