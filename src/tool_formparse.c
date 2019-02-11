@@ -106,7 +106,7 @@ static tool_mime *tool_mime_new_filedata(tool_mime *parent,
     char *data = NULL;
     curl_off_t size;
     curl_off_t origin;
-    struct stat sbuf;
+    struct_stat sbuf;
 
     set_binmode(stdin);
     origin = ftell(stdin);
