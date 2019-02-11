@@ -528,6 +528,19 @@ Curl_cookie_add(struct Curl_easy *data,
         while(*whatptr && ISBLANK(*whatptr))
           whatptr++;
 
+        /*
+         * Check if we have a reserved prefix set before anything else, as we
+         * otherwise have to test for the prefix in both the cookie name and
+         * "the rest". Prefixes must start with '__' and end with a '-', so
+         * only test for names where that can possibly be true.
+         */
+        if(nlen > 3 && name[0] == '_' && name[1] == '_') {
+          if(strncasecompare("__Secure-", name, 9))
+            co->prefix |= COOKIE_PREFIX__SECURE;
+          else if(strncasecompare("__Host-", name, 7))
+            co->prefix |= COOKIE_PREFIX__HOST;
+        }
+
         if(!co->name) {
           /* The very first name/value pair is the actual cookie name */
           if(!sep) {
@@ -862,6 +875,11 @@ Curl_cookie_add(struct Curl_easy *data,
         co->name = strdup(ptr);
         if(!co->name)
           badcookie = TRUE;
+        /* For Netscape file format cookies we check prefix on the name */
+        if(strncasecompare("__Secure-", co->name, 9))
+          co->prefix |= COOKIE_PREFIX__SECURE;
+        else if(strncasecompare("__Host-", co->name, 7))
+          co->prefix |= COOKIE_PREFIX__HOST;
         break;
       case 6:
         co->value = strdup(ptr);
@@ -888,6 +906,26 @@ Curl_cookie_add(struct Curl_easy *data,
       return NULL;
     }
 
+  }
+
+  if(co->prefix & COOKIE_PREFIX__SECURE) {
+    /* The __Secure- prefix only requires that the cookie be set secure */
+    if(!co->secure) {
+      freecookie(co);
+      return NULL;
+    }
+  }
+  if(co->prefix & COOKIE_PREFIX__HOST) {
+    /*
+     * The __Host- prefix requires the cookie to be secure, have a "/" path
+     * and not have a domain set.
+     */
+    if(co->secure && co->path && strcmp(co->path, "/") == 0 && !co->tailmatch)
+      ;
+    else {
+      freecookie(co);
+      return NULL;
+    }
   }
 
   if(!c->running &&    /* read from a file */

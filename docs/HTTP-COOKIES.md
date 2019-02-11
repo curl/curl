@@ -18,9 +18,13 @@
   original [Netscape spec from 1994](https://curl.haxx.se/rfc/cookie_spec.html).
 
   In 2011, [RFC6265](https://www.ietf.org/rfc/rfc6265.txt) was finally
-  published and details how cookies work within HTTP. In 2017, an update was
+  published and details how cookies work within HTTP. In 2016, an update which
+  added support for prefixes was
+  [proposed](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00).
+  In 2017, another update was
   [drafted](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01)
-  to deprecate modification of 'secure' cookies from non-secure origins.
+  to deprecate modification of 'secure' cookies from non-secure origins. Both
+  of these drafs are implemented by curl.
 
 ## Cookies saved to disk
 
