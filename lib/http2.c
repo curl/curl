@@ -618,6 +618,18 @@ static int push_promise(struct Curl_easy *data,
   return rv;
 }
 
+/*
+ * multi_connchanged() is called to tell that there is a connection in
+ * this multi handle that has changed state (pipelining become possible, the
+ * number of allowed streams changed or similar), and a subsequent use of this
+ * multi handle should move CONNECT_PEND handles back to CONNECT to have them
+ * retry.
+ */
+static void multi_connchanged(struct Curl_multi *multi)
+{
+  multi->recheckstate = TRUE;
+}
+
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
@@ -650,7 +662,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         infof(conn->data,
               "Connection state changed (MAX_CONCURRENT_STREAMS == %u)!\n",
               httpc->settings.max_concurrent_streams);
-        Curl_multi_connchanged(conn->data->multi);
+        multi_connchanged(conn->data->multi);
       }
     }
     return 0;
@@ -2163,7 +2175,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
   infof(conn->data, "Connection state changed (HTTP/2 confirmed)\n");
-  Curl_multi_connchanged(conn->data->multi);
+  multi_connchanged(conn->data->multi);
 
   return CURLE_OK;
 }
