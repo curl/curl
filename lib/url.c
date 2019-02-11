@@ -964,6 +964,7 @@ static bool extract_if_dead(struct connectdata *conn,
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
       unsigned int state;
+      conn->data = data; /* use this transfer for now */
       state = conn->handler->connection_check(conn, CONNCHECK_ISDEAD);
       dead = (state & CONNRESULT_DEAD);
     }
