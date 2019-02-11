@@ -813,9 +813,14 @@ static void Curl_mbedtls_session_free(void *ptr)
 
 static size_t Curl_mbedtls_version(char *buffer, size_t size)
 {
+#ifdef MBEDTLS_VERSION_C
+  /* if mbedtls_version_get_number() is available it is better */
   unsigned int version = mbedtls_version_get_number();
   return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
                    (version>>16)&0xff, (version>>8)&0xff);
+#else
+  return msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
+#endif
 }
 
 static CURLcode Curl_mbedtls_random(struct Curl_easy *data,
