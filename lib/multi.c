@@ -3032,9 +3032,6 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
 
   DEBUGASSERT(id < EXPIRE_LAST);
 
-  infof(data, "Expire in %ld ms for %x (transfer %p)\n",
-        (long)milli, id, data);
-
   set = Curl_now();
   set.tv_sec += milli/1000;
   set.tv_usec += (unsigned int)(milli%1000)*1000;
