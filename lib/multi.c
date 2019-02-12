@@ -999,11 +999,11 @@ CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   unsigned int i;
   unsigned int nfds = 0;
   unsigned int curlfds;
-  struct pollfd *ufds = NULL;
   bool ufds_malloc = FALSE;
   long timeout_internal;
   int retcode = 0;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
+  struct pollfd *ufds = &a_few_on_stack[0];
 
   if(gotsocket)
     *gotsocket = FALSE;
@@ -1048,19 +1048,15 @@ CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   curlfds = nfds; /* number of internal file descriptors */
   nfds += extra_nfds; /* add the externally provided ones */
 
-  if(nfds) {
-    if(nfds > NUM_POLLS_ON_STACK) {
-      /* 'nfds' is a 32 bit value and 'struct pollfd' is typically 8 bytes
-         big, so at 2^29 sockets this value might wrap. When a process gets
-         the capability to actually handle over 500 million sockets this
-         calculation needs a integer overflow check. */
-      ufds = malloc(nfds * sizeof(struct pollfd));
-      if(!ufds)
-        return CURLM_OUT_OF_MEMORY;
-      ufds_malloc = TRUE;
-    }
-    else
-      ufds = &a_few_on_stack[0];
+  if(nfds > NUM_POLLS_ON_STACK) {
+    /* 'nfds' is a 32 bit value and 'struct pollfd' is typically 8 bytes
+       big, so at 2^29 sockets this value might wrap. When a process gets
+       the capability to actually handle over 500 million sockets this
+       calculation needs a integer overflow check. */
+    ufds = malloc(nfds * sizeof(struct pollfd));
+    if(!ufds)
+      return CURLM_OUT_OF_MEMORY;
+    ufds_malloc = TRUE;
   }
   nfds = 0;
 
