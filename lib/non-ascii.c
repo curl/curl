@@ -78,7 +78,7 @@ CURLcode Curl_convert_clone(struct Curl_easy *data,
 
 /*
  * Curl_convert_to_network() is an internal function for performing ASCII
- * conversions on non-ASCII platforms. It convers the buffer _in place_.
+ * conversions on non-ASCII platforms. It converts the buffer _in place_.
  */
 CURLcode Curl_convert_to_network(struct Curl_easy *data,
                                  char *buffer, size_t length)
@@ -144,7 +144,7 @@ CURLcode Curl_convert_to_network(struct Curl_easy *data,
 
 /*
  * Curl_convert_from_network() is an internal function for performing ASCII
- * conversions on non-ASCII platforms. It convers the buffer _in place_.
+ * conversions on non-ASCII platforms. It converts the buffer _in place_.
  */
 CURLcode Curl_convert_from_network(struct Curl_easy *data,
                                    char *buffer, size_t length)
