@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,13 +88,16 @@ typedef struct {
   size_t offset;              /* State-dependent offset. */
 }  mime_state;
 
+/* mimimum buffer size for the boundary string */
+#define MIME_BOUNDARY_LEN (24 + MIME_RAND_BOUNDARY_CHARS + 1)
+
 /* A mime multipart. */
 struct curl_mime_s {
   struct Curl_easy *easy;          /* The associated easy handle. */
   curl_mimepart *parent;           /* Parent part. */
   curl_mimepart *firstpart;        /* First part. */
   curl_mimepart *lastpart;         /* Last part. */
-  char *boundary;                  /* The part boundary. */
+  char boundary[MIME_BOUNDARY_LEN]; /* The part boundary. */
   mime_state state;                /* Current readback state. */
 };
 
