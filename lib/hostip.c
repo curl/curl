@@ -543,7 +543,7 @@ int Curl_resolv(struct connectdata *conn,
     /* The entry was not in the cache. Resolve it to IP address */
 
     Curl_addrinfo *addr;
-    int respwait;
+    int respwait = 0;
 
     /* Check what IP specifics the app has requested and if we can provide it.
      * If not, bail out. */
