@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1122,8 +1122,6 @@ void curl_mime_free(curl_mime *mime)
       Curl_mime_cleanpart(part);
       free(part);
     }
-
-    free(mime->boundary);
     free(mime);
   }
 }
@@ -1220,18 +1218,10 @@ curl_mime *curl_mime_init(struct Curl_easy *easy)
     mime->firstpart = NULL;
     mime->lastpart = NULL;
 
-    /* Get a part boundary. */
-    mime->boundary = malloc(24 + MIME_RAND_BOUNDARY_CHARS + 1);
-    if(!mime->boundary) {
-      free(mime);
-      return NULL;
-    }
-
     memset(mime->boundary, '-', 24);
-    if(Curl_rand_hex(easy, (unsigned char *) mime->boundary + 24,
+    if(Curl_rand_hex(easy, (unsigned char *) &mime->boundary[24],
                      MIME_RAND_BOUNDARY_CHARS + 1)) {
       /* failed to get random separator, bail out */
-      free(mime->boundary);
       free(mime);
       return NULL;
     }
