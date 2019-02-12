@@ -964,8 +964,10 @@ static bool extract_if_dead(struct connectdata *conn,
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
       unsigned int state;
+      struct Curl_easy *olddata = conn->data;
       conn->data = data; /* use this transfer for now */
       state = conn->handler->connection_check(conn, CONNCHECK_ISDEAD);
+      conn->data = olddata;
       dead = (state & CONNRESULT_DEAD);
     }
     else {
@@ -994,7 +996,6 @@ struct prunedead {
 static int call_extract_if_dead(struct connectdata *conn, void *param)
 {
   struct prunedead *p = (struct prunedead *)param;
-  conn->data = p->data; /* transfer to use for this check */
   if(extract_if_dead(conn, p->data)) {
     /* stop the iteration here, pass back the connection that was extracted */
     p->extracted = conn;
