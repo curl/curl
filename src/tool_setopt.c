@@ -419,14 +419,14 @@ static CURLcode libcurl_generate_mime(CURL *curl,
 
 /* Wrapper to build and generate source code for a mime part. */
 static CURLcode libcurl_generate_mime_part(CURL *curl,
-                                      struct GlobalConfig *config,
-                                      tool_mime *part,
-                                      curl_mime *mime,
-                                      int mimeno)
+                                           struct GlobalConfig *config,
+                                           tool_mime *part,
+                                           curl_mime *mime,
+                                           int mimeno)
 {
   CURLcode ret = CURLE_OK;
   curl_mimepart *mimepart;
-  int submimeno;
+  int submimeno = 0;
   curl_mime *submime = NULL;
   char *escaped = NULL;
   const char *data = NULL;
