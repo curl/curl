@@ -17,6 +17,7 @@
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
+ 1.1 TFO support on Windows
  1.2 More data sharing
  1.3 struct lifreq
  1.4 signal-based resolver timeouts
@@ -191,6 +192,13 @@
 ==============================================================================
 
 1. libcurl
+
+1.1 TFO support on Windows
+
+ TCP Fast Open is supported on several platforms but not on Windows. Work on
+ this was once started but never finished.
+
+ See https://github.com/curl/curl/pull/3378
 
 1.2 More data sharing
 
