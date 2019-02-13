@@ -129,11 +129,13 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
 #  include <gss.h>
-# elif defined HAVE_GSSMIT
+# elif defined HAVE_GSSAPI_GSSAPI_H
 #  include <gssapi/gssapi.h>
-#  include <gssapi/gssapi_generic.h>
 # else
 #  include <gssapi.h>
+# endif
+# ifdef HAVE_GSSAPI_GSSAPI_GENERIC_H
+#  include <gssapi/gssapi_generic.h>
 # endif
 #endif
 
