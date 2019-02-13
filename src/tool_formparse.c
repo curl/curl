@@ -628,7 +628,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
 }
 #define SET_TOOL_MIME_PTR(m, field, retcode) {                          \
   if(field)                                                             \
-    NULL_CHECK(m->field, strdup(field), retcode);                       \
+    NULL_CHECK((m)->field, strdup(field), retcode);                     \
 }
 
 int formparse(struct OperationConfig *config,
@@ -651,7 +651,7 @@ int formparse(struct OperationConfig *config,
   CURLcode res;
 
   /* Allocate the main mime structure if needed. */
-  if(!*mimepost) {
+  if(!*mimecurrent) {
     NULL_CHECK(*mimepost, tool_mime_new_parts(NULL), 1);
     *mimecurrent = *mimepost;
   }
