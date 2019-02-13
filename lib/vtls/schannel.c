@@ -1627,6 +1627,7 @@ schannel_recv(struct connectdata *conn, int sockindex,
    * handled in the cleanup.
    */
 
+  DEBUGF(infof(data, "schannel: client wants to read %zu bytes\n", len));
   *err = CURLE_OK;
 
   if(len && len <= BACKEND->decdata_offset) {
@@ -1687,7 +1688,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
     if(*err) {
       nread = -1;
       if(*err == CURLE_AGAIN)
-        ;
+        DEBUGF(infof(data,
+                     "schannel: Curl_read_plain returned CURLE_AGAIN\n"));
       else if(*err == CURLE_RECV_ERROR)
         infof(data, "schannel: Curl_read_plain returned CURLE_RECV_ERROR\n");
       else
@@ -1734,6 +1736,8 @@ schannel_recv(struct connectdata *conn, int sockindex,
       /* check for successfully decrypted data, even before actual
          renegotiation or shutdown of the connection context */
       if(inbuf[1].BufferType == SECBUFFER_DATA) {
+        DEBUGF(infof(data, "schannel: decrypted data length: %lu\n",
+                     inbuf[1].cbBuffer));
 
         /* increase buffer in order to fit the received amount of data */
         size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_FREE_SIZE ?
@@ -2040,6 +2044,7 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
   /* free SSPI Schannel API security context handle */
   if(BACKEND->ctxt) {
+    DEBUGF(infof(data, "schannel: clear security context handle\n"));
     s_pSecFn->DeleteSecurityContext(&BACKEND->ctxt->ctxt_handle);
     Curl_safefree(BACKEND->ctxt);
   }
