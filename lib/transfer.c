@@ -296,10 +296,10 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
        here, knowing they'll become CRLFs later on.
      */
 
-    char hexbuffer[11];
+    char hexbuffer[11] = "";
+    int hexlen = 0;
     const char *endofline_native;
     const char *endofline_network;
-    int hexlen = 0;
 
     if(
 #ifdef CURL_DO_LINEEND_CONV
@@ -354,12 +354,14 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
         length = nread;
       else
         /* just translate the protocol portion */
-        length = strlen(hexbuffer);
-      result = Curl_convert_to_network(data, data->req.upload_fromhere,
-                                       length);
-      /* Curl_convert_to_network calls failf if unsuccessful */
-      if(result)
-        return result;
+        length = hexlen;
+      if(length) {
+        result = Curl_convert_to_network(data, data->req.upload_fromhere,
+                                         length);
+        /* Curl_convert_to_network calls failf if unsuccessful */
+        if(result)
+          return result;
+      }
     }
 #endif /* CURL_DOES_CONVERSIONS */
 
