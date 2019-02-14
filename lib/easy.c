@@ -75,6 +75,7 @@
 #include "ssh.h"
 #include "setopt.h"
 #include "http_digest.h"
+#include "system_win32.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -94,6 +95,11 @@ static void win32_cleanup(void)
   Curl_sspi_global_cleanup();
 #endif
 }
+
+#ifdef WIN32
+LARGE_INTEGER Curl_freq;
+bool Curl_isVistaOrGreater;
+#endif
 
 /* win32_init() performs win32 socket initialization to properly setup the
    stack to allow networking */
@@ -142,6 +148,16 @@ static CURLcode win32_init(void)
     if(result)
       return result;
   }
+#endif
+
+#ifdef WIN32
+  if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
+                                 VERSION_GREATER_THAN_EQUAL)) {
+    Curl_isVistaOrGreater = TRUE;
+    QueryPerformanceFrequency(&Curl_freq);
+  }
+  else
+    Curl_isVistaOrGreater = FALSE;
 #endif
 
   return CURLE_OK;
