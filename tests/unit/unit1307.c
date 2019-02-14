@@ -23,6 +23,17 @@
 
 #include "curl_fnmatch.h"
 
+static CURLcode unit_setup(void)
+{
+  return CURLE_OK;
+}
+
+static void unit_stop(void)
+{
+}
+
+#ifndef CURL_DISABLE_FTP
+
 /*
    CURL_FNMATCH_MATCH    0
    CURL_FNMATCH_NOMATCH  1
@@ -239,15 +250,6 @@ static const struct testcase tests[] = {
                                 "a",                      NOMATCH|LINUX_FAIL}
 };
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 static const char *ret2name(int i)
 {
   switch(i) {
@@ -308,3 +310,14 @@ UNITTEST_START
   }
 }
 UNITTEST_STOP
+
+#else
+
+UNITTEST_START
+{
+  /* nothing to do, just fail */
+  return 1;
+}
+UNITTEST_STOP
+
+#endif
