@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,7 +49,7 @@ int main(void)
     chunk = curl_slist_append(chunk, "X-silly-header;");
 
     /* set our custom set of headers */
-    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 
     curl_easy_setopt(curl, CURLOPT_URL, "localhost");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
