@@ -4329,4 +4329,5 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   PSL support:      ${curl_psl_msg}
   HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
+  Features:         ${SUPPORT_FEATURES}
 ])
