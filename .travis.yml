@@ -349,7 +349,7 @@ script:
              source .travis-iconv-env.sh
              ./configure --enable-debug --enable-werror $C
              make && make examples
-             make TFLAGS=-n test-nonflaky
+             make test-nonflaky
         fi
     - |
         set -eo pipefail
