@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -362,7 +362,7 @@ static int encodeUint(char *buf, int n, unsigned int x)
      Return the total number of encoded digits, even if larger than `n'. */
 
   if(y) {
-    i += encodeUint(buf, n, y);
+    i = encodeUint(buf, n, y);
     x -= y * 10;
   }
   if(i < n)
@@ -375,7 +375,7 @@ static int encodeUint(char *buf, int n, unsigned int x)
 
 static int encodeOID(char *buf, int n, const char *beg, const char *end)
 {
-  int i = 0;
+  int i;
   unsigned int x;
   unsigned int y;
 
@@ -387,7 +387,7 @@ static int encodeOID(char *buf, int n, const char *beg, const char *end)
   y = *(const unsigned char *) beg++;
   x = y / 40;
   y -= x * 40;
-  i += encodeUint(buf + i, n - i, x);
+  i = encodeUint(buf, n, x);
   if(i < n)
     buf[i] = '.';
   i++;
@@ -417,12 +417,13 @@ static const char *OID2str(const char *beg, const char *end, bool symbolic)
   char *buf = (char *) NULL;
   const curl_OID * op;
   int n;
+  char dummy;
 
   /* Convert an ASN.1 OID into its dotted or symbolic string representation.
      Return the dynamically allocated string, or NULL if an error occurs. */
 
   if(beg < end) {
-    n = encodeOID((char *) NULL, -1, beg, end);
+    n = encodeOID(&dummy, 0, beg, end);
     if(n >= 0) {
       buf = malloc(n + 1);
       if(buf) {
