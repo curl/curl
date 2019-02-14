@@ -75,6 +75,7 @@
 #include "ssh.h"
 #include "setopt.h"
 #include "http_digest.h"
+#include "system_win32.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

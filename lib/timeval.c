@@ -21,7 +21,6 @@
  ***************************************************************************/
 
 #include "timeval.h"
-#include "system_win32.h"
 
 #if defined(WIN32) && !defined(MSDOS)
 
