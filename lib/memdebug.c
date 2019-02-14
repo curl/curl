@@ -426,7 +426,7 @@ curl_socket_t curl_accept(curl_socket_t s, void *saddr, void *saddrlen,
 }
 
 /* separate function to allow libcurl to mark a "faked" close */
-static void mark_sclose(curl_socket_t sockfd, int line, const char *source)
+void curl_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   const char *fmt = (sizeof(curl_socket_t) == sizeof(int)) ?
     "FD %s:%d sclose(%d)\n":
@@ -442,7 +442,7 @@ static void mark_sclose(curl_socket_t sockfd, int line, const char *source)
 int curl_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   int res = sclose(sockfd);
-  mark_sclose(sockfd, line, source);
+  curl_mark_sclose(sockfd, line, source);
   return res;
 }
 
