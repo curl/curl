@@ -45,6 +45,7 @@
  1.26 CURL_REFUSE_CLEARTEXT
  1.27 hardcode the "localhost" addresses
  1.28 FD_CLOEXEC
+ 1.29 Upgrade to websockets
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -448,6 +449,14 @@
  exec-family functions succeed. Should probably be set by default?
 
  https://github.com/curl/curl/issues/2252
+
+1.29 Upgrade to websockets
+
+ libcurl could offer a smoother path to get to a websocket connection.
+ See https://github.com/curl/curl/issues/3523
+
+ Michael Kaufmann suggestion here:
+ https://curl.haxx.se/video/curlup-2017/2017-03-19_05_Michael_Kaufmann_Websocket_support_for_curl.mp4
 
 2. libcurl - multi interface
 
