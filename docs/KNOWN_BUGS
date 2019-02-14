@@ -48,6 +48,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.1 tests not compatible with python3
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
+ 5.4 Cannot compile against a static build of OpenLDAP
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
@@ -381,6 +382,10 @@ problems may have been fixed or changed somewhat since this was written!
 5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
 
  See https://github.com/curl/curl/issues/2905
+
+5.4 Cannot compile against a static build of OpenLDAP
+
+ See https://github.com/curl/curl/issues/2367
 
 5.5 can't handle Unicode arguments in Windows
 
