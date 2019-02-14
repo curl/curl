@@ -26,7 +26,7 @@
 
 /* set in win32_init() */
 extern LARGE_INTEGER Curl_freq;
-extern int Curl_isVistaOrGreater;
+extern bool Curl_isVistaOrGreater;
 
 struct curltime Curl_now(void)
 {

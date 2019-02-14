@@ -98,7 +98,7 @@ static void win32_cleanup(void)
 
 #ifdef WIN32
 LARGE_INTEGER Curl_freq;
-int Curl_isVistaOrGreater = -1;
+bool Curl_isVistaOrGreater;
 #endif
 
 /* win32_init() performs win32 socket initialization to properly setup the
@@ -153,11 +153,11 @@ static CURLcode win32_init(void)
 #ifdef WIN32
   if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
                                  VERSION_GREATER_THAN_EQUAL)) {
-    Curl_isVistaOrGreater = 1;
+    Curl_isVistaOrGreater = TRUE;
     QueryPerformanceFrequency(&Curl_freq);
   }
   else
-    Curl_isVistaOrGreater = 0;
+    Curl_isVistaOrGreater = FALSE;
 #endif
 
   return CURLE_OK;
