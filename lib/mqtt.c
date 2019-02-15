@@ -38,6 +38,7 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "multiif.h"
+#include "rand.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -48,6 +49,7 @@
 
 #define MQTT_CONNACK_LEN 4
 #define MQTT_SUBACK_LEN 5
+#define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
 
 /*
  * Forward declarations.
@@ -116,10 +118,9 @@ static int mqtt_getsock(struct connectdata *conn,
 static CURLcode mqtt_connect(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  const char clientid[] = "curl1234abcd";
-  const size_t clientidlen = strlen(clientid);
   const size_t client_id_offset = 14;
-  const size_t packetlen = client_id_offset + clientidlen;
+  const size_t packetlen = client_id_offset + MQTT_CLIENTID_LEN;
+  const size_t curl_len = sizeof("curl");
   char packet[32] = {
     MQTT_MSG_CONNECT,  /* packet type */
     0x00,              /* remaining length */
@@ -131,10 +132,14 @@ static CURLcode mqtt_connect(struct connectdata *conn)
     0x00, 0x00         /* payload1 length */
   };
   packet[1] = (packetlen - 2) & 0x7f;
-  packet[client_id_offset - 1] = clientidlen & 0x7f;
+  packet[client_id_offset - 1] = MQTT_CLIENTID_LEN;
 
-  msnprintf(packet + client_id_offset, sizeof(packet), "curl%08x", rand());
-  result = mqtt_busy_write(conn, packet, packetlen);
+  memcpy(packet + client_id_offset, "curl", curl_len);
+  result = Curl_rand_hex(conn->data,
+                         (unsigned char *)packet + client_id_offset + curl_len,
+                         MQTT_CLIENTID_LEN - curl_len + sizeof('\0'));
+  if(!result)
+    result = mqtt_busy_write(conn, packet, packetlen);
   return result;
 }
 
