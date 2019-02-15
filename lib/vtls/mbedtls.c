@@ -716,6 +716,8 @@ mbed_connect_step3(struct connectdata *conn,
 
     ret = mbedtls_ssl_get_session(&BACKEND->ssl, our_ssl_sessionid);
     if(ret) {
+      if(ret != MBEDTLS_ERR_SSL_ALLOC_FAILED)
+        mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
       failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
       return CURLE_SSL_CONNECT_ERROR;
@@ -729,6 +731,7 @@ mbed_connect_step3(struct connectdata *conn,
     retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0, sockindex);
     Curl_ssl_sessionid_unlock(conn);
     if(retcode) {
+      mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
       failf(data, "failed to store ssl session");
       return retcode;
