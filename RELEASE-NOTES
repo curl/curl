@@ -14,14 +14,41 @@ This release includes the following bugfixes:
 
  o cirrus: Added FreeBSD builds using Cirrus CI
  o cleanup: make local functions static [5]
+ o cli tool: do not use mime.h private structures [27]
+ o configure: show features as well in the final summary [15]
+ o connection_check: restore original conn->data after the check [14]
  o connection_check: set ->data to the transfer doing the check [3]
  o curl: fix FreeBSD compiler warning in the --xattr code [2]
+ o Curl_now: figure out windows version in win32_init: [11]
+ o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
  o dns: release sharelock as soon as possible [1]
+ o examples/crawler: Fix the Accept-Encoding setting
+ o examples/http2-download: cleaned up
+ o examples/http2-upload: cleaned up
+ o examples/httpcustomheader: Value stored to 'res' is never read
+ o examples/postinmemory: Potential leak of memory pointed to by 'chunk.memory'
+ o examples/sftpuploadresume: Value stored to 'result' is never read
+ o examples: remove superfluous null-pointer checks
+ o fnmatch: disable if FTP is disabled [25]
+ o gssapi: fix deprecated header warnings [16]
  o hostip: make create_hostcache_id avoid alloc + free [4]
+ o http2: multi_connchanged() moved from multi.c, only used for h2 [21]
+ o mbedtls: make it build even if MBEDTLS_VERSION_C isn't set [24]
+ o mime: put the boundary buffer into the curl_mime struct [18]
+ o multi: remove verbose "Expire in" ... messages [23]
+ o pretransfer: don't strlen() POSTFIELDS set for GET requests [22]
+ o schannel: be quiet - remove verbose output [19]
  o schannel: close TLS before removing conn from cache [10]
+ o tests: add stderr comparison to the test suite [26]
  o tool_operate: fix typecheck warning [9]
+ o transfer.c: do not compute length of undefined hex buffer
+ o travis: add scan-build [13]
+ o travis: enable valgrind for the iconv tests [12]
+ o unit1307: require FTP support [17]
  o url/idnconvert: remove scan for <= 32 ascii values [6]
  o urlapi: reduce variable scope, remove unreachable 'break' [7]
+ o urlglob: Argument with 'nonnull' attribute passed null
+ o x509asn1: "Dereference of null pointer"
  o zsh.pl: escape ':' character [8]
  o zsh.pl: update regex to better match curl -h output [8]
 
@@ -33,8 +60,10 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Chris Araman, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, jnbr on github, Marcel Raad,
-  (7 contributors)
+  Daniel Stenberg, Frank Gevaerts, James Brown, jnbr on github,
+  MAntoniak on github, Marcel Raad, Patrick Monnerat, Paul Groke, Ray Satiro,
+  Renaud Allard, Romain Geissler, tholin on github, Volker Schmid,
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -50,3 +79,20 @@ References to bug reports and discussions on issues:
  [8] = https://bugs.debian.org/921452
  [9] = https://curl.haxx.se/bug/?i=3534
  [10] = https://curl.haxx.se/bug/?i=3412
+ [11] = https://curl.haxx.se/bug/?i=3572
+ [12] = https://curl.haxx.se/bug/?i=3571
+ [13] = https://curl.haxx.se/bug/?i=3564
+ [14] = https://curl.haxx.se/bug/?i=3542
+ [15] = https://curl.haxx.se/bug/?i=3569
+ [16] = https://curl.haxx.se/bug/?i=3566
+ [17] = https://curl.haxx.se/bug/?i=3565
+ [18] = https://curl.haxx.se/bug/?i=3561
+ [19] = https://curl.haxx.se/bug/?i=3552
+ [20] = https://curl.haxx.se/bug/?i=3562
+ [21] = https://curl.haxx.se/bug/?i=3557
+ [22] = https://curl.haxx.se/bug/?i=3548
+ [23] = https://curl.haxx.se/mail/archive-2019-02/0013.html
+ [24] = https://curl.haxx.se/bug/?i=3553
+ [25] = https://curl.haxx.se/bug/?i=3551
+ [26] = https://curl.haxx.se/bug/?i=3536
+ [27] = https://curl.haxx.se/bug/?i=3532
