@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -128,9 +128,12 @@ int my_trace(CURL *handle, curl_infotype type,
 
 #define OUTPUTFILE "dl"
 
-static void setup(CURL *hnd)
+static int setup(CURL *hnd)
 {
   FILE *out = fopen(OUTPUTFILE, "wb");
+  if(!out)
+    /* failed */
+    return 1;
 
   /* write to this file */
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
@@ -153,7 +156,7 @@ static void setup(CURL *hnd)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
 #endif
-
+  return 0; /* all is good */
 }
 
 /* called when there's an incoming push */
@@ -176,6 +179,11 @@ static int server_push_callback(CURL *parent,
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
+  if(!out) {
+    /* if we can't save it, deny it */
+    fprintf(stderr, "Failed to create output file for push\n");
+    return CURL_PUSH_DENY;
+  }
 
   /* write to this file */
   curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
@@ -215,7 +223,10 @@ int main(void)
   easy = curl_easy_init();
 
   /* set options */
-  setup(easy);
+  if(setup(easy)) {
+    fprintf(stderr, "failed\n");
+    return 1;
+  }
 
   /* add the easy transfer */
   curl_multi_add_handle(multi_handle, easy);
