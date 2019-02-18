@@ -1133,6 +1133,10 @@ ConnectionExists(struct Curl_easy *data,
       check = curr->ptr;
       curr = curr->next;
 
+      if(check->bits.connect_only)
+        /* connect-only connections will not be reused */
+        continue;
+
       if(extract_if_dead(check, data)) {
         /* disconnect it */
         (void)Curl_disconnect(data, check, /* dead_connection */TRUE);
@@ -1893,8 +1897,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
     data->set.proxy_ssl.primary.verifystatus;
   conn->proxy_ssl_config.verifypeer = data->set.proxy_ssl.primary.verifypeer;
   conn->proxy_ssl_config.verifyhost = data->set.proxy_ssl.primary.verifyhost;
-
   conn->ip_version = data->set.ipver;
+  conn->bits.connect_only = data->set.connect_only;
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
     defined(NTLM_WB_ENABLED)
@@ -3871,8 +3875,9 @@ static CURLcode create_conn(struct Curl_easy *data,
   /* reuse_fresh is TRUE if we are told to use a new connection by force, but
      we only acknowledge this option if this is not a re-used connection
      already (which happens due to follow-location or during a HTTP
-     authentication phase). */
-  if(data->set.reuse_fresh && !data->state.this_is_a_follow)
+     authentication phase). CONNECT_ONLY transfers also refuse reuse. */
+  if((data->set.reuse_fresh && !data->state.this_is_a_follow) ||
+     data->set.connect_only)
     reuse = FALSE;
   else
     reuse = ConnectionExists(data, conn, &conn_temp, &force_reuse, &waitpipe);

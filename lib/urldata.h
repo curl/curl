@@ -452,6 +452,7 @@ struct ConnectBits {
   bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
                                   is complete */
   bool socksproxy_connecting; /* connecting through a socks proxy */
+  bool connect_only;
 };
 
 struct hostname {
