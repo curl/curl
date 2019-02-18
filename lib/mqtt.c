@@ -50,6 +50,7 @@
 #define MQTT_CONNACK_LEN 4
 #define MQTT_SUBACK_LEN 5
 #define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
+#define MQTT_HEADER_LEN 5    /* max 5 bytes */
 
 /*
  * Forward declarations.
@@ -120,7 +121,7 @@ static CURLcode mqtt_connect(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   const size_t client_id_offset = 14;
   const size_t packetlen = client_id_offset + MQTT_CLIENTID_LEN;
-  const size_t curl_len = sizeof("curl");
+  const size_t curl_len = strlen("curl");
   char packet[32] = {
     MQTT_MSG_CONNECT,  /* packet type */
     0x00,              /* remaining length */
@@ -137,7 +138,7 @@ static CURLcode mqtt_connect(struct connectdata *conn)
   memcpy(packet + client_id_offset, "curl", curl_len);
   result = Curl_rand_hex(conn->data,
                          (unsigned char *)packet + client_id_offset + curl_len,
-                         MQTT_CLIENTID_LEN - curl_len + sizeof('\0'));
+                         MQTT_CLIENTID_LEN - curl_len + 1);
   if(!result)
     result = mqtt_busy_write(conn, packet, packetlen);
   return result;
@@ -358,8 +359,7 @@ static CURLcode mqtt_read_publish(struct connectdata *conn)
     goto fail;
   }
 
-  /* packet header is 2-5 bytes long, read 5 to be sure we get all of it */
-  result = Curl_read(conn, sockfd, pkt, 5, &nread);
+  result = Curl_read(conn, sockfd, pkt, MQTT_HEADER_LEN, &nread);
   if(result)
     goto fail;
 
@@ -388,8 +388,8 @@ static CURLcode mqtt_read_publish(struct connectdata *conn)
 
   /* read rest of packet */
   result = Curl_read(conn, sockfd,
-                     (char *)(pkt + 5),
-                     1 + lenbytes + remlen - 5,
+                     (char *)(pkt + MQTT_HEADER_LEN),
+                     1 + lenbytes + remlen - MQTT_HEADER_LEN,
                      &nread);
   if(result)
     goto fail;
@@ -405,6 +405,8 @@ static CURLcode mqtt_read_publish(struct connectdata *conn)
   ptr += 2; /* skip topic length bytes */
   ptr += topiclen + packetidlen; /* skip topic + packet id */
   result = Curl_client_write(conn, CLIENTWRITE_BODY, ptr, payloadlen);
+  if(result)
+    goto fail;
   /* add a newline for readability */
   result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
 
@@ -424,7 +426,7 @@ static CURLcode mqtt_do(struct connectdata *conn, bool *done)
 
   result = mqtt_connect(conn);
   if(result) {
-    failf(data, "Failed sending MQTT CONN request");
+    failf(data, "Error %d sending MQTT CONN request", result);
     return result;
   }
   mqtt->state = MQTT_CONNACK;
