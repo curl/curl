@@ -417,13 +417,13 @@ static const char *OID2str(const char *beg, const char *end, bool symbolic)
   char *buf = (char *) NULL;
   const curl_OID * op;
   int n;
-  char dummy;
+  char dummy[1];
 
   /* Convert an ASN.1 OID into its dotted or symbolic string representation.
      Return the dynamically allocated string, or NULL if an error occurs. */
 
   if(beg < end) {
-    n = encodeOID(&dummy, 0, beg, end);
+    n = encodeOID(dummy, 0, beg, end);
     if(n >= 0) {
       buf = malloc(n + 1);
       if(buf) {
