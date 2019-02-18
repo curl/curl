@@ -945,6 +945,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
                     config->postfieldsize);
           break;
         case HTTPREQ_MIMEPOST:
+          result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
+          if(result)
+            goto show_error;
           my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
           break;
         default:
