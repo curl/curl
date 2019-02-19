@@ -241,9 +241,9 @@ int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
 static CURLcode tool2curlparts(CURL *curl, tool_mime *m, curl_mime *mime)
 {
   CURLcode ret = CURLE_OK;
-  curl_mimepart *part;
+  curl_mimepart *part = NULL;
   curl_mime *submime = NULL;
-  const char *filename;
+  const char *filename = NULL;
 
   if(m) {
     ret = tool2curlparts(curl, m->prev, mime);
