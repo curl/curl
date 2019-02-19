@@ -166,7 +166,6 @@ void tool_mime_free(tool_mime *mime)
       tool_mime_free(mime->subparts);
     if(mime->prev)
       tool_mime_free(mime->prev);
-    curl_mime_free(mime->handle);
     CONST_SAFEFREE(mime->name);
     CONST_SAFEFREE(mime->filename);
     CONST_SAFEFREE(mime->type);
@@ -235,6 +234,109 @@ int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
   }
   sip->curpos = offset;
   return CURL_SEEKFUNC_OK;
+}
+
+/* Translate an internal mime tree into a libcurl mime tree. */
+
+static CURLcode tool2curlparts(CURL *curl, tool_mime *m, curl_mime *mime)
+{
+  CURLcode ret = CURLE_OK;
+  curl_mimepart *part = NULL;
+  curl_mime *submime = NULL;
+  const char *filename = NULL;
+
+  if(m) {
+    ret = tool2curlparts(curl, m->prev, mime);
+    if(!ret) {
+      part = curl_mime_addpart(mime);
+      if(!part)
+        ret = CURLE_OUT_OF_MEMORY;
+    }
+    if(!ret) {
+      filename = m->filename;
+      switch(m->kind) {
+      case TOOLMIME_PARTS:
+        ret = tool2curlmime(curl, m, &submime);
+        if(!ret) {
+          ret = curl_mime_subparts(part, submime);
+          if(ret)
+            curl_mime_free(submime);
+        }
+        break;
+
+      case TOOLMIME_DATA:
+#ifdef CURL_DOES_CONVERSIONS
+        /* Our data is always textual: convert it to ASCII. */
+        {
+          size_t size = strlen(m->data);
+          char *cp = malloc(size + 1);
+
+          if(!cp)
+            ret = CURLE_OUT_OF_MEMORY;
+          else {
+            memcpy(cp, m->data, size + 1);
+            ret = convert_to_network(cp, size);
+            if(!ret)
+              ret = curl_mime_data(part, cp, CURL_ZERO_TERMINATED);
+            free(cp);
+          }
+        }
+#else
+        ret = curl_mime_data(part, m->data, CURL_ZERO_TERMINATED);
+#endif
+        break;
+
+      case TOOLMIME_FILE:
+      case TOOLMIME_FILEDATA:
+        ret = curl_mime_filedata(part, m->data);
+        if(!ret && m->kind == TOOLMIME_FILEDATA && !filename)
+          ret = curl_mime_filename(part, NULL);
+        break;
+
+      case TOOLMIME_STDIN:
+        if(!filename)
+          filename = "-";
+        /* FALLTHROUGH */
+      case TOOLMIME_STDINDATA:
+        ret = curl_mime_data_cb(part, m->size,
+                                (curl_read_callback) tool_mime_stdin_read,
+                                (curl_seek_callback) tool_mime_stdin_seek,
+                                NULL, m);
+        break;
+
+      default:
+        /* Other cases not possible in this context. */
+        break;
+      }
+    }
+    if(!ret && filename)
+      ret = curl_mime_filename(part, filename);
+    if(!ret)
+      ret = curl_mime_type(part, m->type);
+    if(!ret)
+      ret = curl_mime_headers(part, m->headers, 0);
+    if(!ret)
+      ret = curl_mime_encoder(part, m->encoder);
+    if(!ret)
+      ret = curl_mime_name(part, m->name);
+  }
+  return ret;
+}
+
+CURLcode tool2curlmime(CURL *curl, tool_mime *m, curl_mime **mime)
+{
+  CURLcode ret = CURLE_OK;
+
+  *mime = curl_mime_init(curl);
+  if(!*mime)
+    ret = CURLE_OUT_OF_MEMORY;
+  else
+    ret = tool2curlparts(curl, m->subparts, *mime);
+  if(ret) {
+    curl_mime_free(*mime);
+    *mime = NULL;
+  }
+  return ret;
 }
 
 /*
@@ -633,7 +735,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
 
 int formparse(struct OperationConfig *config,
               const char *input,
-              tool_mime **mimepost,
+              tool_mime **mimeroot,
               tool_mime **mimecurrent,
               bool literal_value)
 {
@@ -652,8 +754,8 @@ int formparse(struct OperationConfig *config,
 
   /* Allocate the main mime structure if needed. */
   if(!*mimecurrent) {
-    NULL_CHECK(*mimepost, tool_mime_new_parts(NULL), 1);
-    *mimecurrent = *mimepost;
+    NULL_CHECK(*mimeroot, tool_mime_new_parts(NULL), 1);
+    *mimecurrent = *mimeroot;
   }
 
   /* Make a copy we can overwrite. */
@@ -683,7 +785,7 @@ int formparse(struct OperationConfig *config,
     }
     else if(!name && !strcmp(contp, ")") && !literal_value) {
       /* Ending a multipart. */
-      if(*mimecurrent == *mimepost) {
+      if(*mimecurrent == *mimeroot) {
         warnf(config->global, "no multipart to terminate!\n");
         Curl_safefree(contents);
         return 6;
@@ -721,6 +823,7 @@ int formparse(struct OperationConfig *config,
                    tool_mime_new_filedata(subparts, data, TRUE, &res), 9);
         part->headers = headers;
         headers = NULL;
+        part->config = config->global;
         if(res == CURLE_READ_ERROR) {
             /* An error occurred while reading stdin: if read has started,
                issue the error now. Else, delay it until processed by
@@ -758,6 +861,7 @@ int formparse(struct OperationConfig *config,
                                                 &res), 15);
         part->headers = headers;
         headers = NULL;
+        part->config = config->global;
         if(res == CURLE_READ_ERROR) {
             /* An error occurred while reading stdin: if read has started,
                issue the error now. Else, delay it until processed by

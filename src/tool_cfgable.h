@@ -178,8 +178,9 @@ struct OperationConfig {
   curl_off_t condtime;
   struct curl_slist *headers;
   struct curl_slist *proxyheaders;
-  tool_mime *mimepost;
+  tool_mime *mimeroot;
   tool_mime *mimecurrent;
+  curl_mime *mimepost;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
   struct curl_slist *connect_to;

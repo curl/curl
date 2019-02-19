@@ -414,60 +414,45 @@ static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
 static CURLcode libcurl_generate_mime(CURL *curl,
                                       struct GlobalConfig *config,
                                       tool_mime *toolmime,
-                                      curl_mime **mime,
                                       int *mimeno);     /* Forward. */
 
-/* Wrapper to build and generate source code for a mime part. */
+/* Wrapper to generate source code for a mime part. */
 static CURLcode libcurl_generate_mime_part(CURL *curl,
                                            struct GlobalConfig *config,
                                            tool_mime *part,
-                                           curl_mime *mime,
                                            int mimeno)
 {
   CURLcode ret = CURLE_OK;
-  curl_mimepart *mimepart;
   int submimeno = 0;
-  curl_mime *submime = NULL;
   char *escaped = NULL;
   const char *data = NULL;
   const char *filename = part->filename;
 
   /* Parts are linked in reverse order. */
   if(part->prev) {
-    ret = libcurl_generate_mime_part(curl, config, part->prev, mime, mimeno);
+    ret = libcurl_generate_mime_part(curl, config, part->prev, mimeno);
     if(ret)
       return ret;
   }
 
   /* Create the part. */
-  mimepart = curl_mime_addpart(mime);
-  NULL_CHECK(mimepart);
-  if(config->libcurl)
-    CODE2("part%d = curl_mime_addpart(mime%d);", mimeno, mimeno);
+  CODE2("part%d = curl_mime_addpart(mime%d);", mimeno, mimeno);
 
   switch(part->kind) {
   case TOOLMIME_PARTS:
-    ret = libcurl_generate_mime(curl, config, part, &submime, &submimeno);
+    ret = libcurl_generate_mime(curl, config, part, &submimeno);
     if(!ret) {
-      ret = curl_mime_subparts(mimepart, submime);
-      if(!ret) {
-        submime = NULL;
-        if(config->libcurl) {
-          CODE2("curl_mime_subparts(part%d, mime%d);", mimeno, submimeno);
-          CODE1("mime%d = NULL;", submimeno);   /* Avoid freeing in CLEAN. */
-        }
-      }
+      CODE2("curl_mime_subparts(part%d, mime%d);", mimeno, submimeno);
+      CODE1("mime%d = NULL;", submimeno);   /* Avoid freeing in CLEAN. */
     }
     break;
 
   case TOOLMIME_DATA:
 #ifdef CURL_DOES_CONVERSIONS
-    if(config->libcurl) {
-      /* Data will be set in ASCII, thus issue a comment with clear text. */
-      escaped = c_escape(part->data, CURL_ZERO_TERMINATED);
-      NULL_CHECK(escaped);
-      CODE1("/* \"%s\" */", escaped);
-    }
+    /* Data will be set in ASCII, thus issue a comment with clear text. */
+    escaped = c_escape(part->data, CURL_ZERO_TERMINATED);
+    NULL_CHECK(escaped);
+    CODE1("/* \"%s\" */", escaped);
 
     /* Our data is always textual: convert it to ASCII. */
     {
@@ -482,9 +467,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
 #else
     data = part->data;
 #endif
-    if(!ret)
-      ret = curl_mime_data(mimepart, data, CURL_ZERO_TERMINATED);
-    if(!ret && config->libcurl) {
+    if(!ret) {
       Curl_safefree(escaped);
       escaped = c_escape(data, CURL_ZERO_TERMINATED);
       NULL_CHECK(escaped);
@@ -495,16 +478,11 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
 
   case TOOLMIME_FILE:
   case TOOLMIME_FILEDATA:
-    ret = curl_mime_filedata(mimepart, part->data);
-    if(!ret && config->libcurl) {
-      escaped = c_escape(part->data, CURL_ZERO_TERMINATED);
-      NULL_CHECK(escaped);
-      CODE2("curl_mime_filedata(part%d, \"%s\");", mimeno, escaped);
-    }
-    if(!ret && part->kind == TOOLMIME_FILEDATA && !filename) {
-      ret = curl_mime_filename(mimepart, NULL);
-      if(!ret && config->libcurl)
-        CODE1("curl_mime_filename(part%d, NULL);", mimeno);
+    escaped = c_escape(part->data, CURL_ZERO_TERMINATED);
+    NULL_CHECK(escaped);
+    CODE2("curl_mime_filedata(part%d, \"%s\");", mimeno, escaped);
+    if(part->kind == TOOLMIME_FILEDATA && !filename) {
+      CODE1("curl_mime_filename(part%d, NULL);", mimeno);
     }
     break;
 
@@ -513,17 +491,10 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
       filename = "-";
     /* FALLTHROUGH */
   case TOOLMIME_STDINDATA:
-    part->config = config;
-    ret = curl_mime_data_cb(mimepart, part->size,
-                            (curl_read_callback) tool_mime_stdin_read,
-                            (curl_seek_callback) tool_mime_stdin_seek,
-                            NULL, part);
-    if(!ret && config->libcurl) {
-      /* Can only be reading stdin in the current context. */
-      CODE1("curl_mime_data_cb(part%d, -1, (curl_read_callback) fread, \\",
-            mimeno);
-      CODE0("                  (curl_seek_callback) fseek, NULL, stdin);");
-      }
+    /* Can only be reading stdin in the current context. */
+    CODE1("curl_mime_data_cb(part%d, -1, (curl_read_callback) fread, \\",
+          mimeno);
+    CODE0("                  (curl_seek_callback) fseek, NULL, stdin);");
     break;
   default:
     /* Other cases not possible in this context. */
@@ -531,55 +502,40 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
   }
 
   if(!ret && part->encoder) {
-    ret = curl_mime_encoder(mimepart, part->encoder);
-    if(!ret && config->libcurl) {
-      Curl_safefree(escaped);
-      escaped = c_escape(part->encoder, CURL_ZERO_TERMINATED);
-      NULL_CHECK(escaped);
-      CODE2("curl_mime_encoder(part%d, \"%s\");", mimeno, escaped);
-    }
+    Curl_safefree(escaped);
+    escaped = c_escape(part->encoder, CURL_ZERO_TERMINATED);
+    NULL_CHECK(escaped);
+    CODE2("curl_mime_encoder(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && filename) {
-    ret = curl_mime_filename(mimepart, filename);
-    if(!ret && config->libcurl) {
-      Curl_safefree(escaped);
-      escaped = c_escape(filename, CURL_ZERO_TERMINATED);
-      NULL_CHECK(escaped);
-      CODE2("curl_mime_filename(part%d, \"%s\");", mimeno, escaped);
-    }
+    Curl_safefree(escaped);
+    escaped = c_escape(filename, CURL_ZERO_TERMINATED);
+    NULL_CHECK(escaped);
+    CODE2("curl_mime_filename(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && part->name) {
-    ret = curl_mime_name(mimepart, part->name);
-    if(!ret && config->libcurl) {
-      Curl_safefree(escaped);
-      escaped = c_escape(part->name, CURL_ZERO_TERMINATED);
-      NULL_CHECK(escaped);
-      CODE2("curl_mime_name(part%d, \"%s\");", mimeno, escaped);
-    }
+    Curl_safefree(escaped);
+    escaped = c_escape(part->name, CURL_ZERO_TERMINATED);
+    NULL_CHECK(escaped);
+    CODE2("curl_mime_name(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && part->type) {
-    ret = curl_mime_type(mimepart, part->type);
-    if(!ret && config->libcurl) {
-      Curl_safefree(escaped);
-      escaped = c_escape(part->type, CURL_ZERO_TERMINATED);
-      NULL_CHECK(escaped);
-      CODE2("curl_mime_type(part%d, \"%s\");", mimeno, escaped);
-    }
+    Curl_safefree(escaped);
+    escaped = c_escape(part->type, CURL_ZERO_TERMINATED);
+    NULL_CHECK(escaped);
+    CODE2("curl_mime_type(part%d, \"%s\");", mimeno, escaped);
   }
 
   if(!ret && part->headers) {
-    ret = curl_mime_headers(mimepart, part->headers, 0);
-    if(!ret && config->libcurl) {
-      int slistno;
+    int slistno;
 
-      ret = libcurl_generate_slist(part->headers, &slistno);
-      if(!ret) {
-        CODE2("curl_mime_headers(part%d, slist%d, 1);", mimeno, slistno);
-        CODE1("slist%d = NULL;", slistno); /* Prevent CLEANing. */
-      }
+    ret = libcurl_generate_slist(part->headers, &slistno);
+    if(!ret) {
+      CODE2("curl_mime_headers(part%d, slist%d, 1);", mimeno, slistno);
+      CODE1("slist%d = NULL;", slistno); /* Prevent CLEANing. */
     }
   }
 
@@ -589,38 +545,30 @@ nomem:
     free((char *) data);
 #endif
 
-  curl_mime_free(submime);
   Curl_safefree(escaped);
   return ret;
 }
 
-/* Wrapper to build and generate source code for a mime structure. */
+/* Wrapper to generate source code for a mime structure. */
 static CURLcode libcurl_generate_mime(CURL *curl,
                                       struct GlobalConfig *config,
                                       tool_mime *toolmime,
-                                      curl_mime **mime,
                                       int *mimeno)
 {
   CURLcode ret = CURLE_OK;
 
-  *mime = curl_mime_init(curl);
-  NULL_CHECK(*mime);
-
-  if(config->libcurl) {
-    /* May need several mime variables, so invent name. */
-    *mimeno = ++easysrc_mime_count;
-    DECL1("curl_mime *mime%d;", *mimeno);
-    DATA1("mime%d = NULL;", *mimeno);
-    CODE1("mime%d = curl_mime_init(hnd);", *mimeno);
-    CLEAN1("curl_mime_free(mime%d);", *mimeno);
-    CLEAN1("mime%d = NULL;", *mimeno);
-  }
+  /* May need several mime variables, so invent name. */
+  *mimeno = ++easysrc_mime_count;
+  DECL1("curl_mime *mime%d;", *mimeno);
+  DATA1("mime%d = NULL;", *mimeno);
+  CODE1("mime%d = curl_mime_init(hnd);", *mimeno);
+  CLEAN1("curl_mime_free(mime%d);", *mimeno);
+  CLEAN1("mime%d = NULL;", *mimeno);
 
   if(toolmime->subparts) {
-    if(config->libcurl)
-      DECL1("curl_mimepart *part%d;", *mimeno);
+    DECL1("curl_mimepart *part%d;", *mimeno);
     ret = libcurl_generate_mime_part(curl, config,
-                                     toolmime->subparts, *mime, *mimeno);
+                                     toolmime->subparts, *mimeno);
   }
 
 nomem:
@@ -630,18 +578,16 @@ nomem:
 /* setopt wrapper for CURLOPT_MIMEPOST */
 CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
                               const char *name, CURLoption tag,
-                              tool_mime *mimepost)
+                              curl_mime *mimepost)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode ret = curl_easy_setopt(curl, tag, mimepost);
   int mimeno = 0;
 
-  ret = libcurl_generate_mime(curl, config, mimepost,
-                              &mimepost->handle, &mimeno);
+  if(!ret && config->libcurl) {
+    ret = libcurl_generate_mime(curl, config,
+                                config->current->mimeroot, &mimeno);
 
-  if(!ret) {
-    ret = curl_easy_setopt(curl, tag, mimepost->handle);
-
-    if(config->libcurl && !ret)
+    if(!ret)
       CODE2("curl_easy_setopt(hnd, %s, mime%d);", name, mimeno);
   }
 
