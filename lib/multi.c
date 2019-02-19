@@ -2349,8 +2349,6 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
   int num;
   unsigned int curraction;
   int actions[MAX_SOCKSPEREASYHANDLE];
-  unsigned int comboaction;
-  bool sincebefore = FALSE;
 
   for(i = 0; i< MAX_SOCKSPEREASYHANDLE; i++)
     socks[i] = CURL_SOCKET_BAD;
@@ -2369,6 +2367,8 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       i++) {
     unsigned int action = CURL_POLL_NONE;
     unsigned int prevaction = 0;
+    unsigned int comboaction;
+    bool sincebefore = FALSE;
 
     s = socks[i];
 
