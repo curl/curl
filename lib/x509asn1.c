@@ -383,7 +383,7 @@ static size_t encodeUint(char *buf, size_t buflen, unsigned int x)
 /*
  * Convert an ASN.1 OID into its dotted string representation.
  * Store the result in th `n'-byte buffer at `buf'.
- * Return the converted string length, or -1 if an error occurs.
+ * Return the converted string length, or 0 on errors.
  */
 static size_t encodeOID(char *buf, size_t buflen,
                         const char *beg, const char *end)
@@ -413,7 +413,7 @@ static size_t encodeOID(char *buf, size_t buflen,
     x = 0;
     do {
       if(x & 0xFF000000)
-        return -1;
+        return 0;
       y = *(const unsigned char *) beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
