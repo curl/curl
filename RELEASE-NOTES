@@ -12,18 +12,24 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Curl_now: figure out windows version in win32_init: [11]
+ o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
  o cirrus: Added FreeBSD builds using Cirrus CI
  o cleanup: make local functions static [5]
  o cli tool: do not use mime.h private structures [27]
  o configure: show features as well in the final summary [15]
+ o connection: never reuse CONNECT_ONLY conections [35]
  o connection_check: restore original conn->data after the check [14]
  o connection_check: set ->data to the transfer doing the check [3]
+ o cookie: Add support for cookie prefixes [29]
  o curl: fix FreeBSD compiler warning in the --xattr code [2]
- o Curl_now: figure out windows version in win32_init: [11]
- o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
+ o curl: remove MANUAL from -M output [38]
+ o curl_multi_remove_handle.3: use at any time, just not from within callbacks
  o dns: release sharelock as soon as possible [1]
+ o easy: fix win32 init to work without CURL_GLOBAL_WIN32 [30]
  o examples/crawler: Fix the Accept-Encoding setting
  o examples/http2-download: cleaned up
+ o examples/http2-serverpush: add some sensible error checks [31]
  o examples/http2-upload: cleaned up
  o examples/httpcustomheader: Value stored to 'res' is never read
  o examples/postinmemory: Potential leak of memory pointed to by 'chunk.memory'
@@ -33,22 +39,30 @@ This release includes the following bugfixes:
  o gssapi: fix deprecated header warnings [16]
  o hostip: make create_hostcache_id avoid alloc + free [4]
  o http2: multi_connchanged() moved from multi.c, only used for h2 [21]
+ o http2: verify :athority in push promise requests [37]
+ o http: make adding a blank header thread-safe [33]
  o mbedtls: make it build even if MBEDTLS_VERSION_C isn't set [24]
+ o mbedtls: release sessionid resources on error [28]
  o mime: put the boundary buffer into the curl_mime struct [18]
  o multi: remove verbose "Expire in" ... messages [23]
  o pretransfer: don't strlen() POSTFIELDS set for GET requests [22]
+ o rand: Fix a mismatch between comments in source and header [32]
  o schannel: be quiet - remove verbose output [19]
  o schannel: close TLS before removing conn from cache [10]
+ o singlesocket: fix the 'sincebefore' placement [36]
  o tests: add stderr comparison to the test suite [26]
  o tool_operate: fix typecheck warning [9]
  o transfer.c: do not compute length of undefined hex buffer
  o travis: add scan-build [13]
  o travis: enable valgrind for the iconv tests [12]
  o unit1307: require FTP support [17]
+ o unit1651: survive curl_easy_init() fails
  o url/idnconvert: remove scan for <= 32 ascii values [6]
  o urlapi: reduce variable scope, remove unreachable 'break' [7]
  o urlglob: Argument with 'nonnull' attribute passed null
+ o version.c: silent scan-build even when librtmp is not enabled
  o x509asn1: "Dereference of null pointer"
+ o x509asn1: cleanup and unify code layout [34]
  o zsh.pl: escape ':' character [8]
  o zsh.pl: update regex to better match curl -h output [8]
 
@@ -59,11 +73,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Chris Araman, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Frank Gevaerts, James Brown, jnbr on github,
-  MAntoniak on github, Marcel Raad, Patrick Monnerat, Paul Groke, Ray Satiro,
-  Renaud Allard, Romain Geissler, tholin on github, Volker Schmid,
-  (17 contributors)
+  Alessandro Ghedini, Björn Stenberg, buzo-ffm on github, Chris Araman,
+  d912e3 on github, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Frank Gevaerts, James Brown, Jan Alexander Steffens, jnbr on github,
+  MAntoniak on github, Marcel Raad, Michał Antoniak, Nicolas Grekas,
+  Patrick Monnerat, Paul Groke, Pavel Löbl, Ray Satiro, Renaud Allard,
+  Romain Geissler, tholin on github, Volker Schmid,
+  (24 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -96,3 +112,14 @@ References to bug reports and discussions on issues:
  [25] = https://curl.haxx.se/bug/?i=3551
  [26] = https://curl.haxx.se/bug/?i=3536
  [27] = https://curl.haxx.se/bug/?i=3532
+ [28] = https://curl.haxx.se/bug/?i=3574
+ [29] = https://curl.haxx.se/bug/?i=3554
+ [30] = https://curl.haxx.se/bug/?i=3313
+ [31] = https://curl.haxx.se/bug/?i=3580
+ [32] = https://curl.haxx.se/bug/?i=3584
+ [33] = https://curl.haxx.se/bug/?i=3578
+ [34] = https://curl.haxx.se/bug/?i=3582
+ [35] = https://curl.haxx.se/mail/lib-2019-02/0064.html
+ [36] = https://curl.haxx.se/bug/?i=3585
+ [37] = https://curl.haxx.se/bug/?i=3577
+ [38] = https://curl.haxx.se/bug/?i=3587
