@@ -2808,6 +2808,12 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
       connssl->connecting_state = ssl_connect_2_writing;
       return CURLE_OK;
     }
+#ifdef SSL_ERROR_WANT_ASYNC
+    if(SSL_ERROR_WANT_ASYNC == detail) {
+      connssl->connecting_state = ssl_connect_2;
+      return CURLE_OK;
+    }
+#endif
     else {
       /* untreated error */
       unsigned long errdetail;
