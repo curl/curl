@@ -72,6 +72,7 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
+ 5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 QUIC
@@ -594,6 +595,15 @@
  sorts the headers based on that number. We could then have internally created
  headers use a default value so only headers that need to be moved have to be
  specified.
+
+5.4 Allow SAN names in HTTP/2 server push
+
+ curl only allows HTTP/2 push promise if the provided :autority header value
+ exactly matches the host name given in the URL. It could be extended to allow
+ any name that would match the Subject Alternative Names in the server's TLS
+ certificate.
+
+ See https://github.com/curl/curl/pull/3581
 
 5.5 auth= in URLs
 
