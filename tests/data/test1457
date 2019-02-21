@@ -45,7 +45,6 @@ Content-Type: text/plain
 testdata
 line1line3
 </stdout>
-#note: as of now <stderr> doesn't actually exist in runtests.pl
 <stderr nonewline="yes">
 line2
 </stderr>
