@@ -660,10 +660,14 @@ static void conn_reset_all_postponed_data(struct connectdata *conn)
 #define conn_reset_all_postponed_data(c) do {} WHILE_FALSE
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
-static void conn_free(struct connectdata *conn)
+
+static void conn_shutdown(struct connectdata *conn)
 {
   if(!conn)
     return;
+
+  infof(conn->data, "Closing connection %ld\n", conn->connection_id);
+  DEBUGASSERT(conn->data);
 
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(conn);
@@ -687,6 +691,21 @@ static void conn_free(struct connectdata *conn)
     defined(NTLM_WB_ENABLED)
   Curl_ntlm_wb_cleanup(conn);
 #endif
+
+  /* unlink ourselves. this should be called last since other shutdown
+     procedures need a valid conn->data and this may clear it. */
+  Curl_conncache_remove_conn(conn->data, conn, TRUE);
+}
+
+static void conn_free(struct connectdata *conn)
+{
+  if(!conn)
+    return;
+
+  free_idnconverted_hostname(&conn->host);
+  free_idnconverted_hostname(&conn->conn_to_host);
+  free_idnconverted_hostname(&conn->http_proxy.host);
+  free_idnconverted_hostname(&conn->socks_proxy.host);
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
@@ -781,25 +800,15 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   Curl_http_ntlm_cleanup(conn);
 #endif
 
-  /* the protocol specific disconnect handler needs a transfer for its
-     connection! */
+  /* the protocol specific disconnect handler and conn_shutdown need a transfer
+     for the connection! */
   conn->data = data;
+
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn, dead_connection);
 
-  infof(data, "Closing connection %ld\n", conn->connection_id);
-  Curl_ssl_close(conn, FIRSTSOCKET);
-  Curl_ssl_close(conn, SECONDARYSOCKET);
-
-  /* unlink ourselves! */
-  Curl_conncache_remove_conn(data, conn, TRUE);
-
-  free_idnconverted_hostname(&conn->host);
-  free_idnconverted_hostname(&conn->conn_to_host);
-  free_idnconverted_hostname(&conn->http_proxy.host);
-  free_idnconverted_hostname(&conn->socks_proxy.host);
-
+  conn_shutdown(conn);
   conn_free(conn);
   return CURLE_OK;
 }
