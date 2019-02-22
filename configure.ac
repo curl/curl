@@ -2384,7 +2384,6 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
         dnl Recent WolfSSL versions build without SSLv3 by default
         dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
         AC_CHECK_FUNCS(wolfSSLv3_client_method \
-                       wolfSSL_CTX_UseSupportedCurve \
                        wolfSSL_get_peer_certificate \
                        wolfSSL_UseALPN)
       else
