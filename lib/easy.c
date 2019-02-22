@@ -94,7 +94,7 @@ static long          init_flags;
 #ifdef WIN32
 
 /* win32_cleanup() is the opposite of win32_init() */
-static void win32_cleanup()
+static void win32_cleanup(void)
 {
 #ifdef USE_WINDOWS_SSPI
   Curl_sspi_global_cleanup();
