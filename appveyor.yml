@@ -14,12 +14,12 @@ environment:
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         PRJ_GEN: "Visual Studio 15 2017 Win64"
-        PRJ_CFG: Release
+        PRJ_CFG: Debug
         OPENSSL: OFF
         WINSSL: ON
         HTTP_ONLY: OFF
-        TESTING: OFF
-        SHARED: ON
+        TESTING: ON
+        SHARED: OFF
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
