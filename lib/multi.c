@@ -1606,7 +1606,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
       else if(result) {
         /* failure detected */
-        /* Just break, the cleaning up is handled all in one place */
+        Curl_posttransfer(data);
+        multi_done(data, result, TRUE);
         stream_error = TRUE;
         break;
       }
