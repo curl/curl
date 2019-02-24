@@ -324,6 +324,9 @@ get_alg_id_by_name(char *name)
 #ifdef CALG_ECDSA
   CIPHEROPTION(CALG_ECDSA);
 #endif
+#ifdef CALG_ECDH_EPHEM
+  CIPHEROPTION(CALG_ECDH_EPHEM);
+#endif
   return 0;
 }
 
