@@ -10,7 +10,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
         OPENSSL: OFF
@@ -18,7 +18,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: OFF
         SHARED: ON
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Release
         OPENSSL: ON
@@ -34,7 +34,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -42,7 +42,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
