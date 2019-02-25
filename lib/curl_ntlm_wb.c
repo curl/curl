@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,6 +124,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
   struct passwd pw, *pw_res;
   char pwbuf[1024];
 #endif
+  char buffer[STRERROR_LEN];
 
   /* Return if communication with ntlm_auth already set up */
   if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD ||
@@ -179,13 +180,13 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
 
   if(access(ntlm_auth, X_OK) != 0) {
     failf(conn->data, "Could not access ntlm_auth: %s errno %d: %s",
-          ntlm_auth, errno, Curl_strerror(conn, errno));
+          ntlm_auth, errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     goto done;
   }
 
   if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds)) {
     failf(conn->data, "Could not open socket pair. errno %d: %s",
-          errno, Curl_strerror(conn, errno));
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     goto done;
   }
 
@@ -194,7 +195,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
     sclose(sockfds[0]);
     sclose(sockfds[1]);
     failf(conn->data, "Could not fork. errno %d: %s",
-          errno, Curl_strerror(conn, errno));
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     goto done;
   }
   else if(!child_pid) {
@@ -206,13 +207,13 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
     sclose_nolog(sockfds[0]);
     if(dup2(sockfds[1], STDIN_FILENO) == -1) {
       failf(conn->data, "Could not redirect child stdin. errno %d: %s",
-            errno, Curl_strerror(conn, errno));
+            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       exit(1);
     }
 
     if(dup2(sockfds[1], STDOUT_FILENO) == -1) {
       failf(conn->data, "Could not redirect child stdout. errno %d: %s",
-            errno, Curl_strerror(conn, errno));
+            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       exit(1);
     }
 
@@ -232,7 +233,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
 
     sclose_nolog(sockfds[1]);
     failf(conn->data, "Could not execl(). errno %d: %s",
-          errno, Curl_strerror(conn, errno));
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     exit(1);
   }
 

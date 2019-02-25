@@ -1005,7 +1005,6 @@ struct connectdata {
 #endif
 #endif
 
-  char syserr_buf [256]; /* buffer for Curl_strerror() */
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
 
