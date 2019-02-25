@@ -411,7 +411,7 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       *code = CURLE_AGAIN;
     }
     else {
-      char buffer[128];
+      char buffer[STRERROR_LEN];
       failf(conn->data, "Send failure: %s",
             Curl_strerror(err, buffer, sizeof(buffer)));
       conn->data->state.os_errno = err;
