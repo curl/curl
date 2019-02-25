@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -955,7 +955,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   unsigned short port_max = 0;
   unsigned short port;
   bool possibly_non_local = TRUE;
-
+  char buffer[STRERROR_LEN];
   char *addr = NULL;
 
   /* Step 1, figure out what is requested,
@@ -1064,11 +1064,10 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   if(!host) {
     /* not an interface and not a host name, get default by extracting
        the IP from the control connection */
-
     sslen = sizeof(ss);
     if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, SOCKERRNO) );
+            Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       free(addr);
       return CURLE_FTP_PORT_FAILED;
     }
@@ -1121,7 +1120,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     break;
   }
   if(!ai) {
-    failf(data, "socket failure: %s", Curl_strerror(conn, error));
+    failf(data, "socket failure: %s",
+          Curl_strerror(error, buffer, sizeof(buffer)));
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -1145,14 +1145,13 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
         /* The requested bind address is not local.  Use the address used for
          * the control connection instead and restart the port loop
          */
-
         infof(data, "bind(port=%hu) on non-local address failed: %s\n", port,
-              Curl_strerror(conn, error) );
+              Curl_strerror(error, buffer, sizeof(buffer)));
 
         sslen = sizeof(ss);
         if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
           failf(data, "getsockname() failed: %s",
-                Curl_strerror(conn, SOCKERRNO) );
+                Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
           Curl_closesocket(conn, portsock);
           return CURLE_FTP_PORT_FAILED;
         }
@@ -1162,7 +1161,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       }
       if(error != EADDRINUSE && error != EACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
-              Curl_strerror(conn, error) );
+              Curl_strerror(error, buffer, sizeof(buffer)));
         Curl_closesocket(conn, portsock);
         return CURLE_FTP_PORT_FAILED;
       }
@@ -1185,7 +1184,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   sslen = sizeof(ss);
   if(getsockname(portsock, (struct sockaddr *)sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
-          Curl_strerror(conn, SOCKERRNO) );
+          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     Curl_closesocket(conn, portsock);
     return CURLE_FTP_PORT_FAILED;
   }
@@ -1193,7 +1192,8 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   /* step 4, listen on the socket */
 
   if(listen(portsock, 1)) {
-    failf(data, "socket failure: %s", Curl_strerror(conn, SOCKERRNO));
+    failf(data, "socket failure: %s",
+          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     Curl_closesocket(conn, portsock);
     return CURLE_FTP_PORT_FAILED;
   }

@@ -248,8 +248,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   free(chlg);
 
   if(GSS_ERROR(nego->status)) {
+    char buffer[STRERROR_LEN];
     failf(data, "InitializeSecurityContext failed: %s",
-          Curl_sspi_strerror(data->conn, nego->status));
+          Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
     return CURLE_OUT_OF_MEMORY;
   }
 
