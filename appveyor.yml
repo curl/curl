@@ -30,20 +30,6 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-      - PRJ_GEN: "Visual Studio 11 2012 Win64"
-        PRJ_CFG: Debug
-        OPENSSL: OFF
-        WINSSL: OFF
-        HTTP_ONLY: OFF
-        TESTING: ON
-        SHARED: OFF
-      - PRJ_GEN: "Visual Studio 12 2013 Win64"
-        PRJ_CFG: Debug
-        OPENSSL: OFF
-        WINSSL: OFF
-        HTTP_ONLY: OFF
-        TESTING: ON
-        SHARED: OFF
       - PRJ_GEN: "Visual Studio 14 2015 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
