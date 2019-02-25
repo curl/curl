@@ -574,13 +574,13 @@ void tool_version_info(void)
     puts(""); /* newline */
   }
   if(curlinfo->features) {
-    const char *featp[ sizeof(feats) / sizeof(feats[0]) + 1];
+    char *featp[ sizeof(feats) / sizeof(feats[0]) + 1];
     size_t numfeat = 0;
     unsigned int i;
     printf("Features:");
     for(i = 0; i < sizeof(feats)/sizeof(feats[0]); i++) {
       if(curlinfo->features & feats[i].bitmask)
-        featp[numfeat++] = feats[i].name;
+        featp[numfeat++] = (char *)feats[i].name;
     }
 #ifdef USE_METALINK
     featp[numfeat++] = (char *)"Metalink";
