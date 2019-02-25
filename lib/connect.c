@@ -1434,7 +1434,7 @@ void Curl_conncontrol(struct connectdata *conn,
   if((ctrl == CONNCTRL_STREAM) &&
      (conn->handler->flags & PROTOPT_STREAM))
     DEBUGF(infof(conn->data, "Kill stream: %s\n", reason));
-  else if(closeit != conn->bits.close) {
+  else if((bit)closeit != conn->bits.close) {
     DEBUGF(infof(conn->data, "Marked for [%s]: %s\n",
                  closeit?"closure":"keep alive", reason));
     conn->bits.close = closeit; /* the only place in the source code that

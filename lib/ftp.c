@@ -4395,7 +4395,6 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   ftp->path = &data->state.up.path[1]; /* don't include the initial slash */
-  data->state.slash_removed = TRUE; /* we've skipped the slash */
 
   /* FTP URLs support an extension like ";type=<typecode>" that
    * we'll try to get now! */
