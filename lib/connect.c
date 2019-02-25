@@ -928,9 +928,11 @@ static void nosigpipe(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   int onoff = 1;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
-                sizeof(onoff)) < 0)
+                sizeof(onoff)) < 0) {
+    char buffer[STRERROR_LEN];
     infof(data, "Could not set SO_NOSIGPIPE: %s\n",
-          Curl_strerror(conn, SOCKERRNO));
+          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+  }
 }
 #else
 #define nosigpipe(x,y) Curl_nop_stmt
