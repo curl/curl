@@ -682,7 +682,7 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
      * Set header option.
      */
     arg = va_arg(param, long);
-    data->set.sep_headers = (arg & CURLHEADER_SEPARATE)? TRUE: FALSE;
+    data->set.sep_headers = (bool)((arg & CURLHEADER_SEPARATE)? TRUE: FALSE);
     break;
 
   case CURLOPT_HTTP200ALIASES:
@@ -884,7 +884,8 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authhost.iestyle = (auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE;
+    data->state.authhost.iestyle =
+      (bool)((auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -967,7 +968,8 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authproxy.iestyle = (auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE;
+    data->state.authproxy.iestyle =
+      (bool)((auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -2076,13 +2078,15 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
 
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.ssl.enable_beast =
+      (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
   case CURLOPT_PROXY_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.proxy_ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.proxy_ssl.enable_beast =
+      (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
     data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
