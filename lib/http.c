@@ -751,7 +751,7 @@ Curl_http_output_auth(struct connectdata *conn,
 #ifndef CURL_DISABLE_PROXY
   /* Send proxy authentication header if needed */
   if(conn->bits.httpproxy &&
-      (conn->bits.tunnel_proxy == proxytunnel)) {
+     (conn->bits.tunnel_proxy == (bit)proxytunnel)) {
     result = output_auth_headers(conn, authproxy, request, path, TRUE);
     if(result)
       return result;
