@@ -497,6 +497,8 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->set.server_response_timeout;
   data->state.conn_cache->closure_handle->set.no_signal =
     data->set.no_signal;
+  data->state.conn_cache->closure_handle->set.verbose =
+    data->set.verbose;
 
   update_timer(multi);
   return CURLM_OK;
