@@ -189,7 +189,7 @@ test1700 test1701 test1702 \
 \
 test1800 test1801 \
 \
-test1900 test1901 test1902 test1903 test1904 \
+test1900 test1901 test1902 test1903 test1904 test1905 \
 \
 test2000 test2001 test2002 test2003 test2004 test2005 test2006 test2007 \
 test2008 test2009 test2010 test2011 test2012 test2013 test2014 test2015 \
