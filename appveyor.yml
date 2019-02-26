@@ -73,6 +73,17 @@ environment:
         DISABLED_TESTS: "!198"
         COMPILER_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        PRJ_GEN: "MSYS Makefiles"
+        PRJ_CFG: Debug
+        OPENSSL: OFF
+        WINSSL: OFF
+        HTTP_ONLY: OFF
+        TESTING: ON
+        SHARED: OFF
+        DISABLED_TESTS: ""
+        COMPILER_PATH: "C:\\MinGW\\bin"
+        MSYS2_ARG_CONV_EXCL: "/*"
 
 install:
     - set "PATH=C:\msys64\usr\bin;%PATH%"
