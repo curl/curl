@@ -81,6 +81,7 @@ Accept: */*
 </protocol>
 <strip>
 ^Host:.*
+^\* Closing connection (?:1|2|3)$
 </strip>
 <file name="log/stderr1506" mode="text">
 * Connection #0 to host server1.example.com left intact
