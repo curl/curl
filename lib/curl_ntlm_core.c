@@ -38,7 +38,7 @@
    3. USE_GNUTLS
    4. USE_NSS
    5. USE_MBEDTLS
-   6. USE_DARWINSSL
+   6. USE_SECTRANSP
    7. USE_OS400CRYPTO
    8. USE_WIN32_CRYPTO
 
@@ -101,7 +101,7 @@
 #    include "curl_md4.h"
 #  endif
 
-#elif defined(USE_DARWINSSL)
+#elif defined(USE_SECTRANSP)
 
 #  include <CommonCrypto/CommonCryptor.h>
 #  include <CommonCrypto/CommonDigest.h>
@@ -290,7 +290,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   return mbedtls_des_crypt_ecb(&ctx, in, out) == 0;
 }
 
-#elif defined(USE_DARWINSSL)
+#elif defined(USE_SECTRANSP)
 
 static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
@@ -437,7 +437,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   setup_des_key(keys + 14, &des);
   gcry_cipher_encrypt(des, results + 16, 8, plaintext, 8);
   gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_DARWINSSL) \
+#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
@@ -501,7 +501,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
     setup_des_key(pw + 7, &des);
     gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
     gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_DARWINSSL) \
+#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
@@ -591,7 +591,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 #else
     Curl_md4it(ntbuffer, pw, 2 * len);
 #endif
-#elif defined(USE_DARWINSSL)
+#elif defined(USE_SECTRANSP)
     (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
 #elif defined(USE_OS400CRYPTO)
     Curl_md4it(ntbuffer, pw, 2 * len);

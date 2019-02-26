@@ -155,7 +155,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,winssl,darwinssl,mesalink} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,schannel,secure-transport,mesalink} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -1509,22 +1509,27 @@ else
   AC_MSG_RESULT(no)
 fi
 
-OPT_DARWINSSL=no
+OPT_SECURETRANSPORT=no
 AC_ARG_WITH(darwinssl,dnl
 AC_HELP_STRING([--with-darwinssl],[enable Apple OS native SSL/TLS])
 AC_HELP_STRING([--without-darwinssl], [disable Apple OS native SSL/TLS]),
-  OPT_DARWINSSL=$withval)
+  OPT_SECURETRANSPORT=$withval)
 
-AC_MSG_CHECKING([whether to enable Apple OS native SSL/TLS])
-if test -z "$ssl_backends" -o "x$OPT_DARWINSSL" != xno; then
-  if test "x$OPT_DARWINSSL" != "xno" &&
+AC_ARG_WITH(secure-transport,dnl
+AC_HELP_STRING([--with-secure-transport],[enable Apple OS native SSL/TLS])
+AC_HELP_STRING([--without-secure-transport], [disable Apple OS native SSL/TLS]),
+  OPT_SECURETRANSPORT=$withval)
+
+AC_MSG_CHECKING([whether to enable Secure Transport])
+if test -z "$ssl_backends" -o "x$OPT_SECURETRANSPORT" != xno; then
+  if test "x$OPT_SECURETRANSPORT" != "xno" &&
      test -d "/System/Library/Frameworks/Security.framework"; then
     AC_MSG_RESULT(yes)
-    AC_DEFINE(USE_DARWINSSL, 1, [to enable Apple OS native SSL/TLS support])
-    AC_SUBST(USE_DARWINSSL, [1])
-    ssl_msg="Apple OS-native"
-    test darwinssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-    DARWINSSL_ENABLED=1
+    AC_DEFINE(USE_SECTRANSP, 1, [enable Secure Transport])
+    AC_SUBST(USE_SECTRANSP, [1])
+    ssl_msg="Secure Transport"
+    test secure-transport != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+    SECURETRANSPORT_ENABLED=1
     LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
   else
     AC_MSG_RESULT(no)
@@ -2633,10 +2638,10 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED$MESALINK_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED" in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-winssl, --with-darwinssl, or --with-mesalink to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-schannel, --with-secure-transport, or --with-mesalink to address this.])
   ;;
 x1)
   # one SSL backend is enabled
@@ -3065,9 +3070,9 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
         elif test "x$CYASSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="CYASSL_"
         elif test "x$WINSSL_ENABLED" = "x1"; then
-          versioned_symbols_flavour="WINSSL_"
-        elif test "x$DARWINSSL_ENABLED" = "x1"; then
-          versioned_symbols_flavour="DARWINSSL_"
+          versioned_symbols_flavour="SCHANNEL_"
+        elif test "x$SECURETRANSPORT_ENABLED" = "x1"; then
+          versioned_symbols_flavour="SECURE_TRANSPORT_"
         else
           versioned_symbols_flavour=""
         fi
@@ -4118,7 +4123,7 @@ fi
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" -o "x$DARWINSSL_ENABLED" = "x1"; then
+      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
 
     if test "x$CURL_DISABLE_HTTP" != "x1" -a \
@@ -4200,7 +4205,7 @@ if test "x$CURL_DISABLE_SMB" != "x1" \
     -a "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" \
     -a \( "x$OPENSSL_ENABLED" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
-      -o "x$NSS_ENABLED" = "x1" -o "x$DARWINSSL_ENABLED" = "x1" \); then
+      -o "x$NSS_ENABLED" = "x1" -o "x$SECURETRANSPORT_ENABLED" = "x1" \); then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"
