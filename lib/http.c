@@ -2733,7 +2733,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       break;
     }
 
-    postsize = http->postsize;
+    data->state.infilesize = postsize = http->postsize;
 
     /* We only set Content-Length and allow a custom Content-Length if
        we don't upload data chunked, as RFC2616 forbids us to set both
