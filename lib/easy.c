@@ -89,94 +89,6 @@ static unsigned int  initialized;
 static long          init_flags;
 
 /*
- * win32 init and cleanup functions
- */
-#ifdef WIN32
-
-/* win32_cleanup() is the opposite of win32_init() */
-static void win32_cleanup(void)
-{
-#ifdef USE_WINDOWS_SSPI
-  Curl_sspi_global_cleanup();
-#endif
-
-  if(init_flags & CURL_GLOBAL_WIN32) {
-#ifdef USE_WINSOCK
-    WSACleanup();
-#endif
-  }
-}
-
-LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
-
-/* win32_init() performs win32 global initialization */
-static CURLcode win32_init(long flags)
-{
-  /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
-     is just for Winsock at the moment. Any required win32 initialization
-     should take place after this block. */
-  if(flags & CURL_GLOBAL_WIN32) {
-#ifdef USE_WINSOCK
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    int res;
-
-#if defined(ENABLE_IPV6) && (USE_WINSOCK < 2)
-#error IPV6_requires_winsock2
-#endif
-
-    wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
-
-    res = WSAStartup(wVersionRequested, &wsaData);
-
-    if(res != 0)
-      /* Tell the user that we couldn't find a usable */
-      /* winsock.dll.     */
-      return CURLE_FAILED_INIT;
-
-    /* Confirm that the Windows Sockets DLL supports what we need.*/
-    /* Note that if the DLL supports versions greater */
-    /* than wVersionRequested, it will still return */
-    /* wVersionRequested in wVersion. wHighVersion contains the */
-    /* highest supported version. */
-
-    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-      /* Tell the user that we couldn't find a usable */
-
-      /* winsock.dll. */
-      WSACleanup();
-      return CURLE_FAILED_INIT;
-    }
-    /* The Windows Sockets DLL is acceptable. Proceed. */
-  #elif defined(USE_LWIPSOCK)
-    lwip_init();
-  #endif
-  } /* CURL_GLOBAL_WIN32 */
-
-#ifdef USE_WINDOWS_SSPI
-  {
-    CURLcode result = Curl_sspi_global_init();
-    if(result)
-      return result;
-  }
-#endif
-
-  if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
-                                 VERSION_GREATER_THAN_EQUAL)) {
-    Curl_isVistaOrGreater = TRUE;
-    QueryPerformanceFrequency(&Curl_freq);
-  }
-  else
-    Curl_isVistaOrGreater = FALSE;
-
-  return CURLE_OK;
-}
-
-#endif /* WIN32 */
-
-/*
  * strdup (and other memory functions) is redefined in complicated
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
@@ -249,7 +161,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 
 #ifdef WIN32
-  if(win32_init(flags)) {
+  if(Curl_win32_init(flags)) {
     DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
     return CURLE_FAILED_INIT;
   }
@@ -358,7 +270,7 @@ void curl_global_cleanup(void)
   Curl_resolver_global_cleanup();
 
 #ifdef WIN32
-  win32_cleanup();
+  Curl_win32_cleanup(init_flags);
 #endif
 
   Curl_amiga_cleanup();
