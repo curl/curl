@@ -446,10 +446,10 @@ FAQ
   backends.
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
-  GnuTLS, yassl, NSS, PolarSSL, MesaLink, Secure Transport (native iOS/OS X),
-  WinSSL (native Windows) or GSKit (native IBM i). They all have their pros
-  and cons, and we try to maintain a comparison of them here:
-  https://curl.haxx.se/docs/ssl-compared.html
+  libressl, BoringSSL, GnuTLS, wolfSSL, NSS, mbedTLS, MesaLink, Secure
+  Transport (native iOS/OS X), Schannel (native Windows) or GSKit (native IBM
+  i). They all have their pros and cons, and we try to maintain a comparison
+  of them here: https://curl.haxx.se/docs/ssl-compared.html
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -483,7 +483,7 @@ FAQ
   and logs and check out why the configure script doesn't find the SSL libs
   and/or include files.
 
-  Also, check out the other paragraph in this FAQ labelled "configure doesn't
+  Also, check out the other paragraph in this FAQ labeled "configure doesn't
   find OpenSSL even when it is installed".
 
   3.2 How do I tell curl to resume a transfer?
@@ -572,13 +572,14 @@ FAQ
   about bindings on the curl-library list too, but be prepared that people on
   that list may not know anything about bindings.
 
-  In October 2009, there were interfaces available for the following
-  languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Dylan, Eiffel, Euphoria,
-  Ferite, Gambas, glib/GTK+, Haskell, ILE/RPG, Java, Lisp, Lua, Mono, .NET,
-  Object-Pascal, OCaml, Pascal, Perl, PHP, PostgreSQL, Python, R, Rexx, Ruby,
-  Scheme, S-Lang, Smalltalk, SP-Forth, SPL, Tcl, Visual Basic, Visual FoxPro,
-  Q, wxwidgets and XBLite. By the time you read this, additional ones may have
-  appeared!
+  In February 2019, there were interfaces available for the following
+  languages: Ada95, Basic, C, C++, Ch, Cocoa, D, Delphi, Dylan, Eiffel,
+  Euphoria, Falcon, Ferite, Gambas, glib/GTK+, Go, Guile, Harbour, Haskell,
+  Java, Julia, Lisp, Lua, Mono, .NET, node.js, Object-Pascal, OCaml, Pascal,
+  Perl, PHP, PostgreSQL, Python, R, Rexx, Ring, RPG, Ruby, Rust, Scheme,
+  Scilab, S-Lang, Smalltalk, SP-Forth, SPL, Tcl, Visual Basic, Visual FoxPro,
+  Q, wxwidgets, XBLite and Xoho. By the time you read this, additional ones
+  may have appeared!
 
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
@@ -745,7 +746,7 @@ FAQ
   directory, you get the actual root directory.
 
   To specify a file in your user's home directory, you need to use the correct
-  URL syntax which for sftp might look similar to:
+  URL syntax which for SFTP might look similar to:
 
     curl -O -u user:password sftp://example.com/~/file.txt
 
@@ -1024,7 +1025,7 @@ FAQ
   speak SSL. FTPS:// connections default to port 990.
 
   To use explicit FTPS, you use a FTP:// URL and the --ftp-ssl option (or one
-  of its related flavours). This is the most common method, and the one
+  of its related flavors). This is the most common method, and the one
   mandated by RFC4217. This kind of connection will then of course use the
   standard FTP port 21 by default.
 
@@ -1115,7 +1116,7 @@ FAQ
   an embedded device with only a single network connection) may want to act
   immediately if its lone network connection goes down.  That can be achieved
   by having the application monitor the network connection on its own using an
-  OS-specific mechanism, then signalling libcurl to abort (see also item 5.13).
+  OS-specific mechanism, then signaling libcurl to abort (see also item 5.13).
 
   4.20 curl doesn't return error for HTTP non-200 responses!
 
