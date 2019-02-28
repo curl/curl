@@ -101,12 +101,12 @@ The default OpenSSL configure check will also detect and use BoringSSL or
 libressl.
 
  - GnuTLS: `--without-ssl --with-gnutls`.
- - Cyassl: `--without-ssl --with-cyassl`
+ - wolfSSL: `--without-ssl --with-wolfssl`
  - NSS: `--without-ssl --with-nss`
  - PolarSSL: `--without-ssl --with-polarssl`
  - mbedTLS: `--without-ssl --with-mbedtls`
- - schannel: `--without-ssl --with-winssl`
- - secure transport: `--without-ssl --with-darwinssl`
+ - schannel: `--without-ssl --with-schannel`
+ - secure transport: `--without-ssl --with-secure-transport`
  - MesaLink: `--without-ssl --with-mesalink`
 
 # Windows
