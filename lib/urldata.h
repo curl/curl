@@ -584,7 +584,6 @@ struct SingleRequest {
   time_t timeofdoc;
   long bodywrites;
   char *buf;
-  curl_socket_t maxfd;
   int keepon;
   char *location;   /* This points to an allocated version of the Location:
                        header data */
