@@ -912,7 +912,7 @@ static CURLcode pop3_state_command_resp(struct connectdata *conn,
 
   if(pop3->transfer == FTPTRANSFER_BODY) {
     /* POP3 download */
-    Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
 
     if(pp->cache) {
       /* The header "cache" contains a bunch of data that is actually body

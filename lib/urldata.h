@@ -538,21 +538,18 @@ struct dohdata {
  */
 struct SingleRequest {
   curl_off_t size;        /* -1 if unknown at this point */
-  curl_off_t *bytecountp; /* return number of bytes read or NULL */
-
   curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch,
                              -1 means unlimited */
-  curl_off_t *writebytecountp; /* return number of bytes written or NULL */
-
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
-  long headerbytecount;         /* only count received headers */
-  long deductheadercount; /* this amount of bytes doesn't count when we check
-                             if anything has been transferred at the end of a
-                             connection. We use this counter to make only a
-                             100 reply (without a following second response
-                             code) result in a CURLE_GOT_NOTHING error code */
+  curl_off_t headerbytecount;   /* only count received headers */
+  curl_off_t deductheadercount; /* this amount of bytes doesn't count when we
+                                   check if anything has been transferred at
+                                   the end of a connection. We use this
+                                   counter to make only a 100 reply (without a
+                                   following second response code) result in a
+                                   CURLE_GOT_NOTHING error code */
 
   struct curltime start;         /* transfer started at this time */
   struct curltime now;           /* current time */
@@ -1046,8 +1043,8 @@ struct PureInfo {
   int httpversion; /* the http version number X.Y = X*10+Y */
   time_t filetime; /* If requested, this is might get set. Set to -1 if the
                       time was unretrievable. */
-  long header_size;  /* size of read header(s) in bytes */
-  long request_size; /* the amount of bytes sent in the request(s) */
+  curl_off_t header_size;  /* size of read header(s) in bytes */
+  curl_off_t request_size; /* the amount of bytes sent in the request(s) */
   unsigned long proxyauthavail; /* what proxy auth types were announced */
   unsigned long httpauthavail;  /* what host auth types were announced */
   long numconnects; /* how many new connection did libcurl created */

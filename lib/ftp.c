@@ -448,7 +448,6 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
 static CURLcode InitiateTransfer(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-  struct FTP *ftp = data->req.protop;
   CURLcode result = CURLE_OK;
 
   if(conn->bits.ftp_use_data_ssl) {
@@ -461,24 +460,19 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
   }
 
   if(conn->proto.ftpc.state_saved == FTP_STOR) {
-    *(ftp->bytecountp) = 0;
-
     /* When we know we're uploading a specified file, we can get the file
        size prior to the actual upload. */
-
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* set the SO_SNDBUF for the secondary socket for those who need it */
     Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
 
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                        SECONDARYSOCKET, ftp->bytecountp);
+    Curl_setup_transfer(data, -1, -1, FALSE, SECONDARYSOCKET);
   }
   else {
     /* FTP download: */
-    Curl_setup_transfer(conn, SECONDARYSOCKET,
-                        conn->proto.ftpc.retr_size_saved, FALSE,
-                        ftp->bytecountp, -1, NULL); /* no upload here */
+    Curl_setup_transfer(data, SECONDARYSOCKET,
+                        conn->proto.ftpc.retr_size_saved, FALSE, -1);
   }
 
   conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
@@ -1658,7 +1652,7 @@ static CURLcode ftp_state_ul_setup(struct connectdata *conn,
         infof(data, "File already completely uploaded\n");
 
         /* no data to transfer */
-        Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+        Curl_setup_transfer(data, -1, -1, FALSE, -1);
 
         /* Set ->transfer so that we won't get any error in
          * ftp_done() because we didn't transfer anything! */
@@ -2230,7 +2224,7 @@ static CURLcode ftp_state_retr(struct connectdata *conn,
 
     if(ftp->downloadsize == 0) {
       /* no data to transfer */
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(data, -1, -1, FALSE, -1);
       infof(data, "File already completely downloaded\n");
 
       /* Set ->transfer so that we won't get any error in ftp_done()
@@ -3308,33 +3302,33 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     ;
   else if(data->set.upload) {
     if((-1 != data->state.infilesize) &&
-       (data->state.infilesize != *ftp->bytecountp) &&
+       (data->state.infilesize != data->req.writebytecount) &&
        !data->set.crlf &&
        (ftp->transfer == FTPTRANSFER_BODY)) {
       failf(data, "Uploaded unaligned file size (%" CURL_FORMAT_CURL_OFF_T
             " out of %" CURL_FORMAT_CURL_OFF_T " bytes)",
-            *ftp->bytecountp, data->state.infilesize);
+            data->req.bytecount, data->state.infilesize);
       result = CURLE_PARTIAL_FILE;
     }
   }
   else {
     if((-1 != data->req.size) &&
-       (data->req.size != *ftp->bytecountp) &&
+       (data->req.size != data->req.bytecount) &&
 #ifdef CURL_DO_LINEEND_CONV
        /* Most FTP servers don't adjust their file SIZE response for CRLFs, so
         * we'll check to see if the discrepancy can be explained by the number
         * of CRLFs we've changed to LFs.
         */
        ((data->req.size + data->state.crlf_conversions) !=
-        *ftp->bytecountp) &&
+        data->req.bytecount) &&
 #endif /* CURL_DO_LINEEND_CONV */
-       (data->req.maxdownload != *ftp->bytecountp)) {
+       (data->req.maxdownload != data->req.bytecount)) {
       failf(data, "Received only partial file: %" CURL_FORMAT_CURL_OFF_T
-            " bytes", *ftp->bytecountp);
+            " bytes", data->req.bytecount);
       result = CURLE_PARTIAL_FILE;
     }
     else if(!ftpc->dont_check &&
-            !*ftp->bytecountp &&
+            !data->req.bytecount &&
             (data->req.size>0)) {
       failf(data, "No data was received!");
       result = CURLE_FTP_COULDNT_RETR_FILE;
@@ -3629,7 +3623,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   if(!result && (ftp->transfer != FTPTRANSFER_BODY))
     /* no data to transfer. FIX: it feels like a kludge to have this here
        too! */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(data, -1, -1, FALSE, -1);
 
   if(!ftpc->wait_data_conn) {
     /* no waiting for the data connection so this is now complete */
@@ -4308,7 +4302,7 @@ static CURLcode ftp_dophase_done(struct connectdata *conn,
 
   if(ftp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn->data, -1, -1, FALSE, -1);
   else if(!connected)
     /* since we didn't connect now, we want do_more to get called */
     conn->bits.do_more = TRUE;
@@ -4427,7 +4421,6 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
   }
 
   /* get some initial data into the ftp struct */
-  ftp->bytecountp = &conn->data->req.bytecount;
   ftp->transfer = FTPTRANSFER_BODY;
   ftp->downloadsize = 0;
 

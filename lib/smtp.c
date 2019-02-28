@@ -959,7 +959,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* SMTP upload */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
+    Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
 
     /* End of DO phase */
     state(conn, SMTP_STOP);
@@ -1388,7 +1388,7 @@ static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 
   if(smtp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn->data, -1, -1, FALSE, -1);
 
   return CURLE_OK;
 }

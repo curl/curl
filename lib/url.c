@@ -3796,9 +3796,8 @@ static CURLcode create_conn(struct Curl_easy *data,
         (void)conn->handler->done(conn, result, FALSE);
         goto out;
       }
-
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                          -1, NULL); /* no upload */
+      Curl_attach_connnection(data, conn);
+      Curl_setup_transfer(data, -1, -1, FALSE, -1);
     }
 
     /* since we skip do_init() */
@@ -4178,7 +4177,8 @@ CURLcode Curl_connect(struct Curl_easy *data,
        connectdata struct, free those here */
     Curl_disconnect(data, conn, TRUE);
   }
-  else
+  else if(!data->conn)
+    /* FILE: transfers already have the connection attached */
     Curl_attach_connnection(data, conn);
 
   return result;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -137,7 +137,6 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = data->state.up.path;
-  curl_off_t *bytecount = &data->req.bytecount;
 
   *done = TRUE; /* unconditionally */
 
@@ -200,8 +199,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
       failf(data, "Failed sending DICT request");
       return result;
     }
-    Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                        -1, NULL); /* no upload */
+    Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1); /* no upload */
   }
   else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
           strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
@@ -247,8 +245,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
       failf(data, "Failed sending DICT request");
       return result;
     }
-    Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                        -1, NULL); /* no upload */
+    Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   }
   else {
 
@@ -270,7 +267,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
         return result;
       }
 
-      Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount, -1, NULL);
+      Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
     }
   }
 
