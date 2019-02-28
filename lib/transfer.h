@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,15 +59,13 @@ CURLcode Curl_get_upload_buffer(struct Curl_easy *data);
 
 /* This sets up a forthcoming transfer */
 void
-Curl_setup_transfer (struct connectdata *data,
-               int sockindex,           /* socket index to read from or -1 */
-               curl_off_t size,         /* -1 if unknown at this point */
-               bool getheader,          /* TRUE if header parsing is wanted */
-               curl_off_t *bytecountp,  /* return number of bytes read */
-               int writesockindex,      /* socket index to write to, it may
-                                           very well be the same we read from.
-                                           -1 disables */
-               curl_off_t *writecountp /* return number of bytes written */
-);
+Curl_setup_transfer (struct Curl_easy *data,
+                     int sockindex,     /* socket index to read from or -1 */
+                     curl_off_t size,   /* -1 if unknown at this point */
+                     bool getheader,    /* TRUE if header parsing is wanted */
+                     int writesockindex /* socket index to write to. May be
+                                           the same we read from. -1
+                                           disables */
+  );
 
 #endif /* HEADER_CURL_TRANSFER_H */

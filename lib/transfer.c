@@ -1198,6 +1198,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
                  (size_t)bytes_written);
 
     k->writebytecount += bytes_written;
+    Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
     if((!k->upload_chunky || k->forbidchunk) &&
        (k->writebytecount == data->state.infilesize)) {
@@ -1231,7 +1232,6 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
       }
     }
 
-    Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
   } WHILE_FALSE; /* just to break out from! */
 
@@ -1309,11 +1309,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   k->now = Curl_now();
   if(didwhat) {
-    /* Update read/write counters */
-    if(k->bytecountp)
-      *k->bytecountp = k->bytecount; /* read count */
-    if(k->writebytecountp)
-      *k->writebytecountp = k->writebytecount; /* write count */
+    ;
   }
   else {
     /* no read no write, this is a timeout? */
@@ -1857,8 +1853,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
 
     if(conn->handler->protocol&PROTO_FAMILY_HTTP) {
-      struct HTTP *http = data->req.protop;
-      if(http->writebytecount) {
+      if(data->req.writebytecount) {
         CURLcode result = Curl_readrewind(conn);
         if(result) {
           Curl_safefree(*url);
@@ -1876,24 +1871,17 @@ CURLcode Curl_retry_request(struct connectdata *conn,
  */
 void
 Curl_setup_transfer(
-  struct connectdata *conn, /* connection data */
+  struct Curl_easy *data,   /* transfer */
   int sockindex,            /* socket index to read from or -1 */
   curl_off_t size,          /* -1 if unknown at this point */
   bool getheader,           /* TRUE if header parsing is wanted */
-  curl_off_t *bytecountp,   /* return number of bytes read or NULL */
-  int writesockindex,       /* socket index to write to, it may very well be
+  int writesockindex        /* socket index to write to, it may very well be
                                the same we read from. -1 disables */
-  curl_off_t *writecountp   /* return number of bytes written or NULL */
   )
 {
-  struct Curl_easy *data;
-  struct SingleRequest *k;
-
+  struct SingleRequest *k = &data->req;
+  struct connectdata *conn = data->conn;
   DEBUGASSERT(conn != NULL);
-
-  data = conn->data;
-  k = &data->req;
-
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
   if(conn->bits.multiplex || conn->httpversion == 20) {
@@ -1912,8 +1900,6 @@ Curl_setup_transfer(
   k->getheader = getheader;
 
   k->size = size;
-  k->bytecountp = bytecountp;
-  k->writebytecountp = writecountp;
 
   /* The code sequence below is placed in this function just because all
      necessary input is not always known in do_complete() as this function may

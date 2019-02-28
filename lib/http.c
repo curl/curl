@@ -416,7 +416,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
     break;
   }
 
-  bytessent = http->writebytecount;
+  bytessent = data->req.writebytecount;
 
   if(conn->bits.authneg) {
     /* This is a state where we are known to be negotiating and we don't send
@@ -1118,14 +1118,13 @@ void Curl_add_buffer_free(Curl_send_buffer **inp)
 CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
                               struct connectdata *conn,
 
-                               /* add the number of sent bytes to this
-                                  counter */
-                              long *bytes_written,
+                              /* add the number of sent bytes to this
+                                 counter */
+                              curl_off_t *bytes_written,
 
-                               /* how much of the buffer contains body data */
+                              /* how much of the buffer contains body data */
                               size_t included_body_bytes,
                               int socketindex)
-
 {
   ssize_t amount;
   CURLcode result;
@@ -1221,7 +1220,8 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
     if(http) {
       /* if we sent a piece of the body here, up the byte counter for it
          accordingly */
-      http->writebytecount += bodylen;
+      data->req.writebytecount += bodylen;
+      Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
 
       if((size_t)amount != size) {
         /* The whole request could not be sent in one system call. We must
@@ -1583,16 +1583,6 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
   Curl_mime_cleanpart(&http->form);
 
-  switch(data->set.httpreq) {
-  case HTTPREQ_PUT:
-  case HTTPREQ_POST_FORM:
-  case HTTPREQ_POST_MIME:
-    data->req.bytecount = http->readbytecount + http->writebytecount;
-    break;
-  default:
-    break;
-  }
-
   if(status)
     return status;
 
@@ -1600,7 +1590,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
                       entire operation is complete */
      !conn->bits.retry &&
      !data->set.connect_only &&
-     (http->readbytecount +
+     (data->req.bytecount +
       data->req.headerbytecount -
       data->req.deductheadercount) <= 0) {
     /* If this connection isn't simply closed to be retried, AND nothing was
@@ -2009,7 +1999,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     data->state.first_remote_port = conn->remote_port;
   }
-  http->writebytecount = http->readbytecount = 0;
 
   if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
      data->set.upload) {
@@ -2706,9 +2695,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       failf(data, "Failed sending PUT request");
     else
       /* prepare for transfer */
-      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                          &http->readbytecount, postsize?FIRSTSOCKET:-1,
-                          postsize?&http->writebytecount:NULL);
+      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE,
+                          postsize?FIRSTSOCKET:-1);
     if(result)
       return result;
     break;
@@ -2728,8 +2716,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         failf(data, "Failed sending POST request");
       else
         /* setup variables for the upcoming transfer */
-        Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
-                            -1, NULL);
+        Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE, -1);
       break;
     }
 
@@ -2797,9 +2784,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       failf(data, "Failed sending POST request");
     else
       /* prepare for transfer */
-      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                          &http->readbytecount, postsize?FIRSTSOCKET:-1,
-                          postsize?&http->writebytecount:NULL);
+      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE,
+                          postsize?FIRSTSOCKET:-1);
     if(result)
       return result;
 
@@ -2953,9 +2939,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     if(result)
       failf(data, "Failed sending HTTP POST request");
     else
-      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE,
-                          &http->readbytecount, http->postdata?FIRSTSOCKET:-1,
-                          http->postdata?&http->writebytecount:NULL);
+      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE,
+                          http->postdata?FIRSTSOCKET:-1);
     break;
 
   default:
@@ -2971,33 +2956,30 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       failf(data, "Failed sending HTTP request");
     else
       /* HTTP GET/HEAD download: */
-      Curl_setup_transfer(conn, FIRSTSOCKET, -1, TRUE, &http->readbytecount,
-                          http->postdata?FIRSTSOCKET:-1,
-                          http->postdata?&http->writebytecount:NULL);
+      Curl_setup_transfer(data, FIRSTSOCKET, -1, TRUE,
+                          http->postdata?FIRSTSOCKET:-1);
   }
   if(result)
     return result;
 
-  if(http->writebytecount) {
+  if(data->req.writebytecount) {
     /* if a request-body has been sent off, we make sure this progress is noted
        properly */
-    Curl_pgrsSetUploadCounter(data, http->writebytecount);
+    Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
     if(Curl_pgrsUpdate(conn))
       result = CURLE_ABORTED_BY_CALLBACK;
 
-    if(http->writebytecount >= postsize) {
+    if(data->req.writebytecount >= postsize) {
       /* already sent the entire request body, mark the "upload" as
          complete */
       infof(data, "upload completely sent off: %" CURL_FORMAT_CURL_OFF_T
             " out of %" CURL_FORMAT_CURL_OFF_T " bytes\n",
-            http->writebytecount, postsize);
+            data->req.writebytecount, postsize);
       data->req.upload_done = TRUE;
       data->req.keepon &= ~KEEP_SEND; /* we're done writing */
       data->req.exp100 = EXP100_SEND_DATA; /* already sent */
       Curl_expire_done(data, EXPIRE_100_TIMEOUT);
     }
-    else
-      data->req.writebytecount = http->writebytecount;
   }
 
   if((conn->httpversion == 20) && data->req.upload_chunky)

@@ -1808,7 +1808,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
       }
       /* upload data */
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
+      Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -2105,7 +2105,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       Curl_safefree(sshc->readdir_longentry);
 
       /* no data to transfer */
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(data, -1, -1, FALSE, -1);
       state(conn, SSH_STOP);
       break;
 
@@ -2245,13 +2245,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     /* Setup the actual download */
     if(data->req.size == 0) {
       /* no data to transfer */
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(data, -1, -1, FALSE, -1);
       infof(data, "File already completely downloaded\n");
       state(conn, SSH_STOP);
       break;
     }
-    Curl_setup_transfer(conn, FIRSTSOCKET, data->req.size,
-                        FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(data, FIRSTSOCKET, data->req.size, FALSE, -1);
 
     /* not set by Curl_setup_transfer to preserve keepon bits */
     conn->writesockfd = conn->sockfd;
@@ -2395,8 +2394,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
 
       /* upload data */
-      Curl_setup_transfer(conn, -1, data->req.size, FALSE, NULL,
-                          FIRSTSOCKET, NULL);
+      Curl_setup_transfer(data, -1, data->req.size, FALSE, FIRSTSOCKET);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -2467,7 +2465,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* download data */
       bytecount = (curl_off_t)sb.st_size;
       data->req.maxdownload =  (curl_off_t)sb.st_size;
-      Curl_setup_transfer(conn, FIRSTSOCKET, bytecount, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(data, FIRSTSOCKET, bytecount, FALSE, -1);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->writesockfd = conn->sockfd;
