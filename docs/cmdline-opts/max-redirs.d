@@ -4,7 +4,7 @@ Help: Maximum number of redirects allowed
 Protocols: HTTP
 ---
 Set maximum number of redirection-followings allowed. When --location is used,
-is used to prevent curl from following redirections \&"in absurdum". By
+is used to prevent curl from following redirections infinitely. By
 default, the limit is set to 50 redirections. Set this option to -1 to make it
 unlimited.
 
