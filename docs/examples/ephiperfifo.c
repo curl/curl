@@ -153,23 +153,26 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, GlobalInfo *g)
 
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
-  timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
   if(timeout_ms > 0) {
     its.it_interval.tv_sec = 1;
     its.it_interval.tv_nsec = 0;
     its.it_value.tv_sec = timeout_ms / 1000;
-    its.it_value.tv_nsec = (timeout_ms % 1000) * 1000;
-    timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
+    its.it_value.tv_nsec = (timeout_ms % 1000) * 1000 * 1000;
   }
   else if(timeout_ms == 0) {
-    rc = curl_multi_socket_action(g->multi,
-                                  CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-    mcode_or_die("multi_timer_cb: curl_multi_socket_action", rc);
+    /* libcurl wants us to timeout now, however setting both fields of
+     * new_value.it_value to zero disarms the timer. The closest we can
+     * do is to schedule the timer to fire in 1 ns. */
+    its.it_interval.tv_sec = 1;
+    its.it_interval.tv_nsec = 0;
+    its.it_value.tv_sec = 0;
+    its.it_value.tv_nsec = 1;
   }
   else {
     memset(&its, 0, sizeof(struct itimerspec));
-    timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
   }
+
+  timerfd_settime(g->tfd, /*flags=*/0, &its, NULL);
   return 0;
 }
 
@@ -206,8 +209,8 @@ static void event_cb(GlobalInfo *g, int fd, int revents)
   CURLMcode rc;
   struct itimerspec its;
 
-  int action = (revents & EPOLLIN ? CURL_POLL_IN : 0) |
-               (revents & EPOLLOUT ? CURL_POLL_OUT : 0);
+  int action = (revents & EPOLLIN ? CURL_CSELECT_IN : 0) |
+               (revents & EPOLLOUT ? CURL_CSELECT_OUT : 0);
 
   rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
