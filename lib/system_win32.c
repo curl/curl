@@ -26,6 +26,7 @@
 
 #include <curl/curl.h>
 #include "system_win32.h"
+#include "curl_sspi.h"
 #include "warnless.h"
 
 /* The last #include files should be: */
