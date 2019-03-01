@@ -40,6 +40,7 @@ addons:
             - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
             - gnutls-bin
+            - libgnutls28-dev
             - clang-tidy-6.0
 
 matrix:
@@ -88,6 +89,10 @@ matrix:
           compiler: clang
           dist: trusty
           env: T=debug C="--with-mbedtls --without-ssl"
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env: T=debug C="--with-gnutls --without-ssl"
         - os: linux
           compiler: clang
           dist: trusty
