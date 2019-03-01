@@ -228,9 +228,6 @@ lock:   share  [Pigs in space]: 94
 unlock: share  [Pigs in space]: 95
 GLOBAL_CLEANUP
 </stdout>
-<stderr>
-http://%HOSTIP:%HTTPPORT/506 
-</stderr>
 <file name="log/jar506" mode="text">
 # Netscape HTTP Cookie File
 # https://curl.haxx.se/docs/http-cookies.html

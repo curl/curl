@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -51,8 +51,9 @@ static int check_sspi_err(struct connectdata *conn,
      status != SEC_I_COMPLETE_AND_CONTINUE &&
      status != SEC_I_COMPLETE_NEEDED &&
      status != SEC_I_CONTINUE_NEEDED) {
+    char buffer[STRERROR_LEN];
     failf(conn->data, "SSPI error: %s failed: %s", function,
-          Curl_sspi_strerror(conn, status));
+          Curl_sspi_strerror(status, buffer, sizeof(buffer)));
     return 1;
   }
   return 0;

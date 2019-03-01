@@ -45,6 +45,7 @@ GET /658 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
+</protocol>
 </verify>
 
 </testcase>

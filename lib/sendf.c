@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -411,8 +411,9 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       *code = CURLE_AGAIN;
     }
     else {
+      char buffer[STRERROR_LEN];
       failf(conn->data, "Send failure: %s",
-            Curl_strerror(conn, err));
+            Curl_strerror(err, buffer, sizeof(buffer)));
       conn->data->state.os_errno = err;
       *code = CURLE_SEND_ERROR;
     }
@@ -476,8 +477,9 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
       *code = CURLE_AGAIN;
     }
     else {
+      char buffer[STRERROR_LEN];
       failf(conn->data, "Recv failure: %s",
-            Curl_strerror(conn, err));
+            Curl_strerror(err, buffer, sizeof(buffer)));
       conn->data->state.os_errno = err;
       *code = CURLE_RECV_ERROR;
     }

@@ -10,16 +10,6 @@ QUIC
 
  See the [QUIC wiki page](https://github.com/curl/curl/wiki/QUIC).
 
-HTTP cookies
-------------
-
-On top of what we already support, the prefix cookie draft has been adopted by
-the httpwg in IETF and we should support it as the popular browsers will:
-
-[Cookie Prefixes](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00)
-
-[Firefox bug report about secure cookies](https://bugzilla.mozilla.org/show_bug.cgi?id=976073)
-
 SRV records
 -----------
 

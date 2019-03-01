@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_DARWINSSL_H
-#define HEADER_CURL_DARWINSSL_H
+#ifndef HEADER_CURL_SECTRANSP_H
+#define HEADER_CURL_SECTRANSP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,7 +8,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,9 +24,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_DARWINSSL
+#ifdef USE_SECTRANSP
 
-extern const struct Curl_ssl Curl_ssl_darwinssl;
+extern const struct Curl_ssl Curl_ssl_sectransp;
 
-#endif /* USE_DARWINSSL */
-#endif /* HEADER_CURL_DARWINSSL_H */
+#endif /* USE_SECTRANSP */
+#endif /* HEADER_CURL_SECTRANSP_H */

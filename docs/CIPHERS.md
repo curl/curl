@@ -496,3 +496,4 @@ WinSSL allows the enabling and disabling of encryption algorithms, but not speci
 `CALG_ECDH`,
 `CALG_ECMQV`,
 `CALG_ECDSA`,
+`CALG_ECDH_EPHEM`,

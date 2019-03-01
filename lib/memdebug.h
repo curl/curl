@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -80,10 +80,6 @@ CURL_EXTERN RECV_TYPE_RETV curl_dorecv(RECV_TYPE_ARG1 sockfd,
 /* FILE functions */
 CURL_EXTERN FILE *curl_fopen(const char *file, const char *mode, int line,
                              const char *source);
-#ifdef HAVE_FDOPEN
-CURL_EXTERN FILE *curl_fdopen(int filedes, const char *mode, int line,
-                              const char *source);
-#endif
 CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #ifndef MEMDEBUG_NODEFINES

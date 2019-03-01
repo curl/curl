@@ -357,7 +357,7 @@ int Curl_http2_ver(char *p, size_t len)
 https://tools.ietf.org/html/rfc7540#page-77
 nghttp2_error_code enums are identical.
 */
-const char *Curl_http2_strerror(uint32_t err)
+static const char *http2_strerror(uint32_t err)
 {
 #ifndef NGHTTP2_HAS_HTTP2_STRERROR
   const char *str[] = {
@@ -618,6 +618,18 @@ static int push_promise(struct Curl_easy *data,
   return rv;
 }
 
+/*
+ * multi_connchanged() is called to tell that there is a connection in
+ * this multi handle that has changed state (pipelining become possible, the
+ * number of allowed streams changed or similar), and a subsequent use of this
+ * multi handle should move CONNECT_PEND handles back to CONNECT to have them
+ * retry.
+ */
+static void multi_connchanged(struct Curl_multi *multi)
+{
+  multi->recheckstate = TRUE;
+}
+
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
@@ -650,7 +662,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
         infof(conn->data,
               "Connection state changed (MAX_CONCURRENT_STREAMS == %u)!\n",
               httpc->settings.max_concurrent_streams);
-        Curl_multi_connchanged(conn->data->multi);
+        multi_connchanged(conn->data->multi);
       }
     }
     return 0;
@@ -837,7 +849,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
       return 0;
     }
     H2BUGF(infof(data_s, "on_stream_close(), %s (err %d), stream %u\n",
-                 Curl_http2_strerror(error_code), error_code, stream_id));
+                 http2_strerror(error_code), error_code, stream_id));
     stream = data_s->req.protop;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -956,6 +968,28 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
      PUSH_PROMISE callback comes */
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
     char *h;
+
+    if(!strcmp(":authority", (const char *)name)) {
+      /* psuedo headers are lower case */
+      int rc = 0;
+      char *check = aprintf("%s:%d", conn->host.name, conn->remote_port);
+      if(!check)
+        /* no memory */
+        return NGHTTP2_ERR_CALLBACK_FAILURE;
+      if(!Curl_strcasecompare(check, (const char *)value)) {
+        /* This is push is not for the same authority that was asked for in
+         * the URL. RFC 7540 section 8.2 says: "A client MUST treat a
+         * PUSH_PROMISE for which the server is not authoritative as a stream
+         * error of type PROTOCOL_ERROR."
+         */
+        (void)nghttp2_submit_rst_stream(session, NGHTTP2_FLAG_NONE,
+                                        stream_id, NGHTTP2_PROTOCOL_ERROR);
+        rc = NGHTTP2_ERR_CALLBACK_FAILURE;
+      }
+      free(check);
+      if(rc)
+        return rc;
+    }
 
     if(!stream->push_headers) {
       stream->push_headers_alloc = 10;
@@ -1197,7 +1231,7 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
 /*
  * Initialize nghttp2 for a Curl connection
  */
-CURLcode Curl_http2_init(struct connectdata *conn)
+static CURLcode http2_init(struct connectdata *conn)
 {
   if(!conn->proto.httpc.h2) {
     int rc;
@@ -1431,7 +1465,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   }
   else if(httpc->error_code != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %d was not closed cleanly: %s (err %u)",
-          stream->stream_id, Curl_http2_strerror(httpc->error_code),
+          stream->stream_id, http2_strerror(httpc->error_code),
           httpc->error_code);
     *err = CURLE_HTTP2_STREAM;
     return -1;
@@ -2141,7 +2175,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   else
     conn->handler = &Curl_handler_http2;
 
-  result = Curl_http2_init(conn);
+  result = http2_init(conn);
   if(result) {
     Curl_add_buffer_free(&stream->header_recvbuf);
     return result;
@@ -2163,7 +2197,7 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
   infof(conn->data, "Connection state changed (HTTP/2 confirmed)\n");
-  Curl_multi_connchanged(conn->data->multi);
+  multi_connchanged(conn->data->multi);
 
   return CURLE_OK;
 }

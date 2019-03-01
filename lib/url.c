@@ -292,7 +292,7 @@ void Curl_freeset(struct Curl_easy *data)
 }
 
 /* free the URL pieces */
-void Curl_up_free(struct Curl_easy *data)
+static void up_free(struct Curl_easy *data)
 {
   struct urlpieces *up = &data->state.up;
   Curl_safefree(up->scheme);
@@ -369,7 +369,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   }
   data->change.referer = NULL;
 
-  Curl_up_free(data);
+  up_free(data);
   Curl_safefree(data->state.buffer);
   Curl_safefree(data->state.headerbuff);
   Curl_safefree(data->state.ulbuf);
@@ -660,10 +660,14 @@ static void conn_reset_all_postponed_data(struct connectdata *conn)
 #define conn_reset_all_postponed_data(c) do {} WHILE_FALSE
 #endif /* ! USE_RECV_BEFORE_SEND_WORKAROUND */
 
-static void conn_free(struct connectdata *conn)
+
+static void conn_shutdown(struct connectdata *conn)
 {
   if(!conn)
     return;
+
+  infof(conn->data, "Closing connection %ld\n", conn->connection_id);
+  DEBUGASSERT(conn->data);
 
   /* possible left-overs from the async name resolvers */
   Curl_resolver_cancel(conn);
@@ -687,6 +691,21 @@ static void conn_free(struct connectdata *conn)
     defined(NTLM_WB_ENABLED)
   Curl_ntlm_wb_cleanup(conn);
 #endif
+
+  /* unlink ourselves. this should be called last since other shutdown
+     procedures need a valid conn->data and this may clear it. */
+  Curl_conncache_remove_conn(conn->data, conn, TRUE);
+}
+
+static void conn_free(struct connectdata *conn)
+{
+  if(!conn)
+    return;
+
+  free_idnconverted_hostname(&conn->host);
+  free_idnconverted_hostname(&conn->conn_to_host);
+  free_idnconverted_hostname(&conn->http_proxy.host);
+  free_idnconverted_hostname(&conn->socks_proxy.host);
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
@@ -781,25 +800,15 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
   Curl_http_ntlm_cleanup(conn);
 #endif
 
-  /* the protocol specific disconnect handler needs a transfer for its
-     connection! */
+  /* the protocol specific disconnect handler and conn_shutdown need a transfer
+     for the connection! */
   conn->data = data;
+
   if(conn->handler->disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->handler->disconnect(conn, dead_connection);
 
-  infof(data, "Closing connection %ld\n", conn->connection_id);
-  Curl_ssl_close(conn, FIRSTSOCKET);
-  Curl_ssl_close(conn, SECONDARYSOCKET);
-
-  /* unlink ourselves! */
-  Curl_conncache_remove_conn(data, conn, TRUE);
-
-  free_idnconverted_hostname(&conn->host);
-  free_idnconverted_hostname(&conn->conn_to_host);
-  free_idnconverted_hostname(&conn->http_proxy.host);
-  free_idnconverted_hostname(&conn->socks_proxy.host);
-
+  conn_shutdown(conn);
   conn_free(conn);
   return CURLE_OK;
 }
@@ -964,7 +973,10 @@ static bool extract_if_dead(struct connectdata *conn,
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
       unsigned int state;
+      struct Curl_easy *olddata = conn->data;
+      conn->data = data; /* use this transfer for now */
       state = conn->handler->connection_check(conn, CONNCHECK_ISDEAD);
+      conn->data = olddata;
       dead = (state & CONNRESULT_DEAD);
     }
     else {
@@ -993,7 +1005,6 @@ struct prunedead {
 static int call_extract_if_dead(struct connectdata *conn, void *param)
 {
   struct prunedead *p = (struct prunedead *)param;
-  conn->data = p->data; /* transfer to use for this check */
   if(extract_if_dead(conn, p->data)) {
     /* stop the iteration here, pass back the connection that was extracted */
     p->extracted = conn;
@@ -1130,6 +1141,10 @@ ConnectionExists(struct Curl_easy *data,
        */
       check = curr->ptr;
       curr = curr->next;
+
+      if(check->bits.connect_only)
+        /* connect-only connections will not be reused */
+        continue;
 
       if(extract_if_dead(check, data)) {
         /* disconnect it */
@@ -1684,6 +1699,8 @@ static bool is_ASCII_name(const char *hostname)
 static void strip_trailing_dot(struct hostname *host)
 {
   size_t len;
+  if(!host || !host->name)
+    return;
   len = strlen(host->name);
   if(len && (host->name[len-1] == '.'))
     host->name[len-1] = 0;
@@ -1747,15 +1764,6 @@ static CURLcode idnconvert_hostname(struct connectdata *conn,
 #else
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
-  }
-  {
-    char *hostp;
-    for(hostp = host->name; *hostp; hostp++) {
-      if(*hostp <= 32) {
-        failf(data, "Host name '%s' contains bad letter", host->name);
-        return CURLE_URL_MALFORMAT;
-      }
-    }
   }
   return CURLE_OK;
 }
@@ -1898,8 +1906,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
     data->set.proxy_ssl.primary.verifystatus;
   conn->proxy_ssl_config.verifypeer = data->set.proxy_ssl.primary.verifypeer;
   conn->proxy_ssl_config.verifyhost = data->set.proxy_ssl.primary.verifyhost;
-
   conn->ip_version = data->set.ipver;
+  conn->bits.connect_only = data->set.connect_only;
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
     defined(NTLM_WB_ENABLED)
@@ -2028,7 +2036,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   CURLUcode uc;
   char *hostname;
 
-  Curl_up_free(data); /* cleanup previous leftovers first */
+  up_free(data); /* cleanup previous leftovers first */
 
   /* parse the URL */
   if(data->set.uh) {
@@ -3876,8 +3884,9 @@ static CURLcode create_conn(struct Curl_easy *data,
   /* reuse_fresh is TRUE if we are told to use a new connection by force, but
      we only acknowledge this option if this is not a re-used connection
      already (which happens due to follow-location or during a HTTP
-     authentication phase). */
-  if(data->set.reuse_fresh && !data->state.this_is_a_follow)
+     authentication phase). CONNECT_ONLY transfers also refuse reuse. */
+  if((data->set.reuse_fresh && !data->state.this_is_a_follow) ||
+     data->set.connect_only)
     reuse = FALSE;
   else
     reuse = ConnectionExists(data, conn, &conn_temp, &force_reuse, &waitpipe);

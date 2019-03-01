@@ -540,6 +540,21 @@ void tool_help(void)
   }
 }
 
+static int
+featcomp(const void *p1, const void *p2)
+{
+  /* The arguments to this function are "pointers to pointers to char", but
+     the comparison arguments are "pointers to char", hence the following cast
+     plus dereference */
+#ifdef HAVE_STRCASECMP
+  return strcasecmp(* (char * const *) p1, * (char * const *) p2);
+#elif defined(HAVE_STRCMPI)
+  return strcmpi(* (char * const *) p1, * (char * const *) p2);
+#else
+  return strcmp(* (char * const *) p1, * (char * const *) p2);
+#endif
+}
+
 void tool_version_info(void)
 {
   const char *const *proto;
@@ -559,15 +574,20 @@ void tool_version_info(void)
     puts(""); /* newline */
   }
   if(curlinfo->features) {
+    char *featp[ sizeof(feats) / sizeof(feats[0]) + 1];
+    size_t numfeat = 0;
     unsigned int i;
-    printf("Features: ");
+    printf("Features:");
     for(i = 0; i < sizeof(feats)/sizeof(feats[0]); i++) {
       if(curlinfo->features & feats[i].bitmask)
-        printf("%s ", feats[i].name);
+        featp[numfeat++] = (char *)feats[i].name;
     }
 #ifdef USE_METALINK
-    printf("Metalink ");
+    featp[numfeat++] = (char *)"Metalink";
 #endif
+    qsort(&featp[0], numfeat, sizeof(char *), featcomp);
+    for(i = 0; i< numfeat; i++)
+      printf(" %s", featp[i]);
     puts(""); /* newline */
   }
 }

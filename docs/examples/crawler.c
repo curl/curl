@@ -81,7 +81,7 @@ CURL *make_handle(char *url)
   curl_easy_setopt(handle, CURLOPT_PRIVATE, mem);
 
   /* For completeness */
-  curl_easy_setopt(handle, CURLOPT_ENCODING, "gzip, deflate");
+  curl_easy_setopt(handle, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(handle, CURLOPT_TIMEOUT, 5L);
   curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(handle, CURLOPT_MAXREDIRS, 10L);

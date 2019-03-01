@@ -18,6 +18,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
  1.6 Unnecessary close when 401 received waiting for 100
+ 1.7 Deflate error after all content was received
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
@@ -46,6 +47,8 @@ problems may have been fixed or changed somewhat since this was written!
  5. Build and portability issues
  5.1 tests not compatible with python3
  5.2 curl-config --libs contains private details
+ 5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
+ 5.4 Cannot compile against a static build of OpenLDAP
  5.5 can't handle Unicode arguments in Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
@@ -153,6 +156,15 @@ problems may have been fixed or changed somewhat since this was written!
  libcurl closes the connection if an HTTP 401 reply is received while it is
  waiting for the the 100-continue response.
  https://curl.haxx.se/mail/lib-2008-08/0462.html
+
+1.7 Deflate error after all content was received
+
+ There's a situation where we can get an error in a HTTP response that is
+ compressed, when that error is detected after all the actual body contents
+ have been received and delivered to the appliction. This is tricky, but is
+ ultimately a broken server.
+
+ See https://github.com/curl/curl/issues/2719
 
 1.9 HTTP/2 frames while in the connection pool kill reuse
 
@@ -366,6 +378,14 @@ problems may have been fixed or changed somewhat since this was written!
  "curl-config --libs" will include details set in LDFLAGS when configure is
  run that might be needed only for building libcurl. Further, curl-config
  --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
+
+5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
+
+ See https://github.com/curl/curl/issues/2905
+
+5.4 Cannot compile against a static build of OpenLDAP
+
+ See https://github.com/curl/curl/issues/2367
 
 5.5 can't handle Unicode arguments in Windows
 

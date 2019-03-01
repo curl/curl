@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -144,10 +144,10 @@ static void free_config_fields(struct OperationConfig *config)
   curl_slist_free_all(config->headers);
   curl_slist_free_all(config->proxyheaders);
 
-  if(config->mimepost) {
-    curl_mime_free(config->mimepost);
-    config->mimepost = NULL;
-  }
+  curl_mime_free(config->mimepost);
+  config->mimepost = NULL;
+  tool_mime_free(config->mimeroot);
+  config->mimeroot = NULL;
   config->mimecurrent = NULL;
 
   curl_slist_free_all(config->telnet_options);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,7 +67,6 @@ int main(void)
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
-
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.org/");
 
     /* send all data to this function  */
@@ -106,10 +105,9 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    free(chunk.memory);
-
     /* we're done with libcurl, so clean it up */
     curl_global_cleanup();
   }
+  free(chunk.memory);
   return 0;
 }

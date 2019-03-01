@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
+#if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
 
 #include <curl/curl.h>
 #include "curl_memory.h"
@@ -193,3 +195,5 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
   Curl_safefree(*path);
   return CURLE_QUOTE_ERROR;
 }
+
+#endif /* if SSH is used */

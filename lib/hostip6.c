@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -101,14 +101,15 @@ static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
   for(; ai; ai = ai->ai_next) {
-    char  buf[INET6_ADDRSTRLEN];
-
+    char buf[INET6_ADDRSTRLEN];
+    char buffer[STRERROR_LEN];
     printf("    fam %2d, CNAME %s, ",
            ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
     if(Curl_printable_address(ai, buf, sizeof(buf)))
       printf("%s\n", buf);
     else
-      printf("failed; %s\n", Curl_strerror(conn, SOCKERRNO));
+      printf("failed; %s\n",
+             Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
   }
 }
 #else

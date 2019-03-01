@@ -791,7 +791,9 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
     '-lldap -llber' \
     '-llber -lldap' \
     '-lldapssl -lldapx -lldapsdk' \
-    '-lldapsdk -lldapx -lldapssl' ; do
+    '-lldapsdk -lldapx -lldapssl' \
+    '-lldap -llber -lssl -lcrypto' ; do
+
     if test "$curl_cv_ldap_LIBS" = "unknown"; then
       if test -z "$x_nlibs"; then
         LIBS="$curl_cv_save_LIBS"

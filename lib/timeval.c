@@ -21,30 +21,22 @@
  ***************************************************************************/
 
 #include "timeval.h"
-#include "system_win32.h"
 
 #if defined(WIN32) && !defined(MSDOS)
+
+/* set in win32_init() */
+extern LARGE_INTEGER Curl_freq;
+extern bool Curl_isVistaOrGreater;
 
 struct curltime Curl_now(void)
 {
   struct curltime now;
-  static LARGE_INTEGER freq;
-  static int isVistaOrGreater = -1;
-  if(isVistaOrGreater == -1) {
-    if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
-                                   VERSION_GREATER_THAN_EQUAL)) {
-      isVistaOrGreater = 1;
-      QueryPerformanceFrequency(&freq);
-    }
-    else
-      isVistaOrGreater = 0;
-  }
-  if(isVistaOrGreater == 1) { /* QPC timer might have issues pre-Vista */
+  if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
-    now.tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
-    now.tv_usec =
-      (int)((count.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart);
+    now.tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
+    now.tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
+                        Curl_freq.QuadPart);
   }
   else {
     /* Disable /analyze warning that GetTickCount64 is preferred  */

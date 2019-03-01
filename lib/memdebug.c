@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -457,20 +457,6 @@ FILE *curl_fopen(const char *file, const char *mode,
 
   return res;
 }
-
-#ifdef HAVE_FDOPEN
-FILE *curl_fdopen(int filedes, const char *mode,
-                  int line, const char *source)
-{
-  FILE *res = fdopen(filedes, mode);
-
-  if(source)
-    curl_memlog("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
-                source, line, filedes, mode, (void *)res);
-
-  return res;
-}
-#endif
 
 int curl_fclose(FILE *file, int line, const char *source)
 {

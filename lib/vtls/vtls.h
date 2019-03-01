@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -105,7 +105,7 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #include "polarssl.h"       /* PolarSSL versions */
 #include "cyassl.h"         /* CyaSSL versions */
 #include "schannel.h"       /* Schannel SSPI version */
-#include "darwinssl.h"      /* SecureTransport (Darwin) version */
+#include "sectransp.h"      /* SecureTransport (Darwin) version */
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "mesalink.h"       /* MesaLink versions */
 

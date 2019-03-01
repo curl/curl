@@ -102,13 +102,14 @@ static int https_getsock(struct connectdata *conn,
 #else
 #define https_connecting(x,y) CURLE_COULDNT_CONNECT
 #endif
+static CURLcode http_setup_conn(struct connectdata *conn);
 
 /*
  * HTTP handler interface.
  */
 const struct Curl_handler Curl_handler_http = {
   "HTTP",                               /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
+  http_setup_conn,                      /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -133,7 +134,7 @@ const struct Curl_handler Curl_handler_http = {
  */
 const struct Curl_handler Curl_handler_https = {
   "HTTPS",                              /* scheme */
-  Curl_http_setup_conn,                 /* setup_connection */
+  http_setup_conn,                      /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -153,7 +154,7 @@ const struct Curl_handler Curl_handler_https = {
 };
 #endif
 
-CURLcode Curl_http_setup_conn(struct connectdata *conn)
+static CURLcode http_setup_conn(struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
@@ -750,7 +751,7 @@ Curl_http_output_auth(struct connectdata *conn,
 #ifndef CURL_DISABLE_PROXY
   /* Send proxy authentication header if needed */
   if(conn->bits.httpproxy &&
-      (conn->bits.tunnel_proxy == proxytunnel)) {
+     (conn->bits.tunnel_proxy == (bit)proxytunnel)) {
     result = output_auth_headers(conn, authproxy, request, path, TRUE);
     if(result)
       return result;
@@ -1789,9 +1790,16 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
           }
           else {
             if(*(--ptr) == ';') {
-              /* send no-value custom header if terminated by semicolon */
-              *ptr = ':';
-              semicolonp = ptr;
+              /* copy the source */
+              semicolonp = strdup(headers->data);
+              if(!semicolonp) {
+                Curl_add_buffer_free(&req_buffer);
+                return CURLE_OUT_OF_MEMORY;
+              }
+              /* put a colon where the semicolon is */
+              semicolonp[ptr - headers->data] = ':';
+              /* point at the colon */
+              optr = &semicolonp [ptr - headers->data];
             }
           }
           ptr = optr;
@@ -1807,36 +1815,37 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
         if(*ptr || semicolonp) {
           /* only send this if the contents was non-blank or done special */
           CURLcode result = CURLE_OK;
+          char *compare = semicolonp ? semicolonp : headers->data;
 
           if(conn->allocptr.host &&
              /* a Host: header was sent already, don't pass on any custom Host:
                 header as that will produce *two* in the same request! */
-             checkprefix("Host:", headers->data))
+             checkprefix("Host:", compare))
             ;
           else if(data->set.httpreq == HTTPREQ_POST_FORM &&
                   /* this header (extended by formdata.c) is sent later */
-                  checkprefix("Content-Type:", headers->data))
+                  checkprefix("Content-Type:", compare))
             ;
           else if(data->set.httpreq == HTTPREQ_POST_MIME &&
                   /* this header is sent later */
-                  checkprefix("Content-Type:", headers->data))
+                  checkprefix("Content-Type:", compare))
             ;
           else if(conn->bits.authneg &&
                   /* while doing auth neg, don't allow the custom length since
                      we will force length zero then */
-                  checkprefix("Content-Length:", headers->data))
+                  checkprefix("Content-Length:", compare))
             ;
           else if(conn->allocptr.te &&
                   /* when asking for Transfer-Encoding, don't pass on a custom
                      Connection: */
-                  checkprefix("Connection:", headers->data))
+                  checkprefix("Connection:", compare))
             ;
           else if((conn->httpversion == 20) &&
-                  checkprefix("Transfer-Encoding:", headers->data))
+                  checkprefix("Transfer-Encoding:", compare))
             /* HTTP/2 doesn't support chunked requests */
             ;
-          else if((checkprefix("Authorization:", headers->data) ||
-                   checkprefix("Cookie:", headers->data)) &&
+          else if((checkprefix("Authorization:", compare) ||
+                   checkprefix("Cookie:", compare)) &&
                   /* be careful of sending this potentially sensitive header to
                      other hosts */
                   (data->state.this_is_a_follow &&
@@ -1845,10 +1854,10 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                    !strcasecompare(data->state.first_host, conn->host.name)))
             ;
           else {
-            result = Curl_add_bufferf(&req_buffer, "%s\r\n", headers->data);
+            result = Curl_add_bufferf(&req_buffer, "%s\r\n", compare);
           }
           if(semicolonp)
-            *semicolonp = ';'; /* put back the semicolon */
+            free(semicolonp);
           if(result)
             return result;
         }
@@ -2724,7 +2733,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       break;
     }
 
-    postsize = http->postsize;
+    data->state.infilesize = postsize = http->postsize;
 
     /* We only set Content-Length and allow a custom Content-Length if
        we don't upload data chunked, as RFC2616 forbids us to set both

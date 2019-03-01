@@ -461,38 +461,9 @@ static CURLcode resolver_error(struct connectdata *conn)
   return result;
 }
 
-/*
- * Until we gain a way to signal the resolver threads to stop early, we must
- * simply wait for them and ignore their results.
- */
-void Curl_resolver_kill(struct connectdata *conn)
-{
-  struct thread_data *td = (struct thread_data*) conn->async.os_specific;
-
-  /* If we're still resolving, we must wait for the threads to fully clean up,
-     unfortunately.  Otherwise, we can simply cancel to clean up any resolver
-     data. */
-  if(td && td->thread_hnd != curl_thread_t_null)
-    (void)Curl_resolver_wait_resolv(conn, NULL);
-  else
-    Curl_resolver_cancel(conn);
-}
-
-/*
- * Curl_resolver_wait_resolv()
- *
- * Waits for a resolve to finish. This function should be avoided since using
- * this risk getting the multi interface to "hang".
- *
- * If 'entry' is non-NULL, make it point to the resolved dns entry
- *
- * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
- * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
- *
- * This is the version for resolves-in-a-thread.
- */
-CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
-                                   struct Curl_dns_entry **entry)
+static CURLcode thread_wait_resolv(struct connectdata *conn,
+                                   struct Curl_dns_entry **entry,
+                                   bool report)
 {
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   CURLcode result = CURLE_OK;
@@ -513,16 +484,53 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   if(entry)
     *entry = conn->async.dns;
 
-  if(!conn->async.dns)
+  if(!conn->async.dns && report)
     /* a name was not resolved, report error */
     result = resolver_error(conn);
 
   destroy_async_data(&conn->async);
 
-  if(!conn->async.dns)
+  if(!conn->async.dns && report)
     connclose(conn, "asynch resolve failed");
 
   return result;
+}
+
+
+/*
+ * Until we gain a way to signal the resolver threads to stop early, we must
+ * simply wait for them and ignore their results.
+ */
+void Curl_resolver_kill(struct connectdata *conn)
+{
+  struct thread_data *td = (struct thread_data*) conn->async.os_specific;
+
+  /* If we're still resolving, we must wait for the threads to fully clean up,
+     unfortunately.  Otherwise, we can simply cancel to clean up any resolver
+     data. */
+  if(td && td->thread_hnd != curl_thread_t_null)
+    (void)thread_wait_resolv(conn, NULL, FALSE);
+  else
+    Curl_resolver_cancel(conn);
+}
+
+/*
+ * Curl_resolver_wait_resolv()
+ *
+ * Waits for a resolve to finish. This function should be avoided since using
+ * this risk getting the multi interface to "hang".
+ *
+ * If 'entry' is non-NULL, make it point to the resolved dns entry
+ *
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
+ *
+ * This is the version for resolves-in-a-thread.
+ */
+CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
+                                   struct Curl_dns_entry **entry)
+{
+  return thread_wait_resolv(conn, entry, TRUE);
 }
 
 /*
