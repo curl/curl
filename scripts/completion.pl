@@ -45,6 +45,8 @@ return rc
 EOS
 
     print $tmpl;
+} else {
+    die("Unsupported shell: $shell");
 }
 
 sub parse_main_opts {
