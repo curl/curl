@@ -12,9 +12,13 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o AppVeyor: add MinGW-w64 and classic Mingw builds [55]
+ o AppVeyor: switch VS 2015 builds to VS 2017 image [49]
+ o Curl_easy: remove req.maxfd - never used! [58]
  o Curl_now: figure out windows version in win32_init: [11]
  o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
  o OpenSSL: add support for TLS ASYNC state [46]
+ o Secure Transport: no more "darwinssl" [56]
  o cirrus: Added FreeBSD builds using Cirrus CI
  o cleanup: make local functions static [5]
  o cli tool: do not use mime.h private structures [27]
@@ -25,12 +29,20 @@ This release includes the following bugfixes:
  o connection_check: restore original conn->data after the check [14]
  o connection_check: set ->data to the transfer doing the check [3]
  o cookie: Add support for cookie prefixes [29]
+ o cookies: fix NULL dereference if flushing cookies with no CookieInfo set [47]
+ o curl.h: use __has_declspec_attribute for shared builds [52]
+ o curl: display --version features sorted alphabetically [51]
  o curl: fix FreeBSD compiler warning in the --xattr code [2]
  o curl: remove MANUAL from -M output [38]
+ o curl_easy_duphandle.3: clarify that a duped handle has no shares [64]
  o curl_multi_remove_handle.3: use at any time, just not from within callbacks
  o dns: release sharelock as soon as possible [1]
+ o docs: update max-redirs.d phrasing [59]
  o easy: fix win32 init to work without CURL_GLOBAL_WIN32 [30]
+ o examples/10-at-a-time.c: improve readability and simplify
+ o examples/cacertinmem.c: use multiple certificates for loading CA-chain [54]
  o examples/crawler: Fix the Accept-Encoding setting
+ o examples/ephiperfifo.c: various fixes [63]
  o examples/http2-download: cleaned up
  o examples/http2-serverpush: add some sensible error checks [31]
  o examples/http2-upload: cleaned up
@@ -40,11 +52,13 @@ This release includes the following bugfixes:
  o examples: remove recursive calls to curl_multi_socket_action [42]
  o examples: remove superfluous null-pointer checks
  o fnmatch: disable if FTP is disabled [25]
+ o gnutls: remove call to deprecated gnutls_compression_get_name [66]
  o gssapi: fix deprecated header warnings [16]
  o hostip: make create_hostcache_id avoid alloc + free [4]
  o http2: multi_connchanged() moved from multi.c, only used for h2 [21]
  o http2: verify :athority in push promise requests [37]
  o http: make adding a blank header thread-safe [33]
+ o http: set state.infilesize when sending multipart formposts [57]
  o mbedtls: make it build even if MBEDTLS_VERSION_C isn't set [24]
  o mbedtls: release sessionid resources on error [28]
  o mime: put the boundary buffer into the curl_mime struct [18]
@@ -52,12 +66,19 @@ This release includes the following bugfixes:
  o multi: remove verbose "Expire in" ... messages [23]
  o pretransfer: don't strlen() POSTFIELDS set for GET requests [22]
  o rand: Fix a mismatch between comments in source and header [32]
+ o runtests: detect "schannel" as an alias for "winssl" [50]
  o schannel: be quiet - remove verbose output [19]
  o schannel: close TLS before removing conn from cache [10]
  o schannel: support CALG_ECDH_EPHEM algorithm [44]
+ o scripts/completion.pl: also generate fish completion file [67]
  o singlesocket: fix the 'sincebefore' placement [36]
+ o ssh: fix Condition '!status' is always true [60]
+ o strerror: make the strerror function use local buffers [48]
+ o system_win32: move win32_init here from easy.c [65]
+ o test578: make it read data from the correct test
  o tests: Fixed XML validation errors in some test files
  o tests: add stderr comparison to the test suite [26]
+ o threaded-resolver: shutdown the resolver thread without error message [61]
  o tool_operate: fix typecheck warning [9]
  o transfer.c: do not compute length of undefined hex buffer
  o travis: add scan-build [13]
@@ -67,6 +88,8 @@ This release includes the following bugfixes:
  o url/idnconvert: remove scan for <= 32 ascii values [6]
  o url: change conn shutdown order to ensure SOCKETFUNCTION callbacks [39]
  o urlapi: reduce variable scope, remove unreachable 'break' [7]
+ o urldata: convert bools to bitfields and move to end [53]
+ o urldata: simplify bytecounters [62]
  o urlglob: Argument with 'nonnull' attribute passed null
  o version.c: silent scan-build even when librtmp is not enabled
  o wolfssl: stop custom-adding curves [41]
@@ -82,14 +105,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  accountantM on github, Alessandro Ghedini, Bernd Mueller, Björn Stenberg,
-  buzo-ffm on github, Chris Araman, d912e3 on github, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, David Garske, Frank Gevaerts,
-  James Brown, Jan Alexander Steffens, jnbr on github, MAntoniak on github,
-  Marcel Raad, Michael Felt, Michał Antoniak, Nicolas Grekas, Patrick Monnerat,
-  Paul Groke, Pavel Löbl, Ray Satiro, Renaud Allard, Romain Geissler,
-  tholin on github, Volker Schmid,
-  (28 contributors)
+  accountantM on github, Alessandro Ghedini, Arnaud Rebillout, Bernd Mueller,
+  Björn Stenberg, buzo-ffm on github, Chris Araman, d912e3 on github,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, David Garske,
+  Don J Olmstead, Frank Gevaerts, Gisle Vanem, James Brown,
+  Jan Alexander Steffens, jnbr on github, MAntoniak on github, Marcel Raad,
+  Matt McClure, Michael Felt, Michael Schmid, Michael Wallner, Michał Antoniak,
+  Nick Zitzmann, Nicolas Grekas, Patrick Monnerat, Paul Groke, Pavel Löbl,
+  Ray Satiro, Renaud Allard, Romain Geissler, Sara Golemon, Simon Legner,
+  tholin on github, Volker Schmid, wesinator on github,
+  (38 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -141,3 +166,24 @@ References to bug reports and discussions on issues:
  [44] = https://curl.haxx.se/bug/?i=3608
  [45] = https://curl.haxx.se/bug/?i=3595
  [46] = https://curl.haxx.se/bug/?i=3591
+ [47] = https://curl.haxx.se/bug/?i=3613
+ [48] = https://curl.haxx.se/bug/?i=3612
+ [49] = https://curl.haxx.se/bug/?i=3606
+ [50] = https://curl.haxx.se/bug/?i=3609
+ [51] = https://curl.haxx.se/bug/?i=3611
+ [52] = https://curl.haxx.se/bug/?i=3616
+ [53] = https://curl.haxx.se/bug/?i=3610
+ [54] = https://curl.haxx.se/bug/?i=3421
+ [55] = https://curl.haxx.se/bug/?i=3623
+ [56] = https://curl.haxx.se/bug/?i=3619
+ [57] = https://curl.haxx.se/mail/archive-2019-02/0023.html
+ [58] = https://curl.haxx.se/bug/?i=3626
+ [59] = https://curl.haxx.se/bug/?i=3631
+ [60] = https://curl.haxx.se/bug/?i=3628
+ [61] = https://curl.haxx.se/bug/?i=3629
+ [62] = https://curl.haxx.se/bug/?i=3627
+ [63] = https://curl.haxx.se/bug/?i=3632
+ [64] = https://curl.haxx.se/bug/?i=3592
+ [65] = https://curl.haxx.se/bug/?i=3625
+ [66] = https://curl.haxx.se/bug/?i=3636
+ [67] = https://curl.haxx.se/bug/?i=3545
