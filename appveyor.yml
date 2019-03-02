@@ -36,7 +36,6 @@ environment:
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
-        COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 17 2022"
@@ -49,7 +48,6 @@ environment:
         TESTING: OFF
         SHARED: ON
         DISABLED_TESTS: ""
-        COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 17 2022"
@@ -62,7 +60,6 @@ environment:
         TESTING: OFF
         SHARED: OFF
         DISABLED_TESTS: ""
-        COMPILER_PATH: ""
       # generated CMake-based Visual Studio Debug builds
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
@@ -75,7 +72,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: ""
+        ADD_PATH: "C:\\msys64\\usr\\bin"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 17 2022"
@@ -88,7 +85,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501 "
-        COMPILER_PATH: ""
+        ADD_PATH: "C:\\msys64\\usr\\bin"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 17 2022"
@@ -101,7 +98,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "~571 !1139 !1501"
-        COMPILER_PATH: ""
+        ADD_PATH: "C:\\msys64\\usr\\bin"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 17 2022"
@@ -114,7 +111,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: ""
+        ADD_PATH: "C:\\msys64\\usr\\bin"
       # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
@@ -127,7 +124,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin"
+        ADD_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
@@ -141,7 +138,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin"
+        ADD_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
@@ -155,7 +152,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin"
+        ADD_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2022"
@@ -169,7 +166,7 @@ environment:
         TESTING: ON
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
-        COMPILER_PATH: "C:\\MinGW\\bin"
+        ADD_PATH: "C:\\MinGW\\bin;C:\\msys64\\usr\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
       # winbuild-based builds
@@ -232,22 +229,24 @@ environment:
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 ~1056 !1233"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
         CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --disable-proxy --with-schannel"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
         CONFIG_ARGS: "--enable-debug --enable-werror --disable-threaded-resolver --with-schannel"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: autotools
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
+        ADD_PATH: "C:\\msys64\\usr\\bin"
         CONFIG_ARGS: "--enable-warnings --enable-werror --with-schannel"
 
 install:
-    - set "PATH=C:\msys64\usr\bin;%PATH%"
-    - if not "%COMPILER_PATH%"=="" (
-        set "PATH=%COMPILER_PATH%;%PATH%" )
+    - if not "%ADD_PATH%"=="" (
+        set "PATH=%ADD_PATH%;%PATH%" )
 
 build_script:
     - if %BUILD_SYSTEM%==CMake (
