@@ -1478,6 +1478,9 @@ enum dupstring {
 #endif
   STRING_TARGET,                /* CURLOPT_REQUEST_TARGET */
   STRING_DOH,                   /* CURLOPT_DOH_URL */
+#ifdef USE_ALTSVC
+  STRING_ALTSVC,                /* CURLOPT_ALTSVC */
+#endif
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
@@ -1794,6 +1797,9 @@ struct Curl_easy {
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
+#ifdef USE_ALTSVC
+  struct altsvcinfo *asi;      /* the alt-svc cache */
+#endif
   struct Progress progress;    /* for all the progress meter data */
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */

@@ -120,6 +120,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "dotdot.h"
 #include "strdup.h"
 #include "setopt.h"
+#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -374,6 +375,11 @@ CURLcode Curl_close(struct Curl_easy *data)
   Curl_safefree(data->state.headerbuff);
   Curl_safefree(data->state.ulbuf);
   Curl_flush_cookies(data, 1);
+#ifdef USE_ALTSVC
+  Curl_altsvc_save(data->asi, data->set.str[STRING_ALTSVC]);
+  Curl_altsvc_cleanup(data->asi);
+  data->asi = NULL;
+#endif
   Curl_digest_cleanup(data);
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
@@ -3367,6 +3373,34 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 
     conn_to_host = conn_to_host->next;
   }
+
+#ifdef USE_ALTSVC
+  if(data->asi && !host && (port == -1) &&
+     (conn->handler->protocol == CURLPROTO_HTTPS)) {
+    /* no connect_to match, try alt-svc! */
+    const char *nhost;
+    int nport;
+    enum alpnid nalpnid;
+    bool hit;
+    host = conn->host.rawalloc;
+    hit = Curl_altsvc_lookup(data->asi,
+                             ALPN_h1, host, conn->remote_port, /* from */
+                             &nalpnid, &nhost, &nport /* to */);
+    if(hit) {
+      char *hostd = strdup((char *)nhost);
+      if(!hostd)
+        return CURLE_OUT_OF_MEMORY;
+      conn->conn_to_host.rawalloc = hostd;
+      conn->conn_to_host.name = hostd;
+      conn->bits.conn_to_host = TRUE;
+      conn->conn_to_port = nport;
+      conn->bits.conn_to_port = TRUE;
+      infof(data, "Alt-svc connecting from [%s]%s:%d to [%s]%s:%d\n",
+            Curl_alpnid2str(ALPN_h1), host, conn->remote_port,
+            Curl_alpnid2str(nalpnid), hostd, nport);
+    }
+  }
+#endif
 
   return result;
 }

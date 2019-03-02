@@ -2696,7 +2696,7 @@ AC_ARG_WITH(libpsl,
            with_libpsl=yes)
 if test $with_libpsl != "no"; then
   AC_SEARCH_LIBS(psl_builtin, psl,
-    [curl_psl_msg="yes";
+    [curl_psl_msg="enabled";
      AC_DEFINE([USE_LIBPSL], [1], [PSL support enabled])
      ],
     [curl_psl_msg="no      (libpsl not found)";
@@ -2704,7 +2704,7 @@ if test $with_libpsl != "no"; then
      ]
   )
 fi
-AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "yes"])
+AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
 
 dnl **********************************************************************
 dnl Check for libmetalink
@@ -4063,6 +4063,32 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
 )
 
 dnl ************************************************************
+dnl switch on/off alt-svc
+dnl
+curl_altsvc_msg="no      (--enable-alt-svc)";
+AC_MSG_CHECKING([whether to support alt-svc])
+AC_ARG_ENABLE(alt-svc,
+AC_HELP_STRING([--enable-alt-svc],[Enable alt-svc support])
+AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *) AC_MSG_RESULT(yes)
+       curl_altsvc_msg="enabled";
+       enable_altsvc="yes"
+       experimental="alt-svc"
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
+if test "$enable_altsvc" = "yes"; then
+  AC_DEFINE(USE_ALTSVC, 1, [to enable alt-svc])
+  experimental="alt-svc"
+fi
+
+dnl ************************************************************
 dnl hiding of library internal symbols
 dnl
 CURL_CONFIGURE_SYMBOL_HIDING
@@ -4131,8 +4157,12 @@ if test "x$HAVE_GSSAPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
-if test "x$curl_psl_msg" = "xyes"; then
+if test "x$curl_psl_msg" = "xenabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
+fi
+
+if test "x$enable_altsvc" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES alt-svc"
 fi
 
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
@@ -4330,32 +4360,38 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
    LIBS:            ${LIBS}
 
   curl version:     ${CURLVERSION}
-  SSL support:      ${curl_ssl_msg}
-  SSH support:      ${curl_ssh_msg}
-  zlib support:     ${curl_zlib_msg}
-  brotli support:   ${curl_brotli_msg}
-  GSS-API support:  ${curl_gss_msg}
-  TLS-SRP support:  ${curl_tls_srp_msg}
+  SSL:              ${curl_ssl_msg}
+  SSH:              ${curl_ssh_msg}
+  zlib:             ${curl_zlib_msg}
+  brotli:           ${curl_brotli_msg}
+  GSS-API:          ${curl_gss_msg}
+  TLS-SRP:          ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
-  IPv6 support:     ${curl_ipv6_msg}
-  Unix sockets support: ${curl_unix_sockets_msg}
-  IDN support:      ${curl_idn_msg}
+  IPv6:             ${curl_ipv6_msg}
+  Unix sockets:     ${curl_unix_sockets_msg}
+  IDN:              ${curl_idn_msg}
   Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
   Built-in manual:  ${curl_manual_msg}
   --libcurl option: ${curl_libcurl_msg}
   Verbose errors:   ${curl_verbose_msg}
   Code coverage:    ${curl_coverage_msg}
-  SSPI support:     ${curl_sspi_msg}
+  SSPI:             ${curl_sspi_msg}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
   ca fallback:      ${with_ca_fallback}
-  LDAP support:     ${curl_ldap_msg}
-  LDAPS support:    ${curl_ldaps_msg}
-  RTSP support:     ${curl_rtsp_msg}
-  RTMP support:     ${curl_rtmp_msg}
-  metalink support: ${curl_mtlnk_msg}
-  PSL support:      ${curl_psl_msg}
-  HTTP2 support:    ${curl_h2_msg}
+  LDAP:             ${curl_ldap_msg}
+  LDAPS:            ${curl_ldaps_msg}
+  RTSP:             ${curl_rtsp_msg}
+  RTMP:             ${curl_rtmp_msg}
+  Metalink:         ${curl_mtlnk_msg}
+  PSL:              ${curl_psl_msg}
+  Alt-svc:          ${curl_altsvc_msg}
+  HTTP2:            ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])
+if test -n "$experimental"; then
+ cat >&2 << _EOF
+  WARNING: $experimental is enabled but marked EXPERIMENTAL. Use with caution!
+_EOF
+fi

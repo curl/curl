@@ -77,6 +77,7 @@
 #include "http2.h"
 #include "connect.h"
 #include "strdup.h"
+#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -3978,6 +3979,20 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
       }
     }
+#ifdef USE_ALTSVC
+    /* If enabled, the header is incoming and this is over HTTPS */
+    else if(data->asi && checkprefix("Alt-Svc:", k->p) &&
+            (conn->handler->flags & PROTOPT_SSL)) {
+      /* the ALPN of the current request */
+      enum alpnid id = (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
+      result = Curl_altsvc_parse(data, data->asi,
+                                 &k->p[ strlen("Alt-Svc:") ],
+                                 id, conn->host.name,
+                                 curlx_uitous(conn->remote_port));
+      if(result)
+        return result;
+    }
+#endif
     else if(conn->handler->protocol & CURLPROTO_RTSP) {
       result = Curl_rtsp_parseheader(conn, k->p);
       if(result)

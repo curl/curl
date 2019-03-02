@@ -44,6 +44,7 @@
 #include "http2.h"
 #include "setopt.h"
 #include "multiif.h"
+#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -2655,6 +2656,31 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.trailer_data = va_arg(param, void *);
 #endif
     break;
+#ifdef USE_ALTSVC
+  case CURLOPT_ALTSVC:
+    if(!data->asi) {
+      data->asi = Curl_altsvc_init();
+      if(!data->asi)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    argptr = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_ALTSVC], argptr);
+    if(result)
+      return result;
+    (void)Curl_altsvc_load(data->asi, argptr);
+    break;
+  case CURLOPT_ALTSVC_CTRL:
+    if(!data->asi) {
+      data->asi = Curl_altsvc_init();
+      if(!data->asi)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    arg = va_arg(param, long);
+    result = Curl_altsvc_ctrl(data->asi, arg);
+    if(result)
+      return result;
+    break;
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
