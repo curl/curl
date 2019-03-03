@@ -42,6 +42,7 @@ CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 
 EXTRA_DIST =                                    \
  $(noinst_man_MANS)                             \
+ ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUGS                                           \
  CHECKSRC.md                                    \
