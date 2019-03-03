@@ -233,6 +233,7 @@ my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
+my $has_altsvc;     # set if libcurl is built with alt-svc support
 my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 my $has_multissl;   # set if curl is build with MultiSSL support
 my $has_manual;     # set if curl is built with built-in manual
@@ -2838,6 +2839,10 @@ sub checksystem {
                 # PSL enabled
                 $has_psl=1;
             }
+            if($feat =~ /alt-svc/i) {
+                # alt-svc enabled
+                $has_altsvc=1;
+            }
             if($feat =~ /AsynchDNS/i) {
                 if(!$has_cares) {
                     # this means threaded resolver
@@ -3384,6 +3389,11 @@ sub singletest {
             }
             elsif($1 eq "PSL") {
                 if($has_psl) {
+                    next;
+                }
+            }
+            elsif($1 eq "alt-svc") {
+                if($has_altsvc) {
                     next;
                 }
             }
