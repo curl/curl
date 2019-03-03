@@ -94,7 +94,7 @@ Accept: */*
 </file>
 <stripfile>
 $_ = '' if (($_ !~ /left intact/) && ($_ !~ /Closing connection/))
-s/^(\* Closing connection) [123]$/$1/
+s/^(\* Closing connection) [123](?=\r?\n)/$1/
 </stripfile>
 </verify>
 </testcase>
