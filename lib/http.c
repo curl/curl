@@ -3982,7 +3982,14 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 #ifdef USE_ALTSVC
     /* If enabled, the header is incoming and this is over HTTPS */
     else if(data->asi && checkprefix("Alt-Svc:", k->p) &&
-            (conn->handler->flags & PROTOPT_SSL)) {
+            ((conn->handler->flags & PROTOPT_SSL) ||
+#ifdef CURLDEBUG
+             /* allow debug builds to circumvent the HTTPS restriction */
+             getenv("CURL_ALTSVC_HTTP")
+#else
+             0
+#endif
+              )) {
       /* the ALPN of the current request */
       enum alpnid id = (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
       result = Curl_altsvc_parse(data, data->asi,
