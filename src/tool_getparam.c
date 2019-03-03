@@ -214,6 +214,7 @@ static const struct LongShort aliases[]= {
   {"a",  "append",                   ARG_BOOL},
   {"A",  "user-agent",               ARG_STRING},
   {"b",  "cookie",                   ARG_STRING},
+  {"ba", "alt-svc",                  ARG_STRING},
   {"B",  "use-ascii",                ARG_BOOL},
   {"c",  "cookie-jar",               ARG_STRING},
   {"C",  "continue-at",              ARG_STRING},
@@ -1244,17 +1245,23 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* This specifies the User-Agent name */
       GetStr(&config->useragent, nextarg);
       break;
-    case 'b': /* cookie string coming up: */
-      if(nextarg[0] == '@') {
-        nextarg++;
-      }
-      else if(strchr(nextarg, '=')) {
-        /* A cookie string must have a =-letter */
-        GetStr(&config->cookie, nextarg);
+    case 'b':
+      switch(subletter) {
+      case 'a': /* --alt-svc */
+        GetStr(&config->altsvc, nextarg);
         break;
+      default:  /* --cookie string coming up: */
+        if(nextarg[0] == '@') {
+          nextarg++;
+        }
+        else if(strchr(nextarg, '=')) {
+          /* A cookie string must have a =-letter */
+          GetStr(&config->cookie, nextarg);
+          break;
+        }
+        /* We have a cookie file to read from! */
+        GetStr(&config->cookiefile, nextarg);
       }
-      /* We have a cookie file to read from! */
-      GetStr(&config->cookiefile, nextarg);
       break;
     case 'B':
       /* use ASCII/text when transferring */

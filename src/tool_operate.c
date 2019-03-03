@@ -1538,6 +1538,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->disallow_username_in_url)
           my_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
 
+#ifdef USE_ALTSVC
+        /* only if explicitly enabled in configure */
+        if(config->altsvc)
+          my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
+#endif
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */

@@ -48,6 +48,8 @@ struct helptxt {
 static const struct helptxt helptext[] = {
   {"    --abstract-unix-socket <path>",
    "Connect via abstract Unix domain socket"},
+  {"    --alt-svc <file name>",
+   "Enable alt-svc with this cache file"},
   {"    --anyauth",
    "Pick any authentication method"},
   {"-a, --append",
