@@ -216,7 +216,9 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
 {
   struct tm stamp;
-  Curl_gmtime(as->expires, &stamp);
+  CURLcode result = Curl_gmtime(as->expires, &stamp);
+  if(result)
+    return result;
 
   fprintf(fp,
           "%s %s %u "
