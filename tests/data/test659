@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 CURLOPT_CURLU
+proxy
 </keywords>
 </info>
 <reply>
@@ -27,13 +28,13 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib658
+lib659
 </tool>
 <name>
-Pass URL to libcurl with CURLOPT_CURLU
+CURLOPT_CURLU without the path set - over proxy
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/658
+http://%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -42,9 +43,10 @@ http://%HOSTIP:%HTTPPORT/658
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /658 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+GET http://www.example.com:80/ HTTP/1.1
+Host: www.example.com
 Accept: */*
+Proxy-Connection: Keep-Alive
 
 </protocol>
 </verify>
