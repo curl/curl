@@ -79,6 +79,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   char *gopherpath;
+  /* path is guaranteed non-NULL */
   char *path = data->state.up.path;
   char *query = data->state.up.query;
   char *sel = NULL;
@@ -88,7 +89,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  if(path && query)
+  if(query)
     gopherpath = aprintf("%s?%s", path, query);
   else
     gopherpath = strdup(path);
