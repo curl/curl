@@ -30,7 +30,7 @@
 #ifndef WIN32
 #  include <unistd.h>
 #endif
-#include <curl/multi.h>
+#include <curl/curl.h>
 
 static const char *urls[] = {
   "https://www.microsoft.com",
