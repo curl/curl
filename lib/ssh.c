@@ -81,11 +81,11 @@
 #include "multiif.h"
 #include "select.h"
 #include "warnless.h"
+#include "curl_path.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
-#include "curl_path.h"
 #include "memdebug.h"
 
 #if LIBSSH2_VERSION_NUM >= 0x010206
@@ -2789,9 +2789,12 @@ static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
   CURLcode result = CURLE_OK;
   bool block; /* we store the status and use that to provide a ssh_getsock()
                  implementation */
-
-  result = ssh_statemach_act(conn, &block);
-  *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
+  do {
+    result = ssh_statemach_act(conn, &block);
+    *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
+    /* if there's no error, it isn't done and it didn't EWOULDBLOCK, then
+       try again */
+  } while(!result && !*done && !block);
   ssh_block2waitfor(conn, block);
 
   return result;
