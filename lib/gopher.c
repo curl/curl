@@ -88,7 +88,10 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  if(path && query)
+  /* path is guaranteed non-NULL */
+  DEBUGASSERT(path);
+
+  if(query)
     gopherpath = aprintf("%s?%s", path, query);
   else
     gopherpath = strdup(path);
