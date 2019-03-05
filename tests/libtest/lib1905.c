@@ -55,7 +55,7 @@ int test(char *URL)
 
   unfinished = 1;
   while(unfinished) {
-    int MAX;
+    int MAX = 0;
     long max_tout;
     fd_set R, W, E;
     struct timeval timeout;

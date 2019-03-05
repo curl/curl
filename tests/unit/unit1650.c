@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -152,7 +152,7 @@ static struct dohresp resp[] = {
 
 UNITTEST_START
 {
-  size_t size;
+  size_t size = 0;
   unsigned char buffer[256];
   size_t i;
   unsigned char *p;

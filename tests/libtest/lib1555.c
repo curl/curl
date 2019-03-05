@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,14 +36,16 @@ static int progressCallback(void *arg,
                             double ulnow)
 {
   CURLcode res = 0;
+  char buffer[256];
+  size_t n = 0;
   (void)arg;
   (void)dltotal;
   (void)dlnow;
   (void)ultotal;
   (void)ulnow;
-  res = curl_easy_recv(curl, NULL, 0, NULL);
+  res = curl_easy_recv(curl, buffer, 256, &n);
   printf("curl_easy_recv returned %d\n", res);
-  res = curl_easy_send(curl, NULL, 0, NULL);
+  res = curl_easy_send(curl, buffer, n, &n);
   printf("curl_easy_send returned %d\n", res);
 
   return 1;
