@@ -8,12 +8,13 @@ curl and libcurl 7.64.1
 
 This release includes the following changes:
 
- o
+ o alt-svc: experiemental support added [74]
 
 This release includes the following bugfixes:
 
  o AppVeyor: add MinGW-w64 and classic Mingw builds [55]
  o AppVeyor: switch VS 2015 builds to VS 2017 image [49]
+ o CURLU: fix NULL dereference when used over proxy [73]
  o Curl_easy: remove req.maxfd - never used! [58]
  o Curl_now: figure out windows version in win32_init: [11]
  o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
@@ -49,10 +50,12 @@ This release includes the following bugfixes:
  o examples/httpcustomheader: Value stored to 'res' is never read
  o examples/postinmemory: Potential leak of memory pointed to by 'chunk.memory'
  o examples/sftpuploadresume: Value stored to 'result' is never read
+ o examples: only include <curl/curl.h> [70]
  o examples: remove recursive calls to curl_multi_socket_action [42]
  o examples: remove superfluous null-pointer checks
  o fnmatch: disable if FTP is disabled [25]
  o gnutls: remove call to deprecated gnutls_compression_get_name [66]
+ o gopher: remove check for path == NULL [69]
  o gssapi: fix deprecated header warnings [16]
  o hostip: make create_hostcache_id avoid alloc + free [4]
  o http2: multi_connchanged() moved from multi.c, only used for h2 [21]
@@ -64,6 +67,7 @@ This release includes the following bugfixes:
  o mime: put the boundary buffer into the curl_mime struct [18]
  o multi: call multi_done on connect timeouts, fixes CURLINFO_TOTAL_TIME [43]
  o multi: remove verbose "Expire in" ... messages [23]
+ o multi: support verbose conncache closure handle [72]
  o pretransfer: don't strlen() POSTFIELDS set for GET requests [22]
  o rand: Fix a mismatch between comments in source and header [32]
  o runtests: detect "schannel" as an alias for "winssl" [50]
@@ -72,7 +76,9 @@ This release includes the following bugfixes:
  o schannel: support CALG_ECDH_EPHEM algorithm [44]
  o scripts/completion.pl: also generate fish completion file [67]
  o singlesocket: fix the 'sincebefore' placement [36]
+ o source: fix two 'nread' may be used uninitialized warnings [68]
  o ssh: fix Condition '!status' is always true [60]
+ o ssh: loop the state machine if not done and not blocking [71]
  o strerror: make the strerror function use local buffers [48]
  o system_win32: move win32_init here from easy.c [65]
  o test578: make it read data from the correct test
@@ -81,6 +87,7 @@ This release includes the following bugfixes:
  o threaded-resolver: shutdown the resolver thread without error message [61]
  o tool_operate: fix typecheck warning [9]
  o transfer.c: do not compute length of undefined hex buffer
+ o travis: add build using gnutls [75]
  o travis: add scan-build [13]
  o travis: enable valgrind for the iconv tests [12]
  o unit1307: require FTP support [17]
@@ -187,3 +194,11 @@ References to bug reports and discussions on issues:
  [65] = https://curl.haxx.se/bug/?i=3625
  [66] = https://curl.haxx.se/bug/?i=3636
  [67] = https://curl.haxx.se/bug/?i=3545
+ [68] = https://curl.haxx.se/bug/?i=3546
+ [69] = https://curl.haxx.se/bug/?i=3617
+ [70] = https://curl.haxx.se/bug/?i=3645
+ [71] = https://curl.haxx.se/bug/?i=3506
+ [72] = https://curl.haxx.se/bug/?i=3618
+ [73] = https://curl.haxx.se/bug/?i=3641
+ [74] = https://curl.haxx.se/bug/?i=3498
+ [76] = https://curl.haxx.se/bug/?i=3637
