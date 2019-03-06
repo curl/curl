@@ -5,25 +5,55 @@ Roadmap of things Daniel Stenberg wants to work on next. It is intended to
 serve as a guideline for others for information, feedback and possible
 participation.
 
-QUIC
+HTTP/3
+------
+
+ See the [QUIC and HTTP/3 wiki page](https://github.com/curl/curl/wiki/QUIC).
+
+ESNI (Encrypted SNI)
+--------------------
+
+ See Daniel's post on [Support of Encrypted
+ SNI](https://curl.haxx.se/mail/lib-2019-03/0000.html) on the mailing list.
+
+HSTS
 ----
 
- See the [QUIC wiki page](https://github.com/curl/curl/wiki/QUIC).
+Complete and merge [the existing PR](https://github.com/curl/curl/pull/2682).
 
-SRV records
------------
+Parallel transfers for the curl tool
+------------------------------------
 
-How to find services for specific domains/hosts.
+This will require several new command line options to enable and control.
 
-Improve
--------
+ 1. switch to creating a list of all the transfers first before any transfer
+    is done
+ 2. make the transfers using the multi interface
+ 3. optionally fire up more transfers before the previous has completed
 
-1. curl -h output (considered overwhelming to users).
+Option to refuse HTTPS => HTTP redirects
+----------------------------------------
 
-2. We have > 200 command line options, is there a way to redo things to
-   simplify or improve the situation as we are likely to keep adding
-   features/options in the future too.
+Possibly as a new bit to `CURLOPT_FOLLOWLOCATION` ?
 
-3. Perform some of the clean up from the TODO document, removing old
-   definitions and such like that are currently earmarked to be removed years
-   ago.
+Option to let CURLOPT_CUSTOMREQUEST be overridden on redirect
+-------------------------------------------------------------
+
+(This is a common problem for people using `-X` and `-L` together.)
+
+Possibly as a new bit to `CURLOPT_FOLLOWLOCATION` ?
+
+Hardcode “localhost”
+--------------------
+
+No need to resolve it. Avoid a risk where this is resolved over the network
+and actually responds with something else than a local address. Some operating
+systems already do this. Also:
+https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
+
+Consider "menu config"-style build feature selection
+----------------------------------------------------
+
+Allow easier building of custom libcurl versions with only a selected feature
+where the available features are easily browsable and toggle-able ON/OFF or
+similar.
