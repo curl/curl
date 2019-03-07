@@ -30,6 +30,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.4 DarwinSSL won't import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.6 CURL_GLOBAL_SSL
+ 2.7 Client cert (MTLS) issues with Schannel
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -283,6 +284,10 @@ problems may have been fixed or changed somewhat since this was written!
  patch is totally ruled out due to those reasons above.
 
  https://github.com/curl/curl/issues/2276
+
+2.7 Client cert (MTLS) issues with Schannel
+
+ See https://github.com/curl/curl/issues/3145
 
 
 3. Email protocols
