@@ -128,11 +128,7 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.dns_cache_timeout = arg;
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
-#if 0 /* deprecated */
-    /* remember we want this enabled */
-    arg = va_arg(param, long);
-    data->set.global_dns_cache = (0 != arg) ? TRUE : FALSE;
-#endif
+    /* deprecated */
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */

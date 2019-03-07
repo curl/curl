@@ -114,41 +114,7 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-/* These two symbols are for the global DNS cache */
-static struct curl_hash hostname_cache;
-static int host_cache_initialized;
-
 static void freednsentry(void *freethis);
-
-/*
- * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
- * Global DNS cache is general badness. Do not use. This will be removed in
- * a future version. Use the share interface instead!
- *
- * Returns a struct curl_hash pointer on success, NULL on failure.
- */
-struct curl_hash *Curl_global_host_cache_init(void)
-{
-  int rc = 0;
-  if(!host_cache_initialized) {
-    rc = Curl_hash_init(&hostname_cache, 7, Curl_hash_str,
-                        Curl_str_key_compare, freednsentry);
-    if(!rc)
-      host_cache_initialized = 1;
-  }
-  return rc?NULL:&hostname_cache;
-}
-
-/*
- * Destroy and cleanup the global DNS cache
- */
-void Curl_global_host_cache_dtor(void)
-{
-  if(host_cache_initialized) {
-    Curl_hash_destroy(&hostname_cache);
-    host_cache_initialized = 0;
-  }
-}
 
 /*
  * Return # of addresses in a Curl_addrinfo struct
