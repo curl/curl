@@ -39,7 +39,7 @@ typedef enum {
 } if2ip_result_t;
 
 if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
-                          unsigned int remote_scope_id, const char *interf,
+                          unsigned int local_scope_id, const char *interf,
                           char *buf, int buf_size);
 
 #ifdef __INTERIX
