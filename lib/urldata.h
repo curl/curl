@@ -1691,7 +1691,6 @@ struct UserDefined {
   bit ftp_use_pret:1;   /* if PRET is to be used before PASV or not */
 
   bit no_signal:1;      /* do not use any signal/alarm handler */
-  bit global_dns_cache:1; /* subject for future removal */
   bit tcp_nodelay:1;    /* whether to enable TCP_NODELAY or not */
   bit ignorecl:1;       /* ignore content length */
   bit ftp_skip_ip:1;    /* skip the IP address the FTP server passes on to
@@ -1732,7 +1731,6 @@ struct Names {
   struct curl_hash *hostcache;
   enum {
     HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_GLOBAL,  /* points to the (shrug) global one */
     HCACHE_MULTI,   /* points to a shared one in the multi handle */
     HCACHE_SHARED   /* points to a shared one in a shared object */
   } hostcachetype;

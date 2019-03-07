@@ -265,7 +265,6 @@ void curl_global_cleanup(void)
   if(--initialized)
     return;
 
-  Curl_global_host_cache_dtor();
   Curl_ssl_cleanup();
   Curl_resolver_global_cleanup();
 

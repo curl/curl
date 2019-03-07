@@ -402,19 +402,9 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   /* set the easy handle */
   multistate(data, CURLM_STATE_INIT);
 
-  if((data->set.global_dns_cache) &&
-     (data->dns.hostcachetype != HCACHE_GLOBAL)) {
-    /* global dns cache was requested but still isn't */
-    struct curl_hash *global = Curl_global_host_cache_init();
-    if(global) {
-      /* only do this if the global cache init works */
-      data->dns.hostcache = global;
-      data->dns.hostcachetype = HCACHE_GLOBAL;
-    }
-  }
   /* for multi interface connections, we share DNS cache automatically if the
      easy handle's one is currently not set. */
-  else if(!data->dns.hostcache ||
+  if(!data->dns.hostcache ||
      (data->dns.hostcachetype == HCACHE_NONE)) {
     data->dns.hostcache = &multi->hostcache;
     data->dns.hostcachetype = HCACHE_MULTI;
