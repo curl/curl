@@ -19,13 +19,13 @@ addons:
             retries: true
         sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+            - llvm-toolchain-trusty-7
         packages:
             - cmake
             - gcc-7
             - gcc-8
             - lcov
-            - clang-6.0
+            - clang-7
             - valgrind
             - libev-dev
             - libc-ares-dev
@@ -41,7 +41,7 @@ addons:
             - libnss3-dev
             - gnutls-bin
             - libgnutls28-dev
-            - clang-tidy-6.0
+            - clang-tidy-7
 
 matrix:
     include:
