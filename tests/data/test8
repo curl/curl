@@ -46,7 +46,6 @@ Set-Cookie: trailingspace    = removed; path=/we/want;
 Set-Cookie: nocookie=yes; path=/WE;
 Set-Cookie: blexp=yesyes; domain=%HOSTIP; domain=%HOSTIP; expiry=totally bad;
 Set-Cookie: partialip=nono; domain=.0.0.1;
-Set-Cookie: chocolate=chip; domain=curl; path=/we/want;
 
 </file>
 <precheck>
