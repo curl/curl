@@ -75,7 +75,7 @@ matrix:
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
               - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -87,19 +87,19 @@ matrix:
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
               - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
               - T=debug-wolfssl C="--with-wolfssl --without-ssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=debug
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -107,13 +107,13 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=debug C="--enable-alt-svc"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -121,13 +121,13 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=debug C="--with-mbedtls --without-ssl"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -135,13 +135,13 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=debug C="--with-gnutls --without-ssl"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -149,14 +149,14 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
                       - libgnutls28-dev
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=debug C="--disable-threaded-resolver"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -164,13 +164,13 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -178,7 +178,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -213,13 +213,13 @@ matrix:
           env: T=cmake
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
               - T=cmake
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=cmake
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -227,13 +227,13 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
               - T=coverage
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -246,13 +246,13 @@ matrix:
                       - lcov
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
               - T=distcheck
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=fuzzer
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -260,13 +260,13 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=tidy
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -274,7 +274,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -295,7 +295,7 @@ matrix:
                       - clang-7
         - os: linux
           compiler: clang
-          dist: trusty
+          dist: xenial
           env:
               - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -303,7 +303,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
