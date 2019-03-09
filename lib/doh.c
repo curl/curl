@@ -173,8 +173,12 @@ static int Curl_doh_done(struct Curl_easy *doh, CURLcode result)
   return 0;
 }
 
-#define ERROR_CHECK_SETOPT(x,y) result = curl_easy_setopt(doh, x, y);   \
-  if(result) goto error
+#define ERROR_CHECK_SETOPT(x,y) \
+do {                                      \
+  result = curl_easy_setopt(doh, x, y);   \
+  if(result)                              \
+    goto error;                           \
+} WHILE_FALSE
 
 static CURLcode dohprobe(struct Curl_easy *data,
                          struct dnsprobe *p, DNStype dnstype,
