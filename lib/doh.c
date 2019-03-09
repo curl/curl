@@ -294,14 +294,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
     }
     if(data->set.ssl.certinfo)
       ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
-    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]) {
-      ERROR_CHECK_SETOPT(CURLOPT_PINNEDPUBLICKEY,
-        data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG]);
-    }
-    if(data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]) {
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_PINNEDPUBLICKEY,
-        data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]);
-    }
     if(data->set.str[STRING_SSL_RANDOM_FILE]) {
       ERROR_CHECK_SETOPT(CURLOPT_RANDOM_FILE,
         data->set.str[STRING_SSL_RANDOM_FILE]);
