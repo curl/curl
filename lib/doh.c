@@ -251,12 +251,13 @@ static CURLcode dohprobe(struct Curl_easy *data,
     if(data->set.no_signal)
       ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
 
-    /* Inherit *some* SSL options. Options likely specific to the user's
-       transfer are not inherited. Refer to discussion in #3661. */
-    if(data->set.ssl_enable_alpn)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_ENABLE_ALPN, 1L);
-    if(data->set.ssl_enable_npn)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_ENABLE_NPN, 1L);
+    /* Inherit *some* SSL options from the user's transfer. This is a
+       best-guess approach as to which options the user would've intended to
+       apply to the doh transfers. #3661 */
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_ENABLE_ALPN,
+                       (data->set.ssl_enable_alpn ? 1L : 0L));
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_ENABLE_NPN,
+                       (data->set.ssl_enable_npn ? 1L : 0L));
     if(data->set.ssl.falsestart)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_FALSESTART, 1L);
     if(data->set.ssl.primary.verifyhost)
