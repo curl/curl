@@ -22,11 +22,11 @@
 
 #include "curl_setup.h"
 
-#if defined(__AMIGA__) && !defined(__ixemul__)
-
-#include <amitcp/socketbasetags.h>
-
+#ifdef __AMIGA__
 #include "amigaos.h"
+
+#ifndef __ixemul__
+#include <amitcp/socketbasetags.h>
 
 struct Library *SocketBase = NULL;
 extern int errno, h_errno;
@@ -74,4 +74,13 @@ bool Curl_amiga_init()
 ADD2EXIT(Curl_amiga_cleanup, -50);
 #endif
 
-#endif /* __AMIGA__ && ! __ixemul__ */
+#endif /* ! __ixemul__ */
+
+#ifdef USE_OPENSSL
+void Curl_amiga_X509_free(X509 *a)
+{
+	X509_free(a);
+}
+#endif /* USE_OPENSSL */
+#endif /* __AMIGA__ */
+

@@ -35,4 +35,9 @@ void Curl_amiga_cleanup();
 
 #endif
 
+#if defined(__AMIGA__) && defined(USE_OPENSSL)
+#include <openssl/x509v3.h>
+void Curl_amiga_X509_free(X509 *a);
+#endif
+
 #endif /* HEADER_CURL_AMIGAOS_H */
