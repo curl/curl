@@ -25,6 +25,7 @@
 #ifdef __AMIGA__
 #include "amigaos.h"
 
+#ifndef USE_AMISSL
 #ifndef __ixemul__
 #include <amitcp/socketbasetags.h>
 
@@ -76,11 +77,11 @@ ADD2EXIT(Curl_amiga_cleanup, -50);
 
 #endif /* ! __ixemul__ */
 
-#ifdef USE_OPENSSL
+#else /* USE_AMISSL */
 void Curl_amiga_X509_free(X509 *a)
 {
 	X509_free(a);
 }
-#endif /* USE_OPENSSL */
+#endif /* USE_AMISSL */
 #endif /* __AMIGA__ */
 

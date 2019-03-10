@@ -23,7 +23,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(__AMIGA__) && !defined(__ixemul__)
+#ifdef __AMIGA__
+
+#if !defined(__ixemul__) && !defined(USE_AMISSL)
 
 bool Curl_amiga_init();
 void Curl_amiga_cleanup();
@@ -35,9 +37,11 @@ void Curl_amiga_cleanup();
 
 #endif
 
-#if defined(__AMIGA__) && defined(USE_OPENSSL)
+#ifdef USE_AMISSL
 #include <openssl/x509v3.h>
 void Curl_amiga_X509_free(X509 *a);
 #endif
 
+#endif /* __AMIGA__ */
 #endif /* HEADER_CURL_AMIGAOS_H */
+

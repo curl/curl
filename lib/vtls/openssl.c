@@ -65,7 +65,7 @@
 #include <openssl/buffer.h>
 #include <openssl/pkcs12.h>
 
-#ifdef __AMIGA__
+#ifdef USE_AMISSL
 #include "amigaos.h"
 #endif
 
@@ -824,7 +824,7 @@ int cert_stuff(struct connectdata *conn,
   fail:
       EVP_PKEY_free(pri);
       X509_free(x509);
-#ifdef __AMIGA__
+#ifdef USE_AMISSL
       sk_X509_pop_free(ca, Curl_amiga_X509_free);
 #else
       sk_X509_pop_free(ca, X509_free);

@@ -315,7 +315,9 @@
 #    include <exec/execbase.h>
 #    include <proto/exec.h>
 #    include <proto/dos.h>
-#    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#    ifndef USE_AMISSL
+#      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#    endif
 #  endif
 #endif
 
