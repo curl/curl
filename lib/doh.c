@@ -238,9 +238,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDSIZE, (long)p->dohlen);
     }
     ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, headers);
-#ifdef USE_NGHTTP2
-    ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
-#endif
+    if(data->set.httpversion != CURL_HTTP_VERSION_NONE)
+      ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, (long)data->set.httpversion);
 #ifndef CURLDEBUG
     /* enforce HTTPS if not debug */
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
@@ -252,8 +251,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
 
     /* Inherit *some* SSL options from the user's transfer. This is a
-       best-guess approach as to which options the user would've intended to
-       apply to the doh transfers. #3661 */
+       best-guess as to which options are needed for compatibility. #3661 */
     ERROR_CHECK_SETOPT(CURLOPT_SSL_ENABLE_ALPN,
                        (data->set.ssl_enable_alpn ? 1L : 0L));
     ERROR_CHECK_SETOPT(CURLOPT_SSL_ENABLE_NPN,
