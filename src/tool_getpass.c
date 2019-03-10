@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,6 +20,10 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
+#if defined(__AMIGA__) && !defined(__amigaos4__)
+#  undef HAVE_TERMIOS_H
+#endif
 
 #ifndef HAVE_GETPASS_R
 /* this file is only for systems without getpass_r() */
