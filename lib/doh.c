@@ -251,7 +251,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
     if(data->set.no_signal)
       ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
 
-    /* Inherit most SSL options */
+    /* Inherit *some* SSL options. Options likely specific to the user's
+       transfer are not inherited. Refer to discussion in #3661. */
     if(data->set.ssl_enable_alpn)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_ENABLE_ALPN, 1L);
     if(data->set.ssl_enable_npn)
@@ -275,10 +276,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
     if(data->set.str[STRING_SSL_CAFILE_PROXY]) {
       ERROR_CHECK_SETOPT(CURLOPT_PROXY_CAINFO,
         data->set.str[STRING_SSL_CAFILE_PROXY]);
-    }
-    if(data->set.str[STRING_SSL_ISSUERCERT_ORIG]) {
-      ERROR_CHECK_SETOPT(CURLOPT_ISSUERCERT,
-        data->set.str[STRING_SSL_ISSUERCERT_ORIG]);
     }
     if(data->set.str[STRING_SSL_CAPATH_ORIG]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAPATH,
