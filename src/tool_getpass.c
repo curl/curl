@@ -21,6 +21,10 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#if defined(__AMIGA__) && !defined(__amigaos4__)
+#  undef HAVE_TERMIOS_H
+#endif
+
 #ifndef HAVE_GETPASS_R
 /* this file is only for systems without getpass_r() */
 
