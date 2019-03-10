@@ -83,7 +83,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
   gcry_md_close(*ctx);
 }
 
-#elif defined(USE_OPENSSL)
+#elif defined(USE_OPENSSL) && !defined(USE_AMISSL)
 /* When OpenSSL is available we use the MD5-function from OpenSSL */
 #include <openssl/md5.h>
 #include "curl_memory.h"

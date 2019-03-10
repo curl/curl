@@ -1554,6 +1554,7 @@ if test -z "$ssl_backends" -o "x$OPT_AMISSL" != xno; then
     test amissl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     AMISSL_ENABLED=1
     LIBS="-lamisslauto $LIBS"
+    AC_DEFINE(USE_AMISSL, 1, [if AmiSSL is in use])
     AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use])
   else
     AC_MSG_RESULT(no)
