@@ -2060,7 +2060,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       return result;
   }
 
-  if((data->state.authhost.multipass || data->state.authproxy.multipass) &&
+  if(((data->state.authhost.multipass && !data->state.authhost.done)
+      || (data->state.authproxy.multipass && !data->state.authproxy.done)) &&
      (httpreq != HTTPREQ_GET) &&
      (httpreq != HTTPREQ_HEAD)) {
     /* Auth is required and we are not authenticated yet. Make a PUT or POST
