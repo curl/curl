@@ -159,10 +159,16 @@ int main(void)
 
     curl_easy_cleanup(curl);
 
+    close(sockfd);
+    
     if(res) {
       printf("libcurl error: %d\n", res);
       return 4;
     }
   }
+
+#ifdef WIN32
+  WSACleanup();
+#endif
   return 0;
 }
