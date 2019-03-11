@@ -1195,57 +1195,6 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
   return rc;
 }
 
-static CURLcode multi_reconnect_request(struct Curl_easy *data)
-{
-  CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
-
-  /* This was a re-use of a connection and we got a write error in the
-   * DO-phase. Then we DISCONNECT this connection and have another attempt to
-   * CONNECT and then DO again! The retry cannot possibly find another
-   * connection to re-use, since we only keep one possible connection for
-   * each.  */
-
-  infof(data, "Re-used connection seems dead, get a new one\n");
-
-  connclose(conn, "Reconnect dead connection"); /* enforce close */
-  result = multi_done(data, result, FALSE); /* we are so done with this */
-
-  /* data->conn was detached in multi_done() */
-
-  /*
-   * We need to check for CURLE_SEND_ERROR here as well. This could happen
-   * when the request failed on a FTP connection and thus multi_done() itself
-   * tried to use the connection (again).
-   */
-  if(!result || (CURLE_SEND_ERROR == result)) {
-    bool async;
-    bool protocol_done = TRUE;
-
-    /* Now, redo the connect and get a new connection */
-    result = Curl_connect(data, &async, &protocol_done);
-    if(!result) {
-      /* We have connected or sent away a name resolve query fine */
-
-      conn = data->conn; /* in case it was updated */
-      if(async) {
-        /* Now, if async is TRUE here, we need to wait for the name
-           to resolve */
-        result = Curl_resolver_wait_resolv(conn, NULL);
-        if(result)
-          return result;
-
-        /* Resolved, continue with the connection */
-        result = Curl_once_resolved(conn, &protocol_done);
-        if(result)
-          return result;
-      }
-    }
-  }
-
-  return result;
-}
-
 /*
  * do_complete is called when the DO actions are complete.
  *
@@ -1266,27 +1215,6 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
   if(conn->handler->do_it) {
     /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->handler->do_it(conn, done);
-
-    /* This was formerly done in transfer.c, but we better do it here */
-    if((CURLE_SEND_ERROR == result) && conn->bits.reuse) {
-      /*
-       * If the connection is using an easy handle, call reconnect
-       * to re-establish the connection.  Otherwise, let the multi logic
-       * figure out how to re-establish the connection.
-       */
-      if(!data->multi) {
-        result = multi_reconnect_request(data);
-
-        if(!result) {
-          /* ... finally back to actually retry the DO phase */
-          conn = data->conn; /* re-assign conn since multi_reconnect_request
-                                creates a new connection */
-          result = conn->handler->do_it(conn, done);
-        }
-      }
-      else
-        return result;
-    }
 
     if(!result && *done)
       /* do_complete must be called after the protocol-specific DO function */
