@@ -26,7 +26,6 @@
 #include "amigaos.h"
 
 #ifndef USE_AMISSL
-#ifndef __ixemul__
 #include <amitcp/socketbasetags.h>
 
 struct Library *SocketBase = NULL;
@@ -74,8 +73,6 @@ bool Curl_amiga_init()
 #ifdef __libnix__
 ADD2EXIT(Curl_amiga_cleanup, -50);
 #endif
-
-#endif /* ! __ixemul__ */
 
 #else /* USE_AMISSL */
 void Curl_amiga_X509_free(X509 *a)
