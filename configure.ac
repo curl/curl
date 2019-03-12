@@ -365,6 +365,18 @@ CURL_CHECK_WIN32_LARGEFILE
 CURL_MAC_CFLAGS
 CURL_SUPPORTS_BUILTIN_AVAILABLE
 
+
+dnl Check for Amiga bsdsocket.library headers
+AC_CHECK_HEADERS([proto/bsdsocket.h],
+  [
+  HAVE_PROTO_BSDSOCKET_H=1
+  AC_DEFINE(HAVE_PROTO_BSDSOCKET_H, 1, [if Amiga bsdsocket.library is in use])
+  AC_SUBST(HAVE_PROTO_BSDSOCKET_H, [1])],
+  [],
+  []
+)
+
+
 dnl ************************************************************
 dnl switch off particular protocols
 dnl
@@ -826,6 +838,27 @@ then
     AC_LANG_PROGRAM([[
 #include <stdio.h>
 #include <netdb.h>
+    ]],[[
+      gethostbyname("www.dummysite.com");
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    HAVE_GETHOSTBYNAME="1"
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl This is for AmigaOS with bsdsocket.library - needs testing before -lnet
+  AC_MSG_CHECKING([for gethostbyname for AmigaOS bsdsocket.library])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+#ifdef HAVE_PROTO_BSDSOCKET_H
+#include <proto/bsdsocket.h>
+struct Library *SocketBase = NULL;
+#endif
     ]],[[
       gethostbyname("www.dummysite.com");
     ]])
@@ -1546,20 +1579,24 @@ AC_HELP_STRING([--without-amissl], [disable Amiga native SSL/TLS (AmiSSL)]),
   OPT_AMISSL=$withval)
 
 AC_MSG_CHECKING([whether to enable Amiga native SSL/TLS (AmiSSL)])
-if test -z "$ssl_backends" -o "x$OPT_AMISSL" != xno; then
-  ssl_msg=
-  if test "x$OPT_AMISSL" != "xno"; then
-    AC_MSG_RESULT(yes)
-    ssl_msg="AmiSSL"
-    test amissl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-    AMISSL_ENABLED=1
-    LIBS="-lamisslauto $LIBS"
-    AC_DEFINE(USE_AMISSL, 1, [if AmiSSL is in use])
-    AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use])
+if test "$HAVE_PROTO_BSDSOCKET_H" == "1"; then
+  if test -z "$ssl_backends" -o "x$OPT_AMISSL" != xno; then
+    ssl_msg=
+    if test "x$OPT_AMISSL" != "xno"; then
+      AC_MSG_RESULT(yes)
+      ssl_msg="AmiSSL"
+      test amissl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+      AMISSL_ENABLED=1
+      LIBS="-lamisslauto $LIBS"
+      AC_DEFINE(USE_AMISSL, 1, [if AmiSSL is in use])
+      AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use])
+    else
+      AC_MSG_RESULT(no)
+    fi
+    test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
   else
     AC_MSG_RESULT(no)
   fi
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 else
   AC_MSG_RESULT(no)
 fi
@@ -3546,6 +3583,7 @@ dnl default includes
 #endif
 ]
 )
+
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
