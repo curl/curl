@@ -18,11 +18,13 @@ This release includes the following bugfixes:
  o Curl_easy: remove req.maxfd - never used! [58]
  o Curl_now: figure out windows version in win32_init: [11]
  o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
+ o DoH: inherit some SSL options from user's easy handle [80]
  o OpenSSL: add support for TLS ASYNC state [46]
  o Secure Transport: no more "darwinssl" [56]
  o cirrus: Added FreeBSD builds using Cirrus CI
  o cleanup: make local functions static [5]
  o cli tool: do not use mime.h private structures [27]
+ o cmdline-opts/proxytunnel.d: the option tunnnels all protocols [83]
  o configure: add additional libraries to check for LDAP support [45]
  o configure: remove the unused fdopen macro [40]
  o configure: show features as well in the final summary [15]
@@ -30,6 +32,7 @@ This release includes the following bugfixes:
  o connection_check: restore original conn->data after the check [14]
  o connection_check: set ->data to the transfer doing the check [3]
  o cookie: Add support for cookie prefixes [29]
+ o cookies: dotless names can set cookies again [81]
  o cookies: fix NULL dereference if flushing cookies with no CookieInfo set [47]
  o curl.h: use __has_declspec_attribute for shared builds [52]
  o curl: display --version features sorted alphabetically [51]
@@ -44,6 +47,7 @@ This release includes the following bugfixes:
  o examples/cacertinmem.c: use multiple certificates for loading CA-chain [54]
  o examples/crawler: Fix the Accept-Encoding setting
  o examples/ephiperfifo.c: various fixes [63]
+ o examples/externalsocket: add missing close socket calls [78]
  o examples/http2-download: cleaned up
  o examples/http2-serverpush: add some sensible error checks [31]
  o examples/http2-upload: cleaned up
@@ -64,9 +68,11 @@ This release includes the following bugfixes:
  o http: set state.infilesize when sending multipart formposts [57]
  o mbedtls: make it build even if MBEDTLS_VERSION_C isn't set [24]
  o mbedtls: release sessionid resources on error [28]
+ o memdebug: make debug-specific functions use curl_dbg_ prefix [82]
  o mime: put the boundary buffer into the curl_mime struct [18]
  o multi: call multi_done on connect timeouts, fixes CURLINFO_TOTAL_TIME [43]
  o multi: remove verbose "Expire in" ... messages [23]
+ o multi: removed unused code for request retries [79]
  o multi: support verbose conncache closure handle [72]
  o pretransfer: don't strlen() POSTFIELDS set for GET requests [22]
  o rand: Fix a mismatch between comments in source and header [32]
@@ -84,12 +90,14 @@ This release includes the following bugfixes:
  o test578: make it read data from the correct test
  o tests: Fixed XML validation errors in some test files
  o tests: add stderr comparison to the test suite [26]
+ o tests: fix multiple may be used uninitialized warnings
  o threaded-resolver: shutdown the resolver thread without error message [61]
  o tool_operate: fix typecheck warning [9]
  o transfer.c: do not compute length of undefined hex buffer
  o travis: add build using gnutls [75]
  o travis: add scan-build [13]
  o travis: enable valgrind for the iconv tests [12]
+ o travis: use updated compiler versions: clang 7 and gcc 8 [77]
  o unit1307: require FTP support [17]
  o unit1651: survive curl_easy_init() fails
  o url/idnconvert: remove scan for <= 32 ascii values [6]
@@ -112,16 +120,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  accountantM on github, Alessandro Ghedini, Arnaud Rebillout, Bernd Mueller,
-  Björn Stenberg, buzo-ffm on github, Chris Araman, d912e3 on github,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, David Garske,
-  Don J Olmstead, Frank Gevaerts, Gisle Vanem, James Brown,
-  Jan Alexander Steffens, jnbr on github, MAntoniak on github, Marcel Raad,
-  Matt McClure, Michael Felt, Michael Schmid, Michael Wallner, Michał Antoniak,
-  Nick Zitzmann, Nicolas Grekas, Patrick Monnerat, Paul Groke, Pavel Löbl,
-  Ray Satiro, Renaud Allard, Romain Geissler, Sara Golemon, Simon Legner,
-  tholin on github, Volker Schmid, wesinator on github,
-  (38 contributors)
+  accountantM on github, Alessandro Ghedini, Andre Guibert de Bruet,
+  Arnaud Rebillout, Bernd Mueller, Björn Stenberg, buzo-ffm on github,
+  Chris Araman, d912e3 on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Lublin, Daniel Stenberg, David Garske, Don J Olmstead, Frank Gevaerts,
+  Gisle Vanem, James Brown, Jan Alexander Steffens, jnbr on github,
+  MAntoniak on github, Marcel Raad, Matt McClure, Michael Felt, Michael Schmid,
+  Michael Wallner, Michał Antoniak, Nick Zitzmann, Nicolas Grekas,
+  Patrick Monnerat, Paul Groke, Pavel Löbl, Ray Satiro, Renaud Allard,
+  Romain Geissler, Sara Golemon, Simon Legner, tholin on github, Volker Schmid,
+  wesinator on github,
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -202,3 +211,10 @@ References to bug reports and discussions on issues:
  [73] = https://curl.haxx.se/bug/?i=3641
  [74] = https://curl.haxx.se/bug/?i=3498
  [76] = https://curl.haxx.se/bug/?i=3637
+ [77] = https://curl.haxx.se/bug/?i=3670
+ [78] = https://curl.haxx.se/bug/?i=3663
+ [79] = https://curl.haxx.se/bug/?i=3666
+ [80] = https://curl.haxx.se/bug/?i=3660
+ [81] = https://curl.haxx.se/bug/?i=3649
+ [82] = https://curl.haxx.se/bug/?i=3656
+ [83] = https://curl.haxx.se/bug/?i=3658
