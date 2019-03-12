@@ -139,7 +139,6 @@ matrix:
           dist: trusty
           env:
               - T=iconv
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: osx
           compiler: gcc
           env: T=debug C=--with-libssh2
