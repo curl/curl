@@ -550,13 +550,13 @@ void
 curl_dbg_freeaddrinfo(struct addrinfo *freethis,
                       int line, const char *source)
 {
+  curl_dbg_log("ADDR %s:%d freeaddrinfo(%p)\n",
+               source, line, (void *)freethis);
 #ifdef USE_LWIPSOCK
   lwip_freeaddrinfo(freethis);
 #else
   (freeaddrinfo)(freethis);
 #endif
-  curl_dbg_log("ADDR %s:%d freeaddrinfo(%p)\n",
-               source, line, (void *)freethis);
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
 
