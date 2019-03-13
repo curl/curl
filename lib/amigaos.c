@@ -25,7 +25,7 @@
 #ifdef __AMIGA__
 #include "amigaos.h"
 
-#ifndef USE_AMISSL
+#if defined(HAVE_PROTO_BSDSOCKET_H) && !defined(USE_AMISSL)
 #include <amitcp/socketbasetags.h>
 
 struct Library *SocketBase = NULL;
@@ -74,7 +74,9 @@ bool Curl_amiga_init()
 ADD2EXIT(Curl_amiga_cleanup, -50);
 #endif
 
-#else /* USE_AMISSL */
+#endif /* HAVE_PROTO_BSDSOCKET_H */
+
+#ifdef USE_AMISSL
 void Curl_amiga_X509_free(X509 *a)
 {
 	X509_free(a);
