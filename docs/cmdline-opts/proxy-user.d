@@ -10,3 +10,7 @@ authentication then you can tell curl to select the user name and password
 from your environment by specifying a single colon with this option: "-U :".
 
 If this option is used several times, the last one will be used.
+
+This is the most secure way of passing user name and password as an argument,
+curl will attempt to mask this argument as soon as it has been processed so it
+is not visible in the process table.
