@@ -94,6 +94,16 @@ MANPAGE=$(abs_top_builddir)/docs/curl.1
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 HUGE=tool_hugehelp.c
 
+HUGECMD = $(HUGEIT_$(V))
+HUGEIT_0 = @echo "  HUGE    " $@;
+HUGEIT_1 =
+HUGEIT_ = $(HUGEIT_0)
+
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
+
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
 
@@ -104,32 +114,32 @@ if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
 # compressed formats.
 $(HUGE): $(MANPAGE) $(MKHELP)
-	echo '#include "tool_setup.h"' > $(HUGE)
-	echo '#ifndef HAVE_LIBZ' >> $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE)
-	echo '#else' >> $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c >> $(HUGE)
-	echo '#endif /* HAVE_LIBZ */' >> $(HUGE)
+	$(HUGECMD) (echo '#include "tool_setup.h"' > $(HUGE);   \
+	echo '#ifndef HAVE_LIBZ' >> $(HUGE);                    \
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE);     \
+	echo '#else' >> $(HUGE);                                \
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c >> $(HUGE);  \
+	echo '#endif /* HAVE_LIBZ */' >> $(HUGE) )
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
 $(HUGE): $(MANPAGE) $(MKHELP)
-	echo '#include "tool_setup.h"' > $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE)
+	$(HUGECMD)(echo '#include "tool_setup.h"' > $(HUGE):    \
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE) )
 endif
 
 else # USE_MANUAL
 # built-in manual has been disabled, make a blank file
 $(HUGE):
-	echo "/* built-in manual is disabled, blank function */" > $(HUGE)
-	echo '#include "tool_hugehelp.h"' >> $(HUGE)
-	echo "void hugehelp(void) {}" >>$(HUGE)
+	$(HUGECMD)(echo "/* built-in manual is disabled, blank function */" > $(HUGE); \
+	echo '#include "tool_hugehelp.h"' >> $(HUGE); \
+	echo "void hugehelp(void) {}" >>$(HUGE) )
 endif
 
 # ignore tool_hugehelp.c since it is generated source code and it plays
 # by slightly different rules!
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir)        \
-	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch]
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir)        \
+	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch])
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

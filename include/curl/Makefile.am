@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -25,8 +25,13 @@ pkginclude_HEADERS = \
 
 pkgincludedir= $(includedir)/curl
 
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
+
 checksrc:
-	@@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/include/curl $(pkginclude_HEADERS)
+	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(top_srcdir)/include/curl $(pkginclude_HEADERS)
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes
