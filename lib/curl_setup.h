@@ -315,7 +315,7 @@
 #  include <proto/exec.h>
 #  include <proto/dos.h>
 #  ifdef HAVE_PROTO_BSDSOCKET_H
-#    include <proto/bsdsocket.h> /* ensure we're using bsdsocket.library functions */
+#    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
 #    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #  endif
 #endif
