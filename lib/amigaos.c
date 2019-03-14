@@ -23,16 +23,25 @@
 #include "curl_setup.h"
 
 #ifdef __AMIGA__
-#include "amigaos.h"
+#  include "amigaos.h"
+#  if defined(HAVE_PROTO_BSDSOCKET_H) && !defined(USE_AMISSL)
+#    include <amitcp/socketbasetags.h>
+#  endif
+#  ifdef __libnix__
+#    include <stabs.h>
+#  endif
+#endif
 
+/* The last #include files should be: */
+#include "curl_memory.h"
+#include "memdebug.h"
+
+#ifdef __AMIGA__
 #if defined(HAVE_PROTO_BSDSOCKET_H) && !defined(USE_AMISSL)
-#include <amitcp/socketbasetags.h>
-
 struct Library *SocketBase = NULL;
 extern int errno, h_errno;
 
 #ifdef __libnix__
-#include <stabs.h>
 void __request(const char *msg);
 #else
 # define __request(msg)       Printf(msg "\n\a")
