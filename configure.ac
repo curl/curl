@@ -366,17 +366,6 @@ CURL_MAC_CFLAGS
 CURL_SUPPORTS_BUILTIN_AVAILABLE
 
 
-dnl Check for Amiga bsdsocket.library headers
-AC_CHECK_HEADERS([proto/bsdsocket.h],
-  [
-  HAVE_PROTO_BSDSOCKET_H=1
-  AC_DEFINE(HAVE_PROTO_BSDSOCKET_H, 1, [if Amiga bsdsocket.library is in use])
-  AC_SUBST(HAVE_PROTO_BSDSOCKET_H, [1])],
-  [],
-  []
-)
-
-
 dnl ************************************************************
 dnl switch off particular protocols
 dnl
@@ -855,16 +844,17 @@ then
   AC_MSG_CHECKING([for gethostbyname for AmigaOS bsdsocket.library])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#ifdef HAVE_PROTO_BSDSOCKET_H
 #include <proto/bsdsocket.h>
 struct Library *SocketBase = NULL;
-#endif
     ]],[[
       gethostbyname("www.dummysite.com");
     ]])
   ],[
     AC_MSG_RESULT([yes])
     HAVE_GETHOSTBYNAME="1"
+    HAVE_PROTO_BSDSOCKET_H="1"
+    AC_DEFINE(HAVE_PROTO_BSDSOCKET_H, 1, [if Amiga bsdsocket.library is in use])
+    AC_SUBST(HAVE_PROTO_BSDSOCKET_H, [1])
   ],[
     AC_MSG_RESULT([no])
   ])
