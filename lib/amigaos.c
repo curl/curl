@@ -88,7 +88,7 @@ ADD2EXIT(Curl_amiga_cleanup, -50);
 #ifdef USE_AMISSL
 void Curl_amiga_X509_free(X509 *a)
 {
-	X509_free(a);
+  X509_free(a);
 }
 #endif /* USE_AMISSL */
 #endif /* __AMIGA__ */
