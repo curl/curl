@@ -1,14 +1,15 @@
 curl and libcurl 7.64.1
 
  Public curl releases:         180
- Command line options:         220
- curl_easy_setopt() options:   265
+ Command line options:         221
+ curl_easy_setopt() options:   267
  Public functions in libcurl:  80
- Contributors:                 1875
+ Contributors:                 1904
 
 This release includes the following changes:
 
  o alt-svc: experiemental support added [74]
+ o configure: add --with-amissl [84]
 
 This release includes the following bugfixes:
 
@@ -19,7 +20,6 @@ This release includes the following bugfixes:
  o Curl_now: figure out windows version in win32_init: [11]
  o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
  o DoH: inherit some SSL options from user's easy handle [80]
- o OpenSSL: add support for TLS ASYNC state [46]
  o Secure Transport: no more "darwinssl" [56]
  o cirrus: Added FreeBSD builds using Cirrus CI
  o cleanup: make local functions static [5]
@@ -34,6 +34,8 @@ This release includes the following bugfixes:
  o cookie: Add support for cookie prefixes [29]
  o cookies: dotless names can set cookies again [81]
  o cookies: fix NULL dereference if flushing cookies with no CookieInfo set [47]
+ o curl.1: --user and --proxy-user are hidden from ps output [86]
+ o curl.1: mark the argument to --cookie as <data|filename> [87]
  o curl.h: use __has_declspec_attribute for shared builds [52]
  o curl: display --version features sorted alphabetically [51]
  o curl: fix FreeBSD compiler warning in the --xattr code [2]
@@ -57,6 +59,7 @@ This release includes the following bugfixes:
  o examples: only include <curl/curl.h> [70]
  o examples: remove recursive calls to curl_multi_socket_action [42]
  o examples: remove superfluous null-pointer checks
+ o file: fix "Checking if unsigned variable 'readcount' is less than zero." [90]
  o fnmatch: disable if FTP is disabled [25]
  o gnutls: remove call to deprecated gnutls_compression_get_name [66]
  o gopher: remove check for path == NULL [69]
@@ -65,15 +68,20 @@ This release includes the following bugfixes:
  o http2: multi_connchanged() moved from multi.c, only used for h2 [21]
  o http2: verify :athority in push promise requests [37]
  o http: make adding a blank header thread-safe [33]
+ o http: send payload when (proxy) authentication is done [89]
  o http: set state.infilesize when sending multipart formposts [57]
+ o makefile: make checksrc and hugefile commands "silent" [85]
  o mbedtls: make it build even if MBEDTLS_VERSION_C isn't set [24]
  o mbedtls: release sessionid resources on error [28]
+ o memdebug: log pointer before freeing its data [91]
  o memdebug: make debug-specific functions use curl_dbg_ prefix [82]
  o mime: put the boundary buffer into the curl_mime struct [18]
  o multi: call multi_done on connect timeouts, fixes CURLINFO_TOTAL_TIME [43]
  o multi: remove verbose "Expire in" ... messages [23]
  o multi: removed unused code for request retries [79]
  o multi: support verbose conncache closure handle [72]
+ o negotiate: fix for HTTP POST with Negotiate [88]
+ o openssl: add support for TLS ASYNC state [46]
  o pretransfer: don't strlen() POSTFIELDS set for GET requests [22]
  o rand: Fix a mismatch between comments in source and header [32]
  o runtests: detect "schannel" as an alias for "winssl" [50]
@@ -92,6 +100,8 @@ This release includes the following bugfixes:
  o tests: add stderr comparison to the test suite [26]
  o tests: fix multiple may be used uninitialized warnings
  o threaded-resolver: shutdown the resolver thread without error message [61]
+ o tool_getpass: termios.h is present on AmigaOS 3, but no tcgetattr/tcsetattr [84]
+ o tool_operate: build on AmigaOS [84]
  o tool_operate: fix typecheck warning [9]
  o transfer.c: do not compute length of undefined hex buffer
  o travis: add build using gnutls [75]
@@ -107,6 +117,7 @@ This release includes the following bugfixes:
  o urldata: simplify bytecounters [62]
  o urlglob: Argument with 'nonnull' attribute passed null
  o version.c: silent scan-build even when librtmp is not enabled
+ o vtls: rename some of the SSL functions [84]
  o wolfssl: stop custom-adding curves [41]
  o x509asn1: "Dereference of null pointer"
  o x509asn1: cleanup and unify code layout [34]
@@ -122,15 +133,16 @@ advice from friends like these:
 
   accountantM on github, Alessandro Ghedini, Andre Guibert de Bruet,
   Arnaud Rebillout, Bernd Mueller, Björn Stenberg, buzo-ffm on github,
-  Chris Araman, d912e3 on github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Lublin, Daniel Stenberg, David Garske, Don J Olmstead, Frank Gevaerts,
-  Gisle Vanem, James Brown, Jan Alexander Steffens, jnbr on github,
-  MAntoniak on github, Marcel Raad, Matt McClure, Michael Felt, Michael Schmid,
-  Michael Wallner, Michał Antoniak, Nick Zitzmann, Nicolas Grekas,
-  Patrick Monnerat, Paul Groke, Pavel Löbl, Ray Satiro, Renaud Allard,
-  Romain Geissler, Sara Golemon, Simon Legner, tholin on github, Volker Schmid,
+  Chris Araman, Chris Young, d912e3 on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Lublin, Daniel Stenberg, David Garske, Dominik Hölzl, Don J Olmstead,
+  Eric Curtin, Frank Gevaerts, Gisle Vanem, James Brown,
+  Jan Alexander Steffens, jnbr on github, MAntoniak on github, Marcel Raad,
+  Marc Schlatter, Matt McClure, Michael Felt, Michael Schmid, Michael Wallner,
+  Michał Antoniak, Nick Zitzmann, Nicolas Grekas, Patrick Monnerat, Paul Groke,
+  Pavel Löbl, Ray Satiro, Renaud Allard, Romain Geissler, Sara Golemon,
+  Simon Legner, tholin on github, Tim Rühsen, Volker Schmid,
   wesinator on github,
-  (40 contributors)
+  (45 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -218,3 +230,11 @@ References to bug reports and discussions on issues:
  [81] = https://curl.haxx.se/bug/?i=3649
  [82] = https://curl.haxx.se/bug/?i=3656
  [83] = https://curl.haxx.se/bug/?i=3658
+ [84] = https://curl.haxx.se/bug/?i=3677
+ [85] = https://curl.haxx.se/bug/?i=3681
+ [86] = https://curl.haxx.se/bug/?i=3680
+ [87] = https://curl.haxx.se/bug/?i=3682
+ [88] = https://curl.haxx.se/bug/?i=1261
+ [89] = https://curl.haxx.se/bug/?i=2431
+ [90] = https://curl.haxx.se/bug/?i=3672
+ [91] = https://curl.haxx.se/bug/?i=3671
