@@ -975,7 +975,7 @@ static bool extract_if_dead(struct connectdata *conn,
                             struct Curl_easy *data)
 {
   size_t pipeLen = conn->send_pipe.size + conn->recv_pipe.size;
-  if(!pipeLen && !CONN_INUSE(conn)) {
+  if(!pipeLen && !CONN_INUSE(conn) && !conn->data) {
     /* The check for a dead socket makes sense only if there are no
        handles in pipeline and the connection isn't already marked in
        use */
@@ -1287,14 +1287,15 @@ ConnectionExists(struct Curl_easy *data,
         }
       }
 
-      if(!canpipe && CONN_INUSE(check))
+      if(!canpipe && check->data)
         /* this request can't be pipelined but the checked connection is
            already in use so we skip it */
         continue;
 
-      if(CONN_INUSE(check) && (check->data->multi != needle->data->multi))
-        /* this could be subject for pipeline/multiplex use, but only
-           if they belong to the same multi handle */
+      if(CONN_INUSE(check) && check->data &&
+         (check->data->multi != needle->data->multi))
+        /* this could be subject for pipeline/multiplex use, but only if they
+           belong to the same multi handle */
         continue;
 
       if(needle->localdev || needle->localport) {
@@ -3420,6 +3421,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
+  DEBUGASSERT(conn);
+  DEBUGASSERT(data);
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
