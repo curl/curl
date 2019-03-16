@@ -1287,7 +1287,7 @@ ConnectionExists(struct Curl_easy *data,
         }
       }
 
-      if(!canpipe && CONN_INUSE(check))
+      if(!canpipe && check->data)
         /* this request can't be pipelined but the checked connection is
            already in use so we skip it */
         continue;
@@ -3420,6 +3420,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
 
+  DEBUGASSERT(conn);
+  DEBUGASSERT(data);
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
