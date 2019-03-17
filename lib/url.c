@@ -1292,9 +1292,10 @@ ConnectionExists(struct Curl_easy *data,
            already in use so we skip it */
         continue;
 
-      if(CONN_INUSE(check) && (check->data->multi != needle->data->multi))
-        /* this could be subject for pipeline/multiplex use, but only
-           if they belong to the same multi handle */
+      if(CONN_INUSE(check) && check->data &&
+         (check->data->multi != needle->data->multi))
+        /* this could be subject for pipeline/multiplex use, but only if they
+           belong to the same multi handle */
         continue;
 
       if(needle->localdev || needle->localport) {
