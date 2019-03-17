@@ -975,7 +975,7 @@ static bool extract_if_dead(struct connectdata *conn,
                             struct Curl_easy *data)
 {
   size_t pipeLen = conn->send_pipe.size + conn->recv_pipe.size;
-  if(!pipeLen && !CONN_INUSE(conn)) {
+  if(!pipeLen && !CONN_INUSE(conn) && !conn->data) {
     /* The check for a dead socket makes sense only if there are no
        handles in pipeline and the connection isn't already marked in
        use */
