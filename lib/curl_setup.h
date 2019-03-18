@@ -82,6 +82,22 @@
 #  include "config-lumin.h"
 #endif
 
+#ifdef __ANDROID__
+#  if defined(__arm__)
+#    include "config-android-arm32.h"
+#  elif defined(__aarch64__)
+#    include "config-android-arm64.h"
+#  elif defined(__i386__)
+#    include "config-android-x86.h"
+#  else
+#    error Unknown Android CPU architecture.
+#  endif
+#endif
+
+#if defined(__linux__) && !defined(LUMIN) && !defined(__ANDROID__)
+#  include "config-linux.h"
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 /* ================================================================ */
