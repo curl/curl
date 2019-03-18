@@ -1132,7 +1132,12 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-    if((int) STRING_LASTZEROTERMINATED != (int) STRING_ALTSVC + 1 ||
+    if(
+#ifdef USE_ALTSVC
+       (int) STRING_LASTZEROTERMINATED != (int) STRING_ALTSVC + 1 ||
+#else
+       (int) STRING_LASTZEROTERMINATED != (int) STRING_DOH + 1 ||
+#endif
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
