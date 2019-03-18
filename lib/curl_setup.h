@@ -82,6 +82,14 @@
 #  include "config-lumin.h"
 #endif
 
+#ifdef __ANDROID__
+#  include "config-android.h"
+#endif
+
+#if defined(__linux__) && !defined(LUMIN) && !defined(__ANDROID__)
+#  include "config-linux.h"
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 /* ================================================================ */
