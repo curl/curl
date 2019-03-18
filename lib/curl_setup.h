@@ -83,7 +83,15 @@
 #endif
 
 #ifdef __ANDROID__
-#  include "config-android.h"
+#  if defined(__arm__)
+#    include "config-android-arm32.h"
+#  elif defined(__aarch64__)
+#    include "config-android-arm64.h"
+#  elif defined(__i386__)
+#    include "config-android-x86.h"
+#  else
+#    error Unknown Android CPU architecture.
+#  endif
 #endif
 
 #if defined(__linux__) && !defined(LUMIN) && !defined(__ANDROID__)

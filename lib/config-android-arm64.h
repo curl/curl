@@ -1,4 +1,3 @@
-/* Manually modified __aarch64__ values. */
 /* lib/curl_config.h.  Generated from curl_config.h.in by configure.  */
 /* lib/curl_config.h.in.  Generated from configure.ac by autoheader.  */
 
@@ -81,11 +80,7 @@
 /* #undef ENABLE_IPV6 */
 
 /* Define to the type of arg 2 for gethostname. */
-#ifdef __aarch64__
 #define GETHOSTNAME_TYPE_ARG2 size_t
-#else
-#define GETHOSTNAME_TYPE_ARG2 unsigned int
-#endif
 
 /* Define to the type qualifier of arg 1 for getnameinfo. */
 #define GETNAMEINFO_QUAL_ARG1 const
@@ -196,18 +191,10 @@
 /* #undef HAVE_FREEIFADDRS */
 
 /* Define to 1 if you have the fsetxattr function. */
-#ifdef __aarch64__
 #define HAVE_FSETXATTR 1
-#else
-/* #undef HAVE_FSETXATTR */
-#endif
 
 /* fsetxattr() takes 5 args */
-#ifdef __aarch64__
 #define HAVE_FSETXATTR_5 1
-#else
-/* #undef HAVE_FSETXATTR_5 */
-#endif
 
 /* fsetxattr() takes 6 args */
 /* #undef HAVE_FSETXATTR_6 */
@@ -279,11 +266,7 @@
 #define HAVE_GETPWUID 1
 
 /* Define to 1 if you have the `getpwuid_r' function. */
-#ifdef __aarch64__
 #define HAVE_GETPWUID_R 1
-#else
-/* #undef HAVE_GETPWUID_R */
-#endif
 
 /* Define to 1 if you have the `getrlimit' function. */
 #define HAVE_GETRLIMIT 1
@@ -574,11 +557,7 @@
 #define HAVE_SIGINTERRUPT 1
 
 /* Define to 1 if you have the signal function. */
-#ifdef __aarch64__
 #define HAVE_SIGNAL 1
-#else
-/* #undef HAVE_SIGNAL */
-#endif
 
 /* Define to 1 if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
@@ -719,11 +698,7 @@
 #define HAVE_SYS_WAIT_H 1
 
 /* Define to 1 if you have the <sys/xattr.h> header file. */
-#ifdef __aarch64__
 #define HAVE_SYS_XATTR_H 1
-#else
-/* #undef HAVE_SYS_XATTR_H */
-#endif
 
 /* Define to 1 if you have the <termios.h> header file. */
 #define HAVE_TERMIOS_H 1
@@ -855,18 +830,10 @@
 #define RECV_TYPE_ARG3 size_t
 
 /* Define to the type of arg 4 for recv. */
-#ifdef __aarch64__
 #define RECV_TYPE_ARG4 int
-#else
-#define RECV_TYPE_ARG4 unsigned int
-#endif
 
 /* Define to the function return type for recv. */
-#ifdef __aarch64__
 #define RECV_TYPE_RETV ssize_t
-#else
-#define RECV_TYPE_RETV int
-#endif
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
@@ -899,62 +866,34 @@
 #define SEND_TYPE_ARG3 size_t
 
 /* Define to the type of arg 4 for send. */
-#ifdef __aarch64__
 #define SEND_TYPE_ARG4 int
-#else
-#define SEND_TYPE_ARG4 unsigned int
-#endif
 
 /* Define to the function return type for send. */
-#ifdef __aarch64__
 #define SEND_TYPE_RETV ssize_t
-#else
-#define SEND_TYPE_RETV int
-#endif
 
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#ifdef __aarch64__
 #define SIZEOF_LONG 8
-#else
-#define SIZEOF_LONG 4
-#endif
 
 /* The size of `long long', as computed by sizeof. */
 /* #undef SIZEOF_LONG_LONG */
 
 /* The size of `off_t', as computed by sizeof. */
-#ifdef __aarch64__
 #define SIZEOF_OFF_T 8
-#else
-#define SIZEOF_OFF_T 4
-#endif
 
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
 /* The size of `size_t', as computed by sizeof. */
-#ifdef __aarch64__
 #define SIZEOF_SIZE_T 8
-#else
-#define SIZEOF_SIZE_T 4
-#endif
 
 /* The size of `time_t', as computed by sizeof. */
-#ifdef __aarch64__
 #define SIZEOF_TIME_T 8
-#else
-#define SIZEOF_TIME_T 4
-#endif
 
 /* The size of `void*', as computed by sizeof. */
-#ifdef __aarch64__
 #define SIZEOF_VOIDP 8
-#else
-#define SIZEOF_VOIDP 4
-#endif
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
