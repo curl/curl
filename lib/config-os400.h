@@ -425,8 +425,8 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME
 
-/* to enable alt-svc */
-#define USE_ALTSVC 1
+/* Define to enable alt-svc support (experimental) */
+#undef USE_ALTSVC
 
 /* Version number of package */
 #undef VERSION
