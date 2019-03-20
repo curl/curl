@@ -108,11 +108,6 @@
 #error "The Secure Transport back-end requires iOS or macOS."
 #endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
 
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
-  (HAVE_BUILTIN_AVAILABLE == 1) && !defined(TARGET_OS_TV)
-#define SECTRANSP_HAS_ALPN
-#endif
-
 #if CURL_BUILD_MAC
 #include <sys/sysctl.h>
 #endif /* CURL_BUILD_MAC */
@@ -1580,9 +1575,9 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
 
-#ifdef SECTRANSP_HAS_ALPN
+#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
   if(conn->bits.tls_enable_alpn) {
-    if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+    if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
       CFMutableArrayRef alpnArr = CFArrayCreateMutable(NULL, 0,
                                                        &kCFTypeArrayCallBacks);
 
@@ -2631,9 +2626,9 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
         break;
     }
 
-#ifdef SECTRANSP_HAS_ALPN
+#if(CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
     if(conn->bits.tls_enable_alpn) {
-      if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+      if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
         CFArrayRef alpnArr = NULL;
         CFStringRef chosenProtocol = NULL;
         err = SSLCopyALPNProtocols(BACKEND->ssl_ctx, &alpnArr);
