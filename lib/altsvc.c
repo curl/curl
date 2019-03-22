@@ -521,7 +521,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         p++;
         result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
         if(result)
-          /* failed to parse, but since we alredy did at least one host we
+          /* failed to parse, but since we already did at least one host we
              return OK */
           return CURLE_OK;
       }
