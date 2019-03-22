@@ -44,15 +44,15 @@ enum min_err_code {
     GSS_LAST
 };
 
-const char *min_err_table[] = {
-    "stub-gss: no error",
-    "stub-gss: no memory",
-    "stub-gss: invalid arguments",
-    "stub-gss: invalid credentials",
-    "stub-gss: invalid context",
-    "stub-gss: server returned error",
-    "stub-gss: cannot find a mechanism",
-    NULL
+static const char *min_err_table[] = {
+  "stub-gss: no error",
+  "stub-gss: no memory",
+  "stub-gss: invalid arguments",
+  "stub-gss: invalid credentials",
+  "stub-gss: invalid context",
+  "stub-gss: server returned error",
+  "stub-gss: cannot find a mechanism",
+  NULL
 };
 
 struct gss_ctx_id_t_desc_struct {

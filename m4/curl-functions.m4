@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -545,6 +545,25 @@ curl_includes_ws2tcpip="\
 ])
 
 
+dnl CURL_INCLUDES_BSDSOCKET
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when bsdsocket.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_BSDSOCKET], [
+curl_includes_bsdsocket="\
+/* includes start */
+#ifdef HAVE_PROTO_BSDSOCKET_H
+#  include <proto/bsdsocket.h>
+  struct Library *SocketBase = NULL;
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    proto/bsdsocket.h,
+    [], [], [      $curl_includes_bsdsocket])
+])
+
+
 dnl CURL_PREPROCESS_CALLCONV
 dnl -------------------------------------------------
 dnl Set up variable with a preprocessor block which
@@ -759,6 +778,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_socket
     ]],[[
       if(0 != closesocket(0))
@@ -776,6 +796,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_MSG_CHECKING([if closesocket is prototyped])
     AC_EGREP_CPP([closesocket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -791,6 +812,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_socket
       ]],[[
         if(0 != closesocket(0))
@@ -944,6 +966,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ]],[[
@@ -962,6 +985,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_MSG_CHECKING([if connect is prototyped])
     AC_EGREP_CPP([connect],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ],[
@@ -978,6 +1002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[
@@ -1167,92 +1192,6 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
     curl_cv_func_fcntl_o_nonblock="no"
   fi
 ])
-
-
-dnl CURL_CHECK_FUNC_FDOPEN
-dnl -------------------------------------------------
-dnl Verify if fdopen is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_fdopen, then
-dnl HAVE_FDOPEN will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_FDOPEN], [
-  AC_REQUIRE([CURL_INCLUDES_STDIO])dnl
-  #
-  tst_links_fdopen="unknown"
-  tst_proto_fdopen="unknown"
-  tst_compi_fdopen="unknown"
-  tst_allow_fdopen="unknown"
-  #
-  AC_MSG_CHECKING([if fdopen can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_FUNC_LINK_TRY([fdopen])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_fdopen="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_fdopen="no"
-  ])
-  #
-  if test "$tst_links_fdopen" = "yes"; then
-    AC_MSG_CHECKING([if fdopen is prototyped])
-    AC_EGREP_CPP([fdopen],[
-      $curl_includes_stdio
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_fdopen="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_fdopen="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_fdopen" = "yes"; then
-    AC_MSG_CHECKING([if fdopen is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_stdio
-      ]],[[
-        if(0 != fdopen(0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_fdopen="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_fdopen="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_fdopen" = "yes"; then
-    AC_MSG_CHECKING([if fdopen usage allowed])
-    if test "x$curl_disallow_fdopen" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_fdopen="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_fdopen="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if fdopen might be used])
-  if test "$tst_links_fdopen" = "yes" &&
-     test "$tst_proto_fdopen" = "yes" &&
-     test "$tst_compi_fdopen" = "yes" &&
-     test "$tst_allow_fdopen" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_FDOPEN, 1,
-      [Define to 1 if you have the fdopen function.])
-    curl_cv_func_fdopen="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_fdopen="no"
-  fi
-])
-
 
 dnl CURL_CHECK_FUNC_FGETXATTR
 dnl -------------------------------------------------
@@ -2292,6 +2231,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gethostbyaddr(0, 0, 0))
@@ -2309,6 +2249,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
     AC_MSG_CHECKING([if gethostbyaddr is prototyped])
     AC_EGREP_CPP([gethostbyaddr],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2324,6 +2265,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gethostbyaddr(0, 0, 0))
@@ -2385,6 +2327,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gai_strerror(0))
@@ -2402,6 +2345,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
     AC_MSG_CHECKING([if gai_strerror is prototyped])
     AC_EGREP_CPP([gai_strerror],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2417,6 +2361,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gai_strerror(0))
@@ -2621,6 +2566,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gethostbyname(0))
@@ -2638,6 +2584,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_MSG_CHECKING([if gethostbyname is prototyped])
     AC_EGREP_CPP([gethostbyname],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2653,6 +2600,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gethostbyname(0))
@@ -2848,6 +2796,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
@@ -2858,6 +2807,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_unistd
     ]],[[
       if(0 != gethostname(0, 0))
@@ -2875,6 +2825,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_MSG_CHECKING([if gethostname is prototyped])
     AC_EGREP_CPP([gethostname],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_unistd
     ],[
       AC_MSG_RESULT([yes])
@@ -2890,6 +2841,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_unistd
       ]],[[
         if(0 != gethostname(0, 0))
@@ -2913,6 +2865,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
           AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([[
               $curl_includes_winsock2
+      $curl_includes_bsdsocket
               $curl_includes_unistd
               $curl_preprocess_callconv
               extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
@@ -4109,6 +4062,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
     ]],[[
       if(0 != ioctlsocket(0, 0, 0))
         return 1;
@@ -4125,6 +4079,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_MSG_CHECKING([if ioctlsocket is prototyped])
     AC_EGREP_CPP([ioctlsocket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_ioctlsocket="yes"
@@ -4139,6 +4094,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
       ]],[[
         if(0 != ioctlsocket(0, 0, 0))
           return 1;
@@ -4197,6 +4153,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
       ]],[[
         int flags = 0;
         if(0 != ioctlsocket(0, FIONBIO, &flags))
@@ -5011,6 +4968,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
       if(0 != setsockopt(0, 0, 0, 0, 0))
@@ -5028,6 +4986,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_MSG_CHECKING([if setsockopt is prototyped])
     AC_EGREP_CPP([setsockopt],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -5043,6 +5002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != setsockopt(0, 0, 0, 0, 0))
@@ -5102,6 +5062,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
@@ -5647,6 +5608,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ]],[[
@@ -5665,6 +5627,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_MSG_CHECKING([if socket is prototyped])
     AC_EGREP_CPP([socket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ],[
@@ -5681,6 +5644,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[
@@ -7024,4 +6988,44 @@ AC_DEFUN([CURL_RUN_IFELSE], [
    export LD_LIBRARY_PATH
    AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
    LD_LIBRARY_PATH=$old # restore
+])
+
+dnl CURL_COVERAGE
+dnl --------------------------------------------------
+dnl Switch on options and libs to build with gcc's code coverage.
+dnl
+
+AC_DEFUN([CURL_COVERAGE],[
+  AC_REQUIRE([AC_PROG_SED])
+  AC_REQUIRE([AC_ARG_ENABLE])
+  AC_MSG_CHECKING([for code coverage support])
+  coverage="no"
+  curl_coverage_msg="disabled"
+
+  dnl check if enabled by argument
+  AC_ARG_ENABLE(code-coverage,
+     AC_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
+     coverage="yes",
+     coverage="no")
+
+  dnl if not gcc switch off again
+  AS_IF([ test "$GCC" != "yes" ], coverage="no" )
+  AC_MSG_RESULT($coverage)
+
+  if test "x$coverage" = "xyes"; then
+    curl_coverage_msg="enabled"
+
+    AC_CHECK_TOOL([GCOV], [gcov], [gcov])
+    if test -z "$GCOV"; then
+      AC_MSG_ERROR([needs gcov for code coverage])
+    fi
+    AC_CHECK_PROG([LCOV], [lcov], [lcov])
+    if test -z "$LCOV"; then
+      AC_MSG_ERROR([needs lcov for code coverage])
+    fi
+
+    CPPFLAGS="$CPPFLAGS -DNDEBUG"
+    CFLAGS="$CLAGS -O0 -g -fprofile-arcs -ftest-coverage"
+    LIBS="$LIBS -lgcov"
+  fi
 ])

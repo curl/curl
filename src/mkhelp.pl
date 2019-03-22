@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -32,14 +32,6 @@ if($ARGV[0] eq "-c") {
     $c=1;
     shift @ARGV;
 }
-
-my $README = $ARGV[0];
-
-if($README eq "") {
-    print "usage: mkhelp.pl [-c] <README> < manpage\n";
-    exit;
-}
-
 
 push @out, "                                  _   _ ____  _\n";
 push @out, "  Project                     ___| | | |  _ \\| |\n";
@@ -88,19 +80,6 @@ while (<STDIN>) {
     push @out, $line;
 }
 push @out, "\n"; # just an extra newline
-
-open(READ, "<$README") ||
-    die "couldn't read the README infile $README";
-
-while(<READ>) {
-    my $line = $_;
-
-    # remove trailing CR from line. msysgit checks out files as line+CRLF
-    $line =~ s/\r$//;
-
-    push @out, $line;
-}
-close(READ);
 
 print <<HEAD
 /*

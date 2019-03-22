@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -42,6 +42,7 @@ CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 
 EXTRA_DIST =                                    \
  $(noinst_man_MANS)                             \
+ ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUGS                                           \
  CHECKSRC.md                                    \
@@ -65,7 +66,6 @@ EXTRA_DIST =                                    \
  KNOWN_BUGS                                     \
  LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
- MANUAL                                         \
  README.cmake                                   \
  README.md                                      \
  README.netware                                 \
@@ -95,7 +95,7 @@ SUFFIXES = .1 .html .pdf
 # have changed.
 $(abs_builddir)/curl.1:
 	if test "$(top_builddir)x" != "$(top_srcdir)x" -a -e "$(srcdir)/curl.1"; then \
-		cp -fp "$(srcdir)/curl.1" $@; fi
+		$(INSTALL_DATA) "$(srcdir)/curl.1" $@; fi
 	cd cmdline-opts && $(MAKE)
 
 html: $(HTMLPAGES)

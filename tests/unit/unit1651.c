@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -352,6 +352,8 @@ UNITTEST_START
   struct Curl_easy *data = curl_easy_init();
   int i;
   int byte;
+  if(!data)
+    return 2;
 
   memset(&conn, 0, sizeof(struct connectdata));
   /* this is a lot of assuming, but we expect the parsing function to only

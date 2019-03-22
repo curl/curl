@@ -96,9 +96,10 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
 
   ca_file_tstr = Curl_convert_UTF8_to_tchar((char *)ca_file);
   if(!ca_file_tstr) {
+    char buffer[STRERROR_LEN];
     failf(data,
           "schannel: invalid path name for CA file '%s': %s",
-          ca_file, Curl_strerror(conn, GetLastError()));
+          ca_file, Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
@@ -116,17 +117,19 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                               FILE_ATTRIBUTE_NORMAL,
                               NULL);
   if(ca_file_handle == INVALID_HANDLE_VALUE) {
+    char buffer[STRERROR_LEN];
     failf(data,
           "schannel: failed to open CA file '%s': %s",
-          ca_file, Curl_strerror(conn, GetLastError()));
+          ca_file, Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
   if(!GetFileSizeEx(ca_file_handle, &file_size)) {
+    char buffer[STRERROR_LEN];
     failf(data,
           "schannel: failed to determine size of CA file '%s': %s",
-          ca_file, Curl_strerror(conn, GetLastError()));
+          ca_file, Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
@@ -153,10 +156,10 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
 
     if(!ReadFile(ca_file_handle, ca_file_buffer + total_bytes_read,
                  bytes_to_read, &bytes_read, NULL)) {
-
+      char buffer[STRERROR_LEN];
       failf(data,
             "schannel: failed to read from CA file '%s': %s",
-            ca_file, Curl_strerror(conn, GetLastError()));
+            ca_file, Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
     }
@@ -215,11 +218,12 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                              NULL,
                              NULL,
                              (const void **)&cert_context)) {
-
+          char buffer[STRERROR_LEN];
           failf(data,
                 "schannel: failed to extract certificate from CA file "
                 "'%s': %s",
-                ca_file, Curl_strerror(conn, GetLastError()));
+                ca_file,
+                Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
           result = CURLE_SSL_CACERT_BADFILE;
           more_certs = 0;
         }
@@ -243,10 +247,12 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
                                                NULL);
             CertFreeCertificateContext(cert_context);
             if(!add_cert_result) {
+              char buffer[STRERROR_LEN];
               failf(data,
                     "schannel: failed to add certificate from CA file '%s' "
                     "to certificate store: %s",
-                    ca_file, Curl_strerror(conn, GetLastError()));
+                    ca_file,
+                    Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
               result = CURLE_SSL_CACERT_BADFILE;
               more_certs = 0;
             }
@@ -408,7 +414,7 @@ cleanup:
 
 CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
 {
-  SECURITY_STATUS status;
+  SECURITY_STATUS sspi_status;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   CURLcode result = CURLE_OK;
@@ -420,13 +426,15 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
     conn->http_proxy.host.name :
     conn->host.name;
 
-  status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-                                            SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                            &pCertContextServer);
+  sspi_status =
+    s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                     SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                     &pCertContextServer);
 
-  if((status != SEC_E_OK) || (pCertContextServer == NULL)) {
+  if((sspi_status != SEC_E_OK) || (pCertContextServer == NULL)) {
+    char buffer[STRERROR_LEN];
     failf(data, "schannel: Failed to read remote certificate context: %s",
-          Curl_sspi_strerror(conn, status));
+          Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -450,8 +458,9 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
                                   CERT_STORE_CREATE_NEW_FLAG,
                                   NULL);
       if(!trust_store) {
+        char buffer[STRERROR_LEN];
         failf(data, "schannel: failed to create certificate store: %s",
-              Curl_strerror(conn, GetLastError()));
+              Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
         result = CURLE_SSL_CACERT_BADFILE;
       }
       else {
@@ -477,9 +486,10 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
         CertCreateCertificateChainEngine(
           (CERT_CHAIN_ENGINE_CONFIG *)&engine_config, &cert_chain_engine);
       if(!create_engine_result) {
+        char buffer[STRERROR_LEN];
         failf(data,
               "schannel: failed to create certificate chain engine: %s",
-              Curl_strerror(conn, GetLastError()));
+              Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
         result = CURLE_SSL_CACERT_BADFILE;
       }
     }
@@ -500,8 +510,9 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
+      char buffer[STRERROR_LEN];
       failf(data, "schannel: CertGetCertificateChain failed: %s",
-            Curl_sspi_strerror(conn, GetLastError()));
+            Curl_strerror(GetLastError(), buffer, sizeof(buffer)));
       pChainContext = NULL;
       result = CURLE_PEER_FAILED_VERIFICATION;
     }

@@ -528,6 +528,19 @@ Curl_cookie_add(struct Curl_easy *data,
         while(*whatptr && ISBLANK(*whatptr))
           whatptr++;
 
+        /*
+         * Check if we have a reserved prefix set before anything else, as we
+         * otherwise have to test for the prefix in both the cookie name and
+         * "the rest". Prefixes must start with '__' and end with a '-', so
+         * only test for names where that can possibly be true.
+         */
+        if(nlen > 3 && name[0] == '_' && name[1] == '_') {
+          if(strncasecompare("__Secure-", name, 9))
+            co->prefix |= COOKIE_PREFIX__SECURE;
+          else if(strncasecompare("__Host-", name, 7))
+            co->prefix |= COOKIE_PREFIX__HOST;
+        }
+
         if(!co->name) {
           /* The very first name/value pair is the actual cookie name */
           if(!sep) {
@@ -803,8 +816,6 @@ Curl_cookie_add(struct Curl_easy *data,
         co->domain = strdup(ptr);
         if(!co->domain)
           badcookie = TRUE;
-        else if(bad_domain(co->domain))
-          badcookie = TRUE;
         break;
       case 1:
         /* This field got its explanation on the 23rd of May 2001 by
@@ -862,6 +873,11 @@ Curl_cookie_add(struct Curl_easy *data,
         co->name = strdup(ptr);
         if(!co->name)
           badcookie = TRUE;
+        /* For Netscape file format cookies we check prefix on the name */
+        if(strncasecompare("__Secure-", co->name, 9))
+          co->prefix |= COOKIE_PREFIX__SECURE;
+        else if(strncasecompare("__Host-", co->name, 7))
+          co->prefix |= COOKIE_PREFIX__HOST;
         break;
       case 6:
         co->value = strdup(ptr);
@@ -890,6 +906,26 @@ Curl_cookie_add(struct Curl_easy *data,
 
   }
 
+  if(co->prefix & COOKIE_PREFIX__SECURE) {
+    /* The __Secure- prefix only requires that the cookie be set secure */
+    if(!co->secure) {
+      freecookie(co);
+      return NULL;
+    }
+  }
+  if(co->prefix & COOKIE_PREFIX__HOST) {
+    /*
+     * The __Host- prefix requires the cookie to be secure, have a "/" path
+     * and not have a domain set.
+     */
+    if(co->secure && co->path && strcmp(co->path, "/") == 0 && !co->tailmatch)
+      ;
+    else {
+      freecookie(co);
+      return NULL;
+    }
+  }
+
   if(!c->running &&    /* read from a file */
      c->newsession &&  /* clean session cookies */
      !co->expires) {   /* this is a session cookie since it doesn't expire! */
@@ -908,20 +944,18 @@ Curl_cookie_add(struct Curl_easy *data,
   if(!noexpire)
     remove_expired(c);
 
-  if(domain && co->domain && !isip(co->domain)) {
-    int acceptable;
 #ifdef USE_LIBPSL
+  /* Check if the domain is a Public Suffix and if yes, ignore the cookie. */
+  if(domain && co->domain && !isip(co->domain)) {
     const psl_ctx_t *psl = Curl_psl_use(data);
+    int acceptable;
 
-    /* Check if the domain is a Public Suffix and if yes, ignore the cookie. */
     if(psl) {
       acceptable = psl_is_cookie_domain_acceptable(psl, domain, co->domain);
       Curl_psl_release(data);
     }
     else
-#endif
-    /* Without libpsl, do the best we can. */
-    acceptable = !bad_domain(co->domain);
+      acceptable = !bad_domain(domain);
 
     if(!acceptable) {
       infof(data, "cookie '%s' dropped, domain '%s' must not "
@@ -930,6 +964,7 @@ Curl_cookie_add(struct Curl_easy *data,
       return NULL;
     }
   }
+#endif
 
   myhash = cookiehash(co->domain);
   clist = c->cookies[myhash];
@@ -1054,7 +1089,7 @@ Curl_cookie_add(struct Curl_easy *data,
  * get_line() makes sure to only return complete whole lines that fit in 'len'
  * bytes and end with a newline.
  */
-static char *get_line(char *buf, int len, FILE *input)
+char *Curl_get_line(char *buf, int len, FILE *input)
 {
   bool partial = FALSE;
   while(1) {
@@ -1134,7 +1169,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     line = malloc(MAX_COOKIE_LINE);
     if(!line)
       goto fail;
-    while(get_line(line, MAX_COOKIE_LINE, fp)) {
+    while(Curl_get_line(line, MAX_COOKIE_LINE, fp)) {
       if(checkprefix("Set-Cookie:", line)) {
         /* This is a cookie line, get it! */
         lineptr = &line[11];
@@ -1502,6 +1537,10 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   unsigned int i;
   unsigned int j;
   struct Cookie **array;
+
+  if(!c)
+    /* no cookie engine alive */
+    return 0;
 
   /* at first, remove expired cookies */
   remove_expired(c);

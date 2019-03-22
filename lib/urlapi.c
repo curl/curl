@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -66,12 +66,6 @@ struct Curl_URL {
 };
 
 #define DEFAULT_SCHEME "https"
-
-#ifdef DEBUGBUILD
-#define UNITTEST
-#else
-#define UNITTEST static
-#endif
 
 static void free_urlhandle(struct Curl_URL *u)
 {
@@ -141,7 +135,7 @@ static bool urlchar_needs_escaping(int c)
  * URL encoding should be skipped for host names, otherwise IDN resolution
  * will fail.
  */
-size_t Curl_strlen_url(const char *url, bool relative)
+static size_t strlen_url(const char *url, bool relative)
 {
   const unsigned char *ptr;
   size_t newlen = 0;
@@ -183,7 +177,7 @@ size_t Curl_strlen_url(const char *url, bool relative)
  * URL encoding should be skipped for host names, otherwise IDN resolution
  * will fail.
  */
-void Curl_strcpy_url(char *output, const char *url, bool relative)
+static void strcpy_url(char *output, const char *url, bool relative)
 {
   /* we must add this with whitespace-replacing */
   bool left = TRUE;
@@ -268,7 +262,7 @@ bool Curl_is_absolute_url(const char *url, char *buf, size_t buflen)
  * The returned pointer must be freed by the caller unless NULL
  * (returns NULL on out of memory).
  */
-char *Curl_concat_url(const char *base, const char *relurl)
+static char *concat_url(const char *base, const char *relurl)
 {
   /***
    TRY to append this new path to the old URL
@@ -392,7 +386,7 @@ char *Curl_concat_url(const char *base, const char *relurl)
      letter we replace each space with %20 while it is replaced with '+'
      on the right side of the '?' letter.
   */
-  newlen = Curl_strlen_url(useurl, !host_changed);
+  newlen = strlen_url(useurl, !host_changed);
 
   urllen = strlen(url_clone);
 
@@ -414,7 +408,7 @@ char *Curl_concat_url(const char *base, const char *relurl)
     newest[urllen++]='/';
 
   /* then append the new piece on the right side */
-  Curl_strcpy_url(&newest[urllen], useurl, !host_changed);
+  strcpy_url(&newest[urllen], useurl, !host_changed);
 
   free(url_clone);
 
@@ -574,15 +568,15 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
 /* scan for byte values < 31 or 127 */
 static CURLUcode junkscan(char *part)
 {
-  char badbytes[]={
-    /* */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
-    0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
-    0x7f,
-    0x00 /* zero terminate */
-  };
   if(part) {
+    static const char badbytes[]={
+      /* */ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+      0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+      0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
+      0x7f,
+      0x00 /* zero terminate */
+    };
     size_t n = strlen(part);
     size_t nfine = strcspn(part, badbytes);
     if(nfine != n)
@@ -1083,10 +1077,10 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       return CURLUE_OUT_OF_MEMORY;
     *part = url;
     return CURLUE_OK;
-    break;
   }
   default:
     ptr = NULL;
+    break;
   }
   if(ptr) {
     *part = strdup(ptr);
@@ -1252,7 +1246,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     }
 
     /* apply the relative part to create a new URL */
-    redired_url = Curl_concat_url(oldurl, part);
+    redired_url = concat_url(oldurl, part);
     free(oldurl);
     if(!redired_url)
       return CURLUE_OUT_OF_MEMORY;

@@ -75,6 +75,7 @@
 #include "ssh.h"
 #include "setopt.h"
 #include "http_digest.h"
+#include "system_win32.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -82,70 +83,6 @@
 #include "memdebug.h"
 
 void Curl_version_init(void);
-
-/* win32_cleanup() is for win32 socket cleanup functionality, the opposite
-   of win32_init() */
-static void win32_cleanup(void)
-{
-#ifdef USE_WINSOCK
-  WSACleanup();
-#endif
-#ifdef USE_WINDOWS_SSPI
-  Curl_sspi_global_cleanup();
-#endif
-}
-
-/* win32_init() performs win32 socket initialization to properly setup the
-   stack to allow networking */
-static CURLcode win32_init(void)
-{
-#ifdef USE_WINSOCK
-  WORD wVersionRequested;
-  WSADATA wsaData;
-  int res;
-
-#if defined(ENABLE_IPV6) && (USE_WINSOCK < 2)
-  Error IPV6_requires_winsock2
-#endif
-
-  wVersionRequested = MAKEWORD(USE_WINSOCK, USE_WINSOCK);
-
-  res = WSAStartup(wVersionRequested, &wsaData);
-
-  if(res != 0)
-    /* Tell the user that we couldn't find a usable */
-    /* winsock.dll.     */
-    return CURLE_FAILED_INIT;
-
-  /* Confirm that the Windows Sockets DLL supports what we need.*/
-  /* Note that if the DLL supports versions greater */
-  /* than wVersionRequested, it will still return */
-  /* wVersionRequested in wVersion. wHighVersion contains the */
-  /* highest supported version. */
-
-  if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-     HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-    /* Tell the user that we couldn't find a usable */
-
-    /* winsock.dll. */
-    WSACleanup();
-    return CURLE_FAILED_INIT;
-  }
-  /* The Windows Sockets DLL is acceptable. Proceed. */
-#elif defined(USE_LWIPSOCK)
-  lwip_init();
-#endif
-
-#ifdef USE_WINDOWS_SSPI
-  {
-    CURLcode result = Curl_sspi_global_init();
-    if(result)
-      return result;
-  }
-#endif
-
-  return CURLE_OK;
-}
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
@@ -223,11 +160,12 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     return CURLE_FAILED_INIT;
   }
 
-  if(flags & CURL_GLOBAL_WIN32)
-    if(win32_init()) {
-      DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
-      return CURLE_FAILED_INIT;
-    }
+#ifdef WIN32
+  if(Curl_win32_init(flags)) {
+    DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+#endif
 
 #ifdef __AMIGA__
   if(!Curl_amiga_init()) {
@@ -331,8 +269,9 @@ void curl_global_cleanup(void)
   Curl_ssl_cleanup();
   Curl_resolver_global_cleanup();
 
-  if(init_flags & CURL_GLOBAL_WIN32)
-    win32_cleanup();
+#ifdef WIN32
+  Curl_win32_cleanup(init_flags);
+#endif
 
   Curl_amiga_cleanup();
 

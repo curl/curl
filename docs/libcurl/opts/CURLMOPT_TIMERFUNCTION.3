@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,7 +28,7 @@ CURLMOPT_TIMERFUNCTION \- set callback to receive timeout values
 #include <curl/curl.h>
 
 int timer_callback(CURLM *multi,    /* multi handle */
-                   long timeout_ms, /* see above */
+                   long timeout_ms, /* timeout in number of ms */
                    void *userp);    /* private callback pointer */
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERFUNCTION, timer_callback);
@@ -40,17 +40,15 @@ Certain features, such as timeouts and retries, require you to call libcurl
 even when there is no activity on the file descriptors.
 
 Your callback function \fBtimer_callback\fP should install a non-repeating
-timer with an interval of \fBtimeout_ms\fP. Each time that timer fires, call
+timer with an interval of \fBtimeout_ms\fP. When time that timer fires, call
 either \fIcurl_multi_socket_action(3)\fP or \fIcurl_multi_perform(3)\fP,
 depending on which interface you use.
 
-A \fBtimeout_ms\fP value of -1 means you should delete your timer.
+A \fBtimeout_ms\fP value of -1 passed to this callback means you should delete
+the timer. All other values are valid expire times in number of milliseconds.
 
-A \fBtimeout_ms\fP value of 0 means you should call
-\fIcurl_multi_socket_action(3)\fP or \fIcurl_multi_perform(3)\fP (once) as soon
-as possible.
-
-\fBtimer_callback\fP will only be called when the \fBtimeout_ms\fP changes.
+The \fBtimer_callback\fP will only be called when the timeout expire time is
+changed.
 
 The \fBuserp\fP pointer is set with \fICURLMOPT_TIMERDATA(3)\fP.
 

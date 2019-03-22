@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -52,10 +52,10 @@ should not be set. If the option is not set, then curl will use the
 certificates in the system and user Keychain to verify the peer, which is the
 preferred method of verifying the peer's certificate chain.
 
-(Schannel/WinSSL only) This option is supported for WinSSL in Windows 7 or
-later with libcurl 7.60 or later. This option is supported for backward
-compatibility with other SSL engines; instead it is recommended to use Windows'
-store of root certificates (the default for WinSSL).
+(Schannel only) This option is supported for Schannel in Windows 7 or later
+with libcurl 7.60 or later. This option is supported for backward
+compatibility with other SSL engines; instead it is recommended to use
+Windows' store of root certificates (the default for Schannel).
 
 The application does not have to keep the string around after setting this
 option.

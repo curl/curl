@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -646,20 +646,18 @@ get_winsock_error (int err, char *buf, size_t len)
  * We don't do range checking (on systems other than Windows) since there is
  * no good reliable and portable way to do it.
  */
-const char *Curl_strerror(struct connectdata *conn, int err)
+const char *Curl_strerror(int err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();
 #endif
   int old_errno = errno;
-  char *buf, *p;
+  char *p;
   size_t max;
 
-  DEBUGASSERT(conn);
   DEBUGASSERT(err >= 0);
 
-  buf = conn->syserr_buf;
-  max = sizeof(conn->syserr_buf)-1;
+  max = buflen - 1;
   *buf = '\0';
 
 #ifdef USE_WINSOCK
@@ -757,7 +755,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 }
 
 #ifdef USE_WINDOWS_SSPI
-const char *Curl_sspi_strerror (struct connectdata *conn, int err)
+const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();
@@ -768,15 +766,13 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
   size_t outmax;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   char txtbuf[80];
-  char msgbuf[sizeof(conn->syserr_buf)];
+  char msgbuf[256];
   char *p, *str, *msg = NULL;
   bool msg_formatted = FALSE;
 #endif
 
-  DEBUGASSERT(conn);
-
-  outbuf = conn->syserr_buf;
-  outmax = sizeof(conn->syserr_buf)-1;
+  outbuf = buf;
+  outmax = buflen - 1;
   *outbuf = '\0';
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS

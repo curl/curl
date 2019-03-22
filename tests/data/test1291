@@ -1,7 +1,6 @@
+<testcase>
 # This test case is primarily meant to verify that parsing and adding the 100K
 # files is a swift operation.
-#
-<testcase>
 <info>
 <keywords>
 HTTP

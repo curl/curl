@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@
    3. USE_GNUTLS
    4. USE_NSS
    5. USE_MBEDTLS
-   6. USE_DARWINSSL
+   6. USE_SECTRANSP
    7. USE_OS400CRYPTO
    8. USE_WIN32_CRYPTO
 
@@ -101,7 +101,7 @@
 #    include "curl_md4.h"
 #  endif
 
-#elif defined(USE_DARWINSSL)
+#elif defined(USE_SECTRANSP)
 
 #  include <CommonCrypto/CommonCryptor.h>
 #  include <CommonCrypto/CommonDigest.h>
@@ -290,7 +290,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   return mbedtls_des_crypt_ecb(&ctx, in, out) == 0;
 }
 
-#elif defined(USE_DARWINSSL)
+#elif defined(USE_SECTRANSP)
 
 static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
@@ -437,7 +437,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   setup_des_key(keys + 14, &des);
   gcry_cipher_encrypt(des, results + 16, 8, plaintext, 8);
   gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_DARWINSSL) \
+#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
@@ -501,7 +501,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(struct Curl_easy *data,
     setup_des_key(pw + 7, &des);
     gcry_cipher_encrypt(des, lmbuffer + 8, 8, magic, 8);
     gcry_cipher_close(des);
-#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_DARWINSSL) \
+#elif defined(USE_NSS) || defined(USE_MBEDTLS) || defined(USE_SECTRANSP) \
   || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
@@ -591,7 +591,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 #else
     Curl_md4it(ntbuffer, pw, 2 * len);
 #endif
-#elif defined(USE_DARWINSSL)
+#elif defined(USE_SECTRANSP)
     (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
 #elif defined(USE_OS400CRYPTO)
     Curl_md4it(ntbuffer, pw, 2 * len);
@@ -621,9 +621,9 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 #if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
 
 /* This returns the HMAC MD5 digest */
-CURLcode Curl_hmac_md5(const unsigned char *key, unsigned int keylen,
-                       const unsigned char *data, unsigned int datalen,
-                       unsigned char *output)
+static CURLcode hmac_md5(const unsigned char *key, unsigned int keylen,
+                         const unsigned char *data, unsigned int datalen,
+                         unsigned char *output)
 {
   HMAC_context *ctxt = Curl_HMAC_init(Curl_HMAC_MD5, key, keylen);
 
@@ -668,9 +668,8 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
 
-  result = Curl_hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
-                         ntlmv2hash);
-
+  result = hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
+                    ntlmv2hash);
   free(identity);
 
   return result;
@@ -756,8 +755,8 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
-  result = Curl_hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
-                         NTLMv2_BLOB_LEN + 8, hmac_output);
+  result = hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
+                    NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
     free(ptr);
     return result;
@@ -799,7 +798,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
 
-  result = Curl_hmac_md5(ntlmv2hash, 16, &data[0], 16, hmac_output);
+  result = hmac_md5(ntlmv2hash, 16, &data[0], 16, hmac_output);
   if(result)
     return result;
 

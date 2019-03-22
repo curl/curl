@@ -163,10 +163,10 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       *param_longp = (long)data->info.filetime;
     break;
   case CURLINFO_HEADER_SIZE:
-    *param_longp = data->info.header_size;
+    *param_longp = (long)data->info.header_size;
     break;
   case CURLINFO_REQUEST_SIZE:
-    *param_longp = data->info.request_size;
+    *param_longp = (long)data->info.request_size;
     break;
   case CURLINFO_SSL_VERIFYRESULT:
     *param_longp = data->set.ssl.certverifyresult;

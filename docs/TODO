@@ -17,6 +17,7 @@
  All bugs documented in the KNOWN_BUGS document are subject for fixing!
 
  1. libcurl
+ 1.1 TFO support on Windows
  1.2 More data sharing
  1.3 struct lifreq
  1.4 signal-based resolver timeouts
@@ -44,6 +45,7 @@
  1.26 CURL_REFUSE_CLEARTEXT
  1.27 hardcode the "localhost" addresses
  1.28 FD_CLOEXEC
+ 1.29 Upgrade to websockets
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -70,6 +72,7 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
+ 5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
  5.6 Refuse "downgrade" redirects
  5.7 QUIC
@@ -126,6 +129,7 @@
  15. WinSSL/SChannel
  15.1 Add support for client certificate authentication
  15.3 Add support for the --ciphers option
+ 15.4 Add option to disable client certificate auto-send
 
  16. SASL
  16.1 Other authentication mechanisms
@@ -163,6 +167,7 @@
  19. Build
  19.1 roffit
  19.2 Enable PIE and RELRO by default
+ 19.3 cmake test suite improvements
 
  20. Test suite
  20.1 SSL tunnel
@@ -190,6 +195,13 @@
 ==============================================================================
 
 1. libcurl
+
+1.1 TFO support on Windows
+
+ TCP Fast Open is supported on several platforms but not on Windows. Work on
+ this was once started but never finished.
+
+ See https://github.com/curl/curl/pull/3378
 
 1.2 More data sharing
 
@@ -439,6 +451,14 @@
 
  https://github.com/curl/curl/issues/2252
 
+1.29 Upgrade to websockets
+
+ libcurl could offer a smoother path to get to a websocket connection.
+ See https://github.com/curl/curl/issues/3523
+
+ Michael Kaufmann suggestion here:
+ https://curl.haxx.se/video/curlup-2017/2017-03-19_05_Michael_Kaufmann_Websocket_support_for_curl.mp4
+
 2. libcurl - multi interface
 
 2.1 More non-blocking
@@ -575,6 +595,15 @@
  sorts the headers based on that number. We could then have internally created
  headers use a default value so only headers that need to be moved have to be
  specified.
+
+5.4 Allow SAN names in HTTP/2 server push
+
+ curl only allows HTTP/2 push promise if the provided :autority header value
+ exactly matches the host name given in the URL. It could be extended to allow
+ any name that would match the Subject Alternative Names in the server's TLS
+ certificate.
+
+ See https://github.com/curl/curl/pull/3581
 
 5.5 auth= in URLs
 
@@ -876,6 +905,19 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  - Specifying Schannel Ciphers and Cipher Strengths
    https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
 
+15.4 Add option to disable client certificate auto-send
+
+ Microsoft says "By default, Schannel will, with no notification to the client,
+ attempt to locate a client certificate and send it to the server." That could
+ be considered a privacy violation and unexpected.
+
+ Some Windows users have come to expect that default behavior and to change the
+ default to make it consistent with other SSL backends would be a breaking
+ change. An option should be added that can be used to disable the default
+ Schannel auto-send behavior.
+
+ https://github.com/curl/curl/issues/2262
+
 16. SASL
 
 16.1 Other authentication mechanisms
@@ -1130,6 +1172,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  to no impact, neither on the performance nor on the general functionality of
  curl.
 
+19.3 cmake test suite improvements
+
+ The cmake build doesn't support 'make show' so it doesn't know which tests
+ are in the makefile or not (making appveyor builds do many false warnings
+ about it) nor does it support running the test suite if building out-of-tree.
+
+ See https://github.com/curl/curl/issues/3109
 
 20. Test suite
 

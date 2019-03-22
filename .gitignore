@@ -53,6 +53,7 @@ mkinstalldirs
 tags
 test-driver
 scripts/_curl
+scripts/curl.fish
 curl_fuzzer
 curl_fuzzer_seed_corpus.zip
 libstandaloneengine.a

@@ -716,6 +716,8 @@ mbed_connect_step3(struct connectdata *conn,
 
     ret = mbedtls_ssl_get_session(&BACKEND->ssl, our_ssl_sessionid);
     if(ret) {
+      if(ret != MBEDTLS_ERR_SSL_ALLOC_FAILED)
+        mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
       failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
       return CURLE_SSL_CONNECT_ERROR;
@@ -729,6 +731,7 @@ mbed_connect_step3(struct connectdata *conn,
     retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0, sockindex);
     Curl_ssl_sessionid_unlock(conn);
     if(retcode) {
+      mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
       failf(data, "failed to store ssl session");
       return retcode;
@@ -813,9 +816,14 @@ static void Curl_mbedtls_session_free(void *ptr)
 
 static size_t Curl_mbedtls_version(char *buffer, size_t size)
 {
+#ifdef MBEDTLS_VERSION_C
+  /* if mbedtls_version_get_number() is available it is better */
   unsigned int version = mbedtls_version_get_number();
   return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
                    (version>>16)&0xff, (version>>8)&0xff);
+#else
+  return msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
+#endif
 }
 
 static CURLcode Curl_mbedtls_random(struct Curl_easy *data,

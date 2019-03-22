@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -212,6 +212,10 @@ char *curl_version(void)
   }
 #endif
 
+  /* Silent scan-build even if librtmp is not enabled. */
+  (void) left;
+  (void) ptr;
+
   initialized = true;
   return version;
 }
@@ -365,6 +369,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(HAVE_BROTLI)
   | CURL_VERSION_BROTLI
+#endif
+#if defined(USE_ALTSVC)
+  | CURL_VERSION_ALTSVC
 #endif
   ,
   NULL, /* ssl_version */

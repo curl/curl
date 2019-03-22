@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -87,10 +87,6 @@ libcurl_la_CPPFLAGS_EXTRA =
 libcurl_la_LDFLAGS_EXTRA =
 libcurl_la_CFLAGS_EXTRA =
 
-@CODE_COVERAGE_RULES@
-libcurl_la_LDFLAGS_EXTRA += $(CODE_COVERAGE_LDFLAGS)
-libcurl_la_CFLAGS_EXTRA += $(CODE_COVERAGE_CFLAGS)
-
 if CURL_LT_SHLIB_USE_VERSION_INFO
 libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
 endif
@@ -135,9 +131,14 @@ include Makefile.inc
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
 
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
+
 checksrc:
-	@PERL@ $(srcdir)/checksrc.pl -D$(srcdir) -W$(srcdir)/curl_config.h      \
-	$(srcdir)/*.[ch] $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch]
+	$(CHECKSRC)(@PERL@ $(srcdir)/checksrc.pl -D$(srcdir) -W$(srcdir)/curl_config.h \
+	$(srcdir)/*.[ch] $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch])
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes

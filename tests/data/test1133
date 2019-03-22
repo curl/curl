@@ -29,7 +29,7 @@ HTTP RFC1867-type formposting with filename/data contains ',', ';', '"'
 http://%HOSTIP:%HTTPPORT/we/want/1133 -F "file=@\"log/test1133,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"log/test1133,and;.txt"' -F 'file3=@"log/test1133,and;.txt";type=m/f,"log/test1133,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
 </command>
 # We create this file before the command is invoked!
-<file name=log/test1133,and;.txt>
+<file name="log/test1133,and;.txt">
 foo bar
 This is a bar foo
 bar

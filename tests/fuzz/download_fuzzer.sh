@@ -4,4 +4,4 @@
 set -ex
 
 # Clone the curl-fuzzer repository to the specified directory.
-git clone https://github.com/curl/curl-fuzzer $1
+git clone --depth=1 https://github.com/curl/curl-fuzzer "$1"

@@ -314,7 +314,7 @@ FTP
 
 <a name="kerberos"></a>
 Kerberos
---------
+========
 
  Kerberos support is mainly in lib/krb5.c and lib/security.c but also
  `curl_sasl_sspi.c` and `curl_sasl_gssapi.c` for the email protocols and
@@ -590,6 +590,7 @@ Asynchronous name resolves
  options that end with LARGE. The type is 64bit large on most modern
  platforms.
 
+<a name="curlx"></a>
 curlx
 =====
 

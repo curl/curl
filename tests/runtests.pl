@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -233,6 +233,7 @@ my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
 my $has_psl;        # set if libcurl is built with PSL support
+my $has_altsvc;     # set if libcurl is built with alt-svc support
 my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 my $has_multissl;   # set if curl is build with MultiSSL support
 my $has_manual;     # set if curl is built with built-in manual
@@ -257,7 +258,6 @@ my $has_sslpinning; # built with a TLS backend that supports pinning
 my $has_shared = "unknown";  # built shared
 
 my $resolver;       # name of the resolver backend (for human presentation)
-my $ssllib;         # name of the SSL library we use (for human presentation)
 
 my $has_textaware;  # set if running on a system that has a text mode concept
                     # on files. Windows for example
@@ -2688,55 +2688,45 @@ sub checksystem {
                 # Win32-style path.
                 $pwd = pathhelp::sys_native_current_path();
             }
-           if ($libcurl =~ /winssl/i) {
+           if ($libcurl =~ /(winssl|schannel)/i) {
                $has_winssl=1;
                $has_sslpinning=1;
-               $ssllib="WinSSL";
            }
            elsif ($libcurl =~ /openssl/i) {
                $has_openssl=1;
                $has_sslpinning=1;
-               $ssllib="OpenSSL";
            }
            elsif ($libcurl =~ /gnutls/i) {
                $has_gnutls=1;
                $has_sslpinning=1;
-               $ssllib="GnuTLS";
            }
            elsif ($libcurl =~ /nss/i) {
                $has_nss=1;
                $has_sslpinning=1;
-               $ssllib="NSS";
            }
            elsif ($libcurl =~ /(yassl|wolfssl)/i) {
                $has_yassl=1;
                $has_sslpinning=1;
-               $ssllib="yassl";
            }
            elsif ($libcurl =~ /polarssl/i) {
                $has_polarssl=1;
                $has_sslpinning=1;
-               $ssllib="polarssl";
            }
            elsif ($libcurl =~ /securetransport/i) {
                $has_darwinssl=1;
                $has_sslpinning=1;
-               $ssllib="DarwinSSL";
            }
            elsif ($libcurl =~ /BoringSSL/i) {
                $has_boringssl=1;
                $has_sslpinning=1;
-               $ssllib="BoringSSL";
            }
            elsif ($libcurl =~ /libressl/i) {
                $has_libressl=1;
                $has_sslpinning=1;
-               $ssllib="libressl";
            }
            elsif ($libcurl =~ /mbedTLS/i) {
                $has_mbedtls=1;
                $has_sslpinning=1;
-               $ssllib="mbedTLS";
            }
            if ($libcurl =~ /ares/i) {
                $has_cares=1;
@@ -2744,7 +2734,6 @@ sub checksystem {
            }
            if ($libcurl =~ /mesalink/i) {
                $has_mesalink=1;
-               $ssllib="MesaLink";
            }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
@@ -2849,6 +2838,10 @@ sub checksystem {
             if($feat =~ /PSL/i) {
                 # PSL enabled
                 $has_psl=1;
+            }
+            if($feat =~ /alt-svc/i) {
+                # alt-svc enabled
+                $has_altsvc=1;
             }
             if($feat =~ /AsynchDNS/i) {
                 if(!$has_cares) {
@@ -3279,7 +3272,7 @@ sub singletest {
                     next;
                 }
             }
-            elsif($1 eq "WinSSL") {
+            elsif(($1 eq "WinSSL") || ($1 eq "Schannel")) {
                 if($has_winssl) {
                     next;
                 }
@@ -3399,6 +3392,11 @@ sub singletest {
                     next;
                 }
             }
+            elsif($1 eq "alt-svc") {
+                if($has_altsvc) {
+                    next;
+                }
+            }
             elsif($1 eq "manual") {
                 if($has_manual) {
                     next;
@@ -3452,7 +3450,7 @@ sub singletest {
                         next;
                     }
                 }
-                elsif($1 eq "WinSSL") {
+                elsif(($1 eq "WinSSL") || ($1 eq "Schannel")) {
                     if(!$has_winssl) {
                         next;
                     }
@@ -3746,6 +3744,7 @@ sub singletest {
 
     # if this section exists, we verify that the stdout contained this:
     my @validstdout = fixarray ( getpart("verify", "stdout") );
+    my @validstderr = fixarray ( getpart("verify", "stderr") );
 
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
@@ -3865,7 +3864,7 @@ sub singletest {
     if($cmdtype eq "perl") {
         # run the command line prepended with "perl"
         $cmdargs ="$cmd";
-        $CMDLINE = "perl ";
+        $CMDLINE = "$perl ";
         $tool=$CMDLINE;
         $disablevalgrind=1;
     }
@@ -4227,6 +4226,57 @@ sub singletest {
     }
     else {
         $ok .= "-"; # stdout not checked
+    }
+
+    if (@validstderr) {
+        # verify redirected stderr
+        my @actual = loadarray($STDERR);
+
+        # what parts to cut off from stderr
+        my @stripfile = getpart("verify", "stripfile");
+
+        foreach my $strip (@stripfile) {
+            chomp $strip;
+            my @newgen;
+            for(@actual) {
+                eval $strip;
+                if($_) {
+                    push @newgen, $_;
+                }
+            }
+            # this is to get rid of array entries that vanished (zero
+            # length) because of replacements
+            @actual = @newgen;
+        }
+
+        # variable-replace in the stderr we have from the test case file
+        @validstderr = fixarray(@validstderr);
+
+        # get all attributes
+        my %hash = getpartattr("verify", "stderr");
+
+        # get the mode attribute
+        my $filemode=$hash{'mode'};
+        if($filemode && ($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @validstderr;
+            map s/\n/\r\n/g, @validstderr;
+        }
+
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the protocol data
+            chomp($validstderr[$#validstderr]);
+        }
+
+        $res = compare($testnum, $testname, "stderr", \@actual, \@validstderr);
+        if($res) {
+            return 1;
+        }
+        $ok .= "r";
+    }
+    else {
+        $ok .= "-"; # stderr not checked
     }
 
     if(@protocol) {

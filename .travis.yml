@@ -5,7 +5,7 @@ cache:
         - $HOME/libpsl-0.20.1
         - $HOME/mbedtls-mbedtls-2.8.0
         - $HOME/libidn2-2.0.4
-        - $HOME/wolfssl-3.14.0-stable
+        - $HOME/wolfssl-4.0.0-stable
         - $HOME/mesalink-0.7.1
         - $HOME/nghttp2-1.34.0
 
@@ -19,13 +19,12 @@ addons:
             retries: true
         sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-6.0
+            - llvm-toolchain-trusty-7
         packages:
             - cmake
-            - gcc-7
             - gcc-8
             - lcov
-            - clang-6.0
+            - clang-7
             - valgrind
             - libev-dev
             - libc-ares-dev
@@ -40,66 +39,107 @@ addons:
             - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
             - gnutls-bin
-            - clang-tidy-6.0
+            - libgnutls28-dev
+            - clang-tidy-7
 
 matrix:
     include:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
+          env:
+              - T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C=--with-libssh
+          env:
+              - T=normal C=--with-libssh
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C="--disable-http --disable-smtp --disable-imap"
+          env:
+              - T=normal C="--disable-http --disable-smtp --disable-imap"
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C="--enable-ares"
+          env:
+              - T=normal C="--enable-ares"
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
+          env:
+              - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=normal BROTLI=yes
+          env:
+              - T=normal BROTLI=yes
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
+          env:
+              - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=debug-wolfssl C="--with-wolfssl --without-ssl"
+          env:
+              - T=debug-wolfssl C="--with-wolfssl --without-ssl"
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=debug-mesalink C="--with-mesalink --without-ssl"
+          env:
+              - T=debug-mesalink C="--with-mesalink --without-ssl"
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=debug
+          env:
+              - T=debug
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=debug C="--with-mbedtls --without-ssl"
+          env:
+              - T=debug C="--enable-alt-svc"
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=debug C="--disable-threaded-resolver"
+          env:
+              - T=debug C="--with-mbedtls --without-ssl"
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
+          env:
+              - T=debug C="--with-gnutls --without-ssl"
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env:
+              - T=debug C="--disable-threaded-resolver"
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env:
+              - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=iconv
+          env:
+              - T=iconv
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: osx
           compiler: gcc
           env: T=debug C=--with-libssh2
@@ -125,31 +165,55 @@ matrix:
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=cmake
+          env:
+              - T=cmake
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=cmake
+          env:
+              - T=cmake
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=coverage
+          env:
+              - T=coverage
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
           dist: trusty
-          env: T=distcheck
+          env:
+              - T=distcheck
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=fuzzer
+          env:
+              - T=fuzzer
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=tidy
+          env:
+              - T=tidy
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
         - os: linux
           compiler: clang
           dist: trusty
-          env: T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
+          env:
+              - T=scan-build
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+        - os: linux
+          compiler: clang
+          dist: trusty
+          env:
+              - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+
+before_install:
+    - eval "${OVERRIDE_CC}"
+    - eval "${OVERRIDE_CXX}"
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
@@ -180,7 +244,7 @@ before_script:
         cd boringssl &&
         mkdir build &&
         cd build &&
-        cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
+        CXX="g++" CC="gcc" cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
         make &&
         cd .. &&
         mkdir lib &&
@@ -226,11 +290,11 @@ before_script:
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
-        if [ ! -e $HOME/wolfssl-3.14.0-stable/Makefile ]; then
+        if [ ! -e $HOME/wolfssl-4.0.0-stable/Makefile ]; then
           (cd $HOME && \
-          curl -LO https://github.com/wolfSSL/wolfssl/archive/v3.14.0-stable.tar.gz && \
-          tar -xzf v3.14.0-stable.tar.gz && \
-          cd wolfssl-3.14.0-stable && \
+          curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.0.0-stable.tar.gz && \
+          tar -xzf v4.0.0-stable.tar.gz && \
+          cd wolfssl-4.0.0-stable && \
           ./autogen.sh && \
           ./configure --enable-tls13 --enable-all && \
           touch wolfssl/wolfcrypt/fips.h && \
@@ -267,7 +331,7 @@ before_script:
         (cd $HOME/libidn2-2.0.4 && sudo make install)
         (cd $HOME/libpsl-0.20.1 && sudo make install)
         (cd $HOME/mbedtls-mbedtls-2.8.0 && sudo make install)
-        (cd $HOME/wolfssl-3.14.0-stable && sudo make install)
+        (cd $HOME/wolfssl-4.0.0-stable && sudo make install)
         (cd $HOME/mesalink-0.7.1 && sudo make install)
         (cd $HOME/nghttp2-1.34.0 && sudo make install)
       fi
@@ -276,15 +340,14 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "coverage" ]; then
-             export CC="gcc-7"
              ./configure --enable-debug --disable-shared --enable-code-coverage
              make
              make TFLAGS=-n test-nonflaky
              make "TFLAGS=-n -e" test-nonflaky
-             tests="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 200 201 202 300 301 302 500 501 502 503 504 506 507 508 509 510 511 512 513 514 515 516 517 518 519 600 601 700 701 702 800 801 802 803 900 901 902 903 1000 1001 1002 1004 1100 1101 1200 1201 1302 1303 1304 1305 1306 1308 1400 1401 1402 1404 1450 1451 1452 1502 1507 1508 1600 1602 1603 1605 1650 2001 2100 3000"
+             tests="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 200 201 202 300 301 302 500 501 502 503 504 506 507 508 509 510 511 512 513 514 515 516 517 518 519 600 601 700 701 702 800 801 802 803 900 901 902 903 1000 1001 1002 1004 1100 1101 1200 1201 1302 1303 1304 1305 1306 1308 1400 1401 1402 1404 1450 1451 1452 1502 1507 1508 1600 1602 1603 1605 1650 1651 1652 1653 1654 2001 2100 3000"
              make "TFLAGS=-n -t $tests" test-nonflaky
-             coveralls --gcov /usr/bin/gcov-7 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
-             coveralls --gcov /usr/bin/gcov-7 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
+             coveralls --gcov /usr/bin/gcov-8 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
+             coveralls --gcov /usr/bin/gcov-8 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
         fi
     - |
         set -eo pipefail
@@ -300,7 +363,7 @@ script:
         if [ "$T" = "debug-wolfssl" ]; then
              ./configure --enable-debug --enable-werror $C
              make
-             make "TFLAGS=-n !311 !313" test-nonflaky
+             make "TFLAGS=-n !313" test-nonflaky
         fi
     - |
         set -eo pipefail
@@ -345,7 +408,7 @@ script:
              source .travis-iconv-env.sh
              ./configure --enable-debug --enable-werror $C
              make && make examples
-             make TFLAGS=-n test-nonflaky
+             make test-nonflaky
         fi
     - |
         set -eo pipefail
@@ -403,6 +466,11 @@ script:
           pushd /tmp/curl_fuzzer
           ./mainline.sh ${CURLSRC}
           popd
+        fi
+    - |
+        if [ "$T" = "scan-build" ]; then
+             scan-build ./configure --enable-debug --enable-werror $C
+             scan-build --status-bugs make && scan-build --status-bugs make examples
         fi
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
