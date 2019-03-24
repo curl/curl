@@ -610,8 +610,7 @@ struct SingleRequest {
   bit upload_done:1;  /* set to TRUE when doing chunked transfer-encoding
                          upload and we're uploading the last chunk */
   bit ignorebody:1;   /* we read a response-body but we ignore it! */
-  bit ignorecl:1;     /* This HTTP response has no body so we ignore the
-                         Content-Length: header */
+  bit httpcode_1xx:1; /* HTTP response status code is between 100 and 199 */
   bit chunk:1; /* if set, this is a chunked transfer-encoding */
   bit upload_chunky:1; /* set TRUE if we are doing chunked transfer-encoding
                           on upload */
