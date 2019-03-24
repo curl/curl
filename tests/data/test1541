@@ -9,7 +9,9 @@ connection-sharing
 </info>
 
 # Server-side
+<reply>
 </reply>
+
 # Client-side
 <client>
 <server>

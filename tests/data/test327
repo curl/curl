@@ -31,7 +31,7 @@ Content-Type: text/html
 Funny-head: yesyes swsclose
 Set-Cookie: foobar=name; expires=Thu, 01 Jan 1970 00:00:00 GMT;
 
-</data>
+</data2>
 </reply>
 
 # Client-side
