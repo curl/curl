@@ -46,6 +46,7 @@
  1.27 hardcode the "localhost" addresses
  1.28 FD_CLOEXEC
  1.29 Upgrade to websockets
+ 1.30 config file parsing
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -458,6 +459,14 @@
 
  Michael Kaufmann suggestion here:
  https://curl.haxx.se/video/curlup-2017/2017-03-19_05_Michael_Kaufmann_Websocket_support_for_curl.mp4
+
+1.30 config file parsing
+
+ Consider providing an API, possibly in a separate companion library, for
+ parsing a config file like curl's -K/--config option to allow applications to
+ get the same ability to read curl options from files.
+
+ See https://github.com/curl/curl/issues/3698
 
 2. libcurl - multi interface
 
