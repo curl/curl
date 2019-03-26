@@ -1881,23 +1881,25 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         }
       }
       else if((CURLE_HTTP2_STREAM == result) &&
-                Curl_h2_http_1_1_error(data->conn)) {
+              Curl_h2_http_1_1_error(data->conn)) {
         CURLcode ret = Curl_retry_request(data->conn, &newurl);
 
-        infof(data, "Forcing HTTP/1.1 for NTLM");
-        data->set.httpversion = CURL_HTTP_VERSION_1_1;
-
-        if(!ret)
-          retry = (newurl)?TRUE:FALSE;
-        else
-          result = ret;
-
-        if(retry) {
-          /* if we are to retry, set the result to OK and consider the
-             request as done */
+        if(!ret) {
+          infof(data, "Downgrades to HTTP/1.1!\n");
+          data->set.httpversion = CURL_HTTP_VERSION_1_1;
+          /* clear the error message bit too as we ignore the one we got */
+          data->state.errorbuf = FALSE;
+          if(!newurl)
+            /* typically for HTTP_1_1_REQUIRED error on first flight */
+            newurl = strdup(data->change.url);
+          /* if we are to retry, set the result to OK and consider the request
+             as done */
+          retry = TRUE;
           result = CURLE_OK;
           done = TRUE;
         }
+        else
+          result = ret;
       }
 
       if(result) {
@@ -1942,13 +1944,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
           else
             follow = FOLLOW_RETRY;
-          result = multi_done(data, CURLE_OK, FALSE);
+          (void)multi_done(data, CURLE_OK, FALSE);
+          /* multi_done() might return CURLE_GOT_NOTHING */
+          result = Curl_follow(data, newurl, follow);
           if(!result) {
-            result = Curl_follow(data, newurl, follow);
-            if(!result) {
-              multistate(data, CURLM_STATE_CONNECT);
-              rc = CURLM_CALL_MULTI_PERFORM;
-            }
+            multistate(data, CURLM_STATE_CONNECT);
+            rc = CURLM_CALL_MULTI_PERFORM;
           }
           free(newurl);
         }
