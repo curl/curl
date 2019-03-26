@@ -41,6 +41,11 @@
 #  include <openssl/ssl.h>
 #endif
 
+// enable USE_NTLM2SESSION even if USE_WIN32_CRYPTO is defined.
+// for NTML auth for SMTP, we need USE_NTLM2SESSION
+#define USE_NTLM2SESSION 1
+
+
 /* Define USE_NTRESPONSES in order to make the type-3 message include
  * the NT response message. */
 #if !defined(USE_OPENSSL) || !defined(OPENSSL_NO_MD4)
