@@ -11,11 +11,17 @@ the number used for the specific protocol the host will be used for. It means
 you need several entries if you want to provide address for the same host but
 different ports.
 
+By specifying '*' as host you can tell curl to resolve any host and specific
+port pair to the specified address. Wildcard is resolved last so any --resolve
+with a specific host and port will be used first.
+
 The provided address set by this option will be used even if --ipv4 or --ipv6
 is set to make curl use another IP version.
 
 Support for providing the IP address within [brackets] was added in 7.57.0.
 
 Support for providing multiple IP addresses per entry was added in 7.59.0.
+
+Support for resolving with wildcard was added in 7.64.0.
 
 This option can be used many times to add many host names to resolve.

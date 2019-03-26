@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 - 2018 Red Hat, Inc.
+ * Copyright (C) 2017 - 2019 Red Hat, Inc.
  *
  * Authors: Nikos Mavrogiannopoulos, Tomas Mraz, Stanislav Zidek,
  *          Robert Kolcun, Andreas Schneider
@@ -556,6 +556,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
   struct Curl_easy *data = conn->data;
   struct SSHPROTO *protop = data->req.protop;
   struct ssh_conn *sshc = &conn->proto.sshc;
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int rc = SSH_NO_ERROR, err;
   char *new_readdir_line;
   int seekerr = CURL_SEEKFUNC_OK;
@@ -799,7 +800,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       Curl_pgrsTime(conn->data, TIMER_APPCONNECT);      /* SSH is connected */
 
-      conn->sockfd = ssh_get_fd(sshc->ssh_session);
+      conn->sockfd = sock;
       conn->writesockfd = CURL_SOCKET_BAD;
 
       if(conn->handler->protocol == CURLPROTO_SFTP) {
@@ -1199,7 +1200,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
       }
       /* upload data */
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
+      Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -1461,7 +1462,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       sshc->sftp_dir = NULL;
 
       /* no data to transfer */
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(data, -1, -1, FALSE, -1);
       state(conn, SSH_STOP);
       break;
 
@@ -1602,13 +1603,12 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
     /* Setup the actual download */
     if(data->req.size == 0) {
       /* no data to transfer */
-      Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+      Curl_setup_transfer(data, -1, -1, FALSE, -1);
       infof(data, "File already completely downloaded\n");
       state(conn, SSH_STOP);
       break;
     }
-    Curl_setup_transfer(conn, FIRSTSOCKET, data->req.size,
-                        FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(data, FIRSTSOCKET, data->req.size, FALSE, -1);
 
     /* not set by Curl_setup_transfer to preserve keepon bits */
     conn->writesockfd = conn->sockfd;
@@ -1730,8 +1730,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       }
 
       /* upload data */
-      Curl_setup_transfer(conn, -1, data->req.size, FALSE, NULL,
-                          FIRSTSOCKET, NULL);
+      Curl_setup_transfer(data, -1, data->req.size, FALSE, FIRSTSOCKET);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -1774,8 +1773,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         /* download data */
         bytecount = ssh_scp_request_get_size(sshc->scp_session);
         data->req.maxdownload = (curl_off_t) bytecount;
-        Curl_setup_transfer(conn, FIRSTSOCKET, bytecount, FALSE, NULL, -1,
-                            NULL);
+        Curl_setup_transfer(data, FIRSTSOCKET, bytecount, FALSE, -1);
 
         /* not set by Curl_setup_transfer to preserve keepon bits */
         conn->writesockfd = conn->sockfd;
@@ -2052,6 +2050,7 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
 {
   struct ssh_conn *ssh;
   CURLcode result;
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   struct Curl_easy *data = conn->data;
   int rc;
 
@@ -2079,6 +2078,8 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
     failf(data, "Failure initialising ssh session");
     return CURLE_FAILED_INIT;
   }
+
+  ssh_options_set(ssh->ssh_session, SSH_OPTIONS_FD, &sock);
 
   if(conn->user) {
     infof(data, "User: %s\n", conn->user);
@@ -2394,13 +2395,9 @@ static CURLcode sftp_done(struct connectdata *conn, CURLcode status,
     /* Post quote commands are executed after the SFTP_CLOSE state to avoid
        errors that could happen due to open file handles during POSTQUOTE
        operation */
-    if(!status && !premature && conn->data->set.postquote &&
-       !conn->bits.retry) {
+    if(!premature && conn->data->set.postquote && !conn->bits.retry)
       sshc->nextstate = SSH_SFTP_POSTQUOTE_INIT;
-      state(conn, SSH_SFTP_CLOSE);
-    }
-    else
-      state(conn, SSH_SFTP_CLOSE);
+    state(conn, SSH_SFTP_CLOSE);
   }
   return myssh_done(conn, status);
 }

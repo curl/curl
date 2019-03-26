@@ -48,7 +48,7 @@ UNITTEST_START
   rc = Curl_open(&empty);
   fail_unless(rc == CURLE_OK, "Curl_open() failed");
 
-  rc = Curl_connect(empty, &empty->easy_conn, &async, &protocol_connect);
+  rc = Curl_connect(empty, &async, &protocol_connect);
   fail_unless(rc == CURLE_URL_MALFORMAT,
               "Curl_connect() failed to return CURLE_URL_MALFORMAT");
 
@@ -56,14 +56,14 @@ UNITTEST_START
               "empty->magic should be equal to CURLEASY_MAGIC_NUMBER");
 
   /* double invoke to ensure no dependency on internal state */
-  rc = Curl_connect(empty, &empty->easy_conn, &async, &protocol_connect);
+  rc = Curl_connect(empty, &async, &protocol_connect);
   fail_unless(rc == CURLE_URL_MALFORMAT,
               "Curl_connect() failed to return CURLE_URL_MALFORMAT");
 
   rc = Curl_init_userdefined(empty);
   fail_unless(rc == CURLE_OK, "Curl_userdefined() failed");
 
-  rc = Curl_init_do(empty, empty->easy_conn);
+  rc = Curl_init_do(empty, empty->conn);
   fail_unless(rc == CURLE_OK, "Curl_init_do() failed");
 
   rc = Curl_parse_login_details(
@@ -71,7 +71,7 @@ UNITTEST_START
   fail_unless(rc == CURLE_OK,
               "Curl_parse_login_details() failed");
 
-  rc = Curl_disconnect(empty, empty->easy_conn, FALSE);
+  rc = Curl_disconnect(empty, empty->conn, FALSE);
   fail_unless(rc == CURLE_OK,
               "Curl_disconnect() with dead_connection set FALSE failed");
 

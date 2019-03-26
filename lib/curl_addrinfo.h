@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -86,17 +86,14 @@ Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract);
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) && \
     defined(HAVE_FREEADDRINFO)
 void
-curl_dofreeaddrinfo(struct addrinfo *freethis,
-                    int line, const char *source);
+curl_dbg_freeaddrinfo(struct addrinfo *freethis, int line, const char *source);
 #endif
 
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
 int
-curl_dogetaddrinfo(const char *hostname,
-                   const char *service,
-                   const struct addrinfo *hints,
-                   struct addrinfo **result,
-                   int line, const char *source);
+curl_dbg_getaddrinfo(const char *hostname, const char *service,
+                     const struct addrinfo *hints, struct addrinfo **result,
+                     int line, const char *source);
 #endif
 
 #ifdef HAVE_GETADDRINFO

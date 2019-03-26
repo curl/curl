@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -296,10 +296,10 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
        here, knowing they'll become CRLFs later on.
      */
 
-    char hexbuffer[11];
+    char hexbuffer[11] = "";
+    int hexlen = 0;
     const char *endofline_native;
     const char *endofline_network;
-    int hexlen = 0;
 
     if(
 #ifdef CURL_DO_LINEEND_CONV
@@ -318,7 +318,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
     /* if we're not handling trailing data, proceed as usual */
     if(data->state.trailers_state != TRAILERS_SENDING) {
       hexlen = msnprintf(hexbuffer, sizeof(hexbuffer),
-                         "%x%s", nread, endofline_native);
+                         "%zx%s", nread, endofline_native);
 
       /* move buffer pointer */
       data->req.upload_fromhere -= hexlen;
@@ -354,12 +354,14 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
         length = nread;
       else
         /* just translate the protocol portion */
-        length = strlen(hexbuffer);
-      result = Curl_convert_to_network(data, data->req.upload_fromhere,
-                                       length);
-      /* Curl_convert_to_network calls failf if unsuccessful */
-      if(result)
-        return result;
+        length = hexlen;
+      if(length) {
+        result = Curl_convert_to_network(data, data->req.upload_fromhere,
+                                         length);
+        /* Curl_convert_to_network calls failf if unsuccessful */
+        if(result)
+          return result;
+      }
     }
 #endif /* CURL_DOES_CONVERSIONS */
 
@@ -1196,6 +1198,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
                  (size_t)bytes_written);
 
     k->writebytecount += bytes_written;
+    Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
     if((!k->upload_chunky || k->forbidchunk) &&
        (k->writebytecount == data->state.infilesize)) {
@@ -1229,7 +1232,6 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
       }
     }
 
-    Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
   } WHILE_FALSE; /* just to break out from! */
 
@@ -1307,11 +1309,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   k->now = Curl_now();
   if(didwhat) {
-    /* Update read/write counters */
-    if(k->bytecountp)
-      *k->bytecountp = k->bytecount; /* read count */
-    if(k->writebytecountp)
-      *k->writebytecountp = k->writebytecount; /* write count */
+    ;
   }
   else {
     /* no read no write, this is a timeout? */
@@ -1350,15 +1348,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if(k->keepon) {
     if(0 > Curl_timeleft(data, &k->now, FALSE)) {
       if(k->size != -1) {
-        failf(data, "Operation timed out after %ld milliseconds with %"
-              CURL_FORMAT_CURL_OFF_T " out of %"
+        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
+              " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
               CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_timediff(k->now, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
-        failf(data, "Operation timed out after %ld milliseconds with %"
-              CURL_FORMAT_CURL_OFF_T " bytes received",
+        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
+              " milliseconds with %" CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_timediff(k->now, data->progress.t_startsingle),
               k->bytecount);
       }
@@ -1526,11 +1524,14 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   if(data->set.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;
-  else {
+  else if((data->set.httpreq != HTTPREQ_GET) &&
+          (data->set.httpreq != HTTPREQ_HEAD)) {
     data->state.infilesize = data->set.postfieldsize;
     if(data->set.postfields && (data->state.infilesize == -1))
       data->state.infilesize = (curl_off_t)strlen(data->set.postfields);
   }
+  else
+    data->state.infilesize = 0;
 
   /* If there is a list of cookie files to read, do it now! */
   if(data->change.cookielist)
@@ -1557,12 +1558,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     Curl_initinfo(data); /* reset session-specific information "variables" */
     Curl_pgrsResetTransferSizes(data);
     Curl_pgrsStartNow(data);
-
-    if(data->set.timeout)
-      Curl_expire(data, data->set.timeout, EXPIRE_TIMEOUT);
-
-    if(data->set.connecttimeout)
-      Curl_expire(data, data->set.connecttimeout, EXPIRE_CONNECTTIMEOUT);
 
     /* In case the handle is re-used and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
@@ -1858,8 +1853,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
 
     if(conn->handler->protocol&PROTO_FAMILY_HTTP) {
-      struct HTTP *http = data->req.protop;
-      if(http->writebytecount) {
+      if(data->req.writebytecount) {
         CURLcode result = Curl_readrewind(conn);
         if(result) {
           Curl_safefree(*url);
@@ -1877,24 +1871,17 @@ CURLcode Curl_retry_request(struct connectdata *conn,
  */
 void
 Curl_setup_transfer(
-  struct connectdata *conn, /* connection data */
+  struct Curl_easy *data,   /* transfer */
   int sockindex,            /* socket index to read from or -1 */
   curl_off_t size,          /* -1 if unknown at this point */
   bool getheader,           /* TRUE if header parsing is wanted */
-  curl_off_t *bytecountp,   /* return number of bytes read or NULL */
-  int writesockindex,       /* socket index to write to, it may very well be
+  int writesockindex        /* socket index to write to, it may very well be
                                the same we read from. -1 disables */
-  curl_off_t *writecountp   /* return number of bytes written or NULL */
   )
 {
-  struct Curl_easy *data;
-  struct SingleRequest *k;
-
+  struct SingleRequest *k = &data->req;
+  struct connectdata *conn = data->conn;
   DEBUGASSERT(conn != NULL);
-
-  data = conn->data;
-  k = &data->req;
-
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
   if(conn->bits.multiplex || conn->httpversion == 20) {
@@ -1913,8 +1900,6 @@ Curl_setup_transfer(
   k->getheader = getheader;
 
   k->size = size;
-  k->bytecountp = bytecountp;
-  k->writebytecountp = writecountp;
 
   /* The code sequence below is placed in this function just because all
      necessary input is not always known in do_complete() as this function may

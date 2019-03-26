@@ -97,7 +97,7 @@ Anyone can aspire to become a curl maintainer.
 ### Duties
 
 There are no mandatory duties. We hope and wish that maintainers consider
-reviewing patches and help merching them, especially when the changes are
+reviewing patches and help merging them, especially when the changes are
 within the area of personal expertise and experience.
 
 ### Requirements
@@ -108,7 +108,7 @@ within the area of personal expertise and experience.
 
 ### Recommendations
 
-- please enable 2fa on your github account to reduce risk of malicious sourc
+- please enable 2fa on your github account to reduce risk of malicious source
   code tampering
 - consider enabling signed git commits for additional verification of changes
 

@@ -422,7 +422,7 @@ static struct timeval tvnow(void)
   DWORD milliseconds = GetTickCount();
 #endif
   now.tv_sec = (long)(milliseconds / 1000);
-  now.tv_usec = (milliseconds % 1000) * 1000;
+  now.tv_usec = (long)((milliseconds % 1000) * 1000);
   return now;
 }
 

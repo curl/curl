@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_DARWINSSL_H
-#define HEADER_CURL_DARWINSSL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,8 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,11 +19,47 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "test.h"
 
-#ifdef USE_DARWINSSL
+#include "testutil.h"
+#include "warnless.h"
+#include "memdebug.h"
 
-extern const struct Curl_ssl Curl_ssl_darwinssl;
+int test(char *URL)
+{
+  CURLcode res = 0;
+  CURL *curl = NULL;
+  long protocol = 0;
 
-#endif /* USE_DARWINSSL */
-#endif /* HEADER_CURL_DARWINSSL_H */
+  global_init(CURL_GLOBAL_ALL);
+  easy_init(curl);
+
+  easy_setopt(curl, CURLOPT_URL, URL);
+  res = curl_easy_perform(curl);
+  if(res) {
+    fprintf(stderr, "curl_easy_perform() returned %d (%s)\n",
+            res, curl_easy_strerror(res));
+    goto test_cleanup;
+  }
+
+  res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+  if(res) {
+    fprintf(stderr, "curl_easy_getinfo() returned %d (%s)\n",
+            res, curl_easy_strerror(res));
+    goto test_cleanup;
+  }
+
+  printf("Protocol: %x\n", protocol);
+
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return 0;
+
+test_cleanup:
+
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return res; /* return the final return code */
+}

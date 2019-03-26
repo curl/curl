@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -152,23 +152,15 @@ static int multi_timer_cb(CURLM *multi _Unused, long timeout_ms, GlobalInfo *g)
   timeout.tv_usec = (timeout_ms%1000)*1000;
   fprintf(MSG_OUT, "multi_timer_cb: Setting timeout to %ld ms\n", timeout_ms);
 
-  /* TODO
-   *
-   * if timeout_ms is 0, call curl_multi_socket_action() at once!
-   *
+  /*
    * if timeout_ms is -1, just delete the timer
    *
-   * for all other values of timeout_ms, this should set or *update*
-   * the timer to the new value
+   * For all other values of timeout_ms, this should set or *update* the timer
+   * to the new value
    */
-  if(timeout_ms == 0) {
-    rc = curl_multi_socket_action(g->multi,
-                                  CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-    mcode_or_die("multi_timer_cb: curl_multi_socket_action", rc);
-  }
-  else if(timeout_ms == -1)
+  if(timeout_ms == -1)
     evtimer_del(&g->timer_event);
-  else
+  else /* includes timeout zero */
     evtimer_add(&g->timer_event, &timeout);
   return 0;
 }

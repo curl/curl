@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,9 +87,24 @@ CURLcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to,
  *
  * It is called from inside other functions to cancel currently performing
  * resolver request. Should also free any temporary resources allocated to
- * perform a request.
+ * perform a request.  This never waits for resolver threads to complete.
+ *
+ * It is safe to call this when conn is in any state.
  */
 void Curl_resolver_cancel(struct connectdata *conn);
+
+/*
+ * Curl_resolver_kill().
+ *
+ * This acts like Curl_resolver_cancel() except it will block until any threads
+ * associated with the resolver are complete.  This never blocks for resolvers
+ * that do not use threads.  This is intended to be the "last chance" function
+ * that cleans up an in-progress resolver completely (before its owner is about
+ * to die).
+ *
+ * It is safe to call this when conn is in any state.
+ */
+void Curl_resolver_kill(struct connectdata *conn);
 
 /* Curl_resolver_getsock()
  *
@@ -117,14 +132,13 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 /*
  * Curl_resolver_wait_resolv()
  *
- * waits for a resolve to finish. This function should be avoided since using
+ * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
  * If 'entry' is non-NULL, make it point to the resolved dns entry
  *
- * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
- * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
-
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
+ * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
  */
 CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **dnsentry);
@@ -148,6 +162,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 #ifndef CURLRES_ASYNCH
 /* convert these functions if an asynch resolver isn't used */
 #define Curl_resolver_cancel(x) Curl_nop_stmt
+#define Curl_resolver_kill(x) Curl_nop_stmt
 #define Curl_resolver_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_resolver_wait_resolv(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_resolver_getsock(x,y,z) 0

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -207,8 +207,12 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
      Section 4. Examples of RFC-4954 but some e-mail servers ignore this and
      only send the response code instead as per Section 4.2. */
   if(line[3] == ' ' || len == 5) {
+    char tmpline[6];
+
     result = TRUE;
-    *resp = curlx_sltosi(strtol(line, NULL, 10));
+    memset(tmpline, '\0', sizeof(tmpline));
+    memcpy(tmpline, line, (len == 5 ? 5 : 3));
+    *resp = curlx_sltosi(strtol(tmpline, NULL, 10));
 
     /* Make sure real server never sends internal value */
     if(*resp == 1)
@@ -955,7 +959,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* SMTP upload */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
+    Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
 
     /* End of DO phase */
     state(conn, SMTP_STOP);
@@ -1384,7 +1388,7 @@ static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 
   if(smtp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn->data, -1, -1, FALSE, -1);
 
   return CURLE_OK;
 }

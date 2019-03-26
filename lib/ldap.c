@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -744,7 +744,7 @@ quit:
 #endif
 
   /* no data to transfer */
-  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+  Curl_setup_transfer(data, -1, -1, FALSE, -1);
   connclose(conn, "LDAP connection always disable re-use");
 
   return result;

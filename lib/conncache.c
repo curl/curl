@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2016, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -392,8 +392,8 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
    NOTE: no locking is done here as this is presumably only done when cleaning
    up a cache!
 */
-struct connectdata *
-Curl_conncache_find_first_connection(struct conncache *connc)
+static struct connectdata *
+conncache_find_first_connection(struct conncache *connc)
 {
   struct curl_hash_iterator iter;
   struct curl_hash_element *he;
@@ -433,6 +433,7 @@ bool Curl_conncache_return_conn(struct connectdata *conn)
     data->multi->maxconnects;
   struct connectdata *conn_candidate = NULL;
 
+  conn->data = NULL; /* no owner anymore */
   if(maxconnects > 0 &&
      Curl_conncache_size(data) > maxconnects) {
     infof(data, "Connection cache is full, closing the oldest one.\n");
@@ -476,7 +477,7 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
   while(curr) {
     conn = curr->ptr;
 
-    if(!CONN_INUSE(conn)) {
+    if(!CONN_INUSE(conn) && !conn->data) {
       /* Set higher score for the age passed since the connection was used */
       score = Curl_timediff(now, conn->now);
 
@@ -534,7 +535,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     while(curr) {
       conn = curr->ptr;
 
-      if(!CONN_INUSE(conn)) {
+      if(!CONN_INUSE(conn) && !conn->data) {
         /* Set higher score for the age passed since the connection was used */
         score = Curl_timediff(now, conn->now);
 
@@ -566,20 +567,18 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 {
   struct connectdata *conn;
 
-  conn = Curl_conncache_find_first_connection(connc);
+  conn = conncache_find_first_connection(connc);
   while(conn) {
     SIGPIPE_VARIABLE(pipe_st);
     conn->data = connc->closure_handle;
 
     sigpipe_ignore(conn->data, &pipe_st);
-    conn->data->easy_conn = NULL; /* clear the easy handle's connection
-                                     pointer */
     /* This will remove the connection from the cache */
     connclose(conn, "kill all");
     (void)Curl_disconnect(connc->closure_handle, conn, FALSE);
     sigpipe_restore(&pipe_st);
 
-    conn = Curl_conncache_find_first_connection(connc);
+    conn = conncache_find_first_connection(connc);
   }
 
   if(connc->closure_handle) {

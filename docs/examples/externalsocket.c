@@ -124,8 +124,10 @@ int main(void)
     servaddr.sin_port   = htons(PORTNUM);
 
     servaddr.sin_addr.s_addr = inet_addr(IPADDR);
-    if(INADDR_NONE == servaddr.sin_addr.s_addr)
+    if(INADDR_NONE == servaddr.sin_addr.s_addr) {
+      close(sockfd);
       return 2;
+    }
 
     if(connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) ==
        -1) {
@@ -157,10 +159,16 @@ int main(void)
 
     curl_easy_cleanup(curl);
 
+    close(sockfd);
+
     if(res) {
       printf("libcurl error: %d\n", res);
       return 4;
     }
   }
+
+#ifdef WIN32
+  WSACleanup();
+#endif
   return 0;
 }

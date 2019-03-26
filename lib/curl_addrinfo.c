@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -539,7 +539,7 @@ Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) &&  \
   defined(HAVE_FREEADDRINFO)
 /*
- * curl_dofreeaddrinfo()
+ * curl_dbg_freeaddrinfo()
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
@@ -547,23 +547,23 @@ Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
  */
 
 void
-curl_dofreeaddrinfo(struct addrinfo *freethis,
-                    int line, const char *source)
+curl_dbg_freeaddrinfo(struct addrinfo *freethis,
+                      int line, const char *source)
 {
+  curl_dbg_log("ADDR %s:%d freeaddrinfo(%p)\n",
+               source, line, (void *)freethis);
 #ifdef USE_LWIPSOCK
   lwip_freeaddrinfo(freethis);
 #else
   (freeaddrinfo)(freethis);
 #endif
-  curl_memlog("ADDR %s:%d freeaddrinfo(%p)\n",
-              source, line, (void *)freethis);
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
 
 
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
 /*
- * curl_dogetaddrinfo()
+ * curl_dbg_getaddrinfo()
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
@@ -571,11 +571,11 @@ curl_dofreeaddrinfo(struct addrinfo *freethis,
  */
 
 int
-curl_dogetaddrinfo(const char *hostname,
-                   const char *service,
-                   const struct addrinfo *hints,
-                   struct addrinfo **result,
-                   int line, const char *source)
+curl_dbg_getaddrinfo(const char *hostname,
+                    const char *service,
+                    const struct addrinfo *hints,
+                    struct addrinfo **result,
+                    int line, const char *source)
 {
 #ifdef USE_LWIPSOCK
   int res = lwip_getaddrinfo(hostname, service, hints, result);
@@ -584,11 +584,11 @@ curl_dogetaddrinfo(const char *hostname,
 #endif
   if(0 == res)
     /* success */
-    curl_memlog("ADDR %s:%d getaddrinfo() = %p\n",
-                source, line, (void *)*result);
+    curl_dbg_log("ADDR %s:%d getaddrinfo() = %p\n",
+                 source, line, (void *)*result);
   else
-    curl_memlog("ADDR %s:%d getaddrinfo() failed\n",
-                source, line);
+    curl_dbg_log("ADDR %s:%d getaddrinfo() failed\n",
+                 source, line);
   return res;
 }
 #endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */

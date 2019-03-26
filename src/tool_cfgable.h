@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,8 @@
 
 #include "tool_metalink.h"
 
+#include "tool_formparse.h"
+
 typedef enum {
   ERR_NONE,
   ERR_BINARY_TERMINAL = 1, /* binary to terminal detected */
@@ -44,6 +46,7 @@ struct OperationConfig {
   char *cookie;             /* single line with specified cookies */
   char *cookiejar;          /* write to this file */
   char *cookiefile;         /* read from this file */
+  char *altsvc;             /* alt-svc cache file name */
   bool cookiesession;       /* new session? */
   bool encoding;            /* Accept-Encoding please */
   bool tr_encoding;         /* Transfer-Encoding please */
@@ -176,8 +179,9 @@ struct OperationConfig {
   curl_off_t condtime;
   struct curl_slist *headers;
   struct curl_slist *proxyheaders;
+  tool_mime *mimeroot;
+  tool_mime *mimecurrent;
   curl_mime *mimepost;
-  curl_mime *mimecurrent;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
   struct curl_slist *connect_to;

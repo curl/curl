@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,6 +44,7 @@
 #include "http2.h"
 #include "setopt.h"
 #include "multiif.h"
+#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -111,8 +112,8 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) (x & 0xffff0000)
 
-CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
-                      va_list param)
+static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
+                        va_list param)
 {
   char *argptr;
   CURLcode result = CURLE_OK;
@@ -682,7 +683,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      * Set header option.
      */
     arg = va_arg(param, long);
-    data->set.sep_headers = (arg & CURLHEADER_SEPARATE)? TRUE: FALSE;
+    data->set.sep_headers = (bool)((arg & CURLHEADER_SEPARATE)? TRUE: FALSE);
     break;
 
   case CURLOPT_HTTP200ALIASES:
@@ -884,7 +885,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authhost.iestyle = (auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE;
+    data->state.authhost.iestyle =
+      (bool)((auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -967,7 +969,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
-    data->state.authproxy.iestyle = (auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE;
+    data->state.authproxy.iestyle =
+      (bool)((auth & CURLAUTH_DIGEST_IE) ? TRUE : FALSE);
 
     if(auth & CURLAUTH_DIGEST_IE) {
       auth |= CURLAUTH_DIGEST; /* set standard digest bit */
@@ -1699,8 +1702,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->ssl_config.verifypeer =
+    if(data->conn) {
+      data->conn->ssl_config.verifypeer =
         data->set.ssl.primary.verifypeer;
     }
     break;
@@ -1712,8 +1715,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       (0 != va_arg(param, long))?TRUE:FALSE;
 
     /* Update the current connection proxy_ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->proxy_ssl_config.verifypeer =
+    if(data->conn) {
+      data->conn->proxy_ssl_config.verifypeer =
         data->set.proxy_ssl.primary.verifypeer;
     }
     break;
@@ -1736,8 +1739,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.ssl.primary.verifyhost = (0 != arg) ? TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->ssl_config.verifyhost =
+    if(data->conn) {
+      data->conn->ssl_config.verifyhost =
         data->set.ssl.primary.verifyhost;
     }
     break;
@@ -1760,8 +1763,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.proxy_ssl.primary.verifyhost = (0 != arg)?TRUE:FALSE;
 
     /* Update the current connection proxy_ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->proxy_ssl_config.verifyhost =
+    if(data->conn) {
+      data->conn->proxy_ssl_config.verifyhost =
         data->set.proxy_ssl.primary.verifyhost;
     }
     break;
@@ -1778,8 +1781,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
       TRUE : FALSE;
 
     /* Update the current connection ssl_config. */
-    if(data->easy_conn) {
-      data->easy_conn->ssl_config.verifystatus =
+    if(data->conn) {
+      data->conn->ssl_config.verifystatus =
         data->set.ssl.primary.verifystatus;
     }
     break;
@@ -2076,13 +2079,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
 
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.ssl.enable_beast =
+      (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
   case CURLOPT_PROXY_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.proxy_ssl.enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.proxy_ssl.enable_beast =
+      (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
     data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
@@ -2237,7 +2242,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     result = Curl_setstropt(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5],
                             va_arg(param, char *));
     break;
-#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+
   case CURLOPT_SSH_KNOWNHOSTS:
     /*
      * Store the file name to read known hosts from.
@@ -2258,7 +2263,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
      */
     data->set.ssh_keyfunc_userp = va_arg(param, void *);
     break;
-#endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 #endif /* USE_LIBSSH2 */
 
   case CURLOPT_HTTP_TRANSFER_DECODING:
@@ -2652,6 +2656,31 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.trailer_data = va_arg(param, void *);
 #endif
     break;
+#ifdef USE_ALTSVC
+  case CURLOPT_ALTSVC:
+    if(!data->asi) {
+      data->asi = Curl_altsvc_init();
+      if(!data->asi)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    argptr = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_ALTSVC], argptr);
+    if(result)
+      return result;
+    (void)Curl_altsvc_load(data->asi, argptr);
+    break;
+  case CURLOPT_ALTSVC_CTRL:
+    if(!data->asi) {
+      data->asi = Curl_altsvc_init();
+      if(!data->asi)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    arg = va_arg(param, long);
+    result = Curl_altsvc_ctrl(data->asi, arg);
+    if(result)
+      return result;
+    break;
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
@@ -2680,7 +2709,7 @@ CURLcode curl_easy_setopt(struct Curl_easy *data, CURLoption tag, ...)
 
   va_start(arg, tag);
 
-  result = Curl_vsetopt(data, tag, arg);
+  result = vsetopt(data, tag, arg);
 
   va_end(arg);
   return result;

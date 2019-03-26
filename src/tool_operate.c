@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,6 +31,10 @@
 
 #ifdef __VMS
 #  include <fabdef.h>
+#endif
+
+#ifdef __AMIGA__
+#  include <proto/dos.h>
 #endif
 
 #include "strcase.h"
@@ -258,9 +262,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
      * no environment-specified filename is found then check for CA bundle
      * default filename curl-ca-bundle.crt in the user's PATH.
      *
-     * If Schannel (WinSSL) is the selected SSL backend then these locations
-     * are ignored. We allow setting CA location for schannel only when
-     * explicitly specified by the user via CURLOPT_CAINFO / --cacert.
+     * If Schannel is the selected SSL backend then these locations are
+     * ignored. We allow setting CA location for schannel only when explicitly
+     * specified by the user via CURLOPT_CAINFO / --cacert.
      */
     if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
       char *env;
@@ -945,6 +949,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
                     config->postfieldsize);
           break;
         case HTTPREQ_MIMEPOST:
+          result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
+          if(result)
+            goto show_error;
           my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
           break;
         default:
@@ -1006,7 +1013,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           if(config->tr_encoding)
             my_setopt(curl, CURLOPT_TRANSFER_ENCODING, 1L);
           /* new in libcurl 7.64.0 */
-          my_setopt(curl, CURLOPT_HTTP09_ALLOWED, config->http09_allowed);
+          my_setopt(curl, CURLOPT_HTTP09_ALLOWED,
+                    config->http09_allowed ? 1L : 0L);
 
         } /* (built_in_protos & CURLPROTO_HTTP) */
 
@@ -1534,6 +1542,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->disallow_username_in_url)
           my_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
 
+#ifdef USE_ALTSVC
+        /* only if explicitly enabled in configure */
+        if(config->altsvc)
+          my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
+#endif
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
@@ -1856,9 +1870,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
 #ifdef __AMIGA__
         if(!result && outs.s_isreg && outs.filename) {
           /* Set the url (up to 80 chars) as comment for the file */
-          if(strlen(url) > 78)
-            url[79] = '\0';
-          SetComment(outs.filename, url);
+          if(strlen(urlnode->url) > 78)
+            urlnode->url[79] = '\0';
+          SetComment(outs.filename, urlnode->url);
         }
 #endif
 

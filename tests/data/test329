@@ -31,7 +31,7 @@ moo
 # Client-side
 <client>
 <file name="log/jar329.txt" mode="text">
-.host.foo.com	TRUE	/we/want/	FALSE	2054030187	test	no
+.host.foo.com	TRUE	/we/want/	FALSE	2147483647	test	no
 </file>
 <server>
 http

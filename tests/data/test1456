@@ -9,7 +9,7 @@ IPv6
 #
 # Server-side
 <reply>
-<data nocheck=yes>
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -21,7 +21,7 @@ Connection: close
 Content-Type: text/html
 Funny-head: yesyes
 
--foo-
+These data aren't actually sent to the client
 </data>
 </reply>
 

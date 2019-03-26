@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,6 +24,10 @@
 #include "urldata.h"
 #include "connect.h"
 #include "share.h"
+
+/* retrieves ip address and port from a sockaddr structure.
+   note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
+bool getaddressinfo(struct sockaddr *sa, char *addr, long *port);
 
 #include "memdebug.h" /* LAST include file */
 
@@ -158,8 +162,8 @@ UNITTEST_START
       if(!addr && !tests[i].address[j])
         break;
 
-      if(addr && !Curl_getaddressinfo(addr->ai_addr,
-                                      ipaddress, &port)) {
+      if(addr && !getaddressinfo(addr->ai_addr,
+                                 ipaddress, &port)) {
         fprintf(stderr, "%s:%d tests[%d] failed. getaddressinfo failed.\n",
                 __FILE__, __LINE__, i);
         problem = true;

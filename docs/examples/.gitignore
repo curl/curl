@@ -20,6 +20,7 @@ getinmemory
 getredirect
 http-post
 http2-download
+http2-pushinmemory
 http2-serverpush
 http2-upload
 httpcustomheader
@@ -46,6 +47,7 @@ multi-double
 multi-formadd
 multi-post
 multi-single
+parseurl
 persistent
 pop3-dele
 pop3-list
@@ -83,6 +85,7 @@ smtp-ssl
 smtp-tls
 smtp-vrfy
 sslbackend
+urlapi
 url2file
 usercertinmem
 xmlstream

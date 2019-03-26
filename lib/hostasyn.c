@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,14 +85,14 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
       dns = Curl_cache_addr(data, ai,
                             conn->async.hostname,
                             conn->async.port);
+      if(data->share)
+        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
       if(!dns) {
         /* failed to store, cleanup and return error */
         Curl_freeaddrinfo(ai);
         result = CURLE_OUT_OF_MEMORY;
       }
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
     }
     else {
       result = CURLE_OUT_OF_MEMORY;

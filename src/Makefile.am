@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -69,10 +69,6 @@ endif
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 curl_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
 
-@CODE_COVERAGE_RULES@
-curl_LDFLAGS += $(CODE_COVERAGE_LDFLAGS)
-CFLAGS += $(CODE_COVERAGE_CFLAGS)
-
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
@@ -95,9 +91,18 @@ EXTRA_DIST = mkhelp.pl makefile.dj                                     \
 
 # Use absolute directory to disable VPATH
 MANPAGE=$(abs_top_builddir)/docs/curl.1
-README=$(top_srcdir)/docs/MANUAL
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 HUGE=tool_hugehelp.c
+
+HUGECMD = $(HUGEIT_$(V))
+HUGEIT_0 = @echo "  HUGE    " $@;
+HUGEIT_1 =
+HUGEIT_ = $(HUGEIT_0)
+
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
@@ -108,33 +113,33 @@ $(MANPAGE):
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
 # compressed formats.
-$(HUGE): $(MANPAGE) $(README) $(MKHELP)
-	echo '#include "tool_setup.h"' > $(HUGE)
-	echo '#ifndef HAVE_LIBZ' >> $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
-	echo '#else' >> $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
-	echo '#endif /* HAVE_LIBZ */' >> $(HUGE)
+$(HUGE): $(MANPAGE) $(MKHELP)
+	$(HUGECMD) (echo '#include "tool_setup.h"' > $(HUGE);   \
+	echo '#ifndef HAVE_LIBZ' >> $(HUGE);                    \
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE);     \
+	echo '#else' >> $(HUGE);                                \
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c >> $(HUGE);  \
+	echo '#endif /* HAVE_LIBZ */' >> $(HUGE) )
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
-$(HUGE): $(MANPAGE) $(README) $(MKHELP)
-	echo '#include "tool_setup.h"' > $(HUGE)
-	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
+$(HUGE): $(MANPAGE) $(MKHELP)
+	$(HUGECMD)(echo '#include "tool_setup.h"' > $(HUGE):    \
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE) )
 endif
 
 else # USE_MANUAL
 # built-in manual has been disabled, make a blank file
 $(HUGE):
-	echo "/* built-in manual is disabled, blank function */" > $(HUGE)
-	echo '#include "tool_hugehelp.h"' >> $(HUGE)
-	echo "void hugehelp(void) {}" >>$(HUGE)
+	$(HUGECMD)(echo "/* built-in manual is disabled, blank function */" > $(HUGE); \
+	echo '#include "tool_hugehelp.h"' >> $(HUGE); \
+	echo "void hugehelp(void) {}" >>$(HUGE) )
 endif
 
 # ignore tool_hugehelp.c since it is generated source code and it plays
 # by slightly different rules!
 checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir)        \
-	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch]
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/lib/checksrc.pl -D$(srcdir)        \
+	-W$(srcdir)/tool_hugehelp.c $(srcdir)/*.[ch])
 
 if CURLDEBUG
 # for debug builds, we scan the sources on all regular make invokes
@@ -147,4 +152,4 @@ TIDYFLAGS=-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-op
 TIDY:=clang-tidy
 
 tidy:
-	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H

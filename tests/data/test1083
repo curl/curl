@@ -39,7 +39,7 @@ HTTP-IPv6 GET with ip6-localhost --interface
 -g "http://%HOST6IP:%HTTP6PORT/1083" --interface ip6-localhost
 </command>
 <precheck>
-perl -e "if ('%CLIENT6IP' ne '[::1]') {print 'Test requires default test server host address';} else {exec './server/resolve --ipv6 ip6-localhost'; print 'Cannot run precheck resolve';}"
+perl -e "if ('%CLIENT6IP' ne '[::1]') {print 'Test requires default test client host address';} else {exec './server/resolve --ipv6 ip6-localhost'; print 'Cannot run precheck resolve';}"
 </precheck>
 </client>
 

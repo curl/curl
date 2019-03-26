@@ -64,6 +64,7 @@ _ curl_easy_setopt_ccsid()
   Variable arguments are a string pointer and a CCSID (unsigned int) for
 options:
         CURLOPT_ABSTRACT_UNIX_SOCKET
+        CURLOPT_ALTSVC
         CURLOPT_CAINFO
         CURLOPT_CAPATH
         CURLOPT_COOKIE

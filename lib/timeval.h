@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,8 +26,10 @@
 
 #if SIZEOF_TIME_T < 8
 typedef int timediff_t;
+#define CURL_FORMAT_TIMEDIFF_T "d"
 #else
 typedef curl_off_t timediff_t;
+#define CURL_FORMAT_TIMEDIFF_T CURL_FORMAT_CURL_OFF_T
 #endif
 
 struct curltime {

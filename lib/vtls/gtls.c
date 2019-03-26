@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1423,11 +1423,6 @@ gtls_connect_step3(struct connectdata *conn,
   size = sizeof(certbuf);
   gnutls_x509_crt_get_issuer_dn(x509_cert, certbuf, &size);
   infof(data, "\t issuer: %s\n", certbuf);
-
-  /* compression algorithm (if any) */
-  ptr = gnutls_compression_get_name(gnutls_compression_get(session));
-  /* the *_get_name() says "NULL" if GNUTLS_COMP_NULL is returned */
-  infof(data, "\t compression: %s\n", ptr);
 #endif
 
   gnutls_x509_crt_deinit(x509_cert);

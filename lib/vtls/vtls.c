@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -248,7 +248,7 @@ Curl_ssl_connect(struct connectdata *conn, int sockindex)
   conn->ssl[sockindex].use = TRUE;
   conn->ssl[sockindex].state = ssl_connection_negotiating;
 
-  result = Curl_ssl->connect(conn, sockindex);
+  result = Curl_ssl->connect_blocking(conn, sockindex);
 
   if(!result)
     Curl_pgrsTime(conn->data, TIMER_APPCONNECT); /* SSL is connected */
@@ -513,7 +513,7 @@ void Curl_ssl_close_all(struct Curl_easy *data)
 }
 
 #if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
-  defined(USE_DARWINSSL) || defined(USE_POLARSSL) || defined(USE_NSS) || \
+  defined(USE_SECTRANSP) || defined(USE_POLARSSL) || defined(USE_NSS) || \
   defined(USE_MBEDTLS) || defined(USE_CYASSL)
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
                      int numsocks)
@@ -546,7 +546,7 @@ int Curl_ssl_getsock(struct connectdata *conn,
   (void)numsocks;
   return GETSOCK_BLANK;
 }
-/* USE_OPENSSL || USE_GNUTLS || USE_SCHANNEL || USE_DARWINSSL || USE_NSS */
+/* USE_OPENSSL || USE_GNUTLS || USE_SCHANNEL || USE_SECTRANSP || USE_NSS */
 #endif
 
 void Curl_ssl_close(struct connectdata *conn, int sockindex)
@@ -557,7 +557,7 @@ void Curl_ssl_close(struct connectdata *conn, int sockindex)
 
 CURLcode Curl_ssl_shutdown(struct connectdata *conn, int sockindex)
 {
-  if(Curl_ssl->shutdown(conn, sockindex))
+  if(Curl_ssl->shut_down(conn, sockindex))
     return CURLE_SSL_SHUTDOWN_FAILED;
 
   conn->ssl[sockindex].use = FALSE; /* get back to ordinary socket usage */
@@ -1114,7 +1114,7 @@ static CURLcode Curl_multissl_connect(struct connectdata *conn, int sockindex)
 {
   if(multissl_init(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->connect(conn, sockindex);
+  return Curl_ssl->connect_blocking(conn, sockindex);
 }
 
 static CURLcode Curl_multissl_connect_nonblocking(struct connectdata *conn,
@@ -1172,8 +1172,8 @@ const struct Curl_ssl *Curl_ssl =
   &Curl_ssl_multi;
 #elif defined(USE_CYASSL)
   &Curl_ssl_cyassl;
-#elif defined(USE_DARWINSSL)
-  &Curl_ssl_darwinssl;
+#elif defined(USE_SECTRANSP)
+  &Curl_ssl_sectransp;
 #elif defined(USE_GNUTLS)
   &Curl_ssl_gnutls;
 #elif defined(USE_GSKIT)
@@ -1198,8 +1198,8 @@ static const struct Curl_ssl *available_backends[] = {
 #if defined(USE_CYASSL)
   &Curl_ssl_cyassl,
 #endif
-#if defined(USE_DARWINSSL)
-  &Curl_ssl_darwinssl,
+#if defined(USE_SECTRANSP)
+  &Curl_ssl_sectransp,
 #endif
 #if defined(USE_GNUTLS)
   &Curl_ssl_gnutls,

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1132,7 +1132,12 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-    if((int) STRING_LASTZEROTERMINATED != (int) STRING_DOH + 1 ||
+    if(
+#ifdef USE_ALTSVC
+       (int) STRING_LASTZEROTERMINATED != (int) STRING_ALTSVC + 1 ||
+#else
+       (int) STRING_LASTZEROTERMINATED != (int) STRING_DOH + 1 ||
+#endif
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
@@ -1144,6 +1149,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
   switch (tag) {
 
   case CURLOPT_ABSTRACT_UNIX_SOCKET:
+  case CURLOPT_ALTSVC:
   case CURLOPT_CAINFO:
   case CURLOPT_CAPATH:
   case CURLOPT_COOKIE:
@@ -1448,10 +1454,11 @@ curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
   result = curl_url_get(handle, what, &s, flags);
   if(result == CURLUE_OK) {
     if(s) {
-      *part = dynconvert(ccsid, s, -1, ccsid, ASCII_CCSID);
+      *part = dynconvert(ccsid, s, -1, ASCII_CCSID);
       if(!*part)
         result = CURLUE_OUT_OF_MEMORY;
     }
+  }
   if(s)
     free(s);
   return result;

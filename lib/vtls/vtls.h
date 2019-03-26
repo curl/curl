@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -47,7 +47,7 @@ struct Curl_ssl {
 
   size_t (*version)(char *buffer, size_t size);
   int (*check_cxn)(struct connectdata *cxn);
-  int (*shutdown)(struct connectdata *conn, int sockindex);
+  int (*shut_down)(struct connectdata *conn, int sockindex);
   bool (*data_pending)(const struct connectdata *conn,
                        int connindex);
 
@@ -56,7 +56,7 @@ struct Curl_ssl {
                      size_t length);
   bool (*cert_status_request)(void);
 
-  CURLcode (*connect)(struct connectdata *conn, int sockindex);
+  CURLcode (*connect_blocking)(struct connectdata *conn, int sockindex);
   CURLcode (*connect_nonblocking)(struct connectdata *conn, int sockindex,
                                   bool *done);
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
@@ -105,7 +105,7 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #include "polarssl.h"       /* PolarSSL versions */
 #include "cyassl.h"         /* CyaSSL versions */
 #include "schannel.h"       /* Schannel SSPI version */
-#include "darwinssl.h"      /* SecureTransport (Darwin) version */
+#include "sectransp.h"      /* SecureTransport (Darwin) version */
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "mesalink.h"       /* MesaLink versions */
 

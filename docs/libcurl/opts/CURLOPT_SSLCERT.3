@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -38,11 +38,10 @@ you wish to authenticate with as it is named in the security database. If you
 want to use a file from the current directory, please precede it with "./"
 prefix, in order to avoid confusion with a nickname.
 
-(Schannel/WinSSL only) Client certificates must be specified by a path
-expression to a certificate store. (Loading PFX is not supported; you can
-import it to a store first). You can use
-"<store location>\\<store name>\\<thumbprint>" to refer to a certificate
-in the system certificates store, for example,
+(Schannel only) Client certificates must be specified by a path expression to
+a certificate store. (Loading PFX is not supported; you can import it to a
+store first). You can use "<store location>\\<store name>\\<thumbprint>" to
+refer to a certificate in the system certificates store, for example,
 "CurrentUser\\MY\\934a7ac6f8a5d579285a74fa61e19f23ddfe8d7a". Thumbprint is
 usually a SHA-1 hex string which you can see in certificate details. Following
 store locations are supported: CurrentUser, LocalMachine, CurrentService,

@@ -25,9 +25,9 @@ should not be set. If the option is not set, then curl will use the
 certificates in the system and user Keychain to verify the peer, which is the
 preferred method of verifying the peer's certificate chain.
 
-(Schannel/WinSSL only) This option is supported for WinSSL in Windows 7 or
-later with libcurl 7.60 or later. This option is supported for backward
-compatibility with other SSL engines; instead it is recommended to use Windows'
-store of root certificates (the default for WinSSL).
+(Schannel only) This option is supported for Schannel in Windows 7 or later with
+libcurl 7.60 or later. This option is supported for backward compatibility
+with other SSL engines; instead it is recommended to use Windows' store of
+root certificates (the default for Schannel).
 
 If this option is used several times, the last one will be used.

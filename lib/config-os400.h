@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -424,6 +424,9 @@
 
 /* Define if you can safely include both <sys/time.h> and <time.h>. */
 #define TIME_WITH_SYS_TIME
+
+/* Define to enable alt-svc support (experimental) */
+#undef USE_ALTSVC
 
 /* Version number of package */
 #undef VERSION

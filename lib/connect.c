@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -446,9 +446,10 @@ static CURLcode bindlocal(struct connectdata *conn,
       curl_socklen_t size = sizeof(add);
       memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
       if(getsockname(sockfd, (struct sockaddr *) &add, &size) < 0) {
+        char buffer[STRERROR_LEN];
         data->state.os_errno = error = SOCKERRNO;
         failf(data, "getsockname() failed with errno %d: %s",
-              error, Curl_strerror(conn, error));
+              error, Curl_strerror(error, buffer, sizeof(buffer)));
         return CURLE_INTERFACE_FAILED;
       }
       infof(data, "Local port: %hu\n", port);
@@ -470,10 +471,12 @@ static CURLcode bindlocal(struct connectdata *conn,
     else
       break;
   }
-
-  data->state.os_errno = error = SOCKERRNO;
-  failf(data, "bind failed with errno %d: %s",
-        error, Curl_strerror(conn, error));
+  {
+    char buffer[STRERROR_LEN];
+    data->state.os_errno = error = SOCKERRNO;
+    failf(data, "bind failed with errno %d: %s",
+          error, Curl_strerror(error, buffer, sizeof(buffer)));
+  }
 
   return CURLE_INTERFACE_FAILED;
 }
@@ -617,10 +620,13 @@ void Curl_persistconninfo(struct connectdata *conn)
   conn->data->info.conn_local_port = conn->local_port;
 }
 
+UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
+                             long *port);
+
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool Curl_getaddressinfo(struct sockaddr *sa, char *addr,
-                         long *port)
+UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
+                             long *port)
 {
   unsigned short us_port;
   struct sockaddr_in *si = NULL;
@@ -683,11 +689,12 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     return;
 
   if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
+    char buffer[STRERROR_LEN];
     len = sizeof(struct Curl_sockaddr_storage);
     if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
       int error = SOCKERRNO;
       failf(data, "getpeername() failed with errno %d: %s",
-            error, Curl_strerror(conn, error));
+            error, Curl_strerror(error, buffer, sizeof(buffer)));
       return;
     }
 
@@ -696,22 +703,22 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
       int error = SOCKERRNO;
       failf(data, "getsockname() failed with errno %d: %s",
-            error, Curl_strerror(conn, error));
+            error, Curl_strerror(error, buffer, sizeof(buffer)));
       return;
     }
 
-    if(!Curl_getaddressinfo((struct sockaddr*)&ssrem,
-                            conn->primary_ip, &conn->primary_port)) {
+    if(!getaddressinfo((struct sockaddr*)&ssrem,
+                       conn->primary_ip, &conn->primary_port)) {
       failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-            errno, Curl_strerror(conn, errno));
+            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       return;
     }
     memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 
-    if(!Curl_getaddressinfo((struct sockaddr*)&ssloc,
-                            conn->local_ip, &conn->local_port)) {
+    if(!getaddressinfo((struct sockaddr*)&ssloc,
+                       conn->local_ip, &conn->local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
-            errno, Curl_strerror(conn, errno));
+            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       return;
     }
 
@@ -836,9 +843,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       if(conn->tempaddr[i]) {
         CURLcode status;
         char ipaddress[MAX_IPADR_LEN];
+        char buffer[STRERROR_LEN];
         Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
         infof(data, "connect to %s port %ld failed: %s\n",
-              ipaddress, conn->port, Curl_strerror(conn, error));
+              ipaddress, conn->port,
+              Curl_strerror(error, buffer, sizeof(buffer)));
 
         conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
                                    allow : allow / 2;
@@ -854,8 +863,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
   if(result) {
     /* no more addresses to try */
-
     const char *hostname;
+    char buffer[STRERROR_LEN];
 
     /* if the first address family runs out of addresses to try before
        the happy eyeball timeout, go ahead and try the next family now */
@@ -875,13 +884,14 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       hostname = conn->host.name;
 
     failf(data, "Failed to connect to %s port %ld: %s",
-        hostname, conn->port, Curl_strerror(conn, error));
+          hostname, conn->port,
+          Curl_strerror(error, buffer, sizeof(buffer)));
   }
 
   return result;
 }
 
-void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
+static void tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 {
 #if defined(TCP_NODELAY)
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -889,6 +899,7 @@ void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 #endif
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
+  char buffer[STRERROR_LEN];
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) conn;
@@ -897,7 +908,7 @@ void Curl_tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
   if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
                 sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s\n",
-          Curl_strerror(conn, SOCKERRNO));
+          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
   else
     infof(data, "TCP_NODELAY set\n");
 #else
@@ -917,9 +928,11 @@ static void nosigpipe(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   int onoff = 1;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
-                sizeof(onoff)) < 0)
+                sizeof(onoff)) < 0) {
+    char buffer[STRERROR_LEN];
     infof(data, "Could not set SO_NOSIGPIPE: %s\n",
-          Curl_strerror(conn, SOCKERRNO));
+          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+  }
 }
 #else
 #define nosigpipe(x,y) Curl_nop_stmt
@@ -995,6 +1008,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
 #ifdef TCP_FASTOPEN_CONNECT
   int optval = 1;
 #endif
+  char buffer[STRERROR_LEN];
 
   *sockp = CURL_SOCKET_BAD;
 
@@ -1006,11 +1020,11 @@ static CURLcode singleipconnect(struct connectdata *conn,
     return CURLE_OK;
 
   /* store remote address and port used in this connection attempt */
-  if(!Curl_getaddressinfo((struct sockaddr*)&addr.sa_addr,
-                          ipaddress, &port)) {
+  if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
+                     ipaddress, &port)) {
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(conn, errno));
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     Curl_closesocket(conn, sockfd);
     return CURLE_OK;
   }
@@ -1023,7 +1037,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   is_tcp = (addr.family == AF_INET) && addr.socktype == SOCK_STREAM;
 #endif
   if(is_tcp && data->set.tcp_nodelay)
-    Curl_tcpnodelay(conn, sockfd);
+    tcpnodelay(conn, sockfd);
 
   nosigpipe(conn, sockfd);
 
@@ -1146,7 +1160,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
     default:
       /* unknown error, fallthrough and try another address! */
       infof(data, "Immediate connect fail for %s: %s\n",
-            ipaddress, Curl_strerror(conn, error));
+            ipaddress, Curl_strerror(error, buffer, sizeof(buffer)));
       data->state.os_errno = error;
 
       /* connect failed */
@@ -1420,7 +1434,7 @@ void Curl_conncontrol(struct connectdata *conn,
   if((ctrl == CONNCTRL_STREAM) &&
      (conn->handler->flags & PROTOPT_STREAM))
     DEBUGF(infof(conn->data, "Kill stream: %s\n", reason));
-  else if(closeit != conn->bits.close) {
+  else if((bit)closeit != conn->bits.close) {
     DEBUGF(infof(conn->data, "Marked for [%s]: %s\n",
                  closeit?"closure":"keep alive", reason));
     conn->bits.close = closeit; /* the only place in the source code that
