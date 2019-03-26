@@ -79,6 +79,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OperationConfig *config = outs->config;
   size_t bytes = sz * nmemb;
   bool is_tty = config->global->isatty;
+#ifdef WIN32
+  CONSOLE_SCREEN_BUFFER_INFO console_info;
+#endif
 
   /*
    * Once that libcurl has called back tool_write_cb() the returned value
@@ -156,7 +159,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 
 #ifdef _WIN32
-  if(isatty(fileno(outs->stream))) {
+  if(isatty(fileno(outs->stream)) &&
+     GetConsoleScreenBufferInfo(
+       (HANDLE)_get_osfhandle(fileno(outs->stream)), &console_info)) {
     DWORD in_len = (DWORD)(sz * nmemb);
     wchar_t* wc_buf;
     DWORD wc_len;
