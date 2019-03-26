@@ -142,7 +142,7 @@ matrix:
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: osx
           compiler: gcc
-          env: T=debug C=--with-libssh2
+          env: T=debug C=--with-libssh2=/usr/local
         - os: osx
           compiler: gcc
           env: T=debug C=--enable-ares
