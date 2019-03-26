@@ -32,7 +32,6 @@ addons:
             - libstdc++-8-dev
             - stunnel4
             - libidn2-0-dev
-            - libssh2-1-dev
             - libssh-dev
             - krb5-user
             - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
@@ -219,7 +218,7 @@ install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump c-ares libmetalink libressl nghttp2 libmetalink; fi
 
 before_script:
     - ./buildconf
@@ -253,6 +252,12 @@ before_script:
         ln -s ../build/ssl/libssl.so . &&
         echo "BoringSSL lib dir: "`pwd` &&
         export LIBS=-lpthread )
+      fi
+    - |
+      if [ ! -e "$HOME/libssh2/Makefile" ]; then
+        (cd $HOME &&
+        git clone --depth=1 https://github.com/libssh2/libssh2.git &&
+        cd libssh2 && ./buildconf && ./configure && make)
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
@@ -334,6 +339,7 @@ before_script:
         (cd $HOME/wolfssl-4.0.0-stable && sudo make install)
         (cd $HOME/mesalink-0.7.1 && sudo make install)
         (cd $HOME/nghttp2-1.34.0 && sudo make install)
+        (cd $HOME/libssh2 && sudo make install)
       fi
 
 script:
