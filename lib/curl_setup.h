@@ -96,6 +96,10 @@
 #  include "config-vxworks.h"
 #endif
 
+#ifdef __PLAN9__
+#  include "config-plan9.h"
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 /* ================================================================ */
