@@ -50,6 +50,7 @@ matrix:
           env:
               - T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+              - LIBSSH2=1
         - os: linux
           compiler: gcc
           dist: trusty
@@ -142,7 +143,9 @@ matrix:
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: osx
           compiler: gcc
-          env: T=debug C=--with-libssh2=/usr/local
+          env:
+              - T=debug C=--with-libssh2=/usr/local
+              - LIBSSH2=1
         - os: osx
           compiler: gcc
           env: T=debug C=--enable-ares
@@ -258,7 +261,7 @@ before_script:
       if [ ! -e "$HOME/libssh2/Makefile" ]; then
         (cd $HOME &&
         git clone --depth=1 https://github.com/libssh2/libssh2.git &&
-        cd libssh2 && ./buildconf && ./configure && make)
+        cd libssh2 && ./buildconf && ./configure --disable-examples-build && make)
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
@@ -341,7 +344,9 @@ before_script:
         (cd $HOME/mesalink-0.7.1 && sudo make install)
         (cd $HOME/nghttp2-1.34.0 && sudo make install)
       fi
-      cd $HOME/libssh2 && sudo make install
+      if [ $LIBSSH2 = 1 ]; then
+        cd $HOME/libssh2 && sudo make install
+      fi
 
 script:
     - |
