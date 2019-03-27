@@ -1569,7 +1569,7 @@ AC_HELP_STRING([--without-amissl], [disable Amiga native SSL/TLS (AmiSSL)]),
   OPT_AMISSL=$withval)
 
 AC_MSG_CHECKING([whether to enable Amiga native SSL/TLS (AmiSSL)])
-if test "$HAVE_PROTO_BSDSOCKET_H" == "1"; then
+if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
   if test -z "$ssl_backends" -o "x$OPT_AMISSL" != xno; then
     ssl_msg=
     if test "x$OPT_AMISSL" != "xno"; then
