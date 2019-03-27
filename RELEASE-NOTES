@@ -4,7 +4,7 @@ curl and libcurl 7.64.1
  Command line options:         221
  curl_easy_setopt() options:   267
  Public functions in libcurl:  80
- Contributors:                 1904
+ Contributors:                 1929
 
 This release includes the following changes:
 
@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o Curl_resolv: fix a gcc -Werror=maybe-uninitialized warning [20]
  o DoH: inherit some SSL options from user's easy handle [80]
  o Secure Transport: no more "darwinssl" [56]
+ o Secure Transport: tvOS 11 is required for ALPN support [94]
  o cirrus: Added FreeBSD builds using Cirrus CI
  o cleanup: make local functions static [5]
  o cli tool: do not use mime.h private structures [27]
@@ -28,6 +29,7 @@ This release includes the following bugfixes:
  o configure: add additional libraries to check for LDAP support [45]
  o configure: remove the unused fdopen macro [40]
  o configure: show features as well in the final summary [15]
+ o conncache: use conn->data to know if a transfer owns it [95]
  o connection: never reuse CONNECT_ONLY connections [35]
  o connection_check: restore original conn->data after the check [14]
  o connection_check: set ->data to the transfer doing the check [3]
@@ -42,6 +44,7 @@ This release includes the following bugfixes:
  o curl: remove MANUAL from -M output [38]
  o curl_easy_duphandle.3: clarify that a duped handle has no shares [64]
  o curl_multi_remove_handle.3: use at any time, just not from within callbacks
+ o curl_url.3: this API is not experimental anymore
  o dns: release sharelock as soon as possible [1]
  o docs: update max-redirs.d phrasing [59]
  o easy: fix win32 init to work without CURL_GLOBAL_WIN32 [30]
@@ -82,6 +85,7 @@ This release includes the following bugfixes:
  o multi: support verbose conncache closure handle [72]
  o negotiate: fix for HTTP POST with Negotiate [88]
  o openssl: add support for TLS ASYNC state [46]
+ o openssl: if cert type is ENG and no key specified, key is ENG too [93]
  o pretransfer: don't strlen() POSTFIELDS set for GET requests [22]
  o rand: Fix a mismatch between comments in source and header [32]
  o runtests: detect "schannel" as an alias for "winssl" [50]
@@ -100,12 +104,14 @@ This release includes the following bugfixes:
  o tests: add stderr comparison to the test suite [26]
  o tests: fix multiple may be used uninitialized warnings
  o threaded-resolver: shutdown the resolver thread without error message [61]
+ o tool_cb_wrt: fix writing to Windows null device NUL [96]
  o tool_getpass: termios.h is present on AmigaOS 3, but no tcgetattr/tcsetattr [84]
  o tool_operate: build on AmigaOS [84]
  o tool_operate: fix typecheck warning [9]
  o transfer.c: do not compute length of undefined hex buffer
  o travis: add build using gnutls [75]
  o travis: add scan-build [13]
+ o travis: bump the used wolfSSL version to 4.0.0 [92]
  o travis: enable valgrind for the iconv tests [12]
  o travis: use updated compiler versions: clang 7 and gcc 8 [77]
  o unit1307: require FTP support [17]
@@ -133,16 +139,17 @@ advice from friends like these:
 
   accountantM on github, Alessandro Ghedini, Andre Guibert de Bruet,
   Arnaud Rebillout, Bernd Mueller, Björn Stenberg, buzo-ffm on github,
-  Chris Araman, Chris Young, d912e3 on github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Lublin, Daniel Stenberg, David Garske, Dominik Hölzl, Don J Olmstead,
-  Eric Curtin, Frank Gevaerts, Gisle Vanem, James Brown,
-  Jan Alexander Steffens, jnbr on github, MAntoniak on github, Marcel Raad,
-  Marc Schlatter, Matt McClure, Michael Felt, Michael Schmid, Michael Wallner,
-  Michał Antoniak, Nick Zitzmann, Nicolas Grekas, Patrick Monnerat, Paul Groke,
-  Pavel Löbl, Ray Satiro, Renaud Allard, Romain Geissler, Sara Golemon,
-  Simon Legner, tholin on github, Tim Rühsen, Volker Schmid,
+  Chris Araman, Christian Schmitz, Chris Young, d912e3 on github, Dan Fandrich,
+  Daniel Gustafsson, Daniel Lublin, Daniel Stenberg, David Garske,
+  David Woodhouse, Dominik Hölzl, Don J Olmstead, Eric Curtin, Frank Gevaerts,
+  Gisle Vanem, James Brown, Jan Alexander Steffens, jnbr on github,
+  MAntoniak on github, Marcel Raad, Marc Schlatter, Matt McClure, Michael Felt,
+  Michael Schmid, Michael Wallner, Michał Antoniak, nedres on github,
+  nianxuejie on github, Nick Zitzmann, Nicolas Grekas, Patrick Monnerat,
+  Paul Groke, Pavel Löbl, Ray Satiro, Renaud Allard, Romain Geissler,
+  Sara Golemon, Simon Legner, tholin on github, Tim Rühsen, Volker Schmid,
   wesinator on github,
-  (45 contributors)
+  (49 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -238,3 +245,9 @@ References to bug reports and discussions on issues:
  [89] = https://curl.haxx.se/bug/?i=2431
  [90] = https://curl.haxx.se/bug/?i=3672
  [91] = https://curl.haxx.se/bug/?i=3671
+ [92] = https://curl.haxx.se/bug/?i=3697
+ [93] = https://curl.haxx.se/bug/?i=3692
+ [94] = https://curl.haxx.se/bug/?i=3689
+ [95] = https://curl.haxx.se/bug/?i=3686
+ [96] = https://github.com/curl/curl/issues/3175#issuecomment-439068724
+
