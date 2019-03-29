@@ -44,6 +44,12 @@ addons:
 
 matrix:
     include:
+        - os: docker
+          env:
+            - T=normal
+          services:
+            - docker
+
         - os: linux
           compiler: gcc
           dist: trusty
@@ -472,6 +478,11 @@ script:
              scan-build ./configure --enable-debug --enable-werror $C
              scan-build --status-bugs make && scan-build --status-bugs make examples
         fi
+     - |
+        if [ "$T" = "normal" ] && [ $TRAVIS_OS_NAME = linux ]; then
+             docker build --no-cache --rm -t "curl:latest" .
+        fi
+
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
