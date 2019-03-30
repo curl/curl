@@ -20,6 +20,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#ifdef HAVE_STRCASECMP
+#include <strings.h>
+#endif
 
 #include "tool_panykey.h"
 #include "tool_help.h"
