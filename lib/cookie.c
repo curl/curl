@@ -93,6 +93,7 @@ Example set of cookies:
 #include "share.h"
 #include "strtoofft.h"
 #include "strcase.h"
+#include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "inet_pton.h"
 
@@ -1083,33 +1084,6 @@ Curl_cookie_add(struct Curl_easy *data,
   }
 
   return co;
-}
-
-/*
- * get_line() makes sure to only return complete whole lines that fit in 'len'
- * bytes and end with a newline.
- */
-char *Curl_get_line(char *buf, int len, FILE *input)
-{
-  bool partial = FALSE;
-  while(1) {
-    char *b = fgets(buf, len, input);
-    if(b) {
-      size_t rlen = strlen(b);
-      if(rlen && (b[rlen-1] == '\n')) {
-        if(partial) {
-          partial = FALSE;
-          continue;
-        }
-        return b;
-      }
-      /* read a partial, discard the next piece that ends with newline */
-      partial = TRUE;
-    }
-    else
-      break;
-  }
-  return NULL;
 }
 
 
