@@ -242,27 +242,8 @@ rem ***************************************************************************
   rem Perform the build
   call :build x64
 
-  rem Move the output directories
-  if exist "%OUTDIR%\LIB Debug" (
-    copy /y out32.dbg\* "%OUTDIR%\LIB Debug" 1>nul
-    rd out32.dbg /s /q
-  ) else (
-    move out32.dbg "%OUTDIR%\LIB Debug" 1>nul
-  )
-  if exist "%OUTDIR%\DLL Debug" (
-    copy /y out32dll.dbg\* "%OUTDIR%\DLL Debug" 1>nul
-    rd out32dll.dbg /s /q
-  ) else (
-    move out32dll.dbg "%OUTDIR%\DLL Debug" 1>nul
-  )
-
-  rem Move the PDB files
-  move tmp32.dbg\lib.pdb "%OUTDIR%\LIB Debug" 1>nul
-  move tmp32dll.dbg\lib.pdb "%OUTDIR%\DLL Debug" 1>nul
-
-  rem Remove the intermediate directories
-  rd tmp32.dbg /s /q
-  rd tmp32dll.dbg /s /q
+  rem Perform the install
+  call :install debug
 
   if "%BUILD_CONFIG%" == "debug" goto success
 
@@ -273,27 +254,8 @@ rem ***************************************************************************
   rem Perform the build
   call :build x64
 
-  rem Move the output directories
-  if exist "%OUTDIR%\LIB Release" (
-    copy /y out32\* "%OUTDIR%\LIB Release" 1>nul
-    rd out32 /s /q
-  ) else (
-    move out32 "%OUTDIR%\LIB Release" 1>nul
-  )
-  if exist "%OUTDIR%\DLL Release" (
-    copy /y out32dll\* "%OUTDIR%\DLL Release" 1>nul
-    rd out32dll /s /q
-  ) else (
-    move out32dll "%OUTDIR%\DLL Release" 1>nul
-  )
-
-  rem Move the PDB files
-  move tmp32\lib.pdb "%OUTDIR%\LIB Release" 1>nul
-  move tmp32dll\lib.pdb "%OUTDIR%\DLL Release" 1>nul
-
-  rem Remove the intermediate directories
-  rd tmp32 /s /q
-  rd tmp32dll /s /q
+  rem Perform the install
+  call :install release
 
   goto success
 
@@ -311,27 +273,8 @@ rem ***************************************************************************
   rem Perform the build
   call :build x86
 
-  rem Move the output directories
-  if exist "%OUTDIR%\LIB Debug" (
-    copy /y out32.dbg\* "%OUTDIR%\LIB Debug" 1>nul
-    rd out32.dbg /s /q
-  ) else (
-    move out32.dbg "%OUTDIR%\LIB Debug" 1>nul
-  )
-  if exist "%OUTDIR%\DLL Debug" (
-    copy /y out32dll.dbg\* "%OUTDIR%\DLL Debug" 1>nul
-    rd out32dll.dbg /s /q
-  ) else (
-    move out32dll.dbg "%OUTDIR%\DLL Debug" 1>nul
-  )
-
-  rem Move the PDB files
-  move tmp32.dbg\lib.pdb "%OUTDIR%\LIB Debug" 1>nul
-  move tmp32dll.dbg\lib.pdb "%OUTDIR%\DLL Debug" 1>nul
-
-  rem Remove the intermediate directories
-  rd tmp32.dbg /s /q
-  rd tmp32dll.dbg /s /q
+  rem Perform the install
+  call :install debug
 
   if "%BUILD_CONFIG%" == "debug" goto success
 
@@ -342,27 +285,8 @@ rem ***************************************************************************
   rem Perform the build
   call :build x86
 
-  rem Move the output directories
-  if exist "%OUTDIR%\LIB Release" (
-    copy /y out32\* "%OUTDIR%\LIB Release" 1>nul
-    rd out32 /s /q
-  ) else (
-    move out32 "%OUTDIR%\LIB Release" 1>nul
-  )
-  if exist "%OUTDIR%\DLL Release" (
-    copy /y out32dll\* "%OUTDIR%\DLL Release" 1>nul
-    rd out32dll /s /q
-  ) else (
-    move out32dll "%OUTDIR%\DLL Release" 1>nul
-  )
-
-  rem Move the PDB files
-  move tmp32\lib.pdb "%OUTDIR%\LIB Release" 1>nul
-  move tmp32dll\lib.pdb "%OUTDIR%\DLL Release" 1>nul
-
-  rem Remove the intermediate directories
-  rd tmp32 /s /q
-  rd tmp32dll /s /q
+  rem Perform the install
+  call :install release
 
   goto success
 
@@ -425,6 +349,64 @@ rem
 
   nmake -f ms\nt.mak
   nmake -f ms\ntdll.mak
+
+  exit /B 0
+
+rem Main installation function.
+rem
+rem %1 - Configuration (release or debug)
+rem
+:install
+  setlocal
+
+  if "%1" == "" exit /B 1
+
+  rem Copy the generated files to our directory structure
+  if "%1" == "debug" (
+    rem Move the output directories
+    if exist "%OUTDIR%\LIB Debug" (
+      copy /y out32.dbg\* "%OUTDIR%\LIB Debug" 1>nul
+      rd out32.dbg /s /q
+    ) else (
+      move out32.dbg "%OUTDIR%\LIB Debug" 1>nul
+    )
+    if exist "%OUTDIR%\DLL Debug" (
+      copy /y out32dll.dbg\* "%OUTDIR%\DLL Debug" 1>nul
+      rd out32dll.dbg /s /q
+    ) else (
+      move out32dll.dbg "%OUTDIR%\DLL Debug" 1>nul
+    )
+
+    rem Move the PDB files
+    move tmp32.dbg\lib.pdb "%OUTDIR%\LIB Debug" 1>nul
+    move tmp32dll.dbg\lib.pdb "%OUTDIR%\DLL Debug" 1>nul
+
+    rem Remove the intermediate directories
+    rd tmp32.dbg /s /q
+    rd tmp32dll.dbg /s /q
+  ) else if "%1" == "release" (
+    rem Move the output directories
+    if exist "%OUTDIR%\LIB Release" (
+      copy /y out32\* "%OUTDIR%\LIB Release" 1>nul
+      rd out32 /s /q
+    ) else (
+      move out32 "%OUTDIR%\LIB Release" 1>nul
+    )
+    if exist "%OUTDIR%\DLL Release" (
+      copy /y out32dll\* "%OUTDIR%\DLL Release" 1>nul
+      rd out32dll /s /q
+    ) else (
+      move out32dll "%OUTDIR%\DLL Release" 1>nul
+    )
+
+    rem Move the PDB files
+    move tmp32\lib.pdb "%OUTDIR%\LIB Release" 1>nul
+    move tmp32dll\lib.pdb "%OUTDIR%\DLL Release" 1>nul
+
+    rem Remove the intermediate directories
+    rd tmp32 /s /q
+    rd tmp32dll /s /q
+  )
 
   exit /B 0
 
