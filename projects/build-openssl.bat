@@ -240,7 +240,8 @@ rem ***************************************************************************
   call :configure x64 debug
 
   rem Perform the build
-  call :build x64
+  call :build x64 static
+  call :build x64 shared
 
   rem Perform the install
   call :install debug
@@ -252,7 +253,8 @@ rem ***************************************************************************
   call :configure x64 release
 
   rem Perform the build
-  call :build x64
+  call :build x64 static
+  call :build x64 shared
 
   rem Perform the install
   call :install release
@@ -271,7 +273,8 @@ rem ***************************************************************************
   call :configure x86 debug
 
   rem Perform the build
-  call :build x86
+  call :build x86 static
+  call :build x86 shared
 
   rem Perform the install
   call :install debug
@@ -283,7 +286,8 @@ rem ***************************************************************************
   call :configure x86 release
 
   rem Perform the build
-  call :build x86
+  call :build x86 static
+  call :build x86 shared
 
   rem Perform the install
   call :install release
@@ -333,11 +337,13 @@ rem
 rem Main build function.
 rem
 rem %1 - Platform (x86 or x64)
+rem %2 - Build Type (static or shared)
 rem
 :build
   setlocal
 
   if "%1" == "" exit /B 1
+  if "%2" == "" exit /B 1
 
   if "%1" == "x86" (
     call ms\do_ms.bat
@@ -347,8 +353,13 @@ rem
     exit /B 1
   )
 
-  nmake -f ms\nt.mak
-  nmake -f ms\ntdll.mak
+  if "%2" == "static" (
+    nmake -f ms\nt.mak
+  ) else if "%2" == "shared" (
+    nmake -f ms\ntdll.mak
+  ) else (
+    exit /B 1
+  )
 
   exit /B 0
 
