@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2012 - 2018, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2012 - 2019, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -26,7 +26,7 @@ rem ***************************************************************************
   if not "%OS%" == "Windows_NT" goto nodos
 
   rem Set our variables
-  setlocal
+  setlocal ENABLEDELAYEDEXPANSION
   set VC_VER=
   set BUILD_PLATFORM=
   set BUILD_CONFIG=
@@ -179,7 +179,7 @@ rem ***************************************************************************
   rem Check that OpenSSL is not unsupported version 1.1.0
   if not exist "%START_DIR%\ms\do_ms.bat" goto unsupported
 
-:configure
+:setup
   if "%BUILD_PLATFORM%" == "" (
     if "%VC_VER%" == "6.0" (
       set BUILD_PLATFORM=x86
@@ -237,7 +237,7 @@ rem ***************************************************************************
 
 :x64debug
   rem Configuring 64-bit Debug Build
-  perl Configure debug-VC-WIN64A --prefix=%CD%
+  call :configure x64 debug
 
   rem Perform the build
   call ms\do_win64a
@@ -270,7 +270,7 @@ rem ***************************************************************************
 
 :x64release
   rem Configuring 64-bit Release Build
-  perl Configure VC-WIN64A --prefix=%CD%
+  call :configure x64 release
 
   rem Perform the build
   call ms\do_win64a
@@ -310,7 +310,7 @@ rem ***************************************************************************
 
 :x86debug
   rem Configuring 32-bit Debug Build
-  perl Configure debug-VC-WIN32 no-asm --prefix=%CD%
+  call :configure x86 debug
 
   rem Perform the build
   call ms\do_ms
@@ -343,7 +343,7 @@ rem ***************************************************************************
 
 :x86release
   rem Configuring 32-bit Release Build
-  perl Configure VC-WIN32 no-asm --prefix=%CD%
+  call :configure x86 release
 
   rem Perform the build
   call ms\do_ms
@@ -373,6 +373,46 @@ rem ***************************************************************************
   rd tmp32dll /s /q
 
   goto success
+
+rem Function to configure the build.
+rem
+rem %1 - Platform (x86 or x64)
+rem %2 - Configuration (release or debug)
+rem
+:configure
+  setlocal
+
+  if "%1" == "" exit /B 1
+  if "%2" == "" exit /B 1
+
+  if "%1" == "x86" (
+    if "%2" == "debug" (
+      set options=debug-VC-WIN32
+    ) else if "%2" == "release" (
+      set options=VC-WIN32
+    ) else (
+      exit /B 1
+    )
+
+    set options=!options! no-asm
+  ) else if "%1" == "x64" (
+    if "%2" == "debug" (
+      set options=debug-VC-WIN64A
+    ) else if "%2" == "release" (
+      set options=VC-WIN64A
+    ) else (
+      exit /B 1
+    )
+  ) else (
+    exit /B 1
+  )
+
+  set options=%options% --prefix=%CD%
+
+  rem Run the configure
+  perl Configure %options%
+
+  exit /B %ERRORLEVEL
 
 :syntax
   rem Display the help
