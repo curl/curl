@@ -47,7 +47,7 @@ CURLcode Curl_getworkingpath(struct connectdata *conn,
     return result;
 
   /* Check for /~/, indicating relative to the user's home directory */
-  if(conn->handler->protocol & CURLPROTO_SCP) {
+  if(conn->handler->protocol & (CURLPROTO_SCP|CURLPROTO_SSH)) {
     real_path = malloc(working_path_len + 1);
     if(real_path == NULL) {
       free(working_path);

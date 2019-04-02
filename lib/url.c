@@ -192,6 +192,10 @@ static const struct Curl_handler * const protocols[] = {
 #endif
 
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
+  &Curl_handler_ssh,
+#endif
+
+#if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
   &Curl_handler_sftp,
 #endif
 
@@ -487,7 +491,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->allowed_protocols = CURLPROTO_ALL;
   set->redir_protocols = CURLPROTO_ALL &  /* All except FILE, SCP and SMB */
                           ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
-                            CURLPROTO_SMBS);
+                            CURLPROTO_SMBS | CURLPROTO_SSH);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   /*
@@ -4311,6 +4315,10 @@ static unsigned int get_protocol_family(unsigned int protocol)
 
   case CURLPROTO_SCP:
     family = CURLPROTO_SCP;
+    break;
+
+  case CURLPROTO_SSH:
+    family = CURLPROTO_SSH;
     break;
 
   case CURLPROTO_SFTP:

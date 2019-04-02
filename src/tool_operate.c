@@ -1035,7 +1035,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
         my_setopt_str(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
 
-        if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
+        if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP|CURLPROTO_SSH)) {
 
           /* SSH and SSL private key uses same command-line option */
           /* new in libcurl 7.16.1 */
@@ -1178,7 +1178,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->path_as_is)
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
-        if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
+        if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP|CURLPROTO_SSH)) {
           if(!config->insecure_ok) {
             char *home;
             char *file;

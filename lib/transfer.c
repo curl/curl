@@ -490,7 +490,8 @@ static int data_pending(const struct connectdata *conn)
 {
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
-  return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
+  return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP|
+    CURLPROTO_SSH) ||
 #if defined(USE_NGHTTP2)
     Curl_ssl_data_pending(conn, FIRSTSOCKET) ||
     /* For HTTP/2, we may read up everything including response body

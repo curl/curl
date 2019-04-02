@@ -73,6 +73,7 @@ CURLcode get_libcurl_info(void)
     { "smtps",  CURLPROTO_SMTPS  },
     { "telnet", CURLPROTO_TELNET },
     { "tftp",   CURLPROTO_TFTP   },
+    { "ssh",    CURLPROTO_SSH    },
     {  NULL,    0                }
   };
 
