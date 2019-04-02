@@ -31,7 +31,6 @@ addons:
             - libidn2-0-dev
             - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
             - libunistring-dev # for libidn2 needed by libpsl
-            - libnss3-dev
             - gnutls-bin
             - libgnutls28-dev
 
@@ -190,6 +189,7 @@ matrix:
                   packages:
                       - *common_packages
                       - clang-7
+                      - libnss3-dev
         - os: linux
           compiler: gcc
           dist: trusty
