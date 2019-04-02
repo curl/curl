@@ -29,7 +29,6 @@ addons:
             - libstdc++-8-dev
             - stunnel4
             - libidn2-0-dev
-            - libssh2-1-dev
             - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
             - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
@@ -51,6 +50,7 @@ matrix:
                   packages:
                       - *common_packages
                       - krb5-user
+                      - libssh2-1-dev
         - os: linux
           compiler: gcc
           dist: trusty
