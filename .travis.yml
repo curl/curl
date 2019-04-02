@@ -17,14 +17,12 @@ addons:
     apt:
         config:
             retries: true
-        sources:
+        sources: &common_sources
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-7
-        packages:
+        packages: &common_packages
             - cmake
             - gcc-8
             - lcov
-            - clang-7
             - valgrind
             - libev-dev
             - libc-ares-dev
@@ -40,7 +38,6 @@ addons:
             - libnss3-dev
             - gnutls-bin
             - libgnutls28-dev
-            - clang-tidy-7
 
 matrix:
     include:
@@ -104,36 +101,84 @@ matrix:
           env:
               - T=debug
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=debug C="--enable-alt-svc"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=debug C="--with-mbedtls --without-ssl"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=debug C="--with-gnutls --without-ssl"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=debug C="--disable-threaded-resolver"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: gcc
           dist: trusty
@@ -174,6 +219,14 @@ matrix:
           env:
               - T=cmake
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: gcc
           dist: trusty
@@ -192,24 +245,57 @@ matrix:
           env:
               - T=fuzzer
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=tidy
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
+                      - clang-tidy-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=scan-build
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
         - os: linux
           compiler: clang
           dist: trusty
           env:
               - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                      - llvm-toolchain-trusty-7
+                  packages:
+                      - *common_packages
+                      - clang-7
 
 before_install:
     - eval "${OVERRIDE_CC}"
