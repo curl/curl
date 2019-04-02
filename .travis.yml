@@ -22,7 +22,6 @@ addons:
         packages: &common_packages
             - cmake
             - gcc-8
-            - lcov
             - valgrind
             - libev-dev
             - libc-ares-dev
@@ -233,6 +232,13 @@ matrix:
           env:
               - T=coverage
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                  packages:
+                      - *common_packages
+                      - lcov
         - os: linux
           compiler: gcc
           dist: trusty
