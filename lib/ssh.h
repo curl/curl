@@ -247,7 +247,7 @@ extern const struct Curl_handler Curl_handler_sftp;
 #endif
 
 extern const struct Curl_handler Curl_handler_scp;
-extern const struct Curl_handler Curl_handler_ssh;
+//extern const struct Curl_handler Curl_handler_ssh;
 extern const struct Curl_handler Curl_handler_sftp;
 
 #endif /* USE_LIBSSH2 */

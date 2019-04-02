@@ -191,7 +191,7 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_scp,
 #endif
 
-#if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
+#if defined(USE_LIBSSH)
   &Curl_handler_ssh,
 #endif
 
