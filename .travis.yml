@@ -30,7 +30,6 @@ addons:
             - stunnel4
             - libidn2-0-dev
             - libssh2-1-dev
-            - libssh-dev
             - autopoint  # for libpsl that needs autoreconf that uses gettext that needs it
             - libunistring-dev # for libidn2 needed by libpsl
             - libnss3-dev
@@ -58,6 +57,13 @@ matrix:
           env:
               - T=normal C=--with-libssh
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                  packages:
+                      - *common_packages
+                      - libssh-dev
         - os: linux
           compiler: gcc
           dist: trusty
