@@ -2523,7 +2523,8 @@ static ssize_t ssh_send(struct connectdata *conn, int sockindex,
   (void) sockindex; /* we only support SCP on the fixed known primary socket */
   (void) err;
 
-  rc = ssh_channel_write(conn->proto.sshc.ssh_channel, mem, (uint32_t)len);
+  rc = ssh_channel_write(conn->proto.sshc.ssh_channel, mem,
+    (uint32_t)len);
 
 #if 0
   /* The following code is misleading, mostly added as wishful thinking
@@ -2583,7 +2584,8 @@ static ssize_t ssh_recv(struct connectdata *conn, int sockindex,
   (void) sockindex; /* we only support SCP on the fixed known primary socket */
 
   /* libssh returns int */
-  nread = ssh_channel_read(conn->proto.sshc.ssh_channel, mem, (uint32_t)len, 0);
+  nread = ssh_channel_read(conn->proto.sshc.ssh_channel, mem,
+    (uint32_t)len, 0);
 
 #if 0
   /* The following code is misleading, mostly added as wishful thinking
