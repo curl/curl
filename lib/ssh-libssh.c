@@ -1750,6 +1750,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_SSH_TRANS_INIT:
+      protop->size = 0;
       result = Curl_getworkingpath(conn, sshc->homedir, &protop->path);
       if(result) {
         sshc->actualcode = result;
@@ -1759,14 +1760,6 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* Functions from the SCP subsystem cannot handle/return SSH_AGAIN */
       ssh_set_blocking(sshc->ssh_session, 1);
-/*      sshc->readdir_linkPath = malloc(PATH_MAX + 1);
-      if(sshc->readdir_linkPath == NULL) {
-        state(conn, SSH_SFTP_CLOSE);
-        sshc->actualcode = CURLE_OUT_OF_MEMORY;
-        break;
-      }
-      msnprintf(sshc->readdir_linkPath, PATH_MAX, "echo \"%s\"",
-      protop->path);*/
 
       if(data->set.upload) {
         if(data->state.infilesize < 0) {
@@ -2525,6 +2518,8 @@ static ssize_t ssh_send(struct connectdata *conn, int sockindex,
                         const void *mem, size_t len, CURLcode *err)
 {
   int rc;
+  struct Curl_easy *data = conn->data;
+  struct SSHPROTO *protop = data->req.protop;
   (void) sockindex; /* we only support SCP on the fixed known primary socket */
   (void) err;
 
@@ -2542,12 +2537,16 @@ static ssize_t ssh_send(struct connectdata *conn, int sockindex,
   }
   else
 #endif
-//  if(rc != SSH_OK) {
-  if(rc == SSH_ERROR) {
+  if(rc < 0) {
     *err = CURLE_SSH;
     return -1;
   }
-  ssh_channel_send_eof(conn->proto.sshc.ssh_channel);
+
+  protop->size += rc;
+
+  if(protop->size >= data->req.size)
+    ssh_channel_send_eof(conn->proto.sshc.ssh_channel);
+
   return len;
 }
 

@@ -115,6 +115,7 @@ typedef enum {
    struct. */
 struct SSHPROTO {
   char *path;                  /* the path we operate on */
+  int size;
 };
 
 /* ssh_conn is used for struct connection-oriented data in the connectdata
