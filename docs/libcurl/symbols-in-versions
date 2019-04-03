@@ -675,6 +675,7 @@ CURLPROTO_RTMPTE                7.21.0
 CURLPROTO_RTMPTS                7.21.0
 CURLPROTO_RTSP                  7.20.0
 CURLPROTO_SCP                   7.19.4
+CURLPROTO_SSH                   7.19.4
 CURLPROTO_SFTP                  7.19.4
 CURLPROTO_SMB                   7.40.0
 CURLPROTO_SMBS                  7.40.0
