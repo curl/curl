@@ -10,7 +10,7 @@ This option enables the alt-svc parser in curl. If the file name points to an
 existing alt-svc cache file, that will be used. After a completed transfer,
 the cache will be saved to the file name again if it has been modified.
 
-Specifiy a "" file name (zero length) to avoid loading/saving and make curl
+Specify a "" file name (zero length) to avoid loading/saving and make curl
 just handle the cache in memory.
 
 If this option is used several times, curl will load contents from all the

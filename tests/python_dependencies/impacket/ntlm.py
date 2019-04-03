@@ -412,7 +412,7 @@ class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
         self['domain_name']='' #"CLON".encode('utf-16le')
         self['host_name']='' #"BETS".encode('utf-16le')
         self['flags'] = (   #authResp['flags']
-                # we think (beto & gera) that his flags force a memory conten leakage when a windows 2000 answers using uninitializaed verifiers
+                # we think (beto & gera) that his flags force a memory content leakage when a windows 2000 answers using uninitializaed verifiers
            NTLMSSP_NEGOTIATE_128     |
            NTLMSSP_NEGOTIATE_KEY_EXCH|
            # NTLMSSP_LM_KEY      |
@@ -894,7 +894,7 @@ def computeResponseNTLMv2(flags, serverChallenge, clientChallenge,  serverName, 
     responseKeyNT = NTOWFv2(user, password, domain, nthash)
     responseKeyLM = LMOWFv2(user, password, domain, lmhash)
 
-    # If you're running test-ntlm, comment the following lines and uncoment the ones that are commented. Don't forget to turn it back after the tests!
+    # If you're running test-ntlm, comment the following lines and uncomment the ones that are commented. Don't forget to turn it back after the tests!
     ######################
     av_pairs = AV_PAIRS(serverName)
     # In order to support SPN target name validation, we have to add this to the serverName av_pairs. Otherwise we will get access denied

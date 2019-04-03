@@ -970,7 +970,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     char *h;
 
     if(!strcmp(":authority", (const char *)name)) {
-      /* psuedo headers are lower case */
+      /* pseudo headers are lower case */
       int rc = 0;
       char *check = aprintf("%s:%d", conn->host.name, conn->remote_port);
       if(!check)

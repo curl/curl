@@ -33,7 +33,7 @@
 # [-] Try replacements for SMB_COM_NT_CREATE_ANDX  (CREATE, T_TRANSACT_CREATE, OPEN_ANDX works
 # [x] Fix forceWriteAndx, which needs to send a RecvRequest, because recv() will not send it
 # [x] Fix Recv() when using RecvAndx and the answer comes splet in several packets
-# [ ] Try [SMB]transport fragmentation with overlaping segments
+# [ ] Try [SMB]transport fragmentation with overlapping segments
 # [ ] Try [SMB]transport fragmentation with out of order segments
 # [x] Do chained AndX requests
 # [ ] Transform the rest of the calls to structure
@@ -249,7 +249,7 @@ def strerror(errclass, errcode):
     else:
         return 'Unknown error', 'Unknown error'
 
-# Raised when an error has occured during a session
+# Raised when an error has occurred during a session
 class SessionError(Exception):
     # SMB X/Open error codes for the ERRDOS error class
     ERRsuccess                           = 0
@@ -754,7 +754,7 @@ class SMBAndXCommand_Parameters(Structure):
         ('_reserved','B=0'),
         ('AndXOffset','<H=0'),
     )
-    structure = (       # default structure, overriden by subclasses
+    structure = (       # default structure, overridden by subclasses
         ('Data',':=""'),
     )
 
@@ -2370,7 +2370,7 @@ class SMB:
         self._SignatureVerificationEnabled = False
         self._SignatureRequired = False
 
-        # Base flags (default flags, can be overriden using set_flags())
+        # Base flags (default flags, can be overridden using set_flags())
         self.__flags1 = SMB.FLAGS1_PATHCASELESS | SMB.FLAGS1_CANONICALIZED_PATHS
         self.__flags2 = SMB.FLAGS2_EXTENDED_SECURITY | SMB.FLAGS2_NT_STATUS | SMB.FLAGS2_LONG_NAMES
 

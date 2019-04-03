@@ -301,7 +301,7 @@ class SMB3:
         # Connection.SupportsPersistentHandles is TRUE, the client MUST set ChannelSequence in the
         # SMB2 header to Session.ChannelSequence
 
-        # Check this is not a CANCEL request. If so, don't consume sequece numbers
+        # Check this is not a CANCEL request. If so, don't consume sequence numbers
         if packet['Command'] is not SMB2_CANCEL:
             packet['MessageID'] = self._Connection['SequenceWindow']
             self._Connection['SequenceWindow'] += 1
