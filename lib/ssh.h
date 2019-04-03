@@ -87,13 +87,15 @@ typedef enum {
   SSH_SFTP_DOWNLOAD_STAT, /* Last state in SFTP-DO */
   SSH_SFTP_CLOSE,    /* Last state in SFTP-DONE */
   SSH_SFTP_SHUTDOWN, /* First state in SFTP-DISCONNECT */
-  SSH_SSH_TRANS_INIT, /* First state in SCP-DO */
+#if defined(USE_LIBSSH)
+  SSH_SSH_TRANS_INIT, /* First state in SSH-DO */
   SSH_SSH_EXECUTE_INIT,
   SSH_SSH_DONE,
   SSH_SSH_SEND_EOF,
   SSH_SSH_WAIT_EOF,
   SSH_SSH_WAIT_CLOSE,
   SSH_SSH_CHANNEL_FREE,   /* Last state in SSH-DONE */
+#endif /* USE_LIBSSH */
   SSH_SCP_TRANS_INIT, /* First state in SCP-DO */
   SSH_SCP_UPLOAD_INIT,
   SSH_SCP_DOWNLOAD_INIT,
@@ -248,7 +250,6 @@ extern const struct Curl_handler Curl_handler_sftp;
 #endif
 
 extern const struct Curl_handler Curl_handler_scp;
-//extern const struct Curl_handler Curl_handler_ssh;
 extern const struct Curl_handler Curl_handler_sftp;
 
 #endif /* USE_LIBSSH2 */
