@@ -17,9 +17,14 @@ import re
 from random import randrange
 from struct import pack, unpack
 
+try:
+    long        # Python 2
+except NameError:
+    long = int  # Python 3
+
 def generate():
     # UHm... crappy Python has an maximum integer of 2**31-1.
-    top = (1L<<31)-1
+    top = (1<<31)-1
     return pack("IIII", randrange(top), randrange(top), randrange(top), randrange(top))
 
 def bin_to_string(uuid):
@@ -49,16 +54,16 @@ def bin_to_uuidtup(bin):
     return uuidstr, "%d.%d" % (maj, min)
 
 #input: string
-#output: tuple (uuid,version) 
+#output: tuple (uuid,version)
 #if version is not found in the input string "1.0"  is returned
-#example: 
-#           "00000000-0000-0000-0000-000000000000 3.0" returns ('00000000-0000-0000-0000-000000000000','3.0') 
-#           "10000000-2000-3000-4000-500000000000 version 3.0" returns ('00000000-0000-0000-0000-000000000000','3.0') 
-#           "10000000-2000-3000-4000-500000000000 v 3.0" returns ('00000000-0000-0000-0000-000000000000','3.0') 
-#           "10000000-2000-3000-4000-500000000000" returns ('00000000-0000-0000-0000-000000000000','1.0') 
+#example:
+#           "00000000-0000-0000-0000-000000000000 3.0" returns ('00000000-0000-0000-0000-000000000000','3.0')
+#           "10000000-2000-3000-4000-500000000000 version 3.0" returns ('00000000-0000-0000-0000-000000000000','3.0')
+#           "10000000-2000-3000-4000-500000000000 v 3.0" returns ('00000000-0000-0000-0000-000000000000','3.0')
+#           "10000000-2000-3000-4000-500000000000" returns ('00000000-0000-0000-0000-000000000000','1.0')
 def string_to_uuidtup(s):
     g =  re.search("([A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}).*?([0-9]{1,5}\.[0-9]{1,5})",s+" 1.0")
-    if g: 
+    if g:
         (u,v) = g.groups()
         return (u,v)
     return
