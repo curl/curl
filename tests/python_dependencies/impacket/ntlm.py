@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright (c) 2003-2016 CORE Security Technologies:
 #
 # This software is provided under under a slightly modified version
@@ -17,8 +18,8 @@ from impacket.structure import Structure
 from impacket import LOG
 
 
-# This is important. NTLMv2 is not negotiated by the client or server. 
-# It is used if set locally on both sides. Change this item if you don't want to use 
+# This is important. NTLMv2 is not negotiated by the client or server.
+# It is used if set locally on both sides. Change this item if you don't want to use
 # NTLMv2 by default and fall back to NTLMv1 (with EXTENDED_SESSION_SECURITY or not)
 # Check the following links:
 # http://davenport.sourceforge.net/ntlm.html
@@ -209,7 +210,7 @@ class AV_PAIRS():
         self.fields[key] = (len(value),value)
 
     def __getitem__(self, key):
-        if self.fields.has_key(key):
+        if key in self.fields:
            return self.fields[key]
         return None
 
@@ -236,16 +237,16 @@ class AV_PAIRS():
 
     def dump(self):
         for i in self.fields.keys():
-            print "%s: {%r}" % (i,self[i])
+            print("%s: {%r}" % (i,self[i]))
 
     def getData(self):
-        if self.fields.has_key(NTLMSSP_AV_EOL):
+        if NTLMSSP_AV_EOL in self.fields:
             del self.fields[NTLMSSP_AV_EOL]
         ans = ''
         for i in self.fields.keys():
             ans+= struct.pack('<HH', i, self[i][0])
             ans+= self[i][1]
- 
+
         # end with a NTLMSSP_AV_EOL
         ans += struct.pack('<HH', NTLMSSP_AV_EOL, 0)
 
@@ -260,7 +261,7 @@ class NTLMAuthMixin:
             minor_v = struct.unpack('B',self['os_version'][1])[0]
             build_v = struct.unpack('H',self['os_version'][2:4])
             return (mayor_v,minor_v,build_v)
-        
+
 class NTLMAuthNegotiate(Structure, NTLMAuthMixin):
 
     structure = (
@@ -276,7 +277,7 @@ class NTLMAuthNegotiate(Structure, NTLMAuthMixin):
         ('os_version',':'),
         ('host_name',':'),
         ('domain_name',':'))
-                                                                                
+
     def __init__(self):
         Structure.__init__(self)
         self['flags']= (
@@ -293,7 +294,7 @@ class NTLMAuthNegotiate(Structure, NTLMAuthMixin):
         self['host_name']=''
         self['domain_name']=''
         self['os_version']=''
-    
+
     def getData(self):
         if len(self.fields['host_name']) > 0:
             self['flags'] |= NTLMSSP_NEGOTIATE_OEM_WORKSTATION_SUPPLIED
@@ -342,7 +343,7 @@ class NTLMAuthChallenge(Structure):
         ('TargetInfoFields_len','<H-TargetInfoFields'),
         ('TargetInfoFields_max_len','<H-TargetInfoFields'),
         ('TargetInfoFields_offset','<L'),
-        ('VersionLen','_-Version','self.checkVersion(self["flags"])'), 
+        ('VersionLen','_-Version','self.checkVersion(self["flags"])'),
         ('Version',':'),
         ('domain_name',':'),
         ('TargetInfoFields',':'))
@@ -365,11 +366,11 @@ class NTLMAuthChallenge(Structure):
         self['TargetInfoFields'] = self['TargetInfoFields'][:self['TargetInfoFields_len']]
         # We gotta process the TargetInfoFields
         #if self['TargetInfoFields_len'] > 0:
-        #    av_pairs = AV_PAIRS(self['TargetInfoFields'][:self['TargetInfoFields_len']]) 
+        #    av_pairs = AV_PAIRS(self['TargetInfoFields'][:self['TargetInfoFields_len']])
         #    self['TargetInfoFields'] = av_pairs
 
         return self
-        
+
 class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
 
     structure = (
@@ -394,7 +395,7 @@ class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
         ('session_key_max_len','<H-session_key'),
         ('session_key_offset','<L'),
         ('flags','<L'),
-        ('VersionLen','_-Version','self.checkVersion(self["flags"])'), 
+        ('VersionLen','_-Version','self.checkVersion(self["flags"])'),
         ('Version',':=""'),
         ('MICLen','_-MIC','self.checkMIC(self["flags"])'),
         ('MIC',':=""'),
@@ -424,7 +425,7 @@ class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
            # NTLMSSP_TARGET      |
            0)
         # Here we do the stuff
-        if username and ( lmhash != '' or nthash != ''):            
+        if username and ( lmhash != '' or nthash != ''):
             self['lanman'] = get_ntlmv1_response(lmhash, challenge)
             self['ntlm'] = get_ntlmv1_response(nthash, challenge)
         elif (username and password):
@@ -450,7 +451,7 @@ class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
            if flags & NTLMSSP_NEGOTIATE_VERSION == 0:
               return 0
         return 16
-                                                                                
+
     def getData(self):
         self['domain_offset']=64+self.checkMIC(self["flags"])+self.checkVersion(self["flags"])
         self['user_offset']=64+self.checkMIC(self["flags"])+self.checkVersion(self["flags"])+len(self['domain_name'])
@@ -463,7 +464,7 @@ class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
     def fromString(self,data):
         Structure.fromString(self,data)
         # [MS-NLMP] page 27
-        # Payload data can be present in any order within the Payload field, 
+        # Payload data can be present in any order within the Payload field,
         # with variable-length padding before or after the data
 
         domain_offset = self['domain_offset']
@@ -478,15 +479,15 @@ class NTLMAuthChallengeResponse(Structure, NTLMAuthMixin):
         user_end    = self['user_len'] + user_offset
         self['user_name'] = data[ user_offset: user_end ]
 
-        ntlm_offset = self['ntlm_offset'] 
-        ntlm_end    = self['ntlm_len'] + ntlm_offset 
+        ntlm_offset = self['ntlm_offset']
+        ntlm_end    = self['ntlm_len'] + ntlm_offset
         self['ntlm'] = data[ ntlm_offset : ntlm_end ]
 
-        lanman_offset = self['lanman_offset'] 
+        lanman_offset = self['lanman_offset']
         lanman_end    = self['lanman_len'] + lanman_offset
         self['lanman'] = data[ lanman_offset : lanman_end]
 
-        #if len(data) >= 36: 
+        #if len(data) >= 36:
         #    self['os_version'] = data[32:36]
         #else:
         #    self['os_version'] = ''
@@ -607,11 +608,11 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
     # Let's start with the original flags sent in the type1 message
     responseFlags = type1['flags']
 
-    # Token received and parsed. Depending on the authentication 
+    # Token received and parsed. Depending on the authentication
     # method we will create a valid ChallengeResponse
     ntlmChallengeResponse = NTLMAuthChallengeResponse(user, password, ntlmChallenge['challenge'])
 
-    clientChallenge = "".join([random.choice(string.digits+string.letters) for i in xrange(8)])
+    clientChallenge = "".join([random.choice(string.digits+string.letters) for i in range(8)])
 
     serverName = ntlmChallenge['TargetInfoFields']
 
@@ -647,7 +648,7 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
     if ntlmChallenge['flags'] & NTLMSSP_NEGOTIATE_KEY_EXCH:
        # not exactly what I call random tho :\
        # exportedSessionKey = this is the key we should use to sign
-       exportedSessionKey = "".join([random.choice(string.digits+string.letters) for i in xrange(16)])
+       exportedSessionKey = "".join([random.choice(string.digits+string.letters) for i in range(16)])
        #exportedSessionKey = "A"*16
        #print "keyExchangeKey %r" % keyExchangeKey
        # Let's generate the right session key based on the challenge flags
@@ -677,7 +678,7 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
     ntlmChallengeResponse['domain_name'] = domain.encode('utf-16le')
     ntlmChallengeResponse['lanman'] = lmResponse
     ntlmChallengeResponse['ntlm'] = ntResponse
-    if encryptedRandomSessionKey is not None: 
+    if encryptedRandomSessionKey is not None:
         ntlmChallengeResponse['session_key'] = encryptedRandomSessionKey
 
     return ntlmChallengeResponse, exportedSessionKey
@@ -688,13 +689,13 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
 def generateSessionKeyV1(password, lmhash, nthash):
     if POW:
         hash = POW.Digest(POW.MD4_DIGEST)
-    else:        
+    else:
         hash = MD4.new()
     hash.update(NTOWFv1(password, lmhash, nthash))
     return hash.digest()
-    
+
 def computeResponseNTLMv1(flags, serverChallenge, clientChallenge, serverName, domain, user, password, lmhash='', nthash='', use_ntlmv2 = USE_NTLMv2):
-    if (user == '' and password == ''): 
+    if (user == '' and password == ''):
         # Special case for anonymous authentication
         lmResponse = ''
         ntResponse = ''
@@ -713,7 +714,7 @@ def computeResponseNTLMv1(flags, serverChallenge, clientChallenge, serverName, d
         else:
            ntResponse = get_ntlmv1_response(nthash,serverChallenge)
            lmResponse = get_ntlmv1_response(lmhash, serverChallenge)
-   
+
     sessionBaseKey = generateSessionKeyV1(password, lmhash, nthash)
     return ntResponse, lmResponse, sessionBaseKey
 
@@ -727,7 +728,7 @@ def compute_lmhash(password):
 def NTOWFv1(password, lmhash = '', nthash=''):
     if nthash != '':
        return nthash
-    return compute_nthash(password)   
+    return compute_nthash(password)
 
 def LMOWFv1(password, lmhash = '', nthash=''):
     if lmhash != '':
@@ -738,13 +739,15 @@ def compute_nthash(password):
     # This is done according to Samba's encryption specification (docs/html/ENCRYPTION.html)
     try:
         password = unicode(password).encode('utf_16le')
+    except NameError:  # unicode() was removed in Python 3
+        password = str(password).encode('utf_16le')
     except UnicodeDecodeError:
         import sys
         password = password.decode(sys.getfilesystemencoding()).encode('utf_16le')
 
     if POW:
         hash = POW.Digest(POW.MD4_DIGEST)
-    else:        
+    else:
         hash = MD4.new()
     hash.update(password)
     return hash.digest()
@@ -780,7 +783,7 @@ def MAC(flags, handle, signingKey, seqNum, message):
        messageSignature['SeqNum'] = handle('\x00\x00\x00\x00')
        messageSignature['SeqNum'] = struct.unpack('<i',messageSignature['SeqNum'])[0] ^ seqNum
        messageSignature['RandomPad'] = 0
-       
+
    return messageSignature
 
 def SEAL(flags, signingKey, sealingKey, messageToSign, messageToEncrypt, seqNum, handle):
@@ -863,7 +866,7 @@ def KXKEY(flags, sessionBaseKey, lmChallengeResponse, serverChallenge, password,
        raise "Can't create a valid KXKEY!"
 
    return keyExchangeKey
-      
+
 def hmac_md5(key, data):
     if POW:
         h = POW.Hmac(POW.MD5_DIGEST, key)
@@ -878,7 +881,7 @@ def hmac_md5(key, data):
 
 def NTOWFv2( user, password, domain, hash = ''):
     if hash != '':
-       theHash = hash 
+       theHash = hash
     else:
        theHash = compute_nthash(password)
     return hmac_md5(theHash, user.upper().encode('utf-16le') + domain.encode('utf-16le'))
@@ -907,7 +910,7 @@ def computeResponseNTLMv2(flags, serverChallenge, clientChallenge,  serverName, 
        #aTime = '\x00'*8
        av_pairs[NTLMSSP_AV_TIME] = aTime
     serverName = av_pairs.getData()
-          
+
     ######################
     #aTime = '\x00'*8
     ######################
@@ -937,20 +940,20 @@ class NTLM_HTTP(object):
         if msg_64 != '':
             msg = base64.b64decode(msg_64[5:]) # Remove the 'NTLM '
             msg_type = ord(msg[8])
-    
+
         for _cls in NTLM_HTTP.__subclasses__():
             if msg_type == _cls.MSG_TYPE:
                 instance = _cls()
                 instance.fromString(msg)
                 return instance
 
-    
+
 class NTLM_HTTP_AuthRequired(NTLM_HTTP):
     commonHdr = ()
     # Message 0 means the first HTTP request e.g. 'GET /bla.png'
     MSG_TYPE = 0
 
-    def fromString(self,data): 
+    def fromString(self,data):
         pass
 
 
@@ -968,4 +971,3 @@ class NTLM_HTTP_AuthChallengeResponse(NTLM_HTTP, NTLMAuthChallengeResponse):
 
     def __init__(self):
         NTLMAuthChallengeResponse.__init__(self)
-
