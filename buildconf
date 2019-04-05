@@ -90,6 +90,25 @@ if test ! -f configure.ac ||
   exit 1
 fi
 
+
+
+
+#--------------------------------------------------------------------------
+# Ensure that brew is installed and install if not
+#
+# am4te_version=`${AUTOM4TE:-autom4te} --version 2>/dev/null|head -n 1| sed -e 's/autom4te\(.*\)/\1/' -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  brew=`${BREW:-brew} -v 2>/dev/null|head -n 1| sed -e 's/Homebrew^[^0-9]*//' -e 's/[a-z]* *$//'`
+  if test -z "$brew"; then
+    echo "Installing Homebrew ..."
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  else
+    echo "buildconf: Homebrew version $brew (ok)"
+  fi
+fi
+
+
+
 #--------------------------------------------------------------------------
 # autoconf 2.57 or newer. Unpatched version 2.67 does not generate proper
 # configure script. Unpatched version 2.68 is simply unusable, we should
@@ -98,18 +117,26 @@ fi
 need_autoconf="2.57"
 ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -n 1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
-  echo "buildconf: autoconf not found."
-  echo "            You need autoconf version $need_autoconf or newer installed."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install autoconf
+  else
+    echo "buildconf: autoconf not found."
+    echo "            You need autoconf version $need_autoconf or newer installed."
+    exit 1
+  fi
 fi
 old_IFS=$IFS; IFS='.'; set $ac_version; IFS=$old_IFS
 if test "$1" = "2" -a "$2" -lt "57" || test "$1" -lt "2"; then
-  echo "buildconf: autoconf version $ac_version found."
-  echo "            You need autoconf version $need_autoconf or newer installed."
-  echo "            If you have a sufficient autoconf installed, but it"
-  echo "            is not named 'autoconf', then try setting the"
-  echo "            AUTOCONF environment variable."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew update && brew upgrade autoconf
+  else
+    echo "buildconf: autoconf version $ac_version found."
+    echo "            You need autoconf version $need_autoconf or newer installed."
+    echo "            If you have a sufficient autoconf installed, but it"
+    echo "            is not named 'autoconf', then try setting the"
+    echo "            AUTOCONF environment variable."
+    exit 1
+  fi
 fi
 
 if test "$1" = "2" -a "$2" -eq "67"; then
@@ -122,6 +149,7 @@ else
   echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
+
 am4te_version=`${AUTOM4TE:-autom4te} --version 2>/dev/null|head -n 1| sed -e 's/autom4te\(.*\)/\1/' -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$am4te_version"; then
   echo "buildconf: autom4te not found. Weird autoconf installation!"
@@ -130,8 +158,12 @@ fi
 if test "$am4te_version" = "$ac_version"; then
   echo "buildconf: autom4te version $am4te_version (ok)"
 else
-  echo "buildconf: autom4te version $am4te_version (ERROR: does not match autoconf version)"
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew update && brew upgrade autom4te
+  else
+    echo "buildconf: autom4te version $am4te_version (ERROR: does not match autoconf version)"
+    exit 1
+  fi
 fi
 
 #--------------------------------------------------------------------------
@@ -139,18 +171,26 @@ fi
 #
 ah_version=`${AUTOHEADER:-autoheader} --version 2>/dev/null|head -n 1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ah_version"; then
-  echo "buildconf: autoheader not found."
-  echo "            You need autoheader version 2.50 or newer installed."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install autoheader
+  else
+    echo "buildconf: autoheader not found."
+    echo "            You need autoheader version 2.50 or newer installed."
+    exit 1
+  fi
 fi
 old_IFS=$IFS; IFS='.'; set $ah_version; IFS=$old_IFS
 if test "$1" = "2" -a "$2" -lt "50" || test "$1" -lt "2"; then
-  echo "buildconf: autoheader version $ah_version found."
-  echo "            You need autoheader version 2.50 or newer installed."
-  echo "            If you have a sufficient autoheader installed, but it"
-  echo "            is not named 'autoheader', then try setting the"
-  echo "            AUTOHEADER environment variable."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew update && brew upgrade autoheader
+  else
+    echo "buildconf: autoheader version $ah_version found."
+    echo "            You need autoheader version 2.50 or newer installed."
+    echo "            If you have a sufficient autoheader installed, but it"
+    echo "            is not named 'autoheader', then try setting the"
+    echo "            AUTOHEADER environment variable."
+    exit 1
+  fi
 fi
 
 echo "buildconf: autoheader version $ah_version (ok)"
@@ -161,32 +201,49 @@ echo "buildconf: autoheader version $ah_version (ok)"
 need_automake="1.7"
 am_version=`${AUTOMAKE:-automake} --version 2>/dev/null|head -n 1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//' -e 's/\(.*\)\(-p.*\)/\1/'`
 if test -z "$am_version"; then
-  echo "buildconf: automake not found."
-  echo "            You need automake version $need_automake or newer installed."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install automake
+  else
+    echo "buildconf: automake not found."
+    echo "            You need automake version $need_automake or newer installed."
+    exit 1
+  fi
 fi
+
 old_IFS=$IFS; IFS='.'; set $am_version; IFS=$old_IFS
 if test "$1" = "1" -a "$2" -lt "7" || test "$1" -lt "1"; then
-  echo "buildconf: automake version $am_version found."
-  echo "            You need automake version $need_automake or newer installed."
-  echo "            If you have a sufficient automake installed, but it"
-  echo "            is not named 'automake', then try setting the"
-  echo "            AUTOMAKE environment variable."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew update && brew upgrade automake
+  else
+    echo "buildconf: automake version $am_version found."
+    echo "            You need automake version $need_automake or newer installed."
+    echo "            If you have a sufficient automake installed, but it"
+    echo "            is not named 'automake', then try setting the"
+    echo "            AUTOMAKE environment variable."
+    exit 1
+  fi
 fi
 
 echo "buildconf: automake version $am_version (ok)"
 
 acloc_version=`${ACLOCAL:-aclocal} --version 2>/dev/null|head -n 1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//' -e 's/\(.*\)\(-p.*\)/\1/'`
 if test -z "$acloc_version"; then
-  echo "buildconf: aclocal not found. Weird automake installation!"
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install automake
+  else
+    echo "buildconf: aclocal not found. Weird automake installation!"
+    exit 1
+  fi
 fi
 if test "$acloc_version" = "$am_version"; then
   echo "buildconf: aclocal version $acloc_version (ok)"
 else
-  echo "buildconf: aclocal version $acloc_version (ERROR: does not match automake version)"
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew update && brew upgrade automake
+  else
+    echo "buildconf: aclocal version $acloc_version (ERROR: does not match automake version)"
+    exit 1
+  fi
 fi
 
 #--------------------------------------------------------------------------
@@ -205,18 +262,26 @@ if test ! -x "$libtoolize"; then
   libtoolize=`findtool ${LIBTOOLIZE:-libtoolize}`
 fi
 if test -z "$libtoolize"; then
-  echo "buildconf: libtoolize not found."
-  echo "  You need GNU libtoolize $want_lt_version or newer installed."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install libtool
+  else
+    echo "buildconf: libtoolize not found."
+    echo "  You need GNU libtoolize $want_lt_version or newer installed."
+    exit 1
+  fi
 fi
 
 lt_pver=`$libtoolize --version 2>/dev/null|head -n 1`
 lt_qver=`echo $lt_pver|sed -e "s/([^)]*)//g" -e "s/^[^0-9]*//g"`
 lt_version=`echo $lt_qver|sed -e "s/[- ].*//" -e "s/\([a-z]*\)$//"`
 if test -z "$lt_version"; then
-  echo "buildconf: libtoolize not found."
-  echo "  You need GNU libtoolize $want_lt_version or newer installed."
-  exit 1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew update && brew upgrade libtool
+  else
+    echo "buildconf: libtoolize not found."
+    echo "  You need GNU libtoolize $want_lt_version or newer installed."
+    exit 1
+  fi
 fi
 old_IFS=$IFS; IFS='.'; set $lt_version; IFS=$old_IFS
 lt_major=$1
