@@ -16,7 +16,7 @@ RFC7628
 <servercmd>
 AUTH OAUTHBEARER
 REPLY AUTH 334 OAUTHBEARER supported
-REPLY dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== 235 Authenticated
+REPLY bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== 235 Authenticated
 </servercmd>
 </reply>
 
@@ -48,7 +48,7 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <protocol>
 EHLO 946
 AUTH OAUTHBEARER
-dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA

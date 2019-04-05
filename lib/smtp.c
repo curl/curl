@@ -1218,7 +1218,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
        returned CURLE_AGAIN, we duplicate the EOB now rather than when the
        bytes written doesn't equal len. */
     if(smtp->trailing_crlf || !conn->data->state.infilesize) {
-      eob = strdup(SMTP_EOB + 2);
+      eob = strdup(&SMTP_EOB[2]);
       len = SMTP_EOB_LEN - 2;
     }
     else {

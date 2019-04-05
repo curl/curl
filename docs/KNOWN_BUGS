@@ -162,7 +162,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  There's a situation where we can get an error in a HTTP response that is
  compressed, when that error is detected after all the actual body contents
- have been received and delivered to the appliction. This is tricky, but is
+ have been received and delivered to the application. This is tricky, but is
  ultimately a broken server.
 
  See https://github.com/curl/curl/issues/2719

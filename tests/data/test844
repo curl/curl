@@ -15,7 +15,8 @@ RFC7628
 <servercmd>
 AUTH OAUTHBEARER
 REPLY AUTHENTICATE +
-REPLY dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== + eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0=
+REPLY bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ== +
+eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0=
 REPLY AQ== A002 NO Authentication failed
 </servercmd>
 </reply>
@@ -52,7 +53,7 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 <protocol>
 A001 CAPABILITY
 A002 AUTHENTICATE OAUTHBEARER
-dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
 AQ==
 </protocol>
 </verify>
