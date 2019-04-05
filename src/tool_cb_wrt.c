@@ -159,7 +159,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-#ifdef _WIN32
+#ifdef WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
   if(isatty(fileno(outs->stream)) &&
      GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info)) {

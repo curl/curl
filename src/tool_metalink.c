@@ -73,7 +73,7 @@
    and later. If you're building for an older cat, well, sorry. */
 #  define COMMON_DIGEST_FOR_OPENSSL
 #  include <CommonCrypto/CommonDigest.h>
-#elif defined(_WIN32)
+#elif defined(WIN32)
 /* For Windows: If no other crypto library is provided, we fallback
    to the hash functions provided within the Microsoft Windows CryptoAPI */
 #  include <wincrypt.h>
@@ -380,7 +380,7 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
   sha256_finish(ctx, digest);
 }
 
-#elif defined(_WIN32)
+#elif defined(WIN32)
 
 static void win32_crypto_final(struct win32_crypto_hash *ctx,
                                unsigned char *digest,
