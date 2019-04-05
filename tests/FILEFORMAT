@@ -156,8 +156,6 @@ auth_required   if this is set and a POST/PUT is made without auth, the
 idle            do nothing after receiving the request, just "sit idle"
 stream          continuously send data to the client, never-ending
 writedelay: [secs] delay this amount between reply packets
-pipe: [num]     tell the server to expect this many HTTP requests before
-                sending back anything, to allow pipelining tests
 skip: [num]     instructs the server to ignore reading this many bytes from a PUT
                 or POST request
 
@@ -188,7 +186,6 @@ ftp-ipv6
 ftps
 http
 http-ipv6
-http-pipe
 http-proxy
 http-unix
 https
@@ -354,7 +351,6 @@ Available substitute variables include:
 %HOST6IP      - IPv6 address of the host running this test
 %HOSTIP       - IPv4 address of the host running this test
 %HTTP6PORT    - IPv6 port number of the HTTP server
-%HTTPPIPEPORT - Port number of the HTTP pipelining server
 %HTTPUNIXPATH - Path to the Unix socket of the HTTP server
 %HTTPPORT     - Port number of the HTTP server
 %HTTPSPORT    - Port number of the HTTPS server

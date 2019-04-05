@@ -73,7 +73,6 @@
 #include "http_proxy.h"
 #include "warnless.h"
 #include "non-ascii.h"
-#include "pipeline.h"
 #include "http2.h"
 #include "connect.h"
 #include "strdup.h"
@@ -1280,7 +1279,6 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
            This needs FIXing.
         */
         return CURLE_SEND_ERROR;
-      Curl_pipeline_leave_write(conn);
     }
   }
   Curl_add_buffer_free(&in);
@@ -3722,16 +3720,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
-          /* If HTTP version is >= 1.1 and connection is persistent
-             server supports pipelining. */
+          /* If HTTP version is >= 1.1 and connection is persistent */
           DEBUGF(infof(data,
-                       "HTTP 1.1 or later with persistent connection, "
-                       "pipelining supported\n"));
-          /* Activate pipelining if needed */
-          if(conn->bundle) {
-            if(!Curl_pipeline_site_blacklisted(data, conn))
-              conn->bundle->multiuse = BUNDLE_PIPELINING;
-          }
+                       "HTTP 1.1 or later with persistent connection\n"));
         }
 
         switch(k->httpcode) {
@@ -3814,19 +3805,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       else {
         Curl_safefree(data->info.contenttype);
         data->info.contenttype = contenttype;
-      }
-    }
-    else if(checkprefix("Server:", k->p)) {
-      if(conn->httpversion < 20) {
-        /* only do this for non-h2 servers */
-        char *server_name = Curl_copy_header_value(k->p);
-
-        /* Turn off pipelining if the server version is blacklisted  */
-        if(conn->bundle && (conn->bundle->multiuse == BUNDLE_PIPELINING)) {
-          if(Curl_pipeline_server_blacklisted(data, server_name))
-            conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
-        }
-        free(server_name);
       }
     }
     else if((conn->httpversion == 10) &&

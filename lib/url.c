@@ -116,7 +116,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "http_proxy.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "pipeline.h"
 #include "dotdot.h"
 #include "strdup.h"
 #include "setopt.h"
@@ -739,14 +738,10 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->secondaryhostname);
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
-  Curl_safefree(conn->master_buffer);
   Curl_safefree(conn->connect_state);
 
   conn_reset_all_postponed_data(conn);
-
-  Curl_llist_destroy(&conn->send_pipe, NULL);
-  Curl_llist_destroy(&conn->recv_pipe, NULL);
-
+  Curl_llist_destroy(&conn->easyq, NULL);
   Curl_safefree(conn->localdev);
   Curl_free_primary_ssl_config(&conn->ssl_config);
   Curl_free_primary_ssl_config(&conn->proxy_ssl_config);
@@ -843,111 +838,26 @@ static bool SocketIsDead(curl_socket_t sock)
 }
 
 /*
- * IsPipeliningPossible()
+ * IsMultiplexingPossible()
  *
- * Return a bitmask with the available pipelining and multiplexing options for
- * the given requested connection.
+ * Return a bitmask with the available multiplexing options for the given
+ * requested connection.
  */
-static int IsPipeliningPossible(const struct Curl_easy *handle,
-                                const struct connectdata *conn)
+static int IsMultiplexingPossible(const struct Curl_easy *handle,
+                                  const struct connectdata *conn)
 {
   int avail = 0;
 
-  /* If a HTTP protocol and pipelining is enabled */
+  /* If a HTTP protocol and multiplexing is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (!conn->bits.protoconnstart || !conn->bits.close)) {
 
-    if(Curl_pipeline_wanted(handle->multi, CURLPIPE_HTTP1) &&
-       (handle->set.httpversion != CURL_HTTP_VERSION_1_0) &&
-       (handle->set.httpreq == HTTPREQ_GET ||
-        handle->set.httpreq == HTTPREQ_HEAD))
-      /* didn't ask for HTTP/1.0 and a GET or HEAD */
-      avail |= CURLPIPE_HTTP1;
-
-    if(Curl_pipeline_wanted(handle->multi, CURLPIPE_MULTIPLEX) &&
+    if(Curl_multiplex_wanted(handle->multi) &&
        (handle->set.httpversion >= CURL_HTTP_VERSION_2))
       /* allows HTTP/2 */
       avail |= CURLPIPE_MULTIPLEX;
   }
   return avail;
-}
-
-/* Returns non-zero if a handle was removed */
-int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
-                                  struct curl_llist *pipeline)
-{
-  if(pipeline) {
-    struct curl_llist_element *curr;
-
-    curr = pipeline->head;
-    while(curr) {
-      if(curr->ptr == handle) {
-        Curl_llist_remove(pipeline, curr, NULL);
-        return 1; /* we removed a handle */
-      }
-      curr = curr->next;
-    }
-  }
-
-  return 0;
-}
-
-#if 0 /* this code is saved here as it is useful for debugging purposes */
-static void Curl_printPipeline(struct curl_llist *pipeline)
-{
-  struct curl_llist_element *curr;
-
-  curr = pipeline->head;
-  while(curr) {
-    struct Curl_easy *data = (struct Curl_easy *) curr->ptr;
-    infof(data, "Handle in pipeline: %s\n", data->state.path);
-    curr = curr->next;
-  }
-}
-#endif
-
-static struct Curl_easy* gethandleathead(struct curl_llist *pipeline)
-{
-  struct curl_llist_element *curr = pipeline->head;
-#ifdef DEBUGBUILD
-  {
-    struct curl_llist_element *p = pipeline->head;
-    while(p) {
-      struct Curl_easy *e = p->ptr;
-      DEBUGASSERT(GOOD_EASY_HANDLE(e));
-      p = p->next;
-    }
-  }
-#endif
-  if(curr) {
-    return (struct Curl_easy *) curr->ptr;
-  }
-
-  return NULL;
-}
-
-/* remove the specified connection from all (possible) pipelines and related
-   queues */
-void Curl_getoff_all_pipelines(struct Curl_easy *data,
-                               struct connectdata *conn)
-{
-  if(!conn->bundle)
-    return;
-  if(conn->bundle->multiuse == BUNDLE_PIPELINING) {
-    bool recv_head = (conn->readchannel_inuse &&
-                      Curl_recvpipe_head(data, conn));
-    bool send_head = (conn->writechannel_inuse &&
-                      Curl_sendpipe_head(data, conn));
-
-    if(Curl_removeHandleFromPipeline(data, &conn->recv_pipe) && recv_head)
-      Curl_pipeline_leave_read(conn);
-    if(Curl_removeHandleFromPipeline(data, &conn->send_pipe) && send_head)
-      Curl_pipeline_leave_write(conn);
-  }
-  else {
-    (void)Curl_removeHandleFromPipeline(data, &conn->recv_pipe);
-    (void)Curl_removeHandleFromPipeline(data, &conn->send_pipe);
-  }
 }
 
 static bool
@@ -974,10 +884,8 @@ proxy_info_matches(const struct proxy_info* data,
 static bool extract_if_dead(struct connectdata *conn,
                             struct Curl_easy *data)
 {
-  size_t pipeLen = conn->send_pipe.size + conn->recv_pipe.size;
-  if(!pipeLen && !CONN_INUSE(conn) && !conn->data) {
-    /* The check for a dead socket makes sense only if there are no
-       handles in pipeline and the connection isn't already marked in
+  if(!CONN_INUSE(conn) && !conn->data) {
+    /* The check for a dead socket makes sense only if the connection isn't in
        use */
     bool dead;
     if(conn->handler->connection_check) {
@@ -1047,13 +955,6 @@ static void prune_dead_connections(struct Curl_easy *data)
   }
 }
 
-
-static size_t max_pipeline_length(struct Curl_multi *multi)
-{
-  return multi ? multi->max_pipeline_length : 0;
-}
-
-
 /*
  * Given one filled in connection struct (named needle), this function should
  * detect if there already is one that has all the significant details
@@ -1063,8 +964,7 @@ static size_t max_pipeline_length(struct Curl_multi *multi)
  * connection as 'in-use'. It must later be called with ConnectionDone() to
  * return back to 'idle' (unused) state.
  *
- * The force_reuse flag is set if the connection must be used, even if
- * the pipelining strategy wants to open a new connection instead of reusing.
+ * The force_reuse flag is set if the connection must be used.
  */
 static bool
 ConnectionExists(struct Curl_easy *data,
@@ -1076,7 +976,7 @@ ConnectionExists(struct Curl_easy *data,
   struct connectdata *check;
   struct connectdata *chosen = 0;
   bool foundPendingCandidate = FALSE;
-  int canpipe = IsPipeliningPossible(data, needle);
+  bool canmultiplex = IsMultiplexingPossible(data, needle);
   struct connectbundle *bundle;
 
 #ifdef USE_NTLM
@@ -1092,59 +992,43 @@ ConnectionExists(struct Curl_easy *data,
   *force_reuse = FALSE;
   *waitpipe = FALSE;
 
-  /* We can't pipeline if the site is blacklisted */
-  if((canpipe & CURLPIPE_HTTP1) &&
-     Curl_pipeline_site_blacklisted(data, needle))
-    canpipe &= ~ CURLPIPE_HTTP1;
-
   /* Look up the bundle with all the connections to this particular host.
      Locks the connection cache, beware of early returns! */
   bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache);
   if(bundle) {
     /* Max pipe length is zero (unlimited) for multiplexed connections */
-    size_t max_pipe_len = (bundle->multiuse != BUNDLE_MULTIPLEX)?
-      max_pipeline_length(data->multi):0;
-    size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
 
     infof(data, "Found bundle for host %s: %p [%s]\n",
           (needle->bits.conn_to_host ? needle->conn_to_host.name :
            needle->host.name), (void *)bundle,
-          (bundle->multiuse == BUNDLE_PIPELINING ?
-           "can pipeline" :
-           (bundle->multiuse == BUNDLE_MULTIPLEX ?
-            "can multiplex" : "serially")));
+          (bundle->multiuse == BUNDLE_MULTIPLEX ?
+           "can multiplex" : "serially"));
 
-    /* We can't pipeline if we don't know anything about the server */
-    if(canpipe) {
+    /* We can't multiplex if we don't know anything about the server */
+    if(canmultiplex) {
       if(bundle->multiuse <= BUNDLE_UNKNOWN) {
         if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
-          infof(data, "Server doesn't support multi-use yet, wait\n");
+          infof(data, "Server doesn't support multiplex yet, wait\n");
           *waitpipe = TRUE;
           Curl_conncache_unlock(data);
           return FALSE; /* no re-use */
         }
 
-        infof(data, "Server doesn't support multi-use (yet)\n");
-        canpipe = 0;
+        infof(data, "Server doesn't support multiplex (yet)\n");
+        canmultiplex = FALSE;
       }
-      if((bundle->multiuse == BUNDLE_PIPELINING) &&
-         !Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1)) {
-        /* not asked for, switch off */
-        infof(data, "Could pipeline, but not asked to!\n");
-        canpipe = 0;
-      }
-      else if((bundle->multiuse == BUNDLE_MULTIPLEX) &&
-              !Curl_pipeline_wanted(data->multi, CURLPIPE_MULTIPLEX)) {
+      if((bundle->multiuse == BUNDLE_MULTIPLEX) &&
+         !Curl_multiplex_wanted(data->multi)) {
         infof(data, "Could multiplex, but not asked to!\n");
-        canpipe = 0;
+        canmultiplex = FALSE;
       }
     }
 
     curr = bundle->conn_list.head;
     while(curr) {
       bool match = FALSE;
-      size_t pipeLen;
+      size_t multiplexed;
 
       /*
        * Note that if we use a HTTP proxy in normal mode (no tunneling), we
@@ -1163,29 +1047,14 @@ ConnectionExists(struct Curl_easy *data,
         continue;
       }
 
-      pipeLen = check->send_pipe.size + check->recv_pipe.size;
+      multiplexed = CONN_INUSE(check);
 
-      if(canpipe) {
+      if(canmultiplex) {
         if(check->bits.protoconnstart && check->bits.close)
           continue;
-
-        if(!check->bits.multiplex) {
-          /* If not multiplexing, make sure the connection is fine for HTTP/1
-             pipelining */
-          struct Curl_easy* sh = gethandleathead(&check->send_pipe);
-          struct Curl_easy* rh = gethandleathead(&check->recv_pipe);
-          if(sh) {
-            if(!(IsPipeliningPossible(sh, check) & CURLPIPE_HTTP1))
-              continue;
-          }
-          else if(rh) {
-            if(!(IsPipeliningPossible(rh, check) & CURLPIPE_HTTP1))
-              continue;
-          }
-        }
       }
       else {
-        if(pipeLen > 0) {
+        if(multiplexed) {
           /* can only happen within multi handles, and means that another easy
              handle is using this connection */
           continue;
@@ -1210,13 +1079,6 @@ ConnectionExists(struct Curl_easy *data,
              to get closed. */
           infof(data, "Connection #%ld isn't open enough, can't reuse\n",
                 check->connection_id);
-#ifdef DEBUGBUILD
-          if(check->recv_pipe.size > 0) {
-            infof(data,
-                  "BAD! Unconnected #%ld has a non-empty recv pipeline!\n",
-                  check->connection_id);
-          }
-#endif
           continue;
         }
       }
@@ -1287,15 +1149,15 @@ ConnectionExists(struct Curl_easy *data,
         }
       }
 
-      if(!canpipe && check->data)
-        /* this request can't be pipelined but the checked connection is
+      if(!canmultiplex && check->data)
+        /* this request can't be multiplexed but the checked connection is
            already in use so we skip it */
         continue;
 
       if(CONN_INUSE(check) && check->data &&
          (check->data->multi != needle->data->multi))
-        /* this could be subject for pipeline/multiplex use, but only if they
-           belong to the same multi handle */
+        /* this could be subject for multiplex use, but only if they belong to
+         * the same multi handle */
         continue;
 
       if(needle->localdev || needle->localport) {
@@ -1424,55 +1286,32 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         }
 #endif
-        if(canpipe) {
-          /* We can pipeline if we want to. Let's continue looking for
-             the optimal connection to use, i.e the shortest pipe that is not
-             blacklisted. */
+        if(canmultiplex) {
+          /* We can multiplex if we want to. Let's continue looking for
+             the optimal connection to use. */
 
-          if(pipeLen == 0) {
+          if(!multiplexed) {
             /* We have the optimal connection. Let's stop looking. */
             chosen = check;
             break;
           }
 
-          /* We can't use the connection if the pipe is full */
-          if(max_pipe_len && (pipeLen >= max_pipe_len)) {
-            infof(data, "Pipe is full, skip (%zu)\n", pipeLen);
-            continue;
-          }
 #ifdef USE_NGHTTP2
           /* If multiplexed, make sure we don't go over concurrency limit */
           if(check->bits.multiplex) {
             /* Multiplexed connections can only be HTTP/2 for now */
             struct http_conn *httpc = &check->proto.httpc;
-            if(pipeLen >= httpc->settings.max_concurrent_streams) {
+            if(multiplexed >= httpc->settings.max_concurrent_streams) {
               infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%zu)\n",
-                    pipeLen);
+                    multiplexed);
               continue;
             }
           }
 #endif
-          /* We can't use the connection if the pipe is penalized */
-          if(Curl_pipeline_penalized(data, check)) {
-            infof(data, "Penalized, skip\n");
-            continue;
-          }
-
-          if(max_pipe_len) {
-            if(pipeLen < best_pipe_len) {
-              /* This connection has a shorter pipe so far. We'll pick this
-                 and continue searching */
-              chosen = check;
-              best_pipe_len = pipeLen;
-              continue;
-            }
-          }
-          else {
-            /* When not pipelining (== multiplexed), we have a match here! */
-            chosen = check;
-            infof(data, "Multiplexed connection found!\n");
-            break;
-          }
+          /* When not multiplexed, we have a match here! */
+          chosen = check;
+          infof(data, "Multiplexed connection found!\n");
+          break;
         }
         else {
           /* We have found a connection. Let's stop searching. */
@@ -1929,17 +1768,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->response_header = NULL;
 #endif
 
-  if(Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1) &&
-     !conn->master_buffer) {
-    /* Allocate master_buffer to be used for HTTP/1 pipelining */
-    conn->master_buffer = calloc(MASTERBUF_SIZE, sizeof(char));
-    if(!conn->master_buffer)
-      goto error;
-  }
-
-  /* Initialize the pipeline lists */
-  Curl_llist_init(&conn->send_pipe, (curl_llist_dtor) llist_dtor);
-  Curl_llist_init(&conn->recv_pipe, (curl_llist_dtor) llist_dtor);
+  /* Initialize the easy handle list */
+  Curl_llist_init(&conn->easyq, (curl_llist_dtor) llist_dtor);
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CLEAR;
@@ -1962,10 +1792,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   return conn;
   error:
 
-  Curl_llist_destroy(&conn->send_pipe, NULL);
-  Curl_llist_destroy(&conn->recv_pipe, NULL);
-
-  free(conn->master_buffer);
+  Curl_llist_destroy(&conn->easyq, NULL);
   free(conn->localdev);
 #ifdef USE_SSL
   free(conn->ssl_extra);
@@ -3614,11 +3441,7 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_safefree(old_conn->http_proxy.passwd);
   Curl_safefree(old_conn->socks_proxy.passwd);
   Curl_safefree(old_conn->localdev);
-
-  Curl_llist_destroy(&old_conn->send_pipe, NULL);
-  Curl_llist_destroy(&old_conn->recv_pipe, NULL);
-
-  Curl_safefree(old_conn->master_buffer);
+  Curl_llist_destroy(&old_conn->easyq, NULL);
 
 #ifdef USE_UNIX_SOCKETS
   Curl_safefree(old_conn->unix_domain_socket);
@@ -3933,12 +3756,12 @@ static CURLcode create_conn(struct Curl_easy *data,
     reuse = ConnectionExists(data, conn, &conn_temp, &force_reuse, &waitpipe);
 
   /* If we found a reusable connection that is now marked as in use, we may
-     still want to open a new connection if we are pipelining. */
-  if(reuse && !force_reuse && IsPipeliningPossible(data, conn_temp)) {
-    size_t pipelen = conn_temp->send_pipe.size + conn_temp->recv_pipe.size;
-    if(pipelen > 0) {
-      infof(data, "Found connection %ld, with requests in the pipe (%zu)\n",
-            conn_temp->connection_id, pipelen);
+     still want to open a new connection if we are multiplexing. */
+  if(reuse && !force_reuse && IsMultiplexingPossible(data, conn_temp)) {
+    size_t multiplexed = CONN_INUSE(conn_temp);
+    if(multiplexed > 0) {
+      infof(data, "Found connection %ld, with %zu requests on it\n",
+            conn_temp->connection_id, multiplexed);
 
       if(Curl_conncache_bundle_size(conn_temp) < max_host_connections &&
          Curl_conncache_size(data) < max_total_connections) {
@@ -3988,7 +3811,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
 
     if(waitpipe)
-      /* There is a connection that *might* become usable for pipelining
+      /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
       connections_available = FALSE;
     else {
@@ -4201,7 +4024,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   if(!result) {
     if(CONN_INUSE(conn))
-      /* pipelining */
+      /* multiplexed */
       *protocol_done = TRUE;
     else if(!*asyncp) {
       /* DNS resolution is done: that's either because this is a reused
@@ -4219,7 +4042,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
        connectdata struct, free those here */
     Curl_disconnect(data, conn, TRUE);
   }
-  else if(!data->conn)
+  else if(!result && !data->conn)
     /* FILE: transfers already have the connection attached */
     Curl_attach_connnection(data, conn);
 

@@ -30,10 +30,11 @@ void Curl_updatesocket(struct Curl_easy *data);
 void Curl_expire(struct Curl_easy *data, time_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
-bool Curl_pipeline_wanted(const struct Curl_multi* multi, int bits);
 void Curl_detach_connnection(struct Curl_easy *data);
 void Curl_attach_connnection(struct Curl_easy *data,
                              struct connectdata *conn);
+bool Curl_multiplex_wanted(const struct Curl_multi *multi);
+void Curl_multi_handlePipeBreak(struct Curl_easy *data);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
 
