@@ -62,7 +62,6 @@ Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com
 
 <a href="https://opencollective.com/curl#backers" target="_blank"><img src="https://opencollective.com/curl/backers.svg?width=890"></a>
 
-
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a
