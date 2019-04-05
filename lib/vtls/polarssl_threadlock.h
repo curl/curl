@@ -26,13 +26,8 @@
 
 #if (defined USE_POLARSSL) || (defined USE_MBEDTLS)
 
-#if defined(USE_THREADS_POSIX)
-#  define POLARSSL_MUTEX_T       pthread_mutex_t
-#elif defined(USE_THREADS_WIN32)
-#  define POLARSSL_MUTEX_T       HANDLE
-#endif
-
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
+    (defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H))
 
 int Curl_polarsslthreadlock_thread_setup(void);
 int Curl_polarsslthreadlock_thread_cleanup(void);
