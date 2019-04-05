@@ -527,12 +527,24 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
     len = 0;
     socksreq[len++] = 1;    /* username/pw subnegotiation version */
     socksreq[len++] = (unsigned char) proxy_user_len;
-    if(proxy_user && proxy_user_len)
+    if(proxy_user && proxy_user_len) {
+      /* the length must fit in a single byte */
+      if(proxy_user_len >= 255) {
+        failf(data, "Excessive user name length for proxy auth");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
       memcpy(socksreq + len, proxy_user, proxy_user_len);
+    }
     len += proxy_user_len;
     socksreq[len++] = (unsigned char) proxy_password_len;
-    if(proxy_password && proxy_password_len)
+    if(proxy_password && proxy_password_len) {
+      /* the length must fit in a single byte */
+      if(proxy_password_len > 255) {
+        failf(data, "Excessive password length for proxy auth");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
       memcpy(socksreq + len, proxy_password, proxy_password_len);
+    }
     len += proxy_password_len;
 
     code = Curl_write_plain(conn, sock, (char *)socksreq, len, &written);
