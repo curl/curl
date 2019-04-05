@@ -66,7 +66,9 @@ struct curltime Curl_now(void)
   ** in any case the time starting point does not change once that the
   ** system has started up.
   */
+#ifdef HAVE_GETTIMEOFDAY
   struct timeval now;
+#endif
   struct curltime cnow;
   struct timespec tsnow;
 

@@ -389,7 +389,6 @@ Curl_gsk_environment_open(gsk_handle * my_env_handle)
 
 {
   struct Curl_gsk_descriptor * p;
-  gsk_handle h;
   int rc;
 
   if(!my_env_handle)

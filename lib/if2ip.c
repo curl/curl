@@ -123,7 +123,9 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
             char ipstr[64];
 #ifdef ENABLE_IPV6
             if(af == AF_INET6) {
+#ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
               unsigned int scopeid = 0;
+#endif
               unsigned int ifscope = Curl_ipv6_scope(iface->ifa_addr);
 
               if(ifscope != remote_scope) {
@@ -149,9 +151,10 @@ if2ip_result_t Curl_if2ip(int af, unsigned int remote_scope,
 
                 continue;
               }
-#endif
+
               if(scopeid)
-                msnprintf(scope, sizeof(scope), "%%%u", scopeid);
+                  msnprintf(scope, sizeof(scope), "%%%u", scopeid);
+#endif
             }
             else
 #endif

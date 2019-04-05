@@ -1160,7 +1160,6 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   long timeout_ms;
-  Qso_OverlappedIO_t cstat;
   CURLcode result = CURLE_OK;
 
   *done = connssl->state == ssl_connection_complete;
