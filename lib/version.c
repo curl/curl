@@ -298,6 +298,9 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_TFTP
   "tftp",
 #endif
+#if defined(USE_LIBSSH)
+  "ssh",
+#endif
 
   NULL
 };

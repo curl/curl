@@ -38,7 +38,7 @@ void config_init(struct OperationConfig* config)
   config->proto_present = FALSE;
   config->proto_redir = CURLPROTO_ALL & /* All except FILE, SCP and SMB */
                         ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
-                          CURLPROTO_SMBS);
+                          CURLPROTO_SMBS | CURLPROTO_SSH);
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
   config->tcp_nodelay = TRUE; /* enabled by default */

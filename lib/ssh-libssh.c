@@ -114,6 +114,12 @@ static CURLcode scp_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode scp_disconnect(struct connectdata *conn,
                                bool dead_connection);
 
+static CURLcode ssh_done(struct connectdata *conn,
+                         CURLcode, bool premature);
+static CURLcode ssh_doing(struct connectdata *conn, bool *dophase_done);
+static CURLcode ssh_disconnect1(struct connectdata *conn,
+                               bool dead_connection);
+
 static CURLcode sftp_done(struct connectdata *conn,
                           CURLcode, bool premature);
 static CURLcode sftp_doing(struct connectdata *conn,
@@ -158,6 +164,31 @@ const struct Curl_handler Curl_handler_scp = {
   ZERO_NULL,                    /* connection_check */
   PORT_SSH,                     /* defport */
   CURLPROTO_SCP,                /* protocol */
+  PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY    /* flags */
+};
+
+/*
+ * SCP protocol handler.
+ */
+
+const struct Curl_handler Curl_handler_ssh = {
+  "SSH",                        /* scheme */
+  myssh_setup_connection,       /* setup_connection */
+  myssh_do_it,                  /* do_it */
+  ssh_done,                     /* done */
+  ZERO_NULL,                    /* do_more */
+  myssh_connect,                /* connect_it */
+  myssh_multi_statemach,        /* connecting */
+  ssh_doing,                    /* doing */
+  myssh_getsock,                /* proto_getsock */
+  myssh_getsock,                /* doing_getsock */
+  ZERO_NULL,                    /* domore_getsock */
+  myssh_perform_getsock,        /* perform_getsock */
+  ssh_disconnect1,               /* disconnect */
+  ZERO_NULL,                    /* readwrite */
+  ZERO_NULL,                    /* connection_check */
+  PORT_SSH,                     /* defport */
+  CURLPROTO_SSH,                /* protocol */
   PROTOPT_DIRLOCK | PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY    /* flags */
 };
 
@@ -279,6 +310,13 @@ static void mystate(struct connectdata *conn, sshstate nowstate
     "SSH_SFTP_DOWNLOAD_STAT",
     "SSH_SFTP_CLOSE",
     "SSH_SFTP_SHUTDOWN",
+    "SSH_SSH_TRANS_INIT",
+    "SSH_SSH_EXECUTE_INIT",
+    "SSH_SSH_DONE",
+    "SSH_SSH_SEND_EOF",
+    "SSH_SSH_WAIT_EOF",
+    "SSH_SSH_WAIT_CLOSE",
+    "SSH_SSH_CHANNEL_FREE",
     "SSH_SCP_TRANS_INIT",
     "SSH_SCP_UPLOAD_INIT",
     "SSH_SCP_DOWNLOAD_INIT",
@@ -1711,6 +1749,38 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       break;
 
+    case SSH_SSH_TRANS_INIT:
+      protop->size = 0;
+      result = Curl_getworkingpath(conn, sshc->homedir, &protop->path);
+      if(result) {
+        sshc->actualcode = result;
+        state(conn, SSH_STOP);
+        break;
+      }
+
+      /* Functions from the SCP subsystem cannot handle/return SSH_AGAIN */
+      ssh_set_blocking(sshc->ssh_session, 1);
+
+      if(data->set.upload) {
+        if(data->state.infilesize < 0) {
+          failf(data, "SSH requires a known file size for upload");
+          sshc->actualcode = CURLE_UPLOAD_FAILED;
+          MOVE_TO_ERROR_STATE(CURLE_UPLOAD_FAILED);
+        }
+      }
+
+      sshc->ssh_channel =
+        ssh_channel_new(sshc->ssh_session);
+      state(conn, SSH_SSH_EXECUTE_INIT);
+
+      if(!sshc->ssh_channel) {
+        err_msg = ssh_get_error(sshc->ssh_session);
+        failf(conn->data, "%s", err_msg);
+        MOVE_TO_ERROR_STATE(CURLE_UPLOAD_FAILED);
+      }
+
+      break;
+
     case SSH_SCP_UPLOAD_INIT:
 
       rc = ssh_scp_init(sshc->scp_session);
@@ -1731,6 +1801,42 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       /* upload data */
       Curl_setup_transfer(data, -1, data->req.size, FALSE, FIRSTSOCKET);
+
+      /* not set by Curl_setup_transfer to preserve keepon bits */
+      conn->sockfd = conn->writesockfd;
+
+      /* store this original bitmask setup to use later on if we can't
+         figure out a "real" bitmask */
+      sshc->orig_waitfor = data->req.keepon;
+
+      /* we want to use the _sending_ function even when the socket turns
+         out readable as the underlying libssh scp send function will deal
+         with both accordingly */
+      conn->cselect_bits = CURL_CSELECT_OUT;
+
+      state(conn, SSH_STOP);
+
+      break;
+
+    case SSH_SSH_EXECUTE_INIT:
+
+      rc = ssh_channel_open_session(sshc->ssh_channel);
+      if(rc != SSH_OK) {
+        err_msg = ssh_get_error(sshc->ssh_session);
+        failf(conn->data, "%s", err_msg);
+        MOVE_TO_ERROR_STATE(CURLE_UPLOAD_FAILED);
+      }
+
+      rc = ssh_channel_request_exec(sshc->ssh_channel, protop->path);
+      if(rc != SSH_OK) {
+        err_msg = ssh_get_error(sshc->ssh_session);
+        failf(conn->data, "%s", err_msg);
+        MOVE_TO_ERROR_STATE(CURLE_UPLOAD_FAILED);
+      }
+
+      /* upload data */
+      Curl_setup_transfer(data, FIRSTSOCKET, data->req.size, FALSE,
+        FIRSTSOCKET);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
@@ -1793,6 +1899,13 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         state(conn, SSH_SCP_CHANNEL_FREE);
       break;
 
+    case SSH_SSH_DONE:
+      if(data->set.upload)
+        state(conn, SSH_SSH_SEND_EOF);
+      else
+        state(conn, SSH_SSH_CHANNEL_FREE);
+      break;
+
     case SSH_SCP_SEND_EOF:
       if(sshc->scp_session) {
         rc = ssh_scp_close(sshc->scp_session);
@@ -1811,12 +1924,42 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       state(conn, SSH_SCP_CHANNEL_FREE);
       break;
 
+    case SSH_SSH_SEND_EOF:
+      if(sshc->ssh_channel) {
+        rc = ssh_channel_close(sshc->ssh_channel);
+        if(rc == SSH_AGAIN) {
+          /* Currently the ssh_scp_close handles waiting for EOF in
+           * blocking way.
+           */
+          break;
+        }
+        if(rc != SSH_OK) {
+          infof(data, "Failed to close libssh scp channel: %s\n",
+                ssh_get_error(sshc->ssh_session));
+        }
+      }
+
+      state(conn, SSH_SSH_CHANNEL_FREE);
+      break;
+
     case SSH_SCP_CHANNEL_FREE:
       if(sshc->scp_session) {
         ssh_scp_free(sshc->scp_session);
         sshc->scp_session = NULL;
       }
       DEBUGF(infof(data, "SCP DONE phase complete\n"));
+
+      ssh_set_blocking(sshc->ssh_session, 0);
+
+      state(conn, SSH_SESSION_DISCONNECT);
+      /* FALLTHROUGH */
+
+    case SSH_SSH_CHANNEL_FREE:
+      if(sshc->ssh_channel) {
+        ssh_channel_free(sshc->ssh_channel);
+        sshc->ssh_channel = NULL;
+      }
+      DEBUGF(infof(data, "SSH DONE phase complete\n"));
 
       ssh_set_blocking(sshc->ssh_session, 0);
 
@@ -1830,6 +1973,11 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
       if(sshc->scp_session) {
         ssh_scp_free(sshc->scp_session);
         sshc->scp_session = NULL;
+      }
+
+      if(sshc->ssh_channel) {
+        ssh_channel_free(sshc->ssh_channel);
+        sshc->ssh_channel = NULL;
       }
 
       ssh_disconnect(sshc->ssh_session);
@@ -1849,6 +1997,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 
       DEBUGASSERT(sshc->ssh_session == NULL);
       DEBUGASSERT(sshc->scp_session == NULL);
+      DEBUGASSERT(sshc->ssh_channel == NULL);
 
       if(sshc->readdir_tmp) {
         ssh_string_free_char(sshc->readdir_tmp);
@@ -2039,8 +2188,8 @@ static CURLcode myssh_setup_connection(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static Curl_recv scp_recv, sftp_recv;
-static Curl_send scp_send, sftp_send;
+static Curl_recv scp_recv, ssh_recv, sftp_recv;
+static Curl_send scp_send, ssh_send, sftp_send;
 
 /*
  * Curl_ssh_connect() gets called from Curl_protocol_connect() to allow us to
@@ -2065,6 +2214,10 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
   if(conn->handler->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
+  }
+  else if(conn->handler->protocol & CURLPROTO_SSH) {
+    conn->recv[FIRSTSOCKET] = ssh_recv;
+    conn->send[FIRSTSOCKET] = ssh_send;
   }
   else {
     conn->recv[FIRSTSOCKET] = sftp_recv;
@@ -2137,6 +2290,19 @@ static CURLcode scp_doing(struct connectdata *conn, bool *dophase_done)
   return result;
 }
 
+/* called from multi.c while DOing */
+static CURLcode ssh_doing(struct connectdata *conn, bool *dophase_done)
+{
+  CURLcode result;
+
+  result = myssh_multi_statemach(conn, dophase_done);
+
+  if(*dophase_done) {
+    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+  }
+  return result;
+}
+
 /*
  ***********************************************************************
  *
@@ -2158,6 +2324,30 @@ CURLcode scp_perform(struct connectdata *conn,
 
   /* start the first command in the DO phase */
   state(conn, SSH_SCP_TRANS_INIT);
+
+  result = myssh_multi_statemach(conn, dophase_done);
+
+  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
+
+  if(*dophase_done) {
+    DEBUGF(infof(conn->data, "DO phase is complete\n"));
+  }
+
+  return result;
+}
+
+static
+CURLcode ssh_perform(struct connectdata *conn,
+                     bool *connected, bool *dophase_done)
+{
+  CURLcode result = CURLE_OK;
+
+  DEBUGF(infof(conn->data, "DO phase starts\n"));
+
+  *dophase_done = FALSE;        /* not done yet */
+
+  /* start the first command in the DO phase */
+  state(conn, SSH_SSH_TRANS_INIT);
 
   result = myssh_multi_statemach(conn, dophase_done);
 
@@ -2192,6 +2382,8 @@ static CURLcode myssh_do_it(struct connectdata *conn, bool *done)
 
   if(conn->handler->protocol & CURLPROTO_SCP)
     result = scp_perform(conn, &connected, done);
+  else if(conn->handler->protocol & CURLPROTO_SSH)
+    result = ssh_perform(conn, &connected, done);
   else
     result = sftp_perform(conn, &connected, done);
 
@@ -2202,6 +2394,27 @@ static CURLcode myssh_do_it(struct connectdata *conn, bool *done)
    this is still blocking is that the multi interface code has no support for
    disconnecting operations that takes a while */
 static CURLcode scp_disconnect(struct connectdata *conn,
+                               bool dead_connection)
+{
+  CURLcode result = CURLE_OK;
+  struct ssh_conn *ssh = &conn->proto.sshc;
+  (void) dead_connection;
+
+  if(ssh->ssh_session) {
+    /* only if there's a session still around to use! */
+
+    state(conn, SSH_SESSION_DISCONNECT);
+
+    result = myssh_block_statemach(conn, TRUE);
+  }
+
+  return result;
+}
+
+/* BLOCKING, but the function is using the state machine so the only reason
+   this is still blocking is that the multi interface code has no support for
+   disconnecting operations that takes a while */
+static CURLcode ssh_disconnect1(struct connectdata *conn,
                                bool dead_connection)
 {
   CURLcode result = CURLE_OK;
@@ -2260,6 +2473,18 @@ static CURLcode scp_done(struct connectdata *conn, CURLcode status,
 
 }
 
+static CURLcode ssh_done(struct connectdata *conn, CURLcode status,
+                         bool premature)
+{
+  (void) premature;             /* not used */
+
+  if(!status)
+    state(conn, SSH_SSH_DONE);
+
+  return myssh_done(conn, status);
+
+}
+
 static ssize_t scp_send(struct connectdata *conn, int sockindex,
                         const void *mem, size_t len, CURLcode *err)
 {
@@ -2289,6 +2514,43 @@ static ssize_t scp_send(struct connectdata *conn, int sockindex,
   return len;
 }
 
+static ssize_t ssh_send(struct connectdata *conn, int sockindex,
+                        const void *mem, size_t len, CURLcode *err)
+{
+  int rc;
+  struct Curl_easy *data = conn->data;
+  struct SSHPROTO *protop = data->req.protop;
+  (void) sockindex; /* we only support SCP on the fixed known primary socket */
+  (void) err;
+
+  rc = ssh_channel_write(conn->proto.sshc.ssh_channel, mem,
+    (uint32_t)len);
+
+#if 0
+  /* The following code is misleading, mostly added as wishful thinking
+   * that libssh at some point will implement non-blocking ssh_scp_write/read.
+   * Currently rc can only be number of bytes read or SSH_ERROR. */
+  myssh_block2waitfor(conn, (rc == SSH_AGAIN) ? TRUE : FALSE);
+
+  if(rc == SSH_AGAIN) {
+    *err = CURLE_AGAIN;
+    return 0;
+  }
+  else
+#endif
+  if(rc < 0) {
+    *err = CURLE_SSH;
+    return -1;
+  }
+
+  protop->size += rc;
+
+  if(protop->size >= data->req.size)
+    ssh_channel_send_eof(conn->proto.sshc.ssh_channel);
+
+  return len;
+}
+
 static ssize_t scp_recv(struct connectdata *conn, int sockindex,
                         char *mem, size_t len, CURLcode *err)
 {
@@ -2298,6 +2560,32 @@ static ssize_t scp_recv(struct connectdata *conn, int sockindex,
 
   /* libssh returns int */
   nread = ssh_scp_read(conn->proto.sshc.scp_session, mem, len);
+
+#if 0
+  /* The following code is misleading, mostly added as wishful thinking
+   * that libssh at some point will implement non-blocking ssh_scp_write/read.
+   * Currently rc can only be SSH_OK or SSH_ERROR. */
+
+  myssh_block2waitfor(conn, (nread == SSH_AGAIN) ? TRUE : FALSE);
+  if(nread == SSH_AGAIN) {
+    *err = CURLE_AGAIN;
+    nread = -1;
+  }
+#endif
+
+  return nread;
+}
+
+static ssize_t ssh_recv(struct connectdata *conn, int sockindex,
+                        char *mem, size_t len, CURLcode *err)
+{
+  ssize_t nread;
+  (void) err;
+  (void) sockindex; /* we only support SCP on the fixed known primary socket */
+
+  /* libssh returns int */
+  nread = ssh_channel_read(conn->proto.sshc.ssh_channel, mem,
+    (uint32_t)len, 0);
 
 #if 0
   /* The following code is misleading, mostly added as wishful thinking
