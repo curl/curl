@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,18 +46,16 @@ typedef enum {
   CURLM_STATE_SENDPROTOCONNECT, /* 6 - initiate protocol connect procedure */
   CURLM_STATE_PROTOCONNECT, /* 7 - completing the protocol-specific connect
                                    phase */
-  CURLM_STATE_WAITDO,       /* 8 - wait for our turn to send the request */
-  CURLM_STATE_DO,           /* 9 - start send off the request (part 1) */
-  CURLM_STATE_DOING,        /* 10 - sending off the request (part 1) */
-  CURLM_STATE_DO_MORE,      /* 11 - send off the request (part 2) */
-  CURLM_STATE_DO_DONE,      /* 12 - done sending off request */
-  CURLM_STATE_WAITPERFORM,  /* 13 - wait for our turn to read the response */
-  CURLM_STATE_PERFORM,      /* 14 - transfer data */
-  CURLM_STATE_TOOFAST,      /* 15 - wait because limit-rate exceeded */
-  CURLM_STATE_DONE,         /* 16 - post data transfer operation */
-  CURLM_STATE_COMPLETED,    /* 17 - operation complete */
-  CURLM_STATE_MSGSENT,      /* 18 - the operation complete message is sent */
-  CURLM_STATE_LAST          /* 19 - not a true state, never use this */
+  CURLM_STATE_DO,           /* 8 - start send off the request (part 1) */
+  CURLM_STATE_DOING,        /* 9 - sending off the request (part 1) */
+  CURLM_STATE_DO_MORE,      /* 10 - send off the request (part 2) */
+  CURLM_STATE_DO_DONE,      /* 11 - done sending off request */
+  CURLM_STATE_PERFORM,      /* 12 - transfer data */
+  CURLM_STATE_TOOFAST,      /* 13 - wait because limit-rate exceeded */
+  CURLM_STATE_DONE,         /* 14 - post data transfer operation */
+  CURLM_STATE_COMPLETED,    /* 15 - operation complete */
+  CURLM_STATE_MSGSENT,      /* 16 - the operation complete message is sent */
+  CURLM_STATE_LAST          /* 17 - not a true state, never use this */
 } CURLMstate;
 
 /* we support N sockets per easy handle. Set the corresponding bit to what
@@ -66,7 +64,7 @@ typedef enum {
 #define GETSOCK_READABLE (0x00ff)
 #define GETSOCK_WRITABLE (0xff00)
 
-#define CURLPIPE_ANY (CURLPIPE_HTTP1 | CURLPIPE_MULTIPLEX)
+#define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
@@ -112,8 +110,8 @@ struct Curl_multi {
      same actual socket) */
   struct curl_hash sockhash;
 
-  /* pipelining wanted bits (CURLPIPE*) */
-  long pipelining;
+  /* multiplexing wanted */
+  bool multiplexing;
 
   bool recheckstate; /* see Curl_multi_connchanged */
 
@@ -128,24 +126,6 @@ struct Curl_multi {
 
   long max_total_connections; /* if >0, a fixed limit of the maximum number
                                  of connections in total */
-
-  long max_pipeline_length; /* if >0, maximum number of requests in a
-                               pipeline */
-
-  long content_length_penalty_size; /* a connection with a
-                                       content-length bigger than
-                                       this is not considered
-                                       for pipelining */
-
-  long chunk_length_penalty_size; /* a connection with a chunk length
-                                     bigger than this is not
-                                     considered for pipelining */
-
-  struct curl_llist pipelining_site_bl; /* List of sites that are blacklisted
-                                           from pipelining */
-
-  struct curl_llist pipelining_server_bl; /* List of server types that are
-                                             blacklisted from pipelining */
 
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;

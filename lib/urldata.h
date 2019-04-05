@@ -144,10 +144,6 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
-
-/* The "master buffer" is for HTTP pipelining */
-#define MASTERBUF_SIZE 16384
-
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
 #define HEADERSIZE 256
@@ -796,11 +792,10 @@ struct connectdata {
   void *closesocket_client;
 
   /* This is used by the connection cache logic. If this returns TRUE, this
-     handle is being used by one or more easy handles and can only used by any
+     handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
-     pipelining/multiplexing) and it cannot be used by another multi
-     handle! */
-#define CONN_INUSE(c) ((c)->send_pipe.size + (c)->recv_pipe.size)
+     multiplexing) and it cannot be used by another multi handle! */
+#define CONN_INUSE(c) ((c)->easyq.size)
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to
@@ -950,16 +945,7 @@ struct connectdata {
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 
-  struct curl_llist send_pipe; /* List of handles waiting to send on this
-                                  pipeline */
-  struct curl_llist recv_pipe; /* List of handles waiting to read their
-                                  responses on this pipeline */
-  char *master_buffer; /* The master buffer allocated on-demand;
-                          used for pipelining. */
-  size_t read_pos; /* Current read position in the master buffer */
-  size_t buf_len; /* Length of the buffer?? */
-
-
+  struct curl_llist easyq;    /* List of easy handles using this connection */
   curl_seek_callback seek_func; /* function that seeks the input */
   void *seek_client;            /* pointer to pass to the seek() above */
 
@@ -1727,8 +1713,8 @@ struct UserDefined {
   bit ssl_enable_npn:1; /* TLS NPN extension? */
   bit ssl_enable_alpn:1;/* TLS ALPN extension? */
   bit path_as_is:1;     /* allow dotdots? */
-  bit pipewait:1;       /* wait for pipe/multiplex status before starting a
-                            new connection */
+  bit pipewait:1;       /* wait for multiplex status before starting a new
+                           connection */
   bit suppress_connect_headers:1; /* suppress proxy CONNECT response headers
                                       from user callbacks */
   bit dns_shuffle_addresses:1; /* whether to shuffle addresses before use */
@@ -1769,8 +1755,8 @@ struct Curl_easy {
 
   struct connectdata *conn;
   struct curl_llist_element connect_queue;
-  struct curl_llist_element pipeline_queue;
   struct curl_llist_element sh_queue; /* list per Curl_sh_entry */
+  struct curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */

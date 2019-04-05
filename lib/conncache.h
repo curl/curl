@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -40,7 +40,6 @@ struct conncache {
 
 #define BUNDLE_NO_MULTIUSE -1
 #define BUNDLE_UNKNOWN     0  /* initial value */
-#define BUNDLE_PIPELINING  1
 #define BUNDLE_MULTIPLEX   2
 
 struct connectbundle {

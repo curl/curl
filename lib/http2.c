@@ -620,7 +620,7 @@ static int push_promise(struct Curl_easy *data,
 
 /*
  * multi_connchanged() is called to tell that there is a connection in
- * this multi handle that has changed state (pipelining become possible, the
+ * this multi handle that has changed state (multiplexing become possible, the
  * number of allowed streams changed or similar), and a subsequent use of this
  * multi handle should move CONNECT_PEND handles back to CONNECT to have them
  * retry.

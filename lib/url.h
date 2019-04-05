@@ -71,14 +71,7 @@ int Curl_doing_getsock(struct connectdata *conn,
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
-
-int Curl_removeHandleFromPipeline(struct Curl_easy *handle,
-                                  struct curl_llist *pipeline);
-/* remove the specified connection from all (possible) pipelines and related
-   queues */
-void Curl_getoff_all_pipelines(struct Curl_easy *data,
-                               struct connectdata *conn);
-
+void Curl_close_connections(struct Curl_easy *data);
 CURLcode Curl_upkeep(struct conncache *conn_cache, void *data);
 
 const struct Curl_handler *Curl_builtin_scheme(const char *scheme);

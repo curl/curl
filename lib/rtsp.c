@@ -48,7 +48,6 @@
  *      -server CSeq counter
  *  -digest authentication
  *  -connect through proxy
- *  -pipelining?
  */
 
 
