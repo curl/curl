@@ -607,7 +607,7 @@
 
 5.4 Allow SAN names in HTTP/2 server push
 
- curl only allows HTTP/2 push promise if the provided :autority header value
+ curl only allows HTTP/2 push promise if the provided :authority header value
  exactly matches the host name given in the URL. It could be extended to allow
  any name that would match the Subject Alternative Names in the server's TLS
  certificate.

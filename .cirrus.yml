@@ -25,8 +25,12 @@ task:
     # Some tests won't run if run as root so run them as another user.
     # Make directories world writable so the test step can write wherever it needs.
     - find . -type d -exec chmod 777 {} \;
-    # TODO: A number of tests are failing on FreeBSD and so are disabled.
-    # This should be investigated.
-    - sudo -u nobody make V=1 TFLAGS='-n -a -p !flaky !303 !304 !310 !311 !312 !313 !323 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001' test-nonflaky
+    # TODO: A number of tests are failing on different FreeBSD versions and so
+    # are disabled.  This should be investigated.
+    - SKIP_TESTS=''
+    - if [ `uname -r` = "12.0-RELEASE" ] ; then SKIP_TESTS='!303 !304 !323 !504 !1242 !1243 !2002 !2003'; fi
+    - if [ `uname -r` = "11.2-RELEASE" ] ; then SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001'; fi
+    - if [ `uname -r` = "10.4-RELEASE" ] ; then SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001'; fi
+    - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
   install_script:
     - make V=1 install

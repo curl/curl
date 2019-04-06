@@ -143,7 +143,7 @@ my %api = (
     'curl_version' => 'API',
     'curl_version_info' => 'API',
 
-    # the following funcions are provided globally in debug builds
+    # the following functions are provided globally in debug builds
     'curl_easy_perform_ev' => 'debug-build',
     );
 

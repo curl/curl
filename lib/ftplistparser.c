@@ -914,10 +914,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
       case PL_WINNT_DIRORSIZE:
         switch(parser->state.NT.sub.dirorsize) {
         case PL_WINNT_DIRORSIZE_PRESPACE:
-          if(c == ' ') {
-
-          }
-          else {
+          if(c != ' ') {
             parser->item_offset = finfo->b_used - 1;
             parser->item_length = 1;
             parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_CONTENT;

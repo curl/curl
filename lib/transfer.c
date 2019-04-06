@@ -650,7 +650,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     if(0 < nread || is_empty_data) {
       k->buf[nread] = 0;
     }
-    else if(0 >= nread) {
+    else {
       /* if we receive 0 or less here, the server closed the connection
          and we bail out from this! */
       DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
