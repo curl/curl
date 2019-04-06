@@ -29,7 +29,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "altsvc.h"
-#include "cookie.h" /* for Curl_get_line() */
+#include "curl_get_line.h"
 #include "strcase.h"
 #include "parsedate.h"
 #include "sendf.h"

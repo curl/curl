@@ -24,6 +24,7 @@
 #include "curl_setup.h"
 
 #include <curl/curl.h>
+#include "curl_get_line.h"
 
 struct Cookie {
   struct Cookie *next; /* next in the chain */
@@ -101,7 +102,6 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *, const char *,
 void Curl_cookie_freelist(struct Cookie *cookies);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
-char *Curl_get_line(char *buf, int len, FILE *input);
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
 #define Curl_cookie_list(x) NULL
