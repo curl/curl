@@ -45,98 +45,98 @@ rem ***************************************************************************
   )
 
 :parseArgs
-  if "%~1" == "" goto prerequisites
+  if not "%~1" == "" (
+    if /i "%~1" == "vc6" (
+      set VC_VER=6.0
+      set VC_DESC=VC6
+      set "VC_PATH=Microsoft Visual Studio\VC98"
+    ) else if /i "%~1" == "vc7" (
+      set VC_VER=7.0
+      set VC_DESC=VC7
+      set "VC_PATH=Microsoft Visual Studio .NET\Vc7"
+    ) else if /i "%~1" == "vc7.1" (
+      set VC_VER=7.1
+      set VC_DESC=VC7.1
+      set "VC_PATH=Microsoft Visual Studio .NET 2003\Vc7"
+    ) else if /i "%~1" == "vc8" (
+      set VC_VER=8.0
+      set VC_DESC=VC8
+      set "VC_PATH=Microsoft Visual Studio 8\VC"
+    ) else if /i "%~1" == "vc9" (
+      set VC_VER=9.0
+      set VC_DESC=VC9
+      set "VC_PATH=Microsoft Visual Studio 9.0\VC"
+    ) else if /i "%~1" == "vc10" (
+      set VC_VER=10.0
+      set VC_DESC=VC10
+      set "VC_PATH=Microsoft Visual Studio 10.0\VC"
+    ) else if /i "%~1" == "vc11" (
+      set VC_VER=11.0
+      set VC_DESC=VC11
+      set "VC_PATH=Microsoft Visual Studio 11.0\VC"
+    ) else if /i "%~1" == "vc12" (
+      set VC_VER=12.0
+      set VC_DESC=VC12
+      set "VC_PATH=Microsoft Visual Studio 12.0\VC"
+    ) else if /i "%~1" == "vc14" (
+      set VC_VER=14.0
+      set VC_DESC=VC14
+      set "VC_PATH=Microsoft Visual Studio 14.0\VC"
+    ) else if /i "%~1" == "vc14.1" (
+      set VC_VER=14.1
+      set VC_DESC=VC14.1
 
-  if /i "%~1" == "vc6" (
-    set VC_VER=6.0
-    set VC_DESC=VC6
-    set "VC_PATH=Microsoft Visual Studio\VC98"
-  ) else if /i "%~1" == "vc7" (
-    set VC_VER=7.0
-    set VC_DESC=VC7
-    set "VC_PATH=Microsoft Visual Studio .NET\Vc7"
-  ) else if /i "%~1" == "vc7.1" (
-    set VC_VER=7.1
-    set VC_DESC=VC7.1
-    set "VC_PATH=Microsoft Visual Studio .NET 2003\Vc7"
-  ) else if /i "%~1" == "vc8" (
-    set VC_VER=8.0
-    set VC_DESC=VC8
-    set "VC_PATH=Microsoft Visual Studio 8\VC"
-  ) else if /i "%~1" == "vc9" (
-    set VC_VER=9.0
-    set VC_DESC=VC9
-    set "VC_PATH=Microsoft Visual Studio 9.0\VC"
-  ) else if /i "%~1" == "vc10" (
-    set VC_VER=10.0
-    set VC_DESC=VC10
-    set "VC_PATH=Microsoft Visual Studio 10.0\VC"
-  ) else if /i "%~1" == "vc11" (
-    set VC_VER=11.0
-    set VC_DESC=VC11
-    set "VC_PATH=Microsoft Visual Studio 11.0\VC"
-  ) else if /i "%~1" == "vc12" (
-    set VC_VER=12.0
-    set VC_DESC=VC12
-    set "VC_PATH=Microsoft Visual Studio 12.0\VC"
-  ) else if /i "%~1" == "vc14" (
-    set VC_VER=14.0
-    set VC_DESC=VC14
-    set "VC_PATH=Microsoft Visual Studio 14.0\VC"
-  ) else if /i "%~1" == "vc14.1" (
-    set VC_VER=14.1
-    set VC_DESC=VC14.1
+      rem Determine the VC14.1 path based on the installed edition in descending
+      rem order (Enterprise, then Professional and finally Community)
+      if exist "%PF%\Microsoft Visual Studio\2017\Enterprise\VC" (
+        set "VC_PATH=Microsoft Visual Studio\2017\Enterprise\VC"
+      ) else if exist "%PF%\Microsoft Visual Studio\2017\Professional\VC" (
+        set "VC_PATH=Microsoft Visual Studio\2017\Professional\VC"
+      ) else (
+        set "VC_PATH=Microsoft Visual Studio\2017\Community\VC"
+      )
+    ) else if /i "%~1%" == "x86" (
+      set BUILD_PLATFORM=x86
+    ) else if /i "%~1%" == "x64" (
+      set BUILD_PLATFORM=x64
+    ) else if /i "%~1%" == "debug" (
+      set BUILD_CONFIG=debug
+    ) else if /i "%~1%" == "release" (
+      set BUILD_CONFIG=release
+    ) else if /i "%~1" == "-?" (
+      goto syntax
+    ) else if /i "%~1" == "-h" (
+      goto syntax
+    ) else if /i "%~1" == "-help" (
+      goto syntax
+    ) else if /i "%~1" == "-VSpath" (
+      if "%~2" == "" (
+        echo.
+        echo Error. Please provide VS Path.
+        goto error
+      ) else (
+        set "ABS_VC_PATH=%~2\VC"
+        shift
+      )
+    ) else if /i "%~1" == "-perlpath" (
+      if "%~2" == "" (
+        echo.
+        echo Error. Please provide Perl root Path.
+        goto error
+      ) else (
+        set "PERL_PATH=%~2"
+        shift
+      )
+    ) else (
+      if not defined START_DIR (
+        set START_DIR=%~1%
+      ) else (
+        goto unknown
+      )
+    )
 
-    rem Determine the VC14.1 path based on the installed edition in descending
-    rem order (Enterprise, then Professional and finally Community)
-    if exist "%PF%\Microsoft Visual Studio\2017\Enterprise\VC" (
-      set "VC_PATH=Microsoft Visual Studio\2017\Enterprise\VC"
-    ) else if exist "%PF%\Microsoft Visual Studio\2017\Professional\VC" (
-      set "VC_PATH=Microsoft Visual Studio\2017\Professional\VC"
-    ) else (
-      set "VC_PATH=Microsoft Visual Studio\2017\Community\VC"
-    )
-  ) else if /i "%~1%" == "x86" (
-    set BUILD_PLATFORM=x86
-  ) else if /i "%~1%" == "x64" (
-    set BUILD_PLATFORM=x64
-  ) else if /i "%~1%" == "debug" (
-    set BUILD_CONFIG=debug
-  ) else if /i "%~1%" == "release" (
-    set BUILD_CONFIG=release
-  ) else if /i "%~1" == "-?" (
-    goto syntax
-  ) else if /i "%~1" == "-h" (
-    goto syntax
-  ) else if /i "%~1" == "-help" (
-    goto syntax
-  ) else if /i "%~1" == "-VSpath" (
-    if "%~2" == "" (
-      echo.
-      echo Error. Please provide VS Path.
-      goto error
-    ) else (
-      set "ABS_VC_PATH=%~2\VC"
-      shift
-    )
-  ) else if /i "%~1" == "-perlpath" (
-    if "%~2" == "" (
-      echo.
-      echo Error. Please provide Perl root Path.
-      goto error
-    ) else (
-      set "PERL_PATH=%~2"
-      shift
-    )
-  ) else (
-    if not defined START_DIR (
-      set START_DIR=%~1%
-    ) else (
-      goto unknown
-    )
+    shift & goto parseArgs
   )
-
-  shift & goto parseArgs
 
 :prerequisites
   rem Compiler is a required parameter
@@ -233,41 +233,39 @@ rem ***************************************************************************
   set OUTDIR=build\Win64\%VC_DESC%
   if not exist %OUTDIR% md %OUTDIR%
 
-  if "%BUILD_CONFIG%" == "release" goto x64release
+  if not "%BUILD_CONFIG%" == "release" (
+    rem Configuring 64-bit Debug Build
+    call :configure x64 debug
 
-:x64debug
-  rem Configuring 64-bit Debug Build
-  call :configure x64 debug
+    rem Perform the static library build
+    call :build x64 static
 
-  rem Perform the static library build
-  call :build x64 static
+    rem Perform the static library install
+    call :install debug static
 
-  rem Perform the static library install
-  call :install debug static
+    rem Perform the 64-bit shared library build
+    call :build x64 shared
 
-  rem Perform the 64-bit shared library build
-  call :build x64 shared
+    rem Perform the shared library install
+    call :install debug shared
+  )
 
-  rem Perform the shared library install
-  call :install debug shared
+  if not "%BUILD_CONFIG%" == "debug" (
+    rem Configuring 64-bit Release Build
+    call :configure x64 release
 
-  if "%BUILD_CONFIG%" == "debug" goto success
+    rem Perform the static library build
+    call :build x64 static
 
-:x64release
-  rem Configuring 64-bit Release Build
-  call :configure x64 release
+    rem Perform the static library install
+    call :install release static
 
-  rem Perform the static library build
-  call :build x64 static
+    rem Perform the shared library build
+    call :build x64 shared
 
-  rem Perform the static library install
-  call :install release static
-
-  rem Perform the shared library build
-  call :build x64 shared
-
-  rem Perform the shared library install
-  call :install release shared
+    rem Perform the shared library install
+    call :install release shared
+  )
 
   goto success
 
@@ -276,41 +274,39 @@ rem ***************************************************************************
   set OUTDIR=build\Win32\%VC_DESC%
   if not exist %OUTDIR% md %OUTDIR%
 
-  if "%BUILD_CONFIG%" == "release" goto x86release
+  if not "%BUILD_CONFIG%" == "release" (
+    rem Configuring 32-bit Debug Build
+    call :configure x86 debug
 
-:x86debug
-  rem Configuring 32-bit Debug Build
-  call :configure x86 debug
+    rem Perform the static library build
+    call :build x86 static
 
-  rem Perform the static library build
-  call :build x86 static
+    rem Perform the static library install
+    call :install debug static
 
-  rem Perform the static library install
-  call :install debug static
+    rem Perform the shared library build
+    call :build x86 shared
 
-  rem Perform the shared library build
-  call :build x86 shared
+    rem Perform the shared library install
+    call :install debug shared
+  )
 
-  rem Perform the shared library install
-  call :install debug shared
+  if not "%BUILD_CONFIG%" == "debug" (
+    rem Configuring 32-bit Release Build
+    call :configure x86 release
 
-  if "%BUILD_CONFIG%" == "debug" goto success
+    rem Perform the static library build
+    call :build x86 static
 
-:x86release
-  rem Configuring 32-bit Release Build
-  call :configure x86 release
+    rem Perform the static library install
+    call :install release static
 
-  rem Perform the static library build
-  call :build x86 static
+    rem Perform the shared library build
+    call :build x86 shared
 
-  rem Perform the static library install
-  call :install release static
-
-  rem Perform the shared library build
-  call :build x86 shared
-
-  rem Perform the shared library install
-  call :install release shared
+    rem Perform the shared library install
+    call :install release shared
+  )
 
   goto success
 
