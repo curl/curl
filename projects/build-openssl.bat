@@ -239,12 +239,16 @@ rem ***************************************************************************
   rem Configuring 64-bit Debug Build
   call :configure x64 debug
 
-  rem Perform the build
+  rem Perform the static library build
   call :build x64 static
+
+  rem Perform the static library install
+  call :install debug static
+
+  rem Perform the 64-bit shared library build
   call :build x64 shared
 
-  rem Perform the install
-  call :install debug static
+  rem Perform the shared library install
   call :install debug shared
 
   if "%BUILD_CONFIG%" == "debug" goto success
@@ -253,12 +257,16 @@ rem ***************************************************************************
   rem Configuring 64-bit Release Build
   call :configure x64 release
 
-  rem Perform the build
+  rem Perform the static library build
   call :build x64 static
+
+  rem Perform the static library install
+  call :install release static
+
+  rem Perform the shared library build
   call :build x64 shared
 
-  rem Perform the install
-  call :install release static
+  rem Perform the shared library install
   call :install release shared
 
   goto success
@@ -274,12 +282,16 @@ rem ***************************************************************************
   rem Configuring 32-bit Debug Build
   call :configure x86 debug
 
-  rem Perform the build
+  rem Perform the static library build
   call :build x86 static
+
+  rem Perform the static library install
+  call :install debug static
+
+  rem Perform the shared library build
   call :build x86 shared
 
-  rem Perform the install
-  call :install debug static
+  rem Perform the shared library install
   call :install debug shared
 
   if "%BUILD_CONFIG%" == "debug" goto success
@@ -288,12 +300,16 @@ rem ***************************************************************************
   rem Configuring 32-bit Release Build
   call :configure x86 release
 
-  rem Perform the build
+  rem Perform the static library build
   call :build x86 static
+
+  rem Perform the static library install
+  call :install release static
+
+  rem Perform the shared library build
   call :build x86 shared
 
-  rem Perform the install
-  call :install release static
+  rem Perform the shared library install
   call :install release shared
 
   goto success
