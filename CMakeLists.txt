@@ -57,7 +57,6 @@ string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+"
   CURL_VERSION_NUM ${CURL_VERSION_H_CONTENTS})
 string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
-include_regular_expression("^.*$")    # Sukender: Is it necessary?
 
 # Setup package meta-data
 # SET(PACKAGE "curl")
@@ -104,11 +103,7 @@ endif()
 
 if(ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
-  if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
-  else()
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUGBUILD)
-  endif()
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
   set(ENABLE_CURLDEBUG ON)
 endif()
 
@@ -246,7 +241,6 @@ include(CheckLibraryExists)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
-include(CMakeDependentOption)
 
 # On windows preload settings
 if(WIN32)
