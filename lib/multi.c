@@ -1448,7 +1448,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(result)
           /* if Curl_once_resolved() returns failure, the connection struct
              is already freed and gone */
-          detach_connnection(data); /* no more connection */
+          data->conn = NULL; /* no more connection */
         else {
           /* call again please so that we get the next socket setup */
           rc = CURLM_CALL_MULTI_PERFORM;
