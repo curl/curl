@@ -469,6 +469,7 @@ if(NOT CURL_DISABLE_LDAP)
         list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})
       endif()
       check_c_source_compiles("${_SRC_STRING}" NOT_NEED_LBER_H)
+      unset(CMAKE_REQUIRED_LIBRARIES)
 
       if(NOT_NEED_LBER_H)
         set(NEED_LBER_H OFF)
@@ -564,6 +565,7 @@ if(CMAKE_USE_LIBSSH2)
     check_function_exists(libssh2_scp_send64        HAVE_LIBSSH2_SCP_SEND64)
     check_function_exists(libssh2_session_handshake HAVE_LIBSSH2_SESSION_HANDSHAKE)
     set(CMAKE_EXTRA_INCLUDE_FILES "")
+    unset(CMAKE_REQUIRED_LIBRARIES)
   endif()
 endif()
 
@@ -611,6 +613,7 @@ if(CMAKE_USE_GSSAPI)
       if(NOT HAVE_GSS_C_NT_HOSTBASED_SERVICE)
         set(HAVE_OLD_GSSMIT ON)
       endif()
+      unset(CMAKE_REQUIRED_LIBRARIES)
 
     endif()
 
