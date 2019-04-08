@@ -290,7 +290,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     /* wrong version ? */
     if(socksreq[0] != 0) {
       failf(data,
-            "SOCKS4 reply has wrong version, version should be 4.");
+            "SOCKS4 reply has wrong version, version should be 0.");
       return CURLE_COULDNT_CONNECT;
     }
 
