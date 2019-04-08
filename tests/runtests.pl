@@ -276,7 +276,7 @@ my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
 my $sshderror;   # for socks server, ssh daemon version error
 
-my $defserverlogslocktimeout = 20; # timeout to await server logs lock removal
+my $defserverlogslocktimeout = 2; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
 my $timestats;   # time stamping and stats generation
@@ -2012,7 +2012,6 @@ sub runsshserver {
     my ($id, $verbose, $ipv6) = @_;
     my $ip=$HOSTIP;
     my $port = $SSHPORT;
-    my $socksport = $SOCKSPORT;
     my $proto = 'ssh';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
@@ -2046,7 +2045,7 @@ sub runsshserver {
     $flags .= "--pidfile \"$pidfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
-    $flags .= "--sshport $port --socksport $socksport ";
+    $flags .= "--sshport $port ";
     $flags .= "--user \"$USER\"";
 
     my $cmd = "$perl $srcdir/sshserver.pl $flags";
@@ -2139,108 +2138,27 @@ sub runsocksserver {
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
-    # The ssh server must be already running
-    if(!$run{'ssh'}) {
-        logmsg "RUN: SOCKS server cannot find running SSH server\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
+    # start our socks server, get commands from the FTP cmd file
+    my $cmd="$srcdir/server/socksd".
+        " --port $port ".
+        " --pidfile $pidfile".
+        " --backend $HOSTIP".
+        " --config $FTPDCMD";
+    my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
 
-    # Find out ssh daemon canonical file name
-    my $sshd = find_sshd();
-    if(!$sshd) {
-        logmsg "RUN: SOCKS server cannot find $sshdexe\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    # Find out ssh daemon version info
-    ($sshdid, $sshdvernum, $sshdverstr, $sshderror) = sshversioninfo($sshd);
-    if(!$sshdid) {
-        # Not an OpenSSH or SunSSH ssh daemon
-        logmsg "$sshderror\n" if($verbose);
-        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
-
-    # Find out ssh client canonical file name
-    my $ssh = find_ssh();
-    if(!$ssh) {
-        logmsg "RUN: SOCKS server cannot find $sshexe\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    # Find out ssh client version info
-    my ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
-    if(!$sshid) {
-        # Not an OpenSSH or SunSSH ssh client
-        logmsg "$ssherror\n" if($verbose);
-        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    # Verify minimum ssh client version
-    if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
-       (($sshid =~ /SunSSH/)  && ($sshvernum < 100))) {
-        logmsg "ssh client found $ssh is $sshverstr\n";
-        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
-
-    # Verify if ssh client and ssh daemon versions match
-    if(($sshdid ne $sshid) || ($sshdvernum != $sshvernum)) {
-        # Our test harness might work with slightly mismatched versions
-        logmsg "Warning: version mismatch: sshd $sshdverstr - ssh $sshverstr\n"
-            if($verbose);
-    }
-
-    # Config file options for ssh client are previously set from sshserver.pl
-    if(! -e $sshconfig) {
-        logmsg "RUN: SOCKS server cannot find $sshconfig\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    $sshlog  = server_logfilename($LOGDIR, 'socks', $ipvnum, $idnum);
-
-    # start our socks server
-    my $cmd="\"$ssh\" -N -F $sshconfig $ip > $sshlog 2>&1";
-    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 30, 1); # fake pidfile
-
-    if($sshpid <= 0 || !pidexists($sshpid)) {
+    if($sockspid <= 0 || !pidexists($sockspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        display_sshlog();
-        display_sshconfig();
-        display_sshdlog();
-        display_sshdconfig();
         stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
-    # Ugly hack but ssh doesn't support pid files. PID is from fake pidfile.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$sshpid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    $pid2 = $pid3;
-
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $pid2\n";
     }
 
-    return ($pid2, $sshpid);
+    return ($pid2, $sockspid);
 }
 
 #######################################################################
@@ -3642,6 +3560,7 @@ sub singletest {
                         }
                     }
                     $ENV{$var} = "$content";
+                    print "setenv $var = $content\n" if($verbose);
                 }
             }
         }
@@ -3757,7 +3676,7 @@ sub singletest {
     }
 
     # if this section exists, it might be FTP server instructions:
-    my @ftpservercmd = getpart("reply", "servercmd");
+    my @ftpservercmd = fixarray ( getpart("reply", "servercmd") );
 
     my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 
@@ -4974,7 +4893,7 @@ sub startservers {
                 $run{'tftp-ipv6'}="$pid $pid2";
             }
         }
-        elsif($what eq "sftp" || $what eq "scp" || $what eq "socks4" || $what eq "socks5" ) {
+        elsif($what eq "sftp" || $what eq "scp") {
             if(!$run{'ssh'}) {
                 ($pid, $pid2) = runsshserver("", $verbose);
                 if($pid <= 0) {
@@ -4983,32 +4902,15 @@ sub startservers {
                 printf ("* pid ssh => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'ssh'}="$pid $pid2";
             }
-            if($what eq "socks4" || $what eq "socks5") {
-                if(!$run{'socks'}) {
-                    ($pid, $pid2) = runsocksserver("", $verbose);
-                    if($pid <= 0) {
-                        return "failed starting socks server";
-                    }
-                    printf ("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
-                    $run{'socks'}="$pid $pid2";
+        }
+        elsif($what eq "socks4" || $what eq "socks5" ) {
+            if(!$run{'socks'}) {
+                ($pid, $pid2) = runsocksserver("", $verbose);
+                if($pid <= 0) {
+                    return "failed starting socks server";
                 }
-            }
-            if($what eq "socks5") {
-                if(!$sshdid) {
-                    # Not an OpenSSH or SunSSH ssh daemon
-                    logmsg "Not OpenSSH or SunSSH; socks5 tests need at least OpenSSH 3.7\n";
-                    return "failed starting socks5 server";
-                }
-                elsif(($sshdid =~ /OpenSSH/) && ($sshdvernum < 370)) {
-                    # Need OpenSSH 3.7 for socks5 - https://www.openssh.com/txt/release-3.7
-                    logmsg "$sshdverstr insufficient; socks5 tests need at least OpenSSH 3.7\n";
-                    return "failed starting socks5 server";
-                }
-                elsif(($sshdid =~ /SunSSH/)  && ($sshdvernum < 100)) {
-                    # Need SunSSH 1.0 for socks5
-                    logmsg "$sshdverstr insufficient; socks5 tests need at least SunSSH 1.0\n";
-                    return "failed starting socks5 server";
-                }
+                printf ("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'socks'}="$pid $pid2";
             }
         }
         elsif($what eq "http-unix") {
