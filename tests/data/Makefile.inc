@@ -86,7 +86,7 @@ test643 test644 test645 test646 test647 test648 test649 test650 test651 \
 test652 test653 test654 test655 test656 test658 test659 \
 \
 test700 test701 test702 test703 test704 test705 test706 test707 test708 \
-test709 test710 test711 test712 test713 test714 test715 \
+test709 test710 test711 test712 test713 test714 test715 test716 test717 \
 \
 test800 test801 test802 test803 test804 test805 test806 test807 test808 \
 test809 test810 test811 test812 test813 test814 test815 test816 test817 \

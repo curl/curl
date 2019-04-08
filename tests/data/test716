@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+SOCKS5
+all_proxy
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+# method 2 is SOCKS5 asking for user+password
+<servercmd>
+method 2
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+socks5
+</server>
+<features>
+http
+</features>
+<name>
+SOCKS5 proxy with too long user name
+</name>
+
+# it should never connect to the target server
+ <command>
+http://hohoho.example.com:99/716 -x socks5://AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA:b@%HOSTIP:%SOCKSPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+43
+</errorcode>
+</verify>
+</testcase>
