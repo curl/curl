@@ -1,4 +1,4 @@
-curl and libcurl 7.64.2
+curl and libcurl 7.65.0
 
  Public curl releases:         181
  Command line options:         221
@@ -8,21 +8,30 @@ curl and libcurl 7.64.2
 
 This release includes the following changes:
 
- o
+ o pipelining: removed [10]
 
 This release includes the following bugfixes:
 
+ o VC15 project: remove MinimalRebuild
+ o VS projects: use Unicode for VC10+ [16]
  o cirrus: Customize the disabled tests per FreeBSD version
+ o cmake: set SSL_BACKENDS [12]
  o configure: avoid unportable `==' test(1) operator [1]
+ o configure: fix default location for fish completions [13]
  o documentation: Fix several typos [7]
+ o ftplistparser: fix LGTM alert "Empty block without comment" [14]
  o multi: improved HTTP_1_1_REQUIRED handling [2]
  o resolve: apply Happy Eyeballs philosophy to parallel c-ares queries [3]
  o scripts: fix typos
+ o smtp: fix compiler warning [15]
+ o socks5: user name and passwords must be shorter than 256 [8]
+ o tests: make Impacket (SMB server) Python 3 compatible [11]
  o tool_cb_wrt: fix bad-function-cast warning [5]
  o tool_help: include <strings.h> for strcasecmp [4]
+ o transfer: fix LGTM alert "Comparison is always true" [14]
  o travis: allow builds on branches named "ci"
+ o urlapi: urlencode characters above 0x7f correctly [9]
  o vauth/oauth2: Fix OAUTHBEARER token generation [6]
- o VC15 project: remove MinimalRebuild
 
 This release includes the following known bugs:
 
@@ -31,10 +40,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad Spencer, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Jakub Zakrzewski, Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu,
-  Paolo Mossino, Tim Rühsen, Wyatt O'Day
-  (11 contributors)
+  Brad Spencer, cclauss on github, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, Eli Schwartz, Even Rouault, Jakub Zakrzewski,
+  Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, niner on github,
+  Paolo Mossino, Rikard Falkeborn, Simon Warta, Tim Rühsen, Wyatt O'Day,
+  XmiliaH on github,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -47,3 +58,12 @@ References to bug reports and discussions on issues:
  [5] = https://curl.haxx.se/bug/?i=3718
  [6] = https://curl.haxx.se/bug/?i=2487
  [7] = https://curl.haxx.se/bug/?i=3724
+ [8] = https://curl.haxx.se/bug/?i=3737
+ [9] = https://curl.haxx.se/bug/?i=3741
+ [10] = https://curl.haxx.se/bug/?i=3651
+ [11] = https://curl.haxx.se/bug/?i=3731
+ [12] = https://curl.haxx.se/bug/?i=3736
+ [13] = https://curl.haxx.se/bug/?i=3723
+ [14] = https://curl.haxx.se/bug/?i=3732
+ [15] = https://curl.haxx.se/bug/?i=3729
+ [16] = https://curl.haxx.se/bug/?i=3720
