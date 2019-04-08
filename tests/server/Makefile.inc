@@ -1,4 +1,4 @@
-noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm
+noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm socksd
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
@@ -49,6 +49,12 @@ sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  ../../lib/inet_pton.c
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
+
+socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+ server_sockaddr.h socksd.c \
+ ../../lib/inet_pton.c
+socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
+socksd_CFLAGS = $(AM_CFLAGS)
 
 sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  server_sockaddr.h \

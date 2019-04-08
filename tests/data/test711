@@ -15,6 +15,9 @@ all_proxy
 <data>
 silly content
 </data>
+<servercmd>
+backendport passthru
+</servercmd>
 </reply>
 
 #
