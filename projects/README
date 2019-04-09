@@ -151,9 +151,9 @@ Notes
 Legacy Windows and SSL
 ======================
 
-   Some of the project configurations allow the use of WinSSL (specifically
-   Schannel from Windows SSPI), the native SSL library in Windows. However,
-   WinSSL in Windows <= XP is unable to connect to servers that no longer
-   support the legacy handshakes and algorithms used by those versions. If
-   you will be using curl in one of those earlier versions of Windows you
-   should choose another SSL backend such as OpenSSL.
+   Some of the project configurations allow the use of Schannel, the native
+   SSL library in Windows which forms part of Windows SSPI. However, Schannel
+   in Windows <= XP is unable to connect to servers that no longer support the
+   legacy handshakes and algorithms used by those versions. If you will be
+   using curl in one of those earlier versions of Windows you should choose
+   another SSL backend such as OpenSSL.
