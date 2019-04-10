@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2017, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2019, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -60,8 +60,9 @@ bool Curl_auth_user_contains_domain(const char *user);
 
 /* This is used to generate a base64 encoded PLAIN cleartext message */
 CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
-                                        const char *userp,
-                                        const char *passwdp,
+                                        const char *authzid,
+                                        const char *authcid,
+                                        const char *passwd,
                                         char **outptr, size_t *outlen);
 
 /* This is used to generate a base64 encoded LOGIN cleartext message */
