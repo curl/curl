@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -63,7 +63,9 @@ Scheme cannot be URL decoded on set.
 The host name can use IDNA. The string must then be encoded as your locale
 says or UTF-8 (when winidn is used).
 .IP CURLUPART_PORT
-Port cannot be URL encoded on set.
+Port cannot be URL encoded on set. The given port number is provided as a
+string and the decimal number must be between 1 and 65535. Anything else will
+return an error.
 .IP CURLUPART_PATH
 If a path is set in the URL without a leading slash, a slash will be inserted
 automatically when this URL is read from the handle.
