@@ -1145,6 +1145,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       storep = &u->host;
       break;
     case CURLUPART_PORT:
+      u->portnum = 0;
       storep = &u->port;
       break;
     case CURLUPART_PATH:
@@ -1188,12 +1189,18 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     storep = &u->host;
     break;
   case CURLUPART_PORT:
+  {
+    char *endp;
     urlencode = FALSE; /* never */
-    port = strtol(part, NULL, 10);  /* Port number must be decimal */
+    port = strtol(part, &endp, 10);  /* Port number must be decimal */
     if((port <= 0) || (port > 0xffff))
       return CURLUE_BAD_PORT_NUMBER;
+    if(*endp)
+      /* weirdly provided number, not good! */
+      return CURLUE_MALFORMED_INPUT;
     storep = &u->port;
-    break;
+  }
+  break;
   case CURLUPART_PATH:
     urlskipslash = TRUE;
     storep = &u->path;
