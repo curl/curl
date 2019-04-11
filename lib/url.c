@@ -303,8 +303,7 @@ static void up_free(struct Curl_easy *data)
   Curl_safefree(up->options);
   Curl_safefree(up->path);
   Curl_safefree(up->query);
-  if(data->set.uh != data->state.uh)
-    curl_url_cleanup(data->state.uh);
+  curl_url_cleanup(data->state.uh);
   data->state.uh = NULL;
 }
 
@@ -1879,7 +1878,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   /* parse the URL */
   if(data->set.uh) {
-    uh = data->state.uh = data->set.uh;
+    uh = data->state.uh = curl_url_dup(data->set.uh);
   }
   else {
     uh = data->state.uh = curl_url();
