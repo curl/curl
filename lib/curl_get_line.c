@@ -23,6 +23,9 @@
 #include "curl_setup.h"
 
 #include "curl_get_line.h"
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
 
 /*
  * get_line() makes sure to only return complete whole lines that fit in 'len'

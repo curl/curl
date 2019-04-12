@@ -24,7 +24,6 @@
 #include "curl_setup.h"
 
 #include <curl/curl.h>
-#include "curl_get_line.h"
 
 struct Cookie {
   struct Cookie *next; /* next in the chain */
