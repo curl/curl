@@ -168,12 +168,6 @@ USE_MBEDTLS = true
 MBEDTLS     = $(WITH_MBEDTLS)
 !ENDIF
 
-!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
- || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
- || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
-!ERROR SSL, MBEDTLS and WINSSL are mutual exclusive options.
-!ENDIF
-
 !IF "$(WITH_CARES)"=="dll"
 USE_CARES = true
 CARES     = dll
