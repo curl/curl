@@ -174,6 +174,7 @@ if(HTTP_ONLY)
   set(CURL_DISABLE_IMAP ON)
   set(CURL_DISABLE_SMTP ON)
   set(CURL_DISABLE_GOPHER ON)
+  set(CURL_DISABLE_SMB ON)
 endif()
 
 option(CURL_DISABLE_COOKIES "to disable cookies support" OFF)
