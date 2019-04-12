@@ -287,7 +287,7 @@ endif()
 # TODO support GNUTLS, NSS, POLARSSL, CYASSL
 
 if(APPLE)
-  option(CMAKE_USE_DARWINSSL "enable Apple OS native SSL/TLS" OFF)
+  option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
 endif()
 if(WIN32)
   option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" OFF)
@@ -297,14 +297,14 @@ endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
+if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
   set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
 count_true(enabled_ssl_options_count
   CMAKE_USE_WINSSL
-  CMAKE_USE_DARWINSSL
+  CMAKE_USE_SECTRANSP
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
 )
@@ -324,6 +324,10 @@ if(CURL_WINDOWS_SSPI)
 endif()
 
 if(CMAKE_USE_DARWINSSL)
+  message(FATAL_ERROR "The cmake option CMAKE_USE_DARWINSSL was renamed to CMAKE_USE_SECTRANSP.")
+endif()
+
+if(CMAKE_USE_SECTRANSP)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
