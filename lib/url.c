@@ -3815,7 +3815,9 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
   }
   else {
     Curl_pgrsTime(data, TIMER_CONNECT);    /* we're connected already */
-    Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
+    if(conn->ssl[FIRSTSOCKET].use ||
+       (conn->handler->protocol & PROTO_FAMILY_SSH))
+      Curl_pgrsTime(data, TIMER_APPCONNECT); /* we're connected already */
     conn->bits.tcpconnect[FIRSTSOCKET] = TRUE;
     *protocol_done = TRUE;
     Curl_updateconninfo(conn, conn->sock[FIRSTSOCKET]);
