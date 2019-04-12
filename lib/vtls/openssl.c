@@ -3822,7 +3822,11 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
       sub[0]='\0';
   }
 
+#ifdef OPENSSL_FIPS
+  return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s-fips",
+#else
   return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s",
+#endif
                    OSSL_PACKAGE,
                    (ssleay_value>>28)&0xf,
                    (ssleay_value>>20)&0xff,
