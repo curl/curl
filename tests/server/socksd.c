@@ -166,6 +166,12 @@ static unsigned char byteval(char *value)
   return num & 0xff;
 }
 
+static unsigned short shortval(char *value)
+{
+  unsigned long num = strtoul(value, NULL, 10);
+  return num & 0xffff;
+}
+
 static void getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
@@ -194,7 +200,7 @@ static void getconfig(void)
           logmsg("backend [%s] set", config.addr);
         }
         else if(!strcmp(key, "backendport")) {
-          config.port = byteval(value);
+          config.port = shortval(value);
           logmsg("backendport [%d] set", config.port);
         }
         else if(!strcmp(key, "user")) {
