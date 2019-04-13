@@ -57,6 +57,8 @@
 #  include <openssl/des.h>
 #  ifndef OPENSSL_NO_MD4
 #    include <openssl/md4.h>
+#  else
+#    include "curl_md4.h"
 #  endif
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
@@ -568,10 +570,14 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
   {
     /* Create NT hashed password. */
 #ifdef USE_OPENSSL
+#if !defined(OPENSSL_NO_MD4)
     MD4_CTX MD4pw;
     MD4_Init(&MD4pw);
     MD4_Update(&MD4pw, pw, 2 * len);
     MD4_Final(ntbuffer, &MD4pw);
+#else
+    Curl_md4it(ntbuffer, pw, 2 * len);
+#endif
 #elif defined(USE_GNUTLS_NETTLE)
     struct md4_ctx MD4pw;
     md4_init(&MD4pw);

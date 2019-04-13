@@ -38,9 +38,11 @@
 
 #include "curl_setup.h"
 
-/* The NSS, OS/400 and sometimes mbed TLS crypto libraries do not provide the
- * MD4 hash algorithm, so we have a local implementation of it */
+/* The NSS, OS/400, and when not included, OpenSSL and mbed TLS crypto
+ * libraries do not provide the MD4 hash algorithm, so we use this
+ * implementation of it */
 #if defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
+    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
 
 #include "curl_md4.h"
@@ -304,5 +306,7 @@ void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
   MD4_Update(&ctx, input, curlx_uztoui(len));
   MD4_Final(output, &ctx);
 }
+
 #endif /* defined(USE_NSS) || defined(USE_OS400CRYPTO) ||
+    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) ||
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C)) */
