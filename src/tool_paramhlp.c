@@ -560,7 +560,7 @@ int ftpcccmethod(struct OperationConfig *config, const char *str)
   return CURLFTPSSL_CCC_PASSIVE;
 }
 
-long delegation(struct OperationConfig *config, char *str)
+long delegation(struct OperationConfig *config, const char *str)
 {
   if(curl_strequal("none", str))
     return CURLGSSAPI_DELEGATION_NONE;
