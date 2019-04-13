@@ -109,7 +109,7 @@ static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */
 
 struct configurable {
-  unsigned char version; /* inital version byte in the request must match
+  unsigned char version; /* initial version byte in the request must match
                             this */
   unsigned char nmethods_min; /* minimum number of nmethods to expect */
   unsigned char nmethods_max; /* maximum number of nmethods to expect */
@@ -623,7 +623,7 @@ static curl_socket_t sockit(curl_socket_t fd)
     len = 16;
     break;
   default:
-    logmsg("Unkown ATYP %d", type);
+    logmsg("Unknown ATYP %d", type);
     return CURL_SOCKET_BAD;
   }
   if(rc < (4 + len + 2)) {
