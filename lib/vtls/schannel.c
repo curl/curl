@@ -592,7 +592,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
       HCERTSTORE cert_store;
       FILE *fInCert = NULL;
 
-      TCHAR *cert_path = Curl_convert_UTF8_to_tchar(data->set.ssl.cert);
+      TCHAR *cert_path = curlx_convert_UTF8_to_tchar(data->set.ssl.cert);
       if(!cert_path)
         return CURLE_OUT_OF_MEMORY;
 
@@ -605,7 +605,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
         failf(data, "schannel: Failed to get certificate location"
               " or file for %s",
               data->set.ssl.cert);
-        Curl_unicodefree(cert_path);
+        curlx_unicodefree(cert_path);
         return result;
       }
 
@@ -633,7 +633,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
            ((int) fread(certdata, (size_t)filesize, 1, fInCert) != 1))
           continue_reading = 0;
         fclose(fInCert);
-        Curl_unicodefree(cert_path);
+        curlx_unicodefree(cert_path);
 
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
@@ -700,7 +700,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                 "last error is 0x%x",
                 cert_store_name, cert_store_path, GetLastError());
           free(cert_store_path);
-          Curl_unicodefree(cert_path);
+          curlx_unicodefree(cert_path);
           return CURLE_SSL_CERTPROBLEM;
         }
         free(cert_store_path);
@@ -714,7 +714,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
                                 cert_thumbprint_data,
                                 &cert_thumbprint.cbData,
                                 NULL, NULL)) {
-          Curl_unicodefree(cert_path);
+          curlx_unicodefree(cert_path);
           CertCloseStore(cert_store, 0);
           return CURLE_SSL_CERTPROBLEM;
         }
@@ -723,7 +723,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
           cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
           CERT_FIND_HASH, &cert_thumbprint, NULL);
 
-        Curl_unicodefree(cert_path);
+        curlx_unicodefree(cert_path);
 
         if(client_certs[0]) {
           schannel_cred.cCreds = 1;
@@ -867,7 +867,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     return CURLE_OUT_OF_MEMORY;
   }
 
-  host_name = Curl_convert_UTF8_to_tchar(hostname);
+  host_name = curlx_convert_UTF8_to_tchar(hostname);
   if(!host_name)
     return CURLE_OUT_OF_MEMORY;
 
@@ -884,7 +884,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     0, &BACKEND->ctxt->ctxt_handle,
     &outbuf_desc, &BACKEND->ret_flags, &BACKEND->ctxt->time_stamp);
 
-  Curl_unicodefree(host_name);
+  curlx_unicodefree(host_name);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     char buffer[STRERROR_LEN];
@@ -1067,7 +1067,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
     memcpy(inbuf[0].pvBuffer, BACKEND->encdata_buffer,
            BACKEND->encdata_offset);
 
-    host_name = Curl_convert_UTF8_to_tchar(hostname);
+    host_name = curlx_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1078,7 +1078,7 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
       host_name, BACKEND->req_flags, 0, 0, &inbuf_desc, 0, NULL,
       &outbuf_desc, &BACKEND->ret_flags, &BACKEND->ctxt->time_stamp);
 
-    Curl_unicodefree(host_name);
+    curlx_unicodefree(host_name);
 
     /* free buffer for received handshake data */
     Curl_safefree(inbuf[0].pvBuffer);
@@ -2112,7 +2112,7 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
     }
 
-    host_name = Curl_convert_UTF8_to_tchar(hostname);
+    host_name = curlx_convert_UTF8_to_tchar(hostname);
     if(!host_name)
       return CURLE_OUT_OF_MEMORY;
 
@@ -2134,7 +2134,7 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
       &BACKEND->ret_flags,
       &BACKEND->ctxt->time_stamp);
 
-    Curl_unicodefree(host_name);
+    curlx_unicodefree(host_name);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */

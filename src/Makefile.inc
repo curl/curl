@@ -34,14 +34,16 @@ CURLX_CFILES = \
   ../lib/strtoofft.c \
   ../lib/nonblock.c \
   ../lib/warnless.c \
-  ../lib/curl_ctype.c
+  ../lib/curl_ctype.c \
+  ../lib/curl_multibyte.c
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
   ../lib/strtoofft.h \
   ../lib/nonblock.h \
   ../lib/warnless.h \
-  ../lib/curl_ctype.h
+  ../lib/curl_ctype.h \
+  ../lib/curl_multibyte.h
 
 CURL_CFILES = \
   slist_wc.c \

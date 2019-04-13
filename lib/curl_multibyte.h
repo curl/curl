@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,48 +23,43 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_WIN32_IDN) || ((defined(USE_WINDOWS_SSPI) || \
-                                defined(USE_WIN32_LDAP)) && defined(UNICODE))
+#if defined(WIN32)
 
  /*
   * MultiByte conversions using Windows kernel32 library.
   */
 
-wchar_t *Curl_convert_UTF8_to_wchar(const char *str_utf8);
-char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
+wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
+char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
 
-#endif /* USE_WIN32_IDN || ((USE_WINDOWS_SSPI || USE_WIN32_LDAP) && UNICODE) */
-
-
-#if defined(USE_WIN32_IDN) || defined(USE_WINDOWS_SSPI) || \
-    defined(USE_WIN32_LDAP)
+#endif /* WIN32 */
 
 /*
- * Macros Curl_convert_UTF8_to_tchar(), Curl_convert_tchar_to_UTF8()
- * and Curl_unicodefree() main purpose is to minimize the number of
+ * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
+ * and curlx_unicodefree() main purpose is to minimize the number of
  * preprocessor conditional directives needed by code using these
  * to differentiate UNICODE from non-UNICODE builds.
  *
- * When building with UNICODE defined, this two macros
- * Curl_convert_UTF8_to_tchar() and Curl_convert_tchar_to_UTF8()
+ * When building with UNICODE defined, these two macros
+ * curlx_convert_UTF8_to_tchar() and curlx_convert_tchar_to_UTF8()
  * return a pointer to a newly allocated memory area holding result.
  * When the result is no longer needed, allocated memory is intended
- * to be free'ed with Curl_unicodefree().
+ * to be free'ed with curlx_unicodefree().
  *
  * When building without UNICODE defined, this macros
- * Curl_convert_UTF8_to_tchar() and Curl_convert_tchar_to_UTF8()
- * return the pointer received as argument. Curl_unicodefree() does
+ * curlx_convert_UTF8_to_tchar() and curlx_convert_tchar_to_UTF8()
+ * return the pointer received as argument. curlx_unicodefree() does
  * no actual free'ing of this pointer it is simply set to NULL.
  */
 
-#ifdef UNICODE
+#if defined(UNICODE) && defined(WIN32)
 
-#define Curl_convert_UTF8_to_tchar(ptr) Curl_convert_UTF8_to_wchar((ptr))
-#define Curl_convert_tchar_to_UTF8(ptr) Curl_convert_wchar_to_UTF8((ptr))
-#define Curl_unicodefree(ptr)                           \
+#define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
+#define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
+#define curlx_unicodefree(ptr)                          \
   do {                                                  \
     if(ptr) {                                           \
-      free(ptr);                                        \
+      (free)(ptr);                                        \
       (ptr) = NULL;                                     \
     }                                                   \
   } while(0)
@@ -78,9 +73,9 @@ typedef union {
 
 #else
 
-#define Curl_convert_UTF8_to_tchar(ptr) (ptr)
-#define Curl_convert_tchar_to_UTF8(ptr) (ptr)
-#define Curl_unicodefree(ptr) \
+#define curlx_convert_UTF8_to_tchar(ptr) (ptr)
+#define curlx_convert_tchar_to_UTF8(ptr) (ptr)
+#define curlx_unicodefree(ptr) \
   do {(ptr) = NULL;} while(0)
 
 typedef union {
@@ -90,8 +85,6 @@ typedef union {
   const unsigned char *const_tbyte_ptr;
 } xcharp_u;
 
-#endif /* UNICODE */
-
-#endif /* USE_WIN32_IDN || USE_WINDOWS_SSPI || USE_WIN32_LDAP */
+#endif /* UNICODE && WIN32 */
 
 #endif /* HEADER_CURL_MULTIBYTE_H */

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,6 +51,16 @@
   curlx_ultous()
   curlx_ultouc()
   curlx_uztosi()
+*/
+
+#include "curl_multibyte.h"
+/* "curl_multibyte.h" provides these functions and macros:
+
+  curlx_convert_UTF8_to_wchar()
+  curlx_convert_wchar_to_UTF8()
+  curlx_convert_UTF8_to_tchar()
+  curlx_convert_tchar_to_UTF8()
+  curlx_unicodefree()
 */
 
 /* Now setup curlx_ * names for the functions that are to become curlx_ and
