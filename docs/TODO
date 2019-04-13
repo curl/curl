@@ -150,7 +150,6 @@
  18.4 simultaneous parallel transfers
  18.5 UTF-8 filenames in Content-Disposition
  18.6 warning when setting an option
- 18.7 warning if curl version is not in sync with libcurl version
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
@@ -1024,13 +1023,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Display a warning when libcurl returns an error when setting an option.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
-
-18.7 warning if curl version is not in sync with libcurl version
-
- This is usually a sign of a funny, weird or unexpected install situations
- that aren't always quickly nor easily detected by users. curl and libcurl are
- always released in sync and should use the same version numbers unless very
- special situations.
 
 18.8 offer color-coded HTTP header output
 

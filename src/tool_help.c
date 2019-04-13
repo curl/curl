@@ -596,6 +596,10 @@ void tool_version_info(void)
       printf(" %s", featp[i]);
     puts(""); /* newline */
   }
+  if(strcmp(CURL_VERSION, curlinfo->version)) {
+    printf("WARNING: curl and libcurl versions do not match. "
+           "Functionality may be affected.\n");
+  }
 }
 
 void tool_list_engines(CURL *curl)
