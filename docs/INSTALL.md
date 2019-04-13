@@ -284,6 +284,19 @@ will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
     ./configure --with-darwinssl
     make
 
+###### In case of missing dependancis
+
+You can use a package manager for macOS like "Homebrew" or what you prefer
+
+Installing Homebrew from Terminal
+   
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+then install missing dependency by 
+
+    brew install (missing dependency)
+
+
 # Cross compile
 
 Download and unpack the curl package.
