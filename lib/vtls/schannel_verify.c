@@ -94,7 +94,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
   int num_certs = 0;
   size_t END_CERT_LEN;
 
-  ca_file_tstr = Curl_convert_UTF8_to_tchar((char *)ca_file);
+  ca_file_tstr = curlx_convert_UTF8_to_tchar((char *)ca_file);
   if(!ca_file_tstr) {
     char buffer[STRERROR_LEN];
     failf(data,
@@ -288,7 +288,7 @@ cleanup:
     CloseHandle(ca_file_handle);
   }
   Curl_safefree(ca_file_buffer);
-  Curl_unicodefree(ca_file_tstr);
+  curlx_unicodefree(ca_file_tstr);
 
   return result;
 }
@@ -476,7 +476,7 @@ static CURLcode verify_host(struct Curl_easy *data,
      * is acceptable since both values are assumed to use ASCII
      * (or some equivalent) encoding
      */
-    cert_hostname = Curl_convert_tchar_to_UTF8(
+    cert_hostname = curlx_convert_tchar_to_UTF8(
         &cert_hostname_buff[cert_hostname_buff_index]);
     if(!cert_hostname) {
       result = CURLE_OUT_OF_MEMORY;
@@ -508,7 +508,7 @@ static CURLcode verify_host(struct Curl_easy *data,
 
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
-      Curl_unicodefree(cert_hostname);
+      curlx_unicodefree(cert_hostname);
     }
   }
 
@@ -522,7 +522,7 @@ static CURLcode verify_host(struct Curl_easy *data,
     failf(data, "schannel: server certificate name verification failed");
 
 cleanup:
-  Curl_unicodefree(cert_hostname_buff);
+  curlx_unicodefree(cert_hostname_buff);
 
   return result;
 }

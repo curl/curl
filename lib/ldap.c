@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -239,13 +239,13 @@ static int ldap_win_bind(struct connectdata *conn, LDAP *server,
   PTCHAR inpass = NULL;
 
   if(user && passwd && (conn->data->set.httpauth & CURLAUTH_BASIC)) {
-    inuser = Curl_convert_UTF8_to_tchar((char *) user);
-    inpass = Curl_convert_UTF8_to_tchar((char *) passwd);
+    inuser = curlx_convert_UTF8_to_tchar((char *) user);
+    inpass = curlx_convert_UTF8_to_tchar((char *) passwd);
 
     rc = ldap_simple_bind_s(server, inuser, inpass);
 
-    Curl_unicodefree(inuser);
-    Curl_unicodefree(inpass);
+    curlx_unicodefree(inuser);
+    curlx_unicodefree(inpass);
   }
 #if defined(USE_WINDOWS_SSPI)
   else {
@@ -306,7 +306,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           ldap_ssl ? "encrypted" : "cleartext");
 
 #if defined(USE_WIN32_LDAP)
-  host = Curl_convert_UTF8_to_tchar(conn->host.name);
+  host = curlx_convert_UTF8_to_tchar(conn->host.name);
   if(!host) {
     result = CURLE_OUT_OF_MEMORY;
 
@@ -517,7 +517,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       size_t name_len;
 #if defined(USE_WIN32_LDAP)
       TCHAR *dn = ldap_get_dn(server, entryIterator);
-      name = Curl_convert_tchar_to_UTF8(dn);
+      name = curlx_convert_tchar_to_UTF8(dn);
       if(!name) {
         ldap_memfree(dn);
 
@@ -533,7 +533,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"DN: ", 4);
       if(result) {
 #if defined(USE_WIN32_LDAP)
-        Curl_unicodefree(name);
+        curlx_unicodefree(name);
 #endif
         ldap_memfree(dn);
 
@@ -544,7 +544,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
                                  name_len);
       if(result) {
 #if defined(USE_WIN32_LDAP)
-        Curl_unicodefree(name);
+        curlx_unicodefree(name);
 #endif
         ldap_memfree(dn);
 
@@ -554,7 +554,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       result = Curl_client_write(conn, CLIENTWRITE_BODY, (char *)"\n", 1);
       if(result) {
 #if defined(USE_WIN32_LDAP)
-        Curl_unicodefree(name);
+        curlx_unicodefree(name);
 #endif
         ldap_memfree(dn);
 
@@ -564,7 +564,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       dlsize += name_len + 5;
 
 #if defined(USE_WIN32_LDAP)
-      Curl_unicodefree(name);
+      curlx_unicodefree(name);
 #endif
       ldap_memfree(dn);
     }
@@ -576,7 +576,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
       BerValue **vals;
       size_t attr_len;
 #if defined(USE_WIN32_LDAP)
-      char *attr = Curl_convert_tchar_to_UTF8(attribute);
+      char *attr = curlx_convert_tchar_to_UTF8(attribute);
       if(!attr) {
         if(ber)
           ber_free(ber, 0);
@@ -597,7 +597,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           if(result) {
             ldap_value_free_len(vals);
 #if defined(USE_WIN32_LDAP)
-            Curl_unicodefree(attr);
+            curlx_unicodefree(attr);
 #endif
             ldap_memfree(attribute);
             if(ber)
@@ -611,7 +611,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           if(result) {
             ldap_value_free_len(vals);
 #if defined(USE_WIN32_LDAP)
-            Curl_unicodefree(attr);
+            curlx_unicodefree(attr);
 #endif
             ldap_memfree(attribute);
             if(ber)
@@ -624,7 +624,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           if(result) {
             ldap_value_free_len(vals);
 #if defined(USE_WIN32_LDAP)
-            Curl_unicodefree(attr);
+            curlx_unicodefree(attr);
 #endif
             ldap_memfree(attribute);
             if(ber)
@@ -646,7 +646,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
             if(result) {
               ldap_value_free_len(vals);
 #if defined(USE_WIN32_LDAP)
-              Curl_unicodefree(attr);
+              curlx_unicodefree(attr);
 #endif
               ldap_memfree(attribute);
               if(ber)
@@ -662,7 +662,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
               if(result) {
                 ldap_value_free_len(vals);
 #if defined(USE_WIN32_LDAP)
-                Curl_unicodefree(attr);
+                curlx_unicodefree(attr);
 #endif
                 ldap_memfree(attribute);
                 if(ber)
@@ -680,7 +680,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
             if(result) {
               ldap_value_free_len(vals);
 #if defined(USE_WIN32_LDAP)
-              Curl_unicodefree(attr);
+              curlx_unicodefree(attr);
 #endif
               ldap_memfree(attribute);
               if(ber)
@@ -696,7 +696,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
           if(result) {
             ldap_value_free_len(vals);
 #if defined(USE_WIN32_LDAP)
-            Curl_unicodefree(attr);
+            curlx_unicodefree(attr);
 #endif
             ldap_memfree(attribute);
             if(ber)
@@ -714,7 +714,7 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
 
       /* Free the attribute as we are done with it */
 #if defined(USE_WIN32_LDAP)
-      Curl_unicodefree(attr);
+      curlx_unicodefree(attr);
 #endif
       ldap_memfree(attribute);
 
@@ -746,7 +746,7 @@ quit:
 #endif /* HAVE_LDAP_SSL && CURL_HAS_NOVELL_LDAPSDK */
 
 #if defined(USE_WIN32_LDAP)
-  Curl_unicodefree(host);
+  curlx_unicodefree(host);
 #endif
 
   /* no data to transfer */
@@ -892,10 +892,10 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 
 #if defined(USE_WIN32_LDAP)
     /* Convert the unescaped string to a tchar */
-    ludp->lud_dn = Curl_convert_UTF8_to_tchar(unescaped);
+    ludp->lud_dn = curlx_convert_UTF8_to_tchar(unescaped);
 
     /* Free the unescaped string as we are done with it */
-    Curl_unicodefree(unescaped);
+    curlx_unicodefree(unescaped);
 
     if(!ludp->lud_dn) {
       rc = LDAP_NO_MEMORY;
@@ -960,10 +960,10 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 
 #if defined(USE_WIN32_LDAP)
       /* Convert the unescaped string to a tchar */
-      ludp->lud_attrs[i] = Curl_convert_UTF8_to_tchar(unescaped);
+      ludp->lud_attrs[i] = curlx_convert_UTF8_to_tchar(unescaped);
 
       /* Free the unescaped string as we are done with it */
-      Curl_unicodefree(unescaped);
+      curlx_unicodefree(unescaped);
 
       if(!ludp->lud_attrs[i]) {
         free(attributes);
@@ -1027,10 +1027,10 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 
 #if defined(USE_WIN32_LDAP)
     /* Convert the unescaped string to a tchar */
-    ludp->lud_filter = Curl_convert_UTF8_to_tchar(unescaped);
+    ludp->lud_filter = curlx_convert_UTF8_to_tchar(unescaped);
 
     /* Free the unescaped string as we are done with it */
-    Curl_unicodefree(unescaped);
+    curlx_unicodefree(unescaped);
 
     if(!ludp->lud_filter) {
       rc = LDAP_NO_MEMORY;

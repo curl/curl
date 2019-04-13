@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -151,7 +151,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
 
-  useranddomain.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)userp);
+  useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)userp);
   if(!useranddomain.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -173,7 +173,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Setup the identity's user and length */
   dup_user.tchar_ptr = _tcsdup(user.tchar_ptr);
   if(!dup_user.tchar_ptr) {
-    Curl_unicodefree(useranddomain.tchar_ptr);
+    curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   identity->User = dup_user.tbyte_ptr;
@@ -183,7 +183,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Setup the identity's domain and length */
   dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
   if(!dup_domain.tchar_ptr) {
-    Curl_unicodefree(useranddomain.tchar_ptr);
+    curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   _tcsncpy(dup_domain.tchar_ptr, domain.tchar_ptr, domlen);
@@ -192,22 +192,22 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   identity->DomainLength = curlx_uztoul(domlen);
   dup_domain.tchar_ptr = NULL;
 
-  Curl_unicodefree(useranddomain.tchar_ptr);
+  curlx_unicodefree(useranddomain.tchar_ptr);
 
   /* Setup the identity's password and length */
-  passwd.tchar_ptr = Curl_convert_UTF8_to_tchar((char *)passwdp);
+  passwd.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)passwdp);
   if(!passwd.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
   dup_passwd.tchar_ptr = _tcsdup(passwd.tchar_ptr);
   if(!dup_passwd.tchar_ptr) {
-    Curl_unicodefree(passwd.tchar_ptr);
+    curlx_unicodefree(passwd.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   identity->Password = dup_passwd.tbyte_ptr;
   identity->PasswordLength = curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
   dup_passwd.tchar_ptr = NULL;
 
-  Curl_unicodefree(passwd.tchar_ptr);
+  curlx_unicodefree(passwd.tchar_ptr);
 
   /* Setup the identity's flags */
   identity->Flags = SECFLAG_WINNT_AUTH_IDENTITY;

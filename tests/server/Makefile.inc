@@ -30,7 +30,8 @@ CURLX_SRCS = \
  ../../lib/warnless.c \
  ../../lib/curl_ctype.c \
  ../../lib/dynbuf.c \
- ../../lib/strdup.c
+ ../../lib/strdup.c \
+ ../../lib/curl_multibyte.c
 
 CURLX_HDRS = \
  ../../lib/curlx.h \
@@ -39,7 +40,8 @@ CURLX_HDRS = \
  ../../lib/warnless.h \
  ../../lib/curl_ctype.h \
  ../../lib/dynbuf.h \
- ../../lib/strdup.h
+ ../../lib/strdup.h \
+ ../../lib/curl_multibyte.h
 
 USEFUL = \
  getpart.c \
