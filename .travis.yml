@@ -2,7 +2,6 @@ language: c
 sudo: required
 cache:
     directories:
-        - $HOME/mbedtls-mbedtls-2.8.0
         - $HOME/wolfssl-4.0.0-stable
         - $HOME/nghttp2-1.34.0
 
@@ -159,6 +158,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libmbedtls-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -395,17 +395,6 @@ before_script:
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
-        if [ ! -e $HOME/mbedtls-mbedtls-2.8.0/library/libmbedtls.a ]; then
-          (cd $HOME && \
-          curl -LO https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.8.0.tar.gz && \
-          tar -xzf mbedtls-2.8.0.tar.gz && \
-          cd mbedtls-mbedtls-2.8.0 && \
-          cmake . -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_C_FLAGS=-fPIC && \
-          make)
-        fi
-      fi
-    - |
-      if [ $TRAVIS_OS_NAME = linux ]; then
         if [ ! -e $HOME/wolfssl-4.0.0-stable/Makefile ]; then
           (cd $HOME && \
           curl -LO https://github.com/wolfSSL/wolfssl/archive/v4.0.0-stable.tar.gz && \
@@ -430,7 +419,6 @@ before_script:
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
-        (cd $HOME/mbedtls-mbedtls-2.8.0 && sudo make install)
         (cd $HOME/wolfssl-4.0.0-stable && sudo make install)
         (cd $HOME/nghttp2-1.34.0 && sudo make install)
       fi
