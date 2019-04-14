@@ -1,5 +1,69 @@
-/*
- * !checksrc! disable COPYRIGHT
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
+
+#include "curl_setup.h"
+
+#ifdef USE_OPENSSL
+#include <openssl/opensslconf.h>
+#endif
+#ifdef USE_MBEDTLS
+#include <mbedtls/config.h>
+#endif
+
+#if defined(USE_GNUTLS_NETTLE)
+
+#include <nettle/md4.h>
+
+#include "curl_md4.h"
+#include "warnless.h"
+#include "curl_memory.h"
+
+/* The last #include file should be: */
+#include "memdebug.h"
+
+typedef struct md4_ctx MD4_CTX;
+
+static void MD4_Init(MD4_CTX *ctx)
+{
+  md4_init(ctx);
+}
+
+static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+{
+  md4_update(ctx, size, data);
+}
+
+static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+{
+  md4_digest(ctx, MD4_DIGEST_SIZE, result);
+}
+
+#elif defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
+    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
+    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
+/* The NSS, OS/400, and when not included, OpenSSL and mbed TLS crypto
+ * libraries do not provide the MD4 hash algorithm, so we use this
+ * implementation of it
+ *
  * This is an OpenSSL-compatible implementation of the RSA Data Security, Inc.
  * MD4 Message-Digest Algorithm (RFC 1320).
  *
@@ -35,22 +99,6 @@
  * optimizations are not included to reduce source code size and avoid
  * compile-time configuration.
  */
-
-#include "curl_setup.h"
-
-#ifdef USE_OPENSSL
-#include <openssl/opensslconf.h>
-#endif
-#ifdef USE_MBEDTLS
-#include <mbedtls/config.h>
-#endif
-
-/* The NSS, OS/400, and when not included, OpenSSL and mbed TLS crypto
- * libraries do not provide the MD4 hash algorithm, so we use this
- * implementation of it */
-#if defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
-    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
-    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
 
 #include "curl_md4.h"
 #include "warnless.h"
@@ -307,6 +355,13 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #endif
 
+#endif /* CRYPTO LIBS */
+
+#if defined(USE_GNUTLS_NETTLE) || defined(USE_NSS) || \
+    defined(USE_OS400CRYPTO) || \
+    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
+    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
+
 void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
 {
   MD4_CTX ctx;
@@ -316,5 +371,6 @@ void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
 }
 
 #endif /* defined(USE_NSS) || defined(USE_OS400CRYPTO) ||
+    defined(USE_OS400CRYPTO) ||
     (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) ||
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C)) */
