@@ -85,6 +85,13 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   gcry_md_close(ctx);
 }
 
+#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
+/* When OpenSSL is available we use the MD4-functions from OpenSSL */
+#include <openssl/md4.h>
+
+#include "curl_md4.h"
+#include "warnless.h"
+
 #elif defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
     (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
@@ -130,8 +137,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #include "curl_md4.h"
 #include "warnless.h"
-
-#ifndef HAVE_OPENSSL
 
 #include <string.h>
 
@@ -381,13 +386,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   memset(ctx, 0, sizeof(*ctx));
 }
 
-#endif
-
 #endif /* CRYPTO LIBS */
 
 #if defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) || \
-    defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
-    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
+    defined(USE_OPENSSL) || defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
     (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
 
@@ -400,7 +402,5 @@ void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
 }
 
 #endif /* defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) ||
-    defined(USE_NSS) || defined(USE_OS400CRYPTO) ||
-    defined(USE_OS400CRYPTO) ||
-    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) ||
+    defined(USE_OPENSSL) || defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C)) */
