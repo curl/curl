@@ -92,6 +92,48 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #include "curl_md4.h"
 #include "warnless.h"
 
+#elif defined(USE_SECTRANSP)
+
+#include <CommonCrypto/CommonDigest.h>
+
+#include "curl_md4.h"
+#include "warnless.h"
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
+
+typedef struct {
+  void *data;
+  unsigned long size;
+} MD4_CTX;
+
+static void MD4_Init(MD4_CTX *ctx)
+{
+  ctx->data = NULL;
+  ctx->size = 0;
+}
+
+static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+{
+  if(ctx->data == NULL) {
+    ctx->data = malloc(size);
+    if(ctx->data != NULL) {
+      memcpy(ctx->data, data, size);
+      ctx->size = size;
+    }
+  }
+}
+
+static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+{
+  if(ctx->data != NULL) {
+    (void)CC_MD4(ctx->data, (CC_LONG) ctx->size, result);
+
+    Curl_safefree(ctx->data);
+    ctx->size = 0;
+  }
+}
+
 #elif defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
     (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
@@ -389,7 +431,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #endif /* CRYPTO LIBS */
 
 #if defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) || \
-    defined(USE_OPENSSL) || defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
+    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || defined(USE_NSS) || \
+    defined(USE_OS400CRYPTO) || \
     (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
 
@@ -402,5 +445,6 @@ void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
 }
 
 #endif /* defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) ||
-    defined(USE_OPENSSL) || defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
+    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || defined(USE_NSS) ||
+    defined(USE_OS400CRYPTO) ||
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C)) */

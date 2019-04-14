@@ -103,6 +103,7 @@
 
 #  include <CommonCrypto/CommonCryptor.h>
 #  include <CommonCrypto/CommonDigest.h>
+#  include "curl_md4.h"
 
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
@@ -579,7 +580,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
     Curl_md4it(ntbuffer, pw, 2 * len);
 #endif
 #elif defined(USE_SECTRANSP)
-    (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
+    Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_OS400CRYPTO)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_WIN32_CRYPTO)
