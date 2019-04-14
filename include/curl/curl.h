@@ -1918,6 +1918,9 @@ typedef enum {
   /* alt-svc cache file name to possibly read from/write to */
   CINIT(ALTSVC, STRINGPOINT, 287),
 
+  /* maximum age of a connection to consider it for reuse (in seconds) */
+  CINIT(MAXAGE_CONN, LONG, 288),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
