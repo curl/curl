@@ -70,16 +70,13 @@
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
 #  endif
-#  include "curl_md4.h"
 
 #elif defined(USE_GNUTLS_NETTLE)
 
 #  include <nettle/des.h>
-#  include "curl_md4.h"
 
 #elif defined(USE_GNUTLS)
 
-#  include "curl_md4.h"
 #  include <gcrypt.h>
 #  define MD5_DIGEST_LENGTH 16
 
@@ -88,7 +85,6 @@
 #  include <nss.h>
 #  include <pk11pub.h>
 #  include <hasht.h>
-#  include "curl_md4.h"
 #  define MD5_DIGEST_LENGTH MD5_LENGTH
 
 #elif defined(USE_MBEDTLS)
@@ -100,14 +96,11 @@
 
 #  include <CommonCrypto/CommonCryptor.h>
 #  include <CommonCrypto/CommonDigest.h>
-#  include "curl_md4.h"
 
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
-#  include "curl_md4.h"
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
-#  include "curl_md4.h"
 #else
 #  error "Can't compile NTLM support without a crypto library."
 #endif
@@ -121,6 +114,7 @@
 #include "warnless.h"
 #include "curl_endian.h"
 #include "curl_des.h"
+#include "curl_md4.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
