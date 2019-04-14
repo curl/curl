@@ -110,6 +110,7 @@
 #  include "curl_md4.h"
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
+#  include "curl_md4.h"
 #else
 #  error "Can't compile NTLM support without a crypto library."
 #endif
@@ -584,18 +585,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 #elif defined(USE_OS400CRYPTO)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_WIN32_CRYPTO)
-    HCRYPTPROV hprov;
-    if(CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
-                           CRYPT_VERIFYCONTEXT)) {
-      HCRYPTHASH hhash;
-      if(CryptCreateHash(hprov, CALG_MD4, 0, 0, &hhash)) {
-        DWORD length = 16;
-        CryptHashData(hhash, pw, (unsigned int)len * 2, 0);
-        CryptGetHashParam(hhash, HP_HASHVAL, ntbuffer, &length, 0);
-        CryptDestroyHash(hhash);
-      }
-      CryptReleaseContext(hprov, 0);
-    }
+    Curl_md4it(ntbuffer, pw, 2 * len);
 #endif
 
     memset(ntbuffer + 16, 0, 21 - 16);
