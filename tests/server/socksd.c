@@ -105,8 +105,8 @@
 #define DEFAULT_CONFIG "socksd.config"
 #endif
 
-const char *backendaddr = "127.0.0.1";
-unsigned short backendport = 0; /* default is use client's */
+static const char *backendaddr = "127.0.0.1";
+static unsigned short backendport = 0; /* default is use client's */
 
 struct configurable {
   unsigned char version; /* inital version byte in the request must match
@@ -133,10 +133,10 @@ struct configurable {
 #define CONFIG_ADDR backendaddr
 #define CONFIG_CONNECTREP 0
 
-struct configurable config;
+static struct configurable config;
 
 const char *serverlogfile = DEFAULT_LOGFILE;
-const char *configfile = DEFAULT_CONFIG;
+static const char *configfile = DEFAULT_CONFIG;
 
 #ifdef ENABLE_IPV6
 static bool use_ipv6 = FALSE;
