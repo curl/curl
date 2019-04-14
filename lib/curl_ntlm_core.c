@@ -561,28 +561,15 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
   if(result)
     return result;
 
-  {
-    /* Create NT hashed password. */
-#ifdef USE_OPENSSL
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_GNUTLS_NETTLE)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_GNUTLS)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_NSS)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_MBEDTLS)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_SECTRANSP)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_OS400CRYPTO)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_WIN32_CRYPTO)
-    Curl_md4it(ntbuffer, pw, 2 * len);
+  /* Create NT hashed password. */
+#if defined(USE_OPENSSL) || defined(USE_GNUTLS_NETTLE) || \
+  defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_MBEDTLS) || \
+  defined(USE_SECTRANSP) || defined(USE_OS400CRYPTO) || \
+  defined(USE_WIN32_CRYPTO)
+  Curl_md4it(ntbuffer, pw, 2 * len);
 #endif
 
-    memset(ntbuffer + 16, 0, 21 - 16);
-  }
+  memset(ntbuffer + 16, 0, 21 - 16);
 
   free(pw);
 
