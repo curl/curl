@@ -94,10 +94,7 @@
 #elif defined(USE_MBEDTLS)
 
 #  include <mbedtls/des.h>
-#  include <mbedtls/md4.h>
-#  if !defined(MBEDTLS_MD4_C)
-#    include "curl_md4.h"
-#  endif
+#  include "curl_md4.h"
 
 #elif defined(USE_SECTRANSP)
 
@@ -575,11 +572,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 #elif defined(USE_NSS)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_MBEDTLS)
-#if defined(MBEDTLS_MD4_C)
-    mbedtls_md4(pw, 2 * len, ntbuffer);
-#else
     Curl_md4it(ntbuffer, pw, 2 * len);
-#endif
 #elif defined(USE_SECTRANSP)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_OS400CRYPTO)
