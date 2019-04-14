@@ -22,6 +22,11 @@
 
 #include "curl_setup.h"
 
+#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+
+#include "curl_md4.h"
+#include "warnless.h"
+
 #ifdef USE_OPENSSL
 #include <openssl/opensslconf.h>
 #endif
@@ -33,8 +38,6 @@
 
 #include <nettle/md4.h>
 
-#include "curl_md4.h"
-#include "warnless.h"
 #include "curl_memory.h"
 
 /* The last #include file should be: */
@@ -61,8 +64,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #include <gcrypt.h>
 
-#include "curl_md4.h"
-#include "warnless.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -89,15 +90,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* When OpenSSL is available we use the MD4-functions from OpenSSL */
 #include <openssl/md4.h>
 
-#include "curl_md4.h"
-#include "warnless.h"
-
 #elif defined(USE_SECTRANSP)
 
 #include <CommonCrypto/CommonDigest.h>
 
-#include "curl_md4.h"
-#include "warnless.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -138,8 +134,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #include <wincrypt.h>
 
-#include "curl_md4.h"
-#include "warnless.h"
 #include "curl_memory.h"
  /* The last #include file should be: */
 #include "memdebug.h"
@@ -184,8 +178,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #include <mbedtls/md4.h>
 
-#include "curl_md4.h"
-#include "warnless.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -222,12 +214,9 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   }
 }
 
-#elif defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
-    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
-    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
-/* The NSS, OS/400, and when not included, OpenSSL and mbed TLS crypto
- * libraries do not provide the MD4 hash algorithm, so we use this
- * implementation of it
+#else
+/* When no other crypto library is available, or the crypto library doesn't
+ * support MD4, we use this code segment this implementation of it
  *
  * This is an OpenSSL-compatible implementation of the RSA Data Security, Inc.
  * MD4 Message-Digest Algorithm (RFC 1320).
@@ -265,8 +254,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
  * compile-time configuration.
  */
 
-#include "curl_md4.h"
-#include "warnless.h"
 
 #include <string.h>
 
@@ -518,11 +505,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #endif /* CRYPTO LIBS */
 
-#if defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) || \
-    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || \
-    defined(USE_WIN32_CRYPTO) || defined(USE_NSS) || \
-    defined(USE_OS400CRYPTO) || defined(USE_MBEDTLS)
-
 void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
 {
   MD4_CTX ctx;
@@ -531,7 +513,4 @@ void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
   MD4_Final(output, &ctx);
 }
 
-#endif /* defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) ||
-    defined(USE_OPENSSL) || defined(USE_SECTRANSP) ||
-    defined(USE_WIN32_CRYPTO) || defined(USE_NSS) ||
-    defined(USE_OS400CRYPTO) || defined(USE_MBEDTLS) */
+#endif /* CURL_DISABLE_CRYPTO_AUTH */

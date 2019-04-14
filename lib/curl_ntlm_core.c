@@ -556,12 +556,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
     return result;
 
   /* Create NT hashed password. */
-#if defined(USE_OPENSSL) || defined(USE_GNUTLS_NETTLE) || \
-  defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_MBEDTLS) || \
-  defined(USE_SECTRANSP) || defined(USE_OS400CRYPTO) || \
-  defined(USE_WIN32_CRYPTO)
   Curl_md4it(ntbuffer, pw, 2 * len);
-#endif
 
   memset(ntbuffer + 16, 0, 21 - 16);
 
