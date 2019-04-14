@@ -27,17 +27,15 @@
 #if defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) || \
     defined(USE_OPENSSL) || defined(USE_SECTRANSP) || \
     defined(USE_WIN32_CRYPTO) || defined(USE_NSS) || \
-    defined(USE_OS400CRYPTO) || \
-    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
+    defined(USE_OS400CRYPTO) || defined(USE_MBEDTLS)
 
 #define MD4_DIGEST_LENGTH 16
 
 void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len);
 
 #endif /* defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) ||
-    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || \
-    defined(USE_WIN32_CRYPTO) || defined(USE_NSS) || \
-    defined(USE_OS400CRYPTO) || \
-    (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C)) */
+    defined(USE_OPENSSL) || defined(USE_SECTRANSP) ||
+    defined(USE_WIN32_CRYPTO) || defined(USE_NSS) ||
+    defined(USE_OS400CRYPTO) || defined(USE_MBEDTLS) */
 
 #endif /* HEADER_CURL_MD4_H */
