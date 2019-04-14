@@ -79,7 +79,7 @@
 #elif defined(USE_GNUTLS_NETTLE)
 
 #  include <nettle/des.h>
-#  include <nettle/md4.h>
+#  include "curl_md4.h"
 
 #elif defined(USE_GNUTLS)
 
@@ -578,10 +578,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
     Curl_md4it(ntbuffer, pw, 2 * len);
 #endif
 #elif defined(USE_GNUTLS_NETTLE)
-    struct md4_ctx MD4pw;
-    md4_init(&MD4pw);
-    md4_update(&MD4pw, (unsigned int)(2 * len), pw);
-    md4_digest(&MD4pw, MD4_DIGEST_SIZE, ntbuffer);
+    Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_GNUTLS)
     gcry_md_hd_t MD4pw;
     gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
