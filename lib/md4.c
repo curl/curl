@@ -134,6 +134,52 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   }
 }
 
+#elif defined(USE_WIN32_CRYPTO)
+
+#include <wincrypt.h>
+
+#include "curl_md4.h"
+#include "warnless.h"
+#include "curl_memory.h"
+ /* The last #include file should be: */
+#include "memdebug.h"
+
+typedef struct {
+  HCRYPTPROV hCryptProv;
+  HCRYPTHASH hHash;
+} MD4_CTX;
+
+static void MD4_Init(MD4_CTX *ctx)
+{
+  ctx->hCryptProv = 0;
+  ctx->hHash = 0;
+
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                         CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_MD4, 0, 0, &ctx->hHash);
+  }
+}
+
+static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+{
+  CryptHashData(ctx->hHash, data, (unsigned int) size, 0);
+}
+
+static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+{
+  unsigned long length = 0;
+
+  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+  if(length == MD4_DIGEST_LENGTH)
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, result, &length, 0);
+
+  if(ctx->hHash)
+    CryptDestroyHash(ctx->hHash);
+
+  if(ctx->hCryptProv)
+    CryptReleaseContext(ctx->hCryptProv, 0);
+}
+
 #elif defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
     (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
@@ -431,7 +477,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #endif /* CRYPTO LIBS */
 
 #if defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) || \
-    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || defined(USE_NSS) || \
+    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || \
+    defined(USE_WIN32_CRYPTO) || defined(USE_NSS) || \
     defined(USE_OS400CRYPTO) || \
     (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
@@ -445,6 +492,7 @@ void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len)
 }
 
 #endif /* defined(USE_GNUTLS_NETTLE) || defined(USE_GNUTLS) ||
-    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || defined(USE_NSS) ||
-    defined(USE_OS400CRYPTO) ||
+    defined(USE_OPENSSL) || defined(USE_SECTRANSP) || \
+    defined(USE_WIN32_CRYPTO) || defined(USE_NSS) || \
+    defined(USE_OS400CRYPTO) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C)) */
