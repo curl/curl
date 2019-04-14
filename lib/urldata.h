@@ -866,6 +866,7 @@ struct connectdata {
 
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
+  struct curltime lastused; /* when returned to the connection cache */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
@@ -1553,6 +1554,8 @@ struct UserDefined {
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
+  long maxage_conn;     /* in seconds, max idle time to allow a connection that
+                           is to be reused */
   long tftp_blksize;    /* in bytes, 0 means use default */
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */

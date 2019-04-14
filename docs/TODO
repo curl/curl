@@ -35,7 +35,6 @@
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
- 1.19 Timeout idle connections from the pool
  1.20 SRV and URI DNS records
  1.21 Have the URL API offer IDN decoding
  1.22 CURLINFO_PAUSE_STATE
@@ -372,16 +371,6 @@
  using PACs.
 
  https://github.com/curl/curl/issues/896
-
-1.19 Timeout idle connections from the pool
-
- libcurl currently keeps connections in its connection pool for an indefinite
- period of time, until it either gets reused, gets noticed that it has been
- closed by the server or gets pruned to make room for a new connection.
-
- To reduce overhead (especially for when we add monitoring of the connections
- in the pool), we should introduce a timeout so that connections that have
- been idle for N seconds get closed.
 
 1.20 SRV and URI DNS records
 
