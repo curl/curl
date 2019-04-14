@@ -83,9 +83,9 @@
 
 #elif defined(USE_GNUTLS)
 
+#  include "curl_md4.h"
 #  include <gcrypt.h>
 #  define MD5_DIGEST_LENGTH 16
-#  define MD4_DIGEST_LENGTH 16
 
 #elif defined(USE_NSS)
 
@@ -580,11 +580,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 #elif defined(USE_GNUTLS_NETTLE)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_GNUTLS)
-    gcry_md_hd_t MD4pw;
-    gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
-    gcry_md_write(MD4pw, pw, 2 * len);
-    memcpy(ntbuffer, gcry_md_read(MD4pw, 0), MD4_DIGEST_LENGTH);
-    gcry_md_close(MD4pw);
+    Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_NSS)
     Curl_md4it(ntbuffer, pw, 2 * len);
 #elif defined(USE_MBEDTLS)
