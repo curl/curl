@@ -39,19 +39,19 @@
 
 typedef struct md5_ctx MD5_CTX;
 
-static void MD5_Init(MD5_CTX * ctx)
+static void MD5_Init(MD5_CTX *ctx)
 {
   md5_init(ctx);
 }
 
-static void MD5_Update(MD5_CTX * ctx,
+static void MD5_Update(MD5_CTX *ctx,
                        const unsigned char *input,
                        unsigned int inputLen)
 {
   md5_update(ctx, inputLen, input);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 {
   md5_digest(ctx, 16, digest);
 }
@@ -65,19 +65,19 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 
 typedef gcry_md_hd_t MD5_CTX;
 
-static void MD5_Init(MD5_CTX * ctx)
+static void MD5_Init(MD5_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_MD5, 0);
 }
 
-static void MD5_Update(MD5_CTX * ctx,
+static void MD5_Update(MD5_CTX *ctx,
                        const unsigned char *input,
                        unsigned int inputLen)
 {
   gcry_md_write(*ctx, input, inputLen);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 {
   memcpy(digest, gcry_md_read(*ctx, 0), 16);
   gcry_md_close(*ctx);
