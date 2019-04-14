@@ -551,7 +551,7 @@ int Curl_MD5_update(MD5_context *context,
 {
   (*context->md5_hash->md5_update_func)(context->md5_hashctx, data, len);
 
-  return 0;
+  return CURLE_OK;
 }
 
 int Curl_MD5_final(MD5_context *context, unsigned char *result)
@@ -561,7 +561,7 @@ int Curl_MD5_final(MD5_context *context, unsigned char *result)
   free(context->md5_hashctx);
   free(context);
 
-  return 0;
+  return CURLE_OK;
 }
 
 #endif /* CURL_DISABLE_CRYPTO_AUTH */
