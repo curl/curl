@@ -2139,7 +2139,7 @@ sub runsocksserver {
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     # start our socks server, get commands from the FTP cmd file
-    my $cmd="$srcdir/server/socksd".
+    my $cmd="server/socksd".
         " --port $port ".
         " --pidfile $pidfile".
         " --backend $HOSTIP".
