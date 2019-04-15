@@ -546,8 +546,8 @@ MD5_context *Curl_MD5_init(const MD5_params *md5params)
 }
 
 CURLcode Curl_MD5_update(MD5_context *context,
-                    const unsigned char *data,
-                    unsigned int len)
+                         const unsigned char *data,
+                         unsigned int len)
 {
   (*context->md5_hash->md5_update_func)(context->md5_hashctx, data, len);
 
