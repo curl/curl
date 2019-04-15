@@ -84,6 +84,7 @@ int test(char *URL)
 
   curl_slist_free_all(pHeaderList);
   curl_easy_cleanup(pCurl);
+  curl_global_cleanup();
 
   return 0;
 }

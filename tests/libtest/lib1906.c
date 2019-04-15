@@ -66,6 +66,7 @@ int test(char *URL)
 
   curl_easy_cleanup(curl);
   curl_url_cleanup(curlu);
+  curl_global_cleanup();
 
   return 0;
 }
