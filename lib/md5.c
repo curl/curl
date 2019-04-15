@@ -545,7 +545,7 @@ MD5_context *Curl_MD5_init(const MD5_params *md5params)
   return ctxt;
 }
 
-int Curl_MD5_update(MD5_context *context,
+CURLcode Curl_MD5_update(MD5_context *context,
                     const unsigned char *data,
                     unsigned int len)
 {
@@ -554,7 +554,7 @@ int Curl_MD5_update(MD5_context *context,
   return CURLE_OK;
 }
 
-int Curl_MD5_final(MD5_context *context, unsigned char *result)
+CURLcode Curl_MD5_final(MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 
