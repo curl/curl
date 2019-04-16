@@ -15,6 +15,7 @@ This release includes the following bugfixes:
 
  o --config: clarify that initial : and = might need quoting [17]
  o AppVeyor: enable testing for WinSSL build [23]
+ o CURLOPT_ADDRESS_SCOPE: fix range check and more [32]
  o README.md: fix no-consecutive-blank-lines Codacy warning [22]
  o VC15 project: remove MinimalRebuild
  o VS projects: use Unicode for VC10+ [16]
@@ -31,23 +32,32 @@ This release includes the following bugfixes:
  o lib509: add missing include for strdup [22]
  o lib557: initialize variables [22]
  o multi: improved HTTP_1_1_REQUIRED handling [2]
+ o openssl: mark connection for close on TLS close_notify [36]
  o polarssl_threadlock: remove conditionally unused code [22]
  o resolve: apply Happy Eyeballs philosophy to parallel c-ares queries [3]
  o scripts: fix typos
+ o singleipconnect: show port in the verbose "Trying ..." message
  o smtp: fix compiler warning [15]
  o socks5: user name and passwords must be shorter than 256 [8]
  o socks: fix error message
+ o socksd: new SOCKS 4+5 server for tests [31]
  o tests/server/util: fix Windows Unicode build [21]
+ o tests: Run global cleanup at end of tests [29]
  o tests: make Impacket (SMB server) Python 3 compatible [11]
  o tool_cb_wrt: fix bad-function-cast warning [5]
+ o tool_help: Warn if curl and libcurl versions do not match [28]
  o tool_help: include <strings.h> for strcasecmp [4]
  o transfer: fix LGTM alert "Comparison is always true" [14]
  o travis: allow builds on branches named "ci"
  o travis: install dependencies only when needed [24]
+ o travis: remove mesalink builds [35]
+ o travis: update some builds do Xenial [30]
  o url: always clone the CUROPT_CURLU handle [26]
+ o urlapi: stricter CURLUPART_PORT parsing [33]
  o urlapi: urlencode characters above 0x7f correctly [9]
  o vauth/cleartext: update the PLAIN login to match RFC 4616 [27]
  o vauth/oauth2: Fix OAUTHBEARER token generation [6]
+ o winbuild: Support MultiSSL builds [34]
  o xattr: skip unittest on unsupported platforms [20]
 
 This release includes the following known bugs:
@@ -58,11 +68,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Brad Spencer, cclauss on github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Eli Schwartz, Even Rouault, Jakub Zakrzewski,
+  Daniel Stenberg, Eli Schwartz, Even Rouault, Jakub Zakrzewski, Jan Ehrhardt,
   Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, niner on github,
-  Paolo Mossino, Poul T Lomholt, Rikard Falkeborn, Simon Warta, Steve Holme,
-  Tim Rühsen, Wyatt O'Day, XmiliaH on github,
-  (20 contributors)
+  Paolo Mossino, Poul T Lomholt, Ray Satiro, Rikard Falkeborn, Simon Warta,
+  Steve Holme, Tim Rühsen, Tom van der Woerdt, Wyatt O'Day, XmiliaH on github,
+  (23 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -95,3 +105,12 @@ References to bug reports and discussions on issues:
  [25] = https://curl.haxx.se/bug/?i=3654
  [26] = https://curl.haxx.se/bug/?i=3753
  [27] = https://curl.haxx.se/bug/?i=3757
+ [28] = https://curl.haxx.se/bug/?i=3774
+ [29] = https://curl.haxx.se/bug/?i=3783
+ [30] = https://curl.haxx.se/bug/?i=3777
+ [31] = https://curl.haxx.se/bug/?i=3752
+ [32] = https://curl.haxx.se/bug/?i=3713
+ [33] = https://curl.haxx.se/bug/?i=3762
+ [34] = https://curl.haxx.se/bug/?i=3772
+ [35] = https://curl.haxx.se/bug/?i=3767
+ [36] = https://curl.haxx.se/bug/?i=3750
