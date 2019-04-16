@@ -260,6 +260,8 @@
 
  Support for doing HTTP/2 to HTTP and HTTPS proxies is still missing.
 
+ See https://github.com/curl/curl/issues/3570
+
 1.8 CURLOPT_RESOLVE for any port number
 
  This option allows applications to set a replacement IP address for a given
