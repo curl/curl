@@ -73,7 +73,7 @@ CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
 
   *outlen = 0;
   *outptr = NULL;
-  zlen = strlen(authzid);
+  zlen = (authzid == NULL ? 0 : strlen(authzid));
   clen = strlen(authcid);
   plen = strlen(passwd);
 
@@ -87,7 +87,8 @@ CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Calculate the reply */
-  memcpy(plainauth, authzid, zlen);
+  if(zlen != 0)
+    memcpy(plainauth, authzid, zlen);
   plainauth[zlen] = '\0';
   memcpy(plainauth + zlen + 1, authcid, clen);
   plainauth[zlen + clen + 1] = '\0';
