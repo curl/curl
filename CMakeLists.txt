@@ -160,6 +160,8 @@ option(CURL_DISABLE_SMTP "to disable SMTP" OFF)
 mark_as_advanced(CURL_DISABLE_SMTP)
 option(CURL_DISABLE_GOPHER "to disable Gopher" OFF)
 mark_as_advanced(CURL_DISABLE_GOPHER)
+option(CURL_DISABLE_SMB "disables SMB" OFF)
+mark_as_advanced(CURL_DISABLE_SMB)
 
 if(HTTP_ONLY)
   set(CURL_DISABLE_FTP ON)
