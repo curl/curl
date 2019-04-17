@@ -713,6 +713,7 @@ static void conn_free(struct connectdata *conn)
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->oauth_bearer);
+  Curl_safefree(conn->sasl_authzid);
   Curl_safefree(conn->options);
   Curl_safefree(conn->http_proxy.user);
   Curl_safefree(conn->socks_proxy.user);
@@ -3456,6 +3457,14 @@ static CURLcode create_conn(struct Curl_easy *data,
   if(data->set.str[STRING_BEARER]) {
     conn->oauth_bearer = strdup(data->set.str[STRING_BEARER]);
     if(!conn->oauth_bearer) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
+
+  if(data->set.str[STRING_SASL_AUTHZID]) {
+    conn->sasl_authzid = strdup(data->set.str[STRING_SASL_AUTHZID]);
+    if(!conn->sasl_authzid) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
