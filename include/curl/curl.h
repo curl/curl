@@ -1929,6 +1929,9 @@ typedef enum {
   /* Bitmask to control HTTP/3 behavior. See CURLH3_* */
   CINIT(H3, LONG, 289),
 
+  /* SASL authorisation identity */
+  CINIT(SASL_AUTHZID, STRINGPOINT, 290),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
