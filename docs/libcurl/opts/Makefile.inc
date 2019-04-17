@@ -272,6 +272,7 @@ man_MANS =                                      \
   CURLOPT_RTSP_SESSION_ID.3                     \
   CURLOPT_RTSP_STREAM_URI.3                     \
   CURLOPT_RTSP_TRANSPORT.3                      \
+  CURLOPT_SASL_AUTHZID.3                        \
   CURLOPT_SASL_IR.3                             \
   CURLOPT_SEEKDATA.3                            \
   CURLOPT_SEEKFUNCTION.3                        \

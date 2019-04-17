@@ -2400,6 +2400,12 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
     break;
 #endif
 
+  case CURLOPT_SASL_AUTHZID:
+    /* Authorisation identity (identity to act as) */
+    result = Curl_setstropt(&data->set.str[STRING_SASL_AUTHZID],
+                            va_arg(param, char *));
+    break;
+
   case CURLOPT_SASL_IR:
     /* Enable/disable SASL initial response */
     data->set.sasl_ir = (0 != va_arg(param, long)) ? TRUE : FALSE;
