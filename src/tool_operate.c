@@ -1778,6 +1778,10 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         if(config->mail_auth)
           my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
 
+        /* new in 7.66.0 */
+        if(config->sasl_authzid)
+          my_setopt_str(curl, CURLOPT_SASL_AUTHZID, config->sasl_authzid);
+
         /* new in 7.31.0 */
         if(config->sasl_ir)
           my_setopt(curl, CURLOPT_SASL_IR, 1L);
@@ -1801,6 +1805,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
                           config->unix_socket_path);
           }
         }
+
         /* new in 7.45.0 */
         if(config->proto_default)
           my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
