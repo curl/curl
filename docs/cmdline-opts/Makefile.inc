@@ -158,6 +158,7 @@ DPAGES =					\
   retry-delay.d					\
   retry-max-time.d				\
   retry.d					\
+  sasl-authzid.d					\
   sasl-ir.d					\
   service-name.d				\
   show-error.d					\
