@@ -385,6 +385,8 @@ static const struct helptxt helptext[] = {
    "Wait time between retries"},
   {"    --retry-max-time <seconds>",
    "Retry only within this period"},
+  {"    --sasl-authzid <identity> ",
+   "Use this identity to act as during SASL PLAIN authentication"},
   {"    --sasl-ir",
    "Enable initial response in SASL authentication"},
   {"    --service-name <name>",
