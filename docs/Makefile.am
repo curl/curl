@@ -44,6 +44,7 @@ EXTRA_DIST =                                    \
  $(noinst_man_MANS)                             \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
+ BUG-BOUNTY.md                                  \
  BUGS                                           \
  CHECKSRC.md                                    \
  CIPHERS.md                                     \
