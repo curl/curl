@@ -8,17 +8,20 @@ curl and libcurl 7.65.0
 
 This release includes the following changes:
 
- o pipelining: removed [10]
  o CURLOPT_DNS_USE_GLOBAL_CACHE: removed [25]
+ o CURLOPT_MAXAGE_CONN: set the maximum allowed age for conn reuse [37]
+ o pipelining: removed [10]
 
 This release includes the following bugfixes:
 
  o --config: clarify that initial : and = might need quoting [17]
  o AppVeyor: enable testing for WinSSL build [23]
  o CURLOPT_ADDRESS_SCOPE: fix range check and more [32]
+ o Curl_disconnect: treat all CONNECT_ONLY connections as "dead" [39]
  o README.md: fix no-consecutive-blank-lines Codacy warning [22]
  o VC15 project: remove MinimalRebuild
  o VS projects: use Unicode for VC10+ [16]
+ o altsvc: Fix building with cookies disabled [38]
  o build-openssl.bat: lots of improvements and polish
  o cirrus: Customize the disabled tests per FreeBSD version
  o cmake: avoid linking executable for some tests with cmake 3.6+ [18]
@@ -33,6 +36,8 @@ This release includes the following bugfixes:
  o lib557: initialize variables [22]
  o multi: improved HTTP_1_1_REQUIRED handling [2]
  o openssl: mark connection for close on TLS close_notify [36]
+ o openvms: Remove pre-processor for SecureTransport [40]
+ o openvms: Remove pre-processors for Windows [40]
  o polarssl_threadlock: remove conditionally unused code [22]
  o resolve: apply Happy Eyeballs philosophy to parallel c-ares queries [3]
  o scripts: fix typos
@@ -41,6 +46,7 @@ This release includes the following bugfixes:
  o socks5: user name and passwords must be shorter than 256 [8]
  o socks: fix error message
  o socksd: new SOCKS 4+5 server for tests [31]
+ o test1002: correct the name
  o tests/server/util: fix Windows Unicode build [21]
  o tests: Run global cleanup at end of tests [29]
  o tests: make Impacket (SMB server) Python 3 compatible [11]
@@ -70,9 +76,10 @@ advice from friends like these:
   Brad Spencer, cclauss on github, Dan Fandrich, Daniel Gustafsson,
   Daniel Stenberg, Eli Schwartz, Even Rouault, Jakub Zakrzewski, Jan Ehrhardt,
   Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, niner on github,
-  Paolo Mossino, Poul T Lomholt, Ray Satiro, Rikard Falkeborn, Simon Warta,
-  Steve Holme, Tim Rühsen, Tom van der Woerdt, Wyatt O'Day, XmiliaH on github,
-  (23 contributors)
+  Paolo Mossino, Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro, Rikard Falkeborn,
+  Simon Warta, Steve Holme, Tim Rühsen, Tom van der Woerdt, Wyatt O'Day,
+  XmiliaH on github,
+  (24 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -114,3 +121,7 @@ References to bug reports and discussions on issues:
  [34] = https://curl.haxx.se/bug/?i=3772
  [35] = https://curl.haxx.se/bug/?i=3767
  [36] = https://curl.haxx.se/bug/?i=3750
+ [37] = https://curl.haxx.se/bug/?i=3782
+ [38] = https://curl.haxx.se/bug/?i=3717
+ [39] = https://curl.haxx.se/mail/lib-2019-04/0052.html
+ [40] = https://curl.haxx.se/bug/?i=3768
