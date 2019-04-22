@@ -689,6 +689,10 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                                             OpenSSL SSL_CTX */
                                           void *userptr);
 
+typedef CURLcode (*curl_ssl_verify_status_callback)(CURL *curl,    /* easy handle */
+                                          void *ssl, /* actually an OpenSSL SSL */
+                                          void *userptr);
+										  
 typedef enum {
   CURLPROXY_HTTP = 0,   /* added in 7.10, new in 7.19.4 default is to use
                            CONNECT HTTP/1.1 */
@@ -1920,6 +1924,13 @@ typedef enum {
 
   /* maximum age of a connection to consider it for reuse (in seconds) */
   CINIT(MAXAGE_CONN, LONG, 288),
+
+  /* User callback for certificate revocation checks. The function must be matching the
+     curl_ssl_verify_status_callback proto. */
+  CINIT(SSL_VERIFYSTATUS_FUNCTION, FUNCTIONPOINT, 289),
+  
+  /* pointer to be passed to SSL_VERIFYSTATUS_FUNCTION */
+  CINIT(SSL_VERIFYSTATUS_DATA, OBJECTPOINT, 290)
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

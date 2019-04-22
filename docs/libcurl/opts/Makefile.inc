@@ -308,6 +308,8 @@ man_MANS =                                      \
   CURLOPT_SSL_VERIFYHOST.3                      \
   CURLOPT_SSL_VERIFYPEER.3                      \
   CURLOPT_SSL_VERIFYSTATUS.3                    \
+  CURLOPT_SSL_VERIFYSTATUS_FUNCTION.3           \
+  CURLOPT_SSL_VERIFYSTATUS_DATA.3               \
   CURLOPT_STDERR.3                              \
   CURLOPT_STREAM_DEPENDS.3                      \
   CURLOPT_STREAM_DEPENDS_E.3                    \

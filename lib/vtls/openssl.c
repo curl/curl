@@ -3467,7 +3467,15 @@ static CURLcode servercert(struct connectdata *conn,
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
     !defined(OPENSSL_NO_OCSP)
   if(SSL_CONN_CONFIG(verifystatus)) {
-    result = verifystatus(conn, connssl);
+	  
+    if (data->set.ssl.fsslvrfst) {
+	  infof(data, "Using user-provided verify status callback.\n");
+	  result = data->set.ssl.fsslvrfst(data, BACKEND->handle, 
+	                                   data->set.ssl.fsslvrfstp);
+    }
+    else 
+      result = verifystatus(conn, connssl);		  
+    
     if(result) {
       X509_free(BACKEND->server_cert);
       BACKEND->server_cert = NULL;

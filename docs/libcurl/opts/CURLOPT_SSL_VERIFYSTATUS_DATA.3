@@ -20,45 +20,56 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLOPT_SSL_VERIFYSTATUS 3 "04 Dec 2014" "libcurl 7.40.0" "curl_easy_setopt options"
+.TH CURLOPT_SSL_VERIFYSTATUS_DATA 3 "11 Aprl 2019" "libcurl 7.64.2" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_SSL_VERIFYSTATUS \- verify the certificate's status
+CURLOPT_SSL_VERIFYSTATUS_DATA \- custom pointer passed to the curl_ssl_verify_status_callback callback
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_VERIFYSTATUS, long verify);
+typedef CURLcode (*curl_ssl_verify_status_callback)(CURL *curl, void *ssl, void *userptr);
+										  
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_VERIFYSTATUS_DATA, void *pointer);
 .SH DESCRIPTION
-Pass a long as parameter set to 1 to enable or 0 to disable.
+Data \fIpointer\fP to pass to the curl_ssl_verify_status_callback callback function. 
+If you use the \fICURLOPT_VERIFYSTATUS_FUNCTION(3)\fP option, this is the pointer you'll get as
+input.
 
-This option determines whether libcurl verifies the status of the server cert
-using the "Certificate Status Request" TLS extension (aka. OCSP stapling).
-
-Note that if this option is enabled but the server does not support the TLS
-extension, the verification will fail.
 .SH DEFAULT
-0
+If you don't set this, NULL is passed to the callback.
 .SH PROTOCOLS
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
+See also cert_revocation_check.c in docs/examples directory for usage example.
+
 .nf
+static CURLcode user_verify_status_callback(CURL *curl, void *ssl, void *userptr)
+{
+	int* options = (int*)(userptr);
+	
+	// do some ssl calls here
+	return CURLE_OK;
+}
+
+....
+
+int revoke_check_options;
 CURL *curl = curl_easy_init();
+
+revoke_check_options = 1; /* set some options for certificates verification check*/
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* ask for OCSP stapling! */
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS_FUNCTION, &user_verify_status_callback);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS_DATA, &revoke_check_options);
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }
 .fi
 .SH AVAILABILITY
-Added in 7.41.0. This option is currently only supported by the OpenSSL, GnuTLS
-and NSS TLS backends.
+Added in 7.64.2. This option is currently only supported by the OpenSSL backends.
 .SH RETURN VALUE
 Returns CURLE_OK if OCSP stapling is supported by the SSL backend, otherwise
 returns CURLE_NOT_BUILT_IN.
 .SH "SEE ALSO"
-.BR CURLOPT_SSL_VERIFYHOST "(3), "
-.BR CURLOPT_SSL_VERIFYPEER "(3), "
-.BR CURLOPT_SSL_VERIFYSTATUS_FUNCTION "(3), "
-.BR CURLOPT_SSL_VERIFYSTATUS_DATA "(3), "
-.BR CURLOPT_CAINFO "(3), "
+.BR CURLOPT_SSL_VERIFYSTATUS "(3), "
+.BR SSL_VERIFYSTATUS_FUNCTION "(3), "

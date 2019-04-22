@@ -1,0 +1,86 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_SSL_VERIFYSTATUS_FUNCTION 3 "11 Aprl 2019" "libcurl 7.64.2" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_SSL_VERIFYSTATUS_FUNCTION \- User callback for certificate revocation checks.
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+typedef CURLcode (*curl_ssl_verify_status_callback)(CURL *curl, void *ssl, void *userptr);
+										  
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_VERIFYSTATUS_FUNCTION, 
+	curl_ssl_verify_status_callback* user_verify_status_callback);
+.SH DESCRIPTION
+Pass a curl_ssl_verify_status_callback as parameter to use your custom callback for 
+certificate status verification.
+
+This option determines whether libcurl uses user callback to verify the status of the server cert.
+
+By default, curl checks leaf certificate using "Certificate Status Request" TLS extension 
+(aka. OCSP stapling). If the server does not support the TLS extension, the verification will fail.
+This callback can be used to customize certificate revocation checks. 
+For example, user can deside to check all certificates in certificate chain using 
+Certificate Revocation List (CRL). Or, user can deside to check all certificates in certificate chain 
+using Online Certificate Status Protocol (OCSP).  
+
+Note that if this option works only when CURLOPT_SSL_VERIFYSTATUS option is set to 1.
+
+.SH DEFAULT
+NULL
+.SH PROTOCOLS
+All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
+.SH EXAMPLE
+See also cert_revocation_check.c in docs/examples directory for usage example.
+
+.nf
+static CURLcode user_verify_status_callback(CURL *curl, void *ssl, void *userptr)
+{
+	int* options = (int*)(userptr);
+
+	// do some ssl calls here
+	return CURLE_OK;
+}
+
+....
+
+int revoke_check_options;
+CURL *curl = curl_easy_init();
+
+revoke_check_options = 1; /* set some options for certificates verification check*/
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS_FUNCTION, &user_verify_status_callback);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS_DATA, &revoke_check_options);
+  ret = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.64.2. This option is currently only supported by the OpenSSL backends.
+.SH RETURN VALUE
+Returns CURLE_OK if OCSP stapling is supported by the SSL backend, otherwise
+returns CURLE_NOT_BUILT_IN.
+.SH "SEE ALSO"
+.BR CURLOPT_SSL_VERIFYSTATUS "(3), "
+.BR SSL_VERIFYSTATUS_DATA "(3), "
