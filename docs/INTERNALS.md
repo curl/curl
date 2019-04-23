@@ -13,7 +13,7 @@ curl internals
    - [`Curl_disconnect`](#Curl_disconnect)
  - [HTTP(S)](#http)
  - [FTP](#ftp)
-   - [Kerberos](#kerberos)
+ - [Kerberos](#kerberos)
  - [TELNET](#telnet)
  - [FILE](#file)
  - [SMB](#smb)
