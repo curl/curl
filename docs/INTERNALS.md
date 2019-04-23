@@ -38,6 +38,13 @@ curl internals
  - [Track Down Memory Leaks](#memoryleak)
  - [`multi_socket`](#multi_socket)
  - [Structs in libcurl](#structs)
+   - [Curl_easy](#Curl_easy)
+   - [connectdata](#connectdata)
+   - [Curl_multi](#Curl_multi)
+   - [Curl_handler](#Curl_handler)
+   - [conncache](#conncache)
+   - [Curl_share](#Curl_share)
+   - [CookieInfo](#CookieInfo)
 
 <a name="intro"></a>
 Intro
@@ -840,6 +847,7 @@ Structs in libcurl
 This section should cover 7.32.0 pretty accurately, but will make sense even
 for older and later versions as things don't change drastically that often.
 
+<a name="Curl_easy"></a>
 ## Curl_easy
 
   The `Curl_easy` struct is the one returned to the outside in the external API
@@ -874,6 +882,7 @@ for older and later versions as things don't change drastically that often.
   an individual stream, sharing the same connectdata struct. Multiplexing
   makes it even more important to keep things associated with the right thing!
 
+<a name="connectdata"></a>
 ## connectdata
 
   A general idea in libcurl is to keep connections around in a connection
@@ -908,6 +917,7 @@ for older and later versions as things don't change drastically that often.
   The libcurl source code generally use the name 'conn' for the variable that
   points to the connectdata.
 
+<a name="Curl_multi"></a>
 ## Curl_multi
 
   Internally, the easy interface is implemented as a wrapper around multi
@@ -945,6 +955,7 @@ for older and later versions as things don't change drastically that often.
   The libcurl source code generally use the name 'multi' for the variable that
   points to the `Curl_multi` struct.
 
+<a name="Curl_handler"></a>
 ## Curl_handler
 
   Each unique protocol that is supported by libcurl needs to provide at least
@@ -1033,12 +1044,14 @@ for older and later versions as things don't change drastically that often.
   - `PROTOPT_NOURLQUERY` - this protocol can't handle a query part on the URL
     (?foo=bar)
 
+<a name="conncache"></a>
 ## conncache
 
   Is a hash table with connections for later re-use. Each `Curl_easy` has a
   pointer to its connection cache. Each multi handle sets up a connection
   cache that all added `Curl_easy`s share by default.
 
+<a name="Curl_share"></a>
 ## Curl_share
 
   The libcurl share API allocates a `Curl_share` struct, exposed to the
@@ -1055,6 +1068,7 @@ for older and later versions as things don't change drastically that often.
   The `Curl_share` struct can currently hold cookies, DNS cache and the SSL
   session cache.
 
+<a name="CookieInfo"></a>
 ## CookieInfo
 
   This is the main cookie struct. It holds all known cookies and related
