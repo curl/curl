@@ -992,25 +992,25 @@ for older and later versions as things don't change drastically that often.
   `->do_more` gets called during the `DO_MORE` state. The FTP protocol uses
   this state when setting up the second connection.
 
-  ->`proto_getsock`
-  ->`doing_getsock`
-  ->`domore_getsock`
-  ->`perform_getsock`
+  `->proto_getsock`
+  `->doing_getsock`
+  `->domore_getsock`
+  `->perform_getsock`
   Functions that return socket information. Which socket(s) to wait for which
   action(s) during the particular multi state.
 
-  ->disconnect is called immediately before the TCP connection is shutdown.
+  `->disconnect` is called immediately before the TCP connection is shutdown.
 
-  ->readwrite gets called during transfer to allow the protocol to do extra
+  `->readwrite` gets called during transfer to allow the protocol to do extra
   reads/writes
 
-  ->defport is the default report TCP or UDP port this protocol uses
+  `->defport` is the default report TCP or UDP port this protocol uses
 
-  ->protocol is one or more bits in the `CURLPROTO_*` set. The SSL versions
+  `->protocol` is one or more bits in the `CURLPROTO_*` set. The SSL versions
   have their "base" protocol set and then the SSL variation. Like
   "HTTP|HTTPS".
 
-  ->flags is a bitmask with additional information about the protocol that will
+  `->flags` is a bitmask with additional information about the protocol that will
   make it get treated differently by the generic engine:
 
   - `PROTOPT_SSL` - will make it connect and negotiate SSL
