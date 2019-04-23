@@ -31,7 +31,7 @@ typedef CURLcode (*curl_ssl_verify_status_callback)(CURL *curl, void *ssl, void 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_VERIFYSTATUS_DATA, void *pointer);
 .SH DESCRIPTION
 Data \fIpointer\fP to pass to the curl_ssl_verify_status_callback callback function. 
-If you use the \fICURLOPT_VERIFYSTATUS_FUNCTION(3)\fP option, this is the pointer you'll get as
+If you use the \fICURLOPT_SSL_VERIFYSTATUS_FUNCTION(3)\fP option, this is the pointer you'll get as
 input.
 
 .SH DEFAULT
@@ -72,4 +72,4 @@ Returns CURLE_OK if OCSP stapling is supported by the SSL backend, otherwise
 returns CURLE_NOT_BUILT_IN.
 .SH "SEE ALSO"
 .BR CURLOPT_SSL_VERIFYSTATUS "(3), "
-.BR SSL_VERIFYSTATUS_FUNCTION "(3), "
+.BR CURLOPT_SSL_VERIFYSTATUS_FUNCTION "(3), "
