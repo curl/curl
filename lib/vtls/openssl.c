@@ -3824,7 +3824,7 @@ static size_t Curl_ossl_version(char *buffer, size_t size)
 
   return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s"
 #ifdef OPENSSL_FIPS
-                   "fips"
+                   "-fips"
 #endif
                    ,
                    OSSL_PACKAGE,
