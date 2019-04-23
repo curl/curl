@@ -1925,7 +1925,7 @@ typedef enum {
   /* maximum age of a connection to consider it for reuse (in seconds) */
   CINIT(MAXAGE_CONN, LONG, 288),
 
-  /* User callback for certificate revocation checks. The function must be 
+  /* User callback for certificate revocation checks. The function must be
      matching the curl_ssl_verify_status_callback proto.*/
   CINIT(SSL_VERIFYSTATUS_FUNCTION, FUNCTIONPOINT, 289),
 
