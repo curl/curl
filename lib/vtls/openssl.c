@@ -3469,12 +3469,12 @@ static CURLcode servercert(struct connectdata *conn,
   if(SSL_CONN_CONFIG(verifystatus)) {
     if(data->set.ssl.fsslvrfst) {
       infof(data, "Using user-provided verify status callback.\n");
-      result = data->set.ssl.fsslvrfst(data, BACKEND->handle, 
+      result = data->set.ssl.fsslvrfst(data, BACKEND->handle,
                                        data->set.ssl.fsslvrfstp);
     }
     else
       result = verifystatus(conn, connssl);
-    
+
     if(result) {
       X509_free(BACKEND->server_cert);
       BACKEND->server_cert = NULL;
