@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,7 +41,10 @@ By default, curl checks leaf certificate using "Certificate Status Request" TLS 
 This callback can be used to customize certificate revocation checks. 
 For example, user can deside to check all certificates in certificate chain using 
 Certificate Revocation List (CRL). Or, user can deside to check all certificates in certificate chain 
-using Online Certificate Status Protocol (OCSP).  
+using Online Certificate Status Protocol (OCSP). 
+This callback is called just after ssl handshake is done. At this moment we can get current OCSP 
+stapling response (via SSL_get_tlsext_status_ocsp_resp call in openssl) and perform our custom 
+revocation check logic. 
 
 Note that if this option works only when CURLOPT_SSL_VERIFYSTATUS option is set to 1.
 
@@ -57,7 +60,7 @@ static CURLcode user_verify_status_callback(CURL *curl, void *ssl, void *userptr
 {
 	int* options = (int*)(userptr);
 
-	// do some ssl calls here
+	/* do some ssl calls here */
 	return CURLE_OK;
 }
 
@@ -83,4 +86,5 @@ Returns CURLE_OK if OCSP stapling is supported by the SSL backend, otherwise
 returns CURLE_NOT_BUILT_IN.
 .SH "SEE ALSO"
 .BR CURLOPT_SSL_VERIFYSTATUS "(3), "
-.BR SSL_VERIFYSTATUS_DATA "(3), "
+.BR CURLOPT_SSL_VERIFYSTATUS_DATA "(3), "
+.BR CURLOPT_SSL_CTX_FUNCTION "(3), "

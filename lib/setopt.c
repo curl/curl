@@ -1784,18 +1784,18 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
     }
     break;	
   case CURLOPT_SSL_VERIFYSTATUS_FUNCTION:
-	if(!Curl_ssl_cert_status_request()) {
+    if(!Curl_ssl_cert_status_request()) {
       result = CURLE_NOT_BUILT_IN;
       break;
     }
-	data->set.ssl.fsslvrfst = va_arg(param, curl_ssl_verify_status_callback);
+    data->set.ssl.fsslvrfst = va_arg(param, curl_ssl_verify_status_callback);
   break;  
   case CURLOPT_SSL_VERIFYSTATUS_DATA:
-	if(!Curl_ssl_cert_status_request()) {
+    if(!Curl_ssl_cert_status_request()) {
       result = CURLE_NOT_BUILT_IN;
       break;
     }
-	data->set.ssl.fsslvrfstp = va_arg(param, void *);
+    data->set.ssl.fsslvrfstp = va_arg(param, void *);
   break;  
   case CURLOPT_SSL_CTX_FUNCTION:
     /*

@@ -25,41 +25,47 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-static CURLcode user_verify_status_callback(CURL *curl, void *ssl, void *userptr)
+static CURLcode user_verify_status_callback(CURL *curl, void *ssl,
+                                            void *userptr)
 {
-	(void)curl; /* unused */
-	(void)ssl; /* unused */
-	(void)userptr; /* unused */
+  (void)curl; /* unused */
+  (void)ssl; /* unused */
+  int *callback_was_called = (int *)userptr;
 
-	// do some ssl stuff here
+  *callback_was_called = 1;
 
-	return CURLE_OK;
+  /* do some ssl calls here */
+
+  return CURLE_OK;
 }
 
 int test(char *URL)
 {
-	int res = 0;
-	CURL *curl = NULL;
-	
-	start_test_timing();
+  int res = 0;
+  CURL *curl = NULL;
+  int callback_was_called = 0;
 
-	res_global_init(CURL_GLOBAL_ALL);
-	
-	easy_init(curl);
-		
-	easy_setopt(curl, CURLOPT_URL, URL);
-	easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-	easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
-	easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS_FUNCTION, &user_verify_status_callback);
+  start_test_timing();
 
-	res = curl_easy_perform(curl);
+  res_global_init(CURL_GLOBAL_ALL);
+
+  easy_init(curl);
+
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
+  easy_setopt(
+    curl, CURLOPT_SSL_VERIFYSTATUS_FUNCTION, &user_verify_status_callback);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS_DATA, &callback_was_called);
+
+  res = curl_easy_perform(curl);
 
 test_cleanup:
 
-	curl_easy_cleanup(curl);
-	curl_global_cleanup();
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
 
-	return res;
+  return callback_was_called ? 0 : 1;
 }
