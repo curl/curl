@@ -102,7 +102,7 @@ int get_crl_url(STACK_OF(DIST_POINT) * dist_points, const char **crlUrl)
     DIST_POINT *dp = sk_DIST_POINT_value(dist_points, j);
     DIST_POINT_NAME *distpoint = dp->distpoint;
 
-    if(distpoint->type == 0) { /* fullname GENERALIZEDNAME	*/
+    if(distpoint->type == 0) { /* fullname GENERALIZEDNAME*/
       for(int k = 0; k < sk_GENERAL_NAME_num(distpoint->name.fullname); k++) {
         GENERAL_NAME *gen;
         ASN1_IA5STRING *asn1_str;
