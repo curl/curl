@@ -642,6 +642,10 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
    ************************************************************/
   /* allocate scratch area */
   urllen = strlen(url);
+  if(urllen > CURL_MAX_INPUT_LENGTH)
+    /* excessive input length */
+    return CURLUE_MALFORMED_INPUT;
+
   path = u->scratch = malloc(urllen * 2 + 2);
   if(!path)
     return CURLUE_OUT_OF_MEMORY;
@@ -1278,6 +1282,10 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   if(storep) {
     const char *newp = part;
     size_t nalloc = strlen(part);
+
+    if(nalloc > CURL_MAX_INPUT_LENGTH)
+      /* excessive input length */
+      return CURLUE_MALFORMED_INPUT;
 
     if(urlencode) {
       const unsigned char *i;

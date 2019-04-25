@@ -61,6 +61,13 @@ CURLcode Curl_setstropt(char **charp, const char *s)
   if(s) {
     char *str = strdup(s);
 
+    if(str) {
+      size_t len = strlen(str);
+      if(len > CURL_MAX_INPUT_LENGTH) {
+        free(str);
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+    }
     if(!str)
       return CURLE_OUT_OF_MEMORY;
 
