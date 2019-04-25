@@ -12,6 +12,11 @@ CURLOPT_URL
 <server>
 none
 </server>
+
+# require HTTP so that CURLOPT_POSTFIELDS works as assumed
+<features>
+http
+</features>
 <tool>
 lib1559
 </tool>
