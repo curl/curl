@@ -3047,7 +3047,10 @@ void Curl_multi_dump(struct Curl_multi *multi)
 }
 #endif
 
-uint32_t Curl_multi_max_http2_concurrent_streams(struct Curl_multi *multi)
+uint32_t Curl_multi_max_http2_concurrent_streams
+(struct Curl_multi *multi)
 {
-  return multi ? (multi->max_http2_concurrent_streams?multi->max_http2_concurrent_streams:100) : 0;
+  return multi ? 
+    (multi->max_http2_concurrent_streams?
+    multi->max_http2_concurrent_streams:100) : 0;
 }
