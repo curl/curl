@@ -108,4 +108,9 @@ CURLMcode Curl_multi_wait(struct Curl_multi *multi,
                           int *ret,
                           bool *gotsocket); /* if any socket was checked */
 
+/* Return the value of the CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS option
+ * If not specified or 0, default would be 100
+ */
+uint32_t Curl_multi_max_http2_concurrent_streams(struct Curl_multi *multi);
+
 #endif /* HEADER_CURL_MULTIIF_H */

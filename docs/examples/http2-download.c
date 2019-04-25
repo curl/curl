@@ -203,6 +203,8 @@ int main(int argc, char **argv)
     curl_multi_add_handle(multi_handle, trans[i].easy);
   }
 
+  curl_multi_setopt(multi_handle, CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS, 100L);
+
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
   /* we start some action by calling perform right away */

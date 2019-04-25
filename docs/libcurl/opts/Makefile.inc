@@ -347,4 +347,5 @@ man_MANS =                                      \
   CURLOPT_WRITEFUNCTION.3                       \
   CURLOPT_XFERINFODATA.3                        \
   CURLOPT_XFERINFOFUNCTION.3                    \
-  CURLOPT_XOAUTH2_BEARER.3
+  CURLOPT_XOAUTH2_BEARER.3                      \
+  CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS.3

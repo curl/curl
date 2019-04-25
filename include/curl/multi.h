@@ -382,6 +382,9 @@ typedef enum {
   /* This is the argument passed to the server push callback */
   CINIT(PUSHDATA, OBJECTPOINT, 15),
 
+  /* maximum number of (pipelining) connections to one host */
+  CINIT(MAX_HTTP2_CONCURRENT_STREAMS, LONG, 16),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
