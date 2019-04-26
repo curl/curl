@@ -378,7 +378,7 @@ static int is_file(const char *filename)
     return 0;
 
   if(stat(filename, &st) == 0)
-    if(S_ISREG(st.st_mode))
+    if(S_ISREG(st.st_mode) || S_ISFIFO(st.st_mode) || S_ISCHR(st.st_mode))
       return 1;
 
   return 0;
