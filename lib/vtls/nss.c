@@ -1305,6 +1305,8 @@ static void nss_unload_module(SECMODModule **pmod)
 static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
 {
   NSSInitParameters initparams;
+  PRErrorCode err;
+  const char *err_name;
 
   if(nss_context != NULL)
     return CURLE_OK;
@@ -1325,7 +1327,9 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
     if(nss_context != NULL)
       return CURLE_OK;
 
-    infof(data, "Unable to initialize NSS database\n");
+    err = PR_GetError();
+    err_name = nss_error_to_name(err);
+    infof(data, "Unable to initialize NSS database: %d (%s)\n", err, err_name);
   }
 
   infof(data, "Initializing NSS with certpath: none\n");
@@ -1335,7 +1339,9 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
   if(nss_context != NULL)
     return CURLE_OK;
 
-  infof(data, "Unable to initialize NSS\n");
+  err = PR_GetError();
+  err_name = nss_error_to_name(err);
+  failf(data, "Unable to initialize NSS: %d (%s)", err, err_name);
   return CURLE_SSL_CACERT_BADFILE;
 }
 
