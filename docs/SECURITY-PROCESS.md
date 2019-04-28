@@ -60,7 +60,7 @@ announcement.
   Figure out the CWE (Common Weakness Enumeration) number for the flaw.
 
 - Request a CVE number from
-  [Hackerone](https://docs.hackerone.com/programs/cve-requests.html)
+  [HackerOne](https://docs.hackerone.com/programs/cve-requests.html)
 
 - Consider informing
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -125,8 +125,8 @@ Publishing Security Advisories
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
-Hackerone Internet Bug Bounty
------------------------------
+Bug Bounty
+----------
 
 See [BUG-BOUNTY](BUG-BOUNTY.md) for specific details on the bug bounty
 program.
