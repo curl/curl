@@ -268,7 +268,7 @@ mesalink_connect_step2(struct connectdata *conn, int sockindex)
     char error_buffer[MESALINK_MAX_ERROR_SZ];
     int detail = SSL_get_error(BACKEND->handle, ret);
 
-    if(SSL_ERROR_WANT_CONNECT == detail) {
+    if(SSL_ERROR_WANT_CONNECT == detail || SSL_ERROR_WANT_READ == detail) {
       connssl->connecting_state = ssl_connect_2_reading;
       return CURLE_OK;
     }
