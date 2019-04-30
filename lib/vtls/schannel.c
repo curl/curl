@@ -58,6 +58,7 @@
 #include "warnless.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
+#include "multiif.h"
 #include "system_win32.h"
 
  /* The last #include file should be: */
@@ -1269,6 +1270,8 @@ schannel_connect_step3(struct connectdata *conn, int sockindex)
     }
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
 

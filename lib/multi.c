@@ -2981,6 +2981,22 @@ size_t Curl_multi_max_total_connections(struct Curl_multi *multi)
   return multi ? multi->max_total_connections : 0;
 }
 
+/*
+ * When information about a connection has appeared, call this!
+ */
+
+void Curl_multiuse_state(struct connectdata *conn,
+                         int bundlestate) /* use BUNDLE_* defines */
+{
+  DEBUGASSERT(conn);
+  DEBUGASSERT(conn->bundle);
+  DEBUGASSERT(conn->data);
+  DEBUGASSERT(conn->data->multi);
+
+  conn->bundle->multiuse = bundlestate;
+  process_pending_handles(conn->data->multi);
+}
+
 static void process_pending_handles(struct Curl_multi *multi)
 {
   struct curl_llist_element *e = multi->pending.head;

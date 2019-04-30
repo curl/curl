@@ -31,6 +31,7 @@
 #include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
 #include "strtok.h"
+#include "multiif.h"
 
 #ifdef USE_SECTRANSP
 
@@ -2650,6 +2651,9 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
         }
         else
           infof(data, "ALPN, server did not agree to a protocol\n");
+
+        Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                            BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 
         /* chosenProtocol is a reference to the string within alpnArr
            and doesn't need to be freed separately */

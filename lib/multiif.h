@@ -82,6 +82,9 @@ size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
 
 void Curl_multi_connchanged(struct Curl_multi *multi);
 
+void Curl_multiuse_state(struct connectdata *conn,
+                         int bundlestate); /* use BUNDLE_* defines */
+
 /*
  * Curl_multi_closed()
  *
