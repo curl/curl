@@ -168,7 +168,7 @@ UNITTEST_START
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15%!25eth3]:80");
+  ipv6port = strdup("[fe80::250:56ff:fea7:da15!25eth3]:80");
   if(!ipv6port)
     goto fail;
   ret = Curl_parse_port(u, ipv6port);
@@ -184,7 +184,7 @@ UNITTEST_START
   if(!ipv6port)
     goto fail;
   ret = Curl_parse_port(u, ipv6port);
-  fail_unless(ret != CURLUE_OK, "Curl_parse_port returned non-error");
+  fail_unless(ret == CURLUE_OK, "Curl_parse_port returned error");
   fail:
   free(ipv6port);
   curl_url_cleanup(u);
