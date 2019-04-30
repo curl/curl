@@ -1363,6 +1363,7 @@ struct UrlState {
                   when multi_done() is called, to prevent multi_done() to get
                   invoked twice when the multi interface is used. */
   bit stream_depends_e:1; /* set or don't set the Exclusive bit */
+  bit previouslypending:1; /* this transfer WAS in the multi->pending queue */
 };
 
 

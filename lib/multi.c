@@ -1365,6 +1365,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         result = CURLE_OK;
         break;
       }
+      else if(data->state.previouslypending) {
+        /* this transfer comes from the pending queue so try move another */
+        infof(data, "Transfer was pending, now try another\n");
+        process_pending_handles(data->multi);
+      }
 
       if(!result) {
         if(async)
@@ -2991,6 +2996,9 @@ static void process_pending_handles(struct Curl_multi *multi)
 
     /* Make sure that the handle will be processed soonish. */
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
+
+    /* mark this as having been in the pending queue */
+    data->state.previouslypending = TRUE;
   }
 }
 
