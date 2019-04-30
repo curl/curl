@@ -54,6 +54,7 @@
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
+#include "multiif.h"
 #include "polarssl_threadlock.h"
 
 /* The last 3 #include files should be in this order */
@@ -684,6 +685,8 @@ mbed_connect_step2(struct connectdata *conn,
     else {
       infof(data, "ALPN, server did not agree to a protocol\n");
     }
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
 

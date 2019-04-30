@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,6 +38,7 @@
 #include "select.h"
 #include "vtls.h"
 #include "llist.h"
+#include "multiif.h"
 #include "curl_printf.h"
 #include "nssg.h"
 #include <nspr.h>
@@ -843,6 +844,8 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
        !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
       conn->negnpn = CURL_HTTP_VERSION_1_1;
     }
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 }
 

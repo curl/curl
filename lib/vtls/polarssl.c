@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -55,6 +55,7 @@
 #include "select.h"
 #include "strcase.h"
 #include "polarssl_threadlock.h"
+#include "multiif.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -593,6 +594,8 @@ polarssl_connect_step2(struct connectdata *conn,
     }
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
 

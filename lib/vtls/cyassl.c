@@ -79,6 +79,7 @@ and that's a problem since options.h hasn't been included yet. */
 #include "strcase.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
+#include "multiif.h"
 
 #include <cyassl/openssl/ssl.h>
 #include <cyassl/ssl.h>
@@ -599,6 +600,8 @@ cyassl_connect_step2(struct connectdata *conn,
       else
         infof(data, "ALPN, unrecognized protocol %.*s\n", protocol_len,
               protocol);
+      Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)
       infof(data, "ALPN, server did not agree to a protocol\n");
