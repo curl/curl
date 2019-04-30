@@ -1031,7 +1031,7 @@ ConnectionExists(struct Curl_easy *data,
 
     /* We can't multiplex if we don't know anything about the server */
     if(canmultiplex) {
-      if(bundle->multiuse <= BUNDLE_UNKNOWN) {
+      if(bundle->multiuse == BUNDLE_UNKNOWN) {
         if((bundle->multiuse == BUNDLE_UNKNOWN) && data->set.pipewait) {
           infof(data, "Server doesn't support multiplex yet, wait\n");
           *waitpipe = TRUE;
@@ -1045,6 +1045,10 @@ ConnectionExists(struct Curl_easy *data,
       if((bundle->multiuse == BUNDLE_MULTIPLEX) &&
          !Curl_multiplex_wanted(data->multi)) {
         infof(data, "Could multiplex, but not asked to!\n");
+        canmultiplex = FALSE;
+      }
+      if(bundle->multiuse == BUNDLE_NO_MULTIUSE) {
+        infof(data, "Can not multiplex, even if we wanted to!\n");
         canmultiplex = FALSE;
       }
     }
@@ -1071,7 +1075,8 @@ ConnectionExists(struct Curl_easy *data,
         continue;
       }
 
-      multiplexed = CONN_INUSE(check);
+      multiplexed = CONN_INUSE(check) &&
+        (bundle->multiuse == BUNDLE_MULTIPLEX);
 
       if(canmultiplex) {
         if(check->bits.protoconnstart && check->bits.close)
