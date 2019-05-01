@@ -34,7 +34,6 @@ void Curl_detach_connnection(struct Curl_easy *data);
 void Curl_attach_connnection(struct Curl_easy *data,
                              struct connectdata *conn);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
-void Curl_multi_handlePipeBreak(struct Curl_easy *data);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
 
@@ -65,22 +64,8 @@ void Curl_multi_dump(struct Curl_multi *multi);
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
 
-/* Return the value of the CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE option */
-curl_off_t Curl_multi_content_length_penalty_size(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE option */
-curl_off_t Curl_multi_chunk_length_penalty_size(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_PIPELINING_SITE_BL option */
-struct curl_llist *Curl_multi_pipelining_site_bl(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_PIPELINING_SERVER_BL option */
-struct curl_llist *Curl_multi_pipelining_server_bl(struct Curl_multi *multi);
-
 /* Return the value of the CURLMOPT_MAX_TOTAL_CONNECTIONS option */
 size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
-
-void Curl_multi_connchanged(struct Curl_multi *multi);
 
 void Curl_multiuse_state(struct connectdata *conn,
                          int bundlestate); /* use BUNDLE_* defines */
