@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+compressed
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+# The content is two streams concatenated together, "foo" and (empty)
+# 1F 8B 08 00 00 00 00 00 02 0A 4B CB CF 07 00 21 65 73 8C 03 00 00 00
+# 1F 8B 08 00 00 00 00 00 00 FF 01 00 00 FF FF 00 00 00 00 00 00 00 00
+<data base64="yes">
+SFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LUVuY29kaW5nOiBHWklQDQpDb250ZW50LUxlbmd0
+aDogNDYNCg0KH4sIAAAAAAACCkvLzwcAIWVzjAMAAAAfiwgAAAAAAAD/AQAA//8AAAAAAAAA
+AA==
+</data>
+
+<datacheck nonewline="yes">
+HTTP/1.1 200 OK
+Content-Encoding: GZIP
+Content-Length: 46
+
+foo
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+libz
+</features>
+<server>
+http
+</server>
+# Test support for an errant extra stream that may be empty (23 bytes or less)
+# https://github.com/curl/curl/issues/3796
+ <name>
+HTTP GET gzip compressed content with errant extra stream
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/357 --compressed
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<strippart>
+s/^Accept-Encoding: .*/Accept-Encoding: xxx/
+</strippart>
+<protocol>
+GET /357 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+</verify>
+</testcase>

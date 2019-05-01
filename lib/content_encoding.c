@@ -139,8 +139,8 @@ static CURLcode process_trailer(struct connectdata *conn, zlib_params *zp)
   CURLcode result = CURLE_OK;
   uInt len = z->avail_in < zp->trailerlen? z->avail_in: zp->trailerlen;
 
-  /* Consume expected trailer bytes. Terminate stream if exhausted.
-     Issue an error if unexpected bytes follow. */
+  /* Consume trailerlen bytes. The bytes may be a trailer or unknown bytes.
+     Terminate stream if exhausted. Issue an error if more bytes follow. */
 
   zp->trailerlen -= len;
   z->avail_in -= len;
@@ -149,10 +149,9 @@ static CURLcode process_trailer(struct connectdata *conn, zlib_params *zp)
     result = CURLE_WRITE_ERROR;
   if(result || !zp->trailerlen)
     result = exit_zlib(conn, z, &zp->zlib_init, result);
-  else {
-    /* Only occurs for gzip with zlib < 1.2.0.4 or raw deflate. */
+  else
     zp->zlib_init = ZLIB_EXTERNAL_TRAILER;
-  }
+
   return result;
 }
 
@@ -233,7 +232,8 @@ static CURLcode inflate_stream(struct connectdata *conn,
           z->next_in = orig_in;
           z->avail_in = nread;
           zp->zlib_init = ZLIB_INFLATING;
-          zp->trailerlen = 4; /* Tolerate up to 4 unknown trailer bytes. */
+          if(zp->trailerlen < 4)
+            zp->trailerlen = 4; /* Tolerate up to 4 unknown trailer bytes. */
           done = FALSE;
           break;
         }
@@ -333,6 +333,7 @@ static CURLcode gzip_init_writer(struct connectdata *conn,
     if(inflateInit2(z, MAX_WBITS + 32) != Z_OK) {
       return process_zlib_error(conn, z);
     }
+    zp->trailerlen = 23; /* Tolerate up to 23 unknown bytes after stream */
     zp->zlib_init = ZLIB_INIT_GZIP; /* Transparent gzip decompress state */
   }
   else {
