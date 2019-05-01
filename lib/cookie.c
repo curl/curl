@@ -874,11 +874,13 @@ Curl_cookie_add(struct Curl_easy *data,
         co->name = strdup(ptr);
         if(!co->name)
           badcookie = TRUE;
-        /* For Netscape file format cookies we check prefix on the name */
-        if(strncasecompare("__Secure-", co->name, 9))
-          co->prefix |= COOKIE_PREFIX__SECURE;
-        else if(strncasecompare("__Host-", co->name, 7))
-          co->prefix |= COOKIE_PREFIX__HOST;
+        else {
+          /* For Netscape file format cookies we check prefix on the name */
+          if(strncasecompare("__Secure-", co->name, 9))
+            co->prefix |= COOKIE_PREFIX__SECURE;
+          else if(strncasecompare("__Host-", co->name, 7))
+            co->prefix |= COOKIE_PREFIX__HOST;
+        }
         break;
       case 6:
         co->value = strdup(ptr);
