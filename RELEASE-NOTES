@@ -17,7 +17,9 @@ This release includes the following bugfixes:
  o --config: clarify that initial : and = might need quoting [17]
  o AppVeyor: enable testing for WinSSL build [23]
  o CURLOPT_ADDRESS_SCOPE: fix range check and more [32]
+ o CURL_MAX_INPUT_LENGTH: largest acceptable string input size [44]
  o Curl_disconnect: treat all CONNECT_ONLY connections as "dead" [39]
+ o INTERNALS: Add code highlighting [47]
  o README.md: fix no-consecutive-blank-lines Codacy warning [22]
  o VC15 project: remove MinimalRebuild
  o VS projects: use Unicode for VC10+ [16]
@@ -26,20 +28,28 @@ This release includes the following bugfixes:
  o cirrus: Customize the disabled tests per FreeBSD version
  o cmake: avoid linking executable for some tests with cmake 3.6+ [18]
  o cmake: clear CMAKE_REQUIRED_LIBRARIES after each use [19]
+ o cmake: rename CMAKE_USE_DARWINSSL to CMAKE_USE_SECTRANSP [46]
  o cmake: set SSL_BACKENDS [12]
  o configure: avoid unportable `==' test(1) operator [1]
  o configure: fix default location for fish completions [13]
+ o cookie: Guard against possible NULL ptr deref [42]
  o curl_easy_getinfo.3: fix minor formatting mistake
+ o curlver.h: use parenthesis in CURL_VERSION_BITS macro [45]
+ o docs/BUG-BOUNTY: bug bounty time [48]
  o documentation: Fix several typos [7]
  o ftplistparser: fix LGTM alert "Empty block without comment" [14]
+ o http: mark bundle as not for multiuse on < HTTP/2 response [41]
  o lib509: add missing include for strdup [22]
  o lib557: initialize variables [22]
  o multi: improved HTTP_1_1_REQUIRED handling [2]
+ o nss: provide more specific error messages on failed init [43]
+ o ntlm: Support the NT response in the type-3 when OpenSSL doesn't include MD4
  o openssl: mark connection for close on TLS close_notify [36]
  o openvms: Remove pre-processor for SecureTransport [40]
  o openvms: Remove pre-processors for Windows [40]
  o polarssl_threadlock: remove conditionally unused code [22]
  o resolve: apply Happy Eyeballs philosophy to parallel c-ares queries [3]
+ o sasl: Don't send authcid as authzid for the PLAIN mechanism as per RFC 4616
  o scripts: fix typos
  o singleipconnect: show port in the verbose "Trying ..." message
  o smtp: fix compiler warning [15]
@@ -56,8 +66,8 @@ This release includes the following bugfixes:
  o transfer: fix LGTM alert "Comparison is always true" [14]
  o travis: allow builds on branches named "ci"
  o travis: install dependencies only when needed [24]
- o travis: remove mesalink builds [35]
  o travis: update some builds do Xenial [30]
+ o travis: updated mesalink builds [35]
  o url: always clone the CUROPT_CURLU handle [26]
  o urlapi: stricter CURLUPART_PORT parsing [33]
  o urlapi: urlencode characters above 0x7f correctly [9]
@@ -73,13 +83,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad Spencer, cclauss on github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Stenberg, Eli Schwartz, Even Rouault, Jakub Zakrzewski, Jan Ehrhardt,
+  Aron Bergman, Brad Spencer, cclauss on github, Dan Fandrich,
+  Daniel Gustafsson, Daniel Stenberg, Eli Schwartz, Even Rouault, Gisle Vanem,
+  Jakub Zakrzewski, Jan Ehrhardt, Jonathan Moerman, Kamil Dudka,
   Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, niner on github,
-  Paolo Mossino, Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro, Rikard Falkeborn,
-  Simon Warta, Steve Holme, Tim Rühsen, Tom van der Woerdt, Wyatt O'Day,
-  XmiliaH on github,
-  (24 contributors)
+  Paolo Mossino, Patrick Monnerat, Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro,
+  Reed Loden, Rikard Falkeborn, Simon Warta, Steve Holme, Tim Rühsen,
+  Tom van der Woerdt, Tseng Jun, Wyatt O'Day, XmiliaH on github, Yiming Jing,
+  (32 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -119,9 +130,17 @@ References to bug reports and discussions on issues:
  [32] = https://curl.haxx.se/bug/?i=3713
  [33] = https://curl.haxx.se/bug/?i=3762
  [34] = https://curl.haxx.se/bug/?i=3772
- [35] = https://curl.haxx.se/bug/?i=3767
+ [35] = https://curl.haxx.se/bug/?i=3823
  [36] = https://curl.haxx.se/bug/?i=3750
  [37] = https://curl.haxx.se/bug/?i=3782
  [38] = https://curl.haxx.se/bug/?i=3717
  [39] = https://curl.haxx.se/mail/lib-2019-04/0052.html
  [40] = https://curl.haxx.se/bug/?i=3768
+ [41] = https://curl.haxx.se/bug/?i=3813
+ [42] = https://curl.haxx.se/bug/?i=3820
+ [43] = https://curl.haxx.se/bug/?i=3808
+ [44] = https://curl.haxx.se/bug/?i=3805
+ [45] = https://curl.haxx.se/bug/?i=3809
+ [46] = https://curl.haxx.se/bug/?i=3769
+ [47] = https://curl.haxx.se/bug/?i=3801
+ [48] = https://curl.haxx.se/bug/?i=3488
