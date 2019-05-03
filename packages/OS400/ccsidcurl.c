@@ -1141,7 +1141,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
-    }
+  }
 
   data = (struct Curl_easy *) curl;
   va_start(arg, tag);
@@ -1235,8 +1235,8 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
       if(!s) {
         result = CURLE_OUT_OF_MEMORY;
         break;
-        }
       }
+    }
 
     result = curl_easy_setopt(curl, tag, s);
     free(s);
@@ -1254,7 +1254,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
     if(!s || !pfsize || ccsid == NOCONV_CCSID || ccsid == ASCII_CCSID) {
       result = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, s);
       break;
-      }
+    }
 
     if(pfsize == -1) {
       /* Data is null-terminated. */
@@ -1272,7 +1272,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
       if(pfsize < 0 || pfsize > SIZE_MAX) {
         result = CURLE_OUT_OF_MEMORY;
         break;
-        }
+      }
 
       len = pfsize;
       pfsize = len * MAX_CONV_EXPANSION;
@@ -1285,7 +1285,7 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
       if(!cp) {
         result = CURLE_OUT_OF_MEMORY;
         break;
-        }
+      }
 
       pfsize = convert(cp, pfsize, ASCII_CCSID, s, len, ccsid);
 
@@ -1293,11 +1293,11 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
         free(cp);
         result = CURLE_OUT_OF_MEMORY;
         break;
-        }
+      }
 
       data->set.postfieldsize = pfsize;         /* Replace data size. */
       s = cp;
-      }
+    }
 
     result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, s);
     data->set.str[STRING_COPYPOSTFIELDS] = s;   /* Give to library. */
@@ -1305,9 +1305,12 @@ curl_easy_setopt_ccsid(CURL * curl, CURLoption tag, ...)
 
   case CURLOPT_ERRORBUFFER:                     /* This is an output buffer. */
   default:
-    result = Curl_vsetopt(data, tag, arg);
+  {
+    long val = va_arg(arg, long);
+    result = curl_easy_setopt(curl, tag, val);
     break;
-    }
+  }
+  }
 
   va_end(arg);
   return result;
