@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,7 +54,7 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
                        ssize_t buffersize,       /* max amount to read */
                        ssize_t *n)               /* amount bytes read */
 {
-  ssize_t nread;
+  ssize_t nread = 0;
   ssize_t allread = 0;
   int result;
   *n = 0;
@@ -290,7 +290,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     /* wrong version ? */
     if(socksreq[0] != 0) {
       failf(data,
-            "SOCKS4 reply has wrong version, version should be 4.");
+            "SOCKS4 reply has wrong version, version should be 0.");
       return CURLE_COULDNT_CONNECT;
     }
 
@@ -527,12 +527,24 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
     len = 0;
     socksreq[len++] = 1;    /* username/pw subnegotiation version */
     socksreq[len++] = (unsigned char) proxy_user_len;
-    if(proxy_user && proxy_user_len)
+    if(proxy_user && proxy_user_len) {
+      /* the length must fit in a single byte */
+      if(proxy_user_len >= 255) {
+        failf(data, "Excessive user name length for proxy auth");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
       memcpy(socksreq + len, proxy_user, proxy_user_len);
+    }
     len += proxy_user_len;
     socksreq[len++] = (unsigned char) proxy_password_len;
-    if(proxy_password && proxy_password_len)
+    if(proxy_password && proxy_password_len) {
+      /* the length must fit in a single byte */
+      if(proxy_password_len > 255) {
+        failf(data, "Excessive password length for proxy auth");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
       memcpy(socksreq + len, proxy_password, proxy_password_len);
+    }
     len += proxy_password_len;
 
     code = Curl_write_plain(conn, sock, (char *)socksreq, len, &written);

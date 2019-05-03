@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+CURLOPT_CURLU
 </keywords>
 </info>
 <reply>
@@ -29,7 +30,7 @@ http
 lib658
 </tool>
 <name>
-HTTP GET
+Pass URL to libcurl with CURLOPT_CURLU
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/658

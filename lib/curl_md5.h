@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,10 +53,10 @@ void Curl_md5it(unsigned char *output,
                 const unsigned char *input);
 
 MD5_context * Curl_MD5_init(const MD5_params *md5params);
-int Curl_MD5_update(MD5_context *context,
-                    const unsigned char *data,
-                    unsigned int len);
-int Curl_MD5_final(MD5_context *context, unsigned char *result);
+CURLcode Curl_MD5_update(MD5_context *context,
+                         const unsigned char *data,
+                         unsigned int len);
+CURLcode Curl_MD5_final(MD5_context *context, unsigned char *result);
 
 #endif
 

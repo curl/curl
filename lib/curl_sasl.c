@@ -357,10 +357,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_XOAUTH2;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                       NULL, 0,
-                                                       conn->oauth_bearer,
-                                                       &resp, &len);
+        result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
+                                                        conn->oauth_bearer,
+                                                        &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_PLAIN) {
       mech = SASL_MECH_STRING_PLAIN;
@@ -368,8 +367,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_PLAIN;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_plain_message(data, conn->user, conn->passwd,
-                                                &resp, &len);
+        result = Curl_auth_create_plain_message(data, NULL, conn->user,
+                                                conn->passwd, &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_LOGIN) {
       mech = SASL_MECH_STRING_LOGIN;
@@ -451,9 +450,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     *progress = SASL_DONE;
     return result;
   case SASL_PLAIN:
-    result = Curl_auth_create_plain_message(data, conn->user, conn->passwd,
-                                            &resp,
-                                            &len);
+    result = Curl_auth_create_plain_message(data, NULL, conn->user,
+                                            conn->passwd, &resp, &len);
     break;
   case SASL_LOGIN:
     result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
@@ -562,10 +560,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
       newstate = SASL_OAUTH2_RESP;
     }
     else
-      result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                     NULL, 0,
-                                                     conn->oauth_bearer,
-                                                     &resp, &len);
+      result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
+                                                      conn->oauth_bearer,
+                                                      &resp, &len);
     break;
 
   case SASL_OAUTH2_RESP:

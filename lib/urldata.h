@@ -79,6 +79,10 @@
 */
 #define RESP_TIMEOUT (120*1000)
 
+/* Max string intput length is a precaution against abuse and to detect junk
+   input easier and better. */
+#define CURL_MAX_INPUT_LENGTH 8000000
+
 #include "cookie.h"
 #include "psl.h"
 #include "formdata.h"
@@ -143,10 +147,6 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
-
-
-/* The "master buffer" is for HTTP pipelining */
-#define MASTERBUF_SIZE 16384
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
@@ -358,7 +358,9 @@ struct ntlmdata {
 struct negotiatedata {
   /* When doing Negotiate (SPNEGO) auth, we first need to send a token
      and then validate the received one. */
-  enum { GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT } state;
+  enum {
+    GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT, GSS_AUTHDONE, GSS_AUTHSUCC
+  } state;
 #ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;
@@ -380,6 +382,10 @@ struct negotiatedata {
   size_t output_token_length;
 #endif
 #endif
+  bool noauthpersist;
+  bool havenoauthpersist;
+  bool havenegdata;
+  bool havemultiplerequests;
 };
 #endif
 
@@ -538,21 +544,18 @@ struct dohdata {
  */
 struct SingleRequest {
   curl_off_t size;        /* -1 if unknown at this point */
-  curl_off_t *bytecountp; /* return number of bytes read or NULL */
-
   curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch,
                              -1 means unlimited */
-  curl_off_t *writebytecountp; /* return number of bytes written or NULL */
-
   curl_off_t bytecount;         /* total number of bytes read */
   curl_off_t writebytecount;    /* number of bytes written */
 
-  long headerbytecount;         /* only count received headers */
-  long deductheadercount; /* this amount of bytes doesn't count when we check
-                             if anything has been transferred at the end of a
-                             connection. We use this counter to make only a
-                             100 reply (without a following second response
-                             code) result in a CURLE_GOT_NOTHING error code */
+  curl_off_t headerbytecount;   /* only count received headers */
+  curl_off_t deductheadercount; /* this amount of bytes doesn't count when we
+                                   check if anything has been transferred at
+                                   the end of a connection. We use this
+                                   counter to make only a 100 reply (without a
+                                   following second response code) result in a
+                                   CURLE_GOT_NOTHING error code */
 
   struct curltime start;         /* transfer started at this time */
   struct curltime now;           /* current time */
@@ -793,11 +796,10 @@ struct connectdata {
   void *closesocket_client;
 
   /* This is used by the connection cache logic. If this returns TRUE, this
-     handle is being used by one or more easy handles and can only used by any
+     handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
-     pipelining/multiplexing) and it cannot be used by another multi
-     handle! */
-#define CONN_INUSE(c) ((c)->send_pipe.size + (c)->recv_pipe.size)
+     multiplexing) and it cannot be used by another multi handle! */
+#define CONN_INUSE(c) ((c)->easyq.size)
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to
@@ -868,6 +870,7 @@ struct connectdata {
 
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
+  struct curltime lastused; /* when returned to the connection cache */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
@@ -947,16 +950,7 @@ struct connectdata {
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 
-  struct curl_llist send_pipe; /* List of handles waiting to send on this
-                                  pipeline */
-  struct curl_llist recv_pipe; /* List of handles waiting to read their
-                                  responses on this pipeline */
-  char *master_buffer; /* The master buffer allocated on-demand;
-                          used for pipelining. */
-  size_t read_pos; /* Current read position in the master buffer */
-  size_t buf_len; /* Length of the buffer?? */
-
-
+  struct curl_llist easyq;    /* List of easy handles using this connection */
   curl_seek_callback seek_func; /* function that seeks the input */
   void *seek_client;            /* pointer to pass to the seek() above */
 
@@ -978,6 +972,11 @@ struct connectdata {
   char *challenge_header;
   char *response_header;
 #endif
+#endif
+
+#ifdef USE_SPNEGO
+  struct negotiatedata negotiate; /* state data for host Negotiate auth */
+  struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
   /* data used for the asynch name resolve callback */
@@ -1046,8 +1045,8 @@ struct PureInfo {
   int httpversion; /* the http version number X.Y = X*10+Y */
   time_t filetime; /* If requested, this is might get set. Set to -1 if the
                       time was unretrievable. */
-  long header_size;  /* size of read header(s) in bytes */
-  long request_size; /* the amount of bytes sent in the request(s) */
+  curl_off_t header_size;  /* size of read header(s) in bytes */
+  curl_off_t request_size; /* the amount of bytes sent in the request(s) */
   unsigned long proxyauthavail; /* what proxy auth types were announced */
   unsigned long httpauthavail;  /* what host auth types were announced */
   long numconnects; /* how many new connection did libcurl created */
@@ -1201,6 +1200,7 @@ typedef enum {
   EXPIRE_ASYNC_NAME,
   EXPIRE_CONNECTTIMEOUT,
   EXPIRE_DNS_PER_NAME,
+  EXPIRE_HAPPY_EYEBALLS_DNS, /* See asyn-ares.c */
   EXPIRE_HAPPY_EYEBALLS,
   EXPIRE_MULTI_PENDING,
   EXPIRE_RUN_NOW,
@@ -1276,11 +1276,6 @@ struct UrlState {
 #endif
   struct digestdata digest;      /* state data for host Digest auth */
   struct digestdata proxydigest; /* state data for proxy Digest auth */
-
-#ifdef USE_SPNEGO
-  struct negotiatedata negotiate; /* state data for host Negotiate auth */
-  struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
-#endif
 
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
@@ -1368,6 +1363,7 @@ struct UrlState {
                   when multi_done() is called, to prevent multi_done() to get
                   invoked twice when the multi interface is used. */
   bit stream_depends_e:1; /* set or don't set the Exclusive bit */
+  bit previouslypending:1; /* this transfer WAS in the multi->pending queue */
 };
 
 
@@ -1481,6 +1477,9 @@ enum dupstring {
 #endif
   STRING_TARGET,                /* CURLOPT_REQUEST_TARGET */
   STRING_DOH,                   /* CURLOPT_DOH_URL */
+#ifdef USE_ALTSVC
+  STRING_ALTSVC,                /* CURLOPT_ALTSVC */
+#endif
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
@@ -1560,6 +1559,8 @@ struct UserDefined {
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
+  long maxage_conn;     /* in seconds, max idle time to allow a connection that
+                           is to be reused */
   long tftp_blksize;    /* in bytes, 0 means use default */
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
@@ -1698,7 +1699,6 @@ struct UserDefined {
   bit ftp_use_pret:1;   /* if PRET is to be used before PASV or not */
 
   bit no_signal:1;      /* do not use any signal/alarm handler */
-  bit global_dns_cache:1; /* subject for future removal */
   bit tcp_nodelay:1;    /* whether to enable TCP_NODELAY or not */
   bit ignorecl:1;       /* ignore content length */
   bit ftp_skip_ip:1;    /* skip the IP address the FTP server passes on to
@@ -1720,8 +1720,8 @@ struct UserDefined {
   bit ssl_enable_npn:1; /* TLS NPN extension? */
   bit ssl_enable_alpn:1;/* TLS ALPN extension? */
   bit path_as_is:1;     /* allow dotdots? */
-  bit pipewait:1;       /* wait for pipe/multiplex status before starting a
-                            new connection */
+  bit pipewait:1;       /* wait for multiplex status before starting a new
+                           connection */
   bit suppress_connect_headers:1; /* suppress proxy CONNECT response headers
                                       from user callbacks */
   bit dns_shuffle_addresses:1; /* whether to shuffle addresses before use */
@@ -1739,7 +1739,6 @@ struct Names {
   struct curl_hash *hostcache;
   enum {
     HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_GLOBAL,  /* points to the (shrug) global one */
     HCACHE_MULTI,   /* points to a shared one in the multi handle */
     HCACHE_SHARED   /* points to a shared one in a shared object */
   } hostcachetype;
@@ -1762,8 +1761,8 @@ struct Curl_easy {
 
   struct connectdata *conn;
   struct curl_llist_element connect_queue;
-  struct curl_llist_element pipeline_queue;
   struct curl_llist_element sh_queue; /* list per Curl_sh_entry */
+  struct curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
@@ -1797,6 +1796,9 @@ struct Curl_easy {
                                   NOTE that the 'cookie' field in the
                                   UserDefined struct defines if the "engine"
                                   is to be used or not. */
+#ifdef USE_ALTSVC
+  struct altsvcinfo *asi;      /* the alt-svc cache */
+#endif
   struct Progress progress;    /* for all the progress meter data */
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */

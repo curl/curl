@@ -20,7 +20,7 @@ REPLY "AUTH NTLM" +
 REPLY TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA= + Rubbish
 REPLY * -ERR AUTH exchange cancelled by client
 REPLY "AUTH PLAIN" +
-REPLY dXNlcgB1c2VyAHNlY3JldA== +OK Login successful
+REPLY AHVzZXIAc2VjcmV0 +OK Login successful
 </servercmd>
 <data>
 From: me@somewhere
@@ -69,7 +69,7 @@ AUTH NTLM
 TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
 *
 AUTH PLAIN
-dXNlcgB1c2VyAHNlY3JldA==
+AHVzZXIAc2VjcmV0
 RETR 880
 QUIT
 </protocol>

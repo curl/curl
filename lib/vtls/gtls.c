@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,6 +55,7 @@
 #include "strcase.h"
 #include "warnless.h"
 #include "x509asn1.h"
+#include "multiif.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -1423,11 +1424,6 @@ gtls_connect_step3(struct connectdata *conn,
   size = sizeof(certbuf);
   gnutls_x509_crt_get_issuer_dn(x509_cert, certbuf, &size);
   infof(data, "\t issuer: %s\n", certbuf);
-
-  /* compression algorithm (if any) */
-  ptr = gnutls_compression_get_name(gnutls_compression_get(session));
-  /* the *_get_name() says "NULL" if GNUTLS_COMP_NULL is returned */
-  infof(data, "\t compression: %s\n", ptr);
 #endif
 
   gnutls_x509_crt_deinit(x509_cert);
@@ -1454,6 +1450,9 @@ gtls_connect_step3(struct connectdata *conn,
     }
     else
       infof(data, "ALPN, server did not agree to a protocol\n");
+
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
 

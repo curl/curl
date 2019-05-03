@@ -122,7 +122,7 @@ static struct curloff_st  co_test[COFFT_TESTS_ARRSZ];
 static int test_unsigned_short_formatting(void)
 {
   int i, j;
-  int num_ushort_tests;
+  int num_ushort_tests = 0;
   int failed = 0;
 
 #if (SIZEOF_SHORT == 1)
@@ -229,7 +229,7 @@ static int test_unsigned_short_formatting(void)
 static int test_signed_short_formatting(void)
 {
   int i, j;
-  int num_sshort_tests;
+  int num_sshort_tests = 0;
   int failed = 0;
 
 #if (SIZEOF_SHORT == 1)
@@ -399,7 +399,7 @@ static int test_signed_short_formatting(void)
 static int test_unsigned_int_formatting(void)
 {
   int i, j;
-  int num_uint_tests;
+  int num_uint_tests = 0;
   int failed = 0;
 
 #if (SIZEOF_INT == 2)
@@ -549,7 +549,7 @@ static int test_unsigned_int_formatting(void)
 static int test_signed_int_formatting(void)
 {
   int i, j;
-  int num_sint_tests;
+  int num_sint_tests = 0;
   int failed = 0;
 
 #if (SIZEOF_INT == 2)
@@ -777,7 +777,7 @@ static int test_signed_int_formatting(void)
 static int test_unsigned_long_formatting(void)
 {
   int i, j;
-  int num_ulong_tests;
+  int num_ulong_tests = 0;
   int failed = 0;
 
 #if (SIZEOF_LONG == 2)
@@ -926,7 +926,7 @@ static int test_unsigned_long_formatting(void)
 static int test_signed_long_formatting(void)
 {
   int i, j;
-  int num_slong_tests;
+  int num_slong_tests = 0;
   int failed = 0;
 
 #if (SIZEOF_LONG == 2)
@@ -1154,7 +1154,7 @@ static int test_signed_long_formatting(void)
 static int test_curl_off_t_formatting(void)
 {
   int i, j;
-  int num_cofft_tests;
+  int num_cofft_tests = 0;
   int failed = 0;
 
 #if (SIZEOF_CURL_OFF_T == 2)

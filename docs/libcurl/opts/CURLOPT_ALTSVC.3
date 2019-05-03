@@ -1,0 +1,61 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_ALTSVC 3 "5 Feb 2019" "libcurl 7.64.1" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_ALTSVC \- set alt-svc cache file name
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC, char *filename);
+.fi
+.SH EXPERIMENTAL
+Warning: this feature is early code and is marked as experimental. It can only
+be enabled by explicitly telling configure with \fB--enable-alt-svc\fP. You are
+advised to not ship this in production before the experimental label is
+removed.
+.SH DESCRIPTION
+Pass in a pointer to a \fIfilename\fP to instruct libcurl to use that file as
+the Alt-Svc cache to read existing cache contents from and possibly also write
+it back to a after a transfer, unless \fBCURLALTSVC_READONLYFILE\fP is set in
+\fICURLOPT_ALTSVC_CTRL(3)\fP.
+.SH DEFAULT
+NULL. The alt-svc cache is not read nor written to file.
+.SH PROTOCOLS
+HTTPS
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, CURLALTSVC_H1);
+  curl_easy_setopt(curl, CURLOPT_ALTSVC, "altsvc-cache.txt");
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.64.1
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_ALTSVC_CTRL "(3), " CURLOPT_CONNECT_TO "(3), " CURLOPT_RESOLVE "(3), "
+.BR CURLOPT_COOKIEFILE "(3), "

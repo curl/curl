@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -63,7 +63,7 @@ This bit is deprecated and has no effect since version 7.62.0.
 If this bit is set, libcurl will try to multiplex the new transfer over an
 existing connection if possible. This requires HTTP/2.
 .SH DEFAULT
-Since 7.62.0, \fBCURLPIPE_MULTIPLEX\bP is enabled by default.
+Since 7.62.0, \fBCURLPIPE_MULTIPLEX\fP is enabled by default.
 
 Before that, default was \fBCURLPIPE_NOTHING\fP.
 .SH PROTOCOLS
@@ -71,12 +71,12 @@ HTTP(S)
 .SH EXAMPLE
 .nf
 CURLM *m = curl_multi_init();
-/* try HTTP/1 pipelining and HTTP/2 multiplexing */
-curl_multi_setopt(m, CURLMOPT_PIPELINING, CURLPIPE_HTTP1 |
-                                          CURLPIPE_MULTIPLEX);
+/* try HTTP/2 multiplexing */
+curl_multi_setopt(m, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 .fi
 .SH AVAILABILITY
-Added in 7.16.0. Multiplex support bit added in 7.43.0.
+Added in 7.16.0. Multiplex support bit added in 7.43.0. HTTP/1 Pipelining
+support was disabled in 7.62.0.
 .SH RETURN VALUE
 Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

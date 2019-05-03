@@ -50,6 +50,11 @@ To download the very latest source from the Git server do this:
 
 (you'll get a directory named curl created, filled with the source code)
 
+## Security problems
+
+Report suspected security problems via [our HackerOne
+page](https://hackerone.com/curl) and not in public!
+
 ## Notice
 
 Curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
@@ -61,7 +66,6 @@ distribution terms.
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/curl#backer)]
 
 <a href="https://opencollective.com/curl#backers" target="_blank"><img src="https://opencollective.com/curl/backers.svg?width=890"></a>
-
 
 ## Sponsors
 

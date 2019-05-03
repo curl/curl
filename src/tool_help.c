@@ -20,6 +20,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#ifdef HAVE_STRCASECMP
+#include <strings.h>
+#endif
 
 #include "tool_panykey.h"
 #include "tool_help.h"
@@ -48,6 +51,8 @@ struct helptxt {
 static const struct helptxt helptext[] = {
   {"    --abstract-unix-socket <path>",
    "Connect via abstract Unix domain socket"},
+  {"    --alt-svc <file name>",
+   "Enable alt-svc with this cache file"},
   {"    --anyauth",
    "Pick any authentication method"},
   {"-a, --append",
@@ -78,7 +83,7 @@ static const struct helptxt helptext[] = {
    "Connect to host"},
   {"-C, --continue-at <offset>",
    "Resumed transfer offset"},
-  {"-b, --cookie <data>",
+  {"-b, --cookie <data|filename>",
    "Send cookies from string/file"},
   {"-c, --cookie-jar <filename>",
    "Write cookies to <filename> after operation"},
@@ -525,6 +530,7 @@ static const struct feat feats[] = {
   {"HTTPS-proxy",    CURL_VERSION_HTTPS_PROXY},
   {"MultiSSL",       CURL_VERSION_MULTI_SSL},
   {"PSL",            CURL_VERSION_PSL},
+  {"alt-svc",        CURL_VERSION_ALTSVC},
 };
 
 void tool_help(void)
@@ -589,6 +595,10 @@ void tool_version_info(void)
     for(i = 0; i< numfeat; i++)
       printf(" %s", featp[i]);
     puts(""); /* newline */
+  }
+  if(strcmp(CURL_VERSION, curlinfo->version)) {
+    printf("WARNING: curl and libcurl versions do not match. "
+           "Functionality may be affected.\n");
   }
 }
 

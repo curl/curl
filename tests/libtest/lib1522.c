@@ -32,14 +32,16 @@ static char g_Data[40 * 1024]; /* POST 40KB */
 static int sockopt_callback(void *clientp, curl_socket_t curlfd,
                             curlsocktype purpose)
 {
+#if defined(SOL_SOCKET) && defined(SO_SNDBUF)
   int sndbufsize = 4 * 1024; /* 4KB send buffer */
   (void) clientp;
   (void) purpose;
-#if defined(SOL_SOCKET) && defined(SO_SNDBUF)
   setsockopt(curlfd, SOL_SOCKET, SO_SNDBUF,
              (const char *)&sndbufsize, sizeof(sndbufsize));
 #else
+  (void)clientp;
   (void)curlfd;
+  (void)purpose;
 #endif
   return CURL_SOCKOPT_OK;
 }
@@ -82,6 +84,7 @@ int test(char *URL)
 
   curl_slist_free_all(pHeaderList);
   curl_easy_cleanup(pCurl);
+  curl_global_cleanup();
 
   return 0;
 }

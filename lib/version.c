@@ -31,7 +31,7 @@
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && \
-     (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
+     (defined(WIN32) || defined(__SYMBIAN32__))
 #    define CARES_STATICLIB
 #  endif
 #  include <ares.h>
@@ -369,6 +369,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(HAVE_BROTLI)
   | CURL_VERSION_BROTLI
+#endif
+#if defined(USE_ALTSVC)
+  | CURL_VERSION_ALTSVC
 #endif
   ,
   NULL, /* ssl_version */

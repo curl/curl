@@ -2,6 +2,7 @@
 
 DPAGES =					\
   abstract-unix-socket.d			\
+  alt-svc.d                                     \
   anyauth.d					\
   append.d basic.d				\
   cacert.d capath.d				\

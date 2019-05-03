@@ -545,6 +545,25 @@ curl_includes_ws2tcpip="\
 ])
 
 
+dnl CURL_INCLUDES_BSDSOCKET
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when bsdsocket.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_BSDSOCKET], [
+curl_includes_bsdsocket="\
+/* includes start */
+#ifdef HAVE_PROTO_BSDSOCKET_H
+#  include <proto/bsdsocket.h>
+  struct Library *SocketBase = NULL;
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    proto/bsdsocket.h,
+    [], [], [      $curl_includes_bsdsocket])
+])
+
+
 dnl CURL_PREPROCESS_CALLCONV
 dnl -------------------------------------------------
 dnl Set up variable with a preprocessor block which
@@ -759,6 +778,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_socket
     ]],[[
       if(0 != closesocket(0))
@@ -776,6 +796,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_MSG_CHECKING([if closesocket is prototyped])
     AC_EGREP_CPP([closesocket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -791,6 +812,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_socket
       ]],[[
         if(0 != closesocket(0))
@@ -944,6 +966,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ]],[[
@@ -962,6 +985,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_MSG_CHECKING([if connect is prototyped])
     AC_EGREP_CPP([connect],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ],[
@@ -978,6 +1002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CONNECT], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[
@@ -2206,6 +2231,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gethostbyaddr(0, 0, 0))
@@ -2223,6 +2249,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
     AC_MSG_CHECKING([if gethostbyaddr is prototyped])
     AC_EGREP_CPP([gethostbyaddr],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2238,6 +2265,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYADDR], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gethostbyaddr(0, 0, 0))
@@ -2299,6 +2327,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gai_strerror(0))
@@ -2316,6 +2345,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
     AC_MSG_CHECKING([if gai_strerror is prototyped])
     AC_EGREP_CPP([gai_strerror],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2331,6 +2361,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GAI_STRERROR], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gai_strerror(0))
@@ -2535,6 +2566,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ]],[[
       if(0 != gethostbyname(0))
@@ -2552,6 +2584,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_MSG_CHECKING([if gethostbyname is prototyped])
     AC_EGREP_CPP([gethostbyname],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_netdb
     ],[
       AC_MSG_RESULT([yes])
@@ -2567,6 +2600,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_netdb
       ]],[[
         if(0 != gethostbyname(0))
@@ -2762,6 +2796,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
   AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
@@ -2772,6 +2807,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_unistd
     ]],[[
       if(0 != gethostname(0, 0))
@@ -2789,6 +2825,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_MSG_CHECKING([if gethostname is prototyped])
     AC_EGREP_CPP([gethostname],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_unistd
     ],[
       AC_MSG_RESULT([yes])
@@ -2804,6 +2841,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_unistd
       ]],[[
         if(0 != gethostname(0, 0))
@@ -2827,6 +2865,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
           AC_COMPILE_IFELSE([
             AC_LANG_PROGRAM([[
               $curl_includes_winsock2
+      $curl_includes_bsdsocket
               $curl_includes_unistd
               $curl_preprocess_callconv
               extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
@@ -4023,6 +4062,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
     ]],[[
       if(0 != ioctlsocket(0, 0, 0))
         return 1;
@@ -4039,6 +4079,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_MSG_CHECKING([if ioctlsocket is prototyped])
     AC_EGREP_CPP([ioctlsocket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_ioctlsocket="yes"
@@ -4053,6 +4094,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
       ]],[[
         if(0 != ioctlsocket(0, 0, 0))
           return 1;
@@ -4111,6 +4153,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
       ]],[[
         int flags = 0;
         if(0 != ioctlsocket(0, FIONBIO, &flags))
@@ -4925,6 +4968,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
       if(0 != setsockopt(0, 0, 0, 0, 0))
@@ -4942,6 +4986,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_MSG_CHECKING([if setsockopt is prototyped])
     AC_EGREP_CPP([setsockopt],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ],[
       AC_MSG_RESULT([yes])
@@ -4957,6 +5002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != setsockopt(0, 0, 0, 0, 0))
@@ -5016,6 +5062,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SETSOCKOPT_SO_NONBLOCK], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
         if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
@@ -5561,6 +5608,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ]],[[
@@ -5579,6 +5627,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_MSG_CHECKING([if socket is prototyped])
     AC_EGREP_CPP([socket],[
       $curl_includes_winsock2
+      $curl_includes_bsdsocket
       $curl_includes_sys_socket
       $curl_includes_socket
     ],[
@@ -5595,6 +5644,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
+      $curl_includes_bsdsocket
         $curl_includes_sys_socket
         $curl_includes_socket
       ]],[[

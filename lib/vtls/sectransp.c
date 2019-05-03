@@ -31,6 +31,7 @@
 #include "urldata.h" /* for the Curl_easy definition */
 #include "curl_base64.h"
 #include "strtok.h"
+#include "multiif.h"
 
 #ifdef USE_SECTRANSP
 
@@ -1577,7 +1578,7 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
 
 #if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
   if(conn->bits.tls_enable_alpn) {
-    if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+    if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
       CFMutableArrayRef alpnArr = CFArrayCreateMutable(NULL, 0,
                                                        &kCFTypeArrayCallBacks);
 
@@ -2628,7 +2629,7 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
 
 #if(CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && HAVE_BUILTIN_AVAILABLE == 1
     if(conn->bits.tls_enable_alpn) {
-      if(__builtin_available(macOS 10.13.4, iOS 11, *)) {
+      if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
         CFArrayRef alpnArr = NULL;
         CFStringRef chosenProtocol = NULL;
         err = SSLCopyALPNProtocols(BACKEND->ssl_ctx, &alpnArr);
@@ -2650,6 +2651,9 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
         }
         else
           infof(data, "ALPN, server did not agree to a protocol\n");
+
+        Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                            BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
 
         /* chosenProtocol is a reference to the string within alpnArr
            and doesn't need to be freed separately */

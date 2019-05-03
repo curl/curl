@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,9 +43,7 @@
 
 /* Define USE_NTRESPONSES in order to make the type-3 message include
  * the NT response message. */
-#if !defined(USE_OPENSSL) || !defined(OPENSSL_NO_MD4)
 #define USE_NTRESPONSES
-#endif
 
 /* Define USE_NTLM2SESSION in order to make the type-3 message include the
    NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and a

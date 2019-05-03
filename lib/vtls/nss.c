@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,6 +38,7 @@
 #include "select.h"
 #include "vtls.h"
 #include "llist.h"
+#include "multiif.h"
 #include "curl_printf.h"
 #include "nssg.h"
 #include <nspr.h>
@@ -843,6 +844,8 @@ static void HandshakeCallback(PRFileDesc *sock, void *arg)
        !memcmp(ALPN_HTTP_1_1, buf, ALPN_HTTP_1_1_LENGTH)) {
       conn->negnpn = CURL_HTTP_VERSION_1_1;
     }
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 }
 
@@ -1305,6 +1308,8 @@ static void nss_unload_module(SECMODModule **pmod)
 static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
 {
   NSSInitParameters initparams;
+  PRErrorCode err;
+  const char *err_name;
 
   if(nss_context != NULL)
     return CURLE_OK;
@@ -1325,7 +1330,9 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
     if(nss_context != NULL)
       return CURLE_OK;
 
-    infof(data, "Unable to initialize NSS database\n");
+    err = PR_GetError();
+    err_name = nss_error_to_name(err);
+    infof(data, "Unable to initialize NSS database: %d (%s)\n", err, err_name);
   }
 
   infof(data, "Initializing NSS with certpath: none\n");
@@ -1335,7 +1342,9 @@ static CURLcode nss_init_core(struct Curl_easy *data, const char *cert_dir)
   if(nss_context != NULL)
     return CURLE_OK;
 
-  infof(data, "Unable to initialize NSS\n");
+  err = PR_GetError();
+  err_name = nss_error_to_name(err);
+  failf(data, "Unable to initialize NSS: %d (%s)", err, err_name);
   return CURLE_SSL_CACERT_BADFILE;
 }
 

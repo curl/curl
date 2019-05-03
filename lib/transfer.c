@@ -506,35 +506,6 @@ static int data_pending(const struct connectdata *conn)
 #endif
 }
 
-static void read_rewind(struct connectdata *conn,
-                        size_t thismuch)
-{
-  DEBUGASSERT(conn->read_pos >= thismuch);
-
-  conn->read_pos -= thismuch;
-  conn->bits.stream_was_rewound = TRUE;
-
-#ifdef DEBUGBUILD
-  {
-    char buf[512 + 1];
-    size_t show;
-
-    show = CURLMIN(conn->buf_len - conn->read_pos, sizeof(buf)-1);
-    if(conn->master_buffer) {
-      memcpy(buf, conn->master_buffer + conn->read_pos, show);
-      buf[show] = '\0';
-    }
-    else {
-      buf[0] = '\0';
-    }
-
-    DEBUGF(infof(conn->data,
-                 "Buffer after stream rewind (read_pos = %zu): [%s]\n",
-                 conn->read_pos, buf));
-  }
-#endif
-}
-
 /*
  * Check to see if CURLOPT_TIMECONDITION was met by comparing the time of the
  * remote document with the time provided by CURLOPT_TIMEVAL
@@ -609,9 +580,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
          conn->httpversion == 20) &&
 #endif
        k->size != -1 && !k->header) {
-      /* make sure we don't read "too much" if we can help it since we
-         might be pipelining and then someone else might want to read what
-         follows! */
+      /* make sure we don't read too much */
       curl_off_t totalleft = k->size - k->bytecount;
       if(totalleft < (curl_off_t)bytestoread)
         bytestoread = (size_t)totalleft;
@@ -650,7 +619,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     if(0 < nread || is_empty_data) {
       k->buf[nread] = 0;
     }
-    else if(0 >= nread) {
+    else {
       /* if we receive 0 or less here, the server closed the connection
          and we bail out from this! */
       DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
@@ -693,20 +662,11 @@ static CURLcode readwrite_data(struct Curl_easy *data,
         /* We've stopped dealing with input, get out of the do-while loop */
 
         if(nread > 0) {
-          if(Curl_pipeline_wanted(conn->data->multi, CURLPIPE_HTTP1)) {
-            infof(data,
-                  "Rewinding stream by : %zd"
-                  " bytes on url %s (zero-length body)\n",
-                  nread, data->state.up.path);
-            read_rewind(conn, (size_t)nread);
-          }
-          else {
-            infof(data,
-                  "Excess found in a non pipelined read:"
-                  " excess = %zd"
-                  " url = %s (zero-length body)\n",
-                  nread, data->state.up.path);
-          }
+          infof(data,
+                "Excess found:"
+                " excess = %zd"
+                " url = %s (zero-length body)\n",
+                nread, data->state.up.path);
         }
 
         break;
@@ -837,19 +797,12 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
           /* There are now possibly N number of bytes at the end of the
              str buffer that weren't written to the client.
-
-             We DO care about this data if we are pipelining.
              Push it back to be read on the next pass. */
 
           dataleft = conn->chunk.dataleft;
           if(dataleft != 0) {
             infof(conn->data, "Leftovers after chunking: %zu bytes\n",
                   dataleft);
-            if(Curl_pipeline_wanted(conn->data->multi, CURLPIPE_HTTP1)) {
-              /* only attempt the rewind if we truly are pipelining */
-              infof(conn->data, "Rewinding %zu bytes\n",dataleft);
-              read_rewind(conn, dataleft);
-            }
           }
         }
         /* If it returned OK, we just keep going */
@@ -868,25 +821,13 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
         excess = (size_t)(k->bytecount + nread - k->maxdownload);
         if(excess > 0 && !k->ignorebody) {
-          if(Curl_pipeline_wanted(conn->data->multi, CURLPIPE_HTTP1)) {
-            infof(data,
-                  "Rewinding stream by : %zu"
-                  " bytes on url %s (size = %" CURL_FORMAT_CURL_OFF_T
-                  ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
-                  ", bytecount = %" CURL_FORMAT_CURL_OFF_T ", nread = %zd)\n",
-                  excess, data->state.up.path,
-                  k->size, k->maxdownload, k->bytecount, nread);
-            read_rewind(conn, excess);
-          }
-          else {
-            infof(data,
-                  "Excess found in a non pipelined read:"
-                  " excess = %zu"
-                  ", size = %" CURL_FORMAT_CURL_OFF_T
-                  ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
-                  ", bytecount = %" CURL_FORMAT_CURL_OFF_T "\n",
-                  excess, k->size, k->maxdownload, k->bytecount);
-          }
+          infof(data,
+                "Excess found in a read:"
+                " excess = %zu"
+                ", size = %" CURL_FORMAT_CURL_OFF_T
+                ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+                ", bytecount = %" CURL_FORMAT_CURL_OFF_T "\n",
+                excess, k->size, k->maxdownload, k->bytecount);
         }
 
         nread = (ssize_t) (k->maxdownload - k->bytecount);
@@ -1198,6 +1139,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
                  (size_t)bytes_written);
 
     k->writebytecount += bytes_written;
+    Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
     if((!k->upload_chunky || k->forbidchunk) &&
        (k->writebytecount == data->state.infilesize)) {
@@ -1231,7 +1173,6 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
       }
     }
 
-    Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
   } WHILE_FALSE; /* just to break out from! */
 
@@ -1309,11 +1250,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   k->now = Curl_now();
   if(didwhat) {
-    /* Update read/write counters */
-    if(k->bytecountp)
-      *k->bytecountp = k->bytecount; /* read count */
-    if(k->writebytecountp)
-      *k->writebytecountp = k->writebytecount; /* write count */
+    ;
   }
   else {
     /* no read no write, this is a timeout? */
@@ -1857,8 +1794,7 @@ CURLcode Curl_retry_request(struct connectdata *conn,
 
 
     if(conn->handler->protocol&PROTO_FAMILY_HTTP) {
-      struct HTTP *http = data->req.protop;
-      if(http->writebytecount) {
+      if(data->req.writebytecount) {
         CURLcode result = Curl_readrewind(conn);
         if(result) {
           Curl_safefree(*url);
@@ -1876,24 +1812,17 @@ CURLcode Curl_retry_request(struct connectdata *conn,
  */
 void
 Curl_setup_transfer(
-  struct connectdata *conn, /* connection data */
+  struct Curl_easy *data,   /* transfer */
   int sockindex,            /* socket index to read from or -1 */
   curl_off_t size,          /* -1 if unknown at this point */
   bool getheader,           /* TRUE if header parsing is wanted */
-  curl_off_t *bytecountp,   /* return number of bytes read or NULL */
-  int writesockindex,       /* socket index to write to, it may very well be
+  int writesockindex        /* socket index to write to, it may very well be
                                the same we read from. -1 disables */
-  curl_off_t *writecountp   /* return number of bytes written or NULL */
   )
 {
-  struct Curl_easy *data;
-  struct SingleRequest *k;
-
+  struct SingleRequest *k = &data->req;
+  struct connectdata *conn = data->conn;
   DEBUGASSERT(conn != NULL);
-
-  data = conn->data;
-  k = &data->req;
-
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
   if(conn->bits.multiplex || conn->httpversion == 20) {
@@ -1912,8 +1841,6 @@ Curl_setup_transfer(
   k->getheader = getheader;
 
   k->size = size;
-  k->bytecountp = bytecountp;
-  k->writebytecountp = writecountp;
 
   /* The code sequence below is placed in this function just because all
      necessary input is not always known in do_complete() as this function may

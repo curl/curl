@@ -83,6 +83,8 @@ man_MANS =                                      \
   CURLOPT_ACCEPTTIMEOUT_MS.3                    \
   CURLOPT_ACCEPT_ENCODING.3                     \
   CURLOPT_ADDRESS_SCOPE.3                       \
+  CURLOPT_ALTSVC.3                              \
+  CURLOPT_ALTSVC_CTRL.3                         \
   CURLOPT_APPEND.3                              \
   CURLOPT_AUTOREFERER.3                         \
   CURLOPT_BUFFERSIZE.3                          \
@@ -187,6 +189,7 @@ man_MANS =                                      \
   CURLOPT_MAIL_AUTH.3                           \
   CURLOPT_MAIL_FROM.3                           \
   CURLOPT_MAIL_RCPT.3                           \
+  CURLOPT_MAXAGE_CONN.3                         \
   CURLOPT_MAXCONNECTS.3                         \
   CURLOPT_MAXFILESIZE.3                         \
   CURLOPT_MAXFILESIZE_LARGE.3                   \

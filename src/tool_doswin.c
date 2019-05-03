@@ -599,7 +599,6 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
       }
       memmove(base + 1, base, blen + 1);
       base[0] = '_';
-      ++blen;
     }
   }
 #endif

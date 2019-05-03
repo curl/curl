@@ -31,7 +31,7 @@ CURLOPT_COOKIELIST set to "FLUSH" of a shared cookie object
  </name>
 <tool>
 lib1905
-</tool
+</tool>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/1905
 </command>

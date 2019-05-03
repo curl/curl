@@ -143,24 +143,8 @@ my %api = (
     'curl_version' => 'API',
     'curl_version_info' => 'API',
 
-    # the following funcions are provided globally in debug builds
+    # the following functions are provided globally in debug builds
     'curl_easy_perform_ev' => 'debug-build',
-    'curl_memdebug' => 'debug-build',
-    'curl_memlimit' => 'debug-build',
-    'curl_memlog' => 'debug-build',
-    'curl_accept' => 'debug-build',
-    'curl_docalloc' => 'debug-build',
-    'curl_dofree' => 'debug-build',
-    'curl_domalloc' => 'debug-build',
-    'curl_dorealloc' => 'debug-build',
-    'curl_dorecv' => 'debug-build',
-    'curl_dosend' => 'debug-build',
-    'curl_dostrdup' => 'debug-build',
-    'curl_fclose' => 'debug-build',
-    'curl_fopen' => 'debug-build',
-    'curl_sclose' => 'debug-build',
-    'curl_socket' => 'debug-build',
-    'curl_socketpair' => 'debug-build',
     );
 
 open(N, "nm $file|") ||
@@ -201,6 +185,9 @@ for(sort keys %exist) {
                 print STDERR "Bad curl-prefix: $_\n";
                 $err++;
             }
+        }
+        elsif($_ =~ /^curl_dbg_/) {
+            # we ignore the memdebug symbols
         }
         elsif($wl{$_}) {
             #print "$_ is WL\n";

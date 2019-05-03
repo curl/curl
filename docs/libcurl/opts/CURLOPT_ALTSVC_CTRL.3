@@ -1,0 +1,92 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_ALTSVC_CTRL 3 "5 Feb 2019" "libcurl 7.64.1" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_ALTSVC_CTRL \- control alt-svc behavior
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+#define CURLALTSVC_IMMEDIATELY  (1<<0)
+#define CURLALTSVC_ALTUSED      (1<<1)
+#define CURLALTSVC_READONLYFILE (1<<2)
+#define CURLALTSVC_H1           (1<<3)
+#define CURLALTSVC_H2           (1<<4)
+#define CURLALTSVC_H3           (1<<5)
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC_CTRL, long bitmask);
+.fi
+.SH EXPERIMENTAL
+Warning: this feature is early code and is marked as experimental. It can only
+be enabled by explicitly telling configure with \fB--enable-alt-svc\fP. You are
+advised to not ship this in production before the experimental label is
+removed.
+.SH DESCRIPTION
+Populate the long \fIbitmask\fP with the correct set of features to instruct
+libcurl how to handle Alt-Svc for the transfers using this handle.
+
+libcurl will only accept Alt-Svc headers over a secure transport, meaning
+HTTPS. It will also only complete a request to an alternative origin if that
+origin is properly hosted over HTTPS. These requirements are there to make
+sure both the source and the destination are legitimate.
+
+Setting any bit will enable the alt-svc engine.
+.IP "CURLALTSVC_IMMEDIATELY"
+If an Alt-Svc: header is received, this instructs libcurl to switch to one of
+those alternatives asap rather than to save it and use for the next request.
+.IP "CURLALTSVC_ALTUSED"
+Issue the Alt-Used: header in all requests that have been redirected by
+alt-svc.
+.IP "CURLALTSVC_READONLYFILE"
+Do not write the alt-svc cache back to the file specified with
+\fICURLOPT_ALTSVC(3)\fP even if it gets updated. By default a file specified
+with that option will be read and written to as deemed necessary.
+.IP "CURLALTSVC_H1"
+Accept alternative services offered over HTTP/1.1.
+.IP "CURLALTSVC_H2"
+Accept alternative services offered over HTTP/2. This will only be used if
+libcurl was also built to actually support HTTP/2, otherwise this bit will be
+ignored.
+.IP "CURLALTSVC_H3"
+Accept alternative services offered over HTTP/3. This will only be used if
+libcurl was also built to actually support HTTP/3, otherwise this bit will be
+ignored.
+.SH DEFAULT
+0. No Alt-Svc treatment.
+.SH PROTOCOLS
+HTTPS
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, CURLALTSVC_H1);
+  curl_easy_setopt(curl, CURLOPT_ALTSVC, "altsvc-cache.txt");
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.64.1
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_ALTSVC "(3), " CURLOPT_CONNECT_TO "(3), " CURLOPT_RESOLVE "(3), "

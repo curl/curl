@@ -88,7 +88,7 @@ typedef struct {
   size_t offset;              /* State-dependent offset. */
 }  mime_state;
 
-/* mimimum buffer size for the boundary string */
+/* minimum buffer size for the boundary string */
 #define MIME_BOUNDARY_LEN (24 + MIME_RAND_BOUNDARY_CHARS + 1)
 
 /* A mime multipart. */

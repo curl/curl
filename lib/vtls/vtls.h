@@ -47,7 +47,7 @@ struct Curl_ssl {
 
   size_t (*version)(char *buffer, size_t size);
   int (*check_cxn)(struct connectdata *cxn);
-  int (*shutdown)(struct connectdata *conn, int sockindex);
+  int (*shut_down)(struct connectdata *conn, int sockindex);
   bool (*data_pending)(const struct connectdata *conn,
                        int connindex);
 
@@ -56,7 +56,7 @@ struct Curl_ssl {
                      size_t length);
   bool (*cert_status_request)(void);
 
-  CURLcode (*connect)(struct connectdata *conn, int sockindex);
+  CURLcode (*connect_blocking)(struct connectdata *conn, int sockindex);
   CURLcode (*connect_nonblocking)(struct connectdata *conn, int sockindex,
                                   bool *done);
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);

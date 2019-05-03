@@ -433,6 +433,8 @@ bool Curl_conncache_return_conn(struct connectdata *conn)
     data->multi->maxconnects;
   struct connectdata *conn_candidate = NULL;
 
+  conn->data = NULL; /* no owner anymore */
+  conn->lastused = Curl_now(); /* it was used up until now */
   if(maxconnects > 0 &&
      Curl_conncache_size(data) > maxconnects) {
     infof(data, "Connection cache is full, closing the oldest one.\n");
@@ -476,9 +478,9 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
   while(curr) {
     conn = curr->ptr;
 
-    if(!CONN_INUSE(conn)) {
+    if(!CONN_INUSE(conn) && !conn->data) {
       /* Set higher score for the age passed since the connection was used */
-      score = Curl_timediff(now, conn->now);
+      score = Curl_timediff(now, conn->lastused);
 
       if(score > highscore) {
         highscore = score;
@@ -534,9 +536,9 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     while(curr) {
       conn = curr->ptr;
 
-      if(!CONN_INUSE(conn)) {
+      if(!CONN_INUSE(conn) && !conn->data) {
         /* Set higher score for the age passed since the connection was used */
-        score = Curl_timediff(now, conn->now);
+        score = Curl_timediff(now, conn->lastused);
 
         if(score > highscore) {
           highscore = score;

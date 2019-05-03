@@ -1,6 +1,6 @@
 Short: b
 Long: cookie
-Arg: <data>
+Arg: <data|filename>
 Protocols: HTTP
 Help: Send cookies from string/file
 ---

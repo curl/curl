@@ -44,6 +44,7 @@
 #include "http2.h"
 #include "setopt.h"
 #include "multiif.h"
+#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -60,6 +61,13 @@ CURLcode Curl_setstropt(char **charp, const char *s)
   if(s) {
     char *str = strdup(s);
 
+    if(str) {
+      size_t len = strlen(str);
+      if(len > CURL_MAX_INPUT_LENGTH) {
+        free(str);
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+    }
     if(!str)
       return CURLE_OUT_OF_MEMORY;
 
@@ -117,6 +125,7 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
   char *argptr;
   CURLcode result = CURLE_OK;
   long arg;
+  unsigned long uarg;
   curl_off_t bigsize;
 
   switch(option) {
@@ -127,11 +136,7 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.dns_cache_timeout = arg;
     break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
-#if 0 /* deprecated */
-    /* remember we want this enabled */
-    arg = va_arg(param, long);
-    data->set.global_dns_cache = (0 != arg) ? TRUE : FALSE;
-#endif
+    /* deprecated */
     break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
@@ -2300,14 +2305,16 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
 
   case CURLOPT_ADDRESS_SCOPE:
     /*
-     * We always get longs when passed plain numericals, but for this value we
-     * know that an unsigned int will always hold the value so we blindly
-     * typecast to this type
+     * Use this scope id when using IPv6
+     * We always get longs when passed plain numericals so we should check
+     * that the value fits into an unsigned 32 bit integer.
      */
-    arg = va_arg(param, long);
-    if((arg < 0) || (arg > 0xf))
+    uarg = va_arg(param, unsigned long);
+#if SIZEOF_LONG > 4
+    if(uarg > UINT_MAX)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.scope_id = curlx_sltoui(arg);
+#endif
+    data->set.scope_id = (unsigned int)uarg;
     break;
 
   case CURLOPT_PROTOCOLS:
@@ -2645,6 +2652,12 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.upkeep_interval_ms = arg;
     break;
+  case CURLOPT_MAXAGE_CONN:
+    arg = va_arg(param, long);
+    if(arg < 0)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.maxage_conn = arg;
+    break;
   case CURLOPT_TRAILERFUNCTION:
 #ifndef CURL_DISABLE_HTTP
     data->set.trailer_callback = va_arg(param, curl_trailer_callback);
@@ -2655,6 +2668,31 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
     data->set.trailer_data = va_arg(param, void *);
 #endif
     break;
+#ifdef USE_ALTSVC
+  case CURLOPT_ALTSVC:
+    if(!data->asi) {
+      data->asi = Curl_altsvc_init();
+      if(!data->asi)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    argptr = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_ALTSVC], argptr);
+    if(result)
+      return result;
+    (void)Curl_altsvc_load(data->asi, argptr);
+    break;
+  case CURLOPT_ALTSVC_CTRL:
+    if(!data->asi) {
+      data->asi = Curl_altsvc_init();
+      if(!data->asi)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    arg = va_arg(param, long);
+    result = Curl_altsvc_ctrl(data->asi, arg);
+    if(result)
+      return result;
+    break;
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

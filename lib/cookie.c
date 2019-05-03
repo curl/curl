@@ -93,6 +93,7 @@ Example set of cookies:
 #include "share.h"
 #include "strtoofft.h"
 #include "strcase.h"
+#include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "inet_pton.h"
 
@@ -816,8 +817,6 @@ Curl_cookie_add(struct Curl_easy *data,
         co->domain = strdup(ptr);
         if(!co->domain)
           badcookie = TRUE;
-        else if(bad_domain(co->domain))
-          badcookie = TRUE;
         break;
       case 1:
         /* This field got its explanation on the 23rd of May 2001 by
@@ -875,11 +874,13 @@ Curl_cookie_add(struct Curl_easy *data,
         co->name = strdup(ptr);
         if(!co->name)
           badcookie = TRUE;
-        /* For Netscape file format cookies we check prefix on the name */
-        if(strncasecompare("__Secure-", co->name, 9))
-          co->prefix |= COOKIE_PREFIX__SECURE;
-        else if(strncasecompare("__Host-", co->name, 7))
-          co->prefix |= COOKIE_PREFIX__HOST;
+        else {
+          /* For Netscape file format cookies we check prefix on the name */
+          if(strncasecompare("__Secure-", co->name, 9))
+            co->prefix |= COOKIE_PREFIX__SECURE;
+          else if(strncasecompare("__Host-", co->name, 7))
+            co->prefix |= COOKIE_PREFIX__HOST;
+        }
         break;
       case 6:
         co->value = strdup(ptr);
@@ -946,20 +947,18 @@ Curl_cookie_add(struct Curl_easy *data,
   if(!noexpire)
     remove_expired(c);
 
-  if(domain && co->domain && !isip(co->domain)) {
-    int acceptable;
 #ifdef USE_LIBPSL
+  /* Check if the domain is a Public Suffix and if yes, ignore the cookie. */
+  if(domain && co->domain && !isip(co->domain)) {
     const psl_ctx_t *psl = Curl_psl_use(data);
+    int acceptable;
 
-    /* Check if the domain is a Public Suffix and if yes, ignore the cookie. */
     if(psl) {
       acceptable = psl_is_cookie_domain_acceptable(psl, domain, co->domain);
       Curl_psl_release(data);
     }
     else
-#endif
-    /* Without libpsl, do the best we can. */
-    acceptable = !bad_domain(co->domain);
+      acceptable = !bad_domain(domain);
 
     if(!acceptable) {
       infof(data, "cookie '%s' dropped, domain '%s' must not "
@@ -968,6 +967,7 @@ Curl_cookie_add(struct Curl_easy *data,
       return NULL;
     }
   }
+#endif
 
   myhash = cookiehash(co->domain);
   clist = c->cookies[myhash];
@@ -1088,33 +1088,6 @@ Curl_cookie_add(struct Curl_easy *data,
   return co;
 }
 
-/*
- * get_line() makes sure to only return complete whole lines that fit in 'len'
- * bytes and end with a newline.
- */
-static char *get_line(char *buf, int len, FILE *input)
-{
-  bool partial = FALSE;
-  while(1) {
-    char *b = fgets(buf, len, input);
-    if(b) {
-      size_t rlen = strlen(b);
-      if(rlen && (b[rlen-1] == '\n')) {
-        if(partial) {
-          partial = FALSE;
-          continue;
-        }
-        return b;
-      }
-      /* read a partial, discard the next piece that ends with newline */
-      partial = TRUE;
-    }
-    else
-      break;
-  }
-  return NULL;
-}
-
 
 /*****************************************************************************
  *
@@ -1172,7 +1145,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     line = malloc(MAX_COOKIE_LINE);
     if(!line)
       goto fail;
-    while(get_line(line, MAX_COOKIE_LINE, fp)) {
+    while(Curl_get_line(line, MAX_COOKIE_LINE, fp)) {
       if(checkprefix("Set-Cookie:", line)) {
         /* This is a cookie line, get it! */
         lineptr = &line[11];

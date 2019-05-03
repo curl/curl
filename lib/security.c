@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -142,7 +142,7 @@ socket_read(curl_socket_t fd, void *to, size_t len)
 {
   char *to_p = to;
   CURLcode result;
-  ssize_t nread;
+  ssize_t nread = 0;
 
   while(len > 0) {
     result = Curl_read_plain(fd, to_p, len, &nread);

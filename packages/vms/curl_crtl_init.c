@@ -183,7 +183,6 @@ static void set_features(void)
     status = sys_trnlnm("GNV$UNIX_SHELL",
                         unix_shell_name, sizeof unix_shell_name -1);
     if (!$VMS_STATUS_SUCCESS(status)) {
-        unix_shell_name[0] = 0;
         use_unix_settings = 0;
     }
 

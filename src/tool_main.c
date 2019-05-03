@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,7 +112,7 @@ static void memory_tracking_init(void)
       env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
     strcpy(fname, env);
     curl_free(env);
-    curl_memdebug(fname);
+    curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called
        before curl_memdebug() as otherwise memory tracking will
        log a free() without an alloc! */
@@ -123,7 +123,7 @@ static void memory_tracking_init(void)
     char *endptr;
     long num = strtol(env, &endptr, 10);
     if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
-      curl_memlimit(num);
+      curl_dbg_memlimit(num);
     curl_free(env);
   }
 }
@@ -237,7 +237,7 @@ static void main_free(struct GlobalConfig *config)
   config->last = NULL;
 }
 
-#ifdef _WIN32
+#ifdef WIN32
 /* TerminalSettings for Windows */
 static struct TerminalSettings {
   HANDLE hStdOut;
@@ -275,7 +275,7 @@ static void configure_terminal(void)
 
 static void restore_terminal(void)
 {
-#ifdef _WIN32
+#ifdef WIN32
   /* Restore Console output mode and codepage to whatever they were
    * when Curl started */
   SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);

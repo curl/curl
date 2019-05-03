@@ -1028,7 +1028,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
     Curl_closesocket(conn, sockfd);
     return CURLE_OK;
   }
-  infof(data, "  Trying %s...\n", ipaddress);
+  infof(data, "  Trying %s:%ld...\n", ipaddress, port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&

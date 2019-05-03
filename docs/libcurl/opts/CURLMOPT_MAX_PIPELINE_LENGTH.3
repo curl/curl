@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,6 +28,8 @@ CURLMOPT_MAX_PIPELINE_LENGTH \- maximum number of requests in a pipeline
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_PIPELINE_LENGTH, long max);
 .SH DESCRIPTION
+No function since pipelining was removed in 7.62.0.
+
 Pass a long. The set \fBmax\fP number will be used as the maximum amount of
 outstanding requests in an HTTP/1.1 pipelined connection. This option is only
 used for HTTP/1.1 pipelining, not for HTTP/2 multiplexing.

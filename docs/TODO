@@ -35,7 +35,6 @@
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
- 1.19 Timeout idle connections from the pool
  1.20 SRV and URI DNS records
  1.21 Have the URL API offer IDN decoding
  1.22 CURLINFO_PAUSE_STATE
@@ -46,6 +45,7 @@
  1.27 hardcode the "localhost" addresses
  1.28 FD_CLOEXEC
  1.29 Upgrade to websockets
+ 1.30 config file parsing
 
  2. libcurl - multi interface
  2.1 More non-blocking
@@ -149,7 +149,6 @@
  18.4 simultaneous parallel transfers
  18.5 UTF-8 filenames in Content-Disposition
  18.6 warning when setting an option
- 18.7 warning if curl version is not in sync with libcurl version
  18.8 offer color-coded HTTP header output
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
@@ -259,6 +258,8 @@
 1.7 Support HTTP/2 for HTTP(S) proxies
 
  Support for doing HTTP/2 to HTTP and HTTPS proxies is still missing.
+
+ See https://github.com/curl/curl/issues/3570
 
 1.8 CURLOPT_RESOLVE for any port number
 
@@ -371,16 +372,6 @@
 
  https://github.com/curl/curl/issues/896
 
-1.19 Timeout idle connections from the pool
-
- libcurl currently keeps connections in its connection pool for an indefinite
- period of time, until it either gets reused, gets noticed that it has been
- closed by the server or gets pruned to make room for a new connection.
-
- To reduce overhead (especially for when we add monitoring of the connections
- in the pool), we should introduce a timeout so that connections that have
- been idle for N seconds get closed.
-
 1.20 SRV and URI DNS records
 
  Offer support for resolving SRV and URI DNS records for libcurl to know which
@@ -458,6 +449,14 @@
 
  Michael Kaufmann suggestion here:
  https://curl.haxx.se/video/curlup-2017/2017-03-19_05_Michael_Kaufmann_Websocket_support_for_curl.mp4
+
+1.30 config file parsing
+
+ Consider providing an API, possibly in a separate companion library, for
+ parsing a config file like curl's -K/--config option to allow applications to
+ get the same ability to read curl options from files.
+
+ See https://github.com/curl/curl/issues/3698
 
 2. libcurl - multi interface
 
@@ -598,7 +597,7 @@
 
 5.4 Allow SAN names in HTTP/2 server push
 
- curl only allows HTTP/2 push promise if the provided :autority header value
+ curl only allows HTTP/2 push promise if the provided :authority header value
  exactly matches the host name given in the URL. It could be extended to allow
  any name that would match the Subject Alternative Names in the server's TLS
  certificate.
@@ -1015,13 +1014,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Display a warning when libcurl returns an error when setting an option.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
-
-18.7 warning if curl version is not in sync with libcurl version
-
- This is usually a sign of a funny, weird or unexpected install situations
- that aren't always quickly nor easily detected by users. curl and libcurl are
- always released in sync and should use the same version numbers unless very
- special situations.
 
 18.8 offer color-coded HTTP header output
 

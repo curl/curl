@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2018, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2013 - 2019, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -138,7 +138,7 @@ int test(char *URL)
   CURLM *m = NULL;
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
-  int running;
+  int running = 0;
   int handlenum = 0;
   struct timeval last_handle_add;
 
