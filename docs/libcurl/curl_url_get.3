@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -76,6 +76,10 @@ Scheme cannot be URL decoded on get.
 .IP CURLUPART_PASSWORD
 .IP CURLUPART_OPTIONS
 .IP CURLUPART_HOST
+If the host part is an IPv6 numeric address, the zoneid will not be part of
+the extracted host but is provided separately in \fICURLUPART_ZONEID\fP.
+.IP CURLUPART_ZONEID
+If the host name is a numeric IPv6 address, this field might also be set.
 .IP CURLUPART_PORT
 Port cannot be URL decoded on get.
 .IP CURLUPART_PATH
@@ -104,7 +108,7 @@ If this function returns an error, no URL part is returned.
   }
 .fi
 .SH AVAILABILITY
-Added in curl 7.62.0
+Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_set "(3), "
 .BR curl_url_dup "(3), "
