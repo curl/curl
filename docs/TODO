@@ -35,7 +35,6 @@
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
- 1.19 add CURLUPART_SCOPEID
  1.20 SRV and URI DNS records
  1.21 Have the URL API offer IDN decoding
  1.22 CURLINFO_PAUSE_STATE
@@ -372,11 +371,6 @@
  using PACs.
 
  https://github.com/curl/curl/issues/896
-
-1.19 add CURLUPART_SCOPEID
-
- Add support for CURLUPART_SCOPEID to curl_url_set() and curl_url_get(). It is
- only really used when the host name is an IPv6 numerical address.
 
 1.20 SRV and URI DNS records
 

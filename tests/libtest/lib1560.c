@@ -414,6 +414,10 @@ static int checkurl(const char *url, const char *out)
 
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static struct setcase set_parts_list[] = {
+  {"https://[::1%25fake]:1234/",
+   "zoneid=NULL,",
+   "https://[::1]:1234/",
+   0, 0, CURLUE_OK, CURLUE_OK},
   {"https://host:1234/",
    "port=NULL,",
    "https://host/",
@@ -547,6 +551,8 @@ static CURLUPart part2id(char *part)
     return CURLUPART_QUERY;
   if(!strcmp("fragment", part))
     return CURLUPART_FRAGMENT;
+  if(!strcmp("zoneid", part))
+    return CURLUPART_ZONEID;
   return 9999; /* bad input => bad output */
 }
 
@@ -571,6 +577,9 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
         /* for debugging this */
         fprintf(stderr, "%s = %s [%d]\n", part, value, (int)what);
 #endif
+        if(what > CURLUPART_ZONEID)
+          fprintf(stderr, "UNKNOWN part '%s'\n", part);
+
         if(!strcmp("NULL", value))
           uc = curl_url_set(u, what, NULL, setflags);
         else if(!strcmp("\"\"", value))
@@ -934,6 +943,35 @@ static int scopeid(void)
   rc = curl_url_get(u, CURLUPART_HOST, &url, 0);
   if(rc != CURLUE_OK) {
     fprintf(stderr, "%s:%d curl_url_get CURLUPART_HOST returned %d\n",
+            __FILE__, __LINE__, (int)rc);
+    error++;
+  }
+  else {
+    printf("we got %s\n", url);
+    curl_free(url);
+  }
+
+  rc = curl_url_get(u, CURLUPART_ZONEID, &url, 0);
+  if(rc != CURLUE_OK) {
+    fprintf(stderr, "%s:%d curl_url_get CURLUPART_ZONEID returned %d\n",
+            __FILE__, __LINE__, (int)rc);
+    error++;
+  }
+  else {
+    printf("we got %s\n", url);
+    curl_free(url);
+  }
+
+  rc = curl_url_set(u, CURLUPART_ZONEID, "clown", 0);
+  if(rc != CURLUE_OK) {
+    fprintf(stderr, "%s:%d curl_url_set CURLUPART_ZONEID returned %d\n",
+            __FILE__, __LINE__, (int)rc);
+    error++;
+  }
+
+  rc = curl_url_get(u, CURLUPART_URL, &url, 0);
+  if(rc != CURLUE_OK) {
+    fprintf(stderr, "%s:%d curl_url_get CURLUPART_URL returned %d\n",
             __FILE__, __LINE__, (int)rc);
     error++;
   }

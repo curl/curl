@@ -764,6 +764,7 @@ CURLUPART_QUERY                 7.62.0
 CURLUPART_SCHEME                7.62.0
 CURLUPART_URL                   7.62.0
 CURLUPART_USER                  7.62.0
+CURLUPART_ZONEID                7.65.0
 CURLUSESSL_ALL                  7.17.0
 CURLUSESSL_CONTROL              7.17.0
 CURLUSESSL_NONE                 7.17.0

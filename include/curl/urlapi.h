@@ -60,7 +60,8 @@ typedef enum {
   CURLUPART_PORT,
   CURLUPART_PATH,
   CURLUPART_QUERY,
-  CURLUPART_FRAGMENT
+  CURLUPART_FRAGMENT,
+  CURLUPART_ZONEID /* added in 7.65.0 */
 } CURLUPart;
 
 #define CURLU_DEFAULT_PORT (1<<0)       /* return default port number */

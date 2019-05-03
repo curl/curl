@@ -56,7 +56,7 @@ struct Curl_URL {
   char *password;
   char *options; /* IMAP only? */
   char *host;
-  char *scopeid; /* for numerical IPv6 addresses */
+  char *zoneid; /* for numerical IPv6 addresses */
   char *port;
   char *path;
   char *query;
@@ -75,7 +75,7 @@ static void free_urlhandle(struct Curl_URL *u)
   free(u->password);
   free(u->options);
   free(u->host);
-  free(u->scopeid);
+  free(u->zoneid);
   free(u->port);
   free(u->path);
   free(u->query);
@@ -606,7 +606,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
     len = strspn(hostname, l);
     if(hlen != len) {
       /* this could now be '%[zone id]' */
-      char scopeid[16];
+      char zoneid[16];
       if(hostname[len] == '%') {
         int i = 0;
         char *h = &hostname[len + 1];
@@ -614,12 +614,12 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
         if(!strncmp(h, "25", 2) && h[2] && (h[2] != ']'))
           h += 2;
         while(*h && (*h != ']') && (i < 15))
-          scopeid[i++] = *h++;
+          zoneid[i++] = *h++;
         if(!i || (']' != *h))
           return CURLUE_MALFORMED_INPUT;
-        scopeid[i] = 0;
-        u->scopeid = strdup(scopeid);
-        if(!u->scopeid)
+        zoneid[i] = 0;
+        u->zoneid = strdup(zoneid);
+        if(!u->zoneid)
           return CURLUE_OUT_OF_MEMORY;
         hostname[len] = ']'; /* insert end bracket */
         hostname[len + 1] = 0; /* terminate the hostname */
@@ -997,6 +997,9 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     ptr = u->host;
     ifmissing = CURLUE_NO_HOST;
     break;
+  case CURLUPART_ZONEID:
+    ptr = u->zoneid;
+    break;
   case CURLUPART_PORT:
     ptr = u->port;
     ifmissing = CURLUE_NO_PORT;
@@ -1082,16 +1085,16 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       if(h && !(h->flags & PROTOPT_URLOPTIONS))
         options = NULL;
 
-      if((u->host[0] == '[') && u->scopeid) {
-        /* make it '[ host %25 scopeid ]' */
+      if((u->host[0] == '[') && u->zoneid) {
+        /* make it '[ host %25 zoneid ]' */
         size_t hostlen = strlen(u->host);
-        size_t alen = hostlen + 3 + strlen(u->scopeid) + 1;
+        size_t alen = hostlen + 3 + strlen(u->zoneid) + 1;
         allochost = malloc(alen);
         if(!allochost)
           return CURLUE_OUT_OF_MEMORY;
         memcpy(allochost, u->host, hostlen - 1);
         msnprintf(&allochost[hostlen - 1], alen - hostlen + 1,
-                  "%%25%s]", u->scopeid);
+                  "%%25%s]", u->zoneid);
       }
 
       url = aprintf("%s://%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
@@ -1184,6 +1187,9 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     case CURLUPART_HOST:
       storep = &u->host;
       break;
+    case CURLUPART_ZONEID:
+      storep = &u->zoneid;
+      break;
     case CURLUPART_PORT:
       u->portnum = 0;
       storep = &u->port;
@@ -1227,8 +1233,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     break;
   case CURLUPART_HOST:
     storep = &u->host;
-    free(u->scopeid);
-    u->scopeid = NULL;
+    free(u->zoneid);
+    u->zoneid = NULL;
+    break;
+  case CURLUPART_ZONEID:
+    storep = &u->zoneid;
     break;
   case CURLUPART_PORT:
   {
