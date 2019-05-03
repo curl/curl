@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -26,6 +26,33 @@ CURLOPT_CHUNK_BGN_FUNCTION \- callback before a transfer with FTP wildcardmatch
 .SH SYNOPSIS
 .nf
 #include <curl/curl.h>
+
+struct curl_fileinfo {
+  char *filename;
+  curlfiletype filetype;
+  time_t time;   /* always zero! */
+  unsigned int perm;
+  int uid;
+  int gid;
+  curl_off_t size;
+  long int hardlinks;
+
+  struct {
+    /* If some of these fields is not NULL, it is a pointer to b_data. */
+    char *time;
+    char *perm;
+    char *user;
+    char *group;
+    char *target; /* pointer to the target filename of a symlink */
+  } strings;
+
+  unsigned int flags;
+
+  /* used internally */
+  char *b_data;
+  size_t b_size;
+  size_t b_used;
+};
 
 long chunk_bgn_callback(const void *transfer_info, void *ptr,
                         int remains);
