@@ -284,7 +284,7 @@ will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
     ./configure --with-darwinssl
     make
 
-###### In case of missing dependancis
+###### In case of missing dependencies
 
 You can use a package manager for macOS like "Homebrew" or what you prefer
 
