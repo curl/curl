@@ -116,7 +116,7 @@ matrix:
                       - libpsl-dev
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
               - T=debug-mesalink C="--with-mesalink --without-ssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
