@@ -75,6 +75,10 @@ This release includes the following bugfixes:
  o vauth/oauth2: Fix OAUTHBEARER token generation [6]
  o winbuild: Support MultiSSL builds [34]
  o xattr: skip unittest on unsupported platforms [20]
+ o urlapi: strip off zone id from numerical IPv6 addresses [49]
+ o OS400/ccsidcurl: replace use of Curl_vsetopt [50]
+ o CURLOPT_CHUNK_BGN_FUNCTION.3: document the struct and time value [51]
+ o CURLMOPT_TIMERFUNCTION.3: warn about the recursive risk [52]
 
 This release includes the following known bugs:
 
@@ -85,12 +89,13 @@ advice from friends like these:
 
   Aron Bergman, Brad Spencer, cclauss on github, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, Eli Schwartz, Even Rouault, Gisle Vanem,
-  Jakub Zakrzewski, Jan Ehrhardt, Jonathan Moerman, Kamil Dudka,
-  Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, niner on github,
+  Jakub Zakrzewski, Jan Ehrhardt, Jonathan Cardoso Machado, Jonathan Moerman,
+  Kamil Dudka, Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, niner on github,
   Paolo Mossino, Patrick Monnerat, Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro,
-  Reed Loden, Rikard Falkeborn, Simon Warta, Steve Holme, Tim Rühsen,
-  Tom van der Woerdt, Tseng Jun, Wyatt O'Day, XmiliaH on github, Yiming Jing,
-  (32 contributors)
+  Reed Loden, Ricardo Gomes, Rikard Falkeborn, Simon Warta, Steve Holme,
+  Tim Rühsen, Tom van der Woerdt, Tseng Jun, Wyatt O'Day, XmiliaH on github,
+  Yiming Jing,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -144,3 +149,7 @@ References to bug reports and discussions on issues:
  [46] = https://curl.haxx.se/bug/?i=3769
  [47] = https://curl.haxx.se/bug/?i=3801
  [48] = https://curl.haxx.se/bug/?i=3488
+ [49] = https://curl.haxx.se/bug/?i=3817
+ [50] = https://curl.haxx.se/bug/?i=3833
+ [51] = https://curl.haxx.se/bug/?i=3829
+ [52] = https://curl.haxx.se/bug/?i=3537
