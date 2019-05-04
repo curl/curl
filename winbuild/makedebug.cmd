@@ -2,7 +2,7 @@
 
 where.exe nmake.exe >nul 2>&1
 
-IF %ERRORLEVEL == 1 (
+IF %ERRORLEVEL% == 1 (
     ECHO Error: Can't find `nmake.exe` - be sure to run this script from within a Developer Command-Prompt
     ECHO.
 ) ELSE (
