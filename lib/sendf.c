@@ -595,7 +595,10 @@ static CURLcode chop_write(struct connectdata *conn,
     size_t chunklen = len <= CURL_MAX_WRITE_SIZE? len: CURL_MAX_WRITE_SIZE;
 
     if(writebody) {
-      size_t wrote = writebody(ptr, 1, chunklen, data->set.out);
+      size_t wrote;
+      Curl_set_in_callback(data, true);
+      wrote = writebody(ptr, 1, chunklen, data->set.out);
+      Curl_set_in_callback(data, false);
 
       if(CURL_WRITEFUNC_PAUSE == wrote) {
         if(conn->handler->flags & PROTOPT_NONETWORK) {
