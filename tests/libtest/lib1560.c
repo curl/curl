@@ -577,7 +577,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
         /* for debugging this */
         fprintf(stderr, "%s = %s [%d]\n", part, value, (int)what);
 #endif
-        if(what == 9999)
+        if(what > CURLUPART_ZONEID)
           fprintf(stderr, "UNKNOWN part '%s'\n", part);
 
         if(!strcmp("NULL", value))
