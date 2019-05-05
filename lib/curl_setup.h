@@ -686,6 +686,10 @@ int netware_init(void);
 #error "No longer supported. Set CURLOPT_CAINFO at runtime instead."
 #endif
 
+#if defined(USE_LIBSSH2) || defined(USE_LIBSSH) || defined(USE_WOLFSSH)
+#define USE_SSH
+#endif
+
 /*
  * Provide a mechanism to silence picky compilers, such as gcc 4.6+.
  * Parameters should of course normally not be unused, but for example when
