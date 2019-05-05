@@ -274,7 +274,7 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
 #endif
-#if defined(USE_LIBSSH) || defined(USE_LIBSSH2)
+#if defined(USE_SSH)
   "scp",
   "sftp",
 #endif
@@ -390,7 +390,7 @@ static curl_version_info_data version_info = {
 curl_version_info_data *curl_version_info(CURLversion stamp)
 {
   static bool initialized;
-#if defined(USE_LIBSSH) || defined(USE_LIBSSH2)
+#if defined(USE_SSH)
   static char ssh_buffer[80];
 #endif
 #ifdef USE_SSL
