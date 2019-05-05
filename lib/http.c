@@ -257,6 +257,7 @@ char *Curl_copy_header_value(const char *header)
   return value;
 }
 
+#ifndef CURL_DISABLE_HTTP_AUTH
 /*
  * http_output_basic() sets up an Authorization: header (or the proxy version)
  * for HTTP Basic authentication.
@@ -337,6 +338,8 @@ static CURLcode http_output_bearer(struct connectdata *conn)
   fail:
   return result;
 }
+
+#endif
 
 /* pickoneauth() selects the most favourable authentication method from the
  * ones available and the ones we want.
@@ -611,6 +614,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   return result;
 }
 
+#ifndef CURL_DISABLE_HTTP_AUTH
 /*
  * Output the correct authentication header depending on the auth type
  * and whether or not it is to a proxy.
@@ -798,6 +802,22 @@ Curl_http_output_auth(struct connectdata *conn,
 
   return result;
 }
+
+#else
+/* when disabled */
+CURLcode
+Curl_http_output_auth(struct connectdata *conn,
+                      const char *request,
+                      const char *path,
+                      bool proxytunnel)
+{
+  (void)conn;
+  (void)request;
+  (void)path;
+  (void)proxytunnel;
+  return CURLE_OK;
+}
+#endif
 
 /*
  * Curl_http_input_auth() deals with Proxy-Authenticate: and WWW-Authenticate:

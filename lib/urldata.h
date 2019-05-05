@@ -1281,7 +1281,6 @@ struct UrlState {
 
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
-
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel f.e. */
 
