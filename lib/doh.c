@@ -22,6 +22,8 @@
 
 #include "curl_setup.h"
 
+#ifndef CURL_DISABLE_DOH
+
 #include "urldata.h"
 #include "curl_addrinfo.h"
 #include "doh.h"
@@ -960,3 +962,5 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
 
   return CURLE_OK;
 }
+
+#endif /* CURL_DISABLE_DOH */

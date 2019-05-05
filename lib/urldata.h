@@ -604,7 +604,9 @@ struct SingleRequest {
   char *upload_fromhere;
   void *protop;       /* Allocated protocol-specific data. Each protocol
                          handler makes sure this points to data it needs. */
+#ifndef CURL_DISABLE_DOH
   struct dohdata doh; /* DoH specific data for this request */
+#endif
   bit header:1;       /* incoming data has HTTP header */
   bit content_range:1; /* set TRUE if Content-Range: was found */
   bit upload_done:1;  /* set to TRUE when doing chunked transfer-encoding
