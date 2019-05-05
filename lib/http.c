@@ -1881,6 +1881,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_PARSEDATE
 CURLcode Curl_add_timecondition(struct Curl_easy *data,
                                 Curl_send_buffer *req_buffer)
 {
@@ -1939,6 +1940,16 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 
   return result;
 }
+#else
+/* disabled */
+CURLcode Curl_add_timecondition(struct Curl_easy *data,
+                                Curl_send_buffer *req_buffer)
+{
+  (void)data;
+  (void)req_buffer;
+  return CURLE_OK;
+}
+#endif
 
 /*
  * Curl_http() gets called from the generic multi_do() function when a HTTP
