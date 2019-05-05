@@ -1568,6 +1568,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         if(!result) {
           if(!dophase_done) {
+#ifndef CURL_DISABLE_FTP
             /* some steps needed for wildcard matching */
             if(data->state.wildcardmatch) {
               struct WildcardData *wc = &data->wildcard;
@@ -1579,6 +1580,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                 break;
               }
             }
+#endif
             /* DO was not completed in one function call, we must continue
                DOING... */
             multistate(data, CURLM_STATE_DOING);
@@ -1718,10 +1720,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          (data->conn->writesockfd != CURL_SOCKET_BAD))
         multistate(data, CURLM_STATE_PERFORM);
       else {
+#ifndef CURL_DISABLE_FTP
         if(data->state.wildcardmatch &&
            ((data->conn->handler->flags & PROTOPT_WILDCARD) == 0)) {
           data->wildcard.state = CURLWC_DONE;
         }
+#endif
         multistate(data, CURLM_STATE_DONE);
       }
       rc = CURLM_CALL_MULTI_PERFORM;
@@ -1942,6 +1946,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           detach_connnection(data);
       }
 
+#ifndef CURL_DISABLE_FTP
       if(data->state.wildcardmatch) {
         if(data->wildcard.state != CURLWC_DONE) {
           /* if a wildcard is set and we are not ending -> lets start again
@@ -1950,7 +1955,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           break;
         }
       }
-
+#endif
       /* after we have DONE what we're supposed to do, go COMPLETED, and
          it doesn't matter what the multi_done() returned! */
       multistate(data, CURLM_STATE_COMPLETED);
