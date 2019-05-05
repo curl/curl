@@ -31,6 +31,9 @@
 
 #include "curl_setup.h"
 
+#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
+  !defined(CURL_DISABLE_POP3)
+
 #include <curl/curl.h>
 #include "urldata.h"
 
@@ -623,3 +626,4 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 
   return result;
 }
+#endif /* protocols are enabled that use SASL */
