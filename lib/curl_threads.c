@@ -59,6 +59,10 @@ static void *curl_thread_create_thunk(void *arg)
   return 0;
 }
 
+#ifndef CURL_THREAD_STACK_SIZE
+#define CURL_THREAD_STACK_SIZE (100*1024)
+#endif
+
 curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
@@ -71,7 +75,7 @@ curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
   ac->arg = arg;
 
   pthread_attr_init(&attr);
-  pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN);
+  pthread_attr_setstacksize(&attr, CURL_THREAD_STACK_SIZE);
   if(pthread_create(t, &attr, curl_thread_create_thunk, ac) != 0)
     goto err;
   pthread_attr_destroy(&attr);
