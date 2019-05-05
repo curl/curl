@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -184,6 +184,9 @@
 
 /* Define if you have the ftruncate function. */
 #define HAVE_FTRUNCATE 1
+
+/* Define to 1 if you have the `getpeername' function. */
+#define HAVE_GETPEERNAME 1
 
 /* Define if you have the gethostbyaddr function. */
 #define HAVE_GETHOSTBYADDR 1

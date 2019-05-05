@@ -235,6 +235,12 @@
 /* Define to 1 if you have the `getprotobyname' function. */
 #cmakedefine HAVE_GETPROTOBYNAME 1
 
+/* Define to 1 if you have the `getpeername' function. */
+#cmakedefine HAVE_GETPEERNAME 1
+
+/* Define to 1 if you have the `getsockname' function. */
+#cmakedefine HAVE_GETSOCKNAME 1
+
 /* Define to 1 if you have the `getpwuid' function. */
 #cmakedefine HAVE_GETPWUID 1
 
