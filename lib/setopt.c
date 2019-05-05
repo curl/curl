@@ -2654,9 +2654,11 @@ static CURLcode vsetopt(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.happy_eyeballs_timeout = arg;
     break;
+#ifndef CURL_DISABLE_SHUFFLE_DNS
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
     data->set.dns_shuffle_addresses = (0 != va_arg(param, long)) ? TRUE:FALSE;
     break;
+#endif
   case CURLOPT_DISALLOW_USERNAME_IN_URL:
     data->set.disallow_username_in_url =
       (0 != va_arg(param, long)) ? TRUE : FALSE;
