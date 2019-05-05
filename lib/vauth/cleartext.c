@@ -25,6 +25,9 @@
 
 #include "curl_setup.h"
 
+#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) ||       \
+  !defined(CURL_DISABLE_POP3)
+
 #include <curl/curl.h>
 #include "urldata.h"
 
@@ -162,3 +165,5 @@ CURLcode Curl_auth_create_external_message(struct Curl_easy *data,
   /* This is the same formatting as the login message */
   return Curl_auth_create_login_message(data, user, outptr, outlen);
 }
+
+#endif /* if no users */
