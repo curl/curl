@@ -92,7 +92,9 @@ static int http_getsock_do(struct connectdata *conn,
                            int numsocks);
 static int http_should_fail(struct connectdata *conn);
 
+#ifndef CURL_DISABLE_PROXY
 static CURLcode add_haproxy_protocol_header(struct connectdata *conn);
+#endif
 
 #ifdef USE_SSL
 static CURLcode https_connecting(struct connectdata *conn, bool *done);
@@ -176,7 +178,7 @@ static CURLcode http_setup_conn(struct connectdata *conn)
   return CURLE_OK;
 }
 
-
+#ifndef CURL_DISABLE_PROXY
 /*
  * checkProxyHeaders() checks the linked list of custom proxy headers
  * if proxy headers are not available, then it will lookup into http header
@@ -203,6 +205,10 @@ char *Curl_checkProxyheaders(const struct connectdata *conn,
 
   return NULL;
 }
+#else
+/* disabled */
+#define Curl_checkProxyheaders(x,y) NULL
+#endif
 
 /*
  * Strip off leading and trailing whitespace from the value in the
@@ -1475,12 +1481,14 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->data->set.haproxyprotocol) {
     /* add HAProxy PROXY protocol header */
     result = add_haproxy_protocol_header(conn);
     if(result)
       return result;
   }
+#endif
 
   if(conn->given->protocol & CURLPROTO_HTTPS) {
     /* perform SSL initialization */
@@ -1507,6 +1515,7 @@ static int http_getsock_do(struct connectdata *conn,
   return GETSOCK_WRITESOCK(0);
 }
 
+#ifndef CURL_DISABLE_PROXY
 static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
 {
   char proxy_header[128];
@@ -1547,6 +1556,7 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn)
 
   return result;
 }
+#endif
 
 #ifdef USE_SSL
 static CURLcode https_connecting(struct connectdata *conn, bool *done)

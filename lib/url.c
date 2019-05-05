@@ -866,6 +866,7 @@ static int IsMultiplexingPossible(const struct Curl_easy *handle,
   return avail;
 }
 
+#ifndef CURL_DISABLE_PROXY
 static bool
 proxy_info_matches(const struct proxy_info* data,
                    const struct proxy_info* needle)
@@ -877,6 +878,10 @@ proxy_info_matches(const struct proxy_info* data,
 
   return FALSE;
 }
+#else
+/* disabled, won't get called */
+#define proxy_info_matches(x,y) FALSE
+#endif
 
 /*
  * This function checks if the given connection is dead and extracts it from
