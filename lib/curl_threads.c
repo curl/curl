@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,6 +62,7 @@ static void *curl_thread_create_thunk(void *arg)
 curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
+  pthread_attr_t attr;
   struct curl_actual_call *ac = malloc(sizeof(struct curl_actual_call));
   if(!(ac && t))
     goto err;
@@ -69,12 +70,15 @@ curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
   ac->func = func;
   ac->arg = arg;
 
-  if(pthread_create(t, NULL, curl_thread_create_thunk, ac) != 0)
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN);
+  if(pthread_create(t, &attr, curl_thread_create_thunk, ac) != 0)
     goto err;
-
+  pthread_attr_destroy(&attr);
   return t;
 
 err:
+  pthread_attr_destroy(&attr);
   free(t);
   free(ac);
   return curl_thread_t_null;
