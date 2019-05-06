@@ -170,7 +170,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
                        major_status, minor_status);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_LOGIN_DENIED;
   }
 
   if(!output_token.value || !output_token.length) {
