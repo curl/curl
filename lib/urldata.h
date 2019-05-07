@@ -367,6 +367,14 @@ struct ntlmdata {
   unsigned char nonce[8];
   void *target_info; /* TargetInfo received in the ntlm type-2 message */
   unsigned int target_info_len;
+
+#if defined(NTLM_WB_ENABLED)
+  /* used for communication with Samba's winbind daemon helper ntlm_auth */
+  curl_socket_t ntlm_auth_hlpr_socket;
+  pid_t ntlm_auth_hlpr_pid;
+  char *challenge_header;
+  char *response_header;
+#endif
 #endif
 };
 #endif
@@ -1010,14 +1018,6 @@ struct connectdata {
                                because it authenticates connections, not
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
-
-#if defined(NTLM_WB_ENABLED)
-  /* used for communication with Samba's winbind daemon helper ntlm_auth */
-  curl_socket_t ntlm_auth_hlpr_socket;
-  pid_t ntlm_auth_hlpr_pid;
-  char *challenge_header;
-  char *response_header;
-#endif
 #endif
 
 #ifdef USE_SPNEGO

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -76,22 +76,22 @@
 #  define sclose_nolog(x)  close((x))
 #endif
 
-void Curl_http_auth_cleanup_ntlm_wb(struct connectdata *conn)
+static void ntlm_wb_cleanup(struct ntlmdata *ntlm)
 {
-  if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
-    sclose(conn->ntlm_auth_hlpr_socket);
-    conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
+  if(ntlm->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
+    sclose(ntlm->ntlm_auth_hlpr_socket);
+    ntlm->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
   }
 
-  if(conn->ntlm_auth_hlpr_pid) {
+  if(ntlm->ntlm_auth_hlpr_pid) {
     int i;
     for(i = 0; i < 4; i++) {
-      pid_t ret = waitpid(conn->ntlm_auth_hlpr_pid, NULL, WNOHANG);
-      if(ret == conn->ntlm_auth_hlpr_pid || errno == ECHILD)
+      pid_t ret = waitpid(ntlm->ntlm_auth_hlpr_pid, NULL, WNOHANG);
+      if(ret == ntlm->ntlm_auth_hlpr_pid || errno == ECHILD)
         break;
       switch(i) {
       case 0:
-        kill(conn->ntlm_auth_hlpr_pid, SIGTERM);
+        kill(ntlm->ntlm_auth_hlpr_pid, SIGTERM);
         break;
       case 1:
         /* Give the process another moment to shut down cleanly before
@@ -99,20 +99,21 @@ void Curl_http_auth_cleanup_ntlm_wb(struct connectdata *conn)
         Curl_wait_ms(1);
         break;
       case 2:
-        kill(conn->ntlm_auth_hlpr_pid, SIGKILL);
+        kill(ntlm->ntlm_auth_hlpr_pid, SIGKILL);
         break;
       case 3:
         break;
       }
     }
-    conn->ntlm_auth_hlpr_pid = 0;
+    ntlm->ntlm_auth_hlpr_pid = 0;
   }
 
-  Curl_safefree(conn->challenge_header);
-  Curl_safefree(conn->response_header);
+  Curl_safefree(ntlm->challenge_header);
+  Curl_safefree(ntlm->response_header);
 }
 
-static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
+static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
+                             const char *userp)
 {
   curl_socket_t sockfds[2];
   pid_t child_pid;
@@ -127,8 +128,8 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
   char buffer[STRERROR_LEN];
 
   /* Return if communication with ntlm_auth already set up */
-  if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD ||
-     conn->ntlm_auth_hlpr_pid)
+  if(ntlm->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD ||
+     ntlm->ntlm_auth_hlpr_pid)
     return CURLE_OK;
 
   username = userp;
@@ -238,8 +239,8 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, const char *userp)
   }
 
   sclose(sockfds[1]);
-  conn->ntlm_auth_hlpr_socket = sockfds[0];
-  conn->ntlm_auth_hlpr_pid = child_pid;
+  ntlm->ntlm_auth_hlpr_socket = sockfds[0];
+  ntlm->ntlm_auth_hlpr_pid = child_pid;
   free(domain);
   free(ntlm_auth_alloc);
   return CURLE_OK;
@@ -254,7 +255,8 @@ done:
 #define MAX_NTLM_WB_RESPONSE 100000
 
 static CURLcode ntlm_wb_response(struct connectdata *conn,
-                                 const char *input, curlntlm state)
+                                 struct ntlmdata *ntlm, const char *input,
+                                 curlntlm state)
 {
   char *buf = malloc(NTLM_BUFSIZE);
   size_t len_in = strlen(input), len_out = 0;
@@ -263,7 +265,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
 
   while(len_in > 0) {
-    ssize_t written = swrite(conn->ntlm_auth_hlpr_socket, input, len_in);
+    ssize_t written = swrite(ntlm->ntlm_auth_hlpr_socket, input, len_in);
     if(written == -1) {
       /* Interrupted by a signal, retry it */
       if(errno == EINTR)
@@ -279,7 +281,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
     ssize_t size;
     char *newbuf;
 
-    size = sread(conn->ntlm_auth_hlpr_socket, buf + len_out, NTLM_BUFSIZE);
+    size = sread(ntlm->ntlm_auth_hlpr_socket, buf + len_out, NTLM_BUFSIZE);
     if(size == -1) {
       if(errno == EINTR)
         continue;
@@ -323,9 +325,9 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
      (buf[0]!='A' || buf[1]!='F' || buf[2]!=' '))
     goto done;
 
-  conn->response_header = aprintf("NTLM %.*s", len_out - 4, buf + 3);
+  ntlm->response_header = aprintf("NTLM %.*s", len_out - 4, buf + 3);
   free(buf);
-  if(!conn->response_header)
+  if(!ntlm->response_header)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 done:
@@ -337,6 +339,7 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
                             bool proxy,
                             const char *header)
 {
+  struct ntlmdata *ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
   curlntlm *state = proxy ? &conn->proxy_ntlm_state : &conn->http_ntlm_state;
 
   if(!checkprefix("NTLM", header))
@@ -347,8 +350,8 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
     header++;
 
   if(*header) {
-    conn->challenge_header = strdup(header);
-    if(!conn->challenge_header)
+    ntlm->challenge_header = strdup(header);
+    if(!ntlm->challenge_header)
       return CURLE_OUT_OF_MEMORY;
 
     *state = NTLMSTATE_TYPE2; /* We got a type-2 message */
@@ -387,6 +390,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   char **allocuserpwd;
   /* point to the name and password for this */
   const char *userp;
+  struct ntlmdata *ntlm;
   curlntlm *state;
   struct auth *authp;
 
@@ -398,12 +402,14 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
+    ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
     authp = &conn->data->state.authproxy;
   }
   else {
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
+    ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;
     authp = &conn->data->state.authhost;
   }
@@ -429,28 +435,28 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
      * request handling process.
      */
     /* Create communication with ntlm_auth */
-    res = ntlm_wb_init(conn, userp);
+    res = ntlm_wb_init(conn, ntlm, userp);
     if(res)
       return res;
-    res = ntlm_wb_response(conn, "YR\n", *state);
+    res = ntlm_wb_response(conn, ntlm, "YR\n", *state);
     if(res)
       return res;
 
     free(*allocuserpwd);
     *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
                             proxy ? "Proxy-" : "",
-                            conn->response_header);
+                            ntlm->response_header);
     DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
-    Curl_safefree(conn->response_header);
+    Curl_safefree(ntlm->response_header);
     if(!*allocuserpwd)
       return CURLE_OUT_OF_MEMORY;
     break;
 
   case NTLMSTATE_TYPE2: {
-    char *input = aprintf("TT %s\n", conn->challenge_header);
+    char *input = aprintf("TT %s\n", ntlm->challenge_header);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
-    res = ntlm_wb_response(conn, input, *state);
+    res = ntlm_wb_response(conn, ntlm, input, *state);
     free(input);
     if(res)
       return res;
@@ -458,7 +464,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     free(*allocuserpwd);
     *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
                             proxy ? "Proxy-" : "",
-                            conn->response_header);
+                            ntlm->response_header);
     DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
     *state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
@@ -479,6 +485,12 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   }
 
   return CURLE_OK;
+}
+
+void Curl_http_auth_cleanup_ntlm_wb(struct connectdata *conn)
+{
+  ntlm_wb_cleanup(&conn->ntlm);
+  ntlm_wb_cleanup(&conn->proxyntlm);
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NTLM && NTLM_WB_ENABLED */

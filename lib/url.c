@@ -1652,7 +1652,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
     defined(NTLM_WB_ENABLED)
-  conn->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
+  conn->ntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
+  conn->proxyntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
 #endif
 
   /* Initialize the easy handle list */
