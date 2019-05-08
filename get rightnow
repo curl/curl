@@ -1,0 +1,1 @@
+curl -u "vigliped:Viglione#32" -X GET   -H "OSvC-CREST-Application-Context:Retrieve all accounts" https://bspr--tst1.custhelp.com/services/rest/connect/v1.4/accounts   
