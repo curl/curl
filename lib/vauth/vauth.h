@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2019, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include <curl/curl.h>
+#include "urldata.h"
 
 struct Curl_easy;
 
@@ -116,6 +117,15 @@ void Curl_auth_digest_cleanup(struct digestdata *digest);
 #endif /* !CURL_DISABLE_CRYPTO_AUTH */
 
 #if defined(USE_NTLM)
+
+#if defined(NTLM_WB_ENABLED)
+/* Don't give these functions public names as this is only temporary */
+CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
+                      const char *userp);
+CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
+                          const char *input, curlntlm state);
+#endif
+
 /* This is used to evaluate if NTLM is supported */
 bool Curl_auth_is_ntlm_supported(void);
 
@@ -143,6 +153,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
 /* This is used to clean up the NTLM specific data */
 void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
+#if defined(NTLM_WB_ENABLED)
+void Curl_auth_cleanup_ntlm_wb(struct ntlmdata *ntlm);
+#endif
 #endif /* USE_NTLM */
 
 /* This is used to generate a base64 encoded OAuth 2.0 message */

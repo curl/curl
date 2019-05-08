@@ -25,35 +25,13 @@
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
     defined(NTLM_WB_ENABLED)
 
-/*
- * NTLM details:
- *
- * https://davenport.sourceforge.io/ntlm.html
- * https://www.innovation.ch/java/ntlm.html
- */
-
 #define DEBUG_ME 0
-
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-#ifdef HAVE_PWD_H
-#include <pwd.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"
-#include "select.h"
-#include "vauth/ntlm.h"
-#include "curl_ntlm_core.h"
 #include "curl_ntlm_wb.h"
-#include "url.h"
-#include "strerror.h"
-#include "strdup.h"
 #include "strcase.h"
+#include "vauth/vauth.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -65,282 +43,6 @@
 #else
 # define DEBUG_OUT(x) Curl_nop_stmt
 #endif
-
-/* Portable 'sclose_nolog' used only in child process instead of 'sclose'
-   to avoid fooling the socket leak detector */
-#if defined(HAVE_CLOSESOCKET)
-#  define sclose_nolog(x)  closesocket((x))
-#elif defined(HAVE_CLOSESOCKET_CAMEL)
-#  define sclose_nolog(x)  CloseSocket((x))
-#else
-#  define sclose_nolog(x)  close((x))
-#endif
-
-static void ntlm_wb_cleanup(struct ntlmdata *ntlm)
-{
-  if(ntlm->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
-    sclose(ntlm->ntlm_auth_hlpr_socket);
-    ntlm->ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-  }
-
-  if(ntlm->ntlm_auth_hlpr_pid) {
-    int i;
-    for(i = 0; i < 4; i++) {
-      pid_t ret = waitpid(ntlm->ntlm_auth_hlpr_pid, NULL, WNOHANG);
-      if(ret == ntlm->ntlm_auth_hlpr_pid || errno == ECHILD)
-        break;
-      switch(i) {
-      case 0:
-        kill(ntlm->ntlm_auth_hlpr_pid, SIGTERM);
-        break;
-      case 1:
-        /* Give the process another moment to shut down cleanly before
-           bringing down the axe */
-        Curl_wait_ms(1);
-        break;
-      case 2:
-        kill(ntlm->ntlm_auth_hlpr_pid, SIGKILL);
-        break;
-      case 3:
-        break;
-      }
-    }
-    ntlm->ntlm_auth_hlpr_pid = 0;
-  }
-
-  Curl_safefree(ntlm->challenge);
-  Curl_safefree(ntlm->response);
-}
-
-static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
-                             const char *userp)
-{
-  curl_socket_t sockfds[2];
-  pid_t child_pid;
-  const char *username;
-  char *slash, *domain = NULL;
-  const char *ntlm_auth = NULL;
-  char *ntlm_auth_alloc = NULL;
-#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
-  struct passwd pw, *pw_res;
-  char pwbuf[1024];
-#endif
-  char buffer[STRERROR_LEN];
-
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
-#endif
-
-  /* Return if communication with ntlm_auth already set up */
-  if(ntlm->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD ||
-     ntlm->ntlm_auth_hlpr_pid)
-    return CURLE_OK;
-
-  username = userp;
-  /* The real ntlm_auth really doesn't like being invoked with an
-     empty username. It won't make inferences for itself, and expects
-     the client to do so (mostly because it's really designed for
-     servers like squid to use for auth, and client support is an
-     afterthought for it). So try hard to provide a suitable username
-     if we don't already have one. But if we can't, provide the
-     empty one anyway. Perhaps they have an implementation of the
-     ntlm_auth helper which *doesn't* need it so we might as well try */
-  if(!username || !username[0]) {
-    username = getenv("NTLMUSER");
-    if(!username || !username[0])
-      username = getenv("LOGNAME");
-    if(!username || !username[0])
-      username = getenv("USER");
-#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
-    if((!username || !username[0]) &&
-       !getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res) &&
-       pw_res) {
-      username = pw.pw_name;
-    }
-#endif
-    if(!username || !username[0])
-      username = userp;
-  }
-  slash = strpbrk(username, "\\/");
-  if(slash) {
-    domain = strdup(username);
-    if(!domain)
-      return CURLE_OUT_OF_MEMORY;
-    slash = domain + (slash - username);
-    *slash = '\0';
-    username = username + (slash - domain) + 1;
-  }
-
-  /* For testing purposes, when DEBUGBUILD is defined and environment
-     variable CURL_NTLM_WB_FILE is set a fake_ntlm is used to perform
-     NTLM challenge/response which only accepts commands and output
-     strings pre-written in test case definitions */
-#ifdef DEBUGBUILD
-  ntlm_auth_alloc = curl_getenv("CURL_NTLM_WB_FILE");
-  if(ntlm_auth_alloc)
-    ntlm_auth = ntlm_auth_alloc;
-  else
-#endif
-    ntlm_auth = NTLM_WB_FILE;
-
-  if(access(ntlm_auth, X_OK) != 0) {
-    failf(data, "Could not access ntlm_auth: %s errno %d: %s",
-          ntlm_auth, errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    goto done;
-  }
-
-  if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds)) {
-    failf(data, "Could not open socket pair. errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    goto done;
-  }
-
-  child_pid = fork();
-  if(child_pid == -1) {
-    sclose(sockfds[0]);
-    sclose(sockfds[1]);
-    failf(data, "Could not fork. errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    goto done;
-  }
-  else if(!child_pid) {
-    /*
-     * child process
-     */
-
-    /* Don't use sclose in the child since it fools the socket leak detector */
-    sclose_nolog(sockfds[0]);
-    if(dup2(sockfds[1], STDIN_FILENO) == -1) {
-      failf(data, "Could not redirect child stdin. errno %d: %s",
-            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-      exit(1);
-    }
-
-    if(dup2(sockfds[1], STDOUT_FILENO) == -1) {
-      failf(data, "Could not redirect child stdout. errno %d: %s",
-            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-      exit(1);
-    }
-
-    if(domain)
-      execl(ntlm_auth, ntlm_auth,
-            "--helper-protocol", "ntlmssp-client-1",
-            "--use-cached-creds",
-            "--username", username,
-            "--domain", domain,
-            NULL);
-    else
-      execl(ntlm_auth, ntlm_auth,
-            "--helper-protocol", "ntlmssp-client-1",
-            "--use-cached-creds",
-            "--username", username,
-            NULL);
-
-    sclose_nolog(sockfds[1]);
-    failf(data, "Could not execl(). errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    exit(1);
-  }
-
-  sclose(sockfds[1]);
-  ntlm->ntlm_auth_hlpr_socket = sockfds[0];
-  ntlm->ntlm_auth_hlpr_pid = child_pid;
-  free(domain);
-  free(ntlm_auth_alloc);
-  return CURLE_OK;
-
-done:
-  free(domain);
-  free(ntlm_auth_alloc);
-  return CURLE_REMOTE_ACCESS_DENIED;
-}
-
-/* if larger than this, something is seriously wrong */
-#define MAX_NTLM_WB_RESPONSE 100000
-
-static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
-                                 const char *input, curlntlm state)
-{
-  char *buf = malloc(NTLM_BUFSIZE);
-  size_t len_in = strlen(input), len_out = 0;
-
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
-#endif
-
-  if(!buf)
-    return CURLE_OUT_OF_MEMORY;
-
-  while(len_in > 0) {
-    ssize_t written = swrite(ntlm->ntlm_auth_hlpr_socket, input, len_in);
-    if(written == -1) {
-      /* Interrupted by a signal, retry it */
-      if(errno == EINTR)
-        continue;
-      /* write failed if other errors happen */
-      goto done;
-    }
-    input += written;
-    len_in -= written;
-  }
-  /* Read one line */
-  while(1) {
-    ssize_t size;
-    char *newbuf;
-
-    size = sread(ntlm->ntlm_auth_hlpr_socket, buf + len_out, NTLM_BUFSIZE);
-    if(size == -1) {
-      if(errno == EINTR)
-        continue;
-      goto done;
-    }
-    else if(size == 0)
-      goto done;
-
-    len_out += size;
-    if(buf[len_out - 1] == '\n') {
-      buf[len_out - 1] = '\0';
-      break;
-    }
-
-    if(len_out > MAX_NTLM_WB_RESPONSE) {
-      failf(data, "too large ntlm_wb response!");
-      free(buf);
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    newbuf = Curl_saferealloc(buf, len_out + NTLM_BUFSIZE);
-    if(!newbuf)
-      return CURLE_OUT_OF_MEMORY;
-
-    buf = newbuf;
-  }
-
-  /* Samba/winbind installed but not configured */
-  if(state == NTLMSTATE_TYPE1 &&
-     len_out == 3 &&
-     buf[0] == 'P' && buf[1] == 'W')
-    goto done;
-  /* invalid response */
-  if(len_out < 4)
-    goto done;
-  if(state == NTLMSTATE_TYPE1 &&
-     (buf[0]!='Y' || buf[1]!='R' || buf[2]!=' '))
-    goto done;
-  if(state == NTLMSTATE_TYPE2 &&
-     (buf[0]!='K' || buf[1]!='K' || buf[2]!=' ') &&
-     (buf[0]!='A' || buf[1]!='F' || buf[2]!=' '))
-    goto done;
-
-  ntlm->response = aprintf("%.*s", len_out - 4, buf + 3);
-  free(buf);
-  if(!ntlm->response)
-    return CURLE_OUT_OF_MEMORY;
-  return CURLE_OK;
-done:
-  free(buf);
-  return CURLE_REMOTE_ACCESS_DENIED;
-}
 
 CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
                             bool proxy,
@@ -395,7 +97,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
   char **allocuserpwd;
-  /* point to the name and password for this */
+  /* point to the name and password */
   const char *userp;
   struct ntlmdata *ntlm;
   curlntlm *state;
@@ -496,8 +198,8 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
 
 void Curl_http_auth_cleanup_ntlm_wb(struct connectdata *conn)
 {
-  ntlm_wb_cleanup(&conn->ntlm);
-  ntlm_wb_cleanup(&conn->proxyntlm);
+  Curl_auth_cleanup_ntlm_wb(&conn->ntlm);
+  Curl_auth_cleanup_ntlm_wb(&conn->proxyntlm);
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NTLM && NTLM_WB_ENABLED */

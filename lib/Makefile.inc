@@ -22,8 +22,8 @@
 
 LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
   vauth/digest.c vauth/digest_sspi.c vauth/krb5_gssapi.c                \
-  vauth/krb5_sspi.c vauth/ntlm.c vauth/ntlm_sspi.c vauth/oauth2.c       \
-  vauth/spnego_gssapi.c vauth/spnego_sspi.c
+  vauth/krb5_sspi.c vauth/ntlm.c vauth/ntlm_sspi.c vauth/ntlm_wb.c      \
+  vauth/oauth2.c vauth/spnego_gssapi.c vauth/spnego_sspi.c
 
 LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
 
