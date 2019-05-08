@@ -867,6 +867,10 @@ void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
 
   /* Reset any variables */
   ntlm->target_info_len = 0;
+
+#if defined(NTLM_WB_ENABLED)
+  Curl_auth_cleanup_ntlm_wb(ntlm);
+#endif
 }
 
 #endif /* USE_NTLM && !USE_WINDOWS_SSPI */
