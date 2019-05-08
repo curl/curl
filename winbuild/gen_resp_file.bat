@@ -21,10 +21,12 @@ rem * KIND, either express or implied.
 rem *
 rem ***************************************************************************
 
-@if exist %OUTFILE% (
+if exist %OUTFILE% (
     del %OUTFILE%
 )
-@echo %MACRO_NAME% = \> %OUTFILE%
-@for %%i in (%*) do @echo		%DIROBJ%/%%i \>>  %OUTFILE%
-@echo. >>  %OUTFILE%
+
+echo %MACRO_NAME% = \> %OUTFILE%
+for %%i in (%*) do echo		%DIROBJ%/%%i \>>  %OUTFILE%
+echo. >>  %OUTFILE%
+
 :END
