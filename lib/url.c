@@ -109,7 +109,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "connect.h"
 #include "inet_ntop.h"
 #include "http_ntlm.h"
-#include "curl_ntlm_wb.h"
 #include "socks.h"
 #include "curl_rtmp.h"
 #include "gopher.h"
@@ -694,11 +693,6 @@ static void conn_shutdown(struct connectdata *conn)
     Curl_closesocket(conn, conn->tempsock[0]);
   if(CURL_SOCKET_BAD != conn->tempsock[1])
     Curl_closesocket(conn, conn->tempsock[1]);
-
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-    defined(NTLM_WB_ENABLED)
-  Curl_http_auth_cleanup_ntlm_wb(conn);
-#endif
 
   /* unlink ourselves. this should be called last since other shutdown
      procedures need a valid conn->data and this may clear it. */
