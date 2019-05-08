@@ -108,8 +108,8 @@ static void ntlm_wb_cleanup(struct ntlmdata *ntlm)
     ntlm->ntlm_auth_hlpr_pid = 0;
   }
 
-  Curl_safefree(ntlm->challenge_header);
-  Curl_safefree(ntlm->response_header);
+  Curl_safefree(ntlm->challenge);
+  Curl_safefree(ntlm->response);
 }
 
 static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
@@ -325,9 +325,9 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
      (buf[0]!='A' || buf[1]!='F' || buf[2]!=' '))
     goto done;
 
-  ntlm->response_header = aprintf("NTLM %.*s", len_out - 4, buf + 3);
+  ntlm->response = aprintf("%.*s", len_out - 4, buf + 3);
   free(buf);
-  if(!ntlm->response_header)
+  if(!ntlm->response)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 done:
@@ -350,8 +350,8 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
     header++;
 
   if(*header) {
-    ntlm->challenge_header = strdup(header);
-    if(!ntlm->challenge_header)
+    ntlm->challenge = strdup(header);
+    if(!ntlm->challenge)
       return CURLE_OUT_OF_MEMORY;
 
     *state = NTLMSTATE_TYPE2; /* We got a type-2 message */
@@ -443,17 +443,17 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
       return res;
 
     free(*allocuserpwd);
-    *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
+    *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                             proxy ? "Proxy-" : "",
-                            ntlm->response_header);
+                            ntlm->response);
     DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
-    Curl_safefree(ntlm->response_header);
+    Curl_safefree(ntlm->response);
     if(!*allocuserpwd)
       return CURLE_OUT_OF_MEMORY;
     break;
 
   case NTLMSTATE_TYPE2: {
-    char *input = aprintf("TT %s\n", ntlm->challenge_header);
+    char *input = aprintf("TT %s\n", ntlm->challenge);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
     res = ntlm_wb_response(conn, ntlm, input, *state);
@@ -462,9 +462,9 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
       return res;
 
     free(*allocuserpwd);
-    *allocuserpwd = aprintf("%sAuthorization: %s\r\n",
+    *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
                             proxy ? "Proxy-" : "",
-                            ntlm->response_header);
+                            ntlm->response);
     DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
     *state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
