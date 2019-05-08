@@ -1970,6 +1970,13 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 #ifdef USE_NGHTTP2
       if(conn->data->set.httpversion ==
          CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+        if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+          /* We don't support HTTP/2 proxies yet. Also it's debatable whether
+             or not this setting should apply to HTTP/2 proxies. */
+          infof(data, "Ignoring HTTP/2 prior knowledge due to proxy\n");
+          break;
+        }
+
         DEBUGF(infof(data, "HTTP/2 over clean TCP\n"));
         conn->httpversion = 20;
 
