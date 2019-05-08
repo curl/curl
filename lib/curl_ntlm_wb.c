@@ -112,7 +112,7 @@ static void ntlm_wb_cleanup(struct ntlmdata *ntlm)
   Curl_safefree(ntlm->response);
 }
 
-static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
+static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
                              const char *userp)
 {
   curl_socket_t sockfds[2];
@@ -126,6 +126,10 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
   char pwbuf[1024];
 #endif
   char buffer[STRERROR_LEN];
+
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) data;
+#endif
 
   /* Return if communication with ntlm_auth already set up */
   if(ntlm->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD ||
@@ -180,13 +184,13 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
     ntlm_auth = NTLM_WB_FILE;
 
   if(access(ntlm_auth, X_OK) != 0) {
-    failf(conn->data, "Could not access ntlm_auth: %s errno %d: %s",
+    failf(data, "Could not access ntlm_auth: %s errno %d: %s",
           ntlm_auth, errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     goto done;
   }
 
   if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds)) {
-    failf(conn->data, "Could not open socket pair. errno %d: %s",
+    failf(data, "Could not open socket pair. errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     goto done;
   }
@@ -195,7 +199,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
   if(child_pid == -1) {
     sclose(sockfds[0]);
     sclose(sockfds[1]);
-    failf(conn->data, "Could not fork. errno %d: %s",
+    failf(data, "Could not fork. errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     goto done;
   }
@@ -207,13 +211,13 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
     /* Don't use sclose in the child since it fools the socket leak detector */
     sclose_nolog(sockfds[0]);
     if(dup2(sockfds[1], STDIN_FILENO) == -1) {
-      failf(conn->data, "Could not redirect child stdin. errno %d: %s",
+      failf(data, "Could not redirect child stdin. errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       exit(1);
     }
 
     if(dup2(sockfds[1], STDOUT_FILENO) == -1) {
-      failf(conn->data, "Could not redirect child stdout. errno %d: %s",
+      failf(data, "Could not redirect child stdout. errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       exit(1);
     }
@@ -233,7 +237,7 @@ static CURLcode ntlm_wb_init(struct connectdata *conn, struct ntlmdata *ntlm,
             NULL);
 
     sclose_nolog(sockfds[1]);
-    failf(conn->data, "Could not execl(). errno %d: %s",
+    failf(data, "Could not execl(). errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     exit(1);
   }
@@ -254,12 +258,15 @@ done:
 /* if larger than this, something is seriously wrong */
 #define MAX_NTLM_WB_RESPONSE 100000
 
-static CURLcode ntlm_wb_response(struct connectdata *conn,
-                                 struct ntlmdata *ntlm, const char *input,
-                                 curlntlm state)
+static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
+                                 const char *input, curlntlm state)
 {
   char *buf = malloc(NTLM_BUFSIZE);
   size_t len_in = strlen(input), len_out = 0;
+
+#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+  (void) data;
+#endif
 
   if(!buf)
     return CURLE_OUT_OF_MEMORY;
@@ -297,7 +304,7 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
     }
 
     if(len_out > MAX_NTLM_WB_RESPONSE) {
-      failf(conn->data, "too large ntlm_wb response!");
+      failf(data, "too large ntlm_wb response!");
       free(buf);
       return CURLE_OUT_OF_MEMORY;
     }
@@ -435,10 +442,10 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
      * request handling process.
      */
     /* Create communication with ntlm_auth */
-    res = ntlm_wb_init(conn, ntlm, userp);
+    res = ntlm_wb_init(conn->data, ntlm, userp);
     if(res)
       return res;
-    res = ntlm_wb_response(conn, ntlm, "YR\n", *state);
+    res = ntlm_wb_response(conn->data, ntlm, "YR\n", *state);
     if(res)
       return res;
 
@@ -456,7 +463,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     char *input = aprintf("TT %s\n", ntlm->challenge);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
-    res = ntlm_wb_response(conn, ntlm, input, *state);
+    res = ntlm_wb_response(conn->data, ntlm, input, *state);
     free(input);
     if(res)
       return res;
