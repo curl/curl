@@ -351,6 +351,34 @@ CURLcode Curl_auth_create_ntlm_wb_type1_message(struct Curl_easy *data,
 }
 
 /*
+ * Curl_auth_decode_ntlm_wb_type2_message()
+ *
+ * This is used to decode an already encoded NTLM type-2 message. The message
+ * is first decoded from a base64 string into a raw NTLM message and checked
+ * for validity before the appropriate data for creating a type-3 message is
+ * written to the given NTLM data structure.
+ *
+ * Parameters:
+ *
+ * type2msg [in]     - The base64 encoded type-2 message.
+ * ntlm     [in/out] - The NTLM data struct being used and modified.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_auth_decode_ntlm_wb_type2_message(const char *type2msg,
+                                                struct ntlmdata *ntlm)
+{
+  CURLcode result = CURLE_OK;
+
+  /* Extract the challage and store for when we generate the type-3 message */
+  ntlm->challenge = strdup(type2msg);
+  if(!ntlm->challenge)
+    result = CURLE_OUT_OF_MEMORY;
+
+  return result;
+}
+
+/*
  * Curl_auth_cleanup_ntlm_wb()
  *
  * This is used to clean up the NTLM specific data.

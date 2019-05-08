@@ -152,6 +152,10 @@ CURLcode Curl_auth_create_ntlm_wb_type1_message(struct Curl_easy *data,
 CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
                                              const char *type2msg,
                                              struct ntlmdata *ntlm);
+#if defined(NTLM_WB_ENABLED)
+CURLcode Curl_auth_decode_ntlm_wb_type2_message(const char *type2msg,
+                                                struct ntlmdata *ntlm);
+#endif
 
 /* This is used to generate a base64 encoded NTLM type-3 message */
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,

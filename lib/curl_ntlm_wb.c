@@ -59,9 +59,9 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
     header++;
 
   if(*header) {
-    ntlm->challenge = strdup(header);
-    if(!ntlm->challenge)
-      return CURLE_OUT_OF_MEMORY;
+    CURLcode result = Curl_auth_decode_ntlm_wb_type2_message(header, ntlm);
+    if(result)
+      return result;
 
     *state = NTLMSTATE_TYPE2; /* We got a type-2 message */
   }
