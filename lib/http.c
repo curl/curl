@@ -895,8 +895,6 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
 
                 /* Get the challenge-message which will be passed to
                  * ntlm_auth for generating the type 3 message later */
-                while(*auth && ISSPACE(*auth))
-                  auth++;
                 if(checkprefix("NTLM", auth)) {
                   auth += strlen("NTLM");
                   while(*auth && ISSPACE(*auth))
