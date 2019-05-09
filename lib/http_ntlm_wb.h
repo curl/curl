@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_NTLM_WB_H
-#define HEADER_CURL_NTLM_WB_H
+#ifndef HEADER_CURL_HTTP_NTLM_WB_H
+#define HEADER_CURL_HTTP_NTLM_WB_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -38,4 +38,4 @@ void Curl_http_auth_cleanup_ntlm_wb(struct connectdata *conn);
 
 #endif /* !CURL_DISABLE_HTTP && USE_NTLM && NTLM_WB_ENABLED */
 
-#endif /* HEADER_CURL_NTLM_WB_H */
+#endif /* HEADER_CURL_HTTP_NTLM_WB_H */

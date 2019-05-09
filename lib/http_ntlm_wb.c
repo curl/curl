@@ -28,8 +28,8 @@
 #define DEBUG_ME 0
 
 #include "urldata.h"
+#include "http_ntlm_wb.h"
 #include "sendf.h"
-#include "curl_ntlm_wb.h"
 #include "strcase.h"
 #include "vauth/vauth.h"
 
