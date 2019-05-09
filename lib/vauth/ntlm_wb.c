@@ -73,8 +73,8 @@
 #define sclose_nolog(x)  close((x))
 #endif
 
-CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
-                      const char *userp)
+static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
+                             const char *userp)
 {
   curl_socket_t sockfds[2];
   pid_t child_pid;
@@ -216,9 +216,9 @@ done:
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 
-CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
-                          const char *input, char **outptr, size_t *outlen,
-                          curlntlm state)
+static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
+                                 const char *input, char **outptr,
+                                 size_t *outlen, curlntlm state)
 {
   char *buf = NULL;
   char *base64data = NULL;
@@ -339,6 +339,7 @@ CURLcode Curl_auth_create_ntlm_wb_type1_message(struct Curl_easy *data,
 {
   CURLcode result;
 
+  /* Initialise the ntlm_auth helper */
   result = ntlm_wb_init(data, ntlm, userp);
   if(result)
     return result;
@@ -374,6 +375,44 @@ CURLcode Curl_auth_decode_ntlm_wb_type2_message(const char *type2msg,
   ntlm->challenge = strdup(type2msg);
   if(!ntlm->challenge)
     result = CURLE_OUT_OF_MEMORY;
+
+  return result;
+}
+
+/*
+ * Curl_auth_create_ntlm_wb_type3_message()
+ *
+ * This is used to generate an already encoded NTLM type-3 message ready for
+ * sending to the recipient using the appropriate compile time crypto API.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * ntlm    [in/out] - The NTLM data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_auth_create_ntlm_wb_type3_message(struct Curl_easy *data,
+                                                struct ntlmdata *ntlm,
+                                                char **outptr, size_t *outlen)
+{
+  CURLcode result = CURLE_OK;
+  char *input;
+
+  /* Format the challenge for the ntlm_auth helper */
+  input = aprintf("TT %s\n", ntlm->challenge);
+  if(!input)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Generate our type-3 message */
+  result = ntlm_wb_response(data, ntlm, input, outptr, outlen,
+                            NTLMSTATE_TYPE3);
+  free(input);
+
+  Curl_auth_cleanup_ntlm_wb(ntlm);
 
   return result;
 }
@@ -421,7 +460,6 @@ void Curl_auth_cleanup_ntlm_wb(struct ntlmdata *ntlm)
   }
 
   Curl_safefree(ntlm->challenge);
-  Curl_safefree(ntlm->response);
 }
 
 #endif /* USE_NTLM && NTLM_WB_ENABLED */

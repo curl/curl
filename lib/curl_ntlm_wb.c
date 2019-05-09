@@ -154,28 +154,29 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     }
     break;
 
-  case NTLMSTATE_TYPE2: {
-    char *input = aprintf("TT %s\n", ntlm->challenge);
-    if(!input)
-      return CURLE_OUT_OF_MEMORY;
-    result = ntlm_wb_response(conn->data, ntlm, input, &ntlm->response, &len,
-                              *state);
-    free(input);
+  case NTLMSTATE_TYPE2:
+    /* We already received the type-2 message, create a type-3 message */
+    result = Curl_auth_create_ntlm_wb_type3_message(conn->data, ntlm, &base64,
+                                                    &len);
     if(result)
       return result;
 
-    free(*allocuserpwd);
-    *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
-                            proxy ? "Proxy-" : "",
-                            ntlm->response);
-    DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
-    *state = NTLMSTATE_TYPE3; /* we sent a type-3 */
-    authp->done = TRUE;
-    Curl_http_auth_cleanup_ntlm_wb(conn);
-    if(!*allocuserpwd)
-      return CURLE_OUT_OF_MEMORY;
+    if(base64) {
+      free(*allocuserpwd);
+      *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
+                              proxy ? "Proxy-" : "",
+                              base64);
+      free(base64);
+      if(!*allocuserpwd)
+        return CURLE_OUT_OF_MEMORY;
+
+      DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
+
+      *state = NTLMSTATE_TYPE3; /* we sent a type-3 */
+      authp->done = TRUE;
+    }
     break;
-  }
+
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */

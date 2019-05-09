@@ -373,7 +373,6 @@ struct ntlmdata {
   curl_socket_t ntlm_auth_hlpr_socket;
   pid_t ntlm_auth_hlpr_pid;
   char *challenge; /* The received base64 encoded ntlm type-2 message */
-  char *response;  /* The generated base64 ntlm type-1/type-3 message */
 #endif
 #endif
 };
