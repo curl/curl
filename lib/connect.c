@@ -357,7 +357,7 @@ static CURLcode bindlocal(struct connectdata *conn,
         conn->ip_version = CURL_IPRESOLVE_V6;
 #endif
 
-      rc = Curl_resolv(conn, dev, 0, &h);
+      rc = Curl_resolv(conn, dev, 0, FALSE, &h);
       if(rc == CURLRESOLV_PENDING)
         (void)Curl_resolver_wait_resolv(conn, &h);
       conn->ip_version = ipver;

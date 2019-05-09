@@ -482,6 +482,7 @@ Curl_cache_addr(struct Curl_easy *data,
 int Curl_resolv(struct connectdata *conn,
                 const char *hostname,
                 int port,
+                bool allowDOH,
                 struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
@@ -527,7 +528,7 @@ int Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
     }
 
-    if(data->set.doh) {
+    if(allowDOH && data->set.doh) {
       addr = Curl_doh(conn, hostname, port, &respwait);
     }
     else {
@@ -715,7 +716,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long.
    */
-  rc = Curl_resolv(conn, hostname, port, entry);
+  rc = Curl_resolv(conn, hostname, port, TRUE, entry);
 
 #ifdef USE_ALARM_TIMEOUT
 clean_up:

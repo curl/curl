@@ -1080,7 +1080,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   }
 
   /* resolv ip/host to ip */
-  rc = Curl_resolv(conn, host, 0, &h);
+  rc = Curl_resolv(conn, host, 0, FALSE, &h);
   if(rc == CURLRESOLV_PENDING)
     (void)Curl_resolver_wait_resolv(conn, &h);
   if(h) {
@@ -1934,7 +1934,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      */
     const char * const host_name = conn->bits.socksproxy ?
       conn->socks_proxy.host.name : conn->http_proxy.host.name;
-    rc = Curl_resolv(conn, host_name, (int)conn->port, &addr);
+    rc = Curl_resolv(conn, host_name, (int)conn->port, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING, ignores the return code but 'addr' will be NULL in
          case of failure */
@@ -1950,7 +1950,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   }
   else {
     /* normal, direct, ftp connection */
-    rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, &addr);
+    rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING */
       (void)Curl_resolver_wait_resolv(conn, &addr);
