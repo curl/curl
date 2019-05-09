@@ -83,8 +83,11 @@ struct Curl_dns_entry {
 #define CURLRESOLV_ERROR    -1
 #define CURLRESOLV_RESOLVED  0
 #define CURLRESOLV_PENDING   1
-int Curl_resolv(struct connectdata *conn, const char *hostname,
-                int port, struct Curl_dns_entry **dnsentry);
+int Curl_resolv(struct connectdata *conn,
+                const char *hostname,
+                int port,
+                bool allowDOH,
+                struct Curl_dns_entry **dnsentry);
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
                         time_t timeoutms);

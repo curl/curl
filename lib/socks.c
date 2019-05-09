@@ -155,7 +155,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     Curl_addrinfo *hp = NULL;
     int rc;
 
-    rc = Curl_resolv(conn, hostname, remote_port, &dns);
+    rc = Curl_resolv(conn, hostname, remote_port, FALSE, &dns);
 
     if(rc == CURLRESOLV_ERROR)
       return CURLE_COULDNT_RESOLVE_PROXY;
@@ -609,7 +609,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
   else {
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp = NULL;
-    int rc = Curl_resolv(conn, hostname, remote_port, &dns);
+    int rc = Curl_resolv(conn, hostname, remote_port, FALSE, &dns);
 
     if(rc == CURLRESOLV_ERROR)
       return CURLE_COULDNT_RESOLVE_HOST;

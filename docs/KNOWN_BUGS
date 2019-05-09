@@ -19,6 +19,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.5 Expect-100 meets 417
  1.6 Unnecessary close when 401 received waiting for 100
  1.7 Deflate error after all content was received
+ 1.8 DoH isn't used for all name resolves when enabled
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
@@ -165,6 +166,16 @@ problems may have been fixed or changed somewhat since this was written!
  ultimately a broken server.
 
  See https://github.com/curl/curl/issues/2719
+
+1.8 DoH isn't used for all name resolves when enabled
+
+ Even if DoH is specified to be used, there are some name resolves that are
+ done without it. This should be fixed. When the internal function
+ `Curl_resolver_wait_resolv()` is called, it doesn't use DoH to complete the
+ resolve as it otherwise should.
+
+ See https://github.com/curl/curl/pull/3857 and
+ https://github.com/curl/curl/pull/3850
 
 1.9 HTTP/2 frames while in the connection pool kill reuse
 
