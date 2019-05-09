@@ -2,7 +2,7 @@ curl and libcurl 7.65.0
 
  Public curl releases:         181
  Command line options:         221
- curl_easy_setopt() options:   267
+ curl_easy_setopt() options:   268
  Public functions in libcurl:  80
  Contributors:                 1929
 
@@ -16,13 +16,18 @@ This release includes the following bugfixes:
 
  o --config: clarify that initial : and = might need quoting [17]
  o AppVeyor: enable testing for WinSSL build [23]
+ o CURLMOPT_TIMERFUNCTION.3: warn about the recursive risk [52]
  o CURLOPT_ADDRESS_SCOPE: fix range check and more [32]
+ o CURLOPT_CHUNK_BGN_FUNCTION.3: document the struct and time value [51]
  o CURL_MAX_INPUT_LENGTH: largest acceptable string input size [44]
  o Curl_disconnect: treat all CONNECT_ONLY connections as "dead" [39]
  o INTERNALS: Add code highlighting [47]
+ o OS400/ccsidcurl: replace use of Curl_vsetopt [50]
+ o OpenSSL: Report -fips in version if OpenSSL is built with FIPS [55]
  o README.md: fix no-consecutive-blank-lines Codacy warning [22]
  o VC15 project: remove MinimalRebuild
  o VS projects: use Unicode for VC10+ [16]
+ o WRITEFUNCTION: add missing set_in_callback around callback [60]
  o altsvc: Fix building with cookies disabled [38]
  o build-openssl.bat: lots of improvements and polish
  o cirrus: Customize the disabled tests per FreeBSD version
@@ -38,10 +43,14 @@ This release includes the following bugfixes:
  o docs/BUG-BOUNTY: bug bounty time [48]
  o documentation: Fix several typos [7]
  o ftplistparser: fix LGTM alert "Empty block without comment" [14]
+ o http: Ignore HTTP/2 prior knowledge setting for HTTP proxies [54]
  o http: mark bundle as not for multiuse on < HTTP/2 response [41]
+ o http_negotiate: do not treat failure of gss_init_sec_context() as fatal [53]
  o lib509: add missing include for strdup [22]
  o lib557: initialize variables [22]
+ o makedebug: Fix ERRORLEVEL detection after running where.exe [58]
  o multi: improved HTTP_1_1_REQUIRED handling [2]
+ o nss: allow fifos and character devices for certificates [56]
  o nss: provide more specific error messages on failed init [43]
  o ntlm: Support the NT response in the type-3 when OpenSSL doesn't include MD4
  o openssl: mark connection for close on TLS close_notify [36]
@@ -56,7 +65,10 @@ This release includes the following bugfixes:
  o socks5: user name and passwords must be shorter than 256 [8]
  o socks: fix error message
  o socksd: new SOCKS 4+5 server for tests [31]
+ o spnego_gssapi: fix return code on gss_init_sec_context() failure [53]
+ o ssh: define USE_SSH if SSH is enabled (any backend) [57]
  o test1002: correct the name
+ o test2100: Fix typos in test description
  o tests/server/util: fix Windows Unicode build [21]
  o tests: Run global cleanup at end of tests [29]
  o tests: make Impacket (SMB server) Python 3 compatible [11]
@@ -69,16 +81,14 @@ This release includes the following bugfixes:
  o travis: update some builds do Xenial [30]
  o travis: updated mesalink builds [35]
  o url: always clone the CUROPT_CURLU handle [26]
+ o urlapi: add CURLUPART_ZONEID to set and get [59]
  o urlapi: stricter CURLUPART_PORT parsing [33]
+ o urlapi: strip off zone id from numerical IPv6 addresses [49]
  o urlapi: urlencode characters above 0x7f correctly [9]
  o vauth/cleartext: update the PLAIN login to match RFC 4616 [27]
  o vauth/oauth2: Fix OAUTHBEARER token generation [6]
  o winbuild: Support MultiSSL builds [34]
  o xattr: skip unittest on unsupported platforms [20]
- o urlapi: strip off zone id from numerical IPv6 addresses [49]
- o OS400/ccsidcurl: replace use of Curl_vsetopt [50]
- o CURLOPT_CHUNK_BGN_FUNCTION.3: document the struct and time value [51]
- o CURLMOPT_TIMERFUNCTION.3: warn about the recursive risk [52]
 
 This release includes the following known bugs:
 
@@ -88,14 +98,15 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Aron Bergman, Brad Spencer, cclauss on github, Dan Fandrich,
-  Daniel Gustafsson, Daniel Stenberg, Eli Schwartz, Even Rouault, Gisle Vanem,
-  Jakub Zakrzewski, Jan Ehrhardt, Jonathan Cardoso Machado, Jonathan Moerman,
-  Kamil Dudka, Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, niner on github,
-  Paolo Mossino, Patrick Monnerat, Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro,
-  Reed Loden, Ricardo Gomes, Rikard Falkeborn, Simon Warta, Steve Holme,
-  Tim Rühsen, Tom van der Woerdt, Tseng Jun, Wyatt O'Day, XmiliaH on github,
-  Yiming Jing,
-  (34 contributors)
+  Daniel Gustafsson, Daniel Stenberg, Eli Schwartz, Even Rouault,
+  Frank Gevaerts, Gisle Vanem, Jakub Zakrzewski, Jan Ehrhardt,
+  Jonathan Cardoso Machado, Jonathan Moerman, Kamil Dudka, Leonardo Taccari,
+  Marcel Raad, Mert Yazıcıoğlu, niner on github, Paolo Mossino,
+  Patrick Monnerat, Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro, Reed Loden,
+  Ricardo Gomes, Ricky Leverence, Rikard Falkeborn, Simon Warta, Steve Holme,
+  Taiyu Len, Tim Rühsen, Tom van der Woerdt, Tseng Jun, Wyatt O'Day,
+  XmiliaH on github, Yiming Jing,
+  (37 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -153,3 +164,11 @@ References to bug reports and discussions on issues:
  [50] = https://curl.haxx.se/bug/?i=3833
  [51] = https://curl.haxx.se/bug/?i=3829
  [52] = https://curl.haxx.se/bug/?i=3537
+ [53] = https://curl.haxx.se/bug/?i=3726
+ [54] = https://curl.haxx.se/bug/?i=3570
+ [55] = https://curl.haxx.se/bug/?i=3771
+ [56] = https://curl.haxx.se/bug/?i=3807
+ [57] = https://curl.haxx.se/bug/?i=3846
+ [58] = https://curl.haxx.se/bug/?i=3838
+ [59] = https://curl.haxx.se/bug/?i=3834
+ [60] = https://curl.haxx.se/bug/?i=3837
