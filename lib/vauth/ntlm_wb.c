@@ -217,15 +217,21 @@ done:
 }
 
 CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
-                          const char *input, curlntlm state)
+                          const char *input, char **outptr, size_t *outlen,
+                          curlntlm state)
 {
-  char *buf = malloc(NTLM_BUFSIZE);
+  char *buf = NULL;
+  char *base64data = NULL;
   size_t len_in = strlen(input), len_out = 0;
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
   (void) data;
 #endif
 
+  *outptr = NULL;
+  *outlen = 0;
+
+  buf = malloc(NTLM_BUFSIZE);
   if(!buf)
     return CURLE_OUT_OF_MEMORY;
 
@@ -291,15 +297,57 @@ CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
      (buf[0] != 'A' || buf[1] != 'F' || buf[2] != ' '))
     goto done;
 
-  ntlm->response = aprintf("%.*s", len_out - 4, buf + 3);
+  base64data = aprintf("%.*s", len_out - 4, buf + 3);
   free(buf);
-  if(!ntlm->response)
+  if(!base64data)
     return CURLE_OUT_OF_MEMORY;
+
+  /* Return the pointer to the new data (allocated memory) */
+  *outptr = base64data;
+
+  /* Return the length of the new data */
+  *outlen = strlen(base64data);
+
   return CURLE_OK;
 
 done:
   free(buf);
   return CURLE_REMOTE_ACCESS_DENIED;
+}
+
+/*
+ * Curl_auth_create_ntlm_wb_type1_message()
+ *
+ * This is used to generate an already encoded NTLM type-1 message ready for
+ * sending to the recipient.
+ *
+ * Parameters:
+ *
+ * data    [in]     - The session handle.
+ * userp   [in]     - The user name in the format User or Domain\User.
+ * ntlm    [in/out] - The NTLM data struct being used and modified.
+ * outptr  [in/out] - The address where a pointer to newly allocated memory
+ *                    holding the result will be stored upon completion.
+ * outlen  [out]    - The length of the output message.
+ *
+ * Returns CURLE_OK on success.
+ */
+CURLcode Curl_auth_create_ntlm_wb_type1_message(struct Curl_easy *data,
+                                                const char *userp,
+                                                struct ntlmdata *ntlm,
+                                                char **outptr, size_t *outlen)
+{
+  CURLcode result;
+
+  result = ntlm_wb_init(data, ntlm, userp);
+  if(result)
+    return result;
+
+  /* Generate our type-1 message */
+  result = ntlm_wb_response(data, ntlm, "YR\n", outptr, outlen,
+                            NTLMSTATE_TYPE1);
+
+  return result;
 }
 
 /*

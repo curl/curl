@@ -123,7 +123,8 @@ void Curl_auth_digest_cleanup(struct digestdata *digest);
 CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
                       const char *userp);
 CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
-                          const char *input, curlntlm state);
+                          const char *input, char **outptr, size_t *outlen,
+                          curlntlm state);
 #endif
 
 /* This is used to evaluate if NTLM is supported */
@@ -138,6 +139,14 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              struct ntlmdata *ntlm,
                                              char **outptr,
                                              size_t *outlen);
+
+#if defined(NTLM_WB_ENABLED)
+CURLcode Curl_auth_create_ntlm_wb_type1_message(struct Curl_easy *data,
+                                                const char *userp,
+                                                struct ntlmdata *ntlm,
+                                                char **outptr,
+                                                size_t *outlen);
+#endif
 
 /* This is used to decode a base64 encoded NTLM type-2 message */
 CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,

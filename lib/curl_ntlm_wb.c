@@ -94,16 +94,20 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
 CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
                               bool proxy)
 {
+  char *base64 = NULL;
+  size_t len = 0;
+  CURLcode result = CURLE_OK;
+
   /* point to the address of the pointer that holds the string to send to the
      server, which is for a plain host or for a HTTP proxy */
   char **allocuserpwd;
-  /* point to the name and password */
+
+  /* point to the username */
   const char *userp;
+
   struct ntlmdata *ntlm;
   curlntlm *state;
   struct auth *authp;
-
-  CURLcode res = CURLE_OK;
 
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->data);
@@ -131,44 +135,34 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   switch(*state) {
   case NTLMSTATE_TYPE1:
   default:
-    /* Use Samba's 'winbind' daemon to support NTLM authentication,
-     * by delegating the NTLM challenge/response protocol to a helper
-     * in ntlm_auth.
-     * http://devel.squid-cache.org/ntlm/squid_helper_protocol.html
-     * https://www.samba.org/samba/docs/man/manpages-3/winbindd.8.html
-     * https://www.samba.org/samba/docs/man/manpages-3/ntlm_auth.1.html
-     * Preprocessor symbol 'NTLM_WB_ENABLED' is defined when this
-     * feature is enabled and 'NTLM_WB_FILE' symbol holds absolute
-     * filename of ntlm_auth helper.
-     * If NTLM authentication using winbind fails, go back to original
-     * request handling process.
-     */
-    /* Create communication with ntlm_auth */
-    res = ntlm_wb_init(conn->data, ntlm, userp);
-    if(res)
-      return res;
-    res = ntlm_wb_response(conn->data, ntlm, "YR\n", *state);
-    if(res)
-      return res;
+    /* Create a type-1 message */
+    result = Curl_auth_create_ntlm_wb_type1_message(conn->data, userp, ntlm,
+                                                    &base64, &len);
+    if(result)
+      return result;
 
-    free(*allocuserpwd);
-    *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
-                            proxy ? "Proxy-" : "",
-                            ntlm->response);
-    DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
-    Curl_safefree(ntlm->response);
-    if(!*allocuserpwd)
-      return CURLE_OUT_OF_MEMORY;
+    if(base64) {
+      free(*allocuserpwd);
+      *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
+                              proxy ? "Proxy-" : "",
+                              base64);
+      Curl_safefree(base64);
+      if(!*allocuserpwd)
+        return CURLE_OUT_OF_MEMORY;
+
+      DEBUG_OUT(fprintf(stderr, "**** Header %s\n ", *allocuserpwd));
+    }
     break;
 
   case NTLMSTATE_TYPE2: {
     char *input = aprintf("TT %s\n", ntlm->challenge);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
-    res = ntlm_wb_response(conn->data, ntlm, input, *state);
+    result = ntlm_wb_response(conn->data, ntlm, input, &ntlm->response, &len,
+                              *state);
     free(input);
-    if(res)
-      return res;
+    if(result)
+      return result;
 
     free(*allocuserpwd);
     *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
