@@ -2,7 +2,7 @@
 
 The curl project runs a bug bounty program in association with
 [HackerOne](https://www.hackerone.com) and the [Internet Bug
-Bounty](https://internetbugbounty.org].
+Bounty](https://internetbugbounty.org).
 
 # How does it work?
 
@@ -13,10 +13,12 @@ After you have reported a security issue, it has been deemed credible, and a
 patch and advisory has been made public, you may be eligible for a bounty from
 this program.
 
-See all details at https://hackerone.com/curl
+See all details at [https://hackerone.com/curl](https://hackerone.com/curl)
 
 This bounty is relying on funds from sponsors. If you use curl professionally,
-consider help funding this! See https://opencollective.com/curl for details.
+consider help funding this! See
+[https://opencollective.com/curl](https://opencollective.com/curl) for
+details.
 
 # What are the reward amounts?
 
@@ -28,7 +30,7 @@ We offer reward money *up to* a certain amount per severity. The curl security
 team determines the severity of each reported flaw on a case by case basis and
 the exact amount rewarded to the reporter is then decided.
 
-Check out the current award amounts at https://hackerone.com/curl
+Check out the current award amounts at [https://hackerone.com/curl](https://hackerone.com/curl)
 
 # Who is eligible for a reward?
 
