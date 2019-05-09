@@ -850,15 +850,15 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 }
 
 /*
-* Curl_auth_ntlm_cleanup()
-*
-* This is used to clean up the NTLM specific data.
-*
-* Parameters:
-*
-* ntlm    [in/out] - The NTLM data struct being cleaned up.
-*
-*/
+ * Curl_auth_ntlm_cleanup()
+ *
+ * This is used to clean up the NTLM specific data.
+ *
+ * Parameters:
+ *
+ * ntlm    [in/out] - The NTLM data struct being cleaned up.
+ *
+ */
 void Curl_auth_ntlm_cleanup(struct ntlmdata *ntlm)
 {
   /* Free the target info */
