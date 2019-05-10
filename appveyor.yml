@@ -114,3 +114,4 @@ test_script:
 branches:
     only:
         - master
+        - /\/ci$/
