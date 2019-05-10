@@ -1239,11 +1239,12 @@ static size_t Curl_multissl_version(char *buffer, size_t size)
 
   if(current != selected) {
     char *p = backends;
+    char *end = backends + sizeof(backends);
     int i;
 
     selected = current;
 
-    for(i = 0; available_backends[i]; i++) {
+    for(i = 0; available_backends[i] && p < (end - 4); i++) {
       if(i)
         *(p++) = ' ';
       if(selected != available_backends[i])
@@ -1256,14 +1257,14 @@ static size_t Curl_multissl_version(char *buffer, size_t size)
     total = p - backends;
   }
 
-  if(size < total)
+  if(size > total)
     memcpy(buffer, backends, total + 1);
   else {
     memcpy(buffer, backends, size - 1);
     buffer[size - 1] = '\0';
   }
 
-  return total;
+  return CURLMIN(size - 1, total);
 }
 
 static int multissl_init(const struct Curl_ssl *backend)
