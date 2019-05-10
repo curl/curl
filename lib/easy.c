@@ -961,7 +961,10 @@ void curl_easy_reset(struct Curl_easy *data)
   /* zero out authentication data: */
   memset(&data->state.authhost, 0, sizeof(struct auth));
   memset(&data->state.authproxy, 0, sizeof(struct auth));
+
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
   Curl_digest_cleanup(data);
+#endif
 }
 
 /*
