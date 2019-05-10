@@ -379,7 +379,9 @@ CURLcode Curl_close(struct Curl_easy *data)
   Curl_altsvc_cleanup(data->asi);
   data->asi = NULL;
 #endif
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
   Curl_digest_cleanup(data);
+#endif
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
