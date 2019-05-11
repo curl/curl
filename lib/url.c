@@ -380,7 +380,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   data->asi = NULL;
 #endif
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
-  Curl_digest_cleanup(data);
+  Curl_http_auth_cleanup_digest(data);
 #endif
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
@@ -697,7 +697,7 @@ static void conn_shutdown(struct connectdata *conn)
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
     defined(NTLM_WB_ENABLED)
-  Curl_ntlm_wb_cleanup(conn);
+  Curl_http_auth_cleanup_ntlm_wb(conn);
 #endif
 
   /* unlink ourselves. this should be called last since other shutdown
@@ -801,11 +801,11 @@ CURLcode Curl_disconnect(struct Curl_easy *data,
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
   /* Cleanup NTLM connection-related data */
-  Curl_http_ntlm_cleanup(conn);
+  Curl_http_auth_cleanup_ntlm(conn);
 #endif
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
   /* Cleanup NEGOTIATE connection-related data */
-  Curl_cleanup_negotiate(conn);
+  Curl_http_auth_cleanup_negotiate(conn);
 #endif
 
   /* the protocol specific disconnect handler and conn_shutdown need a transfer

@@ -35,7 +35,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                             const unsigned char *request,
                             const unsigned char *uripath);
 
-void Curl_digest_cleanup(struct Curl_easy *data);
+void Curl_http_auth_cleanup_digest(struct Curl_easy *data);
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_CRYPTO_AUTH */
 

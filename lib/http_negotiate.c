@@ -84,12 +84,12 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
   if(!len) {
     if(neg_ctx->state == GSS_AUTHSUCC) {
       infof(conn->data, "Negotiate auth restarted\n");
-      Curl_cleanup_negotiate(conn);
+      Curl_http_auth_cleanup_negotiate(conn);
     }
     else if(neg_ctx->state != GSS_AUTHNONE) {
       /* The server rejected our authentication and hasn't supplied any more
       negotiation mechanisms */
-      Curl_cleanup_negotiate(conn);
+      Curl_http_auth_cleanup_negotiate(conn);
       return CURLE_LOGIN_DENIED;
     }
   }
@@ -104,7 +104,7 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
                                            host, header, neg_ctx);
 
   if(result)
-    Curl_auth_spnego_cleanup(neg_ctx);
+    Curl_auth_cleanup_spnego(neg_ctx);
 
   return result;
 }
@@ -139,7 +139,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     if(neg_ctx->noauthpersist && neg_ctx->state == GSS_AUTHSUCC) {
       infof(conn->data, "Curl_output_negotiate, "
        "no persistent authentication: cleanup existing context");
-      Curl_auth_spnego_cleanup(neg_ctx);
+      Curl_auth_cleanup_spnego(neg_ctx);
     }
     if(!neg_ctx->context) {
       result = Curl_input_negotiate(conn, proxy, "Negotiate");
@@ -203,10 +203,10 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
   return CURLE_OK;
 }
 
-void Curl_cleanup_negotiate(struct connectdata *conn)
+void Curl_http_auth_cleanup_negotiate(struct connectdata *conn)
 {
-  Curl_auth_spnego_cleanup(&conn->negotiate);
-  Curl_auth_spnego_cleanup(&conn->proxyneg);
+  Curl_auth_cleanup_spnego(&conn->negotiate);
+  Curl_auth_cleanup_spnego(&conn->proxyneg);
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */

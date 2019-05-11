@@ -33,7 +33,7 @@ CURLcode Curl_input_ntlm(struct connectdata *conn, bool proxy,
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
 
-void Curl_http_ntlm_cleanup(struct connectdata *conn);
+void Curl_http_auth_cleanup_ntlm(struct connectdata *conn);
 
 #endif /* !CURL_DISABLE_HTTP && USE_NTLM */
 

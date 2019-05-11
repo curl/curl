@@ -74,7 +74,7 @@
 #  define sclose_nolog(x)  close((x))
 #endif
 
-void Curl_ntlm_wb_cleanup(struct connectdata *conn)
+void Curl_http_auth_cleanup_ntlm_wb(struct connectdata *conn)
 {
   if(conn->ntlm_auth_hlpr_socket != CURL_SOCKET_BAD) {
     sclose(conn->ntlm_auth_hlpr_socket);
@@ -423,7 +423,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
-    Curl_ntlm_wb_cleanup(conn);
+    Curl_http_auth_cleanup_ntlm_wb(conn);
     if(!*allocuserpwd)
       return CURLE_OUT_OF_MEMORY;
     break;
