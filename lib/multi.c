@@ -3056,8 +3056,8 @@ void Curl_multi_dump(struct Curl_multi *multi)
           continue;
         }
         fprintf(stderr, "[%s %s] ",
-                entry->action&CURL_POLL_IN?"RECVING":"",
-                entry->action&CURL_POLL_OUT?"SENDING":"");
+                (entry->action&CURL_POLL_IN)?"RECVING":"",
+                (entry->action&CURL_POLL_OUT)?"SENDING":"");
       }
       if(data->numsocks)
         fprintf(stderr, "\n");

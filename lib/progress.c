@@ -564,9 +564,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     /* Get the total amount of data expected to get transferred */
     total_expected_transfer =
-      (data->progress.flags & PGRS_UL_SIZE_KNOWN?
+      ((data->progress.flags & PGRS_UL_SIZE_KNOWN)?
        data->progress.size_ul:data->progress.uploaded)+
-      (data->progress.flags & PGRS_DL_SIZE_KNOWN?
+      ((data->progress.flags & PGRS_DL_SIZE_KNOWN)?
        data->progress.size_dl:data->progress.downloaded);
 
     /* We have transferred this much so far */

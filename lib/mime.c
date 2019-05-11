@@ -821,8 +821,10 @@ static size_t readback_part(curl_mimepart *part,
     struct curl_slist *hdr = (struct curl_slist *) part->state.ptr;
     switch(part->state.state) {
     case MIMESTATE_BEGIN:
-      mimesetstate(&part->state, part->flags & MIME_BODY_ONLY? MIMESTATE_BODY:
-                                 MIMESTATE_CURLHEADERS, part->curlheaders);
+      mimesetstate(&part->state,
+                   (part->flags & MIME_BODY_ONLY)?
+                     MIMESTATE_BODY: MIMESTATE_CURLHEADERS,
+                   part->curlheaders);
       break;
     case MIMESTATE_USERHEADERS:
       if(!hdr) {
