@@ -286,11 +286,11 @@ static CURLcode handshake(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   gnutls_session_t session = BACKEND->session;
   curl_socket_t sockfd = conn->sock[sockindex];
-  time_t timeout_ms;
-  int rc;
-  int what;
 
   for(;;) {
+    time_t timeout_ms;
+    int rc;
+
     /* check allowed time left */
     timeout_ms = Curl_timeleft(data, NULL, duringconnect);
 
@@ -303,7 +303,7 @@ static CURLcode handshake(struct connectdata *conn,
     /* if ssl is expecting something, check if it's available. */
     if(connssl->connecting_state == ssl_connect_2_reading
        || connssl->connecting_state == ssl_connect_2_writing) {
-
+      int what;
       curl_socket_t writefd = ssl_connect_2_writing ==
         connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
       curl_socket_t readfd = ssl_connect_2_reading ==
@@ -957,7 +957,6 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   gnutls_pubkey_t key = NULL;
 
   /* Result is returned to caller */
-  int ret = 0;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
   /* if a path wasn't specified, don't pin */
@@ -968,6 +967,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     return result;
 
   do {
+    int ret;
+
     /* Begin Gyrations to get the public key     */
     gnutls_pubkey_init(&key);
 
@@ -1279,10 +1280,7 @@ gtls_connect_step3(struct connectdata *conn,
     #define use_addr in_addr
 #endif
     unsigned char addrbuf[sizeof(struct use_addr)];
-    unsigned char certaddr[sizeof(struct use_addr)];
-    size_t addrlen = 0, certaddrlen;
-    int i;
-    int ret = 0;
+    size_t addrlen = 0;
 
     if(Curl_inet_pton(AF_INET, hostname, addrbuf) > 0)
       addrlen = 4;
@@ -1292,10 +1290,13 @@ gtls_connect_step3(struct connectdata *conn,
 #endif
 
     if(addrlen) {
+      unsigned char certaddr[sizeof(struct use_addr)];
+      int i;
+
       for(i = 0; ; i++) {
-        certaddrlen = sizeof(certaddr);
-        ret = gnutls_x509_crt_get_subject_alt_name(x509_cert, i, certaddr,
-                                                   &certaddrlen, NULL);
+        size_t certaddrlen = sizeof(certaddr);
+        int ret = gnutls_x509_crt_get_subject_alt_name(x509_cert, i, certaddr,
+                                                       &certaddrlen, NULL);
         /* If this happens, it wasn't an IP address. */
         if(ret == GNUTLS_E_SHORT_MEMORY_BUFFER)
           continue;
@@ -1465,8 +1466,6 @@ gtls_connect_step3(struct connectdata *conn,
        already got it from the cache and asked to use it in the connection, it
        might've been rejected and then a new one is in use now and we need to
        detect that. */
-    bool incache;
-    void *ssl_sessionid;
     void *connect_sessionid;
     size_t connect_idsize = 0;
 
@@ -1475,6 +1474,9 @@ gtls_connect_step3(struct connectdata *conn,
     connect_sessionid = malloc(connect_idsize); /* get a buffer for it */
 
     if(connect_sessionid) {
+      bool incache;
+      void *ssl_sessionid;
+
       /* extract session ID to the allocated buffer */
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
@@ -1635,11 +1637,8 @@ static void Curl_gtls_close(struct connectdata *conn, int sockindex)
 static int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  ssize_t result;
   int retval = 0;
   struct Curl_easy *data = conn->data;
-  bool done = FALSE;
-  char buf[120];
 
   /* This has only been tested on the proftpd server, and the mod_tls code
      sends a close notify alert without waiting for a close notify alert in
@@ -1650,6 +1649,10 @@ static int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
       gnutls_bye(BACKEND->session, GNUTLS_SHUT_WR);
 
   if(BACKEND->session) {
+    ssize_t result;
+    bool done = FALSE;
+    char buf[120];
+
     while(!done) {
       int what = SOCKET_READABLE(conn->sock[sockindex],
                                  SSL_SHUTDOWN_TIMEOUT);

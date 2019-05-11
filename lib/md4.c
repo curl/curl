@@ -115,7 +115,6 @@ static const void *body(MD4_CTX *ctx, const void *data, unsigned long size)
 {
   const unsigned char *ptr;
   MD4_u32plus a, b, c, d;
-  MD4_u32plus saved_a, saved_b, saved_c, saved_d;
 
   ptr = (const unsigned char *)data;
 
@@ -125,6 +124,8 @@ static const void *body(MD4_CTX *ctx, const void *data, unsigned long size)
   d = ctx->d;
 
   do {
+    MD4_u32plus saved_a, saved_b, saved_c, saved_d;
+
     saved_a = a;
     saved_b = b;
     saved_c = c;
@@ -214,7 +215,7 @@ static void MD4_Init(MD4_CTX *ctx)
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
   MD4_u32plus saved_lo;
-  unsigned long used, available;
+  unsigned long used;
 
   saved_lo = ctx->lo;
   ctx->lo = (saved_lo + size) & 0x1fffffff;
@@ -225,7 +226,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
   used = saved_lo & 0x3f;
 
   if(used) {
-    available = 64 - used;
+    unsigned long available = 64 - used;
 
     if(size < available) {
       memcpy(&ctx->buffer[used], data, size);

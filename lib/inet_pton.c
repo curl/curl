@@ -153,7 +153,7 @@ inet_pton6(const char *src, unsigned char *dst)
   static const char xdigits_l[] = "0123456789abcdef",
     xdigits_u[] = "0123456789ABCDEF";
   unsigned char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
-  const char *xdigits, *curtok;
+  const char *curtok;
   int ch, saw_xdigit;
   size_t val;
 
@@ -168,6 +168,7 @@ inet_pton6(const char *src, unsigned char *dst)
   saw_xdigit = 0;
   val = 0;
   while((ch = *src++) != '\0') {
+    const char *xdigits;
     const char *pch;
 
     pch = strchr((xdigits = xdigits_l), ch);

@@ -587,13 +587,13 @@ static CURLcode ssh_check_fingerprint(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
   char md5buffer[33];
-  int i;
 
   const char *fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
       LIBSSH2_HOSTKEY_HASH_MD5);
 
   if(fingerprint) {
     /* The fingerprint points to static storage (!), don't free() it. */
+    int i;
     for(i = 0; i < 16; i++)
       msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
     infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);

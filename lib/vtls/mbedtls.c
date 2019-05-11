@@ -540,13 +540,6 @@ mbed_connect_step2(struct connectdata *conn,
         data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
         data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
 
-#ifdef HAS_ALPN
-  const char *next_protocol;
-#endif
-
-  char errorbuf[128];
-  errorbuf[0] = 0;
-
   conn->recv[sockindex] = mbed_recv;
   conn->send[sockindex] = mbed_send;
 
@@ -561,6 +554,8 @@ mbed_connect_step2(struct connectdata *conn,
     return CURLE_OK;
   }
   else if(ret) {
+    char errorbuf[128];
+    errorbuf[0] = 0;
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
@@ -665,7 +660,7 @@ mbed_connect_step2(struct connectdata *conn,
 
 #ifdef HAS_ALPN
   if(conn->bits.tls_enable_alpn) {
-    next_protocol = mbedtls_ssl_get_alpn_protocol(&BACKEND->ssl);
+    const char *next_protocol = mbedtls_ssl_get_alpn_protocol(&BACKEND->ssl);
 
     if(next_protocol) {
       infof(data, "ALPN, server accepted to use %s\n", next_protocol);

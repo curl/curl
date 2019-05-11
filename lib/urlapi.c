@@ -605,9 +605,9 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
     /* only valid letters are ok */
     len = strspn(hostname, l);
     if(hlen != len) {
-      /* this could now be '%[zone id]' */
-      char zoneid[16];
       if(hostname[len] == '%') {
+        /* this could now be '%[zone id]' */
+        char zoneid[16];
         int i = 0;
         char *h = &hostname[len + 1];
         /* pass '25' if present and is a url encoded percent sign */
