@@ -410,8 +410,6 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 static int sec_set_protection_level(struct connectdata *conn)
 {
   int code;
-  char *pbsz;
-  static unsigned int buffer_size = 1 << 20; /* 1048576 */
   enum protection_level level = conn->request_data_prot;
 
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
@@ -427,6 +425,9 @@ static int sec_set_protection_level(struct connectdata *conn)
     return 0;
 
   if(level) {
+    char *pbsz;
+    static unsigned int buffer_size = 1 << 20; /* 1048576 */
+
     code = ftp_send_command(conn, "PBSZ %u", buffer_size);
     if(code < 0)
       return -1;
