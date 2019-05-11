@@ -584,8 +584,8 @@ int fun2(int arg1, int arg2) {
 int
 main() {
   int res3 = c99_vmacro3(1, 2, 3);
-  (void)res3;
   int res2 = c99_vmacro2(1, 2);
+  (void)res3;
   (void)res2;
   return 0;
 }
@@ -607,8 +607,8 @@ int fun2(int arg1, int arg2) {
 int
 main() {
   int res3 = gcc_vmacro3(1, 2, 3);
-  (void)res3;
   int res2 = gcc_vmacro2(1, 2);
+  (void)res3;
   (void)res2;
   return 0;
 }
