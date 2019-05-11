@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2017, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2019, Steve Holme, <steve_holme@hotmail.com>.
  * Copyright (C) 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -372,7 +372,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 }
 
 /*
- * Curl_auth_gssapi_cleanup()
+ * Curl_auth_cleanup_gssapi()
  *
  * This is used to clean up the GSSAPI (Kerberos V5) specific data.
  *
@@ -381,7 +381,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
  * krb5     [in/out] - The Kerberos 5 data struct being cleaned up.
  *
  */
-void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5)
+void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
 {
   OM_uint32 minor_status;
 

@@ -107,7 +107,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
-    Curl_auth_spnego_cleanup(nego);
+    Curl_auth_cleanup_spnego(nego);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -307,7 +307,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
 }
 
 /*
- * Curl_auth_spnego_cleanup()
+ * Curl_auth_cleanup_spnego()
  *
  * This is used to clean up the SPNEGO (Negotiate) specific data.
  *
@@ -316,7 +316,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
  * nego     [in/out] - The Negotiate data struct being cleaned up.
  *
  */
-void Curl_auth_spnego_cleanup(struct negotiatedata *nego)
+void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 {
   /* Free our security context */
   if(nego->context) {

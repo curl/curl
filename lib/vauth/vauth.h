@@ -142,7 +142,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              char **outptr, size_t *outlen);
 
 /* This is used to clean up the NTLM specific data */
-void Curl_auth_ntlm_cleanup(struct ntlmdata *ntlm);
+void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
 #endif /* USE_NTLM */
 
 /* This is used to generate a base64 encoded OAuth 2.0 message */
@@ -184,7 +184,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
                                                   size_t *outlen);
 
 /* This is used to clean up the GSSAPI specific data */
-void Curl_auth_gssapi_cleanup(struct kerberos5data *krb5);
+void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5);
 #endif /* USE_KERBEROS5 */
 
 #if defined(USE_SPNEGO)
@@ -208,7 +208,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
                                          char **outptr, size_t *outlen);
 
 /* This is used to clean up the SPNEGO specifiec data */
-void Curl_auth_spnego_cleanup(struct negotiatedata *nego);
+void Curl_auth_cleanup_spnego(struct negotiatedata *nego);
 
 #endif /* USE_SPNEGO */
 

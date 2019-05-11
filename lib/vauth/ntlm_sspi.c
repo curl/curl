@@ -95,7 +95,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   /* Clean up any former leftovers and initialise to defaults */
-  Curl_auth_ntlm_cleanup(ntlm);
+  Curl_auth_cleanup_ntlm(ntlm);
 
   /* Query the security package for NTLM */
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
@@ -323,13 +323,13 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   result = Curl_base64_encode(data, (char *) ntlm->output_token,
                               type_3_buf.cbBuffer, outptr, outlen);
 
-  Curl_auth_ntlm_cleanup(ntlm);
+  Curl_auth_cleanup_ntlm(ntlm);
 
   return result;
 }
 
 /*
- * Curl_auth_ntlm_cleanup()
+ * Curl_auth_cleanup_ntlm()
  *
  * This is used to clean up the NTLM specific data.
  *
@@ -338,7 +338,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
  * ntlm    [in/out] - The NTLM data struct being cleaned up.
  *
  */
-void Curl_auth_ntlm_cleanup(struct ntlmdata *ntlm)
+void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
 {
   /* Free our security context */
   if(ntlm->context) {

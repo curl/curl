@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,11 +88,11 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
     else {
       if(ntlm->state == NTLMSTATE_LAST) {
         infof(conn->data, "NTLM auth restarted\n");
-        Curl_http_ntlm_cleanup(conn);
+        Curl_http_auth_cleanup_ntlm(conn);
       }
       else if(ntlm->state == NTLMSTATE_TYPE3) {
         infof(conn->data, "NTLM handshake rejected\n");
-        Curl_http_ntlm_cleanup(conn);
+        Curl_http_auth_cleanup_ntlm(conn);
         ntlm->state = NTLMSTATE_NONE;
         return CURLE_REMOTE_ACCESS_DENIED;
       }
@@ -241,13 +241,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   return CURLE_OK;
 }
 
-void Curl_http_ntlm_cleanup(struct connectdata *conn)
+void Curl_http_auth_cleanup_ntlm(struct connectdata *conn)
 {
-  Curl_auth_ntlm_cleanup(&conn->ntlm);
-  Curl_auth_ntlm_cleanup(&conn->proxyntlm);
+  Curl_auth_cleanup_ntlm(&conn->ntlm);
+  Curl_auth_cleanup_ntlm(&conn->proxyntlm);
 
 #if defined(NTLM_WB_ENABLED)
-  Curl_ntlm_wb_cleanup(conn);
+  Curl_http_auth_cleanup_ntlm_wb(conn);
 #endif
 }
 
