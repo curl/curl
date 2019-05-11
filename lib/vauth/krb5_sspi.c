@@ -217,8 +217,12 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   /* Free the decoded challenge as it is not required anymore */
   free(chlg);
 
+  if(status == SEC_E_INSUFFICIENT_MEMORY) {
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
-    return CURLE_RECV_ERROR;
+    return CURLE_AUTH_ERROR;
   }
 
   if(memcmp(&context, krb5->context, sizeof(context))) {
@@ -309,7 +313,10 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(status != SEC_E_OK) {
     free(chlg);
 
-    return CURLE_OUT_OF_MEMORY;
+    if(status == SEC_E_INSUFFICIENT_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+
+    return CURLE_AUTH_ERROR;
   }
 
   /* Get the fully qualified username back from the context */
@@ -319,7 +326,10 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(status != SEC_E_OK) {
     free(chlg);
 
-    return CURLE_RECV_ERROR;
+    if(status == SEC_E_INSUFFICIENT_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+
+    return CURLE_AUTH_ERROR;
   }
 
   /* Setup the "input" security buffer */
@@ -438,7 +448,10 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     free(message);
     free(trailer);
 
-    return CURLE_OUT_OF_MEMORY;
+    if(status == SEC_E_INSUFFICIENT_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+
+    return CURLE_AUTH_ERROR;
   }
 
   /* Allocate the encryption (wrap) buffer */

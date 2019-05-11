@@ -254,6 +254,8 @@ Status returned failure when asked with \fICURLOPT_SSL_VERIFYSTATUS(3)\fP.
 Stream error in the HTTP/2 framing layer.
 .IP "CURLE_RECURSIVE_API_CALL (93)"
 An API function was called from inside a callback.
+.IP "CURLE_AUTH_ERROR (94)"
+An authentication function returned an error.
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.

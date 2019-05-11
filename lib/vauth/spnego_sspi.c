@@ -251,14 +251,25 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     char buffer[STRERROR_LEN];
     failf(data, "InitializeSecurityContext failed: %s",
           Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
-    return CURLE_OUT_OF_MEMORY;
+
+    if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+
+    return CURLE_AUTH_ERROR;
   }
 
   if(nego->status == SEC_I_COMPLETE_NEEDED ||
      nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
     nego->status = s_pSecFn->CompleteAuthToken(nego->context, &resp_desc);
     if(GSS_ERROR(nego->status)) {
-      return CURLE_RECV_ERROR;
+      char buffer[STRERROR_LEN];
+      failf(data, "CompleteAuthToken failed: %s",
+            Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
+
+      if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+
+      return CURLE_AUTH_ERROR;
     }
   }
 

@@ -126,7 +126,8 @@ e90: SSL public key does not match pinned public key
 e91: SSL server certificate status verification FAILED
 e92: Stream error in the HTTP/2 framing layer
 e93: API function called from within callback
-e94: Unknown error
+e94: An authentication function returned an error
+e95: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle
