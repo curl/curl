@@ -569,7 +569,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if(((form->flags & HTTPPOST_FILENAME) ||
           (form->flags & HTTPPOST_BUFFER)) &&
          !form->contenttype) {
-        char *f = form->flags & HTTPPOST_BUFFER?
+        char *f = (form->flags & HTTPPOST_BUFFER)?
           form->showfilename : form->value;
         char const *type;
         type = Curl_mime_contenttype(f);

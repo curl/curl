@@ -451,8 +451,8 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         m->socket.revents = 0;
         ev->list = m;
         infof(easy, "socket cb: socket %d ADDED as %s%s\n", s,
-              what&CURL_POLL_IN?"IN":"",
-              what&CURL_POLL_OUT?"OUT":"");
+              (what&CURL_POLL_IN)?"IN":"",
+              (what&CURL_POLL_OUT)?"OUT":"");
       }
       else
         return CURLE_OUT_OF_MEMORY;
