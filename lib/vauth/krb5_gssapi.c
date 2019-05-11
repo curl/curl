@@ -121,7 +121,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
       free(spn);
 
-      return CURLE_OUT_OF_MEMORY;
+      return CURLE_AUTH_ERROR;
     }
 
     free(spn);
@@ -168,7 +168,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
                        major_status, minor_status);
 
-    return CURLE_RECV_ERROR;
+    return CURLE_AUTH_ERROR;
   }
 
   if(output_token.value && output_token.length) {
@@ -252,7 +252,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
     free(chlg);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_AUTH_ERROR;
   }
 
   /* Convert the username from internal format to a displayable token */
@@ -264,7 +264,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
     free(chlg);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_AUTH_ERROR;
   }
 
   /* Setup the challenge "input" security buffer */
@@ -355,7 +355,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
     free(message);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_AUTH_ERROR;
   }
 
   /* Base64 encode the response */
