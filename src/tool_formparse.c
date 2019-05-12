@@ -347,12 +347,11 @@ CURLcode tool2curlmime(CURL *curl, tool_mime *m, curl_mime **mime)
 static char *get_param_word(char **str, char **end_pos, char endchar)
 {
   char *ptr = *str;
-  char *word_begin = NULL;
+  /* the first non-space char is here */
+  char *word_begin = ptr;
   char *ptr2;
   char *escape = NULL;
 
-  /* the first non-space char is here */
-  word_begin = ptr;
   if(*ptr == '"') {
     ++ptr;
     while(*ptr) {
