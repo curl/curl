@@ -46,16 +46,17 @@ libnssckbi.so, which contains a more comprehensive set of trust information
 than supported by nss-pem, because libnssckbi.so also includes information
 about distrusted certificates.
 
-(iOS and macOS only) If curl is built against Secure Transport, then this
+(iOS and macOS) If curl is built against Secure Transport, then this
 option is supported for backward compatibility with other SSL engines, but it
 should not be set. If the option is not set, then curl will use the
 certificates in the system and user Keychain to verify the peer, which is the
 preferred method of verifying the peer's certificate chain.
 
-(Schannel only) This option is supported for Schannel in Windows 7 or later
-with libcurl 7.60 or later. This option is supported for backward
-compatibility with other SSL engines; instead it is recommended to use
-Windows' store of root certificates (the default for Schannel).
+(Schannel) This option is supported for Schannel in Windows 7 or later but we
+recommend not using it until Windows 8 since it works better starting then.
+Added in libcurl 7.60. This option is supported for backward compatibility
+with other SSL engines; instead it is recommended to use Windows' store of
+root certificates (the default for Schannel).
 
 The application does not have to keep the string around after setting this
 option.
