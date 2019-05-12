@@ -1249,7 +1249,7 @@ static size_t Curl_multissl_version(char *buffer, size_t size)
         *(p++) = ' ';
       if(selected != available_backends[i])
         *(p++) = '(';
-      p += available_backends[i]->version(p, backends + sizeof(backends) - p);
+      p += available_backends[i]->version(p, end - p - 2);
       if(selected != available_backends[i])
         *(p++) = ')';
     }
