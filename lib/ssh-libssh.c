@@ -2012,9 +2012,7 @@ static CURLcode myssh_block_statemach(struct connectdata *conn,
     }
 
     if(!result && block) {
-      curl_socket_t sock = conn->sock[FIRSTSOCKET];
-      curl_socket_t fd_read = CURL_SOCKET_BAD;
-      fd_read = sock;
+      curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
       (void) Curl_socket_check(fd_read, CURL_SOCKET_BAD,
                                CURL_SOCKET_BAD, left > 1000 ? 1000 : left);
