@@ -122,7 +122,7 @@ libressl.
  understanding if you are not going to follow the advice given above.
 
  - [How To Use the C Run-Time](https://support.microsoft.com/kb/94248/en-us)
- - [How to link with the correct C Run-Time CRT library](https://support.microsoft.com/kb/140584/en-us)
+ - [Run-Time Library Compiler Options](https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library)
  - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://msdn.microsoft.com/en-us/library/ms235460)
 
 If your app is misbehaving in some strange way, or it is suffering from
