@@ -427,8 +427,8 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
            mask. Convert from libcurl bitmask to the poll one. */
         m->socket.events = socketcb2poll(what);
         infof(easy, "socket cb: socket %d UPDATED as %s%s\n", s,
-              what&CURL_POLL_IN?"IN":"",
-              what&CURL_POLL_OUT?"OUT":"");
+              (what&CURL_POLL_IN)?"IN":"",
+              (what&CURL_POLL_OUT)?"OUT":"");
       }
       break;
     }
