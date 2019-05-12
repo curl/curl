@@ -1,3 +1,5 @@
+queries:
+  - exclude: cpp/fixme-comment
 extraction:
   cpp:
     prepare:
