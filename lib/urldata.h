@@ -361,11 +361,9 @@ struct ntlmdata {
 };
 #endif
 
+/* Struct used for Negotiate (SPNEGO) authentication */
 #ifdef USE_SPNEGO
 struct negotiatedata {
-  /* When doing Negotiate (SPNEGO) auth, we first need to send a token
-     and then validate the received one. */
-  curlnegotiate state;
 #ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;
@@ -985,6 +983,9 @@ struct connectdata {
 #endif
 
 #ifdef USE_SPNEGO
+  curlnegotiate http_negotiate_state;
+  curlnegotiate proxy_negotiate_state;
+
   struct negotiatedata negotiate; /* state data for host Negotiate auth */
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif

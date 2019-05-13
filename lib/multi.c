@@ -592,8 +592,8 @@ static CURLcode multi_done(struct Curl_easy *data,
            conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
 #endif
 #if defined(USE_SPNEGO)
-      && !(conn->negotiate.state == GSS_AUTHRECV ||
-           conn->proxyneg.state == GSS_AUTHRECV)
+      && !(conn->http_negotiate_state == GSS_AUTHRECV ||
+           conn->proxy_negotiate_state == GSS_AUTHRECV)
 #endif
      ) || conn->bits.close
        || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {

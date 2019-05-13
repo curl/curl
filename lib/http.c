@@ -494,8 +494,8 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
       if(((expectsend - bytessent) < 2000) ||
-         (conn->negotiate.state != GSS_AUTHNONE) ||
-         (conn->proxyneg.state != GSS_AUTHNONE)) {
+         (conn->http_negotiate_state != GSS_AUTHNONE) ||
+         (conn->proxy_negotiate_state != GSS_AUTHNONE)) {
         /* The NEGOTIATE-negotiation has started *OR*
         there is just a little (<2K) data left to send, keep on sending. */
 
@@ -840,8 +840,8 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
   struct Curl_easy *data = conn->data;
 
 #ifdef USE_SPNEGO
-  struct negotiatedata *negdata = proxy?
-    &conn->proxyneg:&conn->negotiate;
+  curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
+                                    &conn->http_negotiate_state;
 #endif
   unsigned long *availp;
   struct auth *authp;
@@ -888,7 +888,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
               return CURLE_OUT_OF_MEMORY;
             data->state.authproblem = FALSE;
             /* we received a GSS auth token and we dealt with it fine */
-            negdata->state = GSS_AUTHRECV;
+            *negstate = GSS_AUTHRECV;
           }
           else
             data->state.authproblem = TRUE;
@@ -3432,19 +3432,19 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 #if defined(USE_SPNEGO)
       if(conn->bits.close &&
         (((data->req.httpcode == 401) &&
-          (conn->negotiate.state == GSS_AUTHRECV)) ||
+          (conn->http_negotiate_state == GSS_AUTHRECV)) ||
          ((data->req.httpcode == 407) &&
-          (conn->proxyneg.state == GSS_AUTHRECV)))) {
+          (conn->proxy_negotiate_state == GSS_AUTHRECV)))) {
         infof(data, "Connection closure while negotiating auth (HTTP 1.0?)\n");
         data->state.authproblem = TRUE;
       }
-      if((conn->negotiate.state == GSS_AUTHDONE) &&
+      if((conn->http_negotiate_state == GSS_AUTHDONE) &&
          (data->req.httpcode != 401)) {
-        conn->negotiate.state = GSS_AUTHSUCC;
+        conn->http_negotiate_state = GSS_AUTHSUCC;
       }
-      if((conn->proxyneg.state == GSS_AUTHDONE) &&
+      if((conn->proxy_negotiate_state == GSS_AUTHDONE) &&
          (data->req.httpcode != 407)) {
-        conn->proxyneg.state = GSS_AUTHSUCC;
+        conn->proxy_negotiate_state = GSS_AUTHSUCC;
       }
 #endif
       /*
