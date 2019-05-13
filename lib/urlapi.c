@@ -636,6 +636,8 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
       /* hostname with bad content */
       return CURLUE_MALFORMED_INPUT;
   }
+  if(!hostname[0])
+    return CURLUE_NO_HOST;
   return CURLUE_OK;
 }
 
