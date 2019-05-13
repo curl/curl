@@ -1890,10 +1890,11 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 fi
 
 if test X"$OPT_SSL" != Xoff &&
+  test X"$OPT_SSL" != Xno &&
   test "$OPENSSL_ENABLED" != "1"; then
+  AC_MSG_NOTICE([OPT_SSL: $OPT_SSL])
+  AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
   AC_MSG_ERROR([--with-ssl was given but OpenSSL could not be detected])
-  AC_MSG_ERROR([OPT_SSL: $OPT_SSL])
-  AC_MSG_ERROR([OPENSSL_ENABLED: $OPENSSL_ENABLED])
 fi
 
 dnl **********************************************************************
