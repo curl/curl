@@ -588,8 +588,8 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   if((data->set.reuse_forbid
 #if defined(USE_NTLM)
-      && !(conn->ntlm.state == NTLMSTATE_TYPE2 ||
-           conn->proxyntlm.state == NTLMSTATE_TYPE2)
+      && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
+           conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
 #endif
 #if defined(USE_SPNEGO)
       && !(conn->negotiate.state == GSS_AUTHRECV ||

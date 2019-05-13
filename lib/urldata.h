@@ -336,7 +336,6 @@ struct kerberos5data {
 /* Struct used for NTLM challenge-response authentication */
 #if defined(USE_NTLM)
 struct ntlmdata {
-  curlntlm state;
 #ifdef USE_WINDOWS_SSPI
 /* The sslContext is used for the Schannel bindings. The
  * api is available on the Windows 7 SDK and later.
@@ -968,6 +967,9 @@ struct connectdata {
 #endif
 
 #if defined(USE_NTLM)
+  curlntlm http_ntlm_state;
+  curlntlm proxy_ntlm_state;
+
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
                                because it authenticates connections, not
                                single requests! */
