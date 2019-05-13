@@ -303,6 +303,14 @@ typedef enum {
   NTLMSTATE_LAST
 } curlntlm;
 
+typedef enum {
+  GSS_AUTHNONE,
+  GSS_AUTHRECV,
+  GSS_AUTHSENT,
+  GSS_AUTHDONE,
+  GSS_AUTHSUCC
+} curlnegotiate;
+
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
 #include <iconv.h>
 #endif
@@ -358,9 +366,7 @@ struct ntlmdata {
 struct negotiatedata {
   /* When doing Negotiate (SPNEGO) auth, we first need to send a token
      and then validate the received one. */
-  enum {
-    GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT, GSS_AUTHDONE, GSS_AUTHSUCC
-  } state;
+  curlnegotiate state;
 #ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;
