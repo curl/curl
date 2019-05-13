@@ -345,8 +345,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   char **allocuserpwd;
   /* point to the name and password for this */
   const char *userp;
-  /* point to the correct struct with this */
-  struct ntlmdata *ntlm;
+  curlntlm *state;
   struct auth *authp;
 
   CURLcode res = CURLE_OK;
@@ -358,13 +357,13 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
-    ntlm = &conn->proxyntlm;
+    state = &conn->proxy_ntlm_state;
     authp = &conn->data->state.authproxy;
   }
   else {
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
-    ntlm = &conn->ntlm;
+    state = &conn->http_ntlm_state;
     authp = &conn->data->state.authhost;
   }
   authp->done = FALSE;
@@ -373,7 +372,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   if(!userp)
     userp = "";
 
-  switch(ntlm->state) {
+  switch(*state) {
   case NTLMSTATE_TYPE1:
   default:
     /* Use Samba's 'winbind' daemon to support NTLM authentication,
@@ -392,7 +391,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     res = ntlm_wb_init(conn, userp);
     if(res)
       return res;
-    res = ntlm_wb_response(conn, "YR\n", ntlm->state);
+    res = ntlm_wb_response(conn, "YR\n", *state);
     if(res)
       return res;
 
@@ -410,7 +409,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     input = aprintf("TT %s\n", conn->challenge_header);
     if(!input)
       return CURLE_OUT_OF_MEMORY;
-    res = ntlm_wb_response(conn, input, ntlm->state);
+    res = ntlm_wb_response(conn, input, *state);
     free(input);
     input = NULL;
     if(res)
@@ -421,7 +420,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
                             proxy ? "Proxy-" : "",
                             conn->response_header);
     DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
-    ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
+    *state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     authp->done = TRUE;
     Curl_http_auth_cleanup_ntlm_wb(conn);
     if(!*allocuserpwd)
