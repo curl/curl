@@ -29,7 +29,11 @@ This release includes the following bugfixes:
  o VS projects: use Unicode for VC10+ [16]
  o WRITEFUNCTION: add missing set_in_callback around callback [60]
  o altsvc: Fix building with cookies disabled [38]
+ o auth: Rename the various authentication clean up functions [61]
+ o base64: build conditionally if there are users
  o build-openssl.bat: lots of improvements and polish
+ o build: fix "clarify calculation precedence" warnings [63]
+ o checksrc.bat: ignore snprintf warnings in docs/examples [67]
  o cirrus: Customize the disabled tests per FreeBSD version
  o cmake: avoid linking executable for some tests with cmake 3.6+ [18]
  o cmake: clear CMAKE_REQUIRED_LIBRARIES after each use [19]
@@ -41,24 +45,37 @@ This release includes the following bugfixes:
  o curl_easy_getinfo.3: fix minor formatting mistake
  o curlver.h: use parenthesis in CURL_VERSION_BITS macro [45]
  o docs/BUG-BOUNTY: bug bounty time [48]
+ o docs/INSTALL: fix broken link [62]
  o documentation: Fix several typos [7]
+ o doh: acknowledge CURL_DISABLE_DOH
+ o doh: disable DOH for the cases it doesn't work [66]
  o ftplistparser: fix LGTM alert "Empty block without comment" [14]
  o http: Ignore HTTP/2 prior knowledge setting for HTTP proxies [54]
+ o http: acknowledge CURL_DISABLE_HTTP_AUTH
  o http: mark bundle as not for multiuse on < HTTP/2 response [41]
+ o http_digest: Don't expose functions when HTTP and Crypto Auth are disabled [65]
  o http_negotiate: do not treat failure of gss_init_sec_context() as fatal [53]
+ o http_ntlm: Corrected the name of the include guard [64]
  o lib509: add missing include for strdup [22]
  o lib557: initialize variables [22]
  o makedebug: Fix ERRORLEVEL detection after running where.exe [58]
+ o mime: acknowledge CURL_DISABLE_MIME
  o multi: improved HTTP_1_1_REQUIRED handling [2]
  o nss: allow fifos and character devices for certificates [56]
  o nss: provide more specific error messages on failed init [43]
+ o ntlm: Fix misaligned function comments for Curl_auth_ntlm_cleanup [70]
  o ntlm: Support the NT response in the type-3 when OpenSSL doesn't include MD4
  o openssl: mark connection for close on TLS close_notify [36]
  o openvms: Remove pre-processor for SecureTransport [40]
  o openvms: Remove pre-processors for Windows [40]
+ o parsedate: disabled on CURL_DISABLE_PARSEDATE
+ o pingpong: disable more when no pingpong protocols are enabled
  o polarssl_threadlock: remove conditionally unused code [22]
+ o proxy: acknowledge DISABLE_PROXY more
  o resolve: apply Happy Eyeballs philosophy to parallel c-ares queries [3]
+ o revert "multi: support verbose conncache closure handle" [69]
  o sasl: Don't send authcid as authzid for the PLAIN mechanism as per RFC 4616
+ o sasl: only enable if there's a protocol enabled using it
  o scripts: fix typos
  o singleipconnect: show port in the verbose "Trying ..." message
  o smtp: fix compiler warning [15]
@@ -87,6 +104,8 @@ This release includes the following bugfixes:
  o urlapi: urlencode characters above 0x7f correctly [9]
  o vauth/cleartext: update the PLAIN login to match RFC 4616 [27]
  o vauth/oauth2: Fix OAUTHBEARER token generation [6]
+ o vauth: Fix incorrect function description for Curl_auth_user_contains_domain [68]
+ o wildcard: disable from build when FTP isn't present
  o winbuild: Support MultiSSL builds [34]
  o xattr: skip unittest on unsupported platforms [20]
 
@@ -100,13 +119,14 @@ advice from friends like these:
   Aron Bergman, Brad Spencer, cclauss on github, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, Eli Schwartz, Even Rouault,
   Frank Gevaerts, Gisle Vanem, Jakub Zakrzewski, Jan Ehrhardt,
-  Jonathan Cardoso Machado, Jonathan Moerman, Kamil Dudka, Leonardo Taccari,
-  Marcel Raad, Mert Yazıcıoğlu, niner on github, Paolo Mossino,
-  Patrick Monnerat, Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro, Reed Loden,
-  Ricardo Gomes, Ricky Leverence, Rikard Falkeborn, Simon Warta, Steve Holme,
-  Taiyu Len, Tim Rühsen, Tom van der Woerdt, Tseng Jun, Wyatt O'Day,
+  Jonathan Cardoso Machado, Jonathan Moerman, Joombalaya on github,
+  Kamil Dudka, Kristoffer Gleditsch, Leonardo Taccari, Marcel Raad,
+  Mert Yazıcıoğlu, niner on github, Paolo Mossino, Patrick Monnerat,
+  Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro, Reed Loden, Ricardo Gomes,
+  Ricky Leverence, Rikard Falkeborn, Simon Warta, Steve Holme, Taiyu Len,
+  Tim Rühsen, Tom van der Woerdt, Tseng Jun, Viktor Szakats, Wyatt O'Day,
   XmiliaH on github, Yiming Jing,
-  (37 contributors)
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -172,3 +192,13 @@ References to bug reports and discussions on issues:
  [58] = https://curl.haxx.se/bug/?i=3838
  [59] = https://curl.haxx.se/bug/?i=3834
  [60] = https://curl.haxx.se/bug/?i=3837
+ [61] = https://curl.haxx.se/bug/?i=3869
+ [62] = https://curl.haxx.se/bug/?i=3818
+ [63] = https://curl.haxx.se/bug/?i=3866
+ [64] = https://curl.haxx.se/bug/?i=3867
+ [65] = https://curl.haxx.se/bug/?i=3861
+ [66] = https://curl.haxx.se/bug/?i=3850
+ [67] = https://curl.haxx.se/bug/?i=3862
+ [68] = https://curl.haxx.se/bug/?i=3860
+ [69] = https://curl.haxx.se/bug/?i=3856
+ [70] = https://curl.haxx.se/bug/?i=3858
