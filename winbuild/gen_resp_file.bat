@@ -22,7 +22,7 @@ rem *
 rem ***************************************************************************
 
 if exist %OUTFILE% (
-    del %OUTFILE%
+  del %OUTFILE%
 )
 
 echo %MACRO_NAME% = \> %OUTFILE%
