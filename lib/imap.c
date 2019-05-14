@@ -1795,7 +1795,7 @@ static char *imap_atom(const char *str, bool escape_only)
     return NULL;
 
   /* Look for "atom-specials", counting the backslash and quote characters as
-     these will need escapping */
+     these will need escaping */
   p1 = str;
   while(*p1) {
     if(*p1 == '\\')
