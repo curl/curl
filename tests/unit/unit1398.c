@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -74,7 +74,6 @@ fail_unless(!strcmp(output, "     bu"), "wrong output");
 
 /* output a number in a limited output */
 rc = curl_msnprintf(output, 4, "%d", 10240);
-/* TODO: this should return 5 to be POSIX/msnprintf compliant! */
 fail_unless(rc == 4, "return code should be 4");
 fail_unless(!strcmp(output, "102"), "wrong output");
 

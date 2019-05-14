@@ -1831,7 +1831,6 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   /* list of all NSS objects we need to destroy in Curl_nss_close() */
   Curl_llist_init(&BACKEND->obj_list, nss_destroy_object);
 
-  /* FIXME. NSS doesn't support multiple databases open at the same time. */
   PR_Lock(nss_initlock);
   result = nss_init(conn->data);
   if(result) {

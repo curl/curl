@@ -1903,7 +1903,6 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
   /* We want to enable 1/n-1 when using a CBC cipher unless the user
      specifically doesn't want us doing that: */
   if(SSLSetSessionOption != NULL) {
-    /* TODO s/data->set.ssl.enable_beast/SSL_SET_OPTION(enable_beast)/g */
     SSLSetSessionOption(BACKEND->ssl_ctx, kSSLSessionOptionSendOneByteRecord,
                       !data->set.ssl.enable_beast);
     SSLSetSessionOption(BACKEND->ssl_ctx, kSSLSessionOptionFalseStart,

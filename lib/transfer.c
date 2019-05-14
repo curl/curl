@@ -463,7 +463,6 @@ CURLcode Curl_readrewind(struct connectdata *conn)
       infof(data, "the ioctl callback returned %d\n", (int)err);
 
       if(err) {
-        /* FIXME: convert to a human readable error message */
         failf(data, "ioctl callback returned error %d", (int)err);
         return CURLE_SEND_FAIL_REWIND;
       }

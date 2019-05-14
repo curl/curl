@@ -2227,12 +2227,7 @@ static CURLcode myssh_done(struct connectdata *conn, CURLcode status)
   struct SSHPROTO *protop = conn->data->req.protop;
 
   if(!status) {
-    /* run the state-machine
-
-       TODO: when the multi interface is used, this _really_ should be using
-       the ssh_multi_statemach function but we have no general support for
-       non-blocking DONE operations!
-     */
+    /* run the state-machine */
     result = myssh_block_statemach(conn, FALSE);
   }
   else

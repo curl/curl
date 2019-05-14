@@ -559,7 +559,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       return CURLE_RECV_ERROR;
 
     if(mcode)
-      return CURLE_URL_MALFORMAT; /* TODO: return a proper error! */
+      return CURLE_URL_MALFORMAT;
 
     /* we don't really care about the "msgs_in_queue" value returned in the
        second argument */

@@ -151,7 +151,6 @@ socket_read(curl_socket_t fd, void *to, size_t len)
       to_p += nread;
     }
     else {
-      /* FIXME: We are doing a busy wait */
       if(result == CURLE_AGAIN)
         continue;
       return result;
@@ -179,7 +178,6 @@ socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
       to_p += written;
     }
     else {
-      /* FIXME: We are doing a busy wait */
       if(result == CURLE_AGAIN)
         continue;
       return result;
@@ -265,13 +263,11 @@ static ssize_t sec_recv(struct connectdata *conn, int sockindex,
     total_read += bytes_read;
     buffer += bytes_read;
   }
-  /* FIXME: Check for overflow */
   return total_read;
 }
 
 /* Send |length| bytes from |from| to the |fd| socket taking care of encoding
    and negociating with the server. |from| can be NULL. */
-/* FIXME: We don't check for errors nor report any! */
 static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
                         const char *from, int length)
 {
@@ -406,13 +402,11 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 
   if(buf[decoded_len - 1] == '\n')
     buf[decoded_len - 1] = '\0';
-  /* FIXME: Is |buffer| length always greater than |decoded_len|? */
   strcpy(buffer, buf);
   free(buf);
   return ret_code;
 }
 
-/* FIXME: The error code returned here is never checked. */
 static int sec_set_protection_level(struct connectdata *conn)
 {
   int code;
@@ -508,7 +502,6 @@ static CURLcode choose_mech(struct connectdata *conn)
   infof(data, "Trying mechanism %s...\n", mech->name);
   ret = ftp_send_command(conn, "AUTH %s", mech->name);
   if(ret < 0)
-    /* FIXME: This error is too generic but it is OK for now. */
     return CURLE_COULDNT_CONNECT;
 
   if(ret/100 != 3) {
@@ -575,7 +568,6 @@ Curl_sec_end(struct connectdata *conn)
     conn->in_buffer.data = NULL;
     conn->in_buffer.size = 0;
     conn->in_buffer.index = 0;
-    /* FIXME: Is this really needed? */
     conn->in_buffer.eof_flag = 0;
   }
   conn->sec_complete = 0;

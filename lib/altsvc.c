@@ -253,7 +253,6 @@ struct altsvcinfo *Curl_altsvc_init(void)
     | CURLALTSVC_H2
 #endif
 #ifdef USE_HTTP3
-    /* TODO: adjust when known */
     | CURLALTSVC_H3
 #endif
     ;
@@ -349,7 +348,7 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   len = p - protop;
 
   if(!len || (len >= buflen))
-    return CURLE_BAD_FUNCTION_ARGUMENT; /* TODO: improve error code */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   memcpy(alpnbuf, protop, len);
   alpnbuf[len] = 0;
   *ptr = p;
@@ -425,7 +424,6 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
 
   /* "clear" is a magic keyword */
   if(strcasecompare(alpnbuf, "clear")) {
-    /* TODO: clear whatever it is it should clear */
     return CURLE_OK;
   }
 
@@ -478,7 +476,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             p++;
           len = p - hostp;
           if(!len || (len >= MAX_ALTSVC_HOSTLEN))
-            return CURLE_BAD_FUNCTION_ARGUMENT; /* TODO: improve error code */
+            return CURLE_BAD_FUNCTION_ARGUMENT;
           memcpy(namebuf, hostp, len);
           namebuf[len] = 0;
           dsthost = namebuf;
@@ -504,8 +502,8 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                              srcalpnid, dstalpnid,
                              srcport, dstport);
         if(as) {
-          /* TODO: the expires time also needs to take the Age: value (if any)
-             into account. [See RFC 7838 section 3.1] */
+          /* The expires time also needs to take the Age: value (if any) into
+             account. [See RFC 7838 section 3.1] */
           as->expires = maxage + time(NULL);
           as->persist = persist;
           Curl_llist_insert_next(&asi->list, asi->list.tail, as, &as->node);

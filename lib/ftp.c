@@ -572,7 +572,6 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
 #if defined(HAVE_GSSAPI)
   /* handle the security-oriented responses 6xx ***/
-  /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
   case 631:
     code = Curl_sec_read_msg(conn, buf, PROT_SAFE);
@@ -3490,7 +3489,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
     if(Curl_connect_ongoing(conn)) {
       /* As we're in TUNNEL_CONNECT state now, we know the proxy name and port
-         aren't used so we blank their arguments. TODO: make this nicer */
+         aren't used so we blank their arguments. */
       result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0);
 
       return result;

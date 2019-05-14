@@ -568,7 +568,6 @@ static int get_param_part(struct OperationConfig *config, char endchar,
             endpos--;
         sep = *p;
         *endpos = '\0';
-        /* TODO: maybe special fopen for VMS? */
         fp = fopen(hdrfile, FOPEN_READTEXT);
         if(!fp)
           warnf(config->global, "Cannot read from %s: %s\n", hdrfile,
