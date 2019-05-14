@@ -101,7 +101,6 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 static bool is_fatal_error(CURLcode code)
 {
   switch(code) {
-  /* TODO: Should CURLE_PEER_FAILED_VERIFICATION be a critical error? */
   case CURLE_FAILED_INIT:
   case CURLE_OUT_OF_MEMORY:
   case CURLE_UNKNOWN_OPTION:
@@ -876,8 +875,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
 #if !defined(CURL_DISABLE_PROXY)
         {
-          /* TODO: Make this a run-time check instead of compile-time one. */
-
           my_setopt_str(curl, CURLOPT_PROXY, config->proxy);
           /* new in libcurl 7.5 */
           if(config->proxy)
@@ -1663,10 +1660,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
                    * file (or terminal). If we write to a file, we must rewind
                    * or close/re-open the file so that the next attempt starts
                    * over from the beginning.
-                   *
-                   * TODO: similar action for the upload case. We might need
-                   * to start over reading from a previous point if we have
-                   * uploaded something when this was returned.
                    */
                   break;
                 }
@@ -1757,8 +1750,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
                download was not successful. */
             long response;
             if(CURLE_OK == result) {
-              /* TODO We want to try next resource when download was
-                 not successful. How to know that? */
               char *effective_url = NULL;
               curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
               if(effective_url &&
@@ -1932,9 +1923,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
             break;
           mlres = mlres->next;
           if(mlres == NULL)
-            /* TODO If metalink_next_res is 1 and mlres is NULL,
-             * set res to error code
-             */
             break;
         }
         else if(urlnum > 1) {

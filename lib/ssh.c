@@ -290,10 +290,6 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
       return CURLE_AGAIN;
   }
 
-  /* TODO: map some more of the libssh2 errors to the more appropriate CURLcode
-     error code, and possibly add a few new SSH-related one. We must however
-     not return or even depend on libssh2 errors in the public libcurl API */
-
   return CURLE_SSH;
 }
 
@@ -3065,12 +3061,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   struct SSHPROTO *sftp_scp = conn->data->req.protop;
 
   if(!status) {
-    /* run the state-machine
-
-       TODO: when the multi interface is used, this _really_ should be using
-       the ssh_multi_statemach function but we have no general support for
-       non-blocking DONE operations!
-    */
+    /* run the state-machine */
     result = ssh_block_statemach(conn, FALSE);
   }
   else

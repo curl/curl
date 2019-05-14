@@ -1206,8 +1206,6 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
  * second stage DO state which (wrongly) was introduced to support FTP's
  * second connection.
  *
- * TODO: A future libcurl should be able to work away this state.
- *
  * 'complete' can return 0 for incomplete, 1 for done and -1 for go back to
  * DOING state there's more work to do!
  */

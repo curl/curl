@@ -911,9 +911,7 @@ const struct Curl_ssl Curl_ssl_polarssl = {
   Curl_none_check_cxn,               /* check_cxn */
   Curl_none_shutdown,                /* shutdown */
   Curl_polarssl_data_pending,        /* data_pending */
-  /* This might cause libcurl to use a weeker random!
-   * TODO: use Polarssl's CTR-DRBG or HMAC-DRBG
-  */
+  /* This might cause libcurl to use a weeker random! */
   Curl_none_random,                  /* random */
   Curl_none_cert_status_request,     /* cert_status_request */
   Curl_polarssl_connect,             /* connect */

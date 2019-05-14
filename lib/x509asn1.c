@@ -1056,8 +1056,6 @@ CURLcode Curl_extract_certinfo(struct connectdata *conn,
   do_pubkey(data, certnum, ccp, &param, &cert.subjectPublicKey);
   free((char *) ccp);
 
-/* TODO: extensions. */
-
   /* Signature. */
   ccp = ASN1tostr(&cert.signature, 0);
   if(!ccp)

@@ -1708,8 +1708,6 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
   const char *endofline_native = NULL;
   const char *endofline_network = NULL;
 
-  /* TODO: Maybe split Curl_add_custom_headers to make it reusable here */
-
   if(
 #ifdef CURL_DO_LINEEND_CONV
      (handle->set.prefer_ascii) ||
@@ -3714,7 +3712,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           conn->httpversion = 11; /* For us, RTSP acts like HTTP 1.1 */
         }
         else {
-          /* TODO: do we care about the other cases here? */
           nc = 0;
         }
       }
