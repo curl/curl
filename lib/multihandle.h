@@ -133,8 +133,7 @@ struct Curl_multi {
   struct curltime timer_lastcall; /* the fixed time for the timeout for the
                                     previous callback */
   bool in_callback;            /* true while executing a callback */
-  uint32_t max_http2_concurrent_streams; /*max concurrent streams http2 client
-                                           to support*/
+  long max_concurrent_streams; /*max concurrent streams client to support*/
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

@@ -348,4 +348,4 @@ man_MANS =                                      \
   CURLOPT_XFERINFODATA.3                        \
   CURLOPT_XFERINFOFUNCTION.3                    \
   CURLOPT_XOAUTH2_BEARER.3                      \
-  CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS.3
+  CURLMOPT_MAX_CONCURRENT_STREAMS.3

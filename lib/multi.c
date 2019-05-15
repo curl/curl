@@ -2625,8 +2625,12 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
     break;
   case CURLMOPT_PIPELINING_SERVER_BL:
     break;
-  case CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS:
-    multi->max_http2_concurrent_streams = va_arg(param, uint32_t);
+  case CURLMOPT_MAX_CONCURRENT_STREAMS:
+    {
+      long streams = va_arg(param, long);
+      multi->max_concurrent_streams = (streams>INITIAL_MAX_CONCURRENT_STREAMS)?
+          INITIAL_MAX_CONCURRENT_STREAMS : streams;
+    }
     break;
   default:
     res = CURLM_UNKNOWN_OPTION;
@@ -3047,10 +3051,10 @@ void Curl_multi_dump(struct Curl_multi *multi)
 }
 #endif
 
-uint32_t Curl_multi_max_http2_concurrent_streams
+size_t Curl_multi_max_concurrent_streams
 (struct Curl_multi *multi)
 {
   return multi ?
-    (multi->max_http2_concurrent_streams?
-    multi->max_http2_concurrent_streams:100) : 0;
+    (multi->max_concurrent_streams?
+    multi->max_concurrent_streams:100) : 0;
 }

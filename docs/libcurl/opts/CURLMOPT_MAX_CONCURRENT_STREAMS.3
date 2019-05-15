@@ -20,18 +20,18 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS 3 "25 Apr 2019" "libcurl 7.64.0" "curl_multi_setopt options"
+.TH CURLMOPT_MAX_CONCURRENT_STREAMS 3 "14 May 2019" "libcurl 7.64.0" "curl_multi_setopt options"
 .SH NAME
-CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS \- set max concurrent streams for http2
+CURLMOPT_MAX_CONCURRENT_STREAMS \- set max concurrent streams for http2
 .SH SYNOPSIS
 #include <curl/curl.h>
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS, long max);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAX_CONCURRENT_STREAMS, long max);
 .SH DESCRIPTION
 Pass a long indicating the \fBmax\fP. The set number will be used as the
 maximum number of concurrent streams for a connections that libcurl should 
 support.
-
+Valid values range from 1 to 2147483647 (2^31 - 1) and defaults to 100.
 This option is for the multi handle's use only.
 
 
@@ -43,7 +43,7 @@ All
 .nf
 CURLM *m = curl_multi_init();
 /* max concurrent streams 200 */
-curl_multi_setopt(m, CURLMOPT_MAX_HTTP2_CONCURRENT_STREAMS, 200L);
+curl_multi_setopt(m, CURLMOPT_MAX_CONCURRENT_STREAMS, 200L);
 .fi
 .SH AVAILABILITY
 Added in 7.64.3
