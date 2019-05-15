@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,8 +27,7 @@
  * 'rnd' points to.
  *
  * If libcurl is built without TLS support or with a TLS backend that lacks a
- * proper random API (Gskit, PolarSSL or mbedTLS), this function will use
- * "weak" random.
+ * proper random API (Gskit or mbedTLS), this function will use "weak" random.
  *
  * When built *with* TLS support and a backend that offers strong random, it
  * will return error if it cannot provide strong random values.
