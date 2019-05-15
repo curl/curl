@@ -18,7 +18,9 @@ This release includes the following bugfixes:
  o AppVeyor: enable testing for WinSSL build [23]
  o CURLMOPT_TIMERFUNCTION.3: warn about the recursive risk [52]
  o CURLOPT_ADDRESS_SCOPE: fix range check and more [32]
+ o CURLOPT_CAINFO.3: with Schannel, you want Windows 8 or later [75]
  o CURLOPT_CHUNK_BGN_FUNCTION.3: document the struct and time value [51]
+ o CURLOPT_READFUNCTION.3: see also CURLOPT_UPLOAD_BUFFERSIZE [71]
  o CURL_MAX_INPUT_LENGTH: largest acceptable string input size [44]
  o Curl_disconnect: treat all CONNECT_ONLY connections as "dead" [39]
  o INTERNALS: Add code highlighting [47]
@@ -40,6 +42,7 @@ This release includes the following bugfixes:
  o cmake: rename CMAKE_USE_DARWINSSL to CMAKE_USE_SECTRANSP [46]
  o cmake: set SSL_BACKENDS [12]
  o configure: avoid unportable `==' test(1) operator [1]
+ o configure: error out if OpenSSL wasn't detected when asked for [74]
  o configure: fix default location for fish completions [13]
  o cookie: Guard against possible NULL ptr deref [42]
  o curl_easy_getinfo.3: fix minor formatting mistake
@@ -68,6 +71,7 @@ This release includes the following bugfixes:
  o openssl: mark connection for close on TLS close_notify [36]
  o openvms: Remove pre-processor for SecureTransport [40]
  o openvms: Remove pre-processors for Windows [40]
+ o parse_proxy: use the URL parser API [72]
  o parsedate: disabled on CURL_DISABLE_PARSEDATE
  o pingpong: disable more when no pingpong protocols are enabled
  o polarssl_threadlock: remove conditionally unused code [22]
@@ -99,12 +103,14 @@ This release includes the following bugfixes:
  o travis: updated mesalink builds [35]
  o url: always clone the CUROPT_CURLU handle [26]
  o urlapi: add CURLUPART_ZONEID to set and get [59]
+ o urlapi: require a non-zero host name length when parsing URL [73]
  o urlapi: stricter CURLUPART_PORT parsing [33]
  o urlapi: strip off zone id from numerical IPv6 addresses [49]
  o urlapi: urlencode characters above 0x7f correctly [9]
  o vauth/cleartext: update the PLAIN login to match RFC 4616 [27]
  o vauth/oauth2: Fix OAUTHBEARER token generation [6]
  o vauth: Fix incorrect function description for Curl_auth_user_contains_domain [68]
+ o vtls: fix potential ssl_buffer stack overflow [76]
  o wildcard: disable from build when FTP isn't present
  o winbuild: Support MultiSSL builds [34]
  o xattr: skip unittest on unsupported platforms [20]
@@ -118,15 +124,16 @@ advice from friends like these:
 
   Aron Bergman, Brad Spencer, cclauss on github, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, Eli Schwartz, Even Rouault,
-  Frank Gevaerts, Gisle Vanem, Jakub Zakrzewski, Jan Ehrhardt,
-  Jonathan Cardoso Machado, Jonathan Moerman, Joombalaya on github,
-  Kamil Dudka, Kristoffer Gleditsch, Leonardo Taccari, Marcel Raad,
-  Mert Yazıcıoğlu, niner on github, Paolo Mossino, Patrick Monnerat,
-  Po-Chuan Hsieh, Poul T Lomholt, Ray Satiro, Reed Loden, Ricardo Gomes,
-  Ricky Leverence, Rikard Falkeborn, Simon Warta, Steve Holme, Taiyu Len,
-  Tim Rühsen, Tom van der Woerdt, Tseng Jun, Viktor Szakats, Wyatt O'Day,
-  XmiliaH on github, Yiming Jing,
-  (40 contributors)
+  Frank Gevaerts, Gisle Vanem, Isaiah Norton, Jakub Zakrzewski, Jan Ehrhardt,
+  Jeroen Ooms, Jonathan Cardoso Machado, Jonathan Moerman,
+  Joombalaya on github, Kamil Dudka, Kristoffer Gleditsch, l00p3r on Hackerone,
+  Leonardo Taccari, Marcel Raad, Mert Yazıcıoğlu, nevv on HackerOne/curl,
+  niner on github, Paolo Mossino, Patrick Monnerat, Po-Chuan Hsieh,
+  Poul T Lomholt, Ray Satiro, Reed Loden, Ricardo Gomes, Ricky Leverence,
+  Rikard Falkeborn, Roy Bellingan, Simon Warta, Steve Holme, Taiyu Len,
+  Tim Rühsen, Tom van der Woerdt, Tseng Jun, Viktor Szakats, Wenchao Li,
+  Wyatt O'Day, XmiliaH on github, Yiming Jing,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -202,3 +209,9 @@ References to bug reports and discussions on issues:
  [68] = https://curl.haxx.se/bug/?i=3860
  [69] = https://curl.haxx.se/bug/?i=3856
  [70] = https://curl.haxx.se/bug/?i=3858
+ [71] = https://curl.haxx.se/bug/?i=3885
+ [72] = https://curl.haxx.se/bug/?i=3878
+ [73] = https://curl.haxx.se/bug/?i=3880
+ [74] = https://curl.haxx.se/bug/?i=3824
+ [75] = https://curl.haxx.se/bug/?i=3711
+ [76] = https://curl.haxx.se/bug/?i=3863
