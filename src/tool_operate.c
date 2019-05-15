@@ -1018,7 +1018,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         } /* (built_in_protos & CURLPROTO_HTTP) */
 
+#ifndef CURL_DISABLE_FTP
         my_setopt_str(curl, CURLOPT_FTPPORT, config->ftpport);
+#endif
         my_setopt(curl, CURLOPT_LOW_SPEED_LIMIT,
                   config->low_speed_limit);
         my_setopt(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
@@ -1373,12 +1375,13 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl?1L:0L);
 
+#ifndef CURL_DISABLE_FTP
         /* curl 7.14.2 */
         my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip?1L:0L);
 
         /* curl 7.15.1 */
         my_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long)config->ftp_filemethod);
-
+#endif
         /* curl 7.15.2 */
         if(config->localport) {
           my_setopt(curl, CURLOPT_LOCALPORT, config->localport);
