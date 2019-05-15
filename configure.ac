@@ -155,7 +155,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,schannel,secure-transport,mesalink,amissl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,mbedtls,cyassl,schannel,secure-transport,mesalink,amissl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -2119,98 +2119,6 @@ if test "$GNUTLS_ENABLED" = "1"; then
 fi
 
 dnl ----------------------------------------------------
-dnl check for PolarSSL
-dnl ----------------------------------------------------
-
-dnl Default to compiler & linker defaults for PolarSSL files & libraries.
-OPT_POLARSSL=no
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-AC_ARG_WITH(polarssl,dnl
-AC_HELP_STRING([--with-polarssl=PATH],[where to look for PolarSSL, PATH points to the installation root])
-AC_HELP_STRING([--without-polarssl], [disable PolarSSL detection]),
-  OPT_POLARSSL=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_POLARSSL" != xno; then
-  ssl_msg=
-
-  if test X"$OPT_POLARSSL" != Xno; then
-
-    if test "$OPT_POLARSSL" = "yes"; then
-      OPT_POLARSSL=""
-    fi
-
-    if test -z "$OPT_POLARSSL" ; then
-      dnl check for lib first without setting any new path
-
-      AC_CHECK_LIB(polarssl, havege_init,
-      dnl libpolarssl found, set the variable
-       [
-         AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
-         AC_SUBST(USE_POLARSSL, [1])
-         POLARSSL_ENABLED=1
-         USE_POLARSSL="yes"
-         ssl_msg="PolarSSL"
-	 test polarssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ])
-    fi
-
-    addld=""
-    addlib=""
-    addcflags=""
-    polarssllib=""
-
-    if test "x$USE_POLARSSL" != "xyes"; then
-      dnl add the path and test again
-      addld=-L$OPT_POLARSSL/lib$libsuff
-      addcflags=-I$OPT_POLARSSL/include
-      polarssllib=$OPT_POLARSSL/lib$libsuff
-
-      LDFLAGS="$LDFLAGS $addld"
-      if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      AC_CHECK_LIB(polarssl, ssl_init,
-       [
-       AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
-       AC_SUBST(USE_POLARSSL, [1])
-       POLARSSL_ENABLED=1
-       USE_POLARSSL="yes"
-       ssl_msg="PolarSSL"
-       test polarssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-       ],
-       [
-         CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
-       ])
-    fi
-
-    if test "x$USE_POLARSSL" = "xyes"; then
-      AC_MSG_NOTICE([detected PolarSSL])
-      check_for_ca_bundle=1
-      LIBS="-lpolarssl $LIBS"
-
-      if test -n "$polarssllib"; then
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
-        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$polarssllib"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $polarssllib to CURL_LIBRARY_PATH])
-        fi
-      fi
-    fi
-
-  fi dnl PolarSSL not disabled
-
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
-
-dnl ----------------------------------------------------
 dnl check for mbedTLS
 dnl ----------------------------------------------------
 
@@ -2698,10 +2606,10 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$AMISSL_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$AMISSL_ENABLED" in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink or --with-amissl to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-cyassl, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink or --with-amissl to address this.])
   ;;
 x1)
   # one SSL backend is enabled
@@ -3125,8 +3033,6 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="GNUTLS_"
         elif test "x$NSS_ENABLED" = "x1"; then
           versioned_symbols_flavour="NSS_"
-        elif test "x$POLARSSL_ENABLED" = "x1"; then
-          versioned_symbols_flavour="POLARSSL_"
         elif test "x$CYASSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="CYASSL_"
         elif test "x$WINSSL_ENABLED" = "x1"; then
