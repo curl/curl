@@ -53,6 +53,8 @@
 #include "url.h"
 #include "strerror.h"
 #include "strdup.h"
+#include "strcase.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -331,6 +333,30 @@ static CURLcode ntlm_wb_response(struct connectdata *conn,
 done:
   free(buf);
   return CURLE_REMOTE_ACCESS_DENIED;
+}
+
+CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
+                            bool proxy,
+                            const char *header)
+{
+  (void) proxy;
+
+  if(!checkprefix("NTLM", header))
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  header += strlen("NTLM");
+  while(*header && ISSPACE(*header))
+    header++;
+
+  if(*header) {
+    conn->challenge_header = strdup(header);
+    if(!conn->challenge_header)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  else
+    return CURLE_BAD_CONTENT_ENCODING;
+
+  return CURLE_OK;
 }
 
 /*
