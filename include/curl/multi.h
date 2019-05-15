@@ -437,6 +437,9 @@ typedef int (*curl_push_callback)(CURL *parent,
                                   struct curl_pushheaders *headers,
                                   void *userp);
 
+/* value for MAXIMUM CONCURRENT STREAMS upper limit */
+#define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
+
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif

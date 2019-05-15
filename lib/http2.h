@@ -31,9 +31,6 @@
    from the peer */
 #define DEFAULT_MAX_CONCURRENT_STREAMS 13
 
-/* value for MAXIMUM CONCURRENT STREAMS upper limit */
-#define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
-
 /*
  * Store nghttp2 version info in this buffer, Prefix with a space.  Return
  * total length written.
