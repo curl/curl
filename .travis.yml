@@ -224,6 +224,9 @@ matrix:
           env: T=debug C=--with-libssh2
         - os: osx
           compiler: gcc
+          env: T=debug C="--disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --enable-debug --enable-maintainer-mode --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib"
+        - os: osx
+          compiler: gcc
           env: T=debug C=--enable-ares
         - os: osx
           compiler: gcc
