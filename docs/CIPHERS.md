@@ -271,7 +271,8 @@ When specifying multiple cipher names, separate them with colon (`:`).
 
 ## GSKit
 
-Ciphers are internally defined as numeric codes (https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm),
+Ciphers are internally defined as
+[numeric codes](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm),
 but libcurl maps them to the following case-insensitive names.
 
 ### SSL2 cipher suites (insecure: disabled by default)
@@ -446,9 +447,12 @@ but libcurl maps them to the following case-insensitive names.
 `DHE-PSK-CHACHA20-POLY1305`,
 `EDH-RSA-DES-CBC3-SHA`,
 
-## WinSSL
+## Schannel
 
-WinSSL allows the enabling and disabling of encryption algorithms, but not specific ciphersuites. They are defined by Microsoft (https://msdn.microsoft.com/en-us/library/windows/desktop/aa375549(v=vs.85).aspx)
+Schannel allows the enabling and disabling of encryption algorithms, but not
+specific ciphersuites. They are
+[defined](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id) by
+Microsoft.
 
 `CALG_MD2`,
 `CALG_MD4`,

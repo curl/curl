@@ -16,7 +16,7 @@ in the source code repo
 
 - run "./maketgz 7.34.0" to build the release tarballs. It is important that
   you run this on a machine with the correct set of autotools etc installed
-  as this is what then will be shipped and used by most users on *nix like
+  as this is what then will be shipped and used by most users on \*nix like
   systems.
 
 - push the git commits and the new tag
