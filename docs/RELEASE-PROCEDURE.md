@@ -92,3 +92,7 @@ time of this writing):
 - February 27, 2020
 - April 22, 2020
 - June 17, 2020
+
+The above (and more) curl-related dates are published in
+[iCalendar format](https://calendar.google.com/calendar/ical/c9u5d64odop9js55oltfarjk6g%40group.calendar.google.com/public/basic.ics)
+as well.
