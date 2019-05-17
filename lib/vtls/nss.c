@@ -216,6 +216,11 @@ static const cipher_s cipherlist[] = {
  {"dhe_rsa_chacha20_poly1305_sha_256",
      TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256},
 #endif
+#ifdef TLS_AES_256_GCM_SHA384
+ {"aes_128_gcm_sha_256",              TLS_AES_128_GCM_SHA256},
+ {"aes_256_gcm_sha_384",              TLS_AES_256_GCM_SHA384},
+ {"chacha20_poly1305_sha_256",        TLS_CHACHA20_POLY1305_SHA256},
+#endif
 };
 
 #ifdef WIN32
