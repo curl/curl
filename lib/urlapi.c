@@ -652,7 +652,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   char *fragment = NULL;
   CURLUcode result;
   bool url_has_scheme = FALSE;
-  char schemebuf[MAX_SCHEME_LEN];
+  char schemebuf[MAX_SCHEME_LEN + 1];
   char *schemep = NULL;
   size_t schemelen = 0;
   size_t urllen;
@@ -1217,6 +1217,9 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
 
   switch(what) {
   case CURLUPART_SCHEME:
+    if(strlen(part) > MAX_SCHEME_LEN)
+      /* too long */
+      return CURLUE_MALFORMED_INPUT;
     if(!(flags & CURLU_NON_SUPPORT_SCHEME) &&
        /* verify that it is a fine scheme */
        !Curl_builtin_scheme(part))
@@ -1279,7 +1282,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     char *redired_url;
     CURLU *handle2;
 
-    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN)) {
+    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN + 1)) {
       handle2 = curl_url();
       if(!handle2)
         return CURLUE_OUT_OF_MEMORY;
