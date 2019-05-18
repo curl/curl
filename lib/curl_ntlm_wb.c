@@ -356,7 +356,11 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
     *state = NTLMSTATE_TYPE2; /* We got a type-2 message */
   }
   else {
-    if(*state == NTLMSTATE_TYPE3) {
+    if(*state == NTLMSTATE_LAST) {
+      infof(conn->data, "NTLM auth restarted\n");
+      Curl_http_auth_cleanup_ntlm_wb(conn);
+    }
+    else if(*state == NTLMSTATE_TYPE3) {
       infof(conn->data, "NTLM handshake rejected\n");
       Curl_http_auth_cleanup_ntlm_wb(conn);
       *state = NTLMSTATE_NONE;
@@ -445,6 +449,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
     conn->response_header = NULL;
     break;
+
   case NTLMSTATE_TYPE2:
     input = aprintf("TT %s\n", conn->challenge_header);
     if(!input)
@@ -466,11 +471,14 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     if(!*allocuserpwd)
       return CURLE_OUT_OF_MEMORY;
     break;
+
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */
-    free(*allocuserpwd);
-    *allocuserpwd = NULL;
+    *state = NTLMSTATE_LAST;
+    /* FALLTHROUGH */
+  case NTLMSTATE_LAST:
+    Curl_safefree(*allocuserpwd);
     authp->done = TRUE;
     break;
   }
