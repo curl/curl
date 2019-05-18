@@ -206,6 +206,9 @@ my $valgrind_tool;
 my $gdb = checktestcmd("gdb");
 my $httptlssrv = find_httptlssrv();
 
+my $uname_release = `uname -r`;
+my $is_wsl = $uname_release =~ /Microsoft$/;
+
 my $has_ssl;        # set if libcurl is built with SSL support
 my $has_largefile;  # set if libcurl is built with large file support
 my $has_idn;        # set if libcurl is built with IDN support
@@ -324,7 +327,12 @@ my $tortalloc;
 #
 sub logmsg {
     for(@_) {
-        print "$_";
+        my $line = $_;
+        if ($is_wsl) {
+            # use \r\n for WSL shell
+            $line =~ s/\r?\n$/\r\n/g;
+        }
+        print "$line";
     }
 }
 
