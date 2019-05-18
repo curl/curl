@@ -371,6 +371,9 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
         logmsg 'Could not generate client key';
         exit 1;
     }
+    # Make sure that permissions are restricted so openssh doesn't complain
+    system "chmod 600 $hstprvkeyf";
+    system "chmod 600 $cliprvkeyf";
 }
 
 
