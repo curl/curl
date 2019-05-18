@@ -339,7 +339,7 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
                             bool proxy,
                             const char *header)
 {
-  (void) proxy;
+  curlntlm *state = proxy ? &conn->proxy_ntlm_state : &conn->http_ntlm_state;
 
   if(!checkprefix("NTLM", header))
     return CURLE_BAD_CONTENT_ENCODING;
@@ -352,9 +352,17 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
     conn->challenge_header = strdup(header);
     if(!conn->challenge_header)
       return CURLE_OUT_OF_MEMORY;
+
+    *state = NTLMSTATE_TYPE2; /* We got a type-2 message */
   }
-  else
-    return CURLE_BAD_CONTENT_ENCODING;
+  else {
+    if(*state >= NTLMSTATE_TYPE1) {
+      infof(conn->data, "NTLM handshake failure (internal error)\n");
+      return CURLE_REMOTE_ACCESS_DENIED;
+    }
+
+    *state = NTLMSTATE_TYPE1; /* We should send away a type-1 */
+  }
 
   return CURLE_OK;
 }
