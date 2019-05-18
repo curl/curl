@@ -34,6 +34,10 @@ use serverhelp qw(
     server_logfilename
     );
 
+use sshhelp qw(
+    exe_ext
+    );
+
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8990;     # just a default
 my $unix_socket;     # location to place a listening Unix socket
@@ -133,7 +137,7 @@ if($ipvnum eq 'unix') {
 $flags .= "--srcdir \"$srcdir\"";
 
 if($verbose) {
-    print STDERR "RUN: server/sws $flags\n";
+    print STDERR "RUN: server/sws".exe_ext('SRV')." $flags\n";
 }
 
-exec("server/sws $flags");
+exec("server/sws".exe_ext('SRV')." $flags");

@@ -106,12 +106,12 @@ use vars qw(
 #***************************************************************************
 # Global variables initialization
 #
-$sshdexe         = 'sshd'        .exe_ext(); # base name and ext of ssh daemon
-$sshexe          = 'ssh'         .exe_ext(); # base name and ext of ssh client
-$sftpsrvexe      = 'sftp-server' .exe_ext(); # base name and ext of sftp-server
-$sftpexe         = 'sftp'        .exe_ext(); # base name and ext of sftp client
-$sshkeygenexe    = 'ssh-keygen'  .exe_ext(); # base name and ext of ssh-keygen
-$httptlssrvexe   = 'gnutls-serv' .exe_ext(); # base name and ext of gnutls-serv
+$sshdexe         = 'sshd'        .exe_ext('SSH'); # base name and ext of ssh daemon
+$sshexe          = 'ssh'         .exe_ext('SSH'); # base name and ext of ssh client
+$sftpsrvexe      = 'sftp-server' .exe_ext('SSH'); # base name and ext of sftp-server
+$sftpexe         = 'sftp'        .exe_ext('SSH'); # base name and ext of sftp client
+$sshkeygenexe    = 'ssh-keygen'  .exe_ext('SSH'); # base name and ext of ssh-keygen
+$httptlssrvexe   = 'gnutls-serv' .exe_ext('SSH'); # base name and ext of gnutls-serv
 $sshdconfig      = 'curl_sshd_config';       # ssh daemon config file
 $sshconfig       = 'curl_ssh_config';        # ssh client config file
 $sftpconfig      = 'curl_sftp_config';       # sftp client config file
@@ -180,6 +180,13 @@ $clipubkeyf      = 'curl_client_key.pub';    # client public key file
 # Return file extension for executable files on this operating system
 #
 sub exe_ext {
+    my ($component, @arr) = @_;
+    if ($ENV{'CURL_TEST_EXE_EXT'}) {
+        return $ENV{'CURL_TEST_EXE_EXT'};
+    }
+    if ($ENV{'CURL_TEST_EXE_EXT_'.$component}) {
+        return $ENV{'CURL_TEST_EXE_EXT_'.$component};
+    }
     if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
         $^O eq 'dos' || $^O eq 'os2') {
         return '.exe';
@@ -314,7 +321,7 @@ sub find_exe_file {
     my $fn = $_[0];
     shift;
     my @path = @_;
-    my $xext = exe_ext();
+    my $xext = exe_ext('SSH');
     foreach (@path) {
         my $file = File::Spec->catfile($_, $fn);
         if(-e $file && ! -d $file) {

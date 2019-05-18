@@ -150,7 +150,7 @@ my $SMBSPORT;            # SMBS server port
 my $NEGTELNETPORT;       # TELNET server port with negotiation
 
 my $srcdir = $ENV{'srcdir'} || '.';
-my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
+my $CURL="../src/curl".exe_ext('TOOL'); # what curl executable to run on the tests
 my $VCURL=$CURL;   # what curl binary to use to verify the servers with
                    # VCURL is handy to set to the system one when the one you
                    # just built hangs or crashes and thus prevent verification
@@ -2915,7 +2915,8 @@ sub checksystem {
         # client has IPv6 support
 
         # check if the HTTP server has it!
-        my @sws = `server/sws --version`;
+        my $cmd = "server/sws".exe_ext('SRV')." --version";
+        my @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
             $http_ipv6 = 1;
@@ -2923,7 +2924,8 @@ sub checksystem {
         }
 
         # check if the FTP server has it!
-        @sws = `server/sockfilt --version`;
+        $cmd = "server/sockfilt".exe_ext('SRV')." --version";
+        @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
             $ftp_ipv6 = 1;
@@ -2932,7 +2934,8 @@ sub checksystem {
 
     if($has_unix) {
         # client has Unix sockets support, check whether the HTTP server has it
-        my @sws = `server/sws --version`;
+        my $cmd = "server/sws".exe_ext('SRV')." --version";
+        my @sws = `$cmd`;
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
 
@@ -3342,7 +3345,7 @@ sub singletest {
                 }
                 else {
                     if($var =~ /^LD_PRELOAD/) {
-                        if(exe_ext() && (exe_ext() eq '.exe')) {
+                        if(exe_ext('TOOL') && (exe_ext('TOOL') eq '.exe')) {
                             # print "Skipping LD_PRELOAD due to lack of OS support\n";
                             next;
                         }
@@ -3489,6 +3492,7 @@ sub singletest {
     if(@codepieces) {
         $tool = $codepieces[0];
         chomp $tool;
+        $tool .= exe_ext('TOOL');
     }
 
     # remove server output logfile
