@@ -265,6 +265,19 @@ static const struct LongShort aliases[]= {
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
+#ifndef OPENSSL_NO_ESNI
+  /* Current convention in DEfO project
+   * is to use OPENSSL_NO_ESNI as marker for new ESNI code.
+   * This may change, as may choice of CLI options.
+   * Here we go for now.
+   *
+   * "ES" is as good a tentative choice of short name as any.
+   * For explanations, see tool_help.c after "socks5-gssapi"
+   */
+  {"ES", "esni",                     ARG_BOOL},
+  {"ET", "esni-cover",               ARG_STRING},
+  {"EU", "esni-load",                ARG_FILENAME},
+#endif
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -1676,6 +1689,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else
           config->socks5_auth &= ~CURLAUTH_GSSAPI;
         break;
+
+#ifndef OPENSSL_NO_ESNI
+      case 'S':
+        /* --esni */
+        break;                  /* TODO */
+
+      case 'T':
+        /* --esni-cover */
+        break;                  /* TODO */
+
+      case 'U':
+        /* --esni-load */
+        break;                  /* TODO */
+
+#endif
 
       default: /* unknown flag */
         return PARAM_OPTION_UNKNOWN;

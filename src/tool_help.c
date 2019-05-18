@@ -409,6 +409,14 @@ static const struct helptxt helptext[] = {
    "SOCKS5 proxy service name for GSS-API"},
   {"    --socks5-hostname <host[:port]>",
    "SOCKS5 proxy, pass host name to proxy"},
+#ifndef OPENSSL_NO_ESNI
+  {"    --esni",
+   "Enable encrypted SNI"},
+  {"    --esni-cover <domain name>",
+   "Specify unencrypted SNI public/cover name to use"},
+  {"    --esni-load <filename>",
+   "Specify file to load ESNIKeys data from (until DNS lookup code is ready)"},
+#endif
   {"-Y, --speed-limit <speed>",
    "Stop transfers slower than this"},
   {"-y, --speed-time <seconds>",
