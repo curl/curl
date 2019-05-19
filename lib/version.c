@@ -394,7 +394,11 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   static char ssh_buffer[80];
 #endif
 #ifdef USE_SSL
+#ifdef CURL_WITH_MULTI_SSL
+  static char ssl_buffer[200];
+#else
   static char ssl_buffer[80];
+#endif
 #endif
 #ifdef HAVE_BROTLI
   static char brotli_buffer[80];
