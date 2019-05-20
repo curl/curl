@@ -411,7 +411,6 @@ int init_fifo(void)
 int main(int argc, char **argv)
 {
   GlobalInfo *g;
-  CURLMcode rc;
   GMainLoop*gmain;
   int fd;
   GIOChannel* ch;

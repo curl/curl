@@ -45,7 +45,6 @@ int my_progress_func(GtkWidget *bar,
 void *my_thread(void *ptr)
 {
   CURL *curl;
-  CURLcode res;
   FILE *outfile;
   gchar *url = ptr;
 
@@ -62,7 +61,7 @@ void *my_thread(void *ptr)
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, my_progress_func);
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, Bar);
 
-    res = curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
     fclose(outfile);
     /* always cleanup */
