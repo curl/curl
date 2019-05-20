@@ -2963,8 +2963,10 @@ static int Curl_sectransp_shutdown(struct connectdata *conn, int sockindex)
   if(!BACKEND->ssl_ctx)
     return 0;
 
+#ifndef CURL_DISABLE_FTP
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
+#endif
 
   Curl_sectransp_close(conn, sockindex);
 

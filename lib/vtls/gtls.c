@@ -1640,6 +1640,7 @@ static int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
   int retval = 0;
   struct Curl_easy *data = conn->data;
 
+#ifndef CURL_DISABLE_FTP
   /* This has only been tested on the proftpd server, and the mod_tls code
      sends a close notify alert without waiting for a close notify alert in
      response. Thus we wait for a close notify alert from the server, but
@@ -1647,6 +1648,7 @@ static int Curl_gtls_shutdown(struct connectdata *conn, int sockindex)
 
   if(data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE)
       gnutls_bye(BACKEND->session, GNUTLS_SHUT_WR);
+#endif
 
   if(BACKEND->session) {
     ssize_t result;

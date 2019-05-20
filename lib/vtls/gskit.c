@@ -1266,8 +1266,10 @@ static int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
   if(!BACKEND->handle)
     return 0;
 
+#ifndef CURL_DISABLE_FTP
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
+#endif
 
   close_one(connssl, conn, sockindex);
   rc = 0;
