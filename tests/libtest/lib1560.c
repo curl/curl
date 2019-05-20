@@ -425,6 +425,16 @@ static int checkurl(const char *url, const char *out)
 
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static struct setcase set_parts_list[] = {
+  {"https://example.com/",
+   /* Set a 41 bytes scheme. That's too long so the old scheme remains set. */
+   "scheme=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc,",
+   "https://example.com/",
+   0, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_MALFORMED_INPUT},
+  {"https://example.com/",
+   /* set a 40 bytes scheme */
+   "scheme=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,",
+   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb://example.com/",
+   0, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_OK},
   {"https://[::1%25fake]:1234/",
    "zoneid=NULL,",
    "https://[::1]:1234/",
