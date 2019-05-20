@@ -1509,10 +1509,6 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   struct Cookie *co;
   FILE *out;
   bool use_stdout = FALSE;
-  char *format_ptr;
-  unsigned int i;
-  unsigned int j;
-  struct Cookie **array;
 
   if(!c)
     /* no cookie engine alive */
@@ -1539,6 +1535,10 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
         out);
 
   if(c->numcookies) {
+    unsigned int i;
+    unsigned int j;
+    struct Cookie **array;
+
     array = malloc(sizeof(struct Cookie *) * c->numcookies);
     if(!array) {
       if(!use_stdout)
@@ -1558,7 +1558,7 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
     qsort(array, c->numcookies, sizeof(struct Cookie *), cookie_sort_ct);
 
     for(i = 0; i < j; i++) {
-      format_ptr = get_netscape_format(array[i]);
+      char *format_ptr = get_netscape_format(array[i]);
       if(format_ptr == NULL) {
         fprintf(out, "#\n# Fatal libcurl error\n");
         free(array);

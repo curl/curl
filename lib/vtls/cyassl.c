@@ -143,7 +143,6 @@ static CURLcode
 cyassl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
-  char error_buffer[CYASSL_MAX_ERROR_SZ];
   char *ciphers;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
@@ -420,6 +419,7 @@ cyassl_connect_step1(struct connectdata *conn,
     if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(BACKEND->handle, ssl_sessionid)) {
+        char error_buffer[CYASSL_MAX_ERROR_SZ];
         Curl_ssl_sessionid_unlock(conn);
         failf(data, "SSL: SSL_set_session failed: %s",
               ERR_error_string(SSL_get_error(BACKEND->handle, 0),

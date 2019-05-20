@@ -439,11 +439,12 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   set->httpreq = HTTPREQ_GET; /* Default HTTP request */
   set->rtspreq = RTSPREQ_OPTIONS; /* Default RTSP request */
+#ifndef CURL_DISABLE_FILE
   set->ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
   set->ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
   set->ftp_use_pret = FALSE;  /* mainly useful for drftpd servers */
   set->ftp_filemethod = FTPFILE_MULTICWD;
-
+#endif
   set->dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
 
   /* Set the default size of the SSL session ID cache */
@@ -1767,9 +1768,10 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif /* CURL_DISABLE_PROXY */
 
   conn->bits.user_passwd = (data->set.str[STRING_USERNAME]) ? TRUE : FALSE;
+#ifndef CURL_DISABLE_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
   conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
-
+#endif
   conn->ssl_config.verifystatus = data->set.ssl.primary.verifystatus;
   conn->ssl_config.verifypeer = data->set.ssl.primary.verifypeer;
   conn->ssl_config.verifyhost = data->set.ssl.primary.verifyhost;

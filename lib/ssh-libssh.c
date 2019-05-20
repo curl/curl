@@ -1946,14 +1946,13 @@ static int myssh_getsock(struct connectdata *conn,
 static void myssh_block2waitfor(struct connectdata *conn, bool block)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
-  int dir;
 
   /* If it didn't block, or nothing was returned by ssh_get_poll_flags
    * have the original set */
   conn->waitfor = sshc->orig_waitfor;
 
   if(block) {
-    dir = ssh_get_poll_flags(sshc->ssh_session);
+    int dir = ssh_get_poll_flags(sshc->ssh_session);
     if(dir & SSH_READ_PENDING) {
       /* translate the libssh define bits into our own bit defines */
       conn->waitfor = KEEP_RECV;
@@ -2012,9 +2011,7 @@ static CURLcode myssh_block_statemach(struct connectdata *conn,
     }
 
     if(!result && block) {
-      curl_socket_t sock = conn->sock[FIRSTSOCKET];
-      curl_socket_t fd_read = CURL_SOCKET_BAD;
-      fd_read = sock;
+      curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
       (void) Curl_socket_check(fd_read, CURL_SOCKET_BAD,
                                CURL_SOCKET_BAD, left > 1000 ? 1000 : left);
@@ -2052,7 +2049,6 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
   CURLcode result;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   struct Curl_easy *data = conn->data;
-  int rc;
 
   /* initialize per-handle data if not already */
   if(!data->req.protop)
@@ -2106,8 +2102,8 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
   ssh->pubkey = NULL;
 
   if(data->set.str[STRING_SSH_PUBLIC_KEY]) {
-    rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
-                                    &ssh->pubkey);
+    int rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
+                                        &ssh->pubkey);
     if(rc != SSH_OK) {
       failf(data, "Could not load public key file");
       /* ignore */

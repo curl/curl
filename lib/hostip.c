@@ -334,9 +334,9 @@ Curl_fetch_addr(struct connectdata *conn,
   return dns;
 }
 
+#ifndef CURL_DISABLE_SHUFFLE_DNS
 UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     Curl_addrinfo **addr);
-
 /*
  * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
@@ -401,6 +401,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
   }
   return result;
 }
+#endif
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
@@ -422,12 +423,14 @@ Curl_cache_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
+#ifndef CURL_DISABLE_SHUFFLE_DNS
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses) {
     CURLcode result = Curl_shuffle_addr(data, &addr);
     if(result)
       return NULL;
   }
+#endif
 
   /* Create a new cache entry */
   dns = calloc(1, sizeof(struct Curl_dns_entry));

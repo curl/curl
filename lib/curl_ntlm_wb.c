@@ -339,7 +339,7 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
                             bool proxy,
                             const char *header)
 {
-  (void) proxy;
+  curlntlm *state = proxy ? &conn->proxy_ntlm_state : &conn->http_ntlm_state;
 
   if(!checkprefix("NTLM", header))
     return CURLE_BAD_CONTENT_ENCODING;
@@ -352,9 +352,27 @@ CURLcode Curl_input_ntlm_wb(struct connectdata *conn,
     conn->challenge_header = strdup(header);
     if(!conn->challenge_header)
       return CURLE_OUT_OF_MEMORY;
+
+    *state = NTLMSTATE_TYPE2; /* We got a type-2 message */
   }
-  else
-    return CURLE_BAD_CONTENT_ENCODING;
+  else {
+    if(*state == NTLMSTATE_LAST) {
+      infof(conn->data, "NTLM auth restarted\n");
+      Curl_http_auth_cleanup_ntlm_wb(conn);
+    }
+    else if(*state == NTLMSTATE_TYPE3) {
+      infof(conn->data, "NTLM handshake rejected\n");
+      Curl_http_auth_cleanup_ntlm_wb(conn);
+      *state = NTLMSTATE_NONE;
+      return CURLE_REMOTE_ACCESS_DENIED;
+    }
+    else if(*state >= NTLMSTATE_TYPE1) {
+      infof(conn->data, "NTLM handshake failure (internal error)\n");
+      return CURLE_REMOTE_ACCESS_DENIED;
+    }
+
+    *state = NTLMSTATE_TYPE1; /* We should send away a type-1 */
+  }
 
   return CURLE_OK;
 }
@@ -431,6 +449,7 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
     conn->response_header = NULL;
     break;
+
   case NTLMSTATE_TYPE2:
     input = aprintf("TT %s\n", conn->challenge_header);
     if(!input)
@@ -452,11 +471,14 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
     if(!*allocuserpwd)
       return CURLE_OUT_OF_MEMORY;
     break;
+
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */
-    free(*allocuserpwd);
-    *allocuserpwd = NULL;
+    *state = NTLMSTATE_LAST;
+    /* FALLTHROUGH */
+  case NTLMSTATE_LAST:
+    Curl_safefree(*allocuserpwd);
     authp->done = TRUE;
     break;
   }
