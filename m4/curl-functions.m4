@@ -2912,6 +2912,201 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   fi
 ])
 
+dnl CURL_CHECK_FUNC_GETPEERNAME
+dnl -------------------------------------------------
+dnl Verify if getpeername is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_getpeername, then
+dnl HAVE_GETPEERNAME will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  #
+  tst_links_getpeername="unknown"
+  tst_proto_getpeername="unknown"
+  tst_compi_getpeername="unknown"
+  tst_allow_getpeername="unknown"
+  #
+  AC_MSG_CHECKING([if getpeername can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ]],[[
+      if(0 != getpeername(0, (void *)0, (void *)0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_getpeername="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_getpeername="no"
+  ])
+  #
+  if test "$tst_links_getpeername" = "yes"; then
+    AC_MSG_CHECKING([if getpeername is prototyped])
+    AC_EGREP_CPP([getpeername],[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_getpeername="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_getpeername="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_getpeername" = "yes"; then
+    AC_MSG_CHECKING([if getpeername is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_bsdsocket
+        $curl_includes_sys_socket
+      ]],[[
+        if(0 != getpeername(0, (void *)0, (void *)0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_getpeername="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_getpeername="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_getpeername" = "yes"; then
+    AC_MSG_CHECKING([if getpeername usage allowed])
+    if test "x$curl_disallow_getpeername" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_getpeername="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_getpeername="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if getpeername might be used])
+  if test "$tst_links_getpeername" = "yes" &&
+     test "$tst_proto_getpeername" = "yes" &&
+     test "$tst_compi_getpeername" = "yes" &&
+     test "$tst_allow_getpeername" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETPEERNAME, 1,
+      [Define to 1 if you have the getpeername function.])
+    curl_cv_func_getpeername="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_getpeername="no"
+  fi
+])
+
+dnl CURL_CHECK_FUNC_GETSOCKNAME
+dnl -------------------------------------------------
+dnl Verify if getsockname is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_getsockname, then
+dnl HAVE_GETSOCKNAME will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
+  #
+  tst_links_getsockname="unknown"
+  tst_proto_getsockname="unknown"
+  tst_compi_getsockname="unknown"
+  tst_allow_getsockname="unknown"
+  #
+  AC_MSG_CHECKING([if getsockname can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ]],[[
+      if(0 != getsockname(0, (void *)0, (void *)0))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_getsockname="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_getsockname="no"
+  ])
+  #
+  if test "$tst_links_getsockname" = "yes"; then
+    AC_MSG_CHECKING([if getsockname is prototyped])
+    AC_EGREP_CPP([getsockname],[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      $curl_includes_sys_socket
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_getsockname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_getsockname="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_getsockname" = "yes"; then
+    AC_MSG_CHECKING([if getsockname is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_bsdsocket
+        $curl_includes_sys_socket
+      ]],[[
+        if(0 != getsockname(0, (void *)0, (void *)0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_getsockname="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_getsockname="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_getsockname" = "yes"; then
+    AC_MSG_CHECKING([if getsockname usage allowed])
+    if test "x$curl_disallow_getsockname" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_getsockname="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_getsockname="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if getsockname might be used])
+  if test "$tst_links_getsockname" = "yes" &&
+     test "$tst_proto_getsockname" = "yes" &&
+     test "$tst_compi_getsockname" = "yes" &&
+     test "$tst_allow_getsockname" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_GETSOCKNAME, 1,
+      [Define to 1 if you have the getsockname function.])
+    curl_cv_func_getsockname="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_getsockname="no"
+  fi
+])
 
 dnl CURL_CHECK_FUNC_GETIFADDRS
 dnl -------------------------------------------------
