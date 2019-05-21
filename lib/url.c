@@ -1884,6 +1884,40 @@ CURLcode Curl_uc_to_curlcode(CURLUcode uc)
 }
 
 /*
+ * If the URL was set with an IPv6 numerical address with a zone id part, set
+ * the scope_id based on that!
+ */
+
+static void zonefrom_url(CURLU *uh, struct connectdata *conn)
+{
+  char *zoneid;
+  CURLUcode uc;
+
+  uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
+
+  if(!uc && zoneid) {
+    char *endp;
+    unsigned long scope = strtoul(zoneid, &endp, 10);
+    if(!*endp && (scope < UINT_MAX))
+      /* A plain number, use it direcly as a scope id. */
+      conn->scope_id = (unsigned int)scope;
+#ifdef HAVE_IF_NAMETOINDEX
+    else {
+      /* Zone identifier is not numeric */
+      unsigned int scopeidx = 0;
+      scopeidx = if_nametoindex(zoneid);
+      if(!scopeidx)
+        infof(conn->data, "Invalid zoneid: %s; %s\n", zoneid,
+              strerror(errno));
+      else
+        conn->scope_id = scopeidx;
+    }
+#endif /* HAVE_IF_NAMETOINDEX */
+    free(zoneid);
+  }
+}
+
+/*
  * Parse URL and fill in the relevant members of the connection struct.
  */
 static CURLcode parseurlandfillconn(struct Curl_easy *data,
@@ -2004,38 +2038,14 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   if(hostname[0] == '[') {
     /* This looks like an IPv6 address literal. See if there is an address
        scope. */
-    char *zoneid;
     size_t hlen;
-    uc = curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0);
     conn->bits.ipv6_ip = TRUE;
-
     /* cut off the brackets! */
     hostname++;
     hlen = strlen(hostname);
     hostname[hlen - 1] = 0;
-    if(!uc && zoneid) {
-      char *endp;
-      unsigned long scope;
-      scope = strtoul(zoneid, &endp, 10);
-      if(!*endp && (scope < UINT_MAX)) {
-        /* A plain number, use it direcly as a scope id. */
-        conn->scope_id = (unsigned int)scope;
-      }
-#ifdef HAVE_IF_NAMETOINDEX
-      else {
-        /* Zone identifier is not numeric */
-        unsigned int scopeidx = 0;
-        scopeidx = if_nametoindex(zoneid);
-        if(!scopeidx)
-          infof(data, "Invalid zoneid id: %s; %s\n", zoneid,
-                strerror(errno));
-        else
-          conn->scope_id = scopeidx;
 
-      }
-#endif /* HAVE_IF_NAMETOINDEX */
-      free(zoneid);
-    }
+    zonefrom_url(uh, conn);
   }
 
   /* make sure the connect struct gets its own copy of the host name */
@@ -2422,6 +2432,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     size_t len = strlen(host);
     host[len-1] = 0; /* clear the trailing bracket */
     host++;
+    zonefrom_url(uhp, conn);
   }
   proxyinfo->host.name = host;
 
