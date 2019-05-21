@@ -146,7 +146,6 @@ static void mcode_or_die(const char *where, CURLMcode code)
 static int multi_timer_cb(CURLM *multi _Unused, long timeout_ms, GlobalInfo *g)
 {
   struct timeval timeout;
-  CURLMcode rc;
 
   timeout.tv_sec = timeout_ms/1000;
   timeout.tv_usec = (timeout_ms%1000)*1000;
