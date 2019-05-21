@@ -563,6 +563,23 @@ curl_includes_bsdsocket="\
     [], [], [      $curl_includes_bsdsocket])
 ])
 
+dnl CURL_INCLUDES_NETIF
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included when net/if.h is to be included.
+
+AC_DEFUN([CURL_INCLUDES_NETIF], [
+curl_includes_netif="\
+/* includes start */
+#ifdef HAVE_NET_IF_H
+#  include <net/if.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    net/if.h,
+    [], [], [$curl_includes_netif])
+])
+
 
 dnl CURL_PREPROCESS_CALLCONV
 dnl -------------------------------------------------
@@ -3107,6 +3124,102 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
     curl_cv_func_getsockname="no"
   fi
 ])
+
+dnl CURL_CHECK_FUNC_IF_NAMETOINDEX
+dnl -------------------------------------------------
+dnl Verify if if_nametoindex is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_if_nametoindex, then
+dnl HAVE_IF_NAMETOINDEX will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_IF_NAMETOINDEX], [
+  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
+  AC_REQUIRE([CURL_INCLUDES_NETIF])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
+  #
+  tst_links_if_nametoindex="unknown"
+  tst_proto_if_nametoindex="unknown"
+  tst_compi_if_nametoindex="unknown"
+  tst_allow_if_nametoindex="unknown"
+  #
+  AC_MSG_CHECKING([if if_nametoindex can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      $curl_includes_winsock2
+      $curl_includes_bsdsocket
+      #include <net/if.h>
+    ]],[[
+      if(0 != if_nametoindex(""))
+        return 1;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_if_nametoindex="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_if_nametoindex="no"
+  ])
+  #
+  if test "$tst_links_if_nametoindex" = "yes"; then
+    AC_MSG_CHECKING([if if_nametoindex is prototyped])
+    AC_EGREP_CPP([if_nametoindex],[
+      $curl_includes_winsock2
+      $curl_includes_netif
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_if_nametoindex="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_if_nametoindex="no"
+    ])
+  fi
+  #
+  if test "$tst_proto_if_nametoindex" = "yes"; then
+    AC_MSG_CHECKING([if if_nametoindex is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_winsock2
+        $curl_includes_netif
+      ]],[[
+        if(0 != if_nametoindex(""))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_if_nametoindex="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_if_nametoindex="no"
+    ])
+  fi
+  #
+  if test "$tst_compi_if_nametoindex" = "yes"; then
+    AC_MSG_CHECKING([if if_nametoindex usage allowed])
+    if test "x$curl_disallow_if_nametoindex" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_if_nametoindex="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_if_nametoindex="no"
+    fi
+  fi
+  #
+  AC_MSG_CHECKING([if if_nametoindex might be used])
+  if test "$tst_links_if_nametoindex" = "yes" &&
+     test "$tst_proto_if_nametoindex" = "yes" &&
+     test "$tst_compi_if_nametoindex" = "yes" &&
+     test "$tst_allow_if_nametoindex" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_IF_NAMETOINDEX, 1,
+      [Define to 1 if you have the if_nametoindex function.])
+    curl_cv_func_if_nametoindex="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_if_nametoindex="no"
+  fi
+])
+
 
 dnl CURL_CHECK_FUNC_GETIFADDRS
 dnl -------------------------------------------------
