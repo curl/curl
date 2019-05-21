@@ -59,12 +59,9 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
   /* Minimalistic http request */
   const char *request = "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n";
   size_t request_len = strlen(request);
-  curl_socket_t sockfd;
-  size_t nsent_total = 0;
 
   /* A general note of caution here: if you're using curl_easy_recv() or
      curl_easy_send() to implement HTTP or _any_ other protocol libcurl
@@ -76,6 +73,10 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
+    CURLcode res;
+    curl_socket_t sockfd;
+    size_t nsent_total = 0;
+
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     /* Do not do the transfer - only connect to host */
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);

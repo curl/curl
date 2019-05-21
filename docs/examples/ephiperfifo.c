@@ -472,8 +472,6 @@ void SignalHandler(int signo)
 int main(int argc _Unused, char **argv _Unused)
 {
   GlobalInfo g;
-  int err;
-  int idx;
   struct itimerspec its;
   struct epoll_event ev;
   struct epoll_event events[10];
@@ -518,8 +516,9 @@ int main(int argc _Unused, char **argv _Unused)
   fprintf(MSG_OUT, "Entering wait loop\n");
   fflush(MSG_OUT);
   while(!g_should_exit_) {
-    err = epoll_wait(g.epfd, events, sizeof(events)/sizeof(struct epoll_event),
-                     10000);
+    int idx;
+    int err = epoll_wait(g.epfd, events,
+                         sizeof(events)/sizeof(struct epoll_event), 10000);
     if(err == -1) {
       if(errno == EINTR) {
         fprintf(MSG_OUT, "note: wait interrupted\n");

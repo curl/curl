@@ -74,13 +74,14 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
 
 int main(int argc, char **argv)
 {
-  CURL *curl;
-  char curl_errbuf[CURL_ERROR_SIZE];
-  TidyDoc tdoc;
-  TidyBuffer docbuf = {0};
-  TidyBuffer tidy_errbuf = {0};
-  int err;
   if(argc == 2) {
+    CURL *curl;
+    char curl_errbuf[CURL_ERROR_SIZE];
+    TidyDoc tdoc;
+    TidyBuffer docbuf = {0};
+    TidyBuffer tidy_errbuf = {0};
+    int err;
+
     curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);

@@ -257,25 +257,15 @@ int main(int argc, char *argv[])
 {
   CURL    *curl;
   conf_t  conf[1];
-  int     OptionIndex;
-  struct  tm *lt;
-  struct  tm *gmt;
-  time_t  tt;
-  time_t  tt_local;
-  time_t  tt_gmt;
-  double  tzonediffFloat;
-  int     tzonediffWord;
-  char    timeBuf[61];
-  char    tzoneBuf[16];
   int     RetValue;
 
-  OptionIndex     = 0;
   ShowAllHeader   = 0;    /* Do not show HTTP Header */
   AutoSyncTime    = 0;    /* Do not synchronise computer clock */
   RetValue        = 0;    /* Successful Exit */
   conf_init(conf);
 
   if(argc > 1) {
+    int OptionIndex = 0;
     while(OptionIndex < argc) {
       if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
         snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
@@ -308,6 +298,16 @@ int main(int argc, char *argv[])
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
+    struct tm *lt;
+    struct tm *gmt;
+    time_t tt;
+    time_t tt_local;
+    time_t tt_gmt;
+    double tzonediffFloat;
+    int tzonediffWord;
+    char timeBuf[61];
+    char tzoneBuf[16];
+
     SyncTime_CURL_Init(curl, conf->http_proxy, conf->proxy_user);
 
     /* Calculating time diff between GMT and localtime */
