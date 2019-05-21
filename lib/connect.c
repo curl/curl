@@ -726,6 +726,8 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     }
 #endif
   }
+#else /* !HAVE_GETSOCKNAME && !HAVE_GETPEERNAME */
+  (void)sockfd; /* unused */
 #endif
 
   /* persist connection info in session handle */
