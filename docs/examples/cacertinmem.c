@@ -85,7 +85,6 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 
   BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
   X509_STORE  *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
-  X509_INFO *itmp;
   int i;
   STACK_OF(X509_INFO) *inf;
   (void)curl;
@@ -103,7 +102,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   }
 
   for(i = 0; i < sk_X509_INFO_num(inf); i++) {
-    itmp = sk_X509_INFO_value(inf, i);
+    X509_INFO *itmp = sk_X509_INFO_value(inf, i);
     if(itmp->x509) {
       X509_STORE_add_cert(cts, itmp->x509);
     }

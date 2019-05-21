@@ -67,13 +67,12 @@ size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
 /* https://weather.com/weather/today/l/46214?cc=*&dayf=5&unit=i */
 void *pull_one_url(void *NaN)
 {
-  CURL *curl;
-  gchar *http;
-  FILE *outfile;
-
   /* Stop threads from entering unless j is incremented */
   pthread_mutex_lock(&lock);
   while(j < num_urls) {
+    CURL *curl;
+    gchar *http;
+
     printf("j = %d\n", j);
 
     http =
@@ -85,7 +84,7 @@ void *pull_one_url(void *NaN)
     curl = curl_easy_init();
     if(curl) {
 
-      outfile = fopen(urls[j], "wb");
+      FILE *outfile = fopen(urls[j], "wb");
 
       /* Set the URL and transfer type */
       curl_easy_setopt(curl, CURLOPT_URL, http);
