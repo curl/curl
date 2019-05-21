@@ -343,7 +343,8 @@ mbed_connect_step1(struct connectdata *conn,
   if(SSL_SET_OPTION(key)) {
     ret = mbedtls_pk_parse_keyfile(&BACKEND->pk, SSL_SET_OPTION(key),
                                    SSL_SET_OPTION(key_passwd));
-    if(ret == 0 && !mbedtls_pk_can_do(&BACKEND->pk, MBEDTLS_PK_RSA))
+    if(ret == 0 && !(mbedtls_pk_can_do(&BACKEND->pk, MBEDTLS_PK_RSA) ||
+                     mbedtls_pk_can_do(&BACKEND->pk, MBEDTLS_PK_ECKEY)))
       ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 
     if(ret) {

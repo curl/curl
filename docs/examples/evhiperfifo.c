@@ -421,7 +421,6 @@ static int init_fifo(GlobalInfo *g)
 int main(int argc, char **argv)
 {
   GlobalInfo g;
-  CURLMcode rc;
   (void)argc;
   (void)argv;
 
