@@ -207,8 +207,8 @@ static void event_cb(GlobalInfo *g, int fd, int revents)
   CURLMcode rc;
   struct itimerspec its;
 
-  int action = (revents & EPOLLIN ? CURL_CSELECT_IN : 0) |
-               (revents & EPOLLOUT ? CURL_CSELECT_OUT : 0);
+  int action = ((revents & EPOLLIN) ? CURL_CSELECT_IN : 0) |
+               ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
 
   rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
@@ -273,8 +273,8 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
                     GlobalInfo *g)
 {
   struct epoll_event ev;
-  int kind = (act & CURL_POLL_IN ? EPOLLIN : 0) |
-             (act & CURL_POLL_OUT ? EPOLLOUT : 0);
+  int kind = ((act & CURL_POLL_IN) ? EPOLLIN : 0) |
+             ((act & CURL_POLL_OUT) ? EPOLLOUT : 0);
 
   if(f->sockfd) {
     if(epoll_ctl(g->epfd, EPOLL_CTL_DEL, f->sockfd, NULL))
