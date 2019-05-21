@@ -49,9 +49,8 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
 {
   CURLcode result = CURLE_GOT_NOTHING;
   curl_off_t remoteFileSizeByte = -1;
-  CURL *curlHandlePtr = NULL;
+  CURL *curlHandlePtr = curl_easy_init();
 
-  curlHandlePtr = curl_easy_init();
   curl_easy_setopt(curlHandlePtr, CURLOPT_VERBOSE, 1L);
 
   curl_easy_setopt(curlHandlePtr, CURLOPT_URL, i_remoteFile);
