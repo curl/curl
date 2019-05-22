@@ -188,6 +188,9 @@
 /* Define to 1 if you have the `getpeername' function. */
 #define HAVE_GETPEERNAME 1
 
+/* Define to 1 if you have the `getsockname' function. */
+#define HAVE_GETSOCKNAME 1
+
 /* Define if you have the gethostbyaddr function. */
 #define HAVE_GETHOSTBYADDR 1
 
