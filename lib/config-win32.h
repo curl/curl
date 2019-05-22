@@ -279,9 +279,7 @@ Vista
 #endif
 
 /* Define if you have the <Iphlpapi.h> header file. */
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
 #define HAVE_IPHLPAPI_H 1
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
@@ -336,7 +334,7 @@ Vista
 #define HAVE_GETPROTOBYNAME
 
 /* Define if you have the `if_nametoindex' function. */
-#if defined(HAVE_IPHLPAPI_H)
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
 #define HAVE_IF_NAMETOINDEX 1
 #endif
 
