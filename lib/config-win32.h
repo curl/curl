@@ -27,6 +27,151 @@
 /* ================================================================ */
 
 /* ---------------------------------------------------------------- */
+/*                        COMPILER SPECIFIC                         */
+/* ---------------------------------------------------------------- */
+
+/* Define to nothing if compiler does not support 'const' qualifier. */
+/* #define const */
+
+/* Define to nothing if compiler does not support 'volatile' qualifier. */
+/* #define volatile */
+
+/* Windows should not have HAVE_GMTIME_R defined */
+/* #undef HAVE_GMTIME_R */
+
+/* Define if the compiler supports C99 variadic macro style. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#define HAVE_VARIADIC_MACROS_C99 1
+#endif
+
+/* Define if the compiler supports the 'long long' data type. */
+#if defined(__MINGW32__) || defined(__WATCOMC__)      || \
+    (defined(_MSC_VER)     && (_MSC_VER     >= 1310)) || \
+    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x561))
+#define HAVE_LONGLONG 1
+#endif
+
+/* Define to avoid VS2005 complaining about portable C functions. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#define _CRT_SECURE_NO_DEPRECATE 1
+#define _CRT_NONSTDC_NO_DEPRECATE 1
+#endif
+
+/* VS2005 and later default size for time_t is 64-bit, unless
+   _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#  ifndef _USE_32BIT_TIME_T
+#    define SIZEOF_TIME_T 8
+#  else
+#    define SIZEOF_TIME_T 4
+#  endif
+#endif
+
+/* Define some minimum and default build targets for Visual Studio */
+#if defined(_MSC_VER)
+   /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
+      2000 as a supported build target. VS2008 default installations provides
+      an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
+      valid build target for VS2008. Popular belief is that binaries built with
+      VS2008 using Windows SDK versions v6.X and Windows 2000 as a build target
+      are functional. */
+#  define VS2008_MIN_TARGET 0x0500
+
+   /* The minimum build target for VS2012 is Vista unless Update 1 is installed
+      and the v110_xp toolset is chosen. */
+#  if defined(_USING_V110_SDK71_)
+#    define VS2012_MIN_TARGET 0x0501
+#  else
+#    define VS2012_MIN_TARGET 0x0600
+#  endif
+
+   /* VS2008 default build target is Windows Vista. We override default target
+      to be Windows XP. */
+#  define VS2008_DEF_TARGET 0x0501
+
+   /* VS2012 default build target is Windows Vista unless Update 1 is installed
+      and the v110_xp toolset is chosen. */
+#  if defined(_USING_V110_SDK71_)
+#    define VS2012_DEF_TARGET 0x0501
+#  else
+#    define VS2012_DEF_TARGET 0x0600
+#  endif
+#endif
+
+/* VS2008 default target settings and minimum build target check. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_MSC_VER <= 1600)
+#  ifndef _WIN32_WINNT
+#    define _WIN32_WINNT VS2008_DEF_TARGET
+#  endif
+#  ifndef WINVER
+#    define WINVER VS2008_DEF_TARGET
+#  endif
+#  if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
+#    error VS2008 does not support Windows build targets prior to Windows 2000
+#  endif
+#endif
+
+/* VS2012 default target settings and minimum build target check. */
+#if defined(_MSC_VER) && (_MSC_VER >= 1700)
+#  ifndef _WIN32_WINNT
+#    define _WIN32_WINNT VS2012_DEF_TARGET
+#  endif
+#  ifndef WINVER
+#    define WINVER VS2012_DEF_TARGET
+#  endif
+#  if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
+#    if defined(_USING_V110_SDK71_)
+#      error VS2012 does not support Windows build targets prior to Windows XP
+#    else
+#      error VS2012 does not support Windows build targets prior to Windows \
+Vista
+#    endif
+#  endif
+#endif
+
+/* When no build target is specified Pelles C 5.00 and later default build
+   target is Windows Vista. We override default target to be Windows 2000. */
+#if defined(__POCC__) && (__POCC__ >= 500)
+#  ifndef _WIN32_WINNT
+#    define _WIN32_WINNT 0x0500
+#  endif
+#  ifndef WINVER
+#    define WINVER 0x0500
+#  endif
+#endif
+
+/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is
+   quite convoluted, compiler dependent and even build target dependent. */
+#if defined(HAVE_WS2TCPIP_H)
+#  if defined(__POCC__)
+#    define HAVE_FREEADDRINFO           1
+#    define HAVE_GETADDRINFO            1
+#    define HAVE_GETADDRINFO_THREADSAFE 1
+#    define HAVE_GETNAMEINFO            1
+#  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
+#    define HAVE_FREEADDRINFO           1
+#    define HAVE_GETADDRINFO            1
+#    define HAVE_GETADDRINFO_THREADSAFE 1
+#    define HAVE_GETNAMEINFO            1
+#  elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#    define HAVE_FREEADDRINFO           1
+#    define HAVE_GETADDRINFO            1
+#    define HAVE_GETADDRINFO_THREADSAFE 1
+#    define HAVE_GETNAMEINFO            1
+#  endif
+#endif
+
+#if defined(__POCC__)
+#  ifndef _MSC_VER
+#    error Microsoft extensions /Ze compiler option is required
+#  endif
+#  ifndef __POCC__OLDNAMES
+#    error Compatibility names /Go compiler option is required
+#  endif
+#endif
+
+
+/* ---------------------------------------------------------------- */
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
 
@@ -154,6 +299,11 @@
 #define HAVE_WS2TCPIP_H 1
 #endif
 
+/* Define if you have the <Iphlpapi.h> header file. */
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+#define HAVE_IPHLPAPI_H 1
+#endif
+
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */
@@ -205,6 +355,11 @@
 
 /* Define if you have the getprotobyname function. */
 #define HAVE_GETPROTOBYNAME
+
+/* Define if you have the `if_nametoindex' function. */
+#if defined(HAVE_IPHLPAPI_H)
+#define HAVE_IF_NAMETOINDEX 1
+#endif
 
 /* Define if you have the gettimeofday function. */
 /* #define HAVE_GETTIMEOFDAY 1 */
@@ -470,150 +625,6 @@
   #define SOCKET int
 #endif
 
-
-/* ---------------------------------------------------------------- */
-/*                        COMPILER SPECIFIC                         */
-/* ---------------------------------------------------------------- */
-
-/* Define to nothing if compiler does not support 'const' qualifier. */
-/* #define const */
-
-/* Define to nothing if compiler does not support 'volatile' qualifier. */
-/* #define volatile */
-
-/* Windows should not have HAVE_GMTIME_R defined */
-/* #undef HAVE_GMTIME_R */
-
-/* Define if the compiler supports C99 variadic macro style. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-#define HAVE_VARIADIC_MACROS_C99 1
-#endif
-
-/* Define if the compiler supports the 'long long' data type. */
-#if defined(__MINGW32__) || defined(__WATCOMC__)      || \
-    (defined(_MSC_VER)     && (_MSC_VER     >= 1310)) || \
-    (defined(__BORLANDC__) && (__BORLANDC__ >= 0x561))
-#define HAVE_LONGLONG 1
-#endif
-
-/* Define to avoid VS2005 complaining about portable C functions. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-#define _CRT_SECURE_NO_DEPRECATE 1
-#define _CRT_NONSTDC_NO_DEPRECATE 1
-#endif
-
-/* VS2005 and later default size for time_t is 64-bit, unless
-   _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-#  ifndef _USE_32BIT_TIME_T
-#    define SIZEOF_TIME_T 8
-#  else
-#    define SIZEOF_TIME_T 4
-#  endif
-#endif
-
-/* Define some minimum and default build targets for Visual Studio */
-#if defined(_MSC_VER)
-   /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
-      2000 as a supported build target. VS2008 default installations provides
-      an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
-      valid build target for VS2008. Popular belief is that binaries built with
-      VS2008 using Windows SDK versions v6.X and Windows 2000 as a build target
-      are functional. */
-#  define VS2008_MIN_TARGET 0x0500
-
-   /* The minimum build target for VS2012 is Vista unless Update 1 is installed
-      and the v110_xp toolset is chosen. */
-#  if defined(_USING_V110_SDK71_)
-#    define VS2012_MIN_TARGET 0x0501
-#  else
-#    define VS2012_MIN_TARGET 0x0600
-#  endif
-
-   /* VS2008 default build target is Windows Vista. We override default target
-      to be Windows XP. */
-#  define VS2008_DEF_TARGET 0x0501
-
-   /* VS2012 default build target is Windows Vista unless Update 1 is installed
-      and the v110_xp toolset is chosen. */
-#  if defined(_USING_V110_SDK71_)
-#    define VS2012_DEF_TARGET 0x0501
-#  else
-#    define VS2012_DEF_TARGET 0x0600
-#  endif
-#endif
-
-/* VS2008 default target settings and minimum build target check. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_MSC_VER <= 1600)
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2008_DEF_TARGET
-#  endif
-#  ifndef WINVER
-#    define WINVER VS2008_DEF_TARGET
-#  endif
-#  if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
-#    error VS2008 does not support Windows build targets prior to Windows 2000
-#  endif
-#endif
-
-/* VS2012 default target settings and minimum build target check. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1700)
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2012_DEF_TARGET
-#  endif
-#  ifndef WINVER
-#    define WINVER VS2012_DEF_TARGET
-#  endif
-#  if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#    if defined(_USING_V110_SDK71_)
-#      error VS2012 does not support Windows build targets prior to Windows XP
-#    else
-#      error VS2012 does not support Windows build targets prior to Windows \
-Vista
-#    endif
-#  endif
-#endif
-
-/* When no build target is specified Pelles C 5.00 and later default build
-   target is Windows Vista. We override default target to be Windows 2000. */
-#if defined(__POCC__) && (__POCC__ >= 500)
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x0500
-#  endif
-#  ifndef WINVER
-#    define WINVER 0x0500
-#  endif
-#endif
-
-/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is
-   quite convoluted, compiler dependent and even build target dependent. */
-#if defined(HAVE_WS2TCPIP_H)
-#  if defined(__POCC__)
-#    define HAVE_FREEADDRINFO           1
-#    define HAVE_GETADDRINFO            1
-#    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
-#  elif defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0501)
-#    define HAVE_FREEADDRINFO           1
-#    define HAVE_GETADDRINFO            1
-#    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
-#  elif defined(_MSC_VER) && (_MSC_VER >= 1200)
-#    define HAVE_FREEADDRINFO           1
-#    define HAVE_GETADDRINFO            1
-#    define HAVE_GETADDRINFO_THREADSAFE 1
-#    define HAVE_GETNAMEINFO            1
-#  endif
-#endif
-
-#if defined(__POCC__)
-#  ifndef _MSC_VER
-#    error Microsoft extensions /Ze compiler option is required
-#  endif
-#  ifndef __POCC__OLDNAMES
-#    error Compatibility names /Go compiler option is required
-#  endif
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
