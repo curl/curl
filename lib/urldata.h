@@ -1703,6 +1703,7 @@ struct UserDefined {
   bit http_fail_on_error:1;  /* fail on HTTP error codes >= 400 */
   bit http_keep_sending_on_error:1; /* for HTTP status codes >= 300 */
   bit http_follow_location:1; /* follow HTTP redirects */
+  bit redirect_clears_method:1; /* CUSTOMREQUEST is only for first request */
   bit http_transfer_encoding:1; /* request compressed HTTP
                                     transfer-encoding */
   bit allow_auth_to_other_hosts:1;
