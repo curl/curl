@@ -1139,12 +1139,7 @@ curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
-    if(
-#ifdef USE_ALTSVC
-       (int) STRING_LASTZEROTERMINATED != (int) STRING_ALTSVC + 1 ||
-#else
-       (int) STRING_LASTZEROTERMINATED != (int) STRING_DOH + 1 ||
-#endif
+    if((int) STRING_LASTZEROTERMINATED != (int) STRING_SASL_AUTHZID + 1 ||
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
@@ -1211,6 +1206,7 @@ curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
   case CURLOPT_RTSP_SESSION_ID:
   case CURLOPT_RTSP_STREAM_URI:
   case CURLOPT_RTSP_TRANSPORT:
+  case CURLOPT_SASL_AUTHZID:
   case CURLOPT_SERVICE_NAME:
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
   case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
