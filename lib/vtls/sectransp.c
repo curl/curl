@@ -3214,7 +3214,7 @@ static ssize_t sectransp_recv(struct connectdata *conn,
            Leopard's headers */
       case -9841:
         if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
-          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), data,
+          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), conn->data,
                                         BACKEND->ssl_ctx);
           if(result)
             return result;
