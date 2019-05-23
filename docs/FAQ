@@ -43,8 +43,8 @@ FAQ
   3.9 How do I use curl in my favorite programming language?
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
   3.11 How do I POST with a different Content-Type?
-  3.12 Why do FTP specific features over HTTP proxy fail?
-  3.13 Why does my single/double quotes fail?
+  3.12 Why do FTP-specific features over HTTP proxy fail?
+  3.13 Why do my single/double quotes fail?
   3.14 Does curl support Javascript or PAC (automated proxy config)?
   3.15 Can I do recursive fetches with curl?
   3.16 What certificates do I need when I use SSL?
@@ -72,7 +72,7 @@ FAQ
   4.8 I found a bug!
   4.9 Curl can't authenticate to the server that requires NTLM?
   4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
-  4.11 Why does my HTTP range requests return the full document?
+  4.11 Why do my HTTP range requests return the full document?
   4.12 Why do I get "certificate verify failed" ?
   4.13 Why is curl -R on Windows one hour off?
   4.14 Redirects work in browser but not with curl!
@@ -557,10 +557,9 @@ FAQ
 
   3.9 How do I use curl in my favorite programming language?
 
-  There exist many language interfaces/bindings for curl that integrates it
-  better with various languages. If you are fluid in a script language, you
-  may very well opt to use such an interface instead of using the command line
-  tool.
+  Many programming languages have interfaces/bindings that allow you to use
+  curl without having to use the command line tool. If you are fluent in such
+  a language, you may prefer to use one of these interfaces instead.
 
   Find out more about which languages that support curl directly, and how to
   install and use them, in the libcurl section of the curl web site:
@@ -598,11 +597,11 @@ FAQ
 
         curl -d "datatopost" -H "Content-Type: text/xml" [URL]
 
-  3.12 Why do FTP specific features over HTTP proxy fail?
+  3.12 Why do FTP-specific features over HTTP proxy fail?
 
   Because when you use a HTTP proxy, the protocol spoken on the network will
   be HTTP, even if you specify a FTP URL. This effectively means that you
-  normally can't use FTP specific features such as FTP upload and FTP quote
+  normally can't use FTP-specific features such as FTP upload and FTP quote
   etc.
 
   There is one exception to this rule, and that is if you can "tunnel through"
@@ -610,7 +609,7 @@ FAQ
   and is generally not available as proxy admins usually disable tunneling to
   ports other than 443 (which is used for HTTPS access through proxies).
 
-  3.13 Why does my single/double quotes fail?
+  3.13 Why do my single/double quotes fail?
 
   To specify a command line option that includes spaces, you might need to
   put the entire option within quotes. Like in:
@@ -895,7 +894,7 @@ FAQ
        <H1>Moved Permanently</H1> The document has moved <A
        HREF="http://same_url_now_with_a_trailing_slash/">here</A>.
 
-    it might be because you request a directory URL but without the trailing
+    it might be because you requested a directory URL but without the trailing
     slash. Try the same operation again _with_ the trailing URL, or use the
     -L/--location option to follow the redirection.
 
@@ -926,8 +925,8 @@ FAQ
   anyone would call security.
 
   Also note that regular HTTP (using Basic authentication) and FTP passwords
-  are sent in clear across the network. All it takes for anyone to fetch them
-  is to listen on the network.  Eavesdropping is very easy. Use more secure
+  are sent as cleartext across the network. All it takes for anyone to fetch
+  them is to listen on the network. Eavesdropping is very easy. Use more secure
   authentication methods (like Digest, Negotiate or even NTLM) or consider the
   SSL-based alternatives HTTPS and FTPS.
 
@@ -962,7 +961,7 @@ FAQ
   software you're trying to interact with. This is not anything curl can do
   anything about.
 
-  4.11 Why does my HTTP range requests return the full document?
+  4.11 Why do my HTTP range requests return the full document?
 
   Because the range may not be supported by the server, or the server may
   choose to ignore it and return the full document anyway.
@@ -1012,8 +1011,8 @@ FAQ
   redirects the browser to another given URL.
 
   There is no way to make curl follow these redirects. You must either
-  manually figure out what the page is set to do, or you write a script that
-  parses the results and fetches the new URL.
+  manually figure out what the page is set to do, or write a script that parses
+  the results and fetches the new URL.
 
   4.15 FTPS doesn't work
 
