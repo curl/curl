@@ -926,7 +926,7 @@ FAQ
   anyone would call security.
 
   Also note that regular HTTP (using Basic authentication) and FTP passwords
-  are sent in the clear across the network. All it takes for anyone to fetch
+  are sent as cleartext across the network. All it takes for anyone to fetch
   them is to listen on the network. Eavesdropping is very easy. Use more secure
   authentication methods (like Digest, Negotiate or even NTLM) or consider the
   SSL-based alternatives HTTPS and FTPS.
