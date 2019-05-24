@@ -8,12 +8,27 @@ curl and libcurl 7.65.1
 
 This release includes the following changes:
 
- o
- 
+ o Added CURLOPT_SASL_AUTHZID [14]
+ o Addded --sasl-authzid [14]
+
 This release includes the following bugfixes:
 
- o
- 
+ o PolarSSL: deprecate support step 1. Removed from configure [3]
+ o Repair CURLOPT_LOW_SPEED_* [6]
+ o cmake: check for if_nametoindex() [2]
+ o config-win32: add support for if_nametoindex and getsockname [8]
+ o example/http2-download: fix format specifier [4]
+ o examples: cleanups and compiler warning fixes [4]
+ o md4: build correctly with openssl without MD4 [9]
+ o md4: include the mbedtls config.h to get the MD4 info [10]
+ o parse_proxy: use the IPv6 zone id if given [1]
+ o sectransp: handle errSSLPeerAuthCompleted from SSLRead() [13]
+ o tests: add support to test against OpenSSH for Windows [5]
+ o tool_parse_cfg: Avoid 2 fopen() for WIN32
+ o tool_setopt: for builds with disabled-proxy, skip all proxy setopts() [12]
+ o url: fix bad feature-disable #ifdef [7]
+ o winbuild: Use two space indentation [11]
+
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
@@ -21,9 +36,26 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
+  Daniel Stenberg, Dave Reisner, Edmond Yu, elsamuko on github, Gisle Vanem,
+  Marcel Raad, Marc Hörsken, Patrick Monnerat, Ray Satiro,
+  smuellerDD on github, Steve Holme, Tom Greenslade,
+  (12 contributors)
+
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=3482
+ [2] = https://curl.haxx.se/bug/?i=3917
+ [3] = https://curl.haxx.se/bug/?i=3888
+ [4] = https://curl.haxx.se/bug/?i=3919
+ [5] = https://curl.haxx.se/bug/?i=3290
+ [6] = https://curl.haxx.se/bug/?i=3927
+ [7] = https://curl.haxx.se/bug/?i=3924
+ [8] = https://curl.haxx.se/bug/?i=3923
+ [9] = https://curl.haxx.se/bug/?i=3921
+ [10] = https://curl.haxx.se/bug/?i=3922
+ [11] = https://curl.haxx.se/bug/?i=3930
+ [12] = https://curl.haxx.se/bug/?i=3926
+ [13] = https://curl.haxx.se/bug/?i=3932
+ [14] = https://curl.haxx.se/bug/?i=3653
