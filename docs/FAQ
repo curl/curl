@@ -557,10 +557,9 @@ FAQ
 
   3.9 How do I use curl in my favorite programming language?
 
-  There exist many language interfaces/bindings for curl that integrate it
-  better with various languages. If you are fluent in a script language, you
-  may very well opt to use such an interface instead of using the command line
-  tool.
+  Many programming languages have interfaces/bindings that allow you to use
+  curl without having to use the command line tool. If you are fluent in such
+  a language, you may prefer to use one of these interfaces instead.
 
   Find out more about which languages that support curl directly, and how to
   install and use them, in the libcurl section of the curl web site:
