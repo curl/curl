@@ -177,8 +177,7 @@ static const struct LongShort aliases[]= {
   {"$H", "mail-auth",                ARG_STRING},
   {"$I", "post303",                  ARG_BOOL},
   {"$J", "metalink",                 ARG_BOOL},
-  {"$6", "sasl-authzid",             ARG_STRING},
-  {"$K", "sasl-ir",                  ARG_BOOL },
+  {"$K", "sasl-ir",                  ARG_BOOL},
   {"$L", "test-event",               ARG_BOOL},
   {"$M", "unix-socket",              ARG_FILENAME},
   {"$N", "path-as-is",               ARG_BOOL},
@@ -1100,9 +1099,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 #endif
           break;
         }
-      case '6': /* --sasl-authzid */
-        GetStr(&config->sasl_authzid, nextarg);
-        break;
       case 'K': /* --sasl-ir */
         config->sasl_ir = toggle;
         break;
