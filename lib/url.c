@@ -1902,7 +1902,7 @@ static void zonefrom_url(CURLU *uh, struct connectdata *conn)
     char *endp;
     unsigned long scope = strtoul(zoneid, &endp, 10);
     if(!*endp && (scope < UINT_MAX))
-      /* A plain number, use it direcly as a scope id. */
+      /* A plain number, use it directly as a scope id. */
       conn->scope_id = (unsigned int)scope;
 #ifdef HAVE_IF_NAMETOINDEX
     else {
