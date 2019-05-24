@@ -727,8 +727,12 @@ Vista
 #define USE_WIN32_CRYPTO
 
 /* Define to use Unix sockets. */
-#if defined(_MSC_VER) && _MSC_VER >= 1900
-/* #define USE_UNIX_SOCKETS */
+#if defined(_MSC_VER) && (_MSC_VER >= 1500)
+/* sdkddkver.h first shipped with Platform SDK v6.0A included with VS2008 */
+#include <sdkddkver.h>
+#if defined(NTDDI_WIN10_RS4)
+#define USE_UNIX_SOCKETS
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
