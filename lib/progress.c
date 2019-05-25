@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,6 @@
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000
 
-#ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
    byte) */
 static void time2str(char *r, curl_off_t seconds)
@@ -120,7 +119,6 @@ static char *max5data(curl_off_t bytes, char *max5)
 
   return max5;
 }
-#endif
 
 /*
 
@@ -364,13 +362,17 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
-#ifndef CURL_DISABLE_PROGRESS_METER
-static void progress_meter(struct connectdata *conn)
+/*
+ * Curl_pgrsUpdate() returns 0 for success or the value returned by the
+ * progress callback!
+ */
+int Curl_pgrsUpdate(struct connectdata *conn)
 {
   struct curltime now;
   curl_off_t timespent;
   curl_off_t timespent_ms; /* milliseconds */
   struct Curl_easy *data = conn->data;
+  int nowindex = data->progress.speeder_c% CURR_TIME;
   bool shownow = FALSE;
   curl_off_t dl = data->progress.downloaded;
   curl_off_t ul = data->progress.uploaded;
@@ -397,9 +399,7 @@ static void progress_meter(struct connectdata *conn)
   /* Calculations done at most once a second, unless end is reached */
   if(data->progress.lastshow != now.tv_sec) {
     int countindex; /* amount of seconds stored in the speeder array */
-    int nowindex = data->progress.speeder_c% CURR_TIME;
-    if(!(data->progress.flags & PGRS_HIDE))
-      shownow = TRUE;
+    shownow = TRUE;
 
     data->progress.lastshow = now.tv_sec;
 
@@ -461,12 +461,8 @@ static void progress_meter(struct connectdata *conn)
         data->progress.ulspeed + data->progress.dlspeed;
 
   } /* Calculations end */
-  if(!shownow)
-    /* only show the internal progress meter once per second */
-    return;
-  else {
-    /* If there's no external callback set, use internal code to show
-       progress */
+
+  if(!(data->progress.flags & PGRS_HIDE)) {
     /* progress meter has not been shut off */
     char max5[6][10];
     curl_off_t dlpercen = 0;
@@ -480,6 +476,42 @@ static void progress_meter(struct connectdata *conn)
     curl_off_t ulestimate = 0;
     curl_off_t dlestimate = 0;
     curl_off_t total_estimate;
+
+    if(data->set.fxferinfo) {
+      int result;
+      /* There's a callback set, call that */
+      Curl_set_in_callback(data, true);
+      result = data->set.fxferinfo(data->set.progress_client,
+                                   data->progress.size_dl,
+                                   data->progress.downloaded,
+                                   data->progress.size_ul,
+                                   data->progress.uploaded);
+      Curl_set_in_callback(data, false);
+      if(result)
+        failf(data, "Callback aborted");
+      return result;
+    }
+    if(data->set.fprogress) {
+      int result;
+      /* The older deprecated callback is set, call that */
+      Curl_set_in_callback(data, true);
+      result = data->set.fprogress(data->set.progress_client,
+                                   (double)data->progress.size_dl,
+                                   (double)data->progress.downloaded,
+                                   (double)data->progress.size_ul,
+                                   (double)data->progress.uploaded);
+      Curl_set_in_callback(data, false);
+      if(result)
+        failf(data, "Callback aborted");
+      return result;
+    }
+
+    if(!shownow)
+      /* only show the internal progress meter once per second */
+      return 0;
+
+    /* If there's no external callback set, use internal code to show
+       progress */
 
     if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
       if(data->state.resume_from) {
@@ -563,57 +595,13 @@ static void progress_meter(struct connectdata *conn)
             time_total,    /* 8 letters */                /* total time */
             time_spent,    /* 8 letters */                /* time spent */
             time_left,     /* 8 letters */                /* time left */
-            max5data(data->progress.current_speed, max5[5])
-      );
+            max5data(data->progress.current_speed, max5[5]) /* current speed */
+            );
 
     /* we flush the output stream to make it appear as soon as possible */
     fflush(data->set.err);
-  } /* don't show now */
-}
-#else
- /* progress bar disabled */
-#define progress_meter(x)
-#endif
 
-
-/*
- * Curl_pgrsUpdate() returns 0 for success or the value returned by the
- * progress callback!
- */
-int Curl_pgrsUpdate(struct connectdata *conn)
-{
-  struct Curl_easy *data = conn->data;
-  if(!(data->progress.flags & PGRS_HIDE)) {
-    if(data->set.fxferinfo) {
-      int result;
-      /* There's a callback set, call that */
-      Curl_set_in_callback(data, true);
-      result = data->set.fxferinfo(data->set.progress_client,
-                                   data->progress.size_dl,
-                                   data->progress.downloaded,
-                                   data->progress.size_ul,
-                                   data->progress.uploaded);
-      Curl_set_in_callback(data, false);
-      if(result)
-        failf(data, "Callback aborted");
-      return result;
-    }
-    if(data->set.fprogress) {
-      int result;
-      /* The older deprecated callback is set, call that */
-      Curl_set_in_callback(data, true);
-      result = data->set.fprogress(data->set.progress_client,
-                                   (double)data->progress.size_dl,
-                                   (double)data->progress.downloaded,
-                                   (double)data->progress.size_ul,
-                                   (double)data->progress.uploaded);
-      Curl_set_in_callback(data, false);
-      if(result)
-        failf(data, "Callback aborted");
-      return result;
-    }
-  }
-  progress_meter(conn);
+  } /* !(data->progress.flags & PGRS_HIDE) */
 
   return 0;
 }

@@ -2111,8 +2111,8 @@ static int append_cert_to_array(struct Curl_easy *data,
     return CURLE_OK;
 }
 
-static int verify_cert(const char *cafile, struct Curl_easy *data,
-                       SSLContextRef ctx)
+static CURLcode verify_cert(const char *cafile, struct Curl_easy *data,
+                            SSLContextRef ctx)
 {
   int n = 0, rc;
   long res;
@@ -2370,10 +2370,10 @@ sectransp_connect_step2(struct connectdata *conn, int sockindex)
         Leopard's headers */
       case -9841:
         if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
-          int res = verify_cert(SSL_CONN_CONFIG(CAfile), data,
-                                BACKEND->ssl_ctx);
-          if(res != CURLE_OK)
-            return res;
+          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), data,
+                                        BACKEND->ssl_ctx);
+          if(result)
+            return result;
         }
         /* the documentation says we need to call SSLHandshake() again */
         return sectransp_connect_step2(conn, sockindex);
@@ -3186,7 +3186,10 @@ static ssize_t sectransp_recv(struct connectdata *conn,
   /*struct Curl_easy *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[num];
   size_t processed = 0UL;
-  OSStatus err = SSLRead(BACKEND->ssl_ctx, buf, buffersize, &processed);
+  OSStatus err;
+
+  again:
+  err = SSLRead(BACKEND->ssl_ctx, buf, buffersize, &processed);
 
   if(err != noErr) {
     switch(err) {
@@ -3207,6 +3210,16 @@ static ssize_t sectransp_recv(struct connectdata *conn,
         return -1L;
         break;
 
+        /* The below is errSSLPeerAuthCompleted; it's not defined in
+           Leopard's headers */
+      case -9841:
+        if(SSL_CONN_CONFIG(CAfile) && SSL_CONN_CONFIG(verifypeer)) {
+          CURLcode result = verify_cert(SSL_CONN_CONFIG(CAfile), conn->data,
+                                        BACKEND->ssl_ctx);
+          if(result)
+            return result;
+        }
+        goto again;
       default:
         failf(conn->data, "SSLRead() return error %d", err);
         *curlcode = CURLE_RECV_ERROR;

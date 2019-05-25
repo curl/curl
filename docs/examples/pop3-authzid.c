@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,38 +19,52 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
+
 /* <DESC>
- * Use CURLOPT_RESOLVE to feed custom IP addresses for given host name + port
- * number combinations.
+ * POP3 example showing how to retrieve e-mails from a shared mailbox
  * </DESC>
  */
+
 #include <stdio.h>
 #include <curl/curl.h>
+
+/* This is a simple example showing how to retrieve mail using libcurl's POP3
+ * capabilities.
+ *
+ * Note that this example requires libcurl 7.66.0 or above.
+ */
 
 int main(void)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
 
-  /* Each single name resolve string should be written using the format
-     HOST:PORT:ADDRESS where HOST is the name libcurl will try to resolve,
-     PORT is the port number of the service where libcurl wants to connect to
-     the HOST and ADDRESS is the numerical IP address
-   */
-  struct curl_slist *host = curl_slist_append(NULL,
-                                              "example.com:443:127.0.0.1");
-
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
-    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    /* Set the username and password */
+    curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
+    curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+
+    /* Set the authorisation identity (identity to act as) */
+    curl_easy_setopt(curl, CURLOPT_SASL_AUTHZID, "shared-mailbox");
+
+    /* Force PLAIN authentication */
+    curl_easy_setopt(curl, CURLOPT_LOGIN_OPTIONS, "AUTH=PLAIN");
+
+    /* This will retrieve message 1 from the user's mailbox */
+    curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
+
+    /* Perform the retr */
     res = curl_easy_perform(curl);
 
-    /* always cleanup */
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+
+    /* Always cleanup */
     curl_easy_cleanup(curl);
   }
-
-  curl_slist_free_all(host);
 
   return (int)res;
 }

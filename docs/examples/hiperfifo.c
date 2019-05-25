@@ -146,7 +146,6 @@ static void mcode_or_die(const char *where, CURLMcode code)
 static int multi_timer_cb(CURLM *multi _Unused, long timeout_ms, GlobalInfo *g)
 {
   struct timeval timeout;
-  CURLMcode rc;
 
   timeout.tv_sec = timeout_ms/1000;
   timeout.tv_usec = (timeout_ms%1000)*1000;
@@ -203,8 +202,8 @@ static void event_cb(int fd, short kind, void *userp)
   CURLMcode rc;
 
   int action =
-    (kind & EV_READ ? CURL_CSELECT_IN : 0) |
-    (kind & EV_WRITE ? CURL_CSELECT_OUT : 0);
+    ((kind & EV_READ) ? CURL_CSELECT_IN : 0) |
+    ((kind & EV_WRITE) ? CURL_CSELECT_OUT : 0);
 
   rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
@@ -250,7 +249,8 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
                     GlobalInfo *g)
 {
   int kind =
-     (act&CURL_POLL_IN?EV_READ:0)|(act&CURL_POLL_OUT?EV_WRITE:0)|EV_PERSIST;
+     ((act & CURL_POLL_IN) ? EV_READ : 0) |
+     ((act & CURL_POLL_OUT) ? EV_WRITE : 0) | EV_PERSIST;
 
   f->sockfd = s;
   f->action = act;

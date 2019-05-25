@@ -147,11 +147,11 @@ int main(void)
   /* See how the transfers went */
   while((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
-      int idx, found = 0;
+      int idx;
 
       /* Find out which handle this message is about */
       for(idx = 0; idx<HANDLECOUNT; idx++) {
-        found = (msg->easy_handle == handles[idx]);
+        int found = (msg->easy_handle == handles[idx]);
         if(found)
           break;
       }

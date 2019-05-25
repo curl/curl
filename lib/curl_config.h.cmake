@@ -241,6 +241,9 @@
 /* Define to 1 if you have the `getsockname' function. */
 #cmakedefine HAVE_GETSOCKNAME 1
 
+/* Define to 1 if you have the `if_nametoindex' function. */
+#cmakedefine HAVE_IF_NAMETOINDEX 1
+
 /* Define to 1 if you have the `getpwuid' function. */
 #cmakedefine HAVE_GETPWUID 1
 

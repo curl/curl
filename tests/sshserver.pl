@@ -389,6 +389,17 @@ if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
     $pidfile_config = pathhelp::build_sys_abs_path($pidfile_config);
     $sftpsrv_config = "internal-sftp";
 }
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Ensure to use native Windows paths with OpenSSH for Windows
+    $clipubkeyf_config = pathhelp::sys_native_abs_path($clipubkeyf);
+    $hstprvkeyf_config = pathhelp::sys_native_abs_path($hstprvkeyf);
+    $pidfile_config = pathhelp::sys_native_abs_path($pidfile);
+    $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
+
+    $sshdconfig = pathhelp::sys_native_abs_path($sshdconfig);
+    $sshconfig = pathhelp::sys_native_abs_path($sshconfig);
+    $sftpconfig = pathhelp::sys_native_abs_path($sftpconfig);
+}
 
 #***************************************************************************
 #  ssh daemon configuration file options we might use and version support
@@ -483,8 +494,18 @@ logmsg 'generating ssh server config file...' if($verbose);
 push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
-push @cfgarr, "DenyUsers !$username";
-push @cfgarr, "AllowUsers $username";
+
+# AllowUsers and DenyUsers options should use lowercase on Windows
+# and do not support quotes around values for some unknown reason.
+if ($sshdid =~ /OpenSSH-Windows/) {
+    my $username_lc = lc $username;
+    push @cfgarr, "DenyUsers !$username_lc";
+    push @cfgarr, "AllowUsers $username_lc";
+} else {
+    push @cfgarr, "DenyUsers !$username";
+    push @cfgarr, "AllowUsers $username";
+}
+
 push @cfgarr, 'DenyGroups';
 push @cfgarr, 'AllowGroups';
 push @cfgarr, '#';
@@ -758,7 +779,11 @@ if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
     $identity_config = pathhelp::build_sys_abs_path($identity_config);
     $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts_config);
 }
-
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Ensure to use native Windows paths with OpenSSH for Windows
+    $identity_config = pathhelp::sys_native_abs_path($identity);
+    $knownhosts_config = pathhelp::sys_native_abs_path($knownhosts);
+}
 
 #***************************************************************************
 #  ssh client configuration file options we might use and version support
@@ -853,7 +878,12 @@ push @cfgarr, "HostName $listenaddr";
 push @cfgarr, "User $username";
 push @cfgarr, 'Protocol 2';
 push @cfgarr, '#';
-push @cfgarr, "BindAddress $listenaddr";
+
+# BindAddress option is not supported by OpenSSH for Windows
+if (!($sshdid =~ /OpenSSH-Windows/)) {
+    push @cfgarr, "BindAddress $listenaddr";
+}
+
 push @cfgarr, '#';
 push @cfgarr, "IdentityFile $identity_config";
 push @cfgarr, "UserKnownHostsFile $knownhosts_config";
@@ -875,8 +905,12 @@ push @cfgarr, 'NumberOfPasswordPrompts 0';
 push @cfgarr, 'PasswordAuthentication no';
 push @cfgarr, 'PreferredAuthentications publickey';
 push @cfgarr, 'PubkeyAuthentication yes';
-push @cfgarr, 'RhostsRSAAuthentication no';
-push @cfgarr, 'RSAAuthentication no';
+
+# RSA authentication options are not supported by OpenSSH for Windows
+if (!($sshdid =~ /OpenSSH-Windows/)) {
+    push @cfgarr, 'RhostsRSAAuthentication no';
+    push @cfgarr, 'RSAAuthentication no';
+}
 
 # Disabled StrictHostKeyChecking since it makes the tests fail on my
 # OpenSSH_6.0p1 on Debian Linux / Daniel

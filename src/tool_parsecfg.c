@@ -46,7 +46,7 @@ static char *my_get_line(FILE *fp);
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
 {
-  FILE *file;
+  FILE *file = NULL;
   char filebuffer[512];
   bool usedarg = FALSE;
   int rc = 0;
@@ -69,7 +69,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
          */
         file = fopen(filebuffer, FOPEN_READTEXT);
         if(file != NULL) {
-          fclose(file);
           filename = filebuffer;
         }
         else {
@@ -110,7 +109,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
   }
 
-  if(strcmp(filename, "-"))
+  if(file != NULL)  /* WIN32: no need to fopen() again */
+    ;
+  else if(strcmp(filename, "-"))
     file = fopen(filename, FOPEN_READTEXT);
   else
     file = stdin;

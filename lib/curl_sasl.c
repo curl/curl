@@ -370,8 +370,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_PLAIN;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_plain_message(data, NULL, conn->user,
-                                                conn->passwd, &resp, &len);
+        result = Curl_auth_create_plain_message(data, conn->sasl_authzid,
+                                                conn->user, conn->passwd,
+                                                &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_LOGIN) {
       mech = SASL_MECH_STRING_LOGIN;
@@ -453,8 +454,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     *progress = SASL_DONE;
     return result;
   case SASL_PLAIN:
-    result = Curl_auth_create_plain_message(data, NULL, conn->user,
-                                            conn->passwd, &resp, &len);
+    result = Curl_auth_create_plain_message(data, conn->sasl_authzid,
+                                            conn->user, conn->passwd,
+                                            &resp, &len);
     break;
   case SASL_LOGIN:
     result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
