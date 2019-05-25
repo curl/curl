@@ -39,9 +39,8 @@ int test(char *URL)
   char *rtsp_session_id;
   int request = 1;
   int i;
-  FILE *idfile = NULL;
 
-  idfile = fopen(libtest_arg2, "wb");
+  FILE *idfile = fopen(libtest_arg2, "wb");
   if(idfile == NULL) {
     fprintf(stderr, "couldn't open the Session ID File\n");
     return TEST_ERR_MAJOR_BAD;

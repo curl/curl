@@ -357,7 +357,6 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *service,
                                              char **outptr, size_t *outlen)
 {
-  CURLcode result = CURLE_OK;
   size_t i;
   MD5_context *ctxt;
   char *response = NULL;
@@ -377,10 +376,12 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char *spn         = NULL;
 
   /* Decode the challenge message */
-  result = auth_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
-                                          realm, sizeof(realm),
-                                          algorithm, sizeof(algorithm),
-                                          qop_options, sizeof(qop_options));
+  CURLcode result = auth_decode_digest_md5_message(chlg64, nonce,
+                                                   sizeof(nonce), realm,
+                                                   sizeof(realm), algorithm,
+                                                   sizeof(algorithm),
+                                                   qop_options,
+                                                   sizeof(qop_options));
   if(result)
     return result;
 

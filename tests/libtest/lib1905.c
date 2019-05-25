@@ -27,12 +27,11 @@
 
 int test(char *URL)
 {
-  CURLM *cm = NULL;
   CURLSH *sh = NULL;
   CURL *ch = NULL;
   int unfinished;
 
-  cm = curl_multi_init();
+  CURLM *cm = curl_multi_init();
   if(!cm)
     return 1;
   sh = curl_share_init();

@@ -565,10 +565,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 #ifdef HAVE_GSSAPI
   char * const buf = data->state.buffer;
 #endif
-  CURLcode result = CURLE_OK;
   int code;
-
-  result = Curl_pp_readresp(sockfd, pp, &code, size);
+  CURLcode result = Curl_pp_readresp(sockfd, pp, &code, size);
 
 #if defined(HAVE_GSSAPI)
   /* handle the security-oriented responses 6xx ***/
@@ -1499,24 +1497,14 @@ static CURLcode ftp_state_list(struct connectdata *conn)
 
 static CURLcode ftp_state_retr_prequote(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* We've sent the TYPE, now we must send the list of prequote strings */
-
-  result = ftp_state_quote(conn, TRUE, FTP_RETR_PREQUOTE);
-
-  return result;
+  return ftp_state_quote(conn, TRUE, FTP_RETR_PREQUOTE);
 }
 
 static CURLcode ftp_state_stor_prequote(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* We've sent the TYPE, now we must send the list of prequote strings */
-
-  result = ftp_state_quote(conn, TRUE, FTP_STOR_PREQUOTE);
-
-  return result;
+  return ftp_state_quote(conn, TRUE, FTP_STOR_PREQUOTE);
 }
 
 static CURLcode ftp_state_type(struct connectdata *conn)
