@@ -957,7 +957,6 @@ static CURLcode smb_do(struct connectdata *conn, bool *done)
 
 static CURLcode smb_parse_url_path(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct smb_request *req = data->req.protop;
   struct smb_conn *smbc = &conn->proto.smbc;
@@ -965,7 +964,8 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
   char *slash;
 
   /* URL decode the path */
-  result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL, TRUE);
+  CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL,
+                                   TRUE);
   if(result)
     return result;
 

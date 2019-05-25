@@ -41,8 +41,6 @@ static size_t write_it(char *buff, size_t size, size_t nmemb,
 
 int main(int argc, char **argv)
 {
-  int rc = CURLE_OK;
-
   /* curl easy handle */
   CURL *handle;
 
@@ -50,7 +48,7 @@ int main(int argc, char **argv)
   struct callback_data data = { 0 };
 
   /* global initialization */
-  rc = curl_global_init(CURL_GLOBAL_ALL);
+  int rc = curl_global_init(CURL_GLOBAL_ALL);
   if(rc)
     return rc;
 

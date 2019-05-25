@@ -359,10 +359,8 @@ static CURLcode smtp_perform_helo(struct connectdata *conn)
  */
 static CURLcode smtp_perform_starttls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the STARTTLS command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "STARTTLS");
+  CURLcode result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "STARTTLS");
 
   if(!result)
     state(conn, SMTP_STARTTLS);
@@ -378,11 +376,10 @@ static CURLcode smtp_perform_starttls(struct connectdata *conn)
  */
 static CURLcode smtp_perform_upgrade_tls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
-
   /* Start the SSL connection */
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                 &smtpc->ssldone);
 
   if(!result) {
     if(smtpc->state != SMTP_UPGRADETLS)
@@ -645,10 +642,8 @@ static CURLcode smtp_perform_rcpt_to(struct connectdata *conn)
  */
 static CURLcode smtp_perform_quit(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "QUIT");
+  CURLcode result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, SMTP_QUIT);

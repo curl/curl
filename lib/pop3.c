@@ -339,10 +339,8 @@ static CURLcode pop3_perform_capa(struct connectdata *conn)
  */
 static CURLcode pop3_perform_starttls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the STLS command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "STLS");
+  CURLcode result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "STLS");
 
   if(!result)
     state(conn, POP3_STARTTLS);
@@ -358,11 +356,10 @@ static CURLcode pop3_perform_starttls(struct connectdata *conn)
  */
 static CURLcode pop3_perform_upgrade_tls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-  struct pop3_conn *pop3c = &conn->proto.pop3c;
-
   /* Start the SSL connection */
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &pop3c->ssldone);
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                 &pop3c->ssldone);
 
   if(!result) {
     if(pop3c->state != POP3_UPGRADETLS)
@@ -593,10 +590,8 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
  */
 static CURLcode pop3_perform_quit(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "QUIT");
+  CURLcode result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, POP3_QUIT);

@@ -1968,11 +1968,10 @@ static CURLcode myssh_multi_statemach(struct connectdata *conn,
                                       bool *done)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
-  CURLcode result = CURLE_OK;
   bool block;    /* we store the status and use that to provide a ssh_getsock()
                     implementation */
+  CURLcode result = myssh_statemach_act(conn, &block);
 
-  result = myssh_statemach_act(conn, &block);
   *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
   myssh_block2waitfor(conn, block);
 

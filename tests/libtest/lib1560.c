@@ -645,13 +645,11 @@ static struct redircase set_url_list[] = {
 static int set_url(void)
 {
   int i;
-  CURLUcode rc;
-  CURLU *urlp;
   int error = 0;
 
   for(i = 0; set_url_list[i].in && !error; i++) {
-    char *url = NULL;
-    urlp = curl_url();
+    CURLUcode rc;
+    CURLU *urlp = curl_url();
     if(!urlp)
       break;
     rc = curl_url_set(urlp, CURLUPART_URL, set_url_list[i].in,
@@ -666,6 +664,7 @@ static int set_url(void)
         error++;
       }
       else {
+        char *url = NULL;
         rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
         if(rc) {
           fprintf(stderr, "%s:%d Get URL returned %d\n",
@@ -677,8 +676,8 @@ static int set_url(void)
             error++;
           }
         }
+        curl_free(url);
       }
-      curl_free(url);
     }
     else if(rc != set_url_list[i].ucode) {
       fprintf(stderr, "Set URL\nin: %s\nreturned %d (expected %d)\n",
@@ -693,11 +692,10 @@ static int set_url(void)
 static int set_parts(void)
 {
   int i;
-  CURLUcode rc;
   int error = 0;
 
   for(i = 0; set_parts_list[i].set && !error; i++) {
-    char *url = NULL;
+    CURLUcode rc;
     CURLU *urlp = curl_url();
     if(!urlp) {
       error++;
@@ -709,6 +707,7 @@ static int set_parts(void)
     else
       rc = CURLUE_OK;
     if(!rc) {
+      char *url = NULL;
       CURLUcode uc = updateurl(urlp, set_parts_list[i].set,
                                set_parts_list[i].setflags);
 
@@ -728,13 +727,13 @@ static int set_parts(void)
       else if(checkurl(url, set_parts_list[i].out)) {
         error++;
       }
+      curl_free(url);
     }
     else if(rc != set_parts_list[i].ucode) {
       fprintf(stderr, "Set parts\nin: %s\nreturned %d (expected %d)\n",
               set_parts_list[i].in, (int)rc, set_parts_list[i].ucode);
       error++;
     }
-    curl_free(url);
     curl_url_cleanup(urlp);
   }
   return error;
@@ -743,10 +742,9 @@ static int set_parts(void)
 static int get_url(void)
 {
   int i;
-  CURLUcode rc;
   int error = 0;
   for(i = 0; get_url_list[i].in && !error; i++) {
-    char *url = NULL;
+    CURLUcode rc;
     CURLU *urlp = curl_url();
     if(!urlp) {
       error++;
@@ -755,6 +753,7 @@ static int get_url(void)
     rc = curl_url_set(urlp, CURLUPART_URL, get_url_list[i].in,
                       get_url_list[i].urlflags);
     if(!rc) {
+      char *url = NULL;
       rc = curl_url_get(urlp, CURLUPART_URL, &url, get_url_list[i].getflags);
 
       if(rc) {
@@ -767,13 +766,13 @@ static int get_url(void)
           error++;
         }
       }
+      curl_free(url);
     }
     else if(rc != get_url_list[i].ucode) {
       fprintf(stderr, "Get URL\nin: %s\nreturned %d (expected %d)\n",
               get_url_list[i].in, (int)rc, get_url_list[i].ucode);
       error++;
     }
-    curl_free(url);
     curl_url_cleanup(urlp);
   }
   return error;
@@ -782,11 +781,10 @@ static int get_url(void)
 static int get_parts(void)
 {
   int i;
-  CURLUcode rc;
-  CURLU *urlp;
   int error = 0;
   for(i = 0; get_parts_list[i].in && !error; i++) {
-    urlp = curl_url();
+    CURLUcode rc;
+    CURLU *urlp = curl_url();
     if(!urlp) {
       error++;
       break;
@@ -831,11 +829,10 @@ static struct querycase append_list[] = {
 static int append(void)
 {
   int i;
-  CURLUcode rc;
-  CURLU *urlp;
   int error = 0;
   for(i = 0; append_list[i].in && !error; i++) {
-    urlp = curl_url();
+    CURLUcode rc;
+    CURLU *urlp = curl_url();
     if(!urlp) {
       error++;
       break;
@@ -881,12 +878,11 @@ static int append(void)
 
 static int scopeid(void)
 {
-  CURLU *u;
+  CURLU *u = curl_url();
   int error = 0;
   CURLUcode rc;
   char *url;
 
-  u = curl_url();
   rc = curl_url_set(u, CURLUPART_URL,
                     "https://[fe80::20c:29ff:fe9c:409b%25eth0]/hello.html", 0);
   if(rc != CURLUE_OK) {

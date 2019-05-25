@@ -620,12 +620,7 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
   va_list arg;
   void *paramp;
   CURLcode ret;
-  unsigned int ccsid;
-  char * * cpp;
   struct Curl_easy * data;
-  struct curl_slist * * slp;
-  struct curl_certinfo * cipf;
-  struct curl_certinfo * cipt;
 
   /* WARNING: unlike curl_easy_getinfo(), the strings returned by this
      procedure have to be free'ed. */
@@ -635,7 +630,13 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
   paramp = va_arg(arg, void *);
   ret = Curl_getinfo(data, info, paramp);
 
-  if(ret == CURLE_OK)
+  if(ret == CURLE_OK) {
+    unsigned int ccsid;
+    char **cpp;
+    struct curl_slist **slp;
+    struct curl_certinfo *cipf;
+    struct curl_certinfo *cipt;
+
     switch((int) info & CURLINFO_TYPEMASK) {
 
     case CURLINFO_STRING:
@@ -706,6 +707,7 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
         break;
       }
     }
+  }
 
   va_end(arg);
   return ret;
@@ -1355,13 +1357,12 @@ curl_pushheader_byname_ccsid(struct curl_pushheaders *h, const char *header,
 
 {
   char *d = (char *) NULL;
-  char *s;
 
   if(header) {
     header = dynconvert(ASCII_CCSID, header, -1, ccsidin);
 
     if(header) {
-      s = curl_pushheader_byname(h, header);
+      char *s = curl_pushheader_byname(h, header);
       free((char *) header);
 
       if(s)

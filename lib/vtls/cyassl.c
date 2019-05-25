@@ -357,9 +357,8 @@ cyassl_connect_step1(struct connectdata *conn,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    CURLcode result = CURLE_OK;
-    result = (*data->set.ssl.fsslctx)(data, BACKEND->ctx,
-                                      data->set.ssl.fsslctxp);
+    CURLcode result = (*data->set.ssl.fsslctx)(data, BACKEND->ctx,
+                                               data->set.ssl.fsslctxp);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
       return result;
