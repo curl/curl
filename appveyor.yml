@@ -92,6 +92,11 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: "C:\\MinGW\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: VisualStudioSolution
+        PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
+        TESTING: OFF
+        VC_VERSION: VC15
 
 install:
     - set "PATH=C:\msys64\usr\bin;%PATH%"
@@ -113,7 +118,11 @@ build_script:
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
-        cmake --build . --config %PRJ_CFG% --clean-first )
+        cmake --build . --config %PRJ_CFG% --clean-first ) else (
+      if %BUILD_SYSTEM%==VisualStudioSolution (
+        cd projects &&
+        .\\generate.bat %VC_VERSION% &&
+        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" ))
 
 test_script:
     - if %TESTING%==ON (
