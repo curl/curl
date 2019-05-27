@@ -1698,15 +1698,28 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 #ifdef USE_ESNI
       case 'S':
         /* --esni */
-        break;                  /* TODO */
+        if(!config->esni_status.word) {
+          /* No ESNI option was parsed yet */
+          config->esni_status.flags.selected = toggle;
+          config->esni_status.flags.disabled = !toggle;
+        }
+        break;
 
       case 'T':
         /* --esni-cover */
-        break;                  /* TODO */
+        if(!config->esni_status.flags.disabled) {
+          config->esni_status.flags.selected = TRUE; /* clamp flag up */
+          GetStr(&config->esni_cover_name, nextarg); /* save argument */
+        }
+        break
 
       case 'U':
         /* --esni-load */
-        break;                  /* TODO */
+        if(!config->esni_status.flags.disabled) {
+          config->esni_status.flags.selected = TRUE; /* as before */
+          GetStr(&config->esni_load_file, nextarg);
+        }
+        break;
 #endif
 
       default: /* unknown flag */

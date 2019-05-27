@@ -270,9 +270,12 @@ struct OperationConfig {
   union {
     unsigned long word;
     struct {
-      unsigned int disabled : 1;
+      unsigned int disabled : 1;  /* Set by --no-esni option */
+      unsigned int selected : 1;  /* Set by any other ESNI-related option */
     } flags;
   } esni_status;
+  char *esni_cover_name;          /* Set by --esni-cover option */
+  char *esni_load_file;           /* Set by --esni-load option */
   SSL_ESNI *ssl_esni;
 #endif
   struct GlobalConfig *global;
