@@ -1921,9 +1921,6 @@ typedef enum {
   /* maximum age of a connection to consider it for reuse (in seconds) */
   CINIT(MAXAGE_CONN, LONG, 288),
 
-  /* SASL authorisation identity */
-  CINIT(SASL_AUTHZID, STRINGPOINT, 289),
-
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -4,17 +4,12 @@ curl and libcurl 7.65.1
  Command line options:         221
  curl_easy_setopt() options:   268
  Public functions in libcurl:  80
- Contributors:                 1929
-
-This release includes the following changes:
-
- o Added CURLOPT_SASL_AUTHZID [14]
- o Addded --sasl-authzid [14]
+ Contributors:                 1953
 
 This release includes the following bugfixes:
 
+ o CURLOPT_LOW_SPEED_* repaired [6]
  o PolarSSL: deprecate support step 1. Removed from configure [3]
- o Repair CURLOPT_LOW_SPEED_* [6]
  o cmake: check for if_nametoindex() [2]
  o config-win32: add support for if_nametoindex and getsockname [8]
  o example/http2-download: fix format specifier [4]

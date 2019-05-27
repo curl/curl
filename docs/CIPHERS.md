@@ -269,6 +269,12 @@ When specifying multiple cipher names, separate them with colon (`:`).
 `ecdhe_ecdsa_chacha20_poly1305_sha_256`
 `dhe_rsa_chacha20_poly1305_sha_256`
 
+### TLS 1.3 cipher suites
+
+`aes_128_gcm_sha_256`
+`aes_256_gcm_sha_384`
+`chacha20_poly1305_sha_256`
+
 ## GSKit
 
 Ciphers are internally defined as
