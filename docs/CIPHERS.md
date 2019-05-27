@@ -6,11 +6,12 @@ and
 [`--ciphers`](https://curl.haxx.se/docs/manpage.html#--ciphers)
 users can control which ciphers to consider when negotiating TLS connections.
 
-TLS 1.3 ciphers are supported since curl 7.61 with options
+TLS 1.3 ciphers are supported since curl 7.61 for OpenSSL 1.1.1+ with options
 [`CURLOPT_TLS13_CIPHERS`](https://curl.haxx.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
 and
 [`--tls13-ciphers`](https://curl.haxx.se/docs/manpage.html#--tls13-ciphers)
-.
+. If you are using a different SSL backend you can try setting TLS 1.3 cipher
+suites by using the respective regular cipher option.
 
 The names of the known ciphers differ depending on which TLS backend that
 libcurl was built to use. This is an attempt to list known cipher names.
