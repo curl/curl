@@ -1711,7 +1711,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->esni_status.flags.selected = TRUE; /* clamp flag up */
           GetStr(&config->esni_cover_name, nextarg); /* save argument */
         }
-        break
+        break;
 
       case 'U':
         /* --esni-load */
