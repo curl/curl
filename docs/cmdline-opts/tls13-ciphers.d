@@ -9,4 +9,6 @@ cipher suite details on this URL:
 
  https://curl.haxx.se/docs/ssl-ciphers.html
 
+This option is used only when curl is built to use OpenSSL 1.1.1 or later.
+
 If this option is used several times, the last one will be used.
