@@ -479,6 +479,9 @@
 /* Define to 1 if you have the <openssl/x509.h> header file. */
 #cmakedefine HAVE_OPENSSL_X509_H 1
 
+/* Define to 1 if you have the <openssl/esni.h> header file. */
+#cmakedefine HAVE_OPENSSL_ESNI_H 1
+
 /* Define to 1 if you have the <pem.h> header file. */
 #cmakedefine HAVE_PEM_H 1
 

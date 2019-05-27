@@ -1792,7 +1792,8 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
       dnl Have the libraries--check for OpenSSL headers
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
-                       openssl/pem.h openssl/ssl.h openssl/err.h,
+                       openssl/pem.h openssl/ssl.h openssl/err.h \
+                       openssl/esni.h,
         ssl_msg="OpenSSL"
 	test openssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         OPENSSL_ENABLED=1
