@@ -653,6 +653,14 @@ int netware_init(void);
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+/* Single point where USE_ESNI definition might be defined */
+#if defined(USE_OPENSSL) && !defined(OPENSSL_NO_ESNI) && \
+  defined(HAVE_OPENSSL_ESNI_H)
+# define USE_ESNI               /* ESNI support available */
+#else
+# undef USE_ESNI                /* No ESNI support */
+#endif
+
 /* Single point where USE_SPNEGO definition might be defined */
 #if !defined(CURL_DISABLE_CRYPTO_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))

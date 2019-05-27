@@ -29,16 +29,7 @@
 
 #include "tool_formparse.h"
 
-/* TODO: 
- *   probably should set up USE_ESNI symbol (in curl_setup.h ?)
- *   derived from HAVE_OPENSSL_ESNI_H and !OPENSSL_NO_ESNI
- *   and use it for conditional inclusion of ESNI support code.
- *   This will allow for adding other (non-OpenSSL) ESNI implementations.
- *
- *   For now, we're just using HAVE_OPENSSL_ESNI_H
- */
-
-#ifdef HAVE_OPENSSL_ESNI_H
+#ifdef USE_ESNI
 # include <openssl/esni.h>
 #endif
 
@@ -275,7 +266,7 @@ struct OperationConfig {
                                      0 is valid. default: CURL_HET_DEFAULT. */
   bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
-#ifdef HAVE_OPENSSL_ESNI_H
+#ifdef USE_ESNI
   union {
     unsigned long word;
     struct {
