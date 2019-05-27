@@ -46,6 +46,8 @@
 #include <arpa/inet.h>
 #endif
 
+#include <stddef.h>
+
 #if (defined(HAVE_IOCTL_FIONBIO) && defined(NETWARE))
 #include <sys/filio.h>
 #endif
@@ -620,13 +622,13 @@ void Curl_persistconninfo(struct connectdata *conn)
   conn->data->info.conn_local_port = conn->local_port;
 }
 
-UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
-                             long *port);
+UNITTEST bool getaddressinfo(struct sockaddr *sa, curl_socklen_t socklen,
+                             char *addr, long *port);
 
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
-                             long *port)
+UNITTEST bool getaddressinfo(struct sockaddr *sa, curl_socklen_t socklen,
+                             char *addr, long *port)
 {
   struct sockaddr_in *si = NULL;
 #ifdef ENABLE_IPV6
@@ -660,7 +662,15 @@ UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
     case AF_UNIX:
       su = (struct sockaddr_un*)sa;
-      msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+      /* On Linux, sun_path within struct sockaddr_un is not initialized
+         if an unbound AF_UNIX socket is returned from accept() or
+         getsockname()/getpeername() are invoked for an unbound socket.
+         Evaluate the address length to not access sun_path in this case. */
+      if(socklen > offsetof(struct sockaddr_un, sun_path))
+        msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+      else
+        /* addr is at least MAX_IPADR_LEN long */
+        strcpy(addr, "<anonymous>");
       *port = 0;
       return TRUE;
 #endif
@@ -688,10 +698,11 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     char buffer[STRERROR_LEN];
     struct Curl_sockaddr_storage ssrem;
     struct Curl_sockaddr_storage ssloc;
-    curl_socklen_t len;
+    curl_socklen_t lenrem;
+    curl_socklen_t lenloc;
 #ifdef HAVE_GETPEERNAME
-    len = sizeof(struct Curl_sockaddr_storage);
-    if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
+    lenrem = sizeof(struct Curl_sockaddr_storage);
+    if(getpeername(sockfd, (struct sockaddr*) &ssrem, &lenrem)) {
       int error = SOCKERRNO;
       failf(data, "getpeername() failed with errno %d: %s",
             error, Curl_strerror(error, buffer, sizeof(buffer)));
@@ -699,9 +710,9 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     }
 #endif
 #ifdef HAVE_GETSOCKNAME
-    len = sizeof(struct Curl_sockaddr_storage);
+    lenloc = sizeof(struct Curl_sockaddr_storage);
     memset(&ssloc, 0, sizeof(ssloc));
-    if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
+    if(getsockname(sockfd, (struct sockaddr*) &ssloc, &lenloc)) {
       int error = SOCKERRNO;
       failf(data, "getsockname() failed with errno %d: %s",
             error, Curl_strerror(error, buffer, sizeof(buffer)));
@@ -709,7 +720,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     }
 #endif
 #ifdef HAVE_GETPEERNAME
-    if(!getaddressinfo((struct sockaddr*)&ssrem,
+    if(!getaddressinfo((struct sockaddr*)&ssrem, lenrem,
                        conn->primary_ip, &conn->primary_port)) {
       failf(data, "ssrem inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
@@ -718,7 +729,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 #endif
 #ifdef HAVE_GETSOCKNAME
-    if(!getaddressinfo((struct sockaddr*)&ssloc,
+    if(!getaddressinfo((struct sockaddr*)&ssloc, lenloc,
                        conn->local_ip, &conn->local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
@@ -1027,6 +1038,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
 
   /* store remote address and port used in this connection attempt */
   if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
+                     ai->ai_addrlen,
                      ipaddress, &port)) {
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
