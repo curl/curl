@@ -241,8 +241,17 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
 
 
 /* delete the given socket + handle from the hash */
-static void sh_delentry(struct curl_hash *sh, curl_socket_t s)
+static void sh_delentry(struct Curl_sh_entry *entry,
+                        struct curl_hash *sh, curl_socket_t s)
 {
+  struct curl_llist *list = &entry->list;
+  struct curl_llist_element *e;
+  /* clear the list of transfers first */
+  for(e = list->head; e; e = list->head) {
+    struct Curl_easy *dta = e->ptr;
+    Curl_llist_remove(&entry->list, e, NULL);
+    dta->sh_entry = NULL;
+  }
   /* We remove the hash entry. This will end up in a call to
      sh_freeentry(). */
   Curl_hash_delete(sh, (char *)&s, sizeof(curl_socket_t));
@@ -780,6 +789,11 @@ bool Curl_multiplex_wanted(const struct Curl_multi *multi)
 static void detach_connnection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
+  if(data->sh_entry) {
+    /* still listed as a user of a socket hash entry, remove it */
+    Curl_llist_remove(&data->sh_entry->list, &data->sh_queue, NULL);
+    data->sh_entry = NULL;
+  }
   if(conn)
     Curl_llist_remove(&conn->easyq, &data->conn_queue, NULL);
   data->conn = NULL;
@@ -2276,6 +2290,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       /* add 'data' to the list of handles using this socket! */
       Curl_llist_insert_next(&entry->list, entry->list.tail,
                              data, &data->sh_queue);
+      data->sh_entry = entry;
     }
 
     comboaction = (entry->writers? CURL_POLL_OUT : 0) |
@@ -2335,11 +2350,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
           multi->socket_cb(data, s, CURL_POLL_REMOVE,
                            multi->socket_userp,
                            entry->socketp);
-        sh_delentry(&multi->sockhash, s);
-      }
-      else {
-        /* remove this transfer as a user of this socket */
-        Curl_llist_remove(&entry->list, &data->sh_queue, NULL);
+        sh_delentry(entry, &multi->sockhash, s);
       }
     }
   } /* for loop over numsocks */
@@ -2383,7 +2394,7 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
                            entry->socketp);
 
         /* now remove it from the socket hash */
-        sh_delentry(&multi->sockhash, s);
+        sh_delentry(entry, &multi->sockhash, s);
       }
     }
   }
@@ -2474,7 +2485,6 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     return result;
   }
   if(s != CURL_SOCKET_TIMEOUT) {
-
     struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
     if(!entry)
@@ -2487,15 +2497,19 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     else {
       struct curl_llist *list = &entry->list;
       struct curl_llist_element *e;
+      struct curl_llist_element *enext;
       SIGPIPE_VARIABLE(pipe_st);
 
       /* the socket can be shared by many transfers, iterate */
-      for(e = list->head; e; e = e->next) {
+      for(e = list->head; e; e = enext) {
         data = (struct Curl_easy *)e->ptr;
 
-        if(data->magic != CURLEASY_MAGIC_NUMBER)
-          /* bad bad bad bad bad bad bad */
-          return CURLM_INTERNAL_ERROR;
+        /* assign 'enext' here since the 'e' struct might be cleared
+           further down in the singlesocket() call */
+        enext = e->next;
+
+        DEBUGASSERT(data);
+        DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
 
         if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
           /* set socket event bitmask if they're not locked */
