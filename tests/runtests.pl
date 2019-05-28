@@ -2635,7 +2635,7 @@ sub checksystem {
     my $versnoexec;
     my @version=();
     my @disabled;
-    my $dis;
+    my $dis = "";
 
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
