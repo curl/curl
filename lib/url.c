@@ -1006,6 +1006,7 @@ ConnectionExists(struct Curl_easy *data,
   bool canmultiplex = IsMultiplexingPossible(data, needle);
   struct connectbundle *bundle;
   struct curltime now = Curl_now();
+  const char *hostbundle;
 
 #ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want &
@@ -1022,16 +1023,15 @@ ConnectionExists(struct Curl_easy *data,
 
   /* Look up the bundle with all the connections to this particular host.
      Locks the connection cache, beware of early returns! */
-  bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache);
+  bundle = Curl_conncache_find_bundle(needle, data->state.conn_cache,
+                                      &hostbundle);
   if(bundle) {
     /* Max pipe length is zero (unlimited) for multiplexed connections */
     struct curl_llist_element *curr;
 
     infof(data, "Found bundle for host %s: %p [%s]\n",
-          (needle->bits.conn_to_host ? needle->conn_to_host.name :
-           needle->host.name), (void *)bundle,
-          (bundle->multiuse == BUNDLE_MULTIPLEX ?
-           "can multiplex" : "serially"));
+          hostbundle, (void *)bundle, (bundle->multiuse == BUNDLE_MULTIPLEX ?
+                                       "can multiplex" : "serially"));
 
     /* We can't multiplex if we don't know anything about the server */
     if(canmultiplex) {
@@ -3762,8 +3762,9 @@ static CURLcode create_conn(struct Curl_easy *data,
       connections_available = FALSE;
     else {
       /* this gets a lock on the conncache */
+      const char *bundlehost;
       struct connectbundle *bundle =
-        Curl_conncache_find_bundle(conn, data->state.conn_cache);
+        Curl_conncache_find_bundle(conn, data->state.conn_cache, &bundlehost);
 
       if(max_host_connections > 0 && bundle &&
          (bundle->num_connections >= max_host_connections)) {
@@ -3777,8 +3778,8 @@ static CURLcode create_conn(struct Curl_easy *data,
           (void)Curl_disconnect(data, conn_candidate,
                                 /* dead_connection */ FALSE);
         else {
-          infof(data, "No more connections allowed to host: %zu\n",
-                max_host_connections);
+          infof(data, "No more connections allowed to host %s: %zu\n",
+                bundlehost, max_host_connections);
           connections_available = FALSE;
         }
       }
