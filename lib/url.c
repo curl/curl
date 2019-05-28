@@ -95,6 +95,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "inet_pton.h"
 #include "getinfo.h"
 #include "urlapi-int.h"
+#include "system_win32.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1903,18 +1904,28 @@ static void zonefrom_url(CURLU *uh, struct connectdata *conn)
     if(!*endp && (scope < UINT_MAX))
       /* A plain number, use it directly as a scope id. */
       conn->scope_id = (unsigned int)scope;
-#ifdef HAVE_IF_NAMETOINDEX
+#if defined(HAVE_IF_NAMETOINDEX)
     else {
+#elif defined(WIN32)
+    else if(Curl_if_nametoindex) {
+#endif
+
+#if defined(HAVE_IF_NAMETOINDEX) || defined(WIN32)
       /* Zone identifier is not numeric */
       unsigned int scopeidx = 0;
+#if defined(WIN32)
+      scopeidx = Curl_if_nametoindex(zoneid);
+#else
       scopeidx = if_nametoindex(zoneid);
+#endif
       if(!scopeidx)
         infof(conn->data, "Invalid zoneid: %s; %s\n", zoneid,
               strerror(errno));
       else
         conn->scope_id = scopeidx;
     }
-#endif /* HAVE_IF_NAMETOINDEX */
+#endif /* HAVE_IF_NAMETOINDEX || WIN32 */
+
     free(zoneid);
   }
 }

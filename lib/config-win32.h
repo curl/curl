@@ -154,11 +154,6 @@
 #define HAVE_WS2TCPIP_H 1
 #endif
 
-/* Define if you have the <Iphlpapi.h> header file. */
-#ifndef __SALFORDC__
-#define HAVE_IPHLPAPI_H 1
-#endif
-
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */
@@ -610,11 +605,6 @@ Vista
 #    define HAVE_GETADDRINFO_THREADSAFE 1
 #    define HAVE_GETNAMEINFO            1
 #  endif
-#endif
-#if defined(HAVE_IPHLPAPI_H)
-  #if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
-    #define HAVE_IF_NAMETOINDEX 1
-  #endif
 #endif
 
 #if defined(__POCC__)
