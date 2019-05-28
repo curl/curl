@@ -2785,6 +2785,8 @@ typedef struct {
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
 
+#define CURL_VERSION_ESNI         (1<<25) /* ESNI support */
+
  /*
  * NAME curl_version_info()
  *
