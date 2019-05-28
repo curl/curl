@@ -4180,7 +4180,9 @@ if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1" \
     -o "x$NSS_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
 fi
-
+if test "x$OPENSSL_ENABLED" = "x1" -a "x$HAVE_OPENSSL_ESNI_H" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES ESNI"
+fi
 AC_SUBST(SUPPORT_FEATURES)
 
 dnl For supported protocols in pkg-config file
