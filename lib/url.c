@@ -1029,9 +1029,10 @@ ConnectionExists(struct Curl_easy *data,
     /* Max pipe length is zero (unlimited) for multiplexed connections */
     struct curl_llist_element *curr;
 
-    infof(data, "Found bundle for host %s: %p [%s]\n",
-          hostbundle, (void *)bundle, (bundle->multiuse == BUNDLE_MULTIPLEX ?
-                                       "can multiplex" : "serially"));
+    infof(data, "Found bundle for host %s:%d %p [%s]\n",
+          hostbundle, needle->port,
+          (void *)bundle, (bundle->multiuse == BUNDLE_MULTIPLEX ?
+                           "can multiplex" : "serially"));
 
     /* We can't multiplex if we don't know anything about the server */
     if(canmultiplex) {
@@ -2027,7 +2028,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
   else {
     unsigned long port = strtoul(data->state.up.port, NULL, 10);
-    conn->remote_port = curlx_ultous(port);
+    conn->port = conn->remote_port = curlx_ultous(port);
   }
 
   (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
