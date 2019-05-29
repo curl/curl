@@ -49,7 +49,7 @@ typedef enum {
 } PlatformIdentifier;
 
 /* We use our own typedef here since some headers might lack this */
-typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(char *);
+typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 
 /* This is used instread of if_nametoindex if available on Windows */
 IF_NAMETOINDEX_FN Curl_if_nametoindex;
