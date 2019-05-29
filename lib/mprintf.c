@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1999 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1008,7 +1008,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
     /* we terminate this with a zero byte */
     if(info.max == info.length)
       /* we're at maximum, scrap the last letter */
-      info.buffer[-1] = 0;
+      info.buffer[maxlength - 1] = 0;
     else
       info.buffer[0] = 0;
   }
