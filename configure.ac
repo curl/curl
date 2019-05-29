@@ -1813,6 +1813,10 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
           OPENSSL_ENABLED=1
         fi
       fi
+
+      if test $ac_cv_header_openssl_esni_h = yes; then
+        ESNI_ENABLED=1
+      fi
     fi
 
     if test X"$OPENSSL_ENABLED" != X"1"; then
@@ -4180,7 +4184,7 @@ if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1" \
     -o "x$NSS_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
 fi
-if test "x$OPENSSL_ENABLED" = "x1" -a "x$HAVE_OPENSSL_ESNI_H" = "x1"; then
+if test "x$ESNI_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES ESNI"
 fi
 AC_SUBST(SUPPORT_FEATURES)
