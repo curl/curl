@@ -61,6 +61,8 @@
     Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT)
 #endif
 
+#define HASHKEY_SIZE 128
+
 static void conn_llist_dtor(void *user, void *element)
 {
   struct connectdata *conn = element;
@@ -178,8 +180,6 @@ static void hashkey(struct connectdata *conn, char *buf,
     /* report back which name we used */
     *hostp = hostname;
 
-  DEBUGASSERT(len > 32);
-
   /* put the number first so that the hostname gets cut off if too long */
   msnprintf(buf, len, "%ld%s", port, hostname);
 }
@@ -224,7 +224,7 @@ struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
   struct connectbundle *bundle = NULL;
   CONN_LOCK(conn->data);
   if(connc) {
-    char key[128];
+    char key[HASHKEY_SIZE];
     hashkey(conn, key, sizeof(key), hostp);
     bundle = Curl_hash_pick(&connc->hash, key, strlen(key));
   }
@@ -277,7 +277,7 @@ CURLcode Curl_conncache_add_conn(struct conncache *connc,
   bundle = Curl_conncache_find_bundle(conn, data->state.conn_cache, NULL);
   if(!bundle) {
     int rc;
-    char key[128];
+    char key[HASHKEY_SIZE];
 
     result = bundle_create(data, &new_bundle);
     if(result) {
