@@ -3,6 +3,7 @@ version: 7.50.0.{build}
 environment:
     matrix:
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 9 2008"
         PRJ_CFG: Release
         OPENSSL: OFF
@@ -13,6 +14,7 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 15 2017 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -23,6 +25,7 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 15 2017 Win64"
         PRJ_CFG: Release
         OPENSSL: ON
@@ -33,6 +36,7 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 10 2010 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -43,6 +47,7 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 15 2017 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -53,6 +58,7 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "Visual Studio 15 2017 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -63,6 +69,7 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -74,6 +81,7 @@ environment:
         COMPILER_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
         OPENSSL: OFF
@@ -84,6 +92,11 @@ environment:
         DISABLED_TESTS: ""
         COMPILER_PATH: "C:\\MinGW\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: VisualStudioSolution
+        PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
+        TESTING: OFF
+        VC_VERSION: VC15
 
 install:
     - set "PATH=C:\msys64\usr\bin;%PATH%"
@@ -91,20 +104,25 @@ install:
         set "PATH=%COMPILER_PATH%;%PATH%" )
 
 build_script:
-    - cmake .
-      -G"%PRJ_GEN%"
-      -DCMAKE_USE_OPENSSL=%OPENSSL%
-      -DCMAKE_USE_WINSSL=%WINSSL%
-      -DHTTP_ONLY=%HTTP_ONLY%
-      -DBUILD_SHARED_LIBS=%SHARED%
-      -DBUILD_TESTING=%TESTING%
-      -DCURL_WERROR=ON
-      -DENABLE_DEBUG=ON
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
-      -DCMAKE_INSTALL_PREFIX="C:/CURL"
-      -DCMAKE_BUILD_TYPE=%PRJ_CFG%
-    - cmake --build . --config %PRJ_CFG% --clean-first
+    - if %BUILD_SYSTEM%==CMake (
+        cmake .
+        -G"%PRJ_GEN%"
+        -DCMAKE_USE_OPENSSL=%OPENSSL%
+        -DCMAKE_USE_WINSSL=%WINSSL%
+        -DHTTP_ONLY=%HTTP_ONLY%
+        -DBUILD_SHARED_LIBS=%SHARED%
+        -DBUILD_TESTING=%TESTING%
+        -DCURL_WERROR=ON
+        -DENABLE_DEBUG=ON
+        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=""
+        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
+        -DCMAKE_INSTALL_PREFIX="C:/CURL"
+        -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
+        cmake --build . --config %PRJ_CFG% --clean-first ) else (
+      if %BUILD_SYSTEM%==VisualStudioSolution (
+        cd projects &&
+        .\\generate.bat %VC_VERSION% &&
+        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" ))
 
 test_script:
     - if %TESTING%==ON (

@@ -644,7 +644,7 @@ output_auth_headers(struct connectdata *conn,
 #endif
 
 #ifdef USE_SPNEGO
-  if((authstatus->picked == CURLAUTH_NEGOTIATE)) {
+  if(authstatus->picked == CURLAUTH_NEGOTIATE) {
     auth = "Negotiate";
     result = Curl_output_negotiate(conn, proxy);
     if(result)
