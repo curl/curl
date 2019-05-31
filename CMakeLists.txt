@@ -40,16 +40,6 @@
 # (From Daniel Stenberg) The gcc command line use neither -g nor any -O options. As a developer, I also treasure our configure scripts's --enable-debug option that sets a long range of "picky" compiler options.
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
-# BEGIN CMAKE_PREFIX_PATH -- NiallOR --
-# Maybe not the right way, but works
-# set(OPENSSL_INCLUDE_DIR "/home/vagrant/installed/niallor/openssl/include/openssl")
-#
-# What follows might be more kosher -- vediamo
-if(DEFINED ENV{CMAKE_PREFIX_PATH})
-  set(CMAKE_PREFIX_PATH "$ENV{CMAKE_PREFIX_PATH}")
-endif()
-# END CMAKE_PREFIX_PATH --
-
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)

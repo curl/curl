@@ -657,8 +657,6 @@ int netware_init(void);
 #if defined(USE_OPENSSL) && !defined(OPENSSL_NO_ESNI) && \
   defined(HAVE_OPENSSL_ESNI_H)
 # define USE_ESNI               /* ESNI support available */
-#else
-# undef USE_ESNI                /* No ESNI support */
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */

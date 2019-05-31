@@ -265,19 +265,6 @@ static const struct LongShort aliases[]= {
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
-#ifdef USE_ESNI
-  /* Current (revised from original) convention in DEfO project
-   * is to use USE_ESNI as marker for new ESNI code.
-   * This may change, as may choice of CLI options.
-   * Here we go for now.
-   *
-   * "ES" is as good a tentative choice of short name as any.
-   * For explanations, see tool_help.c after "socks5-gssapi"
-   */
-  {"ES", "esni",                     ARG_BOOL},
-  {"ET", "esni-cover",               ARG_STRING},
-  {"EU", "esni-load",                ARG_FILENAME},
-#endif
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -1694,33 +1681,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else
           config->socks5_auth &= ~CURLAUTH_GSSAPI;
         break;
-
-#ifdef USE_ESNI
-      case 'S':
-        /* --esni */
-        if(!config->esni_status.word) {
-          /* No ESNI option was parsed yet */
-          config->esni_status.flags.selected = toggle;
-          config->esni_status.flags.disabled = !toggle;
-        }
-        break;
-
-      case 'T':
-        /* --esni-cover */
-        if(!config->esni_status.flags.disabled) {
-          config->esni_status.flags.selected = TRUE; /* clamp flag up */
-          GetStr(&config->esni_cover_name, nextarg); /* save argument */
-        }
-        break;
-
-      case 'U':
-        /* --esni-load */
-        if(!config->esni_status.flags.disabled) {
-          config->esni_status.flags.selected = TRUE; /* as before */
-          GetStr(&config->esni_load_file, nextarg);
-        }
-        break;
-#endif
 
       default: /* unknown flag */
         return PARAM_OPTION_UNKNOWN;

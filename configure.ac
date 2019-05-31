@@ -1792,8 +1792,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
       dnl Have the libraries--check for OpenSSL headers
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
-                       openssl/pem.h openssl/ssl.h openssl/err.h \
-                       openssl/esni.h,
+                       openssl/pem.h openssl/ssl.h openssl/err.h,
         ssl_msg="OpenSSL"
 	test openssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         OPENSSL_ENABLED=1
@@ -1812,10 +1811,6 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
           ssl_msg="OpenSSL"
           OPENSSL_ENABLED=1
         fi
-      fi
-
-      if test $ac_cv_header_openssl_esni_h = yes; then
-        ESNI_ENABLED=1
       fi
     fi
 
@@ -4184,9 +4179,11 @@ if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1" \
     -o "x$NSS_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
 fi
-if test "x$ESNI_ENABLED" = "x1"; then
+
+if test "x$OPENSSL_ENABLED" = "x1" -a "x$HAVE_OPENSSL_ESNI_H" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES ESNI"
 fi
+
 AC_SUBST(SUPPORT_FEATURES)
 
 dnl For supported protocols in pkg-config file
