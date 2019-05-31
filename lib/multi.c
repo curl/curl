@@ -2252,14 +2252,14 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     actions[i] = action;
     if(entry) {
       /* check if new for this transfer */
-      for(i = 0; i< data->numsocks; i++) {
-        if(s == data->sockets[i]) {
-          prevaction = data->actions[i];
+      int j;
+      for(j = 0; j< data->numsocks; j++) {
+        if(s == data->sockets[j]) {
+          prevaction = data->actions[j];
           sincebefore = TRUE;
           break;
         }
       }
-
     }
     else {
       /* this is a socket we didn't have before, add it to the hash! */
