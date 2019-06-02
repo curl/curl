@@ -34,7 +34,12 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+#if defined(WIN32)
+#define CURLRC          ".curlrc"
+#define CURLRC_LEGACY   "_curlrc"
+#else
 #define CURLRC DOT_CHAR "curlrc"
+#endif
 
 /* only acknowledge colon or equals as separators if the option was not
    specified with an initial dash! */
@@ -59,23 +64,31 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     char *home = homedir();    /* portable homedir finder */
     filename = CURLRC;   /* sensible default */
     if(home) {
-      if(strlen(home) < (sizeof(filebuffer) - strlen(filename))) {
-        msnprintf(filebuffer, sizeof(filebuffer),
-                  "%s%s%s", home, DIR_CHAR, filename);
+#ifdef WIN32
+      for(int i = 0; i < 2; i++) {
+        /* If this is the second time round then replace filename for backwards
+           compatibility */
+        if(i)
+          filename = CURLRC_LEGACY;
+#endif
+        if(strlen(home) < (sizeof(filebuffer) - strlen(filename))) {
+          msnprintf(filebuffer, sizeof(filebuffer),
+                    "%s%s%s", home, DIR_CHAR, filename);
 
 #ifdef WIN32
-        /* Check if the file exists - if not, try CURLRC in the same
-         * directory as our executable
-         */
-        file = fopen(filebuffer, FOPEN_READTEXT);
-        if(file != NULL) {
-          filename = filebuffer;
-        }
-        else {
-          /* Get the filename of our executable. GetModuleFileName is
-           * already declared via inclusions done in setup header file.
-           * We assume that we are using the ASCII version here.
+          /* Check if the file exists - if not, try CURLRC in the same
+           * directory as our executable
            */
+          file = fopen(filebuffer, FOPEN_READTEXT);
+          if(file != NULL) {
+            filename = filebuffer;
+            break;
+          }
+
+          /* Get the filename of our executable. GetModuleFileName is
+            * already declared via inclusions done in setup header file.
+            * We assume that we are using the ASCII version here.
+            */
           unsigned long len = GetModuleFileNameA(0, filebuffer,
                                                  sizeof(filebuffer));
           if(len > 0 && len < sizeof(filebuffer)) {
@@ -89,11 +102,17 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
               if(strlen(filename) < remaining - 1) {
                 msnprintf(lastdirchar, remaining,
                           "%s%s", DIR_CHAR, filename);
-                /* Don't bother checking if it exists - we do that later */
-                filename = filebuffer;
+                file = fopen(filebuffer, FOPEN_READTEXT);
+                if(file != NULL) {
+                  filename = filebuffer;
+                  break;
+                }
               }
             }
           }
+
+          /* If we didn't find CURLRC in either location we loop round and try
+             CURLRC_LEGACY next */
         }
 #else /* WIN32 */
         filename = filebuffer;
