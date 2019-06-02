@@ -76,8 +76,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            * already declared via inclusions done in setup header file.
            * We assume that we are using the ASCII version here.
            */
-          int n = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
-          if(n > 0 && n < (int)sizeof(filebuffer)) {
+          unsigned long len = GetModuleFileNameA(0, filebuffer,
+                                                 sizeof(filebuffer));
+          if(len > 0 && len < sizeof(filebuffer)) {
             /* We got a valid filename - get the directory part */
             char *lastdirchar = strrchr(filebuffer, '\\');
             if(lastdirchar) {
