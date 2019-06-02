@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -109,12 +109,12 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
   }
 
-  if(file != NULL)  /* WIN32: no need to fopen() again */
-    ;
-  else if(strcmp(filename, "-"))
-    file = fopen(filename, FOPEN_READTEXT);
-  else
-    file = stdin;
+  if(!file) { /* WIN32: no need to fopen() again */
+    if(strcmp(filename, "-"))
+      file = fopen(filename, FOPEN_READTEXT);
+    else
+      file = stdin;
+  }
 
   if(file) {
     char *line;
