@@ -4,11 +4,12 @@ curl and libcurl 7.65.1
  Command line options:         221
  curl_easy_setopt() options:   268
  Public functions in libcurl:  80
- Contributors:                 1960
+ Contributors:                 1965
 
 This release includes the following bugfixes:
 
  o CURLOPT_LOW_SPEED_* repaired [6]
+ o NTLM: reset proxy "multipass" state when CONNECT request is done [32]
  o PolarSSL: deprecate support step 1. Removed from configure [3]
  o appveyor: add Visual Studio solution build [25]
  o cmake: check for if_nametoindex() [2]
@@ -17,9 +18,12 @@ This release includes the following bugfixes:
  o conncache: Remove the DEBUGASSERT on length check [27]
  o conncache: make "bundles" per host name when doing proxy tunnels [21]
  o curl-win32.h: Enable Unix Domain Sockets based on the Windows SDK version [16]
+ o curl_share_setopt.3: improve wording [34]
+ o dump-header.d: spell out that no headers == empty file [30]
  o example/http2-download: fix format specifier [4]
  o examples: cleanups and compiler warning fixes [4]
  o http2: Stop drain from being permanently set [26]
+ o http: don't parse body-related headers in bodyless responses [28]
  o md4: build correctly with openssl without MD4 [9]
  o md4: include the mbedtls config.h to get the MD4 info [10]
  o multi: track users of a socket better [15]
@@ -27,9 +31,12 @@ This release includes the following bugfixes:
  o parse_proxy: make sure portptr is initialized [23]
  o parse_proxy: use the IPv6 zone id if given [1]
  o sectransp: handle errSSLPeerAuthCompleted from SSLRead() [13]
+ o singlesocket: use separate variable for inner loop [31]
+ o ssl: Update outdated "openssl-only" comments for supported backends [33]
  o tests: add HAProxy keywords [18]
  o tests: add support to test against OpenSSH for Windows [5]
  o tests: make test 1420 and 1406 work with rtsp-disabled libcurl [19]
+ o tls13-docs: mention it is only for OpenSSL >= 1.1.1 [29]
  o tool_parse_cfg: Avoid 2 fopen() for WIN32
  o tool_setopt: for builds with disabled-proxy, skip all proxy setopts() [12]
  o url: Load if_nametoindex() dynamically from iphlpapi.dll on Windows [24]
@@ -44,12 +51,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Benbuck Nason, Daniel Stenberg, Dave Reisner, dbrowndan on github, Edmond Yu,
-  elsamuko on github, Gisle Vanem, Hubert Kario, Jonas Vautherin,
+  Benbuck Nason, Carlos ORyan, Daniel Stenberg, Dave Reisner,
+  dbrowndan on github, dkwolfe4 on github, Edmond Yu, elsamuko on github,
+  Eric Wu, Frank Gevaerts, Gisle Vanem, Hubert Kario, Jonas Vautherin,
   Josie Huddleston, Kunal Ekawde, Maksim Stsepanenka, Marcel Raad,
-  Marc Hörsken, Patrick Monnerat, Ray Satiro, smuellerDD on github,
-  Steve Holme, Tom Greenslade, Tom van der Woerdt,
-  (20 contributors)
+  Marc Hörsken, Michael Kaufmann, Patrick Monnerat, Ray Satiro,
+  Sergey Ogryzkov, smuellerDD on github, Steve Holme, Tom Greenslade,
+  Tom van der Woerdt, wesinator on github,
+  (27 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -82,3 +91,10 @@ References to bug reports and discussions on issues:
  [25] = https://curl.haxx.se/bug/?i=3941
  [26] = https://curl.haxx.se/bug/?i=3966
  [27] = https://curl.haxx.se/bug/?i=3962
+ [28] = https://curl.haxx.se/bug/?i=3968
+ [29] = https://curl.haxx.se/bug/?i=3938
+ [30] = https://curl.haxx.se/bug/?i=3964
+ [31] = https://curl.haxx.se/bug/?i=3970
+ [32] = https://curl.haxx.se/bug/?i=3972
+ [33] = https://curl.haxx.se/bug/?i=3985
+ [34] = https://curl.haxx.se/mail/lib-2019-06/0009.html
