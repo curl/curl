@@ -23,7 +23,7 @@
 #include "curl_setup.h"
 
 #if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_CYASSL) || defined(USE_SCHANNEL)
+    defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -1104,7 +1104,7 @@ CURLcode Curl_extract_certinfo(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_CYASSL or USE_SCHANNEL */
+#endif /* USE_GSKIT or USE_NSS or USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL */
 
 #if defined(USE_GSKIT)
 

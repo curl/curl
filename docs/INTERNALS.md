@@ -90,7 +90,7 @@ Dependencies
  - libssh2      0.16
  - c-ares       1.6.0
  - libidn2      2.0.0
- - cyassl       2.0.0
+ - wolfSSL      2.0.0
  - openldap     2.0
  - MIT Kerberos 1.2.4
  - GSKit        V5R3M0

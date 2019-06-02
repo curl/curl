@@ -103,7 +103,7 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #include "nssg.h"           /* NSS versions */
 #include "gskit.h"          /* Global Secure ToolKit versions */
 #include "polarssl.h"       /* PolarSSL versions */
-#include "cyassl.h"         /* CyaSSL versions */
+#include "wolfssl.h"        /* wolfSSL versions */
 #include "schannel.h"       /* Schannel SSPI version */
 #include "sectransp.h"      /* SecureTransport (Darwin) version */
 #include "mbedtls.h"        /* mbedTLS versions */

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_CYASSL_H
-#define HEADER_CURL_CYASSL_H
+#ifndef HEADER_CURL_WOLFSSL_H
+#define HEADER_CURL_WOLFSSL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,9 +23,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_CYASSL
+#ifdef USE_WOLFSSL
 
-extern const struct Curl_ssl Curl_ssl_cyassl;
+extern const struct Curl_ssl Curl_ssl_wolfssl;
 
-#endif /* USE_CYASSL */
-#endif /* HEADER_CURL_CYASSL_H */
+#endif /* USE_WOLFSSL */
+#endif /* HEADER_CURL_WOLFSSL_H */

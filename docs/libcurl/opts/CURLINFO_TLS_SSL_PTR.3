@@ -54,7 +54,7 @@ struct curl_tlssessioninfo {
 
 The \fIbackend\fP struct member is one of the defines in the CURLSSLBACKEND_*
 series: CURLSSLBACKEND_NONE (when built without TLS support),
-CURLSSLBACKEND_CYASSL, CURLSSLBACKEND_DARWINSSL,
+CURLSSLBACKEND_WOLFSSL, CURLSSLBACKEND_DARWINSSL,
 CURLSSLBACKEND_GNUTLS, CURLSSLBACKEND_GSKIT, CURLSSLBACKEND_MBEDTLS,
 CURLSSLBACKEND_NSS, CURLSSLBACKEND_OPENSSL, CURLSSLBACKEND_POLARSSL,
 CURLSSLBACKEND_SCHANNEL or CURLSSLBACKEND_MESALINK. (Note that the OpenSSL
@@ -83,9 +83,9 @@ mbedtls_ssl_context *
 ssl_context *
 .IP "Secure Channel"
 CtxtHandle *
-.IP "Secure Transport (DarwinSSL)"
+.IP "Secure Transport"
 SSLContext *
-.IP "WolfSSL (formerly CyaSSL)"
+.IP "wolfSSL"
 SSL *
 .IP "MesaLink"
 SSL *
