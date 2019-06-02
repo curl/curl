@@ -3769,6 +3769,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                        "HTTP 1.1 or later with persistent connection\n"));
         }
 
+        k->http_bodyless = k->httpcode >= 100 && k->httpcode < 200;
         switch(k->httpcode) {
         case 304:
           /* (quote from RFC2616, section 10.3.5): The 304 response
@@ -3786,10 +3787,9 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            * empty line after the header fields. */
           k->size = 0;
           k->maxdownload = 0;
-          k->ignorecl = TRUE; /* ignore Content-Length headers */
+          k->http_bodyless = TRUE;
           break;
         default:
-          /* nothing */
           break;
         }
       }
@@ -3805,8 +3805,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       return result;
 
     /* Check for Content-Length: header lines to get size */
-    if(!k->ignorecl && !data->set.ignorecl &&
-       checkprefix("Content-Length:", k->p)) {
+    if(!k->http_bodyless &&
+       !data->set.ignorecl && checkprefix("Content-Length:", k->p)) {
       curl_off_t contentlength;
       CURLofft offt = curlx_strtoofft(k->p + 15, NULL, 10, &contentlength);
 
@@ -3895,7 +3895,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
        */
       streamclose(conn, "Connection: close used");
     }
-    else if(checkprefix("Transfer-Encoding:", k->p)) {
+    else if(!k->http_bodyless && checkprefix("Transfer-Encoding:", k->p)) {
       /* One or more encodings. We check for chunked and/or a compression
          algorithm. */
       /*
@@ -3911,7 +3911,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(result)
         return result;
     }
-    else if(checkprefix("Content-Encoding:", k->p) &&
+    else if(!k->http_bodyless && checkprefix("Content-Encoding:", k->p) &&
             data->set.str[STRING_ENCODING]) {
       /*
        * Process Content-Encoding. Look for the values: identity,
@@ -3924,7 +3924,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(result)
         return result;
     }
-    else if(checkprefix("Content-Range:", k->p)) {
+    else if(!k->http_bodyless && checkprefix("Content-Range:", k->p)) {
       /* Content-Range: bytes [num]-
          Content-Range: bytes: [num]-
          Content-Range: [num]-
@@ -3970,7 +3970,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
 #endif
-    else if(checkprefix("Last-Modified:", k->p) &&
+    else if(!k->http_bodyless && checkprefix("Last-Modified:", k->p) &&
             (data->set.timecondition || data->set.get_filetime) ) {
       time_t secs = time(NULL);
       k->timeofdoc = curl_getdate(k->p + strlen("Last-Modified:"),
