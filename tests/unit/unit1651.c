@@ -33,7 +33,7 @@ static void unit_stop(void)
 
 }
 #if defined(USE_GSKIT) || defined(USE_NSS) || defined(USE_GNUTLS) || \
-    defined(USE_CYASSL) || defined(USE_SCHANNEL)
+    defined(USE_WOLFSSL) || defined(USE_SCHANNEL)
 
 /* cert captured from gdb when connecting to curl.haxx.se on October 26
    2018 */

@@ -155,7 +155,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,mbedtls,cyassl,schannel,secure-transport,mesalink,amissl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,mesalink,amissl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -2211,48 +2211,48 @@ if test -z "$ssl_backends" -o "x$OPT_MBEDTLS" != xno; then
 fi
 
 dnl ----------------------------------------------------
-dnl check for CyaSSL
+dnl check for wolfSSL
 dnl ----------------------------------------------------
 
-dnl Default to compiler & linker defaults for CyaSSL files & libraries.
-OPT_CYASSL=no
+dnl Default to compiler & linker defaults for wolfSSL files & libraries.
+OPT_WOLFSSL=no
 
 _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
 AC_ARG_WITH(cyassl,dnl
 AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: system lib default)])
 AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
-  OPT_CYASSL=$withval)
+  OPT_WOLFSSL=$withval)
 
 dnl provide --with-wolfssl as an alias for --with-cyassl
 AC_ARG_WITH(wolfssl,dnl
 AC_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)])
 AC_HELP_STRING([--without-wolfssl], [disable WolfSSL detection]),
-  OPT_CYASSL=$withval)
+  OPT_WOLFSSL=$withval)
 
-if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
+if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
   ssl_msg=
 
-  if test X"$OPT_CYASSL" != Xno; then
+  if test X"$OPT_WOLFSSL" != Xno; then
 
-    if test "$OPT_CYASSL" = "yes"; then
-      OPT_CYASSL=""
+    if test "$OPT_WOLFSSL" = "yes"; then
+      OPT_WOLFSSL=""
     fi
 
     dnl This should be reworked to use pkg-config instead
 
     cyassllibname=cyassl
 
-    if test -z "$OPT_CYASSL" ; then
+    if test -z "$OPT_WOLFSSL" ; then
       dnl check for lib in system default first
 
       AC_CHECK_LIB(cyassl, CyaSSL_Init,
       dnl libcyassl found, set the variable
        [
-         AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
-         AC_SUBST(USE_CYASSL, [1])
-         CYASSL_ENABLED=1
-         USE_CYASSL="yes"
+         AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
+         AC_SUBST(USE_WOLFSSL, [1])
+         WOLFSSL_ENABLED=1
+         USE_WOLFSSL="yes"
          ssl_msg="CyaSSL"
 	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ])
@@ -2263,11 +2263,11 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
     addcflags=""
     cyassllib=""
 
-    if test "x$USE_CYASSL" != "xyes"; then
+    if test "x$USE_WOLFSSL" != "xyes"; then
       dnl add the path and test again
-      addld=-L$OPT_CYASSL/lib$libsuff
-      addcflags=-I$OPT_CYASSL/include
-      cyassllib=$OPT_CYASSL/lib$libsuff
+      addld=-L$OPT_WOLFSSL/lib$libsuff
+      addcflags=-I$OPT_WOLFSSL/include
+      cyassllib=$OPT_WOLFSSL/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
@@ -2276,10 +2276,10 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 
       AC_CHECK_LIB(cyassl, CyaSSL_Init,
        [
-       AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
-       AC_SUBST(USE_CYASSL, [1])
-       CYASSL_ENABLED=1
-       USE_CYASSL="yes"
+       AC_DEFINE(USE_WOLFSSL, 1, [if CyaSSL is enabled])
+       AC_SUBST(USE_WOLFSSL, [1])
+       WOLFSSL_ENABLED=1
+       USE_WOLFSSL="yes"
        ssl_msg="CyaSSL"
        test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
@@ -2294,11 +2294,11 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
     addlib=""
     addcflags=""
 
-    if test "x$USE_CYASSL" != "xyes"; then
+    if test "x$USE_WOLFSSL" != "xyes"; then
       dnl libcyassl renamed to libwolfssl as of 3.4.0
-      addld=-L$OPT_CYASSL/lib$libsuff
-      addcflags=-I$OPT_CYASSL/include
-      cyassllib=$OPT_CYASSL/lib$libsuff
+      addld=-L$OPT_WOLFSSL/lib$libsuff
+      addcflags=-I$OPT_WOLFSSL/include
+      cyassllib=$OPT_WOLFSSL/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
@@ -2322,10 +2322,10 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 	]])
       ],[
          AC_MSG_RESULT(yes)
-         AC_DEFINE(USE_CYASSL, 1, [if CyaSSL/WolfSSL is enabled])
-         AC_SUBST(USE_CYASSL, [1])
-         CYASSL_ENABLED=1
-         USE_CYASSL="yes"
+         AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
+         AC_SUBST(USE_WOLFSSL, [1])
+         WOLFSSL_ENABLED=1
+         USE_WOLFSSL="yes"
          ssl_msg="WolfSSL"
 	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
@@ -2338,32 +2338,20 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
       LIBS="$my_ac_save_LIBS"
     fi
 
-    if test "x$USE_CYASSL" = "xyes"; then
+    if test "x$USE_WOLFSSL" = "xyes"; then
       AC_MSG_NOTICE([detected $cyassllibname])
       check_for_ca_bundle=1
 
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       AX_COMPILE_CHECK_SIZEOF(long long)
 
-      dnl Versions since at least 2.6.0 may have options.h
-      AC_CHECK_HEADERS(cyassl/options.h)
-
-      dnl Versions since at least 2.9.4 renamed error.h to error-ssl.h
-      AC_CHECK_HEADERS(cyassl/error-ssl.h)
-
       LIBS="-l$cyassllibname -lm $LIBS"
 
-      if test "x$cyassllibname" = "xwolfssl"; then
-        dnl Recent WolfSSL versions build without SSLv3 by default
-        dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
-        AC_CHECK_FUNCS(wolfSSLv3_client_method \
-                       wolfSSL_get_peer_certificate \
-                       wolfSSL_UseALPN)
-      else
-        dnl Cyassl needs configure --enable-opensslextra to have *get_peer*
-        AC_CHECK_FUNCS(CyaSSL_CTX_UseSupportedCurve \
-                       CyaSSL_get_peer_certificate)
-      fi
+      dnl Recent WolfSSL versions build without SSLv3 by default
+      dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
+      AC_CHECK_FUNCS(wolfSSLv3_client_method \
+                     wolfSSL_get_peer_certificate \
+                     wolfSSL_UseALPN)
 
       if test -n "$cyassllib"; then
         dnl when shared libs were found in a path that the run-time
@@ -2379,7 +2367,7 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 
     fi
 
-  fi dnl CyaSSL not disabled
+  fi dnl wolfSSL not disabled
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
@@ -2606,10 +2594,10 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$AMISSL_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$AMISSL_ENABLED" in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-cyassl, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink or --with-amissl to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink or --with-amissl to address this.])
   ;;
 x1)
   # one SSL backend is enabled
@@ -3033,8 +3021,8 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="GNUTLS_"
         elif test "x$NSS_ENABLED" = "x1"; then
           versioned_symbols_flavour="NSS_"
-        elif test "x$CYASSL_ENABLED" = "x1"; then
-          versioned_symbols_flavour="CYASSL_"
+        elif test "x$WOLFSSL_ENABLED" = "x1"; then
+          versioned_symbols_flavour="WOLFSSL_"
         elif test "x$WINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="SCHANNEL_"
         elif test "x$SECURETRANSPORT_ENABLED" = "x1"; then

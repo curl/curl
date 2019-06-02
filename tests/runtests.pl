@@ -244,7 +244,7 @@ my $h2cver = "h2c";
 my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
 my $has_nss;        # built with NSS
-my $has_yassl;      # built with yassl
+my $has_wolfssl;    # built with wolfSSL
 my $has_polarssl;   # built with polarssl
 my $has_winssl;     # built with WinSSL    (Secure Channel aka Schannel)
 my $has_darwinssl;  # built with DarwinSSL (Secure Transport)
@@ -2622,8 +2622,8 @@ sub checksystem {
                $has_nss=1;
                $has_sslpinning=1;
            }
-           elsif ($libcurl =~ /(yassl|wolfssl)/i) {
-               $has_yassl=1;
+           elsif ($libcurl =~ /wolfssl/i) {
+               $has_wolfssl=1;
                $has_sslpinning=1;
            }
            elsif ($libcurl =~ /polarssl/i) {

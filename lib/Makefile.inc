@@ -29,12 +29,12 @@ LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
   vtls/polarssl.c vtls/polarssl_threadlock.c                            \
-  vtls/cyassl.c vtls/schannel.c vtls/schannel_verify.c                  \
+  vtls/wolfssl.c vtls/schannel.c vtls/schannel_verify.c                 \
   vtls/sectransp.c vtls/gskit.c vtls/mbedtls.c vtls/mesalink.c
 
 LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h                \
-  vtls/cyassl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h           \
+  vtls/wolfssl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h          \
   vtls/mbedtls.h vtls/mesalink.h
 
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
