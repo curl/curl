@@ -149,7 +149,7 @@
  18.4 simultaneous parallel transfers
  18.5 UTF-8 filenames in Content-Disposition
  18.6 warning when setting an option
- 18.8 offer color-coded HTTP header output
+ 18.7 at least N milliseconds between requests
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
@@ -1015,11 +1015,16 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  This can be useful to tell when support for a particular feature hasn't been
  compiled into the library.
 
-18.8 offer color-coded HTTP header output
+18.7 at least N milliseconds between requests
 
- By offering different color output on the header name and the header
- contents, they could be made more readable and thus help users working on
- HTTP services.
+ Allow curl command lines issue a lot of request against services that limit
+ users to no more than N requests/second or similar. Could be implemented with
+ an option asking that at least a certain time has elapsed since the previous
+ request before the next one will be performed. Example:
+
+    $ curl "https://example.com/api?input=[1-1000]" -d yadayada --after 500
+
+ See https://github.com/curl/curl/issues/3920
 
 18.9 Choose the name of file in braces for complex URLs
 
