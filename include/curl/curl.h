@@ -209,16 +209,17 @@ struct curl_httppost {
                                        set. Added in 7.46.0 */
 };
 
-/* This is the CURLOPT_PROGRESSFUNCTION callback proto. It is now considered
-   deprecated but was the only choice up until 7.31.0 */
+/* This is the CURLOPT_PROGRESSFUNCTION callback prototype. It is now
+   considered deprecated but was the only choice up until 7.31.0 */
 typedef int (*curl_progress_callback)(void *clientp,
                                       double dltotal,
                                       double dlnow,
                                       double ultotal,
                                       double ulnow);
 
-/* This is the CURLOPT_XFERINFOFUNCTION callback proto. It was introduced in
-   7.32.0, it avoids floating point and provides more detailed information. */
+/* This is the CURLOPT_XFERINFOFUNCTION callback prototype. It was introduced
+   in 7.32.0, avoids the use of floating point numbers and provides more
+   detailed information. */
 typedef int (*curl_xferinfo_callback)(void *clientp,
                                       curl_off_t dltotal,
                                       curl_off_t dlnow,
@@ -685,8 +686,10 @@ typedef enum {
 typedef CURLcode (*curl_conv_callback)(char *buffer, size_t length);
 
 typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
-                                          void *ssl_ctx, /* actually an
-                                                            OpenSSL SSL_CTX */
+                                          void *ssl_ctx, /* actually an OpenSSL
+                                                            or WolfSSL SSL_CTX,
+                                                            or an mbedTLS
+                                                          mbedtls_ssl_config */
                                           void *userptr);
 
 typedef enum {
@@ -1314,9 +1317,9 @@ typedef enum {
      Note that setting multiple bits may cause extra network round-trips. */
   CINIT(HTTPAUTH, LONG, 107),
 
-  /* Set the ssl context callback function, currently only for OpenSSL ssl_ctx
-     in second argument. The function must be matching the
-     curl_ssl_ctx_callback proto. */
+  /* Set the ssl context callback function, currently only for OpenSSL or
+     WolfSSL ssl_ctx, or mbedTLS mbedtls_ssl_config in the second argument.
+     The function must match the curl_ssl_ctx_callback prototype. */
   CINIT(SSL_CTX_FUNCTION, FUNCTIONPOINT, 108),
 
   /* Set the userdata for the ssl context callback function's third
@@ -2514,8 +2517,8 @@ CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
  */
 CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
 
-/* info about the certificate chain, only for OpenSSL builds. Asked
-   for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+/* info about the certificate chain, only for OpenSSL, GnuTLS, Schannel, NSS
+   and GSKit builds. Asked for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
 struct curl_certinfo {
   int num_of_certs;             /* number of certificates with information */
   struct curl_slist **certinfo; /* for each index in this array, there's a

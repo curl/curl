@@ -1081,8 +1081,9 @@ struct PureInfo {
   const char *conn_scheme;
   unsigned int conn_protocol;
   struct curl_certinfo certs; /* info about the certs, only populated in
-                                 OpenSSL builds. Asked for with
-                                 CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+                                 OpenSSL, GnuTLS, Schannel, NSS and GSKit
+                                 builds. Asked for with CURLOPT_CERTINFO
+                                 / CURLINFO_CERTINFO */
 
   bit timecond:1;  /* set to TRUE if the time condition didn't match, which
                       thus made the document NOT get fetched */
