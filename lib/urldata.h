@@ -1778,8 +1778,6 @@ struct Curl_easy {
 
   struct connectdata *conn;
   struct curl_llist_element connect_queue;
-  struct curl_llist_element sh_queue; /* list per Curl_sh_entry */
-  struct Curl_sh_entry *sh_entry; /* the socket hash this was added to */
   struct curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
