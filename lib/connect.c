@@ -368,6 +368,11 @@ static CURLcode bindlocal(struct connectdata *conn,
         infof(data, "Name '%s' family %i resolved to '%s' family %i\n",
               dev, af, myhost, h->addr->ai_family);
         Curl_resolv_unlock(data, h);
+        if(af != h->addr->ai_family) {
+          /* bad IP version combo, signal the caller to try another address
+             family if available */
+          return CURLE_UNSUPPORTED_PROTOCOL;
+        }
         done = 1;
       }
       else {
