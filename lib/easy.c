@@ -1038,8 +1038,11 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
      to have this handle checked soon */
   if(!result &&
      ((newstate&(KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) )
+      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) ) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
+    if(data->multi)
+      Curl_update_timer(data->multi);
+  }
 
   /* This transfer may have been moved in or out of the bundle, update
      the corresponding socket callback, if used */

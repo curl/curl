@@ -71,8 +71,6 @@
 
 static CURLMcode singlesocket(struct Curl_multi *multi,
                               struct Curl_easy *data);
-static int update_timer(struct Curl_multi *multi);
-
 static CURLMcode add_next_timeout(struct curltime now,
                                   struct Curl_multi *multi,
                                   struct Curl_easy *d);
@@ -462,16 +460,16 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   /* increase the alive-counter */
   multi->num_alive++;
 
-  /* A somewhat crude work-around for a little glitch in update_timer() that
-     happens if the lastcall time is set to the same time when the handle is
-     removed as when the next handle is added, as then the check in
-     update_timer() that prevents calling the application multiple times with
-     the same timer info will not trigger and then the new handle's timeout
-     will not be notified to the app.
+  /* A somewhat crude work-around for a little glitch in Curl_update_timer()
+     that happens if the lastcall time is set to the same time when the handle
+     is removed as when the next handle is added, as then the check in
+     Curl_update_timer() that prevents calling the application multiple times
+     with the same timer info will not trigger and then the new handle's
+     timeout will not be notified to the app.
 
      The work-around is thus simply to clear the 'lastcall' variable to force
-     update_timer() to always trigger a callback to the app when a new easy
-     handle is added */
+     Curl_update_timer() to always trigger a callback to the app when a new
+     easy handle is added */
   memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
 
   /* The closure handle only ever has default timeouts set. To improve the
@@ -484,7 +482,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   data->state.conn_cache->closure_handle->set.no_signal =
     data->set.no_signal;
 
-  update_timer(multi);
+  Curl_update_timer(multi);
   return CURLM_OK;
 }
 
@@ -774,7 +772,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      We do not touch the easy handle here! */
   multi->num_easy--; /* one less to care about now */
 
-  update_timer(multi);
+  Curl_update_timer(multi);
   return CURLM_OK;
 }
 
@@ -2107,7 +2105,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   *running_handles = multi->num_alive;
 
   if(CURLM_OK >= returncode)
-    update_timer(multi);
+    Curl_update_timer(multi);
 
   return returncode;
 }
@@ -2544,9 +2542,10 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   }
   else {
     /* Asked to run due to time-out. Clear the 'lastcall' variable to force
-       update_timer() to trigger a callback to the app again even if the same
-       timeout is still the one to run after this call. That handles the case
-       when the application asks libcurl to run the timeout prematurely. */
+       Curl_update_timer() to trigger a callback to the app again even if the
+       same timeout is still the one to run after this call. That handles the
+       case when the application asks libcurl to run the timeout
+       prematurely. */
     memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
   }
 
@@ -2664,7 +2663,7 @@ CURLMcode curl_multi_socket(struct Curl_multi *multi, curl_socket_t s,
     return CURLM_RECURSIVE_API_CALL;
   result = multi_socket(multi, FALSE, s, 0, running_handles);
   if(CURLM_OK >= result)
-    update_timer(multi);
+    Curl_update_timer(multi);
   return result;
 }
 
@@ -2676,7 +2675,7 @@ CURLMcode curl_multi_socket_action(struct Curl_multi *multi, curl_socket_t s,
     return CURLM_RECURSIVE_API_CALL;
   result = multi_socket(multi, FALSE, s, ev_bitmask, running_handles);
   if(CURLM_OK >= result)
-    update_timer(multi);
+    Curl_update_timer(multi);
   return result;
 }
 
@@ -2688,7 +2687,7 @@ CURLMcode curl_multi_socket_all(struct Curl_multi *multi, int *running_handles)
     return CURLM_RECURSIVE_API_CALL;
   result = multi_socket(multi, TRUE, CURL_SOCKET_BAD, 0, running_handles);
   if(CURLM_OK >= result)
-    update_timer(multi);
+    Curl_update_timer(multi);
   return result;
 }
 
@@ -2748,14 +2747,14 @@ CURLMcode curl_multi_timeout(struct Curl_multi *multi,
  * Tell the application it should update its timers, if it subscribes to the
  * update timer callback.
  */
-static int update_timer(struct Curl_multi *multi)
+void Curl_update_timer(struct Curl_multi *multi)
 {
   long timeout_ms;
 
   if(!multi->timer_cb)
-    return 0;
+    return;
   if(multi_timeout(multi, &timeout_ms)) {
-    return -1;
+    return;
   }
   if(timeout_ms < 0) {
     static const struct curltime none = {0, 0};
@@ -2763,9 +2762,10 @@ static int update_timer(struct Curl_multi *multi)
       multi->timer_lastcall = none;
       /* there's no timeout now but there was one previously, tell the app to
          disable it */
-      return multi->timer_cb(multi, -1, multi->timer_userp);
+      multi->timer_cb(multi, -1, multi->timer_userp);
+      return;
     }
-    return 0;
+    return;
   }
 
   /* When multi_timeout() is done, multi->timetree points to the node with the
@@ -2773,11 +2773,11 @@ static int update_timer(struct Curl_multi *multi)
    * if this is the same (fixed) time as we got in a previous call and then
    * avoid calling the callback again. */
   if(Curl_splaycomparekeys(multi->timetree->key, multi->timer_lastcall) == 0)
-    return 0;
+    return;
 
   multi->timer_lastcall = multi->timetree->key;
 
-  return multi->timer_cb(multi, timeout_ms, multi->timer_userp);
+  multi->timer_cb(multi, timeout_ms, multi->timer_userp);
 }
 
 /*
