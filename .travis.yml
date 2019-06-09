@@ -340,7 +340,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-trusty-7
+                      - llvm-toolchain-xenial-7
                   packages:
                       - *common_packages
                       - clang-7
