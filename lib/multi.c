@@ -253,14 +253,8 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
 
   if(there) {
     /* it is present, return fine */
-    if(there->removed) {
+    if(there->removed)
       there->removed = FALSE; /* clear the removed bit */
-      /* init the transfer hash */
-      if(Curl_hash_init(&there->transfers, TRHASH_SIZE, trhash,
-                        trhash_compare, trhash_dtor)) {
-        return NULL;
-      }
-    }
     return there;
   }
 
@@ -289,13 +283,13 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
 static void sh_delentry(struct Curl_sh_entry *entry,
                         struct curl_hash *sh, curl_socket_t s)
 {
-  Curl_hash_destroy(&entry->transfers);
-
   if(entry->blocked) {
     entry->removed = TRUE; /* pretend */
     return;
   }
   else {
+    Curl_hash_destroy(&entry->transfers);
+
     /* We remove the hash entry. This will end up in a call to
        sh_freeentry(). */
     Curl_hash_delete(sh, (char *)&s, sizeof(curl_socket_t));
