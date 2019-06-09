@@ -59,9 +59,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     char *home = homedir();    /* portable homedir finder */
     filename = CURLRC;   /* sensible default */
     if(home) {
-      if(strlen(home) < (sizeof(filebuffer) - strlen(CURLRC))) {
+      if(strlen(home) < (sizeof(filebuffer) - strlen(filename))) {
         msnprintf(filebuffer, sizeof(filebuffer),
-                  "%s%s%s", home, DIR_CHAR, CURLRC);
+                  "%s%s%s", home, DIR_CHAR, filename);
 
 #ifdef WIN32
         /* Check if the file exists - if not, try CURLRC in the same
@@ -86,9 +86,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
               *lastdirchar = 0;
               /* If we have enough space, build the RC filename */
               remaining = sizeof(filebuffer) - strlen(filebuffer);
-              if(strlen(CURLRC) < remaining - 1) {
+              if(strlen(filename) < remaining - 1) {
                 msnprintf(lastdirchar, remaining,
-                          "%s%s", DIR_CHAR, CURLRC);
+                          "%s%s", DIR_CHAR, filename);
                 /* Don't bother checking if it exists - we do that later */
                 filename = filebuffer;
               }
