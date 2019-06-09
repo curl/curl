@@ -2322,7 +2322,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       /* add 'data' to the transfer hash on this socket! */
       if(!Curl_hash_add(&entry->transfers, (char *)data, /* hash key */
                         sizeof(struct Curl_easy *), data))
-        return CURLE_OUT_OF_MEMORY;
+        return CURLM_OUT_OF_MEMORY;
     }
 
     comboaction = (entry->writers? CURL_POLL_OUT : 0) |
