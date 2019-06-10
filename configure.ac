@@ -4010,7 +4010,7 @@ fi
 dnl ************************************************************
 dnl disable cookies support
 dnl
-AC_MSG_CHECKING([whether to enable support for cookies])
+AC_MSG_CHECKING([whether to support cookies])
 AC_ARG_ENABLE(cookies,
 AC_HELP_STRING([--enable-cookies],[Enable cookies support])
 AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
@@ -4018,6 +4018,114 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_COOKIES, 1, [to disable cookies support])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable HTTP authentication support
+dnl
+AC_MSG_CHECKING([whether to support HTTP authentication])
+AC_ARG_ENABLE(http-auth,
+AC_HELP_STRING([--enable-http-auth],[Enable HTTP authentication support])
+AC_HELP_STRING([--disable-http-uath],[Disable HTTP authentication support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_HTTP_AUTH, 1, [disable HTTP authentication])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable DoH support
+dnl
+AC_MSG_CHECKING([whether to support DoH])
+AC_ARG_ENABLE(doh,
+AC_HELP_STRING([--enable-doh],[Enable DoH support])
+AC_HELP_STRING([--disable-doh],[Disable DoH support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_DOH, 1, [disable DoH])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable mime API support
+dnl
+AC_MSG_CHECKING([whether to support the MIME API])
+AC_ARG_ENABLE(mime,
+AC_HELP_STRING([--enable-mime],[Enable mime API support])
+AC_HELP_STRING([--disable-mime],[Disable mime API support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_MIME, 1, [disable mime API])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable date parsing
+dnl
+AC_MSG_CHECKING([whether to support date parsing])
+AC_ARG_ENABLE(dateparse,
+AC_HELP_STRING([--enable-dateparse],[Enable date parsing])
+AC_HELP_STRING([--disable-dateparse],[Disable date parsing]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_PARSEDATE, 1, [disable date parsing])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable netrc
+dnl
+AC_MSG_CHECKING([whether to support netrc parsing])
+AC_ARG_ENABLE(netrc,
+AC_HELP_STRING([--enable-netrc],[Enable netrc parsing])
+AC_HELP_STRING([--disable-netrc],[Disable netrc parsing]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_NETRC, 1, [disable netrc parsing])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable shuffle DNS support
+dnl
+AC_MSG_CHECKING([whether to support DNS shuffling])
+AC_ARG_ENABLE(dnsshuffle,
+AC_HELP_STRING([--enable-dnsshuffle],[Enable DNS shuffling])
+AC_HELP_STRING([--disable-dnsshuffle],[Disable DNS shufflinf]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_SHUFFLE_DNS, 1, [disable DNS shuffling])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
