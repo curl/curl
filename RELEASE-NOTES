@@ -8,8 +8,16 @@ curl and libcurl 7.65.2
 
 This release includes the following bugfixes:
 
- o
- 
+ o bindlocal: detect and avoid IP version mismatches in bind() [1]
+ o build: fix Codacy warnings [6]
+ o examples/fopen: fix comparison [6]
+ o examples/htmltitle: use C++ casts between pointer types [6]
+ o libcurl-tutorial.3: Fix small typo (mutipart -> multipart) [3]
+ o multi: make sure 'data' can present in several sockhash entries [2]
+ o sws: remove unused variables [6]
+ o travis: update scan-build job to xenial [5]
+ o unpause: trigger a timeout for event-based transfers [4]
+
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
@@ -17,11 +25,17 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+  Alex Grebenschikov, Daniel Stenberg, Marcel Raad, MrSorcus on github,
+  sstruchtrup on github, Tom van der Woerdt,
+  (6 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?
- 
+ [1] = https://curl.haxx.se/bug/?id=3993
+ [2] = https://curl.haxx.se/bug/?id=3986
+ [3] = https://curl.haxx.se/bug/?id=4000
+ [4] = https://curl.haxx.se/bug/?id=3994
+ [5] = https://curl.haxx.se/bug/?id=3999
+ [6] = https://curl.haxx.se/bug/?id=3975
