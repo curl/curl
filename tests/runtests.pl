@@ -291,6 +291,7 @@ my %timevrfyend; # timestamp for each test result verification end
 
 my $testnumcheck; # test number, set in singletest sub.
 my %oldenv;
+my %feature; # array of enabled features
 
 #######################################################################
 # variables that command line options may set
@@ -2561,6 +2562,65 @@ sub compare {
     return $result;
 }
 
+sub setupfeatures {
+    $feature{"SSL"} = $has_ssl;
+    $feature{"MultiSSL"} = $has_multissl;
+    $feature{"SSLpinning"} = $has_sslpinning;
+    $feature{"OpenSSL"} = $has_openssl;
+    $feature{"GnuTLS"} = $has_gnutls;
+    $feature{"NSS"} = $has_nss;
+    $feature{"WinSSL"} = $has_winssl;
+    $feature{"Schannel"} = $has_winssl; # alias
+    $feature{"sectransp"} = $has_darwinssl;
+    $feature{"DarwinSSL"} = $has_darwinssl; # alias
+    $feature{"ld_preload"} = ($has_ldpreload && !$debug_build);
+    $feature{"unittest"} = $debug_build;
+    $feature{"debug"} = $debug_build;
+    $feature{"TrackMemory"} = $has_memory_tracking;
+    $feature{"large_file"} = $has_largefile;
+    $feature{"idn"} = $has_idn;
+    $feature{"ipv6"} = $has_ipv6;
+    $feature{"libz"} = $has_libz;
+    $feature{"brotli"} = $has_brotli;
+    $feature{"NTLM"} = $has_ntlm;
+    $feature{"NTLM_WB"} = $has_ntlm_wb;
+    $feature{"SSPI"} = $has_sspi;
+    $feature{"GSS-API"} = $has_gssapi;
+    $feature{"Kerberos"} = $has_kerberos;
+    $feature{"SPNEGO"} = $has_spnego;
+    $feature{"getrlimit"} = $has_getrlimit;
+    $feature{"crypto"} = $has_crypto;
+    $feature{"TLS-SRP"} = $has_tls_srp;
+    $feature{"Metalink"} = $has_metalink;
+    $feature{"http/2"} = $has_http2;
+    $feature{"threaded-resolver"} = $has_threadedres;
+    $feature{"PSL"} = $has_psl;
+    $feature{"alt-svc"} = $has_altsvc;
+    $feature{"manual"} = $has_manual;
+    $feature{"unix-sockets"} = $has_unix;
+
+    # make each protocol an enabled "feature"
+    for my $p (@protocols) {
+        $feature{$p} = 1;
+    }
+    # 'socks' was once here but is now removed
+
+    #
+    # strings that must match the names used in server/disabled.c
+    #
+    $feature{"cookies"} = 1;
+    $feature{"DoH"} = 1;
+    $feature{"HTTP-auth"} = 1;
+    $feature{"Mime"} = 1;
+    $feature{"netrc"} = 1;
+    $feature{"parsedate"} = 1;
+    $feature{"proxy"} = 1;
+    $feature{"shuffle-dns"} = 1;
+    $feature{"typecheck"} = 1;
+    $feature{"verbose-strings"} = 1;
+
+}
+
 #######################################################################
 # display information about curl and the host the test suite runs on
 #
@@ -2574,6 +2634,8 @@ sub checksystem {
     my $versretval;
     my $versnoexec;
     my @version=();
+    my @disabled;
+    my $dis = "";
 
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
@@ -2588,6 +2650,15 @@ sub checksystem {
     open(VERSOUT, "<$curlverout");
     @version = <VERSOUT>;
     close(VERSOUT);
+
+    open(DISABLED, "server/disabled|");
+    @disabled = <DISABLED>;
+    close(DISABLED);
+
+    if($disabled[0]) {
+        map s/[\r\n]//g, @disabled;
+        $dis = join(", ", @disabled);
+    }
 
     $resolver="stock";
     for(@version) {
@@ -2877,11 +2948,12 @@ sub checksystem {
     my $hosttype=join(' ', runclientoutput("uname -a"));
 
     logmsg ("********* System characteristics ******** \n",
-    "* $curl\n",
-    "* $libcurl\n",
-    "* Features: $feat\n",
-    "* Host: $hostname",
-    "* System: $hosttype");
+            "* $curl\n",
+            "* $libcurl\n",
+            "* Features: $feat\n",
+            "* Disabled: $dis\n",
+            "* Host: $hostname",
+            "* System: $hosttype");
 
     if($has_memory_tracking && $has_threadedres) {
         $has_memory_tracking = 0;
@@ -2953,6 +3025,12 @@ sub checksystem {
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
 
     logmsg "***************************************** \n";
+
+    setupfeatures();
+    # toggle off the features that were disabled in the build
+    for my $d(@disabled) {
+        $feature{$d} = 0;
+    }
 }
 
 #######################################################################
@@ -3121,7 +3199,6 @@ sub singletest {
 
     my @what;
     my $why;
-    my %feature;
     my $cmd;
     my $disablevalgrind;
 
@@ -3157,177 +3234,7 @@ sub singletest {
         $f =~ s/\s//g;
 
         if($f =~ /^([^!].*)$/) {
-            # Store the feature for later
-            $feature{$1} = $1;
-
-            if($1 eq "SSL") {
-                if($has_ssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "MultiSSL") {
-                if($has_multissl) {
-                    next;
-                }
-            }
-            elsif($1 eq "SSLpinning") {
-                if($has_sslpinning) {
-                    next;
-                }
-            }
-            elsif($1 eq "OpenSSL") {
-                if($has_openssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "GnuTLS") {
-                if($has_gnutls) {
-                    next;
-                }
-            }
-            elsif($1 eq "NSS") {
-                if($has_nss) {
-                    next;
-                }
-            }
-            elsif(($1 eq "WinSSL") || ($1 eq "Schannel")) {
-                if($has_winssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "DarwinSSL") {
-                if($has_darwinssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "ld_preload") {
-                if($has_ldpreload && !$debug_build) {
-                    next;
-                }
-            }
-            elsif($1 eq "unittest") {
-                if($debug_build) {
-                    next;
-                }
-            }
-            elsif($1 eq "debug") {
-                if($debug_build) {
-                    next;
-                }
-            }
-            elsif($1 eq "TrackMemory") {
-                if($has_memory_tracking) {
-                    next;
-                }
-            }
-            elsif($1 eq "large_file") {
-                if($has_largefile) {
-                    next;
-                }
-            }
-            elsif($1 eq "idn") {
-                if($has_idn) {
-                    next;
-                }
-            }
-            elsif($1 eq "ipv6") {
-                if($has_ipv6) {
-                    next;
-                }
-            }
-            elsif($1 eq "libz") {
-                if($has_libz) {
-                    next;
-                }
-            }
-            elsif($1 eq "brotli") {
-                if($has_brotli) {
-                    next;
-                }
-            }
-            elsif($1 eq "NTLM") {
-                if($has_ntlm) {
-                    next;
-                }
-            }
-            elsif($1 eq "NTLM_WB") {
-                if($has_ntlm_wb) {
-                    next;
-                }
-            }
-            elsif($1 eq "SSPI") {
-                if($has_sspi) {
-                    next;
-                }
-            }
-            elsif($1 eq "GSS-API") {
-                if($has_gssapi) {
-                    next;
-                }
-            }
-            elsif($1 eq "Kerberos") {
-                if($has_kerberos) {
-                    next;
-                }
-            }
-            elsif($1 eq "SPNEGO") {
-                if($has_spnego) {
-                    next;
-                }
-            }
-            elsif($1 eq "getrlimit") {
-                if($has_getrlimit) {
-                    next;
-                }
-            }
-            elsif($1 eq "crypto") {
-                if($has_crypto) {
-                    next;
-                }
-            }
-            elsif($1 eq "TLS-SRP") {
-                if($has_tls_srp) {
-                    next;
-                }
-            }
-            elsif($1 eq "Metalink") {
-                if($has_metalink) {
-                    next;
-                }
-            }
-            elsif($1 eq "http/2") {
-                if($has_http2) {
-                    next;
-                }
-            }
-            elsif($1 eq "threaded-resolver") {
-                if($has_threadedres) {
-                    next;
-                }
-            }
-            elsif($1 eq "PSL") {
-                if($has_psl) {
-                    next;
-                }
-            }
-            elsif($1 eq "alt-svc") {
-                if($has_altsvc) {
-                    next;
-                }
-            }
-            elsif($1 eq "manual") {
-                if($has_manual) {
-                    next;
-                }
-            }
-            elsif($1 eq "socks") {
-                next;
-            }
-            elsif($1 eq "unix-sockets") {
-                next if $has_unix;
-            }
-            # See if this "feature" is in the list of supported protocols
-            elsif (grep /^\Q$1\E$/i, @protocols) {
+            if($feature{$1}) {
                 next;
             }
 
@@ -3343,135 +3250,7 @@ sub singletest {
             $f =~ s/\s//g;
 
             if($f =~ /^!(.*)$/) {
-                if($1 eq "SSL") {
-                    if(!$has_ssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "MultiSSL") {
-                    if(!$has_multissl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "OpenSSL") {
-                    if(!$has_openssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "GnuTLS") {
-                    if(!$has_gnutls) {
-                        next;
-                    }
-                }
-                elsif($1 eq "NSS") {
-                    if(!$has_nss) {
-                        next;
-                    }
-                }
-                elsif(($1 eq "WinSSL") || ($1 eq "Schannel")) {
-                    if(!$has_winssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "DarwinSSL") {
-                    if(!$has_darwinssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "TrackMemory") {
-                    if(!$has_memory_tracking) {
-                        next;
-                    }
-                }
-                elsif($1 eq "large_file") {
-                    if(!$has_largefile) {
-                        next;
-                    }
-                }
-                elsif($1 eq "idn") {
-                    if(!$has_idn) {
-                        next;
-                    }
-                }
-                elsif($1 eq "ipv6") {
-                    if(!$has_ipv6) {
-                        next;
-                    }
-                }
-                elsif($1 eq "unix-sockets") {
-                    next if !$has_unix;
-                }
-                elsif($1 eq "libz") {
-                    if(!$has_libz) {
-                        next;
-                    }
-                }
-                elsif($1 eq "brotli") {
-                    if(!$has_brotli) {
-                        next;
-                    }
-                }
-                elsif($1 eq "NTLM") {
-                    if(!$has_ntlm) {
-                        next;
-                    }
-                }
-                elsif($1 eq "NTLM_WB") {
-                    if(!$has_ntlm_wb) {
-                        next;
-                    }
-                }
-                elsif($1 eq "SSPI") {
-                    if(!$has_sspi) {
-                        next;
-                    }
-                }
-                elsif($1 eq "GSS-API") {
-                    if(!$has_gssapi) {
-                        next;
-                    }
-                }
-                elsif($1 eq "Kerberos") {
-                    if(!$has_kerberos) {
-                        next;
-                    }
-                }
-                elsif($1 eq "SPNEGO") {
-                    if(!$has_spnego) {
-                        next;
-                    }
-                }
-                elsif($1 eq "getrlimit") {
-                    if(!$has_getrlimit) {
-                        next;
-                    }
-                }
-                elsif($1 eq "crypto") {
-                    if(!$has_crypto) {
-                        next;
-                    }
-                }
-                elsif($1 eq "TLS-SRP") {
-                    if(!$has_tls_srp) {
-                        next;
-                    }
-                }
-                elsif($1 eq "Metalink") {
-                    if(!$has_metalink) {
-                        next;
-                    }
-                }
-                elsif($1 eq "PSL") {
-                    if(!$has_psl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "threaded-resolver") {
-                    if(!$has_threadedres) {
-                        next;
-                    }
-                }
-                else {
+                if(!$feature{$1}) {
                     next;
                 }
             }
@@ -4761,10 +4540,6 @@ sub startservers {
                 # we can't run ftps tests without stunnel
                 return "no stunnel";
             }
-            if(!$has_ssl) {
-                # we can't run ftps tests if libcurl is SSL-less
-                return "curl lacks SSL support";
-            }
             if($runcert{'ftps'} && ($runcert{'ftps'} ne $certfile)) {
                 # stop server when running and using a different cert
                 stopserver('ftps');
@@ -4798,10 +4573,6 @@ sub startservers {
             if(!$stunnel) {
                 # we can't run https tests without stunnel
                 return "no stunnel";
-            }
-            if(!$has_ssl) {
-                # we can't run https tests if libcurl is SSL-less
-                return "curl lacks SSL support";
             }
             if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
                 # stop server when running and using a different cert
