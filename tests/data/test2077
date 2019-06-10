@@ -1,0 +1,46 @@
+<testcase>
+<info>
+<keywords>
+HSTS
+HTTP
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+HSTS
+debug
+</features>
+<server>
+http
+http-proxy
+</server>
+<name>
+Check that HSTS does not upgrade domain without record
+</name>
+<setenv>
+CURL_HSTSFILE=data/hsts.dafsa
+</setenv>
+<command>
+-x %HOSTIP:%PROXYPORT http://nohstsdomain.fake/
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<proxy>
+GET http://nohstsdomain.fake/ HTTP/1.1
+Host: nohstsdomain.fake
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

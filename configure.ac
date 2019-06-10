@@ -175,6 +175,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtmp_msg="no      (--with-librtmp)"
   curl_mtlnk_msg="no      (--with-libmetalink)"
     curl_psl_msg="no      (--with-libpsl)"
+   curl_hsts_msg="no      (--with-libhsts)"
 
     ssl_backends=
 
@@ -3342,6 +3343,102 @@ if test X"$want_h2" != Xno; then
 fi
 
 dnl **********************************************************************
+dnl Check for libhsts
+dnl **********************************************************************
+dnl libhsts project home page: https://gitlab.com/rockdaboot/libhsts
+OPT_HSTS=off
+AC_ARG_WITH(libhsts,dnl
+AC_HELP_STRING([--with-libhsts=PATH],[Where to look for libhsts, PATH points to the libhsts installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--without-libhsts], [disable HSTS]),
+  OPT_HSTS=$withval)
+
+if test X"$OPT_HSTS" != Xno; then
+  dnl backup the pre-hsts variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_HSTS" in
+  yes)
+    dnl --with-hsts (without path) used
+    CURL_CHECK_PKGCONFIG(libhsts)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_HSTS=`$PKGCONFIG --libs-only-l libhsts`
+      LD_HSTS=`$PKGCONFIG --libs-only-L libhsts`
+      CPP_HSTS=`$PKGCONFIG --cflags-only-I libhsts`
+      version=`$PKGCONFIG --modversion libhsts`
+      DIR_HSTS=`echo $LD_HSTS | $SED -e 's/-L//'`
+    fi
+
+    ;;
+  off)
+    dnl no --with-hsts option given, just check default places
+    ;;
+  *)
+    dnl use the given --with-hsts spot
+    PREFIX_HSTS=$OPT_HSTS
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_HSTS"; then
+    LIB_HSTS="-lhsts"
+    LD_HSTS=-L${PREFIX_HSTS}/lib$libsuff
+    CPP_HSTS=-I${PREFIX_HSTS}/include
+    DIR_HSTS=${PREFIX_HSTS}/lib$libsuff
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_HSTS"
+  CPPFLAGS="$CPPFLAGS $CPP_HSTS"
+  LIBS="$LIB_HSTS $LIBS"
+
+  AC_CHECK_LIB(hsts, hsts_search)
+
+  AC_CHECK_HEADERS(libhsts.h,
+    curl_hsts_msg="enabled (libhsts)"
+    HAVE_HSTS=1
+    AC_DEFINE(USE_HSTS, 1, [if HSTS is in use])
+    AC_SUBST(USE_HSTS, [1])
+  )
+
+  if test X"$OPT_HSTS" != Xoff &&
+     test "$HAVE_HSTS" != "1"; then
+    AC_MSG_ERROR([HSTS libs and/or directories were not found where specified!])
+  fi
+
+  if test "$HAVE_HSTS" = "1"; then
+    if test -n "$DIR_HSTS"; then
+       dnl when the hsts shared libs were found in a path that the run-time
+       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl to prevent further configure tests to fail due to this
+
+       if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_HSTS"
+         export LD_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_HSTS to LD_LIBRARY_PATH])
+       fi
+    fi
+
+    AC_ARG_WITH(hsts-file,
+    AC_HELP_STRING([--with-hsts-file=FILE],
+                   [Path to hsts.dafsa file]),
+                   [ HSTS_FILE="$withval" ] )
+    if test -n "$HSTS_FILE" ; then
+      AC_DEFINE_UNQUOTED(HSTS_FILE, "$HSTS_FILE",
+                         [Path to hsts.dafsa file] )
+    else
+      AC_MSG_ERROR([When enabling HSTS, you also need to specify --with-hsts-file pointing to the hsts.dafsa file])
+    fi
+  else
+    dnl no hsts, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+fi
+
+dnl **********************************************************************
 dnl Check for zsh completion path
 dnl **********************************************************************
 
@@ -4350,6 +4447,8 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   PSL:              ${curl_psl_msg}
   Alt-svc:          ${curl_altsvc_msg}
   HTTP2:            ${curl_h2_msg}
+  HSTS:             ${curl_hsts_msg} (using ${HSTS_FILE})
+  HSTS        :     ${curl_hsts_msg} (using ${HSTS_FILE})
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])

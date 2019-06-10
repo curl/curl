@@ -2787,6 +2787,7 @@ typedef struct {
 #define CURL_VERSION_MULTI_SSL    (1<<22) /* Multiple SSL backends available */
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
+#define CURL_VERSION_HSTS         (1<<25) /* HSTS features are present */
 
  /*
  * NAME curl_version_info()

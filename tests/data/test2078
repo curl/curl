@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+HSTS
+HTTPS
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+HSTS
+debug
+</features>
+<server>
+https
+http-proxy
+</server>
+<name>
+Check that HSTS upgrades http to https
+</name>
+<setenv>
+CURL_HSTSFILE=data/hsts.dafsa
+</setenv>
+<command>
+-x %HOSTIP:%PROXYPORT http://hstsdomain.fake/
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<proxy>
+CONNECT hstsdomain.fake:443 HTTP/1.1
+Host: hstsdomain.fake:443
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<errorcode>
+56
+</errorcode>
+</verify>
+</testcase>

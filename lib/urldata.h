@@ -315,6 +315,10 @@ typedef enum {
 #include <iconv.h>
 #endif
 
+#ifdef USE_HSTS
+#include <libhsts.h>
+#endif
+
 /* Struct used for GSSAPI (Kerberos V5) authentication */
 #if defined(USE_KERBEROS5)
 struct kerberos5data {
@@ -1750,6 +1754,9 @@ struct UserDefined {
   bit doh:1; /* DNS-over-HTTPS enabled */
   bit doh_get:1; /* use GET for DoH requests, instead of POST */
   bit http09_allowed:1; /* allow HTTP/0.9 responses */
+#ifdef USE_HSTS
+  hsts_t *hsts; /* libhsts handle */
+#endif
 };
 
 struct Names {

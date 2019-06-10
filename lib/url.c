@@ -122,6 +122,9 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "strdup.h"
 #include "setopt.h"
 #include "altsvc.h"
+#ifdef USE_HSTS
+#include <libhsts.h>
+#endif
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -291,6 +294,10 @@ void Curl_freeset(struct Curl_easy *data)
   data->change.url = NULL;
 
   Curl_mime_cleanpart(&data->set.mimepost);
+
+#ifdef USE_HSTS
+  hsts_free(data->set.hsts);
+#endif
 }
 
 /* free the URL pieces */
@@ -617,6 +624,27 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
       Curl_http2_init_state(&data->state);
     }
+
+#ifdef USE_HSTS
+    {
+      hsts_status_t hsts_status = HSTS_ERR_INPUT_FAILURE;
+#if DEBUGBUILD
+      char *debug_hsts_file = curl_getenv("CURL_HSTSFILE");
+      if(debug_hsts_file) {
+        DEBUGF(fprintf(stderr, "DEBUG: HSTS file override: %s\n",
+                       debug_hsts_file));
+        hsts_status = hsts_load_file(debug_hsts_file, &data->set.hsts);
+        free(debug_hsts_file);
+      }
+      else
+#endif
+      hsts_status = hsts_load_file(HSTS_FILE, &data->set.hsts);
+      if(hsts_status < HSTS_SUCCESS) {
+        fprintf(stderr, "Failed loading HSTS database, error code %d!\n",
+                hsts_status);
+      }
+    }
+#endif
   }
 
   if(result) {
@@ -1821,21 +1849,36 @@ const struct Curl_handler *Curl_builtin_scheme(const char *scheme)
 {
   const struct Curl_handler * const *pp;
   const struct Curl_handler *p;
-  /* Scan protocol handler table and match against 'scheme'. The handler may
-     be changed later when the protocol specific setup function is called. */
+
+  /* Scan protocol handler table and match against 'protostr' to set a few
+     variables based on the URL. Now that the handler may be changed later
+     when the protocol specific setup function is called. */
   for(pp = protocols; (p = *pp) != NULL; pp++)
     if(strcasecompare(p->scheme, scheme))
       /* Protocol found in table. Check if allowed */
       return p;
+
   return NULL; /* not found */
 }
-
 
 static CURLcode findprotocol(struct Curl_easy *data,
                              struct connectdata *conn,
                              const char *protostr)
 {
   const struct Curl_handler *p = Curl_builtin_scheme(protostr);
+
+#ifdef USE_HSTS
+  /* HSTS means we override any http access with https if the domain
+     is listed in the HSTS database */
+  if(data->set.hsts && strcasecompare(protostr, "http")) {
+    hsts_status_t hsts_status = hsts_search(data->set.hsts,
+                                            conn->host.name, 0, NULL);
+    if(hsts_status == HSTS_SUCCESS) {
+      infof(data, "Domain found in HSTS database, upgrading to https\n");
+      p = Curl_builtin_scheme("https");
+    }
+  }
+#endif
 
   if(p && /* Protocol found in table. Check if allowed */
      (data->set.allowed_protocols & p->protocol)) {
