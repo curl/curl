@@ -324,7 +324,7 @@ wolfssl_connect_step1(struct connectdata *conn,
 #ifdef ENABLE_IPV6
        (0 == Curl_inet_pton(AF_INET6, hostname, &addr6)) &&
 #endif
-       (wolfssl_CTX_UseSNI(BACKEND->ctx, WOLFSSL_SNI_HOST_NAME, hostname,
+       (wolfSSL_CTX_UseSNI(BACKEND->ctx, WOLFSSL_SNI_HOST_NAME, hostname,
                           (unsigned short)hostname_len) != 1)) {
       infof(data, "WARNING: failed to configure server name indication (SNI) "
             "TLS extension\n");
