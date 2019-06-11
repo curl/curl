@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -80,7 +80,7 @@ int Curl_hash_delete(struct curl_hash *h, void *key, size_t key_len);
 void *Curl_hash_pick(struct curl_hash *, void *key, size_t key_len);
 void Curl_hash_apply(struct curl_hash *h, void *user,
                      void (*cb)(void *user, void *ptr));
-int Curl_hash_count(struct curl_hash *h);
+#define Curl_hash_count(h) ((h)->size)
 void Curl_hash_destroy(struct curl_hash *h);
 void Curl_hash_clean(struct curl_hash *h);
 void Curl_hash_clean_with_criterium(struct curl_hash *h, void *user,

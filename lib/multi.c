@@ -194,9 +194,6 @@ struct Curl_sh_entry {
   unsigned int users; /* number of transfers using this */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
-  unsigned int blocked:1; /* if TRUE, blocked from being removed */
-  unsigned int removed:1; /* if TRUE, this entry is "removed" but prevented
-                             from it by "blocked" being set! */
 };
 /* bits for 'action' having no bits means this socket is not expecting any
    action */
@@ -205,16 +202,11 @@ struct Curl_sh_entry {
 
 /* look up a given socket in the socket hash, skip invalid sockets */
 static struct Curl_sh_entry *sh_getentry(struct curl_hash *sh,
-                                         curl_socket_t s,
-                                         bool also_hidden)
+                                         curl_socket_t s)
 {
   if(s != CURL_SOCKET_BAD) {
     /* only look for proper sockets */
-    struct Curl_sh_entry *entry =
-      Curl_hash_pick(sh, (char *)&s, sizeof(curl_socket_t));
-    if(entry && entry->removed && !also_hidden)
-      return NULL;
-    return entry;
+    return Curl_hash_pick(sh, (char *)&s, sizeof(curl_socket_t));
   }
   return NULL;
 }
@@ -233,7 +225,7 @@ static size_t trhash_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
   (void)k1_len;
   (void)k2_len;
 
-  return k1 == k2;
+  return *(struct Curl_easy **)k1 == *(struct Curl_easy **)k2;
 }
 
 static void trhash_dtor(void *nada)
@@ -246,13 +238,11 @@ static void trhash_dtor(void *nada)
 static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
                                          curl_socket_t s)
 {
-  struct Curl_sh_entry *there = sh_getentry(sh, s, TRUE);
+  struct Curl_sh_entry *there = sh_getentry(sh, s);
   struct Curl_sh_entry *check;
 
   if(there) {
     /* it is present, return fine */
-    if(there->removed)
-      there->removed = FALSE; /* clear the removed bit */
     return there;
   }
 
@@ -281,17 +271,11 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
 static void sh_delentry(struct Curl_sh_entry *entry,
                         struct curl_hash *sh, curl_socket_t s)
 {
-  if(entry->blocked) {
-    entry->removed = TRUE; /* pretend */
-    return;
-  }
-  else {
-    Curl_hash_destroy(&entry->transfers);
+  Curl_hash_destroy(&entry->transfers);
 
-    /* We remove the hash entry. This will end up in a call to
-       sh_freeentry(). */
-    Curl_hash_delete(sh, (char *)&s, sizeof(curl_socket_t));
-  }
+  /* We remove the hash entry. This will end up in a call to
+     sh_freeentry(). */
+  Curl_hash_delete(sh, (char *)&s, sizeof(curl_socket_t));
 }
 
 /*
@@ -2266,7 +2250,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     s = socks[i];
 
     /* get it from the hash */
-    entry = sh_getentry(&multi->sockhash, s, FALSE);
+    entry = sh_getentry(&multi->sockhash, s);
 
     if(curraction & GETSOCK_READSOCK(i))
       action |= CURL_POLL_IN;
@@ -2312,7 +2296,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
         entry->writers++;
 
       /* add 'data' to the transfer hash on this socket! */
-      if(!Curl_hash_add(&entry->transfers, (char *)data, /* hash key */
+      if(!Curl_hash_add(&entry->transfers, (char *)&data, /* hash key */
                         sizeof(struct Curl_easy *), data))
         return CURLM_OUT_OF_MEMORY;
     }
@@ -2350,7 +2334,7 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
     if(stillused)
       continue;
 
-    entry = sh_getentry(&multi->sockhash, s, FALSE);
+    entry = sh_getentry(&multi->sockhash, s);
     /* if this is NULL here, the socket has been closed and notified so
        already by Curl_multi_closed() */
     if(entry) {
@@ -2370,8 +2354,10 @@ static CURLMcode singlesocket(struct Curl_multi *multi,
       }
       else {
         /* still users, but remove this handle as a user of this socket */
-        Curl_hash_delete(&entry->transfers, (char *)data,
-                         sizeof(struct Curl_easy *));
+        if(Curl_hash_delete(&entry->transfers, (char *)&data,
+                            sizeof(struct Curl_easy *))) {
+          DEBUGASSERT(NULL);
+        }
       }
     }
   } /* for loop over numsocks */
@@ -2406,7 +2392,7 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
     if(multi) {
       /* this is set if this connection is part of a handle that is added to
          a multi handle, and only then this is necessary */
-      struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s, FALSE);
+      struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
       if(entry) {
         if(multi->socket_cb)
@@ -2506,7 +2492,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     return result;
   }
   if(s != CURL_SOCKET_TIMEOUT) {
-    struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s, FALSE);
+    struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
     if(!entry)
       /* Unmatched socket, we can't act on it but we ignore this fact.  In
@@ -2518,19 +2504,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     else {
       struct curl_hash_iterator iter;
       struct curl_hash_element *he;
-      SIGPIPE_VARIABLE(pipe_st);
-
-      /* block this sockhash entry from being removed in a sub function called
-         from here */
-      entry->blocked = TRUE;
-      DEBUGASSERT(!entry->removed);
 
       /* the socket can be shared by many transfers, iterate */
       Curl_hash_start_iterate(&entry->transfers, &iter);
       for(he = Curl_hash_next_element(&iter); he;
           he = Curl_hash_next_element(&iter)) {
         data = (struct Curl_easy *)he->ptr;
-
         DEBUGASSERT(data);
         DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
 
@@ -2538,25 +2517,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
           /* set socket event bitmask if they're not locked */
           data->conn->cselect_bits = ev_bitmask;
 
-        sigpipe_ignore(data, &pipe_st);
-        result = multi_runsingle(multi, now, data);
-        sigpipe_restore(&pipe_st);
-
-        if(data->conn && !(data->conn->handler->flags & PROTOPT_DIRLOCK))
-          /* clear the bitmask only if not locked */
-          data->conn->cselect_bits = 0;
-
-        if(CURLM_OK >= result) {
-          /* get the socket(s) and check if the state has been changed since
-             last */
-          result = singlesocket(multi, data);
-          if(result)
-            return result;
-        }
-      }
-      if(entry->removed) {
-        entry->blocked = FALSE; /* unblock */
-        sh_delentry(entry, &multi->sockhash, s); /* delete for real */
+        Curl_expire(data, 0, EXPIRE_RUN_NOW);
       }
 
       /* Now we fall-through and do the timer-based stuff, since we don't want
@@ -3005,7 +2966,7 @@ CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  there = sh_getentry(&multi->sockhash, s, FALSE);
+  there = sh_getentry(&multi->sockhash, s);
 
   if(!there)
     return CURLM_BAD_SOCKET;
@@ -3094,7 +3055,7 @@ void Curl_multi_dump(struct Curl_multi *multi)
               statename[data->mstate], data->numsocks);
       for(i = 0; i < data->numsocks; i++) {
         curl_socket_t s = data->sockets[i];
-        struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s, FALSE);
+        struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
         fprintf(stderr, "%d ", (int)s);
         if(!entry) {
