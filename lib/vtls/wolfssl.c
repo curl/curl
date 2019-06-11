@@ -522,7 +522,7 @@ wolfssl_connect_step2(struct connectdata *conn,
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
 
-    x509_der = (const char *)wolfssl_X509_get_der(x509, &x509_der_len);
+    x509_der = (const char *)wolfSSL_X509_get_der(x509, &x509_der_len);
     if(!x509_der) {
       failf(data, "SSL: failed retrieving ASN.1 server certificate");
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
