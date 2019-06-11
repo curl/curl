@@ -3957,7 +3957,6 @@ AC_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_TLS_SRP, 1, [to disable TLS-SRP authentication])
        want_tls_srp=no
        ;;
   *)   AC_MSG_RESULT(yes)
