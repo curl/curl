@@ -975,7 +975,7 @@ static bool conn_maxage(struct Curl_easy *data,
     timediff_t idletime = Curl_timediff(now, conn->lastused);
     idletime /= 1000; /* integer seconds is fine */
 
-    if(idletime/1000 > data->set.maxage_conn) {
+    if(idletime > data->set.maxage_conn) {
       infof(data, "Too old connection (%ld seconds), disconnect it\n",
             idletime);
       return TRUE;
