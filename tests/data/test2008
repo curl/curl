@@ -82,10 +82,6 @@ Some stuff delivered from an HTTP resource
 s/Last-Modified:.*//
 </stripfile2>
 <file2 name="log/heads2008">
-Content-Length: 496
-Accept-ranges: bytes
-
-
 HTTP/1.1 200 OK
 Date: Thu, 21 Jun 2012 15:23:48 GMT
 Server: test-server/fake

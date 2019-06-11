@@ -273,6 +273,10 @@ static const struct helptxt helptext[] = {
    "OAuth 2 Bearer Token"},
   {"-o, --output <file>",
    "Write to file instead of stdout"},
+  {"-Z, --parallel",
+   "Perform transfers in parallel"},
+  {"    --parallel-max",
+   "Maximum concurrency for parallel transfers"},
   {"    --pass <phrase>",
    "Pass phrase for the private key"},
   {"    --path-as-is",
@@ -602,8 +606,9 @@ void tool_version_info(void)
   }
 }
 
-void tool_list_engines(CURL *curl)
+void tool_list_engines(void)
 {
+  CURL *curl = curl_easy_init();
   struct curl_slist *engines = NULL;
 
   /* Get the list of engines */
@@ -620,4 +625,5 @@ void tool_list_engines(CURL *curl)
 
   /* Cleanup the list of engines */
   curl_slist_free_all(engines);
+  curl_easy_cleanup(curl);
 }

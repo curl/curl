@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,10 +71,13 @@ bool stdin_upload(const char *uploadfile)
  * Adds the file name to the URL if it doesn't already have one.
  * url will be freed before return if the returned pointer is different
  */
-char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
+char *add_file_name_to_url(char *url, const char *filename)
 {
   /* If no file name part is given in the URL, we add this file name */
   char *ptr = strstr(url, "://");
+  CURL *curl = curl_easy_init(); /* for url escaping */
+  if(!curl)
+    return NULL; /* error! */
   if(ptr)
     ptr += 3;
   else
@@ -120,6 +123,7 @@ char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
     else
       Curl_safefree(url);
   }
+  curl_easy_cleanup(curl);
   return url;
 }
 

@@ -3671,6 +3671,7 @@ AC_CHECK_FUNCS([fnmatch \
   setlocale \
   setmode \
   setrlimit \
+  usleep \
   utime \
   utimes
 ],[
