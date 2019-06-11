@@ -67,6 +67,7 @@ EXTRA_DIST =                                    \
  KNOWN_BUGS                                     \
  LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
+ PARALLEL-TRANSFERS.md                          \
  README.cmake                                   \
  README.md                                      \
  README.netware                                 \
