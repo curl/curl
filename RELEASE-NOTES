@@ -8,15 +8,21 @@ curl and libcurl 7.65.2
 
 This release includes the following bugfixes:
 
+ o CURLMOPT_SOCKETFUNCTION.3: clarified [8]
+ o CURLOPT_CAINFO.3: polished wording [9]
  o bindlocal: detect and avoid IP version mismatches in bind() [1]
  o build: fix Codacy warnings [6]
+ o configure: more --disable switches to toggle off individual features [7]
  o examples/fopen: fix comparison [6]
  o examples/htmltitle: use C++ casts between pointer types [6]
+ o http2: remove CURL_DISABLE_TYPECHECK define
  o libcurl-tutorial.3: Fix small typo (mutipart -> multipart) [3]
  o multi: make sure 'data' can present in several sockhash entries [2]
  o sws: remove unused variables [6]
+ o tool_cb_prg: Fix integer overflow in progress bar [10]
  o travis: update scan-build job to xenial [5]
  o unpause: trigger a timeout for event-based transfers [4]
+ o wolfssl: refer to it as wolfSSL only [11]
 
 This release includes the following known bugs:
 
@@ -25,9 +31,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Grebenschikov, Daniel Stenberg, Marcel Raad, MrSorcus on github,
-  sstruchtrup on github, Tom van der Woerdt,
-  (6 contributors)
+  Alex Grebenschikov, Brian Carpenter, Daniel Gustafsson, Daniel Stenberg,
+  Marcel Raad, MrSorcus on github, Richard Alcock, sstruchtrup on github,
+  Tom van der Woerdt,
+  (9 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -39,3 +46,8 @@ References to bug reports and discussions on issues:
  [4] = https://curl.haxx.se/bug/?id=3994
  [5] = https://curl.haxx.se/bug/?id=3999
  [6] = https://curl.haxx.se/bug/?id=3975
+ [7] = https://curl.haxx.se/bug/?id=4009
+ [8] = https://curl.haxx.se/bug/?id=4006
+ [9] = https://curl.haxx.se/mail/lib-2019-06/0019.html
+ [10] = https://curl.haxx.se/bug/?id=3984
+ [11] = https://curl.haxx.se/bug/?id=3903
