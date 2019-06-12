@@ -458,7 +458,7 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "coverage" ]; then
-             ./configure --enable-debug --disable-shared --enable-code-coverage --enable-werror
+             ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror
              make
              make TFLAGS=-n test-nonflaky
              make "TFLAGS=-n -e" test-nonflaky
