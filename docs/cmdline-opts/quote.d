@@ -16,9 +16,10 @@ If the server returns failure for one of the commands, the entire operation
 will be aborted. You must send syntactically correct FTP commands as RFC 959
 defines to FTP servers, or one of the commands listed below to SFTP servers.
 
-This option can be used multiple times. When speaking to an FTP server, prefix
-the command with an asterisk (*) to make curl continue even if the command
-fails as by default curl will stop at first failure.
+Prefix the command with an asterisk (*) to make curl continue even if the
+command fails as by default curl will stop at first failure.
+
+This option can be used multiple times.
 
 SFTP is a binary protocol. Unlike for FTP, curl interprets SFTP quote commands
 itself before sending them to the server.  File names may be quoted
