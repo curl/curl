@@ -82,12 +82,7 @@ matrix:
                   packages:
                       - *common_packages
                       - libpsl-dev
-        - os: linux
-          compiler: gcc
-          dist: trusty
-          env:
-              - T=normal BROTLI=yes
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
@@ -101,6 +96,7 @@ matrix:
                   packages:
                       - *common_packages
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
@@ -114,12 +110,21 @@ matrix:
                   packages:
                       - *common_packages
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
           env:
               - T=debug-mesalink C="--with-mesalink --without-ssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                  packages:
+                      - *common_packages
+                      - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -135,6 +140,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -150,6 +156,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -165,6 +172,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
                       - libmbedtls-dev
         - os: linux
           compiler: clang
@@ -182,6 +190,7 @@ matrix:
                       - clang-7
                       - libgnutls28-dev
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -197,6 +206,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -213,6 +223,7 @@ matrix:
                       - clang-7
                       - libnss3-dev
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: trusty
@@ -257,6 +268,7 @@ matrix:
                   packages:
                       - *common_packages
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -272,6 +284,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
@@ -286,6 +299,7 @@ matrix:
                       - *common_packages
                       - lcov
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
@@ -299,6 +313,7 @@ matrix:
                   packages:
                       - *common_packages
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -314,6 +329,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -330,6 +346,7 @@ matrix:
                       - clang-7
                       - clang-tidy-7
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -345,6 +362,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: clang
           dist: xenial
@@ -360,6 +378,7 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libpsl-dev
+                      - libbrotli-dev
 
 before_install:
     - eval "${OVERRIDE_CC}"
@@ -373,20 +392,6 @@ install:
 
 before_script:
     - ./buildconf
-    - |
-      # No brotli package available for Trusty. Download & compile from source.
-      # Cannot be done in the install script because cmake is needed.
-          if [ "$TRAVIS_OS_NAME" = linux -a "$BROTLI" ]; then
-          curl -L https://github.com/google/brotli/archive/v1.0.1.tar.gz |
-              tar xzf - &&
-              (
-                  cd brotli-1.0.1 &&
-                  cmake . -DCMAKE_INSTALL_PREFIX=/usr \
-                          -DCMAKE_INSTALL_LIBDIR=/usr/lib &&
-                  make &&
-                  sudo make install
-              )
-          fi
     - |
       if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
         (cd $HOME &&
