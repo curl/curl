@@ -53,8 +53,10 @@ UNITTEST_START
   if(!asi)
     return 1;
   result = Curl_altsvc_load(asi, arg);
-  if(result)
+  if(result) {
+    Curl_altsvc_cleanup(asi);
     return result;
+  }
   curl = curl_easy_init();
   if(!curl)
     goto fail;
