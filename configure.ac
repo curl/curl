@@ -49,6 +49,7 @@ CURL_CHECK_OPTION_CURLDEBUG
 CURL_CHECK_OPTION_SYMBOL_HIDING
 CURL_CHECK_OPTION_ARES
 CURL_CHECK_OPTION_RT
+CURL_CHECK_OPTION_ESNI
 
 XC_CHECK_PATH_SEPARATOR
 
@@ -4497,6 +4498,35 @@ if test "$enable_altsvc" = "yes"; then
   experimental="$experimental alt-svc"
 fi
 
+dnl *************************************************************
+dnl check whether ESNI support, if desired, is actually available
+dnl
+if test "x$want_esni" != "xno"; then
+  AC_MSG_CHECKING([whether ESNI support is available])
+
+  dnl assume NOT and look for sufficient condition
+  ESNI_ENABLED=0
+  ESNI_SUPPORT=''
+
+  dnl OpenSSL with a chosen ESNI function should be enough
+  dnl so more exhaustive checking seems unnecessary for now
+  if test "x$OPENSSL_ENABLED" == "x1"; then
+    AC_CHECK_FUNCS(SSL_get_esni_status,
+      ESNI_SUPPORT="ESNI support available (OpenSSL with SSL_get_esni_status)"
+      ESNI_ENABLED=1)
+
+  dnl add 'elif' chain here for additional implementations
+  fi
+
+  dnl now deal with whatever we found
+  if test "x$ESNI_ENABLED" == "x1"; then
+    AC_DEFINE(USE_ESNI, 1, [if ESNI support is available])
+    AC_MSG_RESULT($ESNI_SUPPORT)
+  else
+    AC_MSG_ERROR([--enable-esni ignored: No ESNI support found])
+  fi
+fi
+
 dnl ************************************************************
 dnl hiding of library internal symbols
 dnl
@@ -4616,6 +4646,10 @@ fi
 if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1" \
     -o "x$NSS_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
+fi
+
+if test "x$ESNI_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES ESNI"
 fi
 
 AC_SUBST(SUPPORT_FEATURES)
@@ -4801,6 +4835,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Alt-svc:          ${curl_altsvc_msg}
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
+  ESNI:             ${curl_esni_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])
