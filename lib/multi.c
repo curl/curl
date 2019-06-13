@@ -214,7 +214,7 @@ static struct Curl_sh_entry *sh_getentry(struct curl_hash *sh,
 #define TRHASH_SIZE 13
 static size_t trhash(void *key, size_t key_length, size_t slots_num)
 {
-  size_t keyval = (size_t)key; /* this is a data pointer */
+  size_t keyval = (size_t)*(struct Curl_easy **)key;
   (void) key_length;
 
   return (keyval % slots_num);
