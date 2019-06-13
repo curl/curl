@@ -648,3 +648,39 @@ AC_DEFUN([CURL_CHECK_NTLM_WB], [
     NTLM_WB_ENABLED=1
   fi
 ])
+
+dnl CURL_CHECK_OPTION_ESNI
+dnl -----------------------------------------------------
+dnl Verify whether configure has been invoked with option
+dnl --enable-esni or --disable-esni, and set
+dnl shell variable want_esni as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_ESNI], [
+  AC_MSG_CHECKING([whether to enable ESNI support])
+  OPT_ESNI="default"
+  AC_ARG_ENABLE(esni,
+AC_HELP_STRING([--enable-esni],[Enable ESNI support])
+AC_HELP_STRING([--disable-esni],[Disable ESNI support]),
+  OPT_ESNI=$enableval)
+  case "$OPT_ESNI" in
+    no)
+      dnl --disable-esni option used
+      want_esni="no"
+      curl_esni_msg="no      (--enable-esni)"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure option not specified
+      want_esni="no"
+      curl_esni_msg="default (--enable-esni)"
+      AC_MSG_RESULT([(assumed) no])
+      ;;
+    *)
+      dnl --enable-esni option used
+      want_esni="yes"
+      curl_esni_msg="enabled (--disable-esni)"
+      experimental="esni"
+      AC_MSG_RESULT([yes])
+      ;;
+  esac
+])
