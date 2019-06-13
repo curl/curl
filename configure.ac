@@ -4115,6 +4115,24 @@ AC_HELP_STRING([--disable-netrc],[Disable netrc parsing]),
 )
 
 dnl ************************************************************
+dnl disable progress-meter
+dnl
+AC_MSG_CHECKING([whether to support progress-meter])
+AC_ARG_ENABLE(progress-meter,
+AC_HELP_STRING([--enable-progress-meter],[Enable progress-meter])
+AC_HELP_STRING([--disable-progress-meter],[Disable progress-meter]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_PROGRESS_METER, 1, [disable progress-meter])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable shuffle DNS support
 dnl
 AC_MSG_CHECKING([whether to support DNS shuffling])
