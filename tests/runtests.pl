@@ -2544,7 +2544,7 @@ sub compare {
 
     if($result) {
         # timestamp test result verification end
-        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+        $timevrfyend{$testnum} = Time::HiRes::time();
 
         if(!$short) {
             logmsg "\n $testnum: $subject FAILED:\n";
@@ -3130,7 +3130,7 @@ sub singletest {
     $testnumcheck = $testnum;
 
     # timestamp test preparation start
-    $timeprepini{$testnum} = Time::HiRes::time() if($timestats);
+    $timeprepini{$testnum} = Time::HiRes::time();
 
     if($disttests !~ /test$testnum\W/ ) {
         logmsg "Warning: test$testnum not present in tests/data/Makefile.inc\n";
@@ -3526,14 +3526,14 @@ sub singletest {
     unlink($FTPDCMD) if(-f $FTPDCMD);
 
     # timestamp required servers verification start
-    $timesrvrini{$testnum} = Time::HiRes::time() if($timestats);
+    $timesrvrini{$testnum} = Time::HiRes::time();
 
     if(!$why) {
         $why = serverfortest($testnum);
     }
 
     # timestamp required servers verification end
-    $timesrvrend{$testnum} = Time::HiRes::time() if($timestats);
+    $timesrvrend{$testnum} = Time::HiRes::time();
 
     my @setenv = getpart("client", "setenv");
     if(@setenv) {
@@ -3900,7 +3900,7 @@ sub singletest {
     }
 
     # timestamp starting of test command
-    $timetoolini{$testnum} = Time::HiRes::time() if($timestats);
+    $timetoolini{$testnum} = Time::HiRes::time();
 
     # run the command line we built
     if ($torture) {
@@ -3928,7 +3928,7 @@ sub singletest {
     }
 
     # timestamp finishing of test command
-    $timetoolend{$testnum} = Time::HiRes::time() if($timestats);
+    $timetoolend{$testnum} = Time::HiRes::time();
 
     if(!$dumped_core) {
         if(-r "core") {
@@ -3978,7 +3978,7 @@ sub singletest {
     sleep($postcommanddelay) if($postcommanddelay);
 
     # timestamp removal of server logs advisor read lock
-    $timesrvrlog{$testnum} = Time::HiRes::time() if($timestats);
+    $timesrvrlog{$testnum} = Time::HiRes::time();
 
     # test definition might instruct to stop some servers
     # stop also all servers relative to the given one
@@ -4063,7 +4063,7 @@ sub singletest {
             if($rc != 0 && !$torture) {
                 logmsg " postcheck FAILED\n";
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
         }
@@ -4087,7 +4087,7 @@ sub singletest {
             cleardir($LOGDIR);
         }
         # timestamp test result verification end
-        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+        $timevrfyend{$testnum} = Time::HiRes::time();
         return $cmdres;
     }
 
@@ -4344,7 +4344,7 @@ sub singletest {
                        "has no name attribute\n";
                 stopservers($verbose);
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
             }
             my @generated=loadarray($filename);
@@ -4408,7 +4408,7 @@ sub singletest {
         }
         logmsg " exit FAILED\n";
         # timestamp test result verification end
-        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+        $timevrfyend{$testnum} = Time::HiRes::time();
         return 1;
     }
 
@@ -4431,7 +4431,7 @@ sub singletest {
                 logmsg "\n** MEMORY FAILURE\n";
                 logmsg @memdata;
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             else {
@@ -4448,7 +4448,7 @@ sub singletest {
             unless(opendir(DIR, "$LOGDIR")) {
                 logmsg "ERROR: unable to read $LOGDIR\n";
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             my @files = readdir(DIR);
@@ -4463,7 +4463,7 @@ sub singletest {
             if(!$vgfile) {
                 logmsg "ERROR: valgrind log file missing for test $testnum\n";
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             my @e = valgrindparse("$LOGDIR/$vgfile");
@@ -4476,7 +4476,7 @@ sub singletest {
                     logmsg @e;
                 }
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             $ok .= "v";
@@ -4496,15 +4496,21 @@ sub singletest {
 
     logmsg "$ok " if(!$short);
 
+    # timestamp test result verification end
+    $timevrfyend{$testnum} = Time::HiRes::time();
+
     my $sofar= time()-$start;
     my $esttotal = $sofar/$count * $total;
     my $estleft = $esttotal - $sofar;
     my $left=sprintf("remaining: %02d:%02d",
                      $estleft/60,
                      $estleft%60);
-
+    my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
+    my $duration = sprintf("duration: %02d:%02d",
+                           $sofar/60, $sofar%60);
     if(!$automakestyle) {
-        logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
+        logmsg sprintf("OK (%-3d out of %-3d, %s, took %.1fs, %s)\n",
+                       $count, $total, $left, $took, $duration);
     }
     else {
         logmsg "PASS: $testnum - $testname\n";
@@ -4514,9 +4520,6 @@ sub singletest {
     if(!$keepoutfiles) {
         cleardir($LOGDIR);
     }
-
-    # timestamp test result verification end
-    $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
 
     return 0;
 }
