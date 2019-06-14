@@ -37,6 +37,9 @@ CURLINFO_LOW_SPEED_LIMIT
 <command>
 http://%HOSTIP:%HTTPPORT/1523
 </command>
+<killserver>
+http
+</killserver>
 </client>
 
 #
