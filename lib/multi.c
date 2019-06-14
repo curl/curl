@@ -1797,7 +1797,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* check if under send speed */
       result = Curl_speedcheck(data, now);
-      if (result) {
+      if(result) {
           break;
       }
 
