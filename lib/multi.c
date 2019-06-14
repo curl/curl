@@ -1795,6 +1795,12 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       bool retry = FALSE;
       bool comeback = FALSE;
 
+      /* check if under send speed */
+      result = Curl_speedcheck(data, now);
+      if (result) {
+          break;
+      }
+
       /* check if over send speed */
       send_timeout_ms = 0;
       if(data->set.max_send_speed > 0)
