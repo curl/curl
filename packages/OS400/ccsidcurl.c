@@ -1314,11 +1314,8 @@ curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
 
   case CURLOPT_ERRORBUFFER:                     /* This is an output buffer. */
   default:
-  {
-    long val = va_arg(arg, long);
-    result = curl_easy_setopt(curl, tag, val);
+    result = Curl_vsetopt(curl, tag, arg);
     break;
-  }
   }
 
   va_end(arg);
