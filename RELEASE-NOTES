@@ -13,15 +13,24 @@ This release includes the following bugfixes:
  o bindlocal: detect and avoid IP version mismatches in bind() [1]
  o build: fix Codacy warnings [6]
  o configure: more --disable switches to toggle off individual features [7]
+ o configure: remove CURL_DISABLE_TLS_SRP [19]
  o examples/fopen: fix comparison [6]
  o examples/htmltitle: use C++ casts between pointer types [6]
  o http2: remove CURL_DISABLE_TYPECHECK define
+ o krb5: fix compiler warning [15]
  o libcurl-tutorial.3: Fix small typo (mutipart -> multipart) [3]
+ o multi: fix the transfer hashes in the socket hash entries [17]
  o multi: make sure 'data' can present in several sockhash entries [2]
+ o os400: make vsetopt() non-static as Curl_vsetopt() for os400 support [12]
+ o quote.d: asterisk prefix works for SFTP as well [16]
+ o runtests: report single test time + total duration [13]
  o sws: remove unused variables [6]
+ o test1165: verify that CURL_DISABLE_ symbols are in sync
  o tool_cb_prg: Fix integer overflow in progress bar [10]
  o travis: update scan-build job to xenial [5]
+ o unit1654: cleanup on memory failure [14]
  o unpause: trigger a timeout for event-based transfers [4]
+ o url: Fix CURLOPT_MAXAGE_CONN time comparison [18]
  o wolfssl: refer to it as wolfSSL only [11]
 
 This release includes the following known bugs:
@@ -31,10 +40,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Grebenschikov, Brian Carpenter, Daniel Gustafsson, Daniel Stenberg,
-  Marcel Raad, MrSorcus on github, Richard Alcock, sstruchtrup on github,
-  Tom van der Woerdt,
-  (9 contributors)
+  Alex Grebenschikov, Ben Voris, Brian Carpenter, Cliff Crosland,
+  Daniel Gustafsson, Daniel Stenberg, Jakub Zakrzewski, jonrumsey on github,
+  Marcel Raad, MrSorcus on github, Patrick Monnerat, Richard Alcock,
+  sstruchtrup on github, Tom van der Woerdt,
+  (14 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -51,3 +61,11 @@ References to bug reports and discussions on issues:
  [9] = https://curl.haxx.se/mail/lib-2019-06/0019.html
  [10] = https://curl.haxx.se/bug/?id=3984
  [11] = https://curl.haxx.se/bug/?id=3903
+ [12] = https://curl.haxx.se/bug/?id=3833
+ [13] = https://curl.haxx.se/bug/?id=4027
+ [14] = https://curl.haxx.se/bug/?id=4021
+ [15] = https://curl.haxx.se/bug/?id=4020
+ [16] = https://curl.haxx.se/bug/?id=4017
+ [17] = https://curl.haxx.se/bug/?id=4012
+ [18] = https://curl.haxx.se/bug/?id=4013
+ [19] = https://curl.haxx.se/bug/?id=4010
