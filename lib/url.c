@@ -881,6 +881,26 @@ proxy_info_matches(const struct proxy_info* data,
 #define proxy_info_matches(x,y) FALSE
 #endif
 
+/* A connection has to have been idle for a shorter time than 'maxage_conn' to
+   be subject for reuse. The success rate is just too low after this. */
+
+static bool conn_maxage(struct Curl_easy *data,
+                        struct connectdata *conn,
+                        struct curltime now)
+{
+  if(!conn->data) {
+    timediff_t idletime = Curl_timediff(now, conn->lastused);
+    idletime /= 1000; /* integer seconds is fine */
+
+    if(idletime > data->set.maxage_conn) {
+      infof(data, "Too old connection (%ld seconds), disconnect it\n",
+            idletime);
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 /*
  * This function checks if the given connection is dead and extracts it from
  * the connection cache if so.
@@ -897,7 +917,11 @@ static bool extract_if_dead(struct connectdata *conn,
     /* The check for a dead socket makes sense only if the connection isn't in
        use */
     bool dead;
-    if(conn->handler->connection_check) {
+    struct curltime now = Curl_now();
+    if(conn_maxage(data, conn, now)) {
+      dead = TRUE;
+    }
+    else if(conn->handler->connection_check) {
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
       unsigned int state;
@@ -964,25 +988,6 @@ static void prune_dead_connections(struct Curl_easy *data)
   }
 }
 
-/* A connection has to have been idle for a shorter time than 'maxage_conn' to
-   be subject for reuse. The success rate is just too low after this. */
-
-static bool conn_maxage(struct Curl_easy *data,
-                        struct connectdata *conn,
-                        struct curltime now)
-{
-  if(!conn->data) {
-    timediff_t idletime = Curl_timediff(now, conn->lastused);
-    idletime /= 1000; /* integer seconds is fine */
-
-    if(idletime > data->set.maxage_conn) {
-      infof(data, "Too old connection (%ld seconds), disconnect it\n",
-            idletime);
-      return TRUE;
-    }
-  }
-  return FALSE;
-}
 /*
  * Given one filled in connection struct (named needle), this function should
  * detect if there already is one that has all the significant details
@@ -1006,7 +1011,6 @@ ConnectionExists(struct Curl_easy *data,
   bool foundPendingCandidate = FALSE;
   bool canmultiplex = IsMultiplexingPossible(data, needle);
   struct connectbundle *bundle;
-  struct curltime now = Curl_now();
   const char *hostbundle;
 
 #ifdef USE_NTLM
@@ -1073,12 +1077,6 @@ ConnectionExists(struct Curl_easy *data,
       if(check->bits.connect_only)
         /* connect-only connections will not be reused */
         continue;
-
-      if(conn_maxage(data, check, now) || extract_if_dead(check, data)) {
-        /* disconnect it */
-        (void)Curl_disconnect(data, check, /* dead_connection */TRUE);
-        continue;
-      }
 
       multiplexed = CONN_INUSE(check) &&
         (bundle->multiuse == BUNDLE_MULTIPLEX);
