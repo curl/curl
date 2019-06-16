@@ -86,6 +86,7 @@ where <options> is one or many of:
   WITH_CARES=<dll or static>     - Enable c-ares support, DLL or static
   WITH_ZLIB=<dll or static>      - Enable zlib support, DLL or static
   WITH_SSH2=<dll or static>      - Enable libSSH2 support, DLL or static
+  WITH_PREFIX=<dir>              - Where to install the build
   ENABLE_SSPI=<yes or no>        - Enable SSPI support, defaults to yes
   ENABLE_IPV6=<yes or no>        - Enable IPv6, defaults to yes
   ENABLE_IDN=<yes or no>         - Enable use of Windows IDN APIs, defaults to yes
