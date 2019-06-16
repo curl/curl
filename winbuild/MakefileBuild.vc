@@ -487,7 +487,12 @@ CFLAGS = $(CFLAGS) /DCURL_WITH_MULTI_SSL
 
 LIB_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
 CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
+
+!IFDEF WITH_PREFIX
+DIRDIST = $(WITH_PREFIX)
+!ELSE
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
+!ENDIF
 
 #
 # curl.exe
