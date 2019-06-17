@@ -37,6 +37,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#define NETRC DOT_CHAR "netrc"
+
 /* Get user and password from .netrc when given a machine name */
 
 enum host_lookup_state {
@@ -72,8 +74,6 @@ int Curl_parsenetrc(const char *host,
   char state_password = 0;   /* Found a password keyword */
   int state_our_login = FALSE;  /* With specific_login, found *our* login
                                    name */
-
-#define NETRC DOT_CHAR "netrc"
 
   if(!netrcfile) {
     bool home_alloc = FALSE;
