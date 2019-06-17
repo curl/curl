@@ -75,6 +75,7 @@ int Curl_parsenetrc(const char *host,
                                    name */
 
   if(!netrcfile) {
+    const char *filename = NETRC;     /* sensible default */
     char *home = curl_getenv("HOME"); /* portable environment reader */
     if(home) {
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
@@ -102,7 +103,7 @@ int Curl_parsenetrc(const char *host,
     if(!home)
       return retcode; /* no home directory found (or possibly out of memory) */
 
-    netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, NETRC);
+    netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, filename);
     free(home);
     if(!netrcfile) {
       return -1;
