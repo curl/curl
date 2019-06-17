@@ -1022,14 +1022,8 @@ static int Curl_ossl_init(void)
   ENGINE_load_builtin_engines();
 #endif
 
-  /* OPENSSL_config(NULL); is "strongly recommended" to use but unfortunately
-     that function makes an exit() call on wrongly formatted config files
-     which makes it hard to use in some situations. OPENSSL_config() itself
-     calls CONF_modules_load_file() and we use that instead and we ignore
-     its return code! */
-
-  /* CONF_MFLAGS_DEFAULT_SECTION introduced some time between 0.9.8b and
-     0.9.8e */
+/* CONF_MFLAGS_DEFAULT_SECTION was introduced some time between 0.9.8b and
+   0.9.8e */
 #ifndef CONF_MFLAGS_DEFAULT_SECTION
 #define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
