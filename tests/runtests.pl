@@ -3125,6 +3125,9 @@ sub singletest {
     my $cmd;
     my $disablevalgrind;
 
+    # fist, remove all lingering log files
+    cleardir($LOGDIR);
+
     # copy test number to a global scope var, this allows
     # testnum checking when starting test harness servers.
     $testnumcheck = $testnum;
@@ -4083,9 +4086,6 @@ sub singletest {
 
     # Skip all the verification on torture tests
     if ($torture) {
-        if(!$cmdres && !$keepoutfiles) {
-            cleardir($LOGDIR);
-        }
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
         return $cmdres;
@@ -4516,10 +4516,6 @@ sub singletest {
         logmsg "PASS: $testnum - $testname\n";
     }
 
-    # the test succeeded, remove all log files
-    if(!$keepoutfiles) {
-        cleardir($LOGDIR);
-    }
 
     return 0;
 }
