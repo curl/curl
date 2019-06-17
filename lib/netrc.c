@@ -89,7 +89,7 @@ int Curl_parsenetrc(const char *host,
          && pw_res) {
         home = strdup(pw.pw_dir);
         if(!home)
-          return CURLE_OUT_OF_MEMORY;
+          return -1;
         home_alloc = TRUE;
       }
 #elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
