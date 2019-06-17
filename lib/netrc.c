@@ -67,7 +67,6 @@ int Curl_parsenetrc(const char *host,
   bool specific_login = (login && *login != 0);
   bool login_alloc = FALSE;
   bool password_alloc = FALSE;
-  bool netrc_alloc = FALSE;
   enum host_lookup_state state = NOTHING;
 
   char state_login = 0;      /* Found a login keyword */
@@ -76,10 +75,8 @@ int Curl_parsenetrc(const char *host,
                                    name */
 
   if(!netrcfile) {
-    bool home_alloc = FALSE;
     char *home = curl_getenv("HOME"); /* portable environment reader */
     if(home) {
-      home_alloc = TRUE;
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
     }
     else {
@@ -90,7 +87,6 @@ int Curl_parsenetrc(const char *host,
         home = strdup(pw.pw_dir);
         if(!home)
           return -1;
-        home_alloc = TRUE;
       }
 #elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
     }
@@ -107,17 +103,14 @@ int Curl_parsenetrc(const char *host,
       return retcode; /* no home directory found (or possibly out of memory) */
 
     netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, NETRC);
-    if(home_alloc)
-      free(home);
+    free(home);
     if(!netrcfile) {
       return -1;
     }
-    netrc_alloc = TRUE;
   }
 
   file = fopen(netrcfile, FOPEN_READTEXT);
-  if(netrc_alloc)
-    free(netrcfile);
+  free(netrcfile);
   if(file) {
     char *tok;
     char *tok_buf;
