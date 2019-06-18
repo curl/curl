@@ -30,13 +30,15 @@
  */
 
 #define SETOPT_CHECK(v,opt) do {                \
-    result = tool_real_error((v), opt);         \
-    if(result)                                  \
-      goto show_error;                          \
+    if(!tool_setopt_skip(opt)) {                \
+      result = (v);                             \
+      if(result)                                \
+        goto show_error;                        \
+    }                                           \
   } WHILE_FALSE
 
 /* allow removed features to simulate success: */
-CURLcode tool_real_error(CURLcode result, CURLoption tag);
+bool tool_setopt_skip(CURLoption tag);
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
