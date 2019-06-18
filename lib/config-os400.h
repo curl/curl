@@ -127,11 +127,17 @@
 /* Define if you have the `getpass_r' function. */
 #undef HAVE_GETPASS_R
 
+/* Define to 1 if you have the getpeername function. */
+#define HAVE_GETPEERNAME 1
+
 /* Define if you have the `getpwuid' function. */
 #define HAVE_GETPWUID
 
 /* Define if you have the `getservbyname' function. */
 #define HAVE_GETSERVBYNAME
+
+/* Define to 1 if you have the getsockname function. */
+#define HAVE_GETSOCKNAME 1
 
 /* Define if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY
