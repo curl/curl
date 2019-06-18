@@ -825,9 +825,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
-#ifndef CURL_DISABLE_RTSP
         my_setopt(curl, CURLOPT_INTERLEAVEDATA, &outs);
-#endif
+
         if(metalink || !config->use_metalink)
           /* what call to write */
           my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
@@ -875,7 +874,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->oauth_bearer)
           my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
-#if !defined(CURL_DISABLE_PROXY)
         {
           my_setopt_str(curl, CURLOPT_PROXY, config->proxy);
           /* new in libcurl 7.5 */
@@ -914,7 +912,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS,
                     config->suppress_connect_headers?1L:0L);
         }
-#endif /* !CURL_DISABLE_PROXY */
 
         my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
         my_setopt(curl, CURLOPT_REQUEST_TARGET, config->request_target);
@@ -1017,9 +1014,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         } /* (built_in_protos & CURLPROTO_HTTP) */
 
-#ifndef CURL_DISABLE_FTP
         my_setopt_str(curl, CURLOPT_FTPPORT, config->ftpport);
-#endif
         my_setopt(curl, CURLOPT_LOW_SPEED_LIMIT,
                   config->low_speed_limit);
         my_setopt(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
@@ -1034,9 +1029,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_RESUME_FROM_LARGE, CURL_OFF_T_C(0));
 
         my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
-#ifndef CURL_DISABLE_PROXY
         my_setopt_str(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
-#endif
+
         if(built_in_protos & (CURLPROTO_SCP|CURLPROTO_SFTP)) {
 
           /* SSH and SSL private key uses same command-line option */
@@ -1213,7 +1207,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
         my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
         if(config->cookie)
           my_setopt_str(curl, CURLOPT_COOKIE, config->cookie);
 
@@ -1226,13 +1219,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* new in libcurl 7.9.7 */
         my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession?1L:0L);
-#else
-        if(config->cookie || config->cookiefile || config->cookiejar) {
-          warnf(config->global, "cookie option(s) used even though cookie "
-                "support is disabled!\n");
-          return CURLE_NOT_BUILT_IN;
-        }
-#endif
 
         my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
@@ -1242,9 +1228,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* three new ones in libcurl 7.3: */
         my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
-#ifndef CURL_DISABLE_FTP
         my_setopt_str(curl, CURLOPT_KRBLEVEL, config->krblevel);
-#endif
+
         progressbarinit(&progressbar, config);
         if((global->progressmode == CURL_PROGRESS_BAR) &&
            !global->noprogress && !global->mute) {
@@ -1266,10 +1251,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->dns_ipv6_addr)
         my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
 
-#ifndef CURL_DISABLE_TELNET
         /* new in libcurl 7.6.2: */
         my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
-#endif
+
         /* new in libcurl 7.7: */
         my_setopt_str(curl, CURLOPT_RANDOM_FILE, config->random_file);
         my_setopt_str(curl, CURLOPT_EGDSOCKET, config->egd_file);
@@ -1372,30 +1356,26 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_SERVICE_NAME,
                         config->service_name);
 
-#ifndef CURL_DISABLE_FTP
         /* curl 7.13.0 */
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
-#endif
         my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl?1L:0L);
 
-#ifndef CURL_DISABLE_FTP
         /* curl 7.14.2 */
         my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip?1L:0L);
 
         /* curl 7.15.1 */
         my_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long)config->ftp_filemethod);
-#endif
+
         /* curl 7.15.2 */
         if(config->localport) {
           my_setopt(curl, CURLOPT_LOCALPORT, config->localport);
           my_setopt_str(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
         }
 
-#ifndef CURL_DISABLE_FTP
         /* curl 7.15.5 */
         my_setopt_str(curl, CURLOPT_FTP_ALTERNATIVE_TO_USER,
                       config->ftp_alternative_to_user);
-#endif
+
         /* curl 7.16.0 */
         if(config->disable_sessionid)
           /* disable it */

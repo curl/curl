@@ -720,9 +720,14 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 
-CURLcode tool_real_error(CURLcode result, CURLoption tag)
+/*
+ * tool_setopt_skip() allows the curl tool code to avoid setopt options that
+ * are explicitly disabled in the build.
+ */
+bool tool_setopt_skip(CURLoption tag)
 {
 #ifdef CURL_DISABLE_PROXY
+#define USED_TAG
   switch(tag) {
   case CURLOPT_HAPROXYPROTOCOL:
   case CURLOPT_HTTPPROXYTUNNEL:
@@ -756,13 +761,71 @@ CURLcode tool_real_error(CURLcode result, CURLoption tag)
   case CURLOPT_PROXYTYPE:
   case CURLOPT_PROXYUSERNAME:
   case CURLOPT_PROXYUSERPWD:
-    return CURLE_OK; /* pretend it worked */
+    return TRUE;
   default:
     break;
   }
-#else
+#endif
+#ifdef CURL_DISABLE_FTP
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_FTPPORT:
+  case CURLOPT_FTP_ACCOUNT:
+  case CURLOPT_FTP_ALTERNATIVE_TO_USER:
+  case CURLOPT_FTP_FILEMETHOD:
+  case CURLOPT_FTP_SKIP_PASV_IP:
+  case CURLOPT_FTP_USE_EPRT:
+  case CURLOPT_FTP_USE_EPSV:
+  case CURLOPT_FTP_USE_PRET:
+  case CURLOPT_KRBLEVEL:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#ifdef CURL_DISABLE_RTSP
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_INTERLEAVEDATA:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_COOKIE:
+  case CURLOPT_COOKIEFILE:
+  case CURLOPT_COOKIEJAR:
+  case CURLOPT_COOKIESESSION:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#if defined(CURL_DISABLE_TELNET)
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_TELNETOPTIONS:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#ifdef CURL_DISABLE_TFTP
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_TFTP_BLKSIZE:
+  case CURLOPT_TFTP_NO_OPTIONS:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+
+#ifndef USED_TAG
   (void)tag;
 #endif
-  return result;
+  return FALSE;
 }
-
