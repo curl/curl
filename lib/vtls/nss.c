@@ -223,9 +223,12 @@ static const cipher_s cipherlist[] = {
 #endif
 };
 
-#ifdef WIN32
+#if defined(WIN32)
 static const char *pem_library = "nsspem.dll";
 static const char *trust_library = "nssckbi.dll";
+#elif defined(__APPLE__)
+static const char *pem_library = "libnsspem.dylib";
+static const char *trust_library = "libnssckbi.dylib";
 #else
 static const char *pem_library = "libnsspem.so";
 static const char *trust_library = "libnssckbi.so";
