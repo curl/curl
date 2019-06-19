@@ -927,7 +927,6 @@ typedef enum {
    but 32 */
 #define CURLOPTTYPE_LONG          0
 #define CURLOPTTYPE_OBJECTPOINT   10000
-#define CURLOPTTYPE_STRINGPOINT   10000
 #define CURLOPTTYPE_FUNCTIONPOINT 20000
 #define CURLOPTTYPE_OFF_T         30000
 
@@ -947,11 +946,14 @@ typedef enum {
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
 #define LONG          CURLOPTTYPE_LONG
 #define OBJECTPOINT   CURLOPTTYPE_OBJECTPOINT
-#define STRINGPOINT   CURLOPTTYPE_OBJECTPOINT
 #define FUNCTIONPOINT CURLOPTTYPE_FUNCTIONPOINT
 #define OFF_T         CURLOPTTYPE_OFF_T
 #define CINIT(name,type,number) CURLOPT_/**/name = type + number
 #endif
+
+/* handy aliases that make no run-time difference */
+#define CURLOPTTYPE_STRINGPOINT  CURLOPTTYPE_OBJECTPOINT
+#define CURLOPTTYPE_SLISTPOINT  CURLOPTTYPE_OBJECTPOINT
 
 /*
  * This macro-mania below setups the CURLOPT_[what] enum, to be used with
@@ -1050,7 +1052,7 @@ typedef enum {
 
   /* This points to a linked list of headers, struct curl_slist kind. This
      list is also used for RTSP (in spite of its name) */
-  CINIT(HTTPHEADER, OBJECTPOINT, 23),
+  CINIT(HTTPHEADER, SLISTPOINT, 23),
 
   /* This points to a linked list of post entries, struct curl_httppost */
   CINIT(HTTPPOST, OBJECTPOINT, 24),
@@ -1065,7 +1067,7 @@ typedef enum {
   CINIT(CRLF, LONG, 27),
 
   /* send linked-list of QUOTE commands */
-  CINIT(QUOTE, OBJECTPOINT, 28),
+  CINIT(QUOTE, SLISTPOINT, 28),
 
   /* send FILE * or void * to store headers to, if you use a callback it
      is simply passed to the callback unmodified */
@@ -1100,7 +1102,7 @@ typedef enum {
   /* 38 is not used */
 
   /* send linked-list of post-transfer QUOTE commands */
-  CINIT(POSTQUOTE, OBJECTPOINT, 39),
+  CINIT(POSTQUOTE, SLISTPOINT, 39),
 
   CINIT(OBSOLETE40, OBJECTPOINT, 40), /* OBSOLETE, do not use! */
 
@@ -1176,7 +1178,7 @@ typedef enum {
   CINIT(FILETIME, LONG, 69),
 
   /* This points to a linked list of telnet options */
-  CINIT(TELNETOPTIONS, OBJECTPOINT, 70),
+  CINIT(TELNETOPTIONS, SLISTPOINT, 70),
 
   /* Max amount of cached alive connections */
   CINIT(MAXCONNECTS, LONG, 71),
@@ -1260,7 +1262,7 @@ typedef enum {
   CINIT(DNS_CACHE_TIMEOUT, LONG, 92),
 
   /* send linked-list of pre-transfer QUOTE commands */
-  CINIT(PREQUOTE, OBJECTPOINT, 93),
+  CINIT(PREQUOTE, SLISTPOINT, 93),
 
   /* set the debug function */
   CINIT(DEBUGFUNCTION, FUNCTIONPOINT, 94),
@@ -1300,7 +1302,7 @@ typedef enum {
   CINIT(PRIVATE, OBJECTPOINT, 103),
 
   /* Set aliases for HTTP 200 in the HTTP Response header */
-  CINIT(HTTP200ALIASES, OBJECTPOINT, 104),
+  CINIT(HTTP200ALIASES, SLISTPOINT, 104),
 
   /* Continue to send authentication (user+password) when following locations,
      even when hostname changed. This can potentially send off the name
@@ -1590,7 +1592,7 @@ typedef enum {
   CINIT(MAIL_FROM, STRINGPOINT, 186),
 
   /* set the list of SMTP mail receiver(s) */
-  CINIT(MAIL_RCPT, OBJECTPOINT, 187),
+  CINIT(MAIL_RCPT, SLISTPOINT, 187),
 
   /* FTP: send PRET before PASV */
   CINIT(FTP_USE_PRET, LONG, 188),
@@ -1640,7 +1642,7 @@ typedef enum {
   CINIT(FNMATCH_DATA, OBJECTPOINT, 202),
 
   /* send linked-list of name:port:address sets */
-  CINIT(RESOLVE, OBJECTPOINT, 203),
+  CINIT(RESOLVE, SLISTPOINT, 203),
 
   /* Set a username for authenticated TLS */
   CINIT(TLSAUTH_USERNAME, STRINGPOINT, 204),
@@ -1730,7 +1732,7 @@ typedef enum {
 
   /* This points to a linked list of headers used for proxy requests only,
      struct curl_slist kind */
-  CINIT(PROXYHEADER, OBJECTPOINT, 228),
+  CINIT(PROXYHEADER, SLISTPOINT, 228),
 
   /* Pass in a bitmask of "header options" */
   CINIT(HEADEROPT, LONG, 229),
@@ -1777,7 +1779,7 @@ typedef enum {
 
   /* Linked-list of host:port:connect-to-host:connect-to-port,
      overrides the URL's host:port (only for the network layer) */
-  CINIT(CONNECT_TO, OBJECTPOINT, 243),
+  CINIT(CONNECT_TO, SLISTPOINT, 243),
 
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
