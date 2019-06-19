@@ -2203,7 +2203,8 @@ sub rundictserver {
     $flags .= "--verbose 1 " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--port $port --srcdir \"$srcdir\"";
+    $flags .= "--port $port --srcdir \"$srcdir\" ";
+    $flags .= "--host $HOSTIP";
 
     my $cmd = "$srcdir/dictserver.py $flags";
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -2279,7 +2280,8 @@ sub runsmbserver {
     $flags .= "--verbose 1 " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--port $port --srcdir \"$srcdir\"";
+    $flags .= "--port $port --srcdir \"$srcdir\" ";
+    $flags .= "--host $HOSTIP";
 
     my $cmd = "$srcdir/smbserver.py $flags";
     my ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
