@@ -33,7 +33,7 @@ def dictserver(options):
         with open(options.pidfile, "w") as f:
             f.write("{0}".format(pid))
 
-    local_bind = (HOST, options.port)
+    local_bind = (options.host, options.port)
     log.info("[DICT] Listening on %s", local_bind)
 
     # Need to set the allow_reuse on the class, not on the instance.
@@ -83,6 +83,8 @@ def get_options():
 
     parser.add_argument("--port", action="store", default=9016,
                         type=int, help="port to listen on")
+    parser.add_argument("--host", action="store", default=HOST,
+                        help="host to listen on")
     parser.add_argument("--verbose", action="store", type=int, default=0,
                         help="verbose output")
     parser.add_argument("--pidfile", action="store",
