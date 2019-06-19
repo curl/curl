@@ -382,6 +382,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_QUOTE ||                                               \
    (option) == CURLOPT_RESOLVE ||                                             \
    (option) == CURLOPT_TELNETOPTIONS ||                                       \
+   (option) == CURLOPT_CONNECT_TO ||                                          \
    0)
 
 /* groups of curl_easy_getinfo infos that take the same type of argument */
