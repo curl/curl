@@ -578,17 +578,19 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
   /* acquire lock before call of CERT_CacheCRL() and accessing nss_crl_list */
   PR_Lock(nss_crllock);
 
-  /* store the CRL item so that we can free it in Curl_nss_cleanup() */
-  if(insert_wrapped_ptr(&nss_crl_list, crl_der) != CURLE_OK) {
-    SECITEM_FreeItem(crl_der, PR_TRUE);
-    PR_Unlock(nss_crllock);
-    return CURLE_OUT_OF_MEMORY;
-  }
-
   if(SECSuccess != CERT_CacheCRL(db, crl_der)) {
     /* unable to cache CRL */
+    SECITEM_FreeItem(crl_der, PR_TRUE);
     PR_Unlock(nss_crllock);
     return CURLE_SSL_CRL_BADFILE;
+  }
+
+  /* store the CRL item so that we can free it in Curl_nss_cleanup() */
+  if(insert_wrapped_ptr(&nss_crl_list, crl_der) != CURLE_OK) {
+    if(SECSuccess == CERT_UncacheCRL(db, crl_der))
+      SECITEM_FreeItem(crl_der, PR_TRUE);
+    PR_Unlock(nss_crllock);
+    return CURLE_OUT_OF_MEMORY;
   }
 
   /* we need to clear session cache, so that the CRL could take effect */
