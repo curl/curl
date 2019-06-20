@@ -1758,11 +1758,10 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
     return retlen;
   }
-  /* If stream is closed, return 0 to signal the http routine to close
+  /* If this stream is closed, return 0 to signal the http routine to close
      the connection */
-  if(stream->closed) {
-    return http2_handle_stream_close(conn, data, stream, err);
-  }
+  if(stream->closed)
+    return 0;
   *err = CURLE_AGAIN;
   H2BUGF(infof(data, "http2_recv returns AGAIN for stream %u\n",
                stream->stream_id));
