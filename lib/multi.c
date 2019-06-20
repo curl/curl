@@ -363,6 +363,8 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   Curl_llist_init(&multi->msglist, NULL);
   Curl_llist_init(&multi->pending, NULL);
 
+  multi->multiplexing = CURLPIPE_MULTIPLEX;
+
   /* -1 means it not set by user, use the default value */
   multi->maxconnects = -1;
   return multi;
