@@ -300,12 +300,14 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_PROXY_SSLKEY ||                                        \
    (option) == CURLOPT_PROXY_SSLKEYTYPE ||                                    \
    (option) == CURLOPT_PROXY_SSL_CIPHER_LIST ||                               \
+   (option) == CURLOPT_PROXY_TLS13_CIPHERS ||                                 \
    (option) == CURLOPT_PROXY_TLSAUTH_PASSWORD ||                              \
-   (option) == CURLOPT_PROXY_TLSAUTH_USERNAME ||                              \
    (option) == CURLOPT_PROXY_TLSAUTH_TYPE ||                                  \
+   (option) == CURLOPT_PROXY_TLSAUTH_USERNAME ||                              \
    (option) == CURLOPT_RANDOM_FILE ||                                         \
    (option) == CURLOPT_RANGE ||                                               \
    (option) == CURLOPT_REFERER ||                                             \
+   (option) == CURLOPT_REQUEST_TARGET ||                                      \
    (option) == CURLOPT_RTSP_SESSION_ID ||                                     \
    (option) == CURLOPT_RTSP_STREAM_URI ||                                     \
    (option) == CURLOPT_RTSP_TRANSPORT ||                                      \
@@ -321,6 +323,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SSLKEY ||                                              \
    (option) == CURLOPT_SSLKEYTYPE ||                                          \
    (option) == CURLOPT_SSL_CIPHER_LIST ||                                     \
+   (option) == CURLOPT_TLS13_CIPHERS ||                                       \
    (option) == CURLOPT_TLSAUTH_PASSWORD ||                                    \
    (option) == CURLOPT_TLSAUTH_TYPE ||                                        \
    (option) == CURLOPT_TLSAUTH_USERNAME ||                                    \
@@ -362,7 +365,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SSL_CTX_DATA ||                                        \
    (option) == CURLOPT_WRITEDATA ||                                           \
    (option) == CURLOPT_RESOLVER_START_DATA ||                                 \
-   (option) == CURLOPT_CURLU ||                                               \
+   (option) == CURLOPT_TRAILERDATA ||                                         \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
