@@ -51,7 +51,7 @@ typedef enum {
 /* We use our own typedef here since some headers might lack this */
 typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 
-/* This is used instread of if_nametoindex if available on Windows */
+/* This is used instead of if_nametoindex if available on Windows */
 IF_NAMETOINDEX_FN Curl_if_nametoindex;
 
 /* This is used to verify if we are running on a specific windows version */
