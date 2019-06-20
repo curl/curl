@@ -160,7 +160,7 @@ option(CURL_DISABLE_SMTP "to disable SMTP" OFF)
 mark_as_advanced(CURL_DISABLE_SMTP)
 option(CURL_DISABLE_GOPHER "to disable Gopher" OFF)
 mark_as_advanced(CURL_DISABLE_GOPHER)
-option(CURL_DISABLE_MQTT "to disable MQTT" OFF)
+option(CURL_DISABLE_MQTT "to disable MQTT" ON)
 mark_as_advanced(CURL_DISABLE_MQTT)
 
 if(HTTP_ONLY)
