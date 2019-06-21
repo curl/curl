@@ -2630,7 +2630,7 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       long streams = va_arg(param, long);
       multi->max_concurrent_streams =
           (streams > (long)INITIAL_MAX_CONCURRENT_STREAMS)?
-          INITIAL_MAX_CONCURRENT_STREAMS : streams;
+          (long)INITIAL_MAX_CONCURRENT_STREAMS : streams;
     }
     break;
   default:
