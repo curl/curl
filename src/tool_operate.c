@@ -1066,19 +1066,21 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
         /* For the time being if --proxy-capath is not set then we use the
            --capath value for it, if any. See #1257 */
-        if(config->proxy_capath || config->capath) {
-          result = res_setopt_str(curl, CURLOPT_PROXY_CAPATH,
-                                  (config->proxy_capath ?
-                                   config->proxy_capath :
-                                   config->capath));
-          if(result == CURLE_NOT_BUILT_IN) {
-            if(config->proxy_capath) {
-              warnf(config->global,
-                    "ignoring --proxy-capath, not supported by libcurl\n");
+        if(!tool_setopt_skip(CURLOPT_PROXY_CAPATH)) {
+          if((config->proxy_capath || config->capath)) {
+            result = res_setopt_str(curl, CURLOPT_PROXY_CAPATH,
+                                    (config->proxy_capath ?
+                                     config->proxy_capath :
+                                     config->capath));
+            if(result == CURLE_NOT_BUILT_IN) {
+              if(config->proxy_capath) {
+                warnf(config->global,
+                      "ignoring --proxy-capath, not supported by libcurl\n");
+              }
             }
+            else if(result)
+              goto show_error;
           }
-          else if(result)
-            goto show_error;
         }
 
         if(config->crlfile)
