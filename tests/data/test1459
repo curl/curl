@@ -1,0 +1,26 @@
+<testcase>
+<info>
+<keywords>
+unittest
+typecheck
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+ <name>
+typecheck unit tests
+ </name>
+<tool>
+unit1459
+</tool>
+</client>
+
+</testcase>
