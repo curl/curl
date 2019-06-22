@@ -76,6 +76,7 @@
 #include "setopt.h"
 #include "http_digest.h"
 #include "system_win32.h"
+#include "lazylock.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -138,22 +139,24 @@ curl_calloc_callback Curl_ccalloc;
  * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
  */
-static CURLcode global_init(long flags, bool memoryfuncs)
+static CURLcode global_init_nolock(long flags,
+                                   curl_malloc_callback m,
+                                   curl_free_callback f,
+                                   curl_realloc_callback r,
+                                   curl_strdup_callback s,
+                                   curl_calloc_callback c)
 {
   if(initialized++)
     return CURLE_OK;
 
-  if(memoryfuncs) {
-    /* Setup the default memory functions here (again) */
-    Curl_cmalloc = (curl_malloc_callback)malloc;
-    Curl_cfree = (curl_free_callback)free;
-    Curl_crealloc = (curl_realloc_callback)realloc;
-    Curl_cstrdup = (curl_strdup_callback)system_strdup;
-    Curl_ccalloc = (curl_calloc_callback)calloc;
+  Curl_cmalloc = (curl_malloc_callback)m;
+  Curl_cfree = (curl_free_callback)f;
+  Curl_crealloc = (curl_realloc_callback)r;
+  Curl_cstrdup = (curl_strdup_callback)s;
+  Curl_ccalloc = (curl_calloc_callback)c;
 #if defined(WIN32) && defined(UNICODE)
-    Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
+  Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
-  }
 
   if(!Curl_ssl_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
@@ -211,14 +214,24 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   return CURLE_OK;
 }
 
-
 /**
  * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
  */
 CURLcode curl_global_init(long flags)
 {
-  return global_init(flags, TRUE);
+  CURLcode rc;
+
+  LOCK_GLOBAL_INIT();
+  rc = global_init_nolock(flags,
+                          (curl_malloc_callback)malloc,
+                          (curl_free_callback)free,
+                          (curl_realloc_callback)realloc,
+                          (curl_strdup_callback)system_strdup,
+                          (curl_calloc_callback)calloc);
+  UNLOCK_GLOBAL_INIT();
+
+  return rc;
 }
 
 /*
@@ -229,35 +242,24 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
                               curl_free_callback f, curl_realloc_callback r,
                               curl_strdup_callback s, curl_calloc_callback c)
 {
+  CURLcode rc;
+
   /* Invalid input, return immediately */
   if(!m || !f || !r || !s || !c)
     return CURLE_FAILED_INIT;
 
-  if(initialized) {
-    /* Already initialized, don't do it again, but bump the variable anyway to
-       work like curl_global_init() and require the same amount of cleanup
-       calls. */
-    initialized++;
-    return CURLE_OK;
-  }
+  LOCK_GLOBAL_INIT();
+  rc = global_init_nolock(flags, m, f, r, s, c);
+  UNLOCK_GLOBAL_INIT();
 
-  /* set memory functions before global_init() in case it wants memory
-     functions */
-  Curl_cmalloc = m;
-  Curl_cfree = f;
-  Curl_cstrdup = s;
-  Curl_crealloc = r;
-  Curl_ccalloc = c;
-
-  /* Call the actual init function, but without setting */
-  return global_init(flags, FALSE);
+  return rc;
 }
 
 /**
  * curl_global_cleanup() globally cleanups curl, uses the value of
  * "init_flags" to determine what needs to be cleaned up and what doesn't.
  */
-void curl_global_cleanup(void)
+static void global_cleanup_nolock(void)
 {
   if(!initialized)
     return;
@@ -283,6 +285,17 @@ void curl_global_cleanup(void)
 #endif
 
   init_flags  = 0;
+}
+
+/**
+ * curl_global_cleanup() globally cleanups curl, uses the value of
+ * "init_flags" to determine what needs to be cleaned up and what doesn't.
+ */
+void curl_global_cleanup(void)
+{
+  LOCK_GLOBAL_INIT();
+  global_cleanup_nolock();
+  UNLOCK_GLOBAL_INIT();
 }
 
 /*

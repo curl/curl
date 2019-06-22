@@ -63,6 +63,7 @@
 #include "warnless.h"
 #include "curl_base64.h"
 #include "curl_printf.h"
+#include "lazylock.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -1301,8 +1302,9 @@ static int multissl_init(const struct Curl_ssl *backend)
   return 0;
 }
 
-CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
-                              const curl_ssl_backend ***avail)
+static CURLsslset global_sslset_nolock(curl_sslbackend id,
+                                       const char *name,
+                                       const curl_ssl_backend ***avail)
 {
   int i;
 
@@ -1328,6 +1330,19 @@ CURLsslset curl_global_sslset(curl_sslbackend id, const char *name,
   }
 
   return CURLSSLSET_UNKNOWN_BACKEND;
+}
+
+CURLsslset curl_global_sslset(curl_sslbackend id,
+                              const char *name,
+                              const curl_ssl_backend ***avail)
+{
+  CURLsslset rc;
+
+  LOCK_GLOBAL_INIT();
+  rc = global_sslset_nolock(id, name, avail);
+  UNLOCK_GLOBAL_INIT();
+
+  return rc;
 }
 
 #else /* USE_SSL */
