@@ -38,6 +38,12 @@
  * To add an option that uses the same type as an existing option, you'll just
  * need to extend the appropriate _curl_*_option macro
  */
+
+/* the typechecker doesn't work in C++ (yet) */
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && \
+    ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)) && \
+    !defined(__cplusplus) && !defined(CURL_DISABLE_TYPECHECK)
+
 #define curl_easy_setopt(handle, option, value)                               \
 __extension__ ({                                                              \
   __typeof__(option) _curl_opt = option;                                     \
@@ -234,6 +240,17 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_socket,
   "curl_easy_getinfo expects a pointer to curl_socket_t for this info")
 _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
   "curl_easy_getinfo expects a pointer to curl_off_t for this info")
+#else
+#if defined(__STDC__) && (__STDC__ >= 1)
+/* This preprocessor magic that replaces a call with the exact same call is
+   only done to make sure application authors pass exactly three arguments
+   to these functions. */
+#define curl_easy_setopt(handle,opt,param) curl_easy_setopt(handle,opt,param)
+#define curl_easy_getinfo(handle,info,arg) curl_easy_getinfo(handle,info,arg)
+#define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
+#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
+#endif /* __STDC__ >= 1 */
+#endif /* gcc >= 4.3 && !__cplusplus */
 
 /* groups of curl_easy_setops options that take the same type of argument */
 
