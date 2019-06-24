@@ -1066,7 +1066,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
         /* For the time being if --proxy-capath is not set then we use the
            --capath value for it, if any. See #1257 */
-        if(config->proxy_capath || config->capath) {
+        if((config->proxy_capath || config->capath) &&
+           !tool_setopt_skip(CURLOPT_PROXY_CAPATH)) {
           result = res_setopt_str(curl, CURLOPT_PROXY_CAPATH,
                                   (config->proxy_capath ?
                                    config->proxy_capath :
