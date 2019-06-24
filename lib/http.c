@@ -3147,6 +3147,9 @@ static CURLcode header_append(struct Curl_easy *data,
                               struct SingleRequest *k,
                               size_t length)
 {
+  /* length is at most the size of a full read buffer, for which the upper
+     bound is CURL_MAX_READ_SIZE. There is thus no chance of overflow in this
+     calculation. */
   size_t newsize = k->hbuflen + length;
   if(newsize > CURL_MAX_HTTP_HEADER) {
     /* The reason to have a max limit for this is to avoid the risk of a bad
