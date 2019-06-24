@@ -67,7 +67,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 # (5*12) == 60 bytes less
 <protocol>
 POST /653 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 150
 Content-Type: multipart/form-data; boundary=----------------------------
@@ -78,7 +78,7 @@ Content-Disposition: form-data; name="name"
 short value
 --------------------------------
 POST /653 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 167
 Content-Type: multipart/form-data; boundary=----------------------------
