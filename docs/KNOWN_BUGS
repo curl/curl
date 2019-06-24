@@ -64,6 +64,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.4 Negotiate and Kerberos V5 need a fake user name
  6.5 NTLM doesn't support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
+ 6.7 Don't clear digest for single realm
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -515,6 +516,10 @@ problems may have been fixed or changed somewhat since this was written!
  using NTLM.
 
  https://github.com/curl/curl/issues/876
+
+6.7 Don't clear digest for single realm
+
+ https://github.com/curl/curl/issues/3267
 
 7. FTP
 
