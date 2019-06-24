@@ -1880,7 +1880,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
        are going to send or sending request body in DATA frame */
     stream->upload_mem = mem;
     stream->upload_len = len;
-    nghttp2_session_resume_data(h2, stream->stream_id);
+    rv = nghttp2_session_resume_data(h2, stream->stream_id);
+    if(nghttp2_is_fatal(rv)) {
+      *err = CURLE_SEND_ERROR;
+      return -1;
+    }
     rv = h2_session_send(conn->data, h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
