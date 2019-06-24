@@ -2653,7 +2653,12 @@ sub checksystem {
     @version = <VERSOUT>;
     close(VERSOUT);
 
-    open(DISABLED, "server/disabled|");
+    my $curldisabledout="$LOGDIR/curldisabledout.log";
+    my $disabledcmd="server/disabled 1>$curldisabledout";
+    unlink($curldisabledout);
+    runclient($disabledcmd);
+
+    open(DISABLED, "<$curldisabledout");
     @disabled = <DISABLED>;
     close(DISABLED);
 
@@ -2932,14 +2937,17 @@ sub checksystem {
             "TrackMemory feature (--enable-curldebug)";
     }
 
-    open(M, "$CURL -M 2>&1|");
-    while(my $s = <M>) {
-        if($s =~ /built-in manual was disabled at build-time/) {
-            $has_manual = 0;
-            last;
-        }
-        $has_manual = 1;
-        last;
+    my $curlmanualout="$LOGDIR/curlmanualout.log";
+    my $manualcmd="$CURL -M 1>$curlmanualout 2>&1";
+    unlink($curlmanualout);
+    runclient($manualcmd);
+    open(M, "<$curlmanualout");
+    my $s = <M>;
+    if($s =~ /built-in manual was disabled at build-time/) {
+        $has_manual = 0;
+    }
+    else {
+         $has_manual = 1;
     }
     close(M);
 
