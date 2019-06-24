@@ -12,25 +12,47 @@ This release includes the following bugfixes:
  o CURLOPT_CAINFO.3: polished wording [9]
  o bindlocal: detect and avoid IP version mismatches in bind() [1]
  o build: fix Codacy warnings [6]
+ o config-os400: add getpeername and getsockname defines [27]
+ o configure: --disable-progress-meter [29]
  o configure: more --disable switches to toggle off individual features [7]
  o configure: remove CURL_DISABLE_TLS_SRP [19]
+ o conn_maxage: move the check to prune_dead_connections() [24]
  o examples/fopen: fix comparison [6]
  o examples/htmltitle: use C++ casts between pointer types [6]
+ o http2: don't call stream-close on already closed streams [32]
  o http2: remove CURL_DISABLE_TYPECHECK define
  o krb5: fix compiler warning [15]
  o libcurl-tutorial.3: Fix small typo (mutipart -> multipart) [3]
+ o multi: enable multiplexing by default (again) [34]
  o multi: fix the transfer hashes in the socket hash entries [17]
  o multi: make sure 'data' can present in several sockhash entries [2]
+ o netrc: Return the correct error code when out of memory [28]
+ o openssl: fix pubkey/signature algorithm detection in certinfo [25]
+ o openssl: remove outdated comment [20]
  o os400: make vsetopt() non-static as Curl_vsetopt() for os400 support [12]
  o quote.d: asterisk prefix works for SFTP as well [16]
+ o runtests: keep logfiles around by default [26]
  o runtests: report single test time + total duration [13]
  o sws: remove unused variables [6]
+ o system_win32: fix typo
  o test1165: verify that CURL_DISABLE_ symbols are in sync
+ o test1523: test CURLOPT_LOW_SPEED_LIMIT
+ o test188/189: fix Content-Length [22]
+ o tests: have runtests figure out disabled features [23]
+ o tests: support non-localhost HOSTIP for dict/smb servers [30]
  o tool_cb_prg: Fix integer overflow in progress bar [10]
+ o travis: disable threaded resolver for coverage build
+ o travis: enable alt-svc for coverage build
+ o travis: enable brotli for all xenial jobs
+ o travis: enable libssh2 for coverage build
+ o travis: enable warnings-as-errors for coverage build
  o travis: update scan-build job to xenial [5]
+ o typecheck: CURLOPT_CONNECT_TO takes an slist too [31]
+ o typecheck: add 3 missing strings and a callback data pointer [33]
  o unit1654: cleanup on memory failure [14]
  o unpause: trigger a timeout for event-based transfers [4]
  o url: Fix CURLOPT_MAXAGE_CONN time comparison [18]
+ o winbuild: use WITH_PREFIX if given [21]
  o wolfssl: refer to it as wolfSSL only [11]
 
 This release includes the following known bugs:
@@ -41,10 +63,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alex Grebenschikov, Ben Voris, Brian Carpenter, Cliff Crosland,
-  Daniel Gustafsson, Daniel Stenberg, Jakub Zakrzewski, jonrumsey on github,
-  Marcel Raad, MrSorcus on github, Patrick Monnerat, Richard Alcock,
-  sstruchtrup on github, Tom van der Woerdt,
-  (14 contributors)
+  Daniel Gustafsson, Daniel Stenberg, Gergely Nagy, Gisle Vanem,
+  Jakub Zakrzewski, jonrumsey on github, Kunal Ekawde, Marcel Raad,
+  Michael Wallner, MrSorcus on github, Patrick Monnerat, Richard Alcock,
+  Rich Mirch, sstruchtrup on github, Stephan Szabo, Steve Holme, Thomas Gamper,
+  Tom van der Woerdt, Viktor Szakats,
+  (23 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -69,3 +93,18 @@ References to bug reports and discussions on issues:
  [17] = https://curl.haxx.se/bug/?id=4012
  [18] = https://curl.haxx.se/bug/?id=4013
  [19] = https://curl.haxx.se/bug/?id=4010
+ [20] = https://curl.haxx.se/bug/?id=4033
+ [21] = https://curl.haxx.se/bug/?id=4031
+ [22] = https://curl.haxx.se/bug/?id=4034
+ [23] = https://curl.haxx.se/bug/?id=3950
+ [24] = https://curl.haxx.se/bug/?id=4029
+ [25] = https://curl.haxx.se/bug/?id=3706
+ [26] = https://curl.haxx.se/bug/?id=4035
+ [27] = https://curl.haxx.se/bug/?id=4037
+ [28] = https://curl.haxx.se/bug/?id=4036
+ [29] = https://curl.haxx.se/bug/?id=4023
+ [30] = https://curl.haxx.se/bug/?id=4048
+ [31] = https://curl.haxx.se/bug/?id=4042
+ [32] = https://curl.haxx.se/bug/?id=4055
+ [33] = https://curl.haxx.se/bug/?id=4050
+ [34] = https://curl.haxx.se/bug/?id=4051
