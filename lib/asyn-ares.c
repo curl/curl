@@ -734,7 +734,11 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
     return CURLE_OK;
 
 #if (ARES_VERSION >= 0x010704)
+#if (ARES_VERSION >= 0x010b00)
+  ares_result = ares_set_servers_ports_csv(data->state.resolver, servers);
+#else
   ares_result = ares_set_servers_csv(data->state.resolver, servers);
+#endif
   switch(ares_result) {
   case ARES_SUCCESS:
     result = CURLE_OK;
