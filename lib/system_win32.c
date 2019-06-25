@@ -367,6 +367,7 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
  */
 HMODULE Curl_load_library(LPCTSTR filename)
 {
+#ifndef CURL_WINDOWS_APP
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
@@ -421,8 +422,12 @@ HMODULE Curl_load_library(LPCTSTR filename)
       free(path);
     }
   }
-
   return hModule;
+#else
+  /* the Universal Windows Platform (UWP) can't do this */
+  (void)filename;
+  return NULL;
+#endif
 }
 
 #endif /* WIN32 */
