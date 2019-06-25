@@ -4030,7 +4030,7 @@ dnl
 AC_MSG_CHECKING([whether to support HTTP authentication])
 AC_ARG_ENABLE(http-auth,
 AC_HELP_STRING([--enable-http-auth],[Enable HTTP authentication support])
-AC_HELP_STRING([--disable-http-uath],[Disable HTTP authentication support]),
+AC_HELP_STRING([--disable-http-auth],[Disable HTTP authentication support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
