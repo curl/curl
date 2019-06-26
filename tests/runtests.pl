@@ -2942,12 +2942,13 @@ sub checksystem {
     unlink($curlmanualout);
     runclient($manualcmd);
     open(M, "<$curlmanualout");
-    my $s = <M>;
-    if($s =~ /built-in manual was disabled at build-time/) {
-        $has_manual = 0;
-    }
-    else {
-         $has_manual = 1;
+    while(my $s = <M>) {
+        if($s =~ /built-in manual was disabled at build-time/) {
+            $has_manual = 0;
+            last;
+        }
+        $has_manual = 1;
+        last;
     }
     close(M);
 
