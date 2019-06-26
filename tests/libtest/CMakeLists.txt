@@ -18,7 +18,7 @@ function(setup_test TEST_NAME)          # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries(${TEST_NAME} libcurl ${CURL_LIBS})
+  target_link_libraries(${TEST_NAME} libcurl ${CURL_LIBS} dl)
 
   set_target_properties(${TEST_NAME}
     PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
