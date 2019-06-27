@@ -2937,11 +2937,7 @@ sub checksystem {
             "TrackMemory feature (--enable-curldebug)";
     }
 
-    my $curlmanualout="$LOGDIR/curlmanualout.log";
-    my $manualcmd="$CURL -M 1>$curlmanualout 2>&1";
-    unlink($curlmanualout);
-    runclient($manualcmd);
-    open(M, "<$curlmanualout");
+    open(M, "$CURL -M 2>&1|");
     while(my $s = <M>) {
         if($s =~ /built-in manual was disabled at build-time/) {
             $has_manual = 0;
