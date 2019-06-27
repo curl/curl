@@ -831,6 +831,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.expect_100_timeout = arg;
     break;
+  case CURLOPT_GSS_DELEGCRED:
+  {
+      void *cred = va_arg(param, void *);
+      if (cred == NULL)
+          return CURLE_FAILED_INIT;
+      data->set.delegcred = cred;
+  }
+  break;
 
   case CURLOPT_HTTP09_ALLOWED:
     arg = va_arg(param, unsigned long);

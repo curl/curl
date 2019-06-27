@@ -66,8 +66,16 @@ OM_uint32 Curl_gss_init_sec_context(
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
+  /*retrieve imposonated credential on Linux/Unix*/
+  gss_cred_id_t cred;
+  cred = GSS_C_NO_CREDENTIAL;
+  if(data->set.delegcred != NULL)
+    cred = (gss_cred_id_t)data->set.delegcred;
+
+  infof(data, "Deleg Cred = %x", cred);  
+
   return gss_init_sec_context(minor_status,
-                              GSS_C_NO_CREDENTIAL, /* cred_handle */
+                              cred, /* cred_handle */
                               context,
                               target_name,
                               mech_type,

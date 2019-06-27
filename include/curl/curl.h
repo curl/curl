@@ -1925,6 +1925,8 @@ typedef enum {
 
   /* maximum age of a connection to consider it for reuse (in seconds) */
   CINIT(MAXAGE_CONN, LONG, 288),
+  /* Option to transfer delegated credential to libcurl */
+  CINIT(GSS_DELEGCRED, OBJECTPOINT, 999),  
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
