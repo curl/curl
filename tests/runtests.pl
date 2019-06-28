@@ -2653,12 +2653,7 @@ sub checksystem {
     @version = <VERSOUT>;
     close(VERSOUT);
 
-    my $curldisabledout="$LOGDIR/curldisabledout.log";
-    my $disabledcmd="server/disabled 1>$curldisabledout";
-    unlink($curldisabledout);
-    runclient($disabledcmd);
-
-    open(DISABLED, "<$curldisabledout");
+    open(DISABLED, "server/disabled|");
     @disabled = <DISABLED>;
     close(DISABLED);
 
