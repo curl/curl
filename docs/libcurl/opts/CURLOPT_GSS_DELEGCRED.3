@@ -1,0 +1,60 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_GSS_DELEGCRED 3 "27 Jun 2019" "libcurl 7.66.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_GSS_DELEGCRED \- set the credentials to init the security context, which is used for Kerberos credential delegated situation.
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_GSS_DELEGCRED, void* cred);
+.SH DESCRIPTION
+pass the delegated credentials through cred to libcurl, so that the libcurl could impersonate the original client to retrieve remote resource.
+
+.SH DEFAULT
+By default, the cred is NULL, that means default security context would be used(GSS_C_NO_CREDENTIAL is acting as a default initiator principal).
+.SH PROTOCOLS
+HTTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  /* accept and acquire delegated cred passed from original client*/
+  gss_cred_id_t cred = GSS_C_NO_CREDENTIAL; 
+  ...
+  gss_accept_sec_context(..., &cred);
+  ... 
+  /* pass the cred to libcurl */
+  curl_easy_setopt(curl, CURLOPT_GSS_DELEGCRED,
+                         cred);
+  ret = curl_easy_perform(curl);
+}
+.fi
+
+.SH AVAILABILITY
+Added in 7.66.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_HTTPAUTH "(3), " CURLOPT_PROXYAUTH "(3), "
