@@ -29,7 +29,7 @@
  * (libgcrypt) so far.
  *
  * OpenSSL docs for this:
- *   https://www.openssl.org/docs/crypto/threads.html
+ *   https://www.openssl.org/docs/man1.0.2/man3/CRYPTO_num_locks.html
  * gcrypt docs for this:
  *   https://gnupg.org/documentation/manuals/gcrypt/Multi_002dThreading.html
  */
