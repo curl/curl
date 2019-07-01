@@ -2653,10 +2653,8 @@ sub checksystem {
     @version = <VERSOUT>;
     close(VERSOUT);
 
-    open(DISABLED, "server/disabled|");
-    @disabled = <DISABLED>;
-    close(DISABLED);
-
+    my $disabled = runclientoutput("server/disabled");
+    @disabled = split /\n/, $disabled;
     if($disabled[0]) {
         map s/[\r\n]//g, @disabled;
         $dis = join(", ", @disabled);
@@ -2932,20 +2930,15 @@ sub checksystem {
             "TrackMemory feature (--enable-curldebug)";
     }
 
-    my $curlmanualout="$LOGDIR/curlmanualout.log";
-    my $manualcmd="$CURL -M 1>$curlmanualout 2>&1";
-    unlink($curlmanualout);
-    runclient($manualcmd);
-    open(M, "<$curlmanualout");
-    while(my $s = <M>) {
-        if($s =~ /built-in manual was disabled at build-time/) {
-            $has_manual = 0;
-            last;
-        }
-        $has_manual = 1;
-        last;
+    my $manualcmd="$CURL -M 2>&1";
+    my $manualout = runclientoutput($manualcmd);
+    my @manualout = split /\n/, $manualout;
+    if($manualout[0] =~ /built-in manual was disabled at build-time/) {
+        $has_manual = 0;
     }
-    close(M);
+    else {
+        $has_manual = 1;
+    }
 
     $has_shared = `sh $CURLCONFIG --built-shared`;
     chomp $has_shared;
