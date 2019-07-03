@@ -1,6 +1,6 @@
 /* GSSAPI/krb5 support for FTP - loosely based on old krb4.c
  *
- * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
+ * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska HÃ¶gskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  * Copyright (c) 2004 - 2017 Daniel Stenberg
  * All rights reserved.
