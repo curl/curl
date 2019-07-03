@@ -225,7 +225,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
   if(data->state.trailers_state == TRAILERS_SENDING) {
     /* if we're here then that means that we already sent the last empty chunk
        but we didn't send a final CR LF, so we sent 0 CR LF. We then start
-       pulling trailing data until we ²have no more at which point we
+       pulling trailing data until we have no more at which point we
        simply return to the previous point in the state machine as if
        nothing happened.
        */

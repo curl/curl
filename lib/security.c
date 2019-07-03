@@ -7,7 +7,7 @@
  * rewrite to work around the paragraph 2 in the BSD licenses as explained
  * below.
  *
- * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
+ * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska HÃ¶gskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
  * Copyright (C) 2001 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
