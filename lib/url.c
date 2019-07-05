@@ -488,9 +488,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
      define since we internally only use the lower 16 bits for the passed
      in bitmask to not conflict with the private bits */
   set->allowed_protocols = CURLPROTO_ALL;
-  set->redir_protocols = CURLPROTO_ALL &  /* All except FILE, SCP and SMB */
-                          ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
-                            CURLPROTO_SMBS);
+  set->redir_protocols = CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP;
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   /*
