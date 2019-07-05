@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -138,6 +138,12 @@ USE_WINSSL = false
 
 !IFNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
 ENABLE_OPENSSL_AUTO_LOAD_CONFIG = true
+!ELSEIF "$(ENABLE_OPENSSL_AUTO_LOAD_CONFIG)"=="yes"
+!UNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
+ENABLE_OPENSSL_AUTO_LOAD_CONFIG = true
+!ELSEIF "$(ENABLE_OPENSSL_AUTO_LOAD_CONFIG)"=="no"
+!UNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
+ENABLE_OPENSSL_AUTO_LOAD_CONFIG = false
 !ENDIF
 
 CONFIG_NAME_LIB = libcurl
