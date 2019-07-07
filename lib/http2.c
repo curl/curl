@@ -269,7 +269,7 @@ static unsigned int http2_conncheck(struct connectdata *check,
   return ret_val;
 }
 
-/* called from Curl_http_setup_conn */
+/* called from http_setup_conn */
 void Curl_http2_setup_req(struct Curl_easy *data)
 {
   struct HTTP *http = data->req.protop;
@@ -286,7 +286,7 @@ void Curl_http2_setup_req(struct Curl_easy *data)
   http->memlen = 0;
 }
 
-/* called from Curl_http_setup_conn */
+/* called from http_setup_conn */
 void Curl_http2_setup_conn(struct connectdata *conn)
 {
   conn->proto.httpc.settings.max_concurrent_streams =
