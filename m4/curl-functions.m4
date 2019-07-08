@@ -7313,8 +7313,7 @@ AC_DEFUN([CURL_COVERAGE],[
   dnl check if enabled by argument
   AC_ARG_ENABLE(code-coverage,
      AC_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
-     coverage="yes",
-     coverage="no")
+     coverage="$enableval")
 
   dnl if not gcc switch off again
   AS_IF([ test "$GCC" != "yes" ], coverage="no" )
