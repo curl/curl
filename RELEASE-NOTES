@@ -11,15 +11,20 @@ This release includes the following bugfixes:
  o CURLMOPT_SOCKETFUNCTION.3: clarified [8]
  o CURLMOPT_SOCKETFUNCTION.3: fix typo
  o CURLOPT_CAINFO.3: polished wording [9]
+ o CURLOPT_HEADEROPT.3: Fix example [46]
  o bindlocal: detect and avoid IP version mismatches in bind() [1]
  o build: fix Codacy warnings [6]
  o c-ares: honor port numbers in CURLOPT_DNS_SERVERS [37]
  o config-os400: add getpeername and getsockname defines [27]
  o configure: --disable-progress-meter [29]
+ o configure: fix typo '--disable-http-uath' [41]
  o configure: more --disable switches to toggle off individual features [7]
  o configure: remove CURL_DISABLE_TLS_SRP [19]
  o conn_maxage: move the check to prune_dead_connections() [24]
  o curl: skip CURLOPT_PROXY_CAPATH for disabled-proxy builds [38]
+ o curl_multi_wait.3: escape backslash in example [44]
+ o docs: Fix links to OpenSSL docs
+ o docs: fix string suggesting HTTP/2 is not the default [40]
  o examples/fopen: fix comparison [6]
  o examples/htmltitle: use C++ casts between pointer types [6]
  o http2: call done_sending on end of upload [36]
@@ -27,11 +32,16 @@ This release includes the following bugfixes:
  o http2: remove CURL_DISABLE_TYPECHECK define
  o http: clarify header buffer size calculation
  o krb5: fix compiler warning [15]
+ o lib: Use UTF-8 encoding in comments [47]
  o libcurl-tutorial.3: Fix small typo (mutipart -> multipart) [3]
  o multi: enable multiplexing by default (again) [34]
  o multi: fix the transfer hashes in the socket hash entries [17]
  o multi: make sure 'data' can present in several sockhash entries [2]
  o netrc: Return the correct error code when out of memory [28]
+ o nss: don't set unused parameter [49]
+ o nss: only cache valid CRL entries [48]
+ o nss: support using libnss on macOS [50]
+ o openssl: disable engine if OPENSSL_NO_UI_CONSOLE is defined [43]
  o openssl: fix pubkey/signature algorithm detection in certinfo [25]
  o openssl: remove outdated comment [20]
  o os400: make vsetopt() non-static as Curl_vsetopt() for os400 support [12]
@@ -41,6 +51,7 @@ This release includes the following bugfixes:
  o sws: remove unused variables [6]
  o system_win32: fix typo
  o test1165: verify that CURL_DISABLE_ symbols are in sync
+ o test1521: adapt to SLISTPOINT
  o test1523: test CURLOPT_LOW_SPEED_LIMIT
  o test153: fix content-length to avoid occasional hang [39]
  o test188/189: fix Content-Length [22]
@@ -59,6 +70,8 @@ This release includes the following bugfixes:
  o unit1654: cleanup on memory failure [14]
  o unpause: trigger a timeout for event-based transfers [4]
  o url: Fix CURLOPT_MAXAGE_CONN time comparison [18]
+ o win32: make DLL loading a no-op for UWP [42]
+ o winbuild: Change Makefile to honor ENABLE_OPENSSL_AUTO_LOAD_CONFIG [45]
  o winbuild: use WITH_PREFIX if given [21]
  o wolfssl: refer to it as wolfSSL only [11]
 
@@ -69,14 +82,15 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Grebenschikov, Ben Voris, Brian Carpenter, Cliff Crosland,
-  Daniel Gustafsson, Daniel Stenberg, Gergely Nagy, Gisle Vanem,
-  Jakub Zakrzewski, James Brown, jonrumsey on github, Koen Dergent,
-  Kunal Ekawde, Marcel Raad, Michael Wallner, MrSorcus on github,
-  Patrick Monnerat, Richard Alcock, Rich Mirch, sstruchtrup on github,
+  1ocalhost on github, Alex Grebenschikov, Ben Voris, Brian Carpenter,
+  Caleb Raitto, Cliff Crosland, Daniel Gustafsson, Daniel Stenberg,
+  Gaël Portay, Gergely Nagy, Gisle Vanem, Jakub Zakrzewski, James Brown,
+  Jay Satiro, jonrumsey on github, Koen Dergent, Kunal Ekawde, Marcel Raad,
+  Michael Wallner, MrSorcus on github, Niklas Hambüchen, Patrick Monnerat,
+  Richard Alcock, Rich Mirch, Shankar Jadhavar, sstruchtrup on github,
   Stephan Szabo, Steve Holme, Thomas Gamper, Tom van der Woerdt,
   Viktor Szakats,
-  (25 contributors)
+  (31 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -121,3 +135,14 @@ References to bug reports and discussions on issues:
  [37] = https://curl.haxx.se/bug/?id=4066
  [38] = https://curl.haxx.se/bug/?id=4061
  [39] = https://curl.haxx.se/bug/?id=4065
+ [40] = https://curl.haxx.se/bug/?id=4075
+ [41] = https://curl.haxx.se/bug/?id=4076
+ [42] = https://curl.haxx.se/bug/?id=4072
+ [43] = https://curl.haxx.se/bug/?id=4073
+ [44] = https://curl.haxx.se/bug/?id=4079
+ [45] = https://curl.haxx.se/bug/?id=4086
+ [46] = https://curl.haxx.se/bug/?id=4090
+ [47] = https://curl.haxx.se/bug/?id=4087
+ [48] = https://curl.haxx.se/bug/?id=4053
+ [49] = https://curl.haxx.se/bug/?id=4054
+ [50] = https://curl.haxx.se/bug/?id=4046
