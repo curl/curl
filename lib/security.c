@@ -267,7 +267,7 @@ static ssize_t sec_recv(struct connectdata *conn, int sockindex,
 }
 
 /* Send |length| bytes from |from| to the |fd| socket taking care of encoding
-   and negociating with the server. |from| can be NULL. */
+   and negotiating with the server. |from| can be NULL. */
 static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
                         const char *from, int length)
 {
