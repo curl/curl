@@ -587,9 +587,6 @@
 /* Define to 1 if you have the `socket' function. */
 #cmakedefine HAVE_SOCKET 1
 
-/* Define to 1 if you have the `SSL_get_shutdown' function. */
-#cmakedefine HAVE_SSL_GET_SHUTDOWN 1
-
 /* Define to 1 if you have the <ssl.h> header file. */
 #cmakedefine HAVE_SSL_H 1
 
