@@ -53,7 +53,7 @@ elseif(MSVC)
     message(WARNING "Hiding private symbols regardless CURL_HIDDEN_SYMBOLS being disabled.")
     set(HIDES_CURL_PRIVATE_SYMBOLS TRUE)
   endif()
-elseif()
+else()
   set(HIDES_CURL_PRIVATE_SYMBOLS FALSE)
 endif()
 
