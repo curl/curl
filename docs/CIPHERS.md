@@ -461,6 +461,14 @@ specific ciphersuites. They are
 [defined](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id) by
 Microsoft.
 
+There is also the case that the selected algorithm will not match the ciphers
+offered by the server during the SSL negotiation. In this case curl will 
+print an `CURLE_SSL_CONNECT_ERROR (35) SEC_E_ALGORITHM_MISMATCH` and the
+request will fail.
+
+If no algorithm is specified, curl (and subsequently Schannel) will use the
+ciphers defined in the registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\ciphers`.
+
 `CALG_MD2`,
 `CALG_MD4`,
 `CALG_MD5`,
