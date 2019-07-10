@@ -29,7 +29,6 @@ char *Curl_checkheaders(const struct connectdata *conn,
 void Curl_init_CONNECT(struct Curl_easy *data);
 
 CURLcode Curl_pretransfer(struct Curl_easy *data);
-CURLcode Curl_second_connect(struct connectdata *conn);
 CURLcode Curl_posttransfer(struct Curl_easy *data);
 
 typedef enum {

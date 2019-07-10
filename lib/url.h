@@ -48,8 +48,6 @@ CURLcode Curl_open(struct Curl_easy **curl);
 CURLcode Curl_init_userdefined(struct Curl_easy *data);
 
 void Curl_freeset(struct Curl_easy * data);
-/* free the URL pieces */
-void Curl_up_free(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy *data); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
@@ -71,7 +69,6 @@ int Curl_doing_getsock(struct connectdata *conn,
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
-void Curl_close_connections(struct Curl_easy *data);
 CURLcode Curl_upkeep(struct conncache *conn_cache, void *data);
 
 const struct Curl_handler *Curl_builtin_scheme(const char *scheme);

@@ -82,7 +82,6 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
 CURLcode Curl_http(struct connectdata *conn, bool *done);
 CURLcode Curl_http_done(struct connectdata *, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
-CURLcode Curl_http_setup_conn(struct connectdata *conn);
 
 /* The following functions are defined in http_chunks.c */
 void Curl_httpchunk_init(struct connectdata *conn);
@@ -90,11 +89,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
                               ssize_t length, ssize_t *wrote);
 
 /* These functions are in http.c */
-void Curl_http_auth_stage(struct Curl_easy *data, int stage);
 CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
                               const char *auth);
 CURLcode Curl_http_auth_act(struct connectdata *conn);
-CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
