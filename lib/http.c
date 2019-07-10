@@ -1881,9 +1881,10 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
 }
 
 #ifndef CURL_DISABLE_PARSEDATE
-CURLcode Curl_add_timecondition(struct Curl_easy *data,
+CURLcode Curl_add_timecondition(const struct connectdata *conn,
                                 Curl_send_buffer *req_buffer)
 {
+  struct Curl_easy *data = conn->data;
   const struct tm *tm;
   struct tm keeptime;
   CURLcode result;
@@ -1916,6 +1917,11 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
     break;
   }
 
+  if(Curl_checkheaders(conn, condp)) {
+    /* A custom header was specified; it will be sent instead. */
+    return CURLE_OK;
+  }
+
   /* The If-Modified-Since header family should have their times set in
    * GMT as RFC2616 defines: "All HTTP date/time stamps MUST be
    * represented in Greenwich Mean Time (GMT), without exception. For the
@@ -1941,10 +1947,10 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 }
 #else
 /* disabled */
-CURLcode Curl_add_timecondition(struct Curl_easy *data,
+CURLcode Curl_add_timecondition(const struct connectdata *conn,
                                 Curl_send_buffer *req_buffer)
 {
-  (void)data;
+  (void)conn;
   (void)req_buffer;
   return CURLE_OK;
 }
@@ -2683,7 +2689,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
 #endif
 
-  result = Curl_add_timecondition(data, req_buffer);
+  result = Curl_add_timecondition(conn, req_buffer);
   if(result)
     return result;
 
