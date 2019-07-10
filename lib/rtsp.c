@@ -491,7 +491,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     return result;
 
   if((rtspreq == RTSPREQ_SETUP) || (rtspreq == RTSPREQ_DESCRIBE)) {
-    result = Curl_add_timecondition(data, req_buffer);
+    result = Curl_add_timecondition(conn, req_buffer);
     if(result)
       return result;
   }
