@@ -1826,13 +1826,9 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl These can only exist if OpenSSL exists
-    dnl Older versions of Cyassl (some time before 2.9.4) don't have
-    dnl SSL_get_shutdown (but this check won't actually detect it there
-    dnl as it's a macro that needs the header files be included)
     dnl OpenSSL_version is introduced in 3.0.0
 
     AC_CHECK_FUNCS( RAND_egd \
-                    SSL_get_shutdown \
                     SSLv2_client_method \
                     OpenSSL_version )
 
