@@ -52,7 +52,7 @@ typedef enum {
 typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 
 /* This is used instead of if_nametoindex if available on Windows */
-IF_NAMETOINDEX_FN Curl_if_nametoindex;
+extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
 
 /* This is used to verify if we are running on a specific windows version */
 bool Curl_verify_windows_version(const unsigned int majorVersion,
