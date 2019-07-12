@@ -691,7 +691,10 @@ static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
   tmp = SECMOD_WaitForAnyTokenEvent(pem_module, 0, 0);
   if(tmp)
     PK11_FreeSlot(tmp);
-  PK11_IsPresent(slot);
+  if(!PK11_IsPresent(slot)) {
+    PK11_FreeSlot(slot);
+    return CURLE_SSL_CERTPROBLEM;
+  }
 
   status = PK11_Authenticate(slot, PR_TRUE, SSL_SET_OPTION(key_passwd));
   PK11_FreeSlot(slot);
