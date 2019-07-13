@@ -825,19 +825,6 @@ $	    endif
 $	    goto cfgh_in_loop1
 $	endif
 $!
-$	if key2 .eqs. "HAVE_SSL_GET_SHUTDOWN"
-$	then
-$	    if f$search("''ssl_header_dir'ssl.h") .nes. ""
-$	    then
-$		write tf "#ifndef ''key2'"
-$		write tf "#define ''key2' 1"
-$		write tf "#endif"
-$	    else
-$		write tf "/* #undef ''key2' */"
-$	    endif
-$	    goto cfgh_in_loop1
-$	endif
-$!
 $	if key2b .eqs. "RAND" .and. key2c .nes. "" .and. key2d .eqs. ""
 $	then
 $	    if (key2c .eqs. "EGD") .or. -
