@@ -210,7 +210,8 @@ void progressbarinit(struct ProgressData *bar,
   if(colp) {
     char *endptr;
     long num = strtol(colp, &endptr, 10);
-    if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 20))
+    if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 20) &&
+       (num < 10000))
       bar->width = (int)num;
     curl_free(colp);
   }
