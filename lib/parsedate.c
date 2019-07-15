@@ -567,6 +567,24 @@ static int parsedate(const char *date, time_t *output)
 }
 #endif
 
+time_t Curl_parse_expiry(const char* p)
+{
+  time_t parsed = -1;
+  int rc = parsedate(p, &parsed);
+
+  if(rc == PARSEDATE_OK) {
+    if(parsed == -1)
+      /* avoid returning -1 for a working scenario */
+      parsed++;
+    return parsed;
+  } else if(rc == PARSEDATE_LATER) {
+    /* return the max possible expiry if we cannot hold the real value */
+    return TIME_T_MAX;
+  }
+  /* everything else is fail */
+  return -1;
+}
+
 time_t curl_getdate(const char *p, const time_t *now)
 {
   time_t parsed = -1;
