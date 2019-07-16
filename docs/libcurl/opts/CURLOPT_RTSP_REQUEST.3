@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -33,15 +33,15 @@ enum values as a long in the \fIrequest\fP argument. Unless noted otherwise,
 commands require the Session ID to be initialized.
 .IP CURL_RTSPREQ_OPTIONS
 Used to retrieve the available methods of the server. The application is
-responsible for parsing and obeying the response. \fB(The session ID is not
-needed for this method.)\fP
+responsible for parsing and obeying the response. The session ID is not needed
+for this method.
 .IP CURL_RTSPREQ_DESCRIBE
 Used to get the low level description of a stream. The application should note
 what formats it understands in the \fI'Accept:'\fP header. Unless set
-manually, libcurl will automatically fill in \fI'Accept:
-application/sdp'\fP. Time-condition headers will be added to Describe requests
-if the \fICURLOPT_TIMECONDITION(3)\fP option is active. \fB(The session ID is
-not needed for this method)\fP
+manually, libcurl will automatically fill in \fI'Accept: application/sdp'\fP.
+Time-condition headers will be added to Describe requests if the
+\fICURLOPT_TIMECONDITION(3)\fP option is active. \fB(The session ID is not
+needed for this method)\fP
 .IP CURL_RTSPREQ_ANNOUNCE
 When sent by a client, this method changes the description of the session. For
 example, if a client is using the server to record a meeting, the client can
@@ -53,8 +53,8 @@ Setup is used to initialize the transport layer for the session. The
 application must set the desired Transport options for a session by using the
 \fICURLOPT_RTSP_TRANSPORT(3)\fP option prior to calling setup. If no session
 ID is currently set with \fICURLOPT_RTSP_SESSION_ID(3)\fP, libcurl will
-extract and use the session ID in the response to this request. \fB(The
-session ID is not needed for this method).\fP
+extract and use the session ID in the response to this request. The session ID
+is not needed for this method.
 .IP CURL_RTSPREQ_PLAY
 Send a Play command to the server. Use the \fICURLOPT_RANGE(3)\fP option to
 modify the playback time (e.g. 'npt=10-15').
