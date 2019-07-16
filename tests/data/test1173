@@ -19,7 +19,7 @@ Basic man page syntax check
  </name>
 
 <command type="perl">
-%SRCDIR/manpage-syntax.pl %SRCDIR/../docs/*.1  %SRCDIR/../docs/libcurl/*.3
+%SRCDIR/manpage-syntax.pl %SRCDIR/../docs/*.1  %SRCDIR/../docs/libcurl/*.3 %SRCDIR/../docs/libcurl/opts/*.3
 </command>
 </client>
 
