@@ -97,8 +97,8 @@ Never ever switch off certificate verification.
 The \fICURLOPT_FOLLOWLOCATION(3)\fP option automatically follows HTTP
 redirects sent by a remote server.  These redirects can refer to any kind of
 URL, not just HTTP. libcurl restricts the protocols allowed to be used in
-redirects for security reasons: only HTTP, HTTPS and FTP are enabled by
-default. Applications may opt to restrict thus set further.
+redirects for security reasons: only HTTP, HTTPS, FTP and FTPS are
+enabled by default. Applications may opt to restrict that set further.
 
 A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
 files from the local filesystem.  If the application returns the data back to
