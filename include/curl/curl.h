@@ -1574,8 +1574,7 @@ typedef enum {
 
   /* set the bitmask for the protocols that libcurl is allowed to follow to,
      as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
-     to be set in both bitmasks to be allowed to get redirected to. Defaults
-     to all protocols except FILE and SCP. */
+     to be set in both bitmasks to be allowed to get redirected to. */
   CINIT(REDIR_PROTOCOLS, LONG, 182),
 
   /* set the SSH knownhost file name to use */
