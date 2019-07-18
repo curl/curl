@@ -73,12 +73,6 @@ callback.
 
 #include <curl/curl.h>
 
-#ifdef __GNUC__
-#define _Unused __attribute__((unused))
-#else
-#define _Unused
-#endif
-
 #define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
 
 
@@ -336,22 +330,21 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 
 
 /* CURLOPT_WRITEFUNCTION */
-static size_t write_cb(void *ptr _Unused, size_t size, size_t nmemb,
-                       void *data)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
-  size_t realsize = size * nmemb;
-  (void)_Unused;
+  (void)ptr;
   (void)data;
-
-  return realsize;
+  return size * nmemb;
 }
 
 
 /* CURLOPT_PROGRESSFUNCTION */
-static int prog_cb(void *p, double dltotal, double dlnow, double ult _Unused,
-                   double uln _Unused)
+static int prog_cb(void *p, double dltotal, double dlnow, double ult,
+                   double uln)
 {
   ConnInfo *conn = (ConnInfo *)p;
+  (void)ult;
+  (void)uln;
 
   fprintf(MSG_OUT, "Progress: %s (%g/%g)\n", conn->url, dlnow, dltotal);
   return 0;
@@ -469,12 +462,14 @@ void SignalHandler(int signo)
   }
 }
 
-int main(int argc _Unused, char **argv _Unused)
+int main(int argc, char **argv)
 {
   GlobalInfo g;
   struct itimerspec its;
   struct epoll_event ev;
   struct epoll_event events[10];
+  (void)argc;
+  (void)argv;
 
   g_should_exit_ = 0;
   signal(SIGINT, SignalHandler);
@@ -547,5 +542,6 @@ int main(int argc _Unused, char **argv _Unused)
   fflush(MSG_OUT);
 
   curl_multi_cleanup(g.multi);
+  clean_fifo(&g);
   return 0;
 }
