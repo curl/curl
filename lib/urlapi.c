@@ -56,6 +56,7 @@ struct Curl_URL {
   char *password;
   char *options; /* IMAP only? */
   char *host;
+  char *zoneid; /* for numerical IPv6 addresses */
   char *port;
   char *path;
   char *query;
@@ -74,6 +75,7 @@ static void free_urlhandle(struct Curl_URL *u)
   free(u->password);
   free(u->options);
   free(u->host);
+  free(u->zoneid);
   free(u->port);
   free(u->path);
   free(u->query);
@@ -504,7 +506,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
       portptr = &hostname[len];
     else if('%' == endbracket) {
       int zonelen = len;
-      if(1 == sscanf(hostname + zonelen, "25%*[^]]%c%n", &endbracket, &len)) {
+      if(1 == sscanf(hostname + zonelen, "%*[^]]%c%n", &endbracket, &len)) {
         if(']' != endbracket)
           return CURLUE_MALFORMED_INPUT;
         portptr = &hostname[--zonelen + len + 1];
@@ -587,25 +589,45 @@ static CURLUcode junkscan(char *part)
   return CURLUE_OK;
 }
 
-static CURLUcode hostname_check(char *hostname, unsigned int flags)
+static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
 {
   const char *l = NULL; /* accepted characters */
   size_t len;
   size_t hlen = strlen(hostname);
-  (void)flags;
 
   if(hostname[0] == '[') {
     hostname++;
-    l = "0123456789abcdefABCDEF::.%";
+    l = "0123456789abcdefABCDEF::.";
     hlen -= 2;
   }
 
   if(l) {
     /* only valid letters are ok */
     len = strspn(hostname, l);
-    if(hlen != len)
-      /* hostname with bad content */
-      return CURLUE_MALFORMED_INPUT;
+    if(hlen != len) {
+      if(hostname[len] == '%') {
+        /* this could now be '%[zone id]' */
+        char zoneid[16];
+        int i = 0;
+        char *h = &hostname[len + 1];
+        /* pass '25' if present and is a url encoded percent sign */
+        if(!strncmp(h, "25", 2) && h[2] && (h[2] != ']'))
+          h += 2;
+        while(*h && (*h != ']') && (i < 15))
+          zoneid[i++] = *h++;
+        if(!i || (']' != *h))
+          return CURLUE_MALFORMED_INPUT;
+        zoneid[i] = 0;
+        u->zoneid = strdup(zoneid);
+        if(!u->zoneid)
+          return CURLUE_OUT_OF_MEMORY;
+        hostname[len] = ']'; /* insert end bracket */
+        hostname[len + 1] = 0; /* terminate the hostname */
+      }
+      else
+        return CURLUE_MALFORMED_INPUT;
+      /* hostname is fine */
+    }
   }
   else {
     /* letters from the second string is not ok */
@@ -614,6 +636,8 @@ static CURLUcode hostname_check(char *hostname, unsigned int flags)
       /* hostname with bad content */
       return CURLUE_MALFORMED_INPUT;
   }
+  if(!hostname[0])
+    return CURLUE_NO_HOST;
   return CURLUE_OK;
 }
 
@@ -628,7 +652,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   char *fragment = NULL;
   CURLUcode result;
   bool url_has_scheme = FALSE;
-  char schemebuf[MAX_SCHEME_LEN];
+  char schemebuf[MAX_SCHEME_LEN + 1];
   char *schemep = NULL;
   size_t schemelen = 0;
   size_t urllen;
@@ -642,6 +666,10 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
    ************************************************************/
   /* allocate scratch area */
   urllen = strlen(url);
+  if(urllen > CURL_MAX_INPUT_LENGTH)
+    /* excessive input length */
+    return CURLUE_MALFORMED_INPUT;
+
   path = u->scratch = malloc(urllen * 2 + 2);
   if(!path)
     return CURLUE_OUT_OF_MEMORY;
@@ -852,7 +880,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       return result;
 
-    result = hostname_check(hostname, flags);
+    result = hostname_check(u, hostname);
     if(result)
       return result;
 
@@ -971,6 +999,9 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     ptr = u->host;
     ifmissing = CURLUE_NO_HOST;
     break;
+  case CURLUPART_ZONEID:
+    ptr = u->zoneid;
+    break;
   case CURLUPART_PORT:
     ptr = u->port;
     ifmissing = CURLUE_NO_PORT;
@@ -1017,6 +1048,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
     char *scheme;
     char *options = u->options;
     char *port = u->port;
+    char *allochost = NULL;
     if(u->scheme && strcasecompare("file", u->scheme)) {
       url = aprintf("file://%s%s%s",
                     u->path,
@@ -1055,6 +1087,18 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       if(h && !(h->flags & PROTOPT_URLOPTIONS))
         options = NULL;
 
+      if((u->host[0] == '[') && u->zoneid) {
+        /* make it '[ host %25 zoneid ]' */
+        size_t hostlen = strlen(u->host);
+        size_t alen = hostlen + 3 + strlen(u->zoneid) + 1;
+        allochost = malloc(alen);
+        if(!allochost)
+          return CURLUE_OUT_OF_MEMORY;
+        memcpy(allochost, u->host, hostlen - 1);
+        msnprintf(&allochost[hostlen - 1], alen - hostlen + 1,
+                  "%%25%s]", u->zoneid);
+      }
+
       url = aprintf("%s://%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
                     scheme,
                     u->user ? u->user : "",
@@ -1063,7 +1107,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
                     options ? ";" : "",
                     options ? options : "",
                     (u->user || u->password || options) ? "@": "",
-                    u->host,
+                    allochost ? allochost : u->host,
                     port ? ":": "",
                     port ? port : "",
                     (u->path && (u->path[0] != '/')) ? "/": "",
@@ -1072,6 +1116,7 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
                     (u->query && u->query[0]) ? u->query : "",
                     u->fragment? "#": "",
                     u->fragment? u->fragment : "");
+      free(allochost);
     }
     if(!url)
       return CURLUE_OUT_OF_MEMORY;
@@ -1144,7 +1189,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     case CURLUPART_HOST:
       storep = &u->host;
       break;
+    case CURLUPART_ZONEID:
+      storep = &u->zoneid;
+      break;
     case CURLUPART_PORT:
+      u->portnum = 0;
       storep = &u->port;
       break;
     case CURLUPART_PATH:
@@ -1168,6 +1217,9 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
 
   switch(what) {
   case CURLUPART_SCHEME:
+    if(strlen(part) > MAX_SCHEME_LEN)
+      /* too long */
+      return CURLUE_MALFORMED_INPUT;
     if(!(flags & CURLU_NON_SUPPORT_SCHEME) &&
        /* verify that it is a fine scheme */
        !Curl_builtin_scheme(part))
@@ -1186,14 +1238,25 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     break;
   case CURLUPART_HOST:
     storep = &u->host;
+    free(u->zoneid);
+    u->zoneid = NULL;
+    break;
+  case CURLUPART_ZONEID:
+    storep = &u->zoneid;
     break;
   case CURLUPART_PORT:
+  {
+    char *endp;
     urlencode = FALSE; /* never */
-    port = strtol(part, NULL, 10);  /* Port number must be decimal */
+    port = strtol(part, &endp, 10);  /* Port number must be decimal */
     if((port <= 0) || (port > 0xffff))
       return CURLUE_BAD_PORT_NUMBER;
+    if(*endp)
+      /* weirdly provided number, not good! */
+      return CURLUE_MALFORMED_INPUT;
     storep = &u->port;
-    break;
+  }
+  break;
   case CURLUPART_PATH:
     urlskipslash = TRUE;
     storep = &u->path;
@@ -1219,7 +1282,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     char *redired_url;
     CURLU *handle2;
 
-    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN)) {
+    if(Curl_is_absolute_url(part, NULL, MAX_SCHEME_LEN + 1)) {
       handle2 = curl_url();
       if(!handle2)
         return CURLUE_OUT_OF_MEMORY;
@@ -1272,8 +1335,12 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     const char *newp = part;
     size_t nalloc = strlen(part);
 
+    if(nalloc > CURL_MAX_INPUT_LENGTH)
+      /* excessive input length */
+      return CURLUE_MALFORMED_INPUT;
+
     if(urlencode) {
-      const char *i;
+      const unsigned char *i;
       char *o;
       bool free_part = FALSE;
       char *enc = malloc(nalloc * 3 + 1); /* for worst case! */
@@ -1281,7 +1348,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         return CURLUE_OUT_OF_MEMORY;
       if(plusencode) {
         /* space to plus */
-        i = part;
+        i = (const unsigned char *)part;
         for(o = enc; *i; ++o, ++i)
           *o = (*i == ' ') ? '+' : *i;
         *o = 0; /* zero terminate */
@@ -1292,7 +1359,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         }
         free_part = TRUE;
       }
-      for(i = part, o = enc; *i; i++) {
+      for(i = (const unsigned char *)part, o = enc; *i; i++) {
         if(Curl_isunreserved(*i) ||
            ((*i == '/') && urlskipslash) ||
            ((*i == '=') && equalsencode) ||
@@ -1352,6 +1419,13 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         free(*storep);
         *storep = p;
         return CURLUE_OK;
+      }
+    }
+
+    if(what == CURLUPART_HOST) {
+      if(hostname_check(u, (char *)newp)) {
+        free((char *)newp);
+        return CURLUE_MALFORMED_INPUT;
       }
     }
 

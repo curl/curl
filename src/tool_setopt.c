@@ -713,4 +713,119 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
   return ret;
 }
 
+#else /* CURL_DISABLE_LIBCURL_OPTION */
+
+#include "tool_cfgable.h"
+#include "tool_setopt.h"
+
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
+
+/*
+ * tool_setopt_skip() allows the curl tool code to avoid setopt options that
+ * are explicitly disabled in the build.
+ */
+bool tool_setopt_skip(CURLoption tag)
+{
+#ifdef CURL_DISABLE_PROXY
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_HAPROXYPROTOCOL:
+  case CURLOPT_HTTPPROXYTUNNEL:
+  case CURLOPT_NOPROXY:
+  case CURLOPT_PRE_PROXY:
+  case CURLOPT_PROXY:
+  case CURLOPT_PROXYAUTH:
+  case CURLOPT_PROXY_CAINFO:
+  case CURLOPT_PROXY_CAPATH:
+  case CURLOPT_PROXY_CRLFILE:
+  case CURLOPT_PROXYHEADER:
+  case CURLOPT_PROXY_KEYPASSWD:
+  case CURLOPT_PROXYPASSWORD:
+  case CURLOPT_PROXY_PINNEDPUBLICKEY:
+  case CURLOPT_PROXYPORT:
+  case CURLOPT_PROXY_SERVICE_NAME:
+  case CURLOPT_PROXY_SSLCERT:
+  case CURLOPT_PROXY_SSLCERTTYPE:
+  case CURLOPT_PROXY_SSL_CIPHER_LIST:
+  case CURLOPT_PROXY_SSLKEY:
+  case CURLOPT_PROXY_SSLKEYTYPE:
+  case CURLOPT_PROXY_SSL_OPTIONS:
+  case CURLOPT_PROXY_SSL_VERIFYHOST:
+  case CURLOPT_PROXY_SSL_VERIFYPEER:
+  case CURLOPT_PROXY_SSLVERSION:
+  case CURLOPT_PROXY_TLS13_CIPHERS:
+  case CURLOPT_PROXY_TLSAUTH_PASSWORD:
+  case CURLOPT_PROXY_TLSAUTH_TYPE:
+  case CURLOPT_PROXY_TLSAUTH_USERNAME:
+  case CURLOPT_PROXY_TRANSFER_MODE:
+  case CURLOPT_PROXYTYPE:
+  case CURLOPT_PROXYUSERNAME:
+  case CURLOPT_PROXYUSERPWD:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#ifdef CURL_DISABLE_FTP
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_FTPPORT:
+  case CURLOPT_FTP_ACCOUNT:
+  case CURLOPT_FTP_ALTERNATIVE_TO_USER:
+  case CURLOPT_FTP_FILEMETHOD:
+  case CURLOPT_FTP_SKIP_PASV_IP:
+  case CURLOPT_FTP_USE_EPRT:
+  case CURLOPT_FTP_USE_EPSV:
+  case CURLOPT_FTP_USE_PRET:
+  case CURLOPT_KRBLEVEL:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#ifdef CURL_DISABLE_RTSP
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_INTERLEAVEDATA:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_COOKIE:
+  case CURLOPT_COOKIEFILE:
+  case CURLOPT_COOKIEJAR:
+  case CURLOPT_COOKIESESSION:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#if defined(CURL_DISABLE_TELNET)
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_TELNETOPTIONS:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+#ifdef CURL_DISABLE_TFTP
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_TFTP_BLKSIZE:
+  case CURLOPT_TFTP_NO_OPTIONS:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
+
+#ifndef USED_TAG
+  (void)tag;
+#endif
+  return FALSE;
+}

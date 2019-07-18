@@ -34,7 +34,7 @@ http
 socks5
 </server>
 <setenv>
-http_proxy=socks5://%HOSTIP:%SOCKSPORT 
+http_proxy=socks5://%HOSTIP:%SOCKSPORT
 </setenv>
  <name>
 HTTP GET via SOCKS5 set in http_proxy environment variable

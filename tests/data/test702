@@ -12,6 +12,10 @@ FAILURE
 <reply>
 <data>
 </data>
+# 91 is socks4 failure
+<servercmd>
+response 91
+</servercmd>
 </reply>
 
 # Client-side

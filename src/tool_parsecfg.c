@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,7 +46,7 @@ static char *my_get_line(FILE *fp);
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
 {
-  FILE *file;
+  FILE *file = NULL;
   char filebuffer[512];
   bool usedarg = FALSE;
   int rc = 0;
@@ -69,7 +69,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
          */
         file = fopen(filebuffer, FOPEN_READTEXT);
         if(file != NULL) {
-          fclose(file);
           filename = filebuffer;
         }
         else {
@@ -77,8 +76,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            * already declared via inclusions done in setup header file.
            * We assume that we are using the ASCII version here.
            */
-          int n = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
-          if(n > 0 && n < (int)sizeof(filebuffer)) {
+          unsigned long len = GetModuleFileNameA(0, filebuffer,
+                                                 sizeof(filebuffer));
+          if(len > 0 && len < sizeof(filebuffer)) {
             /* We got a valid filename - get the directory part */
             char *lastdirchar = strrchr(filebuffer, '\\');
             if(lastdirchar) {
@@ -110,10 +110,12 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #endif
   }
 
-  if(strcmp(filename, "-"))
-    file = fopen(filename, FOPEN_READTEXT);
-  else
-    file = stdin;
+  if(!file) { /* WIN32: no need to fopen() again */
+    if(strcmp(filename, "-"))
+      file = fopen(filename, FOPEN_READTEXT);
+    else
+      file = stdin;
+  }
 
   if(file) {
     char *line;

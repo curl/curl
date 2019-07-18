@@ -23,16 +23,15 @@
 #include "curl_setup.h"
 
 #if (defined(USE_POLARSSL) || defined(USE_MBEDTLS)) && \
-    (defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32))
+    ((defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
+     (defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)))
 
-#if defined(USE_THREADS_POSIX)
-#  ifdef HAVE_PTHREAD_H
-#    include <pthread.h>
-#  endif
-#elif defined(USE_THREADS_WIN32)
-#  ifdef HAVE_PROCESS_H
-#    include <process.h>
-#  endif
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#  include <pthread.h>
+#  define POLARSSL_MUTEX_T pthread_mutex_t
+#elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
+#  include <process.h>
+#  define POLARSSL_MUTEX_T HANDLE
 #endif
 
 #include "polarssl_threadlock.h"
@@ -50,25 +49,23 @@ static POLARSSL_MUTEX_T *mutex_buf = NULL;
 int Curl_polarsslthreadlock_thread_setup(void)
 {
   int i;
-  int ret;
 
   mutex_buf = calloc(NUMT * sizeof(POLARSSL_MUTEX_T), 1);
   if(!mutex_buf)
     return 0;     /* error, no number of threads defined */
 
-#ifdef HAVE_PTHREAD_H
   for(i = 0;  i < NUMT;  i++) {
+    int ret;
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     ret = pthread_mutex_init(&mutex_buf[i], NULL);
     if(ret)
       return 0; /* pthread_mutex_init failed */
-  }
-#elif defined(HAVE_PROCESS_H)
-  for(i = 0;  i < NUMT;  i++) {
+#elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
     mutex_buf[i] = CreateMutex(0, FALSE, 0);
     if(mutex_buf[i] == 0)
       return 0;  /* CreateMutex failed */
+#endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
   }
-#endif /* HAVE_PTHREAD_H */
 
   return 1; /* OK */
 }
@@ -76,24 +73,22 @@ int Curl_polarsslthreadlock_thread_setup(void)
 int Curl_polarsslthreadlock_thread_cleanup(void)
 {
   int i;
-  int ret;
 
   if(!mutex_buf)
     return 0; /* error, no threads locks defined */
 
-#ifdef HAVE_PTHREAD_H
   for(i = 0; i < NUMT; i++) {
+    int ret;
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     ret = pthread_mutex_destroy(&mutex_buf[i]);
     if(ret)
       return 0; /* pthread_mutex_destroy failed */
-  }
-#elif defined(HAVE_PROCESS_H)
-  for(i = 0; i < NUMT; i++) {
+#elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
     ret = CloseHandle(mutex_buf[i]);
     if(!ret)
       return 0; /* CloseHandle failed */
+#endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
   }
-#endif /* HAVE_PTHREAD_H */
   free(mutex_buf);
   mutex_buf = NULL;
 
@@ -102,51 +97,47 @@ int Curl_polarsslthreadlock_thread_cleanup(void)
 
 int Curl_polarsslthreadlock_lock_function(int n)
 {
-  int ret;
-#ifdef HAVE_PTHREAD_H
   if(n < NUMT) {
+    int ret;
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     ret = pthread_mutex_lock(&mutex_buf[n]);
     if(ret) {
       DEBUGF(fprintf(stderr,
                      "Error: polarsslthreadlock_lock_function failed\n"));
       return 0; /* pthread_mutex_lock failed */
     }
-  }
-#elif defined(HAVE_PROCESS_H)
-  if(n < NUMT) {
+#elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
     ret = (WaitForSingleObject(mutex_buf[n], INFINITE) == WAIT_FAILED?1:0);
     if(ret) {
       DEBUGF(fprintf(stderr,
                      "Error: polarsslthreadlock_lock_function failed\n"));
       return 0; /* pthread_mutex_lock failed */
     }
+#endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
   }
-#endif /* HAVE_PTHREAD_H */
   return 1; /* OK */
 }
 
 int Curl_polarsslthreadlock_unlock_function(int n)
 {
-  int ret;
-#ifdef HAVE_PTHREAD_H
   if(n < NUMT) {
+    int ret;
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     ret = pthread_mutex_unlock(&mutex_buf[n]);
     if(ret) {
       DEBUGF(fprintf(stderr,
                      "Error: polarsslthreadlock_unlock_function failed\n"));
       return 0; /* pthread_mutex_unlock failed */
     }
-  }
-#elif defined(HAVE_PROCESS_H)
-  if(n < NUMT) {
+#elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
     ret = ReleaseMutex(mutex_buf[n]);
     if(!ret) {
       DEBUGF(fprintf(stderr,
                      "Error: polarsslthreadlock_unlock_function failed\n"));
       return 0; /* pthread_mutex_lock failed */
     }
+#endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
   }
-#endif /* HAVE_PTHREAD_H */
   return 1; /* OK */
 }
 

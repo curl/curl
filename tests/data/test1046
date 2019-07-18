@@ -40,7 +40,7 @@ HTTP-IPv6 GET with numeric localhost --interface
 </command>
 # --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
 <precheck>
-perl -e "print 'Test requires default test server host address' if ( '%CLIENT6IP' ne '[::1]' );"
+perl -e "print 'Test requires default test client host address' if ( '%CLIENT6IP' ne '[::1]' );"
 </precheck>
 </client>
 

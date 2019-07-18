@@ -28,6 +28,7 @@
  * RFC4954 SMTP Authentication
  * RFC5321 SMTP protocol
  * RFC6749 OAuth 2.0 Authorization Framework
+ * RFC8314 Use of TLS for Email Submission and Access
  * Draft   SMTP URL Interface   <draft-earhart-url-smtp-00.txt>
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
@@ -358,10 +359,8 @@ static CURLcode smtp_perform_helo(struct connectdata *conn)
  */
 static CURLcode smtp_perform_starttls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the STARTTLS command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "STARTTLS");
+  CURLcode result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "STARTTLS");
 
   if(!result)
     state(conn, SMTP_STARTTLS);
@@ -377,11 +376,10 @@ static CURLcode smtp_perform_starttls(struct connectdata *conn)
  */
 static CURLcode smtp_perform_upgrade_tls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-  struct smtp_conn *smtpc = &conn->proto.smtpc;
-
   /* Start the SSL connection */
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &smtpc->ssldone);
+  struct smtp_conn *smtpc = &conn->proto.smtpc;
+  CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                 &smtpc->ssldone);
 
   if(!result) {
     if(smtpc->state != SMTP_UPGRADETLS)
@@ -644,10 +642,8 @@ static CURLcode smtp_perform_rcpt_to(struct connectdata *conn)
  */
 static CURLcode smtp_perform_quit(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "QUIT");
+  CURLcode result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, SMTP_QUIT);
@@ -1218,7 +1214,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
        returned CURLE_AGAIN, we duplicate the EOB now rather than when the
        bytes written doesn't equal len. */
     if(smtp->trailing_crlf || !conn->data->state.infilesize) {
-      eob = strdup(SMTP_EOB + 2);
+      eob = strdup(&SMTP_EOB[2]);
       len = SMTP_EOB_LEN - 2;
     }
     else {
@@ -1252,12 +1248,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
     state(conn, SMTP_POSTDATA);
 
-    /* Run the state-machine
-
-       TODO: when the multi interface is used, this _really_ should be using
-       the smtp_multi_statemach function but we have no general support for
-       non-blocking DONE operations!
-    */
+    /* Run the state-machine */
     result = smtp_block_statemach(conn, FALSE);
   }
 

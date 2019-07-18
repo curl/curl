@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+CURLOPT_URL
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+<client>
+<server>
+none
+</server>
+
+# require HTTP so that CURLOPT_POSTFIELDS works as assumed
+<features>
+http
+</features>
+<tool>
+lib1559
+</tool>
+
+<name>
+Set excessive URL lengths
+</name>
+</client>
+
+#
+# Verify that the test runs to completion without crashing
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout>
+CURLOPT_URL 10000000 bytes URL == 43
+CURLOPT_POSTFIELDS 10000000 bytes data == 0
+CURLUPART_URL 10000000 bytes URL == 3
+CURLUPART_SCHEME 10000000 bytes scheme == 3
+CURLUPART_USER 10000000 bytes user == 3
+</stdout>
+</verify>
+
+</testcase>

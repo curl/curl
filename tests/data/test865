@@ -16,7 +16,7 @@ RFC5034
 <servercmd>
 AUTH PLAIN
 REPLY AUTH +
-REPLY dXNlcgB1c2VyAHNlY3JldA== +OK Login successful
+REPLY AHVzZXIAc2VjcmV0 +OK Login successful
 </servercmd>
 <data>
 From: me@somewhere
@@ -49,7 +49,7 @@ pop3://%HOSTIP:%POP3PORT/865 -u user:secret
 <protocol>
 CAPA
 AUTH PLAIN
-dXNlcgB1c2VyAHNlY3JldA==
+AHVzZXIAc2VjcmV0
 RETR 865
 QUIT
 </protocol>

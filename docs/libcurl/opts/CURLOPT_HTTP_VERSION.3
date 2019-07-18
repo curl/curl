@@ -29,9 +29,7 @@ CURLOPT_HTTP_VERSION \- specify HTTP protocol version to use
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_VERSION, long version);
 .SH DESCRIPTION
 Pass \fIversion\fP a long, set to one of the values described below. They ask
-libcurl to use the specific HTTP versions. This is not sensible to do unless
-you have a good reason. You have to set this option if you want to use
-libcurl's HTTP/2 support.
+libcurl to use the specific HTTP versions.
 
 Note that the HTTP version is just a request. libcurl will still prioritize to
 re-use an existing connection so it might then re-use a connection using a

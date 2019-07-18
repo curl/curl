@@ -565,14 +565,11 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 #ifdef HAVE_GSSAPI
   char * const buf = data->state.buffer;
 #endif
-  CURLcode result = CURLE_OK;
   int code;
-
-  result = Curl_pp_readresp(sockfd, pp, &code, size);
+  CURLcode result = Curl_pp_readresp(sockfd, pp, &code, size);
 
 #if defined(HAVE_GSSAPI)
   /* handle the security-oriented responses 6xx ***/
-  /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
   case 631:
     code = Curl_sec_read_msg(conn, buf, PROT_SAFE);
@@ -1080,7 +1077,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   }
 
   /* resolv ip/host to ip */
-  rc = Curl_resolv(conn, host, 0, &h);
+  rc = Curl_resolv(conn, host, 0, FALSE, &h);
   if(rc == CURLRESOLV_PENDING)
     (void)Curl_resolver_wait_resolv(conn, &h);
   if(h) {
@@ -1500,24 +1497,14 @@ static CURLcode ftp_state_list(struct connectdata *conn)
 
 static CURLcode ftp_state_retr_prequote(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* We've sent the TYPE, now we must send the list of prequote strings */
-
-  result = ftp_state_quote(conn, TRUE, FTP_RETR_PREQUOTE);
-
-  return result;
+  return ftp_state_quote(conn, TRUE, FTP_RETR_PREQUOTE);
 }
 
 static CURLcode ftp_state_stor_prequote(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* We've sent the TYPE, now we must send the list of prequote strings */
-
-  result = ftp_state_quote(conn, TRUE, FTP_STOR_PREQUOTE);
-
-  return result;
+  return ftp_state_quote(conn, TRUE, FTP_STOR_PREQUOTE);
 }
 
 static CURLcode ftp_state_type(struct connectdata *conn)
@@ -1934,7 +1921,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
      */
     const char * const host_name = conn->bits.socksproxy ?
       conn->socks_proxy.host.name : conn->http_proxy.host.name;
-    rc = Curl_resolv(conn, host_name, (int)conn->port, &addr);
+    rc = Curl_resolv(conn, host_name, (int)conn->port, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING, ignores the return code but 'addr' will be NULL in
          case of failure */
@@ -1950,7 +1937,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   }
   else {
     /* normal, direct, ftp connection */
-    rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, &addr);
+    rc = Curl_resolv(conn, ftpc->newhost, ftpc->newport, FALSE, &addr);
     if(rc == CURLRESOLV_PENDING)
       /* BLOCKING */
       (void)Curl_resolver_wait_resolv(conn, &addr);
@@ -3490,7 +3477,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
   if(!conn->bits.tcpconnect[SECONDARYSOCKET]) {
     if(Curl_connect_ongoing(conn)) {
       /* As we're in TUNNEL_CONNECT state now, we know the proxy name and port
-         aren't used so we blank their arguments. TODO: make this nicer */
+         aren't used so we blank their arguments. */
       result = Curl_proxyCONNECT(conn, SECONDARYSOCKET, NULL, 0);
 
       return result;

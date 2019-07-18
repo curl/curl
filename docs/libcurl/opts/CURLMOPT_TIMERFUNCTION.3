@@ -54,6 +54,11 @@ The \fBuserp\fP pointer is set with \fICURLMOPT_TIMERDATA(3)\fP.
 
 The timer callback should return 0 on success, and -1 on error. This callback
 can be used instead of, or in addition to, \fIcurl_multi_timeout(3)\fP.
+
+\fBWARNING:\fP even if it feels tempting, avoid calling libcurl directly from
+within the callback itself when the \fBtimeout_ms\fP value is zero, since it
+risks triggering an unpleasant recursive behavior that immediately calls
+another call to the callback with a zero timeout...
 .SH DEFAULT
 NULL
 .SH PROTOCOLS

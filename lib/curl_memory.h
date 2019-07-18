@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,7 +39,7 @@
  *
  * File lib/strdup.c is an exception, given that it provides a strdup
  * clone implementation while using malloc. Extra care needed inside
- * this one. TODO: revisit this paragraph and related code.
+ * this one.
  *
  * The need for curl_memory.h inclusion is due to libcurl's feature
  * of allowing library user to provide memory replacement functions,

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -111,15 +111,12 @@ struct httprequest {
   bool ntlm;      /* Authorization ntlm header found */
   int writedelay; /* if non-zero, delay this number of seconds between
                      writes in the response */
-  int pipe;       /* if non-zero, expect this many requests to do a "piped"
-                     request/response */
   int skip;       /* if non-zero, the server is instructed to not read this
                      many bytes from a PUT/POST request. Ie the client sends N
                      bytes said in Content-Length, but the server only reads N
                      - skip bytes. */
   int rcmd;       /* doing a special command, see defines above */
   int prot_version;  /* HTTP version * 10 */
-  bool pipelining;   /* true if request is pipelined */
   int callcount;  /* times ProcessRequest() gets called */
   bool connmon;   /* monitor the state of the connection, log disconnects */
   bool upgrade;   /* test case allows upgrade to http2 */
@@ -426,14 +423,6 @@ static int parse_servercmd(struct httprequest *req)
         logmsg("swsclose: close this connection after response");
         req->close = TRUE;
       }
-      else if(1 == sscanf(cmd, "pipe: %d", &num)) {
-        logmsg("instructed to allow a pipe size of %d", num);
-        if(num < 0)
-          logmsg("negative pipe size ignored");
-        else if(num > 0)
-          req->pipe = num-1; /* decrease by one since we don't count the
-                                first request in this number */
-      }
       else if(1 == sscanf(cmd, "skip: %d", &num)) {
         logmsg("instructed to skip this number of bytes %d", num);
         req->skip = num;
@@ -706,11 +695,6 @@ static int ProcessRequest(struct httprequest *req)
     }
   }
 
-  if(req->pipe)
-    /* we do have a full set, advance the checkindex to after the end of the
-       headers, for the pipelining case mostly */
-    req->checkindex += (end - line) + strlen(end_of_headers);
-
   /* **** Persistence ****
    *
    * If the request is a HTTP/1.0 one, we close the connection unconditionally
@@ -844,8 +828,7 @@ static int ProcessRequest(struct httprequest *req)
   if(strstr(req->reqbuf, "Connection: close"))
     req->open = FALSE; /* close connection after this request */
 
-  if(!req->pipe &&
-     req->open &&
+  if(req->open &&
      req->prot_version >= 11 &&
      end &&
      req->reqbuf + req->offset > end + strlen(end_of_headers) &&
@@ -855,19 +838,6 @@ static int ProcessRequest(struct httprequest *req)
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
     req->checkindex = (end - req->reqbuf) + strlen(end_of_headers);
-    req->pipelining = TRUE;
-  }
-
-  while(req->pipe) {
-    if(got_exit_signal)
-      return 1; /* done */
-    /* scan for more header ends within this chunk */
-    line = &req->reqbuf[req->checkindex];
-    end = strstr(line, end_of_headers);
-    if(!end)
-      break;
-    req->checkindex += (end - line) + strlen(end_of_headers);
-    req->pipe--;
   }
 
   /* If authentication is required and no auth was provided, end now. This
@@ -951,13 +921,8 @@ storerequest_cleanup:
 
 static void init_httprequest(struct httprequest *req)
 {
-  /* Pipelining is already set, so do not initialize it here. Only initialize
-     checkindex and offset if pipelining is not set, since in a pipeline they
-     need to be inherited from the previous request. */
-  if(!req->pipelining) {
-    req->checkindex = 0;
-    req->offset = 0;
-  }
+  req->checkindex = 0;
+  req->offset = 0;
   req->testno = DOCNUMBER_NOTHING;
   req->partno = 0;
   req->connect_request = FALSE;
@@ -967,7 +932,6 @@ static void init_httprequest(struct httprequest *req)
   req->cl = 0;
   req->digest = FALSE;
   req->ntlm = FALSE;
-  req->pipe = 0;
   req->skip = 0;
   req->writedelay = 0;
   req->rcmd = RCMD_NORMALREQ;
@@ -988,39 +952,19 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
   ssize_t got = 0;
   int overflow = 0;
 
-  char *pipereq = NULL;
-  size_t pipereq_length = 0;
-
-  if(req->pipelining) {
-    pipereq = reqbuf + req->checkindex;
-    pipereq_length = req->offset - req->checkindex;
-
-    /* Now that we've got the pipelining info we can reset the
-       pipelining-related vars which were skipped in init_httprequest */
-    req->pipelining = FALSE;
-    req->checkindex = 0;
-    req->offset = 0;
-  }
-
   if(req->offset >= REQBUFSIZ-1) {
     /* buffer is already full; do nothing */
     overflow = 1;
   }
   else {
-    if(pipereq_length && pipereq) {
-      memmove(reqbuf, pipereq, pipereq_length);
-      got = curlx_uztosz(pipereq_length);
-      pipereq_length = 0;
-    }
-    else {
-      if(req->skip)
-        /* we are instructed to not read the entire thing, so we make sure to
-           only read what we're supposed to and NOT read the enire thing the
-           client wants to send! */
-        got = sread(sock, reqbuf + req->offset, req->cl);
-      else
-        got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
-    }
+    if(req->skip)
+      /* we are instructed to not read the entire thing, so we make sure to
+         only read what we're supposed to and NOT read the enire thing the
+         client wants to send! */
+      got = sread(sock, reqbuf + req->offset, req->cl);
+    else
+      got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
+
     if(got_exit_signal)
       return -1;
     if(got == 0) {
@@ -1051,11 +995,6 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
     req->done_processing = ProcessRequest(req);
     if(got_exit_signal)
       return -1;
-    if(req->done_processing && req->pipe) {
-      logmsg("Waiting for another piped request");
-      req->done_processing = 0;
-      req->pipe--;
-    }
   }
 
   if(overflow || (req->offset == REQBUFSIZ-1 && got > 0)) {
@@ -1075,7 +1014,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
 
   /* at the end of a request dump it to an external file */
   if(fail || req->done_processing)
-    storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
+    storerequest(reqbuf, req->offset);
   if(got_exit_signal)
     return -1;
 
@@ -1598,7 +1537,6 @@ static void http_connect(curl_socket_t *infdp,
               logmsg("====> TCP_NODELAY for client DATA connection failed");
           }
 #endif
-          req2.pipelining = FALSE;
           init_httprequest(&req2);
           while(!req2.done_processing) {
             err = get_request(datafd, &req2);
@@ -2281,7 +2219,6 @@ int main(int argc, char *argv[])
      the pipelining struct field must be initialized previously to FALSE
      every time a new connection arrives. */
 
-  req.pipelining = FALSE;
   init_httprequest(&req);
 
   for(;;) {

@@ -268,13 +268,9 @@ Curl_getnameinfo_a(const struct sockaddr * sa, curl_socklen_t salen,
               int flags)
 
 {
-  char * enodename;
-  char * eservname;
+  char *enodename = NULL;
+  char *eservname = NULL;
   int status;
-  int i;
-
-  enodename = (char *) NULL;
-  eservname = (char *) NULL;
 
   if(nodename && nodenamelen) {
     enodename = malloc(nodenamelen);
@@ -294,6 +290,7 @@ Curl_getnameinfo_a(const struct sockaddr * sa, curl_socklen_t salen,
                        eservname, servnamelen, flags);
 
   if(!status) {
+    int i;
     if(enodename) {
       i = QadrtConvertE2A(nodename, enodename,
         nodenamelen - 1, strlen(enodename));
@@ -389,7 +386,6 @@ Curl_gsk_environment_open(gsk_handle * my_env_handle)
 
 {
   struct Curl_gsk_descriptor * p;
-  gsk_handle h;
   int rc;
 
   if(!my_env_handle)
@@ -767,16 +763,13 @@ static int
 Curl_gss_convert_in_place(OM_uint32 * minor_status, gss_buffer_t buf)
 
 {
-  unsigned int i;
-  char * t;
+  unsigned int i = buf->length;
 
   /* Convert `buf' in place, from EBCDIC to ASCII.
      If error, release the buffer and return -1. Else return 0. */
 
-  i = buf->length;
-
   if(i) {
-    t = malloc(i);
+    char *t = malloc(i);
     if(!t) {
       gss_release_buffer(minor_status, buf);
 
@@ -866,7 +859,6 @@ Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
 
 {
   int rc;
-  unsigned int i;
   gss_buffer_desc in;
   gss_buffer_t inp;
 
@@ -875,7 +867,7 @@ Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
 
   if(inp) {
     if(inp->length && inp->value) {
-      i = inp->length;
+      unsigned int i = inp->length;
 
       in.value = malloc(i + 1);
       if(!in.value) {

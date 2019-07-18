@@ -57,6 +57,8 @@
 #  include <openssl/des.h>
 #  ifndef OPENSSL_NO_MD4
 #    include <openssl/md4.h>
+#  else
+#    include "curl_md4.h"
 #  endif
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
@@ -216,7 +218,6 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
 {
   const CK_MECHANISM_TYPE mech = CKM_DES_ECB; /* DES cipher in ECB mode */
-  PK11SlotInfo *slot = NULL;
   char key[8];                                /* expanded 64 bit key */
   SECItem key_item;
   PK11SymKey *symkey = NULL;
@@ -226,7 +227,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   bool rv = FALSE;
 
   /* use internal slot for DES encryption (requires NSS to be initialized) */
-  slot = PK11_GetInternalKeySlot();
+  PK11SlotInfo *slot = PK11_GetInternalKeySlot();
   if(!slot)
     return FALSE;
 
@@ -568,10 +569,14 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
   {
     /* Create NT hashed password. */
 #ifdef USE_OPENSSL
+#if !defined(OPENSSL_NO_MD4)
     MD4_CTX MD4pw;
     MD4_Init(&MD4pw);
     MD4_Update(&MD4pw, pw, 2 * len);
     MD4_Final(ntbuffer, &MD4pw);
+#else
+    Curl_md4it(ntbuffer, pw, 2 * len);
+#endif
 #elif defined(USE_GNUTLS_NETTLE)
     struct md4_ctx MD4pw;
     md4_init(&MD4pw);

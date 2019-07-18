@@ -265,7 +265,6 @@ void curl_global_cleanup(void)
   if(--initialized)
     return;
 
-  Curl_global_host_cache_dtor();
   Curl_ssl_cleanup();
   Curl_resolver_global_cleanup();
 
@@ -428,8 +427,8 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
            mask. Convert from libcurl bitmask to the poll one. */
         m->socket.events = socketcb2poll(what);
         infof(easy, "socket cb: socket %d UPDATED as %s%s\n", s,
-              what&CURL_POLL_IN?"IN":"",
-              what&CURL_POLL_OUT?"OUT":"");
+              (what&CURL_POLL_IN)?"IN":"",
+              (what&CURL_POLL_OUT)?"OUT":"");
       }
       break;
     }
@@ -452,8 +451,8 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         m->socket.revents = 0;
         ev->list = m;
         infof(easy, "socket cb: socket %d ADDED as %s%s\n", s,
-              what&CURL_POLL_IN?"IN":"",
-              what&CURL_POLL_OUT?"OUT":"");
+              (what&CURL_POLL_IN)?"IN":"",
+              (what&CURL_POLL_OUT)?"OUT":"");
       }
       else
         return CURLE_OUT_OF_MEMORY;
@@ -560,7 +559,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       return CURLE_RECV_ERROR;
 
     if(mcode)
-      return CURLE_URL_MALFORMAT; /* TODO: return a proper error! */
+      return CURLE_URL_MALFORMAT;
 
     /* we don't really care about the "msgs_in_queue" value returned in the
        second argument */
@@ -962,7 +961,10 @@ void curl_easy_reset(struct Curl_easy *data)
   /* zero out authentication data: */
   memset(&data->state.authhost, 0, sizeof(struct auth));
   memset(&data->state.authproxy, 0, sizeof(struct auth));
-  Curl_digest_cleanup(data);
+
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+  Curl_http_auth_cleanup_digest(data);
+#endif
 }
 
 /*
@@ -1036,8 +1038,11 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
      to have this handle checked soon */
   if(!result &&
      ((newstate&(KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) )
+      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) ) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
+    if(data->multi)
+      Curl_update_timer(data->multi);
+  }
 
   /* This transfer may have been moved in or out of the bundle, update
      the corresponding socket callback, if used */

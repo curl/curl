@@ -28,6 +28,7 @@
  * RFC4959 IMAP Extension for SASL Initial Client Response
  * RFC5092 IMAP URL Scheme
  * RFC6749 OAuth 2.0 Authorization Framework
+ * RFC8314 Use of TLS for Email Submission and Access
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
@@ -443,10 +444,8 @@ static CURLcode imap_perform_capability(struct connectdata *conn)
  */
 static CURLcode imap_perform_starttls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the STARTTLS command */
-  result = imap_sendf(conn, "STARTTLS");
+  CURLcode result = imap_sendf(conn, "STARTTLS");
 
   if(!result)
     state(conn, IMAP_STARTTLS);
@@ -462,11 +461,10 @@ static CURLcode imap_perform_starttls(struct connectdata *conn)
  */
 static CURLcode imap_perform_upgrade_tls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-  struct imap_conn *imapc = &conn->proto.imapc;
-
   /* Start the SSL connection */
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
+  struct imap_conn *imapc = &conn->proto.imapc;
+  CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                 &imapc->ssldone);
 
   if(!result) {
     if(imapc->state != IMAP_UPGRADETLS)
@@ -825,10 +823,8 @@ static CURLcode imap_perform_search(struct connectdata *conn)
  */
 static CURLcode imap_perform_logout(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the LOGOUT command */
-  result = imap_sendf(conn, "LOGOUT");
+  CURLcode result = imap_sendf(conn, "LOGOUT");
 
   if(!result)
     state(conn, IMAP_LOGOUT);
@@ -1042,7 +1038,7 @@ static CURLcode imap_state_listsearch_resp(struct connectdata *conn,
     line[len] = '\0';
   }
   else if(imapcode != IMAP_RESP_OK)
-    result = CURLE_QUOTE_ERROR; /* TODO: Fix error code */
+    result = CURLE_QUOTE_ERROR;
   else
     /* End of DO phase */
     state(conn, IMAP_STOP);
@@ -1114,7 +1110,7 @@ static CURLcode imap_state_fetch_resp(struct connectdata *conn, int imapcode,
   if(imapcode != '*') {
     Curl_pgrsSetDownloadSize(data, -1);
     state(conn, IMAP_STOP);
-    return CURLE_REMOTE_FILE_NOT_FOUND; /* TODO: Fix error code */
+    return CURLE_REMOTE_FILE_NOT_FOUND;
   }
 
   /* Something like this is received "* 1 FETCH (BODY[TEXT] {2021}\r" so parse
@@ -1491,12 +1487,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
         state(conn, IMAP_APPEND_FINAL);
     }
 
-    /* Run the state-machine
-
-       TODO: when the multi interface is used, this _really_ should be using
-       the imap_multi_statemach function but we have no general support for
-       non-blocking DONE operations!
-    */
+    /* Run the state-machine */
     if(!result)
       result = imap_block_statemach(conn, FALSE);
   }
@@ -1794,7 +1785,7 @@ static char *imap_atom(const char *str, bool escape_only)
     return NULL;
 
   /* Look for "atom-specials", counting the backslash and quote characters as
-     these will need escapping */
+     these will need escaping */
   p1 = str;
   while(*p1) {
     if(*p1 == '\\')

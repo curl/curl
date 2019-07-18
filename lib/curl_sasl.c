@@ -31,6 +31,9 @@
 
 #include "curl_setup.h"
 
+#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
+  !defined(CURL_DISABLE_POP3)
+
 #include <curl/curl.h>
 #include "urldata.h"
 
@@ -83,14 +86,14 @@ void Curl_sasl_cleanup(struct connectdata *conn, unsigned int authused)
 #if defined(USE_KERBEROS5)
   /* Cleanup the gssapi structure */
   if(authused == SASL_MECH_GSSAPI) {
-    Curl_auth_gssapi_cleanup(&conn->krb5);
+    Curl_auth_cleanup_gssapi(&conn->krb5);
   }
 #endif
 
 #if defined(USE_NTLM)
   /* Cleanup the NTLM structure */
   if(authused == SASL_MECH_NTLM) {
-    Curl_auth_ntlm_cleanup(&conn->ntlm);
+    Curl_auth_cleanup_ntlm(&conn->ntlm);
   }
 #endif
 
@@ -290,7 +293,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 #if defined(USE_KERBEROS5)
     if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported() &&
        Curl_auth_user_contains_domain(conn->user)) {
-      sasl->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
+      sasl->mutual_auth = FALSE;
       mech = SASL_MECH_STRING_GSSAPI;
       state1 = SASL_GSSAPI;
       state2 = SASL_GSSAPI_TOKEN;
@@ -357,10 +360,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_XOAUTH2;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                       NULL, 0,
-                                                       conn->oauth_bearer,
-                                                       &resp, &len);
+        result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
+                                                        conn->oauth_bearer,
+                                                        &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_PLAIN) {
       mech = SASL_MECH_STRING_PLAIN;
@@ -368,8 +370,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_PLAIN;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_plain_message(data, conn->user, conn->passwd,
-                                                &resp, &len);
+        result = Curl_auth_create_plain_message(data, NULL, conn->user,
+                                                conn->passwd, &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_LOGIN) {
       mech = SASL_MECH_STRING_LOGIN;
@@ -451,9 +453,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     *progress = SASL_DONE;
     return result;
   case SASL_PLAIN:
-    result = Curl_auth_create_plain_message(data, conn->user, conn->passwd,
-                                            &resp,
-                                            &len);
+    result = Curl_auth_create_plain_message(data, NULL, conn->user,
+                                            conn->passwd, &resp, &len);
     break;
   case SASL_LOGIN:
     result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
@@ -562,10 +563,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
       newstate = SASL_OAUTH2_RESP;
     }
     else
-      result = Curl_auth_create_oauth_bearer_message(data, conn->user,
-                                                     NULL, 0,
-                                                     conn->oauth_bearer,
-                                                     &resp, &len);
+      result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
+                                                      conn->oauth_bearer,
+                                                      &resp, &len);
     break;
 
   case SASL_OAUTH2_RESP:
@@ -626,3 +626,4 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
 
   return result;
 }
+#endif /* protocols are enabled that use SASL */

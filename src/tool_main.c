@@ -237,7 +237,7 @@ static void main_free(struct GlobalConfig *config)
   config->last = NULL;
 }
 
-#ifdef _WIN32
+#ifdef WIN32
 /* TerminalSettings for Windows */
 static struct TerminalSettings {
   HANDLE hStdOut;
@@ -275,7 +275,7 @@ static void configure_terminal(void)
 
 static void restore_terminal(void)
 {
-#ifdef _WIN32
+#ifdef WIN32
   /* Restore Console output mode and codepage to whatever they were
    * when Curl started */
   SetConsoleMode(TerminalSettings.hStdOut, TerminalSettings.dwOutputMode);

@@ -785,6 +785,8 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
   case SMB_OPEN:
     if(h->status || smbc->got < sizeof(struct smb_nt_create_response)) {
       req->result = CURLE_REMOTE_FILE_NOT_FOUND;
+      if(h->status == smb_swap32(SMB_ERR_NOACCESS))
+        req->result = CURLE_REMOTE_ACCESS_DENIED;
       next_state = SMB_TREE_DISCONNECT;
       break;
     }
@@ -957,7 +959,6 @@ static CURLcode smb_do(struct connectdata *conn, bool *done)
 
 static CURLcode smb_parse_url_path(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct smb_request *req = data->req.protop;
   struct smb_conn *smbc = &conn->proto.smbc;
@@ -965,7 +966,8 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
   char *slash;
 
   /* URL decode the path */
-  result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL, TRUE);
+  CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL,
+                                   TRUE);
   if(result)
     return result;
 

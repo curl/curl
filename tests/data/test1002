@@ -67,7 +67,7 @@ http
 crypto
 </features>
  <name>
-HTTP POST --digest with PUT and resumed upload and modified method, twice
+HTTP PUT with Digest auth, resumed upload and modified method, twice
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1002.upload1 -T log/1002 http://%HOSTIP:%HTTPPORT/1002.upload2 -T log/1002 -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET

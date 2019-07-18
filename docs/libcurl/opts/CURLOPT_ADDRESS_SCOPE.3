@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -22,14 +22,13 @@
 .\"
 .TH CURLOPT_ADDRESS_SCOPE 3 "19 Jun 2014" "libcurl 7.37.0" "curl_easy_setopt options"
 .SH NAME
-CURLOPT_ADDRESS_SCOPE \- set scope for local IPv6 addresses
+CURLOPT_ADDRESS_SCOPE \- set scope id for IPv6 addresses
 .SH SYNOPSIS
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ADDRESS_SCOPE, long scope);
 .SH DESCRIPTION
-Pass a long specifying the scope_id value to use when connecting to IPv6
-link-local or site-local addresses.
+Pass a long specifying the scope id value to use when connecting to IPv6 addresses.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -39,12 +38,10 @@ All, when using IPv6
 CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode ret;
+  long my_scope_id;
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* 0x2 link-local
-     0x5 site-local
-     0x8 organization-local
-     0xe global ... */
-  curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, 0xEL);
+  my_scope_id = if_nametoindex("eth0");
+  curl_easy_setopt(curl, CURLOPT_ADDRESS_SCOPE, my_scope_id);
   ret = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }
@@ -53,5 +50,6 @@ if(curl) {
 Added in 7.19.0
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+Returns CURLE_BAD_FUNCTION_ARGUMENT if set to a negative value.
 .SH "SEE ALSO"
 .BR CURLOPT_STDERR "(3), " CURLOPT_DEBUGFUNCTION "(3), "

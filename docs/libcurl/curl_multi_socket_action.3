@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -43,15 +43,14 @@ libcurl will test the descriptor internally. It is also permissible to pass
 CURL_SOCKET_TIMEOUT to the \fBsockfd\fP parameter in order to initiate the
 whole process or when a timeout occurs.
 
-At return, \fBrunning_handles\fP points to the number
-of running easy handles within the multi handle. When this number reaches
-zero, all transfers are complete/done. When you call
-\fIcurl_multi_socket_action(3)\fP on a specific socket and the counter
-decreases by one, it DOES NOT necessarily mean that this exact socket/transfer
-is the one that completed. Use \fIcurl_multi_info_read(3)\fP to figure out
-which easy handle that completed.
+At return, \fBrunning_handles\fP points to the number of running easy handles
+within the multi handle. When this number reaches zero, all transfers are
+complete/done. When you call \fIcurl_multi_socket_action(3)\fP on a specific
+socket and the counter decreases by one, it DOES NOT necessarily mean that
+this exact socket/transfer is the one that completed. Use
+\fIcurl_multi_info_read(3)\fP to figure out which easy handle that completed.
 
-The \fIcurl_multi_socket_action(3)\fP functions inform the application about
+The \fIcurl_multi_socket_action(3)\fP function informs the application about
 updates in the socket (file descriptor) status by doing none, one, or multiple
 calls to the socket callback function set with the
 \fICURLMOPT_SOCKETFUNCTION(3)\fP option to \fIcurl_multi_setopt(3)\fP. They
@@ -66,65 +65,6 @@ timeout action: call the \fIcurl_multi_socket_action(3)\fP function with the
 \fIcurl_multi_timeout(3)\fP function to poll the value at any given time, but
 for an event-based system using the callback is far better than relying on
 polling the timeout value.
-.SH "CALLBACK DETAILS"
-
-The socket \fBcallback\fP function uses a prototype like this
-.nf
-
-  int curl_socket_callback(CURL *easy,      /* easy handle */
-                           curl_socket_t s, /* socket */
-                           int action,      /* see values below */
-                           void *userp,    /* private callback pointer */
-                           void *socketp); /* private socket pointer,
-                                              \fBNULL\fP if not
-                                              previously assigned with
-                                              \fIcurl_multi_assign(3)\fP */
-
-.fi
-The callback MUST return 0.
-
-The \fIeasy\fP argument is a pointer to the easy handle that deals with this
-particular socket. Note that a single handle may work with several sockets
-simultaneously.
-
-The \fIs\fP argument is the actual socket value as you use it within your
-system.
-
-The \fIaction\fP argument to the callback has one of five values:
-.RS
-.IP "CURL_POLL_NONE (0)"
-register, not interested in readiness (yet)
-.IP "CURL_POLL_IN (1)"
-register, interested in read readiness
-.IP "CURL_POLL_OUT (2)"
-register, interested in write readiness
-.IP "CURL_POLL_INOUT (3)"
-register, interested in both read and write readiness
-.IP "CURL_POLL_REMOVE (4)"
-unregister
-.RE
-
-The \fIsocketp\fP argument is a private pointer you have previously set with
-\fIcurl_multi_assign(3)\fP to be associated with the \fIs\fP socket. If no
-pointer has been set, socketp will be NULL. This argument is of course a
-service to applications that want to keep certain data or structs that are
-strictly associated to the given socket.
-
-The \fIuserp\fP argument is a private pointer you have previously set with
-\fIcurl_multi_setopt(3)\fP and the \fICURLMOPT_SOCKETDATA(3)\fP option.
-.SH "RETURN VALUE"
-CURLMcode type, general libcurl multi interface error code.
-
-Before version 7.20.0: If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this
-basically means that you should call \fIcurl_multi_socket_action(3)\fP again
-before you wait for more actions on libcurl's sockets. You don't have to do it
-immediately, but the return code means that libcurl may have more data
-available to return or that there may be more data to send off before it is
-"satisfied".
-
-The return code from this function is for the whole multi stack.  Problems
-still might have occurred on individual transfers even when one of these
-functions return OK.
 .SH "TYPICAL USAGE"
 1. Create a multi handle
 

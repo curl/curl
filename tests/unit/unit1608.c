@@ -65,6 +65,7 @@ UNITTEST_START
   }
 
   curl_easy_cleanup(easy);
+  curl_global_cleanup();
 
   abort_unless(addrhead != addrs, "addresses are not being reordered");
 

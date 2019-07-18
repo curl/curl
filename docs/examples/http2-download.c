@@ -110,7 +110,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== %d Info: %s", num, data);
+    fprintf(stderr, "== %u Info: %s", num, data);
     /* FALLTHROUGH */
   default: /* in case a new one is introduced to shock us */
     return 0;

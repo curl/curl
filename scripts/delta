@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2018-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 #
 ###########################################################################
 
-# Display changes done in the respository from [tag] until now.
+# Display changes done in the repository from [tag] until now.
 #
 # Uses git for repo data.
 # Uses docs/THANKS and RELEASE-NOTES for current status.
@@ -79,7 +79,7 @@ $apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
 $bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
 $public = $apublic - $bpublic;
 
-# Changes/bug-fixes currenly logged
+# Changes/bug-fixes currently logged
 open(F, "<RELEASE-NOTES");
 while(<F>) {
     if($_ =~ /following changes:/) {

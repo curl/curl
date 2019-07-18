@@ -244,7 +244,7 @@ my $h2cver = "h2c";
 my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
 my $has_nss;        # built with NSS
-my $has_yassl;      # built with yassl
+my $has_wolfssl;    # built with wolfSSL
 my $has_polarssl;   # built with polarssl
 my $has_winssl;     # built with WinSSL    (Secure Channel aka Schannel)
 my $has_darwinssl;  # built with DarwinSSL (Secure Transport)
@@ -276,7 +276,7 @@ my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
 my $sshderror;   # for socks server, ssh daemon version error
 
-my $defserverlogslocktimeout = 20; # timeout to await server logs lock removal
+my $defserverlogslocktimeout = 2; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 
 my $timestats;   # time stamping and stats generation
@@ -291,6 +291,7 @@ my %timevrfyend; # timestamp for each test result verification end
 
 my $testnumcheck; # test number, set in singletest sub.
 my %oldenv;
+my %feature; # array of enabled features
 
 #######################################################################
 # variables that command line options may set
@@ -2012,7 +2013,6 @@ sub runsshserver {
     my ($id, $verbose, $ipv6) = @_;
     my $ip=$HOSTIP;
     my $port = $SSHPORT;
-    my $socksport = $SOCKSPORT;
     my $proto = 'ssh';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
@@ -2046,7 +2046,7 @@ sub runsshserver {
     $flags .= "--pidfile \"$pidfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
-    $flags .= "--sshport $port --socksport $socksport ";
+    $flags .= "--sshport $port ";
     $flags .= "--user \"$USER\"";
 
     my $cmd = "$perl $srcdir/sshserver.pl $flags";
@@ -2139,108 +2139,27 @@ sub runsocksserver {
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
-    # The ssh server must be already running
-    if(!$run{'ssh'}) {
-        logmsg "RUN: SOCKS server cannot find running SSH server\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
+    # start our socks server, get commands from the FTP cmd file
+    my $cmd="server/socksd".
+        " --port $port ".
+        " --pidfile $pidfile".
+        " --backend $HOSTIP".
+        " --config $FTPDCMD";
+    my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
 
-    # Find out ssh daemon canonical file name
-    my $sshd = find_sshd();
-    if(!$sshd) {
-        logmsg "RUN: SOCKS server cannot find $sshdexe\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    # Find out ssh daemon version info
-    ($sshdid, $sshdvernum, $sshdverstr, $sshderror) = sshversioninfo($sshd);
-    if(!$sshdid) {
-        # Not an OpenSSH or SunSSH ssh daemon
-        logmsg "$sshderror\n" if($verbose);
-        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
-
-    # Find out ssh client canonical file name
-    my $ssh = find_ssh();
-    if(!$ssh) {
-        logmsg "RUN: SOCKS server cannot find $sshexe\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    # Find out ssh client version info
-    my ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
-    if(!$sshid) {
-        # Not an OpenSSH or SunSSH ssh client
-        logmsg "$ssherror\n" if($verbose);
-        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    # Verify minimum ssh client version
-    if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
-       (($sshid =~ /SunSSH/)  && ($sshvernum < 100))) {
-        logmsg "ssh client found $ssh is $sshverstr\n";
-        logmsg "SCP, SFTP and SOCKS tests require OpenSSH 2.9.9 or later\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
-
-    # Verify if ssh client and ssh daemon versions match
-    if(($sshdid ne $sshid) || ($sshdvernum != $sshvernum)) {
-        # Our test harness might work with slightly mismatched versions
-        logmsg "Warning: version mismatch: sshd $sshdverstr - ssh $sshverstr\n"
-            if($verbose);
-    }
-
-    # Config file options for ssh client are previously set from sshserver.pl
-    if(! -e $sshconfig) {
-        logmsg "RUN: SOCKS server cannot find $sshconfig\n";
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-
-    $sshlog  = server_logfilename($LOGDIR, 'socks', $ipvnum, $idnum);
-
-    # start our socks server
-    my $cmd="\"$ssh\" -N -F $sshconfig $ip > $sshlog 2>&1";
-    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 30, 1); # fake pidfile
-
-    if($sshpid <= 0 || !pidexists($sshpid)) {
+    if($sockspid <= 0 || !pidexists($sockspid)) {
         # it is NOT alive
         logmsg "RUN: failed to start the $srvrname server\n";
-        display_sshlog();
-        display_sshconfig();
-        display_sshdlog();
-        display_sshdconfig();
         stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
 
-    # Ugly hack but ssh doesn't support pid files. PID is from fake pidfile.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$sshpid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    $pid2 = $pid3;
-
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $pid2\n";
     }
 
-    return ($pid2, $sshpid);
+    return ($pid2, $sockspid);
 }
 
 #######################################################################
@@ -2284,7 +2203,8 @@ sub rundictserver {
     $flags .= "--verbose 1 " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--port $port --srcdir \"$srcdir\"";
+    $flags .= "--port $port --srcdir \"$srcdir\" ";
+    $flags .= "--host $HOSTIP";
 
     my $cmd = "$srcdir/dictserver.py $flags";
     my ($dictpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -2360,7 +2280,8 @@ sub runsmbserver {
     $flags .= "--verbose 1 " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--port $port --srcdir \"$srcdir\"";
+    $flags .= "--port $port --srcdir \"$srcdir\" ";
+    $flags .= "--host $HOSTIP";
 
     my $cmd = "$srcdir/smbserver.py $flags";
     my ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -2626,7 +2547,7 @@ sub compare {
 
     if($result) {
         # timestamp test result verification end
-        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+        $timevrfyend{$testnum} = Time::HiRes::time();
 
         if(!$short) {
             logmsg "\n $testnum: $subject FAILED:\n";
@@ -2643,6 +2564,65 @@ sub compare {
     return $result;
 }
 
+sub setupfeatures {
+    $feature{"SSL"} = $has_ssl;
+    $feature{"MultiSSL"} = $has_multissl;
+    $feature{"SSLpinning"} = $has_sslpinning;
+    $feature{"OpenSSL"} = $has_openssl;
+    $feature{"GnuTLS"} = $has_gnutls;
+    $feature{"NSS"} = $has_nss;
+    $feature{"WinSSL"} = $has_winssl;
+    $feature{"Schannel"} = $has_winssl; # alias
+    $feature{"sectransp"} = $has_darwinssl;
+    $feature{"DarwinSSL"} = $has_darwinssl; # alias
+    $feature{"ld_preload"} = ($has_ldpreload && !$debug_build);
+    $feature{"unittest"} = $debug_build;
+    $feature{"debug"} = $debug_build;
+    $feature{"TrackMemory"} = $has_memory_tracking;
+    $feature{"large_file"} = $has_largefile;
+    $feature{"idn"} = $has_idn;
+    $feature{"ipv6"} = $has_ipv6;
+    $feature{"libz"} = $has_libz;
+    $feature{"brotli"} = $has_brotli;
+    $feature{"NTLM"} = $has_ntlm;
+    $feature{"NTLM_WB"} = $has_ntlm_wb;
+    $feature{"SSPI"} = $has_sspi;
+    $feature{"GSS-API"} = $has_gssapi;
+    $feature{"Kerberos"} = $has_kerberos;
+    $feature{"SPNEGO"} = $has_spnego;
+    $feature{"getrlimit"} = $has_getrlimit;
+    $feature{"crypto"} = $has_crypto;
+    $feature{"TLS-SRP"} = $has_tls_srp;
+    $feature{"Metalink"} = $has_metalink;
+    $feature{"http/2"} = $has_http2;
+    $feature{"threaded-resolver"} = $has_threadedres;
+    $feature{"PSL"} = $has_psl;
+    $feature{"alt-svc"} = $has_altsvc;
+    $feature{"manual"} = $has_manual;
+    $feature{"unix-sockets"} = $has_unix;
+
+    # make each protocol an enabled "feature"
+    for my $p (@protocols) {
+        $feature{$p} = 1;
+    }
+    # 'socks' was once here but is now removed
+
+    #
+    # strings that must match the names used in server/disabled.c
+    #
+    $feature{"cookies"} = 1;
+    $feature{"DoH"} = 1;
+    $feature{"HTTP-auth"} = 1;
+    $feature{"Mime"} = 1;
+    $feature{"netrc"} = 1;
+    $feature{"parsedate"} = 1;
+    $feature{"proxy"} = 1;
+    $feature{"shuffle-dns"} = 1;
+    $feature{"typecheck"} = 1;
+    $feature{"verbose-strings"} = 1;
+
+}
+
 #######################################################################
 # display information about curl and the host the test suite runs on
 #
@@ -2656,6 +2636,8 @@ sub checksystem {
     my $versretval;
     my $versnoexec;
     my @version=();
+    my @disabled;
+    my $dis = "";
 
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
@@ -2670,6 +2652,15 @@ sub checksystem {
     open(VERSOUT, "<$curlverout");
     @version = <VERSOUT>;
     close(VERSOUT);
+
+    open(DISABLED, "server/disabled|");
+    @disabled = <DISABLED>;
+    close(DISABLED);
+
+    if($disabled[0]) {
+        map s/[\r\n]//g, @disabled;
+        $dis = join(", ", @disabled);
+    }
 
     $resolver="stock";
     for(@version) {
@@ -2704,8 +2695,8 @@ sub checksystem {
                $has_nss=1;
                $has_sslpinning=1;
            }
-           elsif ($libcurl =~ /(yassl|wolfssl)/i) {
-               $has_yassl=1;
+           elsif ($libcurl =~ /wolfssl/i) {
+               $has_wolfssl=1;
                $has_sslpinning=1;
            }
            elsif ($libcurl =~ /polarssl/i) {
@@ -2959,11 +2950,12 @@ sub checksystem {
     my $hosttype=join(' ', runclientoutput("uname -a"));
 
     logmsg ("********* System characteristics ******** \n",
-    "* $curl\n",
-    "* $libcurl\n",
-    "* Features: $feat\n",
-    "* Host: $hostname",
-    "* System: $hosttype");
+            "* $curl\n",
+            "* $libcurl\n",
+            "* Features: $feat\n",
+            "* Disabled: $dis\n",
+            "* Host: $hostname",
+            "* System: $hosttype");
 
     if($has_memory_tracking && $has_threadedres) {
         $has_memory_tracking = 0;
@@ -3035,6 +3027,12 @@ sub checksystem {
     $has_textaware = ($^O eq 'MSWin32') || ($^O eq 'msys');
 
     logmsg "***************************************** \n";
+
+    setupfeatures();
+    # toggle off the features that were disabled in the build
+    for my $d(@disabled) {
+        $feature{$d} = 0;
+    }
 }
 
 #######################################################################
@@ -3203,16 +3201,18 @@ sub singletest {
 
     my @what;
     my $why;
-    my %feature;
     my $cmd;
     my $disablevalgrind;
+
+    # fist, remove all lingering log files
+    cleardir($LOGDIR);
 
     # copy test number to a global scope var, this allows
     # testnum checking when starting test harness servers.
     $testnumcheck = $testnum;
 
     # timestamp test preparation start
-    $timeprepini{$testnum} = Time::HiRes::time() if($timestats);
+    $timeprepini{$testnum} = Time::HiRes::time();
 
     if($disttests !~ /test$testnum\W/ ) {
         logmsg "Warning: test$testnum not present in tests/data/Makefile.inc\n";
@@ -3239,177 +3239,7 @@ sub singletest {
         $f =~ s/\s//g;
 
         if($f =~ /^([^!].*)$/) {
-            # Store the feature for later
-            $feature{$1} = $1;
-
-            if($1 eq "SSL") {
-                if($has_ssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "MultiSSL") {
-                if($has_multissl) {
-                    next;
-                }
-            }
-            elsif($1 eq "SSLpinning") {
-                if($has_sslpinning) {
-                    next;
-                }
-            }
-            elsif($1 eq "OpenSSL") {
-                if($has_openssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "GnuTLS") {
-                if($has_gnutls) {
-                    next;
-                }
-            }
-            elsif($1 eq "NSS") {
-                if($has_nss) {
-                    next;
-                }
-            }
-            elsif(($1 eq "WinSSL") || ($1 eq "Schannel")) {
-                if($has_winssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "DarwinSSL") {
-                if($has_darwinssl) {
-                    next;
-                }
-            }
-            elsif($1 eq "ld_preload") {
-                if($has_ldpreload && !$debug_build) {
-                    next;
-                }
-            }
-            elsif($1 eq "unittest") {
-                if($debug_build) {
-                    next;
-                }
-            }
-            elsif($1 eq "debug") {
-                if($debug_build) {
-                    next;
-                }
-            }
-            elsif($1 eq "TrackMemory") {
-                if($has_memory_tracking) {
-                    next;
-                }
-            }
-            elsif($1 eq "large_file") {
-                if($has_largefile) {
-                    next;
-                }
-            }
-            elsif($1 eq "idn") {
-                if($has_idn) {
-                    next;
-                }
-            }
-            elsif($1 eq "ipv6") {
-                if($has_ipv6) {
-                    next;
-                }
-            }
-            elsif($1 eq "libz") {
-                if($has_libz) {
-                    next;
-                }
-            }
-            elsif($1 eq "brotli") {
-                if($has_brotli) {
-                    next;
-                }
-            }
-            elsif($1 eq "NTLM") {
-                if($has_ntlm) {
-                    next;
-                }
-            }
-            elsif($1 eq "NTLM_WB") {
-                if($has_ntlm_wb) {
-                    next;
-                }
-            }
-            elsif($1 eq "SSPI") {
-                if($has_sspi) {
-                    next;
-                }
-            }
-            elsif($1 eq "GSS-API") {
-                if($has_gssapi) {
-                    next;
-                }
-            }
-            elsif($1 eq "Kerberos") {
-                if($has_kerberos) {
-                    next;
-                }
-            }
-            elsif($1 eq "SPNEGO") {
-                if($has_spnego) {
-                    next;
-                }
-            }
-            elsif($1 eq "getrlimit") {
-                if($has_getrlimit) {
-                    next;
-                }
-            }
-            elsif($1 eq "crypto") {
-                if($has_crypto) {
-                    next;
-                }
-            }
-            elsif($1 eq "TLS-SRP") {
-                if($has_tls_srp) {
-                    next;
-                }
-            }
-            elsif($1 eq "Metalink") {
-                if($has_metalink) {
-                    next;
-                }
-            }
-            elsif($1 eq "http/2") {
-                if($has_http2) {
-                    next;
-                }
-            }
-            elsif($1 eq "threaded-resolver") {
-                if($has_threadedres) {
-                    next;
-                }
-            }
-            elsif($1 eq "PSL") {
-                if($has_psl) {
-                    next;
-                }
-            }
-            elsif($1 eq "alt-svc") {
-                if($has_altsvc) {
-                    next;
-                }
-            }
-            elsif($1 eq "manual") {
-                if($has_manual) {
-                    next;
-                }
-            }
-            elsif($1 eq "socks") {
-                next;
-            }
-            elsif($1 eq "unix-sockets") {
-                next if $has_unix;
-            }
-            # See if this "feature" is in the list of supported protocols
-            elsif (grep /^\Q$1\E$/i, @protocols) {
+            if($feature{$1}) {
                 next;
             }
 
@@ -3425,135 +3255,7 @@ sub singletest {
             $f =~ s/\s//g;
 
             if($f =~ /^!(.*)$/) {
-                if($1 eq "SSL") {
-                    if(!$has_ssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "MultiSSL") {
-                    if(!$has_multissl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "OpenSSL") {
-                    if(!$has_openssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "GnuTLS") {
-                    if(!$has_gnutls) {
-                        next;
-                    }
-                }
-                elsif($1 eq "NSS") {
-                    if(!$has_nss) {
-                        next;
-                    }
-                }
-                elsif(($1 eq "WinSSL") || ($1 eq "Schannel")) {
-                    if(!$has_winssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "DarwinSSL") {
-                    if(!$has_darwinssl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "TrackMemory") {
-                    if(!$has_memory_tracking) {
-                        next;
-                    }
-                }
-                elsif($1 eq "large_file") {
-                    if(!$has_largefile) {
-                        next;
-                    }
-                }
-                elsif($1 eq "idn") {
-                    if(!$has_idn) {
-                        next;
-                    }
-                }
-                elsif($1 eq "ipv6") {
-                    if(!$has_ipv6) {
-                        next;
-                    }
-                }
-                elsif($1 eq "unix-sockets") {
-                    next if !$has_unix;
-                }
-                elsif($1 eq "libz") {
-                    if(!$has_libz) {
-                        next;
-                    }
-                }
-                elsif($1 eq "brotli") {
-                    if(!$has_brotli) {
-                        next;
-                    }
-                }
-                elsif($1 eq "NTLM") {
-                    if(!$has_ntlm) {
-                        next;
-                    }
-                }
-                elsif($1 eq "NTLM_WB") {
-                    if(!$has_ntlm_wb) {
-                        next;
-                    }
-                }
-                elsif($1 eq "SSPI") {
-                    if(!$has_sspi) {
-                        next;
-                    }
-                }
-                elsif($1 eq "GSS-API") {
-                    if(!$has_gssapi) {
-                        next;
-                    }
-                }
-                elsif($1 eq "Kerberos") {
-                    if(!$has_kerberos) {
-                        next;
-                    }
-                }
-                elsif($1 eq "SPNEGO") {
-                    if(!$has_spnego) {
-                        next;
-                    }
-                }
-                elsif($1 eq "getrlimit") {
-                    if(!$has_getrlimit) {
-                        next;
-                    }
-                }
-                elsif($1 eq "crypto") {
-                    if(!$has_crypto) {
-                        next;
-                    }
-                }
-                elsif($1 eq "TLS-SRP") {
-                    if(!$has_tls_srp) {
-                        next;
-                    }
-                }
-                elsif($1 eq "Metalink") {
-                    if(!$has_metalink) {
-                        next;
-                    }
-                }
-                elsif($1 eq "PSL") {
-                    if(!$has_psl) {
-                        next;
-                    }
-                }
-                elsif($1 eq "threaded-resolver") {
-                    if(!$has_threadedres) {
-                        next;
-                    }
-                }
-                else {
+                if(!$feature{$1}) {
                     next;
                 }
             }
@@ -3608,14 +3310,14 @@ sub singletest {
     unlink($FTPDCMD) if(-f $FTPDCMD);
 
     # timestamp required servers verification start
-    $timesrvrini{$testnum} = Time::HiRes::time() if($timestats);
+    $timesrvrini{$testnum} = Time::HiRes::time();
 
     if(!$why) {
         $why = serverfortest($testnum);
     }
 
     # timestamp required servers verification end
-    $timesrvrend{$testnum} = Time::HiRes::time() if($timestats);
+    $timesrvrend{$testnum} = Time::HiRes::time();
 
     my @setenv = getpart("client", "setenv");
     if(@setenv) {
@@ -3642,6 +3344,7 @@ sub singletest {
                         }
                     }
                     $ENV{$var} = "$content";
+                    print "setenv $var = $content\n" if($verbose);
                 }
             }
         }
@@ -3757,7 +3460,7 @@ sub singletest {
     }
 
     # if this section exists, it might be FTP server instructions:
-    my @ftpservercmd = getpart("reply", "servercmd");
+    my @ftpservercmd = fixarray ( getpart("reply", "servercmd") );
 
     my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 
@@ -3981,7 +3684,7 @@ sub singletest {
     }
 
     # timestamp starting of test command
-    $timetoolini{$testnum} = Time::HiRes::time() if($timestats);
+    $timetoolini{$testnum} = Time::HiRes::time();
 
     # run the command line we built
     if ($torture) {
@@ -4009,7 +3712,7 @@ sub singletest {
     }
 
     # timestamp finishing of test command
-    $timetoolend{$testnum} = Time::HiRes::time() if($timestats);
+    $timetoolend{$testnum} = Time::HiRes::time();
 
     if(!$dumped_core) {
         if(-r "core") {
@@ -4059,7 +3762,7 @@ sub singletest {
     sleep($postcommanddelay) if($postcommanddelay);
 
     # timestamp removal of server logs advisor read lock
-    $timesrvrlog{$testnum} = Time::HiRes::time() if($timestats);
+    $timesrvrlog{$testnum} = Time::HiRes::time();
 
     # test definition might instruct to stop some servers
     # stop also all servers relative to the given one
@@ -4144,7 +3847,7 @@ sub singletest {
             if($rc != 0 && !$torture) {
                 logmsg " postcheck FAILED\n";
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
         }
@@ -4164,11 +3867,8 @@ sub singletest {
 
     # Skip all the verification on torture tests
     if ($torture) {
-        if(!$cmdres && !$keepoutfiles) {
-            cleardir($LOGDIR);
-        }
         # timestamp test result verification end
-        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+        $timevrfyend{$testnum} = Time::HiRes::time();
         return $cmdres;
     }
 
@@ -4425,7 +4125,7 @@ sub singletest {
                        "has no name attribute\n";
                 stopservers($verbose);
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
             }
             my @generated=loadarray($filename);
@@ -4489,7 +4189,7 @@ sub singletest {
         }
         logmsg " exit FAILED\n";
         # timestamp test result verification end
-        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+        $timevrfyend{$testnum} = Time::HiRes::time();
         return 1;
     }
 
@@ -4512,7 +4212,7 @@ sub singletest {
                 logmsg "\n** MEMORY FAILURE\n";
                 logmsg @memdata;
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             else {
@@ -4529,7 +4229,7 @@ sub singletest {
             unless(opendir(DIR, "$LOGDIR")) {
                 logmsg "ERROR: unable to read $LOGDIR\n";
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             my @files = readdir(DIR);
@@ -4544,7 +4244,7 @@ sub singletest {
             if(!$vgfile) {
                 logmsg "ERROR: valgrind log file missing for test $testnum\n";
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             my @e = valgrindparse("$LOGDIR/$vgfile");
@@ -4557,7 +4257,7 @@ sub singletest {
                     logmsg @e;
                 }
                 # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                $timevrfyend{$testnum} = Time::HiRes::time();
                 return 1;
             }
             $ok .= "v";
@@ -4577,27 +4277,26 @@ sub singletest {
 
     logmsg "$ok " if(!$short);
 
+    # timestamp test result verification end
+    $timevrfyend{$testnum} = Time::HiRes::time();
+
     my $sofar= time()-$start;
     my $esttotal = $sofar/$count * $total;
     my $estleft = $esttotal - $sofar;
     my $left=sprintf("remaining: %02d:%02d",
                      $estleft/60,
                      $estleft%60);
-
+    my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
+    my $duration = sprintf("duration: %02d:%02d",
+                           $sofar/60, $sofar%60);
     if(!$automakestyle) {
-        logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
+        logmsg sprintf("OK (%-3d out of %-3d, %s, took %.1fs, %s)\n",
+                       $count, $total, $left, $took, $duration);
     }
     else {
         logmsg "PASS: $testnum - $testname\n";
     }
 
-    # the test succeeded, remove all log files
-    if(!$keepoutfiles) {
-        cleardir($LOGDIR);
-    }
-
-    # timestamp test result verification end
-    $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
 
     return 0;
 }
@@ -4839,10 +4538,6 @@ sub startservers {
                 # we can't run ftps tests without stunnel
                 return "no stunnel";
             }
-            if(!$has_ssl) {
-                # we can't run ftps tests if libcurl is SSL-less
-                return "curl lacks SSL support";
-            }
             if($runcert{'ftps'} && ($runcert{'ftps'} ne $certfile)) {
                 # stop server when running and using a different cert
                 stopserver('ftps');
@@ -4876,10 +4571,6 @@ sub startservers {
             if(!$stunnel) {
                 # we can't run https tests without stunnel
                 return "no stunnel";
-            }
-            if(!$has_ssl) {
-                # we can't run https tests if libcurl is SSL-less
-                return "curl lacks SSL support";
             }
             if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
                 # stop server when running and using a different cert
@@ -4974,7 +4665,7 @@ sub startservers {
                 $run{'tftp-ipv6'}="$pid $pid2";
             }
         }
-        elsif($what eq "sftp" || $what eq "scp" || $what eq "socks4" || $what eq "socks5" ) {
+        elsif($what eq "sftp" || $what eq "scp") {
             if(!$run{'ssh'}) {
                 ($pid, $pid2) = runsshserver("", $verbose);
                 if($pid <= 0) {
@@ -4983,32 +4674,15 @@ sub startservers {
                 printf ("* pid ssh => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'ssh'}="$pid $pid2";
             }
-            if($what eq "socks4" || $what eq "socks5") {
-                if(!$run{'socks'}) {
-                    ($pid, $pid2) = runsocksserver("", $verbose);
-                    if($pid <= 0) {
-                        return "failed starting socks server";
-                    }
-                    printf ("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
-                    $run{'socks'}="$pid $pid2";
+        }
+        elsif($what eq "socks4" || $what eq "socks5" ) {
+            if(!$run{'socks'}) {
+                ($pid, $pid2) = runsocksserver("", $verbose);
+                if($pid <= 0) {
+                    return "failed starting socks server";
                 }
-            }
-            if($what eq "socks5") {
-                if(!$sshdid) {
-                    # Not an OpenSSH or SunSSH ssh daemon
-                    logmsg "Not OpenSSH or SunSSH; socks5 tests need at least OpenSSH 3.7\n";
-                    return "failed starting socks5 server";
-                }
-                elsif(($sshdid =~ /OpenSSH/) && ($sshdvernum < 370)) {
-                    # Need OpenSSH 3.7 for socks5 - https://www.openssh.com/txt/release-3.7
-                    logmsg "$sshdverstr insufficient; socks5 tests need at least OpenSSH 3.7\n";
-                    return "failed starting socks5 server";
-                }
-                elsif(($sshdid =~ /SunSSH/)  && ($sshdvernum < 100)) {
-                    # Need SunSSH 1.0 for socks5
-                    logmsg "$sshdverstr insufficient; socks5 tests need at least SunSSH 1.0\n";
-                    return "failed starting socks5 server";
-                }
+                printf ("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'socks'}="$pid $pid2";
             }
         }
         elsif($what eq "http-unix") {

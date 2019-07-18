@@ -19,6 +19,7 @@ problems may have been fixed or changed somewhat since this was written!
  1.5 Expect-100 meets 417
  1.6 Unnecessary close when 401 received waiting for 100
  1.7 Deflate error after all content was received
+ 1.8 DoH isn't used for all name resolves when enabled
  1.9 HTTP/2 frames while in the connection pool kill reuse
  1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
@@ -31,6 +32,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.5 Client cert handling with Issuer DN differs between backends
  2.6 CURL_GLOBAL_SSL
  2.7 Client cert (MTLS) issues with Schannel
+ 2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -46,7 +48,6 @@ problems may have been fixed or changed somewhat since this was written!
  4.5 Improve --data-urlencode space encoding
 
  5. Build and portability issues
- 5.1 tests not compatible with python3
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
  5.4 Cannot compile against a static build of OpenLDAP
@@ -63,6 +64,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.4 Negotiate and Kerberos V5 need a fake user name
  6.5 NTLM doesn't support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
+ 6.7 Don't clear digest for single realm
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -162,10 +164,20 @@ problems may have been fixed or changed somewhat since this was written!
 
  There's a situation where we can get an error in a HTTP response that is
  compressed, when that error is detected after all the actual body contents
- have been received and delivered to the appliction. This is tricky, but is
+ have been received and delivered to the application. This is tricky, but is
  ultimately a broken server.
 
  See https://github.com/curl/curl/issues/2719
+
+1.8 DoH isn't used for all name resolves when enabled
+
+ Even if DoH is specified to be used, there are some name resolves that are
+ done without it. This should be fixed. When the internal function
+ `Curl_resolver_wait_resolv()` is called, it doesn't use DoH to complete the
+ resolve as it otherwise should.
+
+ See https://github.com/curl/curl/pull/3857 and
+ https://github.com/curl/curl/pull/3850
 
 1.9 HTTP/2 frames while in the connection pool kill reuse
 
@@ -289,6 +301,11 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/3145
 
+2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
+
+ This seems to be a limitation in the underlying Schannel API.
+
+ https://github.com/curl/curl/issues/3284
 
 3. Email protocols
 
@@ -371,12 +388,6 @@ problems may have been fixed or changed somewhat since this was written!
  See https://github.com/curl/curl/issues/3229
 
 5. Build and portability issues
-
-5.1 tests not compatible with python3
-
- The smb test server still needs python2.
-
- See https://github.com/curl/curl/issues/3289
 
 5.2 curl-config --libs contains private details
 
@@ -505,6 +516,10 @@ problems may have been fixed or changed somewhat since this was written!
  using NTLM.
 
  https://github.com/curl/curl/issues/876
+
+6.7 Don't clear digest for single realm
+
+ https://github.com/curl/curl/issues/3267
 
 7. FTP
 

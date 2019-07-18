@@ -29,7 +29,7 @@ if(CURL_HIDDEN_SYMBOLS)
     set(_CFLAG_SYMBOLS_HIDE "-xldscope=hidden")
   elseif(CMAKE_C_COMPILER_ID MATCHES "Intel" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 9.0)
     # note: this should probably just check for version 9.1.045 but I'm not 100% sure
-    #       so let's to it the same way autotools do.
+    #       so let's do it the same way autotools do.
     set(SUPPORTS_SYMBOL_HIDING TRUE)
     set(_SYMBOL_EXTERN "__attribute__ ((__visibility__ (\"default\")))")
     set(_CFLAG_SYMBOLS_HIDE "-fvisibility=hidden")
@@ -53,7 +53,7 @@ elseif(MSVC)
     message(WARNING "Hiding private symbols regardless CURL_HIDDEN_SYMBOLS being disabled.")
     set(HIDES_CURL_PRIVATE_SYMBOLS TRUE)
   endif()
-elseif()
+else()
   set(HIDES_CURL_PRIVATE_SYMBOLS FALSE)
 endif()
 

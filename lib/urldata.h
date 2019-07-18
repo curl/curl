@@ -79,6 +79,10 @@
 */
 #define RESP_TIMEOUT (120*1000)
 
+/* Max string intput length is a precaution against abuse and to detect junk
+   input easier and better. */
+#define CURL_MAX_INPUT_LENGTH 8000000
+
 #include "cookie.h"
 #include "psl.h"
 #include "formdata.h"
@@ -143,10 +147,6 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
-
-
-/* The "master buffer" is for HTTP pipelining */
-#define MASTERBUF_SIZE 16384
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
@@ -303,6 +303,14 @@ typedef enum {
   NTLMSTATE_LAST
 } curlntlm;
 
+typedef enum {
+  GSS_AUTHNONE,
+  GSS_AUTHRECV,
+  GSS_AUTHSENT,
+  GSS_AUTHDONE,
+  GSS_AUTHSUCC
+} curlnegotiate;
+
 #if defined(CURL_DOES_CONVERSIONS) && defined(HAVE_ICONV)
 #include <iconv.h>
 #endif
@@ -328,7 +336,6 @@ struct kerberos5data {
 /* Struct used for NTLM challenge-response authentication */
 #if defined(USE_NTLM)
 struct ntlmdata {
-  curlntlm state;
 #ifdef USE_WINDOWS_SSPI
 /* The sslContext is used for the Schannel bindings. The
  * api is available on the Windows 7 SDK and later.
@@ -354,13 +361,9 @@ struct ntlmdata {
 };
 #endif
 
+/* Struct used for Negotiate (SPNEGO) authentication */
 #ifdef USE_SPNEGO
 struct negotiatedata {
-  /* When doing Negotiate (SPNEGO) auth, we first need to send a token
-     and then validate the received one. */
-  enum {
-    GSS_AUTHNONE, GSS_AUTHRECV, GSS_AUTHSENT, GSS_AUTHDONE, GSS_AUTHSUCC
-  } state;
 #ifdef HAVE_GSSAPI
   OM_uint32 status;
   gss_ctx_id_t context;
@@ -431,6 +434,7 @@ struct ConnectBits {
                            though it will be discarded. When the whole send
                            operation is done, we must call the data rewind
                            callback. */
+#ifndef CURL_DISABLE_FTP
   bit ftp_use_epsv:1;  /* As set with CURLOPT_FTP_USE_EPSV, but if we find out
                           EPSV doesn't work we disable it for the forthcoming
                           requests */
@@ -438,6 +442,7 @@ struct ConnectBits {
                           EPRT doesn't work we disable it for the forthcoming
                           requests */
   bit ftp_use_data_ssl:1; /* Enabled SSL for the data connection */
+#endif
   bit netrc:1;         /* name+password provided by netrc */
   bit userpwd_in_url:1; /* name+password found in url */
   bit stream_was_rewound:1; /* The stream was rewound after a request read
@@ -604,14 +609,16 @@ struct SingleRequest {
   char *upload_fromhere;
   void *protop;       /* Allocated protocol-specific data. Each protocol
                          handler makes sure this points to data it needs. */
+#ifndef CURL_DISABLE_DOH
   struct dohdata doh; /* DoH specific data for this request */
+#endif
   bit header:1;       /* incoming data has HTTP header */
   bit content_range:1; /* set TRUE if Content-Range: was found */
   bit upload_done:1;  /* set to TRUE when doing chunked transfer-encoding
                          upload and we're uploading the last chunk */
   bit ignorebody:1;   /* we read a response-body but we ignore it! */
-  bit ignorecl:1;     /* This HTTP response has no body so we ignore the
-                         Content-Length: header */
+  bit http_bodyless:1; /* HTTP response status code is between 100 and 199,
+                          204 or 304 */
   bit chunk:1; /* if set, this is a chunked transfer-encoding */
   bit upload_chunky:1; /* set TRUE if we are doing chunked transfer-encoding
                           on upload */
@@ -796,11 +803,10 @@ struct connectdata {
   void *closesocket_client;
 
   /* This is used by the connection cache logic. If this returns TRUE, this
-     handle is being used by one or more easy handles and can only used by any
+     handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
-     pipelining/multiplexing) and it cannot be used by another multi
-     handle! */
-#define CONN_INUSE(c) ((c)->send_pipe.size + (c)->recv_pipe.size)
+     multiplexing) and it cannot be used by another multi handle! */
+#define CONN_INUSE(c) ((c)->easyq.size)
 
   /**** Fields set when inited and not modified again */
   long connection_id; /* Contains a unique number to make it easier to
@@ -871,6 +877,7 @@ struct connectdata {
 
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
+  struct curltime lastused; /* when returned to the connection cache */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
@@ -950,16 +957,7 @@ struct connectdata {
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 
-  struct curl_llist send_pipe; /* List of handles waiting to send on this
-                                  pipeline */
-  struct curl_llist recv_pipe; /* List of handles waiting to read their
-                                  responses on this pipeline */
-  char *master_buffer; /* The master buffer allocated on-demand;
-                          used for pipelining. */
-  size_t read_pos; /* Current read position in the master buffer */
-  size_t buf_len; /* Length of the buffer?? */
-
-
+  struct curl_llist easyq;    /* List of easy handles using this connection */
   curl_seek_callback seek_func; /* function that seeks the input */
   void *seek_client;            /* pointer to pass to the seek() above */
 
@@ -969,6 +967,9 @@ struct connectdata {
 #endif
 
 #if defined(USE_NTLM)
+  curlntlm http_ntlm_state;
+  curlntlm proxy_ntlm_state;
+
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
                                because it authenticates connections, not
                                single requests! */
@@ -984,6 +985,9 @@ struct connectdata {
 #endif
 
 #ifdef USE_SPNEGO
+  curlnegotiate http_negotiate_state;
+  curlnegotiate proxy_negotiate_state;
+
   struct negotiatedata negotiate; /* state data for host Negotiate auth */
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
@@ -1077,8 +1081,9 @@ struct PureInfo {
   const char *conn_scheme;
   unsigned int conn_protocol;
   struct curl_certinfo certs; /* info about the certs, only populated in
-                                 OpenSSL builds. Asked for with
-                                 CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+                                 OpenSSL, GnuTLS, Schannel, NSS and GSKit
+                                 builds. Asked for with CURLOPT_CERTINFO
+                                 / CURLINFO_CERTINFO */
 
   bit timecond:1;  /* set to TRUE if the time condition didn't match, which
                       thus made the document NOT get fetched */
@@ -1209,6 +1214,7 @@ typedef enum {
   EXPIRE_ASYNC_NAME,
   EXPIRE_CONNECTTIMEOUT,
   EXPIRE_DNS_PER_NAME,
+  EXPIRE_HAPPY_EYEBALLS_DNS, /* See asyn-ares.c */
   EXPIRE_HAPPY_EYEBALLS,
   EXPIRE_MULTI_PENDING,
   EXPIRE_RUN_NOW,
@@ -1287,7 +1293,6 @@ struct UrlState {
 
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
-
   void *resolver; /* resolver state, if it is used in the URL state -
                      ares_channel f.e. */
 
@@ -1371,6 +1376,7 @@ struct UrlState {
                   when multi_done() is called, to prevent multi_done() to get
                   invoked twice when the multi interface is used. */
   bit stream_depends_e:1; /* set or don't set the Exclusive bit */
+  bit previouslypending:1; /* this transfer WAS in the multi->pending queue */
 };
 
 
@@ -1461,7 +1467,7 @@ enum dupstring {
   STRING_RTSP_SESSION_ID, /* Session ID to use */
   STRING_RTSP_STREAM_URI, /* Stream URI for this request */
   STRING_RTSP_TRANSPORT,  /* Transport for this session */
-#if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
+#ifdef USE_SSH
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
   STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
@@ -1566,6 +1572,8 @@ struct UserDefined {
   long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long happy_eyeballs_timeout; /* in milliseconds, 0 is a valid value */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
+  long maxage_conn;     /* in seconds, max idle time to allow a connection that
+                           is to be reused */
   long tftp_blksize;    /* in bytes, 0 means use default */
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
@@ -1609,7 +1617,11 @@ struct UserDefined {
   long ipver; /* the CURL_IPRESOLVE_* defines in the public header file
                  0 - whatever, 1 - v2, 2 - v6 */
   curl_off_t max_filesize; /* Maximum file size to download */
+#ifndef CURL_DISABLE_FTP
   curl_ftpfile ftp_filemethod; /* how to get to a file when FTP is used  */
+  curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
+  curl_ftpccc ftp_ccc;   /* FTP CCC options */
+#endif
   int ftp_create_missing_dirs; /* 1 - create directories that don't exist
                                   2 - the same but also allow MKD to fail once
                                */
@@ -1619,8 +1631,6 @@ struct UserDefined {
        use_netrc;        /* defined in include/curl.h */
   curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
-  curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
-  curl_ftpccc ftp_ccc;   /* FTP CCC options */
   long new_file_perms;    /* Permissions to use when creating remote files */
   long new_directory_perms; /* Permissions to use when creating remote dirs */
   long ssh_auth_types;   /* allowed SSH auth types */
@@ -1681,7 +1691,14 @@ struct UserDefined {
   bit prefer_ascii:1;     /* ASCII rather than binary */
   bit ftp_append:1;       /* append, not overwrite, on upload */
   bit ftp_list_only:1;    /* switch FTP command for listing directories */
+#ifndef CURL_DISABLE_FTP
   bit ftp_use_port:1;     /* use the FTP PORT command */
+  bit ftp_use_epsv:1;   /* if EPSV is to be attempted or not */
+  bit ftp_use_eprt:1;   /* if EPRT is to be attempted or not */
+  bit ftp_use_pret:1;   /* if PRET is to be used before PASV or not */
+  bit ftp_skip_ip:1;    /* skip the IP address the FTP server passes on to
+                            us */
+#endif
   bit hide_progress:1;    /* don't use the progress meter */
   bit http_fail_on_error:1;  /* fail on HTTP error codes >= 400 */
   bit http_keep_sending_on_error:1; /* for HTTP status codes >= 300 */
@@ -1699,16 +1716,10 @@ struct UserDefined {
   bit krb:1;            /* Kerberos connection requested */
   bit reuse_forbid:1;   /* forbidden to be reused, close after use */
   bit reuse_fresh:1;    /* do not re-use an existing connection  */
-  bit ftp_use_epsv:1;   /* if EPSV is to be attempted or not */
-  bit ftp_use_eprt:1;   /* if EPRT is to be attempted or not */
-  bit ftp_use_pret:1;   /* if PRET is to be used before PASV or not */
 
   bit no_signal:1;      /* do not use any signal/alarm handler */
-  bit global_dns_cache:1; /* subject for future removal */
   bit tcp_nodelay:1;    /* whether to enable TCP_NODELAY or not */
   bit ignorecl:1;       /* ignore content length */
-  bit ftp_skip_ip:1;    /* skip the IP address the FTP server passes on to
-                            us */
   bit connect_only:1;   /* make connection, let application use the socket */
   bit http_te_skip:1;   /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */
@@ -1726,8 +1737,8 @@ struct UserDefined {
   bit ssl_enable_npn:1; /* TLS NPN extension? */
   bit ssl_enable_alpn:1;/* TLS ALPN extension? */
   bit path_as_is:1;     /* allow dotdots? */
-  bit pipewait:1;       /* wait for pipe/multiplex status before starting a
-                            new connection */
+  bit pipewait:1;       /* wait for multiplex status before starting a new
+                           connection */
   bit suppress_connect_headers:1; /* suppress proxy CONNECT response headers
                                       from user callbacks */
   bit dns_shuffle_addresses:1; /* whether to shuffle addresses before use */
@@ -1745,7 +1756,6 @@ struct Names {
   struct curl_hash *hostcache;
   enum {
     HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_GLOBAL,  /* points to the (shrug) global one */
     HCACHE_MULTI,   /* points to a shared one in the multi handle */
     HCACHE_SHARED   /* points to a shared one in a shared object */
   } hostcachetype;
@@ -1768,8 +1778,7 @@ struct Curl_easy {
 
   struct connectdata *conn;
   struct curl_llist_element connect_queue;
-  struct curl_llist_element pipeline_queue;
-  struct curl_llist_element sh_queue; /* list per Curl_sh_entry */
+  struct curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
@@ -1809,7 +1818,9 @@ struct Curl_easy {
   struct Progress progress;    /* for all the progress meter data */
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
+#ifndef CURL_DISABLE_FTP
   struct WildcardData wildcard; /* wildcard download state info */
+#endif
   struct PureInfo info;        /* stats, reports and info data */
   struct curl_tlssessioninfo tsi; /* Information about the TLS session, only
                                      valid after a client has asked for it */

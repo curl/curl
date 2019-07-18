@@ -114,8 +114,8 @@ void curl_dbg_memdebug(const char *logname)
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
     /* Flush the log file after every line so the log isn't lost in a crash */
-    if(logfile)
-      setbuf(logfile, (char *)NULL);
+    if(curl_dbg_logfile)
+      setbuf(curl_dbg_logfile, (char *)NULL);
 #endif
   }
 }
@@ -306,9 +306,8 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
 
 void curl_dbg_free(void *ptr, int line, const char *source)
 {
-  struct memdebug *mem;
-
   if(ptr) {
+    struct memdebug *mem;
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)

@@ -1416,6 +1416,8 @@
      d                 c                   00286
      d  CURLOPT_ALTSVC...
      d                 c                   10287
+     d  CURLOPT_MAXAGE_CONN...
+     d                 c                   00288
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001

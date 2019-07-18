@@ -20,6 +20,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#ifdef HAVE_STRCASECMP
+#include <strings.h>
+#endif
 
 #include "tool_panykey.h"
 #include "tool_help.h"
@@ -332,8 +335,8 @@ static const struct helptxt helptext[] = {
    "SPNEGO proxy service name"},
   {"    --proxy-ssl-allow-beast",
    "Allow security flaw for interop for HTTPS proxy"},
-  {"    --proxy-tls13-ciphers <ciphersuite list>",
-   "TLS 1.3 proxy cipher suites"},
+  {"    --proxy-tls13-ciphers <list>",
+   "TLS 1.3 ciphersuites for proxy (OpenSSL)"},
   {"    --proxy-tlsauthtype <type>",
    "TLS authentication type for HTTPS proxy"},
   {"    --proxy-tlspassword <string>",
@@ -442,8 +445,8 @@ static const struct helptxt helptext[] = {
    "Transfer based on a time condition"},
   {"    --tls-max <VERSION>",
    "Set maximum allowed TLS version"},
-  {"    --tls13-ciphers <list of TLS 1.3 ciphersuites>",
-   "TLS 1.3 cipher suites to use"},
+  {"    --tls13-ciphers <list>",
+   "TLS 1.3 ciphersuites (OpenSSL)"},
   {"    --tlsauthtype <type>",
    "TLS authentication type"},
   {"    --tlspassword",
@@ -592,6 +595,10 @@ void tool_version_info(void)
     for(i = 0; i< numfeat; i++)
       printf(" %s", featp[i]);
     puts(""); /* newline */
+  }
+  if(strcmp(CURL_VERSION, curlinfo->version)) {
+    printf("WARNING: curl and libcurl versions do not match. "
+           "Functionality may be affected.\n");
   }
 }
 

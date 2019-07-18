@@ -113,7 +113,6 @@ __extension__ ({                                                              \
 })
 
 /* wraps curl_easy_getinfo() with typechecking */
-/* FIXME: don't allow const pointers */
 #define curl_easy_getinfo(handle, info, arg)                                  \
 __extension__ ({                                                              \
   __typeof__(info) _curl_info = info;                                         \
@@ -146,9 +145,8 @@ __extension__ ({                                                              \
   curl_easy_getinfo(handle, _curl_info, arg);                                 \
 })
 
-/* TODO: typechecking for curl_share_setopt() and curl_multi_setopt(),
- * for now just make sure that the functions are called with three
- * arguments
+/*
+ * For now, just make sure that the functions are called with three arguments
  */
 #define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 #define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
@@ -302,12 +300,14 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_PROXY_SSLKEY ||                                        \
    (option) == CURLOPT_PROXY_SSLKEYTYPE ||                                    \
    (option) == CURLOPT_PROXY_SSL_CIPHER_LIST ||                               \
+   (option) == CURLOPT_PROXY_TLS13_CIPHERS ||                                 \
    (option) == CURLOPT_PROXY_TLSAUTH_PASSWORD ||                              \
-   (option) == CURLOPT_PROXY_TLSAUTH_USERNAME ||                              \
    (option) == CURLOPT_PROXY_TLSAUTH_TYPE ||                                  \
+   (option) == CURLOPT_PROXY_TLSAUTH_USERNAME ||                              \
    (option) == CURLOPT_RANDOM_FILE ||                                         \
    (option) == CURLOPT_RANGE ||                                               \
    (option) == CURLOPT_REFERER ||                                             \
+   (option) == CURLOPT_REQUEST_TARGET ||                                      \
    (option) == CURLOPT_RTSP_SESSION_ID ||                                     \
    (option) == CURLOPT_RTSP_STREAM_URI ||                                     \
    (option) == CURLOPT_RTSP_TRANSPORT ||                                      \
@@ -323,6 +323,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SSLKEY ||                                              \
    (option) == CURLOPT_SSLKEYTYPE ||                                          \
    (option) == CURLOPT_SSL_CIPHER_LIST ||                                     \
+   (option) == CURLOPT_TLS13_CIPHERS ||                                       \
    (option) == CURLOPT_TLSAUTH_PASSWORD ||                                    \
    (option) == CURLOPT_TLSAUTH_TYPE ||                                        \
    (option) == CURLOPT_TLSAUTH_USERNAME ||                                    \
@@ -364,7 +365,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SSL_CTX_DATA ||                                        \
    (option) == CURLOPT_WRITEDATA ||                                           \
    (option) == CURLOPT_RESOLVER_START_DATA ||                                 \
-   (option) == CURLOPT_CURLU ||                                               \
+   (option) == CURLOPT_TRAILERDATA ||                                         \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
@@ -384,6 +385,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_QUOTE ||                                               \
    (option) == CURLOPT_RESOLVE ||                                             \
    (option) == CURLOPT_TELNETOPTIONS ||                                       \
+   (option) == CURLOPT_CONNECT_TO ||                                          \
    0)
 
 /* groups of curl_easy_getinfo infos that take the same type of argument */
@@ -506,10 +508,6 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    _curl_is_arr((expr), char) ||                                              \
    _curl_is_arr((expr), unsigned char))
 
-/* FIXME: the whole callback checking is messy...
- * The idea is to tolerate char vs. void and const vs. not const
- * pointers in arguments at least
- */
 /* helper: __builtin_types_compatible_p distinguishes between functions and
  * function pointers, hide it */
 #define _curl_callback_compatible(func, type)                                 \

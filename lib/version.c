@@ -31,7 +31,7 @@
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && \
-     (defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__))
+     (defined(WIN32) || defined(__SYMBIAN32__))
 #    define CARES_STATICLIB
 #  endif
 #  include <ares.h>
@@ -274,7 +274,7 @@ static const char * const protocols[] = {
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
 #endif
-#if defined(USE_LIBSSH) || defined(USE_LIBSSH2)
+#if defined(USE_SSH)
   "scp",
   "sftp",
 #endif
@@ -390,11 +390,15 @@ static curl_version_info_data version_info = {
 curl_version_info_data *curl_version_info(CURLversion stamp)
 {
   static bool initialized;
-#if defined(USE_LIBSSH) || defined(USE_LIBSSH2)
+#if defined(USE_SSH)
   static char ssh_buffer[80];
 #endif
 #ifdef USE_SSL
+#ifdef CURL_WITH_MULTI_SSL
+  static char ssl_buffer[200];
+#else
   static char ssl_buffer[80];
+#endif
 #endif
 #ifdef HAVE_BROTLI
   static char brotli_buffer[80];

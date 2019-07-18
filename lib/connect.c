@@ -357,7 +357,7 @@ static CURLcode bindlocal(struct connectdata *conn,
         conn->ip_version = CURL_IPRESOLVE_V6;
 #endif
 
-      rc = Curl_resolv(conn, dev, 0, &h);
+      rc = Curl_resolv(conn, dev, 0, FALSE, &h);
       if(rc == CURLRESOLV_PENDING)
         (void)Curl_resolver_wait_resolv(conn, &h);
       conn->ip_version = ipver;
@@ -368,6 +368,11 @@ static CURLcode bindlocal(struct connectdata *conn,
         infof(data, "Name '%s' family %i resolved to '%s' family %i\n",
               dev, af, myhost, h->addr->ai_family);
         Curl_resolv_unlock(data, h);
+        if(af != h->addr->ai_family) {
+          /* bad IP version combo, signal the caller to try another address
+             family if available */
+          return CURLE_UNSUPPORTED_PROTOCOL;
+        }
         done = 1;
       }
       else {
@@ -628,7 +633,6 @@ UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
 UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
                              long *port)
 {
-  unsigned short us_port;
   struct sockaddr_in *si = NULL;
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 *si6 = NULL;
@@ -642,7 +646,7 @@ UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
       si = (struct sockaddr_in *)(void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si->sin_addr,
                         addr, MAX_IPADR_LEN)) {
-        us_port = ntohs(si->sin_port);
+        unsigned short us_port = ntohs(si->sin_port);
         *port = us_port;
         return TRUE;
       }
@@ -652,7 +656,7 @@ UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
       si6 = (struct sockaddr_in6 *)(void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr,
                         addr, MAX_IPADR_LEN)) {
-        us_port = ntohs(si6->sin6_port);
+        unsigned short us_port = ntohs(si6->sin6_port);
         *port = us_port;
         return TRUE;
       }
@@ -679,17 +683,18 @@ UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
    connection */
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
 {
-  curl_socklen_t len;
-  struct Curl_sockaddr_storage ssrem;
-  struct Curl_sockaddr_storage ssloc;
-  struct Curl_easy *data = conn->data;
-
   if(conn->socktype == SOCK_DGRAM)
     /* there's no connection! */
     return;
 
+#if defined(HAVE_GETPEERNAME) || defined(HAVE_GETSOCKNAME)
   if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
+    struct Curl_easy *data = conn->data;
     char buffer[STRERROR_LEN];
+    struct Curl_sockaddr_storage ssrem;
+    struct Curl_sockaddr_storage ssloc;
+    curl_socklen_t len;
+#ifdef HAVE_GETPEERNAME
     len = sizeof(struct Curl_sockaddr_storage);
     if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
       int error = SOCKERRNO;
@@ -697,7 +702,8 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
             error, Curl_strerror(error, buffer, sizeof(buffer)));
       return;
     }
-
+#endif
+#ifdef HAVE_GETSOCKNAME
     len = sizeof(struct Curl_sockaddr_storage);
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
@@ -706,7 +712,8 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
             error, Curl_strerror(error, buffer, sizeof(buffer)));
       return;
     }
-
+#endif
+#ifdef HAVE_GETPEERNAME
     if(!getaddressinfo((struct sockaddr*)&ssrem,
                        conn->primary_ip, &conn->primary_port)) {
       failf(data, "ssrem inet_ntop() failed with errno %d: %s",
@@ -714,15 +721,19 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
       return;
     }
     memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
-
+#endif
+#ifdef HAVE_GETSOCKNAME
     if(!getaddressinfo((struct sockaddr*)&ssloc,
                        conn->local_ip, &conn->local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       return;
     }
-
+#endif
   }
+#else /* !HAVE_GETSOCKNAME && !HAVE_GETPEERNAME */
+  (void)sockfd; /* unused */
+#endif
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
@@ -1028,7 +1039,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
     Curl_closesocket(conn, sockfd);
     return CURLE_OK;
   }
-  infof(data, "  Trying %s...\n", ipaddress);
+  infof(data, "  Trying %s:%ld...\n", ipaddress, port);
 
 #ifdef ENABLE_IPV6
   is_tcp = (addr.family == AF_INET || addr.family == AF_INET6) &&

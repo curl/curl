@@ -515,11 +515,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     size_t fnam = strlen(word);
     int numhits = 0;
+    bool noflagged = FALSE;
 
     if(!strncmp(word, "no-", 3)) {
       /* disable this option but ignore the "no-" part when looking for it */
       word += 3;
       toggle = FALSE;
+      noflagged = TRUE;
     }
 
     for(j = 0; j < sizeof(aliases)/sizeof(aliases[0]); j++) {
@@ -543,6 +545,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     if(hit < 0) {
       return PARAM_OPTION_UNKNOWN;
     }
+    if(noflagged && (aliases[hit].desc != ARG_BOOL))
+      /* --no- prefixed an option that isn't boolean! */
+      return PARAM_NO_NOT_BOOLEAN;
   }
   else {
     flag++; /* prefixed with one dash, pass it */

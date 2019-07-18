@@ -155,7 +155,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,schannel,secure-transport,mesalink,amissl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,mbedtls,wolfssl,schannel,secure-transport,mesalink,amissl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -1569,7 +1569,7 @@ AC_HELP_STRING([--without-amissl], [disable Amiga native SSL/TLS (AmiSSL)]),
   OPT_AMISSL=$withval)
 
 AC_MSG_CHECKING([whether to enable Amiga native SSL/TLS (AmiSSL)])
-if test "$HAVE_PROTO_BSDSOCKET_H" == "1"; then
+if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
   if test -z "$ssl_backends" -o "x$OPT_AMISSL" != xno; then
     ssl_msg=
     if test "x$OPT_AMISSL" != "xno"; then
@@ -1826,13 +1826,9 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
 
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl These can only exist if OpenSSL exists
-    dnl Older versions of Cyassl (some time before 2.9.4) don't have
-    dnl SSL_get_shutdown (but this check won't actually detect it there
-    dnl as it's a macro that needs the header files be included)
     dnl OpenSSL_version is introduced in 3.0.0
 
     AC_CHECK_FUNCS( RAND_egd \
-                    SSL_get_shutdown \
                     SSLv2_client_method \
                     OpenSSL_version )
 
@@ -1887,6 +1883,14 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
+fi
+
+if test X"$OPT_SSL" != Xoff &&
+  test X"$OPT_SSL" != Xno &&
+  test "$OPENSSL_ENABLED" != "1"; then
+  AC_MSG_NOTICE([OPT_SSL: $OPT_SSL])
+  AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
+  AC_MSG_ERROR([--with-ssl was given but OpenSSL could not be detected])
 fi
 
 dnl **********************************************************************
@@ -2111,98 +2115,6 @@ if test "$GNUTLS_ENABLED" = "1"; then
 fi
 
 dnl ----------------------------------------------------
-dnl check for PolarSSL
-dnl ----------------------------------------------------
-
-dnl Default to compiler & linker defaults for PolarSSL files & libraries.
-OPT_POLARSSL=no
-
-_cppflags=$CPPFLAGS
-_ldflags=$LDFLAGS
-AC_ARG_WITH(polarssl,dnl
-AC_HELP_STRING([--with-polarssl=PATH],[where to look for PolarSSL, PATH points to the installation root])
-AC_HELP_STRING([--without-polarssl], [disable PolarSSL detection]),
-  OPT_POLARSSL=$withval)
-
-if test -z "$ssl_backends" -o "x$OPT_POLARSSL" != xno; then
-  ssl_msg=
-
-  if test X"$OPT_POLARSSL" != Xno; then
-
-    if test "$OPT_POLARSSL" = "yes"; then
-      OPT_POLARSSL=""
-    fi
-
-    if test -z "$OPT_POLARSSL" ; then
-      dnl check for lib first without setting any new path
-
-      AC_CHECK_LIB(polarssl, havege_init,
-      dnl libpolarssl found, set the variable
-       [
-         AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
-         AC_SUBST(USE_POLARSSL, [1])
-         POLARSSL_ENABLED=1
-         USE_POLARSSL="yes"
-         ssl_msg="PolarSSL"
-	 test polarssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ])
-    fi
-
-    addld=""
-    addlib=""
-    addcflags=""
-    polarssllib=""
-
-    if test "x$USE_POLARSSL" != "xyes"; then
-      dnl add the path and test again
-      addld=-L$OPT_POLARSSL/lib$libsuff
-      addcflags=-I$OPT_POLARSSL/include
-      polarssllib=$OPT_POLARSSL/lib$libsuff
-
-      LDFLAGS="$LDFLAGS $addld"
-      if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      AC_CHECK_LIB(polarssl, ssl_init,
-       [
-       AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
-       AC_SUBST(USE_POLARSSL, [1])
-       POLARSSL_ENABLED=1
-       USE_POLARSSL="yes"
-       ssl_msg="PolarSSL"
-       test polarssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-       ],
-       [
-         CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
-       ])
-    fi
-
-    if test "x$USE_POLARSSL" = "xyes"; then
-      AC_MSG_NOTICE([detected PolarSSL])
-      check_for_ca_bundle=1
-      LIBS="-lpolarssl $LIBS"
-
-      if test -n "$polarssllib"; then
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
-        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$polarssllib"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $polarssllib to CURL_LIBRARY_PATH])
-        fi
-      fi
-    fi
-
-  fi dnl PolarSSL not disabled
-
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
-
-dnl ----------------------------------------------------
 dnl check for mbedTLS
 dnl ----------------------------------------------------
 
@@ -2295,48 +2207,48 @@ if test -z "$ssl_backends" -o "x$OPT_MBEDTLS" != xno; then
 fi
 
 dnl ----------------------------------------------------
-dnl check for CyaSSL
+dnl check for wolfSSL
 dnl ----------------------------------------------------
 
-dnl Default to compiler & linker defaults for CyaSSL files & libraries.
-OPT_CYASSL=no
+dnl Default to compiler & linker defaults for wolfSSL files & libraries.
+OPT_WOLFSSL=no
 
 _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
 AC_ARG_WITH(cyassl,dnl
 AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: system lib default)])
 AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
-  OPT_CYASSL=$withval)
+  OPT_WOLFSSL=$withval)
 
 dnl provide --with-wolfssl as an alias for --with-cyassl
 AC_ARG_WITH(wolfssl,dnl
 AC_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)])
 AC_HELP_STRING([--without-wolfssl], [disable WolfSSL detection]),
-  OPT_CYASSL=$withval)
+  OPT_WOLFSSL=$withval)
 
-if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
+if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
   ssl_msg=
 
-  if test X"$OPT_CYASSL" != Xno; then
+  if test X"$OPT_WOLFSSL" != Xno; then
 
-    if test "$OPT_CYASSL" = "yes"; then
-      OPT_CYASSL=""
+    if test "$OPT_WOLFSSL" = "yes"; then
+      OPT_WOLFSSL=""
     fi
 
     dnl This should be reworked to use pkg-config instead
 
     cyassllibname=cyassl
 
-    if test -z "$OPT_CYASSL" ; then
+    if test -z "$OPT_WOLFSSL" ; then
       dnl check for lib in system default first
 
       AC_CHECK_LIB(cyassl, CyaSSL_Init,
       dnl libcyassl found, set the variable
        [
-         AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
-         AC_SUBST(USE_CYASSL, [1])
-         CYASSL_ENABLED=1
-         USE_CYASSL="yes"
+         AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
+         AC_SUBST(USE_WOLFSSL, [1])
+         WOLFSSL_ENABLED=1
+         USE_WOLFSSL="yes"
          ssl_msg="CyaSSL"
 	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ])
@@ -2347,11 +2259,11 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
     addcflags=""
     cyassllib=""
 
-    if test "x$USE_CYASSL" != "xyes"; then
+    if test "x$USE_WOLFSSL" != "xyes"; then
       dnl add the path and test again
-      addld=-L$OPT_CYASSL/lib$libsuff
-      addcflags=-I$OPT_CYASSL/include
-      cyassllib=$OPT_CYASSL/lib$libsuff
+      addld=-L$OPT_WOLFSSL/lib$libsuff
+      addcflags=-I$OPT_WOLFSSL/include
+      cyassllib=$OPT_WOLFSSL/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
@@ -2360,10 +2272,10 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 
       AC_CHECK_LIB(cyassl, CyaSSL_Init,
        [
-       AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
-       AC_SUBST(USE_CYASSL, [1])
-       CYASSL_ENABLED=1
-       USE_CYASSL="yes"
+       AC_DEFINE(USE_WOLFSSL, 1, [if CyaSSL is enabled])
+       AC_SUBST(USE_WOLFSSL, [1])
+       WOLFSSL_ENABLED=1
+       USE_WOLFSSL="yes"
        ssl_msg="CyaSSL"
        test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
@@ -2378,11 +2290,11 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
     addlib=""
     addcflags=""
 
-    if test "x$USE_CYASSL" != "xyes"; then
+    if test "x$USE_WOLFSSL" != "xyes"; then
       dnl libcyassl renamed to libwolfssl as of 3.4.0
-      addld=-L$OPT_CYASSL/lib$libsuff
-      addcflags=-I$OPT_CYASSL/include
-      cyassllib=$OPT_CYASSL/lib$libsuff
+      addld=-L$OPT_WOLFSSL/lib$libsuff
+      addcflags=-I$OPT_WOLFSSL/include
+      cyassllib=$OPT_WOLFSSL/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
@@ -2406,10 +2318,10 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 	]])
       ],[
          AC_MSG_RESULT(yes)
-         AC_DEFINE(USE_CYASSL, 1, [if CyaSSL/WolfSSL is enabled])
-         AC_SUBST(USE_CYASSL, [1])
-         CYASSL_ENABLED=1
-         USE_CYASSL="yes"
+         AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
+         AC_SUBST(USE_WOLFSSL, [1])
+         WOLFSSL_ENABLED=1
+         USE_WOLFSSL="yes"
          ssl_msg="WolfSSL"
 	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
@@ -2422,32 +2334,20 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
       LIBS="$my_ac_save_LIBS"
     fi
 
-    if test "x$USE_CYASSL" = "xyes"; then
+    if test "x$USE_WOLFSSL" = "xyes"; then
       AC_MSG_NOTICE([detected $cyassllibname])
       check_for_ca_bundle=1
 
       dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       AX_COMPILE_CHECK_SIZEOF(long long)
 
-      dnl Versions since at least 2.6.0 may have options.h
-      AC_CHECK_HEADERS(cyassl/options.h)
-
-      dnl Versions since at least 2.9.4 renamed error.h to error-ssl.h
-      AC_CHECK_HEADERS(cyassl/error-ssl.h)
-
       LIBS="-l$cyassllibname -lm $LIBS"
 
-      if test "x$cyassllibname" = "xwolfssl"; then
-        dnl Recent WolfSSL versions build without SSLv3 by default
-        dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
-        AC_CHECK_FUNCS(wolfSSLv3_client_method \
-                       wolfSSL_get_peer_certificate \
-                       wolfSSL_UseALPN)
-      else
-        dnl Cyassl needs configure --enable-opensslextra to have *get_peer*
-        AC_CHECK_FUNCS(CyaSSL_CTX_UseSupportedCurve \
-                       CyaSSL_get_peer_certificate)
-      fi
+      dnl Recent WolfSSL versions build without SSLv3 by default
+      dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
+      AC_CHECK_FUNCS(wolfSSLv3_client_method \
+                     wolfSSL_get_peer_certificate \
+                     wolfSSL_UseALPN)
 
       if test -n "$cyassllib"; then
         dnl when shared libs were found in a path that the run-time
@@ -2463,7 +2363,7 @@ if test -z "$ssl_backends" -o "x$OPT_CYASSL" != xno; then
 
     fi
 
-  fi dnl CyaSSL not disabled
+  fi dnl wolfSSL not disabled
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
@@ -2690,10 +2590,10 @@ if test -z "$ssl_backends" -o "x$OPT_NSS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$AMISSL_ENABLED" in
+case "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$WINSSL_ENABLED$SECURETRANSPORT_ENABLED$MESALINK_ENABLED$AMISSL_ENABLED" in
 x)
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink or --with-amissl to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-nss, --with-schannel, --with-secure-transport, --with-mesalink or --with-amissl to address this.])
   ;;
 x1)
   # one SSL backend is enabled
@@ -3117,10 +3017,8 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="GNUTLS_"
         elif test "x$NSS_ENABLED" = "x1"; then
           versioned_symbols_flavour="NSS_"
-        elif test "x$POLARSSL_ENABLED" = "x1"; then
-          versioned_symbols_flavour="POLARSSL_"
-        elif test "x$CYASSL_ENABLED" = "x1"; then
-          versioned_symbols_flavour="CYASSL_"
+        elif test "x$WOLFSSL_ENABLED" = "x1"; then
+          versioned_symbols_flavour="WOLFSSL_"
         elif test "x$WINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="SCHANNEL_"
         elif test "x$SECURETRANSPORT_ENABLED" = "x1"; then
@@ -3479,7 +3377,12 @@ case "$OPT_FISH_FPATH" in
     ;;
   default|yes)
     dnl --with-fish-functions-dir option used without path
-    FISH_FUNCTIONS_DIR="$datarootdir/fish/completions"
+    CURL_CHECK_PKGCONFIG(fish)
+    if test "$PKGCONFIG" != "no" ; then
+      FISH_FUNCTIONS_DIR="$($PKGCONFIG --variable completionsdir fish)"
+    else
+      FISH_FUNCTIONS_DIR="$datarootdir/fish/vendor_completions.d"
+    fi
     AC_SUBST(FISH_FUNCTIONS_DIR)
     ;;
   *)
@@ -3706,6 +3609,9 @@ CURL_CHECK_FUNC_GETHOSTBYADDR_R
 CURL_CHECK_FUNC_GETHOSTBYNAME
 CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
+CURL_CHECK_FUNC_GETPEERNAME
+CURL_CHECK_FUNC_GETSOCKNAME
+CURL_CHECK_FUNC_IF_NAMETOINDEX
 CURL_CHECK_FUNC_GETIFADDRS
 CURL_CHECK_FUNC_GETSERVBYPORT_R
 CURL_CHECK_FUNC_GMTIME_R
@@ -4047,7 +3953,6 @@ AC_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_TLS_SRP, 1, [to disable TLS-SRP authentication])
        want_tls_srp=no
        ;;
   *)   AC_MSG_RESULT(yes)
@@ -4100,7 +4005,7 @@ fi
 dnl ************************************************************
 dnl disable cookies support
 dnl
-AC_MSG_CHECKING([whether to enable support for cookies])
+AC_MSG_CHECKING([whether to support cookies])
 AC_ARG_ENABLE(cookies,
 AC_HELP_STRING([--enable-cookies],[Enable cookies support])
 AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
@@ -4108,6 +4013,132 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_COOKIES, 1, [to disable cookies support])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable HTTP authentication support
+dnl
+AC_MSG_CHECKING([whether to support HTTP authentication])
+AC_ARG_ENABLE(http-auth,
+AC_HELP_STRING([--enable-http-auth],[Enable HTTP authentication support])
+AC_HELP_STRING([--disable-http-auth],[Disable HTTP authentication support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_HTTP_AUTH, 1, [disable HTTP authentication])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable DoH support
+dnl
+AC_MSG_CHECKING([whether to support DoH])
+AC_ARG_ENABLE(doh,
+AC_HELP_STRING([--enable-doh],[Enable DoH support])
+AC_HELP_STRING([--disable-doh],[Disable DoH support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_DOH, 1, [disable DoH])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable mime API support
+dnl
+AC_MSG_CHECKING([whether to support the MIME API])
+AC_ARG_ENABLE(mime,
+AC_HELP_STRING([--enable-mime],[Enable mime API support])
+AC_HELP_STRING([--disable-mime],[Disable mime API support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_MIME, 1, [disable mime API])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable date parsing
+dnl
+AC_MSG_CHECKING([whether to support date parsing])
+AC_ARG_ENABLE(dateparse,
+AC_HELP_STRING([--enable-dateparse],[Enable date parsing])
+AC_HELP_STRING([--disable-dateparse],[Disable date parsing]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_PARSEDATE, 1, [disable date parsing])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable netrc
+dnl
+AC_MSG_CHECKING([whether to support netrc parsing])
+AC_ARG_ENABLE(netrc,
+AC_HELP_STRING([--enable-netrc],[Enable netrc parsing])
+AC_HELP_STRING([--disable-netrc],[Disable netrc parsing]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_NETRC, 1, [disable netrc parsing])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable progress-meter
+dnl
+AC_MSG_CHECKING([whether to support progress-meter])
+AC_ARG_ENABLE(progress-meter,
+AC_HELP_STRING([--enable-progress-meter],[Enable progress-meter])
+AC_HELP_STRING([--disable-progress-meter],[Disable progress-meter]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_PROGRESS_METER, 1, [disable progress-meter])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
+dnl disable shuffle DNS support
+dnl
+AC_MSG_CHECKING([whether to support DNS shuffling])
+AC_ARG_ENABLE(dnsshuffle,
+AC_HELP_STRING([--enable-dnsshuffle],[Enable DNS shuffling])
+AC_HELP_STRING([--disable-dnsshuffle],[Disable DNS shufflinf]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_SHUFFLE_DNS, 1, [disable DNS shuffling])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;

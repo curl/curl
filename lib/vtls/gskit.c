@@ -734,12 +734,11 @@ static ssize_t gskit_recv(struct connectdata *conn, int num, char *buf,
 {
   struct ssl_connect_data *connssl = &conn->ssl[num];
   struct Curl_easy *data = conn->data;
-  int buffsize;
   int nread;
   CURLcode cc = CURLE_RECV_ERROR;
 
   if(pipe_ssloverssl(conn, num, SOS_READ) >= 0) {
-    buffsize = buffersize > (size_t) INT_MAX? INT_MAX: (int) buffersize;
+    int buffsize = buffersize > (size_t) INT_MAX? INT_MAX: (int) buffersize;
     cc = gskit_status(data, gsk_secure_soc_read(BACKEND->handle,
                                                 buf, buffsize, &nread),
                       "gsk_secure_soc_read()", CURLE_RECV_ERROR);
@@ -806,7 +805,6 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
     conn->host.name;
   const char *sni;
   unsigned int protoflags = 0;
-  long timeout;
   Qso_OverlappedIO_t commarea;
   int sockpair[2];
   static const int sobufsize = CURL_MAX_WRITE_SIZE;
@@ -914,7 +912,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   if(!result) {
     /* Compute the handshake timeout. Since GSKit granularity is 1 second,
        we round up the required value. */
-    timeout = Curl_timeleft(data, NULL, TRUE);
+    long timeout = Curl_timeleft(data, NULL, TRUE);
     if(timeout < 0)
       result = CURLE_OPERATION_TIMEDOUT;
     else
@@ -1021,14 +1019,13 @@ static CURLcode gskit_connect_step2(struct connectdata *conn, int sockindex,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   Qso_OverlappedIO_t cstat;
-  long timeout_ms;
   struct timeval stmv;
   CURLcode result;
 
   /* Poll or wait for end of SSL asynchronous handshake. */
 
   for(;;) {
-    timeout_ms = nonblocking? 0: Curl_timeleft(data, NULL, TRUE);
+    long timeout_ms = nonblocking? 0: Curl_timeleft(data, NULL, TRUE);
     if(timeout_ms < 0)
       timeout_ms = 0;
     stmv.tv_sec = timeout_ms / 1000;
@@ -1077,7 +1074,6 @@ static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
   const char *cert = (const char *) NULL;
   const char *certend;
   const char *ptr;
-  int i;
   CURLcode result;
 
   /* SSL handshake done: gather certificate info and verify host. */
@@ -1087,6 +1083,8 @@ static CURLcode gskit_connect_step3(struct connectdata *conn, int sockindex)
                                                     &cdev, &cdec),
                   "gsk_attribute_get_cert_info()", CURLE_SSL_CONNECT_ERROR) ==
      CURLE_OK) {
+    int i;
+
     infof(data, "Server certificate:\n");
     p = cdev;
     for(i = 0; i++ < cdec; p++)
@@ -1160,7 +1158,6 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   long timeout_ms;
-  Qso_OverlappedIO_t cstat;
   CURLcode result = CURLE_OK;
 
   *done = connssl->state == ssl_connection_complete;
@@ -1262,7 +1259,6 @@ static int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct Curl_easy *data = conn->data;
-  ssize_t nread;
   int what;
   int rc;
   char buf[120];
@@ -1270,8 +1266,10 @@ static int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
   if(!BACKEND->handle)
     return 0;
 
+#ifndef CURL_DISABLE_FTP
   if(data->set.ftp_ccc != CURLFTPSSL_CCC_ACTIVE)
     return 0;
+#endif
 
   close_one(connssl, conn, sockindex);
   rc = 0;
@@ -1279,6 +1277,8 @@ static int Curl_gskit_shutdown(struct connectdata *conn, int sockindex)
                          SSL_SHUTDOWN_TIMEOUT);
 
   for(;;) {
+    ssize_t nread;
+
     if(what < 0) {
       /* anything that gets here is fatally bad */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

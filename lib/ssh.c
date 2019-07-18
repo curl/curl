@@ -290,10 +290,6 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
       return CURLE_AGAIN;
   }
 
-  /* TODO: map some more of the libssh2 errors to the more appropriate CURLcode
-     error code, and possibly add a few new SSH-related one. We must however
-     not return or even depend on libssh2 errors in the public libcurl API */
-
   return CURLE_SSH;
 }
 
@@ -591,13 +587,13 @@ static CURLcode ssh_check_fingerprint(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
   char md5buffer[33];
-  int i;
 
   const char *fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
       LIBSSH2_HOSTKEY_HASH_MD5);
 
   if(fingerprint) {
     /* The fingerprint points to static storage (!), don't free() it. */
+    int i;
     for(i = 0; i < 16; i++)
       msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
     infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
@@ -737,18 +733,17 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 
       if((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
          (strstr(sshc->authlist, "publickey") != NULL)) {
-        char *home = NULL;
         bool out_of_memory = FALSE;
 
         sshc->rsa_pub = sshc->rsa = NULL;
 
-        /* To ponder about: should really the lib be messing about with the
-           HOME environment variable etc? */
-        home = curl_getenv("HOME");
-
         if(data->set.str[STRING_SSH_PRIVATE_KEY])
           sshc->rsa = strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
         else {
+          /* To ponder about: should really the lib be messing about with the
+             HOME environment variable etc? */
+          char *home = curl_getenv("HOME");
+
           /* If no private key file is specified, try some common paths. */
           if(home) {
             /* Try ~/.ssh first. */
@@ -764,6 +759,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
                 Curl_safefree(sshc->rsa);
               }
             }
+            free(home);
           }
           if(!out_of_memory && !sshc->rsa) {
             /* Nothing found; try the current dir. */
@@ -795,7 +791,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
 
         if(out_of_memory || sshc->rsa == NULL) {
-          free(home);
           Curl_safefree(sshc->rsa);
           Curl_safefree(sshc->rsa_pub);
           state(conn, SSH_SESSION_FREE);
@@ -806,8 +801,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         sshc->passphrase = data->set.ssl.key_passwd;
         if(!sshc->passphrase)
           sshc->passphrase = "";
-
-        free(home);
 
         if(sshc->rsa_pub)
           infof(data, "Using SSH public key file '%s'\n", sshc->rsa_pub);
@@ -3065,12 +3058,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
   struct SSHPROTO *sftp_scp = conn->data->req.protop;
 
   if(!status) {
-    /* run the state-machine
-
-       TODO: when the multi interface is used, this _really_ should be using
-       the ssh_multi_statemach function but we have no general support for
-       non-blocking DONE operations!
-    */
+    /* run the state-machine */
     result = ssh_block_statemach(conn, FALSE);
   }
   else

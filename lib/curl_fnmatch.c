@@ -32,15 +32,6 @@
 
 #ifndef HAVE_FNMATCH
 
-/*
- * TODO:
- *
- * Make this function match POSIX. Test 1307 includes a set of test patterns
- * that returns different results with a POSIX fnmatch() than with this
- * implementation and this is considered a bug where POSIX is the guiding
- * light.
- */
-
 #define CURLFNM_CHARSET_LEN (sizeof(char) * 256)
 #define CURLFNM_CHSET_SIZE (CURLFNM_CHARSET_LEN + 15)
 

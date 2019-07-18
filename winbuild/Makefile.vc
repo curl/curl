@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -39,9 +39,13 @@ CFGSET=true
 !MESSAGE where <options> is one or many of:
 !MESSAGE   VC=<6,7,8,9,10,11,12,14,15>    - VC versions
 !MESSAGE   WITH_DEVEL=<path>              - Paths for the development files (SSL, zlib, etc.)
-!MESSAGE                                    Defaults to sibbling directory deps: ../deps
+!MESSAGE                                    Defaults to curl's sibling directory deps: ../deps
 !MESSAGE                                    Libraries can be fetched at https://windows.php.net/downloads/php-sdk/deps/
 !MESSAGE                                    Uncompress them into the deps folder.
+!MESSAGE   WITH_PREFIX=<path>             - Installation directory path
+!MESSAGE                                    Defaults to a configuration dependent (SSL, zlib, etc.)
+!MESSAGE                                    directory inside curl's subdirectory builds: ./builds
+!MESSAGE                                    Use backslashes as path separator
 !MESSAGE   WITH_SSL=<dll or static>       - Enable OpenSSL support, DLL or static
 !MESSAGE   WITH_NGHTTP2=<dll or static>   - Enable HTTP/2 support, DLL or static
 !MESSAGE   WITH_CARES=<dll or static>     - Enable c-ares support, DLL or static
@@ -134,6 +138,12 @@ USE_WINSSL = false
 
 !IFNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
 ENABLE_OPENSSL_AUTO_LOAD_CONFIG = true
+!ELSEIF "$(ENABLE_OPENSSL_AUTO_LOAD_CONFIG)"=="yes"
+!UNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
+ENABLE_OPENSSL_AUTO_LOAD_CONFIG = true
+!ELSEIF "$(ENABLE_OPENSSL_AUTO_LOAD_CONFIG)"=="no"
+!UNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
+ENABLE_OPENSSL_AUTO_LOAD_CONFIG = false
 !ENDIF
 
 CONFIG_NAME_LIB = libcurl
@@ -166,12 +176,6 @@ USE_NGHTTP2 = false
 !IF "$(WITH_MBEDTLS)"=="dll" || "$(WITH_MBEDTLS)"=="static"
 USE_MBEDTLS = true
 MBEDTLS     = $(WITH_MBEDTLS)
-!ENDIF
-
-!IF ( "$(USE_SSL)"=="true" && "$(USE_WINSSL)"=="true" ) \
- || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
- || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WINSSL)"=="true" )
-!ERROR SSL, MBEDTLS and WINSSL are mutual exclusive options.
 !ENDIF
 
 !IF "$(WITH_CARES)"=="dll"

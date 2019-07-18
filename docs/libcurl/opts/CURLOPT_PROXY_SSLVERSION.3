@@ -69,6 +69,11 @@ The flag defines maximum supported TLS version as TLSv1.2.
 The flag defines maximum supported TLS version as TLSv1.3.
 (Added in 7.54.0)
 .RE
+
+In versions of curl prior to 7.54 the CURL_SSLVERSION_TLS options were
+documented to allow \fIonly\fP the specified TLS version, but behavior was
+inconsistent depending on the TLS library.
+
 .SH DEFAULT
 CURL_SSLVERSION_DEFAULT
 .SH PROTOCOLS

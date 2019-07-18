@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,9 +30,6 @@ unsigned int Curl_read32_le(const unsigned char *buf);
 
 /* Converts a 16-bit integer from big endian */
 unsigned short Curl_read16_be(const unsigned char *buf);
-
-/* Converts a 32-bit integer to little endian */
-void Curl_write32_le(const int value, unsigned char *buffer);
 
 #if (CURL_SIZEOF_CURL_OFF_T > 4)
 /* Converts a 64-bit integer to little endian */

@@ -29,12 +29,12 @@ LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
   vtls/polarssl.c vtls/polarssl_threadlock.c                            \
-  vtls/cyassl.c vtls/schannel.c vtls/schannel_verify.c                  \
+  vtls/wolfssl.c vtls/schannel.c vtls/schannel_verify.c                 \
   vtls/sectransp.c vtls/gskit.c vtls/mbedtls.c vtls/mesalink.c
 
 LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h                \
-  vtls/cyassl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h           \
+  vtls/wolfssl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h          \
   vtls/mbedtls.h vtls/mesalink.h
 
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
@@ -52,10 +52,10 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   openldap.c curl_gethostname.c gopher.c idn_win32.c                    \
   http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c      \
   http_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_sasl.c rand.c        \
-  curl_multibyte.c hostcheck.c conncache.c pipeline.c dotdot.c          \
+  curl_multibyte.c hostcheck.c conncache.c dotdot.c                     \
   x509asn1.c http2.c smb.c curl_endian.c curl_des.c system_win32.c      \
   mime.c sha256.c setopt.c curl_path.c curl_ctype.c curl_range.c psl.c  \
-  doh.c urlapi.c altsvc.c
+  doh.c urlapi.c curl_get_line.c altsvc.c
 
 LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
@@ -72,11 +72,11 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   curl_gethostname.h gopher.h http_proxy.h non-ascii.h asyn.h           \
   http_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h             \
   curl_sasl.h curl_multibyte.h hostcheck.h conncache.h                  \
-  curl_setup_once.h multihandle.h setup-vms.h pipeline.h dotdot.h       \
+  curl_setup_once.h multihandle.h setup-vms.h dotdot.h                  \
   x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h           \
   curl_printf.h system_win32.h rand.h mime.h curl_sha256.h setopt.h     \
   curl_path.h curl_ctype.h curl_range.h psl.h doh.h urlapi-int.h        \
-  altsvc.h
+  curl_get_line.h altsvc.h
 
 LIB_RCFILES = libcurl.rc
 

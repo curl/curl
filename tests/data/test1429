@@ -9,7 +9,7 @@ HTTP/0.9
 
 <reply>
 <data nocheck="yes">
-HTTP/1.1 1234 OK
+HTTP/1.1 2345 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/1429 --write-out '%{response_code}' --http0.9
 # Verify data after the test has been "shot"
 <verify>
 <stdout nonewline="yes">
-HTTP/1.1 1234 OK
+HTTP/1.1 2345 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -55,7 +55,7 @@ Content-Type: text/html
 Funny-head: yesyes
 
 -foo-
-123
+234
 </stdout>
 <strip>
 ^User-Agent:.*

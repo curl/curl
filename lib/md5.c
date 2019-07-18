@@ -39,19 +39,19 @@
 
 typedef struct md5_ctx MD5_CTX;
 
-static void MD5_Init(MD5_CTX * ctx)
+static void MD5_Init(MD5_CTX *ctx)
 {
   md5_init(ctx);
 }
 
-static void MD5_Update(MD5_CTX * ctx,
+static void MD5_Update(MD5_CTX *ctx,
                        const unsigned char *input,
                        unsigned int inputLen)
 {
   md5_update(ctx, inputLen, input);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 {
   md5_digest(ctx, 16, digest);
 }
@@ -65,19 +65,19 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 
 typedef gcry_md_hd_t MD5_CTX;
 
-static void MD5_Init(MD5_CTX * ctx)
+static void MD5_Init(MD5_CTX *ctx)
 {
   gcry_md_open(ctx, GCRY_MD_MD5, 0);
 }
 
-static void MD5_Update(MD5_CTX * ctx,
+static void MD5_Update(MD5_CTX *ctx,
                        const unsigned char *input,
                        unsigned int inputLen)
 {
   gcry_md_write(*ctx, input, inputLen);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 {
   memcpy(digest, gcry_md_read(*ctx, 0), 16);
   gcry_md_close(*ctx);
@@ -124,7 +124,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
   CC_MD5_Final(digest, ctx);
 }
 
-#elif defined(_WIN32) && !defined(CURL_WINDOWS_APP)
+#elif defined(WIN32) && !defined(CURL_WINDOWS_APP)
 
 #include <wincrypt.h>
 #include "curl_memory.h"
@@ -275,7 +275,6 @@ static const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
 {
   const unsigned char *ptr;
   MD5_u32plus a, b, c, d;
-  MD5_u32plus saved_a, saved_b, saved_c, saved_d;
 
   ptr = (const unsigned char *)data;
 
@@ -285,6 +284,8 @@ static const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
   d = ctx->d;
 
   do {
+    MD5_u32plus saved_a, saved_b, saved_c, saved_d;
+
     saved_a = a;
     saved_b = b;
     saved_c = c;
@@ -292,77 +293,77 @@ static const void *body(MD5_CTX *ctx, const void *data, unsigned long size)
 
 /* Round 1 */
     STEP(F, a, b, c, d, SET(0), 0xd76aa478, 7)
-      STEP(F, d, a, b, c, SET(1), 0xe8c7b756, 12)
-      STEP(F, c, d, a, b, SET(2), 0x242070db, 17)
-      STEP(F, b, c, d, a, SET(3), 0xc1bdceee, 22)
-      STEP(F, a, b, c, d, SET(4), 0xf57c0faf, 7)
-      STEP(F, d, a, b, c, SET(5), 0x4787c62a, 12)
-      STEP(F, c, d, a, b, SET(6), 0xa8304613, 17)
-      STEP(F, b, c, d, a, SET(7), 0xfd469501, 22)
-      STEP(F, a, b, c, d, SET(8), 0x698098d8, 7)
-      STEP(F, d, a, b, c, SET(9), 0x8b44f7af, 12)
-      STEP(F, c, d, a, b, SET(10), 0xffff5bb1, 17)
-      STEP(F, b, c, d, a, SET(11), 0x895cd7be, 22)
-      STEP(F, a, b, c, d, SET(12), 0x6b901122, 7)
-      STEP(F, d, a, b, c, SET(13), 0xfd987193, 12)
-      STEP(F, c, d, a, b, SET(14), 0xa679438e, 17)
-      STEP(F, b, c, d, a, SET(15), 0x49b40821, 22)
+    STEP(F, d, a, b, c, SET(1), 0xe8c7b756, 12)
+    STEP(F, c, d, a, b, SET(2), 0x242070db, 17)
+    STEP(F, b, c, d, a, SET(3), 0xc1bdceee, 22)
+    STEP(F, a, b, c, d, SET(4), 0xf57c0faf, 7)
+    STEP(F, d, a, b, c, SET(5), 0x4787c62a, 12)
+    STEP(F, c, d, a, b, SET(6), 0xa8304613, 17)
+    STEP(F, b, c, d, a, SET(7), 0xfd469501, 22)
+    STEP(F, a, b, c, d, SET(8), 0x698098d8, 7)
+    STEP(F, d, a, b, c, SET(9), 0x8b44f7af, 12)
+    STEP(F, c, d, a, b, SET(10), 0xffff5bb1, 17)
+    STEP(F, b, c, d, a, SET(11), 0x895cd7be, 22)
+    STEP(F, a, b, c, d, SET(12), 0x6b901122, 7)
+    STEP(F, d, a, b, c, SET(13), 0xfd987193, 12)
+    STEP(F, c, d, a, b, SET(14), 0xa679438e, 17)
+    STEP(F, b, c, d, a, SET(15), 0x49b40821, 22)
 
 /* Round 2 */
-      STEP(G, a, b, c, d, GET(1), 0xf61e2562, 5)
-      STEP(G, d, a, b, c, GET(6), 0xc040b340, 9)
-      STEP(G, c, d, a, b, GET(11), 0x265e5a51, 14)
-      STEP(G, b, c, d, a, GET(0), 0xe9b6c7aa, 20)
-      STEP(G, a, b, c, d, GET(5), 0xd62f105d, 5)
-      STEP(G, d, a, b, c, GET(10), 0x02441453, 9)
-      STEP(G, c, d, a, b, GET(15), 0xd8a1e681, 14)
-      STEP(G, b, c, d, a, GET(4), 0xe7d3fbc8, 20)
-      STEP(G, a, b, c, d, GET(9), 0x21e1cde6, 5)
-      STEP(G, d, a, b, c, GET(14), 0xc33707d6, 9)
-      STEP(G, c, d, a, b, GET(3), 0xf4d50d87, 14)
-      STEP(G, b, c, d, a, GET(8), 0x455a14ed, 20)
-      STEP(G, a, b, c, d, GET(13), 0xa9e3e905, 5)
-      STEP(G, d, a, b, c, GET(2), 0xfcefa3f8, 9)
-      STEP(G, c, d, a, b, GET(7), 0x676f02d9, 14)
-      STEP(G, b, c, d, a, GET(12), 0x8d2a4c8a, 20)
+    STEP(G, a, b, c, d, GET(1), 0xf61e2562, 5)
+    STEP(G, d, a, b, c, GET(6), 0xc040b340, 9)
+    STEP(G, c, d, a, b, GET(11), 0x265e5a51, 14)
+    STEP(G, b, c, d, a, GET(0), 0xe9b6c7aa, 20)
+    STEP(G, a, b, c, d, GET(5), 0xd62f105d, 5)
+    STEP(G, d, a, b, c, GET(10), 0x02441453, 9)
+    STEP(G, c, d, a, b, GET(15), 0xd8a1e681, 14)
+    STEP(G, b, c, d, a, GET(4), 0xe7d3fbc8, 20)
+    STEP(G, a, b, c, d, GET(9), 0x21e1cde6, 5)
+    STEP(G, d, a, b, c, GET(14), 0xc33707d6, 9)
+    STEP(G, c, d, a, b, GET(3), 0xf4d50d87, 14)
+    STEP(G, b, c, d, a, GET(8), 0x455a14ed, 20)
+    STEP(G, a, b, c, d, GET(13), 0xa9e3e905, 5)
+    STEP(G, d, a, b, c, GET(2), 0xfcefa3f8, 9)
+    STEP(G, c, d, a, b, GET(7), 0x676f02d9, 14)
+    STEP(G, b, c, d, a, GET(12), 0x8d2a4c8a, 20)
 
 /* Round 3 */
-      STEP(H, a, b, c, d, GET(5), 0xfffa3942, 4)
-      STEP(H2, d, a, b, c, GET(8), 0x8771f681, 11)
-      STEP(H, c, d, a, b, GET(11), 0x6d9d6122, 16)
-      STEP(H2, b, c, d, a, GET(14), 0xfde5380c, 23)
-      STEP(H, a, b, c, d, GET(1), 0xa4beea44, 4)
-      STEP(H2, d, a, b, c, GET(4), 0x4bdecfa9, 11)
-      STEP(H, c, d, a, b, GET(7), 0xf6bb4b60, 16)
-      STEP(H2, b, c, d, a, GET(10), 0xbebfbc70, 23)
-      STEP(H, a, b, c, d, GET(13), 0x289b7ec6, 4)
-      STEP(H2, d, a, b, c, GET(0), 0xeaa127fa, 11)
-      STEP(H, c, d, a, b, GET(3), 0xd4ef3085, 16)
-      STEP(H2, b, c, d, a, GET(6), 0x04881d05, 23)
-      STEP(H, a, b, c, d, GET(9), 0xd9d4d039, 4)
-      STEP(H2, d, a, b, c, GET(12), 0xe6db99e5, 11)
-      STEP(H, c, d, a, b, GET(15), 0x1fa27cf8, 16)
-      STEP(H2, b, c, d, a, GET(2), 0xc4ac5665, 23)
+    STEP(H, a, b, c, d, GET(5), 0xfffa3942, 4)
+    STEP(H2, d, a, b, c, GET(8), 0x8771f681, 11)
+    STEP(H, c, d, a, b, GET(11), 0x6d9d6122, 16)
+    STEP(H2, b, c, d, a, GET(14), 0xfde5380c, 23)
+    STEP(H, a, b, c, d, GET(1), 0xa4beea44, 4)
+    STEP(H2, d, a, b, c, GET(4), 0x4bdecfa9, 11)
+    STEP(H, c, d, a, b, GET(7), 0xf6bb4b60, 16)
+    STEP(H2, b, c, d, a, GET(10), 0xbebfbc70, 23)
+    STEP(H, a, b, c, d, GET(13), 0x289b7ec6, 4)
+    STEP(H2, d, a, b, c, GET(0), 0xeaa127fa, 11)
+    STEP(H, c, d, a, b, GET(3), 0xd4ef3085, 16)
+    STEP(H2, b, c, d, a, GET(6), 0x04881d05, 23)
+    STEP(H, a, b, c, d, GET(9), 0xd9d4d039, 4)
+    STEP(H2, d, a, b, c, GET(12), 0xe6db99e5, 11)
+    STEP(H, c, d, a, b, GET(15), 0x1fa27cf8, 16)
+    STEP(H2, b, c, d, a, GET(2), 0xc4ac5665, 23)
 
 /* Round 4 */
-      STEP(I, a, b, c, d, GET(0), 0xf4292244, 6)
-      STEP(I, d, a, b, c, GET(7), 0x432aff97, 10)
-      STEP(I, c, d, a, b, GET(14), 0xab9423a7, 15)
-      STEP(I, b, c, d, a, GET(5), 0xfc93a039, 21)
-      STEP(I, a, b, c, d, GET(12), 0x655b59c3, 6)
-      STEP(I, d, a, b, c, GET(3), 0x8f0ccc92, 10)
-      STEP(I, c, d, a, b, GET(10), 0xffeff47d, 15)
-      STEP(I, b, c, d, a, GET(1), 0x85845dd1, 21)
-      STEP(I, a, b, c, d, GET(8), 0x6fa87e4f, 6)
-      STEP(I, d, a, b, c, GET(15), 0xfe2ce6e0, 10)
-      STEP(I, c, d, a, b, GET(6), 0xa3014314, 15)
-      STEP(I, b, c, d, a, GET(13), 0x4e0811a1, 21)
-      STEP(I, a, b, c, d, GET(4), 0xf7537e82, 6)
-      STEP(I, d, a, b, c, GET(11), 0xbd3af235, 10)
-      STEP(I, c, d, a, b, GET(2), 0x2ad7d2bb, 15)
-      STEP(I, b, c, d, a, GET(9), 0xeb86d391, 21)
+    STEP(I, a, b, c, d, GET(0), 0xf4292244, 6)
+    STEP(I, d, a, b, c, GET(7), 0x432aff97, 10)
+    STEP(I, c, d, a, b, GET(14), 0xab9423a7, 15)
+    STEP(I, b, c, d, a, GET(5), 0xfc93a039, 21)
+    STEP(I, a, b, c, d, GET(12), 0x655b59c3, 6)
+    STEP(I, d, a, b, c, GET(3), 0x8f0ccc92, 10)
+    STEP(I, c, d, a, b, GET(10), 0xffeff47d, 15)
+    STEP(I, b, c, d, a, GET(1), 0x85845dd1, 21)
+    STEP(I, a, b, c, d, GET(8), 0x6fa87e4f, 6)
+    STEP(I, d, a, b, c, GET(15), 0xfe2ce6e0, 10)
+    STEP(I, c, d, a, b, GET(6), 0xa3014314, 15)
+    STEP(I, b, c, d, a, GET(13), 0x4e0811a1, 21)
+    STEP(I, a, b, c, d, GET(4), 0xf7537e82, 6)
+    STEP(I, d, a, b, c, GET(11), 0xbd3af235, 10)
+    STEP(I, c, d, a, b, GET(2), 0x2ad7d2bb, 15)
+    STEP(I, b, c, d, a, GET(9), 0xeb86d391, 21)
 
-      a += saved_a;
+    a += saved_a;
     b += saved_b;
     c += saved_c;
     d += saved_d;
@@ -392,7 +393,7 @@ static void MD5_Init(MD5_CTX *ctx)
 static void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
 {
   MD5_u32plus saved_lo;
-  unsigned long used, available;
+  unsigned long used;
 
   saved_lo = ctx->lo;
   ctx->lo = (saved_lo + size) & 0x1fffffff;
@@ -403,7 +404,7 @@ static void MD5_Update(MD5_CTX *ctx, const void *data, unsigned long size)
   used = saved_lo & 0x3f;
 
   if(used) {
-    available = 64 - used;
+    unsigned long available = 64 - used;
 
     if(size < available) {
       memcpy(&ctx->buffer[used], data, size);
@@ -545,23 +546,23 @@ MD5_context *Curl_MD5_init(const MD5_params *md5params)
   return ctxt;
 }
 
-int Curl_MD5_update(MD5_context *context,
-                    const unsigned char *data,
-                    unsigned int len)
+CURLcode Curl_MD5_update(MD5_context *context,
+                         const unsigned char *data,
+                         unsigned int len)
 {
   (*context->md5_hash->md5_update_func)(context->md5_hashctx, data, len);
 
-  return 0;
+  return CURLE_OK;
 }
 
-int Curl_MD5_final(MD5_context *context, unsigned char *result)
+CURLcode Curl_MD5_final(MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 
   free(context->md5_hashctx);
   free(context);
 
-  return 0;
+  return CURLE_OK;
 }
 
 #endif /* CURL_DISABLE_CRYPTO_AUTH */

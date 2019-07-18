@@ -125,6 +125,7 @@ int main(void)
 #if   defined(HAVE_GETHOSTBYADDR_R_5) || \
       defined(HAVE_GETHOSTBYADDR_R_5_REENTRANT)
   rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+  (void)rc;
 #elif defined(HAVE_GETHOSTBYADDR_R_7) || \
       defined(HAVE_GETHOSTBYADDR_R_7_REENTRANT)
   hp = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &h_errnop);
@@ -132,6 +133,7 @@ int main(void)
 #elif defined(HAVE_GETHOSTBYADDR_R_8) || \
       defined(HAVE_GETHOSTBYADDR_R_8_REENTRANT)
   rc = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &hp, &h_errnop);
+  (void)rc;
 #endif
 
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
@@ -240,6 +242,7 @@ int main()
 #ifndef inet_ntoa_r
   func_type func;
   func = (func_type)inet_ntoa_r;
+  (void)func;
 #endif
   return 0;
 }
@@ -255,6 +258,7 @@ int main()
 #ifndef inet_ntoa_r
   func_type func;
   func = (func_type)&inet_ntoa_r;
+  (void)func;
 #endif
   return 0;
 }
@@ -583,6 +587,8 @@ int
 main() {
   int res3 = c99_vmacro3(1, 2, 3);
   int res2 = c99_vmacro2(1, 2);
+  (void)res3;
+  (void)res2;
   return 0;
 }
 #endif
@@ -604,6 +610,8 @@ int
 main() {
   int res3 = gcc_vmacro3(1, 2, 3);
   int res2 = gcc_vmacro2(1, 2);
+  (void)res3;
+  (void)res2;
   return 0;
 }
 #endif

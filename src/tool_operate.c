@@ -101,7 +101,6 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 static bool is_fatal_error(CURLcode code)
 {
   switch(code) {
-  /* TODO: Should CURLE_PEER_FAILED_VERIFICATION be a critical error? */
   case CURLE_FAILED_INIT:
   case CURLE_OUT_OF_MEMORY:
   case CURLE_UNKNOWN_OPTION:
@@ -827,6 +826,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         my_setopt(curl, CURLOPT_INTERLEAVEDATA, &outs);
+
         if(metalink || !config->use_metalink)
           /* what call to write */
           my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
@@ -874,10 +874,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->oauth_bearer)
           my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
-#if !defined(CURL_DISABLE_PROXY)
         {
-          /* TODO: Make this a run-time check instead of compile-time one. */
-
           my_setopt_str(curl, CURLOPT_PROXY, config->proxy);
           /* new in libcurl 7.5 */
           if(config->proxy)
@@ -915,7 +912,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS,
                     config->suppress_connect_headers?1L:0L);
         }
-#endif /* !CURL_DISABLE_PROXY */
 
         my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
         my_setopt(curl, CURLOPT_REQUEST_TARGET, config->request_target);
@@ -1070,7 +1066,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         }
         /* For the time being if --proxy-capath is not set then we use the
            --capath value for it, if any. See #1257 */
-        if(config->proxy_capath || config->capath) {
+        if((config->proxy_capath || config->capath) &&
+           !tool_setopt_skip(CURLOPT_PROXY_CAPATH)) {
           result = res_setopt_str(curl, CURLOPT_PROXY_CAPATH,
                                   (config->proxy_capath ?
                                    config->proxy_capath :
@@ -1211,7 +1208,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
         my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
         if(config->cookie)
           my_setopt_str(curl, CURLOPT_COOKIE, config->cookie);
 
@@ -1224,13 +1220,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* new in libcurl 7.9.7 */
         my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession?1L:0L);
-#else
-        if(config->cookie || config->cookiefile || config->cookiejar) {
-          warnf(config->global, "cookie option(s) used even though cookie "
-                "support is disabled!\n");
-          return CURLE_NOT_BUILT_IN;
-        }
-#endif
 
         my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
@@ -1370,7 +1359,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         /* curl 7.13.0 */
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
-
         my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl?1L:0L);
 
         /* curl 7.14.2 */
@@ -1660,10 +1648,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
                    * file (or terminal). If we write to a file, we must rewind
                    * or close/re-open the file so that the next attempt starts
                    * over from the beginning.
-                   *
-                   * TODO: similar action for the upload case. We might need
-                   * to start over reading from a previous point if we have
-                   * uploaded something when this was returned.
                    */
                   break;
                 }
@@ -1754,8 +1738,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
                download was not successful. */
             long response;
             if(CURLE_OK == result) {
-              /* TODO We want to try next resource when download was
-                 not successful. How to know that? */
               char *effective_url = NULL;
               curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
               if(effective_url &&
@@ -1929,9 +1911,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
             break;
           mlres = mlres->next;
           if(mlres == NULL)
-            /* TODO If metalink_next_res is 1 and mlres is NULL,
-             * set res to error code
-             */
             break;
         }
         else if(urlnum > 1) {

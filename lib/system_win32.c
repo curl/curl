@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2017, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2016 - 2019, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -35,6 +35,12 @@
 
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
+
+/* Handle of iphlpapp.dll */
+static HMODULE s_hIpHlpApiDll = NULL;
+
+/* Pointer to the if_nametoindex function */
+IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
 
 /* Curl_win32_init() performs win32 global initialization */
 CURLcode Curl_win32_init(long flags)
@@ -89,6 +95,17 @@ CURLcode Curl_win32_init(long flags)
   }
 #endif
 
+  s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
+  if(s_hIpHlpApiDll) {
+    /* Get the address of the if_nametoindex function */
+    IF_NAMETOINDEX_FN pIfNameToIndex =
+      CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
+                          (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
+
+    if(pIfNameToIndex)
+      Curl_if_nametoindex = pIfNameToIndex;
+  }
+
   if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
                                  VERSION_GREATER_THAN_EQUAL)) {
     Curl_isVistaOrGreater = TRUE;
@@ -103,6 +120,12 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
+  if(s_hIpHlpApiDll) {
+    FreeLibrary(s_hIpHlpApiDll);
+    s_hIpHlpApiDll = NULL;
+    Curl_if_nametoindex = NULL;
+  }
+
 #ifdef USE_WINDOWS_SSPI
   Curl_sspi_global_cleanup();
 #endif
@@ -113,10 +136,6 @@ void Curl_win32_cleanup(long init_flags)
 #endif
   }
 }
-
-#if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
-                                  defined(USE_WINSOCK))
-
 
 #if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
@@ -139,8 +158,6 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 #else
 #  define LOADLIBARYEX    "LoadLibraryExA"
 #endif
-
-#endif /* USE_WINDOWS_SSPI || (!CURL_DISABLE_TELNET && USE_WINSOCK) */
 
 /*
  * Curl_verify_windows_version()
@@ -334,9 +351,6 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
   return matched;
 }
 
-#if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
-                                  defined(USE_WINSOCK))
-
 /*
  * Curl_load_library()
  *
@@ -353,6 +367,7 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
  */
 HMODULE Curl_load_library(LPCTSTR filename)
 {
+#ifndef CURL_WINDOWS_APP
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
@@ -407,10 +422,12 @@ HMODULE Curl_load_library(LPCTSTR filename)
       free(path);
     }
   }
-
   return hModule;
+#else
+  /* the Universal Windows Platform (UWP) can't do this */
+  (void)filename;
+  return NULL;
+#endif
 }
-
-#endif /* USE_WINDOWS_SSPI || (!CURL_DISABLE_TELNET && USE_WINSOCK) */
 
 #endif /* WIN32 */

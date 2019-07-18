@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,14 +24,14 @@
 
 #include <curl/curl.h>
 
-#ifndef CURL_DISABLE_HTTP
+#include "formdata.h"
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
 #endif
 
 #include "urldata.h" /* for struct Curl_easy */
-#include "formdata.h"
 #include "mime.h"
 #include "non-ascii.h"
 #include "vtls/vtls.h"
@@ -569,7 +569,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if(((form->flags & HTTPPOST_FILENAME) ||
           (form->flags & HTTPPOST_BUFFER)) &&
          !form->contenttype) {
-        char *f = form->flags & HTTPPOST_BUFFER?
+        char *f = (form->flags & HTTPPOST_BUFFER)?
           form->showfilename : form->value;
         char const *type;
         type = Curl_mime_contenttype(f);
@@ -921,7 +921,8 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
   return result;
 }
 
-#else  /* CURL_DISABLE_HTTP */
+#else
+/* if disabled */
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                           struct curl_httppost **last_post,
                           ...)
@@ -946,5 +947,4 @@ void curl_formfree(struct curl_httppost *form)
   /* does nothing HTTP is disabled */
 }
 
-
-#endif  /* !defined(CURL_DISABLE_HTTP) */
+#endif  /* if disabled */

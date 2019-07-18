@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,6 +24,8 @@
 
 #include "urldata.h"
 #include "curl_addrinfo.h"
+
+#ifndef CURL_DISABLE_DOH
 
 /*
  * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
@@ -102,4 +104,10 @@ DOHcode doh_decode(unsigned char *doh,
                    struct dohentry *d);
 void de_cleanup(struct dohentry *d);
 #endif
+
+#else /* if DOH is disabled */
+#define Curl_doh(a,b,c,d) NULL
+#define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
+#endif
+
 #endif /* HEADER_CURL_DOH_H */

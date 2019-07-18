@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,11 +25,13 @@
 #include "curl_setup.h"
 
 #if defined(USE_NSS) || defined(USE_OS400CRYPTO) || \
+    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) || \
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C))
 
 void Curl_md4it(unsigned char *output, const unsigned char *input, size_t len);
 
 #endif /* defined(USE_NSS) || defined(USE_OS400CRYPTO) ||
+    (defined(USE_OPENSSL) && defined(OPENSSL_NO_MD4)) ||
     (defined(USE_MBEDTLS) && !defined(MBEDTLS_MD4_C)) */
 
 #endif /* HEADER_CURL_MD4_H */

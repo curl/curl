@@ -125,14 +125,19 @@ int tool_progress_cb(void *clientp,
   curl_off_t total;
   curl_off_t point;
 
-  /* expected transfer size */
-  if((CURL_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal))
+  /* Calculate expected transfer size. initial_size can be less than zero
+     when indicating that we are expecting to get the filesize from the
+     remote */
+  if(bar->initial_size < 0 ||
+     ((CURL_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal)))
     total = CURL_OFF_T_MAX;
   else
     total = dltotal + ultotal + bar->initial_size;
 
-  /* we've come this far */
-  if((CURL_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow))
+  /* Calculate the current progress. initial_size can be less than zero when
+     indicating that we are expecting to get the filesize from the remote */
+  if(bar->initial_size < 0 ||
+     ((CURL_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow)))
     point = CURL_OFF_T_MAX;
   else
     point = dlnow + ulnow + bar->initial_size;
@@ -205,7 +210,8 @@ void progressbarinit(struct ProgressData *bar,
   if(colp) {
     char *endptr;
     long num = strtol(colp, &endptr, 10);
-    if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 20))
+    if((endptr != colp) && (endptr == colp + strlen(colp)) && (num > 20) &&
+       (num < 10000))
       bar->width = (int)num;
     curl_free(colp);
   }
@@ -221,7 +227,7 @@ void progressbarinit(struct ProgressData *bar,
     struct winsize ts;
     if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
       cols = ts.ws_col;
-#elif defined(_WIN32)
+#elif defined(WIN32)
     {
       HANDLE  stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
       CONSOLE_SCREEN_BUFFER_INFO console_info;

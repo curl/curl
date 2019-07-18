@@ -61,9 +61,14 @@ BUGS
   using our security development process.
 
   Security related bugs or bugs that are suspected to have a security impact,
-  should be reported by email to curl-security@haxx.se so that they first can
-  be dealt with away from the public to minimize the harm and impact it will
-  have on existing users out there who might be using the vulnerable versions.
+  should be reported on the curl security tracker at HackerOne:
+
+        https://hackerone.com/curl
+
+  This ensures that the report reaches the curl security team so that they
+  first can be deal with the report away from the public to minimize the harm
+  and impact it will have on existing users out there who might be using the
+  vulnerable versions.
 
   The curl project's process for handling security related issues is
   documented here:

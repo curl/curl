@@ -55,7 +55,7 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 # transfer and such a connection will not get a "QUIT"
 <protocol>
 EHLO 949
-AUTH OAUTHBEARER dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+AUTH OAUTHBEARER bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwNQFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
 AQ==
 </protocol>
 </verify>
