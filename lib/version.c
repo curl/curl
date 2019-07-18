@@ -385,6 +385,8 @@ static curl_version_info_data version_info = {
   NULL, /* ssh lib version */
   0,    /* brotli_ver_num */
   NULL, /* brotli version */
+  0,    /* nghttp2 version number */
+  NULL  /* nghttp2 version string */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -458,6 +460,14 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   version_info.brotli_ver_num = BrotliDecoderVersion();
   brotli_version(brotli_buffer, sizeof(brotli_buffer));
   version_info.brotli_version = brotli_buffer;
+#endif
+
+#ifdef USE_NGHTTP2
+  {
+    nghttp2_info *h2 = nghttp2_version(0);
+    version_info.nghttp2_ver_num = h2->version_num;
+    version_info.nghttp2_version = h2->version_str;
+  }
 #endif
 
   (void)stamp; /* avoid compiler warnings, we don't use this */

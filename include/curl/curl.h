@@ -2714,6 +2714,7 @@ typedef enum {
   CURLVERSION_THIRD,
   CURLVERSION_FOURTH,
   CURLVERSION_FIFTH,
+  CURLVERSION_SIXTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2722,7 +2723,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_FIFTH
+#define CURLVERSION_NOW CURLVERSION_SIXTH
 
 typedef struct {
   CURLversion age;          /* age of the returned struct */
@@ -2751,10 +2752,14 @@ typedef struct {
   const char *libssh_version; /* human readable string */
 
   /* These fields were added in CURLVERSION_FIFTH */
-
   unsigned int brotli_ver_num; /* Numeric Brotli version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *brotli_version; /* human readable string. */
+
+  /* These fields were added in CURLVERSION_SIXTH */
+  unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
+                                   (MAJOR << 16) | (MINOR << 8) | PATCH */
+  const char *nghttp2_version; /* human readable string. */
 
 } curl_version_info_data;
 
