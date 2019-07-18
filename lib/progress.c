@@ -364,13 +364,15 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
-static void progress_calc(struct connectdata *conn, struct curltime now)
+/* returns TRUE if it's time to show the progress meter */
+static bool progress_calc(struct connectdata *conn, struct curltime now)
 {
   curl_off_t timespent;
   curl_off_t timespent_ms; /* milliseconds */
   struct Curl_easy *data = conn->data;
   curl_off_t dl = data->progress.downloaded;
   curl_off_t ul = data->progress.uploaded;
+  bool timetoshow = FALSE;
 
   /* The time spent so far (from the start) */
   data->progress.timespent = Curl_timediff_us(now, data->progress.start);
@@ -394,6 +396,7 @@ static void progress_calc(struct connectdata *conn, struct curltime now)
     int countindex; /* amount of seconds stored in the speeder array */
     int nowindex = data->progress.speeder_c% CURR_TIME;
     data->progress.lastshow = now.tv_sec;
+    timetoshow = TRUE;
 
     /* Let's do the "current speed" thing, with the dl + ul speeds
        combined. Store the speed at entry 'nowindex'. */
@@ -452,133 +455,119 @@ static void progress_calc(struct connectdata *conn, struct curltime now)
         data->progress.ulspeed + data->progress.dlspeed;
 
   } /* Calculations end */
+  return timetoshow;
 }
 
 #ifndef CURL_DISABLE_PROGRESS_METER
-static void progress_meter(struct connectdata *conn,
-                           struct curltime now)
+static void progress_meter(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
-  bool shownow = FALSE;
-  if(data->progress.lastshow != now.tv_sec) {
-    if(!(data->progress.flags & PGRS_HIDE))
-      shownow = TRUE;
+  char max5[6][10];
+  curl_off_t dlpercen = 0;
+  curl_off_t ulpercen = 0;
+  curl_off_t total_percen = 0;
+  curl_off_t total_transfer;
+  curl_off_t total_expected_transfer;
+  char time_left[10];
+  char time_total[10];
+  char time_spent[10];
+  curl_off_t ulestimate = 0;
+  curl_off_t dlestimate = 0;
+  curl_off_t total_estimate;
+  curl_off_t timespent =
+    (curl_off_t)data->progress.timespent/1000000; /* seconds */
+
+  if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
+    if(data->state.resume_from) {
+      fprintf(data->set.err,
+              "** Resuming transfer from byte position %"
+              CURL_FORMAT_CURL_OFF_T "\n", data->state.resume_from);
+    }
+    fprintf(data->set.err,
+            "  %% Total    %% Received %% Xferd  Average Speed   "
+            "Time    Time     Time  Current\n"
+            "                                 Dload  Upload   "
+            "Total   Spent    Left  Speed\n");
+    data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
   }
 
-  if(!shownow)
-    /* only show the internal progress meter once per second */
-    return;
-  else {
-    /* If there's no external callback set, use internal code to show
-       progress */
-    /* progress meter has not been shut off */
-    char max5[6][10];
-    curl_off_t dlpercen = 0;
-    curl_off_t ulpercen = 0;
-    curl_off_t total_percen = 0;
-    curl_off_t total_transfer;
-    curl_off_t total_expected_transfer;
-    char time_left[10];
-    char time_total[10];
-    char time_spent[10];
-    curl_off_t ulestimate = 0;
-    curl_off_t dlestimate = 0;
-    curl_off_t total_estimate;
-    curl_off_t timespent =
-      (curl_off_t)data->progress.timespent/1000000; /* seconds */
+  /* Figure out the estimated time of arrival for the upload */
+  if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
+     (data->progress.ulspeed > CURL_OFF_T_C(0))) {
+    ulestimate = data->progress.size_ul / data->progress.ulspeed;
 
-    if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
-      if(data->state.resume_from) {
-        fprintf(data->set.err,
-                "** Resuming transfer from byte position %"
-                CURL_FORMAT_CURL_OFF_T "\n", data->state.resume_from);
-      }
-      fprintf(data->set.err,
-              "  %% Total    %% Received %% Xferd  Average Speed   "
-              "Time    Time     Time  Current\n"
-              "                                 Dload  Upload   "
-              "Total   Spent    Left  Speed\n");
-      data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
-    }
+    if(data->progress.size_ul > CURL_OFF_T_C(10000))
+      ulpercen = data->progress.uploaded /
+        (data->progress.size_ul/CURL_OFF_T_C(100));
+    else if(data->progress.size_ul > CURL_OFF_T_C(0))
+      ulpercen = (data->progress.uploaded*100) /
+        data->progress.size_ul;
+  }
 
-    /* Figure out the estimated time of arrival for the upload */
-    if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
-       (data->progress.ulspeed > CURL_OFF_T_C(0))) {
-      ulestimate = data->progress.size_ul / data->progress.ulspeed;
+  /* ... and the download */
+  if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
+     (data->progress.dlspeed > CURL_OFF_T_C(0))) {
+    dlestimate = data->progress.size_dl / data->progress.dlspeed;
 
-      if(data->progress.size_ul > CURL_OFF_T_C(10000))
-        ulpercen = data->progress.uploaded /
-          (data->progress.size_ul/CURL_OFF_T_C(100));
-      else if(data->progress.size_ul > CURL_OFF_T_C(0))
-        ulpercen = (data->progress.uploaded*100) /
-          data->progress.size_ul;
-    }
+    if(data->progress.size_dl > CURL_OFF_T_C(10000))
+      dlpercen = data->progress.downloaded /
+        (data->progress.size_dl/CURL_OFF_T_C(100));
+    else if(data->progress.size_dl > CURL_OFF_T_C(0))
+      dlpercen = (data->progress.downloaded*100) /
+        data->progress.size_dl;
+  }
 
-    /* ... and the download */
-    if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
-       (data->progress.dlspeed > CURL_OFF_T_C(0))) {
-      dlestimate = data->progress.size_dl / data->progress.dlspeed;
+  /* Now figure out which of them is slower and use that one for the
+     total estimate! */
+  total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
 
-      if(data->progress.size_dl > CURL_OFF_T_C(10000))
-        dlpercen = data->progress.downloaded /
-          (data->progress.size_dl/CURL_OFF_T_C(100));
-      else if(data->progress.size_dl > CURL_OFF_T_C(0))
-        dlpercen = (data->progress.downloaded*100) /
-          data->progress.size_dl;
-    }
+  /* create the three time strings */
+  time2str(time_left, total_estimate > 0?(total_estimate - timespent):0);
+  time2str(time_total, total_estimate);
+  time2str(time_spent, timespent);
 
-    /* Now figure out which of them is slower and use that one for the
-       total estimate! */
-    total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
+  /* Get the total amount of data expected to get transferred */
+  total_expected_transfer =
+    ((data->progress.flags & PGRS_UL_SIZE_KNOWN)?
+     data->progress.size_ul:data->progress.uploaded)+
+    ((data->progress.flags & PGRS_DL_SIZE_KNOWN)?
+     data->progress.size_dl:data->progress.downloaded);
 
-    /* create the three time strings */
-    time2str(time_left, total_estimate > 0?(total_estimate - timespent):0);
-    time2str(time_total, total_estimate);
-    time2str(time_spent, timespent);
+  /* We have transferred this much so far */
+  total_transfer = data->progress.downloaded + data->progress.uploaded;
 
-    /* Get the total amount of data expected to get transferred */
-    total_expected_transfer =
-      ((data->progress.flags & PGRS_UL_SIZE_KNOWN)?
-       data->progress.size_ul:data->progress.uploaded)+
-      ((data->progress.flags & PGRS_DL_SIZE_KNOWN)?
-       data->progress.size_dl:data->progress.downloaded);
+  /* Get the percentage of data transferred so far */
+  if(total_expected_transfer > CURL_OFF_T_C(10000))
+    total_percen = total_transfer /
+      (total_expected_transfer/CURL_OFF_T_C(100));
+  else if(total_expected_transfer > CURL_OFF_T_C(0))
+    total_percen = (total_transfer*100) / total_expected_transfer;
 
-    /* We have transferred this much so far */
-    total_transfer = data->progress.downloaded + data->progress.uploaded;
+  fprintf(data->set.err,
+          "\r"
+          "%3" CURL_FORMAT_CURL_OFF_T " %s  "
+          "%3" CURL_FORMAT_CURL_OFF_T " %s  "
+          "%3" CURL_FORMAT_CURL_OFF_T " %s  %s  %s %s %s %s %s",
+          total_percen,  /* 3 letters */                /* total % */
+          max5data(total_expected_transfer, max5[2]),   /* total size */
+          dlpercen,      /* 3 letters */                /* rcvd % */
+          max5data(data->progress.downloaded, max5[0]), /* rcvd size */
+          ulpercen,      /* 3 letters */                /* xfer % */
+          max5data(data->progress.uploaded, max5[1]),   /* xfer size */
+          max5data(data->progress.dlspeed, max5[3]),    /* avrg dl speed */
+          max5data(data->progress.ulspeed, max5[4]),    /* avrg ul speed */
+          time_total,    /* 8 letters */                /* total time */
+          time_spent,    /* 8 letters */                /* time spent */
+          time_left,     /* 8 letters */                /* time left */
+          max5data(data->progress.current_speed, max5[5])
+    );
 
-    /* Get the percentage of data transferred so far */
-    if(total_expected_transfer > CURL_OFF_T_C(10000))
-      total_percen = total_transfer /
-        (total_expected_transfer/CURL_OFF_T_C(100));
-    else if(total_expected_transfer > CURL_OFF_T_C(0))
-      total_percen = (total_transfer*100) / total_expected_transfer;
-
-    fprintf(data->set.err,
-            "\r"
-            "%3" CURL_FORMAT_CURL_OFF_T " %s  "
-            "%3" CURL_FORMAT_CURL_OFF_T " %s  "
-            "%3" CURL_FORMAT_CURL_OFF_T " %s  %s  %s %s %s %s %s",
-            total_percen,  /* 3 letters */                /* total % */
-            max5data(total_expected_transfer, max5[2]),   /* total size */
-            dlpercen,      /* 3 letters */                /* rcvd % */
-            max5data(data->progress.downloaded, max5[0]), /* rcvd size */
-            ulpercen,      /* 3 letters */                /* xfer % */
-            max5data(data->progress.uploaded, max5[1]),   /* xfer size */
-            max5data(data->progress.dlspeed, max5[3]),    /* avrg dl speed */
-            max5data(data->progress.ulspeed, max5[4]),    /* avrg ul speed */
-            time_total,    /* 8 letters */                /* total time */
-            time_spent,    /* 8 letters */                /* time spent */
-            time_left,     /* 8 letters */                /* time left */
-            max5data(data->progress.current_speed, max5[5])
-      );
-
-    /* we flush the output stream to make it appear as soon as possible */
-    fflush(data->set.err);
-  } /* don't show now */
+  /* we flush the output stream to make it appear as soon as possible */
+  fflush(data->set.err);
 }
 #else
  /* progress bar disabled */
-#define progress_meter(x,y)
+#define progress_meter(x) Curl_nop_stmt
 #endif
 
 
@@ -590,8 +579,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   struct curltime now = Curl_now(); /* what time is it */
-
-  progress_calc(conn, now);
+  bool showprogress = progress_calc(conn, now);
   if(!(data->progress.flags & PGRS_HIDE)) {
     if(data->set.fxferinfo) {
       int result;
@@ -621,8 +609,10 @@ int Curl_pgrsUpdate(struct connectdata *conn)
         failf(data, "Callback aborted");
       return result;
     }
+
+    if(showprogress)
+      progress_meter(conn);
   }
-  progress_meter(conn, now);
 
   return 0;
 }
