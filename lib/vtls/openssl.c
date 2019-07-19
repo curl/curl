@@ -1560,10 +1560,10 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
              assumed that the data returned by ASN1_STRING_data() is null
              terminated or does not contain embedded nulls." But also that
              "The actual format of the data will depend on the actual string
-             type itself: for example for and IA5String the data will be ASCII"
+             type itself: for example for an IA5String the data will be ASCII"
 
-             "I checked the 0.9.6 and 0.9.8 sources before my patch and
-             it always 0-terminates an IA5String."
+             It has been however verified that in 0.9.6 and 0.9.7, IA5String
+             are always zero-terminated.
           */
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
