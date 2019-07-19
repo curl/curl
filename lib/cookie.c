@@ -819,22 +819,14 @@ Curl_cookie_add(struct Curl_easy *data,
           badcookie = TRUE;
         break;
       case 1:
-        /* This field got its explanation on the 23rd of May 2001 by
-           Andrés García:
-
-           flag: A TRUE/FALSE value indicating if all machines within a given
-           domain can access the variable. This value is set automatically by
-           the browser, depending on the value you set for the domain.
-
-           As far as I can see, it is set to true when the cookie says
+        /* flag: A TRUE/FALSE value indicating if all machines within a given
+           domain can access the variable. Set TRUE when the cookie says
            .domain.com and to false when the domain is complete www.domain.com
         */
         co->tailmatch = strcasecompare(ptr, "TRUE")?TRUE:FALSE;
         break;
       case 2:
-        /* It turns out, that sometimes the file format allows the path
-           field to remain not filled in, we try to detect this and work
-           around it! Andrés García made us aware of this... */
+        /* The file format allows the path field to remain not filled in */
         if(strcmp("TRUE", ptr) && strcmp("FALSE", ptr)) {
           /* only if the path doesn't look like a boolean option! */
           co->path = strdup(ptr);
