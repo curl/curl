@@ -4,12 +4,12 @@ curl and libcurl 7.65.3
  Command line options:         221
  curl_easy_setopt() options:   268
  Public functions in libcurl:  80
- Contributors:                 1990
+ Contributors:                 1991
 
 This release includes the following bugfixes:
 
- o
- 
+ o progress: make the progress meter appear again [1]
+
 This release includes the following known bugs:
 
  o see docs/KNOWN_BUGS (https://curl.haxx.se/docs/knownbugs.html)
@@ -17,12 +17,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  
-  (N contributors)
+  Chih-Hsuan Yen, Daniel Stenberg,
+  (2 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
- 
+ [1] = https://curl.haxx.se/bug/?i=4122
