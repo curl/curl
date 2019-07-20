@@ -2744,6 +2744,14 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return result;
     break;
 #endif
+  case CURLOPT_H3:
+#ifdef ENABLE_QUIC
+    arg = va_arg(param, long);
+    data->set.h3opts = arg;
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

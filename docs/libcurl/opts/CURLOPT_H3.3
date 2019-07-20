@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_H3 3 "27 Nov 2018" "libcurl 7.64.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_H3 \- specify HTTP/3 protocol behavior
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_H3, long bitmask);
+.SH DESCRIPTION
+This function accepts a long \fIbitmask\fP with a set of flags set that
+controls the HTTP/3 behavior for this transfer.
+.IP "CURLH3_DIRECT"
+If this bit is set in \fIbitmask\fP, the host name and port number given in
+the URL will be used to connect to directly with QUIC and the port number then
+being a UDP port number.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+HTTPS
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode ret;
+  curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
+  curl_easy_setopt(curl, CURLOPT_H3, (long)CURLH3_DIRECT);
+  ret = curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.64.0
+.SH RETURN VALUE
+Returns CURLE_OK if supported, an error otherwise.
+.SH "SEE ALSO"
+.BR CURLOPT_HTTP_VERSION "(3), "
