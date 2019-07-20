@@ -1,6 +1,6 @@
 # Parallel transfers
 
-curl 7.65.0 introduces support for doing multiple transfers simultaneously; in
+curl 7.66.0 introduces support for doing multiple transfers simultaneously; in
 parallel.
 
 ## -Z, --parallel
