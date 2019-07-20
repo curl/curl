@@ -100,7 +100,10 @@ DPAGES =					\
   noproxy.d					\
   ntlm.d ntlm-wb.d				\
   oauth2-bearer.d				\
-  output.d pass.d				\
+  output.d                                      \
+  pass.d                			\
+  parallel.d                                    \
+  parallel-max.d                                \
   path-as-is.d					\
   pinnedpubkey.d				\
   post301.d					\
