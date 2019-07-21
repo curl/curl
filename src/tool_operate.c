@@ -1827,36 +1827,30 @@ static CURLcode create_transfers(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
 #endif
 
-        for(;;) {
 #ifdef USE_METALINK
-          if(!metalink && config->use_metalink) {
-            outs->metalink_parser = metalink_parser_context_new();
-            if(outs->metalink_parser == NULL) {
-              result = CURLE_OUT_OF_MEMORY;
-              goto show_error;
-            }
-            fprintf(config->global->errors,
-                    "Metalink: parsing (%s) metalink/XML...\n", per->this_url);
+        if(!metalink && config->use_metalink) {
+          outs->metalink_parser = metalink_parser_context_new();
+          if(outs->metalink_parser == NULL) {
+            result = CURLE_OUT_OF_MEMORY;
+            goto show_error;
           }
-          else if(metalink)
-            fprintf(config->global->errors,
-                    "Metalink: fetching (%s) from (%s)...\n",
-                    mlfile->filename, per->this_url);
+          fprintf(config->global->errors,
+                  "Metalink: parsing (%s) metalink/XML...\n", per->this_url);
+        }
+        else if(metalink)
+          fprintf(config->global->errors,
+                  "Metalink: fetching (%s) from (%s)...\n",
+                  mlfile->filename, per->this_url);
 #endif /* USE_METALINK */
 
-          per->metalink = metalink;
-          /* initialize retry vars for loop below */
-          per->retry_sleep_default = (config->retry_delay) ?
-            config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
-          per->retry_numretries = config->req_retry;
-          per->retry_sleep = per->retry_sleep_default; /* ms */
-          per->retrystart = tvnow();
+        per->metalink = metalink;
+        /* initialize retry vars for loop below */
+        per->retry_sleep_default = (config->retry_delay) ?
+          config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
+        per->retry_numretries = config->req_retry;
+        per->retry_sleep = per->retry_sleep_default; /* ms */
+        per->retrystart = tvnow();
 
-
-          /* In all ordinary cases, just break out of loop here */
-          break; /* curl_easy_perform loop */
-
-        }
       } /* loop to the next URL */
 
       show_error:
