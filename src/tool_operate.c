@@ -1110,7 +1110,9 @@ static CURLcode create_transfers(struct GlobalConfig *global,
 
         /* avoid having this setopt added to the --libcurl source
            output */
-        curl_easy_setopt(curl, CURLOPT_SHARE, share);
+        result = curl_easy_setopt(curl, CURLOPT_SHARE, share);
+        if(result)
+          goto show_error;
 
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
