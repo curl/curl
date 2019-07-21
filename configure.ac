@@ -3338,6 +3338,163 @@ if test X"$want_h2" != Xno; then
 fi
 
 dnl **********************************************************************
+dnl Check for ngtcp2 (QUIC)
+dnl **********************************************************************
+
+OPT_TCP2="yes"
+curl_h3_msg="disabled (--with-ngtcp2, --with-quiche)"
+
+if test "x$disable_http" = "xyes"; then
+  # without HTTP, ngtcp2 is no use
+  OPT_TCP2="no"
+fi
+
+AC_ARG_WITH(ngtcp2,
+AC_HELP_STRING([--with-ngtcp2=PATH],[Enable ngtcp2 usage])
+AC_HELP_STRING([--without-ngtcp2],[Disable ngtcp2 usage]),
+  [OPT_TCP2=$withval])
+case "$OPT_TCP2" in
+  no)
+    dnl --without-ngtcp2 option used
+    want_tcp2="no"
+    ;;
+  yes)
+    dnl --with-ngtcp2 option used without path
+    want_tcp2="default"
+    want_tcp2_path=""
+    ;;
+  *)
+    dnl --with-ngtcp2 option used with path
+    want_tcp2="yes"
+    want_tcp2_path="$withval/lib/pkgconfig"
+    ;;
+esac
+
+curl_tcp2_msg="disabled (--with-ngtcp2)"
+if test X"$want_tcp2" != Xno; then
+  dnl backup the pre-ngtcp2 variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  CURL_CHECK_PKGCONFIG(libngtcp2, $want_tcp2_path)
+
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+      $PKGCONFIG --libs-only-l libngtcp2`
+    AC_MSG_NOTICE([-l is $LIB_TCP2])
+
+    CPP_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path]) dnl
+      $PKGCONFIG --cflags-only-I libngtcp2`
+    AC_MSG_NOTICE([-I is $CPP_TCP2])
+
+    LD_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
+      $PKGCONFIG --libs-only-L libngtcp2`
+    AC_MSG_NOTICE([-L is $LD_TCP2])
+
+    LDFLAGS="$LDFLAGS $LD_TCP2"
+    CPPFLAGS="$CPPFLAGS $CPP_TCP2"
+    LIBS="$LIB_TCP2 $LIBS"
+
+    if test "x$cross_compiling" != "xyes"; then
+      DIR_TCP2=`echo $LD_TCP2 | $SED -e 's/-L//'`
+    fi
+    AC_CHECK_LIB(ngtcp2, ngtcp2_conn_client_new,
+      [
+       AC_CHECK_HEADERS(ngtcp2/ngtcp2.h,
+          curl_h3_msg="enabled (ngtcp2)"
+          NGTCP2_ENABLED=1
+          AC_DEFINE(USE_NGTCP2, 1, [if ngtcp2 is in use])
+          AC_SUBST(USE_NGTCP2, [1])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_TCP2"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_TCP2 to CURL_LIBRARY_PATH])
+          experimental="$experimental HTTP3"
+       )
+      ],
+        dnl not found, revert back to clean variables
+        LDFLAGS=$CLEANLDFLAGS
+        CPPFLAGS=$CLEANCPPFLAGS
+        LIBS=$CLEANLIBS
+    )
+
+  else
+    dnl no ngtcp2 pkg-config found, deal with it
+    if test X"$want_tcp2" != Xdefault; then
+      dnl To avoid link errors, we do not allow --with-ngtcp2 without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--with-ngtcp2 was specified but could not find ngtcp2 pkg-config file.])
+    fi
+  fi
+
+fi
+
+dnl **********************************************************************
+dnl Check for quiche (QUIC)
+dnl **********************************************************************
+
+OPT_QUICHE="yes"
+
+if test "x$disable_http" = "xyes" -o "x$USE_NGTCP" = "x1"; then
+  # without HTTP or with ngtcp2, quiche is no use
+  OPT_QUICHE="no"
+fi
+
+AC_ARG_WITH(quiche,
+AC_HELP_STRING([--with-quiche=PATH],[Enable quiche usage])
+AC_HELP_STRING([--without-quiche],[Disable quiche usage]),
+  [OPT_QUICHE=$withval])
+case "$OPT_QUICHE" in
+  *)
+    dnl --with-quiche option used without path
+    want_quiche="default"
+    want_quiche_path=""
+    ;;
+  no)
+    dnl --without-quiche option used
+    want_quiche="no"
+    ;;
+esac
+
+if test X"$want_quiche" != Xno; then
+  dnl backup the pre-quiche variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  LIB_QUICHE="-l:libquiche.a -ldl -lpthread"
+  CPP_QUICHE="-I$OPT_QUICHE/include"
+  LD_QUICHE="-L$OPT_QUICHE/target/release"
+
+  LDFLAGS="$LDFLAGS $LD_QUICHE"
+  CPPFLAGS="$CPPFLAGS $CPP_QUICHE"
+  LIBS="$LIB_QUICHE $LIBS"
+
+  if test "x$cross_compiling" != "xyes"; then
+    DIR_QUICHE=`echo $LD_QUICHE | $SED -e 's/-L//'`
+  fi
+  AC_CHECK_LIB(quiche, quiche_connect,
+    [
+     AC_CHECK_HEADERS(quiche.h,
+        experimental="$experimental HTTP3"
+        AC_MSG_NOTICE([HTTP3 support is experimental])
+        curl_h3_msg="enabled (quiche)"
+        QUICHE_ENABLED=1
+        AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
+        AC_SUBST(USE_QUICHE, [1])
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH]),
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
+  )
+fi
+
+dnl **********************************************************************
 dnl Check for zsh completion path
 dnl **********************************************************************
 
@@ -4162,7 +4319,6 @@ AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
   *) AC_MSG_RESULT(yes)
        curl_altsvc_msg="enabled";
        enable_altsvc="yes"
-       experimental="alt-svc"
        ;;
   esac ],
        AC_MSG_RESULT(no)
@@ -4170,7 +4326,7 @@ AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
 
 if test "$enable_altsvc" = "yes"; then
   AC_DEFINE(USE_ALTSVC, 1, [to enable alt-svc])
-  experimental="alt-svc"
+  experimental="$experimental alt-svc"
 fi
 
 dnl ************************************************************
@@ -4279,6 +4435,10 @@ fi
 
 if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
+fi
+
+if test "x$USE_NGTCP2" = "x1" -o "x$USE_QUICHE" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP3"
 fi
 
 if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
@@ -4472,11 +4632,12 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   PSL:              ${curl_psl_msg}
   Alt-svc:          ${curl_altsvc_msg}
   HTTP2:            ${curl_h2_msg}
+  HTTP3:            ${curl_h3_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])
 if test -n "$experimental"; then
  cat >&2 << _EOF
-  WARNING: $experimental is enabled but marked EXPERIMENTAL. Use with caution!
+  WARNING: $experimental enabled but marked EXPERIMENTAL. Use with caution!
 _EOF
 fi

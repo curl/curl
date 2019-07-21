@@ -60,6 +60,7 @@ EXTRA_DIST =                                    \
  HISTORY.md                                     \
  HTTP-COOKIES.md                                \
  HTTP2.md                                       \
+ HTTP3.md                                       \
  INSTALL                                        \
  INSTALL.cmake                                  \
  INSTALL.md                                     \

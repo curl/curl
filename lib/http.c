@@ -171,10 +171,22 @@ static CURLcode http_setup_conn(struct connectdata *conn)
   Curl_mime_initpart(&http->form, conn->data);
   data->req.protop = http;
 
-  if(!CONN_INUSE(conn))
-    /* if not already multi-using, setup connection details */
-    Curl_http2_setup_conn(conn);
-  Curl_http2_setup_req(data);
+  if(data->set.h3opts & CURLH3_DIRECT) {
+    if(conn->handler->flags & PROTOPT_SSL)
+      /* Only go h3-direct on HTTPS URLs. It needs a UDP socket and does the
+         QUIC dance. */
+      conn->transport = TRNSPRT_QUIC;
+    else {
+      failf(data, "HTTP/3 requested for non-HTTPS URL");
+      return CURLE_URL_MALFORMAT;
+    }
+  }
+  else {
+    if(!CONN_INUSE(conn))
+      /* if not already multi-using, setup connection details */
+      Curl_http2_setup_conn(conn);
+    Curl_http2_setup_req(data);
+  }
   return CURLE_OK;
 }
 
@@ -1554,6 +1566,15 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 {
   CURLcode result;
   DEBUGASSERT((conn) && (conn->handler->flags & PROTOPT_SSL));
+
+#ifdef ENABLE_QUIC
+  if(conn->transport == TRNSPRT_QUIC) {
+    result = Curl_quic_is_connected(conn, FIRSTSOCKET, done);
+    if(result)
+      connclose(conn, "Failed HTTPS connection (over QUIC)");
+    return result;
+  }
+#endif
 
   /* perform SSL initialization for this socket */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);

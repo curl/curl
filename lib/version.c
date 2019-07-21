@@ -27,6 +27,7 @@
 #include "vtls/vtls.h"
 #include "http2.h"
 #include "ssh.h"
+#include "quic.h"
 #include "curl_printf.h"
 
 #ifdef USE_ARES
@@ -184,6 +185,11 @@ char *curl_version(void)
 #endif
 #ifdef USE_NGHTTP2
   len = Curl_http2_ver(ptr, left);
+  left -= len;
+  ptr += len;
+#endif
+#ifdef ENABLE_QUIC
+  len = Curl_quic_ver(ptr, left);
   left -= len;
   ptr += len;
 #endif
@@ -357,6 +363,9 @@ static curl_version_info_data version_info = {
 #endif
 #if defined(USE_NGHTTP2)
   | CURL_VERSION_HTTP2
+#endif
+#if defined(ENABLE_QUIC)
+  | CURL_VERSION_HTTP3
 #endif
 #if defined(USE_UNIX_SOCKETS)
   | CURL_VERSION_UNIX_SOCKETS
