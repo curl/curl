@@ -3409,6 +3409,7 @@ if test X"$want_tcp2" != Xno; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_TCP2"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_TCP2 to CURL_LIBRARY_PATH])
+          experimental="$experimental HTTP3"
        )
       ],
         dnl not found, revert back to clean variables
@@ -3475,6 +3476,8 @@ if test X"$want_quiche" != Xno; then
   AC_CHECK_LIB(quiche, quiche_connect,
     [
      AC_CHECK_HEADERS(quiche.h,
+        experimental="$experimental HTTP3"
+        AC_MSG_NOTICE([HTTP3 support is experimental])
         curl_h3_msg="enabled (quiche)"
         QUICHE_ENABLED=1
         AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
@@ -4316,7 +4319,6 @@ AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
   *) AC_MSG_RESULT(yes)
        curl_altsvc_msg="enabled";
        enable_altsvc="yes"
-       experimental="alt-svc"
        ;;
   esac ],
        AC_MSG_RESULT(no)
@@ -4324,7 +4326,7 @@ AC_HELP_STRING([--disable-alt-svc],[Disable alt-svc support]),
 
 if test "$enable_altsvc" = "yes"; then
   AC_DEFINE(USE_ALTSVC, 1, [to enable alt-svc])
-  experimental="alt-svc"
+  experimental="$experimental alt-svc"
 fi
 
 dnl ************************************************************
@@ -4636,6 +4638,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
 ])
 if test -n "$experimental"; then
  cat >&2 << _EOF
-  WARNING: $experimental is enabled but marked EXPERIMENTAL. Use with caution!
+  WARNING: $experimental enabled but marked EXPERIMENTAL. Use with caution!
 _EOF
 fi

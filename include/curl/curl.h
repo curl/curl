@@ -1930,7 +1930,7 @@ typedef enum {
   CINIT(MAXAGE_CONN, LONG, 288),
 
   /* Bitmask to control HTTP/3 behavior. See CURLH3_* */
-  CINIT(H3, LONG, 999),
+  CINIT(H3, LONG, 289),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

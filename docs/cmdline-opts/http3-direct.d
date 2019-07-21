@@ -7,6 +7,8 @@ Requires: HTTP/3
 Help: Use HTTP v3
 ---
 
+WARNING: this option is experiemental. Do not use in production.
+
 Tells curl to use HTTP version 3 directly to the host and port number used in
 the URL. A normal HTTP/3 transaction will be done to a host and then get
 redirected via Alt-SVc, but this option allows a user to circumvent that when
