@@ -163,6 +163,7 @@ struct thread_sync_data {
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
   int port;
+  int sock_pair[2]; /* socket pair */
   int sock_error;
   Curl_addrinfo *res;
 #ifdef HAVE_GETADDRINFO
@@ -197,6 +198,9 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
   if(tsd->res)
     Curl_freeaddrinfo(tsd->res);
 
+  /* close socket pair */
+  close(tsd->sock_pair[0]);
+  close(tsd->sock_pair[1]);
   memset(tsd, 0, sizeof(*tsd));
 }
 
@@ -230,6 +234,10 @@ int init_thread_sync_data(struct thread_data * td,
 
   Curl_mutex_init(tsd->mtx);
 
+  /* create socket pair */
+  if(socketpair(AF_LOCAL, SOCK_STREAM, 0, &tsd->sock_pair[0]) < 0) {
+    goto err_exit;
+  }
   tsd->sock_error = CURL_ASYNC_SUCCESS;
 
   /* Copying hostname string because original can be destroyed by parent
@@ -276,6 +284,7 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
   struct thread_data *td = tsd->td;
   char service[12];
   int rc;
+  int buf[1] = {1};
 
   msnprintf(service, sizeof(service), "%d", tsd->port);
 
@@ -299,6 +308,8 @@ static unsigned int CURL_STDCALL getaddrinfo_thread(void *arg)
   }
   else {
     tsd->done = 1;
+    /* DNS has been resolved, signal client task */
+    write(tsd->sock_pair[1],  buf, sizeof(buf));
     Curl_mutex_release(tsd->mtx);
   }
 
@@ -595,23 +606,34 @@ int Curl_resolver_getsock(struct connectdata *conn,
                           curl_socket_t *socks,
                           int numsocks)
 {
+  int ret_val = 0;
   time_t milli;
   timediff_t ms;
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
-  (void)socks;
-  (void)numsocks;
-  ms = Curl_timediff(Curl_now(), reslv->start);
-  if(ms < 3)
-    milli = 0;
-  else if(ms <= 50)
-    milli = ms/3;
-  else if(ms <= 250)
-    milli = 50;
-  else
-    milli = 200;
-  Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
-  return 0;
+  struct thread_data *td = (struct thread_data*)conn->async.os_specific;
+
+  memset(socks, -1, sizeof(curl_socket_t) * numsocks);
+
+  if(td) {
+    /* return read fd to client for polling the DNS resolution status */
+    socks[0] = td->tsd.sock_pair[0];
+    ret_val = 1;
+  }
+  else {
+    ms = Curl_timediff(Curl_now(), reslv->start);
+    if(ms < 3)
+      milli = 0;
+    else if(ms <= 50)
+      milli = ms/3;
+    else if(ms <= 250)
+      milli = 50;
+    else
+      milli = 200;
+    Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
+  }
+
+  return ret_val;
 }
 
 #ifndef HAVE_GETADDRINFO
