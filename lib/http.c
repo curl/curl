@@ -2247,8 +2247,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   else {
     if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
        (((httpreq == HTTPREQ_POST_MIME || httpreq == HTTPREQ_POST_FORM) &&
-       http->postsize < 0) ||
-       (data->set.upload && data->state.infilesize == -1))) {
+         http->postsize < 0) ||
+        ((data->set.upload || httpreq == HTTPREQ_POST) &&
+         data->state.infilesize == -1))) {
       if(conn->bits.authneg)
         /* don't enable chunked during auth neg */
         ;
