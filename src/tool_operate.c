@@ -2286,8 +2286,12 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
         struct OperationConfig *operation = config->first;
         CURLSH *share = curl_share_init();
         if(!share) {
-          /* Cleanup the libcurl source output */
-          easysrc_cleanup();
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+          if(config->libcurl) {
+            /* Cleanup the libcurl source output */
+            easysrc_cleanup();
+          }
+#endif
           return CURLE_OUT_OF_MEMORY;
         }
 
