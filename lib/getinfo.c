@@ -394,7 +394,7 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
 #endif
 
       *tsip = tsi;
-      tsi->backend = Curl_ssl_backend();
+      tsi->backend = (curl_sslbackend)Curl_ssl_backend();
       tsi->internals = NULL;
 
 #ifdef USE_SSL

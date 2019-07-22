@@ -55,7 +55,9 @@
 #endif
 
 /* The include stuff here below is mainly for time_t! */
+#if !defined(__MQX__)
 #include <sys/types.h>
+#endif
 #include <time.h>
 
 #if defined(WIN32) && !defined(_WIN32_WCE) && !defined(__CYGWIN__)
@@ -79,11 +81,11 @@
 #include <sys/select.h>
 #endif
 
-#if !defined(WIN32) && !defined(_WIN32_WCE)
+#if !defined(WIN32) && !defined(_WIN32_WCE) && !defined(__MQX__)
 #include <sys/socket.h>
 #endif
 
-#if !defined(WIN32) && !defined(__WATCOMC__) && !defined(__VXWORKS__)
+#if !defined(WIN32) && !defined(__WATCOMC__) && !defined(__VXWORKS__) && !defined(__MQX__)
 #include <sys/time.h>
 #endif
 
@@ -133,6 +135,9 @@ typedef void CURLSH;
 #if defined(WIN32) && !defined(__LWIP_OPT_H__) && !defined(LWIP_HDR_OPT_H)
 typedef SOCKET curl_socket_t;
 #define CURL_SOCKET_BAD INVALID_SOCKET
+#elif defined (__MQX__)
+typedef uint32_t curl_socket_t;
+#define CURL_SOCKET_BAD RTCS_SOCKET_ERROR
 #else
 typedef int curl_socket_t;
 #define CURL_SOCKET_BAD -1

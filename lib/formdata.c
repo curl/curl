@@ -246,7 +246,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     }
     else {
       /* This is not array-state, get next option */
-      option = va_arg(params, CURLformoption);
+      option = (CURLformoption)va_arg(params, int);
       if(CURLFORM_END == option)
         break;
     }

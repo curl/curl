@@ -389,6 +389,14 @@
 #  define CURL_PULL_SYS_TYPES_H      1
 #  define CURL_PULL_SYS_SOCKET_H     1
 
+#elif defined(__MQX__)
+# define CURL_TYPEOF_CURL_OFF_T     long
+# define CURL_FORMAT_CURL_OFF_T     "ld"
+# define CURL_FORMAT_CURL_OFF_TU    "lu"
+# define CURL_SUFFIX_CURL_OFF_T     L
+# define CURL_SUFFIX_CURL_OFF_TU    UL
+# define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+
 #else
 /* generic "safe guess" on old 32 bit style */
 # define CURL_TYPEOF_CURL_OFF_T     long

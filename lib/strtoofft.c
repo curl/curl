@@ -20,7 +20,9 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_ERRNO_H
 #include <errno.h>
+#endif
 #include "curl_setup.h"
 
 #include "strtoofft.h"

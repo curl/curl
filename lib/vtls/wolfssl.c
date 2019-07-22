@@ -923,12 +923,14 @@ static CURLcode Curl_wolfssl_connect(struct connectdata *conn, int sockindex)
 static CURLcode Curl_wolfssl_random(struct Curl_easy *data,
                                    unsigned char *entropy, size_t length)
 {
-  RNG rng;
+  WC_RNG rng;
   (void)data;
   if(wc_InitRng(&rng))
     return CURLE_FAILED_INIT;
+#if SIZEOF_SIZE_T > 4
   if(length > UINT_MAX)
     return CURLE_FAILED_INIT;
+#endif
   if(wc_RNG_GenerateBlock(&rng, entropy, (unsigned)length))
     return CURLE_FAILED_INIT;
   if(wc_FreeRng(&rng))

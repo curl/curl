@@ -74,7 +74,7 @@ int Curl_ack_eintr = 0;
  */
 int Curl_wait_ms(int timeout_ms)
 {
-#if !defined(MSDOS) && !defined(USE_WINSOCK)
+#if !defined(MSDOS) && !defined(USE_WINSOCK) && !defined(__MQX__)
 #ifndef HAVE_POLL_FINE
   struct timeval pending_tv;
 #endif
@@ -93,6 +93,8 @@ int Curl_wait_ms(int timeout_ms)
   delay(timeout_ms);
 #elif defined(USE_WINSOCK)
   Sleep(timeout_ms);
+#elif defined(__MQX__)
+  _time_delay(timeout_ms);
 #else
   pending_ms = timeout_ms;
   initial_tv = Curl_now();
@@ -151,8 +153,10 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   struct pollfd pfd[3];
   int num;
 #else
+#ifndef __MQX__
   struct timeval pending_tv;
   struct timeval *ptimeout;
+#endif
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
@@ -262,7 +266,11 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 #else  /* HAVE_POLL_FINE */
 
   FD_ZERO(&fds_err);
+#ifdef __MQX__
+  maxfd = 0;
+#else
   maxfd = (curl_socket_t)-1;
+#endif
 
   FD_ZERO(&fds_read);
   if(readfd0 != CURL_SOCKET_BAD) {
@@ -288,10 +296,13 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
       maxfd = writefd;
   }
 
+#ifndef __MQX__
   ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
+#endif
 
   do {
     int error;
+#ifndef __MQX__
     if(timeout_ms > 0) {
       pending_tv.tv_sec = pending_ms / 1000;
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
@@ -300,6 +311,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
       pending_tv.tv_sec = 0;
       pending_tv.tv_usec = 0;
     }
+#endif
 
     /* WinSock select() must not be called with an fd_set that contains zero
        fd flags, or it will return WSAEINVAL.  But, it also can't be called
@@ -327,6 +339,11 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
                fds_read.fd_count ? &fds_read : NULL,
                fds_write.fd_count ? &fds_write : NULL,
                &fds_err, ptimeout);
+#elif defined(__MQX__)
+    r = select((int)maxfd + 1,
+               fds_read.fd_count ? &fds_read : NULL,
+               fds_write.fd_count ? &fds_write : NULL,
+               &fds_err, timeout_ms);
 #else
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
 #endif
@@ -392,8 +409,10 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 {
 #ifndef HAVE_POLL_FINE
+#ifndef __MQX__
   struct timeval pending_tv;
   struct timeval *ptimeout;
+#endif
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
@@ -500,10 +519,13 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   }
 #endif
 
+#ifndef __MQX__
   ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
+#endif
 
   do {
     int error;
+#ifndef __MQX__
     if(timeout_ms > 0) {
       pending_tv.tv_sec = pending_ms / 1000;
       pending_tv.tv_usec = (pending_ms % 1000) * 1000;
@@ -512,6 +534,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
       pending_tv.tv_sec = 0;
       pending_tv.tv_usec = 0;
     }
+#endif
 
 #ifdef USE_WINSOCK
     r = select((int)maxfd + 1,
@@ -522,6 +545,8 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
                fds_read.fd_count ? &fds_read : NULL,
                fds_write.fd_count ? &fds_write : NULL,
                fds_err.fd_count ? &fds_err : NULL, ptimeout);
+#elif defined(__MQX__)
+    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, timeout_ms == 0 ? -1 : timeout_ms);
 #else
     r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
 #endif

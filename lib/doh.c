@@ -62,7 +62,7 @@ static const char * const errors[]={
 
 static const char *doh_strerror(DOHcode code)
 {
-  if((code >= DOH_OK) && (code <= DOH_DNS_BAD_ID))
+  if(code <= DOH_DNS_BAD_ID)
     return errors[code];
   return "bad error code";
 }
@@ -906,22 +906,22 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
     init_dohentry(&de);
     rc = doh_decode(data->req.doh.probe[0].serverdoh.memory,
                     data->req.doh.probe[0].serverdoh.size,
-                    data->req.doh.probe[0].dnstype,
+                    (DNStype)data->req.doh.probe[0].dnstype,
                     &de);
     free(data->req.doh.probe[0].serverdoh.memory);
     if(rc) {
       infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc),
-            type2name(data->req.doh.probe[0].dnstype),
+            type2name((DNStype)data->req.doh.probe[0].dnstype),
             data->req.doh.host);
     }
     rc2 = doh_decode(data->req.doh.probe[1].serverdoh.memory,
                      data->req.doh.probe[1].serverdoh.size,
-                     data->req.doh.probe[1].dnstype,
+                     (DNStype)data->req.doh.probe[1].dnstype,
                      &de);
     free(data->req.doh.probe[1].serverdoh.memory);
     if(rc2) {
       infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc2),
-            type2name(data->req.doh.probe[1].dnstype),
+            type2name((DNStype)data->req.doh.probe[1].dnstype),
             data->req.doh.host);
     }
     if(!rc || !rc2) {

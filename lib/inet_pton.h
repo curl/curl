@@ -33,7 +33,11 @@ int Curl_inet_pton(int, const char *, void *);
 /* inet_pton() exists in Vista or later */
 #include <ws2tcpip.h>
 #endif
+#ifdef __MQX__
+#define Curl_inet_pton(x,y,z) inet_aton(y,z)
+#else
 #define Curl_inet_pton(x,y,z) inet_pton(x,y,z)
+#endif
 #endif
 
 #endif /* HEADER_CURL_INET_PTON_H */

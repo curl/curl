@@ -86,7 +86,7 @@ void Curl_version_init(void);
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
-static long          init_flags;
+static long          init_flags __attribute__((unused));
 
 /*
  * strdup (and other memory functions) is redefined in complicated

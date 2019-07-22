@@ -446,12 +446,20 @@ static CURLcode bindlocal(struct connectdata *conn,
   }
 
   for(;;) {
+#ifdef __MQX__
+    if(bind(sockfd, sock, sizeof_sa) == RTCS_OK) {
+#else
     if(bind(sockfd, sock, sizeof_sa) >= 0) {
+#endif
       /* we succeeded to bind */
       struct Curl_sockaddr_storage add;
       curl_socklen_t size = sizeof(add);
       memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
+#ifdef __MQX__
+      if(getsockname(sockfd, (struct sockaddr *) &add, (uint16_t*)&size) != RTCS_OK) {
+#else
       if(getsockname(sockfd, (struct sockaddr *) &add, &size) < 0) {
+#endif
         char buffer[STRERROR_LEN];
         data->state.os_errno = error = SOCKERRNO;
         failf(data, "getsockname() failed with errno %d: %s",
