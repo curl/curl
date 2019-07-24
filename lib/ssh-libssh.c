@@ -1119,7 +1119,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         flags = O_WRONLY|O_APPEND;
       else
         /* Clear file before writing (normal behaviour) */
-        flags = O_WRONLY|O_APPEND|O_CREAT|O_TRUNC;
+        flags = O_WRONLY|O_CREAT|O_TRUNC;
 
       if(sshc->sftp_file)
         sftp_close(sshc->sftp_file);
