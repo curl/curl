@@ -341,6 +341,7 @@ static int parsedate(const char *date, time_t *output)
   enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
+  int returncode = PARSEDATE_OK;
 
   while(*date && (part < 6)) {
     bool found = FALSE;
@@ -504,14 +505,26 @@ static int parsedate(const char *date, time_t *output)
 #ifdef HAVE_TIME_T_UNSIGNED
   /* an unsigned 32 bit time_t can only hold dates to 2106 */
   if(yearnum > 2105) {
-    *output = TIME_T_MAX;
-    return PARSEDATE_LATER;
+    /* return 1.1.2105, 00:00 in the given timezone to avoid returning a later time than specified */
+    secnum = 0;
+    minnum = 0;
+    hournum = 0;
+    mdaynum = 1;
+    monnum = 0;
+    yearnum = 2106;
+    returncode = PARSEDATE_LATER;
   }
 #else
   /* a signed 32 bit time_t can only hold dates to the beginning of 2038 */
   if(yearnum > 2037) {
-    *output = TIME_T_MAX;
-    return PARSEDATE_LATER;
+    /* return 1.1.2038, 00:00 in the given timezone to avoid returning a later time than specified */
+    secnum = 0;
+    minnum = 0;
+    hournum = 0;
+    mdaynum = 1;
+    monnum = 0;
+    yearnum = 2038;
+    returncode = PARSEDATE_LATER;
   }
   if(yearnum < 1903) {
     *output = TIME_T_MIN;
@@ -555,7 +568,7 @@ static int parsedate(const char *date, time_t *output)
 
   *output = t;
 
-  return PARSEDATE_OK;
+  return returncode;
 }
 #else
 /* disabled */
@@ -572,15 +585,13 @@ time_t Curl_parse_expiry(const char* p)
   time_t parsed = -1;
   int rc = parsedate(p, &parsed);
 
-  if(rc == PARSEDATE_OK) {
+  if(rc == PARSEDATE_OK || rc == PARSEDATE_LATER) {
     if(parsed == -1)
       /* avoid returning -1 for a working scenario */
       parsed++;
     return parsed;
-  } else if(rc == PARSEDATE_LATER) {
-    /* return the max possible expiry if we cannot hold the real value */
-    return TIME_T_MAX;
   }
+  
   /* everything else is fail */
   return -1;
 }
