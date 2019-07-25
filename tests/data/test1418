@@ -22,6 +22,15 @@ WWW-Authenticate: Basic
 Please auth with me
 </data>
 
+<data3>
+HTTP/1.1 401 Authentication please!
+Content-Length: 20
+WWW-Authenticate: Digest realm="loonie", nonce="314156592"
+WWW-Authenticate: Basic
+
+Please auth with me
+</data3>
+
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
 <data1000>
@@ -95,6 +104,10 @@ Accept: */*
 GET /1418 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/1418", response="986238b7e0077754944c966f56d9bc77"
+Accept: */*
+
+GET /14180003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 GET /14180003 HTTP/1.1

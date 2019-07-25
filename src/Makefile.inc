@@ -54,6 +54,7 @@ CURL_CFILES = \
   tool_panykey.c \
   tool_paramhlp.c \
   tool_parsecfg.c \
+  tool_progress.c \
   tool_strdup.c \
   tool_setopt.c \
   tool_sleep.c \
@@ -95,6 +96,7 @@ CURL_HFILES = \
   tool_panykey.h \
   tool_paramhlp.h \
   tool_parsecfg.h \
+  tool_progress.h \
   tool_sdecls.h \
   tool_setopt.h \
   tool_setup.h \

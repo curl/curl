@@ -923,6 +923,10 @@ typedef enum {
 #define CURLPROTO_SMBS   (1<<27)
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
+/* bitmask defines for CURLOPT_H3 */
+#define CURLH3_DIRECT (1<<0) /* go QUIC + HTTP/3 directly to the given host +
+                                port */
+
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
 #define CURLOPTTYPE_LONG          0
@@ -1925,6 +1929,9 @@ typedef enum {
   /* maximum age of a connection to consider it for reuse (in seconds) */
   CINIT(MAXAGE_CONN, LONG, 288),
 
+  /* Bitmask to control HTTP/3 behavior. See CURLH3_* */
+  CINIT(H3, LONG, 289),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2714,6 +2721,7 @@ typedef enum {
   CURLVERSION_THIRD,
   CURLVERSION_FOURTH,
   CURLVERSION_FIFTH,
+  CURLVERSION_SIXTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2722,7 +2730,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_FIFTH
+#define CURLVERSION_NOW CURLVERSION_SIXTH
 
 typedef struct {
   CURLversion age;          /* age of the returned struct */
@@ -2751,10 +2759,14 @@ typedef struct {
   const char *libssh_version; /* human readable string */
 
   /* These fields were added in CURLVERSION_FIFTH */
-
   unsigned int brotli_ver_num; /* Numeric Brotli version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *brotli_version; /* human readable string. */
+
+  /* These fields were added in CURLVERSION_SIXTH */
+  unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
+                                   (MAJOR << 16) | (MINOR << 8) | PATCH */
+  const char *nghttp2_version; /* human readable string. */
 
 } curl_version_info_data;
 
@@ -2788,6 +2800,7 @@ typedef struct {
 #define CURL_VERSION_MULTI_SSL    (1<<22) /* Multiple SSL backends available */
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
+#define CURL_VERSION_HTTP3        (1<<25) /* HTTP3 support built-in */
 
  /*
  * NAME curl_version_info()

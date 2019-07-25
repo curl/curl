@@ -37,6 +37,10 @@ LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
   vtls/wolfssl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h          \
   vtls/mbedtls.h vtls/mesalink.h
 
+LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/ngtcp2-crypto.c vquic/quiche.c
+
+LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/ngtcp2-crypto.h vquic/quiche.h
+
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
   ldap.c version.c getenv.c escape.c mprintf.c telnet.c netrc.c         \
@@ -55,7 +59,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   curl_multibyte.c hostcheck.c conncache.c dotdot.c                     \
   x509asn1.c http2.c smb.c curl_endian.c curl_des.c system_win32.c      \
   mime.c sha256.c setopt.c curl_path.c curl_ctype.c curl_range.c psl.c  \
-  doh.c urlapi.c curl_get_line.c altsvc.c
+  doh.c urlapi.c curl_get_line.c altsvc.c quic.c
 
 LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
@@ -76,9 +80,11 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h           \
   curl_printf.h system_win32.h rand.h mime.h curl_sha256.h setopt.h     \
   curl_path.h curl_ctype.h curl_range.h psl.h doh.h urlapi-int.h        \
-  curl_get_line.h altsvc.h
+  curl_get_line.h altsvc.h quic.h
 
 LIB_RCFILES = libcurl.rc
 
-CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES)
-HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES)
+CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES) \
+  $(LIB_VQUIC_CFILES)
+HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \
+  $(LIB_VQUIC_HFILES)

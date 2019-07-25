@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_OPERHLP_H
-#define HEADER_CURL_TOOL_OPERHLP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,18 +19,20 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-struct OperationConfig;
+#include "curl_setup.h"
 
-void clean_getout(struct OperationConfig *config);
+#ifdef ENABLE_QUIC
+#include "quic.h"
+/* backend-independent QUIC functionality */
+const char *Curl_quic_backend(void)
+{
+#ifdef USE_NGTCP2
+  return "ngtcp2";
+#endif
+#ifdef USE_QUICHE
+  return "quiche";
+#endif
+}
+#endif
 
-bool output_expected(const char *url, const char *uploadfile);
-
-bool stdin_upload(const char *uploadfile);
-
-char *add_file_name_to_url(char *url, const char *filename);
-
-CURLcode get_url_file_name(char **filename, const char *url);
-
-#endif /* HEADER_CURL_TOOL_OPERHLP_H */

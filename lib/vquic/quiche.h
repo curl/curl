@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_OPERHLP_H
-#define HEADER_CURL_TOOL_OPERHLP_H
+#ifndef HEADER_CURL_VQUIC_QUICHE_H
+#define HEADER_CURL_VQUIC_QUICHE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,18 +21,27 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-struct OperationConfig;
+#include "curl_setup.h"
 
-void clean_getout(struct OperationConfig *config);
+#ifdef USE_QUICHE
 
-bool output_expected(const char *url, const char *uploadfile);
+#include <quiche.h>
 
-bool stdin_upload(const char *uploadfile);
+struct quic_handshake {
+  char *buf;       /* pointer to the buffer */
+  size_t alloclen; /* size of allocation */
+  size_t len;      /* size of content in buffer */
+  size_t nread;    /* how many bytes have been read */
+};
 
-char *add_file_name_to_url(char *url, const char *filename);
+struct quicsocket {
+  quiche_config *cfg;
+  quiche_conn *conn;
+  uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
+  uint32_t version;
+};
 
-CURLcode get_url_file_name(char **filename, const char *url);
+#endif
 
-#endif /* HEADER_CURL_TOOL_OPERHLP_H */
+#endif /* HEADER_CURL_VQUIC_QUICHE_H */

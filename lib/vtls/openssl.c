@@ -25,11 +25,6 @@
  * but vtls.c should ever call or use these functions.
  */
 
-/*
- * The original SSLeay-using code for curl was written by Linas Vepstas and
- * Sampo Kellomaki 1998.
- */
-
 #include "curl_setup.h"
 
 #ifdef USE_OPENSSL
@@ -1565,11 +1560,10 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
              assumed that the data returned by ASN1_STRING_data() is null
              terminated or does not contain embedded nulls." But also that
              "The actual format of the data will depend on the actual string
-             type itself: for example for and IA5String the data will be ASCII"
+             type itself: for example for an IA5String the data will be ASCII"
 
-             Gisle researched the OpenSSL sources:
-             "I checked the 0.9.6 and 0.9.8 sources before my patch and
-             it always 0-terminates an IA5String."
+             It has been however verified that in 0.9.6 and 0.9.7, IA5String
+             is always zero-terminated.
           */
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
@@ -1633,8 +1627,7 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
       /* In OpenSSL 0.9.7d and earlier, ASN1_STRING_to_UTF8 fails if the input
          is already UTF-8 encoded. We check for this case and copy the raw
          string manually to avoid the problem. This code can be made
-         conditional in the future when OpenSSL has been fixed. Work-around
-         brought by Alexis S. L. Carvalho. */
+         conditional in the future when OpenSSL has been fixed. */
       if(tmp) {
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
           j = ASN1_STRING_length(tmp);
@@ -2654,11 +2647,11 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 
   /* Try building a chain using issuers in the trusted store first to avoid
-  problems with server-sent legacy intermediates.
-  Newer versions of OpenSSL do alternate chain checking by default which
-  gives us the same fix without as much of a performance hit (slight), so we
-  prefer that if available.
-  https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
+     problems with server-sent legacy intermediates.  Newer versions of
+     OpenSSL do alternate chain checking by default which gives us the same
+     fix without as much of a performance hit (slight), so we prefer that if
+     available.
+     https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
   */
 #if defined(X509_V_FLAG_TRUSTED_FIRST) && !defined(X509_V_FLAG_NO_ALT_CHAINS)
   if(verifypeer) {

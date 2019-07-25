@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_OPERHLP_H
-#define HEADER_CURL_TOOL_OPERHLP_H
+#ifndef HEADER_CURL_TOOL_PROGRESS_H
+#define HEADER_CURL_TOOL_PROGRESS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +23,17 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-struct OperationConfig;
+int xferinfo_cb(void *clientp,
+                curl_off_t dltotal,
+                curl_off_t dlnow,
+                curl_off_t ultotal,
+                curl_off_t ulnow);
 
-void clean_getout(struct OperationConfig *config);
+bool progress_meter(struct GlobalConfig *global,
+                    struct timeval *start,
+                    bool final);
+void progress_finalize(struct per_transfer *per);
 
-bool output_expected(const char *url, const char *uploadfile);
+extern curl_off_t all_xfers;   /* total number */
 
-bool stdin_upload(const char *uploadfile);
-
-char *add_file_name_to_url(char *url, const char *filename);
-
-CURLcode get_url_file_name(char **filename, const char *url);
-
-#endif /* HEADER_CURL_TOOL_OPERHLP_H */
+#endif /* HEADER_CURL_TOOL_PROGRESS_H */

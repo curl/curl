@@ -149,6 +149,7 @@ static CURLcode main_init(struct GlobalConfig *config)
   config->showerror = -1;             /* Will show errors */
   config->errors = stderr;            /* Default errors to stderr */
   config->styled_output = TRUE;       /* enable detection */
+  config->parallel_max = PARALLEL_DEFAULT;
 
   /* Allocate the initial operate config */
   config->first = config->last = malloc(sizeof(struct OperationConfig));
@@ -160,19 +161,9 @@ static CURLcode main_init(struct GlobalConfig *config)
       result = get_libcurl_info();
 
       if(!result) {
-        /* Get a curl handle to use for all forthcoming curl transfers */
-        config->easy = curl_easy_init();
-        if(config->easy) {
-          /* Initialise the config */
-          config_init(config->first);
-          config->first->easy = config->easy;
-          config->first->global = config;
-        }
-        else {
-          helpf(stderr, "error initializing curl easy handle\n");
-          result = CURLE_FAILED_INIT;
-          free(config->first);
-        }
+        /* Initialise the config */
+        config_init(config->first);
+        config->first->global = config;
       }
       else {
         helpf(stderr, "error retrieving curl library information\n");
@@ -214,9 +205,6 @@ static void free_globalconfig(struct GlobalConfig *config)
 static void main_free(struct GlobalConfig *config)
 {
   /* Cleanup the easy handle */
-  curl_easy_cleanup(config->easy);
-  config->easy = NULL;
-
   /* Main cleanup */
   curl_global_cleanup();
   convert_cleanup();

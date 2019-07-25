@@ -827,4 +827,8 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST static
 #endif
 
+#if defined(USE_NGTCP2) || defined(USE_QUICHE)
+#define ENABLE_QUIC
+#endif
+
 #endif /* HEADER_CURL_SETUP_H */

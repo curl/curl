@@ -76,13 +76,13 @@ int main(int argc, char *argv[])
 
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
   curl_easy_setopt(hnd, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/1406");
   curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
   curl_easy_setopt(hnd, CURLOPT_MAIL_FROM, "sender@example.com");
   curl_easy_setopt(hnd, CURLOPT_MAIL_RCPT, slist1);
+  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may select to either not use them or implement

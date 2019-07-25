@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_OPERHLP_H
-#define HEADER_CURL_TOOL_OPERHLP_H
+#ifndef HEADER_CURL_QUIC_H
+#define HEADER_CURL_QUIC_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,18 +21,34 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-struct OperationConfig;
+#include "curl_setup.h"
 
-void clean_getout(struct OperationConfig *config);
+#ifdef ENABLE_QUIC
+#ifdef USE_NGTCP2
+#include "vquic/ngtcp2.h"
+#endif
+#ifdef USE_QUICHE
+#include "vquic/quiche.h"
+#endif
 
-bool output_expected(const char *url, const char *uploadfile);
+#include "urldata.h"
 
-bool stdin_upload(const char *uploadfile);
+/* generic */
+const char *Curl_quic_backend(void);
 
-char *add_file_name_to_url(char *url, const char *filename);
+/* functions provided by the specific backends */
+CURLcode Curl_quic_connect(struct connectdata *conn,
+                           curl_socket_t sockfd,
+                           const struct sockaddr *addr,
+                           socklen_t addrlen);
+CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
+                                bool *done);
+int Curl_quic_ver(char *p, size_t len);
 
-CURLcode get_url_file_name(char **filename, const char *url);
+#else
+/* no QUIC */
+#define Curl_quic_backend() ""
+#endif
 
-#endif /* HEADER_CURL_TOOL_OPERHLP_H */
+#endif /* HEADER_CURL_QUIC_H */

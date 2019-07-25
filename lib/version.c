@@ -27,6 +27,7 @@
 #include "vtls/vtls.h"
 #include "http2.h"
 #include "ssh.h"
+#include "quic.h"
 #include "curl_printf.h"
 
 #ifdef USE_ARES
@@ -184,6 +185,11 @@ char *curl_version(void)
 #endif
 #ifdef USE_NGHTTP2
   len = Curl_http2_ver(ptr, left);
+  left -= len;
+  ptr += len;
+#endif
+#ifdef ENABLE_QUIC
+  len = Curl_quic_ver(ptr, left);
   left -= len;
   ptr += len;
 #endif
@@ -358,6 +364,9 @@ static curl_version_info_data version_info = {
 #if defined(USE_NGHTTP2)
   | CURL_VERSION_HTTP2
 #endif
+#if defined(ENABLE_QUIC)
+  | CURL_VERSION_HTTP3
+#endif
 #if defined(USE_UNIX_SOCKETS)
   | CURL_VERSION_UNIX_SOCKETS
 #endif
@@ -385,6 +394,8 @@ static curl_version_info_data version_info = {
   NULL, /* ssh lib version */
   0,    /* brotli_ver_num */
   NULL, /* brotli version */
+  0,    /* nghttp2 version number */
+  NULL  /* nghttp2 version string */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -458,6 +469,14 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   version_info.brotli_ver_num = BrotliDecoderVersion();
   brotli_version(brotli_buffer, sizeof(brotli_buffer));
   version_info.brotli_version = brotli_buffer;
+#endif
+
+#ifdef USE_NGHTTP2
+  {
+    nghttp2_info *h2 = nghttp2_version(0);
+    version_info.nghttp2_ver_num = h2->version_num;
+    version_info.nghttp2_version = h2->version_str;
+  }
 #endif
 
   (void)stamp; /* avoid compiler warnings, we don't use this */
