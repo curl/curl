@@ -6,9 +6,18 @@ curl and libcurl 7.66.0
  Public functions in libcurl:  80
  Contributors:                 1991
 
+This release includes the following changes:
+
+ o curl: support parallel transfers with -Z [4]
+
 This release includes the following bugfixes:
 
- o
+ o HTTP3: initial (experimental still not working) support [5]
+ o curl_version_info: provide nghttp2 details [2]
+ o docs/MANUAL.md: converted to markdown from plain text [3]
+ o multi: call detach_connection before Curl_disconnect [6]
+ o source: remove names from source comments [1]
+ o ssh-libssh: do not specify O_APPEND when not in append mode [7]
 
 This release includes the following known bugs:
 
@@ -17,10 +26,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  (N contributors)
+  Alessandro Ghedini, Daniel Gustafsson, Daniel Stenberg, Felix Hädicke,
+  Gergely Nagy, Marcel Raad, Ray Satiro,
+  (7 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=4129
+ [2] = https://curl.haxx.se/bug/?i=4121
+ [3] = https://curl.haxx.se/bug/?i=4131
+ [4] = https://curl.haxx.se/bug/?i=3804
+ [5] = https://curl.haxx.se/bug/?i=3500
+ [6] = https://curl.haxx.se/bug/?i=4144
+ [7] = https://curl.haxx.se/bug/?i=4147
