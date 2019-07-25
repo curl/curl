@@ -591,7 +591,7 @@ time_t Curl_parse_expiry(const char *p)
       parsed++;
     return parsed;
   }
-  
+
   /* everything else is fail */
   return -1;
 }
