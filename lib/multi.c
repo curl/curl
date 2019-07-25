@@ -2012,13 +2012,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(stream_error) {
             /* Don't attempt to send data over a connection that timed out */
             bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
-            /* disconnect properly */
-            Curl_disconnect(data, data->conn, dead_connection);
+            struct connectdata *conn = data->conn;
 
             /* This is where we make sure that the conn pointer is reset.
                We don't have to do this in every case block above where a
                failure is detected */
             detach_connnection(data);
+
+            /* disconnect properly */
+            Curl_disconnect(data, conn, dead_connection);
           }
         }
         else if(data->mstate == CURLM_STATE_CONNECT) {
