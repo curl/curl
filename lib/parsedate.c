@@ -505,7 +505,7 @@ static int parsedate(const char *date, time_t *output)
 #ifdef HAVE_TIME_T_UNSIGNED
   /* an unsigned 32 bit time_t can only hold dates to 2106 */
   if(yearnum > 2105) {
-    /* return 1.1.2105, 00:00 in the given timezone to avoid returning a later time than specified */
+    /* return 1.1.2105 00:00 to avoid returning a later time than specified */
     secnum = 0;
     minnum = 0;
     hournum = 0;
@@ -517,7 +517,7 @@ static int parsedate(const char *date, time_t *output)
 #else
   /* a signed 32 bit time_t can only hold dates to the beginning of 2038 */
   if(yearnum > 2037) {
-    /* return 1.1.2038, 00:00 in the given timezone to avoid returning a later time than specified */
+    /* return 1.1.2038 00:00 to avoid returning a later time than specified */
     secnum = 0;
     minnum = 0;
     hournum = 0;
@@ -580,7 +580,7 @@ static int parsedate(const char *date, time_t *output)
 }
 #endif
 
-time_t Curl_parse_expiry(const char* p)
+time_t Curl_parse_expiry(const char *p)
 {
   time_t parsed = -1;
   int rc = parsedate(p, &parsed);
