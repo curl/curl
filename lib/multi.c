@@ -1392,9 +1392,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       if(!result) {
-        if(async)
+        if(async) {
           /* We're now waiting for an asynchronous name lookup */
           multistate(data, CURLM_STATE_WAITRESOLVE);
+#ifdef HAVE_SOCKETPAIR
+          /* return CURLM_CALL_MULTI_PERFORM so that client can
+             query read socket fd for polling */
+          rc = CURLM_CALL_MULTI_PERFORM;
+#endif
+        }
         else {
           /* after the connect has been sent off, go WAITCONNECT unless the
              protocol connect is already done and we can go directly to
