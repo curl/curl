@@ -974,12 +974,12 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
 
 #define NUM_POLLS_ON_STACK 10
 
-CURLMcode Curl_multi_wait(struct Curl_multi *multi,
-                          struct curl_waitfd extra_fds[],
-                          unsigned int extra_nfds,
-                          int timeout_ms,
-                          int *ret,
-                          bool *gotsocket) /* if any socket was checked */
+static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
+                                 struct curl_waitfd extra_fds[],
+                                 unsigned int extra_nfds,
+                                 int timeout_ms,
+                                 int *ret,
+                                 bool extrawait) /* when no socket, wait */
 {
   struct Curl_easy *data;
   curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
@@ -992,9 +992,6 @@ CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   int retcode = 0;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
   struct pollfd *ufds = &a_few_on_stack[0];
-
-  if(gotsocket)
-    *gotsocket = FALSE;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1124,9 +1121,19 @@ CURLMcode Curl_multi_wait(struct Curl_multi *multi,
     free(ufds);
   if(ret)
     *ret = retcode;
-  if(gotsocket && (extra_fds || curlfds))
+  if(!extrawait || extra_fds || curlfds)
     /* if any socket was checked */
-    *gotsocket = TRUE;
+    ;
+  else {
+    long sleep_ms = 0;
+
+    /* Avoid busy-looping when there's nothing particular to wait for */
+    if(!curl_multi_timeout(multi, &sleep_ms) && sleep_ms) {
+      if(sleep_ms > timeout_ms)
+        sleep_ms = timeout_ms;
+      Curl_wait_ms((int)sleep_ms);
+    }
+  }
 
   return CURLM_OK;
 }
@@ -1137,7 +1144,16 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
                           int timeout_ms,
                           int *ret)
 {
-  return Curl_multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, NULL);
+  return Curl_multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, FALSE);
+}
+
+CURLMcode curl_multi_poll(struct Curl_multi *multi,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret)
+{
+  return Curl_multi_wait(multi, extra_fds, extra_nfds, timeout_ms, ret, TRUE);
 }
 
 /*
