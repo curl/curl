@@ -1755,6 +1755,9 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     else if(!stream->closed) {
       drained_transfer(data, httpc);
     }
+    else
+      /* this stream is closed, trigger a another read ASAP to detect that */
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
 
     return retlen;
   }
