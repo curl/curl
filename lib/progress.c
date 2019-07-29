@@ -238,6 +238,8 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.ul_limit_start.tv_usec = 0;
   data->progress.dl_limit_start.tv_sec = 0;
   data->progress.dl_limit_start.tv_usec = 0;
+  data->progress.downloaded = 0;
+  data->progress.uploaded = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
   data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
   Curl_ratelimit(data, data->progress.start);
