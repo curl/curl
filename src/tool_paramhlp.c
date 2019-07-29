@@ -198,6 +198,28 @@ ParameterError str2unum(long *val, const char *str)
 }
 
 /*
+ * Parse the string and write the long in the given address if it is below the
+ * maximum allowed value. Return PARAM_OK on success, otherwise a parameter
+ * error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ *
+ * Since this function gets called with the 'nextarg' pointer from within the
+ * getparameter a lot, we must check it for NULL before accessing the str
+ * data.
+ */
+
+ParameterError str2unummax(long *val, const char *str, long max)
+{
+  ParameterError result = str2unum(val, str);
+  if(result != PARAM_OK)
+    return result;
+  if(*val > max)
+    return PARAM_NUMBER_TOO_LARGE;
+
+  return PARAM_OK;
+}
+
+
+/*
  * Parse the string and write the double in the given address. Return PARAM_OK
  * on success, otherwise a parameter specific error enum.
  *

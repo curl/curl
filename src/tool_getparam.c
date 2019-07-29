@@ -911,12 +911,12 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->retry_connrefused = toggle;
         break;
       case 'h': /* --retry-delay */
-        err = str2unum(&config->retry_delay, nextarg);
+        err = str2unummax(&config->retry_delay, nextarg, LONG_MAX/1000);
         if(err)
           return err;
         break;
       case 'i': /* --retry-max-time */
-        err = str2unum(&config->retry_maxtime, nextarg);
+        err = str2unummax(&config->retry_maxtime, nextarg, LONG_MAX/1000);
         if(err)
           return err;
         break;
