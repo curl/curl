@@ -91,6 +91,7 @@ CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+CURL_EXTERN CURLMcode curl_multi_poll(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
 CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
