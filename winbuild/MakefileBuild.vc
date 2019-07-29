@@ -559,6 +559,7 @@ $(LIB_DIROBJ):
 	@if not exist "$(LIB_DIROBJ)" mkdir $(LIB_DIROBJ)
 	@if not exist "$(LIB_DIROBJ)\vauth" mkdir $(LIB_DIROBJ)\vauth
 	@if not exist "$(LIB_DIROBJ)\vtls" mkdir $(LIB_DIROBJ)\vtls
+	@if not exist "$(LIB_DIROBJ)\vquic" mkdir $(LIB_DIROBJ)\vquic
 
 $(CURL_DIROBJ):
 	@if not exist "$(CURL_DIROBJ)" mkdir $(CURL_DIROBJ)
@@ -575,6 +576,9 @@ $(CURL_DIROBJ):
 	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 {$(LIBCURL_SRC_DIR)\vtls\}.c{$(LIB_DIROBJ)\vtls\}.obj:
+	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
+
+{$(LIBCURL_SRC_DIR)\vquic\}.c{$(LIB_DIROBJ)\vquic\}.obj:
 	$(CURL_CC) $(CFLAGS) /Fo"$@"  $<
 
 $(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
