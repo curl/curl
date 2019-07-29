@@ -601,7 +601,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       nread = 0;
     }
 
-    if((k->bytecount == 0) && (k->writebytecount == 0)) {
+    if(!k->bytecount) {
       Curl_pgrsTime(data, TIMER_STARTTRANSFER);
       if(k->exp100 > EXP100_SEND_DATA)
         /* set time stamp to compare with when waiting for the 100 */
