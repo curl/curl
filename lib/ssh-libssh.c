@@ -126,13 +126,9 @@ CURLcode sftp_perform(struct connectdata *conn,
 
 static void sftp_quote(struct connectdata *conn);
 static void sftp_quote_stat(struct connectdata *conn);
-
-static int myssh_getsock(struct connectdata *conn, curl_socket_t *sock,
-                         int numsocks);
-
+static int myssh_getsock(struct connectdata *conn, curl_socket_t *sock);
 static int myssh_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock,
-                                 int numsocks);
+                                 curl_socket_t *sock);
 
 static CURLcode myssh_setup_connection(struct connectdata *conn);
 
@@ -1913,13 +1909,9 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
 static int myssh_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock,  /* points to numsocks
-                                                          number of sockets */
-                                 int numsocks)
+                                 curl_socket_t *sock)
 {
   int bitmap = GETSOCK_BLANK;
-  (void) numsocks;
-
   sock[0] = conn->sock[FIRSTSOCKET];
 
   if(conn->waitfor & KEEP_RECV)
@@ -1934,13 +1926,11 @@ static int myssh_perform_getsock(const struct connectdata *conn,
 /* Generic function called by the multi interface to figure out what socket(s)
    to wait for and for what actions during the DOING and PROTOCONNECT states*/
 static int myssh_getsock(struct connectdata *conn,
-                         curl_socket_t *sock,  /* points to numsocks
-                                                   number of sockets */
-                         int numsocks)
+                         curl_socket_t *sock)
 {
   /* if we know the direction we can use the generic *_getsock() function even
      for the protocol_connect and doing states */
-  return myssh_perform_getsock(conn, sock, numsocks);
+  return myssh_perform_getsock(conn, sock);
 }
 
 static void myssh_block2waitfor(struct connectdata *conn, bool block)

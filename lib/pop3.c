@@ -95,8 +95,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
 static CURLcode pop3_connect(struct connectdata *conn, bool *done);
 static CURLcode pop3_disconnect(struct connectdata *conn, bool dead);
 static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done);
-static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks);
+static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode pop3_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct connectdata *conn);
 static CURLcode pop3_parse_url_options(struct connectdata *conn);
@@ -1055,10 +1054,9 @@ static CURLcode pop3_init(struct connectdata *conn)
 }
 
 /* For the POP3 "protocol connect" and "doing" phases only */
-static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
+static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
-  return Curl_pp_getsock(&conn->proto.pop3c.pp, socks, numsocks);
+  return Curl_pp_getsock(&conn->proto.pop3c.pp, socks);
 }
 
 /***********************************************************************

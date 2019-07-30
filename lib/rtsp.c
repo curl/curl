@@ -52,10 +52,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done);
 static CURLcode rtsp_done(struct connectdata *conn, CURLcode, bool premature);
 static CURLcode rtsp_connect(struct connectdata *conn, bool *done);
 static CURLcode rtsp_disconnect(struct connectdata *conn, bool dead);
-
-static int rtsp_getsock_do(struct connectdata *conn,
-                           curl_socket_t *socks,
-                           int numsocks);
+static int rtsp_getsock_do(struct connectdata *conn, curl_socket_t *socks);
 
 /*
  * Parse and write out any available RTP data.
@@ -77,11 +74,9 @@ static unsigned int rtsp_conncheck(struct connectdata *check,
    interface and then we're always _sending_ a request and thus we wait for
    the single socket to become writable only */
 static int rtsp_getsock_do(struct connectdata *conn,
-                           curl_socket_t *socks,
-                           int numsocks)
+                           curl_socket_t *socks)
 {
   /* write mode */
-  (void)numsocks; /* unused, we trust it to be at least 1 */
   socks[0] = conn->sock[FIRSTSOCKET];
   return GETSOCK_WRITESOCK(0);
 }

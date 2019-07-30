@@ -61,11 +61,8 @@ CURLcode Curl_setup_conn(struct connectdata *conn,
 void Curl_free_request_state(struct Curl_easy *data);
 
 int Curl_protocol_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks);
-int Curl_doing_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
-                       int numsocks);
+                          curl_socket_t *socks);
+int Curl_doing_getsock(struct connectdata *conn, curl_socket_t *socks);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);

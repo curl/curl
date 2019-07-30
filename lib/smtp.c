@@ -95,8 +95,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 static CURLcode smtp_connect(struct connectdata *conn, bool *done);
 static CURLcode smtp_disconnect(struct connectdata *conn, bool dead);
 static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done);
-static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks);
+static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode smtp_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct connectdata *conn);
 static CURLcode smtp_parse_url_options(struct connectdata *conn);
@@ -1114,10 +1113,9 @@ static CURLcode smtp_init(struct connectdata *conn)
 }
 
 /* For the SMTP "protocol connect" and "doing" phases only */
-static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
+static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
-  return Curl_pp_getsock(&conn->proto.smtpc.pp, socks, numsocks);
+  return Curl_pp_getsock(&conn->proto.smtpc.pp, socks);
 }
 
 /***********************************************************************

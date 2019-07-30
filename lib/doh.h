@@ -40,8 +40,7 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
 CURLcode Curl_doh_is_resolved(struct connectdata *conn,
                               struct Curl_dns_entry **dns);
 
-int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks,
-                     int numsocks);
+int Curl_doh_getsock(struct connectdata *conn, curl_socket_t *socks);
 
 typedef enum {
   DOH_OK,

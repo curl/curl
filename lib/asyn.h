@@ -114,8 +114,7 @@ void Curl_resolver_kill(struct connectdata *conn);
  * return bitmask indicating what file descriptors (referring to array indexes
  * in the 'sock' array) to wait for, read/write.
  */
-int Curl_resolver_getsock(struct connectdata *conn, curl_socket_t *sock,
-                          int numsocks);
+int Curl_resolver_getsock(struct connectdata *conn, curl_socket_t *sock);
 
 /*
  * Curl_resolver_is_resolved()
