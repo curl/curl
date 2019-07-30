@@ -1,8 +1,8 @@
 curl and libcurl 7.66.0
 
  Public curl releases:         185
- Command line options:         221
- curl_easy_setopt() options:   268
+ Command line options:         224
+ curl_easy_setopt() options:   269
  Public functions in libcurl:  80
  Contributors:                 1991
 
@@ -13,9 +13,16 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o HTTP3: initial (experimental still not working) support [5]
+ o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
+ o asyn-thread: create a socketpair to wait on [14]
+ o curl: cap the maximum allowed values for retry time arguments [13]
  o curl_version_info: provide nghttp2 details [2]
  o docs/MANUAL.md: converted to markdown from plain text [3]
+ o easy: resize receive buffer on easy handle reset [9]
+ o examples: Avoid reserved names in hiperfifo examples [8]
+ o http2_recv: trigger another read when the last data is returned [11]
  o multi: call detach_connection before Curl_disconnect [6]
+ o progress: reset download/uploaded counter between transfers [12]
  o source: remove names from source comments [1]
  o ssh-libssh: do not specify O_APPEND when not in append mode [7]
 
@@ -26,9 +33,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Daniel Gustafsson, Daniel Stenberg, Felix Hädicke,
-  Gergely Nagy, Marcel Raad, Ray Satiro,
-  (7 contributors)
+  Alessandro Ghedini, Balazs Kovacsics, Brad Spencer, Daniel Gustafsson,
+  Daniel Stenberg, Felix Hädicke, Gergely Nagy, Ironbars13 on github,
+  Jason Lee, Marcel Raad, Michael Lee, Ray Satiro, The Infinnovation team,
+  Tom van der Woerdt,
+  (14 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -41,3 +50,10 @@ References to bug reports and discussions on issues:
  [5] = https://curl.haxx.se/bug/?i=3500
  [6] = https://curl.haxx.se/bug/?i=4144
  [7] = https://curl.haxx.se/bug/?i=4147
+ [8] = https://curl.haxx.se/bug/?i=4153
+ [9] = https://curl.haxx.se/bug/?i=4143
+ [10] = https://curl.haxx.se/bug/?i=4138
+ [11] = https://curl.haxx.se/bug/?i=4043
+ [12] = https://curl.haxx.se/bug/?i=4084
+ [13] = https://curl.haxx.se/bug/?i=4166
+ [14] = https://curl.haxx.se/bug/?i=4157
