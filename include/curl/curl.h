@@ -285,7 +285,7 @@ typedef enum {
 #define CURLFINFOFLAG_KNOWN_HLINKCOUNT  (1<<7)
 
 /* Content of this structure depends on information which is known and is
-   achievable (e.g. by FTP LIST parsing). Please see the url_easy_setopt(3) man
+   achievable (e.g. by FTP LIST parsing). Please see the curl_easy_setopt(3) man
    page for callbacks returning this structure -- some fields are mandatory,
    some others are optional. The FLAG field has special meaning. */
 struct curl_fileinfo {
