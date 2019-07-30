@@ -2094,12 +2094,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
   CURLcode result = CURLE_OK;
   bool capath_from_env;
 
-  /*
-  ** Beyond this point no return'ing from this function allowed.
-  ** Jump to label 'quit_curl' in order to abandon this function
-  ** from outside of nested loops further down below.
-  */
-
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
     helpf(global->errors, "no URL specified!\n");
