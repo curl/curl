@@ -1440,11 +1440,10 @@ void Curl_verboseconnect(struct connectdata *conn)
 #endif
 
 int Curl_protocol_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
+                          curl_socket_t *socks)
 {
   if(conn->handler->proto_getsock)
-    return conn->handler->proto_getsock(conn, socks, numsocks);
+    return conn->handler->proto_getsock(conn, socks);
   /* Backup getsock logic. Since there is a live socket in use, we must wait
      for it or it will be removed from watching when the multi_socket API is
      used. */
@@ -1453,11 +1452,10 @@ int Curl_protocol_getsock(struct connectdata *conn,
 }
 
 int Curl_doing_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
-                       int numsocks)
+                       curl_socket_t *socks)
 {
   if(conn && conn->handler->doing_getsock)
-    return conn->handler->doing_getsock(conn, socks, numsocks);
+    return conn->handler->doing_getsock(conn, socks);
   return GETSOCK_BLANK;
 }
 

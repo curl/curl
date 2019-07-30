@@ -626,8 +626,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
 }
 
 int Curl_resolver_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
+                          curl_socket_t *socks)
 {
   int ret_val = 0;
   time_t milli;
@@ -639,7 +638,6 @@ int Curl_resolver_getsock(struct connectdata *conn,
 #else
   (void)socks;
 #endif
-  (void)numsocks;
 
 #ifdef HAVE_SOCKETPAIR
   if(td) {

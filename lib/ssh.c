@@ -125,17 +125,9 @@ static
 CURLcode sftp_perform(struct connectdata *conn,
                       bool *connected,
                       bool *dophase_done);
-
-static int ssh_getsock(struct connectdata *conn,
-                       curl_socket_t *sock, /* points to numsocks number
-                                               of sockets */
-                       int numsocks);
-
+static int ssh_getsock(struct connectdata *conn, curl_socket_t *sock);
 static int ssh_perform_getsock(const struct connectdata *conn,
-                               curl_socket_t *sock, /* points to numsocks
-                                                       number of sockets */
-                               int numsocks);
-
+                               curl_socket_t *sock);
 static CURLcode ssh_setup_connection(struct connectdata *conn);
 
 /*
@@ -2700,13 +2692,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
 static int ssh_perform_getsock(const struct connectdata *conn,
-                               curl_socket_t *sock, /* points to numsocks
-                                                       number of sockets */
-                               int numsocks)
+                               curl_socket_t *sock)
 {
 #ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
   int bitmap = GETSOCK_BLANK;
-  (void)numsocks;
 
   sock[0] = conn->sock[FIRSTSOCKET];
 
@@ -2720,28 +2709,25 @@ static int ssh_perform_getsock(const struct connectdata *conn,
 #else
   /* if we don't know the direction we can use the generic *_getsock()
      function even for the protocol_connect and doing states */
-  return Curl_single_getsock(conn, sock, numsocks);
+  return Curl_single_getsock(conn, sock);
 #endif
 }
 
 /* Generic function called by the multi interface to figure out what socket(s)
    to wait for and for what actions during the DOING and PROTOCONNECT states*/
 static int ssh_getsock(struct connectdata *conn,
-                       curl_socket_t *sock, /* points to numsocks number
-                                               of sockets */
-                       int numsocks)
+                       curl_socket_t *sock)
 {
 #ifndef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
   (void)conn;
   (void)sock;
-  (void)numsocks;
   /* if we don't know any direction we can just play along as we used to and
      not provide any sensible info */
   return GETSOCK_BLANK;
 #else
   /* if we know the direction we can use the generic *_getsock() function even
      for the protocol_connect and doing states */
-  return ssh_perform_getsock(conn, sock, numsocks);
+  return ssh_perform_getsock(conn, sock);
 #endif
 }
 

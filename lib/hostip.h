@@ -240,7 +240,6 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data);
 CURLcode Curl_resolv_check(struct connectdata *conn,
                            struct Curl_dns_entry **dns);
 int Curl_resolv_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks);
+                        curl_socket_t *socks);
 
 #endif /* HEADER_CURL_HOSTIP_H */

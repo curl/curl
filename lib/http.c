@@ -88,8 +88,7 @@
  */
 
 static int http_getsock_do(struct connectdata *conn,
-                           curl_socket_t *socks,
-                           int numsocks);
+                           curl_socket_t *socks);
 static int http_should_fail(struct connectdata *conn);
 
 #ifndef CURL_DISABLE_PROXY
@@ -99,8 +98,7 @@ static CURLcode add_haproxy_protocol_header(struct connectdata *conn);
 #ifdef USE_SSL
 static CURLcode https_connecting(struct connectdata *conn, bool *done);
 static int https_getsock(struct connectdata *conn,
-                         curl_socket_t *socks,
-                         int numsocks);
+                         curl_socket_t *socks);
 #else
 #define https_connecting(x,y) CURLE_COULDNT_CONNECT
 #endif
@@ -1509,11 +1507,9 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
    interface and then we're always _sending_ a request and thus we wait for
    the single socket to become writable only */
 static int http_getsock_do(struct connectdata *conn,
-                           curl_socket_t *socks,
-                           int numsocks)
+                           curl_socket_t *socks)
 {
   /* write mode */
-  (void)numsocks; /* unused, we trust it to be at least 1 */
   socks[0] = conn->sock[FIRSTSOCKET];
   return GETSOCK_WRITESOCK(0);
 }
@@ -1585,11 +1581,10 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 }
 
 static int https_getsock(struct connectdata *conn,
-                         curl_socket_t *socks,
-                         int numsocks)
+                         curl_socket_t *socks)
 {
   if(conn->handler->flags & PROTOPT_SSL)
-    return Curl_ssl_getsock(conn, socks, numsocks);
+    return Curl_ssl_getsock(conn, socks);
   return GETSOCK_BLANK;
 }
 #endif /* USE_SSL */

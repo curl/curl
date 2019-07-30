@@ -132,10 +132,8 @@ static CURLcode ftp_connect(struct connectdata *conn, bool *done);
 static CURLcode ftp_disconnect(struct connectdata *conn, bool dead_connection);
 static CURLcode ftp_do_more(struct connectdata *conn, int *completed);
 static CURLcode ftp_multi_statemach(struct connectdata *conn, bool *done);
-static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks,
-                       int numsocks);
-static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
-                              int numsocks);
+static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks);
+static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode ftp_doing(struct connectdata *conn,
                           bool *dophase_done);
 static CURLcode ftp_setup_connection(struct connectdata * conn);
@@ -810,20 +808,15 @@ static CURLcode ftp_state_pwd(struct connectdata *conn)
 
 /* For the FTP "protocol connect" and "doing" phases only */
 static int ftp_getsock(struct connectdata *conn,
-                       curl_socket_t *socks,
-                       int numsocks)
+                       curl_socket_t *socks)
 {
-  return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
+  return Curl_pp_getsock(&conn->proto.ftpc.pp, socks);
 }
 
 /* For the FTP "DO_MORE" phase only */
-static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
-                              int numsocks)
+static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-
-  if(!numsocks)
-    return GETSOCK_BLANK;
 
   /* When in DO_MORE state, we could be either waiting for us to connect to a
    * remote site, or we could wait for that site to connect to us. Or just
@@ -856,7 +849,7 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks,
 
     return bits;
   }
-  return Curl_pp_getsock(&conn->proto.ftpc.pp, socks, numsocks);
+  return Curl_pp_getsock(&conn->proto.ftpc.pp, socks);
 }
 
 /* This is called after the FTP_QUOTE state is passed.

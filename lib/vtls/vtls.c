@@ -515,13 +515,9 @@ void Curl_ssl_close_all(struct Curl_easy *data)
 #if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
   defined(USE_SECTRANSP) || defined(USE_POLARSSL) || defined(USE_NSS) || \
   defined(USE_MBEDTLS) || defined(USE_WOLFSSL)
-int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
-                     int numsocks)
+int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
   struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
-
-  if(!numsocks)
-    return GETSOCK_BLANK;
 
   if(connssl->connecting_state == ssl_connect_2_writing) {
     /* write mode */
@@ -538,12 +534,10 @@ int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks,
 }
 #else
 int Curl_ssl_getsock(struct connectdata *conn,
-                     curl_socket_t *socks,
-                     int numsocks)
+                     curl_socket_t *socks)
 {
   (void)conn;
   (void)socks;
-  (void)numsocks;
   return GETSOCK_BLANK;
 }
 /* USE_OPENSSL || USE_GNUTLS || USE_SCHANNEL || USE_SECTRANSP || USE_NSS */

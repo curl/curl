@@ -47,8 +47,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                         struct Curl_easy *data, bool *done,
                         bool *comeback);
 int Curl_single_getsock(const struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks);
+                        curl_socket_t *socks);
 CURLcode Curl_readrewind(struct connectdata *conn);
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
                              size_t *nreadp);
