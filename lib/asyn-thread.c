@@ -636,11 +636,10 @@ int Curl_resolver_getsock(struct connectdata *conn,
   struct resdata *reslv = (struct resdata *)data->state.resolver;
 #ifdef HAVE_SOCKETPAIR
   struct thread_data *td = (struct thread_data*)conn->async.os_specific;
-  int loop_idx;
 #else
   (void)socks;
-  (void)numsocks;
 #endif
+  (void)numsocks;
 
 #ifdef HAVE_SOCKETPAIR
   if(td) {
