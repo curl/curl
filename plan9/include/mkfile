@@ -21,10 +21,14 @@
 ###########################################################################
 
 DIR=/sys/include/ape/curl
+HFILES=`{ls curl/*.h}
 
-all clean nuke:VQ:
-	# do nothing
+all:V: $HFILES
 
 install:V: all
 	mkdir -p $DIR
 	cp curl/*.h $DIR/
+
+clean:V: $HFILES  # do nothing
+
+nuke:V: clean

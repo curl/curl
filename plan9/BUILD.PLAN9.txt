@@ -19,6 +19,7 @@ First, you should construct namespace as like described below:
 
 % bind -a ../lib lib
 % bind -a ../src src
+% bind -a ../include include
 % bind -a .. .
 
 Then you will see as shown below (excerpt):
@@ -31,6 +32,10 @@ Then you will see as shown below (excerpt):
    | |  :
    | |_mkfile
    | |_mkfile.proto
+   | |_include
+   | | |_Makefile.am
+   | | |  :
+   | | |_mkfile
    | |_lib
    | | |_CMakeLists.txt
    | | |  :
