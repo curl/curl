@@ -16,7 +16,6 @@
 .libs
 .project
 .settings
-/build/
 /builds/
 CHANGES.dist
 Debug
@@ -49,3 +48,6 @@ missing
 mkinstalldirs
 tags
 test-driver
+
+#Stadia builds
+**/GGP
