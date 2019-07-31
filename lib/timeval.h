@@ -24,13 +24,13 @@
 
 #include "curl_setup.h"
 
-#if SIZEOF_TIME_T < 8
-typedef int timediff_t;
-#define CURL_FORMAT_TIMEDIFF_T "d"
-#else
+/* Use a larger type even for 32 bit time_t systems so that we can keep
+   microsecond accuracy in it */
 typedef curl_off_t timediff_t;
 #define CURL_FORMAT_TIMEDIFF_T CURL_FORMAT_CURL_OFF_T
-#endif
+
+#define TIMEDIFF_T_MAX CURL_OFF_T_MAX
+#define TIMEDIFF_T_MIN CURL_OFF_T_MIN
 
 struct curltime {
   time_t tv_sec; /* seconds */

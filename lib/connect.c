@@ -795,8 +795,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     if(rc == 0) { /* no connection yet */
       error = 0;
       if(Curl_timediff(now, conn->connecttime) >= conn->timeoutms_per_addr) {
-        infof(data, "After %ldms connect time, move on!\n",
-              conn->timeoutms_per_addr);
+        infof(data, "After %" CURL_FORMAT_TIMEDIFF_T
+              "ms connect time, move on!\n", conn->timeoutms_per_addr);
         error = ETIMEDOUT;
       }
 
@@ -862,11 +862,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
               Curl_strerror(error, buffer, sizeof(buffer)));
 
         conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
-                                   allow : allow / 2;
+          allow : allow / 2;
 
         status = trynextip(conn, sockindex, i);
-        if(status != CURLE_COULDNT_CONNECT
-            || conn->tempsock[other] == CURL_SOCKET_BAD)
+        if((status != CURLE_COULDNT_CONNECT) ||
+           conn->tempsock[other] == CURL_SOCKET_BAD)
           /* the last attempt failed and no other sockets remain open */
           result = status;
       }

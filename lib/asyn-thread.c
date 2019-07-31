@@ -603,8 +603,9 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
-    timediff_t elapsed = Curl_timediff(Curl_now(),
-                                       data->progress.t_startsingle);
+    /* should be fine even if this converts to 32 bit */
+    time_t elapsed = (time_t)Curl_timediff(Curl_now(),
+                                           data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 
@@ -651,7 +652,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)
-      milli = ms/3;
+      milli = (time_t)ms/3;
     else if(ms <= 250)
       milli = 50;
     else
