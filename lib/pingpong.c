@@ -60,12 +60,12 @@ time_t Curl_pp_state_timeout(struct pingpong *pp, bool disconnecting)
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
   timeout_ms = response_time -
-    Curl_timediff(Curl_now(), pp->response); /* spent time */
+    (time_t)Curl_timediff(Curl_now(), pp->response); /* spent time */
 
   if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much remaining time we have */
     time_t timeout2_ms = data->set.timeout - /* timeout time */
-      Curl_timediff(Curl_now(), conn->now); /* spent time */
+      (time_t)Curl_timediff(Curl_now(), conn->now); /* spent time */
 
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
