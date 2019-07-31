@@ -21,16 +21,6 @@ HSTS
 
 Complete and merge [the existing PR](https://github.com/curl/curl/pull/2682).
 
-Parallel transfers for the curl tool
-------------------------------------
-
-This will require several new command line options to enable and control.
-
- 1. switch to creating a list of all the transfers first before any transfer
-    is done
- 2. make the transfers using the multi interface
- 3. optionally fire up more transfers before the previous has completed
-
 Option to refuse HTTPS => HTTP redirects
 ----------------------------------------
 
