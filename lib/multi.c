@@ -2838,7 +2838,7 @@ multi_addtimeout(struct Curl_easy *data,
  *
  * Expire replaces a former timeout using the same id if already set.
  */
-void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
+void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
 {
   struct Curl_multi *multi = data->multi;
   struct curltime *nowp = &data->state.expiretime;
@@ -2852,7 +2852,7 @@ void Curl_expire(struct Curl_easy *data, time_t milli, expire_id id)
   DEBUGASSERT(id < EXPIRE_LAST);
 
   set = Curl_now();
-  set.tv_sec += milli/1000;
+  set.tv_sec += (time_t)(milli/1000); /* might be a 64 to 32 bit conversion */
   set.tv_usec += (unsigned int)(milli%1000)*1000;
 
   if(set.tv_usec >= 1000000) {

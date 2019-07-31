@@ -909,8 +909,8 @@ struct connectdata {
   struct curltime connecttime;
   /* The two fields below get set in Curl_connecthost */
   int num_addr; /* number of addresses to try to connect to */
-  time_t timeoutms_per_addr; /* how long time in milliseconds to spend on
-                                trying to connect to each IP address */
+  timediff_t timeoutms_per_addr; /* how long time in milliseconds to spend on
+                                    trying to connect to each IP address */
 
   const struct Curl_handler *handler; /* Connection's protocol handler */
   const struct Curl_handler *given;   /* The protocol first given */
@@ -1108,17 +1108,17 @@ struct Progress {
   int width; /* screen width at download start */
   int flags; /* see progress.h */
 
-  time_t timespent;
+  timediff_t timespent;
 
   curl_off_t dlspeed;
   curl_off_t ulspeed;
 
-  time_t t_nslookup;
-  time_t t_connect;
-  time_t t_appconnect;
-  time_t t_pretransfer;
-  time_t t_starttransfer;
-  time_t t_redirect;
+  timediff_t t_nslookup;
+  timediff_t t_connect;
+  timediff_t t_appconnect;
+  timediff_t t_pretransfer;
+  timediff_t t_starttransfer;
+  timediff_t t_redirect;
 
   struct curltime start;
   struct curltime t_startsingle;

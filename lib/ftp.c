@@ -380,7 +380,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct pingpong *pp = &ftpc->pp;
   int result;
-  time_t timeout_ms;
+  timediff_t timeout_ms;
   ssize_t nread;
   int ftpcode;
 
@@ -491,7 +491,7 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
 static CURLcode AllowServerConnect(struct connectdata *conn, bool *connected)
 {
   struct Curl_easy *data = conn->data;
-  time_t timeout_ms;
+  timediff_t timeout_ms;
   CURLcode result = CURLE_OK;
 
   *connected = FALSE;

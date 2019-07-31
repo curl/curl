@@ -233,7 +233,7 @@ static unsigned int http2_conncheck(struct connectdata *check,
 
   if(checks_to_perform & CONNCHECK_KEEPALIVE) {
     struct curltime now = Curl_now();
-    time_t elapsed = Curl_timediff(now, check->keepalive);
+    timediff_t elapsed = Curl_timediff(now, check->keepalive);
 
     if(elapsed > check->upkeep_interval_ms) {
       /* Perform an HTTP/2 PING */

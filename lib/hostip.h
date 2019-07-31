@@ -25,6 +25,7 @@
 #include "curl_setup.h"
 #include "hash.h"
 #include "curl_addrinfo.h"
+#include "timeval.h" /* for timediff_t */
 #include "asyn.h"
 
 #ifdef HAVE_SETJMP_H
@@ -89,7 +90,7 @@ int Curl_resolv(struct connectdata *conn,
                 struct Curl_dns_entry **dnsentry);
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
-                        time_t timeoutms);
+                        timediff_t timeoutms);
 
 #ifdef CURLRES_IPV6
 /*
