@@ -56,8 +56,13 @@ static enum alpnid alpn2alpnid(char *name)
     return ALPN_h2;
   if(strcasecompare(name, "h2c"))
     return ALPN_h2c;
+#ifdef USE_QUICHE
+  if(strcasecompare(name, "h3-20"))
+    return ALPN_h3;
+#else
   if(strcasecompare(name, "h3"))
     return ALPN_h3;
+#endif
   return ALPN_none; /* unknown, probably rubbish input */
 }
 
@@ -72,7 +77,11 @@ const char *Curl_alpnid2str(enum alpnid id)
   case ALPN_h2c:
     return "h2c";
   case ALPN_h3:
+#ifdef USE_QUICHE
+    return "h3-20";
+#else
     return "h3";
+#endif
   default:
     return ""; /* bad */
   }
