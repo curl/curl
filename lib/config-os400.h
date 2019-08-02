@@ -434,6 +434,9 @@
 /* Define to enable alt-svc support (experimental) */
 #undef USE_ALTSVC
 
+/* Define to enable HTTP3 support (experimental, requires NGTCP2 or QUICHE) */
+#undef ENABLE_QUIC
+
 /* Version number of package */
 #undef VERSION
 
