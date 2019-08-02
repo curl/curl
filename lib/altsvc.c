@@ -343,7 +343,7 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   while(*p && ISBLANK(*p))
     p++;
   protop = p;
-  while(*p && ISALNUM(*p))
+  while(*p && !ISBLANK(*p) && (*p != ';') && (*p != '='))
     p++;
   len = p - protop;
 
