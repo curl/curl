@@ -125,15 +125,19 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd)
     if((recvd < 0) && ((errno == EAGAIN) || (errno == EWOULDBLOCK)))
       break;
 
-    if(recvd < 0)
+    if(recvd < 0) {
+      failf(conn->data, "quiche: recv() unexpectedly returned %d", recvd);
       return CURLE_RECV_ERROR;
+    }
 
     recvd = quiche_conn_recv(qs->conn, buf, recvd);
     if(recvd == QUICHE_ERR_DONE)
       break;
 
-    if(recvd < 0)
+    if(recvd < 0) {
+      failf(conn->data, "quiche_conn_recv() == %d", recvd);
       return CURLE_RECV_ERROR;
+    }
   } while(1);
 
   return CURLE_OK;
