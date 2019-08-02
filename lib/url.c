@@ -3160,11 +3160,23 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     const char *nhost;
     int nport;
     enum alpnid nalpnid;
+    enum alpnid salpnid;
     bool hit;
     host = conn->host.rawalloc;
+#ifdef USE_NGHTTP2
+    /* with h2 support, check that first */
+    salpnid = ALPN_h2;
     hit = Curl_altsvc_lookup(data->asi,
-                             ALPN_h1, host, conn->remote_port, /* from */
+                             salpnid, host, conn->remote_port, /* from */
                              &nalpnid, &nhost, &nport /* to */);
+    if(!hit)
+#endif
+    {
+      salpnid = ALPN_h1;
+      hit = Curl_altsvc_lookup(data->asi,
+                               salpnid, host, conn->remote_port, /* from */
+                               &nalpnid, &nhost, &nport /* to */);
+    }
     if(hit) {
       char *hostd = strdup((char *)nhost);
       if(!hostd)
@@ -3175,8 +3187,25 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       conn->conn_to_port = nport;
       conn->bits.conn_to_port = TRUE;
       infof(data, "Alt-svc connecting from [%s]%s:%d to [%s]%s:%d\n",
-            Curl_alpnid2str(ALPN_h1), host, conn->remote_port,
+            Curl_alpnid2str(salpnid), host, conn->remote_port,
             Curl_alpnid2str(nalpnid), hostd, nport);
+      if(salpnid != nalpnid) {
+        /* protocol version switch */
+        switch(nalpnid) {
+        case ALPN_h1:
+          conn->httpversion = CURL_HTTP_VERSION_1_1;
+          break;
+        case ALPN_h2:
+          conn->httpversion = CURL_HTTP_VERSION_2TLS;
+          break;
+        case ALPN_h3:
+          conn->transport = TRNSPRT_QUIC;
+          conn->httpversion = CURL_HTTP_VERSION_LAST; /* for the moment */
+          break;
+        default: /* shouldn't be possible */
+          break;
+        }
+      }
     }
   }
 #endif
