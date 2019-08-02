@@ -527,8 +527,13 @@ static int parsedate(const char *date, time_t *output)
     returncode = PARSEDATE_LATER;
   }
   if(yearnum < 1903) {
-    *output = TIME_T_MIN;
-    return PARSEDATE_SOONER;
+    secnum = 59;
+    minnum = 59;
+    hournum = 23;
+    mdaynum = 31;
+    monnum = 11;
+    yearnum = 1902;
+    returncode = PARSEDATE_SOONER;
   }
 #endif
 
@@ -585,7 +590,7 @@ time_t Curl_parse_expiry(const char *p)
   time_t parsed = -1;
   int rc = parsedate(p, &parsed);
 
-  if(rc == PARSEDATE_OK || rc == PARSEDATE_LATER) {
+  if(rc == PARSEDATE_OK || rc == PARSEDATE_LATER || rc == PARSEDATE_SOONER) {
     if(parsed == -1)
       /* avoid returning -1 for a working scenario */
       parsed++;
