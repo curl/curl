@@ -14,17 +14,32 @@ This release includes the following bugfixes:
 
  o HTTP3: initial (experimental still not working) support [5]
  o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
+ o alt-svc: more liberal ALPN name parsing [17]
+ o altsvc: with quiche, use the quiche h3 alpn string [16]
+ o appveyor: pass on -k to make
  o asyn-thread: create a socketpair to wait on [14]
+ o cleanup: remove the 'numsocks' argument used in many places [25]
+ o curl.h: fix outdated comment [23]
  o curl: cap the maximum allowed values for retry time arguments [13]
+ o curl: remove outdated comment [24]
  o curl_version_info: provide nghttp2 details [2]
  o docs/MANUAL.md: converted to markdown from plain text [3]
  o easy: resize receive buffer on easy handle reset [9]
  o examples: Avoid reserved names in hiperfifo examples [8]
+ o getenv: support up to 4K environment variable contents on windows [21]
  o http2_recv: trigger another read when the last data is returned [11]
+ o http_negotiate: improve handling of gss_init_sec_context() failures [18]
+ o md4: Use our own MD4 when no crypto libraries are available [15]
  o multi: call detach_connection before Curl_disconnect [6]
+ o plan9: add support for running on Plan 9 [22]
  o progress: reset download/uploaded counter between transfers [12]
+ o quiche: use the proper HTTP/3 ALPN
+ o readwrite_data: repair setting the TIMER_STARTTRANSFER stamp [26]
  o source: remove names from source comments [1]
+ o src/makefile: fix uncompressed hugehelp.c generation [19]
  o ssh-libssh: do not specify O_APPEND when not in append mode [7]
+ o timediff: make it 64 bit (if possible) even with 32 bit time_t [20]
+ o url: make use of new HTTP version if alt-svc has one [16]
 
 This release includes the following known bugs:
 
@@ -33,11 +48,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Balazs Kovacsics, Brad Spencer, Daniel Gustafsson,
-  Daniel Stenberg, Felix Hädicke, Gergely Nagy, Ironbars13 on github,
-  Jason Lee, Marcel Raad, Michael Lee, Ray Satiro, The Infinnovation team,
+  Alessandro Ghedini, Amit Katyal, Balazs Kovacsics, Brad Spencer,
+  Daniel Gustafsson, Daniel Stenberg, Felix Hädicke, Gergely Nagy,
+  Ironbars13 on github, Jason Lee, Jonathan Cardoso Machado, Kamil Dudka,
+  Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee, Michal Čaplygin,
+  niallor on github, Ray Satiro, Steve Holme, The Infinnovation team,
   Tom van der Woerdt,
-  (14 contributors)
+  (22 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -57,3 +74,15 @@ References to bug reports and discussions on issues:
  [12] = https://curl.haxx.se/bug/?i=4084
  [13] = https://curl.haxx.se/bug/?i=4166
  [14] = https://curl.haxx.se/bug/?i=4157
+ [15] = https://curl.haxx.se/bug/?i=3780
+ [16] = https://curl.haxx.se/bug/?i=4183
+ [17] = https://curl.haxx.se/bug/?i=4182
+ [18] = https://curl.haxx.se/bug/?i=3992
+ [19] = https://curl.haxx.se/bug/?i=4176
+ [20] = https://curl.haxx.se/bug/?i=4165
+ [21] = https://curl.haxx.se/bug/?i=4174
+ [22] = https://curl.haxx.se/bug/?i=3701
+ [23] = https://curl.haxx.se/bug/?i=4167
+ [24] = https://curl.haxx.se/bug/?i=4172
+ [25] = https://curl.haxx.se/bug/?i=4169
+ [26] = https://curl.haxx.se/bug/?i=4136
