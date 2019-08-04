@@ -870,7 +870,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
     outcurl->cookies = Curl_cookie_init(data,
                                         data->cookies->filename,
                                         outcurl->cookies,
-                                        data->set.cookiesession);
+                                        (bool) data->set.cookiesession);
     if(!outcurl->cookies)
       goto fail;
   }
