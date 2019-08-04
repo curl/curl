@@ -2133,7 +2133,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
      * ignored. We allow setting CA location for schannel only when explicitly
      * specified by the user via CURLOPT_CAINFO / --cacert.
      */
-    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
+    if((tls_backend_info) &&
+       (tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL)) {
       char *env;
       env = curlx_getenv("CURL_CA_BUNDLE");
       if(env) {
