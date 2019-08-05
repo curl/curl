@@ -38,6 +38,8 @@ struct quic_handshake {
 struct quicsocket {
   quiche_config *cfg;
   quiche_conn *conn;
+  quiche_h3_conn *h3c;
+  quiche_h3_config *config;
   uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
   uint32_t version;
 };
