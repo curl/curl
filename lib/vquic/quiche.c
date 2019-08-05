@@ -401,7 +401,7 @@ static ssize_t h3_stream_send(struct connectdata *conn,
  */
 int Curl_quic_ver(char *p, size_t len)
 {
-  return msnprintf(p, len, " quiche");
+  return msnprintf(p, len, " quiche/%s", quiche_version());
 }
 
 #ifdef DEBUG_HTTP3
