@@ -559,6 +559,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
     n = e->next;
     if(as->expires < now) {
       /* an expired entry, remove */
+      Curl_llist_remove(&asi->list, e, NULL);
       altsvc_free(as);
       continue;
     }
