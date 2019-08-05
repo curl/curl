@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "imap://%HOSTIP:%IMAPPORT/1420/;MAILINDEX=1");
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "user:secret");
-  curl_easy_setopt(hnd, CURLOPT_HTTP09_ALLOWED, 1L);
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 

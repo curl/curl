@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/0.9
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+-foo- swsclose
+</data>
+<datacheck>
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP/0.9 GET response denied by default
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/1174
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1174 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+# unsupported protocol
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>
