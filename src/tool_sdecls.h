@@ -69,9 +69,14 @@ struct OutStruct {
   bool s_isreg;
   bool fopened;
   FILE *stream;
+  FILE *buffer_stream;
+  char *bodybuf;
+  char *errorbuf;
   struct OperationConfig *config;
   curl_off_t bytes;
   curl_off_t init;
+  size_t bodysize;
+  size_t errorsize;
 #ifdef USE_METALINK
   metalink_parser_context_t *metalink_parser;
 #endif /* USE_METALINK */

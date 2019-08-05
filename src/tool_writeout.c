@@ -62,6 +62,8 @@ typedef enum {
   VAR_SCHEME,
   VAR_STDOUT,
   VAR_STDERR,
+  VAR_CONTENT,
+  VAR_ERROR,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -105,14 +107,84 @@ static const struct variable replacements[]={
   {"scheme", VAR_SCHEME},
   {"stdout", VAR_STDOUT},
   {"stderr", VAR_STDERR},
+  {"content", VAR_CONTENT},
+  {"error", VAR_ERROR},
   {NULL, VAR_NONE}
 };
+
+void copyandshift(char **replace, char *escape)
+{
+  int offset;
+  if(replace == NULL || escape == NULL) {
+    return;
+  }
+  offset = strlen(escape);
+  memcpy(*replace, escape, offset);
+  *replace += offset;
+}
+
+char *escape_string(char *output)
+{
+  char *formatStr = NULL, *tmpbuf = output,
+    *replaceStr = NULL, *escapeStr = NULL;
+  int len = 0, offset = 0;
+  if(NULL == output) {
+    return NULL;
+  }
+  len = strlen(output);
+  formatStr = (char *)malloc(2*len + 1);
+  memset(formatStr, 0, 2*len + 1);
+  replaceStr = formatStr;
+  while (*tmpbuf) {
+    switch(*tmpbuf) {
+    case '"':
+      escapeStr = "\\\"";
+      copyandshift(&replaceStr, escapeStr);
+      break;
+    case '\\':
+      escapeStr = "\\\\";
+      copyandshift(&replaceStr, escapeStr);
+      break;
+    case '\b':
+      escapeStr = "\\b";
+      copyandshift(&replaceStr, escapeStr);
+      break;
+    case '\f':
+      escapeStr = "\\f";
+      copyandshift(&replaceStr, escapeStr);
+      break;
+    case '\n':
+      escapeStr = "\\n";
+      copyandshift(&replaceStr, escapeStr);
+      break;
+    case '\r':
+      escapeStr = "\\r";
+      copyandshift(&replaceStr, escapeStr);
+      break;
+    case '\t':
+      escapeStr = "\\t";
+      copyandshift(&replaceStr, escapeStr);
+      break;
+    default:
+      if('\x00' <= *tmpbuf && *tmpbuf <= '\x1f') {
+        curlx_msprintf(replaceStr, "\\u%04x", (int)*tmpbuf);
+        replaceStr += 6;
+      }
+      else {
+        *replaceStr++ = *tmpbuf;
+      }
+    }
+    tmpbuf++;
+  }
+
+  return formatStr;
+}
 
 void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
 {
   FILE *stream = stdout;
   const char *ptr = writeinfo;
-  char *stringp = NULL;
+  char *stringp = NULL, *outputp = NULL, *errorp = NULL;
   long longinfo;
   double doubleinfo;
 
@@ -150,14 +222,26 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 break;
               case VAR_HTTP_CODE:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &longinfo))
-                  fprintf(stream, "%03ld", longinfo);
+                   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &longinfo)) {
+                  if(longinfo != 0) {
+                    fprintf(stream, "%03ld", longinfo);
+                  }
+                  else {
+                    fprintf(stream, "%ld", longinfo);
+                  }
+                }
                 break;
               case VAR_HTTP_CODE_PROXY:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_HTTP_CONNECTCODE,
-                                     &longinfo))
-                  fprintf(stream, "%03ld", longinfo);
+                                     &longinfo)) {
+                  if(longinfo != 0) {
+                    fprintf(stream, "%03ld", longinfo);
+                  }
+                  else {
+                    fprintf(stream, "%ld", longinfo);
+                  }
+                }
                 break;
               case VAR_HEADER_SIZE:
                 if(CURLE_OK ==
@@ -182,42 +266,84 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
               case VAR_REDIRECT_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_REDIRECT_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                                     &doubleinfo)){
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.6f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_TOTAL_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &doubleinfo)){
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.6f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_NAMELOOKUP_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                                     &doubleinfo)) {
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.6f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_CONNECT_TIME:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME, &doubleinfo)) {
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.6f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_APPCONNECT_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_APPCONNECT_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                                     &doubleinfo)){
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.6f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_PRETRANSFER_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                                     &doubleinfo)){
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.6f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_STARTTRANSFER_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME,
-                                     &doubleinfo))
-                  fprintf(stream, "%.6f", doubleinfo);
+                                     &doubleinfo)){
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.6f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_SIZE_UPLOAD:
                 if(CURLE_OK ==
@@ -233,13 +359,25 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
               case VAR_SPEED_DOWNLOAD:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD,
-                                     &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                                     &doubleinfo)){
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)) {
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.3f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_SPEED_UPLOAD:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                   curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &doubleinfo)){
+                  if((doubleinfo >= -0.00001) && (doubleinfo <= 0.00001)){
+                    fprintf(stream, "%.0f", doubleinfo);
+                  }
+                  else {
+                    fprintf(stream, "%.3f", doubleinfo);
+                  }
+                }
                 break;
               case VAR_CONTENT_TYPE:
                 if((CURLE_OK ==
@@ -330,6 +468,24 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
                 break;
               case VAR_STDERR:
                 stream = stderr;
+                break;
+              case VAR_CONTENT:
+                fflush(outs->buffer_stream);
+                if(NULL != outs->bodybuf) {
+                  if('\"' == *(ptr-3)) {
+                    outputp = escape_string(outs->bodybuf);
+                  }
+                  fprintf(stream, "%s", outputp);
+                }
+                break;
+              case VAR_ERROR:
+                fflush(outs->config->global->errors);
+                if(NULL != outs->errorbuf) {
+                  if('\"' == *(ptr-3)) {
+                    errorp = escape_string(outs->errorbuf);
+                  }
+                  fprintf(stream, "%s", errorp);
+                }
                 break;
               default:
                 break;

@@ -196,7 +196,15 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
   else
 #endif
+  if(NULL != outs->buffer_stream) {
+    rc = fwrite(buffer, sz, nmemb, outs->buffer_stream);
+    if(NULL != outs->filename) {
+      rc = fwrite(buffer, sz, nmemb, outs->stream);
+    }
+  }
+  else {
     rc = fwrite(buffer, sz, nmemb, outs->stream);
+  }
 
   if(bytes == rc)
     /* we added this amount of data to the output */

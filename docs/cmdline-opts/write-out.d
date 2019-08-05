@@ -115,6 +115,14 @@ From this point on, the --write-out output will be written to standard output.
 This is the default, but can be used to switch back after switching to stderr.
 (Added in 7.63.0)
 .TP
+.B content
+From this point on, the result of response content.
+(Added in 7.63.0)
+.TP
+.B error
+From this point on, the result of error message.
+(Added in 7.63.0)
+.TP
 .B time_appconnect
 The time, in seconds, it took from the start until the SSL/SSH/etc
 connect/handshake to the remote host was completed. (Added in 7.19.0)

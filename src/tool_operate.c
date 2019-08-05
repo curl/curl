@@ -983,6 +983,16 @@ static CURLcode create_transfers(struct GlobalConfig *global,
           outs->s_isreg = TRUE;
         }
 
+        if(NULL != config->writeout &&
+            NULL != strstr(config->writeout, "%{content}")) {
+          FILE *bufferStream = NULL;
+          bufferStream = open_memstream(&outs->bodybuf, &outs->bodysize);
+          fflush(bufferStream);
+          if(bufferStream != NULL) {
+            outs->buffer_stream = bufferStream;
+          }
+        }
+
         if(per->uploadfile && !stdin_upload(per->uploadfile)) {
           /*
            * We have specified a file to upload and it isn't "-".
@@ -1096,6 +1106,16 @@ static CURLcode create_transfers(struct GlobalConfig *global,
 
         if(!global->errors)
           global->errors = stderr;
+
+        if(NULL != config->writeout &&
+          NULL != strstr(config->writeout, "%{error}")) {
+          FILE *errorStream = NULL;
+          errorStream = open_memstream(&outs->errorbuf, &outs->errorsize);
+          fflush(errorStream);
+          if(errorStream != NULL) {
+            global->errors = errorStream;
+          }
+        }
 
         if((!per->outfile || !strcmp(per->outfile, "-")) &&
            !config->use_ascii) {
