@@ -146,7 +146,6 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_MIMEPOST, mime1);
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_HTTP09_ALLOWED, 1L);
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
