@@ -38,7 +38,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define DEBUG_HTTP3
+/* #define DEBUG_HTTP3 */
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
 #else
@@ -198,10 +198,12 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd)
 {
   ssize_t recvd;
   struct quicsocket *qs = &conn->quic;
-  static uint8_t buf[65535];
+  struct Curl_easy *data = conn->data;
+  uint8_t *buf = (uint8_t *)data->state.buffer;
+  size_t bufsize = data->set.buffer_size;
 
   do {
-    recvd = recv(sockfd, buf, sizeof(buf), 0);
+    recvd = recv(sockfd, buf, bufsize, 0);
     if((recvd < 0) && ((errno == EAGAIN) || (errno == EWOULDBLOCK)))
       break;
 
@@ -245,13 +247,33 @@ static CURLcode flush_egress(struct connectdata *conn, int sockfd)
   return CURLE_OK;
 }
 
+struct h3h1header {
+  char *dest;
+  size_t destlen; /* left to use */
+  size_t nlen; /* used */
+};
+
 static int cb_each_header(uint8_t *name, size_t name_len,
                           uint8_t *value, size_t value_len,
                           void *argp)
 {
-  (void)argp;
-  fprintf(stderr, "got HTTP header: %.*s=%.*s\n",
-          (int) name_len, name, (int) value_len, value);
+  struct h3h1header *headers = (struct h3h1header *)argp;
+  size_t olen = 0;
+
+  if((name_len == 7) && !strncmp(":status", (char *)name, 7)) {
+    msnprintf(headers->dest,
+              headers->destlen, "HTTP/3 %.*s\n",
+              (int) value_len, value);
+  }
+  else {
+    msnprintf(headers->dest,
+              headers->destlen, "%.*s: %.*s\n",
+              (int)name_len, name, (int) value_len, value);
+  }
+  olen = strlen(headers->dest);
+  headers->destlen -= olen;
+  headers->nlen += olen;
+  headers->dest += olen;
   return 0;
 }
 
@@ -261,60 +283,80 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
                               size_t buffersize,
                               CURLcode *curlcode)
 {
-  bool fin;
-  ssize_t recvd;
+  ssize_t recvd = -1;
+  ssize_t rcode;
   struct quicsocket *qs = &conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
   quiche_h3_event *ev;
   int rc;
+  struct h3h1header headers;
+  struct HTTP *stream = conn->data->req.protop;
+  headers.dest = buf;
+  headers.destlen = buffersize;
+  headers.nlen = 0;
 
   if(process_ingress(conn, sockfd)) {
+    infof(conn->data, "h3_stream_recv returns on ingress\n");
     *curlcode = CURLE_RECV_ERROR;
     return -1;
   }
 
-  recvd = quiche_conn_stream_recv(qs->conn, 0, (uint8_t *) buf, buffersize,
-                                  &fin);
-  if(recvd == QUICHE_ERR_DONE) {
-    *curlcode = CURLE_AGAIN;
-    return -1;
-  }
-
-  infof(conn->data, "%zd bytes of H3 to deal with\n", recvd);
-
-  while(1) {
+  while(recvd < 0) {
     int64_t s = quiche_h3_conn_poll(qs->h3c, qs->conn, &ev);
     if(s < 0)
       /* nothing more to do */
       break;
 
+    infof(conn->data, "quiche_h3_conn_poll got something: %zd\n", s);
+
     switch(quiche_h3_event_type(ev)) {
     case QUICHE_H3_EVENT_HEADERS:
-      rc = quiche_h3_event_for_each_header(ev, cb_each_header, NULL);
+      infof(conn->data, "quiche says HEADERS\n");
+      rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
       if(rc) {
         fprintf(stderr, "failed to process headers");
         /* what do we do about this? */
       }
+      recvd = headers.nlen;
       break;
     case QUICHE_H3_EVENT_DATA:
-      recvd = quiche_h3_recv_body(qs->h3c, qs->conn, s, (unsigned char *)buf,
+      infof(conn->data, "quiche says DATA\n");
+      if(!stream->firstbody) {
+        /* add a header-body separator CRLF */
+        buf[0] = '\r';
+        buf[1] = '\n';
+        buf += 2;
+        buffersize = 2;
+        stream->firstbody = TRUE;
+        recvd = 2; /* two bytes already */
+      }
+      else
+        recvd = 0;
+      rcode = quiche_h3_recv_body(qs->h3c, qs->conn, s, (unsigned char *)buf,
                                   buffersize);
-      if(recvd <= 0) {
+      if(rcode <= 0) {
+        recvd = -1;
         break;
       }
+      recvd += rcode;
       break;
 
     case QUICHE_H3_EVENT_FINISHED:
+      infof(conn->data, "quiche says FINISHED\n");
       if(quiche_conn_close(qs->conn, true, 0, NULL, 0) < 0) {
         fprintf(stderr, "failed to close connection\n");
       }
+      break;
+    default:
+      infof(conn->data, "quiche says UNKNOWN\n");
       break;
     }
 
     quiche_h3_event_free(ev);
   }
 
-  *curlcode = CURLE_OK;
+  *curlcode = (-1 == recvd)? CURLE_AGAIN : CURLE_OK;
+  infof(conn->data, "h3_stream_recv returns %zd\n", recvd);
   return recvd;
 }
 
@@ -334,7 +376,7 @@ static ssize_t h3_stream_send(struct connectdata *conn,
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     }
-    return len;
+    sent = len;
   }
   else {
     sent = quiche_conn_stream_send(qs->conn, 0, mem, len, true);
@@ -362,6 +404,14 @@ int Curl_quic_ver(char *p, size_t len)
   return msnprintf(p, len, " quiche");
 }
 
+#ifdef DEBUG_HTTP3
+static void debug_log(const char *line, void *argp)
+{
+  (void)argp;
+  fprintf(stderr, "%s\n", line);
+}
+#endif
+
 /* Index where :authority header field will appear in request header
    field list. */
 #define AUTHORITY_DST_IDX 3
@@ -380,6 +430,10 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   int64_t stream3_id;
   quiche_h3_header *nva = NULL;
   struct quicsocket *qs = &conn->quic;
+
+#ifdef DEBUG_HTTP3
+  quiche_enable_debug_logging(debug_log, NULL);
+#endif
 
   qs->config = quiche_h3_config_new(0, 1024, 0, 0);
   /* TODO: handle failure */
