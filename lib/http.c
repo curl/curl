@@ -3677,6 +3677,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * guarantees on future behaviors since it isn't within the protocol.
          */
         char separator;
+        char twoorthree[2];
         nc = sscanf(HEADER1,
                     " HTTP/%1d.%1d%c%3d",
                     &httpversion_major,
@@ -3684,8 +3685,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
                     &separator,
                     &k->httpcode);
 
-        if(nc == 1 && httpversion_major == 2 &&
-           1 == sscanf(HEADER1, " HTTP/2 %d", &k->httpcode)) {
+        if(nc == 1 && httpversion_major >= 2 &&
+           2 == sscanf(HEADER1, " HTTP/%1[23] %d", twoorthree, &k->httpcode)) {
           conn->httpversion = 0;
           nc = 4;
           separator = ' ';
@@ -3723,7 +3724,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           }
         }
         else {
-          failf(data, "Unsupported HTTP version in response\n");
+          failf(data, "Unsupported HTTP version in response");
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
       }

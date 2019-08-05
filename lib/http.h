@@ -190,6 +190,7 @@ struct HTTP {
 #ifdef ENABLE_QUIC
   /*********** for HTTP/3 we store stream-local data here *************/
   int64_t stream3_id; /* stream we are interested in */
+  bool firstbody;  /* FALSE until body arrives */
 #endif
 };
 
