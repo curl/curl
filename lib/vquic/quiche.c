@@ -307,8 +307,6 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
       /* nothing more to do */
       break;
 
-    infof(conn->data, "quiche_h3_conn_poll got something: %zd\n", s);
-
     switch(quiche_h3_event_type(ev)) {
     case QUICHE_H3_EVENT_HEADERS:
       infof(conn->data, "quiche says HEADERS\n");
@@ -346,9 +344,9 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
       if(quiche_conn_close(qs->conn, true, 0, NULL, 0) < 0) {
         fprintf(stderr, "failed to close connection\n");
       }
+      recvd = 0; /* end of stream */
       break;
     default:
-      infof(conn->data, "quiche says UNKNOWN\n");
       break;
     }
 
@@ -356,7 +354,6 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
   }
 
   *curlcode = (-1 == recvd)? CURLE_AGAIN : CURLE_OK;
-  infof(conn->data, "h3_stream_recv returns %zd\n", recvd);
   return recvd;
 }
 
