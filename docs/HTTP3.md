@@ -21,25 +21,22 @@ QUIC libraries we're experiementing with:
 
 ## Experimental!
 
-HTTP/3 and QUIC support in curl is not yet working and this is early days.
-Consider all QUIC and HTTP/3 code to be **EXPERIMENTAL** until further notice.
+HTTP/3 and QUIC support in curl is considered **EXPERIMENTAL** until further
+notice. It needs to be enabled at build-time.
 
-curl does not have HTTP/3 support (yet).
-
-The bleeding edge QUIC work is done in the dedicated
-[QUIC](https://github.com/curl/curl/tree/QUIC) branch, but the plan is to
-merge as often as possible from there to master. All QUIC related code will
-remain being build-time conditionally enabled.
+Further development and tweaking of the HTTP/3 support in curl will happen in
+in the master branch using pull-requests, just like ordinary changes.
 
 # ngtcp2 version
 
 ## Build
 
-1. clone ngtcp2 from git (the draft-17 branch)
-2. build and install ngtcp2's custom OpenSSL version (the quic-draft-17 branch)
-3. build and install ngtcp2 according to its instructions
-4. configure curl with ngtcp2 support: `./configure --with-ngtcp2=<install prefix>`
-5. build curl "normally"
+1. clone ngtcp2 from git (the draft-22 branch)
+2. build and install ngtcp2's custom OpenSSL version (the quic-draft-22 branch)
+3. build and install nghttp3
+4. build and install ngtcp2 according to its instructions
+5. configure curl with ngtcp2 support: `./configure --with-ngtcp2=<install prefix>`
+6. build curl "normally"
 
 ## Running
 
@@ -80,6 +77,9 @@ Clone and build curl:
 
 ## Running
 
-Make an HTTP/1.1 request to a QUIC server:
+Make an HTTP/3 request.
 
      % src/curl --http3-direct https://cloudflare-quic.com/
+     % src/curl --http3-direct https://facebook.com/
+     % src/curl --http3-direct https://quic.aiortc.org:4433/
+     % src/curl --http3-direct https://quic.rocks:4433/
