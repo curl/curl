@@ -1071,6 +1071,7 @@ struct PureInfo {
   long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would've been redirected to if asked to */
+  curl_off_t retry_after; /* info from Retry-After: header */
 
   /* PureInfo members 'conn_primary_ip', 'conn_primary_port', 'conn_local_ip'
      and, 'conn_local_port' are copied over from the connectdata struct in
@@ -1090,7 +1091,6 @@ struct PureInfo {
                                  OpenSSL, GnuTLS, Schannel, NSS and GSKit
                                  builds. Asked for with CURLOPT_CERTINFO
                                  / CURLINFO_CERTINFO */
-
   bit timecond:1;  /* set to TRUE if the time condition didn't match, which
                       thus made the document NOT get fetched */
 };
