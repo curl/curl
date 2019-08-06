@@ -3953,6 +3953,19 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       if(result)
         return result;
     }
+    else if(checkprefix("Retry-After:", k->p)) {
+      /* Retry-After = HTTP-date / delay-seconds */
+      curl_off_t retry_after = 0; /* zero for unknown or "now" */
+      time_t date = curl_getdate(&k->p[12], NULL);
+      if(-1 == date) {
+        /* not a date, try it as a decimal number */
+        (void)curlx_strtoofft(&k->p[12], NULL, 10, &retry_after);
+      }
+      else
+        /* convert date to number of seconds into the future */
+        retry_after = date - time(NULL);
+      data->info.retry_after = retry_after; /* store it */
+    }
     else if(!k->http_bodyless && checkprefix("Content-Range:", k->p)) {
       /* Content-Range: bytes [num]-
          Content-Range: bytes: [num]-

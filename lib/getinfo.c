@@ -246,7 +246,6 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_PROTOCOL:
     *param_longp = data->info.conn_protocol;
     break;
-
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -304,7 +303,9 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_REDIRECT_TIME_T:
     *param_offt = data->progress.t_redirect;
     break;
-
+  case CURLINFO_RETRY_AFTER:
+    *param_offt = data->info.retry_after;
+    break;
   default:
     return CURLE_UNKNOWN_OPTION;
   }
