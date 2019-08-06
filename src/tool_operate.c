@@ -496,6 +496,8 @@ static CURLcode post_transfer(struct GlobalConfig *global,
     }
 
     if(retry) {
+      long sleeptime = 0;
+      curl_off_t retry_after = 0;
       static const char * const m[]={
         NULL,
         "timeout",
@@ -504,13 +506,24 @@ static CURLcode post_transfer(struct GlobalConfig *global,
         "FTP error"
       };
 
+      sleeptime = per->retry_sleep;
+      if(RETRY_HTTP == retry) {
+        curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
+        if(retry_after) {
+          /* store in a 'long', make sure it doesn't overflow */
+          if(retry_after > LONG_MAX/1000)
+            sleeptime = LONG_MAX;
+          else
+            sleeptime = (long)retry_after * 1000; /* milliseconds */
+        }
+      }
       warnf(config->global, "Transient problem: %s "
             "Will retry in %ld seconds. "
             "%ld retries left.\n",
             m[retry], per->retry_sleep/1000L, per->retry_numretries);
 
-      tool_go_sleep(per->retry_sleep);
       per->retry_numretries--;
+      tool_go_sleep(sleeptime);
       if(!config->retry_delay) {
         per->retry_sleep *= 2;
         if(per->retry_sleep > RETRY_SLEEP_MAX)
