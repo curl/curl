@@ -453,10 +453,9 @@ static CURLcode post_transfer(struct GlobalConfig *global,
       /* If it returned OK. _or_ failonerror was enabled and it
          returned due to such an error, check for HTTP transient
          errors to retry on. */
-      char *effective_url = NULL;
-      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective_url);
-      if(effective_url &&
-         checkprefix("http", effective_url)) {
+      long protocol;
+      curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+      if((protocol == CURLPROTO_HTTP) || (protocol == CURLPROTO_HTTPS)) {
         /* This was HTTP(S) */
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
