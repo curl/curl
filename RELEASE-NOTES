@@ -8,13 +8,17 @@ curl and libcurl 7.66.0
 
 This release includes the following changes:
 
+ o HTTP3: initial (experimental still not working) support [5]
+ o curl: --sasl-authzid added to support CURLOPT_SASL_AUTHZID from the tool [27]
  o curl: support parallel transfers with -Z [4]
+ o sasl: Implement SASL authorisation identity via CURLOPT_SASL_AUTHZID [27]
+ o curl_multi_poll: a sister to curl_multi_wait() that waits more [28]
 
 This release includes the following bugfixes:
 
- o HTTP3: initial (experimental still not working) support [5]
  o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
  o alt-svc: more liberal ALPN name parsing [17]
+ o altsvc: fix removal of expired cache entry [30]
  o altsvc: with quiche, use the quiche h3 alpn string [16]
  o appveyor: pass on -k to make
  o asyn-thread: create a socketpair to wait on [14]
@@ -27,6 +31,7 @@ This release includes the following bugfixes:
  o easy: resize receive buffer on easy handle reset [9]
  o examples: Avoid reserved names in hiperfifo examples [8]
  o getenv: support up to 4K environment variable contents on windows [21]
+ o http09: disable HTTP/0.9 by default in both tool and library [29]
  o http2_recv: trigger another read when the last data is returned [11]
  o http_negotiate: improve handling of gss_init_sec_context() failures [18]
  o md4: Use our own MD4 when no crypto libraries are available [15]
@@ -52,9 +57,9 @@ advice from friends like these:
   Daniel Gustafsson, Daniel Stenberg, Felix Hädicke, Gergely Nagy,
   Ironbars13 on github, Jason Lee, Jonathan Cardoso Machado, Kamil Dudka,
   Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee, Michal Čaplygin,
-  niallor on github, Ray Satiro, Steve Holme, The Infinnovation team,
-  Tom van der Woerdt,
-  (22 contributors)
+  niallor on github, Patrick Monnerat, Ray Satiro, Steve Holme,
+  The Infinnovation team, Tom van der Woerdt, Yiming Jing,
+  (24 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -86,3 +91,7 @@ References to bug reports and discussions on issues:
  [24] = https://curl.haxx.se/bug/?i=4172
  [25] = https://curl.haxx.se/bug/?i=4169
  [26] = https://curl.haxx.se/bug/?i=4136
+ [27] = https://curl.haxx.se/bug/?i=3653
+ [28] = https://curl.haxx.se/bug/?i=4163
+ [29] = https://curl.haxx.se/bug/?i=4191
+ [30] = https://curl.haxx.se/bug/?i=4192
