@@ -57,3 +57,24 @@ Experimental support in curl means:
 - using `Age:` value for caching age as per spec
 - `CURLALTSVC_IMMEDIATELY` support
 - `CURLALTSVC_ALTUSED` support
+
+# Alt-Svc cache file format
+
+This a text based file with one line per entry and each line consists of nine
+space separated fields.
+
+## Example
+
+    h2 quic.tech 8443 h3-22 quic.tech 8443 "20190808 06:18:37" 0 0
+
+## Fields
+
+1. The ALPN id for the source origin
+2. The host name for the source origin
+3. The port number for the source origin
+4. The ALPN id for the destination host
+5. The host name for the destination host
+6. The host number for the destination host
+7. Within double quotes, the expiration date of this entry
+8. Boolean (1 or 0) if "persist" was set for this entry
+9. Integer priority value (not currently used)
