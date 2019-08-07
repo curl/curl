@@ -39,6 +39,7 @@
 #include "memdebug.h"
 
 /* #define DEBUG_HTTP3 */
+/* #define DEBUG_QUICHE */
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
 #else
@@ -324,7 +325,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 
     switch(quiche_h3_event_type(ev)) {
     case QUICHE_H3_EVENT_HEADERS:
-      infof(conn->data, "quiche says HEADERS\n");
+      H3BUGF(infof(conn->data, "quiche says HEADERS\n"));
       rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
       if(rc) {
         fprintf(stderr, "failed to process headers");
@@ -333,7 +334,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
       recvd = headers.nlen;
       break;
     case QUICHE_H3_EVENT_DATA:
-      infof(conn->data, "quiche says DATA\n");
+      H3BUGF(infof(conn->data, "quiche says DATA\n"));
       if(!stream->firstbody) {
         /* add a header-body separator CRLF */
         buf[0] = '\r';
@@ -355,7 +356,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
       break;
 
     case QUICHE_H3_EVENT_FINISHED:
-      infof(conn->data, "quiche says FINISHED\n");
+      H3BUGF(infof(conn->data, "quiche says FINISHED\n"));
       if(quiche_conn_close(qs->conn, true, 0, NULL, 0) < 0) {
         fprintf(stderr, "failed to close connection\n");
       }
@@ -420,7 +421,7 @@ int Curl_quic_ver(char *p, size_t len)
   return msnprintf(p, len, " quiche/%s", quiche_version());
 }
 
-#ifdef DEBUG_HTTP3
+#ifdef DEBUG_QUICHE
 static void debug_log(const char *line, void *argp)
 {
   (void)argp;
@@ -447,8 +448,9 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   quiche_h3_header *nva = NULL;
   struct quicsocket *qs = &conn->quic;
   CURLcode result = CURLE_OK;
+  struct Curl_easy *data = conn->data;
 
-#ifdef DEBUG_HTTP3
+#ifdef DEBUG_QUICHE
   quiche_enable_debug_logging(debug_log, NULL);
 #endif
 
@@ -605,30 +607,41 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
     for(i = 0; i < nheader; ++i) {
       acc += nva[i].name_len + nva[i].value_len;
 
-      H3BUGF(infof(conn->data, "h3 [%.*s: %.*s]\n",
+      H3BUGF(infof(data, "h3 [%.*s: %.*s]\n",
                    nva[i].name_len, nva[i].name,
                    nva[i].value_len, nva[i].value));
     }
 
     if(acc > MAX_ACC) {
-      infof(conn->data, "http_request: Warning: The cumulative length of all "
+      infof(data, "http_request: Warning: The cumulative length of all "
             "headers exceeds %zu bytes and that could cause the "
             "stream to be rejected.\n", MAX_ACC);
     }
   }
 
-  switch(conn->data->set.httpreq) {
+  switch(data->set.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
   case HTTPREQ_PUT:
-    if(conn->data->state.infilesize != -1)
-      stream->upload_left = conn->data->state.infilesize;
+    if(data->state.infilesize != -1)
+      stream->upload_left = data->state.infilesize;
     else
       /* data sending without specifying the data amount up front */
       stream->upload_left = -1; /* unknown, but not zero */
 
-    /* fix the body submission */
+    stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
+                                        stream->upload_left ? FALSE: TRUE);
+    if((stream3_id >= 0) && data->set.postfields) {
+      ssize_t sent = quiche_h3_send_body(qs->h3c, qs->conn, stream3_id,
+                                         (uint8_t *)data->set.postfields,
+                                         stream->upload_left, TRUE);
+      if(sent <= 0) {
+        failf(data, "quiche_h3_send_body failed!");
+        result = CURLE_SEND_ERROR;
+      }
+      stream->upload_left = 0; /* nothing left to send */
+    }
     break;
   default:
     stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
@@ -639,14 +652,14 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   Curl_safefree(nva);
 
   if(stream3_id < 0) {
-    H3BUGF(infof(conn->data, "quiche_h3_send_request returned %d\n",
+    H3BUGF(infof(data, "quiche_h3_send_request returned %d\n",
                  stream3_id));
     result = CURLE_SEND_ERROR;
     goto fail;
   }
 
-  infof(conn->data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
-        stream3_id, (void *)conn->data);
+  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
+        stream3_id, (void *)data);
   stream->stream3_id = stream3_id;
 
   return CURLE_OK;
