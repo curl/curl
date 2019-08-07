@@ -921,8 +921,6 @@ typedef enum {
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
 /* bitmask defines for CURLOPT_H3 */
-#define CURLH3_DIRECT (1<<0) /* go QUIC + HTTP/3 directly to the given host +
-                                port */
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
@@ -1985,9 +1983,8 @@ enum {
   CURL_HTTP_VERSION_2TLS, /* use version 2 for HTTPS, version 1.1 for HTTP */
   CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,  /* please use HTTP 2 without HTTP/1.1
                                            Upgrade */
-  CURL_HTTP_VERSION_3 = 30, /* This cannot be set with CURLOPT_HTTP_VERSION,
-                               use CURLOPT_H3 and/or CURLOPT_ALTSVC to enable
-                               HTTP/3 */
+  CURL_HTTP_VERSION_3 = 30, /* Makes use of explicit HTTP/3 without fallback.
+                               Use CURLOPT_ALTSVC to enable HTTP/3 upgrade */
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
 };
 

@@ -35,10 +35,6 @@ production before the experimental label is removed.
 .SH DESCRIPTION
 This function accepts a long \fIbitmask\fP with a set of flags set that
 controls the HTTP/3 behavior for this transfer.
-.IP "CURLH3_DIRECT"
-If this bit is set in \fIbitmask\fP, the host name and port number given in
-the URL will be used to connect to directly with QUIC and the port number then
-being a UDP port number.
 .SH DEFAULT
 0
 .SH PROTOCOLS
@@ -49,7 +45,7 @@ CURL *curl = curl_easy_init();
 if(curl) {
   CURLcode ret;
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  curl_easy_setopt(curl, CURLOPT_H3, (long)CURLH3_DIRECT);
+  curl_easy_setopt(curl, CURLOPT_H3, (long)0);
   ret = curl_easy_perform(curl);
 }
 .fi
