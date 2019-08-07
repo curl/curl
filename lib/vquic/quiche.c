@@ -87,8 +87,12 @@ static int quiche_perform_getsock(const struct connectdata *conn,
 static CURLcode quiche_disconnect(struct connectdata *conn,
                                   bool dead_connection)
 {
-  (void)conn;
+  struct quicsocket *qs = &conn->quic;
   (void)dead_connection;
+  quiche_h3_config_free(qs->h3config);
+  quiche_h3_conn_free(qs->h3c);
+  quiche_config_free(qs->cfg);
+  quiche_conn_free(qs->conn);
   return CURLE_OK;
 }
 
@@ -129,11 +133,11 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   (void)addr;
   (void)addrlen;
 
-  infof(conn->data, "Connecting socket %d over QUIC\n", sockfd);
-
   qs->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
-  if(!qs->cfg)
-    return CURLE_FAILED_INIT; /* TODO: better return code */
+  if(!qs->cfg) {
+    failf(conn->data, "can't create quiche config");
+    return CURLE_FAILED_INIT;
+  }
 
   quiche_config_set_idle_timeout(qs->cfg, QUIC_IDLE_TIMEOUT);
   quiche_config_set_initial_max_data(qs->cfg, QUIC_MAX_DATA);
@@ -155,12 +159,14 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
 
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
                             sizeof(qs->scid), qs->cfg);
-  if(!qs->conn)
-    return CURLE_FAILED_INIT; /* TODO: better return code */
+  if(!qs->conn) {
+    failf(conn->data, "can't create quiche connection");
+    return CURLE_OUT_OF_MEMORY;
+  }
 
   result = flush_egress(conn, sockfd);
   if(result)
-    return CURLE_FAILED_INIT; /* TODO: better return code */
+    return result;
 
   infof(conn->data, "Sent QUIC client Initial, ALPN: %s\n",
         QUICHE_H3_APPLICATION_PROTOCOL + 1);
@@ -225,6 +231,10 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd)
   return CURLE_OK;
 }
 
+/*
+ * flush_egress drains the buffers and sends off data.
+ * Calls failf() on errors.
+ */
 static CURLcode flush_egress(struct connectdata *conn, int sockfd)
 {
   ssize_t sent;
@@ -236,12 +246,17 @@ static CURLcode flush_egress(struct connectdata *conn, int sockfd)
     if(sent == QUICHE_ERR_DONE)
       break;
 
-    if(sent < 0)
+    if(sent < 0) {
+      failf(conn->data, "quiche_conn_send returned %zd\n",
+            sent);
       return CURLE_SEND_ERROR;
+    }
 
     sent = send(sockfd, out, sent, 0);
-    if(sent < 0)
+    if(sent < 0) {
+      failf(conn->data, "send() returned %zd\n", sent);
       return CURLE_SEND_ERROR;
+    }
   } while(1);
 
   return CURLE_OK;
@@ -431,17 +446,22 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   int64_t stream3_id;
   quiche_h3_header *nva = NULL;
   struct quicsocket *qs = &conn->quic;
+  CURLcode result = CURLE_OK;
 
 #ifdef DEBUG_HTTP3
   quiche_enable_debug_logging(debug_log, NULL);
 #endif
 
-  qs->config = quiche_h3_config_new(0, 1024, 0, 0);
-  /* TODO: handle failure */
+  qs->h3config = quiche_h3_config_new(0, 1024, 0, 0);
+  if(!qs->h3config)
+    return CURLE_OUT_OF_MEMORY;
 
   /* Create a new HTTP/3 connection on the QUIC connection. */
-  qs->h3c = quiche_h3_conn_new_with_transport(qs->conn, qs->config);
-  /* TODO: handle failure */
+  qs->h3c = quiche_h3_conn_new_with_transport(qs->conn, qs->h3config);
+  if(!qs->h3c) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
   /* Calculate number of headers contained in [mem, mem + len). Assumes a
      correctly generated HTTP header field block. */
@@ -460,14 +480,18 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
      more space. */
   nheader += 1;
   nva = malloc(sizeof(quiche_h3_header) * nheader);
-  if(!nva)
-    return CURLE_OUT_OF_MEMORY;
+  if(!nva) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
 
   /* Extract :method, :path from request line
      We do line endings with CRLF so checking for CR is enough */
   line_end = memchr(hdbuf, '\r', len);
-  if(!line_end)
+  if(!line_end) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
     goto fail;
+  }
 
   /* Method does not contain spaces */
   end = memchr(hdbuf, ' ', line_end - hdbuf);
@@ -615,8 +639,10 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   Curl_safefree(nva);
 
   if(stream3_id < 0) {
-    H3BUGF(infof(conn->data, "http3_send() send error\n"));
-    return CURLE_SEND_ERROR;
+    H3BUGF(infof(conn->data, "quiche_h3_send_request returned %d\n",
+                 stream3_id));
+    result = CURLE_SEND_ERROR;
+    goto fail;
   }
 
   infof(conn->data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
@@ -626,8 +652,10 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   return CURLE_OK;
 
 fail:
+  quiche_h3_config_free(qs->h3config);
+  quiche_h3_conn_free(qs->h3c);
   free(nva);
-  return CURLE_SEND_ERROR;
+  return result;
 }
 
 
