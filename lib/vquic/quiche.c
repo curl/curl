@@ -209,6 +209,9 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd)
   uint8_t *buf = (uint8_t *)data->state.buffer;
   size_t bufsize = data->set.buffer_size;
 
+  /* in case the timeout expired */
+  quiche_conn_on_timeout(qs->conn);
+
   do {
     recvd = recv(sockfd, buf, bufsize, 0);
     if((recvd < 0) && ((errno == EAGAIN) || (errno == EWOULDBLOCK)))
@@ -241,6 +244,7 @@ static CURLcode flush_egress(struct connectdata *conn, int sockfd)
   ssize_t sent;
   struct quicsocket *qs = &conn->quic;
   static uint8_t out[1200];
+  int64_t timeout_ns;
 
   do {
     sent = quiche_conn_send(qs->conn, out, sizeof(out));
@@ -259,6 +263,12 @@ static CURLcode flush_egress(struct connectdata *conn, int sockfd)
       return CURLE_SEND_ERROR;
     }
   } while(1);
+
+  /* time until the next timeout event, as nanoseconds. */
+  timeout_ns = quiche_conn_timeout_as_nanos(qs->conn);
+  if(timeout_ns)
+    /* expire uses milliseconds */
+    Curl_expire(conn->data, (timeout_ns + 999999) / 1000000, EXPIRE_QUIC);
 
   return CURLE_OK;
 }
