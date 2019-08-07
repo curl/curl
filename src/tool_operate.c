@@ -1132,9 +1132,6 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         if(config->tcp_fastopen)
           my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
 
-        if(config->h3direct)
-          my_setopt(curl, CURLOPT_H3, CURLH3_DIRECT);
-
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, per);
         my_setopt(curl, CURLOPT_INTERLEAVEDATA, per);

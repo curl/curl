@@ -1680,7 +1680,6 @@ struct UserDefined {
   CURLU *uh; /* URL handle for the current parsed URL */
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
-  long h3opts; /* the CURLOPT_H3 bitmask */
   bit is_fread_set:1; /* has read callback been set to non-NULL? */
   bit is_fwrite_set:1; /* has write callback been set to non-NULL? */
   bit free_referer:1; /* set TRUE if 'referer' points to a string we

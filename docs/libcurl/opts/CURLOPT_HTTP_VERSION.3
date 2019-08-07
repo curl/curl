@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -57,6 +57,14 @@ Issue non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade. It requires
 prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
 will still do HTTP/2 the standard way with negotiated protocol version in the
 TLS handshake. (Added in 7.49.0)
+.IP CURL_HTTP_VERSION_3
+(Added in 7.66.0) Setting this value will make libcurl attempt to use HTTP/3
+directly to server given in the URL. Note that this cannot gracefully
+downgrade to earlier HTTP version if the server doesn't support HTTP/3.
+
+For more reliably upgrading into HTTP/3, set the prefered version to something
+lower and let the server announce its HTTP/3 support via Alt-Svc:. See
+\fICURLOPT_ALTSVC(3)\fP.
 .SH DEFAULT
 Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
 
@@ -82,4 +90,4 @@ Along with HTTP
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_SSLVERSION "(3), " CURLOPT_HTTP200ALIASES "(3), "
-.BR CURLOPT_HTTP09_ALLOWED "(3), "
+.BR CURLOPT_HTTP09_ALLOWED "(3), " CURLOPT_H3 "(3), " CURLOPT_ALTSVC "(3) "

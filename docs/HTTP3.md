@@ -45,7 +45,7 @@ you'll just get ld.so linker errors.
 
 ## Invoke from command line
 
-    curl --http3-direct https://nghttp2.org:8443/
+    curl --http3 https://nghttp2.org:8443/
 
 # quiche version
 
@@ -79,7 +79,7 @@ Clone and build curl:
 
 Make an HTTP/3 request.
 
-     % src/curl --http3-direct https://cloudflare-quic.com/
-     % src/curl --http3-direct https://facebook.com/
-     % src/curl --http3-direct https://quic.aiortc.org:4433/
-     % src/curl --http3-direct https://quic.rocks:4433/
+     % src/curl --http3 https://cloudflare-quic.com/
+     % src/curl --http3 https://facebook.com/
+     % src/curl --http3 https://quic.aiortc.org:4433/
+     % src/curl --http3 https://quic.rocks:4433/
