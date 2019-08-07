@@ -1998,6 +1998,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *httpstring;
   Curl_send_buffer *req_buffer;
   curl_off_t postsize = 0; /* curl_off_t to handle large file sizes */
+  char *altused = NULL;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that is not yet sent, since we can deal with
@@ -2592,6 +2593,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
+#ifdef USE_ALTSVC
+  if(conn->bits.altused && !Curl_checkheaders(conn, "Alt-Used")) {
+    altused = aprintf("Alt-Used: %s:%d\r\n",
+                      conn->conn_to_host.name, conn->conn_to_port);
+    if(!altused)
+      return CURLE_OUT_OF_MEMORY;
+  }
+#endif
   result =
     Curl_add_bufferf(&req_buffer,
                      "%s" /* ftp typecode (;type=x) */
@@ -2606,7 +2615,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                      "%s" /* accept-encoding */
                      "%s" /* referer */
                      "%s" /* Proxy-Connection */
-                     "%s",/* transfer-encoding */
+                     "%s" /* transfer-encoding */
+                     "%s",/* Alt-Used */
 
                      ftp_typecode,
                      httpstring,
@@ -2632,13 +2642,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                       !conn->bits.tunnel_proxy &&
                       !Curl_checkProxyheaders(conn, "Proxy-Connection"))?
                      "Proxy-Connection: Keep-Alive\r\n":"",
-                     te
+                     te,
+                     altused ? altused : ""
       );
 
   /* clear userpwd and proxyuserpwd to avoid re-using old credentials
    * from re-used connections */
   Curl_safefree(conn->allocptr.userpwd);
   Curl_safefree(conn->allocptr.proxyuserpwd);
+  free(altused);
 
   if(result)
     return result;

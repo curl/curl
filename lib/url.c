@@ -3187,6 +3187,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       conn->bits.conn_to_host = TRUE;
       conn->conn_to_port = nport;
       conn->bits.conn_to_port = TRUE;
+      conn->bits.altused = TRUE;
       infof(data, "Alt-svc connecting from [%s]%s:%d to [%s]%s:%d\n",
             Curl_alpnid2str(salpnid), host, conn->remote_port,
             Curl_alpnid2str(nalpnid), hostd, nport);
