@@ -3158,41 +3158,50 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
   if(data->asi && !host && (port == -1) &&
      (conn->handler->protocol == CURLPROTO_HTTPS)) {
     /* no connect_to match, try alt-svc! */
-    const char *nhost;
-    int nport;
-    enum alpnid nalpnid;
-    enum alpnid salpnid;
+    enum alpnid srcalpnid;
     bool hit;
+    struct altsvc *as;
+    const int allowed_versions = ( ALPN_h1
+#ifdef USE_NGHTTP2
+      | ALPN_h2
+#endif
+#ifdef ENABLE_QUIC
+      | ALPN_h3
+#endif
+      ) & data->asi->flags;
+
     host = conn->host.rawalloc;
 #ifdef USE_NGHTTP2
     /* with h2 support, check that first */
-    salpnid = ALPN_h2;
+    srcalpnid = ALPN_h2;
     hit = Curl_altsvc_lookup(data->asi,
-                             salpnid, host, conn->remote_port, /* from */
-                             &nalpnid, &nhost, &nport /* to */);
+                             srcalpnid, host, conn->remote_port, /* from */
+                             &as /* to */,
+                             allowed_versions);
     if(!hit)
 #endif
     {
-      salpnid = ALPN_h1;
+      srcalpnid = ALPN_h1;
       hit = Curl_altsvc_lookup(data->asi,
-                               salpnid, host, conn->remote_port, /* from */
-                               &nalpnid, &nhost, &nport /* to */);
+                               srcalpnid, host, conn->remote_port, /* from */
+                               &as /* to */,
+                               allowed_versions);
     }
     if(hit) {
-      char *hostd = strdup((char *)nhost);
+      char *hostd = strdup((char *)as->dst.host);
       if(!hostd)
         return CURLE_OUT_OF_MEMORY;
       conn->conn_to_host.rawalloc = hostd;
       conn->conn_to_host.name = hostd;
       conn->bits.conn_to_host = TRUE;
-      conn->conn_to_port = nport;
+      conn->conn_to_port = as->dst.port;
       conn->bits.conn_to_port = TRUE;
       infof(data, "Alt-svc connecting from [%s]%s:%d to [%s]%s:%d\n",
-            Curl_alpnid2str(salpnid), host, conn->remote_port,
-            Curl_alpnid2str(nalpnid), hostd, nport);
-      if(salpnid != nalpnid) {
+            Curl_alpnid2str(srcalpnid), host, conn->remote_port,
+            Curl_alpnid2str(as->dst.alpnid), hostd, as->dst.port);
+      if(srcalpnid != as->dst.alpnid) {
         /* protocol version switch */
-        switch(nalpnid) {
+        switch(as->dst.alpnid) {
         case ALPN_h1:
           conn->httpversion = CURL_HTTP_VERSION_1_1;
           break;
