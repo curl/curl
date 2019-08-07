@@ -352,6 +352,10 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 
     quiche_h3_event_free(ev);
   }
+  if(flush_egress(conn, sockfd)) {
+    *curlcode = CURLE_SEND_ERROR;
+    return -1;
+  }
 
   *curlcode = (-1 == recvd)? CURLE_AGAIN : CURLE_OK;
   return recvd;
