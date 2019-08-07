@@ -3201,7 +3201,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
           break;
         case ALPN_h3:
           conn->transport = TRNSPRT_QUIC;
-          conn->httpversion = CURL_HTTP_VERSION_LAST; /* for the moment */
+          conn->httpversion = CURL_HTTP_VERSION_3;
           break;
         default: /* shouldn't be possible */
           break;

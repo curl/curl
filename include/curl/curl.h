@@ -1985,7 +1985,9 @@ enum {
   CURL_HTTP_VERSION_2TLS, /* use version 2 for HTTPS, version 1.1 for HTTP */
   CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,  /* please use HTTP 2 without HTTP/1.1
                                            Upgrade */
-
+  CURL_HTTP_VERSION_3 = 30, /* This cannot be set with CURLOPT_HTTP_VERSION,
+                               use CURLOPT_H3 and/or CURLOPT_ALTSVC to enable
+                               HTTP/3 */
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
 };
 

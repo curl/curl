@@ -235,6 +235,9 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     case 20:
       *param_longp = CURL_HTTP_VERSION_2_0;
       break;
+    case 30:
+      *param_longp = CURL_HTTP_VERSION_3;
+      break;
     default:
       *param_longp = CURL_HTTP_VERSION_NONE;
       break;
