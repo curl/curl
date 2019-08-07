@@ -405,6 +405,7 @@ struct ConnectBits {
                          the first time on the first connect function call */
   bit close:1; /* if set, we close the connection after this request */
   bit reuse:1; /* if set, this is a re-used connection */
+  bit altused:1; /* this is an alt-svc "redirect" */
   bit conn_to_host:1; /* if set, this connection has a "connect to host"
                          that overrides the host in the URL */
   bit conn_to_port:1; /* if set, this connection has a "connect to port"
