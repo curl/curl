@@ -3195,14 +3195,14 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
         /* protocol version switch */
         switch(nalpnid) {
         case ALPN_h1:
-          conn->httpversion = CURL_HTTP_VERSION_1_1;
+          conn->httpversion = 11;
           break;
         case ALPN_h2:
-          conn->httpversion = CURL_HTTP_VERSION_2TLS;
+          conn->httpversion = 20;
           break;
         case ALPN_h3:
           conn->transport = TRNSPRT_QUIC;
-          conn->httpversion = CURL_HTTP_VERSION_3;
+          conn->httpversion = 30;
           break;
         default: /* shouldn't be possible */
           break;

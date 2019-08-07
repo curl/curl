@@ -1666,6 +1666,12 @@ static bool use_http_1_1plus(const struct Curl_easy *data,
 static const char *get_http_string(const struct Curl_easy *data,
                                    const struct connectdata *conn)
 {
+#ifdef ENABLE_QUIC
+  if((data->set.httpversion == CURL_HTTP_VERSION_3) ||
+     (conn->httpversion == 30))
+    return "3";
+#endif
+
 #ifdef USE_NGHTTP2
   if(conn->proto.httpc.h2)
     return "2";
@@ -2005,49 +2011,50 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
 
-  if(conn->httpversion < 20) { /* unless the connection is re-used and already
-                                  http2 */
-    switch(conn->negnpn) {
-    case CURL_HTTP_VERSION_2:
-      conn->httpversion = 20; /* we know we're on HTTP/2 now */
-
-      result = Curl_http2_switched(conn, NULL, 0);
-      if(result)
-        return result;
-      break;
-    case CURL_HTTP_VERSION_1_1:
-      /* continue with HTTP/1.1 when explicitly requested */
-      break;
-    default:
-      /* Check if user wants to use HTTP/2 with clear TCP*/
-#ifdef USE_NGHTTP2
-      if(conn->data->set.httpversion ==
-         CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
-        if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
-          /* We don't support HTTP/2 proxies yet. Also it's debatable whether
-             or not this setting should apply to HTTP/2 proxies. */
-          infof(data, "Ignoring HTTP/2 prior knowledge due to proxy\n");
-          break;
-        }
-
-        DEBUGF(infof(data, "HTTP/2 over clean TCP\n"));
-        conn->httpversion = 20;
+  if(conn->transport != TRNSPRT_QUIC) {
+    if(conn->httpversion < 20) { /* unless the connection is re-used and
+                                    already http2 */
+      switch(conn->negnpn) {
+      case CURL_HTTP_VERSION_2:
+        conn->httpversion = 20; /* we know we're on HTTP/2 now */
 
         result = Curl_http2_switched(conn, NULL, 0);
         if(result)
           return result;
-      }
+        break;
+      case CURL_HTTP_VERSION_1_1:
+        /* continue with HTTP/1.1 when explicitly requested */
+        break;
+      default:
+        /* Check if user wants to use HTTP/2 with clear TCP*/
+#ifdef USE_NGHTTP2
+        if(conn->data->set.httpversion ==
+           CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+          if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+            /* We don't support HTTP/2 proxies yet. Also it's debatable
+               whether or not this setting should apply to HTTP/2 proxies. */
+            infof(data, "Ignoring HTTP/2 prior knowledge due to proxy\n");
+            break;
+          }
+
+          DEBUGF(infof(data, "HTTP/2 over clean TCP\n"));
+          conn->httpversion = 20;
+
+          result = Curl_http2_switched(conn, NULL, 0);
+          if(result)
+            return result;
+        }
 #endif
-      break;
+        break;
+      }
+    }
+    else {
+      /* prepare for a http2 request */
+      result = Curl_http2_setup(conn);
+      if(result)
+        return result;
     }
   }
-  else {
-    /* prepare for a http2 request */
-    result = Curl_http2_setup(conn);
-    if(result)
-      return result;
-  }
-
   http = data->req.protop;
   DEBUGASSERT(http);
 
