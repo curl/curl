@@ -773,7 +773,7 @@ Track Down Memory Leaks
 
   Add a line in your application code:
 
-       `curl_memdebug("dump");`
+       `curl_dbg_memdebug("dump");`
 
   This will make the malloc debug system output a full trace of all resource
   using functions to the given file name. Make sure you rebuild your program

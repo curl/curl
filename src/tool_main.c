@@ -113,9 +113,9 @@ static void memory_tracking_init(void)
     strcpy(fname, env);
     curl_free(env);
     curl_dbg_memdebug(fname);
-    /* this weird stuff here is to make curl_free() get called
-       before curl_memdebug() as otherwise memory tracking will
-       log a free() without an alloc! */
+    /* this weird stuff here is to make curl_free() get called before
+       curl_gdb_memdebug() as otherwise memory tracking will log a free()
+       without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = curlx_getenv("CURL_MEMLIMIT");
