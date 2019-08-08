@@ -1,32 +1,41 @@
 curl and libcurl 7.66.0
 
  Public curl releases:         185
- Command line options:         224
- curl_easy_setopt() options:   269
- Public functions in libcurl:  80
+ Command line options:         225
+ curl_easy_setopt() options:   270
+ Public functions in libcurl:  81
  Contributors:                 1991
 
 This release includes the following changes:
 
+ o CURLINFO_RETRY_AFTER: parse the Retry-After header value [35]
  o HTTP3: initial (experimental still not working) support [5]
  o curl: --sasl-authzid added to support CURLOPT_SASL_AUTHZID from the tool [27]
  o curl: support parallel transfers with -Z [4]
- o sasl: Implement SASL authorisation identity via CURLOPT_SASL_AUTHZID [27]
  o curl_multi_poll: a sister to curl_multi_wait() that waits more [28]
+ o sasl: Implement SASL authorisation identity via CURLOPT_SASL_AUTHZID [27]
 
 This release includes the following bugfixes:
 
+ o CURLOPT_HTTP_VERSION: seting this to 3 forces HTTP/3 use directly [33]
  o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
+ o alt-svc: add protocol version selection masking [31]
  o alt-svc: more liberal ALPN name parsing [17]
+ o alt-svc: send Alt-Used: in redirected requests [32]
  o altsvc: fix removal of expired cache entry [30]
  o altsvc: with quiche, use the quiche h3 alpn string [16]
  o appveyor: pass on -k to make
  o asyn-thread: create a socketpair to wait on [14]
  o cleanup: remove the 'numsocks' argument used in many places [25]
+ o curl.h: add CURL_HTTP_VERSION_3 to the version enum
  o curl.h: fix outdated comment [23]
  o curl: cap the maximum allowed values for retry time arguments [13]
+ o curl: make use of CURLINFO_RETRY_AFTER when retrying [35]
  o curl: remove outdated comment [24]
+ o curl: use CURLINFO_PROTOCOL to check for HTTP(s)
  o curl_version_info: provide nghttp2 details [2]
+ o docs/ALTSVC: remove what works and the experimental explanation [34]
+ o docs/EXPERIMENTAL: explain what it means and what's experimental now
  o docs/MANUAL.md: converted to markdown from plain text [3]
  o easy: resize receive buffer on easy handle reset [9]
  o examples: Avoid reserved names in hiperfifo examples [8]
@@ -38,7 +47,6 @@ This release includes the following bugfixes:
  o multi: call detach_connection before Curl_disconnect [6]
  o plan9: add support for running on Plan 9 [22]
  o progress: reset download/uploaded counter between transfers [12]
- o quiche: use the proper HTTP/3 ALPN
  o readwrite_data: repair setting the TIMER_STARTTRANSFER stamp [26]
  o source: remove names from source comments [1]
  o src/makefile: fix uncompressed hugehelp.c generation [19]
@@ -95,3 +103,9 @@ References to bug reports and discussions on issues:
  [28] = https://curl.haxx.se/bug/?i=4163
  [29] = https://curl.haxx.se/bug/?i=4191
  [30] = https://curl.haxx.se/bug/?i=4192
+ [31] = https://curl.haxx.se/bug/?i=4201
+ [32] = https://curl.haxx.se/bug/?i=4199
+ [33] = https://curl.haxx.se/bug/?i=4197
+ [34] = https://curl.haxx.se/bug/?i=4198
+ [35] = https://curl.haxx.se/bug/?i=3794
+
