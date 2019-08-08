@@ -32,13 +32,15 @@
 #include "quic.h"
 #include "strcase.h"
 #include "multiif.h"
+#include "connect.h"
+#include "strerror.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* #define DEBUG_HTTP3 */
+#define DEBUG_HTTP3
 /* #define DEBUG_QUICHE */
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
@@ -105,10 +107,17 @@ static unsigned int quiche_conncheck(struct connectdata *conn,
   return CONNRESULT_NONE;
 }
 
+static CURLcode quiche_do(struct connectdata *conn, bool *done)
+{
+  struct HTTP *stream = conn->data->req.protop;
+  stream->h3req = FALSE; /* not sent */
+  return Curl_http(conn, done);
+}
+
 static const struct Curl_handler Curl_handler_h3_quiche = {
   "HTTPS",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
-  Curl_http,                            /* do_it */
+  quiche_do,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
   ZERO_NULL,                            /* connect_it */
@@ -131,12 +140,13 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
 {
   CURLcode result;
   struct quicsocket *qs = &conn->quic;
+  struct Curl_easy *data = conn->data;
   (void)addr;
   (void)addrlen;
 
   qs->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
   if(!qs->cfg) {
-    failf(conn->data, "can't create quiche config");
+    failf(data, "can't create quiche config");
     return CURLE_FAILED_INIT;
   }
 
@@ -154,7 +164,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
                                        sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
                                        - 1);
 
-  result = Curl_rand(conn->data, qs->scid, sizeof(qs->scid));
+  result = Curl_rand(data, qs->scid, sizeof(qs->scid));
   if(result)
     return result;
 
@@ -164,7 +174,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
                             sizeof(qs->scid), qs->cfg);
   if(!qs->conn) {
-    failf(conn->data, "can't create quiche connection");
+    failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -172,11 +182,55 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   if(result)
     return result;
 
-  infof(conn->data, "Sent QUIC client Initial, ALPN: %s\n",
+  /* store the used address as a string */
+  if(!Curl_addr2string((struct sockaddr*)addr,
+                       conn->primary_ip, &conn->primary_port)) {
+    char buffer[STRERROR_LEN];
+    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
+
+  /* for connection reuse purposes: */
+  conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
+
+  infof(data, "Sent QUIC client Initial, ALPN: %s\n",
         QUICHE_H3_APPLICATION_PROTOCOL + 1);
 
   return CURLE_OK;
 }
+
+static CURLcode quiche_has_connected(struct connectdata *conn,
+                                     int sockindex)
+{
+  CURLcode result;
+  struct quicsocket *qs = &conn->quic;
+
+  conn->recv[sockindex] = h3_stream_recv;
+  conn->send[sockindex] = h3_stream_send;
+  conn->handler = &Curl_handler_h3_quiche;
+  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  conn->httpversion = 30;
+  conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  qs->h3config = quiche_h3_config_new(0, 1024, 0, 0);
+  if(!qs->h3config)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* Create a new HTTP/3 connection on the QUIC connection. */
+  qs->h3c = quiche_h3_conn_new_with_transport(qs->conn, qs->h3config);
+  if(!qs->h3c) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
+  return CURLE_OK;
+  fail:
+  quiche_h3_config_free(qs->h3config);
+  quiche_h3_conn_free(qs->h3c);
+  return result;
+}
+
 
 CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
                                 bool *done)
@@ -194,14 +248,12 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
     return result;
 
   if(quiche_conn_is_established(qs->conn)) {
-    conn->recv[sockindex] = h3_stream_recv;
-    conn->send[sockindex] = h3_stream_send;
     *done = TRUE;
-    conn->handler = &Curl_handler_h3_quiche;
+    result = quiche_has_connected(conn, sockindex);
     DEBUGF(infof(conn->data, "quiche established connection!\n"));
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode process_ingress(struct connectdata *conn, int sockfd)
@@ -336,6 +388,13 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
       /* nothing more to do */
       break;
 
+    if(s != stream->stream3_id) {
+      /* another transfer, ignore for now */
+      infof(conn->data, "Got h3 for stream %u, expects %u\n",
+            s, stream->stream3_id);
+      continue;
+    }
+
     switch(quiche_h3_event_type(ev)) {
     case QUICHE_H3_EVENT_HEADERS:
       H3BUGF(infof(conn->data, "quiche says HEADERS\n"));
@@ -399,8 +458,9 @@ static ssize_t h3_stream_send(struct connectdata *conn,
   ssize_t sent;
   struct quicsocket *qs = &conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
+  struct HTTP *stream = conn->data->req.protop;
 
-  if(!qs->h3c) {
+  if(!stream->h3req) {
     CURLcode result = http_request(conn, mem, len);
     if(result) {
       *curlcode = CURLE_SEND_ERROR;
@@ -467,16 +527,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   quiche_enable_debug_logging(debug_log, NULL);
 #endif
 
-  qs->h3config = quiche_h3_config_new(0, 1024, 0, 0);
-  if(!qs->h3config)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Create a new HTTP/3 connection on the QUIC connection. */
-  qs->h3c = quiche_h3_conn_new_with_transport(qs->conn, qs->h3config);
-  if(!qs->h3c) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
+  stream->h3req = TRUE; /* senf off! */
 
   /* Calculate number of headers contained in [mem, mem + len). Assumes a
      correctly generated HTTP header field block. */
@@ -678,8 +729,6 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   return CURLE_OK;
 
 fail:
-  quiche_h3_config_free(qs->h3config);
-  quiche_h3_conn_free(qs->h3c);
   free(nva);
   return result;
 }

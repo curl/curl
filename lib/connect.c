@@ -626,13 +626,9 @@ void Curl_persistconninfo(struct connectdata *conn)
   conn->data->info.conn_local_port = conn->local_port;
 }
 
-UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
-                             long *port);
-
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-UNITTEST bool getaddressinfo(struct sockaddr *sa, char *addr,
-                             long *port)
+bool Curl_addr2string(struct sockaddr *sa, char *addr, long *port)
 {
   struct sockaddr_in *si = NULL;
 #ifdef ENABLE_IPV6
@@ -715,8 +711,8 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     }
 #endif
 #ifdef HAVE_GETPEERNAME
-    if(!getaddressinfo((struct sockaddr*)&ssrem,
-                       conn->primary_ip, &conn->primary_port)) {
+    if(!Curl_addr2string((struct sockaddr*)&ssrem,
+                         conn->primary_ip, &conn->primary_port)) {
       failf(data, "ssrem inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       return;
@@ -724,8 +720,8 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 #endif
 #ifdef HAVE_GETSOCKNAME
-    if(!getaddressinfo((struct sockaddr*)&ssloc,
-                       conn->local_ip, &conn->local_port)) {
+    if(!Curl_addr2string((struct sockaddr*)&ssloc,
+                         conn->local_ip, &conn->local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
       return;
@@ -1032,8 +1028,8 @@ static CURLcode singleipconnect(struct connectdata *conn,
     return CURLE_OK;
 
   /* store remote address and port used in this connection attempt */
-  if(!getaddressinfo((struct sockaddr*)&addr.sa_addr,
-                     ipaddress, &port)) {
+  if(!Curl_addr2string((struct sockaddr*)&addr.sa_addr,
+                       ipaddress, &port)) {
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
