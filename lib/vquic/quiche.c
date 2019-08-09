@@ -158,6 +158,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   if(result)
     return result;
 
+  if(getenv("SSLKEYLOGFILE"))
+    quiche_config_log_keys(qs->cfg);
+
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
                             sizeof(qs->scid), qs->cfg);
   if(!qs->conn) {
