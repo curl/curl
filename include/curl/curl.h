@@ -920,8 +920,6 @@ typedef enum {
 #define CURLPROTO_SMBS   (1<<27)
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
-/* bitmask defines for CURLOPT_H3 */
-
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
 #define CURLOPTTYPE_LONG          0
@@ -1924,11 +1922,8 @@ typedef enum {
   /* maximum age of a connection to consider it for reuse (in seconds) */
   CINIT(MAXAGE_CONN, LONG, 288),
 
-  /* Bitmask to control HTTP/3 behavior. See CURLH3_* */
-  CINIT(H3, LONG, 289),
-
   /* SASL authorisation identity */
-  CINIT(SASL_AUTHZID, STRINGPOINT, 290),
+  CINIT(SASL_AUTHZID, STRINGPOINT, 289),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
