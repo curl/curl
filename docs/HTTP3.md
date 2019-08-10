@@ -51,10 +51,19 @@ you'll just get ld.so linker errors.
 
 ## build
 
+Clone quiche and BoringSSL:
+
+     % git clone https://github.com/cloudflare/quiche
+     % cd quiche/
+     % mkdir deps
+     % cd deps
+     % git clone https://github.com/google/boringssl
+     % cd boringssl
+
 Build BoringSSL (it needs to be built manually so it can be reused with curl):
 
-     % mkdir -p quiche/deps/boringssl/build
-     % cd quiche/deps/boringssl/build
+     % mkdir build
+     % cd build
      % cmake -DCMAKE_POSITION_INDEPENDENT_CODE=on ..
      % make -j`nproc`
      % cd ..
@@ -71,6 +80,7 @@ Clone and build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
+     % cd curl
      % ./buildconf
      % ./configure --with-ssl=$PWD/../quiche/deps/boringssl/.openssl --with-quiche=$PWD/../quiche --enable-debug
      % make -j`nproc`
