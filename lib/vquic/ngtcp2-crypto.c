@@ -33,6 +33,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+static int hkdf_expand_label(uint8_t *dest, size_t destlen,
+                             const uint8_t *secret, size_t secretlen,
+                             const uint8_t *label, size_t labellen,
+                             const struct Context *ctx);
+
 void Curl_qc_prf_sha256(struct Context *ctx)
 {
   ctx->prf = EVP_sha256();
@@ -55,6 +60,7 @@ int Curl_qc_negotiated_prf(struct Context *ctx, SSL *ssl)
   switch(SSL_CIPHER_get_id(SSL_get_current_cipher(ssl))) {
   case 0x03001301u: /* TLS_AES_128_GCM_SHA256 */
   case 0x03001303u: /* TLS_CHACHA20_POLY1305_SHA256 */
+  case 0x03001304u: /* TLS_AES_128_CCM_SHA256 */
     ctx->prf = EVP_sha256();
     return 0;
   case 0x03001302u: /* TLS_AES_256_GCM_SHA384 */
@@ -79,6 +85,10 @@ int Curl_qc_negotiated_aead(struct Context *ctx, SSL *ssl)
   case 0x03001303u: /* TLS_CHACHA20_POLY1305_SHA256 */
     ctx->aead = EVP_chacha20_poly1305();
     ctx->hp = EVP_chacha20();
+    return 0;
+  case 0x03001304u: /* TLS_AES_128_CCM_SHA256 */
+    ctx->aead = EVP_aes_128_ccm();
+    ctx->hp = EVP_aes_128_ctr();
     return 0;
   default:
     return -1;
@@ -199,28 +209,6 @@ static int hkdf_extract(uint8_t *dest, size_t destlen,
   return -1;
 }
 
-static int qhkdf_expand(uint8_t *dest, size_t destlen,
-                        const uint8_t *secret, size_t secretlen,
-                        const uint8_t *qlabel, size_t qlabellen,
-                        const struct Context *ctx)
-{
-  uint8_t info[256];
-  static const char LABEL[] = "quic ";
-
-  uint8_t *p = &info[0];
-  *p++ = (destlen / 256) & 0xff;
-  *p++ = destlen % 256;
-  *p++ = (strlen(LABEL) + qlabellen) & 0xff;
-  memcpy(p, LABEL, strlen(LABEL));
-  p += strlen(LABEL);
-  memcpy(p, qlabel, qlabellen);
-  p += qlabellen;
-  *p++ = 0;
-
-  return hkdf_expand(dest, destlen, secret, secretlen, &info[0],
-                     p - &info[0], ctx);
-}
-
 static size_t aead_key_length(const struct Context *ctx)
 {
   return EVP_CIPHER_key_length(ctx->aead);
@@ -234,6 +222,8 @@ static size_t aead_tag_length(const struct Context *ctx)
   if(ctx->aead == EVP_chacha20_poly1305()) {
     return EVP_CHACHAPOLY_TLS_TAG_LEN;
   }
+  if(ctx->aead == EVP_aes_128_ccm())
+    return EVP_CCM_TLS_TAG_LEN;
   assert(0);
 }
 
@@ -270,7 +260,15 @@ ssize_t Curl_qc_encrypt(uint8_t *dest, size_t destlen,
                          (int)noncelen, NULL) != 1)
     goto error;
 
+  if(ctx->aead == EVP_aes_128_ccm() &&
+     EVP_CIPHER_CTX_ctrl(actx, EVP_CTRL_AEAD_SET_TAG, (int)taglen, NULL) != 1)
+    goto error;
+
   if(EVP_EncryptInit_ex(actx, NULL, NULL, key, nonce) != 1)
+    goto error;
+
+  if(ctx->aead == EVP_aes_128_ccm() &&
+     EVP_EncryptUpdate(actx, NULL, &len, NULL, (int)plaintextlen) != 1)
     goto error;
 
   if(EVP_EncryptUpdate(actx, NULL, &len, ad, (int)adlen) != 1)
@@ -332,7 +330,16 @@ ssize_t Curl_qc_decrypt(uint8_t *dest, size_t destlen,
      1)
     goto error;
 
+  if(ctx->aead == EVP_aes_128_ccm() &&
+     EVP_CIPHER_CTX_ctrl(actx, EVP_CTRL_AEAD_SET_TAG, (int)taglen,
+                         (uint8_t *)tag) != 1)
+    goto error;
+
   if(EVP_DecryptInit_ex(actx, NULL, NULL, key, nonce) != 1)
+    goto error;
+
+  if(ctx->aead == EVP_aes_128_ccm() &&
+     EVP_DecryptUpdate(actx, NULL, &len, NULL, (int)ciphertextlen) != 1)
     goto error;
 
   if(EVP_DecryptUpdate(actx, NULL, &len, ad, (int)adlen) != 1)
@@ -342,6 +349,10 @@ ssize_t Curl_qc_decrypt(uint8_t *dest, size_t destlen,
     goto error;
 
   outlen = len;
+
+  if(ctx->aead == EVP_aes_128_ccm())
+    return outlen;
+
   if(EVP_CIPHER_CTX_ctrl(actx, EVP_CTRL_AEAD_SET_TAG,
                          (int)taglen, (char *)tag) != 1)
     goto error;
@@ -377,8 +388,8 @@ int Curl_qc_derive_client_initial_secret(uint8_t *dest,
   static uint8_t LABEL[] = "client in";
   struct Context ctx;
   Curl_qc_prf_sha256(&ctx);
-  return qhkdf_expand(dest, destlen, secret, secretlen, LABEL,
-                      strlen((char *)LABEL), &ctx);
+  return hkdf_expand_label(dest, destlen, secret, secretlen, LABEL,
+                           sizeof(LABEL) - 1, &ctx);
 }
 
 ssize_t Curl_qc_derive_packet_protection_key(uint8_t *dest, size_t destlen,
@@ -387,14 +398,14 @@ ssize_t Curl_qc_derive_packet_protection_key(uint8_t *dest, size_t destlen,
                                              const struct Context *ctx)
 {
   int rv;
-  static uint8_t LABEL_KEY[] = "key";
+  static uint8_t LABEL[] = "quic key";
   size_t keylen = aead_key_length(ctx);
   if(keylen > destlen) {
     return -1;
   }
 
-  rv = qhkdf_expand(dest, keylen, secret, secretlen, LABEL_KEY,
-                    strlen((char *)LABEL_KEY), ctx);
+  rv = hkdf_expand_label(dest, keylen, secret, secretlen, LABEL,
+                         sizeof(LABEL) - 1, ctx);
   if(rv) {
     return -1;
   }
@@ -408,15 +419,15 @@ ssize_t Curl_qc_derive_packet_protection_iv(uint8_t *dest, size_t destlen,
                                             const struct Context *ctx)
 {
   int rv;
-  static uint8_t LABEL_IV[] = "iv";
+  static uint8_t LABEL[] = "quic iv";
 
   size_t ivlen = CURLMAX(8, Curl_qc_aead_nonce_length(ctx));
   if(ivlen > destlen) {
     return -1;
   }
 
-  rv = qhkdf_expand(dest, ivlen, secret, secretlen, LABEL_IV,
-                    strlen((char *)LABEL_IV), ctx);
+  rv = hkdf_expand_label(dest, ivlen, secret, secretlen, LABEL,
+                         sizeof(LABEL) - 1, ctx);
   if(rv) {
     return -1;
   }
@@ -431,8 +442,8 @@ int Curl_qc_derive_server_initial_secret(uint8_t *dest, size_t destlen,
   static uint8_t LABEL[] = "server in";
   struct Context ctx;
   Curl_qc_prf_sha256(&ctx);
-  return qhkdf_expand(dest, destlen, secret, secretlen, LABEL,
-                      strlen((char *)LABEL), &ctx);
+  return hkdf_expand_label(dest, destlen, secret, secretlen, LABEL,
+                           sizeof(LABEL) - 1, &ctx);
 }
 
 static int
@@ -446,9 +457,9 @@ hkdf_expand_label(uint8_t *dest, size_t destlen, const uint8_t *secret,
   uint8_t *p = &info[0];
   *p++ = (destlen / 256)&0xff;
   *p++ = destlen % 256;
-  *p++ = (strlen((char *)LABEL) + labellen)&0xff;
-  memcpy(p, LABEL, strlen((char *)LABEL));
-  p += strlen((char *)LABEL);
+  *p++ = (sizeof(LABEL) - 1 + labellen) & 0xff;
+  memcpy(p, LABEL, sizeof(LABEL) - 1);
+  p += sizeof(LABEL) - 1;
   memcpy(p, label, labellen);
   p += labellen;
   *p++ = 0;
@@ -470,7 +481,7 @@ Curl_qc_derive_header_protection_key(uint8_t *dest, size_t destlen,
     return -1;
 
   rv = hkdf_expand_label(dest, keylen, secret, secretlen, LABEL,
-                         strlen((char *)LABEL), ctx);
+                         sizeof(LABEL) - 1, ctx);
 
   if(rv)
     return -1;
@@ -498,7 +509,7 @@ ssize_t Curl_qc_hp_mask(uint8_t *dest, size_t destlen,
   if(EVP_EncryptInit_ex(actx, ctx->hp, NULL, key, sample) != 1)
     goto error;
   if(EVP_EncryptUpdate(actx, dest, &len, PLAINTEXT,
-                       (int)strlen((char *)PLAINTEXT)) != 1)
+                       (int)(sizeof(PLAINTEXT) - 1)) != 1)
     goto error;
 
   DEBUGASSERT(len == 5);
