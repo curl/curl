@@ -101,6 +101,20 @@ matrix:
           compiler: gcc
           dist: xenial
           env:
+              - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$home/quiche --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                  packages:
+                      - *common_packages
+                      - libpsl-dev
+                      - libbrotli-dev
+        - os: linux
+          compiler: gcc
+          dist: xenial
+          env:
               - T=debug-wolfssl C="--with-wolfssl --without-ssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
           addons:
@@ -405,10 +419,23 @@ before_script:
         cd .. &&
         mkdir lib &&
         cd lib &&
-        ln -s ../build/crypto/libcrypto.so . &&
-        ln -s ../build/ssl/libssl.so . &&
+        cp ../build/crypto/libcrypto.so . &&
+        cp ../build/ssl/libssl.so . &&
         echo "BoringSSL lib dir: "`pwd` &&
+        cd ../build &&
+        make clean && rm -f CMakeCache.txt &&
+        CXX="g++" CC="gcc" cmake -DCMAKE_POSITION_INDEPENDENT_CODE=on .. &&
+        make &&
         export LIBS=-lpthread )
+      fi
+    - |
+      if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
+        (cd $HOME &&
+        git clone --depth=1 https://github.com/cloudflare/quiche.git &&
+        curl https://sh.rustup.rs -sSf | sh -s -- -y &&
+        source $HOME/.cargo/env &&
+        cd quiche &&
+        QUICHE_BSSL_PATH=$HOME/boringssl cargo build -v --release)
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then
