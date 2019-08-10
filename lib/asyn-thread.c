@@ -164,6 +164,7 @@ struct thread_sync_data {
                             duplicate */
   int port;
 #ifdef HAVE_SOCKETPAIR
+  struct connectdata *conn;
   curl_socket_t sock_pair[2]; /* socket pair */
 #endif
   int sock_error;
@@ -201,11 +202,10 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
     Curl_freeaddrinfo(tsd->res);
 
 #ifdef HAVE_SOCKETPAIR
-  /* close socket pair */
-  if(tsd->sock_pair[0] != CURL_SOCKET_BAD) {
-    sclose(tsd->sock_pair[0]);
-  }
-
+  /*
+   * close one end of the socket pair (may be done in resolver thread);
+   * the other end (for reading) is always closed in the parent thread.
+   */
   if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
     sclose(tsd->sock_pair[1]);
   }
@@ -382,6 +382,10 @@ static void destroy_async_data(struct Curl_async *async)
   if(async->os_specific) {
     struct thread_data *td = (struct thread_data*) async->os_specific;
     int done;
+#ifdef HAVE_SOCKETPAIR
+    curl_socket_t sock_rd = td->tsd.sock_pair[0];
+    struct connectdata *conn = td->tsd.conn;
+#endif
 
     /*
      * if the thread is still blocking in the resolve syscall, detach it and
@@ -403,6 +407,15 @@ static void destroy_async_data(struct Curl_async *async)
 
       free(async->os_specific);
     }
+#ifdef HAVE_SOCKETPAIR
+    /*
+     * ensure CURLMOPT_SOCKETFUNCTION fires CURL_POLL_REMOVE
+     * before the FD is invalidated to avoid EBADF on EPOLL_CTL_DEL
+     */
+    if(conn)
+      Curl_multi_closed(conn->data, sock_rd);
+    sclose(sock_rd);
+#endif
   }
   async->os_specific = NULL;
 
@@ -644,6 +657,8 @@ int Curl_resolver_getsock(struct connectdata *conn,
   if(td) {
     /* return read fd to client for polling the DNS resolution status */
     socks[0] = td->tsd.sock_pair[0];
+    DEBUGASSERT(td->tsd.conn == conn || !td->tsd.conn);
+    td->tsd.conn = conn;
     ret_val = GETSOCK_READSOCK(0);
   }
   else {
