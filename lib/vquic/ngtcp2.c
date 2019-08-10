@@ -1055,7 +1055,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
  */
 int Curl_quic_ver(char *p, size_t len)
 {
-  return msnprintf(p, len, " ngtcp2/blabla");
+  return msnprintf(p, len, " ngtcp2/blabla nghttp3/bloblo");
 }
 
 CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
