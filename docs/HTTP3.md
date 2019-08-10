@@ -31,12 +31,42 @@ in the master branch using pull-requests, just like ordinary changes.
 
 ## Build
 
-1. clone ngtcp2 from git (the draft-22 branch)
-2. build and install ngtcp2's custom OpenSSL version (the quic-draft-22 branch)
-3. build and install nghttp3
-4. build and install ngtcp2 according to its instructions
-5. configure curl with ngtcp2 support: `./configure --with-ngtcp2=<install prefix>`
-6. build curl "normally"
+Build (patched) OpenSSL
+
+     % git clone --depth 1 -b quic-draft-22 https://github.com/tatsuhiro-t/openssl
+     % cd openssl
+     % ./config enable-tls1_3 --prefix=<somewhere1>
+     % make
+     % make install_sw
+
+Build nghttp3
+
+     % cd ..
+     % git clone https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % autoreconf -i
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build ngtcp2
+
+     % cd ..
+     % git clone -b draft-20 https://github.com/ngtcp2/ngtcp2
+     % cd ngtcp2
+     % autoreconf -i
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somehere1>/lib" --prefix==<somewhere3>
+     % make
+     % make install
+
+Build curl
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % ./buildconf
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure -with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % make
 
 ## Running
 
