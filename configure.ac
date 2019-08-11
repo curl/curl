@@ -2633,7 +2633,7 @@ dnl **********************************************************************
 dnl Check for the CA bundle
 dnl **********************************************************************
 
-if test "$check_for_ca_bundle" -gt 0; then
+if test -n "$check_for_ca_bundle"; then
   CURL_CHECK_CA_BUNDLE
 fi
 
