@@ -586,10 +586,10 @@ static int quic_init_ssl(struct connectdata *conn)
   SSL_set_key_callback(qs->ssl, ssl_key_cb, conn);
 
   switch(qs->version) {
-#ifdef NGTCP2_PROTO_VER_D17
-  case NGTCP2_PROTO_VER_D17:
-    alpn = (const uint8_t *)NGTCP2_ALPN_D17;
-    alpnlen = strlen(NGTCP2_ALPN_D17);
+#ifdef NGTCP2_PROTO_VER
+  case NGTCP2_PROTO_VER:
+    alpn = (const uint8_t *)NGTCP2_ALPN_H3;
+    alpnlen = sizeof(NGTCP2_ALPN_H3) - 1;
     break;
 #endif
   }
@@ -997,6 +997,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   (void)addrlen;
   infof(conn->data, "Connecting socket %d over QUIC\n", sockfd);
 
+  qs->version = NGTCP2_PROTO_VER;
   qs->sslctx = quic_ssl_ctx(conn->data);
   if(!qs->sslctx)
     return CURLE_FAILED_INIT; /* TODO: better return code */
