@@ -27,6 +27,7 @@
 #ifdef USE_NGTCP2
 
 #include <ngtcp2/ngtcp2.h>
+#include <nghttp3/nghttp3.h>
 #include <openssl/ssl.h>
 #include "ngtcp2-crypto.h"
 
@@ -56,6 +57,9 @@ struct quicsocket {
   ngtcp2_crypto_level rx_crypto_level;
   struct sockaddr_storage local_addr;
   socklen_t local_addrlen;
+
+  nghttp3_conn *h3conn;
+  nghttp3_conn_settings h3settings;
 };
 
 #include "urldata.h"

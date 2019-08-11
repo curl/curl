@@ -24,6 +24,7 @@
 
 #ifdef USE_NGTCP2
 #include <ngtcp2/ngtcp2.h>
+#include <nghttp3/nghttp3.h>
 #include <openssl/err.h>
 #include "urldata.h"
 #include "sendf.h"
@@ -32,11 +33,21 @@
 #include "ngtcp2.h"
 #include "ngtcp2-crypto.h"
 #include "multiif.h"
+#include "strcase.h"
+#include "connect.h"
+#include "strerror.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#define DEBUG_HTTP3
+#ifdef DEBUG_HTTP3
+#define H3BUGF(x) x
+#else
+#define H3BUGF(x) do { } WHILE_FALSE
+#endif
 
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_MAX_DATA (1*1024*1024)
@@ -1058,6 +1069,490 @@ int Curl_quic_ver(char *p, size_t len)
   return msnprintf(p, len, " ngtcp2/blabla nghttp3/bloblo");
 }
 
+static int ng_getsock(struct connectdata *conn, curl_socket_t *socks)
+{
+  struct SingleRequest *k = &conn->data->req;
+  int bitmap = GETSOCK_BLANK;
+
+  socks[0] = conn->sock[FIRSTSOCKET];
+
+  /* in a HTTP/2 connection we can basically always get a frame so we should
+     always be ready for one */
+  bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
+
+  /* we're still uploading or the HTTP/2 layer wants to send data */
+  if((k->keepon & (KEEP_SEND|KEEP_SEND_PAUSE)) == KEEP_SEND)
+    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
+
+  return bitmap;
+}
+
+static int ng_perform_getsock(const struct connectdata *conn,
+                              curl_socket_t *socks)
+{
+  return ng_getsock((struct connectdata *)conn, socks);
+}
+
+static CURLcode ng_disconnect(struct connectdata *conn,
+                                  bool dead_connection)
+{
+  (void)conn;
+  (void)dead_connection;
+  return CURLE_OK;
+}
+
+static unsigned int ng_conncheck(struct connectdata *conn,
+                                 unsigned int checks_to_perform)
+{
+  (void)conn;
+  (void)checks_to_perform;
+  return CONNRESULT_NONE;
+}
+
+static const struct Curl_handler Curl_handler_h3_quiche = {
+  "HTTPS",                              /* scheme */
+  ZERO_NULL,                            /* setup_connection */
+  Curl_http,                            /* do_it */
+  Curl_http_done,                       /* done */
+  ZERO_NULL,                            /* do_more */
+  ZERO_NULL,                            /* connect_it */
+  ZERO_NULL,                            /* connecting */
+  ZERO_NULL,                            /* doing */
+  ng_getsock,                           /* proto_getsock */
+  ng_getsock,                           /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
+  ng_perform_getsock,                   /* perform_getsock */
+  ng_disconnect,                        /* disconnect */
+  ZERO_NULL,                            /* readwrite */
+  ng_conncheck,                         /* connection_check */
+  PORT_HTTP,                            /* defport */
+  CURLPROTO_HTTPS,                      /* protocol */
+  PROTOPT_SSL | PROTOPT_STREAM          /* flags */
+};
+
+static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
+                              uint64_t app_error_code, void *user_data,
+                              void *stream_user_data)
+{
+  (void)conn;
+  (void)stream_id;
+  (void)app_error_code;
+  (void)user_data;
+  (void)stream_user_data;
+  fprintf(stderr, "cb_h3_stream_close CALLED\n");
+  return 0;
+}
+
+static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
+                           const uint8_t *data, size_t datalen,
+                           void *user_data, void *stream_user_data)
+{
+  (void)conn;
+  (void)stream_id;
+  (void)data;
+  (void)datalen;
+  (void)user_data;
+  (void)stream_user_data;
+  fprintf(stderr, "cb_h3_recv_data CALLED\n");
+  return 0;
+}
+
+static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
+                                  size_t consumed, void *user_data,
+                                  void *stream_user_data)
+{
+  (void)conn;
+  (void)stream_id;
+  (void)consumed;
+  (void)user_data;
+  (void)stream_user_data;
+  fprintf(stderr, "cb_h3_deferred_consume CALLED\n");
+  return 0;
+}
+
+static int cb_h3_begin_headers(nghttp3_conn *conn, int64_t stream_id,
+                               void *user_data, void *stream_user_data)
+{
+  (void)conn;
+  (void)stream_id;
+  (void)user_data;
+  (void)stream_user_data;
+  fprintf(stderr, "cb_h3_begin_headers CALLED\n");
+  return 0;
+}
+
+static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
+                             int32_t token, nghttp3_rcbuf *name,
+                             nghttp3_rcbuf *value, uint8_t flags,
+                             void *user_data, void *stream_user_data)
+{
+  (void)conn;
+  (void)stream_id;
+  (void)token;
+  (void)name;
+  (void)value;
+  (void)flags;
+  (void)user_data;
+  (void)stream_user_data;
+  fprintf(stderr, "cb_h3_recv_header CALLED\n");
+  return 0;
+}
+
+static int cb_h3_send_stop_sending(nghttp3_conn *conn, int64_t stream_id,
+                                   uint64_t app_error_code,
+                                   void *user_data,
+                                   void *stream_user_data)
+{
+  (void)conn;
+  (void)stream_id;
+  (void)app_error_code;
+  (void)user_data;
+  (void)stream_user_data;
+  fprintf(stderr, "cb_h3_send_stop_sending CALLED\n");
+  return 0;
+}
+
+static nghttp3_conn_callbacks ngh3_callbacks = {
+  NULL, /* acked_stream_data */
+  cb_h3_stream_close,
+  cb_h3_recv_data,
+  cb_h3_deferred_consume,
+  cb_h3_begin_headers,
+  cb_h3_recv_header,
+  NULL, /* end_headers */
+  NULL, /* begin_trailers */
+  cb_h3_recv_header,
+  NULL, /* end_trailers */
+  NULL, /* http_begin_push_promise */
+  NULL, /* http_recv_push_promise */
+  NULL, /* http_end_push_promise */
+  NULL, /* http_cancel_push */
+  cb_h3_send_stop_sending,
+  NULL, /* push_stream */
+};
+
+static Curl_recv ngh3_stream_recv;
+static Curl_send ngh3_stream_send;
+
+static ssize_t ngh3_stream_recv(struct connectdata *conn,
+                                int sockindex,
+                                char *buf,
+                                size_t buffersize,
+                                CURLcode *curlcode)
+{
+  (void)conn;
+  (void)sockindex;
+  (void)buf;
+  (void)buffersize;
+  (void)curlcode;
+  return 0;
+}
+
+/* Index where :authority header field will appear in request header
+   field list. */
+#define AUTHORITY_DST_IDX 3
+
+static CURLcode http_request(struct connectdata *conn, const void *mem,
+                             size_t len)
+{
+  /*
+   */
+  struct HTTP *stream = conn->data->req.protop;
+  size_t nheader;
+  size_t i;
+  size_t authority_idx;
+  char *hdbuf = (char *)mem;
+  char *end, *line_end;
+  struct quicsocket *qs = &conn->quic;
+  CURLcode result = CURLE_OK;
+  struct Curl_easy *data = conn->data;
+  nghttp3_nv *nva = NULL;
+  int64_t stream3_id;
+  int rc;
+
+  rc = ngtcp2_conn_open_bidi_stream(qs->conn, &stream3_id, NULL);
+  if(rc) {
+    failf(conn->data, "can get bidi streams");
+    result = CURLE_SEND_ERROR;
+    goto fail;
+  }
+
+  stream->stream3_id = stream3_id;
+  stream->h3req = TRUE; /* senf off! */
+
+  /* Calculate number of headers contained in [mem, mem + len). Assumes a
+     correctly generated HTTP header field block. */
+  nheader = 0;
+  for(i = 1; i < len; ++i) {
+    if(hdbuf[i] == '\n' && hdbuf[i - 1] == '\r') {
+      ++nheader;
+      ++i;
+    }
+  }
+  if(nheader < 2)
+    goto fail;
+
+  /* We counted additional 2 \r\n in the first and last line. We need 3
+     new headers: :method, :path and :scheme. Therefore we need one
+     more space. */
+  nheader += 1;
+  nva = malloc(sizeof(nghttp3_nv) * nheader);
+  if(!nva) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
+
+  /* Extract :method, :path from request line
+     We do line endings with CRLF so checking for CR is enough */
+  line_end = memchr(hdbuf, '\r', len);
+  if(!line_end) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT; /* internal error */
+    goto fail;
+  }
+
+  /* Method does not contain spaces */
+  end = memchr(hdbuf, ' ', line_end - hdbuf);
+  if(!end || end == hdbuf)
+    goto fail;
+  nva[0].name = (unsigned char *)":method";
+  nva[0].namelen = strlen((char *)nva[0].name);
+  nva[0].value = (unsigned char *)hdbuf;
+  nva[0].valuelen = (size_t)(end - hdbuf);
+
+  hdbuf = end + 1;
+
+  /* Path may contain spaces so scan backwards */
+  end = NULL;
+  for(i = (size_t)(line_end - hdbuf); i; --i) {
+    if(hdbuf[i - 1] == ' ') {
+      end = &hdbuf[i - 1];
+      break;
+    }
+  }
+  if(!end || end == hdbuf)
+    goto fail;
+  nva[1].name = (unsigned char *)":path";
+  nva[1].namelen = strlen((char *)nva[1].name);
+  nva[1].value = (unsigned char *)hdbuf;
+  nva[1].valuelen = (size_t)(end - hdbuf);
+
+  nva[2].name = (unsigned char *)":scheme";
+  nva[2].namelen = strlen((char *)nva[2].name);
+  if(conn->handler->flags & PROTOPT_SSL)
+    nva[2].value = (unsigned char *)"https";
+  else
+    nva[2].value = (unsigned char *)"http";
+  nva[2].valuelen = strlen((char *)nva[2].value);
+
+
+  authority_idx = 0;
+  i = 3;
+  while(i < nheader) {
+    size_t hlen;
+
+    hdbuf = line_end + 2;
+
+    /* check for next CR, but only within the piece of data left in the given
+       buffer */
+    line_end = memchr(hdbuf, '\r', len - (hdbuf - (char *)mem));
+    if(!line_end || (line_end == hdbuf))
+      goto fail;
+
+    /* header continuation lines are not supported */
+    if(*hdbuf == ' ' || *hdbuf == '\t')
+      goto fail;
+
+    for(end = hdbuf; end < line_end && *end != ':'; ++end)
+      ;
+    if(end == hdbuf || end == line_end)
+      goto fail;
+    hlen = end - hdbuf;
+
+    if(hlen == 4 && strncasecompare("host", hdbuf, 4)) {
+      authority_idx = i;
+      nva[i].name = (unsigned char *)":authority";
+      nva[i].namelen = strlen((char *)nva[i].name);
+    }
+    else {
+      nva[i].name = (unsigned char *)hdbuf;
+      nva[i].namelen = (size_t)(end - hdbuf);
+    }
+    hdbuf = end + 1;
+    while(*hdbuf == ' ' || *hdbuf == '\t')
+      ++hdbuf;
+    end = line_end;
+
+#if 0 /* This should probably go in more or less like this */
+    switch(inspect_header((const char *)nva[i].name, nva[i].namelen, hdbuf,
+                          end - hdbuf)) {
+    case HEADERINST_IGNORE:
+      /* skip header fields prohibited by HTTP/2 specification. */
+      --nheader;
+      continue;
+    case HEADERINST_TE_TRAILERS:
+      nva[i].value = (uint8_t*)"trailers";
+      nva[i].value_len = sizeof("trailers") - 1;
+      break;
+    default:
+      nva[i].value = (unsigned char *)hdbuf;
+      nva[i].value_len = (size_t)(end - hdbuf);
+    }
+#endif
+    nva[i].value = (unsigned char *)hdbuf;
+    nva[i].valuelen = (size_t)(end - hdbuf);
+
+    ++i;
+  }
+
+  /* :authority must come before non-pseudo header fields */
+  if(authority_idx != 0 && authority_idx != AUTHORITY_DST_IDX) {
+    nghttp3_nv authority = nva[authority_idx];
+    for(i = authority_idx; i > AUTHORITY_DST_IDX; --i) {
+      nva[i] = nva[i - 1];
+    }
+    nva[i] = authority;
+  }
+
+  /* Warn stream may be rejected if cumulative length of headers is too
+     large. */
+#define MAX_ACC 60000  /* <64KB to account for some overhead */
+  {
+    size_t acc = 0;
+
+    for(i = 0; i < nheader; ++i) {
+      acc += nva[i].namelen + nva[i].valuelen;
+
+      H3BUGF(infof(data, "h3 [%.*s: %.*s]\n",
+                   nva[i].namelen, nva[i].name,
+                   nva[i].valuelen, nva[i].value));
+    }
+
+    if(acc > MAX_ACC) {
+      infof(data, "http_request: Warning: The cumulative length of all "
+            "headers exceeds %zu bytes and that could cause the "
+            "stream to be rejected.\n", MAX_ACC);
+    }
+  }
+
+  switch(data->set.httpreq) {
+  case HTTPREQ_POST:
+  case HTTPREQ_POST_FORM:
+  case HTTPREQ_POST_MIME:
+  case HTTPREQ_PUT:
+    if(data->state.infilesize != -1)
+      stream->upload_left = data->state.infilesize;
+    else
+      /* data sending without specifying the data amount up front */
+      stream->upload_left = -1; /* unknown, but not zero */
+
+#if 0
+    stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
+                                        stream->upload_left ? FALSE: TRUE);
+    if((stream3_id >= 0) && data->set.postfields) {
+      ssize_t sent = quiche_h3_send_body(qs->h3c, qs->conn, stream3_id,
+                                         (uint8_t *)data->set.postfields,
+                                         stream->upload_left, TRUE);
+      if(sent <= 0) {
+        failf(data, "quiche_h3_send_body failed!");
+        result = CURLE_SEND_ERROR;
+      }
+      stream->upload_left = 0; /* nothing left to send */
+    }
+#endif
+    break;
+  default:
+    rc = nghttp3_conn_submit_request(qs->h3conn, stream->stream3_id,
+                                     nva, nheader,
+                                     NULL, /* no body! */
+                                     conn->data);
+    if(rc) {
+      result = CURLE_SEND_ERROR;
+      goto fail;
+    }
+    break;
+  }
+
+  Curl_safefree(nva);
+
+  infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
+        stream3_id, (void *)data);
+
+  return CURLE_OK;
+
+fail:
+  free(nva);
+  return result;
+}
+static ssize_t ngh3_stream_send(struct connectdata *conn,
+                                int sockindex,
+                                const void *mem,
+                                size_t len,
+                                CURLcode *curlcode)
+{
+  ssize_t sent;
+  struct quicsocket *qs = &conn->quic;
+  curl_socket_t sockfd = conn->sock[sockindex];
+  struct HTTP *stream = conn->data->req.protop;
+
+  if(!stream->h3req) {
+    CURLcode result = http_request(conn, mem, len);
+    if(result) {
+      *curlcode = CURLE_SEND_ERROR;
+      return -1;
+    }
+    sent = len;
+  }
+  else {
+    (void)qs;
+    /* TODO */
+  }
+
+  if(flush_egress(conn, sockfd)) {
+    *curlcode = CURLE_SEND_ERROR;
+    return -1;
+  }
+
+  *curlcode = CURLE_OK;
+  return sent;
+}
+
+static CURLcode ng_has_connected(struct connectdata *conn,
+                                   int sockindex)
+{
+  CURLcode result;
+  struct quicsocket *qs = &conn->quic;
+  int rc;
+
+  conn->recv[sockindex] = ngh3_stream_recv;
+  conn->send[sockindex] = ngh3_stream_send;
+  conn->handler = &Curl_handler_h3_quiche;
+  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  conn->httpversion = 30;
+  conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  if(ngtcp2_conn_get_max_local_streams_uni(qs->conn) < 3) {
+    failf(conn->data, "too few available QUIC streams");
+    return CURLE_SEND_ERROR;
+  }
+
+  nghttp3_conn_settings_default(&qs->h3settings);
+
+  rc = nghttp3_conn_client_new(&qs->h3conn,
+                               &ngh3_callbacks,
+                               &qs->h3settings,
+                               nghttp3_mem_default(),
+                               conn->data);
+  if(rc) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
+
+  return CURLE_OK;
+  fail:
+
+  return result;
+}
+
 CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
                                 bool *done)
 {
@@ -1075,10 +1570,11 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
 
   if(ngtcp2_conn_get_handshake_completed(qs->conn)) {
     *done = TRUE;
+    result = ng_has_connected(conn, sockindex);
     DEBUGF(infof(conn->data, "ngtcp2 established connection!\n"));
   }
 
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode process_ingress(struct connectdata *conn, int sockfd)
