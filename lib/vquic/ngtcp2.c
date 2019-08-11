@@ -157,8 +157,9 @@ static int setup_initial_crypto_context(struct connectdata *conn)
 
 static void quic_settings(ngtcp2_settings *s)
 {
+  ngtcp2_settings_default(s);
   s->log_printf = quic_printf;
-  s->initial_ts = 0;
+  s->initial_ts = timestamp();
   s->max_stream_data_bidi_local = QUIC_MAX_STREAMS;
   s->max_stream_data_bidi_remote = QUIC_MAX_STREAMS;
   s->max_stream_data_uni = QUIC_MAX_STREAMS;
@@ -166,9 +167,6 @@ static void quic_settings(ngtcp2_settings *s)
   s->max_streams_bidi = 1;
   s->max_streams_uni = 3;
   s->idle_timeout = QUIC_IDLE_TIMEOUT;
-  s->max_packet_size = NGTCP2_MAX_PKT_SIZE;
-  s->ack_delay_exponent = NGTCP2_DEFAULT_ACK_DELAY_EXPONENT;
-  s->max_ack_delay = NGTCP2_DEFAULT_MAX_ACK_DELAY;
 }
 
 /* SSL extension functions */
