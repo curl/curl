@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -206,11 +206,15 @@ extern int Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
                              struct sockaddr * dstaddr, int addrlen);
 extern int Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
                                struct sockaddr *fromaddr, int *addrlen);
+extern int Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen);
+extern int Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen);
 
 #define connect                 Curl_os400_connect
 #define bind                    Curl_os400_bind
 #define sendto                  Curl_os400_sendto
 #define recvfrom                Curl_os400_recvfrom
+#define getpeername             Curl_os400_getpeername
+#define getsockname             Curl_os400_getsockname
 
 #ifdef HAVE_LIBZ
 #define zlibVersion             Curl_os400_zlibVersion

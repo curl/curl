@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -195,7 +195,7 @@ buffer_threaded(localkey_t key, long size)
 
     /* Allocate buffer descriptors for the current thread. */
 
-    bufs = calloc((size_t) LK_LAST, sizeof *bufs);
+    bufs = calloc((size_t) LK_LAST, sizeof(*bufs));
     if(!bufs)
       return (char *) NULL;
 
@@ -224,7 +224,7 @@ buffer_undef(localkey_t key, long size)
   if(Curl_thread_buffer == buffer_undef) {      /* If unchanged during lock. */
     if(!pthread_key_create(&thdkey, thdbufdestroy))
       Curl_thread_buffer = buffer_threaded;
-    else if(!(locbufs = calloc((size_t) LK_LAST, sizeof *locbufs))) {
+    else if(!(locbufs = calloc((size_t) LK_LAST, sizeof(*locbufs)))) {
       pthread_mutex_unlock(&mutex);
       return (char *) NULL;
       }
@@ -390,7 +390,7 @@ Curl_gsk_environment_open(gsk_handle * my_env_handle)
 
   if(!my_env_handle)
     return GSK_OS400_ERROR_INVALID_POINTER;
-  p = (struct Curl_gsk_descriptor *) malloc(sizeof *p);
+  p = (struct Curl_gsk_descriptor *) malloc(sizeof(*p));
   if(!p)
     return GSK_INSUFFICIENT_STORAGE;
   p->strlist = (struct gskstrlist *) NULL;
@@ -417,7 +417,7 @@ Curl_gsk_secure_soc_open(gsk_handle my_env_handle,
   if(!my_session_handle)
     return GSK_OS400_ERROR_INVALID_POINTER;
   h = ((struct Curl_gsk_descriptor *) my_env_handle)->h;
-  p = (struct Curl_gsk_descriptor *) malloc(sizeof *p);
+  p = (struct Curl_gsk_descriptor *) malloc(sizeof(*p));
   if(!p)
     return GSK_INSUFFICIENT_STORAGE;
   p->strlist = (struct gskstrlist *) NULL;
@@ -598,7 +598,7 @@ cachestring(struct Curl_gsk_descriptor * p,
     if(sp->ebcdicstr == ebcdicbuf)
       break;
   if(!sp) {
-    sp = (struct gskstrlist *) malloc(sizeof *sp);
+    sp = (struct gskstrlist *) malloc(sizeof(*sp));
     if(!sp)
       return GSK_INSUFFICIENT_STORAGE;
     asciibuf = malloc(bufsize + 1);
@@ -800,7 +800,7 @@ Curl_gss_import_name_a(OM_uint32 * minor_status, gss_buffer_t in_name,
   if(!in_name || !in_name->value || !in_name->length)
     return gss_import_name(minor_status, in_name, in_name_type, out_name);
 
-  memcpy((char *) &in, (char *) in_name, sizeof in);
+  memcpy((char *) &in, (char *) in_name, sizeof(in));
   i = in.length;
 
   in.value = malloc(i + 1);
@@ -1048,7 +1048,7 @@ Curl_ldap_search_s_a(void * ld, char * base, int scope, char * filter,
     for(i = 0; attrs[i++];)
       ;
 
-    eattrs = calloc(i, sizeof *eattrs);
+    eattrs = calloc(i, sizeof(*eattrs));
     if(!eattrs)
       status = LDAP_NO_MEMORY;
     else {
@@ -1227,19 +1227,18 @@ Curl_ldap_next_attribute_a(void * ld,
 
 
 static int
-convert_sockaddr(struct sockaddr_storage * dstaddr,
-                                const struct sockaddr * srcaddr, int srclen)
-
+sockaddr2ebcdic(struct sockaddr_storage *dstaddr,
+                const struct sockaddr *srcaddr, int srclen)
 {
-  const struct sockaddr_un * srcu;
-  struct sockaddr_un * dstu;
+  const struct sockaddr_un *srcu;
+  struct sockaddr_un *dstu;
   unsigned int i;
   unsigned int dstsize;
 
-  /* Convert a socket address into job CCSID, if needed. */
+  /* Convert a socket address to job CCSID, if needed. */
 
   if(!srcaddr || srclen < offsetof(struct sockaddr, sa_family) +
-     sizeof srcaddr->sa_family || srclen > sizeof *dstaddr) {
+     sizeof(srcaddr->sa_family) || srclen > sizeof(*dstaddr)) {
     errno = EINVAL;
     return -1;
     }
@@ -1251,13 +1250,55 @@ convert_sockaddr(struct sockaddr_storage * dstaddr,
   case AF_UNIX:
     srcu = (const struct sockaddr_un *) srcaddr;
     dstu = (struct sockaddr_un *) dstaddr;
-    dstsize = sizeof *dstaddr - offsetof(struct sockaddr_un, sun_path);
+    dstsize = sizeof(*dstaddr) - offsetof(struct sockaddr_un, sun_path);
     srclen -= offsetof(struct sockaddr_un, sun_path);
     i = QadrtConvertA2E(dstu->sun_path, srcu->sun_path, dstsize - 1, srclen);
     dstu->sun_path[i] = '\0';
-    i += offsetof(struct sockaddr_un, sun_path);
-    srclen = i;
+    srclen = i + offsetof(struct sockaddr_un, sun_path);
     }
+
+  return srclen;
+}
+
+
+static int
+sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
+               const struct sockaddr_storage *srcaddr, int srclen)
+{
+  const struct sockaddr_un *srcu;
+  struct sockaddr_un *dstu;
+  unsigned int dstsize;
+
+  /* Convert a socket address to ASCII, if needed. */
+
+  if(!srclen)
+    return 0;
+  if(srclen > dstlen)
+    srclen = dstlen;
+  if(!srcaddr || srclen < 0) {
+    errno = EINVAL;
+    return -1;
+    }
+
+  memcpy((char *) dstaddr, (char *) srcaddr, srclen);
+
+  if(srclen >= offsetof(struct sockaddr_storage, ss_family) +
+     sizeof(srcaddr->ss_family)) {
+    switch (srcaddr->ss_family) {
+
+    case AF_UNIX:
+      srcu = (const struct sockaddr_un *) srcaddr;
+      dstu = (struct sockaddr_un *) dstaddr;
+      dstsize = dstlen - offsetof(struct sockaddr_un, sun_path);
+      srclen -= offsetof(struct sockaddr_un, sun_path);
+      if(dstsize > 0 && srclen > 0) {
+        srclen = QadrtConvertE2A(dstu->sun_path, srcu->sun_path,
+                                 dstsize - 1, srclen);
+        dstu->sun_path[srclen] = '\0';
+      }
+      srclen += offsetof(struct sockaddr_un, sun_path);
+    }
+  }
 
   return srclen;
 }
@@ -1265,12 +1306,11 @@ convert_sockaddr(struct sockaddr_storage * dstaddr,
 
 int
 Curl_os400_connect(int sd, struct sockaddr * destaddr, int addrlen)
-
 {
   int i;
   struct sockaddr_storage laddr;
 
-  i = convert_sockaddr(&laddr, destaddr, addrlen);
+  i = sockaddr2ebcdic(&laddr, destaddr, addrlen);
 
   if(i < 0)
     return -1;
@@ -1281,12 +1321,11 @@ Curl_os400_connect(int sd, struct sockaddr * destaddr, int addrlen)
 
 int
 Curl_os400_bind(int sd, struct sockaddr * localaddr, int addrlen)
-
 {
   int i;
   struct sockaddr_storage laddr;
 
-  i = convert_sockaddr(&laddr, localaddr, addrlen);
+  i = sockaddr2ebcdic(&laddr, localaddr, addrlen);
 
   if(i < 0)
     return -1;
@@ -1298,12 +1337,11 @@ Curl_os400_bind(int sd, struct sockaddr * localaddr, int addrlen)
 int
 Curl_os400_sendto(int sd, char * buffer, int buflen, int flags,
                                 struct sockaddr * dstaddr, int addrlen)
-
 {
   int i;
   struct sockaddr_storage laddr;
 
-  i = convert_sockaddr(&laddr, dstaddr, addrlen);
+  i = sockaddr2ebcdic(&laddr, dstaddr, addrlen);
 
   if(i < 0)
     return -1;
@@ -1315,19 +1353,14 @@ Curl_os400_sendto(int sd, char * buffer, int buflen, int flags,
 int
 Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
                                 struct sockaddr * fromaddr, int * addrlen)
-
 {
-  int i;
   int rcvlen;
-  int laddrlen;
-  const struct sockaddr_un * srcu;
-  struct sockaddr_un * dstu;
   struct sockaddr_storage laddr;
+  int laddrlen = sizeof(laddr);
 
   if(!fromaddr || !addrlen || *addrlen <= 0)
     return recvfrom(sd, buffer, buflen, flags, fromaddr, addrlen);
 
-  laddrlen = sizeof laddr;
   laddr.ss_family = AF_UNSPEC;          /* To detect if unused. */
   rcvlen = recvfrom(sd, buffer, buflen, flags,
                     (struct sockaddr *) &laddr, &laddrlen);
@@ -1335,36 +1368,51 @@ Curl_os400_recvfrom(int sd, char * buffer, int buflen, int flags,
   if(rcvlen < 0)
     return rcvlen;
 
-  switch (laddr.ss_family) {
-
-  case AF_UNIX:
-    srcu = (const struct sockaddr_un *) &laddr;
-    dstu = (struct sockaddr_un *) fromaddr;
-    i = *addrlen - offsetof(struct sockaddr_un, sun_path);
-    laddrlen -= offsetof(struct sockaddr_un, sun_path);
-    i = QadrtConvertE2A(dstu->sun_path, srcu->sun_path, i, laddrlen);
-    laddrlen = i + offsetof(struct sockaddr_un, sun_path);
-
-    if(laddrlen < *addrlen)
-      dstu->sun_path[i] = '\0';
-
-    break;
-
-  case AF_UNSPEC:
-    break;
-
-  default:
-    if(laddrlen > *addrlen)
-      laddrlen = *addrlen;
-
-    if(laddrlen)
-      memcpy((char *) fromaddr, (char *) &laddr, laddrlen);
-
-    break;
-    }
-
+  if(laddr.ss_family == AF_UNSPEC)
+    laddrlen = 0;
+  else {
+    laddrlen = sockaddr2ascii(fromaddr, *addrlen, &laddr, laddrlen);
+    if(laddrlen < 0)
+      return laddrlen;
+  }
   *addrlen = laddrlen;
   return rcvlen;
+}
+
+
+int
+Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen)
+{
+  struct sockaddr_storage laddr;
+  int laddrlen = sizeof(laddr);
+  int retcode = getpeername(sd, (struct sockaddr *) &laddr, &laddrlen);
+
+  if(!retcode) {
+    laddrlen = sockaddr2ascii(addr, *addrlen, &laddr, laddrlen);
+    if(laddrlen < 0)
+      return laddrlen;
+    *addrlen = laddrlen;
+  }
+
+  return retcode;
+}
+
+
+int
+Curl_os400_getsockname(int sd, struct sockaddr *addr, int *addrlen)
+{
+  struct sockaddr_storage laddr;
+  int laddrlen = sizeof(laddr);
+  int retcode = getsockname(sd, (struct sockaddr *) &laddr, &laddrlen);
+
+  if(!retcode) {
+    laddrlen = sockaddr2ascii(addr, *addrlen, &laddr, laddrlen);
+    if(laddrlen < 0)
+      return laddrlen;
+    *addrlen = laddrlen;
+  }
+
+  return retcode;
 }
 
 
