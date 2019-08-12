@@ -83,12 +83,8 @@ you'll just get ld.so linker errors.
 
 Clone quiche and BoringSSL:
 
-     % git clone https://github.com/cloudflare/quiche
-     % cd quiche/
-     % mkdir deps
-     % cd deps
-     % git clone https://github.com/google/boringssl
-     % cd boringssl
+     % git clone --recursive https://github.com/cloudflare/quiche
+     % cd quiche/deps/boringssl
 
 Build BoringSSL (it needs to be built manually so it can be reused with curl):
 
