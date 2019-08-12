@@ -734,12 +734,19 @@ cb_recv_crypto_data(ngtcp2_conn *tconn, ngtcp2_crypto_level crypto_level,
   return quic_read_tls(conn);
 }
 
+static int init_ngh3_conn(struct connectdata *conn);
+
 static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
   struct connectdata *conn = (struct connectdata *)user_data;
   (void)tconn;
   conn->quic.tx_crypto_level = NGTCP2_CRYPTO_LEVEL_APP;
   infof(conn->data, "QUIC handshake is completed\n");
+
+  if(init_ngh3_conn(conn) != CURLE_OK) {
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+  }
+
   return 0;
 }
 
@@ -1295,6 +1302,67 @@ static nghttp3_conn_callbacks ngh3_callbacks = {
   NULL, /* push_stream */
 };
 
+static int init_ngh3_conn(struct connectdata *conn)
+{
+  CURLcode result;
+  struct quicsocket *qs = &conn->quic;
+  int rc;
+  int64_t ctrl_stream_id, qpack_enc_stream_id, qpack_dec_stream_id;
+
+  if(ngtcp2_conn_get_max_local_streams_uni(qs->conn) < 3) {
+    failf(conn->data, "too few available QUIC streams");
+    return CURLE_FAILED_INIT;
+  }
+
+  nghttp3_conn_settings_default(&qs->h3settings);
+
+  rc = nghttp3_conn_client_new(&qs->h3conn,
+                               &ngh3_callbacks,
+                               &qs->h3settings,
+                               nghttp3_mem_default(),
+                               conn->data);
+  if(rc) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
+  }
+
+  rc = ngtcp2_conn_open_uni_stream(qs->conn, &ctrl_stream_id, NULL);
+  if(rc) {
+    result = CURLE_FAILED_INIT;
+    goto fail;
+  }
+
+  rc = nghttp3_conn_bind_control_stream(qs->h3conn, ctrl_stream_id);
+  if(rc) {
+    result = CURLE_FAILED_INIT;
+    goto fail;
+  }
+
+  rc = ngtcp2_conn_open_uni_stream(qs->conn, &qpack_enc_stream_id, NULL);
+  if(rc) {
+    result = CURLE_FAILED_INIT;
+    goto fail;
+  }
+
+  rc = ngtcp2_conn_open_uni_stream(qs->conn, &qpack_dec_stream_id, NULL);
+  if(rc) {
+    result = CURLE_FAILED_INIT;
+    goto fail;
+  }
+
+  rc = nghttp3_conn_bind_qpack_streams(qs->h3conn, qpack_enc_stream_id,
+                                       qpack_dec_stream_id);
+  if(rc) {
+    result = CURLE_FAILED_INIT;
+    goto fail;
+  }
+
+  return CURLE_OK;
+  fail:
+
+  return result;
+}
+
 static Curl_recv ngh3_stream_recv;
 static Curl_send ngh3_stream_send;
 
@@ -1590,73 +1658,14 @@ static ssize_t ngh3_stream_send(struct connectdata *conn,
   return sent;
 }
 
-static CURLcode ng_has_connected(struct connectdata *conn,
-                                   int sockindex)
+static void ng_has_connected(struct connectdata *conn, int sockindex)
 {
-  CURLcode result;
-  struct quicsocket *qs = &conn->quic;
-  int rc;
-  int64_t ctrl_stream_id, qpack_enc_stream_id, qpack_dec_stream_id;
-
   conn->recv[sockindex] = ngh3_stream_recv;
   conn->send[sockindex] = ngh3_stream_send;
   conn->handler = &Curl_handler_h3_quiche;
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 30;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
-
-  if(ngtcp2_conn_get_max_local_streams_uni(qs->conn) < 3) {
-    failf(conn->data, "too few available QUIC streams");
-    return CURLE_SEND_ERROR;
-  }
-
-  nghttp3_conn_settings_default(&qs->h3settings);
-
-  rc = nghttp3_conn_client_new(&qs->h3conn,
-                               &ngh3_callbacks,
-                               &qs->h3settings,
-                               nghttp3_mem_default(),
-                               conn->data);
-  if(rc) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
-
-  rc = ngtcp2_conn_open_uni_stream(qs->conn, &ctrl_stream_id, NULL);
-  if(rc) {
-    result = CURLE_FAILED_INIT;
-    goto fail;
-  }
-
-  rc = nghttp3_conn_bind_control_stream(qs->h3conn, ctrl_stream_id);
-  if(rc) {
-    result = CURLE_FAILED_INIT;
-    goto fail;
-  }
-
-  rc = ngtcp2_conn_open_uni_stream(qs->conn, &qpack_enc_stream_id, NULL);
-  if(rc) {
-    result = CURLE_FAILED_INIT;
-    goto fail;
-  }
-
-  rc = ngtcp2_conn_open_uni_stream(qs->conn, &qpack_dec_stream_id, NULL);
-  if(rc) {
-    result = CURLE_FAILED_INIT;
-    goto fail;
-  }
-
-  rc = nghttp3_conn_bind_qpack_streams(qs->h3conn, qpack_enc_stream_id,
-                                       qpack_dec_stream_id);
-  if(rc) {
-    result = CURLE_FAILED_INIT;
-    goto fail;
-  }
-
-  return CURLE_OK;
-  fail:
-
-  return result;
 }
 
 CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
@@ -1676,7 +1685,7 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
 
   if(ngtcp2_conn_get_handshake_completed(qs->conn)) {
     *done = TRUE;
-    result = ng_has_connected(conn, sockindex);
+    ng_has_connected(conn, sockindex);
     DEBUGF(infof(conn->data, "ngtcp2 established connection!\n"));
   }
 
