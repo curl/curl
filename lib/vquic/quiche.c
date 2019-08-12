@@ -53,9 +53,11 @@
 #define QUIC_IDLE_TIMEOUT 60 * 1000 /* milliseconds */
 
 static CURLcode process_ingress(struct connectdata *conn,
-                                curl_socket_t sockfd);
+                                curl_socket_t sockfd,
+                                struct quicsocket *qs);
 
-static CURLcode flush_egress(struct connectdata *conn, curl_socket_t sockfd);
+static CURLcode flush_egress(struct connectdata *conn, curl_socket_t sockfd,
+                             struct quicsocket *qs);
 
 static CURLcode http_request(struct connectdata *conn, const void *mem,
                              size_t len);
@@ -90,7 +92,7 @@ static int quiche_perform_getsock(const struct connectdata *conn,
 static CURLcode quiche_disconnect(struct connectdata *conn,
                                   bool dead_connection)
 {
-  struct quicsocket *qs = &conn->quic;
+  struct quicsocket *qs = conn->quic;
   (void)dead_connection;
   quiche_h3_config_free(qs->h3config);
   quiche_h3_conn_free(qs->h3c);
@@ -126,7 +128,7 @@ static const struct Curl_handler Curl_handler_h3_quiche = {
   quiche_getsock,                       /* proto_getsock */
   quiche_getsock,                       /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
-  quiche_perform_getsock,                       /* perform_getsock */
+  quiche_perform_getsock,               /* perform_getsock */
   quiche_disconnect,                    /* disconnect */
   ZERO_NULL,                            /* readwrite */
   quiche_conncheck,                     /* connection_check */
@@ -136,10 +138,11 @@ static const struct Curl_handler Curl_handler_h3_quiche = {
 };
 
 CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
+                           int sockindex,
                            const struct sockaddr *addr, socklen_t addrlen)
 {
   CURLcode result;
-  struct quicsocket *qs = &conn->quic;
+  struct quicsocket *qs = &conn->hequic[sockindex];
   struct Curl_easy *data = conn->data;
   (void)addr;
   (void)addrlen;
@@ -178,10 +181,11 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  result = flush_egress(conn, sockfd);
+  result = flush_egress(conn, sockfd, qs);
   if(result)
     return result;
 
+#if 0
   /* store the used address as a string */
   if(!Curl_addr2string((struct sockaddr*)addr,
                        conn->primary_ip, &conn->primary_port)) {
@@ -191,7 +195,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
-
+#endif
   /* for connection reuse purposes: */
   conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
 
@@ -202,10 +206,11 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
 }
 
 static CURLcode quiche_has_connected(struct connectdata *conn,
-                                     int sockindex)
+                                     int sockindex,
+                                     int tempindex)
 {
   CURLcode result;
-  struct quicsocket *qs = &conn->quic;
+  struct quicsocket *qs = conn->quic = &conn->hequic[tempindex];
 
   conn->recv[sockindex] = h3_stream_recv;
   conn->send[sockindex] = h3_stream_send;
@@ -224,6 +229,13 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
   }
+  if(conn->hequic[1-tempindex].cfg) {
+    qs = &conn->hequic[1-tempindex];
+    quiche_config_free(qs->cfg);
+    quiche_conn_free(qs->conn);
+    qs->cfg = NULL;
+    qs->conn = NULL;
+  }
   return CURLE_OK;
   fail:
   quiche_h3_config_free(qs->h3config);
@@ -231,35 +243,37 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
   return result;
 }
 
-
+/*
+ * This function gets polled to check if this QUIC connection has connected.
+ */
 CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
                                 bool *done)
 {
   CURLcode result;
-  struct quicsocket *qs = &conn->quic;
-  curl_socket_t sockfd = conn->sock[sockindex];
+  struct quicsocket *qs = &conn->hequic[sockindex];
+  curl_socket_t sockfd = conn->tempsock[sockindex];
 
-  result = process_ingress(conn, sockfd);
+  result = process_ingress(conn, sockfd, qs);
   if(result)
     return result;
 
-  result = flush_egress(conn, sockfd);
+  result = flush_egress(conn, sockfd, qs);
   if(result)
     return result;
 
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
-    result = quiche_has_connected(conn, sockindex);
+    result = quiche_has_connected(conn, 0, sockindex);
     DEBUGF(infof(conn->data, "quiche established connection!\n"));
   }
 
   return result;
 }
 
-static CURLcode process_ingress(struct connectdata *conn, int sockfd)
+static CURLcode process_ingress(struct connectdata *conn, int sockfd,
+                                struct quicsocket *qs)
 {
   ssize_t recvd;
-  struct quicsocket *qs = &conn->quic;
   struct Curl_easy *data = conn->data;
   uint8_t *buf = (uint8_t *)data->state.buffer;
   size_t bufsize = data->set.buffer_size;
@@ -273,7 +287,8 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd)
       break;
 
     if(recvd < 0) {
-      failf(conn->data, "quiche: recv() unexpectedly returned %d", recvd);
+      failf(conn->data, "quiche: recv() unexpectedly returned %d "
+            "(errno: %d, socket %d)", recvd, SOCKERRNO, sockfd);
       return CURLE_RECV_ERROR;
     }
 
@@ -294,10 +309,10 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd)
  * flush_egress drains the buffers and sends off data.
  * Calls failf() on errors.
  */
-static CURLcode flush_egress(struct connectdata *conn, int sockfd)
+static CURLcode flush_egress(struct connectdata *conn, int sockfd,
+                             struct quicsocket *qs)
 {
   ssize_t sent;
-  struct quicsocket *qs = &conn->quic;
   static uint8_t out[1200];
   int64_t timeout_ns;
 
@@ -366,7 +381,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 {
   ssize_t recvd = -1;
   ssize_t rcode;
-  struct quicsocket *qs = &conn->quic;
+  struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
   quiche_h3_event *ev;
   int rc;
@@ -376,7 +391,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
   headers.destlen = buffersize;
   headers.nlen = 0;
 
-  if(process_ingress(conn, sockfd)) {
+  if(process_ingress(conn, sockfd, qs)) {
     infof(conn->data, "h3_stream_recv returns on ingress\n");
     *curlcode = CURLE_RECV_ERROR;
     return -1;
@@ -397,16 +412,13 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 
     switch(quiche_h3_event_type(ev)) {
     case QUICHE_H3_EVENT_HEADERS:
-      H3BUGF(infof(conn->data, "quiche says HEADERS\n"));
       rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
       if(rc) {
-        fprintf(stderr, "failed to process headers");
         /* what do we do about this? */
       }
       recvd = headers.nlen;
       break;
     case QUICHE_H3_EVENT_DATA:
-      H3BUGF(infof(conn->data, "quiche says DATA\n"));
       if(!stream->firstbody) {
         /* add a header-body separator CRLF */
         buf[0] = '\r';
@@ -428,9 +440,8 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
       break;
 
     case QUICHE_H3_EVENT_FINISHED:
-      H3BUGF(infof(conn->data, "quiche says FINISHED\n"));
       if(quiche_conn_close(qs->conn, true, 0, NULL, 0) < 0) {
-        fprintf(stderr, "failed to close connection\n");
+        ;
       }
       recvd = 0; /* end of stream */
       break;
@@ -440,7 +451,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 
     quiche_h3_event_free(ev);
   }
-  if(flush_egress(conn, sockfd)) {
+  if(flush_egress(conn, sockfd, qs)) {
     *curlcode = CURLE_SEND_ERROR;
     return -1;
   }
@@ -456,7 +467,7 @@ static ssize_t h3_stream_send(struct connectdata *conn,
                               CURLcode *curlcode)
 {
   ssize_t sent;
-  struct quicsocket *qs = &conn->quic;
+  struct quicsocket *qs = conn->quic;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct HTTP *stream = conn->data->req.protop;
 
@@ -476,7 +487,7 @@ static ssize_t h3_stream_send(struct connectdata *conn,
     }
   }
 
-  if(flush_egress(conn, sockfd)) {
+  if(flush_egress(conn, sockfd, qs)) {
     *curlcode = CURLE_SEND_ERROR;
     return -1;
   }
@@ -519,7 +530,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   char *end, *line_end;
   int64_t stream3_id;
   quiche_h3_header *nva = NULL;
-  struct quicsocket *qs = &conn->quic;
+  struct quicsocket *qs = conn->quic;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
 
