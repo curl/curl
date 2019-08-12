@@ -2763,6 +2763,8 @@ typedef struct {
                                    (MAJOR << 16) | (MINOR << 8) | PATCH */
   const char *nghttp2_version; /* human readable string. */
 
+  char *quic_version; /* human readable quic library + version or NULL */
+
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6         (1<<0)  /* IPv6-enabled */

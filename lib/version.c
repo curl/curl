@@ -395,7 +395,8 @@ static curl_version_info_data version_info = {
   0,    /* brotli_ver_num */
   NULL, /* brotli version */
   0,    /* nghttp2 version number */
-  NULL  /* nghttp2 version string */
+  NULL, /* nghttp2 version string */
+  NULL  /* quic library string */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -476,6 +477,14 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
     nghttp2_info *h2 = nghttp2_version(0);
     version_info.nghttp2_ver_num = h2->version_num;
     version_info.nghttp2_version = h2->version_str;
+  }
+#endif
+
+#ifdef ENABLE_QUIC
+  {
+    static char quicbuffer[80];
+    Curl_quic_ver(quicbuffer, sizeof(quicbuffer));
+    version_info.quic_version = quicbuffer;
   }
 #endif
 
