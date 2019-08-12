@@ -37,10 +37,12 @@
 /* functions provided by the specific backends */
 CURLcode Curl_quic_connect(struct connectdata *conn,
                            curl_socket_t sockfd,
+                           int sockindex,
                            const struct sockaddr *addr,
                            socklen_t addrlen);
-CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
-                                bool *done);
+CURLcode Curl_quic_is_connected(struct connectdata *conn,
+                                curl_socket_t sockfd,
+                                bool *connected);
 int Curl_quic_ver(char *p, size_t len);
 
 #endif

@@ -836,7 +836,8 @@ struct connectdata {
   } transport;
 
 #ifdef ENABLE_QUIC
-  struct quicsocket quic;
+  struct quicsocket hequic[2]; /* two, for happy eyeballs! */
+  struct quicsocket *quic;
 #endif
 
   struct hostname host;

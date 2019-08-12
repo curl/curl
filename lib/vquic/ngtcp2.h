@@ -39,7 +39,8 @@ struct quic_handshake {
 };
 
 struct quicsocket {
-  ngtcp2_conn *conn;
+  struct connectdata *conn; /* point back to the connection */
+  ngtcp2_conn *qconn;
   ngtcp2_cid dcid;
   ngtcp2_cid scid;
   uint32_t version;
@@ -64,11 +65,6 @@ struct quicsocket {
 
 #include "urldata.h"
 
-CURLcode Curl_quic_connect(struct connectdata *conn,
-                           curl_socket_t sockfd,
-                           const struct sockaddr *addr,
-                           socklen_t addrlen);
-int Curl_quic_ver(char *p, size_t len);
 #endif
 
 #endif /* HEADER_CURL_VQUIC_NGTCP2_H */

@@ -1565,10 +1565,8 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 
 #ifdef ENABLE_QUIC
   if(conn->transport == TRNSPRT_QUIC) {
-    result = Curl_quic_is_connected(conn, FIRSTSOCKET, done);
-    if(result)
-      connclose(conn, "Failed HTTPS connection (over QUIC)");
-    return result;
+    *done = TRUE;
+    return CURLE_OK;
   }
 #endif
 
