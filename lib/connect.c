@@ -166,7 +166,7 @@ tcpkeepalive(struct Curl_easy *data,
 static CURLcode
 singleipconnect(struct connectdata *conn,
                 const Curl_addrinfo *ai, /* start connecting to this */
-                curl_socket_t *sock);
+                int sockindex);          /* 0 or 1 among the temp ones */
 
 /*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
@@ -596,7 +596,7 @@ static CURLcode trynextip(struct connectdata *conn,
       }
 
       if(ai) {
-        result = singleipconnect(conn, ai, &conn->tempsock[tempindex]);
+        result = singleipconnect(conn, ai, tempindex);
         if(result == CURLE_COULDNT_CONNECT) {
           ai = ai->ai_next;
           continue;
@@ -778,6 +778,23 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     if(conn->tempsock[i] == CURL_SOCKET_BAD)
       continue;
 
+#ifdef ENABLE_QUIC
+    if(conn->transport == TRNSPRT_QUIC) {
+      result = Curl_quic_is_connected(conn, i, connected);
+      if(result) {
+        error = SOCKERRNO;
+        goto error;
+      }
+      if(*connected) {
+        /* use this socket from now on */
+        conn->sock[sockindex] = conn->tempsock[i];
+        conn->ip_addr = conn->tempaddr[i];
+        conn->tempsock[i] = CURL_SOCKET_BAD;
+      }
+      return result;
+    }
+#endif
+
 #ifdef mpeix
     /* Call this function once now, and ignore the results. We do this to
        "clear" the error state on the socket so that we can later read it
@@ -841,6 +858,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     else if(rc & CURL_CSELECT_ERR)
       (void)verifyconnect(conn->tempsock[i], &error);
 
+    error:
     /*
      * The connection failed here, we should attempt to connect to the "next
      * address" for the given host. But first remember the latest error.
@@ -1001,7 +1019,7 @@ void Curl_sndbufset(curl_socket_t sockfd)
  */
 static CURLcode singleipconnect(struct connectdata *conn,
                                 const Curl_addrinfo *ai,
-                                curl_socket_t *sockp)
+                                int sockindex)
 {
   struct Curl_sockaddr_ex addr;
   int rc = -1;
@@ -1017,7 +1035,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
   int optval = 1;
 #endif
   char buffer[STRERROR_LEN];
-
+  curl_socket_t *sockp = &conn->tempsock[sockindex];
   *sockp = CURL_SOCKET_BAD;
 
   result = Curl_socket(conn, ai, &addr, &sockfd);
@@ -1143,20 +1161,21 @@ static CURLcode singleipconnect(struct connectdata *conn,
 
     if(-1 == rc)
       error = SOCKERRNO;
+#ifdef ENABLE_QUIC
+    else if(conn->transport == TRNSPRT_QUIC) {
+      /* pass in 'sockfd' separately since it hasn't been put into the
+         tempsock array at this point */
+      result = Curl_quic_connect(conn, sockfd, sockindex,
+                                 &addr.sa_addr, addr.addrlen);
+      if(result)
+        error = SOCKERRNO;
+    }
+#endif
   }
   else {
     *sockp = sockfd;
     return CURLE_OK;
   }
-
-#ifdef ENABLE_QUIC
-  if(!isconnected && (conn->transport == TRNSPRT_QUIC)) {
-    result = Curl_quic_connect(conn, sockfd, &addr.sa_addr, addr.addrlen);
-    if(result)
-      return result;
-    rc = 0; /* connect success */
-  }
-#endif
 
   if(-1 == rc) {
     switch(error) {
@@ -1225,7 +1244,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   /* start connecting to first IP */
   while(conn->tempaddr[0]) {
-    result = singleipconnect(conn, conn->tempaddr[0], &(conn->tempsock[0]));
+    result = singleipconnect(conn, conn->tempaddr[0], 0);
     if(!result)
       break;
     conn->tempaddr[0] = conn->tempaddr[0]->ai_next;
