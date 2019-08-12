@@ -1381,8 +1381,14 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
     *curlcode = CURLE_RECV_ERROR;
     return -1;
   }
+  if(flush_egress(conn, sockfd)) {
+    *curlcode = CURLE_SEND_ERROR;
+    return -1;
+  }
 
-  return 0;
+  *curlcode = CURLE_AGAIN;
+
+  return -1;
 }
 
 /* Index where :authority header field will appear in request header
