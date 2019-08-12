@@ -2,7 +2,7 @@ curl and libcurl 7.66.0
 
  Public curl releases:         185
  Command line options:         225
- curl_easy_setopt() options:   270
+ curl_easy_setopt() options:   269
  Public functions in libcurl:  81
  Contributors:                 1991
 
@@ -53,6 +53,10 @@ This release includes the following bugfixes:
  o ssh-libssh: do not specify O_APPEND when not in append mode [7]
  o timediff: make it 64 bit (if possible) even with 32 bit time_t [20]
  o url: make use of new HTTP version if alt-svc has one [16]
+ o docs: s/curl_debug/curl_dbg_debug in comments and docs [36]
+ o curl_global_init_mem.3: mention it was added in 7.12.0
+ o CURLOPT_READFUNCTION.3: provide inline example
+ o configure: avoid undefined check_for_ca_bundle [37]
 
 This release includes the following known bugs:
 
@@ -61,13 +65,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Amit Katyal, Balazs Kovacsics, Brad Spencer,
-  Daniel Gustafsson, Daniel Stenberg, Felix Hädicke, Gergely Nagy,
-  Ironbars13 on github, Jason Lee, Jonathan Cardoso Machado, Kamil Dudka,
-  Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee, Michal Čaplygin,
-  niallor on github, Patrick Monnerat, Ray Satiro, Steve Holme,
+  Alessandro Ghedini, Alex Mayorga, Amit Katyal, Balazs Kovacsics,
+  Brad Spencer, Carlo Marcelo Arenas Belón, Daniel Gustafsson, Daniel Stenberg,
+  Eric Wong, Felix Hädicke, Gergely Nagy, Gisle Vanem, Ironbars13 on github,
+  Jason Lee, Jonathan Cardoso Machado, Kamil Dudka, Kyohei Kadota, Lance Ware,
+  Marcel Raad, Michael Lee, Michal Čaplygin, niallor on github,
+  Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
   The Infinnovation team, Tom van der Woerdt, Yiming Jing,
-  (24 contributors)
+  (29 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -108,4 +113,5 @@ References to bug reports and discussions on issues:
  [33] = https://curl.haxx.se/bug/?i=4197
  [34] = https://curl.haxx.se/bug/?i=4198
  [35] = https://curl.haxx.se/bug/?i=3794
-
+ [36] = https://curl.haxx.se/bug/?i=3794
+ [37] = https://curl.haxx.se/bug/?i=4213
