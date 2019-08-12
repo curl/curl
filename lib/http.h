@@ -174,13 +174,15 @@ struct HTTP {
   size_t pauselen; /* the number of bytes left in data */
   bool closed; /* TRUE on HTTP2 stream close */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
-  char *mem;     /* points to a buffer in memory to store received data */
-  size_t len;    /* size of the buffer 'mem' points to */
-  size_t memlen; /* size of data copied to mem */
 
   char **push_headers;       /* allocated array */
   size_t push_headers_used;  /* number of entries filled in */
   size_t push_headers_alloc; /* number of entries allocated */
+#endif
+#if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
+  char *mem;     /* points to a buffer in memory to store received data */
+  size_t len;    /* size of the buffer 'mem' points to */
+  size_t memlen; /* size of data copied to mem */
 #endif
 #if defined(USE_NGHTTP2) || defined(ENABLE_QUIC)
   /* fields used by both HTTP/2 and HTTP/3 */

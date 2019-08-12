@@ -42,6 +42,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* #define DEBUG_NGTCP2 1 */
 #define DEBUG_HTTP3
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
@@ -67,6 +68,7 @@ static ngtcp2_tstamp timestamp(void)
   return ct.tv_sec * NGTCP2_SECONDS + ct.tv_usec * NGTCP2_MICROSECONDS;
 }
 
+#ifdef DEBUG_NGTCP2
 static void quic_printf(void *user_data, const char *fmt, ...)
 {
   va_list ap;
@@ -76,6 +78,7 @@ static void quic_printf(void *user_data, const char *fmt, ...)
   va_end(ap);
   fprintf(stderr, "\n");
 }
+#endif
 
 static int setup_initial_crypto_context(struct connectdata *conn)
 {
@@ -169,7 +172,11 @@ static int setup_initial_crypto_context(struct connectdata *conn)
 static void quic_settings(ngtcp2_settings *s)
 {
   ngtcp2_settings_default(s);
+#ifdef DEBUG_NGTCP2
   s->log_printf = quic_printf;
+#else
+  s->log_printf = NULL;
+#endif
   s->initial_ts = timestamp();
   s->max_stream_data_bidi_local = QUIC_MAX_STREAMS;
   s->max_stream_data_bidi_remote = QUIC_MAX_STREAMS;
@@ -1137,7 +1144,8 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
  */
 int Curl_quic_ver(char *p, size_t len)
 {
-  return msnprintf(p, len, " ngtcp2/blabla nghttp3/bloblo");
+  return msnprintf(p, len, " ngtcp2/%s nghttp3/%s",
+                   NGTCP2_VERSION, NGHTTP3_VERSION);
 }
 
 static int ng_getsock(struct connectdata *conn, curl_socket_t *socks)
@@ -1215,16 +1223,27 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
 }
 
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
-                           const uint8_t *data, size_t datalen,
+                           const uint8_t *buf, size_t buflen,
                            void *user_data, void *stream_user_data)
 {
+  size_t ncopy;
+  struct Curl_easy *data = stream_user_data;
+  struct HTTP *stream = data->req.protop;
   (void)conn;
   (void)stream_id;
-  (void)data;
-  (void)datalen;
   (void)user_data;
-  (void)stream_user_data;
-  fprintf(stderr, "cb_h3_recv_data CALLED\n");
+  fprintf(stderr, "cb_h3_recv_data CALLED with %d bytes\n",
+          buflen);
+
+  /* TODO: this needs to be handled properly */
+  DEBUGASSERT(buflen <= stream->len);
+
+  ncopy = CURLMIN(stream->len, buflen);
+  memcpy(stream->mem, buf, ncopy);
+  stream->len -= ncopy;
+  stream->memlen += ncopy;
+  stream->mem += ncopy;
+
   return 0;
 }
 
@@ -1241,14 +1260,48 @@ static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static int cb_h3_begin_headers(nghttp3_conn *conn, int64_t stream_id,
-                               void *user_data, void *stream_user_data)
+/* Decode HTTP status code.  Returns -1 if no valid status code was
+   decoded. (duplicate from http2.c) */
+static int decode_status_code(const uint8_t *value, size_t len)
 {
+  int i;
+  int res;
+
+  if(len != 3) {
+    return -1;
+  }
+
+  res = 0;
+
+  for(i = 0; i < 3; ++i) {
+    char c = value[i];
+
+    if(c < '0' || c > '9') {
+      return -1;
+    }
+
+    res *= 10;
+    res += c - '0';
+  }
+
+  return res;
+}
+
+static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
+                             void *user_data, void *stream_user_data)
+{
+  struct Curl_easy *data = stream_user_data;
+  struct HTTP *stream = data->req.protop;
   (void)conn;
   (void)stream_id;
   (void)user_data;
-  (void)stream_user_data;
-  fprintf(stderr, "cb_h3_begin_headers CALLED\n");
+
+  if(stream->memlen >= 2) {
+    memcpy(stream->mem, "\r\n", 2);
+    stream->len -= 2;
+    stream->memlen += 2;
+    stream->mem += 2;
+  }
   return 0;
 }
 
@@ -1257,15 +1310,33 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
                              nghttp3_rcbuf *value, uint8_t flags,
                              void *user_data, void *stream_user_data)
 {
+  nghttp3_vec h3name = nghttp3_rcbuf_get_buf(name);
+  nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
+  struct Curl_easy *data = stream_user_data;
+  struct HTTP *stream = data->req.protop;
+  size_t ncopy;
   (void)conn;
   (void)stream_id;
   (void)token;
-  (void)name;
-  (void)value;
   (void)flags;
   (void)user_data;
-  (void)stream_user_data;
-  fprintf(stderr, "cb_h3_recv_header CALLED\n");
+
+  if(h3name.len == sizeof(":status") - 1 &&
+     !memcmp(":status", h3name.base, h3name.len)) {
+    int status = decode_status_code(h3val.base, h3val.len);
+    DEBUGASSERT(status != -1);
+    msnprintf(stream->mem, stream->len, "HTTP/3 %03d \r\n", status);
+  }
+  else {
+    /* store as a HTTP1-style header */
+    msnprintf(stream->mem, stream->len, "%.*s: %.*s\n",
+              h3name.len, h3name.base, h3val.len, h3val.base);
+  }
+
+  ncopy = strlen(stream->mem);
+  stream->len -= ncopy;
+  stream->memlen += ncopy;
+  stream->mem += ncopy;
   return 0;
 }
 
@@ -1288,9 +1359,9 @@ static nghttp3_conn_callbacks ngh3_callbacks = {
   cb_h3_stream_close,
   cb_h3_recv_data,
   cb_h3_deferred_consume,
-  cb_h3_begin_headers,
+  NULL, /* begin_headers */
   cb_h3_recv_header,
-  NULL, /* end_headers */
+  cb_h3_end_headers,
   NULL, /* begin_trailers */
   cb_h3_recv_header,
   NULL, /* end_trailers */
@@ -1373,8 +1444,15 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
                                 CURLcode *curlcode)
 {
   curl_socket_t sockfd = conn->sock[sockindex];
-  (void)buf;
-  (void)buffersize;
+  struct HTTP *stream = conn->data->req.protop;
+
+  fprintf(stderr, "ngh3_stream_recv CALLED (easy %p)\n", conn->data);
+
+  /* remember where to store incoming data for this stream and how big the
+     buffer is */
+  stream->mem = buf;
+  stream->len = buffersize;
+  stream->memlen = 0;
 
   if(process_ingress(conn, sockfd)) {
     infof(conn->data, "ngh3_stream_recv returns on ingress\n");
@@ -1386,8 +1464,16 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
     return -1;
   }
 
-  *curlcode = CURLE_AGAIN;
+  if(stream->memlen) {
+    /* data arrived */
+    *curlcode = CURLE_OK;
+    infof(conn->data, "ngh3_stream_recv returns %zd bytes\n",
+          stream->memlen);
+    return stream->memlen;
+  }
 
+  infof(conn->data, "ngh3_stream_recv returns 0 bytes and EAGAIN\n");
+  *curlcode = CURLE_AGAIN;
   return -1;
 }
 
@@ -1398,8 +1484,6 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
 static CURLcode http_request(struct connectdata *conn, const void *mem,
                              size_t len)
 {
-  /*
-   */
   struct HTTP *stream = conn->data->req.protop;
   size_t nheader;
   size_t i;
@@ -1580,6 +1664,12 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
             "headers exceeds %zu bytes and that could cause the "
             "stream to be rejected.\n", MAX_ACC);
     }
+  }
+
+  stream->header_recvbuf = Curl_add_buffer_init();
+  if(!stream->header_recvbuf) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto fail;
   }
 
   switch(data->set.httpreq) {
