@@ -2762,7 +2762,7 @@ typedef struct {
   unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
                                    (MAJOR << 16) | (MINOR << 8) | PATCH */
   const char *nghttp2_version; /* human readable string. */
-  char *quic_version;          /* human readable quic (+ HTTP/3) library +
+  const char *quic_version;    /* human readable quic (+ HTTP/3) library +
                                   version or NULL */
 } curl_version_info_data;
 
