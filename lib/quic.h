@@ -34,9 +34,6 @@
 
 #include "urldata.h"
 
-/* generic */
-const char *Curl_quic_backend(void);
-
 /* functions provided by the specific backends */
 CURLcode Curl_quic_connect(struct connectdata *conn,
                            curl_socket_t sockfd,
@@ -46,9 +43,6 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
                                 bool *done);
 int Curl_quic_ver(char *p, size_t len);
 
-#else
-/* no QUIC */
-#define Curl_quic_backend() ""
 #endif
 
 #endif /* HEADER_CURL_QUIC_H */
