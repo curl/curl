@@ -1698,6 +1698,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
 #endif
     break;
   default:
+    stream->upload_left = 0; /* nothing left to send */
     rc = nghttp3_conn_submit_request(qs->h3conn, stream->stream3_id,
                                      nva, nheader,
                                      NULL, /* no body! */
@@ -1710,6 +1711,15 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   }
 
   Curl_safefree(nva);
+
+  if(!stream->upload_left) {
+    /* done with this stream, FIN it */
+    rc = nghttp3_conn_end_stream(qs->h3conn, stream->stream3_id);
+    if(rc) {
+      result = CURLE_SEND_ERROR;
+      goto fail;
+    }
+  }
 
   infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
         stream3_id, (void *)data);
