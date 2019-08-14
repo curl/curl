@@ -103,7 +103,7 @@ static size_t brotli_version(char *buf, size_t bufsz)
 char *curl_version(void)
 {
   static bool initialized;
-  static char version[200];
+  static char version[250];
   char *ptr = version;
   size_t len;
   size_t left = sizeof(version);
