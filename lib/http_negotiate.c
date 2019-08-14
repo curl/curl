@@ -148,7 +148,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy)
     }
     if(!neg_ctx->context) {
       result = Curl_input_negotiate(conn, proxy, "Negotiate");
-      if(result == CURLE_LOGIN_DENIED) {
+      if(result == CURLE_AUTH_ERROR) {
         /* negotiate auth failed, let's continue unauthenticated to stay
          * compatible with the behavior before curl-7_64_0-158-g6c6035532 */
         authp->done = TRUE;
