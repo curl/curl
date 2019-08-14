@@ -165,7 +165,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          nego->p_identity, NULL, NULL,
                                          nego->credentials, &expiry);
     if(nego->status != SEC_E_OK)
-      return CURLE_LOGIN_DENIED;
+      return CURLE_AUTH_ERROR;
 
     /* Allocate our new context handle */
     nego->context = calloc(1, sizeof(CtxtHandle));
