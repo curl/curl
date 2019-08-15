@@ -463,6 +463,8 @@ script:
              make
              make TFLAGS=-n test-nonflaky
              make "TFLAGS=-n -e" test-nonflaky
+             tests="1 200 300 500 700 800 900 1000 1100 1200 1302 1400 1502 3000"
+             make "TFLAGS=-n -t $tests" test-nonflaky
              coveralls --gcov /usr/bin/gcov-8 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
              coveralls --gcov /usr/bin/gcov-8 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
         fi
