@@ -17,46 +17,58 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_ALTSVC.3: use a "" file name to not load from a file
+ o CURLOPT_ALTSVC_CTRL.3: remove CURLALTSVC_ALTUSED
  o CURLOPT_HTTP_VERSION: seting this to 3 forces HTTP/3 use directly [33]
+ o CURLOPT_READFUNCTION.3: provide inline example
  o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
  o alt-svc: add protocol version selection masking [31]
+ o alt-svc: fix removal of expired cache entry [30]
+ o alt-svc: make it use h3-22 with ngtcp2 as well
  o alt-svc: more liberal ALPN name parsing [17]
  o alt-svc: send Alt-Used: in redirected requests [32]
- o altsvc: fix removal of expired cache entry [30]
- o altsvc: with quiche, use the quiche h3 alpn string [16]
+ o alt-svc: with quiche, use the quiche h3 alpn string [16]
  o appveyor: pass on -k to make
  o asyn-thread: create a socketpair to wait on [14]
  o cleanup: remove the 'numsocks' argument used in many places [25]
+ o configure: avoid undefined check_for_ca_bundle [37]
  o curl.h: add CURL_HTTP_VERSION_3 to the version enum
  o curl.h: fix outdated comment [23]
  o curl: cap the maximum allowed values for retry time arguments [13]
  o curl: make use of CURLINFO_RETRY_AFTER when retrying [35]
  o curl: remove outdated comment [24]
  o curl: use CURLINFO_PROTOCOL to check for HTTP(s)
+ o curl_global_init_mem.3: mention it was added in 7.12.0
+ o curl_version: bump string buffer size to 250
+ o curl_version_info.3: mentioned ALTSVC and HTTP3
+ o curl_version_info: offer quic (and h3) library info [38]
  o curl_version_info: provide nghttp2 details [2]
  o docs/ALTSVC: remove what works and the experimental explanation [34]
  o docs/EXPERIMENTAL: explain what it means and what's experimental now
  o docs/MANUAL.md: converted to markdown from plain text [3]
+ o docs: s/curl_debug/curl_dbg_debug in comments and docs [36]
  o easy: resize receive buffer on easy handle reset [9]
  o examples: Avoid reserved names in hiperfifo examples [8]
+ o examples: add http3.c, altsvc.c and http3-present.c [40]
  o getenv: support up to 4K environment variable contents on windows [21]
  o http09: disable HTTP/0.9 by default in both tool and library [29]
  o http2_recv: trigger another read when the last data is returned [11]
+ o http: fix use of credentials from URL when using HTTP proxy [44]
  o http_negotiate: improve handling of gss_init_sec_context() failures [18]
  o md4: Use our own MD4 when no crypto libraries are available [15]
  o multi: call detach_connection before Curl_disconnect [6]
+ o nss: use TLSv1.3 as default if supported [39]
  o plan9: add support for running on Plan 9 [22]
  o progress: reset download/uploaded counter between transfers [12]
  o readwrite_data: repair setting the TIMER_STARTTRANSFER stamp [26]
  o source: remove names from source comments [1]
  o src/makefile: fix uncompressed hugehelp.c generation [19]
  o ssh-libssh: do not specify O_APPEND when not in append mode [7]
+ o tests: Replace outdated test case numbering documentation [43]
  o timediff: make it 64 bit (if possible) even with 32 bit time_t [20]
+ o travis: reduce number of torture tests in 'coverage' [42]
  o url: make use of new HTTP version if alt-svc has one [16]
- o docs: s/curl_debug/curl_dbg_debug in comments and docs [36]
- o curl_global_init_mem.3: mention it was added in 7.12.0
- o CURLOPT_READFUNCTION.3: provide inline example
- o configure: avoid undefined check_for_ca_bundle [37]
+ o vauth: Use CURLE_AUTH_ERROR for auth function errors [41]
 
 This release includes the following known bugs:
 
@@ -67,12 +79,13 @@ advice from friends like these:
 
   Alessandro Ghedini, Alex Mayorga, Amit Katyal, Balazs Kovacsics,
   Brad Spencer, Carlo Marcelo Arenas Belón, Daniel Gustafsson, Daniel Stenberg,
-  Eric Wong, Felix Hädicke, Gergely Nagy, Gisle Vanem, Ironbars13 on github,
-  Jason Lee, Jonathan Cardoso Machado, Kamil Dudka, Kyohei Kadota, Lance Ware,
-  Marcel Raad, Michael Lee, Michal Čaplygin, niallor on github,
-  Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
-  The Infinnovation team, Tom van der Woerdt, Yiming Jing,
-  (29 contributors)
+  Dominik Hölzl, Eric Wong, Felix Hädicke, Gergely Nagy, Gisle Vanem,
+  Igor Makarov, Ironbars13 on github, Jason Lee, Jonathan Cardoso Machado,
+  Junho Choi, Kamil Dudka, Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee,
+  Michal Čaplygin, Mike Crowe, niallor on github, Patrick Monnerat, Peter Wu,
+  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, The Infinnovation team,
+  Tom van der Woerdt, Yiming Jing,
+  (34 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -115,3 +128,10 @@ References to bug reports and discussions on issues:
  [35] = https://curl.haxx.se/bug/?i=3794
  [36] = https://curl.haxx.se/bug/?i=3794
  [37] = https://curl.haxx.se/bug/?i=4213
+ [38] = https://curl.haxx.se/bug/?i=4216
+ [39] = https://curl.haxx.se/bug/?i=4187
+ [40] = https://curl.haxx.se/bug/?i=4221
+ [41] = https://curl.haxx.se/bug/?i=3848
+ [42] = https://curl.haxx.se/bug/?i=4223
+ [43] = https://curl.haxx.se/bug/?i=4227
+ [44] = https://curl.haxx.se/bug/?i=4228
