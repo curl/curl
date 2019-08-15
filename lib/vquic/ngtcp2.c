@@ -859,8 +859,9 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
-  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, buflen);
-  ngtcp2_conn_extend_max_offset(tconn, buflen);
+  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, nconsumed);
+  ngtcp2_conn_extend_max_offset(tconn, nconsumed);
+
   return 0;
 }
 
@@ -1229,12 +1230,11 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
                            const uint8_t *buf, size_t buflen,
                            void *user_data, void *stream_user_data)
 {
+  struct quicsocket *qs = user_data;
   size_t ncopy;
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
   (void)conn;
-  (void)stream_id;
-  (void)user_data;
   fprintf(stderr, "cb_h3_recv_data CALLED with %d bytes\n", buflen);
 
   /* TODO: this needs to be handled properly */
@@ -1246,6 +1246,9 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
   stream->memlen += ncopy;
   stream->mem += ncopy;
 
+  ngtcp2_conn_extend_max_stream_offset(qs->qconn, stream_id, buflen);
+  ngtcp2_conn_extend_max_offset(qs->qconn, buflen);
+
   return 0;
 }
 
@@ -1253,12 +1256,14 @@ static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
                                   size_t consumed, void *user_data,
                                   void *stream_user_data)
 {
+  struct quicsocket *qs = user_data;
   (void)conn;
-  (void)stream_id;
-  (void)consumed;
-  (void)user_data;
   (void)stream_user_data;
   fprintf(stderr, "cb_h3_deferred_consume CALLED\n");
+
+  ngtcp2_conn_extend_max_stream_offset(qs->qconn, stream_id, consumed);
+  ngtcp2_conn_extend_max_offset(qs->qconn, consumed);
+
   return 0;
 }
 
@@ -1394,7 +1399,7 @@ static int init_ngh3_conn(struct quicsocket *qs)
                                &ngh3_callbacks,
                                &qs->h3settings,
                                nghttp3_mem_default(),
-                               qs->conn->data);
+                               qs);
   if(rc) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
