@@ -1503,6 +1503,9 @@ enum dupstring {
   STRING_ALTSVC,                /* CURLOPT_ALTSVC */
 #endif
   STRING_SASL_AUTHZID,          /* CURLOPT_SASL_AUTHZID */
+#ifndef CURL_DISABLE_PROXY
+  STRING_TEMP_URL,              /* temp URL storage for proxy use */
+#endif
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,

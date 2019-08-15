@@ -2357,7 +2357,6 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
     /* and no fragment part */
     CURLUcode uc;
-    char *url;
     CURLU *h = curl_url_dup(data->state.uh);
     if(!h)
       return CURLE_OUT_OF_MEMORY;
@@ -2388,18 +2387,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         return CURLE_OUT_OF_MEMORY;
       }
     }
-    /* now extract the new version of the URL */
-    uc = curl_url_get(h, CURLUPART_URL, &url, 0);
+    /* Extract the the URL to use in the request. Store in STRING_TEMP_URL for
+       clean-up reasons if the function returns before the free() further
+       down. */
+    uc = curl_url_get(h, CURLUPART_URL, &data->set.str[STRING_TEMP_URL], 0);
     if(uc) {
       curl_url_cleanup(h);
       return CURLE_OUT_OF_MEMORY;
     }
-
-    if(data->change.url_alloc)
-      free(data->change.url);
-
-    data->change.url = url;
-    data->change.url_alloc = TRUE;
 
     curl_url_cleanup(h);
 
@@ -2579,12 +2574,16 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     query = NULL;
   }
 
+#ifndef CURL_DISABLE_PROXY
   /* url */
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
-    char *url = data->change.url;
+    char *url = data->set.str[STRING_TEMP_URL];
     result = Curl_add_buffer(&req_buffer, url, strlen(url));
+    Curl_safefree(data->set.str[STRING_TEMP_URL]);
   }
-  else if(paste_ftp_userpwd)
+  else
+#endif
+  if(paste_ftp_userpwd)
     result = Curl_add_bufferf(&req_buffer, "ftp://%s:%s@%s",
                               conn->user, conn->passwd,
                               path + sizeof("ftp://") - 1);
