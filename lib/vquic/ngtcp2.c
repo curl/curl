@@ -938,7 +938,6 @@ static int cb_recv_retry(ngtcp2_conn *tconn, const ngtcp2_pkt_hd *hd,
   (void)hd;
   (void)retry;
 
-  quic_init_ssl(qs);
   setup_initial_crypto_context(qs);
 
   return 0;
