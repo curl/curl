@@ -1029,35 +1029,38 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
   return 0;
 }
 
-static void quic_callbacks(ngtcp2_conn_callbacks *c)
-{
-  memset(c, 0, sizeof(ngtcp2_conn_callbacks));
-  c->client_initial = cb_initial;
-  /* recv_client_initial = NULL */
-  c->recv_crypto_data = cb_recv_crypto_data;
-  c->handshake_completed = cb_handshake_completed;
-  /* recv_version_negotiation = NULL */
-  c->in_encrypt = cb_in_encrypt;
-  c->in_decrypt = cb_in_decrypt;
-  c->encrypt = cb_encrypt_data;
-  c->decrypt = cb_decrypt_data;
-  c->in_hp_mask = cb_in_hp_mask;
-  c->hp_mask = cb_hp_mask;
-  c->recv_stream_data = cb_recv_stream_data;
-  /* c->acked_crypto_offset = cb_acked_crypto_offset; */
-  c->acked_stream_data_offset = cb_acked_stream_data_offset;
-  /* stream_open = NULL */
-  c->stream_close = cb_stream_close;
-  c->stream_reset = cb_stream_reset;
-  /* recv_stateless_reset = NULL */
-  c->recv_retry = cb_recv_retry;
-  c->extend_max_local_streams_bidi = cb_extend_max_local_streams_bidi;
-  /* extend_max_local_streams_uni = NULL */
-  c->extend_max_stream_data = cb_extend_max_stream_data;
-  /* rand = NULL */
-  c->get_new_connection_id = cb_get_new_connection_id;
-  /* remove_connection_id = NULL */
-}
+static ngtcp2_conn_callbacks ng_callbacks = {
+  cb_initial,
+  NULL, /* recv_client_initial */
+  cb_recv_crypto_data,
+  cb_handshake_completed,
+  NULL, /* recv_version_negotiation */
+  cb_in_encrypt,
+  cb_in_decrypt,
+  cb_encrypt_data,
+  cb_decrypt_data,
+  cb_in_hp_mask,
+  cb_hp_mask,
+  cb_recv_stream_data,
+  NULL, /* acked_crypto_offset */
+  cb_acked_stream_data_offset,
+  NULL, /* stream_open */
+  cb_stream_close,
+  NULL, /* recv_stateless_reset */
+  cb_recv_retry,
+  cb_extend_max_local_streams_bidi,
+  NULL, /* extend_max_local_streams_uni */
+  NULL, /* rand  */
+  cb_get_new_connection_id,
+  NULL, /* remove_connection_id */
+  NULL, /* update_key */
+  NULL, /* path_validation */
+  NULL, /* select_preferred_addr */
+  cb_stream_reset,
+  NULL, /* extend_max_remote_streams_bidi */
+  NULL, /* extend_max_remote_streams_uni */
+  cb_extend_max_stream_data,
+};
 
 /*
  * Might be called twice for happy eyeballs.
@@ -1110,7 +1113,6 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
     return result;
 
   quic_settings(&qs->settings);
-  quic_callbacks(&qs->callbacks);
 
   qs->tx_crypto_level = NGTCP2_CRYPTO_LEVEL_INITIAL;
   qs->rx_crypto_level = NGTCP2_CRYPTO_LEVEL_INITIAL;
@@ -1131,7 +1133,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
 #error "unsupported ngtcp2 version"
 #endif
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path, QUICVER,
-                              &qs->callbacks, &qs->settings, NULL, qs);
+                              &ng_callbacks, &qs->settings, NULL, qs);
   if(rc)
     return CURLE_FAILED_INIT; /* TODO: create a QUIC error code */
 
