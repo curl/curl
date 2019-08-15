@@ -1217,12 +1217,16 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
                               uint64_t app_error_code, void *user_data,
                               void *stream_user_data)
 {
+  struct Curl_easy *data = stream_user_data;
+  struct HTTP *stream = data->req.protop;
   (void)conn;
   (void)stream_id;
   (void)app_error_code;
   (void)user_data;
-  (void)stream_user_data;
   fprintf(stderr, "cb_h3_stream_close CALLED\n");
+
+  stream->closed = TRUE;
+
   return 0;
 }
 
@@ -1479,6 +1483,11 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
     infof(conn->data, "ngh3_stream_recv returns %zd bytes\n",
           stream->memlen);
     return stream->memlen;
+  }
+
+  if(stream->closed) {
+    *curlcode = CURLE_OK;
+    return 0;
   }
 
   infof(conn->data, "ngh3_stream_recv returns 0 bytes and EAGAIN\n");
