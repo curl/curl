@@ -3551,7 +3551,7 @@ if test X"$want_quiche" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  LIB_QUICHE="-l:libquiche.a -ldl -lpthread"
+  LIB_QUICHE="-lquiche -ldl -lpthread"
   CPP_QUICHE="-I$OPT_QUICHE/include"
   LD_QUICHE="-L$OPT_QUICHE/target/release"
 
