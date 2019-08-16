@@ -24,8 +24,8 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_LIBSSH2) || \
-  defined(USE_LIBSSH) || !defined(CURL_DISABLE_LDAP) || \
+#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
+  !defined(CURL_DISABLE_LDAP) || \
   !defined(CURL_DISABLE_DOH) || defined(USE_SSL)
 
 #include "urldata.h" /* for the Curl_easy definition */
