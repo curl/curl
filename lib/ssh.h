@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -242,4 +242,5 @@ extern const struct Curl_handler Curl_handler_sftp;
 
 #endif /* USE_LIBSSH2 */
 
+size_t Curl_ssh_version(char *buffer, size_t buflen);
 #endif /* HEADER_CURL_SSH_H */
