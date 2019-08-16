@@ -74,7 +74,6 @@
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
- 5.6 Refuse "downgrade" redirects
  5.7 QUIC
 
  6. TELNET
@@ -615,13 +614,6 @@
  test:pass;auth=NTLM or --user test:pass --ntlm from the command line.
 
  Additionally this should be implemented for proxy base URLs as well.
-
-5.6 Refuse "downgrade" redirects
-
- See https://github.com/curl/curl/issues/226
-
- Consider a way to tell curl to refuse to "downgrade" protocol with a redirect
- and/or possibly a bit that refuses redirect to change protocol completely.
 
 5.7 QUIC
 

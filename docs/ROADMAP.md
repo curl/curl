@@ -5,11 +5,6 @@ Roadmap of things Daniel Stenberg wants to work on next. It is intended to
 serve as a guideline for others for information, feedback and possible
 participation.
 
-HTTP/3
-------
-
- See the [QUIC and HTTP/3 wiki page](https://github.com/curl/curl/wiki/QUIC).
-
 ESNI (Encrypted SNI)
 --------------------
 
@@ -20,11 +15,6 @@ HSTS
 ----
 
 Complete and merge [the existing PR](https://github.com/curl/curl/pull/2682).
-
-Option to refuse HTTPS => HTTP redirects
-----------------------------------------
-
-Possibly as a new bit to `CURLOPT_FOLLOWLOCATION` ?
 
 Option to let CURLOPT_CUSTOMREQUEST be overridden on redirect
 -------------------------------------------------------------
