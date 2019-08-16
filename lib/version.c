@@ -54,18 +54,6 @@
 #include <librtmp/rtmp.h>
 #endif
 
-#ifdef USE_LIBSSH2
-#include <libssh2.h>
-#endif
-
-#ifdef HAVE_LIBSSH2_VERSION
-/* get it run-time if possible */
-#define CURL_LIBSSH2_VERSION libssh2_version(0)
-#else
-/* use build-time if run-time not possible */
-#define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
-#endif
-
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #ifdef __SYMBIAN32__
@@ -173,13 +161,12 @@ char *curl_version(void)
   left -= len;
   ptr += len;
 #endif
-#ifdef USE_LIBSSH2
-  len = msnprintf(ptr, left, " libssh2/%s", CURL_LIBSSH2_VERSION);
-  left -= len;
-  ptr += len;
-#endif
-#ifdef USE_LIBSSH
-  len = msnprintf(ptr, left, " libssh/%s", CURL_LIBSSH_VERSION);
+#ifdef USE_SSH
+  if(left) {
+    *ptr++=' ';
+    left--;
+  }
+  len = Curl_ssh_version(ptr, left);
   left -= len;
   ptr += len;
 #endif
@@ -458,11 +445,8 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #endif /* _LIBICONV_VERSION */
 #endif
 
-#if defined(USE_LIBSSH2)
-  msnprintf(ssh_buffer, sizeof(ssh_buffer), "libssh2/%s", LIBSSH2_VERSION);
-  version_info.libssh_version = ssh_buffer;
-#elif defined(USE_LIBSSH)
-  msnprintf(ssh_buffer, sizeof(ssh_buffer), "libssh/%s", CURL_LIBSSH_VERSION);
+#if defined(USE_SSH)
+  Curl_ssh_version(ssh_buffer, sizeof(ssh_buffer));
   version_info.libssh_version = ssh_buffer;
 #endif
 

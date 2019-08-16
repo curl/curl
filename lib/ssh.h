@@ -247,4 +247,5 @@ void Curl_ssh_cleanup(void);
 #define Curl_ssh_cleanup()
 #endif /* USE_LIBSSH2 */
 
+size_t Curl_ssh_version(char *buffer, size_t buflen);
 #endif /* HEADER_CURL_SSH_H */
