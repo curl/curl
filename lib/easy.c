@@ -187,16 +187,8 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   (void)Curl_ipv6works();
 
-#if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_INIT)
-  if(libssh2_init(0)) {
-    DEBUGF(fprintf(stderr, "Error: libssh2_init failed\n"));
-    return CURLE_FAILED_INIT;
-  }
-#endif
-
-#if defined(USE_LIBSSH)
-  if(ssh_init()) {
-    DEBUGF(fprintf(stderr, "Error: libssh_init failed\n"));
+#if defined(USE_SSH)
+  if(Curl_ssh_init()) {
     return CURLE_FAILED_INIT;
   }
 #endif
@@ -274,13 +266,7 @@ void curl_global_cleanup(void)
 
   Curl_amiga_cleanup();
 
-#if defined(USE_LIBSSH2) && defined(HAVE_LIBSSH2_EXIT)
-  (void)libssh2_exit();
-#endif
-
-#if defined(USE_LIBSSH)
-  (void)ssh_finalize();
-#endif
+  Curl_ssh_cleanup();
 
   init_flags  = 0;
 }
