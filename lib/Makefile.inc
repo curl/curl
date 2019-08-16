@@ -41,6 +41,8 @@ LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/ngtcp2-crypto.c vquic/quiche.c
 
 LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/ngtcp2-crypto.h vquic/quiche.h
 
+LIB_VSSH_CFILES = vssh/libssh2.c vssh/libssh.c
+
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
   ldap.c version.c getenv.c escape.c mprintf.c telnet.c netrc.c         \
@@ -50,7 +52,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   http_digest.c md4.c md5.c http_negotiate.c inet_pton.c strtoofft.c    \
   strerror.c amigaos.c hostasyn.c hostip4.c hostip6.c hostsyn.c         \
   inet_ntop.c parsedate.c select.c tftp.c splay.c strdup.c socks.c      \
-  ssh.c ssh-libssh.c curl_addrinfo.c socks_gssapi.c socks_sspi.c        \
+  curl_addrinfo.c socks_gssapi.c socks_sspi.c                           \
   curl_sspi.c slist.c nonblock.c curl_memrchr.c imap.c pop3.c smtp.c    \
   pingpong.c rtsp.c curl_threads.c warnless.c hmac.c curl_rtmp.c        \
   openldap.c curl_gethostname.c gopher.c idn_win32.c                    \
@@ -85,6 +87,6 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
 LIB_RCFILES = libcurl.rc
 
 CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES) \
-  $(LIB_VQUIC_CFILES)
+  $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES)
 HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \
   $(LIB_VQUIC_HFILES)
