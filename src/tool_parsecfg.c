@@ -34,8 +34,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#define CURLRC DOT_CHAR "curlrc"
-
 /* only acknowledge colon or equals as separators if the option was not
    specified with an initial dash! */
 #define ISSEP(x,dash) (!dash && (((x) == '=') || ((x) == ':')))
@@ -43,74 +41,90 @@
 static const char *unslashquote(const char *line, char *param);
 static char *my_get_line(FILE *fp);
 
+#ifdef WIN32
+static FILE *execpath(const char *filename)
+{
+  char filebuffer[512];
+  /* Get the filename of our executable. GetModuleFileName is already declared
+   * via inclusions done in setup header file.  We assume that we are using
+   * the ASCII version here.
+   */
+  unsigned long len = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
+  if(len > 0 && len < sizeof(filebuffer)) {
+    /* We got a valid filename - get the directory part */
+    char *lastdirchar = strrchr(filebuffer, '\\');
+    if(lastdirchar) {
+      size_t remaining;
+      *lastdirchar = 0;
+      /* If we have enough space, build the RC filename */
+      remaining = sizeof(filebuffer) - strlen(filebuffer);
+      if(strlen(filename) < remaining - 1) {
+        msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
+        return fopen(filebuffer, FOPEN_READTEXT);
+      }
+    }
+  }
+
+  return NULL;
+}
+#endif
+
+
 /* return 0 on everything-is-fine, and non-zero otherwise */
 int parseconfig(const char *filename, struct GlobalConfig *global)
 {
   FILE *file = NULL;
-  char filebuffer[512];
   bool usedarg = FALSE;
   int rc = 0;
   struct OperationConfig *operation = global->first;
+  char *pathalloc = NULL;
 
   if(!filename || !*filename) {
     /* NULL or no file name attempts to load .curlrc from the homedir! */
 
-#ifndef __AMIGA__
     char *home = homedir();    /* portable homedir finder */
-    filename = CURLRC;   /* sensible default */
+#ifndef WIN32
     if(home) {
-      if(strlen(home) < (sizeof(filebuffer) - strlen(CURLRC))) {
-        msnprintf(filebuffer, sizeof(filebuffer),
-                  "%s%s%s", home, DIR_CHAR, CURLRC);
-
-#ifdef WIN32
-        /* Check if the file exists - if not, try CURLRC in the same
-         * directory as our executable
-         */
-        file = fopen(filebuffer, FOPEN_READTEXT);
-        if(file != NULL) {
-          filename = filebuffer;
-        }
-        else {
-          /* Get the filename of our executable. GetModuleFileName is
-           * already declared via inclusions done in setup header file.
-           * We assume that we are using the ASCII version here.
-           */
-          unsigned long len = GetModuleFileNameA(0, filebuffer,
-                                                 sizeof(filebuffer));
-          if(len > 0 && len < sizeof(filebuffer)) {
-            /* We got a valid filename - get the directory part */
-            char *lastdirchar = strrchr(filebuffer, '\\');
-            if(lastdirchar) {
-              size_t remaining;
-              *lastdirchar = 0;
-              /* If we have enough space, build the RC filename */
-              remaining = sizeof(filebuffer) - strlen(filebuffer);
-              if(strlen(CURLRC) < remaining - 1) {
-                msnprintf(lastdirchar, remaining,
-                          "%s%s", DIR_CHAR, CURLRC);
-                /* Don't bother checking if it exists - we do that later */
-                filename = filebuffer;
-              }
-            }
-          }
-        }
-#else /* WIN32 */
-        filename = filebuffer;
-#endif /* WIN32 */
+      pathalloc = curl_maprintf("%s%s.curlrc", home, DIR_CHAR);
+      if(!pathalloc) {
+        free(home);
+        return 1; /* out of memory */
       }
-      Curl_safefree(home); /* we've used it, now free it */
+      filename = pathalloc;
     }
+#else /* Windows */
+    if(home) {
+      int i = 0;
+      char prefix = '.';
+      do {
+        /* check for .curlrc then _curlrc in the home dir */
+        pathalloc = curl_maprintf("%s%s%ccurlrc", home, DIR_CHAR, prefix);
+        if(!pathalloc) {
+          free(home);
+          return 1; /* out of memory */
+        }
 
-# else /* __AMIGA__ */
-    /* On AmigaOS all the config files are into env:
-     */
-    filename = "ENV:" CURLRC;
-
+        /* Check if the file exists - if not, try _curlrc */
+        file = fopen(pathalloc, FOPEN_READTEXT);
+        if(file) {
+          filename = pathalloc;
+          break;
+        }
+        prefix = '_';
+      } while(++i < 2);
+    }
+    if(!filename) {
+      /* check for .curlrc then _curlrc in the dir of the executable */
+      file = execpath(".curlrc");
+      if(!file)
+        file = execpath("_curlrc");
+    }
 #endif
+
+    Curl_safefree(home); /* we've used it, now free it */
   }
 
-  if(!file) { /* WIN32: no need to fopen() again */
+  if(!file && filename) { /* no need to fopen() again */
     if(strcmp(filename, "-"))
       file = fopen(filename, FOPEN_READTEXT);
     else
@@ -271,6 +285,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   else
     rc = 1; /* couldn't open the file */
 
+  free(pathalloc);
   return rc;
 }
 
