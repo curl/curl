@@ -2737,6 +2737,7 @@ CURLcode Curl_ssh_init(void)
 void Curl_ssh_cleanup(void)
 {
   (void)ssh_finalize();
+}
 
 size_t Curl_ssh_version(char *buffer, size_t buflen)
 {
