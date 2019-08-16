@@ -3338,5 +3338,9 @@ void Curl_ssh_cleanup(void)
 #endif
 }
 
+size_t Curl_ssh_version(char *buffer, size_t buflen)
+{
+  return msnprintf(buffer, buflen, "libssh2/%s", LIBSSH2_VERSION);
+}
 
 #endif /* USE_LIBSSH2 */

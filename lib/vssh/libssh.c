@@ -2739,4 +2739,9 @@ void Curl_ssh_cleanup(void)
   (void)ssh_finalize();
 }
 
+size_t Curl_ssh_version(char *buffer, size_t buflen)
+{
+  return msnprintf(buffer, buflen, "libssh/%s", CURL_LIBSSH_VERSION);
+}
+
 #endif                          /* USE_LIBSSH */
