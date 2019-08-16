@@ -3320,4 +3320,23 @@ static const char *sftp_libssh2_strerror(int err)
   return "Unknown error in libssh2";
 }
 
+CURLcode Curl_ssh_init(void)
+{
+#ifdef HAVE_LIBSSH2_INIT
+  if(libssh2_init(0)) {
+    DEBUGF(fprintf(stderr, "Error: libssh2_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+#endif
+  return CURLE_OK;
+}
+
+void Curl_ssh_cleanup(void)
+{
+#ifdef HAVE_LIBSSH2_EXIT
+  (void)libssh2_exit();
+#endif
+}
+
+
 #endif /* USE_LIBSSH2 */
