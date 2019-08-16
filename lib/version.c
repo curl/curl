@@ -162,6 +162,10 @@ char *curl_version(void)
   ptr += len;
 #endif
 #ifdef USE_SSH
+  if(left) {
+    *ptr++=' ';
+    left--;
+  }
   len = Curl_ssh_version(ptr, left);
   left -= len;
   ptr += len;
