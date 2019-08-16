@@ -40,7 +40,7 @@ Unix-like systems (which returns the home dir given the current user in your
 system). On Windows, it then checks for the APPDATA variable, or as a last
 resort the '%USERPROFILE%\\Application Data'.
 
-2) On windows, if there is no _curlrc file in the home dir, it checks for one
+2) On windows, if there is no .curlrc file in the home dir, it checks for one
 in the same dir the curl executable is placed. On Unix-like systems, it will
 simply try to load .curlrc from the determined home dir.
 
