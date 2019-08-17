@@ -137,6 +137,14 @@ static const struct Curl_handler Curl_handler_h3_quiche = {
   PROTOPT_SSL | PROTOPT_STREAM          /* flags */
 };
 
+#ifdef DEBUG_QUICHE
+static void quiche_debug_log(const char *line, void *argp)
+{
+  (void)argp;
+  fprintf(stderr, "%s\n", line);
+}
+#endif
+
 CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
                            int sockindex,
                            const struct sockaddr *addr, socklen_t addrlen)
@@ -144,6 +152,16 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
   struct Curl_easy *data = conn->data;
+
+#ifdef DEBUG_QUICHE
+  /* initialize debug log callback only once */
+  static int debug_log_init = 0;
+  if(!debug_log_init) {
+    quiche_enable_debug_logging(quiche_debug_log, NULL);
+    debug_log_init = 1;
+  }
+#endif
+
   (void)addr;
   (void)addrlen;
 
@@ -505,14 +523,6 @@ int Curl_quic_ver(char *p, size_t len)
   return msnprintf(p, len, " quiche/%s", quiche_version());
 }
 
-#ifdef DEBUG_QUICHE
-static void debug_log(const char *line, void *argp)
-{
-  (void)argp;
-  fprintf(stderr, "%s\n", line);
-}
-#endif
-
 /* Index where :authority header field will appear in request header
    field list. */
 #define AUTHORITY_DST_IDX 3
@@ -533,10 +543,6 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   struct quicsocket *qs = conn->quic;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
-
-#ifdef DEBUG_QUICHE
-  quiche_enable_debug_logging(debug_log, NULL);
-#endif
 
   stream->h3req = TRUE; /* senf off! */
 
