@@ -3534,14 +3534,19 @@ AC_HELP_STRING([--with-quiche=PATH],[Enable quiche usage])
 AC_HELP_STRING([--without-quiche],[Disable quiche usage]),
   [OPT_QUICHE=$withval])
 case "$OPT_QUICHE" in
-  *)
+  no)
+    dnl --without-quiche option used
+    want_quiche="no"
+    ;;
+  yes)
     dnl --with-quiche option used without path
     want_quiche="default"
     want_quiche_path=""
     ;;
-  no)
-    dnl --without-quiche option used
-    want_quiche="no"
+  *)
+    dnl --with-quiche option used with path
+    want_quiche="yes"
+    want_quiche_path="$withval"
     ;;
 esac
 
@@ -3551,36 +3556,55 @@ if test X"$want_quiche" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  LIB_QUICHE="-lquiche -ldl -lpthread"
-  CPP_QUICHE="-I$OPT_QUICHE/include"
-  LD_QUICHE="-L$OPT_QUICHE/target/release"
+  CURL_CHECK_PKGCONFIG(quiche, $want_quiche_path)
 
-  LDFLAGS="$LDFLAGS $LD_QUICHE"
-  CPPFLAGS="$CPPFLAGS $CPP_QUICHE"
-  LIBS="$LIB_QUICHE $LIBS"
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path])
+      $PKGCONFIG --libs-only-l quiche`
+    AC_MSG_NOTICE([-l is $LIB_QUICHE])
 
-  if test "x$cross_compiling" != "xyes"; then
-    DIR_QUICHE=`echo $LD_QUICHE | $SED -e 's/-L//'`
+    CPP_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path]) dnl
+      $PKGCONFIG --cflags-only-I quiche`
+    AC_MSG_NOTICE([-I is $CPP_QUICHE])
+
+    LD_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path])
+      $PKGCONFIG --libs-only-L quiche`
+    AC_MSG_NOTICE([-L is $LD_QUICHE])
+
+    LDFLAGS="$LDFLAGS $LD_QUICHE"
+    CPPFLAGS="$CPPFLAGS $CPP_QUICHE"
+    LIBS="$LIB_QUICHE $LIBS"
+
+    if test "x$cross_compiling" != "xyes"; then
+      DIR_QUICHE=`echo $LD_QUICHE | $SED -e 's/-L//'`
+    fi
+    AC_CHECK_LIB(quiche, quiche_connect,
+      [
+       AC_CHECK_HEADERS(quiche.h,
+          experimental="$experimental HTTP3"
+          AC_MSG_NOTICE([HTTP3 support is experimental])
+          curl_h3_msg="enabled (quiche)"
+          QUICHE_ENABLED=1
+          AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
+          AC_SUBST(USE_QUICHE, [1])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH]),
+       )
+      ],
+        dnl not found, revert back to clean variables
+        LDFLAGS=$CLEANLDFLAGS
+        CPPFLAGS=$CLEANCPPFLAGS
+        LIBS=$CLEANLIBS
+    )
+  else
+    dnl no nghttp3 pkg-config found, deal with it
+    if test X"$want_quiche" != Xdefault; then
+      dnl To avoid link errors, we do not allow --with-nghttp3 without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--with-quiche was specified but could not find quiche pkg-config file.])
+    fi
   fi
-  AC_CHECK_LIB(quiche, quiche_connect,
-    [
-     AC_CHECK_HEADERS(quiche.h,
-        experimental="$experimental HTTP3"
-        AC_MSG_NOTICE([HTTP3 support is experimental])
-        curl_h3_msg="enabled (quiche)"
-        QUICHE_ENABLED=1
-        AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
-        AC_SUBST(USE_QUICHE, [1])
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH]),
-     )
-    ],
-      dnl not found, revert back to clean variables
-      LDFLAGS=$CLEANLDFLAGS
-      CPPFLAGS=$CLEANCPPFLAGS
-      LIBS=$CLEANLIBS
-  )
 fi
 
 dnl **********************************************************************
