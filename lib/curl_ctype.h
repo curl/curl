@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,7 +44,6 @@
 #define ISALPHA(x)  (isalpha((int)  ((unsigned char)x)))
 #define ISPRINT(x)  (isprint((int)  ((unsigned char)x)))
 #define ISUPPER(x)  (isupper((int)  ((unsigned char)x)))
-#define ISLOWER(x)  (islower((int)  ((unsigned char)x)))
 #define ISCNTRL(x)  (iscntrl((int)  ((unsigned char)x)))
 #define ISASCII(x)  (isascii((int)  ((unsigned char)x)))
 
@@ -58,7 +57,6 @@ int Curl_isgraph(int c);
 int Curl_isprint(int c);
 int Curl_isalpha(int c);
 int Curl_isupper(int c);
-int Curl_islower(int c);
 int Curl_iscntrl(int c);
 
 #define ISSPACE(x)  (Curl_isspace((int)  ((unsigned char)x)))
@@ -69,7 +67,6 @@ int Curl_iscntrl(int c);
 #define ISALPHA(x)  (Curl_isalpha((int)  ((unsigned char)x)))
 #define ISPRINT(x)  (Curl_isprint((int)  ((unsigned char)x)))
 #define ISUPPER(x)  (Curl_isupper((int)  ((unsigned char)x)))
-#define ISLOWER(x)  (Curl_islower((int)  ((unsigned char)x)))
 #define ISCNTRL(x)  (Curl_iscntrl((int)  ((unsigned char)x)))
 #define ISASCII(x)  (((x) >= 0) && ((x) <= 0x80))
 
