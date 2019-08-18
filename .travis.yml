@@ -101,7 +101,7 @@ matrix:
           compiler: gcc
           dist: xenial
           env:
-              - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$home/quiche --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
+              - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:$HOME/quiche/target/release:/usr/local/lib
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
           addons:
               apt:
@@ -435,7 +435,7 @@ before_script:
         curl https://sh.rustup.rs -sSf | sh -s -- -y &&
         source $HOME/.cargo/env &&
         cd quiche &&
-        QUICHE_BSSL_PATH=$HOME/boringssl cargo build -v --release)
+        QUICHE_BSSL_PATH=$HOME/boringssl cargo build -v --release --features pkg-config-meta)
       fi
     - |
       if [ $TRAVIS_OS_NAME = linux ]; then

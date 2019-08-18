@@ -84,10 +84,10 @@ you'll just get ld.so linker errors.
 Clone quiche and BoringSSL:
 
      % git clone --recursive https://github.com/cloudflare/quiche
-     % cd quiche/deps/boringssl
 
 Build BoringSSL (it needs to be built manually so it can be reused with curl):
 
+     % cd quiche/deps/boringssl
      % mkdir build
      % cd build
      % cmake -DCMAKE_POSITION_INDEPENDENT_CODE=on ..
@@ -100,7 +100,7 @@ Build BoringSSL (it needs to be built manually so it can be reused with curl):
 Build quiche:
 
      % cd ../..
-     % QUICHE_BSSL_PATH=$PWD/deps/boringssl cargo build --release
+     % QUICHE_BSSL_PATH=$PWD/deps/boringssl cargo build --release --features pkg-config-meta
 
 Clone and build curl:
 
@@ -108,7 +108,7 @@ Clone and build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % ./configure --with-ssl=$PWD/../quiche/deps/boringssl/.openssl --with-quiche=$PWD/../quiche --enable-debug
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl/.openssl --with-quiche=$PWD/../quiche/target/release
      % make -j`nproc`
 
 ## Running
