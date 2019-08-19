@@ -1149,8 +1149,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
  */
 int Curl_quic_ver(char *p, size_t len)
 {
+  ngtcp2_info *ng2 = ngtcp2_version(0);
   return msnprintf(p, len, " ngtcp2/%s nghttp3/%s",
-                   NGTCP2_VERSION, NGHTTP3_VERSION);
+                   ng2->version_str, NGHTTP3_VERSION);
 }
 
 static int ng_getsock(struct connectdata *conn, curl_socket_t *socks)
