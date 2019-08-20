@@ -252,7 +252,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     failf(data, "InitializeSecurityContext failed: %s",
           Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
 
-    if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
+    if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
 
     return CURLE_AUTH_ERROR;
@@ -266,7 +266,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       failf(data, "CompleteAuthToken failed: %s",
             Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
 
-      if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
+      if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
         return CURLE_OUT_OF_MEMORY;
 
       return CURLE_AUTH_ERROR;
