@@ -2628,6 +2628,8 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
   case CURLMOPT_MAX_CONCURRENT_STREAMS:
     {
       long streams = va_arg(param, long);
+      if(streams < 1)
+        streams = 100;
       multi->max_concurrent_streams =
           (streams > (long)INITIAL_MAX_CONCURRENT_STREAMS)?
           (long)INITIAL_MAX_CONCURRENT_STREAMS : streams;
@@ -3055,7 +3057,6 @@ void Curl_multi_dump(struct Curl_multi *multi)
 size_t Curl_multi_max_concurrent_streams
 (struct Curl_multi *multi)
 {
-  return multi ?
-    (multi->max_concurrent_streams?
-    multi->max_concurrent_streams:100) : 0;
+  return multi ? ((size_t)multi->max_concurrent_streams ?
+                  (size_t)multi->max_concurrent_streams : 100) : 0;
 }

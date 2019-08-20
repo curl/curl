@@ -382,7 +382,7 @@ typedef enum {
   /* This is the argument passed to the server push callback */
   CINIT(PUSHDATA, OBJECTPOINT, 15),
 
-  /* maximum number of (pipelining) connections to one host */
+  /* maximum number of concurrent streams to support on a connection */
   CINIT(MAX_CONCURRENT_STREAMS, LONG, 16),
 
   CURLMOPT_LASTENTRY /* the last unused */
