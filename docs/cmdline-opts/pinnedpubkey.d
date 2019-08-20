@@ -15,13 +15,11 @@ abort the connection before sending or receiving any data.
 
 PEM/DER support:
   7.39.0: OpenSSL, GnuTLS and GSKit
-  7.43.0: NSS and wolfSSL/CyaSSL
+  7.43.0: NSS and wolfSSL
   7.47.0: mbedtls
-  7.49.0: PolarSSL
 sha256 support:
-  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL/CyaSSL.
+  7.44.0: OpenSSL, GnuTLS, NSS and wolfSSL
   7.47.0: mbedtls
-  7.49.0: PolarSSL
 Other SSL backends not supported.
 
 If this option is used several times, the last one will be used.

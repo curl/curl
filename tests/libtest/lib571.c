@@ -104,9 +104,8 @@ int test(char *URL)
   CURL *curl;
   char *stream_uri = NULL;
   int request = 1;
-  FILE *protofile = NULL;
 
-  protofile = fopen(libtest_arg2, "wb");
+  FILE *protofile = fopen(libtest_arg2, "wb");
   if(protofile == NULL) {
     fprintf(stderr, "Couldn't open the protocol dump file\n");
     return TEST_ERR_MAJOR_BAD;

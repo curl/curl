@@ -196,9 +196,6 @@ static CURLcode ldap_setup_connection(struct connectdata *conn)
   li->proto = proto;
   conn->proto.generic = li;
   connkeep(conn, "OpenLDAP default");
-  /* TODO:
-   * - provide option to choose SASL Binds instead of Simple
-   */
   return CURLE_OK;
 }
 
@@ -510,8 +507,6 @@ static ssize_t ldap_recv(struct connectdata *conn, int sockindex, char *buf,
     lr->nument++;
     rc = ldap_get_dn_ber(li->ld, ent, &ber, &bv);
     if(rc < 0) {
-      /* TODO: verify that this is really how this return code should be
-         handled */
       *err = CURLE_RECV_ERROR;
       return -1;
     }

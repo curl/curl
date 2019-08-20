@@ -1,4 +1,4 @@
-noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm socksd
+noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm socksd disabled
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
@@ -74,3 +74,5 @@ fake_ntlm_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  fake_ntlm.c
 fake_ntlm_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 fake_ntlm_CFLAGS = $(AM_CFLAGS)
+
+disabled_SOURCES = disabled.c

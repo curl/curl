@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -55,7 +55,8 @@ If you use POST to an HTTP 1.1 server, you can send data without knowing the
 size before starting the POST if you use chunked encoding. You enable this by
 adding a header like "Transfer-Encoding: chunked" with
 \fICURLOPT_HTTPHEADER(3)\fP. With HTTP 1.0 or without chunked transfer, you
-must specify the size in the request.
+must specify the size in the request. (Since 7.66.0, libcurl will
+automatically use chunked encoding for POSTs if the size is unknown.)
 
 When setting \fICURLOPT_POST(3)\fP to 1, libcurl will automatically set
 \fICURLOPT_NOBODY(3)\fP and \fICURLOPT_HTTPGET(3)\fP to 0.

@@ -100,19 +100,12 @@ void Curl_http2_init_userset(struct UserDefined *set)
 }
 
 static int http2_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock, /* points to
-                                                         numsocks
-                                                         number of
-                                                         sockets */
-                                 int numsocks)
+                                 curl_socket_t *sock)
 {
   const struct http_conn *c = &conn->proto.httpc;
   struct SingleRequest *k = &conn->data->req;
   int bitmap = GETSOCK_BLANK;
-  (void)numsocks;
 
-  /* TODO We should check underlying socket state if it is SSL socket
-     because of renegotiation. */
   sock[0] = conn->sock[FIRSTSOCKET];
 
   /* in a HTTP/2 connection we can basically always get a frame so we should
@@ -128,11 +121,9 @@ static int http2_perform_getsock(const struct connectdata *conn,
 }
 
 static int http2_getsock(struct connectdata *conn,
-                         curl_socket_t *sock, /* points to numsocks
-                                                 number of sockets */
-                         int numsocks)
+                         curl_socket_t *socks)
 {
-  return http2_perform_getsock(conn, sock, numsocks);
+  return http2_perform_getsock(conn, socks);
 }
 
 /*
@@ -242,7 +233,7 @@ static unsigned int http2_conncheck(struct connectdata *check,
 
   if(checks_to_perform & CONNCHECK_KEEPALIVE) {
     struct curltime now = Curl_now();
-    time_t elapsed = Curl_timediff(now, check->keepalive);
+    timediff_t elapsed = Curl_timediff(now, check->keepalive);
 
     if(elapsed > check->upkeep_interval_ms) {
       /* Perform an HTTP/2 PING */
@@ -271,7 +262,7 @@ static unsigned int http2_conncheck(struct connectdata *check,
   return ret_val;
 }
 
-/* called from Curl_http_setup_conn */
+/* called from http_setup_conn */
 void Curl_http2_setup_req(struct Curl_easy *data)
 {
   struct HTTP *http = data->req.protop;
@@ -288,7 +279,7 @@ void Curl_http2_setup_req(struct Curl_easy *data)
   http->memlen = 0;
 }
 
-/* called from Curl_http_setup_conn */
+/* called from http_setup_conn */
 void Curl_http2_setup_conn(struct connectdata *conn)
 {
   conn->proto.httpc.settings.max_concurrent_streams =
@@ -1201,9 +1192,6 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
   if(!httpc->h2) /* not HTTP/2 ? */
     return;
 
-  if(data->state.drain)
-    drained_transfer(data, httpc);
-
   if(premature) {
     /* RST_STREAM */
     if(!nghttp2_submit_rst_stream(httpc->h2, NGHTTP2_FLAG_NONE,
@@ -1215,6 +1203,10 @@ void Curl_http2_done(struct connectdata *conn, bool premature)
       httpc->pause_stream_id = 0;
     }
   }
+
+  if(data->state.drain)
+    drained_transfer(data, httpc);
+
   /* -1 means unassigned and 0 means cleared */
   if(http->stream_id > 0) {
     int rv = nghttp2_session_set_stream_user_data(httpc->h2,
@@ -1756,14 +1748,16 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
     else if(!stream->closed) {
       drained_transfer(data, httpc);
     }
+    else
+      /* this stream is closed, trigger a another read ASAP to detect that */
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
 
     return retlen;
   }
-  /* If stream is closed, return 0 to signal the http routine to close
+  /* If this stream is closed, return 0 to signal the http routine to close
      the connection */
-  if(stream->closed) {
-    return http2_handle_stream_close(conn, data, stream, err);
-  }
+  if(stream->closed)
+    return 0;
   *err = CURLE_AGAIN;
   H2BUGF(infof(data, "http2_recv returns AGAIN for stream %u\n",
                stream->stream_id));
@@ -1847,9 +1841,9 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
                           const void *mem, size_t len, CURLcode *err)
 {
   /*
-   * BIG TODO: Currently, we send request in this function, but this
-   * function is also used to send request body. It would be nice to
-   * add dedicated function for request.
+   * Currently, we send request in this function, but this function is also
+   * used to send request body. It would be nice to add dedicated function for
+   * request.
    */
   int rv;
   struct http_conn *httpc = &conn->proto.httpc;
@@ -1882,7 +1876,11 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
        are going to send or sending request body in DATA frame */
     stream->upload_mem = mem;
     stream->upload_len = len;
-    nghttp2_session_resume_data(h2, stream->stream_id);
+    rv = nghttp2_session_resume_data(h2, stream->stream_id);
+    if(nghttp2_is_fatal(rv)) {
+      *err = CURLE_SEND_ERROR;
+      return -1;
+    }
     rv = h2_session_send(conn->data, h2);
     if(nghttp2_is_fatal(rv)) {
       *err = CURLE_SEND_ERROR;
@@ -2416,8 +2414,6 @@ bool Curl_h2_http_1_1_error(struct connectdata *conn)
 #else /* !USE_NGHTTP2 */
 
 /* Satisfy external references even if http2 is not compiled in. */
-
-#define CURL_DISABLE_TYPECHECK
 #include <curl/curl.h>
 
 char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)

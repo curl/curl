@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -69,8 +69,37 @@ The default internal read callback is fread().
 .SH PROTOCOLS
 This is used for all protocols when doing uploads.
 .SH EXAMPLE
-Here's an example setting a read callback for reading that to upload to an FTP
-site: https://curl.haxx.se/libcurl/c/ftpupload.html
+.nf
+size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
+{
+  FILE *readhere = (FILE *)userdata;
+  curl_off_t nread;
+
+  /* copy as much data as possible into the 'ptr' buffer, but no more than
+     'size' * 'nmemb' bytes! */
+  size_t retcode = fread(ptr, size, nmemb, readhere);
+
+  nread = (curl_off_t)retcode;
+
+  fprintf(stderr, "*** We read %" CURL_FORMAT_CURL_OFF_T
+          " bytes from file\\n", nread);
+  return retcode;
+}
+
+void setup(char *uploadthis)
+{
+  FILE *file = fopen("rb", uploadthis);
+  CURLcode result;
+
+  /* set callback to use */
+  curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+
+  /* pass in suitable argument to callback */
+  curl_easy_setopt(curl, CURLOPT_READDATA, uploadthis);
+
+  result = curl_easy_perform(curl);
+}
+.fi
 .SH AVAILABILITY
 CURL_READFUNC_PAUSE return code was added in 7.18.0 and CURL_READFUNC_ABORT
 was added in 7.12.1.
@@ -79,3 +108,4 @@ This will return CURLE_OK.
 .SH "SEE ALSO"
 .BR CURLOPT_READDATA "(3), " CURLOPT_WRITEFUNCTION "(3), "
 .BR CURLOPT_SEEKFUNCTION "(3), " CURLOPT_UPLOAD "(3), " CURLOPT_POST "(3), "
+.BR CURLOPT_UPLOAD_BUFFERSIZE "(3), "

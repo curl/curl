@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -82,20 +82,6 @@
 #include "warnless.h"
 #include "parsedate.h"
 
-const char * const Curl_wkday[] =
-{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-static const char * const weekday[] =
-{ "Monday", "Tuesday", "Wednesday", "Thursday",
-  "Friday", "Saturday", "Sunday" };
-const char * const Curl_month[]=
-{ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-struct tzinfo {
-  char name[5];
-  int offset; /* +/- in minutes */
-};
-
 /*
  * parsedate()
  *
@@ -113,6 +99,22 @@ static int parsedate(const char *date, time_t *output);
 #define PARSEDATE_FAIL   -1
 #define PARSEDATE_LATER  1
 #define PARSEDATE_SOONER 2
+
+#ifndef CURL_DISABLE_PARSEDATE
+
+const char * const Curl_wkday[] =
+{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+static const char * const weekday[] =
+{ "Monday", "Tuesday", "Wednesday", "Thursday",
+  "Friday", "Saturday", "Sunday" };
+const char * const Curl_month[]=
+{ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+struct tzinfo {
+  char name[5];
+  int offset; /* +/- in minutes */
+};
 
 /* Here's a bunch of frequently used time zone names. These were supported
    by the old getdate parser. */
@@ -555,6 +557,15 @@ static int parsedate(const char *date, time_t *output)
 
   return PARSEDATE_OK;
 }
+#else
+/* disabled */
+static int parsedate(const char *date, time_t *output)
+{
+  (void)date;
+  *output = 0;
+  return PARSEDATE_OK; /* a lie */
+}
+#endif
 
 time_t curl_getdate(const char *p, const time_t *now)
 {

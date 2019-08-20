@@ -212,7 +212,7 @@ rem
       copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL 2>&1
     ) else (
       echo #include "tool_setup.h"> src\tool_hugehelp.c
-      echo #include "tool_hugehelp.hd">> src\tool_hugehelp.c
+      echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
       echo.>> src\tool_hugehelp.c
       echo void hugehelp(void^)>> src\tool_hugehelp.c
       echo {>> src\tool_hugehelp.c

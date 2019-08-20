@@ -62,6 +62,8 @@ Scheme cannot be URL decoded on set.
 .IP CURLUPART_HOST
 The host name can use IDNA. The string must then be encoded as your locale
 says or UTF-8 (when winidn is used).
+.IP CURLUPART_ZONEID
+If the host name is a numeric IPv6 address, this field can also be set.
 .IP CURLUPART_PORT
 Port cannot be URL encoded on set. The given port number is provided as a
 string and the decimal number must be between 1 and 65535. Anything else will
@@ -127,7 +129,7 @@ If this function returns an error, no URL part is returned.
   curl_url_cleanup(url);
 .fi
 .SH AVAILABILITY
-Added in curl 7.62.0
+Added in curl 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
 .SH "SEE ALSO"
 .BR curl_url_cleanup "(3), " curl_url "(3), " curl_url_get "(3), "
 .BR curl_url_dup "(3), "

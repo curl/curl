@@ -157,8 +157,7 @@ static CURLcode tftp_done(struct connectdata *conn,
 static CURLcode tftp_setup_connection(struct connectdata * conn);
 static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done);
 static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done);
-static int tftp_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks);
+static int tftp_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode tftp_translate_code(tftp_error_t error);
 
 
@@ -1009,7 +1008,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
   state->sockfd = state->conn->sock[FIRSTSOCKET];
   state->state = TFTP_STATE_START;
   state->error = TFTP_ERR_NONE;
-  state->blksize = TFTP_BLKSIZE_DEFAULT;
+  state->blksize = blksize;
   state->requested_blksize = blksize;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
@@ -1082,14 +1081,9 @@ static CURLcode tftp_done(struct connectdata *conn, CURLcode status,
  * The getsock callback
  *
  **********************************************************/
-static int tftp_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
+static int tftp_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
-  if(!numsocks)
-    return GETSOCK_BLANK;
-
   socks[0] = conn->sock[FIRSTSOCKET];
-
   return GETSOCK_READSOCK(0);
 }
 
@@ -1376,7 +1370,7 @@ static CURLcode tftp_setup_connection(struct connectdata * conn)
   struct Curl_easy *data = conn->data;
   char *type;
 
-  conn->socktype = SOCK_DGRAM;   /* UDP datagram based */
+  conn->transport = TRNSPRT_UDP;
 
   /* TFTP URLs support an extension like ";mode=<typecode>" that
    * we'll try to get now! */

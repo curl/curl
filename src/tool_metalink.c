@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -104,6 +104,7 @@ struct win32_crypto_hash {
 #include "tool_paramhlp.h"
 #include "tool_cfgable.h"
 #include "tool_metalink.h"
+#include "tool_operate.h"
 #include "tool_msgs.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -674,8 +675,9 @@ int metalink_check_hash(struct GlobalConfig *config,
   return rv;
 }
 
-static metalink_checksum *new_metalink_checksum_from_hex_digest
-(const metalink_digest_def *digest_def, const char *hex_digest)
+static metalink_checksum *
+checksum_from_hex_digest(const metalink_digest_def *digest_def,
+                         const char *hex_digest)
 {
   metalink_checksum *chksum;
   unsigned char *digest;
@@ -754,8 +756,8 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
         if(curl_strequal(digest_alias->alias_name, (*p)->type) &&
            check_hex_digest((*p)->hash, digest_alias->digest_def)) {
           f->checksum =
-            new_metalink_checksum_from_hex_digest(digest_alias->digest_def,
-                                                  (*p)->hash);
+            checksum_from_hex_digest(digest_alias->digest_def,
+                                     (*p)->hash);
           break;
         }
       }
@@ -891,7 +893,8 @@ int parse_metalink(struct OperationConfig *config, struct OutStruct *outs,
 size_t metalink_write_cb(void *buffer, size_t sz, size_t nmemb,
                          void *userdata)
 {
-  struct OutStruct *outs = userdata;
+  struct per_transfer *per = userdata;
+  struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = outs->config;
   int rv;
 

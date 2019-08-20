@@ -126,13 +126,9 @@ CURLcode sftp_perform(struct connectdata *conn,
 
 static void sftp_quote(struct connectdata *conn);
 static void sftp_quote_stat(struct connectdata *conn);
-
-static int myssh_getsock(struct connectdata *conn, curl_socket_t *sock,
-                         int numsocks);
-
+static int myssh_getsock(struct connectdata *conn, curl_socket_t *sock);
 static int myssh_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock,
-                                 int numsocks);
+                                 curl_socket_t *sock);
 
 static CURLcode myssh_setup_connection(struct connectdata *conn);
 
@@ -1119,7 +1115,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         flags = O_WRONLY|O_APPEND;
       else
         /* Clear file before writing (normal behaviour) */
-        flags = O_WRONLY|O_APPEND|O_CREAT|O_TRUNC;
+        flags = O_WRONLY|O_CREAT|O_TRUNC;
 
       if(sshc->sftp_file)
         sftp_close(sshc->sftp_file);
@@ -1913,13 +1909,9 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
 static int myssh_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock,  /* points to numsocks
-                                                          number of sockets */
-                                 int numsocks)
+                                 curl_socket_t *sock)
 {
   int bitmap = GETSOCK_BLANK;
-  (void) numsocks;
-
   sock[0] = conn->sock[FIRSTSOCKET];
 
   if(conn->waitfor & KEEP_RECV)
@@ -1934,26 +1926,23 @@ static int myssh_perform_getsock(const struct connectdata *conn,
 /* Generic function called by the multi interface to figure out what socket(s)
    to wait for and for what actions during the DOING and PROTOCONNECT states*/
 static int myssh_getsock(struct connectdata *conn,
-                         curl_socket_t *sock,  /* points to numsocks
-                                                   number of sockets */
-                         int numsocks)
+                         curl_socket_t *sock)
 {
   /* if we know the direction we can use the generic *_getsock() function even
      for the protocol_connect and doing states */
-  return myssh_perform_getsock(conn, sock, numsocks);
+  return myssh_perform_getsock(conn, sock);
 }
 
 static void myssh_block2waitfor(struct connectdata *conn, bool block)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
-  int dir;
 
   /* If it didn't block, or nothing was returned by ssh_get_poll_flags
    * have the original set */
   conn->waitfor = sshc->orig_waitfor;
 
   if(block) {
-    dir = ssh_get_poll_flags(sshc->ssh_session);
+    int dir = ssh_get_poll_flags(sshc->ssh_session);
     if(dir & SSH_READ_PENDING) {
       /* translate the libssh define bits into our own bit defines */
       conn->waitfor = KEEP_RECV;
@@ -1969,11 +1958,10 @@ static CURLcode myssh_multi_statemach(struct connectdata *conn,
                                       bool *done)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
-  CURLcode result = CURLE_OK;
   bool block;    /* we store the status and use that to provide a ssh_getsock()
                     implementation */
+  CURLcode result = myssh_statemach_act(conn, &block);
 
-  result = myssh_statemach_act(conn, &block);
   *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
   myssh_block2waitfor(conn, block);
 
@@ -2012,9 +2000,7 @@ static CURLcode myssh_block_statemach(struct connectdata *conn,
     }
 
     if(!result && block) {
-      curl_socket_t sock = conn->sock[FIRSTSOCKET];
-      curl_socket_t fd_read = CURL_SOCKET_BAD;
-      fd_read = sock;
+      curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
       (void) Curl_socket_check(fd_read, CURL_SOCKET_BAD,
                                CURL_SOCKET_BAD, left > 1000 ? 1000 : left);
@@ -2052,7 +2038,6 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
   CURLcode result;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
   struct Curl_easy *data = conn->data;
-  int rc;
 
   /* initialize per-handle data if not already */
   if(!data->req.protop)
@@ -2106,8 +2091,8 @@ static CURLcode myssh_connect(struct connectdata *conn, bool *done)
   ssh->pubkey = NULL;
 
   if(data->set.str[STRING_SSH_PUBLIC_KEY]) {
-    rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
-                                    &ssh->pubkey);
+    int rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
+                                        &ssh->pubkey);
     if(rc != SSH_OK) {
       failf(data, "Could not load public key file");
       /* ignore */
@@ -2227,12 +2212,7 @@ static CURLcode myssh_done(struct connectdata *conn, CURLcode status)
   struct SSHPROTO *protop = conn->data->req.protop;
 
   if(!status) {
-    /* run the state-machine
-
-       TODO: when the multi interface is used, this _really_ should be using
-       the ssh_multi_statemach function but we have no general support for
-       non-blocking DONE operations!
-     */
+    /* run the state-machine */
     result = myssh_block_statemach(conn, FALSE);
   }
   else
@@ -2745,5 +2725,23 @@ static void sftp_quote_stat(struct connectdata *conn)
   return;
 }
 
+CURLcode Curl_ssh_init(void)
+{
+  if(ssh_init()) {
+    DEBUGF(fprintf(stderr, "Error: libssh_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+  return CURLE_OK;
+}
+
+void Curl_ssh_cleanup(void)
+{
+  (void)ssh_finalize();
+}
+
+size_t Curl_ssh_version(char *buffer, size_t buflen)
+{
+  return msnprintf(buffer, buflen, "libssh/%s", CURL_LIBSSH_VERSION);
+}
 
 #endif                          /* USE_LIBSSH */

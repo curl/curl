@@ -27,8 +27,8 @@ reference to the security nature of the commit if done prior to the public
 announcement.
 
 - The person discovering the issue, the reporter, reports the vulnerability on
-  https://hackerone.com/curl. Issues filed there reach a handful of selected
-  and trusted people.
+  [https://hackerone.com/curl](https://hackerone.com/curl). Issues filed there
+  reach a handful of selected and trusted people.
 
 - Messages that do not relate to the reporting or managing of an undisclosed
   security vulnerability in curl or libcurl are ignored and no further action
@@ -60,7 +60,7 @@ announcement.
   Figure out the CWE (Common Weakness Enumeration) number for the flaw.
 
 - Request a CVE number from
-  [Hackerone](https://docs.hackerone.com/programs/cve-requests.html)
+  [HackerOne](https://docs.hackerone.com/programs/cve-requests.html)
 
 - Consider informing
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
@@ -125,8 +125,8 @@ Publishing Security Advisories
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
-Hackerone Internet Bug Bounty
------------------------------
+Bug Bounty
+----------
 
-See [BUG-BOUNTY](BUG-BOUNTY.md) for specific details on the bug bounty
-program.
+See [BUG-BOUNTY](https://curl.haxx.se/docs/bugbounty.html) for details on the
+bug bounty program.

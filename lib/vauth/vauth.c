@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2016, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2014 - 2019, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -105,26 +105,26 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
 #endif /* USE_WINDOWS_SSPI */
 
 /*
-* Curl_auth_user_contains_domain()
-*
-* This is used to test if the specified user contains a Windows domain name as
-* follows:
-*
-* User\Domain (Down-level Logon Name)
-* User/Domain (curl Down-level format - for compatibility with existing code)
-* User@Domain (User Principal Name)
-*
-* Note: The user name may be empty when using a GSS-API library or Windows SSPI
-* as the user and domain are either obtained from the credentials cache when
-* using GSS-API or via the currently logged in user's credentials when using
-* Windows SSPI.
-*
-* Parameters:
-*
-* user  [in] - The user name.
-*
-* Returns TRUE on success; otherwise FALSE.
-*/
+ * Curl_auth_user_contains_domain()
+ *
+ * This is used to test if the specified user contains a Windows domain name as
+ * follows:
+ *
+ * Domain\User (Down-level Logon Name)
+ * Domain/User (curl Down-level format - for compatibility with existing code)
+ * User@Domain (User Principal Name)
+ *
+ * Note: The user name may be empty when using a GSS-API library or Windows
+ * SSPI as the user and domain are either obtained from the credentials cache
+ * when using GSS-API or via the currently logged in user's credentials when
+ * using Windows SSPI.
+ *
+ * Parameters:
+ *
+ * user  [in] - The user name.
+ *
+ * Returns TRUE on success; otherwise FALSE.
+ */
 bool Curl_auth_user_contains_domain(const char *user)
 {
   bool valid = FALSE;

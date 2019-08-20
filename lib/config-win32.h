@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -184,6 +184,12 @@
 
 /* Define if you have the ftruncate function. */
 #define HAVE_FTRUNCATE 1
+
+/* Define to 1 if you have the `getpeername' function. */
+#define HAVE_GETPEERNAME 1
+
+/* Define to 1 if you have the getsockname function. */
+#define HAVE_GETSOCKNAME 1
 
 /* Define if you have the gethostbyaddr function. */
 #define HAVE_GETHOSTBYADDR 1
@@ -579,8 +585,9 @@ Vista
 #  endif
 #endif
 
-/* Availability of freeaddrinfo, getaddrinfo and getnameinfo functions is
-   quite convoluted, compiler dependent and even build target dependent. */
+/* Availability of freeaddrinfo, getaddrinfo, getnameinfo and if_nametoindex
+   functions is quite convoluted, compiler dependent and even build target
+   dependent. */
 #if defined(HAVE_WS2TCPIP_H)
 #  if defined(__POCC__)
 #    define HAVE_FREEADDRINFO           1
@@ -710,8 +717,12 @@ Vista
 #define USE_WIN32_CRYPTO
 
 /* Define to use Unix sockets. */
-#if defined(_MSC_VER) && _MSC_VER >= 1900
-/* #define USE_UNIX_SOCKETS */
+#if defined(_MSC_VER) && (_MSC_VER >= 1500)
+/* sdkddkver.h first shipped with Platform SDK v6.0A included with VS2008 */
+#include <sdkddkver.h>
+#if defined(NTDDI_WIN10_RS4)
+#define USE_UNIX_SOCKETS
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */

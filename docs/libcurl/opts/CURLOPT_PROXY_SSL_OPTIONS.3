@@ -39,13 +39,10 @@ lessens the security, and by setting this option to 1 you ask for exactly
 that.  This option is only supported for DarwinSSL, NSS and OpenSSL.
 
 \fICURLSSLOPT_NO_REVOKE\fP tells libcurl to disable certificate revocation
-checks for those SSL backends where such behavior is present. \fBCurrently
-this option is only supported for Schannel (the native Windows SSL library),
-with an exception in the case of Windows' Untrusted Publishers blacklist which
-it seems can't be bypassed.\fP This option may have broader support to
-accommodate other SSL backends in the future.
-https://curl.haxx.se/docs/ssl-compared.html
-
+checks for those SSL backends where such behavior is present. This option is
+only supported for Schannel (the native Windows SSL library), with an
+exception in the case of Windows' Untrusted Publishers blacklist which it
+seems can't be bypassed.
 .SH DEFAULT
 0
 .SH PROTOCOLS

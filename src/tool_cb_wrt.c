@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_cb_wrt.h"
+#include "tool_operate.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -75,7 +76,8 @@ bool tool_create_output_file(struct OutStruct *outs)
 size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 {
   size_t rc;
-  struct OutStruct *outs = userdata;
+  struct per_transfer *per = userdata;
+  struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = outs->config;
   size_t bytes = sz * nmemb;
   bool is_tty = config->global->isatty;
@@ -202,7 +204,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->readbusy) {
     config->readbusy = FALSE;
-    curl_easy_pause(config->easy, CURLPAUSE_CONT);
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
   }
 
   if(config->nobuffer) {

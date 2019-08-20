@@ -43,6 +43,14 @@ For RTSP, the formatting of a range should follow RFC2326 Section 12.29. For
 RTSP, byte ranges are \fBnot\fP permitted. Instead, ranges should be given in
 npt, utc, or smpte formats.
 
+For HTTP PUT uploads this option should not be used, since it may conflict with
+other options. If you need to upload arbitrary parts of a file (like for
+Amazon's web services) support is limited. We suggest set resume position using
+\fICURLOPT_RESUME_FROM(3)\fP, set end (resume+size) position using
+\fICURLOPT_INFILESIZE(3)\fP and seek to the resume position before initiating
+the transfer for each part. For more information refer to
+https://curl.haxx.se/mail/lib-2019-05/0012.html
+
 Pass a NULL to this option to disable the use of ranges.
 
 The application does not have to keep the string around after setting this

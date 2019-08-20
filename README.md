@@ -52,7 +52,7 @@ To download the very latest source from the Git server do this:
 
 ## Security problems
 
-Report supected security problems on [our hackerone
+Report suspected security problems via [our HackerOne
 page](https://hackerone.com/curl) and not in public!
 
 ## Notice

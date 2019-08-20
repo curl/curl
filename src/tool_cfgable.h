@@ -38,7 +38,6 @@ typedef enum {
 struct GlobalConfig;
 
 struct OperationConfig {
-  CURL *easy;               /* A copy of the handle from GlobalConfig */
   bool remote_time;
   char *random_file;
   char *egd_file;
@@ -97,6 +96,7 @@ struct OperationConfig {
   char *mail_from;
   struct curl_slist *mail_rcpt;
   char *mail_auth;
+  char *sasl_authzid;       /* Authorisation identity (identity to use) */
   bool sasl_ir;             /* Enable/disable SASL initial response */
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
@@ -242,9 +242,6 @@ struct OperationConfig {
   bool use_metalink;        /* process given URLs as metalink XML file */
   metalinkfile *metalinkfile_list; /* point to the first node */
   metalinkfile *metalinkfile_last; /* point to the last/current node */
-#ifdef CURLDEBUG
-  bool test_event_based;
-#endif
   char *oauth_bearer;             /* OAuth 2.0 bearer token */
   bool nonpn;                     /* enable/disable TLS NPN extension */
   bool noalpn;                    /* enable/disable TLS ALPN extension */
@@ -268,7 +265,6 @@ struct OperationConfig {
 };
 
 struct GlobalConfig {
-  CURL *easy;                     /* Once we have one, we keep it here */
   int showerror;                  /* -1 == unset, default => show errors
                                       0 => -s is used to NOT show errors
                                       1 => -S has been used to show errors */
@@ -286,6 +282,11 @@ struct GlobalConfig {
   char *libcurl;                  /* Output libcurl code to this file name */
   bool fail_early;                /* exit on first transfer error */
   bool styled_output;             /* enable fancy output style detection */
+#ifdef CURLDEBUG
+  bool test_event_based;
+#endif
+  bool parallel;
+  long parallel_max;
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

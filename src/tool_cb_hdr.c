@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,6 +32,7 @@
 #include "tool_msgs.h"
 #include "tool_cb_hdr.h"
 #include "tool_cb_wrt.h"
+#include "tool_operate.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -54,9 +55,10 @@ static char *parse_filename(const char *ptr, size_t len);
 
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-  struct HdrCbData *hdrcbdata = userdata;
-  struct OutStruct *outs = hdrcbdata->outs;
-  struct OutStruct *heads = hdrcbdata->heads;
+  struct per_transfer *per = userdata;
+  struct HdrCbData *hdrcbdata = &per->hdrcbdata;
+  struct OutStruct *outs = &per->outs;
+  struct OutStruct *heads = &per->heads;
   const char *str = ptr;
   const size_t cb = size * nmemb;
   const char *end = (char *)ptr + cb;
@@ -100,7 +102,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
    * Content-Disposition header specifying a filename property.
    */
 
-  curl_easy_getinfo(outs->config->easy, CURLINFO_PROTOCOL, &protocol);
+  curl_easy_getinfo(per->curl, CURLINFO_PROTOCOL, &protocol);
   if(hdrcbdata->honor_cd_filename &&
      (cb > 20) && checkprefix("Content-disposition:", str) &&
      (protocol & (CURLPROTO_HTTPS|CURLPROTO_HTTP))) {

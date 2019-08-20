@@ -134,7 +134,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
       endif()
     endif()
 
-  else() # either there is no config script or we are on platform that doesn't provide one (Windows?)
+  else() # either there is no config script or we are on a platform that doesn't provide one (Windows?)
 
     find_path(_GSS_INCLUDE_DIR
         NAMES
@@ -164,7 +164,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
         set(CMAKE_REQUIRED_DEFINITIONS "")
       endif()
     else()
-      # I'm not convienced if this is the right way but this is what autotools do at the moment
+      # I'm not convinced if this is the right way but this is what autotools do at the moment
       find_path(_GSS_INCLUDE_DIR
           NAMES
               "gssapi.h"

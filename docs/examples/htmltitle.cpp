@@ -136,9 +136,9 @@ static void StartElement(void *voidContext,
                          const xmlChar *name,
                          const xmlChar **attributes)
 {
-  Context *context = (Context *)voidContext;
+  Context *context = static_cast<Context *>(voidContext);
 
-  if(COMPARE((char *)name, "TITLE")) {
+  if(COMPARE(reinterpret_cast<char *>(name), "TITLE")) {
     context->title = "";
     context->addTitle = true;
   }
@@ -152,9 +152,9 @@ static void StartElement(void *voidContext,
 static void EndElement(void *voidContext,
                        const xmlChar *name)
 {
-  Context *context = (Context *)voidContext;
+  Context *context = static_cast<Context *>(voidContext);
 
-  if(COMPARE((char *)name, "TITLE"))
+  if(COMPARE(reinterpret_cast<char *>(name), "TITLE"))
     context->addTitle = false;
 }
 
@@ -167,7 +167,7 @@ static void handleCharacters(Context *context,
                              int length)
 {
   if(context->addTitle)
-    context->title.append((char *)chars, length);
+    context->title.append(reinterpret_cast<char *>(chars), length);
 }
 
 //
@@ -178,7 +178,7 @@ static void Characters(void *voidContext,
                        const xmlChar *chars,
                        int length)
 {
-  Context *context = (Context *)voidContext;
+  Context *context = static_cast<Context *>(voidContext);
 
   handleCharacters(context, chars, length);
 }
@@ -191,7 +191,7 @@ static void cdata(void *voidContext,
                   const xmlChar *chars,
                   int length)
 {
-  Context *context = (Context *)voidContext;
+  Context *context = static_cast<Context *>(voidContext);
 
   handleCharacters(context, chars, length);
 }

@@ -137,7 +137,6 @@ size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
 size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                  void *stream)
 {
-  int   i, RetVal;
   char  TmpStr1[26], TmpStr2[26];
 
   (void)stream;
@@ -156,11 +155,13 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                          TmpStr1 & 2? */
         AutoSyncTime = 0;
       else {
-        RetVal = sscanf((char *)(ptr), "Date: %s %hu %s %hu %hu:%hu:%hu",
-                        TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
-                        &SYSTime.wHour, &SYSTime.wMinute, &SYSTime.wSecond);
+        int RetVal = sscanf((char *)(ptr), "Date: %s %hu %s %hu %hu:%hu:%hu",
+                            TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
+                            &SYSTime.wHour, &SYSTime.wMinute,
+                            &SYSTime.wSecond);
 
         if(RetVal == 7) {
+          int i;
           SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
           for(i = 0; i<12; i++) {
             if(strcmp(MthStr[i], TmpStr2) == 0) {
@@ -257,25 +258,15 @@ int main(int argc, char *argv[])
 {
   CURL    *curl;
   conf_t  conf[1];
-  int     OptionIndex;
-  struct  tm *lt;
-  struct  tm *gmt;
-  time_t  tt;
-  time_t  tt_local;
-  time_t  tt_gmt;
-  double  tzonediffFloat;
-  int     tzonediffWord;
-  char    timeBuf[61];
-  char    tzoneBuf[16];
   int     RetValue;
 
-  OptionIndex     = 0;
   ShowAllHeader   = 0;    /* Do not show HTTP Header */
   AutoSyncTime    = 0;    /* Do not synchronise computer clock */
   RetValue        = 0;    /* Successful Exit */
   conf_init(conf);
 
   if(argc > 1) {
+    int OptionIndex = 0;
     while(OptionIndex < argc) {
       if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
         snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
@@ -308,6 +299,16 @@ int main(int argc, char *argv[])
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
+    struct tm *lt;
+    struct tm *gmt;
+    time_t tt;
+    time_t tt_local;
+    time_t tt_gmt;
+    double tzonediffFloat;
+    int tzonediffWord;
+    char timeBuf[61];
+    char tzoneBuf[16];
+
     SyncTime_CURL_Init(curl, conf->http_proxy, conf->proxy_user);
 
     /* Calculating time diff between GMT and localtime */

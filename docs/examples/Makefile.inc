@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -35,7 +35,8 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   http2-upload http2-serverpush getredirect ftpuploadfrommem               \
   ftpuploadresume sslbackend postit2-formadd multi-formadd                 \
   shared-connection-cache sftpuploadresume http2-pushinmemory parseurl     \
-  urlapi
+  urlapi imap-authzid pop3-authzid smtp-authzid http3 altsvc               \
+  http3-present
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.

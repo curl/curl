@@ -1,6 +1,6 @@
 /* GSSAPI/krb5 support for FTP - loosely based on old krb4.c
  *
- * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
+ * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska HÃ¶gskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  * Copyright (c) 2004 - 2017 Daniel Stenberg
  * All rights reserved.
@@ -320,10 +320,8 @@ static void krb5_end(void *app_data)
     OM_uint32 min;
     gss_ctx_id_t *context = app_data;
     if(*context != GSS_C_NO_CONTEXT) {
-#ifdef DEBUGBUILD
-      OM_uint32 maj =
-#endif
-      gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
+      OM_uint32 maj = gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
+      (void)maj;
       DEBUGASSERT(maj == GSS_S_COMPLETE);
     }
 }

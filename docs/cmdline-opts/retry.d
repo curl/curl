@@ -14,4 +14,7 @@ for all forthcoming retries it will double the waiting time until it reaches
 using --retry-delay you disable this exponential backoff algorithm. See also
 --retry-max-time to limit the total time allowed for retries.
 
+Since curl 7.66.0, curl will comply with the Retry-After: response header if
+one was present to know when to issue the next retry.
+
 If this option is used several times, the last one will be used.

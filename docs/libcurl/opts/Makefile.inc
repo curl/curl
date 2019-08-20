@@ -43,6 +43,7 @@ man_MANS =                                      \
   CURLINFO_REDIRECT_URL.3                       \
   CURLINFO_REQUEST_SIZE.3                       \
   CURLINFO_RESPONSE_CODE.3                      \
+  CURLINFO_RETRY_AFTER.3                        \
   CURLINFO_RTSP_CLIENT_CSEQ.3                   \
   CURLINFO_RTSP_CSEQ_RECV.3                     \
   CURLINFO_RTSP_SERVER_CSEQ.3                   \
@@ -272,6 +273,7 @@ man_MANS =                                      \
   CURLOPT_RTSP_SESSION_ID.3                     \
   CURLOPT_RTSP_STREAM_URI.3                     \
   CURLOPT_RTSP_TRANSPORT.3                      \
+  CURLOPT_SASL_AUTHZID.3                        \
   CURLOPT_SASL_IR.3                             \
   CURLOPT_SEEKDATA.3                            \
   CURLOPT_SEEKFUNCTION.3                        \

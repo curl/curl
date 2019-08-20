@@ -93,7 +93,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
     if((sts & 1) && (iosb.iosb$w_status & 1))
       buffer[iosb.iosb$w_bcnt] = '\0';
 
-    sts = sys$dassgn(chan);
+    sys$dassgn(chan);
   }
   return buffer; /* we always return success */
 }

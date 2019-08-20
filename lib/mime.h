@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 
+#include "curl_setup.h"
+
 #define MIME_RAND_BOUNDARY_CHARS        16  /* Nb. of random boundary chars. */
 #define MAX_ENCODED_LINE_LENGTH         76  /* Maximum encoded line length. */
 #define ENCODING_BUFFER_SIZE            256 /* Encoding temp buffers size. */
@@ -69,7 +71,7 @@ enum mimestrategy {
 typedef struct {
   const char *   name;          /* Encoding name. */
   size_t         (*encodefunc)(char *buffer, size_t size, bool ateof,
-                             curl_mimepart *part);  /* Encoded read. */
+                               curl_mimepart *part);  /* Encoded read. */
   curl_off_t     (*sizefunc)(curl_mimepart *part);  /* Encoded size. */
 }  mime_encoder;
 
@@ -125,6 +127,8 @@ struct curl_mimepart_s {
   mime_encoder_state encstate;     /* Data encoder state. */
 };
 
+#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)) || \
+  !defined(CURL_DISABLE_SMTP) || !defined(CURL_DISABLE_IMAP)
 
 /* Prototypes. */
 void Curl_mime_initpart(curl_mimepart *part, struct Curl_easy *easy);
@@ -142,5 +146,19 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
 CURLcode Curl_mime_rewind(curl_mimepart *part);
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
 const char *Curl_mime_contenttype(const char *filename);
+
+#else
+/* if disabled */
+#define Curl_mime_initpart(x,y)
+#define Curl_mime_cleanpart(x)
+#define Curl_mime_duppart(x,y) CURLE_OK /* Nothing to duplicate. Succeed */
+#define Curl_mime_set_subparts(a,b,c) CURLE_NOT_BUILT_IN
+#define Curl_mime_prepare_headers(a,b,c,d) CURLE_NOT_BUILT_IN
+#define Curl_mime_size(x) (curl_off_t) -1
+#define Curl_mime_read NULL
+#define Curl_mime_rewind(x) ((void)x, CURLE_NOT_BUILT_IN)
+#define Curl_mime_add_header(x,y,...) CURLE_NOT_BUILT_IN
+#endif
+
 
 #endif /* HEADER_CURL_MIME_H */

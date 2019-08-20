@@ -107,7 +107,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     /* We finished successfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
      * can't invent anything better */
-    Curl_auth_spnego_cleanup(nego);
+    Curl_auth_cleanup_spnego(nego);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -251,14 +251,25 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     char buffer[STRERROR_LEN];
     failf(data, "InitializeSecurityContext failed: %s",
           Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
-    return CURLE_OUT_OF_MEMORY;
+
+    if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+
+    return CURLE_AUTH_ERROR;
   }
 
   if(nego->status == SEC_I_COMPLETE_NEEDED ||
      nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
     nego->status = s_pSecFn->CompleteAuthToken(nego->context, &resp_desc);
     if(GSS_ERROR(nego->status)) {
-      return CURLE_RECV_ERROR;
+      char buffer[STRERROR_LEN];
+      failf(data, "CompleteAuthToken failed: %s",
+            Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
+
+      if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+
+      return CURLE_AUTH_ERROR;
     }
   }
 
@@ -307,7 +318,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
 }
 
 /*
- * Curl_auth_spnego_cleanup()
+ * Curl_auth_cleanup_spnego()
  *
  * This is used to clean up the SPNEGO (Negotiate) specific data.
  *
@@ -316,7 +327,7 @@ CURLcode Curl_auth_create_spnego_message(struct Curl_easy *data,
  * nego     [in/out] - The Negotiate data struct being cleaned up.
  *
  */
-void Curl_auth_spnego_cleanup(struct negotiatedata *nego)
+void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 {
   /* Free our security context */
   if(nego->context) {
@@ -343,7 +354,6 @@ void Curl_auth_spnego_cleanup(struct negotiatedata *nego)
   /* Reset any variables */
   nego->status = 0;
   nego->token_max = 0;
-  nego->state = GSS_AUTHNONE;
   nego->noauthpersist = FALSE;
   nego->havenoauthpersist = FALSE;
   nego->havenegdata = FALSE;

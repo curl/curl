@@ -54,7 +54,7 @@ struct curl_tlssessioninfo {
 
 The \fIbackend\fP struct member is one of the defines in the CURLSSLBACKEND_*
 series: CURLSSLBACKEND_NONE (when built without TLS support),
-CURLSSLBACKEND_CYASSL, CURLSSLBACKEND_DARWINSSL,
+CURLSSLBACKEND_WOLFSSL, CURLSSLBACKEND_DARWINSSL,
 CURLSSLBACKEND_GNUTLS, CURLSSLBACKEND_GSKIT, CURLSSLBACKEND_MBEDTLS,
 CURLSSLBACKEND_NSS, CURLSSLBACKEND_OPENSSL, CURLSSLBACKEND_POLARSSL,
 CURLSSLBACKEND_SCHANNEL or CURLSSLBACKEND_MESALINK. (Note that the OpenSSL
@@ -83,9 +83,9 @@ mbedtls_ssl_context *
 ssl_context *
 .IP "Secure Channel"
 CtxtHandle *
-.IP "Secure Transport (DarwinSSL)"
+.IP "Secure Transport"
 SSLContext *
-.IP "WolfSSL (formerly CyaSSL)"
+.IP "wolfSSL"
 SSL *
 .IP "MesaLink"
 SSL *
@@ -95,26 +95,26 @@ If the \fIinternals\fP pointer is NULL then either the SSL backend is not
 supported, an SSL session has not yet been established or the connection is no
 longer associated with the easy handle (eg curl_easy_perform has returned).
 .SH LIMITATIONS
-\fBThis option has some limitations that could make it unsafe when it comes to
-the manual verification of certificates.\fP
+This option has some limitations that could make it unsafe when it comes to
+the manual verification of certificates.
 
 This option only retrieves the first in-use SSL session pointer for your easy
 handle, however your easy handle may have more than one in-use SSL session if
 using FTP over SSL. That is because the FTP protocol has a control channel and
-a data channel and one or both may be over SSL. \fBCurrently there is no way to
-retrieve a second in-use SSL session associated with an easy handle.\fP
+a data channel and one or both may be over SSL. Currently there is no way to
+retrieve a second in-use SSL session associated with an easy handle.
 
-This option has not been thoroughly tested with plaintext protocols that can be
-upgraded/downgraded to/from SSL: FTP, SMTP, POP3, IMAP when used with
+This option has not been thoroughly tested with plaintext protocols that can
+be upgraded/downgraded to/from SSL: FTP, SMTP, POP3, IMAP when used with
 \fICURLOPT_USE_SSL(3)\fP. Though you will be able to retrieve the SSL pointer,
-it's possible that before you can do that \fBdata (including auth) may have
-already been sent over a connection after it was upgraded.\fP
+it's possible that before you can do that data (including auth) may have
+already been sent over a connection after it was upgraded.
 
 Renegotiation. If unsafe renegotiation or renegotiation in a way that the
 certificate is allowed to change is allowed by your SSL library this may occur
-and the certificate may change, and \fBdata may continue to be sent or received
+and the certificate may change, and data may continue to be sent or received
 after renegotiation but before you are able to get the (possibly) changed SSL
-pointer,\fP with the (possibly) changed certificate information.
+pointer, with the (possibly) changed certificate information.
 
 If you are using OpenSSL or wolfSSL then \fICURLOPT_SSL_CTX_FUNCTION(3)\fP can
 be used to set a certificate verification callback in the CTX. That is safer

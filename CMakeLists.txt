@@ -287,7 +287,7 @@ endif()
 # TODO support GNUTLS, NSS, POLARSSL, CYASSL
 
 if(APPLE)
-  option(CMAKE_USE_DARWINSSL "enable Apple OS native SSL/TLS" OFF)
+  option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
 endif()
 if(WIN32)
   option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" OFF)
@@ -297,14 +297,14 @@ endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
+if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
   set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
 
 count_true(enabled_ssl_options_count
   CMAKE_USE_WINSSL
-  CMAKE_USE_DARWINSSL
+  CMAKE_USE_SECTRANSP
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
 )
@@ -324,6 +324,10 @@ if(CURL_WINDOWS_SSPI)
 endif()
 
 if(CMAKE_USE_DARWINSSL)
+  message(FATAL_ERROR "The cmake option CMAKE_USE_DARWINSSL was renamed to CMAKE_USE_SECTRANSP.")
+endif()
+
+if(CMAKE_USE_SECTRANSP)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
@@ -335,7 +339,7 @@ if(CMAKE_USE_DARWINSSL)
   endif()
 
   set(SSL_ENABLED ON)
-  set(USE_DARWINSSL ON)
+  set(USE_SECTRANSP ON)
   list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}")
 endif()
 
@@ -526,7 +530,7 @@ endif()
 option(CURL_BROTLI "Set to ON to enable building curl with brotli support." OFF)
 set(HAVE_BROTLI OFF)
 if(CURL_BROTLI)
-  find_package(BROTLI QUIET)
+  find_package(Brotli QUIET)
   if(BROTLI_FOUND)
     set(HAVE_BROTLI ON)
     list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
@@ -856,6 +860,7 @@ check_symbol_exists(strlcat       "${CURL_INCLUDES}" HAVE_STRLCAT)
 check_symbol_exists(getpwuid      "${CURL_INCLUDES}" HAVE_GETPWUID)
 check_symbol_exists(getpwuid_r    "${CURL_INCLUDES}" HAVE_GETPWUID_R)
 check_symbol_exists(geteuid       "${CURL_INCLUDES}" HAVE_GETEUID)
+check_symbol_exists(usleep        "${CURL_INCLUDES}" HAVE_USLEEP)
 check_symbol_exists(utime         "${CURL_INCLUDES}" HAVE_UTIME)
 check_symbol_exists(gmtime_r      "${CURL_INCLUDES}" HAVE_GMTIME_R)
 check_symbol_exists(localtime_r   "${CURL_INCLUDES}" HAVE_LOCALTIME_R)
@@ -881,6 +886,9 @@ check_symbol_exists(freeifaddrs    "${CURL_INCLUDES}" HAVE_FREEIFADDRS)
 check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
 check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
 check_symbol_exists(getprotobyname "${CURL_INCLUDES}" HAVE_GETPROTOBYNAME)
+check_symbol_exists(getpeername    "${CURL_INCLUDES}" HAVE_GETPEERNAME)
+check_symbol_exists(getsockname    "${CURL_INCLUDES}" HAVE_GETSOCKNAME)
+check_symbol_exists(if_nametoindex "${CURL_INCLUDES}" HAVE_IF_NAMETOINDEX)
 check_symbol_exists(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
 check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
@@ -1194,7 +1202,7 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_DARWINSSL OR USE_MBEDTLS))
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_SECTRANSP OR USE_MBEDTLS))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
@@ -1241,10 +1249,10 @@ message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
 
 # Clear list and collect SSL backends
 set(_items)
-_add_if("WinSSL"        SSL_ENABLED AND USE_WINDOWS_SSPI)
-_add_if("OpenSSL"       SSL_ENABLED AND USE_OPENSSL)
-_add_if("DarwinSSL"     SSL_ENABLED AND USE_DARWINSSL)
-_add_if("mbedTLS"       SSL_ENABLED AND USE_MBEDTLS)
+_add_if("WinSSL"           SSL_ENABLED AND USE_WINDOWS_SSPI)
+_add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
+_add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
+_add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
 if(_items)
   list(SORT _items)
 endif()

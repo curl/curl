@@ -42,6 +42,12 @@ GIT
 
   (you'll get a directory named curl created, filled with the source code)
 
+SECURITY PROBLEMS
+
+  Report suspected security problems via our HackerOne page and not in public!
+
+    https://hackerone.com/curl
+
 NOTICE
 
   Curl contains pieces of source code that is Copyright (c) 1998, 1999

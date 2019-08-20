@@ -76,20 +76,19 @@ int main(int argc, char *argv[])
 
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
   curl_easy_setopt(hnd, CURLOPT_URL, "smtp://%HOSTIP:%SMTPPORT/1406");
   curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
   curl_easy_setopt(hnd, CURLOPT_MAIL_FROM, "sender@example.com");
   curl_easy_setopt(hnd, CURLOPT_MAIL_RCPT, slist1);
+  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)38);
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may select to either not use them or implement
      them yourself.
 
   CURLOPT_WRITEDATA set to a objectpointer
-  CURLOPT_INTERLEAVEDATA set to a objectpointer
   CURLOPT_WRITEFUNCTION set to a functionpointer
   CURLOPT_READDATA set to a objectpointer
   CURLOPT_READFUNCTION set to a functionpointer
@@ -117,12 +116,14 @@ int main(int argc, char *argv[])
 </file>
 <stripfile>
 # These options vary with configurations - just ignore them
+# CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 $_ = '' if /CURLOPT_USERAGENT/
 $_ = '' if /CURLOPT_MAXREDIRS/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
+$_ = '' if /CURLOPT_INTERLEAVEDATA/
 </stripfile>
 </verify>
 </testcase>

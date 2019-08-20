@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,8 +22,9 @@
  *
  ***************************************************************************/
 
-#include <curl/curl.h>
+#include "curl_setup.h"
 
+#ifndef CURL_DISABLE_FTP
 #include "llist.h"
 
 /* list of wildcard process states */
@@ -57,5 +58,10 @@ CURLcode Curl_wildcard_init(struct WildcardData *wc);
 void Curl_wildcard_dtor(struct WildcardData *wc);
 
 struct Curl_easy;
+
+#else
+/* FTP is disabled */
+#define Curl_wildcard_dtor(x)
+#endif
 
 #endif /* HEADER_CURL_WILDCARD_H */

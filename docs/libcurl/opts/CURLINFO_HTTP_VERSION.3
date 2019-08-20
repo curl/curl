@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,9 +28,10 @@ CURLINFO_HTTP_VERSION \- get the http version used in the connection
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HTTP_VERSION, long *p);
 .SH DESCRIPTION
-Pass a pointer to a long to receive the version used in the last http connection.
-The returned value will be CURL_HTTP_VERSION_1_0, CURL_HTTP_VERSION_1_1, or
-CURL_HTTP_VERSION_2_0, or 0 if the version can't be determined.
+Pass a pointer to a long to receive the version used in the last http
+connection.  The returned value will be CURL_HTTP_VERSION_1_0,
+CURL_HTTP_VERSION_1_1, CURL_HTTP_VERSION_2_0, CURL_HTTP_VERSION_3 or 0 if the
+version can't be determined.
 .SH PROTOCOLS
 HTTP
 .SH EXAMPLE

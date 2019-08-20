@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,9 +77,9 @@ int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       time_t timeout_ms);
 
 #define SOCKET_READABLE(x,z) \
-  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
+  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, (time_t)z)
 #define SOCKET_WRITABLE(x,z) \
-  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
+  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, (time_t)z)
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
 

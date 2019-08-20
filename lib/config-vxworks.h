@@ -541,9 +541,6 @@
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
 
-/* Define to 1 if you have the `SSL_get_shutdown' function. */
-#define HAVE_SSL_GET_SHUTDOWN 1
-
 /* Define to 1 if you have the <ssl.h> header file. */
 /* #undef HAVE_SSL_H */
 
