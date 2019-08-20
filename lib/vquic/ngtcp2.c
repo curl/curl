@@ -315,6 +315,7 @@ static void set_tls_alert(struct quicsocket *qs, uint8_t alert)
 {
   qs->tls_alert = alert;
 }
+static int init_ngh3_conn(struct quicsocket *qs);
 
 static int ssl_on_key(struct quicsocket *qs,
                       int name, const uint8_t *secret, size_t secretlen)
@@ -395,6 +396,10 @@ static int ssl_on_key(struct quicsocket *qs,
     ngtcp2_conn_install_rx_keys(qs->qconn, key, keylen, iv, ivlen,
                                 hp, hplen);
     qs->rx_crypto_level = NGTCP2_CRYPTO_LEVEL_APP;
+    if(init_ngh3_conn(qs) != CURLE_OK) {
+      return NGTCP2_ERR_CALLBACK_FAILURE;
+    }
+
     break;
   }
   return 0;
@@ -746,18 +751,12 @@ cb_recv_crypto_data(ngtcp2_conn *tconn, ngtcp2_crypto_level crypto_level,
   return quic_read_tls(qs);
 }
 
-static int init_ngh3_conn(struct quicsocket *qs);
-
 static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
   (void)tconn;
   qs->tx_crypto_level = NGTCP2_CRYPTO_LEVEL_APP;
   infof(qs->conn->data, "QUIC handshake is completed\n");
-
-  if(init_ngh3_conn(qs) != CURLE_OK) {
-    return NGTCP2_ERR_CALLBACK_FAILURE;
-  }
 
   return 0;
 }
