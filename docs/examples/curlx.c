@@ -277,7 +277,7 @@ int main(int argc, char **argv)
 
   int tabLength = 100;
   char *binaryptr;
-  char *mimetype;
+  char *mimetype = NULL;
   char *mimetypeaccept = NULL;
   char *contenttype;
   const char **pp;
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 
   binaryptr = malloc(tabLength);
 
-  p.verbose = 0;
+  memset(&p, '\0', sizeof(p));
   p.errorbio = BIO_new_fp(stderr, BIO_NOCLOSE);
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -372,7 +372,7 @@ int main(int argc, char **argv)
     args++;
   }
 
-  if(mimetype == NULL || mimetypeaccept == NULL)
+  if(mimetype == NULL || mimetypeaccept == NULL || p.p12file == NULL)
     badarg = 1;
 
   if(badarg) {
