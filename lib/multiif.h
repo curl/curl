@@ -108,6 +108,7 @@ CURLMcode Curl_multi_wait(struct Curl_multi *multi,
                           int *ret,
                           bool *gotsocket); /* if any socket was checked */
 
+
 /* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option
  * If not specified or 0, default would be 100
  */
