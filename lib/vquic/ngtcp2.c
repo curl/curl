@@ -1497,6 +1497,28 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
   return -1;
 }
 
+static int cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
+                              const uint8_t **pdata,
+                              size_t *pdatalen, uint32_t *pflags,
+                              void *user_data, void *stream_user_data)
+{
+  struct Curl_easy *data = stream_user_data;
+  (void)conn;
+  (void)stream_id;
+  (void)user_data;
+
+  fprintf(stderr, "called cb_h3_readfunction\n");
+
+  if(data->set.postfields) {
+    *pdata = data->set.postfields;
+    *pdatalen = data->state.infilesize;
+    *pflags = NGHTTP3_DATA_FLAG_EOF;
+    return 0;
+  }
+
+  return 0;
+}
+
 /* Index where :authority header field will appear in request header
    field list. */
 #define AUTHORITY_DST_IDX 3
@@ -1690,28 +1712,25 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
-  case HTTPREQ_PUT:
+  case HTTPREQ_PUT: {
+    nghttp3_data_reader data_reader;
     if(data->state.infilesize != -1)
       stream->upload_left = data->state.infilesize;
     else
       /* data sending without specifying the data amount up front */
       stream->upload_left = -1; /* unknown, but not zero */
 
-#if 0
-    stream3_id = quiche_h3_send_request(qs->h3c, qs->conn, nva, nheader,
-                                        stream->upload_left ? FALSE: TRUE);
-    if((stream3_id >= 0) && data->set.postfields) {
-      ssize_t sent = quiche_h3_send_body(qs->h3c, qs->conn, stream3_id,
-                                         (uint8_t *)data->set.postfields,
-                                         stream->upload_left, TRUE);
-      if(sent <= 0) {
-        failf(data, "quiche_h3_send_body failed!");
-        result = CURLE_SEND_ERROR;
-      }
-      stream->upload_left = 0; /* nothing left to send */
+    data_reader.read_data = cb_h3_readfunction;
+
+    rc = nghttp3_conn_submit_request(qs->h3conn, stream->stream3_id,
+                                     nva, nheader, &data_reader,
+                                     conn->data);
+    if(rc) {
+      result = CURLE_SEND_ERROR;
+      goto fail;
     }
-#endif
     break;
+  }
   default:
     stream->upload_left = 0; /* nothing left to send */
     rc = nghttp3_conn_submit_request(qs->h3conn, stream->stream3_id,
