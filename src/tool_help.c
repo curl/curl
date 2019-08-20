@@ -540,6 +540,7 @@ static const struct feat feats[] = {
   {"MultiSSL",       CURL_VERSION_MULTI_SSL},
   {"PSL",            CURL_VERSION_PSL},
   {"alt-svc",        CURL_VERSION_ALTSVC},
+  {"HSTS",           CURL_VERSION_HSTS},
 };
 
 void tool_help(void)

@@ -2799,6 +2799,7 @@ typedef struct {
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
 #define CURL_VERSION_HTTP3        (1<<25) /* HTTP3 support built-in */
+#define CURL_VERSION_HSTS         (1<<26) /* HSTS features are present */
 
  /*
  * NAME curl_version_info()

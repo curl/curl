@@ -1,0 +1,9 @@
+{
+  "entries": [
+      { "name": "hstsdomain.fake",
+        "policy": "test",
+        "include_subdomains": true,
+        "mode": "force-https"
+      }
+  ]
+}

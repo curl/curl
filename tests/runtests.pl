@@ -237,6 +237,7 @@ my $has_altsvc;     # set if libcurl is built with alt-svc support
 my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 my $has_multissl;   # set if curl is build with MultiSSL support
 my $has_manual;     # set if curl is built with built-in manual
+my $has_hsts;       # set if curl is built with HSTS support
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2600,6 +2601,7 @@ sub setupfeatures {
     $feature{"alt-svc"} = $has_altsvc;
     $feature{"manual"} = $has_manual;
     $feature{"unix-sockets"} = $has_unix;
+    $feature{"HSTS"} = $has_hsts;
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
@@ -2846,6 +2848,10 @@ sub checksystem {
                 $has_http2=1;
 
                 push @protocols, 'http/2';
+            }
+            if($feat =~ /HSTS/) {
+                # HSTS enabled
+                $has_hsts=1;
             }
         }
         #
