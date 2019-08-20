@@ -486,7 +486,6 @@
 #ifdef WIN32
 
 #  define DIR_CHAR      "\\"
-#  define DOT_CHAR      "_"
 
 #else /* WIN32 */
 
@@ -512,14 +511,6 @@
 #  endif
 
 #  define DIR_CHAR      "/"
-#  ifndef DOT_CHAR
-#    define DOT_CHAR      "."
-#  endif
-
-#  ifdef MSDOS
-#    undef DOT_CHAR
-#    define DOT_CHAR      "_"
-#  endif
 
 #  ifndef fileno /* sunos 4 have this as a macro! */
      int fileno(FILE *stream);

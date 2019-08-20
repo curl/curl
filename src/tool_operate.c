@@ -1487,7 +1487,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
             result = CURLE_OUT_OF_MEMORY;
             home = homedir();
             if(home) {
-              file = aprintf("%s/%sssh/known_hosts", home, DOT_CHAR);
+              file = aprintf("%s/.ssh/known_hosts", home);
               if(file) {
                 /* new in curl 7.19.6 */
                 result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, file);
