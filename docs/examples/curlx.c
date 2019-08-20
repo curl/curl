@@ -277,7 +277,7 @@ int main(int argc, char **argv)
 
   int tabLength = 100;
   char *binaryptr;
-  char *mimetype;
+  char *mimetype = NULL;
   char *mimetypeaccept = NULL;
   char *contenttype;
   const char **pp;
