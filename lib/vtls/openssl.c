@@ -391,7 +391,11 @@ static const char *SSL_ERROR_to_str(int err)
  */
 static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 {
+#ifdef OPENSSL_IS_BORINGSSL
+  ERR_error_string_n((uint32_t)error, buf, size);
+#else
   ERR_error_string_n(error, buf, size);
+#endif
   return buf;
 }
 
@@ -1529,8 +1533,13 @@ static CURLcode verifyhost(struct connectdata *conn, X509 *server_cert)
   altnames = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL, NULL);
 
   if(altnames) {
+#ifdef OPENSSL_IS_BORINGSSL
+    size_t numalts;
+    size_t i;
+#else
     int numalts;
     int i;
+#endif
     bool dnsmatched = FALSE;
     bool ipmatched = FALSE;
 
@@ -2147,8 +2156,14 @@ get_ssl_version_txt(SSL *ssl)
 }
 #endif
 
+#ifdef OPENSSL_IS_BORINGSSL
+typedef uint32_t ctx_option_t;
+#else
+typedef long ctx_option_t;
+#endif
+
 static CURLcode
-set_ssl_version_min_max(long *ctx_options, struct connectdata *conn,
+set_ssl_version_min_max(ctx_option_t *ctx_options, struct connectdata *conn,
                         int sockindex)
 {
 #if (OPENSSL_VERSION_NUMBER < 0x1000100FL) || !defined(TLS1_3_VERSION)
@@ -2287,7 +2302,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   X509_LOOKUP *lookup = NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  long ctx_options = 0;
+  ctx_option_t ctx_options = 0;
+
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
@@ -3031,6 +3047,12 @@ static int X509V3_ext(struct Curl_easy *data,
   return 0; /* all is fine */
 }
 
+#ifdef OPENSSL_IS_BORINGSSL
+typedef size_t numcert_t;
+#else
+typedef int numcert_t;
+#endif
+
 static CURLcode get_cert_chain(struct connectdata *conn,
                                struct ssl_connect_data *connssl)
 
@@ -3039,7 +3061,7 @@ static CURLcode get_cert_chain(struct connectdata *conn,
   STACK_OF(X509) *sk;
   int i;
   struct Curl_easy *data = conn->data;
-  int numcerts;
+  numcert_t numcerts;
   BIO *mem;
 
   sk = SSL_get_peer_cert_chain(BACKEND->handle);
@@ -3049,14 +3071,14 @@ static CURLcode get_cert_chain(struct connectdata *conn,
 
   numcerts = sk_X509_num(sk);
 
-  result = Curl_ssl_init_certinfo(data, numcerts);
+  result = Curl_ssl_init_certinfo(data, (int)numcerts);
   if(result) {
     return result;
   }
 
   mem = BIO_new(BIO_s_mem());
 
-  for(i = 0; i < numcerts; i++) {
+  for(i = 0; i < (int)numcerts; i++) {
     ASN1_INTEGER *num;
     X509 *x = sk_X509_value(sk, i);
     EVP_PKEY *pubkey = NULL;

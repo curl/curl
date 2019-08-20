@@ -521,7 +521,7 @@ script:
     - |
         set -eo pipefail
         if [ "$T" = "novalgrind" ]; then
-             ./configure $C
+             ./configure --enable-werror $C
              make && make examples
              make TFLAGS=-n test-nonflaky
         fi
