@@ -51,6 +51,8 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
+bool Curl_addr2string(struct sockaddr *sa, char *addr, long *port);
+
 /*
  * Check if a connection seems to be alive.
  */

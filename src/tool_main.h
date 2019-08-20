@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,9 @@
 
 #define RETRY_SLEEP_DEFAULT 1000L   /* ms */
 #define RETRY_SLEEP_MAX     600000L /* ms == 10 minutes */
+
+#define MAX_PARALLEL 300 /* conservative */
+#define PARALLEL_DEFAULT 50
 
 #ifndef STDIN_FILENO
 #  define STDIN_FILENO  fileno(stdin)

@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2017 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -205,17 +205,6 @@ while(<STDIN>) {
               print "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
               print "${pref} stringpointerextra);\n$check";
             }
-            elsif(($name eq "HTTPHEADER") ||
-                  ($name eq "POSTQUOTE") ||
-                  ($name eq "PREQUOTE") ||
-                  ($name eq "HTTP200ALIASES") ||
-                  ($name eq "TELNETOPTIONS") ||
-                  ($name eq "MAIL_RCPT") ||
-                  ($name eq "RESOLVE") ||
-                  ($name eq "PROXYHEADER") ||
-                  ($name eq "QUOTE")) {
-              print "${pref} slist);\n$check";
-            }
             elsif($name eq "HTTPPOST") {
               print "${pref} httppost);\n$check";
             }
@@ -229,6 +218,9 @@ while(<STDIN>) {
               print "${pref} &object);\n$check";
             }
             print "${pref} NULL);\n$check";
+        }
+        elsif($type eq "SLISTPOINT") {
+            print "${pref} slist);\n$check";
         }
         elsif($type eq "FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {

@@ -211,7 +211,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
 static int use_buffer(URL_FILE *file, size_t want)
 {
   /* sort out buffer */
-  if((file->buffer_pos - want) <= 0) {
+  if(file->buffer_pos <= want) {
     /* ditch buffer - write will recreate */
     free(file->buffer);
     file->buffer = NULL;

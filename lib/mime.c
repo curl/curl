@@ -29,8 +29,8 @@
 #include "urldata.h"
 #include "sendf.h"
 
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
-    !defined(CURL_DISABLE_IMAP)
+#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_MIME)) || \
+  !defined(CURL_DISABLE_SMTP) || !defined(CURL_DISABLE_IMAP)
 
 #if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
@@ -821,8 +821,10 @@ static size_t readback_part(curl_mimepart *part,
     struct curl_slist *hdr = (struct curl_slist *) part->state.ptr;
     switch(part->state.state) {
     case MIMESTATE_BEGIN:
-      mimesetstate(&part->state, part->flags & MIME_BODY_ONLY? MIMESTATE_BODY:
-                                 MIMESTATE_CURLHEADERS, part->curlheaders);
+      mimesetstate(&part->state,
+                   (part->flags & MIME_BODY_ONLY)?
+                     MIMESTATE_BODY: MIMESTATE_CURLHEADERS,
+                   part->curlheaders);
       break;
     case MIMESTATE_USERHEADERS:
       if(!hdr) {
@@ -1899,72 +1901,4 @@ CURLcode curl_mime_headers(curl_mimepart *part,
   return CURLE_NOT_BUILT_IN;
 }
 
-void Curl_mime_initpart(curl_mimepart *part, struct Curl_easy *easy)
-{
-  (void) part;
-  (void) easy;
-}
-
-void Curl_mime_cleanpart(curl_mimepart *part)
-{
-  (void) part;
-}
-
-CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
-{
-  (void) dst;
-  (void) src;
-  return CURLE_OK;    /* Nothing to duplicate: always succeed. */
-}
-
-CURLcode Curl_mime_set_subparts(curl_mimepart *part,
-                                curl_mime *subparts, int take_ownership)
-{
-  (void) part;
-  (void) subparts;
-  (void) take_ownership;
-  return CURLE_NOT_BUILT_IN;
-}
-
-CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
-                                   const char *contenttype,
-                                   const char *disposition,
-                                   enum mimestrategy strategy)
-{
-  (void) part;
-  (void) contenttype;
-  (void) disposition;
-  (void) strategy;
-  return CURLE_NOT_BUILT_IN;
-}
-
-curl_off_t Curl_mime_size(curl_mimepart *part)
-{
-  (void) part;
-  return (curl_off_t) -1;
-}
-
-size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
-{
-  (void) buffer;
-  (void) size;
-  (void) nitems;
-  (void) instream;
-  return 0;
-}
-
-CURLcode Curl_mime_rewind(curl_mimepart *part)
-{
-  (void) part;
-  return CURLE_NOT_BUILT_IN;
-}
-
-/* VARARGS2 */
-CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
-{
-  (void) slp;
-  (void) fmt;
-  return CURLE_NOT_BUILT_IN;
-}
-
-#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
+#endif /* if disabled */

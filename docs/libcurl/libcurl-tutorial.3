@@ -496,13 +496,13 @@ and then a file with binary contents and uploads the whole thing.
 
 .nf
  curl_mime *multipart = curl_mime_init(easyhandle);
- curl_mimepart *part = curl_mime_addpart(mutipart);
+ curl_mimepart *part = curl_mime_addpart(multipart);
  curl_mime_name(part, "name");
  curl_mime_data(part, "daniel", CURL_ZERO_TERMINATED);
- part = curl_mime_addpart(mutipart);
+ part = curl_mime_addpart(multipart);
  curl_mime_name(part, "project");
  curl_mime_data(part, "curl", CURL_ZERO_TERMINATED);
- part = curl_mime_addpart(mutipart);
+ part = curl_mime_addpart(multipart);
  curl_mime_name(part, "logotype-image");
  curl_mime_filedata(part, "curl.png");
 

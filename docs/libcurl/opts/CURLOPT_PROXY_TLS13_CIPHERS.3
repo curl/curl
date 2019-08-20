@@ -37,6 +37,10 @@ You'll find more details about cipher lists on this URL:
 
  https://curl.haxx.se/docs/ssl-ciphers.html
 
+This option is currently used only when curl is built to use OpenSSL 1.1.1 or
+later. If you are using a different SSL backend you can try setting TLS 1.3
+cipher suites by using the CURLOPT_PROXY_SSL_CIPHER_LIST option.
+
 The application does not have to keep the string around after setting this
 option.
 .SH DEFAULT

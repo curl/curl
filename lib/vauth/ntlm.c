@@ -403,7 +403,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   (void)hostname,
 
   /* Clean up any former leftovers and initialise to defaults */
-  Curl_auth_ntlm_cleanup(ntlm);
+  Curl_auth_cleanup_ntlm(ntlm);
 
 #if defined(USE_NTRESPONSES) && defined(USE_NTLM2SESSION)
 #define NTLM2FLAG NTLMFLAG_NEGOTIATE_NTLM2_KEY
@@ -844,22 +844,22 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* Return with binary blob encoded into base64 */
   result = Curl_base64_encode(data, (char *)ntlmbuf, size, outptr, outlen);
 
-  Curl_auth_ntlm_cleanup(ntlm);
+  Curl_auth_cleanup_ntlm(ntlm);
 
   return result;
 }
 
 /*
-* Curl_auth_ntlm_cleanup()
-*
-* This is used to clean up the NTLM specific data.
-*
-* Parameters:
-*
-* ntlm    [in/out] - The NTLM data struct being cleaned up.
-*
-*/
-void Curl_auth_ntlm_cleanup(struct ntlmdata *ntlm)
+ * Curl_auth_cleanup_ntlm()
+ *
+ * This is used to clean up the NTLM specific data.
+ *
+ * Parameters:
+ *
+ * ntlm    [in/out] - The NTLM data struct being cleaned up.
+ *
+ */
+void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
 {
   /* Free the target info */
   Curl_safefree(ntlm->target_info);

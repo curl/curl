@@ -25,10 +25,6 @@
 #include "connect.h"
 #include "share.h"
 
-/* retrieves ip address and port from a sockaddr structure.
-   note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool getaddressinfo(struct sockaddr *sa, char *addr, long *port);
-
 #include "memdebug.h" /* LAST include file */
 
 static void unit_stop(void)
@@ -154,8 +150,8 @@ UNITTEST_START
       if(tests[i].address[j] == &skip)
         continue;
 
-      if(addr && !getaddressinfo(addr->ai_addr,
-                                 ipaddress, &port)) {
+      if(addr && !Curl_addr2string(addr->ai_addr,
+                                   ipaddress, &port)) {
         fprintf(stderr, "%s:%d tests[%d] failed. getaddressinfo failed.\n",
                 __FILE__, __LINE__, i);
         problem = true;

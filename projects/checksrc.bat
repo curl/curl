@@ -143,7 +143,7 @@ rem ***************************************************************************
   if "%CHECK_EXAMPLES%" == "TRUE" (
     rem Check the docs\examples directory
     if exist %SRC_DIR%\docs\examples (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\docs\examples\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\docs\examples" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\docs\examples\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\docs\examples" -ASNPRINTF "%%i"
     )
   )
 

@@ -220,7 +220,10 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     free(output_token);
     free(input_token);
 
-    return CURLE_RECV_ERROR;
+    if(status == SEC_E_INSUFFICIENT_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+
+    return CURLE_AUTH_ERROR;
   }
 
   /* Base64 encode the response */
@@ -607,7 +610,10 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
       Curl_safefree(digest->http_context);
 
-      return CURLE_OUT_OF_MEMORY;
+      if(status == SEC_E_INSUFFICIENT_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+
+      return CURLE_AUTH_ERROR;
     }
 
     output_token_len = resp_buf.cbBuffer;

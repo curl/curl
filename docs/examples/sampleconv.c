@@ -90,7 +90,6 @@ static CURLcode my_conv_from_utf8_to_ebcdic(char *buffer, size_t length)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -104,7 +103,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_CONV_FROM_UTF8_FUNCTION,
                      my_conv_from_utf8_to_ebcdic);
 
-    res = curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

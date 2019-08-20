@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -357,7 +357,6 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const char *service,
                                              char **outptr, size_t *outlen)
 {
-  CURLcode result = CURLE_OK;
   size_t i;
   MD5_context *ctxt;
   char *response = NULL;
@@ -377,10 +376,12 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char *spn         = NULL;
 
   /* Decode the challenge message */
-  result = auth_decode_digest_md5_message(chlg64, nonce, sizeof(nonce),
-                                          realm, sizeof(realm),
-                                          algorithm, sizeof(algorithm),
-                                          qop_options, sizeof(qop_options));
+  CURLcode result = auth_decode_digest_md5_message(chlg64, nonce,
+                                                   sizeof(nonce), realm,
+                                                   sizeof(realm), algorithm,
+                                                   sizeof(algorithm),
+                                                   qop_options,
+                                                   sizeof(qop_options));
   if(result)
     return result;
 
@@ -785,8 +786,7 @@ static CURLcode _Curl_auth_create_digest_http_message(
     return CURLE_OUT_OF_MEMORY;
 
   if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
-    /* We don't support auth-int for PUT or POST at the moment.
-       TODO: replace hash of empty string with entity-body for PUT/POST */
+    /* We don't support auth-int for PUT or POST */
     char hashed[65];
     unsigned char *hashthis2;
 

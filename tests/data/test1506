@@ -88,13 +88,9 @@ Accept: */*
 * Connection #2 to host server3.example.com left intact
 * Closing connection 0
 * Connection #3 to host server4.example.com left intact
-* Closing connection
-* Closing connection
-* Closing connection
 </file>
 <stripfile>
 $_ = '' if (($_ !~ /left intact/) && ($_ !~ /Closing connection/))
-s/^(\* Closing connection) [123](?=\r?\n)/$1/
 </stripfile>
 </verify>
 </testcase>

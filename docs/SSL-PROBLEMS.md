@@ -53,9 +53,9 @@
   Note that these weak ciphers are identified as flawed. For example, this
   includes symmetric ciphers with less than 128 bit keys and RC4.
 
-  WinSSL in Windows XP is not able to connect to servers that no longer
+  Schannel in Windows XP is not able to connect to servers that no longer
   support the legacy handshakes and algorithms used by those versions, so we
-  advice against building curl to use WinSSL on really old Windows versions.
+  advice against building curl to use Schannel on really old Windows versions.
 
   References:
 
@@ -77,9 +77,9 @@
   Some SSL backends may do certificate revocation checks (CRL, OCSP, etc)
   depending on the OS or build configuration. The --ssl-no-revoke option was
   introduced in 7.44.0 to disable revocation checking but currently is only
-  supported for WinSSL (the native Windows SSL library), with an exception in
-  the case of Windows' Untrusted Publishers blacklist which it seems can't be
-  bypassed. This option may have broader support to accommodate other SSL
+  supported for Schannel (the native Windows SSL library), with an exception
+  in the case of Windows' Untrusted Publishers blacklist which it seems can't
+  be bypassed. This option may have broader support to accommodate other SSL
   backends in the future.
 
   References:

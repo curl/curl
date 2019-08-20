@@ -39,7 +39,8 @@ libcurl will follow.
 
 libcurl limits what protocols it automatically follows to. The accepted
 protocols are set with \fICURLOPT_REDIR_PROTOCOLS(3)\fP. By default libcurl
-will allow all protocols on redirect except those disabled for security
+will allow HTTP, HTTPS, FTP and FTPS on redirect (7.65.2). Older versions of
+libcurl allowed all protocols on redirect except those disabled for security
 reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0 SMB and SMBS
 are also disabled.
 

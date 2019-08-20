@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
      them yourself.
 
   CURLOPT_WRITEDATA set to a objectpointer
-  CURLOPT_INTERLEAVEDATA set to a objectpointer
   CURLOPT_WRITEFUNCTION set to a functionpointer
   CURLOPT_READDATA set to a objectpointer
   CURLOPT_READFUNCTION set to a functionpointer
@@ -128,6 +127,7 @@ int main(int argc, char *argv[])
 </file>
 <stripfile>
 # CURLOPT_USERAGENT and CURLOPT_MAXREDIRS requires HTTP protocol
+# CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 # support, IOW depends on configuration - just ignore these.
 $_ = '' if /CURLOPT_USERAGENT/
 $_ = '' if /CURLOPT_MAXREDIRS/
@@ -137,6 +137,7 @@ $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
+$_ = '' if /CURLOPT_INTERLEAVEDATA/
 </stripfile>
 </verify>
 </testcase>

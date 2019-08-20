@@ -749,10 +749,6 @@ static bool incoming(curl_socket_t listenfd)
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
-  curl_socket_t sockfd = CURL_SOCKET_BAD;
-  int maxfd = -99;
-  ssize_t rc;
-  int error = 0;
   int clients = 0; /* connected clients */
   struct perclient c[2];
 
@@ -772,15 +768,17 @@ static bool incoming(curl_socket_t listenfd)
 
   do {
     int i;
+    ssize_t rc;
+    int error = 0;
+    curl_socket_t sockfd = listenfd;
+    int maxfd = (int)sockfd;
 
     FD_ZERO(&fds_read);
     FD_ZERO(&fds_write);
     FD_ZERO(&fds_err);
 
-    sockfd = listenfd;
     /* there's always a socket to wait for */
     FD_SET(sockfd, &fds_read);
-    maxfd = (int)sockfd;
 
     for(i = 0; i < 2; i++) {
       if(c[i].used) {

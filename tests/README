@@ -216,27 +216,12 @@ The curl Test Suite
 
  2.1 Test case numbering
 
-     1   -  99   HTTP
-     100 - 199   FTP
-     200 - 299   FILE
-     300 - 399   HTTPS
-     400 - 499   FTPS
-     500 - 599   libcurl source code tests, not using the curl command tool
-     600 - 699   SCP/SFTP
-     700 - 799   SOCKS4 (even numbers) and SOCK5 (odd numbers)
-     800 - 849   IMAP
-     850 - 899   POP3
-     900 - 999   SMTP
-     1000 - 1299 miscellaneous
-     1300 - 1399 unit tests
-     1400 - 1499 miscellaneous
-     1500 - 1599 libcurl source code tests, not using the curl command tool
-                 (same as 5xx)
-     1600 - 1699 unit tests
-     2000 - x    multiple sequential protocols per test case
+  Test cases used to be numbered by category, but the ranges filled
+  up. Subsets of tests can now be selected by passing keywords to the
+  runtests.pl script via the make TFLAGS variable.
 
-  There's nothing in the system that *requires* us to keep within these number
-  series.
+  New tests should now be added by finding a free number in
+  tests/data/Makefile.inc.
 
 3. Write tests
 

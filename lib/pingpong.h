@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -135,8 +135,7 @@ CURLcode Curl_pp_flushsend(struct pingpong *pp);
 /* call this when a pingpong connection is disconnected */
 CURLcode Curl_pp_disconnect(struct pingpong *pp);
 
-int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks,
-                    int numsocks);
+int Curl_pp_getsock(struct pingpong *pp, curl_socket_t *socks);
 
 
 /***********************************************************************

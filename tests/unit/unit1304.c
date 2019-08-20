@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -207,8 +207,4 @@ UNITTEST_START
   fail_unless(strncmp(login, "none", 4) == 0, "login should be 'none'");
   fail_unless(!login_changed, "login should not have been changed");
 
-  /* TODO:
-   * Test over the size limit password / login!
-   * Test files with a bad format
-   */
 UNITTEST_STOP

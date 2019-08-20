@@ -1,0 +1,25 @@
+<testcase>
+<info>
+<keywords>
+source analysis
+CURL_DISABLE
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+ <name>
+Verify configure.ac and source code CURL_DISABLE_-sync
+ </name>
+
+<command type="perl">
+%SRCDIR/disable-scan.pl %SRCDIR/..
+</command>
+</client>
+
+</testcase>

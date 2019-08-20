@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2016 - 2019, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -48,19 +48,20 @@ typedef enum {
   PLATFORM_WINNT
 } PlatformIdentifier;
 
+/* We use our own typedef here since some headers might lack this */
+typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
+
+/* This is used instead of if_nametoindex if available on Windows */
+extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
+
 /* This is used to verify if we are running on a specific windows version */
 bool Curl_verify_windows_version(const unsigned int majorVersion,
                                  const unsigned int minorVersion,
                                  const PlatformIdentifier platform,
                                  const VersionCondition condition);
 
-#if defined(USE_WINDOWS_SSPI) || (!defined(CURL_DISABLE_TELNET) && \
-                                  defined(USE_WINSOCK))
-
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
-
-#endif /* USE_WINDOWS_SSPI || (!CURL_DISABLE_TELNET && USE_WINSOCK) */
 
 #endif /* WIN32 */
 

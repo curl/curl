@@ -86,10 +86,6 @@ Accept: */*
 Some data delivered from an HTTP resource
 </file1>
 <file2 name="log/heads2006">
-Content-Length: 496
-Accept-ranges: bytes
-
-
 HTTP/1.1 200 OK
 Date: Thu, 21 Jun 2012 14:49:01 GMT
 Server: test-server/fake

@@ -203,8 +203,8 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
   GlobalInfo *g = (GlobalInfo*) w->data;
   CURLMcode rc;
 
-  int action = (revents&EV_READ?CURL_POLL_IN:0)|
-    (revents&EV_WRITE?CURL_POLL_OUT:0);
+  int action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
+    ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
   rc = curl_multi_socket_action(g->multi, w->fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
   check_multi_info(g);
@@ -247,7 +247,8 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 {
   printf("%s  \n", __PRETTY_FUNCTION__);
 
-  int kind = (act&CURL_POLL_IN?EV_READ:0)|(act&CURL_POLL_OUT?EV_WRITE:0);
+  int kind = ((act & CURL_POLL_IN) ? EV_READ : 0) |
+             ((act & CURL_POLL_OUT) ? EV_WRITE : 0);
 
   f->sockfd = s;
   f->action = act;
@@ -421,7 +422,6 @@ static int init_fifo(GlobalInfo *g)
 int main(int argc, char **argv)
 {
   GlobalInfo g;
-  CURLMcode rc;
   (void)argc;
   (void)argv;
 

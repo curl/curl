@@ -253,16 +253,14 @@ static void destroy_async_data(struct Curl_async *async)
  */
 
 int Curl_resolver_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
-
+                          curl_socket_t *socks)
 {
   struct timeval maxtime;
   struct timeval timebuf;
   struct timeval *timeout;
   long milli;
   int max = ares_getsock((ares_channel)conn->data->state.resolver,
-                         (ares_socket_t *)socks, numsocks);
+                         (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
 
   maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
   maxtime.tv_usec = 0;
@@ -331,9 +329,9 @@ static int waitperform(struct connectdata *conn, int timeout_ms)
     /* move through the descriptors and ask for processing on them */
     for(i = 0; i < num; i++)
       ares_process_fd((ares_channel)data->state.resolver,
-                      pfd[i].revents & (POLLRDNORM|POLLIN)?
+                      (pfd[i].revents & (POLLRDNORM|POLLIN))?
                       pfd[i].fd:ARES_SOCKET_BAD,
-                      pfd[i].revents & (POLLWRNORM|POLLOUT)?
+                      (pfd[i].revents & (POLLWRNORM|POLLOUT))?
                       pfd[i].fd:ARES_SOCKET_BAD);
   }
   return nfds;
@@ -490,9 +488,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 
   if(result)
     /* close the connection, since we can't return failure here without
-       cleaning up this connection properly.
-       TODO: remove this action from here, it is not a name resolver decision.
-    */
+       cleaning up this connection properly. */
     connclose(conn, "c-ares resolve failed");
 
   return result;
@@ -736,7 +732,11 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
     return CURLE_OK;
 
 #if (ARES_VERSION >= 0x010704)
+#if (ARES_VERSION >= 0x010b00)
+  ares_result = ares_set_servers_ports_csv(data->state.resolver, servers);
+#else
   ares_result = ares_set_servers_csv(data->state.resolver, servers);
+#endif
   switch(ares_result) {
   case ARES_SUCCESS:
     result = CURLE_OK;

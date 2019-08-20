@@ -209,16 +209,17 @@ struct curl_httppost {
                                        set. Added in 7.46.0 */
 };
 
-/* This is the CURLOPT_PROGRESSFUNCTION callback proto. It is now considered
-   deprecated but was the only choice up until 7.31.0 */
+/* This is the CURLOPT_PROGRESSFUNCTION callback prototype. It is now
+   considered deprecated but was the only choice up until 7.31.0 */
 typedef int (*curl_progress_callback)(void *clientp,
                                       double dltotal,
                                       double dlnow,
                                       double ultotal,
                                       double ulnow);
 
-/* This is the CURLOPT_XFERINFOFUNCTION callback proto. It was introduced in
-   7.32.0, it avoids floating point and provides more detailed information. */
+/* This is the CURLOPT_XFERINFOFUNCTION callback prototype. It was introduced
+   in 7.32.0, avoids the use of floating point numbers and provides more
+   detailed information. */
 typedef int (*curl_xferinfo_callback)(void *clientp,
                                       curl_off_t dltotal,
                                       curl_off_t dlnow,
@@ -283,14 +284,11 @@ typedef enum {
 #define CURLFINFOFLAG_KNOWN_SIZE        (1<<6)
 #define CURLFINFOFLAG_KNOWN_HLINKCOUNT  (1<<7)
 
-/* Content of this structure depends on information which is known and is
-   achievable (e.g. by FTP LIST parsing). Please see the url_easy_setopt(3) man
-   page for callbacks returning this structure -- some fields are mandatory,
-   some others are optional. The FLAG field has special meaning. */
+/* Information about a single file, used when doing FTP wildcard matching */
 struct curl_fileinfo {
   char *filename;
   curlfiletype filetype;
-  time_t time;
+  time_t time; /* always zero! */
   unsigned int perm;
   int uid;
   int gid;
@@ -602,6 +600,8 @@ typedef enum {
                                     */
   CURLE_RECURSIVE_API_CALL,      /* 93 - an api function was called from
                                     inside a callback */
+  CURLE_AUTH_ERROR,              /* 94 - an authentication function returned an
+                                    error */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -685,8 +685,10 @@ typedef enum {
 typedef CURLcode (*curl_conv_callback)(char *buffer, size_t length);
 
 typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
-                                          void *ssl_ctx, /* actually an
-                                                            OpenSSL SSL_CTX */
+                                          void *ssl_ctx, /* actually an OpenSSL
+                                                            or WolfSSL SSL_CTX,
+                                                            or an mbedTLS
+                                                          mbedtls_ssl_config */
                                           void *userptr);
 
 typedef enum {
@@ -883,7 +885,7 @@ typedef enum {
 
 /* CURLALTSVC_* are bits for the CURLOPT_ALTSVC_CTRL option */
 #define CURLALTSVC_IMMEDIATELY  (1<<0)
-#define CURLALTSVC_ALTUSED      (1<<1)
+
 #define CURLALTSVC_READONLYFILE (1<<2)
 #define CURLALTSVC_H1           (1<<3)
 #define CURLALTSVC_H2           (1<<4)
@@ -924,7 +926,6 @@ typedef enum {
    but 32 */
 #define CURLOPTTYPE_LONG          0
 #define CURLOPTTYPE_OBJECTPOINT   10000
-#define CURLOPTTYPE_STRINGPOINT   10000
 #define CURLOPTTYPE_FUNCTIONPOINT 20000
 #define CURLOPTTYPE_OFF_T         30000
 
@@ -944,11 +945,14 @@ typedef enum {
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
 #define LONG          CURLOPTTYPE_LONG
 #define OBJECTPOINT   CURLOPTTYPE_OBJECTPOINT
-#define STRINGPOINT   CURLOPTTYPE_OBJECTPOINT
 #define FUNCTIONPOINT CURLOPTTYPE_FUNCTIONPOINT
 #define OFF_T         CURLOPTTYPE_OFF_T
 #define CINIT(name,type,number) CURLOPT_/**/name = type + number
 #endif
+
+/* handy aliases that make no run-time difference */
+#define CURLOPTTYPE_STRINGPOINT  CURLOPTTYPE_OBJECTPOINT
+#define CURLOPTTYPE_SLISTPOINT  CURLOPTTYPE_OBJECTPOINT
 
 /*
  * This macro-mania below setups the CURLOPT_[what] enum, to be used with
@@ -1047,7 +1051,7 @@ typedef enum {
 
   /* This points to a linked list of headers, struct curl_slist kind. This
      list is also used for RTSP (in spite of its name) */
-  CINIT(HTTPHEADER, OBJECTPOINT, 23),
+  CINIT(HTTPHEADER, SLISTPOINT, 23),
 
   /* This points to a linked list of post entries, struct curl_httppost */
   CINIT(HTTPPOST, OBJECTPOINT, 24),
@@ -1062,7 +1066,7 @@ typedef enum {
   CINIT(CRLF, LONG, 27),
 
   /* send linked-list of QUOTE commands */
-  CINIT(QUOTE, OBJECTPOINT, 28),
+  CINIT(QUOTE, SLISTPOINT, 28),
 
   /* send FILE * or void * to store headers to, if you use a callback it
      is simply passed to the callback unmodified */
@@ -1097,7 +1101,7 @@ typedef enum {
   /* 38 is not used */
 
   /* send linked-list of post-transfer QUOTE commands */
-  CINIT(POSTQUOTE, OBJECTPOINT, 39),
+  CINIT(POSTQUOTE, SLISTPOINT, 39),
 
   CINIT(OBSOLETE40, OBJECTPOINT, 40), /* OBSOLETE, do not use! */
 
@@ -1173,7 +1177,7 @@ typedef enum {
   CINIT(FILETIME, LONG, 69),
 
   /* This points to a linked list of telnet options */
-  CINIT(TELNETOPTIONS, OBJECTPOINT, 70),
+  CINIT(TELNETOPTIONS, SLISTPOINT, 70),
 
   /* Max amount of cached alive connections */
   CINIT(MAXCONNECTS, LONG, 71),
@@ -1257,7 +1261,7 @@ typedef enum {
   CINIT(DNS_CACHE_TIMEOUT, LONG, 92),
 
   /* send linked-list of pre-transfer QUOTE commands */
-  CINIT(PREQUOTE, OBJECTPOINT, 93),
+  CINIT(PREQUOTE, SLISTPOINT, 93),
 
   /* set the debug function */
   CINIT(DEBUGFUNCTION, FUNCTIONPOINT, 94),
@@ -1297,7 +1301,7 @@ typedef enum {
   CINIT(PRIVATE, OBJECTPOINT, 103),
 
   /* Set aliases for HTTP 200 in the HTTP Response header */
-  CINIT(HTTP200ALIASES, OBJECTPOINT, 104),
+  CINIT(HTTP200ALIASES, SLISTPOINT, 104),
 
   /* Continue to send authentication (user+password) when following locations,
      even when hostname changed. This can potentially send off the name
@@ -1314,9 +1318,9 @@ typedef enum {
      Note that setting multiple bits may cause extra network round-trips. */
   CINIT(HTTPAUTH, LONG, 107),
 
-  /* Set the ssl context callback function, currently only for OpenSSL ssl_ctx
-     in second argument. The function must be matching the
-     curl_ssl_ctx_callback proto. */
+  /* Set the ssl context callback function, currently only for OpenSSL or
+     WolfSSL ssl_ctx, or mbedTLS mbedtls_ssl_config in the second argument.
+     The function must match the curl_ssl_ctx_callback prototype. */
   CINIT(SSL_CTX_FUNCTION, FUNCTIONPOINT, 108),
 
   /* Set the userdata for the ssl context callback function's third
@@ -1569,8 +1573,7 @@ typedef enum {
 
   /* set the bitmask for the protocols that libcurl is allowed to follow to,
      as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol needs
-     to be set in both bitmasks to be allowed to get redirected to. Defaults
-     to all protocols except FILE and SCP. */
+     to be set in both bitmasks to be allowed to get redirected to. */
   CINIT(REDIR_PROTOCOLS, LONG, 182),
 
   /* set the SSH knownhost file name to use */
@@ -1587,7 +1590,7 @@ typedef enum {
   CINIT(MAIL_FROM, STRINGPOINT, 186),
 
   /* set the list of SMTP mail receiver(s) */
-  CINIT(MAIL_RCPT, OBJECTPOINT, 187),
+  CINIT(MAIL_RCPT, SLISTPOINT, 187),
 
   /* FTP: send PRET before PASV */
   CINIT(FTP_USE_PRET, LONG, 188),
@@ -1637,7 +1640,7 @@ typedef enum {
   CINIT(FNMATCH_DATA, OBJECTPOINT, 202),
 
   /* send linked-list of name:port:address sets */
-  CINIT(RESOLVE, OBJECTPOINT, 203),
+  CINIT(RESOLVE, SLISTPOINT, 203),
 
   /* Set a username for authenticated TLS */
   CINIT(TLSAUTH_USERNAME, STRINGPOINT, 204),
@@ -1727,7 +1730,7 @@ typedef enum {
 
   /* This points to a linked list of headers used for proxy requests only,
      struct curl_slist kind */
-  CINIT(PROXYHEADER, OBJECTPOINT, 228),
+  CINIT(PROXYHEADER, SLISTPOINT, 228),
 
   /* Pass in a bitmask of "header options" */
   CINIT(HEADEROPT, LONG, 229),
@@ -1774,7 +1777,7 @@ typedef enum {
 
   /* Linked-list of host:port:connect-to-host:connect-to-port,
      overrides the URL's host:port (only for the network layer) */
-  CINIT(CONNECT_TO, OBJECTPOINT, 243),
+  CINIT(CONNECT_TO, SLISTPOINT, 243),
 
   /* Set TCP Fast Open */
   CINIT(TCP_FASTOPEN, LONG, 244),
@@ -1921,6 +1924,9 @@ typedef enum {
   /* maximum age of a connection to consider it for reuse (in seconds) */
   CINIT(MAXAGE_CONN, LONG, 288),
 
+  /* SASL authorisation identity */
+  CINIT(SASL_AUTHZID, STRINGPOINT, 289),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1974,7 +1980,8 @@ enum {
   CURL_HTTP_VERSION_2TLS, /* use version 2 for HTTPS, version 1.1 for HTTP */
   CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,  /* please use HTTP 2 without HTTP/1.1
                                            Upgrade */
-
+  CURL_HTTP_VERSION_3 = 30, /* Makes use of explicit HTTP/3 without fallback.
+                               Use CURLOPT_ALTSVC to enable HTTP/3 upgrade */
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
 };
 
@@ -2514,8 +2521,8 @@ CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
  */
 CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
 
-/* info about the certificate chain, only for OpenSSL builds. Asked
-   for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+/* info about the certificate chain, only for OpenSSL, GnuTLS, Schannel, NSS
+   and GSKit builds. Asked for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
 struct curl_certinfo {
   int num_of_certs;             /* number of certificates with information */
   struct curl_slist **certinfo; /* for each index in this array, there's a
@@ -2610,8 +2617,9 @@ typedef enum {
   CURLINFO_STARTTRANSFER_TIME_T = CURLINFO_OFF_T + 54,
   CURLINFO_REDIRECT_TIME_T  = CURLINFO_OFF_T + 55,
   CURLINFO_APPCONNECT_TIME_T = CURLINFO_OFF_T + 56,
+  CURLINFO_RETRY_AFTER      = CURLINFO_OFF_T + 57,
 
-  CURLINFO_LASTONE          = 56
+  CURLINFO_LASTONE          = 57
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -2710,6 +2718,7 @@ typedef enum {
   CURLVERSION_THIRD,
   CURLVERSION_FOURTH,
   CURLVERSION_FIFTH,
+  CURLVERSION_SIXTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2718,7 +2727,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_FIFTH
+#define CURLVERSION_NOW CURLVERSION_SIXTH
 
 typedef struct {
   CURLversion age;          /* age of the returned struct */
@@ -2747,11 +2756,16 @@ typedef struct {
   const char *libssh_version; /* human readable string */
 
   /* These fields were added in CURLVERSION_FIFTH */
-
   unsigned int brotli_ver_num; /* Numeric Brotli version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *brotli_version; /* human readable string. */
 
+  /* These fields were added in CURLVERSION_SIXTH */
+  unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
+                                   (MAJOR << 16) | (MINOR << 8) | PATCH */
+  const char *nghttp2_version; /* human readable string. */
+  const char *quic_version;    /* human readable quic (+ HTTP/3) library +
+                                  version or NULL */
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6         (1<<0)  /* IPv6-enabled */
@@ -2784,6 +2798,7 @@ typedef struct {
 #define CURL_VERSION_MULTI_SSL    (1<<22) /* Multiple SSL backends available */
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
+#define CURL_VERSION_HTTP3        (1<<25) /* HTTP3 support built-in */
 
  /*
  * NAME curl_version_info()

@@ -3,6 +3,8 @@
 <keywords>
 HTTP
 HTTP GET
+proxy
+haproxy
 IPv6
 </keywords>
 </info>

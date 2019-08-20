@@ -85,14 +85,15 @@ int main(void)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  const char **p;
-  long infilesize;
-  struct upload_status upload_ctx;
-
-  upload_ctx.lines_read = 0;
 
   curl = curl_easy_init();
   if(curl) {
+    const char **p;
+    long infilesize;
+    struct upload_status upload_ctx;
+
+    upload_ctx.lines_read = 0;
+
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");

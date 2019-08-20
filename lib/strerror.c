@@ -311,6 +311,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_RECURSIVE_API_CALL:
     return "API function called from within callback";
 
+  case CURLE_AUTH_ERROR:
+    return "An authentication function returned an error";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

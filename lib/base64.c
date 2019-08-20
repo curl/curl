@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,6 +23,11 @@
 /* Base64 encoding/decoding */
 
 #include "curl_setup.h"
+
+#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
+  !defined(CURL_DISABLE_LDAP) || \
+  !defined(CURL_DISABLE_DOH) || defined(USE_SSL)
+
 #include "urldata.h" /* for the Curl_easy definition */
 #include "warnless.h"
 #include "curl_base64.h"
@@ -317,3 +322,5 @@ CURLcode Curl_base64url_encode(struct Curl_easy *data,
 {
   return base64_encode(base64url, data, inputbuff, insize, outptr, outlen);
 }
+
+#endif /* no users so disabled */

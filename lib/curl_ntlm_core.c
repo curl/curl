@@ -55,9 +55,6 @@
 #ifdef USE_OPENSSL
 
 #  include <openssl/des.h>
-#  ifndef OPENSSL_NO_MD4
-#    include <openssl/md4.h>
-#  endif
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
@@ -77,29 +74,23 @@
 #elif defined(USE_GNUTLS_NETTLE)
 
 #  include <nettle/des.h>
-#  include <nettle/md4.h>
 
 #elif defined(USE_GNUTLS)
 
 #  include <gcrypt.h>
 #  define MD5_DIGEST_LENGTH 16
-#  define MD4_DIGEST_LENGTH 16
 
 #elif defined(USE_NSS)
 
 #  include <nss.h>
 #  include <pk11pub.h>
 #  include <hasht.h>
-#  include "curl_md4.h"
 #  define MD5_DIGEST_LENGTH MD5_LENGTH
 
 #elif defined(USE_MBEDTLS)
 
 #  include <mbedtls/des.h>
-#  include <mbedtls/md4.h>
-#  if !defined(MBEDTLS_MD4_C)
-#    include "curl_md4.h"
-#  endif
+#  include "curl_md4.h"
 
 #elif defined(USE_SECTRANSP)
 
@@ -108,7 +99,6 @@
 
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
-#  include "curl_md4.h"
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
 #else
@@ -124,6 +114,7 @@
 #include "warnless.h"
 #include "curl_endian.h"
 #include "curl_des.h"
+#include "curl_md4.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -216,7 +207,6 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
 {
   const CK_MECHANISM_TYPE mech = CKM_DES_ECB; /* DES cipher in ECB mode */
-  PK11SlotInfo *slot = NULL;
   char key[8];                                /* expanded 64 bit key */
   SECItem key_item;
   PK11SymKey *symkey = NULL;
@@ -226,7 +216,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   bool rv = FALSE;
 
   /* use internal slot for DES encryption (requires NSS to be initialized) */
-  slot = PK11_GetInternalKeySlot();
+  PK11SlotInfo *slot = PK11_GetInternalKeySlot();
   if(!slot)
     return FALSE;
 
@@ -551,7 +541,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
   CURLcode result;
   if(len > SIZE_T_MAX/2) /* avoid integer overflow */
     return CURLE_OUT_OF_MEMORY;
-  pw = len ? malloc(len * 2) : strdup("");
+  pw = len ? malloc(len * 2) : (unsigned char *)strdup("");
   if(!pw)
     return CURLE_OUT_OF_MEMORY;
 
@@ -565,53 +555,10 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
   if(result)
     return result;
 
-  {
-    /* Create NT hashed password. */
-#ifdef USE_OPENSSL
-    MD4_CTX MD4pw;
-    MD4_Init(&MD4pw);
-    MD4_Update(&MD4pw, pw, 2 * len);
-    MD4_Final(ntbuffer, &MD4pw);
-#elif defined(USE_GNUTLS_NETTLE)
-    struct md4_ctx MD4pw;
-    md4_init(&MD4pw);
-    md4_update(&MD4pw, (unsigned int)(2 * len), pw);
-    md4_digest(&MD4pw, MD4_DIGEST_SIZE, ntbuffer);
-#elif defined(USE_GNUTLS)
-    gcry_md_hd_t MD4pw;
-    gcry_md_open(&MD4pw, GCRY_MD_MD4, 0);
-    gcry_md_write(MD4pw, pw, 2 * len);
-    memcpy(ntbuffer, gcry_md_read(MD4pw, 0), MD4_DIGEST_LENGTH);
-    gcry_md_close(MD4pw);
-#elif defined(USE_NSS)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_MBEDTLS)
-#if defined(MBEDTLS_MD4_C)
-    mbedtls_md4(pw, 2 * len, ntbuffer);
-#else
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#endif
-#elif defined(USE_SECTRANSP)
-    (void)CC_MD4(pw, (CC_LONG)(2 * len), ntbuffer);
-#elif defined(USE_OS400CRYPTO)
-    Curl_md4it(ntbuffer, pw, 2 * len);
-#elif defined(USE_WIN32_CRYPTO)
-    HCRYPTPROV hprov;
-    if(CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
-                           CRYPT_VERIFYCONTEXT)) {
-      HCRYPTHASH hhash;
-      if(CryptCreateHash(hprov, CALG_MD4, 0, 0, &hhash)) {
-        DWORD length = 16;
-        CryptHashData(hhash, pw, (unsigned int)len * 2, 0);
-        CryptGetHashParam(hhash, HP_HASHVAL, ntbuffer, &length, 0);
-        CryptDestroyHash(hhash);
-      }
-      CryptReleaseContext(hprov, 0);
-    }
-#endif
+  /* Create NT hashed password. */
+  Curl_md4it(ntbuffer, pw, 2 * len);
 
-    memset(ntbuffer + 16, 0, 21 - 16);
-  }
+  memset(ntbuffer + 16, 0, 21 - 16);
 
   free(pw);
 

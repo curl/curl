@@ -25,6 +25,7 @@
 #include "curl_setup.h"
 #include "hash.h"
 #include "curl_addrinfo.h"
+#include "timeval.h" /* for timediff_t */
 #include "asyn.h"
 
 #ifdef HAVE_SETJMP_H
@@ -61,7 +62,6 @@ struct connectdata;
  * Returns a struct curl_hash pointer on success, NULL on failure.
  */
 struct curl_hash *Curl_global_host_cache_init(void);
-void Curl_global_host_cache_dtor(void);
 
 struct Curl_dns_entry {
   Curl_addrinfo *addr;
@@ -83,11 +83,14 @@ struct Curl_dns_entry {
 #define CURLRESOLV_ERROR    -1
 #define CURLRESOLV_RESOLVED  0
 #define CURLRESOLV_PENDING   1
-int Curl_resolv(struct connectdata *conn, const char *hostname,
-                int port, struct Curl_dns_entry **dnsentry);
+int Curl_resolv(struct connectdata *conn,
+                const char *hostname,
+                int port,
+                bool allowDOH,
+                struct Curl_dns_entry **dnsentry);
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
-                        time_t timeoutms);
+                        timediff_t timeoutms);
 
 #ifdef CURLRES_IPV6
 /*
@@ -120,9 +123,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 /* unlock a previously resolved dns entry */
 void Curl_resolv_unlock(struct Curl_easy *data,
                         struct Curl_dns_entry *dns);
-
-/* for debugging purposes only: */
-void Curl_scan_cache_used(void *user, void *ptr);
 
 /* init a new dns cache and return success */
 int Curl_mk_dnscache(struct curl_hash *hash);
@@ -234,11 +234,6 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
 void Curl_hostcache_clean(struct Curl_easy *data, struct curl_hash *hash);
 
 /*
- * Destroy the hostcache of this handle.
- */
-void Curl_hostcache_destroy(struct Curl_easy *data);
-
-/*
  * Populate the cache with specified entries from CURLOPT_RESOLVE.
  */
 CURLcode Curl_loadhostpairs(struct Curl_easy *data);
@@ -246,7 +241,6 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data);
 CURLcode Curl_resolv_check(struct connectdata *conn,
                            struct Curl_dns_entry **dns);
 int Curl_resolv_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks);
+                        curl_socket_t *socks);
 
 #endif /* HEADER_CURL_HOSTIP_H */

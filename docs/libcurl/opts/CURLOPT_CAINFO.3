@@ -46,21 +46,20 @@ libnssckbi.so, which contains a more comprehensive set of trust information
 than supported by nss-pem, because libnssckbi.so also includes information
 about distrusted certificates.
 
-(iOS and macOS only) If curl is built against Secure Transport, then this
-option is supported for backward compatibility with other SSL engines, but it
-should not be set. If the option is not set, then curl will use the
-certificates in the system and user Keychain to verify the peer, which is the
-preferred method of verifying the peer's certificate chain.
+(iOS and macOS) When curl uses Secure Transport this option is supported. If
+the option is not set, then curl will use the certificates in the system and
+user Keychain to verify the peer.
 
-(Schannel only) This option is supported for Schannel in Windows 7 or later
-with libcurl 7.60 or later. This option is supported for backward
-compatibility with other SSL engines; instead it is recommended to use
-Windows' store of root certificates (the default for Schannel).
+(Schannel) This option is supported for Schannel in Windows 7 or later but we
+recommend not using it until Windows 8 since it works better starting then.
+If the option is not set, then curl will use the certificates in the Windows'
+store of root certificates (the default for Schannel).
 
 The application does not have to keep the string around after setting this
 option.
 .SH DEFAULT
-Built-in system specific
+Built-in system specific. When curl is built with Secure Transport or
+Schannel, this option is not set by default.
 .SH PROTOCOLS
 All TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.
 .SH EXAMPLE
@@ -74,8 +73,8 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-For SSL engines that don't support certificate files the CURLOPT_CAINFO option
-is ignored. Refer to https://curl.haxx.se/docs/ssl-compared.html
+For the SSL engines that don't support certificate files the CURLOPT_CAINFO
+option is ignored. Schannel support added in libcurl 7.60.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, CURLE_UNKNOWN_OPTION if not, or
 CURLE_OUT_OF_MEMORY if there was insufficient heap space.

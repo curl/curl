@@ -53,8 +53,10 @@ UNITTEST_START
   if(!asi)
     return 1;
   result = Curl_altsvc_load(asi, arg);
-  if(result)
+  if(result) {
+    Curl_altsvc_cleanup(asi);
     return result;
+  }
   curl = curl_easy_init();
   if(!curl)
     goto fail;
@@ -88,7 +90,7 @@ UNITTEST_START
   fail_unless(asi->num == 8, "wrong number of entries");
 
   result = Curl_altsvc_parse(curl, asi, "h2=\"example.com:443\"; ma = 120;",
-                             ALPN_h2c, "example.org", 80);
+                             ALPN_h2, "example.org", 80);
   if(result) {
     fprintf(stderr, "Curl_altsvc_parse(4) failed!\n");
     unitfail++;
