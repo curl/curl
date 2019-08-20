@@ -1690,7 +1690,7 @@ static CURLcode expect100(struct Curl_easy *data,
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
   if(use_http_1_1plus(data, conn) &&
-     (conn->httpversion != 20)) {
+     (conn->httpversion < 20)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
        operations (as there is one packet coming back from the web server) */
@@ -1871,7 +1871,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                      Connection: */
                   checkprefix("Connection:", compare))
             ;
-          else if((conn->httpversion == 20) &&
+          else if((conn->httpversion >= 20) &&
                   checkprefix("Transfer-Encoding:", compare))
             /* HTTP/2 doesn't support chunked requests */
             ;
@@ -2255,8 +2255,9 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
         /* don't enable chunked during auth neg */
         ;
       else if(use_http_1_1plus(data, conn)) {
-        /* HTTP, upload, unknown file size and not HTTP 1.0 */
-        data->req.upload_chunky = TRUE;
+        if(conn->httpversion < 20)
+          /* HTTP, upload, unknown file size and not HTTP 1.0 */
+          data->req.upload_chunky = TRUE;
       }
       else {
         failf(data, "Chunky upload is not supported by HTTP 1.0");
