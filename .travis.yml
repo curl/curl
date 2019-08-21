@@ -32,9 +32,9 @@ matrix:
     include:
         - os: linux
           compiler: gcc
-          dist: trusty
+          dist: xenial
           env:
-              - T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
+              - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/nghttp3 --enable-alt-svc" NOTESTS=
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
           addons:
               apt:
@@ -42,356 +42,6 @@ matrix:
                       - *common_sources
                   packages:
                       - *common_packages
-                      - krb5-user
-                      - libssh2-1-dev
-        - os: linux
-          compiler: gcc
-          dist: trusty
-          env:
-              - T=normal C=--with-libssh
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libssh-dev
-        - os: linux
-          compiler: gcc
-          dist: trusty
-          env:
-              - T=normal C="--disable-http --disable-smtp --disable-imap"
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-        - os: linux
-          compiler: gcc
-          dist: trusty
-          env:
-              - T=normal C="--enable-ares"
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:$HOME/quiche/target/release:/usr/local/lib
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=debug-wolfssl C="--with-wolfssl --without-ssl"
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=debug-mesalink C="--with-mesalink --without-ssl"
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug C="--enable-alt-svc"
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug C="--with-mbedtls --without-ssl"
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libpsl-dev
-                      - libbrotli-dev
-                      - libmbedtls-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug C="--with-gnutls --without-ssl"
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libgnutls28-dev
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug C="--disable-threaded-resolver"
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libnss3-dev
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: gcc
-          dist: trusty
-          env:
-              - T=iconv
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-        - os: osx
-          compiler: gcc
-          env: T=debug C=--with-libssh2
-        - os: osx
-          compiler: gcc
-          env: T=debug C="--disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --enable-debug --enable-maintainer-mode --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib"
-        - os: osx
-          compiler: gcc
-          env: T=debug C=--enable-ares
-        - os: osx
-          compiler: gcc
-          env: T=debug C="--with-ssl=/usr/local/opt/openssl --with-libmetalink"
-        - os: osx
-          compiler: gcc
-          env: T=debug C="--with-ssl=/usr/local/opt/libressl --with-libmetalink"
-        - os: osx
-          compiler: clang
-          osx_image: xcode10
-          env: T=debug C="--without-ssl --with-darwinssl --with-libmetalink"
-        - os: osx
-          compiler: clang
-          env: T=normal
-        - os: osx
-          compiler: clang
-          env: T=cmake
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=cmake
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=cmake
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=coverage
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - lcov
-                      - libpsl-dev
-                      - libbrotli-dev
-                      - libssh2-1-dev
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=distcheck
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=fuzzer
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=tidy
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - clang-tidy-7
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=scan-build
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
                       - libpsl-dev
                       - libbrotli-dev
 
@@ -407,6 +57,28 @@ install:
 
 before_script:
     - ./buildconf
+    - |
+      if [ "$NGTCP2" = yes ]; then
+       (cd $HOME &&
+       git clone --depth 1 -b quic-draft-22 https://github.com/tatsuhiro-t/openssl possl &&
+       cd possl &&
+       ./config enable-tls1_3 --prefix=$HOME/ngbuild &&
+       make && make install_sw &&
+
+       cd .. &&
+       git clone --depth 1 https://github.com/ngtcp2/nghttp3
+       cd nghttp3 &&
+       autoreconf -i &&
+       ./configure --prefix=$HOME/ngbuild --enable-lib-only &&
+       make && make install &&
+
+       cd .. &&
+       git clone --depth 1 -b draft-22 https://github.com/ngtcp2/ngtcp2 &&
+       cd ngtcp2 &&
+       autoreconf -i &&
+       ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --prefix==$HOME/ngbuild &&
+       make && make install)
+      fi
     - |
       if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
         (cd $HOME &&
@@ -523,7 +195,9 @@ script:
         if [ "$T" = "novalgrind" ]; then
              ./configure --enable-werror $C
              make && make examples
-             make TFLAGS=-n test-nonflaky
+             if [ -z $NOTESTS ]; then
+                make TFLAGS=-n test-nonflaky
+             fi
         fi
     - |
         set -eo pipefail
