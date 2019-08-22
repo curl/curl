@@ -1,3 +1,5 @@
+#ifndef CURLINC_CCSIDCURL_H
+#define CURLINC_CCSIDCURL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -5,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,10 +22,6 @@
  *
  *
  ***************************************************************************/
-
-#ifndef __CURL_CCSIDCURL_H
-#define __CURL_CCSIDCURL_H
-
 #include "curl.h"
 #include "easy.h"
 #include "multi.h"

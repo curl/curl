@@ -1,5 +1,5 @@
-#ifndef __CURL_CURLVER_H
-#define __CURL_CURLVER_H
+#ifndef CURLINC_CURLVER_H
+#define CURLINC_CURLVER_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -74,4 +74,4 @@
 #define CURL_AT_LEAST_VERSION(x,y,z) \
   (LIBCURL_VERSION_NUM >= CURL_VERSION_BITS(x, y, z))
 
-#endif /* __CURL_CURLVER_H */
+#endif /* CURLINC_CURLVER_H */
