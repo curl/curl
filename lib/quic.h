@@ -44,7 +44,10 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn,
                                 curl_socket_t sockfd,
                                 bool *connected);
 int Curl_quic_ver(char *p, size_t len);
+CURLcode Curl_quic_done_sending(struct connectdata *conn);
 
-#endif
+#else /* ENABLE_QUIC */
+#define Curl_quic_done_sending(x)
+#endif /* !ENABLE_QUIC */
 
 #endif /* HEADER_CURL_QUIC_H */

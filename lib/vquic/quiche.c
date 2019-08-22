@@ -116,7 +116,7 @@ static CURLcode quiche_do(struct connectdata *conn, bool *done)
   return Curl_http(conn, done);
 }
 
-static const struct Curl_handler Curl_handler_h3_quiche = {
+static const struct Curl_handler Curl_handler_http3 = {
   "HTTPS",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   quiche_do,                            /* do_it */
@@ -232,7 +232,7 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
 
   conn->recv[sockindex] = h3_stream_recv;
   conn->send[sockindex] = h3_stream_send;
-  conn->handler = &Curl_handler_h3_quiche;
+  conn->handler = &Curl_handler_http3;
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   conn->httpversion = 30;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
@@ -750,5 +750,19 @@ fail:
   return result;
 }
 
+/*
+ * Called from transfer.c:done_sending when we stop HTTP/3 uploading.
+ */
+CURLcode Curl_quic_done_sending(struct connectdata *conn)
+{
+  if(conn->handler == &Curl_handler_http3) {
+    /* only for HTTP/3 transfers */
+    struct HTTP *stream = conn->data->req.protop;
+    fprintf(stderr, "!!! Curl_quic_done_sending\n");
+    stream->upload_done = TRUE;
+  }
+
+  return CURLE_OK;
+}
 
 #endif

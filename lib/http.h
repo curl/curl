@@ -126,6 +126,10 @@ CURLcode Curl_http_auth_act(struct connectdata *conn);
 
 #endif /* CURL_DISABLE_HTTP */
 
+#ifdef USE_NGHTTP3
+struct h3out; /* see ngtcp2 */
+#endif
+
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
@@ -196,6 +200,10 @@ struct HTTP {
   int64_t stream3_id; /* stream we are interested in */
   bool firstbody;  /* FALSE until body arrives */
   bool h3req;    /* FALSE until request is issued */
+  bool upload_done;
+#endif
+#ifdef USE_NGHTTP3
+  struct h3out *h3out; /* per-stream buffers for upload */
 #endif
 };
 
