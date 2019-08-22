@@ -1,5 +1,5 @@
-#ifndef __CURL_URLAPI_H
-#define __CURL_URLAPI_H
+#ifndef CURLINC_URLAPI_H
+#define CURLINC_URLAPI_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -120,4 +120,4 @@ CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
 } /* end of extern "C" */
 #endif
 
-#endif
+#endif /* CURLINC_URLAPI_H */

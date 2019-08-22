@@ -119,11 +119,13 @@ for my $e (sort @syms) {
     # CURL_EXTERN - is a define used for libcurl functions that are external,
     # public. No app or other code should ever use it.
     #
+    # CURLINC_ - defines for header dual-include prevention, ignore those.
+    #
     # *_LAST and *_LASTENTRY are just prefix for the placeholders used for the
     # last entry in many enum series.
     #
 
-    if($e =~ /(OBSOLETE|^CURL_EXTERN|_LAST\z|_LASTENTRY\z)/) {
+    if($e =~ /(OBSOLETE|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z)/) {
         $ignored++;
         next;
     }

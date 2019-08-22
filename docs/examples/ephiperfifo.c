@@ -108,7 +108,7 @@ typedef struct _SockInfo
   GlobalInfo *global;
 } SockInfo;
 
-#define __case(code) \
+#define mycase(code) \
   case code: s = __STRING(code)
 
 /* Die if we get a bad CURLMcode somewhere */
@@ -117,14 +117,14 @@ static void mcode_or_die(const char *where, CURLMcode code)
   if(CURLM_OK != code) {
     const char *s;
     switch(code) {
-      __case(CURLM_BAD_HANDLE); break;
-      __case(CURLM_BAD_EASY_HANDLE); break;
-      __case(CURLM_OUT_OF_MEMORY); break;
-      __case(CURLM_INTERNAL_ERROR); break;
-      __case(CURLM_UNKNOWN_OPTION); break;
-      __case(CURLM_LAST); break;
+      mycase(CURLM_BAD_HANDLE); break;
+      mycase(CURLM_BAD_EASY_HANDLE); break;
+      mycase(CURLM_OUT_OF_MEMORY); break;
+      mycase(CURLM_INTERNAL_ERROR); break;
+      mycase(CURLM_UNKNOWN_OPTION); break;
+      mycase(CURLM_LAST); break;
       default: s = "CURLM_unknown"; break;
-      __case(CURLM_BAD_SOCKET);
+      mycase(CURLM_BAD_SOCKET);
       fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
       /* ignore this error */
       return;
