@@ -115,6 +115,20 @@ matrix:
           compiler: gcc
           dist: xenial
           env:
+              - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                  packages:
+                      - *common_packages
+                      - libpsl-dev
+                      - libbrotli-dev
+        - os: linux
+          compiler: gcc
+          dist: xenial
+          env:
               - T=debug-wolfssl C="--with-wolfssl --without-ssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
           addons:
@@ -407,6 +421,28 @@ install:
 
 before_script:
     - ./buildconf
+    - |
+      if [ "$NGTCP2" = yes ]; then
+       (cd $HOME &&
+       git clone --depth 1 -b quic-draft-22 https://github.com/tatsuhiro-t/openssl possl &&
+       cd possl &&
+       ./config enable-tls1_3 --prefix=$HOME/ngbuild &&
+       make && make install_sw &&
+
+       cd .. &&
+       git clone --depth 1 https://github.com/ngtcp2/nghttp3
+       cd nghttp3 &&
+       autoreconf -i &&
+       ./configure --prefix=$HOME/ngbuild --enable-lib-only &&
+       make && make install &&
+
+       cd .. &&
+       git clone --depth 1 -b draft-22 https://github.com/ngtcp2/ngtcp2 &&
+       cd ngtcp2 &&
+       autoreconf -i &&
+       ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --prefix=$HOME/ngbuild &&
+       make && make install)
+      fi
     - |
       if [ "$TRAVIS_OS_NAME" = linux -a "$BORINGSSL" ]; then
         (cd $HOME &&
