@@ -498,7 +498,10 @@ static ssize_t h3_stream_send(struct connectdata *conn,
     sent = len;
   }
   else {
-    sent = quiche_conn_stream_send(qs->conn, 0, mem, len, true);
+    H3BUGF(infof(conn->data, "Pass on %zd body bytes to quiche\n",
+                 len));
+    sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
+                               (uint8_t *)mem, len, FALSE);
     if(sent < 0) {
       *curlcode = CURLE_SEND_ERROR;
       return -1;
@@ -757,9 +760,15 @@ CURLcode Curl_quic_done_sending(struct connectdata *conn)
 {
   if(conn->handler == &Curl_handler_http3) {
     /* only for HTTP/3 transfers */
+    ssize_t sent;
     struct HTTP *stream = conn->data->req.protop;
+    struct quicsocket *qs = conn->quic;
     fprintf(stderr, "!!! Curl_quic_done_sending\n");
     stream->upload_done = TRUE;
+    sent = quiche_h3_send_body(qs->h3c, qs->conn, stream->stream3_id,
+                               NULL, 0, TRUE);
+    if(sent < 0)
+      return CURLE_SEND_ERROR;
   }
 
   return CURLE_OK;
