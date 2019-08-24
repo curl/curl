@@ -778,19 +778,16 @@ static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   return 0;
 }
 
-static ssize_t cb_in_encrypt(ngtcp2_conn *tconn,
-                             uint8_t *dest, size_t destlen,
-                             const uint8_t *plaintext,
-                             size_t plaintextlen,
-                             const uint8_t *key, size_t keylen,
-                             const uint8_t *nonce, size_t noncelen,
-                             const uint8_t *ad, size_t adlen,
-                             void *user_data)
+static int cb_in_encrypt(ngtcp2_conn *tconn, uint8_t *dest,
+                         const uint8_t *plaintext, size_t plaintextlen,
+                         const uint8_t *key, const uint8_t *nonce,
+                         size_t noncelen, const uint8_t *ad, size_t adlen,
+                         void *user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  ssize_t nwrite = Curl_qc_encrypt(dest, destlen, plaintext, plaintextlen,
-                                   &qs->hs_crypto_ctx,
-                                   key, keylen, nonce, noncelen, ad, adlen);
+  int nwrite = Curl_qc_encrypt(dest, plaintext, plaintextlen,
+                               &qs->hs_crypto_ctx,
+                               key, nonce, noncelen, ad, adlen);
   if(nwrite < 0) {
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
@@ -799,56 +796,51 @@ static ssize_t cb_in_encrypt(ngtcp2_conn *tconn,
   return nwrite;
 }
 
-static ssize_t cb_in_decrypt(ngtcp2_conn *tconn,
-                             uint8_t *dest, size_t destlen,
-                             const uint8_t *ciphertext, size_t ciphertextlen,
-                             const uint8_t *key, size_t keylen,
-                             const uint8_t *nonce, size_t noncelen,
-                             const uint8_t *ad, size_t adlen,
-                             void *user_data)
+static int cb_in_decrypt(ngtcp2_conn *tconn, uint8_t *dest,
+                         const uint8_t *ciphertext, size_t ciphertextlen,
+                         const uint8_t *key, const uint8_t *nonce,
+                         size_t noncelen, const uint8_t *ad, size_t adlen,
+                         void *user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
   (void)tconn;
-  return Curl_qc_decrypt(dest, destlen, ciphertext, ciphertextlen,
-                         &qs->hs_crypto_ctx, key, keylen,
+  return Curl_qc_decrypt(dest, ciphertext, ciphertextlen,
+                         &qs->hs_crypto_ctx, key,
                          nonce, noncelen, ad, adlen);
 }
 
 
-static ssize_t cb_encrypt_data(ngtcp2_conn *tconn,
-                               uint8_t *dest, size_t destlen,
-                               const uint8_t *plaintext, size_t plaintextlen,
-                               const uint8_t *key, size_t keylen,
-                               const uint8_t *nonce, size_t noncelen,
-                               const uint8_t *ad, size_t adlen,
-                               void *user_data)
+static int cb_encrypt_data(ngtcp2_conn *tconn,
+                           uint8_t *dest,
+                           const uint8_t *plaintext, size_t plaintextlen,
+                           const uint8_t *key,
+                           const uint8_t *nonce, size_t noncelen,
+                           const uint8_t *ad, size_t adlen,
+                           void *user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  ssize_t rc;
+  int rc;
   (void)tconn;
-  rc = Curl_qc_encrypt(dest, destlen, plaintext, plaintextlen,
+  rc = Curl_qc_encrypt(dest, plaintext, plaintextlen,
                        &qs->crypto_ctx,
-                       key, keylen, nonce, noncelen, ad, adlen);
+                       key, nonce, noncelen, ad, adlen);
   if(rc < 0)
     return NGTCP2_ERR_CALLBACK_FAILURE;
   return rc;
 }
 
-static ssize_t
-cb_decrypt_data(ngtcp2_conn *tconn,
-                uint8_t *dest, size_t destlen,
-                const uint8_t *ciphertext, size_t ciphertextlen,
-                const uint8_t *key, size_t keylen,
-                const uint8_t *nonce, size_t noncelen,
-                const uint8_t *ad, size_t adlen,
-                void *user_data)
+static int cb_decrypt_data(ngtcp2_conn *tconn, uint8_t *dest,
+                           const uint8_t *ciphertext, size_t ciphertextlen,
+                           const uint8_t *key,
+                           const uint8_t *nonce, size_t noncelen,
+                           const uint8_t *ad, size_t adlen,
+                           void *user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  ssize_t rc;
+  int rc;
   (void)tconn;
-  rc = Curl_qc_decrypt(dest, destlen, ciphertext, ciphertextlen,
-                       &qs->crypto_ctx,
-                       key, keylen, nonce, noncelen, ad, adlen);
+  rc = Curl_qc_decrypt(dest, ciphertext, ciphertextlen,
+                       &qs->crypto_ctx, key, nonce, noncelen, ad, adlen);
   if(rc < 0)
     return NGTCP2_ERR_TLS_DECRYPT;
   return rc;
@@ -960,34 +952,30 @@ static int cb_recv_retry(ngtcp2_conn *tconn, const ngtcp2_pkt_hd *hd,
   return 0;
 }
 
-static ssize_t cb_in_hp_mask(ngtcp2_conn *tconn, uint8_t *dest, size_t destlen,
-                             const uint8_t *key, size_t keylen,
-                             const uint8_t *sample, size_t samplelen,
-                             void *user_data)
+static int cb_in_hp_mask(ngtcp2_conn *tconn, uint8_t *dest,
+                         const uint8_t *key, const uint8_t *sample,
+                         void *user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  ssize_t nwrite;
+  int nwrite;
   (void)tconn;
 
-  nwrite = Curl_qc_hp_mask(dest, destlen, &qs->hs_crypto_ctx,
-                           key, keylen, sample, samplelen);
+  nwrite = Curl_qc_hp_mask(dest, &qs->hs_crypto_ctx, key, sample);
   if(nwrite < 0)
     return NGTCP2_ERR_CALLBACK_FAILURE;
 
   return nwrite;
 }
 
-static ssize_t cb_hp_mask(ngtcp2_conn *tconn, uint8_t *dest, size_t destlen,
-                          const uint8_t *key, size_t keylen,
-                          const uint8_t *sample, size_t samplelen,
-                          void *user_data)
+static int cb_hp_mask(ngtcp2_conn *tconn, uint8_t *dest,
+                      const uint8_t *key, const uint8_t *sample,
+                      void *user_data)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  ssize_t nwrite;
+  int nwrite;
   (void)tconn;
 
-  nwrite = Curl_qc_hp_mask(dest, destlen, &qs->crypto_ctx,
-                           key, keylen, sample, samplelen);
+  nwrite = Curl_qc_hp_mask(dest, &qs->crypto_ctx, key, sample);
   if(nwrite < 0)
     return NGTCP2_ERR_CALLBACK_FAILURE;
 

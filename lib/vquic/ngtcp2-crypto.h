@@ -44,18 +44,18 @@ size_t Curl_qc_aead_nonce_length(const struct Context *ctx);
 int Curl_qc_negotiated_prf(struct Context *ctx, SSL *ssl);
 int Curl_qc_negotiated_aead(struct Context *ctx, SSL *ssl);
 size_t Curl_qc_aead_max_overhead(const struct Context *ctx);
-ssize_t Curl_qc_encrypt(uint8_t *dest, size_t destlen,
-                        const uint8_t *plaintext, size_t plaintextlen,
-                        const struct Context *ctx,
-                        const uint8_t *key, size_t keylen,
-                        const uint8_t *nonce, size_t noncelen,
-                        const uint8_t *ad, size_t adlen);
-ssize_t Curl_qc_decrypt(uint8_t *dest, size_t destlen,
-                        const uint8_t *ciphertext, size_t ciphertextlen,
-                        const struct Context *ctx,
-                        const uint8_t *key, size_t keylen,
-                        const uint8_t *nonce, size_t noncelen,
-                        const uint8_t *ad, size_t adlen);
+int Curl_qc_encrypt(uint8_t *dest,
+                    const uint8_t *plaintext, size_t plaintextlen,
+                    const struct Context *ctx,
+                    const uint8_t *key,
+                    const uint8_t *nonce, size_t noncelen,
+                    const uint8_t *ad, size_t adlen);
+int Curl_qc_decrypt(uint8_t *dest,
+                    const uint8_t *ciphertext, size_t ciphertextlen,
+                    const struct Context *ctx,
+                    const uint8_t *key,
+                    const uint8_t *nonce, size_t noncelen,
+                    const uint8_t *ad, size_t adlen);
 ssize_t Curl_qc_encrypt_pn(uint8_t *dest, size_t destlen,
                            const uint8_t *plaintext, size_t plaintextlen,
                            const struct Context *ctx,
@@ -85,9 +85,7 @@ Curl_qc_derive_header_protection_key(uint8_t *dest, size_t destlen,
                                      const uint8_t *secret, size_t secretlen,
                                      const struct Context *ctx);
 
-ssize_t Curl_qc_hp_mask(uint8_t *dest, size_t destlen,
-                        const struct Context *ctx,
-                        const uint8_t *key, size_t keylen,
-                        const uint8_t *sample, size_t samplelen);
+int Curl_qc_hp_mask(uint8_t *dest, const struct Context *ctx,
+                    const uint8_t *key, const uint8_t *sample);
 #endif /* USE_NGTCP2 */
 #endif /* HEADER_CURL_VQUIC_NGTCP2_CRYPTO_H */
