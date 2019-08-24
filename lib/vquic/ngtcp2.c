@@ -1256,6 +1256,16 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
   memcpy(stream->mem, buf, ncopy);
   stream->len -= ncopy;
   stream->memlen += ncopy;
+#if 0 /* extra debugging of incoming h3 data */
+  fprintf(stderr, "!! Copies %zd bytes to %p (total %zd)\n",
+          ncopy, stream->mem, stream->memlen);
+  {
+    size_t i;
+    for(i = 0; i < ncopy; i++) {
+      fprintf(stderr, "!! data[%d]: %02x '%c'\n", i, buf[i], buf[i]);
+    }
+  }
+#endif
   stream->mem += ncopy;
 
   ngtcp2_conn_extend_max_stream_offset(qs->qconn, stream_id, buflen);
@@ -1472,11 +1482,13 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
   fprintf(stderr, "ngh3_stream_recv CALLED (easy %p, socket %d)\n",
           conn->data, sockfd);
 
-  /* remember where to store incoming data for this stream and how big the
-     buffer is */
-  stream->mem = buf;
-  stream->len = buffersize;
-  stream->memlen = 0;
+  if(!stream->memlen) {
+    /* remember where to store incoming data for this stream and how big the
+       buffer is */
+    stream->mem = buf;
+    stream->len = buffersize;
+  }
+  /* else, there's data in the buffer already */
 
   if(ng_process_ingress(conn, sockfd, qs)) {
     *curlcode = CURLE_RECV_ERROR;
@@ -1488,11 +1500,16 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
   }
 
   if(stream->memlen) {
+    ssize_t memlen = stream->memlen;
     /* data arrived */
     *curlcode = CURLE_OK;
-    infof(conn->data, "ngh3_stream_recv returns %zd bytes\n",
-          stream->memlen);
-    return stream->memlen;
+    /* reset to allow more data to come */
+    stream->memlen = 0;
+    stream->mem = buf;
+    stream->len = buffersize;
+    H3BUGF(infof(conn->data, "!! ngh3_stream_recv returns %zd bytes at %p\n",
+                 memlen, buf));
+    return memlen;
   }
 
   if(stream->closed) {
@@ -1577,7 +1594,7 @@ static int cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
   }
   if(stream->upload_done && !stream->upload_len &&
      (stream->upload_left <= 0)) {
-    fprintf(stderr, "!!!!!!!!! cb_h3_readfunction sets EOF\n");
+    H3BUGF(infof(data, "!!!!!!!!! cb_h3_readfunction sets EOF\n"));
     *pdata = NULL;
     *pdatalen = 0;
     *pflags = NGHTTP3_DATA_FLAG_EOF;
