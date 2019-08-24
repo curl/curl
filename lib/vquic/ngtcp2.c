@@ -1784,12 +1784,6 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
     }
   }
 
-  stream->header_recvbuf = Curl_add_buffer_init();
-  if(!stream->header_recvbuf) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
-  }
-
   switch(data->set.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
