@@ -285,9 +285,19 @@ static int transport_params_parse_cb(SSL *ssl, unsigned int ext_type,
   return 1;
 }
 
+static FILE *keylog_file; /* not thread-safe */
+static void keylog_callback(const SSL *ssl, const char *line)
+{
+  (void)ssl;
+  fputs(line, keylog_file);
+  fputc('\n', keylog_file);
+  fflush(keylog_file);
+}
+
 static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
+  const char *keylog_filename;
 
   SSL_CTX_set_min_proto_version(ssl_ctx, TLS1_3_VERSION);
   SSL_CTX_set_max_proto_version(ssl_ctx, TLS1_3_VERSION);
@@ -321,6 +331,14 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
           "PARAMETERS) failed: %s\n",
           ERR_error_string(ERR_get_error(), NULL));
     return NULL;
+  }
+
+  keylog_filename = getenv("SSLKEYLOGFILE");
+  if(keylog_filename) {
+    keylog_file = fopen(keylog_filename, "wb");
+    if(keylog_file) {
+      SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
+    }
   }
 
   return ssl_ctx;
