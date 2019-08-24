@@ -176,7 +176,6 @@ struct HTTP {
   int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */
-  bool closed; /* TRUE on HTTP2 stream close */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
 
   char **push_headers;       /* allocated array */
@@ -184,6 +183,7 @@ struct HTTP {
   size_t push_headers_alloc; /* number of entries allocated */
 #endif
 #if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
+  bool closed; /* TRUE on HTTP2 stream close */
   char *mem;     /* points to a buffer in memory to store received data */
   size_t len;    /* size of the buffer 'mem' points to */
   size_t memlen; /* size of data copied to mem */
