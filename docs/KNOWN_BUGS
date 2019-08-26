@@ -48,6 +48,7 @@ problems may have been fixed or changed somewhat since this was written!
  4.5 Improve --data-urlencode space encoding
 
  5. Build and portability issues
+ 5.1 USE_UNIX_SOCKETS on Windows
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
  5.4 Cannot compile against a static build of OpenLDAP
@@ -388,6 +389,13 @@ problems may have been fixed or changed somewhat since this was written!
  See https://github.com/curl/curl/issues/3229
 
 5. Build and portability issues
+
+5.1 USE_UNIX_SOCKETS on Windows
+
+ Due to incorrect CMake checks for the presense of the feature, it will never
+ be enabled for windows in a cmake build.
+
+ See https://github.com/curl/curl/issues/4040
 
 5.2 curl-config --libs contains private details
 
