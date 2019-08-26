@@ -1559,6 +1559,11 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
   if(should_close_session(httpc)) {
     H2BUGF(infof(data,
                  "http2_recv: nothing to do in this session\n"));
+    if(conn->bits.close) {
+      /* already marked for closure, return OK and we're done */
+      *err = CURLE_OK;
+      return 0;
+    }
     *err = CURLE_HTTP2;
     return -1;
   }
