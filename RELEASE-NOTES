@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o CURLOPT_ALTSVC_CTRL.3: remove CURLALTSVC_ALTUSED
  o CURLOPT_HTTP_VERSION: seting this to 3 forces HTTP/3 use directly [33]
  o CURLOPT_READFUNCTION.3: provide inline example
+ o CURLOPT_SSL_VERIFYHOST: treat the value 1 as 2 [51]
  o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
  o alt-svc: add protocol version selection masking [31]
  o alt-svc: fix removal of expired cache entry [30]
@@ -30,6 +31,7 @@ This release includes the following bugfixes:
  o alt-svc: with quiche, use the quiche h3 alpn string [16]
  o appveyor: pass on -k to make
  o asyn-thread: create a socketpair to wait on [14]
+ o build-openssl: fix build with Visual Studio 2019 [45]
  o cleanup: remove the 'numsocks' argument used in many places [25]
  o configure: avoid undefined check_for_ca_bundle [37]
  o curl.h: add CURL_HTTP_VERSION_3 to the version enum
@@ -37,15 +39,18 @@ This release includes the following bugfixes:
  o curl: cap the maximum allowed values for retry time arguments [13]
  o curl: make use of CURLINFO_RETRY_AFTER when retrying [35]
  o curl: remove outdated comment [24]
+ o curl: use .curlrc (with a dot) on Windows [52]
  o curl: use CURLINFO_PROTOCOL to check for HTTP(s)
  o curl_global_init_mem.3: mention it was added in 7.12.0
  o curl_version: bump string buffer size to 250
  o curl_version_info.3: mentioned ALTSVC and HTTP3
  o curl_version_info: offer quic (and h3) library info [38]
  o curl_version_info: provide nghttp2 details [2]
+ o defines: avoid underscore-prefixed defines [47]
  o docs/ALTSVC: remove what works and the experimental explanation [34]
  o docs/EXPERIMENTAL: explain what it means and what's experimental now
  o docs/MANUAL.md: converted to markdown from plain text [3]
+ o docs/examples/curlx: fix errors [48]
  o docs: s/curl_debug/curl_dbg_debug in comments and docs [36]
  o easy: resize receive buffer on easy handle reset [9]
  o examples: Avoid reserved names in hiperfifo examples [8]
@@ -57,13 +62,18 @@ This release includes the following bugfixes:
  o http_negotiate: improve handling of gss_init_sec_context() failures [18]
  o md4: Use our own MD4 when no crypto libraries are available [15]
  o multi: call detach_connection before Curl_disconnect [6]
+ o netrc: make the code try ".netrc" on Windows [52]
  o nss: use TLSv1.3 as default if supported [39]
+ o openssl: build warning free with boringssl [50]
  o plan9: add support for running on Plan 9 [22]
  o progress: reset download/uploaded counter between transfers [12]
  o readwrite_data: repair setting the TIMER_STARTTRANSFER stamp [26]
+ o scp: fix directory name length used in memcpy [46]
  o source: remove names from source comments [1]
+ o spnego_sspi: add typecast to fix build warning [49]
  o src/makefile: fix uncompressed hugehelp.c generation [19]
  o ssh-libssh: do not specify O_APPEND when not in append mode [7]
+ o ssh: move code into vssh for SSH backends [53]
  o tests: Replace outdated test case numbering documentation [43]
  o timediff: make it 64 bit (if possible) even with 32 bit time_t [20]
  o travis: reduce number of torture tests in 'coverage' [42]
@@ -80,12 +90,13 @@ advice from friends like these:
   Alessandro Ghedini, Alex Mayorga, Amit Katyal, Balazs Kovacsics,
   Brad Spencer, Carlo Marcelo Arenas Belón, Daniel Gustafsson, Daniel Stenberg,
   Dominik Hölzl, Eric Wong, Felix Hädicke, Gergely Nagy, Gisle Vanem,
-  Igor Makarov, Ironbars13 on github, Jason Lee, Jonathan Cardoso Machado,
-  Junho Choi, Kamil Dudka, Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee,
-  Michal Čaplygin, Mike Crowe, niallor on github, Patrick Monnerat, Peter Wu,
-  Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa, The Infinnovation team,
-  Tom van der Woerdt, Yiming Jing,
-  (34 contributors)
+  Igor Makarov, Ironbars13 on github, Jason Lee, Jeremy Lainé,
+  Jonathan Cardoso Machado, Junho Choi, Kamil Dudka, Kyle Abramowitz,
+  Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee, Michal Čaplygin,
+  Mike Crowe, niallor on github, osabc on github, patnyb on github,
+  Patrick Monnerat, Peter Wu, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
+  The Infinnovation team, Tom van der Woerdt, Yiming Jing,
+  (38 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -135,3 +146,12 @@ References to bug reports and discussions on issues:
  [42] = https://curl.haxx.se/bug/?i=4223
  [43] = https://curl.haxx.se/bug/?i=4227
  [44] = https://curl.haxx.se/bug/?i=4228
+ [45] = https://curl.haxx.se/bug/?i=4188
+ [46] = https://curl.haxx.se/bug/?i=4258
+ [47] = https://curl.haxx.se/bug/?i=4254
+ [48] = https://curl.haxx.se/bug/?i=4248
+ [49] = https://curl.haxx.se/bug/?i=4245
+ [50] = https://curl.haxx.se/bug/?i=4244
+ [51] = https://curl.haxx.se/bug/?i=4241
+ [52] = https://curl.haxx.se/bug/?i=4230
+ [53] = https://curl.haxx.se/bug/?i=4235
