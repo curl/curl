@@ -111,20 +111,20 @@ matrix:
                       - *common_packages
                       - libpsl-dev
                       - libbrotli-dev
-        #- os: linux
-        #  compiler: gcc
-        #  dist: xenial
-        #  env:
-        #      - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
-        #      - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-        #  addons:
-        #      apt:
-        #          sources:
-        #              - *common_sources
-        #          packages:
-        #              - *common_packages
-        #              - libpsl-dev
-        #              - libbrotli-dev
+        - os: linux
+          compiler: gcc
+          dist: xenial
+          env:
+              - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+          addons:
+              apt:
+                  sources:
+                      - *common_sources
+                  packages:
+                      - *common_packages
+                      - libpsl-dev
+                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
@@ -424,7 +424,7 @@ before_script:
     - |
       if [ "$NGTCP2" = yes ]; then
        (cd $HOME &&
-       git clone --depth 1 -b quic-draft-22 https://github.com/tatsuhiro-t/openssl possl &&
+       git clone --depth 1 -b openssl-quic-draft-22 https://github.com/tatsuhiro-t/openssl possl &&
        cd possl &&
        ./config enable-tls1_3 --prefix=$HOME/ngbuild &&
        make && make install_sw &&
