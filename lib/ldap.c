@@ -119,6 +119,12 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
   #define LDAP_TRACE(x)   Curl_nop_stmt
 #endif
 
+#if defined(USE_WIN32_LDAP) && defined(ldap_err2string)
+/* Use ansi error strings in UNICODE builds */
+#undef ldap_err2string
+#define ldap_err2string ldap_err2stringA
+#endif
+
 
 static CURLcode Curl_ldap(struct connectdata *conn, bool *done);
 
