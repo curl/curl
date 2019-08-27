@@ -37,9 +37,9 @@ LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
   vtls/wolfssl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h          \
   vtls/mbedtls.h vtls/mesalink.h
 
-LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/ngtcp2-crypto.c vquic/quiche.c
+LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/quiche.c
 
-LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/ngtcp2-crypto.h vquic/quiche.h
+LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/quiche.h
 
 LIB_VSSH_CFILES = vssh/libssh2.c vssh/libssh.c
 
