@@ -33,7 +33,7 @@ in the master branch using pull-requests, just like ordinary changes.
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b quic-draft-22 https://github.com/tatsuhiro-t/openssl
+     % git clone --depth 1 -b openssl-quic-draft-22 https://github.com/tatsuhiro-t/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
