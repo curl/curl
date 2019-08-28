@@ -52,7 +52,7 @@ an error to the library. This will cause the transfer to get aborted and the
 libcurl function in progress will return \fICURLE_WRITE_ERROR\fP.
 
 A complete HTTP header that is passed to this function can be up to
-\fICURL_MAX_HTTP_HEADER\fP (100K) bytes.
+\fICURL_MAX_HTTP_HEADER\fP (100K) bytes and includes the final line terminator.
 
 If this option is not set, or if it is set to NULL, but
 \fICURLOPT_HEADERDATA(3)\fP is set to anything but NULL, the function used to
@@ -66,6 +66,9 @@ response. This includes all responses which occur during authentication
 negotiation. If you need to operate on only the headers from the final
 response, you will need to collect headers in the callback yourself and use
 HTTP status lines, for example, to delimit response boundaries.
+
+For an HTTP transfer, the status line and the blank line preceding the response
+body are both included as headers and passed to this function.
 
 When a server sends a chunked encoded transfer, it may contain a trailer. That
 trailer is identical to an HTTP header and if such a trailer is received it is
