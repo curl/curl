@@ -127,7 +127,8 @@ static int setup_initial_crypto_context(struct quicsocket *qs)
   return 0;
 }
 
-static void quic_settings(ngtcp2_settings *s)
+static void quic_settings(ngtcp2_settings *s,
+                          uint64_t stream_buffer_size)
 {
   ngtcp2_settings_default(s);
 #ifdef DEBUG_NGTCP2
@@ -136,7 +137,7 @@ static void quic_settings(ngtcp2_settings *s)
   s->log_printf = NULL;
 #endif
   s->initial_ts = timestamp();
-  s->max_stream_data_bidi_local = QUIC_MAX_STREAMS;
+  s->max_stream_data_bidi_local = stream_buffer_size;
   s->max_stream_data_bidi_remote = QUIC_MAX_STREAMS;
   s->max_stream_data_uni = QUIC_MAX_STREAMS;
   s->max_data = QUIC_MAX_DATA;
@@ -703,7 +704,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   if(result)
     return result;
 
-  quic_settings(&qs->settings);
+  quic_settings(&qs->settings, data->set.buffer_size);
 
   qs->local_addrlen = sizeof(qs->local_addr);
   rv = getsockname(sockfd, (struct sockaddr *)&qs->local_addr,
