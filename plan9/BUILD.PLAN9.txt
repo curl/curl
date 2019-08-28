@@ -17,10 +17,10 @@ Instruction
 ===========
 First, you should construct namespace as like described below:
 
-% bind -a ../lib lib
-% bind -a ../src src
-% bind -a ../include include
-% bind -a .. .
+% bind -ac ../lib lib
+% bind -ac ../src src
+% bind -ac ../include include
+% bind -ac .. .
 
 Then you will see as shown below (excerpt):
 
