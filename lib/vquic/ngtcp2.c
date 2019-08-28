@@ -833,7 +833,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   fprintf(stderr, "cb_h3_stream_close CALLED\n");
 
   stream->closed = TRUE;
-
+  Curl_expire(data, 0, EXPIRE_QUIC);
   return 0;
 }
 
