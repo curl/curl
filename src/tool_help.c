@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#ifdef HAVE_STRCASECMP
+#if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H)
 #include <strings.h>
 #endif
 
