@@ -475,6 +475,9 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
   }
 
   *curlcode = (-1 == recvd)? CURLE_AGAIN : CURLE_OK;
+  if(recvd >= 0)
+    /* Get this called again to drain the event queue */
+    Curl_expire(conn->data, 0, EXPIRE_QUIC);
   return recvd;
 }
 
