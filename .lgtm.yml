@@ -7,4 +7,4 @@ extraction:
       - rm -f CMakeLists.txt
       - ./buildconf
     configure: # enable as many optional features as possible
-      command: ./configure --enable-ares --with-libssh2 --with-gssapi --with-librtmp --with-libmetalink --with-libmetalink
+      command: ./configure --enable-ares --with-libssh2 --with-gssapi --with-librtmp --with-libmetalink
