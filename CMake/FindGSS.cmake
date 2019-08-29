@@ -62,6 +62,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
           COMMAND ${_GSS_CONFIGURE_SCRIPT} "--cflags" "gssapi"
           OUTPUT_VARIABLE _GSS_CFLAGS
           RESULT_VARIABLE _GSS_CONFIGURE_FAILED
+          OUTPUT_STRIP_TRAILING_WHITESPACE
       )
     message(STATUS "CFLAGS: ${_GSS_CFLAGS}")
     if(NOT _GSS_CONFIGURE_FAILED) # 0 means success
@@ -84,6 +85,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
         COMMAND ${_GSS_CONFIGURE_SCRIPT} "--libs" "gssapi"
         OUTPUT_VARIABLE _GSS_LIB_FLAGS
         RESULT_VARIABLE _GSS_CONFIGURE_FAILED
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     message(STATUS "LDFLAGS: ${_GSS_LIB_FLAGS}")
 
@@ -110,6 +112,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
         COMMAND ${_GSS_CONFIGURE_SCRIPT} "--version"
         OUTPUT_VARIABLE _GSS_VERSION
         RESULT_VARIABLE _GSS_CONFIGURE_FAILED
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     # older versions may not have the "--version" parameter. In this case we just don't care.
@@ -121,6 +124,7 @@ if(NOT _GSS_FOUND) #not found by pkg-config. Let's take more traditional approac
         COMMAND ${_GSS_CONFIGURE_SCRIPT} "--vendor"
         OUTPUT_VARIABLE _GSS_VENDOR
         RESULT_VARIABLE _GSS_CONFIGURE_FAILED
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     # older versions may not have the "--vendor" parameter. In this case we just don't care.
