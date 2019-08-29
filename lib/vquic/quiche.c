@@ -442,7 +442,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
         buf[0] = '\r';
         buf[1] = '\n';
         buf += 2;
-        buffersize = 2;
+        buffersize -= 2;
         stream->firstbody = TRUE;
         recvd = 2; /* two bytes already */
       }
