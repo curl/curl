@@ -260,7 +260,7 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-check_library_exists_concat("dl"     dlopen       HAVE_LIBDL)
+check_library_exists_concat("${CMAKE_DL_LIBS}" dlopen HAVE_LIBDL)
 check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
 check_library_exists("c" gethostbyname "" NOT_NEED_LIBNSL)
 
