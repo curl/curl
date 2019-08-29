@@ -24,6 +24,7 @@
 
 #ifdef USE_NGTCP2
 #include <ngtcp2/ngtcp2.h>
+#include <ngtcp2/ngtcp2_crypto.h>
 #include <nghttp3/nghttp3.h>
 #include <openssl/err.h>
 #include "urldata.h"
@@ -165,39 +166,14 @@ static int quic_set_encryption_secrets(SSL *ssl,
 {
   struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
   int level = quic_from_ossl_level(ossl_level);
-  int rv;
-
-  if(!qs->crypto_ctx.aead.native_handle) {
-    ngtcp2_crypto_ctx_tls(&qs->crypto_ctx, ssl);
-    ngtcp2_conn_set_aead_overhead(
-        qs->qconn, ngtcp2_crypto_aead_taglen(&qs->crypto_ctx.aead));
-  }
 
   if(ngtcp2_crypto_derive_and_install_key(
-         qs->qconn, NULL, NULL, NULL, NULL, NULL, NULL, &qs->crypto_ctx.aead,
-         &qs->crypto_ctx.md, level, rx_secret, tx_secret, secretlen,
-         NGTCP2_CRYPTO_SIDE_CLIENT) != 0)
+         qs->qconn, ssl, NULL, NULL, NULL, NULL, NULL, NULL, level, rx_secret,
+         tx_secret, secretlen, NGTCP2_CRYPTO_SIDE_CLIENT) != 0)
     return 0;
 
-  if(level == NGTCP2_CRYPTO_LEVEL_APP) {
-    const uint8_t *tp;
-    size_t tplen;
-    ngtcp2_transport_params params;
-
-    SSL_get_peer_quic_transport_params(ssl, &tp, &tplen);
-
-    rv = ngtcp2_decode_transport_params(
-        &params, NGTCP2_TRANSPORT_PARAMS_TYPE_ENCRYPTED_EXTENSIONS, tp, tplen);
-    if(rv != 0)
-      return 0;
-
-    rv = ngtcp2_conn_set_remote_transport_params(qs->qconn, &params);
-    if(rv != 0)
-      return 0;
-
-    if(init_ngh3_conn(qs) != CURLE_OK)
-      return 0;
-  }
+  if(level == NGTCP2_CRYPTO_LEVEL_APP && init_ngh3_conn(qs) != CURLE_OK)
+    return 0;
 
   return 1;
 }
@@ -358,80 +334,6 @@ static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   return 0;
 }
 
-static int cb_in_encrypt(ngtcp2_conn *tconn, uint8_t *dest,
-                         const uint8_t *plaintext, size_t plaintextlen,
-                         const uint8_t *key, const uint8_t *nonce,
-                         size_t noncelen, const uint8_t *ad, size_t adlen,
-                         void *user_data)
-{
-  ngtcp2_crypto_ctx crypto_ctx;
-  (void)tconn;
-  (void)user_data;
-
-  ngtcp2_crypto_ctx_initial(&crypto_ctx);
-
-  if(ngtcp2_crypto_encrypt(dest, &crypto_ctx.aead, plaintext, plaintextlen,
-                           key, nonce, noncelen, ad, adlen) != 0)
-    return NGTCP2_ERR_CALLBACK_FAILURE;
-
-  return 0;
-}
-
-static int cb_in_decrypt(ngtcp2_conn *tconn, uint8_t *dest,
-                         const uint8_t *ciphertext, size_t ciphertextlen,
-                         const uint8_t *key, const uint8_t *nonce,
-                         size_t noncelen, const uint8_t *ad, size_t adlen,
-                         void *user_data)
-{
-  ngtcp2_crypto_ctx crypto_ctx;
-  (void)tconn;
-  (void)user_data;
-
-  ngtcp2_crypto_ctx_initial(&crypto_ctx);
-  if(ngtcp2_crypto_decrypt(dest, &crypto_ctx.aead, ciphertext, ciphertextlen,
-                           key, nonce, noncelen, ad, adlen) != 0)
-    return NGTCP2_ERR_TLS_DECRYPT;
-
-  return 0;
-}
-
-
-static int cb_encrypt_data(ngtcp2_conn *tconn,
-                           uint8_t *dest,
-                           const uint8_t *plaintext, size_t plaintextlen,
-                           const uint8_t *key,
-                           const uint8_t *nonce, size_t noncelen,
-                           const uint8_t *ad, size_t adlen,
-                           void *user_data)
-{
-  struct quicsocket *qs = (struct quicsocket *)user_data;
-  (void)tconn;
-
-  if(ngtcp2_crypto_encrypt(dest, &qs->crypto_ctx.aead, plaintext, plaintextlen,
-                           key, nonce, noncelen, ad, adlen) != 0)
-    return NGTCP2_ERR_CALLBACK_FAILURE;
-
-  return 0;
-}
-
-static int cb_decrypt_data(ngtcp2_conn *tconn, uint8_t *dest,
-                           const uint8_t *ciphertext, size_t ciphertextlen,
-                           const uint8_t *key,
-                           const uint8_t *nonce, size_t noncelen,
-                           const uint8_t *ad, size_t adlen,
-                           void *user_data)
-{
-  struct quicsocket *qs = (struct quicsocket *)user_data;
-  (void)tconn;
-
-  if(ngtcp2_crypto_decrypt(dest, &qs->crypto_ctx.aead, ciphertext,
-                           ciphertextlen, key, nonce, noncelen, ad,
-                           adlen) != 0)
-    return NGTCP2_ERR_TLS_DECRYPT;
-
-  return 0;
-}
-
 static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
                                int fin, uint64_t offset,
                                const uint8_t *buf, size_t buflen,
@@ -538,35 +440,6 @@ static int cb_recv_retry(ngtcp2_conn *tconn, const ngtcp2_pkt_hd *hd,
   return 0;
 }
 
-static int cb_in_hp_mask(ngtcp2_conn *tconn, uint8_t *dest,
-                         const uint8_t *key, const uint8_t *sample,
-                         void *user_data)
-{
-  ngtcp2_crypto_ctx crypto_ctx;
-  (void)tconn;
-  (void)user_data;
-
-  ngtcp2_crypto_ctx_initial(&crypto_ctx);
-
-  if(ngtcp2_crypto_hp_mask(dest, &crypto_ctx.hp, key, sample) != 0)
-    return NGTCP2_ERR_CALLBACK_FAILURE;
-
-  return 0;
-}
-
-static int cb_hp_mask(ngtcp2_conn *tconn, uint8_t *dest,
-                      const uint8_t *key, const uint8_t *sample,
-                      void *user_data)
-{
-  struct quicsocket *qs = (struct quicsocket *)user_data;
-  (void)tconn;
-
-  if(ngtcp2_crypto_hp_mask(dest, &qs->crypto_ctx.hp, key, sample) != 0)
-    return NGTCP2_ERR_CALLBACK_FAILURE;
-
-  return 0;
-}
-
 static int cb_extend_max_local_streams_bidi(ngtcp2_conn *tconn,
                                             uint64_t max_streams,
                                             void *user_data)
@@ -624,12 +497,9 @@ static ngtcp2_conn_callbacks ng_callbacks = {
   cb_recv_crypto_data,
   cb_handshake_completed,
   NULL, /* recv_version_negotiation */
-  cb_in_encrypt,
-  cb_in_decrypt,
-  cb_encrypt_data,
-  cb_decrypt_data,
-  cb_in_hp_mask,
-  cb_hp_mask,
+  ngtcp2_crypto_encrypt_cb,
+  ngtcp2_crypto_decrypt_cb,
+  ngtcp2_crypto_hp_mask_cb,
   cb_recv_stream_data,
   NULL, /* acked_crypto_offset */
   cb_acked_stream_data_offset,
