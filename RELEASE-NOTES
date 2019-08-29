@@ -17,8 +17,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLINFO docs: mention that in redirects times are added [55]
  o CURLOPT_ALTSVC.3: use a "" file name to not load from a file
  o CURLOPT_ALTSVC_CTRL.3: remove CURLALTSVC_ALTUSED
+ o CURLOPT_HEADERFUNCTION.3: clarify [54]
  o CURLOPT_HTTP_VERSION: seting this to 3 forces HTTP/3 use directly [33]
  o CURLOPT_READFUNCTION.3: provide inline example
  o CURLOPT_SSL_VERIFYHOST: treat the value 1 as 2 [51]
@@ -57,6 +59,7 @@ This release includes the following bugfixes:
  o examples: add http3.c, altsvc.c and http3-present.c [40]
  o getenv: support up to 4K environment variable contents on windows [21]
  o http09: disable HTTP/0.9 by default in both tool and library [29]
+ o http2: when marked for closure and wanted to close == OK [56]
  o http2_recv: trigger another read when the last data is returned [11]
  o http: fix use of credentials from URL when using HTTP proxy [44]
  o http_negotiate: improve handling of gss_init_sec_context() failures [18]
@@ -88,15 +91,15 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Alex Mayorga, Amit Katyal, Balazs Kovacsics,
-  Brad Spencer, Carlo Marcelo Arenas Belón, Daniel Gustafsson, Daniel Stenberg,
-  Dominik Hölzl, Eric Wong, Felix Hädicke, Gergely Nagy, Gisle Vanem,
-  Igor Makarov, Ironbars13 on github, Jason Lee, Jeremy Lainé,
-  Jonathan Cardoso Machado, Junho Choi, Kamil Dudka, Kyle Abramowitz,
-  Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee, Michal Čaplygin,
-  Mike Crowe, niallor on github, osabc on github, patnyb on github,
-  Patrick Monnerat, Peter Wu, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
-  The Infinnovation team, Tom van der Woerdt, Yiming Jing,
-  (38 contributors)
+  Brad Spencer, Brandon Dong, Carlo Marcelo Arenas Belón, Christopher Head,
+  Daniel Gustafsson, Daniel Stenberg, Dominik Hölzl, Eric Wong, Felix Hädicke,
+  Gergely Nagy, Gisle Vanem, Igor Makarov, Ironbars13 on github, Jason Lee,
+  Jeremy Lainé, Jonathan Cardoso Machado, Junho Choi, Kamil Dudka,
+  Kyle Abramowitz, Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee,
+  Michal Čaplygin, Mike Crowe, niallor on github, osabc on github,
+  patnyb on github, Patrick Monnerat, Peter Wu, Ray Satiro, Steve Holme,
+  Tatsuhiro Tsujikawa, The Infinnovation team, Tom van der Woerdt, Yiming Jing,
+  (40 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -155,3 +158,6 @@ References to bug reports and discussions on issues:
  [51] = https://curl.haxx.se/bug/?i=4241
  [52] = https://curl.haxx.se/bug/?i=4230
  [53] = https://curl.haxx.se/bug/?i=4235
+ [54] = https://curl.haxx.se/bug/?i=4273
+ [55] = https://curl.haxx.se/bug/?i=4250
+ [56] = https://curl.haxx.se/bug/?i=4267
