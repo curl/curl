@@ -150,7 +150,7 @@ UNITTEST_START
       if(!addr && !tests[i].address[j])
         break;
 
-      if(addr && !Curl_addr2string(addr->ai_addr,
+      if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
                                    ipaddress, &port)) {
         fprintf(stderr, "%s:%d tests[%d] failed. Curl_addr2string failed.\n",
                 __FILE__, __LINE__, i);
