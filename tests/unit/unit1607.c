@@ -150,7 +150,7 @@ UNITTEST_START
       if(tests[i].address[j] == &skip)
         continue;
 
-      if(addr && !Curl_addr2string(addr->ai_addr,
+      if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
                                    ipaddress, &port)) {
         fprintf(stderr, "%s:%d tests[%d] failed. getaddressinfo failed.\n",
                 __FILE__, __LINE__, i);
