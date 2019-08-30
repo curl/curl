@@ -541,12 +541,11 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   uint8_t paramsbuf[64];
   ngtcp2_transport_params params;
   ssize_t nwrite;
-  (void)addrlen;
 
   qs->conn = conn;
 
   /* extract the used address as a string */
-  if(!Curl_addr2string((struct sockaddr*)addr, ipbuf, &port)) {
+  if(!Curl_addr2string((struct sockaddr*)addr, addrlen, ipbuf, &port)) {
     char buffer[STRERROR_LEN];
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
