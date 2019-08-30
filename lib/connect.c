@@ -628,7 +628,8 @@ void Curl_persistconninfo(struct connectdata *conn)
 
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool Curl_addr2string(struct sockaddr *sa, char *addr, long *port)
+bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
+                      char *addr, long *port)
 {
   struct sockaddr_in *si = NULL;
 #ifdef ENABLE_IPV6
@@ -636,6 +637,8 @@ bool Curl_addr2string(struct sockaddr *sa, char *addr, long *port)
 #endif
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
   struct sockaddr_un *su = NULL;
+#else
+  (void)salen;
 #endif
 
   switch(sa->sa_family) {
@@ -661,8 +664,12 @@ bool Curl_addr2string(struct sockaddr *sa, char *addr, long *port)
 #endif
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
     case AF_UNIX:
-      su = (struct sockaddr_un*)sa;
-      msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+      if(salen > sizeof(sa_family_t)) {
+        su = (struct sockaddr_un*)sa;
+        msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+      }
+      else
+        addr[0] = 0; /* socket with no name */
       *port = 0;
       return TRUE;
 #endif
@@ -690,10 +697,11 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     char buffer[STRERROR_LEN];
     struct Curl_sockaddr_storage ssrem;
     struct Curl_sockaddr_storage ssloc;
-    curl_socklen_t len;
+    curl_socklen_t plen;
+    curl_socklen_t slen;
 #ifdef HAVE_GETPEERNAME
-    len = sizeof(struct Curl_sockaddr_storage);
-    if(getpeername(sockfd, (struct sockaddr*) &ssrem, &len)) {
+    plen = sizeof(struct Curl_sockaddr_storage);
+    if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
       int error = SOCKERRNO;
       failf(data, "getpeername() failed with errno %d: %s",
             error, Curl_strerror(error, buffer, sizeof(buffer)));
@@ -701,9 +709,9 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     }
 #endif
 #ifdef HAVE_GETSOCKNAME
-    len = sizeof(struct Curl_sockaddr_storage);
+    slen = sizeof(struct Curl_sockaddr_storage);
     memset(&ssloc, 0, sizeof(ssloc));
-    if(getsockname(sockfd, (struct sockaddr*) &ssloc, &len)) {
+    if(getsockname(sockfd, (struct sockaddr*) &ssloc, &slen)) {
       int error = SOCKERRNO;
       failf(data, "getsockname() failed with errno %d: %s",
             error, Curl_strerror(error, buffer, sizeof(buffer)));
@@ -711,7 +719,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     }
 #endif
 #ifdef HAVE_GETPEERNAME
-    if(!Curl_addr2string((struct sockaddr*)&ssrem,
+    if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
                          conn->primary_ip, &conn->primary_port)) {
       failf(data, "ssrem inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
@@ -720,7 +728,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 #endif
 #ifdef HAVE_GETSOCKNAME
-    if(!Curl_addr2string((struct sockaddr*)&ssloc,
+    if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
                          conn->local_ip, &conn->local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, Curl_strerror(errno, buffer, sizeof(buffer)));
@@ -1049,7 +1057,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
     return CURLE_OK;
 
   /* store remote address and port used in this connection attempt */
-  if(!Curl_addr2string((struct sockaddr*)&addr.sa_addr,
+  if(!Curl_addr2string((struct sockaddr*)&addr.sa_addr, addr.addrlen,
                        ipaddress, &port)) {
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
