@@ -985,6 +985,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
 {
   tftp_state_data_t *state;
   int blksize;
+  int need_blksize;
 
   blksize = TFTP_BLKSIZE_DEFAULT;
 
@@ -999,15 +1000,20 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
       return CURLE_TFTP_ILLEGAL;
   }
 
+  need_blksize = blksize;
+  /* default size is the fallback when no OACK is received */
+  if(need_blksize < TFTP_BLKSIZE_DEFAULT)
+    need_blksize = TFTP_BLKSIZE_DEFAULT;
+
   if(!state->rpacket.data) {
-    state->rpacket.data = calloc(1, blksize + 2 + 2);
+    state->rpacket.data = calloc(1, need_blksize + 2 + 2);
 
     if(!state->rpacket.data)
       return CURLE_OUT_OF_MEMORY;
   }
 
   if(!state->spacket.data) {
-    state->spacket.data = calloc(1, blksize + 2 + 2);
+    state->spacket.data = calloc(1, need_blksize + 2 + 2);
 
     if(!state->spacket.data)
       return CURLE_OUT_OF_MEMORY;
@@ -1021,7 +1027,7 @@ static CURLcode tftp_connect(struct connectdata *conn, bool *done)
   state->sockfd = state->conn->sock[FIRSTSOCKET];
   state->state = TFTP_STATE_START;
   state->error = TFTP_ERR_NONE;
-  state->blksize = blksize;
+  state->blksize = TFTP_BLKSIZE_DEFAULT; /* Unless updated by OACK response */
   state->requested_blksize = blksize;
 
   ((struct sockaddr *)&state->local_addr)->sa_family =
