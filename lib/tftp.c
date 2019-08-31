@@ -403,13 +403,14 @@ static CURLcode tftp_parse_option_ack(tftp_state_data_t *state,
   return CURLE_OK;
 }
 
-static size_t tftp_option_add(tftp_state_data_t *state, size_t csize,
-                              char *buf, const char *option)
+static CURLcode tftp_option_add(tftp_state_data_t *state, size_t *csize,
+                                char *buf, const char *option)
 {
-  if(( strlen(option) + csize + 1) > (size_t)state->blksize)
-    return 0;
+  if(( strlen(option) + *csize + 1) > (size_t)state->blksize)
+    return CURLE_TFTP_ILLEGAL;
   strcpy(buf, option);
-  return strlen(option) + 1;
+  *csize += strlen(option) + 1;
+  return CURLE_OK;
 }
 
 static CURLcode tftp_connect_for_tx(tftp_state_data_t *state,
@@ -510,26 +511,38 @@ static CURLcode tftp_send_first(tftp_state_data_t *state, tftp_event_t event)
       else
         strcpy(buf, "0"); /* the destination is large enough */
 
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data + sbytes,
-                                TFTP_OPTION_TSIZE);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data + sbytes, buf);
+      result = tftp_option_add(state, &sbytes,
+                               (char *)state->spacket.data + sbytes,
+                               TFTP_OPTION_TSIZE);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes,
+                                 (char *)state->spacket.data + sbytes, buf);
+
       /* add blksize option */
       msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data + sbytes,
-                                TFTP_OPTION_BLKSIZE);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data + sbytes, buf);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes,
+                                 (char *)state->spacket.data + sbytes,
+                                 TFTP_OPTION_BLKSIZE);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes,
+                                 (char *)state->spacket.data + sbytes, buf);
 
       /* add timeout option */
       msnprintf(buf, sizeof(buf), "%d", state->retry_time);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data + sbytes,
-                                TFTP_OPTION_INTERVAL);
-      sbytes += tftp_option_add(state, sbytes,
-                                (char *)state->spacket.data + sbytes, buf);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes,
+                                 (char *)state->spacket.data + sbytes,
+                                 TFTP_OPTION_INTERVAL);
+      if(result == CURLE_OK)
+        result = tftp_option_add(state, &sbytes,
+                                 (char *)state->spacket.data + sbytes, buf);
+
+      if(result != CURLE_OK) {
+        failf(data, "TFTP buffer too small for options");
+        free(filename);
+        return CURLE_TFTP_ILLEGAL;
+      }
     }
 
     /* the typecase for the 3rd argument is mostly for systems that do
