@@ -1125,6 +1125,35 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
 }
 
 /*
+ * Wrapper to call functions in Curl_conncache_foreach()
+ *
+ * Returns always 0.
+ */
+static int conn_upkeep(struct connectdata *conn,
+                       void *param)
+{
+  /* Param is unused. */
+  (void)param;
+
+  if(conn->handler->connection_check) {
+    /* Do a protocol-specific keepalive check on the connection. */
+    conn->handler->connection_check(conn, CONNCHECK_KEEPALIVE);
+  }
+
+  return 0; /* continue iteration */
+}
+
+static CURLcode upkeep(struct conncache *conn_cache, void *data)
+{
+  /* Loop over every connection and make connection alive. */
+  Curl_conncache_foreach(data,
+                         conn_cache,
+                         data,
+                         conn_upkeep);
+  return CURLE_OK;
+}
+
+/*
  * Performs connection upkeep for the given session handle.
  */
 CURLcode curl_easy_upkeep(struct Curl_easy *data)
@@ -1135,7 +1164,7 @@ CURLcode curl_easy_upkeep(struct Curl_easy *data)
 
   if(data->multi_easy) {
     /* Use the common function to keep connections alive. */
-    return Curl_upkeep(&data->multi_easy->conn_cache, data);
+    return upkeep(&data->multi_easy->conn_cache, data);
   }
   else {
     /* No connections, so just return success */
