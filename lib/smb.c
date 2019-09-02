@@ -606,6 +606,7 @@ static CURLcode smb_send_and_recv(struct connectdata *conn, void **msg)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
   CURLcode result;
+  *msg = NULL; /* if it returns early */
 
   /* Check if there is data in the transfer buffer */
   if(!smbc->send_size && smbc->upload_size) {
