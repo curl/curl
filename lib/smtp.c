@@ -714,7 +714,7 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
       result = CURLE_REMOTE_ACCESS_DENIED;
     }
   }
-  else {
+  else if(len >= 4) {
     line += 4;
     len -= 4;
 
@@ -784,6 +784,10 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
       else
         result = smtp_perform_authentication(conn);
     }
+  }
+  else {
+    failf(data, "Unexpectedly short EHLO response");
+    result = CURLE_WEIRD_SERVER_REPLY;
   }
 
   return result;
