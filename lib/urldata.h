@@ -780,6 +780,8 @@ struct http_connect_state {
   bit close_connection:1;
 };
 
+struct ldapconninfo;
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -1018,7 +1020,8 @@ struct connectdata {
     struct smtp_conn smtpc;
     struct rtsp_conn rtspc;
     struct smb_conn smbc;
-    void *generic; /* RTMP and LDAP use this */
+    void *rtmp;
+    struct ldapconninfo *ldapc;
   } proto;
 
   int cselect_bits; /* bitmask of socket events */
