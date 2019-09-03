@@ -1329,6 +1329,9 @@ static CURLcode protocol_connect(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
 
+  DEBUGASSERT(conn);
+  DEBUGASSERT(protocol_done);
+
   *protocol_done = FALSE;
 
   if(conn->bits.tcpconnect[FIRSTSOCKET] && conn->bits.protoconnstart) {
