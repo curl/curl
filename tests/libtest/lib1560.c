@@ -140,6 +140,10 @@ static struct testcase get_parts_list[] ={
    "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
 #endif
+  {"http://[ab.be:1]/x", "",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_MALFORMED_INPUT},
+  {"http://[ab.be]/x", "",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_MALFORMED_INPUT},
   /* URL without host name */
   {"http://a:b@/x", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_NO_HOST},
