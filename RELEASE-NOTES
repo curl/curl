@@ -17,6 +17,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CI: remove duplicate configure flag for LGTM.com
+ o CMake: remove needless newlines at end of gss variables
+ o CMake: use platform dependent name for dlopen() library [62]
  o CURLINFO docs: mention that in redirects times are added [55]
  o CURLOPT_ALTSVC.3: use a "" file name to not load from a file
  o CURLOPT_ALTSVC_CTRL.3: remove CURLALTSVC_ALTUSED
@@ -24,6 +27,7 @@ This release includes the following bugfixes:
  o CURLOPT_HTTP_VERSION: seting this to 3 forces HTTP/3 use directly [33]
  o CURLOPT_READFUNCTION.3: provide inline example
  o CURLOPT_SSL_VERIFYHOST: treat the value 1 as 2 [51]
+ o Curl_addr2string: take an addrlen argument too [61]
  o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
  o alt-svc: add protocol version selection masking [31]
  o alt-svc: fix removal of expired cache entry [30]
@@ -34,6 +38,7 @@ This release includes the following bugfixes:
  o appveyor: pass on -k to make
  o asyn-thread: create a socketpair to wait on [14]
  o build-openssl: fix build with Visual Studio 2019 [45]
+ o cleanup: move functions out of url.c and make them static [58]
  o cleanup: remove the 'numsocks' argument used in many places [25]
  o configure: avoid undefined check_for_ca_bundle [37]
  o curl.h: add CURL_HTTP_VERSION_3 to the version enum
@@ -72,6 +77,8 @@ This release includes the following bugfixes:
  o progress: reset download/uploaded counter between transfers [12]
  o readwrite_data: repair setting the TIMER_STARTTRANSFER stamp [26]
  o scp: fix directory name length used in memcpy [46]
+ o smb: init *msg to NULL in smb_send_and_recv() [60]
+ o smtp: check for and bail out on too short EHLO response [59]
  o source: remove names from source comments [1]
  o spnego_sspi: add typecast to fix build warning [49]
  o src/makefile: fix uncompressed hugehelp.c generation [19]
@@ -81,6 +88,7 @@ This release includes the following bugfixes:
  o timediff: make it 64 bit (if possible) even with 32 bit time_t [20]
  o travis: reduce number of torture tests in 'coverage' [42]
  o url: make use of new HTTP version if alt-svc has one [16]
+ o urldata: avoid 'generic', use dedicated pointers [57]
  o vauth: Use CURLE_AUTH_ERROR for auth function errors [41]
 
 This release includes the following known bugs:
@@ -95,11 +103,12 @@ advice from friends like these:
   Daniel Gustafsson, Daniel Stenberg, Dominik Hölzl, Eric Wong, Felix Hädicke,
   Gergely Nagy, Gisle Vanem, Igor Makarov, Ironbars13 on github, Jason Lee,
   Jeremy Lainé, Jonathan Cardoso Machado, Junho Choi, Kamil Dudka,
-  Kyle Abramowitz, Kyohei Kadota, Lance Ware, Marcel Raad, Michael Lee,
-  Michal Čaplygin, Mike Crowe, niallor on github, osabc on github,
-  patnyb on github, Patrick Monnerat, Peter Wu, Ray Satiro, Steve Holme,
-  Tatsuhiro Tsujikawa, The Infinnovation team, Tom van der Woerdt, Yiming Jing,
-  (40 contributors)
+  Kyle Abramowitz, Kyohei Kadota, Lance Ware, Marcel Raad, Max Dymond,
+  Michael Lee, Michal Čaplygin, Mike Crowe, niallor on github, osabc on github,
+  patnyb on github, Patrick Monnerat, Peter Wu, Ray Satiro, Rolf Eike Beer,
+  Steve Holme, Tatsuhiro Tsujikawa, The Infinnovation team, Tom van der Woerdt,
+  Yiming Jing,
+  (42 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -161,3 +170,9 @@ References to bug reports and discussions on issues:
  [54] = https://curl.haxx.se/bug/?i=4273
  [55] = https://curl.haxx.se/bug/?i=4250
  [56] = https://curl.haxx.se/bug/?i=4267
+ [57] = https://curl.haxx.se/bug/?i=4290
+ [58] = https://curl.haxx.se/bug/?i=4289
+ [59] = https://curl.haxx.se/bug/?i=4287
+ [60] = https://curl.haxx.se/bug/?i=4286
+ [61] = https://curl.haxx.se/bug/?i=4283
+ [62] = https://curl.haxx.se/bug/?i=4279
