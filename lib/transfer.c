@@ -176,7 +176,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
 #ifndef CURL_DISABLE_HTTP
   if(data->state.trailers_state == TRAILERS_INITIALIZED) {
     struct curl_slist *trailers = NULL;
-    CURLcode c;
+    CURLcode result;
     int trailers_ret_code;
 
     /* at this point we already verified that the callback exists
@@ -195,17 +195,18 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, size_t bytes,
                                                    data->set.trailer_data);
     Curl_set_in_callback(data, false);
     if(trailers_ret_code == CURL_TRAILERFUNC_OK) {
-      c = Curl_http_compile_trailers(trailers, data->state.trailers_buf, data);
+      result = Curl_http_compile_trailers(trailers, &data->state.trailers_buf,
+                                          data);
     }
     else {
       failf(data, "operation aborted by trailing headers callback");
       *nreadp = 0;
-      c = CURLE_ABORTED_BY_CALLBACK;
+      result = CURLE_ABORTED_BY_CALLBACK;
     }
-    if(c != CURLE_OK) {
+    if(result) {
       Curl_add_buffer_free(&data->state.trailers_buf);
       curl_slist_free_all(trailers);
-      return c;
+      return result;
     }
     infof(data, "Successfully compiled trailers.\r\n");
     curl_slist_free_all(trailers);

@@ -1146,10 +1146,14 @@ Curl_send_buffer *Curl_add_buffer_init(void)
  */
 void Curl_add_buffer_free(Curl_send_buffer **inp)
 {
-  Curl_send_buffer *in = *inp;
-  if(in) /* deal with NULL input */
+  Curl_send_buffer *in;
+  if(!inp)
+    return;
+  in = *inp;
+  if(in) { /* deal with NULL input */
     free(in->buffer);
-  free(in);
+    free(in);
+  }
   *inp = NULL;
 }
 
@@ -1720,7 +1724,7 @@ enum proxy_use {
    will return an error code if one of the headers is
    not formatted correctly */
 CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
-                                    Curl_send_buffer *buffer,
+                                    Curl_send_buffer **buffer,
                                     struct Curl_easy *handle)
 {
   char *ptr = NULL;
@@ -1746,7 +1750,7 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
     /* only add correctly formatted trailers */
     ptr = strchr(trailers->data, ':');
     if(ptr && *(ptr + 1) == ' ') {
-      result = Curl_add_bufferf(&buffer, "%s%s", trailers->data,
+      result = Curl_add_bufferf(buffer, "%s%s", trailers->data,
                                 endofline_native);
       if(result)
         return result;
@@ -1755,7 +1759,7 @@ CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
       infof(handle, "Malformatted trailing header ! Skipping trailer.");
     trailers = trailers->next;
   }
-  result = Curl_add_buffer(&buffer, endofline_network,
+  result = Curl_add_buffer(buffer, endofline_network,
                            strlen(endofline_network));
   return result;
 }
