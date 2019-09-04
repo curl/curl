@@ -29,6 +29,7 @@
 #include "url.h"
 #include "escape.h"
 #include "curl_ctype.h"
+#include "inet_pton.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -591,20 +592,22 @@ static CURLUcode junkscan(char *part)
 
 static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
 {
-  const char *l = NULL; /* accepted characters */
   size_t len;
   size_t hlen = strlen(hostname);
 
   if(hostname[0] == '[') {
+    char dest[16]; /* fits a binary IPv6 address */
+    const char *l = "0123456789abcdefABCDEF::.";
     hostname++;
-    l = "0123456789abcdefABCDEF::.";
     hlen -= 2;
-  }
 
-  if(l) {
+    if(hostname[hlen] != ']')
+      return CURLUE_MALFORMED_INPUT;
+
     /* only valid letters are ok */
     len = strspn(hostname, l);
     if(hlen != len) {
+      hlen = len;
       if(hostname[len] == '%') {
         /* this could now be '%[zone id]' */
         char zoneid[16];
@@ -628,6 +631,12 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
         return CURLUE_MALFORMED_INPUT;
       /* hostname is fine */
     }
+#ifdef ENABLE_IPV6
+    hostname[hlen] = 0; /* end the address there */
+    if(1 != Curl_inet_pton(AF_INET6, hostname, dest))
+      return CURLUE_MALFORMED_INPUT;
+    hostname[hlen] = ']'; /* restore ending bracket */
+#endif
   }
   else {
     /* letters from the second string is not ok */
