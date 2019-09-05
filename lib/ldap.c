@@ -457,6 +457,22 @@ static CURLcode Curl_ldap(struct connectdata *conn, bool *done)
   }
 #ifdef USE_WIN32_LDAP
   ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
+  /*
+   For WIN32_LDAP, transfer the callback
+   It must implements :
+    BOOLEAN Verifyservercert(
+      PLDAP Connection,
+      PCCERT_CONTEXT *pServerCert
+    )
+    @see https://docs.microsoft.com/fr-fr/windows/win32/api/winldap/
+      nc-winldap-verifyservercert
+    There is no way to transmit arguments to the callback
+    (but you can access to static objects from the callback method)
+   */
+  if(data->set.ssl.fsslctx) {
+    ldap_set_option(server, LDAP_OPT_SERVER_CERTIFICATE,
+                    data->set.ssl.fsslctx);
+  }
 #endif
 
 #ifdef USE_WIN32_LDAP
