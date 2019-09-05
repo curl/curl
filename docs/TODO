@@ -18,11 +18,8 @@
 
  1. libcurl
  1.1 TFO support on Windows
- 1.2 More data sharing
  1.3 struct lifreq
- 1.4 signal-based resolver timeouts
  1.5 get rid of PATH_MAX
- 1.6 Modified buffer size approach
  1.7 Support HTTP/2 for HTTP(S) proxies
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
@@ -36,12 +33,10 @@
  1.17 Add support for IRIs
  1.18 try next proxy if one doesn't work
  1.20 SRV and URI DNS records
- 1.21 Have the URL API offer IDN decoding
  1.22 CURLINFO_PAUSE_STATE
  1.23 Offer API to flush the connection pool
  1.24 TCP Fast Open for windows
  1.25 Expose tried IP addresses that failed
- 1.26 CURL_REFUSE_CLEARTEXT
  1.27 hardcode the "localhost" addresses
  1.28 FD_CLOEXEC
  1.29 Upgrade to websockets
@@ -62,7 +57,6 @@
  4.1 HOST
  4.2 Alter passive/active on failure and retry
  4.3 Earlier bad letter detection
- 4.4 REST for large files
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
@@ -70,11 +64,9 @@
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
- 5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
- 5.7 QUIC
 
  6. TELNET
  6.1 ditch stdin
@@ -82,12 +74,10 @@
  6.3 feature negotiation debug data
 
  7. SMTP
- 7.1 Pipelining
  7.2 Enhanced capability support
  7.3 Add CURLOPT_MAIL_CLIENT option
 
  8. POP3
- 8.1 Pipelining
  8.2 Enhanced capability support
 
  9. IMAP
@@ -103,10 +93,8 @@
  11.4 Create remote directories
 
  12. New protocols
- 12.1 RSYNC
 
  13. SSL
- 13.1 Disable specific versions
  13.2 Provide mutex locking API
  13.3 Support in-memory certs/ca certs/keys
  13.4 Cache/share OpenSSL contexts
@@ -114,15 +102,12 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
- 13.9 Configurable loading of OpenSSL configuration file
  13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
- 13.13 Support HPKP
  13.14 Support the clienthello extension
 
  14. GnuTLS
- 14.1 SSL engine stuff
  14.2 check connection
 
  15. WinSSL/SChannel
@@ -137,7 +122,6 @@
 
  17. SSH protocols
  17.1 Multiplexing
- 17.2 SFTP performance
  17.3 Support better than MD5 hostkey hash
  17.4 Support CURLOPT_PREQUOTE
 
@@ -145,16 +129,12 @@
  18.1 sync
  18.2 glob posts
  18.3 prevent file overwriting
- 18.4 simultaneous parallel transfers
  18.5 UTF-8 filenames in Content-Disposition
- 18.6 warning when setting an option
  18.7 at least N milliseconds between requests
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
  18.12 keep running, read instructions from pipe/socket
- 18.13 support metalink in http headers
- 18.14 --fail without --location should treat 3xx as a failure
  18.15 --retry should resume
  18.16 send only part of --data
  18.17 consider file name from the redirected URL with -O ?
@@ -201,58 +181,20 @@
 
  See https://github.com/curl/curl/pull/3378
 
-1.2 More data sharing
-
- curl_share_* functions already exist and work, and they can be extended to
- share more. For example, enable sharing of the ares channel.
-
 1.3 struct lifreq
 
  Use 'struct lifreq' and SIOCGLIFADDR instead of 'struct ifreq' and
  SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
  To support IPv6 interface addresses for network interfaces properly.
 
-1.4 signal-based resolver timeouts
-
- libcurl built without an asynchronous resolver library uses alarm() to time
- out DNS lookups. When a timeout occurs, this causes libcurl to jump from the
- signal handler back into the library with a sigsetjmp, which effectively
- causes libcurl to continue running within the signal handler. This is
- non-portable and could cause problems on some platforms. A discussion on the
- problem is available at https://curl.haxx.se/mail/lib-2008-09/0197.html
-
- Also, alarm() provides timeout resolution only to the nearest second. alarm
- ought to be replaced by setitimer on systems that support it.
-
 1.5 get rid of PATH_MAX
 
  Having code use and rely on PATH_MAX is not nice:
  https://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html
 
- Currently the SSH based code uses it a bit, but to remove PATH_MAX from there
- we need libssh2 to properly tell us when we pass in a too small buffer and
- its current API (as of libssh2 1.2.7) doesn't.
-
-1.6 Modified buffer size approach
-
- Current libcurl allocates a fixed 16K size buffer for download and an
- additional 16K for upload. They are always unconditionally part of the easy
- handle. If CRLF translations are requested, an additional 32K "scratch
- buffer" is allocated. A total of 64K transfer buffers in the worst case.
-
- First, while the handles are not actually in use these buffers could be freed
- so that lingering handles just kept in queues or whatever waste less memory.
-
- Secondly, SFTP is a protocol that needs to handle many ~30K blocks at once
- since each need to be individually acked and therefore libssh2 must be
- allowed to send (or receive) many separate ones in parallel to achieve high
- transfer speeds. A current libcurl build with a 16K buffer makes that
- impossible, but one with a 512K buffer will reach MUCH faster transfers. But
- allocating 512K unconditionally for all buffers just in case they would like
- to do fast SFTP transfers at some point is not a good solution either.
-
- Dynamically allocate buffer size depending on protocol in use in combination
- with freeing it after each individual transfer? Other suggestions?
+ Currently the libssh2 SSH based code uses it, but to remove PATH_MAX from
+ there we need libssh2 to properly tell us when we pass in a too small buffer
+ and its current API (as of libssh2 1.2.7) doesn't.
 
 1.7 Support HTTP/2 for HTTP(S) proxies
 
@@ -376,12 +318,6 @@
  Offer support for resolving SRV and URI DNS records for libcurl to know which
  server to connect to for various protocols (including HTTP!).
 
-1.21 Have the URL API offer IDN decoding
-
- Similar to how URL decoding/encoding is done, we could have URL functions to
- convert IDN host names to punycode (probably not the reverse).
- https://github.com/curl/curl/issues/3232
-
 1.22 CURLINFO_PAUSE_STATE
 
  Return information about the transfer's current pause state, in both
@@ -405,21 +341,6 @@
  application the list of IP addresses that were used in the attempt.
 
  https://github.com/curl/curl/issues/2126
-
-1.26 CURL_REFUSE_CLEARTEXT
-
- An environment variable that when set will make libcurl refuse to use any
- cleartext network protocol. That's all non-encrypted ones (FTP, HTTP, Gopher,
- etc). By adding the check to libcurl and not just curl, this environment
- variable can then help users to block all libcurl-using programs from
- accessing the network using unsafe protocols.
-
- The variable could be given some sort of syntax or different levels and be
- used to also allow for example users to refuse libcurl to do transfers with
- HTTPS certificate checks disabled.
-
- It could also automatically refuse usernames in URLs when set
- (see CURLOPT_DISALLOW_USERNAME_IN_URL)
 
 1.27 hardcode the "localhost" addresses
 
@@ -538,12 +459,6 @@
  Make the detection of (bad) %0d and %0a codes in FTP URL parts earlier in the
  process to avoid doing a resolve and connect in vain.
 
-4.4 REST for large files
-
- REST fix for servers not behaving well on >2GB requests. This should fail if
- the server doesn't set the pointer to the requested index. The tricky
- (impossible?) part is to figure out if the server did the right thing or not.
-
 4.5 ASCII support
 
  FTP ASCII transfers do not follow RFC959. They don't convert the data
@@ -576,12 +491,6 @@
  "Better" support for persistent connections over HTTP 1.0
  https://curl.haxx.se/bug/feature.cgi?id=1089001
 
-5.2 support FF3 sqlite cookie files
-
- Firefox 3 is changing from its former format to a a sqlite database instead.
- We should consider how (lib)curl can/should support this.
- https://curl.haxx.se/bug/feature.cgi?id=1871388
-
 5.3 Rearrange request header order
 
  Server implementors often make an effort to detect browser and to reject
@@ -610,29 +519,19 @@
 
  For example:
 
- http://test:pass;auth=NTLM@example.com would be equivalent to specifying --user
- test:pass;auth=NTLM or --user test:pass --ntlm from the command line.
+ http://test:pass;auth=NTLM@example.com would be equivalent to specifying
+ --user test:pass;auth=NTLM or --user test:pass --ntlm from the command line.
 
  Additionally this should be implemented for proxy base URLs as well.
-
-5.7 QUIC
-
- The standardization process of QUIC has been taken to the IETF and can be
- followed on the [IETF QUIC Mailing
- list](https://www.ietf.org/mailman/listinfo/quic). I'd like us to get on the
- bandwagon. Ideally, this would be done with a separate library/project to
- handle the binary/framing layer in a similar fashion to how HTTP/2 is
- implemented. This, to allow other projects to benefit from the work and to
- thus broaden the interest and chance of others to participate.
 
 
 6. TELNET
 
 6.1 ditch stdin
 
-Reading input (to send to the remote server) on stdin is a crappy solution for
-library purposes. We need to invent a good way for the application to be able
-to provide the data to send.
+ Reading input (to send to the remote server) on stdin is a crappy solution
+ for library purposes. We need to invent a good way for the application to be
+ able to provide the data to send.
 
 6.2 ditch telnet-specific select
 
@@ -642,14 +541,10 @@ to provide the data to send.
 
 6.3 feature negotiation debug data
 
-  Add telnet feature negotiation data to the debug callback as header data.
+ Add telnet feature negotiation data to the debug callback as header data.
 
 
 7. SMTP
-
-7.1 Pipelining
-
- Add support for pipelining emails.
 
 7.2 Enhanced capability support
 
@@ -668,10 +563,6 @@ to provide the data to send.
 
 
 8. POP3
-
-8.1 Pipelining
-
- Add support for pipelining commands.
 
 8.2 Enhanced capability support
 
@@ -717,17 +608,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
 12. New protocols
 
-12.1 RSYNC
-
- There's no RFC for the protocol or an URI/URL format.  An implementation
- should most probably use an existing rsync library, such as librsync.
-
 13. SSL
-
-13.1 Disable specific versions
-
- Provide an option that allows for disabling specific SSL versions, such as
- SSLv2 https://curl.haxx.se/bug/feature.cgi?id=1767276
 
 13.2 Provide mutex locking API
 
@@ -793,17 +674,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
 
-13.9 Configurable loading of OpenSSL configuration file
-
- libcurl calls the OpenSSL function CONF_modules_load_file() in openssl.c,
- Curl_ossl_init(). "We regard any changes in the OpenSSL configuration as a
- security risk or at least as unnecessary."
-
- Please add a configuration switch or something similar to disable the
- CONF_modules_load_file() call.
-
- See https://github.com/curl/curl/issues/2724
-
 13.10 Support Authority Information Access certificate extension (AIA)
 
  AIA can provide various things like CRLs but more importantly information
@@ -836,21 +706,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Doc: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
  RFC 6797: https://tools.ietf.org/html/rfc6797
 
-13.13 Support HPKP
-
- "HTTP Public Key Pinning" is TOFU (trust on first use), time-based
- features indicated by a HTTP header send by the webserver. It's purpose is
- to prevent Man-in-the-middle attacks by trusted CAs by allowing webadmins
- to specify which CAs/certificates/public keys to trust when connection to
- their websites.
-
- It can be build based on PINNEDPUBLICKEY.
-
- Wikipedia: https://en.wikipedia.org/wiki/HTTP_Public_Key_Pinning
- OWASP: https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning
- Doc: https://developer.mozilla.org/de/docs/Web/Security/Public_Key_Pinning
- RFC: https://tools.ietf.org/html/draft-ietf-websec-key-pinning-21
-
 13.14 Support the clienthello extension
 
  Certain stupid networks and middle boxes have a problem with SSL handshake
@@ -862,10 +717,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  https://github.com/curl/curl/issues/2299
 
 14. GnuTLS
-
-14.1 SSL engine stuff
-
- Is this even possible?
 
 14.2 check connection
 
@@ -941,11 +792,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  To fix this, libcurl would have to detect an existing connection and "attach"
  the new transfer to the existing one.
 
-17.2 SFTP performance
-
- libcurl's SFTP transfer performance is sub par and can be improved, mostly by
- the approach mentioned in "1.6 Modified buffer size approach".
-
 17.3 Support better than MD5 hostkey hash
 
  libcurl offers the CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 option for verifying the
@@ -984,28 +830,12 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  existing). So that index.html becomes first index.html.1 and then
  index.html.2 etc.
 
-18.4 simultaneous parallel transfers
-
- The client could be told to use maximum N simultaneous parallel transfers and
- then just make sure that happens. It should of course not make more than one
- connection to the same remote host. This would require the client to use the
- multi interface. https://curl.haxx.se/bug/feature.cgi?id=1558595
-
- Using the multi interface would also allow properly using parallel transfers
- with HTTP/2 and supporting HTTP/2 server push from the command line.
-
 18.5 UTF-8 filenames in Content-Disposition
 
  RFC 6266 documents how UTF-8 names can be passed to a client in the
  Content-Disposition header, and curl does not support this.
 
  https://github.com/curl/curl/issues/1888
-
-18.6 warning when setting an option
-
- Display a warning when libcurl returns an error when setting an option.
- This can be useful to tell when support for a particular feature hasn't been
- compiled into the library.
 
 18.7 at least N milliseconds between requests
 
@@ -1054,30 +884,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  over a socket to make further instructions so that a second subsequent curl
  invoke can talk to the still running instance and ask for transfers to get
  done, and thus maintain its connection pool, DNS cache and more.
-
-18.13 support metalink in http headers
-
- Curl has support for downloading a metalink xml file, processing it, and then
- downloading the target of the metalink. This is done via the --metalink option.
- It would be nice if metalink also supported downloading via metalink
- information that is stored in HTTP headers (RFC 6249). Theoretically this could
- also be supported with the --metalink option.
-
- See https://tools.ietf.org/html/rfc6249
-
- See also https://lists.gnu.org/archive/html/bug-wget/2015-06/msg00034.html for
- an implematation of this in wget.
-
-18.14 --fail without --location should treat 3xx as a failure
-
- To allow a command line like this to detect a redirect and consider it a
- failure:
-
-    curl -v --fail -O https://example.com/curl-7.48.0.tar.gz
-
- ... --fail must treat 3xx responses as failures too. The least problematic
- way to implement this is probably to add that new logic in the command line
- tool only and not in the underlying CURLOPT_FAILONERROR logic.
 
 18.15 --retry should resume
 
@@ -1194,17 +1000,17 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
 20.5 Add support for concurrent connections
 
- Tests 836, 882 and 938 were designed to verify that separate connections aren't
- used when using different login credentials in protocols that shouldn't re-use
- a connection under such circumstances.
+ Tests 836, 882 and 938 were designed to verify that separate connections
+ aren't used when using different login credentials in protocols that
+ shouldn't re-use a connection under such circumstances.
 
  Unfortunately, ftpserver.pl doesn't appear to support multiple concurrent
- connections. The read while() loop seems to loop until it receives a disconnect
- from the client, where it then enters the waiting for connections loop. When
- the client opens a second connection to the server, the first connection hasn't
- been dropped (unless it has been forced - which we shouldn't do in these tests)
- and thus the wait for connections loop is never entered to receive the second
- connection.
+ connections. The read while() loop seems to loop until it receives a
+ disconnect from the client, where it then enters the waiting for connections
+ loop. When the client opens a second connection to the server, the first
+ connection hasn't been dropped (unless it has been forced - which we
+ shouldn't do in these tests) and thus the wait for connections loop is never
+ entered to receive the second connection.
 
 20.6 Use the RFC6265 test suite
 
