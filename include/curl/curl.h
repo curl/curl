@@ -442,6 +442,9 @@ typedef void (*curl_free_callback)(void *ptr);
 typedef void *(*curl_realloc_callback)(void *ptr, size_t size);
 typedef char *(*curl_strdup_callback)(const char *str);
 typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
+#if defined(WIN32) 
+typedef wchar_t *(*curl_wcsdup_callback)(const wchar_t *str);
+#endif
 
 #define CURL_DID_MEMORY_FUNC_TYPEDEFS
 #endif
@@ -2431,7 +2434,11 @@ CURL_EXTERN CURLcode curl_global_init_mem(long flags,
                                           curl_free_callback f,
                                           curl_realloc_callback r,
                                           curl_strdup_callback s,
-                                          curl_calloc_callback c);
+                                          curl_calloc_callback c
+#if defined(WIN32) 
+										, curl_wcsdup_callback w
+#endif
+										);
 
 /*
  * NAME curl_global_cleanup()

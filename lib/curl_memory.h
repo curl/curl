@@ -95,6 +95,9 @@ typedef void (*curl_free_callback)(void *ptr);
 typedef void *(*curl_realloc_callback)(void *ptr, size_t size);
 typedef char *(*curl_strdup_callback)(const char *str);
 typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
+#if defined(WIN32)
+typedef void *(*curl_wcsdup_callback)(const wchar_t * str);
+#endif
 #define CURL_DID_MEMORY_FUNC_TYPEDEFS
 #endif
 

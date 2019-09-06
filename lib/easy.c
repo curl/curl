@@ -219,10 +219,19 @@ CURLcode curl_global_init(long flags)
  */
 CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
                               curl_free_callback f, curl_realloc_callback r,
-                              curl_strdup_callback s, curl_calloc_callback c)
+                              curl_strdup_callback s, curl_calloc_callback c
+#if defined(WIN32)
+                              , curl_wcsdup_callback w
+#endif
+)
+
 {
   /* Invalid input, return immediately */
-  if(!m || !f || !r || !s || !c)
+  if(!m || !f || !r || !s || !c
+#if defined(WIN32)
+        || !w
+#endif
+    )
     return CURLE_FAILED_INIT;
 
   if(initialized) {
@@ -240,6 +249,9 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
   Curl_cstrdup = s;
   Curl_crealloc = r;
   Curl_ccalloc = c;
+#if defined(WIN32)
+  Curl_cwcsdup = w;
+#endif
 
   /* Call the actual init function, but without setting */
   return global_init(flags, FALSE);
