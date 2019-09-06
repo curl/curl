@@ -56,6 +56,11 @@ bool Curl_auth_is_ntlm_supported(void)
   status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
                                               &SecurityPackage);
 
+  /* Release the package buffer as it is not required anymore */
+  if(status == SEC_E_OK) {
+    s_pSecFn->FreeContextBuffer(SecurityPackage);
+  }
+
   return (status == SEC_E_OK ? TRUE : FALSE);
 }
 

@@ -59,6 +59,12 @@ bool Curl_auth_is_spnego_supported(void)
                                               TEXT(SP_NAME_NEGOTIATE),
                                               &SecurityPackage);
 
+  /* Release the package buffer as it is not required anymore */
+  if(status == SEC_E_OK) {
+    s_pSecFn->FreeContextBuffer(SecurityPackage);
+  }
+
+
   return (status == SEC_E_OK ? TRUE : FALSE);
 }
 
