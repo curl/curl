@@ -824,6 +824,16 @@ bool tool_setopt_skip(CURLoption tag)
     break;
   }
 #endif
+#ifdef CURL_DISABLE_NETRC
+#define USED_TAG
+  switch(tag) {
+  case CURLOPT_NETRC:
+  case CURLOPT_NETRC_FILE:
+    return TRUE;
+  default:
+    break;
+  }
+#endif
 
 #ifndef USED_TAG
   (void)tag;
