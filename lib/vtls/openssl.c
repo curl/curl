@@ -2156,15 +2156,96 @@ get_ssl_version_txt(SSL *ssl)
 }
 #endif
 
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
+static CURLcode
+set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
+{
+  /* first, TLS min version... */
+  long curl_ssl_version_min = SSL_CONN_CONFIG(version);
+  long curl_ssl_version_max;
+
+  /* convert cURL min SSL version option to OpenSSL constant */
+  long ossl_ssl_version_min = 0;
+  long ossl_ssl_version_max = 0;
+  switch(curl_ssl_version_min) {
+    case CURL_SSLVERSION_TLSv1: /* TLS 1.x */
+    case CURL_SSLVERSION_TLSv1_0:
+      ossl_ssl_version_min = TLS1_VERSION;
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      ossl_ssl_version_min = TLS1_1_VERSION;
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      ossl_ssl_version_min = TLS1_2_VERSION;
+      break;
+#ifdef TLS1_3_VERSION
+    case CURL_SSLVERSION_TLSv1_3:
+      ossl_ssl_version_min = TLS1_3_VERSION;
+      break;
+#endif
+  }
+
+  /* CURL_SSLVERSION_DEFAULT means that no option was selected.
+    We don't want to pass 0 to SSL_CTX_set_min_proto_version as
+    it would enable all versions down to the lowest supported by
+    the library.
+    So we skip this, and stay with the OS default
+  */
+  if(curl_ssl_version_min != CURL_SSLVERSION_DEFAULT) {
+    if(!SSL_CTX_set_min_proto_version(ctx, ossl_ssl_version_min)) {
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
+  /* ... then, TLS max version */
+  curl_ssl_version_max = SSL_CONN_CONFIG(version_max);
+
+  /* convert cURL max SSL version option to OpenSSL constant */
+  ossl_ssl_version_max = 0;
+  switch(curl_ssl_version_max) {
+    case CURL_SSLVERSION_MAX_TLSv1_0:
+      ossl_ssl_version_max = TLS1_VERSION;
+      break;
+    case CURL_SSLVERSION_MAX_TLSv1_1:
+      ossl_ssl_version_max = TLS1_1_VERSION;
+      break;
+    case CURL_SSLVERSION_MAX_TLSv1_2:
+      ossl_ssl_version_max = TLS1_2_VERSION;
+      break;
+#ifdef TLS1_3_VERSION
+    case CURL_SSLVERSION_MAX_TLSv1_3:
+      ossl_ssl_version_max = TLS1_3_VERSION;
+      break;
+#endif
+    case CURL_SSLVERSION_MAX_NONE:  /* none selected */
+    case CURL_SSLVERSION_MAX_DEFAULT:  /* max selected */
+    default:
+      /* SSL_CTX_set_max_proto_version states that:
+        setting the maximum to 0 will enable
+        protocol versions up to the highest version
+        supported by the library */
+      ossl_ssl_version_max = 0;
+      break;
+  }
+
+  if(!SSL_CTX_set_max_proto_version(ctx, ossl_ssl_version_max)) {
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  return CURLE_OK;
+}
+#endif
+
 #ifdef OPENSSL_IS_BORINGSSL
 typedef uint32_t ctx_option_t;
 #else
 typedef long ctx_option_t;
 #endif
 
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) /* 1.1.0 */
 static CURLcode
-set_ssl_version_min_max(ctx_option_t *ctx_options, struct connectdata *conn,
-                        int sockindex)
+set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
+                              struct connectdata *conn, int sockindex)
 {
 #if (OPENSSL_VERSION_NUMBER < 0x1000100FL) || !defined(TLS1_3_VERSION)
   /* convoluted #if condition just to avoid compiler warnings on unused
@@ -2236,6 +2317,7 @@ set_ssl_version_min_max(ctx_option_t *ctx_options, struct connectdata *conn,
   }
   return CURLE_OK;
 }
+#endif
 
 /* The "new session" callback must return zero if the session can be removed
  * or non-zero if the session has been put into the session cache.
@@ -2468,30 +2550,37 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   switch(ssl_version) {
     /* "--sslv2" option means SSLv2 only, disable all others */
     case CURL_SSLVERSION_SSLv2:
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0 */
+      SSL_CTX_set_min_proto_version(BACKEND->ctx, SSL2_VERSION);
+      SSL_CTX_set_max_proto_version(BACKEND->ctx, SSL2_VERSION);
+#else
       ctx_options |= SSL_OP_NO_SSLv3;
       ctx_options |= SSL_OP_NO_TLSv1;
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
+#  if OPENSSL_VERSION_NUMBER >= 0x1000100FL
       ctx_options |= SSL_OP_NO_TLSv1_1;
       ctx_options |= SSL_OP_NO_TLSv1_2;
-#ifdef TLS1_3_VERSION
+#    ifdef TLS1_3_VERSION
       ctx_options |= SSL_OP_NO_TLSv1_3;
-#endif
+#    endif
+#  endif
 #endif
       break;
 
     /* "--sslv3" option means SSLv3 only, disable all others */
     case CURL_SSLVERSION_SSLv3:
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0 */
       SSL_CTX_set_min_proto_version(BACKEND->ctx, SSL3_VERSION);
-#endif
+      SSL_CTX_set_max_proto_version(BACKEND->ctx, SSL3_VERSION);
+#else
       ctx_options |= SSL_OP_NO_SSLv2;
       ctx_options |= SSL_OP_NO_TLSv1;
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
+#  if OPENSSL_VERSION_NUMBER >= 0x1000100FL
       ctx_options |= SSL_OP_NO_TLSv1_1;
       ctx_options |= SSL_OP_NO_TLSv1_2;
-#ifdef TLS1_3_VERSION
+#    ifdef TLS1_3_VERSION
       ctx_options |= SSL_OP_NO_TLSv1_3;
-#endif
+#    endif
+#  endif
 #endif
       break;
 
@@ -2506,7 +2595,12 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
         allowed */
       ctx_options |= SSL_OP_NO_SSLv2;
       ctx_options |= SSL_OP_NO_SSLv3;
-      result = set_ssl_version_min_max(&ctx_options, conn, sockindex);
+
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
+      result = set_ssl_version_min_max(BACKEND->ctx, conn);
+#else
+      result = set_ssl_version_min_max_legacy(&ctx_options, conn, sockindex);
+#endif
       if(result != CURLE_OK)
         return result;
       break;
