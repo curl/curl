@@ -2466,48 +2466,54 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #endif
 
   switch(ssl_version) {
-  case CURL_SSLVERSION_SSLv3:
-    ctx_options |= SSL_OP_NO_SSLv2;
-    ctx_options |= SSL_OP_NO_TLSv1;
+    /* "--sslv2" option means SSLv2 only, disable all others */
+    case CURL_SSLVERSION_SSLv2:
+      ctx_options |= SSL_OP_NO_SSLv3;
+      ctx_options |= SSL_OP_NO_TLSv1;
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
-    ctx_options |= SSL_OP_NO_TLSv1_1;
-    ctx_options |= SSL_OP_NO_TLSv1_2;
+      ctx_options |= SSL_OP_NO_TLSv1_1;
+      ctx_options |= SSL_OP_NO_TLSv1_2;
 #ifdef TLS1_3_VERSION
-    ctx_options |= SSL_OP_NO_TLSv1_3;
+      ctx_options |= SSL_OP_NO_TLSv1_3;
 #endif
 #endif
-    break;
+      break;
 
-  case CURL_SSLVERSION_DEFAULT:
-  case CURL_SSLVERSION_TLSv1:
-  case CURL_SSLVERSION_TLSv1_0:
-  case CURL_SSLVERSION_TLSv1_1:
-  case CURL_SSLVERSION_TLSv1_2:
-  case CURL_SSLVERSION_TLSv1_3:
-    /* asking for any TLS version as the minimum, means no SSL versions
-       allowed */
-    ctx_options |= SSL_OP_NO_SSLv2;
-    ctx_options |= SSL_OP_NO_SSLv3;
-    result = set_ssl_version_min_max(&ctx_options, conn, sockindex);
-    if(result != CURLE_OK)
-       return result;
-    break;
-
-  case CURL_SSLVERSION_SSLv2:
-    ctx_options |= SSL_OP_NO_SSLv3;
-    ctx_options |= SSL_OP_NO_TLSv1;
+    /* "--sslv3" option means SSLv3 only, disable all others */
+    case CURL_SSLVERSION_SSLv3:
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+      SSL_CTX_set_min_proto_version(BACKEND->ctx, SSL3_VERSION);
+#endif
+      ctx_options |= SSL_OP_NO_SSLv2;
+      ctx_options |= SSL_OP_NO_TLSv1;
 #if OPENSSL_VERSION_NUMBER >= 0x1000100FL
-    ctx_options |= SSL_OP_NO_TLSv1_1;
-    ctx_options |= SSL_OP_NO_TLSv1_2;
+      ctx_options |= SSL_OP_NO_TLSv1_1;
+      ctx_options |= SSL_OP_NO_TLSv1_2;
 #ifdef TLS1_3_VERSION
-    ctx_options |= SSL_OP_NO_TLSv1_3;
+      ctx_options |= SSL_OP_NO_TLSv1_3;
 #endif
 #endif
-    break;
+      break;
 
-  default:
-    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-    return CURLE_SSL_CONNECT_ERROR;
+    /* "--tlsv<x.y>" options mean TLS >= version <x.y> */
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1: /* TLS >= version 1.0 */
+    case CURL_SSLVERSION_TLSv1_0: /* TLS >= version 1.0 */
+    case CURL_SSLVERSION_TLSv1_1: /* TLS >= version 1.1 */
+    case CURL_SSLVERSION_TLSv1_2: /* TLS >= version 1.2 */
+    case CURL_SSLVERSION_TLSv1_3: /* TLS >= version 1.3 */
+      /* asking for any TLS version as the minimum, means no SSL versions
+        allowed */
+      ctx_options |= SSL_OP_NO_SSLv2;
+      ctx_options |= SSL_OP_NO_SSLv3;
+      result = set_ssl_version_min_max(&ctx_options, conn, sockindex);
+      if(result != CURLE_OK)
+        return result;
+      break;
+
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
   }
 
   SSL_CTX_set_options(BACKEND->ctx, ctx_options);
