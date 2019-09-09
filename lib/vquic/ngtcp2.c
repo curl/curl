@@ -42,6 +42,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#define ENABLE_SSLKEYLOGFILE
+
 /* #define DEBUG_NGTCP2 */
 #define DEBUG_HTTP3
 #ifdef DEBUG_HTTP3
@@ -147,14 +149,37 @@ static void quic_settings(ngtcp2_settings *s,
   s->idle_timeout = QUIC_IDLE_TIMEOUT;
 }
 
-static FILE *keylog_file; /* not thread-safe */
+#ifdef ENABLE_SSLKEYLOGFILE
+static FILE *keylog_file_fp;
+/* This function copied from openssl.c ossl_keylog_callback */
 static void keylog_callback(const SSL *ssl, const char *line)
 {
   (void)ssl;
-  fputs(line, keylog_file);
-  fputc('\n', keylog_file);
-  fflush(keylog_file);
+
+  /* Using fputs here instead of fprintf since libcurl's fprintf replacement
+     may not be thread-safe. */
+  if(keylog_file_fp && line && *line) {
+    char stackbuf[256];
+    char *buf;
+    size_t linelen = strlen(line);
+
+    if(linelen <= sizeof(stackbuf) - 2)
+      buf = stackbuf;
+    else {
+      buf = malloc(linelen + 2);
+      if(!buf)
+        return;
+    }
+    memcpy(buf, line, linelen);
+    buf[linelen] = '\n';
+    buf[linelen + 1] = '\0';
+
+    fputs(buf, keylog_file_fp);
+    if(buf != stackbuf)
+      free(buf);
+  }
 }
+#endif /* ENABLE_SSLKEYLOGFILE */
 
 static int init_ngh3_conn(struct quicsocket *qs);
 
@@ -233,8 +258,10 @@ static SSL_QUIC_METHOD quic_method = {quic_set_encryption_secrets,
 
 static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
+#ifdef ENABLE_SSLKEYLOGFILE
+  char *keylog_file_name;
+#endif
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
-  const char *keylog_filename;
 
   SSL_CTX_set_min_proto_version(ssl_ctx, TLS1_3_VERSION);
   SSL_CTX_set_max_proto_version(ssl_ctx, TLS1_3_VERSION);
@@ -254,13 +281,29 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 
   SSL_CTX_set_quic_method(ssl_ctx, &quic_method);
 
-  keylog_filename = getenv("SSLKEYLOGFILE");
-  if(keylog_filename) {
-    keylog_file = fopen(keylog_filename, "wb");
-    if(keylog_file) {
-      SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
+#ifdef ENABLE_SSLKEYLOGFILE
+  if(!keylog_file_fp) {
+    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
+    if(keylog_file_name) {
+      keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
+      if(keylog_file_fp) {
+#ifdef WIN32
+        if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
+#else
+        if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
+#endif
+        {
+          fclose(keylog_file_fp);
+          keylog_file_fp = NULL;
+        }
+      }
+      Curl_safefree(keylog_file_name);
     }
   }
+  if(keylog_file_fp) {
+    SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
+  }
+#endif
 
   return ssl_ctx;
 }
