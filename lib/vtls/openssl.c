@@ -2240,6 +2240,7 @@ typedef uint32_t ctx_option_t;
 typedef long ctx_option_t;
 #endif
 
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) /* 1.1.0 */
 static CURLcode
 set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
                               struct connectdata *conn, int sockindex)
@@ -2314,6 +2315,7 @@ set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
   }
   return CURLE_OK;
 }
+#endif
 
 /* The "new session" callback must return zero if the session can be removed
  * or non-zero if the session has been put into the session cache.
