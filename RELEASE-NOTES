@@ -17,6 +17,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2019-5481: FTP-KRB double-free [64]
+ o CVE-2019-5482: TFTP small blocksize heap buffer overflow [65]
  o CI: remove duplicate configure flag for LGTM.com
  o CMake: remove needless newlines at end of gss variables
  o CMake: use platform dependent name for dlopen() library [62]
@@ -28,6 +30,7 @@ This release includes the following bugfixes:
  o CURLOPT_READFUNCTION.3: provide inline example
  o CURLOPT_SSL_VERIFYHOST: treat the value 1 as 2 [51]
  o Curl_addr2string: take an addrlen argument too [61]
+ o Curl_fillreadbuffer: avoid double-free trailer buf on error [66]
  o HTTP: use chunked Transfer-Encoding for HTTP_POST if size unknown [10]
  o alt-svc: add protocol version selection masking [31]
  o alt-svc: fix removal of expired cache entry [30]
@@ -44,6 +47,7 @@ This release includes the following bugfixes:
  o curl.h: add CURL_HTTP_VERSION_3 to the version enum
  o curl.h: fix outdated comment [23]
  o curl: cap the maximum allowed values for retry time arguments [13]
+ o curl: handle a libcurl build without netrc support [63]
  o curl: make use of CURLINFO_RETRY_AFTER when retrying [35]
  o curl: remove outdated comment [24]
  o curl: use .curlrc (with a dot) on Windows [52]
@@ -73,6 +77,7 @@ This release includes the following bugfixes:
  o netrc: make the code try ".netrc" on Windows [52]
  o nss: use TLSv1.3 as default if supported [39]
  o openssl: build warning free with boringssl [50]
+ o openssl: use SSL_CTX_set_<min|max>_proto_version() when available [68]
  o plan9: add support for running on Plan 9 [22]
  o progress: reset download/uploaded counter between transfers [12]
  o readwrite_data: repair setting the TIMER_STARTTRANSFER stamp [26]
@@ -84,10 +89,13 @@ This release includes the following bugfixes:
  o src/makefile: fix uncompressed hugehelp.c generation [19]
  o ssh-libssh: do not specify O_APPEND when not in append mode [7]
  o ssh: move code into vssh for SSH backends [53]
+ o sspi: fix memory leaks [67]
  o tests: Replace outdated test case numbering documentation [43]
+ o tftp: return error when packet is too small for options
  o timediff: make it 64 bit (if possible) even with 32 bit time_t [20]
  o travis: reduce number of torture tests in 'coverage' [42]
  o url: make use of new HTTP version if alt-svc has one [16]
+ o urlapi: verify the IPv6 numerical address [69]
  o urldata: avoid 'generic', use dedicated pointers [57]
  o vauth: Use CURLE_AUTH_ERROR for auth function errors [41]
 
@@ -100,15 +108,16 @@ advice from friends like these:
 
   Alessandro Ghedini, Alex Mayorga, Amit Katyal, Balazs Kovacsics,
   Brad Spencer, Brandon Dong, Carlo Marcelo Arenas Belón, Christopher Head,
-  Daniel Gustafsson, Daniel Stenberg, Dominik Hölzl, Eric Wong, Felix Hädicke,
-  Gergely Nagy, Gisle Vanem, Igor Makarov, Ironbars13 on github, Jason Lee,
-  Jeremy Lainé, Jonathan Cardoso Machado, Junho Choi, Kamil Dudka,
-  Kyle Abramowitz, Kyohei Kadota, Lance Ware, Marcel Raad, Max Dymond,
-  Michael Lee, Michal Čaplygin, Mike Crowe, niallor on github, osabc on github,
-  patnyb on github, Patrick Monnerat, Peter Wu, Ray Satiro, Rolf Eike Beer,
-  Steve Holme, Tatsuhiro Tsujikawa, The Infinnovation team, Tom van der Woerdt,
-  Yiming Jing,
-  (42 contributors)
+  Clément Notin, codesniffer13 on github, Daniel Gustafsson, Daniel Stenberg,
+  Dominik Hölzl, Eric Wong, Felix Hädicke, Gergely Nagy, Gisle Vanem,
+  Igor Makarov, Ironbars13 on github, Jason Lee, Jeremy Lainé,
+  Jonathan Cardoso Machado, Junho Choi, Kamil Dudka, Kyle Abramowitz,
+  Kyohei Kadota, Lance Ware, Marcel Raad, Max Dymond, Michael Lee,
+  Michal Čaplygin, migueljcrum on github, Mike Crowe, niallor on github,
+  osabc on github, patnyb on github, Patrick Monnerat, Peter Wu, Ray Satiro,
+  Rolf Eike Beer, Steve Holme, Tatsuhiro Tsujikawa, The Infinnovation team,
+  Thomas Vegas, Tom van der Woerdt, Yiming Jing,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -176,3 +185,10 @@ References to bug reports and discussions on issues:
  [60] = https://curl.haxx.se/bug/?i=4286
  [61] = https://curl.haxx.se/bug/?i=4283
  [62] = https://curl.haxx.se/bug/?i=4279
+ [63] = https://curl.haxx.se/bug/?i=4302
+ [64] = https://curl.haxx.se/docs/CVE-2019-5481.html
+ [65] = https://curl.haxx.se/docs/CVE-2019-5482.html
+ [66] = https://curl.haxx.se/bug/?i=4307
+ [67] = https://curl.haxx.se/bug/?i=4299
+ [68] = https://curl.haxx.se/bug/?i=4304
+ [69] = https://curl.haxx.se/bug/?i=4315
