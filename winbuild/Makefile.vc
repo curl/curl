@@ -59,6 +59,7 @@ CFGSET=true
 !MESSAGE   ENABLE_WINSSL=<yes or no>      - Enable native Windows SSL support, defaults to yes
 !MESSAGE   ENABLE_OPENSSL_AUTO_LOAD_CONFIG=<yes or no>
 !MESSAGE                                  - Whether the OpenSSL configuration will be loaded automatically, defaults to yes
+!MESSAGE   ENABLE_UNICODE=<yes or no>     - Enable UNICODE support, defaults to no
 !MESSAGE   GEN_PDB=<yes or no>            - Generate Program Database (debug symbols for release build)
 !MESSAGE   DEBUG=<yes or no>              - Debug builds
 !MESSAGE   MACHINE=<x86 or x64>           - Target architecture (default x64 on AMD64, x86 on others)
@@ -144,6 +145,14 @@ ENABLE_OPENSSL_AUTO_LOAD_CONFIG = true
 !ELSEIF "$(ENABLE_OPENSSL_AUTO_LOAD_CONFIG)"=="no"
 !UNDEF ENABLE_OPENSSL_AUTO_LOAD_CONFIG
 ENABLE_OPENSSL_AUTO_LOAD_CONFIG = false
+!ENDIF
+
+!IFNDEF ENABLE_UNICODE
+USE_UNICODE = false
+!ELSEIF "$(ENABLE_UNICODE)"=="yes"
+USE_UNICODE = true
+!ELSEIF "$(ENABLE_UNICODE)"=="no"
+USE_UNICODE = false
 !ENDIF
 
 CONFIG_NAME_LIB = libcurl
@@ -277,6 +286,7 @@ $(MODE):
 	@SET USE_IPV6=$(USE_IPV6)
 	@SET USE_SSPI=$(USE_SSPI)
 	@SET USE_WINSSL=$(USE_WINSSL)
+	@SET USE_UNICODE=$(USE_UNICODE)
 # compatibility bit
 	@SET WITH_NGHTTP2=$(WITH_NGHTTP2)
 
