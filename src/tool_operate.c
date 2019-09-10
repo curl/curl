@@ -1926,15 +1926,19 @@ static long all_added; /* number of easy handles currently added */
 
 /*
  * add_parallel_transfers() sets 'morep' to TRUE if there are more transfers
- * to add even after this call returns.
+ * to add even after this call returns. sets 'addedp' to TRUE if one or more
+ * transfers were added.
  */
 static int add_parallel_transfers(struct GlobalConfig *global,
                                   CURLM *multi,
-                                  bool *morep)
+                                  bool *morep,
+                                  bool *addedp)
 {
   struct per_transfer *per;
   CURLcode result;
   CURLMcode mcode;
+  *addedp = FALSE;
+  *morep = FALSE;
   for(per = transfers; per && (all_added < global->parallel_max);
       per = per->next) {
     if(per->added)
@@ -1954,6 +1958,7 @@ static int add_parallel_transfers(struct GlobalConfig *global,
       return CURLE_OUT_OF_MEMORY;
     per->added = TRUE;
     all_added++;
+    *addedp = TRUE;
   }
   *morep = per ? TRUE : FALSE;
   return CURLE_OK;
@@ -1969,12 +1974,14 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   int still_running = 1;
   struct timeval start = tvnow();
   bool more_transfers;
+  bool added_transfers;
 
   multi = curl_multi_init();
   if(!multi)
     return CURLE_OUT_OF_MEMORY;
 
-  result = add_parallel_transfers(global, multi, &more_transfers);
+  result = add_parallel_transfers(global, multi,
+                                  &more_transfers, &added_transfers);
   if(result)
     return result;
 
@@ -2008,9 +2015,14 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           (void)del_transfer(ended);
         }
       } while(msg);
-      if(removed)
+      if(removed) {
         /* one or more transfers completed, add more! */
-        (void)add_parallel_transfers(global, multi, &more_transfers);
+        (void)add_parallel_transfers(global, multi, &more_transfers,
+                                     &added_transfers);
+        if(added_transfers)
+          /* we added new ones, make sure the loop doesn't exit yet */
+          still_running = 1;
+      }
     }
   }
 
