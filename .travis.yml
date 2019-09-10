@@ -111,20 +111,20 @@ matrix:
                       - *common_packages
                       - libpsl-dev
                       - libbrotli-dev
-        - os: linux
-          compiler: gcc
-          dist: xenial
-          env:
-              - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                  packages:
-                      - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
+        #- os: linux
+        #  compiler: gcc
+        #  dist: xenial
+        #  env:
+        #      - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
+        #      - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+        #  addons:
+        #      apt:
+        #          sources:
+        #              - *common_sources
+        #          packages:
+        #              - *common_packages
+        #              - libpsl-dev
+        #              - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
