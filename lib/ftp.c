@@ -877,7 +877,9 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
     if((conn->data->set.ftp_filemethod == FTPFILE_NOCWD) && !ftpc->cwdcount)
       /* No CWD necessary */
       result = ftp_state_mdtm(conn);
-    else if(conn->bits.reuse && ftpc->entrypath) {
+    else if(conn->bits.reuse && ftpc->entrypath &&
+            /* no need to go to entrypath when we have an absolute path */
+            !(ftpc->dirdepth && ftpc->dirs[0][0] == '/')) {
       /* This is a re-used connection. Since we change directory to where the
          transfer is taking place, we must first get back to the original dir
          where we ended up after login: */
