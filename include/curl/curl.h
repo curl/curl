@@ -874,8 +874,9 @@ typedef enum {
 typedef enum {
   CURLFTPMETHOD_DEFAULT,   /* let libcurl pick */
   CURLFTPMETHOD_MULTICWD,  /* single CWD operation for each path part */
-  CURLFTPMETHOD_NOCWD,     /* no CWD at all */
+  CURLFTPMETHOD_NOCWD,     /* no CWD except when working dir is changed to entry path */
   CURLFTPMETHOD_SINGLECWD, /* one CWD to full dir, then work on file */
+  CURLFTPMETHOD_FULLPATH,  /* no CWD ever: requires full paths relative to server root */
   CURLFTPMETHOD_LAST       /* not an option, never use */
 } curl_ftpmethod;
 
