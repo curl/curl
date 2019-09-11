@@ -105,6 +105,8 @@ extern const digest_params SHA256_DIGEST_PARAMS[1];
  * Counts the resource in the metalinkfile.
  */
 int count_next_metalink_resource(metalinkfile *mlfile);
+
+void delete_metalinkfile(metalinkfile *mlfile);
 void clean_metalink(struct OperationConfig *config);
 
 /*
