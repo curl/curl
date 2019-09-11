@@ -244,8 +244,8 @@ int init_thread_sync_data(struct thread_data * td,
   Curl_mutex_init(tsd->mtx);
 
 #ifdef HAVE_SOCKETPAIR
-  /* create socket pair */
-  if(socketpair(AF_LOCAL, SOCK_STREAM, 0, &tsd->sock_pair[0]) < 0) {
+  /* create socket pair, avoid AF_LOCAL since it doesn't build on Solaris */
+  if(socketpair(AF_UNIX, SOCK_STREAM, 0, &tsd->sock_pair[0]) < 0) {
     tsd->sock_pair[0] = CURL_SOCKET_BAD;
     tsd->sock_pair[1] = CURL_SOCKET_BAD;
     goto err_exit;
