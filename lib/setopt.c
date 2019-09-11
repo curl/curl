@@ -315,7 +315,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Parse the $HOME/.netrc file
      */
     arg = va_arg(param, long);
-    if((arg < CURL_NETRC_IGNORED) || (arg > CURL_NETRC_REQUIRED))
+    if((arg < CURL_NETRC_IGNORED) || (arg >= CURL_NETRC_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.use_netrc = (enum CURL_NETRC_OPTION)arg;
     break;
@@ -342,7 +342,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * curl/curl.h header file.
      */
     arg = va_arg(param, long);
-    if((arg < CURL_TIMECOND_NONE) || (arg > CURL_TIMECOND_LASTMOD))
+    if((arg < CURL_TIMECOND_NONE) || (arg >= CURL_TIMECOND_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.timecondition = (curl_TimeCond)arg;
     break;
@@ -818,7 +818,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(arg >= CURL_HTTP_VERSION_2)
       return CURLE_UNSUPPORTED_PROTOCOL;
 #else
-    if(arg > CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
+    if(arg >= CURL_HTTP_VERSION_LAST)
       return CURLE_UNSUPPORTED_PROTOCOL;
     if(arg == CURL_HTTP_VERSION_NONE)
       arg = CURL_HTTP_VERSION_2TLS;
@@ -1109,7 +1109,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * How do access files over FTP.
      */
     arg = va_arg(param, long);
-    if((arg < CURLFTPMETHOD_DEFAULT) || (arg > CURLFTPMETHOD_SINGLECWD))
+    if((arg < CURLFTPMETHOD_DEFAULT) || (arg >= CURLFTPMETHOD_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ftp_filemethod = (curl_ftpfile)arg;
     break;
@@ -1136,7 +1136,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_FTP_SSL_CCC:
     arg = va_arg(param, long);
-    if((arg < CURLFTPSSL_CCC_NONE) || (arg > CURLFTPSSL_CCC_ACTIVE))
+    if((arg < CURLFTPSSL_CCC_NONE) || (arg >= CURLFTPSSL_CCC_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ftp_ccc = (curl_ftpccc)arg;
     break;
@@ -1164,7 +1164,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set a specific auth for FTP-SSL transfers.
      */
     arg = va_arg(param, long);
-    if((arg < CURLFTPAUTH_DEFAULT) || (arg > CURLFTPAUTH_TLS))
+    if((arg < CURLFTPAUTH_DEFAULT) || (arg >= CURLFTPAUTH_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ftpsslauth = (curl_ftpauth)arg;
     break;
@@ -2123,7 +2123,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Make transfers attempt to use SSL/TLS.
      */
     arg = va_arg(param, long);
-    if((arg < CURLUSESSL_NONE) || (arg > CURLUSESSL_ALL))
+    if((arg < CURLUSESSL_NONE) || (arg >= CURLUSESSL_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.use_ssl = (curl_usessl)arg;
     break;
