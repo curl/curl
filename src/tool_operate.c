@@ -2073,6 +2073,10 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     result = post_transfer(global, share, per, result, &retry);
     if(retry)
       continue;
+
+    /* Release metalink related resources here */
+    delete_metalinkfile(per->mlfile);
+
     per = del_transfer(per);
 
     /* Bail out upon critical errors or --fail-early */

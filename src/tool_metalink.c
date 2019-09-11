@@ -965,7 +965,7 @@ static void delete_metalink_resource(metalink_resource *res)
   Curl_safefree(res);
 }
 
-static void delete_metalinkfile(metalinkfile *mlfile)
+void delete_metalinkfile(metalinkfile *mlfile)
 {
   metalink_resource *res;
   if(mlfile == NULL) {
