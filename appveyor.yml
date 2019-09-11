@@ -94,6 +94,12 @@ environment:
         COMPILER_PATH: "C:\\MinGW\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: winbuild
+        OPENSSL: ON
+        WINSSL: OFF
+        TESTING: OFF
+        MSYS2_ARG_CONV_EXCL: "/*"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: VisualStudioSolution
         PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
@@ -124,7 +130,14 @@ build_script:
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
         .\\generate.bat %VC_VERSION% &&
-        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" ))
+        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" ) else (
+      if %BUILD_SYSTEM%==winbuild (
+        call buildconf.bat &&
+        cd winbuild &&
+        call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
+        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
+        nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64
+      )))
 
 test_script:
     - if %TESTING%==ON (
