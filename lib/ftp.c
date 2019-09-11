@@ -3183,7 +3183,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
       ftpc->prevpath = NULL; /* no path remembering */
     }
     else {
-      size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
+      size_t flen = ftpc->file?strlen(ftpc->file):0; /* file already "raw" */
       size_t dlen = strlen(path)-flen;
       if(!ftpc->cwdfail) {
         ftpc->prevmethod = data->set.ftp_filemethod;
@@ -3209,7 +3209,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
       }
     }
   }
-  
+
   /* free the dir tree and file parts */
   freedirs(ftpc);
 
