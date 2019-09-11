@@ -1448,7 +1448,8 @@ static CURLcode ftp_state_list(struct connectdata *conn)
   const char *inpath = ftp->path;
 
   lstArg = NULL;
-  if((data->set.ftp_filemethod == FTPFILE_NOCWD) &&
+  if((data->set.ftp_filemethod == FTPFILE_NOCWD ||
+      data->set.ftp_filemethod == FTPFILE_FULLPATH) &&
      inpath && inpath[0] && strchr(inpath, '/')) {
     size_t n = strlen(inpath);
 
@@ -3153,9 +3154,6 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     break;
   }
 
-  /* now store a copy of the directory we are in */
-  free(ftpc->prevpath);
-
   if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
       Curl_set_in_callback(data, true);
@@ -3165,42 +3163,53 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     ftpc->known_filesize = -1;
   }
 
-  if(!result)
-    /* get the "raw" path */
-    result = Curl_urldecode(data, ftp->path, 0, &path, NULL, TRUE);
-  if(result) {
-    /* We can limp along anyway (and should try to since we may already be in
-     * the error path) */
-    ftpc->ctl_valid = FALSE; /* mark control connection as bad */
-    connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
-    ftpc->prevpath = NULL; /* no path remembering */
+  if(data->set.ftp_filemethod == FTPFILE_FULLPATH) {
+    /* no CWDs happened => remember old working dir */
+    /* ftpc->prevmethod = */
+    /* ftpc->prevpath = */
   }
   else {
-    size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
-    size_t dlen = strlen(path)-flen;
-    if(!ftpc->cwdfail) {
-      ftpc->prevmethod = data->set.ftp_filemethod;
-      if(dlen && (data->set.ftp_filemethod != FTPFILE_NOCWD)) {
-        ftpc->prevpath = path;
-        if(flen)
-          /* if 'path' is not the whole string */
-          ftpc->prevpath[dlen] = 0; /* terminate */
-      }
-      else {
-        free(path);
-        /* we never changed dir */
-        ftpc->prevpath = strdup("");
-        if(!ftpc->prevpath)
-          return CURLE_OUT_OF_MEMORY;
-      }
-      if(ftpc->prevpath)
-        infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
+    /* now store a copy of the directory we are in */
+    free(ftpc->prevpath);
+
+    if(!result)
+      /* get the "raw" path */
+      result = Curl_urldecode(data, ftp->path, 0, &path, NULL, TRUE);
+    if(result) {
+      /* We can limp along anyway (and should try to since we may already be in
+       * the error path) */
+      ftpc->ctl_valid = FALSE; /* mark control connection as bad */
+      connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
+      ftpc->prevpath = NULL; /* no path remembering */
     }
     else {
-      ftpc->prevpath = NULL; /* no path */
-      free(path);
+      size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
+      size_t dlen = strlen(path)-flen;
+      if(!ftpc->cwdfail) {
+        ftpc->prevmethod = data->set.ftp_filemethod;
+        if(dlen && (data->set.ftp_filemethod != FTPFILE_NOCWD)) {
+          ftpc->prevpath = path;
+          if(flen)
+            /* if 'path' is not the whole string */
+            ftpc->prevpath[dlen] = 0; /* terminate */
+        }
+        else {
+          free(path);
+          /* we never changed dir */
+          ftpc->prevpath = strdup("");
+          if(!ftpc->prevpath)
+            return CURLE_OUT_OF_MEMORY;
+        }
+        if(ftpc->prevpath)
+          infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
+      }
+      else {
+        ftpc->prevpath = NULL; /* no path */
+        free(path);
+      }
     }
   }
+  
   /* free the dir tree and file parts */
   freedirs(ftpc);
 
@@ -4093,6 +4102,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
   switch(data->set.ftp_filemethod) {
   case FTPFILE_NOCWD:
+  case FTPFILE_FULLPATH:
     /* fastest, but less standard-compliant */
 
     /*
@@ -4238,7 +4248,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
   ftpc->cwddone = FALSE; /* default to not done */
 
-  if(ftpc->prevpath) {
+  if(data->set.ftp_filemethod == FTPFILE_FULLPATH)
+    ftpc->cwddone = TRUE;
+  else if(ftpc->prevpath) {
     /* prevpath is "raw" so we convert the input path before we compare the
        strings */
     size_t dlen;
