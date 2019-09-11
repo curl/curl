@@ -93,8 +93,10 @@ struct ftp_wc {
 typedef enum {
   FTPFILE_MULTICWD  = 1, /* as defined by RFC1738 */
   FTPFILE_NOCWD     = 2, /* use SIZE / RETR / STOR on the full path */
-  FTPFILE_SINGLECWD = 3  /* make one CWD, then SIZE / RETR / STOR on the
+  FTPFILE_SINGLECWD = 3,  /* make one CWD, then SIZE / RETR / STOR on the
                             file */
+  FTPFILE_FULLPATH = 4 /*  no CWD ever: requires full paths relative to
+                            server root */
 } curl_ftpfile;
 
 /* This FTP struct is used in the Curl_easy. All FTP data that is
