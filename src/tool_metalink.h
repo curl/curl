@@ -160,6 +160,7 @@ void metalink_cleanup(void);
 #else /* USE_METALINK */
 
 #define count_next_metalink_resource(x)  0
+#define delete_metalinkfile(x)  (void)x
 #define clean_metalink(x)  (void)x
 
 /* metalink_cleanup() takes no arguments */
