@@ -65,7 +65,7 @@ Build curl
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure -with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
 
 ## Running
