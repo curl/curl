@@ -59,7 +59,11 @@ struct getout *new_getout(struct OperationConfig *config)
 ParameterError file2string(char **bufp, FILE *file)
 {
   char *ptr;
-  char *string = NULL;
+  size_t alloc = 512;
+  size_t alloc_needed;
+  char *string = malloc(alloc);
+  if(!string)
+    return PARAM_NO_MEM;
 
   if(file) {
     char buffer[256];
@@ -73,12 +77,24 @@ ParameterError file2string(char **bufp, FILE *file)
       if(ptr)
         *ptr = '\0';
       buflen = strlen(buffer);
-      ptr = realloc(string, stringlen + buflen + 1);
-      if(!ptr) {
-        Curl_safefree(string);
-        return PARAM_NO_MEM;
+      alloc_needed = stringlen + buflen + 1;
+      if(alloc < alloc_needed) {
+#if SIZEOF_SIZE_T < 8
+        if(alloc >= (size_t)SIZE_T_MAX/2) {
+          Curl_safefree(string);
+          return PARAM_NO_MEM;
+        }
+#endif
+        /* doubling is enough since the string to add is always max 256 bytes
+           and the alloc size start at 512 */
+        alloc *= 2;
+        ptr = realloc(string, alloc);
+        if(!ptr) {
+          Curl_safefree(string);
+          return PARAM_NO_MEM;
+        }
+        string = ptr;
       }
-      string = ptr;
       strcpy(string + stringlen, buffer);
       stringlen += buflen;
     }
