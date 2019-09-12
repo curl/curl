@@ -135,7 +135,7 @@ build_script:
         cd winbuild &&
         call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
         call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
-        nmake /f Makefile.vc mode=dll VC=15 WITH_SSL=dll MACHINE=x64
+        nmake /f Makefile.vc mode=dll VC=15 SSL_PATH=%OPENSSL% WITH_SSL=dll MACHINE=x64
       )))
 
 test_script:
