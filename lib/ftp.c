@@ -1453,7 +1453,8 @@ static CURLcode ftp_state_list(struct connectdata *conn)
   if((data->set.ftp_filemethod == FTPFILE_NOCWD) &&
      inpath && inpath[0] && strchr(inpath, '/')) {
     /* chop off the file part if format is dir/file
-       otherwise remove the trailing slash for dir/dir/ */
+       otherwise remove the trailing slash for dir/dir/
+       and full paths like %2f/ except for /        */
     size_t n = strrchr(inpath, '/') - inpath;
     if(n == 0)
       ++n;
