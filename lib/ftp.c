@@ -1452,14 +1452,12 @@ static CURLcode ftp_state_list(struct connectdata *conn)
   lstArg = NULL;
   if((data->set.ftp_filemethod == FTPFILE_NOCWD) &&
      inpath && inpath[0] && strchr(inpath, '/')) {
-    size_t n = strlen(inpath);
+    /* chop off the file part if format is dir/file
+       otherwise remove the trailing slash for dir/dir/ */
+    size_t n = strrchr(inpath, '/') - inpath;
+    if(n == 0)
+      ++n;
 
-    /* Check if path does not end with /, as then we cut off the file part */
-    if(inpath[n - 1] != '/') {
-      /* chop off the file part if format is dir/dir/file */
-      slashPos = strrchr(inpath, '/');
-      n = slashPos - inpath;
-    }
     result = Curl_urldecode(data, inpath, n, &lstArg, NULL, TRUE);
     if(result)
       return result;
