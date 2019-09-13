@@ -327,6 +327,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     break;
 #endif
+#ifdef USE_HSTS
+  case CURLOPT_HSTS_PRELOAD_FILE:
+    /*
+     * Use this file to preload the HSTS lookup database
+     */
+    result = Curl_setstropt(&data->set.str[STRING_HSTS_PRELOAD_FILE],
+                            va_arg(param, char *));
+    break;
+#endif
   case CURLOPT_TRANSFERTEXT:
     /*
      * This option was previously named 'FTPASCII'. Renamed to work with

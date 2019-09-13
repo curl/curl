@@ -1927,6 +1927,9 @@ typedef enum {
   /* SASL authorisation identity */
   CINIT(SASL_AUTHZID, STRINGPOINT, 289),
 
+  /* Set this option to the file you want to preload hsts data from */
+  CINIT(HSTS_PRELOAD_FILE, STRINGPOINT, 290),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

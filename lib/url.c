@@ -625,6 +625,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
 #ifdef USE_HSTS
     {
+      char *hsts_preload = NULL;
       hsts_status_t hsts_status = HSTS_ERR_INPUT_FAILURE;
 #if DEBUGBUILD
       char *debug_hsts_file = curl_getenv("CURL_HSTSFILE");
@@ -636,10 +637,17 @@ CURLcode Curl_open(struct Curl_easy **curl)
       }
       else
 #endif
-      hsts_status = hsts_load_file(HSTS_FILE, &data->set.hsts);
-      if(hsts_status < HSTS_SUCCESS) {
-        fprintf(stderr, "Failed loading HSTS database, error code %d!\n",
-                hsts_status);
+      hsts_preload = data->set.str[STRING_HSTS_PRELOAD_FILE];
+#ifdef HSTS_PRELOAD_FILE
+      if(!hsts_preload)
+        hsts_preload = HSTS_PRELOAD_FILE
+#endif
+      if(hsts_preload) {
+        hsts_status = hsts_load_file(hsts_preload, &data->set.hsts);
+        if(hsts_status < HSTS_SUCCESS) {
+          fprintf(stderr, "Failed loading HSTS preload file, error code %d!\n",
+                  hsts_status);
+        }
       }
     }
 #endif

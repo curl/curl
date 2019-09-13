@@ -3741,15 +3741,13 @@ if test X"$OPT_HSTS" != Xno; then
        fi
     fi
 
-    AC_ARG_WITH(hsts-file,
-    AC_HELP_STRING([--with-hsts-file=FILE],
+    AC_ARG_WITH(hsts-preload-file,
+    AC_HELP_STRING([--with-hsts-preload-file=FILE],
                    [Path to hsts.dafsa file]),
-                   [ HSTS_FILE="$withval" ] )
-    if test -n "$HSTS_FILE" ; then
-      AC_DEFINE_UNQUOTED(HSTS_FILE, "$HSTS_FILE",
+                   [ HSTS_PRELOAD_FILE="$withval" ] )
+    if test -n "$HSTS_PRELOAD_FILE" ; then
+      AC_DEFINE_UNQUOTED(HSTS_PRELOAD_FILE, "$HSTS_PRELOAD_FILE",
                          [Path to hsts.dafsa file] )
-    else
-      AC_MSG_ERROR([When enabling HSTS, you also need to specify --with-hsts-file pointing to the hsts.dafsa file])
     fi
   else
     dnl no hsts, revert back to clean variables
@@ -4898,7 +4896,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Alt-svc:          ${curl_altsvc_msg}
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
-  HSTS:             ${curl_hsts_msg} (using ${HSTS_FILE})
+  HSTS:             ${curl_hsts_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])

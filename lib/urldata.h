@@ -1513,6 +1513,9 @@ enum dupstring {
 #ifndef CURL_DISABLE_PROXY
   STRING_TEMP_URL,              /* temp URL storage for proxy use */
 #endif
+#ifdef USE_HSTS
+  STRING_HSTS_PRELOAD_FILE,     /* file to preload hsts info from */
+#endif
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
