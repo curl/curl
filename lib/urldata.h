@@ -259,6 +259,7 @@ struct ssl_config_data {
   BIT(no_partialchain); /* don't accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
+  BIT(native_ca_store); /* use the native ca store of operating system */
 };
 
 struct ssl_general_config {
