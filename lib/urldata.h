@@ -222,6 +222,7 @@ struct ssl_primary_config {
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
+  char *pinned_key;
   bit verifypeer:1;      /* set TRUE if this is desired */
   bit verifyhost:1;      /* set TRUE if CN/SAN must match hostname */
   bit verifystatus:1;    /* set TRUE if certificate status must be checked */
