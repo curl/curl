@@ -132,6 +132,7 @@ build_script:
         .\\generate.bat %VC_VERSION% &&
         msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" ) else (
       if %BUILD_SYSTEM%==winbuild (
+        call buildconf.bat &&
         cd winbuild &&
         call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
         call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
