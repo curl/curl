@@ -55,6 +55,10 @@ offline distribution points for those SSL backends where such behavior is
 present. This option is only supported for Schannel (the native Windows SSL
 library). If combined with \fICURLSSLOPT_NO_REVOKE\fP, the latter takes
 precedence. (Added in 7.70.0)
+.IP CURLSSLOPT_NATIVE_CA
+Tell libcurl to use the operating system's native CA store for certificate
+verifiction. Works only on Windows when built to use OpenSSL. This option
+overrides \fICURLOPT_CAINFO(3)\fP if both are set. (Added in 7.71.0)
 .SH DEFAULT
 0
 .SH PROTOCOLS

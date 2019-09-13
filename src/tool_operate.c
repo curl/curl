@@ -1905,7 +1905,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           long mask = (config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
                       (config->ssl_revoke_best_effort ?
                        CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
+                      (config->native_ca_store ?
+                       CURLSSLOPT_NATIVE_CA : 0) |
                       (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
+
           if(mask)
             my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);
         }
@@ -2332,6 +2335,14 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
       else {
         result = FindWin32CACert(config, tls_backend_info->backend,
                                  "curl-ca-bundle.crt");
+#if defined(USE_WIN32_CRYPTO)
+        if(!config->cacert && !config->capath) {
+          /* user, and environement did not specify any ca file or path
+             and there is no "curl-ca-bundle.crt" file in standard path
+             so the only possible solution is using the windows ca store */
+          config->native_ca_store = TRUE;
+        }
+#endif
       }
 #endif
     }
