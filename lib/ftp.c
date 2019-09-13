@@ -1446,20 +1446,19 @@ static CURLcode ftp_state_list(struct connectdata *conn)
      The other ftp_filemethods will CWD into dir/dir/ first and
      then just do LIST (in that case: nothing to do here)
   */
-  char *cmd, *lstArg, *slashPos;
+  char *cmd, *lstArg;
   const char *inpath = ftp->path;
 
   lstArg = NULL;
   if((data->set.ftp_filemethod == FTPFILE_NOCWD) &&
      inpath && inpath[0] && strchr(inpath, '/')) {
-    size_t n = strlen(inpath);
+    /* chop off the file part if format is dir/file
+       otherwise remove the trailing slash for dir/dir/
+       and full paths like %2f/ except for /        */
+    size_t n = strrchr(inpath, '/') - inpath;
+    if(n == 0)
+      ++n;
 
-    /* Check if path does not end with /, as then we cut off the file part */
-    if(inpath[n - 1] != '/') {
-      /* chop off the file part if format is dir/dir/file */
-      slashPos = strrchr(inpath, '/');
-      n = slashPos - inpath;
-    }
     result = Curl_urldecode(data, inpath, n, &lstArg, NULL, TRUE);
     if(result)
       return result;

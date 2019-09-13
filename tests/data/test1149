@@ -57,7 +57,7 @@ TYPE A
 LIST
 CWD /
 EPSV
-LIST list/this/path/1149/
+LIST list/this/path/1149
 QUIT
 </protocol>
 </verify>

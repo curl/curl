@@ -49,9 +49,9 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE A
-LIST /list/this/path/1010/
+LIST /list/this/path/1010
 EPSV
-LIST /list/this/path/1010/
+LIST /list/this/path/1010
 QUIT
 </protocol>
 </verify>
