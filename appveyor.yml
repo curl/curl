@@ -98,7 +98,7 @@ environment:
         BUILD_SYSTEM: winbuild
         OPENSSL: ON
         WINSSL: OFF
-        COMPILER_PATH: "C:\\MinGW\\bin"
+        TESTING: OFF
         MSYS2_ARG_CONV_EXCL: "/*"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: VisualStudioSolution
