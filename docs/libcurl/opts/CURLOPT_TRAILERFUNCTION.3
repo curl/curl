@@ -21,15 +21,15 @@
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TRAILERFUNCTION 3 "14 Aug 2018" "libcurl 7.64.0" "curl_easy_setopt options"
-.SH NAME:
+.SH NAME
 CURLOPT_TRAILERFUNCTION \- Set callback for sending trailing headers
-.SH SYNOPSIS:
+.SH SYNOPSIS
 #include <curl.h>
 
 int curl_trailer_callback(struct curl_slist ** list, void *userdata);
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERFUNCTION, curl_trailer_callback *func);
-.SH DESCRIPTION:
+.SH DESCRIPTION
 Pass a pointer to a callback function.
 
 This callback function will be called once right before sending the final
@@ -56,11 +56,11 @@ trailers or to abort the request.
 
 If you set this option to NULL, then the transfer proceeds as usual
 without any interruptions.
-.SH DEFAULT:
+.SH DEFAULT
 NULL
-.SH PROTOCOLS:
+.SH PROTOCOLS
 HTTP
-.SH EXAMPLE:
+.SH EXAMPLE
 #include <curl/curl.h>
 
 static int trailer_cb(struct curl_slist **tr, void *data)
@@ -95,7 +95,7 @@ if(curl) {
 
   curl_slist_free_all(headers);
 }
-.SH AVAILABILITY:
+.SH AVAILABILITY
 This option was added in curl 7.64.0 and is present if HTTP support is enabled
 .SH "SEE ALSO"
 .BR CURLOPT_TRAILERDATA "(3), "
