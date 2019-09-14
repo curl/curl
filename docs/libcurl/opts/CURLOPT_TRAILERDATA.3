@@ -21,19 +21,19 @@
 .\" **************************************************************************
 .\"
 .TH CURLOPT_TRAILERDATA 3 "14 Aug 2018" "libcurl 7.64.0" "curl_easy_setopt options"
-.SH NAME:
+.SH NAME
 CURLOPT_TRAILERDATA \- Custom pointer passed to the trailing headers callback
-.SH SYNOPSIS:
+.SH SYNOPSIS
 #include <curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TRAILERDATA, void *userdata);
 .SH DESCRIPTION:
 Data pointer to be passed to the HTTP trailer callback function.
-.SH DEFAULT:
+.SH DEFAULT
 NULL
-.SH PROTOCOLS:
+.SH PROTOCOLS
 HTTP
-.SH EXAMPLE:
+.SH EXAMPLE
 .nf
 /* Assuming we have a CURL handle in the hndl variable. */
 
@@ -43,7 +43,7 @@ curl_easy_setopt(hndl, CURLOPT_TRAILERDATA, &data);
 .fi
 
 A more complete example can be found in examples/http_trailers.html
-.SH AVAILABILITY:
+.SH AVAILABILITY
 This option was added in curl 7.64.0 and is present if HTTP support is enabled
 .SH "SEE ALSO"
 .BR CURLOPT_TRAILERFUNCTION "(3), "
