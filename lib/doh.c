@@ -80,11 +80,18 @@ UNITTEST DOHcode doh_encode(const char *host,
                             size_t len,  /* buffer size */
                             size_t *olen) /* output length */
 {
-  size_t hostlen = strlen(host);
+  const size_t hostlen = strlen(host);
   unsigned char *orig = dnsp;
   const char *hostp = host;
 
-  if(len < (12 + hostlen + 4))
+  /* The expected output length does not depend on the number of dots within
+   * the host name. It will always be two more than the length of the host
+   * name, one for the size and one trailing null. In case there are dots,
+   * each dot adds one size but removes the need to store the dot, net zero.
+   */
+  const size_t expected_len = 12 + ( 1 + hostlen + 1) + 4;
+
+  if(len < expected_len)
     return DOH_TOO_SMALL_BUFFER;
 
   *dnsp++ = 0; /* 16 bit id */
@@ -132,6 +139,7 @@ UNITTEST DOHcode doh_encode(const char *host,
   *dnsp++ = DNS_CLASS_IN; /* IN - "the Internet" */
 
   *olen = dnsp - orig;
+  assert(*olen == expected_len);
   return DOH_OK;
 }
 
