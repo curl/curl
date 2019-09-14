@@ -16,7 +16,7 @@ none
 unittest
 </features>
  <name>
-unit test for doh_encode and doh_decode
+unit test for doh_encode
  </name>
 <tool>
 unit1655

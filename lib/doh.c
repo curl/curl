@@ -74,6 +74,8 @@ static const char *doh_strerror(DOHcode code)
 #define UNITTEST static
 #endif
 
+/* @unittest 1655
+ */
 UNITTEST DOHcode doh_encode(const char *host,
                             DNStype dnstype,
                             unsigned char *dnsp, /* buffer */
@@ -139,7 +141,10 @@ UNITTEST DOHcode doh_encode(const char *host,
   *dnsp++ = DNS_CLASS_IN; /* IN - "the Internet" */
 
   *olen = dnsp - orig;
-  assert(*olen == expected_len);
+
+  /* verify that our assumption of length is valid, since
+   * this has lead to buffer overflows in this function */
+  DEBUGASSERT(*olen == expected_len);
   return DOH_OK;
 }
 
