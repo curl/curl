@@ -2165,8 +2165,13 @@ set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
   long curl_ssl_version_max;
 
   /* convert cURL min SSL version option to OpenSSL constant */
+#ifdef OPENSSL_IS_BORINGSSL
+  uint16_t ossl_ssl_version_min = 0;
+  uint16_t ossl_ssl_version_max = 0;
+#else
   long ossl_ssl_version_min = 0;
   long ossl_ssl_version_max = 0;
+#endif
   switch(curl_ssl_version_min) {
     case CURL_SSLVERSION_TLSv1: /* TLS 1.x */
     case CURL_SSLVERSION_TLSv1_0:
@@ -2186,10 +2191,10 @@ set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
   }
 
   /* CURL_SSLVERSION_DEFAULT means that no option was selected.
-    We don't want to pass 0 to SSL_CTX_set_min_proto_version as
-    it would enable all versions down to the lowest supported by
-    the library.
-    So we skip this, and stay with the OS default
+     We don't want to pass 0 to SSL_CTX_set_min_proto_version as
+     it would enable all versions down to the lowest supported by
+     the library.
+     So we skip this, and stay with the OS default
   */
   if(curl_ssl_version_min != CURL_SSLVERSION_DEFAULT) {
     if(!SSL_CTX_set_min_proto_version(ctx, ossl_ssl_version_min)) {
