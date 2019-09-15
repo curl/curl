@@ -6,6 +6,9 @@ cache:
         - $HOME/mesalink-1.0.0
         - $HOME/nghttp2-1.39.2
 
+go:
+    - stable
+
 env:
     global:
         - LD_LIBRARY_PATH=/usr/local/lib
