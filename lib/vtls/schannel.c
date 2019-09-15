@@ -585,11 +585,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     /* client certificate */
     if(data->set.ssl.cert) {
       DWORD cert_store_name;
-      TCHAR *cert_store_path;
+      TCHAR *cert_store_path = NULL;
       TCHAR *cert_thumbprint_str;
       CRYPT_HASH_BLOB cert_thumbprint;
       BYTE cert_thumbprint_data[CERT_THUMBPRINT_DATA_LEN];
       HCERTSTORE cert_store;
+      FILE *fInCert = NULL;
 
       TCHAR *cert_path = Curl_convert_UTF8_to_tchar(data->set.ssl.cert);
       if(!cert_path)
@@ -597,54 +598,143 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 
       result = get_cert_location(cert_path, &cert_store_name,
                                  &cert_store_path, &cert_thumbprint_str);
-      if(result != CURLE_OK) {
-        failf(data, "schannel: Failed to get certificate location for %s",
-              cert_path);
+      if((result != CURLE_OK) && (data->set.ssl.cert[0]!='\0'))
+        fInCert = fopen(data->set.ssl.cert, "rb");
+
+      if((result != CURLE_OK) && (fInCert == NULL)) {
+        failf(data, "schannel: Failed to get certificate location"
+              " or file for %s",
+              data->set.ssl.cert);
         Curl_unicodefree(cert_path);
         return result;
       }
 
-      cert_store =
-        CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
-                      (HCRYPTPROV)NULL,
-                      CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
-                      cert_store_path);
-      if(!cert_store) {
-        failf(data, "schannel: Failed to open cert store %x %s, "
-              "last error is %x",
-              cert_store_name, cert_store_path, GetLastError());
-        free(cert_store_path);
+      if(fInCert) {
+        /* Reading a .P12 or .pfx file, like the example at bottom of
+           https://social.msdn.microsoft.com/Forums/windowsdesktop/
+           en-US/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
+        */
+        void *certdata = NULL;
+        long filesize = 0;
+        CRYPT_DATA_BLOB datablob;
+        WCHAR* pszPassword;
+        size_t pwd_len = 0;
+        int str_w_len = 0;
+        int continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
+        if(continue_reading)
+          filesize = ftell(fInCert);
+        if(filesize < 0)
+          continue_reading = 0;
+        if(continue_reading)
+          continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
+        if(continue_reading)
+          certdata = malloc(((size_t)filesize) + 1);
+        if((certdata == NULL) ||
+           ((int) fread(certdata, (size_t)filesize, 1, fInCert) != 1))
+          continue_reading = 0;
+        fclose(fInCert);
         Curl_unicodefree(cert_path);
-        return CURLE_SSL_CERTPROBLEM;
-      }
-      free(cert_store_path);
 
-      cert_thumbprint.pbData = cert_thumbprint_data;
-      cert_thumbprint.cbData = CERT_THUMBPRINT_DATA_LEN;
+        if(!continue_reading) {
+          failf(data, "schannel: Failed to read cert file %s",
+                data->set.ssl.cert);
+          free(certdata);
+          return CURLE_SSL_CERTPROBLEM;
+        }
 
-      if(!CryptStringToBinary(cert_thumbprint_str, CERT_THUMBPRINT_STR_LEN,
-                              CRYPT_STRING_HEX,
-                              cert_thumbprint_data, &cert_thumbprint.cbData,
-                              NULL, NULL)) {
-        Curl_unicodefree(cert_path);
-        return CURLE_SSL_CERTPROBLEM;
-      }
+        /* Convert key-pair data to the in-memory certificate store */
+        datablob.pbData = (BYTE*)certdata;
+        datablob.cbData = (DWORD)filesize;
 
-      client_certs[0] = CertFindCertificateInStore(
-        cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
-        CERT_FIND_HASH, &cert_thumbprint, NULL);
+        if(data->set.ssl.key_passwd != NULL)
+          pwd_len = strlen(data->set.ssl.key_passwd);
+        pszPassword = (WCHAR*)malloc(sizeof(WCHAR)*(pwd_len + 1));
+        if(pwd_len > 0)
+          str_w_len =
+            MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                data->set.ssl.key_passwd, (int)pwd_len,
+                                pszPassword, (int)(pwd_len + 1));
 
-      Curl_unicodefree(cert_path);
+        if((str_w_len >= 0) && (str_w_len <= (int)pwd_len))
+          pszPassword[str_w_len] = 0;
+        else
+          pszPassword[0] = 0;
 
-      if(client_certs[0]) {
+        cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
+        free(pszPassword);
+        free(certdata);
+        if(cert_store == NULL) {
+          DWORD errorcode = GetLastError();
+          if(errorcode == ERROR_INVALID_PASSWORD)
+            failf(data, "schannel: Failed to import cert file %s, "
+                  "password is bad", data->set.ssl.cert);
+          else
+            failf(data, "schannel: Failed to import cert file %s, "
+                  "last error is 0x%x", data->set.ssl.cert, errorcode);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+
+        client_certs[0] = CertFindCertificateInStore(
+            cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
+            CERT_FIND_ANY, NULL, NULL);
+
+        if(client_certs[0] == NULL) {
+          failf(data, "schannel: Failed to get certificat from file %s"
+                ", last error is 0x%x",
+                data->set.ssl.cert, GetLastError());
+          CertCloseStore(cert_store, 0);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+
         schannel_cred.cCreds = 1;
         schannel_cred.paCred = client_certs;
       }
       else {
-        /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
-        return CURLE_SSL_CERTPROBLEM;
-      }
+        cert_store =
+          CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
+                        (HCRYPTPROV)NULL,
+                        CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
+                        cert_store_path);
+        if(!cert_store) {
+          failf(data, "schannel: Failed to open cert store %x %s, "
+                "last error is 0x%x",
+                cert_store_name, cert_store_path, GetLastError());
+          free(cert_store_path);
+          Curl_unicodefree(cert_path);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+        free(cert_store_path);
 
+        cert_thumbprint.pbData = cert_thumbprint_data;
+        cert_thumbprint.cbData = CERT_THUMBPRINT_DATA_LEN;
+
+        if(!CryptStringToBinary(cert_thumbprint_str,
+                                CERT_THUMBPRINT_STR_LEN,
+                                CRYPT_STRING_HEX,
+                                cert_thumbprint_data,
+                                &cert_thumbprint.cbData,
+                                NULL, NULL)) {
+          Curl_unicodefree(cert_path);
+          CertCloseStore(cert_store, 0);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+
+        client_certs[0] = CertFindCertificateInStore(
+          cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
+          CERT_FIND_HASH, &cert_thumbprint, NULL);
+
+        Curl_unicodefree(cert_path);
+
+        if(client_certs[0]) {
+          schannel_cred.cCreds = 1;
+          schannel_cred.paCred = client_certs;
+        }
+        else {
+          /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
+          CertCloseStore(cert_store, 0);
+          return CURLE_SSL_CERTPROBLEM;
+        }
+      }
       CertCloseStore(cert_store, 0);
     }
 #else
