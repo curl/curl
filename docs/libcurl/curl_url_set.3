@@ -111,6 +111,12 @@ instead "guesses" which scheme that was intended based on the host name.  If
 the outermost sub-domain name matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then
 that scheme will be used, otherwise it picks HTTP. Conflicts with the
 \fICURLU_DEFAULT_SCHEME\fP option which takes precedence if both are set.
+.IP CURLU_NO_AUTHORITY
+If set, skips authority checks. The RFC allows individual schemes to omit the
+host part (normally the only mandatory part of the authority), but libcurl
+cannot know whether this is permitted for custom schemes. Specifying the flag
+permits empty authority sections, similar to how file scheme is handled.
+
 .SH RETURN VALUE
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
 fine.
