@@ -810,7 +810,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
       hostname[len] = 0;
     }
     else {
-      if (!(flags & CURLU_NO_AUTHORITY))
+      if(!(flags & CURLU_NO_AUTHORITY))
         return CURLUE_MALFORMED_INPUT;
     }
 
@@ -893,8 +893,8 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       return result;
 
-    if (0 == strlen(hostname) && (flags & CURLU_NO_AUTHORITY)) {
-      // Skip hostname check, it's allowed to be empty.
+    if(0 == strlen(hostname) && (flags & CURLU_NO_AUTHORITY)) {
+      /* Skip hostname check, it's allowed to be empty. */
     }
     else {
       result = hostname_check(u, hostname);
@@ -1441,8 +1441,8 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     }
 
     if(what == CURLUPART_HOST) {
-      if (0 == strlen(newp) && (flags & CURLU_NO_AUTHORITY)) {
-        // Skip hostname check, it's allowed to be empty.
+      if(0 == strlen(newp) && (flags & CURLU_NO_AUTHORITY)) {
+        /* Skip hostname check, it's allowed to be empty. */
       }
       else {
         if(hostname_check(u, (char *)newp)) {
