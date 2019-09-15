@@ -566,11 +566,13 @@ static struct setcase set_parts_list[] = {
   {"custom-scheme://host",
    "host=\"\",",
    "custom-scheme://host/",
-   CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_MALFORMED_INPUT},
+   CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK,
+   CURLUE_MALFORMED_INPUT},
   {"custom-scheme://host",
    "host=\"\",",
    "custom-scheme:///",
-   CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY, CURLUE_OK, CURLUE_OK},
+   CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY,
+   CURLUE_OK, CURLUE_OK},
 
   {NULL, NULL, NULL, 0, 0, 0, 0}
 };
