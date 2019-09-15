@@ -451,7 +451,7 @@ before_script:
         mkdir build &&
         cd build &&
         CXX="g++" CC="gcc" cmake -DCMAKE_BUILD_TYPE=release -DBUILD_SHARED_LIBS=1 .. &&
-        make &&
+        make bssl &&
         cd .. &&
         mkdir lib &&
         cd lib &&
