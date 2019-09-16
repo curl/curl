@@ -394,9 +394,9 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
   error:
   curl_slist_free_all(data->req.doh.headers);
   data->req.doh.headers = NULL;
-  curl_easy_cleanup(data->req.doh.probe[0].easy);
+  Curl_close(data->req.doh.probe[0].easy);
   data->req.doh.probe[0].easy = NULL;
-  curl_easy_cleanup(data->req.doh.probe[1].easy);
+  Curl_close(data->req.doh.probe[1].easy);
   data->req.doh.probe[1].easy = NULL;
   return NULL;
 }
@@ -918,16 +918,17 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
     /* remove DOH handles from multi handle and close them */
     curl_multi_remove_handle(data->multi, data->req.doh.probe[0].easy);
     Curl_close(data->req.doh.probe[0].easy);
+    data->req.doh.probe[0].easy = NULL;
     curl_multi_remove_handle(data->multi, data->req.doh.probe[1].easy);
     Curl_close(data->req.doh.probe[1].easy);
-
+    data->req.doh.probe[1].easy = NULL;
     /* parse the responses, create the struct and return it! */
     init_dohentry(&de);
     rc = doh_decode(data->req.doh.probe[0].serverdoh.memory,
                     data->req.doh.probe[0].serverdoh.size,
                     data->req.doh.probe[0].dnstype,
                     &de);
-    free(data->req.doh.probe[0].serverdoh.memory);
+    Curl_safefree(data->req.doh.probe[0].serverdoh.memory);
     if(rc) {
       infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc),
             type2name(data->req.doh.probe[0].dnstype),
@@ -937,7 +938,7 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
                      data->req.doh.probe[1].serverdoh.size,
                      data->req.doh.probe[1].dnstype,
                      &de);
-    free(data->req.doh.probe[1].serverdoh.memory);
+    Curl_safefree(data->req.doh.probe[1].serverdoh.memory);
     if(rc2) {
       infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc2),
             type2name(data->req.doh.probe[1].dnstype),

@@ -399,6 +399,12 @@ CURLcode Curl_close(struct Curl_easy *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+  /* Leave no dangling DOH handles behind */
+  Curl_close(data->req.doh.probe[0].easy);
+  Curl_close(data->req.doh.probe[1].easy);
+  free(data->req.doh.probe[0].serverdoh.memory);
+  free(data->req.doh.probe[1].serverdoh.memory);
+
   /* destruct wildcard structures if it is needed */
   Curl_wildcard_dtor(&data->wildcard);
   Curl_freeset(data);
