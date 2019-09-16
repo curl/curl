@@ -1901,4 +1901,11 @@ CURLcode curl_mime_headers(curl_mimepart *part,
   return CURLE_NOT_BUILT_IN;
 }
 
+CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
+{
+  (void)slp;
+  (void)fmt;
+  return CURLE_NOT_BUILT_IN;
+}
+
 #endif /* if disabled */
