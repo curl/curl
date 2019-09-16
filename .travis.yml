@@ -92,11 +92,10 @@ matrix:
           addons:
               apt:
                   sources:
+                      - ppa:longsleep/golang-backports
                       - *common_sources
                   packages:
                       - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
         - os: linux
           compiler: gcc
           dist: xenial
@@ -412,6 +411,10 @@ matrix:
 before_install:
     - eval "${OVERRIDE_CC}"
     - eval "${OVERRIDE_CXX}"
+    # Install and use the current stable release of Go
+    - gimme --list
+    - eval "$(gimme stable)"
+    - gimme --list
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
