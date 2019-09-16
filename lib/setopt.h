@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 CURLcode Curl_setstropt(char **charp, const char *s);
+CURLcode Curl_setblobopt(char **charp, const char *sblob);
 CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list arg);
 
 #endif /* HEADER_CURL_SETOPT_H */

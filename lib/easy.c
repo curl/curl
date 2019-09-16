@@ -83,6 +83,30 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+
+/* curl_decode_data_blob is used by curl library to
+ *  check if a curl parameter is a memory blob instead filename
+ * it return 1 and fill len and data if this is memory blob
+ * and return 0 if this is a filename (or another string) */
+bool curl_decode_data_blob(char *str, size_t *len, void **data)
+{
+  const char *magicblobstore = CURL_BLOB_MAGIC;
+
+  size_t walk;
+  for(walk = 0; walk < CURL_BLOB_MAGIC_SIZE; walk++)
+    if(str[walk] != magicblobstore[walk])
+      return FALSE;
+
+  /* The string is matches exacly CURL_BLOB_MAGIC
+   * This mean str is really a pointer to a 0x20 bytes structure
+   *   with certificate data pointer and size */
+  memcpy(len, str + CURL_BLOB_OFFSET_DATALEN, sizeof(*len));
+  memcpy(data, str + CURL_BLOB_OFFSET_DATAPTR, sizeof(*data));
+  return TRUE;
+}
+
+void Curl_version_init(void);
+
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
 static long          init_flags;
@@ -774,6 +798,9 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   /* duplicate all strings */
   for(i = (enum dupstring)0; i< STRING_LASTZEROTERMINATED; i++) {
     result = Curl_setstropt(&dst->set.str[i], src->set.str[i]);
+    /* Curl_setstropt return CURLE_BAD_FUNCTION_ARGUMENT with blob */
+    if(result == CURLE_BAD_FUNCTION_ARGUMENT)
+      result = Curl_setblobopt(&dst->set.str[i], src->set.str[i]);
     if(result)
       return result;
   }

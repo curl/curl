@@ -63,6 +63,12 @@ CURLcode Curl_setstropt(char **charp, const char *s)
 
     if(str) {
       size_t len = strlen(str);
+
+      /* Protect against malicious usage of BLOB magic */
+      if((len == CURL_BLOB_MAGIC_STRLEN) &&
+          (!memcmp(s, CURL_BLOB_MAGIC, CURL_BLOB_MAGIC_SIZE)))
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+
       if(len > CURL_MAX_INPUT_LENGTH) {
         free(str);
         return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -72,6 +78,53 @@ CURLcode Curl_setstropt(char **charp, const char *s)
       return CURLE_OUT_OF_MEMORY;
 
     *charp = str;
+  }
+
+  return CURLE_OK;
+}
+
+CURLcode Curl_setblobopt(char **charp, const char *sblob)
+{
+  /* Release the previous storage at `charp' and replace by a dynamic storage
+     copy of `sblob'.
+     Return CURLE_OK, CURLE_BAD_FUNCTION_ARGUMENT or CURLE_OUT_OF_MEMORY. */
+
+  Curl_safefree(*charp);
+
+  if(sblob) {
+    size_t len = strlen(sblob);
+    if((len == CURL_BLOB_MAGIC_STRLEN) &&
+       (!memcmp(sblob, CURL_BLOB_MAGIC, CURL_BLOB_MAGIC_SIZE))) {
+        /* sblob contain struct curl_blob data, created with
+         * curl_init_blob_*. This is not ordinary string but a
+         * blob memory block */
+        size_t datalen;
+        char *srcdata;
+        char *dstdata;
+        char *dblob;
+        char dupflag = sblob[CURL_BLOB_OFFSET_DUPFLAG];
+        memcpy(&datalen, sblob + CURL_BLOB_OFFSET_DATALEN, sizeof(datalen));
+        memcpy(&srcdata, sblob + CURL_BLOB_OFFSET_DATAPTR, sizeof(srcdata));
+        dblob = (char *)malloc(CURL_BLOB_SIZE + (dupflag ? datalen : 0));
+        if(!dblob)
+          return CURLE_OUT_OF_MEMORY;
+        memcpy(dblob, CURL_BLOB_MAGIC, CURL_BLOB_MAGIC_SIZE);
+        dblob[CURL_BLOB_OFFSET_DUPFLAG] = dupflag;
+        memcpy(dblob + CURL_BLOB_OFFSET_DATALEN, &datalen, sizeof(datalen));
+
+        if(dupflag) {
+          /* dupflag is set by curl_init_blob_dup. We need copy the data,
+           *   app don't need keep data pointer valid after setopt */
+          dstdata = dblob + CURL_BLOB_SIZE;
+          memcpy(dstdata, srcdata, datalen);
+        }
+        else
+          dstdata = srcdata;
+        memcpy(dblob + CURL_BLOB_OFFSET_DATAPTR, &dstdata, sizeof(dstdata));
+        *charp = (char *)dblob;
+        return CURLE_OK;
+    }
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   return CURLE_OK;
@@ -1605,6 +1658,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     result = Curl_setstropt(&data->set.str[STRING_CERT_ORIG],
                             va_arg(param, char *));
+    break;
+  case CURLOPT_SSLCERT_BLOB:
+    /*
+     * String that holds file name of the SSL certificate to use
+     */
+    result = Curl_setblobopt(&data->set.str[STRING_CERT_ORIG],
+                             va_arg(param, char *));
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLCERT:

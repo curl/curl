@@ -745,27 +745,35 @@ int cert_stuff(struct connectdata *conn,
       PKCS12 *p12 = NULL;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
+      size_t bloblen;
+      void *blobdata;
+      bool blob = curl_decode_data_blob(cert_file, &bloblen, &blobdata);
+      if(blob)
+        fp = BIO_new_mem_buf(blobdata, (int)bloblen);
+      else {
+        fp = BIO_new(BIO_s_file());
+        if(fp == NULL) {
+          failf(data,
+                "BIO_new return NULL, " OSSL_PACKAGE
+                " error %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)) );
+          return 0;
+        }
 
-      fp = BIO_new(BIO_s_file());
-      if(fp == NULL) {
-        failf(data,
-              "BIO_new return NULL, " OSSL_PACKAGE
-              " error %s",
-              ossl_strerror(ERR_get_error(), error_buffer,
-                            sizeof(error_buffer)) );
-        return 0;
+        if(BIO_read_filename(fp, cert_file) <= 0) {
+          failf(data, "could not open PKCS12 file '%s'", cert_file);
+          BIO_free(fp);
+          return 0;
+        }
       }
 
-      if(BIO_read_filename(fp, cert_file) <= 0) {
-        failf(data, "could not open PKCS12 file '%s'", cert_file);
-        BIO_free(fp);
-        return 0;
-      }
       p12 = d2i_PKCS12_bio(fp, NULL);
       BIO_free(fp);
 
       if(!p12) {
-        failf(data, "error reading PKCS12 file '%s'", cert_file);
+        failf(data, "error reading PKCS12 file '%s'",
+              blob ? "memory blob" : cert_file);
         return 0;
       }
 
@@ -3546,12 +3554,14 @@ static CURLcode servercert(struct connectdata *conn,
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
+    char *issuercert = SSL_SET_OPTION(issuercert);
     infof(data, " issuer: %s\n", buffer);
 
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
 
     /* e.g. match issuer name with provided issuer certificate */
+
     if(SSL_SET_OPTION(issuercert)) {
       fp = BIO_new(BIO_s_file());
       if(fp == NULL) {
@@ -3573,13 +3583,41 @@ static CURLcode servercert(struct connectdata *conn,
         X509_free(backend->server_cert);
         backend->server_cert = NULL;
         return CURLE_SSL_ISSUER_ERROR;
-      }
 
+    if(issuercert) {
+      size_t bloblen;
+      void *blobdata;
+      bool blob = curl_decode_data_blob(issuercert, &bloblen, &blobdata);
+      if(blob)
+        fp = BIO_new_mem_buf(blobdata, (int)bloblen);
+      else {
+        fp = BIO_new(BIO_s_file());
+        if(fp == NULL) {
+          failf(data,
+                "BIO_new return NULL, " OSSL_PACKAGE
+                " error %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)) );
+          X509_free(BACKEND->server_cert);
+          BACKEND->server_cert = NULL;
+          return CURLE_OUT_OF_MEMORY;
+        }
+
+        if(BIO_read_filename(fp, issuercert) <= 0) {
+          if(strict)
+            failf(data, "SSL: Unable to open issuer cert (%s)",
+                  issuercert);
+          BIO_free(fp);
+          X509_free(BACKEND->server_cert);
+          BACKEND->server_cert = NULL;
+          return CURLE_SSL_ISSUER_ERROR;
+        }
+      }
       issuer = PEM_read_bio_X509(fp, NULL, ZERO_NULL, NULL);
       if(!issuer) {
         if(strict)
           failf(data, "SSL: Unable to read issuer cert (%s)",
-                SSL_SET_OPTION(issuercert));
+                blob ? "memory blob" : SSL_SET_OPTION(issuercert));
         BIO_free(fp);
         X509_free(issuer);
         X509_free(backend->server_cert);

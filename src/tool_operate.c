@@ -1551,6 +1551,45 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             }
           }
 
+          /* In debug build of curl tool, using
+           *    --cert loadmem=<filename>:<password> --cert-type p12
+           *  must do the same thing than classic:
+           *    --cert <filename>:<password> --cert-type p12
+           *  but is designed to test curl_init_blob_dup */
+#if defined(CURLDEBUG) || defined(DEBUGBUILD)
+          if(config->cert && (strlen(config->cert) > 8) &&
+             (memcmp(config->cert, "loadmem=",8) == 0)) {
+            FILE *fInCert = fopen(config->cert + 8, "rb");
+            void *certdata = NULL;
+            long filesize = 0;
+            bool continue_reading = fInCert != NULL;
+            if(continue_reading)
+              continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
+            if(continue_reading)
+              filesize = ftell(fInCert);
+            if(filesize < 0)
+              continue_reading = FALSE;
+            if(continue_reading)
+              continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
+            if(continue_reading)
+              certdata = malloc(((size_t)filesize) + 1);
+            if((!certdata) ||
+                ((int)fread(certdata, (size_t)filesize, 1, fInCert) != 1))
+              continue_reading = FALSE;
+            if(fInCert)
+              fclose(fInCert);
+            if((filesize > 0) && continue_reading) {
+              struct curl_blob structblob;
+              curl_init_blob_dup(&structblob, certdata, (size_t)filesize);
+              my_setopt_str(curl, CURLOPT_SSLCERT_BLOB, &structblob);
+              /* if test run well, we are sure we don't reuse
+               * original mem pointer */
+              memset(certdata, 0, (size_t)filesize);
+            }
+            free(certdata);
+          }
+          else
+#endif
           my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
           my_setopt_str(curl, CURLOPT_PROXY_SSLCERT, config->proxy_cert);
           my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);

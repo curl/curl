@@ -98,6 +98,8 @@ bool Curl_ssl_tls13_ciphersuites(void);
 CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
                           unsigned char *md5sum, size_t md5len);
 
+bool curl_decode_data_blob(char *str, size_t *len, void **data);
+
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
 #include "nssg.h"           /* NSS versions */
@@ -138,11 +140,11 @@ CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
 #define SSL_CONN_CONFIG(var) (SSL_IS_PROXY() ?          \
   conn->proxy_ssl_config.var : conn->ssl_config.var)
 
-bool Curl_ssl_config_matches(struct ssl_primary_config* data,
-                             struct ssl_primary_config* needle);
+bool Curl_ssl_config_matches(struct ssl_primary_config *data,
+                             struct ssl_primary_config *needle);
 bool Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
                                    struct ssl_primary_config *dest);
-void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc);
+void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc);
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks);
 
 int Curl_ssl_backend(void);

@@ -83,8 +83,8 @@
     dest->var = NULL;
 
 bool
-Curl_ssl_config_matches(struct ssl_primary_config* data,
-                        struct ssl_primary_config* needle)
+Curl_ssl_config_matches(struct ssl_primary_config *data,
+                        struct ssl_primary_config *needle)
 {
   if((data->version == needle->version) &&
      (data->version_max == needle->version_max) &&
@@ -127,7 +127,7 @@ Curl_clone_primary_ssl_config(struct ssl_primary_config *source,
   return TRUE;
 }
 
-void Curl_free_primary_ssl_config(struct ssl_primary_config* sslc)
+void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
   Curl_safefree(sslc->CApath);
   Curl_safefree(sslc->CAfile);

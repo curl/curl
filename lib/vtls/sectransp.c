@@ -1125,13 +1125,19 @@ static OSStatus CopyIdentityWithLabel(char *label,
   return status;
 }
 
+static bool is_pack_binary_data(const char *cPath)
+{
+  size_t bin_data_size;
+  void *bin_data;
+  return curl_decode_data_blob((char *)cPath, &bin_data_size, &bin_data);
+}
+
 static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
                                            const char *cPassword,
                                            SecIdentityRef *out_cert_and_key)
 {
   OSStatus status = errSecItemNotFound;
-  CFURLRef pkcs_url = CFURLCreateFromFileSystemRepresentation(NULL,
-    (const UInt8 *)cPath, strlen(cPath), false);
+  CFURLRef pkcs_url = NULL;
   CFStringRef password = cPassword ? CFStringCreateWithCString(NULL,
     cPassword, kCFStringEncodingUTF8) : NULL;
   CFDataRef pkcs_data = NULL;
@@ -1140,8 +1146,24 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
   /* These constants are documented as having first appeared in 10.6 but they
      raise linker errors when used on that cat for some reason. */
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
-  if(CFURLCreateDataAndPropertiesFromResource(NULL, pkcs_url, &pkcs_data,
-   NULL, NULL, &status)) {
+  bool resource_imported;
+  void *bin_data = NULL;
+  size_t bin_data_size = 0;
+
+  if(curl_decode_data_blob((char *)cPath, &bin_data_size, &bin_data)) {
+    pkcs_data = CFDataCreate(kCFAllocatorDefault,
+      (const unsigned char *)bin_data, bin_data_size);
+    status = (pkcs_data != NULL) ? errSecSuccess : errSecAllocate;
+    resource_imported = (pkcs_data != NULL);
+  }
+  else {
+    pkcs_url = CFURLCreateFromFileSystemRepresentation(NULL,
+      (const UInt8 *)cPath, strlen(cPath), false);
+    resource_imported = CFURLCreateDataAndPropertiesFromResource(NULL,
+      pkcs_url, &pkcs_data, NULL, NULL, &status);
+  }
+
+  if(resource_imported) {
     CFArrayRef items = NULL;
 
   /* On iOS SecPKCS12Import will never add the client certificate to the
@@ -1219,7 +1241,8 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
   if(password)
     CFRelease(password);
-  CFRelease(pkcs_url);
+  if(pkcs_url)
+    CFRelease(pkcs_url);
   return status;
 }
 
@@ -1613,14 +1636,15 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
   }
 
   if(ssl_cert) {
+    bool is_cert_data = is_pack_binary_data(ssl_cert);
+    bool is_cert_file = (!is_cert_data) && is_file(ssl_cert);
     SecIdentityRef cert_and_key = NULL;
-    bool is_cert_file = is_file(ssl_cert);
 
     /* User wants to authenticate with a client cert. Look for it:
        If we detect that this is a file on disk, then let's load it.
        Otherwise, assume that the user wants to use an identity loaded
        from the Keychain. */
-    if(is_cert_file) {
+    if(is_cert_file || is_cert_data) {
       if(!SSL_SET_OPTION(cert_type))
         infof(data, "WARNING: SSL: Certificate type not set, assuming "
                     "PKCS#12 format.\n");
@@ -1750,9 +1774,10 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
   if(ssl_cafile && verifypeer) {
-    bool is_cert_file = is_file(ssl_cafile);
+    bool is_cert_data = is_pack_binary_data(ssl_cafile);
+    bool is_cert_file = (!is_cert_data) && is_file(ssl_cafile);
 
-    if(!is_cert_file) {
+    if(!(is_cert_file || is_cert_data)) {
       failf(data, "SSL: can't load CA certificate file %s", ssl_cafile);
       return CURLE_SSL_CACERT_BADFILE;
     }
