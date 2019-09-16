@@ -682,7 +682,8 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
 
   switch(smbc->state) {
   case SMB_NEGOTIATE:
-    if(h->status || smbc->got < sizeof(*nrsp) + sizeof(smbc->challenge) - 1) {
+    if((smbc->got < sizeof(*nrsp) + sizeof(smbc->challenge) - 1) ||
+       h->status) {
       connclose(conn, "SMB: negotiation failed");
       return CURLE_COULDNT_CONNECT;
     }
