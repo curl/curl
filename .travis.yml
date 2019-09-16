@@ -93,10 +93,10 @@ matrix:
               apt:
                   sources:
                       - *common_sources
+                      - ppa:longsleep/golang-backports
                   packages:
                       - *common_packages
-                      - libpsl-dev
-                      - libbrotli-dev
+                      - golang-go
         - os: linux
           compiler: gcc
           dist: xenial
