@@ -203,9 +203,8 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   if(result)
     return result;
 
-#if 0
   /* store the used address as a string */
-  if(!Curl_addr2string((struct sockaddr*)addr,
+  if(!Curl_addr2string((struct sockaddr*)addr, addrlen,
                        conn->primary_ip, &conn->primary_port)) {
     char buffer[STRERROR_LEN];
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
@@ -213,7 +212,8 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
-#endif
+  Curl_persistconninfo(conn);
+
   /* for connection reuse purposes: */
   conn->ssl[FIRSTSOCKET].state = ssl_connection_complete;
 
