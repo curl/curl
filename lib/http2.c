@@ -967,7 +967,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       if(!check)
         /* no memory */
         return NGHTTP2_ERR_CALLBACK_FAILURE;
-      if(!Curl_strcasecompare(check, (const char *)value)) {
+      if(!Curl_strcasecompare(check, (const char *)value) &&
+         ((conn->remote_port != conn->given->defport) ||
+          !Curl_strcasecompare(conn->host.name, (const char *)value))) {
         /* This is push is not for the same authority that was asked for in
          * the URL. RFC 7540 section 8.2 says: "A client MUST treat a
          * PUSH_PROMISE for which the server is not authoritative as a stream
