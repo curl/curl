@@ -157,7 +157,6 @@ const char *Curl_mime_contenttype(const char *filename);
 #define Curl_mime_size(x) (curl_off_t) -1
 #define Curl_mime_read NULL
 #define Curl_mime_rewind(x) ((void)x, CURLE_NOT_BUILT_IN)
-#define Curl_mime_add_header(x,y,...) CURLE_NOT_BUILT_IN
 #endif
 
 
