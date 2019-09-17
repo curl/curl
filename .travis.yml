@@ -92,11 +92,10 @@ matrix:
           addons:
               apt:
                   sources:
-                      - *common_sources
                       - ppa:longsleep/golang-backports
                   packages:
                       - *common_packages
-                      - golang-1.13-go
+                      - golang-1.13
         - os: linux
           compiler: gcc
           dist: xenial
