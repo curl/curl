@@ -96,7 +96,7 @@ matrix:
                       - ppa:longsleep/golang-backports
                   packages:
                       - *common_packages
-                      - golang-1.13
+                      - golang-1.13-go
         - os: linux
           compiler: gcc
           dist: xenial
