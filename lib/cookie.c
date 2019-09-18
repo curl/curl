@@ -1528,28 +1528,28 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
 
   if(c->numcookies) {
     unsigned int i;
-    unsigned int j;
+    size_t nvalid = 0;
     struct Cookie **array;
 
-    array = malloc(sizeof(struct Cookie *) * c->numcookies);
+    array = calloc(1, sizeof(struct Cookie *) * c->numcookies);
     if(!array) {
       if(!use_stdout)
         fclose(out);
       return 1;
     }
 
-    j = 0;
+    /* only sort the cookies with a domain property */
     for(i = 0; i < COOKIE_HASH_SIZE; i++) {
       for(co = c->cookies[i]; co; co = co->next) {
         if(!co->domain)
           continue;
-        array[j++] = co;
+        array[nvalid++] = co;
       }
     }
 
-    qsort(array, c->numcookies, sizeof(struct Cookie *), cookie_sort_ct);
+    qsort(array, nvalid, sizeof(struct Cookie *), cookie_sort_ct);
 
-    for(i = 0; i < j; i++) {
+    for(i = 0; i < nvalid; i++) {
       char *format_ptr = get_netscape_format(array[i]);
       if(format_ptr == NULL) {
         fprintf(out, "#\n# Fatal libcurl error\n");
