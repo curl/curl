@@ -90,7 +90,7 @@ matrix:
               - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
           go:
-              - 1.13.x
+              - master
           addons:
               apt:
                   sources:
@@ -101,7 +101,7 @@ matrix:
           compiler: gcc
           dist: xenial
           go:
-              - 1.13.x
+              - master
           env:
               - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:$HOME/quiche/target/release:/usr/local/lib
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
