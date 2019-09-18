@@ -96,6 +96,7 @@ matrix:
               apt:
                   sources:
                       - ppa:longsleep/golang-backports
+                      - *common_sources
                   packages:
                       - *common_packages
         - os: linux
