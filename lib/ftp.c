@@ -1512,7 +1512,7 @@ static CURLcode ftp_state_type(struct connectdata *conn)
      information. Which in FTP can't be much more than the file size and
      date. */
   if(data->set.opt_no_body && ftpc->file &&
-     ftp_need_type(conn, data->set.prefer_ascii)) {
+     ftp_need_type(conn, (bool)data->set.prefer_ascii)) {
     /* The SIZE command is _not_ RFC 959 specified, and therefore many servers
        may not support it! It is however the only way we have to get a file's
        size! */
@@ -1522,7 +1522,7 @@ static CURLcode ftp_state_type(struct connectdata *conn)
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    result = ftp_nb_type(conn, data->set.prefer_ascii, FTP_TYPE);
+    result = ftp_nb_type(conn, (bool)data->set.prefer_ascii, FTP_TYPE);
     if(result)
       return result;
   }
@@ -3566,7 +3566,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
       }
     }
     else if(data->set.upload) {
-      result = ftp_nb_type(conn, data->set.prefer_ascii, FTP_STOR_TYPE);
+      result = ftp_nb_type(conn, (bool)data->set.prefer_ascii, FTP_STOR_TYPE);
       if(result)
         return result;
 
@@ -3606,7 +3606,7 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
         /* otherwise just fall through */
       }
       else {
-        result = ftp_nb_type(conn, data->set.prefer_ascii, FTP_RETR_TYPE);
+        result = ftp_nb_type(conn, (bool)data->set.prefer_ascii, FTP_RETR_TYPE);
         if(result)
           return result;
       }

@@ -706,7 +706,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * have been made.
      */
     newcookies = Curl_cookie_init(data, NULL, data->cookies,
-                                  data->set.cookiesession);
+                                  (bool)data->set.cookiesession);
     if(!newcookies)
       result = CURLE_OUT_OF_MEMORY;
     data->cookies = newcookies;

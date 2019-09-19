@@ -3097,7 +3097,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
       else {
         bool longpath = FALSE;
         hostaddr->addr = Curl_unix2addr(path, &longpath,
-                                        conn->abstract_unix_socket);
+                                        (bool)conn->abstract_unix_socket);
         if(hostaddr->addr)
           hostaddr->inuse++;
         else {

@@ -237,7 +237,7 @@ static CURLcode CONNECT(struct connectdata *conn,
         const char *useragent = "";
         const char *http = (conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ?
           "1.0" : "1.1";
-        bool ipv6_ip = conn->bits.ipv6_ip;
+        bool ipv6_ip = (bool)conn->bits.ipv6_ip;
         char *hostheader;
 
         /* the hostname may be different */
