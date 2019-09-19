@@ -135,8 +135,10 @@ UNITTEST DOHcode doh_encode(const char *host,
     }
   } while(1);
 
-  *dnsp++ = '\0'; /* upper 8 bit TYPE */
-  *dnsp++ = (unsigned char)dnstype;
+  /* There are assigned TYPE codes beyond 255: use range [1..65535]  */
+  *dnsp++ = (unsigned char)(255 & (dnstype>>8)); /* upper 8 bit TYPE */
+  *dnsp++ = (unsigned char)(255 & dnstype);      /* lower 8 bit TYPE */
+
   *dnsp++ = '\0'; /* upper 8 bit CLASS */
   *dnsp++ = DNS_CLASS_IN; /* IN - "the Internet" */
 
