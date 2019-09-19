@@ -1348,7 +1348,8 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   default:
     return CURLUE_UNKNOWN_PART;
   }
-  if(storep) {
+  DEBUGASSERT(storep);
+  {
     const char *newp = part;
     size_t nalloc = strlen(part);
 
