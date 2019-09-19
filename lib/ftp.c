@@ -474,7 +474,7 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
       Curl_set_in_callback(data, false);
 
       if(error)
-          return CURLE_ABORTED_BY_CALLBACK;
+        return CURLE_ABORTED_BY_CALLBACK;
      }
 
     Curl_setup_transfer(data, -1, -1, FALSE, SECONDARYSOCKET);
