@@ -13,9 +13,9 @@ environment:
         SHARED: ON
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 15 2017 Win64"
+        PRJ_GEN: "Visual Studio 15 2019 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
         WINSSL: ON
@@ -24,9 +24,9 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 15 2017 Win64"
+        PRJ_GEN: "Visual Studio 15 2019 Win64"
         PRJ_CFG: Release
         OPENSSL: ON
         WINSSL: OFF
@@ -46,9 +46,9 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 15 2017 Win64"
+        PRJ_GEN: "Visual Studio 15 2019 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
         WINSSL: OFF
@@ -57,9 +57,9 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
-        PRJ_GEN: "Visual Studio 15 2017 Win64"
+        PRJ_GEN: "Visual Studio 15 2019 Win64"
         PRJ_CFG: Debug
         OPENSSL: OFF
         WINSSL: OFF
@@ -100,7 +100,7 @@ environment:
         WINSSL: OFF
         TESTING: OFF
         MSYS2_ARG_CONV_EXCL: "/*"
-      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: VisualStudioSolution
         PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
         TESTING: OFF
