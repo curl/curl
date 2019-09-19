@@ -351,7 +351,7 @@ static char *concat_url(const char *base, const char *relurl)
   else {
     /* We got a new absolute path for this server */
 
-    if((relurl[0] == '/') && (relurl[1] == '/')) {
+    if(relurl[1] == '/') {
       /* the new URL starts with //, just keep the protocol part from the
          original one */
       *protsep = 0;
