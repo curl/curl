@@ -1075,24 +1075,23 @@ CURLUcode curl_url_get(CURLU *u, CURLUPart what,
       else
         return CURLUE_NO_SCHEME;
 
-      if(scheme) {
-        h = Curl_builtin_scheme(scheme);
-        if(!port && (flags & CURLU_DEFAULT_PORT)) {
-          /* there's no stored port number, but asked to deliver
-             a default one for the scheme */
-          if(h) {
-            msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
-            port = portbuf;
-          }
-        }
-        else if(port) {
-          /* there is a stored port number, but asked to inhibit if it matches
-             the default one for the scheme */
-          if(h && (h->defport == u->portnum) &&
-             (flags & CURLU_NO_DEFAULT_PORT))
-            port = NULL;
+      h = Curl_builtin_scheme(scheme);
+      if(!port && (flags & CURLU_DEFAULT_PORT)) {
+        /* there's no stored port number, but asked to deliver
+           a default one for the scheme */
+        if(h) {
+          msnprintf(portbuf, sizeof(portbuf), "%ld", h->defport);
+          port = portbuf;
         }
       }
+      else if(port) {
+        /* there is a stored port number, but asked to inhibit if it matches
+           the default one for the scheme */
+        if(h && (h->defport == u->portnum) &&
+           (flags & CURLU_NO_DEFAULT_PORT))
+          port = NULL;
+      }
+
       if(h && !(h->flags & PROTOPT_URLOPTIONS))
         options = NULL;
 
