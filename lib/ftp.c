@@ -870,7 +870,7 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
     /* FTPFILE_NOCWD with full path: expect ftpc->cwddone! */
     DEBUGASSERT((conn->data->set.ftp_filemethod != FTPFILE_NOCWD) ||
                 !(ftpc->dirdepth && ftpc->dirs[0][0] == '/'));
-    
+
     ftpc->count2 = 0; /* count2 counts failed CWDs */
 
     /* count3 is set to allow a MKD to fail once. In the case when first CWD
@@ -3215,7 +3215,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     if(ftpc->prevpath)
       infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
   }
-  
+
   /* free the dir tree and file parts */
   freedirs(ftpc);
 
@@ -4252,7 +4252,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   }
 
   ftpc->cwddone = FALSE; /* default to not done */
-  
+
   /* prevpath and ftpc->file are url-decoded so convert the input path
      before we compare the strings */
   char *path = NULL;
