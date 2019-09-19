@@ -3606,7 +3606,8 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
         /* otherwise just fall through */
       }
       else {
-        result = ftp_nb_type(conn, (bool)data->set.prefer_ascii, FTP_RETR_TYPE);
+        result = ftp_nb_type(conn, (bool)data->set.prefer_ascii,
+                             FTP_RETR_TYPE);
         if(result)
           return result;
       }
