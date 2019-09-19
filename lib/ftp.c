@@ -466,11 +466,12 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
     Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
 
     if(data->set.fsockopt) {
+      int error = 0;
       /* activate callback for setting socket options */
       Curl_set_in_callback(data, true);
-      int error = data->set.fsockopt(data->set.sockopt_client,
-                                     conn->sock[SECONDARYSOCKET],
-                                     CURLSOCKTYPE_IPCXN);
+      error = data->set.fsockopt(data->set.sockopt_client,
+                                 conn->sock[SECONDARYSOCKET],
+                                 CURLSOCKTYPE_IPCXN);
       Curl_set_in_callback(data, false);
 
       if(error)
