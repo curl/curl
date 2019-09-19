@@ -1968,7 +1968,6 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
                                    CURLSH *share)
 {
   CURLM *multi;
-  bool done = FALSE;
   CURLMcode mcode = CURLM_OK;
   CURLcode result = CURLE_OK;
   int still_running = 1;
@@ -1985,7 +1984,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   if(result)
     return result;
 
-  while(!done && !mcode && (still_running || more_transfers)) {
+  while(!mcode && (still_running || more_transfers)) {
     mcode = curl_multi_poll(multi, NULL, 0, 1000, NULL);
     if(!mcode)
       mcode = curl_multi_perform(multi, &still_running);
