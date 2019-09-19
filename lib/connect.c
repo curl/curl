@@ -1039,8 +1039,8 @@ static void nosigpipe(struct connectdata *conn,
 
    The problem described in this knowledge-base is referencing Windows XP,
    but the performance issue also occurs in Windows Vista and 7, but seems
-   solved in Windows 8 and later. Following function trying to detect OS version
-   and skips SO_SNDBUF adjustment for Windows 8 and above.
+   solved in Windows 8 and later. Following function trying to detect OS
+   version and skips SO_SNDBUF adjustment for Windows 8 and above.
 */
 #define DETECT_OS_NONE 0
 #define DETECT_OS_PRE_WIN8 1
