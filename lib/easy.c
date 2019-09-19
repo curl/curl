@@ -1020,9 +1020,8 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 
   /* if there's no error and we're not pausing both directions, we want
      to have this handle checked soon */
-  if(!result &&
-     ((newstate&(KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-      (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) ) {
+  if((newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
+     (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW); /* get this handle going again */
     if(data->multi)
       Curl_update_timer(data->multi);
