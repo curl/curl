@@ -1186,10 +1186,11 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
     }
   }
 
-  /* Duplicate other fields. */
-  dst->encoder = src->encoder;
-
-  res = curl_mime_type(dst, src->mimetype);
+  if(!res) {
+    /* Duplicate other fields. */
+    dst->encoder = src->encoder;
+    res = curl_mime_type(dst, src->mimetype);
+  }
   if(!res)
     res = curl_mime_name(dst, src->name);
   if(!res)
