@@ -2761,13 +2761,6 @@ static CURLcode set_login(struct connectdata *conn)
       result = CURLE_OUT_OF_MEMORY;
   }
 
-  /* if there's a user without password, consider password blank */
-  if(conn->user && !conn->passwd) {
-    conn->passwd = strdup("");
-    if(!conn->passwd)
-      result = CURLE_OUT_OF_MEMORY;
-  }
-
   return result;
 }
 
