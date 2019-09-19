@@ -3530,14 +3530,13 @@ static CURLcode ftp_do_more(struct connectdata *conn, int *completep)
 
     /* if we got an error or if we don't wait for a data connection return
        immediately */
-    if(result || (ftpc->wait_data_conn != TRUE))
+    if(result || !ftpc->wait_data_conn)
       return result;
 
-    if(ftpc->wait_data_conn)
-      /* if we reach the end of the FTP state machine here, *complete will be
-         TRUE but so is ftpc->wait_data_conn, which says we need to wait for
-         the data connection and therefore we're not actually complete */
-      *completep = 0;
+    /* if we reach the end of the FTP state machine here, *complete will be
+       TRUE but so is ftpc->wait_data_conn, which says we need to wait for the
+       data connection and therefore we're not actually complete */
+    *completep = 0;
   }
 
   if(ftp->transfer <= FTPTRANSFER_INFO) {
