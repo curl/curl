@@ -327,7 +327,7 @@ static CURLcode CONNECT(struct connectdata *conn,
     { /* READING RESPONSE PHASE */
       int error = SELECT_OK;
 
-      while(s->keepon && !error) {
+      while(s->keepon) {
         ssize_t gotbytes;
 
         /* make sure we have space to read more data */
