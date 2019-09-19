@@ -4252,28 +4252,37 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   }
 
   ftpc->cwddone = FALSE; /* default to not done */
-
-  if(ftpc->prevpath) {
-    /* prevpath is "raw" so we convert the input path before we compare the
-       strings */
-    size_t dlen;
-    char *path;
-    CURLcode result =
-      Curl_urldecode(conn->data, ftp->path, 0, &path, &dlen, TRUE);
-    if(result) {
-      freedirs(ftpc);
-      return result;
-    }
-
-    dlen -= ftpc->file?strlen(ftpc->file):0;
-    if((dlen == strlen(ftpc->prevpath)) &&
-       !strncmp(path, ftpc->prevpath, dlen) &&
-       (ftpc->prevmethod == data->set.ftp_filemethod)) {
-      infof(data, "Request has same path as previous transfer\n");
-      ftpc->cwddone = TRUE;
-    }
-    free(path);
+  
+  /* prevpath and ftpc->file are url-decoded so convert the input path
+     before we compare the strings */
+  char *path = NULL;
+  size_t pathlen = 0;
+  CURLcode result =
+    Curl_urldecode(conn->data, ftp->path, 0, &path, &pathlen, TRUE);
+  if(result) {
+    freedirs(ftpc);
+    return result;
   }
+
+  if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (path[0] == '/'))
+    ftpc->cwddone = TRUE; /* skip CWD for absolute paths */
+  else { /* newly created FTP connections are already in entry path */
+    const char* oldpath = conn->bits.reuse ? ftpc->prevpath : "";
+    if(oldpath) {
+      if(data->set.ftp_filemethod == FTPFILE_NOCWD)
+        pathlen = 0; /* CWD to entry for relative paths */
+      else
+        pathlen -= ftpc->file?strlen(ftpc->file):0;
+
+      path[pathlen] = '\0';
+
+      if(!strcmp(path, oldpath)) {
+        infof(data, "Request has same path as previous transfer\n");
+        ftpc->cwddone = TRUE;
+      }
+    }
+  }
+  free(path);
 
   return CURLE_OK;
 }
