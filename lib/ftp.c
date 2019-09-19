@@ -465,6 +465,18 @@ static CURLcode InitiateTransfer(struct connectdata *conn)
     /* set the SO_SNDBUF for the secondary socket for those who need it */
     Curl_sndbufset(conn->sock[SECONDARYSOCKET]);
 
+    if(data->set.fsockopt) {
+      /* activate callback for setting socket options */
+      Curl_set_in_callback(data, true);
+      int error = data->set.fsockopt(data->set.sockopt_client,
+                                     conn->sock[SECONDARYSOCKET],
+                                     CURLSOCKTYPE_IPCXN);
+      Curl_set_in_callback(data, false);
+
+      if(error)
+          return CURLE_ABORTED_BY_CALLBACK;
+     }
+
     Curl_setup_transfer(data, -1, -1, FALSE, SECONDARYSOCKET);
   }
   else {
