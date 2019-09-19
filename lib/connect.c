@@ -1037,13 +1037,14 @@ static void nosigpipe(struct connectdata *conn,
    Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
    Buffer Size
 
-   The problem described in this knowledge-base is applied only to pre-Vista
-   Windows.  Following function trying to detect OS version and skips
-   SO_SNDBUF adjustment for Windows Vista and above.
+   The problem described in this knowledge-base is referencing Windows XP,
+   but the performance issue also occurs in Windows Vista and 7, but seems
+   solved in Windows 8 and later. Following function trying to detect OS version
+   and skips SO_SNDBUF adjustment for Windows 8 and above.
 */
 #define DETECT_OS_NONE 0
-#define DETECT_OS_PREVISTA 1
-#define DETECT_OS_VISTA_OR_LATER 2
+#define DETECT_OS_PRE_WIN8 1
+#define DETECT_OS_WIN8_OR_LATER 2
 
 void Curl_sndbufset(curl_socket_t sockfd)
 {
@@ -1054,14 +1055,14 @@ void Curl_sndbufset(curl_socket_t sockfd)
   static int detectOsState = DETECT_OS_NONE;
 
   if(detectOsState == DETECT_OS_NONE) {
-    if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
+    if(Curl_verify_windows_version(6, 2, PLATFORM_WINNT,
                                    VERSION_GREATER_THAN_EQUAL))
-      detectOsState = DETECT_OS_VISTA_OR_LATER;
+      detectOsState = DETECT_OS_WIN8_OR_LATER;
     else
-      detectOsState = DETECT_OS_PREVISTA;
+      detectOsState = DETECT_OS_PRE_WIN8;
   }
 
-  if(detectOsState == DETECT_OS_VISTA_OR_LATER)
+  if(detectOsState == DETECT_OS_WIN8_OR_LATER)
     return;
 
   if(getsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&curval, &curlen) == 0)
