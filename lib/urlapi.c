@@ -784,6 +784,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 
       if(junkscan(schemep))
         return CURLUE_MALFORMED_INPUT;
+
     }
     else {
       /* no scheme! */
@@ -804,11 +805,14 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
       p++;
 
     len = p - hostp;
-    if(!len)
-      return CURLUE_MALFORMED_INPUT;
-
-    memcpy(hostname, hostp, len);
-    hostname[len] = 0;
+    if(len) {
+      memcpy(hostname, hostp, len);
+      hostname[len] = 0;
+    }
+    else {
+      if(!(flags & CURLU_NO_AUTHORITY))
+        return CURLUE_MALFORMED_INPUT;
+    }
 
     if((flags & CURLU_GUESS_SCHEME) && !schemep) {
       /* legacy curl-style guess based on host name */
@@ -889,9 +893,14 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if(result)
       return result;
 
-    result = hostname_check(u, hostname);
-    if(result)
-      return result;
+    if(0 == strlen(hostname) && (flags & CURLU_NO_AUTHORITY)) {
+      /* Skip hostname check, it's allowed to be empty. */
+    }
+    else {
+      result = hostname_check(u, hostname);
+      if(result)
+        return result;
+    }
 
     u->host = strdup(hostname);
     if(!u->host)
@@ -1432,9 +1441,14 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     }
 
     if(what == CURLUPART_HOST) {
-      if(hostname_check(u, (char *)newp)) {
-        free((char *)newp);
-        return CURLUE_MALFORMED_INPUT;
+      if(0 == strlen(newp) && (flags & CURLU_NO_AUTHORITY)) {
+        /* Skip hostname check, it's allowed to be empty. */
+      }
+      else {
+        if(hostname_check(u, (char *)newp)) {
+          free((char *)newp);
+          return CURLUE_MALFORMED_INPUT;
+        }
       }
     }
 

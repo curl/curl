@@ -414,6 +414,18 @@ static struct urltestcase get_url_list[] = {
   {"tp://example.com/path/html",
    "tp://example.com/path/html",
    CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK},
+  {"custom-scheme://host?expected=test-good",
+   "custom-scheme://host/?expected=test-good",
+   CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK},
+  {"custom-scheme://?expected=test-bad",
+   "",
+   CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_MALFORMED_INPUT},
+  {"custom-scheme://?expected=test-new-good",
+   "custom-scheme:///?expected=test-new-good",
+   CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY, 0, CURLUE_OK},
+  {"custom-scheme://host?expected=test-still-good",
+   "custom-scheme://host/?expected=test-still-good",
+   CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY, 0, CURLUE_OK},
   {NULL, NULL, 0, 0, 0}
 };
 
@@ -551,6 +563,17 @@ static struct setcase set_parts_list[] = {
    "scheme=ftp,",
    "ftp://example.com:80/",
    0, 0, CURLUE_OK, CURLUE_OK},
+  {"custom-scheme://host",
+   "host=\"\",",
+   "custom-scheme://host/",
+   CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK,
+   CURLUE_MALFORMED_INPUT},
+  {"custom-scheme://host",
+   "host=\"\",",
+   "custom-scheme:///",
+   CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY,
+   CURLUE_OK, CURLUE_OK},
+
   {NULL, NULL, NULL, 0, 0, 0, 0}
 };
 
