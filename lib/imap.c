@@ -1306,6 +1306,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       break;
 
     case IMAP_LIST:
+    case IMAP_SEARCH:
       result = imap_state_listsearch_resp(conn, imapcode, imapc->state);
       break;
 
@@ -1327,10 +1328,6 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_APPEND_FINAL:
       result = imap_state_append_final_resp(conn, imapcode, imapc->state);
-      break;
-
-    case IMAP_SEARCH:
-      result = imap_state_listsearch_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
