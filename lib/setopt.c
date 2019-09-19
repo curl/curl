@@ -2500,7 +2500,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_RTSP_SERVER_CSEQ:
     /* Same as the above, but for server-initiated requests */
-    data->state.rtsp_next_client_CSeq = va_arg(param, long);
+    data->state.rtsp_next_server_CSeq = va_arg(param, long);
     break;
 
   case CURLOPT_INTERLEAVEDATA:
