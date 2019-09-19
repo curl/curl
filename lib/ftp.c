@@ -867,6 +867,10 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
     /* already done and fine */
     result = ftp_state_mdtm(conn);
   else {
+    /* FTPFILE_NOCWD with full path: expect ftpc->cwddone! */
+    DEBUGASSERT((conn->data->set.ftp_filemethod != FTPFILE_NOCWD) ||
+                !(ftpc->dirdepth && ftpc->dirs[0][0] == '/'));
+
     ftpc->count2 = 0; /* count2 counts failed CWDs */
 
     /* count3 is set to allow a MKD to fail once. In the case when first CWD
@@ -874,12 +878,9 @@ static CURLcode ftp_state_cwd(struct connectdata *conn)
        dir) this then allows for a second try to CWD to it */
     ftpc->count3 = (conn->data->set.ftp_create_missing_dirs == 2)?1:0;
 
-    if((conn->data->set.ftp_filemethod == FTPFILE_NOCWD) && !ftpc->cwdcount)
-      /* No CWD necessary */
-      result = ftp_state_mdtm(conn);
-    else if(conn->bits.reuse && ftpc->entrypath &&
-            /* no need to go to entrypath when we have an absolute path */
-            !(ftpc->dirdepth && ftpc->dirs[0][0] == '/')) {
+    if(conn->bits.reuse && ftpc->entrypath &&
+       /* no need to go to entrypath when we have an absolute path */
+       !(ftpc->dirdepth && ftpc->dirs[0][0] == '/')) {
       /* This is a re-used connection. Since we change directory to where the
          transfer is taking place, we must first get back to the original dir
          where we ended up after login: */
@@ -1438,8 +1439,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
      servers either... */
 
   /*
-     if FTPFILE_NOCWD was specified, we are currently in
-     the user's home directory, so we should add the path
+     if FTPFILE_NOCWD was specified, we should add the path
      as argument for the LIST / NLST / or custom command.
      Whether the server will support this, is uncertain.
 
@@ -3133,6 +3133,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
   int ftpcode;
   CURLcode result = CURLE_OK;
   char *path = NULL;
+  size_t pathlen = 0;
 
   if(!ftp)
     return CURLE_OK;
@@ -3170,9 +3171,6 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     break;
   }
 
-  /* now store a copy of the directory we are in */
-  free(ftpc->prevpath);
-
   if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
       Curl_set_in_callback(data, true);
@@ -3184,40 +3182,40 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
 
   if(!result)
     /* get the "raw" path */
-    result = Curl_urldecode(data, ftp->path, 0, &path, NULL, TRUE);
+    result = Curl_urldecode(data, ftp->path, 0, &path, &pathlen, TRUE);
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
     ftpc->ctl_valid = FALSE; /* mark control connection as bad */
     connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
+    free(ftpc->prevpath);
     ftpc->prevpath = NULL; /* no path remembering */
   }
-  else {
-    size_t flen = ftpc->file?strlen(ftpc->file):0; /* file is "raw" already */
-    size_t dlen = strlen(path)-flen;
-    if(!ftpc->cwdfail) {
-      ftpc->prevmethod = data->set.ftp_filemethod;
-      if(dlen && (data->set.ftp_filemethod != FTPFILE_NOCWD)) {
+  else { /* remember working directory for connection reuse */
+    if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (path[0] == '/'))
+      free(path); /* full path => no CWDs happened => keep ftpc->prevpath */
+    else {
+      free(ftpc->prevpath);
+
+      if(!ftpc->cwdfail) {
+        if(data->set.ftp_filemethod == FTPFILE_NOCWD)
+          pathlen = 0; /* relative path => working directory is FTP home */
+        else
+          pathlen -= ftpc->file?strlen(ftpc->file):0; /* file is url-decoded */
+
+        path[pathlen] = '\0';
         ftpc->prevpath = path;
-        if(flen)
-          /* if 'path' is not the whole string */
-          ftpc->prevpath[dlen] = 0; /* terminate */
       }
       else {
         free(path);
-        /* we never changed dir */
-        ftpc->prevpath = strdup("");
-        if(!ftpc->prevpath)
-          return CURLE_OUT_OF_MEMORY;
+        ftpc->prevpath = NULL; /* no path */
       }
-      if(ftpc->prevpath)
-        infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
     }
-    else {
-      ftpc->prevpath = NULL; /* no path */
-      free(path);
-    }
+
+    if(ftpc->prevpath)
+      infof(data, "Remembering we are in dir \"%s\"\n", ftpc->prevpath);
   }
+
   /* free the dir tree and file parts */
   freedirs(ftpc);
 
@@ -4093,6 +4091,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   const char *path_to_use = ftp->path;
   const char *cur_pos;
   const char *filename = NULL;
+  char *path = NULL;
+  size_t pathlen = 0;
+  CURLcode result = CURLE_OK;
 
   cur_pos = path_to_use; /* current position in path. point at the begin of
                             next path component */
@@ -4134,7 +4135,6 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     slash_pos = strrchr(cur_pos, '/');
     if(slash_pos || !*cur_pos) {
       size_t dirlen = slash_pos-cur_pos;
-      CURLcode result;
 
       ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
       if(!ftpc->dirs)
@@ -4185,10 +4185,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
              CWD requires a parameter and a non-existent parameter a) doesn't
              work on many servers and b) has no effect on the others. */
           size_t len = slash_pos - cur_pos + absolute_dir;
-          CURLcode result =
-            Curl_urldecode(conn->data, cur_pos - absolute_dir, len,
-                           &ftpc->dirs[ftpc->dirdepth], NULL,
-                           TRUE);
+          result = Curl_urldecode(conn->data, cur_pos - absolute_dir, len,
+                                  &ftpc->dirs[ftpc->dirdepth], NULL,
+                                  TRUE);
           if(result) {
             freedirs(ftpc);
             return result;
@@ -4227,8 +4226,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   } /* switch */
 
   if(filename && *filename) {
-    CURLcode result =
-      Curl_urldecode(conn->data, filename, 0,  &ftpc->file, NULL, TRUE);
+    result = Curl_urldecode(conn->data, filename, 0,  &ftpc->file, NULL, TRUE);
 
     if(result) {
       freedirs(ftpc);
@@ -4247,27 +4245,33 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
   ftpc->cwddone = FALSE; /* default to not done */
 
-  if(ftpc->prevpath) {
-    /* prevpath is "raw" so we convert the input path before we compare the
-       strings */
-    size_t dlen;
-    char *path;
-    CURLcode result =
-      Curl_urldecode(conn->data, ftp->path, 0, &path, &dlen, TRUE);
-    if(result) {
-      freedirs(ftpc);
-      return result;
-    }
-
-    dlen -= ftpc->file?strlen(ftpc->file):0;
-    if((dlen == strlen(ftpc->prevpath)) &&
-       !strncmp(path, ftpc->prevpath, dlen) &&
-       (ftpc->prevmethod == data->set.ftp_filemethod)) {
-      infof(data, "Request has same path as previous transfer\n");
-      ftpc->cwddone = TRUE;
-    }
-    free(path);
+  /* prevpath and ftpc->file are url-decoded so convert the input path
+     before we compare the strings */
+  result = Curl_urldecode(conn->data, ftp->path, 0, &path, &pathlen, TRUE);
+  if(result) {
+    freedirs(ftpc);
+    return result;
   }
+
+  if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (path[0] == '/'))
+    ftpc->cwddone = TRUE; /* skip CWD for absolute paths */
+  else { /* newly created FTP connections are already in entry path */
+    const char *oldpath = conn->bits.reuse ? ftpc->prevpath : "";
+    if(oldpath) {
+      if(data->set.ftp_filemethod == FTPFILE_NOCWD)
+        pathlen = 0; /* CWD to entry for relative paths */
+      else
+        pathlen -= ftpc->file?strlen(ftpc->file):0;
+
+      path[pathlen] = '\0';
+
+      if(!strcmp(path, oldpath)) {
+        infof(data, "Request has same path as previous transfer\n");
+        ftpc->cwddone = TRUE;
+      }
+    }
+  }
+  free(path);
 
   return CURLE_OK;
 }
