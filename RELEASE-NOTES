@@ -12,11 +12,28 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o ldap: Stop using wide char version of ldapp_err2string [1]
- o winbuild/MakefileBuild.vc: Fix line endings
- o winbuild/MakefileBuild.vc: Add vssh [2]
+ o FTP: allow "rubbish" prepended to the SIZE response [15]
+ o FTP: remove trailing slash from path for LIST/MLSD [6]
+ o FTP: skip CWD to entry dir when target is absolute [16]
+ o appveyor: add a winbuild [14]
  o asyn-thread: s/AF_LOCAL/AF_UNIX for Solaris [3]
+ o curl: fix memory leaked by parse_metalink() [17]
+ o curl: load large files with -d @ much faster [19]
+ o docs/HTTP3: fix `--with-ssl` ngtcp2 configure flag [21]
+ o doh: clean up dangling DOH memory on easy close [9]
+ o doh: fix (harmless) buffer overrun [13]
+ o doh: fix undefined behaviour and open up for gcc and clang optimization [12]
+ o http2: relax verification of :authority in push promise requests [8]
+ o ldap: Stop using wide char version of ldapp_err2string [1]
+ o mime: when disabled, avoid C99 macro [7]
+ o openssl: close_notify on the FTP data connection doesn't mean closure [20]
+ o parsedate: fix date parsing disabled builds [18]
+ o quiche: persist connection details (fixes -I with --http3) [11]
  o setopt: make it easier to add new enum values [4]
+ o smb: check for full size message before reading message details [10]
+ o url: only reuse TLS connections with matching pinning [5]
+ o winbuild/MakefileBuild.vc: Add vssh [2]
+ o winbuild/MakefileBuild.vc: Fix line endings
 
 This release includes the following known bugs:
 
@@ -25,9 +42,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Bernhard Walle, Dagobert Michelsen, Daniel Stenberg, Ray Satiro,
-  Zenju on github,
-  (5 contributors)
+  Alessandro Ghedini, Bernhard Walle, Christoph M. Becker, Dagobert Michelsen,
+  Daniel Stenberg, George Liu, Gilles Vollant, Jimmy Gaussen, Kamil Dudka,
+  Marcel Raad, Max Dymond, Michael Kaufmann, Paul Dreik, Philippe Marguinaud,
+  Ray Satiro, Roland Hieber, Sebastian Haglund, Zenju on github,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -37,3 +56,20 @@ References to bug reports and discussions on issues:
  [2] = https://curl.haxx.se/bug/?i=4322
  [3] = https://curl.haxx.se/bug/?i=4328
  [4] = https://curl.haxx.se/bug/?i=4321
+ [5] = https://curl.haxx.se/mail/lib-2019-09/0061.html
+ [6] = https://curl.haxx.se/bug/?i=4348
+ [7] = https://curl.haxx.se/bug/?i=4368
+ [8] = https://curl.haxx.se/bug/?i=4365
+ [9] = https://curl.haxx.se/bug/?i=4366
+ [10] = https://curl.haxx.se/bug/?i=4363
+ [11] = https://curl.haxx.se/bug/?i=4358
+ [12] = https://curl.haxx.se/bug/?i=4350
+ [13] = https://curl.haxx.se/bug/?i=4352
+ [14] = https://curl.haxx.se/bug/?i=4324
+ [15] = https://curl.haxx.se/bug/?i=4339
+ [16] = https://curl.haxx.se/bug/?i=4332
+ [17] = https://curl.haxx.se/bug/?i=4326
+ [18] = https://curl.haxx.se/bug/?i=4325
+ [19] = https://curl.haxx.se/bug/?i=4336
+ [20] = https://curl.haxx.se/bug/?i=4329
+ [21] = https://curl.haxx.se/bug/?i=4338
