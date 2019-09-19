@@ -1135,6 +1135,8 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
   const curl_mimepart *s;
   CURLcode res = CURLE_OK;
 
+  DEBUGASSERT(dst);
+
   /* Duplicate content. */
   switch(src->kind) {
   case MIMEKIND_NONE:
@@ -1184,20 +1186,18 @@ CURLcode Curl_mime_duppart(curl_mimepart *dst, const curl_mimepart *src)
     }
   }
 
-  /* Duplicate other fields. */
-  if(dst != NULL)
+  if(!res) {
+    /* Duplicate other fields. */
     dst->encoder = src->encoder;
-  else
-    res = CURLE_WRITE_ERROR;
-  if(!res)
     res = curl_mime_type(dst, src->mimetype);
+  }
   if(!res)
     res = curl_mime_name(dst, src->name);
   if(!res)
     res = curl_mime_filename(dst, src->filename);
 
   /* If an error occurred, rollback. */
-  if(res && dst)
+  if(res)
     Curl_mime_cleanpart(dst);
 
   return res;
