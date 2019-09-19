@@ -119,7 +119,7 @@ build_script:
     - if %BUILD_SYSTEM%==CMake (
         cmake .
         -G"%PRJ_GEN%"
-        "%TARGET%"
+        %TARGET%
         -DCMAKE_USE_OPENSSL=%OPENSSL%
         -DCMAKE_USE_WINSSL=%WINSSL%
         -DHTTP_ONLY=%HTTP_ONLY%
