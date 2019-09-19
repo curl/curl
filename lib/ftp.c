@@ -4267,7 +4267,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (path[0] == '/'))
     ftpc->cwddone = TRUE; /* skip CWD for absolute paths */
   else { /* newly created FTP connections are already in entry path */
-    const char* oldpath = conn->bits.reuse ? ftpc->prevpath : "";
+    const char *oldpath = conn->bits.reuse ? ftpc->prevpath : "";
     if(oldpath) {
       if(data->set.ftp_filemethod == FTPFILE_NOCWD)
         pathlen = 0; /* CWD to entry for relative paths */
