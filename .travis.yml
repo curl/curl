@@ -10,9 +10,6 @@ env:
     global:
         - LD_LIBRARY_PATH=/usr/local/lib
 
-go:
-    - master
-
 addons:
     apt:
         config:
@@ -414,6 +411,10 @@ matrix:
 before_install:
     - eval "${OVERRIDE_CC}"
     - eval "${OVERRIDE_CXX}"
+    # Install and use the current stable release of Go
+    - gimme --list
+    - gimme stable
+    - gimme --list
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
