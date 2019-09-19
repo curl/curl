@@ -3198,7 +3198,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
       free(ftpc->prevpath);
 
       if(!ftpc->cwdfail) {
-        if (data->set.ftp_filemethod == FTPFILE_NOCWD)
+        if(data->set.ftp_filemethod == FTPFILE_NOCWD)
           pathlen = 0; /* relative path => working directory is FTP home */
         else
           pathlen -= ftpc->file?strlen(ftpc->file):0; /* file is url-decoded */
