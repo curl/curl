@@ -4099,6 +4099,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   const char *path_to_use = ftp->path;
   const char *cur_pos;
   const char *filename = NULL;
+  char *path = NULL;
+  size_t pathlen = 0;
+  CURLcode result = CURLE_OK;
 
   cur_pos = path_to_use; /* current position in path. point at the begin of
                             next path component */
@@ -4255,10 +4258,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
   /* prevpath and ftpc->file are url-decoded so convert the input path
      before we compare the strings */
-  char *path = NULL;
-  size_t pathlen = 0;
-  CURLcode result =
-    Curl_urldecode(conn->data, ftp->path, 0, &path, &pathlen, TRUE);
+  result = Curl_urldecode(conn->data, ftp->path, 0, &path, &pathlen, TRUE);
   if(result) {
     freedirs(ftpc);
     return result;
