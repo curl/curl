@@ -2811,7 +2811,7 @@ static CURLcode ssh_block_statemach(struct connectdata *conn,
     }
 
 #ifdef HAVE_LIBSSH2_SESSION_BLOCK_DIRECTION
-    if(!result && block) {
+    if(block) {
       int dir = libssh2_session_block_directions(sshc->ssh_session);
       curl_socket_t sock = conn->sock[FIRSTSOCKET];
       curl_socket_t fd_read = CURL_SOCKET_BAD;
