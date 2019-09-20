@@ -4143,7 +4143,6 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     slash_pos = strrchr(cur_pos, '/');
     if(slash_pos || !*cur_pos) {
       size_t dirlen = slash_pos-cur_pos;
-      CURLcode result;
 
       ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
       if(!ftpc->dirs)
@@ -4194,10 +4193,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
              CWD requires a parameter and a non-existent parameter a) doesn't
              work on many servers and b) has no effect on the others. */
           size_t len = slash_pos - cur_pos + absolute_dir;
-          CURLcode result =
-            Curl_urldecode(conn->data, cur_pos - absolute_dir, len,
-                           &ftpc->dirs[ftpc->dirdepth], NULL,
-                           TRUE);
+          result = Curl_urldecode(conn->data, cur_pos - absolute_dir, len,
+                                  &ftpc->dirs[ftpc->dirdepth], NULL,
+                                  TRUE);
           if(result) {
             freedirs(ftpc);
             return result;
@@ -4236,8 +4234,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   } /* switch */
 
   if(filename && *filename) {
-    CURLcode result =
-      Curl_urldecode(conn->data, filename, 0,  &ftpc->file, NULL, TRUE);
+    result = Curl_urldecode(conn->data, filename, 0,  &ftpc->file, NULL, TRUE);
 
     if(result) {
       freedirs(ftpc);
