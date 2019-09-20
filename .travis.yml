@@ -413,7 +413,7 @@ before_install:
     - eval "${OVERRIDE_CXX}"
     # Install and use the current stable release of Go
     - gimme --list
-    - gimme stable
+    - eval "$(gimme stable)"
     - gimme --list
 
 install:
