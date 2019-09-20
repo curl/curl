@@ -620,20 +620,20 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_DOH
   struct dohdata doh; /* DoH specific data for this request */
 #endif
-  bit header:1;       /* incoming data has HTTP header */
-  bit content_range:1; /* set TRUE if Content-Range: was found */
-  bit upload_done:1;  /* set to TRUE when doing chunked transfer-encoding
-                         upload and we're uploading the last chunk */
-  bit ignorebody:1;   /* we read a response-body but we ignore it! */
-  bit http_bodyless:1; /* HTTP response status code is between 100 and 199,
-                          204 or 304 */
-  bit chunk:1; /* if set, this is a chunked transfer-encoding */
-  bit upload_chunky:1; /* set TRUE if we are doing chunked transfer-encoding
-                          on upload */
-  bit getheader:1;    /* TRUE if header parsing is wanted */
-  bit forbidchunk:1;  /* used only to explicitly forbid chunk-upload for
-                         specific upload buffers. See readmoredata() in http.c
-                         for details. */
+  BIT(header);       /* incoming data has HTTP header */
+  BIT(content_range); /* set TRUE if Content-Range: was found */
+  BIT(upload_done);  /* set to TRUE when doing chunked transfer-encoding
+                        upload and we're uploading the last chunk */
+  BIT(ignorebody);   /* we read a response-body but we ignore it! */
+  BIT(http_bodyless); /* HTTP response status code is between 100 and 199,
+                         204 or 304 */
+  BIT(chunk); /* if set, this is a chunked transfer-encoding */
+  BIT(upload_chunky); /* set TRUE if we are doing chunked transfer-encoding
+                         on upload */
+  BIT(getheader);    /* TRUE if header parsing is wanted */
+  BIT(forbidchunk);  /* used only to explicitly forbid chunk-upload for
+                        specific upload buffers. See readmoredata() in http.c
+                        for details. */
 };
 
 /*
