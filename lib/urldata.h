@@ -158,7 +158,7 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
 
 /* the type we use for storing a single boolean bit */
-#ifdef _MSV_VER
+#ifdef _MSC_VER
 #define BIT(x) bool x
 #else
 typedef unsigned int bit;
