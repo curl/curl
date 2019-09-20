@@ -598,6 +598,8 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
   if(hostname[0] == '[') {
     char dest[16]; /* fits a binary IPv6 address */
     const char *l = "0123456789abcdefABCDEF:.";
+    if(hlen <= 2)
+      return CURLUE_MALFORMED_INPUT;
     hostname++;
     hlen -= 2;
 
