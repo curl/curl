@@ -1010,10 +1010,10 @@ static int cb_h3_acked_stream_data(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static int cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
-                              const uint8_t **pdata,
-                              size_t *pdatalen, uint32_t *pflags,
-                              void *user_data, void *stream_user_data)
+static ssize_t cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
+                                  nghttp3_vec *vec, size_t veccnt,
+                                  uint32_t *pflags, void *user_data,
+                                  void *stream_user_data)
 {
   struct Curl_easy *data = stream_user_data;
   size_t nread;
@@ -1021,12 +1021,13 @@ static int cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
   (void)conn;
   (void)stream_id;
   (void)user_data;
+  (void)veccnt;
 
   if(data->set.postfields) {
-    *pdata = data->set.postfields;
-    *pdatalen = data->state.infilesize;
+    vec[0].base = data->set.postfields;
+    vec[0].len = data->state.infilesize;
     *pflags = NGHTTP3_DATA_FLAG_EOF;
-    return 0;
+    return 1;
   }
 
   nread = CURLMIN(stream->upload_len, H3_SEND_SIZE - stream->h3out->used);
@@ -1044,8 +1045,8 @@ static int cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
     out->used += nread;
 
     /* that's the chunk we return to nghttp3 */
-    *pdata = &out->buf[out->windex];
-    *pdatalen = nread;
+    vec[0].base = &out->buf[out->windex];
+    vec[0].len = nread;
 
     if(out->windex == H3_SEND_SIZE)
       out->windex = 0; /* wrap */
@@ -1063,15 +1064,13 @@ static int cb_h3_readfunction(nghttp3_conn *conn, int64_t stream_id,
   if(stream->upload_done && !stream->upload_len &&
      (stream->upload_left <= 0)) {
     H3BUGF(infof(data, "!!!!!!!!! cb_h3_readfunction sets EOF\n"));
-    *pdata = NULL;
-    *pdatalen = 0;
     *pflags = NGHTTP3_DATA_FLAG_EOF;
+    return 0;
   }
   else if(!nread) {
-    *pdatalen = 0;
     return NGHTTP3_ERR_WOULDBLOCK;
   }
-  return 0;
+  return 1;
 }
 
 /* Index where :authority header field will appear in request header
@@ -1524,7 +1523,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
             return CURLE_SEND_ERROR;
           }
         }
-        else if(ndatalen > 0) {
+        else if(ndatalen >= 0) {
           rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id, ndatalen);
           if(rv != 0) {
             failf(conn->data,
