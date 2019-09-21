@@ -1885,15 +1885,9 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         urls = NULL;
       }
 
-      if(infilenum > 1) {
-        /* when file globbing, exit loop upon critical error */
-        if(is_fatal_error(result))
-          break;
-      }
-      else if(result)
-        /* when not file globbing, exit loop upon any error */
+      if(result)
+        /* exit loop upon error */
         break;
-
     } /* loop to the next globbed upload file */
 
     /* Free loop-local allocated memory */
@@ -1913,6 +1907,9 @@ static CURLcode create_transfers(struct GlobalConfig *global,
     Curl_safefree(urlnode->infile);
     urlnode->flags = 0;
 
+    if(result)
+      /* exit loop upon error */
+      break;
   } /* for-loop through all URLs */
   quit_curl:
 
