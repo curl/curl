@@ -55,7 +55,7 @@ static enum alpnid alpn2alpnid(char *name)
   if(strcasecompare(name, "h2"))
     return ALPN_h2;
 #if (defined(USE_QUICHE) || defined(USE_NGHTTP2)) && !defined(UNITTESTS)
-  if(strcasecompare(name, "h3-22"))
+  if(strcasecompare(name, "h3-23"))
     return ALPN_h3;
 #else
   if(strcasecompare(name, "h3"))
