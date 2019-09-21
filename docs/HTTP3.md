@@ -33,7 +33,7 @@ in the master branch using pull-requests, just like ordinary changes.
 
 Build (patched) OpenSSL
 
-     % git clone --depth 1 -b openssl-quic-draft-22 https://github.com/tatsuhiro-t/openssl
+     % git clone --depth 1 -b openssl-quic-draft-23 https://github.com/tatsuhiro-t/openssl
      % cd openssl
      % ./config enable-tls1_3 --prefix=<somewhere1>
      % make
@@ -52,7 +52,7 @@ Build nghttp3
 Build ngtcp2
 
      % cd ..
-     % git clone -b draft-22 https://github.com/ngtcp2/ngtcp2
+     % git clone https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -i
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somehere1>/lib" --prefix==<somewhere3>
