@@ -2805,7 +2805,7 @@ sectransp_connect_common(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
-  long timeout_ms;
+  timediff_t timeout_ms;
   int what;
 
   /* check if the connection has already been established */
@@ -2852,7 +2852,7 @@ sectransp_connect_common(struct connectdata *conn,
       connssl->connecting_state?sockfd:CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                               nonblocking?0:timeout_ms);
+                               nonblocking?0:(time_t)timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

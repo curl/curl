@@ -1347,7 +1347,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   curl_socket_t sockfd = conn->sock[sockindex];
-  time_t timeout_ms;
+  timediff_t timeout_ms;
   int what;
 
   /* check if the connection has already been established */
@@ -1394,7 +1394,7 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
         connssl->connecting_state ? sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                               nonblocking ? 0 : timeout_ms);
+                               nonblocking ? 0 : (time_t)timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL/TLS socket, errno: %d", SOCKERRNO);
@@ -1544,7 +1544,7 @@ schannel_send(struct connectdata *conn, int sockindex,
     /* send entire message or fail */
     while(len > (size_t)written) {
       ssize_t this_write;
-      time_t timeleft;
+      timediff_t timeleft;
       int what;
 
       this_write = 0;
