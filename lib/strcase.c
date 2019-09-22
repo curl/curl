@@ -93,6 +93,75 @@ char Curl_raw_toupper(char in)
   return in;
 }
 
+
+/* Portable, consistent tolower (remember EBCDIC). Do not use tolower() because
+   its behavior is altered by the current locale. */
+char Curl_raw_tolower(char in)
+{
+#if !defined(CURL_DOES_CONVERSIONS)
+  if(in >= 'A' && in <= 'Z')
+    return (char)('a' + in - 'A');
+#else
+  switch(in) {
+  case 'A':
+    return 'a';
+  case 'B':
+    return 'b';
+  case 'C':
+    return 'c';
+  case 'D':
+    return 'd';
+  case 'E':
+    return 'e';
+  case 'F':
+    return 'f';
+  case 'G':
+    return 'g';
+  case 'H':
+    return 'h';
+  case 'I':
+    return 'i';
+  case 'J':
+    return 'j';
+  case 'K':
+    return 'k';
+  case 'L':
+    return 'l';
+  case 'M':
+    return 'm';
+  case 'N':
+    return 'n';
+  case 'O':
+    return 'o';
+  case 'P':
+    return 'p';
+  case 'Q':
+    return 'q';
+  case 'R':
+    return 'r';
+  case 'S':
+    return 's';
+  case 'T':
+    return 't';
+  case 'U':
+    return 'u';
+  case 'V':
+    return 'v';
+  case 'W':
+    return 'w';
+  case 'X':
+    return 'X';
+  case 'Y':
+    return 'y';
+  case 'Z':
+    return 'z';
+  }
+#endif
+
+  return in;
+}
+
+
 /*
  * Curl_strcasecompare() is for doing "raw" case insensitive strings. This is
  * meant to be locale independent and only compare strings we know are safe
@@ -162,6 +231,21 @@ void Curl_strntoupper(char *dest, const char *src, size_t n)
 
   do {
     *dest++ = Curl_raw_toupper(*src);
+  } while(*src++ && --n);
+}
+
+/* Copy a lower case version of the string from src to dest.  The
+ * strings may overlap.  No more than n characters of the string are copied
+ * (including any NUL) and the destination string will NOT be
+ * NUL-terminated if that limit is reached.
+ */
+void Curl_strntolower(char *dest, const char *src, size_t n)
+{
+  if(n < 1)
+    return;
+
+  do {
+    *dest++ = Curl_raw_tolower(*src);
   } while(*src++ && --n);
 }
 

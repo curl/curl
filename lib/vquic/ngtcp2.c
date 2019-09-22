@@ -1201,8 +1201,10 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
       nva[i].namelen = strlen((char *)nva[i].name);
     }
     else {
-      nva[i].name = (unsigned char *)hdbuf;
       nva[i].namelen = (size_t)(end - hdbuf);
+      /* Lower case the header name for HTTP/3 */
+      Curl_strntolower((char *)hdbuf, hdbuf, nva[i].namelen);
+      nva[i].name = (unsigned char *)hdbuf;
     }
     nva[i].flags = NGHTTP3_NV_FLAG_NONE;
     hdbuf = end + 1;
