@@ -86,6 +86,11 @@ matrix:
         - os: linux
           compiler: gcc
           dist: xenial
+          before_install:
+              # Install and use the current stable release of Go
+              - gimme --list
+              - eval "$(gimme stable)"
+              - gimme --list
           env:
               - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -99,6 +104,11 @@ matrix:
         - os: linux
           compiler: gcc
           dist: xenial
+          before_install:
+              # Install and use the current stable release of Go
+              - gimme --list
+              - eval "$(gimme stable)"
+              - gimme --list
           env:
               - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:$HOME/quiche/target/release:/usr/local/lib
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -411,10 +421,6 @@ matrix:
 before_install:
     - eval "${OVERRIDE_CC}"
     - eval "${OVERRIDE_CXX}"
-    # Install and use the current stable release of Go
-    - gimme --list
-    - eval "$(gimme stable)"
-    - gimme --list
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
