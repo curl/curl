@@ -646,6 +646,8 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
       nva[i].name_len = strlen((char *)nva[i].name);
     }
     else {
+      /* Lower case the header name for HTTP/3 */
+      Curl_strntolower((char *)hdbuf, hdbuf, strlen(hdbuf));
       nva[i].name = (unsigned char *)hdbuf;
       nva[i].name_len = (size_t)(end - hdbuf);
     }
