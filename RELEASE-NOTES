@@ -8,30 +8,43 @@ curl and libcurl 7.67.0
 
 This release includes the following changes:
 
- o
+ o urlapi: CURLU_NO_AUTHORITY allows empty authority/host part [22]
 
 This release includes the following bugfixes:
 
+ o FTP: FTPFILE_NOCWD: avoid redundant CWDs [28]
  o FTP: allow "rubbish" prepended to the SIZE response [15]
  o FTP: remove trailing slash from path for LIST/MLSD [6]
  o FTP: skip CWD to entry dir when target is absolute [16]
+ o altsvc: both backends run h3-23 now [31]
  o appveyor: add a winbuild [14]
+ o appveyor: upgrade VS2017 to VS2019 [29]
  o asyn-thread: s/AF_LOCAL/AF_UNIX for Solaris [3]
+ o cleanups: 21 various PVS-Studio warnings [24]
+ o cookie: pass in the correct cookie amount to qsort() [27]
+ o curl: exit the create_transfers loop on errors [33]
  o curl: fix memory leaked by parse_metalink() [17]
  o curl: load large files with -d @ much faster [19]
  o docs/HTTP3: fix `--with-ssl` ngtcp2 configure flag [21]
+ o doh: avoid truncating DNS QTYPE to lower octet [23]
  o doh: clean up dangling DOH memory on easy close [9]
  o doh: fix (harmless) buffer overrun [13]
  o doh: fix undefined behaviour and open up for gcc and clang optimization [12]
  o http2: relax verification of :authority in push promise requests [8]
  o ldap: Stop using wide char version of ldapp_err2string [1]
  o mime: when disabled, avoid C99 macro [7]
+ o ngtcp2: compile with latest ngtcp2 + nghttp3 draft-23 [25]
  o openssl: close_notify on the FTP data connection doesn't mean closure [20]
+ o openssl: fix compiler warning with LibreSSL [34]
  o parsedate: fix date parsing disabled builds [18]
  o quiche: persist connection details (fixes -I with --http3) [11]
  o setopt: make it easier to add new enum values [4]
+ o setopt: store CURLOPT_RTSP_SERVER_CSEQ correctly [24]
  o smb: check for full size message before reading message details [10]
+ o socks: Fix destination host shown on SOCKS5 error [32]
  o url: only reuse TLS connections with matching pinning [5]
+ o urlapi: avoid index underflow for short ipv6 hostnames [26]
+ o urldata: use 'bool' for the bit type on MSVC compilers [30]
  o winbuild/MakefileBuild.vc: Add vssh [2]
  o winbuild/MakefileBuild.vc: Fix line endings
 
@@ -43,10 +56,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Bernhard Walle, Christoph M. Becker, Dagobert Michelsen,
-  Daniel Stenberg, George Liu, Gilles Vollant, Jimmy Gaussen, Kamil Dudka,
-  Marcel Raad, Max Dymond, Michael Kaufmann, Paul Dreik, Philippe Marguinaud,
-  Ray Satiro, Roland Hieber, Sebastian Haglund, Zenju on github,
-  (18 contributors)
+  Daniel Stenberg, George Liu, Gilles Vollant, Jens Finkhaeuser, Jimmy Gaussen,
+  Kamil Dudka, Marcel Raad, Max Dymond, Michael Kaufmann, Niall O'Reilly,
+  Paul Dreik, Philippe Marguinaud, Ray Satiro, Roland Hieber,
+  Sebastian Haglund, SumatraPeter on github, Tatsuhiro Tsujikawa,
+  Valerii Zapodovnikov, Zenju on github,
+  (23 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -73,3 +88,16 @@ References to bug reports and discussions on issues:
  [19] = https://curl.haxx.se/bug/?i=4336
  [20] = https://curl.haxx.se/bug/?i=4329
  [21] = https://curl.haxx.se/bug/?i=4338
+ [22] = https://curl.haxx.se/bug/?i=4349
+ [23] = https://curl.haxx.se/bug/?i=4381
+ [24] = https://curl.haxx.se/bug/?i=4374
+ [25] = https://curl.haxx.se/bug/?i=4392
+ [26] = https://curl.haxx.se/bug/?i=4389
+ [27] = https://curl.haxx.se/bug/?i=4386
+ [28] = https://curl.haxx.se/bug/?i=4382
+ [29] = https://curl.haxx.se/bug/?i=4383
+ [30] = https://curl.haxx.se/bug/?i=4387
+ [31] = https://curl.haxx.se/bug/?i=4395
+ [32] = https://curl.haxx.se/bug/?i=4394
+ [33] = https://curl.haxx.se/bug/?i=4393
+ [34] = https://curl.haxx.se/bug/?i=4397
