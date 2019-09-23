@@ -1999,7 +1999,7 @@ static CURLcode myssh_block_statemach(struct connectdata *conn,
       }
     }
 
-    if(!result && block) {
+    if(block) {
       curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
       (void) Curl_socket_check(fd_read, CURL_SOCKET_BAD,
