@@ -43,7 +43,7 @@ struct negotiatedata;
 #endif
 
 #if defined(USE_WINDOWS_SSPI)
-#define GSS_ERROR(status) (status & 0x80000000)
+#define GSS_ERROR(status) ((status) & 0x80000000)
 #endif
 
 /* This is used to build a SPN string */
