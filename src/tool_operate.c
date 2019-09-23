@@ -103,10 +103,14 @@ CURLcode curl_easy_perform_ev(CURL *easy);
   "this situation and\nhow to fix it, please visit the web page mentioned " \
   "above.\n"
 
-static CURLcode create_transfers(struct GlobalConfig *global,
-                                 struct OperationConfig *config,
-                                 CURLSH *share,
-                                 bool capath_from_env);
+static CURLcode single_transfer(struct GlobalConfig *global,
+                                struct OperationConfig *config,
+                                CURLSH *share,
+                                bool capath_from_env,
+                                bool *added);
+static CURLcode get_transfer(struct GlobalConfig *global,
+                             CURLSH *share,
+                             bool *added);
 
 static bool is_fatal_error(CURLcode code)
 {
@@ -316,7 +320,6 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
       my_setopt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
     per->input.fd = per->infd;
   }
-  show_error:
   return result;
 }
 
@@ -324,7 +327,6 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
  * Call this after a transfer has completed.
  */
 static CURLcode post_transfer(struct GlobalConfig *global,
-                              CURLSH *share,
                               struct per_transfer *per,
                               CURLcode result,
                               bool *retryp)
@@ -332,6 +334,9 @@ static CURLcode post_transfer(struct GlobalConfig *global,
   struct OutStruct *outs = &per->outs;
   CURL *curl = per->curl;
   struct OperationConfig *config = per->config;
+
+  if(!curl || !config)
+    return result;
 
   *retryp = FALSE;
 
@@ -401,7 +406,6 @@ static CURLcode post_transfer(struct GlobalConfig *global,
     else if(rv == -1)
       fprintf(config->global->errors, "Metalink: parsing (%s) FAILED\n",
               per->this_url);
-    result = create_transfers(global, config, share, FALSE);
   }
   else if(per->metalink && result == CURLE_OK && !per->metalink_next_res) {
     int rv;
@@ -410,8 +414,6 @@ static CURLcode post_transfer(struct GlobalConfig *global,
     if(!rv)
       per->metalink_next_res = 1;
   }
-#else
-  (void)share;
 #endif /* USE_METALINK */
 
 #ifdef USE_METALINK
@@ -651,60 +653,81 @@ static CURLcode post_transfer(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-/* go through the list of URLs and configs and add transfers */
+static void single_transfer_cleanup(struct OperationConfig *config)
+{
+  if(config) {
+    struct State *state = &config->state;
+    if(state->urls) {
+      /* Free list of remaining URLs */
+      glob_cleanup(state->urls);
+      state->urls = NULL;
+    }
+    Curl_safefree(state->outfiles);
+    Curl_safefree(state->httpgetfields);
+    Curl_safefree(state->uploadfile);
+    if(state->inglob) {
+      /* Free list of globbed upload files */
+      glob_cleanup(state->inglob);
+      state->inglob = NULL;
+    }
+  }
+}
 
-static CURLcode create_transfers(struct GlobalConfig *global,
-                                 struct OperationConfig *config,
-                                 CURLSH *share,
-                                 bool capath_from_env)
+/* create the next (singular) transfer */
+
+static CURLcode single_transfer(struct GlobalConfig *global,
+                                struct OperationConfig *config,
+                                CURLSH *share,
+                                bool capath_from_env,
+                                bool *added)
 {
   CURLcode result = CURLE_OK;
   struct getout *urlnode;
   metalinkfile *mlfile_last = NULL;
   bool orig_noprogress = global->noprogress;
   bool orig_isatty = global->isatty;
-  char *httpgetfields = NULL;
+  struct State *state = &config->state;
+  char *httpgetfields = state->httpgetfields;
+  *added = FALSE; /* not yet */
 
   if(config->postfields) {
     if(config->use_httpget) {
-      /* Use the postfields data for a http get */
-      httpgetfields = strdup(config->postfields);
-      Curl_safefree(config->postfields);
       if(!httpgetfields) {
-        helpf(global->errors, "out of memory\n");
-        result = CURLE_OUT_OF_MEMORY;
-        goto quit_curl;
-      }
-      if(SetHTTPrequest(config,
-                        (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
-                        &config->httpreq)) {
-        result = CURLE_FAILED_INIT;
-        goto quit_curl;
+        /* Use the postfields data for a http get */
+        httpgetfields = state->httpgetfields = strdup(config->postfields);
+        Curl_safefree(config->postfields);
+        if(!httpgetfields) {
+          helpf(global->errors, "out of memory\n");
+          result = CURLE_OUT_OF_MEMORY;
+        }
+        else if(SetHTTPrequest(config,
+                               (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
+                               &config->httpreq)) {
+          result = CURLE_FAILED_INIT;
+        }
       }
     }
     else {
-      if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq)) {
+      if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq))
         result = CURLE_FAILED_INIT;
-        goto quit_curl;
-      }
     }
+    if(result)
+      return result;
+  }
+  if(!state->urlnode) {
+    /* first time caller, setup things */
+    state->urlnode = config->url_list;
+    state->infilenum = 1;
   }
 
-  for(urlnode = config->url_list; urlnode; urlnode = urlnode->next) {
-    unsigned long li;
-    unsigned long up; /* upload file counter within a single upload glob */
+  while(config->state.urlnode) {
     char *infiles; /* might be a glob pattern */
-    char *outfiles;
-    unsigned long infilenum;
-    URLGlob *inglob;
+    URLGlob *inglob = state->inglob;
     bool metalink = FALSE; /* metalink download? */
     metalinkfile *mlfile;
     metalink_resource *mlres;
 
-    outfiles = NULL;
-    infilenum = 1;
-    inglob = NULL;
-
+    urlnode = config->state.urlnode;
     if(urlnode->flags & GETOUT_METALINK) {
       metalink = 1;
       if(mlfile_last == NULL) {
@@ -727,13 +750,15 @@ static CURLcode create_transfers(struct GlobalConfig *global,
       Curl_safefree(urlnode->outfile);
       Curl_safefree(urlnode->infile);
       urlnode->flags = 0;
+      config->state.urlnode = urlnode->next;
+      state->up = 0;
       continue; /* next URL please */
     }
 
     /* save outfile pattern before expansion */
-    if(urlnode->outfile) {
-      outfiles = strdup(urlnode->outfile);
-      if(!outfiles) {
+    if(urlnode->outfile && !state->outfiles) {
+      state->outfiles = strdup(urlnode->outfile);
+      if(!state->outfiles) {
         helpf(global->errors, "out of memory\n");
         result = CURLE_OUT_OF_MEMORY;
         break;
@@ -742,88 +767,95 @@ static CURLcode create_transfers(struct GlobalConfig *global,
 
     infiles = urlnode->infile;
 
-    if(!config->globoff && infiles) {
+    if(!config->globoff && infiles && !inglob) {
       /* Unless explicitly shut off */
-      result = glob_url(&inglob, infiles, &infilenum,
+      result = glob_url(&inglob, infiles, &state->infilenum,
                         global->showerror?global->errors:NULL);
-      if(result) {
-        Curl_safefree(outfiles);
+      if(result)
         break;
-      }
+      config->state.inglob = inglob;
     }
 
-    /* Here's the loop for uploading multiple files within the same
-       single globbed string. If no upload, we enter the loop once anyway. */
-    for(up = 0 ; up < infilenum; up++) {
-
-      char *uploadfile; /* a single file, never a glob */
+    {
       int separator;
-      URLGlob *urls;
       unsigned long urlnum;
 
-      uploadfile = NULL;
-      urls = NULL;
-      urlnum = 0;
-
-      if(!up && !infiles)
+      if(!state->up && !infiles)
         Curl_nop_stmt;
       else {
-        if(inglob) {
-          result = glob_next_url(&uploadfile, inglob);
-          if(result == CURLE_OUT_OF_MEMORY)
-            helpf(global->errors, "out of memory\n");
-        }
-        else if(!up) {
-          uploadfile = strdup(infiles);
-          if(!uploadfile) {
-            helpf(global->errors, "out of memory\n");
-            result = CURLE_OUT_OF_MEMORY;
+        if(!state->uploadfile) {
+          if(inglob) {
+            result = glob_next_url(&state->uploadfile, inglob);
+            if(result == CURLE_OUT_OF_MEMORY)
+              helpf(global->errors, "out of memory\n");
+          }
+          else if(!state->up) {
+            state->uploadfile = strdup(infiles);
+            if(!state->uploadfile) {
+              helpf(global->errors, "out of memory\n");
+              result = CURLE_OUT_OF_MEMORY;
+            }
           }
         }
-        if(!uploadfile)
+        if(result)
           break;
       }
 
-      if(metalink) {
-        /* For Metalink download, we don't use glob. Instead we use
-           the number of resources as urlnum. */
-        urlnum = count_next_metalink_resource(mlfile);
-      }
-      else if(!config->globoff) {
-        /* Unless explicitly shut off, we expand '{...}' and '[...]'
-           expressions and return total number of URLs in pattern set */
-        result = glob_url(&urls, urlnode->url, &urlnum,
-                          global->showerror?global->errors:NULL);
-        if(result) {
-          Curl_safefree(uploadfile);
-          break;
+      if(!state->urlnum) {
+        if(metalink) {
+          /* For Metalink download, we don't use glob. Instead we use
+             the number of resources as urlnum. */
+          urlnum = count_next_metalink_resource(mlfile);
         }
+        else if(!config->globoff) {
+          /* Unless explicitly shut off, we expand '{...}' and '[...]'
+             expressions and return total number of URLs in pattern set */
+          result = glob_url(&state->urls, urlnode->url, &state->urlnum,
+                            global->showerror?global->errors:NULL);
+          if(result)
+            break;
+          urlnum = state->urlnum;
+        }
+        else
+          urlnum = 1; /* without globbing, this is a single URL */
       }
       else
-        urlnum = 1; /* without globbing, this is a single URL */
+        urlnum = state->urlnum;
 
       /* if multiple files extracted to stdout, insert separators! */
-      separator = ((!outfiles || !strcmp(outfiles, "-")) && urlnum > 1);
+      separator = ((!state->outfiles ||
+                    !strcmp(state->outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
-      for(li = 0 ; li < urlnum; li++) {
+
+      if(state->li >= urlnum) {
+        state->li = 0;
+        state->up++;
+      }
+      if(state->up < state->infilenum) {
         struct per_transfer *per;
         struct OutStruct *outs;
         struct InStruct *input;
         struct OutStruct *heads;
         struct HdrCbData *hdrcbdata = NULL;
         CURL *curl = curl_easy_init();
-
         result = add_transfer(&per);
         if(result || !curl) {
-          free(uploadfile);
           curl_easy_cleanup(curl);
           result = CURLE_OUT_OF_MEMORY;
-          goto show_error;
+          break;
         }
+        if(state->uploadfile) {
+          per->uploadfile = strdup(state->uploadfile);
+          if(!per->uploadfile) {
+            curl_easy_cleanup(curl);
+            result = CURLE_OUT_OF_MEMORY;
+            break;
+          }
+        }
+        *added = TRUE;
         per->config = config;
         per->curl = curl;
-        per->uploadfile = uploadfile;
 
         /* default headers output stream is stdout */
         heads = &per->heads;
@@ -838,7 +870,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
             if(!newfile) {
               warnf(config->global, "Failed to open %s\n", config->headerfile);
               result = CURLE_WRITE_ERROR;
-              goto quit_curl;
+              break;
             }
             else {
               heads->filename = config->headerfile;
@@ -873,26 +905,26 @@ static CURLcode create_transfers(struct GlobalConfig *global,
           per->outfile = strdup(mlfile->filename);
           if(!per->outfile) {
             result = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+            break;
           }
           per->this_url = strdup(mlres->url);
           if(!per->this_url) {
             result = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+            break;
           }
           per->mlfile = mlfile;
         }
         else {
-          if(urls) {
-            result = glob_next_url(&per->this_url, urls);
+          if(state->urls) {
+            result = glob_next_url(&per->this_url, state->urls);
             if(result)
-              goto show_error;
+              break;
           }
-          else if(!li) {
+          else if(!state->li) {
             per->this_url = strdup(urlnode->url);
             if(!per->this_url) {
               result = CURLE_OUT_OF_MEMORY;
-              goto show_error;
+              break;
             }
           }
           else
@@ -900,11 +932,11 @@ static CURLcode create_transfers(struct GlobalConfig *global,
           if(!per->this_url)
             break;
 
-          if(outfiles) {
-            per->outfile = strdup(outfiles);
+          if(state->outfiles) {
+            per->outfile = strdup(state->outfiles);
             if(!per->outfile) {
               result = CURLE_OUT_OF_MEMORY;
-              goto show_error;
+              break;
             }
           }
         }
@@ -922,22 +954,22 @@ static CURLcode create_transfers(struct GlobalConfig *global,
             /* extract the file name from the URL */
             result = get_url_file_name(&per->outfile, per->this_url);
             if(result)
-              goto show_error;
+              break;
             if(!*per->outfile && !config->content_disposition) {
               helpf(global->errors, "Remote file name has no length!\n");
               result = CURLE_WRITE_ERROR;
-              goto quit_urls;
+              break;
             }
           }
-          else if(urls) {
+          else if(state->urls) {
             /* fill '#1' ... '#9' terms from URL pattern */
             char *storefile = per->outfile;
-            result = glob_match_url(&per->outfile, storefile, urls);
+            result = glob_match_url(&per->outfile, storefile, state->urls);
             Curl_safefree(storefile);
             if(result) {
               /* bad globbing */
               warnf(config->global, "bad output glob!\n");
-              goto quit_urls;
+              break;
             }
           }
 
@@ -947,11 +979,8 @@ static CURLcode create_transfers(struct GlobalConfig *global,
           if(config->create_dirs || metalink) {
             result = create_dir_hierarchy(per->outfile, global->errors);
             /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
-            if(result == CURLE_WRITE_ERROR)
-              goto quit_urls;
-            if(result) {
-              goto show_error;
-            }
+            if(result)
+              break;
           }
 
           if((urlnode->flags & GETOUT_USEREMOTE)
@@ -986,7 +1015,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
             if(!file) {
               helpf(global->errors, "Can't open '%s'!\n", per->outfile);
               result = CURLE_WRITE_ERROR;
-              goto quit_urls;
+              break;
             }
             outs->fopened = TRUE;
             outs->stream = file;
@@ -1006,7 +1035,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
           char *nurl = add_file_name_to_url(per->this_url, per->uploadfile);
           if(!nurl) {
             result = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+            break;
           }
           per->this_url = nurl;
         }
@@ -1065,7 +1094,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         if(urlnum > 1 && !global->mute) {
           per->separator_err =
             aprintf("\n[%lu/%lu]: %s --> %s",
-                    li + 1, urlnum, per->this_url,
+                    state->li + 1, urlnum, per->this_url,
                     per->outfile ? per->outfile : "<stdout>");
           if(separator)
             per->separator = aprintf("%s%s", CURLseparator, per->this_url);
@@ -1103,7 +1132,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
 
           if(!urlbuffer) {
             result = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+            break;
           }
 
           Curl_safefree(per->this_url); /* free previous URL */
@@ -1124,11 +1153,10 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         config->terminal_binary_ok =
           (per->outfile && !strcmp(per->outfile, "-"));
 
-        /* avoid having this setopt added to the --libcurl source
-           output */
+        /* Avoid having this setopt added to the --libcurl source output. */
         result = curl_easy_setopt(curl, CURLOPT_SHARE, share);
         if(result)
-          goto show_error;
+          break;
 
         if(!config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
@@ -1256,12 +1284,14 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         case HTTPREQ_MIMEPOST:
           result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
           if(result)
-            goto show_error;
+            break;
           my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
           break;
         default:
           break;
         }
+        if(result)
+          break;
 
         /* new in libcurl 7.10.6 (default is Basic) */
         if(config->authtype)
@@ -1371,7 +1401,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
                   "SSL_CERT_DIR environment variable":"--capath");
           }
           else if(result)
-            goto show_error;
+            break;
         }
         /* For the time being if --proxy-capath is not set then we use the
            --capath value for it, if any. See #1257 */
@@ -1388,7 +1418,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
             }
           }
           else if(result)
-            goto show_error;
+            break;
         }
 
         if(config->crlfile)
@@ -1503,7 +1533,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
               Curl_safefree(home);
             }
             if(result)
-              goto show_error;
+              break;
           }
         }
 
@@ -1607,7 +1637,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         if(config->engine) {
           result = res_setopt_str(curl, CURLOPT_SSLENGINE, config->engine);
           if(result)
-            goto show_error;
+            break;
         }
 
         /* new in curl 7.10.7, extended in 7.19.4. Modified to use
@@ -1855,7 +1885,7 @@ static CURLcode create_transfers(struct GlobalConfig *global,
           outs->metalink_parser = metalink_parser_context_new();
           if(outs->metalink_parser == NULL) {
             result = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+            break;
           }
           fprintf(config->global->errors,
                   "Metalink: parsing (%s) metalink/XML...\n", per->this_url);
@@ -1874,48 +1904,37 @@ static CURLcode create_transfers(struct GlobalConfig *global,
         per->retry_sleep = per->retry_sleep_default; /* ms */
         per->retrystart = tvnow();
 
-      } /* loop to the next URL */
-
-      show_error:
-      quit_urls:
-
-      if(urls) {
-        /* Free list of remaining URLs */
-        glob_cleanup(urls);
-        urls = NULL;
+        state->li++;
       }
+      else {
+        /* Free this URL node data without destroying the
+           the node itself nor modifying next pointer. */
+        Curl_safefree(urlnode->outfile);
+        Curl_safefree(urlnode->infile);
+        urlnode->flags = 0;
+        glob_cleanup(state->urls);
+        state->urls = NULL;
+        state->urlnum = 0;
 
-      if(result)
-        /* exit loop upon error */
-        break;
-    } /* loop to the next globbed upload file */
-
-    /* Free loop-local allocated memory */
-
-    Curl_safefree(outfiles);
-
-    if(inglob) {
-      /* Free list of globbed upload files */
-      glob_cleanup(inglob);
-      inglob = NULL;
+        Curl_safefree(state->outfiles);
+        Curl_safefree(state->uploadfile);
+        if(state->inglob) {
+          /* Free list of globbed upload files */
+          glob_cleanup(state->inglob);
+          state->inglob = NULL;
+        }
+        config->state.urlnode = urlnode->next;
+        state->up = 0;
+        continue;
+      }
     }
+    break;
+  }
 
-    /* Free this URL node data without destroying the
-       the node itself nor modifying next pointer. */
-    Curl_safefree(urlnode->url);
-    Curl_safefree(urlnode->outfile);
-    Curl_safefree(urlnode->infile);
-    urlnode->flags = 0;
-
-    if(result)
-      /* exit loop upon error */
-      break;
-  } /* for-loop through all URLs */
-  quit_curl:
-
-  /* Free function-local referenced allocated memory */
-  Curl_safefree(httpgetfields);
-
+  if(!*added || result) {
+    *added = FALSE;
+    single_transfer_cleanup(config);
+  }
   return result;
 }
 
@@ -1926,18 +1945,23 @@ static long all_added; /* number of easy handles currently added */
  * to add even after this call returns. sets 'addedp' to TRUE if one or more
  * transfers were added.
  */
-static int add_parallel_transfers(struct GlobalConfig *global,
-                                  CURLM *multi,
-                                  bool *morep,
-                                  bool *addedp)
+static CURLcode add_parallel_transfers(struct GlobalConfig *global,
+                                       CURLM *multi,
+                                       CURLSH *share,
+                                       bool *morep,
+                                       bool *addedp)
 {
   struct per_transfer *per;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   CURLMcode mcode;
   *addedp = FALSE;
   *morep = FALSE;
+  result = get_transfer(global, share, addedp);
+  if(result || !*addedp)
+    return result;
   for(per = transfers; per && (all_added < global->parallel_max);
       per = per->next) {
+    bool getadded = FALSE;
     if(per->added)
       /* already added */
       continue;
@@ -1953,6 +1977,10 @@ static int add_parallel_transfers(struct GlobalConfig *global,
     mcode = curl_multi_add_handle(multi, per->curl);
     if(mcode)
       return CURLE_OUT_OF_MEMORY;
+    /* get the next transfer created */
+    result = get_transfer(global, share, &getadded);
+    if(result)
+      return result;
     per->added = TRUE;
     all_added++;
     *addedp = TRUE;
@@ -1976,7 +2004,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   if(!multi)
     return CURLE_OUT_OF_MEMORY;
 
-  result = add_parallel_transfers(global, multi,
+  result = add_parallel_transfers(global, multi, share,
                                   &more_transfers, &added_transfers);
   if(result)
     return result;
@@ -2002,7 +2030,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
           curl_multi_remove_handle(multi, easy);
 
-          result = post_transfer(global, share, ended, result, &retry);
+          result = post_transfer(global, ended, result, &retry);
           if(retry)
             continue;
           progress_finalize(ended); /* before it goes away */
@@ -2013,7 +2041,8 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
       } while(msg);
       if(removed) {
         /* one or more transfers completed, add more! */
-        (void)add_parallel_transfers(global, multi, &more_transfers,
+        (void)add_parallel_transfers(global, multi, share,
+                                     &more_transfers,
                                      &added_transfers);
         if(added_transfers)
           /* we added new ones, make sure the loop doesn't exit yet */
@@ -2043,8 +2072,14 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   CURLcode returncode = CURLE_OK;
   CURLcode result = CURLE_OK;
   struct per_transfer *per;
+  bool added = FALSE;
+
+  result = get_transfer(global, share, &added);
+  if(result || !added)
+    return result;
   for(per = transfers; per;) {
     bool retry;
+    bool bailout = FALSE;
     result = pre_transfer(global, per);
     if(result)
       break;
@@ -2066,32 +2101,47 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     /* store the result of the actual transfer */
     returncode = result;
 
-    result = post_transfer(global, share, per, result, &retry);
+    result = post_transfer(global, per, result, &retry);
     if(retry)
       continue;
+
+    /* Bail out upon critical errors or --fail-early */
+    if(result || is_fatal_error(returncode) ||
+       (returncode && global->fail_early))
+      bailout = TRUE;
+    else {
+      /* setup the next one just before we delete this */
+      result = get_transfer(global, share, &added);
+      if(result)
+        bailout = TRUE;
+    }
 
     /* Release metalink related resources here */
     delete_metalinkfile(per->mlfile);
 
     per = del_transfer(per);
 
-    /* Bail out upon critical errors or --fail-early */
-    if(result || is_fatal_error(returncode) ||
-       (returncode && global->fail_early))
+    if(bailout)
       break;
   }
   if(returncode)
     /* returncode errors have priority */
     result = returncode;
+
+  if(result)
+    single_transfer_cleanup(global->current);
+
   return result;
 }
 
 static CURLcode operate_do(struct GlobalConfig *global,
                            struct OperationConfig *config,
-                           CURLSH *share)
+                           CURLSH *share,
+                           bool *added)
 {
   CURLcode result = CURLE_OK;
   bool capath_from_env;
+  *added = FALSE;
 
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
@@ -2180,9 +2230,30 @@ static CURLcode operate_do(struct GlobalConfig *global,
   }
 
   if(!result)
-    /* loop through the list of given URLs */
-    result = create_transfers(global, config, share, capath_from_env);
+    result = single_transfer(global, config, share, capath_from_env, added);
 
+  return result;
+}
+
+/*
+ * 'get_transfer' gets the details and sets up *one* new transfer if 'added'
+ * returns TRUE.
+ */
+static CURLcode get_transfer(struct GlobalConfig *global,
+                             CURLSH *share,
+                             bool *added)
+{
+  CURLcode result = CURLE_OK;
+  *added = FALSE;
+  while(global->current) {
+    result = operate_do(global, global->current, share, added);
+    if(!result && !*added) {
+      /* when one set is drained, continue to next */
+      global->current = global->current->next;
+      continue;
+    }
+    break;
+  }
   return result;
 }
 
@@ -2206,7 +2277,11 @@ static CURLcode operate_transfers(struct GlobalConfig *global,
   /* cleanup if there are any left */
   for(per = transfers; per;) {
     bool retry;
-    (void)post_transfer(global, share, per, result, &retry);
+    CURLcode result2 = post_transfer(global, per, result, &retry);
+    if(!result)
+      /* don't overwrite the original error */
+      result = result2;
+
     /* Free list of given URLs */
     clean_getout(per->config);
 
@@ -2223,7 +2298,7 @@ static CURLcode operate_transfers(struct GlobalConfig *global,
   return result;
 }
 
-CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
+CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
 
@@ -2236,18 +2311,18 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
   if((argc == 1) ||
      (!curl_strequal(argv[1], "-q") &&
       !curl_strequal(argv[1], "--disable"))) {
-    parseconfig(NULL, config); /* ignore possible failure */
+    parseconfig(NULL, global); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
-    if((argc < 2) && (!config->first->url_list)) {
-      helpf(config->errors, NULL);
+    if((argc < 2) && (!global->first->url_list)) {
+      helpf(global->errors, NULL);
       result = CURLE_FAILED_INIT;
     }
   }
 
   if(!result) {
     /* Parse the command line arguments */
-    ParameterError res = parse_args(config, argc, argv);
+    ParameterError res = parse_args(global, argc, argv);
     if(res) {
       result = CURLE_OK;
 
@@ -2270,7 +2345,7 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
     }
     else {
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-      if(config->libcurl) {
+      if(global->libcurl) {
         /* Initialise the libcurl source output */
         result = easysrc_init();
       }
@@ -2279,11 +2354,11 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
       /* Perform the main operations */
       if(!result) {
         size_t count = 0;
-        struct OperationConfig *operation = config->first;
+        struct OperationConfig *operation = global->first;
         CURLSH *share = curl_share_init();
         if(!share) {
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-          if(config->libcurl) {
+          if(global->libcurl) {
             /* Cleanup the libcurl source output */
             easysrc_cleanup();
           }
@@ -2305,30 +2380,24 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
         } while(!result && operation);
 
         /* Set the current operation pointer */
-        config->current = config->first;
-
-        /* Setup all transfers */
-        while(!result && config->current) {
-          result = operate_do(config, config->current, share);
-          config->current = config->current->next;
-        }
+        global->current = global->first;
 
         /* now run! */
-        result = operate_transfers(config, share, result);
+        result = operate_transfers(global, share, result);
 
         curl_share_cleanup(share);
 #ifndef CURL_DISABLE_LIBCURL_OPTION
-        if(config->libcurl) {
+        if(global->libcurl) {
           /* Cleanup the libcurl source output */
           easysrc_cleanup();
 
           /* Dump the libcurl code if previously enabled */
-          dumpeasysrc(config);
+          dumpeasysrc(global);
         }
 #endif
       }
       else
-        helpf(config->errors, "out of memory\n");
+        helpf(global->errors, "out of memory\n");
     }
   }
 

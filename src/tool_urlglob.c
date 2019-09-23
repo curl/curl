@@ -488,6 +488,9 @@ void glob_cleanup(URLGlob* glob)
   size_t i;
   int elem;
 
+  if(!glob)
+    return;
+
   for(i = 0; i < glob->size; i++) {
     if((glob->pattern[i].type == UPTSet) &&
        (glob->pattern[i].content.Set.elements)) {
