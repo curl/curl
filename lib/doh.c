@@ -240,7 +240,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
   }
 
   timeout_ms = Curl_timeleft(data, NULL, TRUE);
-
+  if(timeout_ms <= 0) {
+    result = CURLE_OPERATION_TIMEDOUT;
+    goto error;
+  }
   /* Curl_open() is the internal version of curl_easy_init() */
   result = Curl_open(&doh);
   if(!result) {
