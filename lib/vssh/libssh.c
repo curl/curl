@@ -1356,7 +1356,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
       }
-      else if(sshc->readdir_attrs == NULL && sftp_dir_eof(sshc->sftp_dir)) {
+      else if(sftp_dir_eof(sshc->sftp_dir)) {
         state(conn, SSH_SFTP_READDIR_DONE);
         break;
       }
