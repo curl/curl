@@ -258,7 +258,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
 #ifdef USE_NGHTTP2
     ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
 #endif
-#ifndef CURLDEBUG
+#ifdef CURLDEBUG
+    /* allow plain HTTP in debug builds */
+    ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTPS | CURLPROTO_HTTP);
+#else
     /* enforce HTTPS if not debug */
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
 #endif
