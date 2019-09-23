@@ -493,7 +493,7 @@ restart:
         return SSH_ERROR;
 
       nprompts = ssh_userauth_kbdint_getnprompts(sshc->ssh_session);
-      if(nprompts == SSH_ERROR || nprompts != 1)
+      if(nprompts != 1)
         return SSH_ERROR;
 
       rc = ssh_userauth_kbdint_setanswer(sshc->ssh_session, 0, conn->passwd);
