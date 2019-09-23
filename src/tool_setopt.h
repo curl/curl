@@ -33,7 +33,7 @@
     if(!tool_setopt_skip(opt)) {                \
       result = (v);                             \
       if(result)                                \
-        goto show_error;                        \
+        break;                                  \
     }                                           \
   } WHILE_FALSE
 
