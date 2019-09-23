@@ -1775,8 +1775,9 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
    field list. */
 #define AUTHORITY_DST_IDX 3
 
+/* USHRT_MAX is 65535 == 0xffff */
 #define HEADER_OVERFLOW(x) \
-  (x.namelen > (uint16_t)-1 || x.valuelen > (uint16_t)-1 - x.namelen)
+  (x.namelen > 0xffff || x.valuelen > 0xffff - x.namelen)
 
 /*
  * Check header memory for the token "trailers".
