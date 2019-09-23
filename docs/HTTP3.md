@@ -93,7 +93,7 @@ Build BoringSSL (it needs to be built manually so it can be reused with curl):
      % cmake -DCMAKE_POSITION_INDEPENDENT_CODE=on ..
      % make -j`nproc`
      % cd ..
-     % mkdir .openssl/lib -p
+     % mkdir -p .openssl/lib
      % cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib
      % ln -s $PWD/include .openssl
 
