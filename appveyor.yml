@@ -90,6 +90,19 @@ environment:
         PRJ_GEN: "MSYS Makefiles"
         PRJ_CFG: Debug
         OPENSSL: OFF
+        WINSSL: ON
+        HTTP_ONLY: OFF
+        TESTING: ON
+        SHARED: OFF
+        DISABLED_TESTS: ""
+        COMPILER_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin"
+        MSYS2_ARG_CONV_EXCL: "/*"
+        BUILD_OPT: -k
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: CMake
+        PRJ_GEN: "MSYS Makefiles"
+        PRJ_CFG: Debug
+        OPENSSL: OFF
         WINSSL: OFF
         HTTP_ONLY: OFF
         TESTING: ON
