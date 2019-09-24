@@ -1874,7 +1874,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     /* this is for file:// transfers, get a dummy made */
     hostname = (char *)"";
 
-  if(hostname[0] == '[') {
+  else if(hostname[0] == '[') {
     /* This looks like an IPv6 address literal. See if there is an address
        scope. */
     size_t hlen;
