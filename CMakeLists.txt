@@ -1368,12 +1368,6 @@ configure_package_config_file(CMake/curl-config.cmake.in
 )
 
 install(
-        EXPORT "${TARGETS_EXPORT_NAME}"
-        NAMESPACE "${PROJECT_NAME}::"
-        DESTINATION ${CURL_INSTALL_CMAKE_DIR}
-)
-
-install(
         FILES ${version_config} ${project_config}
         DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
