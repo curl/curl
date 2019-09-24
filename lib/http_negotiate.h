@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#ifdef USE_SPNEGO
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
 
 /* this is for Negotiate header input */
 CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
@@ -31,8 +31,8 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, bool proxy,
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct connectdata *conn, bool proxy);
 
-void Curl_cleanup_negotiate(struct Curl_easy *data);
+void Curl_http_auth_cleanup_negotiate(struct connectdata *conn);
 
-#endif /* USE_SPNEGO */
+#endif /* !CURL_DISABLE_HTTP && USE_SPNEGO */
 
 #endif /* HEADER_CURL_HTTP_NEGOTIATE_H */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,17 +44,18 @@
 void *
 Curl_memrchr(const void *s, int c, size_t n)
 {
-  const unsigned char *p = s;
-  const unsigned char *q = s;
+  if(n > 0) {
+    const unsigned char *p = s;
+    const unsigned char *q = s;
 
-  p += n - 1;
+    p += n - 1;
 
-  while(p >= q) {
-    if(*p == (unsigned char)c)
-      return (void *)p;
-    p--;
+    while(p >= q) {
+      if(*p == (unsigned char)c)
+        return (void *)p;
+      p--;
+    }
   }
-
   return NULL;
 }
 

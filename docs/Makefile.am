@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -40,13 +40,50 @@ DIST_SUBDIRS = $(SUBDIRS) examples libcurl
 
 CLEANFILES = $(GENHTMLPAGES) $(PDFPAGES) $(MANDISTPAGES) curl.1
 
-EXTRA_DIST = MANUAL BUGS CONTRIBUTE.md FAQ FEATURES INTERNALS.md SSLCERTS.md    \
- README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS VERSIONS KNOWN_BUGS   \
- BINDINGS.md HISTORY.md INSTALL INSTALL.md LICENSE-MIXING.md     \
- README.netware MAIL-ETIQUETTE HTTP-COOKIES.md SECURITY.md RELEASE-PROCEDURE    \
- SSL-PROBLEMS.md HTTP2.md ROADMAP.md CODE_OF_CONDUCT.md CODE_STYLE.md           \
- CHECKSRC.md CMakeLists.txt README.md CIPHERS.md INSTALL.cmake README.cmake     \
- $(noinst_man_MANS) HELP-US.md
+EXTRA_DIST =                                    \
+ $(noinst_man_MANS)                             \
+ ALTSVC.md                                      \
+ BINDINGS.md                                    \
+ BUG-BOUNTY.md                                  \
+ BUGS                                           \
+ CHECKSRC.md                                    \
+ CIPHERS.md                                     \
+ CMakeLists.txt                                 \
+ CODE_OF_CONDUCT.md                             \
+ CODE_STYLE.md                                  \
+ CONTRIBUTE.md                                  \
+ DEPRECATE.md                                   \
+ EXPERIMENTAL.md                                \
+ FAQ                                            \
+ FEATURES                                       \
+ GOVERNANCE.md                                  \
+ HELP-US.md                                     \
+ HISTORY.md                                     \
+ HTTP-COOKIES.md                                \
+ HTTP2.md                                       \
+ HTTP3.md                                       \
+ INSTALL                                        \
+ INSTALL.cmake                                  \
+ INSTALL.md                                     \
+ INTERNALS.md                                   \
+ KNOWN_BUGS                                     \
+ LICENSE-MIXING.md                              \
+ MAIL-ETIQUETTE                                 \
+ PARALLEL-TRANSFERS.md                          \
+ README.cmake                                   \
+ README.md                                      \
+ README.netware                                 \
+ README.win32                                   \
+ RELEASE-PROCEDURE.md                           \
+ RESOURCES                                      \
+ ROADMAP.md                                     \
+ SECURITY-PROCESS.md                            \
+ SSL-PROBLEMS.md                                \
+ SSLCERTS.md                                    \
+ THANKS                                         \
+ TODO                                           \
+ TheArtOfHttpScripting                          \
+ VERSIONS
 
 MAN2HTML= roffit $< >$@
 
@@ -62,7 +99,7 @@ SUFFIXES = .1 .html .pdf
 # have changed.
 $(abs_builddir)/curl.1:
 	if test "$(top_builddir)x" != "$(top_srcdir)x" -a -e "$(srcdir)/curl.1"; then \
-		cp -fp "$(srcdir)/curl.1" $@; fi
+		$(INSTALL_DATA) "$(srcdir)/curl.1" $@; fi
 	cd cmdline-opts && $(MAKE)
 
 html: $(HTMLPAGES)
@@ -83,4 +120,3 @@ pdf: $(PDFPAGES)
 
 distclean:
 	rm -f $(CLEANFILES)
-

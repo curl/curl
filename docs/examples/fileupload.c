@@ -33,7 +33,7 @@ int main(void)
   CURL *curl;
   CURLcode res;
   struct stat file_info;
-  double speed_upload, total_time;
+  curl_off_t speed_upload, total_time;
   FILE *fd;
 
   fd = fopen("debugit", "rb"); /* open file to upload */
@@ -72,11 +72,13 @@ int main(void)
     }
     else {
       /* now extract transfer info */
-      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
-      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
+      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &speed_upload);
+      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total_time);
 
-      fprintf(stderr, "Speed: %.3f bytes/sec during %.3f seconds\n",
-              speed_upload, total_time);
+      fprintf(stderr, "Speed: %" CURL_FORMAT_CURL_OFF_T " bytes/sec during %"
+              CURL_FORMAT_CURL_OFF_T ".%06ld seconds\n",
+              speed_upload,
+              (total_time / 1000000), (long)(total_time % 1000000));
 
     }
     /* always cleanup */

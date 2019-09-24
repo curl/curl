@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@ CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in      \
  CMake/CurlSymbolHiding.cmake CMake/FindCARES.cmake             \
  CMake/FindLibSSH2.cmake CMake/FindNGHTTP2.cmake                \
  CMake/FindMbedTLS.cmake CMake/cmake_uninstall.cmake.in         \
- CMake/curl-config.cmake
+ CMake/curl-config.cmake.in
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist
@@ -151,18 +151,29 @@ VC_DIST = projects/README                           \
  projects/wolfssl_options.h                         \
  projects/wolfssl_override.props
 
-WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat	\
+WINBUILD_DIST = winbuild/BUILD.WINDOWS.txt winbuild/gen_resp_file.bat \
  winbuild/MakefileBuild.vc winbuild/Makefile.vc
 
-EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in	\
- RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework scripts/zsh.pl	\
- scripts/updatemanpages.pl $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)	\
- lib/libcurl.vers.in buildconf.bat scripts/coverage.sh
+PLAN9_DIST = plan9/include/mkfile \
+ plan9/include/mkfile             \
+ plan9/mkfile.proto               \
+ plan9/mkfile                     \
+ plan9/BUILD.PLAN9.txt            \
+ plan9/lib/mkfile.inc             \
+ plan9/lib/mkfile                 \
+ plan9/src/mkfile.inc             \
+ plan9/src/mkfile
 
-CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ)	\
- $(VC71_LIBVCPROJ) $(VC71_SRCVCPROJ) $(VC8_LIBVCPROJ) $(VC8_SRCVCPROJ)	\
- $(VC9_LIBVCPROJ) $(VC9_SRCVCPROJ) $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ)	\
- $(VC11_LIBVCXPROJ) $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ)	\
+EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in \
+ RELEASE-NOTES buildconf libcurl.pc.in MacOSX-Framework \
+ scripts/updatemanpages.pl $(CMAKE_DIST) \
+ $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST) \
+ lib/libcurl.vers.in buildconf.bat scripts/coverage.sh scripts/completion.pl
+
+CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ) \
+ $(VC71_LIBVCPROJ) $(VC71_SRCVCPROJ) $(VC8_LIBVCPROJ) $(VC8_SRCVCPROJ) \
+ $(VC9_LIBVCPROJ) $(VC9_SRCVCPROJ) $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ) \
+ $(VC11_LIBVCXPROJ) $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ) \
  $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) $(VC15_LIBVCXPROJ) $(VC15_SRCVCXPROJ)
 
 bin_SCRIPTS = curl-config
@@ -305,12 +316,12 @@ checksrc:
 
 .PHONY: vc-ide
 
-vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS)	\
- $(VC7_SRCVCPROJ_DEPS) $(VC71_LIBVCPROJ_DEPS) $(VC71_SRCVCPROJ_DEPS)	\
- $(VC8_LIBVCPROJ_DEPS) $(VC8_SRCVCPROJ_DEPS) $(VC9_LIBVCPROJ_DEPS)	\
- $(VC9_SRCVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS)	\
- $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS)	\
- $(VC12_SRCVCXPROJ_DEPS) $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS)	\
+vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS) \
+ $(VC7_SRCVCPROJ_DEPS) $(VC71_LIBVCPROJ_DEPS) $(VC71_SRCVCPROJ_DEPS) \
+ $(VC8_LIBVCPROJ_DEPS) $(VC8_SRCVCPROJ_DEPS) $(VC9_LIBVCPROJ_DEPS) \
+ $(VC9_SRCVCPROJ_DEPS) $(VC10_LIBVCXPROJ_DEPS) $(VC10_SRCVCXPROJ_DEPS) \
+ $(VC11_LIBVCXPROJ_DEPS) $(VC11_SRCVCXPROJ_DEPS) $(VC12_LIBVCXPROJ_DEPS) \
+ $(VC12_SRCVCXPROJ_DEPS) $(VC14_LIBVCXPROJ_DEPS) $(VC14_SRCVCXPROJ_DEPS) \
  $(VC15_LIBVCXPROJ_DEPS) $(VC15_SRCVCXPROJ_DEPS)
 	@(win32_lib_srcs='$(LIB_CFILES)'; \
 	win32_lib_hdrs='$(LIB_HFILES) config-win32.h'; \
@@ -642,3 +653,7 @@ function gen_element(type, dir, file)\
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC15_SRCTMPL) > $(VC15_SRCVCXPROJ) || { exit 1; };)
+
+tidy:
+	(cd src && $(MAKE) tidy)
+	(cd lib && $(MAKE) tidy)

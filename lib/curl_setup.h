@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,6 +43,9 @@
  */
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
+#  endif
+#  ifndef NOGDI
+#    define NOGDI
 #  endif
 #endif
 
@@ -91,6 +94,10 @@
 
 #ifdef __VXWORKS__
 #  include "config-vxworks.h"
+#endif
+
+#ifdef __PLAN9__
+#  include "config-plan9.h"
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -217,7 +224,7 @@
 
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
- * interface doesn’t support IPv4, but supports IPv6, NAT64, and DNS64,
+ * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
 #ifdef  __APPLE__
@@ -242,6 +249,7 @@
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    define UNICODE
 #  endif
+#  include <winerror.h>
 #  include <windows.h>
 #  ifdef HAVE_WINSOCK2_H
 #    include <winsock2.h>
@@ -306,11 +314,12 @@
 #endif
 
 #ifdef __AMIGA__
-#  ifndef __ixemul__
-#    include <exec/types.h>
-#    include <exec/execbase.h>
-#    include <proto/exec.h>
-#    include <proto/dos.h>
+#  include <exec/types.h>
+#  include <exec/execbase.h>
+#  include <proto/exec.h>
+#  include <proto/dos.h>
+#  ifdef HAVE_PROTO_BSDSOCKET_H
+#    include <proto/bsdsocket.h> /* ensure bsdsocket.library use */
 #    define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
 #  endif
 #endif
@@ -389,6 +398,11 @@
 #  define LSEEK_ERROR (off_t)-1
 #endif
 
+#ifndef SIZEOF_TIME_T
+/* assume default size of time_t to be 32 bit */
+#define SIZEOF_TIME_T 4
+#endif
+
 /*
  * Default sizeof(off_t) in case it hasn't been defined in config file.
  */
@@ -424,6 +438,33 @@
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
 
+#if (SIZEOF_TIME_T == 4)
+#  ifdef HAVE_TIME_T_UNSIGNED
+#  define TIME_T_MAX UINT_MAX
+#  define TIME_T_MIN 0
+#  else
+#  define TIME_T_MAX INT_MAX
+#  define TIME_T_MIN INT_MIN
+#  endif
+#else
+#  ifdef HAVE_TIME_T_UNSIGNED
+#  define TIME_T_MAX 0xFFFFFFFFFFFFFFFF
+#  define TIME_T_MIN 0
+#  else
+#  define TIME_T_MAX 0x7FFFFFFFFFFFFFFF
+#  define TIME_T_MIN (-TIME_T_MAX - 1)
+#  endif
+#endif
+
+#ifndef SIZE_T_MAX
+/* some limits.h headers have this defined, some don't */
+#if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
+#define SIZE_T_MAX 18446744073709551615U
+#else
+#define SIZE_T_MAX 4294967295U
+#endif
+#endif
+
 /*
  * Arg 2 type for gethostname in case it hasn't been defined in config file.
  */
@@ -445,7 +486,6 @@
 #ifdef WIN32
 
 #  define DIR_CHAR      "\\"
-#  define DOT_CHAR      "_"
 
 #else /* WIN32 */
 
@@ -471,14 +511,6 @@
 #  endif
 
 #  define DIR_CHAR      "/"
-#  ifndef DOT_CHAR
-#    define DOT_CHAR      "."
-#  endif
-
-#  ifdef MSDOS
-#    undef DOT_CHAR
-#    define DOT_CHAR      "_"
-#  endif
 
 #  ifndef fileno /* sunos 4 have this as a macro! */
      int fileno(FILE *stream);
@@ -607,17 +639,12 @@ int netware_init(void);
 #error "Both libidn2 and WinIDN are enabled, choose one."
 #endif
 
-#ifndef SIZEOF_TIME_T
-/* assume default size of time_t to be 32 bit */
-#define SIZEOF_TIME_T 4
-#endif
-
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_NSS) || \
-    defined(USE_POLARSSL) || defined(USE_AXTLS) || defined(USE_MBEDTLS) || \
-    defined(USE_CYASSL) || defined(USE_SCHANNEL) || \
-    defined(USE_DARWINSSL) || defined(USE_GSKIT)
+    defined(USE_MBEDTLS) || \
+    defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
+    defined(USE_SECTRANSP) || defined(USE_GSKIT) || defined(USE_MESALINK)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -636,7 +663,7 @@ int netware_init(void);
 /* Single point where USE_NTLM definition might be defined */
 #if !defined(CURL_DISABLE_NTLM) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 #if defined(USE_OPENSSL) || defined(USE_WINDOWS_SSPI) || \
-    defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL) || \
+    defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_SECTRANSP) || \
     defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) || \
     defined(USE_MBEDTLS)
 
@@ -652,6 +679,10 @@ int netware_init(void);
 
 #ifdef CURL_WANTS_CA_BUNDLE_ENV
 #error "No longer supported. Set CURLOPT_CAINFO at runtime instead."
+#endif
+
+#if defined(USE_LIBSSH2) || defined(USE_LIBSSH) || defined(USE_WOLFSSH)
+#define USE_SSH
 #endif
 
 /*
@@ -751,11 +782,11 @@ endings either CRLF or LF so 't' is appropriate.
 #  if defined(WIN32) || defined(__CYGWIN__)
 #    define USE_RECV_BEFORE_SEND_WORKAROUND
 #  endif
-#else  /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+#else  /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 #  ifdef USE_RECV_BEFORE_SEND_WORKAROUND
 #    undef USE_RECV_BEFORE_SEND_WORKAROUND
 #  endif
-#endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUNDS */
+#endif /* DONT_USE_RECV_BEFORE_SEND_WORKAROUND */
 
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
@@ -767,5 +798,32 @@ endings either CRLF or LF so 't' is appropriate.
 #    define CURL_WINDOWS_APP
 #  endif
 # endif
+
+/* for systems that don't detect this in configure, use a sensible default */
+#ifndef CURL_SA_FAMILY_T
+#define CURL_SA_FAMILY_T unsigned short
+#endif
+
+/* Some convenience macros to get the larger/smaller value out of two given.
+   We prefix with CURL to prevent name collisions. */
+#define CURLMAX(x,y) ((x)>(y)?(x):(y))
+#define CURLMIN(x,y) ((x)<(y)?(x):(y))
+
+/* Some versions of the Android SDK is missing the declaration */
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
+struct passwd;
+int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
+               size_t buflen, struct passwd **result);
+#endif
+
+#ifdef DEBUGBUILD
+#define UNITTEST
+#else
+#define UNITTEST static
+#endif
+
+#if defined(USE_NGTCP2) || defined(USE_QUICHE)
+#define ENABLE_QUIC
+#endif
 
 #endif /* HEADER_CURL_SETUP_H */

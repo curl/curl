@@ -31,7 +31,7 @@
 # at a regular interval. The output is suitable to be mailed to
 # curl-autocompile@haxx.se to be dealt with automatically (make sure the
 # subject includes the word "autobuild" as the mail gets silently discarded
-# otherwise).  The most current build status (with a resonable backlog) will
+# otherwise).  The most current build status (with a reasonable backlog) will
 # be published on the curl site, at https://curl.haxx.se/auto/
 
 # USAGE:

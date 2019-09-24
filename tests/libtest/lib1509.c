@@ -69,7 +69,7 @@ int test(char *URL)
     goto test_cleanup;
   }
 
-  printf("header length is ........: %lu\n", headerSize);
+  printf("header length is ........: %ld\n", headerSize);
   printf("header length should be..: %lu\n", realHeaderSize);
 
 test_cleanup:

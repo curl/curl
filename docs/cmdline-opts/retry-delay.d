@@ -1,5 +1,5 @@
-long: retry-delay
-arg: <seconds>
+Long: retry-delay
+Arg: <seconds>
 Help: Wait time between retries
 Added: 7.12.3
 ---

@@ -32,4 +32,3 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
                   void *userdata);
 
 #endif /* HEADER_CURL_TOOL_CB_DBG_H */
-

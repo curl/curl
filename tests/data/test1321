@@ -27,9 +27,6 @@ body
   yours sincerely
 </data>
 <datacheck>
-HTTP/1.1 200 Mighty fine indeed
-imap: sure hit me
-
 From: me@somewhere
 To: fake@nowhere
 
@@ -54,7 +51,7 @@ http
 IMAP FETCH tunneled through HTTP proxy
  </name>
  <command>
-'imap://imap.1321:%IMAPPORT/1321/;UID=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
+'imap://imap.1321:%IMAPPORT/1321/;MAILINDEX=1' -u user:secret -p -x %HOSTIP:%PROXYPORT
 </command>
 </client>
 

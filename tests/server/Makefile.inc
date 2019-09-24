@@ -1,16 +1,18 @@
-noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm
+noinst_PROGRAMS = getpart resolve rtspd sockfilt sws tftpd fake_ntlm socksd disabled
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
  ../../lib/nonblock.c \
  ../../lib/strtoofft.c \
- ../../lib/warnless.c
+ ../../lib/warnless.c \
+ ../../lib/curl_ctype.c
 
 CURLX_HDRS = \
  ../../lib/curlx.h \
  ../../lib/nonblock.h \
  ../../lib/strtoofft.h \
- ../../lib/warnless.h
+ ../../lib/warnless.h \
+ ../../lib/curl_ctype.h
 
 USEFUL = \
  getpart.c \
@@ -48,6 +50,12 @@ sockfilt_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
+socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
+ server_sockaddr.h socksd.c \
+ ../../lib/inet_pton.c
+socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
+socksd_CFLAGS = $(AM_CFLAGS)
+
 sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  server_sockaddr.h \
  sws.c \
@@ -66,3 +74,5 @@ fake_ntlm_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  fake_ntlm.c
 fake_ntlm_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 fake_ntlm_CFLAGS = $(AM_CFLAGS)
+
+disabled_SOURCES = disabled.c

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,39 +59,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
-/* These are strictly for memory tracing and are using the same style as the
- * family otherwise present in memdebug.c. I put these ones here since they
- * require a bunch of structs I didn't want to include in memdebug.c
- */
-
-/*
- * For CURLRES_ARS, this should be written using ares_gethostbyaddr()
- * (ignoring the fact c-ares doesn't return 'serv').
- */
-
-int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
-                       GETNAMEINFO_TYPE_ARG2 salen,
-                       char *host, GETNAMEINFO_TYPE_ARG46 hostlen,
-                       char *serv, GETNAMEINFO_TYPE_ARG46 servlen,
-                       GETNAMEINFO_TYPE_ARG7 flags,
-                       int line, const char *source)
-{
-  int res = (getnameinfo)(sa, salen,
-                          host, hostlen,
-                          serv, servlen,
-                          flags);
-  if(0 == res)
-    /* success */
-    curl_memlog("GETNAME %s:%d getnameinfo()\n",
-                source, line);
-  else
-    curl_memlog("GETNAME %s:%d getnameinfo() failed = %d\n",
-                source, line, res);
-  return res;
-}
-#endif /* defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO) */
-
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
@@ -134,14 +101,16 @@ static void dump_addrinfo(struct connectdata *conn, const Curl_addrinfo *ai)
 {
   printf("dump_addrinfo:\n");
   for(; ai; ai = ai->ai_next) {
-    char  buf[INET6_ADDRSTRLEN];
-
+    char buf[INET6_ADDRSTRLEN];
     printf("    fam %2d, CNAME %s, ",
            ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
     if(Curl_printable_address(ai, buf, sizeof(buf)))
       printf("%s\n", buf);
-    else
-      printf("failed; %s\n", Curl_strerror(conn, SOCKERRNO));
+    else {
+      char buffer[STRERROR_LEN];
+      printf("failed; %s\n",
+             Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+    }
   }
 }
 #else
@@ -196,7 +165,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = conn->socktype;
+  hints.ai_socktype = (conn->transport == TRNSPRT_TCP) ?
+    SOCK_STREAM : SOCK_DGRAM;
 
 #ifndef USE_RESOLVE_ON_IPS
   /*
@@ -211,7 +181,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #endif
 
   if(port) {
-    snprintf(sbuf, sizeof(sbuf), "%d", port);
+    msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
   }
 

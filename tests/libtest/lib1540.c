@@ -79,8 +79,6 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_WRITEFUNC_PAUSE;
 }
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 int test(char *URL)
 {
   CURL *curls = NULL;

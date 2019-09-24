@@ -42,4 +42,3 @@ double tutil_tvdiff_secs(struct timeval t1, struct timeval t2);
 
 
 #endif  /* HEADER_CURL_LIBTEST_TESTUTIL_H */
-

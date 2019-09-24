@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -51,12 +51,12 @@ void dump(const char *text, unsigned char *ptr, size_t size,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%s, %ld bytes (0x%lx)\n",
-          text, (long)size, (long)size);
+  fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
+          text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stderr, "%4.4lx: ", (long)i);
+    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -128,9 +128,12 @@ int my_trace(CURL *handle, curl_infotype type,
 
 #define OUTPUTFILE "dl"
 
-static void setup(CURL *hnd)
+static int setup(CURL *hnd)
 {
   FILE *out = fopen(OUTPUTFILE, "wb");
+  if(!out)
+    /* failed */
+    return 1;
 
   /* write to this file */
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
@@ -153,7 +156,7 @@ static void setup(CURL *hnd)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
 #endif
-
+  return 0; /* all is good */
 }
 
 /* called when there's an incoming push */
@@ -176,16 +179,21 @@ static int server_push_callback(CURL *parent,
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
+  if(!out) {
+    /* if we can't save it, deny it */
+    fprintf(stderr, "Failed to create output file for push\n");
+    return CURL_PUSH_DENY;
+  }
 
   /* write to this file */
   curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
 
-  fprintf(stderr, "**** push callback approves stream %u, got %d headers!\n",
-          count, (int)num_headers);
+  fprintf(stderr, "**** push callback approves stream %u, got %lu headers!\n",
+          count, (unsigned long)num_headers);
 
   for(i = 0; i<num_headers; i++) {
     headp = curl_pushheader_bynum(headers, i);
-    fprintf(stderr, "**** header %u: %s\n", (int)i, headp);
+    fprintf(stderr, "**** header %lu: %s\n", (unsigned long)i, headp);
   }
 
   headp = curl_pushheader_byname(headers, ":path");
@@ -215,7 +223,10 @@ int main(void)
   easy = curl_easy_init();
 
   /* set options */
-  setup(easy);
+  if(setup(easy)) {
+    fprintf(stderr, "failed\n");
+    return 1;
+  }
 
   /* add the easy transfer */
   curl_multi_add_handle(multi_handle, easy);

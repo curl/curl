@@ -71,7 +71,7 @@ int test(char *URL)
   }
   if(protocol != CURLPROTO_HTTP) {
     fprintf(stderr, "%s:%d protocol of http resource is incorrect; "
-            "expected %ld but is %ld\n",
+            "expected %d but is %ld\n",
             __FILE__, __LINE__, CURLPROTO_HTTP, protocol);
     res = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;

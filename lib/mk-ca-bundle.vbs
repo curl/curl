@@ -314,7 +314,7 @@ Function RegExprFirst(SearchPattern, TheString)
   Set objRegExp = New RegExp                    ' create a regular expression.
   objRegExp.Pattern = SearchPattern             ' sets the search pattern.
   objRegExp.IgnoreCase = TRUE                   ' set to ignores case.
-  objRegExp.Global = TRUE                       ' set to gloabal search.
+  objRegExp.Global = TRUE                       ' set to global search.
   Set Matches = objRegExp.Execute(TheString)    ' do the search.
   If (Matches.Count) Then
     RegExprFirst = Matches(0).SubMatches(0)     ' return first match.

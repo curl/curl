@@ -44,7 +44,9 @@ perl %SRCDIR/libtest/test75.pl http://%HOSTIP:%HTTPPORT/ 22
 3
 </errorcode>
 <stdout mode="text">
-curl: (3) [globbing] bad range in column 47
+curl: (3) bad range in URL position 47:
+http://a-site-never-accessed.example.org/[2-1]
+                                              ^
 </stdout>
 </verify>
 </testcase>

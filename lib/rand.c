@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -106,8 +106,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
  * 'rndptr' points to.
  *
  * If libcurl is built without TLS support or with a TLS backend that lacks a
- * proper random API (Gskit, PolarSSL or mbedTLS), this function will use
- * "weak" random.
+ * proper random API (Gskit or mbedTLS), this function will use "weak" random.
  *
  * When built *with* TLS support and a backend that offers strong random, it
  * will return error if it cannot provide strong random values.
@@ -158,7 +157,7 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   DEBUGASSERT(num > 1);
 
 #ifdef __clang_analyzer__
-  /* This silences a scan-build warning about accesssing this buffer with
+  /* This silences a scan-build warning about accessing this buffer with
      uninitialized memory. */
   memset(buffer, 0, sizeof(buffer));
 #endif
@@ -174,6 +173,8 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
     return result;
 
   while(num) {
+    /* clang-tidy warns on this line without this comment: */
+    /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
     *rnd++ = hex[(*bufp & 0xF0)>>4];
     *rnd++ = hex[*bufp & 0x0F];
     bufp++;

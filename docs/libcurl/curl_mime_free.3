@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -40,6 +40,8 @@ not be explicitly freed as they are by the top structure freeing.
 \fBmime\fP is the handle as returned from a previous call to
 \fIcurl_mime_init(3)\fP and may be NULL.
 
+Passing in a NULL pointer in \fImime\fP will make this function return
+immediately with no action.
 .SH AVAILABILITY
 As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
 .SH RETURN VALUE

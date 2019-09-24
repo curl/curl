@@ -835,7 +835,7 @@ static int dprintf_formatf(
           while(width-- > 0)
             OUTCHAR(' ');
 
-        while((len-- > 0) && *str)
+        for(; len && *str; len--)
           OUTCHAR(*str++);
         if(p->flags&FLAGS_LEFT)
           while(width-- > 0)

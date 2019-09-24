@@ -25,7 +25,7 @@ http
 attempt connect to non-existing host name
  </name>
  <command>
-non-existing-host.haxx.se.
+--ipv4 non-existing-host.haxx.se.
 </command>
 </client>
 

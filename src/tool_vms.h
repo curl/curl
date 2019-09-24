@@ -44,4 +44,3 @@ void vms_special_exit(int code, int vms_show);
 #endif /* __VMS */
 
 #endif /* HEADER_CURL_TOOL_VMS_H */
-

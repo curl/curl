@@ -48,7 +48,7 @@ pop3://%HOSTIP:%POP3PORT/871 -u user:secret --sasl-ir
 <verify>
 <protocol>
 CAPA
-AUTH PLAIN dXNlcgB1c2VyAHNlY3JldA==
+AUTH PLAIN AHVzZXIAc2VjcmV0
 RETR 871
 QUIT
 </protocol>

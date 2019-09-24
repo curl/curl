@@ -32,7 +32,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INFILESIZE_LARGE,
 .SH DESCRIPTION
 When uploading a file to a remote site, \fIfilesize\fP should be used to tell
 libcurl what the expected size of the input file is. This value must be passed
-as a \fBcurl_off_t\fP. 
+as a \fBcurl_off_t\fP.
 
 For uploading using SCP, this option or \fICURLOPT_INFILESIZE(3)\fP is
 mandatory.

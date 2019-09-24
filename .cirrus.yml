@@ -1,0 +1,36 @@
+# Cirrus CI configuration
+# https://cirrus-ci.com/github/curl/curl
+
+task:
+  name: FreeBSD
+  freebsd_instance:
+    matrix:
+      image: freebsd-12-0-release-amd64
+      image: freebsd-11-2-release-amd64
+      image: freebsd-10-4-release-amd64
+
+  env:
+    CIRRUS_CLONE_DEPTH: 1
+    MAKE_FLAGS: -j 2
+
+  pkginstall_script:
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libmetalink libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - pkg delete -y curl
+  configure_script:
+    - ./buildconf
+    - ./configure --prefix="${HOME}"/install --enable-debug --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
+  compile_script:
+    - make V=1
+  test_script:
+    # Some tests won't run if run as root so run them as another user.
+    # Make directories world writable so the test step can write wherever it needs.
+    - find . -type d -exec chmod 777 {} \;
+    # TODO: A number of tests are failing on different FreeBSD versions and so
+    # are disabled.  This should be investigated.
+    - SKIP_TESTS=''
+    - if [ `uname -r` = "12.0-RELEASE" ] ; then SKIP_TESTS='!303 !304 !323 !504 !1242 !1243 !2002 !2003'; fi
+    - if [ `uname -r` = "11.2-RELEASE" ] ; then SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001'; fi
+    - if [ `uname -r` = "10.4-RELEASE" ] ; then SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001'; fi
+    - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
+  install_script:
+    - make V=1 install

@@ -47,7 +47,7 @@ if(curl) {
     curl_off_t cl;
     res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_UPLOAD_T, &cl);
     if(!res) {
-      printf("Size: " CURL_FORMAT_CURL_OFF_T "\\n", cl);
+      printf("Upload size: %" CURL_FORMAT_CURL_OFF_T "\\n", cl);
     }
   }
 }

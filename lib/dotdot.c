@@ -62,6 +62,8 @@ char *Curl_dedotdotify(const char *input)
   if(!out)
     return NULL; /* out of memory */
 
+  *out = 0; /* zero terminates, for inputs like "./" */
+
   /* get a cloned copy of the input */
   clone = strdup(input);
   if(!clone) {

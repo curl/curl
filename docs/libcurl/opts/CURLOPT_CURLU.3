@@ -1,0 +1,69 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_CURLU 3 "28 Oct 2018" "libcurl 7.63.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_CURLU \- set URL with CURLU *
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CURLU, void *pointer);
+.SH DESCRIPTION
+Pass in a pointer to the \fIURL\fP to work with. The parameter should be a
+CURLU *. Setting \fICURLOPT_CURLU(3)\fP will explicitly override
+\fICURLOPT_URL(3)\fP.
+
+\fICURLOPT_URL(3)\fP or \fICURLOPT_CURLU(3)\fP \fBmust\fP be set before a
+transfer is started.
+
+libcurl will use this handle and its contents read-only and will not change
+its contents. An application can very well update the contents of the URL
+handle after a transfer is done and if the same handle is then used in a
+subsequent request the updated contents will then be used.
+.SH DEFAULT
+The default value of this parameter is NULL.
+.SH PROTOCOLS
+All
+.SH EXAMPLE
+.nf
+CURL *handle = curl_easy_init();
+CURLU *urlp = curl_url();
+int res = 0;
+if(curl) {
+
+  res = curl_url_set(urlp, CURLUPART_URL, "http://example.com", 0);
+
+  curl_easy_setopt(handle, CURLOPT_CURLU, urlp);
+
+  ret = curl_easy_perform(handle);
+
+  curl_url_cleanup(urlp);
+  curl_easy_cleanup(handle);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.63.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_URL "(3), "
+.BR curl_url "(3), " curl_url_get "(3), " curl_url_set "(3), "

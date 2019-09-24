@@ -1,7 +1,17 @@
 # Ciphers
 
-With curl's options `CURLOPT_SSL_CIPHER_LIST` and `--ciphers` users can
-control which ciphers to consider when negotiating TLS connections.
+With curl's options
+[`CURLOPT_SSL_CIPHER_LIST`](https://curl.haxx.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html)
+and
+[`--ciphers`](https://curl.haxx.se/docs/manpage.html#--ciphers)
+users can control which ciphers to consider when negotiating TLS connections.
+
+TLS 1.3 ciphers are supported since curl 7.61 for OpenSSL 1.1.1+ with options
+[`CURLOPT_TLS13_CIPHERS`](https://curl.haxx.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html)
+and
+[`--tls13-ciphers`](https://curl.haxx.se/docs/manpage.html#--tls13-ciphers)
+. If you are using a different SSL backend you can try setting TLS 1.3 cipher
+suites by using the respective regular cipher option.
 
 The names of the known ciphers differ depending on which TLS backend that
 libcurl was built to use. This is an attempt to list known cipher names.
@@ -9,6 +19,8 @@ libcurl was built to use. This is an attempt to list known cipher names.
 ## OpenSSL
 
 (based on [OpenSSL docs](https://www.openssl.org/docs/man1.1.0/apps/ciphers.html))
+
+When specifying multiple cipher names, separate them with colon (`:`).
 
 ### SSL3 cipher suites
 
@@ -142,6 +154,16 @@ libcurl was built to use. This is an attempt to list known cipher names.
 `ECDHE-RSA-CAMELLIA128-SHA256`
 `ECDHE-RSA-CAMELLIA256-SHA384`
 
+### TLS 1.3 cipher suites
+
+(Note these ciphers are set with `CURLOPT_TLS13_CIPHERS` and `--tls13-ciphers`)
+
+`TLS_AES_256_GCM_SHA384`
+`TLS_CHACHA20_POLY1305_SHA256`
+`TLS_AES_128_GCM_SHA256`
+`TLS_AES_128_CCM_8_SHA256`
+`TLS_AES_128_CCM_SHA256`
+
 ## NSS
 
 ### Totally insecure
@@ -248,9 +270,16 @@ libcurl was built to use. This is an attempt to list known cipher names.
 `ecdhe_ecdsa_chacha20_poly1305_sha_256`
 `dhe_rsa_chacha20_poly1305_sha_256`
 
+### TLS 1.3 cipher suites
+
+`aes_128_gcm_sha_256`
+`aes_256_gcm_sha_384`
+`chacha20_poly1305_sha_256`
+
 ## GSKit
 
-Ciphers are internally defined as numeric codes (https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm),
+Ciphers are internally defined as
+[numeric codes](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_73/apis/gsk_attribute_set_buffer.htm),
 but libcurl maps them to the following case-insensitive names.
 
 ### SSL2 cipher suites (insecure: disabled by default)
@@ -424,3 +453,64 @@ but libcurl maps them to the following case-insensitive names.
 `ECDHE-PSK-CHACHA20-POLY1305`,
 `DHE-PSK-CHACHA20-POLY1305`,
 `EDH-RSA-DES-CBC3-SHA`,
+
+## Schannel
+
+Schannel allows the enabling and disabling of encryption algorithms, but not
+specific ciphersuites. They are
+[defined](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id) by
+Microsoft.
+
+There is also the case that the selected algorithm is not supported by the
+protocol or does not match the ciphers offered by the server during the SSL
+negotiation. In this case curl will return error
+`CURLE_SSL_CONNECT_ERROR (35) SEC_E_ALGORITHM_MISMATCH`
+and the request will fail.
+
+`CALG_MD2`,
+`CALG_MD4`,
+`CALG_MD5`,
+`CALG_SHA`,
+`CALG_SHA1`,
+`CALG_MAC`,
+`CALG_RSA_SIGN`,
+`CALG_DSS_SIGN`,
+`CALG_NO_SIGN`,
+`CALG_RSA_KEYX`,
+`CALG_DES`,
+`CALG_3DES_112`,
+`CALG_3DES`,
+`CALG_DESX`,
+`CALG_RC2`,
+`CALG_RC4`,
+`CALG_SEAL`,
+`CALG_DH_SF`,
+`CALG_DH_EPHEM`,
+`CALG_AGREEDKEY_ANY`,
+`CALG_HUGHES_MD5`,
+`CALG_SKIPJACK`,
+`CALG_TEK`,
+`CALG_CYLINK_MEK`,
+`CALG_SSL3_SHAMD5`,
+`CALG_SSL3_MASTER`,
+`CALG_SCHANNEL_MASTER_HASH`,
+`CALG_SCHANNEL_MAC_KEY`,
+`CALG_SCHANNEL_ENC_KEY`,
+`CALG_PCT1_MASTER`,
+`CALG_SSL2_MASTER`,
+`CALG_TLS1_MASTER`,
+`CALG_RC5`,
+`CALG_HMAC`,
+`CALG_TLS1PRF`,
+`CALG_HASH_REPLACE_OWF`,
+`CALG_AES_128`,
+`CALG_AES_192`,
+`CALG_AES_256`,
+`CALG_AES`,
+`CALG_SHA_256`,
+`CALG_SHA_384`,
+`CALG_SHA_512`,
+`CALG_ECDH`,
+`CALG_ECMQV`,
+`CALG_ECDSA`,
+`CALG_ECDH_EPHEM`,

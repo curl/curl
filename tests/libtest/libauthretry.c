@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  snprintf(full_url, len, "%s%04d", url, seq);
+  msnprintf(full_url, len, "%s%04d", url, seq);
   fprintf(stderr, "Sending new request %d to %s with credential %s "
           "(auth %ld)\n", seq, full_url, userpwd, auth_scheme);
   test_setopt(curl, CURLOPT_URL, full_url);
@@ -145,4 +145,3 @@ test_cleanup:
 
   return (int)res;
 }
-

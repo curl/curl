@@ -31,7 +31,7 @@ imap
 IMAP OAuth 2.0 (OAUTHBEARER) failure as continuation with initial response
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/845/;UID=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
+'imap://%HOSTIP:%IMAPPORT/845/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
 # The protocol section doesn't support ways of specifying the raw data in the
 # base64 encoded message so we must assert this
@@ -52,7 +52,7 @@ perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' 
 # transfer and such a connection will not get a "LOGOUT"
 <protocol>
 A001 CAPABILITY
-A002 AUTHENTICATE OAUTHBEARER dXNlcj11c2VyAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
+A002 AUTHENTICATE OAUTHBEARER bixhPXVzZXIsAWhvc3Q9MTI3LjAuMC4xAXBvcnQ9OTAwMwFhdXRoPUJlYXJlciBtRl85LkI1Zi00LjFKcU0BAQ==
 AQ==
 </protocol>
 </verify>

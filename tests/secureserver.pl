@@ -264,6 +264,11 @@ if($stunnel_version < 400) {
 #
 if($stunnel_version >= 400) {
     $socketopt = "a:SO_REUSEADDR=1";
+    if(($stunnel_version >= 534) && $tstunnel_windows) {
+        # SO_EXCLUSIVEADDRUSE is on by default on Vista or newer,
+        # but does not work together with SO_REUSEADDR being on.
+        $socketopt .= "\nsocket = a:SO_EXCLUSIVEADDRUSE=0";
+    }
     $cmd  = "$stunnel $conffile ";
     $cmd .= ">$logfile 2>&1";
     # setup signal handler

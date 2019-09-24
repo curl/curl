@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,7 +36,7 @@ void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 #elif defined(HAVE_VARIADIC_MACROS_GCC)
 #define infof(x...)  Curl_nop_stmt
 #else
-#define infof (void)
+#error "missing VARIADIC macro define, fix and rebuild!"
 #endif
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
@@ -51,8 +51,6 @@ void Curl_failf(struct Curl_easy *, const char *fmt, ...);
 #define CLIENTWRITE_HEADER (1<<1)
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
-CURLcode Curl_client_chop_write(struct connectdata *conn, int type, char *ptr,
-                                size_t len) WARN_UNUSED_RESULT;
 CURLcode Curl_client_write(struct connectdata *conn, int type, char *ptr,
                            size_t len) WARN_UNUSED_RESULT;
 
@@ -86,9 +84,8 @@ CURLcode Curl_write_plain(struct connectdata *conn,
                           ssize_t *written);
 
 /* the function used to output verbose information */
-int Curl_debug(struct Curl_easy *handle, curl_infotype type,
-               char *data, size_t size,
-               struct connectdata *conn);
+int Curl_debug(struct Curl_easy *data, curl_infotype type,
+               char *ptr, size_t size);
 
 
 #endif /* HEADER_CURL_SENDF_H */

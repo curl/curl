@@ -1,0 +1,55 @@
+Prerequirement
+==============
+This document describes how to compile, build and install curl and libcurl
+from sources using mk. To build it, you will require to install latest
+9legacy patches into Plan 9. Also Plan 9 still have no configuration option so
+both zlib and libopenssl are required too.
+
+The zlib that is available on Plan 9 can be downloaded from:
+
+  https://github.com/madler/zlib/pull/398
+
+LibreSSL Portable can be downloaded from:
+
+  https://github.com/libressl-portable/portable/pull/510
+
+Instruction
+===========
+First, you should construct namespace as like described below:
+
+% bind -ac ../lib lib
+% bind -ac ../src src
+% bind -ac ../include include
+% bind -ac .. .
+
+Then you will see as shown below (excerpt):
+
+  curl.git/
+   |_plan9
+   | |_BUILD.PLAN9.txt
+   | |_CHANGES
+   | |_CMake
+   | |  :
+   | |_mkfile
+   | |_mkfile.proto
+   | |_include
+   | | |_Makefile.am
+   | | |  :
+   | | |_mkfile
+   | |_lib
+   | | |_CMakeLists.txt
+   | | |  :
+   | | |_mkfile
+   | | |_mkfile.inc
+   | |_src
+   | | |_CMakeLists.txt
+   | | |  :
+   | | |_mkfile
+   | | |_mkfile.inc
+   |_lib
+   |_src
+
+After constructing namespace, you can run mk on plan9 directory.
+
+% mk
+% mk install

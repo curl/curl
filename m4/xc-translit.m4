@@ -161,4 +161,3 @@ dnl Expands to quoted result of 'translit' expansion.
 
 AC_DEFUN([XC_QTRANSLIT],
 [XC_QUOTE(translit([$1], [$2], [$3]))])
-

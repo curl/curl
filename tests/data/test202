@@ -19,7 +19,7 @@ file
  <name>
 two file:// URLs to stdout
  </name>
- <command>
+<command option="no-include">
 file://localhost/%PWD/log/test202.txt FILE://localhost/%PWD/log/test202.txt
 </command>
 <file name="log/test202.txt">

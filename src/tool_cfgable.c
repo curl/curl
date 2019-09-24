@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,14 +34,16 @@ void config_init(struct OperationConfig* config)
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;
-  config->proto = CURLPROTO_ALL; /* FIXME: better to read from library */
+  config->proto = CURLPROTO_ALL;
   config->proto_present = FALSE;
   config->proto_redir = CURLPROTO_ALL & /* All except FILE, SCP and SMB */
-                        ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
-                          CURLPROTO_SMBS);
+    ~(CURLPROTO_FILE | CURLPROTO_SCP | CURLPROTO_SMB |
+      CURLPROTO_SMBS);
   config->proto_redir_present = FALSE;
   config->proto_default = NULL;
   config->tcp_nodelay = TRUE; /* enabled by default */
+  config->happy_eyeballs_timeout_ms = CURL_HET_DEFAULT;
+  config->http09_allowed = FALSE;
 }
 
 static void free_config_fields(struct OperationConfig *config)
@@ -51,6 +53,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->random_file);
   Curl_safefree(config->egd_file);
   Curl_safefree(config->useragent);
+  Curl_safefree(config->altsvc);
   Curl_safefree(config->cookie);
   Curl_safefree(config->cookiejar);
   Curl_safefree(config->cookiefile);
@@ -101,6 +104,7 @@ static void free_config_fields(struct OperationConfig *config)
   config->url_get = NULL;
   config->url_out = NULL;
 
+  Curl_safefree(config->doh_url);
   Curl_safefree(config->cipher_list);
   Curl_safefree(config->proxy_cipher_list);
   Curl_safefree(config->cert);
@@ -113,6 +117,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->proxy_capath);
   Curl_safefree(config->crlfile);
   Curl_safefree(config->pinnedpubkey);
+  Curl_safefree(config->proxy_pinnedpubkey);
   Curl_safefree(config->proxy_crlfile);
   Curl_safefree(config->key);
   Curl_safefree(config->proxy_key);
@@ -128,6 +133,7 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->krblevel);
 
   Curl_safefree(config->oauth_bearer);
+  Curl_safefree(config->sasl_authzid);
 
   Curl_safefree(config->unix_socket_path);
   Curl_safefree(config->writeout);
@@ -140,10 +146,10 @@ static void free_config_fields(struct OperationConfig *config)
   curl_slist_free_all(config->headers);
   curl_slist_free_all(config->proxyheaders);
 
-  if(config->mimepost) {
-    curl_mime_free(config->mimepost);
-    config->mimepost = NULL;
-  }
+  curl_mime_free(config->mimepost);
+  config->mimepost = NULL;
+  tool_mime_free(config->mimeroot);
+  config->mimeroot = NULL;
   config->mimecurrent = NULL;
 
   curl_slist_free_all(config->telnet_options);

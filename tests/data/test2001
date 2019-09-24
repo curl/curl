@@ -48,7 +48,7 @@ file
  <name>
 HTTP GET followed by FTP RETR followed by FILE
  </name>
- <command>
+<command option="no-include">
 http://%HOSTIP:%HTTPPORT/20010001 ftp://%HOSTIP:%FTPPORT/20010002 file://localhost/%PWD/log/test2001.txt
 </command>
 <file name="log/test2001.txt">
@@ -81,17 +81,6 @@ RETR 20010002
 QUIT
 </protocol>
 <stdout>
-HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: "21025-dc7-39462498"
-Accept-Ranges: bytes
-Content-Length: 6
-Connection: close
-Content-Type: text/html
-Funny-head: yesyes
-
 -foo-
 data
     to

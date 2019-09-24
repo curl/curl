@@ -220,9 +220,6 @@ $!
 $ file = "lcl_root:[...]gnv*.opt"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!
-$ file = "lcl_root:[.packages.EPM]curl.list"
-$ if f$search(file) .nes. "" then delete 'file';*
-$!
 $ file = "lcl_root:[.packages.vms]macro32_exactcase.exe"
 $ if f$search(file) .nes. "" then delete 'file';*
 $!

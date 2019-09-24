@@ -1,0 +1,137 @@
+#!/usr/bin/perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2018-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
+
+# Display changes done in the repository from [tag] until now.
+#
+# Uses git for repo data.
+# Uses docs/THANKS and RELEASE-NOTES for current status.
+#
+# In the git clone root, invoke 'scripts/delta [release tag]'
+
+$start = $ARGV[0];
+
+if($start eq "") {
+    print "Usage: summary [tag]\n";
+    exit;
+}
+
+$commits = `git log --oneline $start.. | wc -l`;
+$committers = `git shortlog -s $start.. | wc -l`;
+$bcommitters = `git shortlog -s $start | wc -l`;
+
+$acommits = `git log --oneline | wc -l`;
+$acommitters = `git shortlog -s | wc -l`;
+
+# delta from now compared to before
+$ncommitters = $acommitters - $bcommitters;
+
+# number of contributors right now (according to THANKS)
+$acontribs = `cat docs/THANKS | grep -c '^[^ ]'`;
+# number when the tag tag was set
+$bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
+# delta
+$contribs = $acontribs - $bcontribs;
+
+# number of setops:
+$asetopts=`grep "^  CINIT" include/curl/curl.h  | grep -cv OBSOLETE`;
+$bsetopts=`git show $start:include/curl/curl.h | grep "^  CINIT" | grep -cv OBSOLETE`;
+$nsetopts = $asetopts - $bsetopts;
+
+# Number of command line options:
+$aoptions=`grep -c '{"....--' src/tool_help.c`;
+$boptions=`git show $start:src/tool_help.c | grep -c '{"....--'`;
+$noptions=$aoptions - $boptions;
+
+# Number of files in git
+$afiles=`git ls-files | wc -l`;
+$deletes=`git diff-tree --diff-filter=A -r --summary origin/master $start | wc -l`;
+$creates=`git diff-tree --diff-filter=D -r --summary origin/master $start | wc -l`;
+
+# Time since that tag
+$tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # unix timestamp
+$taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
+chomp $taggednice;
+$now=`date +%s`;
+$elapsed=$now - $tagged; # number of seconds since tag
+
+# Number of public functions in libcurl
+$apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
+$bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
+$public = $apublic - $bpublic;
+
+# Changes/bug-fixes currently logged
+open(F, "<RELEASE-NOTES");
+while(<F>) {
+    if($_ =~ /following changes:/) {
+        $mode=1;
+    }
+    elsif($_ =~ /following bugfixes:/) {
+        $mode=2;
+    }
+    elsif($_ =~ /known bugs:/) {
+        $mode=3;
+    }
+    elsif($_ =~ /like these:/) {
+        $mode=4;
+    }
+    if($_ =~ /^ o /) {
+        if($mode == 1) {
+            $numchanges++;
+        }
+        elsif($mode == 2) {
+            $numbugfixes++;
+        }
+    }
+    if(($mode == 4) && ($_ =~ /^  \((\d+) contributors/)) {
+        $numcontributors = $1;
+    }
+}
+close(F);
+
+########################################################################
+# Produce the summary
+
+print "== Since $start ==\n";
+printf "Commits: %d (out of %d)\n",
+    $commits, $acommits;
+printf "Commit authors: %d out of which %d are new (out of %d)\n",
+    $committers, $ncommitters, $acommitters;
+printf "Contributors in RELEASE-NOTES: %d\n",
+    $numcontributors;
+printf "New contributors (in THANKS): %d (out of %d)\n",
+    $contribs, $acontribs;
+printf "New curl_easy_setopt() options: %d (out of %d)\n",
+    $nsetopts, $asetopts;
+printf "New command line options: %d (out of %d)\n",
+    $noptions, $aoptions;
+
+printf "Deleted %d files, added %d files (total %d)\n",
+    $deletes, $creates, $afiles;
+
+printf "Elapsed time: %.1f days (since$taggednice)\n",
+    $elapsed / 3600 / 24;
+printf "Changes logged: %d\n", $numchanges;
+printf "Bugfixes logged: %d\n", $numbugfixes;
+
+printf "New public functions: %d (out of %d)\n",
+    $public, $apublic;

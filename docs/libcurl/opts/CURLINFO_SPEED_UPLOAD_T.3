@@ -44,7 +44,7 @@ if(curl) {
     curl_off_t speed;
     res = curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &speed);
     if(!res) {
-      printf("Upload speed " CURL_FORMAT_CURL_OFF_T " bytes/sec\\n", ul);
+      printf("Upload speed %" CURL_FORMAT_CURL_OFF_T " bytes/sec\\n", speed);
     }
   }
 }

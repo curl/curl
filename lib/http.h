@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -58,26 +58,30 @@ struct Curl_send_buffer {
 typedef struct Curl_send_buffer Curl_send_buffer;
 
 Curl_send_buffer *Curl_add_buffer_init(void);
-void Curl_add_buffer_free(Curl_send_buffer *buff);
-CURLcode Curl_add_bufferf(Curl_send_buffer *in, const char *fmt, ...);
-CURLcode Curl_add_buffer(Curl_send_buffer *in, const void *inptr, size_t size);
-CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
+void Curl_add_buffer_free(Curl_send_buffer **inp);
+CURLcode Curl_add_bufferf(Curl_send_buffer **inp, const char *fmt, ...)
+  WARN_UNUSED_RESULT;
+CURLcode Curl_add_buffer(Curl_send_buffer **inp, const void *inptr,
+                         size_t size) WARN_UNUSED_RESULT;
+CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
                               struct connectdata *conn,
-                              long *bytes_written,
+                              curl_off_t *bytes_written,
                               size_t included_body_bytes,
                               int socketindex);
 
-CURLcode Curl_add_timecondition(struct Curl_easy *data,
+CURLcode Curl_add_timecondition(const struct connectdata *conn,
                                 Curl_send_buffer *buf);
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
                                  Curl_send_buffer *req_buffer);
+CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
+                                    Curl_send_buffer **buffer,
+                                    struct Curl_easy *handle);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);
 CURLcode Curl_http_done(struct connectdata *, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
-CURLcode Curl_http_setup_conn(struct connectdata *conn);
 
 /* The following functions are defined in http_chunks.c */
 void Curl_httpchunk_init(struct connectdata *conn);
@@ -85,11 +89,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
                               ssize_t length, ssize_t *wrote);
 
 /* These functions are in http.c */
-void Curl_http_auth_stage(struct Curl_easy *data, int stage);
 CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
                               const char *auth);
 CURLcode Curl_http_auth_act(struct connectdata *conn);
-CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
@@ -104,7 +106,7 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
    This value used to be fairly big (100K), but we must take into account that
    if the server rejects the POST due for authentication reasons, this data
-   will always be uncondtionally sent and thus it may not be larger than can
+   will always be unconditionally sent and thus it may not be larger than can
    always be afforded to send twice.
 
    It must not be greater than 64K to work on VMS.
@@ -124,6 +126,10 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
 #endif /* CURL_DISABLE_HTTP */
 
+#ifdef USE_NGHTTP3
+struct h3out; /* see ngtcp2 */
+#endif
+
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
@@ -134,8 +140,6 @@ struct HTTP {
 
   const char *p_pragma;      /* Pragma: string */
   const char *p_accept;      /* Accept: string */
-  curl_off_t readbytecount;
-  curl_off_t writebytecount;
 
   /* For FORM posting */
   curl_mimepart form;
@@ -154,9 +158,11 @@ struct HTTP {
     HTTPSEND_LAST     /* never use this */
   } sending;
 
-  void *send_buffer; /* used if the request couldn't be sent in one chunk,
-                        points to an allocated send_buffer struct */
-
+#ifndef CURL_DISABLE_HTTP
+  Curl_send_buffer *send_buffer; /* used if the request couldn't be sent in
+                                    one chunk, points to an allocated
+                                    send_buffer struct */
+#endif
 #ifdef USE_NGHTTP2
   /*********** for HTTP/2 we store stream-local data here *************/
   int32_t stream_id; /* stream we are interested in */
@@ -170,26 +176,36 @@ struct HTTP {
   int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */
-  bool closed; /* TRUE on HTTP2 stream close */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
-  uint32_t error_code; /* HTTP/2 error code */
-
-  char *mem;     /* points to a buffer in memory to store received data */
-  size_t len;    /* size of the buffer 'mem' points to */
-  size_t memlen; /* size of data copied to mem */
-
-  const uint8_t *upload_mem; /* points to a buffer to read from */
-  size_t upload_len; /* size of the buffer 'upload_mem' points to */
-  curl_off_t upload_left; /* number of bytes left to upload */
 
   char **push_headers;       /* allocated array */
   size_t push_headers_used;  /* number of entries filled in */
   size_t push_headers_alloc; /* number of entries allocated */
 #endif
-};
+#if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
+  bool closed; /* TRUE on HTTP2 stream close */
+  char *mem;     /* points to a buffer in memory to store received data */
+  size_t len;    /* size of the buffer 'mem' points to */
+  size_t memlen; /* size of data copied to mem */
+#endif
+#if defined(USE_NGHTTP2) || defined(ENABLE_QUIC)
+  /* fields used by both HTTP/2 and HTTP/3 */
+  const uint8_t *upload_mem; /* points to a buffer to read from */
+  size_t upload_len; /* size of the buffer 'upload_mem' points to */
+  curl_off_t upload_left; /* number of bytes left to upload */
+#endif
 
-typedef int (*sending)(void); /* Curl_send */
-typedef int (*recving)(void); /* Curl_recv */
+#ifdef ENABLE_QUIC
+  /*********** for HTTP/3 we store stream-local data here *************/
+  int64_t stream3_id; /* stream we are interested in */
+  bool firstbody;  /* FALSE until body arrives */
+  bool h3req;    /* FALSE until request is issued */
+  bool upload_done;
+#endif
+#ifdef USE_NGHTTP3
+  struct h3out *h3out; /* per-stream buffers for upload */
+#endif
+};
 
 #ifdef USE_NGHTTP2
 /* h2 settings for this connection */
@@ -199,15 +215,14 @@ struct h2settings {
 };
 #endif
 
-
 struct http_conn {
 #ifdef USE_NGHTTP2
 #define H2_BINSETTINGS_LEN 80
   nghttp2_session *h2;
   uint8_t binsettings[H2_BINSETTINGS_LEN];
   size_t  binlen; /* length of the binsettings data */
-  sending send_underlying; /* underlying send Curl_send callback */
-  recving recv_underlying; /* underlying recv Curl_recv callback */
+  Curl_send *send_underlying; /* underlying send Curl_send callback */
+  Curl_recv *recv_underlying; /* underlying recv Curl_recv callback */
   char *inbuf; /* buffer to receive data from underlying socket */
   size_t inbuflen; /* number of bytes filled in inbuf */
   size_t nread_inbuf; /* number of bytes read from in inbuf */
@@ -226,6 +241,7 @@ struct http_conn {
   /* list of settings that will be sent */
   nghttp2_settings_entry local_settings[3];
   size_t local_settings_num;
+  uint32_t error_code; /* HTTP/2 error code */
 #else
   int unused; /* prevent a compiler warning */
 #endif
@@ -258,4 +274,3 @@ Curl_http_output_auth(struct connectdata *conn,
                                             up the proxy tunnel */
 
 #endif /* HEADER_CURL_HTTP_H */
-

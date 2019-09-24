@@ -1,6 +1,6 @@
 Short: b
 Long: cookie
-Arg: <data>
+Arg: <data|filename>
 Protocols: HTTP
 Help: Send cookies from string/file
 ---
@@ -12,7 +12,8 @@ If no '=' symbol is used in the argument, it is instead treated as a filename
 to read previously stored cookie from. This option also activates the cookie
 engine which will make curl record incoming cookies, which may be handy if
 you're using this in combination with the --location option or do multiple URL
-transfers on the same invoke.
+transfers on the same invoke. If the file name is exactly a minus ("-"), curl
+will instead the contents from stdin.
 
 The file format of the file to read cookies from should be plain HTTP headers
 (Set-Cookie style) or the Netscape/Mozilla cookie file format.

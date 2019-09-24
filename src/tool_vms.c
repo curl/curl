@@ -216,4 +216,3 @@ int dmy_lib$initialize = (int) LIB$INITIALIZE;
 #endif /* __DECC && !__VAX && __CRTL_VER && __CRTL_VER >= 70301000 */
 
 #endif /* __VMS */
-

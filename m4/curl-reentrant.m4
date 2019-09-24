@@ -614,4 +614,3 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   fi
   #
 ])
-

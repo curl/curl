@@ -5,38 +5,52 @@ Roadmap of things Daniel Stenberg wants to work on next. It is intended to
 serve as a guideline for others for information, feedback and possible
 participation.
 
-QUIC
+HSTS
 ----
 
- See the [QUIC wiki page](https://github.com/curl/curl/wiki/QUIC).
+ Complete and merge [the existing PR](https://github.com/curl/curl/pull/2682).
 
-HTTP cookies
+ Loading a huge preload file is probably not too interesting to most people,
+ but using a custom file and reacting to HSTS response header probably are
+ good features.
+
+DNS-over-TLS
 ------------
 
-Two cookie drafts have been adopted by the httpwg in IETF and we should
-support them as the popular browsers will as well:
+ Similar to DNS-over-HTTPS. Could share quite a lot of generic code.
 
-[Deprecate modification of 'secure' cookies from non-secure
-origins](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-00)
+ESNI (Encrypted SNI)
+--------------------
 
-[Cookie Prefixes](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-prefixes-00)
+ See Daniel's post on [Support of Encrypted
+ SNI](https://curl.haxx.se/mail/lib-2019-03/0000.html) on the mailing list.
 
-[Firefox bug report about secure cookies](https://bugzilla.mozilla.org/show_bug.cgi?id=976073)
+ Initial work exists in https://github.com/curl/curl/pull/4011
 
-SRV records
------------
+tiny-curl
+---------
 
-How to find services for specific domains/hosts.
+ There's no immediate action for this but users seem keen on being able to
+ building custom minimized versions of libcurl for their products. Make sure
+ new features that are "niche" can still be disabled at build-time.
 
-Improve
--------
+MQTT
+----
 
-1. curl -h output (considered overwhelming to users).
+ Support receiving and sending MQTT messages. Initial work exists in
+ https://github.com/curl/curl/pull/3514
 
-2. We have > 200 command line options, is there a way to redo things to
-   simplify or improve the situation as we are likely to keep adding
-   features/options in the future too.
+Hardcode “localhost”
+--------------------
 
-3. Perform some of the clean up from the TODO document, removing old
-   definitions and such like that are currently earmarked to be removed years
-   ago.
+ No need to resolve it. Avoid a risk where this is resolved over the network
+ and actually responds with something else than a local address. Some
+ operating systems already do this. Also:
+ https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
+
+"menu config"-style build feature selection
+-------------------------------------------
+
+ Allow easier building of custom libcurl versions with only a selected feature
+ where the available features are easily browsable and toggle-able ON/OFF or
+ similar.

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -96,10 +96,10 @@ static void memory_tracking_init(void)
       env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
     strcpy(fname, env);
     curl_free(env);
-    curl_memdebug(fname);
-    /* this weird stuff here is to make curl_free() get called
-       before curl_memdebug() as otherwise memory tracking will
-       log a free() without an alloc! */
+    curl_dbg_memdebug(fname);
+    /* this weird stuff here is to make curl_free() get called before
+       curl_dbg_memdebug() as otherwise memory tracking will log a free()
+       without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = curl_getenv("CURL_MEMLIMIT");
@@ -107,7 +107,7 @@ static void memory_tracking_init(void)
     char *endptr;
     long num = strtol(env, &endptr, 10);
     if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
-      curl_memlimit(num);
+      curl_dbg_memlimit(num);
     curl_free(env);
   }
 }
@@ -124,7 +124,7 @@ char *hexdump(const unsigned char *buffer, size_t len)
   if(len > 200)
     return NULL;
   for(i = 0; i<len; i++, p += 3)
-    snprintf(p, 4, "%02x ", buffer[i]);
+    msnprintf(p, 4, "%02x ", buffer[i]);
   return dump;
 }
 

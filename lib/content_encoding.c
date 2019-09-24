@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -71,13 +71,13 @@
 #define RESERVED     0xE0 /* bits 5..7: reserved */
 
 typedef enum {
-  ZLIB_UNINIT,          /* uninitialized */
-  ZLIB_INIT,            /* initialized */
-  ZLIB_INFLATING,       /* Inflating started. */
-  ZLIB_GZIP_HEADER,     /* reading gzip header */
-  ZLIB_GZIP_TRAILER,    /* reading gzip trailer */
-  ZLIB_GZIP_INFLATING,  /* inflating gzip stream */
-  ZLIB_INIT_GZIP        /* initialized in transparent gzip mode */
+  ZLIB_UNINIT,               /* uninitialized */
+  ZLIB_INIT,                 /* initialized */
+  ZLIB_INFLATING,            /* inflating started. */
+  ZLIB_EXTERNAL_TRAILER,     /* reading external trailer */
+  ZLIB_GZIP_HEADER,          /* reading gzip header */
+  ZLIB_GZIP_INFLATING,       /* inflating gzip stream */
+  ZLIB_INIT_GZIP             /* initialized in transparent gzip mode */
 } zlibInitState;
 
 /* Writer parameters. */
@@ -150,8 +150,8 @@ static CURLcode process_trailer(struct connectdata *conn, zlib_params *zp)
   if(result || !zp->trailerlen)
     result = exit_zlib(conn, z, &zp->zlib_init, result);
   else {
-    /* Only occurs for gzip with zlib < 1.2.0.4. */
-    zp->zlib_init = ZLIB_GZIP_TRAILER;
+    /* Only occurs for gzip with zlib < 1.2.0.4 or raw deflate. */
+    zp->zlib_init = ZLIB_EXTERNAL_TRAILER;
   }
   return result;
 }
@@ -163,7 +163,6 @@ static CURLcode inflate_stream(struct connectdata *conn,
   z_stream *z = &zp->z;         /* zlib state structure */
   uInt nread = z->avail_in;
   Bytef *orig_in = z->next_in;
-  int status;                   /* zlib status */
   bool done = FALSE;
   CURLcode result = CURLE_OK;   /* Curl_client_write status */
   char *decomp;                 /* Put the decompressed data here. */
@@ -184,13 +183,20 @@ static CURLcode inflate_stream(struct connectdata *conn,
   /* because the buffer size is fixed, iteratively decompress and transfer to
      the client via downstream_write function. */
   while(!done) {
+    int status;                   /* zlib status */
     done = TRUE;
 
     /* (re)set buffer for decompressed output for every iteration */
     z->next_out = (Bytef *) decomp;
     z->avail_out = DSIZ;
 
+#ifdef Z_BLOCK
+    /* Z_BLOCK is only available in zlib ver. >= 1.2.0.5 */
     status = inflate(z, Z_BLOCK);
+#else
+    /* fallback for zlib ver. < 1.2.0.5 */
+    status = inflate(z, Z_SYNC_FLUSH);
+#endif
 
     /* Flush output data if some. */
     if(z->avail_out != DSIZ) {
@@ -227,6 +233,7 @@ static CURLcode inflate_stream(struct connectdata *conn,
           z->next_in = orig_in;
           z->avail_in = nread;
           zp->zlib_init = ZLIB_INFLATING;
+          zp->trailerlen = 4; /* Tolerate up to 4 unknown trailer bytes. */
           done = FALSE;
           break;
         }
@@ -280,6 +287,9 @@ static CURLcode deflate_unencode_write(struct connectdata *conn,
   /* Set the compressed input when this function is called */
   z->next_in = (Bytef *) buf;
   z->avail_in = (uInt) nbytes;
+
+  if(zp->zlib_init == ZLIB_EXTERNAL_TRAILER)
+    return process_trailer(conn, zp);
 
   /* Now uncompress the data */
   return inflate_stream(conn, writer, ZLIB_INFLATING);
@@ -526,7 +536,7 @@ static CURLcode gzip_unencode_write(struct connectdata *conn,
   }
   break;
 
-  case ZLIB_GZIP_TRAILER:
+  case ZLIB_EXTERNAL_TRAILER:
     z->next_in = (Bytef *) buf;
     z->avail_in = (uInt) nbytes;
     return process_trailer(conn, zp);
@@ -726,7 +736,7 @@ static void identity_close_writer(struct connectdata *conn,
 
 static const content_encoding identity_encoding = {
   "identity",
-  NULL,
+  "none",
   identity_init_writer,
   identity_unencode_write,
   identity_close_writer,
@@ -755,7 +765,6 @@ char *Curl_all_content_encodings(void)
   const content_encoding * const *cep;
   const content_encoding *ce;
   char *ace;
-  char *p;
 
   for(cep = encodings; *cep; cep++) {
     ce = *cep;
@@ -768,7 +777,7 @@ char *Curl_all_content_encodings(void)
 
   ace = malloc(len);
   if(ace) {
-    p = ace;
+    char *p = ace;
     for(cep = encodings; *cep; cep++) {
       ce = *cep;
       if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT)) {
@@ -873,10 +882,9 @@ static contenc_writer *new_unencoding_writer(struct connectdata *conn,
                                              contenc_writer *downstream)
 {
   size_t sz = offsetof(contenc_writer, params) + handler->paramsize;
-  contenc_writer *writer = (contenc_writer *) malloc(sz);
+  contenc_writer *writer = (contenc_writer *) calloc(1, sz);
 
   if(writer) {
-    memset(writer, 0, sz);
     writer->handler = handler;
     writer->downstream = downstream;
     if(handler->init_writer(conn, writer)) {
@@ -916,10 +924,9 @@ void Curl_unencode_cleanup(struct connectdata *conn)
 static const content_encoding *find_encoding(const char *name, size_t len)
 {
   const content_encoding * const *cep;
-  const content_encoding *ce;
 
   for(cep = encodings; *cep; cep++) {
-    ce = *cep;
+    const content_encoding *ce = *cep;
     if((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
        (ce->alias && strncasecompare(name, ce->alias, len) && !ce->alias[len]))
       return ce;

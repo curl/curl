@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -163,16 +163,14 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
   MSG_OUT("*** update_timeout_cb %ld => %ld:%ld ***\n",
           timeout_ms, timeout.tv_sec, timeout.tv_usec);
 
-  /* TODO
-   *
-   * if timeout_ms is 0, call curl_multi_socket_action() at once!
-   *
+  /*
    * if timeout_ms is -1, just delete the timer
    *
-   * for all other values of timeout_ms, this should set or *update*
-   * the timer to the new value
+   * For other values of timeout_ms, this should set or *update* the timer to
+   * the new value
    */
-  g->timer_event = g_timeout_add(timeout_ms, timer_cb, g);
+  if(timeout_ms >= 0)
+    g->timer_event = g_timeout_add(timeout_ms, timer_cb, g);
   return 0;
 }
 
@@ -184,8 +182,8 @@ static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
   int fd = g_io_channel_unix_get_fd(ch);
 
   int action =
-    (condition & G_IO_IN ? CURL_CSELECT_IN : 0) |
-    (condition & G_IO_OUT ? CURL_CSELECT_OUT : 0);
+    ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
+    ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
 
   rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
@@ -220,7 +218,8 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
                     GlobalInfo *g)
 {
   GIOCondition kind =
-    (act&CURL_POLL_IN?G_IO_IN:0)|(act&CURL_POLL_OUT?G_IO_OUT:0);
+    ((act & CURL_POLL_IN) ? G_IO_IN : 0) |
+    ((act & CURL_POLL_OUT) ? G_IO_OUT : 0);
 
   f->sockfd = s;
   f->action = act;
@@ -257,8 +256,8 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   else {
     if(!fdp) {
       MSG_OUT("Adding data: %s%s\n",
-              what&CURL_POLL_IN?"READ":"",
-              what&CURL_POLL_OUT?"WRITE":"");
+              (what & CURL_POLL_IN) ? "READ" : "",
+              (what & CURL_POLL_OUT) ? "WRITE" : "");
       addsock(s, e, what, g);
     }
     else {
@@ -413,7 +412,6 @@ int init_fifo(void)
 int main(int argc, char **argv)
 {
   GlobalInfo *g;
-  CURLMcode rc;
   GMainLoop*gmain;
   int fd;
   GIOChannel* ch;

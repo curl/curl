@@ -45,11 +45,11 @@ your own home directory:
 The configure script always tries to find a working SSL library unless
 explicitly told not to. If you have OpenSSL installed in the default search
 path for your compiler/linker, you don't need to do anything special. If you
-have OpenSSL installed in /usr/local/ssl, you can run configure like:
+have OpenSSL installed in `/usr/local/ssl`, you can run configure like:
 
     ./configure --with-ssl
 
-If you have OpenSSL installed somewhere else (for example, /opt/OpenSSL) and
+If you have OpenSSL installed somewhere else (for example, `/opt/OpenSSL`) and
 you have pkg-config installed, set the pkg-config path first, like this:
 
     env PKG_CONFIG_PATH=/opt/OpenSSL/lib/pkgconfig ./configure --with-ssl
@@ -64,7 +64,7 @@ have OpenSSL installed in your system, you can run configure like this:
    ./configure --without-ssl
 
 If you have OpenSSL installed, but with the libraries in one place and the
-header files somewhere else, you have to set the LDFLAGS and CPPFLAGS
+header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
 environment variables prior to running configure.  Something like this should
 work:
 
@@ -72,10 +72,9 @@ work:
 
 If you have shared SSL libs installed in a directory where your run-time
 linker doesn't find them (which usually causes configure failures), you can
-provide the -R option to ld on some operating systems to set a hard-coded
-path to the run-time linker:
+provide this option to gcc to set a hard-coded path to the run-time linker:
 
-    LDFLAGS=-R/usr/local/ssl/lib ./configure --with-ssl
+    LDFLAGS=-Wl,-R/usr/local/ssl/lib ./configure --with-ssl
 
 ## More Options
 
@@ -102,13 +101,13 @@ The default OpenSSL configure check will also detect and use BoringSSL or
 libressl.
 
  - GnuTLS: `--without-ssl --with-gnutls`.
- - Cyassl: `--without-ssl --with-cyassl`
+ - wolfSSL: `--without-ssl --with-wolfssl`
  - NSS: `--without-ssl --with-nss`
  - PolarSSL: `--without-ssl --with-polarssl`
  - mbedTLS: `--without-ssl --with-mbedtls`
- - axTLS: `--without-ssl --with-axtls`
- - schannel: `--without-ssl --with-winssl`
- - secure transport: `--without-ssl --with-darwinssl`
+ - schannel: `--without-ssl --with-schannel`
+ - secure transport: `--without-ssl --with-secure-transport`
+ - MesaLink: `--without-ssl --with-mesalink`
 
 # Windows
 
@@ -122,9 +121,9 @@ libressl.
  KB140584 is a must for any Windows developer. Especially important is full
  understanding if you are not going to follow the advice given above.
 
- - [How To Use the C Run-Time](https://support.microsoft.com/kb/94248/en-us)
- - [How to link with the correct C Run-Time CRT library](https://support.microsoft.com/kb/140584/en-us)
- - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://msdn.microsoft.com/en-us/library/ms235460)
+ - [How To Use the C Run-Time](https://support.microsoft.com/help/94248/how-to-use-the-c-run-time)
+ - [Run-Time Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
+ - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://docs.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
 If your app is misbehaving in some strange way, or it is suffering from
 memory corruption, before asking for further help, please try first to
@@ -149,7 +148,7 @@ make targets available to build libcurl with more features, use:
    and SSPI support.
 
 If you have any problems linking libraries or finding header files, be sure
-to verify that the provided "Makefile.m32" files use the proper paths, and
+to verify that the provided `Makefile.m32` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
@@ -173,57 +172,10 @@ If you want to enable LDAPS support then set LDAPS=1.
 ## Cygwin
 
 Almost identical to the unix installation. Run the configure script in the
-curl source tree root with `sh configure`. Make sure you have the sh
-executable in /bin/ or you'll see the configure fail toward the end.
+curl source tree root with `sh configure`. Make sure you have the `sh`
+executable in `/bin/` or you'll see the configure fail toward the end.
 
 Run `make`
-
-## Borland C++ compiler
-
-Ensure that your build environment is properly set up to use the compiler and
-associated tools. PATH environment variable must include the path to bin
-subdirectory of your compiler installation, eg: `c:\Borland\BCC55\bin`
-
-It is advisable to set environment variable BCCDIR to the base path of the
-compiler installation.
-
-    set BCCDIR=c:\Borland\BCC55
-
-In order to build a plain vanilla version of curl and libcurl run the
-following command from curl's root directory:
-
-    make borland
-
-To build curl and libcurl with zlib and OpenSSL support set environment
-variables `ZLIB_PATH` and `OPENSSL_PATH` to the base subdirectories of the
-already built zlib and OpenSSL libraries and from curl's root directory run
-command:
-
-    make borland-ssl-zlib
-
-libcurl library will be built in 'lib' subdirectory while curl tool is built
-in 'src' subdirectory. In order to use libcurl library it is advisable to
-modify compiler's configuration file bcc32.cfg located in
-`c:\Borland\BCC55\bin` to reflect the location of libraries include paths for
-example the '-I' line could result in something like:
-
-    -I"c:\Borland\BCC55\include;c:\curl\include;c:\openssl\inc32"
-
-bcc3.cfg `-L` line could also be modified to reflect the location of of
-libcurl library resulting for example:
-
-    -L"c:\Borland\BCC55\lib;c:\curl\lib;c:\openssl\out32"
-
-In order to build sample program `simple.c` from the docs\examples
-subdirectory run following command from mentioned subdirectory:
-
-    bcc32 simple.c libcurl.lib cw32mt.lib
-
-In order to build sample program simplessl.c an SSL enabled libcurl is
-required, as well as the OpenSSL libeay32.lib and ssleay32.lib libraries.
-
-In order to build sample program `sslbackend.c`, an SSL enabled libcurl
-is required.
 
 ## Disabling Specific Protocols in Windows builds
 
@@ -248,9 +200,9 @@ protocols:
 
 If you want to set any of these defines you have the following options:
 
- - Modify lib/config-win32.h
- - Modify lib/curl_setup.h
- - Modify winbuild/Makefile.vc
+ - Modify `lib/config-win32.h`
+ - Modify `lib/curl_setup.h`
+ - Modify `winbuild/Makefile.vc`
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
@@ -261,12 +213,12 @@ versions.
 ## Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
 
 In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
-necessary to make definition of preprocessor symbol USE_LWIPSOCK visible to
+necessary to make definition of preprocessor symbol `USE_LWIPSOCK` visible to
 libcurl and curl compilation processes. To set this definition you have the
 following alternatives:
 
- - Modify lib/config-win32.h and src/config-win32.h
- - Modify winbuild/Makefile.vc
+ - Modify `lib/config-win32.h` and `src/config-win32.h`
+ - Modify `winbuild/Makefile.vc`
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
@@ -296,13 +248,13 @@ look for dynamic import symbols.
 
 ## Legacy Windows and SSL
 
-WinSSL (specifically SChannel from Windows SSPI), is the native SSL library in
-Windows. However, WinSSL in Windows <= XP is unable to connect to servers that
+Schannel (from Windows SSPI), is the native SSL library in Windows. However,
+Schannel in Windows <= XP is unable to connect to servers that
 no longer support the legacy handshakes and algorithms used by those
 versions. If you will be using curl in one of those earlier versions of
 Windows you should choose another SSL backend such as OpenSSL.
 
-# Apple iOS and Mac OS X
+# Apple iOS and macOS
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
@@ -317,12 +269,12 @@ the server. This, of course, includes the root certificates that ship with the
 OS. The `--cert` and `--engine` options, and their libcurl equivalents, are
 currently unimplemented in curl with Secure Transport.
 
-For OS X users: In OS X 10.8 ("Mountain Lion"), Apple made a major overhaul to
-the Secure Transport API that, among other things, added support for the newer
-TLS 1.1 and 1.2 protocols. To get curl to support TLS 1.1 and 1.2, you must
-build curl on Mountain Lion or later, or by using the equivalent SDK. If you
-set the `MACOSX_DEPLOYMENT_TARGET` environmental variable to an earlier
-version of OS X prior to building curl, then curl will use the new Secure
+For macOS users: In OS X 10.8 ("Mountain Lion"), Apple made a major overhaul
+to the Secure Transport API that, among other things, added support for the
+newer TLS 1.1 and 1.2 protocols. To get curl to support TLS 1.1 and 1.2, you
+must build curl on Mountain Lion or later, or by using the equivalent SDK. If
+you set the `MACOSX_DEPLOYMENT_TARGET` environmental variable to an earlier
+version of macOS prior to building curl, then curl will use the new Secure
 Transport API on Mountain Lion and later, and fall back on the older API when
 the same curl binary is executed on older cats. For example, running these
 commands in curl's directory in the shell will build the code such that it
@@ -336,7 +288,7 @@ will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
 
 Download and unpack the curl package.
 
-'cd' to the new directory. (e.g. `cd curl-7.12.3`)
+`cd` to the new directory. (e.g. `cd curl-7.12.3`)
 
 Set environment variables to point to the cross-compile toolchain and call
 configure with any options you need.  Be sure and specify the `--host` and
@@ -375,7 +327,7 @@ In some cases, you may be able to simplify the above commands to as little as:
 
 There are a number of configure options that can be used to reduce the size of
 libcurl for embedded applications where binary size is an important factor.
-First, be sure to set the CFLAGS variable when configuring with any relevant
+First, be sure to set the `CFLAGS` variable when configuring with any relevant
 compiler optimization flags to reduce the size of the binary.  For gcc, this
 would mean at minimum the -Os option, and potentially the `-march=X`,
 `-mdynamic-no-pic` and `-flto` options as well, e.g.
@@ -408,8 +360,8 @@ use, here are some other flags that can reduce the size of the library:
 
 The GNU compiler and linker have a number of options that can reduce the
 size of the libcurl dynamic libraries on some platforms even further.
-Specify them by providing appropriate CFLAGS and LDFLAGS variables on the
-configure command-line, e.g.
+Specify them by providing appropriate `CFLAGS` and `LDFLAGS` variables on
+the configure command-line, e.g.
 
     CFLAGS="-Os -ffunction-sections -fdata-sections
             -fno-unwind-tables -fno-asynchronous-unwind-tables -flto"
@@ -431,7 +383,7 @@ in a lower total size than dynamically linking.
 Note that the curl test harness can detect the use of some, but not all, of
 the `--disable` statements suggested above. Use will cause tests relying on
 those features to fail.  The test harness can be manually forced to skip the
-relevant tests by specifying certain key words on the runtests.pl command
+relevant tests by specifying certain key words on the `runtests.pl` command
 line.  Following is a list of appropriate key words:
 
  - `--disable-cookies`          !cookies

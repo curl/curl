@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,11 +46,15 @@ static char *getflagstr(int flags)
 {
   char *buf = malloc(256);
   if(buf) {
-    snprintf(buf, 256, "%s,%s,%s,%s",
-      ((flags & SANITIZE_ALLOW_COLONS) ? "SANITIZE_ALLOW_COLONS" : ""),
-      ((flags & SANITIZE_ALLOW_PATH) ? "SANITIZE_ALLOW_PATH" : ""),
-      ((flags & SANITIZE_ALLOW_RESERVED) ? "SANITIZE_ALLOW_RESERVED" : ""),
-      ((flags & SANITIZE_ALLOW_TRUNCATE) ? "SANITIZE_ALLOW_TRUNCATE" : ""));
+    msnprintf(buf, 256, "%s,%s,%s,%s",
+              ((flags & SANITIZE_ALLOW_COLONS) ?
+               "SANITIZE_ALLOW_COLONS" : ""),
+              ((flags & SANITIZE_ALLOW_PATH) ?
+               "SANITIZE_ALLOW_PATH" : ""),
+              ((flags & SANITIZE_ALLOW_RESERVED) ?
+               "SANITIZE_ALLOW_RESERVED" : ""),
+              ((flags & SANITIZE_ALLOW_TRUNCATE) ?
+               "SANITIZE_ALLOW_TRUNCATE" : ""));
   }
   return buf;
 }
@@ -59,13 +63,13 @@ static char *getcurlcodestr(int cc)
 {
   char *buf = malloc(256);
   if(buf) {
-    snprintf(buf, 256, "%s (%d)",
-      (cc == SANITIZE_ERR_OK ? "SANITIZE_ERR_OK" :
-       cc == SANITIZE_ERR_BAD_ARGUMENT ? "SANITIZE_ERR_BAD_ARGUMENT" :
-       cc == SANITIZE_ERR_INVALID_PATH ? "SANITIZE_ERR_INVALID_PATH" :
-       cc == SANITIZE_ERR_OUT_OF_MEMORY ? "SANITIZE_ERR_OUT_OF_MEMORY" :
-       "unexpected error code - add name"),
-      cc);
+    msnprintf(buf, 256, "%s (%d)",
+              (cc == SANITIZE_ERR_OK ? "SANITIZE_ERR_OK" :
+               cc == SANITIZE_ERR_BAD_ARGUMENT ? "SANITIZE_ERR_BAD_ARGUMENT" :
+               cc == SANITIZE_ERR_INVALID_PATH ? "SANITIZE_ERR_INVALID_PATH" :
+               cc == SANITIZE_ERR_OUT_OF_MEMORY ? "SANITIZE_ERR_OUT_OF_MEMORY":
+               "unexpected error code - add name"),
+              cc);
   }
   return buf;
 }
@@ -295,7 +299,7 @@ UNITTEST_START
 
   size_t i;
 
-  for(i = 0; i < sizeof data / sizeof data[0]; ++i) {
+  for(i = 0; i < sizeof(data) / sizeof(data[0]); ++i) {
     char *output = NULL;
     char *flagstr = NULL;
     char *received_ccstr = NULL;

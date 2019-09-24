@@ -181,7 +181,7 @@ sub get_win32_current_drive {
 sub do_msys_transform;
 
 # Internal function. Gets two parameters: first parameter must be single
-# drive letter ('c'), second optional parameter is path relative to drive's 
+# drive letter ('c'), second optional parameter is path relative to drive's
 # current working directory. Returns Win32 absolute normalized path.
 sub get_abs_path_on_win32_drive;
 
@@ -451,11 +451,11 @@ sub build_sys_abs_path {
         return $path;
     }
     elsif(should_use_cygpath()) {
-        # 'cygpath' is avalable - use it.
+        # 'cygpath' is available - use it.
 
         my $has_final_slash = ($path =~ m{[\\/]$});
 
-        # Resolve relative directories, as they may be not resolved for 
+        # Resolve relative directories, as they may be not resolved for
         # Unix-style paths.
         # Remove duplicated slashes, as they may be not processed.
         $path = normalize_path($path);
@@ -624,7 +624,7 @@ sub do_msys_transform {
 }
 
 # Internal function. Gets two parameters: first parameter must be single
-# drive letter ('c'), second optional parameter is path relative to drive's 
+# drive letter ('c'), second optional parameter is path relative to drive's
 # current working directory. Returns Win32 absolute normalized path.
 sub get_abs_path_on_win32_drive {
     my ($drv, $rel_path) = @_;

@@ -47,4 +47,3 @@ char *tool_basename(char *path)
 }
 
 #endif /* HAVE_BASENAME */
-

@@ -4,7 +4,7 @@ Arg: <data>
 Help: HTTP POST data
 Protocols: HTTP
 See-also: data-binary data-urlencode data-raw
-Mutexed: form head upload
+Mutexed: form head upload-file
 ---
 Sends the specified data in a POST request to the HTTP server, in the same way
 that a browser does when a user has filled in an HTML form and presses the
@@ -24,7 +24,7 @@ chunk that looks like \&'name=daniel&skill=lousy'.
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from
 stdin. Multiple files can also be specified. Posting data from a file named
-'foobar' would thus be done with --data @foobar. When --data is told to read
+\&'foobar' would thus be done with --data @foobar. When --data is told to read
 from a file like that, carriage returns and newlines will be stripped out. If
 you don't want the @ character to have a special interpretation use --data-raw
 instead.

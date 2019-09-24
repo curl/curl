@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -81,25 +81,23 @@
 # undef printf
 # undef fprintf
 # undef sprintf
-# undef snprintf
+# undef msnprintf
 # undef vprintf
 # undef vfprintf
 # undef vsprintf
-# undef vsnprintf
+# undef mvsnprintf
 # undef aprintf
 # undef vaprintf
 
 # define printf curlx_mprintf
 # define fprintf curlx_mfprintf
 # define sprintf curlx_msprintf
-# define snprintf curlx_msnprintf
+# define msnprintf curlx_msnprintf
 # define vprintf curlx_mvprintf
 # define vfprintf curlx_mvfprintf
-# define vsprintf curlx_mvsprintf
-# define vsnprintf curlx_mvsnprintf
+# define mvsnprintf curlx_mvsnprintf
 # define aprintf curlx_maprintf
 # define vaprintf curlx_mvaprintf
 #endif /* ENABLE_CURLX_PRINTF */
 
 #endif /* HEADER_CURL_CURLX_H */
-

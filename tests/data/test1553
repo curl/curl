@@ -38,7 +38,9 @@ IMAP cleanup before a connection was created
 <tool>
 lib1553
 </tool>
- <command>
+
+# this MUST use a host name that doesn't resolve
+<command>
 imap://non-existing-host.haxx.se:%IMAPPORT/1553
 </command>
 </client>

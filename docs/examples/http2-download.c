@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,22 +41,13 @@
 #define CURLPIPE_MULTIPLEX 0
 #endif
 
+struct transfer {
+  CURL *easy;
+  unsigned int num;
+  FILE *out;
+};
+
 #define NUM_HANDLES 1000
-
-static void *curl_hnd[NUM_HANDLES];
-static int num_transfers;
-
-/* a handle to number lookup, highly ineffective when we do many
-   transfers... */
-static int hnd2num(CURL *hnd)
-{
-  int i;
-  for(i = 0; i< num_transfers; i++) {
-    if(curl_hnd[i] == hnd)
-      return i;
-  }
-  return 0; /* weird, but just a fail-safe */
-}
 
 static
 void dump(const char *text, int num, unsigned char *ptr, size_t size,
@@ -71,12 +62,12 @@ void dump(const char *text, int num, unsigned char *ptr, size_t size,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%d %s, %ld bytes (0x%lx)\n",
-          num, text, (long)size, (long)size);
+  fprintf(stderr, "%d %s, %lu bytes (0x%lx)\n",
+          num, text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stderr, "%4.4lx: ", (long)i);
+    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -113,12 +104,13 @@ int my_trace(CURL *handle, curl_infotype type,
              void *userp)
 {
   const char *text;
-  int num = hnd2num(handle);
+  struct transfer *t = (struct transfer *)userp;
+  unsigned int num = t->num;
   (void)handle; /* prevent compiler warning */
-  (void)userp;
+
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== %d Info: %s", num, data);
+    fprintf(stderr, "== %u Info: %s", num, data);
     /* FALLTHROUGH */
   default: /* in case a new one is introduced to shock us */
     return 0;
@@ -147,17 +139,19 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-static void setup(CURL *hnd, int num)
+static void setup(struct transfer *t, int num)
 {
-  FILE *out;
   char filename[128];
+  CURL *hnd;
+
+  hnd = t->easy = curl_easy_init();
 
   snprintf(filename, 128, "dl-%d", num);
 
-  out = fopen(filename, "wb");
+  t->out = fopen(filename, "wb");
 
   /* write to this file */
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
+  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t->out);
 
   /* set the same URL */
   curl_easy_setopt(hnd, CURLOPT_URL, "https://localhost:8443/index.html");
@@ -165,6 +159,7 @@ static void setup(CURL *hnd, int num)
   /* please be verbose */
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
+  curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, t);
 
   /* HTTP/2 please */
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
@@ -177,37 +172,35 @@ static void setup(CURL *hnd, int num)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
 #endif
-
-  curl_hnd[num] = hnd;
 }
 
 /*
- * Simply download two files over HTTP/2, using the same physical connection!
+ * Download many transfers over HTTP/2, using the same connection!
  */
 int main(int argc, char **argv)
 {
-  CURL *easy[NUM_HANDLES];
+  struct transfer trans[NUM_HANDLES];
   CURLM *multi_handle;
   int i;
-  int still_running; /* keep number of running handles */
-
-  if(argc > 1)
+  int still_running = 0; /* keep number of running handles */
+  int num_transfers;
+  if(argc > 1) {
     /* if given a number, do that many transfers */
     num_transfers = atoi(argv[1]);
-
-  if(!num_transfers || (num_transfers > NUM_HANDLES))
-    num_transfers = 3; /* a suitable low default */
+    if((num_transfers < 1) || (num_transfers > NUM_HANDLES))
+      num_transfers = 3; /* a suitable low default */
+  }
+  else
+    num_transfers = 3; /* suitable default */
 
   /* init a multi stack */
   multi_handle = curl_multi_init();
 
-  for(i = 0; i<num_transfers; i++) {
-    easy[i] = curl_easy_init();
-    /* set options */
-    setup(easy[i], i);
+  for(i = 0; i < num_transfers; i++) {
+    setup(&trans[i], i);
 
     /* add the individual transfer */
-    curl_multi_add_handle(multi_handle, easy[i]);
+    curl_multi_add_handle(multi_handle, trans[i].easy);
   }
 
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
@@ -215,7 +208,7 @@ int main(int argc, char **argv)
   /* we start some action by calling perform right away */
   curl_multi_perform(multi_handle, &still_running);
 
-  do {
+  while(still_running) {
     struct timeval timeout;
     int rc; /* select() return code */
     CURLMcode mc; /* curl_multi_fdset() return code */
@@ -284,12 +277,14 @@ int main(int argc, char **argv)
       curl_multi_perform(multi_handle, &still_running);
       break;
     }
-  } while(still_running);
+  }
+
+  for(i = 0; i < num_transfers; i++) {
+    curl_multi_remove_handle(multi_handle, trans[i].easy);
+    curl_easy_cleanup(trans[i].easy);
+  }
 
   curl_multi_cleanup(multi_handle);
-
-  for(i = 0; i<num_transfers; i++)
-    curl_easy_cleanup(easy[i]);
 
   return 0;
 }

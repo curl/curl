@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 #endif
 
 #ifdef WIN32
+#  include <tlhelp32.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
 #endif
@@ -598,7 +599,6 @@ SANITIZEcode rename_if_reserved_dos_device_name(char **const sanitized,
       }
       memmove(base + 1, base, blen + 1);
       base[0] = '_';
-      ++blen;
     }
   }
 #endif
@@ -638,12 +638,19 @@ char **__crt0_glob_function(char *arg)
  */
 
 CURLcode FindWin32CACert(struct OperationConfig *config,
+                         curl_sslbackend backend,
                          const char *bundle_file)
 {
   CURLcode result = CURLE_OK;
 
-  /* search and set cert file only if libcurl supports SSL */
-  if(curlinfo->features & CURL_VERSION_SSL) {
+  /* Search and set cert file only if libcurl supports SSL.
+   *
+   * If Schannel is the selected SSL backend then these locations are
+   * ignored. We allow setting CA location for schannel only when explicitly
+   * specified by the user via CURLOPT_CAINFO / --cacert.
+   */
+  if((curlinfo->features & CURL_VERSION_SSL) &&
+     backend != CURLSSLBACKEND_SCHANNEL) {
 
     DWORD res_len;
     char buf[PATH_MAX];
@@ -661,6 +668,60 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   }
 
   return result;
+}
+
+
+/* Get a list of all loaded modules with full paths.
+ * Returns slist on success or NULL on error.
+ */
+struct curl_slist *GetLoadedModulePaths(void)
+{
+  HANDLE hnd = INVALID_HANDLE_VALUE;
+  MODULEENTRY32 mod = {0};
+  struct curl_slist *slist = NULL;
+
+  mod.dwSize = sizeof(MODULEENTRY32);
+
+  do {
+    hnd = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
+  } while(hnd == INVALID_HANDLE_VALUE && GetLastError() == ERROR_BAD_LENGTH);
+
+  if(hnd == INVALID_HANDLE_VALUE)
+    goto error;
+
+  if(!Module32First(hnd, &mod))
+    goto error;
+
+  do {
+    char *path; /* points to stack allocated buffer */
+    struct curl_slist *temp;
+
+#ifdef UNICODE
+    /* sizeof(mod.szExePath) is the max total bytes of wchars. the max total
+       bytes of multibyte chars won't be more than twice that. */
+    char buffer[sizeof(mod.szExePath) * 2];
+    if(!WideCharToMultiByte(CP_ACP, 0, mod.szExePath, -1,
+                            buffer, sizeof(buffer), NULL, NULL))
+      goto error;
+    path = buffer;
+#else
+    path = mod.szExePath;
+#endif
+    temp = curl_slist_append(slist, path);
+    if(!temp)
+      goto error;
+    slist = temp;
+  } while(Module32Next(hnd, &mod));
+
+  goto cleanup;
+
+error:
+  curl_slist_free_all(slist);
+  slist = NULL;
+cleanup:
+  if(hnd != INVALID_HANDLE_VALUE)
+    CloseHandle(hnd);
+  return slist;
 }
 
 #endif /* WIN32 */

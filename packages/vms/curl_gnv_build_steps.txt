@@ -198,7 +198,7 @@ The *.EXE files are not moved to the new_gnu: directory.
 After you are satisfied with the results of your build, you can move the
 files from new_gnu: to old_gnu: at your convenience.
 
-Building a PCSI kit for an archictecture takes the following steps after
+Building a PCSI kit for an architecture takes the following steps after
 making sure that you have a working build environment.
 
 Note that it requires manually creating two logical names as described

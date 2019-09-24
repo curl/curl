@@ -7,10 +7,10 @@
  * rewrite to work around the paragraph 2 in the BSD licenses as explained
  * below.
  *
- * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
+ * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska HÃ¶gskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
@@ -61,7 +61,9 @@
 #include "strcase.h"
 #include "warnless.h"
 #include "strdup.h"
-/* The last #include file should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
 #include "memdebug.h"
 
 static const struct {
@@ -118,7 +120,7 @@ static int ftp_send_command(struct connectdata *conn, const char *message, ...)
   char print_buffer[50];
 
   va_start(args, message);
-  vsnprintf(print_buffer, sizeof(print_buffer), message, args);
+  mvsnprintf(print_buffer, sizeof(print_buffer), message, args);
   va_end(args);
 
   if(Curl_ftpsend(conn, print_buffer)) {
@@ -140,7 +142,7 @@ socket_read(curl_socket_t fd, void *to, size_t len)
 {
   char *to_p = to;
   CURLcode result;
-  ssize_t nread;
+  ssize_t nread = 0;
 
   while(len > 0) {
     result = Curl_read_plain(fd, to_p, len, &nread);
@@ -149,7 +151,6 @@ socket_read(curl_socket_t fd, void *to, size_t len)
       to_p += nread;
     }
     else {
-      /* FIXME: We are doing a busy wait */
       if(result == CURLE_AGAIN)
         continue;
       return result;
@@ -177,7 +178,6 @@ socket_write(struct connectdata *conn, curl_socket_t fd, const void *to,
       to_p += written;
     }
     else {
-      /* FIXME: We are doing a busy wait */
       if(result == CURLE_AGAIN)
         continue;
       return result;
@@ -191,7 +191,6 @@ static CURLcode read_data(struct connectdata *conn,
                           struct krb5buffer *buf)
 {
   int len;
-  void *tmp = NULL;
   CURLcode result;
 
   result = socket_read(fd, &len, sizeof(len));
@@ -201,12 +200,11 @@ static CURLcode read_data(struct connectdata *conn,
   if(len) {
     /* only realloc if there was a length */
     len = ntohl(len);
-    tmp = Curl_saferealloc(buf->data, len);
+    buf->data = Curl_saferealloc(buf->data, len);
   }
-  if(tmp == NULL)
+  if(!len || !buf->data)
     return CURLE_OUT_OF_MEMORY;
 
-  buf->data = tmp;
   result = socket_read(fd, buf->data, len);
   if(result)
     return result;
@@ -263,13 +261,11 @@ static ssize_t sec_recv(struct connectdata *conn, int sockindex,
     total_read += bytes_read;
     buffer += bytes_read;
   }
-  /* FIXME: Check for overflow */
   return total_read;
 }
 
 /* Send |length| bytes from |from| to the |fd| socket taking care of encoding
-   and negociating with the server. |from| can be NULL. */
-/* FIXME: We don't check for errors nor report any! */
+   and negotiating with the server. |from| can be NULL. */
 static void do_sec_send(struct connectdata *conn, curl_socket_t fd,
                         const char *from, int length)
 {
@@ -390,7 +386,7 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 
   if(conn->data->set.verbose) {
     buf[decoded_len] = '\n';
-    Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1, conn);
+    Curl_debug(conn->data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
   }
 
   buf[decoded_len] = '\0';
@@ -404,25 +400,21 @@ int Curl_sec_read_msg(struct connectdata *conn, char *buffer,
 
   if(buf[decoded_len - 1] == '\n')
     buf[decoded_len - 1] = '\0';
-  /* FIXME: Is |buffer| length always greater than |decoded_len|? */
   strcpy(buffer, buf);
   free(buf);
   return ret_code;
 }
 
-/* FIXME: The error code returned here is never checked. */
 static int sec_set_protection_level(struct connectdata *conn)
 {
   int code;
-  char *pbsz;
-  static unsigned int buffer_size = 1 << 20; /* 1048576 */
   enum protection_level level = conn->request_data_prot;
 
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
   if(!conn->sec_complete) {
     infof(conn->data, "Trying to change the protection level after the"
-                      "completion of the data exchange.\n");
+                      " completion of the data exchange.\n");
     return -1;
   }
 
@@ -431,6 +423,9 @@ static int sec_set_protection_level(struct connectdata *conn)
     return 0;
 
   if(level) {
+    char *pbsz;
+    static unsigned int buffer_size = 1 << 20; /* 1048576 */
+
     code = ftp_send_command(conn, "PBSZ %u", buffer_size);
     if(code < 0)
       return -1;
@@ -488,7 +483,7 @@ static CURLcode choose_mech(struct connectdata *conn)
 
   tmp_allocation = realloc(conn->app_data, mech->size);
   if(tmp_allocation == NULL) {
-    failf(data, "Failed realloc of size %u", mech->size);
+    failf(data, "Failed realloc of size %zu", mech->size);
     mech = NULL;
     return CURLE_OUT_OF_MEMORY;
   }
@@ -506,7 +501,6 @@ static CURLcode choose_mech(struct connectdata *conn)
   infof(data, "Trying mechanism %s...\n", mech->name);
   ret = ftp_send_command(conn, "AUTH %s", mech->name);
   if(ret < 0)
-    /* FIXME: This error is too generic but it is OK for now. */
     return CURLE_COULDNT_CONNECT;
 
   if(ret/100 != 3) {
@@ -573,7 +567,6 @@ Curl_sec_end(struct connectdata *conn)
     conn->in_buffer.data = NULL;
     conn->in_buffer.size = 0;
     conn->in_buffer.index = 0;
-    /* FIXME: Is this really needed? */
     conn->in_buffer.eof_flag = 0;
   }
   conn->sec_complete = 0;

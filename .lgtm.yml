@@ -1,0 +1,10 @@
+extraction:
+  cpp:
+    prepare:
+      packages: # to avoid confusion with libopenafs-dev which also provides a des.h
+        - libssl-dev
+    after_prepare: # make sure lgtm.com doesn't use CMake (which generates and runs tests)
+      - rm -f CMakeLists.txt
+      - ./buildconf
+    configure: # enable as many optional features as possible
+      command: ./configure --enable-ares --with-libssh2 --with-gssapi --with-librtmp --with-libmetalink

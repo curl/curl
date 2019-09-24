@@ -77,7 +77,7 @@ rem ***************************************************************************
   )
 
   shift & goto parseArgs
- 
+
 :start
   if exist ..\buildconf.bat (
     if "%MODE%" == "GENERATE" (
@@ -264,7 +264,7 @@ rem
     exit /B
   )
 
-  if exist %3 (  
+  if exist %3 (
     del %3
   )
 
@@ -284,12 +284,14 @@ rem
       call :element %1 lib "strtoofft.c" %3
       call :element %1 lib "nonblock.c" %3
       call :element %1 lib "warnless.c" %3
+      call :element %1 lib "curl_ctype.c" %3
     ) else if "!var!" == "CURL_SRC_X_H_FILES" (
       call :element %1 lib "config-win32.h" %3
       call :element %1 lib "curl_setup.h" %3
       call :element %1 lib "strtoofft.h" %3
       call :element %1 lib "nonblock.h" %3
       call :element %1 lib "warnless.h" %3
+      call :element %1 lib "curl_ctype.h" %3
     ) else if "!var!" == "CURL_LIB_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element %1 lib "%%c" %3
     ) else if "!var!" == "CURL_LIB_H_FILES" (
@@ -389,7 +391,7 @@ rem
 :clean
   echo * %CD%\%1
 
-  if exist %1 (  
+  if exist %1 (
     del %1
   )
 

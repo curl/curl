@@ -12,6 +12,12 @@ The user name and passwords are split up on the first colon, which makes it
 impossible to use a colon in the user name with this option. The password can,
 still.
 
+On systems where it works, curl will hide the given option argument from
+process listings. This is not enough to protect credentials from possibly
+getting seen by other users on the same system as they will still be visible
+for a brief moment before cleared. Such sensitive data should be retrieved
+from a file instead or similar and never used in clear text in a command line.
+
 When using Kerberos V5 with a Windows based server you should include the
 Windows domain name in the user name, in order for the server to successfully
 obtain a Kerberos Ticket. If you don't then the initial authentication

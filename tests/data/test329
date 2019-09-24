@@ -1,0 +1,70 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+cookies
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Set-Cookie: test=yes; path=/we/want/; domain=.host.foo.com; Max-Age=0;
+Content-Length: 4
+
+boo
+</data>
+<data2>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+moo
+</data2>
+</reply>
+
+# Client-side
+<client>
+<file name="log/jar329.txt" mode="text">
+.host.foo.com	TRUE	/we/want/	FALSE	2147483647	test	no
+</file>
+<server>
+http
+</server>
+ <name>
+HTTP cookie with Max-Age=0
+ </name>
+# Explicitly set the time zone to a known good one, in case the user is
+# using one of the 'right' zones that take into account leap seconds
+# which causes the cookie expiry times to be different.
+<setenv>
+TZ=GMT
+</setenv>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/329 -b log/jar329.txt -H "Host: host.foo.com" http://%HOSTIP:%HTTPPORT/we/want/3290002
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /we/want/329 HTTP/1.1
+Host: host.foo.com
+Accept: */*
+Cookie: test=no
+
+GET /we/want/3290002 HTTP/1.1
+Host: host.foo.com
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

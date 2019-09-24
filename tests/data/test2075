@@ -1,0 +1,34 @@
+<testcase>
+<info>
+<keywords>
+--disallow-username-in-url
+HTTP
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+http
+</features>
+<server>
+none
+</server>
+<name>
+Verify usernames are not allowed in url
+</name>
+<command>
+--disallow-username-in-url http://username:password@example.com/
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# CURLE_LOGIN_DENIED is code 67
+<errorcode>
+67
+</errorcode>
+</verify>
+</testcase>

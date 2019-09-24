@@ -156,8 +156,6 @@ auth_required   if this is set and a POST/PUT is made without auth, the
 idle            do nothing after receiving the request, just "sit idle"
 stream          continuously send data to the client, never-ending
 writedelay: [secs] delay this amount between reply packets
-pipe: [num]     tell the server to expect this many HTTP requests before
-                sending back anything, to allow pipelining tests
 skip: [num]     instructs the server to ignore reading this many bytes from a PUT
                 or POST request
 
@@ -169,6 +167,7 @@ connection-monitor When used, this will log [DISCONNECT] to the server.input
                log when the connection is disconnected.
 upgrade        when an HTTP upgrade header is found, the server will upgrade
                to http2
+swsclose       instruct server to close connection after response
 
 For TFTP:
 writedelay: [secs] delay this amount between reply packets (each packet being
@@ -187,7 +186,6 @@ ftp-ipv6
 ftps
 http
 http-ipv6
-http-pipe
 http-proxy
 http-unix
 https
@@ -219,18 +217,18 @@ SKIPPED.
 
 Features testable here are:
 
-axTLS
 crypto
 debug
 getrlimit
 GnuTLS
 GSS-API
-http2
+http/2
 idn
 ipv6
 Kerberos
 large_file
 libz
+manual
 Metalink
 NSS
 NTLM
@@ -248,6 +246,7 @@ unittest
 unix-sockets
 WinSSL
 ld_preload
+alt-svc
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -293,8 +292,8 @@ command is run. They are cleared again after the command has been run.
 Variables are first substituted as in the <command> section.
 </setenv>
 
-<command [option="no-output/no-include"] [timeout="secs"] [delay="secs"]
-         [type="perl"]>
+<command [option="no-output/no-include/force-output"] [timeout="secs"]
+         [delay="secs"][type="perl"]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly.
 
@@ -316,6 +315,9 @@ there's no memory debugging and valgrind gets shut off for this test.
 Set option="no-output" to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
 the verify/stdout section is used.
+
+Set option="force-output" to make use of --output even when the test is
+otherwise written to verify stdout.
 
 Set option="no-include" to prevent the test script to slap on the --include
 argument.
@@ -349,7 +351,6 @@ Available substitute variables include:
 %HOST6IP      - IPv6 address of the host running this test
 %HOSTIP       - IPv4 address of the host running this test
 %HTTP6PORT    - IPv6 port number of the HTTP server
-%HTTPPIPEPORT - Port number of the HTTP pipelining server
 %HTTPUNIXPATH - Path to the Unix socket of the HTTP server
 %HTTPPORT     - Port number of the HTTP server
 %HTTPSPORT    - Port number of the HTTPS server
@@ -361,6 +362,8 @@ Available substitute variables include:
 %POP3PORT  - Port number of the POP3 server
 %PROXYPORT - Port number of the HTTP proxy
 %PWD       - Current directory
+%POSIX_PWD - Current directory somewhat mingw friendly
+%FILE_PWD  - Current directory, on windows prefixed with a slash
 %RTSP6PORT - IPv6 port number of the RTSP server
 %RTSPPORT  - Port number of the RTSP server
 %SMTP6PORT - IPv6 port number of the SMTP server
@@ -440,11 +443,30 @@ Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
 Variables are substituted as in the <command> section.
 </file>
+<file1>
+1 to 4 can be appended to 'file' to compare more files.
+</file1>
+<file2>
+</file2>
+<file3>
+</file3>
+<file4>
+</file4>
 <stripfile>
 One perl op per line that operates on the output file or stdout before being
 compared with what is stored in the test file. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </stripfile>
+<stripfile1>
+1 to 4 can be appended to 'stripfile' to strip the correspending <fileN>
+content
+</stripfile1>
+<stripfile2>
+</stripfile2>
+<stripfile3>
+</stripfile3>
+<stripfile4>
+</stripfile4>
 <upload>
 the contents of the upload data curl should have sent
 </upload>

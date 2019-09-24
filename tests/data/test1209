@@ -39,7 +39,7 @@ s/^EPRT \|1\|(.*)/EPRT \|1\|/
 
 # The protocol part does not include QUIT simply because the error is
 # CURLE_OPERATION_TIMEDOUT (28) which is a generic timeout error without
-# specificly saying for which connection it concerns, and for timeouts libcurl
+# specifically saying for which connection it concerns, and for timeouts libcurl
 # marks the control channel as "invalid". As this test case times out for the
 # data connection it could still use the control channel.
 <protocol>

@@ -57,10 +57,6 @@ not have the announcement clause that collides with GPL.
  different obligations. You should select the license that best meets your
  needs.
 
-## axTLS
-
- (May be used for SSL/TLS support) Uses a Modified BSD-style license.
-
 ## mbedTLS
 
  (May be used for SSL/TLS support) Uses the [Apache 2.0

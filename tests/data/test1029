@@ -29,7 +29,7 @@ http
  <name>
 HTTP Location: and 'redirect_url' check
  </name>
- <command>
+<command>
 http://%HOSTIP:%HTTPPORT/we/want/our/1029 -w '%{redirect_url}\n'
 </command>
 </client>

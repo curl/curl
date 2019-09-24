@@ -192,7 +192,8 @@ int main(int argc, char * const argv[])
   char *base_name = NULL;
 
   printf("\nRTSP request %s\n", VERSION_STR);
-  printf("    Project web site: http://code.google.com/p/rtsprequest/\n");
+  printf("    Project web site: "
+    "https://github.com/BackupGGCode/rtsprequest\n");
   printf("    Requires curl V7.20 or greater\n\n");
 
   /* check command line */

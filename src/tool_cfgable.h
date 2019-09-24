@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,8 @@
 
 #include "tool_metalink.h"
 
+#include "tool_formparse.h"
+
 typedef enum {
   ERR_NONE,
   ERR_BINARY_TERMINAL = 1, /* binary to terminal detected */
@@ -36,7 +38,6 @@ typedef enum {
 struct GlobalConfig;
 
 struct OperationConfig {
-  CURL *easy;               /* A copy of the handle from GlobalConfig */
   bool remote_time;
   char *random_file;
   char *egd_file;
@@ -44,6 +45,7 @@ struct OperationConfig {
   char *cookie;             /* single line with specified cookies */
   char *cookiejar;          /* write to this file */
   char *cookiefile;         /* read from this file */
+  char *altsvc;             /* alt-svc cache file name */
   bool cookiesession;       /* new session? */
   bool encoding;            /* Accept-Encoding please */
   bool tr_encoding;         /* Transfer-Encoding please */
@@ -69,8 +71,8 @@ struct OperationConfig {
   char *headerfile;
   char *ftpport;
   char *iface;
-  int localport;
-  int localportrange;
+  long localport;
+  long localportrange;
   unsigned short porttouse;
   char *range;
   long low_speed_limit;
@@ -94,13 +96,14 @@ struct OperationConfig {
   char *mail_from;
   struct curl_slist *mail_rcpt;
   char *mail_auth;
+  char *sasl_authzid;       /* Authorisation identity (identity to use) */
   bool sasl_ir;             /* Enable/disable SASL initial response */
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
   bool use_ascii;           /* select ascii or text transfer */
   bool autoreferer;         /* automatically set referer */
   bool failonerror;         /* fail on (HTTP) errors */
-  bool include_headers;     /* send headers to data output */
+  bool show_headers;        /* show headers to data output */
   bool no_body;             /* don't get the body */
   bool dirlistonly;         /* only get the FTP dir list */
   bool followlocation;      /* follow http redirects */
@@ -115,8 +118,11 @@ struct OperationConfig {
   struct getout *url_get;   /* point to the node to fill in URL */
   struct getout *url_out;   /* point to the node to fill in outfile */
   struct getout *url_ul;    /* point to the node to fill in upload */
+  char *doh_url;
   char *cipher_list;
   char *proxy_cipher_list;
+  char *cipher13_list;
+  char *proxy_cipher13_list;
   char *cert;
   char *proxy_cert;
   char *cert_type;
@@ -128,6 +134,7 @@ struct OperationConfig {
   char *crlfile;
   char *proxy_crlfile;
   char *pinnedpubkey;
+  char *proxy_pinnedpubkey;
   char *key;
   char *proxy_key;
   char *key_type;
@@ -142,6 +149,7 @@ struct OperationConfig {
   char *krblevel;
   char *request_target;
   long httpversion;
+  bool http09_allowed;
   bool nobuffer;
   bool readbusy;            /* set when reading input returns EAGAIN */
   bool globoff;
@@ -168,11 +176,12 @@ struct OperationConfig {
   long proxy_ssl_version;
   long ip_version;
   curl_TimeCond timecond;
-  time_t condtime;
+  curl_off_t condtime;
   struct curl_slist *headers;
   struct curl_slist *proxyheaders;
+  tool_mime *mimeroot;
+  tool_mime *mimecurrent;
   curl_mime *mimepost;
-  curl_mime *mimecurrent;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
   struct curl_slist *connect_to;
@@ -233,9 +242,6 @@ struct OperationConfig {
   bool use_metalink;        /* process given URLs as metalink XML file */
   metalinkfile *metalinkfile_list; /* point to the first node */
   metalinkfile *metalinkfile_last; /* point to the last/current node */
-#ifdef CURLDEBUG
-  bool test_event_based;
-#endif
   char *oauth_bearer;             /* OAuth 2.0 bearer token */
   bool nonpn;                     /* enable/disable TLS NPN extension */
   bool noalpn;                    /* enable/disable TLS ALPN extension */
@@ -249,13 +255,16 @@ struct OperationConfig {
   curl_error synthetic_error;     /* if non-zero, it overrides any libcurl
                                      error */
   bool ssh_compression;           /* enable/disable SSH compression */
+  long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
+                                     0 is valid. default: CURL_HET_DEFAULT. */
+  bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
+  bool disallow_username_in_url;  /* disallow usernames in URLs */
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
 };
 
 struct GlobalConfig {
-  CURL *easy;                     /* Once we have one, we keep it here */
   int showerror;                  /* -1 == unset, default => show errors
                                       0 => -s is used to NOT show errors
                                       1 => -S has been used to show errors */
@@ -272,6 +281,12 @@ struct GlobalConfig {
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
   char *libcurl;                  /* Output libcurl code to this file name */
   bool fail_early;                /* exit on first transfer error */
+  bool styled_output;             /* enable fancy output style detection */
+#ifdef CURLDEBUG
+  bool test_event_based;
+#endif
+  bool parallel;
+  long parallel_max;
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

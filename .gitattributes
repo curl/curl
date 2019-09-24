@@ -5,3 +5,4 @@ configure.ac eol=lf
 *.in eol=lf
 *.am eol=lf
 *.sh eol=lf
+*.[ch] whitespace=tab-in-indent

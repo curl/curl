@@ -183,8 +183,7 @@ IMAPS (*1)
 FOOTNOTES
 =========
 
-  *1 = requires OpenSSL, GnuTLS, NSS, yassl, axTLS, PolarSSL, WinSSL (native
-       Windows), Secure Transport (native iOS/OS X) or GSKit (native IBM i)
+  *1 = requires a TLS library
   *2 = requires OpenLDAP or WinLDAP
   *3 = requires a GSS-API implementation (such as Heimdal or MIT Kerberos) or
        SSPI (native Windows)
@@ -197,8 +196,7 @@ FOOTNOTES
   *8 = requires libssh2
   *9 = requires OpenSSL, GnuTLS, mbedTLS, NSS, yassl, Secure Transport or SSPI
        (native Windows)
-  *10 = requires any of the SSL libraries in (*1) above other than axTLS, which
-        does not support SSLv3
+  *10 = requires an SSL library that supports SSLv3
   *11 = requires libidn or Windows
   *12 = requires libz
   *13 = requires libmetalink, and either an Apple or Microsoft operating

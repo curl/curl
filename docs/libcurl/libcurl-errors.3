@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -162,8 +162,6 @@ libcurl. The error buffer might contain more specific information about which
 exact option it concerns.
 .IP "CURLE_TELNET_OPTION_SYNTAX (49)"
 A telnet option string was Illegally formatted.
-.IP "CURLE_PEER_FAILED_VERIFICATION (51)"
-The remote server's SSL certificate or SSH md5 fingerprint was deemed not OK.
 .IP "CURLE_GOT_NOTHING (52)"
 Nothing was returned from the server, and under the circumstances, getting
 nothing is considered an error.
@@ -179,8 +177,10 @@ Failure with receiving network data.
 problem with the local client certificate.
 .IP "CURLE_SSL_CIPHER (59)"
 Couldn't use specified cipher.
-.IP "CURLE_SSL_CACERT (60)"
-Peer certificate cannot be authenticated with known CA certificates.
+.IP "CURLE_PEER_FAILED_VERIFICATION (60)"
+The remote server's SSL certificate or SSH md5 fingerprint was deemed not OK.
+This error code has been unified with CURLE_SSL_CACERT since 7.62.0. Its
+previous value was 51.
 .IP "CURLE_BAD_CONTENT_ENCODING (61)"
 Unrecognized transfer encoding.
 .IP "CURLE_LDAP_INVALID_URL (62)"
@@ -252,6 +252,10 @@ Failed to match the pinned key specified with \fICURLOPT_PINNEDPUBLICKEY(3)\fP.
 Status returned failure when asked with \fICURLOPT_SSL_VERIFYSTATUS(3)\fP.
 .IP "CURLE_HTTP2_STREAM (92)"
 Stream error in the HTTP/2 framing layer.
+.IP "CURLE_RECURSIVE_API_CALL (93)"
+An API function was called from inside a callback.
+.IP "CURLE_AUTH_ERROR (94)"
+An authentication function returned an error.
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.
@@ -285,6 +289,8 @@ curl_multi_setopt() with unsupported option
 .IP "CURLM_ADDED_ALREADY (7)"
 An easy handle already added to a multi handle was attempted to get added a
 second time. (Added in 7.32.1)
+.IP "CURLM_RECURSIVE_API_CALL (8)"
+An API function was called from inside a callback.
 .SH "CURLSHcode"
 The "share" interface will return a CURLSHcode to indicate when an error has
 occurred.  Also consider \fIcurl_share_strerror(3)\fP.
@@ -302,6 +308,41 @@ Not enough memory was available.
 .IP "CURLSHE_NOT_BUILT_IN (5)"
 The requested sharing could not be done because the library you use don't have
 that particular feature enabled. (Added in 7.23.0)
+.SH "CURLUcode"
+.IP "CURLUE_BAD_HANDLE (1)"
+An argument that should be a CURLU pointer was passed in as a NULL.
+.IP "CURLUE_BAD_PARTPOINTER (2)"
+A NULL pointer was passed to the 'part' argument of \fIcurl_url_get(3)\fP.
+.IP "CURLUE_MALFORMED_INPUT (3)"
+A malformed input was passed to a URL API function.
+.IP "CURLUE_BAD_PORT_NUMBER (4)"
+The port number was not a decimal number between 0 and 65535.
+.IP "CURLUE_UNSUPPORTED_SCHEME (5)"
+This libcurl build doesn't support the given URL scheme.
+.IP "CURLUE_URLDECODE (6)"
+URL decode error, most likely because of rubbish in the input.
+.IP "CURLUE_OUT_OF_MEMORY (7)"
+A memory function failed.
+.IP "CURLUE_USER_NOT_ALLOWED (8)"
+Credentials was passed in the URL when prohibited.
+.IP "CURLUE_UNKNOWN_PART (9)"
+An unknown part ID was passed to a URL API function.
+.IP "CURLUE_NO_SCHEME (10)"
+There is no scheme part in the URL.
+.IP "CURLUE_NO_USER (11)"
+There is no user part in the URL.
+.IP "CURLUE_NO_PASSWORD (12)"
+There is no password part in the URL.
+.IP "CURLUE_NO_OPTIONS (13)"
+There is no options part in the URL.
+.IP "CURLUE_NO_HOST (14)"
+There is no host part in the URL.
+.IP "CURLUE_NO_PORT (15)"
+There is no port part in the URL.
+.IP "CURLUE_NO_QUERY (16)"
+There is no query part in the URL.
+.IP "CURLUE_NO_FRAGMENT (17)"
+There is no fragment part in the URL.
 .SH "SEE ALSO"
 .BR curl_easy_strerror "(3), " curl_multi_strerror "(3), "
 .BR curl_share_strerror "(3), " CURLOPT_ERRORBUFFER "(3), "

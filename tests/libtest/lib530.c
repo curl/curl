@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,7 +53,7 @@ int test(char *URL)
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    snprintf(target_url, sizeof(target_url), "%s%04i", URL, i + 1);
+    msnprintf(target_url, sizeof(target_url), "%s%04i", URL, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */

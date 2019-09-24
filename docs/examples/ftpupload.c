@@ -77,7 +77,7 @@ int main(void)
 
   /* get the file size of the local file */
   if(stat(LOCAL_FILE, &file_info)) {
-    printf("Couldnt open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 1;
   }
   fsize = (curl_off_t)file_info.st_size;

@@ -1,0 +1,12 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+if(@USE_OPENSSL@)
+  find_dependency(OpenSSL @OPENSSL_VERSION_MAJOR@)
+endif()
+if(@USE_ZLIB@)
+  find_dependency(ZLIB @ZLIB_VERSION_MAJOR@)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/@TARGETS_EXPORT_NAME@.cmake")
+check_required_components("@PROJECT_NAME@")

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,6 +28,8 @@ CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE \- chunk length threshold for pipelining
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, long size);
 .SH DESCRIPTION
+No function since pipelining was removed in 7.62.0.
+
 Pass a long with a \fBsize\fP in bytes. If a pipelined connection is currently
 processing a chunked (Transfer-encoding: chunked) request with a current chunk
 length larger than \fICURLMOPT_CHUNK_LENGTH_PENALTY_SIZE(3)\fP, that pipeline

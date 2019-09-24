@@ -1,0 +1,66 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
+Content-Type: text/html; charset=ISO-8859-1
+Transfer-Encoding: chunked
+
+18
+line 1
+ line 2
+  line 3
+
+0
+
+</data>
+
+<datacheck>
+18
+line 1
+ line 2
+  line 3
+
+0
+
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET chunked data in raw mode
+ </name>
+ <command option="no-include">
+http://%HOSTIP:%HTTPPORT/326 --raw
+ </command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /326 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

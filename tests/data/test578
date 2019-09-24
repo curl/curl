@@ -38,7 +38,7 @@ lib578
 HTTP POST lower than MAX_INITIAL_POST_SIZE with progress callback
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/500 log/ip578
+http://%HOSTIP:%HTTPPORT/578 log/ip578
 </command>
 </client>
 

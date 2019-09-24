@@ -34,7 +34,7 @@ http
 Send "OPTIONS *" with --request-target
  </name>
  <command>
---request-target "*" -X OPTIONS http://%HOSTIP:%HTTPPORT/ -H "Testno: 1299"
+--request-target '*' -X OPTIONS http://%HOSTIP:%HTTPPORT/ -H "Testno: 1299"
 </command>
 </client>
 

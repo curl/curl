@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -131,7 +131,7 @@ struct ssh_conn {
                                  quote command fails) */
   char *homedir;              /* when doing SFTP we figure out home dir in the
                                  connect phase */
-  int readdir_len, readdir_totalLen, readdir_currLen;
+  size_t readdir_len, readdir_totalLen, readdir_currLen;
   char *readdir_line;
   char *readdir_linkPath;
   /* end of READDIR stuff */
@@ -239,7 +239,16 @@ extern const struct Curl_handler Curl_handler_sftp;
 
 extern const struct Curl_handler Curl_handler_scp;
 extern const struct Curl_handler Curl_handler_sftp;
-
 #endif /* USE_LIBSSH2 */
+
+#ifdef USE_SSH
+/* generic SSH backend functions */
+CURLcode Curl_ssh_init(void);
+void Curl_ssh_cleanup(void);
+size_t Curl_ssh_version(char *buffer, size_t buflen);
+#else
+/* for non-SSH builds */
+#define Curl_ssh_cleanup()
+#endif
 
 #endif /* HEADER_CURL_SSH_H */

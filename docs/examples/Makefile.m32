@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -18,13 +18,16 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
+#***************************************************************************
+
 ###########################################################################
 #
 ## Makefile for building curl examples with MingW (GCC-3.2 or later)
-## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4)
+## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4),
+## brotli (1.0.1)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
-## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-spi-winidn
+## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
 ##
 ## Hint: you can also set environment vars to control the build, f.e.:
 ## set ZLIB_PATH=c:/zlib-1.2.8
@@ -35,6 +38,10 @@
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../../zlib-1.2.8
+endif
+# Edit the path below to point to the base of your Brotli sources.
+ifndef BROTLI_PATH
+BROTLI_PATH = ../../../brotli-1.0.1
 endif
 # Edit the path below to point to the base of your OpenSSL package.
 ifndef OPENSSL_PATH
@@ -48,9 +55,21 @@ endif
 ifndef LIBRTMP_PATH
 LIBRTMP_PATH = ../../../librtmp-2.4
 endif
-# Edit the path below to point to the base of your libidn package.
-ifndef LIBIDN_PATH
-LIBIDN_PATH = ../../../libidn-1.32
+# Edit the path below to point to the base of your libmetalink package.
+ifndef LIBMETALINK_PATH
+LIBMETALINK_PATH = ../../../libmetalink-0.1.3
+endif
+# Edit the path below to point to the base of your libexpat package.
+ifndef LIBEXPAT_PATH
+LIBEXPAT_PATH = ../../../expat-2.1.0
+endif
+# Edit the path below to point to the base of your libxml2 package.
+ifndef LIBXML2_PATH
+LIBXML2_PATH = ../../../libxml2-2.9.2
+endif
+# Edit the path below to point to the base of your libidn2 package.
+ifndef LIBIDN2_PATH
+LIBIDN2_PATH = ../../../libidn2-2.0.3
 endif
 # Edit the path below to point to the base of your MS IDN package.
 # Microsoft Internationalized Domain Names (IDN) Mitigation APIs 1.1
@@ -74,58 +93,66 @@ ifndef LIBCARES_PATH
 LIBCARES_PATH = $(PROOT)/ares
 endif
 
-# Edit the var below to set to your architecture or set environment var.
+ifeq ($(CURL_CC),)
+CURL_CC := $(CROSSPREFIX)gcc
+endif
+ifeq ($(CURL_AR),)
+CURL_AR := $(CROSSPREFIX)ar
+endif
+
+CC = $(CURL_CC)
+CFLAGS = $(CURL_CFLAG_EXTRAS) -g -O2 -Wall -W
+CFLAGS += -fno-strict-aliasing
+# comment LDFLAGS below to keep debug info
+LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
+RC = $(CROSSPREFIX)windres
+RCFLAGS = --include-dir=$(PROOT)/include -O COFF
+
+# Set environment var ARCH to your architecture to override autodetection.
 ifndef ARCH
 ifeq ($(findstring x86_64,$(shell $(CC) -dumpmachine)),x86_64)
-ARCH    = w64
+ARCH = w64
 else
-ARCH    = w32
+ARCH = w32
 endif
 endif
 
-CC	= $(CROSSPREFIX)gcc
-CFLAGS	= -g -O2 -Wall -W
-CFLAGS	+= -fno-strict-aliasing
 ifeq ($(ARCH),w64)
-CFLAGS	+= -m64 -D_AMD64_
+CFLAGS  += -m64 -D_AMD64_
 LDFLAGS += -m64
 RCFLAGS += -F pe-x86-64
 else
-CFLAGS	+= -m32
+CFLAGS  += -m32
 LDFLAGS += -m32
 RCFLAGS += -F pe-i386
 endif
-# comment LDFLAGS below to keep debug info
-LDFLAGS	= -s
-RC	= $(CROSSPREFIX)windres
-RCFLAGS	= --include-dir=$(PROOT)/include -O COFF -i
 
 # Platform-dependent helper tool macros
 ifeq ($(findstring /sh,$(SHELL)),/sh)
-DEL	= rm -f $1
-RMDIR	= rm -fr $1
-MKDIR	= mkdir -p $1
-COPY	= -cp -afv $1 $2
-#COPYR	= -cp -afr $1/* $2
-COPYR	= -rsync -aC $1/* $2
-TOUCH	= touch $1
-CAT	= cat
-ECHONL	= echo ""
-DL	= '
+DEL     = rm -f $1
+RMDIR   = rm -fr $1
+MKDIR   = mkdir -p $1
+COPY    = -cp -afv $1 $2
+#COPYR  = -cp -afr $1/* $2
+COPYR   = -rsync -aC $1/* $2
+TOUCH   = touch $1
+CAT     = cat
+ECHONL  = echo ""
+DL = '
 else
 ifeq "$(OS)" "Windows_NT"
-DEL	= -del 2>NUL /q /f $(subst /,\,$1)
-RMDIR	= -rd 2>NUL /q /s $(subst /,\,$1)
+DEL     = -del 2>NUL /q /f $(subst /,\,$1)
+RMDIR   = -rd 2>NUL /q /s $(subst /,\,$1)
 else
-DEL	= -del 2>NUL $(subst /,\,$1)
-RMDIR	= -deltree 2>NUL /y $(subst /,\,$1)
+DEL     = -del 2>NUL $(subst /,\,$1)
+RMDIR   = -deltree 2>NUL /y $(subst /,\,$1)
 endif
-MKDIR	= -md 2>NUL $(subst /,\,$1)
-COPY	= -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
-COPYR	= -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
-TOUCH	= copy 2>&1>NUL /b $(subst /,\,$1) +,,
-CAT	= type
-ECHONL	= $(ComSpec) /c echo.
+MKDIR   = -md 2>NUL $(subst /,\,$1)
+COPY    = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
+COPYR   = -xcopy 2>NUL /q /y /e $(subst /,\,$1) $(subst /,\,$2)
+TOUCH   = copy 2>&1>NUL /b $(subst /,\,$1) +,,
+CAT     = type
+ECHONL  = $(ComSpec) /c echo.
 endif
 
 ########################################################
@@ -153,8 +180,11 @@ endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 ZLIB = 1
 endif
-ifeq ($(findstring -idn,$(CFG)),-idn)
-IDN = 1
+ifeq ($(findstring -brotli,$(CFG)),-brotli)
+BROTLI = 1
+endif
+ifeq ($(findstring -idn2,$(CFG)),-idn2)
+IDN2 = 1
 endif
 ifeq ($(findstring -winidn,$(CFG)),-winidn)
 WINIDN = 1
@@ -208,8 +238,24 @@ endif
 ifdef SSH2
   CFLAGS += -DUSE_LIBSSH2 -DHAVE_LIBSSH2_H
   curl_LDADD += -L"$(LIBSSH2_PATH)/win32" -lssh2
+  ifdef WINSSL
+    ifndef DYN
+      curl_LDADD += -lbcrypt -lcrypt32
+    endif
+  endif
 endif
 ifdef SSL
+  ifndef OPENSSL_INCLUDE
+    ifeq "$(wildcard $(OPENSSL_PATH)/outinc)" "$(OPENSSL_PATH)/outinc"
+      OPENSSL_INCLUDE = $(OPENSSL_PATH)/outinc
+    endif
+    ifeq "$(wildcard $(OPENSSL_PATH)/include)" "$(OPENSSL_PATH)/include"
+      OPENSSL_INCLUDE = $(OPENSSL_PATH)/include
+    endif
+  endif
+  ifneq "$(wildcard $(OPENSSL_INCLUDE)/openssl/opensslv.h)" "$(OPENSSL_INCLUDE)/openssl/opensslv.h"
+  $(error Invalid path to OpenSSL package: $(OPENSSL_PATH))
+  endif
   ifndef OPENSSL_LIBPATH
     OPENSSL_LIBS = -lssl -lcrypto
     ifeq "$(wildcard $(OPENSSL_PATH)/out)" "$(OPENSSL_PATH)/out"
@@ -225,28 +271,52 @@ ifdef SSL
   ifndef DYN
     OPENSSL_LIBS += -lgdi32 -lcrypt32
   endif
+  INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL
   curl_LDADD += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
+endif
+ifdef WINSSL
+  CFLAGS += -DUSE_SCHANNEL
+  curl_LDADD += -lcrypt32
 endif
 ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   curl_LDADD += -L"$(ZLIB_PATH)" -lz
 endif
-ifdef IDN
-  CFLAGS += -DUSE_LIBIDN
-  curl_LDADD += -L"$(LIBIDN_PATH)/lib" -lidn
+ifdef BROTLI
+  INCLUDES += -I"$(BROTLI_PATH)/include"
+  CFLAGS += -DHAVE_BROTLI
+  curl_LDADD += -L"$(BROTLI_PATH)/lib"
+  ifdef BROTLI_LIBS
+    curl_LDADD += $(BROTLI_LIBS)
+  else
+    curl_LDADD += -lbrotlidec
+  endif
+endif
+ifdef IDN2
+  CFLAGS += -DUSE_LIBIDN2
+  curl_LDADD += -L"$(LIBIDN2_PATH)/lib" -lidn2
 else
 ifdef WINIDN
   CFLAGS += -DUSE_WIN32_IDN
   curl_LDADD += -L"$(WINIDN_PATH)" -lnormaliz
 endif
 endif
+ifdef METALINK
+  INCLUDES += -I"$(LIBMETALINK_PATH)/include"
+  CFLAGS += -DUSE_METALINK
+  curl_LDADD += -L"$(LIBMETALINK_PATH)/lib" -lmetalink
+  ifndef DYN
+    ifeq ($(findstring libexpat_metalink_parser.o,$(shell $(AR) t "$(LIBMETALINK_PATH)/lib/libmetalink.a")),libexpat_metalink_parser.o)
+      curl_LDADD += -L"$(LIBEXPAT_PATH)/lib" -lexpat
+    else
+      curl_LDADD += -L"$(LIBXML2_PATH)/lib" -lxml2
+    endif
+  endif
+endif
 ifdef SSPI
   CFLAGS += -DUSE_WINDOWS_SSPI
-  ifdef WINSSL
-    CFLAGS += -DUSE_SCHANNEL
-  endif
 endif
 ifdef IPV6
   CFLAGS += -DENABLE_IPV6 -D_WIN32_WINNT=0x0501
@@ -287,11 +357,10 @@ all: $(check_PROGRAMS)
 	$(CC) $(INCLUDES) $(CFLAGS) -c $<
 
 %.res: %.rc
-	$(RC) $(RCFLAGS) $< -o $@
+	$(RC) $(RCFLAGS) -i $< -o $@
 
 clean:
 	@$(call DEL, $(check_PROGRAMS:.exe=.o))
 
 distclean vclean: clean
 	@$(call DEL, $(check_PROGRAMS))
-

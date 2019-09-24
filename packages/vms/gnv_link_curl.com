@@ -740,7 +740,7 @@ gnv$libcurl/share
 $endif
 $!
 $!
-$target = "persistant"
+$target = "persistent"
 $if f$search("[.docs.examples]''target'.exe") .eqs. ""
 $then
 $   define/user gnv$libcurl 'gnv_libcurl_share'

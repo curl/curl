@@ -23,10 +23,28 @@ nickname contains ":", it needs to be preceded by "\\" so that it is not
 recognized as password delimiter.  If the nickname contains "\\", it needs to
 be escaped as "\\\\" so that it is not recognized as an escape character.
 
+If curl is built against OpenSSL library, and the engine pkcs11 is available,
+then a PKCS#11 URI (RFC 7512) can be used to specify a certificate located in
+a PKCS#11 device. A string beginning with "pkcs11:" will be interpreted as a
+PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine option will be set
+as "pkcs11" if none was provided and the --cert-type option will be set as
+"ENG" if none was provided.
+
 (iOS and macOS only) If curl is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the
 system or user keychain, or the path to a PKCS#12-encoded certificate and
 private key. If you want to use a file from the current directory, please
 precede it with "./" prefix, in order to avoid confusion with a nickname.
+
+(Schannel only) Client certificates must be specified by a path
+expression to a certificate store. (Loading PFX is not supported; you can
+import it to a store first). You can use
+"<store location>\\<store name>\\<thumbprint>" to refer to a certificate
+in the system certificates store, for example,
+"CurrentUser\\MY\\934a7ac6f8a5d579285a74fa61e19f23ddfe8d7a". Thumbprint is
+usually a SHA-1 hex string which you can see in certificate details. Following
+store locations are supported: CurrentUser, LocalMachine, CurrentService,
+Services, CurrentUserGroupPolicy, LocalMachineGroupPolicy,
+LocalMachineEnterprise.
 
 If this option is used several times, the last one will be used.

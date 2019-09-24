@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -83,7 +83,16 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
   CURL_CHECK_DEF([__clang__], [], [silent])
   if test "$curl_cv_have_def___clang__" = "yes"; then
     AC_MSG_RESULT([yes])
-    compiler_id="CLANG"
+    AC_MSG_CHECKING([if compiler is xlclang])
+    CURL_CHECK_DEF([__ibmxl__], [], [silent])
+    if test "$curl_cv_have_def___ibmxl__" = "yes" ; then
+      dnl IBM's almost-compatible clang version
+      AC_MSG_RESULT([yes])
+      compiler_id="XLCLANG"
+    else
+      AC_MSG_RESULT([no])
+      compiler_id="CLANG"
+    fi
     fullclangver=`$CC -v 2>&1 | grep version`
     clangver=`echo $fullclangver | grep "based on LLVM " | "$SED" 's/.*(based on LLVM \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*)/\1/'`
     if test -z "$clangver"; then
@@ -513,7 +522,7 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
   dnl only do runtime verification when not cross-compiling
   if test "x$cross_compiling" != "xyes" &&
     test "$tmp_compiler_works" = "yes"; then
-    AC_RUN_IFELSE([
+    CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
 #       ifdef __STDC__
 #         include <stdlib.h>
@@ -977,6 +986,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 2.95 or later
           if test "$compiler_num" -ge "295"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
+            tmp_CFLAGS="$tmp_CFLAGS -Wbad-function-cast"
           fi
           #
           dnl Only gcc 2.96 or later
@@ -1011,6 +1021,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 3.4 or later
           if test "$compiler_num" -ge "304"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
+            tmp_CFLAGS="$tmp_CFLAGS -Wold-style-definition"
           fi
           #
           dnl Only gcc 4.0 or later
@@ -1029,6 +1040,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wmissing-parameter-type -Wempty-body"
             tmp_CFLAGS="$tmp_CFLAGS -Wclobbered -Wignored-qualifiers"
             tmp_CFLAGS="$tmp_CFLAGS -Wconversion -Wno-sign-conversion -Wvla"
+            dnl required for -Warray-bounds, included in -Wall
+            tmp_CFLAGS="$tmp_CFLAGS -ftree-vrp"
           fi
           #
           dnl Only gcc 4.5 or later
@@ -1042,6 +1055,35 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 4.6 or later
           if test "$compiler_num" -ge "406"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wdouble-promotion"
+          fi
+          #
+          dnl only gcc 4.8 or later
+          if test "$compiler_num" -ge "408"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
+          fi
+          #
+          dnl Only gcc 5 or later
+          if test "$compiler_num" -ge "500"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Warray-bounds=2"
+          fi
+          #
+          dnl Only gcc 6 or later
+          if test "$compiler_num" -ge "600"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wshift-negative-value"
+            tmp_CFLAGS="$tmp_CFLAGS -Wshift-overflow=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wnull-dereference -fdelete-null-pointer-checks"
+            tmp_CFLAGS="$tmp_CFLAGS -Wduplicated-cond"
+            tmp_CFLAGS="$tmp_CFLAGS -Wunused-const-variable"
+          fi
+          #
+          dnl Only gcc 7 or later
+          if test "$compiler_num" -ge "700"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wduplicated-branches"
+            tmp_CFLAGS="$tmp_CFLAGS -Wrestrict"
+            tmp_CFLAGS="$tmp_CFLAGS -Walloc-zero"
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat-overflow=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wformat-truncation=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough=4"
           fi
           #
         fi
@@ -1281,15 +1323,6 @@ AC_DEFUN([CURL_CHECK_CURLDEBUG], [
       AC_MSG_WARN([cannot enable curl debug memory tracking.])
       want_curldebug="no"
     fi
-  fi
-  #
-  if test "$want_curldebug" = "yes"; then
-    CPPFLAGS="-DCURLDEBUG $CPPFLAGS"
-    squeeze CPPFLAGS
-  fi
-  if test "$want_debug" = "yes"; then
-    CPPFLAGS="-DDEBUGBUILD $CPPFLAGS"
-    squeeze CPPFLAGS
   fi
 ])
 
@@ -1609,4 +1642,3 @@ AC_DEFUN([CURL_VAR_STRIP], [
   [$1]="$ac_var_stripped"
   squeeze [$1]
 ])
-

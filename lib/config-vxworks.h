@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -160,9 +160,6 @@
 
 /* Define to 1 if you have a working fcntl O_NONBLOCK function. */
 #define HAVE_FCNTL_O_NONBLOCK 1
-
-/* Define to 1 if you have the fdopen function. */
-#define HAVE_FDOPEN 1
 
 /* Define to 1 if you have the `fork' function. */
 #define HAVE_FORK 1
@@ -544,9 +541,6 @@
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
 
-/* Define to 1 if you have the `SSL_get_shutdown' function. */
-#define HAVE_SSL_GET_SHUTDOWN 1
-
 /* Define to 1 if you have the <ssl.h> header file. */
 /* #undef HAVE_SSL_H */
 
@@ -846,9 +840,6 @@
 
 /* The size of `time_t', as computed by sizeof. */
 #define SIZEOF_TIME_T 4
-
-/* The size of `void*', as computed by sizeof. */
-#define SIZEOF_VOIDP 4
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

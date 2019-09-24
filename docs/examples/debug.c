@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,12 +44,12 @@ void dump(const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\n",
-          text, (long)size, (long)size);
+  fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
+          text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i<size; i += width) {
 
-    fprintf(stream, "%4.4lx: ", (long)i);
+    fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -140,7 +140,7 @@ int main(void)
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     res = curl_easy_perform(curl);
     /* Check for errors */
     if(res != CURLE_OK)

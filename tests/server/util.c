@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -87,7 +87,7 @@ char *data_to_hex(char *data, size_t len)
     if((data[i] >= 0x20) && (data[i] < 0x7f))
       *optr++ = *iptr++;
     else {
-      snprintf(optr, 4, "%%%02x", *iptr++);
+      msnprintf(optr, 4, "%%%02x", *iptr++);
       optr += 3;
     }
   }
@@ -101,7 +101,6 @@ void logmsg(const char *msg, ...)
   va_list ap;
   char buffer[2048 + 1];
   FILE *logfp;
-  int error;
   struct timeval tv;
   time_t sec;
   struct tm *now;
@@ -122,11 +121,12 @@ void logmsg(const char *msg, ...)
   sec = epoch_offset + tv.tv_sec;
   now = localtime(&sec); /* not thread safe but we don't care */
 
-  snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-    (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec, (long)tv.tv_usec);
+  msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
+            (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
+            (long)tv.tv_usec);
 
   va_start(ap, msg);
-  vsnprintf(buffer, sizeof(buffer), msg, ap);
+  mvsnprintf(buffer, sizeof(buffer), msg, ap);
   va_end(ap);
 
   logfp = fopen(serverlogfile, "ab");
@@ -135,7 +135,7 @@ void logmsg(const char *msg, ...)
     fclose(logfp);
   }
   else {
-    error = errno;
+    int error = errno;
     fprintf(stderr, "fopen() failed with error: %d %s\n",
             error, strerror(error));
     fprintf(stderr, "Error opening file: %s\n", serverlogfile);
@@ -150,9 +150,9 @@ void win32_perror(const char *msg)
   char buf[512];
   DWORD err = SOCKERRNO;
 
-  if(!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                    LANG_NEUTRAL, buf, sizeof(buf), NULL))
-     snprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
+  if(!FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                     LANG_NEUTRAL, buf, sizeof(buf), NULL))
+    msnprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
   if(msg)
     fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
@@ -196,7 +196,7 @@ const char *path = ".";
 char *test2file(long testno)
 {
   static char filename[256];
-  snprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
+  msnprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
   return filename;
 }
 
@@ -217,7 +217,6 @@ int wait_ms(int timeout_ms)
 #endif
   struct timeval initial_tv;
   int pending_ms;
-  int error;
 #endif
   int r = 0;
 
@@ -235,6 +234,7 @@ int wait_ms(int timeout_ms)
   pending_ms = timeout_ms;
   initial_tv = tvnow();
   do {
+    int error;
 #if defined(HAVE_POLL_FINE)
     r = poll(NULL, 0, pending_ms);
 #else
@@ -415,13 +415,14 @@ static struct timeval tvnow(void)
   ** is typically in the range of 10 milliseconds to 16 milliseconds.
   */
   struct timeval now;
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600)
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0600) && \
+    (!defined(__MINGW32__) || defined(__MINGW64_VERSION_MAJOR))
   ULONGLONG milliseconds = GetTickCount64();
 #else
   DWORD milliseconds = GetTickCount();
 #endif
   now.tv_sec = (long)(milliseconds / 1000);
-  now.tv_usec = (milliseconds % 1000) * 1000;
+  now.tv_usec = (long)((milliseconds % 1000) * 1000);
   return now;
 }
 

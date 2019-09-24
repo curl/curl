@@ -181,4 +181,3 @@
 #undef byte
 
 #endif /* HEADER_CURL_CONFIG_DOS_H */
-

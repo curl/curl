@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -44,10 +44,14 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib
 endif
 
-EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
-test1022.pl Makefile.inc notexists.pl CMakeLists.txt mk-lib1521.pl
+EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl \
+  test1022.pl Makefile.inc notexists.pl CMakeLists.txt mk-lib1521.pl
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
+
+CFLAGS += @CURL_CFLAG_EXTRAS@
+
+CLEANFILES = lib1521.c
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -115,7 +119,7 @@ noinst_LTLIBRARIES += libstubgss.la
 
 libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
 libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
-libstubgss_la_CFLAGS = $(AM_CFLAGS) -g -Wno-unused-parameter
+libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
 
 libstubgss_la_SOURCES = stub_gssapi.c stub_gssapi.h
 
@@ -127,8 +131,15 @@ endif
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
 	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h > lib1521.c
 
-checksrc:
-	@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
 
-dist:
-	rm lib1521.c
+checksrc:
+	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+
+if CURLDEBUG
+# for debug builds, we scan the sources on all regular make invokes
+all-local: checksrc
+endif

@@ -50,4 +50,3 @@ int tool_progress_cb(void *clientp,
                      curl_off_t ultotal, curl_off_t ulnow);
 
 #endif /* HEADER_CURL_TOOL_CB_PRG_H */
-

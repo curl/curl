@@ -211,7 +211,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
 static int use_buffer(URL_FILE *file, size_t want)
 {
   /* sort out buffer */
-  if((file->buffer_pos - want) <= 0) {
+  if(file->buffer_pos <= want) {
     /* ditch buffer - write will recreate */
     free(file->buffer);
     file->buffer = NULL;
@@ -237,11 +237,9 @@ URL_FILE *url_fopen(const char *url, const char *operation)
   URL_FILE *file;
   (void)operation;
 
-  file = malloc(sizeof(URL_FILE));
+  file = calloc(1, sizeof(URL_FILE));
   if(!file)
     return NULL;
-
-  memset(file, 0, sizeof(URL_FILE));
 
   file->handle.file = fopen(url, operation);
   if(file->handle.file)

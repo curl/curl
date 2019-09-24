@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
 check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   fopen ftpget ftpgetresp ftpupload getinfo getinmemory http-post httpput  \
   https multi-app multi-debugcallback multi-double multi-post multi-single \
-  persistant post-callback postit2 sepheaders simple simplepost simplessl  \
+  persistent post-callback postit2 sepheaders simple simplepost simplessl  \
   sendrecv httpcustomheader certinfo chkspeed ftpgetinfo ftp-wildcard      \
   smtp-mail smtp-mime smtp-multi smtp-ssl smtp-tls smtp-vrfy smtp-expn     \
   rtsp externalsocket resolve progressfunc pop3-retr pop3-list pop3-uidl   \
@@ -34,13 +34,15 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   imap-tls imap-multi url2file sftpget ftpsget postinmemory http2-download \
   http2-upload http2-serverpush getredirect ftpuploadfrommem               \
   ftpuploadresume sslbackend postit2-formadd multi-formadd                 \
-  shared-connection-cache
+  shared-connection-cache sftpuploadresume http2-pushinmemory parseurl     \
+  urlapi imap-authzid pop3-authzid smtp-authzid http3 altsvc               \
+  http3-present
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
-COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c	\
-  ghiper.c hiperfifo.c htmltidy.c multithread.c opensslthreadlock.c	\
-  sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c			\
-  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp	\
-  multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c			\
-  threaded-shared-conn.c
+COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c \
+  ghiper.c hiperfifo.c htmltidy.c multithread.c opensslthreadlock.c \
+  sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
+  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp \
+  multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c \
+  threaded-shared-conn.c crawler.c ephiperfifo.c

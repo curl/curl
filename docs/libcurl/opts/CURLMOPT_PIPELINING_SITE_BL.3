@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,6 +28,8 @@ CURLMOPT_PIPELINING_SITE_BL \- pipelining host blacklist
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING_SITE_BL, char **hosts);
 .SH DESCRIPTION
+No function since pipelining was removed in 7.62.0.
+
 Pass a \fBhosts\fP array of char *, ending with a NULL entry. This is a list
 of sites that are blacklisted from pipelining, i.e sites that are known to not
 support HTTP pipelining. The array is copied by libcurl.

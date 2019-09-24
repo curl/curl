@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,7 +28,7 @@ CURLOPT_POSTFIELDS \- specify data to POST to server
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTFIELDS, char *postdata);
 .SH DESCRIPTION
-Pass a char * as parameter, pointing to the full data to send in a HTTP POST
+Pass a char * as parameter, pointing to the full data to send in an HTTP POST
 operation. You must make sure that the data is formatted the way you want the
 server to receive it. libcurl will not convert or encode it for you in any
 way. For example, the web server may assume that this data is url-encoded.
@@ -45,7 +45,7 @@ used by HTML forms. Change Content-Type with \fICURLOPT_HTTPHEADER(3)\fP.
 You can use \fIcurl_easy_escape(3)\fP to url-encode your data, if necessary. It
 returns a pointer to an encoded string that can be passed as \fIpostdata\fP.
 
-Using \fICURLOPT_POSTFIELDS(3)\fP implies \fICURLOPT_POST(3)\fP.
+Using \fICURLOPT_POSTFIELDS(3)\fP implies setting \fICURLOPT_POST(3)\fP to 1.
 
 If \fICURLOPT_POSTFIELDS(3)\fP is explicitly set to NULL then libcurl will get
 the POST data from the read callback. If you want to send a zero-byte POST set

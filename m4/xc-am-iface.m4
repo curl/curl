@@ -250,4 +250,3 @@ _XC_AMEND_DISTCLEAN_BODY([$1])
 ])dnl
 m4_define([$0], [])[]dnl
 ])
-

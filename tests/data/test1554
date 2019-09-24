@@ -38,8 +38,6 @@ run 1: foobar and so on fun!
 <- Mutex unlock
 -> Mutex lock
 <- Mutex unlock
--> Mutex lock
-<- Mutex unlock
 run 1: foobar and so on fun!
 -> Mutex lock
 <- Mutex unlock
@@ -49,11 +47,7 @@ run 1: foobar and so on fun!
 <- Mutex unlock
 -> Mutex lock
 <- Mutex unlock
--> Mutex lock
-<- Mutex unlock
 run 1: foobar and so on fun!
--> Mutex lock
-<- Mutex unlock
 -> Mutex lock
 <- Mutex unlock
 -> Mutex lock

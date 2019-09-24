@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (c) 1983, 2016 Regents of the University of California.
+ * Copyright (c) 1983 Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -569,7 +569,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
 
   if(!test->ofile) {
     char outfile[256];
-    snprintf(outfile, sizeof(outfile), "log/upload.%ld", test->testno);
+    msnprintf(outfile, sizeof(outfile), "log/upload.%ld", test->testno);
 #ifdef WIN32
     test->ofile = open(outfile, O_CREAT|O_RDWR|O_BINARY, 0777);
 #else
@@ -955,8 +955,6 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   int first = 1, ecode;
   struct formats *pf;
   char *filename, *mode = NULL;
-  int error;
-  FILE *server;
 #ifdef USE_WINSOCK
   DWORD recvtimeout, recvtimeoutbak;
 #endif
@@ -964,9 +962,9 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   int toggle = 1;
 
   /* Open request dump file. */
-  server = fopen(REQUEST_DUMP, "ab");
+  FILE *server = fopen(REQUEST_DUMP, "ab");
   if(!server) {
-    error = errno;
+    int error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", REQUEST_DUMP);
     return -1;
@@ -1138,16 +1136,13 @@ static int validate_access(struct testcase *test,
                            const char *filename, int mode)
 {
   char *ptr;
-  long testno, partno;
-  int error;
-  char partbuf[80]="data";
 
   logmsg("trying to get file: %s mode %x", filename, mode);
 
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
-    size_t count = snprintf(weare, sizeof(weare),
-                            "WE ROOLZ: %ld\r\n", (long)getpid());
+    size_t count = msnprintf(weare, sizeof(weare),
+                             "WE ROOLZ: %ld\r\n", (long)getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);
@@ -1161,6 +1156,9 @@ static int validate_access(struct testcase *test,
   ptr = strrchr(filename, '/');
 
   if(ptr) {
+    char partbuf[80]="data";
+    long partno;
+    long testno;
     char *file;
 
     ptr++; /* skip the slash */
@@ -1189,12 +1187,12 @@ static int validate_access(struct testcase *test,
     file = test2file(testno);
 
     if(0 != partno)
-      snprintf(partbuf, sizeof(partbuf), "data%ld", partno);
+      msnprintf(partbuf, sizeof(partbuf), "data%ld", partno);
 
     if(file) {
       FILE *stream = fopen(file, "rb");
       if(!stream) {
-        error = errno;
+        int error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
         logmsg("Error opening file: %s", file);
         logmsg("Couldn't open test file: %s", file);
@@ -1202,7 +1200,7 @@ static int validate_access(struct testcase *test,
       }
       else {
         size_t count;
-        error = getpart(&test->buffer, &count, "reply", partbuf, stream);
+        int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
         fclose(stream);
         if(error) {
           logmsg("getpart() failed with error: %d", error);

@@ -73,4 +73,3 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 #endif /* CURL_DISABLE_PROXY */
 
 #endif  /* HEADER_CURL_SOCKS_H */
-

@@ -22,7 +22,7 @@ file
  <name>
 X-X range on a file:// URL to stdout
  </name>
- <command>
+<command option="no-include">
 -r 4-4 file://localhost/%PWD/log/test1018.txt 
 </command>
 <file name="log/test1018.txt">

@@ -29,7 +29,7 @@ CURLOPT_FOLLOWLOCATION \- follow HTTP 3xx redirects
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FOLLOWLOCATION, long enable);
 .SH DESCRIPTION
 A long parameter set to 1 tells the library to follow any Location: header
-that the server sends as part of a HTTP header in a 3xx response. The
+that the server sends as part of an HTTP header in a 3xx response. The
 Location: header can specify a relative or an absolute URL to follow.
 
 libcurl will issue another request for the new URL and follow new Location:
@@ -39,7 +39,8 @@ libcurl will follow.
 
 libcurl limits what protocols it automatically follows to. The accepted
 protocols are set with \fICURLOPT_REDIR_PROTOCOLS(3)\fP. By default libcurl
-will allow all protocols on redirect except those disabled for security
+will allow HTTP, HTTPS, FTP and FTPS on redirect (7.65.2). Older versions of
+libcurl allowed all protocols on redirect except those disabled for security
 reasons: Since 7.19.4 FILE and SCP are disabled, and since 7.40.0 SMB and SMBS
 are also disabled.
 
@@ -77,4 +78,4 @@ Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_REDIR_PROTOCOLS "(3), " CURLOPT_PROTOCOLS "(3), "
 .BR CURLOPT_POSTREDIR "(3), "
-.BR CURLINFO_REDIRECT_URL "(3), ", CURLINFO_REDIRECT_COUNT "(3), "
+.BR CURLINFO_REDIRECT_URL "(3), " CURLINFO_REDIRECT_COUNT "(3), "

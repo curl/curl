@@ -96,7 +96,7 @@ CFLAGS = -g -O2 -I. -I$(TOPDIR)/include -I$(TOPDIR)/lib \
          -I$(WATT32_ROOT)/inc -Wall -DHAVE_CONFIG_H
 
 ifeq ($(USE_SSL),1)
-  CFLAGS += -DUSE_SSLEAY -DUSE_OPENSSL -I$(OPENSSL_ROOT)
+  CFLAGS += -DUSE_OPENSSL -I$(OPENSSL_ROOT)
 endif
 
 ifeq ($(USE_ZLIB),1)

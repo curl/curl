@@ -5,8 +5,8 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2004 - 2014, Guenter Knauf, <http://www.gknw.net/phpbb>.
-# Copyright (C) 2001 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2004 - 2014, Guenter Knauf
+# Copyright (C) 2001 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@
 
 # Edit the path below to point to the base of your Novell NDK.
 ifndef NDKBASE
-NDKBASE	= c:/novell
+NDKBASE = c:/novell
 endif
 
 # Edit the path below to point to the base of your Zlib sources.
@@ -47,11 +47,6 @@ endif
 # Edit the path below to point to the base of your LibSSH2 package.
 ifndef LIBSSH2_PATH
 LIBSSH2_PATH = ../../libssh2-1.5.0
-endif
-
-# Edit the path below to point to the base of your axTLS package.
-ifndef AXTLS_PATH
-AXTLS_PATH = ../../axTLS-1.2.7
 endif
 
 # Edit the path below to point to the base of your libidn package.
@@ -95,18 +90,18 @@ LIBCARES_PATH = ../ares
 endif
 
 ifndef INSTDIR
-INSTDIR	= ..$(DS)curl-$(LIBCURL_VERSION_STR)-bin-nw
+INSTDIR = ..$(DS)curl-$(LIBCURL_VERSION_STR)-bin-nw
 endif
 
 # Edit the vars below to change NLM target settings.
 TARGET  = curl
-VERSION	= $(LIBCURL_VERSION)
-COPYR	= Copyright (C) $(LIBCURL_COPYRIGHT_STR)
-DESCR	= curl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - https://curl.haxx.se
-MTSAFE	= YES
-STACK	= 64000
-SCREEN	= $(TARGET) commandline utility
-# Comment the line below if you dont want to load protected automatically.
+VERSION = $(LIBCURL_VERSION)
+COPYR   = Copyright (C) $(LIBCURL_COPYRIGHT_STR)
+DESCR   = curl $(LIBCURL_VERSION_STR) ($(LIBARCH)) - https://curl.haxx.se
+MTSAFE  = YES
+STACK   = 64000
+SCREEN  = $(TARGET) commandline utility
+# Comment the line below if you don't want to load protected automatically.
 # LDRING = 3
 
 # Uncomment the next line to enable linking with POSIX semantics.
@@ -119,39 +114,39 @@ endif
 
 # must be equal to NDEBUG or DEBUG, CURLDEBUG
 ifndef DB
-DB	= NDEBUG
+DB = NDEBUG
 endif
 # Optimization: -O<n> or debugging: -g
 ifeq ($(DB),NDEBUG)
-	OPT	= -O2
-	OBJDIR	= release
+  OPT = -O2
+  OBJDIR = release
 else
-	OPT	= -g
-	OBJDIR	= debug
+  OPT = -g
+  OBJDIR = debug
 endif
 
 # The following lines defines your compiler.
 ifdef CWFolder
-	METROWERKS = $(CWFolder)
+  METROWERKS = $(CWFolder)
 endif
 ifdef METROWERKS
-	# MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
-	MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support/Metrowerks Support
-	CC = mwccnlm
+  # MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support
+  MWCW_PATH = $(subst \,/,$(METROWERKS))/Novell Support/Metrowerks Support
+  CC = mwccnlm
 else
-	CC = gcc
+  CC = gcc
 endif
-PERL	= perl
+PERL = perl
 # Here you can find a native Win32 binary of the original awk:
 # http://www.gknw.net/development/prgtools/awk-20100523.zip
-AWK	= awk
-CP	= cp -afv
-MKDIR	= mkdir
-# RM	= rm -f
+AWK = awk
+CP  = cp -afv
+MKDIR = mkdir
+# RM = rm -f
 # If you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
 # http://www.gknw.net/development/prgtools/mkxdc.zip
-MPKXDC	= mkxdc
+MPKXDC = mkxdc
 
 # LIBARCH_U = $(shell $(AWK) 'BEGIN {print toupper(ARGV[1])}' $(LIBARCH))
 LIBARCH_L = $(shell $(AWK) 'BEGIN {print tolower(ARGV[1])}' $(LIBARCH))
@@ -160,52 +155,52 @@ LIBARCH_L = $(shell $(AWK) 'BEGIN {print tolower(ARGV[1])}' $(LIBARCH))
 -include $(OBJDIR)/version.inc
 
 # Global flags for all compilers
-CFLAGS	+= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
+CFLAGS += $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
-LD	= mwldnlm
-LDFLAGS	= -nostdlib $(OBJS) $(PRELUDE) $(LDLIBS) -o $@ -commandfile
-LIBEXT	= lib
-CFLAGS	+= -gccinc -inline off -opt nointrinsics -proc 586
-CFLAGS	+= -relax_pointers
-#CFLAGS	+= -w on
-ifeq ($(LIBARCH),LIBC)
-ifeq ($(POSIXFL),1)
-	PRELUDE = $(NDK_LIBC)/imports/posixpre.o
+  LD = mwldnlm
+  LDFLAGS = -nostdlib $(OBJS) $(PRELUDE) $(LDLIBS) -o $@ -commandfile
+  LIBEXT  = lib
+  CFLAGS  += -gccinc -inline off -opt nointrinsics -proc 586
+  CFLAGS  += -relax_pointers
+  #CFLAGS += -w on
+  ifeq ($(LIBARCH),LIBC)
+    ifeq ($(POSIXFL),1)
+      PRELUDE = $(NDK_LIBC)/imports/posixpre.o
+    else
+      PRELUDE = $(NDK_LIBC)/imports/libcpre.o
+    endif
+    CFLAGS += -align 4
+  else
+    # PRELUDE = $(NDK_CLIB)/imports/clibpre.o
+    # to avoid the __init_* / __deinit_* woes don't use prelude from NDK
+    PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
+    # CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
+    CFLAGS += -align 1
+  endif
 else
-	PRELUDE = $(NDK_LIBC)/imports/libcpre.o
-endif
-	CFLAGS += -align 4
-else
-	# PRELUDE = $(NDK_CLIB)/imports/clibpre.o
-	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
-	PRELUDE = "$(MWCW_PATH)/libraries/runtime/prelude.obj"
-	# CFLAGS += -include "$(MWCW_PATH)/headers/nlm_clib_prefix.h"
-	CFLAGS += -align 1
-endif
-else
-LD	= nlmconv
-LDFLAGS	= -T
-LIBEXT	= a
-CFLAGS	+= -m32
-CFLAGS  += -fno-builtin -fno-strict-aliasing
-ifeq ($(findstring gcc,$(CC)),gcc)
-CFLAGS  += -fpcc-struct-return
-endif
-CFLAGS	+= -Wall # -pedantic
-ifeq ($(LIBARCH),LIBC)
-ifeq ($(POSIXFL),1)
-	PRELUDE = $(NDK_LIBC)/imports/posixpre.gcc.o
-else
-	PRELUDE = $(NDK_LIBC)/imports/libcpre.gcc.o
-endif
-else
-	# PRELUDE = $(NDK_CLIB)/imports/clibpre.gcc.o
-	# to avoid the __init_* / __deinit_* whoes dont use prelude from NDK
-	# http://www.gknw.net/development/mk_nlm/gcc_pre.zip
-	PRELUDE = $(NDK_ROOT)/pre/prelude.o
-	CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
-endif
+  LD = nlmconv
+  LDFLAGS = -T
+  LIBEXT  = a
+  CFLAGS  += -m32
+  CFLAGS  += -fno-builtin -fno-strict-aliasing
+  ifeq ($(findstring gcc,$(CC)),gcc)
+    CFLAGS  += -fpcc-struct-return
+  endif
+  CFLAGS  += -Wall # -pedantic
+  ifeq ($(LIBARCH),LIBC)
+    ifeq ($(POSIXFL),1)
+      PRELUDE = $(NDK_LIBC)/imports/posixpre.gcc.o
+    else
+      PRELUDE = $(NDK_LIBC)/imports/libcpre.gcc.o
+    endif
+  else
+    # PRELUDE = $(NDK_CLIB)/imports/clibpre.gcc.o
+    # to avoid the __init_* / __deinit_* woes don't use prelude from NDK
+    # http://www.gknw.net/development/mk_nlm/gcc_pre.zip
+    PRELUDE = $(NDK_ROOT)/pre/prelude.o
+    CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
+  endif
 endif
 
 NDK_ROOT = $(NDKBASE)/ndk
@@ -239,13 +234,8 @@ WITH_SSH2 = 1
 WITH_SSL = 1
 WITH_ZLIB = 1
 endif
-ifeq ($(findstring -axtls,$(CFG)),-axtls)
-WITH_AXTLS = 1
-WITH_SSL =
-else
 ifeq ($(findstring -ssl,$(CFG)),-ssl)
 WITH_SSL = 1
-endif
 endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 WITH_ZLIB = 1
@@ -265,124 +255,114 @@ ENABLE_IPV6 = 1
 endif
 
 ifdef LINK_STATIC
-	LDLIBS	= $(CURL_LIB)/libcurl.$(LIBEXT)
+  LDLIBS = $(CURL_LIB)/libcurl.$(LIBEXT)
 ifdef WITH_ARES
-	LDLIBS += $(LIBCARES_PATH)/libcares.$(LIBEXT)
+  LDLIBS += $(LIBCARES_PATH)/libcares.$(LIBEXT)
 endif
 else
-	MODULES	= libcurl.nlm
-	IMPORTS	= @$(CURL_LIB)/libcurl.imp
+  MODULES  = libcurl.nlm
+  IMPORTS = @$(CURL_LIB)/libcurl.imp
 endif
 ifdef WITH_SSH2
-	# INCLUDES += -I$(LIBSSH2_PATH)/include
-ifdef LINK_STATIC
-	LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.$(LIBEXT)
-else
-	MODULES += libssh2.nlm
-	IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
-endif
+  # INCLUDES += -I$(LIBSSH2_PATH)/include
+  ifdef LINK_STATIC
+    LDLIBS += $(LIBSSH2_PATH)/nw/libssh2.$(LIBEXT)
+  else
+    MODULES += libssh2.nlm
+    IMPORTS += @$(LIBSSH2_PATH)/nw/libssh2.imp
+  endif
 endif
 ifdef WITH_RTMP
-	# INCLUDES += -I$(LIBRTMP_PATH)
-ifdef LINK_STATIC
-	LDLIBS += $(LIBRTMP_PATH)/librtmp/librtmp.$(LIBEXT)
-endif
+  # INCLUDES += -I$(LIBRTMP_PATH)
+  ifdef LINK_STATIC
+    LDLIBS += $(LIBRTMP_PATH)/librtmp/librtmp.$(LIBEXT)
+  endif
 endif
 ifdef WITH_SSL
-	# INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
-	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
-	LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
-	IMPORTS += GetProcessSwitchCount RunningProcess
-else
-ifdef WITH_AXTLS
-	# INCLUDES += -I$(AXTLS_PATH)/inc
-ifdef LINK_STATIC
-	LDLIBS += $(AXTLS_PATH)/lib/libaxtls.$(LIBEXT)
-else
-	MODULES += libaxtls.nlm
-	IMPORTS += $(AXTLS_PATH)/lib/libaxtls.imp
-endif
-endif
+  # INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
+  LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/ssl.$(LIBEXT)
+  LDLIBS += $(OPENSSL_PATH)/out_nw_$(LIBARCH_L)/crypto.$(LIBEXT)
+  IMPORTS += GetProcessSwitchCount RunningProcess
 endif
 ifdef WITH_ZLIB
-	INCLUDES += -I$(ZLIB_PATH)
-ifdef LINK_STATIC
-	LDLIBS += $(ZLIB_PATH)/nw/$(LIBARCH)/libz.$(LIBEXT)
-else
-	MODULES += libz.nlm
-	IMPORTS += @$(ZLIB_PATH)/nw/$(LIBARCH)/libz.imp
-endif
+  INCLUDES += -I$(ZLIB_PATH)
+  ifdef LINK_STATIC
+    LDLIBS += $(ZLIB_PATH)/nw/$(LIBARCH)/libz.$(LIBEXT)
+  else
+    MODULES += libz.nlm
+    IMPORTS += @$(ZLIB_PATH)/nw/$(LIBARCH)/libz.imp
+  endif
 endif
 ifdef WITH_IDN
-	# INCLUDES += -I$(LIBIDN_PATH)/include
-	LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
+  # INCLUDES += -I$(LIBIDN_PATH)/include
+  LDLIBS += $(LIBIDN_PATH)/lib/libidn.$(LIBEXT)
 endif
 ifdef WITH_NGHTTP2
-	INCLUDES += -I$(NGHTTP2_PATH)/include
-	LDLIBS += $(NGHTTP2_PATH)/lib/libnghttp2.$(LIBEXT)
+  INCLUDES += -I$(NGHTTP2_PATH)/include
+  LDLIBS += $(NGHTTP2_PATH)/lib/libnghttp2.$(LIBEXT)
 endif
 ifdef WITH_METALINK
-	CFLAGS += -DUSE_METALINK
-	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
-	INCLUDES += -I$(LIBMETALINK_PATH)/include
-	LDLIBS += $(LIBMETALINK_PATH)/lib/libmetalink.$(LIBEXT)
-ifdef WITH_LIBEXPAT
-	ifeq ($(LIBARCH),LIBC)
-		IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlbc.imp
-		MODULES += expatlbc
-	else
-		IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlib.imp
-		MODULES += expatlib
-	endif
+  CFLAGS += -DUSE_METALINK
+  INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_$(LIBARCH_L)
+  INCLUDES += -I$(LIBMETALINK_PATH)/include
+  LDLIBS += $(LIBMETALINK_PATH)/lib/libmetalink.$(LIBEXT)
+  ifdef WITH_LIBEXPAT
+    ifeq ($(LIBARCH),LIBC)
+      IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlbc.imp
+      MODULES += expatlbc
+    else
+      IMPORTS += @$(LIBEXPAT_PATH)/imports/expatlib.imp
+      MODULES += expatlib
+  endif
 else
 ifdef WITH_LIBXML2
-	IMPORTS += @$(LIBXML2_PATH)/lib/libxml2.imp
-	MODULES += libxml2
+  IMPORTS += @$(LIBXML2_PATH)/lib/libxml2.imp
+  MODULES += libxml2
 endif
 endif
 endif
 
 ifeq ($(LIBARCH),LIBC)
-	INCLUDES += -I$(NDK_LIBC)/include
-	# INCLUDES += -I$(NDK_LIBC)/include/nks
-	# INCLUDES += -I$(NDK_LIBC)/include/winsock
-	CFLAGS += -D_POSIX_SOURCE
+  INCLUDES += -I$(NDK_LIBC)/include
+  # INCLUDES += -I$(NDK_LIBC)/include/nks
+  # INCLUDES += -I$(NDK_LIBC)/include/winsock
+  CFLAGS += -D_POSIX_SOURCE
 else
-	INCLUDES += -I$(NDK_CLIB)/include/nlm
-	# INCLUDES += -I$(NDK_CLIB)/include
+  INCLUDES += -I$(NDK_CLIB)/include/nlm
+  # INCLUDES += -I$(NDK_CLIB)/include
 endif
 ifndef DISABLE_LDAP
-	# INCLUDES += -I$(NDK_LDAP)/$(LIBARCH_L)/inc
+  # INCLUDES += -I$(NDK_LDAP)/$(LIBARCH_L)/inc
 endif
-CFLAGS	+= $(INCLUDES)
+CFLAGS += $(INCLUDES)
 
 ifeq ($(MTSAFE),YES)
-	XDCOPT = -n
+  XDCOPT = -n
 endif
 ifeq ($(MTSAFE),NO)
-	XDCOPT = -u
+  XDCOPT = -u
 endif
 ifdef XDCOPT
-	XDCDATA = $(OBJDIR)/$(TARGET).xdc
+  XDCDATA = $(OBJDIR)/$(TARGET).xdc
 endif
 
 ifeq ($(findstring /sh,$(SHELL)),/sh)
-DL	= '
-DS	= /
-PCT	= %
+DL  = '
+DS  = /
+PCT = %
 #-include $(NDKBASE)/nlmconv/ncpfs.inc
 else
-DS	= \\
-PCT	= %%
+DS  = \\
+PCT = %%
 endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJX	:= $(patsubst %.c,$(OBJDIR)/%.o,$(notdir $(strip $(CURLX_CFILES))))
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CURL_CFILES)))
+OBJX := $(patsubst %.c,$(OBJDIR)/%.o,$(notdir $(strip $(CURLX_CFILES))))
+OBJS := $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CURL_CFILES)))
 ifndef LINK_STATIC
-OBJS	+= $(OBJX)
+OBJS += $(OBJX)
 endif
 
 vpath %.c $(CURL_LIB)
@@ -520,5 +500,3 @@ tool_hugehelp.c:
 
 $(LIBCARES_PATH)/libcares.$(LIBEXT):
 	$(MAKE) -C $(LIBCARES_PATH) -f Makefile.netware lib
-
-

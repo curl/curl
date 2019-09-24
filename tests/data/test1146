@@ -24,7 +24,7 @@ file
 <name>
 --proto-default file
 </name>
-<command>
+<command option="no-include">
 --proto-default file %PWD/log/test1146.txt
 </command>
 <file name="log/test1146.txt">

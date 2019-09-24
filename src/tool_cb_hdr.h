@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -39,6 +39,8 @@
  */
 
 struct HdrCbData {
+  struct GlobalConfig *global;
+  struct OperationConfig *config;
   struct OutStruct *outs;
   struct OutStruct *heads;
   bool honor_cd_filename;
@@ -51,4 +53,3 @@ struct HdrCbData {
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 #endif /* HEADER_CURL_TOOL_CB_HDR_H */
-

@@ -13,6 +13,12 @@ SUPPORTFILES = first.c test.h
 # These are all libcurl test programs
 noinst_PROGRAMS = chkhostname libauthretry libntlmconnect
 
+chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
+ ../../lib/curl_ctype.c
+chkdecimalpoint_LDADD =
+chkdecimalpoint_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB \
+ -DCURLX_NO_MEMORY_CALLBACKS
+
 chkhostname_SOURCES = chkhostname.c ../../lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
 chkhostname_DEPENDENCIES =

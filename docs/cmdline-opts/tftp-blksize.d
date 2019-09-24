@@ -1,6 +1,6 @@
 Long: tftp-blksize
 Arg: <value>
-help: Set TFTP BLKSIZE option
+Help: Set TFTP BLKSIZE option
 Protocols: TFTP
 Added: 7.20.0
 ---

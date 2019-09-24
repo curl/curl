@@ -11,7 +11,7 @@ HTTP GET
 <data>
 HTTP/1.1 301 OK swsbounce
 Location: /189
-Content-Length: 2
+Content-Length: 3
 
 OK
 </data>
@@ -26,7 +26,7 @@ Actual content
 <datacheck>
 HTTP/1.1 301 OK swsbounce
 Location: /189
-Content-Length: 2
+Content-Length: 3
 
 HTTP/1.1 200 OK 
 Connection: close

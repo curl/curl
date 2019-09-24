@@ -37,4 +37,3 @@ int Curl_inet_pton(int, const char *, void *);
 #endif
 
 #endif /* HEADER_CURL_INET_PTON_H */
-

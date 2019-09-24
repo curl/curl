@@ -5,6 +5,7 @@ FTP
 PORT
 RETR
 NODATACONN150
+flaky
 </keywords>
 </info>
 # Server-side
@@ -39,7 +40,7 @@ s/^EPRT \|1\|(.*)/EPRT \|1\|/
 
 # This test doesn't send a QUIT because the main state machine in multi.c
 # triggers the timeout and sets the CURLE_OPERATION_TIMEDOUT error (28) for
-# which the FTP disconect code generically has to assume could mean the
+# which the FTP disconnect code generically has to assume could mean the
 # control the connection and thus it cannot send any command.
 <protocol>
 USER anonymous

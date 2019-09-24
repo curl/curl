@@ -1,4 +1,4 @@
-set(MANPAGE "${CMAKE_BINARY_DIR}/docs/curl.1")
+set(MANPAGE "${CURL_BINARY_DIR}/docs/curl.1")
 
 # Load DPAGES and OTHERPAGES from shared file
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")

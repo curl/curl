@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,8 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
+#if defined(USE_SSH)
 
 #include <curl/curl.h>
 #include "curl_memory.h"
@@ -39,7 +41,7 @@ CURLcode Curl_getworkingpath(struct connectdata *conn,
   char *working_path;
   size_t working_path_len;
   CURLcode result =
-    Curl_urldecode(data, data->state.path, 0, &working_path,
+    Curl_urldecode(data, data->state.up.path, 0, &working_path,
                    &working_path_len, FALSE);
   if(result)
     return result;
@@ -53,7 +55,7 @@ CURLcode Curl_getworkingpath(struct connectdata *conn,
     }
     if((working_path_len > 3) && (!memcmp(working_path, "/~/", 3)))
       /* It is referenced to the home directory, so strip the leading '/~/' */
-      memcpy(real_path, working_path + 3, 4 + working_path_len-3);
+      memcpy(real_path, working_path + 3, working_path_len - 2);
     else
       memcpy(real_path, working_path, 1 + working_path_len);
   }
@@ -193,3 +195,5 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, char *homedir)
   Curl_safefree(*path);
   return CURLE_QUOTE_ERROR;
 }
+
+#endif /* if SSH is used */

@@ -4,6 +4,7 @@
 Metalink
 HTTP
 HTTP GET
+FILE
 </keywords>
 </info>
 
@@ -105,6 +106,9 @@ Metalink: fetching (log/download2006) from (http://%HOSTIP:%HTTPPORT/2006) OK
 Metalink: validating (log/download2006)...
 Metalink: validating (log/download2006) [sha-256] OK
 </file4>
+<stripfile2>
+s/Last-Modified:.*//
+</stripfile2>
 <stripfile4>
 $_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
 </stripfile4>

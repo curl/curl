@@ -39,7 +39,7 @@ IMAP multi transfer error without curl_multi_remove_handle
 lib1552
 </tool>
  <command>
-'imap://%HOSTIP:%IMAPPORT/1552/;UID=1'
+'imap://%HOSTIP:%IMAPPORT/1552/;MAILINDEX=1'
 </command>
 </client>
 

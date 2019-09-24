@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "ftp://%HOSTIP:%FTPPORT/1405");
-  curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
   curl_easy_setopt(hnd, CURLOPT_QUOTE, slist1);
   curl_easy_setopt(hnd, CURLOPT_POSTQUOTE, slist2);
   curl_easy_setopt(hnd, CURLOPT_PREQUOTE, slist3);
@@ -97,7 +96,6 @@ int main(int argc, char *argv[])
      them yourself.
 
   CURLOPT_WRITEDATA set to a objectpointer
-  CURLOPT_INTERLEAVEDATA set to a objectpointer
   CURLOPT_WRITEFUNCTION set to a functionpointer
   CURLOPT_READDATA set to a objectpointer
   CURLOPT_READFUNCTION set to a functionpointer
@@ -129,6 +127,7 @@ int main(int argc, char *argv[])
 </file>
 <stripfile>
 # CURLOPT_USERAGENT and CURLOPT_MAXREDIRS requires HTTP protocol
+# CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 # support, IOW depends on configuration - just ignore these.
 $_ = '' if /CURLOPT_USERAGENT/
 $_ = '' if /CURLOPT_MAXREDIRS/
@@ -137,6 +136,8 @@ $_ = '' if /CURLOPT_MAXREDIRS/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
+$_ = '' if /CURLOPT_HTTP09_ALLOWED/
+$_ = '' if /CURLOPT_INTERLEAVEDATA/
 </stripfile>
 </verify>
 </testcase>

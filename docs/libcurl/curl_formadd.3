@@ -175,7 +175,8 @@ Deprecated in 7.56.0. Before this release, field names were allowed to
 contain zero-valued bytes. The pseudo-filename "-" to read stdin is
 discouraged although still supported, but data is not read before being
 actually sent: the effective data size can then not be automatically
-determined, resulting in a chunked encoding transfer.
+determined, resulting in a chunked encoding transfer. Backslashes and
+double quotes in field and file names are now escaped before transmission.
 .SH RETURN VALUE
 0 means everything was ok, non-zero means an error occurred corresponding
 to a CURL_FORMADD_* constant defined in

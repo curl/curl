@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2017 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -71,7 +71,7 @@ struct data {
 /* Unexpected error.
     CURLE_NOT_BUILT_IN   - means disabled at build
     CURLE_UNKNOWN_OPTION - means no such option (anymore?)
-    CURLE_SSL_ENGINE_NOTFOUND - set unkown ssl engine
+    CURLE_SSL_ENGINE_NOTFOUND - set unknown ssl engine
     CURLE_UNSUPPORTED_PROTOCOL - set bad HTTP version
     CURLE_BAD_FUNCTION_ARGUMENT - unsupported value
    */
@@ -121,6 +121,7 @@ static int geterr(const char *name, CURLcode val, int lineno)
 static curl_progress_callback progresscb;
 static curl_write_callback headercb;
 static curl_debug_callback debugcb;
+static curl_trailer_callback trailercb;
 static curl_ssl_ctx_callback ssl_ctx_cb;
 static curl_ioctl_callback ioctlcb;
 static curl_sockopt_callback sockoptcb;
@@ -132,6 +133,7 @@ static curl_chunk_end_callback chunk_end_cb;
 static curl_fnmatch_callback fnmatch_cb;
 static curl_closesocket_callback closesocketcb;
 static curl_xferinfo_callback xferinfocb;
+static curl_resolver_start_callback resolver_start_cb;
 
 int test(char *URL)
 {
@@ -203,17 +205,6 @@ while(<STDIN>) {
               print "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
               print "${pref} stringpointerextra);\n$check";
             }
-            elsif(($name eq "HTTPHEADER") ||
-                  ($name eq "POSTQUOTE") ||
-                  ($name eq "PREQUOTE") ||
-                  ($name eq "HTTP200ALIASES") ||
-                  ($name eq "TELNETOPTIONS") ||
-                  ($name eq "MAIL_RCPT") ||
-                  ($name eq "RESOLVE") ||
-                  ($name eq "PROXYHEADER") ||
-                  ($name eq "QUOTE")) {
-              print "${pref} slist);\n$check";
-            }
             elsif($name eq "HTTPPOST") {
               print "${pref} httppost);\n$check";
             }
@@ -227,6 +218,9 @@ while(<STDIN>) {
               print "${pref} &object);\n$check";
             }
             print "${pref} NULL);\n$check";
+        }
+        elsif($type eq "SLISTPOINT") {
+            print "${pref} slist);\n$check";
         }
         elsif($type eq "FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {

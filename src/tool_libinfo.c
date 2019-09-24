@@ -76,7 +76,6 @@ CURLcode get_libcurl_info(void)
     {  NULL,    0                }
   };
 
-  struct proto_name_pattern const *p;
   const char *const *proto;
 
   /* Pointer to libcurl's run-time version information */
@@ -88,6 +87,7 @@ CURLcode get_libcurl_info(void)
   built_in_protos = 0;
   if(curlinfo->protocols) {
     for(proto = curlinfo->protocols; *proto; proto++) {
+      struct proto_name_pattern const *p;
       for(p = possibly_built_in; p->proto_name; p++) {
         if(curl_strequal(*proto, p->proto_name)) {
           built_in_protos |= p->proto_pattern;
@@ -99,4 +99,3 @@ CURLcode get_libcurl_info(void)
 
   return CURLE_OK;
 }
-

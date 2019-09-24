@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -920,7 +920,7 @@ sub DATA_smtp {
                 print FILE $line if(!$nosave);
 
                 $raw .= $line;
-                if($raw =~ /\x0d\x0a\x2e\x0d\x0a/) {
+                if($raw =~ /(?:^|\x0d\x0a)\x2e\x0d\x0a/) {
                     # end of data marker!
                     $eob = 1;
                 }
@@ -1560,7 +1560,13 @@ sub UID_imap {
     if ($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
-    elsif (($command ne "COPY") && ($command ne "FETCH") &&
+    elsif (substr($command, 0, 5) eq "FETCH"){
+        my $func = $commandfunc{"FETCH"};
+        if($func) {
+            &$func($args, $command);
+        }
+    }
+    elsif (($command ne "COPY") &&
            ($command ne "STORE") && ($command ne "SEARCH")) {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
@@ -2708,7 +2714,7 @@ sub datasockf_state {
 }
 
 #**********************************************************************
-# nodataconn_str returns string of efective nodataconn command. Notice
+# nodataconn_str returns string of effective nodataconn command. Notice
 # that $nodataconn may be set alone or in addition to a $nodataconnXXX.
 #
 sub nodataconn_str {
@@ -2934,7 +2940,7 @@ while(@ARGV) {
 }
 
 #***************************************************************************
-# Initialize command line option dependant variables
+# Initialize command line option dependent variables
 #
 
 if(!$srcdir) {

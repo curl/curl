@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2017-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,8 @@
 
 #include "stub_gssapi.h"
 
+/* !checksrc! disable SNPRINTF all */
+
 #define MAX_CREDS_LENGTH 250
 #define APPROX_TOKEN_LEN 250
 
@@ -42,15 +44,15 @@ enum min_err_code {
     GSS_LAST
 };
 
-const char *min_err_table[] = {
-    "stub-gss: no error",
-    "stub-gss: no memory",
-    "stub-gss: invalid arguments",
-    "stub-gss: invalid credentials",
-    "stub-gss: invalid context",
-    "stub-gss: server returned error",
-    "stub-gss: cannot find a mechanism",
-    NULL
+static const char *min_err_table[] = {
+  "stub-gss: no error",
+  "stub-gss: no memory",
+  "stub-gss: invalid arguments",
+  "stub-gss: invalid credentials",
+  "stub-gss: invalid context",
+  "stub-gss: server returned error",
+  "stub-gss: cannot find a mechanism",
+  NULL
 };
 
 struct gss_ctx_id_t_desc_struct {
@@ -81,6 +83,12 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   char *token = NULL;
   const char *creds = NULL;
   gss_ctx_id_t ctx = NULL;
+
+  (void)initiator_cred_handle;
+  (void)mech_type;
+  (void)time_req;
+  (void)input_chan_bindings;
+  (void)actual_mech_type;
 
   if(!min)
     return GSS_S_FAILURE;
@@ -196,6 +204,8 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   }
 
   /* Token format: creds:target:type:padding */
+  /* Note: this is using the *real* snprintf() and not the curl provided
+     one */
   used = snprintf(token, length, "%s:%s:%d:", creds,
                   (char *) target_name, ctx->sent);
 
@@ -221,6 +231,8 @@ OM_uint32 gss_delete_sec_context(OM_uint32 *min,
                                  gss_ctx_id_t *context_handle,
                                  gss_buffer_t output_token)
 {
+  (void)output_token;
+
   if(!min)
     return GSS_S_FAILURE;
 
@@ -256,6 +268,7 @@ OM_uint32 gss_import_name(OM_uint32 *min,
                           gss_name_t *output_name)
 {
   char *name = NULL;
+  (void)input_name_type;
 
   if(!min)
     return GSS_S_FAILURE;
@@ -297,6 +310,7 @@ OM_uint32 gss_display_status(OM_uint32 *min,
                              gss_buffer_t status_string)
 {
   const char maj_str[] = "Stub GSS error";
+  (void)mech_type;
   if(min)
     *min = 0;
 
@@ -324,7 +338,7 @@ OM_uint32 gss_display_status(OM_uint32 *min,
     if(status_string->value)
       status_string->length = strlen(status_string->value);
     else
-       return GSS_S_FAILURE;
+      return GSS_S_FAILURE;
   }
 
   return GSS_S_COMPLETE;
@@ -337,6 +351,10 @@ OM_uint32 gss_display_name(OM_uint32 *min,
                            gss_buffer_t output_name_buffer,
                            gss_OID *output_name_type)
 {
+  (void)min;
+  (void)input_name;
+  (void)output_name_buffer;
+  (void)output_name_type;
   return GSS_S_FAILURE;
 }
 
@@ -350,6 +368,15 @@ OM_uint32 gss_inquire_context(OM_uint32 *min,
                               int *locally_initiated,
                               int *open_context)
 {
+  (void)min;
+  (void)context_handle;
+  (void)src_name;
+  (void)targ_name;
+  (void)lifetime_rec;
+  (void)mech_type;
+  (void)ctx_flags;
+  (void)locally_initiated;
+  (void)open_context;
   return GSS_S_FAILURE;
 }
 
@@ -361,6 +388,13 @@ OM_uint32 gss_wrap(OM_uint32 *min,
                    int *conf_state,
                    gss_buffer_t output_message_buffer)
 {
+  (void)min;
+  (void)context_handle;
+  (void)conf_req_flag;
+  (void)qop_req;
+  (void)input_message_buffer;
+  (void)conf_state;
+  (void)output_message_buffer;
   return GSS_S_FAILURE;
 }
 
@@ -371,6 +405,12 @@ OM_uint32 gss_unwrap(OM_uint32 *min,
                      int *conf_state,
                      gss_qop_t *qop_state)
 {
+  (void)min;
+  (void)context_handle;
+  (void)input_message_buffer;
+  (void)output_message_buffer;
+  (void)conf_state;
+  (void)qop_state;
   return GSS_S_FAILURE;
 }
 
@@ -382,6 +422,13 @@ OM_uint32 gss_seal(OM_uint32 *min,
                    int *conf_state,
                    gss_buffer_t output_message_buffer)
 {
+  (void)min;
+  (void)context_handle;
+  (void)conf_req_flag;
+  (void)qop_req;
+  (void)input_message_buffer;
+  (void)conf_state;
+  (void)output_message_buffer;
   return GSS_S_FAILURE;
 }
 
@@ -392,6 +439,11 @@ OM_uint32 gss_unseal(OM_uint32 *min,
                      int *conf_state,
                      int *qop_state)
 {
+  (void)min;
+  (void)context_handle;
+  (void)input_message_buffer;
+  (void)output_message_buffer;
+  (void)conf_state;
+  (void)qop_state;
   return GSS_S_FAILURE;
 }
-

@@ -49,7 +49,7 @@ if(curl) {
     curl_off_t dl;
     res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &dl);
     if(!res) {
-      printf("Downloaded " CURL_FORMAT_CURL_OFF_T " bytes\\n", cl);
+      printf("Downloaded %" CURL_FORMAT_CURL_OFF_T " bytes\\n", dl);
     }
   }
 }

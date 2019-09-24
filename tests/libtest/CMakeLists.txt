@@ -1,6 +1,10 @@
 set(TARGET_LABEL_PREFIX "Test ")
 
-function(SETUP_TEST TEST_NAME)          # ARGN are the files in the test
+if(MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4127")
+endif()
+
+function(setup_test TEST_NAME)          # ARGN are the files in the test
   add_executable( ${TEST_NAME} ${ARGN} )
   string(TOUPPER ${TEST_NAME} UPPER_TEST_NAME)
 
@@ -14,18 +18,12 @@ function(SETUP_TEST TEST_NAME)          # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries( ${TEST_NAME} libcurl ${CURL_LIBS})
+  target_link_libraries(${TEST_NAME} libcurl ${CURL_LIBS})
 
   set_target_properties(${TEST_NAME}
     PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
   set_target_properties(${TEST_NAME}
     PROPERTIES PROJECT_LABEL "${TARGET_LABEL_PREFIX}${TEST_NAME}")
-
-  # Add the postfix to the executable since it is
-  # not added automatically as for modules and shared libraries
-  set_target_properties(${TEST_NAME}
-    PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
-
 endfunction()
 
 
@@ -33,7 +31,11 @@ transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.
 include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 
 foreach(TEST_NAME ${noinst_PROGRAMS})
-  setup_test(${TEST_NAME} ${${TEST_NAME}_SOURCES})
+  if(DEFINED ${TEST_NAME}_SOURCES)
+    setup_test(${TEST_NAME} ${${TEST_NAME}_SOURCES})
+  else()
+    setup_test(${TEST_NAME} ${nodist_${TEST_NAME}_SOURCES})
+  endif()
 endforeach()
 
 # Allows for hostname override to make tests machine independent.
@@ -52,11 +54,14 @@ endif()
 
 add_custom_command(
   OUTPUT lib1521.c
-  COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl < ${CMAKE_SOURCE_DIR}/include/curl/curl.h > lib1521.c
+  COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl < ${CURL_SOURCE_DIR}/include/curl/curl.h > lib1521.c
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
-    "${CMAKE_SOURCE_DIR}/include/curl/curl.h"
+    "${CURL_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
+
+set_property(TARGET chkdecimalpoint
+  APPEND PROPERTY COMPILE_DEFINITIONS "CURLX_NO_MEMORY_CALLBACKS;CURL_STATICLIB")
 
   # # files used only in some libcurl test programs
 # SET(TESTUTIL testutil.c testutil.h)

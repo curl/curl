@@ -48,7 +48,8 @@ int curlx_nonblock(curl_socket_t sockfd,    /* operate on this */
                    int nonblock   /* TRUE or FALSE */)
 {
 #if defined(USE_BLOCKING_SOCKETS)
-
+  (void)sockfd;
+  (void)nonblock;
   return 0; /* returns success */
 
 #elif defined(HAVE_FCNTL_O_NONBLOCK)

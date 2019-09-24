@@ -55,8 +55,8 @@ service RTP data when no requests are desired. If the application makes a
 request, (e.g.  \fICURL_RTSPREQ_PAUSE\fP) then the response handler will
 process any pending RTP data before marking the request as finished.
 
-The \fICURLOPT_WRITEDATA(3)\fP is passed in the \fIuserdata\fP argument in the
-callback.
+The \fICURLOPT_INTERLEAVEDATA(3)\fP is passed in the \fIuserdata\fP argument in
+the callback.
 .SH DEFAULT
 NULL, the interleave data is then passed to the regular write function:
 \fICURLOPT_WRITEFUNCTION(3)\fP.

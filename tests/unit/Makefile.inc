@@ -5,11 +5,13 @@ UNITFILES = curlcheck.h \
  ../libtest/first.c
 
 # These are all unit test programs
-UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307	\
+UNITPROGS = unit1300 unit1301 unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit1308 unit1309 unit1323 \
- unit1330 unit1394 unit1395 unit1396 unit1397 unit1398	\
- unit1399	\
- unit1600 unit1601 unit1602 unit1603 unit1604 unit1605 unit1606
+ unit1330 unit1394 unit1395 unit1396 unit1397 unit1398 \
+ unit1399 \
+ unit1600 unit1601 unit1602 unit1603 unit1604 unit1605 unit1606 unit1607 \
+ unit1608 unit1609 unit1620 unit1621 \
+ unit1650 unit1651 unit1652 unit1653 unit1654
 
 unit1300_SOURCES = unit1300.c $(UNITFILES)
 unit1300_CPPFLAGS = $(AM_CPPFLAGS)
@@ -85,3 +87,34 @@ unit1605_CPPFLAGS = $(AM_CPPFLAGS)
 
 unit1606_SOURCES = unit1606.c $(UNITFILES)
 unit1606_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1607_SOURCES = unit1607.c $(UNITFILES)
+unit1607_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1608_SOURCES = unit1608.c $(UNITFILES)
+unit1608_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1609_SOURCES = unit1609.c $(UNITFILES)
+unit1609_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1620_SOURCES = unit1620.c $(UNITFILES)
+unit1620_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1621_SOURCES = unit1621.c $(UNITFILES)
+unit1621_CPPFLAGS = $(AM_CPPFLAGS)
+unit1621_LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
+
+unit1650_SOURCES = unit1650.c $(UNITFILES)
+unit1650_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1651_SOURCES = unit1651.c $(UNITFILES)
+unit1651_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1652_SOURCES = unit1652.c $(UNITFILES)
+unit1652_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1653_SOURCES = unit1653.c $(UNITFILES)
+unit1653_CPPFLAGS = $(AM_CPPFLAGS)
+
+unit1654_SOURCES = unit1654.c $(UNITFILES)
+unit1654_CPPFLAGS = $(AM_CPPFLAGS)

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,7 @@ int test(char *URL)
   CURLcode res = CURLE_OK;
   char *ptr = NULL;
   int asize;
-  int outlen;
+  int outlen = 0;
   char *raw;
 
   (void)URL; /* we don't use this */
@@ -43,8 +43,7 @@ int test(char *URL)
   asize = (int)sizeof(a);
   ptr = curl_easy_escape(NULL, (char *)a, asize);
   printf("%s\n", ptr);
-  if(ptr)
-    curl_free(ptr);
+  curl_free(ptr);
 
   /* deprecated API */
   ptr = curl_escape((char *)a, asize);
@@ -58,8 +57,7 @@ int test(char *URL)
   printf("outlen == %d\n", outlen);
   printf("unescape == original? %s\n",
          memcmp(raw, a, outlen) ? "no" : "YES");
-  if(raw)
-    curl_free(raw);
+  curl_free(raw);
 
   /* deprecated API */
   raw = curl_unescape(ptr, (int)strlen(ptr));
@@ -71,10 +69,8 @@ int test(char *URL)
   printf("[old] outlen == %d\n", outlen);
   printf("[old] unescape == original? %s\n",
          memcmp(raw, a, outlen) ? "no" : "YES");
-  if(raw)
-    curl_free(raw);
-  if(ptr)
-    curl_free(ptr);
+  curl_free(raw);
+  curl_free(ptr);
 
   /* weird input length */
   ptr = curl_easy_escape(NULL, (char *)a, -1);
@@ -86,8 +82,7 @@ int test(char *URL)
   printf("unescape -1 length: %s %d\n", ptr, outlen);
 
 test_cleanup:
-  if(ptr)
-    curl_free(ptr);
+  curl_free(ptr);
   curl_global_cleanup();
 
   return (int)res;

@@ -23,7 +23,7 @@ file
  <name>
 basic file:// file
  </name>
- <command>
+<command option="no-include">
 file://localhost/%PWD/log/test200.txt
 </command>
 <file name="log/test200.txt">

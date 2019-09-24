@@ -35,7 +35,7 @@ crypto
 IMAP DIGEST-MD5 graceful cancellation
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/832/;UID=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/832/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 

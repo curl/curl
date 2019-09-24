@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,6 +62,7 @@ int test(char *URL)
   struct curl_forms formarray[3];
   size_t formlength = 0;
   char flbuf[32];
+  long contentlength = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -94,11 +95,13 @@ int test(char *URL)
     goto test_cleanup;
   }
 
+  contentlength = (long)(strlen(data) - 1);
+
   /* Use a form array for the non-copy test. */
   formarray[0].option = CURLFORM_PTRCONTENTS;
   formarray[0].value = data;
   formarray[1].option = CURLFORM_CONTENTSLENGTH;
-  formarray[1].value = (char *) strlen(data) - 1;
+  formarray[1].value = (char *)(size_t)contentlength;
   formarray[2].option = CURLFORM_END;
   formarray[2].value = NULL;
   formrc = curl_formadd(&formpost,
@@ -153,7 +156,7 @@ int test(char *URL)
   curl_formget(formpost, (void *) &formlength, count_chars);
 
   /* Include length in data for external check. */
-  curl_msnprintf(flbuf, sizeof flbuf, "%lu", (unsigned long) formlength);
+  curl_msnprintf(flbuf, sizeof(flbuf), "%lu", (unsigned long) formlength);
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_COPYNAME, "formlength",

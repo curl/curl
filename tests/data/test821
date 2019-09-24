@@ -40,7 +40,7 @@ crypto
 IMAP CRAM-MD5 authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/821/;UID=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/821/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 

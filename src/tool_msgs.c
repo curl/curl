@@ -67,7 +67,7 @@ static void voutf(struct GlobalConfig *config,
         (void)fwrite(ptr, cut + 1, 1, config->errors);
         fputs("\n", config->errors);
         ptr += cut + 1; /* skip the space too */
-        len -= cut;
+        len -= cut + 1;
       }
       else {
         fputs(ptr, config->errors);
@@ -109,8 +109,8 @@ void warnf(struct GlobalConfig *config, const char *fmt, ...)
 
 void helpf(FILE *errors, const char *fmt, ...)
 {
-  va_list ap;
   if(fmt) {
+    va_list ap;
     va_start(ap, fmt);
     fputs("curl: ", errors); /* prefix it */
     vfprintf(errors, fmt, ap);
@@ -122,4 +122,3 @@ void helpf(FILE *errors, const char *fmt, ...)
 #endif
           "for more information\n");
 }
-

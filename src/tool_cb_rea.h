@@ -30,4 +30,3 @@
 size_t tool_read_cb(void *buffer, size_t sz, size_t nmemb, void *userdata);
 
 #endif /* HEADER_CURL_TOOL_CB_REA_H */
-

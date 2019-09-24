@@ -51,7 +51,7 @@ GET http://example.fake/c/1216 HTTP/1.1
 Host: example.fake
 Accept: */*
 Proxy-Connection: Keep-Alive
-Cookie: moo2=indeed; moo3=indeed
+Cookie: moo3=indeed; moo2=indeed
 
 GET http://bexample.fake/c/1216 HTTP/1.1
 Host: bexample.fake

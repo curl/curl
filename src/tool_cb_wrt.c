@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_cb_wrt.h"
+#include "tool_operate.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -75,10 +76,15 @@ bool tool_create_output_file(struct OutStruct *outs)
 size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 {
   size_t rc;
-  struct OutStruct *outs = userdata;
+  struct per_transfer *per = userdata;
+  struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = outs->config;
   size_t bytes = sz * nmemb;
   bool is_tty = config->global->isatty;
+#ifdef WIN32
+  CONSOLE_SCREEN_BUFFER_INFO console_info;
+  intptr_t fhnd;
+#endif
 
   /*
    * Once that libcurl has called back tool_write_cb() the returned value
@@ -97,7 +103,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-  if(config->include_headers) {
+  if(config->show_headers) {
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
       warnf(config->global, "Header data size exceeds single call write "
             "limit!\n");
@@ -155,7 +161,42 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-  rc = fwrite(buffer, sz, nmemb, outs->stream);
+#ifdef WIN32
+  fhnd = _get_osfhandle(fileno(outs->stream));
+  if(isatty(fileno(outs->stream)) &&
+     GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info)) {
+    DWORD in_len = (DWORD)(sz * nmemb);
+    wchar_t* wc_buf;
+    DWORD wc_len;
+
+    /* calculate buffer size for wide characters */
+    wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len,  NULL, 0);
+    wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
+    if(!wc_buf)
+      return failure;
+
+    /* calculate buffer size for multi-byte characters */
+    wc_len = MultiByteToWideChar(CP_UTF8, 0, buffer, in_len, wc_buf, wc_len);
+    if(!wc_len) {
+      free(wc_buf);
+      return failure;
+    }
+
+    if(!WriteConsoleW(
+        (HANDLE) fhnd,
+        wc_buf,
+        wc_len,
+        &wc_len,
+        NULL)) {
+      free(wc_buf);
+      return failure;
+    }
+    free(wc_buf);
+    rc = bytes;
+  }
+  else
+#endif
+    rc = fwrite(buffer, sz, nmemb, outs->stream);
 
   if(bytes == rc)
     /* we added this amount of data to the output */
@@ -163,7 +204,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->readbusy) {
     config->readbusy = FALSE;
-    curl_easy_pause(config->easy, CURLPAUSE_CONT);
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
   }
 
   if(config->nobuffer) {

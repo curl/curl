@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+compressed
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data base64="yes">
+SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDI5IE5vdiAyMDA0IDIxOjU2OjUzIEdNVA0KU2Vy
+dmVyOiBBcGFjaGUvMS4zLjMxIChEZWJpYW4gR05VL0xpbnV4KSBtb2RfZ3ppcC8xLjMuMjYuMWEg
+UEhQLzQuMy45LTEgbW9kX3NzbC8yLjguMjAgT3BlblNTTC8wLjkuN2QgbW9kX3BlcmwvMS4yOQ0K
+Q29udGVudC1UeXBlOiB0ZXh0L2h0bWw7IGNoYXJzZXQ9SVNPLTg4NTktMQ0KVHJhbnNmZXItRW5j
+b2Rpbmc6IGd6aXANCkNvbnRlbnQtTGVuZ3RoOiA0NA0KDQofiwgIeZ6rQQADbGFsYWxhAMvJzEtV
+MORSyAHRRlwKEIYxFwAKAnFgGAAAAA==
+</data>
+
+<datacheck base64="yes">
+H4sICHmeq0EAA2xhbGFsYQDLycxLVTDkUsgB0UZcChCGMRcACgJxYBgAAAA=
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+libz
+</features>
+<server>
+http
+</server>
+ <name>
+HTTP GET gzip transfer-encoded data in raw mode
+ </name>
+ <command option="no-include">
+http://%HOSTIP:%HTTPPORT/319 --raw
+ </command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /319 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

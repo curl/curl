@@ -12,11 +12,11 @@ to setup an IP address and port for it to connect to. <address> should be one
 of:
 .RS
 .IP interface
-i.e "eth0" to specify which interface's IP address you want to use (Unix only)
+e.g. "eth0" to specify which interface's IP address you want to use (Unix only)
 .IP "IP address"
-i.e "192.168.10.1" to specify the exact IP address
+e.g. "192.168.10.1" to specify the exact IP address
 .IP "host name"
-i.e "my.host.domain" to specify the machine
+e.g. "my.host.domain" to specify the machine
 .IP "-"
 make curl pick the same IP address that is already used for the control
 connection

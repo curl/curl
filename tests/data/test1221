@@ -17,7 +17,7 @@ none
 10 chars object name generation testing
 </name>
 <command option="no-output,no-include" type="shell">
-%SRCDIR/../lib/objnames-test10.sh %SRCDIR
+%SRCDIR/objnames-test10.sh %SRCDIR
 </command>
 </client>
 

@@ -67,7 +67,7 @@ http
 crypto
 </features>
  <name>
-HTTP POST --digest with PUT and resumed upload and modified method, twice
+HTTP PUT with Digest auth, resumed upload and modified method, twice
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1002.upload1 -T log/1002 http://%HOSTIP:%HTTPPORT/1002.upload2 -T log/1002 -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
@@ -101,6 +101,14 @@ Content-Length: 3
 Expect: 100-continue
 
 st
+GET http://%HOSTIP:%HTTPPORT/1002.upload2 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Content-Range: bytes 2-4/5
+User-Agent: curl/7.16.1
+Accept: */*
+Proxy-Connection: Keep-Alive
+Content-Length: 0
+
 GET http://%HOSTIP:%HTTPPORT/1002.upload2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/1002.upload2", response="d711f0d2042786d930de635ba0d1a1d0"

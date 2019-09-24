@@ -57,4 +57,3 @@ dnl provided elsewhere.
 
 AC_DEFUN([XC_OVR_ZZ50],
   [AC_BEFORE([$0],[AC_PROG_LIBTOOL])])
-

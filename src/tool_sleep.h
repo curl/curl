@@ -26,4 +26,3 @@
 void tool_go_sleep(long ms);
 
 #endif /* HEADER_CURL_TOOL_SLEEP_H */
-

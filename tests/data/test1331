@@ -1,7 +1,7 @@
 <testcase>
 # Test case inspired by this question on stackoverflow:
 #
-# http://stackoverflow.com/questions/10017165/use-libcurl-with-bluecoat-cookie-proxy
+# https://stackoverflow.com/questions/10017165/use-libcurl-with-bluecoat-cookie-proxy
 #
 <info>
 <keywords>

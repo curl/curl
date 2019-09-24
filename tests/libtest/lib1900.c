@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2017, Linus Nielsen Feltzing, <linus@haxx.se>
+ * Copyright (C) 2013 - 2019, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -63,14 +63,14 @@ static int parse_url_file(const char *filename)
     return 0;
 
   while(!feof(f)) {
-    if(fscanf(f, "%d %s\n", &filetime, buf)) {
+    if(fscanf(f, "%d %199s\n", &filetime, buf)) {
       urltime[num_handles] = filetime;
       urlstring[num_handles] = strdup(buf);
       num_handles++;
       continue;
     }
 
-    if(fscanf(f, "blacklist_site %s\n", buf)) {
+    if(fscanf(f, "blacklist_site %199s\n", buf)) {
       site_blacklist[blacklist_num_sites] = strdup(buf);
       blacklist_num_sites++;
       continue;
@@ -113,7 +113,7 @@ static void setup_handle(char *base_url, CURLM *m, int handlenum)
 {
   char urlbuf[256];
 
-  snprintf(urlbuf, sizeof(urlbuf), "%s%s", base_url, urlstring[handlenum]);
+  msnprintf(urlbuf, sizeof(urlbuf), "%s%s", base_url, urlstring[handlenum]);
   curl_easy_setopt(handles[handlenum], CURLOPT_URL, urlbuf);
   curl_easy_setopt(handles[handlenum], CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(handles[handlenum], CURLOPT_FAILONERROR, 1L);
@@ -138,7 +138,7 @@ int test(char *URL)
   CURLM *m = NULL;
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
-  int running;
+  int running = 0;
   int handlenum = 0;
   struct timeval last_handle_add;
 
@@ -192,11 +192,11 @@ int test(char *URL)
     do {
       msg = curl_multi_info_read(m, &msgs_left);
       if(msg && msg->msg == CURLMSG_DONE) {
-        int i, found = 0;
+        int i;
 
         /* Find out which handle this message is about */
         for(i = 0; i < num_handles; i++) {
-          found = (msg->easy_handle == handles[i]);
+          int found = (msg->easy_handle == handles[i]);
           if(found)
             break;
         }

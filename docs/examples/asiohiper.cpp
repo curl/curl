@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -42,6 +42,16 @@
  *
  * This is purely a demo app, all retrieved data is simply discarded by the
  * write callback.
+ *
+ * ===========================================================================
+ * WARNING: This example program is known to have flaws:
+ * https://github.com/curl/curl/issues/2407
+ *
+ * It still kept in the example repository with the hope that it might be
+ * useful, and maybe some day someone who knows enough about boost::asio will
+ * read this text, accept the challenge and make the example code work
+ * correctly. Until then: expect this example program to fail occasionally.
+ * ===========================================================================
  */
 
 

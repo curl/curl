@@ -220,8 +220,6 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   errno = 0;
   *num = 0; /* clear by default */
 
-  DEBUGASSERT(str);
-
   while(*str && ISSPACE(*str))
     str++;
   if('-' == *str) {

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,12 +43,12 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s%s, %d bytes (0x%x)\n", timebuf, text,
-          (int)size, (int)size);
+  fprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text,
+          size, size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%04x: ", (int)i);
+    fprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -90,7 +90,6 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   struct libtest_trace_cfg *trace_cfg = userp;
   const char *text;
   struct timeval tv;
-  struct tm *now;
   char timebuf[20];
   char *timestr;
   time_t secs;
@@ -101,6 +100,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   timestr = &timebuf[0];
 
   if(trace_cfg->tracetime) {
+    struct tm *now;
     tv = tutil_tvnow();
     if(!known_offset) {
       epoch_offset = time(NULL) - tv.tv_sec;
@@ -108,8 +108,8 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
     }
     secs = epoch_offset + tv.tv_sec;
     now = localtime(&secs);  /* not thread safe but we don't care */
-    snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
-             now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+    msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
+              now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
   }
 
   switch(type) {
@@ -142,4 +142,3 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   libtest_debug_dump(timebuf, text, stderr, data, size, trace_cfg->nohex);
   return 0;
 }
-

@@ -32,7 +32,7 @@ Set the \fBtunnel\fP parameter to 1L to make libcurl tunnel all operations
 through the HTTP proxy (set with \fICURLOPT_PROXY(3)\fP). There is a big
 difference between using a proxy and to tunnel through it.
 
-Tunneling means that a HTTP CONNECT request is sent to the proxy, asking it
+Tunneling means that an HTTP CONNECT request is sent to the proxy, asking it
 to connect to a remote host on a specific port number and then the traffic is
 just passed through the proxy. Proxies tend to white-list specific port numbers
 it allows CONNECT requests to and often only port 80 and 443 are allowed.
@@ -43,7 +43,7 @@ To suppress proxy CONNECT response headers from user callbacks use
 HTTP proxies can generally only speak HTTP (for obvious reasons), which makes
 libcurl convert non-HTTP requests to HTTP when using an HTTP proxy without
 this tunnel option set. For example, asking for an FTP URL and specifying an
-HTTP proxy will make libcurl send an FTP URL in a HTTP GET request to the
+HTTP proxy will make libcurl send an FTP URL in an HTTP GET request to the
 proxy. By instead tunneling through the proxy, you avoid that conversion (that
 rarely works through the proxy anyway).
 .SH DEFAULT

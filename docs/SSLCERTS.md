@@ -92,8 +92,8 @@ server, do one of the following:
     If you use the 'openssl' tool, this is one way to get extract the CA cert
     for a particular server:
 
-     - `openssl s_client -connect xxxxx.com:443 |tee logfile`
-     - type "QUIT", followed by the "ENTER" key
+     - `openssl s_client -showcerts -servername server -connect server:443 > cacert.pem`
+     - type "quit", followed by the "ENTER" key
      - The certificate will have "BEGIN CERTIFICATE" and "END CERTIFICATE"
        markers.
      - If you want to see the data in the certificate, you can do: "openssl

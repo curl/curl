@@ -51,4 +51,3 @@ void Curl_llist_move(struct curl_llist *, struct curl_llist_element *,
                      struct curl_llist *, struct curl_llist_element *);
 
 #endif /* HEADER_CURL_LLIST_H */
-

@@ -29,11 +29,11 @@ CURLOPT_XOAUTH2_BEARER \- specify OAuth 2.0 access token
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_XOAUTH2_BEARER, char *token);
 .SH DESCRIPTION
 Pass a char * as parameter, which should point to the zero terminated OAuth
-2.0 Bearer Access Token for use with IMAP, POP3 and SMTP servers that support
-the OAuth 2.0 Authorization Framework.
+2.0 Bearer Access Token for use with HTTP, IMAP, POP3 and SMTP servers
+that support the OAuth 2.0 Authorization Framework.
 
-Note: The user name used to generate the Bearer Token should be supplied via
-the \fICURLOPT_USERNAME(3)\fP option.
+Note: For IMAP, POP3 and SMTP, the user name used to generate the Bearer Token
+should be supplied via the \fICURLOPT_USERNAME(3)\fP option.
 
 The application does not have to keep the string around after setting this
 option.

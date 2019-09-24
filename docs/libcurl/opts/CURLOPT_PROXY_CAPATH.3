@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -45,7 +45,7 @@ Everything used over an HTTPS proxy
 CURL *curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-  /* using a HTTPS proxy */
+  /* using an HTTPS proxy */
   curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
   curl_easy_setopt(curl, CURLOPT_PROXY_CAPATH, "/etc/cert-dir");
   ret = curl_easy_perform(curl);
@@ -55,9 +55,8 @@ if(curl) {
 .SH AVAILABILITY
 Added in 7.52.0
 
-This option is supported by the OpenSSL, GnuTLS, PolarSSL and mbedTLS
-(since 7.56.0) backends. The NSS backend provides the option only for
-backward compatibility.
+This option is supported by the OpenSSL, GnuTLS, and mbedTLS (since 7.56.0)
+backends. The NSS backend provides the option only for backward compatibility.
 .SH RETURN VALUE
 CURLE_OK if supported; or an error such as:
 

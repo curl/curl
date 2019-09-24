@@ -37,7 +37,7 @@ imap
 IMAP login authentication
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/820/;UID=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/820/;MAILINDEX=1' -u user:secret
 </command>
 </client>
 

@@ -88,4 +88,3 @@ struct Curl_chunker {
 };
 
 #endif /* HEADER_CURL_HTTP_CHUNKS_H */
-

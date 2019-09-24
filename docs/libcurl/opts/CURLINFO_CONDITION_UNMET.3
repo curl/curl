@@ -31,7 +31,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONDITION_UNMET, long *unmet);
 Pass a pointer to a long to receive the number 1 if the condition provided in
 the previous request didn't match (see \fICURLOPT_TIMECONDITION(3)\fP). Alas,
 if this returns a 1 you know that the reason you didn't get data in return is
-because it didn't fulfill the condition. The long ths argument points to will
+because it didn't fulfill the condition. The long this argument points to will
 get a zero stored if the condition instead was met.
 .SH PROTOCOLS
 HTTP and some

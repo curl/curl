@@ -35,6 +35,7 @@ struct smb_conn {
   enum smb_conn_state state;
   char *user;
   char *domain;
+  char *share;
   unsigned char challenge[8];
   unsigned int session_key;
   unsigned short uid;

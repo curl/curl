@@ -35,6 +35,7 @@ Trailer: chunky-trailer
 Connection: mooo
 
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
+chunky-trailer: header data
 </datacheck>
 </reply>
 

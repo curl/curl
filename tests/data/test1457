@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+protocol
+--write-out
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+Connection: close
+Content-Type: text/plain
+
+testdata
+</data>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+
+<name>
+Check if %{stderr} and %{stdout} switch between stdout and stderr.
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/1457 --silent --write-out 'line1%{stderr}line2%{stdout}line3'
+</command>
+</client>
+
+# Verify data
+<verify>
+<stdout nonewline="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+Connection: close
+Content-Type: text/plain
+
+testdata
+line1line3
+</stdout>
+<stderr nonewline="yes">
+line2
+</stderr>
+<protocol>
+GET /1457 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<strip>
+^User-Agent:.*
+</strip>
+</verify>
+</testcase>

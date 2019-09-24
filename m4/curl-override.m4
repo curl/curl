@@ -73,4 +73,3 @@ char $1 ();
 choke me
 #endif
 ], [return $1 ();])])
-

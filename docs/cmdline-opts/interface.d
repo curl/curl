@@ -12,5 +12,5 @@ name, IP address or host name. An example could look like:
 If this option is used several times, the last one will be used.
 
 On Linux it can be used to specify a VRF, but the binary needs to either
-have CAP_NET_RAW or to be ran as root. More information about Linux VRF:
+have CAP_NET_RAW or to be run as root. More information about Linux VRF:
 https://www.kernel.org/doc/Documentation/networking/vrf.txt

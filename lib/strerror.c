@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2004 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -191,9 +191,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TELNET_OPTION_SYNTAX :
     return "Malformed telnet option";
 
-  case CURLE_PEER_FAILED_VERIFICATION:
-    return "SSL peer certificate or SSH remote key was not OK";
-
   case CURLE_GOT_NOTHING:
     return "Server returned nothing (no headers, no data)";
 
@@ -218,9 +215,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSL_CIPHER:
     return "Couldn't use specified SSL cipher";
 
-  case CURLE_SSL_CACERT:
-    return "Peer certificate cannot be authenticated with given CA "
-      "certificates";
+  case CURLE_PEER_FAILED_VERIFICATION:
+    return "SSL peer certificate or SSH remote key was not OK";
 
   case CURLE_SSL_CACERT_BADFILE:
     return "Problem with the SSL CA cert (path? access rights?)";
@@ -312,6 +308,12 @@ curl_easy_strerror(CURLcode error)
   case CURLE_HTTP2_STREAM:
     return "Stream error in the HTTP/2 framing layer";
 
+  case CURLE_RECURSIVE_API_CALL:
+    return "API function called from within callback";
+
+  case CURLE_AUTH_ERROR:
+    return "An authentication function returned an error";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:
@@ -321,6 +323,7 @@ curl_easy_strerror(CURLcode error)
   case CURLE_OBSOLETE44:
   case CURLE_OBSOLETE46:
   case CURLE_OBSOLETE50:
+  case CURLE_OBSOLETE51:
   case CURLE_OBSOLETE57:
   case CURL_LAST:
     break;
@@ -379,6 +382,9 @@ curl_multi_strerror(CURLMcode error)
 
   case CURLM_ADDED_ALREADY:
     return "The easy handle is already added to a multi handle";
+
+  case CURLM_RECURSIVE_API_CALL:
+    return "API function called from within callback";
 
   case CURLM_LAST:
     break;
@@ -643,20 +649,18 @@ get_winsock_error (int err, char *buf, size_t len)
  * We don't do range checking (on systems other than Windows) since there is
  * no good reliable and portable way to do it.
  */
-const char *Curl_strerror(struct connectdata *conn, int err)
+const char *Curl_strerror(int err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();
 #endif
   int old_errno = errno;
-  char *buf, *p;
+  char *p;
   size_t max;
 
-  DEBUGASSERT(conn);
   DEBUGASSERT(err >= 0);
 
-  buf = conn->syserr_buf;
-  max = sizeof(conn->syserr_buf)-1;
+  max = buflen - 1;
   *buf = '\0';
 
 #ifdef USE_WINSOCK
@@ -678,7 +682,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     if(!get_winsock_error(err, buf, max) &&
        !FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
                        LANG_NEUTRAL, buf, (DWORD)max, NULL))
-      snprintf(buf, max, "Unknown error %d (%#x)", err, err);
+      msnprintf(buf, max, "Unknown error %d (%#x)", err, err);
   }
 #endif
 
@@ -692,7 +696,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   */
   if(0 != strerror_r(err, buf, max)) {
     if('\0' == buf[0])
-      snprintf(buf, max, "Unknown error %d", err);
+      msnprintf(buf, max, "Unknown error %d", err);
   }
 #elif defined(HAVE_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R)
  /*
@@ -706,7 +710,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     if(msg)
       strncpy(buf, msg, max);
     else
-      snprintf(buf, max, "Unknown error %d", err);
+      msnprintf(buf, max, "Unknown error %d", err);
   }
 #elif defined(HAVE_STRERROR_R) && defined(HAVE_VXWORKS_STRERROR_R)
  /*
@@ -718,7 +722,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     if(OK == strerror_r(err, buffer))
       strncpy(buf, buffer, max);
     else
-      snprintf(buf, max, "Unknown error %d", err);
+      msnprintf(buf, max, "Unknown error %d", err);
   }
 #else
   {
@@ -726,7 +730,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     if(msg)
       strncpy(buf, msg, max);
     else
-      snprintf(buf, max, "Unknown error %d", err);
+      msnprintf(buf, max, "Unknown error %d", err);
   }
 #endif
 
@@ -754,7 +758,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 }
 
 #ifdef USE_WINDOWS_SSPI
-const char *Curl_sspi_strerror (struct connectdata *conn, int err)
+const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   DWORD old_win_err = GetLastError();
@@ -765,15 +769,13 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
   size_t outmax;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   char txtbuf[80];
-  char msgbuf[sizeof(conn->syserr_buf)];
+  char msgbuf[256];
   char *p, *str, *msg = NULL;
   bool msg_formatted = FALSE;
 #endif
 
-  DEBUGASSERT(conn);
-
-  outbuf = conn->syserr_buf;
-  outmax = sizeof(conn->syserr_buf)-1;
+  outbuf = buf;
+  outmax = buflen - 1;
   *outbuf = '\0';
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -1029,14 +1031,14 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
   if(err == SEC_E_OK)
     strncpy(outbuf, txt, outmax);
   else if(err == SEC_E_ILLEGAL_MESSAGE)
-    snprintf(outbuf, outmax,
-             "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually occurs "
-             "when a fatal SSL/TLS alert is received (e.g. handshake failed). "
-             "More detail may be available in the Windows System event log.",
-             err);
+    msnprintf(outbuf, outmax,
+              "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually occurs "
+              "when a fatal SSL/TLS alert is received (e.g. handshake failed)."
+              " More detail may be available in the Windows System event log.",
+              err);
   else {
     str = txtbuf;
-    snprintf(txtbuf, sizeof(txtbuf), "%s (0x%08X)", txt, err);
+    msnprintf(txtbuf, sizeof(txtbuf), "%s (0x%08X)", txt, err);
     txtbuf[sizeof(txtbuf)-1] = '\0';
 
 #ifdef _WIN32_WCE
@@ -1072,7 +1074,7 @@ const char *Curl_sspi_strerror (struct connectdata *conn, int err)
       msg = msgbuf;
     }
     if(msg)
-      snprintf(outbuf, outmax, "%s - %s", str, msg);
+      msnprintf(outbuf, outmax, "%s - %s", str, msg);
     else
       strncpy(outbuf, str, outmax);
   }

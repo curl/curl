@@ -41,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/919 --mail-rcpt recipient@example.com --mail-from sende
 <verify>
 <protocol>
 EHLO 919
-AUTH PLAIN dXNlcgB1c2VyAHNlY3JldA==
+AUTH PLAIN AHVzZXIAc2VjcmV0
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA

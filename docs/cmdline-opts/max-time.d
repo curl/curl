@@ -1,6 +1,6 @@
 Long: max-time
 Short: m
-Arg: <time>
+Arg: <seconds>
 Help: Maximum time allowed for the transfer
 See-also: connect-timeout
 ---

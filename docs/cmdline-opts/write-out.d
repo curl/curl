@@ -15,6 +15,9 @@ text that curl thinks fit, as described below. All variables are specified as
 output a newline by using \\n, a carriage return with \\r and a tab space with
 \\t.
 
+The output will be written to standard output, but this can be switched to
+standard error by using %{stderr}.
+
 .B NOTE:
 The %-symbol is a special symbol in the win32-environment, where all
 occurrences of % must be doubled when using this option.
@@ -102,6 +105,15 @@ second.
 .B ssl_verify_result
 The result of the SSL peer certificate verification that was requested. 0
 means the verification was successful. (Added in 7.19.0)
+.TP
+.B stderr
+From this point on, the --write-out output will be written to standard
+error. (Added in 7.63.0)
+.TP
+.B stdout
+From this point on, the --write-out output will be written to standard output.
+This is the default, but can be used to switch back after switching to stderr.
+(Added in 7.63.0)
 .TP
 .B time_appconnect
 The time, in seconds, it took from the start until the SSL/SSH/etc

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2010, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2010 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,6 @@ struct fileinfo {
 };
 
 struct fileinfo *Curl_fileinfo_alloc(void);
-
-void Curl_fileinfo_dtor(void *, void *);
+void Curl_fileinfo_cleanup(struct fileinfo *finfo);
 
 #endif /* HEADER_CURL_FILEINFO_H */

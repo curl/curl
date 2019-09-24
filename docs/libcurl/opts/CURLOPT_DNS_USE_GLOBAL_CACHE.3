@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,6 +29,8 @@ CURLOPT_DNS_USE_GLOBAL_CACHE \- enable/disable global DNS cache
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_USE_GLOBAL_CACHE,
                           long enable);
 .SH DESCRIPTION
+Has no function since 7.62.0. Do note use!
+
 Pass a long. If the \fIenable\fP value is 1, it tells curl to use a global DNS
 cache that will survive between easy handle creations and deletions. This is
 not thread-safe and this will use a global variable.
@@ -53,7 +55,7 @@ if(curl) {
 }
 .fi
 .SH AVAILABILITY
-Subject for removal in the future. Do not use!
+Deprecated since 7.62.0. Has no function.
 .SH RETURN VALUE
 Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

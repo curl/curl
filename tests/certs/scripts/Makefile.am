@@ -26,4 +26,3 @@ SCRIPTFILES = \
   genserv.sh
 
 EXTRA_DIST = $(SCRIPTFILES)
-

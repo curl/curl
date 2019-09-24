@@ -25,10 +25,10 @@ body
 imap
 </server>
  <name>
-IMAP FETCH message by UID and SECTION
+IMAP FETCH message by MAILINDEX and SECTION
  </name>
  <command>
-'imap://%HOSTIP:%IMAPPORT/801/;UID=123/;SECTION=1' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/801/;MAILINDEX=123/;SECTION=1' -u user:secret
 </command>
 </client>
 

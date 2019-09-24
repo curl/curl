@@ -24,4 +24,3 @@ Metalink file at the time of this writing. Also note that if --metalink and
 including headers in the response will break Metalink parser and if the
 headers are included in the file described in Metalink file, hash check will
 fail.
-

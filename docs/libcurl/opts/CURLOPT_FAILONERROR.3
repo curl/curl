@@ -55,7 +55,7 @@ if(curl) {
   curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
   ret = curl_easy_perform(curl);
   if(ret == CURLE_HTTP_RETURNED_ERROR) {
-    /* a HTTP response error problem */
+    /* an HTTP response error problem */
   }
 }
 .fi

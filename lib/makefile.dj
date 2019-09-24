@@ -69,4 +69,3 @@ realclean vclean: clean
 	- $(DELETE) $(CURL_LIB)
 
 -include depend.dj
-

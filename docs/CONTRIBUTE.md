@@ -20,8 +20,8 @@ Before posting to one of the curl mailing lists, please read up on the
 We also hang out on IRC in #curl on irc.freenode.net
 
 If you're at all interested in the code side of things, consider clicking
-'watch' on the [curl repo on github](https://github.com/curl/curl) to get
-notified on pull requests and new issues posted there.
+'watch' on the [curl repo on github](https://github.com/curl/curl) to be
+notified of pull requests and new issues posted there.
 
 ### License and copyright
 
@@ -155,7 +155,7 @@ to loose in the flood of many emails, like they sometimes do on the mailing
 lists.
 
 Every pull request submitted will automatically be tested in several different
-ways. Every pull request is verfied that:
+ways. Every pull request is verified for each of the following:
 
  - ... it still builds, warning-free, on Linux and macOS, with both
    clang and gcc
@@ -168,7 +168,7 @@ ways. Every pull request is verfied that:
  - ... code coverage doesn't shrink drastically
 
 If the pull-request fails one of these tests, it will show up as a red X and
-you are expected to fix the problem. If you don't understand whan the issue is
+you are expected to fix the problem. If you don't understand when the issue is
 or have other problems to fix the complaint, just ask and other project
 members will likely be able to help out.
 

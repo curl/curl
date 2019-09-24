@@ -34,4 +34,3 @@ void set_binmode(FILE *stream);
 #endif /* HAVE_SETMODE */
 
 #endif /* HEADER_CURL_TOOL_BINMODE_H */
-

@@ -23,7 +23,7 @@ file
  <name>
 basic file:// file with "127.0.0.1" hostname
  </name>
- <command>
+<command option="no-include">
 file://127.0.0.1/%PWD/log/test2070.txt
 </command>
 <file name="log/test2070.txt">
