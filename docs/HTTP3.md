@@ -27,7 +27,7 @@ notice. It needs to be enabled at build-time.
 Further development and tweaking of the HTTP/3 support in curl will happen in
 in the master branch using pull-requests, just like ordinary changes.
 
-To build on MacOS with provided recipes you may want to set `alias nproc="sysctl -n hw.ncpu"`
+To build on MacOS or *BSD with provided recipes you may want to set `alias nproc="sysctl -n hw.ncpu"`
 before running make commands.
 
 # ngtcp2 version
