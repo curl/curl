@@ -44,6 +44,7 @@
 #include "strcase.h"
 #include "hostcheck.h"
 #include "multiif.h"
+#include "strerror.h"
 #include "curl_printf.h"
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -3825,8 +3826,8 @@ static ssize_t ossl_send(struct connectdata *conn,
       *curlcode = CURLE_AGAIN;
       return -1;
     case SSL_ERROR_SYSCALL:
-      failf(conn->data, "SSL_write() returned SYSCALL, errno = %d",
-            SOCKERRNO);
+      Curl_strerror(SOCKERRNO, error_buffer, sizeof(error_buffer));
+      failf(conn->data, OSSL_PACKAGE " SSL_write: %s", error_buffer);
       *curlcode = CURLE_SEND_ERROR;
       return -1;
     case SSL_ERROR_SSL:
@@ -3892,6 +3893,11 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
     case SSL_ERROR_WANT_WRITE:
       /* there's data pending, re-invoke SSL_read() */
       *curlcode = CURLE_AGAIN;
+      return -1;
+    case SSL_ERROR_SYSCALL:
+      Curl_strerror(SOCKERRNO, error_buffer, sizeof(error_buffer));
+      failf(conn->data, OSSL_PACKAGE " SSL_read: %s", error_buffer);
+      *curlcode = CURLE_RECV_ERROR;
       return -1;
     default:
       /* openssl/ssl.h for SSL_ERROR_SYSCALL says "look at error stack/return
