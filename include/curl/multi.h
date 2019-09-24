@@ -396,6 +396,9 @@ typedef enum {
   /* This is the argument passed to the server push callback */
   CINIT(PUSHDATA, OBJECTPOINT, 15),
 
+  /* maximum number of concurrent streams to support on a connection */
+  CINIT(MAX_CONCURRENT_STREAMS, LONG, 16),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
@@ -447,6 +450,9 @@ typedef int (*curl_push_callback)(CURL *parent,
                                   size_t num_headers,
                                   struct curl_pushheaders *headers,
                                   void *userp);
+
+/* value for MAXIMUM CONCURRENT STREAMS upper limit */
+#define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
 #ifdef __cplusplus
 } /* end of extern "C" */

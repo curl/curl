@@ -89,4 +89,10 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
 
+
+/* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option
+ * If not specified or 0, default would be 100
+ */
+size_t Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
+
 #endif /* HEADER_CURL_MULTIIF_H */
