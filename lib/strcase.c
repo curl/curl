@@ -150,7 +150,7 @@ char Curl_raw_tolower(char in)
   case 'W':
     return 'w';
   case 'X':
-    return 'X';
+    return 'x';
   case 'Y':
     return 'y';
   case 'Z':
