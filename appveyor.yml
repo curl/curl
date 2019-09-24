@@ -103,7 +103,6 @@ environment:
         OPENSSL: ON
         WINSSL: OFF
         TESTING: OFF
-        MSYS2_ARG_CONV_EXCL: "/*"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: VisualStudioSolution
         PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
