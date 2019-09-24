@@ -1841,6 +1841,8 @@
      d                 c                   20014
      d  CURLMOPT_PUSHDATA...
      d                 c                   10015
+     d  CURLMOPT_MAX_CONCURRENT_STREAMS...
+     d                 c                   10016
       *
       * Bitmask bits for CURLMOPT_PIPELING.
       *

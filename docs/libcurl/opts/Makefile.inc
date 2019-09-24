@@ -68,6 +68,7 @@ man_MANS =                                      \
   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE.3          \
   CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE.3        \
   CURLMOPT_MAXCONNECTS.3                        \
+  CURLMOPT_MAX_CONCURRENT_STREAMS.3             \
   CURLMOPT_MAX_HOST_CONNECTIONS.3               \
   CURLMOPT_MAX_PIPELINE_LENGTH.3                \
   CURLMOPT_MAX_TOTAL_CONNECTIONS.3              \
@@ -97,7 +98,6 @@ man_MANS =                                      \
   CURLOPT_CHUNK_END_FUNCTION.3                  \
   CURLOPT_CLOSESOCKETDATA.3                     \
   CURLOPT_CLOSESOCKETFUNCTION.3                 \
-  CURLOPT_UPKEEP_INTERVAL_MS.3             \
   CURLOPT_CONNECTTIMEOUT.3                      \
   CURLOPT_CONNECTTIMEOUT_MS.3                   \
   CURLOPT_CONNECT_ONLY.3                        \
@@ -113,8 +113,8 @@ man_MANS =                                      \
   CURLOPT_COPYPOSTFIELDS.3                      \
   CURLOPT_CRLF.3                                \
   CURLOPT_CRLFILE.3                             \
-  CURLOPT_CUSTOMREQUEST.3                       \
   CURLOPT_CURLU.3                               \
+  CURLOPT_CUSTOMREQUEST.3                       \
   CURLOPT_DEBUGDATA.3                           \
   CURLOPT_DEBUGFUNCTION.3                       \
   CURLOPT_DEFAULT_PROTOCOL.3                    \
@@ -168,8 +168,6 @@ man_MANS =                                      \
   CURLOPT_HTTP_TRANSFER_DECODING.3              \
   CURLOPT_HTTP_VERSION.3                        \
   CURLOPT_IGNORE_CONTENT_LENGTH.3               \
-  CURLOPT_TRAILERDATA.3                         \
-  CURLOPT_TRAILERFUNCTION.3                     \
   CURLOPT_INFILESIZE.3                          \
   CURLOPT_INFILESIZE_LARGE.3                    \
   CURLOPT_INTERFACE.3                           \
@@ -332,10 +330,13 @@ man_MANS =                                      \
   CURLOPT_TLSAUTH_PASSWORD.3                    \
   CURLOPT_TLSAUTH_TYPE.3                        \
   CURLOPT_TLSAUTH_USERNAME.3                    \
+  CURLOPT_TRAILERDATA.3                         \
+  CURLOPT_TRAILERFUNCTION.3                     \
   CURLOPT_TRANSFERTEXT.3                        \
   CURLOPT_TRANSFER_ENCODING.3                   \
   CURLOPT_UNIX_SOCKET_PATH.3                    \
   CURLOPT_UNRESTRICTED_AUTH.3                   \
+  CURLOPT_UPKEEP_INTERVAL_MS.3                  \
   CURLOPT_UPLOAD.3                              \
   CURLOPT_UPLOAD_BUFFERSIZE.3                   \
   CURLOPT_URL.3                                 \
