@@ -73,6 +73,7 @@ int test(char *URL)
    test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
    res = curl_easy_perform(curl);
 
+   /* curve ball: CWD /folderB before reusing connection with _NOCWD */
    free(newURL);
    newURL = aprintf("%s/folderB/661", URL);
    test_setopt(curl, CURLOPT_URL, newURL);
