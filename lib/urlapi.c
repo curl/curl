@@ -849,13 +849,13 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   if(junkscan(path))
     return CURLUE_MALFORMED_INPUT;
 
+  fragment = strchr(path, '#');
+  if(fragment)
+    *fragment++ = 0;
+
   query = strchr(path, '?');
   if(query)
     *query++ = 0;
-
-  fragment = strchr(query?query:path, '#');
-  if(fragment)
-    *fragment++ = 0;
 
   if(!path[0])
     /* if there's no path set, unset */
