@@ -121,7 +121,6 @@ struct ftp_conn {
   char *entrypath; /* the PWD reply when we logged on */
   char **dirs;   /* realloc()ed array for path components */
   int dirdepth;  /* number of entries used in the 'dirs' array */
-  int diralloc;  /* number of entries allocated for the 'dirs' array */
   char *file;    /* url-decoded file name (or path) */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
