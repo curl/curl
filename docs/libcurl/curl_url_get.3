@@ -76,8 +76,9 @@ Scheme cannot be URL decoded on get.
 .IP CURLUPART_PASSWORD
 .IP CURLUPART_OPTIONS
 .IP CURLUPART_HOST
-If the host part is an IPv6 numeric address, the zoneid will not be part of
-the extracted host but is provided separately in \fICURLUPART_ZONEID\fP.
+The host name. If it is an IPv6 numeric address, the zoneid will not be part
+of it but is provided separately in \fICURLUPART_ZONEID\fP. IPv6 numerical
+addresses are returned within brackets ([]).
 .IP CURLUPART_ZONEID
 If the host name is a numeric IPv6 address, this field might also be set.
 .IP CURLUPART_PORT
