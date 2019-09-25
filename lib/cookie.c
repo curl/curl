@@ -1684,13 +1684,13 @@ CURLcode curl_cookie_filter(const char *url,
   }
 
   for(current = in; current; current = current->next) {
-    char *str = current->data;
-    if(checkprefix("Set-Cookie:", str))
+    char *line = current->data;
+    if(checkprefix("Set-Cookie:", line))
       /* HTTP Header format line */
-      Curl_cookie_add(NULL, ci, TRUE, FALSE, str + 11, NULL, NULL, TRUE);
+      Curl_cookie_add(NULL, ci, TRUE, FALSE, line + 11, NULL, NULL, TRUE);
     else
       /* Netscape format line */
-      Curl_cookie_add(NULL, ci, FALSE, FALSE, str, NULL, NULL, TRUE);
+      Curl_cookie_add(NULL, ci, FALSE, FALSE, line, NULL, NULL, TRUE);
   }
 
   co = Curl_cookie_getlist(ci, hostname, path, TRUE);
@@ -1706,6 +1706,7 @@ error:
   curl_url_cleanup(h);
   Curl_cookie_cleanup(ci);
   curl_slist_free_all(*out);
+  *out = NULL;
   return CURLE_OUT_OF_MEMORY;
 }
 
