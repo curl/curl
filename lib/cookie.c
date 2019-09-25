@@ -1086,7 +1086,7 @@ Curl_cookie_add(struct Curl_easy *data,
  * Curl_cookie_init()
  *
  * Inits a cookie struct to read data from a local file. This is always
- * called before any cookies are set. File may be NULL.
+ * called before any cookies are set. File, data and inc may be NULL.
  *
  * If 'newsession' is TRUE, discard all "session cookies" on read from file.
  *
@@ -1570,36 +1570,48 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   return 0;
 }
 
+/*
+ * cookie_list_from_cookie()
+ *
+ * helper function for exporting cookies in netscape format.
+ * c may be null and *list is appended to.
+ */
+static void cookie_list_from_cookie(struct Cookie *c,
+                                    struct curl_slist **list) {
+  struct curl_slist *beg;
+  char *line;
+
+  for(; c; c = c->next) {
+    if(!c->domain)
+      continue;
+    line = get_netscape_format(c);
+    if(!line) {
+      curl_slist_free_all(*list);
+      *list = NULL;
+      return;
+    }
+    beg = Curl_slist_append_nodup(*list, line);
+    if(!beg) {
+      free(line);
+      curl_slist_free_all(*list);
+      *list = NULL;
+      return;
+    }
+    *list = beg;
+  }
+}
+
 static struct curl_slist *cookie_list(struct Curl_easy *data)
 {
-  struct curl_slist *list = NULL;
-  struct curl_slist *beg;
-  struct Cookie *c;
-  char *line;
   unsigned int i;
+  struct curl_slist *list = NULL;
 
   if((data->cookies == NULL) ||
       (data->cookies->numcookies == 0))
     return NULL;
 
-  for(i = 0; i < COOKIE_HASH_SIZE; i++) {
-    for(c = data->cookies->cookies[i]; c; c = c->next) {
-      if(!c->domain)
-        continue;
-      line = get_netscape_format(c);
-      if(!line) {
-        curl_slist_free_all(list);
-        return NULL;
-      }
-      beg = Curl_slist_append_nodup(list, line);
-      if(!beg) {
-        free(line);
-        curl_slist_free_all(list);
-        return NULL;
-      }
-      list = beg;
-    }
-  }
+  for(i = 0; i < COOKIE_HASH_SIZE; i++)
+    cookie_list_from_cookie(data->cookies->cookies[i], &list);
 
   return list;
 }
@@ -1644,6 +1656,56 @@ void Curl_flush_cookies(struct Curl_easy *data, int cleanup)
     Curl_cookie_cleanup(data->cookies);
   }
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+}
+
+CURLcode curl_filter_cookies(const char *url,
+                             struct curl_slist *in,
+                             struct curl_slist **out)
+{
+  CURLU *h = NULL;
+  char *hostname = NULL;
+  char *path = NULL;
+  struct Cookie *co = NULL;
+  struct CookieInfo *ci = NULL;
+  struct curl_slist *current;
+
+  *out = NULL;
+
+  ci = Curl_cookie_init(NULL, NULL, NULL, TRUE);
+  if(!ci)
+    goto error;
+
+  h = curl_url();
+  if(!h ||
+     curl_url_set(h, CURLUPART_URL, url, CURLU_GUESS_SCHEME) ||
+     curl_url_get(h, CURLUPART_HOST, &hostname, 0) ||
+     curl_url_get(h, CURLUPART_PATH, &path, 0)) {
+    goto error;
+  }
+
+  for(current = in; current; current = current->next) {
+    char *str = current->data;
+    if(checkprefix("Set-Cookie:", str))
+      /* HTTP Header format line */
+      Curl_cookie_add(NULL, ci, TRUE, FALSE, str + 11, NULL, NULL, TRUE);
+    else
+      /* Netscape format line */
+      Curl_cookie_add(NULL, ci, FALSE, FALSE, str, NULL, NULL, TRUE);
+  }
+
+  co = Curl_cookie_getlist(ci, hostname, path, TRUE);
+  if(co) {
+    cookie_list_from_cookie(co, out);
+    Curl_cookie_freelist(co);
+  }
+
+  return CURLE_OK;
+error:
+  free(path);
+  free(hostname);
+  curl_url_cleanup(h);
+  Curl_cookie_cleanup(c);
+  return CURLE_OUT_OF_MEMORY;
 }
 
 #endif /* CURL_DISABLE_HTTP || CURL_DISABLE_COOKIES */
