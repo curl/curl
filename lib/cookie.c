@@ -1704,7 +1704,8 @@ error:
   free(path);
   free(hostname);
   curl_url_cleanup(h);
-  Curl_cookie_cleanup(c);
+  Curl_cookie_cleanup(ci);
+  curl_slist_free_all(*out);
   return CURLE_OUT_OF_MEMORY;
 }
 
