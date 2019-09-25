@@ -54,8 +54,8 @@ int test(char *URL)
    newURL = aprintf("%s/folderB/661", URL);
    test_setopt(curl, CURLOPT_URL, newURL);
    res = curl_easy_perform(curl);
-   
-   /* test: CURLFTPMETHOD_NOCWD with absolute path should 
+
+   /* test: CURLFTPMETHOD_NOCWD with absolute path should
       never emit CWD (for both new and reused easy handle) */
    curl_easy_cleanup(curl);
    curl = curl_easy_init();
