@@ -1870,11 +1870,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
 
   hostname = data->state.up.hostname;
-  if(!hostname)
-    /* this is for file:// transfers, get a dummy made */
-    hostname = (char *)"";
-
-  if(hostname[0] == '[') {
+  if(hostname && hostname[0] == '[') {
     /* This looks like an IPv6 address literal. See if there is an address
        scope. */
     size_t hlen;
@@ -1888,7 +1884,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
 
   /* make sure the connect struct gets its own copy of the host name */
-  conn->host.rawalloc = strdup(hostname);
+  conn->host.rawalloc = strdup(hostname ? hostname : "");
   if(!conn->host.rawalloc)
     return CURLE_OUT_OF_MEMORY;
   conn->host.name = conn->host.rawalloc;
