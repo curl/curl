@@ -1658,9 +1658,9 @@ void Curl_flush_cookies(struct Curl_easy *data, int cleanup)
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 }
 
-CURLcode curl_cookie_filter_url(const char *url,
-                                struct curl_slist *in,
-                                struct curl_slist **out)
+CURLcode curl_cookie_filter(const char *url,
+                            struct curl_slist *in,
+                            struct curl_slist **out)
 {
   CURLU *h = NULL;
   char *hostname = NULL;
