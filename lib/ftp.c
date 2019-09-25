@@ -1446,7 +1446,7 @@ static CURLcode ftp_state_list(struct connectdata *conn)
      The other ftp_filemethods will CWD into dir/dir/ first and
      then just do LIST (in that case: nothing to do here)
   */
-  char *cmd, *lstArg;
+  char *cmd, *lstArg; 
   const char *inpath = ftp->path;
 
   lstArg = NULL;
