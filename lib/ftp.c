@@ -4092,7 +4092,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   /* the ftp struct is already inited in ftp_connect() */
   struct FTP *ftp = data->req.protop;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
-  const char *slashPos = NULL; /* position of the first '/' char in curpos */
+  const char *slashPos = NULL;
   const char *fileName = NULL;
   CURLcode result = CURLE_OK;
   char *rawPath = NULL; /* url-decoded "raw" path */
