@@ -74,7 +74,7 @@ const char *Curl_alpnid2str(enum alpnid id)
     return "h2";
   case ALPN_h3:
 #if (defined(USE_QUICHE) || defined(USE_NGHTTP2)) && !defined(UNITTESTS)
-    return "h3-22";
+    return "h3-23";
 #else
     return "h3";
 #endif
