@@ -4113,14 +4113,15 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
           fileName = rawPath;  /* this is a full file path */
       /*
         else: ftpc->file is not used anywhere other than for operations on
-		      a file. In other words, never for directory operations.
+              a file. In other words, never for directory operations.
               So we can safely leave filename as NULL here and use it as a
               argument in dir/file decisions.
       */
       break;
 
     case FTPFILE_SINGLECWD:
-      if((slashPos = strrchr(rawPath, '/')) != NULL) {
+      slashPos = strrchr(rawPath, '/');
+      if(slashPos) {
         /* get path before last slash, except for / */
         size_t dirlen = slashPos - rawPath;
         if(dirlen == 0)
@@ -4152,7 +4153,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       const char *curPos = rawPath;
 
       int dirAlloc = 0; /* number of entries allocated for the 'dirs' array */
-	  const char* str = rawPath;
+      const char *str = rawPath;
       for(; *str != 0; ++str)
         if (*str == '/')
           ++dirAlloc;
