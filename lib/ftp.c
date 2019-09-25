@@ -4152,7 +4152,8 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       const char *curPos = rawPath;
 
       int dirAlloc = 0; /* number of entries allocated for the 'dirs' array */
-      for(const char* str = rawPath; *str != 0; ++str)
+	  const char* str = rawPath;
+      for(; *str != 0; ++str)
         if (*str == '/')
           ++dirAlloc;
 
