@@ -4158,7 +4158,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         if (*str == '/')
           ++dirAlloc;
 
-      if (dirAlloc > 0) {
+      if(dirAlloc > 0) {
         ftpc->dirs = calloc(dirAlloc, sizeof(ftpc->dirs[0]));
         if(!ftpc->dirs) {
           free(rawPath);
