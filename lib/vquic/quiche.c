@@ -459,9 +459,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
       break;
 
     case QUICHE_H3_EVENT_FINISHED:
-      if(quiche_conn_close(qs->conn, true, 0, NULL, 0) < 0) {
-        ;
-      }
+      streamclose(conn, "End of stream");
       recvd = 0; /* end of stream */
       break;
     default:
