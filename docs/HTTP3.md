@@ -117,5 +117,7 @@ Make an HTTP/3 request.
 
      % src/curl --http3 https://cloudflare-quic.com/
      % src/curl --http3 https://facebook.com/
-     % src/curl --http3 https://quic.aiortc.org:4433/
+     % src/curl --http3 https://quic.aiortc.org/
      % src/curl --http3 https://quic.rocks:4433/
+
+See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
