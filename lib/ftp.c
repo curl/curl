@@ -4158,33 +4158,35 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         if (*str == '/')
           ++dirAlloc;
 
-      ftpc->dirs = calloc(dirAlloc, sizeof(ftpc->dirs[0]));
-      if(!ftpc->dirs) {
-        free(rawPath);
-        return CURLE_OUT_OF_MEMORY;
-      }
-
-      /* parse the URL path into separate path components */
-      while((slashPos = strchr(curPos, '/')) != NULL) {
-        size_t compLen = slashPos - curPos;
-
-        /* path starts with a slash: add that as a directory */
-        if((compLen == 0) && (ftpc->dirdepth == 0))
-          ++compLen;
-
-        /* we skip empty path components, like "x//y" since the FTP command
-           CWD requires a parameter and a non-existent parameter a) doesn't
-           work on many servers and b) has no effect on the others. */
-        if(compLen > 0) {
-          char *comp = calloc(1, compLen + 1);
-          if(!comp) {
-            free(rawPath);
-            return CURLE_OUT_OF_MEMORY;
-          }
-          strncpy(comp, curPos, compLen);
-          ftpc->dirs[ftpc->dirdepth++] = comp;
+      if (dirAlloc > 0) {
+        ftpc->dirs = calloc(dirAlloc, sizeof(ftpc->dirs[0]));
+        if(!ftpc->dirs) {
+          free(rawPath);
+          return CURLE_OUT_OF_MEMORY;
         }
-        curPos = slashPos + 1;
+
+        /* parse the URL path into separate path components */
+        while((slashPos = strchr(curPos, '/')) != NULL) {
+          size_t compLen = slashPos - curPos;
+
+          /* path starts with a slash: add that as a directory */
+          if((compLen == 0) && (ftpc->dirdepth == 0))
+            ++compLen;
+
+          /* we skip empty path components, like "x//y" since the FTP command
+             CWD requires a parameter and a non-existent parameter a) doesn't
+             work on many servers and b) has no effect on the others. */
+          if(compLen > 0) {
+            char *comp = calloc(1, compLen + 1);
+            if(!comp) {
+              free(rawPath);
+              return CURLE_OUT_OF_MEMORY;
+            }
+            strncpy(comp, curPos, compLen);
+            ftpc->dirs[ftpc->dirdepth++] = comp;
+          }
+          curPos = slashPos + 1;
+        }
       }
       DEBUGASSERT(ftpc->dirdepth <= dirAlloc);
       fileName = curPos; /* the rest is the file name (or empty) */
