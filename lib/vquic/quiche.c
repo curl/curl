@@ -404,13 +404,14 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
   quiche_h3_event *ev;
   int rc;
   struct h3h1header headers;
-  struct HTTP *stream = conn->data->req.protop;
+  struct Curl_easy *data = conn->data;
+  struct HTTP *stream = data->req.protop;
   headers.dest = buf;
   headers.destlen = buffersize;
   headers.nlen = 0;
 
   if(process_ingress(conn, sockfd, qs)) {
-    infof(conn->data, "h3_stream_recv returns on ingress\n");
+    infof(data, "h3_stream_recv returns on ingress\n");
     *curlcode = CURLE_RECV_ERROR;
     return -1;
   }
@@ -423,7 +424,7 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 
     if(s != stream->stream3_id) {
       /* another transfer, ignore for now */
-      infof(conn->data, "Got h3 for stream %u, expects %u\n",
+      infof(data, "Got h3 for stream %u, expects %u\n",
             s, stream->stream3_id);
       continue;
     }
@@ -477,7 +478,9 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
   *curlcode = (-1 == recvd)? CURLE_AGAIN : CURLE_OK;
   if(recvd >= 0)
     /* Get this called again to drain the event queue */
-    Curl_expire(conn->data, 0, EXPIRE_QUIC);
+    Curl_expire(data, 0, EXPIRE_QUIC);
+
+  data->state.drain = (recvd >= 0) ? 1 : 0;
   return recvd;
 }
 
