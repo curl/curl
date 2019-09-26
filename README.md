@@ -22,7 +22,7 @@ libcurl is the library curl is using to do its job. It is readily available to
 be used by your software. Read [the libcurl.3 man
 page](https://curl.haxx.se/libcurl/c/libcurl.html) to learn how!
 
-You find answers to the most frequent questions we get in [the FAQ
+You can find answers to the most frequent questions we get in [the FAQ
 document](https://curl.haxx.se/docs/faq.html).
 
 Study [the COPYING file](https://curl.haxx.se/docs/copyright.html) for
