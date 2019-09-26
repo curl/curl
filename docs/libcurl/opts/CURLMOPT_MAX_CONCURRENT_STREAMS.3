@@ -20,7 +20,7 @@
 .\" *
 .\" **************************************************************************
 .\"
-.TH CURLMOPT_MAX_CONCURRENT_STREAMS 3 "08 Aug 2019" "libcurl 7.66.0" "curl_multi_setopt options"
+.TH CURLMOPT_MAX_CONCURRENT_STREAMS 3 "06 Nov 2019" "libcurl 7.67.0" "curl_multi_setopt options"
 .SH NAME
 CURLMOPT_MAX_CONCURRENT_STREAMS \- set max concurrent streams for http2
 .SH SYNOPSIS
@@ -32,9 +32,7 @@ Pass a long indicating the \fBmax\fP. The set number will be used as the
 maximum number of concurrent streams for a connections that libcurl should 
 support.
 Valid values range from 1 to 2147483647 (2^31 - 1) and defaults to 100.
-The value passed here would be honoured based on other system resources properties,
-by which maximum concurrent streams could be achievied. So, its not a guarantee to
-create the specified concurrent streams for a given http transfer rate.
+The value passed here would be honoured based on other system resources properties.
 
 .SH DEFAULT
 See DESCRIPTION
@@ -47,7 +45,7 @@ CURLM *m = curl_multi_init();
 curl_multi_setopt(m, CURLMOPT_MAX_CONCURRENT_STREAMS, 200L);
 .fi
 .SH AVAILABILITY
-Added in 7.64.3
+Added in 7.67.0
 .SH RETURN VALUE
 Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"

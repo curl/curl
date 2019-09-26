@@ -3221,8 +3221,7 @@ void Curl_multi_dump(struct Curl_multi *multi)
 }
 #endif
 
-size_t Curl_multi_max_concurrent_streams
-(struct Curl_multi *multi)
+size_t Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
 {
   return multi ? ((size_t)multi->max_concurrent_streams ?
                   (size_t)multi->max_concurrent_streams : 100) : 0;
