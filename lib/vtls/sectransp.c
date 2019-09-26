@@ -79,7 +79,7 @@
 /* These macros mean "the following code is present to allow runtime backward
    compatibility with at least this cat or earlier":
    (You set this at build-time using the compiler command line option
-   "-mmacos-version-min.") */
+   "-mmacosx-version-min.") */
 #define CURL_SUPPORT_MAC_10_5 MAC_OS_X_VERSION_MIN_REQUIRED <= 1050
 #define CURL_SUPPORT_MAC_10_6 MAC_OS_X_VERSION_MIN_REQUIRED <= 1060
 #define CURL_SUPPORT_MAC_10_7 MAC_OS_X_VERSION_MIN_REQUIRED <= 1070
