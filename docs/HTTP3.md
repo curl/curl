@@ -75,7 +75,13 @@ you'll just get ld.so linker errors.
 
 ## Invoke from command line
 
+Use HTTP/3 directly:
+
     curl --http3 https://nghttp2.org:8443/
+
+Upgrade via Alt-Svc:
+
+    curl --alt-svc altsvc.cache https://quic.aiortc.org/
 
 # quiche version
 
