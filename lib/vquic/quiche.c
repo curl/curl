@@ -237,7 +237,7 @@ static CURLcode quiche_has_connected(struct connectdata *conn,
   conn->httpversion = 30;
   conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
-  qs->h3config = quiche_h3_config_new(0, 1024, 0, 0);
+  qs->h3config = quiche_h3_config_new();
   if(!qs->h3config)
     return CURLE_OUT_OF_MEMORY;
 
