@@ -1090,6 +1090,8 @@ Curl_cookie_add(struct Curl_easy *data,
  *
  * If 'newsession' is TRUE, discard all "session cookies" on read from file.
  *
+ * Note that 'data' might be called as NULL pointer.
+ *
  * Returns NULL on out of memory. Invalid cookies are ignored.
  ****************************************************************************/
 struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
@@ -1160,6 +1162,8 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
   }
 
   c->running = TRUE;          /* now, we're running */
+  if(data)
+    data->state.cookie_engine = TRUE;
 
   return c;
 
