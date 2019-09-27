@@ -1397,6 +1397,7 @@ struct UrlState {
                   invoked twice when the multi interface is used. */
   BIT(stream_depends_e); /* set or don't set the Exclusive bit */
   BIT(previouslypending); /* this transfer WAS in the multi->pending queue */
+  BIT(cookie_engine);
 };
 
 

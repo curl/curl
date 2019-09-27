@@ -2676,7 +2676,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
     struct Cookie *co = NULL; /* no cookies from start */
     int count = 0;
 
-    if(data->cookies) {
+    if(data->cookies && data->state.cookie_engine) {
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       co = Curl_cookie_getlist(data->cookies,
                                conn->allocptr.cookiehost?
@@ -4013,7 +4013,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         data->state.resume_from = 0; /* get everything */
     }
 #if !defined(CURL_DISABLE_COOKIES)
-    else if(data->cookies &&
+    else if(data->cookies && data->state.cookie_engine &&
             checkprefix("Set-Cookie:", k->p)) {
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
                       CURL_LOCK_ACCESS_SINGLE);
