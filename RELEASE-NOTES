@@ -16,6 +16,12 @@ This release includes the following bugfixes:
  o FTP: allow "rubbish" prepended to the SIZE response [15]
  o FTP: remove trailing slash from path for LIST/MLSD [6]
  o FTP: skip CWD to entry dir when target is absolute [16]
+ o FTP: url-decode path before evaluation [36]
+ o HTTP3.md: move -p for mkdir, remove -j for make [46]
+ o HTTP3: fix prefix parameter for ngtcp2 build [40]
+ o HTTP3: show an --alt-svc using example too
+ o INSTALL: add vcpkg installation instructions [35]
+ o README: minor grammar fix [39]
  o altsvc: both backends run h3-23 now [31]
  o appveyor: add a winbuild [14]
  o appveyor: upgrade VS2017 to VS2019 [29]
@@ -26,27 +32,42 @@ This release includes the following bugfixes:
  o curl: fix memory leaked by parse_metalink() [17]
  o curl: load large files with -d @ much faster [19]
  o docs/HTTP3: fix `--with-ssl` ngtcp2 configure flag [21]
+ o doh: allow only http and https in debug mode [48]
  o doh: avoid truncating DNS QTYPE to lower octet [23]
  o doh: clean up dangling DOH memory on easy close [9]
  o doh: fix (harmless) buffer overrun [13]
  o doh: fix undefined behaviour and open up for gcc and clang optimization [12]
+ o doh: return early if there is no time left [48]
  o http2: relax verification of :authority in push promise requests [8]
+ o http: lowercase headernames for HTTP/2 and HTTP/3 [49]
  o ldap: Stop using wide char version of ldapp_err2string [1]
  o mime: when disabled, avoid C99 macro [7]
  o ngtcp2: compile with latest ngtcp2 + nghttp3 draft-23 [25]
+ o ngtcp2: remove fprintf() calls [43]
  o openssl: close_notify on the FTP data connection doesn't mean closure [20]
  o openssl: fix compiler warning with LibreSSL [34]
+ o openssl: use strerror on SSL_ERROR_SYSCALL [41]
+ o os400: getpeername() and getsockname() return ebcdic AF_UNIX sockaddr [47]
  o parsedate: fix date parsing disabled builds [18]
+ o quiche: don't close connection at end of stream
  o quiche: persist connection details (fixes -I with --http3) [11]
+ o quiche: set 'drain' when returning without having drained the queues
  o setopt: make it easier to add new enum values [4]
  o setopt: store CURLOPT_RTSP_SERVER_CSEQ correctly [24]
  o smb: check for full size message before reading message details [10]
  o socks: Fix destination host shown on SOCKS5 error [32]
+ o tests: fix narrowing conversion warnings [37]
+ o url: don't set appconnect time for non-ssl/non-ssh connections [42]
+ o url: fix the NULL hostname compiler warning [44]
  o url: only reuse TLS connections with matching pinning [5]
  o urlapi: avoid index underflow for short ipv6 hostnames [26]
+ o urlapi: question mark within fragment is still fragment [45]
  o urldata: use 'bool' for the bit type on MSVC compilers [30]
+ o vtls: Fix comment typo about macosx-version-min compiler flag [38]
+ o vtls: fix narrowing conversion warnings [50]
  o winbuild/MakefileBuild.vc: Add vssh [2]
  o winbuild/MakefileBuild.vc: Fix line endings
+ o winbuild: Add manifest to curl.exe for proper OS version detection [51]
 
 This release includes the following known bugs:
 
@@ -55,13 +76,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Bernhard Walle, Christoph M. Becker, Dagobert Michelsen,
-  Daniel Stenberg, George Liu, Gilles Vollant, Jens Finkhaeuser, Jimmy Gaussen,
-  Kamil Dudka, Marcel Raad, Max Dymond, Michael Kaufmann, Niall O'Reilly,
-  Paul Dreik, Philippe Marguinaud, Ray Satiro, Roland Hieber,
-  Sebastian Haglund, SumatraPeter on github, Tatsuhiro Tsujikawa,
-  Valerii Zapodovnikov, Zenju on github,
-  (23 contributors)
+  Alessandro Ghedini, Alex Konev, Alex Samorukov, Barry Pollard,
+  Bernhard Walle, Christoph M. Becker, Dagobert Michelsen, Daniel Stenberg,
+  George Liu, Gilles Vollant, Griffin Downs, Jens Finkhaeuser, Jeremy Lainé,
+  Jimmy Gaussen, Joel Depooter, jzinn on github, Kamil Dudka, Lucas Pardue,
+  Marcel Hernandez, Marcel Raad, Max Dymond, Michael Kaufmann, Niall O'Reilly,
+  Patrick Monnerat, Paul Dreik, Philippe Marguinaud, Ray Satiro, Roland Hieber,
+  Sebastian Haglund, Spezifant on github, SumatraPeter on github,
+  Tatsuhiro Tsujikawa, Valerii Zapodovnikov, Yechiel Kalmenson,
+  Zenju on github,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -101,3 +125,20 @@ References to bug reports and discussions on issues:
  [32] = https://curl.haxx.se/bug/?i=4394
  [33] = https://curl.haxx.se/bug/?i=4393
  [34] = https://curl.haxx.se/bug/?i=4397
+ [35] = https://curl.haxx.se/bug/?i=4435
+ [36] = https://curl.haxx.se/bug/?i=4428
+ [37] = https://curl.haxx.se/bug/?i=4415
+ [38] = https://curl.haxx.se/bug/?i=4425
+ [39] = https://curl.haxx.se/bug/?i=4431
+ [40] = https://curl.haxx.se/bug/?i=4430
+ [41] = https://curl.haxx.se/bug/?i=4411
+ [42] = https://curl.haxx.se/bug/?i=3760
+ [43] = https://curl.haxx.se/bug/?i=4421
+ [44] = https://curl.haxx.se/bug/?i=4403
+ [45] = https://curl.haxx.se/bug/?i=4412
+ [46] = https://curl.haxx.se/bug/?i=4407
+ [47] = https://curl.haxx.se/bug/?i=4214
+ [48] = https://curl.haxx.se/bug/?i=4406
+ [49] = https://curl.haxx.se/bug/?i=4400
+ [50] = https://curl.haxx.se/bug/?i=4398
+ [51] = https://curl.haxx.se/bug/?i=4399
