@@ -2725,7 +2725,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setstropt(&data->set.str[STRING_ALTSVC], argptr);
     if(result)
       return result;
-    (void)Curl_altsvc_load(data->asi, argptr);
+    if(argptr)
+      (void)Curl_altsvc_load(data->asi, argptr);
     break;
   case CURLOPT_ALTSVC_CTRL:
     if(!data->asi) {
