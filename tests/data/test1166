@@ -29,7 +29,7 @@ http
  <name>
 HTTP response with cookies but not receiving!
  </name>
- <command>h
+ <command>
 http://%HOSTIP:%HTTPPORT/want/1166 http://%HOSTIP:%HTTPPORT/want/1166
 </command>
 </client>
