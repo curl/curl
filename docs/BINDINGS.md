@@ -23,6 +23,8 @@ Requests](https://github.com/whoshuu/cpr) by Huu Nguyen
 Cocoa: [BBHTTP](https://github.com/brunodecarvalho/BBHTTP) written by Bruno de Carvalho
 [curlhandle](https://github.com/karelia/curlhandle) Written by Dan Wood
 
+Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
+
 [D](https://dlang.org/library/std/net/curl.html) Written by Kenneth Bogert
 
 [Delphi](https://github.com/Mercury13/curl4delphi) Written by Mikhail Merkuryev
