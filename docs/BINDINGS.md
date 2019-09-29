@@ -65,6 +65,8 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [.NET](https://sourceforge.net/projects/libcurl-net/) libcurl-net by Jeffrey Phillips
 
+[Nim](https://nimble.directory/pkg/libcurl) wrapper for libcurl
+
 [node.js](https://github.com/JCMais/node-libcurl) node-libcurl by Jonathan Cardoso Machado
 
 [Object-Pascal](https://web.archive.org/web/20020610214926/www.tekool.com/opcurl) Free Pascal, Delphi and Kylix binding written by Christophe Espern.
@@ -73,13 +75,16 @@ Lua: [luacurl](http://luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](ht
 
 [Pascal](https://web.archive.org/web/20030804091414/houston.quik.com/jkp/curlpas/) Free Pascal, Delphi and Kylix binding written by Jeffrey Pohlmeyer.
 
-Perl: [WWW--Curl](https://github.com/szbalint/WWW--Curl) Maintained by Cris
+Perl: [WWW::Curl](https://github.com/szbalint/WWW--Curl) Maintained by Cris
 Bailiff and Bálint Szilakszi,
 [perl6-net-curl](https://github.com/azawawi/perl6-net-curl) by Ahmad M. Zawawi
+[NET::Curl](https://metacpan.org/pod/Net::Curl) by Przemyslaw Iskra
 
 [PHP](https://php.net/curl) Originally written by Sterling Hughes
 
 [PostgreSQL](https://github.com/pramsey/pgsql-http) - HTTP client for PostgreSQL
+
+[PureBasic](https://www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
