@@ -195,7 +195,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   qs->conn = quiche_connect(conn->host.name, (const uint8_t *) qs->scid,
                             sizeof(qs->scid), qs->cfg);
   if(!qs->conn) {
-    failf(data, "can't create quiche connectconfigion");
+    failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
 
