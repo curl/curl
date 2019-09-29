@@ -497,7 +497,7 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
-_Bool CheckFile(char *fname, _Bool override_file_prohibit)
+static bool CheckFile(char *fname, bool override_file_prohibit)
 {
   /* Check if override is allowed */
   if(override_file_prohibit) {
@@ -706,7 +706,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
 
       case 'I': /* --override */
-      config->override_file_prohibit = !toggle;
+        config->override_file_prohibit = !toggle;
       break;
 
       case 'j': /* --compressed */
@@ -1514,7 +1514,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       /* dump-header to given file name */
       GetStr(&config->headerfile, nextarg);
       if(CheckFile(config->headerfile, config->override_file_prohibit))
-          return PARAM_FILE_EXISTS;
+        return PARAM_FILE_EXISTS;
       break;
     case 'e':
     {
