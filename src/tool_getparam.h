@@ -43,6 +43,7 @@ typedef enum {
   PARAM_NO_PREFIX,
   PARAM_NUMBER_TOO_LARGE,
   PARAM_NO_NOT_BOOLEAN,
+  PARAM_FILE_EXISTS,
   PARAM_LAST
 } ParameterError;
 

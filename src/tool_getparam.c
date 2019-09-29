@@ -42,6 +42,9 @@
 #include "tool_parsecfg.h"
 #include "tool_main.h"
 
+/* to use access() */
+#include <unistd.h>
+
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef MSDOS
@@ -95,6 +98,7 @@ static const struct LongShort aliases[]= {
   {"*h", "trace-ascii",              ARG_FILENAME},
   {"*H", "alpn",                     ARG_BOOL},
   {"*i", "limit-rate",               ARG_STRING},
+  {"*I", "override",                 ARG_BOOL},
   {"*j", "compressed",               ARG_BOOL},
   {"*J", "tr-encoding",              ARG_BOOL},
   {"*k", "digest",                   ARG_BOOL},
@@ -493,6 +497,17 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
+_Bool CheckFile(char *fname, _Bool override_file_prohibit)
+{
+  /* Check if override is allowed */
+  if(override_file_prohibit) {
+    /* Check if file exists */
+    if(access(fname, F_OK) != -1)
+      return TRUE;
+  }
+  return FALSE;
+}
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
                             bool *usedarg,    /* set to TRUE if the arg
@@ -657,6 +672,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'g': /* --trace */
         GetStr(&global->trace_dump, nextarg);
+        if(CheckFile(global->trace_dump, config->override_file_prohibit))
+          return PARAM_FILE_EXISTS;
         if(global->tracetype && (global->tracetype != TRACE_BIN))
           warnf(global, "--trace overrides an earlier trace/verbose option\n");
         global->tracetype = TRACE_BIN;
@@ -666,6 +683,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'h': /* --trace-ascii */
         GetStr(&global->trace_dump, nextarg);
+        if(CheckFile(global->trace_dump, config->override_file_prohibit))
+          return PARAM_FILE_EXISTS;
         if(global->tracetype && (global->tracetype != TRACE_ASCII))
           warnf(global,
                 "--trace-ascii overrides an earlier trace/verbose option\n");
@@ -684,6 +703,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->recvpersecond = value;
         config->sendpersecond = value;
       }
+      break;
+
+      case 'I': /* --override */
+      config->override_file_prohibit = !toggle;
       break;
 
       case 'j': /* --compressed */
@@ -1287,6 +1310,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'c':
       /* get the file name to dump all cookies in */
       GetStr(&config->cookiejar, nextarg);
+      if(CheckFile(config->cookiejar, config->override_file_prohibit))
+        return PARAM_FILE_EXISTS;
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
@@ -1488,6 +1513,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'D':
       /* dump-header to given file name */
       GetStr(&config->headerfile, nextarg);
+      if(CheckFile(config->headerfile, config->override_file_prohibit))
+          return PARAM_FILE_EXISTS;
       break;
     case 'e':
     {
@@ -1898,6 +1925,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if('o' == letter) {
         GetStr(&url->outfile, nextarg);
         url->flags &= ~GETOUT_USEREMOTE; /* switch off */
+        if(CheckFile(url->outfile, config->override_file_prohibit))
+          return PARAM_FILE_EXISTS;
       }
       else {
         url->outfile = NULL; /* leave it */

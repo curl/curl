@@ -68,6 +68,8 @@ const char *param2text(int res)
     return "too large number";
   case PARAM_NO_NOT_BOOLEAN:
     return "used '--no-' for option that isn't a boolean";
+  case PARAM_FILE_EXISTS:
+    return "file exists and override is blocked";
   default:
     return "unknown error";
   }
