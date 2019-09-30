@@ -98,7 +98,7 @@ static const struct LongShort aliases[]= {
   {"*h", "trace-ascii",              ARG_FILENAME},
   {"*H", "alpn",                     ARG_BOOL},
   {"*i", "limit-rate",               ARG_STRING},
-  {"*I", "override",                 ARG_BOOL},
+  {"*I", "overwrite",                 ARG_BOOL},
   {"*j", "compressed",               ARG_BOOL},
   {"*J", "tr-encoding",              ARG_BOOL},
   {"*k", "digest",                   ARG_BOOL},
@@ -497,10 +497,10 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
-static bool CheckFile(char *fname, bool override_file_prohibit)
+static bool CheckFile(char *fname, bool overwrite_file_prohibit)
 {
-  /* Check if override is allowed */
-  if(override_file_prohibit) {
+  /* Check if overwrite is allowed */
+  if(overwrite_file_prohibit) {
     /* Check if file exists */
     if(access(fname, F_OK) != -1)
       return TRUE;
@@ -672,7 +672,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'g': /* --trace */
         GetStr(&global->trace_dump, nextarg);
-        if(CheckFile(global->trace_dump, config->override_file_prohibit))
+        if(CheckFile(global->trace_dump, config->overwrite_file_prohibit))
           return PARAM_FILE_EXISTS;
         if(global->tracetype && (global->tracetype != TRACE_BIN))
           warnf(global, "--trace overrides an earlier trace/verbose option\n");
@@ -683,7 +683,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'h': /* --trace-ascii */
         GetStr(&global->trace_dump, nextarg);
-        if(CheckFile(global->trace_dump, config->override_file_prohibit))
+        if(CheckFile(global->trace_dump, config->overwrite_file_prohibit))
           return PARAM_FILE_EXISTS;
         if(global->tracetype && (global->tracetype != TRACE_ASCII))
           warnf(global,
@@ -705,8 +705,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
 
-      case 'I': /* --override */
-        config->override_file_prohibit = !toggle;
+      case 'I': /* --overwrite */
+        config->overwrite_file_prohibit = !toggle;
       break;
 
       case 'j': /* --compressed */
@@ -1310,7 +1310,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'c':
       /* get the file name to dump all cookies in */
       GetStr(&config->cookiejar, nextarg);
-      if(CheckFile(config->cookiejar, config->override_file_prohibit))
+      if(CheckFile(config->cookiejar, config->overwrite_file_prohibit))
         return PARAM_FILE_EXISTS;
       break;
     case 'C':
@@ -1513,7 +1513,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case 'D':
       /* dump-header to given file name */
       GetStr(&config->headerfile, nextarg);
-      if(CheckFile(config->headerfile, config->override_file_prohibit))
+      if(CheckFile(config->headerfile, config->overwrite_file_prohibit))
         return PARAM_FILE_EXISTS;
       break;
     case 'e':
@@ -1925,7 +1925,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if('o' == letter) {
         GetStr(&url->outfile, nextarg);
         url->flags &= ~GETOUT_USEREMOTE; /* switch off */
-        if(CheckFile(url->outfile, config->override_file_prohibit))
+        if(CheckFile(url->outfile, config->overwrite_file_prohibit))
           return PARAM_FILE_EXISTS;
       }
       else {

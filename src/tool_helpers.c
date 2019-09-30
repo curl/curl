@@ -69,7 +69,7 @@ const char *param2text(int res)
   case PARAM_NO_NOT_BOOLEAN:
     return "used '--no-' for option that isn't a boolean";
   case PARAM_FILE_EXISTS:
-    return "file exists and override is blocked";
+    return "file exists and overwriting is blocked";
   default:
     return "unknown error";
   }

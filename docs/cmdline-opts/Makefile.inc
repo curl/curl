@@ -102,7 +102,7 @@ DPAGES =					\
   ntlm.d ntlm-wb.d				\
   oauth2-bearer.d				\
   output.d                                      \
-  override.d                                    \
+  overwrite.d                                    \
   pass.d                			\
   parallel.d                                    \
   parallel-max.d                                \
