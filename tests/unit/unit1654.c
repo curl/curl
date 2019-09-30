@@ -97,6 +97,15 @@ UNITTEST_START
   }
   fail_unless(asi->num == 9, "wrong number of entries");
 
+  /* quoted 'ma' value */
+  result = Curl_altsvc_parse(curl, asi, "h2=\"example.net:443\"; ma=\"180\";",
+                             ALPN_h2, "example.net", 80);
+  if(result) {
+    fprintf(stderr, "Curl_altsvc_parse(4) failed!\n");
+    unitfail++;
+  }
+  fail_unless(asi->num == 10, "wrong number of entries");
+
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\":443\", h3=\":443\"; ma = 120; persist = 1",
                              ALPN_h1, "curl.haxx.se", 80);
@@ -104,7 +113,7 @@ UNITTEST_START
     fprintf(stderr, "Curl_altsvc_parse(5) failed!\n");
     unitfail++;
   }
-  fail_unless(asi->num == 11, "wrong number of entries");
+  fail_unless(asi->num == 12, "wrong number of entries");
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(curl, asi, "clear;",
@@ -113,7 +122,7 @@ UNITTEST_START
     fprintf(stderr, "Curl_altsvc_parse(6) failed!\n");
     unitfail++;
   }
-  fail_unless(asi->num == 9, "wrong number of entries");
+  fail_unless(asi->num == 10, "wrong number of entries");
 
   Curl_altsvc_save(asi, outname);
 
