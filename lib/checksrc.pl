@@ -176,7 +176,7 @@ sub checkwarn {
 
 $file = shift @ARGV;
 
-while(1) {
+while(defined $file) {
 
     if($file =~ /-D(.*)/) {
         $dir = $1;
