@@ -42,8 +42,10 @@
 #include "tool_parsecfg.h"
 #include "tool_main.h"
 
+#ifdef HAVE_UNISTD_H
 /* to use access() */
 #include <unistd.h>
+#endif
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -497,8 +499,14 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
+#ifdef HAVE_UNISTD_H
 static bool CheckFile(char *fname, bool overwrite_file_prohibit)
 {
+  /* Check i the arguments are valid */
+  if(fname == NULL) {
+    printf("nullpointer warning with overwrite");
+    return TRUE;
+  }
   /* Check if overwrite is allowed */
   if(overwrite_file_prohibit) {
     /* Check if file exists */
@@ -507,6 +515,15 @@ static bool CheckFile(char *fname, bool overwrite_file_prohibit)
   }
   return FALSE;
 }
+#endif
+#ifndef HAVE_UNISTD_H
+static bool CheckFile(char *fname, bool overwrite_file_prohibit)
+{
+  /* Make this function useless if unistd is not available */
+  printf("overwrite parameter is being ignored because unistd.h is missing\n");
+  return TRUE;
+}
+#endif
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
