@@ -619,8 +619,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
       data->progress.flags |= PGRS_HIDE;
       data->state.current_speed = -1; /* init to negative == impossible */
-
-      Curl_http2_init_state(&data->state);
     }
   }
 
