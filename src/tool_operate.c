@@ -108,9 +108,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                 CURLSH *share,
                                 bool capath_from_env,
                                 bool *added);
-static CURLcode get_transfer(struct GlobalConfig *global,
-                             CURLSH *share,
-                             bool *added);
+static CURLcode create_transfer(struct GlobalConfig *global,
+                                CURLSH *share,
+                                bool *added);
 
 static bool is_fatal_error(CURLcode code)
 {
@@ -204,7 +204,9 @@ static curl_off_t VmsSpecialSize(const char *name,
 struct per_transfer *transfers; /* first node */
 static struct per_transfer *transfersl; /* last node */
 
-static CURLcode add_transfer(struct per_transfer **per)
+/* add_per_transfer creates a new 'per_transfer' node in the linked
+   list of transfers */
+static CURLcode add_per_transfer(struct per_transfer **per)
 {
   struct per_transfer *p;
   p = calloc(sizeof(struct per_transfer), 1);
@@ -228,7 +230,7 @@ static CURLcode add_transfer(struct per_transfer **per)
 
 /* Remove the specified transfer from the list (and free it), return the next
    in line */
-static struct per_transfer *del_transfer(struct per_transfer *per)
+static struct per_transfer *del_per_transfer(struct per_transfer *per)
 {
   struct per_transfer *n;
   struct per_transfer *p;
@@ -326,10 +328,10 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
 /*
  * Call this after a transfer has completed.
  */
-static CURLcode post_transfer(struct GlobalConfig *global,
-                              struct per_transfer *per,
-                              CURLcode result,
-                              bool *retryp)
+static CURLcode post_per_transfer(struct GlobalConfig *global,
+                                  struct per_transfer *per,
+                                  CURLcode result,
+                                  bool *retryp)
 {
   struct OutStruct *outs = &per->outs;
   CURL *curl = per->curl;
@@ -839,7 +841,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         struct OutStruct *heads;
         struct HdrCbData *hdrcbdata = NULL;
         CURL *curl = curl_easy_init();
-        result = add_transfer(&per);
+        result = add_per_transfer(&per);
         if(result || !curl) {
           curl_easy_cleanup(curl);
           result = CURLE_OUT_OF_MEMORY;
@@ -1956,7 +1958,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   CURLMcode mcode;
   *addedp = FALSE;
   *morep = FALSE;
-  result = get_transfer(global, share, addedp);
+  result = create_transfer(global, share, addedp);
   if(result || !*addedp)
     return result;
   for(per = transfers; per && (all_added < global->parallel_max);
@@ -1977,8 +1979,8 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     mcode = curl_multi_add_handle(multi, per->curl);
     if(mcode)
       return CURLE_OUT_OF_MEMORY;
-    /* get the next transfer created */
-    result = get_transfer(global, share, &getadded);
+
+    result = create_transfer(global, share, &getadded);
     if(result)
       return result;
     per->added = TRUE;
@@ -2030,13 +2032,13 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
           curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
           curl_multi_remove_handle(multi, easy);
 
-          result = post_transfer(global, ended, result, &retry);
+          result = post_per_transfer(global, ended, result, &retry);
           if(retry)
             continue;
           progress_finalize(ended); /* before it goes away */
           all_added--; /* one fewer added */
           removed = TRUE;
-          (void)del_transfer(ended);
+          (void)del_per_transfer(ended);
         }
       } while(msg);
       if(removed) {
@@ -2074,7 +2076,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   struct per_transfer *per;
   bool added = FALSE;
 
-  result = get_transfer(global, share, &added);
+  result = create_transfer(global, share, &added);
   if(result || !added)
     return result;
   for(per = transfers; per;) {
@@ -2101,7 +2103,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     /* store the result of the actual transfer */
     returncode = result;
 
-    result = post_transfer(global, per, result, &retry);
+    result = post_per_transfer(global, per, result, &retry);
     if(retry)
       continue;
 
@@ -2111,7 +2113,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
       bailout = TRUE;
     else {
       /* setup the next one just before we delete this */
-      result = get_transfer(global, share, &added);
+      result = create_transfer(global, share, &added);
       if(result)
         bailout = TRUE;
     }
@@ -2119,7 +2121,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     /* Release metalink related resources here */
     delete_metalinkfile(per->mlfile);
 
-    per = del_transfer(per);
+    per = del_per_transfer(per);
 
     if(bailout)
       break;
@@ -2134,10 +2136,11 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   return result;
 }
 
-static CURLcode operate_do(struct GlobalConfig *global,
-                           struct OperationConfig *config,
-                           CURLSH *share,
-                           bool *added)
+/* setup a transfer for the given config */
+static CURLcode transfer_per_config(struct GlobalConfig *global,
+                                    struct OperationConfig *config,
+                                    CURLSH *share,
+                                    bool *added)
 {
   CURLcode result = CURLE_OK;
   bool capath_from_env;
@@ -2236,17 +2239,17 @@ static CURLcode operate_do(struct GlobalConfig *global,
 }
 
 /*
- * 'get_transfer' gets the details and sets up *one* new transfer if 'added'
+ * 'create_transfer' gets the details and sets up a new transfer if 'added'
  * returns TRUE.
  */
-static CURLcode get_transfer(struct GlobalConfig *global,
-                             CURLSH *share,
-                             bool *added)
+static CURLcode create_transfer(struct GlobalConfig *global,
+                                CURLSH *share,
+                                bool *added)
 {
   CURLcode result = CURLE_OK;
   *added = FALSE;
   while(global->current) {
-    result = operate_do(global, global->current, share, added);
+    result = transfer_per_config(global, global->current, share, added);
     if(!result && !*added) {
       /* when one set is drained, continue to next */
       global->current = global->current->next;
@@ -2257,7 +2260,7 @@ static CURLcode get_transfer(struct GlobalConfig *global,
   return result;
 }
 
-static CURLcode operate_transfers(struct GlobalConfig *global,
+static CURLcode run_all_transfers(struct GlobalConfig *global,
                                   CURLSH *share,
                                   CURLcode result)
 {
@@ -2277,7 +2280,7 @@ static CURLcode operate_transfers(struct GlobalConfig *global,
   /* cleanup if there are any left */
   for(per = transfers; per;) {
     bool retry;
-    CURLcode result2 = post_transfer(global, per, result, &retry);
+    CURLcode result2 = post_per_transfer(global, per, result, &retry);
     if(!result)
       /* don't overwrite the original error */
       result = result2;
@@ -2287,7 +2290,7 @@ static CURLcode operate_transfers(struct GlobalConfig *global,
 
     /* Release metalink related resources here */
     clean_metalink(per->config);
-    per = del_transfer(per);
+    per = del_per_transfer(per);
   }
 
   /* Reset the global config variables */
@@ -2383,7 +2386,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
         global->current = global->first;
 
         /* now run! */
-        result = operate_transfers(global, share, result);
+        result = run_all_transfers(global, share, result);
 
         curl_share_cleanup(share);
 #ifndef CURL_DISABLE_LIBCURL_OPTION
