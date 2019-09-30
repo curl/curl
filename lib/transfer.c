@@ -1510,6 +1510,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       }
     }
 #endif
+    Curl_http2_init_state(&data->state);
   }
 
   return result;
