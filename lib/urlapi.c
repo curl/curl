@@ -849,7 +849,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   if(junkscan(path))
     return CURLUE_MALFORMED_INPUT;
 
-  if(flags & CURLU_URLENCODE) {
+  if((flags & CURLU_URLENCODE) && path[0]) {
     /* worst case output length is 3x the original! */
     char *newp = malloc(strlen(path) * 3);
     if(!newp)
