@@ -26,7 +26,7 @@ Further sections here describe
 
 -   additional details of specific stages of the progress.
 
-## Resources
+## Resources needed
 
 To build and demonstrate ESNI support in **curl** and/or **libcurl**,
 you will need
@@ -63,12 +63,30 @@ The following set of resources is currently known to be available.
 -   New configuration option: `--enable-esni`;
 
 -   Build-time check for availability of resources needed for ESNI
-    support, which can be extended to accommodate alternative sets of
-    resources as these become available;
+    support;
 
 -   Pre-processor symbol `USE_ESNI` for conditional compilation of
-    ESNI support code, enabled only when configuration option is used
-    and needed resources are available.
+    ESNI support code, subject to configuration option and
+    availability of needed resources.
+
+## TODO
+
+-   (next PR) Add libcurl options to set ESNI parameters.
+
+-   (next PR) Add curl tool command line options to set ESNI parameters.
+
+-   (WIP) Extend DoH functions so that published ESNI parameters can be
+    retrieved from DNS instead of being required as options.
+
+-   (WIP) Work with OpenSSL community to finalize ESNI API.
+
+-   Track OpenSSL ESNI API in libcurl
+
+-   Identify and implement any changes needed for CMake.
+
+-   Optimize build-time checking of available resources.
+
+-   Encourage ESNI support work on other TLS/SSL backends.
 
 ## Additional detail
 
@@ -94,7 +112,7 @@ See-also: [this message](https://curl.haxx.se/mail/lib-2019-05/0108.html)
 Limitations:
 -   Book-keeping (symbols-in-versions) needs real release number, not 'DUMMY'.
 
--   Framework is incomplete, as it covers autoconf, but not cmake.
+-   Framework is incomplete, as it covers autoconf, but not CMake.
 
 -   Check for available resources, although extensible, refers only to
     specific work in progress ([described
