@@ -17,57 +17,58 @@ Project][DEFOPROJ].
 
 Further sections here describe
 
-- resources needed for building and demonstrating **curl** support for
-  ESNI,
+-   resources needed for building and demonstrating **curl** support
+    for ESNI,
 
-- progress to date,
+-   progress to date,
 
-- TODO items, and
+-   TODO items, and
 
-- additional details of specific stages of the progress.
+-   additional details of specific stages of the progress.
 
 ## Resources
 
 To build and demonstrate ESNI support in **curl** and/or **libcurl**,
 you will need
 
-- a TLS library, supported by **libcurl**, which implements ESNI;
+-   a TLS library, supported by **libcurl**, which implements ESNI;
 
-- an edition of **curl** and/or **libcurl** which supports the
-  ESNI implementation of the chosen TLS library;
+-   an edition of **curl** and/or **libcurl** which supports the ESNI
+    implementation of the chosen TLS library;
 
-- an environment for building and running **curl**, and at least
-  building **OpenSSL**;
+-   an environment for building and running **curl**, and at least
+    building **OpenSSL**;
 
-- a server, supporting ESNI, against which to run a demonstration and
-  perhaps a specific target URL;
+-   a server, supporting ESNI, against which to run a demonstration
+    and perhaps a specific target URL;
 
-- some instructions.
+-   some instructions.
 
 The following set of resources is currently known to be available.
 
 | Set  | Component    | Location                      | Remarks                                    |
 |:-----|:-------------|:------------------------------|:-------------------------------------------|
-| DEfO | TLS library  | [sftcd/openssl][SFTCDOPENSSL] | Tag *esni-2019-08-30* avoids bleeding edge |
-|      | curl fork    | [niallor/curl][NIALLORCURL]   | Tag *esni-2019-08-30* likewise             |
-|      | instructions | [ESNI-README][NIALLORREADME]     |                                            |
+| DEfO | TLS library  | [sftcd/openssl][SFTCDOPENSSL]     | Tag *esni-2019-08-30* avoids bleeding edge |
+|      | curl fork    | [niallor/curl][NIALLORCURL]       | Tag *esni-2019-08-30* likewise             |
+|      | instructions | [ESNI-README][NIALLORREADME]      |                                            |
 
 ## Progress
 
 ### PR 4011 (Jun 2019) expected in curl release 7.67.0 (Oct 2019)
 
-- Details [below](#pr4011);
+-   Details [below](#pr4011);
 
-- New **curl** feature: `CURL_VERSION_ESNI`;
+-   New **curl** feature: `CURL_VERSION_ESNI`;
 
-- New configuration option: `--enable-esni`;
+-   New configuration option: `--enable-esni`;
 
-- Build-time check for availability of resources needed for ESNI support,
-  which can be extended to accommodate alternative sets of resources as
-  these become available;
+-   Build-time check for availability of resources needed for ESNI
+    support, which can be extended to accommodate alternative sets of
+    resources as these become available;
 
-- Pre-processor symbol `USE_ESNI` for conditional compilation of ESNI support code,
-  enabled only when configuration option is used and needed resources are available.
+-   Pre-processor symbol `USE_ESNI` for conditional compilation of
+    ESNI support code, enabled only when configuration option is used
+    and needed resources are available.
 
 ## Additional detail
 
