@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -109,7 +109,8 @@ void Curl_httpchunk_init(struct connectdata *conn)
 CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                               char *datap,
                               ssize_t datalen,
-                              ssize_t *wrotep)
+                              ssize_t *wrotep,
+                              CURLcode *extrap)
 {
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
@@ -125,8 +126,10 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
      chunk read process, to properly calculate the content length*/
   if(data->set.http_te_skip && !k->ignorebody) {
     result = Curl_client_write(conn, CLIENTWRITE_BODY, datap, datalen);
-    if(result)
-      return CHUNKE_WRITE_ERROR;
+    if(result) {
+      *extrap = result;
+      return CHUNKE_PASSTHRU_ERROR;
+    }
   }
 
   while(length) {
@@ -197,8 +200,10 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         else
           result = Curl_client_write(conn, CLIENTWRITE_BODY, datap, piece);
 
-        if(result)
-          return CHUNKE_WRITE_ERROR;
+        if(result) {
+          *extrap = result;
+          return CHUNKE_PASSTHRU_ERROR;
+        }
       }
 
       *wrote += piece;
@@ -244,8 +249,10 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           if(!data->set.http_te_skip) {
             result = Curl_client_write(conn, CLIENTWRITE_HEADER,
                                        conn->trailer, conn->trlPos);
-            if(result)
-              return CHUNKE_WRITE_ERROR;
+            if(result) {
+              *extrap = result;
+              return CHUNKE_PASSTHRU_ERROR;
+            }
           }
           conn->trlPos = 0;
           ch->state = CHUNK_TRAILER_CR;
@@ -339,8 +346,9 @@ const char *Curl_chunked_strerror(CHUNKcode code)
     return "Illegal or missing hexadecimal sequence";
   case CHUNKE_BAD_CHUNK:
     return "Malformed encoding found";
-  case CHUNKE_WRITE_ERROR:
-    return "Write error";
+  case CHUNKE_PASSTHRU_ERROR:
+    DEBUGASSERT(0); /* never used */
+    return "";
   case CHUNKE_BAD_ENCODING:
     return "Bad content-encoding found";
   case CHUNKE_OUT_OF_MEMORY:
