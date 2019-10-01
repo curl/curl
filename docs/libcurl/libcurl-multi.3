@@ -97,8 +97,7 @@ period for your select() calls.
 \fIcurl_multi_perform(3)\fP stores the number of still running transfers in
 one of its input arguments, and by reading that you can figure out when all
 the transfers in the multi handles are done. 'done' does not mean
-successful. One or more of the transfers may have failed. Tracking when this
-number changes, you know when one or more transfers are done.
+successful. One or more of the transfers may have failed. 
 
 To get information about completed transfers, to figure out success or not and
 similar, \fIcurl_multi_info_read(3)\fP should be called. It can return a
