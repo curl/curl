@@ -4,16 +4,16 @@
 
 **ESNI** means **Encrypted Server Name Indication**, a TLS 1.3
 extension which is currently the subject of an
-[IETF Draft][TLSESNI].
+[IETF Draft][tlsesni].
 
 This file is intended to show the latest current state of ESNI support
 in **curl** and **libcurl**.
 
-At end of August 2019, an [experimental fork of curl][NIALLORCURL],
-built using an [experimental fork of OpenSSL][SFTCDOPENSSL], which in
+At end of August 2019, an [experimental fork of curl][niallorcurl],
+built using an [experimental fork of OpenSSL][sftcdopenssl], which in
 turn provided an implementation of ESNI, was demonstrated
 interoperating with a server belonging to the [DEfO
-Project][DEFOPROJ].
+Project][defoproj].
 
 Further sections here describe
 
@@ -48,9 +48,9 @@ The following set of resources is currently known to be available.
 
 | Set  | Component    | Location                      | Remarks                                    |
 |:-----|:-------------|:------------------------------|:-------------------------------------------|
-| DEfO | TLS library  | [sftcd/openssl][SFTCDOPENSSL]     | Tag *esni-2019-08-30* avoids bleeding edge |
-|      | curl fork    | [niallor/curl][NIALLORCURL]       | Tag *esni-2019-08-30* likewise             |
-|      | instructions | [ESNI-README][NIALLORREADME]      |                                            |
+| DEfO | TLS library  | [sftcd/openssl][sftcdopenssl] | Tag *esni-2019-08-30* avoids bleeding edge |
+|      | curl fork    | [niallor/curl][niallorcurl]   | Tag *esni-2019-08-30* likewise             |
+|      | instructions | [ESNI-README][niallorreadme]  |                                            |
 
 ## Progress
 
@@ -102,21 +102,20 @@ Limitations:
     implement ESNI for OpenSSL, as this is the immediate motivation
     for the proposed change.
 
-
 ## References
 
-CloudFlare blog: [Encrypting SNI: Fixing One of the Core Internet Bugs][COREBUG]
+CloudFlare blog: [Encrypting SNI: Fixing One of the Core Internet Bugs][corebug]
 
-Cloudflare blog: [Encrypt it or lose it: how encrypted SNI works][ESNIWORKS]
+Cloudflare blog: [Encrypt it or lose it: how encrypted SNI works][esniworks]
 
-IETF Draft: [Encrypted Server Name Indication for TLS 1.3][TLSESNI]
+IETF Draft: [Encrypted Server Name Indication for TLS 1.3][tlsesni]
 
 ---
 
-[TLSESNI]:		https://datatracker.ietf.org/doc/draft-ietf-tls-esni/
-[ESNIWORKS]:	https://blog.cloudflare.com/encrypted-sni/
-[COREBUG]:		https://blog.cloudflare.com/esni/
-[DEFOPROJ]:		https://defo.ie/
-[SFTCDOPENSSL]: https://github.com/sftcd/openssl/
-[NIALLORCURL]:	https://github.com/niallor/curl/
-[NIALLORREADME]: https://github.com/niallor/curl/blob/master/ESNI-README.md
+[tlsesni]:		https://datatracker.ietf.org/doc/draft-ietf-tls-esni/
+[esniworks]:	https://blog.cloudflare.com/encrypted-sni/
+[corebug]:		https://blog.cloudflare.com/esni/
+[defoproj]:		https://defo.ie/
+[sftcdopenssl]: https://github.com/sftcd/openssl/
+[niallorcurl]:	https://github.com/niallor/curl/
+[niallorreadme]: https://github.com/niallor/curl/blob/master/ESNI-README.md
