@@ -873,8 +873,11 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   else if(!(flags & CURLU_PATH_AS_IS)) {
     /* sanitise paths and remove ../ and ./ sequences according to RFC3986 */
     char *newp = Curl_dedotdotify(path);
-    if(!newp)
+    if(!newp) {
+      if(path_alloced)
+        free(path);
       return CURLUE_OUT_OF_MEMORY;
+    }
 
     if(strcmp(newp, path)) {
       /* if we got a new version */
