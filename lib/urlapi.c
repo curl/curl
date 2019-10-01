@@ -849,6 +849,16 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   if(junkscan(path))
     return CURLUE_MALFORMED_INPUT;
 
+  if(flags & CURLU_URLENCODE) {
+    /* worst case output length is 3x the original! */
+    char *newp = malloc(strlen(path) * 3);
+    if(!newp)
+      return CURLUE_OUT_OF_MEMORY;
+    path_alloced = TRUE;
+    strcpy_url(newp, path, TRUE); /* consider it relative */
+    path = newp;
+  }
+
   fragment = strchr(path, '#');
   if(fragment)
     *fragment++ = 0;
@@ -868,6 +878,8 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
 
     if(strcmp(newp, path)) {
       /* if we got a new version */
+      if(path_alloced)
+        free(path);
       path = newp;
       path_alloced = TRUE;
     }
