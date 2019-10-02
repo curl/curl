@@ -9,9 +9,11 @@ curl and libcurl 7.67.0
 This release includes the following changes:
 
  o urlapi: CURLU_NO_AUTHORITY allows empty authority/host part [22]
+ o setopt: CURLMOPT_MAX_CONCURRENT_STREAMS is new [55]
 
 This release includes the following bugfixes:
 
+ o BINDINGS: five new bindings addded
  o FTP: FTPFILE_NOCWD: avoid redundant CWDs [28]
  o FTP: allow "rubbish" prepended to the SIZE response [15]
  o FTP: remove trailing slash from path for LIST/MLSD [6]
@@ -22,22 +24,30 @@ This release includes the following bugfixes:
  o HTTP3: show an --alt-svc using example too
  o INSTALL: add vcpkg installation instructions [35]
  o README: minor grammar fix [39]
+ o altsvc: accept quoted ma and persist values [60]
  o altsvc: both backends run h3-23 now [31]
+ o appveyor: add 32-bit MinGW-w64 build [58]
  o appveyor: add a winbuild [14]
  o appveyor: upgrade VS2017 to VS2019 [29]
  o asyn-thread: s/AF_LOCAL/AF_UNIX for Solaris [3]
+ o checksrc: fix uninitialized variable warning [57]
+ o chunked-encoding: stop hiding the CURLE_BAD_CONTENT_ENCODING error [56]
  o cleanups: 21 various PVS-Studio warnings [24]
  o cookie: pass in the correct cookie amount to qsort() [27]
+ o cookies: using a share with cookies shouldn't enable the cookie engine [63]
+ o curl: create easy handles on-demand and not ahead of time [54]
  o curl: exit the create_transfers loop on errors [33]
  o curl: fix memory leaked by parse_metalink() [17]
  o curl: load large files with -d @ much faster [19]
  o docs/HTTP3: fix `--with-ssl` ngtcp2 configure flag [21]
+ o docs: disambiguate CURLUPART_HOST is for host name (ie no port) [62]
  o doh: allow only http and https in debug mode [48]
  o doh: avoid truncating DNS QTYPE to lower octet [23]
  o doh: clean up dangling DOH memory on easy close [9]
  o doh: fix (harmless) buffer overrun [13]
  o doh: fix undefined behaviour and open up for gcc and clang optimization [12]
  o doh: return early if there is no time left [48]
+ o git: add tests/server/disabled to .gitignore [59]
  o http2: relax verification of :authority in push promise requests [8]
  o http: lowercase headernames for HTTP/2 and HTTP/3 [49]
  o ldap: Stop using wide char version of ldapp_err2string [1]
@@ -52,6 +62,9 @@ This release includes the following bugfixes:
  o quiche: don't close connection at end of stream
  o quiche: persist connection details (fixes -I with --http3) [11]
  o quiche: set 'drain' when returning without having drained the queues
+ o quiche: update HTTP/3 config creation to new API [61]
+ o redirect: handle redirects to absolute URLs containing spaces [52]
+ o setopt: handle ALTSVC set to NULL
  o setopt: make it easier to add new enum values [4]
  o setopt: store CURLOPT_RTSP_SERVER_CSEQ correctly [24]
  o smb: check for full size message before reading message details [10]
@@ -61,6 +74,8 @@ This release includes the following bugfixes:
  o url: fix the NULL hostname compiler warning [44]
  o url: only reuse TLS connections with matching pinning [5]
  o urlapi: avoid index underflow for short ipv6 hostnames [26]
+ o urlapi: fix URL encoding when setting a full URL [53]
+ o urlapi: fix unused variable warning [57]
  o urlapi: question mark within fragment is still fragment [45]
  o urldata: use 'bool' for the bit type on MSVC compilers [30]
  o vtls: Fix comment typo about macosx-version-min compiler flag [38]
@@ -78,14 +93,16 @@ advice from friends like these:
 
   Alessandro Ghedini, Alex Konev, Alex Samorukov, Barry Pollard,
   Bernhard Walle, Christoph M. Becker, Dagobert Michelsen, Daniel Stenberg,
-  George Liu, Gilles Vollant, Griffin Downs, Jens Finkhaeuser, Jeremy Lainé,
-  Jimmy Gaussen, Joel Depooter, jzinn on github, Kamil Dudka, Lucas Pardue,
-  Marcel Hernandez, Marcel Raad, Max Dymond, Michael Kaufmann, Niall O'Reilly,
-  Patrick Monnerat, Paul Dreik, Philippe Marguinaud, Ray Satiro, Roland Hieber,
+  Emil Engler, George Liu, Gilles Vollant, Griffin Downs, Ilya Kosarev,
+  Jens Finkhaeuser, Jeremy Lainé, Jimmy Gaussen, Joel Depooter,
+  jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue, Lucas Severo,
+  Marcel Hernandez, Marcel Raad, Max Dymond, Michael Kaufmann,
+  momala454 on github, Niall O'Reilly, Patrick Monnerat, Paul Dreik,
+  Peter Sumatra, Philippe Marguinaud, Ray Satiro, Roland Hieber,
   Sebastian Haglund, Spezifant on github, SumatraPeter on github,
   Tatsuhiro Tsujikawa, Valerii Zapodovnikov, Yechiel Kalmenson,
   Zenju on github,
-  (35 contributors)
+  (41 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -142,3 +159,15 @@ References to bug reports and discussions on issues:
  [49] = https://curl.haxx.se/bug/?i=4400
  [50] = https://curl.haxx.se/bug/?i=4398
  [51] = https://curl.haxx.se/bug/?i=4399
+ [52] = https://curl.haxx.se/bug/?i=4445
+ [53] = https://curl.haxx.se/bug/?i=4447
+ [54] = https://curl.haxx.se/bug/?i=4393
+ [55] = https://curl.haxx.se/bug/?i=4410
+ [56] = https://curl.haxx.se/bug/?i=4310
+ [57] = https://curl.haxx.se/bug/?i=4444
+ [58] = https://curl.haxx.se/bug/?i=4433
+ [59] = https://curl.haxx.se/bug/?i=4441
+ [60] = https://curl.haxx.se/bug/?i=4443
+ [61] = https://curl.haxx.se/bug/?i=4437
+ [62] = https://curl.haxx.se/bug/?i=4424
+ [63] = https://curl.haxx.se/bug/?i=4429
