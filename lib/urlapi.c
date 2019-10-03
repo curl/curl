@@ -64,6 +64,7 @@ struct Curl_URL {
   char *fragment;
 
   char *scratch; /* temporary scratch area */
+  char *temppath; /* temporary path pointer */
   long portnum; /* the numerical version */
 };
 
@@ -82,6 +83,7 @@ static void free_urlhandle(struct Curl_URL *u)
   free(u->query);
   free(u->fragment);
   free(u->scratch);
+  free(u->temppath);
 }
 
 /* move the full contents of one handle onto another and
@@ -858,43 +860,53 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
       return CURLUE_OUT_OF_MEMORY;
     path_alloced = TRUE;
     strcpy_url(newp, path, TRUE); /* consider it relative */
-    path = newp;
+    u->temppath = path = newp;
   }
 
   fragment = strchr(path, '#');
-  if(fragment)
+  if(fragment) {
     *fragment++ = 0;
+    if(fragment[0]) {
+      u->fragment = strdup(fragment);
+      if(!u->fragment)
+        return CURLUE_OUT_OF_MEMORY;
+    }
+  }
 
   query = strchr(path, '?');
-  if(query)
+  if(query) {
     *query++ = 0;
+    /* done even if the query part is a blank string */
+    u->query = strdup(query);
+    if(!u->query)
+      return CURLUE_OUT_OF_MEMORY;
+  }
 
   if(!path[0])
-    /* if there's no path set, unset */
+    /* if there's no path left set, unset */
     path = NULL;
-  else if(!(flags & CURLU_PATH_AS_IS)) {
-    /* sanitise paths and remove ../ and ./ sequences according to RFC3986 */
-    char *newp = Curl_dedotdotify(path);
-    if(!newp) {
-      if(path_alloced)
-        free(path);
-      return CURLUE_OUT_OF_MEMORY;
+  else {
+    if(!(flags & CURLU_PATH_AS_IS)) {
+      /* remove ../ and ./ sequences according to RFC3986 */
+      char *newp = Curl_dedotdotify(path);
+      if(!newp)
+        return CURLUE_OUT_OF_MEMORY;
+
+      if(strcmp(newp, path)) {
+        /* if we got a new version */
+        if(path_alloced)
+          Curl_safefree(u->temppath);
+        u->temppath = path = newp;
+        path_alloced = TRUE;
+      }
+      else
+        free(newp);
     }
 
-    if(strcmp(newp, path)) {
-      /* if we got a new version */
-      if(path_alloced)
-        free(path);
-      path = newp;
-      path_alloced = TRUE;
-    }
-    else
-      free(newp);
-  }
-  if(path) {
     u->path = path_alloced?path:strdup(path);
     if(!u->path)
       return CURLUE_OUT_OF_MEMORY;
+    u->temppath = NULL; /* used now */
   }
 
   if(hostname) {
@@ -926,19 +938,8 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
       return CURLUE_OUT_OF_MEMORY;
   }
 
-  if(query) {
-    u->query = strdup(query);
-    if(!u->query)
-      return CURLUE_OUT_OF_MEMORY;
-  }
-  if(fragment && fragment[0]) {
-    u->fragment = strdup(fragment);
-    if(!u->fragment)
-      return CURLUE_OUT_OF_MEMORY;
-  }
-
-  free(u->scratch);
-  u->scratch = NULL;
+  Curl_safefree(u->scratch);
+  Curl_safefree(u->temppath);
 
   return CURLUE_OK;
 }
