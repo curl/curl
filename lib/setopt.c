@@ -752,7 +752,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
     else if(strcasecompare(argptr, "FLUSH")) {
       /* flush cookies to file, takes care of the locking */
-      Curl_flush_cookies(data, 0);
+      Curl_flush_cookies(data, FALSE);
     }
     else if(strcasecompare(argptr, "RELOAD")) {
       /* reload cookies from file */
