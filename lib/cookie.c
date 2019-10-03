@@ -1646,6 +1646,7 @@ void Curl_flush_cookies(struct Curl_easy *data, int cleanup)
 
   if(cleanup && (!data->share || (data->cookies != data->share->cookies))) {
     Curl_cookie_cleanup(data->cookies);
+    data->cookies = NULL;
   }
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 }
