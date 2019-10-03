@@ -374,7 +374,7 @@ CURLcode Curl_close(struct Curl_easy *data)
   Curl_safefree(data->state.buffer);
   Curl_safefree(data->state.headerbuff);
   Curl_safefree(data->state.ulbuf);
-  Curl_flush_cookies(data, 1);
+  Curl_flush_cookies(data, TRUE);
 #ifdef USE_ALTSVC
   Curl_altsvc_save(data->asi, data->set.str[STRING_ALTSVC]);
   Curl_altsvc_cleanup(data->asi);

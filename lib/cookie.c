@@ -1617,7 +1617,7 @@ struct curl_slist *Curl_cookie_list(struct Curl_easy *data)
   return list;
 }
 
-void Curl_flush_cookies(struct Curl_easy *data, int cleanup)
+void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
 {
   if(data->set.str[STRING_COOKIEJAR]) {
     if(data->change.cookielist) {
