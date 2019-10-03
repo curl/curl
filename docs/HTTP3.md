@@ -67,7 +67,9 @@ Build curl
      % ./buildconf
      % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-ssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
      % make
-
+     % sudo make install
+     % sudo ldconfig
+     
 # quiche version
 
 ## build
@@ -101,6 +103,8 @@ Clone and build curl:
      % ./buildconf
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl/.openssl --with-quiche=$PWD/../quiche/target/release
      % make
+     % sudo make install
+     % sudo ldconfig
 
 ## Run
 
