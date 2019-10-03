@@ -140,13 +140,13 @@ static void quic_settings(ngtcp2_settings *s,
   s->log_printf = NULL;
 #endif
   s->initial_ts = timestamp();
-  s->max_stream_data_bidi_local = stream_buffer_size;
-  s->max_stream_data_bidi_remote = QUIC_MAX_STREAMS;
-  s->max_stream_data_uni = QUIC_MAX_STREAMS;
-  s->max_data = QUIC_MAX_DATA;
-  s->max_streams_bidi = 1;
-  s->max_streams_uni = 3;
-  s->idle_timeout = QUIC_IDLE_TIMEOUT;
+  s->transport_params.initial_max_stream_data_bidi_local = stream_buffer_size;
+  s->transport_params.initial_max_stream_data_bidi_remote = QUIC_MAX_STREAMS;
+  s->transport_params.initial_max_stream_data_uni = QUIC_MAX_STREAMS;
+  s->transport_params.initial_max_data = QUIC_MAX_DATA;
+  s->transport_params.initial_max_streams_bidi = 1;
+  s->transport_params.initial_max_streams_uni = 3;
+  s->transport_params.idle_timeout = QUIC_IDLE_TIMEOUT;
 }
 
 static FILE *keylog_file; /* not thread-safe */
