@@ -407,9 +407,6 @@
 /* Define to 1 if you have the <libssh2.h> header file. */
 #cmakedefine HAVE_LIBSSH2_H 1
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
-#cmakedefine HAVE_LIBSSL 1
-
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
 

@@ -640,8 +640,6 @@ ifdef WITH_SSL
 	@echo $(DL)#define HAVE_OPENSSL_ERR_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_CRYPTO_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_OPENSSL_ENGINE_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_LIBSSL 1$(DL) >> $@
-	@echo $(DL)#define HAVE_LIBCRYPTO 1$(DL) >> $@
 	@echo $(DL)#define OPENSSL_NO_KRB5 1$(DL) >> $@
 ifdef WITH_SRP
 	@echo $(DL)#define USE_TLS_SRP 1$(DL) >> $@

@@ -375,9 +375,6 @@
 /* Define to 1 if you have the `libssh2_version' function. */
 /* #undef HAVE_LIBSSH2_VERSION */
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
-#define HAVE_LIBSSL 1
-
 /* if zlib is available */
 #define HAVE_LIBZ 1
 
