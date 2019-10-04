@@ -12,7 +12,7 @@ If-Modified-Since
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 503 Error
+HTTP/1.1 429 Too Many Requests
 Date: Thu, 11 Jul 2019 02:26:59 GMT
 Server: test-server/swsclose
 Retry-After: Thu, 11 Jul 2024 02:26:59 GMT
