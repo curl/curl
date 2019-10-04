@@ -315,9 +315,6 @@
 /* Define to 1 if you have the <libssh2.h> header file. */
 /*#define HAVE_LIBSSH2_H 1*/
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
-/*#define HAVE_LIBSSL 1*/
-
 /* if your compiler supports LL */
 #define HAVE_LL 1
 

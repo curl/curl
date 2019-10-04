@@ -126,7 +126,6 @@
 #define HAVE_INTTYPES_H 1
 #define HAVE_IOCTL 1
 #define HAVE_LIBGEN_H 1
-#define HAVE_LIBSSL 1
 #define HAVE_LIBZ 1
 #define HAVE_LL 1
 #define HAVE_LOCALE_H 1
