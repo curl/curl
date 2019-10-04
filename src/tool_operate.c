@@ -468,6 +468,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
         switch(response) {
+        case 429: /* Too Many Requests (RFC6585) */
         case 500: /* Internal Server Error */
         case 502: /* Bad Gateway */
         case 503: /* Service Unavailable */
