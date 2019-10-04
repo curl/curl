@@ -976,6 +976,14 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     failf(data, "Failed to connect to %s port %ld: %s",
           hostname, conn->port,
           Curl_strerror(error, buffer, sizeof(buffer)));
+
+#ifdef WSAETIMEDOUT
+    if(WSAETIMEDOUT == data->state.os_errno)
+      result = CURLE_OPERATION_TIMEDOUT;
+#elif defined(ETIMEDOUT)
+    if(ETIMEDOUT == data->state.os_errno)
+      result = CURLE_OPERATION_TIMEDOUT;
+#endif
   }
 
   return result;
