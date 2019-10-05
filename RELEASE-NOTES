@@ -14,6 +14,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o BINDINGS: five new bindings addded
+ o ESNI: initial build/setup support [71]
  o FTP: FTPFILE_NOCWD: avoid redundant CWDs [28]
  o FTP: allow "rubbish" prepended to the SIZE response [15]
  o FTP: remove trailing slash from path for LIST/MLSD [6]
@@ -33,14 +34,18 @@ This release includes the following bugfixes:
  o checksrc: fix uninitialized variable warning [57]
  o chunked-encoding: stop hiding the CURLE_BAD_CONTENT_ENCODING error [56]
  o cleanups: 21 various PVS-Studio warnings [24]
+ o cookie: avoid harmless use after free [69]
  o cookie: pass in the correct cookie amount to qsort() [27]
+ o cookies: change argument type for Curl_flush_cookies [67]
  o cookies: using a share with cookies shouldn't enable the cookie engine [63]
  o curl: create easy handles on-demand and not ahead of time [54]
+ o curl: ensure HTTP 429 triggers --retry [64]
  o curl: exit the create_transfers loop on errors [33]
  o curl: fix memory leaked by parse_metalink() [17]
  o curl: load large files with -d @ much faster [19]
  o docs/HTTP3: fix `--with-ssl` ngtcp2 configure flag [21]
  o docs: disambiguate CURLUPART_HOST is for host name (ie no port) [62]
+ o docs: note on failed handles not being counted by curl_multi_perform [70]
  o doh: allow only http and https in debug mode [48]
  o doh: avoid truncating DNS QTYPE to lower octet [23]
  o doh: clean up dangling DOH memory on easy close [9]
@@ -48,10 +53,12 @@ This release includes the following bugfixes:
  o doh: fix undefined behaviour and open up for gcc and clang optimization [12]
  o doh: return early if there is no time left [48]
  o git: add tests/server/disabled to .gitignore [59]
+ o http2: prevent dup'ed handles to send dummy PRIORITY frames [68]
  o http2: relax verification of :authority in push promise requests [8]
  o http: lowercase headernames for HTTP/2 and HTTP/3 [49]
  o ldap: Stop using wide char version of ldapp_err2string [1]
  o mime: when disabled, avoid C99 macro [7]
+ o ngtcp2: adapt to API change [66]
  o ngtcp2: compile with latest ngtcp2 + nghttp3 draft-23 [25]
  o ngtcp2: remove fprintf() calls [43]
  o openssl: close_notify on the FTP data connection doesn't mean closure [20]
@@ -83,6 +90,7 @@ This release includes the following bugfixes:
  o winbuild/MakefileBuild.vc: Add vssh [2]
  o winbuild/MakefileBuild.vc: Fix line endings
  o winbuild: Add manifest to curl.exe for proper OS version detection [51]
+ o winbuild: add ENABLE_UNICODE option [65]
 
 This release includes the following known bugs:
 
@@ -92,17 +100,17 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Alex Konev, Alex Samorukov, Barry Pollard,
-  Bernhard Walle, Christoph M. Becker, Dagobert Michelsen, Daniel Stenberg,
-  Emil Engler, George Liu, Gilles Vollant, Griffin Downs, Ilya Kosarev,
-  Jens Finkhaeuser, Jeremy Lainé, Jimmy Gaussen, Joel Depooter,
-  jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue, Lucas Severo,
-  Marcel Hernandez, Marcel Raad, Max Dymond, Michael Kaufmann,
+  Bernhard Walle, Christoph M. Becker, Dagobert Michelsen, Daniel Silverstone,
+  Daniel Stenberg, Denis Chaplygin, Emil Engler, George Liu, Gilles Vollant,
+  Griffin Downs, Ilya Kosarev, Jens Finkhaeuser, Jeremy Lainé, Jimmy Gaussen,
+  Joel Depooter, jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue,
+  Lucas Severo, Marcel Hernandez, Marcel Raad, Max Dymond, Michael Kaufmann,
   momala454 on github, Niall O'Reilly, Patrick Monnerat, Paul Dreik,
   Peter Sumatra, Philippe Marguinaud, Ray Satiro, Roland Hieber,
-  Sebastian Haglund, Spezifant on github, SumatraPeter on github,
-  Tatsuhiro Tsujikawa, Valerii Zapodovnikov, Yechiel Kalmenson,
-  Zenju on github,
-  (41 contributors)
+  Sebastian Haglund, Spezifant on github, Stian Soiland-Reyes,
+  SumatraPeter on github, Tatsuhiro Tsujikawa, Valerii Zapodovnikov,
+  Yechiel Kalmenson, Zenju on github,
+  (44 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -171,3 +179,11 @@ References to bug reports and discussions on issues:
  [61] = https://curl.haxx.se/bug/?i=4437
  [62] = https://curl.haxx.se/bug/?i=4424
  [63] = https://curl.haxx.se/bug/?i=4429
+ [64] = https://curl.haxx.se/bug/?i=4465
+ [65] = https://curl.haxx.se/bug/?i=4308
+ [66] = https://curl.haxx.se/bug/?i=4457
+ [67] = https://curl.haxx.se/bug/?i=4455
+ [68] = https://curl.haxx.se/bug/?i=4303
+ [69] = https://curl.haxx.se/bug/?i=4454
+ [70] = https://curl.haxx.se/bug/?i=4446
+ [71] = https://curl.haxx.se/bug/?i=4011
