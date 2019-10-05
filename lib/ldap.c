@@ -847,7 +847,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   char *path;
   char *query;
   char *p;
-  char *q;
+  char *q = NULL;
   size_t i;
 
   if(!conn->data ||
@@ -865,11 +865,13 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!path)
     return LDAP_NO_MEMORY;
 
-  /* Duplicate the query */
-  q = query = strdup(conn->data->state.up.query);
-  if(!query) {
-    free(path);
-    return LDAP_NO_MEMORY;
+  /* Duplicate the query if present */
+  if(conn->data->state.up.query) {
+    q = query = strdup(conn->data->state.up.query);
+    if(!query) {
+      free(path);
+      return LDAP_NO_MEMORY;
+    }
   }
 
   /* Parse the DN (Distinguished Name) */
