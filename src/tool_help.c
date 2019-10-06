@@ -276,7 +276,7 @@ static const struct helptxt helptext[] = {
   {"-o, --output <file>",
    "Write to file instead of stdout"},
   {"    --overwrite",
-   "Don't overwrite files which already exist"},
+   "Overwrite files which already exist"},
   {"-Z, --parallel",
    "Perform transfers in parallel"},
   {"    --parallel-max",
