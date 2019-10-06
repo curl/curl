@@ -520,7 +520,7 @@ static bool CheckFile(char *fname, bool overwrite_file_prohibit)
 static bool CheckFile(char *fname, bool overwrite_file_prohibit)
 {
   /* Make this function useless if unistd is not available */
-  printf("overwrite parameter is being ignored because unistd.h is missing\n");
+  warnf("overwrite parameter is being ignored because unistd.h is missing\n");
   return TRUE;
 }
 #endif
