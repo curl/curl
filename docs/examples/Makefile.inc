@@ -45,4 +45,4 @@ COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c \
   sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
   smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp \
   multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c \
-  threaded-shared-conn.c crawler.c ephiperfifo.c
+  threaded-shared-conn.c crawler.c ephiperfifo.c multi-event.c
