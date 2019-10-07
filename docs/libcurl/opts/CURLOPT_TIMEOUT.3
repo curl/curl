@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -30,9 +30,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMEOUT, long timeout);
 .SH DESCRIPTION
 Pass a long as parameter containing \fItimeout\fP - the maximum time in
 seconds that you allow the libcurl transfer operation to take. Normally, name
-lookups can take a considerable time and limiting operations to less than a
-few minutes risk aborting perfectly normal operations. This option may cause
-libcurl to use the SIGALRM signal to timeout system calls.
+lookups can take a considerable time and limiting operations risk aborting
+perfectly normal operations. This option may cause libcurl to use the SIGALRM
+signal to timeout system calls.
 
 In unix-like systems, this might cause signals to be used unless
 \fICURLOPT_NOSIGNAL(3)\fP is set.
