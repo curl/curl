@@ -295,6 +295,8 @@ static const struct helptxt helptext[] = {
    "Use this proxy first"},
   {"-#, --progress-bar",
    "Display transfer progress as a bar"},
+  {"    --progress-meter",
+   "Show the progress meter"},
   {"    --proto <protocols>",
    "Enable/disable PROTOCOLS"},
   {"    --proto-default <protocol>",
