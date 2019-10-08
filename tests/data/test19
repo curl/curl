@@ -24,7 +24,7 @@ http
 attempt connect to non-listening socket
  </name>
  <command>
-%HOSTIP:60000
+%HOSTIP:2
 </command>
 </client>
 
