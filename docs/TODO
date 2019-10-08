@@ -18,6 +18,7 @@
 
  1. libcurl
  1.1 TFO support on Windows
+ 1.2 Consult %APPDATA% also for .netrc
  1.3 struct lifreq
  1.5 get rid of PATH_MAX
  1.7 Support HTTP/2 for HTTP(S) proxies
@@ -180,6 +181,12 @@
  this was once started but never finished.
 
  See https://github.com/curl/curl/pull/3378
+
+1.2 Consult %APPDATA% also for .netrc
+
+ %APPDATA%\.netrc is not considered when running on Windows. Shouldn't it?
+
+ See https://github.com/curl/curl/issues/4016
 
 1.3 struct lifreq
 
