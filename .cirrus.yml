@@ -5,9 +5,12 @@ task:
   name: FreeBSD
   freebsd_instance:
     matrix:
-      image: freebsd-12-0-release-amd64
-      image: freebsd-11-2-release-amd64
-      image: freebsd-10-4-release-amd64
+      # There isn't a stable 13.0 image yet (2019-10)
+      image_family: freebsd-13-0-snap
+      image_family: freebsd-12-0
+      # The stable 11.3 image causes "Agent is not responding" so use a snapshot
+      image_family: freebsd-11-3-snap
+      image_family: freebsd-10-4
 
   env:
     CIRRUS_CLONE_DEPTH: 1
@@ -28,9 +31,13 @@ task:
     # TODO: A number of tests are failing on different FreeBSD versions and so
     # are disabled.  This should be investigated.
     - SKIP_TESTS=''
-    - if [ `uname -r` = "12.0-RELEASE" ] ; then SKIP_TESTS='!303 !304 !323 !504 !1242 !1243 !2002 !2003'; fi
-    - if [ `uname -r` = "11.2-RELEASE" ] ; then SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001'; fi
-    - if [ `uname -r` = "10.4-RELEASE" ] ; then SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001'; fi
+    - uname -r
+    - case `uname -r` in
+        13.0*) SKIP_TESTS='!303 !304 !323 !504 !1242 !1243 !2002 !2003';;
+        12.0*) SKIP_TESTS='!303 !304 !323 !504 !1242 !1243 !2002 !2003';;
+        11.3*) SKIP_TESTS='!303 !304 !504 !1242 !1243 !2002 !2003';;
+        10.4*) SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001';;
+      esac
     - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
   install_script:
     - make V=1 install
