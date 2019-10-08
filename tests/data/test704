@@ -23,7 +23,7 @@ http
 Attempt connect to non-listening SOCKS4 proxy
  </name>
  <command>
---socks4 %HOSTIP:60000 http://%HOSTIP:%HTTPPORT/704
+--socks4 %HOSTIP:2 http://%HOSTIP:%HTTPPORT/704
 </command>
 </client>
 
