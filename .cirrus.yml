@@ -13,7 +13,7 @@ task:
       image_family: freebsd-10-4
 
   env:
-    CIRRUS_CLONE_DEPTH: 1
+    CIRRUS_CLONE_DEPTH: 10
     MAKE_FLAGS: -j 2
 
   pkginstall_script:
