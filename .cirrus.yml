@@ -22,6 +22,8 @@ task:
   compile_script:
     - make V=1
   test_script:
+    # blackhole?
+    - sysctl net.inet.tcp.blackhole
     # Some tests won't run if run as root so run them as another user.
     # Make directories world writable so the test step can write wherever it needs.
     - find . -type d -exec chmod 777 {} \;
