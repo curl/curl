@@ -1,19 +1,21 @@
 curl and libcurl 7.67.0
 
  Public curl releases:         186
- Command line options:         225
+ Command line options:         226
  curl_easy_setopt() options:   269
  Public functions in libcurl:  81
  Contributors:                 2014
 
 This release includes the following changes:
 
- o urlapi: CURLU_NO_AUTHORITY allows empty authority/host part [22]
+ o curl: added --no-progress-meter [73]
  o setopt: CURLMOPT_MAX_CONCURRENT_STREAMS is new [55]
+ o urlapi: CURLU_NO_AUTHORITY allows empty authority/host part [22]
 
 This release includes the following bugfixes:
 
  o BINDINGS: five new bindings addded
+ o CURLOPT_TIMEOUT.3: remove the mention of "minutes" [74]
  o ESNI: initial build/setup support [71]
  o FTP: FTPFILE_NOCWD: avoid redundant CWDs [28]
  o FTP: allow "rubbish" prepended to the SIZE response [15]
@@ -31,9 +33,14 @@ This release includes the following bugfixes:
  o appveyor: add a winbuild [14]
  o appveyor: upgrade VS2017 to VS2019 [29]
  o asyn-thread: s/AF_LOCAL/AF_UNIX for Solaris [3]
+ o build: Remove unused HAVE_LIBSSL and HAVE_LIBCRYPTO defines [77]
  o checksrc: fix uninitialized variable warning [57]
  o chunked-encoding: stop hiding the CURLE_BAD_CONTENT_ENCODING error [56]
+ o cirrus: Increase the git clone depth
+ o cirrus: Switch the FreeBSD 11.x build to 11.3 and add a 13.0 build
+ o cirrus: switch off blackhole status on the freebsd CI machines [72]
  o cleanups: 21 various PVS-Studio warnings [24]
+ o connect: return CURLE_OPERATION_TIMEDOUT for errno == ETIMEDOUT [72]
  o cookie: avoid harmless use after free [69]
  o cookie: pass in the correct cookie amount to qsort() [27]
  o cookies: change argument type for Curl_flush_cookies [67]
@@ -44,6 +51,7 @@ This release includes the following bugfixes:
  o curl: fix memory leaked by parse_metalink() [17]
  o curl: load large files with -d @ much faster [19]
  o docs/HTTP3: fix `--with-ssl` ngtcp2 configure flag [21]
+ o docs: added multi-event.c example [75]
  o docs: disambiguate CURLUPART_HOST is for host name (ie no port) [62]
  o docs: note on failed handles not being counted by curl_multi_perform [70]
  o doh: allow only http and https in debug mode [48]
@@ -57,6 +65,7 @@ This release includes the following bugfixes:
  o http2: relax verification of :authority in push promise requests [8]
  o http: lowercase headernames for HTTP/2 and HTTP/3 [49]
  o ldap: Stop using wide char version of ldapp_err2string [1]
+ o ldap: fix OOM error on missing query string [76]
  o mime: when disabled, avoid C99 macro [7]
  o ngtcp2: adapt to API change [66]
  o ngtcp2: compile with latest ngtcp2 + nghttp3 draft-23 [25]
@@ -77,6 +86,7 @@ This release includes the following bugfixes:
  o smb: check for full size message before reading message details [10]
  o socks: Fix destination host shown on SOCKS5 error [32]
  o tests: fix narrowing conversion warnings [37]
+ o tests: use port 2 instead of 60000 for a safer non-listening port [72]
  o url: don't set appconnect time for non-ssl/non-ssh connections [42]
  o url: fix the NULL hostname compiler warning [44]
  o url: only reuse TLS connections with matching pinning [5]
@@ -99,18 +109,20 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Alex Konev, Alex Samorukov, Barry Pollard,
-  Bernhard Walle, Christoph M. Becker, Dagobert Michelsen, Daniel Silverstone,
-  Daniel Stenberg, Denis Chaplygin, Emil Engler, George Liu, Gilles Vollant,
-  Griffin Downs, Ilya Kosarev, Jens Finkhaeuser, Jeremy Lainé, Jimmy Gaussen,
-  Joel Depooter, jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue,
-  Lucas Severo, Marcel Hernandez, Marcel Raad, Max Dymond, Michael Kaufmann,
-  momala454 on github, Niall O'Reilly, Patrick Monnerat, Paul Dreik,
-  Peter Sumatra, Philippe Marguinaud, Ray Satiro, Roland Hieber,
-  Sebastian Haglund, Spezifant on github, Stian Soiland-Reyes,
-  SumatraPeter on github, Tatsuhiro Tsujikawa, Valerii Zapodovnikov,
-  Yechiel Kalmenson, Zenju on github,
-  (44 contributors)
+  Alessandro Ghedini, Alex Konev, Alex Samorukov, Andrei Valeriu BICA,
+  Barry Pollard, Bernhard Walle, Christoph M. Becker, Dagobert Michelsen,
+  Dan Fandrich, Daniel Silverstone, Daniel Stenberg, Denis Chaplygin,
+  Emil Engler, George Liu, Gilles Vollant, Griffin Downs, Ilya Kosarev,
+  infinnovation-dev on github, Jens Finkhaeuser, Jeremy Lainé, Jimmy Gaussen,
+  Joel Depooter, Jojojov on github, jzinn on github, Kamil Dudka, Kunal Ekawde,
+  Lucas Pardue, Lucas Severo, Marcel Hernandez, Marcel Raad, Martin Gartner,
+  Max Dymond, Michael Kaufmann, momala454 on github, Nathaniel J. Smith,
+  Niall O'Reilly, nico-abram on github, Patrick Monnerat, Paul B. Omta,
+  Paul Dreik, Peter Sumatra, Philippe Marguinaud, Piotr Komborski, Ray Satiro,
+  Roland Hieber, Samuel Surtees, Sebastian Haglund, Spezifant on github,
+  Stian Soiland-Reyes, SumatraPeter on github, Tatsuhiro Tsujikawa,
+  Valerii Zapodovnikov, Yechiel Kalmenson, Zenju on github,
+  (54 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -187,3 +199,9 @@ References to bug reports and discussions on issues:
  [69] = https://curl.haxx.se/bug/?i=4454
  [70] = https://curl.haxx.se/bug/?i=4446
  [71] = https://curl.haxx.se/bug/?i=4011
+ [72] = https://curl.haxx.se/bug/?i=4461
+ [73] = https://curl.haxx.se/bug/?i=4422
+ [74] = https://curl.haxx.se/bug/?i=4469
+ [75] = https://curl.haxx.se/bug/?i=4471
+ [76] = https://curl.haxx.se/bug/?i=4467
+ [77] = https://curl.haxx.se/bug/?i=4460
