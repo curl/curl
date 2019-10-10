@@ -37,6 +37,12 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h> /* IPPROTO_TCP */
+#endif
+#ifndef INADDR_LOOPBACK
+#define INADDR_LOOPBACK 0x7f000001
+#endif /* !INADDR_LOOPBACK */
 #endif /* !WIN32 */
 
 /* The last 3 #include files should be in this order */
