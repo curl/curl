@@ -89,8 +89,6 @@ int Curl_socketpair(int domain, int type, int protocol,
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
 
-  sclose(listener);
-
   /* verify that nothing else connected */
   msnprintf(data[0], sizeof(data[0]), "%p", socks);
   dlen = strlen(data[0]);
@@ -100,6 +98,8 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(memcmp(data[0], data[1], dlen))
     goto error;
+
+  sclose(listener);
   return 0;
 
   error:
