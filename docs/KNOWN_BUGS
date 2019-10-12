@@ -102,6 +102,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
+ 12.2 LDAP on Windows does authentication wrong?
 
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
@@ -733,6 +734,9 @@ problems may have been fixed or changed somewhat since this was written!
  See https://github.com/curl/curl/issues/622 and
      https://curl.haxx.se/mail/lib-2016-01/0101.html
 
+12.2 LDAP on Windows does authentication wrong?
+
+ https://github.com/curl/curl/issues/3116
 
 13. TCP/IP
 
