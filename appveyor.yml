@@ -117,6 +117,11 @@ environment:
         WINSSL: OFF
         TESTING: OFF
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: winbuild17
+        OPENSSL: ON
+        WINSSL: OFF
+        TESTING: OFF
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: VisualStudioSolution
         PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
         TESTING: OFF
@@ -154,7 +159,13 @@ build_script:
         call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
         call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
         nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64
-      )))
+      ) else (
+      if %BUILD_SYSTEM%==winbuild17 (
+        call buildconf.bat &&
+        cd winbuild &&
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" &&
+        nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64
+      ))))
 
 test_script:
     - if %TESTING%==ON (
