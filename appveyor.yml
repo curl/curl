@@ -23,7 +23,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: ""
+        DISABLED_TESTS: "!1139"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -46,7 +46,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: ""
+        DISABLED_TESTS: "!1139"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -58,7 +58,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: ""
+        DISABLED_TESTS: "!1139"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -70,7 +70,7 @@ environment:
         HTTP_ONLY: ON
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: ""
+        DISABLED_TESTS: "!1139"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
@@ -81,7 +81,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!198"
+        DISABLED_TESTS: "!198 !1139"
         COMPILER_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
@@ -94,7 +94,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: ""
+        DISABLED_TESTS: "!1139"
         COMPILER_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
@@ -107,7 +107,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: ""
+        DISABLED_TESTS: "!1139"
         COMPILER_PATH: "C:\\MinGW\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
@@ -148,6 +148,11 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: ""
         COMPILER_PATH: ""
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: autotools
+        TESTING: ON
+        DISABLED_TESTS: "!19 !1056 !1233 !1242 !1243 !2002 !2003"
+        CONFIG_ARGS: "--enable-debug --enable-werror --enable-alt-svc --disable-threaded-resolver --disable-proxy"
 
 install:
     - set "PATH=C:\msys64\usr\bin;%PATH%"
@@ -170,11 +175,13 @@ build_script:
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
-        cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT%) else (
+        cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT%
+      ) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
         .\\generate.bat %VC_VERSION% &&
-        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln" ) else (
+        msbuild.exe /p:Configuration="%PRJ_CFG%" "Windows\\%VC_VERSION%\\curl-all.sln"
+      ) else (
       if %BUILD_SYSTEM%==winbuild_vs2015 (
         call buildconf.bat &&
         cd winbuild &&
@@ -189,11 +196,14 @@ build_script:
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" &&
         nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% &&
         ..\builds\libcurl-vc15-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
-      ))))
+      ) else (
+      if %BUILD_SYSTEM%==autotools (
+        bash.exe -e -l -c "cd /c/projects/curl && ./buildconf && ./configure %CONFIG_ARGS% && make && make examples && cd tests && make"
+      )))))
 
 test_script:
     - if %TESTING%==ON (
-        bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p !flaky !1139 %DISABLED_TESTS%" )
+        bash.exe -e -l -c "cd /c/projects/curl/tests && ./runtests.pl -a -p !flaky %DISABLED_TESTS%" )
 
 # whitelist branches to avoid testing feature branches twice (as branch and as pull request)
 branches:
