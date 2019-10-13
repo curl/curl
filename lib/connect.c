@@ -665,7 +665,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #endif
 #if defined(HAVE_SYS_UN_H) && defined(AF_UNIX)
     case AF_UNIX:
-      if(salen > sizeof(sa_family_t)) {
+      if(salen > (curl_socklen_t)sizeof(sa_family_t)) {
         su = (struct sockaddr_un*)sa;
         msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
       }
