@@ -236,7 +236,7 @@ static ssize_t sec_recv(struct connectdata *conn, int sockindex,
 
   /* Handle clear text response. */
   if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR)
-      return read(fd, buffer, len);
+      return sread(fd, buffer, len);
 
   if(conn->in_buffer.eof_flag) {
     conn->in_buffer.eof_flag = 0;
