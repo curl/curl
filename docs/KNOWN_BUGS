@@ -12,7 +12,6 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written!
 
  1. HTTP
- 1.1 CURLFORM_CONTENTLEN in an array
  1.3 STARTTRANSFER time is wrong for HTTP POSTs
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
@@ -113,15 +112,6 @@ problems may have been fixed or changed somewhat since this was written!
 ==============================================================================
 
 1. HTTP
-
-1.1 CURLFORM_CONTENTLEN in an array
-
- It is not possible to pass a 64-bit value using CURLFORM_CONTENTLEN with
- CURLFORM_ARRAY, when compiled on 32-bit platforms that support 64-bit
- integers. This is because the underlying structure 'curl_forms' uses a dual
- purpose char* for storing these values in via casting. For more information
- see the now closed related issue:
- https://github.com/curl/curl/issues/608
 
 1.3 STARTTRANSFER time is wrong for HTTP POSTs
 
