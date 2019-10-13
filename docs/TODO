@@ -123,6 +123,7 @@
 
  17. SSH protocols
  17.1 Multiplexing
+ 17.2 Handle growing SFTP files
  17.3 Support better than MD5 hostkey hash
  17.4 Support CURLOPT_PREQUOTE
 
@@ -798,6 +799,16 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  To fix this, libcurl would have to detect an existing connection and "attach"
  the new transfer to the existing one.
+
+17.2 Handle growing SFTP files
+
+ The SFTP code in libcurl checks the file size *before* a transfer starts and
+ then proceeds to transfer exactly that amount of data. If the remote file
+ grows while the tranfer is in progress libcurl won't notice and will not
+ adapt. The OpenSSH SFTP command line tool does and libcurl could also just
+ attempt to download more to see if there is more to get...
+
+ https://github.com/curl/curl/issues/4344
 
 17.3 Support better than MD5 hostkey hash
 
