@@ -38,6 +38,9 @@ supertrooper.fake	FALSE	/a	FALSE	2139150993	mooo	indeed
 supertrooper.fake	FALSE	/b	FALSE	0		moo1	indeed
 supertrooper.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
 </file>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

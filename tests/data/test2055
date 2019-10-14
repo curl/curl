@@ -51,7 +51,9 @@ socks5
  <name>
 Connect to specific host via SOCKS proxy and HTTP proxy (switch to tunnel mode automatically)
  </name>
-
+<features>
+proxy
+</features>
  <command>
 http://www.example.com.2055/2055 --connect-to ::connect.example.com.2055:%HTTPPORT -x %HOSTIP:%PROXYPORT --preproxy socks5://%HOSTIP:%SOCKSPORT
 </command>

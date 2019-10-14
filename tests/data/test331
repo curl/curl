@@ -41,6 +41,9 @@ HTTP with cookie using host name 'moo'
  <command>
 -x http://%HOSTIP:%HTTPPORT http://moo/we/want/331 -b none http://moo/we/want/3310002
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

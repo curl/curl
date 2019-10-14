@@ -59,6 +59,7 @@ http
 <features>
 !SSPI
 crypto
+proxy
 </features>
  <name>
 HTTP with proxy-requiring-Digest to site-requiring-Digest

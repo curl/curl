@@ -67,6 +67,7 @@ lib540
 <features>
 !SSPI
 crypto
+proxy
 </features>
  <name>
 HTTP proxy auth Digest multi API re-using connection

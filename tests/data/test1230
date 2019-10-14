@@ -43,6 +43,7 @@ mooooooo
 <client>
 <features>
 ipv6
+proxy
 </features>
 <server>
 http-proxy

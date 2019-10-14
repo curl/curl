@@ -29,6 +29,7 @@ http
 </server>
 <features>
 ftp
+proxy
 </features>
  <name>
 FTP over HTTP proxy

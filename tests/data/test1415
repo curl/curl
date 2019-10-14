@@ -46,6 +46,9 @@ TZ=GMT
 <command>
 http://example.com/we/want/1415 -b none -c log/jar1415.txt -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

@@ -80,6 +80,9 @@ HTTP, proxy with --anyauth and Location: to new host
  <command>
 http://first.host.it.is/we/want/that/page/10871000 -x %HOSTIP:%HTTPPORT --user iam:myself --location --anyauth
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

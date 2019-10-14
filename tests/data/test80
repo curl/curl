@@ -55,6 +55,9 @@ HTTP 1.0 CONNECT with proxytunnel and proxy+host Basic authentication
  <command>
 http://test.80:%HTTPPORT/we/want/that/page/80 -p --proxy1.0 %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

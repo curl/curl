@@ -30,6 +30,9 @@ HTTP with proxy string including http:// and user+empty password
  <command>
 http://we.want.that.site.com/278 -x http://f%61ke:@%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

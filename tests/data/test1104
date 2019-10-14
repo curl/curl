@@ -61,6 +61,9 @@ HTTP cookie expiry date at Jan 1 00:00:00 GMT 1970
  <command>
 http://%HOSTIP:%HTTPPORT/want/1104 -L -x %HOSTIP:%HTTPPORT -c log/cookies1104.jar
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

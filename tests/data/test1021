@@ -93,6 +93,7 @@ http
 NTLM
 !SSPI
 debug
+proxy
 </features>
  <name>
 HTTP proxy CONNECT with any proxyauth and proxy offers NTLM and close

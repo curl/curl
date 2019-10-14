@@ -35,6 +35,9 @@ Re-using HTTP proxy connection for two different host names
  <command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1421:8990/ http://different.remote.haxx.se.1421:8990
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

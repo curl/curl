@@ -80,6 +80,7 @@ http
 NTLM
 !SSPI
 debug
+proxy
 </features>
  <name>
 HTTP proxy CONNECT auth NTLM and then POST, response-body in the 407

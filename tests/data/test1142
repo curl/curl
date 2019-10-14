@@ -42,6 +42,9 @@ HTTP redirect to http://// (four slashes!)
  <command>
 %HOSTIP:%HTTPPORT/want/1142 -L -x http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

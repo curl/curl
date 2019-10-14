@@ -45,6 +45,9 @@ HTTP 1.0 CONNECT with proxytunnel and downgrade GET to HTTP/1.0
  <command>
 --proxy1.0 %HOSTIP:%PROXYPORT -p http://%HOSTIP.1078:%HTTPPORT/we/want/that/page/1078 http://%HOSTIP.1078:%HTTPPORT/we/want/that/page/1078
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

@@ -41,6 +41,9 @@ HTTP GET with proxy and CURLOPT_PORT
  <command>
 http://www.example.com:999/523 http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

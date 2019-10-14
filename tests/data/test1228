@@ -31,6 +31,9 @@ HTTP cookie path match
  <command>
 http://example.fake/hoge/1228 http://example.fake/hogege/ -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

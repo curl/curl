@@ -35,6 +35,9 @@ NO_PROXY=example.com
 <command>
 http://somewhere.example.com/1253 --proxy http://%HOSTIP:%HTTPPORT --noproxy %HOSTIP
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

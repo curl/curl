@@ -79,6 +79,7 @@ http
 NTLM
 !SSPI
 debug
+proxy
 </features>
  <name>
 HTTP 1.0 proxy CONNECT auth NTLM and then POST

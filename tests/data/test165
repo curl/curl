@@ -29,6 +29,7 @@ http
 </server>
 <features>
 idn
+proxy
 </features>
 <setenv>
 LC_ALL=

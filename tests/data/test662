@@ -51,6 +51,9 @@ HTTP redirect with whitespace in absolute Location: URL
  <command>
 http://example.com/please/gimme/662 -L -x http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

@@ -56,6 +56,9 @@ HTTP CONNECT with proxytunnel getting two URLs from the same host
  <command>
 http://remotesite.com.275:%HTTPPORT/we/want/that/page/275 -p -x %HOSTIP:%PROXYPORT --user iam:myself --proxy-user youare:yourself http://remotesite.com.275:%HTTPPORT/we/want/that/page/275
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

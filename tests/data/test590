@@ -76,6 +76,7 @@ lib590
 NTLM
 !SSPI
 debug
+proxy
 </features>
  <name>
 HTTP proxy offers Negotiate+NTLM, use only NTLM

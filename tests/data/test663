@@ -55,6 +55,9 @@ HTTP redirect with dotdots and whitespaces in absolute Location: URL
  <command>
 http://example.com/please/../gimme/663?foobar#hello -L -x http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

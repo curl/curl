@@ -25,6 +25,9 @@ Attempt connect to non-listening SOCKS4 proxy
  <command>
 --socks4 %HOSTIP:2 http://%HOSTIP:%HTTPPORT/704
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

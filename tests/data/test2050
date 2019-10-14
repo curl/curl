@@ -53,6 +53,9 @@ Connect to specific host via HTTP proxy (switch to tunnel mode automatically)
  <command>
 http://www.example.com.2050/2050 --connect-to ::connect.example.com.2050:%HTTPPORT -x %HOSTIP:%PROXYPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

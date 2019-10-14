@@ -32,6 +32,9 @@ HTTP cookies and domains with same prefix
  <command>
 http://example.fake/c/1218 http://example.fake/c/1218 http://bexample.fake/c/1218 -b nonexisting -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"
