@@ -40,11 +40,12 @@ In unix-like systems, this might cause signals to be used unless
 If both \fICURLOPT_TIMEOUT(3)\fP and \fICURLOPT_TIMEOUT_MS(3)\fP are set, the
 value set last will be used.
 
-Since this puts a hard limit for how long time a request is allowed to take,
-it has limited use in dynamic use cases with varying transfer times. You are
-then advised to explore \fICURLOPT_LOW_SPEED_LIMIT(3)\fP,
-\fICURLOPT_LOW_SPEED_TIME(3)\fP or using \fICURLOPT_PROGRESSFUNCTION(3)\fP to
-implement your own timeout logic.
+Since this option puts a hard limit on how long time a request is allowed to
+take, it has limited use in dynamic use cases with varying transfer times. That
+is especially apparent when using the multi interface, which may queue the
+transfer, and that time is included. You are advised to explore
+\fICURLOPT_LOW_SPEED_LIMIT(3)\fP, \fICURLOPT_LOW_SPEED_TIME(3)\fP or using
+\fICURLOPT_PROGRESSFUNCTION(3)\fP to implement your own timeout logic.
 .SH DEFAULT
 Default timeout is 0 (zero) which means it never times out during transfer.
 .SH PROTOCOLS
