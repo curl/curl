@@ -95,7 +95,7 @@ Funny-head: yesyes
 </file2>
 <file3 name="log/stdout2009">
 </file3>
-<file4 name="log/stderr2009">
+<file4 name="log/stderr2009" mode="text">
 Metalink: parsing (file://%PWD/log/test2009.metalink) metalink/XML...
 Metalink: parsing (file://%PWD/log/test2009.metalink) OK
 Metalink: fetching (log/download2009) from (http://%HOSTIP:%HTTPPORT/2009)...

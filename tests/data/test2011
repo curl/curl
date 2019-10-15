@@ -78,7 +78,7 @@ Data delivered from an HTTP resource
 </file1>
 <file2 name="log/stdout2011">
 </file2>
-<file3 name="log/stderr2011">
+<file3 name="log/stderr2011" mode="text">
 Metalink: parsing (file://%PWD/log/test2011.metalink) metalink/XML...
 Metalink: parsing (file://%PWD/log/test2011.metalink) OK
 Metalink: fetching (log/download2011) from (http://%HOSTIP:%HTTPPORT/2011)...
