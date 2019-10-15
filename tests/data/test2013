@@ -66,7 +66,7 @@ perl %SRCDIR/libtest/notexists.pl log/2013 log/name2013 /tmp/download2013
 <verify>
 <file1 name="log/stdout2013">
 </file1>
-<file2 name="log/stderr2013">
+<file2 name="log/stderr2013" mode="text">
 Metalink: parsing (file://%PWD/log/test2013.metalink) metalink/XML...
 Metalink: parsing (file://%PWD/log/test2013.metalink) WARNING (missing or invalid file name)
 Metalink: parsing (file://%PWD/log/test2013.metalink) FAILED
