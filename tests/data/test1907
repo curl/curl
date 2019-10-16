@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+CURLINFO_EFFECTIVE_URL
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes swsclose
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+CURLINFO_EFFECTIVE_URL with non-scheme URL
+ </name>
+<tool>
+lib1907
+</tool>
+
+<command>
+%HOSTIP:%HTTPPORT/hello/../1907
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /1907 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout>
+Effective URL: http://%HOSTIP:%HTTPPORT/1907
+</stdout>
+</verify>
+</testcase>

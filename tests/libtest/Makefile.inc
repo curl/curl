@@ -33,7 +33,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect                \
  lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
  lib1558 lib1559 lib1560 \
  lib1591 lib1592 lib1593 lib1594 lib1596 \
- lib1900 lib1905 lib1906 \
+ lib1900 lib1905 lib1906 lib1907 \
  lib2033
 
 chkdecimalpoint_SOURCES = chkdecimalpoint.c ../../lib/mprintf.c \
@@ -565,6 +565,10 @@ lib1905_CPPFLAGS = $(AM_CPPFLAGS)
 lib1906_SOURCES = lib1906.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1906_LDADD = $(TESTUTIL_LIBS)
 lib1906_CPPFLAGS = $(AM_CPPFLAGS)
+
+lib1907_SOURCES = lib1907.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1907_LDADD = $(TESTUTIL_LIBS)
+lib1907_CPPFLAGS = $(AM_CPPFLAGS)
 
 lib2033_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2033_LDADD = $(TESTUTIL_LIBS)
