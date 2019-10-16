@@ -529,7 +529,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       warnf(config->global, "Transient problem: %s "
             "Will retry in %ld seconds. "
             "%ld retries left.\n",
-            m[retry], per->retry_sleep/1000L, per->retry_numretries);
+            m[retry], sleeptime/1000L, per->retry_numretries);
 
       per->retry_numretries--;
       tool_go_sleep(sleeptime);
