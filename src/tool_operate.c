@@ -1976,6 +1976,10 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     if(result)
       break;
 
+    /* parallel connect means that we don't set PIPEWAIT since pipewait
+       will make libcurl prefer multiplexing */
+    (void)curl_easy_setopt(per->curl, CURLOPT_PIPEWAIT,
+                           global->parallel_connect ? 0L : 1L);
     (void)curl_easy_setopt(per->curl, CURLOPT_PRIVATE, per);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFODATA, per);

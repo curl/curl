@@ -103,9 +103,10 @@ DPAGES =					\
   ntlm.d ntlm-wb.d				\
   oauth2-bearer.d				\
   output.d                                      \
+  parallel-immediate.d                          \
+  parallel-max.d                                \
   parallel.d                                    \
   pass.d                			\
-  parallel-max.d                                \
   path-as-is.d					\
   pinnedpubkey.d				\
   post301.d					\
