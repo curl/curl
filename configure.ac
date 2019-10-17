@@ -2216,12 +2216,7 @@ OPT_WOLFSSL=no
 
 _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
-AC_ARG_WITH(cyassl,dnl
-AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: system lib default)])
-AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
-  OPT_WOLFSSL=$withval)
 
-dnl provide --with-wolfssl as an alias for --with-cyassl
 AC_ARG_WITH(wolfssl,dnl
 AC_HELP_STRING([--with-wolfssl=PATH],[where to look for WolfSSL, PATH points to the installation root (default: system lib default)])
 AC_HELP_STRING([--without-wolfssl], [disable WolfSSL detection]),
@@ -2236,86 +2231,33 @@ if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
       OPT_WOLFSSL=""
     fi
 
-    dnl This should be reworked to use pkg-config instead
-
-    cyassllibname=cyassl
-
-    if test -z "$OPT_WOLFSSL" ; then
-      dnl check for lib in system default first
-
-      AC_CHECK_LIB(cyassl, CyaSSL_Init,
-      dnl libcyassl found, set the variable
-       [
-         AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
-         AC_SUBST(USE_WOLFSSL, [1])
-         WOLFSSL_ENABLED=1
-         USE_WOLFSSL="yes"
-         ssl_msg="CyaSSL"
-	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ])
-    fi
-
     addld=""
     addlib=""
     addcflags=""
-    cyassllib=""
 
     if test "x$USE_WOLFSSL" != "xyes"; then
-      dnl add the path and test again
       addld=-L$OPT_WOLFSSL/lib$libsuff
       addcflags=-I$OPT_WOLFSSL/include
-      cyassllib=$OPT_WOLFSSL/lib$libsuff
+      wolfssllibpath=$OPT_WOLFSSL/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(cyassl, CyaSSL_Init,
-       [
-       AC_DEFINE(USE_WOLFSSL, 1, [if CyaSSL is enabled])
-       AC_SUBST(USE_WOLFSSL, [1])
-       WOLFSSL_ENABLED=1
-       USE_WOLFSSL="yes"
-       ssl_msg="CyaSSL"
-       test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-       ],
-       [
-         CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
-         cyassllib=""
-       ])
-    fi
-
-    addld=""
-    addlib=""
-    addcflags=""
-
-    if test "x$USE_WOLFSSL" != "xyes"; then
-      dnl libcyassl renamed to libwolfssl as of 3.4.0
-      addld=-L$OPT_WOLFSSL/lib$libsuff
-      addcflags=-I$OPT_WOLFSSL/include
-      cyassllib=$OPT_WOLFSSL/lib$libsuff
-
-      LDFLAGS="$LDFLAGS $addld"
-      if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      cyassllibname=wolfssl
       my_ac_save_LIBS="$LIBS"
-      LIBS="-l$cyassllibname -lm $LIBS"
+      LIBS="-lwolfssl -lm $LIBS"
 
-      AC_MSG_CHECKING([for CyaSSL_Init in -lwolfssl])
+      AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
       AC_LINK_IFELSE([
 	AC_LANG_PROGRAM([[
 /* These aren't needed for detection and confuse WolfSSL.
    They are set up properly later if it is detected.  */
 #undef SIZEOF_LONG
 #undef SIZEOF_LONG_LONG
-#include <cyassl/ssl.h>
+#include <wolfssl/ssl.h>
 	]],[[
-	  return CyaSSL_Init();
+	  return wolfSSL_Init();
 	]])
       ],[
          AC_MSG_RESULT(yes)
@@ -2324,25 +2266,25 @@ if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
          WOLFSSL_ENABLED=1
          USE_WOLFSSL="yes"
          ssl_msg="WolfSSL"
-	 test cyassl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+	 test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
        ],
        [
          AC_MSG_RESULT(no)
          CPPFLAGS=$_cppflags
          LDFLAGS=$_ldflags
-         cyassllib=""
+         wolfssllibpath=""
        ])
       LIBS="$my_ac_save_LIBS"
     fi
 
     if test "x$USE_WOLFSSL" = "xyes"; then
-      AC_MSG_NOTICE([detected $cyassllibname])
+      AC_MSG_NOTICE([detected wolfSSL])
       check_for_ca_bundle=1
 
-      dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
+      dnl wolfssl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       AX_COMPILE_CHECK_SIZEOF(long long)
 
-      LIBS="-l$cyassllibname -lm $LIBS"
+      LIBS="-lwolfssl -lm $LIBS"
 
       dnl Recent WolfSSL versions build without SSLv3 by default
       dnl WolfSSL needs configure --enable-opensslextra to have *get_peer*
@@ -2350,15 +2292,15 @@ if test -z "$ssl_backends" -o "x$OPT_WOLFSSL" != xno; then
                      wolfSSL_get_peer_certificate \
                      wolfSSL_UseALPN)
 
-      if test -n "$cyassllib"; then
+      if test -n "$wolfssllibpath"; then
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to
         dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$cyassllib"
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$wolfssllibpath"
           export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $cyassllib to CURL_LIBRARY_PATH])
+          AC_MSG_NOTICE([Added $wolfssllibpath to CURL_LIBRARY_PATH])
         fi
       fi
 
