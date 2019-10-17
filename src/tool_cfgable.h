@@ -300,6 +300,7 @@ struct GlobalConfig {
 #endif
   bool parallel;
   long parallel_max;
+  bool parallel_connect;
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

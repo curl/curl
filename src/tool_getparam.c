@@ -321,6 +321,7 @@ static const struct LongShort aliases[]= {
   {"z",  "time-cond",                ARG_STRING},
   {"Z",  "parallel",                 ARG_BOOL},
   {"Zb", "parallel-max",             ARG_STRING},
+  {"Zc", "parallel-connect",         ARG_BOOL},
   {"#",  "progress-bar",             ARG_BOOL},
   {"#m", "progress-meter",           ARG_BOOL},
   {":",  "next",                     ARG_NONE},
@@ -2153,6 +2154,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         if((global->parallel_max > MAX_PARALLEL) ||
            (global->parallel_max < 1))
           global->parallel_max = PARALLEL_DEFAULT;
+        break;
+      case 'c':   /* --parallel-connect */
+        global->parallel_connect = toggle;
         break;
       }
       break;
