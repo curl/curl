@@ -15,6 +15,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o BINDINGS: five new bindings addded
+ o CURLOPT_TIMEOUT.3: Clarify transfer timeout time includes queue time [78]
  o CURLOPT_TIMEOUT.3: remove the mention of "minutes" [74]
  o ESNI: initial build/setup support [71]
  o FTP: FTPFILE_NOCWD: avoid redundant CWDs [28]
@@ -31,7 +32,9 @@ This release includes the following bugfixes:
  o altsvc: both backends run h3-23 now [31]
  o appveyor: add 32-bit MinGW-w64 build [58]
  o appveyor: add a winbuild [14]
+ o appveyor: add a winbuild that uses VS2017 [84]
  o appveyor: upgrade VS2017 to VS2019 [29]
+ o asyn-thread: make use of Curl_socketpair() where available [85]
  o asyn-thread: s/AF_LOCAL/AF_UNIX for Solaris [3]
  o build: Remove unused HAVE_LIBSSL and HAVE_LIBCRYPTO defines [77]
  o checksrc: fix uninitialized variable warning [57]
@@ -41,6 +44,7 @@ This release includes the following bugfixes:
  o cirrus: switch off blackhole status on the freebsd CI machines [72]
  o cleanups: 21 various PVS-Studio warnings [24]
  o connect: return CURLE_OPERATION_TIMEDOUT for errno == ETIMEDOUT [72]
+ o connect: silence sign-compare warning [83]
  o cookie: avoid harmless use after free [69]
  o cookie: pass in the correct cookie amount to qsort() [27]
  o cookies: change argument type for Curl_flush_cookies [67]
@@ -80,15 +84,20 @@ This release includes the following bugfixes:
  o quiche: set 'drain' when returning without having drained the queues
  o quiche: update HTTP/3 config creation to new API [61]
  o redirect: handle redirects to absolute URLs containing spaces [52]
+ o security: silence conversion warning [83]
  o setopt: handle ALTSVC set to NULL
  o setopt: make it easier to add new enum values [4]
  o setopt: store CURLOPT_RTSP_SERVER_CSEQ correctly [24]
  o smb: check for full size message before reading message details [10]
+ o smbserver: fix Python 3 compatibility [82]
  o socks: Fix destination host shown on SOCKS5 error [32]
  o tests: fix narrowing conversion warnings [37]
+ o tests: makes tests succeed when using --disable-proxy [81]
  o tests: use port 2 instead of 60000 for a safer non-listening port [72]
+ o tool_operate: Fix retry sleep time shown to user when Retry-After [79]
  o url: don't set appconnect time for non-ssl/non-ssh connections [42]
  o url: fix the NULL hostname compiler warning [44]
+ o url: normalize CURLINFO_EFFECTIVE_URL [80]
  o url: only reuse TLS connections with matching pinning [5]
  o urlapi: avoid index underflow for short ipv6 hostnames [26]
  o urlapi: fix URL encoding when setting a full URL [53]
@@ -110,19 +119,20 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Alex Konev, Alex Samorukov, Andrei Valeriu BICA,
-  Barry Pollard, Bernhard Walle, Christoph M. Becker, Dagobert Michelsen,
-  Dan Fandrich, Daniel Silverstone, Daniel Stenberg, Denis Chaplygin,
-  Emil Engler, George Liu, Gilles Vollant, Griffin Downs, Ilya Kosarev,
-  infinnovation-dev on github, Jens Finkhaeuser, Jeremy Lainé, Jimmy Gaussen,
-  Joel Depooter, Jojojov on github, jzinn on github, Kamil Dudka, Kunal Ekawde,
-  Lucas Pardue, Lucas Severo, Marcel Hernandez, Marcel Raad, Martin Gartner,
-  Max Dymond, Michael Kaufmann, momala454 on github, Nathaniel J. Smith,
-  Niall O'Reilly, nico-abram on github, Patrick Monnerat, Paul B. Omta,
-  Paul Dreik, Peter Sumatra, Philippe Marguinaud, Piotr Komborski, Ray Satiro,
+  Barry Pollard, Bernhard Walle, Christophe Dervieux, Christoph M. Becker,
+  Dagobert Michelsen, Dan Fandrich, Daniel Silverstone, Daniel Stenberg,
+  Denis Chaplygin, Emil Engler, George Liu, Gilles Vollant, Griffin Downs,
+  Harry Sintonen, Ilya Kosarev, infinnovation-dev on github, Jens Finkhaeuser,
+  Jeremy Lainé, Jeroen Ooms, Jimmy Gaussen, Joel Depooter, Jojojov on github,
+  jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue, Lucas Severo,
+  Marcel Hernandez, Marcel Raad, Martin Gartner, Max Dymond, Michael Kaufmann,
+  momala454 on github, Nathaniel J. Smith, Niall O'Reilly,
+  nico-abram on github, Patrick Monnerat, Paul B. Omta, Paul Dreik,
+  Peter Sumatra, Philippe Marguinaud, Piotr Komborski, Ray Satiro,
   Roland Hieber, Samuel Surtees, Sebastian Haglund, Spezifant on github,
   Stian Soiland-Reyes, SumatraPeter on github, Tatsuhiro Tsujikawa,
   Valerii Zapodovnikov, Yechiel Kalmenson, Zenju on github,
-  (54 contributors)
+  (57 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -205,3 +215,11 @@ References to bug reports and discussions on issues:
  [75] = https://curl.haxx.se/bug/?i=4471
  [76] = https://curl.haxx.se/bug/?i=4467
  [77] = https://curl.haxx.se/bug/?i=4460
+ [78] = https://curl.haxx.se/bug/?i=4486
+ [79] = https://curl.haxx.se/bug/?i=4498
+ [80] = https://curl.haxx.se/bug/?i=4491
+ [81] = https://curl.haxx.se/bug/?i=4488
+ [82] = https://curl.haxx.se/bug/?i=4484
+ [83] = https://curl.haxx.se/bug/?i=4483
+ [84] = https://curl.haxx.se/bug/?i=4482
+ [85] = https://curl.haxx.se/bug/?i=4466
