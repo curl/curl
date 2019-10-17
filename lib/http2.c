@@ -848,6 +848,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
     stream->closed = TRUE;
     httpc = &conn->proto.httpc;
     drain_this(data_s, httpc);
+    Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
     httpc->error_code = error_code;
 
     /* remove the entry from the hash as the stream is now gone */
