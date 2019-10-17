@@ -31,6 +31,10 @@ FTP wildcard with crazy pattern
 <command>
 "ftp://%HOSTIP:%FTPPORT/fully_simulated/DOS/[*\\s-'tl"
 </command>
+<setenv>
+# Needed for MSYS2 to not convert backslash to forward slash
+MSYS2_ARG_CONV_EXCL=ftp://
+</setenv>
 </client>
 <verify>
 <protocol>
