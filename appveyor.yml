@@ -160,7 +160,7 @@ build_script:
         -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=""
         -DCMAKE_INSTALL_PREFIX="C:/CURL"
         -DCMAKE_BUILD_TYPE=%PRJ_CFG% &&
-        cmake --build . --config %PRJ_CFG% --clean-first -- %BUILD_OPT%) else (
+        cmake --build . --config %PRJ_CFG% --parallel 2 --clean-first -- %BUILD_OPT%) else (
       if %BUILD_SYSTEM%==VisualStudioSolution (
         cd projects &&
         .\\generate.bat %VC_VERSION% &&
