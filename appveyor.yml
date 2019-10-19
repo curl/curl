@@ -210,3 +210,9 @@ branches:
     only:
         - master
         - /\/ci$/
+
+artifacts:
+  - path: '**/curl.exe'
+    name: curl
+  - path: '**/libcurl.dll'
+    name: libcurl
