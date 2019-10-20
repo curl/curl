@@ -58,7 +58,7 @@ tftp
 HTTP GET followed by FTP RETR followed by FILE followed by TFTP RRQ
  </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/20020001 ftp://%HOSTIP:%FTPPORT/20020002 file://localhost/%PWD/log/test2002.txt tftp://%HOSTIP:%TFTPPORT//20020003
+http://%HOSTIP:%HTTPPORT/20020001 ftp://%HOSTIP:%FTPPORT/20020002 file://localhost%FILE_PWD/log/test2002.txt tftp://%HOSTIP:%TFTPPORT//20020003
 </command>
 <file name="log/test2002.txt">
 foo

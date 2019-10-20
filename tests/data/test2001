@@ -49,7 +49,7 @@ file
 HTTP GET followed by FTP RETR followed by FILE
  </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/20010001 ftp://%HOSTIP:%FTPPORT/20010002 file://localhost/%PWD/log/test2001.txt
+http://%HOSTIP:%HTTPPORT/20010001 ftp://%HOSTIP:%FTPPORT/20010002 file://localhost%FILE_PWD/log/test2001.txt
 </command>
 <file name="log/test2001.txt">
 foo
