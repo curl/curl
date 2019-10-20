@@ -6,6 +6,7 @@ HTTP GET
 HTTP proxy
 multi
 FAILURE
+connect to non-listen
 </keywords>
 </info>
 
