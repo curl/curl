@@ -1282,8 +1282,14 @@ ConnectionExists(struct Curl_easy *data,
            partway through a handshake!) */
         if(wantNTLMhttp) {
           if(strcmp(needle->user, check->user) ||
-             strcmp(needle->passwd, check->passwd))
+             strcmp(needle->passwd, check->passwd)) {
+
+            /* we prefer a credential match, but this is at least a connection
+               that can be reused and "upgraded" to NTLM */
+            if(check->http_ntlm_state == NTLMSTATE_NONE)
+              chosen = check;
             continue;
+          }
         }
         else if(check->http_ntlm_state != NTLMSTATE_NONE) {
           /* Connection is using NTLM auth but we don't want NTLM */
