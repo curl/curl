@@ -30,6 +30,7 @@ This release includes the following bugfixes:
  o README: minor grammar fix [39]
  o altsvc: accept quoted ma and persist values [60]
  o altsvc: both backends run h3-23 now [31]
+ o appveyor: Add MSVC ARM64 build [87]
  o appveyor: add 32-bit MinGW-w64 build [58]
  o appveyor: add a winbuild [14]
  o appveyor: add a winbuild that uses VS2017 [84]
@@ -43,6 +44,7 @@ This release includes the following bugfixes:
  o cirrus: Switch the FreeBSD 11.x build to 11.3 and add a 13.0 build
  o cirrus: switch off blackhole status on the freebsd CI machines [72]
  o cleanups: 21 various PVS-Studio warnings [24]
+ o configure: remove all cyassl references [90]
  o connect: return CURLE_OPERATION_TIMEDOUT for errno == ETIMEDOUT [72]
  o connect: silence sign-compare warning [83]
  o cookie: avoid harmless use after free [69]
@@ -64,9 +66,12 @@ This release includes the following bugfixes:
  o doh: fix (harmless) buffer overrun [13]
  o doh: fix undefined behaviour and open up for gcc and clang optimization [12]
  o doh: return early if there is no time left [48]
+ o examples/sslbackend: fix -Wchar-subscripts warning [89]
  o git: add tests/server/disabled to .gitignore [59]
+ o http2: expire a timeout at end of stream [88]
  o http2: prevent dup'ed handles to send dummy PRIORITY frames [68]
  o http2: relax verification of :authority in push promise requests [8]
+ o http2_recv: a closed stream trumps pause state [88]
  o http: lowercase headernames for HTTP/2 and HTTP/3 [49]
  o ldap: Stop using wide char version of ldapp_err2string [1]
  o ldap: fix OOM error on missing query string [76]
@@ -84,6 +89,7 @@ This release includes the following bugfixes:
  o quiche: set 'drain' when returning without having drained the queues
  o quiche: update HTTP/3 config creation to new API [61]
  o redirect: handle redirects to absolute URLs containing spaces [52]
+ o runtests: get textaware info from curl instead of perl [86]
  o security: silence conversion warning [83]
  o setopt: handle ALTSVC set to NULL
  o setopt: make it easier to add new enum values [4]
@@ -91,10 +97,14 @@ This release includes the following bugfixes:
  o smb: check for full size message before reading message details [10]
  o smbserver: fix Python 3 compatibility [82]
  o socks: Fix destination host shown on SOCKS5 error [32]
+ o test1162: disable MSYS2's POSIX path conversion
+ o tests: add `connect to non-listen` keywords [91]
  o tests: fix narrowing conversion warnings [37]
  o tests: makes tests succeed when using --disable-proxy [81]
+ o tests: use %FILE_PWD for file:// URLs [92]
  o tests: use port 2 instead of 60000 for a safer non-listening port [72]
  o tool_operate: Fix retry sleep time shown to user when Retry-After [79]
+ o travis: Add an ARM64 build
  o url: don't set appconnect time for non-ssl/non-ssh connections [42]
  o url: fix the NULL hostname compiler warning [44]
  o url: normalize CURLINFO_EFFECTIVE_URL [80]
@@ -122,17 +132,18 @@ advice from friends like these:
   Barry Pollard, Bernhard Walle, Christophe Dervieux, Christoph M. Becker,
   Dagobert Michelsen, Dan Fandrich, Daniel Silverstone, Daniel Stenberg,
   Denis Chaplygin, Emil Engler, George Liu, Gilles Vollant, Griffin Downs,
-  Harry Sintonen, Ilya Kosarev, infinnovation-dev on github, Jens Finkhaeuser,
-  Jeremy Lainé, Jeroen Ooms, Jimmy Gaussen, Joel Depooter, Jojojov on github,
-  jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue, Lucas Severo,
-  Marcel Hernandez, Marcel Raad, Martin Gartner, Max Dymond, Michael Kaufmann,
-  momala454 on github, Nathaniel J. Smith, Niall O'Reilly,
-  nico-abram on github, Patrick Monnerat, Paul B. Omta, Paul Dreik,
-  Peter Sumatra, Philippe Marguinaud, Piotr Komborski, Ray Satiro,
-  Roland Hieber, Samuel Surtees, Sebastian Haglund, Spezifant on github,
-  Stian Soiland-Reyes, SumatraPeter on github, Tatsuhiro Tsujikawa,
+  Harry Sintonen, Ilya Kosarev, infinnovation-dev on github, Jacob Barthelmeh,
+  Jens Finkhaeuser, Jeremy Lainé, Jeroen Ooms, Jimmy Gaussen, Joel Depooter,
+  Jojojov on github, jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue,
+  Lucas Severo, Marcel Hernandez, Marcel Raad, Martin Gartner, Max Dymond,
+  Michael Kaufmann, Michał Janiszewski, momala454 on github,
+  Nathaniel J. Smith, Niall O'Reilly, nico-abram on github, Patrick Monnerat,
+  Paul B. Omta, Paul Dreik, Peter Sumatra, Philippe Marguinaud,
+  Piotr Komborski, Ray Satiro, Roland Hieber, Samuel Surtees,
+  Sebastian Haglund, Spezifant on github, Stian Soiland-Reyes,
+  SumatraPeter on github, Tatsuhiro Tsujikawa, Tom van der Woerdt,
   Valerii Zapodovnikov, Yechiel Kalmenson, Zenju on github,
-  (57 contributors)
+  (60 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -223,3 +234,10 @@ References to bug reports and discussions on issues:
  [83] = https://curl.haxx.se/bug/?i=4483
  [84] = https://curl.haxx.se/bug/?i=4482
  [85] = https://curl.haxx.se/bug/?i=4466
+ [86] = https://curl.haxx.se/bug/?i=4506
+ [87] = https://curl.haxx.se/bug/?i=4507
+ [88] = https://curl.haxx.se/bug/?i=4496
+ [89] = https://curl.haxx.se/bug/?i=4503
+ [90] = https://curl.haxx.se/bug/?i=4502
+ [91] = https://curl.haxx.se/bug/?i=4511
+ [92] = https://curl.haxx.se/bug/?i=4512
