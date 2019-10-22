@@ -419,17 +419,18 @@ matrix:
                       - libbrotli-dev
         - os: linux
           arch: arm64
-          compiler: gcc
+          compiler: clang
           dist: xenial
           env:
               - T=debug C="--enable-alt-svc"
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
           addons:
               apt:
                   sources:
                       - *common_sources
                   packages:
                       - *common_packages
+                      - clang-7
                       - libpsl-dev
                       - libbrotli-dev
                       - libev-dev
