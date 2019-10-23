@@ -19,7 +19,7 @@ Server: test-server/fake
 # Client-side
 <client>
 <features>
-HTTP
+http
 </features>
 <server>
 http
