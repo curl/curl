@@ -169,7 +169,7 @@ build_script:
         call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
         call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
         nmake /f Makefile.vc mode=dll VC=14 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% &&
-        ..\src\curl -V
+        ..\builds\libcurl-vc14-x64-debug-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2017 (
         call buildconf.bat &&
