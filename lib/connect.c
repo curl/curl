@@ -1190,10 +1190,11 @@ static CURLcode singleipconnect(struct connectdata *conn,
   if(!isconnected && (conn->transport != TRNSPRT_UDP)) {
     if(conn->bits.tcp_fastopen) {
 #if defined(CONNECT_DATA_IDEMPOTENT) /* Darwin */
-#  if defined(HAVE_BUILTIN_AVAILABLE)
+#  if defined(HAVE_BUILTIN_AVAILABLE) && !defined(CURL_STATICLIB)
       /* while connectx function is available since macOS 10.11 / iOS 9,
          it did not have the interface declared correctly until
-         Xcode 9 / macOS SDK 10.13 */
+         Xcode 9 / macOS SDK 10.13
+         note that __builtin_available() will not work with static libraries */
       if(__builtin_available(macOS 10.11, iOS 9.0, tvOS 9.0, watchOS 2.0, *)) {
         sa_endpoints_t endpoints;
         endpoints.sae_srcif = 0;
