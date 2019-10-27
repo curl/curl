@@ -1516,6 +1516,11 @@ CURLcode Curl_socket(struct connectdata *conn,
     /* no socket, no connection */
     return CURLE_COULDNT_CONNECT;
 
+  if(conn->transport == TRNSPRT_QUIC) {
+    /* QUIC sockets need to be nonblocking */
+    (void)curlx_nonblock(*sockfd, TRUE);
+  }
+
 #if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(conn->scope_id && (addr->family == AF_INET6)) {
     struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
