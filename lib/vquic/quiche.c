@@ -208,7 +208,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
                        conn->primary_ip, &conn->primary_port)) {
     char buffer[STRERROR_LEN];
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+          SOCKERRNO, Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
@@ -301,7 +301,7 @@ static CURLcode process_ingress(struct connectdata *conn, int sockfd,
 
   do {
     recvd = recv(sockfd, buf, bufsize, 0);
-    if((recvd < 0) && ((errno == EAGAIN) || (errno == EWOULDBLOCK)))
+    if((recvd < 0) && ((SOCKERRNO == EAGAIN) || (SOCKERRNO == EWOULDBLOCK)))
       break;
 
     if(recvd < 0) {
