@@ -62,6 +62,10 @@ AM_CPPFLAGS += -I$(top_builddir)/ares        \
                -I$(top_srcdir)/ares
 endif
 
+if USE_SIGNALS_HANDLER
+AM_CPPFLAGS += -DUSE_SIGNALS_HANDLER
+endif
+
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 

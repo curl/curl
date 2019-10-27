@@ -560,6 +560,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
     CURL_HTTP_VERSION_1_1
 #endif
     ;
+#if !defined(USE_SIGNALS_HANDLER)
+  set->no_signal = TRUE;
+#endif
   Curl_http2_init_userset(set);
   return result;
 }

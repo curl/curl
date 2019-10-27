@@ -295,6 +295,7 @@ CURL_CHECK_CURLDEBUG
 AM_CONDITIONAL(CURLDEBUG, test x$want_curldebug = xyes)
 
 supports_unittests=yes
+use_signals_handler=yes
 # cross-compilation of unit tests static library/programs fails when
 # libcurl shared library is built. This might be due to a libtool or
 # automake issue. In this case we disable unit tests.
@@ -323,6 +324,12 @@ case $host_os in
     ;;
 esac
 
+case $host_os in
+  freebsd*)
+    use_signals_handler=no
+    ;;
+esac
+
 dnl Build unit tests when option --enable-debug is given.
 if test "x$want_debug" = "xyes" &&
    test "x$supports_unittests" = "xyes"; then
@@ -331,6 +338,7 @@ else
   want_unittests=no
 fi
 AM_CONDITIONAL(BUILD_UNITTESTS, test x$want_unittests = xyes)
+AM_CONDITIONAL(USE_SIGNALS_HANDLER, test x$use_signals_handler = xyes)
 
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
