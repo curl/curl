@@ -317,12 +317,16 @@ static void up_free(struct Curl_easy *data)
  * when curl_easy_perform() is invoked.
  */
 
-CURLcode Curl_close(struct Curl_easy *data)
+CURLcode Curl_close(struct Curl_easy **datap)
 {
   struct Curl_multi *m;
+  struct Curl_easy *data;
 
-  if(!data)
+  if(!datap || !*datap)
     return CURLE_OK;
+
+  data = *datap;
+  *datap = NULL;
 
   Curl_expire_clear(data); /* shut off timers */
 
@@ -1983,10 +1987,8 @@ void Curl_free_request_state(struct Curl_easy *data)
 {
   Curl_safefree(data->req.protop);
   Curl_safefree(data->req.newurl);
-  Curl_close(data->req.doh.probe[0].easy);
-  data->req.doh.probe[0].easy = NULL;
-  Curl_close(data->req.doh.probe[1].easy);
-  data->req.doh.probe[1].easy = NULL;
+  Curl_close(&data->req.doh.probe[0].easy);
+  Curl_close(&data->req.doh.probe[1].easy);
 }
 
 

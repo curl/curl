@@ -346,7 +346,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
 
   error:
   free(nurl);
-  Curl_close(doh);
+  Curl_close(&doh);
   return result;
 }
 
@@ -402,10 +402,8 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
   error:
   curl_slist_free_all(data->req.doh.headers);
   data->req.doh.headers = NULL;
-  Curl_close(data->req.doh.probe[0].easy);
-  data->req.doh.probe[0].easy = NULL;
-  Curl_close(data->req.doh.probe[1].easy);
-  data->req.doh.probe[1].easy = NULL;
+  Curl_close(&data->req.doh.probe[0].easy);
+  Curl_close(&data->req.doh.probe[1].easy);
   return NULL;
 }
 
@@ -925,11 +923,9 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
     struct dohentry de;
     /* remove DOH handles from multi handle and close them */
     curl_multi_remove_handle(data->multi, data->req.doh.probe[0].easy);
-    Curl_close(data->req.doh.probe[0].easy);
-    data->req.doh.probe[0].easy = NULL;
+    Curl_close(&data->req.doh.probe[0].easy);
     curl_multi_remove_handle(data->multi, data->req.doh.probe[1].easy);
-    Curl_close(data->req.doh.probe[1].easy);
-    data->req.doh.probe[1].easy = NULL;
+    Curl_close(&data->req.doh.probe[1].easy);
     /* parse the responses, create the struct and return it! */
     init_dohentry(&de);
     rc = doh_decode(data->req.doh.probe[0].serverdoh.memory,
