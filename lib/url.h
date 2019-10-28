@@ -49,7 +49,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data);
 
 void Curl_freeset(struct Curl_easy * data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
-CURLcode Curl_close(struct Curl_easy *data); /* opposite of curl_open() */
+CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
 CURLcode Curl_disconnect(struct Curl_easy *data,
                          struct connectdata *, bool dead_connection);

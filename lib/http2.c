@@ -496,16 +496,14 @@ static struct Curl_easy *duphandle(struct Curl_easy *data)
     /* setup the request struct */
     struct HTTP *http = calloc(1, sizeof(struct HTTP));
     if(!http) {
-      (void)Curl_close(second);
-      second = NULL;
+      (void)Curl_close(&second);
     }
     else {
       second->req.protop = http;
       http->header_recvbuf = Curl_add_buffer_init();
       if(!http->header_recvbuf) {
         free(http);
-        (void)Curl_close(second);
-        second = NULL;
+        (void)Curl_close(&second);
       }
       else {
         Curl_http2_setup_req(second);
@@ -547,7 +545,7 @@ static int push_promise(struct Curl_easy *data,
     stream = data->req.protop;
     if(!stream) {
       failf(data, "Internal NULL stream!\n");
-      (void)Curl_close(newhandle);
+      (void)Curl_close(&newhandle);
       rv = 1;
       goto fail;
     }
@@ -569,7 +567,7 @@ static int push_promise(struct Curl_easy *data,
       /* denied, kill off the new handle again */
       http2_stream_free(newhandle->req.protop);
       newhandle->req.protop = NULL;
-      (void)Curl_close(newhandle);
+      (void)Curl_close(&newhandle);
       goto fail;
     }
 
@@ -585,7 +583,7 @@ static int push_promise(struct Curl_easy *data,
       infof(data, "failed to add handle to multi\n");
       http2_stream_free(newhandle->req.protop);
       newhandle->req.protop = NULL;
-      Curl_close(newhandle);
+      Curl_close(&newhandle);
       rv = 1;
       goto fail;
     }
