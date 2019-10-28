@@ -1544,9 +1544,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
     }
 
     memcpy(&remote_addr, ps.path.remote.addr, ps.path.remote.addrlen);
-    while((sent = sendto(sockfd, out, outlen, 0,
-                         (struct sockaddr *)&remote_addr,
-                         (socklen_t)ps.path.remote.addrlen)) == -1 &&
+    while((sent = send(sockfd, out, outlen, 0)) == -1 &&
           SOCKERRNO == EINTR)
       ;
 
@@ -1556,7 +1554,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
         break;
       }
       else {
-        failf(conn->data, "sendto() returned %zd (errno %d)\n", sent,
+        failf(conn->data, "send() returned %zd (errno %d)\n", sent,
               SOCKERRNO);
         return CURLE_SEND_ERROR;
       }
