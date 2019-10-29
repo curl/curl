@@ -68,12 +68,12 @@ you have pkg-config installed, set the pkg-config path first, like this:
 
 Without pkg-config installed, use this:
 
-   ./configure --with-ssl=/opt/OpenSSL
+    ./configure --with-ssl=/opt/OpenSSL
 
 If you insist on forcing a build without SSL support, even though you may
 have OpenSSL installed in your system, you can run configure like this:
 
-   ./configure --without-ssl
+    ./configure --without-ssl
 
 If you have OpenSSL installed, but with the libraries in one place and the
 header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
