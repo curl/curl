@@ -106,10 +106,10 @@ Clone and build curl:
 
 Use HTTP/3 directly:
 
-    curl --http3 https://nghttp2.org:8443/
+    src/curl --http3 https://nghttp2.org:8443/
 
 Upgrade via Alt-Svc:
 
-    curl --alt-svc altsvc.cache https://quic.aiortc.org/
+    src/curl --alt-svc altsvc.cache https://quic.aiortc.org/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
