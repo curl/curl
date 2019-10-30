@@ -644,6 +644,12 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(per->heads.alloc_filename)
     Curl_safefree(per->heads.filename);
 
+  if(per->etag_save.fopened && per->etag_save.stream)
+    fclose(per->etag_save.stream);
+
+  if(per->etag_save.alloc_filename)
+    Curl_safefree(per->etag_save.filename);
+
   curl_easy_cleanup(per->curl);
   if(outs->alloc_filename)
     free(outs->filename);
@@ -834,6 +840,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         struct OutStruct *outs;
         struct InStruct *input;
         struct OutStruct *heads;
+        struct OutStruct *etag_save;
         struct HdrCbData *hdrcbdata = NULL;
         CURL *curl = curl_easy_init();
         result = add_per_transfer(&per);
@@ -882,6 +889,99 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
         }
 
+        /* disallowing simultaneous use of --etag-save and --etag-compare */
+        if(config->etag_save_file && config->etag_compare_file) {
+          warnf(
+            config->global,
+            "Cannot use --etag-save and --etag-compare at the same time\n");
+
+          result = CURLE_UNKNOWN_OPTION;
+          break;
+        }
+
+        /* --etag-save */
+        etag_save = &per->etag_save;
+        etag_save->stream = stdout;
+        etag_save->config = config;
+        if(config->etag_save_file) {
+          /* open file for output: */
+          if(strcmp(config->etag_save_file, "-")) {
+            FILE *newfile = fopen(config->etag_save_file, "wb");
+            if(!newfile) {
+              warnf(
+                config->global,
+                "Failed to open %s\n", config->etag_save_file);
+
+              result = CURLE_WRITE_ERROR;
+              break;
+            }
+            else {
+              etag_save->filename = config->etag_save_file;
+              etag_save->s_isreg = TRUE;
+              etag_save->fopened = TRUE;
+              etag_save->stream = newfile;
+            }
+          }
+          else {
+            /* always use binary mode for protocol header output */
+            set_binmode(etag_save->stream);
+          }
+        }
+
+        /* --etag-compare */
+        if(config->etag_compare_file) {
+          char *etag_from_file = NULL;
+          char *header = NULL;
+          size_t file_size = 0;
+
+          /* open file for reading: */
+          FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
+          if(!file) {
+            warnf(
+              config->global,
+              "Failed to open %s\n", config->etag_compare_file);
+
+            result = CURLE_READ_ERROR;
+            break;
+          }
+
+          /* get file size */
+          fseek(file, 0, SEEK_END);
+          file_size = ftell(file);
+
+          /*
+           * check if file is empty, if it's not load etag
+           * else continue with empty etag
+           */
+          if(file_size != 0) {
+            fseek(file, 0, SEEK_SET);
+            file2string(&etag_from_file, file);
+
+            header = aprintf("If-None-Match: \"%s\"", etag_from_file);
+          }
+          else {
+            header = aprintf("If-None-Match: \"\"");
+          }
+
+          if(!header) {
+            warnf(
+              config->global,
+              "Failed to allocate memory for custom etag header\n");
+
+            result = CURLE_OUT_OF_MEMORY;
+            break;
+          }
+
+          /* add Etag from file to list of custom headers */
+          add2list(&config->headers, header);
+
+          Curl_safefree(header);
+          Curl_safefree(etag_from_file);
+
+          if(file) {
+            fclose(file);
+          }
+        }
 
         hdrcbdata = &per->hdrcbdata;
 
@@ -1769,6 +1869,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         hdrcbdata->outs = outs;
         hdrcbdata->heads = heads;
+        hdrcbdata->etag_save = etag_save;
         hdrcbdata->global = global;
         hdrcbdata->config = config;
 

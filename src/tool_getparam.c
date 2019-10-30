@@ -268,6 +268,8 @@ static const struct LongShort aliases[]= {
   {"E9", "proxy-tlsv1",              ARG_NONE},
   {"EA", "socks5-basic",             ARG_BOOL},
   {"EB", "socks5-gssapi",            ARG_BOOL},
+  {"EC", "etag-save",                ARG_FILENAME},
+  {"ED", "etag-compare",             ARG_FILENAME},
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
@@ -1695,6 +1697,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->socks5_auth |= CURLAUTH_GSSAPI;
         else
           config->socks5_auth &= ~CURLAUTH_GSSAPI;
+        break;
+
+      case 'C':
+        GetStr(&config->etag_save_file, nextarg);
+        break;
+
+      case 'D':
+        GetStr(&config->etag_compare_file, nextarg);
         break;
 
       default: /* unknown flag */

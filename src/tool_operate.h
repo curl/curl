@@ -48,6 +48,7 @@ struct per_transfer {
   struct ProgressData progressbar;
   struct OutStruct outs;
   struct OutStruct heads;
+  struct OutStruct etag_save;
   struct InStruct input;
   struct HdrCbData hdrcbdata;
   char errorbuffer[CURL_ERROR_SIZE];
