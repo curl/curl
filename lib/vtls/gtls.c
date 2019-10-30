@@ -1608,7 +1608,7 @@ static ssize_t gtls_send(struct connectdata *conn,
 static void close_one(struct ssl_connect_data *connssl)
 {
   if(BACKEND->session) {
-    gnutls_bye(BACKEND->session, GNUTLS_SHUT_RDWR);
+    gnutls_bye(BACKEND->session, GNUTLS_SHUT_WR);
     gnutls_deinit(BACKEND->session);
     BACKEND->session = NULL;
   }
