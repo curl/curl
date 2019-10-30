@@ -38,6 +38,8 @@ DPAGES =					\
   dump-header.d					\
   egd-file.d					\
   engine.d					\
+  etag-save.d                   \
+  etag-compare.d                \
   expect100-timeout.d				\
   fail-early.d					\
   fail.d					\

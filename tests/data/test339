@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked
+Trailer: chunky-trailer
+Connection: mooo
+ETag: "asdf"
+
+40
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+30
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+21;heresatest=moooo
+cccccccccccccccccccccccccccccccc
+
+0
+chunky-trailer: header data
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Check if --etag-save saved correct etag to a file
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/339 --etag-save log/etag339
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /339 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<file name="log/etag339">
+asdf
+</file>
+</verify>
+
+</testcase>

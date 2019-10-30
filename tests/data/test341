@@ -1,0 +1,57 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked
+Trailer: chunky-trailer
+Connection: mooo
+ETag: "asdf"
+
+40
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+30
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+21;heresatest=moooo
+cccccccccccccccccccccccccccccccc
+
+0
+chunky-trailer: header data
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Try to open a non existing file with --etag-compare should return an error
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/341 --etag-compare log/etag341
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<errorcode>
+26
+</errorcode>
+</verify>
+
+</testcase>

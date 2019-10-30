@@ -43,6 +43,7 @@ struct HdrCbData {
   struct OperationConfig *config;
   struct OutStruct *outs;
   struct OutStruct *heads;
+  struct OutStruct *etag_save;
   bool honor_cd_filename;
 };
 
