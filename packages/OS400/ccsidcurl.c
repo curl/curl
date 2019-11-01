@@ -1141,8 +1141,13 @@ curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
   if(testwarn) {
     testwarn = 0;
 
+#ifndef CURL_DISABLE_PROXY
+    if((int) STRING_LASTZEROTERMINATED != (int) STRING_TEMP_URL + 1 ||
+       (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
+#else
     if((int) STRING_LASTZEROTERMINATED != (int) STRING_SASL_AUTHZID + 1 ||
        (int) STRING_LAST != (int) STRING_COPYPOSTFIELDS + 1)
+#endif
       curl_mfprintf(stderr,
        "*** WARNING: curl_easy_setopt_ccsid() should be reworked ***\n");
   }
