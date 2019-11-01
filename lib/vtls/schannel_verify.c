@@ -111,7 +111,7 @@ static CURLcode add_certs_to_store(HCERTSTORE trust_store,
    */
   ca_file_handle = CreateFile(ca_file_tstr,
                               GENERIC_READ,
-                              0,
+                              FILE_SHARE_READ,
                               NULL,
                               OPEN_EXISTING,
                               FILE_ATTRIBUTE_NORMAL,
