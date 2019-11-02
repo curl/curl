@@ -13,7 +13,7 @@
  * See the main() function at the bottom that shows an app that retrieves from
  * a specified url using fgets() and fread() and saves as two output files.
  *
- * Copyright (c) 2003, 2017 Simtec Electronics
+ * Copyright (c) 2003 - 2019 Simtec Electronics
  *
  * Re-implemented by Vincent Sanders <vince@kyllikki.org> with extensive
  * reference to original curl example code
