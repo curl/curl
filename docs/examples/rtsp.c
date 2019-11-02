@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Jim Hollinger
+ * Copyright (c) 2011 - 2019, Jim Hollinger
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

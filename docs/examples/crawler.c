@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Web crawler based on curl and libxml2.
- * Copyright (C) 2018 Jeroen Ooms <jeroenooms@gmail.com>
+ * Copyright (C) 2018 - 2019 Jeroen Ooms <jeroenooms@gmail.com>
  * License: MIT
  *
  * To compile:
