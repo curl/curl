@@ -588,6 +588,9 @@ mbed_connect_step2(struct connectdata *conn,
     else if(ret & MBEDTLS_X509_BADCERT_NOT_TRUSTED)
       failf(data, "Cert verify failed: BADCERT_NOT_TRUSTED");
 
+    else if(ret & MBEDTLS_X509_BADCERT_FUTURE)
+      failf(data, "Cert verify failed: BADCERT_FUTURE");
+
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
