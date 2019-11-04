@@ -1227,10 +1227,6 @@ main()
   ipv6=yes
 ))
 
-if test "$ipv6" = "yes"; then
-  curl_ipv6_msg="enabled"
-fi
-
 # Check if struct sockaddr_in6 have sin6_scope_id member
 if test "$ipv6" = yes; then
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
@@ -3969,6 +3965,7 @@ if test "$ipv6" = "yes"; then
     AC_DEFINE(ENABLE_IPV6, 1, [Define if you want to enable IPv6 support])
     IPV6_ENABLED=1
     AC_SUBST(IPV6_ENABLED)
+    curl_ipv6_msg="enabled"
   fi
 fi
 
