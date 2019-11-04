@@ -4,7 +4,7 @@ curl and libcurl 7.67.0
  Command line options:         226
  curl_easy_setopt() options:   269
  Public functions in libcurl:  81
- Contributors:                 2014
+ Contributors:                 2056
 
 This release includes the following changes:
 
@@ -24,9 +24,12 @@ This release includes the following bugfixes:
  o FTP: skip CWD to entry dir when target is absolute [16]
  o FTP: url-decode path before evaluation [36]
  o HTTP3.md: move -p for mkdir, remove -j for make [46]
+ o HTTP3: fix invalid use of sendto for connected UDP socket [109]
  o HTTP3: fix ngtcp2 Windows build [93]
  o HTTP3: fix prefix parameter for ngtcp2 build [40]
+ o HTTP3: fix typo somehere1 > somewhere1 [108]
  o HTTP3: show an --alt-svc using example too
+ o INSTALL: add missing space for configure commands [106]
  o INSTALL: add vcpkg installation instructions [35]
  o README: minor grammar fix [39]
  o altsvc: accept quoted ma and persist values [60]
@@ -38,6 +41,7 @@ This release includes the following bugfixes:
  o appveyor: add a winbuild [14]
  o appveyor: add a winbuild that uses VS2017 [84]
  o appveyor: make winbuilds with DEBUG=no/yes and VS 2015/2017 [95]
+ o appveyor: publish artifacts on appveyor [105]
  o appveyor: upgrade VS2017 to VS2019 [29]
  o asyn-thread: make use of Curl_socketpair() where available [85]
  o asyn-thread: s/AF_LOCAL/AF_UNIX for Solaris [3]
@@ -48,6 +52,7 @@ This release includes the following bugfixes:
  o cirrus: Switch the FreeBSD 11.x build to 11.3 and add a 13.0 build
  o cirrus: switch off blackhole status on the freebsd CI machines [72]
  o cleanups: 21 various PVS-Studio warnings [24]
+ o configure: only say ipv6 enabled when the variable is set [110]
  o configure: remove all cyassl references [90]
  o conn-reuse: requests wanting NTLM can reuse non-NTLM connections [99]
  o connect: return CURLE_OPERATION_TIMEDOUT for errno == ETIMEDOUT [72]
@@ -56,6 +61,7 @@ This release includes the following bugfixes:
  o cookie: pass in the correct cookie amount to qsort() [27]
  o cookies: change argument type for Curl_flush_cookies [67]
  o cookies: using a share with cookies shouldn't enable the cookie engine [63]
+ o copyrights: update copyright notices to 2019 [101]
  o curl: create easy handles on-demand and not ahead of time [54]
  o curl: ensure HTTP 429 triggers --retry [64]
  o curl: exit the create_transfers loop on errors [33]
@@ -72,7 +78,9 @@ This release includes the following bugfixes:
  o doh: fix undefined behaviour and open up for gcc and clang optimization [12]
  o doh: return early if there is no time left [48]
  o examples/sslbackend: fix -Wchar-subscripts warning [89]
+ o examples: remove the "this exact code has not been verified"
  o git: add tests/server/disabled to .gitignore [59]
+ o gnutls: make gnutls_bye() not wait for response on shutdown [104]
  o http2: expire a timeout at end of stream [88]
  o http2: prevent dup'ed handles to send dummy PRIORITY frames [68]
  o http2: relax verification of :authority in push promise requests [8]
@@ -80,6 +88,7 @@ This release includes the following bugfixes:
  o http: lowercase headernames for HTTP/2 and HTTP/3 [49]
  o ldap: Stop using wide char version of ldapp_err2string [1]
  o ldap: fix OOM error on missing query string [76]
+ o mbedtls: add error message for cert validity starting in the future [102]
  o mime: when disabled, avoid C99 macro [7]
  o ngtcp2: adapt to API change [66]
  o ngtcp2: compile with latest ngtcp2 + nghttp3 draft-23 [25]
@@ -96,6 +105,7 @@ This release includes the following bugfixes:
  o redirect: handle redirects to absolute URLs containing spaces [52]
  o runtests: get textaware info from curl instead of perl [86]
  o schannel: reverse the order of certinfo insertions [96]
+ o schannel_verify: Fix concurrent openings of CA file [103]
  o security: silence conversion warning [83]
  o setopt: handle ALTSVC set to NULL
  o setopt: make it easier to add new enum values [4]
@@ -107,11 +117,13 @@ This release includes the following bugfixes:
  o test1591: fix spelling of http feature [97]
  o tests: add `connect to non-listen` keywords [91]
  o tests: fix narrowing conversion warnings [37]
+ o tests: fix the test 3001 cert failures [100]
  o tests: makes tests succeed when using --disable-proxy [81]
  o tests: use %FILE_PWD for file:// URLs [92]
  o tests: use port 2 instead of 60000 for a safer non-listening port [72]
  o tool_operate: Fix retry sleep time shown to user when Retry-After [79]
  o travis: Add an ARM64 build
+ o url: Curl_free_request_state() should also free doh handles [107]
  o url: don't set appconnect time for non-ssl/non-ssh connections [42]
  o url: fix the NULL hostname compiler warning [44]
  o url: normalize CURLINFO_EFFECTIVE_URL [80]
@@ -136,21 +148,23 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alessandro Ghedini, Alex Konev, Alex Samorukov, Andrei Valeriu BICA,
-  Barry Pollard, Bernhard Walle, Christophe Dervieux, Christoph M. Becker,
-  Dagobert Michelsen, Dan Fandrich, Daniel Silverstone, Daniel Stenberg,
-  Denis Chaplygin, Emil Engler, Francois Rivard, George Liu, Gilles Vollant,
-  Griffin Downs, Harry Sintonen, Ilya Kosarev, infinnovation-dev on github,
-  Jacob Barthelmeh, Javier Blazquez, Jens Finkhaeuser, Jeremy Lainé,
-  Jeroen Ooms, Jimmy Gaussen, Joel Depooter, Jojojov on github,
-  jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue, Lucas Severo,
-  Marcel Hernandez, Marcel Raad, Martin Gartner, Max Dymond, Michael Kaufmann,
-  Michał Janiszewski, momala454 on github, Nathaniel J. Smith, Niall O'Reilly,
-  nico-abram on github, Patrick Monnerat, Paul B. Omta, Paul Dreik,
+  Barry Pollard, Bastien Bouclet, Bernhard Walle, Bylon2 on github,
+  Christophe Dervieux, Christoph M. Becker, Dagobert Michelsen, Dan Fandrich,
+  Daniel Silverstone, Daniel Stenberg, Denis Chaplygin, Emil Engler,
+  Francois Rivard, George Liu, Gilles Vollant, Griffin Downs, Harry Sintonen,
+  Ilya Kosarev, infinnovation-dev on github, Jacob Barthelmeh, Javier Blazquez,
+  Jens Finkhaeuser, Jeremy Lainé, Jeroen Ooms, Jimmy Gaussen, Joel Depooter,
+  Jojojov on github, jzinn on github, Kamil Dudka, Kunal Ekawde, Lucas Pardue,
+  Lucas Severo, Marcel Hernandez, Marcel Raad, Martin Gartner, Max Dymond,
+  Michael Kaufmann, Michał Janiszewski, momala454 on github,
+  Nathaniel J. Smith, Niall O'Reilly, nico-abram on github,
+  Nikos Mavrogiannopoulos, Patrick Monnerat, Paul B. Omta, Paul Dreik,
   Peter Sumatra, Philippe Marguinaud, Piotr Komborski, Ray Satiro,
-  Roland Hieber, Samuel Surtees, Sebastian Haglund, Spezifant on github,
-  Stian Soiland-Reyes, SumatraPeter on github, Tatsuhiro Tsujikawa,
-  Tom van der Woerdt, Valerii Zapodovnikov, Yechiel Kalmenson, Zenju on github,
-  (62 contributors)
+  Richard Alcock, Roland Hieber, Samuel Surtees, Sebastian Haglund,
+  Spezifant on github, Stian Soiland-Reyes, SumatraPeter on github,
+  Tatsuhiro Tsujikawa, Tom van der Woerdt, Trivikram Kamat,
+  Valerii Zapodovnikov, Vilhelm Prytz, Yechiel Kalmenson, Zenju on github,
+  (68 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -255,3 +269,14 @@ References to bug reports and discussions on issues:
  [97] = https://curl.haxx.se/bug/?i=4520
  [98] = https://curl.haxx.se/bug/?i=4508
  [99] = https://curl.haxx.se/bug/?i=4499
+ [100] = https://curl.haxx.se/bug/?i=4551
+ [101] = https://curl.haxx.se/bug/?i=4547
+ [102] = https://curl.haxx.se/bug/?i=4552
+ [103] = https://curl.haxx.se/mail/lib-2019-10/0104.html
+ [104] = https://curl.haxx.se/bug/?i=4487
+ [105] = https://curl.haxx.se/bug/?i=4509
+ [106] = https://curl.haxx.se/bug/?i=4539
+ [107] = https://curl.haxx.se/bug/?i=4463
+ [108] = https://curl.haxx.se/bug/?i=4535
+ [109] = https://curl.haxx.se/bug/?i=4529
+ [110] = https://curl.haxx.se/bug/?i=4555
