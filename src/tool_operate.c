@@ -437,6 +437,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       RETRY_NO,
       RETRY_TIMEOUT,
       RETRY_CONNREFUSED,
+      RETRY_FLAKY,
       RETRY_HTTP,
       RETRY_FTP,
       RETRY_LAST /* not used */
@@ -454,6 +455,18 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &oserrno);
       if(ECONNREFUSED == oserrno)
         retry = RETRY_CONNREFUSED;
+    }
+    else if(config->retry_flaky &&
+            ((CURLE_COULDNT_RESOLVE_HOST == result) ||
+             (CURLE_FTP_CANT_GET_HOST == result) ||
+             (CURLE_HTTP2 == result) ||
+             (CURLE_PARTIAL_FILE == result) ||
+             (CURLE_SSL_CONNECT_ERROR == result) ||
+             (CURLE_GOT_NOTHING == result) ||
+             (CURLE_SEND_ERROR == result) ||
+             (CURLE_RECV_ERROR == result) ||
+             (CURLE_HTTP2_STREAM == result))) {
+      retry = RETRY_FLAKY;
     }
     else if((CURLE_OK == result) ||
             (config->failonerror &&
@@ -511,6 +524,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         NULL,
         "timeout",
         "connection refused",
+        "flaky transfer",
         "HTTP error",
         "FTP error"
       };

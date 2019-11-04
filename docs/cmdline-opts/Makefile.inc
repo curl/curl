@@ -157,6 +157,7 @@ DPAGES =					\
   resolve.d					\
   retry-connrefused.d				\
   retry-delay.d					\
+  retry-flaky.d					\
   retry-max-time.d				\
   retry.d					\
   sasl-authzid.d					\
