@@ -158,6 +158,7 @@
  20.5 Add support for concurrent connections
  20.6 Use the RFC6265 test suite
  20.7 Support LD_PRELOAD on macOS
+ 20.8 Run web-platform-tests url tests
 
  21. Next SONAME bump
  21.1 http-style HEAD output for FTP
@@ -1052,6 +1053,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  LD_RELOAD doesn't work on macOS, but there are tests which require it to run
  properly. Look into making the preload support in runtests.pl portable such
  that it uses DYLD_INSERT_LIBRARIES on macOS.
+
+20.8 Run web-platform-tests url tests
+
+ Run web-platform-tests url tests and compare results with browsers on wpt.fyi
+
+ It would help us find issues to fix and help us document where our parser
+ differs from the WHATWG URL spec parsers.
+
+ See https://github.com/curl/curl/issues/4477
 
 21. Next SONAME bump
 
