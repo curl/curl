@@ -447,9 +447,9 @@ FAQ
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
   libressl, BoringSSL, GnuTLS, wolfSSL, NSS, mbedTLS, MesaLink, Secure
-  Transport (native iOS/OS X), Schannel (native Windows) or GSKit (native IBM
-  i). They all have their pros and cons, and we try to maintain a comparison
-  of them here: https://curl.haxx.se/docs/ssl-compared.html
+  Transport (native iOS/OS X), Schannel (native Windows), GSKit (native IBM
+  i), or BearSSL. They all have their pros and cons, and we try to maintain a
+  comparison of them here: https://curl.haxx.se/docs/ssl-compared.html
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 

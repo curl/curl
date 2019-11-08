@@ -948,6 +948,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
 
+/* if BearSSL is enabled */
+#cmakedefine USE_BEARSSL 1
+
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 1
 

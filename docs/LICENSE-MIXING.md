@@ -75,6 +75,11 @@ not have the announcement clause that collides with GPL.
  (May be used for SSL/TLS support) As an OpenSSL fork, it has the same
  license as that.
 
+## BearSSL
+
+ (May be used for SSL/TLS support) Uses an MIT license that is very liberal
+ and imposes no restrictions on any other library or part you may link with.
+
 ## c-ares
 
  (Used for asynchronous name resolves) Uses an MIT license that is very
