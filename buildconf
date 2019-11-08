@@ -64,16 +64,7 @@ findtool(){
 #
 removethis(){
   if test "$#" = "1"; then
-    find . -depth -name $1 -print > buildconf.tmp.$$
-    while read fdname
-    do
-      if test -f "$fdname"; then
-        rm -f "$fdname"
-      elif test -d "$fdname"; then
-        rm -f -r "$fdname"
-      fi
-    done < buildconf.tmp.$$
-    rm -f buildconf.tmp.$$
+    find . -depth -name $1 -print -exec rm -rf {} \;
   fi
 }
 
