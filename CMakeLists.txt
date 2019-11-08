@@ -295,6 +295,7 @@ if(WIN32)
     CMAKE_USE_WINSSL OFF)
 endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
+option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF)
 
 set(openssl_default ON)
 if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
@@ -307,6 +308,7 @@ count_true(enabled_ssl_options_count
   CMAKE_USE_SECTRANSP
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
+  CMAKE_USE_BEARSSL
 )
 if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
@@ -377,6 +379,14 @@ if(CMAKE_USE_MBEDTLS)
   set(USE_MBEDTLS ON)
   list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
   include_directories(${MBEDTLS_INCLUDE_DIRS})
+endif()
+
+if(CMAKE_USE_BEARSSL)
+  find_package(BearSSL REQUIRED)
+  set(SSL_ENABLED ON)
+  set(USE_BEARSSL ON)
+  list(APPEND CURL_LIBS ${BEARSSL_LIBRARY})
+  include_directories(${BEARSSL_INCLUDE_DIRS})
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -1251,6 +1261,7 @@ _add_if("WinSSL"           SSL_ENABLED AND USE_WINDOWS_SSPI)
 _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
+_add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
 if(_items)
   list(SORT _items)
 endif()

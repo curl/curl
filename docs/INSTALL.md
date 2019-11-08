@@ -120,6 +120,7 @@ libressl.
  - schannel: `--without-ssl --with-schannel`
  - secure transport: `--without-ssl --with-secure-transport`
  - MesaLink: `--without-ssl --with-mesalink`
+ - BearSSL: `--without-ssl --with-bearssl`
 
 # Windows
 
