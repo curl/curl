@@ -1575,6 +1575,10 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
   return CURLE_OK;
 }
 
+void Curl_http3_done(struct Curl_easy *data)
+{
+  (void)data;
+}
 /*
  * Called from transfer.c:done_sending when we stop HTTP/3 uploading.
  */

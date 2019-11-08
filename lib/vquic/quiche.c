@@ -361,34 +361,60 @@ static CURLcode flush_egress(struct connectdata *conn, int sockfd,
   return CURLE_OK;
 }
 
-struct h3h1header {
-  char *dest;
-  size_t destlen; /* left to use */
-  size_t nlen; /* used */
-};
-
-static int cb_each_header(uint8_t *name, size_t name_len,
-                          uint8_t *value, size_t value_len,
+/* Pseudo headers come before the real ones but :status doesn't necessarily
+   have to be the first to arrive */
+static int cb_each_header(uint8_t *name, size_t namelen,
+                          uint8_t *value, size_t valuelen,
                           void *argp)
 {
-  struct h3h1header *headers = (struct h3h1header *)argp;
-  size_t olen = 0;
+  struct HTTP *stream = (struct HTTP *)argp;
+  CURLcode result;
 
-  if((name_len == 7) && !strncmp(":status", (char *)name, 7)) {
-    msnprintf(headers->dest,
-              headers->destlen, "HTTP/3 %.*s\n",
-              (int) value_len, value);
+  if((namelen == 7) && !strncmp(":status", (char *)name, 7)) {
+    /* "HTTP/3 NNN" is already a placeholder, so just replace the number with
+       the incoming value */
+    if(valuelen == 3)
+      memcpy(&stream->header_recvbuf->buffer[7], value, 3);
   }
-  else {
-    msnprintf(headers->dest,
-              headers->destlen, "%.*s: %.*s\n",
-              (int)name_len, name, (int) value_len, value);
+  else if(':' != name[0]) {
+    /* Non-psuedo headers get converted a HTTP1-style headers */
+    result = Curl_add_buffer(&stream->header_recvbuf, name, namelen);
+    if(result)
+      return result;
+    result = Curl_add_buffer(&stream->header_recvbuf, ": ", 2);
+    if(result)
+      return result;
+    result = Curl_add_buffer(&stream->header_recvbuf, value, valuelen);
+    if(result)
+      return result;
+    result = Curl_add_buffer(&stream->header_recvbuf, "\r\n", 2);
+    if(result)
+      return result;
   }
-  olen = strlen(headers->dest);
-  headers->destlen -= olen;
-  headers->nlen += olen;
-  headers->dest += olen;
   return 0;
+}
+
+static CURLcode h3_headers2buffer(struct HTTP *stream,
+                                  char *buf,
+                                  size_t *buflen,
+                                  size_t *added)
+{
+  Curl_send_buffer *recvb = stream->header_recvbuf;
+  CURLcode result;
+  *added = 0;
+  /* add a header-body separator CRLF */
+  result = Curl_add_buffer(&recvb, "\r\n", 2);
+  if(result)
+    return result;
+  stream->firstbody = TRUE;
+  DEBUGASSERT(*buflen >= recvb->size_used);
+  if(*buflen >= recvb->size_used) {
+    memcpy(buf, recvb->buffer, recvb->size_used);
+    *buflen -= recvb->size_used;
+    *added = recvb->size_used;
+    Curl_add_buffer_free(&stream->header_recvbuf);
+  }
+  return CURLE_OK;
 }
 
 static ssize_t h3_stream_recv(struct connectdata *conn,
@@ -403,12 +429,8 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
   quiche_h3_event *ev;
   int rc;
-  struct h3h1header headers;
   struct Curl_easy *data = conn->data;
   struct HTTP *stream = data->req.protop;
-  headers.dest = buf;
-  headers.destlen = buffersize;
-  headers.nlen = 0;
 
   if(process_ingress(conn, sockfd, qs)) {
     infof(data, "h3_stream_recv returns on ingress\n");
@@ -431,21 +453,24 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 
     switch(quiche_h3_event_type(ev)) {
     case QUICHE_H3_EVENT_HEADERS:
-      rc = quiche_h3_event_for_each_header(ev, cb_each_header, &headers);
+      rc = quiche_h3_event_for_each_header(ev, cb_each_header, stream);
       if(rc) {
-        /* what do we do about this? */
+        *curlcode = rc;
+        return -1;
       }
-      recvd = headers.nlen;
       break;
     case QUICHE_H3_EVENT_DATA:
       if(!stream->firstbody) {
-        /* add a header-body separator CRLF */
-        buf[0] = '\r';
-        buf[1] = '\n';
-        buf += 2;
-        buffersize -= 2;
-        stream->firstbody = TRUE;
-        recvd = 2; /* two bytes already */
+        size_t added;
+        CURLcode result = h3_headers2buffer(stream, buf, &buffersize, &added);
+        if(result) {
+          *curlcode = result;
+          break;
+        }
+        recvd = added;
+        if(!buffersize)
+          break;
+        buf += added;
       }
       else
         recvd = 0;
@@ -460,7 +485,18 @@ static ssize_t h3_stream_recv(struct connectdata *conn,
 
     case QUICHE_H3_EVENT_FINISHED:
       streamclose(conn, "End of stream");
-      recvd = 0; /* end of stream */
+      if(!stream->firstbody) {
+        /* No body, only headers have been received */
+        size_t added;
+        CURLcode result = h3_headers2buffer(stream, buf, &buffersize, &added);
+        if(result) {
+          *curlcode = result;
+          break;
+        }
+        recvd = added;
+      }
+      else
+        recvd = 0; /* end of stream */
       break;
     default:
       break;
@@ -748,6 +784,17 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
     goto fail;
   }
 
+  if(!stream->header_recvbuf) {
+    stream->header_recvbuf = Curl_add_buffer_init();
+    if(!stream->header_recvbuf)
+      result = CURLE_OUT_OF_MEMORY;
+    else
+      /* add response code place holder first in the receive header buffer */
+      result = Curl_add_buffer(&stream->header_recvbuf, "HTTP/3 000\r\n", 12);
+    if(result)
+      goto fail;
+  }
+
   infof(data, "Using HTTP/3 Stream ID: %x (easy handle %p)\n",
         stream3_id, (void *)data);
   stream->stream3_id = stream3_id;
@@ -757,6 +804,12 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
 fail:
   free(nva);
   return result;
+}
+
+void Curl_http3_done(struct Curl_easy *data)
+{
+  struct HTTP *http = data->req.protop;
+  Curl_add_buffer_free(&http->header_recvbuf);
 }
 
 /*

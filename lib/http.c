@@ -1618,6 +1618,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
   }
 
   Curl_http2_done(conn, premature);
+  Curl_http3_done(data);
 
   Curl_mime_cleanpart(&http->form);
 

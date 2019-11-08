@@ -163,8 +163,6 @@ struct HTTP {
   int32_t stream_id; /* stream we are interested in */
 
   bool bodystarted;
-  /* We store non-final and final response headers here, per-stream */
-  Curl_send_buffer *header_recvbuf;
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
   Curl_send_buffer *trailer_recvbuf;
@@ -184,6 +182,8 @@ struct HTTP {
   size_t memlen; /* size of data copied to mem */
 #endif
 #if defined(USE_NGHTTP2) || defined(ENABLE_QUIC)
+  /* We store non-final and final response headers here, per-stream */
+  Curl_send_buffer *header_recvbuf;
   /* fields used by both HTTP/2 and HTTP/3 */
   const uint8_t *upload_mem; /* points to a buffer to read from */
   size_t upload_len; /* size of the buffer 'upload_mem' points to */
