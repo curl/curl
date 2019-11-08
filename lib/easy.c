@@ -1027,9 +1027,10 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
       Curl_update_timer(data->multi);
   }
 
-  /* This transfer may have been moved in or out of the bundle, update
-     the corresponding socket callback, if used */
-  Curl_updatesocket(data);
+  if(!data->state.done)
+    /* This transfer may have been moved in or out of the bundle, update the
+       corresponding socket callback, if used */
+    Curl_updatesocket(data);
 
   return result;
 }
