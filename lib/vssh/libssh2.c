@@ -454,7 +454,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
     int keybit = 0;
     
     if(data->set.ssh_knowhost_hlock && data->set.func_lock)
-		data->set.func_lock(data->set.ssh_knowhost_hlock);
+      data->set.func_lock(data->set.ssh_knowhost_hlock);
 
     if(remotekey) {
       /*
@@ -544,9 +544,9 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
     case CURLKHSTAT_FINE_REPLACE_TO_FILE:
       /* proceed */
       if(keycheck != LIBSSH2_KNOWNHOST_CHECK_MATCH) {
-		int addrc;
-        if(rc == CURLKHSTAT_FINE_REPLACE_TO_FILE && host){
-            libssh2_knownhost_del(sshc->kh, host);
+        int addrc;
+        if(rc == CURLKHSTAT_FINE_REPLACE_TO_FILE && host) {
+          libssh2_knownhost_del(sshc->kh, host);
         }
         /* the found host+key didn't match but has been told to be fine
            anyway so we add it in memory */
@@ -575,7 +575,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
       break;
     }
     if(data->set.ssh_knowhost_hlock && data->set.func_unlock)
-		data->set.func_unlock(data->set.ssh_knowhost_hlock);
+        data->set.func_unlock(data->set.ssh_knowhost_hlock);
   }
 #else /* HAVE_LIBSSH2_KNOWNHOST_API */
   (void)conn;
@@ -2918,32 +2918,32 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     /*handle to global lock ?*/
     if(data->set.ssh_knowhost_hlock && data->set.func_lock)
-		data->set.func_lock(data->set.ssh_knowhost_hlock);
+      data->set.func_lock(data->set.ssh_knowhost_hlock);
     /*global known_host file ?*/
-    if(data->set.ssh_knowhost_pkh){
-        ssh->kh = *(data->set.ssh_knowhost_pkh);
+    if(data->set.ssh_knowhost_pkh) {
+      ssh->kh = *(data->set.ssh_knowhost_pkh);
     }else ssh->kh = NULL;
     
-    if(ssh->kh == NULL){
-        int rc;
-        ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
-        if(!ssh->kh) {
-          libssh2_session_free(ssh->ssh_session);
-          return CURLE_FAILED_INIT;
-        }else if(data->set.ssh_knowhost_pkh){
-            *(data->set.ssh_knowhost_pkh) = ssh->kh;
-        }
+    if(ssh->kh == NULL) {
+      int rc;
+      ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
+      if(!ssh->kh) {
+        libssh2_session_free(ssh->ssh_session);
+        return CURLE_FAILED_INIT;
+      }else if(data->set.ssh_knowhost_pkh) {
+        *(data->set.ssh_knowhost_pkh) = ssh->kh;
+      }
 
-        /* read all known hosts from there */
-        rc = libssh2_knownhost_readfile(ssh->kh,
-                                        data->set.str[STRING_SSH_KNOWNHOSTS],
-                                        LIBSSH2_KNOWNHOST_FILE_OPENSSH);
-        if(rc < 0)
-          infof(data, "Failed to read known hosts from %s\n",
-                data->set.str[STRING_SSH_KNOWNHOSTS]);
+      /* read all known hosts from there */
+      rc = libssh2_knownhost_readfile(ssh->kh,
+                                      data->set.str[STRING_SSH_KNOWNHOSTS],
+                                      LIBSSH2_KNOWNHOST_FILE_OPENSSH);
+      if(rc < 0)
+        infof(data, "Failed to read known hosts from %s\n",
+              data->set.str[STRING_SSH_KNOWNHOSTS]);
     }
     if(data->set.ssh_knowhost_hlock && data->set.func_unlock)
-		data->set.func_unlock(data->set.ssh_knowhost_hlock);
+      data->set.func_unlock(data->set.ssh_knowhost_hlock);
   }
 #endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 
