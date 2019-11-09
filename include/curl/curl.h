@@ -793,8 +793,8 @@ enum curl_khmatch {
   CURLKHMATCH_LAST      /* not for use, only a marker for last-in-list */
 };
 
-typedef int (*curl_func_lock) (HANDLE handle);
-typedef int (*curl_func_unlock) (HANDLE handle);
+typedef int (*curl_func_lock) (void* handle);
+typedef int (*curl_func_unlock) (void* handle);
 
 typedef int
   (*curl_sshkeycallback) (CURL *easy,     /* easy handle */
