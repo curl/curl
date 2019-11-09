@@ -452,7 +452,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
                                                     &keylen, &keytype);
     int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;
     int keybit = 0;
-    
+
     if(data->set.ssh_knowhost_hlock && data->set.func_lock)
       data->set.func_lock(data->set.ssh_knowhost_hlock);
 
@@ -471,7 +471,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
 
       keybit = (keytype == LIBSSH2_HOSTKEY_TYPE_RSA)?
         LIBSSH2_KNOWNHOST_KEY_SSHRSA:LIBSSH2_KNOWNHOST_KEY_SSHDSS;
-      
+
 #ifdef HAVE_LIBSSH2_KNOWNHOST_CHECKP
       keycheck = libssh2_knownhost_checkp(sshc->kh,
                                           conn->host.name,
@@ -2600,7 +2600,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     case SSH_SESSION_FREE:
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
       if(sshc->kh) {
-        if(data->set.ssh_knowhost_pkh==NULL)libssh2_knownhost_free(sshc->kh);
+        if(data->set.ssh_knowhost_pkh == NULL)libssh2_knownhost_free(sshc->kh);
         sshc->kh = NULL;
       }
 #endif
@@ -2923,7 +2923,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     if(data->set.ssh_knowhost_pkh) {
       ssh->kh = *(data->set.ssh_knowhost_pkh);
     }else ssh->kh = NULL;
-    
+
     if(ssh->kh == NULL) {
       int rc;
       ssh->kh = libssh2_knownhost_init(ssh->ssh_session);

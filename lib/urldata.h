@@ -1661,8 +1661,8 @@ struct UserDefined {
   long new_file_perms;    /* Permissions to use when creating remote files */
   long new_directory_perms; /* Permissions to use when creating remote dirs */
   long ssh_auth_types;   /* allowed SSH auth types */
-  void** ssh_knowhost_pkh; /* common file for knownhost */
-  void* ssh_knowhost_hlock; /* common lock handle for knownhost */
+  void **ssh_knowhost_pkh; /* common file for knownhost */
+  void *ssh_knowhost_hlock; /* common lock handle for knownhost */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   unsigned int scope_id;  /* Scope id for IPv6 */
   long allowed_protocols;

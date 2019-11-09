@@ -2288,20 +2288,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* the pointer handle to store the handle of the known_host  */
     data->set.ssh_knowhost_pkh = va_arg(param, void**);
     break;
-    
+
   case CURLOPT_SSH_KNOWNHOSTS_HANDLE_LOCK:
     /* the handle to the lock */
     data->set.ssh_knowhost_hlock = va_arg(param, void*);
     break;
-    
+
   case CURLOPT_FUNCTION_LOCK:
     data->set.func_lock = va_arg(param, curl_func_lock);
     break;
-    
+
   case CURLOPT_FUNCTION_UNLOCK:
     data->set.func_unlock = va_arg(param, curl_func_unlock);
     break;
-    
+
   case CURLOPT_SSH_KEYFUNCTION:
     /* setting to NULL is fine since the ssh.c functions themselves will
        then rever to use the internal default */
