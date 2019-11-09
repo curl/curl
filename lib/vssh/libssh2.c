@@ -559,7 +559,8 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
         if(addrc)
           infof(data, "Warning adding the known host %s failed!\n",
                 conn->host.name);
-        else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE || rc == CURLKHSTAT_FINE_REPLACE_TO_FILE) {
+        else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE 
+                || rc == CURLKHSTAT_FINE_REPLACE_TO_FILE) {
           /* now we write the entire in-memory list of known hosts to the
              known_hosts file */
           int wrc =
@@ -2922,7 +2923,8 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
     /*global known_host file ?*/
     if(data->set.ssh_knowhost_pkh) {
       ssh->kh = *(data->set.ssh_knowhost_pkh);
-    }else ssh->kh = NULL;
+    }
+    else ssh->kh = NULL;
 
     if(ssh->kh == NULL) {
       int rc;
@@ -2930,7 +2932,8 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
       if(!ssh->kh) {
         libssh2_session_free(ssh->ssh_session);
         return CURLE_FAILED_INIT;
-      }else if(data->set.ssh_knowhost_pkh) {
+      }
+      else if(data->set.ssh_knowhost_pkh) {
         *(data->set.ssh_knowhost_pkh) = ssh->kh;
       }
 
