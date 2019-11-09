@@ -269,25 +269,25 @@ static CURLcode dohprobe(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
 #endif
     ERROR_CHECK_SETOPT(CURLOPT_TIMEOUT_MS, (long)timeout_ms);
-    if(data->set.verbose)
-      ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
-    if(data->set.no_signal)
-      ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
+    ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, data->set.verbose ? 1L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, data->set.no_signal ? 1L : 0L);
 
     /* Inherit *some* SSL options from the user's transfer. This is a
        best-guess as to which options are needed for compatibility. #3661 */
-    if(data->set.ssl.falsestart)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_FALSESTART, 1L);
-    if(data->set.ssl.primary.verifyhost)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST, 2L);
-    if(data->set.proxy_ssl.primary.verifyhost)
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_VERIFYHOST, 2L);
-    if(data->set.ssl.primary.verifypeer)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYPEER, 1L);
-    if(data->set.proxy_ssl.primary.verifypeer)
-      ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_VERIFYPEER, 1L);
-    if(data->set.ssl.primary.verifystatus)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYSTATUS, 1L);
+    ERROR_CHECK_SETOPT(CURLOPT_CERTINFO,
+      data->set.ssl.certinfo ? 1L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_FALSESTART,
+      data->set.ssl.falsestart ? 1L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST,
+      data->set.ssl.primary.verifyhost ? 2L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_VERIFYHOST,
+      data->set.proxy_ssl.primary.verifyhost ? 2L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYPEER,
+      data->set.ssl.primary.verifypeer ? 1L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_VERIFYPEER,
+      data->set.proxy_ssl.primary.verifypeer ? 1L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYSTATUS,
+      data->set.ssl.primary.verifystatus ? 1L : 0L);
     if(data->set.str[STRING_SSL_CAFILE_ORIG]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
         data->set.str[STRING_SSL_CAFILE_ORIG]);
@@ -312,8 +312,6 @@ static CURLcode dohprobe(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_PROXY_CRLFILE,
         data->set.str[STRING_SSL_CRLFILE_PROXY]);
     }
-    if(data->set.ssl.certinfo)
-      ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
     if(data->set.str[STRING_SSL_RANDOM_FILE]) {
       ERROR_CHECK_SETOPT(CURLOPT_RANDOM_FILE,
         data->set.str[STRING_SSL_RANDOM_FILE]);
