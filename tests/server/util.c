@@ -150,7 +150,8 @@ void win32_perror(const char *msg)
   char buf[512];
   DWORD err = SOCKERRNO;
 
-  if(!FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
+                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
                      LANG_NEUTRAL, buf, sizeof(buf), NULL))
     msnprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
   if(msg)
