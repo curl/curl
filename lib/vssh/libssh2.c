@@ -453,7 +453,8 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
     int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;
     int keybit = 0;
     
-    if(data->set.ssh_knowhost_hlock && data->set.func_lock)data->set.func_lock(data->set.ssh_knowhost_hlock);
+    if(data->set.ssh_knowhost_hlock && data->set.func_lock)
+		data->set.func_lock(data->set.ssh_knowhost_hlock);
 
     if(remotekey) {
       /*
@@ -573,7 +574,8 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
       }
       break;
     }
-    if(data->set.ssh_knowhost_hlock && data->set.func_unlock)data->set.func_unlock(data->set.ssh_knowhost_hlock);
+    if(data->set.ssh_knowhost_hlock && data->set.func_unlock)
+		data->set.func_unlock(data->set.ssh_knowhost_hlock);
   }
 #else /* HAVE_LIBSSH2_KNOWNHOST_API */
   (void)conn;
@@ -2915,7 +2917,8 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     /*handle to global lock ?*/
-    if(data->set.ssh_knowhost_hlock && data->set.func_lock)data->set.func_lock(data->set.ssh_knowhost_hlock);
+    if(data->set.ssh_knowhost_hlock && data->set.func_lock)
+		data->set.func_lock(data->set.ssh_knowhost_hlock);
     /*global known_host file ?*/
     if(data->set.ssh_knowhost_pkh){
         ssh->kh = *(data->set.ssh_knowhost_pkh);
@@ -2939,7 +2942,8 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
           infof(data, "Failed to read known hosts from %s\n",
                 data->set.str[STRING_SSH_KNOWNHOSTS]);
     }
-    if(data->set.ssh_knowhost_hlock && data->set.func_unlock)data->set.func_unlock(data->set.ssh_knowhost_hlock);
+    if(data->set.ssh_knowhost_hlock && data->set.func_unlock)
+		data->set.func_unlock(data->set.ssh_knowhost_hlock);
   }
 #endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 
