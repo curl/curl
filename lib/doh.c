@@ -191,10 +191,10 @@ static int Curl_doh_done(struct Curl_easy *doh, CURLcode result)
 }
 
 #define ERROR_CHECK_SETOPT(x,y) \
-do {                                      \
-  result = curl_easy_setopt(doh, x, y);   \
-  if(result)                              \
-    goto error;                           \
+do {                                         \
+  result = curl_easy_setopt(doh, x, y);      \
+  if(result && result != CURLE_NOT_BUILT_IN) \
+    goto error;                              \
 } WHILE_FALSE
 
 static CURLcode dohprobe(struct Curl_easy *data,
