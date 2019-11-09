@@ -472,6 +472,8 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   Curl_mime_initpart(&set->mimepost, data);
 
+  set->func_lock = NULL;
+  set->func_unlock = NULL;
   /*
    * libcurl 7.10 introduced SSL verification *by default*! This needs to be
    * switched off unless wanted.
@@ -481,6 +483,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 #ifdef USE_TLS_SRP
   set->ssl.authtype = CURL_TLSAUTH_NONE;
 #endif
+  set->ssh_knowhost_pkh = NULL; /*default no common file for knownhost*/
+  set->ssh_knowhost_hlock = NULL; /*default no common lock handle for knownhost*/
+  
   set->ssh_auth_types = CURLSSH_AUTH_DEFAULT; /* defaults to any auth
                                                       type */
   set->ssl.primary.sessionid = TRUE; /* session ID caching enabled by

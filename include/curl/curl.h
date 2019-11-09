@@ -781,6 +781,7 @@ enum curl_khstat {
   CURLKHSTAT_DEFER,  /* do not accept it, but we can't answer right now so
                         this causes a CURLE_DEFER error but otherwise the
                         connection will be left intact etc */
+  CURLKHSTAT_FINE_REPLACE_TO_FILE, /* replace the old entry*/
   CURLKHSTAT_LAST    /* not for use, only a marker for last-in-list */
 };
 
@@ -791,6 +792,9 @@ enum curl_khmatch {
   CURLKHMATCH_MISSING,  /* no matching host/key found */
   CURLKHMATCH_LAST      /* not for use, only a marker for last-in-list */
 };
+
+typedef int (*curl_func_lock) (HANDLE handle);
+typedef int (*curl_func_unlock) (HANDLE handle);
 
 typedef int
   (*curl_sshkeycallback) (CURL *easy,     /* easy handle */
@@ -1926,6 +1930,15 @@ typedef enum {
 
   /* SASL authorisation identity */
   CINIT(SASL_AUTHZID, STRINGPOINT, 289),
+
+  /* SSH handle the global known_host file to use */
+  CINIT(SSH_KNOWNHOSTS_HANDLE_KH, OBJECTPOINT, 290),
+
+  /* SSH handle of the lock to use */
+  CINIT(SSH_KNOWNHOSTS_HANDLE_LOCK, OBJECTPOINT, 291),
+  
+  CINIT(FUNCTION_LOCK,OBJECTPOINT,292),
+  CINIT(FUNCTION_UNLOCK,OBJECTPOINT,293),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

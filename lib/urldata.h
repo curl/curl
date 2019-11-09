@@ -1650,6 +1650,8 @@ struct UserDefined {
   int ftp_create_missing_dirs; /* 1 - create directories that don't exist
                                   2 - the same but also allow MKD to fail once
                                */
+  curl_func_lock func_lock;
+  curl_func_unlock func_unlock;
   curl_sshkeycallback ssh_keyfunc; /* key matching callback */
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
   enum CURL_NETRC_OPTION
@@ -1659,6 +1661,8 @@ struct UserDefined {
   long new_file_perms;    /* Permissions to use when creating remote files */
   long new_directory_perms; /* Permissions to use when creating remote dirs */
   long ssh_auth_types;   /* allowed SSH auth types */
+  void** ssh_knowhost_pkh; /* common file for knownhost */
+  void* ssh_knowhost_hlock; /* common lock handle for knownhost */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   unsigned int scope_id;  /* Scope id for IPv6 */
   long allowed_protocols;

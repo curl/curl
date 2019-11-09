@@ -440,6 +440,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
   struct Curl_easy *data = conn->data;
+  struct libssh2_knownhost *host = NULL;
 
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
     /* we're asked to verify the host against a file */
@@ -451,6 +452,8 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
                                                     &keylen, &keytype);
     int keycheck = LIBSSH2_KNOWNHOST_CHECK_FAILURE;
     int keybit = 0;
+    
+    if(data->set.ssh_knowhost_hlock && data->set.func_lock)data->set.func_lock(data->set.ssh_knowhost_hlock);
 
     if(remotekey) {
       /*
@@ -458,7 +461,6 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
        * What host name does OpenSSH store in its file if an IDN name is
        * used?
        */
-      struct libssh2_knownhost *host;
       enum curl_khmatch keymatch;
       curl_sshkeycallback func =
         data->set.ssh_keyfunc?data->set.ssh_keyfunc:sshkeycallback;
@@ -468,7 +470,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
 
       keybit = (keytype == LIBSSH2_HOSTKEY_TYPE_RSA)?
         LIBSSH2_KNOWNHOST_KEY_SSHRSA:LIBSSH2_KNOWNHOST_KEY_SSHDSS;
-
+      
 #ifdef HAVE_LIBSSH2_KNOWNHOST_CHECKP
       keycheck = libssh2_knownhost_checkp(sshc->kh,
                                           conn->host.name,
@@ -538,11 +540,16 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
       break;
     case CURLKHSTAT_FINE:
     case CURLKHSTAT_FINE_ADD_TO_FILE:
+    case CURLKHSTAT_FINE_REPLACE_TO_FILE:
       /* proceed */
       if(keycheck != LIBSSH2_KNOWNHOST_CHECK_MATCH) {
+		int addrc;
+        if(rc == CURLKHSTAT_FINE_REPLACE_TO_FILE && host){
+            libssh2_knownhost_del(sshc->kh, host);
+        }
         /* the found host+key didn't match but has been told to be fine
            anyway so we add it in memory */
-        int addrc = libssh2_knownhost_add(sshc->kh,
+        addrc = libssh2_knownhost_add(sshc->kh,
                                           conn->host.name, NULL,
                                           remotekey, keylen,
                                           LIBSSH2_KNOWNHOST_TYPE_PLAIN|
@@ -551,7 +558,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
         if(addrc)
           infof(data, "Warning adding the known host %s failed!\n",
                 conn->host.name);
-        else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE) {
+        else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE || rc == CURLKHSTAT_FINE_REPLACE_TO_FILE) {
           /* now we write the entire in-memory list of known hosts to the
              known_hosts file */
           int wrc =
@@ -566,6 +573,7 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
       }
       break;
     }
+    if(data->set.ssh_knowhost_hlock && data->set.func_unlock)data->set.func_unlock(data->set.ssh_knowhost_hlock);
   }
 #else /* HAVE_LIBSSH2_KNOWNHOST_API */
   (void)conn;
@@ -2590,7 +2598,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     case SSH_SESSION_FREE:
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
       if(sshc->kh) {
-        libssh2_knownhost_free(sshc->kh);
+        if(data->set.ssh_knowhost_pkh==NULL)libssh2_knownhost_free(sshc->kh);
         sshc->kh = NULL;
       }
 #endif
@@ -2906,20 +2914,32 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
   if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
-    int rc;
-    ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
-    if(!ssh->kh) {
-      libssh2_session_free(ssh->ssh_session);
-      return CURLE_FAILED_INIT;
-    }
+    /*handle to global lock ?*/
+    if(data->set.ssh_knowhost_hlock && data->set.func_lock)data->set.func_lock(data->set.ssh_knowhost_hlock);
+    /*global known_host file ?*/
+    if(data->set.ssh_knowhost_pkh){
+        ssh->kh = *(data->set.ssh_knowhost_pkh);
+    }else ssh->kh = NULL;
+    
+    if(ssh->kh == NULL){
+        int rc;
+        ssh->kh = libssh2_knownhost_init(ssh->ssh_session);
+        if(!ssh->kh) {
+          libssh2_session_free(ssh->ssh_session);
+          return CURLE_FAILED_INIT;
+        }else if(data->set.ssh_knowhost_pkh){
+            *(data->set.ssh_knowhost_pkh) = ssh->kh;
+        }
 
-    /* read all known hosts from there */
-    rc = libssh2_knownhost_readfile(ssh->kh,
-                                    data->set.str[STRING_SSH_KNOWNHOSTS],
-                                    LIBSSH2_KNOWNHOST_FILE_OPENSSH);
-    if(rc < 0)
-      infof(data, "Failed to read known hosts from %s\n",
-            data->set.str[STRING_SSH_KNOWNHOSTS]);
+        /* read all known hosts from there */
+        rc = libssh2_knownhost_readfile(ssh->kh,
+                                        data->set.str[STRING_SSH_KNOWNHOSTS],
+                                        LIBSSH2_KNOWNHOST_FILE_OPENSSH);
+        if(rc < 0)
+          infof(data, "Failed to read known hosts from %s\n",
+                data->set.str[STRING_SSH_KNOWNHOSTS]);
+    }
+    if(data->set.ssh_knowhost_hlock && data->set.func_unlock)data->set.func_unlock(data->set.ssh_knowhost_hlock);
   }
 #endif /* HAVE_LIBSSH2_KNOWNHOST_API */
 
