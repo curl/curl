@@ -695,11 +695,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     easy_owns_conn = TRUE;
   }
 
-  /* The timer must be shut down before data->multi is set to NULL,
-     else the timenode will remain in the splay tree after
-     curl_easy_cleanup is called. */
-  Curl_expire_clear(data);
-
   if(data->conn) {
 
     /* we must call multi_done() here (if we still own the connection) so that
@@ -714,6 +709,11 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
       (void)multi_done(data, data->result, premature);
     }
   }
+
+  /* The timer must be shut down before data->multi is set to NULL, else the
+     timenode will remain in the splay tree after curl_easy_cleanup is
+     called. Do it after multi_done() in case that sets another time! */
+  Curl_expire_clear(data);
 
   if(data->connect_queue.ptr)
     /* the handle was in the pending list waiting for an available connection,
