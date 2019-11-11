@@ -52,7 +52,7 @@ e16: Error in the HTTP2 framing layer
 e17: FTP: couldn't set file type
 e18: Transferred a partial file
 e19: FTP: couldn't retrieve (RETR failed) the specified file
-e20: Unknown error
+e20: HTTP/3 error
 e21: Quote command returned error
 e22: HTTP response code said error
 e23: Failed writing received data to disk/application
