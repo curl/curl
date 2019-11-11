@@ -195,20 +195,8 @@ The configure utility, unfortunately, is not available for the Windows
 environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
-However, you can use the following defines to disable specific
-protocols:
-
- - `HTTP_ONLY`             disables all protocols except HTTP
- - `CURL_DISABLE_FTP`      disables FTP
- - `CURL_DISABLE_LDAP`     disables LDAP
- - `CURL_DISABLE_TELNET`   disables TELNET
- - `CURL_DISABLE_DICT`     disables DICT
- - `CURL_DISABLE_FILE`     disables FILE
- - `CURL_DISABLE_TFTP`     disables TFTP
- - `CURL_DISABLE_HTTP`     disables HTTP
- - `CURL_DISABLE_IMAP`     disables IMAP
- - `CURL_DISABLE_POP3`     disables POP3
- - `CURL_DISABLE_SMTP`     disables SMTP
+You can use specific defines to disable specific protocols and features. See
+[CURL-DISABLE.md](CURL-DISABLE-md) for the full list.
 
 If you want to set any of these defines you have the following options:
 
