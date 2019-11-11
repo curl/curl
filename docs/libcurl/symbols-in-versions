@@ -84,6 +84,7 @@ CURLE_FUNCTION_NOT_FOUND        7.1
 CURLE_GOT_NOTHING               7.9.1
 CURLE_HTTP2                     7.38.0
 CURLE_HTTP2_STREAM              7.49.0
+CURLE_HTTP3                     7.68.0
 CURLE_HTTP_NOT_FOUND            7.1
 CURLE_HTTP_PORT_FAILED          7.3           7.12.0
 CURLE_HTTP_POST_ERROR           7.1
