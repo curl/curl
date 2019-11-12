@@ -336,6 +336,16 @@ static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   return 0;
 }
 
+static void extend_stream_window(ngtcp2_conn *tconn,
+                                 struct HTTP *stream)
+{
+  size_t thismuch = stream->unacked_window;
+  ngtcp2_conn_extend_max_stream_offset(tconn, stream->stream3_id, thismuch);
+  ngtcp2_conn_extend_max_offset(tconn, thismuch);
+  stream->unacked_window = 0;
+}
+
+
 static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
                                int fin, uint64_t offset,
                                const uint8_t *buf, size_t buflen,
@@ -346,9 +356,6 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   (void)offset;
   (void)stream_user_data;
 
-  infof(qs->conn->data, "Received %ld bytes data on stream %u\n",
-        buflen, stream_id);
-
   nconsumed =
     nghttp3_conn_read_stream(qs->h3conn, stream_id, buf, buflen, fin);
   if(nconsumed < 0) {
@@ -357,6 +364,9 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
+  /* number of bytes inside buflen which consists of framing overhead
+   * including QPACK HEADERS. In other words, it does not consume payload of
+   * DATA frame. */
   ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, nconsumed);
   ngtcp2_conn_extend_max_offset(tconn, nconsumed);
 
@@ -711,17 +721,19 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
                            const uint8_t *buf, size_t buflen,
                            void *user_data, void *stream_user_data)
 {
-  struct quicsocket *qs = user_data;
   size_t ncopy;
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
   (void)conn;
-  H3BUGF(infof(data, "cb_h3_recv_data CALLED with %d bytes\n", buflen));
 
   /* TODO: this needs to be handled properly */
-  DEBUGASSERT(buflen <= stream->len);
+  if(buflen > stream->len) {
+    fprintf(stderr, "!! got %zd bytes, buffer has room for %zd bytes\n",
+            buflen, stream->len);
+    DEBUGASSERT(0);
+  }
 
-  ncopy = CURLMIN(stream->len, buflen);
+  ncopy = buflen;
   memcpy(stream->mem, buf, ncopy);
   stream->len -= ncopy;
   stream->memlen += ncopy;
@@ -736,10 +748,9 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
   }
 #endif
   stream->mem += ncopy;
-
-  ngtcp2_conn_extend_max_stream_offset(qs->qconn, stream_id, buflen);
-  ngtcp2_conn_extend_max_offset(qs->qconn, buflen);
-
+  stream->unacked_window += ncopy;
+  (void)stream_id;
+  (void)user_data;
   return 0;
 }
 
@@ -750,10 +761,10 @@ static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
   struct quicsocket *qs = user_data;
   (void)conn;
   (void)stream_user_data;
+  (void)stream_id;
 
   ngtcp2_conn_extend_max_stream_offset(qs->qconn, stream_id, consumed);
   ngtcp2_conn_extend_max_offset(qs->qconn, consumed);
-
   return 0;
 }
 
@@ -969,8 +980,7 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
     stream->memlen = 0;
     stream->mem = buf;
     stream->len = buffersize;
-    H3BUGF(infof(conn->data, "!! ngh3_stream_recv returns %zd bytes at %p\n",
-                 memlen, buf));
+    extend_stream_window(qs->qconn, stream);
     return memlen;
   }
 
