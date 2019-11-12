@@ -198,6 +198,7 @@ struct HTTP {
   bool upload_done;
 #endif
 #ifdef USE_NGHTTP3
+  size_t unacked_window;
   struct h3out *h3out; /* per-stream buffers for upload */
 #endif
 };
