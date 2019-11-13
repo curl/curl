@@ -218,6 +218,8 @@ November:
 
 March: security vulnerability: libcurl Arbitrary File Access
 
+April: added CMake support
+
 August: security vulnerability: libcurl embedded zero in cert name
 
 December: Added support for IMAP, POP3 and SMTP
@@ -344,3 +346,10 @@ April: added the cyassl backend (later renamed to WolfSSL)
     curl_easy_setopt() options:   261
     Public functions in libcurl:  80
     Contributors:                 1808
+
+2019
+----
+
+ August: the first HTTP/3 requests with curl.
+
+ September: 7.66.0 is released and the tool offers parallel downloads
