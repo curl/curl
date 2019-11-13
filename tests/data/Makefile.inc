@@ -66,6 +66,8 @@ test393 test394 test395 \
 test400 test401 test402 test403 test404 test405 test406 test407 test408 \
 test409 \
 \
+test490 test491 test492 \
+\
 test500 test501 test502 test503 test504 test505 test506 test507 test508 \
 test509 test510 test511 test512 test513 test514 test515 test516 test517 \
 test518 test519 test520 test521 test522 test523 test524 test525 test526 \

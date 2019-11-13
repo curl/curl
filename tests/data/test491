@@ -1,0 +1,64 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Two globbed HTTP PUTs, the second upload file is missing
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/491 -T '{log/in491,log/bad491}'
+</command>
+<file name="log/in491">
+surprise!
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /491 HTTP/1.1
+Host: 127.0.0.1:8990
+Accept: */*
+Content-Length: 10
+Expect: 100-continue
+
+surprise!
+</protocol>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>
