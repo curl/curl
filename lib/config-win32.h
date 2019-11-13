@@ -737,7 +737,7 @@ Vista
 #define OS "x86_64-pc-win32"
 #elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
 #define OS "ia64-pc-win32"
-#elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 (Windows RT, Windows 10 IoT) */
+#elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 (Windows RT) */
 #define OS "thumbv7a-pc-win32"
 #elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
 #define OS "aarch64-pc-win32"
