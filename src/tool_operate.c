@@ -829,12 +829,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       separator = ((!state->outfiles ||
                     !strcmp(state->outfiles, "-")) && urlnum > 1);
 
-      /* Here's looping around each globbed URL */
-
-      if(state->li >= urlnum) {
-        state->li = 0;
-        state->up++;
-      }
       if(state->up < state->infilenum) {
         struct per_transfer *per;
         struct OutStruct *outs;
@@ -1908,6 +1902,15 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         per->retrystart = tvnow();
 
         state->li++;
+        /* Here's looping around each globbed URL */
+        if(state->li >= urlnum) {
+          state->li = 0;
+          state->urlnum = 0; /* forced reglob of URLs */
+          glob_cleanup(state->urls);
+          state->urls = NULL;
+          state->up++;
+          Curl_safefree(state->uploadfile); /* clear it to get the next */
+        }
       }
       else {
         /* Free this URL node data without destroying the
