@@ -2990,8 +2990,13 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
         const char * const hostname = SSL_IS_PROXY() ?
           conn->http_proxy.host.name : conn->host.name;
         const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
+        char extramsg[80]="";
+        int sockerr = SOCKERRNO;
+        if(sockerr && detail == SSL_ERROR_SYSCALL)
+          Curl_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%ld ",
-              SSL_ERROR_to_str(detail), hostname, port);
+              extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
+              hostname, port);
         return result;
       }
 
