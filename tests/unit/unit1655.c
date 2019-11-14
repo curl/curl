@@ -36,43 +36,99 @@ static void unit_stop(void)
 
 UNITTEST_START
 
-/* introduce a scope and prove the corner case with write overflow,
- * so we can prove this test would detect it and that it is properly fixed
+/*
+ * Prove detection of write overflow using a short buffer and a name
+ * of maximal valid length.
+ *
+ * Prove detection of other invalid input.
  */
 do {
-  const char *bad = "this.is.a.hostname.where.each.individual.part.is.within."
-    "the.sixtythree.character.limit.but.still.long.enough.to."
-    "trigger.the.the.buffer.overflow......it.is.chosen.to.be."
-    "of.a.length.such.that.it.causes.a.two.byte.buffer......."
-    "overwrite.....making.it.longer.causes.doh.encode.to....."
-    ".return.early.so.dont.change.its.length.xxxx.xxxxxxxxxxx"
-    "..xxxxxx.....xx..........xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    "xxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxx..x......xxxx"
-    "xxxx..xxxxxxxxxxxxxxxxxxx.x...xxxx.x.x.x...xxxxx";
+  const char *max =
+    /* ..|....1.........2.........3.........4.........5.........6... */
+    /* 3456789012345678901234567890123456789012345678901234567890123 */
+    "this.is.a.maximum-length.hostname."                  /* 34:  34 */
+    "with-no-label-of-greater-length-than-the-sixty-three-characters."
+                                                          /* 64:  98 */
+    "specified.in.the.RFCs."                              /* 22: 120 */
+    "and.with.a.QNAME.encoding.whose.length.is.exactly."  /* 50: 170 */
+    "the.maximum.length.allowed."                         /* 27: 197 */
+    "that.is.two-hundred.and.fifty-six."                  /* 34: 231 */
+    "including.the.last.null."                            /* 24: 255 */
+    "";
+  const char *toolong =
+    /* ..|....1.........2.........3.........4.........5.........6... */
+    /* 3456789012345678901234567890123456789012345678901234567890123 */
+    "here.is.a.hostname.which.is.just.barely.too.long."   /* 49:  49 */
+    "to.be.encoded.as.a.QNAME.of.the.maximum.allowed.length."
+                                                          /* 55: 104 */
+    "which.is.256.including.a.final.zero-length.label."   /* 49: 153 */
+    "representing.the.root.node.so.that.a.name.with."     /* 47: 200 */
+    "a.trailing.dot.may.have.up.to."                      /* 30: 230 */
+    "255.characters.never.more."                          /* 26: 256 */
+    "";
+  const char *emptylabel =
+    "this.is.an.otherwise-valid.hostname."
+    ".with.an.empty.label.";
+  const char *outsizelabel =
+    "this.is.an.otherwise-valid.hostname."
+    "with-a-label-of-greater-length-than-the-sixty-three-characters-"
+    "specified.in.the.RFCs.";
+
+  struct test {
+    const char *name;
+    const DOHcode expected_result;
+  };
 
   /* plays the role of struct dnsprobe in urldata.h */
   struct demo {
-    unsigned char dohbuffer[512];
+    unsigned char dohbuffer[255 + 16]; /* deliberately short buffer */
     unsigned char canary1;
     unsigned char canary2;
     unsigned char canary3;
   };
 
-  size_t olen = 100000;
-  struct demo victim;
-  DOHcode d;
-  victim.canary1 = 87; /* magic numbers, arbritrarily picked */
-  victim.canary2 = 35;
-  victim.canary3 = 41;
-  d = doh_encode(bad, DNS_TYPE_A, victim.dohbuffer,
-                 sizeof(victim.dohbuffer), &olen);
-  fail_unless(victim.canary1 == 87, "one byte buffer overwrite has happened");
-  fail_unless(victim.canary2 == 35, "two byte buffer overwrite has happened");
-  fail_unless(victim.canary3 == 41,
-              "three byte buffer overwrite has happened");
-  if(d == DOH_OK) {
-    fail_unless(olen <= sizeof(victim.dohbuffer), "wrote outside bounds");
-    fail_unless(olen > strlen(bad), "unrealistic low size");
+  const struct test playlist[4] = {
+    { toolong, DOH_DNS_NAME_TOO_LONG },  /* expect early failure */
+    { emptylabel, DOH_DNS_BAD_LABEL },   /* also */
+    { outsizelabel, DOH_DNS_BAD_LABEL }, /* also */
+    { max, DOH_OK }                      /* expect buffer overwrite */
+  };
+
+  for(int i = 0; i < (int)(sizeof(playlist)/sizeof(*playlist)); i++) {
+    const char *name = playlist[i].name;
+    size_t olen = 100000;
+    struct demo victim;
+    DOHcode d;
+
+    victim.canary1 = 87; /* magic numbers, arbritrarily picked */
+    victim.canary2 = 35;
+    victim.canary3 = 41;
+    d = doh_encode(name, DNS_TYPE_A, victim.dohbuffer,
+                   sizeof(struct demo), /* allow room for overflow */
+                   &olen);
+
+    fail_unless(d == playlist[i].expected_result,
+                "result returned was not as expected");
+    if(d == playlist[i].expected_result) {
+      if(name == max) {
+        fail_if(victim.canary1 == 87,
+                "demo one-byte buffer overwrite did not happen");
+      }
+      else {
+        fail_unless(victim.canary1 == 87,
+                    "one-byte buffer overwrite has happened");
+      }
+      fail_unless(victim.canary2 == 35,
+                  "two-byte buffer overwrite has happened");
+      fail_unless(victim.canary3 == 41,
+                  "three-byte buffer overwrite has happened");
+    }
+    else {
+      if(d == DOH_OK) {
+        fail_unless(olen <= sizeof(victim.dohbuffer), "wrote outside bounds");
+        fail_unless(olen > strlen(name), "unrealistic low size");
+      }
+    }
   }
 } while(0);
 
@@ -84,6 +140,7 @@ do {
   const size_t magic1 = 9765;
   size_t olen1 = magic1;
   const char *sunshine1 = "a.com";
+  const char *dotshine1 = "a.com.";
   const char *sunshine2 = "aa.com";
   size_t olen2;
   DOHcode ret2;
@@ -93,6 +150,13 @@ do {
   fail_unless(ret == DOH_OK, "sunshine case 1 should pass fine");
   fail_if(olen1 == magic1, "olen has not been assigned properly");
   fail_unless(olen1 > strlen(sunshine1), "bad out length");
+
+  /* with a trailing dot, the response should have the same length */
+  olen2 = magic1;
+  ret2 = doh_encode(dotshine1, dnstype, buffer, buflen, &olen2);
+  fail_unless(ret2 == DOH_OK, "dotshine case should pass fine");
+  fail_if(olen2 == magic1, "olen has not been assigned properly");
+  fail_unless(olen1 == olen2, "olen should not grow for a trailing dot");
 
   /* add one letter, the response should be one longer */
   olen2 = magic1;

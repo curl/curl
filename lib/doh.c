@@ -86,12 +86,36 @@ UNITTEST DOHcode doh_encode(const char *host,
   unsigned char *orig = dnsp;
   const char *hostp = host;
 
-  /* The expected output length does not depend on the number of dots within
-   * the host name. It will always be two more than the length of the host
-   * name, one for the size and one trailing null. In case there are dots,
-   * each dot adds one size but removes the need to store the dot, net zero.
+  /* The expected output length is 16 bytes more than the length of
+   * the QNAME-encoding of the host name.
+   *
+   * A valid DNS name may not contain a zero-length label, except at
+   * the end.  For this reason, a name beginning with a dot, or
+   * containing a sequence of two or more consecutive dots, is invalid
+   * and cannot be encoded as a QNAME.
+   *
+   * If the host name ends with a trailing dot, the corresponding
+   * QNAME-encoding is one byte longer than the host name. If (as is
+   * also valid) the hostname is shortened by the omission of the
+   * trailing dot, then its QNAME-encoding will be two bytes longer
+   * than the host name.
+   *
+   * Each [ label, dot ] pair is encoded as [ length, label ],
+   * preserving overall length.  A final [ label ] without a dot is
+   * also encoded as [ length, label ], increasing overall length
+   * by one. The encoding is completed by appending a zero byte,
+   * representing the zero-length root label, again increasing
+   * the overall length by one.
    */
-  const size_t expected_len = 12 + ( 1 + hostlen + 1) + 4;
+
+  size_t expected_len;
+  DEBUGASSERT(hostlen);
+  expected_len = 12 + 1 + hostlen + 4;
+  if(host[hostlen-1]!='.')
+    expected_len++;
+
+  if(expected_len > (256 + 16)) /* RFCs 1034, 1035 */
+    return DOH_DNS_NAME_TOO_LONG;
 
   if(len < expected_len)
     return DOH_TOO_SMALL_BUFFER;
@@ -109,31 +133,30 @@ UNITTEST DOHcode doh_encode(const char *host,
   *dnsp++ = '\0';
   *dnsp++ = '\0'; /* ARCOUNT */
 
-  /* store a QNAME */
-  do {
-    char *dot = strchr(hostp, '.');
+  /* encode each label and store it in the QNAME */
+  while(*hostp) {
     size_t labellen;
-    bool found = false;
-    if(dot) {
-      found = true;
+    char *dot = strchr(hostp, '.');
+    if(dot)
       labellen = dot - hostp;
-    }
     else
       labellen = strlen(hostp);
-    if(labellen > 63) {
-      /* too long label, error out */
+    if((labellen > 63) || (!labellen)) {
+      /* label is too long or too short, error out */
       *olen = 0;
       return DOH_DNS_BAD_LABEL;
     }
+    /* label is non-empty, process it */
     *dnsp++ = (unsigned char)labellen;
     memcpy(dnsp, hostp, labellen);
     dnsp += labellen;
-    hostp += labellen + 1;
-    if(!found) {
-      *dnsp++ = 0; /* terminating zero */
-      break;
-    }
-  } while(1);
+    hostp += labellen;
+    /* advance past dot, but only if there is one */
+    if(dot)
+      hostp++;
+  } /* next label */
+
+  *dnsp++ = 0; /* append zero-length label for root */
 
   /* There are assigned TYPE codes beyond 255: use range [1..65535]  */
   *dnsp++ = (unsigned char)(255 & (dnstype>>8)); /* upper 8 bit TYPE */
@@ -144,8 +167,8 @@ UNITTEST DOHcode doh_encode(const char *host,
 
   *olen = dnsp - orig;
 
-  /* verify that our assumption of length is valid, since
-   * this has lead to buffer overflows in this function */
+  /* verify that our estimation of length is valid, since
+   * this has led to buffer overflows in this function */
   DEBUGASSERT(*olen == expected_len);
   return DOH_OK;
 }
@@ -586,6 +609,9 @@ static DOHcode rdata(unsigned char *doh,
     if(rc)
       return rc;
     break;
+  case DNS_TYPE_DNAME:
+    /* explicit for clarity; just skip; rely on synthesized CNAME  */
+    break;
   default:
     /* unsupported type, just skip it */
     break;
@@ -647,8 +673,10 @@ UNITTEST DOHcode doh_decode(unsigned char *doh,
       return DOH_DNS_OUT_OF_RANGE;
 
     type = get16bit(doh, index);
-    if((type != DNS_TYPE_CNAME) && (type != dnstype))
-      /* Not the same type as was asked for nor CNAME */
+    if((type != DNS_TYPE_CNAME)    /* may be synthesized from DNAME */
+       && (type != DNS_TYPE_DNAME) /* if present, accept and ignore */
+       && (type != dnstype))
+      /* Not the same type as was asked for nor CNAME nor DNAME */
       return DOH_DNS_UNEXPECTED_TYPE;
     index += 2;
 
