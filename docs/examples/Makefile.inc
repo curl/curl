@@ -36,7 +36,7 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
   ftpuploadresume sslbackend postit2-formadd multi-formadd                 \
   shared-connection-cache sftpuploadresume http2-pushinmemory parseurl     \
   urlapi imap-authzid pop3-authzid smtp-authzid http3 altsvc               \
-  http3-present
+  http3-present multi-poll
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so don't bother attempting to compile them here.
