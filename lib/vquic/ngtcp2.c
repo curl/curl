@@ -355,6 +355,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
   ssize_t nconsumed;
   (void)offset;
   (void)tconn;
+  (void)stream_user_data;
 
   nconsumed =
     nghttp3_conn_read_stream(qs->h3conn, stream_id, buf, buflen, fin);
@@ -364,17 +365,11 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, int64_t stream_id,
     return NGTCP2_ERR_CALLBACK_FAILURE;
   }
 
-  if(stream_user_data) {
-    struct Curl_easy *data = stream_user_data;
-    struct HTTP *stream = data->req.protop;
-    stream->unacked_window += buflen;
-  }
-  else {
-    /* probably QPACK stream or similar */
-    ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, nconsumed);
-    ngtcp2_conn_extend_max_offset(tconn, nconsumed);
-  }
-
+  /* number of bytes inside buflen which consists of framing overhead
+   * including QPACK HEADERS. In other words, it does not consume payload of
+   * DATA frame. */
+  ngtcp2_conn_extend_max_stream_offset(tconn, stream_id, nconsumed);
+  ngtcp2_conn_extend_max_offset(tconn, nconsumed);
   return 0;
 }
 
@@ -753,6 +748,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
   }
 #endif
   stream->mem += ncopy;
+  stream->unacked_window += ncopy;
   (void)stream_id;
   (void)user_data;
   return 0;
