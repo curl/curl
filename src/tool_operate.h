@@ -44,6 +44,7 @@ struct per_transfer {
   char *outfile;
   bool infdopen; /* TRUE if infd needs closing */
   int infd;
+  bool noprogress;
   struct ProgressData progressbar;
   struct OutStruct outs;
   struct OutStruct heads;

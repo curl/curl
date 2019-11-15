@@ -1080,11 +1080,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            isatty(fileno(outs->stream)))
           /* we send the output to a tty, therefore we switch off the progress
              meter */
-          global->noprogress = global->isatty = TRUE;
+          per->noprogress = global->noprogress = global->isatty = TRUE;
         else {
           /* progress meter is per download, so restore config
              values */
-          global->noprogress = orig_noprogress;
+          per->noprogress = global->noprogress = orig_noprogress;
           global->isatty = orig_isatty;
         }
 
@@ -1573,7 +1573,14 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* we want the alternative style, then we have to implement it
              ourselves! */
           my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_progress_cb);
-          my_setopt(curl, CURLOPT_XFERINFODATA, &per->progressbar);
+          my_setopt(curl, CURLOPT_XFERINFODATA, per);
+        }
+        else if(per->uploadfile && !strcmp(per->uploadfile, ".")) {
+          /* when reading from stdin in non-blocking mode, we use the progress
+             function to unpause a busy read */
+          my_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+          my_setopt(curl, CURLOPT_XFERINFOFUNCTION, tool_readbusy_cb);
+          my_setopt(curl, CURLOPT_XFERINFODATA, per);
         }
 
         /* new in libcurl 7.24.0: */
