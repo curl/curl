@@ -766,7 +766,6 @@ static int cb_h3_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
   (void)conn;
   (void)stream_user_data;
   (void)stream_id;
-  (void)consumed;
 
   ngtcp2_conn_extend_max_stream_offset(qs->qconn, stream_id, consumed);
   ngtcp2_conn_extend_max_offset(qs->qconn, consumed);
