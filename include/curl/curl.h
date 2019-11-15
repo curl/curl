@@ -610,6 +610,9 @@ typedef enum {
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
 
+/* Previously obsolete error code re-used in 7.67.1 */
+#define CURLE_OBSOLETE20 CURLE_HTTP3
+
 /* Previously obsolete error code re-used in 7.38.0 */
 #define CURLE_OBSOLETE16 CURLE_HTTP2
 
