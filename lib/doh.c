@@ -107,11 +107,12 @@ UNITTEST DOHcode doh_encode(const char *host,
    * representing the zero-length root label, again increasing
    * the overall length by one.
    */
-  const size_t expected_len =
-    (12                         /* header */
-     + (hostlen ? (hostlen + ((host[hostlen-1] == '.') ? 0 : 1)) : 0)
-     + 1                        /* zero-length root label */
-     + 4);                      /* QTYPE, QCLASS */
+
+  size_t expected_len;
+  DEBUGASSERT(hostlen);
+  expected_len = 12 + 1 + hostlen + 4;
+  if(host[hostlen-1]!='.')
+    expected_len++;
 
   if(expected_len > (256 + 16)) /* RFCs 1034, 1035 */
     return DOH_DNS_NAME_TOO_LONG;
