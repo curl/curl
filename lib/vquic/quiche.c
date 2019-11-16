@@ -785,4 +785,23 @@ CURLcode Curl_quic_done_sending(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*
+ * Called from http.c:Curl_http_done when a request completes.
+ */
+void Curl_quic_done(struct Curl_easy *data, bool premature)
+{
+  (void)data;
+  (void)premature;
+}
+
+/*
+ * Called from transfer.c:data_pending to know if we should keep looping
+ * to receive more data from the connection.
+ */
+bool Curl_quic_data_pending(const struct Curl_easy *data)
+{
+  (void)data;
+  return FALSE;
+}
+
 #endif
