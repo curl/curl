@@ -714,41 +714,119 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
 
   stream->closed = TRUE;
   Curl_expire(data, 0, EXPIRE_QUIC);
+  /* make sure that ngh3_stream_recv is called again to complete the transfer
+     even if there are no more packets to be received from the server. */
+  data->state.drain = 1;
   return 0;
+}
+
+/* Minimum size of the overflow buffer */
+#define OVERFLOWSIZE 1024
+
+/*
+ * allocate_overflow() ensures that there is room for incoming data in the
+ * overflow buffer, growing it to accommodate the new data if necessary. We
+ * may need to use the overflow buffer because we can't precisely limit the
+ * amount of HTTP/3 header data we receive using QUIC flow control mechanisms.
+ */
+static CURLcode allocate_overflow(struct Curl_easy *data,
+                                  struct HTTP *stream,
+                                  size_t length)
+{
+  size_t maxleft;
+  size_t newsize;
+  /* length can be arbitrarily large, so take care not to overflow newsize */
+  maxleft = CURL_MAX_READ_SIZE - stream->overflow_buflen;
+  if(length > maxleft) {
+    /* The reason to have a max limit for this is to avoid the risk of a bad
+       server feeding libcurl with a highly compressed list of headers that
+       will cause our overflow buffer to grow too large */
+    failf(data, "Rejected %zu bytes of overflow data (max is %d)!",
+          stream->overflow_buflen + length, CURL_MAX_READ_SIZE);
+    return CURLE_OUT_OF_MEMORY;
+  }
+  newsize = stream->overflow_buflen + length;
+  if(newsize > stream->overflow_bufsize) {
+    /* We enlarge the overflow buffer as it is too small */
+    char *newbuff;
+    newsize = CURLMAX(newsize * 3 / 2, stream->overflow_bufsize*2);
+    newsize = CURLMIN(CURLMAX(OVERFLOWSIZE, newsize), CURL_MAX_READ_SIZE);
+    newbuff = realloc(stream->overflow_buf, newsize);
+    if(!newbuff) {
+      failf(data, "Failed to alloc memory for overflow buffer!");
+      return CURLE_OUT_OF_MEMORY;
+    }
+    stream->overflow_buf = newbuff;
+    stream->overflow_bufsize = newsize;
+    infof(data, "Grew HTTP/3 overflow buffer to %zu bytes\n", newsize);
+  }
+  return CURLE_OK;
+}
+
+/*
+ * write_data() copies data to the stream's receive buffer. If not enough
+ * space is available in the receive buffer, it copies the rest to the
+ * stream's overflow buffer.
+ */
+static CURLcode write_data(struct Curl_easy *data,
+                           struct HTTP *stream,
+                           const void *mem, size_t memlen)
+{
+  CURLcode result = CURLE_OK;
+  const char *buf = mem;
+  size_t ncopy = memlen;
+  /* copy as much as possible to the receive buffer */
+  if(stream->len) {
+    size_t len = CURLMIN(ncopy, stream->len);
+#if 0 /* extra debugging of incoming h3 data */
+    fprintf(stderr, "!! Copies %zd bytes to %p (total %zd)\n",
+            len, stream->mem, stream->memlen);
+#endif
+    memcpy(stream->mem, buf, len);
+    stream->len -= len;
+    stream->memlen += len;
+    stream->mem += len;
+    buf += len;
+    ncopy -= len;
+  }
+  /* copy the rest to the overflow buffer */
+  if(ncopy) {
+    result = allocate_overflow(data, stream, ncopy);
+    if(result) {
+      return result;
+    }
+#if 0 /* extra debugging of incoming h3 data */
+    fprintf(stderr, "!! Copies %zd overflow bytes to %p (total %zd)\n",
+            ncopy, stream->overflow_buf, stream->overflow_buflen);
+#endif
+    memcpy(stream->overflow_buf + stream->overflow_buflen, buf, ncopy);
+    stream->overflow_buflen += ncopy;
+  }
+#if 0 /* extra debugging of incoming h3 data */
+  {
+    size_t i;
+    for(i = 0; i < memlen; i++) {
+      fprintf(stderr, "!! data[%d]: %02x '%c'\n", i, buf[i], buf[i]);
+    }
+  }
+#endif
+  return result;
 }
 
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
                            const uint8_t *buf, size_t buflen,
                            void *user_data, void *stream_user_data)
 {
-  size_t ncopy;
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
+  CURLcode result = CURLE_OK;
   (void)conn;
 
-  /* TODO: this needs to be handled properly */
-  if(buflen > stream->len) {
-    fprintf(stderr, "!! got %zd bytes, buffer has room for %zd bytes\n",
-            buflen, stream->len);
-    DEBUGASSERT(0);
+  result = write_data(data, stream, buf, buflen);
+  if(result) {
+    return -1;
   }
-
-  ncopy = buflen;
-  memcpy(stream->mem, buf, ncopy);
-  stream->len -= ncopy;
-  stream->memlen += ncopy;
-#if 0 /* extra debugging of incoming h3 data */
-  fprintf(stderr, "!! Copies %zd bytes to %p (total %zd)\n",
-          ncopy, stream->mem, stream->memlen);
-  {
-    size_t i;
-    for(i = 0; i < ncopy; i++) {
-      fprintf(stderr, "!! data[%d]: %02x '%c'\n", i, buf[i], buf[i]);
-    }
-  }
-#endif
-  stream->mem += ncopy;
-  stream->unacked_window += ncopy;
+  stream->unacked_window += buflen;
   (void)stream_id;
   (void)user_data;
   return 0;
@@ -800,15 +878,17 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
+  CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
   (void)user_data;
 
-  if(stream->memlen >= 2) {
-    memcpy(stream->mem, "\r\n", 2);
-    stream->len -= 2;
-    stream->memlen += 2;
-    stream->mem += 2;
+  /* add a CRLF only if we've received some headers */
+  if(stream->firstheader) {
+    result = write_data(data, stream, "\r\n", 2);
+    if(result) {
+      return -1;
+    }
   }
   return 0;
 }
@@ -822,7 +902,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
-  size_t ncopy;
+  CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
   (void)token;
@@ -831,20 +911,37 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
 
   if(h3name.len == sizeof(":status") - 1 &&
      !memcmp(":status", h3name.base, h3name.len)) {
+    char line[14]; /* status line is always 13 characters long */
+    size_t ncopy;
     int status = decode_status_code(h3val.base, h3val.len);
     DEBUGASSERT(status != -1);
-    msnprintf(stream->mem, stream->len, "HTTP/3 %03d \r\n", status);
+    ncopy = msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n", status);
+    result = write_data(data, stream, line, ncopy);
+    if(result) {
+      return -1;
+    }
   }
   else {
     /* store as a HTTP1-style header */
-    msnprintf(stream->mem, stream->len, "%.*s: %.*s\n",
-              h3name.len, h3name.base, h3val.len, h3val.base);
+    result = write_data(data, stream, h3name.base, h3name.len);
+    if(result) {
+      return -1;
+    }
+    result = write_data(data, stream, ": ", 2);
+    if(result) {
+      return -1;
+    }
+    result = write_data(data, stream, h3val.base, h3val.len);
+    if(result) {
+      return -1;
+    }
+    result = write_data(data, stream, "\r\n", 2);
+    if(result) {
+      return -1;
+    }
   }
 
-  ncopy = strlen(stream->mem);
-  stream->len -= ncopy;
-  stream->memlen += ncopy;
-  stream->mem += ncopy;
+  stream->firstheader = TRUE;
   return 0;
 }
 
@@ -944,6 +1041,21 @@ static int init_ngh3_conn(struct quicsocket *qs)
 static Curl_recv ngh3_stream_recv;
 static Curl_send ngh3_stream_send;
 
+static size_t drain_overflow_buffer(struct HTTP *stream)
+{
+  size_t ncopy = CURLMIN(stream->overflow_buflen, stream->len);
+  if(ncopy > 0) {
+    memcpy(stream->mem, stream->overflow_buf, ncopy);
+    stream->len -= ncopy;
+    stream->mem += ncopy;
+    stream->memlen += ncopy;
+    stream->overflow_buflen -= ncopy;
+    memmove(stream->overflow_buf, stream->overflow_buf + ncopy,
+            stream->overflow_buflen);
+  }
+  return ncopy;
+}
+
 /* incoming data frames on the h3 stream */
 static ssize_t ngh3_stream_recv(struct connectdata *conn,
                                 int sockindex,
@@ -963,6 +1075,10 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
   }
   /* else, there's data in the buffer already */
 
+  /* if there's data in the overflow buffer from a previous call, copy as much
+     as possible to the receive buffer before receiving more */
+  drain_overflow_buffer(stream);
+
   if(ng_process_ingress(conn, sockfd, qs)) {
     *curlcode = CURLE_RECV_ERROR;
     return -1;
@@ -980,7 +1096,13 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
     stream->memlen = 0;
     stream->mem = buf;
     stream->len = buffersize;
+    /* extend the stream window with the data we're consuming and send out
+       any additional packets to tell the server that we can receive more */
     extend_stream_window(qs->qconn, stream);
+    if(ng_flush_egress(conn, sockfd, qs)) {
+      *curlcode = CURLE_SEND_ERROR;
+      return -1;
+    }
     return memlen;
   }
 
@@ -1600,4 +1722,32 @@ CURLcode Curl_quic_done_sending(struct connectdata *conn)
 
   return CURLE_OK;
 }
+
+/*
+ * Called from http.c:Curl_http_done when a request completes.
+ */
+void Curl_quic_done(struct Curl_easy *data, bool premature)
+{
+  (void)premature;
+  if(data->conn->handler == &Curl_handler_http3) {
+    /* only for HTTP/3 transfers */
+    struct HTTP *stream = data->req.protop;
+    Curl_safefree(stream->overflow_buf);
+  }
+}
+
+/*
+ * Called from transfer.c:data_pending to know if we should keep looping
+ * to receive more data from the connection.
+ */
+bool Curl_quic_data_pending(const struct Curl_easy *data)
+{
+  /* We may have received more data than we're able to hold in the receive
+     buffer and allocated an overflow buffer. Since it's possible that
+     there's no more data coming on the socket, we need to keep reading
+     until the overflow buffer is empty. */
+  const struct HTTP *stream = data->req.protop;
+  return stream->overflow_buflen > 0;
+}
+
 #endif
