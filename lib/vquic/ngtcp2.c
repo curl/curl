@@ -717,6 +717,49 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
+/*
+ * h3_buffer_grow() makes room for new data at the end of the receive buffer.
+ * We make sure that the full data fits in the allocated header buffer, or
+ * else we enlarge it. We need to do this because we can't limit HTTP/3
+ * headers precisely via QUIC flow control.
+ */
+static CURLcode h3_buffer_grow(struct Curl_easy *data,
+                               struct HTTP *stream,
+                               size_t length)
+{
+  struct SingleRequest *k = &data->req;
+  /* length can be arbitrarily large, so take care not to overflow. */
+  size_t maxleft = CURL_MAX_READ_SIZE - stream->memlen;
+  if(length > maxleft) {
+    /* The reason to have a max limit for this is to avoid the risk of a bad
+       server feeding libcurl with a highly compressed list of headers that
+       will cause our buffer to grow too large */
+    failf(data, "Rejected %zu bytes list of headers (max is %d)!",
+          stream->memlen + length, CURL_MAX_READ_SIZE);
+    return CURLE_OUT_OF_MEMORY;
+  }
+  size_t newsize = stream->memlen + length;
+  if(newsize >= data->set.buffer_size) {
+    /* We enlarge the receive buffer as it is too small */
+    char *newbuff;
+    newsize = CURLMAX(newsize * 3 / 2, data->set.buffer_size*2);
+    newsize = CURLMIN(newsize, CURL_MAX_READ_SIZE);
+    newbuff = realloc(k->buf, newsize + 1);
+    if(!newbuff) {
+      failf(data, "Failed to alloc memory for resized receive buffer!");
+      return CURLE_OUT_OF_MEMORY;
+    }
+    /* Update all the pointers to this buffer now that it's reallocated */
+    data->state.buffer = k->buf = newbuff;
+    data->set.buffer_size = newsize;
+    stream->mem = newbuff + stream->memlen;
+    stream->len = newsize - stream->memlen;
+    infof(data, "Grew receive buffer to %zu bytes to hold QUIC data\n",
+          newsize);
+  }
+  return CURLE_OK;
+}
+
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
                            const uint8_t *buf, size_t buflen,
                            void *user_data, void *stream_user_data)
@@ -724,13 +767,12 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream_id,
   size_t ncopy;
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
+  CURLcode result = CURLE_OK;
   (void)conn;
 
-  /* TODO: this needs to be handled properly */
-  if(buflen > stream->len) {
-    fprintf(stderr, "!! got %zd bytes, buffer has room for %zd bytes\n",
-            buflen, stream->len);
-    DEBUGASSERT(0);
+  result = h3_buffer_grow(data, stream, buflen);
+  if(result) {
+    return -1;
   }
 
   ncopy = buflen;
@@ -800,11 +842,16 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t stream_id,
 {
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
+  CURLcode result = CURLE_OK;
   (void)conn;
   (void)stream_id;
   (void)user_data;
 
   if(stream->memlen >= 2) {
+    result = h3_buffer_grow(data, stream, 2);
+    if(result) {
+      return -1;
+    }
     memcpy(stream->mem, "\r\n", 2);
     stream->len -= 2;
     stream->memlen += 2;
@@ -822,6 +869,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
   nghttp3_vec h3val = nghttp3_rcbuf_get_buf(value);
   struct Curl_easy *data = stream_user_data;
   struct HTTP *stream = data->req.protop;
+  CURLcode result = CURLE_OK;
   size_t ncopy;
   (void)conn;
   (void)stream_id;
@@ -833,15 +881,23 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t stream_id,
      !memcmp(":status", h3name.base, h3name.len)) {
     int status = decode_status_code(h3val.base, h3val.len);
     DEBUGASSERT(status != -1);
-    msnprintf(stream->mem, stream->len, "HTTP/3 %03d \r\n", status);
+    /* make room for the status line */
+    result = h3_buffer_grow(data, stream, 13);
+    if(result) {
+      return -1;
+    }
+    ncopy = msnprintf(stream->mem, stream->len, "HTTP/3 %03d \r\n", status);
   }
   else {
     /* store as a HTTP1-style header */
-    msnprintf(stream->mem, stream->len, "%.*s: %.*s\n",
-              h3name.len, h3name.base, h3val.len, h3val.base);
+    result = h3_buffer_grow(data, stream, h3name.len + 2 + h3val.len + 1);
+    if(result) {
+      return -1;
+    }
+    ncopy = msnprintf(stream->mem, stream->len, "%.*s: %.*s\n",
+                      h3name.len, h3name.base, h3val.len, h3val.base);
   }
 
-  ncopy = strlen(stream->mem);
   stream->len -= ncopy;
   stream->memlen += ncopy;
   stream->mem += ncopy;
@@ -980,7 +1036,13 @@ static ssize_t ngh3_stream_recv(struct connectdata *conn,
     stream->memlen = 0;
     stream->mem = buf;
     stream->len = buffersize;
+    /* extend the stream window with the data we're consuming and send out
+       any additional packets to tell the server that we can receive more */
     extend_stream_window(qs->qconn, stream);
+    if(ng_flush_egress(conn, sockfd, qs)) {
+      *curlcode = CURLE_SEND_ERROR;
+      return -1;
+    }
     return memlen;
   }
 
