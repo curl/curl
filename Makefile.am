@@ -328,6 +328,10 @@ vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS) \
 	win32_lib_rc='$(LIB_RCFILES)'; \
 	win32_lib_vauth_srcs='$(LIB_VAUTH_CFILES)'; \
 	win32_lib_vauth_hdrs='$(LIB_VAUTH_HFILES)'; \
+	win32_lib_vquic_srcs='$(LIB_VQUIC_CFILES)'; \
+	win32_lib_vquic_hdrs='$(LIB_VQUIC_HFILES)'; \
+	win32_lib_vssh_srcs='$(LIB_VSSH_CFILES)'; \
+	win32_lib_vssh_hdrs='$(LIB_VSSH_HFILES)'; \
 	win32_lib_vtls_srcs='$(LIB_VTLS_CFILES)'; \
 	win32_lib_vtls_hdrs='$(LIB_VTLS_HFILES)'; \
 	win32_src_srcs='$(CURL_CFILES)'; \
@@ -340,6 +344,10 @@ vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS) \
 	sorted_lib_hdrs=`for file in $$win32_lib_hdrs; do echo $$file; done | sort`; \
 	sorted_lib_vauth_srcs=`for file in $$win32_lib_vauth_srcs; do echo $$file; done | sort`; \
 	sorted_lib_vauth_hdrs=`for file in $$win32_lib_vauth_hdrs; do echo $$file; done | sort`; \
+	sorted_lib_vquic_srcs=`for file in $$win32_lib_vquic_srcs; do echo $$file; done | sort`; \
+	sorted_lib_vquic_hdrs=`for file in $$win32_lib_vquic_hdrs; do echo $$file; done | sort`; \
+	sorted_lib_vssh_srcs=`for file in $$win32_lib_vssh_srcs; do echo $$file; done | sort`; \
+	sorted_lib_vssh_hdrs=`for file in $$win32_lib_vssh_hdrs; do echo $$file; done | sort`; \
 	sorted_lib_vtls_srcs=`for file in $$win32_lib_vtls_srcs; do echo $$file; done | sort`; \
 	sorted_lib_vtls_hdrs=`for file in $$win32_lib_vtls_hdrs; do echo $$file; done | sort`; \
 	sorted_src_srcs=`for file in $$win32_src_srcs; do echo $$file; done | sort`; \
@@ -351,10 +359,15 @@ vc-ide: $(VC6_LIBDSP_DEPS) $(VC6_SRCDSP_DEPS) $(VC7_LIBVCPROJ_DEPS) \
 function gen_element(type, dir, file)\
 {\
   sub(/vauth\//, "", file);\
+  sub(/vquic\//, "", file);\
+  sub(/vssh\//, "", file);\
   sub(/vtls\//, "", file);\
 \
   spaces="    ";\
-  if(dir == "lib\\vauth" || dir == "lib\\vtls")\
+  if(dir == "lib\\vauth" ||\
+     dir == "lib\\vquic" ||\
+     dir == "lib\\vssh"  ||\
+     dir == "lib\\vtls")\
     tabs="				";\
   else\
     tabs="			";\
@@ -416,6 +429,22 @@ function gen_element(type, dir, file)\
     split(lib_vauth_hdrs, arr);\
     for(val in arr) gen_element(proj_type, "lib\\vauth", arr[val]);\
   }\
+  else if($$0 == "CURL_LIB_VQUIC_C_FILES") {\
+    split(lib_vquic_srcs, arr);\
+    for(val in arr) gen_element(proj_type, "lib\\vquic", arr[val]);\
+  }\
+  else if($$0 == "CURL_LIB_VQUIC_H_FILES") {\
+    split(lib_vquic_hdrs, arr);\
+    for(val in arr) gen_element(proj_type, "lib\\vquic", arr[val]);\
+  }\
+  else if($$0 == "CURL_LIB_VSSH_C_FILES") {\
+    split(lib_vssh_srcs, arr);\
+    for(val in arr) gen_element(proj_type, "lib\\vssh", arr[val]);\
+  }\
+  else if($$0 == "CURL_LIB_VSSH_H_FILES") {\
+    split(lib_vssh_hdrs, arr);\
+    for(val in arr) gen_element(proj_type, "lib\\vssh", arr[val]);\
+  }\
   else if($$0 == "CURL_LIB_VTLS_C_FILES") {\
     split(lib_vtls_srcs, arr);\
     for(val in arr) gen_element(proj_type, "lib\\vtls", arr[val]);\
@@ -461,6 +490,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC6_LIBTMPL) > $(VC6_LIBDSP) || { exit 1; }; \
@@ -481,6 +514,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC7_LIBTMPL) > $(VC7_LIBVCPROJ) || { exit 1; }; \
@@ -501,6 +538,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC71_LIBTMPL) > $(VC71_LIBVCPROJ) || { exit 1; }; \
@@ -521,6 +562,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC8_LIBTMPL) > $(VC8_LIBVCPROJ) || { exit 1; }; \
@@ -541,6 +586,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC9_LIBTMPL) > $(VC9_LIBVCPROJ) || { exit 1; }; \
@@ -561,6 +610,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC10_LIBTMPL) > $(VC10_LIBVCXPROJ) || { exit 1; }; \
@@ -581,6 +634,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC11_LIBTMPL) > $(VC11_LIBVCXPROJ) || { exit 1; }; \
@@ -601,6 +658,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC12_LIBTMPL) > $(VC12_LIBVCXPROJ) || { exit 1; }; \
@@ -621,6 +682,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC14_LIBTMPL) > $(VC14_LIBVCXPROJ) || { exit 1; }; \
@@ -641,6 +706,10 @@ function gen_element(type, dir, file)\
 		-v lib_rc="$$win32_lib_rc" \
 		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
 		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
 		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC15_LIBTMPL) > $(VC15_LIBVCXPROJ) || { exit 1; }; \
