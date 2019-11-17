@@ -303,6 +303,14 @@ rem
       for /f "delims=" %%c in ('dir /b ..\lib\vauth\*.c') do call :element %1 lib\vauth "%%c" %3
     ) else if "!var!" == "CURL_LIB_VAUTH_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\lib\vauth\*.h') do call :element %1 lib\vauth "%%h" %3
+    ) else if "!var!" == "CURL_LIB_VQUIC_C_FILES" (
+      for /f "delims=" %%c in ('dir /b ..\lib\vquic\*.c') do call :element %1 lib\vquic "%%c" %3
+    ) else if "!var!" == "CURL_LIB_VQUIC_H_FILES" (
+      for /f "delims=" %%h in ('dir /b ..\lib\vquic\*.h') do call :element %1 lib\vquic "%%h" %3
+    ) else if "!var!" == "CURL_LIB_VSSH_C_FILES" (
+      for /f "delims=" %%c in ('dir /b ..\lib\vssh\*.c') do call :element %1 lib\vssh "%%c" %3
+    ) else if "!var!" == "CURL_LIB_VSSH_H_FILES" (
+      for /f "delims=" %%h in ('dir /b ..\lib\vssh\*.h') do call :element %1 lib\vssh "%%h" %3
     ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls "%%c" %3
     ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
@@ -319,13 +327,17 @@ rem Generates a single file xml element.
 rem
 rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
 rem      or vcxproj for VC10, VC11, VC12, VC14 and VC15)
-rem %2 - Directory (src, lib, lib\vauth or lib\vtls)
+rem %2 - Directory (src, lib, lib\vauth, lib\vquic, lib\vssh, lib\vtls)
 rem %3 - Source filename
 rem %4 - Output project file
 rem
 :element
   set "SPACES=    "
   if "%2" == "lib\vauth" (
+    set "TABS=				"
+  ) else if "%2" == "lib\vquic" (
+    set "TABS=				"
+  ) else if "%2" == "lib\vssh" (
     set "TABS=				"
   ) else if "%2" == "lib\vtls" (
     set "TABS=				"
