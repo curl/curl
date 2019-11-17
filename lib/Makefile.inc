@@ -43,6 +43,8 @@ LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/quiche.h
 
 LIB_VSSH_CFILES = vssh/libssh2.c vssh/libssh.c
 
+LIB_VSSH_HFILES = vssh/ssh.h
+
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
   ldap.c version.c getenv.c escape.c mprintf.c telnet.c netrc.c         \
@@ -72,7 +74,7 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   http_negotiate.h inet_pton.h amigaos.h strtoofft.h strerror.h         \
   inet_ntop.h curlx.h curl_memory.h curl_setup.h transfer.h select.h    \
   easyif.h multiif.h parsedate.h tftp.h sockaddr.h splay.h strdup.h     \
-  socks.h ssh.h curl_base64.h curl_addrinfo.h curl_sspi.h      \
+  socks.h curl_base64.h curl_addrinfo.h curl_sspi.h                     \
   slist.h nonblock.h curl_memrchr.h imap.h pop3.h smtp.h pingpong.h     \
   rtsp.h curl_threads.h warnless.h curl_hmac.h curl_rtmp.h              \
   curl_gethostname.h gopher.h http_proxy.h non-ascii.h asyn.h           \
@@ -89,4 +91,4 @@ LIB_RCFILES = libcurl.rc
 CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES) \
   $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES)
 HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \
-  $(LIB_VQUIC_HFILES)
+  $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES)

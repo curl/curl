@@ -124,7 +124,7 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #include "smtp.h"
 #include "ftp.h"
 #include "file.h"
-#include "ssh.h"
+#include "vssh/ssh.h"
 #include "http.h"
 #include "rtsp.h"
 #include "smb.h"

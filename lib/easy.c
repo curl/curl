@@ -72,7 +72,7 @@
 #include "warnless.h"
 #include "multiif.h"
 #include "sigpipe.h"
-#include "ssh.h"
+#include "vssh/ssh.h"
 #include "setopt.h"
 #include "http_digest.h"
 #include "system_win32.h"

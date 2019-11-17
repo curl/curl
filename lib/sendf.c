@@ -36,7 +36,7 @@
 #include "sendf.h"
 #include "connect.h"
 #include "vtls/vtls.h"
-#include "ssh.h"
+#include "vssh/ssh.h"
 #include "easyif.h"
 #include "multiif.h"
 #include "non-ascii.h"
