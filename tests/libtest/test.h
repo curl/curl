@@ -355,6 +355,60 @@ extern int unitfail;
 
 /* ---------------------------------------------------------------- */
 
+#define exe_multi_poll(A,B,C,D,E,Y,Z) do {                          \
+  CURLMcode ec;                                                     \
+  if((ec = curl_multi_poll((A), (B), (C), (D), (E))) != CURLM_OK) { \
+    fprintf(stderr, "%s:%d curl_multi_poll() failed, "              \
+            "with code %d (%s)\n",                                  \
+            (Y), (Z), (int)ec, curl_multi_strerror(ec));            \
+    res = (int)ec;                                                  \
+  }                                                                 \
+  else if(*((E)) < 0) {                                             \
+    fprintf(stderr, "%s:%d curl_multi_poll() succeeded, "           \
+            "but returned invalid numfds value (%d)\n",             \
+            (Y), (Z), (int)*((E)));                                 \
+    res = TEST_ERR_NUM_HANDLES;                                     \
+  }                                                                 \
+} WHILE_FALSE
+
+#define res_multi_poll(A, B, C, D, E) \
+  exe_multi_poll((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
+
+#define chk_multi_poll(A, B, C, D, E, Y, Z) do {     \
+  exe_multi_poll((A), (B), (C), (D), (E), (Y), (Z)); \
+  if(res)                                            \
+    goto test_cleanup;                               \
+} WHILE_FALSE
+
+#define multi_poll(A, B, C, D, E) \
+  chk_multi_poll((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
+
+/* ---------------------------------------------------------------- */
+
+#define exe_multi_wakeup(A,Y,Z) do {                     \
+  CURLMcode ec;                                          \
+  if((ec = curl_multi_wakeup((A))) != CURLM_OK) {        \
+    fprintf(stderr, "%s:%d curl_multi_wakeup() failed, " \
+            "with code %d (%s)\n",                       \
+            (Y), (Z), (int)ec, curl_multi_strerror(ec)); \
+    res = (int)ec;                                       \
+  }                                                      \
+} WHILE_FALSE
+
+#define res_multi_wakeup(A) \
+  exe_multi_wakeup((A), (__FILE__), (__LINE__))
+
+#define chk_multi_wakeup(A, Y, Z) do { \
+  exe_multi_wakeup((A), (Y), (Z));     \
+  if(res)                              \
+    goto test_cleanup;                 \
+} WHILE_FALSE
+
+#define multi_wakeup(A) \
+  chk_multi_wakeup((A), (__FILE__), (__LINE__))
+
+/* ---------------------------------------------------------------- */
+
 #define exe_select_test(A, B, C, D, E, Y, Z) do {               \
     int ec;                                                     \
     if(select_wrapper((A), (B), (C), (D), (E)) == -1) {         \
