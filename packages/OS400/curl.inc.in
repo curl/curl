@@ -1804,7 +1804,11 @@
      d                 c                   6
      d  CURLM_ADDED_ALREADY...
      d                 c                   7
-     d  CURLM_LAST     c                   8
+     d  CURLM_RECURSIVE_API_CALL...
+     d                 c                   8
+     d  CURLM_WAKEUP_FAILURE...
+     d                 c                   9
+     d  CURLM_LAST     c                   10
       *
      d CURLMSG         s             10i 0 based(######ptr######)               Enum
      d  CURLMSG_NONE   c                   0

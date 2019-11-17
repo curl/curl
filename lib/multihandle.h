@@ -24,6 +24,7 @@
 
 #include "conncache.h"
 #include "psl.h"
+#include "socketpair.h"
 
 struct Curl_message {
   struct curl_llist_element list;
@@ -65,6 +66,10 @@ typedef enum {
 #define GETSOCK_WRITABLE (0xff00)
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
+
+#if defined(USE_SOCKETPAIR) && !defined(USE_BLOCKING_SOCKETS)
+#define ENABLE_WAKEUP
+#endif
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
@@ -134,6 +139,11 @@ struct Curl_multi {
                                     previous callback */
   bool in_callback;            /* true while executing a callback */
   long max_concurrent_streams; /* max concurrent streams client to support */
+
+#ifdef ENABLE_WAKEUP
+  curl_socket_t wakeup_pair[2]; /* socketpair() used for wakeup
+                                   0 is used for read, 1 is used for write */
+#endif
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */
