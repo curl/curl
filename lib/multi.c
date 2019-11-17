@@ -1147,7 +1147,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
     free(ufds);
   if(ret)
     *ret = retcode;
-  if(!extrawait || extra_fds || curlfds)
+  if(!extrawait || nfds)
     /* if any socket was checked */
     ;
   else {
