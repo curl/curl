@@ -12,10 +12,34 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURL-DISABLE: initial docs for the CURL_DISABLE_* defines [19]
+ o HISTORY: added cmake, HTTP/3 and parallel downloads with curl
+ o INSTALL.md: provide Android build instructions [10]
+ o altsvc: bump to h3-24 [6]
  o build: fix for CURL_DISABLE_DOH [2]
+ o checksrc: repair the copyrightyear check [25]
+ o config-win32: cpu-machine-OS for Windows on ARM [13]
  o configure: avoid unportable `==' test(1) operator [1]
  o configure: fix typo in help text [4]
+ o copyrights: fix copyright year range [25]
+ o curl: fix -T globbing [16]
+ o doh: improced both encoding and decoding [11]
+ o examples: add multi-poll.c [14]
+ o lib: Move lib/ssh.h -> lib/vssh/ssh.h [9]
+ o multi_poll: avoid busy-loop when called without easy handles attached [15]
+ o ngtcp2: free used resources on disconnect [7]
+ o ngtcp2: handle key updates as ngtcp2 master branch tells us [8]
+ o ngtcp2: increase QUIC window size when data is consumed [12]
+ o ngtcp2: use overflow buffer for extra HTTP/3 data [5]
  o ntlm: USE_WIN32_CRYPTO check removed to get USE_NTLM2SESSION set [3]
+ o openssl: prevent recursive function calls from ctx callbacks [18]
+ o pause: avoid updating socket if done was already called [22]
+ o quiche: reject HTTP/3 headers in the wrong order [17]
+ o remove_handle: clear expire timers after multi_done() [20]
+ o strerror: Fix an error looking up some Windows error strings
+ o system.h: fix for MCST lcc compiler [23]
+ o test1558: use double slash after file: [21]
+ o test1560: require IPv6 for IPv6 aware URL parsing [24]
 
 This release includes the following known bugs:
 
@@ -24,9 +48,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Christian Schmitz, Daniel Stenberg, Leonardo Taccari, Massimiliano Fantuzzi,
-  Ray Satiro, Wyatt O'Day,
-  (6 contributors)
+  3dyd on github, Anderson Sasaki, Andreas Falkenhahn, Christian Schmitz,
+  Cynthia Coan, Daniel Stenberg, Gergely Nagy, Javier Blazquez, Kamil Dudka,
+  Leonardo Taccari, Marcel Raad, Massimiliano Fantuzzi, Max Kellermann,
+  Melissa Mears, Ray Satiro, Richard Bowker, SLDiggie on github,
+  Tatsuhiro Tsujikawa, Wyatt O'Day,
+  (19 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,3 +63,24 @@ References to bug reports and discussions on issues:
  [2] = https://curl.haxx.se/bug/?i=4565
  [3] = https://curl.haxx.se/bug/?i=3704
  [4] = https://curl.haxx.se/bug/?i=4570
+ [5] = https://curl.haxx.se/bug/?i=4525
+ [6] = https://curl.haxx.se/bug/?i=4604
+ [7] = https://curl.haxx.se/bug/?i=4614
+ [8] = https://curl.haxx.se/bug/?i=4612
+ [9] = https://curl.haxx.se/bug/?i=4609
+ [10] = https://curl.haxx.se/bug/?i=4606
+ [11] = https://curl.haxx.se/bug/?i=4598
+ [12] = https://curl.haxx.se/bug/?i=4600
+ [13] = https://curl.haxx.se/bug/?i=4590
+ [14] = https://curl.haxx.se/bug/?i=4596
+ [15] = https://curl.haxx.se/bug/?i=4594
+ [16] = https://curl.haxx.se/bug/?i=4588
+ [17] = https://curl.haxx.se/bug/?i=4571
+ [18] = https://curl.haxx.se/bug/?i=4585
+ [19] = https://curl.haxx.se/bug/?i=4545
+ [20] = https://curl.haxx.se/bug/?i=4575
+ [21] = https://curl.haxx.se/bug/?i=4554
+ [22] = https://curl.haxx.se/bug/?i=4563
+ [23] = https://curl.haxx.se/bug/?i=4576
+ [24] = https://curl.haxx.se/bug/?i=4556
+ [25] = https://curl.haxx.se/bug/?i=4549
