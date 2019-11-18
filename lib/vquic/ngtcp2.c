@@ -202,7 +202,6 @@ static int quic_add_handshake_data(SSL *ssl, OSSL_ENCRYPTION_LEVEL ossl_level,
   crypto_data = &qs->crypto_data[level];
   if(crypto_data->buf == NULL) {
     crypto_data->buf = malloc(4096);
-    fprintf(stderr, "malloc 4096 => %p\n", crypto_data->buf);
     if(!crypto_data->buf)
       return 0;
     crypto_data->alloclen = 4096;
