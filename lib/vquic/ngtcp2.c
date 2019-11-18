@@ -199,11 +199,13 @@ static int quic_add_handshake_data(SSL *ssl, OSSL_ENCRYPTION_LEVEL ossl_level,
   ngtcp2_crypto_level level = quic_from_ossl_level(ossl_level);
   int rv;
 
-  crypto_data = &qs->client_crypto_data[level];
+  crypto_data = &qs->crypto_data[level];
   if(crypto_data->buf == NULL) {
     crypto_data->buf = malloc(4096);
+    fprintf(stderr, "malloc 4096 => %p\n", crypto_data->buf);
+    if(!crypto_data->buf)
+      return 0;
     crypto_data->alloclen = 4096;
-    /* TODO Explode if malloc failed */
   }
 
   /* TODO Just pretend that handshake does not grow more than 4KiB for
@@ -214,8 +216,8 @@ static int quic_add_handshake_data(SSL *ssl, OSSL_ENCRYPTION_LEVEL ossl_level,
   crypto_data->len += len;
 
   rv = ngtcp2_conn_submit_crypto_data(
-      qs->qconn, level, (uint8_t *)(&crypto_data->buf[crypto_data->len] - len),
-      len);
+    qs->qconn, level, (uint8_t *)(&crypto_data->buf[crypto_data->len] - len),
+    len);
   if(rv) {
     H3BUGF(fprintf(stderr, "write_client_handshake failed\n"));
   }
@@ -316,7 +318,7 @@ static int cb_initial(ngtcp2_conn *quic, void *user_data)
   struct quicsocket *qs = (struct quicsocket *)user_data;
 
   if(ngtcp2_crypto_read_write_crypto_data(
-         quic, qs->ssl, NGTCP2_CRYPTO_LEVEL_INITIAL, NULL, 0) != 0)
+       quic, qs->ssl, NGTCP2_CRYPTO_LEVEL_INITIAL, NULL, 0) != 0)
     return NGTCP2_ERR_CALLBACK_FAILURE;
 
   return 0;
@@ -696,8 +698,17 @@ static int ng_perform_getsock(const struct connectdata *conn,
 static CURLcode ng_disconnect(struct connectdata *conn,
                               bool dead_connection)
 {
-  (void)conn;
+  int i;
+  struct quicsocket *qs = &conn->hequic[0];
   (void)dead_connection;
+  free(qs->rx_secret);
+  if(qs->ssl)
+    SSL_free(qs->ssl);
+  for(i = 0; i < 3; i++)
+    free(qs->crypto_data[i].buf);
+  nghttp3_conn_del(qs->h3conn);
+  ngtcp2_conn_del(qs->qconn);
+  SSL_CTX_free(qs->sslctx);
   return CURLE_OK;
 }
 
