@@ -321,7 +321,7 @@ static const struct LongShort aliases[]= {
   {"z",  "time-cond",                ARG_STRING},
   {"Z",  "parallel",                 ARG_BOOL},
   {"Zb", "parallel-max",             ARG_STRING},
-  {"Zc", "parallel-connect",         ARG_BOOL},
+  {"Zc", "parallel-immediate",       ARG_BOOL},
   {"#",  "progress-bar",             ARG_BOOL},
   {"#m", "progress-meter",           ARG_BOOL},
   {":",  "next",                     ARG_NONE},
