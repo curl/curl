@@ -392,11 +392,20 @@ static const char *SSL_ERROR_to_str(int err)
  */
 static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 {
+  if(size)
+    *buf = '\0';
+
 #ifdef OPENSSL_IS_BORINGSSL
   ERR_error_string_n((uint32_t)error, buf, size);
 #else
   ERR_error_string_n(error, buf, size);
 #endif
+
+  if(size > 1 && !*buf) {
+    strncpy(buf, (error ? "Unknown error" : "No error"), size);
+    buf[size - 1] = '\0';
+  }
+
   return buf;
 }
 
@@ -3833,10 +3842,22 @@ static ssize_t ossl_send(struct connectdata *conn,
       *curlcode = CURLE_AGAIN;
       return -1;
     case SSL_ERROR_SYSCALL:
-      Curl_strerror(SOCKERRNO, error_buffer, sizeof(error_buffer));
-      failf(conn->data, OSSL_PACKAGE " SSL_write: %s", error_buffer);
-      *curlcode = CURLE_SEND_ERROR;
-      return -1;
+      {
+        int sockerr = SOCKERRNO;
+        sslerror = ERR_get_error();
+        if(sslerror)
+          ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
+        else if(sockerr)
+          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+        else {
+          strncpy(error_buffer, SSL_ERROR_to_str(err), sizeof(error_buffer));
+          error_buffer[sizeof(error_buffer) - 1] = '\0';
+        }
+        failf(conn->data, OSSL_PACKAGE " SSL_write: %s, errno %d",
+              error_buffer, sockerr);
+        *curlcode = CURLE_SEND_ERROR;
+        return -1;
+      }
     case SSL_ERROR_SSL:
       /*  A failure in the SSL library occurred, usually a protocol error.
           The OpenSSL error queue contains more information on the error. */
@@ -3901,11 +3922,6 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
       /* there's data pending, re-invoke SSL_read() */
       *curlcode = CURLE_AGAIN;
       return -1;
-    case SSL_ERROR_SYSCALL:
-      Curl_strerror(SOCKERRNO, error_buffer, sizeof(error_buffer));
-      failf(conn->data, OSSL_PACKAGE " SSL_read: %s", error_buffer);
-      *curlcode = CURLE_RECV_ERROR;
-      return -1;
     default:
       /* openssl/ssl.h for SSL_ERROR_SYSCALL says "look at error stack/return
          value/errno" */
@@ -3914,14 +3930,44 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
       if((nread < 0) || sslerror) {
         /* If the return code was negative or there actually is an error in the
            queue */
+        int sockerr = SOCKERRNO;
+        if(sslerror)
+          ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
+        else if(sockerr && err == SSL_ERROR_SYSCALL)
+          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+        else {
+          strncpy(error_buffer, SSL_ERROR_to_str(err), sizeof(error_buffer));
+          error_buffer[sizeof(error_buffer) - 1] = '\0';
+        }
         failf(conn->data, OSSL_PACKAGE " SSL_read: %s, errno %d",
-              (sslerror ?
-               ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)) :
-               SSL_ERROR_to_str(err)),
-              SOCKERRNO);
+              error_buffer, sockerr);
         *curlcode = CURLE_RECV_ERROR;
         return -1;
       }
+      /* For debug builds be a little stricter and error on any
+         SSL_ERROR_SYSCALL. For example a server may have closed the connection
+         abruptly without a close_notify alert. For compatibility with older
+         peers we don't do this by default. #4624
+
+         We can use this to gauge how many users may be affected, and
+         if it goes ok eventually transition to allow in dev and release with
+         the newest OpenSSL: #if (OPENSSL_VERSION_NUMBER >= 0x10101000L) */
+#ifdef DEBUGBUILD
+      if(err == SSL_ERROR_SYSCALL) {
+        int sockerr = SOCKERRNO;
+        if(sockerr)
+          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+        else {
+          msnprintf(error_buffer, sizeof(error_buffer),
+                    "Connection closed abruptly");
+        }
+        failf(conn->data, OSSL_PACKAGE " SSL_read: %s, errno %d"
+              " (Fatal because this is a curl debug build)",
+              error_buffer, sockerr);
+        *curlcode = CURLE_RECV_ERROR;
+        return -1;
+      }
+#endif
     }
   }
   return nread;
