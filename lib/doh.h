@@ -94,11 +94,14 @@ struct dohentry {
 
 
 #ifdef DEBUGBUILD
-DOHcode doh_encode(const char *host,
-                   DNStype dnstype,
-                   unsigned char *dnsp, /* buffer */
-                   size_t len,  /* buffer size */
-                   size_t *olen); /* output length */
+#define doh_encode(host, dnstype, dnsp, len, olen) \
+  (doh_encodepfx(host, NULL, dnstype, dnsp, len, olen))
+DOHcode doh_encodepfx(const char *host,
+                      const char *prefix,
+                      DNStype dnstype,
+                      unsigned char *dnsp, /* buffer */
+                      size_t len,  /* buffer size */
+                      size_t *olen); /* output length */
 DOHcode doh_decode(unsigned char *doh,
                    size_t dohlen,
                    DNStype dnstype,

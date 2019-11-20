@@ -76,15 +76,18 @@ static const char *doh_strerror(DOHcode code)
 
 /* @unittest 1655
  */
-UNITTEST DOHcode doh_encode(const char *host,
-                            DNStype dnstype,
-                            unsigned char *dnsp, /* buffer */
-                            size_t len,  /* buffer size */
-                            size_t *olen) /* output length */
+UNITTEST DOHcode doh_encodepfx(const char *host,
+                               const char *prefix,
+                               DNStype dnstype,
+                               unsigned char *dnsp, /* buffer */
+                               size_t len,  /* buffer size */
+                               size_t *olen) /* output length */
 {
   const size_t hostlen = strlen(host);
   unsigned char *orig = dnsp;
-  const char *hostp = host;
+  const size_t preflen = prefix ? strlen(prefix) : 0;
+  const char *fragment[] = { prefix, host };
+  const int fragments = sizeof(fragment)/sizeof(*fragment);
 
   /* The expected output length is 16 bytes more than the length of
    * the QNAME-encoding of the host name.
@@ -110,8 +113,11 @@ UNITTEST DOHcode doh_encode(const char *host,
 
   size_t expected_len;
   DEBUGASSERT(hostlen);
-  expected_len = 12 + 1 + hostlen + 4;
+  expected_len = 12 + hostlen + preflen + 1 + 4;
   if(host[hostlen-1]!='.')
+    expected_len++;
+
+  if((preflen) && (prefix[preflen-1]!='.'))
     expected_len++;
 
   if(expected_len > (256 + 16)) /* RFCs 1034, 1035 */
@@ -134,27 +140,31 @@ UNITTEST DOHcode doh_encode(const char *host,
   *dnsp++ = '\0'; /* ARCOUNT */
 
   /* encode each label and store it in the QNAME */
-  while(*hostp) {
-    size_t labellen;
-    char *dot = strchr(hostp, '.');
-    if(dot)
-      labellen = dot - hostp;
-    else
-      labellen = strlen(hostp);
-    if((labellen > 63) || (!labellen)) {
-      /* label is too long or too short, error out */
-      *olen = 0;
-      return DOH_DNS_BAD_LABEL;
-    }
-    /* label is non-empty, process it */
-    *dnsp++ = (unsigned char)labellen;
-    memcpy(dnsp, hostp, labellen);
-    dnsp += labellen;
-    hostp += labellen;
-    /* advance past dot, but only if there is one */
-    if(dot)
-      hostp++;
-  } /* next label */
+  for(int i = 0; i < fragments; i++) {
+    char *hostp = (char *)fragment[i];
+    if(hostp)
+      while(*hostp) {
+        size_t labellen;
+        char *dot = strchr(hostp, '.');
+        if(dot)
+          labellen = dot - hostp;
+        else
+          labellen = strlen(hostp);
+        if((labellen > 63) || (!labellen)) {
+          /* label is too long or too short, error out */
+          *olen = 0;
+          return DOH_DNS_BAD_LABEL;
+        }
+        /* label is non-empty, process it */
+        *dnsp++ = (unsigned char)labellen;
+        memcpy(dnsp, hostp, labellen);
+        dnsp += labellen;
+        hostp += labellen;
+        /* advance past dot, but only if there is one */
+        if(dot)
+          hostp++;
+      } /* next label */
+  }     /* next fragment */
 
   *dnsp++ = 0; /* append zero-length label for root */
 
@@ -172,6 +182,9 @@ UNITTEST DOHcode doh_encode(const char *host,
   DEBUGASSERT(*olen == expected_len);
   return DOH_OK;
 }
+
+#define doh_encode(host, dnstype, dnsp, len, olen) \
+  (doh_encodepfx(host, NULL, dnstype, dnsp, len, olen))
 
 static size_t
 doh_write_cb(void *contents, size_t size, size_t nmemb, void *userp)
@@ -220,24 +233,27 @@ do {                                      \
     goto error;                           \
 } while(0)
 
-static CURLcode dohprobe(struct Curl_easy *data,
-                         struct dnsprobe *p, DNStype dnstype,
-                         const char *host,
-                         const char *url, CURLM *multi,
-                         struct curl_slist *headers)
+static CURLcode dohprobepfx(struct Curl_easy *data,
+                            struct dnsprobe *p, DNStype dnstype,
+                            const char *prefix,
+                            const char *host,
+                            const char *url, CURLM *multi,
+                            struct curl_slist *headers)
 {
   struct Curl_easy *doh = NULL;
   char *nurl = NULL;
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms;
-  DOHcode d = doh_encode(host, dnstype, p->dohbuffer, sizeof(p->dohbuffer),
-                         &p->dohlen);
+  DOHcode d = doh_encodepfx(host, prefix, dnstype,
+                            p->dohbuffer, sizeof(p->dohbuffer),
+                            &p->dohlen);
   if(d) {
     failf(data, "Failed to encode DOH packet [%d]\n", d);
     return CURLE_OUT_OF_MEMORY;
   }
 
   p->dnstype = dnstype;
+  p->prefix = (char *) prefix;
   p->serverdoh.memory = NULL;
   /* the memory will be grown as needed by realloc in the doh_write_cb
      function */
@@ -374,6 +390,9 @@ static CURLcode dohprobe(struct Curl_easy *data,
   Curl_close(&doh);
   return result;
 }
+
+#define dohprobe(data, p, dnstype, host, url, multi, headers) \
+  (dohprobepfx(data, p, dnstype, NULL, host, url, multi, headers))
 
 /*
  * Curl_doh() resolves a name using DOH. It resolves a name and returns a

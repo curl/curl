@@ -45,6 +45,18 @@ UNITTEST_START
  * Prove detection of other invalid input.
  */
 do {
+  const char *submax =
+    /* ..|....1.........2.........3.........4.........5.........6... */
+    /* 3456789012345678901234567890123456789012345678901234567890123 */
+    "this.is.a.long.hostname."                            /* 24:  24 */
+    "with-no-label-of-greater-length-than-the-sixty-three-characters."
+                                                          /* 64:  88 */
+    "specified.in.the.RFCs."                              /* 22: 110 */
+    "and.with.a.QNAME.encoding.whose.length.is."          /* 42: 152 */
+    "a.little.shorter.than.the.maximum."                  /* 34: 186 */
+    "that.is.two-hundred.and.fifty-six."                  /* 34: 220 */
+    "including.the.last.null."                            /* 24: 244 */
+    "";                                                 /* slack: 11 */
   const char *max =
     /* ..|....1.........2.........3.........4.........5.........6... */
     /* 3456789012345678901234567890123456789012345678901234567890123 */
@@ -78,41 +90,79 @@ do {
 
   struct test {
     const char *name;
+    const char *prefix;
     const DOHcode expected_result;
+    const int overflow;
   };
 
   /* plays the role of struct dnsprobe in urldata.h */
   struct demo {
-    unsigned char dohbuffer[255 + 16]; /* deliberately short buffer */
+    unsigned char dohbuffer[256 + 16]; /* full-size buffer */
     unsigned char canary1;
     unsigned char canary2;
     unsigned char canary3;
   };
 
-  const struct test playlist[4] = {
-    { toolong, DOH_DNS_NAME_TOO_LONG },  /* expect early failure */
-    { emptylabel, DOH_DNS_BAD_LABEL },   /* also */
-    { outsizelabel, DOH_DNS_BAD_LABEL }, /* also */
-    { max, DOH_OK }                      /* expect buffer overwrite */
+  const char *message[] = {
+    "DOH_OK",
+    "DOH_DNS_BAD_LABEL",
+    "DOH_DNS_OUT_OF_RANGE",
+    "DOH_DNS_LABEL_LOOP",
+    "DOH_TOO_SMALL_BUFFER",
+    "DOH_OUT_OF_MEM",
+    "DOH_DNS_RDATA_LEN",
+    "DOH_DNS_MALFORMAT",
+    "DOH_DNS_BAD_RCODE",
+    "DOH_DNS_UNEXPECTED_TYPE",
+    "DOH_DNS_UNEXPECTED_CLASS",
+    "DOH_NO_CONTENT",
+    "DOH_DNS_BAD_ID",
+    "DOH_DNS_NAME_TOO_LONG"
+  };
+
+  const struct test playlist[] = {
+    /* use macro doh_encode() */
+    { toolong, NULL, DOH_DNS_NAME_TOO_LONG, 0 },  /* expect early failure */
+    { ".", NULL, DOH_DNS_BAD_LABEL, 0 },          /* also */
+    { emptylabel, NULL, DOH_DNS_BAD_LABEL, 0 },   /* also */
+    { outsizelabel, NULL, DOH_DNS_BAD_LABEL, 0 }, /* also */
+    { max, NULL, DOH_OK, 2 },                     /* trigger 2x overwrite */
+    /* use function doh_encodepfx() */
+    { submax, "", DOH_OK, 0 },                    /* empty prefix */
+    { submax, ".", DOH_DNS_BAD_LABEL, 0 },        /* prefix begins with dot */
+    { submax, "_short.", DOH_OK, 0 },             /* well within slack */
+    { submax, "_very._max.", DOH_OK, 1 },         /* just within slack */
+    { submax, "_more._than.", DOH_DNS_NAME_TOO_LONG, 0 } /* just too long */
   };
 
   for(int i = 0; i < (int)(sizeof(playlist)/sizeof(*playlist)); i++) {
     const char *name = playlist[i].name;
+    const char *prefix = playlist[i].prefix;
     size_t olen = 100000;
     struct demo victim;
+    int offset = playlist[i].overflow;
     DOHcode d;
+
+    fail_if(offset > 2, "misconfigured unit-test: offset too great");
 
     victim.canary1 = 87; /* magic numbers, arbritrarily picked */
     victim.canary2 = 35;
     victim.canary3 = 41;
-    d = doh_encode(name, DNS_TYPE_A, victim.dohbuffer,
-                   sizeof(struct demo), /* allow room for overflow */
-                   &olen);
+    if(prefix)
+      d = doh_encodepfx(name, prefix, DNS_TYPE_A,
+                        victim.dohbuffer + offset, /* buffer shortened */
+                        sizeof(victim.dohbuffer),  /* allow for overflow */
+                        &olen);
+    else
+      d = doh_encode(name, DNS_TYPE_A,
+                     victim.dohbuffer + offset,
+                     sizeof(victim.dohbuffer),
+                     &olen);
 
     fail_unless(d == playlist[i].expected_result,
                 "result returned was not as expected");
     if(d == playlist[i].expected_result) {
-      if(name == max) {
+      if(offset > 0) {
         fail_if(victim.canary1 == 87,
                 "demo one-byte buffer overwrite did not happen");
       }
@@ -120,12 +170,32 @@ do {
         fail_unless(victim.canary1 == 87,
                     "one-byte buffer overwrite has happened");
       }
-      fail_unless(victim.canary2 == 35,
+      if(offset > 1) {
+        fail_if(victim.canary2 == 35,
+                  "demo two-byte buffer overwrite did not happen");
+      }
+      else {
+        fail_unless(victim.canary2 == 35,
                   "two-byte buffer overwrite has happened");
+      }
+
+      /* not triggered in playlist, so must be an error */
       fail_unless(victim.canary3 == 41,
                   "three-byte buffer overwrite has happened");
     }
     else {
+
+      /* give some clue as to what happened */
+      fprintf(stderr, "\n  result: %d (%s); expected: %d (%s)\n",
+              d, message[d],
+              playlist[i].expected_result,
+              message[playlist[i].expected_result]);
+      fprintf(stderr, "  name: (%ld) '%s'\n", strlen(name), name);
+      if(prefix)
+        fprintf(stderr, "  prefix: (%ld) '%s'\n", strlen(prefix), prefix);
+      else
+        fprintf(stderr, "  no prefix\n");
+
       if(d == DOH_OK) {
         fail_unless(olen <= sizeof(victim.dohbuffer), "wrote outside bounds");
         fail_unless(olen > strlen(name), "unrealistic low size");
@@ -176,6 +246,35 @@ do {
   fail_unless(ret == DOH_OK, "minimal length buffer should be long enough");
   fail_unless(olen == olen1, "bad buffer length");
 } while(0);
+
+/* Prove that prefix and name haven't inadvertently been swapped */
+do {
+  DNStype dnstype = DNS_TYPE_A;
+  unsigned char buffer[256 + 16];
+  const size_t buflen = sizeof(buffer);
+  const char *basename = "example.com";
+  const char *prefix = "_dummy";
+  unsigned char *p = (unsigned char *)prefix;
+  unsigned char *q = buffer + 13; /* move past header and count */
+  size_t olen;
+  bool order_ok = TRUE;
+
+  DOHcode ret = doh_encodepfx(basename, prefix, dnstype,
+                              buffer, buflen, &olen);
+  fail_unless(ret == DOH_OK,
+              "unexpected failure for ('_dummy', 'example.com'");
+
+  /* First label must match (first label of) prefix */
+  while((*p) && (*p != '.')) {
+    if(*p++ != *q++) {
+      order_ok = FALSE;
+      break;
+    }
+  }
+  fail_unless(order_ok == TRUE,
+              "first label of result does not match that of prefix");
+ } while(0);
+
 UNITTEST_STOP
 
 #else /* CURL_DISABLE_DOH */
