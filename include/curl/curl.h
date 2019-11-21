@@ -501,9 +501,7 @@ typedef enum {
   CURLE_FTP_COULDNT_SET_TYPE,    /* 17 */
   CURLE_PARTIAL_FILE,            /* 18 */
   CURLE_FTP_COULDNT_RETR_FILE,   /* 19 */
-  CURLE_HTTP3,                   /* 20 - An HTTP/3 layer problem.
-                                    [was obsoleted in August 2007 for 7.17.0,
-                                    reused in November 2019 for 7.67.1] */
+  CURLE_OBSOLETE20,              /* 20 - NOT USED */
   CURLE_QUOTE_ERROR,             /* 21 - quote command failure */
   CURLE_HTTP_RETURNED_ERROR,     /* 22 */
   CURLE_WRITE_ERROR,             /* 23 */
@@ -604,6 +602,7 @@ typedef enum {
                                     inside a callback */
   CURLE_AUTH_ERROR,              /* 94 - an authentication function returned an
                                     error */
+  CURLE_HTTP3,                   /* 95 - An HTTP/3 layer problem */
   CURL_LAST /* never use! */
 } CURLcode;
 

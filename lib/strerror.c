@@ -318,6 +318,7 @@ curl_easy_strerror(CURLcode error)
     return "HTTP/3 error";
 
     /* error codes not used by current libcurl */
+  case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:
   case CURLE_OBSOLETE29:
   case CURLE_OBSOLETE32:
