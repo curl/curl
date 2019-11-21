@@ -385,6 +385,7 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
 {
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
+  int slot;
   *waitp = TRUE; /* this never returns synchronously */
   (void)conn;
   (void)hostname;
@@ -403,8 +404,8 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
 
   if(conn->ip_version != CURL_IPRESOLVE_V6) {
     /* create IPv4 DOH request */
-    result = dohprobe(data, &data->req.doh.probe[0], DNS_TYPE_A,
-                      hostname, data->set.str[STRING_DOH],
+    result = dohprobe(data, &data->req.doh.probe[DOH_PROBE_SLOT_IPADDR_V4],
+                      DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
                       data->multi, data->req.doh.headers);
     if(result)
       goto error;
@@ -413,8 +414,8 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
 
   if(conn->ip_version != CURL_IPRESOLVE_V4) {
     /* create IPv6 DOH request */
-    result = dohprobe(data, &data->req.doh.probe[1], DNS_TYPE_AAAA,
-                      hostname, data->set.str[STRING_DOH],
+    result = dohprobe(data, &data->req.doh.probe[DOH_PROBE_SLOT_IPADDR_V6],
+                      DNS_TYPE_AAAA, hostname, data->set.str[STRING_DOH],
                       data->multi, data->req.doh.headers);
     if(result)
       goto error;
@@ -425,8 +426,9 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
   error:
   curl_slist_free_all(data->req.doh.headers);
   data->req.doh.headers = NULL;
-  Curl_close(&data->req.doh.probe[0].easy);
-  Curl_close(&data->req.doh.probe[1].easy);
+  for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
+    Curl_close(&data->req.doh.probe[slot].easy);
+  }
   return NULL;
 }
 
@@ -937,46 +939,43 @@ UNITTEST void de_cleanup(struct dohentry *d)
 CURLcode Curl_doh_is_resolved(struct connectdata *conn,
                               struct Curl_dns_entry **dnsp)
 {
+  CURLcode result;
   struct Curl_easy *data = conn->data;
   *dnsp = NULL; /* defaults to no response */
 
-  if(!data->req.doh.probe[0].easy && !data->req.doh.probe[1].easy) {
+  if(!data->req.doh.probe[DOH_PROBE_SLOT_IPADDR_V4].easy &&
+     !data->req.doh.probe[DOH_PROBE_SLOT_IPADDR_V6].easy) {
     failf(data, "Could not DOH-resolve: %s", conn->async.hostname);
     return conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!data->req.doh.pending) {
-    DOHcode rc;
-    DOHcode rc2;
+    DOHcode rc[DOH_PROBE_SLOTS];
     struct dohentry de;
+    int slot;
     /* remove DOH handles from multi handle and close them */
-    curl_multi_remove_handle(data->multi, data->req.doh.probe[0].easy);
-    Curl_close(&data->req.doh.probe[0].easy);
-    curl_multi_remove_handle(data->multi, data->req.doh.probe[1].easy);
-    Curl_close(&data->req.doh.probe[1].easy);
+    for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
+      curl_multi_remove_handle(data->multi, data->req.doh.probe[slot].easy);
+      Curl_close(&data->req.doh.probe[slot].easy);
+    }
     /* parse the responses, create the struct and return it! */
     init_dohentry(&de);
-    rc = doh_decode(data->req.doh.probe[0].serverdoh.memory,
-                    data->req.doh.probe[0].serverdoh.size,
-                    data->req.doh.probe[0].dnstype,
-                    &de);
-    Curl_safefree(data->req.doh.probe[0].serverdoh.memory);
-    if(rc) {
-      infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc),
-            type2name(data->req.doh.probe[0].dnstype),
-            data->req.doh.host);
-    }
-    rc2 = doh_decode(data->req.doh.probe[1].serverdoh.memory,
-                     data->req.doh.probe[1].serverdoh.size,
-                     data->req.doh.probe[1].dnstype,
-                     &de);
-    Curl_safefree(data->req.doh.probe[1].serverdoh.memory);
-    if(rc2) {
-      infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc2),
-            type2name(data->req.doh.probe[1].dnstype),
-            data->req.doh.host);
-    }
-    if(!rc || !rc2) {
+    for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
+      rc[slot] = doh_decode(data->req.doh.probe[slot].serverdoh.memory,
+                            data->req.doh.probe[slot].serverdoh.size,
+                            data->req.doh.probe[slot].dnstype,
+                            &de);
+      Curl_safefree(data->req.doh.probe[slot].serverdoh.memory);
+      if(rc[slot]) {
+        infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc[slot]),
+              type2name(data->req.doh.probe[slot].dnstype),
+              data->req.doh.host);
+      }
+    } /* next slot */
+
+    result = CURLE_COULDNT_RESOLVE_HOST; /* until we know better */
+    if(!rc[DOH_PROBE_SLOT_IPADDR_V4] || !rc[DOH_PROBE_SLOT_IPADDR_V6]) {
+      /* we have an address, of one kind or other */
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
@@ -998,21 +997,26 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
-      de_cleanup(&de);
-      if(!dns)
+      if(!dns) {
         /* returned failure, bail out nicely */
         Curl_freeaddrinfo(ai);
+      }
       else {
         conn->async.dns = dns;
         *dnsp = dns;
-        return CURLE_OK;
+        result = CURLE_OK;      /* address resolution OK */
       }
-    }
+    } /* address processing done */
+
+    /* Now process any build-specific attributes retrieved from DNS */
+
+    /* All done */
     de_cleanup(&de);
+    return result;
 
-    return CURLE_COULDNT_RESOLVE_HOST;
-  }
+  } /* !data->req.doh.pending */
 
+  /* else wait for pending DOH transactions to complete */
   return CURLE_OK;
 }
 
