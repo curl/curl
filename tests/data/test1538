@@ -52,7 +52,7 @@ e16: Error in the HTTP2 framing layer
 e17: FTP: couldn't set file type
 e18: Transferred a partial file
 e19: FTP: couldn't retrieve (RETR failed) the specified file
-e20: HTTP/3 error
+e20: Unknown error
 e21: Quote command returned error
 e22: HTTP response code said error
 e23: Failed writing received data to disk/application
@@ -127,7 +127,8 @@ e91: SSL server certificate status verification FAILED
 e92: Stream error in the HTTP/2 framing layer
 e93: API function called from within callback
 e94: An authentication function returned an error
-e95: Unknown error
+e95: HTTP/3 error
+e96: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error
 m1: Invalid multi handle
