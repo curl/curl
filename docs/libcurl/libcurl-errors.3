@@ -59,9 +59,9 @@ Couldn't resolve proxy. The given proxy host could not be resolved.
 Couldn't resolve host. The given remote host was not resolved.
 .IP "CURLE_COULDNT_CONNECT (7)"
 Failed to connect() to host or proxy.
-.IP "CURLE_FTP_WEIRD_SERVER_REPLY (8)"
-The server sent data libcurl couldn't parse. This error code is used for more
-than just FTP and is aliased as \fICURLE_WEIRD_SERVER_REPLY\fP since 7.51.0.
+.IP "CURLE_WEIRD_SERVER_REPLY (8)"
+The server sent data libcurl couldn't parse. This error code was known as as
+\fICURLE_FTP_WEIRD_SERVER_REPLY\fP before 7.51.0.
 .IP "CURLE_REMOTE_ACCESS_DENIED (9)"
 We were denied access to the resource given in the URL.  For FTP, this occurs
 while trying to change to the remote directory.
@@ -271,6 +271,9 @@ This is not really an error. It means you should call
 between. Before version 7.20.0 this could be returned by
 \fIcurl_multi_perform(3)\fP, but in later versions this return code is never
 used.
+.IP "CURLM_CALL_MULTI_SOCKET (-1)"
+An alias for CURLM_CALL_MULTI_PERFORM. Never returned by modern libcurl
+versions.
 .IP "CURLM_OK (0)"
 Things are fine.
 .IP "CURLM_BAD_HANDLE (1)"
