@@ -2991,8 +2991,9 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
           conn->http_proxy.host.name : conn->host.name;
         const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
         char extramsg[80]="";
-        if(detail == SSL_ERROR_SYSCALL)
-          Curl_strerror(SOCKERRNO, extramsg, sizeof(extramsg));
+        int sockerr = SOCKERRNO;
+        if(sockerr && detail == SSL_ERROR_SYSCALL)
+          Curl_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%ld ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
               hostname, port);
