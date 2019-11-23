@@ -1,3 +1,4 @@
+#test
 name: Build on Ubuntu with default options
 
 on: [push]
