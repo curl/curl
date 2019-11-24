@@ -113,6 +113,18 @@ rem ***************************************************************************
       for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vauth\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vauth" "%%i"
     )
 
+    rem Check the lib\vquic directory
+    if exist %SRC_DIR%\lib\vquic (
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vquic\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vquic" "%%i"
+    )
+
+    rem Check the lib\vssh directory
+    if exist %SRC_DIR%\lib\vssh (
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vssh\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vssh" "%%i"
+    )
+
     rem Check the lib\vtls directory
     if exist %SRC_DIR%\lib\vtls (
       for /f "delims=" %%i in ('dir "%SRC_DIR%\lib\vtls\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\lib\checksrc.pl" "-D%SRC_DIR%\lib\vtls" "%%i"
