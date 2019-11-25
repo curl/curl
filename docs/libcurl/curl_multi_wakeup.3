@@ -43,5 +43,44 @@ operation.
 This function has no effect on \fIcurl_multi_wait(3)\fP calls.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
+.SH AVAILABILITY
+Added in 7.68.0
+.SH EXAMPLE
+.nf
+CURL *easy_handle;
+CURLM *multi_handle;
+
+/* add the individual easy handle */
+curl_multi_add_handle(multi_handle, easy_handle);
+
+/* this is thread 1 */
+do {
+  CURLMcode mc;
+  int numfds;
+
+  mc = curl_multi_perform(multi_handle, &still_running);
+
+  if(mc == CURLM_OK) {
+    /* wait for activity, timeout or wakeup */
+    mc = curl_multi_poll(multi_handle, NULL, 0, 10000, &numfds);
+  }
+
+  if(time_to_die())
+    exit(1);
+
+} while(still_running);
+
+curl_multi_remove_handle(multi_handle, easy_handle);
+
+/* this is thread 2 */
+
+if(soemthing makes us decide to stop thread 1) {
+
+  set_something_to_signal_thread_1_to_exit();
+
+  curl_multi_wakeup(multi_handle);
+}
+
+.fi
 .SH "SEE ALSO"
 .BR curl_multi_poll "(3), " curl_multi_wait "(3)"
