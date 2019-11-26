@@ -10,7 +10,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: config
+    - name: configure
       run: ./buildconf && ./configure
     - name: make
       run: make
