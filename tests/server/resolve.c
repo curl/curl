@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("resolve IPv4%s\n",
-#ifdef ENABLE_IPV6
+#if defined(CURLRES_IPV6)
              "/IPv6"
 #else
              ""
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     puts("Usage: resolve [option] <host>\n"
          " --version\n"
          " --ipv4"
-#ifdef ENABLE_IPV6
+#if defined(CURLRES_IPV6)
          "\n --ipv6"
 #endif
          );
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
   atexit(win32_cleanup);
 #endif
 
-#ifdef ENABLE_IPV6
+#if defined(CURLRES_IPV6)
   if(use_ipv6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
