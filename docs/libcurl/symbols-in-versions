@@ -869,6 +869,7 @@ CURL_POLL_INOUT                 7.14.0
 CURL_POLL_NONE                  7.14.0
 CURL_POLL_OUT                   7.14.0
 CURL_POLL_REMOVE                7.14.0
+CURL_PROGRESSFUNC_CONTINUE      7.68.0
 CURL_PROGRESS_BAR               7.1.1         -           7.4.1
 CURL_PROGRESS_STATS             7.1.1         -           7.4.1
 CURL_PUSH_DENY                  7.44.0
