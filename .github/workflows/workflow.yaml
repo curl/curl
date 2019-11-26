@@ -6,13 +6,13 @@ jobs:
   build:
     name: Glo actions
     runs-on: ubuntu-latest
-  steps:
-  - uses: Axosoft/glo-action-parse-links@v1
+    steps:
+    - uses: Axosoft/glo-action-parse-links@v1
       id: glo-parse
 
-  - uses: Axosoft/glo-action-label-card@v1
+    - uses: Axosoft/glo-action-move-card@v1
       with:
         authToken: ${{ secrets.pat }}
         cards: '${{ steps.glo-parse.outputs.cards }}'
-        label: 'middle'
-      id: glo-label
+        column: 'doing'
+      id: glo-move
