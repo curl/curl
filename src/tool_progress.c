@@ -95,10 +95,18 @@ int xferinfo_cb(void *clientp,
                 curl_off_t ulnow)
 {
   struct per_transfer *per = clientp;
+  struct OutStruct *outs = &per->outs;
+  struct OperationConfig *config = outs->config;
   per->dltotal = dltotal;
   per->dlnow = dlnow;
   per->ultotal = ultotal;
   per->ulnow = ulnow;
+
+  if(config->readbusy) {
+    config->readbusy = FALSE;
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
+  }
+
   return 0;
 }
 

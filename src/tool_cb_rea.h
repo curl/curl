@@ -29,4 +29,12 @@
 
 size_t tool_read_cb(void *buffer, size_t sz, size_t nmemb, void *userdata);
 
+/*
+** callback for CURLOPT_XFERINFOFUNCTION used to unpause busy reads
+*/
+
+int tool_readbusy_cb(void *clientp,
+                     curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow);
+
 #endif /* HEADER_CURL_TOOL_CB_REA_H */

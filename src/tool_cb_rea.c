@@ -27,6 +27,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
+#include "tool_operate.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -51,4 +52,29 @@ size_t tool_read_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
   }
   in->config->readbusy = FALSE;
   return (size_t)rc;
+}
+
+/*
+** callback for CURLOPT_XFERINFOFUNCTION used to unpause busy reads
+*/
+
+int tool_readbusy_cb(void *clientp,
+                     curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow)
+{
+  struct per_transfer *per = clientp;
+  struct OutStruct *outs = &per->outs;
+  struct OperationConfig *config = outs->config;
+
+  (void)dltotal;  /* unused */
+  (void)dlnow;  /* unused */
+  (void)ultotal;  /* unused */
+  (void)ulnow;  /* unused */
+
+  if(config->readbusy) {
+    config->readbusy = FALSE;
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
+  }
+
+  return per->noprogress? 0 : CURL_PROGRESSFUNC_CONTINUE;
 }

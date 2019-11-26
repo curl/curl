@@ -32,6 +32,7 @@
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
 #include "tool_util.h"
+#include "tool_operate.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -121,7 +122,10 @@ int tool_progress_cb(void *clientp,
      and this new edition inherits some of his concepts. */
 
   struct timeval now = tvnow();
-  struct ProgressData *bar = (struct ProgressData *)clientp;
+  struct per_transfer *per = clientp;
+  struct OutStruct *outs = &per->outs;
+  struct OperationConfig *config = outs->config;
+  struct ProgressData *bar = &per->progressbar;
   curl_off_t total;
   curl_off_t point;
 
@@ -190,6 +194,11 @@ int tool_progress_cb(void *clientp,
   fflush(bar->out);
   bar->prev = point;
   bar->prevtime = now;
+
+  if(config->readbusy) {
+    config->readbusy = FALSE;
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
+  }
 
   return 0;
 }
