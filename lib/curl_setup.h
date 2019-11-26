@@ -585,7 +585,7 @@
 #  define CURLRES_SYNCH
 #endif
 
-#ifdef ENABLE_IPV6
+#if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
 #else
 #  define CURLRES_IPV4
