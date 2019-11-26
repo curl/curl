@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
   steps:
   - uses: Axosoft/glo-action-parse-links@v1
-      id: glo-parse
+    id: glo-parse
 
   - uses: Axosoft/glo-action-label-card@v1
-      with:
+    with:
         authToken: ${{ secrets.pat }}
         cards: '${{ steps.glo-parse.outputs.cards }}'
         label: 'middle'
-      id: glo-label
+    id: glo-label
