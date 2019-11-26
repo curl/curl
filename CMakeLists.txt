@@ -234,6 +234,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
 endif()
 
 # Include all the necessary files for macros
+include(CMakePushCheckState)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckIncludeFiles)
@@ -284,7 +285,7 @@ if(WIN32)
 endif()
 
 # check SSL libraries
-# TODO support GNUTLS, NSS, POLARSSL, CYASSL
+# TODO support GNUTLS, POLARSSL, CYASSL
 
 if(APPLE)
   option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
@@ -296,9 +297,10 @@ if(WIN32)
 endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 option(CMAKE_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF)
+option(CMAKE_USE_NSS "Enable NSS for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
+if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS OR CMAKE_USE_NSS)
   set(openssl_default OFF)
 endif()
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ${openssl_default})
@@ -309,6 +311,7 @@ count_true(enabled_ssl_options_count
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
   CMAKE_USE_BEARSSL
+  CMAKE_USE_NSS
 )
 if(enabled_ssl_options_count GREATER "1")
   set(CURL_WITH_MULTI_SSL ON)
@@ -387,6 +390,19 @@ if(CMAKE_USE_BEARSSL)
   set(USE_BEARSSL ON)
   list(APPEND CURL_LIBS ${BEARSSL_LIBRARY})
   include_directories(${BEARSSL_INCLUDE_DIRS})
+endif()
+
+if(CMAKE_USE_NSS)
+  find_package(NSS REQUIRED)
+  include_directories(${NSS_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS ${NSS_LIBRARIES})
+  set(SSL_ENABLED ON)
+  set(USE_NSS ON)
+  cmake_push_check_state()
+  set(CMAKE_REQUIRED_INCLUDES ${NSS_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${NSS_LIBRARIES})
+  check_symbol_exists(PK11_CreateManagedGenericObject "pk11pub.h" HAVE_PK11_CREATEMANAGEDGENERICOBJECT)
+  cmake_pop_check_state()
 endif()
 
 option(USE_NGHTTP2 "Use Nghttp2 library" OFF)
@@ -676,7 +692,9 @@ elseif("${CURL_CA_PATH}" STREQUAL "none")
   unset(CURL_CA_PATH CACHE)
 elseif("${CURL_CA_PATH}" STREQUAL "auto")
   unset(CURL_CA_PATH CACHE)
-  set(CURL_CA_PATH_AUTODETECT TRUE)
+  if(NOT USE_NSS)
+    set(CURL_CA_PATH_AUTODETECT TRUE)
+  endif()
 else()
   set(CURL_CA_PATH_SET TRUE)
 endif()
@@ -1210,7 +1228,7 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_SECTRANSP OR USE_MBEDTLS))
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_SECTRANSP OR USE_MBEDTLS OR USE_NSS))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
@@ -1262,6 +1280,7 @@ _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
 _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
 _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
 _add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
+_add_if("NSS"              SSL_ENABLED AND USE_NSS)
 if(_items)
   list(SORT _items)
 endif()

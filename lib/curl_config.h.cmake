@@ -960,6 +960,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if NSS is enabled */
 #cmakedefine USE_NSS 1
 
+/* if you have the PK11_CreateManagedGenericObject function */
+#cmakedefine HAVE_PK11_CREATEMANAGEDGENERICOBJECT 1
+
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
 #cmakedefine USE_OPENLDAP 1
 
