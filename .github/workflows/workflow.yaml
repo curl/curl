@@ -1,0 +1,20 @@
+name: glo workflow
+
+on: pull_request
+
+name: Glo actions
+
+jobs:
+  build:
+    name: Glo actions
+    runs-on: ubuntu-latest
+    steps:
+    - uses: Axosoft/glo-action-parse-links@v1
+      id: glo-parse
+
+    - uses: Axosoft/glo-action-move-card@v1
+      with:
+        authToken: ${{ secrets.pat }}
+        cards: '${{ steps.glo-parse.outputs.cards }}'
+        column: 'doing'
+      id: glo-move
