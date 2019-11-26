@@ -1,5 +1,3 @@
-name: glo workflow
-
 on: pull_request
 
 name: Glo actions
