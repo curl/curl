@@ -256,8 +256,9 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
   SSL_CTX_set_default_verify_paths(ssl_ctx);
 
   if(SSL_CTX_set_ciphersuites(ssl_ctx, QUIC_CIPHERS) != 1) {
-    failf(data, "SSL_CTX_set_ciphersuites: %s",
-          ERR_error_string(ERR_get_error(), NULL));
+    char error_buffer[256];
+    ERR_error_string_n(ERR_get_error(), error_buffer, sizeof(error_buffer));
+    failf(data, "SSL_CTX_set_ciphersuites: %s", error_buffer);
     return NULL;
   }
 
