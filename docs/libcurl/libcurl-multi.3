@@ -85,7 +85,7 @@ returns back to the calling application.
 
 Your application extracts info from libcurl about when it would like to get
 invoked to transfer data or do other work. The most convenient way is to use
-\fIcurl_multi_wait(3)\fP that will help you wait until the application should
+\fIcurl_multi_poll(3)\fP that will help you wait until the application should
 call libcurl again. The older API to accomplish the same thing is
 \fIcurl_multi_fdset(3)\fP that extracts fd_sets from libcurl to use in
 select() or poll() calls in order to get to know when the transfers in the
