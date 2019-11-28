@@ -457,7 +457,7 @@ sub scanfile {
             }
         }
 
-        if($nostr =~ /^((.*)(if) *\()(.*)\)/) {
+        if($nostr =~ /^((.*)(if) *\()(.*)\) [{\n]/) {
             my $pos = length($1);
             if($4 =~ / = /) {
                 checkwarn("ASSIGNWITHINCONDITION",
