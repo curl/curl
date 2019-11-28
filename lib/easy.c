@@ -157,20 +157,20 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   if(!Curl_ssl_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
-    return CURLE_FAILED_INIT;
+    goto fail;
   }
 
 #ifdef WIN32
   if(Curl_win32_init(flags)) {
     DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
-    return CURLE_FAILED_INIT;
+    goto fail;
   }
 #endif
 
 #ifdef __AMIGA__
   if(!Curl_amiga_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
-    return CURLE_FAILED_INIT;
+    goto fail;
   }
 #endif
 
@@ -182,14 +182,14 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   if(Curl_resolver_global_init()) {
     DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
-    return CURLE_FAILED_INIT;
+    goto fail;
   }
 
   (void)Curl_ipv6works();
 
 #if defined(USE_SSH)
   if(Curl_ssh_init()) {
-    return CURLE_FAILED_INIT;
+    goto fail;
   }
 #endif
 
@@ -201,6 +201,10 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   Curl_version_init();
 
   return CURLE_OK;
+
+  fail:
+  initialized--; /* undo the increase */
+  return CURLE_FAILED_INIT;
 }
 
 
