@@ -2045,7 +2045,7 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
                   "%04d%02d%02d %02d:%02d:%02d GMT",
                   year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
-        data->info.filetime = curl_getdate(timebuf, &secs);
+        data->info.filetime = Curl_getdate_capped(timebuf, &secs);
       }
 
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
