@@ -31,6 +31,6 @@ CURLcode Curl_gmtime(time_t intime, struct tm *store);
    TIME_T_MAX in case the parsed time value was too big, instead of an
    error. */
 
-time_t Curl_getdate_capped(const char *p, const time_t *now);
+time_t Curl_getdate_capped(const char *p);
 
 #endif /* HEADER_CURL_PARSEDATE_H */

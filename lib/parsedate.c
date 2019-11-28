@@ -591,11 +591,10 @@ time_t curl_getdate(const char *p, const time_t *now)
    TIME_T_MAX in case the parsed time value was too big, instead of an
    error. */
 
-time_t Curl_getdate_capped(const char *p, const time_t *now)
+time_t Curl_getdate_capped(const char *p)
 {
   time_t parsed = -1;
   int rc = parsedate(p, &parsed);
-  (void)now; /* legacy argument from the past that we ignore */
 
   switch(rc) {
   case PARSEDATE_OK:
