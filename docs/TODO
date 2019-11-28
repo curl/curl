@@ -813,7 +813,7 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  The SFTP code in libcurl checks the file size *before* a transfer starts and
  then proceeds to transfer exactly that amount of data. If the remote file
- grows while the tranfer is in progress libcurl won't notice and will not
+ grows while the transfer is in progress libcurl won't notice and will not
  adapt. The OpenSSH SFTP command line tool does and libcurl could also just
  attempt to download more to see if there is more to get...
 

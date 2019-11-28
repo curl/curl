@@ -307,7 +307,7 @@ for `aarch64` and API level 29:
     export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
     export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
 
-When building on Linux or targetting other API levels or architectures, you need
+When building on Linux or targeting other API levels or architectures, you need
 to adjust those variables accordingly. After that you can build curl like this:
 
     ./configure --host aarch64-linux-android --with-pic --disable-shared

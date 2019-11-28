@@ -339,7 +339,7 @@ problems may have been fixed or changed somewhat since this was written!
 
 5.1 USE_UNIX_SOCKETS on Windows
 
- Due to incorrect CMake checks for the presense of the feature, it will never
+ Due to incorrect CMake checks for the presence of the feature, it will never
  be enabled for windows in a cmake build.
 
  See https://github.com/curl/curl/issues/4040
