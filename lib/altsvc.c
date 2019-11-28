@@ -161,7 +161,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
               date, &persist, &prio);
   if(9 == rc) {
     struct altsvc *as;
-    time_t expires = curl_getdate(date, NULL);
+    time_t expires = Curl_getdate_capped(date);
     as = altsvc_create(srchost, dsthost, srcalpn, dstalpn, srcport, dstport);
     if(as) {
       as->expires = expires;

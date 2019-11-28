@@ -2039,13 +2039,11 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
                      &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         char timebuf[24];
-        time_t secs = time(NULL);
-
         msnprintf(timebuf, sizeof(timebuf),
                   "%04d%02d%02d %02d:%02d:%02d GMT",
                   year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
-        data->info.filetime = curl_getdate(timebuf, &secs);
+        data->info.filetime = Curl_getdate_capped(timebuf);
       }
 
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
