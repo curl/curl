@@ -1226,7 +1226,7 @@ static int cookie_sort_ct(const void *p1, const void *p2)
       if(!d->field)                      \
         goto fail;                       \
     }                                    \
-  } while(0)
+  } WHILE_FALSE
 
 static struct Cookie *dup_cookie(struct Cookie *src)
 {
