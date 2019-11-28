@@ -140,7 +140,7 @@ curl_calloc_callback Curl_ccalloc;
  */
 static CURLcode global_init(long flags, bool memoryfuncs)
 {
-  if(initialized++)
+  if(initialized)
     return CURLE_OK;
 
   if(memoryfuncs) {
@@ -200,6 +200,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   Curl_version_init();
 
+  initialized++;
   return CURLE_OK;
 }
 
