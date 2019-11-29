@@ -455,7 +455,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       if(ECONNREFUSED == oserrno)
         retry = RETRY_CONNREFUSED;
     }
-    else if (CURLE_FILE_COULDNT_READ_FILE == result) {
+    else if(CURLE_FILE_COULDNT_READ_FILE == result) {
       /*
        * treat unreadable file condition as retryable and regard it as
        * `refused' in a way, so that the requested file may be
