@@ -38,33 +38,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/*
- * Macros ALWAYS_TRUE and ALWAYS_FALSE are used to avoid compiler warnings.
- */
-
-#define ALWAYS_TRUE   (1)
-#define ALWAYS_FALSE  (0)
-
-#if defined(_MSC_VER) && !defined(__POCC__)
-#  undef ALWAYS_TRUE
-#  undef ALWAYS_FALSE
-#  if (_MSC_VER < 1500)
-#    define ALWAYS_TRUE   (0, 1)
-#    define ALWAYS_FALSE  (1, 0)
-#  else
-#    define ALWAYS_TRUE \
-__pragma(warning(push)) \
-__pragma(warning(disable:4127)) \
-(1) \
-__pragma(warning(pop))
-#    define ALWAYS_FALSE \
-__pragma(warning(push)) \
-__pragma(warning(disable:4127)) \
-(0) \
-__pragma(warning(pop))
-#  endif
-#endif
-
 #ifdef WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
@@ -79,9 +52,9 @@ __pragma(warning(pop))
 #endif
 
 #ifdef WIN32
-#  define _use_lfn(f) ALWAYS_TRUE   /* long file names always available */
+#  define _use_lfn(f) (1)   /* long file names always available */
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
-#  define _use_lfn(f) ALWAYS_FALSE  /* long file names never available */
+#  define _use_lfn(f) (0)  /* long file names never available */
 #elif defined(__DJGPP__)
 #  include <fcntl.h>                /* _use_lfn(f) prototype */
 #endif
