@@ -218,7 +218,7 @@ do {                                      \
   result = curl_easy_setopt(doh, x, y);   \
   if(result)                              \
     goto error;                           \
-} WHILE_FALSE
+} while(0)
 
 static CURLcode dohprobe(struct Curl_easy *data,
                          struct dnsprobe *p, DNStype dnstype,

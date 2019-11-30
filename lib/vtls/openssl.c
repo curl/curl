@@ -3081,7 +3081,7 @@ do {                              \
   Curl_ssl_push_certinfo_len(data, _num, _label, ptr, info_len); \
   if(1 != BIO_reset(mem))                                        \
     break;                                                       \
-} WHILE_FALSE
+} while(0)
 
 static void pubkey_show(struct Curl_easy *data,
                         BIO *mem,
@@ -3113,7 +3113,7 @@ do {                              \
   if(_type->_name) { \
     pubkey_show(data, mem, _num, #_type, #_name, _type->_name); \
   } \
-} WHILE_FALSE
+} while(0)
 #endif
 
 static int X509V3_ext(struct Curl_easy *data,
