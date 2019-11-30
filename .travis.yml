@@ -439,8 +439,8 @@ matrix:
                       - zlib1g-dev
 
 before_install:
-    - export "${OVERRIDE_CC}"
-    - export "${OVERRIDE_CXX}"
+  - export "${OVERRIDE_CC-blank=}"
+  - export "${OVERRIDE_CXX-blank=}"
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
