@@ -1177,7 +1177,7 @@ static CURLcode readwrite_upload(struct Curl_easy *data,
     }
 
 
-  } WHILE_FALSE; /* just to break out from! */
+  } while(0); /* just to break out from! */
 
   return CURLE_OK;
 }

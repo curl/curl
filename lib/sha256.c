@@ -58,7 +58,7 @@ do {                                                                \
   (a)[1] = (unsigned char)((((unsigned long) (val)) >> 16) & 0xff); \
   (a)[2] = (unsigned char)((((unsigned long) (val)) >> 8) & 0xff);  \
   (a)[3] = (unsigned char)(((unsigned long) (val)) & 0xff);         \
-} WHILE_FALSE;
+} while(0)
 
 #ifdef HAVE_LONGLONG
 #define WPA_PUT_BE64(a, val)                                    \
@@ -71,7 +71,7 @@ do {                                                            \
   (a)[5] = (unsigned char)(((unsigned long long)(val)) >> 16);  \
   (a)[6] = (unsigned char)(((unsigned long long)(val)) >> 8);   \
   (a)[7] = (unsigned char)(((unsigned long long)(val)) & 0xff); \
-} WHILE_FALSE;
+} while(0)
 #else
 #define WPA_PUT_BE64(a, val)                                  \
 do {                                                          \

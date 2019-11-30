@@ -52,7 +52,7 @@
     fprintf(stderr, "%s:%d test failed: '%s'\n",                       \
             __FILE__, __LINE__, msg);                                  \
     unitfail++;                                                        \
-  } WHILE_FALSE
+  } while(0)
 
 
 /* The abort macros mark the current test step as failed, and exit the test */
@@ -77,7 +77,7 @@
             __FILE__, __LINE__, msg);                         \
     unitfail++;                                               \
     goto unit_test_abort;                                     \
-  } WHILE_FALSE
+  } while(0)
 
 
 

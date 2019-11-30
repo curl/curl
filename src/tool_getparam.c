@@ -58,7 +58,7 @@
     if(!(*(str)))          \
       return PARAM_NO_MEM; \
   } \
-} WHILE_FALSE
+} while(0)
 
 struct LongShort {
   const char *letter; /* short name option */

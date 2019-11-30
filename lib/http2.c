@@ -68,7 +68,7 @@
 #ifdef DEBUG_HTTP2
 #define H2BUGF(x) x
 #else
-#define H2BUGF(x) do { } WHILE_FALSE
+#define H2BUGF(x) do { } while(0)
 #endif
 
 

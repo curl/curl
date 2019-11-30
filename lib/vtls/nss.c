@@ -113,7 +113,7 @@ typedef struct {
   ptr->type = (_type);                                      \
   ptr->pValue = (_val);                                     \
   ptr->ulValueLen = (_len);                                 \
-} WHILE_FALSE
+} while(0)
 
 #define CERT_NewTempCertificate __CERT_NewTempCertificate
 

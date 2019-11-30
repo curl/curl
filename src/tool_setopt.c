@@ -181,18 +181,18 @@ static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   ret = easysrc_add args; \
   if(ret) \
     goto nomem; \
-} WHILE_FALSE
+} while(0)
 #define ADDF(args) do { \
   ret = easysrc_addf args; \
   if(ret) \
     goto nomem; \
-} WHILE_FALSE
+} while(0)
 #define NULL_CHECK(p) do { \
   if(!p) { \
     ret = CURLE_OUT_OF_MEMORY; \
     goto nomem; \
   } \
-} WHILE_FALSE
+} while(0)
 
 #define DECL0(s) ADD((&easysrc_decl, s))
 #define DECL1(f,a) ADDF((&easysrc_decl, f,a))

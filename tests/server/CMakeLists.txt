@@ -1,7 +1,7 @@
 set(TARGET_LABEL_PREFIX "Test server ")
 
 if(MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4127 /wd4306")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4306")
 endif()
 
 function(SETUP_EXECUTABLE TEST_NAME)    # ARGN are the files in the test

@@ -119,7 +119,7 @@ struct win32_crypto_hash {
     *(str) = strdup((val)); \
   if(!(val)) \
     return PARAM_NO_MEM; \
-} WHILE_FALSE
+} while(0)
 
 #if defined(USE_OPENSSL)
 /* Functions are already defined */

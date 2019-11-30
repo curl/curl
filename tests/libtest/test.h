@@ -131,7 +131,7 @@ extern int unitfail;
     fprintf(stderr, "%s:%d curl_easy_init() failed\n", (Y), (Z)); \
     res = TEST_ERR_EASY_INIT;                                     \
   }                                                               \
-} WHILE_FALSE
+} while(0)
 
 #define res_easy_init(A) \
   exe_easy_init((A), (__FILE__), (__LINE__))
@@ -140,7 +140,7 @@ extern int unitfail;
   exe_easy_init((A), (Y), (Z));   \
   if(res)                         \
     goto test_cleanup;            \
-} WHILE_FALSE
+} while(0)
 
 #define easy_init(A) \
   chk_easy_init((A), (__FILE__), (__LINE__))
@@ -152,7 +152,7 @@ extern int unitfail;
     fprintf(stderr, "%s:%d curl_multi_init() failed\n", (Y), (Z)); \
     res = TEST_ERR_MULTI_INIT;                                     \
   }                                                                \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_init(A) \
   exe_multi_init((A), (__FILE__), (__LINE__))
@@ -161,7 +161,7 @@ extern int unitfail;
   exe_multi_init((A), (Y), (Z));   \
   if(res)                          \
     goto test_cleanup;             \
-} WHILE_FALSE
+} while(0)
 
 #define multi_init(A) \
   chk_multi_init((A), (__FILE__), (__LINE__))
@@ -176,7 +176,7 @@ extern int unitfail;
             (Y), (Z), (int)ec, curl_easy_strerror(ec));    \
     res = (int)ec;                                         \
   }                                                        \
-} WHILE_FALSE
+} while(0)
 
 #define res_easy_setopt(A, B, C) \
   exe_easy_setopt((A), (B), (C), (__FILE__), (__LINE__))
@@ -185,7 +185,7 @@ extern int unitfail;
   exe_easy_setopt((A), (B), (C), (Y), (Z)); \
   if(res)                                   \
     goto test_cleanup;                      \
-} WHILE_FALSE
+} while(0)
 
 #define easy_setopt(A, B, C) \
   chk_easy_setopt((A), (B), (C), (__FILE__), (__LINE__))
@@ -200,7 +200,7 @@ extern int unitfail;
             (Y), (Z), (int)ec, curl_multi_strerror(ec));    \
     res = (int)ec;                                          \
   }                                                         \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_setopt(A,B,C) \
   exe_multi_setopt((A), (B), (C), (__FILE__), (__LINE__))
@@ -209,7 +209,7 @@ extern int unitfail;
   exe_multi_setopt((A), (B), (C), (Y), (Z)); \
   if(res)                                    \
     goto test_cleanup;                       \
-} WHILE_FALSE
+} while(0)
 
 #define multi_setopt(A,B,C) \
   chk_multi_setopt((A), (B), (C), (__FILE__), (__LINE__))
@@ -224,7 +224,7 @@ extern int unitfail;
             (Y), (Z), (int)ec, curl_multi_strerror(ec));     \
     res = (int)ec;                                           \
   }                                                          \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_add_handle(A, B) \
   exe_multi_add_handle((A), (B), (__FILE__), (__LINE__))
@@ -233,7 +233,7 @@ extern int unitfail;
   exe_multi_add_handle((A), (B), (Y), (Z));   \
   if(res)                                     \
     goto test_cleanup;                        \
-} WHILE_FALSE
+} while(0)
 
 #define multi_add_handle(A, B) \
   chk_multi_add_handle((A), (B), (__FILE__), (__LINE__))
@@ -248,7 +248,7 @@ extern int unitfail;
             (Y), (Z), (int)ec, curl_multi_strerror(ec));        \
     res = (int)ec;                                              \
   }                                                             \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_remove_handle(A, B) \
   exe_multi_remove_handle((A), (B), (__FILE__), (__LINE__))
@@ -257,7 +257,7 @@ extern int unitfail;
   exe_multi_remove_handle((A), (B), (Y), (Z));   \
   if(res)                                        \
     goto test_cleanup;                           \
-} WHILE_FALSE
+} while(0)
 
 
 #define multi_remove_handle(A, B) \
@@ -279,7 +279,7 @@ extern int unitfail;
             (Y), (Z), (int)*((B)));                              \
     res = TEST_ERR_NUM_HANDLES;                                  \
   }                                                              \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_perform(A, B) \
   exe_multi_perform((A), (B), (__FILE__), (__LINE__))
@@ -288,7 +288,7 @@ extern int unitfail;
   exe_multi_perform((A), (B), (Y), (Z));   \
   if(res)                                  \
     goto test_cleanup;                     \
-} WHILE_FALSE
+} while(0)
 
 #define multi_perform(A,B) \
   chk_multi_perform((A), (B), (__FILE__), (__LINE__))
@@ -309,7 +309,7 @@ extern int unitfail;
             (Y), (Z), (int)*((E)));                                  \
     res = TEST_ERR_NUM_HANDLES;                                      \
   }                                                                  \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_fdset(A, B, C, D, E) \
   exe_multi_fdset((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
@@ -318,7 +318,7 @@ extern int unitfail;
     exe_multi_fdset((A), (B), (C), (D), (E), (Y), (Z)); \
     if(res)                                             \
       goto test_cleanup;                                \
-  } WHILE_FALSE
+  } while(0)
 
 #define multi_fdset(A, B, C, D, E) \
   chk_multi_fdset((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
@@ -339,7 +339,7 @@ extern int unitfail;
             (Y), (Z), (long)*((B)));                         \
     res = TEST_ERR_BAD_TIMEOUT;                              \
   }                                                          \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_timeout(A, B) \
   exe_multi_timeout((A), (B), (__FILE__), (__LINE__))
@@ -348,7 +348,7 @@ extern int unitfail;
     exe_multi_timeout((A), (B), (Y), (Z)); \
     if(res)                                \
       goto test_cleanup;                   \
-  } WHILE_FALSE
+  } while(0)
 
 #define multi_timeout(A, B) \
   chk_multi_timeout((A), (B), (__FILE__), (__LINE__))
@@ -369,7 +369,7 @@ extern int unitfail;
             (Y), (Z), (int)*((E)));                                 \
     res = TEST_ERR_NUM_HANDLES;                                     \
   }                                                                 \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_poll(A, B, C, D, E) \
   exe_multi_poll((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
@@ -378,7 +378,7 @@ extern int unitfail;
   exe_multi_poll((A), (B), (C), (D), (E), (Y), (Z)); \
   if(res)                                            \
     goto test_cleanup;                               \
-} WHILE_FALSE
+} while(0)
 
 #define multi_poll(A, B, C, D, E) \
   chk_multi_poll((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
@@ -393,7 +393,7 @@ extern int unitfail;
             (Y), (Z), (int)ec, curl_multi_strerror(ec)); \
     res = (int)ec;                                       \
   }                                                      \
-} WHILE_FALSE
+} while(0)
 
 #define res_multi_wakeup(A) \
   exe_multi_wakeup((A), (__FILE__), (__LINE__))
@@ -402,7 +402,7 @@ extern int unitfail;
   exe_multi_wakeup((A), (Y), (Z));     \
   if(res)                              \
     goto test_cleanup;                 \
-} WHILE_FALSE
+} while(0)
 
 #define multi_wakeup(A) \
   chk_multi_wakeup((A), (__FILE__), (__LINE__))
@@ -418,7 +418,7 @@ extern int unitfail;
               (Y), (Z), ec, strerror(ec));                      \
       res = TEST_ERR_SELECT;                                    \
     }                                                           \
-  } WHILE_FALSE
+  } while(0)
 
 #define res_select_test(A, B, C, D, E) \
   exe_select_test((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
@@ -427,7 +427,7 @@ extern int unitfail;
     exe_select_test((A), (B), (C), (D), (E), (Y), (Z)); \
     if(res)                                             \
       goto test_cleanup;                                \
-  } WHILE_FALSE
+  } while(0)
 
 #define select_test(A, B, C, D, E) \
   chk_select_test((A), (B), (C), (D), (E), (__FILE__), (__LINE__))
@@ -436,7 +436,7 @@ extern int unitfail;
 
 #define start_test_timing() do { \
   tv_test_start = tutil_tvnow(); \
-} WHILE_FALSE
+} while(0)
 
 #define exe_test_timedout(Y,Z) do {                                    \
   if(tutil_tvdiff(tutil_tvnow(), tv_test_start) > TEST_HANG_TIMEOUT) { \
@@ -444,7 +444,7 @@ extern int unitfail;
                     "that it would have run forever.\n", (Y), (Z));    \
     res = TEST_ERR_RUNS_FOREVER;                                       \
   }                                                                    \
-} WHILE_FALSE
+} while(0)
 
 #define res_test_timedout() \
   exe_test_timedout((__FILE__), (__LINE__))
@@ -453,7 +453,7 @@ extern int unitfail;
     exe_test_timedout(Y, Z);         \
     if(res)                          \
       goto test_cleanup;             \
-  } WHILE_FALSE
+  } while(0)
 
 #define abort_on_test_timeout() \
   chk_test_timedout((__FILE__), (__LINE__))
@@ -468,7 +468,7 @@ extern int unitfail;
             (Y), (Z), (int)ec, curl_easy_strerror(ec)); \
     res = (int)ec;                                      \
   }                                                     \
-} WHILE_FALSE
+} while(0)
 
 #define res_global_init(A) \
   exe_global_init((A), (__FILE__), (__LINE__))
@@ -477,7 +477,7 @@ extern int unitfail;
     exe_global_init((A), (Y), (Z));   \
     if(res)                           \
       return res;                     \
-  } WHILE_FALSE
+  } while(0)
 
 /* global_init() is different than other macros. In case of
    failure it 'return's instead of going to 'test_cleanup'. */

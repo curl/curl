@@ -62,7 +62,7 @@ char *Curl_convert_wchar_to_UTF8(const wchar_t *str_w);
 #define Curl_convert_UTF8_to_tchar(ptr) Curl_convert_UTF8_to_wchar((ptr))
 #define Curl_convert_tchar_to_UTF8(ptr) Curl_convert_wchar_to_UTF8((ptr))
 #define Curl_unicodefree(ptr) \
-  do {if((ptr)) {free((ptr)); (ptr) = NULL;}} WHILE_FALSE
+  do {if((ptr)) {free((ptr)); (ptr) = NULL;}} while(0)
 
 typedef union {
   unsigned short       *tchar_ptr;
@@ -76,7 +76,7 @@ typedef union {
 #define Curl_convert_UTF8_to_tchar(ptr) (ptr)
 #define Curl_convert_tchar_to_UTF8(ptr) (ptr)
 #define Curl_unicodefree(ptr) \
-  do {(ptr) = NULL;} WHILE_FALSE
+  do {(ptr) = NULL;} while(0)
 
 typedef union {
   char                *tchar_ptr;

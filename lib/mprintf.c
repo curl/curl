@@ -104,7 +104,7 @@ static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
       done++; \
     else \
      return done; /* return immediately on failure */ \
-  } WHILE_FALSE
+  } while(0)
 
 /* Data type to read from the arglist */
 typedef enum {

@@ -45,7 +45,7 @@
 #ifdef DEBUG_HTTP3
 #define H3BUGF(x) x
 #else
-#define H3BUGF(x) do { } WHILE_FALSE
+#define H3BUGF(x) do { } while(0)
 #endif
 
 #define QUIC_MAX_STREAMS (256*1024)
