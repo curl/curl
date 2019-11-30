@@ -30,15 +30,25 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+#ifndef CURL_DISABLE_TERMINAL_COLORS
+#define WARN_PREFIX "\033[33mWarning: \033[0m"
+#define NOTE_PREFIX "\033[36mNote: \033[0m"
+#else
 #define WARN_PREFIX "Warning: "
 #define NOTE_PREFIX "Note: "
+#endif
 
 static void voutf(struct GlobalConfig *config,
                   const char *prefix,
                   const char *fmt,
                   va_list ap)
 {
-  size_t width = (79 - strlen(prefix));
+  unsigned short maxlength = 79;
+  #ifndef CURL_DISABLE_TERMINAL_COLORS
+  /* Terminal color sequences are 16 characters long (starter and escaper) */
+  maxlength += 16;
+  #endif
+  size_t width = (maxlength - strlen(prefix));
   if(!config->mute) {
     size_t len;
     char *ptr;

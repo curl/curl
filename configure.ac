@@ -4487,6 +4487,24 @@ AC_HELP_STRING([--disable-progress-meter],[Disable progress-meter]),
 )
 
 dnl ************************************************************
+dnl disable terminal colors
+dnl
+AC_MSG_CHECKING([whether to support terminal-colors])
+AC_ARG_ENABLE(terminal-colors,
+AC_HELP_STRING([--enable-terminal-colors],[Enable terminal-colors])
+AC_HELP_STRING([--disable-terminal-colors],[Disable terminal-colors]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_TERMINAL_COLORS, 1, [disable terminal-colors])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable shuffle DNS support
 dnl
 AC_MSG_CHECKING([whether to support DNS shuffling])
