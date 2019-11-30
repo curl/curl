@@ -1203,16 +1203,23 @@ AC_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
        ;;
   esac ],
 
-  AC_TRY_RUN([ /* is AF_INET6 available? */
+  AC_TRY_RUN([ /* are AF_INET6 and sockaddr_in6 available? */
 #include <sys/types.h>
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #else
 #include <sys/socket.h>
+#include <netinet/in.h>
+#if defined (__TANDEM)
+# include <netinet/in6.h>
+#endif
 #endif
 #include <stdlib.h> /* for exit() */
 main()
 {
+ struct sockaddr_in6 s;
+ (void)s;
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
    exit(1);
  else
@@ -1227,8 +1234,12 @@ main()
   ipv6=yes
 ))
 
-# Check if struct sockaddr_in6 have sin6_scope_id member
 if test "$ipv6" = yes; then
+  curl_ipv6_msg="enabled"
+  AC_DEFINE(ENABLE_IPV6, 1, [Define if you want to enable IPv6 support])
+  IPV6_ENABLED=1
+  AC_SUBST(IPV6_ENABLED)
+
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
   AC_TRY_COMPILE([
 #include <sys/types.h>
@@ -4051,15 +4062,6 @@ AC_CHECK_FUNCS([fnmatch \
     ])
   fi
 ])
-
-if test "$ipv6" = "yes"; then
-  if test "$curl_cv_func_getaddrinfo" = "yes"; then
-    AC_DEFINE(ENABLE_IPV6, 1, [Define if you want to enable IPv6 support])
-    IPV6_ENABLED=1
-    AC_SUBST(IPV6_ENABLED)
-    curl_ipv6_msg="enabled"
-  fi
-fi
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
