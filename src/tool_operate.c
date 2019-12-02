@@ -1615,7 +1615,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(!config->insecure_ok) {
             char *home;
             char *file;
-            result = CURLE_OUT_OF_MEMORY;
+            result = CURLE_FAILED_INIT;
             home = homedir();
             if(home) {
               file = aprintf("%s/.ssh/known_hosts", home);
@@ -1628,6 +1628,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                   result = CURLE_OK;
               }
               Curl_safefree(home);
+            }
+            else {
+              errorf(global, "Failed to figure out user's home dir!");
             }
             if(result)
               break;
