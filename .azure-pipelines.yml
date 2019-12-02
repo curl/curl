@@ -16,5 +16,5 @@ steps:
 - script: make
   displayName: 'make'
 
-- script: test
-  displayName: 'make check'
+- script: make check
+  displayName: 'test'
