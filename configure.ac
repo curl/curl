@@ -247,8 +247,10 @@ AM_CONDITIONAL([USE_CPPFLAG_CURL_STATICLIB],
 CPPFLAG_CURL_STATICLIB=
 if test "x$xc_lt_build_static_only" = 'xyes'; then
   CPPFLAG_CURL_STATICLIB='-DCURL_STATICLIB'
+  CPPFLAG_NGHTTP2_STATICLIB='-DNGHTTP2_STATICLIB'
 fi
 AC_SUBST([CPPFLAG_CURL_STATICLIB])
+AC_SUBST([CPPFLAG_NGHTTP2_STATICLIB])
 
 
 # Determine whether all dependent libraries must be specified when linking
@@ -3315,6 +3317,8 @@ case "$OPT_H2" in
 esac
 
 curl_h2_msg="disabled (--with-nghttp2)"
+AM_CONDITIONAL([USE_CPPFLAG_NGHTTP2_STATICLIB],
+  [test "x$xc_lt_build_static_only" = 'xyes'])
 if test X"$want_h2" != Xno; then
   dnl backup the pre-nghttp2 variables
   CLEANLDFLAGS="$LDFLAGS"

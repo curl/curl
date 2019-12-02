@@ -36,4 +36,4 @@ Description: Library to transfer files with ftp, http, etc.
 Version: @CURLVERSION@
 Libs: -L${libdir} -lcurl
 Libs.private: @LIBCURL_LIBS@
-Cflags: -I${includedir} @CPPFLAG_CURL_STATICLIB@
+Cflags: -I${includedir} @CPPFLAG_CURL_STATICLIB@ @CPPFLAG_NGHTTP2_STATICLIB@
