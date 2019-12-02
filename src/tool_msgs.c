@@ -32,6 +32,7 @@
 
 #define WARN_PREFIX "Warning: "
 #define NOTE_PREFIX "Note: "
+#define ERROR_PREFIX "curl: "
 
 static void voutf(struct GlobalConfig *config,
                   const char *prefix,
@@ -121,4 +122,17 @@ void helpf(FILE *errors, const char *fmt, ...)
           "or 'curl --manual' "
 #endif
           "for more information\n");
+}
+
+/*
+ * Emit error message on error stream if not muted.
+ */
+void errorf(struct GlobalConfig *config, const char *fmt, ...)
+{
+  if(!config->mute) {
+    va_list ap;
+    va_start(ap, fmt);
+    voutf(config, ERROR_PREFIX, fmt, ap);
+    va_end(ap);
+  }
 }
