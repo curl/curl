@@ -257,6 +257,7 @@ struct ssl_config_data {
   BIT(falsestart);
   BIT(enable_beast); /* allow this flaw for interoperability's sake*/
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
+  BIT(no_partialchain); /* don't accept partial certificate chains */
 };
 
 struct ssl_general_config {
