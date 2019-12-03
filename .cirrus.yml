@@ -21,6 +21,13 @@ task:
     - pkg delete -y curl
   configure_script:
     - ./buildconf
+    - case `uname -r` in
+        13.0*)
+        export CC=clang;
+        export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
+        export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
+        export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
+      esac
     - ./configure --prefix="${HOME}"/install --enable-debug --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
   compile_script:
     - make V=1
