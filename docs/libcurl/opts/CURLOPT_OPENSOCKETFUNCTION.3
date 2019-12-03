@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,8 +29,6 @@ CURLOPT_OPENSOCKETFUNCTION \- set callback for opening sockets
 
 typedef enum  {
   CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
-  CURLSOCKTYPE_ACCEPT, /* socket created by accept() call */
-  CURLSOCKTYPE_LAST    /* never use */
 } curlsocktype;
 
 struct curl_sockaddr {
@@ -52,10 +50,9 @@ shown above.
 
 This callback function gets called by libcurl instead of the \fIsocket(2)\fP
 call. The callback's \fIpurpose\fP argument identifies the exact purpose for
-this particular socket: \fICURLSOCKTYPE_IPCXN\fP is for IP based connections
-and \fICURLSOCKTYPE_ACCEPT\fP is for sockets created after accept() - such as
-when doing active FTP. Future versions of libcurl may support more
-purposes.
+this particular socket. \fICURLSOCKTYPE_IPCXN\fP is for IP based connections
+and is the only purpose currently used in libcurl. Future versions of libcurl
+may support more purposes.
 
 The \fIclientp\fP pointer contains whatever user-defined value set using the
 \fICURLOPT_OPENSOCKETDATA(3)\fP function.
