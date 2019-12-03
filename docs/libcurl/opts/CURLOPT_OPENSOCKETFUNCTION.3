@@ -51,8 +51,8 @@ shown above.
 This callback function gets called by libcurl instead of the \fIsocket(2)\fP
 call. The callback's \fIpurpose\fP argument identifies the exact purpose for
 this particular socket. \fICURLSOCKTYPE_IPCXN\fP is for IP based connections
-and is the only purpose used in curren libcurl. Future versions of libcurl may
-support more purposes.
+and is the only purpose currently used in libcurl. Future versions of libcurl
+may support more purposes.
 
 The \fIclientp\fP pointer contains whatever user-defined value set using the
 \fICURLOPT_OPENSOCKETDATA(3)\fP function.
