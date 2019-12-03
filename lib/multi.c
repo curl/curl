@@ -547,6 +547,8 @@ static CURLcode multi_done(struct Curl_easy *data,
     /* Stop if multi_done() has already been called */
     return CURLE_OK;
 
+  conn->data = data; /* ensure the connection uses this transfer now */
+
   /* Stop the resolver and free its own resources (but not dns_entry yet). */
   Curl_resolver_kill(conn);
 
@@ -583,15 +585,17 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   process_pending_handles(data->multi); /* connection / multiplex */
 
+  CONN_LOCK(data);
   detach_connnection(data);
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
+    CONN_UNLOCK(data);
     DEBUGF(infof(data, "Connection still in use %zu, "
                  "no more multi_done now!\n",
                  conn->easyq.size));
     return CURLE_OK;
   }
-
+  conn->data = NULL; /* the connection now has no owner */
   data->state.done = TRUE; /* called just now! */
 
   if(conn->dns_entry) {
@@ -634,7 +638,10 @@ static CURLcode multi_done(struct Curl_easy *data,
 #endif
      ) || conn->bits.close
        || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
-    CURLcode res2 = Curl_disconnect(data, conn, premature);
+    CURLcode res2;
+    conn->bits.close = TRUE; /* forcibly prevents reuse */
+    CONN_UNLOCK(data);
+    res2 = Curl_disconnect(data, conn, premature);
 
     /* If we had an error already, make sure we return that one. But
        if we got a new error, return that. */
@@ -651,9 +658,9 @@ static CURLcode multi_done(struct Curl_easy *data,
               conn->bits.httpproxy ? conn->http_proxy.host.dispname :
               conn->bits.conn_to_host ? conn->conn_to_host.dispname :
               conn->host.dispname);
-
     /* the connection is no longer in use by this transfer */
-    if(Curl_conncache_return_conn(conn)) {
+    CONN_UNLOCK(data);
+    if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
       data->state.lastconnect = conn;
       infof(data, "%s\n", buffer);
@@ -760,10 +767,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
                                 vanish with this handle */
 
   /* Remove the association between the connection and the handle */
-  if(data->conn) {
-    data->conn->data = NULL;
+  if(data->conn)
     detach_connnection(data);
-  }
 
 #ifdef USE_LIBPSL
   /* Remove the PSL association. */
@@ -1349,6 +1354,7 @@ static CURLcode multi_do(struct Curl_easy *data, bool *done)
 
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->handler);
+  DEBUGASSERT(conn->data == data);
 
   if(conn->handler->do_it) {
     /* generic protocol-specific function pointer set in curl_connect() */

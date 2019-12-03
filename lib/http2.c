@@ -1169,11 +1169,10 @@ static void populate_settings(struct connectdata *conn,
   httpc->local_settings_num = 3;
 }
 
-void Curl_http2_done(struct connectdata *conn, bool premature)
+void Curl_http2_done(struct Curl_easy *data, bool premature)
 {
-  struct Curl_easy *data = conn->data;
   struct HTTP *http = data->req.protop;
-  struct http_conn *httpc = &conn->proto.httpc;
+  struct http_conn *httpc = &data->conn->proto.httpc;
 
   /* there might be allocated resources done before this got the 'h2' pointer
      setup */
