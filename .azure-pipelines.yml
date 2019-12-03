@@ -9,12 +9,27 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- script: ./buildconf && ./configure
-  displayName: 'Run configure'
+jobs:
+  - job: vanilla_ubuntu
+    displayName: stock Ubuntu with plain configure
+    steps:
+    - script: ./buildconf && ./configure
+      displayName: 'Run configure'
 
-- script: make
-  displayName: 'make'
+    - script: make
+      displayName: 'make'
 
-- script: make test-nonflaky
-  displayName: 'test'
+    - script: make test-nonflaky
+      displayName: 'test'
+
+  - job: disable_ipv6
+    displayName: without IPv6
+    steps:
+    - script: ./buildconf && ./configure --disable-ipv6
+      displayName: 'Run configure --disable-ipv6'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make test-nonflaky
+      displayName: 'test'
