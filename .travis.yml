@@ -61,12 +61,6 @@ matrix:
           compiler: gcc
           dist: trusty
           env:
-              - T=normal C="--disable-http --disable-smtp --disable-imap"
-              - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-        - os: linux
-          compiler: gcc
-          dist: trusty
-          env:
               - T=normal C="--enable-ares"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
@@ -226,22 +220,6 @@ matrix:
                       - *common_packages
                       - clang-7
                       - libgnutls28-dev
-                      - libpsl-dev
-                      - libbrotli-dev
-        - os: linux
-          compiler: clang
-          dist: xenial
-          env:
-              - T=debug C="--disable-threaded-resolver"
-              - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-          addons:
-              apt:
-                  sources:
-                      - *common_sources
-                      - llvm-toolchain-xenial-7
-                  packages:
-                      - *common_packages
-                      - clang-7
                       - libpsl-dev
                       - libbrotli-dev
         - os: linux
