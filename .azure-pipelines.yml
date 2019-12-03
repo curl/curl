@@ -9,12 +9,63 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- script: ./buildconf && ./configure
-  displayName: 'Run configure'
+jobs:
+  - job: vanilla_ubuntu
+    displayName: default configure
+    steps:
+    - script: ./buildconf && ./configure
+      displayName: 'Run configure'
 
-- script: make
-  displayName: 'make'
+    - script: make
+      displayName: 'make'
 
-- script: make test-nonflaky
-  displayName: 'test'
+    - script: make test-nonflaky
+      displayName: 'test'
+
+  - job: disable_ipv6
+    displayName: without IPv6
+    steps:
+    - script: ./buildconf && ./configure --disable-ipv6
+      displayName: 'Run configure --disable-ipv6'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make test-nonflaky
+      displayName: 'test'
+
+  - job: disable_http_smtp_imap
+    displayName: without HTTP/SMTP/IMAP
+    steps:
+    - script: ./buildconf && ./configure --disable-http --disable-smtp --disable-imap
+      displayName: 'Run configure'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make test-nonflaky
+      displayName: 'test'
+
+  - job: disable_thredres
+    displayName: sync resolver
+    steps:
+    - script: ./buildconf && ./configure --disable-threaded-resolver
+      displayName: 'Run configure'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make test-nonflaky
+      displayName: 'test'
+
+  - job: http_only
+    displayName: HTTP only
+    steps:
+    - script: ./buildconf && ./configure --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp
+      displayName: 'Run configure'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make test-nonflaky
+      displayName: 'test'
