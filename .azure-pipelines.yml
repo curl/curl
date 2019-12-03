@@ -16,5 +16,5 @@ steps:
 - script: make
   displayName: 'make'
 
-- script: make check
+- script: make test-nonflaky
   displayName: 'test'
