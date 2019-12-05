@@ -889,16 +889,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
         }
 
-        /* disallowing simultaneous use of --etag-save and --etag-compare */
-        if(config->etag_save_file && config->etag_compare_file) {
-          warnf(
-            config->global,
-            "Cannot use --etag-save and --etag-compare at the same time\n");
-
-          result = CURLE_UNKNOWN_OPTION;
-          break;
-        }
-
         /* --etag-save */
         etag_save = &per->etag_save;
         etag_save->stream = stdout;
