@@ -571,6 +571,12 @@
  * Mutually exclusive CURLRES_* definitions.
  */
 
+#if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
+#  define CURLRES_IPV6
+#else
+#  define CURLRES_IPV4
+#endif
+
 #ifdef USE_ARES
 #  define CURLRES_ASYNCH
 #  define CURLRES_ARES
@@ -583,12 +589,6 @@
 #  define CURLRES_THREADED
 #else
 #  define CURLRES_SYNCH
-#endif
-
-#if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
-#  define CURLRES_IPV6
-#else
-#  define CURLRES_IPV4
 #endif
 
 /* ---------------------------------------------------------------- */
