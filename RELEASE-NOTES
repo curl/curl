@@ -8,30 +8,42 @@ curl and libcurl 7.68.0
 
 This release includes the following changes:
 
- o curl: add --parallel-immediate [29]
- o curl: add --etag-compare and --etag-save [31]
- o XFERINFOFUNCTION: support CURL_PROGRESSFUNC_CONTINUE [36]
  o TLS: add BearSSL vtls implementation [37]
+ o XFERINFOFUNCTION: support CURL_PROGRESSFUNC_CONTINUE [36]
+ o curl: add --etag-compare and --etag-save [31]
+ o curl: add --parallel-immediate [29]
  o multi: add curl_multi_wakeup() [38]
+ o openssl: CURLSSLOPT_NO_PARTIALCHAIN can disable partial cert chains [45]
 
 This release includes the following bugfixes:
 
+ o Azure Pipelines: add several builds
+ o CMake: add support for building with the NSS vtls backend [43]
  o CURL-DISABLE: initial docs for the CURL_DISABLE_* defines [19]
+ o CURLOPT_VERBOSE.3: see also ERRORBUFFER
  o HISTORY: added cmake, HTTP/3 and parallel downloads with curl
  o INSTALL.md: provide Android build instructions [10]
+ o OPENSOCKETFUNCTION.3: correct the purpose description [48]
  o altsvc: bump to h3-24 [6]
+ o build: Disable Visual Studio warning "conditional expression is constant" [49]
  o build: fix for CURL_DISABLE_DOH [2]
  o checksrc.bat: Add a check for vquic and vssh directories [40]
+ o checksrc: fix regexp for ASSIGNWITHINCONDITION [56]
  o checksrc: repair the copyrightyear check [25]
  o config-win32: cpu-machine-OS for Windows on ARM [13]
  o configure: avoid unportable `==' test(1) operator [1]
+ o configure: enable IPv6 support without `getaddrinfo` [44]
  o configure: fix typo in help text [4]
  o copyrights: fix copyright year range [25]
  o curl: fix --upload-file . hangs if delay in STDIN [35]
  o curl: fix -T globbing [16]
+ o curl: show better error message when no homedir is found [47]
+ o curl_setup_once: consistently use WHILE_FALSE in macros [54]
  o docs: Change 'experiemental' to 'experimental' [30]
  o doh: improced both encoding and decoding [11]
  o examples: add multi-poll.c [14]
+ o global_init: undo the "intialized" bump in case of failure [52]
+ o http_ntlm: Remove duplicate NSS initialisation [55]
  o lib: Move lib/ssh.h -> lib/vssh/ssh.h [9]
  o multi_poll: avoid busy-loop when called without easy handles attached [15]
  o ngtcp2: fix thread-safety bug in error-handling [33]
@@ -43,12 +55,17 @@ This release includes the following bugfixes:
  o openssl: Revert to less sensitivity for SYSCALL errors [26]
  o openssl: improve error message for SYSCALL during connect [27]
  o openssl: prevent recursive function calls from ctx callbacks [18]
+ o openssl: retrieve reported LibreSSL version at runtime [50]
+ o openssl: set X509_V_FLAG_PARTIAL_CHAIN by default [46]
+ o parsedate: offer a getdate_capped() alternative [53]
  o pause: avoid updating socket if done was already called [22]
  o projects: Fix Visual Studio projects SSH builds [41]
  o projects: Fix Visual Studio wolfSSL configurations
  o quiche: reject HTTP/3 headers in the wrong order [17]
  o remove_handle: clear expire timers after multi_done() [20]
  o schannel: fix --tls-max for when min is --tlsv1 or default [39]
+ o setopt: Fix ALPN / NPN user option when built without HTTP2 [42]
+ o strerror: Add Curl_winapi_strerror for Win API specific errors [51]
  o strerror: Fix an error looking up some Windows error strings
  o system.h: fix for MCST lcc compiler [23]
  o test1175: verify symbols-in-versions and libcurl-errors.3 in sync [28]
@@ -67,13 +84,14 @@ advice from friends like these:
   3dyd on github, Anderson Sasaki, Andreas Falkenhahn, bdry on github,
   Bjoern Franke, Christian Schmitz, Christoph M. Becker, Cynthia Coan,
   Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, David Benjamin,
-  Gergely Nagy, Javier Blazquez, John Schroeder, Kamil Dudka, Leonardo Taccari,
-  Marcel Raad, Maros Priputen, Massimiliano Fantuzzi, Max Kellermann,
-  Melissa Mears, Michael Forney, Niall O'Reilly, Paul Hoffman,
-  Paulo Roberto Tomasi, Peter Wu, Ray Satiro, Richard Bowker,
-  SLDiggie on github, Tatsuhiro Tsujikawa, Tom van der Woerdt,
-  Victor Magierski, Wyatt O'Day, Xiaoyin Liu,
-  (35 contributors)
+  Gergely Nagy, JanB on github, Javier Blazquez, Jeff Mears, Jeffrey Walton,
+  John Schroeder, Kamil Dudka, Leonardo Taccari, Marcel Raad, Maros Priputen,
+  Massimiliano Fantuzzi, Max Kellermann, Melissa Mears, Michael Forney,
+  Niall O'Reilly, Paul Groke, Paul Hoffman, Paulo Roberto Tomasi, Peter Wu,
+  Ray Satiro, Richard Alcock, Richard Bowker, Shailesh Kapse,
+  SLDiggie on github, Steve Holme, Tatsuhiro Tsujikawa, Tom van der Woerdt,
+  Victor Magierski, Vlastimil Ovčáčík, Wyatt O'Day, Xiaoyin Liu,
+  (43 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -120,3 +138,18 @@ References to bug reports and discussions on issues:
  [39] = https://curl.haxx.se/bug/?i=4633
  [40] = https://curl.haxx.se/bug/?i=4607
  [41] = https://curl.haxx.se/bug/?i=4492
+ [42] = https://curl.haxx.se/bug/?i=4668
+ [43] = https://curl.haxx.se/bug/?i=4663
+ [44] = https://curl.haxx.se/bug/?i=4662
+ [45] = https://curl.haxx.se/bug/?i=4665
+ [46] = https://curl.haxx.se/mail/lib-2019-11/0094.html
+ [47] = https://curl.haxx.se/bug/?i=4644
+ [48] = https://curl.haxx.se/mail/lib-2019-12/0007.html
+ [49] = https://curl.haxx.se/bug/?i=4658
+ [50] = https://curl.haxx.se/bug/?i=2425
+ [51] = https://curl.haxx.se/bug/?i=4550
+ [52] = https://curl.haxx.se/bug/?i=4636
+ [53] = https://curl.haxx.se/bug/?i=4152
+ [54] = https://curl.haxx.se/bug/?i=4649
+ [55] = https://curl.haxx.se/bug/?i=3935
+ [56] = https://curl.haxx.se/bug/?i=4647
