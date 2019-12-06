@@ -124,6 +124,7 @@ const NameValue setopt_nv_CURLUSESSL[] = {
 const NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
   NV(CURLSSLOPT_ALLOW_BEAST),
   NV(CURLSSLOPT_NO_REVOKE),
+  NV(CURLSSLOPT_NO_PARTIALCHAIN),
   NVEND,
 };
 
