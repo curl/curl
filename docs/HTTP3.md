@@ -13,7 +13,7 @@ and libcurl.
 
 ## QUIC libraries
 
-QUIC libraries we're experiementing with:
+QUIC libraries we're experimenting with:
 
 [ngtcp2](https://github.com/ngtcp2/ngtcp2)
 

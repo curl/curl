@@ -701,7 +701,7 @@ Otherwise, curl will attempt to use a sensible TLS default version.
 ## Resuming File Transfers
 
 To continue a file transfer where it was previously aborted, curl supports
-esume on HTTP(S) downloads as well as FTP uploads and downloads.
+resume on HTTP(S) downloads as well as FTP uploads and downloads.
 
 Continue downloading a document:
 
