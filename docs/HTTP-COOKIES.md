@@ -24,7 +24,7 @@
   and in 2017, another update was
   [drafted](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01)
   to deprecate modification of 'secure' cookies from non-secure origins. Both
-  of these drafs have been incorporated into a proposal to
+  of these drafts have been incorporated into a proposal to
   [replace](https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-02)
   RFC6265. Cookie prefixes and secure cookie modification protection has been
   implemented by curl.

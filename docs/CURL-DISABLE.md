@@ -35,7 +35,7 @@ support.
 
 ## CURL_DISABLE_HTTP_AUTH
 
-Disable suppotr for all HTTP authentication methods.
+Disable support for all HTTP authentication methods.
 
 ## CURL_DISABLE_IMAP
 
