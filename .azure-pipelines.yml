@@ -6,12 +6,11 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
-
 jobs:
   - job: vanilla_ubuntu
-    displayName: default configure
+    displayName: unbuntu default
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure
       displayName: 'Run configure'
@@ -23,7 +22,9 @@ jobs:
       displayName: 'test'
 
   - job: disable_ipv6
-    displayName: without IPv6
+    displayName: ubuntu w/o IPv6
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-ipv6
       displayName: 'Run configure --disable-ipv6'
@@ -35,7 +36,9 @@ jobs:
       displayName: 'test'
 
   - job: disable_http_smtp_imap
-    displayName: without HTTP/SMTP/IMAP
+    displayName: ubuntu w/o HTTP/SMTP/IMAP
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-http --disable-smtp --disable-imap
       displayName: 'Run configure'
@@ -47,7 +50,9 @@ jobs:
       displayName: 'test'
 
   - job: disable_thredres
-    displayName: sync resolver
+    displayName: ubuntu sync resolver
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-threaded-resolver
       displayName: 'Run configure'
@@ -59,9 +64,28 @@ jobs:
       displayName: 'test'
 
   - job: http_only
-    displayName: HTTP only
+    displayName: ubuntu HTTP only
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp
+      displayName: 'Run configure'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make test-nonflaky
+      displayName: 'test'
+
+  - job: vanilla_macos
+    displayName: macos default
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - script: brew update && brew install libtool autoconf automake nghttp2
+      displayName: Install packages
+
+    - script: ./buildconf && ./configure
       displayName: 'Run configure'
 
     - script: make
