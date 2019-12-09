@@ -639,7 +639,7 @@ static CURLcode multi_done(struct Curl_easy *data,
      ) || conn->bits.close
        || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
     CURLcode res2;
-    conn->bits.close = TRUE; /* forcibly prevents reuse */
+    connclose(conn, "disconnecting");
     CONN_UNLOCK(data);
     res2 = Curl_disconnect(data, conn, premature);
 
