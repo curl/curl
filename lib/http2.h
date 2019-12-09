@@ -50,7 +50,7 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
 /* called from http_setup_conn */
 void Curl_http2_setup_conn(struct connectdata *conn);
 void Curl_http2_setup_req(struct Curl_easy *data);
-void Curl_http2_done(struct connectdata *conn, bool premature);
+void Curl_http2_done(struct Curl_easy *data, bool premature);
 CURLcode Curl_http2_done_sending(struct connectdata *conn);
 CURLcode Curl_http2_add_child(struct Curl_easy *parent,
                               struct Curl_easy *child,
