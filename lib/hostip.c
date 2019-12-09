@@ -1021,6 +1021,10 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 CURLcode Curl_resolv_check(struct connectdata *conn,
                            struct Curl_dns_entry **dns)
 {
+#if defined(CURL_DISABLE_DOH) && !defined(CURLRES_ASYNCH)
+  (void)dns;
+#endif
+
   if(conn->data->set.doh)
     return Curl_doh_is_resolved(conn, dns);
   return Curl_resolver_is_resolved(conn, dns);
