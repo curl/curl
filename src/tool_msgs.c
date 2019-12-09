@@ -105,9 +105,9 @@ void warnf(struct GlobalConfig *config, const char *fmt, ...)
   va_end(ap);
 }
 /*
- * Emit help formatted message on given stream.
+ * Emit help formatted message on given stream. This is for errors with or
+ * related to command line arguments.
  */
-
 void helpf(FILE *errors, const char *fmt, ...)
 {
   if(fmt) {
@@ -125,7 +125,8 @@ void helpf(FILE *errors, const char *fmt, ...)
 }
 
 /*
- * Emit error message on error stream if not muted.
+ * Emit error message on error stream if not muted. When errors are not tied
+ * to command line arguments, use helpf() for such errors.
  */
 void errorf(struct GlobalConfig *config, const char *fmt, ...)
 {

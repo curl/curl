@@ -706,7 +706,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         httpgetfields = state->httpgetfields = strdup(config->postfields);
         Curl_safefree(config->postfields);
         if(!httpgetfields) {
-          helpf(global->errors, "out of memory\n");
+          errorf(global, "out of memory\n");
           result = CURLE_OUT_OF_MEMORY;
         }
         else if(SetHTTPrequest(config,
@@ -768,7 +768,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     if(urlnode->outfile && !state->outfiles) {
       state->outfiles = strdup(urlnode->outfile);
       if(!state->outfiles) {
-        helpf(global->errors, "out of memory\n");
+        errorf(global, "out of memory\n");
         result = CURLE_OUT_OF_MEMORY;
         break;
       }
@@ -796,12 +796,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if(inglob) {
             result = glob_next_url(&state->uploadfile, inglob);
             if(result == CURLE_OUT_OF_MEMORY)
-              helpf(global->errors, "out of memory\n");
+              errorf(global, "out of memory\n");
           }
           else if(!state->up) {
             state->uploadfile = strdup(infiles);
             if(!state->uploadfile) {
-              helpf(global->errors, "out of memory\n");
+              errorf(global, "out of memory\n");
               result = CURLE_OUT_OF_MEMORY;
             }
           }
@@ -1030,7 +1030,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             if(result)
               break;
             if(!*per->outfile && !config->content_disposition) {
-              helpf(global->errors, "Remote file name has no length!\n");
+              errorf(global, "Remote file name has no length!\n");
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -1087,7 +1087,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             FILE *file = fopen(per->outfile, "ab");
 #endif
             if(!file) {
-              helpf(global->errors, "Can't open '%s'!\n", per->outfile);
+              errorf(global, "Can't open '%s'!\n", per->outfile);
               result = CURLE_WRITE_ERROR;
               break;
             }
@@ -2288,7 +2288,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
         config->cacert = strdup(env);
         if(!config->cacert) {
           curl_free(env);
-          helpf(global->errors, "out of memory\n");
+          errorf(global, "out of memory\n");
           return CURLE_OUT_OF_MEMORY;
         }
       }
@@ -2309,7 +2309,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
             config->cacert = strdup(env);
             if(!config->cacert) {
               curl_free(env);
-              helpf(global->errors, "out of memory\n");
+              errorf(global, "out of memory\n");
               return CURLE_OUT_OF_MEMORY;
             }
           }
@@ -2496,7 +2496,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 #endif
       }
       else
-        helpf(global->errors, "out of memory\n");
+        errorf(global, "out of memory\n");
     }
   }
 
