@@ -116,7 +116,7 @@ jobs:
     pool:
       vmImage: 'macOS-latest'
     steps:
-    - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config libssh2
+    - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config libssh
       displayName: Install packages
 
     - script: ./buildconf && ./configure --with-libssh --enable-debug
