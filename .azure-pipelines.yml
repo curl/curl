@@ -77,12 +77,12 @@ jobs:
     - script: make test-nonflaky
       displayName: 'test'
 
-  - job: vanilla_macos
+  - job: macos_plain
     displayName: macos default
     pool:
       vmImage: 'macOS-latest'
     steps:
-    - script: brew update && brew install libtool autoconf automake nghttp2
+    - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config
       displayName: Install packages
 
     - script: ./buildconf && ./configure
@@ -93,3 +93,31 @@ jobs:
 
     - script: make test-nonflaky
       displayName: 'test'
+
+  - job: macos_libssh2
+    displayName: macos libssh2
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config libssh2
+      displayName: Install packages
+
+    - script: ./buildconf && ./configure --with-libssh2 --enable-debug
+      displayName: 'Run configure'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make test-nonflaky
+      displayName: 'test'
+
+  - job: macos_cmake
+    displayName: macos cmake openssl
+    pool:
+      vmImage: 'macOS-latest'
+    steps:
+    - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config cmake openssl
+      displayName: Install packages
+
+    - script: cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON && cmake --build build
+      displayName: 'Run cmake'
