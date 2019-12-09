@@ -34,6 +34,8 @@ static void unit_stop(void)
     /* done before shutting down and exiting */
 }
 
+#ifndef CURL_DISABLE_DOH
+
 UNITTEST_START
 
 /*
@@ -175,3 +177,13 @@ do {
   fail_unless(olen == olen1, "bad buffer length");
 } while(0);
 UNITTEST_STOP
+
+#else /* CURL_DISABLE_DOH */
+
+UNITTEST_START
+{
+  return 1; /* nothing to do, just fail */
+}
+UNITTEST_STOP
+
+#endif
