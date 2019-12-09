@@ -58,8 +58,9 @@ static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex)
       Curl_ssl_connect_nonblocking(conn, sockindex,
                                    &conn->bits.proxy_ssl_connected[sockindex]);
     if(result)
-      conn->bits.close = TRUE; /* a failed connection is marked for closure to
-                                  prevent (bad) re-use or similar */
+      /* a failed connection is marked for closure to prevent (bad) re-use or
+         similar */
+      connclose(conn, "TLS handshake failed");
   }
   return result;
 #else
