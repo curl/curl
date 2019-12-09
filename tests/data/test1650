@@ -14,7 +14,7 @@ none
 </server>
 <features>
 unittest
-http/2
+DoH
 </features>
  <name>
 DOH

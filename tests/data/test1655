@@ -14,6 +14,7 @@ none
 </server>
 <features>
 unittest
+DoH
 </features>
  <name>
 unit test for doh_encode
