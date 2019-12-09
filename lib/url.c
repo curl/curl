@@ -1090,8 +1090,7 @@ ConnectionExists(struct Curl_easy *data,
         (bundle->multiuse == BUNDLE_MULTIPLEX);
 
       if(canmultiplex) {
-        if(check->bits.protoconnstart)
-          continue;
+        ;
       }
       else {
         if(multiplexed) {
