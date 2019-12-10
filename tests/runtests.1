@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -84,6 +84,11 @@ Display run time statistics. (Requires Perl Time::HiRes module)
 Display full run time statistics. (Requires Perl Time::HiRes module)
 .IP "-s"
 Shorter output. Speaks less than default.
+.IP "--shallow=[num](,seed)"
+Used together with \fB-t\fP. This limits the number of tests to fail in
+torture mode to no more than 'num' per test case. If this reduces the amount,
+the given 'seed' will be used to randomly discard entries to fail until the
+amount is 'num'.
 .IP "-t[num]"
 Selects a \fBtorture\fP test for the given tests. This makes runtests.pl first
 run the tests once and count the number of memory allocations made. It then
