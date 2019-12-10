@@ -30,17 +30,20 @@ This release includes the following bugfixes:
  o checksrc.bat: Add a check for vquic and vssh directories [40]
  o checksrc: fix regexp for ASSIGNWITHINCONDITION [56]
  o checksrc: repair the copyrightyear check [25]
+ o cirrus-ci: enable clang sanitizers on freebsd 13 [60]
  o config-win32: cpu-machine-OS for Windows on ARM [13]
  o configure: avoid unportable `==' test(1) operator [1]
  o configure: enable IPv6 support without `getaddrinfo` [44]
  o configure: fix typo in help text [4]
+ o conncache: fix multi-thread use of shared connection cache [61]
  o copyrights: fix copyright year range [25]
  o curl: fix --upload-file . hangs if delay in STDIN [35]
  o curl: fix -T globbing [16]
  o curl: show better error message when no homedir is found [47]
  o curl_setup_once: consistently use WHILE_FALSE in macros [54]
  o docs: Change 'experiemental' to 'experimental' [30]
- o doh: improced both encoding and decoding [11]
+ o docs: fix several typos [62]
+ o doh: improved both encoding and decoding [11]
  o examples: add multi-poll.c [14]
  o global_init: undo the "intialized" bump in case of failure [52]
  o http_ntlm: Remove duplicate NSS initialisation [55]
@@ -71,8 +74,13 @@ This release includes the following bugfixes:
  o test1175: verify symbols-in-versions and libcurl-errors.3 in sync [28]
  o test1558: use double slash after file: [21]
  o test1560: require IPv6 for IPv6 aware URL parsing [24]
+ o tests: fix permissions of ssh keys in WSL [58]
+ o tests: make it possible to set executable extensions [58]
+ o tests: use \r\n for log messages in WSL [58]
+ o travis: abandon coveralls, it is not reliable [57]
  o travis: build ngtcp2 with --enable-lib-only [32]
  o travis: export the CC/CXX variables when set [34]
+ o winbuild: Define CARES_STATICLIB when WITH_CARES=static [59]
 
 This release includes the following known bugs:
 
@@ -82,16 +90,17 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   3dyd on github, Anderson Sasaki, Andreas Falkenhahn, bdry on github,
-  Bjoern Franke, Christian Schmitz, Christoph M. Becker, Cynthia Coan,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, David Benjamin,
-  Gergely Nagy, JanB on github, Javier Blazquez, Jeff Mears, Jeffrey Walton,
-  John Schroeder, Kamil Dudka, Leonardo Taccari, Marcel Raad, Maros Priputen,
-  Massimiliano Fantuzzi, Max Kellermann, Melissa Mears, Michael Forney,
-  Niall O'Reilly, Paul Groke, Paul Hoffman, Paulo Roberto Tomasi, Peter Wu,
-  Ray Satiro, Richard Alcock, Richard Bowker, Shailesh Kapse,
-  SLDiggie on github, Steve Holme, Tatsuhiro Tsujikawa, Tom van der Woerdt,
-  Victor Magierski, Vlastimil Ovčáčík, Wyatt O'Day, Xiaoyin Liu,
-  (43 contributors)
+  Bjoern Franke, Christian Schmitz, Christopher Reid, Christoph M. Becker,
+  Cynthia Coan, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  David Benjamin, Gergely Nagy, JanB on github, Javier Blazquez, Jeff Mears,
+  Jeffrey Walton, John Schroeder, Kamil Dudka, Leonardo Taccari, Marcel Raad,
+  Marc Hörsken, Maros Priputen, Massimiliano Fantuzzi, Max Kellermann,
+  Melissa Mears, Michael Forney, Mohammad Hasbini, Niall O'Reilly, Paul Groke,
+  Paul Hoffman, Paulo Roberto Tomasi, Peter Wu, Ray Satiro, Richard Alcock,
+  Richard Bowker, Shailesh Kapse, SLDiggie on github, Steve Holme,
+  Tatsuhiro Tsujikawa, Tom van der Woerdt, Victor Magierski, Vlastimil Ovčáčík,
+  Wyatt O'Day, Xiaoyin Liu,
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -153,3 +162,9 @@ References to bug reports and discussions on issues:
  [54] = https://curl.haxx.se/bug/?i=4649
  [55] = https://curl.haxx.se/bug/?i=3935
  [56] = https://curl.haxx.se/bug/?i=4647
+ [57] = https://curl.haxx.se/bug/?i=4694
+ [58] = https://curl.haxx.se/bug/?i=3899
+ [59] = https://curl.haxx.se/bug/?i=4688
+ [60] = https://curl.haxx.se/bug/?i=4557
+ [61] = https://curl.haxx.se/bug/?i=4544
+ [62] = https://curl.haxx.se/bug/?i=4680
