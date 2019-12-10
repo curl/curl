@@ -81,6 +81,27 @@ jobs:
     - script: make test-nonflaky
       displayName: 'test'
 
+  - job: torture
+    displayName: ubuntu torture tests
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: sudo apt install libnghttp2-dev
+      displayName: 'apt install'
+
+    - script: ./buildconf && ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+      displayName: 'Run configure'
+
+    - script: make
+      displayName: 'make'
+
+    - script: make "TFLAGS=-n -t --shallow=40 '!FTP'" test-nonflaky
+      displayName: 'torture test'
+
+##########################################
+### macOS jobs below
+##########################################
+
   - job: macos_plain
     displayName: macos default
     pool:
