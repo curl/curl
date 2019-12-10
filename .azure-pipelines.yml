@@ -6,13 +6,17 @@
 trigger:
 - master
 
+##########################################
+### Linux jobs first
+##########################################
+
 jobs:
   - job: vanilla_ubuntu
     displayName: unbuntu default
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - script: ./buildconf && ./configure
+    - script: ./buildconf && ./configure --enable-debug --enable-werror
       displayName: 'Run configure'
 
     - script: make
