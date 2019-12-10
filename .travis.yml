@@ -301,7 +301,7 @@ matrix:
           compiler: gcc
           dist: xenial
           env:
-              - T=coverage
+              - T=torture
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
           addons:
               apt:
@@ -534,6 +534,16 @@ script:
              make "TFLAGS=-n -t $tests" test-nonflaky
              coveralls --gcov /usr/bin/gcov-8 --gcov-options '\-lp' -i src -e lib -e tests -e docs -b $PWD/src
              coveralls --gcov /usr/bin/gcov-8 --gcov-options '\-lp' -e src -i lib -e tests -e docs -b $PWD/lib
+        fi
+    - |
+        set -eo pipefail
+        if [ "$T" = "torture" ]; then
+             ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-code-coverage --enable-werror --enable-alt-svc --with-libssh2
+             make
+             make TFLAGS=-n test-nonflaky
+             make "TFLAGS=-n -e" test-nonflaky
+             tests="1 200 300 500 700 800 900 1000 1100 1200 1302 1400 1502 3000"
+             make "TFLAGS=-n -t $tests" test-nonflaky
         fi
     - |
         set -eo pipefail
