@@ -321,6 +321,8 @@ my %runcert;      # cert file currently in use by an ssl running server
 my $torture;
 my $tortnum;
 my $tortalloc;
+my $shallow;
+my $shallowseed;
 
 #######################################################################
 # logmsg is our general message logging subroutine.
@@ -598,13 +600,34 @@ sub torture {
         return 0;
     }
 
-    logmsg " $count functions to make fail\n";
+    my @ttests = (1 .. $count);
+    if($shallow && ($shallow < $count)) {
+        my $discard = scalar(@ttests) - $shallow;
+        my $percent = sprintf("%.2f%%", $shallow * 100 / scalar(@ttests));;
+        logmsg " $count functions found, but only fail $shallow ($percent)\n";
+        while($discard) {
+            my $rm;
+            do {
+                # find a test to discard
+                $rm = rand(scalar(@ttests));
+            } while(!$ttests[$rm]);
+            $ttests[$rm] = undef;
+            $discard--;
+        }
+    }
+    else {
+        logmsg " $count functions to make fail\n";
+    }
 
-    for ( 1 .. $count ) {
+    for (@ttests) {
         my $limit = $_;
         my $fail;
         my $dumped_core;
 
+        if(!defined($limit)) {
+            # --shallow can undefine them
+            next;
+        }
         if($tortalloc && ($tortalloc != $limit)) {
             next;
         }
@@ -5022,6 +5045,14 @@ while(@ARGV) {
             $tortalloc = $1;
         }
     }
+    elsif($ARGV[0] =~ /--shallow=(\d+)(,|)(\d*)/) {
+        # Fail no more than this amount per tests when running
+        # torture.
+        my ($num, $seed)=($1,$3);
+        $shallow=$num;
+        $shallowseed=$seed?$seed:1234; # get a real seed later
+        srand($shallowseed); # make it predictable
+    }
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
         $anyway=1;
@@ -5070,6 +5101,7 @@ while(@ARGV) {
         print <<EOHELP
 Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
+  -am      automake style output PASS/FAIL: [number] [name]
   -bN      use base port number N for test servers (default $base)
   -c path  use this curl executable
   -d       display server debug info
@@ -5085,7 +5117,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -r       run time statistics
   -rf      full run time statistics
   -s       short output
-  -am      automake style output PASS/FAIL: [number] [name]
+  --shallow=[num](,seed) make the torture tests thinner
   -t[N]    torture (simulate function failures); N means fail Nth function
   -v       verbose output
   -vc path use this curl only to verify the existing servers
