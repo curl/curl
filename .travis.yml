@@ -543,7 +543,7 @@ script:
              make TFLAGS=-n test-nonflaky
              make "TFLAGS=-n -e" test-nonflaky
              tests="1 200 300 500 700 800 900 1000 1100 1200 1302 1400 1502 3000"
-             make "TFLAGS=-n -t $tests" test-nonflaky
+             make "TFLAGS=-n --shallow=40 -t $tests" test-nonflaky
         fi
     - |
         set -eo pipefail
