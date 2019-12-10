@@ -1226,6 +1226,9 @@ static const struct Curl_ssl *available_backends[] = {
 #if defined(USE_MESALINK)
   &Curl_ssl_mesalink,
 #endif
+#if defined(USE_BEARSSL)
+  &Curl_ssl_bearssl,
+#endif
   NULL
 };
 
