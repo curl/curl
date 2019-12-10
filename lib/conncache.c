@@ -519,7 +519,8 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
     while(curr) {
       conn = curr->ptr;
 
-      if(!CONN_INUSE(conn) && !conn->data && !conn->bits.close) {
+      if(!CONN_INUSE(conn) && !conn->data && !conn->bits.close &&
+         !conn->bits.connect_only) {
         /* Set higher score for the age passed since the connection was used */
         score = Curl_timediff(now, conn->lastused);
 
