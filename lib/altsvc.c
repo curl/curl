@@ -320,8 +320,8 @@ CURLcode Curl_altsvc_save(struct altsvcinfo *altsvc, const char *file)
     /* no cache activated */
     return CURLE_OK;
 
-  if((altsvc->flags & CURLALTSVC_READONLYFILE) || !file[0])
-    /* marked as read-only or zero length file name */
+  if((altsvc->flags & CURLALTSVC_READONLYFILE) || !file || !file[0])
+    /* marked as read-only, no file or zero length file name */
     return CURLE_OK;
   out = fopen(file, FOPEN_WRITETEXT);
   if(!out)
