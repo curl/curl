@@ -926,25 +926,25 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* open file for reading: */
           FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
           if(!file) {
-            warnf(
-              config->global,
-              "Failed to open %s\n", config->etag_compare_file);
-
+            errorf(config->global,
+                   "Failed to open %s\n", config->etag_compare_file);
             result = CURLE_READ_ERROR;
             break;
           }
 
           if((PARAM_OK == file2string(&etag_from_file, file)) &&
-             etag_from_file)
+             etag_from_file) {
             header = aprintf("If-None-Match: \"%s\"", etag_from_file);
+            Curl_safefree(etag_from_file);
+          }
           else
             header = aprintf("If-None-Match: \"\"");
 
           if(!header) {
-            warnf(
-              config->global,
-              "Failed to allocate memory for custom etag header\n");
-
+            if(file)
+              fclose(file);
+            errorf(config->global,
+                   "Failed to allocate memory for custom etag header\n");
             result = CURLE_OUT_OF_MEMORY;
             break;
           }
@@ -953,7 +953,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           add2list(&config->headers, header);
 
           Curl_safefree(header);
-          Curl_safefree(etag_from_file);
 
           if(file) {
             fclose(file);
