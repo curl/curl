@@ -186,6 +186,7 @@ my $server_response_maxtime=13;
 my $debug_build=0;          # built debug enabled (--enable-debug)
 my $has_memory_tracking=0;  # built with memory tracking (--enable-curldebug)
 my $libtool;
+my $repeat = 0;
 
 # name of the file that the memory debugging creates:
 my $memdump="$LOGDIR/memdump";
@@ -5053,6 +5054,10 @@ while(@ARGV) {
         $shallowseed=$seed?$seed:1234; # get a real seed later
         srand($shallowseed); # make it predictable
     }
+    elsif($ARGV[0] =~ /--repeat=(\d+)/) {
+        # Repeat-run the given tests this many times
+        $repeat = $1;
+    }
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
         $anyway=1;
@@ -5341,6 +5346,13 @@ else {
         exit;
     }
     $TESTCASES = $verified;
+}
+if($repeat) {
+    my $s;
+    for(1 .. $repeat) {
+        $s .= $TESTCASES;
+    }
+    $TESTCASES = $s;
 }
 
 if($scrambleorder) {

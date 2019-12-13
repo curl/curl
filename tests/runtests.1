@@ -82,6 +82,13 @@ Run the tests in a scrambled, or randomized, order instead of sequentially.
 Display run time statistics. (Requires Perl Time::HiRes module)
 .IP "-rf"
 Display full run time statistics. (Requires Perl Time::HiRes module)
+.IP "--repeat=[num]"
+This will repeat the given set of test numbers this many times. If no test
+numbers are given, it will repeat ALL tests this many times. It iteratively
+adds the new sequence at the end of the initially given one.
+
+If \fB-R\fP is also used, the scrambling is done after the repeats have
+extended the test sequence.
 .IP "-s"
 Shorter output. Speaks less than default.
 .IP "--shallow=[num](,seed)"
