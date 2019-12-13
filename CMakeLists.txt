@@ -172,6 +172,7 @@ if(HTTP_ONLY)
   set(CURL_DISABLE_RTSP ON)
   set(CURL_DISABLE_POP3 ON)
   set(CURL_DISABLE_IMAP ON)
+  set(CURL_DISABLE_SMB ON)
   set(CURL_DISABLE_SMTP ON)
   set(CURL_DISABLE_GOPHER ON)
 endif()
@@ -410,6 +411,10 @@ if(USE_NGHTTP2)
   find_package(NGHTTP2 REQUIRED)
   include_directories(${NGHTTP2_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
+endif()
+
+if(WIN32)
+  set(USE_WIN32_CRYPTO ON)
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
@@ -1199,6 +1204,14 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
+# NTLM support requires crypto function adaptions from various SSL libs
+# TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_DARWINSSL OR USE_MBEDTLS OR USE_WIN32_CRYPTO))
+  set(use_ntlm ON)
+else()
+  set(use_ntlm OFF)
+endif()
+
 # Helper to populate a list (_items) with a label when conditions (the remaining
 # args) are satisfied
 function(_add_if label)
@@ -1228,11 +1241,9 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_SECTRANSP OR USE_MBEDTLS OR USE_NSS))
-  _add_if("NTLM"        1)
-  # TODO missing option (autoconf: --enable-ntlm-wb)
-  _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
-endif()
+_add_if("NTLM"        use_ntlm)
+# TODO missing option (autoconf: --enable-ntlm-wb)
+_add_if("NTLM_WB"     use_ntlm AND NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
 # TODO missing option (--enable-tls-srp), depends on GNUTLS_SRP/OPENSSL_SRP
 _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
@@ -1261,6 +1272,8 @@ _add_if("POP3"          NOT CURL_DISABLE_POP3)
 _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
 _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
 _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
+_add_if("SMB"           NOT CURL_DISABLE_SMB AND use_ntlm)
+_add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND use_ntlm)
 _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
 _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
 _add_if("SCP"           USE_LIBSSH2)

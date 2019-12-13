@@ -73,6 +73,9 @@
 #define CURL_EXTERN_SYMBOL
 #endif
 
+/* Allow SMB to work on Windows */
+#cmakedefine USE_WIN32_CRYPTO
+
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1
 
