@@ -260,6 +260,7 @@ static struct Curl_sh_entry *sh_addentry(struct curl_hash *sh,
 
   /* make/add new hash entry */
   if(!Curl_hash_add(sh, (char *)&s, sizeof(curl_socket_t), check)) {
+    Curl_hash_destroy(&check->transfers);
     free(check);
     return NULL; /* major failure */
   }
