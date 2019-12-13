@@ -5,12 +5,11 @@ task:
   name: FreeBSD
   freebsd_instance:
     matrix:
-      # There isn't a stable 13.0 image yet (2019-10)
+      # There isn't a stable 13.0 image yet (2019-12)
       image_family: freebsd-13-0-snap
       image_family: freebsd-12-0
       # The stable 11.3 image causes "Agent is not responding" so use a snapshot
       image_family: freebsd-11-3-snap
-      image_family: freebsd-10-4
 
   env:
     CIRRUS_CLONE_DEPTH: 10
