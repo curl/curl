@@ -412,6 +412,10 @@ if(USE_NGHTTP2)
   list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
 endif()
 
+if(WIN32)
+  set(USE_WIN32_CRYPTO ON)
+endif()
+
 if(NOT CURL_DISABLE_LDAP)
   if(WIN32)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
