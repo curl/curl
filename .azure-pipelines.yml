@@ -161,6 +161,6 @@ jobs:
     - script: make
       displayName: 'make'
 
-    - script: make "TFLAGS=-n -t --shallow=35 '!FTP'" test-nonflaky
+    - script: make "TFLAGS=-n -t --shallow=25 '!FTP'" test-nonflaky
       displayName: 'torture test'
 
