@@ -25,29 +25,36 @@ This release includes the following bugfixes:
  o INSTALL.md: provide Android build instructions [10]
  o OPENSOCKETFUNCTION.3: correct the purpose description [48]
  o altsvc: bump to h3-24 [6]
+ o altsvc: make the save function ignore NULL filenames [67]
  o build: Disable Visual Studio warning "conditional expression is constant" [49]
  o build: fix for CURL_DISABLE_DOH [2]
  o checksrc.bat: Add a check for vquic and vssh directories [40]
  o checksrc: fix regexp for ASSIGNWITHINCONDITION [56]
  o checksrc: repair the copyrightyear check [25]
  o cirrus-ci: enable clang sanitizers on freebsd 13 [60]
+ o cirrus: Drop the FreeBSD 10.4 build
  o config-win32: cpu-machine-OS for Windows on ARM [13]
  o configure: avoid unportable `==' test(1) operator [1]
  o configure: enable IPv6 support without `getaddrinfo` [44]
  o configure: fix typo in help text [4]
+ o conncache: CONNECT_ONLY connections assumed always in-use [71]
  o conncache: fix multi-thread use of shared connection cache [61]
  o copyrights: fix copyright year range [25]
  o curl: fix --upload-file . hangs if delay in STDIN [35]
  o curl: fix -T globbing [16]
+ o curl: improved cleanup in upload error path [69]
  o curl: show better error message when no homedir is found [47]
  o curl_setup_once: consistently use WHILE_FALSE in macros [54]
  o docs: Change 'experiemental' to 'experimental' [30]
  o docs: fix several typos [62]
  o doh: improved both encoding and decoding [11]
+ o doh: make it behave when built without proxy support [68]
  o examples: add multi-poll.c [14]
  o global_init: undo the "intialized" bump in case of failure [52]
+ o hostip: suppress compiler warning [64]
  o http_ntlm: Remove duplicate NSS initialisation [55]
  o lib: Move lib/ssh.h -> lib/vssh/ssh.h [9]
+ o multi: free sockhash on OOM [63]
  o multi_poll: avoid busy-loop when called without easy handles attached [15]
  o ngtcp2: fix thread-safety bug in error-handling [33]
  o ngtcp2: free used resources on disconnect [7]
@@ -55,6 +62,7 @@ This release includes the following bugfixes:
  o ngtcp2: increase QUIC window size when data is consumed [12]
  o ngtcp2: use overflow buffer for extra HTTP/3 data [5]
  o ntlm: USE_WIN32_CRYPTO check removed to get USE_NTLM2SESSION set [3]
+ o ntlm_wb: fix double-free in OOM [65]
  o openssl: Revert to less sensitivity for SYSCALL errors [26]
  o openssl: improve error message for SYSCALL during connect [27]
  o openssl: prevent recursive function calls from ctx callbacks [18]
@@ -66,6 +74,7 @@ This release includes the following bugfixes:
  o projects: Fix Visual Studio wolfSSL configurations
  o quiche: reject HTTP/3 headers in the wrong order [17]
  o remove_handle: clear expire timers after multi_done() [20]
+ o runtests: introduce --shallow to reduce huge torture tests [70]
  o schannel: fix --tls-max for when min is --tlsv1 or default [39]
  o setopt: Fix ALPN / NPN user option when built without HTTP2 [42]
  o strerror: Add Curl_winapi_strerror for Win API specific errors [51]
@@ -74,12 +83,20 @@ This release includes the following bugfixes:
  o test1175: verify symbols-in-versions and libcurl-errors.3 in sync [28]
  o test1558: use double slash after file: [21]
  o test1560: require IPv6 for IPv6 aware URL parsing [24]
+ o tests/lib1557: fix mem-leak in OOM [66]
+ o tests/lib1559: fix mem-leak in OOM [66]
+ o tests/unit1607: fix mem-leak in OOM [66]
+ o tests/unit1609: fix mem-leak in OOM [66]
+ o tests/unit1620: fix bad free in OOM [66]
+ o tests: fix build with `CURL_DISABLE_DOH` [64]
  o tests: fix permissions of ssh keys in WSL [58]
  o tests: make it possible to set executable extensions [58]
+ o tests: use DoH feature for DoH tests [64]
  o tests: use \r\n for log messages in WSL [58]
  o travis: abandon coveralls, it is not reliable [57]
  o travis: build ngtcp2 with --enable-lib-only [32]
  o travis: export the CC/CXX variables when set [34]
+ o vtls: make BearSSL possible to set with CURL_SSL_BACKEND [72]
  o winbuild: Define CARES_STATICLIB when WITH_CARES=static [59]
 
 This release includes the following known bugs:
@@ -89,18 +106,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  3dyd on github, Anderson Sasaki, Andreas Falkenhahn, bdry on github,
-  Bjoern Franke, Christian Schmitz, Christopher Reid, Christoph M. Becker,
-  Cynthia Coan, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  David Benjamin, Gergely Nagy, JanB on github, Javier Blazquez, Jeff Mears,
-  Jeffrey Walton, John Schroeder, Kamil Dudka, Leonardo Taccari, Marcel Raad,
-  Marc Hörsken, Maros Priputen, Massimiliano Fantuzzi, Max Kellermann,
-  Melissa Mears, Michael Forney, Mohammad Hasbini, Niall O'Reilly, Paul Groke,
-  Paul Hoffman, Paulo Roberto Tomasi, Peter Wu, Ray Satiro, Richard Alcock,
-  Richard Bowker, Shailesh Kapse, SLDiggie on github, Steve Holme,
-  Tatsuhiro Tsujikawa, Tom van der Woerdt, Victor Magierski, Vlastimil Ovčáčík,
-  Wyatt O'Day, Xiaoyin Liu,
-  (46 contributors)
+  3dyd on github, Anderson Sasaki, Andreas Falkenhahn, Andrew Ishchuk,
+  bdry on github, Bjoern Franke, Christian Schmitz, Christopher Reid,
+  Christoph M. Becker, Cynthia Coan, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, David Benjamin, Gergely Nagy, Gisle Vanem, JanB on github,
+  Javier Blazquez, Jeff Mears, Jeffrey Walton, John Schroeder, Kamil Dudka,
+  Leonardo Taccari, Marcel Raad, Marc Hörsken, Maros Priputen,
+  Massimiliano Fantuzzi, Max Kellermann, Melissa Mears, Michael Forney,
+  Mohammad Hasbini, Niall O'Reilly, Paul Groke, Paul Hoffman,
+  Paulo Roberto Tomasi, Pavel Löbl, Pavel Pavlov, Peter Wu, Ray Satiro,
+  Richard Alcock, Richard Bowker, Shailesh Kapse, SLDiggie on github,
+  Steve Holme, Tatsuhiro Tsujikawa, Tom van der Woerdt, Victor Magierski,
+  Vlastimil Ovčáčík, Wyatt O'Day, Xiaoyin Liu,
+  (50 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -168,3 +186,13 @@ References to bug reports and discussions on issues:
  [60] = https://curl.haxx.se/bug/?i=4557
  [61] = https://curl.haxx.se/bug/?i=4544
  [62] = https://curl.haxx.se/bug/?i=4680
+ [63] = https://curl.haxx.se/bug/?i=4713
+ [64] = https://curl.haxx.se/bug/?i=4692
+ [65] = https://curl.haxx.se/bug/?i=4710
+ [66] = https://curl.haxx.se/bug/?i=4709
+ [67] = https://curl.haxx.se/bug/?i=4707
+ [68] = https://curl.haxx.se/bug/?i=4704
+ [69] = https://curl.haxx.se/bug/?i=4705
+ [70] = https://curl.haxx.se/bug/?i=4699
+ [71] = https://curl.haxx.se/bug/?i=4369
+ [72] = https://curl.haxx.se/bug/?i=4698
