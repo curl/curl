@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -50,12 +50,25 @@ static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
   return amount;
 }
 
+/*
+ * carefully not leak memory on OOM
+ */
 static int trailers_callback(struct curl_slist **list, void *userdata)
 {
+  struct curl_slist *nlist = NULL;
+  struct curl_slist *nlist2 = NULL;
   (void)userdata;
-  *list = curl_slist_append(*list, "my-super-awesome-trailer: trail1");
-  *list = curl_slist_append(*list, "my-other-awesome-trailer: trail2");
-  return CURL_TRAILERFUNC_OK;
+  nlist = curl_slist_append(*list, "my-super-awesome-trailer: trail1");
+  if(nlist)
+    nlist2 = curl_slist_append(nlist, "my-other-awesome-trailer: trail2");
+  if(nlist2) {
+    *list = nlist2;
+    return CURL_TRAILERFUNC_OK;
+  }
+  else {
+    curl_slist_free_all(nlist);
+    return CURL_TRAILERFUNC_ABORT;
+  }
 }
 
 int test(char *URL)
