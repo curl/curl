@@ -114,6 +114,12 @@ already built but not with that option, or if the option was specified
 differently, you must destroy the build directory containing the configuration
 so that nmake can build it from scratch.
 
+Building your own application with a static libcurl
+===================================================
+When building an application that uses the static libcurl library on Windows,
+you must define CURL_STATICLIB. Otherwise the linker will look for dynamic
+import symbols.
+
 Legacy Windows and SSL
 ======================
 When you build curl using the build files in this directory the default SSL
