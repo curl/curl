@@ -114,6 +114,10 @@ already built but not with that option, or if the option was specified
 differently, you must destroy the build directory containing the configuration
 so that nmake can build it from scratch.
 
+NOTE: Subsequent compilation with statically linked libraries will require 
+CURL_STATICLIB to be defined to ensure that headers are appropriately processed.
+Not having this definition in place will cause DLL name mangling to occur.
+
 Legacy Windows and SSL
 ======================
 When you build curl using the build files in this directory the default SSL
