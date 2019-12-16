@@ -141,7 +141,7 @@ jobs:
     pool:
       vmImage: 'macOS-latest'
     steps:
-    - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config cmake openssl
+    - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config openssl
       displayName: Install packages
 
     - script: cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON && cmake --build build
