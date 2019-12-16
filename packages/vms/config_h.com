@@ -803,28 +803,6 @@ $	    write tf "#endif"
 $	    goto cfgh_in_loop1
 $	endif
 $!
-$	if key2 .eqs. "HAVE_ENGINE_LOAD_BUILTIN_ENGINES"
-$	then
-$	    if f$search("''ssl_header_dir'engine.h") .nes. ""
-$	    then
-$		search_key = key2 - "HAVE_"
-$		define/user sys$output nl:
-$		define/user sys$error nl:
-$		search/output=nl: 'ssl_header_dir'engine.h 'search_key'
-$		if '$severity' .eq. 1
-$		then
-$		    write tf "#ifndef ''key2'"
-$		    write tf "#define ''key2' 1"
-$		    write tf "#endif"
-$		else
-$		    write tf "/* #undef ''key2' */"
-$		endif
-$	    else
-$		write tf "/* #undef ''key2' */"
-$	    endif
-$	    goto cfgh_in_loop1
-$	endif
-$!
 $	if key2b .eqs. "RAND" .and. key2c .nes. "" .and. key2d .eqs. ""
 $	then
 $	    if (key2c .eqs. "EGD") .or. -
