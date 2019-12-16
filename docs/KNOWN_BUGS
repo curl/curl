@@ -102,6 +102,7 @@ problems may have been fixed or changed somewhat since this was written!
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
  12.2 LDAP on Windows does authentication wrong?
+ 12.3 LDAP on Windows doesn't work
 
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
@@ -727,6 +728,13 @@ problems may have been fixed or changed somewhat since this was written!
 12.2 LDAP on Windows does authentication wrong?
 
  https://github.com/curl/curl/issues/3116
+
+12.3 LDAP on Windows doesn't work
+
+ A simple curl command line getting "ldap://ldap.forumsys.com" returns an
+ error that says "no memory" !
+
+ https://github.com/curl/curl/issues/4261
 
 13. TCP/IP
 
