@@ -70,7 +70,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.c
+	$(CHECKSRC)@PERL@ $(top_srcdir)/lib/checksrc.pl $(srcdir)/*.[ch]
 
 if BUILD_UNITTESTS
 noinst_PROGRAMS = $(UNITPROGS)
