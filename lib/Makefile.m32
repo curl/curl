@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -271,7 +271,7 @@ ifdef SSL
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
   CFLAGS += -DUSE_OPENSSL -DHAVE_OPENSSL_ENGINE_H -DHAVE_OPENSSL_PKCS12_H \
-            -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES -DOPENSSL_NO_KRB5
+            -DOPENSSL_NO_KRB5
   DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"
