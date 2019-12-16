@@ -7,7 +7,7 @@ task:
     matrix:
       # There isn't a stable 13.0 image yet (2019-12)
       image_family: freebsd-13-0-snap
-      image_family: freebsd-12-0
+      image_family: freebsd-12-1
       # The stable 11.3 image causes "Agent is not responding" so use a snapshot
       image_family: freebsd-11-3-snap
 
@@ -43,10 +43,10 @@ task:
     - SKIP_TESTS=''
     - uname -r
     - case `uname -r` in
-        13.0*) SKIP_TESTS='!303 !304 !323 !504 !1242 !1243 !2002 !2003';;
-        12.0*) SKIP_TESTS='!303 !304 !323 !504 !1242 !1243 !2002 !2003';;
-        11.3*) SKIP_TESTS='!303 !304 !504 !1242 !1243 !2002 !2003';;
-        10.4*) SKIP_TESTS='!303 !304 !310 !311 !312 !313 !504 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001';;
+        13.0*) SKIP_TESTS='!323 !1242 !1243 !2002 !2003';;
+        12.1*) SKIP_TESTS='!323 !1242 !1243 !2002 !2003';;
+        11.3*) SKIP_TESTS='!504 !1242 !1243 !2002 !2003';;
+        10.4*) SKIP_TESTS='!310 !311 !312 !313 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001';;
       esac
     - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
   install_script:
