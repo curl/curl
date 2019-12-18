@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -227,7 +227,6 @@ scp://user@example.com/etc/issue - This specifies the file /etc/issue
 
 scp://example.com/~/my-file - This specifies the file my-file in the
 user's home directory on the server
-
 .IP SFTP
 The path part of a SFTP request specifies the file to retrieve and from what
 directory. If the file part is omitted then libcurl downloads the directory
@@ -260,6 +259,7 @@ in the root of the "files" share
 smb://server.example.com/files/ -T issue - This specifies the file "issue" will
 be uploaded to the root of the "files" share.
 
+curl supports SMB version 1 (only)
 .IP LDAP
 The path part of a LDAP request can be used to specify the: Distinguished
 Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field
