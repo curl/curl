@@ -86,8 +86,14 @@ UNITTEST DOHcode doh_encodepfx(const char *host,
   const size_t hostlen = strlen(host);
   unsigned char *orig = dnsp;
   const size_t preflen = prefix ? strlen(prefix) : 0;
-  const char *fragment[] = { prefix, host };
-  const int fragments = sizeof(fragment)/sizeof(*fragment);
+  size_t expected_len;
+  int i;
+
+  /* For C89 ... */
+  char *fragment[2];
+  int fragments = 2;
+  fragment[0] = (char *) prefix;
+  fragment[1] = (char *) host;
 
   /* The expected output length is 16 bytes more than the length of
    * the QNAME-encoding of the host name.
@@ -111,7 +117,6 @@ UNITTEST DOHcode doh_encodepfx(const char *host,
    * the overall length by one.
    */
 
-  size_t expected_len;
   DEBUGASSERT(hostlen);
   expected_len = 12 + hostlen + preflen + 1 + 4;
   if(host[hostlen-1]!='.')
@@ -140,7 +145,7 @@ UNITTEST DOHcode doh_encodepfx(const char *host,
   *dnsp++ = '\0'; /* ARCOUNT */
 
   /* encode each label and store it in the QNAME */
-  for(int i = 0; i < fragments; i++) {
+  for(i = 0; i < fragments; i++) {
     char *hostp = (char *)fragment[i];
     if(hostp)
       while(*hostp) {
