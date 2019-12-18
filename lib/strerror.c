@@ -872,7 +872,7 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
     case SEC_E_OK:
       txt = "No error";
       break;
-#define SEC2TXT(sec) case sec: txt = #sec; break;
+#define SEC2TXT(sec) case sec: txt = #sec; break
     SEC2TXT(CRYPT_E_REVOKED);
     SEC2TXT(SEC_E_ALGORITHM_MISMATCH);
     SEC2TXT(SEC_E_BAD_BINDINGS);
