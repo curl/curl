@@ -78,6 +78,9 @@ people checking the failures and the reasons for them might not have physical
 access to the machine and logs.
 .IP "-R"
 Run the tests in a scrambled, or randomized, order instead of sequentially.
+
+The random seed initially set for this is fixed per month and can be set with
+\fI--seed\fP.
 .IP "-r"
 Display run time statistics. (Requires Perl Time::HiRes module)
 .IP "-rf"
@@ -91,11 +94,18 @@ If \fB-R\fP is also used, the scrambling is done after the repeats have
 extended the test sequence.
 .IP "-s"
 Shorter output. Speaks less than default.
-.IP "--shallow=[num](,seed)"
+.IP "--seed=[num]"
+When using \fI--shallow\fP or \fI-R\rP that random certain aspects of the
+behavior, this option can set the initial seed. If not set, the random seed
+will be set based on the currently set local year and month and the first line
+of the "curl -V" output.
+.IP "--shallow=[num]"
 Used together with \fB-t\fP. This limits the number of tests to fail in
 torture mode to no more than 'num' per test case. If this reduces the amount,
-the given 'seed' will be used to randomly discard entries to fail until the
-amount is 'num'.
+the script will randomly discard entries to fail until the amount is 'num'.
+
+The random seed initially set for this is fixed per month and can be set with
+\fI--seed\fP.
 .IP "-t[num]"
 Selects a \fBtorture\fP test for the given tests. This makes runtests.pl first
 run the tests once and count the number of memory allocations made. It then
