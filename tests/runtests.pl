@@ -69,6 +69,7 @@ BEGIN {
 use strict;
 use warnings;
 use Cwd;
+use Digest::MD5 qw(md5);
 
 # Subs imported from serverhelp module
 use serverhelp qw(
@@ -323,7 +324,7 @@ my $torture;
 my $tortnum;
 my $tortalloc;
 my $shallow;
-my $shallowseed;
+my $randseed = 0;
 
 #######################################################################
 # logmsg is our general message logging subroutine.
@@ -3008,6 +3009,7 @@ sub checksystem {
     logmsg sprintf("* Env: %s%s", $valgrind?"Valgrind ":"",
                    $run_event_based?"event-based ":"");
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
+    logmsg ("* Seed: $randseed\n");
 
     if($verbose) {
         logmsg "* Ports:\n";
@@ -5046,17 +5048,19 @@ while(@ARGV) {
             $tortalloc = $1;
         }
     }
-    elsif($ARGV[0] =~ /--shallow=(\d+)(,|)(\d*)/) {
+    elsif($ARGV[0] =~ /--shallow=(\d+)/) {
         # Fail no more than this amount per tests when running
         # torture.
-        my ($num, $seed)=($1,$3);
+        my ($num)=($1);
         $shallow=$num;
-        $shallowseed=$seed?$seed:1234; # get a real seed later
-        srand($shallowseed); # make it predictable
     }
     elsif($ARGV[0] =~ /--repeat=(\d+)/) {
         # Repeat-run the given tests this many times
         $repeat = $1;
+    }
+    elsif($ARGV[0] =~ /--seed=(\d+)/) {
+        # Set a fixed random seed (used for -R and --shallow)
+        $randseed = $1;
     }
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
@@ -5118,11 +5122,12 @@ Usage: runtests.pl [options] [test selection(s)]
   -l       list all test case names/descriptions
   -n       no valgrind
   -p       print log file contents when a test fails
-  -R       scrambled order
+  -R       scrambled order (uses the random seed, see --seed)
   -r       run time statistics
   -rf      full run time statistics
   -s       short output
-  --shallow=[num](,seed) make the torture tests thinner
+  --seed=[num] set the random seed to a fixed number
+  --shallow=[num] randomly makes the torture tests "thinner"
   -t[N]    torture (simulate function failures); N means fail Nth function
   -v       verbose output
   -vc path use this curl only to verify the existing servers
@@ -5174,6 +5179,20 @@ EOHELP
     }
     shift @ARGV;
 }
+
+if(!$randseed) {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+        localtime(time);
+    # seed of the month. December 2019 becomes 201912
+    $randseed = ($year+1900)*100 + $mon+1;
+    open(C, "$CURL --version 2>/dev/null|");
+    my @c = <C>;
+    close(C);
+    # use the first line of output and get the md5 out of it
+    my $str = md5($c[0]);
+    $randseed += unpack('S', $str);  # unsigned 16 bit value
+}
+srand $randseed;
 
 if(@testthis && ($testthis[0] ne "")) {
     $TESTCASES=join(" ", @testthis);
