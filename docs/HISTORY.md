@@ -285,6 +285,8 @@ April: added the cyassl backend (later renamed to WolfSSL)
 
  September: Web site had 245,000 unique visitors and served 236GB data
 
+ SMB and SMBS support
+
 2015
 ----
 
