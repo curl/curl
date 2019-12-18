@@ -81,16 +81,16 @@ NULL
 SFTP and FTP
 .SH EXAMPLE
 .nf
-struct curl_slist *h = NULL;
-h = curl_slist_append(h, "RNFR source-name");
-h = curl_slist_append(h, "RNTO new-name");
+struct curl_slist *cmdlist = NULL;
+cmdlist = curl_slist_append(cmdlist, "RNFR source-name");
+cmdlist = curl_slist_append(cmdlist, "RNTO new-name");
 
 curl = curl_easy_init();
 if(curl) {
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
 
   /* pass in the FTP commands to run before the transfer */
-  curl_easy_setopt(curl, CURLOPT_QUOTE, headerlist);
+  curl_easy_setopt(curl, CURLOPT_QUOTE, cmdlist);
 
   ret = curl_easy_perform(curl);
 
