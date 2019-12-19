@@ -37,7 +37,7 @@ http
 HTTP GET when PROXY Protocol enabled
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/1455 --haproxy-protocol
+http://%HOSTIP:%HTTPPORT/1455 --haproxy-protocol -H "Testno: 1455"
 </command>
 <features>
 proxy
@@ -58,6 +58,7 @@ proxy-line
 GET /1455 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
+Testno: 1455
 
 </protocol>
 </verify>
