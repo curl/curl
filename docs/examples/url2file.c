@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   /* Switch on full protocol/debug output while testing */
   curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
-  /* disable progress meter, set to 0L to enable and disable debug output */
+  /* disable progress meter, set to 0L to enable it */
   curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
 
   /* send all data to this function  */
