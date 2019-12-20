@@ -106,6 +106,7 @@ static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc);
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc);
 static LIBSSH2_FREE_FUNC(my_libssh2_free);
 
+static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn);
 static CURLcode ssh_connect(struct connectdata *conn, bool *done);
 static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done);
 static CURLcode ssh_do(struct connectdata *conn, bool *done);
@@ -649,6 +650,129 @@ static CURLcode ssh_check_fingerprint(struct connectdata *conn)
 }
 
 /*
+ * ssh_force_knownhost_key_type() will check the known hosts file and try to
+ * force a specific public key type from the server if an entry is found.
+ */
+static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+
+#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+
+#ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
+  static const char * const hostkey_method_ssh_ed25519
+    = "ssh-ed25519";
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_521
+  static const char * const hostkey_method_ssh_ecdsa_521
+    = "ecdsa-sha2-nistp521";
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_384
+  static const char * const hostkey_method_ssh_ecdsa_384
+    = "ecdsa-sha2-nistp384";
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_256
+  static const char * const hostkey_method_ssh_ecdsa_256
+    = "ecdsa-sha2-nistp256";
+#endif
+  static const char * const hostkey_method_ssh_rsa
+    = "ssh-rsa";
+  static const char * const hostkey_method_ssh_dss
+    = "ssh-dss";
+
+  const char *hostkey_method = NULL;
+  struct ssh_conn *sshc = &conn->proto.sshc;
+  struct Curl_easy *data = conn->data;
+  struct libssh2_knownhost* store = NULL;
+  const char *kh_name_end = NULL;
+  long unsigned int kh_name_size = 0;
+  int port = 0;
+  bool found = false;
+
+  if(sshc->kh && !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
+    /* lets try to find our host in the known hosts file */
+    while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
+      /* For non-standard ports, the name will be enclosed in */
+      /* square brackets, followed by a colon and the port */
+      if(store->name[0] == '[') {
+        kh_name_end = strstr(store->name, "]:");
+        if(!kh_name_end) {
+          infof(data, "Invalid host pattern %s in %s\n",
+                store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+          continue;
+        }
+        port = atoi(kh_name_end + 2);
+        if(kh_name_end && (port == conn->remote_port)) {
+          kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
+          if(strncmp(store->name + 1, conn->host.name, kh_name_size) == 0) {
+            found = true;
+            break;
+          }
+        }
+      }
+      else if(strcmp(store->name, conn->host.name) == 0) {
+        found = true;
+        break;
+      }
+    }
+
+    if(found) {
+      infof(data, "Found host %s in %s\n",
+            store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+
+      switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
+#ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
+      case LIBSSH2_KNOWNHOST_KEY_ED25519:
+        hostkey_method = hostkey_method_ssh_ed25519;
+        break;
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_521
+      case LIBSSH2_KNOWNHOST_KEY_ECDSA_521:
+        hostkey_method = hostkey_method_ssh_ecdsa_521;
+        break;
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_384
+      case LIBSSH2_KNOWNHOST_KEY_ECDSA_384:
+        hostkey_method = hostkey_method_ssh_ecdsa_384;
+        break;
+#endif
+#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_256
+      case LIBSSH2_KNOWNHOST_KEY_ECDSA_256:
+        hostkey_method = hostkey_method_ssh_ecdsa_256;
+        break;
+#endif
+      case LIBSSH2_KNOWNHOST_KEY_SSHRSA:
+        hostkey_method = hostkey_method_ssh_rsa;
+        break;
+      case LIBSSH2_KNOWNHOST_KEY_SSHDSS:
+        hostkey_method = hostkey_method_ssh_dss;
+        break;
+      case LIBSSH2_KNOWNHOST_KEY_RSA1:
+        failf(data, "Found host key type RSA1 which is not supported\n");
+        return CURLE_SSH;
+      default:
+        failf(data, "Unknown host key type: %i\n",
+              (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK));
+        return CURLE_SSH;
+      }
+
+      infof(data, "Set \"%s\" as SSH hostkey type\n", hostkey_method);
+      result = libssh2_session_error_to_CURLE(
+          libssh2_session_method_pref(
+              sshc->ssh_session, LIBSSH2_METHOD_HOSTKEY, hostkey_method));
+    }
+    else {
+      infof(data, "Did not find host %s in %s\n",
+            conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+    }
+  }
+
+#endif /* HAVE_LIBSSH2_KNOWNHOST_API */
+
+  return result;
+}
+
+/*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end.  The data the pointer 'block' points
  * to will be set to TRUE if the libssh2 function returns LIBSSH2_ERROR_EAGAIN
@@ -679,6 +803,12 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       /* Set libssh2 to non-blocking, since everything internally is
          non-blocking */
       libssh2_session_set_blocking(sshc->ssh_session, 0);
+
+      result = ssh_force_knownhost_key_type(conn);
+      if(result) {
+        state(conn, SSH_SESSION_FREE);
+        break;
+      }
 
       state(conn, SSH_S_STARTUP);
       /* FALLTHROUGH */
