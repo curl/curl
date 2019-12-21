@@ -52,6 +52,8 @@ struct ssl_backend_data {
   const char *protocols[2];
   /* SSL client context is active */
   bool active;
+  /* size of pending write, yet to be flushed */
+  size_t pending_write;
 };
 
 #define BACKEND connssl->backend
@@ -421,7 +423,8 @@ static CURLcode bearssl_connect_step1(struct connectdata *conn, int sockindex)
   return CURLE_OK;
 }
 
-static CURLcode bearssl_connect_step2(struct connectdata *conn, int sockindex)
+static CURLcode bearssl_run_until(struct connectdata *conn, int sockindex,
+                                  unsigned target)
 {
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
@@ -437,6 +440,13 @@ static CURLcode bearssl_connect_step2(struct connectdata *conn, int sockindex)
     if(state & BR_SSL_CLOSED) {
       err = br_ssl_engine_last_error(&BACKEND->ctx.eng);
       switch(err) {
+      case BR_ERR_OK:
+        /* TLS close notify */
+        if(connssl->state != ssl_connection_complete) {
+          failf(data, "SSL: connection closed during handshake");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
+        return CURLE_OK;
       case BR_ERR_X509_EXPIRED:
         failf(data, "SSL: X.509 verification: "
               "certificate is expired or not yet valid");
@@ -455,37 +465,58 @@ static CURLcode bearssl_connect_step2(struct connectdata *conn, int sockindex)
         return CURLE_PEER_FAILED_VERIFICATION;
       return CURLE_SSL_CONNECT_ERROR;
     }
-    if(state & (BR_SSL_SENDAPP | BR_SSL_RECVAPP)) {
-      connssl->connecting_state = ssl_connect_3;
+    if(state & target)
       return CURLE_OK;
-    }
     if(state & BR_SSL_SENDREC) {
       buf = br_ssl_engine_sendrec_buf(&BACKEND->ctx.eng, &len);
       ret = swrite(sockfd, buf, len);
       if(ret == -1) {
         if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-          connssl->connecting_state = ssl_connect_2_writing;
-          return CURLE_OK;
+          if(connssl->state != ssl_connection_complete)
+            connssl->connecting_state = ssl_connect_2_writing;
+          return CURLE_AGAIN;
         }
-        return CURLE_SEND_ERROR;
+        return CURLE_WRITE_ERROR;
       }
       br_ssl_engine_sendrec_ack(&BACKEND->ctx.eng, ret);
     }
     else if(state & BR_SSL_RECVREC) {
       buf = br_ssl_engine_recvrec_buf(&BACKEND->ctx.eng, &len);
       ret = sread(sockfd, buf, len);
+      if(ret == 0) {
+        failf(data, "SSL: EOF without close notify");
+        return CURLE_READ_ERROR;
+      }
       if(ret == -1) {
         if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK) {
-          connssl->connecting_state = ssl_connect_2_reading;
-          return CURLE_OK;
+          if(connssl->state != ssl_connection_complete)
+            connssl->connecting_state = ssl_connect_2_reading;
+          return CURLE_AGAIN;
         }
         return CURLE_READ_ERROR;
       }
-      if(ret == 0)
-        return CURLE_SSL_CONNECT_ERROR;
       br_ssl_engine_recvrec_ack(&BACKEND->ctx.eng, ret);
     }
   }
+}
+
+static CURLcode bearssl_connect_step2(struct connectdata *conn, int sockindex)
+{
+  struct Curl_easy *data = conn->data;
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  CURLcode ret;
+
+  ret = bearssl_run_until(conn, sockindex, BR_SSL_SENDAPP | BR_SSL_RECVAPP);
+  if(ret == CURLE_AGAIN)
+    return CURLE_OK;
+  if(ret == CURLE_OK) {
+    if(br_ssl_engine_current_state(&BACKEND->ctx.eng) == BR_SSL_CLOSED) {
+      failf(data, "SSL: connection closed during handshake");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    connssl->connecting_state = ssl_connect_3;
+  }
+  return ret;
 }
 
 static CURLcode bearssl_connect_step3(struct connectdata *conn, int sockindex)
@@ -548,83 +579,52 @@ static CURLcode bearssl_connect_step3(struct connectdata *conn, int sockindex)
 static ssize_t bearssl_send(struct connectdata *conn, int sockindex,
                             const void *buf, size_t len, CURLcode *err)
 {
+  struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  unsigned state;
-  unsigned char *rec, *app;
-  size_t reclen, applen;
-  ssize_t ret;
+  unsigned char *app;
+  size_t applen;
 
-  applen = 0;
   for(;;) {
-    state = br_ssl_engine_current_state(&BACKEND->ctx.eng);
-    if(state & BR_SSL_SENDREC) {
-      rec = br_ssl_engine_sendrec_buf(&BACKEND->ctx.eng, &reclen);
-      ret = swrite(conn->sock[sockindex], rec, reclen);
-      if(ret == -1) {
-        if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)
-          *err = CURLE_AGAIN;
-        else
-          *err = CURLE_SEND_ERROR;
-        return -1;
-      }
-      br_ssl_engine_sendrec_ack(&BACKEND->ctx.eng, ret);
-    }
-    else if(state & BR_SSL_SENDAPP && applen == 0) {
-      app = br_ssl_engine_sendapp_buf(&BACKEND->ctx.eng, &applen);
-      if(applen > len)
-        applen = len;
-      memcpy(app, buf, applen);
-      br_ssl_engine_sendapp_ack(&BACKEND->ctx.eng, applen);
-      br_ssl_engine_flush(&BACKEND->ctx.eng, 0);
-    }
-    else if(state & BR_SSL_CLOSED || applen == 0) {
+    *err = bearssl_run_until(conn, sockindex, BR_SSL_SENDAPP);
+    if (*err != CURLE_OK)
+      return -1;
+    app = br_ssl_engine_sendapp_buf(&BACKEND->ctx.eng, &applen);
+    if(!app) {
+      failf(data, "SSL: connection closed during write");
       *err = CURLE_SEND_ERROR;
       return -1;
     }
-    else
-      break;
+    if(BACKEND->pending_write) {
+      applen = BACKEND->pending_write;
+      BACKEND->pending_write = 0;
+      return applen;
+    }
+    if(applen > len)
+      applen = len;
+    memcpy(app, buf, applen);
+    br_ssl_engine_sendapp_ack(&BACKEND->ctx.eng, applen);
+    br_ssl_engine_flush(&BACKEND->ctx.eng, 0);
+    BACKEND->pending_write = applen;
   }
-
-  return applen;
 }
 
 static ssize_t bearssl_recv(struct connectdata *conn, int sockindex,
                             char *buf, size_t len, CURLcode *err)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  unsigned state;
-  unsigned char *rec, *app;
-  size_t reclen, applen;
-  ssize_t ret;
+  unsigned char *app;
+  size_t applen;
 
-  for(;;) {
-    state = br_ssl_engine_current_state(&BACKEND->ctx.eng);
-    if(state & BR_SSL_RECVREC) {
-      rec = br_ssl_engine_recvrec_buf(&BACKEND->ctx.eng, &reclen);
-      ret = sread(conn->sock[sockindex], rec, reclen);
-      if(ret == -1 && (SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)) {
-        *err = CURLE_AGAIN;
-        return -1;
-      }
-      if(ret <= 0) {
-        *err = CURLE_RECV_ERROR;
-        return -1;
-      }
-      br_ssl_engine_recvrec_ack(&BACKEND->ctx.eng, ret);
-    }
-    else if(state & BR_SSL_RECVAPP) {
-      app = br_ssl_engine_recvapp_buf(&BACKEND->ctx.eng, &applen);
-      if(applen > len)
-        applen = len;
-      memcpy(buf, app, applen);
-      br_ssl_engine_recvapp_ack(&BACKEND->ctx.eng, applen);
-      break;
-    }
-    else {
-      *err = CURLE_RECV_ERROR;
-      return -1;
-    }
-  }
+  *err = bearssl_run_until(conn, sockindex, BR_SSL_RECVAPP);
+  if(*err != CURLE_OK)
+    return -1;
+  app = br_ssl_engine_recvapp_buf(&BACKEND->ctx.eng, &applen);
+  if(!app)
+    return 0;
+  if(applen > len)
+    applen = len;
+  memcpy(buf, app, applen);
+  br_ssl_engine_recvapp_ack(&BACKEND->ctx.eng, applen);
 
   return applen;
 }
@@ -792,19 +792,11 @@ static void *Curl_bearssl_get_internals(struct ssl_connect_data *connssl,
 static void Curl_bearssl_close(struct connectdata *conn, int sockindex)
 {
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  unsigned char *buf;
-  size_t len, i;
-  ssize_t ret;
+  size_t i;
 
   if(BACKEND->active) {
     br_ssl_engine_close(&BACKEND->ctx.eng);
-    while(br_ssl_engine_current_state(&BACKEND->ctx.eng) & BR_SSL_SENDREC) {
-      buf = br_ssl_engine_sendrec_buf(&BACKEND->ctx.eng, &len);
-      ret = swrite(conn->sock[sockindex], buf, len);
-      if(ret < 0)
-        break;
-      br_ssl_engine_sendrec_ack(&BACKEND->ctx.eng, ret);
-    }
+    (void)bearssl_run_until(conn, sockindex, BR_SSL_CLOSED);
   }
   for(i = 0; i < BACKEND->anchors_len; ++i)
     free(BACKEND->anchors[i].dn.data);
