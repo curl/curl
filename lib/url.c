@@ -497,7 +497,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
      in bitmask to not conflict with the private bits */
   set->allowed_protocols = CURLPROTO_ALL;
   set->redir_protocols = CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP |
-                         CURLPROTO_FTPS;
+                         CURLPROTO_RTSP | CURLPROTO_FTPS;
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   /*
