@@ -81,6 +81,7 @@ unsigned short Curl_read16_be(const unsigned char *buf)
                           ((unsigned short)buf[1]));
 }
 
+#if (CURL_SIZEOF_CURL_OFF_T > 4)
 /*
  * write32_le()
  *
@@ -100,7 +101,6 @@ static void write32_le(const int value, unsigned char *buffer)
   buffer[3] = (char)((value & 0xFF000000) >> 24);
 }
 
-#if (CURL_SIZEOF_CURL_OFF_T > 4)
 /*
  * Curl_write64_le()
  *

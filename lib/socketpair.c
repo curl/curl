@@ -40,6 +40,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* IPPROTO_TCP */
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #ifndef INADDR_LOOPBACK
 #define INADDR_LOOPBACK 0x7f000001
 #endif /* !INADDR_LOOPBACK */
