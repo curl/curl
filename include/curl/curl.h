@@ -600,6 +600,7 @@ typedef enum {
   CURLE_AUTH_ERROR,              /* 94 - an authentication function returned an
                                     error */
   CURLE_HTTP3,                   /* 95 - An HTTP/3 layer problem */
+  CURLE_QUIC_CONNECT_ERROR,      /* 96 - QUIC connection error */
   CURL_LAST /* never use! */
 } CURLcode;
 

@@ -317,6 +317,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_HTTP3:
     return "HTTP/3 error";
 
+  case CURLE_QUIC_CONNECT_ERROR:
+    return "QUIC connection error";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

@@ -574,10 +574,10 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   qs->version = NGTCP2_PROTO_VER;
   qs->sslctx = quic_ssl_ctx(data);
   if(!qs->sslctx)
-    return CURLE_FAILED_INIT; /* TODO: better return code */
+    return CURLE_QUIC_CONNECT_ERROR;
 
   if(quic_init_ssl(qs))
-    return CURLE_FAILED_INIT; /* TODO: better return code */
+    return CURLE_QUIC_CONNECT_ERROR;
 
   qs->dcid.datalen = NGTCP2_MAX_CIDLEN;
   result = Curl_rand(data, qs->dcid.data, NGTCP2_MAX_CIDLEN);
@@ -595,7 +595,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   rv = getsockname(sockfd, (struct sockaddr *)&qs->local_addr,
                    &qs->local_addrlen);
   if(rv == -1)
-    return CURLE_FAILED_INIT;
+    return CURLE_QUIC_CONNECT_ERROR;
 
   ngtcp2_addr_init(&path.local, (uint8_t *)&qs->local_addr, qs->local_addrlen,
                    NULL);
@@ -609,7 +609,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   rc = ngtcp2_conn_client_new(&qs->qconn, &qs->dcid, &qs->scid, &path, QUICVER,
                               &ng_callbacks, &qs->settings, NULL, qs);
   if(rc)
-    return CURLE_FAILED_INIT; /* TODO: create a QUIC error code */
+    return CURLE_QUIC_CONNECT_ERROR;
 
   ngtcp2_conn_get_local_transport_params(qs->qconn, &params);
   nwrite = ngtcp2_encode_transport_params(
@@ -618,15 +618,15 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   if(nwrite < 0) {
     failf(data, "ngtcp2_encode_transport_params: %s\n",
           ngtcp2_strerror((int)nwrite));
-    return CURLE_FAILED_INIT;
+    return CURLE_QUIC_CONNECT_ERROR;
   }
 
   if(!SSL_set_quic_transport_params(qs->ssl, paramsbuf, nwrite))
-    return CURLE_FAILED_INIT;
+    return CURLE_QUIC_CONNECT_ERROR;
 
   rc = setup_initial_crypto_context(qs);
   if(rc)
-    return CURLE_FAILED_INIT; /* TODO: better return code */
+    return CURLE_QUIC_CONNECT_ERROR;
 
   return CURLE_OK;
 }
@@ -998,7 +998,7 @@ static int init_ngh3_conn(struct quicsocket *qs)
 
   if(ngtcp2_conn_get_max_local_streams_uni(qs->qconn) < 3) {
     failf(qs->conn->data, "too few available QUIC streams");
-    return CURLE_FAILED_INIT;
+    return CURLE_QUIC_CONNECT_ERROR;
   }
 
   nghttp3_conn_settings_default(&qs->h3settings);
@@ -1015,32 +1015,32 @@ static int init_ngh3_conn(struct quicsocket *qs)
 
   rc = ngtcp2_conn_open_uni_stream(qs->qconn, &ctrl_stream_id, NULL);
   if(rc) {
-    result = CURLE_FAILED_INIT;
+    result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
 
   rc = nghttp3_conn_bind_control_stream(qs->h3conn, ctrl_stream_id);
   if(rc) {
-    result = CURLE_FAILED_INIT;
+    result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
 
   rc = ngtcp2_conn_open_uni_stream(qs->qconn, &qpack_enc_stream_id, NULL);
   if(rc) {
-    result = CURLE_FAILED_INIT;
+    result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
 
   rc = ngtcp2_conn_open_uni_stream(qs->qconn, &qpack_dec_stream_id, NULL);
   if(rc) {
-    result = CURLE_FAILED_INIT;
+    result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
 
   rc = nghttp3_conn_bind_qpack_streams(qs->h3conn, qpack_enc_stream_id,
                                        qpack_dec_stream_id);
   if(rc) {
-    result = CURLE_FAILED_INIT;
+    result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
 

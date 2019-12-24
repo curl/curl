@@ -259,6 +259,9 @@ An authentication function returned an error.
 .IP "CURLE_HTTP3 (95)"
 A problem was detected in the HTTP/3 layer. This is somewhat generic and can
 be one out of several problems, see the error buffer for details.
+.IP "CURLE_QUIC_CONNECT_ERROR (96)"
+QUIC connection error. This error may be caused by an SSL library error. QUIC
+is the protocol used for HTTP/3 transfers.
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.
