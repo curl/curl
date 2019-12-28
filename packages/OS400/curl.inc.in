@@ -1816,7 +1816,9 @@
      d                 c                   8
      d  CURLM_WAKEUP_FAILURE...
      d                 c                   9
-     d  CURLM_LAST     c                   10
+     d  CURLM_BAD_FUNCTION_ARGUMENT...
+     d                 c                   10
+     d  CURLM_LAST     c                   11
       *
      d CURLMSG         s             10i 0 based(######ptr######)               Enum
      d  CURLMSG_NONE   c                   0
