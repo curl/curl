@@ -392,6 +392,9 @@ curl_multi_strerror(CURLMcode error)
   case CURLM_WAKEUP_FAILURE:
     return "Wakeup is unavailable or failed";
 
+  case CURLM_BAD_FUNCTION_ARGUMENT:
+    return "A libcurl function was given a bad argument";
+
   case CURLM_LAST:
     break;
   }

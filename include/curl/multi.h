@@ -72,7 +72,8 @@ typedef enum {
                             attempted to get added - again */
   CURLM_RECURSIVE_API_CALL, /* an api function was called from inside a
                                callback */
-  CURLM_WAKEUP_FAILURE, /* wakeup is unavailable or failed */
+  CURLM_WAKEUP_FAILURE,  /* wakeup is unavailable or failed */
+  CURLM_BAD_FUNCTION_ARGUMENT,  /* function called with a bad parameter */
   CURLM_LAST
 } CURLMcode;
 
