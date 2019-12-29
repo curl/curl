@@ -86,6 +86,7 @@ http
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 debug
 proxy
