@@ -720,8 +720,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq))
         result = CURLE_FAILED_INIT;
     }
-    if(result)
+    if(result) {
+      single_transfer_cleanup(config);
       return result;
+    }
   }
   if(!state->urlnode) {
     /* first time caller, setup things */
