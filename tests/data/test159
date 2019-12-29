@@ -43,6 +43,7 @@ This is not the real page either!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 debug
 </features>

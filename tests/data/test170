@@ -19,6 +19,7 @@ http
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 proxy
 </features>

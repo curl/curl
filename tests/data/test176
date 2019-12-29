@@ -48,6 +48,7 @@ content for you
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 </features>
 <server>
