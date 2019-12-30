@@ -156,7 +156,10 @@ static void MD4_Init(MD4_CTX *ctx)
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  CryptHashData(ctx->hHash, data, (unsigned int) size, 0);
+  /* Old versions of mingw incorrectly mark the second parameter as non-const,
+   * so explicitly cast away the const to make the compiler not complain
+   */
+  CryptHashData(ctx->hHash, (BYTE *)data, (unsigned int) size, 0);
 }
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
