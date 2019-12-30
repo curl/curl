@@ -126,7 +126,7 @@ static void rtsp_play(CURL *curl, const char *uri, const char *range)
   CURLcode res = CURLE_OK;
   printf("\nRTSP: PLAY %s\n", uri);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, uri);
-  my_curl_easy_setopt(curl, CURLOPT_RANGE, range);
+  // my_curl_easy_setopt(curl, CURLOPT_RANGE, range);
   my_curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_PLAY);
   my_curl_easy_perform(curl);
 
@@ -164,29 +164,29 @@ static void get_sdp_filename(const char *url, char *sdp_filename,
 static void get_media_control_attribute(const char *sdp_filename,
                                         char *control)
 {
-  int max_len = 256;
-  char *s = malloc(max_len);
+  char s[256];
   FILE *sdp_fp = fopen(sdp_filename, "rb");
   control[0] = '\0';
   if(sdp_fp != NULL) {
-    while(fgets(s, max_len - 2, sdp_fp) != NULL) {
-      sscanf(s, " a = control: %s", control);
+    while(fgets(s, sizeof(s)-2, sdp_fp) != NULL) {
+      sscanf(s, " a = control:%s", control);
     }
     fclose(sdp_fp);
   }
-  free(s);
 }
 
 
 /* main app */
 int main(int argc, char * const argv[])
 {
-#if 1
+#if 0
   const char *transport = "RTP/AVP;unicast;client_port=1234-1235";  /* UDP */
 #else
   /* TCP */
-  const char *transport = "RTP/AVP/TCP;unicast;client_port=1234-1235";
+  const char *transport = "RTP/AVP/TCP;unicast;interleaved=0-1";
 #endif
+  const char *url = NULL;
+  const char *credentials = NULL;
   const char *range = "0.000-";
   int rc = EXIT_SUCCESS;
   char *base_name = NULL;
@@ -196,8 +196,13 @@ int main(int argc, char * const argv[])
     "https://github.com/BackupGGCode/rtsprequest\n");
   printf("    Requires curl V7.20 or greater\n\n");
 
+#if defined(_WIN32)
+      WSADATA wsaData;
+      WSAStartup(MAKEWORD(1,1),&wsaData);
+#endif
+
   /* check command line */
-  if((argc != 2) && (argc != 3)) {
+  if(argc < 2) {
     base_name = strrchr(argv[0], '/');
     if(base_name == NULL) {
       base_name = strrchr(argv[0], '\\');
@@ -208,21 +213,54 @@ int main(int argc, char * const argv[])
     else {
       base_name++;
     }
-    printf("Usage:   %s url [transport]\n", base_name);
-    printf("         url of video server\n");
-    printf("         transport (optional) specifier for media stream"
+    printf("Usage:   %s [-t transport] [-u user:pass] url\n", base_name);
+    printf("         url: url of video server\n");
+    printf("         user:pass: optional) credentials to use\n");
+    printf("         transport: (optional) specifier for media stream"
            " protocol\n");
     printf("         default transport: %s\n", transport);
     printf("Example: %s rtsp://192.168.0.2/media/video1\n\n", base_name);
     rc = EXIT_FAILURE;
   }
   else {
-    const char *url = argv[1];
-    char *uri = malloc(strlen(url) + 32);
-    char *sdp_filename = malloc(strlen(url) + 32);
-    char *control = malloc(strlen(url) + 32);
+    int arg = 1;
+    while (arg < argc) {
+      const char *s = argv[arg];
+      if (*s == '-')
+      {
+        if(arg < argc-1) {
+          switch (s[1]) {
+          case 'u':
+            credentials = argv[++arg];
+            break;
+          case 't':
+            transport = argv[++arg];
+            break;
+          }
+        }
+        else {
+          printf("Expected more arguments\n");
+          rc = EXIT_FAILURE;
+        }
+      }
+      else
+      {
+        url = argv[arg];
+      }
+      arg++;
+    }
+    if(url == NULL) {
+      printf("Need a URL\n");
+      rc = EXIT_FAILURE;
+    }
+  }
+
+  if(rc == EXIT_SUCCESS) {
+    char uri[256];
+    char sdp_filename[256];
+    char control[256];
     CURLcode res;
-    get_sdp_filename(url, sdp_filename, strlen(url) + 32);
+    get_sdp_filename(url, sdp_filename, sizeof(sdp_filename)-1);
     if(argc == 3) {
       transport = argv[2];
     }
@@ -242,8 +280,14 @@ int main(int argc, char * const argv[])
         my_curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
         my_curl_easy_setopt(curl, CURLOPT_URL, url);
 
+        if(credentials != NULL) {
+           printf("Using credentials: %s\n", credentials);
+           my_curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST | CURLAUTH_BASIC);
+           my_curl_easy_setopt(curl, CURLOPT_USERPWD, credentials);
+        }
+
         /* request server options */
-        snprintf(uri, strlen(url) + 32, "%s", url);
+        snprintf(uri, sizeof(uri)-1, "%s", url);
         rtsp_options(curl, uri);
 
         /* request session description and write response to sdp file */
@@ -253,7 +297,11 @@ int main(int argc, char * const argv[])
         get_media_control_attribute(sdp_filename, control);
 
         /* setup media stream */
-        snprintf(uri, strlen(url) + 32, "%s/%s", url, control);
+        if(strncmp(control, "rtsp://", 7)) {
+           snprintf(uri, sizeof(uri)-1, "%s/%s", url, control);
+        } else {
+            strncpy(uri, control, sizeof(uri)-1);
+        }
         rtsp_setup(curl, uri, transport);
 
         /* start playing media stream */
@@ -279,9 +327,6 @@ int main(int argc, char * const argv[])
       fprintf(stderr, "curl_global_init(%s) failed: %d\n",
               "CURL_GLOBAL_ALL", res);
     }
-    free(control);
-    free(sdp_filename);
-    free(uri);
   }
 
   return rc;
