@@ -1242,6 +1242,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) "
            "were sent",
            responsesize-count, responsesize);
+    prevtestno = req->testno;
+    prevpartno = req->partno;
     free(ptr);
     free(cmd);
     return -1;
