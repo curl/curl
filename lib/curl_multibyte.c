@@ -79,3 +79,54 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
 }
 
 #endif /* WIN32 */
+
+#if defined(USE_WIN32_LARGE_FILES) || defined(USE_WIN32_SMALL_FILES)
+
+FILE *curlx_win32_fopen(const char *filename, const char *mode)
+{
+#ifdef _UNICODE
+  FILE *result = NULL;
+  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
+  wchar_t *mode_w = curlx_convert_UTF8_to_wchar(mode);
+  if(filename_w && mode_w)
+    result = _wfopen(filename_w, mode_w);
+  free(filename_w);
+  free(mode_w);
+  if(result)
+    return result;
+#endif
+
+  return (fopen)(filename, mode);
+}
+
+int curlx_win32_stat(const char *path, struct_stat *buffer)
+{
+  int result = -1;
+#ifdef _UNICODE
+  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+#endif /* _UNICODE */
+
+#if defined(USE_WIN32_SMALL_FILES)
+#if defined(_UNICODE)
+  if(path_w)
+    result = _wstat(path_w, buffer);
+  else
+#endif /* _UNICODE */
+    result = _stat(path, buffer);
+#else /* USE_WIN32_SMALL_FILES */
+#if defined(_UNICODE)
+  if(path_w)
+    result = _wstati64(path_w, buffer);
+  else
+#endif /* _UNICODE */
+    result = _stati64(path, buffer);
+#endif /* USE_WIN32_SMALL_FILES */
+
+#ifdef _UNICODE
+  free(path_w);
+#endif
+
+  return result;
+}
+
+#endif /* USE_WIN32_LARGE_FILES || USE_WIN32_SMALL_FILES */
