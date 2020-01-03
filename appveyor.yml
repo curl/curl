@@ -167,21 +167,49 @@ environment:
         DEBUG: yes
         PATHPART: debug
         TESTING: OFF
+        ENABLE_UNICODE: no
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: winbuild_vs2015
         DEBUG: no
         PATHPART: release
         TESTING: OFF
+        ENABLE_UNICODE: no
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: winbuild_vs2017
         DEBUG: yes
         PATHPART: debug
         TESTING: OFF
+        ENABLE_UNICODE: no
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: winbuild_vs2017
         DEBUG: no
         PATHPART: release
         TESTING: OFF
+        ENABLE_UNICODE: no
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: winbuild_vs2015
+        DEBUG: yes
+        PATHPART: debug
+        TESTING: OFF
+        ENABLE_UNICODE: yes
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+        BUILD_SYSTEM: winbuild_vs2015
+        DEBUG: no
+        PATHPART: release
+        TESTING: OFF
+        ENABLE_UNICODE: yes
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: winbuild_vs2017
+        DEBUG: yes
+        PATHPART: debug
+        TESTING: OFF
+        ENABLE_UNICODE: yes
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
+        BUILD_SYSTEM: winbuild_vs2017
+        DEBUG: no
+        PATHPART: release
+        TESTING: OFF
+        ENABLE_UNICODE: yes
       # generated VisualStudioSolution-based builds
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2017"
         BUILD_SYSTEM: VisualStudioSolution
@@ -233,14 +261,14 @@ build_script:
         cd winbuild &&
         call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 &&
         call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86_amd64 &&
-        nmake /f Makefile.vc mode=dll VC=14 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% &&
+        nmake /f Makefile.vc mode=dll VC=14 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
         ..\builds\libcurl-vc14-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==winbuild_vs2017 (
         call buildconf.bat &&
         cd winbuild &&
         call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" &&
-        nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% &&
+        nmake /f Makefile.vc mode=dll VC=15 "SSL_PATH=C:\OpenSSL-v111-Win64" WITH_SSL=dll MACHINE=x64 DEBUG=%DEBUG% ENABLE_UNICODE=%ENABLE_UNICODE% &&
         ..\builds\libcurl-vc15-x64-%PATHPART%-dll-ssl-dll-ipv6-sspi\bin\curl.exe -V
       ) else (
       if %BUILD_SYSTEM%==autotools (
