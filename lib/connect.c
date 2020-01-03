@@ -932,9 +932,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       SET_SOCKERRNO(error);
       if(conn->tempaddr[i]) {
         CURLcode status;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
         char ipaddress[MAX_IPADR_LEN];
         char buffer[STRERROR_LEN];
         Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
+#endif
         infof(data, "connect to %s port %ld failed: %s\n",
               ipaddress, conn->port,
               Curl_strerror(error, buffer, sizeof(buffer)));
@@ -992,14 +994,12 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 static void tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
 {
 #if defined(TCP_NODELAY)
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  struct Curl_easy *data = conn->data;
-#endif
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  struct Curl_easy *data = conn->data;
   char buffer[STRERROR_LEN];
-
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#else
   (void) conn;
 #endif
 
