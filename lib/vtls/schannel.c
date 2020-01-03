@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2012 - 2016, Marc Hoersken, <info@marc-hoersken.de>
  * Copyright (C) 2012, Mark Salisbury, <mark.salisbury@hp.com>
- * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1855,7 +1855,9 @@ schannel_recv(struct connectdata *conn, int sockindex,
       goto cleanup;
     }
     else {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       char buffer[STRERROR_LEN];
+#endif
       *err = CURLE_RECV_ERROR;
       infof(data, "schannel: failed to read data from server: %s\n",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
