@@ -1357,6 +1357,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                     config->postfieldsize);
           break;
         case HTTPREQ_MIMEPOST:
+          /* free previous remainders */
+          curl_mime_free(config->mimepost);
+          config->mimepost = NULL;
           result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
           if(result)
             break;
