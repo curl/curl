@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--write-out
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 This is a weirdo text message swsclose
+Content-Length: 4
+Connection: close
+
+Moo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+--write-out from file with empty file
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/we/want/our/1271 -w @log/blank1271
+</command>
+<file name="log/blank1271">
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /we/want/our/1271 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
