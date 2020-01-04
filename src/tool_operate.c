@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2105,8 +2105,10 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
 
   result = add_parallel_transfers(global, multi, share,
                                   &more_transfers, &added_transfers);
-  if(result)
+  if(result) {
+    curl_multi_cleanup(multi);
     return result;
+  }
 
   while(!mcode && (still_running || more_transfers)) {
     mcode = curl_multi_poll(multi, NULL, 0, 1000, NULL);
