@@ -1,10 +1,10 @@
 curl and libcurl 7.68.0
 
- Public curl releases:         187
+ Public curl releases:         188
  Command line options:         229
  curl_easy_setopt() options:   269
  Public functions in libcurl:  82
- Contributors:                 2056
+ Contributors:                 2088
 
 This release includes the following changes:
 
@@ -17,10 +17,13 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CVE-2019-15601: file: on Windows, refuse paths that start with \\ [106]
  o Azure Pipelines: add several builds
  o CMake: add support for building with the NSS vtls backend [43]
  o CURL-DISABLE: initial docs for the CURL_DISABLE_* defines [19]
+ o CURLOPT_HEADERFUNCTION.3: Document that size is always 1 [100]
  o CURLOPT_QUOTE.3: fix typos [78]
+ o CURLOPT_READFUNCTION.3: fix the example [107]
  o CURLOPT_URL.3: "curl supports SMB version 1 (only)"
  o CURLOPT_VERBOSE.3: see also ERRORBUFFER
  o HISTORY: added cmake, HTTP/3 and parallel downloads with curl
@@ -30,6 +33,7 @@ This release includes the following bugfixes:
  o KNOWN_BUGS: LDAP on Windows doesn't work correctly [86]
  o KNOWN_BUGS: TLS session cache doesn't work with TFO [56]
  o OPENSOCKETFUNCTION.3: correct the purpose description [48]
+ o TrackMemory tests: always remove CR before LF [111]
  o altsvc: bump to h3-24 [6]
  o altsvc: make the save function ignore NULL filenames [67]
  o build: Disable Visual Studio warning "conditional expression is constant" [49]
@@ -46,29 +50,42 @@ This release includes the following bugfixes:
  o conncache: fix multi-thread use of shared connection cache [61]
  o copyrights: fix copyright year range [25]
  o create_conn: prefer multiplexing to using new connections [76]
+ o curl -w: handle a blank input file correctly [105]
  o curl.h: add two missing defines for "pre ISO C" compilers [75]
  o curl/parseconfig: fix mem-leak [81]
  o curl/parseconfig: use curl_free() to free memory allocated by libcurl [80]
+ o curl: cleanup multi handle on failure [103]
  o curl: fix --upload-file . hangs if delay in STDIN [35]
  o curl: fix -T globbing [16]
  o curl: improved cleanup in upload error path [69]
+ o curl: make a few char pointers point to const char instead [95]
+ o curl: properly free mimepost data [104]
  o curl: show better error message when no homedir is found [47]
+ o curl: show error for --http3 if libcurl lacks support [108]
  o curl_setup_once: consistently use WHILE_FALSE in macros [54]
  o define: remove HAVE_ENGINE_LOAD_BUILTIN_ENGINES, not used anymore [83]
  o docs: Change 'experiemental' to 'experimental' [30]
  o docs: TLS SRP doesn't work with TLS 1.3 [87]
  o docs: fix several typos [62]
+ o docs: mention CURL_MAX_INPUT_LENGTH restrictions [109]
  o doh: improved both encoding and decoding [11]
  o doh: make it behave when built without proxy support [68]
+ o examples/postinmemory.c: Call curl_global_cleanup always [101]
+ o examples/url2file.c: corrected erroneous comment [102]
  o examples: add multi-poll.c [14]
  o global_init: undo the "intialized" bump in case of failure [52]
  o hostip: suppress compiler warning [64]
  o http_ntlm: Remove duplicate NSS initialisation [55]
  o lib: Move lib/ssh.h -> lib/vssh/ssh.h [9]
+ o lib: fix compiler warnings with `CURL_DISABLE_VERBOSE_STRINGS` [93]
+ o lib: fix warnings found when porting to NuttX [99]
  o lib: remove ASSIGNWITHINCONDITION exceptions, use our code style [84]
+ o lib: remove erroneous +x file permission on some c files [99]
  o libssh2: add support for ECDSA and ed25519 knownhost keys [89]
+ o multi.h: remove INITIAL_MAX_CONCURRENT_STREAMS from public header [110]
  o multi: free sockhash on OOM [63]
  o multi_poll: avoid busy-loop when called without easy handles attached [15]
+ o ngtcp2: Support the latest update key callback type [92]
  o ngtcp2: fix thread-safety bug in error-handling [33]
  o ngtcp2: free used resources on disconnect [7]
  o ngtcp2: handle key updates as ngtcp2 master branch tells us [8]
@@ -107,6 +124,8 @@ This release includes the following bugfixes:
  o tests/unit1607: fix mem-leak in OOM [66]
  o tests/unit1609: fix mem-leak in OOM [66]
  o tests/unit1620: fix bad free in OOM [66]
+ o tests: Change NTLM tests to require SSL [96]
+ o tests: Fix bounce requests with truncated writes [94]
  o tests: fix build with `CURL_DISABLE_DOH` [64]
  o tests: fix permissions of ssh keys in WSL [58]
  o tests: make it possible to set executable extensions [58]
@@ -114,13 +133,14 @@ This release includes the following bugfixes:
  o tests: set LC_ALL=en_US.UTF-8 instead of blank in several tests [74]
  o tests: use DoH feature for DoH tests [64]
  o tests: use \r\n for log messages in WSL [58]
+ o tool_operate: fix mem leak when failed config parse [98]
+ o travis: Fix error detection [97]
  o travis: abandon coveralls, it is not reliable [57]
  o travis: build ngtcp2 with --enable-lib-only [32]
  o travis: export the CC/CXX variables when set [34]
  o vtls: make BearSSL possible to set with CURL_SSL_BACKEND [72]
  o winbuild: Define CARES_STATICLIB when WITH_CARES=static [59]
  o winbuild: Document CURL_STATICLIB requirement for static libcurl [88]
- o ngtcp2: Support the latest update key callback type [92]
 
 This release includes the following known bugs:
 
@@ -130,20 +150,23 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   3dyd on github, Anderson Sasaki, Andreas Falkenhahn, Andrew Ishchuk,
-  bdry on github, Bjoern Franke, bxac on github, Bylon2 on github,
-  Christian Schmitz, Christopher Reid, Christoph M. Becker, Cynthia Coan,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, David Benjamin,
-  Gergely Nagy, Gisle Vanem, JanB on github, Javier Blazquez, Jeff Mears,
-  Jeffrey Walton, John Schroeder, Kamil Dudka, Kunal Ekawde, Leonardo Taccari,
-  Marcel Raad, Marc Hörsken, Maros Priputen, Massimiliano Fantuzzi,
-  Max Kellermann, Melissa Mears, Michael Forney, Michael Vittiglio,
-  Mohammad Hasbini, Niall O'Reilly, Paul Groke, Paul Hoffman,
-  Paulo Roberto Tomasi, Pavel Löbl, Pavel Pavlov, Peter Wu, Ram Krushna Mishra,
-  Ray Satiro, Richard Alcock, Richard Bowker, Santino Keupp, sayrer on github,
-  Shailesh Kapse, SLDiggie on github, Steve Holme, Tatsuhiro Tsujikawa,
+  bdry on github, Bjoern Franke, Brian Carpenter, bxac on github,
+  Bylon2 on github, Christian Schmitz, Christopher Head, Christopher Reid,
+  Christoph M. Becker, Cynthia Coan, Dan Fandrich, Daniel Gustafsson,
+  Daniel Stenberg, David Benjamin, Emil Engler, Fernando Muñoz, Frank Gevaerts,
+  Geeknik Labs, Gergely Nagy, Gisle Vanem, JanB on github, Javier Blazquez,
+  Jeff Mears, Jeffrey Walton, John Schroeder, Kamil Dudka,
+  kouzhudong on github, Kunal Ekawde, Leonardo Taccari, Marc Aldorasi,
+  Marcel Raad, marc-groundctl on github, Marc Hörsken, Maros Priputen,
+  Massimiliano Fantuzzi, Max Kellermann, Melissa Mears, Michael Forney,
+  Michael Vittiglio, Mohammad Hasbini, Niall O'Reilly, Paul Groke,
+  Paul Hoffman, Paul Joyce, Paulo Roberto Tomasi, Pavel Löbl, Pavel Pavlov,
+  Peter Wu, Ram Krushna Mishra, Ray Satiro, Richard Alcock, Richard Bowker,
+  Rickard Hallerbäck, Santino Keupp, sayrer on github, Shailesh Kapse,
+  Simon Warta, SLDiggie on github, Steve Holme, Tatsuhiro Tsujikawa,
   Tom van der Woerdt, Victor Magierski, Vlastimil Ovčáčík, Wyatt O'Day,
-  Xiaoyin Liu,
-  (57 contributors)
+  Xiang Xiao, Xiaoyin Liu,
+  (70 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -241,3 +264,22 @@ References to bug reports and discussions on issues:
  [90] = https://curl.haxx.se/bug/?i=4720
  [91] = https://curl.haxx.se/bug/?i=4715
  [92] = https://curl.haxx.se/bug/?i=4735
+ [93] = https://curl.haxx.se/bug/?i=4775
+ [94] = https://github.com/curl/curl/pull/4717#issuecomment-570240785
+ [95] = https://curl.haxx.se/bug/?i=4771
+ [96] = https://curl.haxx.se/bug/?i=4768
+ [97] = https://curl.haxx.se/bug/?i=3730
+ [98] = https://curl.haxx.se/bug/?i=4767
+ [99] = https://curl.haxx.se/bug/?i=4756
+ [100] = https://curl.haxx.se/bug/?i=4758
+ [101] = https://curl.haxx.se/bug/?i=4751
+ [102] = https://curl.haxx.se/bug/?i=4745
+ [103] = https://curl.haxx.se/bug/?i=4772
+ [104] = https://curl.haxx.se/bug/?i=4781
+ [105] = https://curl.haxx.se/bug/?i=4786
+ [106] = https://curl.haxx.se/docs/CVE-2019-15601.html
+ [107] = https://curl.haxx.se/bug/?i=4787
+ [108] = https://curl.haxx.se/bug/?i=4785
+ [109] = https://curl.haxx.se/bug/?i=4783
+ [110] = https://curl.haxx.se/bug/?i=4790
+ [111] = https://curl.haxx.se/bug/?i=4788
