@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -146,7 +146,7 @@ test1260 test1261 test1262 test1263 test1264 test1265 test1266 test1267 \
 test1268 test1269 test1270 \
 \
 test1280 test1281 test1282 test1283 test1284 test1285 test1286 test1287 \
-test1288 test1289 test1290 test1291 test1292 \
+test1288 test1289 test1290 test1291 test1292 test1293 \
 test1298 test1299 \
 test1300 test1301 test1302 test1303 test1304 test1305 test1306 test1307 \
 test1308 test1309 test1310 test1311 test1312 test1313 test1314 test1315 \
