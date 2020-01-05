@@ -48,7 +48,6 @@
 static CURLcode wssh_connect(struct connectdata *conn, bool *done);
 static CURLcode wssh_multi_statemach(struct connectdata *conn, bool *done);
 static CURLcode wssh_do(struct connectdata *conn, bool *done);
-
 #if 0
 static CURLcode wscp_done(struct connectdata *conn,
                           CURLcode, bool premature);
@@ -462,6 +461,7 @@ static CURLcode wssh_statemach_act(struct connectdata *conn, bool *block)
       break;
     case SSH_STOP:
       break;
+
     case SSH_SFTP_INIT:
       rc = wolfSSH_SFTP_connect(sshc->ssh_session);
       if(rc != WS_SUCCESS)
@@ -928,7 +928,7 @@ CURLcode wsftp_perform(struct connectdata *conn,
   *dophase_done = FALSE; /* not done yet */
 
   /* start the first command in the DO phase */
-  state(conn, SSH_SCP_TRANS_INIT);
+  state(conn, SSH_SFTP_QUOTE_INIT);
 
   /* run the state-machine */
   result = wssh_multi_statemach(conn, dophase_done);
@@ -1009,8 +1009,9 @@ static CURLcode wssh_block_statemach(struct connectdata *conn,
       curl_socket_t fd_write = CURL_SOCKET_BAD;
       if(dir == KEEP_RECV)
         fd_read = sock;
-      if(dir == KEEP_SEND)
+      else if(dir == KEEP_SEND)
         fd_write = sock;
+
       /* wait for the socket to become ready */
       (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
                               left>1000?1000:left); /* ignore result */
@@ -1044,7 +1045,6 @@ static CURLcode wssh_done(struct connectdata *conn, CURLcode status)
 }
 
 #if 0
-
 static CURLcode wscp_done(struct connectdata *conn,
                          CURLcode code, bool premature)
 {
@@ -1074,7 +1074,6 @@ static CURLcode wscp_disconnect(struct connectdata *conn, bool dead_connection)
 
   return result;
 }
-
 #endif
 
 static CURLcode wsftp_done(struct connectdata *conn,
@@ -1117,20 +1116,22 @@ static CURLcode wsftp_disconnect(struct connectdata *conn, bool dead)
 static int wssh_getsock(struct connectdata *conn,
                         curl_socket_t *sock)
 {
-  CURLcode result = CURLE_OK;
-  (void)conn;
-  (void)sock;
-
-  return result;
+  return wssh_perform_getsock(conn, sock);
 }
 
 static int wssh_perform_getsock(const struct connectdata *conn,
                                 curl_socket_t *sock)
 {
-  CURLcode result = CURLE_OK;
-  (void)conn;
-  (void)sock;
-  return result;
+  int bitmap = GETSOCK_BLANK;
+  int dir = conn->waitfor;
+  sock[0] = conn->sock[FIRSTSOCKET];
+
+  if(dir == KEEP_RECV)
+    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
+  else if(dir == KEEP_SEND)
+    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
+
+  return bitmap;
 }
 
 size_t Curl_ssh_version(char *buffer, size_t buflen)
