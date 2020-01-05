@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -622,6 +622,10 @@ TELNET options. See \fICURLOPT_TELNETOPTIONS(3)\fP
 \fICURLE_OK\fP (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
 man page for the full list with descriptions.
+
+Strings passed on to libcurl must be shorter than 8000000 bytes, otherwise
+\fIcurl_easy_setopt(3)\fP returns \fBCURLE_BAD_FUNCTION_ARGUMENT\fP (added in
+7.65.0).
 
 If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
