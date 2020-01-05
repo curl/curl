@@ -42,7 +42,7 @@ LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/quiche.c
 
 LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/quiche.h
 
-LIB_VSSH_CFILES = vssh/libssh2.c vssh/libssh.c
+LIB_VSSH_CFILES = vssh/libssh2.c vssh/libssh.c vssh/wolfssh.c
 
 LIB_VSSH_HFILES = vssh/ssh.h
 
