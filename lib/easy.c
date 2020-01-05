@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -193,6 +193,13 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
+#ifdef USE_WOLFSSH
+  if(WS_SUCCESS != wolfSSH_Init()) {
+    DEBUGF(fprintf(stderr, "Error: wolfSSH_Init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+#endif
+
   if(flags & CURL_GLOBAL_ACK_EINTR)
     Curl_ack_eintr = 1;
 
@@ -271,6 +278,10 @@ void curl_global_cleanup(void)
   Curl_amiga_cleanup();
 
   Curl_ssh_cleanup();
+
+#ifdef USE_WOLFSSH
+  (void)wolfSSH_Cleanup();
+#endif
 
   init_flags  = 0;
 }
