@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -369,6 +369,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 
   /* -1 means it not set by user, use the default value */
   multi->maxconnects = -1;
+  multi->max_concurrent_streams = 100;
 
 #ifdef ENABLE_WAKEUP
   if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, multi->wakeup_pair) < 0) {
@@ -2897,8 +2898,8 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       if(streams < 1)
         streams = 100;
       multi->max_concurrent_streams =
-          (streams > (long)INITIAL_MAX_CONCURRENT_STREAMS)?
-          (long)INITIAL_MAX_CONCURRENT_STREAMS : streams;
+        (streams > (long)INITIAL_MAX_CONCURRENT_STREAMS)?
+        INITIAL_MAX_CONCURRENT_STREAMS : (unsigned int)streams;
     }
     break;
   default:
@@ -3340,8 +3341,8 @@ void Curl_multi_dump(struct Curl_multi *multi)
 }
 #endif
 
-size_t Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
+unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
 {
-  return multi ? ((size_t)multi->max_concurrent_streams ?
-                  (size_t)multi->max_concurrent_streams : 100) : 0;
+  DEBUGASSERT(multi);
+  return multi->max_concurrent_streams;
 }

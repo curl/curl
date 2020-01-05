@@ -142,7 +142,7 @@ struct Curl_multi {
   struct curltime timer_lastcall; /* the fixed time for the timeout for the
                                     previous callback */
   bool in_callback;            /* true while executing a callback */
-  long max_concurrent_streams; /* max concurrent streams client to support */
+  unsigned int max_concurrent_streams;
 
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* socketpair() used for wakeup

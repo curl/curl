@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -90,9 +90,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct connectdata *conn);
 
 
-/* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option
- * If not specified or 0, default would be 100
- */
-size_t Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
+/* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
+unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_MULTIIF_H */

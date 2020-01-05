@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1073,7 +1073,7 @@ ConnectionExists(struct Curl_easy *data,
     curr = bundle->conn_list.head;
     while(curr) {
       bool match = FALSE;
-      size_t multiplexed;
+      size_t multiplexed = 0;
 
       /*
        * Note that if we use a HTTP proxy in normal mode (no tunneling), we
@@ -1086,8 +1086,8 @@ ConnectionExists(struct Curl_easy *data,
         /* connect-only or to-be-closed connections will not be reused */
         continue;
 
-      multiplexed = CONN_INUSE(check) &&
-        (bundle->multiuse == BUNDLE_MULTIPLEX);
+      if(bundle->multiuse == BUNDLE_MULTIPLEX)
+        multiplexed = CONN_INUSE(check);
 
       if(canmultiplex) {
         ;
@@ -1344,6 +1344,13 @@ ConnectionExists(struct Curl_easy *data,
             struct http_conn *httpc = &check->proto.httpc;
             if(multiplexed >= httpc->settings.max_concurrent_streams) {
               infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%zu)\n",
+                    multiplexed);
+              continue;
+            }
+            else if(multiplexed >=
+                    Curl_multi_max_concurrent_streams(needle->data->multi)) {
+              infof(data, "client side MAX_CONCURRENT_STREAMS reached"
+                    ", skip (%zu)\n",
                     multiplexed);
               continue;
             }
