@@ -59,6 +59,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
+#include "inet_pton.h"
 #include "multiif.h"
 #include "doh.h"
 #include "warnless.h"
@@ -512,13 +513,11 @@ int Curl_resolv(struct connectdata *conn,
   if(!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
 
-    Curl_addrinfo *addr;
+    Curl_addrinfo *addr = NULL;
     int respwait = 0;
-
-    /* Check what IP specifics the app has requested and if we can provide it.
-     * If not, bail out. */
-    if(!Curl_ipvalid(conn))
-      return CURLRESOLV_ERROR;
+#ifndef USE_RESOLVE_ON_IPS
+    struct in_addr in;
+#endif
 
     /* notify the resolver start callback */
     if(data->set.resolver_start) {
@@ -531,20 +530,43 @@ int Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
     }
 
-    if(allowDOH && data->set.doh) {
-      addr = Curl_doh(conn, hostname, port, &respwait);
+#ifndef USE_RESOLVE_ON_IPS
+    /* First check if this is an IPv4 address string */
+    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
+      /* This is a dotted IP address 123.123.123.123-style */
+      addr = Curl_ip2addr(AF_INET, &in, hostname, port);
+#ifdef ENABLE_IPV6
+    if(!addr) {
+      struct in6_addr in6;
+      /* check if this is an IPv6 address string */
+      if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
+        /* This is an IPv6 address literal */
+        addr = Curl_ip2addr(AF_INET6, &in6, hostname, port);
     }
-    else {
-      /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
-         non-zero value indicating that we need to wait for the response to the
-         resolve call */
-      addr = Curl_getaddrinfo(conn,
+#endif /* ENABLE_IPV6 */
+#endif /* !USE_RESOLVE_ON_IPS */
+
+    if(!addr) {
+      /* Check what IP specifics the app has requested and if we can provide
+       * it. If not, bail out. */
+      if(!Curl_ipvalid(conn))
+        return CURLRESOLV_ERROR;
+
+      if(allowDOH && data->set.doh) {
+        addr = Curl_doh(conn, hostname, port, &respwait);
+      }
+      else {
+        /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
+           non-zero value indicating that we need to wait for the response to
+           the resolve call */
+        addr = Curl_getaddrinfo(conn,
 #ifdef DEBUGBUILD
-                              (data->set.str[STRING_DEVICE]
-                               && !strcmp(data->set.str[STRING_DEVICE],
-                                          "LocalHost"))?"localhost":
+                                (data->set.str[STRING_DEVICE]
+                                 && !strcmp(data->set.str[STRING_DEVICE],
+                                            "LocalHost"))?"localhost":
 #endif
-                              hostname, port, &respwait);
+                                hostname, port, &respwait);
+      }
     }
     if(!addr) {
       if(respwait) {

@@ -71,7 +71,6 @@
 #include "strerror.h"
 #include "url.h"
 #include "multiif.h"
-#include "inet_pton.h"
 #include "inet_ntop.h"
 #include "curl_threads.h"
 #include "connect.h"
@@ -692,25 +691,10 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
                                          int port,
                                          int *waitp)
 {
-  struct in_addr in;
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
 
   *waitp = 0; /* default to synchronous response */
-
-#ifdef ENABLE_IPV6
-  {
-    struct in6_addr in6;
-    /* check if this is an IPv6 address string */
-    if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
-      /* This is an IPv6 address literal */
-      return Curl_ip2addr(AF_INET6, &in6, hostname, port);
-  }
-#endif /* ENABLE_IPV6 */
-
-  if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
-    /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, hostname, port);
 
   reslv->start = Curl_now();
 
@@ -742,25 +726,6 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   struct resdata *reslv = (struct resdata *)data->state.resolver;
 
   *waitp = 0; /* default to synchronous response */
-
-#ifndef USE_RESOLVE_ON_IPS
-  {
-    struct in_addr in;
-    /* First check if this is an IPv4 address string */
-    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
-      /* This is a dotted IP address 123.123.123.123-style */
-      return Curl_ip2addr(AF_INET, &in, hostname, port);
-  }
-#ifdef ENABLE_IPV6
-  {
-    struct in6_addr in6;
-    /* check if this is an IPv6 address string */
-    if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
-      /* This is an IPv6 address literal */
-      return Curl_ip2addr(AF_INET6, &in6, hostname, port);
-  }
-#endif /* ENABLE_IPV6 */
-#endif /* !USE_RESOLVE_ON_IPS */
 
 #ifdef CURLRES_IPV6
   /*
