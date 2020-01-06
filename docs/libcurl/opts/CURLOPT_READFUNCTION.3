@@ -88,7 +88,7 @@ size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userdata)
 
 void setup(char *uploadthis)
 {
-  FILE *file = fopen("rb", uploadthis);
+  FILE *file = fopen(uploadthis, "rb");
   CURLcode result;
 
   /* set callback to use */
