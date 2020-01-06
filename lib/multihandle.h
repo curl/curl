@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,6 +70,10 @@ typedef enum {
 #if defined(USE_SOCKETPAIR) && !defined(USE_BLOCKING_SOCKETS)
 #define ENABLE_WAKEUP
 #endif
+
+
+/* value for MAXIMUM CONCURRENT STREAMS upper limit */
+#define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
