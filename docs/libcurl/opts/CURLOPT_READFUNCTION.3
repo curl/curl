@@ -95,7 +95,7 @@ void setup(char *uploadthis)
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
   /* pass in suitable argument to callback */
-  curl_easy_setopt(curl, CURLOPT_READDATA, uploadthis);
+  curl_easy_setopt(curl, CURLOPT_READDATA, (void *)file);
 
   result = curl_easy_perform(curl);
 }
