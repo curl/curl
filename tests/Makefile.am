@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -38,7 +38,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
  CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
  manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py                  \
  negtelnetserver.py $(SMBDEPS) objnames-test08.sh objnames-test10.sh          \
- objnames.inc disable-scan.pl manpage-syntax.pl error-codes.pl
+ objnames.inc disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl
 
 DISTCLEANFILES = configurehelp.pm
 
