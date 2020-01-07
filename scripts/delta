@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2018-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2018-2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -53,8 +53,8 @@ $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 $contribs = $acontribs - $bcontribs;
 
 # number of setops:
-$asetopts=`grep "^  CINIT" include/curl/curl.h  | grep -cv OBSOLETE`;
-$bsetopts=`git show $start:include/curl/curl.h | grep "^  CINIT" | grep -cv OBSOLETE`;
+$asetopts=`grep '^  CURLOPT(' include/curl/curl.h  | grep -cv OBSOLETE`;
+$bsetopts=`git show $start:include/curl/curl.h | grep '^  CURLOPT(' | grep -cv OBSOLETE`;
 $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
