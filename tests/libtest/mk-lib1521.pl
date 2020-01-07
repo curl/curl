@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2017 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -173,45 +173,45 @@ HEADER
     ;
 
 while(<STDIN>) {
-    if($_ =~ /^  CINIT\(([^ ]*), ([^ ]*), (\d*)\)/) {
+    if($_ =~ /^  CURLOPT\(([^ ]*), ([^ ]*), (\d*)\)/) {
         my ($name, $type, $val)=($1, $2, $3);
         my $w="  ";
-        my $pref = "${w}res = curl_easy_setopt(curl, CURLOPT_$name,";
+        my $pref = "${w}res = curl_easy_setopt(curl, $name,";
         my $i = ' ' x (length($w) + 23);
-        my $check = "  if(UNEX(res)) {\n    err(\"$name\", res, __LINE__); goto test_cleanup; }\n";
-        if($type eq "STRINGPOINT") {
+        my $check = "  if(UNEX(res)) {\n    err(\"$name\", res, __LINE__);\n    goto test_cleanup;\n  }\n";
+        if($type eq "CURLOPTTYPE_STRINGPOINT") {
             print "${pref} \"string\");\n$check";
             print "${pref} NULL);\n$check";
         }
-        elsif($type eq "LONG") {
+        elsif($type eq "CURLOPTTYPE_LONG") {
             print "${pref} 0L);\n$check";
             print "${pref} 22L);\n$check";
             print "${pref} LO);\n$check";
             print "${pref} HI);\n$check";
         }
-        elsif($type eq "OBJECTPOINT") {
+        elsif($type eq "CURLOPTTYPE_OBJECTPOINT") {
             if($name =~ /DEPENDS/) {
               print "${pref} dep);\n$check";
             }
             elsif($name =~ "SHARE") {
               print "${pref} share);\n$check";
             }
-            elsif($name eq "ERRORBUFFER") {
+            elsif($name eq "CURLOPT_ERRORBUFFER") {
               print "${pref} errorbuffer);\n$check";
             }
-            elsif(($name eq "POSTFIELDS") ||
-                  ($name eq "COPYPOSTFIELDS")) {
-              # set size to zero to avoid it being "illegal"
-              print "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
-              print "${pref} stringpointerextra);\n$check";
+            elsif(($name eq "CURLOPT_POSTFIELDS") ||
+                  ($name eq "CURLOPT_COPYPOSTFIELDS")) {
+                # set size to zero to avoid it being "illegal"
+                print "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
+                print "${pref} stringpointerextra);\n$check";
             }
-            elsif($name eq "HTTPPOST") {
+            elsif($name eq "CURLOPT_HTTPPOST") {
               print "${pref} httppost);\n$check";
             }
-            elsif($name eq "MIMEPOST") {
+            elsif($name eq "CURLOPT_MIMEPOST") {
               print "${pref} mimepost);\n$check";
             }
-            elsif($name eq "STDERR") {
+            elsif($name eq "CURLOPT_STDERR") {
               print "${pref} stream);\n$check";
             }
             else {
@@ -219,20 +219,21 @@ while(<STDIN>) {
             }
             print "${pref} NULL);\n$check";
         }
-        elsif($type eq "SLISTPOINT") {
+        elsif($type eq "CURLOPTTYPE_SLISTPOINT") {
             print "${pref} slist);\n$check";
         }
-        elsif($type eq "FUNCTIONPOINT") {
+        elsif($type eq "CURLOPTTYPE_FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {
-              my $l=lc($1);
-              print "${pref}\n$i${l}cb);\n$check";
+                my $l=lc($1);
+                $l =~ s/^curlopt_//;
+                print "${pref}\n$i${l}cb);\n$check";
             }
             else {
-              print "${pref} &func);\n$check";
+                print "${pref} &func);\n$check";
             }
             print "${pref} NULL);\n$check";
         }
-        elsif($type eq "OFF_T") {
+        elsif($type eq "CURLOPTTYPE_OFF_T") {
             # play conservative to work with 32bit curl_off_t
             print "${pref} OFF_NO);\n$check";
             print "${pref} OFF_HI);\n$check";
@@ -249,7 +250,7 @@ while(<STDIN>) {
           ($_ =~ /^  CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
        my ($info, $type)=($1, $2);
        my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
-       my $check = "  if(UNEX(res)) {\n    geterr(\"$info\", res, __LINE__); goto test_cleanup; }\n";
+       my $check = "  if(UNEX(res)) {\n    geterr(\"$info\", res, __LINE__);\n    goto test_cleanup;\n  }\n";
        if($type eq "STRING") {
          print "$c &charp);\n$check";
        }
