@@ -85,7 +85,7 @@ Based on the description above, here are some planned release dates (at the
 time of this writing):
 
 - January 8, 2020 (moved)
-- February 27, 2020
+- February 26, 2020
 - April 22, 2020
 - June 17, 2020
 - August 12, 2020
