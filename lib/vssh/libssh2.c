@@ -655,6 +655,10 @@ static CURLcode ssh_check_fingerprint(struct connectdata *conn)
  */
 static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
 {
+  CURLcode result = CURLE_OK; 
+
+#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+
 #ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
   static const char * const hostkey_method_ssh_ed25519
     = "ssh-ed25519";
@@ -676,7 +680,7 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
   static const char * const hostkey_method_ssh_dss
     = "ssh-dss";
 
-  CURLcode result = CURLE_OK;
+
   const char *hostkey_method = NULL;
   struct ssh_conn *sshc = &conn->proto.sshc;
   struct Curl_easy *data = conn->data;
@@ -745,6 +749,9 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
               sshc->ssh_session, LIBSSH2_METHOD_HOSTKEY, hostkey_method));
     }
   }
+
+#endif /* HAVE_LIBSSH2_KNOWNHOST_API */
+
   return result;
 }
 
