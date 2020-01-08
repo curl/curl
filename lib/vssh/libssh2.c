@@ -655,7 +655,7 @@ static CURLcode ssh_check_fingerprint(struct connectdata *conn)
  */
 static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK; 
+  CURLcode result = CURLE_OK;
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
 
@@ -680,28 +680,40 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
   static const char * const hostkey_method_ssh_dss
     = "ssh-dss";
 
-
   const char *hostkey_method = NULL;
   struct ssh_conn *sshc = &conn->proto.sshc;
   struct Curl_easy *data = conn->data;
   struct libssh2_knownhost* store = NULL;
+  const char *kh_name_end = NULL;
+  long unsigned int kh_name_size = 0;
+  int port = 0;
   bool found = false;
 
-  /*&& data->set.str[STRING_SSH_KNOWNHOSTS]
-   *<-- unnecessary because of sshc->kh? */
   if(sshc->kh && !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
     /* lets try to find our host in the known hosts file */
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
-      /* TODO: what about specific ports, mentioned in the name? */
-      if(strcmp(store->name, conn->host.name) == 0) {
-        infof(data, "Found host (%s) in %s\n",
-            conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+      /* For non-standard ports, the name will be enclosed in */
+      /* square brackets, followed by a colon and the port */
+      if(store->name[0] == '[') {
+        kh_name_end = strstr(store->name, "]:");
+        port = atoi(kh_name_end + 2);
+        if(kh_name_end && (port == conn->remote_port)) {
+          kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
+          if(strncmp(store->name + 1, conn->host.name, kh_name_size) == 0) {
+            found = true;
+            break;
+          }
+        }
+      }
+      else if(strcmp(store->name, conn->host.name) == 0) {
         found = true;
         break;
       }
     }
 
     if(found) {
+      infof(data, "Found host %s in %s\n",
+          store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
       /* TODO: do we need to check the host and key format here as well?*/
       switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
 #ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
@@ -741,12 +753,13 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
       }
 
       infof(data, "Set \"%s\" as SSH hostkey type\n", hostkey_method);
-      /*TODO: should we add LIBSSH2_ERROR_METHOD_NOT_SUPPORTED
-       * and LIBSSH2_ERROR_INVAL to libssh2_session_error_to_CURLE()
-       * and is this even the right function at all? */
       result = libssh2_session_error_to_CURLE(
           libssh2_session_method_pref(
               sshc->ssh_session, LIBSSH2_METHOD_HOSTKEY, hostkey_method));
+    }
+    else {
+      infof(data, "Did not find host %s in %s\n",
+          conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
     }
   }
 
