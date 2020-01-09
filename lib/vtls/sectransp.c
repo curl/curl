@@ -1147,8 +1147,20 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
   /* On iOS SecPKCS12Import will never add the client certificate to the
    * Keychain.
    *
-   * It gives us back a SecIdentityRef that we can use directly. */
-#if CURL_BUILD_IOS
+   * It gives us back a SecIdentityRef that we can use directly.
+   */
+  /* On macOS SecPKCS12Import will always add the client certificate to
+   * the Keychain.
+   *
+   * Using SecItemImport with a NULL keychain prevents it from importing the
+   * corresponding private key to the keychain.
+   * to the keychain
+   *
+   * This leads to SecIdentityCreateWithCertificate failing
+   * with 'errSecItemNotFound'
+   *
+   * Therefore, we use SecPKCS12Import everywhere
+   */
     const void *cKeys[] = {kSecImportExportPassphrase};
     const void *cValues[] = {password};
     CFDictionaryRef options = CFDictionaryCreate(NULL, cKeys, cValues,
@@ -1158,31 +1170,6 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
       status = SecPKCS12Import(pkcs_data, options, &items);
       CFRelease(options);
     }
-
-
-  /* On macOS SecPKCS12Import will always add the client certificate to
-   * the Keychain.
-   *
-   * As this doesn't match iOS, and apps may not want to see their client
-   * certificate saved in the the user's keychain, we use SecItemImport
-   * with a NULL keychain to avoid importing it.
-   *
-   * This returns a SecCertificateRef from which we can construct a
-   * SecIdentityRef.
-   */
-#elif CURL_BUILD_MAC_10_7
-    SecItemImportExportKeyParameters keyParams;
-    SecExternalFormat inputFormat = kSecFormatPKCS12;
-    SecExternalItemType inputType = kSecItemTypeCertificate;
-
-    memset(&keyParams, 0x00, sizeof(keyParams));
-    keyParams.version    = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
-    keyParams.passphrase = password;
-
-    status = SecItemImport(pkcs_data, NULL, &inputFormat, &inputType,
-                           0, &keyParams, NULL, &items);
-#endif
-
 
     /* Extract the SecIdentityRef */
     if(status == errSecSuccess && items && CFArrayGetCount(items)) {
