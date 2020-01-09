@@ -37,6 +37,7 @@ problems may have been fixed or changed somewhat since this was written!
  3.2 No disconnect command
  3.3 SMTP to multiple recipients
  3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+ 3.5 AUTH PLAIN for SMTP is not working on all servers
 
  4. Command line
  4.1 -J and -O with %-encoded file names
@@ -289,6 +290,12 @@ problems may have been fixed or changed somewhat since this was written!
  response commands. Please see the POP3 examples and test cases which show
  this for the NOOP and DELE commands. https://curl.haxx.se/bug/?i=740
 
+3.5 AUTH PLAIN for SMTP is not working on all servers
+
+ Specifying "--login-options AUTH=PLAIN" on the command line doesn't seem to
+ work correctly.
+
+ See https://github.com/curl/curl/issues/4080
 
 4. Command line
 
