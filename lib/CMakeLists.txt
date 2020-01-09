@@ -96,6 +96,12 @@ endif()
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
 
+if(CURL_HAS_LTO)
+  set_target_properties(${LIB_NAME} PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+    INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+endif()
+
 if(WIN32)
   if(BUILD_SHARED_LIBS)
     # Add "_imp" as a suffix before the extension to avoid conflicting with the statically linked "libcurl.lib"

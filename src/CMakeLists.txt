@@ -46,6 +46,12 @@ add_executable(
   ${CURL_FILES}
   )
 
+if(CURL_HAS_LTO)
+  set_target_properties(${EXE_NAME} PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+    INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+endif()
+
 source_group("curlX source files" FILES ${CURLX_CFILES})
 source_group("curl source files" FILES ${CURL_CFILES})
 source_group("curl header files" FILES ${CURL_HFILES})
