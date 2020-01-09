@@ -343,60 +343,58 @@ CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *multi_handle,
                                          long *milliseconds);
 
-#define CURLMOPT(name,type,num) name = type + num
-
 typedef enum {
   /* This is the socket callback function pointer */
-  CURLMOPT(CURLMOPT_SOCKETFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 1),
+  CURLOPT(CURLMOPT_SOCKETFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 1),
 
   /* This is the argument passed to the socket callback */
-  CURLMOPT(CURLMOPT_SOCKETDATA, CURLOPTTYPE_OBJECTPOINT, 2),
+  CURLOPT(CURLMOPT_SOCKETDATA, CURLOPTTYPE_OBJECTPOINT, 2),
 
     /* set to 1 to enable pipelining for this multi handle */
-  CURLMOPT(CURLMOPT_PIPELINING, CURLOPTTYPE_LONG, 3),
+  CURLOPT(CURLMOPT_PIPELINING, CURLOPTTYPE_LONG, 3),
 
    /* This is the timer callback function pointer */
-  CURLMOPT(CURLMOPT_TIMERFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 4),
+  CURLOPT(CURLMOPT_TIMERFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 4),
 
   /* This is the argument passed to the timer callback */
-  CURLMOPT(CURLMOPT_TIMERDATA, CURLOPTTYPE_OBJECTPOINT, 5),
+  CURLOPT(CURLMOPT_TIMERDATA, CURLOPTTYPE_OBJECTPOINT, 5),
 
   /* maximum number of entries in the connection cache */
-  CURLMOPT(CURLMOPT_MAXCONNECTS, CURLOPTTYPE_LONG, 6),
+  CURLOPT(CURLMOPT_MAXCONNECTS, CURLOPTTYPE_LONG, 6),
 
   /* maximum number of (pipelining) connections to one host */
-  CURLMOPT(CURLMOPT_MAX_HOST_CONNECTIONS, CURLOPTTYPE_LONG, 7),
+  CURLOPT(CURLMOPT_MAX_HOST_CONNECTIONS, CURLOPTTYPE_LONG, 7),
 
   /* maximum number of requests in a pipeline */
-  CURLMOPT(CURLMOPT_MAX_PIPELINE_LENGTH, CURLOPTTYPE_LONG, 8),
+  CURLOPT(CURLMOPT_MAX_PIPELINE_LENGTH, CURLOPTTYPE_LONG, 8),
 
   /* a connection with a content-length longer than this
      will not be considered for pipelining */
-  CURLMOPT(CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, CURLOPTTYPE_OFF_T, 9),
+  CURLOPT(CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE, CURLOPTTYPE_OFF_T, 9),
 
   /* a connection with a chunk length longer than this
      will not be considered for pipelining */
-  CURLMOPT(CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, CURLOPTTYPE_OFF_T, 10),
+  CURLOPT(CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE, CURLOPTTYPE_OFF_T, 10),
 
   /* a list of site names(+port) that are blacklisted from
      pipelining */
-  CURLMOPT(CURLMOPT_PIPELINING_SITE_BL, CURLOPTTYPE_OBJECTPOINT, 11),
+  CURLOPT(CURLMOPT_PIPELINING_SITE_BL, CURLOPTTYPE_OBJECTPOINT, 11),
 
   /* a list of server types that are blacklisted from
      pipelining */
-  CURLMOPT(CURLMOPT_PIPELINING_SERVER_BL, CURLOPTTYPE_OBJECTPOINT, 12),
+  CURLOPT(CURLMOPT_PIPELINING_SERVER_BL, CURLOPTTYPE_OBJECTPOINT, 12),
 
   /* maximum number of open connections in total */
-  CURLMOPT(CURLMOPT_MAX_TOTAL_CONNECTIONS, CURLOPTTYPE_LONG, 13),
+  CURLOPT(CURLMOPT_MAX_TOTAL_CONNECTIONS, CURLOPTTYPE_LONG, 13),
 
    /* This is the server push callback function pointer */
-  CURLMOPT(CURLMOPT_PUSHFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 14),
+  CURLOPT(CURLMOPT_PUSHFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 14),
 
   /* This is the argument passed to the server push callback */
-  CURLMOPT(CURLMOPT_PUSHDATA, CURLOPTTYPE_OBJECTPOINT, 15),
+  CURLOPT(CURLMOPT_PUSHDATA, CURLOPTTYPE_OBJECTPOINT, 15),
 
   /* maximum number of concurrent streams to support on a connection */
-  CURLMOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
+  CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
 
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
