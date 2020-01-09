@@ -80,6 +80,7 @@ if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
   option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
 endif()
+option(CURL_LTO "Turn on compiler Link Time Optimizations" OFF)
 
 cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
         ON "NOT ENABLE_ARES"
@@ -1164,6 +1165,23 @@ if(CURL_WERROR)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
   endif()
 endif()
+
+if(CURL_LTO)
+  if(CMAKE_VERSION VERSION_LESS 3.9)
+    message(FATAL_ERROR "Requested LTO but your cmake version ${CMAKE_VERSION} is to old. You need at least 3.9")
+  endif()
+
+  cmake_policy(SET CMP0069 NEW)
+
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT CURL_HAS_LTO OUTPUT CURL_LTO_ERROR LANGUAGES C)
+  if(CURL_HAS_LTO)
+    message(STATUS "LTO supported and enabled")
+  else()
+    message(FATAL_ERROR "LTO was requested - but compiler doesn't support it\n${CURL_LTO_ERROR}")
+  endif()
+endif()
+
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
 function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
