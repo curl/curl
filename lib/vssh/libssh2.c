@@ -696,6 +696,11 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
       /* square brackets, followed by a colon and the port */
       if(store->name[0] == '[') {
         kh_name_end = strstr(store->name, "]:");
+        if(!kh_name_end) {
+          infof(data, "Invalid host pattern %s in %s\n",
+              store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+          continue;
+        }
         port = atoi(kh_name_end + 2);
         if(kh_name_end && (port == conn->remote_port)) {
           kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
@@ -714,7 +719,7 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
     if(found) {
       infof(data, "Found host %s in %s\n",
           store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
-      /* TODO: do we need to check the host and key format here as well?*/
+
       switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
 #ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
       case LIBSSH2_KNOWNHOST_KEY_ED25519:
