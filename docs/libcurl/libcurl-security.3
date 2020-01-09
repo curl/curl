@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -215,6 +215,11 @@ By default curl and libcurl support file:// URLs. Such a URL is always an
 access, or attempted access, to a local resource. If your application wants to
 avoid that, keep control of what URLs to use and/or prevent curl/libcurl from
 using the protocol.
+
+Most systems have local resources that hold potentially sensitive information.
+If you can feed a FILE: URL to a remote service, making it show the contents
+of its local /etc/passwd or certain files in /proc/ etc, it could lead to
+unwanted data leakage.
 
 By default, libcurl prohibits redirects to file:// URLs.
 .SH "What if the user can set the URL"
