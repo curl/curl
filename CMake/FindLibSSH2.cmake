@@ -12,7 +12,7 @@ endif()
 find_path(LIBSSH2_INCLUDE_DIR libssh2.h
 )
 
-find_library(LIBSSH2_LIBRARY NAMES ssh2
+find_library(LIBSSH2_LIBRARY NAMES ssh2 libssh2
 )
 
 if(LIBSSH2_INCLUDE_DIR)
