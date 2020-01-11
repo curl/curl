@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,11 +33,14 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /* create a local file for writing, return TRUE on success */
-bool tool_create_output_file(struct OutStruct *outs)
+bool tool_create_output_file(struct OutStruct *outs,
+                             struct OperationConfig *config)
 {
-  struct GlobalConfig *global = outs->config->global;
+  struct GlobalConfig *global;
   FILE *file;
-
+  DEBUGASSERT(outs);
+  DEBUGASSERT(config);
+  global = config->global;
   if(!outs->filename || !*outs->filename) {
     warnf(global, "Remote filename has no length!\n");
     return FALSE;
@@ -78,7 +81,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   size_t rc;
   struct per_transfer *per = userdata;
   struct OutStruct *outs = &per->outs;
-  struct OperationConfig *config = outs->config;
+  struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
   bool is_tty = config->global->isatty;
 #ifdef WIN32
@@ -147,7 +150,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 #endif
 
-  if(!outs->stream && !tool_create_output_file(outs))
+  if(!outs->stream && !tool_create_output_file(outs, per->config))
     return failure;
 
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
