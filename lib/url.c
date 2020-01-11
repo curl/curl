@@ -131,6 +131,9 @@ static void conn_free(struct connectdata *conn);
 static void free_idnconverted_hostname(struct hostname *host);
 static unsigned int get_protocol_family(unsigned int protocol);
 
+extern char *Curl_ssl_cert_dir;
+extern char *Curl_ssl_cert_file;
+
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has at
  * more than just a few bytes to play with. Don't let it become too small or
  * bad things will happen.
@@ -534,6 +537,27 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
     if(result)
       return result;
 #endif
+    if(Curl_ssl_cert_dir) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_ORIG],
+                              Curl_ssl_cert_dir);
+      if(result)
+        return result;
+      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY],
+                              Curl_ssl_cert_dir);
+      if(result)
+        return result;
+    }
+
+    if(Curl_ssl_cert_file) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_ORIG],
+                              Curl_ssl_cert_file);
+      if(result)
+        return result;
+      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+                              Curl_ssl_cert_file);
+      if(result)
+        return result;
+    }
   }
 
   set->wildcard_enabled = FALSE;

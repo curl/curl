@@ -134,6 +134,9 @@ curl_calloc_callback Curl_ccalloc;
 #  pragma warning(default:4232) /* MSVC extension, dllimport identity */
 #endif
 
+char *Curl_ssl_cert_dir = NULL;
+char *Curl_ssl_cert_file = NULL;
+
 /**
  * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
@@ -154,6 +157,9 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
   }
+
+  Curl_ssl_cert_dir = curl_getenv("SSL_CERT_DIR");
+  Curl_ssl_cert_file = curl_getenv("SSL_CERT_FILE");
 
   if(!Curl_ssl_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
@@ -263,6 +269,9 @@ void curl_global_cleanup(void)
 
   Curl_ssl_cleanup();
   Curl_resolver_global_cleanup();
+
+  free(Curl_ssl_cert_dir);
+  free(Curl_ssl_cert_file);
 
 #ifdef WIN32
   Curl_win32_cleanup(init_flags);
