@@ -313,7 +313,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   CERT_ALT_NAME_INFO *alt_name_info = NULL;
   DWORD alt_name_info_size = 0;
   BOOL ret_val = FALSE;
-  char *current_pos = NULL;
+  LPTSTR current_pos = NULL;
   DWORD i;
 
   /* CERT_NAME_SEARCH_ALL_NAMES_FLAG is available from Windows 8 onwards. */
