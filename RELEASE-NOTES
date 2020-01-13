@@ -8,12 +8,24 @@ curl and libcurl 7.69.0
 
 This release includes the following changes:
 
- o
+ o wolfSSH: new support SSH backend [5]
 
 This release includes the following bugfixes:
 
+ o cmake: Enable SMB for Windows builds [12]
+ o cmake: Improve libssh2 check on Windows [8]
+ o connection reuse: respect the max_concurrent_streams limits [3]
+ o curl: make #0 not output the full URL [4]
+ o curl: remove 'config' field from OutStruct [6]
+ o hostip: move code to resolve IP address literals to `Curl_resolv` [13]
+ o include: remove non-curl prefixed defines [15]
+ o libssh2: add support for forcing a hostkey type [7]
+ o multi: Change curl_multi_wait/poll to error on negative timeout [11]
+ o ngtcp2: Add an error code for QUIC connection errors [10]
  o runtests: make random seed fixed for a month [1]
+ o schannel: Make CURLOPT_CAINFO work better on Windows 7 [9]
  o tool_dirhie: Allow directory traversal during creation [2]
+ o vtls: Refactor Curl_multissl_version to make the code clearer [14]
 
 This release includes the following known bugs:
 
@@ -22,8 +34,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, mbeifuss on github, Ray Satiro,
-  (3 contributors)
+  Brian Carpenter, Daniel Stenberg, Emil Engler, Faizur Rahman,
+  hamstergene on github, Jeroen Ooms, Johannes Schindelin, Kunal Ekawde,
+  Marc Aldorasi, Marcel Raad, mbeifuss on github, Ray Satiro, Santino Keupp,
+  vshmuk on hackerone,
+  (14 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -31,3 +46,16 @@ References to bug reports and discussions on issues:
 
  [1] = https://curl.haxx.se/bug/?i=4734
  [2] = https://curl.haxx.se/bug/?i=4796
+ [3] = https://curl.haxx.se/bug/?i=4779
+ [4] = https://curl.haxx.se/bug/?i=4812
+ [5] = https://daniel.haxx.se/blog/2020/01/12/curl-even-more-wolfed/
+ [6] = https://curl.haxx.se/bug/?i=4807
+ [7] = https://curl.haxx.se/bug/?i=4747
+ [8] = https://curl.haxx.se/bug/?i=4804
+ [9] = https://curl.haxx.se/bug/?i=3711
+ [10] = https://curl.haxx.se/bug/?i=4754
+ [11] = https://curl.haxx.se/bug/?i=4763
+ [12] = https://curl.haxx.se/bug/?i=4717
+ [13] = https://curl.haxx.se/bug/?i=4798
+ [14] = https://curl.haxx.se/bug/?i=4803
+ [15] = https://curl.haxx.se/bug/?i=4793
