@@ -251,7 +251,8 @@ void progressbarinit(struct ProgressData *bar,
       }
     }
 #endif /* TIOCGSIZE */
-    bar->width = cols;
+    if(cols > 20)
+      bar->width = cols;
   }
 
   if(!bar->width)
