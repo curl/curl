@@ -61,7 +61,6 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 17139
 Content-Type: multipart/form-data; boundary=----------------------------
-Expect: 100-continue
 
 ------------------------------
 Content-Disposition: form-data; name="hello"
