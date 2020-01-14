@@ -239,6 +239,8 @@ static const struct helptxt helptext[] = {
    "Mail from this address"},
   {"    --mail-rcpt <address>",
    "Mail to this address"},
+  {"    --mail-rcpt-allowfails",
+   "Allow RCPT TO command to fail for some recipients"},
   {"-M, --manual",
    "Display the full manual"},
   {"    --max-filesize <bytes>",

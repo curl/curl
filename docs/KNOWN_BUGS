@@ -281,8 +281,14 @@ problems may have been fixed or changed somewhat since this was written!
  When sending data to multiple recipients, curl will abort and return failure
  if one of the recipients indicate failure (on the "RCPT TO"
  command). Ordinary mail programs would proceed and still send to the ones
- that can receive data. This is subject for change in the future.
- https://curl.haxx.se/bug/view.cgi?id=1116
+ that can receive data.
+
+ By specifying "--mail-rcpt-allowfails" on the command line (or by setting
+ "CURLOPT_MAIL_RCPT_ALLLOWFAILS" option) the default behavior can be changed to
+ make curl ignore errors and proceed with the remaining valid recipients only.
+
+ See https://github.com/curl/curl/issues/4792 and
+ https://github.com/curl/curl/pull/4816
 
 3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
 

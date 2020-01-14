@@ -55,6 +55,9 @@ struct SMTP {
   curl_pp_transfer transfer;
   char *custom;            /* Custom Request */
   struct curl_slist *rcpt; /* Recipient list */
+  bool rcpt_had_ok;        /* Whether any of RCPT TO commands (depends on
+                              total number of recipients) succeeded so far */
+  int rcpt_last_error;     /* The last error received for RCPT TO command */
   size_t eob;              /* Number of bytes of the EOB (End Of Body) that
                               have been received so far */
   bool trailing_crlf;      /* Specifies if the tailing CRLF is present */

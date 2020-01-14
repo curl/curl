@@ -273,6 +273,7 @@ static const struct LongShort aliases[]= {
   {"f",  "fail",                     ARG_BOOL},
   {"fa", "fail-early",               ARG_BOOL},
   {"fb", "styled-output",            ARG_BOOL},
+  {"fc", "mail-rcpt-allowfails",     ARG_BOOL},
   {"F",  "form",                     ARG_STRING},
   {"Fs", "form-string",              ARG_STRING},
   {"g",  "globoff",                  ARG_BOOL},
@@ -1721,6 +1722,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       case 'b': /* --styled-output */
         global->styled_output = toggle;
+        break;
+      case 'c': /* --mail-rcpt-allowfails */
+        config->mail_rcpt_allowfails = toggle;
         break;
       default: /* --fail (hard on errors)  */
         config->failonerror = toggle;
