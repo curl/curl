@@ -49,7 +49,6 @@ User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 z
 Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 Content-Length: 1386
-Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------c3b2ef7f0bb8
 
 ------------------------------c3b2ef7f0bb8
