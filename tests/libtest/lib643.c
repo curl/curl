@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,10 +41,15 @@ struct WriteThis {
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
 #ifdef LIB644
+  static int count = 0;
   (void)ptr;
   (void)size;
   (void)nmemb;
   (void)userp;
+  if(++count > 1) {
+    printf("Wrongly called >1 times\n");
+    exit(1); /* trigger major failure */
+  }
   return CURL_READFUNC_ABORT;
 #else
 

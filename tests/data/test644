@@ -4,7 +4,6 @@
 HTTP
 HTTP POST
 HTTP MIME POST
-flaky
 </keywords>
 </info>
 
@@ -46,9 +45,6 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 718
 Content-Type: multipart/form-data; boundary=----------------------------
-
-------------------------------
-Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
 
 </protocol>
 # CURLE_ABORTED_BY_CALLBACK (42)

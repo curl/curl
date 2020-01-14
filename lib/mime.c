@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -765,6 +765,7 @@ static size_t read_encoded_part_content(curl_mimepart *part,
         break;
       case CURL_READFUNC_ABORT:
       case CURL_READFUNC_PAUSE:
+        return sz;
       case READ_ERROR:
         return cursize? cursize: sz;
       default:
@@ -794,6 +795,7 @@ static size_t read_encoded_part_content(curl_mimepart *part,
       break;
     case CURL_READFUNC_ABORT:
     case CURL_READFUNC_PAUSE:
+      return sz;
     case READ_ERROR:
       return cursize? cursize: sz;
     default:
@@ -878,10 +880,11 @@ static size_t readback_part(curl_mimepart *part,
           part->fp = NULL;
         }
         /* FALLTHROUGH */
-      case CURL_READFUNC_ABORT:
-      case CURL_READFUNC_PAUSE:
       case READ_ERROR:
         return cursize? cursize: sz;
+      case CURL_READFUNC_ABORT:
+      case CURL_READFUNC_PAUSE:
+        return sz;
       }
       break;
     case MIMESTATE_END:
@@ -966,6 +969,7 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
       switch(sz) {
       case CURL_READFUNC_ABORT:
       case CURL_READFUNC_PAUSE:
+        return sz;
       case READ_ERROR:
         return cursize? cursize: sz;
       case 0:
