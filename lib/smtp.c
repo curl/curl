@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -915,25 +915,53 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct SMTP *smtp = data->req.protop;
+  bool is_smtp_err = FALSE;
+  bool is_smtp_blocking_err = FALSE;
 
   (void)instate; /* no use for this yet */
 
-  if(smtpcode/100 != 2) {
-    failf(data, "RCPT failed: %d", smtpcode);
-    result = CURLE_SEND_ERROR;
+  is_smtp_err = (smtpcode/100 != 2) ? TRUE : FALSE;
+
+  /* If there's multiple RCPT TO to be issued, it's possible to ignore errors
+     and proceed with only the valid addresses. */
+  is_smtp_blocking_err =
+    (is_smtp_err && !data->set.mail_rcpt_allowfails) ? TRUE : FALSE;
+
+  if(is_smtp_err) {
+    /* Remembering the last failure which we can report if all "RCPT TO" have
+       failed and we cannot proceed. */
+    smtp->rcpt_last_error = smtpcode;
+
+    if(is_smtp_blocking_err) {
+      failf(data, "RCPT failed: %d", smtpcode);
+      result = CURLE_SEND_ERROR;
+    }
   }
   else {
+    /* Some RCPT TO commands have succeeded. */
+    smtp->rcpt_had_ok = TRUE;
+  }
+
+  if(!is_smtp_blocking_err) {
     smtp->rcpt = smtp->rcpt->next;
 
     if(smtp->rcpt)
       /* Send the next RCPT TO command */
       result = smtp_perform_rcpt_to(conn);
     else {
-      /* Send the DATA command */
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "DATA");
+      /* We weren't able to issue a successful RCPT TO command while going
+         over recipients (potentially multiple). Sending back last error. */
+      if(!smtp->rcpt_had_ok) {
+        failf(data, "RCPT failed: %d (last error)", smtp->rcpt_last_error);
+        result = CURLE_SEND_ERROR;
+      }
+      else {
+        /* Send the DATA command */
+        result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "DATA");
 
-      if(!result)
-        state(conn, SMTP_DATA);
+        if(!result)
+          state(conn, SMTP_DATA);
+      }
     }
   }
 
@@ -1286,6 +1314,12 @@ static CURLcode smtp_perform(struct connectdata *conn, bool *connected,
 
   /* Store the first recipient (or NULL if not specified) */
   smtp->rcpt = data->set.mail_rcpt;
+
+  /* Track of whether we've successfully sent at least one RCPT TO command */
+  smtp->rcpt_had_ok = FALSE;
+
+  /* Track of the last error we've received by sending RCPT TO command */
+  smtp->rcpt_last_error = 0;
 
   /* Initial data character is the first character in line: it is implicitly
      preceded by a virtual CRLF. */

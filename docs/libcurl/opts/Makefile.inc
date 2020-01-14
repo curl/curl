@@ -188,6 +188,7 @@ man_MANS =                                      \
   CURLOPT_MAIL_AUTH.3                           \
   CURLOPT_MAIL_FROM.3                           \
   CURLOPT_MAIL_RCPT.3                           \
+  CURLOPT_MAIL_RCPT_ALLLOWFAILS.3               \
   CURLOPT_MAXAGE_CONN.3                         \
   CURLOPT_MAXCONNECTS.3                         \
   CURLOPT_MAXFILESIZE.3                         \

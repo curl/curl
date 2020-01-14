@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -239,6 +239,8 @@ static const struct helptxt helptext[] = {
    "Mail from this address"},
   {"    --mail-rcpt <address>",
    "Mail to this address"},
+  {"    --mail-rcpt-allowfails",
+   "Allow RCPT TO command to fail for some recipients"},
   {"-M, --manual",
    "Display the full manual"},
   {"    --max-filesize <bytes>",

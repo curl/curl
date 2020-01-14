@@ -1791,6 +1791,8 @@ struct UserDefined {
   BIT(doh); /* DNS-over-HTTPS enabled */
   BIT(doh_get); /* use GET for DoH requests, instead of POST */
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
+  BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
+                                recipients */
 };
 
 struct Names {

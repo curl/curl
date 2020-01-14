@@ -35,9 +35,8 @@ problems may have been fixed or changed somewhat since this was written!
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
  3.2 No disconnect command
- 3.3 SMTP to multiple recipients
- 3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
- 3.5 AUTH PLAIN for SMTP is not working on all servers
+ 3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
+ 3.4 AUTH PLAIN for SMTP is not working on all servers
 
  4. Command line
  4.1 -J and -O with %-encoded file names
@@ -276,21 +275,13 @@ problems may have been fixed or changed somewhat since this was written!
  The disconnect commands (LOGOUT and QUIT) may not be sent by IMAP, POP3 and
  SMTP if a failure occurs during the authentication phase of a connection.
 
-3.3 SMTP to multiple recipients
-
- When sending data to multiple recipients, curl will abort and return failure
- if one of the recipients indicate failure (on the "RCPT TO"
- command). Ordinary mail programs would proceed and still send to the ones
- that can receive data. This is subject for change in the future.
- https://curl.haxx.se/bug/view.cgi?id=1116
-
-3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
 
  You have to tell libcurl not to expect a body, when dealing with one line
  response commands. Please see the POP3 examples and test cases which show
  this for the NOOP and DELE commands. https://curl.haxx.se/bug/?i=740
 
-3.5 AUTH PLAIN for SMTP is not working on all servers
+3.4 AUTH PLAIN for SMTP is not working on all servers
 
  Specifying "--login-options AUTH=PLAIN" on the command line doesn't seem to
  work correctly.

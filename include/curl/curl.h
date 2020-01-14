@@ -1937,6 +1937,9 @@ typedef enum {
   /* SASL authorisation identity */
   CURLOPT(CURLOPT_SASL_AUTHZID, CURLOPTTYPE_STRINGPOINT, 289),
 
+  /* allow RCPT TO command to fail for some recipients */
+  CURLOPT(CURLOPT_MAIL_RCPT_ALLLOWFAILS, CURLOPTTYPE_LONG, 290),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
