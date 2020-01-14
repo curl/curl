@@ -5,6 +5,7 @@ cache:
         - $HOME/wolfssl-4.0.0-stable
         - $HOME/mesalink-1.0.0
         - $HOME/nghttp2-1.39.2
+        - $HOME/wolfssh-1.4.3-stable
 
 env:
     global:
@@ -132,7 +133,7 @@ matrix:
           compiler: gcc
           dist: xenial
           env:
-              - T=debug-wolfssl C="--with-wolfssl --without-ssl"
+              - T=debug-wolfssl C="--with-wolfssl --without-ssl --with-wolfssh"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
           addons:
               apt:

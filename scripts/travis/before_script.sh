@@ -70,12 +70,25 @@ if [ $TRAVIS_OS_NAME = linux ]; then
     tar -xzf v4.0.0-stable.tar.gz
     cd wolfssl-4.0.0-stable
     ./autogen.sh
-    ./configure --enable-tls13 --enable-all
+    ./configure --enable-tls13 --enable-all --enable-ssh
     touch wolfssl/wolfcrypt/fips.h
     make
   fi
 
   cd $HOME/wolfssl-4.0.0-stable
+  sudo make install
+
+  if [ ! -e $HOME/wolfssh-1.4.3-stable/Makefile ]; then
+    cd $HOME
+    curl -LO https://github.com/wolfSSL/wolfssh/archive/v1.4.3-stable.tar.gz
+    tar -xzf v1.4.3-stable.tar.gz
+    cd wolfssh-1.4.3-stable
+    ./autogen.sh
+    ./configure --enable-sftp --disable-examples
+    make
+  fi
+
+  cd $HOME/wolfssh-1.4.3-stable
   sudo make install
 
   if [ ! -e $HOME/mesalink-1.0.0/Makefile ]; then
