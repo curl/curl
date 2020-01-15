@@ -685,7 +685,7 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   struct libssh2_knownhost* store = NULL;
   const char *kh_name_end = NULL;
-  long unsigned int kh_name_size = 0;
+  size_t kh_name_size = 0;
   int port = 0;
   bool found = false;
 
