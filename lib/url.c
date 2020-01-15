@@ -3244,6 +3244,14 @@ static void reuse_conn(struct connectdata *old_conn,
     old_conn->socks_proxy.passwd = NULL;
   }
 
+  /* get the bearer information from the old_conn struct since it may
+   * be new for this request even when we re-use an existing connection */
+  if(old_conn->oauth_bearer) {
+    Curl_safefree(conn->oauth_bearer);
+    conn->oauth_bearer = old_conn->oauth_bearer;
+    old_conn->oauth_bearer = NULL;
+  }
+
   /* host can change, when doing keepalive with a proxy or if the case is
      different this time etc */
   free_idnconverted_hostname(&conn->host);
@@ -3274,6 +3282,7 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_safefree(old_conn->socks_proxy.user);
   Curl_safefree(old_conn->http_proxy.passwd);
   Curl_safefree(old_conn->socks_proxy.passwd);
+  Curl_safefree(old_conn->oauth_bearer);
   Curl_safefree(old_conn->localdev);
   Curl_llist_destroy(&old_conn->easyq, NULL);
 
