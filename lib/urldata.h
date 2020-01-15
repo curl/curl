@@ -1434,8 +1434,8 @@ struct Curl_multi;    /* declared and used only in multi.c */
 
 /*
  * This enumeration MUST not use conditional directives (#ifdefs), new
- * null terminated strings MUST be added to the enumeration immediately 
- * before STRING_LASTZEROTERMINATED, binary fields immediately before 
+ * null terminated strings MUST be added to the enumeration immediately
+ * before STRING_LASTZEROTERMINATED, binary fields immediately before
  * STRING_LAST. When doing so, ensure that the packages/OS400/chkstring.c
  * test is updated and applicable changes for EBCDIC to ASCII conversion
  * are catered for in curl_easy_setopt_ccsid()
