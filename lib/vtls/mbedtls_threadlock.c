@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2013 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -22,19 +22,19 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if (defined(USE_POLARSSL) || defined(USE_MBEDTLS)) && \
-    ((defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
-     (defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)))
+#if defined(USE_MBEDTLS) &&                                     \
+  ((defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) ||   \
+   (defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)))
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 #  include <pthread.h>
-#  define POLARSSL_MUTEX_T pthread_mutex_t
+#  define MBEDTLS_MUTEX_T pthread_mutex_t
 #elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
 #  include <process.h>
-#  define POLARSSL_MUTEX_T HANDLE
+#  define MBEDTLS_MUTEX_T HANDLE
 #endif
 
-#include "polarssl_threadlock.h"
+#include "mbedtls_threadlock.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -43,14 +43,14 @@
 /* number of thread locks */
 #define NUMT                    2
 
-/* This array will store all of the mutexes available to PolarSSL. */
-static POLARSSL_MUTEX_T *mutex_buf = NULL;
+/* This array will store all of the mutexes available to Mbedtls. */
+static MBEDTLS_MUTEX_T *mutex_buf = NULL;
 
-int Curl_polarsslthreadlock_thread_setup(void)
+int Curl_mbedtlsthreadlock_thread_setup(void)
 {
   int i;
 
-  mutex_buf = calloc(NUMT * sizeof(POLARSSL_MUTEX_T), 1);
+  mutex_buf = calloc(NUMT * sizeof(MBEDTLS_MUTEX_T), 1);
   if(!mutex_buf)
     return 0;     /* error, no number of threads defined */
 
@@ -70,7 +70,7 @@ int Curl_polarsslthreadlock_thread_setup(void)
   return 1; /* OK */
 }
 
-int Curl_polarsslthreadlock_thread_cleanup(void)
+int Curl_mbedtlsthreadlock_thread_cleanup(void)
 {
   int i;
 
@@ -95,7 +95,7 @@ int Curl_polarsslthreadlock_thread_cleanup(void)
   return 1; /* OK */
 }
 
-int Curl_polarsslthreadlock_lock_function(int n)
+int Curl_mbedtlsthreadlock_lock_function(int n)
 {
   if(n < NUMT) {
     int ret;
@@ -103,14 +103,14 @@ int Curl_polarsslthreadlock_lock_function(int n)
     ret = pthread_mutex_lock(&mutex_buf[n]);
     if(ret) {
       DEBUGF(fprintf(stderr,
-                     "Error: polarsslthreadlock_lock_function failed\n"));
+                     "Error: mbedtlsthreadlock_lock_function failed\n"));
       return 0; /* pthread_mutex_lock failed */
     }
 #elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
     ret = (WaitForSingleObject(mutex_buf[n], INFINITE) == WAIT_FAILED?1:0);
     if(ret) {
       DEBUGF(fprintf(stderr,
-                     "Error: polarsslthreadlock_lock_function failed\n"));
+                     "Error: mbedtlsthreadlock_lock_function failed\n"));
       return 0; /* pthread_mutex_lock failed */
     }
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
@@ -118,7 +118,7 @@ int Curl_polarsslthreadlock_lock_function(int n)
   return 1; /* OK */
 }
 
-int Curl_polarsslthreadlock_unlock_function(int n)
+int Curl_mbedtlsthreadlock_unlock_function(int n)
 {
   if(n < NUMT) {
     int ret;
@@ -126,14 +126,14 @@ int Curl_polarsslthreadlock_unlock_function(int n)
     ret = pthread_mutex_unlock(&mutex_buf[n]);
     if(ret) {
       DEBUGF(fprintf(stderr,
-                     "Error: polarsslthreadlock_unlock_function failed\n"));
+                     "Error: mbedtlsthreadlock_unlock_function failed\n"));
       return 0; /* pthread_mutex_unlock failed */
     }
 #elif defined(USE_THREADS_WIN32) && defined(HAVE_PROCESS_H)
     ret = ReleaseMutex(mutex_buf[n]);
     if(!ret) {
       DEBUGF(fprintf(stderr,
-                     "Error: polarsslthreadlock_unlock_function failed\n"));
+                     "Error: mbedtlsthreadlock_unlock_function failed\n"));
       return 0; /* pthread_mutex_lock failed */
     }
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
@@ -141,4 +141,4 @@ int Curl_polarsslthreadlock_unlock_function(int n)
   return 1; /* OK */
 }
 
-#endif /* USE_POLARSSL || USE_MBEDTLS */
+#endif /* USE_MBEDTLS */

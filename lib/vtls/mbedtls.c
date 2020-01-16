@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,7 +55,7 @@
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
 #include "multiif.h"
-#include "polarssl_threadlock.h"
+#include "mbedtls_threadlock.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -91,12 +91,12 @@ static int entropy_init_initialized = 0;
 static void entropy_init_mutex(mbedtls_entropy_context *ctx)
 {
   /* lock 0 = entropy_init_mutex() */
-  Curl_polarsslthreadlock_lock_function(0);
+  Curl_mbedtlsthreadlock_lock_function(0);
   if(entropy_init_initialized == 0) {
     mbedtls_entropy_init(ctx);
     entropy_init_initialized = 1;
   }
-  Curl_polarsslthreadlock_unlock_function(0);
+  Curl_mbedtlsthreadlock_unlock_function(0);
 }
 /* end of entropy_init_mutex() */
 
@@ -105,9 +105,9 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
 {
   int ret;
   /* lock 1 = entropy_func_mutex() */
-  Curl_polarsslthreadlock_lock_function(1);
+  Curl_mbedtlsthreadlock_lock_function(1);
   ret = mbedtls_entropy_func(data, output, len);
-  Curl_polarsslthreadlock_unlock_function(1);
+  Curl_mbedtlsthreadlock_unlock_function(1);
 
   return ret;
 }
@@ -1017,12 +1017,12 @@ static CURLcode Curl_mbedtls_connect(struct connectdata *conn, int sockindex)
  */
 static int Curl_mbedtls_init(void)
 {
-  return Curl_polarsslthreadlock_thread_setup();
+  return Curl_mbedtlsthreadlock_thread_setup();
 }
 
 static void Curl_mbedtls_cleanup(void)
 {
-  (void)Curl_polarsslthreadlock_thread_cleanup();
+  (void)Curl_mbedtlsthreadlock_thread_cleanup();
 }
 
 static bool Curl_mbedtls_data_pending(const struct connectdata *conn,

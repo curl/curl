@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -28,15 +28,14 @@ LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
 LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
-  vtls/polarssl.c vtls/polarssl_threadlock.c                            \
-  vtls/wolfssl.c vtls/schannel.c vtls/schannel_verify.c                 \
-  vtls/sectransp.c vtls/gskit.c vtls/mbedtls.c vtls/mesalink.c          \
-  vtls/bearssl.c
+  vtls/mbedtls_threadlock.c vtls/wolfssl.c vtls/schannel.c              \
+  vtls/schannel_verify.c vtls/sectransp.c vtls/gskit.c vtls/mbedtls.c   \
+  vtls/mesalink.c vtls/bearssl.c
 
-LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
-  vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h                \
-  vtls/wolfssl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h          \
-  vtls/mbedtls.h vtls/mesalink.h vtls/bearssl.h
+LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h vtls/nssg.h    \
+  vtls/mbedtls_threadlock.h vtls/wolfssl.h vtls/schannel.h              \
+  vtls/sectransp.h vtls/gskit.h vtls/mbedtls.h vtls/mesalink.h          \
+  vtls/bearssl.h
 
 LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/quiche.c
 

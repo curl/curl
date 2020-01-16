@@ -516,7 +516,7 @@ void Curl_ssl_close_all(struct Curl_easy *data)
 }
 
 #if defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
-  defined(USE_SECTRANSP) || defined(USE_POLARSSL) || defined(USE_NSS) || \
+  defined(USE_SECTRANSP) || defined(USE_NSS) || \
   defined(USE_MBEDTLS) || defined(USE_WOLFSSL) || defined(USE_BEARSSL)
 int Curl_ssl_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
@@ -1183,8 +1183,6 @@ const struct Curl_ssl *Curl_ssl =
   &Curl_ssl_nss;
 #elif defined(USE_OPENSSL)
   &Curl_ssl_openssl;
-#elif defined(USE_POLARSSL)
-  &Curl_ssl_polarssl;
 #elif defined(USE_SCHANNEL)
   &Curl_ssl_schannel;
 #elif defined(USE_MESALINK)
@@ -1216,9 +1214,6 @@ static const struct Curl_ssl *available_backends[] = {
 #endif
 #if defined(USE_OPENSSL)
   &Curl_ssl_openssl,
-#endif
-#if defined(USE_POLARSSL)
-  &Curl_ssl_polarssl,
 #endif
 #if defined(USE_SCHANNEL)
   &Curl_ssl_schannel,
