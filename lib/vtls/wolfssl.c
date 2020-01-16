@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -923,7 +923,7 @@ static CURLcode Curl_wolfssl_connect(struct connectdata *conn, int sockindex)
 static CURLcode Curl_wolfssl_random(struct Curl_easy *data,
                                    unsigned char *entropy, size_t length)
 {
-  RNG rng;
+  WC_RNG rng;
   (void)data;
   if(wc_InitRng(&rng))
     return CURLE_FAILED_INIT;
@@ -937,11 +937,11 @@ static CURLcode Curl_wolfssl_random(struct Curl_easy *data,
 }
 
 static CURLcode Curl_wolfssl_sha256sum(const unsigned char *tmp, /* input */
-                                  size_t tmplen,
-                                  unsigned char *sha256sum /* output */,
-                                  size_t unused)
+                                       size_t tmplen,
+                                       unsigned char *sha256sum /* output */,
+                                       size_t unused)
 {
-  Sha256 SHA256pw;
+  wc_Sha256 SHA256pw;
   (void)unused;
   wc_InitSha256(&SHA256pw);
   wc_Sha256Update(&SHA256pw, tmp, (word32)tmplen);
