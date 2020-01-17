@@ -27,6 +27,13 @@ ESNI (Encrypted SNI)
 
  Initial work exists in https://github.com/curl/curl/pull/4011
 
+thread-safe `curl_global_init()`
+--------------------------------
+
+ Fix the libcurl specific parts of the function to be thread-safe. Make sure
+ it can be thread-safe if built with thread-safe 3rd party libraries.
+ (probably can't include `curl_global_init_mem()` for obvious reasons)
+
 tiny-curl
 ---------
 
