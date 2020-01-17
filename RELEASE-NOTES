@@ -9,21 +9,28 @@ curl and libcurl 7.69.0
 This release includes the following changes:
 
  o wolfSSH: new support SSH backend [5]
+ o polarssl: removed [16]
 
 This release includes the following bugfixes:
 
+ o CMake: Add support for CMAKE_LTO option [22]
+ o CMake: use check_symbol_exists also for inet_pton [19]
+ o HTTP-COOKIES.md: describe the cookie file format [21]
  o cmake: Enable SMB for Windows builds [12]
  o cmake: Improve libssh2 check on Windows [8]
  o connection reuse: respect the max_concurrent_streams limits [3]
  o curl: make #0 not output the full URL [4]
  o curl: remove 'config' field from OutStruct [6]
+ o curl:progressbarinit: ignore column width from terminals < 20 [18]
  o hostip: move code to resolve IP address literals to `Curl_resolv` [13]
  o include: remove non-curl prefixed defines [15]
  o libssh2: add support for forcing a hostkey type [7]
+ o libssh2: fix variable type [17]
  o multi: Change curl_multi_wait/poll to error on negative timeout [11]
  o ngtcp2: Add an error code for QUIC connection errors [10]
  o runtests: make random seed fixed for a month [1]
  o schannel: Make CURLOPT_CAINFO work better on Windows 7 [9]
+ o schannel_verify: Fix alt names manual verify for UNICODE builds [20]
  o tool_dirhie: Allow directory traversal during creation [2]
  o vtls: Refactor Curl_multissl_version to make the code clearer [14]
 
@@ -34,11 +41,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Carpenter, Daniel Stenberg, Emil Engler, Faizur Rahman,
-  hamstergene on github, Jeroen Ooms, Johannes Schindelin, Kunal Ekawde,
-  Marc Aldorasi, Marcel Raad, mbeifuss on github, Ray Satiro, Santino Keupp,
+  Brian Carpenter, bsammon on github, Daniel Marjamäki, Daniel Stenberg,
+  Emil Engler, Faizur Rahman, hamstergene on github, Jeroen Ooms,
+  Johannes Schindelin, Kunal Ekawde, Marc Aldorasi, Marcel Raad,
+  mbeifuss on github, Ray Satiro, Santino Keupp, Tobias Hieta,
   vshmuk on hackerone,
-  (14 contributors)
+  (17 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -59,3 +67,10 @@ References to bug reports and discussions on issues:
  [13] = https://curl.haxx.se/bug/?i=4798
  [14] = https://curl.haxx.se/bug/?i=4803
  [15] = https://curl.haxx.se/bug/?i=4793
+ [16] = https://curl.haxx.se/bug/?i=4825
+ [17] = https://curl.haxx.se/bug/?i=4823
+ [18] = https://curl.haxx.se/bug/?i=4818
+ [19] = https://curl.haxx.se/bug/?i=4808
+ [20] = https://curl.haxx.se/bug/?i=4761
+ [21] = https://curl.haxx.se/bug/?i=4805
+ [22] = https://curl.haxx.se/bug/?i=4799
