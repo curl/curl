@@ -876,12 +876,34 @@ static bool
 proxy_info_matches(const struct proxy_info* data,
                    const struct proxy_info* needle)
 {
-  if((data->proxytype == needle->proxytype) &&
-     (data->port == needle->port) &&
-     Curl_safe_strcasecompare(data->host.name, needle->host.name))
-    return TRUE;
+  if (data->proxytype != needle->proxytype)
+    return FALSE;
+  if (data->port != needle->port)
+    return FALSE;
 
-  return FALSE;
+  // host names are case-insensitive according to RFC 3986 chapter 3.2.2.
+  // see https://tools.ietf.org/html/rfc3986#section-3.2.2
+  if (!Curl_safe_strcasecompare(data->host.name, needle->host.name))
+    return FALSE;
+
+  // the user information is case-sensitive
+  // or at least it is not defined as case-insensitive
+  // see https://tools.ietf.org/html/rfc3986#section-3.2.1
+  if ((data->user == NULL) != (needle->user == NULL))
+    return FALSE;
+  // curl_strequal does a case insentive comparison, so do not use it here!
+  if (data->user &&
+      needle->user &&
+      strcmp(data->user, needle->user) != 0)
+    return FALSE;
+  if ((data->passwd == NULL) != (needle->passwd == NULL))
+    return FALSE;
+  // curl_strequal does a case insentive comparison, so do not use it here!
+  if (data->passwd &&
+      needle->passwd &&
+      strcmp(data->passwd, needle->passwd) != 0)
+    return FALSE;
+  return TRUE;
 }
 #else
 /* disabled, won't get called */
