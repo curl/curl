@@ -882,9 +882,37 @@ proxy_info_matches(const struct proxy_info* data,
 
   return FALSE;
 }
+
+static bool
+socks_proxy_info_matches(const struct proxy_info* data,
+                         const struct proxy_info* needle)
+{
+  if(!proxy_info_matches(data, needle))
+    return FALSE;
+
+  /* the user information is case-sensitive
+     or at least it is not defined as case-insensitive
+     see https://tools.ietf.org/html/rfc3986#section-3.2.1 */
+  if((data->user == NULL) != (needle->user == NULL))
+    return FALSE;
+  /* curl_strequal does a case insentive comparison, so do not use it here! */
+  if(data->user &&
+     needle->user &&
+     strcmp(data->user, needle->user) != 0)
+    return FALSE;
+  if((data->passwd == NULL) != (needle->passwd == NULL))
+    return FALSE;
+  /* curl_strequal does a case insentive comparison, so do not use it here! */
+  if(data->passwd &&
+     needle->passwd &&
+     strcmp(data->passwd, needle->passwd) != 0)
+    return FALSE;
+  return TRUE;
+}
 #else
 /* disabled, won't get called */
 #define proxy_info_matches(x,y) FALSE
+#define socks_proxy_info_matches(x,y) FALSE
 #endif
 
 /* A connection has to have been idle for a shorter time than 'maxage_conn' to
@@ -1143,8 +1171,9 @@ ConnectionExists(struct Curl_easy *data,
          needle->bits.socksproxy != check->bits.socksproxy)
         continue;
 
-      if(needle->bits.socksproxy && !proxy_info_matches(&needle->socks_proxy,
-                                                        &check->socks_proxy))
+      if(needle->bits.socksproxy &&
+        !socks_proxy_info_matches(&needle->socks_proxy,
+                                  &check->socks_proxy))
         continue;
 
       if(needle->bits.conn_to_host != check->bits.conn_to_host)
