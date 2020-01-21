@@ -876,9 +876,9 @@ static bool
 proxy_info_matches(const struct proxy_info* data,
                    const struct proxy_info* needle)
 {
-  if ((data->proxytype == needle->proxytype) &&
-    (data->port == needle->port) &&
-    Curl_safe_strcasecompare(data->host.name, needle->host.name))
+  if((data->proxytype == needle->proxytype) &&
+     (data->port == needle->port) &&
+     Curl_safe_strcasecompare(data->host.name, needle->host.name))
     return TRUE;
 
   return FALSE;
@@ -898,15 +898,15 @@ socks_proxy_info_matches(const struct proxy_info* data,
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->user &&
-    needle->user &&
-    strcmp(data->user, needle->user) != 0)
+     needle->user &&
+     strcmp(data->user, needle->user) != 0)
     return FALSE;
   if((data->passwd == NULL) != (needle->passwd == NULL))
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->passwd &&
-    needle->passwd &&
-    strcmp(data->passwd, needle->passwd) != 0)
+     needle->passwd &&
+     strcmp(data->passwd, needle->passwd) != 0)
     return FALSE;
   return TRUE;
 }
