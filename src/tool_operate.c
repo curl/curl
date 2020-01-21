@@ -871,7 +871,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->headerfile) {
           /* open file for output: */
           if(strcmp(config->headerfile, "-")) {
-            FILE *newfile = fopen(config->headerfile, "wb");
+            FILE *newfile;
+            newfile = fopen(config->headerfile, per->prev == NULL?"wb":"ab");
             if(!newfile) {
               warnf(config->global, "Failed to open %s\n", config->headerfile);
               result = CURLE_WRITE_ERROR;
