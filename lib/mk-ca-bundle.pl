@@ -38,6 +38,7 @@ use warnings;
 use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;
+use Time::Local;
 my $MOD_SHA = "Digest::SHA";
 eval "require $MOD_SHA";
 if ($@) {
@@ -465,15 +466,14 @@ while (<TXT>) {
           }
           # Example date: 200617000000Z
           # Means 2020-06-17 00:00:00Z
-          my $done = "20". $timestamp[0] . $timestamp[1]. "-".
-              $timestamp[2]. $timestamp[3]. "-".
-              $timestamp[4]. $timestamp[5]. " ".
-              $timestamp[6]. $timestamp[7]. ":".
-              $timestamp[8]. $timestamp[9]. ":".
-              $timestamp[10]. $timestamp[11];
-          my $distrustat = `date -d "$done" -u +"%s"`;
-          my $now = `date -u +"%s"`;
-          if($now > $distrustat) {
+          my $distrustat =
+            timegm($timestamp[10] . $timestamp[11], # second
+                   $timestamp[8] . $timestamp[9],   # minute
+                   $timestamp[6] . $timestamp[7],   # hour
+                   $timestamp[4] . $timestamp[5],   # day
+                   ($timestamp[2] . $timestamp[3]) - 1, # month
+                   "20" . $timestamp[0] . $timestamp[1]); # year
+          if(time >= $distrustat) {
               # not trusted anymore
               $skipnum++;
               report "Skipping: $caname is not trusted anymore" if ($opt_v);
