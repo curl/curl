@@ -334,6 +334,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_URL ||                                                 \
    (option) == CURLOPT_USERAGENT ||                                           \
    (option) == CURLOPT_USERNAME ||                                            \
+   (option) == CURLOPT_AWS_SIGV4 ||                                           \
    (option) == CURLOPT_USERPWD ||                                             \
    (option) == CURLOPT_XOAUTH2_BEARER ||                                      \
    (option) == CURLOPT_SSL_EC_CURVES ||                                       \
