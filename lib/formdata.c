@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -730,11 +730,15 @@ int curl_formget(struct curl_httppost *form, void *arg,
 
     switch(nread) {
     default:
-      if(append(arg, buffer, nread) != nread)
-        result = CURLE_READ_ERROR;
-      break;
+      if(append(arg, buffer, nread) == nread)
+        break;
+      /* FALLTHROUGH */
     case CURL_READFUNC_ABORT:
-    case CURL_READFUNC_PAUSE:
+      result = CURLE_ABORTED_BY_CALLBACK;
+      break;
+    case (size_t) -1:   /* Read error. */
+    case CURL_READFUNC_PAUSE:    /* Should not be paused. */
+      result = CURLE_READ_ERROR;
       break;
     }
   }

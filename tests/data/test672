@@ -3,8 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
-HTTP MIME POST
-flaky
+FORM
 </keywords>
 </info>
 
@@ -12,7 +11,23 @@ flaky
 # Server-side
 <reply>
 <data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
 </data>
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</datacheck>
 </reply>
 
 # Client-side
@@ -22,14 +37,14 @@ http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib644
+lib672
 </tool>
 
  <name>
-HTTP multi-part formpost with aborted read callback
+Request pause from form read callback: multi
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/644
+http://%HOSTIP:%HTTPPORT/672
 </command>
 </client>
 
@@ -41,20 +56,17 @@ s/^--------------------------[a-z0-9]*/------------------------------/
 s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
-POST /644 HTTP/1.1
+POST /672 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 718
+Content-Length: 142
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
-Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
+Content-Disposition: form-data; name="field"
 
-
+AB
+--------------------------------
 </protocol>
-# CURLE_ABORTED_BY_CALLBACK (42)
-<errorcode>
-42
-</errorcode>
 </verify>
 </testcase>
