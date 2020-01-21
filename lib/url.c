@@ -876,14 +876,19 @@ static bool
 proxy_info_matches(const struct proxy_info* data,
                    const struct proxy_info* needle)
 {
-  if(data->proxytype != needle->proxytype)
-    return FALSE;
-  if(data->port != needle->port)
-    return FALSE;
+  if ((data->proxytype == needle->proxytype) &&
+    (data->port == needle->port) &&
+    Curl_safe_strcasecompare(data->host.name, needle->host.name))
+    return TRUE;
 
-  /* host names are case-insensitive according to RFC 3986 chapter 3.2.2.
-   see https://tools.ietf.org/html/rfc3986#section-3.2.2 */
-  if(!Curl_safe_strcasecompare(data->host.name, needle->host.name))
+  return FALSE;
+}
+
+static bool
+socks_proxy_info_matches(const struct proxy_info* data,
+                         const struct proxy_info* needle)
+{
+  if(!proxy_info_matches(data, needle))
     return FALSE;
 
   /* the user information is case-sensitive
@@ -893,21 +898,22 @@ proxy_info_matches(const struct proxy_info* data,
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->user &&
-      needle->user &&
-      strcmp(data->user, needle->user) != 0)
+    needle->user &&
+    strcmp(data->user, needle->user) != 0)
     return FALSE;
   if((data->passwd == NULL) != (needle->passwd == NULL))
     return FALSE;
   /* curl_strequal does a case insentive comparison, so do not use it here! */
   if(data->passwd &&
-      needle->passwd &&
-      strcmp(data->passwd, needle->passwd) != 0)
+    needle->passwd &&
+    strcmp(data->passwd, needle->passwd) != 0)
     return FALSE;
   return TRUE;
 }
 #else
 /* disabled, won't get called */
 #define proxy_info_matches(x,y) FALSE
+#define socks_proxy_info_matches(x,y) FALSE
 #endif
 
 /* A connection has to have been idle for a shorter time than 'maxage_conn' to
@@ -1166,8 +1172,9 @@ ConnectionExists(struct Curl_easy *data,
          needle->bits.socksproxy != check->bits.socksproxy)
         continue;
 
-      if(needle->bits.socksproxy && !proxy_info_matches(&needle->socks_proxy,
-                                                        &check->socks_proxy))
+      if(needle->bits.socksproxy &&
+        !socks_proxy_info_matches(&needle->socks_proxy,
+                                  &check->socks_proxy))
         continue;
 
       if(needle->bits.conn_to_host != check->bits.conn_to_host)
