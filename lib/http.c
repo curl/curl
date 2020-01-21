@@ -344,7 +344,7 @@ static CURLcode http_output_bearer(struct connectdata *conn)
   userp = &conn->allocptr.userpwd;
   free(*userp);
   *userp = aprintf("Authorization: Bearer %s\r\n",
-                   conn->oauth_bearer);
+                   conn->data->set.str[STRING_BEARER]);
 
   if(!*userp) {
     result = CURLE_OUT_OF_MEMORY;
@@ -555,7 +555,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   unsigned long authmask = ~0ul;
 
-  if(!conn->oauth_bearer)
+  if(!data->set.str[STRING_BEARER])
     authmask &= (unsigned long)~CURLAUTH_BEARER;
 
   if(100 <= data->req.httpcode && 199 >= data->req.httpcode)
@@ -565,7 +565,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   if(data->state.authproblem)
     return data->set.http_fail_on_error?CURLE_HTTP_RETURNED_ERROR:CURLE_OK;
 
-  if((conn->bits.user_passwd || conn->oauth_bearer) &&
+  if((conn->bits.user_passwd || data->set.str[STRING_BEARER]) &&
      ((data->req.httpcode == 401) ||
       (conn->bits.authneg && data->req.httpcode < 300))) {
     pickhost = pickoneauth(&data->state.authhost, authmask);
@@ -641,9 +641,7 @@ output_auth_headers(struct connectdata *conn,
 {
   const char *auth = NULL;
   CURLcode result = CURLE_OK;
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
   struct Curl_easy *data = conn->data;
-#endif
 
 #ifdef CURL_DISABLE_CRYPTO_AUTH
   (void)request;
@@ -707,7 +705,7 @@ output_auth_headers(struct connectdata *conn,
   }
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
-    if((!proxy && conn->oauth_bearer &&
+    if((!proxy && data->set.str[STRING_BEARER] &&
         !Curl_checkheaders(conn, "Authorization:"))) {
       auth = "Bearer";
       result = http_output_bearer(conn);
@@ -765,7 +763,7 @@ Curl_http_output_auth(struct connectdata *conn,
   authproxy = &data->state.authproxy;
 
   if((conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
-     conn->bits.user_passwd || conn->oauth_bearer)
+     conn->bits.user_passwd || data->set.str[STRING_BEARER])
     /* continue please */;
   else {
     authhost->done = TRUE;
