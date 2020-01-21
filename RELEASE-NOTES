@@ -1,13 +1,14 @@
 curl and libcurl 7.69.0
 
  Public curl releases:         189
- Command line options:         229
- curl_easy_setopt() options:   269
+ Command line options:         230
+ curl_easy_setopt() options:   270
  Public functions in libcurl:  82
  Contributors:                 2088
 
 This release includes the following changes:
 
+ o smtp: introducing CURLOPT_MAIL_RCPT_ALLLOWFAILS and --mail-rcpt-allowfails [23]
  o wolfSSH: new support SSH backend [5]
  o polarssl: removed [16]
 
@@ -18,11 +19,16 @@ This release includes the following bugfixes:
  o HTTP-COOKIES.md: describe the cookie file format [21]
  o cmake: Enable SMB for Windows builds [12]
  o cmake: Improve libssh2 check on Windows [8]
+ o cmake: support specifying the target Windows version [27]
  o connection reuse: respect the max_concurrent_streams limits [3]
+ o curl: Let -D merge headers in one file again [25]
  o curl: make #0 not output the full URL [4]
  o curl: remove 'config' field from OutStruct [6]
  o curl:progressbarinit: ignore column width from terminals < 20 [18]
+ o data.d: remove "Multiple files can also be specified" [26]
  o hostip: move code to resolve IP address literals to `Curl_resolv` [13]
+ o http: increase EXPECT_100_THRESHOLD to 1Mb [28]
+ o http: move "oauth_bearer" from connectdata to Curl_easy [24]
  o include: remove non-curl prefixed defines [15]
  o libssh2: add support for forcing a hostkey type [7]
  o libssh2: fix variable type [17]
@@ -44,9 +50,9 @@ advice from friends like these:
   Brian Carpenter, bsammon on github, Daniel Marjamäki, Daniel Stenberg,
   Emil Engler, Faizur Rahman, hamstergene on github, Jeroen Ooms,
   Johannes Schindelin, Kunal Ekawde, Marc Aldorasi, Marcel Raad,
-  mbeifuss on github, Ray Satiro, Santino Keupp, Tobias Hieta,
-  vshmuk on hackerone,
-  (17 contributors)
+  mbeifuss on github, Mike Norton, Pavel Volgarev, Ray Satiro, Santino Keupp,
+  Tobias Hieta, vshmuk on hackerone,
+  (19 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -74,3 +80,9 @@ References to bug reports and discussions on issues:
  [20] = https://curl.haxx.se/bug/?i=4761
  [21] = https://curl.haxx.se/bug/?i=4805
  [22] = https://curl.haxx.se/bug/?i=4799
+ [23] = https://curl.haxx.se/bug/?i=4816
+ [24] = https://curl.haxx.se/bug/?i=4824
+ [25] = https://curl.haxx.se/bug/?i=4762
+ [26] = https://curl.haxx.se/mail/archive-2020-01/0016.html
+ [27] = https://curl.haxx.se/bug/?i=4815
+ [28] = https://curl.haxx.se/bug/?i=4814
