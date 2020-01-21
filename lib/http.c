@@ -64,6 +64,7 @@
 #include "http_ntlm.h"
 #include "curl_ntlm_wb.h"
 #include "http_negotiate.h"
+#include "http_aws_sigv4.h"
 #include "url.h"
 #include "share.h"
 #include "hostip.h"
@@ -398,6 +399,8 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
     pick->picked = CURLAUTH_NTLM_WB;
   else if(avail & CURLAUTH_BASIC)
     pick->picked = CURLAUTH_BASIC;
+  else if(avail & CURLAUTH_AWS_SIGV4)
+    pick->picked = CURLAUTH_AWS_SIGV4;
   else {
     pick->picked = CURLAUTH_PICKNONE; /* we select to use nothing */
     picked = FALSE;
@@ -664,7 +667,15 @@ output_auth_headers(struct connectdata *conn,
   (void)request;
   (void)path;
 #endif
-
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+  if(authstatus->picked == CURLAUTH_AWS_SIGV4) {
+    auth = "AWS_SIGV4";
+    result = Curl_output_aws_sigv4(conn, proxy);
+    if(result)
+      return result;
+  }
+  else
+#endif
 #ifdef USE_SPNEGO
   if(authstatus->picked == CURLAUTH_NEGOTIATE) {
     auth = "Negotiate";
