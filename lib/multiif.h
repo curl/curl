@@ -39,7 +39,7 @@ bool Curl_is_in_callback(struct Curl_easy *easy);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket and connection hashes */
-struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize);
+struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize, int flags);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16

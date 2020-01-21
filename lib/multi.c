@@ -344,7 +344,8 @@ static CURLMcode multi_addmsg(struct Curl_multi *multi,
 }
 
 struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
-                                     int chashsize) /* connection hash */
+                                     int chashsize, /* connection hash */
+                                     int flags)
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
@@ -372,16 +373,22 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->max_concurrent_streams = 100;
 
 #ifdef ENABLE_WAKEUP
-  if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, multi->wakeup_pair) < 0) {
-    multi->wakeup_pair[0] = CURL_SOCKET_BAD;
-    multi->wakeup_pair[1] = CURL_SOCKET_BAD;
-  }
-  else if(curlx_nonblock(multi->wakeup_pair[0], TRUE) < 0 ||
-          curlx_nonblock(multi->wakeup_pair[1], TRUE) < 0) {
-    sclose(multi->wakeup_pair[0]);
-    sclose(multi->wakeup_pair[1]);
-    multi->wakeup_pair[0] = CURL_SOCKET_BAD;
-    multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+  if(!(flags & CURL_MULTI_DISABLE_POLL_WAKEUP)) {
+    if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, multi->wakeup_pair) < 0) {
+      multi->wakeup_pair[0] = CURL_SOCKET_BAD;
+      multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+    }
+    else if(curlx_nonblock(multi->wakeup_pair[0], TRUE) < 0 ||
+            curlx_nonblock(multi->wakeup_pair[1], TRUE) < 0) {
+      if(multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
+        sclose(multi->wakeup_pair[0]);
+        multi->wakeup_pair[0] = CURL_SOCKET_BAD;
+      }
+      if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
+        sclose(multi->wakeup_pair[1]);
+        multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+      }
+    }
   }
 #endif
 
@@ -402,7 +409,18 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
 struct Curl_multi *curl_multi_init(void)
 {
   return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
-                           CURL_CONNECTION_HASH_SIZE);
+                           CURL_CONNECTION_HASH_SIZE, 0);
+}
+
+struct Curl_multi *curl_multi_init2(int socket_table_hashsize,
+                                    int conn_table_hashsize,
+                                    int flags)
+{
+  if(socket_table_hashsize <= 0)
+    socket_table_hashsize = CURL_SOCKET_HASH_TABLE_SIZE;
+  if(conn_table_hashsize <= 0)
+    conn_table_hashsize = CURL_CONNECTION_HASH_SIZE;
+  return Curl_multi_handle(socket_table_hashsize, conn_table_hashsize, flags);
 }
 
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
@@ -2425,8 +2443,10 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     Curl_psl_destroy(&multi->psl);
 
 #ifdef ENABLE_WAKEUP
-    sclose(multi->wakeup_pair[0]);
-    sclose(multi->wakeup_pair[1]);
+    if(multi->wakeup_pair[0] != CURL_SOCKET_BAD)
+      sclose(multi->wakeup_pair[0]);
+    if(multi->wakeup_pair[1] != CURL_SOCKET_BAD)
+      sclose(multi->wakeup_pair[1]);
 #endif
     free(multi);
 

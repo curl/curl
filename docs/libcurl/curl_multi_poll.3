@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -49,9 +49,11 @@ number can include both libcurl internal descriptors as well as descriptors
 provided in \fIextra_fds\fP.
 
 The \fIcurl_multi_wakeup(3)\fP function can be used from another thread to
-wake up this function and return faster. This is one of the details
-that makes this function different than \fIcurl_multi_wait(3)\fP which cannot
-be woken up this way.
+wake up this function and return faster. The ability to wake up is one of the
+details that makes this function different than \fIcurl_multi_wait(3)\fP which
+cannot be woken up this way. (Note wakeup can be disabled and libcurl has no
+internal thread synchronization; refer to the wakeup function's documentation
+for more info.)
 
 If no extra file descriptors are provided and libcurl has no file descriptor
 to offer to wait for, this function will instead wait during \fItimeout_ms\fP

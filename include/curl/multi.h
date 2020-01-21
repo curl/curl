@@ -449,6 +449,21 @@ typedef int (*curl_push_callback)(CURL *parent,
                                   struct curl_pushheaders *headers,
                                   void *userp);
 
+
+/* Initialization flags for curl_multi_init2 (Curl_multi_handle) */
+#define CURL_MULTI_DISABLE_POLL_WAKEUP    (1<<0)
+
+/*
+ * Name:    curl_multi_init2()
+ *
+ * Desc:    inititalize multi-style curl usage, with initialization options
+ *
+ * Returns: a new CURLM handle to use in all 'curl_multi' functions.
+ */
+CURL_EXTERN CURLM *curl_multi_init2(int socket_table_hashsize,
+                                    int conn_table_hashsize,
+                                    int flags);
+
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif

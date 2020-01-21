@@ -105,6 +105,7 @@ CURL_EXTERN CURLMcode curl_multi_setopt(CURLM *multi_handle,
 CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
 CURL_EXTERN char *curl_pushheader_bynum(struct curl_pushheaders *h,
 CURL_EXTERN char *curl_pushheader_byname(struct curl_pushheaders *h,
+CURL_EXTERN CURLM *curl_multi_init2(int socket_table_hashsize,
 </stdout>
 </verify>
 

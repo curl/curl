@@ -28,9 +28,11 @@ libcurl is thread safe but has no internal thread synchronization. You may have
 to provide your own locking should you meet any of the thread safety exceptions
 below.
 
-\fBHandles.\fP You must \fBnever\fP share the same handle in multiple threads.
+\fBHandles.\fP You must never share the same handle in multiple threads.
 You can pass the handles around among threads, but you must never use a single
-handle from more than one thread at any given time.
+handle from more than one thread at any given time. \fBException:\fP
+\fIcurl_multi_wakeup(3)\fP can be called from any thread for as long as you can
+ensure that \fIcurl_multi_cleanup(3)\fP has not been called on the multi.
 
 \fBShared objects.\fP You can share certain data between multiple handles by
 using the share interface but you must provide your own locking and set

@@ -45,6 +45,7 @@ man_MANS = \
  curl_multi_fdset.3 \
  curl_multi_info_read.3 \
  curl_multi_init.3 \
+ curl_multi_init2.3 \
  curl_multi_perform.3 \
  curl_multi_poll.3 \
  curl_multi_remove_handle.3 \

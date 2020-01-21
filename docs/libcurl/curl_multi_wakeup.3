@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -28,9 +28,14 @@ curl_multi_wakeup - wakes up a sleeping curl_multi_poll call
 CURLMcode curl_multi_wakeup(CURLM *multi_handle);
 .ad
 .SH DESCRIPTION
-This function can be called from any thread and it wakes up a
-sleeping \fIcurl_multi_poll(3)\fP call that is currently (or will be)
-waiting for activity or a timeout.
+This function can be called from any thread and it wakes up a sleeping
+\fIcurl_multi_poll(3)\fP call that is currently (or will be) waiting for
+activity or a timeout.
+
+Warning: \fBlibcurl has no internal thread synchronization.\fP This function
+can be called from any thread for as long as you can ensure that
+\fIcurl_multi_cleanup(3)\fP has not been called on the multi. For more
+information on thread safety read \fIlibcurl-thread(3)\fP.
 
 If the function is called when there is no \fIcurl_multi_poll(3)\fP call,
 it will cause the next call to return immediately.
@@ -41,6 +46,9 @@ possible that multiple calls to this function will wake up the same waiting
 operation.
 
 This function has no effect on \fIcurl_multi_wait(3)\fP calls.
+
+The wakeup feature may be disabled for a multi via \fIcurl_multi_init2(3)\fP.
+If the wakeup feature is disabled then this function will return an error.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH AVAILABILITY
@@ -83,4 +91,5 @@ if(something makes us decide to stop thread 1) {
 
 .fi
 .SH "SEE ALSO"
-.BR curl_multi_poll "(3), " curl_multi_wait "(3)"
+.BR curl_multi_poll "(3), " curl_multi_wait "(3)," curl_multi_init2 "(3),"
+.BR libcurl-thread "(3)"

@@ -19,13 +19,14 @@
 .\" * KIND, either express or implied.
 .\" *
 .\" **************************************************************************
-.TH curl_multi_init 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
+.TH curl_multi_init2 3 "21 January 2020" "libcurl 7.69.0" "libcurl Manual"
 .SH NAME
-curl_multi_init - create a multi handle
+curl_multi_init2 - create a multi handle with advanced init options
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLM *curl_multi_init( );"
+.BI "CURLM *curl_multi_init2(int " socket_table_hashsize ", "
+.BI "int " conn_table_hashsize ", int " flags " );"
 .ad
 .SH DESCRIPTION
 This function returns a CURLM handle to be used as input to all the other
@@ -33,11 +34,28 @@ multi-functions, sometimes referred to as a multi handle in some places in the
 documentation. This init call MUST have a corresponding call to
 \fIcurl_multi_cleanup(3)\fP when the operation is complete.
 
-\fIcurl_multi_init2(3)\fP is the same as this function except that it allows
-setting advanced init options. (7.69.0)
+\fBsocket_table_hashsize\fP sets the size of the hash table used to keep track
+of sockets. \fBconn_table_hashsize\fP sets the size of the hash table used to
+keep track of connections. Set both parameters to 0 to use the default values,
+unless a curl developer says otherwise.
+
+\fBflags\fP refer to the FLAGS section below.
+
+\fIcurl_multi_init(3)\fP is the same as this function except that it doesn't
+allow setting advanced init options.
+.SH FLAGS
+.IP CURL_MULTI_DISABLE_POLL_WAKEUP
+Since 7.68.0 each multi has a wakeup socket pair to allow waking
+\fIcurl_multi_poll(3)\fP from a different thread. The wakeup socket pair is 2
+sockets that remain open for the life of the multi. If your socket resources
+are very limited you can use this flag to disable the wakeup socket pair. Note
+\fIcurl_multi_wakeup(3)\fP will return an error if there is no wakeup socket
+pair.
+.SH AVAILABILITY
+7.69.0
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.
 .SH "SEE ALSO"
-.BR curl_multi_init2 "(3)"
+.BR curl_multi_init "(3)"
 .BR curl_multi_cleanup "(3)," curl_global_init "(3)," curl_easy_init "(3)"
