@@ -464,8 +464,12 @@ while (<TXT>) {
                   push @timestamp, chr(oct);
               }
           }
+          # A trailing Z in the timestamp signifies UTC
+          if($timestamp[12] ne "Z") {
+              report "distrust date stamp is not using UTC";
+          }
           # Example date: 200617000000Z
-          # Means 2020-06-17 00:00:00Z
+          # Means 2020-06-17 00:00:00 UTC
           my $distrustat =
             timegm($timestamp[10] . $timestamp[11], # second
                    $timestamp[8] . $timestamp[9],   # minute
