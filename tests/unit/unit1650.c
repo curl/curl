@@ -157,7 +157,7 @@ UNITTEST_START
   size_t i;
   unsigned char *p;
   for(i = 0; i < sizeof(req) / sizeof(req[0]); i++) {
-    int rc = doh_encode(req[i].name, req[i].type,
+    int rc = doh_encode(req[i].name, NULL, req[i].type,
                         buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
       fprintf(stderr, "req %zu: Expected return code %d got %d\n", i,

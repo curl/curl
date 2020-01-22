@@ -121,13 +121,13 @@ do {
   };
 
   const struct test playlist[] = {
-    /* use macro doh_encode() */
+    /* tests without prefix */
     { toolong, NULL, DOH_DNS_NAME_TOO_LONG, 0 },  /* expect early failure */
     { ".", NULL, DOH_DNS_BAD_LABEL, 0 },          /* also */
     { emptylabel, NULL, DOH_DNS_BAD_LABEL, 0 },   /* also */
     { outsizelabel, NULL, DOH_DNS_BAD_LABEL, 0 }, /* also */
     { max, NULL, DOH_OK, 2 },                     /* trigger 2x overwrite */
-    /* use function doh_encodepfx() */
+    /* tests with (perhaps empty) prefix */
     { submax, "", DOH_OK, 0 },                    /* empty prefix */
     { submax, ".", DOH_DNS_BAD_LABEL, 0 },        /* prefix begins with dot */
     { submax, "_short.", DOH_OK, 0 },             /* well within slack */
@@ -148,16 +148,10 @@ do {
     victim.canary1 = 87; /* magic numbers, arbritrarily picked */
     victim.canary2 = 35;
     victim.canary3 = 41;
-    if(prefix)
-      d = doh_encodepfx(name, prefix, DNS_TYPE_A,
-                        victim.dohbuffer + offset, /* buffer shortened */
-                        sizeof(victim.dohbuffer),  /* allow for overflow */
-                        &olen);
-    else
-      d = doh_encode(name, DNS_TYPE_A,
-                     victim.dohbuffer + offset,
-                     sizeof(victim.dohbuffer),
-                     &olen);
+    d = doh_encode(name, prefix, DNS_TYPE_A,
+                   victim.dohbuffer + offset, /* buffer shortened */
+                   sizeof(victim.dohbuffer),  /* allow for overflow */
+                   &olen);
 
     fail_unless(d == playlist[i].expected_result,
                 "result returned was not as expected");
@@ -218,31 +212,31 @@ do {
   DOHcode ret2;
   size_t olen;
 
-  DOHcode ret = doh_encode(sunshine1, dnstype, buffer, buflen, &olen1);
+  DOHcode ret = doh_encode(sunshine1, NULL, dnstype, buffer, buflen, &olen1);
   fail_unless(ret == DOH_OK, "sunshine case 1 should pass fine");
   fail_if(olen1 == magic1, "olen has not been assigned properly");
   fail_unless(olen1 > strlen(sunshine1), "bad out length");
 
   /* with a trailing dot, the response should have the same length */
   olen2 = magic1;
-  ret2 = doh_encode(dotshine1, dnstype, buffer, buflen, &olen2);
+  ret2 = doh_encode(dotshine1, NULL, dnstype, buffer, buflen, &olen2);
   fail_unless(ret2 == DOH_OK, "dotshine case should pass fine");
   fail_if(olen2 == magic1, "olen has not been assigned properly");
   fail_unless(olen1 == olen2, "olen should not grow for a trailing dot");
 
   /* add one letter, the response should be one longer */
   olen2 = magic1;
-  ret2 = doh_encode(sunshine2, dnstype, buffer, buflen, &olen2);
+  ret2 = doh_encode(sunshine2, NULL, dnstype, buffer, buflen, &olen2);
   fail_unless(ret2 == DOH_OK, "sunshine case 2 should pass fine");
   fail_if(olen2 == magic1, "olen has not been assigned properly");
   fail_unless(olen1 + 1 == olen2, "olen should grow with the hostname");
 
   /* pass a short buffer, should fail */
-  ret = doh_encode(sunshine1, dnstype, buffer, olen1 - 1, &olen);
+  ret = doh_encode(sunshine1, NULL, dnstype, buffer, olen1 - 1, &olen);
   fail_if(ret == DOH_OK, "short buffer should have been noticed");
 
   /* pass a minimum buffer, should succeed */
-  ret = doh_encode(sunshine1, dnstype, buffer, olen1, &olen);
+  ret = doh_encode(sunshine1, NULL, dnstype, buffer, olen1, &olen);
   fail_unless(ret == DOH_OK, "minimal length buffer should be long enough");
   fail_unless(olen == olen1, "bad buffer length");
 } while(0);
@@ -259,8 +253,8 @@ do {
   size_t olen;
   bool order_ok = TRUE;
 
-  DOHcode ret = doh_encodepfx(basename, prefix, dnstype,
-                              buffer, buflen, &olen);
+  DOHcode ret = doh_encode(basename, prefix, dnstype,
+                           buffer, buflen, &olen);
   fail_unless(ret == DOH_OK,
               "unexpected failure for ('_dummy', 'example.com'");
 
