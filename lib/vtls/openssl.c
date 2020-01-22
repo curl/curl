@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -3122,28 +3122,25 @@ do {                              \
 } while(0)
 #endif
 
-static int X509V3_ext(struct Curl_easy *data,
+static void X509V3_ext(struct Curl_easy *data,
                       int certnum,
                       CONST_EXTS STACK_OF(X509_EXTENSION) *exts)
 {
   int i;
-  size_t j;
 
   if((int)sk_X509_EXTENSION_num(exts) <= 0)
     /* no extensions, bail out */
-    return 1;
+    return;
 
   for(i = 0; i < (int)sk_X509_EXTENSION_num(exts); i++) {
     ASN1_OBJECT *obj;
     X509_EXTENSION *ext = sk_X509_EXTENSION_value(exts, i);
     BUF_MEM *biomem;
-    char buf[512];
-    char *ptr = buf;
     char namebuf[128];
     BIO *bio_out = BIO_new(BIO_s_mem());
 
     if(!bio_out)
-      return 1;
+      return;
 
     obj = X509_EXTENSION_get_object(ext);
 
@@ -3153,26 +3150,10 @@ static int X509V3_ext(struct Curl_easy *data,
       ASN1_STRING_print(bio_out, (ASN1_STRING *)X509_EXTENSION_get_data(ext));
 
     BIO_get_mem_ptr(bio_out, &biomem);
-
-    for(j = 0; j < (size_t)biomem->length; j++) {
-      const char *sep = "";
-      if(biomem->data[j] == '\n') {
-        sep = ", ";
-        j++; /* skip the newline */
-      };
-      while((j<(size_t)biomem->length) && (biomem->data[j] == ' '))
-        j++;
-      if(j<(size_t)biomem->length)
-        ptr += msnprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
-                         biomem->data[j]);
-    }
-
-    Curl_ssl_push_certinfo(data, certnum, namebuf, buf);
-
+    Curl_ssl_push_certinfo_len(data, certnum, namebuf, biomem->data,
+                               biomem->length);
     BIO_free(bio_out);
-
   }
-  return 0; /* all is fine */
 }
 
 #ifdef OPENSSL_IS_BORINGSSL
