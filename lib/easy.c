@@ -193,13 +193,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
-#ifdef USE_WOLFSSH
-  if(WS_SUCCESS != wolfSSH_Init()) {
-    DEBUGF(fprintf(stderr, "Error: wolfSSH_Init failed\n"));
-    return CURLE_FAILED_INIT;
-  }
-#endif
-
   if(flags & CURL_GLOBAL_ACK_EINTR)
     Curl_ack_eintr = 1;
 
