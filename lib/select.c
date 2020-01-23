@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,9 +53,6 @@
 /* Convenience local macros */
 #define ELAPSED_MS() (int)Curl_timediff(Curl_now(), initial_tv)
 
-int Curl_ack_eintr = 0;
-#define ERROR_NOT_EINTR(error) (Curl_ack_eintr || error != EINTR)
-
 /*
  * Internal function used for waiting a specific amount of ms
  * in Curl_socket_check() and Curl_poll() when no file descriptor
@@ -74,13 +71,6 @@ int Curl_ack_eintr = 0;
  */
 int Curl_wait_ms(int timeout_ms)
 {
-#if !defined(MSDOS) && !defined(USE_WINSOCK)
-#ifndef HAVE_POLL_FINE
-  struct timeval pending_tv;
-#endif
-  struct curltime initial_tv;
-  int pending_ms;
-#endif
   int r = 0;
 
   if(!timeout_ms)
@@ -94,28 +84,16 @@ int Curl_wait_ms(int timeout_ms)
 #elif defined(USE_WINSOCK)
   Sleep(timeout_ms);
 #else
-  pending_ms = timeout_ms;
-  initial_tv = Curl_now();
-  do {
-    int error;
 #if defined(HAVE_POLL_FINE)
-    r = poll(NULL, 0, pending_ms);
+  r = poll(NULL, 0, timeout_ms);
 #else
-    pending_tv.tv_sec = pending_ms / 1000;
-    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+  {
+    struct timeval pending_tv;
+    pending_tv.tv_sec = timeout_ms / 1000;
+    pending_tv.tv_usec = (timeout_ms % 1000) * 1000;
     r = select(0, NULL, NULL, NULL, &pending_tv);
+  }
 #endif /* HAVE_POLL_FINE */
-    if(r != -1)
-      break;
-    error = SOCKERRNO;
-    if(error && ERROR_NOT_EINTR(error))
-      break;
-    pending_ms = timeout_ms - ELAPSED_MS();
-    if(pending_ms <= 0) {
-      r = 0;  /* Simulate a "call timed out" case */
-      break;
-    }
-  } while(r == -1);
 #endif /* USE_WINSOCK */
   if(r)
     r = -1;
@@ -158,7 +136,6 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
-  struct curltime initial_tv = {0, 0};
   int pending_ms = 0;
   int r;
   int ret;
@@ -183,7 +160,6 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 
   if(timeout_ms > 0) {
     pending_ms = (int)timeout_ms;
-    initial_tv = Curl_now();
   }
 
 #ifdef HAVE_POLL_FINE
@@ -208,26 +184,11 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     num++;
   }
 
-  do {
-    int error;
-    if(timeout_ms < 0)
-      pending_ms = -1;
-    else if(!timeout_ms)
-      pending_ms = 0;
-    r = poll(pfd, num, pending_ms);
-    if(r != -1)
-      break;
-    error = SOCKERRNO;
-    if(error && ERROR_NOT_EINTR(error))
-      break;
-    if(timeout_ms > 0) {
-      pending_ms = (int)(timeout_ms - ELAPSED_MS());
-      if(pending_ms <= 0) {
-        r = 0;  /* Simulate a "call timed out" case */
-        break;
-      }
-    }
-  } while(r == -1);
+  if(timeout_ms < 0)
+    pending_ms = -1;
+  else if(!timeout_ms)
+    pending_ms = 0;
+  r = poll(pfd, num, pending_ms);
 
   if(r < 0)
     return -1;
@@ -290,60 +251,44 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 
   ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
 
-  do {
-    int error;
-    if(timeout_ms > 0) {
-      pending_tv.tv_sec = pending_ms / 1000;
-      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
-    }
-    else if(!timeout_ms) {
-      pending_tv.tv_sec = 0;
-      pending_tv.tv_usec = 0;
-    }
+  if(timeout_ms > 0) {
+    pending_tv.tv_sec = pending_ms / 1000;
+    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+  }
+  else if(!timeout_ms) {
+    pending_tv.tv_sec = 0;
+    pending_tv.tv_usec = 0;
+  }
 
-    /* WinSock select() must not be called with an fd_set that contains zero
-       fd flags, or it will return WSAEINVAL.  But, it also can't be called
-       with no fd_sets at all!  From the documentation:
+  /* WinSock select() must not be called with an fd_set that contains zero
+     fd flags, or it will return WSAEINVAL.  But, it also can't be called
+     with no fd_sets at all!  From the documentation:
 
-         Any two of the parameters, readfds, writefds, or exceptfds, can be
-         given as null. At least one must be non-null, and any non-null
-         descriptor set must contain at least one handle to a socket.
+     Any two of the parameters, readfds, writefds, or exceptfds, can be
+     given as null. At least one must be non-null, and any non-null
+     descriptor set must contain at least one handle to a socket.
 
-       We know that we have at least one bit set in at least two fd_sets in
-       this case, but we may have no bits set in either fds_read or fd_write,
-       so check for that and handle it.  Luckily, with WinSock, we can _also_
-       ask how many bits are set on an fd_set.
+     We know that we have at least one bit set in at least two fd_sets in
+     this case, but we may have no bits set in either fds_read or fd_write,
+     so check for that and handle it.  Luckily, with WinSock, we can _also_
+     ask how many bits are set on an fd_set.
 
-       It is unclear why WinSock doesn't just handle this for us instead of
-       calling this an error.
+     It is unclear why WinSock doesn't just handle this for us instead of
+     calling this an error.
 
-       Note also that WinSock ignores the first argument, so we don't worry
-       about the fact that maxfd is computed incorrectly with WinSock (since
-       curl_socket_t is unsigned in such cases and thus -1 is the largest
-       value).
-    */
+     Note also that WinSock ignores the first argument, so we don't worry
+     about the fact that maxfd is computed incorrectly with WinSock (since
+     curl_socket_t is unsigned in such cases and thus -1 is the largest
+     value).
+  */
 #ifdef USE_WINSOCK
-    r = select((int)maxfd + 1,
-               fds_read.fd_count ? &fds_read : NULL,
-               fds_write.fd_count ? &fds_write : NULL,
-               &fds_err, ptimeout);
+  r = select((int)maxfd + 1,
+             fds_read.fd_count ? &fds_read : NULL,
+             fds_write.fd_count ? &fds_write : NULL,
+             &fds_err, ptimeout);
 #else
-    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
+  r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
 #endif
-
-    if(r != -1)
-      break;
-    error = SOCKERRNO;
-    if(error && ERROR_NOT_EINTR(error))
-      break;
-    if(timeout_ms > 0) {
-      pending_ms = (int)(timeout_ms - ELAPSED_MS());
-      if(pending_ms <= 0) {
-        r = 0;  /* Simulate a "call timed out" case */
-        break;
-      }
-    }
-  } while(r == -1);
 
   if(r < 0)
     return -1;
@@ -399,7 +344,6 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   fd_set fds_err;
   curl_socket_t maxfd;
 #endif
-  struct curltime initial_tv = {0, 0};
   bool fds_none = TRUE;
   unsigned int i;
   int pending_ms = 0;
@@ -425,31 +369,15 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 
   if(timeout_ms > 0) {
     pending_ms = timeout_ms;
-    initial_tv = Curl_now();
   }
 
 #ifdef HAVE_POLL_FINE
 
-  do {
-    int error;
-    if(timeout_ms < 0)
-      pending_ms = -1;
-    else if(!timeout_ms)
-      pending_ms = 0;
-    r = poll(ufds, nfds, pending_ms);
-    if(r != -1)
-      break;
-    error = SOCKERRNO;
-    if(error && ERROR_NOT_EINTR(error))
-      break;
-    if(timeout_ms > 0) {
-      pending_ms = (int)(timeout_ms - ELAPSED_MS());
-      if(pending_ms <= 0) {
-        r = 0;  /* Simulate a "call timed out" case */
-        break;
-      }
-    }
-  } while(r == -1);
+  if(timeout_ms < 0)
+    pending_ms = -1;
+  else if(!timeout_ms)
+    pending_ms = 0;
+  r = poll(ufds, nfds, pending_ms);
 
   if(r < 0)
     return -1;
@@ -502,42 +430,27 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 
   ptimeout = (timeout_ms < 0) ? NULL : &pending_tv;
 
-  do {
-    int error;
-    if(timeout_ms > 0) {
-      pending_tv.tv_sec = pending_ms / 1000;
-      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
-    }
-    else if(!timeout_ms) {
-      pending_tv.tv_sec = 0;
-      pending_tv.tv_usec = 0;
-    }
+  if(timeout_ms > 0) {
+    pending_tv.tv_sec = pending_ms / 1000;
+    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+  }
+  else if(!timeout_ms) {
+    pending_tv.tv_sec = 0;
+    pending_tv.tv_usec = 0;
+  }
 
 #ifdef USE_WINSOCK
-    r = select((int)maxfd + 1,
-               /* WinSock select() can't handle fd_sets with zero bits set, so
-                  don't give it such arguments.  See the comment about this in
-                  Curl_check_socket().
-               */
-               fds_read.fd_count ? &fds_read : NULL,
-               fds_write.fd_count ? &fds_write : NULL,
-               fds_err.fd_count ? &fds_err : NULL, ptimeout);
+  r = select((int)maxfd + 1,
+             /* WinSock select() can't handle fd_sets with zero bits set, so
+                don't give it such arguments.  See the comment about this in
+                Curl_check_socket().
+             */
+             fds_read.fd_count ? &fds_read : NULL,
+             fds_write.fd_count ? &fds_write : NULL,
+             fds_err.fd_count ? &fds_err : NULL, ptimeout);
 #else
-    r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
+  r = select((int)maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
 #endif
-    if(r != -1)
-      break;
-    error = SOCKERRNO;
-    if(error && ERROR_NOT_EINTR(error))
-      break;
-    if(timeout_ms > 0) {
-      pending_ms = timeout_ms - ELAPSED_MS();
-      if(pending_ms <= 0) {
-        r = 0;  /* Simulate a "call timed out" case */
-        break;
-      }
-    }
-  } while(r == -1);
 
   if(r < 0)
     return -1;
