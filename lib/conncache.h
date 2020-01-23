@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2015 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2015 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2012 - 2014, Linus Nielsen Feltzing, <linus@haxx.se>
  *
  * This software is licensed as described in the file COPYING, which
@@ -80,7 +80,6 @@ struct connectbundle *Curl_conncache_find_bundle(struct connectdata *conn,
 void Curl_conncache_unlock(struct Curl_easy *data);
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
-size_t Curl_conncache_bundle_size(struct connectdata *conn);
 
 bool Curl_conncache_return_conn(struct Curl_easy *data,
                                 struct connectdata *conn);
