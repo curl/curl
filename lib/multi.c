@@ -406,21 +406,22 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   return NULL;
 }
 
-struct Curl_multi *curl_multi_init(void)
+struct Curl_multi *curl_multi_init_advanced(int flags, ...)
 {
+  /* This function accepts variable arguments, for future use.
+     If CURL_MULTI_EXTENDED_INIT_OPTIONS is set then the second argument is a
+     pointer to a variable-length struct that can increase in size.
+
+     if((flags & CURL_MULTI_EXTENDED_INIT_OPTIONS))
+       options = va_arg(arg, struct curl_multi_extended_init_options *);
+  */
   return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
-                           CURL_CONNECTION_HASH_SIZE, 0);
+                           CURL_CONNECTION_HASH_SIZE, flags);
 }
 
-struct Curl_multi *curl_multi_init2(int socket_table_hashsize,
-                                    int conn_table_hashsize,
-                                    int flags)
+struct Curl_multi *curl_multi_init(void)
 {
-  if(socket_table_hashsize <= 0)
-    socket_table_hashsize = CURL_SOCKET_HASH_TABLE_SIZE;
-  if(conn_table_hashsize <= 0)
-    conn_table_hashsize = CURL_CONNECTION_HASH_SIZE;
-  return Curl_multi_handle(socket_table_hashsize, conn_table_hashsize, flags);
+  return curl_multi_init_advanced(0);
 }
 
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,

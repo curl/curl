@@ -33,11 +33,11 @@ multi-functions, sometimes referred to as a multi handle in some places in the
 documentation. This init call MUST have a corresponding call to
 \fIcurl_multi_cleanup(3)\fP when the operation is complete.
 
-\fIcurl_multi_init2(3)\fP is the same as this function except that it allows
-setting advanced init options. (7.69.0)
+\fIcurl_multi_init_advanced(3)\fP is the same as this function except that it
+allows setting advanced init options. (7.69.0)
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.
 .SH "SEE ALSO"
-.BR curl_multi_init2 "(3)"
+.BR curl_multi_init_advanced "(3)"
 .BR curl_multi_cleanup "(3)," curl_global_init "(3)," curl_easy_init "(3)"

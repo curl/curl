@@ -110,6 +110,7 @@ my %api = (
     'curl_multi_fdset' => 'API',
     'curl_multi_info_read' => 'API',
     'curl_multi_init' => 'API',
+    'curl_multi_init_advanced' => 'API',
     'curl_multi_perform' => 'API',
     'curl_multi_remove_handle' => 'API',
     'curl_multi_setopt' => 'API',
