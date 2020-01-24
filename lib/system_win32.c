@@ -109,11 +109,11 @@ CURLcode Curl_win32_init(long flags)
   if(Curl_verify_windows_version(6, 0, PLATFORM_WINNT,
                                  VERSION_GREATER_THAN_EQUAL)) {
     Curl_isVistaOrGreater = TRUE;
-    QueryPerformanceFrequency(&Curl_freq);
   }
   else
     Curl_isVistaOrGreater = FALSE;
 
+  QueryPerformanceFrequency(&Curl_freq);
   return CURLE_OK;
 }
 

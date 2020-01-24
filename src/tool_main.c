@@ -279,6 +279,24 @@ int main(int argc, char *argv[])
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
+#ifdef WIN32
+  /* Undocumented diagnostic option to list the full paths of all loaded
+     modules. This is purposely pre-init. */
+  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
+    struct curl_slist *item, *head = GetLoadedModulePaths();
+    for(item = head; item; item = item->next)
+      printf("%s\n", item->data);
+    curl_slist_free_all(head);
+    return head ? 0 : 1;
+  }
+  /* win32_init must be called before other init routines. */
+  result = win32_init();
+  if(result) {
+    fprintf(stderr, "curl: (%d) Windows-specific init failed.\n", result);
+    return result;
+  }
+#endif
+
   /* Perform any platform-specific terminal configuration */
   configure_terminal();
 
@@ -294,21 +312,6 @@ int main(int argc, char *argv[])
   /* Initialize the curl library - do not call any libcurl functions before
      this point */
   result = main_init(&global);
-
-#ifdef WIN32
-  /* Undocumented diagnostic option to list the full paths of all loaded
-     modules, regardless of whether or not initialization succeeded. */
-  if(argc == 2 && !strcmp(argv[1], "--dump-module-paths")) {
-    struct curl_slist *item, *head = GetLoadedModulePaths();
-    for(item = head; item; item = item->next) {
-      printf("%s\n", item->data);
-    }
-    curl_slist_free_all(head);
-    if(!result)
-      main_free(&global);
-  }
-  else
-#endif /* WIN32 */
   if(!result) {
     /* Start our curl operation */
     result = operate(&global, argc, argv);
