@@ -697,6 +697,31 @@ cleanup:
   return slist;
 }
 
+LARGE_INTEGER Curl_freq;
+bool Curl_isVistaOrGreater;
+
+CURLcode win32_init(void)
+{
+  OSVERSIONINFOEXA osvi = { sizeof(osvi), };
+  unsigned __int64 mask = 0;
+  unsigned char op = VER_GREATER_EQUAL;
+
+  osvi.dwMajorVersion = 6;
+  osvi.dwMinorVersion = 0;
+  VER_SET_CONDITION(mask, VER_MAJORVERSION, op);
+  VER_SET_CONDITION(mask, VER_MINORVERSION, op);
+
+  if(VerifyVersionInfoA(&osvi, (VER_MAJORVERSION | VER_MINORVERSION), mask))
+    Curl_isVistaOrGreater = true;
+  else if(GetLastError() == ERROR_OLD_WIN_VERSION)
+    Curl_isVistaOrGreater = false;
+  else
+    return CURLE_FAILED_INIT;
+
+  QueryPerformanceFrequency(&Curl_freq);
+  return CURLE_OK;
+}
+
 #endif /* WIN32 */
 
 #endif /* MSDOS || WIN32 */

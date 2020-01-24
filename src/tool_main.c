@@ -279,6 +279,12 @@ int main(int argc, char *argv[])
   struct GlobalConfig global;
   memset(&global, 0, sizeof(global));
 
+#ifdef WIN32
+  result = win32_init();
+  if(result)
+    return result;
+#endif
+
   /* Perform any platform-specific terminal configuration */
   configure_terminal();
 
