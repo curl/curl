@@ -669,7 +669,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     res->last_status = ARES_ENOTFOUND;
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
     if(family == PF_UNSPEC) {
-      if(Curl_ipv6works()) {
+      if(Curl_ipv6works(conn)) {
         res->num_pending = 2;
 
         /* areschannel is already setup in the Curl_open() function */
