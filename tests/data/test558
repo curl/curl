@@ -36,8 +36,6 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <file name="log/memdump">
-FD hostip6.c: socket()
-FD connect.c: sclose()
 MEM lib558.c: malloc()
 MEM lib558.c: free()
 MEM escape.c: malloc()

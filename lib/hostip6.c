@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -62,13 +62,19 @@
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
-bool Curl_ipv6works(void)
+bool Curl_ipv6works(struct connectdata *conn)
 {
-  /* the nature of most system is that IPv6 status doesn't come and go
-     during a program's lifetime so we only probe the first time and then we
-     have the info kept for fast re-use */
-  static int ipv6_works = -1;
-  if(-1 == ipv6_works) {
+  if(conn) {
+    /* the nature of most system is that IPv6 status doesn't come and go
+       during a program's lifetime so we only probe the first time and then we
+       have the info kept for fast re-use */
+    DEBUGASSERT(conn);
+    DEBUGASSERT(conn->data);
+    DEBUGASSERT(conn->data->multi);
+    return conn->data->multi->ipv6_works;
+  }
+  else {
+    int ipv6_works = -1;
     /* probe to see if we have a working IPv6 stack */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
@@ -78,8 +84,8 @@ bool Curl_ipv6works(void)
       ipv6_works = 1;
       Curl_closesocket(NULL, s);
     }
+    return (ipv6_works>0)?TRUE:FALSE;
   }
-  return (ipv6_works>0)?TRUE:FALSE;
 }
 
 /*
@@ -89,7 +95,7 @@ bool Curl_ipv6works(void)
 bool Curl_ipvalid(struct connectdata *conn)
 {
   if(conn->ip_version == CURL_IPRESOLVE_V6)
-    return Curl_ipv6works();
+    return Curl_ipv6works(conn);
 
   return TRUE;
 }
@@ -159,7 +165,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     break;
   }
 
-  if((pf != PF_INET) && !Curl_ipv6works())
+  if((pf != PF_INET) && !Curl_ipv6works(conn))
     /* The stack seems to be a non-IPv6 one */
     pf = PF_INET;
 

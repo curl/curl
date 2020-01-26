@@ -185,8 +185,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
-  (void)Curl_ipv6works();
-
 #if defined(USE_SSH)
   if(Curl_ssh_init()) {
     goto fail;
