@@ -1450,6 +1450,14 @@ struct DynamicStatic {
 
 struct Curl_multi;    /* declared and used only in multi.c */
 
+/*
+ * This enumeration MUST not use conditional directives (#ifdefs), new
+ * null terminated strings MUST be added to the enumeration immediately
+ * before STRING_LASTZEROTERMINATED, binary fields immediately before
+ * STRING_LAST. When doing so, ensure that the packages/OS400/chkstring.c
+ * test is updated and applicable changes for EBCDIC to ASCII conversion
+ * are catered for in curl_easy_setopt_ccsid()
+ */
 enum dupstring {
   STRING_CERT_ORIG,       /* client certificate file name */
   STRING_CERT_PROXY,      /* client certificate file name */
@@ -1506,36 +1514,35 @@ enum dupstring {
   STRING_RTSP_SESSION_ID, /* Session ID to use */
   STRING_RTSP_STREAM_URI, /* Stream URI for this request */
   STRING_RTSP_TRANSPORT,  /* Transport for this session */
-#ifdef USE_SSH
+
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
   STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
   STRING_SSH_KNOWNHOSTS,  /* file name of knownhosts file */
-#endif
+
   STRING_PROXY_SERVICE_NAME, /* Proxy service name */
   STRING_SERVICE_NAME,    /* Service name */
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
 
-#ifdef USE_TLS_SRP
   STRING_TLSAUTH_USERNAME_ORIG,  /* TLS auth <username> */
   STRING_TLSAUTH_USERNAME_PROXY, /* TLS auth <username> */
   STRING_TLSAUTH_PASSWORD_ORIG,  /* TLS auth <password> */
   STRING_TLSAUTH_PASSWORD_PROXY, /* TLS auth <password> */
-#endif
+
   STRING_BEARER,                /* <bearer>, if used */
-#ifdef USE_UNIX_SOCKETS
+
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */
-#endif
+
   STRING_TARGET,                /* CURLOPT_REQUEST_TARGET */
   STRING_DOH,                   /* CURLOPT_DOH_URL */
-#ifdef USE_ALTSVC
+
   STRING_ALTSVC,                /* CURLOPT_ALTSVC */
-#endif
+
   STRING_SASL_AUTHZID,          /* CURLOPT_SASL_AUTHZID */
-#ifndef CURL_DISABLE_PROXY
+
   STRING_TEMP_URL,              /* temp URL storage for proxy use */
-#endif
+
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
