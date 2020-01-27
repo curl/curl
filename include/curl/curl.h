@@ -41,8 +41,7 @@
  * Define CURL_WIN32 when build target is Win32 API
  */
 
-#if (defined(_WIN32) || defined(__WIN32__)) &&  \
-  !defined(WIN32) && !defined(__SYMBIAN32__)
+#if (defined(_WIN32) || defined(__WIN32__)) && !defined(__SYMBIAN32__)
 #define CURL_WIN32
 #endif
 
