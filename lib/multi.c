@@ -591,6 +591,9 @@ static CURLcode multi_done(struct Curl_easy *data,
   detach_connnection(data);
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
+    /* conn->data must not remain pointing to this transfer since it is going
+       away! Find another to own it! */
+    conn->data = conn->easyq.head->ptr;
     CONN_UNLOCK(data);
     DEBUGF(infof(data, "Connection still in use %zu, "
                  "no more multi_done now!\n",
