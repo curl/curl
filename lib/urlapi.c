@@ -575,7 +575,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, char *hostname)
 }
 
 /* scan for byte values < 31 or 127 */
-static CURLUcode junkscan(char *part)
+static CURLUcode junkscan(const char *part)
 {
   if(part) {
     static const char badbytes[]={
@@ -672,7 +672,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
   CURLUcode result;
   bool url_has_scheme = FALSE;
   char schemebuf[MAX_SCHEME_LEN + 1];
-  char *schemep = NULL;
+  const char *schemep = NULL;
   size_t schemelen = 0;
   size_t urllen;
 
@@ -801,7 +801,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
       if(!(flags & (CURLU_DEFAULT_SCHEME|CURLU_GUESS_SCHEME)))
         return CURLUE_MALFORMED_INPUT;
       if(flags & CURLU_DEFAULT_SCHEME)
-        schemep = (char *) DEFAULT_SCHEME;
+        schemep = DEFAULT_SCHEME;
 
       /*
        * The URL was badly formatted, let's try without scheme specified.
@@ -924,19 +924,19 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
     if((flags & CURLU_GUESS_SCHEME) && !schemep) {
       /* legacy curl-style guess based on host name */
       if(checkprefix("ftp.", hostname))
-        schemep = (char *)"ftp";
+        schemep = "ftp";
       else if(checkprefix("dict.", hostname))
-        schemep = (char *)"dict";
+        schemep = "dict";
       else if(checkprefix("ldap.", hostname))
-        schemep = (char *)"ldap";
+        schemep = "ldap";
       else if(checkprefix("imap.", hostname))
-        schemep = (char *)"imap";
+        schemep = "imap";
       else if(checkprefix("smtp.", hostname))
-        schemep = (char *)"smtp";
+        schemep = "smtp";
       else if(checkprefix("pop3.", hostname))
-        schemep = (char *)"pop3";
+        schemep = "pop3";
       else
-        schemep = (char *)"http";
+        schemep = "http";
 
       u->scheme = strdup(schemep);
       if(!u->scheme)
