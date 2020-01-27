@@ -16,28 +16,41 @@ This release includes the following bugfixes:
 
  o CMake: Add support for CMAKE_LTO option [22]
  o CMake: use check_symbol_exists also for inet_pton [19]
+ o CURLOPT_PROXY_SSL_OPTIONS.3: Sync with CURLOPT_SSL_OPTIONS.3
  o HTTP-COOKIES.md: describe the cookie file format [21]
  o cmake: Enable SMB for Windows builds [12]
  o cmake: Improve libssh2 check on Windows [8]
  o cmake: support specifying the target Windows version [27]
+ o conn: do not reuse connection if SOCKS proxy credentials differ [32]
+ o conncache: removed unused Curl_conncache_bundle_size() [33]
  o connection reuse: respect the max_concurrent_streams limits [3]
  o curl: Let -D merge headers in one file again [25]
  o curl: make #0 not output the full URL [4]
+ o curl: make the -# spaceship bar not wrap the line [30]
  o curl: remove 'config' field from OutStruct [6]
  o curl:progressbarinit: ignore column width from terminals < 20 [18]
+ o curl_global_init: assume the EINTR bit by default [31]
  o data.d: remove "Multiple files can also be specified" [26]
+ o form.d: fix two minor typos [34]
  o hostip: move code to resolve IP address literals to `Curl_resolv` [13]
  o http: increase EXPECT_100_THRESHOLD to 1Mb [28]
  o http: move "oauth_bearer" from connectdata to Curl_easy [24]
  o include: remove non-curl prefixed defines [15]
  o libssh2: add support for forcing a hostkey type [7]
  o libssh2: fix variable type [17]
+ o llist: removed unused Curl_llist_move() [33]
+ o mk-ca-bundle: add support for CKA_NSS_SERVER_DISTRUST_AFTER [36]
  o multi: Change curl_multi_wait/poll to error on negative timeout [11]
  o ngtcp2: Add an error code for QUIC connection errors [10]
+ o openssl: make CURLINFO_CERTINFO not truncate x509v3 fields [35]
+ o os400: fixed the build [29]
  o runtests: make random seed fixed for a month [1]
  o schannel: Make CURLOPT_CAINFO work better on Windows 7 [9]
  o schannel_verify: Fix alt names manual verify for UNICODE builds [20]
+ o singleuse.pl: support new API functions, fix curl_dbg_ handling [33]
+ o strcase: turn Curl_raw_tolower into static [33]
  o tool_dirhie: Allow directory traversal during creation [2]
+ o urldata: do string enums without #ifdefs for build scripts [29]
  o vtls: Refactor Curl_multissl_version to make the code clearer [14]
 
 This release includes the following known bugs:
@@ -47,12 +60,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Carpenter, bsammon on github, Daniel Marjamäki, Daniel Stenberg,
+  Andrew Potter, Aron Rotteveel, bnfp on github, Brian Carpenter,
+  bsammon on github, Christian Heimes, Daniel Marjamäki, Daniel Stenberg,
   Emil Engler, Faizur Rahman, hamstergene on github, Jeroen Ooms,
-  Johannes Schindelin, Kunal Ekawde, Marc Aldorasi, Marcel Raad,
-  mbeifuss on github, Mike Norton, Pavel Volgarev, Ray Satiro, Santino Keupp,
-  Tobias Hieta, vshmuk on hackerone,
-  (19 contributors)
+  Johannes Schindelin, Jon Rumsey, Kunal Ekawde, Marc Aldorasi, Marcel Raad,
+  mbeifuss on github, Mike Norton, naost3rn on github, Nicolas Guillier,
+  Pavel Volgarev, Peter Piekarski, Ray Satiro, Santino Keupp, Tobias Hieta,
+  vshmuk on hackerone, 加藤郁之,
+  (28 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -86,3 +101,11 @@ References to bug reports and discussions on issues:
  [26] = https://curl.haxx.se/mail/archive-2020-01/0016.html
  [27] = https://curl.haxx.se/bug/?i=4815
  [28] = https://curl.haxx.se/bug/?i=4814
+ [29] = https://curl.haxx.se/bug/?i=4822
+ [30] = https://curl.haxx.se/bug/?i=4849
+ [31] = https://curl.haxx.se/bug/?i=4840
+ [32] = https://curl.haxx.se/bug/?i=4835
+ [33] = https://curl.haxx.se/bug/?i=4842
+ [34] = https://curl.haxx.se/bug/?i=4843
+ [35] = https://curl.haxx.se/bug/?i=4837
+ [36] = https://curl.haxx.se/bug/?i=4834
