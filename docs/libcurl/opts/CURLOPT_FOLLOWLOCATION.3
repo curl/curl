@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -46,7 +46,7 @@ are also disabled.
 
 When following a Location:, the 3xx response code that redirected it also
 dictates which request method it will use in the subsequent request: For 301,
-302 and 303 responses libcurl will switch method to GET unless
+302 and 303 responses libcurl will switch method from POST to GET unless
 \fICURLOPT_POSTREDIR(3)\fP instructs libcurl otherwise. All other 3xx codes
 will make libcurl send the same method again.
 
