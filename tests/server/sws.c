@@ -2163,7 +2163,7 @@ int main(int argc, char *argv[])
   case AF_UNIX:
     memset(&me.sau, 0, sizeof(me.sau));
     me.sau.sun_family = AF_UNIX;
-    strncpy(me.sau.sun_path, unix_socket, sizeof(me.sau.sun_path));
+    strncpy(me.sau.sun_path, unix_socket, sizeof(me.sau.sun_path) - 1);
     rc = bind(sock, &me.sa, sizeof(me.sau));
     if(0 != rc && errno == EADDRINUSE) {
       struct stat statbuf;
