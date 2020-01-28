@@ -60,7 +60,7 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
     {CURLUPART_FRAGMENT, "fragment"},
     {0, NULL}
   };
-  buf[0] = 0;
+  memset(buf, 0, sizeof(buf));
 
   for(i = 0; parts[i].name; i++) {
     char *p = NULL;
@@ -645,6 +645,9 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
       char buf[80];
       char part[80];
       char value[80];
+
+      memset(part, 0, sizeof(part)); /* Avoid valgrind false positive. */
+      memset(value, 0, sizeof(value)); /* Avoid valgrind false positive. */
       memcpy(buf, p, n);
       buf[n] = 0;
       if(2 == sscanf(buf, "%79[^=]=%79[^,]", part, value)) {
