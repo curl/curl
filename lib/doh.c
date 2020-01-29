@@ -77,6 +77,7 @@ static const char *doh_strerror(DOHcode code)
 /* @unittest 1655
  */
 UNITTEST DOHcode doh_encode(const char *host,
+                            const char *prefix,
                             DNStype dnstype,
                             unsigned char *dnsp, /* buffer */
                             size_t len,  /* buffer size */
@@ -84,7 +85,15 @@ UNITTEST DOHcode doh_encode(const char *host,
 {
   const size_t hostlen = strlen(host);
   unsigned char *orig = dnsp;
-  const char *hostp = host;
+  const size_t preflen = prefix ? strlen(prefix) : 0;
+  size_t expected_len;
+  int i;
+
+  /* For C89 ... */
+  char *fragment[2];
+  int fragments = 2;
+  fragment[0] = (char *) prefix;
+  fragment[1] = (char *) host;
 
   /* The expected output length is 16 bytes more than the length of
    * the QNAME-encoding of the host name.
@@ -108,10 +117,12 @@ UNITTEST DOHcode doh_encode(const char *host,
    * the overall length by one.
    */
 
-  size_t expected_len;
   DEBUGASSERT(hostlen);
-  expected_len = 12 + 1 + hostlen + 4;
+  expected_len = 12 + hostlen + preflen + 1 + 4;
   if(host[hostlen-1]!='.')
+    expected_len++;
+
+  if((preflen) && (prefix[preflen-1]!='.'))
     expected_len++;
 
   if(expected_len > (256 + 16)) /* RFCs 1034, 1035 */
@@ -134,27 +145,31 @@ UNITTEST DOHcode doh_encode(const char *host,
   *dnsp++ = '\0'; /* ARCOUNT */
 
   /* encode each label and store it in the QNAME */
-  while(*hostp) {
-    size_t labellen;
-    char *dot = strchr(hostp, '.');
-    if(dot)
-      labellen = dot - hostp;
-    else
-      labellen = strlen(hostp);
-    if((labellen > 63) || (!labellen)) {
-      /* label is too long or too short, error out */
-      *olen = 0;
-      return DOH_DNS_BAD_LABEL;
-    }
-    /* label is non-empty, process it */
-    *dnsp++ = (unsigned char)labellen;
-    memcpy(dnsp, hostp, labellen);
-    dnsp += labellen;
-    hostp += labellen;
-    /* advance past dot, but only if there is one */
-    if(dot)
-      hostp++;
-  } /* next label */
+  for(i = 0; i < fragments; i++) {
+    char *hostp = (char *)fragment[i];
+    if(hostp)
+      while(*hostp) {
+        size_t labellen;
+        char *dot = strchr(hostp, '.');
+        if(dot)
+          labellen = dot - hostp;
+        else
+          labellen = strlen(hostp);
+        if((labellen > 63) || (!labellen)) {
+          /* label is too long or too short, error out */
+          *olen = 0;
+          return DOH_DNS_BAD_LABEL;
+        }
+        /* label is non-empty, process it */
+        *dnsp++ = (unsigned char)labellen;
+        memcpy(dnsp, hostp, labellen);
+        dnsp += labellen;
+        hostp += labellen;
+        /* advance past dot, but only if there is one */
+        if(dot)
+          hostp++;
+      } /* next label */
+  }     /* next fragment */
 
   *dnsp++ = 0; /* append zero-length label for root */
 
@@ -222,6 +237,7 @@ do {                                      \
 
 static CURLcode dohprobe(struct Curl_easy *data,
                          struct dnsprobe *p, DNStype dnstype,
+                         const char *prefix,
                          const char *host,
                          const char *url, CURLM *multi,
                          struct curl_slist *headers)
@@ -230,7 +246,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
   char *nurl = NULL;
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms;
-  DOHcode d = doh_encode(host, dnstype, p->dohbuffer, sizeof(p->dohbuffer),
+  DOHcode d = doh_encode(host, prefix, dnstype,
+                         p->dohbuffer, sizeof(p->dohbuffer),
                          &p->dohlen);
   if(d) {
     failf(data, "Failed to encode DOH packet [%d]\n", d);
@@ -238,6 +255,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
   }
 
   p->dnstype = dnstype;
+  p->prefix = (char *) prefix;
   p->serverdoh.memory = NULL;
   /* the memory will be grown as needed by realloc in the doh_write_cb
      function */
@@ -407,7 +425,8 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
   if(conn->ip_version != CURL_IPRESOLVE_V6) {
     /* create IPv4 DOH request */
     result = dohprobe(data, &data->req.doh.probe[DOH_PROBE_SLOT_IPADDR_V4],
-                      DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
+                      DNS_TYPE_A, NULL, hostname,
+                      data->set.str[STRING_DOH],
                       data->multi, data->req.doh.headers);
     if(result)
       goto error;
@@ -417,7 +436,8 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
   if(conn->ip_version != CURL_IPRESOLVE_V4) {
     /* create IPv6 DOH request */
     result = dohprobe(data, &data->req.doh.probe[DOH_PROBE_SLOT_IPADDR_V6],
-                      DNS_TYPE_AAAA, hostname, data->set.str[STRING_DOH],
+                      DNS_TYPE_AAAA, NULL, hostname,
+                      data->set.str[STRING_DOH],
                       data->multi, data->req.doh.headers);
     if(result)
       goto error;

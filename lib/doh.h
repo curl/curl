@@ -95,6 +95,7 @@ struct dohentry {
 
 #ifdef DEBUGBUILD
 DOHcode doh_encode(const char *host,
+                   const char *prefix,
                    DNStype dnstype,
                    unsigned char *dnsp, /* buffer */
                    size_t len,  /* buffer size */
