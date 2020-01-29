@@ -12,6 +12,7 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written!
 
  1. HTTP
+ 1.2 Multiple methods in a single WWW-Authenticate: header
  1.3 STARTTRANSFER time is wrong for HTTP POSTs
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
@@ -114,6 +115,13 @@ problems may have been fixed or changed somewhat since this was written!
 ==============================================================================
 
 1. HTTP
+
+1.2 Multiple methods in a single WWW-Authenticate: header
+
+ The HTTP responses headers WWW-Authenticate: can provide information about
+ multiple authentication methods as multiple headers or as several methods
+ within a single header. The latter way, several methods in the same physical
+ line, is not supported by libcurl's parser. (For no good reason.)
 
 1.3 STARTTRANSFER time is wrong for HTTP POSTs
 
