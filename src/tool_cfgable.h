@@ -27,6 +27,10 @@
 #include "tool_urlglob.h"
 #include "tool_formparse.h"
 
+#ifdef USE_ESNI
+# include <openssl/esni.h>
+#endif
+
 typedef enum {
   ERR_NONE,
   ERR_BINARY_TERMINAL = 1, /* binary to terminal detected */
@@ -274,6 +278,21 @@ struct OperationConfig {
                                      0 is valid. default: CURL_HET_DEFAULT. */
   bool haproxy_protocol;          /* whether to send HAProxy protocol v1 */
   bool disallow_username_in_url;  /* disallow usernames in URLs */
+#ifdef USE_ESNI
+  union {
+    unsigned long word;
+    struct {
+      unsigned int disabled : 1;  /* Set by --no-esni option */
+      unsigned int selected : 1;  /* Set by any other ESNI-related option */
+    } flags;
+  } esni_status;
+  char *esni_cover_name;          /* Set by --esni-cover option */
+  char *esni_load_file;           /* Filename, set by --esni-load option */
+  char *esni_load_data;           /* ESNI RDATA as base64 or hex string,
+                                   * set by --esni-load option */
+  SSL_ESNI *ssl_esni;             /* TODO:
+                                     decide whether this is needed here */
+#endif
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
