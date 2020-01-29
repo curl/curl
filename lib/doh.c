@@ -453,10 +453,10 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
      /* (!data->set.str[STRING_ESNI_ASCIIRR]) */
      ) {
     /* create ESNI TXT request */
-    result = dohprobepfx(data, &data->req.doh.probe[DOH_PROBE_SLOT_ESNI_TXT],
-                         DNS_TYPE_TXT, "_esni",
-                         hostname, data->set.str[STRING_DOH],
-                         data->multi, data->req.doh.headers);
+    result = dohprobe(data, &data->req.doh.probe[DOH_PROBE_SLOT_ESNI_TXT],
+                      DNS_TYPE_TXT, "_esni",
+                      hostname, data->set.str[STRING_DOH],
+                      data->multi, data->req.doh.headers);
     if(result)
       goto error;
     data->req.doh.pending++;
