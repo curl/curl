@@ -61,6 +61,10 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <openssl/pkcs12.h>
+#ifdef USE_ESNI
+#include "esni.h"
+#include <openssl/esni.h>
+#endif /* USE_ESNI */
 
 #ifdef USE_AMISSL
 #include "amigaos.h"
@@ -226,6 +230,13 @@ struct ssl_backend_data {
   /* tap_state holds the last seen master key if we're logging them */
   ssl_tap_state_t tap_state;
 #endif
+#ifdef USE_ESNI
+  /* TODO: when freeing BACKEND, provide for freeing ESNIKEYS */
+  SSL_ESNI *esnikeys;           /* Handle for ESNI data object */
+  int nesnis;                   /* Count of ESNI keys */
+#define ESNIKEYS BACKEND->esnikeys
+#define NESNIS BACKEND->nesnis
+#endif  /* USE_ESNI */
 };
 
 #define BACKEND connssl->backend
@@ -1283,6 +1294,15 @@ static void ossl_close(struct ssl_connect_data *connssl)
     SSL_CTX_free(BACKEND->ctx);
     BACKEND->ctx = NULL;
   }
+
+#ifdef USE_ESNI
+  /* Free ESNI data */
+  if(!BACKEND->esnikeys) {
+    SSL_ESNI_free(BACKEND->esnikeys);
+    OPENSSL_free(BACKEND->esnikeys);
+    BACKEND->esnikeys = NULL;
+  }
+#endif
 }
 
 /*
@@ -2857,10 +2877,108 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 #ifdef ENABLE_IPV6
      (0 == Curl_inet_pton(AF_INET6, hostname, &addr)) &&
 #endif
-     sni &&
-     !SSL_set_tlsext_host_name(BACKEND->handle, hostname))
-    infof(data, "WARNING: failed to configure server name indication (SNI) "
-          "TLS extension\n");
+     sni) {
+    if(!SSL_set_tlsext_host_name(BACKEND->handle, hostname))
+      infof(data, "WARNING: failed to configure server name indication (SNI) "
+            "TLS extension\n");
+#ifdef USE_ESNI
+    /* TODO: review appropriateness of nesting conditional blocks */
+    if(data->set.tls_enable_esni) {
+
+      /* Local variables: no need to move them */
+      bool value_error = FALSE;  /* Problem flag */
+      size_t asciirrlen = 0;     /* Length of STRING_ESNI_ASCIIRR */
+      char *srvname;             /* Effective server name */
+
+      /* TODO: review Curl_esni_ready() */
+      value_error = !Curl_esni_ready(data);
+
+      infof(data, "Found ESNI parameters:\n");
+
+      /* Came this far, so ssl_enable_esni must be set */
+      infof(data, "  flag ssl_enable_esni (SET)\n");
+
+      srvname = conn->host.name;
+
+      if(srvname)
+        infof(data, "  Effective server name (%s)\n", srvname);
+      else {
+        value_error = TRUE;
+        failf(data, "ESNI: missing server name\n");
+      }
+
+      if(data->set.str[STRING_ESNI_COVER])
+        infof(data, "  STRING_ESNI_COVER (%s)\n",
+              data->set.str[STRING_ESNI_COVER]);
+
+      if(data->set.str[STRING_ESNI_ASCIIRR])
+        infof(data, "  STRING_ESNI_ASCIIRR (%s)\n",
+              data->set.str[STRING_ESNI_ASCIIRR]);
+
+      /* Decode STRING_ESNI_ASCIIRR as ESNIKEYS, NESNIS;
+       *
+       * Do this here because OpenSSL library code is needed,
+       * which must not be exposed elsewhere in libcurl.
+       */
+
+      if(!ESNIKEYS && !value_error) {
+        /* We don't have this yet/still, so make a new one */
+        asciirrlen = strlen(data->set.str[STRING_ESNI_ASCIIRR]);
+        ESNIKEYS
+          = SSL_ESNI_new_from_buffer(ESNI_RRFMT_GUESS,
+                                     asciirrlen,
+                                     data->set.str[STRING_ESNI_ASCIIRR],
+                                     &NESNIS);
+        if((!ESNIKEYS) || (!NESNIS)) {
+          failf(data,
+                "ESNI: failed to decode STRING_ESNI_ASCIIRR\n");
+          if(ESNIKEYS) {
+            /* TODO: ascertain the RIGHT WAY to free ESNIKEYS
+             * Any of these might not be the one we need:
+             * - SSL_CTX_free()
+             * - SSL_free()
+             * - OPENSSL_free(peer_CN)
+             * Maybe look to OpenSSL s_client code.
+             */
+            /* Follow example of sftcd/openssl/apps/s_client.c */
+            SSL_ESNI_free(ESNIKEYS);
+            OPENSSL_free(ESNIKEYS);
+            ESNIKEYS = NULL;
+          }
+          value_error = TRUE;
+        }
+      }
+
+      if(!value_error) {
+        infof(data, "SSL_ESNI object version (%0x)\n",
+              ESNIKEYS->version);
+        infof(data, "Found %d ESNI key%s\n",
+              NESNIS, ((NESNIS == 1) ? "" :"s"));
+
+        /* Propagate ESNI parameters to OpenSSL context */
+        /* TODO: propagate these from connection handle, not easy handle */
+        if(!SSL_esni_enable(BACKEND->handle,
+                            srvname,
+                            data->set.str[STRING_ESNI_COVER],
+                            ESNIKEYS, /* decoded just now */
+                            NESNIS,   /* decoded just now */
+                            TRUE      /* always use strict mode */
+                            )) {
+          failf(data, "ESNI: failed to configure "
+                "encrypted server name (ESNI) TLS extension\n");
+          value_error = TRUE;
+        }
+
+        if(value_error)
+          return CURLE_SSL_CONNECT_ERROR; /* TODO: ESNI error data point */
+
+        else
+          infof(data, "Configured "
+                "encrypted server name (ESNI) TLS extension\n");
+      }
+    }
+#endif  /* USE_ESNI */
+  }
 #endif
 
   /* Check if there's a cached ID we can/should use here! */
