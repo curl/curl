@@ -26,7 +26,10 @@ import socket
 import time
 import datetime
 import struct
-import ConfigParser
+try: # Python 3
+    import configparser
+except ImportError: # Python 2
+    import ConfigParser as configparser
 import SocketServer
 import threading
 import logging
@@ -4130,7 +4133,7 @@ smb.SMB.TRANS_TRANSACT_NMPIPE          :self.__smbTransHandler.transactNamedPipe
         if self.__serverConfig is None:
             if configFile is None:
                 configFile = 'smb.conf'
-            self.__serverConfig = ConfigParser.ConfigParser()
+            self.__serverConfig = configparser.ConfigParser()
             self.__serverConfig.read(configFile)
 
         self.__serverName   = self.__serverConfig.get('global','server_name')
