@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -537,9 +537,9 @@ Curl_cookie_add(struct Curl_easy *data,
          * only test for names where that can possibly be true.
          */
         if(nlen > 3 && name[0] == '_' && name[1] == '_') {
-          if(strncasecompare("__Secure-", name, 9))
+          if(!strncmp("__Secure-", name, 9))
             co->prefix |= COOKIE_PREFIX__SECURE;
-          else if(strncasecompare("__Host-", name, 7))
+          else if(!strncmp("__Host-", name, 7))
             co->prefix |= COOKIE_PREFIX__HOST;
         }
 
