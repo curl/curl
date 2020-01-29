@@ -146,7 +146,7 @@ static void quic_settings(ngtcp2_settings *s,
   s->transport_params.initial_max_data = QUIC_MAX_DATA;
   s->transport_params.initial_max_streams_bidi = 1;
   s->transport_params.initial_max_streams_uni = 3;
-  s->transport_params.idle_timeout = QUIC_IDLE_TIMEOUT;
+  s->transport_params.max_idle_timeout = QUIC_IDLE_TIMEOUT;
 }
 
 static FILE *keylog_file; /* not thread-safe */
@@ -535,6 +535,8 @@ static ngtcp2_conn_callbacks ng_callbacks = {
   NULL, /* extend_max_remote_streams_bidi */
   NULL, /* extend_max_remote_streams_uni */
   cb_extend_max_stream_data,
+  NULL, /* dcid_status */
+  NULL  /* handshake_confirmed */
 };
 
 /*
