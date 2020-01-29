@@ -934,6 +934,10 @@ typedef enum {
 #define CURLPROTO_SMBS   (1<<27)
 #define CURLPROTO_ALL    (~0) /* enable everything */
 
+/* CURLESNI_ defines are for the CURLOPT_ESNI_STATUS option */
+#define CURLESNI_ENABLE     (1<<0)
+#define CURLESNI_INVALID (~((1<<1) - 1)) /* unused bits */
+
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
 #define CURLOPTTYPE_LONG          0
@@ -1948,6 +1952,15 @@ typedef enum {
 
   /* allow RCPT TO command to fail for some recipients */
   CURLOPT(CURLOPT_MAIL_RCPT_ALLLOWFAILS, CURLOPTTYPE_LONG, 290),
+
+  /* ESNI status: 1L to enable, 0L otherwise */
+  CURLOPT(CURLOPT_ESNI_STATUS, CURLOPTTYPE_LONG, 291),
+
+  /* ESNI: string to send (unencrypted) as SNI option */
+  CURLOPT(CURLOPT_ESNI_COVER, CURLOPTTYPE_STRINGPOINT, 292),
+
+  /* ESNI: TXT or ESNI RDATA from DNS, as base64 or hex respectively */
+  CURLOPT(CURLOPT_ESNI_ASCIIRR, CURLOPTTYPE_STRINGPOINT, 293),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -128,6 +128,9 @@ man_MANS =                                      \
   CURLOPT_DNS_SHUFFLE_ADDRESSES.3               \
   CURLOPT_DNS_USE_GLOBAL_CACHE.3                \
   CURLOPT_DOH_URL.3                             \
+  CURLOPT_ESNI_ASCIIRR.3                        \
+  CURLOPT_ESNI_COVER.3                          \
+  CURLOPT_ESNI_STATUS.3                         \
   CURLOPT_EGDSOCKET.3                           \
   CURLOPT_ERRORBUFFER.3                         \
   CURLOPT_EXPECT_100_TIMEOUT_MS.3               \

@@ -1,0 +1,58 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_ESNI_COVER 3 "2 Jul 2019" "libcurl FUTURE" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_ESNI_COVER \- set value for TLS SNI option when using ESNI
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ESNI_COVER, char *hostname);
+.fi
+.SH EXPERIMENTAL
+Warning: this feature is early code and is marked as experimental. It can only
+be enabled by explicitly telling configure with \fB--enable-esni\fP. You are
+advised to not ship this in production before the experimental label is
+removed.
+.SH DESCRIPTION
+Passes a pointer to a (dummy) string to be used as the value of the
+TLS SNI option when the ESNI option is being used. This should be a
+valid hostname.
+.SH DEFAULT
+None.
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_ESNI_STATUS, 1L);
+  curl_easy_setopt(curl, CURLOPT_ESNI_COVER, "esni-cover.example.net");
+  curl_easy_setopt(curl, CURLOPT_ESNI_ASCIIRR, ascii_encoded_rrset_blob);
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+To be added in a FUTURE release
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_ESNI_STATUS "(3), " CURLOPT_ESNI_ASCIIRR "(3), "

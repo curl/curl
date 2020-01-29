@@ -1582,6 +1582,11 @@ enum dupstring {
   STRING_DNS_LOCAL_IP4,
   STRING_DNS_LOCAL_IP6,
 
+#endif
+#ifdef USE_ESNI
+  STRING_ESNI_COVER,            /* CURLOPT_ESNI_COVER */
+  STRING_ESNI_ASCIIRR,          /* CURLOPT_ESNI_ASCIIRR */
+#endif
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
@@ -1840,6 +1845,9 @@ struct UserDefined {
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */
+#ifdef USE_ESNI
+  BIT(tls_enable_esni);      /* TLS ESNI extension */
+#endif
 };
 
 struct Names {

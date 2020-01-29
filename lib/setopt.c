@@ -2760,6 +2760,28 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return result;
     break;
 #endif
+#ifdef USE_ESNI
+  case CURLOPT_ESNI_STATUS:
+    arg = va_arg(param, long);
+    if(arg & CURLESNI_INVALID)            /* Unused flag bits */
+      return CURLE_BAD_FUNCTION_ARGUMENT; /* MUST be zero */
+    if(arg & CURLESNI_ENABLE) {
+      data->set.tls_enable_esni = TRUE;
+    }
+    break;
+  case CURLOPT_ESNI_COVER:
+    argptr = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_ESNI_COVER], argptr);
+    if(result)
+      return result;
+    break;
+  case CURLOPT_ESNI_ASCIIRR:
+    argptr = va_arg(param, char *);
+    result = Curl_setstropt(&data->set.str[STRING_ESNI_ASCIIRR], argptr);
+    if(result)
+      return result;
+    break;
+#endif
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;
