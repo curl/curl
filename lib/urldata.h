@@ -548,6 +548,10 @@ enum doh_slots {
   /*   DOH_PROBE_SLOT_FOOBAR_TXT, */
   /* #endif */
 
+#ifdef USE_ESNI
+  DOH_PROBE_SLOT_ESNI_TXT,      /* ESNI draft 02 uses (TXT, "_esni") */
+#endif
+
   /* AFTER all slot definitions, establish how many we have */
   DOH_PROBE_SLOTS
 };
@@ -561,7 +565,7 @@ struct dohresponse {
 struct dnsprobe {
   CURL *easy;
   int dnstype;
-  char *prefix;                 /* specific to request, like dnstype */
+  char *prefix;                /* specific to request, like dnstype */
   unsigned char dohbuffer[512];
   size_t dohlen;
   struct dohresponse serverdoh;
