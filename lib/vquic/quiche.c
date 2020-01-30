@@ -171,7 +171,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     return CURLE_FAILED_INIT;
   }
 
-  quiche_config_set_idle_timeout(qs->cfg, QUIC_IDLE_TIMEOUT);
+  quiche_config_set_max_idle_timeout(qs->cfg, QUIC_IDLE_TIMEOUT);
   quiche_config_set_initial_max_data(qs->cfg, QUIC_MAX_DATA);
   quiche_config_set_initial_max_stream_data_bidi_local(qs->cfg, QUIC_MAX_DATA);
   quiche_config_set_initial_max_stream_data_bidi_remote(qs->cfg,
