@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -55,7 +55,7 @@ static enum alpnid alpn2alpnid(char *name)
   if(strcasecompare(name, "h2"))
     return ALPN_h2;
 #if (defined(USE_QUICHE) || defined(USE_NGTCP2)) && !defined(UNITTESTS)
-  if(strcasecompare(name, "h3-24"))
+  if(strcasecompare(name, "h3-25"))
     return ALPN_h3;
 #else
   if(strcasecompare(name, "h3"))
