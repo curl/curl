@@ -931,7 +931,7 @@ static CURLUcode seturl(const char *url, CURLU *u, unsigned int flags)
         schemep = "ldap";
       else if(checkprefix("imap.", hostname))
         schemep = "imap";
-      else if(checkprefix("smtp.", hostname))
+      else if(checkprefix("smtp.", hostname) || checkprefix("mail.", hostname))
         schemep = "smtp";
       else if(checkprefix("pop3.", hostname))
         schemep = "pop3";
