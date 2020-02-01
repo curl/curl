@@ -62,6 +62,7 @@ CURL_CFILES = \
   tool_util.c \
   tool_vms.c \
   tool_writeout.c \
+  tool_writeout_json.c \
   tool_xattr.c
 
 CURL_HFILES = \
@@ -107,6 +108,7 @@ CURL_HFILES = \
   tool_version.h \
   tool_vms.h \
   tool_writeout.h \
+  tool_writeout_json.h \
   tool_xattr.h
 
 CURL_RCFILES = curl.rc

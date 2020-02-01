@@ -127,6 +127,16 @@ char *curl_version(void)
   int i = 0;
   int j;
 
+#ifdef DEBUGBUILD
+  /* Override version string when environment variable CURL_VERSION is set */
+  const char *debugversion = getenv("CURL_VERSION");
+  if(debugversion) {
+    strncpy(out, debugversion, sizeof(out)-1);
+    out[sizeof(out)-1] = '\0';
+    return out;
+  }
+#endif
+
   src[i++] = LIBCURL_NAME "/" LIBCURL_VERSION;
 #ifdef USE_SSL
   Curl_ssl_version(ssl_version, sizeof(ssl_version));
