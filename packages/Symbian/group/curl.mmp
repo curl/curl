@@ -45,6 +45,7 @@ SOURCE \
     tool_vms.c \
     tool_writeenv.c \
     tool_writeout.c \
+    tool_writeout_json.c \
     tool_xattr.c
 
 SOURCEPATH  ../../../lib

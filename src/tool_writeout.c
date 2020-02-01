@@ -25,6 +25,7 @@
 #include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
+#include "tool_writeout_json.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -62,6 +63,7 @@ typedef enum {
   VAR_SCHEME,
   VAR_STDOUT,
   VAR_STDERR,
+  VAR_JSON,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -105,6 +107,7 @@ static const struct variable replacements[]={
   {"scheme", VAR_SCHEME},
   {"stdout", VAR_STDOUT},
   {"stderr", VAR_STDERR},
+  {"json", VAR_JSON},
   {NULL, VAR_NONE}
 };
 
@@ -334,6 +337,8 @@ void ourWriteOut(CURL *curl, struct OutStruct *outs, const char *writeinfo)
               case VAR_STDERR:
                 stream = stderr;
                 break;
+              case VAR_JSON:
+                ourWriteOutJSON(curl, outs, stream);
               default:
                 break;
               }

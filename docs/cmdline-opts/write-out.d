@@ -50,6 +50,9 @@ curl CONNECT request. (Added in 7.12.4)
 .B http_version
 The http version that was effectively used. (Added in 7.50.0)
 .TP
+.B json
+A JSON object with all available keys.
+.TP
 .B local_ip
 The IP address of the local end of the most recently done connection - can be
 either IPv4 or IPv6 (Added in 7.29.0)
