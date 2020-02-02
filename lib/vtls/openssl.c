@@ -2212,7 +2212,6 @@ set_ssl_version_min_max(SSL_CTX *ctx, struct connectdata *conn)
   curl_ssl_version_max = SSL_CONN_CONFIG(version_max);
 
   /* convert cURL max SSL version option to OpenSSL constant */
-  ossl_ssl_version_max = 0;
   switch(curl_ssl_version_max) {
     case CURL_SSLVERSION_MAX_TLSv1_0:
       ossl_ssl_version_max = TLS1_VERSION;
