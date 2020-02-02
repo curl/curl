@@ -65,7 +65,7 @@ matrix:
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
-          dist: xenial
+          dist: bionic
           env:
               - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -79,7 +79,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: gcc
-          dist: xenial
+          dist: bionic
           before_install:
               # Install and use the current stable release of Go
               - gimme --list
@@ -97,7 +97,7 @@ matrix:
                       - *common_packages
         - os: linux
           compiler: gcc
-          dist: xenial
+          dist: bionic
           before_install:
               # Install and use the current stable release of Go
               - gimme --list
@@ -130,7 +130,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: gcc
-          dist: xenial
+          dist: bionic
           env:
               - T=debug-wolfssl C="--with-wolfssl --without-ssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -144,7 +144,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: gcc
-          dist: xenial
+          dist: bionic
           env:
               - T=debug-mesalink C="--with-mesalink --without-ssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -207,7 +207,7 @@ matrix:
                       - libmbedtls-dev
         - os: linux
           compiler: clang
-          dist: xenial
+          dist: bionic
           env:
               - T=debug C="--with-gnutls --without-ssl"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -215,7 +215,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-xenial-7
+                      - llvm-toolchain-bionic-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -224,7 +224,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: clang
-          dist: xenial
+          dist: bionic
           env:
               - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -232,7 +232,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-xenial-7
+                      - llvm-toolchain-bionic-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -269,7 +269,7 @@ matrix:
           env: T=cmake
         - os: linux
           compiler: gcc
-          dist: xenial
+          dist: bionic
           env:
               - T=cmake
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -283,7 +283,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: clang
-          dist: xenial
+          dist: bionic
           env:
               - T=cmake
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -291,7 +291,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-xenial-7
+                      - llvm-toolchain-bionic-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -315,7 +315,7 @@ matrix:
                       - libssh2-1-dev
         - os: linux
           compiler: gcc
-          dist: xenial
+          dist: bionic
           env:
               - T=distcheck
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
@@ -329,7 +329,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: clang
-          dist: xenial
+          dist: bionic
           env:
               - T=fuzzer
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -337,7 +337,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-xenial-7
+                      - llvm-toolchain-bionic-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -345,7 +345,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: clang
-          dist: xenial
+          dist: bionic
           env:
               - T=tidy
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -353,7 +353,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-xenial-7
+                      - llvm-toolchain-bionic-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -362,7 +362,7 @@ matrix:
                       - libbrotli-dev
         - os: linux
           compiler: clang
-          dist: xenial
+          dist: bionic
           env:
               - T=scan-build
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
@@ -370,7 +370,7 @@ matrix:
               apt:
                   sources:
                       - *common_sources
-                      - llvm-toolchain-xenial-7
+                      - llvm-toolchain-bionic-7
                   packages:
                       - *common_packages
                       - clang-7
@@ -395,7 +395,7 @@ matrix:
         - os: linux
           arch: arm64
           compiler: gcc
-          dist: xenial
+          dist: bionic
           env:
               - T=debug C="--enable-alt-svc"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
