@@ -14,4 +14,4 @@ Specify a "" file name (zero length) to avoid loading/saving and make curl
 just handle the cache in memory.
 
 If this option is used several times, curl will load contents from all the
-files but the the last one will be used for saving.
+files but the last one will be used for saving.

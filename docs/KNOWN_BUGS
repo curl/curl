@@ -151,7 +151,7 @@ problems may have been fixed or changed somewhat since this was written!
 1.6 Unnecessary close when 401 received waiting for 100
 
  libcurl closes the connection if an HTTP 401 reply is received while it is
- waiting for the the 100-continue response.
+ waiting for the 100-continue response.
  https://curl.haxx.se/mail/lib-2008-08/0462.html
 
 1.7 Deflate error after all content was received

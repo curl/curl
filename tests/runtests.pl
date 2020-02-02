@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -3152,7 +3152,7 @@ sub subVariables {
   $$thing =~ s/%USER/$USER/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
-  # used for time-out tests and that whould work on most hosts as these
+  # used for time-out tests and that would work on most hosts as these
   # adjust for the startup/check time for this particular host. We needed
   # to do this to make the test suite run better on very slow hosts.
 

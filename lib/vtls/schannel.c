@@ -718,7 +718,7 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
     unsigned short* list_len = NULL;
 
     /* The first four bytes will be an unsigned int indicating number
-       of bytes of data in the rest of the the buffer. */
+       of bytes of data in the rest of the buffer. */
     extension_len = (unsigned int *)(&alpn_buffer[cur]);
     cur += sizeof(unsigned int);
 

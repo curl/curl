@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -548,7 +548,7 @@ static DOHcode store_cname(unsigned char *doh,
       if((index + 1) >= dohlen)
         return DOH_DNS_OUT_OF_RANGE;
 
-      /* move to the the new index */
+      /* move to the new index */
       newpos = (length & 0x3f) << 8 | doh[index + 1];
       index = newpos;
       continue;

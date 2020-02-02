@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2012 - 2017, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1164,7 +1164,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
    * the Keychain.
    *
    * As this doesn't match iOS, and apps may not want to see their client
-   * certificate saved in the the user's keychain, we use SecItemImport
+   * certificate saved in the user's keychain, we use SecItemImport
    * with a NULL keychain to avoid importing it.
    *
    * This returns a SecCertificateRef from which we can construct a
