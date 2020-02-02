@@ -1,7 +1,7 @@
 /* File: curl_crtl_init.c
  *
  * This file makes sure that the DECC Unix settings are correct for
- * the mode the the program is run in.
+ * the mode the program is run in.
  *
  * The CRTL has not been initialized at the time that these routines
  * are called, so many routines can not be called.

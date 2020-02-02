@@ -17,7 +17,7 @@ $!        me because VMS Backup can create a saveset of files from a
 $!        NFS mounted volume.
 $!
 $! First the files in the original source directory which is assumed to be
-$! under source codde control are compared with the copy directory.
+$! under source code control are compared with the copy directory.
 $!
 $! Then the files are are only in the copy directory are listed.
 $!

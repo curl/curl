@@ -548,7 +548,7 @@ static DOHcode store_cname(unsigned char *doh,
       if((index + 1) >= dohlen)
         return DOH_DNS_OUT_OF_RANGE;
 
-      /* move to the the new index */
+      /* move to the new index */
       newpos = (length & 0x3f) << 8 | doh[index + 1];
       index = newpos;
       continue;

@@ -605,7 +605,7 @@ static int ProcessRequest(struct httprequest *req)
     }
 
     if(req->testno == DOCNUMBER_NOTHING) {
-      /* Still no test case number. Try to get the the number off the last dot
+      /* Still no test case number. Try to get the number off the last dot
          instead, IE we consider the TLD to be the test number. Test 123 can
          then be written as "example.com.123". */
 

@@ -1164,7 +1164,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
    * the Keychain.
    *
    * As this doesn't match iOS, and apps may not want to see their client
-   * certificate saved in the the user's keychain, we use SecItemImport
+   * certificate saved in the user's keychain, we use SecItemImport
    * with a NULL keychain to avoid importing it.
    *
    * This returns a SecCertificateRef from which we can construct a

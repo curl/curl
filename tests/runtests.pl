@@ -3152,7 +3152,7 @@ sub subVariables {
   $$thing =~ s/%USER/$USER/g;
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
-  # used for time-out tests and that whould work on most hosts as these
+  # used for time-out tests and that would work on most hosts as these
   # adjust for the startup/check time for this particular host. We needed
   # to do this to make the test suite run better on very slow hosts.
 

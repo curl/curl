@@ -6350,7 +6350,7 @@ dnl glibc-style strerror_r:
 dnl
 dnl      char *strerror_r(int errnum, char *workbuf, size_t bufsize);
 dnl
-dnl  glibc-style strerror_r returns a pointer to the the error string,
+dnl  glibc-style strerror_r returns a pointer to the error string,
 dnl  and might use the provided workbuf as a scratch area if needed. A
 dnl  quick test on a few systems shows that it's usually not used at all.
 dnl

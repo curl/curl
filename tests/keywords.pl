@@ -42,7 +42,7 @@ my $TESTCASES; # start with no test cases
 for(@cmds) {
     $_ =~ s/[a-z\/\.]*//g;
 }
-# the the numbers from low to high
+# the numbers from low to high
 for(sort { $a <=> $b } @cmds) {
     $TESTCASES .= " $_";
 }
