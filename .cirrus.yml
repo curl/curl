@@ -5,7 +5,7 @@ task:
   name: FreeBSD
   freebsd_instance:
     matrix:
-      # There isn't a stable 13.0 image yet (2019-12)
+      # A stable 13.0 image likely won't be available before early 2021
       image_family: freebsd-13-0-snap
       image_family: freebsd-12-1
       # The stable 11.3 image causes "Agent is not responding" so use a snapshot
@@ -23,8 +23,8 @@ task:
     - case `uname -r` in
         13.0*)
         export CC=clang;
-        export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
-        export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
+        export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
+        export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
         export LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" ;;
       esac
     - ./configure --prefix="${HOME}"/install --enable-debug --with-libssh2 --with-brotli --with-gssapi --with-libidn2 --enable-manual --enable-ldap --enable-ldaps --with-librtmp --with-libmetalink --with-libpsl --with-nghttp2 || { tail -300 config.log; false; }
