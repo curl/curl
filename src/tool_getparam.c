@@ -422,7 +422,7 @@ void parse_cert_parameter(const char *cert_parameter,
       /* escaped colons and Windows drive letter colons were handled
        * above; if we're still here, this is a separating colon */
       param_place++;
-      if(strlen(param_place) > 0) {
+      if(*param_place) {
         *passphrase = strdup(param_place);
       }
       goto done;

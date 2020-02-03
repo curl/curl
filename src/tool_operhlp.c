@@ -85,7 +85,7 @@ char *add_file_name_to_url(char *url, const char *filename)
   else
     ptr = url;
   ptr = strrchr(ptr, '/');
-  if(!ptr || !strlen(++ptr)) {
+  if(!ptr || !*++ptr) {
     /* The URL has no file name part, add the local file name. In order
        to be able to do so, we have to create a new URL in another
        buffer.*/
