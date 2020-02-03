@@ -1601,9 +1601,11 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
   case AF_INET:
     pktlen = NGTCP2_MAX_PKTLEN_IPV4;
     break;
+#ifdef ENABLE_IPV6
   case AF_INET6:
     pktlen = NGTCP2_MAX_PKTLEN_IPV6;
     break;
+#endif
   default:
     assert(0);
   }
