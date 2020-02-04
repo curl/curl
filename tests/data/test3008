@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 04 Feb 2020 14:49:00 GMT
+Content-Length: 8
+Connection: close
+
+monster
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET -w json without dynamic values
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/3008 -w "%{json}\n"
+</command>
+<features>
+debug
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /3008 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+
+<stdout>
+HTTP/1.1 200 OK
+Date: Thu, 04 Feb 2020 14:49:00 GMT
+Content-Length: 8
+Connection: close
+
+monster
+{"url_effective":"http://%HOSTIP:%HTTPPORT/3008","http_code":200,"response_code":200,"http_connect":0,"size_header":89,"size_request":86,"size_download":8.000000,"size_upload":0.000000,"num_connects":1,"time_redirect":0.000000,"num_redirects":0,"ssl_verify_result":0,"proxy_ssl_verify_result":0,"filename_effective":null,"remote_ip":"127.0.0.1","remote_port":8990,"http_version":"1.1","scheme":"HTTP","curl_version":"debug"}
+</stdout>
+</verify>
+</testcase>

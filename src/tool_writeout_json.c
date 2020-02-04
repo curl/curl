@@ -56,18 +56,22 @@ static const struct mapping mappings[]={
   {"http_code", JSON_LONG, CURLINFO_RESPONSE_CODE},
   {"response_code", JSON_LONG, CURLINFO_RESPONSE_CODE},
   {"http_connect", JSON_LONG, CURLINFO_HTTP_CONNECTCODE},
+#ifndef DEBUGBUILD
   {"time_total", JSON_DOUBLE, CURLINFO_TOTAL_TIME},
   {"time_namelookup", JSON_DOUBLE, CURLINFO_NAMELOOKUP_TIME},
   {"time_connect", JSON_DOUBLE, CURLINFO_CONNECT_TIME},
   {"time_appconnect", JSON_DOUBLE, CURLINFO_APPCONNECT_TIME},
   {"time_pretransfer", JSON_DOUBLE, CURLINFO_PRETRANSFER_TIME},
   {"time_starttransfer", JSON_DOUBLE, CURLINFO_STARTTRANSFER_TIME},
+#endif
   {"size_header", JSON_LONG, CURLINFO_HEADER_SIZE},
   {"size_request", JSON_LONG, CURLINFO_REQUEST_SIZE},
   {"size_download", JSON_DOUBLE, CURLINFO_SIZE_DOWNLOAD},
   {"size_upload", JSON_DOUBLE, CURLINFO_SIZE_UPLOAD},
+#ifndef DEBUGBUILD
   {"speed_download", JSON_DOUBLE, CURLINFO_SPEED_DOWNLOAD},
   {"speed_upload", JSON_DOUBLE, CURLINFO_SPEED_UPLOAD},
+#endif
   {"content_type", JSON_STRING, CURLINFO_CONTENT_TYPE},
   {"num_connects", JSON_LONG, CURLINFO_NUM_CONNECTS},
   {"time_redirect", JSON_DOUBLE, CURLINFO_REDIRECT_TIME},
@@ -79,8 +83,10 @@ static const struct mapping mappings[]={
   {"filename_effective", JSON_FILENAME, CURLINFO_NONE},
   {"remote_ip", JSON_STRING, CURLINFO_PRIMARY_IP},
   {"remote_port", JSON_LONG, CURLINFO_PRIMARY_PORT},
+#ifndef DEBUGBUILD
   {"local_ip", JSON_STRING, CURLINFO_LOCAL_IP},
   {"local_port", JSON_LONG, CURLINFO_LOCAL_PORT},
+#endif
   {"http_version", JSON_VERSION, CURLINFO_HTTP_VERSION},
   {"scheme", JSON_STRING, CURLINFO_SCHEME},
   {NULL, JSON_NONE, CURLINFO_NONE}
@@ -193,7 +199,11 @@ void ourWriteOutJSON(CURL *curl, struct OutStruct *outs, FILE *stream)
       break;
     }
   }
+#ifndef DEBUGBUILD
   fprintf(stream, "\"curl_version\":\"%s\"}", curl_version());
+#else
+  fprintf(stream, "\"curl_version\":\"debug\"}");
+#endif
 
 #ifdef HAVE_SETLOCALE
   setlocale(LC_NUMERIC, current_locale);
