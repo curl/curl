@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -920,7 +920,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   struct Curl_easy *data = conn->data;
   curl_socket_t portsock = CURL_SOCKET_BAD;
-  char myhost[256] = "";
+  char myhost[MAX_IPADR_LEN + 1] = "";
 
   struct Curl_sockaddr_storage ss;
   Curl_addrinfo *res, *ai;
@@ -931,7 +931,6 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 * const sa6 = (void *)sa;
 #endif
-  char tmp[1024];
   static const char mode[][5] = { "EPRT", "PORT" };
   int rc;
   int error;
@@ -1246,8 +1245,10 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       break;
     }
     if(PORT == fcmd) {
+      /* large enough for [IP address],[num],[num] */
+      char target[sizeof(myhost) + 20];
       char *source = myhost;
-      char *dest = tmp;
+      char *dest = target;
 
       /* translate x.x.x.x to x,x,x,x */
       while(source && *source) {
@@ -1261,7 +1262,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
       *dest = 0;
       msnprintf(dest, 20, ",%d,%d", (int)(port>>8), (int)(port&0xff));
 
-      result = Curl_pp_sendf(&ftpc->pp, "%s %s", mode[fcmd], tmp);
+      result = Curl_pp_sendf(&ftpc->pp, "%s %s", mode[fcmd], target);
       if(result) {
         failf(data, "Failure sending PORT command: %s",
               curl_easy_strerror(result));
