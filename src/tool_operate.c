@@ -1966,11 +1966,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->disallow_username_in_url)
           my_setopt(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1L);
 
-#ifdef USE_ALTSVC
-        /* only if explicitly enabled in configure */
         if(config->altsvc)
           my_setopt_str(curl, CURLOPT_ALTSVC, config->altsvc);
-#endif
 
 #ifdef USE_METALINK
         if(!metalink && config->use_metalink) {
