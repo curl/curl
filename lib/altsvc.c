@@ -351,12 +351,12 @@ static CURLcode getalnum(const char **ptr, char *alpnbuf, size_t buflen)
   while(*p && !ISBLANK(*p) && (*p != ';') && (*p != '='))
     p++;
   len = p - protop;
+  *ptr = p;
 
   if(!len || (len >= buflen))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   memcpy(alpnbuf, protop, len);
   alpnbuf[len] = 0;
-  *ptr = p;
   return CURLE_OK;
 }
 
@@ -402,6 +402,10 @@ static time_t debugtime(void *unused)
  *
  * 'value' points to the header *value*. That's contents to the right of the
  * header name.
+ *
+ * Currently this function rejects invalid data without returning an error.
+ * Invalid host name, port number will result in the specific alternative
+ * being rejected. Unknown protocols are skipped.
  */
 CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                            struct altsvcinfo *asi, const char *value,
@@ -415,12 +419,11 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   char alpnbuf[MAX_ALTSVC_ALPNLEN] = "";
   struct altsvc *as;
   unsigned short dstport = srcport; /* the same by default */
-  const char *semip;
-  time_t maxage = 24 * 3600; /* default is 24 hours */
-  bool persist = FALSE;
   CURLcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
-  if(result)
-    return result;
+  if(result) {
+    infof(data, "Excessive alt-svc header, ignoring...\n");
+    return CURLE_OK;
+  }
 
   DEBUGASSERT(asi);
 
@@ -432,57 +435,20 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  /* The 'ma' and 'persist' flags are annoyingly meant for all alternatives
-     but are set after the list on the line. Scan for the semicolons and get
-     those fields first! */
-  semip = p;
-  do {
-    semip = strchr(semip, ';');
-    if(semip) {
-      char option[32];
-      unsigned long num;
-      char *end_ptr;
-      bool quoted = FALSE;
-      semip++; /* pass the semicolon */
-      result = getalnum(&semip, option, sizeof(option));
-      if(result)
-        break;
-      while(*semip && ISBLANK(*semip))
-        semip++;
-      if(*semip != '=')
-        continue;
-      semip++;
-      while(*semip && ISBLANK(*semip))
-        semip++;
-      if(*semip == '\"') {
-        /* quoted value */
-        semip++;
-        quoted = TRUE;
-      }
-      num = strtoul(semip, &end_ptr, 10);
-      if((end_ptr != semip) && num && (num < ULONG_MAX)) {
-        if(strcasecompare("ma", option))
-          maxage = num;
-        else if(strcasecompare("persist", option) && (num == 1))
-          persist = TRUE;
-        if(quoted && (*end_ptr == '\"'))
-          end_ptr++;
-      }
-      semip = end_ptr;
-    }
-  } while(semip);
-
   do {
     if(*p == '=') {
       /* [protocol]="[host][:port]" */
       dstalpnid = alpn2alpnid(alpnbuf);
-      if(!dstalpnid) {
-        infof(data, "Unknown alt-svc protocol \"%s\", ignoring...\n", alpnbuf);
-        return CURLE_OK;
-      }
       p++;
       if(*p == '\"') {
         const char *dsthost;
+        const char *value_ptr;
+        char option[32];
+        unsigned long num;
+        char *end_ptr;
+        bool quoted = FALSE;
+        time_t maxage = 24 * 3600; /* default is 24 hours */
+        bool persist = FALSE;
         p++;
         if(*p != ':') {
           /* host name starts here */
@@ -490,11 +456,15 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           while(*p && (ISALNUM(*p) || (*p == '.') || (*p == '-')))
             p++;
           len = p - hostp;
-          if(!len || (len >= MAX_ALTSVC_HOSTLEN))
-            return CURLE_BAD_FUNCTION_ARGUMENT;
-          memcpy(namebuf, hostp, len);
-          namebuf[len] = 0;
-          dsthost = namebuf;
+          if(!len || (len >= MAX_ALTSVC_HOSTLEN)) {
+            infof(data, "Excessive alt-svc host name, ignoring...\n");
+            dstalpnid = ALPN_none;
+          }
+          else {
+            memcpy(namebuf, hostp, len);
+            namebuf[len] = 0;
+            dsthost = namebuf;
+          }
         }
         else {
           /* no destination name, use source host */
@@ -502,31 +472,86 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         }
         if(*p == ':') {
           /* a port number */
-          char *end_ptr;
           unsigned long port = strtoul(++p, &end_ptr, 10);
           if(port > USHRT_MAX || end_ptr == p || *end_ptr != '\"') {
             infof(data, "Unknown alt-svc port number, ignoring...\n");
-            return CURLE_OK;
+            dstalpnid = ALPN_none;
           }
           p = end_ptr;
           dstport = curlx_ultous(port);
         }
         if(*p++ != '\"')
-          return CURLE_BAD_FUNCTION_ARGUMENT;
-        as = altsvc_createid(srchost, dsthost,
-                             srcalpnid, dstalpnid,
-                             srcport, dstport);
-        if(as) {
-          /* The expires time also needs to take the Age: value (if any) into
-             account. [See RFC 7838 section 3.1] */
-          as->expires = maxage + time(NULL);
-          as->persist = persist;
-          Curl_llist_insert_next(&asi->list, asi->list.tail, as, &as->node);
-          asi->num++; /* one more entry */
-          infof(data, "Added alt-svc: %s:%d over %s\n", dsthost, dstport,
-                Curl_alpnid2str(dstalpnid));
+          break;
+        /* Handle the optional 'ma' and 'persist' flags. Unknown flags
+           are skipped. */
+        for(;;) {
+          while(*p && ISBLANK(*p) && *p != ';' && *p != ',')
+            p++;
+          if(!*p || *p == ',')
+            break;
+          p++; /* pass the semicolon */
+          if(!*p)
+            break;
+          result = getalnum(&p, option, sizeof(option));
+          if(result) {
+            /* skip option if name is too long */
+            option[0] = '\0';
+          }
+          while(*p && ISBLANK(*p))
+            p++;
+          if(*p != '=')
+            return CURLE_OK;
+          p++;
+          while(*p && ISBLANK(*p))
+            p++;
+          if(!*p)
+            return CURLE_OK;
+          if(*p == '\"') {
+            /* quoted value */
+            p++;
+            quoted = TRUE;
+          }
+          value_ptr = p;
+          if(quoted) {
+            while(*p && *p != '\"')
+              p++;
+            if(!*p++)
+              return CURLE_OK;
+          }
+          else {
+            while(*p && !ISBLANK(*p) && *p!= ';' && *p != ',')
+              p++;
+          }
+          num = strtoul(value_ptr, &end_ptr, 10);
+          if((end_ptr != value_ptr) && (num < ULONG_MAX)) {
+            if(strcasecompare("ma", option))
+              maxage = num;
+            else if(strcasecompare("persist", option) && (num == 1))
+              persist = TRUE;
+          }
+        }
+        if(dstalpnid) {
+          as = altsvc_createid(srchost, dsthost,
+                               srcalpnid, dstalpnid,
+                               srcport, dstport);
+          if(as) {
+            /* The expires time also needs to take the Age: value (if any) into
+               account. [See RFC 7838 section 3.1] */
+            as->expires = maxage + time(NULL);
+            as->persist = persist;
+            Curl_llist_insert_next(&asi->list, asi->list.tail, as, &as->node);
+            asi->num++; /* one more entry */
+            infof(data, "Added alt-svc: %s:%d over %s\n", dsthost, dstport,
+                  Curl_alpnid2str(dstalpnid));
+          }
+        }
+        else {
+          infof(data, "Unknown alt-svc protocol \"%s\", skipping...\n",
+                alpnbuf);
         }
       }
+      else
+        break;
       /* after the double quote there can be a comma if there's another
          string or a semicolon if no more */
       if(*p == ',') {
@@ -534,11 +559,11 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
         p++;
         result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
         if(result)
-          /* failed to parse, but since we already did at least one host we
-             return OK */
-          return CURLE_OK;
+          break;
       }
     }
+    else
+      break;
   } while(*p && (*p != ';') && (*p != '\n') && (*p != '\r'));
 
   return CURLE_OK;
