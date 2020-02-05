@@ -552,8 +552,10 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   conn->data = data; /* ensure the connection uses this transfer now */
 
-  /* Stop the resolver and free its own resources (but not dns_entry yet). */
-  Curl_resolver_kill(conn);
+  /* Cancel the resolver (but not dns_entry yet). We used to call
+     Curl_resolver_kill here but that blocks waiting for incomplete resolve
+     threads (eg getaddrinfo has not returned), which may take a while. */
+  Curl_resolver_cancel(conn);
 
   /* Cleanup possible redirect junk */
   Curl_safefree(data->req.newurl);

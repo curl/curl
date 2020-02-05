@@ -509,7 +509,7 @@ struct Curl_async {
   int port;
   struct Curl_dns_entry *dns;
   int status; /* if done is TRUE, this is the status from the callback */
-  void *os_specific;  /* 'struct thread_data' for Windows */
+  void *os_specific;  /* resolver backend / os specific data */
   BIT(done);  /* set TRUE when the lookup is complete */
 };
 
