@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2013-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2013-2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -29,9 +29,13 @@
 
 start=$1
 
-if test -z "$start"; then
+if test "$start" = "-h"; then
     echo "Usage: $0 <since this tag/hash> [--releasenotes]"
     exit
+fi
+if test -z "$start"; then
+    start=`git tag --sort=taggerdate | tail -1`;
+    echo "Since $start:"
 fi
 
 # filter out Author:, Commit: and *by: lines
