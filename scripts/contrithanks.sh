@@ -28,8 +28,12 @@
 
 start=$1
 
-if test -z "$start"; then
+if test "$start" = "-h"; then
   echo "Usage: $0 <since this tag/hash>"
+  exit
+fi
+if test -z "$start"; then
+  start=`git tag --sort=taggerdate | tail -1`;
 fi
 
 cat ./docs/THANKS
