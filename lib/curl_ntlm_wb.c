@@ -189,7 +189,7 @@ static CURLcode ntlm_wb_init(struct Curl_easy *data, struct ntlmdata *ntlm,
     goto done;
   }
 
-  if(socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds)) {
+  if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, sockfds)) {
     failf(data, "Could not open socket pair. errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     goto done;
