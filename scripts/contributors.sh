@@ -38,6 +38,11 @@ if test -z "$start"; then
     echo "Since $start:"
 fi
 
+# We also include curl-www if possible. Override by setting CURLWWW
+if [ -z "$CURLWWW" ] ; then
+    CURLWWW=../curl-www
+fi
+
 # filter out Author:, Commit: and *by: lines
 # cut off the email parts
 # split list of names at comma
@@ -47,8 +52,15 @@ fi
 # only count names with a space (ie more than one word)
 # sort all unique names
 # awk them into RELEASE-NOTES format
+
 (
-git log --pretty=full --use-mailmap $start..HEAD | \
+ (
+  git log --pretty=full --use-mailmap $start..HEAD
+  if [ -d "$CURLWWW" ]
+  then
+   git -C ../curl-www log --pretty=full --use-mailmap $start..HEAD
+  fi
+ ) | \
 egrep -ai '(^Author|^Commit|by):' | \
 cut -d: -f2- | \
 cut '-d(' -f1 | \
