@@ -114,7 +114,9 @@ struct orphaned_threads {
   /* Count of threads in the list that are in the process of or have exited.
      (ie .exiting member of the thread_list item is set true) */
   size_t exiting_count;
-} orphaned_threads;
+};
+
+static struct orphaned_threads orphaned_threads;
 
 /* Flags for wait_and_destroy_orphaned_threads().
    They're documented above the function definition. */
