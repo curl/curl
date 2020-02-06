@@ -78,7 +78,7 @@ Content-Type: application/x-www-form-urlencoded
 
 POST /2067 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2067", response="67b97af219c92fa7e8685e5bebb8e74892f6c6792e911c52bd2dfbf0b49272eb", algorithm="SHA-256"
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2067", response="67b97af219c92fa7e8685e5bebb8e74892f6c6792e911c52bd2dfbf0b49272eb", algorithm=SHA-256
 Accept: */*
 Content-Length: 11
 Content-Type: application/x-www-form-urlencoded

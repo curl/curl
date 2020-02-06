@@ -95,7 +95,7 @@ Content-Length: 0
 
 GET http://%HOSTIP:%HTTPPORT/2058 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2058", response="fbed69f9f3fd304c8f1acb1a43eb32688b933c0e28055c16b926cbcec070aeed", algorithm="SHA-256"
+Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/2058", response="fbed69f9f3fd304c8f1acb1a43eb32688b933c0e28055c16b926cbcec070aeed", algorithm=SHA-256
 Content-Range: bytes 2-4/5
 Accept: */*
 Proxy-Connection: Keep-Alive
