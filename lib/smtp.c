@@ -29,6 +29,7 @@
  * RFC5321 SMTP protocol
  * RFC5890 Internationalized Domain Names for Applications (IDNA)
  * RFC6531 SMTP Extension for Internationalized Email
+ * RFC6532 Internationalized Email Headers
  * RFC6749 OAuth 2.0 Authorization Framework
  * RFC8314 Use of TLS for Email Submission and Access
  * Draft   SMTP URL Interface   <draft-earhart-url-smtp-00.txt>
@@ -801,6 +802,10 @@ static CURLcode smtp_state_ehlo_resp(struct connectdata *conn, int smtpcode,
     /* Does the server support the SIZE capability? */
     else if(len >= 4 && !memcmp(line, "SIZE", 4))
       smtpc->size_supported = TRUE;
+
+    /* Does the server support the UTF-8 capability? */
+    else if(len >= 8 && !memcmp(line, "SMTPUTF8", 8))
+      smtpc->utf8_supported = TRUE;
 
     /* Does the server support authentication? */
     else if(len >= 5 && !memcmp(line, "AUTH ", 5)) {
