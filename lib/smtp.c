@@ -549,8 +549,29 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
 
   /* Calculate the optional AUTH parameter */
   if(data->set.str[STRING_MAIL_AUTH] && conn->proto.smtpc.sasl.authused) {
-    if(data->set.str[STRING_MAIL_AUTH][0] != '\0')
-      auth = aprintf("%s", data->set.str[STRING_MAIL_AUTH]);
+    if(data->set.str[STRING_MAIL_AUTH][0] != '\0') {
+      char *address = NULL;
+      struct hostname host = { NULL, NULL, NULL, NULL };
+
+      /* Parse the AUTH mailbox into the local address and host name parts,
+         converting the host name to an IDN A-label if necessary */
+      result = smtp_parse_address(conn, data->set.str[STRING_MAIL_AUTH],
+                                  &address, &host);
+      if(result)
+        return result;
+
+      if(host.name) {
+        from = aprintf("<%s@%s>", address, host.name);
+
+        Curl_free_idnconverted_hostname(&host);
+      }
+      else
+        /* An invalid mailbox was provided but we'll simply let the server
+           worry about it */
+        auth = aprintf("<%s>", address);
+
+      free(address);
+    }
     else
       /* Empty AUTH, RFC-2554, sect. 5 */
       auth = strdup("<>");
@@ -584,6 +605,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
     if(result) {
       free(from);
       free(auth);
+
       return result;
     }
 
