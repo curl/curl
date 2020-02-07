@@ -74,6 +74,8 @@ struct smtp_conn {
   bool tls_supported;      /* StartTLS capability supported by server */
   bool size_supported;     /* If server supports SIZE extension according to
                               RFC 1870 */
+  bool utf8_supported;     /* If server supports SMTPUTF8 extension according
+                              to RFC 6531 */
   bool auth_supported;     /* AUTH capability supported by server */
 };
 
