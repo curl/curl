@@ -27,6 +27,8 @@
  * RFC4752 The Kerberos V5 ("GSSAPI") SASL Mechanism
  * RFC4954 SMTP Authentication
  * RFC5321 SMTP protocol
+ * RFC5890 Internationalized Domain Names for Applications (IDNA)
+ * RFC6531 SMTP Extension for Internationalized Email
  * RFC6749 OAuth 2.0 Authorization Framework
  * RFC8314 Use of TLS for Email Submission and Access
  * Draft   SMTP URL Interface   <draft-earhart-url-smtp-00.txt>
@@ -101,6 +103,8 @@ static CURLcode smtp_setup_connection(struct connectdata *conn);
 static CURLcode smtp_parse_url_options(struct connectdata *conn);
 static CURLcode smtp_parse_url_path(struct connectdata *conn);
 static CURLcode smtp_parse_custom_request(struct connectdata *conn);
+static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
+                                   char **address, struct hostname *host);
 static CURLcode smtp_perform_auth(struct connectdata *conn, const char *mech,
                                   const char *initresp);
 static CURLcode smtp_continue_auth(struct connectdata *conn, const char *resp);
@@ -516,10 +520,29 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
   if(!data->set.str[STRING_MAIL_FROM])
     /* Null reverse-path, RFC-5321, sect. 3.6.3 */
     from = strdup("<>");
-  else if(data->set.str[STRING_MAIL_FROM][0] == '<')
-    from = aprintf("%s", data->set.str[STRING_MAIL_FROM]);
-  else
-    from = aprintf("<%s>", data->set.str[STRING_MAIL_FROM]);
+  else {
+    char *address = NULL;
+    struct hostname host = { NULL, NULL, NULL, NULL };
+
+    /* Parse the FROM mailbox into the local address and host name parts,
+       converting the host name to an IDN A-label if necessary */
+    result = smtp_parse_address(conn, data->set.str[STRING_MAIL_FROM],
+                                &address, &host);
+    if(result)
+      return result;
+
+    if(host.name) {
+      from = aprintf("<%s@%s>", address, host.name);
+
+      Curl_free_idnconverted_hostname(&host);
+    }
+    else
+      /* An invalid mailbox was provided but we'll simply let the server worry
+         about that and reply with a 501 error */
+      from = aprintf("<%s>", address);
+
+    free(address);
+  }
 
   if(!from)
     return CURLE_OUT_OF_MEMORY;
@@ -1562,6 +1585,76 @@ static CURLcode smtp_parse_custom_request(struct connectdata *conn)
   /* URL decode the custom request */
   if(custom)
     result = Curl_urldecode(data, custom, 0, &smtp->custom, NULL, TRUE);
+
+  return result;
+}
+
+/***********************************************************************
+ *
+ * smtp_parse_address()
+ *
+ * Parse the fully qualified mailbox address into a local address part and the
+ * host name, converting the host name to an IDN A-label, as per RFC-5890, if
+ * necessary.
+ *
+ * Parameters:
+ *
+ * conn  [in]              - The connection handle.
+ * fqma  [in]              - The fully qualified mailbox address (which may or
+ *                           may not contain UTF-8 characters).
+ * address        [in/out] - A new allocated buffer which holds the local
+ *                           address part of the mailbox. This buffer must be
+ *                           free'ed by the caller.
+ * host           [in/out] - The host name structure that holds the original,
+ *                           and optionally encoded, host name.
+ *                           Curl_free_idnconverted_hostname() must be called
+ *                           once the caller has finished with the structure.
+ *
+ * Returns CURLE_OK on success.
+ *
+ * Notes:
+ *
+ * If an mailbox '@' seperator cannot be located then the mailbox is considered
+ * to be either a local mailbox or an invalid mailbox (depending on what the
+ * calling function deems it to be) then the input will simply be returned in
+ * the address part with the host name being NULL.
+ */
+static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
+                                   char **address, struct hostname *host)
+{
+  CURLcode result = CURLE_OK;
+  size_t length;
+
+  /* Duplicate the fully qualified email address so we can manipulate it,
+     ensuring it doesn't contain the delimiters if specified */
+  char *dup = strdup(fqma[0] == '<' ? fqma + 1  : fqma);
+  if(!dup)
+    return CURLE_OUT_OF_MEMORY;
+
+  length = strlen(dup);
+  if(dup[length - 1] == '>')
+    dup[length - 1] = '\0';
+
+  /* Extract the host name from the addresss (if we can) */
+  host->name = strpbrk(dup, "@");
+  if(host->name) {
+    *host->name = '\0';
+    host->name = host->name + 1;
+
+    /* Convert the host name to IDN ACE */
+    result = Curl_idnconvert_hostname(conn, host);
+    if(result) {
+      free(dup);
+      host->name = NULL;
+
+      return result;
+    }
+  }
+  else
+    host->name = NULL;
+
+  /* Extract the local address from the mailbox */
+  *address = dup;
 
   return result;
 }
