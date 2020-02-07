@@ -2,6 +2,7 @@
 <info>
 <keywords>
 SMTP
+IDN
 </keywords>
 </info>
 
@@ -17,7 +18,7 @@ SMTP
 smtp
 </server>
 <features>
-!idn
+idn
 </features>
 <setenv>
 LC_ALL=en_US.UTF-8
@@ -36,21 +37,26 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/959 --mail-rcpt recipient@example.com --mail-from sender@åäö.se -T -
+smtp://%HOSTIP:%SMTPPORT/962 --mail-rcpt recipient@example.com --mail-from sender@åäö.se -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-# 55 - CURLE_SEND_ERROR
-<errorcode>
-55
-</errorcode>
 <protocol>
-EHLO 959
-MAIL FROM:<sender@åäö.se>
+EHLO 962
+MAIL FROM:<sender@xn--4cab6c.se>
+RCPT TO:<recipient@example.com>
+DATA
 QUIT
 </protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
 </verify>
 </testcase>
