@@ -128,7 +128,6 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "memdebug.h"
 
 static void conn_free(struct connectdata *conn);
-static void free_idnconverted_hostname(struct hostname *host);
 static unsigned int get_protocol_family(unsigned int protocol);
 
 /* Some parts of the code (e.g. chunked encoding) assume this buffer has at
@@ -714,10 +713,10 @@ static void conn_free(struct connectdata *conn)
   if(!conn)
     return;
 
-  free_idnconverted_hostname(&conn->host);
-  free_idnconverted_hostname(&conn->conn_to_host);
-  free_idnconverted_hostname(&conn->http_proxy.host);
-  free_idnconverted_hostname(&conn->socks_proxy.host);
+  Curl_free_idnconverted_hostname(&conn->host);
+  Curl_free_idnconverted_hostname(&conn->conn_to_host);
+  Curl_free_idnconverted_hostname(&conn->http_proxy.host);
+  Curl_free_idnconverted_hostname(&conn->socks_proxy.host);
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
@@ -1437,7 +1436,7 @@ void Curl_verboseconnect(struct connectdata *conn)
 /*
  * Helpers for IDNA conversions.
  */
-static bool is_ASCII_name(const char *hostname)
+bool Curl_is_ASCII_name(const char *hostname)
 {
   const unsigned char *ch = (const unsigned char *)hostname;
 
@@ -1465,8 +1464,8 @@ static void strip_trailing_dot(struct hostname *host)
 /*
  * Perform any necessary IDN conversion of hostname
  */
-static CURLcode idnconvert_hostname(struct connectdata *conn,
-                                    struct hostname *host)
+CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
+                                  struct hostname *host)
 {
   struct Curl_easy *data = conn->data;
 
@@ -1481,7 +1480,7 @@ static CURLcode idnconvert_hostname(struct connectdata *conn,
   host->dispname = host->name;
 
   /* Check name for non-ASCII and convert hostname to ACE form if we can */
-  if(!is_ASCII_name(host->name)) {
+  if(!Curl_is_ASCII_name(host->name)) {
 #ifdef USE_LIBIDN2
     if(idn2_check_version(IDN2_VERSION)) {
       char *ace_hostname = NULL;
@@ -1529,7 +1528,7 @@ static CURLcode idnconvert_hostname(struct connectdata *conn,
 /*
  * Frees data allocated by idnconvert_hostname()
  */
-static void free_idnconverted_hostname(struct hostname *host)
+void Curl_free_idnconverted_hostname(struct hostname *host)
 {
 #if defined(USE_LIBIDN2)
   if(host->encalloc) {
@@ -3234,8 +3233,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
 static void reuse_conn(struct connectdata *old_conn,
                        struct connectdata *conn)
 {
-  free_idnconverted_hostname(&old_conn->http_proxy.host);
-  free_idnconverted_hostname(&old_conn->socks_proxy.host);
+  Curl_free_idnconverted_hostname(&old_conn->http_proxy.host);
+  Curl_free_idnconverted_hostname(&old_conn->socks_proxy.host);
 
   free(old_conn->http_proxy.host.rawalloc);
   free(old_conn->socks_proxy.host.rawalloc);
@@ -3279,8 +3278,8 @@ static void reuse_conn(struct connectdata *old_conn,
 
   /* host can change, when doing keepalive with a proxy or if the case is
      different this time etc */
-  free_idnconverted_hostname(&conn->host);
-  free_idnconverted_hostname(&conn->conn_to_host);
+  Curl_free_idnconverted_hostname(&conn->host);
+  Curl_free_idnconverted_hostname(&conn->conn_to_host);
   Curl_safefree(conn->host.rawalloc);
   Curl_safefree(conn->conn_to_host.rawalloc);
   conn->host = old_conn->host;
@@ -3439,21 +3438,21 @@ static CURLcode create_conn(struct Curl_easy *data,
   /*************************************************************
    * IDN-convert the hostnames
    *************************************************************/
-  result = idnconvert_hostname(conn, &conn->host);
+  result = Curl_idnconvert_hostname(conn, &conn->host);
   if(result)
     goto out;
   if(conn->bits.conn_to_host) {
-    result = idnconvert_hostname(conn, &conn->conn_to_host);
+    result = Curl_idnconvert_hostname(conn, &conn->conn_to_host);
     if(result)
       goto out;
   }
   if(conn->bits.httpproxy) {
-    result = idnconvert_hostname(conn, &conn->http_proxy.host);
+    result = Curl_idnconvert_hostname(conn, &conn->http_proxy.host);
     if(result)
       goto out;
   }
   if(conn->bits.socksproxy) {
-    result = idnconvert_hostname(conn, &conn->socks_proxy.host);
+    result = Curl_idnconvert_hostname(conn, &conn->socks_proxy.host);
     if(result)
       goto out;
   }

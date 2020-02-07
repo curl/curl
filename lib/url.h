@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -61,6 +61,11 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **optionsptr);
 
 const struct Curl_handler *Curl_builtin_scheme(const char *scheme);
+
+bool Curl_is_ASCII_name(const char *hostname);
+CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
+                                  struct hostname *host);
+void Curl_free_idnconverted_hostname(struct hostname *host);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
