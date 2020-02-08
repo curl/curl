@@ -1040,7 +1040,13 @@ sub VRFY_smtp {
             my @data = getreplydata($smtp_client);
 
             if(!@data) {
-              push @data, "250 <$username\@example.com>\r\n"
+                if ($username !~
+                    /^([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})$/) {
+                  push @data, "250 <$username\@example.com>\r\n"
+                }
+                else {
+                  push @data, "250 <$username>\r\n"
+                }
             }
 
             for my $d (@data) {
