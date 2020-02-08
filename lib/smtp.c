@@ -659,14 +659,28 @@ static CURLcode smtp_perform_rcpt_to(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct SMTP *smtp = data->req.protop;
+  char *address = NULL;
+  struct hostname host = { NULL, NULL, NULL, NULL };
+
+  /* Parse the recipient mailbox into the local address and host name parts,
+     converting the host name to an IDN A-label if necessary */
+  result = smtp_parse_address(conn, smtp->rcpt->data,
+                              &address, &host);
+  if(result)
+    return result;
 
   /* Send the RCPT TO command */
-  if(smtp->rcpt->data[0] == '<')
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:%s",
-                           smtp->rcpt->data);
+  if(host.name)
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s@%s>", address,
+                           host.name);
   else
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>",
-                           smtp->rcpt->data);
+    /* An invalid mailbox was provided but we'll simply let the server worry
+       about that and reply with a 501 error */
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "RCPT TO:<%s>", address);
+
+  Curl_free_idnconverted_hostname(&host);
+  free(address);
+
   if(!result)
     state(conn, SMTP_RCPT);
 

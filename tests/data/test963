@@ -2,6 +2,7 @@
 <info>
 <keywords>
 SMTP
+IDN
 </keywords>
 </info>
 
@@ -17,7 +18,7 @@ SMTP
 smtp
 </server>
 <features>
-!idn
+idn
 </features>
 <setenv>
 LC_ALL=en_US.UTF-8
@@ -27,7 +28,7 @@ LC_CTYPE=en_US.UTF-8
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
  <name>
-SMTP without SMTPUTF8 support - UTF-8 based recipient (host part only)
+SMTP without SMTPUTF8 support (IDN Enabked) - UTF-8 based recipient (host part only)
  </name>
 <stdin>
 From: different
@@ -36,22 +37,26 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/960 --mail-rcpt recipient@åäö.se --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/963 --mail-rcpt recipient@åäö.se --mail-from sender@example.com -T -
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-# 55 - CURLE_SEND_ERROR
-<errorcode>
-55
-</errorcode>
 <protocol>
-EHLO 960
+EHLO 963
 MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@åäö.se>
+RCPT TO:<recipient@xn--4cab6c.se>
+DATA
 QUIT
 </protocol>
+<upload>
+From: different
+To: another
+
+body
+.
+</upload>
 </verify>
 </testcase>
