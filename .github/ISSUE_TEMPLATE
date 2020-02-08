@@ -15,3 +15,5 @@
 [curl -V output]
 
 ### operating system
+
+<!-- On Unix please post the output of "uname -a" -->
