@@ -91,6 +91,17 @@ char *curl_version(void)
   char *outp;
   size_t outlen;
   const char *src[14];
+
+#ifdef DEBUGBUILD
+  /* Override version string when environment variable CURL_VERSION is set */
+  const char *debugversion = getenv("CURL_VERSION");
+  if(debugversion) {
+    strncpy(out, debugversion, sizeof(out)-1);
+    out[sizeof(out)-1] = '\0';
+    return out;
+  }
+#endif
+
 #ifdef USE_SSL
   char ssl_version[40];
 #endif

@@ -1,0 +1,77 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+debug
+</features>
+<setenv>
+CURL_TIME=13
+CURL_VERSION=curl-unit-test-fake-version
+</setenv>
+ <name>
+HTTP GET with JSON output
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/970 --write-out '%{json}'
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /970 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<stdout nonewline="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+{"url_effective":"http://127.0.0.1:8990/970","http_code":200,"response_code":200,"http_connect":0,"time_total":0.000013,"time_namelookup":0.000013,"time_connect":0.000013,"time_appconnect":0.000013,"time_pretransfer":0.000013,"time_starttransfer":0.000013,"size_header":250,"size_request":85,"size_download":6,"size_upload":0,"speed_download":0.000013,"speed_upload":0.000013,"content_type":"text/html","num_connects":1,"time_redirect":0.000013,"num_redirects":0,"ssl_verify_result":0,"proxy_ssl_verify_result":0,"filename_effective":null,"remote_ip":"127.0.0.1","remote_port":8990,"local_ip":"127.0.0.1","local_port":13,"http_version":"1.1","scheme":"HTTP","curl_version":"curl-unit-test-fake-version"}
+</stdout>
+</verify>
+</testcase>
