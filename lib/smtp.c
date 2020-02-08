@@ -485,13 +485,35 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
   struct Curl_easy *data = conn->data;
   struct SMTP *smtp = data->req.protop;
 
-  /* Send the command */
-  if(smtp->rcpt)
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s",
-                           smtp->custom && smtp->custom[0] != '\0' ?
-                           smtp->custom : "VRFY",
-                           smtp->rcpt->data);
+  if(smtp->rcpt) {
+    if((!smtp->custom) || (!smtp->custom[0])) {
+      char *address = NULL;
+      struct hostname host = { NULL, NULL, NULL, NULL };
+
+      /* Parse the mailbox to verify into the local address and host name
+         parts, converting the host name to an IDN A-label if necessary */
+      result = smtp_parse_address(conn, smtp->rcpt->data,
+                                  &address, &host);
+      if(result)
+        return result;
+
+      /* Send the VRFY command (Note: The host name part may be absent when the
+         host is a local system) */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "VRFY %s%s%s",
+                             address,
+                             host.name ? "@" : "",
+                             host.name ? host.name : "");
+
+      Curl_free_idnconverted_hostname(&host);
+      free(address);
+    }
+    else
+      /* Send the custom recipient based command such as the EXPN command */
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s", smtp->custom,
+                             smtp->rcpt->data);
+  }
   else
+    /* Send the non-recipient based command such as HELP */
     result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s",
                            smtp->custom && smtp->custom[0] != '\0' ?
                            smtp->custom : "HELP");

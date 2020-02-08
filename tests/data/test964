@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 VRFY
+IDN
 </keywords>
 </info>
 
@@ -18,7 +19,7 @@ VRFY
 smtp
 </server>
 <features>
-!idn
+idn
 </features>
 <setenv>
 LC_ALL=en_US.UTF-8
@@ -28,23 +29,19 @@ LC_CTYPE=en_US.UTF-8
 perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
 </precheck>
  <name>
-SMTP external VRFY without SMTPUTF8 support - UTF-8 based recipient (host part only)
+SMTP external VRFY without SMTPUTF8 support (IDN Enabled) - UTF-8 based recipient (host part only)
  </name>
 <command>
-smtp://%HOSTIP:%SMTPPORT/961 --mail-rcpt user@åäö.se
+smtp://%HOSTIP:%SMTPPORT/964 --mail-rcpt user@åäö.se
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-# 56 - CURLE_RECV_ERROR
-<errorcode>
-56
-</errorcode>
 <protocol>
-EHLO 961
-VRFY user@åäö.se
+EHLO 964
+VRFY user@xn--4cab6c.se
 QUIT
 </protocol>
 </verify>
