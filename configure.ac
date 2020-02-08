@@ -3723,9 +3723,9 @@ if test X"$want_quiche" != Xno; then
         LIBS=$CLEANLIBS
     )
   else
-    dnl no nghttp3 pkg-config found, deal with it
+    dnl no quiche pkg-config found, deal with it
     if test X"$want_quiche" != Xdefault; then
-      dnl To avoid link errors, we do not allow --with-nghttp3 without
+      dnl To avoid link errors, we do not allow --with-quiche without
       dnl a pkgconfig file
       AC_MSG_ERROR([--with-quiche was specified but could not find quiche pkg-config file.])
     fi
