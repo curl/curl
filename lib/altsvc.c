@@ -215,7 +215,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   return result;
 
   fail:
-  free(asi->filename);
+  Curl_safefree(asi->filename);
   free(line);
   fclose(fp);
   return CURLE_OUT_OF_MEMORY;
