@@ -730,8 +730,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
        we don't leave a half-baked one around */
     if(easy_owns_conn) {
 
-      /* multi_done() clears the conn->data field to lose the association
-         between the easy handle and the connection
+      /* multi_done() clears the association between the easy handle and the
+         connection.
 
          Note that this ignores the return code simply because there's
          nothing really useful to do with it anyway! */
