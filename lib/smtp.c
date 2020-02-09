@@ -487,15 +487,15 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
   struct SMTP *smtp = data->req.protop;
 
   if(smtp->rcpt) {
+    /* We notify the server we are sending UTF-8 data if a) it supports the
+       SMTPUTF8 extension and b) The mailbox contains UTF-8 charaacters, in
+       either the local address or host name parts. This is regardless of
+       whether the host name is encoded using IDN ACE */
+    bool utf8 = FALSE;
+
     if((!smtp->custom) || (!smtp->custom[0])) {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
-
-      /* We notify the server we are sending UTF-8 data if a) it supports the
-         SMTPUTF8 extension and b) The mailbox contains UTF-8 charaacters, in
-         either the local address or host name parts. This is regardless of
-         whether the host name is encoded using IDN ACE */
-      bool utf8 = FALSE;
 
       /* Parse the mailbox to verify into the local address and host name
          parts, converting the host name to an IDN A-label if necessary */
@@ -521,10 +521,17 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
       Curl_free_idnconverted_hostname(&host);
       free(address);
     }
-    else
+    else {
+      /* Establish whether we should report that we support SMTPUTF8 for EXPN
+         commands to the server as per RFC-6531 sect. 3.1 point 6 */
+      utf8 = (conn->proto.smtpc.utf8_supported) &&
+             (!strcmp(smtp->custom, "EXPN"));
+
       /* Send the custom recipient based command such as the EXPN command */
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s", smtp->custom,
-                             smtp->rcpt->data);
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s %s%s", smtp->custom,
+                             smtp->rcpt->data,
+                             utf8 ? " SMTPUTF8" : "");
+    }
   }
   else
     /* Send the non-recipient based command such as HELP */
