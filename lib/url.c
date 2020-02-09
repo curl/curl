@@ -1514,7 +1514,9 @@ static CURLcode idnconvert_hostname(struct connectdata *conn,
       host->name = host->encalloc;
     }
     else {
-      failf(data, "Failed to convert %s to ACE;\n", host->name);
+      char buffer[STRERROR_LEN];
+      failf(data, "Failed to convert %s to ACE; %s\n", host->name,
+            Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       return CURLE_URL_MALFORMAT;
     }
 #else
