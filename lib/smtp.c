@@ -584,18 +584,13 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
   }
 
   /* Send the MAIL command */
-  if(!auth && !size)
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s", from);
-  else if(auth && !size)
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s AUTH=%s", from, auth);
-  else if(auth && size)
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s AUTH=%s SIZE=%s", from, auth, size);
-  else
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                           "MAIL FROM:%s SIZE=%s", from, size);
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp,
+                         "MAIL FROM:%s%s%s%s%s",
+                         from,                 /* Mandatory */
+                         auth ? " AUTH=" : "", /* Optional (on AUTH support) */
+                         auth ? auth : "",
+                         size ? " SIZE=" : "", /* Optional (on SIZE support) */
+                         size ? size : "");
 
   free(from);
   free(auth);
