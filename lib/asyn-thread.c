@@ -720,7 +720,6 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
                                          int *waitp)
 {
   struct addrinfo hints;
-  char sbuf[12];
   int pf = PF_INET;
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
@@ -752,8 +751,6 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   hints.ai_family = pf;
   hints.ai_socktype = (conn->transport == TRNSPRT_TCP)?
     SOCK_STREAM : SOCK_DGRAM;
-
-  msnprintf(sbuf, sizeof(sbuf), "%d", port);
 
   reslv->start = Curl_now();
   /* fire up a new resolver thread! */
