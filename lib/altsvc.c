@@ -185,7 +185,16 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 {
   CURLcode result = CURLE_OK;
   char *line = NULL;
-  FILE *fp = fopen(file, FOPEN_READTEXT);
+  FILE *fp;
+
+  /* we need a private copy of the file name so that the altsvc cache file
+     name survives an easy handle reset */
+  free(asi->filename);
+  asi->filename = strdup(file);
+  if(!asi->filename)
+    return CURLE_OUT_OF_MEMORY;
+
+  fp = fopen(file, FOPEN_READTEXT);
   if(fp) {
     line = malloc(MAX_ALTSVC_LINE);
     if(!line)
@@ -206,6 +215,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   return result;
 
   fail:
+  Curl_safefree(asi->filename);
   free(line);
   fclose(fp);
   return CURLE_OUT_OF_MEMORY;
@@ -299,6 +309,7 @@ void Curl_altsvc_cleanup(struct altsvcinfo *altsvc)
       n = e->next;
       altsvc_free(as);
     }
+    free(altsvc->filename);
     free(altsvc);
   }
 }
@@ -316,6 +327,10 @@ CURLcode Curl_altsvc_save(struct altsvcinfo *altsvc, const char *file)
   if(!altsvc)
     /* no cache activated */
     return CURLE_OK;
+
+  /* if not new name is given, use the one we stored from the load */
+  if(!file && altsvc->filename)
+    file = altsvc->filename;
 
   if((altsvc->flags & CURLALTSVC_READONLYFILE) || !file || !file[0])
     /* marked as read-only, no file or zero length file name */
