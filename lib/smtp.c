@@ -566,10 +566,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
   bool utf8 = FALSE;
 
   /* Calculate the FROM parameter */
-  if(!data->set.str[STRING_MAIL_FROM])
-    /* Null reverse-path, RFC-5321, sect. 3.6.3 */
-    from = strdup("<>");
-  else {
+  if(data->set.str[STRING_MAIL_FROM]) {
     char *address = NULL;
     struct hostname host = { NULL, NULL, NULL, NULL };
 
@@ -598,6 +595,9 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
 
     free(address);
   }
+  else
+    /* Null reverse-path, RFC-5321, sect. 3.6.3 */
+    from = strdup("<>");
 
   if(!from)
     return CURLE_OUT_OF_MEMORY;
