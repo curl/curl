@@ -598,7 +598,8 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
       /* Establish whether we should report SMTPUTF8 to the server for this
          mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
       utf8 = (!utf8) && (conn->proto.smtpc.utf8_supported) &&
-             ((host.encalloc) || (!Curl_is_ASCII_name(address)));
+             ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
+              (!Curl_is_ASCII_name(host.name)));
 
       if(host.name) {
         from = aprintf("<%s@%s>", address, host.name);
