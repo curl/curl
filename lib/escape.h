@@ -25,6 +25,10 @@
  * allocated string or NULL if an error occurred.  */
 
 bool Curl_isunreserved(unsigned char in);
+bool form_isunreserved(unsigned char in);
+char *curl_easy_escape_flexible(struct Curl_easy *data, const char *string,
+                                int inlength,
+                                bool (*isunreserved)(unsigned char in));
 CURLcode Curl_urldecode(struct Curl_easy *data,
                         const char *string, size_t length,
                         char **ostring, size_t *olen,

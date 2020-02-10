@@ -158,7 +158,7 @@ char *curl_easy_escape_form(struct Curl_easy *data, const char *string,
                                         &form_isunreserved);
 
   /* replace space with + */
-  for(int enc_index = 0; enc_index < strlen(enc); enc_index++) {
+  for(unsigned int enc_index = 0; enc_index < strlen(enc); enc_index++) {
     if(*(enc + enc_index) == ' ')
       *(enc + enc_index) = '+';
   }
