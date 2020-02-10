@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -828,7 +828,7 @@ sub MAIL_smtp {
         # Validate the from address (only <> and a valid email address inside
         # <> are allowed, such as <user@example.com>)
         if ((!$from) || (($from ne "<>") && ($from !~
-            /^<([a-zA-Z0-9._%+-]+)\@([a-zA-Z0-9.-]+).([a-zA-Z]{2,4})>$/))) {
+            /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/))) {
             sendcontrol "501 Invalid address\r\n";
         }
         else {
@@ -872,7 +872,7 @@ sub RCPT_smtp {
         # Validate the to address (only a valid email address inside <> is
         # allowed, such as <user@example.com>)
         if ($to !~
-            /^<([a-zA-Z0-9._%+-]+)\@([a-zA-Z0-9.-]+).([a-zA-Z]{2,4})>$/) {
+            /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/) {
             sendcontrol "501 Invalid address\r\n";
         }
         else {
