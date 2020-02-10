@@ -4,7 +4,7 @@ curl and libcurl 7.69.0
  Command line options:         230
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2088
+ Contributors:                 2113
 
 This release includes the following changes:
 
@@ -20,17 +20,25 @@ This release includes the following bugfixes:
  o HTTP-COOKIES.md: describe the cookie file format [21]
  o KNOWN_BUGS: Multiple methods in a single WWW-Authenticate: header
  o README: mention that the docs is in docs/ [49]
+ o RELEASE-PROCEDURE: feature win is closed post-release a few days [62]
+ o altsvc: improved header parser [63]
+ o altsvc: keep a copy of the file name to survive handle reset [50]
  o altsvc: use h3-25 [40]
+ o checksrc.bat: Fix not being able to run script from the main curl dir [54]
  o cleanup: fix typos and wording in docs and comments [39]
  o cmake: Enable SMB for Windows builds [12]
  o cmake: Improve libssh2 check on Windows [8]
  o cmake: support specifying the target Windows version [27]
+ o configure.ac: fix comments about --with-quiche [53]
  o conn: do not reuse connection if SOCKS proxy credentials differ [32]
  o conncache: removed unused Curl_conncache_bundle_size() [33]
  o connection reuse: respect the max_concurrent_streams limits [3]
+ o contributors: Also include people who contributed to curl-www [58]
+ o contrithanks: Use the most recent tag by default [59]
  o cookie: check __Secure- and __Host- case sensitively [43]
  o curl: Let -D merge headers in one file again [25]
  o curl: avoid using strlen for testing if a string is empty [37]
+ o curl: error on --alt-svc use w/o support [61]
  o curl: make #0 not output the full URL [4]
  o curl: make the -# spaceship bar not wrap the line [30]
  o curl: remove 'config' field from OutStruct [6]
@@ -38,7 +46,13 @@ This release includes the following bugfixes:
  o curl_global_init: assume the EINTR bit by default [31]
  o curl_global_init: move the IPv6 works status bool to multi handle [48]
  o data.d: remove "Multiple files can also be specified" [26]
+ o digest: Do not quote algorithm in HTTP authorisation [55]
+ o docs/HTTP3: add --enable-alt-svc to curl's configure
+ o docs/HTTP3: update the OpenSSL branch to use for ngtcp2
  o form.d: fix two minor typos [34]
+ o ftp: remove superfluous checking for crlf in user or pwd [56]
+ o ftp: shrink temp buffers used for PORT [60]
+ o github: Instructions to post "uname -a" on Unix systems in issues [52]
  o hostip: move code to resolve IP address literals to `Curl_resolv` [13]
  o http: increase EXPECT_100_THRESHOLD to 1Mb [28]
  o http: move "oauth_bearer" from connectdata to Curl_easy [24]
@@ -51,8 +65,11 @@ This release includes the following bugfixes:
  o multi: Change curl_multi_wait/poll to error on negative timeout [11]
  o multi_done: if multiplexed, make conn->data point to another transfer [45]
  o ngtcp2: Add an error code for QUIC connection errors [10]
+ o ngtcp2: fixed to only use AF_INET6 when ENABLE_IPV6 [63]
  o ngtcp2: update to git master and its draft-25 support [42]
  o ntlm: Move the winbind data into the NTLM data structure
+ o ntlm: Pass the Curl_easy structure to the private winbind functions
+ o ntlm_wb: Use Curl_socketpair() for greater portability [57]
  o oauth2-bearer.d: works for HTTP too [44]
  o openssl: make CURLINFO_CERTINFO not truncate x509v3 fields [35]
  o openssl: remove redundant assignment [38]
@@ -65,6 +82,7 @@ This release includes the following bugfixes:
  o strcase: turn Curl_raw_tolower into static [33]
  o tool_dirhie: Allow directory traversal during creation [2]
  o travis: update non-OpenSSL Linux jobs to Bionic [38]
+ o url: Include the failure reason when curl_win32_idn_to_ascii() fails [51]
  o urlapi: guess scheme properly with credentials given [47]
  o urldata: do string enums without #ifdefs for build scripts [29]
  o vtls: Refactor Curl_multissl_version to make the code clearer [14]
@@ -78,14 +96,16 @@ advice from friends like these:
 
   Alessandro Ghedini, Andrew Potter, Andrius Merkys, Aron Rotteveel,
   Austin Green, bnfp on github, Brian Carpenter, bsammon on github,
-  Christian Heimes, crazydef on github, Dan Fandrich, Daniel Gustafsson,
-  Daniel Marjamäki, Daniel Stenberg, dmitrmax on github, Emil Engler,
-  Faizur Rahman, hamstergene on github, Jeroen Ooms, Johannes Schindelin,
-  Jon Rumsey, Kunal Ekawde, Marc Aldorasi, Marcel Raad, mbeifuss on github,
-  Mike Norton, Mischa Salle, naost3rn on github, Nicolas Guillier,
-  Orgad Shaneh, Pavel Volgarev, Pedro Monreal, Peter Piekarski, Ray Satiro,
+  Christian Heimes, Craig Andrews, crazydef on github, Cristian Greco,
+  Dan Fandrich, Daniel Gustafsson, Daniel Marjamäki, Daniel Stenberg,
+  dmitrmax on github, Edgaras Janušauskas, Emil Engler, Faizur Rahman,
+  Frank Gevaerts, hamstergene on github, Harry Sintonen, James Fuller,
+  Jeroen Ooms, Johannes Schindelin, Jon Rumsey, Kunal Ekawde, Marc Aldorasi,
+  Marcel Raad, mbeifuss on github, Mike Norton, Mischa Salle,
+  naost3rn on github, Nicolas Guillier, Orgad Shaneh, Pavel Volgarev,
+  Pedro Monreal, Peter Piekarski, Pierre-Yves Bigourdan, Ray Satiro,
   Santino Keupp, Steve Holme, Tobias Hieta, vshmuk on hackerone, 加藤郁之,
-  (39 contributors)
+  (46 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -140,3 +160,17 @@ References to bug reports and discussions on issues:
  [47] = https://curl.haxx.se/bug/?i=4856
  [48] = https://curl.haxx.se/bug/?i=4851
  [49] = https://curl.haxx.se/bug/?i=4830
+ [50] = https://curl.haxx.se/bug/?i=4898
+ [51] = https://curl.haxx.se/bug/?i=4899
+ [52] = https://curl.haxx.se/bug/?i=4896
+ [53] = https://curl.haxx.se/bug/?i=4897
+ [54] = https://curl.haxx.se/bug/?i=4894
+ [55] = https://curl.haxx.se/bug/?i=4890
+ [56] = https://curl.haxx.se/bug/?i=4887
+ [57] = https://curl.haxx.se/bug/?i=4886
+ [58] = https://curl.haxx.se/bug/?i=4884
+ [59] = https://curl.haxx.se/bug/?i=4883
+ [60] = https://curl.haxx.se/bug/?i=4880
+ [61] = https://curl.haxx.se/bug/?i=4878
+ [62] = https://curl.haxx.se/bug/?i=4877
+ [63] = https://curl.haxx.se/bug/?i=4875
