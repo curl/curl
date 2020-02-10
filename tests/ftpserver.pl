@@ -1030,10 +1030,22 @@ sub VRFY_smtp {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
     else {
-        my @data = getreplydata($smtp_client);
+        # Validate the username (only a valid local or external username is
+        # allowed, such as user or user@example.com)
+        if ($username !~
+            /^([a-zA-Z0-9._%+-]+)(\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4}))?$/) {
+            sendcontrol "501 Invalid address\r\n";
+        }
+        else {
+            my @data = getreplydata($smtp_client);
 
-        for my $d (@data) {
-            sendcontrol $d;
+            if(!@data) {
+              push @data, "250 <$username\@example.com>\r\n"
+            }
+
+            for my $d (@data) {
+                sendcontrol $d;
+            }
         }
     }
 
