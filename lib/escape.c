@@ -67,7 +67,7 @@ bool Curl_isunreserved(unsigned char in)
 /* spaces in form data are replaced with + rather than standard URL encoding
  * %20, so consider spaces unreserved so they can be handled specially later on
  */
-bool form_isunreserved(unsigned char in)
+static bool form_isunreserved(unsigned char in)
 {
   if(Curl_isunreserved(in) || in == ' ')
     return TRUE;
@@ -87,9 +87,9 @@ char *curl_unescape(const char *string, int length)
 }
 
 /* allow for custom definition of unreserved characters */
-char *curl_easy_escape_flexible(struct Curl_easy *data, const char *string,
-                                int inlength,
-                                bool (*isunreserved)(unsigned char in))
+static char *easy_escape_flexible(struct Curl_easy *data, const char *string,
+                                  int inlength,
+                                  bool (*isunreserved)(unsigned char in))
 {
   size_t alloc;
   char *ns;
@@ -147,21 +147,24 @@ char *curl_easy_escape_flexible(struct Curl_easy *data, const char *string,
 char *curl_easy_escape(struct Curl_easy *data, const char *string,
                        int inlength)
 {
-  return curl_easy_escape_flexible(data, string, inlength, &Curl_isunreserved);
+  return easy_escape_flexible(data, string, inlength, &Curl_isunreserved);
 }
 
 /* escape form data per RFC1866 */
 char *curl_easy_escape_form(struct Curl_easy *data, const char *string,
                             int inlength)
 {
-  char *enc = curl_easy_escape_flexible(data, string, inlength,
-                                        &form_isunreserved);
+  char *enc = easy_escape_flexible(data, string, inlength,
+                                   &form_isunreserved);
 
   if(enc) {
     /* replace space with + */
-    for(unsigned int enc_index = 0; enc_index < strlen(enc); enc_index++) {
-      if(*(enc + enc_index) == ' ')
-        *(enc + enc_index) = '+';
+    size_t enclen = strlen(enc);
+    size_t enc_index = 0;
+    while(enc_index < enclen) {
+      if(enc[enc_index] == ' ')
+        enc[enc_index] = '+';
+      enc_index++;
     }
   }
 
