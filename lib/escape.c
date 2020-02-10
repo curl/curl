@@ -157,10 +157,12 @@ char *curl_easy_escape_form(struct Curl_easy *data, const char *string,
   char *enc = curl_easy_escape_flexible(data, string, inlength,
                                         &form_isunreserved);
 
-  /* replace space with + */
-  for(unsigned int enc_index = 0; enc_index < strlen(enc); enc_index++) {
-    if(*(enc + enc_index) == ' ')
-      *(enc + enc_index) = '+';
+  if(enc) {
+    /* replace space with + */
+    for(unsigned int enc_index = 0; enc_index < strlen(enc); enc_index++) {
+      if(*(enc + enc_index) == ' ')
+        *(enc + enc_index) = '+';
+    }
   }
 
   return enc;
