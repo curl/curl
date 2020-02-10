@@ -64,6 +64,15 @@ bool Curl_isunreserved(unsigned char in)
   return FALSE;
 }
 
+/* spaces in form data are replaced with + rather than standard URL encoding %20,
+ * so consider spaces unreserved so they can be handled specially later on */
+bool form_isunreserved(unsigned char in)
+{
+  if(Curl_isunreserved(in) || in == ' ')
+    return TRUE;
+  return FALSE;
+}
+
 /* for ABI-compatibility with previous versions */
 char *curl_escape(const char *string, int inlength)
 {
@@ -76,8 +85,9 @@ char *curl_unescape(const char *string, int length)
   return curl_easy_unescape(NULL, string, length, NULL);
 }
 
-char *curl_easy_escape(struct Curl_easy *data, const char *string,
-                       int inlength)
+/* allow for custom definition of unreserved characters */
+char *curl_easy_escape_flexible(struct Curl_easy *data, const char *string,
+                                int inlength, bool (*isunreserved)(unsigned char in))
 {
   size_t alloc;
   char *ns;
@@ -101,7 +111,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   while(length--) {
     unsigned char in = *string; /* we need to treat the characters unsigned */
 
-    if(Curl_isunreserved(in))
+    if(isunreserved(in))
       /* just copy this */
       ns[strindex++] = in;
     else {
@@ -130,6 +140,27 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   }
   ns[strindex] = 0; /* terminate it */
   return ns;
+}
+
+char *curl_easy_escape(struct Curl_easy *data, const char *string,
+                       int inlength)
+{
+  return curl_easy_escape_flexible(data, string, inlength, &Curl_isunreserved);
+}
+
+/* escape form data per RFC1866 */
+char *curl_easy_escape_form(struct Curl_easy *data, const char *string,
+                            int inlength)
+{
+  char *enc = curl_easy_escape_flexible(data, string, inlength, &form_isunreserved);
+
+  /* replace space with + */
+  for(int enc_index = 0; enc_index < strlen(enc); enc_index++) {
+    if(*(enc + enc_index) == ' ')
+      *(enc + enc_index) = '+';
+  }
+
+  return enc;
 }
 
 /*

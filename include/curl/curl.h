@@ -2375,6 +2375,9 @@ CURL_EXTERN char *curl_easy_escape(CURL *handle,
 CURL_EXTERN char *curl_escape(const char *string,
                               int length);
 
+CURL_EXTERN char *curl_easy_escape_form(CURL *handle,
+                                        const char *string,
+                                        int length);
 
 /*
  * NAME curl_easy_unescape()
