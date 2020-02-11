@@ -40,7 +40,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/966 --mail-rcpt recipient@åäö.se --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/966 --mail-rcpt Stödmottagaren@åäö.se --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -50,7 +50,7 @@ smtp://%HOSTIP:%SMTPPORT/966 --mail-rcpt recipient@åäö.se --mail-from sender@
 <protocol>
 EHLO 966
 MAIL FROM:<sender@example.com> SMTPUTF8
-RCPT TO:<recipient@xn--4cab6c.se>
+RCPT TO:<Stödmottagaren@xn--4cab6c.se>
 DATA
 QUIT
 </protocol>

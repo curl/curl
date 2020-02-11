@@ -871,16 +871,19 @@ sub RCPT_smtp {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
     else {
+        my $smtputf8 = grep /^SMTPUTF8$/, @capabilities;
         my $to = $1;
 
         # Validate the to address (only a valid email address inside <> is
         # allowed, such as <user@example.com>)
-        if ($to !~
-            /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/) {
-            sendcontrol "501 Invalid address\r\n";
+        if ((!$smtputf8 && $to =~
+              /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/) ||
+            ($smtputf8 && $to =~
+              /^<([a-zA-Z0-9\x{80}-\x{ff}._%+-]+)\@(([a-zA-Z0-9\x{80}-\x{ff}-]+)\.)+([a-zA-Z]{2,4})>$/)) {
+            sendcontrol "250 Recipient OK\r\n";      
         }
         else {
-            sendcontrol "250 Recipient OK\r\n";
+            sendcontrol "501 Invalid address\r\n";
         }
     }
 
