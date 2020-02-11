@@ -164,7 +164,7 @@ my $UNITDIR="./unit";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $PROXYIN="$LOGDIR/proxy.input"; # what curl sent the proxy
-my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
+my $CURLLOG="commands.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 my $CURLCONFIG="../curl-config"; # curl-config from current build
@@ -2561,7 +2561,7 @@ sub cleardir {
     opendir(DIR, $dir) ||
         return 0; # can't open dir
     while($file = readdir(DIR)) {
-        if($file !~ /^\./) {
+        if(($file !~ /^\./) && ($file ne $CURLLOG)) {
             unlink("$dir/$file");
             $count++;
         }
@@ -5405,7 +5405,7 @@ if($scrambleorder) {
 #######################################################################
 # Start the command line log
 #
-open(CMDLOG, ">$CURLLOG") ||
+open(CMDLOG, ">", "$LOGDIR/$CURLLOG") ||
     logmsg "can't log command lines to $CURLLOG\n";
 
 #######################################################################
