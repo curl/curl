@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -69,7 +69,10 @@ Accept alternative services offered over HTTP/3. This will only be used if
 libcurl was also built to actually support HTTP/3, otherwise this bit will be
 ignored.
 .SH DEFAULT
-0. No Alt-Svc treatment.
+Alt-Svc handling is disabled by default. If \fICURLOPT_ALTSVC(3)\fP is set,
+\fICURLOPT_ALTSVC_CTRL(3)\fP has a default value corresponding to
+CURLALTSVC_H1 | CURLALTSVC_H2 | CURLALTSVC_H3 - the HTTP/2 and HTTP/3 bits are
+only set if libcurl was built with support for those versions.
 .SH PROTOCOLS
 HTTPS
 .SH EXAMPLE
