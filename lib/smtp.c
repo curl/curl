@@ -670,6 +670,23 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
     }
   }
 
+  /* If the mailboxes in the FROM and AUTH parameters don't include a UTF-8
+     based address then quickly scan through the recipient list and check if
+     any there do, as we need to correctly identify our support for SMTPUTF8
+     in the envelope, as per RFC-6531 sect. 3.4 */
+  if(conn->proto.smtpc.utf8_supported && !utf8) {
+    struct SMTP *smtp = data->req.protop;
+    struct curl_slist *rcpt = smtp->rcpt;
+
+    while(rcpt && !utf8) {
+      /* Does the host name contain non-ASCII characters? */
+      if(!Curl_is_ASCII_name(rcpt->data))
+        utf8 = TRUE;
+
+      rcpt = rcpt->next;
+    }
+  }
+
   /* Send the MAIL command */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp,
                          "MAIL FROM:%s%s%s%s%s%s",
@@ -679,7 +696,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
                          size ? " SIZE=" : "", /* Optional on SIZE support  */
                          size ? size : "",     /*                           */
                          utf8 ? " SMTPUTF8"    /* Internationalised mailbox */
-                               : "");          /* address included          */
+                               : "");          /* included in our envelope  */
 
   free(from);
   free(auth);
