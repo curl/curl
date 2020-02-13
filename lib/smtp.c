@@ -491,6 +491,12 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
 
+      /* We notify the server we are sending UTF-8 data if a) it supports the
+         SMTPUTF8 extension and b) The mailbox contains UTF-8 charaacters, in
+         either the local address or host name parts. This is regardless of
+         whether the host name is encoded using IDN ACE */
+      bool utf8 = false;
+
       /* Parse the mailbox to verify into the local address and host name
          parts, converting the host name to an IDN A-label if necessary */
       result = smtp_parse_address(conn, smtp->rcpt->data,
@@ -498,12 +504,18 @@ static CURLcode smtp_perform_command(struct connectdata *conn)
       if(result)
         return result;
 
+      /* Establish whether we should report SMTPUTF8 to the server for this
+         mailbox as per RFC-6531 sect. 3.1 point 6 */
+      utf8 = (conn->proto.smtpc.utf8_supported) &&
+             ((host.encalloc) || (!Curl_is_ASCII_name(address)));
+
       /* Send the VRFY command (Note: The host name part may be absent when the
          host is a local system) */
-      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "VRFY %s%s%s",
+      result = Curl_pp_sendf(&conn->proto.smtpc.pp, "VRFY %s%s%s%s",
                              address,
                              host.name ? "@" : "",
-                             host.name ? host.name : "");
+                             host.name ? host.name : "",
+                             utf8 ? " SMTPUTF8" : "");
 
       Curl_free_idnconverted_hostname(&host);
       free(address);
