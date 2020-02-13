@@ -338,13 +338,6 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/2051
 
-4.5 Improve --data-urlencode space encoding
-
- ASCII space characters in --data-urlencode are currently encoded as %20
- rather than +, which RFC 1866 says should be used.
-
- See https://github.com/curl/curl/issues/3229
-
 5. Build and portability issues
 
 5.1 USE_UNIX_SOCKETS on Windows

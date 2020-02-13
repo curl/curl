@@ -498,6 +498,36 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
+/* fix space encoding per RFC1866 */
+static char *replace_url_encoded_space_with_plus(const char *in)
+{
+  size_t inlen = strlen(in);
+  size_t in_index = 0;
+  size_t out_index = 0;
+
+  char *out = malloc(inlen + 1);
+  if(!out)
+    return NULL;
+
+  while(in_index < inlen) {
+    if((in[in_index] == '%') &&
+       (in[in_index + 1] == '2') &&
+       (in[in_index + 2] == '0')) {
+      out[out_index] = '+';
+      in_index += 3;
+    }
+    else {
+      out[out_index] = in[in_index];
+      in_index++;
+    }
+    out_index++;
+  }
+
+  out[out_index] = 0; /* terminate string */
+
+  return out;
+}
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
                             bool *usedarg,    /* set to TRUE if the arg
@@ -1387,12 +1417,20 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           char *enc = curl_easy_escape(NULL, postdata, (int)size);
           Curl_safefree(postdata); /* no matter if it worked or not */
           if(enc) {
+            size_t outlen;
+            char *n;
+            char *reenc = replace_url_encoded_space_with_plus(enc);
+            curl_free(enc);
+            if(!reenc)
+              return PARAM_NO_MEM;
+            enc = reenc;
+
             /* now make a string with the name from above and append the
                encoded string */
-            size_t outlen = nlen + strlen(enc) + 2;
-            char *n = malloc(outlen);
+            outlen = nlen + strlen(enc) + 2;
+            n = malloc(outlen);
             if(!n) {
-              curl_free(enc);
+              free(enc);
               return PARAM_NO_MEM;
             }
             if(nlen > 0) { /* only append '=' if we have a name */
@@ -1403,7 +1441,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               strcpy(n, enc);
               size = outlen-2; /* since no '=' was inserted */
             }
-            curl_free(enc);
+            free(enc);
             postdata = n;
           }
           else
