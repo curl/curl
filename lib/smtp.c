@@ -539,6 +539,12 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
 
+  /* We notify the server we are sending UTF-8 data if a) it supports the
+     SMTPUTF8 extension and b) The mailbox contains UTF-8 charaacters, in
+     either the local address or host name parts. This is regardless of
+     whether the host name is encoded using IDN ACE */
+  bool utf8 = FALSE;
+
   /* Calculate the FROM parameter */
   if(!data->set.str[STRING_MAIL_FROM])
     /* Null reverse-path, RFC-5321, sect. 3.6.3 */
@@ -553,6 +559,12 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
                                 &address, &host);
     if(result)
       return result;
+
+    /* Establish whether we should report SMTPUTF8 to the server for this
+       mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
+    utf8 = (conn->proto.smtpc.utf8_supported) &&
+           ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
+            (!Curl_is_ASCII_name(host.name)));
 
     if(host.name) {
       from = aprintf("<%s@%s>", address, host.name);
@@ -582,6 +594,13 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
                                   &address, &host);
       if(result)
         return result;
+
+      /* Establish whether we should report SMTPUTF8 to the server for this
+         mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
+      if((!utf8) && (conn->proto.smtpc.utf8_supported) &&
+         ((host.encalloc) || (!Curl_is_ASCII_name(address)) ||
+          (!Curl_is_ASCII_name(host.name))))
+        utf8 = TRUE;
 
       if(host.name) {
         from = aprintf("<%s@%s>", address, host.name);
@@ -653,12 +672,14 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
 
   /* Send the MAIL command */
   result = Curl_pp_sendf(&conn->proto.smtpc.pp,
-                         "MAIL FROM:%s%s%s%s%s",
-                         from,                 /* Mandatory */
-                         auth ? " AUTH=" : "", /* Optional (on AUTH support) */
-                         auth ? auth : "",
-                         size ? " SIZE=" : "", /* Optional (on SIZE support) */
-                         size ? size : "");
+                         "MAIL FROM:%s%s%s%s%s%s",
+                         from,                 /* Mandatory                 */
+                         auth ? " AUTH=" : "", /* Optional on AUTH support  */
+                         auth ? auth : "",     /*                           */
+                         size ? " SIZE=" : "", /* Optional on SIZE support  */
+                         size ? size : "",     /*                           */
+                         utf8 ? " SMTPUTF8"    /* Internationalised mailbox */
+                               : "");          /* address included          */
 
   free(from);
   free(auth);
@@ -1677,6 +1698,10 @@ static CURLcode smtp_parse_custom_request(struct connectdata *conn)
  *
  * Notes:
  *
+ * Should a UTF-8 host name require conversion to IDN ACE and we cannot honor
+ * that convertion then we shall return success. This allow the caller to send
+ * the data to the server as a U-label (as per RFC-6531 sect. 3.2).
+ *
  * If an mailbox '@' seperator cannot be located then the mailbox is considered
  * to be either a local mailbox or an invalid mailbox (depending on what the
  * calling function deems it to be) then the input will simply be returned in
@@ -1704,14 +1729,12 @@ static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
     *host->name = '\0';
     host->name = host->name + 1;
 
-    /* Convert the host name to IDN ACE */
-    result = Curl_idnconvert_hostname(conn, host);
-    if(result) {
-      free(dup);
-      host->name = NULL;
+    /* Attempt to convert the host name to IDN ACE */
+    (void) Curl_idnconvert_hostname(conn, host);
 
-      return result;
-    }
+    /* If Curl_idnconvert_hostname() fails then we shall attempt to continue
+       and send the host name using UTF-8 rather than as 7-bit ACE (which is
+       our preference) */
   }
   else
     host->name = NULL;

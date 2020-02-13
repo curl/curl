@@ -813,6 +813,7 @@ sub MAIL_smtp {
     else {
         my $from;
         my $size;
+        my $smtputf8 = grep /^SMTPUTF8$/, @capabilities;
         my @elements = split(/ /, $args);
 
         # Get the FROM and SIZE parameters
@@ -827,11 +828,11 @@ sub MAIL_smtp {
 
         # Validate the from address (only <> and a valid email address inside
         # <> are allowed, such as <user@example.com>)
-        if ((!$from) || (($from ne "<>") && ($from !~
-            /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/))) {
-            sendcontrol "501 Invalid address\r\n";
-        }
-        else {
+        if (($from eq "<>") ||
+            (!$smtputf8 && $from =~
+              /^<([a-zA-Z0-9._%+-]+)\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4})>$/) ||
+            ($smtputf8 && $from =~
+              /^<([a-zA-Z0-9\x{80}-\x{ff}._%+-]+)\@(([a-zA-Z0-9\x{80}-\x{ff}-]+)\.)+([a-zA-Z]{2,4})>$/)) {
             my @found;
             my $valid = 1;
 
@@ -851,6 +852,9 @@ sub MAIL_smtp {
             else {
                 sendcontrol "250 Sender OK\r\n";
             }
+        }
+        else {
+            sendcontrol "501 Invalid address\r\n";
         }
     }
 
