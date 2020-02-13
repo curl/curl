@@ -1037,13 +1037,15 @@ sub VRFY_smtp {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
     else {
+        my $smtputf8 = grep /^SMTPUTF8$/, @capabilities;
+
         # Validate the username (only a valid local or external username is
         # allowed, such as user or user@example.com)
-        if ($username !~
-            /^([a-zA-Z0-9._%+-]+)(\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4}))?$/) {
-            sendcontrol "501 Invalid address\r\n";
-        }
-        else {
+        if ((!$smtputf8 && $username =~
+            /^([a-zA-Z0-9._%+-]+)(\@(([a-zA-Z0-9-]+)\.)+([a-zA-Z]{2,4}))?$/) ||
+            ($smtputf8 && $username =~
+            /^([a-zA-Z0-9\x{80}-\x{ff}._%+-]+)(\@(([a-zA-Z0-9\x{80}-\x{ff}-]+)\.)+([a-zA-Z]{2,4}))?$/)) {
+
             my @data = getreplydata($smtp_client);
 
             if(!@data) {
@@ -1059,6 +1061,9 @@ sub VRFY_smtp {
             for my $d (@data) {
                 sendcontrol $d;
             }
+        }
+        else {
+            sendcontrol "501 Invalid address\r\n";
         }
     }
 
