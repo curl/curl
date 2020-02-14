@@ -2191,8 +2191,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           }
         }
       }
-      else if(comeback)
-        rc = CURLM_CALL_MULTI_PERFORM;
+      else if(comeback) {
+        /* This avoids CURLM_CALL_MULTI_PERFORM so that a very fast transfer
+           won't get stuck on this transfer at the expense of other concurrent
+           transfers */
+        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        rc = CURLM_OK;
+      }
       break;
     }
 
