@@ -503,13 +503,15 @@ static char *replace_url_encoded_space_with_plus(const char *in)
   size_t inlen = strlen(in);
   size_t in_index = 0;
   size_t out_index = 0;
+  size_t in_replace_limit = inlen - 2; /* no room for %20 beyond this */
 
   char *out = malloc(inlen + 1);
   if(!out)
     return NULL;
 
   while(in_index < inlen) {
-    if(in[in_index] == '%'
+    if(in_index < in_replace_limit
+        && in[in_index] == '%'
         && in[in_index + 1] == '2'
         && in[in_index + 2] == '0') {
       out[out_index] = '+';
