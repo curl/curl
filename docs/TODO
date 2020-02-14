@@ -88,6 +88,7 @@
  10. LDAP
  10.1 SASL based authentication mechanisms
  10.2 CURLOPT_SSL_CTX_FUNCTION for LDAPS
+ 10.3 Paged searches on LDAP server
 
  11. SMB
  11.1 File listing support
@@ -610,6 +611,10 @@
  it has no effect for LDAPS connections.
 
  https://github.com/curl/curl/issues/4108
+
+10.3 Paged searches on LDAP server
+
+ https://github.com/curl/curl/issues/4452
 
 11. SMB
 
