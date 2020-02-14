@@ -110,7 +110,7 @@ jobs:
     - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config
       displayName: Install packages
 
-    - script: ./buildconf && ./configure --enable-debug --enable-werror
+    - script: ./buildconf && ./configure --enable-debug --enable-werror --without-brotli
       displayName: 'Run configure'
 
     - script: make
