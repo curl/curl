@@ -87,6 +87,7 @@
 
  10. LDAP
  10.1 SASL based authentication mechanisms
+ 10.2 CURLOPT_SSL_CTX_FUNCTION for LDAPS
 
  11. SMB
  11.1 File listing support
@@ -602,6 +603,13 @@
  using the simple authentication mechanism (as clear text). However, it should
  be possible to use ldap_bind_s() instead specifying the security context
  information ourselves.
+
+10.2 CURLOPT_SSL_CTX_FUNCTION for LDAPS
+
+ CURLOPT_SSL_CTX_FUNCTION works perfectly for HTTPS and email protocols, but
+ it has no effect for LDAPS connections.
+
+ https://github.com/curl/curl/issues/4108
 
 11. SMB
 
