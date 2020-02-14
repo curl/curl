@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  * Copyright (C) 2009, 2011, Markus Moeller, <markus_moeller@compuserve.com>
  *
  * This software is licensed as described in the file COPYING, which
@@ -152,6 +152,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     s_pSecFn->FreeCredentialsHandle(&cred_handle);
     return CURLE_COULDNT_CONNECT;
   }
+
+  (void)curlx_nonblock(sock, FALSE);
 
   /* As long as we need to keep sending some context info, and there's no  */
   /* errors, keep sending it...                                            */
@@ -587,6 +589,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
     memcpy(socksreq, sspi_w_token[0].pvBuffer, sspi_w_token[0].cbBuffer);
     s_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
   }
+  (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.\n",
         (socksreq[0] == 0)?"out GSS-API data":

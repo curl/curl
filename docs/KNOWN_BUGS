@@ -87,8 +87,6 @@ problems may have been fixed or changed somewhat since this was written!
  9.1 SFTP doesn't do CURLOPT_POSTQUOTE correct
 
  10. SOCKS
- 10.1 SOCKS proxy connections are done blocking
- 10.2 SOCKS don't support timeouts
  10.3 FTPS over SOCKS
  10.4 active FTP over a SOCKS
 
@@ -620,21 +618,6 @@ problems may have been fixed or changed somewhat since this was written!
 
 
 10. SOCKS
-
-10.1 SOCKS proxy connections are done blocking
-
- Both SOCKS5 and SOCKS4 proxy connections are done blocking, which is very bad
- when used with the multi interface.
-
-10.2 SOCKS don't support timeouts
-
- The SOCKS4 connection codes don't properly acknowledge (connect) timeouts.
- According to bug #1556528, even the SOCKS5 connect code does not do it right:
- https://curl.haxx.se/bug/view.cgi?id=604
-
- When connecting to a SOCK proxy, the (connect) timeout is not properly
- acknowledged after the actual TCP connect (during the SOCKS "negotiate"
- phase).
 
 10.3 FTPS over SOCKS
 
