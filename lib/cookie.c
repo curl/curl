@@ -97,6 +97,7 @@ Example set of cookies:
 #include "curl_memrchr.h"
 #include "inet_pton.h"
 #include "parsedate.h"
+#include "rand.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1493,6 +1494,31 @@ static char *get_netscape_format(const struct Cookie *co)
     co->value?co->value:"");
 }
 
+/* return 0 on success, 1 on error */
+static int xrename(const char *oldpath, const char *newpath)
+{
+#ifdef WIN32
+  /* rename() on Windows doesn't overwrite, so we can't use it here.
+     MoveFileExA() will overwrite and is usually atomic, however it fails
+     when there are open handles to the file. */
+  const int max_wait_ms = 1000;
+  struct curltime start = Curl_now();
+  for(;;) {
+    timediff_t diff;
+    if(MoveFileExA(oldpath, newpath, MOVEFILE_REPLACE_EXISTING))
+      break;
+    diff = Curl_timediff(Curl_now(), start);
+    if(diff < 0 || diff > max_wait_ms)
+      return 1;
+    Sleep(1);
+  }
+#else
+  if(rename(oldpath, newpath))
+    return 1;
+#endif
+  return 0;
+}
+
 /*
  * cookie_output()
  *
@@ -1501,11 +1527,14 @@ static char *get_netscape_format(const struct Cookie *co)
  *
  * The function returns non-zero on write failure.
  */
-static int cookie_output(struct CookieInfo *c, const char *dumphere)
+static int cookie_output(struct Curl_easy *data,
+                         struct CookieInfo *c, const char *filename)
 {
   struct Cookie *co;
-  FILE *out;
+  FILE *out = NULL;
   bool use_stdout = FALSE;
+  char *tempstore = NULL;
+  bool error = false;
 
   if(!c)
     /* no cookie engine alive */
@@ -1514,16 +1543,24 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
   /* at first, remove expired cookies */
   remove_expired(c);
 
-  if(!strcmp("-", dumphere)) {
+  if(!strcmp("-", filename)) {
     /* use stdout */
     out = stdout;
     use_stdout = TRUE;
   }
   else {
-    out = fopen(dumphere, FOPEN_WRITETEXT);
-    if(!out) {
-      return 1; /* failure */
-    }
+    unsigned char randsuffix[9];
+
+    if(Curl_rand_hex(data, randsuffix, sizeof(randsuffix)))
+      return 2;
+
+    tempstore = aprintf("%s.%s.tmp", filename, randsuffix);
+    if(!tempstore)
+      return 1;
+
+    out = fopen(tempstore, FOPEN_WRITETEXT);
+    if(!out)
+      goto error;
   }
 
   fputs("# Netscape HTTP Cookie File\n"
@@ -1538,9 +1575,7 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
 
     array = calloc(1, sizeof(struct Cookie *) * c->numcookies);
     if(!array) {
-      if(!use_stdout)
-        fclose(out);
-      return 1;
+      goto error;
     }
 
     /* only sort the cookies with a domain property */
@@ -1559,9 +1594,7 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
       if(format_ptr == NULL) {
         fprintf(out, "#\n# Fatal libcurl error\n");
         free(array);
-        if(!use_stdout)
-          fclose(out);
-        return 1;
+        goto error;
       }
       fprintf(out, "%s\n", format_ptr);
       free(format_ptr);
@@ -1569,10 +1602,24 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
 
     free(array);
   }
-  if(!use_stdout)
-    fclose(out);
 
-  return 0;
+  if(out && !use_stdout) {
+    fclose(out);
+    out = NULL;
+    if(xrename(tempstore, filename)) {
+      unlink(tempstore);
+      goto error;
+    }
+  }
+
+  goto cleanup;
+error:
+  error = true;
+cleanup:
+  if(out && !use_stdout)
+    fclose(out);
+  free(tempstore);
+  return error ? 1 : 0;
 }
 
 static struct curl_slist *cookie_list(struct Curl_easy *data)
@@ -1631,7 +1678,7 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
 
     /* if we have a destination file for all the cookies to get dumped to */
-    if(cookie_output(data->cookies, data->set.str[STRING_COOKIEJAR]))
+    if(cookie_output(data, data->cookies, data->set.str[STRING_COOKIEJAR]))
       infof(data, "WARNING: failed to save cookies in %s\n",
             data->set.str[STRING_COOKIEJAR]);
   }
