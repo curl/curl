@@ -925,8 +925,6 @@ struct connectdata {
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
-  bool sock_accepted[2]; /* TRUE if the socket on this index was created with
-                            accept() */
   Curl_recv *recv[2];
   Curl_send *send[2];
 
@@ -1081,6 +1079,8 @@ struct connectdata {
                               handle */
   BIT(writechannel_inuse); /* whether the write channel is in use by an easy
                               handle */
+  BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
+                         accept() */
 };
 
 /* The end of connectdata. */
