@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,13 +27,13 @@
 #ifdef CURL_DISABLE_PROXY
 #define Curl_SOCKS4(a,b,c,d,e) CURLE_NOT_BUILT_IN
 #define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
+#define Curl_SOCKS_getsock(x,y,z) 0
 #else
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
  * blocks until all bytes amount of buffersize will be read. No more, no less.
  *
- * This is STUPID BLOCKING behaviour which we frown upon, but right now this
- * is what we have...
+ * This is STUPID BLOCKING behavior
  */
 int Curl_blockread_all(struct connectdata *conn,
                        curl_socket_t sockfd,
@@ -41,6 +41,9 @@ int Curl_blockread_all(struct connectdata *conn,
                        ssize_t buffersize,
                        ssize_t *n);
 
+int Curl_SOCKS_getsock(struct connectdata *conn,
+                       curl_socket_t *sock,
+                       int sockindex);
 /*
  * This function logs in to a SOCKS4(a) proxy and sends the specifics to the
  * final destination server.
@@ -49,7 +52,8 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
                      const char *hostname,
                      int remote_port,
                      int sockindex,
-                     struct connectdata *conn);
+                     struct connectdata *conn,
+                     bool *done);
 
 /*
  * This function logs in to a SOCKS5 proxy and sends the specifics to the
@@ -60,7 +64,8 @@ CURLcode Curl_SOCKS5(const char *proxy_name,
                      const char *hostname,
                      int remote_port,
                      int sockindex,
-                     struct connectdata *conn);
+                     struct connectdata *conn,
+                     bool *done);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
 /*

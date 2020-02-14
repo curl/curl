@@ -483,16 +483,16 @@ Curl_cache_addr(struct Curl_easy *data,
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-int Curl_resolv(struct connectdata *conn,
-                const char *hostname,
-                int port,
-                bool allowDOH,
-                struct Curl_dns_entry **entry)
+enum resolve_t Curl_resolv(struct connectdata *conn,
+                           const char *hostname,
+                           int port,
+                           bool allowDOH,
+                           struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
   struct Curl_easy *data = conn->data;
   CURLcode result;
-  int rc = CURLRESOLV_ERROR; /* default to failure */
+  enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
 
   *entry = NULL;
 
@@ -642,11 +642,11 @@ RETSIGTYPE alarmfunc(int sig)
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-int Curl_resolv_timeout(struct connectdata *conn,
-                        const char *hostname,
-                        int port,
-                        struct Curl_dns_entry **entry,
-                        timediff_t timeoutms)
+enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
+                                   const char *hostname,
+                                   int port,
+                                   struct Curl_dns_entry **entry,
+                                   timediff_t timeoutms)
 {
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
@@ -662,7 +662,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   volatile unsigned int prev_alarm = 0;
   struct Curl_easy *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
-  int rc;
+  enum resolve_t rc;
 
   *entry = NULL;
 

@@ -692,19 +692,20 @@ CURLcode Curl_read_plain(curl_socket_t sockfd,
   ssize_t nread = sread(sockfd, buf, bytesfromsocket);
 
   if(-1 == nread) {
-    int err = SOCKERRNO;
-    int return_error;
+    const int err = SOCKERRNO;
+    const bool return_error =
 #ifdef USE_WINSOCK
-    return_error = WSAEWOULDBLOCK == err;
+      WSAEWOULDBLOCK == err
 #else
-    return_error = EWOULDBLOCK == err || EAGAIN == err || EINTR == err;
+      EWOULDBLOCK == err || EAGAIN == err || EINTR == err
 #endif
+      ;
+    *n = 0; /* no data returned */
     if(return_error)
       return CURLE_AGAIN;
     return CURLE_RECV_ERROR;
   }
 
-  /* we only return number of bytes read when we return OK */
   *n = nread;
   return CURLE_OK;
 }

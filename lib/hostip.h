@@ -79,18 +79,21 @@ struct Curl_dns_entry {
  * use, or we'll leak memory!
  */
 /* return codes */
-#define CURLRESOLV_TIMEDOUT -2
-#define CURLRESOLV_ERROR    -1
-#define CURLRESOLV_RESOLVED  0
-#define CURLRESOLV_PENDING   1
-int Curl_resolv(struct connectdata *conn,
-                const char *hostname,
-                int port,
-                bool allowDOH,
-                struct Curl_dns_entry **dnsentry);
-int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
-                        int port, struct Curl_dns_entry **dnsentry,
-                        timediff_t timeoutms);
+enum resolve_t {
+  CURLRESOLV_TIMEDOUT = -2,
+  CURLRESOLV_ERROR    = -1,
+  CURLRESOLV_RESOLVED =  0,
+  CURLRESOLV_PENDING  =  1
+};
+enum resolve_t Curl_resolv(struct connectdata *conn,
+                           const char *hostname,
+                           int port,
+                           bool allowDOH,
+                           struct Curl_dns_entry **dnsentry);
+enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
+                                   const char *hostname, int port,
+                                   struct Curl_dns_entry **dnsentry,
+                                   timediff_t timeoutms);
 
 #ifdef CURLRES_IPV6
 /*

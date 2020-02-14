@@ -55,7 +55,6 @@
 #include "transfer.h"
 #include "escape.h"
 #include "http.h" /* for HTTP proxy tunnel stuff */
-#include "socks.h"
 #include "ftp.h"
 #include "fileinfo.h"
 #include "ftplistparser.h"
@@ -78,6 +77,7 @@
 #include "warnless.h"
 #include "http_proxy.h"
 #include "non-ascii.h"
+#include "socks.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -810,6 +810,9 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks)
    * handle ordinary commands.
    */
 
+  if(SOCKS_STATE(conn->cnnct.state))
+    return Curl_SOCKS_getsock(conn, socks, SECONDARYSOCKET);
+
   if(FTP_STOP == ftpc->state) {
     int bits = GETSOCK_READSOCK(0);
 
@@ -919,7 +922,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   struct sockaddr_in6 * const sa6 = (void *)sa;
 #endif
   static const char mode[][5] = { "EPRT", "PORT" };
-  int rc;
+  enum resolve_t rc;
   int error;
   char *host = NULL;
   char *string_ftpport = data->set.str[STRING_FTPPORT];
@@ -1794,7 +1797,7 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
   CURLcode result;
   struct Curl_easy *data = conn->data;
   struct Curl_dns_entry *addr = NULL;
-  int rc;
+  enum resolve_t rc;
   unsigned short connectport; /* the local port connect() should use! */
   char *str = &data->state.buffer[4];  /* start on the first letter */
 

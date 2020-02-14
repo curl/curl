@@ -405,7 +405,6 @@
  EWOULDBLOCK or similar. Blocking cases include:
 
  - Name resolves on non-windows unless c-ares or the threaded resolver is used
- - SOCKS proxy handshakes
  - file:// transfers
  - TELNET transfers
  - The "DONE" operation (post transfer protocol-specific actions) for the

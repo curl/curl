@@ -476,7 +476,6 @@ struct ConnectBits {
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_npn);  /* TLS NPN extension? */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
-  BIT(socksproxy_connecting); /* connecting through a socks proxy */
   BIT(connect_only);
 };
 
@@ -817,6 +816,41 @@ struct http_connect_state {
 
 struct ldapconninfo;
 
+/* for the (SOCKS) connect state machine */
+enum connect_t {
+  CONNECT_INIT,
+  CONNECT_SOCKS_INIT, /* 1 */
+  CONNECT_SOCKS_SEND, /* 2 waiting to send more first data */
+  CONNECT_SOCKS_READ_INIT, /* 3 set up read */
+  CONNECT_SOCKS_READ, /* 4 read server response */
+  CONNECT_GSSAPI_INIT, /* 5 */
+  CONNECT_AUTH_INIT, /* 6 setup outgoing auth buffer */
+  CONNECT_AUTH_SEND, /* 7 send auth */
+  CONNECT_AUTH_READ, /* 8 read auth response */
+  CONNECT_REQ_INIT,  /* 9 init SOCKS "request" */
+  CONNECT_RESOLVING, /* 10 */
+  CONNECT_RESOLVED,  /* 11 */
+  CONNECT_RESOLVE_REMOTE, /* 12 */
+  CONNECT_REQ_SEND,  /* 13 */
+  CONNECT_REQ_SENDING, /* 14 */
+  CONNECT_REQ_READ,  /* 15 */
+  CONNECT_REQ_READ_MORE, /* 16 */
+  CONNECT_DONE /* 17 connected fine to the remote or the SOCKS proxy */
+};
+
+#define SOCKS_STATE(x) (((x) >= CONNECT_SOCKS_INIT) &&  \
+                        ((x) < CONNECT_DONE))
+#define SOCKS_REQUEST_BUFSIZE 600  /* room for large user/pw (255 max each) */
+
+struct connstate {
+  enum connect_t state;
+  unsigned char socksreq[SOCKS_REQUEST_BUFSIZE];
+
+  /* CONNECT_SOCKS_SEND */
+  ssize_t outstanding;  /* send this many bytes more */
+  unsigned char *outp; /* send from this pointer */
+};
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -826,7 +860,7 @@ struct connectdata {
      caution that this might very well vary between different times this
      connection is used! */
   struct Curl_easy *data;
-
+  struct connstate cnnct;
   struct curl_llist_element bundle_node; /* conncache */
 
   /* chunk is for HTTP chunked encoding, but is in the general connectdata
