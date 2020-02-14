@@ -1416,6 +1416,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           char *enc = curl_easy_escape(NULL, postdata, (int)size);
           Curl_safefree(postdata); /* no matter if it worked or not */
           if(enc) {
+            size_t outlen;
+            char *n;
+
             /* fix space encoding per RFC1866 */
             char *reenc = replace_url_encoded_space_with_plus(enc);
             curl_free(enc);
@@ -1424,8 +1427,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
             /* now make a string with the name from above and append the
                encoded string */
-            size_t outlen = nlen + strlen(reenc) + 2;
-            char *n = malloc(outlen);
+            outlen = nlen + strlen(reenc) + 2;
+            n = malloc(outlen);
             if(!n) {
               curl_free(reenc);
               return PARAM_NO_MEM;
