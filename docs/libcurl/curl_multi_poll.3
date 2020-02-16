@@ -113,6 +113,8 @@ CURLMcode type, general libcurl multi interface error code. See
 \fIlibcurl-errors(3)\fP
 .SH AVAILABILITY
 This function was added in libcurl 7.66.0.
+
+Passing -1 as \ftimeout_ms\fP is valid since 7.69.0; prior to that, doing so had undefined behaviour.
 .SH "SEE ALSO"
 .BR curl_multi_fdset "(3), " curl_multi_perform "(3), "
 .BR curl_multi_wait "(3), " curl_multi_wakeup "(3)"
