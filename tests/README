@@ -182,7 +182,8 @@ The curl Test Suite
  1.9 Test input files
 
   All test cases are put in the data/ subdirectory. Each test is stored in the
-  file named according to the test number.
+  file named according to the test number. The current running test is
+  set in the envvar "CURL_TESTNUM"
 
   See FILEFORMAT for the description of the test case files.
 

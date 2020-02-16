@@ -5509,6 +5509,7 @@ $start = time();
 
 foreach $testnum (@at) {
 
+    $ENV{CURL_TESTNUM} = $testnum;
     $lasttest = $testnum if($testnum > $lasttest);
     $count++;
 
@@ -5535,6 +5536,8 @@ foreach $testnum (@at) {
     elsif(!$error) {
         $ok++; # successful test counter
     }
+    # Unset the CURL_TESTNUM envvar
+    delete($ENV{CURL_TESTNUM});
 
     # loop for next test
 }
