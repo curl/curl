@@ -98,6 +98,7 @@ Example set of cookies:
 #include "inet_pton.h"
 #include "parsedate.h"
 #include "rand.h"
+#include "rename.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1494,31 +1495,6 @@ static char *get_netscape_format(const struct Cookie *co)
     co->value?co->value:"");
 }
 
-/* return 0 on success, 1 on error */
-static int xrename(const char *oldpath, const char *newpath)
-{
-#ifdef WIN32
-  /* rename() on Windows doesn't overwrite, so we can't use it here.
-     MoveFileExA() will overwrite and is usually atomic, however it fails
-     when there are open handles to the file. */
-  const int max_wait_ms = 1000;
-  struct curltime start = Curl_now();
-  for(;;) {
-    timediff_t diff;
-    if(MoveFileExA(oldpath, newpath, MOVEFILE_REPLACE_EXISTING))
-      break;
-    diff = Curl_timediff(Curl_now(), start);
-    if(diff < 0 || diff > max_wait_ms)
-      return 1;
-    Sleep(1);
-  }
-#else
-  if(rename(oldpath, newpath))
-    return 1;
-#endif
-  return 0;
-}
-
 /*
  * cookie_output()
  *
@@ -1606,7 +1582,7 @@ static int cookie_output(struct Curl_easy *data,
   if(out && !use_stdout) {
     fclose(out);
     out = NULL;
-    if(xrename(tempstore, filename)) {
+    if(Curl_rename(tempstore, filename)) {
       unlink(tempstore);
       goto error;
     }
