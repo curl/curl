@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -33,73 +33,73 @@ CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in      \
  CMake/FindMbedTLS.cmake CMake/FindBearSSL.cmake                \
  CMake/cmake_uninstall.cmake.in CMake/curl-config.cmake.in
 
-VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
+VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.dsp.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist
 VC6_LIBDSP_DEPS = $(VC6_LIBTMPL) Makefile.am lib/Makefile.inc
-VC6_SRCTMPL = projects/Windows/VC6/src/curl.tmpl
+VC6_SRCTMPL = projects/Windows/VC6/src/curl.dsp.tmpl
 VC6_SRCDSP = projects/Windows/VC6/src/curl.dsp.dist
 VC6_SRCDSP_DEPS = $(VC6_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC7_LIBTMPL = projects/Windows/VC7/lib/libcurl.tmpl
+VC7_LIBTMPL = projects/Windows/VC7/lib/libcurl.vcproj.tmpl
 VC7_LIBVCPROJ = projects/Windows/VC7/lib/libcurl.vcproj.dist
 VC7_LIBVCPROJ_DEPS = $(VC7_LIBTMPL) Makefile.am lib/Makefile.inc
-VC7_SRCTMPL = projects/Windows/VC7/src/curl.tmpl
+VC7_SRCTMPL = projects/Windows/VC7/src/curl.vcproj.tmpl
 VC7_SRCVCPROJ = projects/Windows/VC7/src/curl.vcproj.dist
 VC7_SRCVCPROJ_DEPS = $(VC7_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC71_LIBTMPL = projects/Windows/VC7.1/lib/libcurl.tmpl
+VC71_LIBTMPL = projects/Windows/VC7.1/lib/libcurl.vcproj.tmpl
 VC71_LIBVCPROJ = projects/Windows/VC7.1/lib/libcurl.vcproj.dist
 VC71_LIBVCPROJ_DEPS = $(VC71_LIBTMPL) Makefile.am lib/Makefile.inc
-VC71_SRCTMPL = projects/Windows/VC7.1/src/curl.tmpl
+VC71_SRCTMPL = projects/Windows/VC7.1/src/curl.vcproj.tmpl
 VC71_SRCVCPROJ = projects/Windows/VC7.1/src/curl.vcproj.dist
 VC71_SRCVCPROJ_DEPS = $(VC71_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC8_LIBTMPL = projects/Windows/VC8/lib/libcurl.tmpl
+VC8_LIBTMPL = projects/Windows/VC8/lib/libcurl.vcproj.tmpl
 VC8_LIBVCPROJ = projects/Windows/VC8/lib/libcurl.vcproj.dist
 VC8_LIBVCPROJ_DEPS = $(VC8_LIBTMPL) Makefile.am lib/Makefile.inc
-VC8_SRCTMPL = projects/Windows/VC8/src/curl.tmpl
+VC8_SRCTMPL = projects/Windows/VC8/src/curl.vcproj.tmpl
 VC8_SRCVCPROJ = projects/Windows/VC8/src/curl.vcproj.dist
 VC8_SRCVCPROJ_DEPS = $(VC8_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC9_LIBTMPL = projects/Windows/VC9/lib/libcurl.tmpl
+VC9_LIBTMPL = projects/Windows/VC9/lib/libcurl.vcproj.tmpl
 VC9_LIBVCPROJ = projects/Windows/VC9/lib/libcurl.vcproj.dist
 VC9_LIBVCPROJ_DEPS = $(VC9_LIBTMPL) Makefile.am lib/Makefile.inc
-VC9_SRCTMPL = projects/Windows/VC9/src/curl.tmpl
+VC9_SRCTMPL = projects/Windows/VC9/src/curl.vcproj.tmpl
 VC9_SRCVCPROJ = projects/Windows/VC9/src/curl.vcproj.dist
 VC9_SRCVCPROJ_DEPS = $(VC9_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.tmpl
+VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.vcxproj.tmpl
 VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj.dist
 VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) Makefile.am lib/Makefile.inc
-VC10_SRCTMPL = projects/Windows/VC10/src/curl.tmpl
+VC10_SRCTMPL = projects/Windows/VC10/src/curl.vcxproj.tmpl
 VC10_SRCVCXPROJ = projects/Windows/VC10/src/curl.vcxproj.dist
 VC10_SRCVCXPROJ_DEPS = $(VC10_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.tmpl
+VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.vcxproj.tmpl
 VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj.dist
 VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) Makefile.am lib/Makefile.inc
-VC11_SRCTMPL = projects/Windows/VC11/src/curl.tmpl
+VC11_SRCTMPL = projects/Windows/VC11/src/curl.vcxproj.tmpl
 VC11_SRCVCXPROJ = projects/Windows/VC11/src/curl.vcxproj.dist
 VC11_SRCVCXPROJ_DEPS = $(VC11_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.tmpl
+VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.vcxproj.tmpl
 VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj.dist
 VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) Makefile.am lib/Makefile.inc
-VC12_SRCTMPL = projects/Windows/VC12/src/curl.tmpl
+VC12_SRCTMPL = projects/Windows/VC12/src/curl.vcxproj.tmpl
 VC12_SRCVCXPROJ = projects/Windows/VC12/src/curl.vcxproj.dist
 VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC14_LIBTMPL = projects/Windows/VC14/lib/libcurl.tmpl
+VC14_LIBTMPL = projects/Windows/VC14/lib/libcurl.vcxproj.tmpl
 VC14_LIBVCXPROJ = projects/Windows/VC14/lib/libcurl.vcxproj.dist
 VC14_LIBVCXPROJ_DEPS = $(VC14_LIBTMPL) Makefile.am lib/Makefile.inc
-VC14_SRCTMPL = projects/Windows/VC14/src/curl.tmpl
+VC14_SRCTMPL = projects/Windows/VC14/src/curl.vcxproj.tmpl
 VC14_SRCVCXPROJ = projects/Windows/VC14/src/curl.vcxproj.dist
 VC14_SRCVCXPROJ_DEPS = $(VC14_SRCTMPL) Makefile.am src/Makefile.inc
 
-VC15_LIBTMPL = projects/Windows/VC15/lib/libcurl.tmpl
+VC15_LIBTMPL = projects/Windows/VC15/lib/libcurl.vcxproj.tmpl
 VC15_LIBVCXPROJ = projects/Windows/VC15/lib/libcurl.vcxproj.dist
 VC15_LIBVCXPROJ_DEPS = $(VC15_LIBTMPL) Makefile.am lib/Makefile.inc
-VC15_SRCTMPL = projects/Windows/VC15/src/curl.tmpl
+VC15_SRCTMPL = projects/Windows/VC15/src/curl.vcxproj.tmpl
 VC15_SRCVCXPROJ = projects/Windows/VC15/src/curl.vcxproj.dist
 VC15_SRCVCXPROJ_DEPS = $(VC15_SRCTMPL) Makefile.am src/Makefile.inc
 

@@ -30,54 +30,54 @@ rem ***************************************************************************
   set VERSION=ALL
   set MODE=GENERATE
 
-  set VC6_LIBTMPL=dsp Windows\VC6\lib\libcurl.tmpl
+  set VC6_LIBTMPL=dsp Windows\VC6\lib\libcurl.dsp.tmpl
   set VC6_LIBDSP=Windows\VC6\lib\libcurl.dsp
-  set VC6_SRCTMPL=Windows\VC6\src\curl.tmpl
+  set VC6_SRCTMPL=Windows\VC6\src\curl.dsp.tmpl
   set VC6_SRCDSP=Windows\VC6\src\curl.dsp
 
-  set VC7_LIBTMPL=Windows\VC7\lib\libcurl.tmpl
+  set VC7_LIBTMPL=Windows\VC7\lib\libcurl.vcproj.tmpl
   set VC7_LIBVCPROJ=Windows\VC7\lib\libcurl.vcproj
-  set VC7_SRCTMPL=Windows\VC7\src\curl.tmpl
+  set VC7_SRCTMPL=Windows\VC7\src\curl.vcproj.tmpl
   set VC7_SRCVCPROJ=Windows\VC7\src\curl.vcproj
 
-  set VC71_LIBTMPL=Windows\VC7.1\lib\libcurl.tmpl
+  set VC71_LIBTMPL=Windows\VC7.1\lib\libcurl.vcproj.tmpl
   set VC71_LIBVCPROJ=Windows\VC7.1\lib\libcurl.vcproj
-  set VC71_SRCTMPL=Windows\VC7.1\src\curl.tmpl
+  set VC71_SRCTMPL=Windows\VC7.1\src\curl.vcproj.tmpl
   set VC71_SRCVCPROJ=Windows\VC7.1\src\curl.vcproj
 
-  set VC8_LIBTMPL=Windows\VC8\lib\libcurl.tmpl
+  set VC8_LIBTMPL=Windows\VC8\lib\libcurl.vcproj.tmpl
   set VC8_LIBVCPROJ=Windows\VC8\lib\libcurl.vcproj
-  set VC8_SRCTMPL=Windows\VC8\src\curl.tmpl
+  set VC8_SRCTMPL=Windows\VC8\src\curl.vcproj.tmpl
   set VC8_SRCVCPROJ=Windows\VC8\src\curl.vcproj
 
-  set VC9_LIBTMPL=Windows\VC9\lib\libcurl.tmpl
+  set VC9_LIBTMPL=Windows\VC9\lib\libcurl.vcproj.tmpl
   set VC9_LIBVCPROJ=Windows\VC9\lib\libcurl.vcproj
-  set VC9_SRCTMPL=Windows\VC9\src\curl.tmpl
+  set VC9_SRCTMPL=Windows\VC9\src\curl.vcproj.tmpl
   set VC9_SRCVCPROJ=Windows\VC9\src\curl.vcproj
 
-  set VC10_LIBTMPL=Windows\VC10\lib\libcurl.tmpl
+  set VC10_LIBTMPL=Windows\VC10\lib\libcurl.vcxproj.tmpl
   set VC10_LIBVCXPROJ=Windows\VC10\lib\libcurl.vcxproj
-  set VC10_SRCTMPL=Windows\VC10\src\curl.tmpl
+  set VC10_SRCTMPL=Windows\VC10\src\curl.vcxproj.tmpl
   set VC10_SRCVCXPROJ=Windows\VC10\src\curl.vcxproj
 
-  set VC11_LIBTMPL=Windows\VC11\lib\libcurl.tmpl
+  set VC11_LIBTMPL=Windows\VC11\lib\libcurl.vcxproj.tmpl
   set VC11_LIBVCXPROJ=Windows\VC11\lib\libcurl.vcxproj
-  set VC11_SRCTMPL=Windows\VC11\src\curl.tmpl
+  set VC11_SRCTMPL=Windows\VC11\src\curl.vcxproj.tmpl
   set VC11_SRCVCXPROJ=Windows\VC11\src\curl.vcxproj
 
-  set VC12_LIBTMPL=Windows\VC12\lib\libcurl.tmpl
+  set VC12_LIBTMPL=Windows\VC12\lib\libcurl.vcxproj.tmpl
   set VC12_LIBVCXPROJ=Windows\VC12\lib\libcurl.vcxproj
-  set VC12_SRCTMPL=Windows\VC12\src\curl.tmpl
+  set VC12_SRCTMPL=Windows\VC12\src\curl.vcxproj.tmpl
   set VC12_SRCVCXPROJ=Windows\VC12\src\curl.vcxproj
 
-  set VC14_LIBTMPL=Windows\VC14\lib\libcurl.tmpl
+  set VC14_LIBTMPL=Windows\VC14\lib\libcurl.vcxproj.tmpl
   set VC14_LIBVCXPROJ=Windows\VC14\lib\libcurl.vcxproj
-  set VC14_SRCTMPL=Windows\VC14\src\curl.tmpl
+  set VC14_SRCTMPL=Windows\VC14\src\curl.vcxproj.tmpl
   set VC14_SRCVCXPROJ=Windows\VC14\src\curl.vcxproj
 
-  set VC15_LIBTMPL=Windows\VC15\lib\libcurl.tmpl
+  set VC15_LIBTMPL=Windows\VC15\lib\libcurl.vcxproj.tmpl
   set VC15_LIBVCXPROJ=Windows\VC15\lib\libcurl.vcxproj
-  set VC15_SRCTMPL=Windows\VC15\src\curl.tmpl
+  set VC15_SRCTMPL=Windows\VC15\src\curl.vcxproj.tmpl
   set VC15_SRCVCXPROJ=Windows\VC15\src\curl.vcxproj
 
   rem Check we are not running on a network drive
