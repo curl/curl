@@ -71,9 +71,9 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,
                         int srcport,
                         struct altsvc **dstentry,
-                        int versions); /* one or more CURLALTSVC_H* bits */
+                        const int versions); /* CURLALTSVC_H* bits */
 #else
 /* disabled */
-#define Curl_altsvc_save(a,b)
+#define Curl_altsvc_save(a,b,c)
 #endif /* CURL_DISABLE_HTTP || USE_ALTSVC */
 #endif /* HEADER_CURL_ALTSVC_H */

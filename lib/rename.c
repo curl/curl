@@ -27,6 +27,8 @@
 #if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)) ||  \
   defined(USE_ALTSVC)
 
+#include "timeval.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
