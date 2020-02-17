@@ -6,7 +6,7 @@ rem *                             / __| | | | |_) | |
 rem *                            | (__| |_| |  _ <| |___
 rem *                             \___|\___/|_| \_\_____|
 rem *
-rem * Copyright (C) 2014 - 2017, Steve Holme, <steve_holme@hotmail.com>.
+rem * Copyright (C) 2014 - 2020, Steve Holme, <steve_holme@hotmail.com>.
 rem *
 rem * This software is licensed as described in the file COPYING, which
 rem * you should have received as part of this distribution. The terms
@@ -29,6 +29,56 @@ rem ***************************************************************************
   setlocal ENABLEEXTENSIONS
   set VERSION=ALL
   set MODE=GENERATE
+
+  set VC6_LIBTMPL=dsp Windows\VC6\lib\libcurl.tmpl
+  set VC6_LIBDSP=Windows\VC6\lib\libcurl.dsp
+  set VC6_SRCTMPL=Windows\VC6\src\curl.tmpl
+  set VC6_SRCDSP=Windows\VC6\src\curl.dsp
+
+  set VC7_LIBTMPL=Windows\VC7\lib\libcurl.tmpl
+  set VC7_LIBVCPROJ=Windows\VC7\lib\libcurl.vcproj
+  set VC7_SRCTMPL=Windows\VC7\src\curl.tmpl
+  set VC7_SRCVCPROJ=Windows\VC7\src\curl.vcproj
+
+  set VC71_LIBTMPL=Windows\VC7.1\lib\libcurl.tmpl
+  set VC71_LIBVCPROJ=Windows\VC7.1\lib\libcurl.vcproj
+  set VC71_SRCTMPL=Windows\VC7.1\src\curl.tmpl
+  set VC71_SRCVCPROJ=Windows\VC7.1\src\curl.vcproj
+
+  set VC8_LIBTMPL=Windows\VC8\lib\libcurl.tmpl
+  set VC8_LIBVCPROJ=Windows\VC8\lib\libcurl.vcproj
+  set VC8_SRCTMPL=Windows\VC8\src\curl.tmpl
+  set VC8_SRCVCPROJ=Windows\VC8\src\curl.vcproj
+
+  set VC9_LIBTMPL=Windows\VC9\lib\libcurl.tmpl
+  set VC9_LIBVCPROJ=Windows\VC9\lib\libcurl.vcproj
+  set VC9_SRCTMPL=Windows\VC9\src\curl.tmpl
+  set VC9_SRCVCPROJ=Windows\VC9\src\curl.vcproj
+
+  set VC10_LIBTMPL=Windows\VC10\lib\libcurl.tmpl
+  set VC10_LIBVCXPROJ=Windows\VC10\lib\libcurl.vcxproj
+  set VC10_SRCTMPL=Windows\VC10\src\curl.tmpl
+  set VC10_SRCVCXPROJ=Windows\VC10\src\curl.vcxproj
+
+  set VC11_LIBTMPL=Windows\VC11\lib\libcurl.tmpl
+  set VC11_LIBVCXPROJ=Windows\VC11\lib\libcurl.vcxproj
+  set VC11_SRCTMPL=Windows\VC11\src\curl.tmpl
+  set VC11_SRCVCXPROJ=Windows\VC11\src\curl.vcxproj
+
+  set VC12_LIBTMPL=Windows\VC12\lib\libcurl.tmpl
+  set VC12_LIBVCXPROJ=Windows\VC12\lib\libcurl.vcxproj
+  set VC12_SRCTMPL=Windows\VC12\src\curl.tmpl
+  set VC12_SRCVCXPROJ=Windows\VC12\src\curl.vcxproj
+
+  set VC14_LIBTMPL=Windows\VC14\lib\libcurl.tmpl
+  set VC14_LIBVCXPROJ=Windows\VC14\lib\libcurl.vcxproj
+  set VC14_SRCTMPL=Windows\VC14\src\curl.tmpl
+  set VC14_SRCVCXPROJ=Windows\VC14\src\curl.vcxproj
+
+  set VC15_LIBTMPL=Windows\VC15\lib\libcurl.tmpl
+  set VC15_LIBVCXPROJ=Windows\VC15\lib\libcurl.vcxproj
+  set VC15_SRCTMPL=Windows\VC15\src\curl.tmpl
+  set VC15_SRCVCXPROJ=Windows\VC15\src\curl.vcxproj
 
   rem Check we are not running on a network drive
   if "%~d0."=="\\." goto nonetdrv
@@ -105,12 +155,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC6 project files
-    call :generate dsp Windows\VC6\src\curl.tmpl Windows\VC6\src\curl.dsp
-    call :generate dsp Windows\VC6\lib\libcurl.tmpl Windows\VC6\lib\libcurl.dsp
+    call :generate dsp %VC6_SRCTMPL% %VC6_SRCDSP%
+    call :generate %VC6_LIBTMPL% %VC6_LIBDSP%
   ) else (
     echo Removing VC6 project files
-    call :clean Windows\VC6\src\curl.dsp
-    call :clean Windows\VC6\lib\libcurl.dsp
+    call :clean %VC6_SRCDSP%
+    call :clean %VC6_LIBDSP%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -120,12 +170,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC7 project files
-    call :generate vcproj1 Windows\VC7\src\curl.tmpl Windows\VC7\src\curl.vcproj
-    call :generate vcproj1 Windows\VC7\lib\libcurl.tmpl Windows\VC7\lib\libcurl.vcproj
+    call :generate vcproj1 %VC7_SRCTMPL% %VC7_SRCVCPROJ%
+    call :generate vcproj1 %VC7_LIBTMPL% %VC7_LIBVCPROJ%
   ) else (
     echo Removing VC7 project files
-    call :clean Windows\VC7\src\curl.vcproj
-    call :clean Windows\VC7\lib\libcurl.vcproj
+    call :clean %VC7_SRCVCPROJ%
+    call :clean %VC7_LIBVCPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -135,12 +185,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC7.1 project files
-    call :generate vcproj1 Windows\VC7.1\src\curl.tmpl Windows\VC7.1\src\curl.vcproj
-    call :generate vcproj1 Windows\VC7.1\lib\libcurl.tmpl Windows\VC7.1\lib\libcurl.vcproj
+    call :generate vcproj1 %VC71_SRCTMPL% %VC71_SRCVCPROJ%
+    call :generate vcproj1 %VC71_LIBTMPL% %VC71_LIBVCPROJ%
   ) else (
     echo Removing VC7.1 project files
-    call :clean Windows\VC7.1\src\curl.vcproj
-    call :clean Windows\VC7.1\lib\libcurl.vcproj
+    call :clean %VC71_SRCVCPROJ%
+    call :clean %VC71_LIBVCPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -150,12 +200,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC8 project files
-    call :generate vcproj2 Windows\VC8\src\curl.tmpl Windows\VC8\src\curl.vcproj
-    call :generate vcproj2 Windows\VC8\lib\libcurl.tmpl Windows\VC8\lib\libcurl.vcproj
+    call :generate vcproj2 %VC8_SRCTMPL% %VC8_SRCVCPROJ%
+    call :generate vcproj2 %VC8_LIBTMPL% %VC8_LIBVCPROJ%
   ) else (
     echo Removing VC8 project files
-    call :clean Windows\VC8\src\curl.vcproj
-    call :clean Windows\VC8\lib\libcurl.vcproj
+    call :clean %VC8_SRCVCPROJ%
+    call :clean %VC8_LIBVCPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -165,12 +215,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC9 project files
-    call :generate vcproj2 Windows\VC9\src\curl.tmpl Windows\VC9\src\curl.vcproj
-    call :generate vcproj2 Windows\VC9\lib\libcurl.tmpl Windows\VC9\lib\libcurl.vcproj
+    call :generate vcproj2 %VC9_SRCTMPL% %VC9_SRCVCPROJ%
+    call :generate vcproj2 %VC9_LIBTMPL% %VC9_LIBVCPROJ%
   ) else (
     echo Removing VC9 project files
-    call :clean Windows\VC9\src\curl.vcproj
-    call :clean Windows\VC9\lib\libcurl.vcproj
+    call :clean %VC9_SRCVCPROJ%
+    call :clean %VC9_LIBVCPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -180,12 +230,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC10 project files
-    call :generate vcxproj Windows\VC10\src\curl.tmpl Windows\VC10\src\curl.vcxproj
-    call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+    call :generate vcxproj %VC10_SRCTMPL% %VC10_SRCVCXPROJ%
+    call :generate vcxproj %VC10_LIBTMPL% %VC10_LIBVCXPROJ%
   ) else (
     echo Removing VC10 project files
-    call :clean Windows\VC10\src\curl.vcxproj
-    call :clean Windows\VC10\lib\libcurl.vcxproj
+    call :clean %VC10_SRCVCXPROJ%
+    call :clean %VC10_LIBVCXPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -195,12 +245,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC11 project files
-    call :generate vcxproj Windows\VC11\src\curl.tmpl Windows\VC11\src\curl.vcxproj
-    call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
+    call :generate vcxproj %VC11_SRCTMPL% %VC11_SRCVCXPROJ%
+    call :generate vcxproj %VC11_LIBTMPL% %VC11_LIBVCXPROJ%
   ) else (
     echo Removing VC11 project files
-    call :clean Windows\VC11\src\curl.vcxproj
-    call :clean Windows\VC11\lib\libcurl.vcxproj
+    call :clean %VC11_SRCVCXPROJ%
+    call :clean %VC11_LIBVCXPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -210,12 +260,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC12 project files
-    call :generate vcxproj Windows\VC12\src\curl.tmpl Windows\VC12\src\curl.vcxproj
-    call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+    call :generate vcxproj %VC12_SRCTMPL% %VC12_SRCVCXPROJ%
+    call :generate vcxproj %VC12_LIBTMPL% %VC12_LIBVCXPROJ%
   ) else (
     echo Removing VC12 project files
-    call :clean Windows\VC12\src\curl.vcxproj
-    call :clean Windows\VC12\lib\libcurl.vcxproj
+    call :clean %VC12_SRCVCXPROJ%
+    call :clean %VC12_LIBVCXPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -225,12 +275,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC14 project files
-    call :generate vcxproj Windows\VC14\src\curl.tmpl Windows\VC14\src\curl.vcxproj
-    call :generate vcxproj Windows\VC14\lib\libcurl.tmpl Windows\VC14\lib\libcurl.vcxproj
+    call :generate vcxproj %VC14_SRCTMPL% %VC14_SRCVCXPROJ%
+    call :generate vcxproj %VC14_LIBTMPL% %VC14_LIBVCXPROJ%
   ) else (
     echo Removing VC14 project files
-    call :clean Windows\VC14\src\curl.vcxproj
-    call :clean Windows\VC14\lib\libcurl.vcxproj
+    call :clean %VC14_SRCVCXPROJ%
+    call :clean %VC14_LIBVCXPROJ%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -240,12 +290,12 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC15 project files
-    call :generate vcxproj Windows\VC15\src\curl.tmpl Windows\VC15\src\curl.vcxproj
-    call :generate vcxproj Windows\VC15\lib\libcurl.tmpl Windows\VC15\lib\libcurl.vcxproj
+    call :generate vcxproj %VC15_SRCTMPL% %VC15_SRCVCXPROJ%
+    call :generate vcxproj %VC15_LIBTMPL% %VC15_LIBVCXPROJ%
   ) else (
     echo Removing VC15 project files
-    call :clean Windows\VC15\src\curl.vcxproj
-    call :clean Windows\VC15\lib\libcurl.vcxproj
+    call :clean %VC15_SRCVCXPROJ%
+    call :clean %VC15_LIBVCXPROJ%
   )
 
   goto success
