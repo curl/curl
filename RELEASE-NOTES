@@ -16,14 +16,18 @@ This release includes the following bugfixes:
 
  o CMake: Add support for CMAKE_LTO option [22]
  o CMake: use check_symbol_exists also for inet_pton [19]
+ o CURLINFO_COOKIELIST.3: Fix example [67]
+ o CURLOPT_ALTSVC_CTRL.3: fix the DEFAULT wording [74]
  o CURLOPT_PROXY_SSL_OPTIONS.3: Sync with CURLOPT_SSL_OPTIONS.3
  o HTTP-COOKIES.md: describe the cookie file format [21]
  o KNOWN_BUGS: Multiple methods in a single WWW-Authenticate: header
  o README: mention that the docs is in docs/ [49]
  o RELEASE-PROCEDURE: feature win is closed post-release a few days [62]
+ o SOCKS: make the connect phase non-blocking [64]
  o altsvc: improved header parser [63]
  o altsvc: keep a copy of the file name to survive handle reset [50]
  o altsvc: use h3-25 [40]
+ o azure: disable brotli on the macos debug-builds [68]
  o checksrc.bat: Fix not being able to run script from the main curl dir [54]
  o cleanup: fix typos and wording in docs and comments [39]
  o cmake: Enable SMB for Windows builds [12]
@@ -36,6 +40,7 @@ This release includes the following bugfixes:
  o contributors: Also include people who contributed to curl-www [58]
  o contrithanks: Use the most recent tag by default [59]
  o cookie: check __Secure- and __Host- case sensitively [43]
+ o create-dirs.d: mention the mode [73]
  o curl: Let -D merge headers in one file again [25]
  o curl: avoid using strlen for testing if a string is empty [37]
  o curl: error on --alt-svc use w/o support [61]
@@ -49,7 +54,9 @@ This release includes the following bugfixes:
  o digest: Do not quote algorithm in HTTP authorisation [55]
  o docs/HTTP3: add --enable-alt-svc to curl's configure
  o docs/HTTP3: update the OpenSSL branch to use for ngtcp2
+ o easy: remove dead code [72]
  o form.d: fix two minor typos [34]
+ o ftp: convert 'sock_accepted' to a plain boolean [66]
  o ftp: remove superfluous checking for crlf in user or pwd [56]
  o ftp: shrink temp buffers used for PORT [60]
  o github: Instructions to post "uname -a" on Unix systems in issues [52]
@@ -63,6 +70,8 @@ This release includes the following bugfixes:
  o location.d: the method change is from POST to GET only [46]
  o mk-ca-bundle: add support for CKA_NSS_SERVER_DISTRUST_AFTER [36]
  o multi: Change curl_multi_wait/poll to error on negative timeout [11]
+ o multi: fix outdated comment [71]
+ o multi: if Curl_readwrite sets 'comeback' use expire, not loop [65]
  o multi_done: if multiplexed, make conn->data point to another transfer [45]
  o ngtcp2: Add an error code for QUIC connection errors [10]
  o ngtcp2: fixed to only use AF_INET6 when ENABLE_IPV6 [63]
@@ -80,7 +89,9 @@ This release includes the following bugfixes:
  o schannel_verify: Fix alt names manual verify for UNICODE builds [20]
  o singleuse.pl: support new API functions, fix curl_dbg_ handling [33]
  o strcase: turn Curl_raw_tolower into static [33]
+ o strerror: Increase STRERROR_LEN 128 -> 256 [70]
  o tool_dirhie: Allow directory traversal during creation [2]
+ o tool_homedir: Change GetEnv() to use libcurl's curl_getenv() [69]
  o travis: update non-OpenSSL Linux jobs to Bionic [38]
  o url: Include the failure reason when curl_win32_idn_to_ascii() fails [51]
  o urlapi: guess scheme properly with credentials given [47]
@@ -94,18 +105,19 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Andrew Potter, Andrius Merkys, Aron Rotteveel,
-  Austin Green, bnfp on github, Brian Carpenter, bsammon on github,
-  Christian Heimes, Craig Andrews, crazydef on github, Cristian Greco,
-  Dan Fandrich, Daniel Gustafsson, Daniel Marjamäki, Daniel Stenberg,
-  dmitrmax on github, Edgaras Janušauskas, Emil Engler, Faizur Rahman,
-  Frank Gevaerts, hamstergene on github, Harry Sintonen, James Fuller,
-  Jeroen Ooms, Johannes Schindelin, Jon Rumsey, Kunal Ekawde, Marc Aldorasi,
-  Marcel Raad, mbeifuss on github, Mike Norton, Mischa Salle,
-  naost3rn on github, Nicolas Guillier, Orgad Shaneh, Pavel Volgarev,
-  Pedro Monreal, Peter Piekarski, Pierre-Yves Bigourdan, Ray Satiro,
-  Santino Keupp, Steve Holme, Tobias Hieta, vshmuk on hackerone, 加藤郁之,
-  (46 contributors)
+  3dyd on github, Alessandro Ghedini, Andrew Potter, Andrius Merkys,
+  Aron Rotteveel, Austin Green, bnfp on github, Brian Carpenter,
+  bsammon on github, Christian Heimes, Christoph M. Becker, Craig Andrews,
+  crazydef on github, Cristian Greco, Dan Fandrich, Daniel Gustafsson,
+  Daniel Marjamäki, Daniel Stenberg, Dan Jacobson, dmitrmax on github,
+  Edgaras Janušauskas, Emil Engler, Faizur Rahman, Frank Gevaerts,
+  hamstergene on github, Harry Sintonen, James Fuller, Jeroen Ooms,
+  Johannes Schindelin, Jon Rumsey, Kunal Ekawde, Marc Aldorasi, Marcel Raad,
+  mbeifuss on github, Mike Norton, Mischa Salle, naost3rn on github,
+  Nicolas Guillier, Orgad Shaneh, Pavel Volgarev, Pedro Monreal,
+  Peter Piekarski, Pierre-Yves Bigourdan, Ray Satiro, Santino Keupp,
+  Steve Holme, Tobias Hieta, vshmuk on hackerone, 加藤郁之,
+  (49 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -174,3 +186,14 @@ References to bug reports and discussions on issues:
  [61] = https://curl.haxx.se/bug/?i=4878
  [62] = https://curl.haxx.se/bug/?i=4877
  [63] = https://curl.haxx.se/bug/?i=4875
+ [64] = https://curl.haxx.se/bug/?i=4907
+ [65] = https://curl.haxx.se/bug/?i=4927
+ [66] = https://curl.haxx.se/bug/?i=4929
+ [67] = https://curl.haxx.se/bug/?i=4930
+ [68] = https://curl.haxx.se/bug/?i=4925
+ [69] = https://curl.haxx.se/bug/?i=4774
+ [70] = https://curl.haxx.se/bug/?i=4920
+ [71] = https://curl.haxx.se/bug/?i=4901
+ [72] = https://curl.haxx.se/bug/?i=4900
+ [73] = https://curl.haxx.se/bug/?i=4766
+ [74] = https://curl.haxx.se/bug/?i=4909
