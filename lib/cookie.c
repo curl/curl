@@ -1501,20 +1501,24 @@ static int xrename(const char *oldpath, const char *newpath)
   /* rename() on Windows doesn't overwrite, so we can't use it here.
      MoveFileExA() will overwrite and is usually atomic, however it fails
      when there are open handles to the file. */
-  int i = 0;
-  int max_wait_ms = 1000;
-  for(i = 0; i < max_wait_ms; ++i, Sleep(1)) {
+  const int max_wait_ms = 1000;
+  struct curltime start = Curl_now();
+  for(;;) {
+    timediff_t diff;
     if(MoveFileExA(oldpath, newpath, MOVEFILE_REPLACE_EXISTING))
       break;
+    diff = Curl_timediff(Curl_now(), start);
+    if(diff < 0 || diff > max_wait_ms)
+      return 1;
+    Sleep(1);
   }
-  if(i == max_wait_ms)
-    return 1;
 #else
   if(rename(oldpath, newpath))
     return 1;
 #endif
   return 0;
 }
+
 /*
  * cookie_output()
  *
@@ -1550,7 +1554,7 @@ static int cookie_output(struct Curl_easy *data,
     if(Curl_rand_hex(data, randsuffix, sizeof(randsuffix)))
       return 2;
 
-    tempstore = aprintf("%s.%s", filename, randsuffix);
+    tempstore = aprintf("%s.%s.tmp", filename, randsuffix);
     if(!tempstore)
       return 1;
 
@@ -1602,8 +1606,10 @@ static int cookie_output(struct Curl_easy *data,
   if(out && !use_stdout) {
     fclose(out);
     out = NULL;
-    if(xrename(tempstore, filename))
+    if(xrename(tempstore, filename)) {
+      unlink(tempstore);
       goto error;
+    }
   }
 
   goto cleanup;
