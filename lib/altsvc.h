@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,7 +59,8 @@ struct altsvcinfo {
 const char *Curl_alpnid2str(enum alpnid id);
 struct altsvcinfo *Curl_altsvc_init(void);
 CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file);
-CURLcode Curl_altsvc_save(struct altsvcinfo *asi, const char *file);
+CURLcode Curl_altsvc_save(struct Curl_easy *data,
+                          struct altsvcinfo *asi, const char *file);
 CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl);
 void Curl_altsvc_cleanup(struct altsvcinfo *altsvc);
 CURLcode Curl_altsvc_parse(struct Curl_easy *data,
@@ -70,9 +71,9 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,
                         int srcport,
                         struct altsvc **dstentry,
-                        int versions); /* one or more CURLALTSVC_H* bits */
+                        const int versions); /* CURLALTSVC_H* bits */
 #else
 /* disabled */
-#define Curl_altsvc_save(a,b)
+#define Curl_altsvc_save(a,b,c)
 #endif /* CURL_DISABLE_HTTP || USE_ALTSVC */
 #endif /* HEADER_CURL_ALTSVC_H */
