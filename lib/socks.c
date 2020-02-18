@@ -838,7 +838,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       socksreq[len++] = (char) hostname_len; /* one byte address length */
       memcpy(&socksreq[len], hostname, hostname_len); /* address w/o NULL */
       len += hostname_len;
-      infof(data, "SOCKS5 connect to %s:5d (remotely resolved)\n",
+      infof(data, "SOCKS5 connect to %s:%d (remotely resolved)\n",
             hostname, remote_port);
     }
     /* FALLTHROUGH */
