@@ -26,7 +26,7 @@ rem ***************************************************************************
   if not "%OS%" == "Windows_NT" goto nodos
 
   rem Set our variables
-  setlocal ENABLEEXTENSIONS
+  setlocal ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
   set VERSION=ALL
   set MODE=GENERATE
 
@@ -57,28 +57,48 @@ rem ***************************************************************************
 
   set VC10_LIBTMPL=Windows\VC10\lib\libcurl.vcxproj.tmpl
   set VC10_LIBVCXPROJ=Windows\VC10\lib\libcurl.vcxproj
+  set VC10_LIBFILTERSTMPL=Windows\VC10\lib\libcurl.vcxproj.filters.tmpl
+  set VC10_LIBFILTERS=Windows\VC10\lib\libcurl.vcxproj.filters
   set VC10_SRCTMPL=Windows\VC10\src\curl.vcxproj.tmpl
   set VC10_SRCVCXPROJ=Windows\VC10\src\curl.vcxproj
+  set VC10_SRCFILTERSTMPL=Windows\VC10\src\curl.vcxproj.filters.tmpl
+  set VC10_SRCFILTERS=Windows\VC10\src\curl.vcxproj.filters
 
   set VC11_LIBTMPL=Windows\VC11\lib\libcurl.vcxproj.tmpl
   set VC11_LIBVCXPROJ=Windows\VC11\lib\libcurl.vcxproj
+  set VC11_LIBFILTERSTMPL=Windows\VC11\lib\libcurl.vcxproj.filters.tmpl
+  set VC11_LIBFILTERS=Windows\VC11\lib\libcurl.vcxproj.filters
   set VC11_SRCTMPL=Windows\VC11\src\curl.vcxproj.tmpl
   set VC11_SRCVCXPROJ=Windows\VC11\src\curl.vcxproj
+  set VC11_SRCFILTERSTMPL=Windows\VC11\src\curl.vcxproj.filters.tmpl
+  set VC11_SRCFILTERS=Windows\VC11\src\curl.vcxproj.filters
 
   set VC12_LIBTMPL=Windows\VC12\lib\libcurl.vcxproj.tmpl
   set VC12_LIBVCXPROJ=Windows\VC12\lib\libcurl.vcxproj
+  set VC12_LIBFILTERSTMPL=Windows\VC12\lib\libcurl.vcxproj.filters.tmpl
+  set VC12_LIBFILTERS=Windows\VC12\lib\libcurl.vcxproj.filters
   set VC12_SRCTMPL=Windows\VC12\src\curl.vcxproj.tmpl
   set VC12_SRCVCXPROJ=Windows\VC12\src\curl.vcxproj
+  set VC12_SRCFILTERSTMPL=Windows\VC12\src\curl.vcxproj.filters.tmpl
+  set VC12_SRCFILTERS=Windows\VC12\src\curl.vcxproj.filters
 
   set VC14_LIBTMPL=Windows\VC14\lib\libcurl.vcxproj.tmpl
   set VC14_LIBVCXPROJ=Windows\VC14\lib\libcurl.vcxproj
+  set VC14_LIBFILTERSTMPL=Windows\VC14\lib\libcurl.vcxproj.filters.tmpl
+  set VC14_LIBFILTERS=Windows\VC14\lib\libcurl.vcxproj.filters
   set VC14_SRCTMPL=Windows\VC14\src\curl.vcxproj.tmpl
   set VC14_SRCVCXPROJ=Windows\VC14\src\curl.vcxproj
+  set VC14_SRCFILTERSTMPL=Windows\VC14\src\curl.vcxproj.filters.tmpl
+  set VC14_SRCFILTERS=Windows\VC14\src\curl.vcxproj.filters
 
   set VC15_LIBTMPL=Windows\VC15\lib\libcurl.vcxproj.tmpl
   set VC15_LIBVCXPROJ=Windows\VC15\lib\libcurl.vcxproj
+  set VC15_LIBFILTERSTMPL=Windows\VC15\lib\libcurl.vcxproj.filters.tmpl
+  set VC15_LIBFILTERS=Windows\VC15\lib\libcurl.vcxproj.filters
   set VC15_SRCTMPL=Windows\VC15\src\curl.vcxproj.tmpl
   set VC15_SRCVCXPROJ=Windows\VC15\src\curl.vcxproj
+  set VC15_SRCFILTERSTMPL=Windows\VC15\src\curl.vcxproj.filters.tmpl
+  set VC15_SRCFILTERS=Windows\VC15\src\curl.vcxproj.filters
 
   rem Check we are not running on a network drive
   if "%~d0."=="\\." goto nonetdrv
@@ -231,11 +251,15 @@ rem ***************************************************************************
   if "%MODE%" == "GENERATE" (
     echo Generating VC10 project files
     call :generate vcxproj %VC10_SRCTMPL% %VC10_SRCVCXPROJ%
+    call :generate filters %VC10_SRCFILTERSTMPL% %VC10_SRCFILTERS%
     call :generate vcxproj %VC10_LIBTMPL% %VC10_LIBVCXPROJ%
+    call :generate filters %VC10_LIBFILTERSTMPL% %VC10_LIBFILTERS%
   ) else (
     echo Removing VC10 project files
     call :clean %VC10_SRCVCXPROJ%
+    call :clean %VC10_SRCFILTERS%
     call :clean %VC10_LIBVCXPROJ%
+    call :clean %VC10_LIBFILTERS%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -246,11 +270,15 @@ rem ***************************************************************************
   if "%MODE%" == "GENERATE" (
     echo Generating VC11 project files
     call :generate vcxproj %VC11_SRCTMPL% %VC11_SRCVCXPROJ%
+    call :generate filters %VC11_SRCFILTERSTMPL% %VC11_SRCFILTERS%
     call :generate vcxproj %VC11_LIBTMPL% %VC11_LIBVCXPROJ%
+    call :generate filters %VC11_LIBFILTERSTMPL% %VC11_LIBFILTERS%
   ) else (
     echo Removing VC11 project files
     call :clean %VC11_SRCVCXPROJ%
+    call :clean %VC11_SRCFILTERS%
     call :clean %VC11_LIBVCXPROJ%
+    call :clean %VC11_LIBFILTERS%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -261,11 +289,15 @@ rem ***************************************************************************
   if "%MODE%" == "GENERATE" (
     echo Generating VC12 project files
     call :generate vcxproj %VC12_SRCTMPL% %VC12_SRCVCXPROJ%
+    call :generate filters %VC12_SRCFILTERSTMPL% %VC12_SRCFILTERS%
     call :generate vcxproj %VC12_LIBTMPL% %VC12_LIBVCXPROJ%
+    call :generate filters %VC12_LIBFILTERSTMPL% %VC12_LIBFILTERS%
   ) else (
     echo Removing VC12 project files
     call :clean %VC12_SRCVCXPROJ%
+    call :clean %VC12_SRCFILTERS%
     call :clean %VC12_LIBVCXPROJ%
+    call :clean %VC12_LIBFILTERS%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -276,11 +308,15 @@ rem ***************************************************************************
   if "%MODE%" == "GENERATE" (
     echo Generating VC14 project files
     call :generate vcxproj %VC14_SRCTMPL% %VC14_SRCVCXPROJ%
+    call :generate filters %VC14_SRCFILTERSTMPL% %VC14_SRCFILTERS%
     call :generate vcxproj %VC14_LIBTMPL% %VC14_LIBVCXPROJ%
+    call :generate filters %VC14_LIBFILTERSTMPL% %VC14_LIBFILTERS%
   ) else (
     echo Removing VC14 project files
     call :clean %VC14_SRCVCXPROJ%
+    call :clean %VC14_SRCFILTERS%
     call :clean %VC14_LIBVCXPROJ%
+    call :clean %VC14_LIBFILTERS%
   )
 
   if not "%VERSION%" == "ALL" goto success
@@ -291,21 +327,43 @@ rem ***************************************************************************
   if "%MODE%" == "GENERATE" (
     echo Generating VC15 project files
     call :generate vcxproj %VC15_SRCTMPL% %VC15_SRCVCXPROJ%
+    call :generate filters %VC15_SRCFILTERSTMPL% %VC15_SRCFILTERS%
     call :generate vcxproj %VC15_LIBTMPL% %VC15_LIBVCXPROJ%
+    call :generate filters %VC15_LIBFILTERSTMPL% %VC15_LIBFILTERS%
   ) else (
     echo Removing VC15 project files
     call :clean %VC15_SRCVCXPROJ%
+    call :clean %VC15_SRCFILTERS%
     call :clean %VC15_LIBVCXPROJ%
+    call :clean %VC15_LIBFILTERS%
   )
 
   goto success
 
 rem Main generate function.
 rem
-rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
-rem      or vcxproj for VC10, VC11, VC12, VC14 and VC15)
-rem %2 - Input template file
-rem %3 - Output project file
+rem %1 - File Type: dsp for Developer Studio Project files
+rem                   * Visual Studio 98 (Version 6)
+rem                 vcproj1 for Visual Studio Project (Format 1) files
+rem                   * Visual Studio.net (Version 7)
+rem                   * Visual Studio 2003.net (Version 7.1)
+rem                 vcproj2 for Visual Studio Project (Format 2) files
+rem                   * Visual Studio 2008 (Version 8)
+rem                   * Visual Studio 2009 (Version 9)
+rem                 vcxproj for Visual Studio XML Project files
+rem                   * Visual Studio 2010 (Version 10)
+rem                   * Visual Studio 2012 (Version 11)
+rem                   * Visual Studio 2013 (Version 12)
+rem                   * Visual Studio 2015 (Version 14)
+rem                   * Visual Studio 2017 (Version 15)
+rem                 filters for Visual Studio Project Filter files
+rem                   * Visual Studio 2010 (Version 10)
+rem                   * Visual Studio 2012 (Version 11)
+rem                   * Visual Studio 2013 (Version 12)
+rem                   * Visual Studio 2015 (Version 14)
+rem                   * Visual Studio 2017 (Version 15)
+rem %2 - Template file
+rem %3 - Output file
 rem
 :generate
   if not exist %2 (
@@ -375,11 +433,29 @@ rem
 
 rem Generates a single file xml element.
 rem
-rem %1 - Project Type (dsp for VC6, vcproj1 for VC7 and VC7.1, vcproj2 for VC8 and VC9
-rem      or vcxproj for VC10, VC11, VC12, VC14 and VC15)
+rem %1 - File Type: dsp for Developer Studio Project files
+rem                   * Visual Studio 98 (Version 6)
+rem                 vcproj1 for Visual Studio Project (Format 1) files
+rem                   * Visual Studio.net (Version 7)
+rem                   * Visual Studio 2003.net (Version 7.1)
+rem                 vcproj2 for Visual Studio Project (Format 2) files
+rem                   * Visual Studio 2008 (Version 8)
+rem                   * Visual Studio 2009 (Version 9)
+rem                 vcxproj for Visual Studio XML Project files
+rem                   * Visual Studio 2010 (Version 10)
+rem                   * Visual Studio 2012 (Version 11)
+rem                   * Visual Studio 2013 (Version 12)
+rem                   * Visual Studio 2015 (Version 14)
+rem                   * Visual Studio 2017 (Version 15)
+rem                 filters for Visual Studio Project Filter files
+rem                   * Visual Studio 2010 (Version 10)
+rem                   * Visual Studio 2012 (Version 11)
+rem                   * Visual Studio 2013 (Version 12)
+rem                   * Visual Studio 2015 (Version 14)
+rem                   * Visual Studio 2017 (Version 15)
 rem %2 - Directory (src, lib, lib\vauth, lib\vquic, lib\vssh, lib\vtls)
-rem %3 - Source filename
-rem %4 - Output project file
+rem %3 - Template file
+rem %4 - Output file
 rem
 :element
   set "SPACES=    "
@@ -418,6 +494,28 @@ rem
       echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%~3^" /^>>> %4
     ) else if "%ext%" == "rc" (
       echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
+    )
+  ) else if "%1" == "filters" (
+    rem Calculate the relative FILTER path from src or lib
+    set FILTER=%2
+    if "!FILTER:~0,4!" == "lib\" (
+      set FILTER=!FILTER:~3!
+    ) else (
+      set FILTER=
+    )
+
+    if "%ext%" == "c" (
+      echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%~3^"^>>> %4
+      echo %SPACES%  ^<Filter^>Source Files!FILTER!^</Filter^>>> %4
+      echo %SPACES%^</ClCompile^>>> %4
+    ) else if "%ext%" == "h" (
+      echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%~3^"^>>> %4
+      echo %SPACES%  ^<Filter^>Header Files!FILTER!^</Filter^>>> %4
+      echo %SPACES%^</ClInclude^>>> %4
+    ) else if "%ext%" == "rc" (
+      echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%~3^"^>>> %4
+      echo %SPACES%  ^<Filter^>Resource Files^</Filter^>>> %4
+      echo %SPACES%^</ResourceCompile^>>> %4
     )
   )
 

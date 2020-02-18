@@ -70,38 +70,58 @@ VC9_SRCVCPROJ_DEPS = $(VC9_SRCTMPL) Makefile.am src/Makefile.inc
 
 VC10_LIBTMPL = projects/Windows/VC10/lib/libcurl.vcxproj.tmpl
 VC10_LIBVCXPROJ = projects/Windows/VC10/lib/libcurl.vcxproj.dist
-VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) Makefile.am lib/Makefile.inc
+VC10_LIBFILTERSTMPL = projects/Windows/VC10/lib/libcurl.vcxproj.filters.tmpl
+VC10_LIBFILTERS = projects/Windows/VC10/lib/libcurl.vcxproj.filters.dist
+VC10_LIBVCXPROJ_DEPS = $(VC10_LIBTMPL) $(VC10_LIBFILTERSTMPL) Makefile.am lib/Makefile.inc
 VC10_SRCTMPL = projects/Windows/VC10/src/curl.vcxproj.tmpl
 VC10_SRCVCXPROJ = projects/Windows/VC10/src/curl.vcxproj.dist
-VC10_SRCVCXPROJ_DEPS = $(VC10_SRCTMPL) Makefile.am src/Makefile.inc
+VC10_SRCFILTERSTMPL = projects/Windows/VC10/src/curl.vcxproj.filters.tmpl
+VC10_SRCFILTERS = projects/Windows/VC10/src/curl.vcxproj.filters.dist
+VC10_SRCVCXPROJ_DEPS = $(VC10_SRCTMPL) $(VC10_SRCFILTERSTMPL) Makefile.am src/Makefile.inc
 
 VC11_LIBTMPL = projects/Windows/VC11/lib/libcurl.vcxproj.tmpl
 VC11_LIBVCXPROJ = projects/Windows/VC11/lib/libcurl.vcxproj.dist
-VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) Makefile.am lib/Makefile.inc
+VC11_LIBFILTERSTMPL = projects/Windows/VC11/lib/libcurl.vcxproj.filters.tmpl
+VC11_LIBFILTERS = projects/Windows/VC11/lib/libcurl.vcxproj.filters.dist
+VC11_LIBVCXPROJ_DEPS = $(VC11_LIBTMPL) $(VC11_LIBFILTERSTMPL) Makefile.am lib/Makefile.inc
 VC11_SRCTMPL = projects/Windows/VC11/src/curl.vcxproj.tmpl
 VC11_SRCVCXPROJ = projects/Windows/VC11/src/curl.vcxproj.dist
-VC11_SRCVCXPROJ_DEPS = $(VC11_SRCTMPL) Makefile.am src/Makefile.inc
+VC11_SRCFILTERSTMPL = projects/Windows/VC11/src/curl.vcxproj.filters.tmpl
+VC11_SRCFILTERS = projects/Windows/VC11/src/curl.vcxproj.filters.dist
+VC11_SRCVCXPROJ_DEPS = $(VC11_SRCTMPL) $(VC11_SRCFILTERSTMPL) Makefile.am src/Makefile.inc
 
 VC12_LIBTMPL = projects/Windows/VC12/lib/libcurl.vcxproj.tmpl
 VC12_LIBVCXPROJ = projects/Windows/VC12/lib/libcurl.vcxproj.dist
-VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) Makefile.am lib/Makefile.inc
+VC12_LIBFILTERSTMPL = projects/Windows/VC12/lib/libcurl.vcxproj.filters.tmpl
+VC12_LIBFILTERS = projects/Windows/VC12/lib/libcurl.vcxproj.filters.dist
+VC12_LIBVCXPROJ_DEPS = $(VC12_LIBTMPL) $(VC12_LIBFILTERSTMPL) Makefile.am lib/Makefile.inc
 VC12_SRCTMPL = projects/Windows/VC12/src/curl.vcxproj.tmpl
 VC12_SRCVCXPROJ = projects/Windows/VC12/src/curl.vcxproj.dist
-VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) Makefile.am src/Makefile.inc
+VC12_SRCFILTERSTMPL = projects/Windows/VC12/src/curl.vcxproj.filters.tmpl
+VC12_SRCFILTERS = projects/Windows/VC12/src/curl.vcxproj.filters.dist
+VC12_SRCVCXPROJ_DEPS = $(VC12_SRCTMPL) $(VC12_SRCFILTERSTMPL) Makefile.am src/Makefile.inc
 
 VC14_LIBTMPL = projects/Windows/VC14/lib/libcurl.vcxproj.tmpl
 VC14_LIBVCXPROJ = projects/Windows/VC14/lib/libcurl.vcxproj.dist
-VC14_LIBVCXPROJ_DEPS = $(VC14_LIBTMPL) Makefile.am lib/Makefile.inc
+VC14_LIBFILTERSTMPL = projects/Windows/VC14/lib/libcurl.vcxproj.filters.tmpl
+VC14_LIBFILTERS = projects/Windows/VC14/lib/libcurl.vcxproj.filters.dist
+VC14_LIBVCXPROJ_DEPS = $(VC14_LIBTMPL) $(VC14_LIBFILTERSTMPL) Makefile.am lib/Makefile.inc
 VC14_SRCTMPL = projects/Windows/VC14/src/curl.vcxproj.tmpl
 VC14_SRCVCXPROJ = projects/Windows/VC14/src/curl.vcxproj.dist
-VC14_SRCVCXPROJ_DEPS = $(VC14_SRCTMPL) Makefile.am src/Makefile.inc
+VC14_SRCFILTERSTMPL = projects/Windows/VC14/src/curl.vcxproj.filters.tmpl
+VC14_SRCFILTERS = projects/Windows/VC14/src/curl.vcxproj.filters.dist
+VC14_SRCVCXPROJ_DEPS = $(VC14_SRCTMPL) $(VC14_SRCFILTERSTMPL) Makefile.am src/Makefile.inc
 
 VC15_LIBTMPL = projects/Windows/VC15/lib/libcurl.vcxproj.tmpl
 VC15_LIBVCXPROJ = projects/Windows/VC15/lib/libcurl.vcxproj.dist
-VC15_LIBVCXPROJ_DEPS = $(VC15_LIBTMPL) Makefile.am lib/Makefile.inc
+VC15_LIBFILTERSTMPL = projects/Windows/VC15/lib/libcurl.vcxproj.filters.tmpl
+VC15_LIBFILTERS = projects/Windows/VC15/lib/libcurl.vcxproj.filters.dist
+VC15_LIBVCXPROJ_DEPS = $(VC15_LIBTMPL) $(VC15_LIBFILTERSTMPL) Makefile.am lib/Makefile.inc
 VC15_SRCTMPL = projects/Windows/VC15/src/curl.vcxproj.tmpl
 VC15_SRCVCXPROJ = projects/Windows/VC15/src/curl.vcxproj.dist
-VC15_SRCVCXPROJ_DEPS = $(VC15_SRCTMPL) Makefile.am src/Makefile.inc
+VC15_SRCFILTERSTMPL = projects/Windows/VC15/src/curl.vcxproj.filters.tmpl
+VC15_SRCFILTERS = projects/Windows/VC15/src/curl.vcxproj.filters.dist
+VC15_SRCVCXPROJ_DEPS = $(VC15_SRCTMPL) $(VC15_SRCFILTERSTMPL) Makefile.am src/Makefile.inc
 
 VC_DIST = projects/README                           \
  projects/build-openssl.bat                         \
@@ -124,29 +144,19 @@ VC_DIST = projects/README                           \
  projects/Windows/VC9/src/curl.sln                  \
  projects/Windows/VC10/curl-all.sln                 \
  projects/Windows/VC10/lib/libcurl.sln              \
- projects/Windows/VC10/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC10/src/curl.sln                 \
- projects/Windows/VC10/src/curl.vcxproj.filters     \
  projects/Windows/VC11/curl-all.sln                 \
  projects/Windows/VC11/lib/libcurl.sln              \
- projects/Windows/VC11/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC11/src/curl.sln                 \
- projects/Windows/VC11/src/curl.vcxproj.filters     \
  projects/Windows/VC12/curl-all.sln                 \
  projects/Windows/VC12/lib/libcurl.sln              \
- projects/Windows/VC12/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC12/src/curl.sln                 \
- projects/Windows/VC12/src/curl.vcxproj.filters     \
  projects/Windows/VC14/curl-all.sln                 \
  projects/Windows/VC14/lib/libcurl.sln              \
- projects/Windows/VC14/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC14/src/curl.sln                 \
- projects/Windows/VC14/src/curl.vcxproj.filters     \
  projects/Windows/VC15/curl-all.sln                 \
  projects/Windows/VC15/lib/libcurl.sln              \
- projects/Windows/VC15/lib/libcurl.vcxproj.filters  \
  projects/Windows/VC15/src/curl.sln                 \
- projects/Windows/VC15/src/curl.vcxproj.filters     \
  projects/generate.bat                              \
  projects/wolfssl_options.h                         \
  projects/wolfssl_override.props
@@ -172,9 +182,12 @@ EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in \
 
 CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ) \
  $(VC71_LIBVCPROJ) $(VC71_SRCVCPROJ) $(VC8_LIBVCPROJ) $(VC8_SRCVCPROJ) \
- $(VC9_LIBVCPROJ) $(VC9_SRCVCPROJ) $(VC10_LIBVCXPROJ) $(VC10_SRCVCXPROJ) \
- $(VC11_LIBVCXPROJ) $(VC11_SRCVCXPROJ) $(VC12_LIBVCXPROJ) $(VC12_SRCVCXPROJ) \
- $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) $(VC15_LIBVCXPROJ) $(VC15_SRCVCXPROJ)
+ $(VC9_LIBVCPROJ) $(VC9_SRCVCPROJ) \
+ $(VC10_LIBVCXPROJ) $(VC10_LIBFILTERS) $(VC10_SRCVCXPROJ) $(VC10_SRCFILTERS) \
+ $(VC11_LIBVCXPROJ) $(VC11_LIBFILTERS) $(VC11_SRCVCXPROJ) $(VC11_SRCFILTERS) \
+ $(VC12_LIBVCXPROJ) $(VC12_LIBFILTERS) $(VC12_SRCVCXPROJ) $(VC12_SRCFILTERS) \
+ $(VC14_LIBVCXPROJ) $(VC14_LIBFILTERS) $(VC14_SRCVCXPROJ) $(VC14_SRCFILTERS) \
+ $(VC15_LIBVCXPROJ) $(VC15_LIBFILTERS) $(VC15_SRCVCXPROJ) $(VC15_SRCFILTERS)
 
 bin_SCRIPTS = curl-config
 
@@ -405,6 +418,35 @@ function gen_element(type, dir, file)\
       printf("%s<ResourceCompile Include=\"..\\..\\..\\..\\%s\\%s\" />\r\n",\
       spaces, dir, file);\
   }\
+  else if(type == "filters") {\
+    i = index(file, ".");\
+    ext = substr(file, i == 0 ? 0 : i + 1);\
+    if(substr(dir, 1, 4) == "lib\" {\
+      filter = substr(dir, 4);\
+    }\
+    else {\
+      filter = "";\
+    }
+\
+    if(ext == "c") {\
+      printf("%s<ClCompile Include=\"..\\..\\..\\..\\%s\\%s\">\r\n",\
+             spaces, dir, file);\
+      printf("%s  <Filter>Source Files%s</Filter>\r\n", spaces, filter);\
+      printf("%s</ClCompile>\r\n", spaces);\
+    }\
+    else if(ext == "h") {\
+      printf("%s<ClInclude Include=\"..\\..\\..\\..\\%s\\%s\">\r\n",\
+             spaces, dir, file);\
+      printf("%s  <Filter>Header Files%s</Filter>\r\n", spaces, filter);\
+      printf("%s</ClInclude>\r\n", spaces);\
+    }\
+    else if(ext == "rc") {\
+      printf("%s<ResourceCompile Include=\"..\\..\\..\\..\\%s\\%s\">\r\n",\
+             spaces, dir, file);\
+      printf("%s  <Filter>Resource Files</Filter>\r\n", spaces);\
+      printf("%s</ResourceCompile>\r\n", spaces);\
+    }\
+  }\
 }\
 \
 {\
@@ -618,6 +660,21 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC10_LIBTMPL) > $(VC10_LIBVCXPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC10_LIBFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
+		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC10_LIBFILTERSTMPL) > $(VC10_LIBFILTERS) || { exit 1; }; \
+	\
 	echo "generating '$(VC10_SRCVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v src_srcs="$$sorted_src_srcs" \
@@ -626,6 +683,15 @@ function gen_element(type, dir, file)\
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC10_SRCTMPL) > $(VC10_SRCVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC10_SRCFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC10_SRCFILTERSTMPL) > $(VC10_SRCFILTERS) || { exit 1; }; \
 	\
 	echo "generating '$(VC11_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
@@ -642,6 +708,21 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC11_LIBTMPL) > $(VC11_LIBVCXPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC11_LIBFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
+		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC11_LIBFILTERSTMPL) > $(VC11_LIBFILTERS) || { exit 1; }; \
+	\
 	echo "generating '$(VC11_SRCVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v src_srcs="$$sorted_src_srcs" \
@@ -650,6 +731,15 @@ function gen_element(type, dir, file)\
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC11_SRCTMPL) > $(VC11_SRCVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC11_SRCFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC11_SRCFILTERSTMPL) > $(VC11_SRCFILTERS) || { exit 1; }; \
 	\
 	echo "generating '$(VC12_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
@@ -666,6 +756,21 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC12_LIBTMPL) > $(VC12_LIBVCXPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC12_LIBFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
+		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC12_LIBFILTERSTMPL) > $(VC12_LIBFILTERS) || { exit 1; }; \
+	\
 	echo "generating '$(VC12_SRCVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v src_srcs="$$sorted_src_srcs" \
@@ -674,6 +779,15 @@ function gen_element(type, dir, file)\
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC12_SRCTMPL) > $(VC12_SRCVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC12_SRCFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC12_SRCFILTERSTMPL) > $(VC12_SRCFILTERS) || { exit 1; }; \
 	\
 	echo "generating '$(VC14_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
@@ -690,6 +804,21 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC14_LIBTMPL) > $(VC14_LIBVCXPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC14_LIBFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
+		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC14_LIBFILTERSTMPL) > $(VC14_LIBFILTERS) || { exit 1; }; \
+	\
 	echo "generating '$(VC14_SRCVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v src_srcs="$$sorted_src_srcs" \
@@ -698,6 +827,15 @@ function gen_element(type, dir, file)\
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC14_SRCTMPL) > $(VC14_SRCVCXPROJ) || { exit 1; }; \
+	\
+	echo "generating '$(VC14_SRCFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC14_SRCFILTERSTMPL) > $(VC14_SRCFILTERS) || { exit 1; }; \
 	\
 	echo "generating '$(VC15_LIBVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
@@ -714,6 +852,21 @@ function gen_element(type, dir, file)\
 		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
 		"$$awk_code" $(srcdir)/$(VC15_LIBTMPL) > $(VC15_LIBVCXPROJ) || { exit 1; }; \
 	\
+	echo "generating '$(VC15_LIBFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v lib_srcs="$$sorted_lib_srcs" \
+		-v lib_hdrs="$$sorted_lib_hdrs" \
+		-v lib_rc="$$win32_lib_rc" \
+		-v lib_vauth_srcs="$$sorted_lib_vauth_srcs" \
+		-v lib_vauth_hdrs="$$sorted_lib_vauth_hdrs" \
+		-v lib_vquic_srcs="$$sorted_lib_vquic_srcs" \
+		-v lib_vquic_hdrs="$$sorted_lib_vquic_hdrs" \
+		-v lib_vssh_srcs="$$sorted_lib_vssh_srcs" \
+		-v lib_vssh_hdrs="$$sorted_lib_vssh_hdrs" \
+		-v lib_vtls_srcs="$$sorted_lib_vtls_srcs" \
+		-v lib_vtls_hdrs="$$sorted_lib_vtls_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC15_LIBFILTERSTMPL) > $(VC15_LIBFILTERS) || { exit 1; }; \
+	\
 	echo "generating '$(VC15_SRCVCXPROJ)'"; \
 	awk -v proj_type=vcxproj \
 		-v src_srcs="$$sorted_src_srcs" \
@@ -721,7 +874,15 @@ function gen_element(type, dir, file)\
 		-v src_rc="$$win32_src_rc" \
 		-v src_x_srcs="$$sorted_src_x_srcs" \
 		-v src_x_hdrs="$$sorted_src_x_hdrs" \
-		"$$awk_code" $(srcdir)/$(VC15_SRCTMPL) > $(VC15_SRCVCXPROJ) || { exit 1; };)
+		"$$awk_code" $(srcdir)/$(VC15_SRCTMPL) > $(VC15_SRCVCXPROJ) || { exit 1; }; \
+	echo "generating '$(VC15_SRCFILTERS)'"; \
+	awk -v proj_type=filters \
+		-v src_srcs="$$sorted_src_srcs" \
+		-v src_hdrs="$$sorted_src_hdrs" \
+		-v src_rc="$$win32_src_rc" \
+		-v src_x_srcs="$$sorted_src_x_srcs" \
+		-v src_x_hdrs="$$sorted_src_x_hdrs" \
+		"$$awk_code" $(srcdir)/$(VC15_SRCFILTERSTMPL) > $(VC15_SRCFILTERS) || { exit 1; };)
 
 tidy:
 	(cd src && $(MAKE) tidy)
