@@ -133,7 +133,8 @@ Notes
 
    <platform>      - The platform (For example: Windows)
    <ide>           - The IDE (For example: VC6, VC10, BCC5)
-   <architecture>  - The platform architecture (For example: Win32, Win64)
+   <architecture>  - The platform architecture (For example: Win32, Win64, ARM
+                     or ARM64)
    <configuration> - The target configuration (For example: DLL Debug,
                      LIB Release - LIB OpenSSL)
 

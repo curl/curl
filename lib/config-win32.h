@@ -714,7 +714,7 @@ Vista
 #endif
 
 /* Define to use the Windows crypto library. */
-#if !defined(CURL_WINDOWS_APP)
+#if !defined(_M_ARM) && !defined(_M_ARM64) && !defined(CURL_WINDOWS_APP)
 #define USE_WIN32_CRYPTO
 #endif
 
