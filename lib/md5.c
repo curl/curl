@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -124,7 +124,7 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
   CC_MD5_Final(digest, ctx);
 }
 
-#elif defined(WIN32) && !defined(CURL_WINDOWS_APP)
+#elif defined(USE_WIN32_CRYPTO)
 
 #include <wincrypt.h>
 #include "curl_memory.h"
