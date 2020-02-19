@@ -757,9 +757,6 @@ static CURLcode connect_SOCKS(struct connectdata *conn, int sockindex,
 {
   CURLcode result = CURLE_OK;
 
-  infof(conn->data, "connect_SOCKS is called [socks state %d]\n",
-        conn->cnnct.state);
-
   if(conn->bits.socksproxy) {
 #ifndef CURL_DISABLE_PROXY
     /* for the secondary socket (FTP), use the "connect to host"
@@ -1034,8 +1031,6 @@ static void tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
                 sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s\n",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
-  else
-    infof(data, "TCP_NODELAY set\n");
 #else
   (void)conn;
   (void)sockfd;
@@ -1243,8 +1238,6 @@ static CURLcode singleipconnect(struct connectdata *conn,
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
                     (void *)&optval, sizeof(optval)) < 0)
         infof(data, "Failed to enable TCP Fast Open on fd %d\n", sockfd);
-      else
-        infof(data, "TCP_FASTOPEN_CONNECT set\n");
 
       rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
 #elif defined(MSG_FASTOPEN) /* old Linux */
