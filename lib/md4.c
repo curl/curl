@@ -65,10 +65,11 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #include <gcrypt.h>
 
 #include "curl_memory.h"
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
-typedef struct gcry_md_hd_t MD4_CTX;
+typedef gcry_md_hd_t MD4_CTX;
 
 static void MD4_Init(MD4_CTX *ctx)
 {
@@ -82,8 +83,8 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
-  memcpy(result, gcry_md_read(ctx, 0), MD4_DIGEST_LENGTH);
-  gcry_md_close(ctx);
+  memcpy(result, gcry_md_read(*ctx, 0), MD4_DIGEST_LENGTH);
+  gcry_md_close(*ctx);
 }
 
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
@@ -95,6 +96,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #include <CommonCrypto/CommonDigest.h>
 
 #include "curl_memory.h"
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -135,7 +137,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #include <wincrypt.h>
 
 #include "curl_memory.h"
- /* The last #include file should be: */
+
+/* The last #include file should be: */
 #include "memdebug.h"
 
 typedef struct {
