@@ -192,6 +192,45 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
   (void) CC_SHA256_Final(digest, ctx);
 }
 
+#elif defined(USE_WIN32_CRYPTO)
+
+#include <wincrypt.h>
+
+typedef struct {
+  HCRYPTPROV hCryptProv;
+  HCRYPTHASH hHash;
+} SHA256_CTX;
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash);
+  }
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *data,
+                          unsigned int length)
+{
+  CryptHashData(ctx->hHash, (unsigned char *) data, length, 0);
+}
+
+static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
+{
+  unsigned long length;
+
+  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+  if(length == SHA256_DIGEST_LENGTH)
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+
+  if(ctx->hHash)
+    CryptDestroyHash(ctx->hHash);
+
+  if(ctx->hCryptProv)
+    CryptReleaseContext(ctx->hCryptProv, 0);
+}
+
 #else
 
 /* When no other crypto library is available we use this code segment */
