@@ -1048,7 +1048,7 @@ Curl_cookie_add(struct Curl_easy *data,
 
         *clist = *co;  /* then store all the new data */
 
-        free(co);   /* free the newly alloced memory */
+        free(co);   /* free the newly allocated memory */
         co = clist; /* point to the previous struct instead */
 
         /* We have replaced a cookie, now skip the rest of the list but

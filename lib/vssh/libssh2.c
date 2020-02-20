@@ -2381,7 +2381,6 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
         }
-        /* Does a completed file need to be seeked and started or closed ? */
         /* Now store the number of bytes we are expected to download */
         data->req.size = attrs.filesize - data->state.resume_from;
         data->req.maxdownload = attrs.filesize - data->state.resume_from;

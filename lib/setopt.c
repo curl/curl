@@ -2288,7 +2288,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_SSH_KEYFUNCTION:
     /* setting to NULL is fine since the ssh.c functions themselves will
-       then rever to use the internal default */
+       then revert to use the internal default */
     data->set.ssh_keyfunc = va_arg(param, curl_sshkeycallback);
     break;
 
