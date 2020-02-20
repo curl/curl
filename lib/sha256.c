@@ -161,6 +161,37 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 #endif
 }
 
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
+      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
+
+#include <CommonCrypto/CommonDigest.h>
+
+#include "curl_memory.h"
+
+/* The last #include file should be: */
+#include "memdebug.h"
+
+typedef CC_SHA256_CTX SHA256_CTX;
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  (void) CC_SHA256_Init(ctx);
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *data,
+                          unsigned int length)
+{
+  (void) CC_SHA256_Update(ctx, data, length);
+}
+
+static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
+{
+  (void) CC_SHA256_Final(digest, ctx);
+}
+
 #else
 
 /* When no other crypto library is available we use this code segment */
