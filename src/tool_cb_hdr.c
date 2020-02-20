@@ -109,7 +109,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       size_t etag_length = 0;
 
       etag_h = ptr;
-      /* point to first occurence of double quote */
+      /* point to first occurrence of double quote */
       first = memchr(etag_h, '\"', cb);
 
       /*
@@ -127,7 +127,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         first++;
       }
 
-      /* point to last occurence of double quote */
+      /* point to last occurrence of double quote */
       last = memchr(first, '\"', cb);
 
       if(!last) {
