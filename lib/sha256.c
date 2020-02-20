@@ -38,9 +38,39 @@
 
 #endif
 
-#ifdef USE_OPENSSL_SHA256
+#if defined(USE_OPENSSL_SHA256)
+
 /* When OpenSSL is available we use the SHA256-function from OpenSSL */
 #include <openssl/sha.h>
+
+#elif defined(USE_GNUTLS_NETTLE)
+
+#include <nettle/sha.h>
+
+#include "curl_memory.h"
+
+/* The last #include file should be: */
+#include "memdebug.h"
+
+typedef struct sha256_ctx SHA256_CTX;
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  sha256_init(ctx);
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *data,
+                          unsigned int length)
+{
+  sha256_update(ctx, length, data);
+}
+
+static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
+{
+  sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
+}
+
 #else
 
 /* When no other crypto library is available we use this code segment */
