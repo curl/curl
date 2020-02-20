@@ -71,6 +71,35 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 }
 
+#elif defined(USE_GNUTLS)
+
+#include <gcrypt.h>
+
+#include "curl_memory.h"
+
+/* The last #include file should be: */
+#include "memdebug.h"
+
+typedef gcry_md_hd_t SHA256_CTX;
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  gcry_md_open(ctx, GCRY_MD_SHA256, 0);
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *data,
+                          unsigned int length)
+{
+  gcry_md_write(*ctx, data, length);
+}
+
+static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
+{
+  memcpy(digest, gcry_md_read(*ctx, 0), SHA256_DIGEST_LENGTH);
+  gcry_md_close(*ctx);
+}
+
 #else
 
 /* When no other crypto library is available we use this code segment */
