@@ -43,19 +43,11 @@
 
 #define H2_BUFSIZE 32768
 
-#if (NGHTTP2_VERSION_NUM < 0x010000)
+#if (NGHTTP2_VERSION_NUM < 0x010c00)
 #error too old nghttp2 version, upgrade!
 #endif
 
-#if (NGHTTP2_VERSION_NUM > 0x010800)
-#define NGHTTP2_HAS_HTTP2_STRERROR 1
-#endif
-
-#if (NGHTTP2_VERSION_NUM >= 0x010900)
-/* nghttp2_session_callbacks_set_error_callback is present in nghttp2 1.9.0 or
-   later */
-#define NGHTTP2_HAS_ERROR_CALLBACK 1
-#else
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
 #define nghttp2_session_callbacks_set_error_callback(x,y)
 #endif
 
@@ -342,35 +334,6 @@ int Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
   return msnprintf(p, len, " nghttp2/%s", h2->version_str);
-}
-
-/* HTTP/2 error code to name based on the Error Code Registry.
-https://tools.ietf.org/html/rfc7540#page-77
-nghttp2_error_code enums are identical.
-*/
-static const char *http2_strerror(uint32_t err)
-{
-#ifndef NGHTTP2_HAS_HTTP2_STRERROR
-  const char *str[] = {
-    "NO_ERROR",             /* 0x0 */
-    "PROTOCOL_ERROR",       /* 0x1 */
-    "INTERNAL_ERROR",       /* 0x2 */
-    "FLOW_CONTROL_ERROR",   /* 0x3 */
-    "SETTINGS_TIMEOUT",     /* 0x4 */
-    "STREAM_CLOSED",        /* 0x5 */
-    "FRAME_SIZE_ERROR",     /* 0x6 */
-    "REFUSED_STREAM",       /* 0x7 */
-    "CANCEL",               /* 0x8 */
-    "COMPRESSION_ERROR",    /* 0x9 */
-    "CONNECT_ERROR",        /* 0xA */
-    "ENHANCE_YOUR_CALM",    /* 0xB */
-    "INADEQUATE_SECURITY",  /* 0xC */
-    "HTTP_1_1_REQUIRED"     /* 0xD */
-  };
-  return (err < sizeof(str) / sizeof(str[0])) ? str[err] : "unknown";
-#else
-  return nghttp2_http2_strerror(err);
-#endif
 }
 
 /*
@@ -838,7 +801,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
       return 0;
     }
     H2BUGF(infof(data_s, "on_stream_close(), %s (err %d), stream %u\n",
-                 http2_strerror(error_code), error_code, stream_id));
+                 nghttp2_strerror(error_code), error_code, stream_id));
     stream = data_s->req.protop;
     if(!stream)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1138,8 +1101,7 @@ static ssize_t data_source_read_callback(nghttp2_session *session,
   return nread;
 }
 
-#if defined(NGHTTP2_HAS_ERROR_CALLBACK) &&      \
-  !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static int error_callback(nghttp2_session *session,
                           const char *msg,
                           size_t len,
@@ -1257,9 +1219,7 @@ static CURLcode http2_init(struct connectdata *conn)
     /* nghttp2_on_header_callback */
     nghttp2_session_callbacks_set_on_header_callback(callbacks, on_header);
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
     nghttp2_session_callbacks_set_error_callback(callbacks, error_callback);
-#endif
 
     /* The nghttp2 session is not yet setup, do it */
     rc = nghttp2_session_client_new(&conn->proto.httpc.h2, callbacks, conn);
@@ -1457,7 +1417,7 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
   }
   else if(httpc->error_code != NGHTTP2_NO_ERROR) {
     failf(data, "HTTP/2 stream %d was not closed cleanly: %s (err %u)",
-          stream->stream_id, http2_strerror(httpc->error_code),
+          stream->stream_id, nghttp2_strerror(httpc->error_code),
           httpc->error_code);
     *err = CURLE_HTTP2_STREAM;
     return -1;
@@ -2264,7 +2224,6 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
     }
   }
 
-#ifdef NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
   rv = nghttp2_session_set_local_window_size(httpc->h2, NGHTTP2_FLAG_NONE, 0,
                                              HTTP2_HUGE_WINDOW_SIZE);
   if(rv != 0) {
@@ -2272,7 +2231,6 @@ CURLcode Curl_http2_switched(struct connectdata *conn,
           nghttp2_strerror(rv), rv);
     return CURLE_HTTP2;
   }
-#endif
 
   /* we are going to copy mem to httpc->inbuf.  This is required since
      mem is part of buffer pointed by stream->mem, and callbacks
