@@ -13,7 +13,7 @@ jobs:
       uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
       with:
         oss-fuzz-project-name: 'curl'
-        fuzz-time: 600
+        fuzz-seconds: 600
         dry-run: true
     - name: Upload Crash
       uses: actions/upload-artifact@v1
