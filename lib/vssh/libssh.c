@@ -322,14 +322,25 @@ static int myssh_is_known(struct connectdata *conn)
   ssh_key pubkey;
   size_t hlen;
   unsigned char *hash = NULL;
-  char *base64 = NULL;
+  char *found_base64 = NULL;
+  char *known_base64 = NULL;
   int vstate;
   enum curl_khmatch keymatch;
   struct curl_khkey foundkey;
+  struct curl_khkey *knownkeyp = NULL;
   curl_sshkeycallback func =
     data->set.ssh_keyfunc;
 
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  struct ssh_knownhosts_entry *knownhostsentry = NULL;
+  struct curl_khkey knownkey;
+#endif
+
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
+  rc = ssh_get_server_publickey(sshc->ssh_session, &pubkey);
+#else
   rc = ssh_get_publickey(sshc->ssh_session, &pubkey);
+#endif
   if(rc != SSH_OK)
     return rc;
 
@@ -354,6 +365,65 @@ static int myssh_is_known(struct connectdata *conn)
     goto cleanup;
   }
 
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  /* Get the known_key from the known hosts file */
+  vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
+                                             &knownhostsentry);
+
+  /* Case an entry was found in a known hosts file */
+  if(knownhostsentry) {
+    if(knownhostsentry->publickey) {
+      rc = ssh_pki_export_pubkey_base64(knownhostsentry->publickey,
+                                        &known_base64);
+      if(rc != SSH_OK) {
+        goto cleanup;
+      }
+      knownkey.key = known_base64;
+      knownkey.len = strlen(known_base64);
+
+      switch(ssh_key_type(knownhostsentry->publickey)) {
+        case SSH_KEYTYPE_RSA:
+          knownkey.keytype = CURLKHTYPE_RSA;
+          break;
+        case SSH_KEYTYPE_RSA1:
+          knownkey.keytype = CURLKHTYPE_RSA1;
+          break;
+        case SSH_KEYTYPE_ECDSA:
+          knownkey.keytype = CURLKHTYPE_ECDSA;
+          break;
+        case SSH_KEYTYPE_ED25519:
+          knownkey.keytype = CURLKHTYPE_ED25519;
+          break;
+        case SSH_KEYTYPE_DSS:
+          knownkey.keytype = CURLKHTYPE_DSS;
+          break;
+        default:
+          rc = SSH_ERROR;
+          goto cleanup;
+      }
+      knownkeyp = &knownkey;
+    }
+  }
+
+  switch(vstate) {
+    case SSH_KNOWN_HOSTS_OK:
+      keymatch = CURLKHMATCH_OK;
+      break;
+    case SSH_KNOWN_HOSTS_OTHER:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_NOT_FOUND:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_UNKNOWN:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_ERROR:
+      keymatch = CURLKHMATCH_MISSING;
+      break;
+  default:
+      keymatch = CURLKHMATCH_MISMATCH;
+      break;
+  }
+
+#else
   vstate = ssh_is_server_known(sshc->ssh_session);
   switch(vstate) {
     case SSH_SERVER_KNOWN_OK:
@@ -368,14 +438,15 @@ static int myssh_is_known(struct connectdata *conn)
       keymatch = CURLKHMATCH_MISMATCH;
       break;
   }
+#endif
 
   if(func) { /* use callback to determine action */
-    rc = ssh_pki_export_pubkey_base64(pubkey, &base64);
+    rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
     if(rc != SSH_OK)
       goto cleanup;
 
-    foundkey.key = base64;
-    foundkey.len = strlen(base64);
+    foundkey.key = found_base64;
+    foundkey.len = strlen(found_base64);
 
     switch(ssh_key_type(pubkey)) {
       case SSH_KEYTYPE_RSA:
@@ -400,15 +471,19 @@ static int myssh_is_known(struct connectdata *conn)
         goto cleanup;
     }
 
-    /* we don't have anything equivalent to knownkey. Always NULL */
     Curl_set_in_callback(data, true);
-    rc = func(data, NULL, &foundkey, /* from the remote host */
+    rc = func(data, knownkeyp, /* from the knownhosts file */
+              &foundkey, /* from the remote host */
               keymatch, data->set.ssh_keyfunc_userp);
     Curl_set_in_callback(data, false);
 
     switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
+        rc = ssh_session_update_known_hosts(sshc->ssh_session);
+#else
         rc = ssh_write_knownhost(sshc->ssh_session);
+#endif
         if(rc != SSH_OK) {
           goto cleanup;
         }
@@ -429,9 +504,20 @@ static int myssh_is_known(struct connectdata *conn)
   rc = SSH_OK;
 
 cleanup:
+  if(found_base64) {
+    free(found_base64);
+  }
+  if(known_base64) {
+    free(known_base64);
+  }
   if(hash)
     ssh_clean_pubkey_hash(&hash);
   ssh_key_free(pubkey);
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  if(knownhostsentry) {
+    ssh_knownhosts_entry_free(knownhostsentry);
+  }
+#endif
   return rc;
 }
 
