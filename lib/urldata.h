@@ -1442,6 +1442,8 @@ struct UrlState {
   BIT(ftp_trying_alternative);
   BIT(wildcardmatch); /* enable wildcard matching */
   BIT(expect100header);  /* TRUE if we added Expect: 100-continue */
+  BIT(disableexpect);    /* TRUE if Expect: is disabled due to a previous
+                            417 response */
   BIT(use_range);
   BIT(rangestringalloc); /* the range string is malloc()'ed */
   BIT(done); /* set to FALSE when Curl_init_do() is called and set to TRUE

@@ -1689,7 +1689,7 @@ static CURLcode expect100(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   data->state.expect100header = FALSE; /* default to false unless it is set
                                           to TRUE below */
-  if(use_http_1_1plus(data, conn) &&
+  if(!data->state.disableexpect && use_http_1_1plus(data, conn) &&
      (conn->httpversion < 20)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
@@ -3543,7 +3543,16 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
              */
             Curl_expire_done(data, EXPIRE_100_TIMEOUT);
             if(!k->upload_done) {
-              if(data->set.http_keep_sending_on_error) {
+              if((k->httpcode == 417) && data->state.expect100header) {
+                /* 417 Expectation Failed - try again without the Expect
+                   header */
+                infof(data, "Got 417 while waiting for a 100\n");
+                data->state.disableexpect = TRUE;
+                DEBUGASSERT(!data->req.newurl);
+                data->req.newurl = strdup(conn->data->change.url);
+                Curl_done_sending(conn, k);
+              }
+              else if(data->set.http_keep_sending_on_error) {
                 infof(data, "HTTP error before end of send, keep sending\n");
                 if(k->exp100 > EXP100_SEND_DATA) {
                   k->exp100 = EXP100_SEND_DATA;
