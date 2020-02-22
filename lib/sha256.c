@@ -259,12 +259,13 @@ static int SHA256_Final(unsigned char *out,
 /*
  * @unittest: 1610
  */
-void Curl_sha256it(unsigned char *outbuffer, /* 32 unsigned chars */
-                   const unsigned char *input)
+void Curl_sha256it(unsigned char *outbuffer, const unsigned char *input,
+                   const size_t len)
 {
   SHA256_CTX ctx;
+
   SHA256_Init(&ctx);
-  SHA256_Update(&ctx, input, curlx_uztoui(strlen((char *)input)));
+  SHA256_Update(&ctx, input, curlx_uztoui(len));
   SHA256_Final(outbuffer, &ctx);
 }
 
