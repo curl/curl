@@ -111,6 +111,7 @@ use pathhelp;
 require "getpart.pm"; # array functions
 require "valgrind.pm"; # valgrind report parser
 require "ftp.pm";
+require "azure.pm";
 
 my $HOSTIP="127.0.0.1";   # address on which the test server listens
 my $HOST6IP="[::1]";      # address on which the test server listens
@@ -326,6 +327,10 @@ my $tortnum;
 my $tortalloc;
 my $shallow;
 my $randseed = 0;
+
+# Azure Pipelines specific variables
+my $AZURE_RUN_ID = 0;
+my $AZURE_RESULT_ID = 0;
 
 #######################################################################
 # logmsg is our general message logging subroutine.
@@ -3732,6 +3737,10 @@ sub singletest {
         close(GDBCMD);
     }
 
+    if(azure_check_environment() && $AZURE_RUN_ID) {
+        $AZURE_RESULT_ID = azure_create_test_result($AZURE_RUN_ID, $testnum, $testname);
+    }
+
     # timestamp starting of test command
     $timetoolini{$testnum} = Time::HiRes::time();
 
@@ -4345,7 +4354,6 @@ sub singletest {
     else {
         logmsg "PASS: $testnum - $testname\n";
     }
-
 
     return 0;
 }
@@ -5505,6 +5513,15 @@ sub displaylogs {
 }
 
 #######################################################################
+# Setup Azure Pipelines Test Run (if running in Azure DevOps)
+#
+
+if(azure_check_environment()) {
+    $AZURE_RUN_ID = azure_create_test_run();
+    logmsg "Azure Run ID: $AZURE_RUN_ID\n" if ($verbose);
+}
+
+#######################################################################
 # The main test-loop
 #
 
@@ -5524,6 +5541,12 @@ foreach $testnum (@at) {
     $count++;
 
     my $error = singletest($run_event_based, $testnum, $count, scalar(@at));
+
+    if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
+        $AZURE_RESULT_ID = azure_update_test_result($AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
+                                                    $timeprepini{$testnum}, $timevrfyend{$testnum});
+    }
+
     if($error < 0) {
         # not a test we can run
         next;
@@ -5551,6 +5574,14 @@ foreach $testnum (@at) {
 }
 
 my $sofar = time() - $start;
+
+#######################################################################
+# Finish Azure Pipelines Test Run (if running in Azure DevOps)
+#
+
+if(azure_check_environment() && $AZURE_RUN_ID) {
+    $AZURE_RUN_ID = azure_update_test_run($AZURE_RUN_ID);
+}
 
 #######################################################################
 # Close command log
