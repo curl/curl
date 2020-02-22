@@ -29,6 +29,8 @@ stages:
 
     - script: make test-nonflaky
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: disable_ipv6
     displayName: ubuntu w/o IPv6
@@ -43,6 +45,8 @@ stages:
 
     - script: make test-nonflaky
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: disable_http_smtp_imap
     displayName: ubuntu w/o HTTP/SMTP/IMAP
@@ -57,6 +61,8 @@ stages:
 
     - script: make test-nonflaky
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: disable_thredres
     displayName: ubuntu sync resolver
@@ -71,6 +77,8 @@ stages:
 
     - script: make test-nonflaky
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: http_only
     displayName: ubuntu HTTP only
@@ -85,6 +93,8 @@ stages:
 
     - script: make test-nonflaky
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
 - stage: linux_torture
   dependsOn: linux
@@ -129,6 +139,8 @@ stages:
 
     - script: make test-nonflaky
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: macos_libssh2
     displayName: macos libssh2
@@ -146,6 +158,8 @@ stages:
 
     - script: make test-nonflaky
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: macos_cmake
     displayName: macos cmake openssl
@@ -205,6 +219,8 @@ stages:
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys2_mingw64_debug_openssl
     displayName: msys2 mingw64 debug openssl
@@ -226,6 +242,8 @@ stages:
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys1_mingw_debug_openssl
     displayName: msys1 mingw debug openssl
@@ -245,6 +263,8 @@ stages:
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys1_mingw32_debug_openssl
     displayName: msys1 mingw32 debug openssl
@@ -264,6 +284,8 @@ stages:
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys1_mingw64_debug_openssl
     displayName: msys1 mingw64 debug openssl
@@ -283,6 +305,8 @@ stages:
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys2_mingw32_debug_schannel
     displayName: msys2 mingw32 debug schannel
@@ -304,6 +328,8 @@ stages:
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys2_mingw64_debug_schannel
     displayName: msys2 mingw64 debug schannel
@@ -325,6 +351,8 @@ stages:
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys1_mingw_debug_schannel
     displayName: msys1 mingw debug schannel
@@ -344,6 +372,8 @@ stages:
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys1_mingw32_debug_schannel
     displayName: msys1 mingw32 debug schannel
@@ -363,6 +393,8 @@ stages:
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
 
   - job: windows_msys1_mingw64_debug_schannel
     displayName: msys1 mingw64 debug schannel
@@ -382,3 +414,5 @@ stages:
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
+      env:
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"

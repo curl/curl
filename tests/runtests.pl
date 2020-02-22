@@ -327,6 +327,10 @@ my $tortalloc;
 my $shallow;
 my $randseed = 0;
 
+# Azure Pipelines specific variables
+my $AZURE_RUN_ID = 0;
+my $AZURE_RESULT_ID = 0;
+
 #######################################################################
 # logmsg is our general message logging subroutine.
 #
@@ -3732,6 +3736,29 @@ sub singletest {
         close(GDBCMD);
     }
 
+    if(defined $ENV{'AZURE_ACCESS_TOKEN'} && $AZURE_RUN_ID) {
+        my $azure_result=`curl \\
+        --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
+        --header "Content-Type: application/json" \\
+        --data "
+            [
+                {
+                    'build': {'id': '$ENV{'BUILD_BUILDID'}'},
+                    'testCase': {'id': $testnum},
+                    'testCaseTitle': '$testname',
+                    'automatedTestName': 'curl.tests.$testnum',
+                    'outcome': 'InProgress'
+                }
+            ]
+        " \\
+        "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs/$AZURE_RUN_ID/results?api-version=5.0"`;
+        logmsg "Azure Result, pre: $azure_result\n" if ($verbose);
+        if($azure_result =~ /\[\{"id":(\d+)/) {
+            $AZURE_RESULT_ID = $1;
+        }
+        logmsg "Azure Result ID, pre: $AZURE_RESULT_ID\n" if ($verbose);
+    }
+
     # timestamp starting of test command
     $timetoolini{$testnum} = Time::HiRes::time();
 
@@ -4345,7 +4372,6 @@ sub singletest {
     else {
         logmsg "PASS: $testnum - $testname\n";
     }
-
 
     return 0;
 }
@@ -5505,6 +5531,29 @@ sub displaylogs {
 }
 
 #######################################################################
+# Setup Azure Pipelines Test Run (if running in Azure DevOps)
+#
+
+if(defined $ENV{'AZURE_ACCESS_TOKEN'}) {
+    my $azure_run=`curl \\
+    --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
+    --header "Content-Type: application/json" \\
+    --data "
+        {
+            'name': '$ENV{'AGENT_JOBNAME'}',
+            'automated': true,
+            'build': {'id': '$ENV{'BUILD_BUILDID'}'}
+        }
+    " \\
+    "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs?api-version=5.0"`;
+    logmsg "Azure Run, pre: $azure_run\n" if ($verbose);
+    if($azure_run =~ /"id":(\d+)/) {
+        $AZURE_RUN_ID = $1;
+    }
+    logmsg "Azure Run ID, pre: $AZURE_RUN_ID\n" if ($verbose);
+}
+
+#######################################################################
 # The main test-loop
 #
 
@@ -5547,10 +5596,66 @@ foreach $testnum (@at) {
         $ok++; # successful test counter
     }
 
+    if(defined $ENV{'AZURE_ACCESS_TOKEN'} && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
+        use POSIX qw(strftime);
+        my $azure_took = $timevrfyend{$testnum} - $timeprepini{$testnum};
+        my $azure_start = strftime "%FT%XZ", gmtime  $timeprepini{$testnum};
+        my $azure_complete = strftime "%FT%XZ", gmtime $timevrfyend{$testnum};
+        my $azure_duration = sprintf("%.0f", $azure_took * 1000);
+        my $azure_outcome;
+        if(!$error) {
+            $azure_outcome = 'Passed';
+        }
+        else {
+            $azure_outcome = 'Failed';
+        }
+        my $azure_result=`curl --request PATCH \\
+        --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
+        --header "Content-Type: application/json" \\
+        --data "
+            [
+                {
+                    'id': $AZURE_RESULT_ID,
+                    'outcome': '$azure_outcome',
+                    'startedDate': '$azure_start',
+                    'completedDate': '$azure_complete',
+                    'durationInMs': $azure_duration
+                }
+            ]
+        " \\
+        "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs/$AZURE_RUN_ID/results?api-version=5.0"`;
+        logmsg "Azure Result, post: $azure_result\n" if ($verbose);
+        if($azure_result =~ /\[\{"id":(\d+)/) {
+            $AZURE_RESULT_ID = $1;
+        }
+        logmsg "Azure Result ID, post: $AZURE_RESULT_ID\n" if ($verbose);
+    }
+
     # loop for next test
 }
 
 my $sofar = time() - $start;
+
+#######################################################################
+# Finish Azure Pipelines Test Run (if running in Azure DevOps)
+#
+
+if(defined $ENV{'AZURE_ACCESS_TOKEN'} && $AZURE_RUN_ID) {
+    my $azure_run=`curl --request PATCH \\
+    --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
+    --header "Content-Type: application/json" \\
+    --data "
+        {
+            'state': 'Completed'
+        }
+    " \\
+    "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs/$AZURE_RUN_ID?api-version=5.0"`;
+    logmsg "Azure Run, post: $azure_run\n" if ($verbose);
+    if($azure_run =~ /"id":(\d+)/) {
+        $AZURE_RUN_ID = $1;
+    }
+    logmsg "Azure Run ID, post: $AZURE_RUN_ID\n" if ($verbose);
+}
 
 #######################################################################
 # Close command log
