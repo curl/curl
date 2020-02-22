@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -40,6 +40,7 @@
 #include "curl_ntlm_core.h"
 #include "curl_gethostname.h"
 #include "curl_multibyte.h"
+#include "curl_md5.h"
 #include "warnless.h"
 #include "rand.h"
 #include "vtls/vtls.h"
@@ -621,11 +622,11 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     memcpy(tmp, &ntlm->nonce[0], 8);
     memcpy(tmp + 8, entropy, 8);
 
-    result = Curl_ssl_md5sum(tmp, 16, md5sum, MD5_DIGEST_LENGTH);
-    if(!result)
-      /* We shall only use the first 8 bytes of md5sum, but the des code in
-         Curl_ntlm_core_lm_resp only encrypt the first 8 bytes */
-      result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
+    Curl_md5it(md5sum, tmp, 16);
+
+    /* We shall only use the first 8 bytes of md5sum, but the des code in
+       Curl_ntlm_core_lm_resp only encrypt the first 8 bytes */
+    result = Curl_ntlm_core_mk_nt_hash(data, passwdp, ntbuffer);
     if(result)
       return result;
 
