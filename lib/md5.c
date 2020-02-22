@@ -513,12 +513,13 @@ const MD5_params Curl_DIGEST_MD5[] = {
 /*
  * @unittest: 1601
  */
-void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
-                const unsigned char *input)
+void Curl_md5it(unsigned char *outbuffer, const unsigned char *input,
+                const size_t len)
 {
   MD5_CTX ctx;
+
   MD5_Init(&ctx);
-  MD5_Update(&ctx, input, curlx_uztoui(strlen((char *)input)));
+  MD5_Update(&ctx, input, curlx_uztoui(len));
   MD5_Final(outbuffer, &ctx);
 }
 

@@ -62,7 +62,7 @@
    what ultimately goes over the network.
 */
 #define CURL_OUTPUT_DIGEST_CONV(a, b) \
-  result = Curl_convert_to_network(a, (char *)b, strlen((const char *)b)); \
+  result = Curl_convert_to_network(a, b, strlen(b)); \
   if(result) { \
     free(b); \
     return result; \
@@ -688,12 +688,12 @@ static CURLcode auth_create_digest_http_message(
                   struct digestdata *digest,
                   char **outptr, size_t *outlen,
                   void (*convert_to_ascii)(unsigned char *, unsigned char *),
-                  void (*hash)(unsigned char *, const unsigned char *))
+                  void (*hash)(unsigned char *, const unsigned char *,
+                               const size_t))
 {
   CURLcode result;
   unsigned char hashbuf[32]; /* 32 bytes/256 bits */
   unsigned char request_digest[65];
-  unsigned char *hashthis;
   unsigned char ha1[65];    /* 64 digits and 1 zero byte */
   unsigned char ha2[65];    /* 64 digits and 1 zero byte */
   char userh[65];
@@ -701,6 +701,7 @@ static CURLcode auth_create_digest_http_message(
   size_t cnonce_sz = 0;
   char *userp_quoted;
   char *response = NULL;
+  char *hashthis = NULL;
   char *tmp = NULL;
 
   if(!digest->nc)
@@ -722,12 +723,12 @@ static CURLcode auth_create_digest_http_message(
   }
 
   if(digest->userhash) {
-    hashthis = (unsigned char *) aprintf("%s:%s", userp, digest->realm);
+    hashthis = aprintf("%s:%s", userp, digest->realm);
     if(!hashthis)
       return CURLE_OUT_OF_MEMORY;
 
     CURL_OUTPUT_DIGEST_CONV(data, hashthis);
-    hash(hashbuf, hashthis);
+    hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
     free(hashthis);
     convert_to_ascii(hashbuf, (unsigned char *)userh);
   }
@@ -743,14 +744,13 @@ static CURLcode auth_create_digest_http_message(
            unq(nonce-value) ":" unq(cnonce-value)
   */
 
-  hashthis = (unsigned char *)
-    aprintf("%s:%s:%s", digest->userhash ? userh : userp,
-                                    digest->realm, passwdp);
+  hashthis = aprintf("%s:%s:%s", digest->userhash ? userh : userp,
+                                 digest->realm, passwdp);
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
   CURL_OUTPUT_DIGEST_CONV(data, hashthis); /* convert on non-ASCII machines */
-  hash(hashbuf, hashthis);
+  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
   convert_to_ascii(hashbuf, ha1);
 
@@ -763,7 +763,7 @@ static CURLcode auth_create_digest_http_message(
       return CURLE_OUT_OF_MEMORY;
 
     CURL_OUTPUT_DIGEST_CONV(data, tmp); /* Convert on non-ASCII machines */
-    hash(hashbuf, (unsigned char *) tmp);
+    hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
     free(tmp);
     convert_to_ascii(hashbuf, ha1);
   }
@@ -781,19 +781,19 @@ static CURLcode auth_create_digest_http_message(
     5.1.1 of RFC 2616)
   */
 
-  hashthis = (unsigned char *) aprintf("%s:%s", request, uripath);
+  hashthis = aprintf("%s:%s", request, uripath);
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
   if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
     /* We don't support auth-int for PUT or POST */
     char hashed[65];
-    unsigned char *hashthis2;
+    char *hashthis2;
 
-    hash(hashbuf, (const unsigned char *)"");
+    hash(hashbuf, (const unsigned char *)"", 0);
     convert_to_ascii(hashbuf, (unsigned char *)hashed);
 
-    hashthis2 = (unsigned char *)aprintf("%s:%s", hashthis, hashed);
+    hashthis2 = aprintf("%s:%s", hashthis, hashed);
     free(hashthis);
     hashthis = hashthis2;
   }
@@ -802,31 +802,23 @@ static CURLcode auth_create_digest_http_message(
     return CURLE_OUT_OF_MEMORY;
 
   CURL_OUTPUT_DIGEST_CONV(data, hashthis); /* convert on non-ASCII machines */
-  hash(hashbuf, hashthis);
+  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
   convert_to_ascii(hashbuf, ha2);
 
   if(digest->qop) {
-    hashthis = (unsigned char *) aprintf("%s:%s:%08x:%s:%s:%s",
-                                        ha1,
-                                        digest->nonce,
-                                        digest->nc,
-                                        digest->cnonce,
-                                        digest->qop,
-                                        ha2);
+    hashthis = aprintf("%s:%s:%08x:%s:%s:%s", ha1, digest->nonce, digest->nc,
+                       digest->cnonce, digest->qop, ha2);
   }
   else {
-    hashthis = (unsigned char *) aprintf("%s:%s:%s",
-                                        ha1,
-                                        digest->nonce,
-                                        ha2);
+    hashthis = aprintf("%s:%s:%s", ha1, digest->nonce, ha2);
   }
 
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
   CURL_OUTPUT_DIGEST_CONV(data, hashthis); /* convert on non-ASCII machines */
-  hash(hashbuf, hashthis);
+  hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
   free(hashthis);
   convert_to_ascii(hashbuf, request_digest);
 
