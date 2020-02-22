@@ -660,7 +660,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 }
 
 /*
- * _Curl_auth_create_digest_http_message()
+ * auth_create_digest_http_message()
  *
  * This is used to generate a HTTP DIGEST response message ready for sending
  * to the recipient.
@@ -679,7 +679,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  *
  * Returns CURLE_OK on success.
  */
-static CURLcode _Curl_auth_create_digest_http_message(
+static CURLcode auth_create_digest_http_message(
                   struct Curl_easy *data,
                   const char *userp,
                   const char *passwdp,
@@ -955,21 +955,21 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   switch(digest->algo) {
   case CURLDIGESTALGO_MD5:
   case CURLDIGESTALGO_MD5SESS:
-    return _Curl_auth_create_digest_http_message(data, userp, passwdp,
-                                                 request, uripath, digest,
-                                                 outptr, outlen,
-                                                 auth_digest_md5_to_ascii,
-                                                 Curl_md5it);
+    return auth_create_digest_http_message(data, userp, passwdp,
+                                           request, uripath, digest,
+                                           outptr, outlen,
+                                           auth_digest_md5_to_ascii,
+                                           Curl_md5it);
 
   case CURLDIGESTALGO_SHA256:
   case CURLDIGESTALGO_SHA256SESS:
   case CURLDIGESTALGO_SHA512_256:
   case CURLDIGESTALGO_SHA512_256SESS:
-    return _Curl_auth_create_digest_http_message(data, userp, passwdp,
-                                                 request, uripath, digest,
-                                                 outptr, outlen,
-                                                 auth_digest_sha256_to_ascii,
-                                                 Curl_sha256it);
+    return auth_create_digest_http_message(data, userp, passwdp,
+                                           request, uripath, digest,
+                                           outptr, outlen,
+                                           auth_digest_sha256_to_ascii,
+                                           Curl_sha256it);
 
   default:
     return CURLE_UNSUPPORTED_PROTOCOL;
