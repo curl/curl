@@ -20,11 +20,6 @@ none
 unittest
 TrackMemory
 </features>
-# tool is what to use instead of 'curl'
-<tool>
-unit1330
-</tool>
-
 <name>
 unit tests memory tracking operational
 </name>
@@ -48,5 +43,4 @@ s:^(MEM )(.*/)(.*):$1$3:
 s/\r\n/\n/
 </stripfile>
 </verify>
-
 </testcase>

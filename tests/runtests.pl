@@ -296,7 +296,8 @@ my %timevrfyend; # timestamp for each test result verification end
 
 my $testnumcheck; # test number, set in singletest sub.
 my %oldenv;
-my %feature; # array of enabled features
+my %feature;      # array of enabled features
+my %keywords;     # array of keywords from the test spec
 
 #######################################################################
 # variables that command line options may set
@@ -3306,21 +3307,26 @@ sub singletest {
     }
 
     if(!$why) {
-        my @keywords = getpart("info", "keywords");
+        my @info_keywords = getpart("info", "keywords");
         my $match;
         my $k;
 
-        if(!$keywords[0]) {
+        # Clear the list of keywords from the last test
+        %keywords = ();
+
+        if(!$info_keywords[0]) {
             $why = "missing the <keywords> section!";
         }
 
-        for $k (@keywords) {
+        for $k (@info_keywords) {
             chomp $k;
             if ($disabled_keywords{lc($k)}) {
                 $why = "disabled by keyword";
             } elsif ($enabled_keywords{lc($k)}) {
                 $match = 1;
             }
+
+            $keywords{$k} = 1;
         }
 
         if(!$why && !$match && %enabled_keywords) {
@@ -3616,7 +3622,7 @@ sub singletest {
         $tool=$CMDLINE;
         $disablevalgrind=1;
     }
-    elsif(!$tool) {
+    elsif(!$tool && !$keywords{"unittest"}) {
         # run curl, add suitable command line options
         my $inc="";
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
@@ -3635,6 +3641,11 @@ sub singletest {
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
         $CURLOUT = $STDOUT; # sends received data to stdout
+
+        # Default the tool to a unit test with the same name as the test spec
+        if($keywords{"unittest"} && !$tool) {
+            $tool="unit$testnum";
+        }
 
         if($tool =~ /^lib/) {
             $CMDLINE="$LIBDIR/$tool";

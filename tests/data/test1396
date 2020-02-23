@@ -19,9 +19,6 @@ unittest
  <name>
 curl_easy_escape and curl_easy_unescape
  </name>
-<tool>
-unit1396
-</tool>
 </client>
 
 </testcase>

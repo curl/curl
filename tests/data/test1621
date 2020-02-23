@@ -19,9 +19,5 @@ https
  <name>
 unit tests for stripcredentials from URL
  </name>
-<tool>
-unit1621
-</tool>
 </client>
-
 </testcase>

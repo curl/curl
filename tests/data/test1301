@@ -18,9 +18,5 @@ unittest
  <name>
 curl_strcasecompare unit tests
  </name>
-<tool>
-unit1301
-</tool>
 </client>
-
 </testcase>

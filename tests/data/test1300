@@ -18,9 +18,5 @@ unittest
  <name>
 llist unit tests
  </name>
-<tool>
-unit1300
-</tool>
 </client>
-
 </testcase>

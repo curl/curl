@@ -17,9 +17,5 @@ unittest
  <name>
 Test negative data lengths as input to libcurl functions
  </name>
-<tool>
-unit1605
-</tool>
 </client>
-
 </testcase>

@@ -18,9 +18,5 @@ unittest
  <name>
 verify DNS shuffling
  </name>
-<tool>
-unit1608
-</tool>
 </client>
-
 </testcase>
