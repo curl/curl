@@ -152,6 +152,8 @@ my $SMBPORT;             # SMB server port
 my $SMBSPORT;            # SMBS server port
 my $NEGTELNETPORT;       # TELNET server port with negotiation
 
+my $SSHSRVMD5;           # MD5 of ssh server public key
+
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext('TOOL'); # what curl executable to run on the tests
 my $VCURL=$CURL;   # what curl binary to use to verify the servers with
@@ -2139,6 +2141,18 @@ sub runsshserver {
         return (0,0);
     }
 
+    my $hstpubmd5f = "curl_host_rsa_key.pub_md5";
+    if(!open(PUBMD5FILE, "<", $hstpubmd5f) ||
+       (read(PUBMD5FILE, $SSHSRVMD5, 32) != 32) ||
+       !close(PUBMD5FILE) ||
+       ($SSHSRVMD5 !~ /^[a-f0-9]{32}$/i))
+    {
+        my $msg = "Fatal: $srvrname pubkey md5 missing : \"$hstpubmd5f\" : $!";
+        logmsg "$msg\n";
+        stopservers($verbose);
+        die $msg;
+    }
+
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $pid2\n";
     }
@@ -3157,6 +3171,16 @@ sub subVariables {
   $$thing =~ s/%FILE_PWD/$file_pwd/g;
   $$thing =~ s/%SRCDIR/$srcdir/g;
   $$thing =~ s/%USER/$USER/g;
+
+  if($$thing =~ /%SSHSRVMD5/) {
+      if(!$SSHSRVMD5) {
+          my $msg = "Fatal: Missing SSH server pubkey MD5. Is server running?";
+          logmsg "$msg\n";
+          stopservers($verbose);
+          die $msg;
+      }
+      $$thing =~ s/%SSHSRVMD5/$SSHSRVMD5/g;
+  }
 
   # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
   # used for time-out tests and that would work on most hosts as these

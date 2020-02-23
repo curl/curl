@@ -366,6 +366,7 @@ Available substitute variables include:
 %FILE_PWD  - Current directory, on windows prefixed with a slash
 %RTSP6PORT - IPv6 port number of the RTSP server
 %RTSPPORT  - Port number of the RTSP server
+%SSHSRVMD5 - MD5 of SSH server's public key
 %SMTP6PORT - IPv6 port number of the SMTP server
 %SMTPPORT  - Port number of the SMTP server
 %SOCKSPORT - Port number of the SOCKS4/5 server

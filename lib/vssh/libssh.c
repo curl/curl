@@ -345,13 +345,27 @@ static int myssh_is_known(struct connectdata *conn)
     return rc;
 
   if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
+    int i;
+    char md5buffer[33];
+    const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
+
     rc = ssh_get_publickey_hash(pubkey, SSH_PUBLICKEY_HASH_MD5,
                                 &hash, &hlen);
-    if(rc != SSH_OK)
+    if(rc != SSH_OK || hlen != 16) {
+      failf(data,
+            "Denied establishing ssh session: md5 fingerprint not available");
       goto cleanup;
+    }
 
-    if(hlen != strlen(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) ||
-       memcmp(&data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5], hash, hlen)) {
+    for(i = 0; i < 16; i++)
+      msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char)hash[i]);
+
+    infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
+
+    if(!strcasecompare(md5buffer, pubkey_md5)) {
+      failf(data,
+            "Denied establishing ssh session: mismatch md5 fingerprint. "
+            "Remote %s is not equal to %s", md5buffer, pubkey_md5);
       rc = SSH_ERROR;
       goto cleanup;
     }
