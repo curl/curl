@@ -17,6 +17,9 @@ curlx_tvdiff
 <server>
 none
 </server>
+<features>
+unittest
+</features>
 <name>
 curlx_tvdiff
 </name>
