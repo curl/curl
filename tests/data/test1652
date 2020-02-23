@@ -16,8 +16,5 @@ unittest
 <name>
 infof
 </name>
-<tool>
-unit1652
-</tool>
 </client>
 </testcase>

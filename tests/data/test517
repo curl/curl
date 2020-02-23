@@ -15,11 +15,6 @@ unittest
 <server>
 none
 </server>
-# tool is what to use instead of 'curl'
-<tool>
-lib517
-</tool>
-
  <name>
 curl_getdate() testing
  </name>

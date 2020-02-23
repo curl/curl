@@ -18,9 +18,6 @@ unittest
  <name>
 Internal hash add, retrieval, deletion testing
  </name>
-<tool>
-unit1603
-</tool>
 </client>
 
 </testcase>

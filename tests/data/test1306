@@ -19,9 +19,6 @@ unittest
  <name>
 internal hash create/add/destroy testing
  </name>
-<tool>
-unit1305
-</tool>
 <command>
 1306
 </command>

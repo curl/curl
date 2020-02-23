@@ -18,9 +18,6 @@ unittest
  <name>
 unit tests for url.c
  </name>
-<tool>
-unit1620
-</tool>
 </client>
 
 </testcase>

@@ -18,9 +18,6 @@ unittest
  <name>
 SHA256 unit tests
  </name>
-<tool>
-unit1610
-</tool>
 </client>
 
 </testcase>
