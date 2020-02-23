@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -120,7 +120,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define NTLM_HMAC_MD5_LEN     (16)
 #define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
 #define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
@@ -567,25 +566,6 @@ CURLcode Curl_ntlm_core_mk_nt_hash(struct Curl_easy *data,
 
 #if defined(USE_NTLM_V2) && !defined(USE_WINDOWS_SSPI)
 
-/* This returns the HMAC MD5 digest */
-static CURLcode hmac_md5(const unsigned char *key, unsigned int keylen,
-                         const unsigned char *data, unsigned int datalen,
-                         unsigned char *output)
-{
-  HMAC_context *ctxt = Curl_HMAC_init(Curl_HMAC_MD5, key, keylen);
-
-  if(!ctxt)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* Update the digest with the given challenge */
-  Curl_HMAC_update(ctxt, data, datalen);
-
-  /* Finalise the digest */
-  Curl_HMAC_final(ctxt, output);
-
-  return CURLE_OK;
-}
-
 /* This creates the NTLMv2 hash by using NTLM hash as the key and Unicode
  * (uppercase UserName + Domain) as the data
  */
@@ -615,8 +595,8 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
 
-  result = hmac_md5(ntlmhash, 16, identity, curlx_uztoui(identity_len),
-                    ntlmv2hash);
+  result = Curl_hmacit(Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
+                       ntlmv2hash);
   free(identity);
 
   return result;
@@ -662,7 +642,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   unsigned int len = 0;
   unsigned char *ptr = NULL;
-  unsigned char hmac_output[NTLM_HMAC_MD5_LEN];
+  unsigned char hmac_output[HMAC_MD5_LENGTH];
   curl_off_t tw;
 
   CURLcode result = CURLE_OK;
@@ -681,7 +661,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
     tw = ((curl_off_t)time(NULL) + CURL_OFF_T_C(11644473600)) * 10000000;
 
   /* Calculate the response len */
-  len = NTLM_HMAC_MD5_LEN + NTLMv2_BLOB_LEN;
+  len = HMAC_MD5_LENGTH + NTLMv2_BLOB_LEN;
 
   /* Allocate the response */
   ptr = calloc(1, len);
@@ -689,7 +669,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
     return CURLE_OUT_OF_MEMORY;
 
   /* Create the BLOB structure */
-  msnprintf((char *)ptr + NTLM_HMAC_MD5_LEN, NTLMv2_BLOB_LEN,
+  msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
             "%c%c%c%c"   /* NTLMv2_BLOB_SIGNATURE */
             "%c%c%c%c",  /* Reserved = 0 */
             NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
@@ -702,7 +682,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
-  result = hmac_md5(ntlmv2hash, NTLM_HMAC_MD5_LEN, ptr + 8,
+  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
                     NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
     free(ptr);
@@ -710,7 +690,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   }
 
   /* Concatenate the HMAC MD5 output  with the BLOB */
-  memcpy(ptr, hmac_output, NTLM_HMAC_MD5_LEN);
+  memcpy(ptr, hmac_output, HMAC_MD5_LENGTH);
 
   /* Return the response */
   *ntresp = ptr;
@@ -745,7 +725,8 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
 
-  result = hmac_md5(ntlmv2hash, 16, &data[0], 16, hmac_output);
+  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
+                       hmac_output);
   if(result)
     return result;
 
