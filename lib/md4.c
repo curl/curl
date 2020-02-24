@@ -97,7 +97,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* When OpenSSL is available we use the MD4-functions from OpenSSL */
 #include <openssl/md4.h>
 
-#elif defined(USE_SECTRANSP)
+#elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
+              (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
+      (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
 
 #include <CommonCrypto/CommonDigest.h>
 
@@ -106,36 +109,21 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 /* The last #include file should be: */
 #include "memdebug.h"
 
-typedef struct {
-  void *data;
-  unsigned long size;
-} MD4_CTX;
+typedef CC_MD4_CTX MD4_CTX;
 
 static void MD4_Init(MD4_CTX *ctx)
 {
-  ctx->data = NULL;
-  ctx->size = 0;
+  (void)CC_MD4_Init(ctx);
 }
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  if(ctx->data == NULL) {
-    ctx->data = malloc(size);
-    if(ctx->data != NULL) {
-      memcpy(ctx->data, data, size);
-      ctx->size = size;
-    }
-  }
+  (void)CC_MD4_Update(ctx, data, (CC_LONG)size);
 }
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
-  if(ctx->data != NULL) {
-    (void)CC_MD4(ctx->data, (CC_LONG) ctx->size, result);
-
-    Curl_safefree(ctx->data);
-    ctx->size = 0;
-  }
+  (void)CC_MD4_Final(result, ctx);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
