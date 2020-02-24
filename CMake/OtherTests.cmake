@@ -32,7 +32,7 @@ int main(void) {
     return 0;
 }" curl_cv_recv)
 if(curl_cv_recv)
-  if(NOT DEFINED curl_cv_func_recv_args OR "${curl_cv_func_recv_args}" STREQUAL "unknown")
+  if(NOT DEFINED curl_cv_func_recv_args OR curl_cv_func_recv_args STREQUAL "unknown")
     foreach(recv_retv "int" "ssize_t" )
       foreach(recv_arg1 "SOCKET" "int" )
         foreach(recv_arg2 "char *" "void *" )
@@ -81,7 +81,7 @@ if(curl_cv_recv)
     string(REGEX REPLACE "^[^,]*,[^,]*,[^,]*,[^,]*,([^,]*)$" "\\1" RECV_TYPE_RETV "${curl_cv_func_recv_args}")
   endif()
 
-  if("${curl_cv_func_recv_args}" STREQUAL "unknown")
+  if(curl_cv_func_recv_args STREQUAL "unknown")
     message(FATAL_ERROR "Cannot find proper types to use for recv args")
   endif()
 else()
