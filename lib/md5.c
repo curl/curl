@@ -30,6 +30,14 @@
 #include "curl_hmac.h"
 #include "warnless.h"
 
+#ifdef USE_MBEDTLS
+#include <mbedtls/version.h>
+
+#if(MBEDTLS_VERSION_NUMBER >= 0x02070000)
+  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+#endif
+#endif /* USE_MBEDTLS */
+
 #if defined(USE_GNUTLS_NETTLE)
 
 #include <nettle/md5.h>
@@ -89,6 +97,46 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#elif defined(USE_MBEDTLS)
+
+#include <mbedtls/md5.h>
+
+#include "curl_memory.h"
+
+/* The last #include file should be: */
+#include "memdebug.h"
+
+typedef mbedtls_md5_context MD5_CTX;
+
+static void MD5_Init(MD5_CTX *ctx)
+{
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+  mbedtls_md5_starts(ctx);
+#else
+  (void) mbedtls_md5_starts_ret(ctx);
+#endif
+}
+
+static void MD5_Update(MD5_CTX *ctx,
+                       const unsigned char *data,
+                       unsigned int length)
+{
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+  mbedtls_md5_update(ctx, data, length);
+#else
+  (void) mbedtls_md5_update_ret(ctx, data, length);
+#endif
+}
+
+static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
+{
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+  mbedtls_md5_finish(ctx, digest);
+#else
+  (void) mbedtls_md5_finish_ret(ctx, digest);
+#endif
+}
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
@@ -164,7 +212,9 @@ static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 }
 
 #else
+
 /* When no other crypto library is available we use this code segment */
+
 /*
  * This is an OpenSSL-compatible implementation of the RSA Data Security, Inc.
  * MD5 Message-Digest Algorithm (RFC 1321).
