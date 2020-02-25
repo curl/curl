@@ -36,7 +36,15 @@
 #define USE_OPENSSL_SHA256
 #endif
 
+#endif /* USE_OPENSSL */
+
+#ifdef USE_MBEDTLS
+#include <mbedtls/version.h>
+
+#if(MBEDTLS_VERSION_NUMBER >= 0x02070000)
+  #define HAS_RESULT_CODE_BASED_FUNCTIONS
 #endif
+#endif /* USE_MBEDTLS */
 
 #if defined(USE_OPENSSL_SHA256)
 
@@ -98,6 +106,46 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 {
   memcpy(digest, gcry_md_read(*ctx, 0), SHA256_DIGEST_LENGTH);
   gcry_md_close(*ctx);
+}
+
+#elif defined(USE_MBEDTLS)
+
+#include <mbedtls/sha256.h>
+
+#include "curl_memory.h"
+
+/* The last #include file should be: */
+#include "memdebug.h"
+
+typedef mbedtls_sha256_context SHA256_CTX;
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+#if !defined(HAS_RESULT_CODE_BASED_FUNCTIONS)
+  mbedtls_sha256_starts(ctx, 0);
+#else
+  (void) mbedtls_sha256_starts_ret(ctx, 0);
+#endif
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *data,
+                          unsigned int length)
+{
+#if !defined(HAS_RESULT_CODE_BASED_FUNCTIONS)
+  mbedtls_sha256_update(ctx, data, length);
+#else
+  (void) mbedtls_sha256_update_ret(ctx, data, length);
+#endif
+}
+
+static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
+{
+#if !defined(HAS_RESULT_CODE_BASED_FUNCTIONS)
+  mbedtls_sha256_finish(ctx, digest);
+#else
+  (void) mbedtls_sha256_finish_ret(ctx, digest);
+#endif
 }
 
 #else
