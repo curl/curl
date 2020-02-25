@@ -702,6 +702,7 @@ void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
     curl_socklen_t slen;
 #ifdef HAVE_GETPEERNAME
     plen = sizeof(struct Curl_sockaddr_storage);
+    memset(&ssrem, 0, sizeof(ssrem));
     if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
       int error = SOCKERRNO;
       failf(data, "getpeername() failed with errno %d: %s",
