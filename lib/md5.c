@@ -51,7 +51,7 @@ static void MD5_Update(MD5_CTX *ctx,
   md5_update(ctx, inputLen, input);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 {
   md5_digest(ctx, 16, digest);
 }
@@ -77,7 +77,7 @@ static void MD5_Update(MD5_CTX *ctx,
   gcry_md_write(*ctx, input, inputLen);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 {
   memcpy(digest, gcry_md_read(*ctx, 0), 16);
   gcry_md_close(*ctx);
@@ -119,7 +119,7 @@ static void MD5_Update(MD5_CTX *ctx,
   CC_MD5_Update(ctx, input, inputLen);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 {
   CC_MD5_Final(digest, ctx);
 }
@@ -151,7 +151,7 @@ static void MD5_Update(MD5_CTX *ctx,
   CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
 }
 
-static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+static void MD5_Final(unsigned char *digest, MD5_CTX *ctx)
 {
   unsigned long length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
