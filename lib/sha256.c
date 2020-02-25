@@ -46,6 +46,19 @@
 #endif
 #endif /* USE_MBEDTLS */
 
+/* Please keep the SSL backend-specific #if branches in this order:
+ *
+ * 1. USE_OPENSSL
+ * 2. USE_GNUTLS_NETTLE
+ * 3. USE_GNUTLS
+ * 4. USE_MBEDTLS
+ * 5. USE_COMMON_CRYPTO
+ * 6. USE_WIN32_CRYPTO
+ *
+ * This ensures that the same SSL branch gets activated throughout this source
+ * file even if multiple backends are enabled at the same time.
+ */
+
 #if defined(USE_OPENSSL_SHA256)
 
 /* When OpenSSL is available we use the SHA256-function from OpenSSL */
@@ -222,7 +235,6 @@ static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 
 /* When no other crypto library is available we use this code segment */
 
-/* ===== start - public domain SHA256 implementation ===== */
 /* This is based on SHA256 implementation in LibTomCrypt that was released into
  * public domain by Tom St Denis. */
 
@@ -273,7 +285,8 @@ typedef struct sha256_state {
   unsigned long state[8], curlen;
   unsigned char buf[64];
 } SHA256_CTX;
-/* the K array */
+
+/* The K array */
 static const unsigned long K[64] = {
   0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL, 0x3956c25bUL,
   0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL, 0xd807aa98UL, 0x12835b01UL,
@@ -289,6 +302,7 @@ static const unsigned long K[64] = {
   0x682e6ff3UL, 0x748f82eeUL, 0x78a5636fUL, 0x84c87814UL, 0x8cc70208UL,
   0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL
 };
+
 /* Various logical functions */
 #define RORc(x, y) \
 (((((unsigned long)(x) & 0xFFFFFFFFUL) >> (unsigned long)((y) & 31)) | \
@@ -301,13 +315,15 @@ static const unsigned long K[64] = {
 #define Sigma1(x)   (S(x, 6) ^ S(x, 11) ^ S(x, 25))
 #define Gamma0(x)   (S(x, 7) ^ S(x, 18) ^ R(x, 3))
 #define Gamma1(x)   (S(x, 17) ^ S(x, 19) ^ R(x, 10))
-/* compress 512-bits */
+
+/* Compress 512-bits */
 static int sha256_compress(struct sha256_state *md,
                            unsigned char *buf)
 {
   unsigned long S[8], W[64];
   int i;
-  /* copy state into S */
+
+  /* Copy state into S */
   for(i = 0; i < 8; i++) {
     S[i] = md->state[i];
   }
@@ -319,6 +335,7 @@ static int sha256_compress(struct sha256_state *md,
     W[i] = Gamma1(W[i - 2]) + W[i - 7] + Gamma0(W[i - 15]) +
       W[i - 16];
   }
+
   /* Compress */
 #define RND(a,b,c,d,e,f,g,h,i)                                  \
   unsigned long t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i]; \
@@ -331,12 +348,15 @@ static int sha256_compress(struct sha256_state *md,
     t = S[7]; S[7] = S[6]; S[6] = S[5]; S[5] = S[4];
     S[4] = S[3]; S[3] = S[2]; S[2] = S[1]; S[1] = S[0]; S[0] = t;
   }
-  /* feedback */
+
+  /* Feedback */
   for(i = 0; i < 8; i++) {
     md->state[i] = md->state[i] + S[i];
   }
+
   return 0;
 }
+
 /* Initialize the hash state */
 static void SHA256_Init(struct sha256_state *md)
 {
@@ -351,7 +371,8 @@ static void SHA256_Init(struct sha256_state *md)
   md->state[6] = 0x1F83D9ABUL;
   md->state[7] = 0x5BE0CD19UL;
 }
-/**
+
+/*
    Process a block of memory though the hash
    @param md     The hash state
    @param in     The data to hash
@@ -363,6 +384,7 @@ static int SHA256_Update(struct sha256_state *md,
                          unsigned long inlen)
 {
   unsigned long n;
+
 #define block_size 64
   if(md->curlen > sizeof(md->buf))
     return -1;
@@ -388,9 +410,11 @@ static int SHA256_Update(struct sha256_state *md,
       }
     }
   }
+
   return 0;
 }
-/**
+
+/*
    Terminate the hash to get the digest
    @param md  The hash state
    @param out [out] The destination of the hash (32 bytes)
@@ -400,13 +424,17 @@ static int SHA256_Final(unsigned char *out,
                         struct sha256_state *md)
 {
   int i;
+
   if(md->curlen >= sizeof(md->buf))
     return -1;
-  /* increase the length of the message */
+
+  /* Increase the length of the message */
   md->length += md->curlen * 8;
-  /* append the '1' bit */
+
+  /* Append the '1' bit */
   md->buf[md->curlen++] = (unsigned char)0x80;
-  /* if the length is currently above 56 bytes we append zeros
+
+  /* If the length is currently above 56 bytes we append zeros
    * then compress.  Then we can fall back to padding zeros and length
    * encoding like normal.
    */
@@ -417,33 +445,44 @@ static int SHA256_Final(unsigned char *out,
     sha256_compress(md, md->buf);
     md->curlen = 0;
   }
-  /* pad up to 56 bytes of zeroes */
+
+  /* Pad up to 56 bytes of zeroes */
   while(md->curlen < 56) {
     md->buf[md->curlen++] = (unsigned char)0;
   }
-  /* store length */
+
+  /* Store length */
   WPA_PUT_BE64(md->buf + 56, md->length);
   sha256_compress(md, md->buf);
-  /* copy output */
+
+  /* Copy output */
   for(i = 0; i < 8; i++)
     WPA_PUT_BE32(out + (4 * i), md->state[i]);
+
   return 0;
 }
-/* ===== end - public domain SHA256 implementation ===== */
 
-#endif
+#endif /* CRYPTO LIBS */
 
 /*
- * @unittest: 1610
+ * Curl_sha256it()
+ *
+ * Generates a SHA256 hash for the given input data.
+ *
+ * Parameters:
+ *
+ * output [in/out] - The output buffer.
+ * input  [in]     - The input data.
+ * length [in]     - The input length.
  */
-void Curl_sha256it(unsigned char *outbuffer, const unsigned char *input,
-                   const size_t len)
+void Curl_sha256it(unsigned char *output, const unsigned char *input,
+                   const size_t length)
 {
   SHA256_CTX ctx;
 
   SHA256_Init(&ctx);
-  SHA256_Update(&ctx, input, curlx_uztoui(len));
-  SHA256_Final(outbuffer, &ctx);
+  SHA256_Update(&ctx, input, curlx_uztoui(length));
+  SHA256_Final(output, &ctx);
 }
 
 #endif /* CURL_DISABLE_CRYPTO_AUTH */
