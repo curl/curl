@@ -1579,7 +1579,7 @@ static int cookie_output(struct Curl_easy *data,
     free(array);
   }
 
-  if(out && !use_stdout) {
+  if(!use_stdout) {
     fclose(out);
     out = NULL;
     if(Curl_rename(tempstore, filename)) {
