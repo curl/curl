@@ -29,10 +29,16 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslconf.h>
-#endif
+#endif /* USE_OPENSSL */
+
 #ifdef USE_MBEDTLS
 #include <mbedtls/config.h>
+#include <mbedtls/version.h>
+
+#if(MBEDTLS_VERSION_NUMBER >= 0x02070000)
+  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
 #endif
+#endif /* USE_MBEDTLS */
 
 #if defined(USE_GNUTLS_NETTLE)
 
@@ -182,6 +188,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #include <mbedtls/md4.h>
 
 #include "curl_memory.h"
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -210,7 +217,11 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   if(ctx->data != NULL) {
+#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
     mbedtls_md4(ctx->data, ctx->size, result);
+#else
+    (void) mbedtls_md4_ret(ctx->data, ctx->size, result);
+#endif
 
     Curl_safefree(ctx->data);
     ctx->size = 0;
