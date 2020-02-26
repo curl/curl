@@ -636,6 +636,15 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
       CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
       DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
       dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
+
+      if(data->set.ssl.revoke_best_effort) {
+        /* Ignore errors when root certificates are missing the revocation
+         * list URL, or when the list could not be downloaded because the
+         * server is currently unreachable. */
+        dwTrustErrorMask &= ~(DWORD)(CERT_TRUST_REVOCATION_STATUS_UNKNOWN |
+          CERT_TRUST_IS_OFFLINE_REVOCATION);
+      }
+
       if(dwTrustErrorMask) {
         if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
           failf(data, "schannel: CertGetCertificateChain trust error"

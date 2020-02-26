@@ -2134,6 +2134,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
     data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     data->set.ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
+    data->set.ssl.revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
     break;
 
 #ifndef CURL_DISABLE_PROXY
@@ -2143,6 +2144,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       (bool)((arg&CURLSSLOPT_ALLOW_BEAST) ? TRUE : FALSE);
     data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     data->set.proxy_ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
+    data->set.proxy_ssl.revoke_best_effort =
+      !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
     break;
 #endif
 

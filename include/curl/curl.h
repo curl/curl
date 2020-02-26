@@ -833,6 +833,11 @@ typedef enum {
    if possible. The OpenSSL backend has this ability. */
 #define CURLSSLOPT_NO_PARTIALCHAIN (1<<2)
 
+/* - REVOKE_BEST_EFFORT tells libcurl to ignore certificate revocation offline
+   checks and ignore missing revocation list for those SSL backends where such
+   behavior is present. */
+#define CURLSSLOPT_REVOKE_BEST_EFFORT (1<<3)
+
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
    this value, keep them in sync. */
