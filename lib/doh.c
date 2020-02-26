@@ -318,6 +318,9 @@ static CURLcode dohprobe(struct Curl_easy *data,
     }
     if(data->set.proxy_ssl.no_revoke)
       ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_OPTIONS, CURLSSLOPT_NO_REVOKE);
+    else if(data->set.proxy_ssl.revoke_best_effort)
+      ERROR_CHECK_SETOPT(CURLOPT_PROXY_SSL_OPTIONS,
+                         CURLSSLOPT_REVOKE_BEST_EFFORT);
     if(data->set.str[STRING_SSL_CAPATH_PROXY]) {
       ERROR_CHECK_SETOPT(CURLOPT_PROXY_CAPATH,
         data->set.str[STRING_SSL_CAPATH_PROXY]);
@@ -351,6 +354,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
     }
     if(data->set.ssl.no_revoke)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_OPTIONS, CURLSSLOPT_NO_REVOKE);
+    else if(data->set.ssl.revoke_best_effort)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_OPTIONS, CURLSSLOPT_REVOKE_BEST_EFFORT);
     if(data->set.ssl.fsslctx)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)

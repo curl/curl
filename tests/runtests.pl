@@ -249,6 +249,7 @@ my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 my $has_multissl;   # set if curl is build with MultiSSL support
 my $has_manual;     # set if curl is built with built-in manual
 my $has_win32;      # set if curl is built for Windows
+my $has_mingw;      # set if curl is built with MinGW (as opposed to MinGW-w64)
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -272,7 +273,6 @@ my $resolver;       # name of the resolver backend (for human presentation)
 
 my $has_textaware;  # set if running on a system that has a text mode concept
                     # on files. Windows for example
-
 my @protocols;   # array of lowercase supported protocol servers
 
 my $skipped=0;  # number of tests skipped; reported in main loop
@@ -2659,6 +2659,7 @@ sub setupfeatures {
     $feature{"manual"} = $has_manual;
     $feature{"unix-sockets"} = $has_unix;
     $feature{"win32"} = $has_win32;
+    $feature{"MinGW"} = $has_mingw;
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
@@ -2739,6 +2740,7 @@ sub checksystem {
                 $pwd = pathhelp::sys_native_current_path();
                 $has_textaware = 1;
                 $has_win32 = 1;
+                $has_mingw = 1 if ($curl =~ /-pc-mingw32/);
             }
            if ($libcurl =~ /(winssl|schannel)/i) {
                $has_winssl=1;

@@ -179,6 +179,7 @@ DPAGES =					\
   ssl-allow-beast.d				\
   ssl-no-revoke.d				\
   ssl-reqd.d					\
+  ssl-revoke-best-effort.d			\
   ssl.d						\
   sslv2.d sslv3.d				\
   stderr.d					\
