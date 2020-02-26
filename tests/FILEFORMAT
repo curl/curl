@@ -156,18 +156,17 @@ auth_required   if this is set and a POST/PUT is made without auth, the
 idle            do nothing after receiving the request, just "sit idle"
 stream          continuously send data to the client, never-ending
 writedelay: [secs] delay this amount between reply packets
-skip: [num]     instructs the server to ignore reading this many bytes from a PUT
-                or POST request
-
+skip: [num]     instructs the server to ignore reading this many bytes from a
+                PUT or POST request
 rtp: part [num] channel [num] size [num]
                stream a fake RTP packet for the given part on a chosen channel
                with the given payload size
-
 connection-monitor When used, this will log [DISCONNECT] to the server.input
                log when the connection is disconnected.
 upgrade        when an HTTP upgrade header is found, the server will upgrade
                to http2
 swsclose       instruct server to close connection after response
+no-expect      don't read the request body if Expect: is present
 
 For TFTP:
 writedelay: [secs] delay this amount between reply packets (each packet being
