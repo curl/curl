@@ -612,8 +612,10 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
          converting the host name to an IDN A-label if necessary */
       result = smtp_parse_address(conn, data->set.str[STRING_MAIL_AUTH],
                                   &address, &host);
-      if(result)
+      if(result) {
+        free(from);
         return result;
+      }
 
       /* Establish whether we should report SMTPUTF8 to the server for this
          mailbox as per RFC-6531 sect. 3.1 point 4 and sect. 3.4 */
