@@ -216,6 +216,7 @@ SKIPPED.
 
 Features testable here are:
 
+alt-svc
 crypto
 debug
 getrlimit
@@ -226,6 +227,7 @@ idn
 ipv6
 Kerberos
 large_file
+ld_preload
 libz
 manual
 Metalink
@@ -238,14 +240,13 @@ SPNEGO
 SSL
 SSLpinning
 SSPI
+threaded-resolver
 TLS-SRP
 TrackMemory
-threaded-resolver
 unittest
 unix-sockets
+win32
 WinSSL
-ld_preload
-alt-svc
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server

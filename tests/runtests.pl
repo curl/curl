@@ -243,6 +243,7 @@ my $has_altsvc;     # set if libcurl is built with alt-svc support
 my $has_ldpreload;  # set if curl is built for systems supporting LD_PRELOAD
 my $has_multissl;   # set if curl is build with MultiSSL support
 my $has_manual;     # set if curl is built with built-in manual
+my $has_win32;      # set if curl is built for Windows
 
 # this version is decided by the particular nghttp2 library that is being used
 my $h2cver = "h2c";
@@ -2639,6 +2640,7 @@ sub setupfeatures {
     $feature{"alt-svc"} = $has_altsvc;
     $feature{"manual"} = $has_manual;
     $feature{"unix-sockets"} = $has_unix;
+    $feature{"win32"} = $has_win32;
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
@@ -2718,6 +2720,7 @@ sub checksystem {
                 # Win32-style path.
                 $pwd = pathhelp::sys_native_current_path();
                 $has_textaware = 1;
+                $has_win32 = 1;
             }
            if ($libcurl =~ /(winssl|schannel)/i) {
                $has_winssl=1;
