@@ -664,7 +664,11 @@ gtls_connect_step1(struct connectdata *conn,
   }
 
   /* Initialize TLS session as a client */
-  init_flags = GNUTLS_CLIENT | GNUTLS_FORCE_CLIENT_CERT;
+  init_flags = GNUTLS_CLIENT;
+
+#if defined(GNUTLS_FORCE_CLIENT_CERT)
+  init_flags |= GNUTLS_FORCE_CLIENT_CERT;
+#endif
 
 #if defined(GNUTLS_NO_TICKETS)
   /* Disable TLS session tickets */
