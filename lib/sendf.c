@@ -43,6 +43,7 @@
 #include "strerror.h"
 #include "select.h"
 #include "strdup.h"
+#include "http2.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -501,6 +502,9 @@ static CURLcode pausewrite(struct Curl_easy *data,
   unsigned int i;
   bool newtype = TRUE;
 
+  /* If this transfers over HTTP/2, pause the stream! */
+  Curl_http2_stream_pause(data, TRUE);
+
   if(s->tempcount) {
     for(i = 0; i< s->tempcount; i++) {
       if(s->tempwrite[i].type == type) {
@@ -529,6 +533,8 @@ static CURLcode pausewrite(struct Curl_easy *data,
     /* update the pointer and the size */
     s->tempwrite[i].buf = newptr;
     s->tempwrite[i].len = newlen;
+
+    len = newlen; /* for the debug output below */
   }
   else {
     dupl = Curl_memdup(ptr, len);
