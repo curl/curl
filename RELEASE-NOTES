@@ -69,14 +69,18 @@ This release includes the following bugfixes:
  o github action: add CIFuzz [77]
  o github: Instructions to post "uname -a" on Unix systems in issues [52]
  o hostip: move code to resolve IP address literals to `Curl_resolv` [13]
+ o http2: make pausing/unpausing set/clear local stream window [86]
  o http2: now requires nghttp2 >= 1.12.0 [75]
+ o http: added 417 response treatment [89]
  o http: increase EXPECT_100_THRESHOLD to 1Mb [28]
  o http: move "oauth_bearer" from connectdata to Curl_easy [24]
  o include: remove non-curl prefixed defines [15]
  o libssh2: add support for forcing a hostkey type [7]
  o libssh2: fix variable type [17]
+ o libssh: improve known hosts handling [87]
  o llist: removed unused Curl_llist_move() [33]
  o location.d: the method change is from POST to GET only [46]
+ o md4: Fixed compilation issues when using GNU TLS gcrypt [95]
  o mk-ca-bundle: add support for CKA_NSS_SERVER_DISTRUST_AFTER [36]
  o multi: Change curl_multi_wait/poll to error on negative timeout [11]
  o multi: fix outdated comment [71]
@@ -87,6 +91,7 @@ This release includes the following bugfixes:
  o ngtcp2: update to git master and its draft-25 support [42]
  o ntlm: Move the winbind data into the NTLM data structure
  o ntlm: Pass the Curl_easy structure to the private winbind functions
+ o ntlm: Removed the dependency on the TLS libaries when using MD5 [93]
  o ntlm_wb: Use Curl_socketpair() for greater portability [57]
  o oauth2-bearer.d: works for HTTP too [44]
  o openssl: make CURLINFO_CERTINFO not truncate x509v3 fields [35]
@@ -97,8 +102,15 @@ This release includes the following bugfixes:
  o schannel: Make CURLOPT_CAINFO work better on Windows 7 [9]
  o schannel_verify: Fix alt names manual verify for UNICODE builds [20]
  o singleuse.pl: support new API functions, fix curl_dbg_ handling [33]
+ o smtp: Support UTF-8 based host names [90]
+ o smtp: Support the SMTPUTF8 extension [90]
  o strcase: turn Curl_raw_tolower into static [33]
  o strerror: Increase STRERROR_LEN 128 -> 256 [70]
+ o test1323: added missing 'unit test' feature requirement
+ o tests: Added a unit test for MD4 digest generation [92]
+ o tests: Added a unit test for SHA256 digest generation [94]
+ o tests: Added a unit test for the HMAC hash generation [91]
+ o tests: deduce the tool name from the test case for unit tests [88]
  o tool_dirhie: Allow directory traversal during creation [2]
  o tool_homedir: Change GetEnv() to use libcurl's curl_getenv() [69]
  o tool_util: Improve Windows version of tvnow() [82]
@@ -107,7 +119,7 @@ This release includes the following bugfixes:
  o urlapi: guess scheme properly with credentials given [47]
  o urldata: do string enums without #ifdefs for build scripts [29]
  o vtls: Refactor Curl_multissl_version to make the code clearer [14]
- o win32: USE_WIN32_CRYPTO to enable Win32 based MD4, MD5 and SHA256 functions [79]
+ o win32: USE_WIN32_CRYPTO to enable Win32 based MD4, MD5 and SHA256 [79]
 
 This release includes the following known bugs:
 
@@ -116,20 +128,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  3dyd on github, Alessandro Ghedini, Andrew Potter, Andrius Merkys,
-  Aron Rotteveel, Austin Green, bnfp on github, Brian Carpenter,
-  bsammon on github, Christian Heimes, Christoph M. Becker, Craig Andrews,
-  crazydef on github, Cristian Greco, Dan Fandrich, Daniel Gustafsson,
-  Daniel Marjamäki, Daniel Stenberg, Dan Jacobson, dmitrmax on github,
-  Edgaras Janušauskas, Emil Engler, Faizur Rahman, Frank Gevaerts,
-  hamstergene on github, Harry Sintonen, James Fuller, Jeroen Ooms,
-  jethrogb on github, Johannes Schindelin, Jon Rumsey, Joonas Kuorilehto,
-  Kunal Ekawde, Leo Neat, Marc Aldorasi, Marcel Raad, mbeifuss on github,
-  Mike Frysinger, Mike Norton, Mischa Salle, naost3rn on github,
-  Nicolas Guillier, Orgad Shaneh, Pavel Volgarev, Pedro Monreal,
-  Peter Piekarski, Pierre-Yves Bigourdan, Ray Satiro, Santino Keupp,
-  Steve Holme, Sunny Bean, Tobias Hieta, vshmuk on hackerone, 加藤郁之,
-  (54 contributors)
+  3dyd on github, Alessandro Ghedini, Anderson Toshiyuki Sasaki, Andrew Potter,
+  Andrius Merkys, Aron Rotteveel, Austin Green, bnfp on github,
+  bramus on github, Brian Carpenter, bsammon on github, Christian Heimes,
+  Christoph M. Becker, Craig Andrews, crazydef on github, Cristian Greco,
+  Dan Fandrich, Daniel Gustafsson, Daniel Marjamäki, Daniel Stenberg,
+  Dan Jacobson, dmitrmax on github, Edgaras Janušauskas, Emil Engler,
+  Faizur Rahman, Frank Gevaerts, hamstergene on github, Harry Sintonen,
+  James Fuller, Jeroen Ooms, jethrogb on github, Johannes Schindelin,
+  Jon Rumsey, Joonas Kuorilehto, Kunal Ekawde, Leo Neat, Marc Aldorasi,
+  Marcel Raad, mbeifuss on github, Mike Frysinger, Mike Norton, Mischa Salle,
+  naost3rn on github, Nicolas Guillier, Orgad Shaneh, Pavel Volgarev,
+  Pedro Monreal, Peter Piekarski, Pierre-Yves Bigourdan, Ray Satiro,
+  Santino Keupp, Steve Holme, Sunny Bean, Tobias Hieta, vshmuk on hackerone,
+  ygthien on github, 加藤郁之,
+  (57 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -220,3 +233,13 @@ References to bug reports and discussions on issues:
  [83] = https://curl.haxx.se/bug/?i=4943
  [84] = https://curl.haxx.se/bug/?i=4936
  [85] = https://curl.haxx.se/bug/?i=4914
+ [86] = https://curl.haxx.se/bug/?i=4939
+ [87] = https://curl.haxx.se/bug/?i=4953
+ [88] = https://curl.haxx.se/bug/?i=4976
+ [89] = https://curl.haxx.se/bug/?i=4949
+ [90] = https://curl.haxx.se/bug/?i=4928
+ [91] = https://curl.haxx.se/bug/?i=4973
+ [92] = https://curl.haxx.se/bug/?i=4970
+ [93] = https://curl.haxx.se/bug/?i=4967
+ [94] = https://curl.haxx.se/bug/?i=4968
+ [95] = https://curl.haxx.se/bug/?i=4959
