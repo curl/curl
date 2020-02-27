@@ -1773,8 +1773,6 @@ static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
        and send the host name using UTF-8 rather than as 7-bit ACE (which is
        our preference) */
   }
-  else
-    host->name = NULL;
 
   /* Extract the local address from the mailbox */
   *address = dup;
