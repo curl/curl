@@ -16,8 +16,8 @@ stages:
 - stage: linux
   dependsOn: []
   jobs:
-  - job: vanilla_ubuntu
-    displayName: unbuntu default
+  - job: vanilla
+    displayName: ubuntu default
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -113,13 +113,13 @@ stages:
 - stage: macos
   dependsOn: []
   jobs:
-  - job: macos_plain
+  - job: macos_vanilla
     displayName: macos default
     pool:
       vmImage: 'macOS-latest'
     steps:
     - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config
-      displayName: Install packages
+      displayName: 'brew install'
 
     - script: ./buildconf && ./configure --enable-debug --enable-werror --without-brotli
       displayName: 'Run configure'
@@ -136,7 +136,7 @@ stages:
       vmImage: 'macOS-latest'
     steps:
     - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config libssh2
-      displayName: Install packages
+      displayName: 'brew install'
 
     - script: ./buildconf && ./configure --with-libssh2 --enable-debug
       displayName: 'Run configure'
