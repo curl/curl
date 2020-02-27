@@ -76,6 +76,7 @@
 #include "setopt.h"
 #include "http_digest.h"
 #include "system_win32.h"
+#include "http2.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -985,43 +986,47 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   /* put it back in the keepon */
   k->keepon = newstate;
 
-  if(!(newstate & KEEP_RECV_PAUSE) && data->state.tempcount) {
-    /* there are buffers for sending that can be delivered as the receive
-       pausing is lifted! */
-    unsigned int i;
-    unsigned int count = data->state.tempcount;
-    struct tempbuf writebuf[3]; /* there can only be three */
-    struct connectdata *conn = data->conn;
-    struct Curl_easy *saved_data = NULL;
+  if(!(newstate & KEEP_RECV_PAUSE)) {
+    Curl_http2_stream_pause(data, FALSE);
 
-    /* copy the structs to allow for immediate re-pausing */
-    for(i = 0; i < data->state.tempcount; i++) {
-      writebuf[i] = data->state.tempwrite[i];
-      data->state.tempwrite[i].buf = NULL;
+    if(data->state.tempcount) {
+      /* there are buffers for sending that can be delivered as the receive
+         pausing is lifted! */
+      unsigned int i;
+      unsigned int count = data->state.tempcount;
+      struct tempbuf writebuf[3]; /* there can only be three */
+      struct connectdata *conn = data->conn;
+      struct Curl_easy *saved_data = NULL;
+
+      /* copy the structs to allow for immediate re-pausing */
+      for(i = 0; i < data->state.tempcount; i++) {
+        writebuf[i] = data->state.tempwrite[i];
+        data->state.tempwrite[i].buf = NULL;
+      }
+      data->state.tempcount = 0;
+
+      /* set the connection's current owner */
+      if(conn->data != data) {
+        saved_data = conn->data;
+        conn->data = data;
+      }
+
+      for(i = 0; i < count; i++) {
+        /* even if one function returns error, this loops through and frees
+           all buffers */
+        if(!result)
+          result = Curl_client_write(conn, writebuf[i].type, writebuf[i].buf,
+                                     writebuf[i].len);
+        free(writebuf[i].buf);
+      }
+
+      /* recover previous owner of the connection */
+      if(saved_data)
+        conn->data = saved_data;
+
+      if(result)
+        return result;
     }
-    data->state.tempcount = 0;
-
-    /* set the connection's current owner */
-    if(conn->data != data) {
-      saved_data = conn->data;
-      conn->data = data;
-    }
-
-    for(i = 0; i < count; i++) {
-      /* even if one function returns error, this loops through and frees all
-         buffers */
-      if(!result)
-        result = Curl_client_write(conn, writebuf[i].type, writebuf[i].buf,
-                                   writebuf[i].len);
-      free(writebuf[i].buf);
-    }
-
-    /* recover previous owner of the connection */
-    if(saved_data)
-      conn->data = saved_data;
-
-    if(result)
-      return result;
   }
 
   /* if there's no error and we're not pausing both directions, we want

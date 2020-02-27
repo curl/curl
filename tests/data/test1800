@@ -48,7 +48,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Connection: Upgrade, HTTP2-Settings
 Upgrade: %H2CVER
-HTTP2-Settings: AAMAAABkAARAAAAAAAIAAAAA
+HTTP2-Settings: AAMAAABkAAQCAAAAAAIAAAAA
 
 </protocol>
 </verify>
