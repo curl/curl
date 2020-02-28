@@ -295,6 +295,7 @@ if(WIN32)
   check_library_exists_concat("ws2_32" getch        HAVE_LIBWS2_32)
   check_library_exists_concat("winmm"  getch        HAVE_LIBWINMM)
   list(APPEND CURL_LIBS "advapi32")
+  list(APPEND CURL_LIBS "shell32")
 endif()
 
 # check SSL libraries
