@@ -12,7 +12,7 @@ cookies
 <reply>
 <data>
 HTTP/1.1 301 Moved
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Location: /want/data/11040002
 Server: test-server/fake
 Set-Cookie: test=true; domain=127.0.0.1; path=/; expires=Thu Jan  1 00:00:00 GMT 1970;
@@ -24,7 +24,7 @@ This server reply is for testing a set-cookie
 </data>
 <data2>
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -33,7 +33,7 @@ If this is received, the location following worked
 </data2>
 <datacheck>
 HTTP/1.1 301 Moved
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Location: /want/data/11040002
 Server: test-server/fake
 Set-Cookie: test=true; domain=127.0.0.1; path=/; expires=Thu Jan  1 00:00:00 GMT 1970;
@@ -41,7 +41,7 @@ Set-Cookie: test2=true; domain=127.0.0.1; path=/; expires=Fri Feb 13 11:56:27 GM
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 

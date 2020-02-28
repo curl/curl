@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /556 HTTP/1.2
+GET /556 HTTP/1.1
 Host: ninja
 
 </protocol>

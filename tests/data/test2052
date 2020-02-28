@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 CURLOPT_CONNECT_TO
+--resolve
 </keywords>
 </info>
 
@@ -12,7 +13,7 @@ CURLOPT_CONNECT_TO
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 
@@ -53,7 +54,7 @@ Accept: */*
 
 <stdout>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 

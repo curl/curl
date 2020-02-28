@@ -13,7 +13,7 @@ CURLOPT_CLOSESOCKETFUNCTION
 <reply>
 <data>
 HTTP/1.1 302 eat this!
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: this-is-the-first.html
 Content-Length: 0
@@ -23,7 +23,7 @@ Connection: close
 <datacheck>
 [OPEN] counter: 1
 HTTP/1.1 302 eat this!
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: this-is-the-first.html
 Content-Length: 0

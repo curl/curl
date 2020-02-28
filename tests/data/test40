@@ -12,14 +12,14 @@ followlocation
 <data>
 HTTP/1.1 302 OK swsclose
 Location: ../moo.html/?name=d a niel&testcase=/400002    
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 </data>
 <data2>
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body
@@ -31,12 +31,12 @@ Location: ../moo.html/?name=d a niel&testcase=/400002
 %else
 Location: ../moo.html/?name=d a niel&testcase=/400002
 %endif
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 body

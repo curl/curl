@@ -9,7 +9,7 @@ HTTP GET
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location:  /online/1,1795,Welcome,00.html/280002.txt?logout=TRUE
 Connection: close
@@ -19,7 +19,7 @@ This server reply is for testing a simple Location: following
 </data>
 <data2>
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -28,7 +28,7 @@ If this is received, the location following worked
 </data2>
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 %if hyper
 Location: /online/1,1795,Welcome,00.html/280002.txt?logout=TRUE
@@ -38,7 +38,7 @@ Location:  /online/1,1795,Welcome,00.html/280002.txt?logout=TRUE
 Connection: close
 
 HTTP/1.1 200 Followed here fine swsclose
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 

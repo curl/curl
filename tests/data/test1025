@@ -12,7 +12,7 @@ cookies
 <reply>
 <data>
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: ../data/10250002.txt
 Set-Cookie: firstcookie=want; path=/want/
@@ -23,7 +23,7 @@ This server reply is for testing a Location: following with cookies
 </data>
 <data2>
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: ../want/10250003.txt
 Set-Cookie: nextcookie=data; path=/data/
@@ -34,7 +34,7 @@ This server reply is for testing a Location: following with cookies
 </data2>
 <data3>
 HTTP/1.1 200 Followed here fine
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 
@@ -43,21 +43,21 @@ If this is received, the location following worked
 </data3>
 <datacheck>
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: ../data/10250002.txt
 Set-Cookie: firstcookie=want; path=/want/
 Content-Length: 69
 
 HTTP/1.1 301 This is a weirdo text message
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Location: ../want/10250003.txt
 Set-Cookie: nextcookie=data; path=/data/
 Content-Length: 69
 
 HTTP/1.1 200 Followed here fine
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 52
 

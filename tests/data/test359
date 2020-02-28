@@ -13,7 +13,7 @@ HTTP/2
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Connection: close
 Content-Type: text/html
@@ -60,7 +60,7 @@ Connection: Upgrade
 Upgrade: h2c
 
 HTTP/2 200 
-date: Thu, 09 Nov 2010 14:49:00 GMT
+date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html
 funny-head: yesyes
@@ -69,7 +69,7 @@ via: 1.1 nghttpx
 
 -foo-
 HTTP/2 200 
-date: Thu, 09 Nov 2010 14:49:00 GMT
+date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html
 funny-head: yesyes

@@ -20,7 +20,7 @@ HTTP/1.1 200 Connection established
 
 <data>
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 
@@ -31,7 +31,7 @@ OK
 HTTP/1.1 200 Connection established
 
 HTTP/1.1 200 OK
-Date: Thu, 09 Nov 2010 14:49:00 GMT
+Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 3
 Content-Type: text/plain
 
