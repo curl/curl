@@ -187,7 +187,7 @@ stages:
   jobs:
   - job: windows_msys2_mingw32_debug_openssl
     displayName: msys2 mingw32 debug openssl
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -208,7 +208,7 @@ stages:
 
   - job: windows_msys2_mingw64_debug_openssl
     displayName: msys2 mingw64 debug openssl
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -229,7 +229,7 @@ stages:
 
   - job: windows_msys1_mingw_debug_openssl
     displayName: msys1 mingw debug openssl
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -248,7 +248,7 @@ stages:
 
   - job: windows_msys1_mingw32_debug_openssl
     displayName: msys1 mingw32 debug openssl
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -267,7 +267,7 @@ stages:
 
   - job: windows_msys1_mingw64_debug_openssl
     displayName: msys1 mingw64 debug openssl
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -286,7 +286,7 @@ stages:
 
   - job: windows_msys2_mingw32_debug_schannel
     displayName: msys2 mingw32 debug schannel
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -307,7 +307,7 @@ stages:
 
   - job: windows_msys2_mingw64_debug_schannel
     displayName: msys2 mingw64 debug schannel
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -328,7 +328,7 @@ stages:
 
   - job: windows_msys1_mingw_debug_schannel
     displayName: msys1 mingw debug schannel
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -347,7 +347,7 @@ stages:
 
   - job: windows_msys1_mingw32_debug_schannel
     displayName: msys1 mingw32 debug schannel
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
@@ -366,7 +366,7 @@ stages:
 
   - job: windows_msys1_mingw64_debug_schannel
     displayName: msys1 mingw64 debug schannel
-    timeoutInMinutes: 60
+    timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
     container:
