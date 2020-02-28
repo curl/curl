@@ -625,6 +625,7 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
         utf8 = TRUE;
 
       if(host.name) {
+        free(from);
         from = aprintf("<%s@%s>", address, host.name);
 
         Curl_free_idnconverted_hostname(&host);
@@ -635,6 +636,8 @@ static CURLcode smtp_perform_mail(struct connectdata *conn)
         auth = aprintf("<%s>", address);
 
       free(address);
+      if(!from)
+        return CURLE_OUT_OF_MEMORY;
     }
     else
       /* Empty AUTH, RFC-2554, sect. 5 */
