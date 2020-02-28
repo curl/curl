@@ -82,7 +82,7 @@ LFLAGS_PDB = /incremental:no /opt:ref,icf /DEBUG
 
 CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
-WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib crypt32.lib shell32.lib
+WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib crypt32.lib
 
 BASE_NAME              = libcurl
 BASE_NAME_DEBUG        = $(BASE_NAME)_debug
@@ -618,7 +618,8 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj \
- $(CURL_DIROBJ)\curl_ctype.obj
+ $(CURL_DIROBJ)\curl_ctype.obj \
+ $(CURL_DIROBJ)\loadlibrary.obj
  
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
@@ -637,6 +638,8 @@ $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
 $(CURL_DIROBJ)\curl_ctype.obj: ../lib/curl_ctype.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_ctype.c
+$(CURL_DIROBJ)\loadlibrary.obj: ../lib/loadlibrary.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/loadlibrary.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	rc $(CURL_RC_FLAGS)
 

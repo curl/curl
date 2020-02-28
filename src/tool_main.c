@@ -33,12 +33,16 @@
 #endif
 
 #ifdef WIN32
-#include <shellapi.h>
+typedef LPWSTR *(APIENTRY *COMMANDLINETOARGVW_FN)(LPCWSTR lpCmdLine,
+                                                  int *pNumArgs);
 #endif
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
 #include "curlx.h"
+
+/* Curl_load_library() from libcurl */
+#include "loadlibrary.h"
 
 #include "tool_cfgable.h"
 #include "tool_convert.h"
@@ -321,73 +325,91 @@ int main(int argc, char *argv[])
     /* Start our curl operation */
     result = operate(&global, argc, argv);
 #else
-    int wargc = 0;
     bool wide_arguments = false;
 
-    /* Get the arguments in Unicode form */
-    LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    /* Dynamically load Shell32.dll */
+    HMODULE hShell32Dll = Curl_load_library(TEXT("shell32.dll"));
+    if(hShell32Dll) {
+      /* Try and obtain a pointer to the CommandLineToArgvW() function */
+      COMMANDLINETOARGVW_FN pCommandLineToArgvW =
+        CURLX_FUNCTION_CAST(COMMANDLINETOARGVW_FN,
+        (GetProcAddress(hShell32Dll, "CommandLineToArgvW")));
 
-    if(wargv) {
-      if(wargc == argc) {
-        /* Allocate a new UTF-8 argv */
-        char **utf8argv = malloc(argc * sizeof(char *));
-        if(utf8argv) {
-          /* And a free list (so we know what we allocated) */
-          char **freeargv = malloc(argc * sizeof(char *));
-          if(freeargv) {
-            int i;
-            wide_arguments = true;
+      if(pCommandLineToArgvW) {
+        int wargc = 0;
 
-            /* Convert each of the arguments to UTF-8. If anything goes wrong
-               we use the ANSI argv and place NULL in the free list. */
-            for(i = 0; i < argc; i++) {
-              int utf8len = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, NULL,
-                                                0, NULL, NULL);
-              if(utf8len > 0) {
-                char *arg = malloc(utf8len);
-                if(arg) {
-                  if(WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, arg,
-                                         utf8len, NULL, NULL)) {
-                    utf8argv[i] = arg;
-                    freeargv[i] = arg;
+        /* Get the command-line as Unicode */
+        LPCWSTR wcmdline = GetCommandLineW();
+
+        /* Convert the command-line string to an argv array */
+        LPWSTR *wargv = pCommandLineToArgvW(wcmdline, &wargc);
+
+        if(wargv) {
+          if(wargc == argc) {
+            /* Allocate a new UTF-8 argv */
+            char **utf8argv = malloc(argc * sizeof(char *));
+            if(utf8argv) {
+              /* And a free list (so we know what we allocated) */
+              char **freeargv = malloc(argc * sizeof(char *));
+              if(freeargv) {
+                int i;
+                wide_arguments = true;
+
+                /* Convert each of the arguments to UTF-8. If anything goes
+                   wrong we use the ANSI argv and place NULL in the free
+                   list. */
+                for(i = 0; i < argc; i++) {
+                  int utf8len = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1,
+                                                    NULL, 0, NULL, NULL);
+                  if(utf8len > 0) {
+                    char *arg = malloc(utf8len);
+                    if(arg) {
+                      if(WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, arg,
+                                             utf8len, NULL, NULL)) {
+                        utf8argv[i] = arg;
+                        freeargv[i] = arg;
+                      }
+                      else {
+                        utf8argv[i] = argv[i];
+                        freeargv[i] = NULL;
+                      }
+                    }
+                    else {
+                      utf8argv[i] = argv[i];
+                      freeargv[i] = NULL;
+                    }
                   }
                   else {
                     utf8argv[i] = argv[i];
                     freeargv[i] = NULL;
                   }
                 }
-                else {
-                  utf8argv[i] = argv[i];
-                  freeargv[i] = NULL;
+
+                /* Start our curl operation using UTF-8 arguments */
+                result = operate(&global, wargc, utf8argv);
+
+                /* Free the allocated arguments */
+                for(i = 0; i < argc; i++) {
+                  if(freeargv[i])
+                    free(freeargv[i]);
                 }
-              }
-              else {
-                utf8argv[i] = argv[i];
-                freeargv[i] = NULL;
+
+                free(freeargv);
               }
             }
+            else
+              result = CURLE_OUT_OF_MEMORY;
 
-            /* Start our curl operation using UTF-8 arguments */
-            result = operate(&global, wargc, utf8argv);
-
-            /* Free the allocated arguments */
-            for(i = 0; i < argc; i++) {
-              if(freeargv[i])
-                free(freeargv[i]);
-            }
-
-            free(freeargv);
+            free(utf8argv);
           }
           else
             result = CURLE_OUT_OF_MEMORY;
-
-          free(utf8argv);
         }
-        else
-          result = CURLE_OUT_OF_MEMORY;
+
+        LocalFree(wargv);
       }
 
-      LocalFree(wargv);
+      FreeLibrary(hShell32Dll);
     }
 
     /* Start our curl operation using ANSI arguments */
