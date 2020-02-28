@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 IDN
 followlocation
+--resolve
 --write-out
 </keywords>
 </info>
