@@ -2566,7 +2566,7 @@ sub cleardir {
     opendir(DIR, $dir) ||
         return 0; # can't open dir
     while($file = readdir(DIR)) {
-        if(($file !~ /^\./) && ($file ne $CURLLOG)) {
+        if(($file !~ /^\./)) {
             unlink("$dir/$file");
             $count++;
         }
@@ -3721,7 +3721,9 @@ sub singletest {
         logmsg "$CMDLINE\n";
     }
 
+    open(CMDLOG, ">", "$LOGDIR/$CURLLOG");
     print CMDLOG "$CMDLINE\n";
+    close(CMDLOG);
 
     unlink("core");
 
@@ -5410,14 +5412,6 @@ if($scrambleorder) {
     $TESTCASES = join(" ", @rand);
 }
 
-#######################################################################
-# Start the command line log
-#
-open(CMDLOG, ">", "$LOGDIR/$CURLLOG") ||
-    logmsg "can't log command lines to $CURLLOG\n";
-
-#######################################################################
-
 # Display the contents of the given file.  Line endings are canonicalized
 # and excessively long files are elided
 sub displaylogcontent {
@@ -5582,11 +5576,6 @@ my $sofar = time() - $start;
 if(azure_check_environment() && $AZURE_RUN_ID) {
     $AZURE_RUN_ID = azure_update_test_run($AZURE_RUN_ID);
 }
-
-#######################################################################
-# Close command log
-#
-close(CMDLOG);
 
 # Tests done, stop the servers
 stopservers($verbose);
