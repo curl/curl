@@ -54,13 +54,6 @@
 #  define SHA256_CTX void *
 #  define HAVE_NSS_CONTEXT
    static NSSInitContext *nss_context;
-#elif defined(USE_POLARSSL)
-#  include <polarssl/md5.h>
-#  include <polarssl/sha1.h>
-#  include <polarssl/sha256.h>
-#  define MD5_CTX    md5_context
-#  define SHA_CTX    sha1_context
-#  define SHA256_CTX sha256_context
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
@@ -323,62 +316,6 @@ static void SHA256_Update(SHA256_CTX *pctx,
 static void SHA256_Final(unsigned char digest[32], SHA256_CTX *pctx)
 {
   nss_hash_final(pctx, digest, 32);
-}
-
-#elif defined(USE_POLARSSL)
-
-static int MD5_Init(MD5_CTX *ctx)
-{
-  md5_starts(ctx);
-  return 1;
-}
-
-static void MD5_Update(MD5_CTX *ctx,
-                       const unsigned char *input,
-                       unsigned int inputLen)
-{
-  md5_update(ctx, input, inputLen);
-}
-
-static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
-{
-  md5_finish(ctx, digest);
-}
-
-static int SHA1_Init(SHA_CTX *ctx)
-{
-  sha1_starts(ctx);
-  return 1;
-}
-
-static void SHA1_Update(SHA_CTX *ctx,
-                        const unsigned char *input,
-                        unsigned int inputLen)
-{
-  sha1_update(ctx, input, inputLen);
-}
-
-static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
-{
-  sha1_finish(ctx, digest);
-}
-
-static int SHA256_Init(SHA256_CTX *ctx)
-{
-  sha256_starts(ctx, 0); /* 0 = sha256 */
-  return 1;
-}
-
-static void SHA256_Update(SHA256_CTX *ctx,
-                          const unsigned char *input,
-                          unsigned int inputLen)
-{
-  sha256_update(ctx, input, inputLen);
-}
-
-static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
-{
-  sha256_finish(ctx, digest);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
