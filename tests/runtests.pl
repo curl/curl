@@ -3737,7 +3737,7 @@ sub singletest {
         close(GDBCMD);
     }
 
-    if(defined $ENV{'AZURE_ACCESS_TOKEN'} && $AZURE_RUN_ID) {
+    if(azure_check_environment() && $AZURE_RUN_ID) {
         $AZURE_RESULT_ID = azure_create_test_result($AZURE_RUN_ID, $testnum, $testname);
     }
 
@@ -5516,7 +5516,7 @@ sub displaylogs {
 # Setup Azure Pipelines Test Run (if running in Azure DevOps)
 #
 
-if(defined $ENV{'AZURE_ACCESS_TOKEN'}) {
+if(azure_check_environment()) {
     $AZURE_RUN_ID = azure_create_test_run();
     logmsg "Azure Run ID: $AZURE_RUN_ID\n" if ($verbose);
 }
@@ -5541,6 +5541,12 @@ foreach $testnum (@at) {
     $count++;
 
     my $error = singletest($run_event_based, $testnum, $count, scalar(@at));
+
+    if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
+        $AZURE_RESULT_ID = azure_update_test_result($AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
+                                                    $timeprepini{$testnum}, $timevrfyend{$testnum});
+    }
+
     if($error < 0) {
         # not a test we can run
         next;
@@ -5564,11 +5570,6 @@ foreach $testnum (@at) {
         $ok++; # successful test counter
     }
 
-    if(defined $ENV{'AZURE_ACCESS_TOKEN'} && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
-        $AZURE_RESULT_ID = azure_update_test_result($AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
-                                                    $timeprepini{$testnum}, $timevrfyend{$testnum});
-    }
-
     # loop for next test
 }
 
@@ -5578,7 +5579,7 @@ my $sofar = time() - $start;
 # Finish Azure Pipelines Test Run (if running in Azure DevOps)
 #
 
-if(defined $ENV{'AZURE_ACCESS_TOKEN'} && $AZURE_RUN_ID) {
+if(azure_check_environment() && $AZURE_RUN_ID) {
     $AZURE_RUN_ID = azure_update_test_run($AZURE_RUN_ID);
 }
 

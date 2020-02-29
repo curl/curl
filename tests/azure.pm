@@ -26,8 +26,19 @@ use warnings;
 
 use POSIX qw(strftime);
 
+sub azure_check_environment {
+    if(defined $ENV{'AZURE_ACCESS_TOKEN'} &&
+       defined $ENV{'AGENT_JOBNAME'} && $ENV{'BUILD_BUILDID'} &&
+       defined $ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'} &&
+       defined $ENV{'SYSTEM_TEAMPROJECTID'}) {
+        return 1;
+    }
+    return 0;
+}
+
 sub azure_create_test_run {
-    my $azure_run=`curl \\
+    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_run=`curl --silent \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -37,7 +48,7 @@ sub azure_create_test_run {
             'build': {'id': '$ENV{'BUILD_BUILDID'}'}
         }
     " \\
-    "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs?api-version=5.0"`;
     if($azure_run =~ /"id":(\d+)/) {
         return $1;
     }
@@ -46,7 +57,8 @@ sub azure_create_test_run {
 
 sub azure_create_test_result {
     my ($azure_run_id, $testnum, $testname)=@_;
-    my $azure_result=`curl \\
+    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_result=`curl --silent \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -60,7 +72,7 @@ sub azure_create_test_result {
             }
         ]
     " \\
-    "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
     if($azure_result =~ /\[\{"id":(\d+)/) {
         return $1;
     }
@@ -68,18 +80,22 @@ sub azure_create_test_result {
 }
 
 sub azure_update_test_result {
-    my ($azure_run_id, $azure_result_id, $testnum, $error, $timeprepini, $timevrfyend)=@_;
-    my $azure_start = strftime "%FT%XZ", gmtime  $timeprepini;
-    my $azure_complete = strftime "%FT%XZ", gmtime $timevrfyend;
-    my $azure_duration = sprintf("%.0f", ($timevrfyend-$timeprepini)*1000);
+    my ($azure_run_id, $azure_result_id, $testnum, $error, $start, $stop)=@_;
+    my $azure_start = strftime "%Y-%m-%dT%H:%M:%SZ", gmtime $start;
+    my $azure_complete = strftime "%Y-%m-%dT%H:%M:%SZ", gmtime $stop;
+    my $azure_duration = sprintf("%.0f", ($stop-$start)*1000);
     my $azure_outcome;
-    if(!$error) {
+    if($error < 0) {
+        $azure_outcome = 'Not executed';
+    }
+    elsif(!$error) {
         $azure_outcome = 'Passed';
     }
     else {
         $azure_outcome = 'Failed';
     }
-    my $azure_result=`curl --request PATCH \\
+    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_result=`curl --silent --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -93,7 +109,7 @@ sub azure_update_test_result {
             }
         ]
     " \\
-    "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id/results?api-version=5.0"`;
     if($azure_result =~ /\[\{"id":(\d+)/) {
         return $1;
     }
@@ -102,7 +118,8 @@ sub azure_update_test_result {
 
 sub azure_update_test_run {
     my ($azure_run_id)=@_;
-    my $azure_run=`curl --request PATCH \\
+    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_run=`curl --silent --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -110,7 +127,7 @@ sub azure_update_test_run {
             'state': 'Completed'
         }
     " \\
-    "https://dev.azure.com/$ENV{'BUILD_REPOSITORY_NAME'}/_apis/test/runs/$azure_run_id?api-version=5.0"`;
+    "$azure_baseurl/_apis/test/runs/$azure_run_id?api-version=5.0"`;
     if($azure_run =~ /"id":(\d+)/) {
         return $1;
     }
