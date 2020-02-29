@@ -9,58 +9,59 @@ curl and libcurl 7.69.0
 This release includes the following changes:
 
  o polarssl: removed [16]
- o smtp: introducing CURLOPT_MAIL_RCPT_ALLLOWFAILS and --mail-rcpt-allowfails [23]
- o wolfSSH: new support SSH backend [5]
+ o smtp: add CURLOPT_MAIL_RCPT_ALLLOWFAILS and --mail-rcpt-allowfails [23]
+ o wolfSSH: new SSH backend [5]
 
 This release includes the following bugfixes:
 
- o CMake: Add support for CMAKE_LTO option [22]
- o CMake: use check_symbol_exists also for inet_pton [19]
- o CURLINFO_COOKIELIST.3: Fix example [67]
- o CURLOPT_ALTSVC_CTRL.3: fix the DEFAULT wording [74]
- o CURLOPT_PROXY_SSL_OPTIONS.3: Sync with CURLOPT_SSL_OPTIONS.3
- o CURLOPT_REDIR_PROTOCOLS.3: update the DEFAULT section [83]
- o GnuTLS: Always send client cert [76]
- o HTTP-COOKIES.md: describe the cookie file format [21]
- o HTTP-COOKIES: mention that a trailing newline is required [81]
- o KNOWN_BUGS: Multiple methods in a single WWW-Authenticate: header
- o README: mention that the docs is in docs/ [49]
- o RELEASE-PROCEDURE: feature win is closed post-release a few days [62]
- o SOCKS: make the connect phase non-blocking [64]
  o altsvc: improved header parser [63]
  o altsvc: keep a copy of the file name to survive handle reset [50]
  o altsvc: make saving the cache an atomic operation [84]
- o altsvc: use h3-25 [40]
+ o altsvc: use h3-27
  o azure: disable brotli on the macos debug-builds [68]
+ o build: remove all HAVE_OPENSSL_ENGINE_H defines [99]
  o checksrc.bat: Fix not being able to run script from the main curl dir [54]
  o cleanup: fix several comment typos [78]
  o cleanup: fix typos and wording in docs and comments [39]
- o cmake: Enable SMB for Windows builds [12]
- o cmake: Improve libssh2 check on Windows [8]
+ o cmake: add support for CMAKE_LTO option [22]
+ o cmake: clean up and improve build procedures [100]
+ o cmake: enable SMB for Windows builds [12]
+ o cmake: improve libssh2 check on Windows [8]
+ o cmake: Show HTTPS-proxy in the features output [110]
  o cmake: support specifying the target Windows version [27]
+ o cmake: use check_symbol_exists also for inet_pton [19]
  o configure.ac: fix comments about --with-quiche [53]
+ o configure: disable metalink if mbedTLS is specified [105]
+ o configure: disable metalink support for incompatible SSL/TLS [40]
  o conn: do not reuse connection if SOCKS proxy credentials differ [32]
  o conncache: removed unused Curl_conncache_bundle_size() [33]
  o connect: remove some spurious infof() calls [80]
  o connection reuse: respect the max_concurrent_streams limits [3]
- o contributors: Also include people who contributed to curl-www [58]
- o contrithanks: Use the most recent tag by default [59]
+ o contributors: also include people who contributed to curl-www [58]
+ o contrithanks: use the most recent tag by default [59]
  o cookie: check __Secure- and __Host- case sensitively [43]
  o cookies: make saving atomic with a rename [85]
  o create-dirs.d: mention the mode [73]
- o curl: Let -D merge headers in one file again [25]
  o curl: avoid using strlen for testing if a string is empty [37]
  o curl: error on --alt-svc use w/o support [61]
+ o curl: let -D merge headers in one file again [25]
  o curl: make #0 not output the full URL [4]
  o curl: make the -# spaceship bar not wrap the line [30]
  o curl: remove 'config' field from OutStruct [6]
  o curl:progressbarinit: ignore column width from terminals < 20 [18]
+ o curl_escape.3: add a link to curl_free [107]
+ o curl_getenv.3: fix the memory handling description [107]
  o curl_global_init: assume the EINTR bit by default [31]
  o curl_global_init: move the IPv6 works status bool to multi handle [48]
+ o CURLINFO_COOKIELIST.3: Fix example [67]
+ o CURLOPT_ALTSVC_CTRL.3: fix the DEFAULT wording [74]
+ o CURLOPT_PROXY_SSL_OPTIONS.3: Sync with CURLOPT_SSL_OPTIONS.3
+ o CURLOPT_REDIR_PROTOCOLS.3: update the DEFAULT section [83]
  o data.d: remove "Multiple files can also be specified" [26]
- o digest: Do not quote algorithm in HTTP authorisation [55]
+ o digest: do not quote algorithm in HTTP authorisation [55]
  o docs/HTTP3: add --enable-alt-svc to curl's configure
  o docs/HTTP3: update the OpenSSL branch to use for ngtcp2
+ o docs: fix typo on CURLINFO_RETRY_AFTER [101]
  o easy: remove dead code [72]
  o form.d: fix two minor typos [34]
  o ftp: convert 'sock_accepted' to a plain boolean [66]
@@ -68,57 +69,73 @@ This release includes the following bugfixes:
  o ftp: shrink temp buffers used for PORT [60]
  o github action: add CIFuzz [77]
  o github: Instructions to post "uname -a" on Unix systems in issues [52]
+ o GnuTLS: always send client cert [76]
+ o gtls: fixed compilation when using GnuTLS < 3.5.0 [98]
  o hostip: move code to resolve IP address literals to `Curl_resolv` [13]
+ o HTTP-COOKIES: describe the cookie file format [21]
+ o HTTP-COOKIES: mention that a trailing newline is required [81]
  o http2: make pausing/unpausing set/clear local stream window [86]
  o http2: now requires nghttp2 >= 1.12.0 [75]
  o http: added 417 response treatment [89]
  o http: increase EXPECT_100_THRESHOLD to 1Mb [28]
+ o http: mark POSTs with no body as "upload done" from the start [104]
  o http: move "oauth_bearer" from connectdata to Curl_easy [24]
  o include: remove non-curl prefixed defines [15]
+ o KNOWN_BUGS: Multiple methods in a single WWW-Authenticate: header
  o libssh2: add support for forcing a hostkey type [7]
  o libssh2: fix variable type [17]
  o libssh: improve known hosts handling [87]
  o llist: removed unused Curl_llist_move() [33]
  o location.d: the method change is from POST to GET only [46]
- o md4: Fixed compilation issues when using GNU TLS gcrypt [95]
+ o md4: fixed compilation issues when using GNU TLS gcrypt [95]
+ o md4: use init/update/final functions in Secure Transport [108]
+ o md5: added implementation for mbedTLS [102]
  o mk-ca-bundle: add support for CKA_NSS_SERVER_DISTRUST_AFTER [36]
- o multi: Change curl_multi_wait/poll to error on negative timeout [11]
+ o multi: change curl_multi_wait/poll to error on negative timeout [11]
  o multi: fix outdated comment [71]
  o multi: if Curl_readwrite sets 'comeback' use expire, not loop [65]
  o multi_done: if multiplexed, make conn->data point to another transfer [45]
- o ngtcp2: Add an error code for QUIC connection errors [10]
+ o multi_wait: stop loop when sread() returns zero [103]
+ o ngtcp2: add error code for QUIC connection errors [10]
  o ngtcp2: fixed to only use AF_INET6 when ENABLE_IPV6 [63]
  o ngtcp2: update to git master and its draft-25 support [42]
- o ntlm: Move the winbind data into the NTLM data structure
- o ntlm: Pass the Curl_easy structure to the private winbind functions
- o ntlm: Removed the dependency on the TLS libaries when using MD5 [93]
- o ntlm_wb: Use Curl_socketpair() for greater portability [57]
+ o ntlm: move the winbind data into the NTLM data structure
+ o ntlm: pass the Curl_easy structure to the private winbind functions
+ o ntlm: removed the dependency on the TLS libaries when using MD5 [93]
+ o ntlm_wb: use Curl_socketpair() for greater portability [57]
  o oauth2-bearer.d: works for HTTP too [44]
  o openssl: make CURLINFO_CERTINFO not truncate x509v3 fields [35]
  o openssl: remove redundant assignment [38]
  o os400: fixed the build [29]
+ o pause: force-drain the transfer on unpause [96]
  o quiche: update to draft-25 [41]
+ o README: mention that the docs is in docs/ [49]
+ o RELEASE-PROCEDURE: feature win is closed post-release a few days [62]
  o runtests: make random seed fixed for a month [1]
- o schannel: Make CURLOPT_CAINFO work better on Windows 7 [9]
+ o runtests: restore the command log [97]
+ o schannel: make CURLOPT_CAINFO work better on Windows 7 [9]
  o schannel_verify: Fix alt names manual verify for UNICODE builds [20]
+ o sha256: use crypto implementations when available [106]
  o singleuse.pl: support new API functions, fix curl_dbg_ handling [33]
- o smtp: Support UTF-8 based host names [90]
- o smtp: Support the SMTPUTF8 extension [90]
+ o smtp: support the SMTPUTF8 extension [90]
+ o smtp: support UTF-8 based host names in MAIL FROM [109]
+ o SOCKS: make the connect phase non-blocking [64]
  o strcase: turn Curl_raw_tolower into static [33]
- o strerror: Increase STRERROR_LEN 128 -> 256 [70]
+ o strerror: increase STRERROR_LEN 128 -> 256 [70]
  o test1323: added missing 'unit test' feature requirement
- o tests: Added a unit test for MD4 digest generation [92]
- o tests: Added a unit test for SHA256 digest generation [94]
- o tests: Added a unit test for the HMAC hash generation [91]
+ o tests: add a unit test for MD4 digest generation [92]
+ o tests: add a unit test for SHA256 digest generation [94]
+ o tests: add a unit test for the HMAC hash generation [91]
  o tests: deduce the tool name from the test case for unit tests [88]
- o tool_dirhie: Allow directory traversal during creation [2]
- o tool_homedir: Change GetEnv() to use libcurl's curl_getenv() [69]
- o tool_util: Improve Windows version of tvnow() [82]
+ o tests: fix Python 3 compatibility of smbserver.py
+ o tool_dirhie: allow directory traversal during creation [2]
+ o tool_homedir: change GetEnv() to use libcurl's curl_getenv() [69]
+ o tool_util: improve Windows version of tvnow() [82]
  o travis: update non-OpenSSL Linux jobs to Bionic [38]
- o url: Include the failure reason when curl_win32_idn_to_ascii() fails [51]
+ o url: include the failure reason when curl_win32_idn_to_ascii() fails [51]
  o urlapi: guess scheme properly with credentials given [47]
  o urldata: do string enums without #ifdefs for build scripts [29]
- o vtls: Refactor Curl_multissl_version to make the code clearer [14]
+ o vtls: refactor Curl_multissl_version to make the code clearer [14]
  o win32: USE_WIN32_CRYPTO to enable Win32 based MD4, MD5 and SHA256 [79]
 
 This release includes the following known bugs:
@@ -128,21 +145,23 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  3dyd on github, Alessandro Ghedini, Anderson Toshiyuki Sasaki, Andrew Potter,
-  Andrius Merkys, Aron Rotteveel, Austin Green, bnfp on github,
+  3dyd on github, Alessandro Ghedini, Anders Berg, Anderson Toshiyuki Sasaki,
+  Andrew Potter, Andrius Merkys, Aron Rotteveel, Austin Green, bnfp on github,
   bramus on github, Brian Carpenter, bsammon on github, Christian Heimes,
   Christoph M. Becker, Craig Andrews, crazydef on github, Cristian Greco,
   Dan Fandrich, Daniel Gustafsson, Daniel Marjamäki, Daniel Stenberg,
   Dan Jacobson, dmitrmax on github, Edgaras Janušauskas, Emil Engler,
   Faizur Rahman, Frank Gevaerts, hamstergene on github, Harry Sintonen,
-  James Fuller, Jeroen Ooms, jethrogb on github, Johannes Schindelin,
-  Jon Rumsey, Joonas Kuorilehto, Kunal Ekawde, Leo Neat, Marc Aldorasi,
-  Marcel Raad, mbeifuss on github, Mike Frysinger, Mike Norton, Mischa Salle,
-  naost3rn on github, Nicolas Guillier, Orgad Shaneh, Pavel Volgarev,
-  Pedro Monreal, Peter Piekarski, Pierre-Yves Bigourdan, Ray Satiro,
-  Santino Keupp, Steve Holme, Sunny Bean, Tobias Hieta, vshmuk on hackerone,
-  ygthien on github, 加藤郁之,
-  (57 contributors)
+  IvanoG on github, James Fuller, Jeroen Ooms, jethrogb on github,
+  Johannes Schindelin, Jonathan Cardoso Machado, Jon Rumsey, Joonas Kuorilehto,
+  Kristian Mide, Kunal Ekawde, Leo Neat, Marc Aldorasi, Marcel Raad,
+  Marc Hörsken, mbeifuss on github, Mike Frysinger, Mike Norton, Mischa Salle,
+  MrdUkk on github, naost3rn on github, Nick Zitzmann, Nicolas Guillier,
+  Orgad Shaneh, Patrick Monnerat, Pavel Volgarev, Pedro Monreal,
+  Peter Piekarski, Peter Wu, Pierre-Yves Bigourdan, Ray Satiro, Robert Dunaj,
+  Rolf Eike Beer, RuurdBeerstra on github, Santino Keupp, Steve Holme,
+  Sunny Bean, Tobias Hieta, vshmuk on hackerone, ygthien on github, 加藤郁之,
+  (69 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -187,7 +206,7 @@ References to bug reports and discussions on issues:
  [37] = https://curl.haxx.se/bug/?i=4873
  [38] = https://curl.haxx.se/bug/?i=4872
  [39] = https://curl.haxx.se/bug/?i=4869
- [40] = https://curl.haxx.se/bug/?i=4868
+ [40] = https://curl.haxx.se/bug/?i=5006
  [41] = https://curl.haxx.se/bug/?i=4867
  [42] = https://curl.haxx.se/bug/?i=4865
  [43] = https://curl.haxx.se/bug/?i=4864
@@ -243,3 +262,18 @@ References to bug reports and discussions on issues:
  [93] = https://curl.haxx.se/bug/?i=4967
  [94] = https://curl.haxx.se/bug/?i=4968
  [95] = https://curl.haxx.se/bug/?i=4959
+ [96] = https://curl.haxx.se/bug/?i=4966
+ [97] = https://curl.haxx.se/bug/?i=4911
+ [98] = https://curl.haxx.se/bug/?i=4984
+ [99] = https://curl.haxx.se/bug/?i=5007
+ [100] = https://curl.haxx.se/bug/?i=4975
+ [101] = https://curl.haxx.se/bug/?i=5005
+ [102] = https://curl.haxx.se/bug/?i=4980
+ [103] = https://curl.haxx.se/mail/archive-2020-02/0011.html
+ [104] = https://curl.haxx.se/bug/?i=4996
+ [105] = https://curl.haxx.se/bug/?i=5013
+ [106] = https://curl.haxx.se/bug/?i=4956
+ [107] = https://curl.haxx.se/bug/?i=5016
+ [108] = https://curl.haxx.se/bug/?i=4979
+ [109] = https://curl.haxx.se/bug/?i=4928
+ [110] = https://curl.haxx.se/bug/?i=5025
