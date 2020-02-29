@@ -2561,7 +2561,7 @@ sub cleardir {
     opendir(DIR, $dir) ||
         return 0; # can't open dir
     while($file = readdir(DIR)) {
-        if(($file !~ /^\./) && ($file ne $CURLLOG)) {
+        if(($file !~ /^\./)) {
             unlink("$dir/$file");
             $count++;
         }
@@ -3716,7 +3716,9 @@ sub singletest {
         logmsg "$CMDLINE\n";
     }
 
+    open(CMDLOG, ">", "$LOGDIR/$CURLLOG");
     print CMDLOG "$CMDLINE\n";
+    close(CMDLOG);
 
     unlink("core");
 
@@ -5402,14 +5404,6 @@ if($scrambleorder) {
     $TESTCASES = join(" ", @rand);
 }
 
-#######################################################################
-# Start the command line log
-#
-open(CMDLOG, ">", "$LOGDIR/$CURLLOG") ||
-    logmsg "can't log command lines to $CURLLOG\n";
-
-#######################################################################
-
 # Display the contents of the given file.  Line endings are canonicalized
 # and excessively long files are elided
 sub displaylogcontent {
@@ -5551,11 +5545,6 @@ foreach $testnum (@at) {
 }
 
 my $sofar = time() - $start;
-
-#######################################################################
-# Close command log
-#
-close(CMDLOG);
 
 # Tests done, stop the servers
 stopservers($verbose);
