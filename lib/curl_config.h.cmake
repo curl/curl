@@ -939,9 +939,6 @@ ${SIZEOF_TIME_T_CODE}
 /* if GnuTLS is enabled */
 #cmakedefine USE_GNUTLS 1
 
-/* if PolarSSL is enabled */
-#cmakedefine USE_POLARSSL 1
-
 /* if Secure Transport is enabled */
 #cmakedefine USE_SECTRANSP 1
 
