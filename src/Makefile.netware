@@ -6,7 +6,7 @@
 #                             \___|\___/|_| \_\_____|
 #
 # Copyright (C) 2004 - 2014, Guenter Knauf
-# Copyright (C) 2001 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -155,7 +155,7 @@ LIBARCH_L = $(shell $(AWK) 'BEGIN {print tolower(ARGV[1])}' $(LIBARCH))
 -include $(OBJDIR)/version.inc
 
 # Global flags for all compilers
-CFLAGS += $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
+CFLAGS += $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc -DCURLX_NO_MEMORY_CALLBACKS
 
 ifeq ($(CC),mwccnlm)
   LD = mwldnlm

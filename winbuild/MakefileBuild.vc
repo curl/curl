@@ -103,7 +103,7 @@ PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
 PROGRAM_NAME  = curl.exe
-CURL_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c
+CURL_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c /DCURLX_NO_MEMORY_CALLBACKS
 CURL_LFLAGS   = /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console $(LFLAGS)
 CURL_RESFLAGS = /i../include
 

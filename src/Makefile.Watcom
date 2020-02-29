@@ -6,7 +6,7 @@
 #                             \___|\___/|_| \_\_____|
 #
 # Copyright (C) 2005 - 2008, Gisle Vanem <gvanem@yahoo.no>.
-# Copyright (C) 2005 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2005 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -83,7 +83,8 @@ SYS_INCL = -I"$(%watcom)/h/nt" -I"$(%watcom)/h"
 
 CFLAGS = -3r -mf -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm &
          -wcd=201 -bt=nt -bc -d+ -dWIN32 -dHAVE_STRTOLL             &
-         -I"../include" -I"../lib" $(SYS_INCL)
+         -I"../include" -I"../lib" $(SYS_INCL)                      &
+         -dCURLX_NO_MEMORY_CALLBACKS
 
 !ifdef %debug
 DEBUG  = -dDEBUG=1 -dDEBUGBUILD
