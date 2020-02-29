@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 CURLOPT_CONNECT_TO
+--resolve
 </keywords>
 </info>
 
