@@ -3044,6 +3044,8 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   if(result)
     return result;
+  if(!postsize)
+    data->req.upload_done = TRUE;
 
   if(data->req.writebytecount) {
     /* if a request-body has been sent off, we make sure this progress is noted
