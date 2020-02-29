@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2019, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) 2016 - 2020, Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,9 +59,6 @@ bool Curl_verify_windows_version(const unsigned int majorVersion,
                                  const unsigned int minorVersion,
                                  const PlatformIdentifier platform,
                                  const VersionCondition condition);
-
-/* This is used to dynamically load DLLs */
-HMODULE Curl_load_library(LPCTSTR filename);
 
 #endif /* WIN32 */
 
