@@ -27,57 +27,8 @@
 #include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_writeout_json.h"
+#include "tool_writeout.h"
 
-
-typedef enum {
-  JSON_NONE,
-  JSON_STRING,
-  JSON_LONG,
-  JSON_TIME,
-  JSON_VERSION,
-  JSON_FILENAME
-} jsontype;
-
-struct mapping {
-  const char *key;
-  jsontype type;
-  CURLINFO cinfo;
-};
-
-static const struct mapping mappings[]={
-  {"url_effective", JSON_STRING, CURLINFO_EFFECTIVE_URL},
-  {"http_code", JSON_LONG, CURLINFO_RESPONSE_CODE},
-  {"response_code", JSON_LONG, CURLINFO_RESPONSE_CODE},
-  {"http_connect", JSON_LONG, CURLINFO_HTTP_CONNECTCODE},
-  {"time_total", JSON_TIME, CURLINFO_TOTAL_TIME_T},
-  {"time_namelookup", JSON_TIME, CURLINFO_NAMELOOKUP_TIME_T},
-  {"time_connect", JSON_TIME, CURLINFO_CONNECT_TIME_T},
-  {"time_appconnect", JSON_TIME, CURLINFO_APPCONNECT_TIME_T},
-  {"time_pretransfer", JSON_TIME, CURLINFO_PRETRANSFER_TIME_T},
-  {"time_starttransfer", JSON_TIME, CURLINFO_STARTTRANSFER_TIME_T},
-  {"size_header", JSON_LONG, CURLINFO_HEADER_SIZE},
-  {"size_request", JSON_LONG, CURLINFO_REQUEST_SIZE},
-  {"size_download", JSON_LONG, CURLINFO_SIZE_DOWNLOAD_T},
-  {"size_upload", JSON_LONG, CURLINFO_SIZE_UPLOAD_T},
-  {"speed_download", JSON_TIME, CURLINFO_SPEED_DOWNLOAD_T},
-  {"speed_upload", JSON_TIME, CURLINFO_SPEED_UPLOAD_T},
-  {"content_type", JSON_STRING, CURLINFO_CONTENT_TYPE},
-  {"num_connects", JSON_LONG, CURLINFO_NUM_CONNECTS},
-  {"time_redirect", JSON_TIME, CURLINFO_REDIRECT_TIME_T},
-  {"num_redirects", JSON_LONG, CURLINFO_REDIRECT_COUNT},
-  {"ftp_entry_path", JSON_STRING, CURLINFO_FTP_ENTRY_PATH},
-  {"redirect_url", JSON_STRING, CURLINFO_REDIRECT_URL},
-  {"ssl_verify_result", JSON_LONG, CURLINFO_SSL_VERIFYRESULT},
-  {"proxy_ssl_verify_result", JSON_LONG, CURLINFO_PROXY_SSL_VERIFYRESULT},
-  {"filename_effective", JSON_FILENAME, CURLINFO_NONE},
-  {"remote_ip", JSON_STRING, CURLINFO_PRIMARY_IP},
-  {"remote_port", JSON_LONG, CURLINFO_PRIMARY_PORT},
-  {"local_ip", JSON_STRING, CURLINFO_LOCAL_IP},
-  {"local_port", JSON_LONG, CURLINFO_LOCAL_PORT},
-  {"http_version", JSON_VERSION, CURLINFO_HTTP_VERSION},
-  {"scheme", JSON_STRING, CURLINFO_SCHEME},
-  {NULL, JSON_NONE, CURLINFO_NONE}
-};
 
 static const char *http_version[] = {
   "0",   /* CURL_HTTP_VERSION_NONE */
@@ -186,30 +137,36 @@ static int writeVersion(FILE *str, CURL *curl, const char *key, CURLINFO ci)
   return 0;
 }
 
-void ourWriteOutJSON(CURL *curl, struct OutStruct *outs, FILE *stream)
+void ourWriteOutJSON(const struct writeoutvar mappings[], CURL *curl,
+        struct OutStruct *outs, FILE *stream)
 {
   int i;
 
   fputs("{", stream);
-  for(i = 0; mappings[i].key != NULL; i++) {
-    const char *key = mappings[i].key;
+  for(i = 0; mappings[i].name != NULL; i++) {
+    const char *name = mappings[i].name;
     CURLINFO cinfo = mappings[i].cinfo;
     int ok = 0;
-    switch(mappings[i].type) {
+
+    if(mappings[i].is_ctrl == 1) {
+      continue;
+    }
+
+    switch(mappings[i].jsontype) {
     case JSON_STRING:
-      ok = writeString(stream, curl, key, cinfo);
+      ok = writeString(stream, curl, name, cinfo);
       break;
     case JSON_LONG:
-      ok = writeLong(stream, curl, key, cinfo);
+      ok = writeLong(stream, curl, name, cinfo);
       break;
     case JSON_TIME:
-      ok = writeTime(stream, curl, key, cinfo);
+      ok = writeTime(stream, curl, name, cinfo);
       break;
     case JSON_FILENAME:
-      ok = writeFilename(stream, key, outs->filename);
+      ok = writeFilename(stream, name, outs->filename);
       break;
     case JSON_VERSION:
-      ok = writeVersion(stream, curl, key, cinfo);
+      ok = writeVersion(stream, curl, name, cinfo);
       break;
     default:
       break;

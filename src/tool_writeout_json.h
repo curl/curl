@@ -22,7 +22,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_writeout.h"
 
-void ourWriteOutJSON(CURL *curl, struct OutStruct *outs, FILE *stream);
+void ourWriteOutJSON(const struct writeoutvar mappings[],
+        CURL *curl, struct OutStruct *outs, FILE *stream);
 
 #endif /* HEADER_CURL_TOOL_WRITEOUT_H */
