@@ -22,7 +22,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --enable-debug --enable-werror
-      displayName: 'Run configure'
+      displayName: 'configure debug'
 
     - script: make
       displayName: 'make'
@@ -38,7 +38,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-ipv6
-      displayName: 'Run configure --disable-ipv6'
+      displayName: 'configure disable ipv6'
 
     - script: make
       displayName: 'make'
@@ -54,7 +54,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-http --disable-smtp --disable-imap
-      displayName: 'Run configure'
+      displayName: 'configure disable http/smtp/imap'
 
     - script: make
       displayName: 'make'
@@ -70,7 +70,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-threaded-resolver
-      displayName: 'Run configure'
+      displayName: 'configure disable threaded-resolver'
 
     - script: make
       displayName: 'make'
@@ -86,7 +86,7 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - script: ./buildconf && ./configure --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp
-      displayName: 'Run configure'
+      displayName: 'configure disable non-http'
 
     - script: make
       displayName: 'make'
@@ -108,7 +108,7 @@ stages:
       displayName: 'apt install'
 
     - script: ./buildconf && ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
-      displayName: 'Run configure'
+      displayName: 'configure torture'
 
     - script: make
       displayName: 'make'
@@ -132,7 +132,7 @@ stages:
       displayName: 'brew install'
 
     - script: ./buildconf && ./configure --enable-debug --enable-werror --without-brotli
-      displayName: 'Run configure'
+      displayName: 'configure debug without brotli'
 
     - script: make
       displayName: 'make'
@@ -150,8 +150,8 @@ stages:
     - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config libssh2
       displayName: 'brew install'
 
-    - script: ./buildconf && ./configure --with-libssh2 --enable-debug
-      displayName: 'Run configure'
+    - script: ./buildconf && ./configure --enable-debug --with-libssh2
+      displayName: 'configure debug with libssh2'
 
     - script: make
       displayName: 'make'
@@ -167,10 +167,10 @@ stages:
       vmImage: 'macOS-latest'
     steps:
     - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config openssl
-      displayName: Install packages
+      displayName: 'brew install'
 
     - script: cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON && cmake --build build
-      displayName: 'Run cmake'
+      displayName: 'cmake build'
 
 - stage: macos_torture
   dependsOn: macos
@@ -181,10 +181,10 @@ stages:
       vmImage: 'macOS-latest'
     steps:
     - script: brew update && brew install libtool autoconf automake nghttp2 pkg-config
-      displayName: Install packages
+      displayName: 'brew install'
 
     - script: ./buildconf && ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
-      displayName: 'Run configure'
+      displayName: 'configure torture'
 
     - script: make
       displayName: 'make'
@@ -212,7 +212,7 @@ stages:
         TFLAGS: "!323 !1056 !1299"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --enable-debug --enable-werror"
-      displayName: 'Run configure'
+      displayName: 'configure debug'
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -235,7 +235,7 @@ stages:
         TFLAGS: "!323 !1056 !1299"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --enable-debug --enable-werror"
-      displayName: 'Run configure'
+      displayName: 'configure debug'
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -256,7 +256,7 @@ stages:
         TFLAGS: "!203 !1056 !1143"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug"
-      displayName: 'Run configure'
+      displayName: 'configure debug'
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -277,7 +277,7 @@ stages:
         TFLAGS: "!203 !1056 !1143 !1299"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --without-zlib"
-      displayName: 'Run configure'
+      displayName: 'configure debug without zlib'
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -298,7 +298,7 @@ stages:
         TFLAGS: "!203 !1056 !1143 !1299"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib"
-      displayName: 'Run configure'
+      displayName: 'configure debug without zlib'
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -321,7 +321,7 @@ stages:
         TFLAGS: "!165 !310 !1013 !1056 !1299 !1448 !2034 !2037 !2041 !2046 !2047 !3000 !3001"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn"
-      displayName: 'Run configure'
+      displayName: 'configure debug with sspi/schannel/winidn'
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -344,7 +344,7 @@ stages:
         TFLAGS: "!165 !310 !1013 !1056 !1299 !1448 !2034 !2037 !2041 !2046 !2047 !3000 !3001"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn"
-      displayName: 'Run configure'
+      displayName: 'configure debug with sspi/schannel/winidn'
 
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -365,7 +365,7 @@ stages:
         TFLAGS: "!203 !305 !310 !311 !312 !313 !404 !1013 !1056 !1143 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --enable-sspi --without-ssl --with-schannel --with-winidn"
-      displayName: 'Run configure'
+      displayName: 'configure debug with sspi/schannel/winidn'
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -386,7 +386,7 @@ stages:
         TFLAGS: "!203 !310 !1013 !1056 !1143 !1299 !2034 !2037 !2041 !3000 !3001"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib"
-      displayName: 'Run configure'
+      displayName: 'configure debug with sspi/schannel/winidn without zlib'
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
@@ -407,7 +407,7 @@ stages:
         TFLAGS: "!203 !310 !1013 !1056 !1143 !1299 !2034 !2037 !2041 !3000 !3001"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64  --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib"
-      displayName: 'Run configure'
+      displayName: 'configure debug with sspi/schannel/winidn without zlib'
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
