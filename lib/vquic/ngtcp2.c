@@ -641,7 +641,7 @@ int Curl_quic_ver(char *p, size_t len)
 {
   ngtcp2_info *ng2 = ngtcp2_version(0);
   nghttp3_info *ht3 = nghttp3_version(0);
-  return msnprintf(p, len, " ngtcp2/%s nghttp3/%s",
+  return msnprintf(p, len, "ngtcp2/%s nghttp3/%s",
                    ng2->version_str, ht3->version_str);
 }
 

@@ -83,8 +83,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-void Curl_version_init(void);
-
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
 static long          init_flags;
@@ -200,8 +198,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
 
   init_flags = flags;
-
-  Curl_version_init();
 
   return CURLE_OK;
 
