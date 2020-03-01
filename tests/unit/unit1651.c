@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2018 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -368,7 +368,7 @@ UNITTEST_START
   for(byte = 1 ; byte < 255; byte += 17) {
     for(i = 0; i < 45; i++) {
       char backup = cert[i];
-      cert[i] = (unsigned char)byte&0xff;
+      cert[i] = (unsigned char) (byte & 0xff);
       (void) Curl_extract_certinfo(&conn, 0, beg, end);
       cert[i] = backup;
     }
