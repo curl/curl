@@ -262,7 +262,6 @@ bool Curl_ssl_false_start(void);
 #define Curl_ssl_send(a,b,c,d,e) -1
 #define Curl_ssl_recv(a,b,c,d,e) -1
 #define Curl_ssl_initsessions(x,y) CURLE_OK
-#define Curl_ssl_version(x,y) 0
 #define Curl_ssl_data_pending(x,y) 0
 #define Curl_ssl_check_cxn(x) 0
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
