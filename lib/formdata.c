@@ -728,19 +728,14 @@ int curl_formget(struct curl_httppost *form, void *arg,
     if(!nread)
       break;
 
-    switch(nread) {
-    default:
-      if(append(arg, buffer, nread) == nread)
-        break;
-      /* FALLTHROUGH */
-    case CURL_READFUNC_ABORT:
+    if((nread <= sizeof(buffer) &&
+        (append(arg, buffer, nread) == nread)))
+      ;
+    /* anything else is an error */
+    else if(nread == CURL_READFUNC_ABORT)
       result = CURLE_ABORTED_BY_CALLBACK;
-      break;
-    case (size_t) -1:   /* Read error. */
-    case CURL_READFUNC_PAUSE:    /* Should not be paused. */
+    else
       result = CURLE_READ_ERROR;
-      break;
-    }
   }
 
   Curl_mime_cleanpart(&toppart);
