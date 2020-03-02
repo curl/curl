@@ -1199,7 +1199,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
                data from it until it receives an error (except EINTR).
                In normal cases it will get EAGAIN or EWOULDBLOCK
                when there is no more data, breaking the loop. */
-            if(sread(multi->wakeup_pair[0], buf, sizeof(buf)) < 0) {
+            if(sread(multi->wakeup_pair[0], buf, sizeof(buf)) <= 0) {
 #ifndef USE_WINSOCK
               if(EINTR == SOCKERRNO)
                 continue;
