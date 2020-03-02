@@ -2771,8 +2771,8 @@ if test X"$OPT_LIBMETALINK" != Xno; then
       want_metalink="no"
     ])
     if test "x$OPENSSL_ENABLED" != "x1" -a "x$USE_WINDOWS_SSPI" != "x1" \
-        -a "x$GNUTLS_ENABLED" != "x1" -a "x$MBEDTLS_ENABLED" != "x1" \
-        -a "x$NSS_ENABLED" != "x1" -a "x$SECURETRANSPORT_ENABLED" != "x1"; then
+        -a "x$GNUTLS_ENABLED" != "x1" -a "x$NSS_ENABLED" != "x1" \
+        -a "x$SECURETRANSPORT_ENABLED" != "x1"; then
       AC_MSG_WARN([metalink support requires a compatible SSL/TLS backend])
       want_metalink="no"
     fi
