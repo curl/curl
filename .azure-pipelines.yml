@@ -219,7 +219,7 @@ stages:
       env:
         MSYSTEM: MINGW32
         MSYS2_PATH_TYPE: inherit
-        TFLAGS: "!323 !1056 !1299"
+        TFLAGS: "~323 ~1056 ~1299"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --enable-debug --enable-werror"
       displayName: 'configure debug'
@@ -242,7 +242,7 @@ stages:
       env:
         MSYSTEM: MINGW64
         MSYS2_PATH_TYPE: inherit
-        TFLAGS: "!323 !1056 !1299"
+        TFLAGS: "~323 ~1056 ~1299"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --enable-debug --enable-werror"
       displayName: 'configure debug'
@@ -263,7 +263,7 @@ stages:
     container:
       image: mback2k/curl-docker-winbuildenv-msys1-mingw:ltsc2019
       env:
-        TFLAGS: "!203 !1056 !1143"
+        TFLAGS: "~203 ~1056 ~1143"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug"
       displayName: 'configure debug'
@@ -284,7 +284,7 @@ stages:
     container:
       image: mback2k/curl-docker-winbuildenv-msys1-mingw32:ltsc2019
       env:
-        TFLAGS: "!203 !1056 !1143 !1299"
+        TFLAGS: "~203 ~1056 ~1143 ~1299"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --without-zlib"
       displayName: 'configure debug without zlib'
@@ -305,7 +305,7 @@ stages:
     container:
       image: mback2k/curl-docker-winbuildenv-msys1-mingw64:ltsc2019
       env:
-        TFLAGS: "!203 !1056 !1143 !1299"
+        TFLAGS: "~203 ~1056 ~1143 ~1299"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib"
       displayName: 'configure debug without zlib'
@@ -328,7 +328,7 @@ stages:
       env:
         MSYSTEM: MINGW32
         MSYS2_PATH_TYPE: inherit
-        TFLAGS: "!165 !310 !1013 !1056 !1299 !1448 !2034 !2037 !2041 !2046 !2047 !3000 !3001"
+        TFLAGS: "~165 ~310 ~1013 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn"
       displayName: 'configure debug with sspi/schannel/winidn'
@@ -351,7 +351,7 @@ stages:
       env:
         MSYSTEM: MINGW64
         MSYS2_PATH_TYPE: inherit
-        TFLAGS: "!165 !310 !1013 !1056 !1299 !1448 !2034 !2037 !2041 !2046 !2047 !3000 !3001"
+        TFLAGS: "~165 ~310 ~1013 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001"
     steps:
     - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn"
       displayName: 'configure debug with sspi/schannel/winidn'
@@ -372,7 +372,7 @@ stages:
     container:
       image: mback2k/curl-docker-winbuildenv-msys1-mingw:ltsc2019
       env:
-        TFLAGS: "!203 !305 !310 !311 !312 !313 !404 !1013 !1056 !1143 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001"
+        TFLAGS: "~203 ~305 ~310 ~311 ~312 ~313 ~404 ~1013 ~1056 ~1143 ~2034 ~2035 ~2037 ~2038 ~2041 ~2042 ~2048 ~3000 ~3001"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --enable-sspi --without-ssl --with-schannel --with-winidn"
       displayName: 'configure debug with sspi/schannel/winidn'
@@ -393,7 +393,7 @@ stages:
     container:
       image: mback2k/curl-docker-winbuildenv-msys1-mingw32:ltsc2019
       env:
-        TFLAGS: "!203 !310 !1013 !1056 !1143 !1299 !2034 !2037 !2041 !3000 !3001"
+        TFLAGS: "~203 ~310 ~1013 ~1056 ~1143 ~1299 ~2034 ~2037 ~2041 ~3000 ~3001"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib"
       displayName: 'configure debug with sspi/schannel/winidn without zlib'
@@ -414,7 +414,7 @@ stages:
     container:
       image: mback2k/curl-docker-winbuildenv-msys1-mingw64:ltsc2019
       env:
-        TFLAGS: "!203 !310 !1013 !1056 !1143 !1299 !2034 !2037 !2041 !3000 !3001"
+        TFLAGS: "~203 ~310 ~1013 ~1056 ~1143 ~1299 ~2034 ~2037 ~2041 ~3000 ~3001"
     steps:
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64  --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib"
       displayName: 'configure debug with sspi/schannel/winidn without zlib'

@@ -63,7 +63,11 @@ sub appveyor_update_test_result {
     my $appveyor_duration = sprintf("%.0f", ($stop-$start)*1000);
     my $appveyor_outcome;
     my $appveyor_category;
-    if($error < 0) {
+    if($error == 2) {
+        $appveyor_outcome = 'Ignored';
+        $appveyor_category = 'Warning';
+    }
+    elsif($error < 0) {
         $appveyor_outcome = 'NotRunnable';
         $appveyor_category = 'Warning';
     }

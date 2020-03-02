@@ -276,8 +276,10 @@ my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
+my %ignored_keywords;   # key words of tests to ignore results
 my %enabled_keywords;   # key words of tests to run
 my %disabled;           # disabled test cases
+my %ignored;            # ignored results of test cases
 
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -3250,6 +3252,7 @@ sub singletest {
     my $why;
     my $cmd;
     my $disablevalgrind;
+    my $errorreturncode = 1; # 1 means normal error, 2 means ignored error
 
     # fist, remove all lingering log files
     cleardir($LOGDIR);
@@ -3266,6 +3269,10 @@ sub singletest {
     }
     if($disabled{$testnum}) {
         logmsg "Warning: test$testnum is explicitly disabled\n";
+    }
+    if($ignored{$testnum}) {
+        logmsg "Warning: test$testnum result is ignored\n";
+        $errorreturncode = 2;
     }
 
     # load the test case file definition
@@ -3333,6 +3340,10 @@ sub singletest {
                 $why = "disabled by keyword";
             } elsif ($enabled_keywords{lc($k)}) {
                 $match = 1;
+            }
+            if ($ignored_keywords{lc($k)}) {
+                logmsg "Warning: test$testnum result is ignored due to $k\n";
+                $errorreturncode = 2;
             }
 
             $keywords{$k} = 1;
@@ -3918,7 +3929,7 @@ sub singletest {
                 logmsg " postcheck FAILED\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return 1;
+                return $errorreturncode;
             }
         }
     }
@@ -3990,7 +4001,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "stdout", \@actual, \@validstdout);
         if($res) {
-            return 1;
+            return $errorreturncode;
         }
         $ok .= "s";
     }
@@ -4041,7 +4052,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "stderr", \@actual, \@validstderr);
         if($res) {
-            return 1;
+            return $errorreturncode;
         }
         $ok .= "r";
     }
@@ -4087,7 +4098,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "protocol", \@out, \@protstrip);
         if($res) {
-            return 1;
+            return $errorreturncode;
         }
 
         $ok .= "p";
@@ -4102,7 +4113,7 @@ sub singletest {
         my @out = loadarray($CURLOUT);
         $res = compare($testnum, $testname, "data", \@out, \@reply);
         if ($res) {
-            return 1;
+            return $errorreturncode;
         }
         $ok .= "d";
     }
@@ -4126,7 +4137,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
-            return 1;
+            return $errorreturncode;
         }
         $ok .= "u";
     }
@@ -4172,7 +4183,7 @@ sub singletest {
 
         $res = compare($testnum, $testname, "proxy", \@out, \@protstrip);
         if($res) {
-            return 1;
+            return $errorreturncode;
         }
 
         $ok .= "P";
@@ -4230,7 +4241,7 @@ sub singletest {
             $res = compare($testnum, $testname, "output ($filename)",
                            \@generated, \@outfile);
             if($res) {
-                return 1;
+                return $errorreturncode;
             }
 
             $outputok = 1; # output checked
@@ -4260,7 +4271,7 @@ sub singletest {
         logmsg " exit FAILED\n";
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
-        return 1;
+        return $errorreturncode;
     }
 
     if($has_memory_tracking) {
@@ -4283,7 +4294,7 @@ sub singletest {
                 logmsg @memdata;
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return 1;
+                return $errorreturncode;
             }
             else {
                 $ok .= "m";
@@ -4300,7 +4311,7 @@ sub singletest {
                 logmsg "ERROR: unable to read $LOGDIR\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return 1;
+                return $errorreturncode;
             }
             my @files = readdir(DIR);
             closedir(DIR);
@@ -4315,7 +4326,7 @@ sub singletest {
                 logmsg "ERROR: valgrind log file missing for test $testnum\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return 1;
+                return $errorreturncode;
             }
             my @e = valgrindparse("$LOGDIR/$vgfile");
             if(@e && $e[0]) {
@@ -4328,7 +4339,7 @@ sub singletest {
                 }
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
-                return 1;
+                return $errorreturncode;
             }
             $ok .= "v";
         }
@@ -4365,6 +4376,10 @@ sub singletest {
     }
     else {
         logmsg "PASS: $testnum - $testname\n";
+    }
+
+    if($errorreturncode==2) {
+        logmsg "Warning: test$testnum result is ignored, but passed!\n";
     }
 
     return 0;
@@ -5164,8 +5179,10 @@ Usage: runtests.pl [options] [test selection(s)]
   -vc path use this curl only to verify the existing servers
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
+  [~num]   like "~5 ~6 ~9" to ignore the result of those tests
   [keyword] like "IPv6" to select only tests containing the key word
   [!keyword] like "!cookies" to disable any tests containing the key word
+  [~keyword] like "~cookies" to ignore results of tests containing key word
 EOHELP
     ;
         exit;
@@ -5198,8 +5215,15 @@ EOHELP
         $fromnum = -1;
         $disabled{$1}=$1;
     }
+    elsif($ARGV[0] =~ /^~(\d+)/) {
+        $fromnum = -1;
+        $ignored{$1}=$1;
+    }
     elsif($ARGV[0] =~ /^!(.+)/) {
         $disabled_keywords{lc($1)}=$1;
+    }
+    elsif($ARGV[0] =~ /^~(.+)/) {
+        $ignored_keywords{lc($1)}=$1;
     }
     elsif($ARGV[0] =~ /^([-[{a-zA-Z].*)/) {
         $enabled_keywords{lc($1)}=$1;
@@ -5532,6 +5556,7 @@ if(azure_check_environment()) {
 my $failed;
 my $testnum;
 my $ok=0;
+my $ign=0;
 my $total=0;
 my $lasttest=0;
 my @at = split(" ", $TESTCASES);
@@ -5568,7 +5593,10 @@ foreach $testnum (@at) {
             # display all files in log/ in a nice way
             displaylogs($testnum);
         }
-        if(!$anyway) {
+        if($error==2) {
+            $ign++; # ignored test result counter
+        }
+        elsif(!$anyway) {
             # a test failed, abort
             logmsg "\n - abort tests\n";
             last;
@@ -5644,6 +5672,6 @@ if($skipped && !$short) {
     }
 }
 
-if($total && ($ok != $total)) {
+if($total && (($ok+$ign) != $total)) {
     exit 1;
 }
