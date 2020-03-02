@@ -887,6 +887,17 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
                              data->state.resolver))
     goto fail;
 
+#ifdef USE_ARES
+  if(Curl_set_dns_servers(outcurl, data->set.str[STRING_DNS_SERVERS]))
+    goto fail;
+  if(Curl_set_dns_interface(outcurl, data->set.str[STRING_DNS_INTERFACE]))
+    goto fail;
+  if(Curl_set_dns_local_ip4(outcurl, data->set.str[STRING_DNS_LOCAL_IP4]))
+    goto fail;
+  if(Curl_set_dns_local_ip6(outcurl, data->set.str[STRING_DNS_LOCAL_IP6]))
+    goto fail;
+#endif /* USE_ARES */
+
   Curl_convert_setup(outcurl);
 
   Curl_initinfo(outcurl);

@@ -1585,6 +1585,13 @@ enum dupstring {
 
   STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
 
+#ifdef USE_ARES
+  STRING_DNS_SERVERS,
+  STRING_DNS_INTERFACE,
+  STRING_DNS_LOCAL_IP4,
+  STRING_DNS_LOCAL_IP6,
+#endif /* USE_ARES */
+
   STRING_LAST /* not used, just an end-of-list marker */
 };
 
