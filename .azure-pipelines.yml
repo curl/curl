@@ -18,6 +18,7 @@ stages:
   jobs:
   - job: vanilla
     displayName: ubuntu default
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -34,6 +35,7 @@ stages:
 
   - job: disable_ipv6
     displayName: ubuntu w/o IPv6
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -50,6 +52,7 @@ stages:
 
   - job: disable_http_smtp_imap
     displayName: ubuntu w/o HTTP/SMTP/IMAP
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -66,6 +69,7 @@ stages:
 
   - job: disable_thredres
     displayName: ubuntu sync resolver
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -82,6 +86,7 @@ stages:
 
   - job: http_only
     displayName: ubuntu HTTP only
+    timeoutInMinutes: 20
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -101,6 +106,7 @@ stages:
   jobs:
   - job: torture
     displayName: ubuntu torture tests
+    timeoutInMinutes: 50
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -125,6 +131,7 @@ stages:
   jobs:
   - job: macos_vanilla
     displayName: macos default
+    timeoutInMinutes: 20
     pool:
       vmImage: 'macOS-latest'
     steps:
@@ -144,6 +151,7 @@ stages:
 
   - job: macos_libssh2
     displayName: macos libssh2
+    timeoutInMinutes: 20
     pool:
       vmImage: 'macOS-latest'
     steps:
@@ -163,6 +171,7 @@ stages:
 
   - job: macos_cmake
     displayName: macos cmake openssl
+    timeoutInMinutes: 20
     pool:
       vmImage: 'macOS-latest'
     steps:
@@ -177,6 +186,7 @@ stages:
   jobs:
   - job: macos_torture
     displayName: macos torture
+    timeoutInMinutes: 50
     pool:
       vmImage: 'macOS-latest'
     steps:
@@ -201,7 +211,7 @@ stages:
   jobs:
   - job: windows_msys2_mingw32_debug_openssl
     displayName: msys2 mingw32 debug openssl
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -224,7 +234,7 @@ stages:
 
   - job: windows_msys2_mingw64_debug_openssl
     displayName: msys2 mingw64 debug openssl
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -247,7 +257,7 @@ stages:
 
   - job: windows_msys1_mingw_debug_openssl
     displayName: msys1 mingw debug openssl
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -268,7 +278,7 @@ stages:
 
   - job: windows_msys1_mingw32_debug_openssl
     displayName: msys1 mingw32 debug openssl
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -289,7 +299,7 @@ stages:
 
   - job: windows_msys1_mingw64_debug_openssl
     displayName: msys1 mingw64 debug openssl
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -310,7 +320,7 @@ stages:
 
   - job: windows_msys2_mingw32_debug_schannel
     displayName: msys2 mingw32 debug schannel
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -333,7 +343,7 @@ stages:
 
   - job: windows_msys2_mingw64_debug_schannel
     displayName: msys2 mingw64 debug schannel
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -356,7 +366,7 @@ stages:
 
   - job: windows_msys1_mingw_debug_schannel
     displayName: msys1 mingw debug schannel
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -377,7 +387,7 @@ stages:
 
   - job: windows_msys1_mingw32_debug_schannel
     displayName: msys1 mingw32 debug schannel
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
@@ -398,7 +408,7 @@ stages:
 
   - job: windows_msys1_mingw64_debug_schannel
     displayName: msys1 mingw64 debug schannel
-    timeoutInMinutes: 90
+    timeoutInMinutes: 70
     pool:
       vmImage: 'windows-2019'
     container:
