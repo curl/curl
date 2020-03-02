@@ -73,42 +73,16 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-76
+2ce
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
 
-d
-1
-u
-1
-m
-1
-m
-1
-y
-1
-
-
-65
+this is what we post to the silly web server
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
 
-
-1
-d
-1
-u
-1
-m
-1
-m
-1
-y
-1
-
-
-19a
+this is what we post to the silly web server
 
 ------------------------------
 Content-Disposition: form-data; name="filename"
@@ -134,42 +108,16 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-84
+2dc
 ------------------------------
 Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
 
-d
-1
-u
-1
-m
-1
-m
-1
-y
-1
-
-
-65
+this is what we post to the silly web server
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
 
-
-1
-d
-1
-u
-1
-m
-1
-m
-1
-y
-1
-
-
-19a
+this is what we post to the silly web server
 
 ------------------------------
 Content-Disposition: form-data; name="filename"

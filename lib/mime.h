@@ -31,7 +31,6 @@
 /* Part flags. */
 #define MIME_USERHEADERS_OWNER  (1 << 0)
 #define MIME_BODY_ONLY          (1 << 1)
-#define MIME_FAST_READ          (1 << 2)
 
 #define FILE_CONTENTTYPE_DEFAULT        "application/octet-stream"
 #define MULTIPART_CONTENTTYPE_DEFAULT   "multipart/mixed"
@@ -88,7 +87,7 @@ typedef struct {
 typedef struct {
   enum mimestate state;       /* Current state token. */
   void *ptr;                  /* State-dependent pointer. */
-  curl_off_t offset;          /* State-dependent offset. */
+  size_t offset;              /* State-dependent offset. */
 }  mime_state;
 
 /* minimum buffer size for the boundary string */

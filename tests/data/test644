@@ -44,7 +44,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 POST /644 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 640
+Content-Length: 718
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
