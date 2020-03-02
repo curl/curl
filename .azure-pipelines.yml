@@ -131,7 +131,7 @@ stages:
   jobs:
   - job: macos_vanilla
     displayName: macos default
-    timeoutInMinutes: 20
+    timeoutInMinutes: 30
     pool:
       vmImage: 'macOS-latest'
     steps:
@@ -151,7 +151,7 @@ stages:
 
   - job: macos_libssh2
     displayName: macos libssh2
-    timeoutInMinutes: 20
+    timeoutInMinutes: 30
     pool:
       vmImage: 'macOS-latest'
     steps:
