@@ -975,6 +975,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 {
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
+  int oldstate = k->keepon & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
 
   /* first switch off both pause bits */
   int newstate = k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
@@ -982,6 +983,12 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   /* set the new desired pause bits */
   newstate |= ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
     ((action & CURLPAUSE_SEND)?KEEP_SEND_PAUSE:0);
+
+  if((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) == oldstate) {
+    /* Not changing any pause state, return */
+    DEBUGF(infof(data, "pause: no change, early return\n"));
+    return CURLE_OK;
+  }
 
   /* put it back in the keepon */
   k->keepon = newstate;
