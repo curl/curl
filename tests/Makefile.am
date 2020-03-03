@@ -38,7 +38,8 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
  CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
  manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py                  \
  negtelnetserver.py $(SMBDEPS) objnames-test08.sh objnames-test10.sh          \
- objnames.inc disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl
+ objnames.inc disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl  \
+ azure.pm
 
 DISTCLEANFILES = configurehelp.pm
 
