@@ -112,6 +112,7 @@ require "getpart.pm"; # array functions
 require "valgrind.pm"; # valgrind report parser
 require "ftp.pm";
 require "azure.pm";
+require "appveyor.pm";
 
 my $HOSTIP="127.0.0.1";   # address on which the test server listens
 my $HOST6IP="[::1]";      # address on which the test server listens
@@ -3745,6 +3746,9 @@ sub singletest {
     if(azure_check_environment() && $AZURE_RUN_ID) {
         $AZURE_RESULT_ID = azure_create_test_result($AZURE_RUN_ID, $testnum, $testname);
     }
+    elsif(appveyor_check_environment()) {
+        appveyor_create_test_result($testnum, $testname);
+    }
 
     # timestamp starting of test command
     $timetoolini{$testnum} = Time::HiRes::time();
@@ -5542,6 +5546,9 @@ foreach $testnum (@at) {
     if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
         $AZURE_RESULT_ID = azure_update_test_result($AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
                                                     $timeprepini{$testnum}, $timevrfyend{$testnum});
+    }
+    elsif(appveyor_check_environment()) {
+        appveyor_update_test_result($testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
     }
 
     if($error < 0) {
