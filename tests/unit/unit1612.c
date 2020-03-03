@@ -22,6 +22,7 @@
 #include "curlcheck.h"
 
 #include "curl_hmac.h"
+#include "curl_md5.h"
 
 static CURLcode unit_setup(void)
 {
@@ -44,7 +45,7 @@ UNITTEST_START
 
   Curl_hmacit(Curl_HMAC_MD5,
               (const unsigned char *) password, strlen(password),
-              (const unsigned char *) string1, strlen(string1)
+              (const unsigned char *) string1, strlen(string1),
               output);
 
   verify_memory(testp,
