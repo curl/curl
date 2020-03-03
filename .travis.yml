@@ -61,7 +61,7 @@ matrix:
           compiler: gcc
           dist: trusty
           env:
-              - T=normal C="--enable-ares"
+              - T=debug C="--enable-ares --enable-debug "
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
