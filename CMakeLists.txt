@@ -1264,6 +1264,7 @@ _add_if("NTLM_WB"     use_ntlm AND NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
 _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
 _add_if("HTTP2"         USE_NGHTTP2)
+_add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")
 
