@@ -253,7 +253,6 @@ my $has_openssl;    # built with a lib using an OpenSSL-like API
 my $has_gnutls;     # built with GnuTLS
 my $has_nss;        # built with NSS
 my $has_wolfssl;    # built with wolfSSL
-my $has_polarssl;   # built with polarssl
 my $has_winssl;     # built with WinSSL    (Secure Channel aka Schannel)
 my $has_darwinssl;  # built with DarwinSSL (Secure Transport)
 my $has_boringssl;  # built with BoringSSL
@@ -2743,10 +2742,6 @@ sub checksystem {
            }
            elsif ($libcurl =~ /wolfssl/i) {
                $has_wolfssl=1;
-               $has_sslpinning=1;
-           }
-           elsif ($libcurl =~ /polarssl/i) {
-               $has_polarssl=1;
                $has_sslpinning=1;
            }
            elsif ($libcurl =~ /securetransport/i) {

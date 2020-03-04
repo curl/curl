@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -54,11 +54,11 @@ struct curl_tlssessioninfo {
 
 The \fIbackend\fP struct member is one of the defines in the CURLSSLBACKEND_*
 series: CURLSSLBACKEND_NONE (when built without TLS support),
-CURLSSLBACKEND_WOLFSSL, CURLSSLBACKEND_DARWINSSL,
-CURLSSLBACKEND_GNUTLS, CURLSSLBACKEND_GSKIT, CURLSSLBACKEND_MBEDTLS,
-CURLSSLBACKEND_NSS, CURLSSLBACKEND_OPENSSL, CURLSSLBACKEND_POLARSSL,
-CURLSSLBACKEND_SCHANNEL or CURLSSLBACKEND_MESALINK. (Note that the OpenSSL
-forks are all reported as just OpenSSL here.)
+CURLSSLBACKEND_WOLFSSL, CURLSSLBACKEND_DARWINSSL, CURLSSLBACKEND_GNUTLS,
+CURLSSLBACKEND_GSKIT, CURLSSLBACKEND_MBEDTLS, CURLSSLBACKEND_NSS,
+CURLSSLBACKEND_OPENSSL, CURLSSLBACKEND_SCHANNEL or
+CURLSSLBACKEND_MESALINK. (Note that the OpenSSL forks are all reported as just
+OpenSSL here.)
 
 The \fIinternals\fP struct member will point to a TLS library specific pointer
 for the active ("in use") SSL connection, with the following underlying types:
@@ -79,8 +79,6 @@ as well:
 .RS
 .IP mbedTLS
 mbedtls_ssl_context *
-.IP PolarSSL
-ssl_context *
 .IP "Secure Channel"
 CtxtHandle *
 .IP "Secure Transport"

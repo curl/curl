@@ -17,7 +17,7 @@ $! and the [.lib]config-vms.h file do two different tasks and that the
 $! filenames are slightly different.
 $!
 $!
-$! Copyright 2013, John Malmberg
+$! Copyright 2013 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
@@ -348,9 +348,6 @@ $write cvh "#undef USE_NSS"
 $write cvh "#endif"
 $write cvh "#ifdef USE_OPENLDAP"
 $write cvh "#undef USE_OPENLDAP"
-$write cvh "#endif"
-$write cvh "#ifdef USE_POLARSSL"
-$write cvh "#undef USE_POLARSSL"
 $write cvh "#endif"
 $write cvh "#ifdef USE_THREADS_POSIX"
 $write cvh "#undef USE_THREADS_POSIX"
