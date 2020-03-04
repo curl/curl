@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -20,6 +20,14 @@
 #
 ###########################################################################
 
+BEGIN {
+    # portable sleeping needs Time::HiRes
+    eval {
+        no warnings "all";
+        require Time::HiRes;
+    }
+}
+
 use strict;
 use warnings;
 
@@ -28,6 +36,27 @@ use serverhelp qw(
     mainsockf_pidfilename
     datasockf_pidfilename
     );
+
+#######################################################################
+# portable_sleep uses Time::HiRes::sleep if available and falls back
+# to the classic approach of using select(undef, undef, undef, ...).
+# even though that one is not portable due to being implemented using
+# select on Windows: https://perldoc.perl.org/perlport.html#select
+# On Windows it also just uses full-second sleep for waits >1 second.
+#
+sub portable_sleep {
+    my ($seconds) = @_;
+
+    if($Time::HiRes::VERSION) {
+        Time::HiRes::sleep($seconds);
+    }
+    elsif ($seconds > 1 && ($^O eq 'MSWin32' || $^O eq 'msys')) {
+        sleep($seconds);
+    }
+    else {
+        select(undef, undef, undef, $seconds);
+    }
+}
 
 #######################################################################
 # pidfromfile returns the pid stored in the given pidfile.  The value
@@ -216,7 +245,7 @@ sub killpid {
                 }
             }
             last if(not scalar(@signalled));
-            select(undef, undef, undef, 0.05);
+            portable_sleep(0.05);
         }
     }
 
