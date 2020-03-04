@@ -493,7 +493,7 @@ sub sendcontrol {
 
         for(@a) {
             sockfilt $_;
-            select(undef, undef, undef, 0.01);
+            portable_sleep(0.01);
         }
     }
     my $log;
@@ -530,7 +530,7 @@ sub senddata {
             # pause between each byte
             for (split(//,$l)) {
                 sockfiltsecondary $_;
-                select(undef, undef, undef, 0.01);
+                portable_sleep(0.01);
             }
         }
     }
@@ -3199,7 +3199,7 @@ while(1) {
             logmsg("Sleep for $delay seconds\n");
             my $twentieths = $delay * 20;
             while($twentieths--) {
-                select(undef, undef, undef, 0.05) unless($got_exit_signal);
+                portable_sleep(0.05) unless($got_exit_signal);
             }
         }
 
