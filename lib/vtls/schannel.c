@@ -27,16 +27,6 @@
  * but vtls.c should ever call or use these functions.
  */
 
-/*
- * Based upon the PolarSSL implementation in polarssl.c and polarssl.h:
- *   Copyright (C) 2010, 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- *
- * Based upon the CyaSSL implementation in cyassl.c and cyassl.h:
- *   Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
- *
- * Thanks for code and inspiration!
- */
-
 #include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
