@@ -1217,12 +1217,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
-  if(data->state.drain) {
-    data->state.drain--;
-    select_res |= CURL_CSELECT_IN;
-    DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data\n"));
-  }
-
   if(!select_res) /* Call for select()/poll() only, if read/write/error
                      status is not known. */
     select_res = Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write, 0);
@@ -1230,6 +1224,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if(select_res == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");
     return CURLE_SEND_ERROR;
+  }
+
+  if(data->state.drain) {
+    data->state.drain--;
+    select_res |= CURL_CSELECT_IN;
+    DEBUGF(infof(data, "Curl_readwrite: forcibly told to drain data\n"));
   }
 
   /* We go ahead and do a read if we have a readable socket or if
