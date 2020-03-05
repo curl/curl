@@ -658,7 +658,7 @@ sub torture {
                 $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
                 # $valgrindcmd .= "--gen-suppressions=all ";
                 $valgrindcmd .= "--num-callers=16 ";
-                $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
+                $valgrindcmd .= "--track-origins=yes ";
                 $cmd = "$valgrindcmd $testcmd";
             }
         }

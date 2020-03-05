@@ -1420,6 +1420,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
             size_t outlen;
             char *n;
             char *reenc = replace_url_encoded_space_with_plus(enc);
+            fprintf(stderr, "enc: %p\n", enc);
+            fprintf(stderr, "reenc: %p\n", reenc);
             curl_free(enc);
             if(!reenc)
               return PARAM_NO_MEM;
@@ -1429,20 +1431,27 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                encoded string */
             outlen = nlen + strlen(enc) + 2;
             n = malloc(outlen);
+            fprintf(stderr, "n: %p\n", n);
             if(!n) {
               free(enc);
               return PARAM_NO_MEM;
             }
             if(nlen > 0) { /* only append '=' if we have a name */
+              fprintf(stderr, "marker1\n");
               msnprintf(n, outlen, "%.*s=%s", nlen, nextarg, enc);
+              fprintf(stderr, "marker2\n");
               size = outlen-1;
             }
             else {
+              fprintf(stderr, "marker3\n");
               strcpy(n, enc);
+              fprintf(stderr, "marker4\n");
               size = outlen-2; /* since no '=' was inserted */
             }
             free(enc);
             postdata = n;
+            fprintf(stderr, "postdata = n. size %zu, strlen(postdata): %zu\n",
+                    size, strlen(postdata));
           }
           else
             return PARAM_NO_MEM;
@@ -1509,17 +1518,25 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         char *oldpost = config->postfields;
         curl_off_t oldlen = config->postfieldsize;
         curl_off_t newlen = oldlen + curlx_uztoso(size) + 2;
+        fprintf(stderr, "marker6\n");
         config->postfields = malloc((size_t)newlen);
+        fprintf(stderr, "config->postfields: %p\n", config->postfields);
+        fprintf(stderr, "marker7\n");
         if(!config->postfields) {
           Curl_safefree(oldpost);
           Curl_safefree(postdata);
           return PARAM_NO_MEM;
         }
+        fprintf(stderr, "marker8\n");
         memcpy(config->postfields, oldpost, (size_t)oldlen);
+        fprintf(stderr, "marker9\n");
         /* use byte value 0x26 for '&' to accommodate non-ASCII platforms */
         config->postfields[oldlen] = '\x26';
+        fprintf(stderr, "marker10\n");
         memcpy(&config->postfields[oldlen + 1], postdata, size);
+        fprintf(stderr, "marker11\n");
         config->postfields[oldlen + 1 + size] = '\0';
+        fprintf(stderr, "marker12\n");
         Curl_safefree(oldpost);
         Curl_safefree(postdata);
         config->postfieldsize += size + 1;
