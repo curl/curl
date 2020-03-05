@@ -464,8 +464,6 @@ struct ConnectBits {
 #endif
   BIT(netrc);         /* name+password provided by netrc */
   BIT(userpwd_in_url); /* name+password found in url */
-  BIT(stream_was_rewound); /* The stream was rewound after a request read
-                              past the end of its response byte boundary */
   BIT(proxy_connect_closed); /* TRUE if a proxy disconnected the connection
                                 in a CONNECT request with auth, so that
                                 libcurl should reconnect and continue. */
