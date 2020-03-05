@@ -745,7 +745,7 @@ For fun try
 
     curl dict://dict.org/m:curl
     curl dict://dict.org/d:heisenbug:jargon
-    curl dict://dict.org/d:daniel:web1913
+    curl dict://dict.org/d:daniel:gcide
 
 Aliases for 'm' are 'match' and 'find', and aliases for 'd' are 'define' and
 'lookup'. For example,
