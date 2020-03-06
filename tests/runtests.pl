@@ -2196,7 +2196,7 @@ sub runsocksserver {
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     # start our socks server, get commands from the FTP cmd file
-    my $cmd="server/socksd".
+    my $cmd="server/socksd".exe_ext('SRV').
         " --port $port ".
         " --pidfile $pidfile".
         " --backend $HOSTIP".
@@ -2710,7 +2710,7 @@ sub checksystem {
     @version = <VERSOUT>;
     close(VERSOUT);
 
-    open(DISABLED, "server/disabled|");
+    open(DISABLED, "server/disabled".exe_ext('TOOL')."|");
     @disabled = <DISABLED>;
     close(DISABLED);
 
