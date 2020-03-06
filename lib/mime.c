@@ -740,9 +740,19 @@ static size_t read_part_content(curl_mimepart *part,
 {
   size_t sz = 0;
 
-  if(part->readfunc)
-    sz = part->readfunc(buffer, 1, bufsize, part->arg);
-  return sz;
+  switch(part->lastreadstatus) {
+  case 0:
+  case CURL_READFUNC_ABORT:
+  case CURL_READFUNC_PAUSE:
+  case READ_ERROR:
+    break;
+  default:
+    if(part->readfunc)
+      sz = part->readfunc(buffer, 1, bufsize, part->arg);
+    part->lastreadstatus = sz;
+    break;
+  }
+  return part->lastreadstatus;
 }
 
 /* Read and encode part content. */
@@ -1031,6 +1041,7 @@ static int mime_part_rewind(curl_mimepart *part)
   if(res == CURL_SEEKFUNC_OK)
     mimesetstate(&part->state, targetstate, NULL);
 
+  part->lastreadstatus = 1; /* Successful read status. */
   return res;
 }
 
@@ -1073,6 +1084,7 @@ static void cleanup_part_content(curl_mimepart *part)
   part->datasize = (curl_off_t) 0;    /* No size yet. */
   cleanup_encoder_state(&part->encstate);
   part->kind = MIMEKIND_NONE;
+  part->lastreadstatus = 1; /* Successful read status. */
 }
 
 static void mime_subparts_free(void *ptr)
@@ -1238,6 +1250,7 @@ void Curl_mime_initpart(curl_mimepart *part, struct Curl_easy *easy)
 {
   memset((char *) part, 0, sizeof(*part));
   part->easy = easy;
+  part->lastreadstatus = 1; /* Successful read status. */
   mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
 }
 
@@ -1804,6 +1817,26 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
   }
   return ret;
 }
+
+/* Recursively reset paused status in the given part. */
+void Curl_mime_unpause(curl_mimepart *part)
+{
+  if(part) {
+    if(part->lastreadstatus == CURL_READFUNC_PAUSE)
+      part->lastreadstatus = 1; /* Successful read status. */
+    if(part->kind == MIMEKIND_MULTIPART) {
+      curl_mime *mime = (curl_mime *) part->arg;
+
+      if(mime) {
+        curl_mimepart *subpart;
+
+        for(subpart = mime->firstpart; subpart; subpart = subpart->nextpart)
+          Curl_mime_unpause(subpart);
+      }
+    }
+  }
+}
+
 
 #else /* !CURL_DISABLE_HTTP || !CURL_DISABLE_SMTP || !CURL_DISABLE_IMAP */
 
