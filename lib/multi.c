@@ -1194,14 +1194,16 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
       if(use_wakeup && multi->wakeup_pair[0] != CURL_SOCKET_BAD) {
         if(ufds[curlfds + extra_nfds].revents & POLLIN) {
           char buf[64];
+          ssize_t nread;
           while(1) {
             /* the reading socket is non-blocking, try to read
                data from it until it receives an error (except EINTR).
                In normal cases it will get EAGAIN or EWOULDBLOCK
                when there is no more data, breaking the loop. */
-            if(sread(multi->wakeup_pair[0], buf, sizeof(buf)) <= 0) {
+            nread = sread(multi->wakeup_pair[0], buf, sizeof(buf));
+            if(nread <= 0) {
 #ifndef USE_WINSOCK
-              if(EINTR == SOCKERRNO)
+              if(nread < 0 && EINTR == SOCKERRNO)
                 continue;
 #endif
               break;
