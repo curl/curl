@@ -682,6 +682,8 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
+option(CURL_WITH_EXPORT_TARGETS "Export CMake targets. Disable if they conflict with an outer cmake project." ON)
+
 #
 # CA handling
 #
@@ -1391,11 +1393,13 @@ configure_package_config_file(CMake/curl-config.cmake.in
         INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
 
+if (CURL_WITH_EXPORT_TARGETS)
 install(
         EXPORT "${TARGETS_EXPORT_NAME}"
         NAMESPACE "${PROJECT_NAME}::"
         DESTINATION ${CURL_INSTALL_CMAKE_DIR}
 )
+endif()
 
 install(
         FILES ${version_config} ${project_config}
