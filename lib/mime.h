@@ -125,6 +125,7 @@ struct curl_mimepart_s {
   mime_state state;                /* Current readback state. */
   const mime_encoder *encoder;     /* Content data encoder. */
   mime_encoder_state encstate;     /* Data encoder state. */
+  size_t lastreadstatus;           /* Last read callback returned status. */
 };
 
 CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...);
@@ -147,6 +148,7 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems,
                       void *instream);
 CURLcode Curl_mime_rewind(curl_mimepart *part);
 const char *Curl_mime_contenttype(const char *filename);
+void Curl_mime_unpause(curl_mimepart *part);
 
 #else
 /* if disabled */
@@ -158,6 +160,7 @@ const char *Curl_mime_contenttype(const char *filename);
 #define Curl_mime_size(x) (curl_off_t) -1
 #define Curl_mime_read NULL
 #define Curl_mime_rewind(x) ((void)x, CURLE_NOT_BUILT_IN)
+#define Curl_mime_unpause(x)
 #endif
 
 

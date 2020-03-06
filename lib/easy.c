@@ -1003,6 +1003,14 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
     return CURLE_OK;
   }
 
+  /* Unpause parts in active mime tree. */
+  if((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
+     (data->mstate == CURLM_STATE_PERFORM ||
+      data->mstate == CURLM_STATE_TOOFAST) &&
+     data->state.fread_func == (curl_read_callback) Curl_mime_read) {
+    Curl_mime_unpause(data->state.in);
+  }
+
   /* put it back in the keepon */
   k->keepon = newstate;
 

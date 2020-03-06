@@ -728,14 +728,10 @@ int curl_formget(struct curl_httppost *form, void *arg,
     if(!nread)
       break;
 
-    switch(nread) {
-    default:
-      if(append(arg, buffer, nread) != nread)
-        result = CURLE_READ_ERROR;
-      break;
-    case CURL_READFUNC_ABORT:
-    case CURL_READFUNC_PAUSE:
-      break;
+    if(nread > sizeof(buffer) || append(arg, buffer, nread) != nread) {
+      result = CURLE_READ_ERROR;
+      if(nread == CURL_READFUNC_ABORT)
+        result = CURLE_ABORTED_BY_CALLBACK;
     }
   }
 
