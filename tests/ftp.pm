@@ -25,6 +25,11 @@ BEGIN {
     eval {
         no warnings "all";
         require Time::HiRes;
+    };
+    # portable sleeping falls back to native Sleep on Win32
+    eval {
+        no warnings "all";
+        require Win32;
     }
 }
 
@@ -50,8 +55,8 @@ sub portable_sleep {
     if($Time::HiRes::VERSION) {
         Time::HiRes::sleep($seconds);
     }
-    elsif ($seconds > 1 && ($^O eq 'MSWin32' || $^O eq 'msys')) {
-        sleep($seconds);
+    elsif ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+        Win32::Sleep($seconds*1000);
     }
     else {
         select(undef, undef, undef, $seconds);
