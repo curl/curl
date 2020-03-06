@@ -88,7 +88,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   return CURL_SEEKFUNC_OK;
 }
 
-#if defined(WIN32) && !defined(__MINGW64__)
+#ifdef USE_TOOL_FTRUNCATE
 
 #ifdef __BORLANDC__
 /* 64-bit lseek-like function unavailable */
@@ -129,4 +129,4 @@ int tool_ftruncate64(int fd, curl_off_t where)
   return 0;
 }
 
-#endif /* WIN32  && ! __MINGW64__ */
+#endif /* USE_TOOL_FTRUNCATE */
