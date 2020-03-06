@@ -50,7 +50,7 @@ sub appveyor_create_test_result {
         }
     " \\
     "$appveyor_baseurl/api/tests"`;
-    print $appveyor_result;
+    print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
     $APPVEYOR_TEST_NAMES{$testnum}=$testname;
 }
 
@@ -68,7 +68,7 @@ sub appveyor_update_test_result {
     my $appveyor_category;
     if($error == 2) {
         $appveyor_outcome = 'Ignored';
-        $appveyor_category = 'Warning';
+        $appveyor_category = 'Error';
     }
     elsif($error < 0) {
         $appveyor_outcome = 'NotRunnable';
@@ -91,23 +91,24 @@ sub appveyor_update_test_result {
             'testFramework': 'runtests.pl',
             'fileName': 'tests/data/test$testnum',
             'outcome': '$appveyor_outcome',
-            'durationMilliseconds': $appveyor_duration
+            'durationMilliseconds': $appveyor_duration,
+            'ErrorMessage': 'Test $testnum $appveyor_outcome'
         }
     " \\
     "$appveyor_baseurl/api/tests"`;
-    print $appveyor_result;
+    print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
     if($appveyor_category eq 'Error') {
         $appveyor_result=`curl --silent --noproxy "*" \\
         --header "Content-Type: application/json" \\
         --data "
             {
-                'message': '$testname $appveyor_outcome',
+                'message': '$appveyor_outcome: $testname',
                 'category': '$appveyor_category',
                 'details': 'Test $testnum $appveyor_outcome'
             }
         " \\
         "$appveyor_baseurl/api/build/messages"`;
-        print $appveyor_result;
+        print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
     }
 }
 
