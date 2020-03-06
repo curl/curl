@@ -173,7 +173,7 @@ if ($^O eq 'MSWin32' || $targetos) {
   }
 }
 
-if (($^O eq 'MSWin32' || $^O eq 'msys') &&
+if (($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
     ($targetos =~ /vc/ || $targetos =~ /mingw32/ ||
      $targetos =~ /borland/ || $targetos =~ /watcom/)) {
 
