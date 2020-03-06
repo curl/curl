@@ -973,15 +973,21 @@ void curl_easy_reset(struct Curl_easy *data)
  */
 CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 {
-  struct SingleRequest *k = &data->req;
+  struct SingleRequest *k;
   CURLcode result = CURLE_OK;
-  int oldstate = k->keepon & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
+  int oldstate;
+  int newstate;
 
-  /* first switch off both pause bits */
-  int newstate = k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
+  if(!GOOD_EASY_HANDLE(data) || !data->conn)
+    /* crazy input, don't continue */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  /* set the new desired pause bits */
-  newstate |= ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
+  k = &data->req;
+  oldstate = k->keepon & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
+
+  /* first switch off both pause bits then set the new pause bits */
+  newstate = (k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) |
+    ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
     ((action & CURLPAUSE_SEND)?KEEP_SEND_PAUSE:0);
 
   if((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) == oldstate) {
