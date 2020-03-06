@@ -763,8 +763,8 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
 
     if(!dns) {
       result = Curl_resolv_check(data->conn, &dns);
-      /* stay in the state or error out */
-      return result;
+      if(!dns)
+        return result;
     }
     /* FALLTHROUGH */
   CONNECT_RESOLVED:
