@@ -68,7 +68,7 @@ sub appveyor_update_test_result {
     my $appveyor_category;
     if($error == 2) {
         $appveyor_outcome = 'Ignored';
-        $appveyor_category = 'Warning';
+        $appveyor_category = 'Error';
     }
     elsif($error < 0) {
         $appveyor_outcome = 'NotRunnable';
@@ -91,7 +91,8 @@ sub appveyor_update_test_result {
             'testFramework': 'runtests.pl',
             'fileName': 'tests/data/test$testnum',
             'outcome': '$appveyor_outcome',
-            'durationMilliseconds': $appveyor_duration
+            'durationMilliseconds': $appveyor_duration,
+            'ErrorMessage': 'Test $testnum $appveyor_outcome'
         }
     " \\
     "$appveyor_baseurl/api/tests"`;
@@ -101,7 +102,7 @@ sub appveyor_update_test_result {
         --header "Content-Type: application/json" \\
         --data "
             {
-                'message': '$testname $appveyor_outcome',
+                'message': '$appveyor_outcome: $testname',
                 'category': '$appveyor_category',
                 'details': 'Test $testnum $appveyor_outcome'
             }
