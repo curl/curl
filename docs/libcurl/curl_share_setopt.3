@@ -59,6 +59,8 @@ be set to one of the values described below.
 .RS
 .IP CURL_LOCK_DATA_COOKIE
 Cookie data will be shared across the easy handles using this shared object.
+Note that this does not activate an easy handle's cookie handling. You can do
+that separately by using \fICURLOPT_COOKIEFILE(3)\fP for example.
 .IP CURL_LOCK_DATA_DNS
 Cached DNS hosts will be shared across the easy handles using this shared
 object. Note that when you use the multi interface, all easy handles added to
