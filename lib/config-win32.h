@@ -183,7 +183,7 @@
 /* #define HAVE_DOPRNT 1 */
 
 /* Define if you have the ftruncate function. */
-#define HAVE_FTRUNCATE 1
+/* #define HAVE_FTRUNCATE 1 */
 
 /* Define to 1 if you have the `getpeername' function. */
 #define HAVE_GETPEERNAME 1
