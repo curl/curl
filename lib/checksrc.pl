@@ -36,7 +36,7 @@ my $file;
 my $dir=".";
 my $wlist="";
 my @alist;
-my $windows_os = $^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin';
+my $windows_os = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys';
 my $verbose;
 my %whitelist;
 
