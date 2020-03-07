@@ -81,7 +81,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "!198 !1139"
+        DISABLED_TESTS: "!1139"
         COMPILER_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
