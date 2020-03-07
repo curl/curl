@@ -4,7 +4,7 @@ curl and libcurl 7.69.1
  Command line options:         230
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2128
+ Contributors:                 2131
 
 This release includes the following changes:
 
@@ -12,10 +12,20 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o MANUAL: update a dict-using command line
- o tests: make sleeping portable by avoiding select [1]
- o runtests.1: rephrase how to specify what tests to run [2]
  o cirrus-ci: disable the FreeBSD 13 builds [3]
+ o curl_share_setopt.3: Note sharing cookies doesn't enable the engine [11]
+ o libssh: Fix matching user-specified MD5 hex key [7]
+ o MANUAL: update a dict-using command line
+ o multi: skip EINTR check on wakeup socket if it was closed [12]
+ o pause: bail out on bad input [8]
+ o pause: force a connection recheck after unpausing (take 2) [5]
+ o pause: return early for calls that don't change pause state [10]
+ o runtests.1: rephrase how to specify what tests to run [2]
+ o seek: fix fall back for missing ftruncate on Windows [4]
+ o socks5: host name resolv regression fix [6]
+ o tests: make sleeping portable by avoiding select [1]
+ o unit1612: fix the inclusion and compilation of the HMAC unit test [9]
+ o urldata: remove the 'stream_was_rewound' connectdata struct member [13]
 
 This release includes the following known bugs:
 
@@ -24,9 +34,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Fedor Korotkov, Marc Hörsken, Ray Satiro,
-  Steve Holme,
-  (6 contributors)
+  Anders Berg, Christopher Reid, Dan Fandrich, Daniel Stenberg,
+  fds242 on github, Fedor Korotkov, Felipe Gasper, Marcel Raad, Marc Hörsken,
+  Patrick Monnerat, Ray Satiro, Steve Holme, vitaha85 on github,
+  (13 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -35,3 +46,13 @@ References to bug reports and discussions on issues:
  [1] = https://curl.haxx.se/bug/?i=5035
  [2] = https://curl.haxx.se/bug/?i=5033
  [3] = https://curl.haxx.se/bug/?i=5028
+ [4] = https://curl.haxx.se/bug/?i=5055
+ [5] = https://curl.haxx.se/bug/?i=5049
+ [6] = https://curl.haxx.se/bug/?i=5053
+ [7] = https://curl.haxx.se/bug/?i=4971
+ [8] = https://curl.haxx.se/bug/?i=5050
+ [9] = https://curl.haxx.se/bug/?i=5024
+ [10] = https://curl.haxx.se/bug/?i=5026
+ [11] = https://curl.haxx.se/mail/lib-2020-03/0019.html
+ [12] = https://curl.haxx.se/bug/?i=5047
+ [13] = https://curl.haxx.se/bug/?i=5046
