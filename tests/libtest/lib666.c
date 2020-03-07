@@ -31,14 +31,16 @@ int test(char *URL)
   CURLcode res = CURLE_OK;
   curl_mime *mime = NULL;
   curl_mimepart *part;
-  struct curl_slist *recipients = NULL;
+  size_t i;
 
-  /* create a buffer with AAAA...BBBBB...CCCC...etc */
-  int i;
-  int size = (int)sizeof(buffer) / 10;
+  /* Checks huge binary-encoded mime post. */
 
-  for(i = 0; i < size ; i++)
-    memset(&buffer[i * 10], 65 + (i % 26), 10);
+  /* Create a buffer with pseudo-binary data. */
+  for(i = 0; i < sizeof(buffer); i++)
+    if(i % 77 == 76)
+      buffer[i] = '\n';
+    else
+      buffer[i] = (char) (0x41 + i % 26); /* A...Z */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -65,14 +67,14 @@ int test(char *URL)
     res = (CURLcode) TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  res = curl_mime_filename(part, "myfile.jpg");
+  res = curl_mime_name(part, "upfile");
   if(res) {
-    fprintf(stderr, "curl_mime_filename() failed\n");
+    fprintf(stderr, "curl_mime_name() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_type(part, "image/jpeg");
+  res = curl_mime_filename(part, "myfile.txt");
   if(res) {
-    fprintf(stderr, "curl_mime_type() failed\n");
+    fprintf(stderr, "curl_mime_filename() failed\n");
     goto test_cleanup;
   }
   res = curl_mime_data(part, buffer, sizeof(buffer));
@@ -80,29 +82,16 @@ int test(char *URL)
     fprintf(stderr, "curl_mime_data() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_encoder(part, "base64");
+  res = curl_mime_encoder(part, "binary");
   if(res) {
     fprintf(stderr, "curl_mime_encoder() failed\n");
-    goto test_cleanup;
-  }
-
-  /* Prepare recipients. */
-  recipients = curl_slist_append(NULL, "someone@example.com");
-  if(!recipients) {
-    fprintf(stderr, "curl_slist_append() failed\n");
     goto test_cleanup;
   }
 
   /* First set the URL that is about to receive our mime mail. */
   test_setopt(curl, CURLOPT_URL, URL);
 
-  /* Set sender. */
-  test_setopt(curl, CURLOPT_MAIL_FROM, "somebody@example.com");
-
-  /* Set recipients. */
-  test_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
-
-  /* send a multi-part mail */
+  /* Post form */
   test_setopt(curl, CURLOPT_MIMEPOST, mime);
 
   /* Shorten upload buffer. */
@@ -110,6 +99,9 @@ int test(char *URL)
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+  /* include headers in the output */
+  test_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
@@ -121,9 +113,6 @@ test_cleanup:
 
   /* now cleanup the mime structure */
   curl_mime_free(mime);
-
-  /* cleanup the recipients. */
-  curl_slist_free_all(recipients);
 
   curl_global_cleanup();
 

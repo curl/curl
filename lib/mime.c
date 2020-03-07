@@ -366,7 +366,7 @@ static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
     size = insize;
 
   if(size)
-    memcpy(buffer, st->buf, size);
+    memcpy(buffer, st->buf + st->bufbeg, size);
 
   st->bufbeg += size;
   return size;
