@@ -231,64 +231,20 @@
 #endif
 
 /*
+ * Windows setup file includes some system headers.
+ */
+
+#ifdef HAVE_WINDOWS_H
+#  include "setup-win32.h"
+#endif
+
+/*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
  * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
 #ifdef  __APPLE__
 #define USE_RESOLVE_ON_IPS 1
-#endif
-
-/*
- * Include header files for windows builds before redefining anything.
- * Use this preprocessor block only to include or exclude windows.h,
- * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
- * to any other further and independent block.  Under Cygwin things work
- * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
- * never be included when __CYGWIN__ is defined.  configure script takes
- * care of this, not defining HAVE_WINDOWS_H, HAVE_WINSOCK_H, HAVE_WINSOCK2_H,
- * neither HAVE_WS2TCPIP_H when __CYGWIN__ is defined.
- */
-
-#ifdef HAVE_WINDOWS_H
-#  if defined(UNICODE) && !defined(_UNICODE)
-#    define _UNICODE
-#  endif
-#  if defined(_UNICODE) && !defined(UNICODE)
-#    define UNICODE
-#  endif
-#  include <winerror.h>
-#  include <windows.h>
-#  ifdef HAVE_WINSOCK2_H
-#    include <winsock2.h>
-#    ifdef HAVE_WS2TCPIP_H
-#      include <ws2tcpip.h>
-#    endif
-#  else
-#    ifdef HAVE_WINSOCK_H
-#      include <winsock.h>
-#    endif
-#  endif
-#  include <tchar.h>
-#  ifdef UNICODE
-     typedef wchar_t *(*curl_wcsdup_callback)(const wchar_t *str);
-#  endif
-#endif
-
-/*
- * Define USE_WINSOCK to 2 if we have and use WINSOCK2 API, else
- * define USE_WINSOCK to 1 if we have and use WINSOCK  API, else
- * undefine USE_WINSOCK.
- */
-
-#undef USE_WINSOCK
-
-#ifdef HAVE_WINSOCK2_H
-#  define USE_WINSOCK 2
-#else
-#  ifdef HAVE_WINSOCK_H
-#    define USE_WINSOCK 1
-#  endif
 #endif
 
 #ifdef USE_LWIPSOCK
