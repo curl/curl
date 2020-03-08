@@ -452,8 +452,10 @@ dnl GNUC versions these warnings are not silenced.
 AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
   AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
   AC_REQUIRE([CURL_CHECK_COMPILER])dnl
+  AC_MSG_CHECKING([convert -I options to -isystem])
   if test "$compiler_id" = "GNU_C" ||
     test "$compiler_id" = "CLANG"; then
+    AC_MSG_RESULT([yes])
     tmp_has_include="no"
     tmp_chg_FLAGS="$CFLAGS"
     for word1 in $tmp_chg_FLAGS; do
@@ -484,6 +486,8 @@ AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
       CPPFLAGS="$tmp_chg_FLAGS"
       squeeze CPPFLAGS
     fi
+  else
+    AC_MSG_RESULT([no])
   fi
 ])
 
@@ -569,11 +573,6 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
   AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
   #
   if test "$compiler_id" != "unknown"; then
-    #
-    if test "$compiler_id" = "GNU_C" ||
-      test "$compiler_id" = "CLANG"; then
-      CURL_CONVERT_INCLUDE_TO_ISYSTEM
-    fi
     #
     tmp_save_CPPFLAGS="$CPPFLAGS"
     tmp_save_CFLAGS="$CFLAGS"

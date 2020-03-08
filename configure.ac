@@ -4259,6 +4259,8 @@ if test "$want_thres" = "yes" && test "x$USE_THREADS_POSIX" != "x1"; then
   fi
 fi
 
+CURL_CONVERT_INCLUDE_TO_ISYSTEM
+
 dnl ************************************************************
 dnl disable verbose text strings
 dnl
