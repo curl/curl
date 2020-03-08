@@ -694,7 +694,7 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
       /* For non-standard ports, the name will be enclosed in */
       /* square brackets, followed by a colon and the port */
-      if(store->name){
+      if(store->name) {
         if(store->name[0] == '[') {
           kh_name_end = strstr(store->name, "]:");
           if(!kh_name_end) {
