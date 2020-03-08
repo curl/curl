@@ -12,20 +12,30 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o ares: store dns parameters for duphandle [20]
  o cirrus-ci: disable the FreeBSD 13 builds [3]
  o curl_share_setopt.3: Note sharing cookies doesn't enable the engine [11]
+ o lib1564: reduce number of mid-wait wakeup calls [16]
  o libssh: Fix matching user-specified MD5 hex key [7]
  o MANUAL: update a dict-using command line
+ o mime: do not perform more than one read in a row [18]
+ o mime: fix the binary encoder to handle large data properly [17]
+ o mime: latch last read callback status [19]
  o multi: skip EINTR check on wakeup socket if it was closed [12]
  o pause: bail out on bad input [8]
  o pause: force a connection recheck after unpausing (take 2) [5]
  o pause: return early for calls that don't change pause state [10]
  o runtests.1: rephrase how to specify what tests to run [2]
+ o runtests: fix missing use of exe_ext helper function
  o seek: fix fall back for missing ftruncate on Windows [4]
+ o sha256: Added SecureTransport implementation [15]
+ o sha256: Added WinCrypt implementation [15]
+ o socks4: fix host resolve regression [14]
  o socks5: host name resolv regression fix [6]
  o tests: make sleeping portable by avoiding select [1]
  o unit1612: fix the inclusion and compilation of the HMAC unit test [9]
  o urldata: remove the 'stream_was_rewound' connectdata struct member [13]
+ o version: make curl_version* thread-safe without using global context [21]
 
 This release includes the following known bugs:
 
@@ -34,10 +44,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anders Berg, Christopher Reid, Dan Fandrich, Daniel Stenberg,
-  fds242 on github, Fedor Korotkov, Felipe Gasper, Marcel Raad, Marc Hörsken,
-  Patrick Monnerat, Ray Satiro, Steve Holme, vitaha85 on github,
-  (13 contributors)
+  amishmm on github, Anders Berg, Andy Fiddaman, Christopher Reid,
+  Dan Fandrich, Daniel Stenberg, Ernst Sjöstrand, fds242 on github,
+  Fedor Korotkov, Felipe Gasper, Marcel Raad, Marc Hörsken, MrdUkk on github,
+  Patrick Monnerat, Ray Satiro, RuurdBeerstra on github, Steve Holme,
+  vitaha85 on github,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -56,3 +68,11 @@ References to bug reports and discussions on issues:
  [11] = https://curl.haxx.se/mail/lib-2020-03/0019.html
  [12] = https://curl.haxx.se/bug/?i=5047
  [13] = https://curl.haxx.se/bug/?i=5046
+ [14] = https://curl.haxx.se/bug/?i=5061
+ [15] = https://curl.haxx.se/bug/?i=5030
+ [16] = https://curl.haxx.se/bug/?i=5037
+ [17] = https://curl.haxx.se/bug/?i=4860
+ [18] = https://curl.haxx.se/bug/?i=4826
+ [19] = https://curl.haxx.se/bug/?i=4813
+ [20] = https://curl.haxx.se/bug/?i=4893
+ [21] = https://curl.haxx.se/bug/?i=5010
