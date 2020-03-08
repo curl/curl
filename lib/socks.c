@@ -205,6 +205,8 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
 
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
+    /* SOCKS4 can only do IPv4, insist! */
+    conn->ip_version = CURL_IPRESOLVE_V4;
     if(conn->bits.httpproxy)
       infof(conn->data, "SOCKS4%s: connecting to HTTP proxy %s port %d\n",
             protocol4a ? "a" : "", hostname, remote_port);
@@ -261,8 +263,8 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     }
     else {
       result = Curl_resolv_check(data->conn, &dns);
-      /* stay in the state or error out */
-      return result;
+      if(!dns)
+        return result;
     }
     /* FALLTHROUGH */
   CONNECT_RESOLVED:
