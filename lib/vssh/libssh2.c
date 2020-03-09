@@ -727,7 +727,7 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
 
     if(found) {
       infof(data, "Found host %s in %s\n",
-            store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+            conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
 
       switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
 #ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
