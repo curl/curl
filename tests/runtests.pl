@@ -120,6 +120,8 @@ my $CLIENTIP="127.0.0.1"; # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";    # address which curl uses for incoming connections
 
 my $base = 8990; # base port number
+my $minport;     # minimum used port number
+my $maxport;     # maximum used port number
 
 my $HTTPPORT;            # HTTP server port
 my $HTTP6PORT;           # HTTP IPv6 server port
@@ -3031,6 +3033,7 @@ sub checksystem {
                    $run_event_based?"event-based ":"");
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
+    logmsg ("* Port range: $minport-$maxport\n");
 
     if($verbose) {
         logmsg "* Ports:\n";
@@ -5324,6 +5327,8 @@ if ($gdbthis) {
     }
 }
 
+$minport         = $base; # original base port number
+
 $HTTPPORT        = $base++; # HTTP server port
 $HTTPSPORT       = $base++; # HTTPS (stunnel) server port
 $FTPPORT         = $base++; # FTP server port
@@ -5354,6 +5359,8 @@ $SMBPORT         = $base++; # SMB port
 $SMBSPORT        = $base++; # SMBS port
 $NEGTELNETPORT   = $base++; # TELNET port with negotiation
 $HTTPUNIXPATH    = 'http.sock'; # HTTP server Unix domain socket path
+
+$maxport         = $base-1; # updated base port number
 
 #######################################################################
 # clear and create logging directory:
