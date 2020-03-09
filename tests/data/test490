@@ -50,14 +50,14 @@ surprise!
 </strip>
 <protocol>
 PUT /490 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 10
 Expect: 100-continue
 
 surprise!
 PUT /490 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 10
 Expect: 100-continue
