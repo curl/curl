@@ -4,11 +4,7 @@ curl and libcurl 7.69.1
  Command line options:         230
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2131
-
-This release includes the following changes:
-
- o
+ Contributors:                 2133
 
 This release includes the following bugfixes:
 
@@ -28,10 +24,13 @@ This release includes the following bugfixes:
  o runtests.1: rephrase how to specify what tests to run [2]
  o runtests: fix missing use of exe_ext helper function
  o seek: fix fall back for missing ftruncate on Windows [4]
+ o sftp: fix segfault regression introduced by #4747 in 7.69.0 [22]
  o sha256: Added SecureTransport implementation [15]
  o sha256: Added WinCrypt implementation [15]
  o socks4: fix host resolve regression [14]
  o socks5: host name resolv regression fix [6]
+ o tests/server: fix missing use of exe_ext helper function [24]
+ o tests: fix static ip:port instead of dynamic values being used [23]
  o tests: make sleeping portable by avoiding select [1]
  o unit1612: fix the inclusion and compilation of the HMAC unit test [9]
  o urldata: remove the 'stream_was_rewound' connectdata struct member [13]
@@ -46,10 +45,10 @@ advice from friends like these:
 
   amishmm on github, Anders Berg, Andy Fiddaman, Christopher Reid,
   Dan Fandrich, Daniel Stenberg, Ernst Sjöstrand, fds242 on github,
-  Fedor Korotkov, Felipe Gasper, Marcel Raad, Marc Hörsken, MrdUkk on github,
-  Patrick Monnerat, Ray Satiro, RuurdBeerstra on github, Steve Holme,
-  vitaha85 on github,
-  (18 contributors)
+  Fedor Korotkov, Felipe Gasper, Jim Fuller, Marcel Raad, Marc Hörsken,
+  MrdUkk on github, Patrick Monnerat, Ray Satiro, RuurdBeerstra on github,
+  Steve Holme, vitaha85 on github,
+  (19 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -76,3 +75,6 @@ References to bug reports and discussions on issues:
  [19] = https://curl.haxx.se/bug/?i=4813
  [20] = https://curl.haxx.se/bug/?i=4893
  [21] = https://curl.haxx.se/bug/?i=5010
+ [22] = https://curl.haxx.se/bug/?i=5041
+ [23] = https://curl.haxx.se/bug/?i=5065
+ [24] = https://curl.haxx.se/bug/?i=5064
