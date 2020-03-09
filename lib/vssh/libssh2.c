@@ -694,24 +694,31 @@ static CURLcode ssh_force_knownhost_key_type(struct connectdata *conn)
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
       /* For non-standard ports, the name will be enclosed in */
       /* square brackets, followed by a colon and the port */
-      if(store->name) {
-        if(store->name[0] == '[') {
-          kh_name_end = strstr(store->name, "]:");
-          if(!kh_name_end) {
-            infof(data, "Invalid host pattern %s in %s\n",
-                  store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
-            continue;
-          }
-          port = atoi(kh_name_end + 2);
-          if(kh_name_end && (port == conn->remote_port)) {
-            kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
-            if(strncmp(store->name + 1, conn->host.name, kh_name_size) == 0) {
-              found = true;
-              break;
+      if(store) {
+        if(store->name) {
+          if(store->name[0] == '[') {
+            kh_name_end = strstr(store->name, "]:");
+            if(!kh_name_end) {
+              infof(data, "Invalid host pattern %s in %s\n",
+                    store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+              continue;
+            }
+            port = atoi(kh_name_end + 2);
+            if(kh_name_end && (port == conn->remote_port)) {
+              kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
+              if(strncmp(store->name + 1,
+                 conn->host.name, kh_name_size) == 0) {
+                found = true;
+                break;
+              }
             }
           }
+          else if(strcmp(store->name, conn->host.name) == 0) {
+            found = true;
+            break;
+          }
         }
-        else if(strcmp(store->name, conn->host.name) == 0) {
+        else {
           found = true;
           break;
         }
