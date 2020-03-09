@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -217,6 +217,32 @@ avoid that, keep control of what URLs to use and/or prevent curl/libcurl from
 using the protocol.
 
 By default, libcurl prohibits redirects to file:// URLs.
+
+.SH "Warning: file:// on Windows"
+The Windows operating system will automatically, and without any way for
+applications to disable it, try to establish a connection to another host over
+the network and access it (over SMB or other protocols), if only the correct
+file path is accessed.
+
+When first realizing this, the curl team tried to filter out such attempts in
+order to protect applications for inadvertent probes of for example internal
+networks etc. This resulted in CVE-2019-15601 and the associated security fix.
+
+However, we've since been made aware of the fact that the previous fix was far
+from adequate as there are several other ways to accomplish more or less the
+same thing: accessing a remote host over the network instead of the local file
+system.
+
+The conclusion we have come to is that this is a weakness or feature in the
+Windows operating system itself, that we as an application cannot safely
+protect users against. It would just be a whack-a-mole race we don't want to
+participate in. There are too many ways to do it and there's no knob we can
+use to turn off the practice.
+
+If you use curl or libcurl on Windows (any version), disable the use of the
+FILE protocol in curl or be prepared that accesses to a range of "magic paths"
+will potentially make your system try to access other hosts on your
+network. curl cannot protect you against this.
 .SH "What if the user can set the URL"
 Applications may find it tempting to let users set the URL that it can work
 on. That's probably fine, but opens up for mischief and trickery that you as
