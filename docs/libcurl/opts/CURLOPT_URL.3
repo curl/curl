@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -152,6 +152,10 @@ path.
 ftp://user:password@ftp.example.com//readme.txt - This retrieves the readme.txt
 from the root directory when logging in as a specified user.
 
+.IP FILE
+When a FILE:// URL is accessed on Windows systems, it can be crafted in a way
+so that Windows attempts to connect to a (remote) machine when curl wants to
+read or write such a path.
 .IP SMTP
 The path part of a SMTP request specifies the host name to present during
 communication with the mail server. If the path is omitted then libcurl will
