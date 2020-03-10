@@ -59,19 +59,6 @@ XC_CHECK_PATH_SEPARATOR
 CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
-CURL_CFLAG_EXTRAS=""
-if test X"$want_werror" = Xyes; then
-  CURL_CFLAG_EXTRAS="-Werror"
-  if test "$compiler_id" = "GNU_C"; then
-    dnl enable -pedantic-errors for GCC 5 and later,
-    dnl as before that it was the same as -Werror=pedantic
-    if test "$compiler_num" -ge "500"; then
-      CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
-    fi
-  fi
-fi
-AC_SUBST(CURL_CFLAG_EXTRAS)
-
 dnl SED is mandatory for configure process and libtool.
 dnl Set it now, allowing it to be changed later.
 if test -z "$SED"; then
@@ -285,6 +272,19 @@ if test "$compiler_id" = "INTEL_UNIX_C"; then
   fi
   #
 fi
+
+CURL_CFLAG_EXTRAS=""
+if test X"$want_werror" = Xyes; then
+  CURL_CFLAG_EXTRAS="-Werror"
+  if test "$compiler_id" = "GNU_C"; then
+    dnl enable -pedantic-errors for GCC 5 and later,
+    dnl as before that it was the same as -Werror=pedantic
+    if test "$compiler_num" -ge "500"; then
+      CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
+    fi
+  fi
+fi
+AC_SUBST(CURL_CFLAG_EXTRAS)
 
 CURL_CHECK_COMPILER_HALT_ON_ERROR
 CURL_CHECK_COMPILER_ARRAY_SIZE_NEGATIVE
