@@ -1779,6 +1779,12 @@ CURLcode Curl_retry_request(struct connectdata *conn,
     retry = TRUE;
   }
   if(retry) {
+#define CONN_MAX_RETRIES 5
+    if(conn->retrycount++ >= CONN_MAX_RETRIES) {
+      failf(data, "Connection died, tried %d times before giving up",
+            CONN_MAX_RETRIES);
+      return CURLE_SEND_ERROR;
+    }
     infof(conn->data, "Connection died, retrying a fresh connect\n");
     *url = strdup(conn->data->change.url);
     if(!*url)
