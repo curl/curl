@@ -53,7 +53,7 @@ second 492 contents
 </strip>
 <protocol>
 PUT /one/first492 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Testno: 492
 Content-Length: 19
@@ -61,7 +61,7 @@ Expect: 100-continue
 
 first 492 contents
 PUT /two/first492 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Testno: 492
 Content-Length: 19
@@ -69,7 +69,7 @@ Expect: 100-continue
 
 first 492 contents
 PUT /one/second492 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Testno: 492
 Content-Length: 20
@@ -77,7 +77,7 @@ Expect: 100-continue
 
 second 492 contents
 PUT /two/second492 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Testno: 492
 Content-Length: 20

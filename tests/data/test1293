@@ -52,7 +52,7 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 </strippart>
 <protocol>
 POST /1293 HTTP/1.1
-Host: 127.0.0.1:8990
+Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 126
 Content-Type: multipart/form-data; boundary=----------------------------
