@@ -34,6 +34,10 @@ use serverhelp qw(
     server_logfilename
     );
 
+use sshhelp qw(
+    exe_ext
+    );
+
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8997;     # just a default
 my $ipvnum = 4;      # default IP version of tftp server
@@ -107,4 +111,4 @@ if(!$logfile) {
 $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
-exec("server/tftpd $flags");
+exec("server/tftpd".exe_ext('SRV')." $flags");
