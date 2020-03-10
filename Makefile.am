@@ -289,15 +289,15 @@ cygwinbin:
 
 # We extend the standard install with a custom hook:
 install-data-hook:
-	cd include && $(MAKE) install
-	cd docs && $(MAKE) install
-	cd docs/libcurl && $(MAKE) install
+	(cd include && $(MAKE) install)
+	(cd docs && $(MAKE) install)
+	(cd docs/libcurl && $(MAKE) install)
 
 # We extend the standard uninstall with a custom hook:
 uninstall-hook:
-	cd include && $(MAKE) uninstall
-	cd docs && $(MAKE) uninstall
-	cd docs/libcurl && $(MAKE) uninstall
+	(cd include && $(MAKE) uninstall)
+	(cd docs && $(MAKE) uninstall)
+	(cd docs/libcurl && $(MAKE) uninstall)
 
 ca-bundle: lib/mk-ca-bundle.pl
 	@echo "generating a fresh ca-bundle.crt"
@@ -308,11 +308,11 @@ ca-firefox: lib/firefox-db2pem.sh
 	./lib/firefox-db2pem.sh lib/ca-bundle.crt
 
 checksrc:
-	cd lib && $(MAKE) checksrc
-	cd src && $(MAKE) checksrc
-	cd tests && $(MAKE) checksrc
-	cd include/curl && $(MAKE) checksrc
-	cd docs/examples && $(MAKE) checksrc
+	(cd lib && $(MAKE) checksrc)
+	(cd src && $(MAKE) checksrc)
+	(cd tests && $(MAKE) checksrc)
+	(cd include/curl && $(MAKE) checksrc)
+	(cd docs/examples && $(MAKE) checksrc)
 
 .PHONY: vc-ide
 
