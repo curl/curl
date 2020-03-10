@@ -1587,11 +1587,9 @@ enum dupstring {
   STRING_DNS_LOCAL_IP4,
   STRING_DNS_LOCAL_IP6,
 
-#endif
-#ifdef USE_ESNI
   STRING_ESNI_COVER,            /* CURLOPT_ESNI_COVER */
   STRING_ESNI_ASCIIRR,          /* CURLOPT_ESNI_ASCIIRR */
-#endif
+
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
