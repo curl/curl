@@ -72,6 +72,12 @@ struct pollfd
    therefore defined here */
 #define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
 
+int Curl_select(curl_socket_t maxfd,
+                fd_set *fds_read,
+                fd_set *fds_write,
+                fd_set *fds_err,
+                time_t timeout_ms);
+
 int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       curl_socket_t writefd,
                       time_t timeout_ms);
