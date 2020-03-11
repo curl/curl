@@ -589,6 +589,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
           }
         }
         /* there is some data available, stop waiting */
+        logmsg("[select_ws_wait_thread] data available on DISK: %p", handle);
         break;
       }
       break;
@@ -618,6 +619,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
           }
         }
         /* there is some data available, stop waiting */
+        logmsg("[select_ws_wait_thread] data available on CHAR: %p", handle);
         break;
       }
       break;
@@ -640,15 +642,21 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
             SleepEx(0, FALSE);
             continue;
           }
+          else {
+            logmsg("[select_ws_wait_thread] PeekNamedPipe len: %d", length);
+          }
         }
         else {
           /* if the pipe has been closed, sleep and continue waiting */
-          if(GetLastError() == ERROR_BROKEN_PIPE) {
+          length = GetLastError();
+          logmsg("[select_ws_wait_thread] PeekNamedPipe error: %d", length);
+          if(length == ERROR_BROKEN_PIPE) {
             SleepEx(0, FALSE);
             continue;
           }
         }
         /* there is some data available, stop waiting */
+        logmsg("[select_ws_wait_thread] data available on PIPE: %p", handle);
         break;
       }
       break;
@@ -656,6 +664,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
     default:
       /* The handle has an unknown type, try to wait on it */
       WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE);
+      logmsg("[select_ws_wait_thread] data available on HANDLE: %p", handle);
       break;
   }
 
