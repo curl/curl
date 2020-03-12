@@ -31,7 +31,7 @@ MechTypes = {
 '*\x86H\x86\xf7\x12\x01\x02\x02': 'KRB5 - Kerberos 5',
 '*\x86H\x86\xf7\x12\x01\x02\x02\x03': 'KRB5 - Kerberos 5 - User to User'
 }
-TypesMech = dict((v,k) for k, v in MechTypes.iteritems())
+TypesMech = dict((v,k) for k, v in MechTypes.items())
 
 def asn1encode(data = ''):
     #res = asn1.SEQUENCE(str).encode()

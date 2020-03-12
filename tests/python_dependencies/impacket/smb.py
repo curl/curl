@@ -57,10 +57,14 @@ import hashlib
 unicode_support = 0
 unicode_convert = 1
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+import sys
+if sys.version_info.major >= 3:
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except ImportError:
+        from StringIO import StringIO
 
 # Dialect for SMB1
 SMB_DIALECT = 'NT LM 0.12'
