@@ -119,7 +119,7 @@ int Curl_select(curl_socket_t maxfd,
 {
   struct timeval pending_tv;
   struct timeval *ptimeout;
-  int pending_ms = 0;
+  int pending_ms;
   int r;
 
 #ifdef USE_WINSOCK
@@ -197,7 +197,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 {
 #ifdef HAVE_POLL_FINE
   struct pollfd pfd[3];
-  int pending_ms = 0;
+  int pending_ms;
   int num;
 #else
   fd_set fds_read;
@@ -252,7 +252,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     pending_ms = (int)timeout_ms;
   else if(timeout_ms < 0)
     pending_ms = -1;
-  else if(!timeout_ms)
+  else
     pending_ms = 0;
   r = poll(pfd, num, pending_ms);
 
@@ -374,7 +374,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 {
 #ifdef HAVE_POLL_FINE
-  int pending_ms = 0;
+  int pending_ms;
 #else
   fd_set fds_read;
   fd_set fds_write;
@@ -409,7 +409,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     pending_ms = timeout_ms;
   else if(timeout_ms < 0)
     pending_ms = -1;
-  else if(!timeout_ms)
+  else
     pending_ms = 0;
   r = poll(ufds, nfds, pending_ms);
 
