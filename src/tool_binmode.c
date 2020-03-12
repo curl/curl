@@ -46,6 +46,7 @@ void set_binmode(FILE *stream)
 #else
   (void)stream;
 
+
 #endif
 }
 
