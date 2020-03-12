@@ -122,6 +122,12 @@ int Curl_select(curl_socket_t maxfd,
   int pending_ms;
   int r;
 
+#if SIZEOF_TIME_T != SIZEOF_INT
+  /* wrap-around precaution */
+  if(timeout_ms >= INT_MAX)
+    timeout_ms = INT_MAX;
+#endif
+
 #ifdef USE_WINSOCK
   /* WinSock select() can't handle zero events.  See the comment below. */
   if((!fds_read || fds_read->fd_count == 0) &&
