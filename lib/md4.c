@@ -146,7 +146,7 @@ static void MD4_Init(MD4_CTX *ctx)
   ctx->hHash = 0;
 
   if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
-                         CRYPT_VERIFYCONTEXT)) {
+                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_MD4, 0, 0, &ctx->hHash);
   }
 }

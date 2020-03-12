@@ -2203,7 +2203,7 @@ static void Curl_schannel_checksum(const unsigned char *input,
   memset(checksum, 0, checksumlen);
 
   if(!CryptAcquireContext(&hProv, NULL, NULL, provType,
-                          CRYPT_VERIFYCONTEXT))
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return; /* failed */
 
   do {
