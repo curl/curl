@@ -1126,10 +1126,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
 
   result = Curl_socket(conn, ai, &addr, &sockfd);
   if(result)
-    /* Failed to create the socket, but still return OK since we signal the
-       lack of socket as well. This allows the parent function to keep looping
-       over alternative addresses/socket families etc. */
-    return CURLE_OK;
+    return result;
 
   /* store remote address and port used in this connection attempt */
   if(!Curl_addr2string((struct sockaddr*)&addr.sa_addr, addr.addrlen,
