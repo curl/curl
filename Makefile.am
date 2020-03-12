@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -24,14 +24,24 @@ AUTOMAKE_OPTIONS = foreign
 
 ACLOCAL_AMFLAGS = -I m4
 
-CMAKE_DIST = CMakeLists.txt CMake/CMakeConfigurableFile.in      \
- CMake/CurlTests.c CMake/FindGSS.cmake CMake/OtherTests.cmake   \
- CMake/Platforms/WindowsCache.cmake CMake/Utilities.cmake       \
- CMake/Macros.cmake              \
- CMake/CurlSymbolHiding.cmake CMake/FindCARES.cmake             \
- CMake/FindLibSSH2.cmake CMake/FindNGHTTP2.cmake                \
- CMake/FindMbedTLS.cmake CMake/FindBearSSL.cmake                \
- CMake/cmake_uninstall.cmake.in CMake/curl-config.cmake.in
+CMAKE_DIST =                                    \
+ CMake/cmake_uninstall.cmake.in                 \
+ CMake/CMakeConfigurableFile.in                 \
+ CMake/curl-config.cmake.in                     \
+ CMake/CurlSymbolHiding.cmake                   \
+ CMake/CurlTests.c                              \
+ CMake/FindBearSSL.cmake                        \
+ CMake/FindCARES.cmake                          \
+ CMake/FindGSS.cmake                            \
+ CMake/FindLibSSH2.cmake                        \
+ CMake/FindMbedTLS.cmake                        \
+ CMake/FindNGHTTP2.cmake                        \
+ CMake/FindWolfSSL.cmake                        \
+ CMake/Macros.cmake                             \
+ CMake/OtherTests.cmake                         \
+ CMake/Platforms/WindowsCache.cmake             \
+ CMake/Utilities.cmake                          \
+ CMakeLists.txt
 
 VC6_LIBTMPL = projects/Windows/VC6/lib/libcurl.tmpl
 VC6_LIBDSP = projects/Windows/VC6/lib/libcurl.dsp.dist
