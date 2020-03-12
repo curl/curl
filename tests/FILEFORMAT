@@ -459,7 +459,7 @@ compared with what is stored in the test file. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </stripfile>
 <stripfile1>
-1 to 4 can be appended to 'stripfile' to strip the correspending <fileN>
+1 to 4 can be appended to 'stripfile' to strip the corresponding <fileN>
 content
 </stripfile1>
 <stripfile2>

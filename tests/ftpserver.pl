@@ -333,7 +333,7 @@ sub eXsysread {
 sub read_mainsockf {
     my $scalar  = shift;
     my $nbytes  = shift;
-    my $timeout = shift; # Optional argument, if zero blocks indefinitively
+    my $timeout = shift; # Optional argument, if zero blocks indefinitely
     my $FH = \*SFREAD;
 
     if(not defined $timeout) {
@@ -357,7 +357,7 @@ sub read_mainsockf {
 sub read_datasockf {
     my $scalar = shift;
     my $nbytes = shift;
-    my $timeout = shift; # Optional argument, if zero blocks indefinitively
+    my $timeout = shift; # Optional argument, if zero blocks indefinitely
     my $FH = \*DREAD;
 
     if(not defined $timeout) {

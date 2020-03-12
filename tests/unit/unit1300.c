@@ -75,7 +75,7 @@ UNITTEST_START
   fail_unless(llist.head == NULL, "list head should initiate to NULL");
   fail_unless(llist.tail == NULL, "list tail should intiate to NULL");
   fail_unless(llist.dtor == test_curl_llist_dtor,
-               "list dtor shold initiate to test_curl_llist_dtor");
+               "list dtor should initiate to test_curl_llist_dtor");
 
   /**
    * testing Curl_llist_insert_next
