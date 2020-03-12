@@ -72,6 +72,13 @@ static int _getch(void)
   if(res != CURLE_OK)                                               \
     fprintf(stderr, "curl_easy_perform(%s) failed: %d\n", #A, res);
 
+/*------------------------------------------------------------------------------
+ *
+ *
+ *    Easy functions
+ *
+ *
+ *----------------------------------------------------------------------------*/
 
 /* send RTSP OPTIONS request */
 static void rtsp_options(CURL *curl, const char *uri)
@@ -175,21 +182,381 @@ static void get_media_control_attribute(const char *sdp_filename,
   }
 }
 
+/*------------------------------------------------------------------------------
+ *
+ *
+ *    Multi functions
+ *
+ *
+ *----------------------------------------------------------------------------*/
 
-/* main app */
+typedef enum
+{
+   RTSP_STATE_MIN = -1,
+   RTSP_STATE_IDLE,
+   RTSP_STATE_IN_OPTIONS,
+   RTSP_STATE_IN_DESCRIBE
+   RTSP_STATE_IN_SETUP,
+   RTSP_STATE_IN_PLAY,
+   RTSP_STATE_PLAYING,
+   RTSP_STATE_IN_PAUSE,
+   RTSP_STATE_PAUSED,
+   RTSP_STATE_WAIT_FOR_TERMINATING,
+   RTSP_STATE_TERMINATING,
+   RTSP_STATE_TERMINATED,
+   RTSP_STATE_KEEPALIVE,
+   RTSP_STATE_MAX
+}
+RtspSessionState;
+
+typedef struct
+{
+  RtspSessionState state;
+  CURL*            handle;
+  char*            url;
+  char             uri[256];
+  char*            credentials;
+}
+RtspSession;
+
+void session_init(RtspSession* session) {
+  session->url = NULL;
+  session->credentials = NULL;
+  session->uri[0] = '\0';
+  session->state = RTSP_STATE_MIN;
+}
+
+void session_setup(RtspSession* session, CURL* handle) {
+  session->handle = handle;
+  session->state = RTSP_STATE_IDLE;
+}
+
+int session_check_error(RtspSession* session, CURLcode result_code)
+{
+  long server_response = 0L;
+   if (result_code == CURLE_OK)
+   {
+      curl_easy_getinfo(session->handle, CURLINFO_RESPONSE_CODE, &last_server_response); 
+      if ((last_server_response == 0) || 
+          ((last_server_response >= 200) && (last_server_response < 300)))
+      {
+         return 0;
+      }
+      printf(
+         "Session %s: server response %li\n", 
+         session->url,
+         last_server_response);
+   }
+   else
+   {
+      LOG(LOG_ERROR, "Session %s: curl code %li", session->url, result_code);
+   }
+   return 1;
+}
+
+session_next(RtspSession* session, CURLcode result_code) {
+   int result = 0;
+   CURLcode res = CURLE_OK;
+   CURLMcode curlm_result = CURLM_OK;
+
+   if (session->state != RTSP_STATE_PLAYING)
+   {
+      printf(
+         "RtspRtpSession %s: rtsp state = %i\n", 
+         session->uri, session->state);
+   }
+
+   bool retry_makes_sense = false;
+
+   /*
+    * This condition checks skips odd resultcodes (but successfull
+    * communication) on the OPTIONS. This helps setting up RTSP sessions over
+    * port 80 (Axis fw 5.60+ supports that). In that case the first option
+    * response is a 503.
+    */
+   if ((session->state < RTSP_STATE_TERMINATING) && 
+       !((session->state == RTSP_STATE_IN_OPTIONS)) && 
+       session_check_error(result_code, retry_makes_sense))
+   {
+      LOG(LOG_ERROR, "Curl log: %s", m_error_buffer);
+      if (retry_makes_sense)
+      {
+         setErrorAndRetry();
+         result = RESULT_SIGNIFICANT_CHANGE;
+      }
+      else
+      {
+         LOG(LOG_ERROR,"Session %s: failed. Stop!", session->url);
+         result = Teardown() ? RESULT_CAN_REMOVE_ME : RESULT_SIGNIFICANT_CHANGE;
+      }
+      return result;
+   }
+
+   my_curl_easy_setopt(session->handle, CURLOPT_POSTFIELDS, 0); 
+
+   /*
+    * Normal state handling. We know that there is no curl error or error
+    * server response
+    */
+
+   switch (session->state)
+   {
+      case RTSP_STATE_IDLE:
+         /*
+          * If idle, do nothing. Need to call start() first
+          */
+         break;
+
+      case RTSP_STATE_IN_OPTIONS:
+         /*
+          * Skip parsing OPTIONS. Prepare for DESCRIBE
+          */
+         // curl_multi_remove_handle(m_multi, session->handle);
+         my_curl_easy_setopt(session->handle, CURLOPT_WRITEFUNCTION, (void*)rtsp_describe_callback_s);
+         my_curl_easy_setopt(session->handle, CURLOPT_WRITEDATA, (void*)&m_sdp);
+         my_curl_easy_setopt(session->handle, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_DESCRIBE);
+         LOG(LOG_INFO,"RTSP: DESCRIBE %s", m_uri.c_str());
+         curlm_result = curl_multi_restart_handle(m_multi, session->handle);
+         if (curlm_result == CURLM_OK)
+         {
+            session->state = RTSP_STATE_IN_DESCRIBE;
+         }
+         else
+         {
+            LOG(LOG_ERROR,"Session %s: Curl error %u!", session->url, curlm_result);
+            Teardown();
+         }
+         break;
+
+      case RTSP_STATE_IN_DESCRIBE:
+         /*
+          * DESCRIBE completed. Prepare for SETUP
+          */
+         // curl_multi_remove_handle(m_multi, session->handle);
+         my_curl_easy_setopt(session->handle, CURLOPT_WRITEDATA, 0);
+         my_curl_easy_setopt(session->handle, CURLOPT_WRITEFUNCTION, 0);
+         if (m_sdp)
+         {
+            SDP::MediaDefinition* media = m_sdp->FindMedia(m_media_name.c_str());
+            if (media != nullptr)
+            {
+               unsigned int payload_type = media->GetPayloadType();
+               bool has_listener = m_listeners.HasSubscriber(payload_type);
+               if (!has_listener && (m_create_parser_cb != 0))
+               {
+                  (*m_create_parser_cb)(m_media_name.c_str());  /* Parser will get the SDP from the session ('this') */
+                  has_listener = m_listeners.HasSubscriber(payload_type);
+               }
+
+               if (has_listener)
+               {
+                  HeaderDict::iterator hi = m_rtsp_headers.find("Content-Base");
+                  if (hi != m_rtsp_headers.end())
+                  {
+                     m_play_uri = hi->second;
+                  }
+                  else
+                  {
+                     m_play_uri = m_uri;
+                  }
+                  std::string setup_uri = m_sdp->MediaUrl(m_media_name.c_str());
+                  if (setup_uri.compare(0, 5, "rtsp:") == 0)
+                  {      
+                     m_setup_uri = setup_uri;
+                  }
+                  else
+                  {
+                     if ((setup_uri[0] == '/') || (!m_play_uri.empty() && m_play_uri[m_play_uri.size()-1] == '/')) /* can´t use back() */
+                     {
+                        m_setup_uri = m_play_uri + setup_uri;
+                     }
+                     else
+                     {
+                        m_setup_uri = m_play_uri + "/" + setup_uri;
+                     }
+                  }
+                  setupTransport();
+                  LOG(LOG_INFO,"RTSP: SETUP %s", m_setup_uri.c_str());
+                  LOG(LOG_INFO,"      TRANSPORT %s", m_transport_str.c_str());
+                  my_curl_easy_setopt(session->handle, CURLOPT_RTSP_STREAM_URI, m_setup_uri.c_str());
+                  my_curl_easy_setopt(session->handle, CURLOPT_RTSP_TRANSPORT, m_transport_str.c_str());
+                  my_curl_easy_setopt(session->handle, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_SETUP);
+                  if ((m_transport == StreamSpecification::TRANSPORT_RTSP_TCP) || (m_transport == StreamSpecification::TRANSPORT_RTSP_OVER_HTTP))
+                  {
+                     my_curl_easy_setopt(session->handle, CURLOPT_HTTPHEADER, blocksize_header_s);
+                  }
+         m_error_buffer[0] = '\0';
+                  curl_multi_restart_handle(m_multi, session->handle);
+                  session->state = RTSP_STATE_IN_SETUP;
+               }
+               else
+               {
+               LOG(LOG_ERROR,"Session %s: Can't process payloadtype %u. Stop", session->url, payload_type);
+               Teardown();
+               }
+            }
+            else
+            {
+               LOG(LOG_ERROR,"Session %s: No media \"%s\" available. Stop", session->url, m_media_name.c_str());
+               Teardown();
+            }
+         }
+         else
+         {
+            LOG(LOG_ERROR,"Session %s: No SDP. Stop!", session->url);
+            Teardown();
+         }
+         break;
+      case RTSP_STATE_IN_SETUP:
+         /*
+          * SETUP completed. Prepare for PLAY
+          * Alternatively if already streaming, simply repeat the play command
+          */
+         // curl_multi_remove_handle(m_multi, session->handle);
+         my_curl_easy_setopt(session->handle, CURLOPT_WRITEDATA, 0);
+         my_curl_easy_setopt(session->handle, CURLOPT_WRITEFUNCTION, 0);
+         my_curl_easy_setopt(session->handle, CURLOPT_HTTPHEADER, 0);
+         if ((m_session_state == STATE_STREAMING) || processTransportResponse())
+         {
+
+            LOG(LOG_INFO,"RTSP: PLAY %s", m_uri.c_str());
+            my_curl_easy_setopt(session->handle, CURLOPT_RTSP_STREAM_URI, m_play_uri.c_str());
+            //    my_curl_easy_setopt(session->handle, CURLOPT_RANGE, range);
+            my_curl_easy_setopt(session->handle, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_PLAY);
+         m_error_buffer[0] = '\0';
+            curl_multi_restart_handle(m_multi, session->handle);
+            session->state = RTSP_STATE_IN_PLAY;
+            result |= RESULT_SIGNIFICANT_CHANGE;
+            /* Next call is known to succeed (we survived in describe before) */
+            SDP::MediaDefinition* media = m_sdp->FindMedia(m_media_name.c_str());
+            m_listeners.InitialiseSubscribers(media->GetPayloadType());
+         }
+         else
+         {
+            LOG(LOG_ERROR,"RtspRtpSession%s: SETUP was not succesfull!", session->url);
+            Teardown();
+         }
+         break;
+      case RTSP_STATE_IN_PLAY:
+      case RTSP_STATE_PLAYING:
+      case RTSP_STATE_TERMINATING:
+         /*
+          * One of: 
+          *  - RTSP PLAY-command completed. Move forward into state PLAYING
+          *  - Got a new RTP Packet. Set up for receiving the next one unless
+          */
+         /*
+          * TODO?: when timeout expired do an options here, with an
+          * RTSP_STATE_REFRESH or something like that. The way it is now the
+          * options are out of sync with what is happening here
+          */
+         if (session->state == RTSP_STATE_IN_PLAY)
+         {
+            setStarted();
+            prepareRtpInfo();
+            session->state = RTSP_STATE_PLAYING;
+            m_keepalive_timer->Start();
+         }
+         if (session->state == RTSP_STATE_TERMINATING)
+         {
+            /* 
+             *  Fastforward into TERMINATED state. Maybe the server hasn't
+             *  received our message, but we're out of here.
+             */
+            session->state = RTSP_STATE_TERMINATED;
+            return next(CURLE_OK);
+         }
+         /*
+          * Even while we're terminating there may still be data coming in, process it
+          */
+         if (m_transport == StreamSpecification::TRANSPORT_RTSP_TCP)
+         {
+            // curl_multi_remove_handle(m_multi, session->handle);
+            my_curl_easy_setopt(session->handle, CURLOPT_RTSP_REQUEST, (long)CURL_RTSPREQ_RECEIVE); 
+         m_error_buffer[0] = '\0';
+            curl_multi_restart_handle(m_multi, session->handle);
+         }
+         break;
+      case RTSP_STATE_WAIT_FOR_TERMINATING:
+         /*
+          * This state we only get in RTP-over-RTSP aka RTP interleaving aka
+          * TCP streaming. By waiting for the next packet from the server
+          * before initiating the TEARDOWN we can keep the same socket inside
+          * libcurl? Since fw 5.60 the Axis camera is sensitive to socket changes,
+          * violating a 'SHOULD' in the standard.
+          */
+         doStop();
+         break;
+      case RTSP_STATE_IN_PAUSE:
+         session->state = RTSP_STATE_PAUSED;
+         m_session_state = STATE_PAUSED;
+         break;
+      case RTSP_STATE_TERMINATED:
+         result = handleTerminationCompleted();
+         /*
+          * From this point on we may be deleted!
+          */
+         break;
+      default:
+         LOG(LOG_INFO,"Session %s: Unknown state %i. Stop!", session->url, session->state);
+         Teardown();
+   }
+   return result;
+}
+
+void process_sessions(CURLM* multi) {
+   int msgs_left = 0;
+   int next_result = 0;
+   bool relevant_state_change = false;
+   while (CURLMsg* msg = curl_multi_info_read(m_multi, &msgs_left))
+   {
+      if (msg->msg == CURLMSG_DONE)
+      {
+         RtspRtpSession* session = NULL;
+         if (curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &session) == CURLE_OK)
+         {
+            next_result = session_next(session, msg->data.result);
+         }
+         else
+         {
+            printf("process_sessions: failed to get session pointer\n");
+         }
+      }
+      else
+      {
+         /* */
+      }
+   }
+   if ((m_listener != 0) && relevant_state_change)
+   {
+      (*m_listener)(this, Message::MSG_SESSION_CHANGE);
+   }
+}
+
+/*------------------------------------------------------------------------------ 
+ *
+ *
+ *    Main program. Choose between easy and multi interface at runtime
+ *
+ *
+ *----------------------------------------------------------------------------*/
+
 int main(int argc, char * const argv[])
 {
+  RtspSession session;
+  session_init(&session);
+
 #if 0
   const char *transport = "RTP/AVP;unicast;client_port=1234-1235";  /* UDP */
 #else
   /* TCP */
   const char *transport = "RTP/AVP/TCP;unicast;interleaved=0-1";
 #endif
-  const char *url = NULL;
-  const char *credentials = NULL;
   const char *range = "0.000-";
   int rc = EXIT_SUCCESS;
   char *base_name = NULL;
+
+  int do_multi = 0;
 
   printf("\nRTSP request %s\n", VERSION_STR);
   printf("    Project web site: "
@@ -213,10 +580,11 @@ int main(int argc, char * const argv[])
     else {
       base_name++;
     }
-    printf("Usage:   %s [-t transport] [-u user:pass] url\n", base_name);
-    printf("         url: url of video server\n");
-    printf("         user:pass: optional) credentials to use\n");
-    printf("         transport: (optional) specifier for media stream"
+    printf("Usage:   %s [-t transport] [-u user:pass] [-m] url\n", base_name);
+    printf("         url:          url of video server\n");
+    printf("         -u user:pass: (optional) credentials to use\n");
+    printf("         -t transport: (optional) specifier for media stream"
+    printf("         -m:           (optional) use multi- instead of easy interface"
            " protocol\n");
     printf("         default transport: %s\n", transport);
     printf("Example: %s rtsp://192.168.0.2/media/video1\n\n", base_name);
@@ -231,11 +599,13 @@ int main(int argc, char * const argv[])
         if(arg < argc-1) {
           switch (s[1]) {
           case 'u':
-            credentials = argv[++arg];
+            session.credentials = argv[++arg];
             break;
           case 't':
             transport = argv[++arg];
             break;
+          case 'm':
+            do_multi = 1;
           }
         }
         else {
@@ -245,25 +615,22 @@ int main(int argc, char * const argv[])
       }
       else
       {
-        url = argv[arg];
+        session.url = argv[arg];
       }
       arg++;
     }
-    if(url == NULL) {
+    if(session.url == NULL) {
       printf("Need a URL\n");
       rc = EXIT_FAILURE;
     }
   }
 
   if(rc == EXIT_SUCCESS) {
-    char uri[256];
+    char uri[256]session.;
     char sdp_filename[256];
     char control[256];
     CURLcode res;
-    get_sdp_filename(url, sdp_filename, sizeof(sdp_filename)-1);
-    if(argc == 3) {
-      transport = argv[2];
-    }
+    get_sdp_filename(session.url, sdp_filename, sizeof(sdp_filename)-1);
 
     /* initialize curl */
     res = curl_global_init(CURL_GLOBAL_ALL);
@@ -278,41 +645,83 @@ int main(int argc, char * const argv[])
         my_curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
         my_curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
         my_curl_easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
-        my_curl_easy_setopt(curl, CURLOPT_URL, url);
+        my_curl_easy_setopt(curl, CURLOPT_URL, session.url);
 
-        if(credentials != NULL) {
-           printf("Using credentials: %s\n", credentials);
+        if(session.credentials != NULL) {
+           printf("Using credentials: %s\n", session.credentials);
            my_curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST | CURLAUTH_BASIC);
-           my_curl_easy_setopt(curl, CURLOPT_USERPWD, credentials);
+           my_curl_easy_setopt(curl, CURLOPT_USERPWD, session.credentials);
         }
 
         /* request server options */
-        snprintf(uri, sizeof(uri)-1, "%s", url);
-        rtsp_options(curl, uri);
+        rtsp_options(curl, session.url);
 
-        /* request session description and write response to sdp file */
-        rtsp_describe(curl, uri, sdp_filename);
+        if(do_multi == 0) {
+          /* EASY */
+          /* request session description and write response to sdp file */
+          rtsp_describe(curl, session.url, sdp_filename);
 
-        /* get media control attribute from sdp file */
-        get_media_control_attribute(sdp_filename, control);
+          /* get media control attribute from sdp file */
+          get_media_control_attribute(sdp_filename, control);
 
-        /* setup media stream */
-        if(strncmp(control, "rtsp://", 7)) {
-           snprintf(uri, sizeof(uri)-1, "%s/%s", url, control);
+          /* setup media stream */
+          if(strncmp(control, "rtsp://", 7)) {
+             snprintf(session.uri, sizeof(session.uri)-1, "%s/%s", session.url, control);
+          } else {
+              strncpy(session.uri, control, sizeof(session.uri)-1);
+          }
+          rtsp_setup(curl, session.uri, transport);
+
+          /* start playing media stream */
+          snprintf(session.uri, sizeof(session.uri)-1, "%s/", session.url);
+          rtsp_play(curl, session.uri, range);
+          printf("Playing video, press any key to stop ...");
+          _getch();
+          printf("\n");
+
+          /* teardown session */
+          rtsp_teardown(curl, session.uri);
         } else {
-            strncpy(uri, control, sizeof(uri)-1);
+          /* MULTI */
+          int num_fds = 0;
+          CURLM* multi = curl_multi_init();
+          CURLMcode code = CURLM_OK;
+
+
+          for (;;) {
+
+            /*
+             * TODO: copy keypress detection from stream_peeker
+             */
+
+            code = curl_multi_wait(
+                multi,
+                &m_socks[0],
+                m_socks.size(),
+                1000,
+                &num_fds
+                );
+            if (code != CURLM_OK)
+            {
+              LOG(LOG_WARNING, "curl_multi_wait: %s", curl_multi_strerror(code) );
+            }
+            int curl_running = 0;
+            do
+            {
+              code = curl_multi_perform(multi, &curl_running);
+            }
+            while (code == CURLM_CALL_MULTI_PERFORM);
+
+            if (code != CURLM_OK)
+            {
+              LOG(LOG_WARNING, "curl_multi_perform: %s", curl_multi_strerror(code) );
+            }
+
+            process_sessions(multi);
+          }
+
+          curl_multi_cleanup(multi);
         }
-        rtsp_setup(curl, uri, transport);
-
-        /* start playing media stream */
-        snprintf(uri, strlen(url) + 32, "%s/", url);
-        rtsp_play(curl, uri, range);
-        printf("Playing video, press any key to stop ...");
-        _getch();
-        printf("\n");
-
-        /* teardown session */
-        rtsp_teardown(curl, uri);
 
         /* cleanup */
         curl_easy_cleanup(curl);
