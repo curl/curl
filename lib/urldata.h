@@ -957,6 +957,7 @@ struct connectdata {
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   curl_socket_t tempsock[2]; /* temporary sockets for happy eyeballs */
+  int tempfamily[2]; /* family used for the temp sockets */
   Curl_recv *recv[2];
   Curl_send *send[2];
 
@@ -1113,6 +1114,8 @@ struct connectdata {
                               handle */
   BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
                          accept() */
+  BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
+                            started (happy eyeballs) */
 };
 
 /* The end of connectdata. */
