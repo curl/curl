@@ -26,9 +26,10 @@ import socket
 import time
 import datetime
 import struct
-try: # Python 3
+import sys
+if sys.version_info.major >= 3:
     import configparser
-except ImportError: # Python 2
+else:
     import ConfigParser as configparser
 import SocketServer
 import threading
@@ -38,7 +39,6 @@ import ntpath
 import os
 import fnmatch
 import errno
-import sys
 import random
 import shutil
 from binascii import hexlify

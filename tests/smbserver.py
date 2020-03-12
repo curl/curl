@@ -28,9 +28,9 @@ import os
 import sys
 import logging
 import tempfile
-try: # Python 3
+if sys.version_info.major >= 3:
     import configparser
-except ImportError: # Python 2
+else:
     import ConfigParser as configparser
 
 # Import our curl test data helper
