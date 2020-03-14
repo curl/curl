@@ -36,9 +36,13 @@ else:
 # Import our curl test data helper
 import curl_test_data
 
-# This saves us having to set up the PYTHONPATH explicitly
-deps_dir = os.path.join(os.path.dirname(__file__), "python_dependencies")
-sys.path.append(deps_dir)
+# impacket needs to be installed in the Python environment
+try:
+    import impacket
+except ImportError:
+    sys.stderr.write('Python package impacket needs to be installed!\n')
+    sys.stderr.write('Use pip or your package manager to install it.\n')
+    sys.exit(1)
 from impacket import smbserver as imp_smbserver
 from impacket import smb as imp_smb
 from impacket.nt_errors import (STATUS_ACCESS_DENIED, STATUS_SUCCESS,

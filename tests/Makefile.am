@@ -24,21 +24,15 @@ HTMLPAGES = testcurl.html runtests.html
 PDFPAGES = testcurl.pdf runtests.pdf
 MANDISTPAGES = runtests.1.dist testcurl.1.dist
 
-# the path to the impacket python lib used for SMB tests
-IMP = python_dependencies/impacket
-SMBDEPS = $(IMP)/__init__.py $(IMP)/nmb.py $(IMP)/nt_errors.py          \
- $(IMP)/ntlm.py $(IMP)/smb.py $(IMP)/smb3.py $(IMP)/smb3structs.py      \
- $(IMP)/smbserver.py $(IMP)/spnego.py $(IMP)/structure.py               \
- $(IMP)/uuid.py $(IMP)/version.py smbserver.py curl_test_data.py
-
 EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
  getpart.pm FILEFORMAT README stunnel.pem memanalyze.pl testcurl.pl           \
  valgrind.pm ftp.pm sshserver.pl sshhelp.pm pathhelp.pm testcurl.1 runtests.1 \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl      \
  CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
  manpage-scan.pl nroff-scan.pl http2-server.pl dictserver.py                  \
- negtelnetserver.py $(SMBDEPS) objnames-test08.sh objnames-test10.sh          \
- objnames.inc disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl  \
+ negtelnetserver.py smbserver.py curl_test_data.py                            \
+ objnames-test08.sh objnames-test10.sh objnames.inc                           \
+ disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl               \
  azure.pm appveyor.pm
 
 DISTCLEANFILES = configurehelp.pm
