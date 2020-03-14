@@ -99,7 +99,7 @@ LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL) -s
 AR = $(CURL_AR)
 RANLIB = $(CURL_RANLIB)
 RC = $(CROSSPREFIX)windres
-RCFLAGS = --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF
+RCFLAGS = --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O coff
 STRIP   = $(CROSSPREFIX)strip -g
 
 # Set environment var ARCH to your architecture to override autodetection.
