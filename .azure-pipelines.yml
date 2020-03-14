@@ -22,6 +22,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: sudo apt install stunnel4 python-impacket
+      displayName: 'apt install'
+
     - script: ./buildconf && ./configure --enable-debug --enable-werror
       displayName: 'configure debug'
 
@@ -39,6 +42,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: sudo apt install stunnel4 python-impacket
+      displayName: 'apt install'
+
     - script: ./buildconf && ./configure --disable-ipv6
       displayName: 'configure disable ipv6'
 
@@ -56,6 +62,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: sudo apt install stunnel4 python-impacket
+      displayName: 'apt install'
+
     - script: ./buildconf && ./configure --disable-http --disable-smtp --disable-imap
       displayName: 'configure disable http/smtp/imap'
 
@@ -73,6 +82,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: sudo apt install stunnel4 python-impacket
+      displayName: 'apt install'
+
     - script: ./buildconf && ./configure --disable-threaded-resolver
       displayName: 'configure disable threaded-resolver'
 
@@ -90,6 +102,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - script: sudo apt install stunnel4 python-impacket
+      displayName: 'apt install'
+
     - script: ./buildconf && ./configure --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp
       displayName: 'configure disable non-http'
 
@@ -110,7 +125,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - script: sudo apt install libnghttp2-dev
+    - script: sudo apt install stunnel4 python-impacket libnghttp2-dev
       displayName: 'apt install'
 
     - script: ./buildconf && ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
