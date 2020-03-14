@@ -62,7 +62,7 @@ if [ "$T" = "normal" ]; then
     # Only done on Linux since we're not permitted to on mac.
     sudo rm -f /usr/bin/curl
   fi
-  ./configure --enable-warnings --enable-werror $C
+  ./configure --enable-warnings --enable-werror $C CFLAGS="-g -fno-omit-frame-pointer"
   make
   make examples
   if [ -z $NOTESTS ]; then
