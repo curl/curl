@@ -16,7 +16,8 @@ task:
     MAKE_FLAGS: -j 2
 
   pkginstall_script:
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libmetalink libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - pkg update -f
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libmetalink libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py27-impacket
     - pkg delete -y curl
   configure_script:
     - ./buildconf
