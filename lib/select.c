@@ -69,9 +69,15 @@
  *   -1 = system call error, invalid timeout value, or interrupted
  *    0 = specified timeout has elapsed
  */
-int Curl_wait_ms(int timeout_ms)
+int Curl_wait_ms(time_t timeout_ms)
 {
   int r = 0;
+
+#if SIZEOF_TIME_T != SIZEOF_INT
+  /* wrap-around precaution */
+  if(timeout_ms >= INT_MAX)
+    timeout_ms = INT_MAX;
+#endif
 
   if(!timeout_ms)
     return 0;
@@ -122,20 +128,20 @@ int Curl_select(curl_socket_t maxfd,
   int pending_ms;
   int r;
 
-#if SIZEOF_TIME_T != SIZEOF_INT
-  /* wrap-around precaution */
-  if(timeout_ms >= INT_MAX)
-    timeout_ms = INT_MAX;
-#endif
-
 #ifdef USE_WINSOCK
   /* WinSock select() can't handle zero events.  See the comment below. */
   if((!fds_read || fds_read->fd_count == 0) &&
      (!fds_write || fds_write->fd_count == 0) &&
      (!fds_err || fds_err->fd_count == 0)) {
-    r = Curl_wait_ms((int)timeout_ms);
+    r = Curl_wait_ms(timeout_ms);
     return r;
   }
+#endif
+
+#if SIZEOF_TIME_T != SIZEOF_INT
+  /* wrap-around precaution */
+  if(timeout_ms >= INT_MAX)
+    timeout_ms = INT_MAX;
 #endif
 
   ptimeout = &pending_tv;
@@ -148,7 +154,7 @@ int Curl_select(curl_socket_t maxfd,
     pending_tv.tv_sec = pending_ms / 1000;
     pending_tv.tv_usec = (pending_ms % 1000) * 1000;
   }
-  else if(!timeout_ms) {
+  else {
     pending_tv.tv_sec = 0;
     pending_tv.tv_usec = 0;
   }
@@ -214,16 +220,10 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   int r;
   int ret;
 
-#if SIZEOF_TIME_T != SIZEOF_INT
-  /* wrap-around precaution */
-  if(timeout_ms >= INT_MAX)
-    timeout_ms = INT_MAX;
-#endif
-
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
     /* no sockets, just wait */
-    r = Curl_wait_ms((int)timeout_ms);
+    r = Curl_wait_ms(timeout_ms);
     return r;
   }
 
@@ -253,6 +253,12 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     pfd[num].revents = 0;
     num++;
   }
+
+#if SIZEOF_TIME_T != SIZEOF_INT
+  /* wrap-around precaution */
+  if(timeout_ms >= INT_MAX)
+    timeout_ms = INT_MAX;
+#endif
 
   if(timeout_ms > 0)
     pending_ms = (int)timeout_ms;
@@ -377,7 +383,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
  *    0 = timeout
  *    N = number of structures with non zero revent fields
  */
-int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
+int Curl_poll(struct pollfd ufds[], unsigned int nfds, time_t timeout_ms)
 {
 #ifdef HAVE_POLL_FINE
   int pending_ms;
@@ -411,8 +417,14 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 
 #ifdef HAVE_POLL_FINE
 
+#if SIZEOF_TIME_T != SIZEOF_INT
+  /* wrap-around precaution */
+  if(timeout_ms >= INT_MAX)
+    timeout_ms = INT_MAX;
+#endif
+
   if(timeout_ms > 0)
-    pending_ms = timeout_ms;
+    pending_ms = (int)timeout_ms;
   else if(timeout_ms < 0)
     pending_ms = -1;
   else
