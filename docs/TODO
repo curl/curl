@@ -99,6 +99,7 @@
  12. New protocols
 
  13. SSL
+ 13.1 TLS-PSK with OpenSSL
  13.2 Provide mutex locking API
  13.3 Support in-memory certs/ca certs/keys
  13.4 Cache/share OpenSSL contexts
@@ -639,6 +640,15 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 12. New protocols
 
 13. SSL
+
+13.1 TLS-PSK with OpenSSL
+
+ Transport Layer Security pre-shared key ciphersuites (TLS-PSK) is a set of
+ cryptographic protocols that provide secure communication based on pre-shared
+ keys (PSKs). These pre-shared keys are symmetric keys shared in advance among
+ the communicating parties.
+
+ https://github.com/curl/curl/issues/5081
 
 13.2 Provide mutex locking API
 
