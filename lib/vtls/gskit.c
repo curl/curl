@@ -524,7 +524,6 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
   int m;
   int i;
   int ret = 0;
-  struct timeval tv = {0, 0};
   char buf[CURL_MAX_WRITE_SIZE];
 
   if(!connssl->use || !connproxyssl->use)
@@ -544,7 +543,7 @@ static int pipe_ssloverssl(struct connectdata *conn, int sockindex,
     if(n < conn->sock[sockindex])
       n = conn->sock[sockindex];
   }
-  i = select(n + 1, &fds_read, &fds_write, NULL, &tv);
+  i = Curl_select(n + 1, &fds_read, &fds_write, NULL, 0);
   if(i < 0)
     return -1;  /* Select error. */
 
