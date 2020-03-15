@@ -84,8 +84,13 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* _Atomic is a C11 feature */
+#ifndef HAVE_ATOMIC
+#define _Atomic
+#endif
+
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
-static unsigned int  initialized;
+static _Atomic unsigned int  initialized;
 static long          init_flags;
 
 /*
@@ -140,8 +145,7 @@ curl_calloc_callback Curl_ccalloc;
  */
 static CURLcode global_init(long flags, bool memoryfuncs)
 {
-  if(initialized++)
-    return CURLE_OK;
+  initialized++;
 
   if(memoryfuncs) {
     /* Setup the default memory functions here (again) */
@@ -258,8 +262,13 @@ void curl_global_cleanup(void)
   if(!initialized)
     return;
 
+#ifdef WIN32
+  if(InterlockedDecrement((LPLONG)&initialized))
+    return;
+#else
   if(--initialized)
     return;
+#endif
 
   Curl_ssl_cleanup();
   Curl_resolver_global_cleanup();
