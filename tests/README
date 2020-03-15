@@ -40,11 +40,20 @@ The curl Test Suite
 
   perl (and a unix-style shell)
   python (and a unix-style shell)
+  python-impacket (for SMB tests)
   diff (when a test fails, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
   OpenSSH or SunSSH (for SCP, SFTP and SOCKS4/5 tests)
   nghttpx (for HTTP/2 tests)
   nroff (for --manual tests)
+
+  Please install python-impacket in the correct Python environment.
+  At the moment the Python-based test servers still require Python 2.
+  Therefore you will need to use pip2 or your OS' package manager to
+  install the Python 2 version of impacket (if it is still available).
+
+  On stable Debian/Ubuntu the package name is "python-impacket".
+  On FreeBSD the package name is "py27-impacket".
 
  1.2 Port numbers used by test servers
 
