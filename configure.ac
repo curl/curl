@@ -163,6 +163,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtmp_msg="no      (--with-librtmp)"
   curl_mtlnk_msg="no      (--with-libmetalink)"
     curl_psl_msg="no      (--with-libpsl)"
+ curl_ssl_threadsafe="yes"
 
     ssl_backends=
 
@@ -1887,6 +1888,7 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
        fi
     fi
     CURL_CHECK_OPENSSL_API
+    CURL_CHECK_OPENSSL_THREADSAFE
     check_for_ca_bundle=1
   fi
 
@@ -4910,6 +4912,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
   ESNI:             ${curl_esni_msg}
+  SSL thread-safe:  ${curl_ssl_threadsafe}
   Protocols:        ${SUPPORT_PROTOCOLS}
   Features:         ${SUPPORT_FEATURES}
 ])
