@@ -27,6 +27,7 @@ addons:
             - stunnel4
             - libidn2-0-dev
             - gnutls-bin
+            - python-impacket
 
 matrix:
     include:
