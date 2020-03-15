@@ -4,8 +4,16 @@
 # https://aka.ms/yaml
 
 trigger:
-- 'master'
-- '*/ci'
+  branches:
+    include:
+    - 'master'
+    - '*/ci'
+
+pr:
+  branches:
+    include:
+    - 'master'
+    - '*/ci'
 
 stages:
 
