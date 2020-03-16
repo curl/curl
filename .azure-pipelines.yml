@@ -43,7 +43,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~323"
+        TFLAGS: ""
 
   - job: disable_ipv6
     displayName: ubuntu w/o IPv6
@@ -64,7 +64,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~323"
+        TFLAGS: ""
 
   - job: disable_http_smtp_imap
     displayName: ubuntu w/o HTTP/SMTP/IMAP
@@ -105,7 +105,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~323"
+        TFLAGS: ""
 
   - job: http_only
     displayName: ubuntu HTTP only
@@ -126,7 +126,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~323"
+        TFLAGS: ""
 
 - stage: linux_torture
   dependsOn: linux
@@ -149,7 +149,7 @@ stages:
     - script: make test-nonflaky
       displayName: 'torture test'
       env:
-        TFLAGS: "-n -t --shallow=40 !FTP ~323"
+        TFLAGS: "-n -t --shallow=40 !FTP"
 
 ##########################################
 ### macOS jobs below
@@ -261,7 +261,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~323 ~1056 ~1299"
+        TFLAGS: "~1056 ~1299"
 
   - job: windows_msys2_mingw64_debug_openssl
     displayName: msys2 mingw64 debug openssl
@@ -284,7 +284,7 @@ stages:
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~323 ~1056 ~1299"
+        TFLAGS: "~1056 ~1299"
 
   - job: windows_msys1_mingw_debug_openssl
     displayName: msys1 mingw debug openssl
