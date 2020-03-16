@@ -2055,7 +2055,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   *addedp = FALSE;
   *morep = FALSE;
   result = create_transfer(global, share, addedp);
-  if(result || !*addedp)
+  if(result)
     return result;
   for(per = transfers; per && (all_added < global->parallel_max);
       per = per->next) {
