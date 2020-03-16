@@ -28,12 +28,7 @@ if [ "$T" = "debug" ]; then
   make
   make examples
   if [ -z $NOTESTS ]; then
-    if [ "$TRAVIS_ARCH" = "aarch64" ] ; then
-      # TODO: find out why this test is failing on arm64
-      make "TFLAGS=-n !323" test-nonflaky
-    else
-      make TFLAGS=-n test-nonflaky
-    fi
+    make TFLAGS=-n test-nonflaky
   fi
 fi
 
