@@ -9,11 +9,10 @@ import argparse
 import os
 import sys
 import logging
-try:  # Python 2
-    import SocketServer as socketserver
-except ImportError:  # Python 3
+if sys.version_info.major >= 3:
     import socketserver
-
+else:
+    import SocketServer as socketserver
 
 log = logging.getLogger(__name__)
 HOST = "localhost"
