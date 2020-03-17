@@ -39,7 +39,7 @@ The curl Test Suite
  1.1 Requires to run
 
   perl (and a unix-style shell)
-  python (and a unix-style shell)
+  python (and a unix-style shell, for SMB and TELNET tests)
   python-impacket (for SMB tests)
   diff (when a test fails, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
@@ -47,13 +47,28 @@ The curl Test Suite
   nghttpx (for HTTP/2 tests)
   nroff (for --manual tests)
 
-  Please install python-impacket in the correct Python environment.
-  At the moment the Python-based test servers still require Python 2.
-  Therefore you will need to use pip2 or your OS' package manager to
-  install the Python 2 version of impacket (if it is still available).
+ 1.1.1 Installation of python-impacket
 
-  On stable Debian/Ubuntu the package name is "python-impacket".
-  On FreeBSD the package name is "py27-impacket".
+  The Python-based test servers support both recent Python 2 and 3.
+  You can figure out your default Python interpreter with python -V
+
+  Please install python-impacket in the correct Python environment.
+  You can use pip or your OS' package manager to install 'impacket'.
+
+  On Debian/Ubuntu the package names are:
+    Python 2: 'python-impacket'
+    Python 3: 'python3-impacket'
+
+  On FreeBSD the package names are:
+    Python 2: 'py27-impacket'
+    Python 3: 'py37-impacket'
+
+  On any system where pip is available:
+    Python 2: 'pip2 install impacket'
+    Python 3: 'pip3 install impacket'
+
+  You may also need to manually install the Python package 'six'
+  as that may be a missing requirement for impacket on Python 3.
 
  1.2 Port numbers used by test servers
 

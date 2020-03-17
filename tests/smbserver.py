@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2017 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -22,7 +22,7 @@
 """Server for testing SMB"""
 
 from __future__ import (absolute_import, division, print_function)
-# unicode_literals)
+# NOTE: the impacket configuration is not unicode_literals compatible!
 import argparse
 import os
 import sys
@@ -52,7 +52,7 @@ log = logging.getLogger(__name__)
 SERVER_MAGIC = "SERVER_MAGIC"
 TESTS_MAGIC = "TESTS_MAGIC"
 VERIFIED_REQ = "verifiedserver"
-VERIFIED_RSP = b"WE ROOLZ: {pid}\n"
+VERIFIED_RSP = "WE ROOLZ: {pid}\n"
 
 
 def smbserver(options):
@@ -267,7 +267,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
         if requested_filename == VERIFIED_REQ:
             log.debug("[SMB] Verifying server is alive")
-            contents = VERIFIED_RSP.format(pid=os.getpid())
+            contents = VERIFIED_RSP.format(pid=os.getpid()).encode('utf-8')
 
         self.write_to_fid(fid, contents)
         return fid, filename
@@ -288,7 +288,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
                   filename, fid, requested_filename)
 
         try:
-            contents = self.ctd.get_test_data(requested_filename)
+            contents = self.ctd.get_test_data(requested_filename).encode('utf-8')
             self.write_to_fid(fid, contents)
             return fid, filename
 

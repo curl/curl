@@ -17,7 +17,11 @@ task:
 
   pkginstall_script:
     - pkg update -f
-    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libmetalink libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel py27-impacket
+    - pkg install -y autoconf automake libtool pkgconf brotli openldap-client heimdal libpsl libmetalink libssh2 openssh-portable libidn2 librtmp libnghttp2 nghttp2 stunnel
+    - case `python -V` in
+        Python?3.7*) pkg install -y py37-impacket ;;
+        Python?2.7*) pkg install -y py27-impacket ;;
+      esac
     - pkg delete -y curl
   configure_script:
     - ./buildconf
