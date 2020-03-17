@@ -84,7 +84,8 @@ static int writeTime(FILE *str, CURL *curl, const char *key, CURLINFO ci)
   if(CURLE_OK == curl_easy_getinfo(curl, ci, &val)) {
     curl_off_t s = val / 1000000l;
     curl_off_t ms = val % 1000000l;
-    fprintf(str, "\"%s\":%ld.%06ld", key, s, ms);
+    fprintf(str, "\"%s\":%" CURL_FORMAT_CURL_OFF_T
+            ".%06" CURL_FORMAT_CURL_OFF_T, key, s, ms);
     return 1;
   }
   return 0;
