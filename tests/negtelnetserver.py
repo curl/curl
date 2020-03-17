@@ -84,17 +84,17 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             data = neg.recv(1024)
             log.debug("Incoming data: %r", data)
 
-            if VERIFIED_REQ.encode('ascii') in data:
+            if VERIFIED_REQ.encode('utf-8') in data:
                 log.debug("Received verification request from test framework")
                 response = VERIFIED_RSP.format(pid=os.getpid())
-                response_data = response.encode('ascii')
+                response_data = response.encode('utf-8')
             else:
                 log.debug("Received normal request - echoing back")
-                response_data = data.decode('utf8').strip()
+                response_data = data.decode('utf-8').strip().encode('utf-8')
 
             if response_data:
                 log.debug("Sending %r", response_data)
-                self.request.sendall(response_data.encode('utf8'))
+                self.request.sendall(response_data)
 
         except IOError:
             log.exception("IOError hit during request")
