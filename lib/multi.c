@@ -700,6 +700,10 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   if(!data->multi)
     return CURLM_OK; /* it is already removed so let's say it is fine! */
 
+  /* Prevent users from trying to remove an easy handle from the wrong multi */
+  if(data->multi != multi)
+    return CURLM_BAD_EASY_HANDLE;
+
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
