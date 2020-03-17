@@ -133,7 +133,7 @@ stages:
   jobs:
   - job: torture
     displayName: ubuntu torture tests
-    timeoutInMinutes: 50
+    timeoutInMinutes: 60
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -215,7 +215,7 @@ stages:
   jobs:
   - job: macos_torture
     displayName: macos torture
-    timeoutInMinutes: 50
+    timeoutInMinutes: 60
     pool:
       vmImage: 'macOS-latest'
     steps:
