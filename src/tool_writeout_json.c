@@ -34,7 +34,7 @@ static const char *http_version[] = {
   "0",   /* CURL_HTTP_VERSION_NONE */
   "1",   /* CURL_HTTP_VERSION_1_0 */
   "1.1", /* CURL_HTTP_VERSION_1_1 */
-  "2"    /* CURL_HTTP_VERSION_2 */
+  "2",   /* CURL_HTTP_VERSION_2 */
   "3"    /* CURL_HTTP_VERSION_3 */
 };
 
