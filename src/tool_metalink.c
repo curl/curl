@@ -336,8 +336,8 @@ static void win32_crypto_final(struct win32_crypto_hash *ctx,
 
 static int MD5_Init(MD5_CTX *ctx)
 {
-  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
-                         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
   }
   return 1;
@@ -357,8 +357,8 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
 
 static int SHA1_Init(SHA_CTX *ctx)
 {
-  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
-                         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_FULL,
+                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_SHA1, 0, 0, &ctx->hHash);
   }
   return 1;
@@ -378,8 +378,8 @@ static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
 
 static int SHA256_Init(SHA256_CTX *ctx)
 {
-  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
-                         PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
+                         CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
     CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash);
   }
   return 1;
