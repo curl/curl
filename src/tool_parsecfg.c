@@ -76,7 +76,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   FILE *file = NULL;
   bool usedarg = FALSE;
   int rc = 0;
-  struct OperationConfig *operation = global->first;
+  struct OperationConfig *operation = global->last;
   char *pathalloc = NULL;
 
   if(!filename || !*filename) {
@@ -233,6 +233,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       fprintf(stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
       res = getparameter(option, param, &usedarg, global, operation);
+      operation = global->last;
 
       if(!res && param && *param && !usedarg)
         /* we passed in a parameter that wasn't used! */

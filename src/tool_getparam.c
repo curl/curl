@@ -2258,6 +2258,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         char *nextarg = (i < (argc - 1)) ? argv[i + 1] : NULL;
 
         result = getparameter(flag, nextarg, &passarg, global, config);
+        config = global->last;
         if(result == PARAM_NEXT_OPERATION) {
           /* Reset result as PARAM_NEXT_OPERATION is only used here and not
              returned from this function */
