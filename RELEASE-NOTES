@@ -22,6 +22,7 @@ This release includes the following bugfixes:
  o docs: add warnings about FILE: URLs on Windows [19]
  o easy: fix curl_easy_duphandle for builds missing IPv6 that use c-ares [18]
  o gskit: use our internal select wrapper for portability [12]
+ o http2: Fix erroneous debug message that h2 connection closed [21]
  o Makefile.m32: Improve windres parameter compatibility [17]
  o Makefile: run the cd commands in a subshell [1]
  o multi: improve parameter check for curl_multi_remove_handle [6]
@@ -71,3 +72,4 @@ References to bug reports and discussions on issues:
  [18] = https://curl.haxx.se/bug/?i=5097
  [19] = https://curl.haxx.se/bug/?i=5066
  [20] = https://curl.haxx.se/bug/?i=5071
+ [21] = https://curl.haxx.se/bug/?i=5118
