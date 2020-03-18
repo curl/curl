@@ -1,22 +1,38 @@
-curl and libcurl 7.69.2
+curl and libcurl 7.70.0
 
  Public curl releases:         191
  Command line options:         230
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2135
+ Contributors:                 2142
 
 This release includes the following changes:
 
- o
+ o curl: add --ssl-revoke-best-effort to allow a "best effort" revocation check [5]
+ o schannel: add "best effort" revocation check option: CURLSSLOPT_REVOKE_BEST_EFFORT [5]
+ o writeout: support to generate JSON output with '%{json}' [8]
 
 This release includes the following bugfixes:
 
+ o cmake: add support for building with wolfSSL [9]
  o configure: convert -I to -isystem as a last step [2]
  o configure: document 'compiler_num' for gcc [4]
  o configure: fix -pedantic-errors for GCC 5 and later [3]
+ o connect: happy eyeballs cleanup [15]
+ o docs: add warnings about FILE: URLs on Windows [19]
+ o easy: fix curl_easy_duphandle for builds missing IPv6 that use c-ares [18]
+ o gskit: use our internal select wrapper for portability [12]
+ o Makefile.m32: Improve windres parameter compatibility [17]
  o Makefile: run the cd commands in a subshell [1]
- o tests/data: Fix some XML formatting issues in test cases
+ o multi: improve parameter check for curl_multi_remove_handle [6]
+ o select: move duplicate select preparation code into Curl_select [14]
+ o server/getpart: make the "XML-parser" stricter [20]
+ o tests/data: fix some XML formatting issues in test cases
+ o tests: remove python_dependencies for smbserver from our tree [16]
+ o tool_operate: fix add_parallel_transfers when more are in queue [10]
+ o transfer: cap retries of "dead connections" to 5 [13]
+ o vtls: fix ssl_config memory-leak on out-of-memory [11]
+ o windows: suppress UI in all CryptAcquireContext() calls [7]
 
 This release includes the following known bugs:
 
@@ -25,8 +41,11 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Muhammad Herdiansyah, Stepan Efremov,
-  (4 contributors)
+  Brad King, Dan Fandrich, Daniel Stenberg, Dima Tisnek, Frank Gevaerts,
+  Gavin Wong, Johannes Schindelin, Karl Chen, Marc Hörsken, Markus Olsson,
+  Mathias Gumz, Muhammad Herdiansyah, Paul Vixie, Ray Satiro, Stepan Efremov,
+  Steven Penny, Tim Sedlmeyer, Viktor Szakats,
+  (18 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -36,3 +55,19 @@ References to bug reports and discussions on issues:
  [2] = https://curl.haxx.se/bug/?i=5060
  [3] = https://curl.haxx.se/bug/?i=5067
  [4] = https://curl.haxx.se/bug/?i=5069
+ [5] = https://curl.haxx.se/bug/?i=4981
+ [6] = https://curl.haxx.se/bug/?i=5116
+ [7] = https://curl.haxx.se/bug/?i=5088
+ [8] = https://curl.haxx.se/bug/?i=4870
+ [9] = https://curl.haxx.se/bug/?i=5095
+ [10] = https://curl.haxx.se/bug/?i=4937
+ [11] = https://curl.haxx.se/bug/?i=5108
+ [12] = https://curl.haxx.se/bug/?i=5106
+ [13] = https://curl.haxx.se/mail/lib-2020-03/0044.html
+ [14] = https://curl.haxx.se/bug/?i=5078
+ [15] = https://curl.haxx.se/bug/?i=4954
+ [16] = https://curl.haxx.se/bug/?i=5094
+ [17] = https://curl.haxx.se/bug/?i=5099
+ [18] = https://curl.haxx.se/bug/?i=5097
+ [19] = https://curl.haxx.se/bug/?i=5066
+ [20] = https://curl.haxx.se/bug/?i=5071
