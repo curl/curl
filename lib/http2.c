@@ -1727,8 +1727,6 @@ static ssize_t http2_recv(struct connectdata *conn, int sockindex,
 
     return retlen;
   }
-  /* If this stream is closed, return 0 to signal the http routine to close
-     the connection */
   if(stream->closed)
     return 0;
   *err = CURLE_AGAIN;

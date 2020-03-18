@@ -568,17 +568,20 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     bool is_empty_data = FALSE;
     size_t buffersize = data->set.buffer_size;
     size_t bytestoread = buffersize;
+#ifdef USE_NGHTTP2
+    bool is_http2 = ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+                     (conn->httpversion == 20));
+#endif
 
     if(
-#if defined(USE_NGHTTP2)
+#ifdef USE_NGHTTP2
        /* For HTTP/2, read data without caring about the content
           length. This is safe because body in HTTP/2 is always
           segmented thanks to its framing layer. Meanwhile, we have to
           call Curl_read to ensure that http2_handle_stream_close is
           called when we read all incoming bytes for a particular
           stream. */
-       !((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-         conn->httpversion == 20) &&
+       !is_http2 &&
 #endif
        k->size != -1 && !k->header) {
       /* make sure we don't read too much */
@@ -621,9 +624,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       k->buf[nread] = 0;
     }
     else {
-      /* if we receive 0 or less here, the server closed the connection
-         and we bail out from this! */
-      DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
+      /* if we receive 0 or less here, either the http2 stream is closed or the
+         server closed the connection and we bail out from this! */
+#ifdef USE_NGHTTP2
+      if(is_http2 && !nread)
+        DEBUGF(infof(data, "nread == 0, stream closed, bailing\n"));
+      else
+#endif
+        DEBUGF(infof(data, "nread <= 0, server closed connection, bailing\n"));
       k->keepon &= ~KEEP_RECV;
       break;
     }
