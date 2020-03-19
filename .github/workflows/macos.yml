@@ -1,0 +1,76 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  vanilla:
+    name: macos default
+    timeout-minutes: 30
+    runs-on: 'macos-latest'
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: brew update && brew install libtool autoconf automake nghttp2 pkg-config
+      name: 'brew install'
+
+    - run: ./buildconf && ./configure --enable-debug --enable-werror --without-brotli
+      name: 'configure debug without brotli'
+
+    - run: make
+      name: 'make'
+
+    - run: make test-nonflaky
+      name: 'test'
+
+  libssh2:
+    name: macos libssh2
+    timeout-minutes: 30
+    runs-on: 'macos-latest'
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: brew update && brew install libtool autoconf automake nghttp2 pkg-config libssh2
+      name: 'brew install'
+
+    - run: ./buildconf && ./configure --enable-debug --with-libssh2
+      name: 'configure debug with libssh2'
+
+    - run: make
+      name: 'make'
+
+    - run: make test-nonflaky
+      name: 'test'
+
+  cmake_openssl:
+    name: macos cmake openssl
+    timeout-minutes: 20
+    runs-on: 'macos-latest'
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: brew update && brew install libtool autoconf automake nghttp2 pkg-config openssl
+      name: 'brew install'
+
+    - run: cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON && cmake --build build
+      name: 'cmake build'
+
+  torture:
+    name: macos torture
+    timeout-minutes: 60
+    runs-on: 'macos-latest'
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: brew update && brew install libtool autoconf automake nghttp2 pkg-config
+      name: 'brew install'
+
+    - run: ./buildconf && ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+      name: 'configure torture'
+
+    - run: make
+      name: 'make'
+
+    - run: make test-nonflaky
+      name: 'torture test'
+      env:
+        TFLAGS: "-n -t --shallow=25 !FTP"
