@@ -26,7 +26,7 @@ task:
   configure_script:
     - ./buildconf
     - case `uname -r` in
-        13.0*)
+        12.1*)
         export CC=clang;
         export CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
         export CXXFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g";
@@ -51,7 +51,6 @@ task:
         13.0*) SKIP_TESTS='!1242 !1243 !2002 !2003';;
         12.1*) SKIP_TESTS='!1242 !1243 !2002 !2003';;
         11.3*) SKIP_TESTS='!504 !1242 !1243 !2002 !2003';;
-        10.4*) SKIP_TESTS='!310 !311 !312 !313 !1082 !1242 !1243 !2002 !2003 !2034 !2035 !2037 !2038 !2041 !2042 !2048 !3000 !3001';;
       esac
     - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
   install_script:
