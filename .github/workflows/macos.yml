@@ -4,10 +4,18 @@ on: [push, pull_request]
 
 jobs:
   autotools:
-    name: macos ${{ matrix.build.name }}
+    name: macos ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
     runs-on: 'macos-latest'
+    env: ${{ matrix.compiler }}
     strategy:
       matrix:
+        compiler:
+        - CC: clang
+          CXX: clang++
+        - CC: gcc-8
+          CXX: g++-8
+        - CC: gcc-9
+          CXX: g++-9
         build:
         - name: normal
           install: nghttp2
@@ -59,10 +67,10 @@ jobs:
     strategy:
       matrix:
         build:
-        - name: openssl
+        - name: OpenSSL
           install: nghttp2 openssl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
-        - name: libressl
+        - name: LibreSSL
           install: nghttp2 libressl
           generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
     steps:
