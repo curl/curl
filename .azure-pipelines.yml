@@ -239,6 +239,8 @@ stages:
 
 - stage: windows
   dependsOn: []
+  variables:
+    agent.preferPowerShellOnContainers: true
   jobs:
   - job: windows_msys2_mingw32_debug_openssl
     displayName: msys2 mingw32 debug openssl
