@@ -398,9 +398,6 @@ before_install:
 
 install:
   - if [ "$T" = "coverage" ]; then pip2 install --user cpp-coveralls; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew reinstall libtool > /dev/null; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install rtmpdump libssh2 c-ares libmetalink libressl nghttp2 libmetalink; fi
 
 # before_script and script:
 # Travis isn't reliable catching errors in inline script commands (#3730).
