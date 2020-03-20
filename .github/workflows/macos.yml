@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   autotools:
-    name: macos ${{ matrix.feature.name }}
+    name: macos ${{ matrix.build.name }}
     runs-on: 'macos-latest'
     strategy:
       matrix:
@@ -48,15 +48,26 @@ jobs:
       env:
         TFLAGS: "${{ matrix.build.tflags }}"
 
-  cmake_openssl:
-    name: macos cmake openssl
-    timeout-minutes: 20
+  cmake:
+    name: macos cmake ${{ matrix.build.name }}
     runs-on: 'macos-latest'
+    strategy:
+      matrix:
+        build:
+        - name: openssl
+          install: nghttp2 openssl
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+        - name: libressl
+          install: nghttp2 libressl
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
     steps:
     - uses: actions/checkout@v2
 
-    - run: brew update && brew install libtool autoconf automake nghttp2 pkg-config openssl
+    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
       name: 'brew install'
 
-    - run: cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON && cmake --build build
+    - run: cmake -H. -Bbuild ${{ matrix.build.generate }}
+      name: 'cmake generate'
+
+    - run: cmake --build build
       name: 'cmake build'
