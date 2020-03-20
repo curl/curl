@@ -16,9 +16,9 @@ jobs:
         - name: libssh2
           install: nghttp2 libssh2
           configure: --enable-debug --with-libssh2
-        - name: async resolver
+        - name: c-ares
           install: nghttp2
-          configure: --enable-debug --enable-threaded-resolver
+          configure: --enable-debug --enable-ares
         - name: HTTP only
           install: nghttp2
           configure: --enable-debug --enable-werror --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
