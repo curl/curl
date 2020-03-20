@@ -3,13 +3,12 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
+  autotools:
     name: macos ${{ matrix.feature.name }}
-    timeout-minutes: 30
     runs-on: 'macos-latest'
     strategy:
       matrix:
-        feature:
+        build:
         - name: default
           install: nghttp2
           configure: --enable-debug --enable-werror --without-brotli
@@ -28,13 +27,17 @@ jobs:
         - name: libressl metalink
           install: nghttp2 libressl libmetalink
           configure: --enable-debug --with-ssl=/usr/local/opt/libressl --with-libmetalink
+        - name: torture
+          install: nghttp2 openssl
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          tflags: -n -t --shallow=25 !FTP
     steps:
     - uses: actions/checkout@v2
 
-    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.feature.install }}
+    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
       name: 'brew install'
 
-    - run: ./buildconf && ./configure ${{ matrix.feature.configure }}
+    - run: ./buildconf && ./configure ${{ matrix.build.configure }}
       name: 'configure'
 
     - run: make
@@ -42,6 +45,8 @@ jobs:
 
     - run: make test-nonflaky
       name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }}"
 
   cmake_openssl:
     name: macos cmake openssl
@@ -55,24 +60,3 @@ jobs:
 
     - run: cmake -H. -Bbuild -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON && cmake --build build
       name: 'cmake build'
-
-  torture:
-    name: macos torture
-    timeout-minutes: 70
-    runs-on: 'macos-latest'
-    steps:
-    - uses: actions/checkout@v2
-
-    - run: brew update && brew install libtool autoconf automake nghttp2 pkg-config
-      name: 'brew install'
-
-    - run: ./buildconf && ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
-      name: 'configure torture'
-
-    - run: make
-      name: 'make'
-
-    - run: make test-nonflaky
-      name: 'torture test'
-      env:
-        TFLAGS: "-n -t --shallow=25 !FTP"
