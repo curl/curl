@@ -4,18 +4,10 @@ on: [push, pull_request]
 
 jobs:
   autotools:
-    name: macos ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
+    name: macos ${{ matrix.build.name }}
     runs-on: 'macos-latest'
-    env: ${{ matrix.compiler }}
     strategy:
       matrix:
-        compiler:
-        - CC: clang
-          CXX: clang++
-        - CC: gcc-8
-          CXX: g++-8
-        - CC: gcc-9
-          CXX: g++-9
         build:
         - name: normal
           install: nghttp2
@@ -59,13 +51,21 @@ jobs:
     - run: make test-nonflaky
       name: 'test'
       env:
-        TFLAGS: "${{ matrix.build.tflags }}"
+        TFLAGS: "${{ matrix.build.tflags }} ~1452"
 
   cmake:
-    name: macos cmake ${{ matrix.build.name }}
+    name: macos cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
     runs-on: 'macos-latest'
+    env: ${{ matrix.compiler }}
     strategy:
       matrix:
+        compiler:
+        - CC: clang
+          CXX: clang++
+        - CC: gcc-8
+          CXX: g++-8
+        - CC: gcc-9
+          CXX: g++-9
         build:
         - name: OpenSSL
           install: nghttp2 openssl
