@@ -159,6 +159,19 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       break;
     }
   }
+  /* use another variable for this to allow different values */
+  timestr = getenv("CURL_DEBUG_SIZE");
+  if(timestr) {
+    unsigned long val = strtol(timestr, NULL, 10);
+    switch(info) {
+    case CURLINFO_HEADER_SIZE:
+    case CURLINFO_REQUEST_SIZE:
+      *param_longp = (long)val;
+      return CURLE_OK;
+    default:
+      break;
+    }
+  }
 #endif
 
   switch(info) {
