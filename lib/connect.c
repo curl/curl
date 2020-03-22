@@ -807,6 +807,7 @@ static void post_SOCKS(struct connectdata *conn,
     Curl_pgrsTime(conn->data, TIMER_CONNECT); /* connect done */
   Curl_updateconninfo(conn, conn->sock[sockindex]);
   Curl_verboseconnect(conn);
+  conn->data->info.numconnects++; /* to track the number of connections made */
 }
 
 /*
@@ -1343,7 +1344,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   if(result)
     return result;
 
-  data->info.numconnects++; /* to track the number of connections made */
   Curl_expire(conn->data, data->set.happy_eyeballs_timeout,
               EXPIRE_HAPPY_EYEBALLS);
 
