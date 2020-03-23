@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -72,10 +72,7 @@ EXTRA_DIST =                                    \
  LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
  PARALLEL-TRANSFERS.md                          \
- README.cmake                                   \
  README.md                                      \
- README.netware                                 \
- README.win32                                   \
  RELEASE-PROCEDURE.md                           \
  RESOURCES                                      \
  ROADMAP.md                                     \

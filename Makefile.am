@@ -168,7 +168,7 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/include/mkfile             \
  plan9/mkfile.proto               \
  plan9/mkfile                     \
- plan9/BUILD.PLAN9.txt            \
+ plan9/README                     \
  plan9/lib/mkfile.inc             \
  plan9/lib/mkfile                 \
  plan9/src/mkfile.inc             \

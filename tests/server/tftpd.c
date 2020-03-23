@@ -15,7 +15,8 @@
  */
 
 /*
- * Copyright (c) 1983 Regents of the University of California.
+ * Copyright (C) 2005 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (c) 1983, Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
