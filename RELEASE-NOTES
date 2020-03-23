@@ -4,7 +4,7 @@ curl and libcurl 7.70.0
  Command line options:         230
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2142
+ Contributors:                 2148
 
 This release includes the following changes:
 
@@ -14,11 +14,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o ci/tests: fix Azure Pipelines not running Windows containers [25]
+ o cirrus: re-enable the FreeBSD 13 CI builds [29]
  o cmake: add support for building with wolfSSL [9]
+ o cmdline: fix handling of OperationConfig linked list (--next) [24]
  o configure: convert -I to -isystem as a last step [2]
  o configure: document 'compiler_num' for gcc [4]
  o configure: fix -pedantic-errors for GCC 5 and later [3]
  o connect: happy eyeballs cleanup [15]
+ o curl-functions.m4: remove inappropriate AC_REQUIRE [26]
+ o curl_setup: define _WIN32_WINNT_[OS] symbols [27]
+ o CURLINFO_NUM_CONNECTS: improve accuracy [28]
  o docs: add warnings about FILE: URLs on Windows [19]
  o easy: fix curl_easy_duphandle for builds missing IPv6 that use c-ares [18]
  o gskit: use our internal select wrapper for portability [12]
@@ -26,10 +32,14 @@ This release includes the following bugfixes:
  o Makefile.m32: Improve windres parameter compatibility [17]
  o Makefile: run the cd commands in a subshell [1]
  o multi: improve parameter check for curl_multi_remove_handle [6]
+ o OS400: update strings for ccsid-ifier (fixes the build) [30]
  o select: move duplicate select preparation code into Curl_select [14]
  o server/getpart: make the "XML-parser" stricter [20]
+ o test2100: fix static port instead of dynamic value being used
  o tests/data: fix some XML formatting issues in test cases
+ o tests: make Python-based servers compatible with Python 2 and 3 [22]
  o tests: remove python_dependencies for smbserver from our tree [16]
+ o tls: remove the BACKEND define kludge from most backends [23]
  o tool_operate: fix add_parallel_transfers when more are in queue [10]
  o transfer: cap retries of "dead connections" to 5 [13]
  o vtls: fix ssl_config memory-leak on out-of-memory [11]
@@ -42,11 +52,13 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad King, Dan Fandrich, Daniel Stenberg, Dima Tisnek, Frank Gevaerts,
-  Gavin Wong, Johannes Schindelin, Karl Chen, Marc Hörsken, Markus Olsson,
-  Mathias Gumz, Muhammad Herdiansyah, Paul Vixie, Ray Satiro, Stepan Efremov,
-  Steven Penny, Tim Sedlmeyer, Viktor Szakats,
-  (18 contributors)
+  Brad King, Calvin Buckley, Dan Fandrich, Daniel Stenberg, Dima Tisnek,
+  Frank Gevaerts, FuccDucc on github, Gavin Wong, Johannes Schindelin,
+  Kamil Dudka, Karl Chen, Marcel Raad, Marc Hörsken, Markus Olsson,
+  Mathias Gumz, Muhammad Herdiansyah, Paul Vixie, Ray Satiro, Rici Lake,
+  Ross Burton, Simon Chalifoux, Stepan Efremov, Steven Penny, Timothe Litt,
+  Tim Sedlmeyer, Tommy Petty, Viktor Szakats,
+  (27 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -73,3 +85,12 @@ References to bug reports and discussions on issues:
  [19] = https://curl.haxx.se/bug/?i=5066
  [20] = https://curl.haxx.se/bug/?i=5071
  [21] = https://curl.haxx.se/bug/?i=5118
+ [22] = https://curl.haxx.se/bug/?i=5104
+ [23] = https://curl.haxx.se/bug/?i=5122
+ [24] = https://curl.haxx.se/bug/?i=5120
+ [25] = https://curl.haxx.se/bug/?i=5117
+ [26] = https://curl.haxx.se/bug/?i=5126
+ [27] = https://curl.haxx.se/bug/?i=4995
+ [28] = https://curl.haxx.se/bug/?i=5135
+ [29] = https://curl.haxx.se/bug/?i=5091
+ [30] = https://curl.haxx.se/bug/?i=5132
