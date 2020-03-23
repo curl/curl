@@ -28,7 +28,7 @@ $!
 $! This procedure may not guess the options correctly for all architectures,
 $! and is a work in progress.
 $!
-$! Copyright 2011, John Malmberg
+$! Copyright 2011 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above
