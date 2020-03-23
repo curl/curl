@@ -18,7 +18,7 @@ parts. The reason for this is that HTTP/2 is much more complex at that layer
 than HTTP/1.1 (which we implement on our own) and that nghttp2 is an already
 existing and well functional library.
 
-We require at least version 1.0.0.
+We require at least version 1.12.0.
 
 Over an http:// URL
 -------------------
