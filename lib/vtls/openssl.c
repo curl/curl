@@ -2719,6 +2719,33 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 #endif
 
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+  /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
+  if(ssl_cafile) {
+    if(!SSL_CTX_load_verify_file(backend->ctx, ssl_cafile)) {
+      if(verifypeer) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate file: %s", ssl_cafile);
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+      /* Continue with a warning if no certificate verification is required. */
+      infof(data, "error setting certificate file, continuing anyway\n");
+    }
+    infof(data, "  CAfile: %s\n", ssl_cafile);
+  }
+  if(ssl_capath) {
+    if(!SSL_CTX_load_verify_dir(backend->ctx, ssl_capath)) {
+      if(verifypeer) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error setting certificate path: %s", ssl_capath);
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+      /* Continue with a warning if no certificate verification is required. */
+      infof(data, "error setting certificate path, continuing anyway\n");
+    }
+    infof(data, "  CApath: %s\n", ssl_capath);
+  }
+#else
   if(ssl_cafile || ssl_capath) {
     /* tell SSL where to find CA certificates that are used to verify
        the servers certificate. */
@@ -2746,6 +2773,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
           ssl_cafile ? ssl_cafile : "none",
           ssl_capath ? ssl_capath : "none");
   }
+#endif
+
 #ifdef CURL_CA_FALLBACK
   else if(verifypeer) {
     /* verifying the peer without any CA certificates won't

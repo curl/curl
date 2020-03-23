@@ -1873,6 +1873,31 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
     ],[
       AC_MSG_RESULT([no])
     ])
+
+    AC_MSG_CHECKING([for OpenSSL >= v3])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+#include <openssl/opensslv.h>
+      ]],[[
+        #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+        return 0;
+        #else
+        #error older than 3
+        #endif
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      AC_DEFINE_UNQUOTED(HAVE_OPENSSL3, 1,
+        [Define to 1 if using OpenSSL 3 or later.])
+      dnl OpenSSLv3 marks the DES functions deprecated but we have no
+      dnl replacements (yet) so tell the compiler to not warn for them
+      dnl
+      dnl Ask OpenSSL to suppress the warnings.
+      CPPFLAGS="$CPPFLAGS -DOPENSSL_SUPPRESS_DEPRECATED"
+      ssl_msg="OpenSSL v3+"
+    ],[
+      AC_MSG_RESULT([no])
+    ])
   fi
 
   if test "$OPENSSL_ENABLED" = "1"; then
