@@ -166,9 +166,6 @@
 /* Define to 1 if you have the <crypto.h> header file. */
 #cmakedefine HAVE_CRYPTO_H 1
 
-/* Define to 1 if you have the <des.h> header file. */
-#cmakedefine HAVE_DES_H 1
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine HAVE_DLFCN_H 1
 
