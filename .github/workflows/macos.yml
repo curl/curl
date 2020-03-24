@@ -1,0 +1,88 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  autotools:
+    name: macos ${{ matrix.build.name }}
+    runs-on: 'macos-latest'
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+        - name: normal
+          install: nghttp2
+        - name: debug
+          install: nghttp2
+          configure: --enable-debug --enable-werror --without-brotli
+        - name: libssh2
+          install: nghttp2 libssh2
+          configure: --enable-debug --with-libssh2
+        - name: c-ares
+          install: nghttp2
+          configure: --enable-debug --enable-ares
+        - name: HTTP only
+          install: nghttp2
+          configure: --enable-debug --enable-werror --enable-maintainer-mode --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets --disable-shared --without-brotli --without-gssapi --without-libidn2 --without-libmetalink --without-libpsl --without-librtmp --without-libssh2 --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib
+        - name: SecureTransport metalink
+          install: nghttp2 openssl libmetalink
+          configure: --enable-debug --without-ssl --with-darwinssl --with-libmetalink
+        - name: OpenSSL metalink
+          install: nghttp2 openssl libmetalink
+          configure: --enable-debug --with-ssl=/usr/local/opt/openssl --with-libmetalink
+        - name: LibreSSL metalink
+          install: nghttp2 libressl libmetalink
+          configure: --enable-debug --with-ssl=/usr/local/opt/libressl --with-libmetalink
+        - name: torture
+          install: nghttp2 openssl
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          tflags: -n -t --shallow=25 !FTP
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
+      name: 'brew install'
+
+    - run: ./buildconf && ./configure ${{ matrix.build.configure }}
+      name: 'configure'
+
+    - run: make
+      name: 'make'
+
+    - run: make test-nonflaky
+      name: 'test'
+      env:
+        TFLAGS: "${{ matrix.build.tflags }} ~1452"
+
+  cmake:
+    name: macos cmake ${{ matrix.compiler.CC }} ${{ matrix.build.name }}
+    runs-on: 'macos-latest'
+    env: ${{ matrix.compiler }}
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+        - CC: clang
+          CXX: clang++
+        - CC: gcc-8
+          CXX: g++-8
+        - CC: gcc-9
+          CXX: g++-9
+        build:
+        - name: OpenSSL
+          install: nghttp2 openssl
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+        - name: LibreSSL
+          install: nghttp2 libressl
+          generate: -DOPENSSL_ROOT_DIR=/usr/local/opt/libressl -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
+      name: 'brew install'
+
+    - run: cmake -H. -Bbuild ${{ matrix.build.generate }}
+      name: 'cmake generate'
+
+    - run: cmake --build build
+      name: 'cmake build'
