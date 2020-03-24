@@ -115,10 +115,6 @@
 /* #undef HAVE_CRYPTO_H */
 #define HAVE_CRYPTO_H 1
 
-/* Define to 1 if you have the <des.h> header file. */
-/* #undef HAVE_DES_H */
-#define HAVE_DES_H 1
-
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
 

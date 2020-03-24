@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -96,9 +96,6 @@
 
 /* Define if you have the <crypto.h> header file. */
 #undef HAVE_CRYPTO_H
-
-/* Define if you have the <des.h> header file. */
-#undef HAVE_DES_H
 
 /* Define if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H
