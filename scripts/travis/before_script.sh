@@ -26,7 +26,7 @@ set -eo pipefail
 
 if [ "$NGTCP2" = yes ]; then
   cd $HOME
-  git clone --depth 1 -b openssl-quic-draft-23 https://github.com/tatsuhiro-t/openssl possl
+  git clone --depth 1 -b OpenSSL_1_1_1d-quic-draft-27 https://github.com/tatsuhiro-t/openssl possl
   cd possl
   ./config enable-tls1_3 --prefix=$HOME/ngbuild
   make
