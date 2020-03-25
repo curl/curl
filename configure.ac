@@ -1891,13 +1891,9 @@ if test -z "$ssl_backends" -o "x$OPT_SSL" != xno &&
         [Define to 1 if using OpenSSL 3 or later.])
       dnl OpenSSLv3 marks the DES functions deprecated but we have no
       dnl replacements (yet) so tell the compiler to not warn for them
-      case "$compiler_id" in
-        CLANG | GNU_C)
-          CFLAGS="$CFLAGS -Wno-deprecated-declarations"
-          ;;
-        *)
-          ;;
-      esac
+      dnl
+      dnl Ask OpenSSL to suppress the warnings.
+      CPPFLAGS="$CPPFLAGS -DOPENSSL_SUPPRESS_DEPRECATED"
       ssl_msg="OpenSSL v3+"
     ],[
       AC_MSG_RESULT([no])
