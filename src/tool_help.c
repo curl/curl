@@ -40,7 +40,7 @@
  ---------------------------------------------------------
 
   cd $srcroot/docs/cmdline-opts
-  ./gen.pl listhelp
+  ./gen.pl listhelp *.d
  */
 
 struct helptxt {
