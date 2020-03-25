@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -32,3 +32,20 @@ all: $(MANPAGE)
 
 $(MANPAGE): $(DPAGES) $(OTHERPAGES) Makefile.inc
 	@PERL@ $(srcdir)/gen.pl mainpage $(srcdir) > $(MANPAGE)
+
+filecheck:
+	@(INC="$(DPAGES)";                      \
+	GIT=`git ls-files "*.d"`;               \
+	for f in $$GIT; do                      \
+	  found="no";                           \
+	  for i in $$INC; do                    \
+	    if test "$$f" = "$$i"; then         \
+	      found="yes";                      \
+	      break;			        \
+	    fi                                  \
+	  done;                                 \
+          if test "$$found" != "yes"; then      \
+	    echo "missing in DPAGES: $$f";	\
+	    exit 1;			        \
+	  fi				        \
+	done)
