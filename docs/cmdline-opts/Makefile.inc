@@ -59,8 +59,8 @@ DPAGES =					\
   dump-header.d					\
   egd-file.d					\
   engine.d					\
-  etag-save.d                   \
   etag-compare.d                \
+  etag-save.d                   \
   expect100-timeout.d				\
   fail-early.d					\
   fail.d					\
@@ -106,6 +106,7 @@ DPAGES =					\
   login-options.d				\
   mail-auth.d					\
   mail-from.d					\
+  mail-rcpt-allowfails.d                        \
   mail-rcpt.d					\
   manual.d					\
   max-filesize.d				\
@@ -183,7 +184,7 @@ DPAGES =					\
   retry-delay.d					\
   retry-max-time.d				\
   retry.d					\
-  sasl-authzid.d					\
+  sasl-authzid.d				\
   sasl-ir.d					\
   service-name.d				\
   show-error.d					\
