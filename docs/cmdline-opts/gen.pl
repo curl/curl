@@ -25,7 +25,7 @@
 
 This script generates the manpage.
 
-Example: gen.pl mainpage > curl.1
+Example: gen.pl <command> [files] > curl.1
 
 Dev notes:
 
@@ -36,12 +36,6 @@ Unfortunately it seems some perls like msysgit can't handle a global input-only
 
 =end comment
 =cut
-
-my $some_dir=$ARGV[1] || ".";
-
-opendir(my $dh, $some_dir) || die "Can't opendir $some_dir: $!";
-my @s = grep { /\.d$/ && -f "$some_dir/$_" } readdir($dh);
-closedir $dh;
 
 my %optshort;
 my %optlong;
@@ -122,7 +116,7 @@ sub added {
 
 sub single {
     my ($f, $standalone)=@_;
-    open(F, "<:crlf", "$some_dir/$f") ||
+    open(F, "<:crlf", "$f") ||
         return 1;
     my $short;
     my $long;
@@ -262,7 +256,7 @@ sub single {
 
 sub getshortlong {
     my ($f)=@_;
-    open(F, "<:crlf", "$some_dir/$f");
+    open(F, "<:crlf", "$f");
     my $short;
     my $long;
     my $help;
@@ -301,14 +295,15 @@ sub getshortlong {
 }
 
 sub indexoptions {
-  foreach my $f (@s) {
-    getshortlong($f);
-  }
+    my (@files) = @_;
+    foreach my $f (@files) {
+        getshortlong($f);
+    }
 }
 
 sub header {
     my ($f)=@_;
-    open(F, "<:crlf", "$some_dir/$f");
+    open(F, "<:crlf", "$f");
     my @d;
     while(<F>) {
         push @d, $_;
@@ -347,12 +342,15 @@ sub listhelp {
 }
 
 sub mainpage {
+    my (@files) = @_;
     # show the page header
     header("page-header");
 
     # output docs for all options
-    foreach my $f (sort @s) {
-        single($f, 0);
+    foreach my $f (sort @files) {
+        if(single($f, 0)) {
+            print STDERR "Can't read $f?\n";
+        }
     }
 
     header("page-footer");
@@ -379,33 +377,33 @@ sub showprotocols {
 }
 
 sub getargs {
-    my $f;
-    do {
-        $f = shift @ARGV;
-        if($f eq "mainpage") {
-            mainpage();
-            return;
-        }
-        elsif($f eq "listhelp") {
-            listhelp();
-            return;
-        }
-        elsif($f eq "single") {
-            showonly(shift @ARGV);
-            return;
-        }
-        elsif($f eq "protos") {
-            showprotocols();
-            return;
-        }
-    } while($f);
+    my ($f, @s) = @_;
+    if($f eq "mainpage") {
+        mainpage(@s);
+        return;
+    }
+    elsif($f eq "listhelp") {
+        listhelp();
+        return;
+    }
+    elsif($f eq "single") {
+        showonly($s[0]);
+        return;
+    }
+    elsif($f eq "protos") {
+        showprotocols();
+        return;
+    }
 
-    print "Usage: gen.pl <mainpage/listhelp/single FILE/protos> [srcdir]\n";
+    print "Usage: gen.pl <mainpage/listhelp/single FILE/protos> [files]\n";
 }
 
 #------------------------------------------------------------------------
 
-# learn all existing options
-indexoptions();
+my $cmd = shift @ARGV;
+my @files = @ARGV; # the rest are the files
 
-getargs();
+# learn all existing options
+indexoptions(@files);
+
+getargs($cmd, @files);
