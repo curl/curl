@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -49,7 +49,6 @@ The curl_version_info_data struct looks like this
 typedef struct {
   CURLversion age;          /* see description below */
 
-  /* when 'age' is 0 or higher, the members below also exist: */
   const char *version;      /* human readable string */
   unsigned int version_num; /* numeric representation */
   const char *host;         /* human readable string */
@@ -59,27 +58,27 @@ typedef struct {
   const char *libz_version; /* human readable string */
   const char * const *protocols; /* protocols */
 
-  /* when 'age' is 1 or higher, the members below also exist: */
+  /* when 'age' is CURLVERSION_SECOND or higher, the members below exist */
   const char *ares;         /* human readable string */
   int ares_num;             /* number */
 
-  /* when 'age' is 2 or higher, the member below also exists: */
+  /* when 'age' is CURLVERSION_THIRD or higher, the members below exist */
   const char *libidn;       /* human readable string */
 
-  /* when 'age' is 3 or higher (7.16.1 or later), the members below also
-     exist  */
+  /* when 'age' is CURLVERSION_FOURTH or higher (>= 7.16.1), the members
+     below exist */
   int iconv_ver_num;       /* '_libiconv_version' if iconv support enabled */
 
   const char *libssh_version; /* human readable string */
 
-  /* when 'age' is 4 or higher (7.57.0 or later), the members below also
-     exist  */
+  /* when 'age' is CURLVERSION_FIFTH or higher (>= 7.57.0), the members
+     below exist */
   unsigned int brotli_ver_num; /* Numeric Brotli version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *brotli_version; /* human readable string. */
 
-  /* when 'age is CURLVERSION_SIXTH or alter (7.66.0 or later), these fields
-     also exist */
+  /* when 'age' is CURLVERSION_SIXTH or higher (>= 7.66.0), the members
+     below exist */
   unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
                                    (MAJOR << 16) | (MINOR << 8) | PATCH */
   const char *nghttp2_version; /* human readable string. */
@@ -87,6 +86,12 @@ typedef struct {
   const char *quic_version;    /* human readable quic (+ HTTP/3) library +
                                   version or NULL */
 
+  /* when 'age' is CURLVERSION_SEVENTH or higher (>= 7.70.0), the members
+     below exist */
+  const char *cainfo;          /* the built-in default CURLOPT_CAINFO, might
+                                  be NULL */
+  const char *capath;          /* the built-in default CURLOPT_CAPATH, might
+                                  be NULL */
 } curl_version_info_data;
 .fi
 

@@ -404,7 +404,17 @@ static curl_version_info_data version_info = {
   NULL, /* brotli version */
   0,    /* nghttp2 version number */
   NULL, /* nghttp2 version string */
-  NULL  /* quic library string */
+  NULL, /* quic library string */
+#ifdef CURL_CA_BUNDLE
+  CURL_CA_BUNDLE, /* cainfo */
+#else
+  NULL,
+#endif
+#ifdef CURL_CA_PATH
+  CURL_CA_PATH  /* capath */
+#else
+  NULL
+#endif
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
