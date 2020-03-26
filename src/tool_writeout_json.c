@@ -105,9 +105,19 @@ static int writeString(FILE *str, CURL *curl, const char *key, CURLINFO ci)
 
 static int writeLong(FILE *str, CURL *curl, const char *key, CURLINFO ci)
 {
-  curl_off_t val = 0;
+  long val = 0;
   if(CURLE_OK == curl_easy_getinfo(curl, ci, &val)) {
     fprintf(str, "\"%s\":%ld", key, val);
+    return 1;
+  }
+  return 0;
+}
+
+static int writeOffset(FILE *str, CURL *curl, const char *key, CURLINFO ci)
+{
+  curl_off_t val = 0;
+  if(CURLE_OK == curl_easy_getinfo(curl, ci, &val)) {
+    fprintf(str, "\"%s\":%" CURL_FORMAT_CURL_OFF_T, key, val);
     return 1;
   }
   return 0;
@@ -159,6 +169,9 @@ void ourWriteOutJSON(const struct writeoutvar mappings[], CURL *curl,
       break;
     case JSON_LONG:
       ok = writeLong(stream, curl, name, cinfo);
+      break;
+    case JSON_OFFSET:
+      ok = writeOffset(stream, curl, name, cinfo);
       break;
     case JSON_TIME:
       ok = writeTime(stream, curl, name, cinfo);
