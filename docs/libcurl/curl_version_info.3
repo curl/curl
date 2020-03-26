@@ -77,7 +77,7 @@ typedef struct {
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *brotli_version; /* human readable string. */
 
-  /* when 'age is CURLVERSION_SIXTH or higher (>= 7.66.0), the members
+  /* when 'age' is CURLVERSION_SIXTH or higher (>= 7.66.0), the members
      below exist */
   unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
                                    (MAJOR << 16) | (MINOR << 8) | PATCH */
@@ -86,7 +86,7 @@ typedef struct {
   const char *quic_version;    /* human readable quic (+ HTTP/3) library +
                                   version or NULL */
 
-  /* when 'age is CURLVERSION_SEVENTH or higher (>= 7.70.0), the members
+  /* when 'age' is CURLVERSION_SEVENTH or higher (>= 7.70.0), the members
      below exist */
   const char *cainfo;          /* the built-in default CURLOPT_CAINFO, might
                                   be NULL */
