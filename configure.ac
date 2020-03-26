@@ -149,6 +149,7 @@ dnl initialize all the info variables
  curl_brotli_msg="no      (--with-brotli)"
    curl_zstd_msg="no      (--with-zstd)"
     curl_gss_msg="no      (--with-gssapi)"
+curl_gssntlm_msg="no      (--enable-gssntlmssp)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
@@ -1398,6 +1399,21 @@ no)
         ;;
 esac
 
+dnl -------------------------------------------------------------
+dnl enable gssntlmssp support
+dnl -------------------------------------------------------------
+AC_ARG_ENABLE(gssntlmssp,
+AC_HELP_STRING([--enable-gssntlmssp],[Enable GSSNTLMSSP])
+AC_HELP_STRING([--disable-gssntlmssp],[Disable GSSNTLMSSP]),
+[ case "$enableval" in
+  yes)
+    want_gssntlmssp="yes"
+    dnl Also implies GSSAPI
+    want_gss="yes"
+  ;;
+  esac
+])
+
 dnl **********************************************************************
 dnl Check for GSS-API libraries
 dnl **********************************************************************
@@ -1578,6 +1594,24 @@ if test x"$want_gss" = "xyes"; then
 fi
 
 AM_CONDITIONAL(BUILD_STUB_GSS, test "x$build_libstubgss" = "xyes")
+
+AC_MSG_CHECKING([whether to enable GSSNTLMSSP support (MIT GSSAPI builds only)])
+if test x"$want_gssntlmssp" = xyes; then
+  AC_MSG_RESULT(yes)
+  if test "$HAVE_GSSAPI" = "1"; then
+    AC_CHECK_HEADER(gssapi/gssapi_ntlmssp.h,
+      [
+        AC_DEFINE(HAVE_GSSNTLMSSP, 1, [if you have GSSNTLMSSP support])
+        AC_DEFINE(USE_GSSNTLMSSP, 1, [to enable GSSNTLMSSP support])
+        AC_SUBST(USE_GSSNTLMSSP)
+        curl_gssntlm_msg="enabled"
+      ])
+  else
+    AC_MSG_WARN([--enable-gssntlmssp Ignored.])
+  fi
+else
+  AC_MSG_RESULT(no)
+fi
 
 dnl -------------------------------------------------------------
 dnl parse --with-default-ssl-backend so it can be validated below
@@ -4981,6 +5015,9 @@ fi
 if test "x$HAVE_GSSAPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
+if test "x$USE_GSSNTLMSSP" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSSNTLMSSP"
+fi
 
 if test "x$curl_psl_msg" = "xenabled"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
@@ -5225,6 +5262,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Verbose errors:   ${curl_verbose_msg}
   Code coverage:    ${curl_coverage_msg}
   SSPI:             ${curl_sspi_msg}
+  GSSNTLMSSP:       ${curl_gssntlm_msg}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
   ca fallback:      ${with_ca_fallback}

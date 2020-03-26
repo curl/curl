@@ -349,7 +349,7 @@ struct kerberos5data {
 /* Struct used for NTLM challenge-response authentication */
 #if defined(USE_NTLM)
 struct ntlmdata {
-#ifdef USE_WINDOWS_SSPI
+#if defined(USE_WINDOWS_SSPI)
 /* The sslContext is used for the Schannel bindings. The
  * api is available on the Windows 7 SDK and later.
  */
@@ -365,11 +365,20 @@ struct ntlmdata {
   BYTE *input_token;
   size_t input_token_len;
   TCHAR *spn;
+#elif defined(USE_GSSNTLMSSP)
+  /* TODO: add support for channel bindings:
+     CtxtHandle *sslContext;
+  */
+  gss_ctx_id_t context;
+  gss_cred_id_t cred;
+  gss_name_t spn;
+  gss_buffer_desc input_token;
 #else
   unsigned int flags;
   unsigned char nonce[8];
   void *target_info; /* TargetInfo received in the ntlm type-2 message */
   unsigned int target_info_len;
+#endif
 
 #if defined(NTLM_WB_ENABLED)
   /* used for communication with Samba's winbind daemon helper ntlm_auth */
@@ -377,7 +386,6 @@ struct ntlmdata {
   pid_t ntlm_auth_hlpr_pid;
   char *challenge; /* The received base64 encoded ntlm type-2 message */
   char *response;  /* The generated base64 ntlm type-1/type-3 message */
-#endif
 #endif
 };
 #endif
