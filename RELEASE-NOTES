@@ -1,7 +1,7 @@
 curl and libcurl 7.70.0
 
  Public curl releases:         191
- Command line options:         230
+ Command line options:         231
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
  Contributors:                 2148
@@ -15,16 +15,23 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o ci/tests: fix Azure Pipelines not running Windows containers [25]
+ o CI: bring GitHub Actions fuzzing job in line with macOS jobs
+ o CI: migrate macOS jobs from Azure and Travis CI to GitHub Actions [36]
+ o CI: remove default Ubuntu build from GitHub Actions
  o cirrus: re-enable the FreeBSD 13 CI builds [29]
  o cmake: add support for building with wolfSSL [9]
  o cmdline: fix handling of OperationConfig linked list (--next) [24]
+ o config: remove all defines of HAVE_DES_H [37]
  o configure: convert -I to -isystem as a last step [2]
  o configure: document 'compiler_num' for gcc [4]
  o configure: fix -pedantic-errors for GCC 5 and later [3]
  o connect: happy eyeballs cleanup [15]
+ o copyright: fix out-of-date copyright ranges and missing headers [38]
  o curl-functions.m4: remove inappropriate AC_REQUIRE [26]
  o curl_setup: define _WIN32_WINNT_[OS] symbols [27]
  o CURLINFO_NUM_CONNECTS: improve accuracy [28]
+ o dist: add mail-rcpt-allowfails.d to the tarball [35]
+ o docs/make: generate curl.1 from listed files only [33]
  o docs: add warnings about FILE: URLs on Windows [19]
  o easy: fix curl_easy_duphandle for builds missing IPv6 that use c-ares [18]
  o gskit: use our internal select wrapper for portability [12]
@@ -32,9 +39,14 @@ This release includes the following bugfixes:
  o Makefile.m32: Improve windres parameter compatibility [17]
  o Makefile: run the cd commands in a subshell [1]
  o multi: improve parameter check for curl_multi_remove_handle [6]
+ o nghttp2: 1.12.0 required [40]
+ o openssl: adapt to functions marked as deprecated since version 3 [34]
  o OS400: update strings for ccsid-ifier (fixes the build) [30]
+ o packages: add OS400/chkstrings.c to the dist [39]
  o select: move duplicate select preparation code into Curl_select [14]
  o server/getpart: make the "XML-parser" stricter [20]
+ o sockfilt: add logmsg output to select_ws_wait_thread on Windows [32]
+ o SSLCERTS.md: Fix example code for setting CA cert file [31]
  o test2100: fix static port instead of dynamic value being used
  o tests/data: fix some XML formatting issues in test cases
  o tests: make Python-based servers compatible with Python 2 and 3 [22]
@@ -42,6 +54,7 @@ This release includes the following bugfixes:
  o tls: remove the BACKEND define kludge from most backends [23]
  o tool_operate: fix add_parallel_transfers when more are in queue [10]
  o transfer: cap retries of "dead connections" to 5 [13]
+ o travis: update the ngtcp2 build to use the latest OpenSSL patch
  o vtls: fix ssl_config memory-leak on out-of-memory [11]
  o windows: suppress UI in all CryptAcquireContext() calls [7]
 
@@ -52,13 +65,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad King, Calvin Buckley, Dan Fandrich, Daniel Stenberg, Dima Tisnek,
-  Frank Gevaerts, FuccDucc on github, Gavin Wong, Johannes Schindelin,
-  Kamil Dudka, Karl Chen, Marcel Raad, Marc Hörsken, Markus Olsson,
-  Mathias Gumz, Muhammad Herdiansyah, Paul Vixie, Ray Satiro, Rici Lake,
-  Ross Burton, Simon Chalifoux, Stepan Efremov, Steven Penny, Timothe Litt,
-  Tim Sedlmeyer, Tommy Petty, Viktor Szakats,
-  (27 contributors)
+  Brad King, Calvin Buckley, Clément Notin, Dan Fandrich, Daniel Stenberg,
+  Dima Tisnek, Frank Gevaerts, FuccDucc on github, Gavin Wong,
+  Johannes Schindelin, Jon Rumsey, Kamil Dudka, Karl Chen, Maksim Stsepanenka,
+  Marcel Raad, Marc Hörsken, Markus Olsson, Mathias Gumz, Muhammad Herdiansyah,
+  Paul Vixie, Ray Satiro, Rici Lake, Ross Burton, Simon Chalifoux,
+  Stepan Efremov, Steven Penny, Timothe Litt, Tim Sedlmeyer, Tommy Petty,
+  Viktor Szakats,
+  (30 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -94,3 +108,13 @@ References to bug reports and discussions on issues:
  [28] = https://curl.haxx.se/bug/?i=5135
  [29] = https://curl.haxx.se/bug/?i=5091
  [30] = https://curl.haxx.se/bug/?i=5132
+ [31] = https://curl.haxx.se/mail/lib-2020-03/0121.html
+ [32] = https://curl.haxx.se/bug/?i=5086
+ [33] = https://curl.haxx.se/bug/?i=5149
+ [34] = https://curl.haxx.se/bug/?i=5139
+ [35] = https://curl.haxx.se/bug/?i=5146
+ [36] = https://curl.haxx.se/bug/?i=5124
+ [37] = https://curl.haxx.se/bug/?i=5144
+ [38] = https://curl.haxx.se/bug/?i=5141
+ [39] = https://curl.haxx.se/bug/?i=5142
+ [40] = https://curl.haxx.se/bug/?i=5140
