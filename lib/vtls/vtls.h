@@ -74,6 +74,10 @@ struct Curl_ssl {
                      unsigned char *md5sum, size_t md5sumlen);
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
+  CURLcode (*get_tls_unique)(struct connectdata *conn,
+                             void **data, unsigned int *len);
+  CURLcode (*get_tls_endpoint)(struct connectdata *conn,
+                               void **data, unsigned int *len);
 };
 
 #ifdef USE_SSL
@@ -260,6 +264,12 @@ bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(void);
 
+#define CURL_SSL_CB_TLS_UNIQUE 1
+#define CURL_SSL_CB_TLS_SERVER_END_POINT 2
+CURLcode Curl_ssl_get_tls_channel_binding(struct connectdata *conn,
+                                          int tls_cb_type,
+                                          void **data, unsigned int *len);
+
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 #else /* if not USE_SSL */
@@ -286,6 +296,7 @@ bool Curl_ssl_false_start(void);
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start() FALSE
 #define Curl_ssl_tls13_ciphersuites() FALSE
+#define Curl_ssl_get_tls_channel_binding(x, y, z, w) CURLE_NOT_BUILT_IN
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

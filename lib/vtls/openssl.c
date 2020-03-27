@@ -4402,6 +4402,82 @@ static void *Curl_ossl_get_internals(struct ssl_connect_data *connssl,
          (void *)backend->ctx : (void *)backend->handle;
 }
 
+/* See RFC 5929 section 3 for details */
+static CURLcode Curl_ossl_get_tls_unique(struct connectdata *conn,
+                                         void **data, unsigned int *size)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+  struct ssl_backend_data *backend = connssl->backend;
+  const char *prefix = "tls-unique:";
+  unsigned int preflen = sizeof(prefix)-1;
+  /* a finished message is never larger than the max MD size in TLS */
+  unsigned char buf[EVP_MAX_MD_SIZE];
+  size_t len;
+
+  len = SSL_get_finished(backend->handle, buf, EVP_MAX_MD_SIZE);
+  if(len == 0) {
+    failf(conn->data, "Failed to retrieve TLS finished message for "
+                      "TLS-UNIQUE Channel Bindings");
+    return CURLE_SSL_INTERNAL;
+  }
+
+  *data = malloc(preflen + len);
+  if(!*data)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy(*data, prefix, preflen);
+  memcpy(((char *)*data) + preflen, buf, len);
+  *size = (unsigned int)(preflen + len);
+  return CURLE_OK;
+}
+
+/* See RFC 5929 section 4 for details */
+static CURLcode Curl_ossl_get_tls_endpoint(struct connectdata *conn,
+                                           void **data, unsigned int *size)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+  struct ssl_backend_data *backend = connssl->backend;
+  X509* server_cert;
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
+  X509_ALGOR *sig_alg = NULL;
+#else
+  const X509_ALGOR *sig_alg = NULL;
+#endif
+  const EVP_MD *md;
+  const char *prefix = "tls-server-end-point:";
+  unsigned int preflen = sizeof(prefix)-1;
+  unsigned char buf[EVP_MAX_MD_SIZE];
+  unsigned int len;
+
+  server_cert = SSL_get_peer_certificate(backend->handle);
+  if(!server_cert)
+    return CURLE_SSL_INTERNAL;
+
+#ifdef HAVE_X509_GET0_SIGNATURE
+  X509_get0_signature(NULL, &sig_alg, server_cert);
+#else
+  sig_alg = server_cert->sig_alg;
+#endif
+  md = EVP_get_digestbynid(OBJ_obj2nid(sig_alg->algorithm));
+  if(md == NULL || md == EVP_md5() || md == EVP_sha1()) {
+    md = EVP_sha256();
+  }
+  if(!X509_digest(server_cert, md, buf, &len)) {
+    failf(conn->data, "Failed to computed digest of server cert for "
+                      "TLS-SERVER-END-POINT Channel Bindings");
+    return CURLE_SSL_INTERNAL;
+  }
+
+  *data = malloc(preflen + len);
+  if(!*data)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy((char *)*data, prefix, preflen);
+  memcpy(((char *)*data) + preflen, buf, len);
+  *size = preflen + len;
+  return CURLE_OK;
+}
+
 const struct Curl_ssl Curl_ssl_openssl = {
   { CURLSSLBACKEND_OPENSSL, "openssl" }, /* info */
 
@@ -4436,10 +4512,12 @@ const struct Curl_ssl Curl_ssl_openssl = {
   Curl_none_false_start,         /* false_start */
   Curl_ossl_md5sum,              /* md5sum */
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
-  Curl_ossl_sha256sum            /* sha256sum */
+  Curl_ossl_sha256sum,           /* sha256sum */
 #else
-  NULL                           /* sha256sum */
+  NULL,                          /* sha256sum */
 #endif
+  Curl_ossl_get_tls_unique,       /* get_tls_unique */
+  Curl_ossl_get_tls_endpoint,     /* get_tls_endpoint */
 };
 
 #endif /* USE_OPENSSL */

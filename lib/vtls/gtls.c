@@ -1687,7 +1687,9 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   Curl_none_engines_list,        /* engines_list */
   Curl_none_false_start,         /* false_start */
   Curl_gtls_md5sum,              /* md5sum */
-  Curl_gtls_sha256sum            /* sha256sum */
+  Curl_gtls_sha256sum,           /* sha256sum */
+  NULL,                          /* get_tls_unique */
+  NULL                           /* get_tls_endpoint */
 };
 
 #endif /* USE_GNUTLS */

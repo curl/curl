@@ -184,6 +184,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 #endif
 #endif
 
+
   switch(*state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */

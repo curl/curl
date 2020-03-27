@@ -611,6 +611,7 @@ typedef enum {
   CURLE_HTTP3,                   /* 95 - An HTTP/3 layer problem */
   CURLE_QUIC_CONNECT_ERROR,      /* 96 - QUIC connection error */
   CURLE_PROXY,                   /* 97 - proxy handshake error */
+  CURLE_SSL_INTERNAL,            /* 98 - Internal TLS Error */
   CURL_LAST /* never use! */
 } CURLcode;
 

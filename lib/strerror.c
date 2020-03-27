@@ -324,6 +324,9 @@ curl_easy_strerror(CURLcode error)
  case CURLE_PROXY:
     return "proxy handshake error";
 
+  case CURLE_SSL_INTERNAL:
+    return "Internal SSL library error";
+
     /* error codes not used by current libcurl */
   case CURLE_OBSOLETE20:
   case CURLE_OBSOLETE24:

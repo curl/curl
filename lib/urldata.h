@@ -366,13 +366,11 @@ struct ntlmdata {
   size_t input_token_len;
   TCHAR *spn;
 #elif defined(USE_GSSNTLMSSP)
-  /* TODO: add support for channel bindings:
-     CtxtHandle *sslContext;
-  */
   gss_ctx_id_t context;
   gss_cred_id_t cred;
   gss_name_t spn;
   gss_buffer_desc input_token;
+  struct gss_channel_bindings_struct cb;
 #else
   unsigned int flags;
   unsigned char nonce[8];

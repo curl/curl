@@ -2458,7 +2458,9 @@ const struct Curl_ssl Curl_ssl_nss = {
   Curl_none_engines_list,       /* engines_list */
   Curl_nss_false_start,         /* false_start */
   Curl_nss_md5sum,              /* md5sum */
-  Curl_nss_sha256sum            /* sha256sum */
+  Curl_nss_sha256sum,           /* sha256sum */
+  NULL,                         /* get_tls_unique */
+  NULL                          /* get_tls_endpoint */
 };
 
 #endif /* USE_NSS */

@@ -871,7 +871,9 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   Curl_none_engines_list,
   Curl_none_false_start,
   Curl_bearssl_md5sum,
-  Curl_bearssl_sha256sum
+  Curl_bearssl_sha256sum,
+  NULL,
+  NULL
 };
 
 #endif /* USE_BEARSSL */

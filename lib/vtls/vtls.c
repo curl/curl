@@ -1064,6 +1064,24 @@ bool Curl_ssl_tls13_ciphersuites(void)
   return Curl_ssl->supports & SSLSUPP_TLS13_CIPHERSUITES;
 }
 
+
+CURLcode Curl_ssl_get_tls_channel_binding(struct connectdata *conn,
+                                          int tls_cb_type,
+                                          void **data, unsigned int *len)
+{
+  if(tls_cb_type == CURL_SSL_CB_TLS_UNIQUE) {
+    if(!Curl_ssl->get_tls_unique)
+      return CURLE_FUNCTION_NOT_FOUND;
+    return Curl_ssl->get_tls_unique(conn, data, len);
+  }
+  if(tls_cb_type == CURL_SSL_CB_TLS_SERVER_END_POINT) {
+    if(!Curl_ssl->get_tls_endpoint)
+      return CURLE_FUNCTION_NOT_FOUND;
+    return Curl_ssl->get_tls_endpoint(conn, data, len);
+  }
+  return CURLE_UNKNOWN_OPTION;
+}
+
 /*
  * Default implementations for unsupported functions.
  */
@@ -1238,7 +1256,9 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_engines_list,            /* engines_list */
   Curl_none_false_start,             /* false_start */
   Curl_none_md5sum,                  /* md5sum */
-  NULL                               /* sha256sum */
+  NULL,                              /* sha256sum */
+  NULL,                              /* get_tls_unique */
+  NULL,                              /* get_tls_endpoint */
 };
 
 const struct Curl_ssl *Curl_ssl =
