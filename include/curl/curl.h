@@ -2818,8 +2818,6 @@ typedef struct {
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
 #define CURL_VERSION_HTTP3        (1<<25) /* HTTP3 support built-in */
 
-/* #define CURL_VERSION_ESNI         (1<<26) ESNI support */
-
  /*
  * NAME curl_version_info()
  *
