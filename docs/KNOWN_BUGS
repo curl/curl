@@ -92,13 +92,12 @@ problems may have been fixed or changed somewhat since this was written!
  10.4 active FTP over a SOCKS
 
  11. Internals
- 11.1 Curl leaks .onion hostnames in DNS
- 11.2 error buffer not set if connection to multiple addresses fails
- 11.3 c-ares deviates from stock resolver on http://1346569778
- 11.4 HTTP test server 'connection-monitor' problems
- 11.5 Connection information when using TCP Fast Open
- 11.6 slow connect to localhost on Windows
- 11.7 signal-based resolver timeouts
+ 11.1 error buffer not set if connection to multiple addresses fails
+ 11.2 c-ares deviates from stock resolver on http://1346569778
+ 11.3 HTTP test server 'connection-monitor' problems
+ 11.4 Connection information when using TCP Fast Open
+ 11.5 slow connect to localhost on Windows
+ 11.6 signal-based resolver timeouts
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -637,22 +636,14 @@ problems may have been fixed or changed somewhat since this was written!
 
 11. Internals
 
-11.1 Curl leaks .onion hostnames in DNS
-
- Curl sends DNS requests for hostnames with a .onion TLD. This leaks
- information about what the user is attempting to access, and violates this
- requirement of RFC7686: https://tools.ietf.org/html/rfc7686
-
- Issue: https://github.com/curl/curl/issues/543
-
-11.2 error buffer not set if connection to multiple addresses fails
+11.1 error buffer not set if connection to multiple addresses fails
 
  If you ask libcurl to resolve a hostname like example.com to IPv6 addresses
  only. But you only have IPv4 connectivity. libcurl will correctly fail with
  CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
 
-11.3 c-ares deviates from stock resolver on http://1346569778
+11.2 c-ares deviates from stock resolver on http://1346569778
 
  When using the socket resolvers, that URL becomes:
 
@@ -664,14 +655,14 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/893
 
-11.4 HTTP test server 'connection-monitor' problems
+11.3 HTTP test server 'connection-monitor' problems
 
  The 'connection-monitor' feature of the sws HTTP test server doesn't work
  properly if some tests are run in unexpected order. Like 1509 and then 1525.
 
  See https://github.com/curl/curl/issues/868
 
-11.5 Connection information when using TCP Fast Open
+11.4 Connection information when using TCP Fast Open
 
  CURLINFO_LOCAL_PORT (and possibly a few other) fails when TCP Fast Open is
  enabled.
@@ -679,7 +670,7 @@ problems may have been fixed or changed somewhat since this was written!
  See https://github.com/curl/curl/issues/1332 and
  https://github.com/curl/curl/issues/4296
 
-11.6 slow connect to localhost on Windows
+11.5 slow connect to localhost on Windows
 
  When connecting to "localhost" on Windows, curl will resolve the name for
  both ipv4 and ipv6 and try to connect to both happy eyeballs-style. Something
@@ -693,7 +684,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/2281
 
-11.7 signal-based resolver timeouts
+11.6 signal-based resolver timeouts
 
  libcurl built without an asynchronous resolver library uses alarm() to time
  out DNS lookups. When a timeout occurs, this causes libcurl to jump from the

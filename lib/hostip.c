@@ -494,6 +494,39 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
   CURLcode result;
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
 
+  /* Check for illegal Top-Level-Domain */
+  if(strlen(hostname) > 0) {
+    static const char * const illegal_tlds[]={
+      ".onion",
+      ".onion."
+    };
+    int last_dot = -1;
+    unsigned long i;
+    /* Check for last dot */
+    for(i = (int)strlen(hostname) - 1; i >= 0; --i) {
+      /* Ignore if the dot is the last character */
+      if(hostname[i] == '.' && strlen(hostname) - 1 != i) {
+        last_dot = (int)i;
+        break;
+      }
+    }
+    if(last_dot != -1) {
+      char *tld = malloc(strlen(hostname) - last_dot);
+      /* Fill tld */
+      for(i = (int)last_dot; i < strlen(hostname); ++i) {
+        tld[i - last_dot] = hostname[i];
+      }
+      tld[strlen(hostname) - last_dot] = '\0';
+      for(i = 0; i < sizeof(illegal_tlds) / sizeof(illegal_tlds[0]); ++i) {
+        if(strcmp(tld, illegal_tlds[i]) == 0) {
+          failf(data, "%s Top-Level-Domains are not allowed", tld);
+          return CURLRESOLV_ERROR;
+        }
+      }
+      free(tld);
+    }
+  }
+
   *entry = NULL;
 
   if(data->share)
