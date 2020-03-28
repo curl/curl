@@ -66,6 +66,7 @@
 
  5. HTTP
  5.1 Better persistency for HTTP 1.0
+ 5.2 Set custom client ip when using haproxy protocol
  5.3 Rearrange request header order
  5.4 Allow SAN names in HTTP/2 server push
  5.5 auth= in URLs
@@ -511,6 +512,13 @@
 
  "Better" support for persistent connections over HTTP 1.0
  https://curl.haxx.se/bug/feature.cgi?id=1089001
+
+5.2 Set custom client ip when using haproxy protocol
+
+ This would allow testing servers with different client ip addresses (without
+ using x-forward-for header).
+
+ https://github.com/curl/curl/issues/5125
 
 5.3 Rearrange request header order
 
