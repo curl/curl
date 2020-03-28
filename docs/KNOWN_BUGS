@@ -99,6 +99,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.5 Connection information when using TCP Fast Open
  11.6 slow connect to localhost on Windows
  11.7 signal-based resolver timeouts
+ 11.8 DoH leaks memory after followlocation
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -703,6 +704,9 @@ problems may have been fixed or changed somewhat since this was written!
  Also, alarm() provides timeout resolution only to the nearest second. alarm
  ought to be replaced by setitimer on systems that support it.
 
+11.8 DoH leaks memory after followlocation
+
+ https://github.com/curl/curl/issues/4592
 
 12. LDAP and OpenLDAP
 
