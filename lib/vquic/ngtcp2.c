@@ -123,8 +123,8 @@ static int setup_initial_crypto_context(struct quicsocket *qs)
   const ngtcp2_cid *dcid = ngtcp2_conn_get_dcid(qs->qconn);
 
   if(ngtcp2_crypto_derive_and_install_initial_key(
-         qs->qconn, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, dcid,
-         NGTCP2_CRYPTO_SIDE_CLIENT) != 0)
+         qs->qconn, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+         dcid) != 0)
     return -1;
 
   return 0;
@@ -169,9 +169,13 @@ static int quic_set_encryption_secrets(SSL *ssl,
   struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
   int level = quic_from_ossl_level(ossl_level);
 
-  if(ngtcp2_crypto_derive_and_install_key(
-         qs->qconn, ssl, NULL, NULL, NULL, NULL, NULL, NULL, level, rx_secret,
-         tx_secret, secretlen, NGTCP2_CRYPTO_SIDE_CLIENT) != 0)
+  if(level != NGTCP2_CRYPTO_LEVEL_EARLY &&
+     ngtcp2_crypto_derive_and_install_rx_key(
+         qs->qconn, ssl, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
+    return 0;
+
+  if(ngtcp2_crypto_derive_and_install_tx_key(
+         qs->qconn, ssl, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
     return 0;
 
   if(level == NGTCP2_CRYPTO_LEVEL_APP) {
