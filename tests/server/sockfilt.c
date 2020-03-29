@@ -742,6 +742,7 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal,
   return thread;
 }
 struct select_ws_data {
+  WSANETWORKEVENTS pre;  /* the internal select result (indexed by fds/idx) */
   curl_socket_t fd;      /* the original input handle  (indexed by fds/idx) */
   curl_socket_t wsasock; /* the internal socket handle (indexed by wsa) */
   WSAEVENT wsaevent;     /* the internal WINSOCK event (indexed by wsa) */
@@ -752,6 +753,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *timeout)
 {
   HANDLE abort, mutex, signal, handle, *handles;
+  fd_set readsock, writesock, exceptsock;
   DWORD milliseconds, wait, idx;
   WSANETWORKEVENTS wsanetevents;
   struct select_ws_data *data;
@@ -811,14 +813,24 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     long networkevents = 0;
     handles[nfd] = 0;
 
-    if(FD_ISSET(fds, readfds))
+    FD_ZERO(&readsock);
+    FD_ZERO(&writesock);
+    FD_ZERO(&exceptsock);
+
+    if(FD_ISSET(fds, readfds)) {
+      FD_SET(fds, &readsock);
       networkevents |= FD_READ|FD_ACCEPT|FD_CLOSE;
+    }
 
-    if(FD_ISSET(fds, writefds))
+    if(FD_ISSET(fds, writefds)) {
+      FD_SET(fds, &writesock);
       networkevents |= FD_WRITE|FD_CONNECT;
+    }
 
-    if(FD_ISSET(fds, exceptfds))
-      networkevents |= FD_OOB|FD_CLOSE;
+    if(FD_ISSET(fds, exceptfds)) {
+      FD_SET(fds, &exceptsock);
+      networkevents |= FD_OOB;
+    }
 
     /* only wait for events for which we actually care */
     if(networkevents) {
@@ -854,6 +866,20 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
             handles[nfd] = handle;
             data[wsa].wsasock = curlx_sitosk(fds);
             data[wsa].wsaevent = wsaevent;
+            data[nfd].pre.lNetworkEvents = 0;
+            tv->tv_sec = 0;
+            tv->tv_usec = 0;
+            /* check if the socket is already ready */
+            if(select(fds + 1, &readsock, &writesock, &exceptsock, tv) == 1) {
+              logmsg("[select_ws] socket %d is ready", fds);
+              WSASetEvent(wsaevent);
+              if(FD_ISSET(fds, &readsock))
+                data[nfd].pre.lNetworkEvents |= FD_READ;
+              if(FD_ISSET(fds, &writesock))
+                data[nfd].pre.lNetworkEvents |= FD_WRITE;
+              if(FD_ISSET(fds, &exceptsock))
+                data[nfd].pre.lNetworkEvents |= FD_OOB;
+            }
             wsa++;
           }
           else {
@@ -919,6 +945,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
         wsanetevents.lNetworkEvents = 0;
         error = WSAEnumNetworkEvents(fds, handle, &wsanetevents);
         if(error != SOCKET_ERROR) {
+          /* merge result from pre-check using select */
+          wsanetevents.lNetworkEvents |= data[idx].pre.lNetworkEvents;
+
           /* remove from descriptor set if not ready for read/accept/close */
           if(!(wsanetevents.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE)))
             FD_CLR(sock, readfds);
@@ -927,17 +956,8 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           if(!(wsanetevents.lNetworkEvents & (FD_WRITE|FD_CONNECT)))
             FD_CLR(sock, writefds);
 
-          /* HACK:
-           * use exceptfds together with readfds to signal
-           * that the connection was closed by the client.
-           *
-           * Reason: FD_CLOSE is only signaled once, sometimes
-           * at the same time as FD_READ with data being available.
-           * This means that recv/sread is not reliable to detect
-           * that the connection is closed.
-           */
           /* remove from descriptor set if not exceptional */
-          if(!(wsanetevents.lNetworkEvents & (FD_OOB|FD_CLOSE)))
+          if(!(wsanetevents.lNetworkEvents & (FD_OOB)))
             FD_CLR(sock, exceptfds);
         }
       }
@@ -1061,9 +1081,6 @@ static bool juggle(curl_socket_t *sockfdp,
     else {
       /* there's always a socket to wait for */
       FD_SET(sockfd, &fds_read);
-#ifdef USE_WINSOCK
-      FD_SET(sockfd, &fds_err);
-#endif
       maxfd = (int)sockfd;
     }
     break;
@@ -1074,9 +1091,6 @@ static bool juggle(curl_socket_t *sockfdp,
     /* sockfd turns CURL_SOCKET_BAD when our connection has been closed */
     if(CURL_SOCKET_BAD != sockfd) {
       FD_SET(sockfd, &fds_read);
-#ifdef USE_WINSOCK
-      FD_SET(sockfd, &fds_err);
-#endif
       maxfd = (int)sockfd;
     }
     else {
@@ -1254,11 +1268,7 @@ static bool juggle(curl_socket_t *sockfdp,
       lograw(buffer, nread_socket);
     }
 
-    if(nread_socket <= 0
-#ifdef USE_WINSOCK
-       || FD_ISSET(sockfd, &fds_err)
-#endif
-       ) {
+    if(nread_socket <= 0) {
       logmsg("====> Client disconnect");
       if(!write_stdout("DISC\n", 5))
         return FALSE;
