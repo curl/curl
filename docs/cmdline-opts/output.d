@@ -5,9 +5,9 @@ Help: Write to file instead of stdout
 See-also: remote-name remote-name-all remote-header-name
 ---
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
-multiple documents, you can use '#' followed by a number in the <file>
-specifier. That variable will be replaced with the current string for the URL
-being fetched. Like in:
+multiple documents, you should quote the URL and you can use '#' followed by a
+number in the <file> specifier. That variable will be replaced with the current
+string for the URL being fetched. Like in:
 
  curl "http://{one,two}.example.com" -o "file_#1.txt"
 
