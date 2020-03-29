@@ -46,9 +46,9 @@ The URL syntax is protocol-dependent. You'll find a detailed description in
 RFC 3986.
 
 You can specify multiple URLs or parts of URLs by writing part sets within
-braces as in:
+braces and quoting the URL as in:
 
-  http://site.{one,two,three}.com
+  "http://site.{one,two,three}.com"
 
 or you can get sequences of alphanumeric series by using [] as in:
 
