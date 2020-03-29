@@ -405,7 +405,7 @@ static curl_version_info_data version_info = {
   0,    /* nghttp2 version number */
   NULL, /* nghttp2 version string */
   NULL, /* quic library string */
-#ifdef CURL_CA_BUNDLE
+#if defined(CURL_CA_BUNDLE) && !defined(CURL_CA_BUNDLE_THREAD_UNSAFE)
   CURL_CA_BUNDLE, /* cainfo */
 #else
   NULL,

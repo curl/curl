@@ -670,7 +670,9 @@ endif
 ifdef CABUNDLE
 	@echo $(DL)#define CURL_CA_BUNDLE "$(CABUNDLE)"$(DL) >> $@
 else
+	@echo $(DL)/* Thread-unsafe hack to get CURL_CA_BUNDLE at runtime. Legacy OSes only.  */$(DL) >> $@
 	@echo $(DL)#define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")$(DL) >> $@
+	@echo $(DL)#define CURL_CA_BUNDLE_THREAD_UNSAFE 1$(DL) >> $@
 endif
 
 $(EXPORTF): $(CURL_INC)/curl/curl.h $(CURL_INC)/curl/easy.h $(CURL_INC)/curl/multi.h $(CURL_INC)/curl/mprintf.h

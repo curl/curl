@@ -151,7 +151,9 @@
   #define ssize_t  int
 #endif
 
+/* Thread-unsafe hack to get CURL_CA_BUNDLE at runtime. Legacy OSes only.  */
 #define CURL_CA_BUNDLE  getenv("CURL_CA_BUNDLE")
+#define CURL_CA_BUNDLE_THREAD_UNSAFE 1
 
 /* Target HAVE_x section */
 
