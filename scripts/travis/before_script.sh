@@ -25,12 +25,30 @@ set -eo pipefail
 ./buildconf
 
 if [ "$NGTCP2" = yes ]; then
-  cd $HOME
-  git clone --depth 1 -b OpenSSL_1_1_1d-quic-draft-27 https://github.com/tatsuhiro-t/openssl possl
-  cd possl
-  ./config enable-tls1_3 --prefix=$HOME/ngbuild
-  make
-  make install_sw
+  if [ "$TRAVIS_OS_NAME" = linux -a "$GNUTLS" ]; then
+    cd $HOME
+    git clone --depth 1 https://gitlab.com/gnutls/nettle.git
+    cd nettle
+    ./.bootstrap
+    ./configure LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --disable-documentation --prefix=$HOME/ngbuild
+    make
+    make install
+
+    cd $HOME
+    git clone --depth 1 -b tmp-quic https://gitlab.com/gnutls/gnutls.git pgtls
+    cd pgtls
+    ./bootstrap
+    ./configure PKG_CONFIG_PATH=$HOME/ngbuild/lib/pkgconfig LDFLAGS="-Wl,-rpath,$HOME/ngbuild/lib" --with-included-libtasn1 --with-included-unistring --disable-guile --disable-doc --prefix=$HOME/ngbuild
+    make
+    make install
+  else
+    cd $HOME
+    git clone --depth 1 -b OpenSSL_1_1_1d-quic-draft-27 https://github.com/tatsuhiro-t/openssl possl
+    cd possl
+    ./config enable-tls1_3 --prefix=$HOME/ngbuild
+    make
+    make install_sw
+  fi
 
   cd $HOME
   git clone --depth 1 https://github.com/ngtcp2/nghttp3
