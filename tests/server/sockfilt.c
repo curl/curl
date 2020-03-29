@@ -750,7 +750,7 @@ struct select_ws_data {
   HANDLE thread;         /* the internal thread handle (indexed by thd) */
 };
 static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
-                     fd_set *exceptfds, struct timeval *timeout)
+                     fd_set *exceptfds, struct timeval *tv)
 {
   HANDLE abort, mutex, signal, handle, *handles;
   fd_set readsock, writesock, exceptsock;
@@ -768,9 +768,17 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     return -1;
   }
 
+  /* convert struct timeval to milliseconds */
+  if(tv) {
+    milliseconds = (tv->tv_sec*1000)+(DWORD)(((double)tv->tv_usec)/1000.0);
+  }
+  else {
+    milliseconds = INFINITE;
+  }
+
   /* check if we got descriptors, sleep in case we got none */
   if(!nfds) {
-    Sleep((timeout->tv_sec*1000)+(DWORD)(((double)timeout->tv_usec)/1000.0));
+    SleepEx(milliseconds, FALSE);
     return 0;
   }
 
@@ -906,14 +914,6 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     }
   }
 
-  /* convert struct timeval to milliseconds */
-  if(timeout) {
-    milliseconds = ((timeout->tv_sec * 1000) + (timeout->tv_usec / 1000));
-  }
-  else {
-    milliseconds = INFINITE;
-  }
-
   /* wait for one of the internal handles to trigger */
   wait = WaitForMultipleObjectsEx(nfd, handles, FALSE, milliseconds, FALSE);
 
@@ -981,13 +981,13 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   for(fds = 0; fds < nfds; fds++) {
     if(FD_ISSET(fds, readfds))
-      logmsg("select_ws: %d is readable", fds);
+      logmsg("[select_ws] %d is readable", fds);
 
     if(FD_ISSET(fds, writefds))
-      logmsg("select_ws: %d is writable", fds);
+      logmsg("[select_ws] %d is writable", fds);
 
     if(FD_ISSET(fds, exceptfds))
-      logmsg("select_ws: %d is excepted", fds);
+      logmsg("[select_ws] %d is exceptional", fds);
   }
 
   for(idx = 0; idx < wsa; idx++) {
