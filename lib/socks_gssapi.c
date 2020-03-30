@@ -227,7 +227,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
 
     gss_release_buffer(&gss_status, &gss_send_token);
     gss_release_buffer(&gss_status, &gss_recv_token);
-    if(gss_major_status != GSS_S_CONTINUE_NEEDED) break;
+    if(gss_major_status != GSS_S_CONTINUE_NEEDED)
+      break;
 
     /* analyse response */
 

@@ -122,8 +122,10 @@ UNITTEST_START
         fail("assertion failure");
       }
     }
-    if(certname) free(certname);
-    if(passphrase) free(passphrase);
+    if(certname)
+      free(certname);
+    if(passphrase)
+      free(passphrase);
   }
 
 UNITTEST_STOP

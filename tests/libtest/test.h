@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -44,11 +44,13 @@
 
 #include "curl_printf.h"
 
-#define test_setopt(A,B,C) \
-  if((res = curl_easy_setopt((A), (B), (C))) != CURLE_OK) goto test_cleanup
+#define test_setopt(A,B,C)                                      \
+  if((res = curl_easy_setopt((A), (B), (C))) != CURLE_OK)       \
+    goto test_cleanup
 
-#define test_multi_setopt(A,B,C) \
-  if((res = curl_multi_setopt((A), (B), (C))) != CURLE_OK) goto test_cleanup
+#define test_multi_setopt(A,B,C)                                \
+  if((res = curl_multi_setopt((A), (B), (C))) != CURLE_OK)      \
+    goto test_cleanup
 
 extern char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
 extern char *libtest_arg3; /* set by first.c to the argv[3] or NULL */

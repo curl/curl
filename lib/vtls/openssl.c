@@ -1824,7 +1824,8 @@ static CURLcode verifystatus(struct connectdata *conn,
   }
 
 end:
-  if(br) OCSP_BASICRESP_free(br);
+  if(br)
+    OCSP_BASICRESP_free(br);
   OCSP_RESPONSE_free(rsp);
 
   return result;
