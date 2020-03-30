@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -328,7 +328,7 @@ void curl_dbg_free(void *ptr, int line, const char *source)
     (Curl_cfree)(mem);
   }
 
-  if(source)
+  if(source && ptr)
     curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
 }
 
