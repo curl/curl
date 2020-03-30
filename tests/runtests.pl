@@ -243,6 +243,7 @@ my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;       # set if libcurl is built with NTLM support
 my $has_ntlm_wb;    # set if libcurl is built with NTLM delegation to winbind
 my $has_sspi;       # set if libcurl is built with Windows SSPI
+my $has_gssntlmssp; # set if libcurl is built with GSSNTLMSSP
 my $has_gssapi;     # set if libcurl is built with a GSS-API library
 my $has_kerberos;   # set if libcurl is built with Kerberos support
 my $has_spnego;     # set if libcurl is built with SPNEGO support
@@ -2768,6 +2769,7 @@ sub setupfeatures {
     $feature{"getrlimit"} = $has_getrlimit;
     $feature{"GnuTLS"} = $has_gnutls;
     $feature{"GSS-API"} = $has_gssapi;
+    $feature{"GSSNTLMSSP"} = $has_gssntlmssp;
     $feature{"http/2"} = $has_http2;
     $feature{"https-proxy"} = $has_httpsproxy;
     $feature{"idn"} = $has_idn;
@@ -2996,6 +2998,10 @@ sub checksystem {
             if($feat =~ /SSPI/i) {
                 # SSPI enabled
                 $has_sspi=1;
+            }
+            if($feat =~ /GSSNTLMSSP/i) {
+                # SSPI enabled
+                $has_gssntlmssp=1;
             }
             if($feat =~ /GSS-API/i) {
                 # GSS-API enabled

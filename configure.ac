@@ -1603,7 +1603,7 @@ if test x"$want_gssntlmssp" = xyes; then
       [
         AC_DEFINE(HAVE_GSSNTLMSSP, 1, [if you have GSSNTLMSSP support])
         AC_DEFINE(USE_GSSNTLMSSP, 1, [to enable GSSNTLMSSP support])
-        AC_SUBST(USE_GSSNTLMSSP)
+        AC_SUBST(USE_GSSNTLMSSP, [1])
         curl_gssntlm_msg="enabled"
       ])
   else

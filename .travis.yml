@@ -396,6 +396,16 @@ jobs:
         - libtool
         - pkg-config
         - zlib1g-dev
+  - env:
+    - T=debug C="--with-gssapi --enable-gssntlmssp"
+    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *common_packages
+        - krb5-user
+        - gss-ntlmssp-dev
 
 before_install:
 - export "${OVERRIDE_CC-blank=}"
