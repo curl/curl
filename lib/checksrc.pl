@@ -80,6 +80,7 @@ my %warnings = (
     'MULTISPACE'       => 'multiple spaces used when not suitable',
     'SIZEOFNOPAREN'    => 'use of sizeof without parentheses',
     'SNPRINTF'         => 'use of snprintf',
+    'ONELINECONDITION' => 'conditional block on the same line as the if()',
     );
 
 sub readwhitelist {
@@ -457,12 +458,33 @@ sub scanfile {
             }
         }
 
-        if($nostr =~ /^((.*)(if) *\()(.*)\)/) {
+        if($nostr =~ /^((.*\s)(if) *\()(.*)\)(.*)/) {
             my $pos = length($1);
-            if($4 =~ / = /) {
+            my $postparen = $5;
+            my $cond = $4;
+            if($cond =~ / = /) {
                 checkwarn("ASSIGNWITHINCONDITION",
                           $line, $pos+1, $file, $l,
                           "assignment within conditional expression");
+            }
+            my $temp = $cond;
+            $temp =~ s/\(//g; # remove open parens
+            my $openc = length($cond) - length($temp);
+
+            $temp = $cond;
+            $temp =~ s/\)//g; # remove close parens
+            my $closec = length($cond) - length($temp);
+            my $even = $openc == $closec;
+
+            if($l =~ / *\#/) {
+                # this is a #if, treat it differently
+            }
+            elsif($even && $postparen &&
+               ($postparen !~ /^ *$/) && ($postparen !~ /^ *[,{&|\\]+/)) {
+                print STDERR "5: '$postparen'\n";
+                checkwarn("ONELINECONDITION",
+                          $line, length($l)-length($postparen), $file, $l,
+                          "conditional block on the same line");
             }
         }
         # check spaces after open parentheses
