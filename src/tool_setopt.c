@@ -285,7 +285,8 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
     /* we only use this for real if --libcurl was used */
     const NameValue *nv = NULL;
     for(nv = nvlist; nv->name; nv++) {
-      if(nv->value == lval) break; /* found it */
+      if(nv->value == lval)
+        break; /* found it */
     }
     if(! nv->name) {
       /* If no definition was found, output an explicit value.
