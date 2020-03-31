@@ -721,6 +721,7 @@ Vista
 /* Define to use Unix sockets. */
 #define USE_UNIX_SOCKETS
 #if !defined(UNIX_PATH_MAX)
+  /* Replicating logic present in afunix.h of newer Windows 10 SDK versions */
 # define UNIX_PATH_MAX 108
 # include <ws2tcpip.h>
   typedef struct sockaddr_un {
