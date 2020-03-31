@@ -50,10 +50,6 @@
 #  define in_addr_t unsigned long
 #endif
 
-#if defined(USE_UNIX_SOCKETS) && !defined(WIN32)
-#include <afunix.h>
-#endif
-
 #include <stddef.h>
 
 #include "curl_addrinfo.h"
