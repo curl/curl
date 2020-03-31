@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2013-2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2013-2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -29,9 +29,18 @@
 
 start=$1
 
-if test -z "$start"; then
+if test "$start" = "-h"; then
     echo "Usage: $0 <since this tag/hash> [--releasenotes]"
     exit
+fi
+if test -z "$start"; then
+    start=`git tag --sort=taggerdate | tail -1`;
+    echo "Since $start:"
+fi
+
+# We also include curl-www if possible. Override by setting CURLWWW
+if [ -z "$CURLWWW" ] ; then
+    CURLWWW=../curl-www
 fi
 
 # filter out Author:, Commit: and *by: lines
@@ -43,8 +52,15 @@ fi
 # only count names with a space (ie more than one word)
 # sort all unique names
 # awk them into RELEASE-NOTES format
+
 (
-git log --use-mailmap $start..HEAD | \
+ (
+  git log --pretty=full --use-mailmap $start..HEAD
+  if [ -d "$CURLWWW" ]
+  then
+   git -C ../curl-www log --pretty=full --use-mailmap $start..HEAD
+  fi
+ ) | \
 egrep -ai '(^Author|^Commit|by):' | \
 cut -d: -f2- | \
 cut '-d(' -f1 | \

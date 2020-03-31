@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_sdecls.h"
 
 struct GlobalConfig;
 struct OperationConfig;
@@ -104,6 +105,8 @@ extern const digest_params SHA256_DIGEST_PARAMS[1];
  * Counts the resource in the metalinkfile.
  */
 int count_next_metalink_resource(metalinkfile *mlfile);
+
+void delete_metalinkfile(metalinkfile *mlfile);
 void clean_metalink(struct OperationConfig *config);
 
 /*
@@ -157,6 +160,7 @@ void metalink_cleanup(void);
 #else /* USE_METALINK */
 
 #define count_next_metalink_resource(x)  0
+#define delete_metalinkfile(x)  (void)x
 #define clean_metalink(x)  (void)x
 
 /* metalink_cleanup() takes no arguments */

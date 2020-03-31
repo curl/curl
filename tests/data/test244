@@ -47,7 +47,7 @@ PASS ftp@example.com
 PWD
 EPSV
 TYPE A
-LIST fir#t/third/244/
+LIST fir#t/third/244
 QUIT
 </protocol>
 </verify>

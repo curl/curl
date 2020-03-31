@@ -33,6 +33,9 @@ HTTP with proxy authorization
  <command>
  -U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x %HOSTIP:%HTTPPORT http://we.want.that.site.com/16
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

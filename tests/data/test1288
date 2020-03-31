@@ -44,6 +44,9 @@ Suppress proxy CONNECT response headers
 <command>
 --proxytunnel --suppress-connect-headers --dump-header - --include --write-out "\nCONNECT CODE: %{http_connect}\nRECEIVED HEADER BYTE TOTAL: %{size_header}\n" --proxy %HOSTIP:%PROXYPORT http://%HOSTIP.1288:%HTTPPORT/we/want/that/page/1288
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

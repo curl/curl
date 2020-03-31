@@ -43,6 +43,7 @@ socks5
 </server>
 <features>
 http
+proxy
 </features>
  <name>
 FTP fetch with --preproxy, --proxy and --connect-to

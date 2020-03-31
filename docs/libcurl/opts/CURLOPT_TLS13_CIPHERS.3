@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -35,6 +35,10 @@ correct, it consists of one or more cipher suite strings separated by colons.
 You'll find more details about cipher lists on this URL:
 
  https://curl.haxx.se/docs/ssl-ciphers.html
+
+This option is currently used only when curl is built to use OpenSSL 1.1.1 or
+later. If you are using a different SSL backend you can try setting TLS 1.3
+cipher suites by using the CURLOPT_SSL_CIPHER_LIST option.
 
 The application does not have to keep the string around after setting this
 option.

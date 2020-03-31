@@ -12,8 +12,7 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written!
 
  1. HTTP
- 1.1 CURLFORM_CONTENTLEN in an array
- 1.2 Disabling HTTP Pipelining
+ 1.2 Multiple methods in a single WWW-Authenticate: header
  1.3 STARTTRANSFER time is wrong for HTTP POSTs
  1.4 multipart formposts file name encoding
  1.5 Expect-100 meets 417
@@ -21,7 +20,6 @@ problems may have been fixed or changed somewhat since this was written!
  1.7 Deflate error after all content was received
  1.8 DoH isn't used for all name resolves when enabled
  1.9 HTTP/2 frames while in the connection pool kill reuse
- 1.10 Strips trailing dot from host name
  1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
  2. TLS
@@ -32,12 +30,14 @@ problems may have been fixed or changed somewhat since this was written!
  2.5 Client cert handling with Issuer DN differs between backends
  2.6 CURL_GLOBAL_SSL
  2.7 Client cert (MTLS) issues with Schannel
+ 2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
+ 2.9 TLS session cache doesn't work with TFO
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
  3.2 No disconnect command
- 3.3 SMTP to multiple recipients
- 3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+ 3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
+ 3.4 AUTH PLAIN for SMTP is not working on all servers
 
  4. Command line
  4.1 -J and -O with %-encoded file names
@@ -47,6 +47,7 @@ problems may have been fixed or changed somewhat since this was written!
  4.5 Improve --data-urlencode space encoding
 
  5. Build and portability issues
+ 5.1 USE_UNIX_SOCKETS on Windows
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
  5.4 Cannot compile against a static build of OpenLDAP
@@ -55,6 +56,8 @@ problems may have been fixed or changed somewhat since this was written!
  5.7 Visual Studio project gaps
  5.8 configure finding libs in wrong directory
  5.9 Utilize Requires.private directives in libcurl.pc
+ 5.10 IDN tests failing on Windows / MSYS2
+ 5.11 configure --with-gssapi with Heimdal is ignored on macOS
 
  6. Authentication
  6.1 NTLM authentication and unicode
@@ -63,6 +66,7 @@ problems may have been fixed or changed somewhat since this was written!
  6.4 Negotiate and Kerberos V5 need a fake user name
  6.5 NTLM doesn't support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
+ 6.7 Don't clear digest for single realm
 
  7. FTP
  7.1 FTP without or slow 220 response
@@ -74,7 +78,7 @@ problems may have been fixed or changed somewhat since this was written!
  7.7 FTP and empty path parts in the URL
  7.8 Premature transfer end but healthy control channel
  7.9 Passive transfer tries only one IP address
- 7.10 Stick to same family over SOCKS proxy
+ 7.10 FTPS needs session reuse
 
  8. TELNET
  8.1 TELNET and time limitations don't work
@@ -84,8 +88,6 @@ problems may have been fixed or changed somewhat since this was written!
  9.1 SFTP doesn't do CURLOPT_POSTQUOTE correct
 
  10. SOCKS
- 10.1 SOCKS proxy connections are done blocking
- 10.2 SOCKS don't support timeouts
  10.3 FTPS over SOCKS
  10.4 active FTP over a SOCKS
 
@@ -96,9 +98,14 @@ problems may have been fixed or changed somewhat since this was written!
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.6 slow connect to localhost on Windows
+ 11.7 signal-based resolver timeouts
+ 11.8 DoH leaks memory after followlocation
+ 11.9 DoH doesn't inherit all transfer options
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
+ 12.2 LDAP on Windows does authentication wrong?
+ 12.3 LDAP on Windows doesn't work
 
  13. TCP/IP
  13.1 --interface for ipv6 binds to unusable IP address
@@ -110,22 +117,12 @@ problems may have been fixed or changed somewhat since this was written!
 
 1. HTTP
 
-1.1 CURLFORM_CONTENTLEN in an array
+1.2 Multiple methods in a single WWW-Authenticate: header
 
- It is not possible to pass a 64-bit value using CURLFORM_CONTENTLEN with
- CURLFORM_ARRAY, when compiled on 32-bit platforms that support 64-bit
- integers. This is because the underlying structure 'curl_forms' uses a dual
- purpose char* for storing these values in via casting. For more information
- see the now closed related issue:
- https://github.com/curl/curl/issues/608
-
-1.2 Disabling HTTP Pipelining
-
- Disabling HTTP Pipelining when there are ongoing transfers can lead to
- heap corruption and crash. https://curl.haxx.se/bug/view.cgi?id=1411
-
- Similarly, removing a handle when pipelining corrupts data:
- https://github.com/curl/curl/issues/2101
+ The HTTP responses headers WWW-Authenticate: can provide information about
+ multiple authentication methods as multiple headers or as several methods
+ within a single header. The latter way, several methods in the same physical
+ line, is not supported by libcurl's parser. (For no good reason.)
 
 1.3 STARTTRANSFER time is wrong for HTTP POSTs
 
@@ -155,7 +152,7 @@ problems may have been fixed or changed somewhat since this was written!
 1.6 Unnecessary close when 401 received waiting for 100
 
  libcurl closes the connection if an HTTP 401 reply is received while it is
- waiting for the the 100-continue response.
+ waiting for the 100-continue response.
  https://curl.haxx.se/mail/lib-2008-08/0462.html
 
 1.7 Deflate error after all content was received
@@ -186,42 +183,6 @@ problems may have been fixed or changed somewhat since this was written!
 
  This is *best* fixed by adding monitoring to connections while they are kept
  in the pool so that pings can be responded to appropriately.
-
-1.10 Strips trailing dot from host name
-
- When given a URL with a trailing dot for the host name part:
- "https://example.com./", libcurl will strip off the dot and use the name
- without a dot internally and send it dot-less in HTTP Host: headers and in
- the TLS SNI field. For the purpose of resolving the name to an address
- the hostname is used as is without any change.
-
- The HTTP part violates RFC 7230 section 5.4 but the SNI part is accordance
- with RFC 6066 section 3.
-
- URLs using these trailing dots are very rare in the wild and we have not seen
- or gotten any real-world problems with such URLs reported. The popular
- browsers seem to have stayed with not stripping the dot for both uses (thus
- they violate RFC 6066 instead of RFC 7230).
-
- Daniel took the discussion to the HTTPbis mailing list in March 2016:
- https://lists.w3.org/Archives/Public/ietf-http-wg/2016JanMar/0430.html but
- there was not major rush or interest to fix this. The impression I get is
- that most HTTP people rather not rock the boat now and instead prioritize web
- compatibility rather than to strictly adhere to these RFCs.
-
- Our current approach allows a knowing client to send a custom HTTP header
- with the dot added.
-
- In a few cases there is a difference in name resolving to IP addresses with
- a trailing dot, but it can be noted that many HTTP servers will not happily
- accept the trailing dot there unless that has been specifically configured
- to be a fine virtual host.
-
- If URLs with trailing dots for host names become more popular or even just
- used more than for just plain fun experiments, I'm sure we will have reason
- to go back and reconsider.
-
- See https://github.com/curl/curl/issues/716 for the discussion.
 
 1.11 CURLOPT_SEEKFUNCTION not called with CURLFORM_STREAM
 
@@ -299,6 +260,15 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/3145
 
+2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
+
+ This seems to be a limitation in the underlying Schannel API.
+
+ https://github.com/curl/curl/issues/3284
+
+2.9 TLS session cache doesn't work with TFO
+
+ See https://github.com/curl/curl/issues/4301
 
 3. Email protocols
 
@@ -314,20 +284,18 @@ problems may have been fixed or changed somewhat since this was written!
  The disconnect commands (LOGOUT and QUIT) may not be sent by IMAP, POP3 and
  SMTP if a failure occurs during the authentication phase of a connection.
 
-3.3 SMTP to multiple recipients
-
- When sending data to multiple recipients, curl will abort and return failure
- if one of the recipients indicate failure (on the "RCPT TO"
- command). Ordinary mail programs would proceed and still send to the ones
- that can receive data. This is subject for change in the future.
- https://curl.haxx.se/bug/view.cgi?id=1116
-
-3.4 POP3 expects "CRLF.CRLF" eob for some single-line responses
+3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
 
  You have to tell libcurl not to expect a body, when dealing with one line
  response commands. Please see the POP3 examples and test cases which show
  this for the NOOP and DELE commands. https://curl.haxx.se/bug/?i=740
 
+3.4 AUTH PLAIN for SMTP is not working on all servers
+
+ Specifying "--login-options AUTH=PLAIN" on the command line doesn't seem to
+ work correctly.
+
+ See https://github.com/curl/curl/issues/4080
 
 4. Command line
 
@@ -381,6 +349,13 @@ problems may have been fixed or changed somewhat since this was written!
  See https://github.com/curl/curl/issues/3229
 
 5. Build and portability issues
+
+5.1 USE_UNIX_SOCKETS on Windows
+
+ Due to incorrect CMake checks for the presence of the feature, it will never
+ be enabled for windows in a cmake build.
+
+ See https://github.com/curl/curl/issues/4040
 
 5.2 curl-config --libs contains private details
 
@@ -458,6 +433,19 @@ problems may have been fixed or changed somewhat since this was written!
 
  https://github.com/curl/curl/issues/864
 
+5.10 IDN tests failing on Windows / MSYS2
+
+ It seems like MSYS2 does some UTF-8-to-something-else conversion for Windows
+ compatibility.
+
+ https://github.com/curl/curl/issues/3747
+
+5.11 configure --with-gssapi with Heimdal is ignored on macOS
+
+ ... unless you also pass --with-gssapi-libs
+
+ https://github.com/curl/curl/issues/3841
+
 6. Authentication
 
 6.1 NTLM authentication and unicode
@@ -509,6 +497,10 @@ problems may have been fixed or changed somewhat since this was written!
  using NTLM.
 
  https://github.com/curl/curl/issues/876
+
+6.7 Don't clear digest for single realm
+
+ https://github.com/curl/curl/issues/3267
 
 7. FTP
 
@@ -599,15 +591,13 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/1508
 
-7.10 Stick to same family over SOCKS proxy
+7.10 FTPS needs session reuse
 
- When asked to do FTP over a SOCKS proxy, it might connect to the proxy (and
- then subsequently to the remote server) using for example IPv4. When doing
- the second connection, curl should make sure that the second connection is
- using the same IP protocol version as the first connection did and not try
- others, since the remote server will only accept the same.
+ When the control connection is reused for a subsequent transfer, some FTPS
+ servers complain about "missing session reuse" for the data channel for the
+ second transfer.
 
- See https://curl.haxx.se/mail/archive-2018-07/0000.html
+ https://github.com/curl/curl/issues/4654
 
 8. TELNET
 
@@ -635,21 +625,6 @@ problems may have been fixed or changed somewhat since this was written!
 
 
 10. SOCKS
-
-10.1 SOCKS proxy connections are done blocking
-
- Both SOCKS5 and SOCKS4 proxy connections are done blocking, which is very bad
- when used with the multi interface.
-
-10.2 SOCKS don't support timeouts
-
- The SOCKS4 connection codes don't properly acknowledge (connect) timeouts.
- According to bug #1556528, even the SOCKS5 connect code does not do it right:
- https://curl.haxx.se/bug/view.cgi?id=604
-
- When connecting to a SOCK proxy, the (connect) timeout is not properly
- acknowledged after the actual TCP connect (during the SOCKS "negotiate"
- phase).
 
 10.3 FTPS over SOCKS
 
@@ -701,7 +676,8 @@ problems may have been fixed or changed somewhat since this was written!
  CURLINFO_LOCAL_PORT (and possibly a few other) fails when TCP Fast Open is
  enabled.
 
- See https://github.com/curl/curl/issues/1332
+ See https://github.com/curl/curl/issues/1332 and
+ https://github.com/curl/curl/issues/4296
 
 11.6 slow connect to localhost on Windows
 
@@ -716,6 +692,26 @@ problems may have been fixed or changed somewhat since this was written!
  addresses, mentioned in TODO). Possibly we should reduce that delay for all.
 
  https://github.com/curl/curl/issues/2281
+
+11.7 signal-based resolver timeouts
+
+ libcurl built without an asynchronous resolver library uses alarm() to time
+ out DNS lookups. When a timeout occurs, this causes libcurl to jump from the
+ signal handler back into the library with a sigsetjmp, which effectively
+ causes libcurl to continue running within the signal handler. This is
+ non-portable and could cause problems on some platforms. A discussion on the
+ problem is available at https://curl.haxx.se/mail/lib-2008-09/0197.html
+
+ Also, alarm() provides timeout resolution only to the nearest second. alarm
+ ought to be replaced by setitimer on systems that support it.
+
+11.8 DoH leaks memory after followlocation
+
+ https://github.com/curl/curl/issues/4592
+
+11.9 DoH doesn't inherit all transfer options
+
+ https://github.com/curl/curl/issues/4578
 
 12. LDAP and OpenLDAP
 
@@ -738,6 +734,16 @@ problems may have been fixed or changed somewhat since this was written!
  See https://github.com/curl/curl/issues/622 and
      https://curl.haxx.se/mail/lib-2016-01/0101.html
 
+12.2 LDAP on Windows does authentication wrong?
+
+ https://github.com/curl/curl/issues/3116
+
+12.3 LDAP on Windows doesn't work
+
+ A simple curl command line getting "ldap://ldap.forumsys.com" returns an
+ error that says "no memory" !
+
+ https://github.com/curl/curl/issues/4261
 
 13. TCP/IP
 

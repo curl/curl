@@ -123,7 +123,7 @@ $(HUGE): $(MANPAGE) $(MKHELP)
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
 $(HUGE): $(MANPAGE) $(MKHELP)
-	$(HUGECMD)(echo '#include "tool_setup.h"' > $(HUGE):    \
+	$(HUGECMD)(echo '#include "tool_setup.h"' > $(HUGE);    \
 	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) >> $(HUGE) )
 endif
 

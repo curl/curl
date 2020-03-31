@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -58,12 +58,17 @@ struct getout *new_getout(struct OperationConfig *config)
 
 ParameterError file2string(char **bufp, FILE *file)
 {
-  char *ptr;
   char *string = NULL;
-
   if(file) {
+    char *ptr;
+    size_t alloc = 512;
+    size_t alloc_needed;
     char buffer[256];
     size_t stringlen = 0;
+    string = calloc(1, alloc);
+    if(!string)
+      return PARAM_NO_MEM;
+
     while(fgets(buffer, sizeof(buffer), file)) {
       size_t buflen;
       ptr = strchr(buffer, '\r');
@@ -73,12 +78,24 @@ ParameterError file2string(char **bufp, FILE *file)
       if(ptr)
         *ptr = '\0';
       buflen = strlen(buffer);
-      ptr = realloc(string, stringlen + buflen + 1);
-      if(!ptr) {
-        Curl_safefree(string);
-        return PARAM_NO_MEM;
+      alloc_needed = stringlen + buflen + 1;
+      if(alloc < alloc_needed) {
+#if SIZEOF_SIZE_T < 8
+        if(alloc >= (size_t)SIZE_T_MAX/2) {
+          Curl_safefree(string);
+          return PARAM_NO_MEM;
+        }
+#endif
+        /* doubling is enough since the string to add is always max 256 bytes
+           and the alloc size start at 512 */
+        alloc *= 2;
+        ptr = realloc(string, alloc);
+        if(!ptr) {
+          Curl_safefree(string);
+          return PARAM_NO_MEM;
+        }
+        string = ptr;
       }
-      string = ptr;
       strcpy(string + stringlen, buffer);
       stringlen += buflen;
     }
@@ -196,6 +213,28 @@ ParameterError str2unum(long *val, const char *str)
 
   return PARAM_OK;
 }
+
+/*
+ * Parse the string and write the long in the given address if it is below the
+ * maximum allowed value. Return PARAM_OK on success, otherwise a parameter
+ * error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ *
+ * Since this function gets called with the 'nextarg' pointer from within the
+ * getparameter a lot, we must check it for NULL before accessing the str
+ * data.
+ */
+
+ParameterError str2unummax(long *val, const char *str, long max)
+{
+  ParameterError result = str2unum(val, str);
+  if(result != PARAM_OK)
+    return result;
+  if(*val > max)
+    return PARAM_NUMBER_TOO_LARGE;
+
+  return PARAM_OK;
+}
+
 
 /*
  * Parse the string and write the double in the given address. Return PARAM_OK
@@ -521,7 +560,7 @@ int ftpcccmethod(struct OperationConfig *config, const char *str)
   return CURLFTPSSL_CCC_PASSIVE;
 }
 
-long delegation(struct OperationConfig *config, char *str)
+long delegation(struct OperationConfig *config, const char *str)
 {
   if(curl_strequal("none", str))
     return CURLGSSAPI_DELEGATION_NONE;
@@ -567,7 +606,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
   if(!config->useragent) {
     config->useragent = my_useragent();
     if(!config->useragent) {
-      helpf(config->global->errors, "out of memory\n");
+      errorf(config->global, "out of memory\n");
       result = CURLE_OUT_OF_MEMORY;
     }
   }

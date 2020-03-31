@@ -6,6 +6,7 @@ HTTP GET
 HTTP proxy
 multi
 FAILURE
+connect to non-listen
 </keywords>
 </info>
 
@@ -20,6 +21,7 @@ none
 </server>
 <features>
 http
+proxy
 </features>
 # tool is what to use instead of 'curl'
 <tool>

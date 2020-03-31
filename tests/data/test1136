@@ -33,6 +33,7 @@ boo
 <client>
 <features>
 PSL
+proxy
 </features>
 <server>
 http

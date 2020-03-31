@@ -60,6 +60,9 @@ HTTP over proxy-tunnel ignore TE and CL in CONNECT 2xx responses
 <command>
 -v --proxytunnel -x %HOSTIP:%PROXYPORT http://test.1287:%HTTPPORT/we/want/that/page/1287
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -136,7 +136,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   char *real_path;
   struct FILEPROTO *file = data->req.protop;
-  int fd;
+  int fd = -1;
 #ifdef DOS_FILESYSTEM
   size_t i;
   char *actual_path;
@@ -181,7 +181,9 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
+  if(strncmp("\\\\", actual_path, 2))
+    /* refuse to open path that starts with two backslashes */
+    fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {

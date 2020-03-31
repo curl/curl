@@ -29,9 +29,10 @@ http
 </server>
 <features>
 idn
+proxy
 </features>
 <setenv>
-LC_ALL=
+LC_ALL=en_US.UTF-8
 LC_CTYPE=en_US.UTF-8
 </setenv>
 <precheck>

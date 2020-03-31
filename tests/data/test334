@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+204
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 204 No Content
+Date: Mon, 13 Nov 2000 13:41:09 GMT
+Server: myown/1.0
+Transfer-Encoding: chunked
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP 204 No content with chunked header
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/want/334
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /want/334 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

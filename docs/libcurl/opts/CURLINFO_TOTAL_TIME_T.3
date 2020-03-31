@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2018 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -31,6 +31,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TOTAL_TIME_T, curl_off_t *time
 Pass a pointer to a curl_off_t to receive the total time in microseconds
 for the previous transfer, including name resolving, TCP connect etc.
 The curl_off_t represents the time in microseconds.
+
+When a redirect is followed, the time from each request is added together.
 
 See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 .SH PROTOCOLS

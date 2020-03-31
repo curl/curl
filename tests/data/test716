@@ -23,6 +23,7 @@ socks5
 </server>
 <features>
 http
+proxy
 </features>
 <name>
 SOCKS5 proxy with too long user name

@@ -1,3 +1,24 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 # ./src/Makefile.inc
 # Using the backslash as line continuation character might be problematic
 # with some make flavours, as Watcom's wmake showed us already. If we
@@ -54,6 +75,7 @@ CURL_CFILES = \
   tool_panykey.c \
   tool_paramhlp.c \
   tool_parsecfg.c \
+  tool_progress.c \
   tool_strdup.c \
   tool_setopt.c \
   tool_sleep.c \
@@ -61,6 +83,7 @@ CURL_CFILES = \
   tool_util.c \
   tool_vms.c \
   tool_writeout.c \
+  tool_writeout_json.c \
   tool_xattr.c
 
 CURL_HFILES = \
@@ -95,6 +118,7 @@ CURL_HFILES = \
   tool_panykey.h \
   tool_paramhlp.h \
   tool_parsecfg.h \
+  tool_progress.h \
   tool_sdecls.h \
   tool_setopt.h \
   tool_setup.h \
@@ -105,6 +129,7 @@ CURL_HFILES = \
   tool_version.h \
   tool_vms.h \
   tool_writeout.h \
+  tool_writeout_json.h \
   tool_xattr.h
 
 CURL_RCFILES = curl.rc

@@ -1,5 +1,5 @@
-#ifndef __CURL_SYSTEM_H
-#define __CURL_SYSTEM_H
+#ifndef CURLINC_SYSTEM_H
+#define CURLINC_SYSTEM_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -137,15 +137,26 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__LCC__)
-#  define CURL_TYPEOF_CURL_OFF_T     long
-#  define CURL_FORMAT_CURL_OFF_T     "ld"
-#  define CURL_FORMAT_CURL_OFF_TU    "lu"
-#  define CURL_SUFFIX_CURL_OFF_T     L
-#  define CURL_SUFFIX_CURL_OFF_TU    UL
-#  define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  if defined(__e2k__) /* MCST eLbrus C Compiler */
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
+#    define CURL_PULL_SYS_TYPES_H      1
+#    define CURL_PULL_SYS_SOCKET_H     1
+#  else                /* Local (or Little) C Compiler */
+#    define CURL_TYPEOF_CURL_OFF_T     long
+#    define CURL_FORMAT_CURL_OFF_T     "ld"
+#    define CURL_FORMAT_CURL_OFF_TU    "lu"
+#    define CURL_SUFFIX_CURL_OFF_T     L
+#    define CURL_SUFFIX_CURL_OFF_TU    UL
+#    define CURL_TYPEOF_CURL_SOCKLEN_T int
+#  endif
 
 #elif defined(__SYMBIAN32__)
-#  if defined(__EABI__)  /* Treat all ARM compilers equally */
+#  if defined(__EABI__) /* Treat all ARM compilers equally */
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -288,7 +299,6 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__TINYC__) /* also known as tcc */
-
 #  define CURL_TYPEOF_CURL_OFF_T     long long
 #  define CURL_FORMAT_CURL_OFF_T     "lld"
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -377,6 +387,7 @@
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  elif defined(__LP64__) || \
         defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__) || \
+        defined(__e2k__) || \
         (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 8) || \
         (defined(__LONG_MAX__) && __LONG_MAX__ == 9223372036854775807L)
 #    define CURL_TYPEOF_CURL_OFF_T     long
@@ -473,21 +484,21 @@
  */
 
 #if defined(__BORLANDC__) && (__BORLANDC__ == 0x0551)
-#  define __CURL_OFF_T_C_HLPR2(x) x
-#  define __CURL_OFF_T_C_HLPR1(x) __CURL_OFF_T_C_HLPR2(x)
-#  define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HLPR1(Val) ## \
-                             __CURL_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_T)
-#  define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HLPR1(Val) ## \
-                             __CURL_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_TU)
+#  define CURLINC_OFF_T_C_HLPR2(x) x
+#  define CURLINC_OFF_T_C_HLPR1(x) CURLINC_OFF_T_C_HLPR2(x)
+#  define CURL_OFF_T_C(Val)  CURLINC_OFF_T_C_HLPR1(Val) ## \
+                             CURLINC_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_T)
+#  define CURL_OFF_TU_C(Val) CURLINC_OFF_T_C_HLPR1(Val) ## \
+                             CURLINC_OFF_T_C_HLPR1(CURL_SUFFIX_CURL_OFF_TU)
 #else
 #  ifdef CURL_ISOCPP
-#    define __CURL_OFF_T_C_HLPR2(Val,Suffix) Val ## Suffix
+#    define CURLINC_OFF_T_C_HLPR2(Val,Suffix) Val ## Suffix
 #  else
-#    define __CURL_OFF_T_C_HLPR2(Val,Suffix) Val/**/Suffix
+#    define CURLINC_OFF_T_C_HLPR2(Val,Suffix) Val/**/Suffix
 #  endif
-#  define __CURL_OFF_T_C_HLPR1(Val,Suffix) __CURL_OFF_T_C_HLPR2(Val,Suffix)
-#  define CURL_OFF_T_C(Val)  __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_T)
-#  define CURL_OFF_TU_C(Val) __CURL_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_TU)
+#  define CURLINC_OFF_T_C_HLPR1(Val,Suffix) CURLINC_OFF_T_C_HLPR2(Val,Suffix)
+#  define CURL_OFF_T_C(Val)  CURLINC_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_T)
+#  define CURL_OFF_TU_C(Val) CURLINC_OFF_T_C_HLPR1(Val,CURL_SUFFIX_CURL_OFF_TU)
 #endif
 
-#endif /* __CURL_SYSTEM_H */
+#endif /* CURLINC_SYSTEM_H */

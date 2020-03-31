@@ -41,6 +41,7 @@ http-proxy
 </server>
 <features>
 http
+proxy
 </features>
  <name>
 FTP fetch with --proxy set to http:// and with --connect-to

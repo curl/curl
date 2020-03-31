@@ -44,11 +44,12 @@ s/boundary=------------------------[a-z0-9]*/boundary=--------------------------
 POST /644 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
-Content-Length: 718
+Content-Length: 640
 Content-Type: multipart/form-data; boundary=----------------------------
 
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
+
 
 </protocol>
 # CURLE_ABORTED_BY_CALLBACK (42)

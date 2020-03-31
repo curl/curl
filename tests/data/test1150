@@ -32,6 +32,9 @@ HTTP proxy with URLs using different ports
  <command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.example.com.1150:150/path http://test.remote.example.com.1150:1234/path/
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

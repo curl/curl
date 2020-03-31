@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (c) 2003 The OpenEvidence Project.  All rights reserved.
+ * Copyright (c) 2003 - 2019 The OpenEvidence Project.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -277,7 +277,7 @@ int main(int argc, char **argv)
 
   int tabLength = 100;
   char *binaryptr;
-  char *mimetype;
+  char *mimetype = NULL;
   char *mimetypeaccept = NULL;
   char *contenttype;
   const char **pp;
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 
   binaryptr = malloc(tabLength);
 
-  p.verbose = 0;
+  memset(&p, '\0', sizeof(p));
   p.errorbio = BIO_new_fp(stderr, BIO_NOCLOSE);
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -372,7 +372,7 @@ int main(int argc, char **argv)
     args++;
   }
 
-  if(mimetype == NULL || mimetypeaccept == NULL)
+  if(mimetype == NULL || mimetypeaccept == NULL || p.p12file == NULL)
     badarg = 1;
 
   if(badarg) {
@@ -544,7 +544,7 @@ int main(int argc, char **argv)
   BIO_printf(p.errorbio, "%d %s %d\n", __LINE__, "curl_easy_perform",
              res = curl_easy_perform(p.curl));
   {
-    int result = curl_easy_getinfo(p.curl, CURLINFO_CONTENT_TYPE, &response);
+    curl_easy_getinfo(p.curl, CURLINFO_CONTENT_TYPE, &response);
     if(mimetypeaccept && p.verbose) {
       if(!strcmp(mimetypeaccept, response))
         BIO_printf(p.errorbio, "the response has a correct mimetype : %s\n",

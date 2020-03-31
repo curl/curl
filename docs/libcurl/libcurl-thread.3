@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 2015 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 2015 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -41,14 +41,15 @@ then of course using the underlying SSL library multi-threaded and those libs
 might have their own requirements on this issue.  You may need to provide one
 or two functions to allow it to function properly:
 .IP OpenSSL
-OpenSSL 1.1.0 "can be safely used in multi-threaded applications provided that
-support for the underlying OS threading API is built-in."
+OpenSSL 1.1.0+ "can be safely used in multi-threaded applications provided that
+support for the underlying OS threading API is built-in." In that case the
+engine is used by libcurl in a way that is fully thread-safe.
 
-https://www.openssl.org/docs/manmaster/crypto/threads.html#DESCRIPTION
+https://www.openssl.org/docs/man1.1.0/man3/CRYPTO_THREAD_run_once.html#DESCRIPTION
 
 OpenSSL <= 1.0.2 the user must set callbacks.
 
-https://www.openssl.org/docs/man1.0.2/crypto/threads.html#DESCRIPTION
+https://www.openssl.org/docs/man1.0.2/man3/CRYPTO_set_locking_callback.html#DESCRIPTION
 
 https://curl.haxx.se/libcurl/c/opensslthreadlock.html
 
@@ -56,10 +57,6 @@ https://curl.haxx.se/libcurl/c/opensslthreadlock.html
 https://gnutls.org/manual/html_node/Thread-safety.html
 .IP NSS
 thread-safe already without anything required.
-.IP PolarSSL
-Required actions unknown.
-.IP yassl
-Required actions unknown.
 .IP Secure-Transport
 The engine is used by libcurl in a way that is fully thread-safe.
 .IP WinSSL

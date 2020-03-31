@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -29,9 +29,7 @@ CURLOPT_HTTP_VERSION \- specify HTTP protocol version to use
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_VERSION, long version);
 .SH DESCRIPTION
 Pass \fIversion\fP a long, set to one of the values described below. They ask
-libcurl to use the specific HTTP versions. This is not sensible to do unless
-you have a good reason. You have to set this option if you want to use
-libcurl's HTTP/2 support.
+libcurl to use the specific HTTP versions.
 
 Note that the HTTP version is just a request. libcurl will still prioritize to
 re-use an existing connection so it might then re-use a connection using a
@@ -59,6 +57,14 @@ Issue non-TLS HTTP requests using HTTP/2 without HTTP/1.1 Upgrade. It requires
 prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
 will still do HTTP/2 the standard way with negotiated protocol version in the
 TLS handshake. (Added in 7.49.0)
+.IP CURL_HTTP_VERSION_3
+(Added in 7.66.0) Setting this value will make libcurl attempt to use HTTP/3
+directly to server given in the URL. Note that this cannot gracefully
+downgrade to earlier HTTP version if the server doesn't support HTTP/3.
+
+For more reliably upgrading to HTTP/3, set the preferred version to something
+lower and let the server announce its HTTP/3 support via Alt-Svc:. See
+\fICURLOPT_ALTSVC(3)\fP.
 .SH DEFAULT
 Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
 
@@ -84,4 +90,4 @@ Along with HTTP
 Returns CURLE_OK if HTTP is supported, and CURLE_UNKNOWN_OPTION if not.
 .SH "SEE ALSO"
 .BR CURLOPT_SSLVERSION "(3), " CURLOPT_HTTP200ALIASES "(3), "
-.BR CURLOPT_HTTP09_ALLOWED "(3), "
+.BR CURLOPT_HTTP09_ALLOWED "(3), " CURLOPT_ALTSVC "(3) "

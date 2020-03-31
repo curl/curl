@@ -27,7 +27,9 @@ isn't because there's no Proxy-Authorization: NTLM header
 <client>
 <features>
 NTLM
+SSL
 !SSPI
+proxy
 </features>
 <server>
 http

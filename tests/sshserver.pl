@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -28,6 +28,9 @@ use strict;
 use warnings;
 use Cwd;
 use Cwd 'abs_path';
+use Digest::MD5;
+use Digest::MD5 'md5_hex';
+use MIME::Base64;
 
 #***************************************************************************
 # Variables and subs imported from sshhelp module
@@ -48,6 +51,7 @@ use sshhelp qw(
     $sftpcmds
     $hstprvkeyf
     $hstpubkeyf
+    $hstpubmd5f
     $cliprvkeyf
     $clipubkeyf
     display_sshdconfig
@@ -357,10 +361,11 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 #
 if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
    (! -e $hstpubkeyf) || (! -s $hstpubkeyf) ||
+   (! -e $hstpubmd5f) || (! -s $hstpubmd5f) ||
    (! -e $cliprvkeyf) || (! -s $cliprvkeyf) ||
    (! -e $clipubkeyf) || (! -s $clipubkeyf)) {
     # Make sure all files are gone so ssh-keygen doesn't complain
-    unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf);
+    unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f, $cliprvkeyf, $clipubkeyf);
     logmsg 'generating host keys...' if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f $hstprvkeyf -C 'curl test server' -N ''") {
         logmsg 'Could not generate host key';
@@ -369,6 +374,24 @@ if((! -e $hstprvkeyf) || (! -s $hstprvkeyf) ||
     logmsg 'generating client keys...' if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f $cliprvkeyf -C 'curl test client' -N ''") {
         logmsg 'Could not generate client key';
+        exit 1;
+    }
+    # Make sure that permissions are restricted so openssh doesn't complain
+    system "chmod 600 $hstprvkeyf";
+    system "chmod 600 $cliprvkeyf";
+    # Save md5 hash of public host key
+    open(RSAKEYFILE, "<$hstpubkeyf");
+    my @rsahostkey = do { local $/ = ' '; <RSAKEYFILE> };
+    close(RSAKEYFILE);
+    if(!$rsahostkey[1]) {
+        logmsg 'Failed parsing base64 encoded RSA host key';
+        exit 1;
+    }
+    open(PUBMD5FILE, ">$hstpubmd5f");
+    print PUBMD5FILE md5_hex(decode_base64($rsahostkey[1]));
+    close(PUBMD5FILE);
+    if((! -e $hstpubmd5f) || (! -s $hstpubmd5f)) {
+        logmsg 'Failed writing md5 hash of RSA host key';
         exit 1;
     }
 }
@@ -388,6 +411,17 @@ if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
     $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
     $pidfile_config = pathhelp::build_sys_abs_path($pidfile_config);
     $sftpsrv_config = "internal-sftp";
+}
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Ensure to use native Windows paths with OpenSSH for Windows
+    $clipubkeyf_config = pathhelp::sys_native_abs_path($clipubkeyf);
+    $hstprvkeyf_config = pathhelp::sys_native_abs_path($hstprvkeyf);
+    $pidfile_config = pathhelp::sys_native_abs_path($pidfile);
+    $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
+
+    $sshdconfig = pathhelp::sys_native_abs_path($sshdconfig);
+    $sshconfig = pathhelp::sys_native_abs_path($sshconfig);
+    $sftpconfig = pathhelp::sys_native_abs_path($sftpconfig);
 }
 
 #***************************************************************************
@@ -483,8 +517,18 @@ logmsg 'generating ssh server config file...' if($verbose);
 push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
-push @cfgarr, "DenyUsers !$username";
-push @cfgarr, "AllowUsers $username";
+
+# AllowUsers and DenyUsers options should use lowercase on Windows
+# and do not support quotes around values for some unknown reason.
+if ($sshdid =~ /OpenSSH-Windows/) {
+    my $username_lc = lc $username;
+    push @cfgarr, "DenyUsers !$username_lc";
+    push @cfgarr, "AllowUsers $username_lc";
+} else {
+    push @cfgarr, "DenyUsers !$username";
+    push @cfgarr, "AllowUsers $username";
+}
+
 push @cfgarr, 'DenyGroups';
 push @cfgarr, 'AllowGroups';
 push @cfgarr, '#';
@@ -758,7 +802,11 @@ if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
     $identity_config = pathhelp::build_sys_abs_path($identity_config);
     $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts_config);
 }
-
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Ensure to use native Windows paths with OpenSSH for Windows
+    $identity_config = pathhelp::sys_native_abs_path($identity);
+    $knownhosts_config = pathhelp::sys_native_abs_path($knownhosts);
+}
 
 #***************************************************************************
 #  ssh client configuration file options we might use and version support
@@ -853,7 +901,12 @@ push @cfgarr, "HostName $listenaddr";
 push @cfgarr, "User $username";
 push @cfgarr, 'Protocol 2';
 push @cfgarr, '#';
-push @cfgarr, "BindAddress $listenaddr";
+
+# BindAddress option is not supported by OpenSSH for Windows
+if (!($sshdid =~ /OpenSSH-Windows/)) {
+    push @cfgarr, "BindAddress $listenaddr";
+}
+
 push @cfgarr, '#';
 push @cfgarr, "IdentityFile $identity_config";
 push @cfgarr, "UserKnownHostsFile $knownhosts_config";
@@ -875,8 +928,12 @@ push @cfgarr, 'NumberOfPasswordPrompts 0';
 push @cfgarr, 'PasswordAuthentication no';
 push @cfgarr, 'PreferredAuthentications publickey';
 push @cfgarr, 'PubkeyAuthentication yes';
-push @cfgarr, 'RhostsRSAAuthentication no';
-push @cfgarr, 'RSAAuthentication no';
+
+# RSA authentication options are not supported by OpenSSH for Windows
+if (!($sshdid =~ /OpenSSH-Windows/)) {
+    push @cfgarr, 'RhostsRSAAuthentication no';
+    push @cfgarr, 'RSAAuthentication no';
+}
 
 # Disabled StrictHostKeyChecking since it makes the tests fail on my
 # OpenSSH_6.0p1 on Debian Linux / Daniel
@@ -1062,8 +1119,8 @@ elsif($verbose && ($rc >> 8)) {
 #***************************************************************************
 # Clean up once the server has stopped
 #
-unlink($hstprvkeyf, $hstpubkeyf, $cliprvkeyf, $clipubkeyf, $knownhosts);
-unlink($sshdconfig, $sshconfig, $sftpconfig);
-
+unlink($hstprvkeyf, $hstpubkeyf, $hstpubmd5f,
+       $cliprvkeyf, $clipubkeyf, $knownhosts,
+       $sshdconfig, $sshconfig, $sftpconfig);
 
 exit 0;

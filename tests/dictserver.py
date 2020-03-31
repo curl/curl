@@ -1,5 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 2008 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+###########################################################################
 #
 """ DICT server """
 
@@ -33,7 +54,7 @@ def dictserver(options):
         with open(options.pidfile, "w") as f:
             f.write("{0}".format(pid))
 
-    local_bind = (HOST, options.port)
+    local_bind = (options.host, options.port)
     log.info("[DICT] Listening on %s", local_bind)
 
     # Need to set the allow_reuse on the class, not on the instance.
@@ -83,6 +104,8 @@ def get_options():
 
     parser.add_argument("--port", action="store", default=9016,
                         type=int, help="port to listen on")
+    parser.add_argument("--host", action="store", default=HOST,
+                        help="host to listen on")
     parser.add_argument("--verbose", action="store", type=int, default=0,
                         help="verbose output")
     parser.add_argument("--pidfile", action="store",

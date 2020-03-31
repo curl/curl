@@ -31,7 +31,7 @@ $! A rename action section is needed to make sure that the files are
 $! created in the GNV$GNU: in the correct case, and to create the alias
 $! link [usr.bin]curl. for [usr.bin]curl.exe.
 $!
-$! Copyright 2009, John Malmberg
+$! Copyright 2009 - 2020, John Malmberg
 $!
 $! Permission to use, copy, modify, and/or distribute this software for any
 $! purpose with or without fee is hereby granted, provided that the above

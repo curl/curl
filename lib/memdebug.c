@@ -306,9 +306,8 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
 
 void curl_dbg_free(void *ptr, int line, const char *source)
 {
-  struct memdebug *mem;
-
   if(ptr) {
+    struct memdebug *mem;
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)

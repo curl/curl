@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
- * Copyright (C) 2016-2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2016-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -64,8 +64,7 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done);
 static CURLcode smb_done(struct connectdata *conn, CURLcode status,
                          bool premature);
 static CURLcode smb_disconnect(struct connectdata *conn, bool dead);
-static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
-                       int numsocks);
+static int smb_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode smb_parse_url_path(struct connectdata *conn);
 
 /*
@@ -607,6 +606,7 @@ static CURLcode smb_send_and_recv(struct connectdata *conn, void **msg)
 {
   struct smb_conn *smbc = &conn->proto.smbc;
   CURLcode result;
+  *msg = NULL; /* if it returns early */
 
   /* Check if there is data in the transfer buffer */
   if(!smbc->send_size && smbc->upload_size) {
@@ -682,7 +682,8 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
 
   switch(smbc->state) {
   case SMB_NEGOTIATE:
-    if(h->status || smbc->got < sizeof(*nrsp) + sizeof(smbc->challenge) - 1) {
+    if((smbc->got < sizeof(*nrsp) + sizeof(smbc->challenge) - 1) ||
+       h->status) {
       connclose(conn, "SMB: negotiation failed");
       return CURLE_COULDNT_CONNECT;
     }
@@ -785,6 +786,8 @@ static CURLcode smb_request_state(struct connectdata *conn, bool *done)
   case SMB_OPEN:
     if(h->status || smbc->got < sizeof(struct smb_nt_create_response)) {
       req->result = CURLE_REMOTE_FILE_NOT_FOUND;
+      if(h->status == smb_swap32(SMB_ERR_NOACCESS))
+        req->result = CURLE_REMOTE_ACCESS_DENIED;
       next_state = SMB_TREE_DISCONNECT;
       break;
     }
@@ -934,12 +937,8 @@ static CURLcode smb_disconnect(struct connectdata *conn, bool dead)
   return CURLE_OK;
 }
 
-static int smb_getsock(struct connectdata *conn, curl_socket_t *socks,
-                       int numsocks)
+static int smb_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
-  if(!numsocks)
-    return GETSOCK_BLANK;
-
   socks[0] = conn->sock[FIRSTSOCKET];
   return GETSOCK_READSOCK(0) | GETSOCK_WRITESOCK(0);
 }
@@ -957,7 +956,6 @@ static CURLcode smb_do(struct connectdata *conn, bool *done)
 
 static CURLcode smb_parse_url_path(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   struct smb_request *req = data->req.protop;
   struct smb_conn *smbc = &conn->proto.smbc;
@@ -965,7 +963,8 @@ static CURLcode smb_parse_url_path(struct connectdata *conn)
   char *slash;
 
   /* URL decode the path */
-  result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL, TRUE);
+  CURLcode result = Curl_urldecode(data, data->state.up.path, 0, &path, NULL,
+                                   TRUE);
   if(result)
     return result;
 

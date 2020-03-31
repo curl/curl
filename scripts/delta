@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2018-2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2018-2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -30,9 +30,13 @@
 
 $start = $ARGV[0];
 
-if($start eq "") {
+if($start eq "-h") {
     print "Usage: summary [tag]\n";
     exit;
+}
+elsif($start eq "") {
+    $start = `git tag --sort=taggerdate | tail -1`;
+    chomp $start;
 }
 
 $commits = `git log --oneline $start.. | wc -l`;
@@ -45,16 +49,16 @@ $acommitters = `git shortlog -s | wc -l`;
 # delta from now compared to before
 $ncommitters = $acommitters - $bcommitters;
 
-# number of contributors right now (according to THANKS)
-$acontribs = `cat docs/THANKS | grep -c '^[^ ]'`;
+# number of contributors right now
+$acontribs = `./scripts/contrithanks.sh | grep -c '^[^ ]'`;
 # number when the tag tag was set
 $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
 $contribs = $acontribs - $bcontribs;
 
 # number of setops:
-$asetopts=`grep "^  CINIT" include/curl/curl.h  | grep -cv OBSOLETE`;
-$bsetopts=`git show $start:include/curl/curl.h | grep "^  CINIT" | grep -cv OBSOLETE`;
+$asetopts=`grep '^  CURLOPT(' include/curl/curl.h  | grep -cv OBSOLETE`;
+$bsetopts=`git show $start:include/curl/curl.h | grep '^  CURLOPT(' | grep -cv OBSOLETE`;
 $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
@@ -118,7 +122,7 @@ printf "Commit authors: %d out of which %d are new (out of %d)\n",
     $committers, $ncommitters, $acommitters;
 printf "Contributors in RELEASE-NOTES: %d\n",
     $numcontributors;
-printf "New contributors (in THANKS): %d (out of %d)\n",
+printf "New contributors: %d (out of %d)\n",
     $contribs, $acontribs;
 printf "New curl_easy_setopt() options: %d (out of %d)\n",
     $nsetopts, $asetopts;

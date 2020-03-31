@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,7 +54,6 @@ UNITTEST_START
   struct curl_llist_element case2_list;
   struct curl_llist_element case3_list;
   struct curl_llist_element case4_list;
-  struct curl_llist_element case5_list;
   struct curl_llist_element *head;
   struct curl_llist_element *element_next;
   struct curl_llist_element *element_prev;
@@ -76,7 +75,7 @@ UNITTEST_START
   fail_unless(llist.head == NULL, "list head should initiate to NULL");
   fail_unless(llist.tail == NULL, "list tail should intiate to NULL");
   fail_unless(llist.dtor == test_curl_llist_dtor,
-               "list dtor shold initiate to test_curl_llist_dtor");
+               "list dtor should initiate to test_curl_llist_dtor");
 
   /**
    * testing Curl_llist_insert_next
@@ -215,55 +214,6 @@ UNITTEST_START
               "llist head is not NULL while the llist is empty");
   fail_unless(llist.tail == NULL,
               "llist tail is not NULL while the llist is empty");
-
-  /* @testing Curl_llist_move(struct curl_llist *,
-   * struct curl_llist_element *, struct curl_llist *,
-   * struct curl_llist_element *);
-  */
-
-  /**
-   * @case 1:
-   * moving head from an llist containing one element to an empty llist
-   * @assumptions:
-   * 1: llist size will be 0
-   * 2: llist_destination size will be 1
-   * 3: llist head will be NULL
-   * 4: llist_destination head == llist_destination tail != NULL
-   */
-
-  /*
-  * @setup
-  * add one element to the list
-  */
-
-  Curl_llist_insert_next(&llist, llist.head, &unusedData_case1,
-                         &case5_list);
-  /* necessary assertions */
-
-  abort_unless(Curl_llist_count(&llist) == 1,
-  "Number of list elements is not as expected, Aborting");
-  abort_unless(Curl_llist_count(&llist_destination) == 0,
-  "Number of list elements is not as expected, Aborting");
-
-  /*actual testing code*/
-  Curl_llist_move(&llist, llist.head, &llist_destination, NULL);
-  fail_unless(Curl_llist_count(&llist) == 0,
-      "moving element from llist didn't decrement the size");
-
-  fail_unless(Curl_llist_count(&llist_destination) == 1,
-        "moving element to llist_destination didn't increment the size");
-
-  fail_unless(llist.head == NULL,
-      "llist head not set to null after moving the head");
-
-  fail_unless(llist_destination.head != NULL,
-        "llist_destination head set to null after moving an element");
-
-  fail_unless(llist_destination.tail != NULL,
-          "llist_destination tail set to null after moving an element");
-
-  fail_unless(llist_destination.tail == llist_destination.head,
-            "llist_destination tail doesn't equal llist_destination head");
 
   Curl_llist_destroy(&llist, NULL);
   Curl_llist_destroy(&llist_destination, NULL);

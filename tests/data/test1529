@@ -31,6 +31,9 @@ HTTP request-injection in URL sent over proxy
  <command>
  "http://the.old.moo:%HTTPPORT/1529" %HOSTIP:%PROXYPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # it should be detected and an error should be reported

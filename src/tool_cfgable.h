@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,11 +22,9 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-
 #include "tool_sdecls.h"
-
 #include "tool_metalink.h"
-
+#include "tool_urlglob.h"
 #include "tool_formparse.h"
 
 typedef enum {
@@ -37,8 +35,21 @@ typedef enum {
 
 struct GlobalConfig;
 
+struct State {
+  struct getout *urlnode;
+  URLGlob *inglob;
+  URLGlob *urls;
+  char *outfiles;
+  char *httpgetfields;
+  char *uploadfile;
+  unsigned long infilenum; /* number of files to upload */
+  unsigned long up;  /* upload file counter within a single upload glob */
+  unsigned long urlnum; /* how many iterations this single URL has with ranges
+                           etc */
+  unsigned long li;
+};
+
 struct OperationConfig {
-  CURL *easy;               /* A copy of the handle from GlobalConfig */
   bool remote_time;
   char *random_file;
   char *egd_file;
@@ -97,6 +108,8 @@ struct OperationConfig {
   char *mail_from;
   struct curl_slist *mail_rcpt;
   char *mail_auth;
+  bool mail_rcpt_allowfails; /* --mail-rcpt-allowfails */
+  char *sasl_authzid;       /* Authorisation identity (identity to use) */
   bool sasl_ir;             /* Enable/disable SASL initial response */
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
@@ -144,6 +157,8 @@ struct OperationConfig {
   char *pubkey;
   char *hostpubmd5;
   char *engine;
+  char *etag_save_file;
+  char *etag_compare_file;
   bool crlf;
   char *customrequest;
   char *krblevel;
@@ -239,12 +254,12 @@ struct OperationConfig {
   bool ssl_no_revoke;       /* disable SSL certificate revocation checks */
   /*bool proxy_ssl_no_revoke; */
 
+  bool ssl_revoke_best_effort; /* ignore SSL revocation offline/missing
+                                  revocation list errors */
+
   bool use_metalink;        /* process given URLs as metalink XML file */
   metalinkfile *metalinkfile_list; /* point to the first node */
   metalinkfile *metalinkfile_last; /* point to the last/current node */
-#ifdef CURLDEBUG
-  bool test_event_based;
-#endif
   char *oauth_bearer;             /* OAuth 2.0 bearer token */
   bool nonpn;                     /* enable/disable TLS NPN extension */
   bool noalpn;                    /* enable/disable TLS ALPN extension */
@@ -265,10 +280,10 @@ struct OperationConfig {
   struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
+  struct State state;             /* for create_transfer() */
 };
 
 struct GlobalConfig {
-  CURL *easy;                     /* Once we have one, we keep it here */
   int showerror;                  /* -1 == unset, default => show errors
                                       0 => -s is used to NOT show errors
                                       1 => -S has been used to show errors */
@@ -286,6 +301,12 @@ struct GlobalConfig {
   char *libcurl;                  /* Output libcurl code to this file name */
   bool fail_early;                /* exit on first transfer error */
   bool styled_output;             /* enable fancy output style detection */
+#ifdef CURLDEBUG
+  bool test_event_based;
+#endif
+  bool parallel;
+  long parallel_max;
+  bool parallel_connect;
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;   /* Always last in the struct */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,11 +26,9 @@
 static char data[]=
 #ifdef CURL_DOES_CONVERSIONS
   /* ASCII representation with escape sequences for non-ASCII platforms */
-  "\x74\x68\x69\x73\x20\x69\x73\x20\x77\x68\x61\x74\x20\x77\x65\x20\x70"
-  "\x6f\x73\x74\x20\x74\x6f\x20\x74\x68\x65\x20\x73\x69\x6c\x6c\x79\x20"
-  "\x77\x65\x62\x20\x73\x65\x72\x76\x65\x72\x0a";
+  "\x64\x75\x6d\x6d\x79\x0a";
 #else
-  "this is what we post to the silly web server\n";
+  "dummy\n";
 #endif
 
 struct WriteThis {
@@ -41,11 +39,20 @@ struct WriteThis {
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
 #ifdef LIB644
+  static int count = 0;
   (void)ptr;
   (void)size;
   (void)nmemb;
   (void)userp;
-  return CURL_READFUNC_ABORT;
+  switch(count++) {
+  case 0: /* Return a single byte. */
+    *ptr = '\n';
+    return 1;
+  case 1: /* Request abort. */
+    return CURL_READFUNC_ABORT;
+  }
+  printf("Wrongly called >2 times\n");
+  exit(1); /* trigger major failure */
 #else
 
   struct WriteThis *pooh = (struct WriteThis *)userp;

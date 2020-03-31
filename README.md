@@ -4,12 +4,13 @@
 [![Coverity passed](https://scan.coverity.com/projects/curl/badge.svg)](https://scan.coverity.com/projects/curl)
 [![Travis-CI Build Status](https://travis-ci.org/curl/curl.svg?branch=master)](https://travis-ci.org/curl/curl)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/l1vv31029huhf4g4?svg=true)](https://ci.appveyor.com/project/curlorg/curl)
+[![Azure DevOps Build Status](https://dev.azure.com/daniel0244/curl/_apis/build/status/curl.curl?branchName=master)](https://dev.azure.com/daniel0244/curl/_build/latest?definitionId=1&branchName=master)
 [![Cirrus Build Status](https://api.cirrus-ci.com/github/curl/curl.svg?branch=master)](https://cirrus-ci.com/github/curl/curl)
-[![Coverage Status](https://coveralls.io/repos/github/curl/curl/badge.svg)](https://coveralls.io/github/curl/curl)
 [![Backers on Open Collective](https://opencollective.com/curl/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/curl/sponsors/badge.svg)](#sponsors)
 [![Language Grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/curl/curl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/curl/curl/context:cpp)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d11483a0cc5c4ebd9da4ff9f7cd56690)](https://www.codacy.com/app/curl/curl?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=curl/curl&amp;utm_campaign=Badge_Grade)
+[![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/curl.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:curl)
 
 Curl is a command-line tool for transferring data specified with URL
 syntax. Find out how to use curl by reading [the curl.1 man
@@ -21,7 +22,7 @@ libcurl is the library curl is using to do its job. It is readily available to
 be used by your software. Read [the libcurl.3 man
 page](https://curl.haxx.se/libcurl/c/libcurl.html) to learn how!
 
-You find answers to the most frequent questions we get in [the FAQ
+You can find answers to the most frequent questions we get in [the FAQ
 document](https://curl.haxx.se/docs/faq.html).
 
 Study [the COPYING file](https://curl.haxx.se/docs/copyright.html) for

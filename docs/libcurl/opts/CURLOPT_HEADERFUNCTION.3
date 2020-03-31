@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -39,9 +39,9 @@ shown above.
 This function gets called by libcurl as soon as it has received header
 data. The header callback will be called once for each header and only
 complete header lines are passed on to the callback. Parsing headers is very
-easy using this. The size of the data pointed to by \fIbuffer\fP is \fIsize\fP
-multiplied with \fInitems\fP. Do not assume that the header line is zero
-terminated!
+easy using this. \fIbuffer\fP points to the delivered data, and the size of
+that data is \fInitems\fP; \fIsize\fP is always 1. Do not assume that the
+header line is zero terminated!
 
 The pointer named \fIuserdata\fP is the one you set with the
 \fICURLOPT_HEADERDATA(3)\fP option.
@@ -52,7 +52,7 @@ an error to the library. This will cause the transfer to get aborted and the
 libcurl function in progress will return \fICURLE_WRITE_ERROR\fP.
 
 A complete HTTP header that is passed to this function can be up to
-\fICURL_MAX_HTTP_HEADER\fP (100K) bytes.
+\fICURL_MAX_HTTP_HEADER\fP (100K) bytes and includes the final line terminator.
 
 If this option is not set, or if it is set to NULL, but
 \fICURLOPT_HEADERDATA(3)\fP is set to anything but NULL, the function used to
@@ -66,6 +66,9 @@ response. This includes all responses which occur during authentication
 negotiation. If you need to operate on only the headers from the final
 response, you will need to collect headers in the callback yourself and use
 HTTP status lines, for example, to delimit response boundaries.
+
+For an HTTP transfer, the status line and the blank line preceding the response
+body are both included as headers and passed to this function.
 
 When a server sends a chunked encoded transfer, it may contain a trailer. That
 trailer is identical to an HTTP header and if such a trailer is received it is

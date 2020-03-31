@@ -18,7 +18,8 @@ expects from us.
 
 There is no legal entity. The curl project is just a bunch of people scattered
 around the globe with the common goal to produce source code that creates
-great products.
+great products. We are not part of any umbrella organization and we are not
+located in any specific country. We are totally independent.
 
 The copyrights in the project are owned by the individuals and organizations
 that wrote those parts of the code.
@@ -35,6 +36,28 @@ the appropriate way forward in any given situation or challenge.
 If there is no obvious consensus, a maintainer who's knowledgeable in the
 specific area will take an "executive" decision that they think is the right
 for the project.
+
+## Donations
+
+Donating plain money to curl is best done to curl's [Open Collective
+fund](https://opencollective.com/curl). Open Collective is a US based
+non-profit organization that holds on to funds for us. This fund is then used
+for paying the curl security bug bounties, to reimburse project related
+expenses etc.
+
+Donations to the project can also come in form of server hosting, providing
+services and paying for people to work on curl related code etc. Usually, such
+donations are services paid for directly by the sponsors.
+
+We grade sponsors in a few different levels and if they meet the criterias,
+they can be mentioned on the Sponsors page on the curl web site.
+
+## Commercial Support
+
+The curl project does not do or offer commercial support. It only hosts
+mailing lists, runs bug trackers etc to facilitate communication and work.
+
+However, Daniel works for wolfSSL and we offer commercial curl support there.
 
 ## Key roles
 
@@ -108,8 +131,8 @@ within the area of personal expertise and experience.
 
 ### Recommendations
 
-- please enable 2fa on your github account to reduce risk of malicious source
-  code tampering
+- we require two-factor authentication enabled on your github account to
+  reduce risk of malicious source code tampering
 - consider enabling signed git commits for additional verification of changes
 
 ### Merge advice

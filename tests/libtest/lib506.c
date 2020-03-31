@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -142,6 +142,7 @@ static void *fire(void *ptr)
   curl_easy_setopt(curl, CURLOPT_VERBOSE,    1L);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_URL,        tdata->url);
+  curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
   printf("CURLOPT_SHARE\n");
   curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
 

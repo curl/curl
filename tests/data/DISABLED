@@ -28,3 +28,6 @@
 1901
 1902
 2033
+# Uses SRP to "a server not supporting it" but modern stunnel versions
+# will silently accept it and remain happy
+323

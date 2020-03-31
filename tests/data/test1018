@@ -23,7 +23,7 @@ file
 X-X range on a file:// URL to stdout
  </name>
 <command option="no-include">
--r 4-4 file://localhost/%PWD/log/test1018.txt 
+-r 4-4 file://localhost%FILE_PWD/log/test1018.txt 
 </command>
 <file name="log/test1018.txt">
 1234567890

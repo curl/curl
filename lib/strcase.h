@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,5 +46,6 @@ char Curl_raw_toupper(char in);
 #define checkprefix(a,b)    curl_strnequal(a,b,strlen(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
+void Curl_strntolower(char *dest, const char *src, size_t n);
 
 #endif /* HEADER_CURL_STRCASE_H */

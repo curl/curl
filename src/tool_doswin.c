@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -38,33 +38,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/*
- * Macros ALWAYS_TRUE and ALWAYS_FALSE are used to avoid compiler warnings.
- */
-
-#define ALWAYS_TRUE   (1)
-#define ALWAYS_FALSE  (0)
-
-#if defined(_MSC_VER) && !defined(__POCC__)
-#  undef ALWAYS_TRUE
-#  undef ALWAYS_FALSE
-#  if (_MSC_VER < 1500)
-#    define ALWAYS_TRUE   (0, 1)
-#    define ALWAYS_FALSE  (1, 0)
-#  else
-#    define ALWAYS_TRUE \
-__pragma(warning(push)) \
-__pragma(warning(disable:4127)) \
-(1) \
-__pragma(warning(pop))
-#    define ALWAYS_FALSE \
-__pragma(warning(push)) \
-__pragma(warning(disable:4127)) \
-(0) \
-__pragma(warning(pop))
-#  endif
-#endif
-
 #ifdef WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
@@ -79,9 +52,9 @@ __pragma(warning(pop))
 #endif
 
 #ifdef WIN32
-#  define _use_lfn(f) ALWAYS_TRUE   /* long file names always available */
+#  define _use_lfn(f) (1)   /* long file names always available */
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
-#  define _use_lfn(f) ALWAYS_FALSE  /* long file names never available */
+#  define _use_lfn(f) (0)  /* long file names never available */
 #elif defined(__DJGPP__)
 #  include <fcntl.h>                /* _use_lfn(f) prototype */
 #endif
@@ -722,6 +695,32 @@ cleanup:
   if(hnd != INVALID_HANDLE_VALUE)
     CloseHandle(hnd);
   return slist;
+}
+
+LARGE_INTEGER Curl_freq;
+bool Curl_isVistaOrGreater;
+
+CURLcode win32_init(void)
+{
+  OSVERSIONINFOEXA osvi;
+  unsigned __int64 mask = 0;
+  unsigned char op = VER_GREATER_EQUAL;
+
+  memset(&osvi, 0, sizeof(osvi));
+  osvi.dwOSVersionInfoSize = sizeof(osvi);
+  osvi.dwMajorVersion = 6;
+  VER_SET_CONDITION(mask, VER_MAJORVERSION, op);
+  VER_SET_CONDITION(mask, VER_MINORVERSION, op);
+
+  if(VerifyVersionInfoA(&osvi, (VER_MAJORVERSION | VER_MINORVERSION), mask))
+    Curl_isVistaOrGreater = true;
+  else if(GetLastError() == ERROR_OLD_WIN_VERSION)
+    Curl_isVistaOrGreater = false;
+  else
+    return CURLE_FAILED_INIT;
+
+  QueryPerformanceFrequency(&Curl_freq);
+  return CURLE_OK;
 }
 
 #endif /* WIN32 */

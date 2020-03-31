@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -32,6 +32,8 @@ Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the first byte is received by libcurl. This includes
 \fICURLINFO_PRETRANSFER_TIME(3)\fP and also the time the server needs to
 calculate the result.
+
+When a redirect is followed, the time from each request is added together.
 
 See also the TIMES overview in the \fIcurl_easy_getinfo(3)\fP man page.
 .SH PROTOCOLS

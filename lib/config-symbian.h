@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -122,14 +122,8 @@
 /* Define to 1 if you have the <crypto.h> header file. */
 /* #undef HAVE_CRYPTO_H */
 
-/* Define to 1 if you have the <des.h> header file. */
-/* #undef HAVE_DES_H */
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
-
-/* Define to 1 if you have the `ENGINE_load_builtin_engines' function. */
-/*#define HAVE_ENGINE_LOAD_BUILTIN_ENGINES 1*/
 
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
@@ -315,9 +309,6 @@
 /* Define to 1 if you have the <libssh2.h> header file. */
 /*#define HAVE_LIBSSH2_H 1*/
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
-/*#define HAVE_LIBSSL 1*/
-
 /* if your compiler supports LL */
 #define HAVE_LL 1
 
@@ -363,9 +354,6 @@
 
 /* Define to 1 if you have the <openssl/crypto.h> header file. */
 /*#define HAVE_OPENSSL_CRYPTO_H 1*/
-
-/* Define to 1 if you have the <openssl/engine.h> header file. */
-/*#define HAVE_OPENSSL_ENGINE_H 1*/
 
 /* Define to 1 if you have the <openssl/err.h> header file. */
 /*#define HAVE_OPENSSL_ERR_H 1*/
@@ -477,9 +465,6 @@
 
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
-
-/* Define to 1 if you have the `SSL_get_shutdown' function. */
-/*#define HAVE_SSL_GET_SHUTDOWN 1*/
 
 /* Define to 1 if you have the <ssl.h> header file. */
 /* #undef HAVE_SSL_H */

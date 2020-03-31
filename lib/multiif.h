@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,10 +27,10 @@
  */
 
 void Curl_updatesocket(struct Curl_easy *data);
-void Curl_expire(struct Curl_easy *data, time_t milli, expire_id);
+void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
-void Curl_detach_connnection(struct Curl_easy *data);
+void Curl_update_timer(struct Curl_multi *multi);
 void Curl_attach_connnection(struct Curl_easy *data,
                              struct connectdata *conn);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
@@ -89,11 +89,8 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
 
-CURLMcode Curl_multi_wait(struct Curl_multi *multi,
-                          struct curl_waitfd extra_fds[],
-                          unsigned int extra_nfds,
-                          int timeout_ms,
-                          int *ret,
-                          bool *gotsocket); /* if any socket was checked */
+
+/* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
+unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_MULTIIF_H */

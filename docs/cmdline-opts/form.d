@@ -33,11 +33,11 @@ form-field to which the file portrait.jpg will be the input:
 
  curl -F profile=@portrait.jpg https://example.com/upload.cgi
 
-Example: send a your name and shoe size in two text fields to the server:
+Example: send your name and shoe size in two text fields to the server:
 
  curl -F name=John -F shoesize=11 https://example.com/
 
-Example: send a your essay in a text field to the server. Send it as a plain
+Example: send your essay in a text field to the server. Send it as a plain
 text field, but get the contents for it from a local file:
 
  curl -F "story=<hugefile.txt" https://example.com/

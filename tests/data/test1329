@@ -17,6 +17,9 @@ http
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/1329 -x "/server"
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

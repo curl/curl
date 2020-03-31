@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -138,7 +138,6 @@
 /* USE_OPENSSL on cmd-line */
 #ifdef USE_OPENSSL
   #define HAVE_CRYPTO_CLEANUP_ALL_EX_DATA 1
-  #define HAVE_OPENSSL_ENGINE_H  1
   #define OPENSSL_NO_KRB5        1
 #endif
 

@@ -2,7 +2,7 @@
 #
 # xc-cc-check.m4
 #
-# Copyright (c) 2013 Daniel Stenberg <daniel@haxx.se>
+# Copyright (c) 2013 - 2020, Daniel Stenberg <daniel@haxx.se>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above

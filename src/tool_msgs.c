@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -32,6 +32,7 @@
 
 #define WARN_PREFIX "Warning: "
 #define NOTE_PREFIX "Note: "
+#define ERROR_PREFIX "curl: "
 
 static void voutf(struct GlobalConfig *config,
                   const char *prefix,
@@ -104,9 +105,9 @@ void warnf(struct GlobalConfig *config, const char *fmt, ...)
   va_end(ap);
 }
 /*
- * Emit help formatted message on given stream.
+ * Emit help formatted message on given stream. This is for errors with or
+ * related to command line arguments.
  */
-
 void helpf(FILE *errors, const char *fmt, ...)
 {
   if(fmt) {
@@ -121,4 +122,18 @@ void helpf(FILE *errors, const char *fmt, ...)
           "or 'curl --manual' "
 #endif
           "for more information\n");
+}
+
+/*
+ * Emit error message on error stream if not muted. When errors are not tied
+ * to command line arguments, use helpf() for such errors.
+ */
+void errorf(struct GlobalConfig *config, const char *fmt, ...)
+{
+  if(!config->mute) {
+    va_list ap;
+    va_start(ap, fmt);
+    voutf(config, ERROR_PREFIX, fmt, ap);
+    va_end(ap);
+  }
 }

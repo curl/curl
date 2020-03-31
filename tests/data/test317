@@ -67,6 +67,9 @@ HTTP with custom Authorization: and redirect to new host
  <command>
 http://first.host.it.is/we/want/that/page/317 -x %HOSTIP:%HTTPPORT -H "Authorization: s3cr3t" --proxy-user testing:this --location
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

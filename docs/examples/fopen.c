@@ -13,7 +13,7 @@
  * See the main() function at the bottom that shows an app that retrieves from
  * a specified url using fgets() and fread() and saves as two output files.
  *
- * Copyright (c) 2003, 2017 Simtec Electronics
+ * Copyright (c) 2003 - 2019 Simtec Electronics
  *
  * Re-implemented by Vincent Sanders <vince@kyllikki.org> with extensive
  * reference to original curl example code
@@ -211,7 +211,7 @@ static int fill_buffer(URL_FILE *file, size_t want)
 static int use_buffer(URL_FILE *file, size_t want)
 {
   /* sort out buffer */
-  if((file->buffer_pos - want) <= 0) {
+  if(file->buffer_pos <= want) {
     /* ditch buffer - write will recreate */
     free(file->buffer);
     file->buffer = NULL;

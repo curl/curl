@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -23,6 +23,7 @@
 #use strict;
 
 my @xml;
+my $xmlfile;
 
 my $warning=0;
 my $trace=0;
@@ -80,11 +81,10 @@ sub getpart {
     my @this;
     my $inside=0;
     my $base64=0;
-
- #   print "Section: $section, part: $part\n";
+    my $line;
 
     for(@xml) {
- #       print "$inside: $_";
+        $line++;
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
@@ -105,6 +105,10 @@ sub getpart {
             $inside--;
         }
         elsif(($inside >= 1) && ($_ =~ /^ *\<\/$section/)) {
+            if($inside > 1) {
+                print STDERR "$xmlfile:$line:1: error: missing </$part> tag before </$section>\n";
+                @this = ("format error in $xmlfile");
+            }
             if($trace && @this) {
                 print STDERR "*** getpart.pm: $section/$part returned data!\n";
             }
@@ -165,6 +169,7 @@ sub loadtest {
     my ($file)=@_;
 
     undef @xml;
+    $xmlfile = $file;
 
     if(open(XML, "<$file")) {
         binmode XML; # for crapage systems, use binary

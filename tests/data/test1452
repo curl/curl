@@ -3,7 +3,6 @@
 <keywords>
 TELNET
 UPLOAD
-flaky
 </keywords>
 </info>
 
@@ -37,6 +36,8 @@ telnet://%HOSTIP:%NEGTELNETPORT --upload-file -
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout>test1452</stdout>
+<stdout nonewline="yes">
+test1452
+</stdout>
 </verify>
 </testcase>

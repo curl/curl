@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -54,8 +54,8 @@ the POST data from the read callback. If you want to send a zero-byte POST set
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header,
 and libcurl will add that header automatically if the POST is either known to
-be larger than 1024 bytes or if the expected size is unknown. You can disable
-this header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
+be larger than 1MB or if the expected size is unknown. You can disable this
+header with \fICURLOPT_HTTPHEADER(3)\fP as usual.
 
 To make multipart/formdata posts (aka RFC2388-posts), check out the
 \fICURLOPT_HTTPPOST(3)\fP option combined with \fIcurl_formadd(3)\fP.

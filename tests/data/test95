@@ -52,6 +52,9 @@ HTTP over proxytunnel using POST
  <command>
 http://test.95:%HTTPPORT/we/want/that/page/95 -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

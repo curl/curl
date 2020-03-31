@@ -76,8 +76,10 @@ lib547
 </tool>
 <features>
 NTLM
+SSL
 !SSPI
 debug
+proxy
 </features>
  <name>
 HTTP proxy auth NTLM with POST data from read callback

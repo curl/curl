@@ -7,6 +7,18 @@ document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
 libcurl from source code.
 
+## Building using vcpkg
+
+You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    ./vcpkg integrate install
+    vcpkg install curl[tool]
+
+The curl port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
@@ -56,15 +68,15 @@ you have pkg-config installed, set the pkg-config path first, like this:
 
 Without pkg-config installed, use this:
 
-   ./configure --with-ssl=/opt/OpenSSL
+    ./configure --with-ssl=/opt/OpenSSL
 
 If you insist on forcing a build without SSL support, even though you may
 have OpenSSL installed in your system, you can run configure like this:
 
-   ./configure --without-ssl
+    ./configure --without-ssl
 
 If you have OpenSSL installed, but with the libraries in one place and the
-header files somewhere else, you have to set the LDFLAGS and CPPFLAGS
+header files somewhere else, you have to set the `LDFLAGS` and `CPPFLAGS`
 environment variables prior to running configure.  Something like this should
 work:
 
@@ -103,11 +115,11 @@ libressl.
  - GnuTLS: `--without-ssl --with-gnutls`.
  - wolfSSL: `--without-ssl --with-wolfssl`
  - NSS: `--without-ssl --with-nss`
- - PolarSSL: `--without-ssl --with-polarssl`
  - mbedTLS: `--without-ssl --with-mbedtls`
  - schannel: `--without-ssl --with-schannel`
  - secure transport: `--without-ssl --with-secure-transport`
  - MesaLink: `--without-ssl --with-mesalink`
+ - BearSSL: `--without-ssl --with-bearssl`
 
 # Windows
 
@@ -121,9 +133,9 @@ libressl.
  KB140584 is a must for any Windows developer. Especially important is full
  understanding if you are not going to follow the advice given above.
 
- - [How To Use the C Run-Time](https://support.microsoft.com/kb/94248/en-us)
- - [Run-Time Library Compiler Options](https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library)
- - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://msdn.microsoft.com/en-us/library/ms235460)
+ - [How To Use the C Run-Time](https://support.microsoft.com/help/94248/how-to-use-the-c-run-time)
+ - [Run-Time Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
+ - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://docs.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
 If your app is misbehaving in some strange way, or it is suffering from
 memory corruption, before asking for further help, please try first to
@@ -148,7 +160,7 @@ make targets available to build libcurl with more features, use:
    and SSPI support.
 
 If you have any problems linking libraries or finding header files, be sure
-to verify that the provided "Makefile.m32" files use the proper paths, and
+to verify that the provided `Makefile.m32` files use the proper paths, and
 adjust as necessary. It is also possible to override these paths with
 environment variables, for example:
 
@@ -172,8 +184,8 @@ If you want to enable LDAPS support then set LDAPS=1.
 ## Cygwin
 
 Almost identical to the unix installation. Run the configure script in the
-curl source tree root with `sh configure`. Make sure you have the sh
-executable in /bin/ or you'll see the configure fail toward the end.
+curl source tree root with `sh configure`. Make sure you have the `sh`
+executable in `/bin/` or you'll see the configure fail toward the end.
 
 Run `make`
 
@@ -183,26 +195,14 @@ The configure utility, unfortunately, is not available for the Windows
 environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
-However, you can use the following defines to disable specific
-protocols:
-
- - `HTTP_ONLY`             disables all protocols except HTTP
- - `CURL_DISABLE_FTP`      disables FTP
- - `CURL_DISABLE_LDAP`     disables LDAP
- - `CURL_DISABLE_TELNET`   disables TELNET
- - `CURL_DISABLE_DICT`     disables DICT
- - `CURL_DISABLE_FILE`     disables FILE
- - `CURL_DISABLE_TFTP`     disables TFTP
- - `CURL_DISABLE_HTTP`     disables HTTP
- - `CURL_DISABLE_IMAP`     disables IMAP
- - `CURL_DISABLE_POP3`     disables POP3
- - `CURL_DISABLE_SMTP`     disables SMTP
+You can use specific defines to disable specific protocols and features. See
+[CURL-DISABLE.md](CURL-DISABLE-md) for the full list.
 
 If you want to set any of these defines you have the following options:
 
- - Modify lib/config-win32.h
- - Modify lib/curl_setup.h
- - Modify winbuild/Makefile.vc
+ - Modify `lib/config-win32.h`
+ - Modify `lib/curl_setup.h`
+ - Modify `winbuild/Makefile.vc`
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
@@ -213,12 +213,12 @@ versions.
 ## Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
 
 In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
-necessary to make definition of preprocessor symbol USE_LWIPSOCK visible to
+necessary to make definition of preprocessor symbol `USE_LWIPSOCK` visible to
 libcurl and curl compilation processes. To set this definition you have the
 following alternatives:
 
- - Modify lib/config-win32.h and src/config-win32.h
- - Modify winbuild/Makefile.vc
+ - Modify `lib/config-win32.h` and `src/config-win32.h`
+ - Modify `winbuild/Makefile.vc`
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
@@ -248,13 +248,13 @@ look for dynamic import symbols.
 
 ## Legacy Windows and SSL
 
-WinSSL (specifically Schannel from Windows SSPI), is the native SSL library in
-Windows. However, WinSSL in Windows <= XP is unable to connect to servers that
+Schannel (from Windows SSPI), is the native SSL library in Windows. However,
+Schannel in Windows <= XP is unable to connect to servers that
 no longer support the legacy handshakes and algorithms used by those
 versions. If you will be using curl in one of those earlier versions of
 Windows you should choose another SSL backend such as OpenSSL.
 
-# Apple iOS and Mac OS X
+# Apple iOS and macOS
 
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
@@ -269,12 +269,12 @@ the server. This, of course, includes the root certificates that ship with the
 OS. The `--cert` and `--engine` options, and their libcurl equivalents, are
 currently unimplemented in curl with Secure Transport.
 
-For OS X users: In OS X 10.8 ("Mountain Lion"), Apple made a major overhaul to
-the Secure Transport API that, among other things, added support for the newer
-TLS 1.1 and 1.2 protocols. To get curl to support TLS 1.1 and 1.2, you must
-build curl on Mountain Lion or later, or by using the equivalent SDK. If you
-set the `MACOSX_DEPLOYMENT_TARGET` environmental variable to an earlier
-version of OS X prior to building curl, then curl will use the new Secure
+For macOS users: In OS X 10.8 ("Mountain Lion"), Apple made a major overhaul
+to the Secure Transport API that, among other things, added support for the
+newer TLS 1.1 and 1.2 protocols. To get curl to support TLS 1.1 and 1.2, you
+must build curl on Mountain Lion or later, or by using the equivalent SDK. If
+you set the `MACOSX_DEPLOYMENT_TARGET` environmental variable to an earlier
+version of macOS prior to building curl, then curl will use the new Secure
 Transport API on Mountain Lion and later, and fall back on the older API when
 the same curl binary is executed on older cats. For example, running these
 commands in curl's directory in the shell will build the code such that it
@@ -284,11 +284,52 @@ will run on cats as old as OS X 10.6 ("Snow Leopard") (using bash):
     ./configure --with-darwinssl
     make
 
+# Android
+
+When building curl for Android it's recommended to use a Linux environment
+since using curl's `configure` script is the easiest way to build curl
+for Android. Before you can build curl for Android, you need to install the
+Android NDK first. This can be done using the SDK Manager that is part of
+Android Studio. Once you have installed the Android NDK, you need to figure out
+where it has been installed and then set up some environment variables before
+launching `configure`. On macOS, those variables could look like this to compile
+for `aarch64` and API level 29:
+
+    export NDK=~/Library/Android/sdk/ndk/20.1.5948944
+    export HOST_TAG=darwin-x86_64
+    export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/$HOST_TAG
+    export AR=$TOOLCHAIN/bin/aarch64-linux-android-ar
+    export AS=$TOOLCHAIN/bin/aarch64-linux-android-as
+    export CC=$TOOLCHAIN/bin/aarch64-linux-android29-clang
+    export CXX=$TOOLCHAIN/bin/aarch64-linux-android29-clang++
+    export LD=$TOOLCHAIN/bin/aarch64-linux-android-ld
+    export RANLIB=$TOOLCHAIN/bin/aarch64-linux-android-ranlib
+    export STRIP=$TOOLCHAIN/bin/aarch64-linux-android-strip
+
+When building on Linux or targeting other API levels or architectures, you need
+to adjust those variables accordingly. After that you can build curl like this:
+
+    ./configure --host aarch64-linux-android --with-pic --disable-shared
+
+Note that this won't give you SSL/TLS support. If you need SSL/TLS, you have
+to build curl against a SSL/TLS layer, e.g. OpenSSL, because it's impossible for
+curl to access Android's native SSL/TLS layer. To build curl for Android using
+OpenSSL, follow the OpenSSL build instructions and then install `libssl.a` and
+`libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy `include/openssl` to
+`$TOOLCHAIN/sysroot/usr/include`. Now you can build curl for Android using
+OpenSSL like this:
+    
+    ./configure --host aarch64-linux-android --with-pic --disable-shared --with-ssl="$TOOLCHAIN/sysroot/usr"
+
+Note, however, that you must target at least Android M (API level 23) or `configure`
+won't be able to detect OpenSSL since `stderr` (and the like) weren't defined
+before Android M.
+
 # Cross compile
 
 Download and unpack the curl package.
 
-'cd' to the new directory. (e.g. `cd curl-7.12.3`)
+`cd` to the new directory. (e.g. `cd curl-7.12.3`)
 
 Set environment variables to point to the cross-compile toolchain and call
 configure with any options you need.  Be sure and specify the `--host` and
@@ -327,7 +368,7 @@ In some cases, you may be able to simplify the above commands to as little as:
 
 There are a number of configure options that can be used to reduce the size of
 libcurl for embedded applications where binary size is an important factor.
-First, be sure to set the CFLAGS variable when configuring with any relevant
+First, be sure to set the `CFLAGS` variable when configuring with any relevant
 compiler optimization flags to reduce the size of the binary.  For gcc, this
 would mean at minimum the -Os option, and potentially the `-march=X`,
 `-mdynamic-no-pic` and `-flto` options as well, e.g.
@@ -360,8 +401,8 @@ use, here are some other flags that can reduce the size of the library:
 
 The GNU compiler and linker have a number of options that can reduce the
 size of the libcurl dynamic libraries on some platforms even further.
-Specify them by providing appropriate CFLAGS and LDFLAGS variables on the
-configure command-line, e.g.
+Specify them by providing appropriate `CFLAGS` and `LDFLAGS` variables on
+the configure command-line, e.g.
 
     CFLAGS="-Os -ffunction-sections -fdata-sections
             -fno-unwind-tables -fno-asynchronous-unwind-tables -flto"
@@ -383,7 +424,7 @@ in a lower total size than dynamically linking.
 Note that the curl test harness can detect the use of some, but not all, of
 the `--disable` statements suggested above. Use will cause tests relying on
 those features to fail.  The test harness can be manually forced to skip the
-relevant tests by specifying certain key words on the runtests.pl command
+relevant tests by specifying certain key words on the `runtests.pl` command
 line.  Following is a list of appropriate key words:
 
  - `--disable-cookies`          !cookies

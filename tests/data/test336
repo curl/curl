@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PASV
+TYPE A
+RETR
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+<datacheck nonewline="yes">
+data
+</datacheck>
+<servercmd>
+REPLY EPSV 500 no such command
+REPLY SIZE 500 no such command
+</servercmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP range download when SIZE doesn't work
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/336 --use-ascii --range 3-6
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+PASV
+TYPE A
+SIZE 336
+REST 3
+RETR 336
+ABOR
+QUIT
+</protocol>
+</verify>
+</testcase>

@@ -1,0 +1,71 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_MAIL_RCPT_ALLLOWFAILS 3 "16 Jan 2020" "libcurl 7.69.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_MAIL_RCPT_ALLLOWFAILS \- allow RCPT TO command to fail for some recipients
+.SH SYNOPSIS
+.nf
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAIL_RCPT_ALLLOWFAILS,
+                          long allow);
+.SH DESCRIPTION
+If \fIallow\fP is set to 1L, allow RCPT TO command to fail for some recipients.
+
+When sending data to multiple recipients, by default curl will abort SMTP
+conversation if at least one of the recipients causes RCPT TO command to
+return an error.
+
+The default behavior can be changed by setting \fIignore\fP to 1L which will
+make curl ignore errors and proceed with the remaining valid recipients.
+
+In case when all recipients cause RCPT TO command to fail, curl will abort SMTP
+conversation and return the error received from to the last RCPT TO command.
+.SH DEFAULT
+0
+.SH PROTOCOLS
+SMTP
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  struct curl_slist *list;
+
+  /* Adding one valid and one invalid email address */
+  list = curl_slist_append(NULL, "person@example.com");
+  list = curl_slist_append(list, "invalidemailaddress");
+
+  curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT_ALLLOWFAILS, 1L);
+
+  ret = curl_easy_perform(curl);
+  curl_slist_free_all(list);
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in 7.69.0.
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_MAIL_FROM "(3), " CURLOPT_MAIL_RCPT "(3), "

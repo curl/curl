@@ -1,0 +1,99 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+HTTP MIME POST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Connection: close
+Content-Type: text/html
+
+hello
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib668
+</tool>
+
+ <name>
+HTTP mimepost early end of data detection
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/668
+</command>
+<file name="log/file668.txt">
+This is data from a file
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+# Note that the stripping above removes 12 bytes from every occurrence of the
+# boundary string and since 5 of them are in the body contents, we see
+# (5*12) == 60 bytes less
+<protocol>
+POST /668 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Transfer-Encoding: chunked
+Content-Type: multipart/form-data; boundary=----------------------------
+Expect: 100-continue
+
+c1
+------------------------------
+Content-Disposition: form-data; name="field1"
+
+dummy
+------------------------------
+Content-Disposition: form-data; name="field2"
+
+
+5
+dummy
+91
+
+------------------------------
+Content-Disposition: form-data; name="field3"; filename="file668.txt"
+Content-Type: text/plain
+
+
+49
+This is data from a file
+
+--------------------------------
+
+0
+
+</protocol>
+</verify>
+</testcase>

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -117,7 +117,6 @@ int main(void)
 {
   pthread_t tid[NUM_THREADS];
   int i;
-  int error;
   CURLSH *share;
   struct initurl url[NUM_THREADS];
 
@@ -132,6 +131,7 @@ int main(void)
   init_locks();
 
   for(i = 0; i< NUM_THREADS; i++) {
+    int error;
     url[i].url = URL;
     url[i].share = share;
     url[i].threadno = i;
@@ -144,7 +144,7 @@ int main(void)
 
   /* now wait for all threads to terminate */
   for(i = 0; i< NUM_THREADS; i++) {
-    error = pthread_join(tid[i], NULL);
+    pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
 

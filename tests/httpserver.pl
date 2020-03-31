@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -32,6 +32,10 @@ use warnings;
 use serverhelp qw(
     server_pidfilename
     server_logfilename
+    );
+
+use sshhelp qw(
+    exe_ext
     );
 
 my $verbose = 0;     # set to 1 for debugging
@@ -133,7 +137,7 @@ if($ipvnum eq 'unix') {
 $flags .= "--srcdir \"$srcdir\"";
 
 if($verbose) {
-    print STDERR "RUN: server/sws $flags\n";
+    print STDERR "RUN: server/sws".exe_ext('SRV')." $flags\n";
 }
 
-exec("server/sws $flags");
+exec("server/sws".exe_ext('SRV')." $flags");

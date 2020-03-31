@@ -1,5 +1,5 @@
-#ifndef __CURL_URLAPI_H
-#define __CURL_URLAPI_H
+#ifndef CURLINC_URLAPI_H
+#define CURLINC_URLAPI_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -77,6 +77,8 @@ typedef enum {
 #define CURLU_URLENCODE (1<<7)          /* URL encode on set */
 #define CURLU_APPENDQUERY (1<<8)        /* append a form style part */
 #define CURLU_GUESS_SCHEME (1<<9)       /* legacy curl-style guessing */
+#define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
+                                           scheme is unknown. */
 
 typedef struct Curl_URL CURLU;
 
@@ -120,4 +122,4 @@ CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
 } /* end of extern "C" */
 #endif
 
-#endif
+#endif /* CURLINC_URLAPI_H */

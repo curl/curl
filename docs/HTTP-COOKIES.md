@@ -24,7 +24,7 @@
   and in 2017, another update was
   [drafted](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-alone-01)
   to deprecate modification of 'secure' cookies from non-secure origins. Both
-  of these drafs have been incorporated into a proposal to
+  of these drafts have been incorporated into a proposal to
   [replace](https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-02)
   RFC6265. Cookie prefixes and secure cookie modification protection has been
   implemented by curl.
@@ -42,6 +42,27 @@
 
   When libcurl saves a cookiejar, it creates a file header of its own in which
   there is a URL mention that will link to the web version of this document.
+
+## Cookie file format
+
+  The cookie file format is text based and stores one cookie per line. Lines
+  that start with `#` are treated as comments.
+
+  Each line that each specifies a single cookie consists of seven text fields
+  separated with TAB characters. A valid line must end with a newline
+  character.
+
+### Fields in the file
+
+  Field number, what type and example data and the meaning of it:
+
+  0. string `example.com` - the domain name
+  1. boolean `FALSE` - include subdomains
+  2. string `/foobar/` - path
+  3. boolean `TRUE` - send/receive over HTTPS only
+  4. number `1462299217` - expires at - seconds since Jan 1st 1970, or 0
+  5. string `person` - name of the cookie
+  6. string `daniel` - value of the cookie
 
 ## Cookies with curl the command line tool
 

@@ -25,10 +25,6 @@
 #include "connect.h"
 #include "share.h"
 
-/* retrieves ip address and port from a sockaddr structure.
-   note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool getaddressinfo(struct sockaddr *sa, char *addr, long *port);
-
 #include "memdebug.h" /* LAST include file */
 
 static void unit_stop(void)
@@ -103,23 +99,23 @@ static const struct testcase tests[] = {
 };
 
 UNITTEST_START
+{
   int i;
   int testnum = sizeof(tests) / sizeof(struct testcase);
+  struct Curl_multi *multi = NULL;
+  struct Curl_easy *easy = NULL;
+  struct curl_slist *list = NULL;
 
   for(i = 0; i < testnum; ++i) {
     int j;
     int addressnum = sizeof(tests[i].address) / sizeof(*tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
-    struct curl_slist *list;
     void *entry_id;
     bool problem = false;
-    struct Curl_multi *multi;
-    struct Curl_easy *easy = curl_easy_init();
-    if(!easy) {
-      curl_global_cleanup();
-      return CURLE_OUT_OF_MEMORY;
-    }
+    easy = curl_easy_init();
+    if(!easy)
+      goto error;
 
     /* create a multi handle and add the easy handle to it so that the
        hostcache is setup */
@@ -128,16 +124,14 @@ UNITTEST_START
 
     list = curl_slist_append(NULL, tests[i].optval);
     if(!list)
-        goto unit_test_abort;
+      goto error;
     curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
 
     Curl_loadhostpairs(easy);
 
     entry_id = (void *)aprintf("%s:%d", tests[i].host, tests[i].port);
-    if(!entry_id) {
-      curl_slist_free_all(list);
-      goto unit_test_abort;
-    }
+    if(!entry_id)
+      goto error;
     dns = Curl_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
     free(entry_id);
     entry_id = NULL;
@@ -154,8 +148,8 @@ UNITTEST_START
       if(tests[i].address[j] == &skip)
         continue;
 
-      if(addr && !getaddressinfo(addr->ai_addr,
-                                 ipaddress, &port)) {
+      if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
+                                   ipaddress, &port)) {
         fprintf(stderr, "%s:%d tests[%d] failed. getaddressinfo failed.\n",
                 __FILE__, __LINE__, i);
         problem = true;
@@ -206,12 +200,20 @@ UNITTEST_START
     }
 
     curl_easy_cleanup(easy);
+    easy = NULL;
     curl_multi_cleanup(multi);
+    multi = NULL;
     curl_slist_free_all(list);
+    list = NULL;
 
     if(problem) {
       unitfail++;
       continue;
     }
   }
+  error:
+  curl_easy_cleanup(easy);
+  curl_multi_cleanup(multi);
+  curl_slist_free_all(list);
+}
 UNITTEST_STOP

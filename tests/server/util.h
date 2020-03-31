@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,16 +37,16 @@ extern const char *path;
 /* global variable, log file name */
 extern const char *serverlogfile;
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #include <process.h>
 #include <fcntl.h>
 
-#define sleep(sec)   Sleep ((sec)*1000)
+#define sleep(sec) Sleep ((sec)*1000)
 
 #undef perror
 #define perror(m) win32_perror(m)
 void win32_perror(const char *msg);
-#endif  /* WIN32 */
+#endif  /* WIN32 or _WIN32 */
 
 #ifdef USE_WINSOCK
 void win32_init(void);

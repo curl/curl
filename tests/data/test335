@@ -1,0 +1,103 @@
+<testcase>
+# Mostly a duplicate of test168
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP proxy
+HTTP proxy Digest auth
+HTTP Digest auth
+HTTP auth in URL
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<data>
+HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+And you should ignore this data.
+</data>
+
+# then this is returned since we get no server-auth
+<data1000>
+HTTP/1.1 401 Authorization to the remote host as well swsbounce swsclose
+WWW-Authenticate: Digest realm="realmweirdo", nonce="123456"
+
+you should ignore this data too
+</data1000>
+
+<data1001>
+HTTP/1.1 200 OK swsclose
+Server: no
+Content-Length: 15
+
+Nice auth sir!
+</data1001>
+
+<datacheck>
+HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+HTTP/1.1 401 Authorization to the remote host as well swsbounce swsclose
+WWW-Authenticate: Digest realm="realmweirdo", nonce="123456"
+
+HTTP/1.1 200 OK swsclose
+Server: no
+Content-Length: 15
+
+Nice auth sir!
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+proxy
+</features>
+ <name>
+HTTP with proxy Digest and site Digest with creds in URLs
+ </name>
+ <command>
+http://digest:alot@data.from.server.requiring.digest.hohoho.com/335 --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+Host: data.from.server.requiring.digest.hohoho.com
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+Host: data.from.server.requiring.digest.hohoho.com
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://data.from.server.requiring.digest.hohoho.com/335 HTTP/1.1
+Host: data.from.server.requiring.digest.hohoho.com
+Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/335", response="f61609cd8f5bb205ef4e169b2c5626cb"
+Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/335", response="08a2e2e684047f4219a38ddc189ac00c"
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

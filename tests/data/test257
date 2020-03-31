@@ -73,7 +73,9 @@ HTTP Location: following with --netrc-optional
  <command>
 http://supersite.com/want/257 -L -x http://%HOSTIP:%HTTPPORT --netrc-optional --netrc-file log/netrc257
 </command>
-
+<features>
+proxy
+</features>
 # netrc auth for two out of three sites:
 <file name="log/netrc257">
 machine supersite.com login user1 password passwd1

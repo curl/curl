@@ -76,6 +76,7 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM
+SSL
 !SSPI
 debug
 </features>

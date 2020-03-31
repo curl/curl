@@ -64,6 +64,9 @@ HTTP --proxy-anyauth and 407 with cookies
  <command>
 -U myname:mypassword -x %HOSTIP:%HTTPPORT http://z.x.com/1331 --proxy-anyauth -c log/dump1331
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

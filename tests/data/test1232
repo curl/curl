@@ -41,6 +41,9 @@ HTTP URL with dotdot removal from path using an HTTP proxy
  <command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.1232:8990/../../hej/but/who/../1232?stupid=me/../1232#soo/../1232 http://test.remote.haxx.se.1232:8990/../../hej/but/who/../12320001#/../12320001
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

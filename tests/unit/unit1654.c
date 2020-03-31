@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2019 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -53,8 +53,10 @@ UNITTEST_START
   if(!asi)
     return 1;
   result = Curl_altsvc_load(asi, arg);
-  if(result)
+  if(result) {
+    Curl_altsvc_cleanup(asi);
     return result;
+  }
   curl = curl_easy_init();
   if(!curl)
     goto fail;
@@ -88,12 +90,21 @@ UNITTEST_START
   fail_unless(asi->num == 8, "wrong number of entries");
 
   result = Curl_altsvc_parse(curl, asi, "h2=\"example.com:443\"; ma = 120;",
-                             ALPN_h2c, "example.org", 80);
+                             ALPN_h2, "example.org", 80);
   if(result) {
     fprintf(stderr, "Curl_altsvc_parse(4) failed!\n");
     unitfail++;
   }
   fail_unless(asi->num == 9, "wrong number of entries");
+
+  /* quoted 'ma' value */
+  result = Curl_altsvc_parse(curl, asi, "h2=\"example.net:443\"; ma=\"180\";",
+                             ALPN_h2, "example.net", 80);
+  if(result) {
+    fprintf(stderr, "Curl_altsvc_parse(4) failed!\n");
+    unitfail++;
+  }
+  fail_unless(asi->num == 10, "wrong number of entries");
 
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\":443\", h3=\":443\"; ma = 120; persist = 1",
@@ -102,7 +113,7 @@ UNITTEST_START
     fprintf(stderr, "Curl_altsvc_parse(5) failed!\n");
     unitfail++;
   }
-  fail_unless(asi->num == 11, "wrong number of entries");
+  fail_unless(asi->num == 12, "wrong number of entries");
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(curl, asi, "clear;",
@@ -111,9 +122,9 @@ UNITTEST_START
     fprintf(stderr, "Curl_altsvc_parse(6) failed!\n");
     unitfail++;
   }
-  fail_unless(asi->num == 9, "wrong number of entries");
+  fail_unless(asi->num == 10, "wrong number of entries");
 
-  Curl_altsvc_save(asi, outname);
+  Curl_altsvc_save(curl, asi, outname);
 
   curl_easy_cleanup(curl);
   fail:

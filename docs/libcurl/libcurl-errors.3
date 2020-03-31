@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -59,9 +59,9 @@ Couldn't resolve proxy. The given proxy host could not be resolved.
 Couldn't resolve host. The given remote host was not resolved.
 .IP "CURLE_COULDNT_CONNECT (7)"
 Failed to connect() to host or proxy.
-.IP "CURLE_FTP_WEIRD_SERVER_REPLY (8)"
-The server sent data libcurl couldn't parse. This error code is used for more
-than just FTP and is aliased as \fICURLE_WEIRD_SERVER_REPLY\fP since 7.51.0.
+.IP "CURLE_WEIRD_SERVER_REPLY (8)"
+The server sent data libcurl couldn't parse. This error code was known as as
+\fICURLE_FTP_WEIRD_SERVER_REPLY\fP before 7.51.0.
 .IP "CURLE_REMOTE_ACCESS_DENIED (9)"
 We were denied access to the resource given in the URL.  For FTP, this occurs
 while trying to change to the remote directory.
@@ -147,7 +147,7 @@ Function not found. A required zlib function was not found.
 .IP "CURLE_ABORTED_BY_CALLBACK (42)"
 Aborted by callback. A callback returned "abort" to libcurl.
 .IP "CURLE_BAD_FUNCTION_ARGUMENT (43)"
-Internal error. A function was called with a bad parameter.
+A function was called with a bad parameter.
 .IP "CURLE_INTERFACE_FAILED (45)"
 Interface error. A specified outgoing interface could not be used. Set which
 interface to use for outgoing connections' source IP address with
@@ -254,6 +254,14 @@ Status returned failure when asked with \fICURLOPT_SSL_VERIFYSTATUS(3)\fP.
 Stream error in the HTTP/2 framing layer.
 .IP "CURLE_RECURSIVE_API_CALL (93)"
 An API function was called from inside a callback.
+.IP "CURLE_AUTH_ERROR (94)"
+An authentication function returned an error.
+.IP "CURLE_HTTP3 (95)"
+A problem was detected in the HTTP/3 layer. This is somewhat generic and can
+be one out of several problems, see the error buffer for details.
+.IP "CURLE_QUIC_CONNECT_ERROR (96)"
+QUIC connection error. This error may be caused by an SSL library error. QUIC
+is the protocol used for HTTP/3 transfers.
 .IP "CURLE_OBSOLETE*"
 These error codes will never be returned. They were used in an old libcurl
 version and are currently unused.
@@ -266,14 +274,17 @@ This is not really an error. It means you should call
 between. Before version 7.20.0 this could be returned by
 \fIcurl_multi_perform(3)\fP, but in later versions this return code is never
 used.
+.IP "CURLM_CALL_MULTI_SOCKET (-1)"
+An alias for CURLM_CALL_MULTI_PERFORM. Never returned by modern libcurl
+versions.
 .IP "CURLM_OK (0)"
 Things are fine.
 .IP "CURLM_BAD_HANDLE (1)"
 The passed-in handle is not a valid CURLM handle.
 .IP "CURLM_BAD_EASY_HANDLE (2)"
 An easy handle was not good/valid. It could mean that it isn't an easy handle
-at all, or possibly that the handle already is in used by this or another
-multi handle.
+at all, or possibly that the handle already is in use by this or another multi
+handle.
 .IP "CURLM_OUT_OF_MEMORY (3)"
 You are doomed.
 .IP "CURLM_INTERNAL_ERROR (4)"
@@ -289,6 +300,10 @@ An easy handle already added to a multi handle was attempted to get added a
 second time. (Added in 7.32.1)
 .IP "CURLM_RECURSIVE_API_CALL (8)"
 An API function was called from inside a callback.
+.IP "CURLM_WAKEUP_FAILURE (9)"
+Wakeup is unavailable or failed.
+.IP "CURLM_BAD_FUNCTION_ARGUMENT (10)"
+A function was called with a bad parameter.
 .SH "CURLSHcode"
 The "share" interface will return a CURLSHcode to indicate when an error has
 occurred.  Also consider \fIcurl_share_strerror(3)\fP.

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,16 +70,17 @@ int main(void)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct curl_slist *headers = NULL;
-  struct curl_slist *recipients = NULL;
-  struct curl_slist *slist = NULL;
-  curl_mime *mime;
-  curl_mime *alt;
-  curl_mimepart *part;
-  const char **cpp;
 
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *headers = NULL;
+    struct curl_slist *recipients = NULL;
+    struct curl_slist *slist = NULL;
+    curl_mime *mime;
+    curl_mime *alt;
+    curl_mimepart *part;
+    const char **cpp;
+
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 

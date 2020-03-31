@@ -52,6 +52,9 @@ HTTP over proxy-tunnel with site authentication
  <command>
 http://test.83:%HTTPPORT/we/want/that/page/83 -p -x %HOSTIP:%PROXYPORT --user 'iam:my:;self'
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

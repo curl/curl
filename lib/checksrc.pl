@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2011 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2011 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -36,7 +36,7 @@ my $file;
 my $dir=".";
 my $wlist="";
 my @alist;
-my $windows_os = $^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin';
+my $windows_os = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys';
 my $verbose;
 my %whitelist;
 
@@ -80,6 +80,7 @@ my %warnings = (
     'MULTISPACE'       => 'multiple spaces used when not suitable',
     'SIZEOFNOPAREN'    => 'use of sizeof without parentheses',
     'SNPRINTF'         => 'use of snprintf',
+    'ONELINECONDITION' => 'conditional block on the same line as the if()',
     );
 
 sub readwhitelist {
@@ -176,7 +177,7 @@ sub checkwarn {
 
 $file = shift @ARGV;
 
-while(1) {
+while(defined $file) {
 
     if($file =~ /-D(.*)/) {
         $dir = $1;
@@ -457,12 +458,33 @@ sub scanfile {
             }
         }
 
-        if($nostr =~ /^((.*)(if) *\()(.*)\)/) {
+        if($nostr =~ /^((.*\s)(if) *\()(.*)\)(.*)/) {
             my $pos = length($1);
-            if($4 =~ / = /) {
+            my $postparen = $5;
+            my $cond = $4;
+            if($cond =~ / = /) {
                 checkwarn("ASSIGNWITHINCONDITION",
                           $line, $pos+1, $file, $l,
                           "assignment within conditional expression");
+            }
+            my $temp = $cond;
+            $temp =~ s/\(//g; # remove open parens
+            my $openc = length($cond) - length($temp);
+
+            $temp = $cond;
+            $temp =~ s/\)//g; # remove close parens
+            my $closec = length($cond) - length($temp);
+            my $even = $openc == $closec;
+
+            if($l =~ / *\#/) {
+                # this is a #if, treat it differently
+            }
+            elsif($even && $postparen &&
+               ($postparen !~ /^ *$/) && ($postparen !~ /^ *[,{&|\\]+/)) {
+                print STDERR "5: '$postparen'\n";
+                checkwarn("ONELINECONDITION",
+                          $line, length($l)-length($postparen), $file, $l,
+                          "conditional block on the same line");
             }
         }
         # check spaces after open parentheses
@@ -717,12 +739,17 @@ sub scanfile {
         my $commityear = undef;
         @copyright = sort {$$b{year} cmp $$a{year}} @copyright;
 
+        # if the file is modified, assume commit year this year
         if(`git status -s -- $file` =~ /^ [MARCU]/) {
             $commityear = (localtime(time))[5] + 1900;
         }
-        elsif (`git rev-list --count origin/master..HEAD -- $file` !~ /^0/) {
-            my $grl = `git rev-list --max-count=1 --timestamp HEAD -- $file`;
-            $commityear = (localtime((split(/ /, $grl))[0]))[5] + 1900;
+        else {
+            # min-parents=1 to ignore wrong initial commit in truncated repos
+            my $grl = `git rev-list --max-count=1 --min-parents=1 --timestamp HEAD -- $file`;
+            if($grl) {
+                chomp $grl;
+                $commityear = (localtime((split(/ /, $grl))[0]))[5] + 1900;
+            }
         }
 
         if(defined($commityear) && scalar(@copyright) &&

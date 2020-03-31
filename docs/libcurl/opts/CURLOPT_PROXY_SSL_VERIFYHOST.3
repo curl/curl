@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -42,8 +42,15 @@ Curl considers the proxy the intended one when the Common Name field or a
 Subject Alternate Name field in the certificate matches the host name in the
 proxy string which you told curl to use.
 
-When the \fIverify\fP value is 1L, \fIcurl_easy_setopt\fP will return an error
-and the option value will not be changed due to old legacy reasons.
+If \fIverify\fP value is set to 1:
+
+In 7.28.0 and earlier: treated as a debug option of some sorts, not supported
+anymore due to frequently leading to programmer mistakes.
+
+From 7.28.1 to 7.65.3: setting it to 1 made curl_easy_setopt() return an error
+and leaving the flag untouched.
+
+From 7.66.0: treats 1 and 2 the same.
 
 When the \fIverify\fP value is 0L, the connection succeeds regardless of the
 names used in the certificate. Use that ability with caution!

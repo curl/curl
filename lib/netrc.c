@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#ifndef CURL_DISABLE_NETRC
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -44,27 +45,27 @@ enum host_lookup_state {
   HOSTVALID     /* this is "our" machine! */
 };
 
+#define NETRC_FILE_MISSING 1
+#define NETRC_FAILED -1
+#define NETRC_SUCCESS 0
+
 /*
- * @unittest: 1304
- *
- * *loginp and *passwordp MUST be allocated if they aren't NULL when passed
- * in.
+ * Returns zero on success.
  */
-int Curl_parsenetrc(const char *host,
-                    char **loginp,
-                    char **passwordp,
-                    bool *login_changed,
-                    bool *password_changed,
-                    char *netrcfile)
+static int parsenetrc(const char *host,
+                      char **loginp,
+                      char **passwordp,
+                      bool *login_changed,
+                      bool *password_changed,
+                      char *netrcfile)
 {
   FILE *file;
-  int retcode = 1;
+  int retcode = NETRC_FILE_MISSING;
   char *login = *loginp;
   char *password = *passwordp;
   bool specific_login = (login && *login != 0);
   bool login_alloc = FALSE;
   bool password_alloc = FALSE;
-  bool netrc_alloc = FALSE;
   enum host_lookup_state state = NOTHING;
 
   char state_login = 0;      /* Found a login keyword */
@@ -72,51 +73,9 @@ int Curl_parsenetrc(const char *host,
   int state_our_login = FALSE;  /* With specific_login, found *our* login
                                    name */
 
-#define NETRC DOT_CHAR "netrc"
-
-  if(!netrcfile) {
-    bool home_alloc = FALSE;
-    char *home = curl_getenv("HOME"); /* portable environment reader */
-    if(home) {
-      home_alloc = TRUE;
-#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
-    }
-    else {
-      struct passwd pw, *pw_res;
-      char pwbuf[1024];
-      if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
-         && pw_res) {
-        home = strdup(pw.pw_dir);
-        if(!home)
-          return CURLE_OUT_OF_MEMORY;
-        home_alloc = TRUE;
-      }
-#elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
-    }
-    else {
-      struct passwd *pw;
-      pw = getpwuid(geteuid());
-      if(pw) {
-        home = pw->pw_dir;
-      }
-#endif
-    }
-
-    if(!home)
-      return retcode; /* no home directory found (or possibly out of memory) */
-
-    netrcfile = curl_maprintf("%s%s%s", home, DIR_CHAR, NETRC);
-    if(home_alloc)
-      free(home);
-    if(!netrcfile) {
-      return -1;
-    }
-    netrc_alloc = TRUE;
-  }
+  DEBUGASSERT(netrcfile);
 
   file = fopen(netrcfile, FOPEN_READTEXT);
-  if(netrc_alloc)
-    free(netrcfile);
   if(file) {
     char *tok;
     char *tok_buf;
@@ -129,7 +88,7 @@ int Curl_parsenetrc(const char *host,
       if(tok && *tok == '#')
         /* treat an initial hash as a comment line */
         continue;
-      while(!done && tok) {
+      while(tok) {
 
         if((login && *login) && (password && *password)) {
           done = TRUE;
@@ -147,14 +106,14 @@ int Curl_parsenetrc(const char *host,
           }
           else if(strcasecompare("default", tok)) {
             state = HOSTVALID;
-            retcode = 0; /* we did find our host */
+            retcode = NETRC_SUCCESS; /* we did find our host */
           }
           break;
         case HOSTFOUND:
           if(strcasecompare(host, tok)) {
             /* and yes, this is our host! */
             state = HOSTVALID;
-            retcode = 0; /* we did find our host */
+            retcode = NETRC_SUCCESS; /* we did find our host */
           }
           else
             /* not our host */
@@ -173,7 +132,7 @@ int Curl_parsenetrc(const char *host,
               }
               login = strdup(tok);
               if(!login) {
-                retcode = -1; /* allocation failed */
+                retcode = NETRC_FAILED; /* allocation failed */
                 goto out;
               }
               login_alloc = TRUE;
@@ -189,7 +148,7 @@ int Curl_parsenetrc(const char *host,
               }
               password = strdup(tok);
               if(!password) {
-                retcode = -1; /* allocation failed */
+                retcode = NETRC_FAILED; /* allocation failed */
                 goto out;
               }
               password_alloc = TRUE;
@@ -214,6 +173,7 @@ int Curl_parsenetrc(const char *host,
 
     out:
     if(!retcode) {
+      /* success */
       *login_changed = FALSE;
       *password_changed = FALSE;
       if(login_alloc) {
@@ -240,3 +200,79 @@ int Curl_parsenetrc(const char *host,
 
   return retcode;
 }
+
+/*
+ * @unittest: 1304
+ *
+ * *loginp and *passwordp MUST be allocated if they aren't NULL when passed
+ * in.
+ */
+int Curl_parsenetrc(const char *host,
+                    char **loginp,
+                    char **passwordp,
+                    bool *login_changed,
+                    bool *password_changed,
+                    char *netrcfile)
+{
+  int retcode = 1;
+  char *filealloc = NULL;
+
+  if(!netrcfile) {
+    char *home = NULL;
+    char *homea = curl_getenv("HOME"); /* portable environment reader */
+    if(homea) {
+      home = homea;
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
+    }
+    else {
+      struct passwd pw, *pw_res;
+      char pwbuf[1024];
+      if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
+         && pw_res) {
+        home = pw.pw_dir;
+      }
+#elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
+    }
+    else {
+      struct passwd *pw;
+      pw = getpwuid(geteuid());
+      if(pw) {
+        home = pw->pw_dir;
+      }
+#endif
+    }
+
+    if(!home)
+      return retcode; /* no home directory found (or possibly out of
+                         memory) */
+
+    filealloc = curl_maprintf("%s%s.netrc", home, DIR_CHAR);
+    if(!filealloc) {
+      free(homea);
+      return -1;
+    }
+    retcode = parsenetrc(host, loginp, passwordp, login_changed,
+                         password_changed, filealloc);
+    free(filealloc);
+#ifdef WIN32
+    if(retcode == NETRC_FILE_MISSING) {
+      /* fallback to the old-style "_netrc" file */
+      filealloc = curl_maprintf("%s%s_netrc", home, DIR_CHAR);
+      if(!filealloc) {
+        free(homea);
+        return -1;
+      }
+      retcode = parsenetrc(host, loginp, passwordp, login_changed,
+                           password_changed, filealloc);
+      free(filealloc);
+    }
+#endif
+    free(homea);
+  }
+  else
+    retcode = parsenetrc(host, loginp, passwordp, login_changed,
+                         password_changed, netrcfile);
+  return retcode;
+}
+
+#endif

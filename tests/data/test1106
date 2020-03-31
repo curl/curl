@@ -24,6 +24,7 @@ hello
 <client>
 <features>
 ftp
+proxy
 </features>
 <server>
 http

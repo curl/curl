@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,8 +49,8 @@ typedef struct {
 extern const MD5_params Curl_DIGEST_MD5[1];
 extern const HMAC_params Curl_HMAC_MD5[1];
 
-void Curl_md5it(unsigned char *output,
-                const unsigned char *input);
+void Curl_md5it(unsigned char *output, const unsigned char *input,
+                const size_t len);
 
 MD5_context * Curl_MD5_init(const MD5_params *md5params);
 CURLcode Curl_MD5_update(MD5_context *context,

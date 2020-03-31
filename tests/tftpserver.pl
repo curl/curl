@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -32,6 +32,10 @@ use warnings;
 use serverhelp qw(
     server_pidfilename
     server_logfilename
+    );
+
+use sshhelp qw(
+    exe_ext
     );
 
 my $verbose = 0;     # set to 1 for debugging
@@ -107,4 +111,4 @@ if(!$logfile) {
 $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
-exec("server/tftpd $flags");
+exec("server/tftpd".exe_ext('SRV')." $flags");

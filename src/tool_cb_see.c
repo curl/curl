@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -88,7 +88,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   return CURL_SEEKFUNC_OK;
 }
 
-#if defined(WIN32) && !defined(__MINGW64__)
+#ifdef USE_TOOL_FTRUNCATE
 
 #ifdef __BORLANDC__
 /* 64-bit lseek-like function unavailable */
@@ -129,4 +129,4 @@ int tool_ftruncate64(int fd, curl_off_t where)
   return 0;
 }
 
-#endif /* WIN32  && ! __MINGW64__ */
+#endif /* USE_TOOL_FTRUNCATE */

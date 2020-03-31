@@ -156,18 +156,17 @@ auth_required   if this is set and a POST/PUT is made without auth, the
 idle            do nothing after receiving the request, just "sit idle"
 stream          continuously send data to the client, never-ending
 writedelay: [secs] delay this amount between reply packets
-skip: [num]     instructs the server to ignore reading this many bytes from a PUT
-                or POST request
-
+skip: [num]     instructs the server to ignore reading this many bytes from a
+                PUT or POST request
 rtp: part [num] channel [num] size [num]
                stream a fake RTP packet for the given part on a chosen channel
                with the given payload size
-
 connection-monitor When used, this will log [DISCONNECT] to the server.input
                log when the connection is disconnected.
 upgrade        when an HTTP upgrade header is found, the server will upgrade
                to http2
 swsclose       instruct server to close connection after response
+no-expect      don't read the request body if Expect: is present
 
 For TFTP:
 writedelay: [secs] delay this amount between reply packets (each packet being
@@ -217,6 +216,7 @@ SKIPPED.
 
 Features testable here are:
 
+alt-svc
 crypto
 debug
 getrlimit
@@ -227,6 +227,7 @@ idn
 ipv6
 Kerberos
 large_file
+ld_preload
 libz
 manual
 Metalink
@@ -239,14 +240,13 @@ SPNEGO
 SSL
 SSLpinning
 SSPI
+threaded-resolver
 TLS-SRP
 TrackMemory
-threaded-resolver
 unittest
 unix-sockets
+win32
 WinSSL
-ld_preload
-alt-svc
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server
@@ -366,6 +366,7 @@ Available substitute variables include:
 %FILE_PWD  - Current directory, on windows prefixed with a slash
 %RTSP6PORT - IPv6 port number of the RTSP server
 %RTSPPORT  - Port number of the RTSP server
+%SSHSRVMD5 - MD5 of SSH server's public key
 %SMTP6PORT - IPv6 port number of the SMTP server
 %SMTPPORT  - Port number of the SMTP server
 %SOCKSPORT - Port number of the SOCKS4/5 server
@@ -458,7 +459,7 @@ compared with what is stored in the test file. This is pretty
 advanced. Example: "s/^EPRT .*/EPRT stripped/"
 </stripfile>
 <stripfile1>
-1 to 4 can be appended to 'stripfile' to strip the correspending <fileN>
+1 to 4 can be appended to 'stripfile' to strip the corresponding <fileN>
 content
 </stripfile1>
 <stripfile2>

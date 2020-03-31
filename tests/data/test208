@@ -27,6 +27,7 @@ http
 </server>
 <features>
 ftp
+proxy
 </features>
  <name>
 HTTP PUT to a FTP URL with username+password - over HTTP proxy

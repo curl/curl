@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -46,6 +46,8 @@ know that there is one or more transfers less "running". You can then call
 \fIcurl_multi_info_read(3)\fP to get information about each individual
 completed transfer, and that returned info includes CURLcode and more. If an
 added handle fails very quickly, it may never be counted as a running_handle.
+You could use \fIcurl_multi_info_read(3)\fP to track actual status of the
+added handles in that case.
 
 When \fIrunning_handles\fP is set to zero (0) on the return of this function,
 there is no longer any transfers in progress.

@@ -44,9 +44,7 @@
 
 /* SSL backend-specific #if branches in this file must be kept in the order
    documented in curl_ntlm_core. */
-#if defined(NTLM_NEEDS_NSS_INIT)
-#include "vtls/nssg.h"
-#elif defined(USE_WINDOWS_SSPI)
+#if defined(USE_WINDOWS_SSPI)
 #include "curl_sspi.h"
 #endif
 
@@ -68,9 +66,11 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
 {
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
+  curlntlm *state;
   CURLcode result = CURLE_OK;
 
   ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
+  state = proxy ? &conn->proxy_ntlm_state : &conn->http_ntlm_state;
 
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
@@ -83,25 +83,25 @@ CURLcode Curl_input_ntlm(struct connectdata *conn,
       if(result)
         return result;
 
-      ntlm->state = NTLMSTATE_TYPE2; /* We got a type-2 message */
+      *state = NTLMSTATE_TYPE2; /* We got a type-2 message */
     }
     else {
-      if(ntlm->state == NTLMSTATE_LAST) {
+      if(*state == NTLMSTATE_LAST) {
         infof(conn->data, "NTLM auth restarted\n");
         Curl_http_auth_cleanup_ntlm(conn);
       }
-      else if(ntlm->state == NTLMSTATE_TYPE3) {
+      else if(*state == NTLMSTATE_TYPE3) {
         infof(conn->data, "NTLM handshake rejected\n");
         Curl_http_auth_cleanup_ntlm(conn);
-        ntlm->state = NTLMSTATE_NONE;
+        *state = NTLMSTATE_NONE;
         return CURLE_REMOTE_ACCESS_DENIED;
       }
-      else if(ntlm->state >= NTLMSTATE_TYPE1) {
+      else if(*state >= NTLMSTATE_TYPE1) {
         infof(conn->data, "NTLM handshake failure (internal error)\n");
         return CURLE_REMOTE_ACCESS_DENIED;
       }
 
-      ntlm->state = NTLMSTATE_TYPE1; /* We should send away a type-1 */
+      *state = NTLMSTATE_TYPE1; /* We should send away a type-1 */
     }
   }
 
@@ -129,15 +129,11 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
+  curlntlm *state;
   struct auth *authp;
 
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->data);
-
-#if defined(NTLM_NEEDS_NSS_INIT)
-  if(CURLE_OK != Curl_nss_force_init(conn->data))
-    return CURLE_OUT_OF_MEMORY;
-#endif
 
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
@@ -147,6 +143,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
               conn->data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
     ntlm = &conn->proxyntlm;
+    state = &conn->proxy_ntlm_state;
     authp = &conn->data->state.authproxy;
   }
   else {
@@ -157,6 +154,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
               conn->data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
     ntlm = &conn->ntlm;
+    state = &conn->http_ntlm_state;
     authp = &conn->data->state.authhost;
   }
   authp->done = FALSE;
@@ -180,7 +178,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 #endif
 #endif
 
-  switch(ntlm->state) {
+  switch(*state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
@@ -222,7 +220,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
 
       DEBUG_OUT(fprintf(stderr, "**** %s\n ", *allocuserpwd));
 
-      ntlm->state = NTLMSTATE_TYPE3; /* we send a type-3 */
+      *state = NTLMSTATE_TYPE3; /* we send a type-3 */
       authp->done = TRUE;
     }
     break;
@@ -230,7 +228,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */
-    ntlm->state = NTLMSTATE_LAST;
+    *state = NTLMSTATE_LAST;
     /* FALLTHROUGH */
   case NTLMSTATE_LAST:
     Curl_safefree(*allocuserpwd);

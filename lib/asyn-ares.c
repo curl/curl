@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -253,16 +253,14 @@ static void destroy_async_data(struct Curl_async *async)
  */
 
 int Curl_resolver_getsock(struct connectdata *conn,
-                          curl_socket_t *socks,
-                          int numsocks)
-
+                          curl_socket_t *socks)
 {
   struct timeval maxtime;
   struct timeval timebuf;
   struct timeval *timeout;
   long milli;
   int max = ares_getsock((ares_channel)conn->data->state.resolver,
-                         (ares_socket_t *)socks, numsocks);
+                         (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
 
   maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
   maxtime.tv_usec = 0;
@@ -490,9 +488,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 
   if(result)
     /* close the connection, since we can't return failure here without
-       cleaning up this connection properly.
-       TODO: remove this action from here, it is not a name resolver decision.
-    */
+       cleaning up this connection properly. */
     connclose(conn, "c-ares resolve failed");
 
   return result;
@@ -630,26 +626,11 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 {
   char *bufp;
   struct Curl_easy *data = conn->data;
-  struct in_addr in;
   int family = PF_INET;
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
-  struct in6_addr in6;
-#endif /* CURLRES_IPV6 */
 
   *waitp = 0; /* default to synchronous response */
 
-  /* First check if this is an IPv4 address string */
-  if(Curl_inet_pton(AF_INET, hostname, &in) > 0) {
-    /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, hostname, port);
-  }
-
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
-  /* Otherwise, check if this is an IPv6 address string */
-  if(Curl_inet_pton (AF_INET6, hostname, &in6) > 0)
-    /* This must be an IPv6 address literal.  */
-    return Curl_ip2addr(AF_INET6, &in6, hostname, port);
-
   switch(conn->ip_version) {
   default:
 #if ARES_VERSION >= 0x010601
@@ -688,7 +669,7 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
     res->last_status = ARES_ENOTFOUND;
 #ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
     if(family == PF_UNSPEC) {
-      if(Curl_ipv6works()) {
+      if(Curl_ipv6works(conn)) {
         res->num_pending = 2;
 
         /* areschannel is already setup in the Curl_open() function */
@@ -736,7 +717,11 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
     return CURLE_OK;
 
 #if (ARES_VERSION >= 0x010704)
+#if (ARES_VERSION >= 0x010b00)
+  ares_result = ares_set_servers_ports_csv(data->state.resolver, servers);
+#else
   ares_result = ares_set_servers_csv(data->state.resolver, servers);
+#endif
   switch(ares_result) {
   case ARES_SUCCESS:
     result = CURLE_OK;

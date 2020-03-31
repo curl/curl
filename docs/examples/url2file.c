@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   /* Switch on full protocol/debug output while testing */
   curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
-  /* disable progress meter, set to 0L to enable and disable debug output */
+  /* disable progress meter, set to 0L to enable it */
   curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
 
   /* send all data to this function  */

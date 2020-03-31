@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-F
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+Multipart formpost to two URLs, the first failing
+ </name>
+ <command>
+http://0 http://%HOSTIP:%HTTPPORT/1293 -F=
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<strippart>
+s/^--------------------------[a-z0-9]*/------------------------------/
+s/boundary=------------------------[a-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+POST /1293 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 126
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data
+
+
+--------------------------------
+</protocol>
+</verify>
+</testcase>

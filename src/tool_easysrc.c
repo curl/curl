@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -123,7 +123,7 @@ CURLcode easysrc_addf(struct slist_wc **plist, const char *fmt, ...)
   return ret;
 }
 
-#define CHKRET(v) do {CURLcode ret = (v); if(ret) return ret;} WHILE_FALSE
+#define CHKRET(v) do {CURLcode ret = (v); if(ret) return ret;} while(0)
 
 CURLcode easysrc_init(void)
 {

@@ -100,16 +100,20 @@ static int parsedate(const char *date, time_t *output);
 #define PARSEDATE_LATER  1
 #define PARSEDATE_SOONER 2
 
-#ifndef CURL_DISABLE_PARSEDATE
-
+#if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
+  !defined(CURL_DISABLE_FILE)
+/* These names are also used by FTP and FILE code */
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-static const char * const weekday[] =
-{ "Monday", "Tuesday", "Wednesday", "Thursday",
-  "Friday", "Saturday", "Sunday" };
 const char * const Curl_month[]=
 { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+#endif
+
+#ifndef CURL_DISABLE_PARSEDATE
+static const char * const weekday[] =
+{ "Monday", "Tuesday", "Wednesday", "Thursday",
+  "Friday", "Saturday", "Sunday" };
 
 struct tzinfo {
   char name[5];
@@ -581,6 +585,30 @@ time_t curl_getdate(const char *p, const time_t *now)
   }
   /* everything else is fail */
   return -1;
+}
+
+/* Curl_getdate_capped() differs from curl_getdate() in that this will return
+   TIME_T_MAX in case the parsed time value was too big, instead of an
+   error. */
+
+time_t Curl_getdate_capped(const char *p)
+{
+  time_t parsed = -1;
+  int rc = parsedate(p, &parsed);
+
+  switch(rc) {
+  case PARSEDATE_OK:
+    if(parsed == -1)
+      /* avoid returning -1 for a working scenario */
+      parsed++;
+    return parsed;
+  case PARSEDATE_LATER:
+    /* this returns the maximum time value */
+    return parsed;
+  default:
+    return -1; /* everything else is fail */
+  }
+  /* UNREACHABLE */
 }
 
 /*

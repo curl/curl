@@ -1,6 +1,6 @@
 From File: curl_gnv_build_steps.txt
 
- Copyright 2009, John Malmberg
+ Copyright 2009 - 2020, John Malmberg
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -125,7 +125,7 @@ or
   $ @build_gnv_curl.com.
 
 The GNV configure procedure takes considerably longer than the DCL build
-procecure takes.  It is of use for testing the GNV build environment, and
+procedure takes.  It is of use for testing the GNV build environment, and
 may not have been kept up to date.
 
 The pcsi_product_gnv_curl.com needs the following logical names which

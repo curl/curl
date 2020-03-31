@@ -33,6 +33,9 @@ HTTP over proxy with site authentication
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/84 -x %HOSTIP:%HTTPPORT --user iam:myself
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -28,14 +28,22 @@ LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
 LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
 
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
-  vtls/polarssl.c vtls/polarssl_threadlock.c                            \
-  vtls/cyassl.c vtls/schannel.c vtls/schannel_verify.c                  \
-  vtls/sectransp.c vtls/gskit.c vtls/mbedtls.c vtls/mesalink.c
+  vtls/mbedtls_threadlock.c vtls/wolfssl.c vtls/schannel.c              \
+  vtls/schannel_verify.c vtls/sectransp.c vtls/gskit.c vtls/mbedtls.c   \
+  vtls/mesalink.c vtls/bearssl.c
 
-LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
-  vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h                \
-  vtls/cyassl.h vtls/schannel.h vtls/sectransp.h vtls/gskit.h           \
-  vtls/mbedtls.h vtls/mesalink.h
+LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h vtls/nssg.h    \
+  vtls/mbedtls_threadlock.h vtls/wolfssl.h vtls/schannel.h              \
+  vtls/sectransp.h vtls/gskit.h vtls/mbedtls.h vtls/mesalink.h          \
+  vtls/bearssl.h
+
+LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/quiche.c
+
+LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/quiche.h
+
+LIB_VSSH_CFILES = vssh/libssh2.c vssh/libssh.c vssh/wolfssh.c
+
+LIB_VSSH_HFILES = vssh/ssh.h
 
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
@@ -46,7 +54,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   http_digest.c md4.c md5.c http_negotiate.c inet_pton.c strtoofft.c    \
   strerror.c amigaos.c hostasyn.c hostip4.c hostip6.c hostsyn.c         \
   inet_ntop.c parsedate.c select.c tftp.c splay.c strdup.c socks.c      \
-  ssh.c ssh-libssh.c curl_addrinfo.c socks_gssapi.c socks_sspi.c        \
+  curl_addrinfo.c socks_gssapi.c socks_sspi.c                           \
   curl_sspi.c slist.c nonblock.c curl_memrchr.c imap.c pop3.c smtp.c    \
   pingpong.c rtsp.c curl_threads.c warnless.c hmac.c curl_rtmp.c        \
   openldap.c curl_gethostname.c gopher.c idn_win32.c                    \
@@ -55,7 +63,7 @@ LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   curl_multibyte.c hostcheck.c conncache.c dotdot.c                     \
   x509asn1.c http2.c smb.c curl_endian.c curl_des.c system_win32.c      \
   mime.c sha256.c setopt.c curl_path.c curl_ctype.c curl_range.c psl.c  \
-  doh.c urlapi.c curl_get_line.c altsvc.c
+  doh.c urlapi.c curl_get_line.c altsvc.c socketpair.c rename.c
 
 LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
@@ -66,7 +74,7 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   http_negotiate.h inet_pton.h amigaos.h strtoofft.h strerror.h         \
   inet_ntop.h curlx.h curl_memory.h curl_setup.h transfer.h select.h    \
   easyif.h multiif.h parsedate.h tftp.h sockaddr.h splay.h strdup.h     \
-  socks.h ssh.h curl_base64.h curl_addrinfo.h curl_sspi.h      \
+  socks.h curl_base64.h curl_addrinfo.h curl_sspi.h                     \
   slist.h nonblock.h curl_memrchr.h imap.h pop3.h smtp.h pingpong.h     \
   rtsp.h curl_threads.h warnless.h curl_hmac.h curl_rtmp.h              \
   curl_gethostname.h gopher.h http_proxy.h non-ascii.h asyn.h           \
@@ -76,9 +84,11 @@ LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
   x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h           \
   curl_printf.h system_win32.h rand.h mime.h curl_sha256.h setopt.h     \
   curl_path.h curl_ctype.h curl_range.h psl.h doh.h urlapi-int.h        \
-  curl_get_line.h altsvc.h
+  curl_get_line.h altsvc.h quic.h socketpair.h rename.h
 
 LIB_RCFILES = libcurl.rc
 
-CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES)
-HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES)
+CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES) \
+  $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES)
+HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \
+  $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES)

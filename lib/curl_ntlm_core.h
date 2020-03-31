@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -46,9 +46,9 @@
 #define USE_NTRESPONSES
 
 /* Define USE_NTLM2SESSION in order to make the type-3 message include the
-   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and a
-   Crypto engine that we have curl_ssl_md5sum() for. */
-#if defined(USE_NTRESPONSES) && !defined(USE_WIN32_CRYPTO)
+   NTLM2Session response message, requires USE_NTRESPONSES defined to 1 and
+   MD5 support */
+#if defined(USE_NTRESPONSES) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 #define USE_NTLM2SESSION
 #endif
 

@@ -65,6 +65,9 @@ HTTP with custom Cookie: and redirect to new host
  <command>
 http://first.host.it.is/we/want/that/page/317 -x %HOSTIP:%HTTPPORT -H "Cookie: test=yes" --location
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

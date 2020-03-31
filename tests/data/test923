@@ -9,9 +9,6 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
-250 <recipient@example.com>
-</data>
 </reply>
 
 #

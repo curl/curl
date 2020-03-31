@@ -77,8 +77,10 @@ http
 </server>
 <features>
 NTLM
+SSL
 !SSPI
 debug
+proxy
 </features>
  <name>
 HTTP with proxy-requiring-NTLM to site-requiring-Digest

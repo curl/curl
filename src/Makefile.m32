@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -107,7 +107,7 @@ CFLAGS += -fno-strict-aliasing
 LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_EXE) -s
 AR = $(CURL_AR)
 RC = $(CROSSPREFIX)windres
-RCFLAGS = --include-dir=$(PROOT)/include -O COFF -DCURL_EMBED_MANIFEST
+RCFLAGS = --include-dir=$(PROOT)/include -O coff -DCURL_EMBED_MANIFEST
 STRIP   = $(CROSSPREFIX)strip -g
 
 # We may need these someday

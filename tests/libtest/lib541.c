@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -97,7 +97,7 @@ int test(char *URL)
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
+  curl_easy_perform(curl);
 
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */

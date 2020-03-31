@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -272,6 +272,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
 #endif
+  const char *oauth_bearer = data->set.str[STRING_BEARER];
 
   sasl->force_ir = force_ir;    /* Latch for future use */
   sasl->authused = 0;           /* No mechanism used yet */
@@ -293,7 +294,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
 #if defined(USE_KERBEROS5)
     if((enabledmechs & SASL_MECH_GSSAPI) && Curl_auth_is_gssapi_supported() &&
        Curl_auth_user_contains_domain(conn->user)) {
-      sasl->mutual_auth = FALSE; /* TODO: Calculate mutual authentication */
+      sasl->mutual_auth = FALSE;
       mech = SASL_MECH_STRING_GSSAPI;
       state1 = SASL_GSSAPI;
       state2 = SASL_GSSAPI_TOKEN;
@@ -341,7 +342,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       }
     else
 #endif
-    if((enabledmechs & SASL_MECH_OAUTHBEARER) && conn->oauth_bearer) {
+    if((enabledmechs & SASL_MECH_OAUTHBEARER) && oauth_bearer) {
       mech = SASL_MECH_STRING_OAUTHBEARER;
       state1 = SASL_OAUTH2;
       state2 = SASL_OAUTH2_RESP;
@@ -351,17 +352,17 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
         result = Curl_auth_create_oauth_bearer_message(data, conn->user,
                                                        hostname,
                                                        port,
-                                                       conn->oauth_bearer,
+                                                       oauth_bearer,
                                                        &resp, &len);
     }
-    else if((enabledmechs & SASL_MECH_XOAUTH2) && conn->oauth_bearer) {
+    else if((enabledmechs & SASL_MECH_XOAUTH2) && oauth_bearer) {
       mech = SASL_MECH_STRING_XOAUTH2;
       state1 = SASL_OAUTH2;
       sasl->authused = SASL_MECH_XOAUTH2;
 
       if(force_ir || data->set.sasl_ir)
         result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
-                                                        conn->oauth_bearer,
+                                                        oauth_bearer,
                                                         &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_PLAIN) {
@@ -370,8 +371,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
       sasl->authused = SASL_MECH_PLAIN;
 
       if(force_ir || data->set.sasl_ir)
-        result = Curl_auth_create_plain_message(data, NULL, conn->user,
-                                                conn->passwd, &resp, &len);
+        result = Curl_auth_create_plain_message(data, conn->sasl_authzid,
+                                                conn->user, conn->passwd,
+                                                &resp, &len);
     }
     else if(enabledmechs & SASL_MECH_LOGIN) {
       mech = SASL_MECH_STRING_LOGIN;
@@ -430,6 +432,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   char *serverdata;
 #endif
   size_t len = 0;
+  const char *oauth_bearer = data->set.str[STRING_BEARER];
 
   *progress = SASL_INPROGRESS;
 
@@ -453,8 +456,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     *progress = SASL_DONE;
     return result;
   case SASL_PLAIN:
-    result = Curl_auth_create_plain_message(data, NULL, conn->user,
-                                            conn->passwd, &resp, &len);
+    result = Curl_auth_create_plain_message(data, conn->sasl_authzid,
+                                            conn->user, conn->passwd,
+                                            &resp, &len);
     break;
   case SASL_LOGIN:
     result = Curl_auth_create_login_message(data, conn->user, &resp, &len);
@@ -556,7 +560,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
       result = Curl_auth_create_oauth_bearer_message(data, conn->user,
                                                      hostname,
                                                      port,
-                                                     conn->oauth_bearer,
+                                                     oauth_bearer,
                                                      &resp, &len);
 
       /* Failures maybe sent by the server as continuations for OAUTHBEARER */
@@ -564,7 +568,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
     }
     else
       result = Curl_auth_create_xoauth_bearer_message(data, conn->user,
-                                                      conn->oauth_bearer,
+                                                      oauth_bearer,
                                                       &resp, &len);
     break;
 

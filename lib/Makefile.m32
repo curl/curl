@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1999 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -99,7 +99,7 @@ LDFLAGS = $(CURL_LDFLAG_EXTRAS) $(CURL_LDFLAG_EXTRAS_DLL) -s
 AR = $(CURL_AR)
 RANLIB = $(CURL_RANLIB)
 RC = $(CROSSPREFIX)windres
-RCFLAGS = --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O COFF
+RCFLAGS = --include-dir=$(PROOT)/include -DDEBUGBUILD=0 -O coff
 STRIP   = $(CROSSPREFIX)strip -g
 
 # Set environment var ARCH to your architecture to override autodetection.
@@ -270,8 +270,8 @@ ifdef SSL
     OPENSSL_LIBS += -lgdi32 -lcrypt32
   endif
   INCLUDES += -I"$(OPENSSL_INCLUDE)"
-  CFLAGS += -DUSE_OPENSSL -DHAVE_OPENSSL_ENGINE_H -DHAVE_OPENSSL_PKCS12_H \
-            -DHAVE_ENGINE_LOAD_BUILTIN_ENGINES -DOPENSSL_NO_KRB5
+  CFLAGS += -DUSE_OPENSSL -DHAVE_OPENSSL_PKCS12_H \
+            -DOPENSSL_NO_KRB5
   DLL_LIBS += -L"$(OPENSSL_LIBPATH)" $(OPENSSL_LIBS)
   ifdef SRP
     ifeq "$(wildcard $(OPENSSL_INCLUDE)/openssl/srp.h)" "$(OPENSSL_INCLUDE)/openssl/srp.h"

@@ -31,6 +31,9 @@ HTTP GET with failed proxy auth
  <command>
 http://%HOSTIP:%HTTPPORT/93 -x %HOSTIP:%HTTPPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #

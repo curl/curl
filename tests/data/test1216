@@ -39,6 +39,9 @@ example.fake	FALSE	/b	FALSE	0		moo1	indeed
 example.fake	FALSE	/c	FALSE	2139150993	moo2	indeed
 example.fake	TRUE	/c	FALSE	2139150993	moo3	indeed
 </file>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

@@ -38,6 +38,9 @@ FTP RETR a file over a SOCKS proxy using the multi interface
 <command>
 ftp://%HOSTIP:%FTPPORT/path/564 %HOSTIP:%SOCKSPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

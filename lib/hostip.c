@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,6 +59,7 @@
 #include "strerror.h"
 #include "url.h"
 #include "inet_ntop.h"
+#include "inet_pton.h"
 #include "multiif.h"
 #include "doh.h"
 #include "warnless.h"
@@ -334,9 +335,9 @@ Curl_fetch_addr(struct connectdata *conn,
   return dns;
 }
 
+#ifndef CURL_DISABLE_SHUFFLE_DNS
 UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     Curl_addrinfo **addr);
-
 /*
  * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
@@ -401,6 +402,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
   }
   return result;
 }
+#endif
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
@@ -422,12 +424,14 @@ Curl_cache_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
+#ifndef CURL_DISABLE_SHUFFLE_DNS
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses) {
     CURLcode result = Curl_shuffle_addr(data, &addr);
     if(result)
       return NULL;
   }
+#endif
 
   /* Create a new cache entry */
   dns = calloc(1, sizeof(struct Curl_dns_entry));
@@ -479,16 +483,16 @@ Curl_cache_addr(struct Curl_easy *data,
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-int Curl_resolv(struct connectdata *conn,
-                const char *hostname,
-                int port,
-                bool allowDOH,
-                struct Curl_dns_entry **entry)
+enum resolve_t Curl_resolv(struct connectdata *conn,
+                           const char *hostname,
+                           int port,
+                           bool allowDOH,
+                           struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
   struct Curl_easy *data = conn->data;
   CURLcode result;
-  int rc = CURLRESOLV_ERROR; /* default to failure */
+  enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
 
   *entry = NULL;
 
@@ -509,13 +513,11 @@ int Curl_resolv(struct connectdata *conn,
   if(!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
 
-    Curl_addrinfo *addr;
+    Curl_addrinfo *addr = NULL;
     int respwait = 0;
-
-    /* Check what IP specifics the app has requested and if we can provide it.
-     * If not, bail out. */
-    if(!Curl_ipvalid(conn))
-      return CURLRESOLV_ERROR;
+#ifndef USE_RESOLVE_ON_IPS
+    struct in_addr in;
+#endif
 
     /* notify the resolver start callback */
     if(data->set.resolver_start) {
@@ -528,20 +530,43 @@ int Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
     }
 
-    if(allowDOH && data->set.doh) {
-      addr = Curl_doh(conn, hostname, port, &respwait);
+#ifndef USE_RESOLVE_ON_IPS
+    /* First check if this is an IPv4 address string */
+    if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
+      /* This is a dotted IP address 123.123.123.123-style */
+      addr = Curl_ip2addr(AF_INET, &in, hostname, port);
+#ifdef ENABLE_IPV6
+    if(!addr) {
+      struct in6_addr in6;
+      /* check if this is an IPv6 address string */
+      if(Curl_inet_pton(AF_INET6, hostname, &in6) > 0)
+        /* This is an IPv6 address literal */
+        addr = Curl_ip2addr(AF_INET6, &in6, hostname, port);
     }
-    else {
-      /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
-         non-zero value indicating that we need to wait for the response to the
-         resolve call */
-      addr = Curl_getaddrinfo(conn,
+#endif /* ENABLE_IPV6 */
+#endif /* !USE_RESOLVE_ON_IPS */
+
+    if(!addr) {
+      /* Check what IP specifics the app has requested and if we can provide
+       * it. If not, bail out. */
+      if(!Curl_ipvalid(conn))
+        return CURLRESOLV_ERROR;
+
+      if(allowDOH && data->set.doh) {
+        addr = Curl_doh(conn, hostname, port, &respwait);
+      }
+      else {
+        /* If Curl_getaddrinfo() returns NULL, 'respwait' might be set to a
+           non-zero value indicating that we need to wait for the response to
+           the resolve call */
+        addr = Curl_getaddrinfo(conn,
 #ifdef DEBUGBUILD
-                              (data->set.str[STRING_DEVICE]
-                               && !strcmp(data->set.str[STRING_DEVICE],
-                                          "LocalHost"))?"localhost":
+                                (data->set.str[STRING_DEVICE]
+                                 && !strcmp(data->set.str[STRING_DEVICE],
+                                            "LocalHost"))?"localhost":
 #endif
-                              hostname, port, &respwait);
+                                hostname, port, &respwait);
+      }
     }
     if(!addr) {
       if(respwait) {
@@ -617,11 +642,11 @@ RETSIGTYPE alarmfunc(int sig)
  * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
 
-int Curl_resolv_timeout(struct connectdata *conn,
-                        const char *hostname,
-                        int port,
-                        struct Curl_dns_entry **entry,
-                        time_t timeoutms)
+enum resolve_t Curl_resolv_timeout(struct connectdata *conn,
+                                   const char *hostname,
+                                   int port,
+                                   struct Curl_dns_entry **entry,
+                                   timediff_t timeoutms)
 {
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
@@ -637,7 +662,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   volatile unsigned int prev_alarm = 0;
   struct Curl_easy *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
-  int rc;
+  enum resolve_t rc;
 
   *entry = NULL;
 
@@ -746,7 +771,7 @@ clean_up:
                                             conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
-    unsigned long alarm_set = prev_alarm - elapsed_secs;
+    unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);
 
     if(!alarm_set ||
        ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
@@ -1018,25 +1043,27 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 CURLcode Curl_resolv_check(struct connectdata *conn,
                            struct Curl_dns_entry **dns)
 {
+#if defined(CURL_DISABLE_DOH) && !defined(CURLRES_ASYNCH)
+  (void)dns;
+#endif
+
   if(conn->data->set.doh)
     return Curl_doh_is_resolved(conn, dns);
   return Curl_resolver_is_resolved(conn, dns);
 }
 
 int Curl_resolv_getsock(struct connectdata *conn,
-                        curl_socket_t *socks,
-                        int numsocks)
+                        curl_socket_t *socks)
 {
 #ifdef CURLRES_ASYNCH
   if(conn->data->set.doh)
     /* nothing to wait for during DOH resolve, those handles have their own
        sockets */
     return GETSOCK_BLANK;
-  return Curl_resolver_getsock(conn, socks, numsocks);
+  return Curl_resolver_getsock(conn, socks);
 #else
   (void)conn;
   (void)socks;
-  (void)numsocks;
   return GETSOCK_BLANK;
 #endif
 }

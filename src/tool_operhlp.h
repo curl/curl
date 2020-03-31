@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,7 @@ bool output_expected(const char *url, const char *uploadfile);
 
 bool stdin_upload(const char *uploadfile);
 
-char *add_file_name_to_url(CURL *curl, char *url, const char *filename);
+char *add_file_name_to_url(char *url, const char *filename);
 
 CURLcode get_url_file_name(char **filename, const char *url);
 

@@ -27,6 +27,7 @@ http
 </server>
 <features>
 ftp
+proxy
 </features>
  <name>
 FTP over HTTP proxy with user:pass not in url

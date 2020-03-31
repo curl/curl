@@ -20,7 +20,7 @@ file
 two file:// URLs to stdout
  </name>
 <command option="no-include">
-file://localhost/%PWD/log/test202.txt FILE://localhost/%PWD/log/test202.txt
+file://localhost%FILE_PWD/log/test202.txt FILE://localhost%FILE_PWD/log/test202.txt
 </command>
 <file name="log/test202.txt">
 contents in a single file

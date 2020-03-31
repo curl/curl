@@ -1,0 +1,63 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLINFO_RETRY_AFTER 3 "6 Aug 2019" "libcurl 7.66.0" "curl_easy_getinfo options"
+.SH NAME
+CURLINFO_RETRY_AFTER \- returns the Retry-After retry delay
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_RETRY_AFTER, curl_off_t *retry);
+.SH DESCRIPTION
+Pass a pointer to a curl_off_t variable to receive the number of seconds the
+HTTP server suggesets the client should wait until the next request is
+issued. The information from the "Retry-After:" header.
+
+While the HTTP header might contain a fixed date string, the
+\fICURLINFO_RETRY_AFTER(3)\fP will always return number of seconds to wait -
+or zero if there was no header or the header couldn't be parsed.
+.SH DEFAULT
+Returns zero delay if there was no header.
+.SH PROTOCOLS
+HTTP(S)
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  CURLcode res;
+  curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+  res = curl_easy_perform(curl);
+  if(res == CURLE_OK) {
+    curl_off_t wait = 0;
+    curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &wait);
+    if(wait)
+      printf("Wait for %" CURL_FORMAT_CURL_OFF_T " seconds\\n", wait);
+  }
+  curl_easy_cleanup(curl);
+}
+.fi
+.SH AVAILABILITY
+Added in curl 7.66.0
+.SH RETURN VALUE
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
+.SH "SEE ALSO"
+.BR CURLOPT_STDERR "(3), " CURLOPT_HEADERFUNCTION "(3), "

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,6 +27,7 @@
 
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
+#include "tool_operate.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -51,4 +52,28 @@ size_t tool_read_cb(void *buffer, size_t sz, size_t nmemb, void *userdata)
   }
   in->config->readbusy = FALSE;
   return (size_t)rc;
+}
+
+/*
+** callback for CURLOPT_XFERINFOFUNCTION used to unpause busy reads
+*/
+
+int tool_readbusy_cb(void *clientp,
+                     curl_off_t dltotal, curl_off_t dlnow,
+                     curl_off_t ultotal, curl_off_t ulnow)
+{
+  struct per_transfer *per = clientp;
+  struct OperationConfig *config = per->config;
+
+  (void)dltotal;  /* unused */
+  (void)dlnow;  /* unused */
+  (void)ultotal;  /* unused */
+  (void)ulnow;  /* unused */
+
+  if(config->readbusy) {
+    config->readbusy = FALSE;
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
+  }
+
+  return per->noprogress? 0 : CURL_PROGRESSFUNC_CONTINUE;
 }

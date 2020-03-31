@@ -25,6 +25,7 @@ hello
 <client>
 <features>
 ipv6
+proxy
 </features>
 <server>
 http-ipv6

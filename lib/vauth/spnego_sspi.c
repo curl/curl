@@ -59,6 +59,12 @@ bool Curl_auth_is_spnego_supported(void)
                                               TEXT(SP_NAME_NEGOTIATE),
                                               &SecurityPackage);
 
+  /* Release the package buffer as it is not required anymore */
+  if(status == SEC_E_OK) {
+    s_pSecFn->FreeContextBuffer(SecurityPackage);
+  }
+
+
   return (status == SEC_E_OK ? TRUE : FALSE);
 }
 
@@ -165,7 +171,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          nego->p_identity, NULL, NULL,
                                          nego->credentials, &expiry);
     if(nego->status != SEC_E_OK)
-      return CURLE_LOGIN_DENIED;
+      return CURLE_AUTH_ERROR;
 
     /* Allocate our new context handle */
     nego->context = calloc(1, sizeof(CtxtHandle));
@@ -251,14 +257,25 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     char buffer[STRERROR_LEN];
     failf(data, "InitializeSecurityContext failed: %s",
           Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
-    return CURLE_OUT_OF_MEMORY;
+
+    if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
+
+    return CURLE_AUTH_ERROR;
   }
 
   if(nego->status == SEC_I_COMPLETE_NEEDED ||
      nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
     nego->status = s_pSecFn->CompleteAuthToken(nego->context, &resp_desc);
     if(GSS_ERROR(nego->status)) {
-      return CURLE_RECV_ERROR;
+      char buffer[STRERROR_LEN];
+      failf(data, "CompleteAuthToken failed: %s",
+            Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
+
+      if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
+        return CURLE_OUT_OF_MEMORY;
+
+      return CURLE_AUTH_ERROR;
     }
   }
 
@@ -343,7 +360,6 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   /* Reset any variables */
   nego->status = 0;
   nego->token_max = 0;
-  nego->state = GSS_AUTHNONE;
   nego->noauthpersist = FALSE;
   nego->havenoauthpersist = FALSE;
   nego->havenegdata = FALSE;

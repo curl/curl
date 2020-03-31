@@ -21,6 +21,8 @@ README
   curl binaries or other binaries that involve libcurl, you might enjoy the
   LICENSE-MIXING document.
 
+  All of those documents and more can be found in the docs/ directory.
+
 CONTACT
 
   If you have problems, questions, ideas or suggestions, please contact us

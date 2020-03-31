@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -72,23 +72,21 @@ struct pollfd
    therefore defined here */
 #define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
 
+int Curl_select(curl_socket_t maxfd,
+                fd_set *fds_read,
+                fd_set *fds_write,
+                fd_set *fds_err,
+                time_t timeout_ms);
+
 int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       curl_socket_t writefd,
                       time_t timeout_ms);
-
 #define SOCKET_READABLE(x,z) \
-  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
+  Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, (time_t)z)
 #define SOCKET_WRITABLE(x,z) \
-  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
+  Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, (time_t)z)
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
-
-/* On non-DOS and non-Winsock platforms, when Curl_ack_eintr is set,
- * EINTR condition is honored and function might exit early without
- * awaiting full timeout.  Otherwise EINTR will be ignored and full
- * timeout will elapse. */
-extern int Curl_ack_eintr;
-
 int Curl_wait_ms(int timeout_ms);
 
 #ifdef TPF
@@ -109,7 +107,7 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
     SET_SOCKERRNO(EINVAL); \
     return -1; \
   } \
-} WHILE_FALSE
+} while(0)
 #endif
 
 #endif /* HEADER_CURL_SELECT_H */

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -69,32 +69,24 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
                               size_t included_body_bytes,
                               int socketindex);
 
-CURLcode Curl_add_timecondition(struct Curl_easy *data,
+CURLcode Curl_add_timecondition(const struct connectdata *conn,
                                 Curl_send_buffer *buf);
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
                                  Curl_send_buffer *req_buffer);
 CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
-                                    Curl_send_buffer *buffer,
+                                    Curl_send_buffer **buffer,
                                     struct Curl_easy *handle);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn, bool *done);
 CURLcode Curl_http_done(struct connectdata *, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct connectdata *conn, bool *done);
-CURLcode Curl_http_setup_conn(struct connectdata *conn);
-
-/* The following functions are defined in http_chunks.c */
-void Curl_httpchunk_init(struct connectdata *conn);
-CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
-                              ssize_t length, ssize_t *wrote);
 
 /* These functions are in http.c */
-void Curl_http_auth_stage(struct Curl_easy *data, int stage);
 CURLcode Curl_http_input_auth(struct connectdata *conn, bool proxy,
                               const char *auth);
 CURLcode Curl_http_auth_act(struct connectdata *conn);
-CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed
@@ -124,10 +116,14 @@ CURLcode Curl_http_perhapsrewind(struct connectdata *conn);
  *
  */
 #ifndef EXPECT_100_THRESHOLD
-#define EXPECT_100_THRESHOLD 1024
+#define EXPECT_100_THRESHOLD (1024*1024)
 #endif
 
 #endif /* CURL_DISABLE_HTTP */
+
+#ifdef USE_NGHTTP3
+struct h3out; /* see ngtcp2 */
+#endif
 
 /****************************************************************************
  * HTTP unique setup
@@ -175,19 +171,39 @@ struct HTTP {
   int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */
-  bool closed; /* TRUE on HTTP2 stream close */
   bool close_handled; /* TRUE if stream closure is handled by libcurl */
-  char *mem;     /* points to a buffer in memory to store received data */
-  size_t len;    /* size of the buffer 'mem' points to */
-  size_t memlen; /* size of data copied to mem */
-
-  const uint8_t *upload_mem; /* points to a buffer to read from */
-  size_t upload_len; /* size of the buffer 'upload_mem' points to */
-  curl_off_t upload_left; /* number of bytes left to upload */
 
   char **push_headers;       /* allocated array */
   size_t push_headers_used;  /* number of entries filled in */
   size_t push_headers_alloc; /* number of entries allocated */
+#endif
+#if defined(USE_NGHTTP2) || defined(USE_NGHTTP3)
+  bool closed; /* TRUE on HTTP2 stream close */
+  char *mem;     /* points to a buffer in memory to store received data */
+  size_t len;    /* size of the buffer 'mem' points to */
+  size_t memlen; /* size of data copied to mem */
+#endif
+#if defined(USE_NGHTTP2) || defined(ENABLE_QUIC)
+  /* fields used by both HTTP/2 and HTTP/3 */
+  const uint8_t *upload_mem; /* points to a buffer to read from */
+  size_t upload_len; /* size of the buffer 'upload_mem' points to */
+  curl_off_t upload_left; /* number of bytes left to upload */
+#endif
+
+#ifdef ENABLE_QUIC
+  /*********** for HTTP/3 we store stream-local data here *************/
+  int64_t stream3_id; /* stream we are interested in */
+  bool firstheader;  /* FALSE until headers arrive */
+  bool firstbody;  /* FALSE until body arrives */
+  bool h3req;    /* FALSE until request is issued */
+  bool upload_done;
+#endif
+#ifdef USE_NGHTTP3
+  size_t unacked_window;
+  struct h3out *h3out; /* per-stream buffers for upload */
+  char *overflow_buf; /* excess data received during a single Curl_read */
+  size_t overflow_buflen; /* amount of data currently in overflow_buf */
+  size_t overflow_bufsize; /* size of the overflow_buf allocation */
 #endif
 };
 

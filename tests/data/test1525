@@ -49,6 +49,9 @@ CURLOPT_PROXYHEADER is ignored CURLHEADER_UNIFIED
  <command>
  http://the.old.moo.1525:%HTTPPORT/1525 %HOSTIP:%PROXYPORT
 </command>
+<features>
+proxy
+</features>
 </client>
 
 # Verify data after the test has been "shot"

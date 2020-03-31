@@ -55,7 +55,7 @@ server, do one of the following:
 
  2. Get a CA certificate that can verify the remote server and use the proper
     option to point out this CA cert for verification when connecting. For
-    libcurl hackers: `curl_easy_setopt(curl, CURLOPT_CAPATH, capath);`
+    libcurl hackers: `curl_easy_setopt(curl, CURLOPT_CAINFO, cacert);`
 
     With the curl command line tool: --cacert [file]
 
@@ -104,7 +104,7 @@ server, do one of the following:
        the security is no better than the way you obtained the certificate.
 
  4. If you're using the curl command line tool, you can specify your own CA
-    cert path by setting the environment variable `CURL_CA_BUNDLE` to the path
+    cert file by setting the environment variable `CURL_CA_BUNDLE` to the path
     of your choice.
 
     If you're using the curl command line tool on Windows, curl will search

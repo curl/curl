@@ -1,0 +1,63 @@
+<testcase>
+# See https://github.com/curl/curl/issues/4499
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+<servercmd>
+connection-monitor
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+ANYAUTH connection reuse of non-authed connection
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/338 --next http://%HOSTIP:%HTTPPORT/338 --anyauth -u foo:moo
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /338 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /338 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+[DISCONNECT]
+</protocol>
+</verify>
+</testcase>

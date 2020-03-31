@@ -29,6 +29,7 @@ http
 </server>
 <features>
 SSL
+proxy
 </features>
  <name>
 HTTPS GET with failed proxy auth (CONNECT 1.0)

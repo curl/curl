@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2013-2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2013 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -28,14 +28,31 @@
 
 start=$1
 
-if test -z "$start"; then
+if test "$start" = "-h"; then
   echo "Usage: $0 <since this tag/hash>"
+  exit
+fi
+if test -z "$start"; then
+  start=`git tag --sort=taggerdate | tail -1`;
+fi
+
+
+# We also include curl-www if possible. Override by setting CURLWWW
+if [ -z "$CURLWWW" ] ; then
+    CURLWWW=../curl-www
 fi
 
 cat ./docs/THANKS
 
 (
-git log --use-mailmap $start..HEAD | \
+ (
+  git log --use-mailmap $start..HEAD
+  if [ -d "$CURLWWW" ]
+  then
+   git -C ../curl-www log --use-mailmap $start..HEAD
+  fi
+ ) | \
+
 egrep -ai '(^Author|^Commit|by):' | \
 cut -d: -f2- | \
 cut '-d(' -f1 | \

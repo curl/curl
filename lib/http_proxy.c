@@ -58,8 +58,9 @@ static CURLcode https_proxy_connect(struct connectdata *conn, int sockindex)
       Curl_ssl_connect_nonblocking(conn, sockindex,
                                    &conn->bits.proxy_ssl_connected[sockindex]);
     if(result)
-      conn->bits.close = TRUE; /* a failed connection is marked for closure to
-                                  prevent (bad) re-use or similar */
+      /* a failed connection is marked for closure to prevent (bad) re-use or
+         similar */
+      connclose(conn, "TLS handshake failed");
   }
   return result;
 #else
@@ -327,7 +328,7 @@ static CURLcode CONNECT(struct connectdata *conn,
     { /* READING RESPONSE PHASE */
       int error = SELECT_OK;
 
-      while(s->keepon && !error) {
+      while(s->keepon) {
         ssize_t gotbytes;
 
         /* make sure we have space to read more data */
@@ -384,11 +385,12 @@ static CURLcode CONNECT(struct connectdata *conn,
             /* chunked-encoded body, so we need to do the chunked dance
                properly to know when the end of the body is reached */
             CHUNKcode r;
+            CURLcode extra;
             ssize_t tookcareof = 0;
 
             /* now parse the chunked piece of data so that we can
                properly tell when the stream ends */
-            r = Curl_httpchunk_read(conn, s->ptr, 1, &tookcareof);
+            r = Curl_httpchunk_read(conn, s->ptr, 1, &tookcareof, &extra);
             if(r == CHUNKE_STOP) {
               /* we're done reading chunks! */
               infof(data, "chunk reading DONE\n");
@@ -455,6 +457,7 @@ static CURLcode CONNECT(struct connectdata *conn,
             }
             else if(s->chunked_encoding) {
               CHUNKcode r;
+              CURLcode extra;
 
               infof(data, "Ignore chunked response-body\n");
 
@@ -472,7 +475,8 @@ static CURLcode CONNECT(struct connectdata *conn,
 
               /* now parse the chunked piece of data so that we can
                  properly tell when the stream ends */
-              r = Curl_httpchunk_read(conn, s->line_start + 1, 1, &gotbytes);
+              r = Curl_httpchunk_read(conn, s->line_start + 1, 1, &gotbytes,
+                                      &extra);
               if(r == CHUNKE_STOP) {
                 /* we're done reading chunks! */
                 infof(data, "chunk reading DONE\n");
@@ -632,6 +636,7 @@ static CURLcode CONNECT(struct connectdata *conn,
   conn->allocptr.proxyuserpwd = NULL;
 
   data->state.authproxy.done = TRUE;
+  data->state.authproxy.multipass = FALSE;
 
   infof(data, "Proxy replied %d to CONNECT request\n",
         data->info.httpproxycode);

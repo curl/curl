@@ -52,6 +52,9 @@ HTTP over proxy-tunnel with --proxy-header and --header
  <command>
 http://test.1428:%HTTPPORT/we/want/that/page/1428 -p -x %HOSTIP:%PROXYPORT --user 'iam:my:;self' --header "header-type: server" --proxy-header "header-type: proxy"
 </command>
+<features>
+proxy
+</features>
 </client>
 
 #
