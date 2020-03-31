@@ -4,6 +4,8 @@ curl release procedure - how to do a release
 in the source code repo
 -----------------------
 
+- run `./scripts/copyright.pl` and correct possible omissions
+
 - edit `RELEASE-NOTES` to be accurate
 
 - update `docs/THANKS`
