@@ -30,6 +30,7 @@
 #include <curl/curl.h>
 
 #include "vauth/vauth.h"
+#include "vtls/vtls.h"
 #include "urldata.h"
 #include "curl_base64.h"
 #include "curl_ntlm_core.h"
@@ -118,9 +119,22 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   gss_buffer_desc userb;
   gss_name_t username = GSS_C_NO_NAME;
   gss_buffer_desc token = {0};
+  gss_channel_bindings_t cb = GSS_C_NO_CHANNEL_BINDINGS;
+  unsigned int cb_len = 0;
+  void *cb_data = NULL;
 
   /* throw away any old cred */
   Curl_auth_cleanup_ntlm(ntlm);
+
+  /* cb only filled if CBs are available */
+  (void)Curl_ssl_get_tls_channel_binding(data->conn,
+                                         CURL_SSL_CB_TLS_SERVER_END_POINT,
+                                         &cb_data, &cb_len);
+  if(cb_data) {
+    ntlm->cb.application_data.value = cb_data;
+    ntlm->cb.application_data.length = cb_len;
+    cb = &ntlm->cb;
+  }
 
   /* target name, GSSAPI wants a SPN formatted as svc@host */
   spn = Curl_auth_build_spn(service, NULL, host);
@@ -170,7 +184,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   maj = gss_init_sec_context(&min, ntlm->cred, &ntlm->context, ntlm->spn,
                              discard_const(gssntlmssp_mech), 0, 0,
-                             GSS_C_NO_CHANNEL_BINDINGS, GSS_C_NO_BUFFER,
+                             cb, GSS_C_NO_BUFFER,
                              NULL, &token, NULL, NULL);
   if(maj != GSS_S_COMPLETE && maj != GSS_S_CONTINUE_NEEDED) {
     result = CURLE_AUTH_ERROR;
@@ -254,10 +268,14 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   OM_uint32 maj, min;
   gss_buffer_desc token = {0};
+  gss_channel_bindings_t cb = GSS_C_NO_CHANNEL_BINDINGS;
+
+  if(ntlm->cb.application_data.value)
+    cb = &ntlm->cb;
 
   maj = gss_init_sec_context(&min, ntlm->cred, &ntlm->context, ntlm->spn,
                              discard_const(gssntlmssp_mech), 0, 0,
-                             GSS_C_NO_CHANNEL_BINDINGS, &ntlm->input_token,
+                             cb, &ntlm->input_token,
                              NULL, &token, NULL, NULL);
   if(maj != GSS_S_COMPLETE) {
     result = CURLE_AUTH_ERROR;
@@ -297,7 +315,8 @@ void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
   /* Free Target Name */
   gss_release_name(&min, &ntlm->spn);
 
-  memset(ntlm, 0, sizeof(*ntlm));
+  /* Reset bindings */
+  gss_release_buffer(&min, &ntlm->cb.application_data);
 }
 
 #endif /* USE_GSSNTLSSP && USE_NTLM */
