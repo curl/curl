@@ -65,6 +65,7 @@ This is the final page !
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 </features>
 <server>

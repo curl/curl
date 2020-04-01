@@ -57,6 +57,7 @@ Wrong password dude. Get it fixed and return.
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 </features>
 <server>

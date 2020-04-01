@@ -39,6 +39,7 @@ pop3
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 </features>
  <name>

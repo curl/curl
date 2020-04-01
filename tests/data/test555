@@ -83,6 +83,7 @@ lib555
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 proxy
 </features>

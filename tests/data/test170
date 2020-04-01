@@ -21,6 +21,7 @@ http
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 proxy
 </features>
  <name>

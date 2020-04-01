@@ -38,6 +38,7 @@ imap
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 </features>
  <name>

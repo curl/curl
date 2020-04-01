@@ -43,6 +43,7 @@ pop3
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 </features>
  <name>
 POP3 NTLM authentication with SASL downgrade

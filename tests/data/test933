@@ -30,6 +30,7 @@ smtp
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 </features>
  <name>
 SMTP NTLM graceful cancellation

@@ -78,6 +78,7 @@ lib548
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 proxy
 </features>

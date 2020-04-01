@@ -45,6 +45,7 @@ This is not the real page either!
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 </features>
 <server>

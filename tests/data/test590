@@ -76,6 +76,7 @@ lib590
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 debug
 proxy
 </features>

@@ -33,6 +33,7 @@ smtp
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 </features>
  <name>
 SMTP NTLM authentication with SASL downgrade

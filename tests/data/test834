@@ -41,6 +41,7 @@ imap
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 </features>
  <name>
 IMAP NTLM authentication with SASL downgrade

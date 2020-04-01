@@ -30,6 +30,7 @@ imap
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 </features>
  <name>
 IMAP NTLM graceful cancellation

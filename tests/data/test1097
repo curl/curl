@@ -48,6 +48,7 @@ NTLM
 SSL
 !SSPI
 proxy
+!GSSNTLMSSP
 </features>
  <name>
 HTTP POST using CONNECT with --proxy-ntlm but no auth is required

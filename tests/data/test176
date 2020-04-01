@@ -50,6 +50,7 @@ content for you
 NTLM
 SSL
 !SSPI
+!GSSNTLMSSP
 </features>
 <server>
 http
