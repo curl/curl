@@ -27,6 +27,7 @@
 #include <curl/curl.h>
 
 #include "vauth/vauth.h"
+#include "vtls/vtls.h"
 #include "urldata.h"
 #include "curl_base64.h"
 #include "curl_ntlm_core.h"
@@ -286,20 +287,19 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   * https://docs.microsoft.com/en-us/security-updates
   * /SecurityAdvisories/2009/973811
   */
-  if(ntlm->sslContext) {
+  {
     SEC_CHANNEL_BINDINGS channelBindings;
-    SecPkgContext_Bindings pkgBindings;
-    pkgBindings.Bindings = &channelBindings;
-    status = s_pSecFn->QueryContextAttributes(
-      ntlm->sslContext,
-      SECPKG_ATTR_ENDPOINT_BINDINGS,
-      &pkgBindings
-    );
-    if(status == SEC_E_OK) {
+    void *cb_data = (void *)&channelBindings;
+    unsigned int cb_len;
+
+    result = Curl_ssl_get_tls_channel_binding(data->conn,
+                                              CURL_SSL_CB_TLS_SERVER_END_POINT,
+                                              &cb_data, &cb_len);
+    if(result == CURLE_OK) {
       type_2_desc.cBuffers++;
       type_2_bufs[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
-      type_2_bufs[1].cbBuffer = pkgBindings.BindingsLength;
-      type_2_bufs[1].pvBuffer = pkgBindings.Bindings;
+      type_2_bufs[1].cbBuffer = cb_len;
+      type_2_bufs[1].pvBuffer = cb_data;
     }
   }
 #endif

@@ -353,9 +353,6 @@ struct ntlmdata {
 /* The sslContext is used for the Schannel bindings. The
  * api is available on the Windows 7 SDK and later.
  */
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-  CtxtHandle *sslContext;
-#endif
   CredHandle *credentials;
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;
@@ -398,9 +395,6 @@ struct negotiatedata {
   gss_buffer_desc output_token;
 #else
 #ifdef USE_WINDOWS_SSPI
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-  CtxtHandle *sslContext;
-#endif
   DWORD status;
   CredHandle *credentials;
   CtxtHandle *context;
@@ -1035,10 +1029,6 @@ struct connectdata {
   void *seek_client;            /* pointer to pass to the seek() above */
 
   /*************** Request - specific items ************/
-#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
-  CtxtHandle *sslContext;
-#endif
-
 #if defined(USE_NTLM)
   curlntlm http_ntlm_state;
   curlntlm proxy_ntlm_state;

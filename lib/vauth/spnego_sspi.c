@@ -29,6 +29,7 @@
 #include <curl/curl.h>
 
 #include "vauth/vauth.h"
+#include "vtls/vtls.h"
 #include "urldata.h"
 #include "curl_base64.h"
 #include "warnless.h"
@@ -213,20 +214,20 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     * https://docs.microsoft.com/en-us/security-updates
     * /SecurityAdvisories/2009/973811
     */
-    if(nego->sslContext) {
+    {
       SEC_CHANNEL_BINDINGS channelBindings;
-      SecPkgContext_Bindings pkgBindings;
-      pkgBindings.Bindings = &channelBindings;
-      nego->status = s_pSecFn->QueryContextAttributes(
-          nego->sslContext,
-          SECPKG_ATTR_ENDPOINT_BINDINGS,
-          &pkgBindings
-      );
-      if(nego->status == SEC_E_OK) {
+      void *cb_data = (void *)&channelBindings;
+      unsigned int cb_len;
+
+      result = Curl_ssl_get_tls_channel_binding(
+        data->conn,
+        CURL_SSL_CB_TLS_SERVER_END_POINT,
+        &cb_data, &cb_len);
+      if(result == CURLE_OK) {
         chlg_desc.cBuffers++;
         chlg_buf[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
-        chlg_buf[1].cbBuffer   = pkgBindings.BindingsLength;
-        chlg_buf[1].pvBuffer   = pkgBindings.Bindings;
+        chlg_buf[1].cbBuffer = cb_len;
+        chlg_buf[1].pvBuffer = cb_data;
       }
     }
 #endif

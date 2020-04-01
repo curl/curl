@@ -3000,7 +3000,7 @@ sub checksystem {
                 $has_sspi=1;
             }
             if($feat =~ /GSSNTLMSSP/i) {
-                # SSPI enabled
+                # GSSNTLMSSP enabled
                 $has_gssntlmssp=1;
             }
             if($feat =~ /GSS-API/i) {

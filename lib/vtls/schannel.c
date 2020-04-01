@@ -1576,15 +1576,6 @@ schannel_connect_common(struct connectdata *conn, int sockindex,
     conn->recv[sockindex] = schannel_recv;
     conn->send[sockindex] = schannel_send;
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-    /* When SSPI is used in combination with Schannel
-     * we need the Schannel context to create the Schannel
-     * binding to pass the IIS extended protection checks.
-     * Available on Windows 7 or later.
-     */
-    conn->sslContext = &BACKEND->ctxt->ctxt_handle;
-#endif
-
     *done = TRUE;
   }
   else
@@ -2411,6 +2402,53 @@ static void *Curl_schannel_get_internals(struct ssl_connect_data *connssl,
   return &BACKEND->ctxt->ctxt_handle;
 }
 
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+static CURLcode Curl_schannel_get_bindings(struct connectdata *conn,
+                                           unsigned long type,
+                                           void **data, unsigned int *size)
+{
+  struct ssl_connect_data *connssl = &conn->ssl[FIRSTSOCKET];
+  SEC_CHANNEL_BINDINGS *channelBindings = (SEC_CHANNEL_BINDINGS *)*data;
+  SecPkgContext_Bindings pkgBindings;
+  SECURITY_STATUS status = SEC_E_OK;
+
+  pkgBindings.Bindings = channelBindings;
+  status = s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+                                            type, &pkgBindings);
+  if(status == SEC_E_OK) {
+    *data = pkgBindings.Bindings;
+    *size = pkgBindings.BindingsLength;
+    return CURLE_OK;
+  }
+  else if(status == SEC_E_INSUFFICIENT_MEMORY) {
+    return CURLE_OUT_OF_MEMORY;
+  }
+  else{
+    return CURLE_SSL_INTERNAL;
+  }
+}
+
+/* See RFC 5929 section 3 for details */
+static CURLcode Curl_schannel_get_tls_unique(struct connectdata *conn,
+                                             void **data, unsigned int *size)
+{
+  return Curl_schannel_get_bindings(conn, SECPKG_ATTR_UNIQUE_BINDINGS,
+                                    data, size);
+}
+
+/* See RFC 5929 section 4 for details */
+static CURLcode Curl_schannel_get_tls_endpoint(struct connectdata *conn,
+                                               void **data, unsigned int *size)
+{
+  return Curl_schannel_get_bindings(conn, SECPKG_ATTR_ENDPOINT_BINDINGS,
+                                    data, size);
+}
+
+#else /* !SECPKG_ATTR_ENDPOINT_BINDINGS */
+#define Curl_schannel_get_tls_unique NULL
+#define Curl_schannel_get_tls_endpoint NULL
+#endif /* SECPKG_ATTR_ENDPOINT_BINDINGS */
+
 const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
@@ -2439,8 +2477,8 @@ const struct Curl_ssl Curl_ssl_schannel = {
   Curl_none_false_start,             /* false_start */
   Curl_schannel_md5sum,              /* md5sum */
   Curl_schannel_sha256sum,           /* sha256sum */
-  NULL,                              /* get_tls_unique */
-  NULL                               /* get_tls_endpoint */
+  Curl_schannel_get_tls_unique,      /* get_tls_unique */
+  Curl_schannel_get_tls_endpoint     /* get_tls_endpoint */
 };
 
 #endif /* USE_SCHANNEL */
