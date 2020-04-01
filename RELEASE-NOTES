@@ -4,7 +4,7 @@ curl and libcurl 7.70.0
  Command line options:         231
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2148
+ Contributors:                 2150
 
 This release includes the following changes:
 
@@ -14,11 +14,16 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o build: fixed build for systems with select() in unistd.h [43]
+ o checksrc: warn on obvious conditional blocks on the same line as if() [44]
  o ci/tests: fix Azure Pipelines not running Windows containers [25]
+ o CI: add build with ngtcp2 + gnutls on Travis CI
  o CI: bring GitHub Actions fuzzing job in line with macOS jobs
  o CI: migrate macOS jobs from Azure and Travis CI to GitHub Actions [36]
  o CI: remove default Ubuntu build from GitHub Actions
  o cirrus: re-enable the FreeBSD 13 CI builds [29]
+ o cleanup: insert newline after if() conditions
+ o cmake: add CMAKE_MSVC_RUNTIME_LIBRARY [45]
  o cmake: add support for building with wolfSSL [9]
  o cmdline: fix handling of OperationConfig linked list (--next) [24]
  o config: remove all defines of HAVE_DES_H [37]
@@ -28,25 +33,33 @@ This release includes the following bugfixes:
  o connect: happy eyeballs cleanup [15]
  o copyright: fix out-of-date copyright ranges and missing headers [38]
  o curl-functions.m4: remove inappropriate AC_REQUIRE [26]
+ o curl.h: remnove CURL_VERSION_ESNI. Never supported nor documented [49]
  o curl_setup: define _WIN32_WINNT_[OS] symbols [27]
  o CURLINFO_NUM_CONNECTS: improve accuracy [28]
  o dist: add mail-rcpt-allowfails.d to the tarball [35]
  o docs/make: generate curl.1 from listed files only [33]
  o docs: add warnings about FILE: URLs on Windows [19]
  o easy: fix curl_easy_duphandle for builds missing IPv6 that use c-ares [18]
+ o examples/sessioninfo.c: add include to fix compiler warning [42]
  o gskit: use our internal select wrapper for portability [12]
  o http2: Fix erroneous debug message that h2 connection closed [21]
+ o mailmap: fixup a few author names/fields
  o Makefile.m32: Improve windres parameter compatibility [17]
  o Makefile: run the cd commands in a subshell [1]
+ o memdebug: don't log free(NULL)
  o multi: improve parameter check for curl_multi_remove_handle [6]
  o nghttp2: 1.12.0 required [40]
+ o ngtcp2: update to git master for the key installation API change [46]
  o openssl: adapt to functions marked as deprecated since version 3 [34]
  o OS400: update strings for ccsid-ifier (fixes the build) [30]
+ o output.d: quote the URL when globbing [48]
  o packages: add OS400/chkstrings.c to the dist [39]
+ o RELEASE-PROCEDURE.md: run the copyright.pl script!
  o select: move duplicate select preparation code into Curl_select [14]
  o server/getpart: make the "XML-parser" stricter [20]
  o sockfilt: add logmsg output to select_ws_wait_thread on Windows [32]
  o SSLCERTS.md: Fix example code for setting CA cert file [31]
+ o test1177: verify that all the CURL_VERSION_ bits are documented
  o test2100: fix static port instead of dynamic value being used
  o tests/data: fix some XML formatting issues in test cases
  o tests: make Python-based servers compatible with Python 2 and 3 [22]
@@ -55,6 +68,8 @@ This release includes the following bugfixes:
  o tool_operate: fix add_parallel_transfers when more are in queue [10]
  o transfer: cap retries of "dead connections" to 5 [13]
  o travis: update the ngtcp2 build to use the latest OpenSSL patch
+ o version: add 'cainfo' and 'capath' to version info struct [55]
+ o vquic: add support for GnuTLS backend of ngtcp2 [41]
  o vtls: fix ssl_config memory-leak on out-of-memory [11]
  o windows: suppress UI in all CryptAcquireContext() calls [7]
 
@@ -65,14 +80,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad King, Calvin Buckley, Clément Notin, Dan Fandrich, Daniel Stenberg,
-  Dima Tisnek, Frank Gevaerts, FuccDucc on github, Gavin Wong,
-  Johannes Schindelin, Jon Rumsey, Kamil Dudka, Karl Chen, Maksim Stsepanenka,
-  Marcel Raad, Marc Hörsken, Markus Olsson, Mathias Gumz, Muhammad Herdiansyah,
-  Paul Vixie, Ray Satiro, Rici Lake, Ross Burton, Simon Chalifoux,
-  Stepan Efremov, Steven Penny, Timothe Litt, Tim Sedlmeyer, Tommy Petty,
-  Viktor Szakats,
-  (30 contributors)
+  Brad King, Calvin Buckley, Clément Notin, Daiki Ueno, Dan Fandrich,
+  Daniel Stenberg, Dima Tisnek, Frank Gevaerts, FuccDucc on github, Gavin Wong,
+  Gisle Vanem, Harry Sintonen, Johannes Schindelin, Jon Rumsey, Kamil Dudka,
+  Karl Chen, Maksim Stsepanenka, Marcel Raad, Marc Hörsken, Markus Olsson,
+  Mathias Gumz, Michael Kaufmann, Muhammad Herdiansyah, Paul Vixie, Ray Satiro,
+  Rici Lake, Roger Orr, Ross Burton, Simon Chalifoux, Stepan Efremov,
+  Steven Penny, Timothe Litt, Tim Sedlmeyer, Tommy Petty, Viktor Szakats,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -118,3 +133,12 @@ References to bug reports and discussions on issues:
  [38] = https://curl.haxx.se/bug/?i=5141
  [39] = https://curl.haxx.se/bug/?i=5142
  [40] = https://curl.haxx.se/bug/?i=5140
+ [41] = https://curl.haxx.se/bug/?i=5148
+ [42] = https://curl.haxx.se/bug/?i=5171
+ [43] = https://curl.haxx.se/bug/?i=5169
+ [44] = https://curl.haxx.se/bug/?i=5164
+ [45] = https://curl.haxx.se/bug/?i=5165
+ [46] = https://curl.haxx.se/bug/?i=5166
+ [48] = https://curl.haxx.se/bug/?i=5160
+ [49] = https://curl.haxx.se/bug/?i=5157
+ [55] = https://curl.haxx.se/bug/?i=5150
