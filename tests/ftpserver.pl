@@ -687,6 +687,7 @@ sub close_dataconn {
             print DWRITE "DISC\n";
             my $i;
             sysread DREAD, $i, 5;
+            logmsg "Server disconnected $datasockf_mode DATA connection\n";
         }
         else {
             logmsg "Server finds $datasockf_mode DATA connection already ".
@@ -699,10 +700,12 @@ sub close_dataconn {
     }
 
     if($datapid > 0) {
+        logmsg "DATA sockfilt for $datasockf_mode data channel quits ".
+               "(pid $datapid)\n";
         print DWRITE "QUIT\n";
         waitpid($datapid, 0);
         unlink($datasockf_pidfile) if(-f $datasockf_pidfile);
-        logmsg "DATA sockfilt for $datasockf_mode data channel quits ".
+        logmsg "DATA sockfilt for $datasockf_mode data channel quit ".
                "(pid $datapid)\n";
     }
     else {
