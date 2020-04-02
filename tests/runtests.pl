@@ -3010,6 +3010,7 @@ sub checksystem {
 
     my $hostname=join(' ', runclientoutput("hostname"));
     my $hosttype=join(' ', runclientoutput("uname -a"));
+    my $hostos=$^O;
 
     logmsg ("********* System characteristics ******** \n",
             "* $curl\n",
@@ -3017,7 +3018,8 @@ sub checksystem {
             "* Features: $feat\n",
             "* Disabled: $dis\n",
             "* Host: $hostname",
-            "* System: $hosttype");
+            "* System: $hosttype",
+            "* OS: $hostos\n");
 
     if($has_memory_tracking && $has_threadedres) {
         $has_memory_tracking = 0;
