@@ -16,7 +16,7 @@ jobs:
       uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
       with:
         oss-fuzz-project-name: 'curl'
-        fuzz-seconds: 600
+        fuzz-seconds: 2400
         dry-run: false
 
     - name: Upload Crash
