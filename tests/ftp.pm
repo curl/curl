@@ -64,6 +64,33 @@ sub portable_sleep {
 }
 
 #######################################################################
+# portable_waitpid uses kill with SIGZERO which is emulated on Win32 to
+# check if the process still exists as waitpid without &WNOHANG causes
+# random freezes on Win32 even though it is emulated in cygwin and msys.
+# kill SIGZERO on Windows: https://perldoc.perl.org/perlport.html#kill
+# waitpid WNOHANG on Windows: https://perldoc.perl.org/perlport.html#wait
+#
+sub portable_waitpid {
+    my ($pid, $flags) = @_;
+
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+        if($^O eq 'cygwin' || $^O eq 'msys') {
+            waitpid($pid, &WNOHANG); # reap first on pseudo-POSIX
+        }
+        if($flags == &WNOHANG) {
+            return (pidexists($pid))?0:$pid;
+        }
+        while(pidexists($pid)) {
+            portable_sleep(0.05);
+        }
+        return $pid;
+    }
+    else {
+        return waitpid($pid, $flags);
+    }
+}
+
+#######################################################################
 # pidfromfile returns the pid stored in the given pidfile.  The value
 # of the returned pid will never be a negative value. It will be zero
 # on any file related error or if a pid can not be extracted from the
@@ -177,7 +204,7 @@ sub processexists {
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             # reap its dead children, if not done yet
-            waitpid($pid, &WNOHANG);
+            portable_waitpid($pid, &WNOHANG);
             # negative return value means dead process
             return -$pid;
         }
@@ -227,7 +254,7 @@ sub killpid {
                     print("RUN: Process with pid $pid already dead\n")
                         if($verbose);
                     # if possible reap its dead children
-                    waitpid($pid, &WNOHANG);
+                    portable_waitpid($pid, &WNOHANG);
                     push @reapchild, $pid;
                 }
             }
@@ -245,7 +272,7 @@ sub killpid {
                         if($verbose);
                     splice @signalled, $i, 1;
                     # if possible reap its dead children
-                    waitpid($pid, &WNOHANG);
+                    portable_waitpid($pid, &WNOHANG);
                     push @reapchild, $pid;
                 }
             }
@@ -262,7 +289,7 @@ sub killpid {
                     if($verbose);
                 pidkill($pid);
                 # if possible reap its dead children
-                waitpid($pid, &WNOHANG);
+                portable_waitpid($pid, &WNOHANG);
                 push @reapchild, $pid;
             }
         }
@@ -272,7 +299,7 @@ sub killpid {
     if(@reapchild) {
         foreach my $pid (@reapchild) {
             if($pid > 0) {
-                waitpid($pid, 0);
+                portable_waitpid($pid, 0);
             }
         }
     }
@@ -301,7 +328,7 @@ sub killsockfilters {
             printf("* kill pid for %s-%s => %d\n", $server,
                 ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
             pidkill($pid);
-            waitpid($pid, 0);
+            portable_waitpid($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);
     }
@@ -315,7 +342,7 @@ sub killsockfilters {
             printf("* kill pid for %s-data => %d\n", $server,
                 $pid) if($verbose);
             pidkill($pid);
-            waitpid($pid, 0);
+            portable_waitpid($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);
     }
