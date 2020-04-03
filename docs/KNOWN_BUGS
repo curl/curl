@@ -32,6 +32,7 @@ problems may have been fixed or changed somewhat since this was written!
  2.7 Client cert (MTLS) issues with Schannel
  2.8 Schannel disable CURLOPT_SSL_VERIFYPEER and verify hostname
  2.9 TLS session cache doesn't work with TFO
+ 2.10 Store TLS context per transfer instead of per connection
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -269,6 +270,16 @@ problems may have been fixed or changed somewhat since this was written!
 2.9 TLS session cache doesn't work with TFO
 
  See https://github.com/curl/curl/issues/4301
+
+2.10 Store TLS context per transfer instead of per connection
+
+ The GnuTLS `backend->cred` and the OpenSSL `backend->ctx` data and their
+ proxy versions (and possibly other TLS backends), could be better moved to be
+ stored in the Curl_easy handle instead of in per connection so that a single
+ transfer that makes multiple connections can reuse the context and reduce
+ memory consumption.
+
+ https://github.com/curl/curl/issues/5102
 
 3. Email protocols
 
