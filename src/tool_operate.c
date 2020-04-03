@@ -905,35 +905,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         /* default output stream is stdout */
         outs->stream = stdout;
 
-        /* --etag-save */
-        etag_save = &per->etag_save;
-        etag_save->stream = stdout;
-
-        if(config->etag_save_file) {
-          /* open file for output: */
-          if(strcmp(config->etag_save_file, "-")) {
-            FILE *newfile = fopen(config->etag_save_file, "wb");
-            if(!newfile) {
-              warnf(
-                config->global,
-                "Failed to open %s\n", config->etag_save_file);
-
-              result = CURLE_WRITE_ERROR;
-              break;
-            }
-            else {
-              etag_save->filename = config->etag_save_file;
-              etag_save->s_isreg = TRUE;
-              etag_save->fopened = TRUE;
-              etag_save->stream = newfile;
-            }
-          }
-          else {
-            /* always use binary mode for protocol header output */
-            set_binmode(etag_save->stream);
-          }
-        }
-
         /* --etag-compare */
         if(config->etag_compare_file) {
           char *etag_from_file = NULL;
@@ -941,7 +912,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           /* open file for reading: */
           FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
-          if(!file) {
+          if(!file && !config->etag_save_file) {
             errorf(config->global,
                    "Failed to open %s\n", config->etag_compare_file);
             result = CURLE_READ_ERROR;
@@ -972,6 +943,35 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if(file) {
             fclose(file);
+          }
+        }
+
+        /* --etag-save */
+        etag_save = &per->etag_save;
+        etag_save->stream = stdout;
+
+        if(config->etag_save_file) {
+          /* open file for output: */
+          if(strcmp(config->etag_save_file, "-")) {
+            FILE *newfile = fopen(config->etag_save_file, "wb");
+            if(!newfile) {
+              warnf(
+                config->global,
+                "Failed to open %s\n", config->etag_save_file);
+
+              result = CURLE_WRITE_ERROR;
+              break;
+            }
+            else {
+              etag_save->filename = config->etag_save_file;
+              etag_save->s_isreg = TRUE;
+              etag_save->fopened = TRUE;
+              etag_save->stream = newfile;
+            }
+          }
+          else {
+            /* always use binary mode for protocol header output */
+            set_binmode(etag_save->stream);
           }
         }
 
