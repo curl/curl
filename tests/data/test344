@@ -31,7 +31,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-Both --etag-compare and --etag-save to save new Etag using the same filename and log/etag344 does not exists
+Both --etag-compare and -save store new Etag using non-existing file
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/344 --etag-compare log/etag344 --etag-save log/etag344
