@@ -127,6 +127,10 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#if defined(CURL_CA_BUNDLE_PEM)
+#include "cacert.h"
+#endif
+
 static void conn_free(struct connectdata *conn);
 static unsigned int get_protocol_family(unsigned int protocol);
 
@@ -505,6 +509,18 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
    * seem not to follow rfc1961 section 4.3/4.4
    */
   set->socks5_gssapi_nec = FALSE;
+#endif
+
+#if defined(CURL_CA_BUNDLE_PEM)
+  result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PEM_ORIG],
+                          (const char *) CACERT_PEM);
+  if(result)
+    return result;
+
+  result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PEM_PROXY],
+                          (const char *) CACERT_PEM);
+  if(result)
+    return result;
 #endif
 
   /* Set the default CA cert bundle/path detected/specified at build time.
@@ -3555,6 +3571,10 @@ static CURLcode create_conn(struct Curl_easy *data,
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
   data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_ORIG];
   data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
+  data->set.ssl.primary.ca_file_pem =
+    data->set.str[STRING_SSL_CAFILE_PEM_ORIG];
+  data->set.proxy_ssl.primary.ca_file_pem =
+    data->set.str[STRING_SSL_CAFILE_PEM_PROXY];
   data->set.ssl.primary.random_file = data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.proxy_ssl.primary.random_file =
     data->set.str[STRING_SSL_RANDOM_FILE];

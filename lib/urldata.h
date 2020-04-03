@@ -230,6 +230,7 @@ struct ssl_primary_config {
   char *cipher_list;     /* list of ciphers to use */
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
+  char *ca_file_pem;
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
   BIT(verifystatus);     /* set TRUE if certificate status must be checked */
@@ -1529,6 +1530,8 @@ enum dupstring {
   STRING_SSL_CAPATH_PROXY, /* CA directory name (doesn't work on windows) */
   STRING_SSL_CAFILE_ORIG, /* certificate file to verify peer against */
   STRING_SSL_CAFILE_PROXY, /* certificate file to verify peer against */
+  STRING_SSL_CAFILE_PEM_ORIG, /* PEM certificate to verify peer against */
+  STRING_SSL_CAFILE_PEM_PROXY, /* PEM certificate to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_ORIG, /* public key file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_ORIG, /* list of ciphers to use */

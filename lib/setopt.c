@@ -1944,6 +1944,21 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       result = CURLE_NOT_BUILT_IN;
     break;
 #endif
+  case CURLOPT_CAINFO_PEM:
+    /*
+     * Set CA info for SSL connection. Specify entire PEM of the CA certificate
+     */
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE_PEM_ORIG],
+                            va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_CAINFO_PEM:
+    /*
+     * Set CA info for SSL connection proxy.
+     * Specify entire PEM of the CA certificate
+     */
+    result = Curl_setstropt(&data->set.str[STRING_SSL_CAFILE_PEM_PROXY],
+                            va_arg(param, char *));
+    break;
   case CURLOPT_CRLFILE:
     /*
      * Set CRL file info for SSL connection. Specify file name of the CRL

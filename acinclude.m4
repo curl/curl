@@ -2306,6 +2306,24 @@ AC_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the 
     fi
     AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built in CA store of SSL library ])
   fi
+
+  AC_MSG_CHECKING([whether to use built in CACERT_PEM from generated cacert.h])
+  AC_ARG_WITH(ca-built-in,
+AC_HELP_STRING([--with-ca-built-in], [Use the built in CACERT_PEM from generated cacert.h])
+AC_HELP_STRING([--without-ca-built-in], [Don't use the built in CACERT_PEM from generated cacert.h]),
+  [
+    if test "x$with_ca_built_in" != "xyes" -a "x$with_ca_built_in" != "xno"; then
+      AC_MSG_ERROR([--with-ca-built-in only allows yes or no as parameter])
+    fi
+  ],
+  [ with_ca_fallback="no"])
+  AC_MSG_RESULT([$with_ca_built_in])
+  if test "x$with_ca_built_in" = "xyes"; then
+    if test "x$OPENSSL_ENABLED" != "x1"; then
+      AC_MSG_ERROR([--with-ca-built-in only works with OpenSSL])
+    fi
+    AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE_PEM, 1, [define "1" to use built in CACERT_PEM from generated cacert.h ])
+  fi
 ])
 
 dnl CURL_CHECK_WIN32_LARGEFILE

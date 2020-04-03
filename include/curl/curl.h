@@ -1954,6 +1954,14 @@ typedef enum {
   /* allow RCPT TO command to fail for some recipients */
   CURLOPT(CURLOPT_MAIL_RCPT_ALLLOWFAILS, CURLOPTTYPE_LONG, 290),
 
+  /* The CAfile in memory as PEM used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_CAINFO_PEM, CURLOPTTYPE_STRINGPOINT, 291),
+
+  /* The CAfile in memory as PEM used to validate the proxy certificate
+     this option is used only if PROXY_SSL_VERIFYPEER is true */
+  CURLOPT(CURLOPT_PROXY_CAINFO_PEM, CURLOPTTYPE_STRINGPOINT, 292),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
