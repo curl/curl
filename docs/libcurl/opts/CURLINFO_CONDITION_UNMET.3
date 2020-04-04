@@ -22,7 +22,7 @@
 .\"
 .TH CURLINFO_CONDITION_UNMET 3 "1 Sep 2015" "libcurl 7.44.0" "curl_easy_getinfo options"
 .SH NAME
-CURLINFO_CONDITION_UNMET \- get info on unmet time conditional
+CURLINFO_CONDITION_UNMET \- get info on unmet time conditional or 304 HTTP response.
 .SH SYNOPSIS
 #include <curl/curl.h>
 
@@ -32,7 +32,9 @@ Pass a pointer to a long to receive the number 1 if the condition provided in
 the previous request didn't match (see \fICURLOPT_TIMECONDITION(3)\fP). Alas,
 if this returns a 1 you know that the reason you didn't get data in return is
 because it didn't fulfill the condition. The long this argument points to will
-get a zero stored if the condition instead was met.
+get a zero stored if the condition instead was met. This can also return 1 if
+the server responded with a 304 HTTP status code, for example after sending a
+custom "If-Match-*" header.
 .SH PROTOCOLS
 HTTP and some
 .SH EXAMPLE
