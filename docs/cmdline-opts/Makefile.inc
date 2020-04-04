@@ -180,6 +180,7 @@ DPAGES =					\
   request-target.d				\
   request.d					\
   resolve.d					\
+  retry-all-errors.d				\
   retry-connrefused.d				\
   retry-delay.d					\
   retry-max-time.d				\
