@@ -239,8 +239,11 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     *param_longp = data->info.conn_local_port;
     break;
   case CURLINFO_CONDITION_UNMET:
-    /* return if the condition prevented the document to get transferred */
-    *param_longp = data->info.timecond ? 1L : 0L;
+    if(data->info.httpcode == 304)
+      *param_longp = 1L;
+    else
+      /* return if the condition prevented the document to get transferred */
+      *param_longp = data->info.timecond ? 1L : 0L;
     break;
   case CURLINFO_RTSP_CLIENT_CSEQ:
     *param_longp = data->state.rtsp_next_client_CSeq;
