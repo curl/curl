@@ -719,12 +719,15 @@ Vista
 #endif
 
 /* Define to use Unix sockets. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500)
-/* sdkddkver.h first shipped with Platform SDK v6.0A included with VS2008 */
-#include <sdkddkver.h>
-#if defined(NTDDI_WIN10_RS4)
 #define USE_UNIX_SOCKETS
-#endif
+#if !defined(UNIX_PATH_MAX)
+  /* Replicating logic present in afunix.h of newer Windows 10 SDK versions */
+# define UNIX_PATH_MAX 108
+# include <ws2tcpip.h>
+  typedef struct sockaddr_un {
+    ADDRESS_FAMILY sun_family;
+    char sun_path[UNIX_PATH_MAX];
+  } SOCKADDR_UN, *PSOCKADDR_UN;
 #endif
 
 /* ---------------------------------------------------------------- */
