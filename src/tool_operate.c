@@ -437,6 +437,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
        config->retry_maxtime*1000L)) ) {
     enum {
       RETRY_NO,
+      RETRY_ALL_ERRORS,
       RETRY_TIMEOUT,
       RETRY_CONNREFUSED,
       RETRY_HTTP,
@@ -506,11 +507,22 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         retry = RETRY_FTP;
     }
 
+    if(result && !retry && config->retry_all_errors) {
+      /* Warn the first time --retry-all-errors is used for the transfer. */
+      if(!per->config->retry_all_errors_warned) {
+        warnf(global,
+              "Option --retry-all-errors may have unintended consequences.\n");
+        per->config->retry_all_errors_warned = true;
+      }
+      retry = RETRY_ALL_ERRORS;
+    }
+
     if(retry) {
       long sleeptime = 0;
       curl_off_t retry_after = 0;
       static const char * const m[]={
         NULL,
+        "(retrying all errors)",
         "timeout",
         "connection refused",
         "HTTP error",

@@ -197,6 +197,7 @@ static const struct LongShort aliases[]= {
   {"$Y", "suppress-connect-headers", ARG_BOOL},
   {"$Z", "compressed-ssh",           ARG_BOOL},
   {"$~", "happy-eyeballs-timeout-ms", ARG_STRING},
+  {"$!", "retry-all-errors",         ARG_BOOL},
   {"0",   "http1.0",                 ARG_NONE},
   {"01",  "http1.1",                 ARG_NONE},
   {"02",  "http2",                   ARG_NONE},
@@ -926,6 +927,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = str2unummax(&config->retry_maxtime, nextarg, LONG_MAX/1000);
         if(err)
           return err;
+        break;
+      case '!': /* --retry-all-errors */
+        config->retry_all_errors = toggle;
         break;
 
       case 'k': /* --proxy-negotiate */
