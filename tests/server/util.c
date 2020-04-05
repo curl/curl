@@ -269,6 +269,15 @@ int write_pidfile(const char *filename)
     logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
     return 0; /* fail */
   }
+#if defined(WIN32) || defined(_WIN32)
+  /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
+   * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
+   *   h=b5e1003722cb14235c4f166be72c09acdffc62ea
+   * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
+   *   h=448cf5aa4b429d5a9cebf92a0da4ab4b5b6d23fe
+   */
+  pid += 65536;
+#endif
   fprintf(pidfile, "%ld\n", pid);
   fclose(pidfile);
   logmsg("Wrote pid %ld to %s", pid, filename);

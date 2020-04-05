@@ -49,6 +49,9 @@ def telnetserver(options):
     """
     if options.pidfile:
         pid = os.getpid()
+        # see tests/server/util.c function write_pidfile
+        if os.name == "nt":
+            pid += 65536
         with open(options.pidfile, "w") as f:
             f.write(str(pid))
 
@@ -86,7 +89,11 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
 
             if VERIFIED_REQ.encode('utf-8') in data:
                 log.debug("Received verification request from test framework")
-                response = VERIFIED_RSP.format(pid=os.getpid())
+                pid = os.getpid()
+                # see tests/server/util.c function write_pidfile
+                if os.name == "nt":
+                    pid += 65536
+                response = VERIFIED_RSP.format(pid=pid)
                 response_data = response.encode('utf-8')
             else:
                 log.debug("Received normal request - echoing back")

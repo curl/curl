@@ -42,6 +42,10 @@ use serverhelp qw(
     datasockf_pidfilename
     );
 
+use pathhelp qw(
+    os_is_win
+    );
+
 #######################################################################
 # portable_sleep uses Time::HiRes::sleep if available and falls back
 # to the classic approach of using select(undef, undef, undef, ...).
@@ -55,7 +59,7 @@ sub portable_sleep {
     if($Time::HiRes::VERSION) {
         Time::HiRes::sleep($seconds);
     }
-    elsif ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+    elsif (os_is_win()) {
         Win32::Sleep($seconds*1000);
     }
     else {
@@ -91,18 +95,22 @@ sub pidexists {
     my $pid = $_[0];
 
     if($pid > 0) {
+        # verify if currently existing Windows process
+        if ($pid > 65536 && os_is_win()) {
+            $pid -= 65536;
+            if($^O ne 'MSWin32') {
+                my $filter = "PID eq $pid";
+                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    return -$pid;
+                }
+                return 0;
+            }
+        }
+
         # verify if currently existing and alive
         if(kill(0, $pid)) {
             return $pid;
-        }
-
-        # verify if currently existing Windows process
-        if($^O eq "msys") {
-            my $filter = "PID eq $pid";
-            my $result = `tasklist -fi \"$filter\" 2>nul`;
-            if(index($result, "$pid") != -1) {
-                return -$pid;
-            }
         }
     }
 
@@ -116,17 +124,21 @@ sub pidterm {
     my $pid = $_[0];
 
     if($pid > 0) {
-        # signal the process to terminate
-        kill("TERM", $pid);
-
         # request the process to quit
-        if($^O eq "msys") {
-            my $filter = "PID eq $pid";
-            my $result = `tasklist -fi \"$filter\" 2>nul`;
-            if(index($result, "$pid") != -1) {
-                system("taskkill -fi \"$filter\" >nul 2>&1");
+        if ($pid > 65536 && os_is_win()) {
+            $pid -= 65536;
+            if($^O ne 'MSWin32') {
+                my $filter = "PID eq $pid";
+                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    system("taskkill -fi \"$filter\" >nul 2>&1");
+                }
+                return;
             }
         }
+
+        # signal the process to terminate
+        kill("TERM", $pid);
     }
 }
 
@@ -137,19 +149,23 @@ sub pidkill {
     my $pid = $_[0];
 
     if($pid > 0) {
-        # signal the process to terminate
-        kill("KILL", $pid);
-
         # request the process to quit
-        if($^O eq "msys") {
-            my $filter = "PID eq $pid";
-            my $result = `tasklist -fi \"$filter\" 2>nul`;
-            if(index($result, "$pid") != -1) {
-                system("taskkill -f -fi \"$filter\" >nul 2>&1");
-                # Windows XP Home compatibility
-                system("tskill $pid >nul 2>&1");
+        if ($pid > 65536 && os_is_win()) {
+            $pid -= 65536;
+            if($^O ne 'MSWin32') {
+                my $filter = "PID eq $pid";
+                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    system("taskkill -f -fi \"$filter\" >nul 2>&1");
+                    # Windows XP Home compatibility
+                    system("tskill $pid >nul 2>&1");
+                }
+                return;
             }
         }
+
+        # signal the process to terminate
+        kill("KILL", $pid);
     }
 }
 

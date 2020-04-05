@@ -51,8 +51,11 @@ def dictserver(options):
     """
     if options.pidfile:
         pid = os.getpid()
+        # see tests/server/util.c function write_pidfile
+        if os.name == "nt":
+            pid += 65536
         with open(options.pidfile, "w") as f:
-            f.write("{0}".format(pid))
+            f.write(str(pid))
 
     local_bind = (options.host, options.port)
     log.info("[DICT] Listening on %s", local_bind)
@@ -85,7 +88,11 @@ class DictHandler(socketserver.BaseRequestHandler):
             if VERIFIED_REQ in data:
                 log.debug("[DICT] Received verification request from test "
                           "framework")
-                response_data = VERIFIED_RSP.format(pid=os.getpid())
+                pid = os.getpid()
+                # see tests/server/util.c function write_pidfile
+                if os.name == "nt":
+                    pid += 65536
+                response_data = VERIFIED_RSP.format(pid=pid)
             else:
                 log.debug("[DICT] Received normal request")
                 response_data = "No matches"
