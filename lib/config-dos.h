@@ -151,8 +151,6 @@
   #define ssize_t  int
 #endif
 
-#define CURL_CA_BUNDLE  getenv("CURL_CA_BUNDLE")
-
 /* Target HAVE_x section */
 
 #if defined(DJGPP)
