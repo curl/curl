@@ -405,7 +405,7 @@ my $hstprvkeyf_config = abs_path("$path/$hstprvkeyf");
 my $pidfile_config = $pidfile;
 my $sftpsrv_config = $sftpsrv;
 
-if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+if (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
     $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
@@ -797,7 +797,7 @@ if((! -e $knownhosts) || (! -s $knownhosts)) {
 my $identity_config = abs_path("$path/$identity");
 my $knownhosts_config = abs_path("$path/$knownhosts");
 
-if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') {
+if (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $identity_config = pathhelp::build_sys_abs_path($identity_config);
     $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts_config);
