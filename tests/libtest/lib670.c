@@ -210,7 +210,7 @@ int test(char *URL)
     mres = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcept, &maxfd);
     if(mres)
       break;
-#ifdef _WIN32
+#if defined(WIN32) || defined(_WIN32)
     if(maxfd == -1)
       Sleep(100);
     else
