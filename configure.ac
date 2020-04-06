@@ -1554,7 +1554,7 @@ AC_HELP_STRING([--without-secure-transport], [disable Apple OS native SSL/TLS]),
 AC_MSG_CHECKING([whether to enable Secure Transport])
 if test -z "$ssl_backends" -o "x$OPT_SECURETRANSPORT" != xno; then
   if test "x$OPT_SECURETRANSPORT" != "xno" &&
-     test -d "/System/Library/Frameworks/Security.framework"; then
+     (test "x$cross_compiling" != "xno" || test -d "/System/Library/Frameworks/Security.framework"); then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SECTRANSP, 1, [enable Secure Transport])
     AC_SUBST(USE_SECTRANSP, [1])
