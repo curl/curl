@@ -27,7 +27,7 @@
 #
 # 1. Get recent commits added to RELEASE-NOTES:
 #
-# $ ./scripts/release-notes
+# $ ./scripts/release-notes.pl
 #
 # 2. Edit RELEASE-NOTES and *remove* entries among the newly added ones that
 # don't belong. Don't mind leaving unused references below. Make sure to move
@@ -37,7 +37,7 @@
 # 3. Run the cleanup script and let it sort the entries and remove unused
 # references from lines you removed in step (2):
 #
-# $ ./script/release-notes cleanup
+# $ ./script/release-notes.pl cleanup
 #
 # 4. Reload RELEASE-NOTES and verify that things look okay. The cleanup
 # procedure can and should be re-run when lines are removed or rephrased.
@@ -60,13 +60,15 @@ my $refnum; # the highest number used so far
 my @refused;
 
 my @o;
+my @usedrefs;
 for my $l (@releasenotes) {
     if($l =~ /^ o .*\[(\d+)\]/) {
         $refused[$1]=1;
     }
-    elsif($l =~ /^ \[(\d+)\] = /) {
+    elsif($l =~ /^ \[(\d+)\] = (.*)/) {
         $refused[$1] |= 2;
         $refnum=$1;
+        $usedrefs[$1] = $2;
     }
 }
 
@@ -169,10 +171,6 @@ for my $l (@releasenotes) {
             next;
         }
         elsif($l =~ /^ \[(\d+)\] = /) {
-            if($refused[$1] & 1) {
-                # only output actually used references
-                push @o, $l;
-            }
             next;
         }
         elsif($bullets[0]) {
@@ -189,11 +187,11 @@ for my $l (@releasenotes) {
     }
 }
 
-for my $f (@line) {
-    my $n = $moreinfo{$f};
-    my $r;
-    if($n) {
-        $r = $refs[$n];
+my @srefs;
+my $ln;
+for my $n (1 .. $#usedrefs) {
+    my $r = $usedrefs[$n];
+    if($r && ($refused[$n] & 1)) {
         push @o, sprintf " [%d] = %s\n", $n, $r;
     }
 }
