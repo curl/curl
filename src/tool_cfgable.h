@@ -224,8 +224,6 @@ struct OperationConfig {
   bool tcp_fastopen;
   long req_retry;           /* number of retries */
   bool retry_all_errors;    /* retry on any error */
-  bool retry_all_errors_warned;    /* set true once user has been warned
-                                      --retry-all-errors is enabled */
   bool retry_connrefused;   /* set connection refused as a transient error */
   long retry_delay;         /* delay between retries (in seconds) */
   long retry_maxtime;       /* maximum time to keep retrying */
