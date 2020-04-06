@@ -94,19 +94,6 @@ unsigned short curlx_htons(unsigned short usnum);
 
 unsigned short curlx_ntohs(unsigned short usnum);
 
-#ifndef BUILDING_WARNLESS_C
-#  undef  FD_ISSET
-#  define FD_ISSET(a,b) curlx_FD_ISSET((a),(b))
-#  undef  FD_SET
-#  define FD_SET(a,b)   curlx_FD_SET((a),(b))
-#  undef  FD_ZERO
-#  define FD_ZERO(a)    curlx_FD_ZERO((a))
-#  undef  htons
-#  define htons(a)      curlx_htons((a))
-#  undef  ntohs
-#  define ntohs(a)      curlx_ntohs((a))
-#endif
-
 #endif /* __INTEL_COMPILER && __unix__ */
 
 #endif /* HEADER_CURL_WARNLESS_H */
