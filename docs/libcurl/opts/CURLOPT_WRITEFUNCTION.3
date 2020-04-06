@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -76,8 +76,37 @@ Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
 .SH RETURN VALUE
 This will return CURLE_OK.
 .SH EXAMPLE
-A common technique is to use this callback to store the incoming data into a
-dynamically growing allocated buffer. Like in the getinmemory example:
-https://curl.haxx.se/libcurl/c/getinmemory.html
+.NF
+ struct memory {
+   char *response;
+   size_t size;
+ };
+
+ static size_t cb(void *data, size_t size, size_t nmemb, void *userp)
+ {
+   size_t realsize = size * nmemb;
+   struct memory *mem = (struct memory *)userp;
+
+   char *ptr = realloc(mem->response, mem->size + realsize + 1);
+   if(ptr == NULL)
+     return 0;  /* out of memory! */
+
+   mem->response = ptr;
+   memcpy(&(mem->response[mem->size]), data, realsize);
+   mem->size += realsize;
+   mem->response[mem->size] = 0;
+
+   return realsize;
+ }
+
+ struct memory chunk;
+
+ /* send all data to this function  */
+ curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, cb);
+
+ /* we pass our 'chunk' struct to the callback function */
+ curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+.FI
 .SH "SEE ALSO"
 .BR CURLOPT_WRITEDATA "(3), " CURLOPT_READFUNCTION "(3), "
+.BR CURLOPT_HEADERFUNCTION "(3), "
