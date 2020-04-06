@@ -1164,11 +1164,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         tmp_CFLAGS="$tmp_CFLAGS -fno-strict-aliasing"
         dnl Value-safe optimizations on floating-point data
         tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
-        dnl Only icc 10.0 or later
-        if test "$compiler_num" -ge "1000"; then
-          dnl Disable vectorizer diagnostic information
-          tmp_CFLAGS="$tmp_CFLAGS -vec-report0"
-        fi
         ;;
         #
       INTEL_WINDOWS_C)
