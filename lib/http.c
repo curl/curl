@@ -3057,7 +3057,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   }
   if(result)
     return result;
-  if(!postsize)
+  if(!postsize && (http->sending != HTTPSEND_REQUEST))
     data->req.upload_done = TRUE;
 
   if(data->req.writebytecount) {

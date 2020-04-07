@@ -1837,15 +1837,21 @@ Curl_setup_transfer(
 {
   struct SingleRequest *k = &data->req;
   struct connectdata *conn = data->conn;
+  struct HTTP *http = data->req.protop;
+  bool httpsending = ((conn->handler->protocol&PROTO_FAMILY_HTTP) &&
+                      (http->sending == HTTPSEND_REQUEST));
   DEBUGASSERT(conn != NULL);
   DEBUGASSERT((sockindex <= 1) && (sockindex >= -1));
 
-  if(conn->bits.multiplex || conn->httpversion == 20) {
+  if(conn->bits.multiplex || conn->httpversion == 20 || httpsending) {
     /* when multiplexing, the read/write sockets need to be the same! */
     conn->sockfd = sockindex == -1 ?
       ((writesockindex == -1 ? CURL_SOCKET_BAD : conn->sock[writesockindex])) :
       conn->sock[sockindex];
     conn->writesockfd = conn->sockfd;
+    if(httpsending)
+      /* special and very HTTP-specific */
+      writesockindex = FIRSTSOCKET;
   }
   else {
     conn->sockfd = sockindex == -1 ?
@@ -1873,7 +1879,6 @@ Curl_setup_transfer(
       k->keepon |= KEEP_RECV;
 
     if(writesockindex != -1) {
-      struct HTTP *http = data->req.protop;
       /* HTTP 1.1 magic:
 
          Even if we require a 100-return code before uploading data, we might
