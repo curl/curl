@@ -96,12 +96,11 @@ The curl Test Suite
   - TCP/9011 for HTTPS server with TLS-SRP support
   - TCP/9012 for HTTPS IPv6 server with TLS-SRP support
   - TCP/9013 for HTTP proxy server for CONNECT
-  - TCP/9014 for HTTP pipelining server
-  - TCP/9015 for HTTP/2 server
-  - TCP/9016 for DICT server
-  - TCP/9017 for SMB server
-  - TCP/9018 for SMBS server (reserved)
-  - TCP/9019 for TELNET server with negotiation support
+  - TCP/9014 for HTTP/2 server
+  - TCP/9015 for DICT server
+  - TCP/9016 for SMB server
+  - TCP/9017 for SMBS server (reserved)
+  - TCP/9018 for TELNET server with negotiation support
 
  1.3 Test servers
 
