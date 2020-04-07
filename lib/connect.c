@@ -679,58 +679,56 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
    connection */
 void Curl_updateconninfo(struct connectdata *conn, curl_socket_t sockfd)
 {
-  if(conn->transport != TRNSPRT_TCP)
-    /* there's no TCP connection! */
-    return;
-
+  if(conn->transport == TRNSPRT_TCP) {
 #if defined(HAVE_GETPEERNAME) || defined(HAVE_GETSOCKNAME)
-  if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
-    struct Curl_easy *data = conn->data;
-    char buffer[STRERROR_LEN];
-    struct Curl_sockaddr_storage ssrem;
-    struct Curl_sockaddr_storage ssloc;
-    curl_socklen_t plen;
-    curl_socklen_t slen;
+    if(!conn->bits.reuse && !conn->bits.tcp_fastopen) {
+      struct Curl_easy *data = conn->data;
+      char buffer[STRERROR_LEN];
+      struct Curl_sockaddr_storage ssrem;
+      struct Curl_sockaddr_storage ssloc;
+      curl_socklen_t plen;
+      curl_socklen_t slen;
 #ifdef HAVE_GETPEERNAME
-    plen = sizeof(struct Curl_sockaddr_storage);
-    if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
-      int error = SOCKERRNO;
-      failf(data, "getpeername() failed with errno %d: %s",
-            error, Curl_strerror(error, buffer, sizeof(buffer)));
-      return;
-    }
+      plen = sizeof(struct Curl_sockaddr_storage);
+      if(getpeername(sockfd, (struct sockaddr*) &ssrem, &plen)) {
+        int error = SOCKERRNO;
+        failf(data, "getpeername() failed with errno %d: %s",
+              error, Curl_strerror(error, buffer, sizeof(buffer)));
+        return;
+      }
 #endif
 #ifdef HAVE_GETSOCKNAME
-    slen = sizeof(struct Curl_sockaddr_storage);
-    memset(&ssloc, 0, sizeof(ssloc));
-    if(getsockname(sockfd, (struct sockaddr*) &ssloc, &slen)) {
-      int error = SOCKERRNO;
-      failf(data, "getsockname() failed with errno %d: %s",
-            error, Curl_strerror(error, buffer, sizeof(buffer)));
-      return;
-    }
+      slen = sizeof(struct Curl_sockaddr_storage);
+      memset(&ssloc, 0, sizeof(ssloc));
+      if(getsockname(sockfd, (struct sockaddr*) &ssloc, &slen)) {
+        int error = SOCKERRNO;
+        failf(data, "getsockname() failed with errno %d: %s",
+              error, Curl_strerror(error, buffer, sizeof(buffer)));
+        return;
+      }
 #endif
 #ifdef HAVE_GETPEERNAME
-    if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
-                         conn->primary_ip, &conn->primary_port)) {
-      failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-      return;
-    }
-    memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
+      if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
+                           conn->primary_ip, &conn->primary_port)) {
+        failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+              errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+        return;
+      }
+      memcpy(conn->ip_addr_str, conn->primary_ip, MAX_IPADR_LEN);
 #endif
 #ifdef HAVE_GETSOCKNAME
-    if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
-                         conn->local_ip, &conn->local_port)) {
-      failf(data, "ssloc inet_ntop() failed with errno %d: %s",
-            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-      return;
-    }
+      if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
+                           conn->local_ip, &conn->local_port)) {
+        failf(data, "ssloc inet_ntop() failed with errno %d: %s",
+              errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+        return;
+      }
 #endif
-  }
+    }
 #else /* !HAVE_GETSOCKNAME && !HAVE_GETPEERNAME */
-  (void)sockfd; /* unused */
+    (void)sockfd; /* unused */
 #endif
+  } /* end of TCP-only section */
 
   /* persist connection info in session handle */
   Curl_persistconninfo(conn);
@@ -872,6 +870,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         conn->sock[sockindex] = conn->tempsock[i];
         conn->ip_addr = conn->tempaddr[i];
         conn->tempsock[i] = CURL_SOCKET_BAD;
+        post_SOCKS(conn, sockindex, connected);
         connkeep(conn, "HTTP/3 default");
       }
       return result;
