@@ -1229,8 +1229,21 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
     memcpy(data->state.ulbuf, ptr, sendsize);
     ptr = data->state.ulbuf;
   }
-  else
+  else {
+#ifdef CURLDEBUG
+    /* Allow debug builds override this logic to force short initial sends */
+    char *p = getenv("CURL_SMALLREQSEND");
+    if(p) {
+      size_t altsize = (size_t)strtoul(p, NULL, 10);
+      if(altsize)
+        sendsize = CURLMIN(size, altsize);
+      else
+        sendsize = size;
+    }
+    else
+#endif
     sendsize = size;
+  }
 
   result = Curl_write(conn, sockfd, ptr, sendsize, &amount);
 
