@@ -37,9 +37,6 @@ progress-bar
  <command>
 http://%HOSTIP:%HTTPPORT/1148 -# --stderr log/stderrlog1148
 </command>
-<precheck>
-perl -e '$ENV{"LC_NUMERIC"} = "en_US.UTF-8"; print "Test requires point as decimal separator" if system("./libtest/chkdecimalpoint");'
-</precheck>
 <setenv>
 LC_ALL=
 LC_NUMERIC=en_US.UTF-8
@@ -57,13 +54,16 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
-# This allows the last 4 letters of the bar to get updated without it
-# matters. We're mostly checking the width of it anyway.
+
+# Check that the progress finished at 100% and has the right bar width.
+# Note the dot in 100.0% is regex to match any character since different
+# locales use different separators.
 <file name="log/stderrlog1148" mode="text">
-bar 100.0%
+correct
 </file>
 <stripfile>
-s/####################################################################..../bar/
+s/.*\r#{72} 100.0%/correct/
 </stripfile>
+
 </verify>
 </testcase>
