@@ -1645,8 +1645,9 @@ schannel_send(struct connectdata *conn, int sockindex,
         written = -1;
         break;
       }
-
-      what = SOCKET_WRITABLE(conn->sock[sockindex], timeleft);
+      if(timeleft > TIME_T_MAX)
+        timeleft = TIME_T_MAX;
+      what = SOCKET_WRITABLE(conn->sock[sockindex], (time_t)timeleft);
       if(what < 0) {
         /* fatal error */
         failf(conn->data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

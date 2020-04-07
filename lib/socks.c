@@ -68,7 +68,9 @@ int Curl_blockread_all(struct connectdata *conn, /* connection data */
       result = CURLE_OPERATION_TIMEDOUT;
       break;
     }
-    if(SOCKET_READABLE(sockfd, timeleft) <= 0) {
+    if(timeleft > TIME_T_MAX)
+      timeleft = TIME_T_MAX;
+    if(SOCKET_READABLE(sockfd, (time_t)timeleft) <= 0) {
       result = ~CURLE_OK;
       break;
     }
