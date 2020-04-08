@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = use_ipv6 ? PF_INET6 : PF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_CANONNAME;
+    hints.ai_flags = 0;
     /* Use parenthesis around functions to stop them from being replaced by
        the macro in memdebug.h */
     rc = (getaddrinfo)(host, "80", &hints, &ai);
