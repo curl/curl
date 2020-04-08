@@ -1,6 +1,15 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  # Trigger the workflow on push or pull requests, but only for the
+  # master branch
+  push:
+    branches:
+      - master
+      - '*/ci'
+  pull_request:
+    branches:
+      - master
 
 jobs:
   fuzzing:
