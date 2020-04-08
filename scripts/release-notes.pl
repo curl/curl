@@ -29,10 +29,10 @@
 #
 # $ ./scripts/release-notes.pl
 #
-# 2. Edit RELEASE-NOTES and *remove* entries among the newly added ones that
-# don't belong. Don't mind leaving unused references below. Make sure to move
-# "changes" up to the changes section. All new ones will by default be listed
-# under bug-fixes as the script can't know where to put them.
+# 2. Edit RELEASE-NOTES and remove all entries that don't belong.  Unused
+# references below will be cleaned up in the next step. Make sure to move
+# "changes" up to the changes section. All entries will by default be listed
+# under bug-fixes as this script can't know where to put them.
 #
 # 3. Run the cleanup script and let it sort the entries and remove unused
 # references from lines you removed in step (2):
@@ -56,30 +56,30 @@ my $cleanup = ($ARGV[0] eq "cleanup");
 my @gitlog=`git log @^{/RELEASE-NOTES:.synced}..` if(!$cleanup);
 my @releasenotes=`cat RELEASE-NOTES`;
 
-my $refnum; # the highest number used so far
-my @refused;
-
-my @o;
-my @usedrefs;
+my @o; # the entire new RELEASE-NOTES
+my @refused; # [num] = [2 bits of use info]
+my @refs; # [number] = [URL]
 for my $l (@releasenotes) {
     if($l =~ /^ o .*\[(\d+)\]/) {
+        # referenced, set bit 0
         $refused[$1]=1;
     }
     elsif($l =~ /^ \[(\d+)\] = (.*)/) {
+        # listed in a refernce, set bit 1
         $refused[$1] |= 2;
-        $refnum=$1;
-        $usedrefs[$1] = $2;
+        $refs[$1] = $2;
     }
 }
 
+# Return a new fresh reference number
 sub getref {
-    for my $r (1 .. $refnum) {
+    for my $r (1 .. $#refs) {
         if(!$refused[$r] & 1) {
             return $r;
         }
     }
     # add at the end
-    return ++$refnum;
+    return $#refs + 1;
 }
 
 my $short;
@@ -170,9 +170,6 @@ for my $l (@releasenotes) {
             push @bullets, $l;
             next;
         }
-        elsif($l =~ /^ \[(\d+)\] = /) {
-            next;
-        }
         elsif($bullets[0]) {
             # output them case insensitively
             for my $b (sort { "\L$a" cmp "\L$b" } @bullets) {
@@ -182,6 +179,10 @@ for my $l (@releasenotes) {
         }
         push @o, $l;
     }
+    elsif($l =~ /^ \[(\d+)\] = /) {
+        # stop now
+        last;
+    }
     else {
         push @o, $l;
     }
@@ -189,8 +190,8 @@ for my $l (@releasenotes) {
 
 my @srefs;
 my $ln;
-for my $n (1 .. $#usedrefs) {
-    my $r = $usedrefs[$n];
+for my $n (1 .. $#refs) {
+    my $r = $refs[$n];
     if($r && ($refused[$n] & 1)) {
         push @o, sprintf " [%d] = %s\n", $n, $r;
     }
@@ -205,7 +206,7 @@ close(O);
 exit;
 
 # Debug: show unused references
-for my $r (1 .. ($refnum - 1)) {
+for my $r (1 .. $#refs) {
     if($refused[$r] != 3) {
         printf "$r is %d!\n", $refused[$r];
     }
