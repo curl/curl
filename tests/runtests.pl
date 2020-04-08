@@ -4122,6 +4122,13 @@ sub singletest {
             }
         }
 
+        if(($out[0] eq "") && $protstrip[0]) {
+            logmsg "\n $testnum: protocol FAILED!\n".
+                " There was no content at all in the file $SERVERIN.\n".
+                " Server glitch? Total curl failure?\n";
+            return $errorreturncode;
+        }
+
         $res = compare($testnum, $testname, "protocol", \@out, \@protstrip);
         if($res) {
             return $errorreturncode;
