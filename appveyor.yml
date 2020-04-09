@@ -192,12 +192,12 @@ environment:
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: autotools
         TESTING: ON
-        DISABLED_TESTS: "~19 ~1056 ~1233 ~1242 ~1243 ~2002 ~2003"
-        CONFIG_ARGS: "--enable-debug --enable-werror --enable-alt-svc --disable-threaded-resolver --disable-proxy"
+        DISABLED_TESTS: "~19 ~504 ~704 ~705 ~1056 ~1233 ~1242 ~1243 ~2002 ~2003"
+        CONFIG_ARGS: "--enable-debug --enable-werror --enable-alt-svc --disable-threaded-resolver"
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: autotools
         TESTING: ON
-        DISABLED_TESTS: "~19 ~1056 ~1233 ~1242 ~1243 ~2002 ~2003"
+        DISABLED_TESTS: "~19 ~504 ~704 ~705 ~1056 ~1233 ~1242 ~1243 ~2002 ~2003"
         CONFIG_ARGS: "--enable-debug --enable-werror --enable-alt-svc --disable-threaded-resolver"
 
 install:
