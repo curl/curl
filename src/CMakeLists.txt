@@ -67,6 +67,11 @@ add_executable(
   ${CURL_FILES}
   )
 
+add_executable(
+  ${PROJECT_NAME}::${EXE_NAME}
+  ALIAS ${EXE_NAME}
+  )
+
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
@@ -99,5 +104,5 @@ target_link_libraries(${EXE_NAME} libcurl ${CURL_LIBS})
 install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 export(TARGETS ${EXE_NAME}
        APPEND FILE ${PROJECT_BINARY_DIR}/curl-target.cmake
-       NAMESPACE CURL::
+       NAMESPACE ${PROJECT_NAME}::
 )
