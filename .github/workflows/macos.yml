@@ -19,8 +19,8 @@ jobs:
       fail-fast: false
       matrix:
         compiler:
-        - CC: clang
-          CXX: clang++
+        - CC: gcc-8
+          CXX: g++-8
         build:
         - name: normal
           install: nghttp2
