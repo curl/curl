@@ -97,13 +97,15 @@ sub pidexists {
     if($pid > 0) {
         # verify if currently existing Windows process
         if ($pid > 65536 && os_is_win()) {
-            my $winpid = $pid - 65536;
-            my $filter = "PID eq $winpid";
-            my $result = `tasklist -fi \"$filter\" 2>nul`;
-            if(index($result, "$winpid") != -1) {
-                return -$winpid;
+            $pid -= 65536;
+            if($^O ne 'MSWin32') {
+                my $filter = "PID eq $pid";
+                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    return -$pid;
+                }
+                return 0;
             }
-            return 0;
         }
 
         # verify if currently existing and alive
@@ -124,13 +126,15 @@ sub pidterm {
     if($pid > 0) {
         # request the process to quit
         if ($pid > 65536 && os_is_win()) {
-            my $winpid = $pid - 65536;
-            my $filter = "PID eq $winpid";
-            my $result = `tasklist -fi \"$filter\" 2>nul`;
-            if(index($result, "$winpid") != -1) {
-                system("taskkill -fi \"$filter\" >nul 2>&1");
+            $pid -= 65536;
+            if($^O ne 'MSWin32') {
+                my $filter = "PID eq $pid";
+                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    system("taskkill -fi \"$filter\" >nul 2>&1");
+                }
+                return;
             }
-            return;
         }
 
         # signal the process to terminate
@@ -147,15 +151,17 @@ sub pidkill {
     if($pid > 0) {
         # request the process to quit
         if ($pid > 65536 && os_is_win()) {
-            my $winpid = $pid - 65536;
-            my $filter = "PID eq $winpid";
-            my $result = `tasklist -fi \"$filter\" 2>nul`;
-            if(index($result, "$winpid") != -1) {
-                system("taskkill -f -fi \"$filter\" >nul 2>&1");
-                # Windows XP Home compatibility
-                system("tskill $winpid >nul 2>&1");
+            $pid -= 65536;
+            if($^O ne 'MSWin32') {
+                my $filter = "PID eq $pid";
+                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                if(index($result, "$pid") != -1) {
+                    system("taskkill -f -fi \"$filter\" >nul 2>&1");
+                    # Windows XP Home compatibility
+                    system("tskill $pid >nul 2>&1");
+                }
+                return;
             }
-            return;
         }
 
         # signal the process to terminate
