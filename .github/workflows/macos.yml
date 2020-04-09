@@ -49,7 +49,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
+    - run: brew update && brew reinstall libtool && brew install autoconf automake pkg-config ${{ matrix.build.install }}
       name: 'brew install'
 
     - run: ./buildconf && ./configure ${{ matrix.build.configure }}
@@ -87,7 +87,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - run: brew update && brew install libtool autoconf automake pkg-config ${{ matrix.build.install }}
+    - run: brew update && brew reinstall libtool && brew install autoconf automake pkg-config ${{ matrix.build.install }}
       name: 'brew install'
 
     - run: cmake -H. -Bbuild ${{ matrix.build.generate }}
