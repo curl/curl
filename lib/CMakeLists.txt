@@ -92,6 +92,11 @@ add_library(
   ${HHEADERS} ${CSOURCES}
   )
 
+add_library(
+  ${PROJECT_NAME}::${LIB_NAME}
+  ALIAS ${LIB_NAME}
+  )
+
 if(MSVC AND NOT BUILD_SHARED_LIBS)
   set_target_properties(${LIB_NAME} PROPERTIES STATIC_LIBRARY_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
 endif()
@@ -143,5 +148,5 @@ install(TARGETS ${LIB_NAME}
 
 export(TARGETS ${LIB_NAME}
        APPEND FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
-       NAMESPACE CURL::
+       NAMESPACE ${PROJECT_NAME}::
 )
