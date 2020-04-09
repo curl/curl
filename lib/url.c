@@ -3040,7 +3040,14 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 
 #ifdef USE_ALTSVC
   if(data->asi && !host && (port == -1) &&
-     (conn->handler->protocol == CURLPROTO_HTTPS)) {
+     ((conn->handler->protocol == CURLPROTO_HTTPS) ||
+#ifdef CURLDEBUG
+      /* allow debug builds to circumvent the HTTPS restriction */
+      getenv("CURL_ALTSVC_HTTP")
+#else
+      0
+#endif
+       )) {
     /* no connect_to match, try alt-svc! */
     enum alpnid srcalpnid;
     bool hit;
