@@ -441,7 +441,7 @@ sub checkdied {
     if((not defined $pid) || $pid <= 0) {
         return 0;
     }
-    my $rc = waitpid($pid, &WNOHANG);
+    my $rc = pidwait($pid, &WNOHANG);
     return ($rc == $pid)?1:0;
 }
 

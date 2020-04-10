@@ -703,7 +703,7 @@ sub close_dataconn {
         logmsg "DATA sockfilt for $datasockf_mode data channel quits ".
                "(pid $datapid)\n";
         print DWRITE "QUIT\n";
-        waitpid($datapid, 0);
+        pidwait($datapid, 0);
         unlink($datasockf_pidfile) if(-f $datasockf_pidfile);
         logmsg "DATA sockfilt for $datasockf_mode data channel quit ".
                "(pid $datapid)\n";
