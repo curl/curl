@@ -136,7 +136,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
   struct Curl_easy *data = conn->data;
   char *real_path;
   struct FILEPROTO *file = data->req.protop;
-  int fd = -1;
+  int fd;
 #ifdef DOS_FILESYSTEM
   size_t i;
   char *actual_path;
@@ -181,9 +181,7 @@ static CURLcode file_connect(struct connectdata *conn, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  if(strncmp("\\\\", actual_path, 2))
-    /* refuse to open path that starts with two backslashes */
-    fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
+  fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
