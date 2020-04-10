@@ -329,6 +329,7 @@ if($stunnel_version >= 400) {
 # Set file permissions on certificate pem file.
 #
 chmod(0600, $certfile) if(-f $certfile);
+print STDERR "RUN: $cmd\n" if($verbose);
 
 #***************************************************************************
 # Run tstunnel on Windows.
@@ -341,8 +342,10 @@ if($tstunnel_windows) {
     }
 
     # Put an "exec" in front of the command so that the child process
-    # keeps this child's process ID.
+    # keeps this child's process ID by being tied to the spawned shell.
     exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    # exec() will create a new process, but ties the existance of the
+    # new process to the parent waiting perl.exe and sh.exe processes.
 
     # exec() should never return back here to this process. We protect
     # ourselves by calling die() just in case something goes really bad.
