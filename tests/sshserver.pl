@@ -535,7 +535,9 @@ push @cfgarr, '#';
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
 push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
 push @cfgarr, "HostKey $hstprvkeyf_config";
-push @cfgarr, "PidFile $pidfile_config";
+if ($sshdid !~ /OpenSSH-Windows/) {
+    push @cfgarr, "PidFile $pidfile_config";
+}
 push @cfgarr, '#';
 push @cfgarr, "Port $port";
 push @cfgarr, "ListenAddress $listenaddr";
@@ -1098,12 +1100,38 @@ if($error) {
 }
 @cfgarr = ();
 
+#***************************************************************************
+# Prepare command line of ssh server daemon
+#
+my $cmd = "\"$sshd\" -e -D -f $sshdconfig > $sshdlog 2>&1";
+logmsg "SCP/SFTP server listening on port $port" if($verbose);
+logmsg "RUN: $cmd" if($verbose);
+
+#***************************************************************************
+# Start the ssh server daemon on Windows without forking it
+#
+if ($sshdid =~ /OpenSSH-Windows/) {
+    # Fake pidfile for ssh server on Windows.
+    if(open(OUT, ">$pidfile")) {
+        print OUT $$ . "\n";
+        close(OUT);
+    }
+
+    # Put an "exec" in front of the command so that the child process
+    # keeps this child's process ID by being tied to the spawned shell.
+    exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    # exec() will create a new process, but ties the existance of the
+    # new process to the parent waiting perl.exe and sh.exe processes.
+
+    # exec() should never return back here to this process. We protect
+    # ourselves by calling die() just in case something goes really bad.
+    die "error: exec() has returned";
+}
 
 #***************************************************************************
 # Start the ssh server daemon without forking it
 #
-logmsg "SCP/SFTP server listening on port $port" if($verbose);
-my $rc = system "\"$sshd\" -e -D -f $sshdconfig > $sshdlog 2>&1";
+my $rc = system($cmd);
 if($rc == -1) {
     logmsg "\"$sshd\" failed with: $!";
 }
