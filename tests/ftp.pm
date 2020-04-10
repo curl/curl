@@ -51,7 +51,7 @@ use pathhelp qw(
 # to the classic approach of using select(undef, undef, undef, ...).
 # even though that one is not portable due to being implemented using
 # select on Windows: https://perldoc.perl.org/perlport.html#select
-# On Windows it also just uses full-second sleep for waits >1 second.
+# Therefore it uses Win32::Sleep on Windows systems instead.
 #
 sub portable_sleep {
     my ($seconds) = @_;
@@ -143,7 +143,7 @@ sub pidterm {
 }
 
 #######################################################################
-# pidkill kills the process with a given pid mercilessly andforcefully.
+# pidkill kills the process with a given pid mercilessly and forcefully.
 #
 sub pidkill {
     my $pid = $_[0];
@@ -170,6 +170,28 @@ sub pidkill {
 }
 
 #######################################################################
+# pidwait waits for the process with a given pid to be terminated.
+#
+sub pidwait {
+    my $pid = $_[0];
+    my $flags = $_[1];
+
+    # check if the process exists
+    if ($pid > 65536 && os_is_win()) {
+        if($flags == &WNOHANG) {
+            return pidexists($pid)?0:$pid;
+        }
+        while(pidexists($pid)) {
+            portable_sleep(0.01);
+        }
+        return $pid;
+    }
+
+    # wait on the process to terminate
+    return waitpid($pid, $flags);
+}
+
+#######################################################################
 # processexists checks if a process with the pid stored in the given
 # pidfile exists and is alive. This will return 0 on any file related
 # error or if a pid can not be extracted from the given file. When a
@@ -193,7 +215,7 @@ sub processexists {
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             # reap its dead children, if not done yet
-            waitpid($pid, &WNOHANG);
+            pidwait($pid, &WNOHANG);
             # negative return value means dead process
             return -$pid;
         }
@@ -243,7 +265,7 @@ sub killpid {
                     print("RUN: Process with pid $pid already dead\n")
                         if($verbose);
                     # if possible reap its dead children
-                    waitpid($pid, &WNOHANG);
+                    pidwait($pid, &WNOHANG);
                     push @reapchild, $pid;
                 }
             }
@@ -261,7 +283,7 @@ sub killpid {
                         if($verbose);
                     splice @signalled, $i, 1;
                     # if possible reap its dead children
-                    waitpid($pid, &WNOHANG);
+                    pidwait($pid, &WNOHANG);
                     push @reapchild, $pid;
                 }
             }
@@ -278,7 +300,7 @@ sub killpid {
                     if($verbose);
                 pidkill($pid);
                 # if possible reap its dead children
-                waitpid($pid, &WNOHANG);
+                pidwait($pid, &WNOHANG);
                 push @reapchild, $pid;
             }
         }
@@ -288,7 +310,7 @@ sub killpid {
     if(@reapchild) {
         foreach my $pid (@reapchild) {
             if($pid > 0) {
-                waitpid($pid, 0);
+                pidwait($pid, 0);
             }
         }
     }
@@ -317,7 +339,7 @@ sub killsockfilters {
             printf("* kill pid for %s-%s => %d\n", $server,
                 ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
             pidkill($pid);
-            waitpid($pid, 0);
+            pidwait($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);
     }
@@ -331,7 +353,7 @@ sub killsockfilters {
             printf("* kill pid for %s-data => %d\n", $server,
                 $pid) if($verbose);
             pidkill($pid);
-            waitpid($pid, 0);
+            pidwait($pid, 0);
         }
         unlink($pidfile) if(-f $pidfile);
     }
