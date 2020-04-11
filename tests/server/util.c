@@ -261,9 +261,9 @@ int wait_ms(int timeout_ms)
 int write_pidfile(const char *filename)
 {
   FILE *pidfile;
-  long pid;
+  curl_off_t pid;
 
-  pid = (long)getpid();
+  pid = (curl_off_t)getpid();
   pidfile = fopen(filename, "wb");
   if(!pidfile) {
     logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
@@ -278,7 +278,7 @@ int write_pidfile(const char *filename)
    */
   pid += 65536;
 #endif
-  fprintf(pidfile, "%ld\n", pid);
+  fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
   fclose(pidfile);
   logmsg("Wrote pid %ld to %s", pid, filename);
   return 1; /* success */
