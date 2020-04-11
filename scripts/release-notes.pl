@@ -177,9 +177,8 @@ for my $l (@releasenotes) {
             }
             undef @bullets;
         }
-        push @o, $l;
     }
-    elsif($l =~ /^ \[(\d+)\] = /) {
+    if($l =~ /^ \[(\d+)\] = /) {
         # stop now
         last;
     }
