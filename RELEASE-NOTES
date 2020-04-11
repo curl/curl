@@ -4,7 +4,7 @@ curl and libcurl 7.70.0
  Command line options:         231
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2152
+ Contributors:                 2155
 
 This release includes the following changes:
 
@@ -36,7 +36,9 @@ This release includes the following bugfixes:
  o configure: document 'compiler_num' for gcc [4]
  o configure: don't check for Security.framework when cross-compiling [47]
  o configure: fix -pedantic-errors for GCC 5 and later [3]
+ o configure: remove use of -vec-report0 from CFLAGS with icc [71]
  o connect: happy eyeballs cleanup [15]
+ o connect: store connection info for QUIC connections [68]
  o copyright: fix out-of-date copyright ranges and missing headers [38]
  o curl-functions.m4: remove inappropriate AC_REQUIRE [26]
  o curl.h: remnove CURL_VERSION_ESNI. Never supported nor documented [49]
@@ -44,13 +46,16 @@ This release includes the following bugfixes:
  o curl_setup: define _WIN32_WINNT_[OS] symbols [27]
  o CURLINFO_CONDITION_UNMET: return true for 304 http status code [54]
  o CURLINFO_NUM_CONNECTS: improve accuracy [28]
+ o CURLOPT_WRITEFUNCTION.3: add inline example and new see-also [70]
  o dist: add mail-rcpt-allowfails.d to the tarball [35]
  o docs/make: generate curl.1 from listed files only [33]
  o docs: add warnings about FILE: URLs on Windows [19]
  o easy: fix curl_easy_duphandle for builds missing IPv6 that use c-ares [18]
  o examples/sessioninfo.c: add include to fix compiler warning [42]
+ o github actions: run when pushed to master or */ci + PRs [64]
  o gskit: use our internal select wrapper for portability [12]
  o http2: Fix erroneous debug message that h2 connection closed [21]
+ o http: don't consider upload done if the request isn't completely sent off [67]
  o lib670: use the same Win32 API check as all other lib tests
  o lib: never define CURL_CA_BUNDLE with a getenv [51]
  o mailmap: fixup a few author names/fields
@@ -65,13 +70,19 @@ This release includes the following bugfixes:
  o output.d: quote the URL when globbing [48]
  o packages: add OS400/chkstrings.c to the dist [39]
  o RELEASE-PROCEDURE.md: run the copyright.pl script!
+ o Revert "file: on Windows, refuse paths that start with \\" [50]
+ o runtests: provide nicer errormsg when protocol "dump" file is empty
+ o schannel: support .P12 or .PFX client certificates [65]
  o scripts/release-notes.pl: add helper script for RELEASE-NOTES maintenance
  o select: move duplicate select preparation code into Curl_select [14]
+ o select: remove typecast from SOCKET_WRITABLE/READABLE macros [69]
  o server/getpart: make the "XML-parser" stricter [20]
+ o server/resolve: remove AI_CANONNAME to make macos tell the truth [63]
  o sockfilt: add logmsg output to select_ws_wait_thread on Windows [32]
  o sockfilt: fix handling of ready closed sockets on Windows
  o sockfilt: fix race-condition of waiting threads and event handling [58]
  o SSLCERTS.md: Fix example code for setting CA cert file [31]
+ o test1148: tolerate progress updates better (again) [60]
  o test1177: verify that all the CURL_VERSION_ bits are documented
  o test1566: verify --etag-compare that gets a 304 back [53]
  o test2100: fix static port instead of dynamic value being used
@@ -82,9 +93,11 @@ This release includes the following bugfixes:
  o tool_operate: fix add_parallel_transfers when more are in queue [10]
  o transfer: cap retries of "dead connections" to 5 [13]
  o travis: update the ngtcp2 build to use the latest OpenSSL patch
+ o url: allow non-HTTPS altsvc-matching for debug builds [62]
  o version: add 'cainfo' and 'capath' to version info struct [55]
  o vquic: add support for GnuTLS backend of ngtcp2 [41]
  o vtls: fix ssl_config memory-leak on out-of-memory [11]
+ o warnless: remove code block for icc that didn't work [72]
  o windows: enable UnixSockets with all build toolchains
  o windows: suppress UI in all CryptAcquireContext() calls [7]
 
@@ -95,15 +108,16 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brad King, Calvin Buckley, Clément Notin, Daiki Ueno, Dan Fandrich,
-  Daniel Stenberg, Dennis Felsing, Dima Tisnek, Frank Gevaerts,
-  FuccDucc on github, Gavin Wong, Gisle Vanem, Harry Sintonen,
-  Johannes Schindelin, Jon Rumsey, Kamil Dudka, Karl Chen, Kwon-Young Choi,
-  Leo Neat, Maksim Stsepanenka, Marcel Raad, Marc Hörsken, Markus Olsson,
-  Mathias Gumz, Michael Kaufmann, Muhammad Herdiansyah, Paul Vixie, Ray Satiro,
-  Rici Lake, Roger Orr, Ross Burton, Simon Chalifoux, Stepan Efremov,
-  Steven Penny, Timothe Litt, Tim Sedlmeyer, Tommy Petty, Viktor Szakats,
-  (38 contributors)
+  Alain Miniussi, Brad King, Calvin Buckley, Chris Roberts, Clément Notin,
+  Daiki Ueno, Dan Fandrich, Daniel Stenberg, Dennis Felsing, Dima Tisnek,
+  Eylem Ugurel, Frank Gevaerts, FuccDucc on github, Gavin Wong, Gilles Vollant,
+  Gisle Vanem, Harry Sintonen, James Fuller, Johannes Schindelin, Jon Rumsey,
+  Kamil Dudka, Karl Chen, Kwon-Young Choi, Leo Neat, Maksim Stsepanenka,
+  Marcel Raad, Marc Hörsken, Markus Olsson, Mathias Gumz, Michael Kaufmann,
+  Muhammad Herdiansyah, Paul Vixie, Ray Satiro, Rici Lake, Roger Orr,
+  Ross Burton, Simon Chalifoux, Stepan Efremov, Steven Penny, Timothe Litt,
+  Tim Sedlmeyer, Tommy Petty, Viktor Szakats,
+  (43 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -155,14 +169,26 @@ References to bug reports and discussions on issues:
  [44] = https://curl.haxx.se/bug/?i=5164
  [45] = https://curl.haxx.se/bug/?i=5165
  [46] = https://curl.haxx.se/bug/?i=5166
+ [47] = https://curl.haxx.se/bug/?i=5189
  [48] = https://curl.haxx.se/bug/?i=5160
  [49] = https://curl.haxx.se/bug/?i=5157
- [55] = https://curl.haxx.se/bug/?i=5150
- [47] = https://curl.haxx.se/bug/?i=5189
+ [50] = https://curl.haxx.se/mail/archive-2020-04/0013.html
  [51] = https://github.com/curl/curl/commit/6de756c#r38127030
  [52] = https://curl.haxx.se/bug/?i=5034
  [53] = https://curl.haxx.se/bug/?i=5186
  [54] = https://curl.haxx.se/bug/?i=5181
+ [55] = https://curl.haxx.se/bug/?i=5150
  [56] = https://curl.haxx.se/bug/?i=5179
  [58] = https://curl.haxx.se/bug/?i=5156
  [59] = https://curl.haxx.se/bug/?i=5174
+ [60] = https://curl.haxx.se/bug/?i=5194
+ [62] = https://curl.haxx.se/bug/?i=5205
+ [63] = https://curl.haxx.se/bug/?i=5202
+ [64] = https://curl.haxx.se/bug/?i=5201
+ [65] = https://curl.haxx.se/bug/?i=5193
+ [67] = https://curl.haxx.se/bug/?i=4919
+ [68] = https://curl.haxx.se/bug/?i=5196
+ [69] = https://curl.haxx.se/bug/?i=5190
+ [70] = https://curl.haxx.se/bug/?i=5192
+ [71] = https://curl.haxx.se/bug/?i=5096
+ [72] = https://curl.haxx.se/bug/?i=5096
