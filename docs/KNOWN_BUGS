@@ -101,6 +101,7 @@ problems may have been fixed or changed somewhat since this was written!
  11.7 signal-based resolver timeouts
  11.8 DoH leaks memory after followlocation
  11.9 DoH doesn't inherit all transfer options
+ 11.10 Blocking socket operations in non-blocking API
 
  12. LDAP and OpenLDAP
  12.1 OpenLDAP hangs after returning results
@@ -715,6 +716,10 @@ problems may have been fixed or changed somewhat since this was written!
 11.9 DoH doesn't inherit all transfer options
 
  https://github.com/curl/curl/issues/4578
+
+11.10 Blocking socket operations in non-blocking API
+
+ The list of blocking socket operations is in TODO section "More non-blocking".
 
 12. LDAP and OpenLDAP
 
