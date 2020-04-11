@@ -66,4 +66,13 @@ void clear_advisor_read_lock(const char *filename);
 
 int strncasecompare(const char *first, const char *second, size_t max);
 
+/* global variable which if set indicates that the program should finish */
+extern volatile int got_exit_signal;
+
+/* global variable which if set indicates the first signal handled */
+extern volatile int exit_signal;
+
+void install_signal_handlers(bool keep_sigalrm);
+void restore_signal_handlers(bool keep_sigalrm);
+
 #endif  /* HEADER_CURL_SERVER_UTIL_H */
