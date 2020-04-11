@@ -567,6 +567,47 @@ static RETSIGTYPE exit_signal_handler(int signum)
   errno = old_errno;
 }
 
+#ifdef WIN32
+/* CTRL event handler for Windows Console applications to simulate
+ * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
+ *
+ * Background information from MSDN:
+ * SIGINT is not supported for any Win32 application. When a CTRL+C
+ * interrupt occurs, Win32 operating systems generate a new thread
+ * to specifically handle that interrupt. This can cause a single-thread
+ * application, such as one in UNIX, to become multithreaded and cause
+ * unexpected behavior.
+ * [...]
+ * The SIGILL and SIGTERM signals are not generated under Windows.
+ * They are included for ANSI compatibility. Therefore, you can set
+ * signal handlers for these signals by using signal, and you can also
+ * explicitly generate these signals by calling raise. Source:
+ * https://docs.microsoft.com/de-de/cpp/c-runtime-library/reference/signal
+ */
+static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
+{
+  int signum = 0;
+  logmsg("ctrl_event_handler: %d", dwCtrlType);
+  switch(dwCtrlType) {
+#ifdef SIGINT
+    case CTRL_C_EVENT: signum = SIGINT; break;
+#endif
+#ifdef SIGTERM
+    case CTRL_CLOSE_EVENT: signum = SIGTERM; break;
+#endif
+#ifdef SIGBREAK
+    case CTRL_BREAK_EVENT: signum = SIGBREAK; break;
+#endif
+    default: return FALSE;
+  }
+  if(signum) {
+    logmsg("ctrl_event_handler: %d -> %d", dwCtrlType, signum);
+    exit_signal_handler(signum);
+  }
+  return TRUE;
+}
+#endif
+
 void install_signal_handlers(bool keep_sigalrm)
 {
 #ifdef SIGHUP
@@ -615,6 +656,10 @@ void install_signal_handlers(bool keep_sigalrm)
   else
     siginterrupt(SIGBREAK, 1);
 #endif
+#ifdef WIN32
+  if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
+    logmsg("cannot install CTRL event handler");
+#endif
 }
 
 void restore_signal_handlers(bool keep_sigalrm)
@@ -646,5 +691,8 @@ void restore_signal_handlers(bool keep_sigalrm)
 #if defined(SIGBREAK) && defined(WIN32)
   if(SIG_ERR != old_sigbreak_handler)
     (void)signal(SIGBREAK, old_sigbreak_handler);
+#endif
+#ifdef WIN32
+  (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
 #endif
 }
