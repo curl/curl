@@ -36,7 +36,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,
 
 /* generic function that returns how much time there's left to run, according
    to the timeouts set */
-timediff_t Curl_timeleft(struct Curl_easy *data,
+timediff_t Curl_timeout(struct Curl_easy *data,
                          struct curltime *nowp,
                          bool duringconnect);
 

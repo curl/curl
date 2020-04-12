@@ -142,7 +142,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
     else
       break;
 
-    timeout_ms = Curl_timeleft(conn->data, NULL, FALSE);
+    timeout_ms = Curl_timeout(conn->data, NULL, FALSE);
     if(timeout_ms < 0) {
       result = CURLE_OPERATION_TIMEDOUT;
       break;

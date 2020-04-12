@@ -1569,7 +1569,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        (data->mstate < CURLM_STATE_COMPLETED)) {
       /* we need to wait for the connect state as only then is the start time
          stored, but we must not check already completed handles */
-      timeout_ms = Curl_timeleft(data, &now,
+      timeout_ms = Curl_timeout(data, &now,
                                  (data->mstate <= CURLM_STATE_DO)?
                                  TRUE:FALSE);
 

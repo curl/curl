@@ -1298,7 +1298,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     return result;
 
   if(k->keepon) {
-    if(0 > Curl_timeleft(data, &k->now, FALSE)) {
+    if(0 > Curl_timeout(data, &k->now, FALSE)) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
               " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"

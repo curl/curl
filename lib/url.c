@@ -3123,7 +3123,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
                                bool *async)
 {
   CURLcode result = CURLE_OK;
-  timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  timediff_t timeout_ms = Curl_timeout(data, NULL, TRUE);
 
   DEBUGASSERT(conn);
   DEBUGASSERT(data);

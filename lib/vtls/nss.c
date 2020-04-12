@@ -2135,15 +2135,15 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
 
 
   /* check timeout situation */
-  const timediff_t time_left = Curl_timeleft(data, NULL, TRUE);
-  if(time_left < 0) {
+  const timediff_t timeout_ms = Curl_timeout(data, NULL, TRUE);
+  if(timeout_ms < 0) {
     failf(data, "timed out before SSL handshake");
     result = CURLE_OPERATION_TIMEDOUT;
     goto error;
   }
 
   /* Force the handshake now */
-  timeout = PR_MillisecondsToInterval((PRUint32) time_left);
+  timeout = PR_MillisecondsToInterval((PRUint32) timeout_ms);
   if(SSL_ForceHandshakeWithTimeout(backend->handle, timeout) != SECSuccess) {
     if(PR_GetError() == PR_WOULD_BLOCK_ERROR)
       /* blocking direction is updated by nss_update_connecting_state() */

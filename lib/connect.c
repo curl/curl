@@ -170,7 +170,7 @@ singleipconnect(struct connectdata *conn,
                 int tempindex);          /* 0 or 1 among the temp ones */
 
 /*
- * Curl_timeleft() returns the amount of milliseconds left allowed for the
+ * Curl_timeout() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is 0, there's no timeout (ie there's
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
@@ -184,7 +184,7 @@ singleipconnect(struct connectdata *conn,
  *
  * @unittest: 1303
  */
-timediff_t Curl_timeleft(struct Curl_easy *data,
+timediff_t Curl_timeout(struct Curl_easy *data,
                          struct curltime *nowp,
                          bool duringconnect)
 {
@@ -838,7 +838,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   now = Curl_now();
 
   /* figure out how long time we have left to connect */
-  allow = Curl_timeleft(data, &now, TRUE);
+  allow = Curl_timeout(data, &now, TRUE);
 
   if(allow < 0) {
     /* time-out, bail out, go home */
@@ -1306,7 +1306,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   struct curltime before = Curl_now();
   CURLcode result = CURLE_COULDNT_CONNECT;
   int i;
-  timediff_t timeout_ms = Curl_timeleft(data, &before, TRUE);
+  timediff_t timeout_ms = Curl_timeout(data, &before, TRUE);
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */

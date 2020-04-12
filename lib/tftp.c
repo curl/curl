@@ -205,7 +205,7 @@ static CURLcode tftp_set_timeouts(tftp_state_data_t *state)
   time(&state->start_time);
 
   /* Compute drop-dead time */
-  timeout_ms = Curl_timeleft(state->conn->data, NULL, start);
+  timeout_ms = Curl_timeout(state->conn->data, NULL, start);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */

@@ -819,7 +819,7 @@ static CURLcode gskit_connect_step1(struct connectdata *conn, int sockindex)
   if(!result) {
     /* Compute the handshake timeout. Since GSKit granularity is 1 second,
        we round up the required value. */
-    long timeout = Curl_timeleft(data, NULL, TRUE);
+    long timeout = Curl_timeout(data, NULL, TRUE);
     if(timeout < 0)
       result = CURLE_OPERATION_TIMEDOUT;
     else
@@ -932,7 +932,7 @@ static CURLcode gskit_connect_step2(struct connectdata *conn, int sockindex,
   /* Poll or wait for end of SSL asynchronous handshake. */
 
   for(;;) {
-    long timeout_ms = nonblocking? 0: Curl_timeleft(data, NULL, TRUE);
+    long timeout_ms = nonblocking? 0: Curl_timeout(data, NULL, TRUE);
     if(timeout_ms < 0)
       timeout_ms = 0;
     stmv.tv_sec = timeout_ms / 1000;
@@ -1074,7 +1074,7 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
   /* Step 1: create session, start handshake. */
   if(connssl->connecting_state == ssl_connect_1) {
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Curl_timeout(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */
@@ -1093,7 +1093,7 @@ static CURLcode gskit_connect_common(struct connectdata *conn, int sockindex,
   /* Step 2: check if handshake is over. */
   if(!result && connssl->connecting_state == ssl_connect_2) {
     /* check allowed time left */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timeout_ms = Curl_timeout(data, NULL, TRUE);
 
     if(timeout_ms < 0) {
       /* no need to continue if time already is up */

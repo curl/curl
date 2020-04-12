@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-Curl_timeleft
+Curl_timeout
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
  <name>
-Curl_timeleft unit tests
+Curl_timeout unit tests
  </name>
 </client>
 </testcase>

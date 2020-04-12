@@ -262,7 +262,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     url = nurl;
   }
 
-  timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  timeout_ms = Curl_timeout(data, NULL, TRUE);
   if(timeout_ms <= 0) {
     result = CURLE_OPERATION_TIMEDOUT;
     goto error;

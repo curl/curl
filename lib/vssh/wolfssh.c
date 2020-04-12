@@ -981,7 +981,7 @@ static CURLcode wssh_block_statemach(struct connectdata *conn,
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
-    timediff_t left = 1000;
+    timediff_t timeout_ms = 1000;
     struct curltime now = Curl_now();
 
     result = wssh_statemach_act(conn, &block);
@@ -996,11 +996,13 @@ static CURLcode wssh_block_statemach(struct connectdata *conn,
       if(result)
         break;
 
-      left = Curl_timeleft(data, NULL, FALSE);
-      if(left < 0) {
+      timeout_ms = Curl_timeout(data, NULL, FALSE);
+      if(timeout_ms < 0) {
         failf(data, "Operation timed out");
         return CURLE_OPERATION_TIMEDOUT;
       }
+      if(!timeout_ms || timeout_ms > TIME_T_MAX)
+        timeout_ms = TIME_T_MAX;
     }
 
     if(!result) {
@@ -1015,7 +1017,7 @@ static CURLcode wssh_block_statemach(struct connectdata *conn,
 
       /* wait for the socket to become ready */
       (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
-                              left>1000?1000:left); /* ignore result */
+                              (time_t)(timeout_ms > 1000 ? 1000 : timeout_ms));
     }
   }
 
