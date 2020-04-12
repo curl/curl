@@ -188,6 +188,7 @@ void win32_init(void)
 void win32_cleanup(void)
 {
   WSACleanup();
+  _flushall();
 }
 #endif  /* USE_WINSOCK */
 
