@@ -171,7 +171,8 @@ singleipconnect(struct connectdata *conn,
 
 /*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
- * transfer/connection. If the value is negative, the timeout time has already
+ * transfer/connection. If the value is 0, there's no timeout (ie there's
+ * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  *
  * The start time is stored in progress.t_startsingle - as set with
