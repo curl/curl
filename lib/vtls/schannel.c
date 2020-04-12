@@ -1645,7 +1645,7 @@ schannel_send(struct connectdata *conn, int sockindex,
         written = -1;
         break;
       }
-      if(timeleft > TIME_T_MAX)
+      if(!timeleft || timeleft > TIME_T_MAX)
         timeleft = TIME_T_MAX;
       what = SOCKET_WRITABLE(conn->sock[sockindex], (time_t)timeleft);
       if(what < 0) {
