@@ -544,6 +544,12 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
+#ifdef WIN32
+static DWORD thread_main_id = 0;
+static HANDLE thread_main_window = NULL;
+static HWND hidden_main_window = NULL;
+#endif
+
 /* var which if set indicates that the program should finish execution */
 volatile int got_exit_signal = 0;
 
@@ -606,6 +612,78 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   }
   return TRUE;
 }
+/* Window message handler for Windows applications to add support
+ * for graceful process termination via taskkill (without /f) which
+ * sends WM_CLOSE to all Windows of a process (even hidden ones).
+ *
+ * Therefore we create and run a hidden Window in a separate thread
+ * to receive and handle the WM_CLOSE message as SIGTERM signal.
+ */
+static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
+                                         WPARAM wParam, LPARAM lParam)
+{
+  int signum = 0;
+  if(hwnd == hidden_main_window) {
+    switch(uMsg) {
+#ifdef SIGTERM
+      case WM_CLOSE: signum = SIGTERM; break;
+#endif
+      case WM_DESTROY: PostQuitMessage(0); break;
+    }
+    if(signum) {
+      logmsg("main_window_proc: %d -> %d", uMsg, signum);
+      exit_signal_handler(signum);
+    }
+  }
+  return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+/* Window message queue loop for hidden main window, details see above.
+ */
+static DWORD WINAPI main_window_loop(LPVOID lpParameter)
+{
+  WNDCLASS wc;
+  BOOL ret;
+  MSG msg;
+
+  ZeroMemory(&wc, sizeof(wc));
+  wc.lpfnWndProc = (WNDPROC)main_window_proc;
+  wc.hInstance = (HINSTANCE)lpParameter;
+  wc.lpszClassName = "MainWClass";
+  if(!RegisterClass(&wc)) {
+    perror("RegisterClass failed");
+    return (DWORD)-1;
+  }
+
+  hidden_main_window = CreateWindowEx(0, "MainWClass", "Recv WM_CLOSE msg",
+                                      WS_OVERLAPPEDWINDOW,
+                                      CW_USEDEFAULT, CW_USEDEFAULT,
+                                      CW_USEDEFAULT, CW_USEDEFAULT,
+                                      (HWND)NULL, (HMENU)NULL,
+                                      wc.hInstance, (LPVOID)NULL);
+  if(!hidden_main_window) {
+    perror("CreateWindowEx failed");
+    return (DWORD)-1;
+  }
+
+  do {
+    ret = GetMessage(&msg, NULL, 0, 0);
+    if(ret == -1) {
+      perror("GetMessage failed");
+      return (DWORD)-1;
+    }
+    else if(ret) {
+      if(msg.message == WM_APP) {
+        DestroyWindow(hidden_main_window);
+      }
+      else if(msg.hwnd && !TranslateMessage(&msg)) {
+        DispatchMessage(&msg);
+      }
+    }
+  } while(ret);
+
+  hidden_main_window = NULL;
+  return (DWORD)msg.wParam;
+}
 #endif
 
 void install_signal_handlers(bool keep_sigalrm)
@@ -659,6 +737,12 @@ void install_signal_handlers(bool keep_sigalrm)
 #ifdef WIN32
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
+  thread_main_window = CreateThread(NULL, 0,
+                                    &main_window_loop,
+                                    (LPVOID)GetModuleHandle(NULL),
+                                    0, &thread_main_id);
+  if(!thread_main_window || !thread_main_id)
+    logmsg("cannot start main window loop");
 #endif
 }
 
@@ -694,5 +778,9 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
 #ifdef WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
+  if(thread_main_window && thread_main_id) {
+    if(PostThreadMessage(thread_main_id, WM_APP, 0, 0))
+      (void)WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE);
+  }
 #endif
 }
