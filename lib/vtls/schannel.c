@@ -1631,13 +1631,13 @@ schannel_send(struct connectdata *conn, int sockindex,
     /* send entire message or fail */
     while(len > (size_t)written) {
       ssize_t this_write;
-      timediff_t timeleft;
+      timediff_t timeout_ms;
       int what;
 
       this_write = 0;
 
-      timeleft = Curl_timeleft(conn->data, NULL, FALSE);
-      if(timeleft < 0) {
+      timeout_ms = Curl_timeleft(conn->data, NULL, FALSE);
+      if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(conn->data, "schannel: timed out sending data "
               "(bytes sent: %zd)", written);
@@ -1645,9 +1645,9 @@ schannel_send(struct connectdata *conn, int sockindex,
         written = -1;
         break;
       }
-      if(timeleft > TIME_T_MAX)
-        timeleft = TIME_T_MAX;
-      what = SOCKET_WRITABLE(conn->sock[sockindex], (time_t)timeleft);
+      if(!timeout_ms || timeout_ms > TIME_T_MAX)
+        timeout_ms = TIME_T_MAX;
+      what = SOCKET_WRITABLE(conn->sock[sockindex], (time_t)timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(conn->data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
