@@ -446,32 +446,32 @@ set_ssl_version_min_max(const char **prioritylist, struct connectdata *conn)
   switch(ssl_version | ssl_version_max) {
     case CURL_SSLVERSION_TLSv1_0 | CURL_SSLVERSION_MAX_TLSv1_0:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.0:" GNUTLS_SRP;
+                      "+VERS-TLS1.0";
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_0 | CURL_SSLVERSION_MAX_TLSv1_1:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.0:+VERS-TLS1.1:" GNUTLS_SRP;
+                      "+VERS-TLS1.0:+VERS-TLS1.1";
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_0 | CURL_SSLVERSION_MAX_TLSv1_2:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.0:+VERS-TLS1.1:+VERS-TLS1.2:" GNUTLS_SRP;
+                      "+VERS-TLS1.0:+VERS-TLS1.1:+VERS-TLS1.2";
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_1 | CURL_SSLVERSION_MAX_TLSv1_1:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.1:" GNUTLS_SRP;
+                      "+VERS-TLS1.1";
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_1 | CURL_SSLVERSION_MAX_TLSv1_2:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.1:+VERS-TLS1.2:" GNUTLS_SRP;
+                      "+VERS-TLS1.1:+VERS-TLS1.2";
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_2 | CURL_SSLVERSION_MAX_TLSv1_2:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.2:" GNUTLS_SRP;
+                      "+VERS-TLS1.2";
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_3 | CURL_SSLVERSION_MAX_TLSv1_3:
 #ifdef HAS_TLS13
        *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                       "+VERS-TLS1.3:" GNUTLS_SRP;
+                       "+VERS-TLS1.3";
       return CURLE_OK;
 #else
        failf(data, "GnuTLS: TLS 1.3 is not yet supported");
@@ -479,35 +479,35 @@ set_ssl_version_min_max(const char **prioritylist, struct connectdata *conn)
 #endif
     case CURL_SSLVERSION_TLSv1_0 | CURL_SSLVERSION_MAX_DEFAULT:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.0:+VERS-TLS1.1:+VERS-TLS1.2:"
+                      "+VERS-TLS1.0:+VERS-TLS1.1:+VERS-TLS1.2"
 #ifdef HAS_TLS13
-                      "+VERS-TLS1.3:"
+                      ":+VERS-TLS1.3"
 #endif
-                      GNUTLS_SRP;
+                      ;
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_1 | CURL_SSLVERSION_MAX_DEFAULT:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.1:+VERS-TLS1.2:"
+                      "+VERS-TLS1.1:+VERS-TLS1.2"
 #ifdef HAS_TLS13
-                      "+VERS-TLS1.3:"
+                      ":+VERS-TLS1.3"
 #endif
-                      GNUTLS_SRP;
+                      ;
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_2 | CURL_SSLVERSION_MAX_DEFAULT:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.2:"
+                      "+VERS-TLS1.2"
 #ifdef HAS_TLS13
-                      "+VERS-TLS1.3:"
+                      ":+VERS-TLS1.3"
 #endif
-                      GNUTLS_SRP;
+                      ;
       return CURLE_OK;
     case CURL_SSLVERSION_TLSv1_3 | CURL_SSLVERSION_MAX_DEFAULT:
       *prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:-VERS-TLS-ALL:"
-                      "+VERS-TLS1.2:"
+                      "+VERS-TLS1.2"
 #ifdef HAS_TLS13
-                      "+VERS-TLS1.3:"
+                      ":+VERS-TLS1.3"
 #endif
-                      GNUTLS_SRP;
+                      ;
       return CURLE_OK;
   }
 
@@ -764,11 +764,11 @@ gtls_connect_step1(struct connectdata *conn,
       break;
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
-      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0:"
+      prioritylist = GNUTLS_CIPHERS ":-VERS-SSL3.0"
 #ifdef HAS_TLS13
-                     "+VERS-TLS1.3:"
+                     ":+VERS-TLS1.3"
 #endif
-                     GNUTLS_SRP;
+                     ;
       break;
     case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
@@ -787,24 +787,33 @@ gtls_connect_step1(struct connectdata *conn,
       failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
       return CURLE_SSL_CONNECT_ERROR;
   }
-  rc = gnutls_priority_set_direct(session, prioritylist, &err);
-  if((rc == GNUTLS_E_INVALID_REQUEST) && err) {
-    if(!strcmp(err, GNUTLS_SRP)) {
-      /* This GnuTLS was probably compiled without support for SRP.
-       * Note that fact and try again without it. */
-      int validprioritylen = curlx_uztosi(err - prioritylist);
-      char *prioritycopy = strdup(prioritylist);
-      if(!prioritycopy)
-        return CURLE_OUT_OF_MEMORY;
 
+#ifdef USE_TLS_SRP
+  /* Only add SRP to the cipher list if SRP is requested. Otherwise
+   * GnuTLS will disable TLS 1.3 support. */
+  if(SSL_SET_OPTION(authtype) == CURL_TLSAUTH_SRP) {
+    size_t len = strlen(prioritylist);
+
+    char *prioritysrp = malloc(len + sizeof(GNUTLS_SRP) + 1);
+    if(!prioritysrp)
+      return CURLE_OUT_OF_MEMORY;
+    strcpy(prioritysrp, prioritylist);
+    strcpy(prioritysrp + len, ":" GNUTLS_SRP);
+
+    rc = gnutls_priority_set_direct(session, prioritysrp, &err);
+    free(prioritysrp);
+
+    if((rc == GNUTLS_E_INVALID_REQUEST) && err) {
       infof(data, "This GnuTLS does not support SRP\n");
-      if(validprioritylen)
-        /* Remove the :+SRP */
-        prioritycopy[validprioritylen - 1] = 0;
-      rc = gnutls_priority_set_direct(session, prioritycopy, &err);
-      free(prioritycopy);
     }
   }
+  else {
+#endif
+    rc = gnutls_priority_set_direct(session, prioritylist, &err);
+#ifdef USE_TLS_SRP
+  }
+#endif
+
   if(rc != GNUTLS_E_SUCCESS) {
     failf(data, "Error %d setting GnuTLS cipher list starting with %s",
           rc, err);
