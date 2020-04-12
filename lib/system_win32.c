@@ -135,6 +135,7 @@ void Curl_win32_cleanup(long init_flags)
     WSACleanup();
 #endif
   }
+  _flushall();
 }
 
 #if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
