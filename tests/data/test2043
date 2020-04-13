@@ -19,7 +19,7 @@ none
 Disable certificate revocation checks
  </name>
  <command>
---ssl-no-revoke -I https://revoked.grc.com/
+--ssl-no-revoke -I https://revoked.badssl.com/
 </command>
 </client>
 
