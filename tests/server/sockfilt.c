@@ -544,13 +544,16 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
             }
           }
           else {
-            /* if the pipe has been closed, sleep and continue waiting */
+            /* if the pipe has NOT been closed, sleep and continue waiting */
             length = GetLastError();
-            logmsg("[select_ws_wait_thread] PeekNamedPipe error: %d", length);
-            if(length == ERROR_BROKEN_PIPE) {
+            if(length != ERROR_BROKEN_PIPE) {
+              logmsg("[select_ws_wait_thread] PeekNamedPipe err: %d", length);
               SleepEx(0, FALSE);
               ReleaseMutex(mutex);
               continue;
+            }
+            else {
+              logmsg("[select_ws_wait_thread] pipe closed, PIPE: %p", handle);
             }
           }
           /* there is some data available, stop waiting */
