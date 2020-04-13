@@ -63,6 +63,9 @@ if(curl_cv_recv)
                 unset(curl_cv_func_recv_test CACHE)
                 check_c_source_compiles("
                   ${_source_epilogue}
+                  #ifdef WINSOCK_API_LINKAGE
+                  WINSOCK_API_LINKAGE
+                  #endif
                   extern ${recv_retv} ${signature_call_conv}
                   recv(${recv_arg1}, ${recv_arg2}, ${recv_arg3}, ${recv_arg4});
                   int main(void) {
@@ -127,6 +130,9 @@ if(curl_cv_send)
                 unset(curl_cv_func_send_test CACHE)
                 check_c_source_compiles("
                   ${_source_epilogue}
+                  #ifdef WINSOCK_API_LINKAGE
+                  WINSOCK_API_LINKAGE
+                  #endif
                   extern ${send_retv} ${signature_call_conv}
                   send(${send_arg1}, ${send_arg2}, ${send_arg3}, ${send_arg4});
                   int main(void) {
