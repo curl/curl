@@ -697,8 +697,8 @@ cleanup:
   return slist;
 }
 
-LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
+LARGE_INTEGER tool_freq;
+bool tool_isVistaOrGreater;
 
 CURLcode win32_init(void)
 {
@@ -713,13 +713,13 @@ CURLcode win32_init(void)
   VER_SET_CONDITION(mask, VER_MINORVERSION, op);
 
   if(VerifyVersionInfoA(&osvi, (VER_MAJORVERSION | VER_MINORVERSION), mask))
-    Curl_isVistaOrGreater = true;
+    tool_isVistaOrGreater = true;
   else if(GetLastError() == ERROR_OLD_WIN_VERSION)
-    Curl_isVistaOrGreater = false;
+    tool_isVistaOrGreater = false;
   else
     return CURLE_FAILED_INIT;
 
-  QueryPerformanceFrequency(&Curl_freq);
+  QueryPerformanceFrequency(&tool_freq);
   return CURLE_OK;
 }
 

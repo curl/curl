@@ -28,19 +28,19 @@
 #if defined(WIN32) && !defined(MSDOS)
 
 /* set in win32_init() */
-extern LARGE_INTEGER Curl_freq;
-extern bool Curl_isVistaOrGreater;
+extern LARGE_INTEGER tool_freq;
+extern bool tool_isVistaOrGreater;
 
 /* In case of bug fix this function has a counterpart in timeval.c */
 struct timeval tvnow(void)
 {
   struct timeval now;
-  if(Curl_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
+  if(tool_isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     QueryPerformanceCounter(&count);
-    now.tv_sec = (long)(count.QuadPart / Curl_freq.QuadPart);
-    now.tv_usec = (long)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
-                         Curl_freq.QuadPart);
+    now.tv_sec = (long)(count.QuadPart / tool_freq.QuadPart);
+    now.tv_usec = (long)((count.QuadPart % tool_freq.QuadPart) * 1000000 /
+                         tool_freq.QuadPart);
   }
   else {
     /* Disable /analyze warning that GetTickCount64 is preferred  */
