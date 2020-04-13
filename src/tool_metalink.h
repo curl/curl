@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,31 +28,25 @@ struct GlobalConfig;
 struct OperationConfig;
 
 /* returns 1 for success, 0 otherwise (we use OpenSSL *_Init fncs directly) */
-typedef int (* Curl_digest_init_func)(void *context);
+typedef int (*digest_init_func)(void *context);
 
-typedef void (* Curl_digest_update_func)(void *context,
-                                         const unsigned char *data,
-                                         unsigned int len);
-typedef void (* Curl_digest_final_func)(unsigned char *result, void *context);
+typedef void (*digest_update_func)(void *context,
+                                   const unsigned char *data,
+                                   unsigned int len);
+typedef void (*digest_final_func)(unsigned char *result, void *context);
 
 typedef struct {
-  Curl_digest_init_func     digest_init;   /* Initialize context procedure */
-  Curl_digest_update_func   digest_update; /* Update context with data */
-  Curl_digest_final_func    digest_final;  /* Get final result procedure */
-  unsigned int           digest_ctxtsize;  /* Context structure size */
-  unsigned int           digest_resultlen; /* Result length (bytes) */
+  digest_init_func     digest_init;   /* Initialize context procedure */
+  digest_update_func   digest_update; /* Update context with data */
+  digest_final_func    digest_final;  /* Get final result procedure */
+  unsigned int         digest_ctxtsize;  /* Context structure size */
+  unsigned int         digest_resultlen; /* Result length (bytes) */
 } digest_params;
 
 typedef struct {
   const digest_params   *digest_hash;      /* Hash function definition */
   void                  *digest_hashctx;   /* Hash function context */
 } digest_context;
-
-digest_context * Curl_digest_init(const digest_params *dparams);
-int Curl_digest_update(digest_context *context,
-                       const unsigned char *data,
-                       unsigned int len);
-int Curl_digest_final(digest_context *context, unsigned char *result);
 
 typedef struct {
   const char *hash_name;

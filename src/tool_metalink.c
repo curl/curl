@@ -401,9 +401,9 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
 
 const digest_params MD5_DIGEST_PARAMS[] = {
   {
-    CURLX_FUNCTION_CAST(Curl_digest_init_func, MD5_Init),
-    CURLX_FUNCTION_CAST(Curl_digest_update_func, MD5_Update),
-    CURLX_FUNCTION_CAST(Curl_digest_final_func, MD5_Final),
+    CURLX_FUNCTION_CAST(digest_init_func, MD5_Init),
+    CURLX_FUNCTION_CAST(digest_update_func, MD5_Update),
+    CURLX_FUNCTION_CAST(digest_final_func, MD5_Final),
     sizeof(MD5_CTX),
     16
   }
@@ -411,9 +411,9 @@ const digest_params MD5_DIGEST_PARAMS[] = {
 
 const digest_params SHA1_DIGEST_PARAMS[] = {
   {
-    CURLX_FUNCTION_CAST(Curl_digest_init_func, SHA1_Init),
-    CURLX_FUNCTION_CAST(Curl_digest_update_func, SHA1_Update),
-    CURLX_FUNCTION_CAST(Curl_digest_final_func, SHA1_Final),
+    CURLX_FUNCTION_CAST(digest_init_func, SHA1_Init),
+    CURLX_FUNCTION_CAST(digest_update_func, SHA1_Update),
+    CURLX_FUNCTION_CAST(digest_final_func, SHA1_Final),
     sizeof(SHA_CTX),
     20
   }
@@ -421,9 +421,9 @@ const digest_params SHA1_DIGEST_PARAMS[] = {
 
 const digest_params SHA256_DIGEST_PARAMS[] = {
   {
-    CURLX_FUNCTION_CAST(Curl_digest_init_func, SHA256_Init),
-    CURLX_FUNCTION_CAST(Curl_digest_update_func, SHA256_Update),
-    CURLX_FUNCTION_CAST(Curl_digest_final_func, SHA256_Final),
+    CURLX_FUNCTION_CAST(digest_init_func, SHA256_Init),
+    CURLX_FUNCTION_CAST(digest_update_func, SHA256_Update),
+    CURLX_FUNCTION_CAST(digest_final_func, SHA256_Final),
     sizeof(SHA256_CTX),
     32
   }
@@ -457,7 +457,7 @@ static const metalink_digest_alias digest_aliases[] = {
   {NULL, NULL}
 };
 
-digest_context *Curl_digest_init(const digest_params *dparams)
+static digest_context *digest_init(const digest_params *dparams)
 {
   digest_context *ctxt;
 
@@ -485,16 +485,16 @@ digest_context *Curl_digest_init(const digest_params *dparams)
   return ctxt;
 }
 
-int Curl_digest_update(digest_context *context,
-                       const unsigned char *data,
-                       unsigned int len)
+static int digest_update(digest_context *context,
+                         const unsigned char *data,
+                         unsigned int len)
 {
   (*context->digest_hash->digest_update)(context->digest_hashctx, data, len);
 
   return 0;
 }
 
-int Curl_digest_final(digest_context *context, unsigned char *result)
+static int digest_final(digest_context *context, unsigned char *result)
 {
   if(result)
     (*context->digest_hash->digest_final)(result, context->digest_hashctx);
@@ -551,7 +551,7 @@ static int check_hash(const char *filename,
     return -1;
   }
 
-  dctx = Curl_digest_init(digest_def->dparams);
+  dctx = digest_init(digest_def->dparams);
   if(!dctx) {
     fprintf(error, "Metalink: validating (%s) [%s] FAILED (%s)\n", filename,
             digest_def->hash_name, "failed to initialize hash algorithm");
@@ -562,7 +562,7 @@ static int check_hash(const char *filename,
   result = malloc(digest_def->dparams->digest_resultlen);
   if(!result) {
     close(fd);
-    Curl_digest_final(dctx, NULL);
+    digest_final(dctx, NULL);
     return -1;
   }
   while(1) {
@@ -574,13 +574,13 @@ static int check_hash(const char *filename,
     else if(len == -1) {
       fprintf(error, "Metalink: validating (%s) [%s] FAILED (%s)\n", filename,
               digest_def->hash_name, strerror(errno));
-      Curl_digest_final(dctx, result);
+      digest_final(dctx, result);
       close(fd);
       return -1;
     }
-    Curl_digest_update(dctx, buf, (unsigned int)len);
+    digest_update(dctx, buf, (unsigned int)len);
   }
-  Curl_digest_final(dctx, result);
+  digest_final(dctx, result);
   check_ok = memcmp(result, digest,
                     digest_def->dparams->digest_resultlen) == 0;
   /* sha*sum style verdict output */
