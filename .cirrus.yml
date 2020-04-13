@@ -71,7 +71,7 @@ task:
     - case `uname -r` in
         13.0*) SKIP_TESTS='~1242 ~1243 ~2002 ~2003';;
         12.1*) SKIP_TESTS='~1242 ~1243 ~2002 ~2003';;
-        11.3*) SKIP_TESTS='~504 ~1242 ~1243 ~2002 ~2003';;
+        11.3*) SKIP_TESTS='~1242 ~1243 ~2002 ~2003';;
       esac
     - sudo -u nobody make V=1 TFLAGS="-n -a -p !flaky ${SKIP_TESTS}" test-nonflaky
   install_script:
