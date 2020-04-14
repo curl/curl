@@ -1692,6 +1692,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->doh_url)
           my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
 
+        if(config->sni_name)
+          my_setopt_str(curl, CURLOPT_TLSSNI_NAME, config->sni_name);
+
         if(config->cipher_list)
           my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);
 

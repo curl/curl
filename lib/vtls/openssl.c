@@ -2397,6 +2397,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   ctx_option_t ctx_options = 0;
 
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+  const char *sniname;
   bool sni;
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
@@ -2883,14 +2884,19 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
 
   backend->server_cert = 0x0;
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  if((0 == Curl_inet_pton(AF_INET, hostname, &addr)) &&
+  sniname = SSL_CONN_CONFIG(sni_name);
+  if(!sniname)
+    sniname = hostname;
+  if(sniname && sniname[0]) {
+    if((0 == Curl_inet_pton(AF_INET, sniname, &addr)) &&
 #ifdef ENABLE_IPV6
-     (0 == Curl_inet_pton(AF_INET6, hostname, &addr)) &&
+   (0 == Curl_inet_pton(AF_INET6, sniname, &addr)) &&
 #endif
-     sni &&
-     !SSL_set_tlsext_host_name(backend->handle, hostname))
+   sni &&
+   !SSL_set_tlsext_host_name(backend->handle, sniname))
     infof(data, "WARNING: failed to configure server name indication (SNI) "
-          "TLS extension\n");
+       "TLS extension\n");
+  }
 #endif
 
   /* Check if there's a cached ID we can/should use here! */

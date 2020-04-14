@@ -141,6 +141,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     /* deprecated */
     break;
+  case CURLOPT_TLSSNI_NAME:
+    /* set SNI ServerName in ClientHello */
+    result = Curl_setstropt(&data->set.str[STRING_SSL_SNI_NAME],
+                            va_arg(param, char *));
+    break;
   case CURLOPT_SSL_CIPHER_LIST:
     /* set a list of cipher we want to use in the SSL connection */
     result = Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST_ORIG],

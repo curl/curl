@@ -1954,6 +1954,9 @@ typedef enum {
   /* allow RCPT TO command to fail for some recipients */
   CURLOPT(CURLOPT_MAIL_RCPT_ALLLOWFAILS, CURLOPTTYPE_LONG, 290),
 
+  /* Specify ServerName of SNI extension in openssl ClientHello */
+  CURLOPT(CURLOPT_TLSSNI_NAME, CURLOPTTYPE_STRINGPOINT, 291),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -473,6 +473,8 @@ static const struct helptxt helptext[] = {
    "TLS password"},
   {"    --tlsuser <name>",
    "TLS user name"},
+  {"    --sniname <name>",
+   "sni servername in ClientHello (OpenSSL)"},
   {"-1, --tlsv1",
    "Use TLSv1.0 or greater"},
   {"    --tlsv1.0",

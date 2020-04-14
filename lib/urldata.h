@@ -227,6 +227,7 @@ struct ssl_primary_config {
   char *clientcert;
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
+  char *sni_name;     /* SNI Servername in ClientHello */
   char *cipher_list;     /* list of ciphers to use */
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
   char *pinned_key;
@@ -1531,6 +1532,7 @@ enum dupstring {
   STRING_SSL_CAFILE_PROXY, /* certificate file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_ORIG, /* public key file to verify peer against */
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
+  STRING_SSL_SNI_NAME, /* sni servername in clienthello */
   STRING_SSL_CIPHER_LIST_ORIG, /* list of ciphers to use */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
   STRING_SSL_CIPHER13_LIST_ORIG, /* list of TLS 1.3 ciphers to use */

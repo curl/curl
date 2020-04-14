@@ -132,6 +132,7 @@ struct OperationConfig {
   struct getout *url_out;   /* point to the node to fill in outfile */
   struct getout *url_ul;    /* point to the node to fill in upload */
   char *doh_url;
+  char *sni_name;
   char *cipher_list;
   char *proxy_cipher_list;
   char *cipher13_list;

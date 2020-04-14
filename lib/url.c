@@ -3567,6 +3567,8 @@ static CURLcode create_conn(struct Curl_easy *data,
     data->set.str[STRING_SSL_RANDOM_FILE];
   data->set.ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
   data->set.proxy_ssl.primary.egdsocket = data->set.str[STRING_SSL_EGDSOCKET];
+  data->set.ssl.primary.sni_name =
+    data->set.str[STRING_SSL_SNI_NAME];
   data->set.ssl.primary.cipher_list =
     data->set.str[STRING_SSL_CIPHER_LIST_ORIG];
   data->set.proxy_ssl.primary.cipher_list =
