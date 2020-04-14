@@ -20,71 +20,66 @@
 #
 ###########################################################################
 
-LIB_VAUTH_CFILES = vauth/vauth.c vauth/cleartext.c vauth/cram.c         \
-  vauth/digest.c vauth/digest_sspi.c vauth/krb5_gssapi.c                \
-  vauth/krb5_sspi.c vauth/ntlm.c vauth/ntlm_sspi.c vauth/oauth2.c       \
-  vauth/spnego_gssapi.c vauth/spnego_sspi.c
+LIB_VAUTH_CFILES = vauth/cleartext.c vauth/cram.c vauth/digest.c             \
+  vauth/digest_sspi.c vauth/krb5_gssapi.c vauth/krb5_sspi.c vauth/ntlm.c     \
+  vauth/ntlm_sspi.c vauth/oauth2.c vauth/spnego_gssapi.c vauth/spnego_sspi.c \
+  vauth/vauth.c
 
-LIB_VAUTH_HFILES = vauth/vauth.h vauth/digest.h vauth/ntlm.h
+LIB_VAUTH_HFILES = vauth/digest.h vauth/ntlm.h vauth/vauth.h
 
-LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
-  vtls/mbedtls_threadlock.c vtls/wolfssl.c vtls/schannel.c              \
-  vtls/schannel_verify.c vtls/sectransp.c vtls/gskit.c vtls/mbedtls.c   \
-  vtls/mesalink.c vtls/bearssl.c
+LIB_VTLS_CFILES = vtls/bearssl.c vtls/gskit.c vtls/gtls.c vtls/mbedtls.c \
+  vtls/mbedtls_threadlock.c vtls/mesalink.c vtls/nss.c vtls/openssl.c    \
+  vtls/schannel.c vtls/schannel_verify.c vtls/sectransp.c vtls/vtls.c    \
+  vtls/wolfssl.c
 
-LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h vtls/nssg.h    \
-  vtls/mbedtls_threadlock.h vtls/wolfssl.h vtls/schannel.h              \
-  vtls/sectransp.h vtls/gskit.h vtls/mbedtls.h vtls/mesalink.h          \
-  vtls/bearssl.h
+LIB_VTLS_HFILES = vtls/bearssl.h vtls/gskit.h vtls/gtls.h vtls/mbedtls.h \
+  vtls/mbedtls_threadlock.h vtls/mesalink.h vtls/nssg.h vtls/openssl.h   \
+  vtls/schannel.h vtls/sectransp.h vtls/vtls.h vtls/wolfssl.h
 
 LIB_VQUIC_CFILES = vquic/ngtcp2.c vquic/quiche.c
 
 LIB_VQUIC_HFILES = vquic/ngtcp2.h vquic/quiche.h
 
-LIB_VSSH_CFILES = vssh/libssh2.c vssh/libssh.c vssh/wolfssh.c
+LIB_VSSH_CFILES = vssh/libssh.c vssh/libssh2.c vssh/wolfssh.c
 
 LIB_VSSH_HFILES = vssh/ssh.h
 
-LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
-  cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
-  ldap.c version.c getenv.c escape.c mprintf.c telnet.c netrc.c         \
-  getinfo.c transfer.c strcase.c easy.c security.c curl_fnmatch.c       \
-  fileinfo.c ftplistparser.c wildcard.c krb5.c memdebug.c http_chunks.c \
-  strtok.c connect.c llist.c hash.c multi.c content_encoding.c share.c  \
-  http_digest.c md4.c md5.c http_negotiate.c inet_pton.c strtoofft.c    \
-  strerror.c amigaos.c hostasyn.c hostip4.c hostip6.c hostsyn.c         \
-  inet_ntop.c parsedate.c select.c tftp.c splay.c strdup.c socks.c      \
-  curl_addrinfo.c socks_gssapi.c socks_sspi.c                           \
-  curl_sspi.c slist.c nonblock.c curl_memrchr.c imap.c pop3.c smtp.c    \
-  pingpong.c rtsp.c curl_threads.c warnless.c hmac.c curl_rtmp.c        \
-  openldap.c curl_gethostname.c gopher.c idn_win32.c                    \
-  http_proxy.c non-ascii.c asyn-ares.c asyn-thread.c curl_gssapi.c      \
-  http_ntlm.c curl_ntlm_wb.c curl_ntlm_core.c curl_sasl.c rand.c        \
-  curl_multibyte.c hostcheck.c conncache.c dotdot.c                     \
-  x509asn1.c http2.c smb.c curl_endian.c curl_des.c system_win32.c      \
-  mime.c sha256.c setopt.c curl_path.c curl_ctype.c curl_range.c psl.c  \
-  doh.c urlapi.c curl_get_line.c altsvc.c socketpair.c rename.c
+LIB_CFILES = altsvc.c amigaos.c asyn-ares.c asyn-thread.c base64.c            \
+  conncache.c connect.c content_encoding.c cookie.c curl_addrinfo.c           \
+  curl_ctype.c curl_des.c curl_endian.c curl_fnmatch.c curl_get_line.c        \
+  curl_gethostname.c curl_gssapi.c curl_memrchr.c curl_multibyte.c            \
+  curl_ntlm_core.c curl_ntlm_wb.c curl_path.c curl_range.c curl_rtmp.c        \
+  curl_sasl.c curl_sspi.c curl_threads.c dict.c dotdot.c easy.c escape.c      \
+  file.c fileinfo.c formdata.c ftp.c url.c ftplistparser.c getenv.c getinfo.c \
+  gopher.c hash.c hmac.c hostasyn.c hostcheck.c hostip.c hostip4.c hostip6.c  \
+  hostsyn.c http.c http2.c http_chunks.c http_digest.c http_negotiate.c       \
+  http_ntlm.c http_proxy.c idn_win32.c if2ip.c imap.c inet_ntop.c inet_pton.c \
+  krb5.c ldap.c llist.c md4.c md5.c memdebug.c mime.c mprintf.c mqtt.c        \
+  multi.c netrc.c non-ascii.c nonblock.c openldap.c parsedate.c pingpong.c    \
+  pop3.c progress.c psl.c doh.c rand.c rename.c rtsp.c security.c select.c    \
+  sendf.c setopt.c sha256.c share.c slist.c smb.c smtp.c socketpair.c socks.c \
+  socks_gssapi.c socks_sspi.c speedcheck.c splay.c strcase.c strdup.c         \
+  strerror.c strtok.c strtoofft.c system_win32.c telnet.c tftp.c timeval.c    \
+  transfer.c urlapi.c version.c warnless.c wildcard.c x509asn1.c
 
-LIB_HFILES = arpa_telnet.h netrc.h file.h timeval.h hostip.h progress.h \
-  formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h if2ip.h         \
-  speedcheck.h urldata.h curl_ldap.h escape.h telnet.h getinfo.h        \
-  strcase.h curl_sec.h memdebug.h http_chunks.h curl_fnmatch.h          \
-  wildcard.h fileinfo.h ftplistparser.h strtok.h connect.h llist.h      \
-  hash.h content_encoding.h share.h curl_md4.h curl_md5.h http_digest.h \
-  http_negotiate.h inet_pton.h amigaos.h strtoofft.h strerror.h         \
-  inet_ntop.h curlx.h curl_memory.h curl_setup.h transfer.h select.h    \
-  easyif.h multiif.h parsedate.h tftp.h sockaddr.h splay.h strdup.h     \
-  socks.h curl_base64.h curl_addrinfo.h curl_sspi.h                     \
-  slist.h nonblock.h curl_memrchr.h imap.h pop3.h smtp.h pingpong.h     \
-  rtsp.h curl_threads.h warnless.h curl_hmac.h curl_rtmp.h              \
-  curl_gethostname.h gopher.h http_proxy.h non-ascii.h asyn.h           \
-  http_ntlm.h curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h             \
-  curl_sasl.h curl_multibyte.h hostcheck.h conncache.h                  \
-  curl_setup_once.h multihandle.h setup-vms.h dotdot.h                  \
-  x509asn1.h http2.h sigpipe.h smb.h curl_endian.h curl_des.h           \
-  curl_printf.h system_win32.h rand.h mime.h curl_sha256.h setopt.h     \
-  curl_path.h curl_ctype.h curl_range.h psl.h doh.h urlapi-int.h        \
-  curl_get_line.h altsvc.h quic.h socketpair.h rename.h
+LIB_HFILES = altsvc.h amigaos.h arpa_telnet.h asyn.h conncache.h connect.h    \
+  content_encoding.h cookie.h curl_addrinfo.h curl_base64.h curl_ctype.h      \
+  curl_des.h curl_endian.h curl_fnmatch.h curl_get_line.h curl_gethostname.h  \
+  curl_gssapi.h curl_hmac.h curl_ldap.h curl_md4.h curl_md5.h curl_memory.h   \
+  curl_memrchr.h curl_multibyte.h curl_ntlm_core.h curl_ntlm_wb.h curl_path.h \
+  curl_printf.h curl_range.h curl_rtmp.h curl_sasl.h curl_sec.h curl_setup.h  \
+  curl_setup_once.h curl_sha256.h curl_sspi.h curl_threads.h curlx.h dict.h   \
+  dotdot.h easyif.h escape.h file.h fileinfo.h formdata.h ftp.h url.h         \
+  ftplistparser.h getinfo.h gopher.h hash.h hostcheck.h hostip.h http.h       \
+  http2.h http_chunks.h http_digest.h http_negotiate.h http_ntlm.h            \
+  http_proxy.h if2ip.h imap.h inet_ntop.h inet_pton.h llist.h memdebug.h      \
+  mime.h mqtt.h multihandle.h multiif.h netrc.h non-ascii.h nonblock.h        \
+  parsedate.h pingpong.h pop3.h progress.h psl.h doh.h quic.h rand.h rename.h \
+  rtsp.h select.h sendf.h setopt.h setup-vms.h share.h sigpipe.h slist.h      \
+  smb.h smtp.h sockaddr.h socketpair.h socks.h speedcheck.h splay.h strcase.h \
+  strdup.h strerror.h strtok.h strtoofft.h system_win32.h telnet.h tftp.h     \
+  timeval.h transfer.h urlapi-int.h urldata.h warnless.h wildcard.h           \
+  x509asn1.h
 
 LIB_RCFILES = libcurl.rc
 

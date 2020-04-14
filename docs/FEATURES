@@ -180,6 +180,9 @@ IMAPS (*1)
  - explicit "STARTTLS" usage to "upgrade" plain imap:// connections to use SSL
  - via http-proxy
 
+MQTT
+ - Subscribe to and publish topics using url scheme mqtt://broker/topic
+
 FOOTNOTES
 =========
 
