@@ -35,6 +35,15 @@ sub decode_base64 {
   return unpack("u", $len . $_);         # uudecode and print
 }
 
+sub decode_hex {
+    my $s = $_;
+    # remove everything not hex
+    $s =~ s/[^A-Fa-f0-9]//g;
+    # encode everything
+    $s =~ s/([a-fA-F0-9][a-fA-F0-9])/chr(hex($1))/eg;
+    return $s;
+}
+
 sub getpartattr {
     # if $part is undefined (ie only one argument) then
     # return the attributes of the section
@@ -81,6 +90,7 @@ sub getpart {
     my @this;
     my $inside=0;
     my $base64=0;
+    my $hex=0;
     my $line;
 
     for(@xml) {
@@ -95,6 +105,10 @@ sub getpart {
             elsif($_ =~ /$part [^>]*base64=/) {
                 # attempt to detect our base64 encoded part
                 $base64=1;
+            }
+            elsif($_ =~ /$part [^>]*hex=/) {
+                # attempt to detect a hex-encoded part
+                $hex=1;
             }
             $inside++;
         }
@@ -119,6 +133,13 @@ sub getpart {
                 # decode the whole array before returning it!
                 for(@this) {
                     my $decoded = decode_base64($_);
+                    $_ = $decoded;
+                }
+            }
+            elsif($hex) {
+                # decode the whole array before returning it!
+                for(@this) {
+                    my $decoded = decode_hex($_);
                     $_ = $decoded;
                 }
             }

@@ -37,7 +37,7 @@ which are treated together as a single identifier.
 </info>
 
 <reply>
-<data [nocheck="yes"] [sendzero="yes"] [base64="yes"]>
+<data [nocheck="yes"] [sendzero="yes"] [base64="yes"] [hex="yes"]>
 data to be sent to the client on its request and later verified that it arrived
 safely. Set nocheck="yes" to prevent the test script from verifying the arrival
 of this data.
@@ -59,6 +59,9 @@ transfers.
 of data encoded with base64. It is the only way a test case can contain binary
 data. (This attribute can in fact be used on any section, but it doesn't make
 much sense for other sections than "data").
+
+'hex' set to yes means that the data is a sequence of hex pairs. It will get
+decoded and used as "raw" data.
 
 For FTP file listings, the <data> section will be used *only* if you make sure
 that there has been a CWD done first to a directory named 'test-[num]' where
@@ -292,8 +295,8 @@ command is run. They are cleared again after the command has been run.
 Variables are first substituted as in the <command> section.
 </setenv>
 
-<command [option="no-output/no-include/force-output"] [timeout="secs"]
-         [delay="secs"][type="perl"]>
+<command [option="no-output/no-include/force-output/binary-trace"]
+         [timeout="secs"][delay="secs"][type="perl"]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly.
 
@@ -321,6 +324,9 @@ otherwise written to verify stdout.
 
 Set option="no-include" to prevent the test script to slap on the --include
 argument.
+
+Set option="binary-trace" to use --trace instead of --trace-ascii for tracing.
+Suitable for binary-oriented protocols such as MQTT.
 
 Set timeout="secs" to override default server logs advisor read lock timeout.
 This timeout is used by the test harness, once that the command has completed
