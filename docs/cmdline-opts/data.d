@@ -2,7 +2,7 @@ Long: data
 Short: d
 Arg: <data>
 Help: HTTP POST data
-Protocols: HTTP
+Protocols: HTTP MQTT
 See-also: data-binary data-urlencode data-raw
 Mutexed: form head upload-file
 ---

@@ -71,6 +71,7 @@ EXTRA_DIST =                                    \
  KNOWN_BUGS                                     \
  LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
+ MQTT.md                                        \
  PARALLEL-TRANSFERS.md                          \
  README.md                                      \
  RELEASE-PROCEDURE.md                           \

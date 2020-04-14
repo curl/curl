@@ -676,6 +676,7 @@ CURLPROTO_IMAP                  7.20.0
 CURLPROTO_IMAPS                 7.20.0
 CURLPROTO_LDAP                  7.19.4
 CURLPROTO_LDAPS                 7.19.4
+CURLPROTO_MQTT                  7.71.0
 CURLPROTO_POP3                  7.20.0
 CURLPROTO_POP3S                 7.20.0
 CURLPROTO_RTMP                  7.21.0
