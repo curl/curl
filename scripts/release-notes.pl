@@ -160,6 +160,7 @@ for my $l (@releasenotes) {
             $refused[$moreinfo{$f}]=3;
         }
         push @o, " --- new entries are listed above this ---";
+        next;
     }
     elsif($cleanup) {
         if($l =~ /^ --- new entries are listed/) {
