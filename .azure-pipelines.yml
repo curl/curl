@@ -255,7 +255,7 @@ stages:
     container:
       image: mback2k/curl-docker-winbuildenv-msys1-mingw32:ltsc2019
     steps:
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --without-zlib"
+    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --without-zlib --enable-mqtt"
       displayName: 'configure debug without zlib'
 
     - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
