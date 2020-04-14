@@ -87,6 +87,11 @@ matrix:
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
         - os: linux
           compiler: gcc
+          dist: trusty
+          env:
+              - T=normal C="--enable-mqtt"
+        - os: linux
+          compiler: gcc
           dist: bionic
           env:
               - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
