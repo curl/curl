@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -281,6 +281,20 @@ int write_pidfile(const char *filename)
   fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
   fclose(pidfile);
   logmsg("Wrote pid %ld to %s", pid, filename);
+  return 1; /* success */
+}
+
+/* store the used port number in a file */
+int write_portfile(const char *filename, int port)
+{
+  FILE *portfile = fopen(filename, "wb");
+  if(!portfile) {
+    logmsg("Couldn't write port file: %s %s", filename, strerror(errno));
+    return 0; /* fail */
+  }
+  fprintf(portfile, "%d\n", port);
+  fclose(portfile);
+  logmsg("Wrote port %d to %s", port, filename);
   return 1; /* success */
 }
 
