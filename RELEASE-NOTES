@@ -4,16 +4,18 @@ curl and libcurl 7.70.0
  Command line options:         231
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2155
+ Contributors:                 2159
 
 This release includes the following changes:
 
  o curl: add --ssl-revoke-best-effort to allow a "best effort" revocation check [5]
+ o mqtt: add new experimental protocol [57]
  o schannel: add "best effort" revocation check option: CURLSSLOPT_REVOKE_BEST_EFFORT [5]
  o writeout: support to generate JSON output with '%{json}' [8]
 
 This release includes the following bugfixes:
 
+ o appveyor: completely disable tests that fail to timeout early
  o appveyor: show failed tests in log even if test is ignored
  o appveyor: sort builds by type and add two new variants
  o appveyor: turn disabled tests into ignored result tests
@@ -26,11 +28,14 @@ This release includes the following bugfixes:
  o CI: bring GitHub Actions fuzzing job in line with macOS jobs
  o CI: migrate macOS jobs from Azure and Travis CI to GitHub Actions [36]
  o CI: remove default Ubuntu build from GitHub Actions
+ o cirrus: no longer ignore test 504 which is working again
  o cirrus: re-enable the FreeBSD 13 CI builds [29]
  o cleanup: insert newline after if() conditions
+ o cmake: add aliases so exported target names are available in tree [73]
  o cmake: add CMAKE_MSVC_RUNTIME_LIBRARY [45]
  o cmake: add support for building with wolfSSL [9]
  o cmdline: fix handling of OperationConfig linked list (--next) [24]
+ o compressed.d: stress that the headers are not modified [80]
  o config: remove all defines of HAVE_DES_H [37]
  o configure: convert -I to -isystem as a last step [2]
  o configure: document 'compiler_num' for gcc [4]
@@ -53,6 +58,8 @@ This release includes the following bugfixes:
  o easy: fix curl_easy_duphandle for builds missing IPv6 that use c-ares [18]
  o examples/sessioninfo.c: add include to fix compiler warning [42]
  o github actions: run when pushed to master or */ci + PRs [64]
+ o gnutls: ensure TLS 1.3 when SRP isn't requested [79]
+ o gopher: check remaining time left during write busy loop [78]
  o gskit: use our internal select wrapper for portability [12]
  o http2: Fix erroneous debug message that h2 connection closed [21]
  o http: don't consider upload done if the request isn't completely sent off [67]
@@ -72,6 +79,7 @@ This release includes the following bugfixes:
  o RELEASE-PROCEDURE.md: run the copyright.pl script!
  o Revert "file: on Windows, refuse paths that start with \\" [50]
  o runtests: provide nicer errormsg when protocol "dump" file is empty
+ o schannel: Fix blocking timeout logic [76]
  o schannel: support .P12 or .PFX client certificates [65]
  o scripts/release-notes.pl: add helper script for RELEASE-NOTES maintenance
  o select: move duplicate select preparation code into Curl_select [14]
@@ -81,20 +89,28 @@ This release includes the following bugfixes:
  o sockfilt: add logmsg output to select_ws_wait_thread on Windows [32]
  o sockfilt: fix handling of ready closed sockets on Windows
  o sockfilt: fix race-condition of waiting threads and event handling [58]
+ o socks: Fix blocking timeout logic [77]
  o SSLCERTS.md: Fix example code for setting CA cert file [31]
  o test1148: tolerate progress updates better (again) [60]
  o test1177: verify that all the CURL_VERSION_ bits are documented
  o test1566: verify --etag-compare that gets a 304 back [53]
+ o test1908: avoid using fixed port number in test data [75]
  o test2100: fix static port instead of dynamic value being used
  o tests/data: fix some XML formatting issues in test cases
+ o tests/server/util.c: use curl_off_t instead of long for pid
+ o tests: add Windows compatible pidwait like pidkill and pidterm
+ o tests: fix conflict between Cygwin/msys and Windows PIDs [81]
  o tests: make Python-based servers compatible with Python 2 and 3 [22]
  o tests: remove python_dependencies for smbserver from our tree [16]
+ o tests: use Cygwin/msys PIDs for stunnel and sshd on Windows
  o tls: remove the BACKEND define kludge from most backends [23]
+ o tool: do not declare functions with Curl_ prefix [66]
  o tool_operate: fix add_parallel_transfers when more are in queue [10]
  o transfer: cap retries of "dead connections" to 5 [13]
  o travis: update the ngtcp2 build to use the latest OpenSSL patch
  o url: allow non-HTTPS altsvc-matching for debug builds [62]
  o version: add 'cainfo' and 'capath' to version info struct [55]
+ o version: increase buffer space for ssl version output [74]
  o vquic: add support for GnuTLS backend of ngtcp2 [41]
  o vtls: fix ssl_config memory-leak on out-of-memory [11]
  o warnless: remove code block for icc that didn't work [72]
@@ -108,16 +124,18 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alain Miniussi, Brad King, Calvin Buckley, Chris Roberts, Clément Notin,
-  Daiki Ueno, Dan Fandrich, Daniel Stenberg, Dennis Felsing, Dima Tisnek,
-  Eylem Ugurel, Frank Gevaerts, FuccDucc on github, Gavin Wong, Gilles Vollant,
-  Gisle Vanem, Harry Sintonen, James Fuller, Johannes Schindelin, Jon Rumsey,
-  Kamil Dudka, Karl Chen, Kwon-Young Choi, Leo Neat, Maksim Stsepanenka,
-  Marcel Raad, Marc Hörsken, Markus Olsson, Mathias Gumz, Michael Kaufmann,
-  Muhammad Herdiansyah, Paul Vixie, Ray Satiro, Rici Lake, Roger Orr,
-  Ross Burton, Simon Chalifoux, Stepan Efremov, Steven Penny, Timothe Litt,
-  Tim Sedlmeyer, Tommy Petty, Viktor Szakats,
-  (43 contributors)
+  Alain Miniussi, Alex Gaynor, Andrew Kurushin, Björn Stenberg, Brad King,
+  Calvin Buckley, Chris Roberts, Clément Notin, Daiki Ueno, Dan Fandrich,
+  Daniel Stenberg, Dennis Felsing, Dima Tisnek, Dirkjan Bussink, Eylem Ugurel,
+  Frank Gevaerts, FuccDucc on github, Gavin Wong, Gilles Vollant, Gisle Vanem,
+  Harry Sintonen, hydra3333 on github, James Fuller, Johannes Schindelin,
+  Jon Rumsey, Kamil Dudka, Karl Chen, Kwon-Young Choi, Leo Neat,
+  Maksim Stsepanenka, Marcel Raad, Marc Hörsken, Markus Olsson, Mathias Gumz,
+  Michael Kaufmann, Michael Osipov, Muhammad Herdiansyah, Nathaniel R. Lewis,
+  Paul Vixie, Ray Satiro, Rici Lake, Roger Orr, Ross Burton, Simon Chalifoux,
+  Stepan Efremov, Steven Penny, Timothe Litt, Tim Sedlmeyer, Tommy Petty,
+  Viktor Szakats,
+  (50 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -179,6 +197,7 @@ References to bug reports and discussions on issues:
  [54] = https://curl.haxx.se/bug/?i=5181
  [55] = https://curl.haxx.se/bug/?i=5150
  [56] = https://curl.haxx.se/bug/?i=5179
+ [57] = https://curl.haxx.se/bug/?i=5173
  [58] = https://curl.haxx.se/bug/?i=5156
  [59] = https://curl.haxx.se/bug/?i=5174
  [60] = https://curl.haxx.se/bug/?i=5194
@@ -186,9 +205,19 @@ References to bug reports and discussions on issues:
  [63] = https://curl.haxx.se/bug/?i=5202
  [64] = https://curl.haxx.se/bug/?i=5201
  [65] = https://curl.haxx.se/bug/?i=5193
+ [66] = https://curl.haxx.se/bug/?i=5219
  [67] = https://curl.haxx.se/bug/?i=4919
  [68] = https://curl.haxx.se/bug/?i=5196
  [69] = https://curl.haxx.se/bug/?i=5190
  [70] = https://curl.haxx.se/bug/?i=5192
  [71] = https://curl.haxx.se/bug/?i=5096
  [72] = https://curl.haxx.se/bug/?i=5096
+ [73] = https://curl.haxx.se/bug/?i=5206
+ [74] = https://curl.haxx.se/bug/?i=5222
+ [75] = https://curl.haxx.se/bug/?i=5225
+ [76] = https://curl.haxx.se/bug/?i=5177
+ [77] = https://curl.haxx.se/bug/?i=5220
+ [78] = https://curl.haxx.se/bug/?i=5214
+ [79] = https://curl.haxx.se/bug/?i=5223
+ [80] = https://github.com/curl/curl/issues/5182#issuecomment-611638008
+ [81] = https://curl.haxx.se/bug/?i=5188
