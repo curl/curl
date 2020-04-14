@@ -23,7 +23,7 @@ jobs:
           install: nghttp2
         - name: debug
           install: nghttp2
-          configure: --enable-debug --enable-werror --without-brotli
+          configure: --enable-debug --enable-werror --without-brotli --enable-mqtt
         - name: libssh2
           install: nghttp2 libssh2
           configure: --enable-debug --with-libssh2
