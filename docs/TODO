@@ -140,6 +140,7 @@
  18.5 UTF-8 filenames in Content-Disposition
  18.6 Option to make -Z merge lined based outputs on stdout
  18.7 at least N milliseconds between requests
+ 18.8 Consider convenience options for JSON and XML?
  18.9 Choose the name of file in braces for complex URLs
  18.10 improve how curl works in a windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
@@ -925,6 +926,20 @@ that doesn't exist on the server, just like --ftp-create-dirs.
     $ curl "https://example.com/api?input=[1-1000]" -d yadayada --after 500
 
  See https://github.com/curl/curl/issues/3920
+
+18.8 Consider convenience options for JSON and XML?
+
+ Could we add `--xml` or `--json` to add headers needed to call rest API:
+
+ `--xml` adds -H 'Content-Type: application/xml' -H "Accept: application/xml" and
+ `--json` adds -H 'Content-Type: application/json' -H "Accept: application/json"
+
+ Setting Content-Type when doing a GET or any other method without a body
+ would be a bit strange I think - so maybe only add CT for requests with body?
+ Maybe plain `--xml` and ` --json` are a bit too brief and generic. Maybe
+ `--http-json` etc?
+
+ See https://github.com/curl/curl/issues/5203
 
 18.9 Choose the name of file in braces for complex URLs
 
