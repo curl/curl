@@ -31,7 +31,7 @@ Example subscribe:
 
 Example publish:
 
-    curl -d 80 mqtt://host/home/bedroom/dimmer
+    curl -d 75 mqtt://host/home/bedroom/dimmer
 
 ## What does curl deliver as a response to a subscribe
 
