@@ -201,7 +201,7 @@ int Curl_select(curl_socket_t maxfd,
 int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
                       curl_socket_t readfd1,
                       curl_socket_t writefd, /* socket to write to */
-                      time_t timeout_ms)     /* milliseconds to wait */
+                      timediff_t timeout_ms)     /* milliseconds to wait */
 {
 #ifdef HAVE_POLL_FINE
   struct pollfd pfd[3];

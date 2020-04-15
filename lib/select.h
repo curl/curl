@@ -80,7 +80,7 @@ int Curl_select(curl_socket_t maxfd,
 
 int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       curl_socket_t writefd,
-                      time_t timeout_ms);
+                      timediff_t timeout_ms);
 #define SOCKET_READABLE(x,z) \
   Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
 #define SOCKET_WRITABLE(x,z) \
