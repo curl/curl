@@ -643,7 +643,7 @@ static bool incoming(curl_socket_t listenfd)
         logmsg("signalled to die, exiting...");
         return FALSE;
       }
-    } while((rc == -1) && ((error = errno) == EINTR));
+    } while((rc == -1) && ((error = SOCKERRNO) == EINTR));
 
     if(rc < 0) {
       logmsg("select() failed with error: (%d) %s",
@@ -700,9 +700,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
         rc = wait_ms(delay);
         if(rc) {
           /* should not happen */
-          error = errno;
-          logmsg("wait_ms() failed with error: (%d) %s",
-                 error, strerror(error));
+          logmsg("wait_ms() failed with error: %d", rc);
           sclose(sock);
           return CURL_SOCKET_BAD;
         }
