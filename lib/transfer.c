@@ -1717,12 +1717,19 @@ CURLcode Curl_follow(struct Curl_easy *data,
     break;
 
   case 303: /* See Other */
-    /* Disable both types of POSTs, unless the user explicitly
-       asks for POST after POST */
-    if(data->set.httpreq != HTTPREQ_GET
-      && !(data->set.keep_post & CURL_REDIR_POST_303)) {
-      data->set.httpreq = HTTPREQ_GET; /* enforce GET request */
-      infof(data, "Disables POST, goes with %s\n",
+    /* 'See Other' location is not the resource but a substitute for the
+     * resource. In this case we switch the method to GET/HEAD, unless the
+     * method is POST and the user specified to keep it as POST.
+     * https://github.com/curl/curl/issues/5237#issuecomment-614641049
+     */
+    if(data->set.httpreq != HTTPREQ_GET &&
+       ((data->set.httpreq != HTTPREQ_POST &&
+         data->set.httpreq != HTTPREQ_POST_FORM &&
+         data->set.httpreq != HTTPREQ_POST_MIME) ||
+        !(data->set.keep_post & CURL_REDIR_POST_303))) {
+      data->set.httpreq = HTTPREQ_GET;
+      data->set.upload = false;
+      infof(data, "Switch to %s\n",
             data->set.opt_no_body?"HEAD":"GET");
     }
     break;
