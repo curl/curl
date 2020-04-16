@@ -85,8 +85,15 @@ Accept: */*
 <file1 name="log/download2006">
 Some data delivered from an HTTP resource
 </file1>
+
+# The Content-Length replace here is to handle with 4/5 digit port number in
+# the content
+<stripfile2>
+s/Last-Modified:.*//
+s/Content-Length: 49[67]/Content-Length: yeps/
+</stripfile2>
 <file2 name="log/heads2006">
-Content-Length: 496
+Content-Length: yeps
 Accept-ranges: bytes
 
 
@@ -110,9 +117,6 @@ Metalink: fetching (log/download2006) from (http://%HOSTIP:%HTTPPORT/2006) OK
 Metalink: validating (log/download2006)...
 Metalink: validating (log/download2006) [sha-256] OK
 </file4>
-<stripfile2>
-s/Last-Modified:.*//
-</stripfile2>
 <stripfile4>
 $_ = '' if (($_ !~ /^Metalink: /) && ($_ !~ /error/i) && ($_ !~ /warn/i))
 </stripfile4>
