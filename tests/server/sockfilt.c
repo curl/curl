@@ -410,7 +410,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
   HANDLE mutex, signal, handle, handles[2];
   INPUT_RECORD inputrecord;
   LARGE_INTEGER size, pos;
-  DWORD type, length;
+  DWORD type, length, ret;
 
   /* retrieve handles from internal structure */
   data = (struct select_ws_wait_data *) lpParameter;
@@ -439,21 +439,21 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
         */
       while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
             == WAIT_TIMEOUT) {
-        length = WaitForSingleObjectEx(mutex, 0, FALSE);
-        if(length == WAIT_OBJECT_0) {
+        ret = WaitForSingleObjectEx(mutex, 0, FALSE);
+        if(ret == WAIT_OBJECT_0) {
           /* get total size of file */
           length = 0;
           size.QuadPart = 0;
           size.LowPart = GetFileSize(handle, &length);
           if((size.LowPart != INVALID_FILE_SIZE) ||
-            (GetLastError() == NO_ERROR)) {
+             (GetLastError() == NO_ERROR)) {
             size.HighPart = length;
             /* get the current position within the file */
             pos.QuadPart = 0;
             pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart,
                                         FILE_CURRENT);
             if((pos.LowPart != INVALID_SET_FILE_POINTER) ||
-              (GetLastError() == NO_ERROR)) {
+               (GetLastError() == NO_ERROR)) {
               /* compare position with size, abort if not equal */
               if(size.QuadPart == pos.QuadPart) {
                 /* sleep and continue waiting */
@@ -469,7 +469,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
           ReleaseMutex(mutex);
           break;
         }
-        else if(length == WAIT_ABANDONED) {
+        else if(ret == WAIT_ABANDONED) {
           /* we are not allowed to process this event, because select_ws
              is post-processing the signalled events and we must exit. */
           break;
@@ -487,11 +487,10 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
         */
       while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
             == WAIT_OBJECT_0 + 1) {
-        length = WaitForSingleObjectEx(mutex, 0, FALSE);
-        if(length == WAIT_OBJECT_0) {
+        ret = WaitForSingleObjectEx(mutex, 0, FALSE);
+        if(ret == WAIT_OBJECT_0) {
           /* check if this is an actual console handle */
-          length = 0;
-          if(GetConsoleMode(handle, &length)) {
+          if(GetConsoleMode(handle, &ret)) {
             /* retrieve an event from the console buffer */
             length = 0;
             if(PeekConsoleInput(handle, &inputrecord, 1, &length)) {
@@ -510,7 +509,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
           ReleaseMutex(mutex);
           break;
         }
-        else if(length == WAIT_ABANDONED) {
+        else if(ret == WAIT_ABANDONED) {
           /* we are not allowed to process this event, because select_ws
              is post-processing the signalled events and we must exit. */
           break;
@@ -528,8 +527,8 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
         */
       while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
             == WAIT_TIMEOUT) {
-        length = WaitForSingleObjectEx(mutex, 0, FALSE);
-        if(length == WAIT_OBJECT_0) {
+        ret = WaitForSingleObjectEx(mutex, 0, FALSE);
+        if(ret == WAIT_OBJECT_0) {
           /* peek into the pipe and retrieve the amount of data available */
           length = 0;
           if(PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
@@ -545,9 +544,9 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
           }
           else {
             /* if the pipe has NOT been closed, sleep and continue waiting */
-            length = GetLastError();
-            if(length != ERROR_BROKEN_PIPE) {
-              logmsg("[select_ws_wait_thread] PeekNamedPipe err: %d", length);
+            ret = GetLastError();
+            if(ret != ERROR_BROKEN_PIPE) {
+              logmsg("[select_ws_wait_thread] PeekNamedPipe error: %d", ret);
               SleepEx(0, FALSE);
               ReleaseMutex(mutex);
               continue;
@@ -562,7 +561,7 @@ static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
           ReleaseMutex(mutex);
           break;
         }
-        else if(length == WAIT_ABANDONED) {
+        else if(ret == WAIT_ABANDONED) {
           /* we are not allowed to process this event, because select_ws
              is post-processing the signalled events and we must exit. */
           break;
@@ -613,25 +612,24 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal,
   return thread;
 }
 struct select_ws_data {
-  WSANETWORKEVENTS pre;  /* the internal select result (indexed by fds/idx) */
-  curl_socket_t fd;      /* the original input handle  (indexed by fds/idx) */
-  curl_socket_t wsasock; /* the internal socket handle (indexed by wsa) */
-  WSAEVENT wsaevent;     /* the internal WINSOCK event (indexed by wsa) */
-  HANDLE signal;         /* the internal signal handle (indexed by thd) */
-  HANDLE thread;         /* the internal thread handle (indexed by thd) */
+  int fd;                /* provided file descriptor  (indexed by nfd) */
+  long wsastate;         /* internal pre-select state (indexed by nfd) */
+  curl_socket_t wsasock; /* internal socket handle    (indexed by nws) */
+  WSAEVENT wsaevent;     /* internal select event     (indexed by nws) */
+  HANDLE signal;         /* internal thread signal    (indexed by nth) */
+  HANDLE thread;         /* internal thread handle    (indexed by nth) */
 };
 static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *tv)
 {
   HANDLE abort, mutex, signal, handle, *handles;
+  DWORD timeout_ms, wait, nfd, nth, nws, i;
   fd_set readsock, writesock, exceptsock;
-  DWORD milliseconds, wait, idx;
-  WSANETWORKEVENTS wsanetevents;
   struct select_ws_data *data;
+  WSANETWORKEVENTS wsaevents;
+  curl_socket_t wsasock;
+  int error, ret, fd;
   WSAEVENT wsaevent;
-  int error, fds;
-  DWORD nfd = 0, thd = 0, wsa = 0;
-  int ret = 0;
 
   /* check if the input value is valid */
   if(nfds < 0) {
@@ -641,15 +639,15 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* convert struct timeval to milliseconds */
   if(tv) {
-    milliseconds = (tv->tv_sec*1000)+(DWORD)(((double)tv->tv_usec)/1000.0);
+    timeout_ms = (tv->tv_sec*1000) + (DWORD)(((double)tv->tv_usec)/1000.0);
   }
   else {
-    milliseconds = INFINITE;
+    timeout_ms = INFINITE;
   }
 
   /* check if we got descriptors, sleep in case we got none */
   if(!nfds) {
-    SleepEx(milliseconds, FALSE);
+    SleepEx(timeout_ms, FALSE);
     return 0;
   }
 
@@ -688,91 +686,93 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   /* loop over the handles in the input descriptor sets */
-  for(fds = 0; fds < nfds; fds++) {
-    long networkevents = 0;
+  nfd = 0; /* number of handled file descriptors */
+  nth = 0; /* number of interal waiting threads */
+  nws = 0; /* number of handled WINSOCK sockets */
+  for(fd = 0; fd < nfds; fd++) {
+    wsasock = curlx_sitosk(fd);
+    wsaevents.lNetworkEvents = 0;
     handles[nfd] = 0;
 
     FD_ZERO(&readsock);
     FD_ZERO(&writesock);
     FD_ZERO(&exceptsock);
 
-    if(FD_ISSET(fds, readfds)) {
-      FD_SET(fds, &readsock);
-      networkevents |= FD_READ|FD_ACCEPT|FD_CLOSE;
+    if(FD_ISSET(wsasock, readfds)) {
+      FD_SET(wsasock, &readsock);
+      wsaevents.lNetworkEvents |= FD_READ|FD_ACCEPT|FD_CLOSE;
     }
 
-    if(FD_ISSET(fds, writefds)) {
-      FD_SET(fds, &writesock);
-      networkevents |= FD_WRITE|FD_CONNECT;
+    if(FD_ISSET(wsasock, writefds)) {
+      FD_SET(wsasock, &writesock);
+      wsaevents.lNetworkEvents |= FD_WRITE|FD_CONNECT;
     }
 
-    if(FD_ISSET(fds, exceptfds)) {
-      FD_SET(fds, &exceptsock);
-      networkevents |= FD_OOB;
+    if(FD_ISSET(wsasock, exceptfds)) {
+      FD_SET(wsasock, &exceptsock);
+      wsaevents.lNetworkEvents |= FD_OOB;
     }
 
     /* only wait for events for which we actually care */
-    if(networkevents) {
-      data[nfd].fd = curlx_sitosk(fds);
-      if(fds == fileno(stdin)) {
-        handle = GetStdHandle(STD_INPUT_HANDLE);
+    if(wsaevents.lNetworkEvents) {
+      data[nfd].fd = fd;
+      if(fd == fileno(stdin)) {
         signal = CreateEvent(NULL, TRUE, FALSE, NULL);
         if(signal) {
+          handle = GetStdHandle(STD_INPUT_HANDLE);
           handle = select_ws_wait(handle, signal, abort, mutex);
           if(handle) {
             handles[nfd] = signal;
-            data[thd].signal = signal;
-            data[thd].thread = handle;
-            thd++;
+            data[nth].signal = signal;
+            data[nth].thread = handle;
+            nth++;
           }
           else {
             CloseHandle(signal);
           }
         }
       }
-      else if(fds == fileno(stdout)) {
+      else if(fd == fileno(stdout)) {
         handles[nfd] = GetStdHandle(STD_OUTPUT_HANDLE);
       }
-      else if(fds == fileno(stderr)) {
+      else if(fd == fileno(stderr)) {
         handles[nfd] = GetStdHandle(STD_ERROR_HANDLE);
       }
       else {
         wsaevent = WSACreateEvent();
         if(wsaevent != WSA_INVALID_EVENT) {
-          error = WSAEventSelect(fds, wsaevent, networkevents);
+          error = WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents);
           if(error != SOCKET_ERROR) {
-            handle = (HANDLE) wsaevent;
-            handles[nfd] = handle;
-            data[wsa].wsasock = curlx_sitosk(fds);
-            data[wsa].wsaevent = wsaevent;
-            data[nfd].pre.lNetworkEvents = 0;
+            handles[nfd] = (HANDLE)wsaevent;
+            data[nws].wsasock = wsasock;
+            data[nws].wsaevent = wsaevent;
+            data[nfd].wsastate = 0;
             tv->tv_sec = 0;
             tv->tv_usec = 0;
             /* check if the socket is already ready */
-            if(select(fds + 1, &readsock, &writesock, &exceptsock, tv) == 1) {
-              logmsg("[select_ws] socket %d is ready", fds);
+            if(select(fd + 1, &readsock, &writesock, &exceptsock, tv) == 1) {
+              logmsg("[select_ws] socket %d is ready", fd);
               WSASetEvent(wsaevent);
-              if(FD_ISSET(fds, &readsock))
-                data[nfd].pre.lNetworkEvents |= FD_READ;
-              if(FD_ISSET(fds, &writesock))
-                data[nfd].pre.lNetworkEvents |= FD_WRITE;
-              if(FD_ISSET(fds, &exceptsock))
-                data[nfd].pre.lNetworkEvents |= FD_OOB;
+              if(FD_ISSET(wsasock, &readsock))
+                data[nfd].wsastate |= FD_READ;
+              if(FD_ISSET(wsasock, &writesock))
+                data[nfd].wsastate |= FD_WRITE;
+              if(FD_ISSET(wsasock, &exceptsock))
+                data[nfd].wsastate |= FD_OOB;
             }
-            wsa++;
+            nws++;
           }
           else {
-            curl_socket_t socket = curlx_sitosk(fds);
             WSACloseEvent(wsaevent);
-            handle = (HANDLE) socket;
             signal = CreateEvent(NULL, TRUE, FALSE, NULL);
             if(signal) {
+              handle = (HANDLE)wsasock;
               handle = select_ws_wait(handle, signal, abort, mutex);
               if(handle) {
                 handles[nfd] = signal;
-                data[thd].signal = signal;
-                data[thd].thread = handle;
-                thd++;
+                data[nth].signal = signal;
+                data[nth].thread = handle;
+                nth++;
               }
               else {
                 CloseHandle(signal);
@@ -786,90 +786,89 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   /* wait for one of the internal handles to trigger */
-  wait = WaitForMultipleObjectsEx(nfd, handles, FALSE, milliseconds, FALSE);
+  wait = WaitForMultipleObjectsEx(nfd, handles, FALSE, timeout_ms, FALSE);
 
   /* wait for internal mutex to lock event handling in threads */
   WaitForSingleObjectEx(mutex, INFINITE, FALSE);
 
   /* loop over the internal handles returned in the descriptors */
-  for(idx = 0; idx < nfd; idx++) {
-    curl_socket_t sock = data[idx].fd;
-    handle = handles[idx];
-    fds = curlx_sktosi(sock);
+  ret = 0; /* number of ready file descriptors */
+  for(i = 0; i < nfd; i++) {
+    fd = data[i].fd;
+    handle = handles[i];
+    wsasock = curlx_sitosk(fd);
 
     /* check if the current internal handle was triggered */
-    if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) <= idx &&
+    if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) <= i &&
        WaitForSingleObjectEx(handle, 0, FALSE) == WAIT_OBJECT_0) {
       /* first handle stdin, stdout and stderr */
-      if(fds == fileno(stdin)) {
+      if(fd == fileno(stdin)) {
         /* stdin is never ready for write or exceptional */
-        FD_CLR(sock, writefds);
-        FD_CLR(sock, exceptfds);
+        FD_CLR(wsasock, writefds);
+        FD_CLR(wsasock, exceptfds);
       }
-      else if(fds == fileno(stdout) || fds == fileno(stderr)) {
+      else if(fd == fileno(stdout) || fd == fileno(stderr)) {
         /* stdout and stderr are never ready for read or exceptional */
-        FD_CLR(sock, readfds);
-        FD_CLR(sock, exceptfds);
+        FD_CLR(wsasock, readfds);
+        FD_CLR(wsasock, exceptfds);
       }
       else {
         /* try to handle the event with the WINSOCK2 functions */
-        wsanetevents.lNetworkEvents = 0;
-        error = WSAEnumNetworkEvents(fds, handle, &wsanetevents);
+        wsaevents.lNetworkEvents = 0;
+        error = WSAEnumNetworkEvents(wsasock, handle, &wsaevents);
         if(error != SOCKET_ERROR) {
           /* merge result from pre-check using select */
-          wsanetevents.lNetworkEvents |= data[idx].pre.lNetworkEvents;
+          wsaevents.lNetworkEvents |= data[i].wsastate;
 
           /* remove from descriptor set if not ready for read/accept/close */
-          if(!(wsanetevents.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE)))
-            FD_CLR(sock, readfds);
+          if(!(wsaevents.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE)))
+            FD_CLR(wsasock, readfds);
 
           /* remove from descriptor set if not ready for write/connect */
-          if(!(wsanetevents.lNetworkEvents & (FD_WRITE|FD_CONNECT)))
-            FD_CLR(sock, writefds);
+          if(!(wsaevents.lNetworkEvents & (FD_WRITE|FD_CONNECT)))
+            FD_CLR(wsasock, writefds);
 
           /* remove from descriptor set if not exceptional */
-          if(!(wsanetevents.lNetworkEvents & (FD_OOB)))
-            FD_CLR(sock, exceptfds);
+          if(!(wsaevents.lNetworkEvents & (FD_OOB)))
+            FD_CLR(wsasock, exceptfds);
         }
       }
 
       /* check if the event has not been filtered using specific tests */
-      if(FD_ISSET(sock, readfds) || FD_ISSET(sock, writefds) ||
-         FD_ISSET(sock, exceptfds)) {
+      if(FD_ISSET(wsasock, readfds) || FD_ISSET(wsasock, writefds) ||
+         FD_ISSET(wsasock, exceptfds)) {
         ret++;
       }
     }
     else {
       /* remove from all descriptor sets since this handle did not trigger */
-      FD_CLR(sock, readfds);
-      FD_CLR(sock, writefds);
-      FD_CLR(sock, exceptfds);
+      FD_CLR(wsasock, readfds);
+      FD_CLR(wsasock, writefds);
+      FD_CLR(wsasock, exceptfds);
     }
   }
 
   /* signal the event handle for the other waiting threads */
   SetEvent(abort);
 
-  for(fds = 0; fds < nfds; fds++) {
-    if(FD_ISSET(fds, readfds))
-      logmsg("[select_ws] %d is readable", fds);
-
-    if(FD_ISSET(fds, writefds))
-      logmsg("[select_ws] %d is writable", fds);
-
-    if(FD_ISSET(fds, exceptfds))
-      logmsg("[select_ws] %d is exceptional", fds);
+  for(fd = 0; fd < nfds; fd++) {
+    if(FD_ISSET(fd, readfds))
+      logmsg("[select_ws] %d is readable", fd);
+    if(FD_ISSET(fd, writefds))
+      logmsg("[select_ws] %d is writable", fd);
+    if(FD_ISSET(fd, exceptfds))
+      logmsg("[select_ws] %d is exceptional", fd);
   }
 
-  for(idx = 0; idx < wsa; idx++) {
-    WSAEventSelect(data[idx].wsasock, NULL, 0);
-    WSACloseEvent(data[idx].wsaevent);
+  for(i = 0; i < nws; i++) {
+    WSAEventSelect(data[i].wsasock, NULL, 0);
+    WSACloseEvent(data[i].wsaevent);
   }
 
-  for(idx = 0; idx < thd; idx++) {
-    WaitForSingleObjectEx(data[idx].thread, INFINITE, FALSE);
-    CloseHandle(data[idx].thread);
-    CloseHandle(data[idx].signal);
+  for(i = 0; i < nth; i++) {
+    WaitForSingleObjectEx(data[i].thread, INFINITE, FALSE);
+    CloseHandle(data[i].thread);
+    CloseHandle(data[i].signal);
   }
 
   CloseHandle(abort);
