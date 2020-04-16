@@ -1955,6 +1955,9 @@ typedef enum {
   /* allow RCPT TO command to fail for some recipients */
   CURLOPT(CURLOPT_MAIL_RCPT_ALLLOWFAILS, CURLOPTTYPE_LONG, 290),
 
+  /* Set client name for a DICT session */
+  CURLOPT(CURLOPT_DICT_CLIENTNAME, CURLOPTTYPE_STRINGPOINT, 291),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

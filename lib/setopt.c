@@ -1978,6 +1978,15 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.telnet_options = va_arg(param, struct curl_slist *);
     break;
 #endif
+#ifndef CURL_DISABLE_DICT
+  case CURLOPT_DICT_CLIENTNAME:
+    /*
+     * Set a client name for a DICT session
+     */
+    result = Curl_setstropt(&data->set.str[STRING_DICT_CLIENT_NAME],
+                            va_arg(param, char *));
+    break;
+#endif
   case CURLOPT_BUFFERSIZE:
     /*
      * The application kindly asks for a differently sized receive buffer.

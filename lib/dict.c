@@ -134,6 +134,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
   char *strategy = NULL;
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
+  char *client_name = NULL;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
@@ -144,6 +145,18 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
 
   if(conn->bits.user_passwd) {
     /* AUTH is missing */
+  }
+
+  /* If a custom client name was set by CURLOPT_DICT_CLIENTNAME */
+  if(data->set.str[STRING_DICT_CLIENT_NAME]) {
+    client_name = data->set.str[STRING_DICT_CLIENT_NAME];
+  }
+  else {
+    const char *static_client_name = LIBCURL_NAME " " LIBCURL_VERSION;
+    client_name = malloc(strlen(static_client_name));
+    if(!client_name)
+      return CURLE_OUT_OF_MEMORY;
+    strcpy(client_name, static_client_name);
   }
 
   if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
@@ -183,13 +196,14 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
 
     result = Curl_sendf(sockfd, conn,
-                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
+                        "CLIENT %s\r\n"
                         "MATCH "
                         "%s "    /* database */
                         "%s "    /* strategy */
                         "%s\r\n" /* word */
                         "QUIT\r\n",
 
+                        client_name,
                         database,
                         strategy,
                         eword
@@ -233,11 +247,12 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
       return CURLE_OUT_OF_MEMORY;
 
     result = Curl_sendf(sockfd, conn,
-                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
+                        "CLIENT %s\r\n"
                         "DEFINE "
                         "%s "     /* database */
                         "%s\r\n"  /* word */
                         "QUIT\r\n",
+                        client_name,
                         database,
                         eword);
 
@@ -261,9 +276,9 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
           ppath[i] = ' ';
       }
       result = Curl_sendf(sockfd, conn,
-                          "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
+                          "CLIENT %s\r\n"
                           "%s\r\n"
-                          "QUIT\r\n", ppath);
+                          "QUIT\r\n", client_name, ppath);
       if(result) {
         failf(data, "Failed sending DICT request");
         return result;
@@ -272,7 +287,7 @@ static CURLcode dict_do(struct connectdata *conn, bool *done)
       Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
     }
   }
-
+  free(client_name);
   return CURLE_OK;
 }
 #endif /*CURL_DISABLE_DICT*/

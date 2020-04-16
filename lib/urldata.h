@@ -1590,6 +1590,8 @@ enum dupstring {
   STRING_DNS_LOCAL_IP4,
   STRING_DNS_LOCAL_IP6,
 
+  STRING_DICT_CLIENT_NAME,
+
   /* -- end of zero-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
