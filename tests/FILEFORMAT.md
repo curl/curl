@@ -130,6 +130,10 @@ For HTTP/HTTPS, these are supported:
 ### `<servercmd>`
 Special-commands for the server.
 
+The first line of this file will always be set to `Testnum [number]` by the
+test script, to allow servers to read that to know what test the client is
+about to issue.
+
 #### For FTP/SMTP/POP/IMAP
 
 - `REPLY [command] [return value] [response string]` - Changes how the server

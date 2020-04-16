@@ -175,7 +175,7 @@ my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $PROXYIN="$LOGDIR/proxy.input"; # what curl sent the proxy
 my $CURLLOG="commands.log"; # all command lines run
-my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
+my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy server instructions here
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
 my $CURLCONFIG="../curl-config"; # curl-config from current build
 
@@ -3675,10 +3675,9 @@ sub singletest {
     unlink($SERVER2IN);
     unlink($PROXYIN);
 
-    if(@ftpservercmd) {
-        # write the instructions to file
-        writearray($FTPDCMD, \@ftpservercmd);
-    }
+    push @ftpservercmd, "Testnum $testnum\n";
+    # write the instructions to file
+    writearray($FTPDCMD, \@ftpservercmd);
 
     # get the command line options to use
     my @blaha;
@@ -4028,9 +4027,6 @@ sub singletest {
             unlink($pidfile) if(-f $pidfile);
         }
     }
-
-    # remove the test server commands file after each test
-    unlink($FTPDCMD) if(-f $FTPDCMD);
 
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
