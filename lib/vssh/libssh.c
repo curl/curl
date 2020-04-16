@@ -403,6 +403,9 @@ static int myssh_is_known(struct connectdata *conn)
           knownkey.keytype = CURLKHTYPE_RSA1;
           break;
         case SSH_KEYTYPE_ECDSA:
+        case SSH_KEYTYPE_ECDSA_P256:
+        case SSH_KEYTYPE_ECDSA_P384:
+        case SSH_KEYTYPE_ECDSA_P521:
           knownkey.keytype = CURLKHTYPE_ECDSA;
           break;
         case SSH_KEYTYPE_ED25519:
@@ -470,6 +473,11 @@ static int myssh_is_known(struct connectdata *conn)
         foundkey.keytype = CURLKHTYPE_RSA1;
         break;
       case SSH_KEYTYPE_ECDSA:
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+      case SSH_KEYTYPE_ECDSA_P256:
+      case SSH_KEYTYPE_ECDSA_P384:
+      case SSH_KEYTYPE_ECDSA_P521:
+#endif
         foundkey.keytype = CURLKHTYPE_ECDSA;
         break;
 #if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,7,0)
