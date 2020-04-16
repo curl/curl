@@ -1,0 +1,56 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" **************************************************************************
+.\"
+.TH CURLOPT_DICT_CLIENTNAME 3 "16 Apr 2020" "libcurl 7.70.0" "curl_easy_setopt options"
+.SH NAME
+CURLOPT_DICT_CLIENTNAME \- set DICT CLIENT name
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DICT_CLIENTNAME, char *cn);
+.SH DESCRIPTION
+Pass a pointer to a zero terminated string as parameter. It will be used to
+set the CLIENT field in the DICT request sent to the remote server. This
+can be used to fool servers or scripts.
+
+The application does not have to keep the string around after setting this
+option.
+.SH DEFAULT
+NULL, The string "libcurl CURRENTVERSION" will be used.
+.SH PROTOCOLS
+DICT
+.SH EXAMPLE
+.nf
+CURL *curl = curl_easy_init();
+if(curl) {
+  curl_easy_setopt(curl, CURLOPT_URL, "dict://example.com/d:Test");
+
+  curl_easy_setopt(curl, CURLOPT_DICT_CLIENTNAME, "definitely_not_libcurl");
+
+  curl_easy_perform(curl);
+}
+.fi
+.SH AVAILABILITY
+As long as DICT is supported
+.SH RETURN VALUE
+Returns CURLE_OK if DICT is supported, CURLE_UNKNOWN_OPTION if not, or
+CURLE_OUT_OF_MEMORY if there was insufficient heap space.
