@@ -1498,6 +1498,7 @@ sub runhttpserver {
     $server = servername_id($proto, $ipvnum, $idnum);
 
     $pidfile = $serverpidfile{$server};
+    my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1518,11 +1519,12 @@ sub runhttpserver {
     $flags .= "--connect $HOSTIP " if($alt eq "proxy");
     $flags .= $verbose_flag if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--portfile $portfile ";
     $flags .= "--id $idnum " if($idnum > 1);
     if($ipvnum eq "unix") {
         $flags .= "--unix-socket '$port_or_path' ";
     } else {
-        $flags .= "--ipv$ipvnum --port $port_or_path ";
+        $flags .= "--ipv$ipvnum --port 0 ";
     }
     $flags .= "--srcdir \"$srcdir\"";
 
@@ -1536,6 +1538,12 @@ sub runhttpserver {
         displaylogs($testnumcheck);
         $doesntrun{$pidfile} = 1;
         return (0,0);
+    }
+
+    # where is it?
+    my $port;
+    if(!$port_or_path) {
+        $port = $port_or_path = pidfromfile($portfile);
     }
 
     # Server is up. Verify that we can speak to it.
@@ -1556,7 +1564,7 @@ sub runhttpserver {
 
     sleep(1);
 
-    return ($httppid, $pid2);
+    return ($httppid, $pid2, $port);
 }
 
 #######################################################################
@@ -4611,8 +4619,8 @@ sub startservers {
                 stopserver('gopher');
             }
             if(!$run{'gopher'}) {
-                ($pid, $pid2) = runhttpserver("gopher", $verbose, 0,
-                                              $GOPHERPORT);
+                ($pid, $pid2, $GOPHERPORT) =
+                    runhttpserver("gopher", $verbose, 0);
                 if($pid <= 0) {
                     return "failed starting GOPHER server";
                 }
@@ -4628,8 +4636,8 @@ sub startservers {
                 stopserver('gopher-ipv6');
             }
             if(!$run{'gopher-ipv6'}) {
-                ($pid, $pid2) = runhttpserver("gopher", $verbose, "ipv6",
-                                              $GOPHER6PORT);
+                ($pid, $pid2, $GOPHER6PORT) =
+                    runhttpserver("gopher", $verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting GOPHER-IPv6 server";
                 }
@@ -4655,8 +4663,8 @@ sub startservers {
                 stopserver('http');
             }
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver("http", $verbose, 0,
-                                              $HTTPPORT);
+                ($pid, $pid2, $HTTPPORT) =
+                    runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
@@ -4672,8 +4680,8 @@ sub startservers {
                 stopserver('http-proxy');
             }
             if(!$run{'http-proxy'}) {
-                ($pid, $pid2) = runhttpserver("http", $verbose, "proxy",
-                                              $HTTPPROXYPORT);
+                ($pid, $pid2, $HTTPPROXYPORT) =
+                    runhttpserver("http", $verbose, "proxy");
                 if($pid <= 0) {
                     return "failed starting HTTP-proxy server";
                 }
@@ -4688,8 +4696,8 @@ sub startservers {
                 stopserver('http-ipv6');
             }
             if(!$run{'http-ipv6'}) {
-                ($pid, $pid2) = runhttpserver("http", $verbose, "ipv6",
-                                              $HTTP6PORT);
+                ($pid, $pid2, $HTTP6PORT) =
+                    runhttpserver("http", $verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting HTTP-IPv6 server";
                 }
@@ -4775,8 +4783,8 @@ sub startservers {
                 stopserver('http');
             }
             if(!$run{'http'}) {
-                ($pid, $pid2) = runhttpserver("http", $verbose, 0,
-                                              $HTTPPORT);
+                ($pid, $pid2, $HTTPPORT) =
+                    runhttpserver("http", $verbose, 0);
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
@@ -4895,8 +4903,9 @@ sub startservers {
                 stopserver('http-unix');
             }
             if(!$run{'http-unix'}) {
-                ($pid, $pid2) = runhttpserver("http", $verbose, "unix",
-                                              $HTTPUNIXPATH);
+                my $unused;
+                ($pid, $pid2, $unused) =
+                    runhttpserver("http", $verbose, "unix", $HTTPUNIXPATH);
                 if($pid <= 0) {
                     return "failed starting HTTP-unix server";
                 }
@@ -5427,11 +5436,9 @@ if ($gdbthis) {
 
 $minport         = $base; # original base port number
 
-$HTTPPORT        = $base++; # HTTP server port
 $HTTPSPORT       = $base++; # HTTPS (stunnel) server port
 $FTPPORT         = $base++; # FTP server port
 $FTPSPORT        = $base++; # FTPS (stunnel) server port
-$HTTP6PORT       = $base++; # HTTP IPv6 server port
 $FTP2PORT        = $base++; # FTP server 2 port
 $FTP6PORT        = $base++; # FTP IPv6 port
 $TFTPPORT        = $base++; # TFTP (UDP) port
@@ -5446,11 +5453,8 @@ $SMTPPORT        = $base++; # SMTP server port
 $SMTP6PORT       = $base++; # SMTP IPv6 server port
 $RTSPPORT        = $base++; # RTSP server port
 $RTSP6PORT       = $base++; # RTSP IPv6 server port
-$GOPHERPORT      = $base++; # Gopher IPv4 server port
-$GOPHER6PORT     = $base++; # Gopher IPv6 server port
 $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port
 $HTTPTLS6PORT    = $base++; # HTTP TLS (non-stunnel) IPv6 server port
-$HTTPPROXYPORT   = $base++; # HTTP proxy port, when using CONNECT
 $HTTP2PORT       = $base++; # HTTP/2 port
 $DICTPORT        = $base++; # DICT port
 $SMBPORT         = $base++; # SMB port

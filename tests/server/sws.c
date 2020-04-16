@@ -1849,6 +1849,7 @@ int main(int argc, char *argv[])
   bool unlink_socket = false;
 #endif
   const char *pidname = ".http.pid";
+  const char *portname = ".http.port";
   struct httprequest req;
   int rc = 0;
   int error;
@@ -1880,6 +1881,11 @@ int main(int argc, char *argv[])
       arg++;
       if(argc>arg)
         pidname = argv[arg++];
+    }
+    else if(!strcmp("--portfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        portname = argv[arg++];
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
@@ -1928,7 +1934,7 @@ int main(int argc, char *argv[])
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum < 1025UL) || (ulnum > 65535UL)) {
+           (ulnum && ((ulnum < 1025UL) || (ulnum > 65535UL)))) {
           fprintf(stderr, "sws: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
@@ -1961,6 +1967,7 @@ int main(int argc, char *argv[])
            " --version\n"
            " --logfile [file]\n"
            " --pidfile [file]\n"
+           " --portfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --unix-socket [file]\n"
@@ -1971,8 +1978,6 @@ int main(int argc, char *argv[])
       return 0;
     }
   }
-
-  msnprintf(port_str, sizeof(port_str), "port %hu", port);
 
 #ifdef WIN32
   win32_init();
@@ -2080,10 +2085,57 @@ int main(int argc, char *argv[])
   }
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on %s: (%d) %s",
-           location_str, error, strerror(error));
+    logmsg("Error binding socket: (%d) %s", error, strerror(error));
     goto sws_cleanup;
   }
+
+  if(!port) {
+    /* The system was supposed to choose a port number, figure out which
+       port we actually got and update the listener port value with it. */
+    curl_socklen_t la_size;
+    srvr_sockaddr_union_t localaddr;
+#ifdef ENABLE_IPV6
+    if(socket_domain != AF_INET6)
+#endif
+      la_size = sizeof(localaddr.sa4);
+#ifdef ENABLE_IPV6
+    else
+      la_size = sizeof(localaddr.sa6);
+#endif
+    memset(&localaddr.sa, 0, (size_t)la_size);
+    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
+      error = SOCKERRNO;
+      logmsg("getsockname() failed with error: (%d) %s",
+             error, strerror(error));
+      sclose(sock);
+      goto sws_cleanup;
+    }
+    switch(localaddr.sa.sa_family) {
+    case AF_INET:
+      port = ntohs(localaddr.sa4.sin_port);
+      break;
+#ifdef ENABLE_IPV6
+    case AF_INET6:
+      port = ntohs(localaddr.sa6.sin6_port);
+      break;
+#endif
+    default:
+      break;
+    }
+    if(!port) {
+      /* Real failure, listener port shall not be zero beyond this point. */
+      logmsg("Apparently getsockname() succeeded, with listener port zero.");
+      logmsg("A valid reason for this failure is a binary built without");
+      logmsg("proper network library linkage. This might not be the only");
+      logmsg("reason, but double check it before anything else.");
+      sclose(sock);
+      goto sws_cleanup;
+    }
+  }
+#ifdef USE_UNIX_SOCKETS
+  if(socket_domain != AF_UNIX)
+#endif
+    msnprintf(port_str, sizeof(port_str), "port %hu", port);
 
   logmsg("Running %s %s version on %s",
          use_gopher?"GOPHER":"HTTP", socket_type, location_str);
@@ -2108,6 +2160,10 @@ int main(int argc, char *argv[])
   */
 
   wrotepidfile = write_pidfile(pidname);
+  if(!wrotepidfile)
+    goto sws_cleanup;
+
+  wrotepidfile = write_portfile(portname, port);
   if(!wrotepidfile)
     goto sws_cleanup;
 
