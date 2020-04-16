@@ -15,6 +15,11 @@ hello
 <datacheck hex="yes">
 00 04 31 31 39 30   68 65 6c 6c 6f 5b 4c 46 5d 0a
 </datacheck>
+
+# error 1 - "Connection Refused, unacceptable protocol version"
+<servercmd>
+error-CONNACK 1
+</servercmd>
 </reply>
 
 #
@@ -27,10 +32,10 @@ mqtt
 mqtt
 </server>
 <name>
-MQTT SUBSCRIBE
+MQTT with error in CONNACK
 </name>
 <command option="binary-trace">
-mqtt://%HOSTIP:%MQTTPORT/1190
+mqtt://%HOSTIP:%MQTTPORT/1196
 </command>
 </client>
 
@@ -46,11 +51,12 @@ s/^(.* 00044d5154540402003c000c6375726c).*/$1/
 </strippart>
 <protocol>
 client CONNECT 18 00044d5154540402003c000c6375726c
-server CONNACK 2 20020000
-client SUBSCRIBE 9 000100043131393000
-server SUBACK 3 9003000100
-server PUBLISH c 300c00043131393068656c6c6f0a
-server DISCONNECT 0 e000
+server CONNACK 2 20020001
 </protocol>
+
+# 8 is CURLE_WEIRD_SERVER_REPLY
+<errorcode>
+8
+</errorcode>
 </verify>
 </testcase>
