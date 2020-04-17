@@ -174,6 +174,9 @@ int Curl_ssl_init(void)
   return Curl_ssl->init();
 }
 
+#if defined(CURL_WITH_MULTI_SSL)
+static const struct Curl_ssl Curl_ssl_multi;
+#endif
 
 /* Global cleanup */
 void Curl_ssl_cleanup(void)
@@ -181,6 +184,9 @@ void Curl_ssl_cleanup(void)
   if(init_ssl) {
     /* only cleanup if we did a previous init */
     Curl_ssl->cleanup();
+#if defined(CURL_WITH_MULTI_SSL)
+    Curl_ssl = &Curl_ssl_multi;
+#endif
     init_ssl = FALSE;
   }
 }
