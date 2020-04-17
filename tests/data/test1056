@@ -13,7 +13,7 @@ IPv6
 <reply>
 <data>
 HTTP/1.1 302 OK swsclose
-Location: http://[::1%259999]:8994/moo/10560002
+Location: http://[::1%259999]:%HTTP6PORT/moo/10560002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
 Connection: close
 
@@ -27,7 +27,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 302 OK swsclose
-Location: http://[::1%259999]:8994/moo/10560002
+Location: http://[::1%259999]:%HTTP6PORT/moo/10560002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
 Connection: close
 
@@ -55,10 +55,6 @@ HTTP follow redirect from IPv4 to IPv6 with scope
  <command>
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/1056 -L
 </command>
-# The data section doesn't do variable substitution, so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOST6IP' ne '[::1]' || '%HTTP6PORT' ne '8994' );"
-</precheck>
 </client>
 
 #
