@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Web crawler based on curl and libxml2.
- * Copyright (C) 2018 - 2019 Jeroen Ooms <jeroenooms@gmail.com>
+ * Copyright (C) 2018 - 2020 Jeroen Ooms <jeroenooms@gmail.com>
  * License: MIT
  *
  * To compile:
@@ -116,7 +116,8 @@ size_t follow_links(CURLM *multi_handle, memory *mem, char *url)
     return 0;
   }
   size_t count = 0;
-  for(int i = 0; i < nodeset->nodeNr; i++) {
+  int i;
+  for(i = 0; i < nodeset->nodeNr; i++) {
     double r = rand();
     int x = r * nodeset->nodeNr / RAND_MAX;
     const xmlNode *node = nodeset->nodeTab[x]->xmlChildrenNode;
