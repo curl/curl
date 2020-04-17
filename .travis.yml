@@ -421,6 +421,8 @@ matrix:
                       - clang-7
                       - libpsl-dev
                       - libbrotli-dev
+   allow_failures:
+        # non-x86 are flaky
         - os: linux
           arch: arm64
           compiler: gcc
