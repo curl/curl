@@ -156,7 +156,7 @@ my $SMBPORT;             # SMB server port
 my $SMBSPORT;            # SMBS server port
 my $NEGTELNETPORT;       # TELNET server port with negotiation
 
-my $SSHSRVMD5;           # MD5 of ssh server public key
+my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext('TOOL'); # what curl executable to run on the tests
@@ -1559,7 +1559,7 @@ sub runhttpserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $httppid\n";
+        logmsg "RUN: $srvrname server is on PID $httppid port $port\n";
     }
 
     sleep(1);
@@ -3119,9 +3119,7 @@ sub checksystem {
     logmsg ("* Port range: $minport-$maxport\n");
 
     if($verbose) {
-        logmsg "* Ports:\n";
-
-        logmsg sprintf("*   HTTP/%d ", $HTTPPORT);
+        logmsg "* Ports: ";
         logmsg sprintf("FTP/%d ", $FTPPORT);
         logmsg sprintf("FTP2/%d ", $FTP2PORT);
         logmsg sprintf("RTSP/%d ", $RTSPPORT);
@@ -3131,7 +3129,6 @@ sub checksystem {
         }
         logmsg sprintf("\n*   TFTP/%d ", $TFTPPORT);
         if($http_ipv6) {
-            logmsg sprintf("HTTP-IPv6/%d ", $HTTP6PORT);
             logmsg sprintf("RTSP-IPv6/%d ", $RTSP6PORT);
         }
         if($ftp_ipv6) {
@@ -3139,10 +3136,6 @@ sub checksystem {
         }
         if($tftp_ipv6) {
             logmsg sprintf("TFTP-IPv6/%d ", $TFTP6PORT);
-        }
-        logmsg sprintf("\n*   GOPHER/%d ", $GOPHERPORT);
-        if($gopher_ipv6) {
-            logmsg sprintf("GOPHER-IPv6/%d", $GOPHER6PORT);
         }
         logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
         logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
@@ -3184,105 +3177,83 @@ sub checksystem {
 # a command, in either case passed by reference
 #
 sub subVariables {
-  my ($thing) = @_;
+    my ($thing, $prefix) = @_;
 
-  # ports
+    if(!$prefix) {
+        $prefix = "%";
+    }
 
-  $$thing =~ s/%FTP6PORT/$FTP6PORT/g;
-  $$thing =~ s/%FTP2PORT/$FTP2PORT/g;
-  $$thing =~ s/%FTPSPORT/$FTPSPORT/g;
-  $$thing =~ s/%FTPPORT/$FTPPORT/g;
+    # test server ports
+    $$thing =~ s/${prefix}FTP6PORT/$FTP6PORT/g;
+    $$thing =~ s/${prefix}FTP2PORT/$FTP2PORT/g;
+    $$thing =~ s/${prefix}FTPSPORT/$FTPSPORT/g;
+    $$thing =~ s/${prefix}FTPPORT/$FTPPORT/g;
+    $$thing =~ s/${prefix}GOPHER6PORT/$GOPHER6PORT/g;
+    $$thing =~ s/${prefix}GOPHERPORT/$GOPHERPORT/g;
+    $$thing =~ s/${prefix}HTTPTLS6PORT/$HTTPTLS6PORT/g;
+    $$thing =~ s/${prefix}HTTPTLSPORT/$HTTPTLSPORT/g;
+    $$thing =~ s/${prefix}HTTP6PORT/$HTTP6PORT/g;
+    $$thing =~ s/${prefix}HTTPSPORT/$HTTPSPORT/g;
+    $$thing =~ s/${prefix}HTTP2PORT/$HTTP2PORT/g;
+    $$thing =~ s/${prefix}HTTPPORT/$HTTPPORT/g;
+    $$thing =~ s/${prefix}PROXYPORT/$HTTPPROXYPORT/g;
+    $$thing =~ s/${prefix}MQTTPORT/$MQTTPORT/g;
+    $$thing =~ s/${prefix}IMAP6PORT/$IMAP6PORT/g;
+    $$thing =~ s/${prefix}IMAPPORT/$IMAPPORT/g;
+    $$thing =~ s/${prefix}POP36PORT/$POP36PORT/g;
+    $$thing =~ s/${prefix}POP3PORT/$POP3PORT/g;
+    $$thing =~ s/${prefix}RTSP6PORT/$RTSP6PORT/g;
+    $$thing =~ s/${prefix}RTSPPORT/$RTSPPORT/g;
+    $$thing =~ s/${prefix}SMTP6PORT/$SMTP6PORT/g;
+    $$thing =~ s/${prefix}SMTPPORT/$SMTPPORT/g;
+    $$thing =~ s/${prefix}SOCKSPORT/$SOCKSPORT/g;
+    $$thing =~ s/${prefix}SSHPORT/$SSHPORT/g;
+    $$thing =~ s/${prefix}TFTP6PORT/$TFTP6PORT/g;
+    $$thing =~ s/${prefix}TFTPPORT/$TFTPPORT/g;
+    $$thing =~ s/${prefix}DICTPORT/$DICTPORT/g;
+    $$thing =~ s/${prefix}SMBPORT/$SMBPORT/g;
+    $$thing =~ s/${prefix}SMBSPORT/$SMBSPORT/g;
+    $$thing =~ s/${prefix}NEGTELNETPORT/$NEGTELNETPORT/g;
 
-  $$thing =~ s/%GOPHER6PORT/$GOPHER6PORT/g;
-  $$thing =~ s/%GOPHERPORT/$GOPHERPORT/g;
+    # server Unix domain socket paths
+    $$thing =~ s/${prefix}HTTPUNIXPATH/$HTTPUNIXPATH/g;
 
-  $$thing =~ s/%HTTPTLS6PORT/$HTTPTLS6PORT/g;
-  $$thing =~ s/%HTTPTLSPORT/$HTTPTLSPORT/g;
-  $$thing =~ s/%HTTP6PORT/$HTTP6PORT/g;
-  $$thing =~ s/%HTTPSPORT/$HTTPSPORT/g;
-  $$thing =~ s/%HTTP2PORT/$HTTP2PORT/g;
-  $$thing =~ s/%HTTPPORT/$HTTPPORT/g;
-  $$thing =~ s/%PROXYPORT/$HTTPPROXYPORT/g;
-  $$thing =~ s/%MQTTPORT/$MQTTPORT/g;
+    # client IP addresses
+    $$thing =~ s/${prefix}CLIENT6IP/$CLIENT6IP/g;
+    $$thing =~ s/${prefix}CLIENTIP/$CLIENTIP/g;
 
-  $$thing =~ s/%IMAP6PORT/$IMAP6PORT/g;
-  $$thing =~ s/%IMAPPORT/$IMAPPORT/g;
+    # server IP addresses
+    $$thing =~ s/${prefix}HOST6IP/$HOST6IP/g;
+    $$thing =~ s/${prefix}HOSTIP/$HOSTIP/g;
 
-  $$thing =~ s/%POP36PORT/$POP36PORT/g;
-  $$thing =~ s/%POP3PORT/$POP3PORT/g;
+    # misc
+    $$thing =~ s/${prefix}CURL/$CURL/g;
+    $$thing =~ s/${prefix}PWD/$pwd/g;
+    $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
 
-  $$thing =~ s/%RTSP6PORT/$RTSP6PORT/g;
-  $$thing =~ s/%RTSPPORT/$RTSPPORT/g;
+    my $file_pwd = $pwd;
+    if($file_pwd !~ /^\//) {
+        $file_pwd = "/$file_pwd";
+    }
 
-  $$thing =~ s/%SMTP6PORT/$SMTP6PORT/g;
-  $$thing =~ s/%SMTPPORT/$SMTPPORT/g;
+    $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
+    $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
+    $$thing =~ s/${prefix}USER/$USER/g;
 
-  $$thing =~ s/%SOCKSPORT/$SOCKSPORT/g;
-  $$thing =~ s/%SSHPORT/$SSHPORT/g;
+    $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
 
-  $$thing =~ s/%TFTP6PORT/$TFTP6PORT/g;
-  $$thing =~ s/%TFTPPORT/$TFTPPORT/g;
+    # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
+    # used for time-out tests and that would work on most hosts as these
+    # adjust for the startup/check time for this particular host. We needed to
+    # do this to make the test suite run better on very slow hosts.
+    my $ftp2 = $ftpchecktime * 2;
+    my $ftp3 = $ftpchecktime * 3;
 
-  $$thing =~ s/%DICTPORT/$DICTPORT/g;
+    $$thing =~ s/${prefix}FTPTIME2/$ftp2/g;
+    $$thing =~ s/${prefix}FTPTIME3/$ftp3/g;
 
-  $$thing =~ s/%SMBPORT/$SMBPORT/g;
-  $$thing =~ s/%SMBSPORT/$SMBSPORT/g;
-
-  $$thing =~ s/%NEGTELNETPORT/$NEGTELNETPORT/g;
-
-  # server Unix domain socket paths
-
-  $$thing =~ s/%HTTPUNIXPATH/$HTTPUNIXPATH/g;
-
-  # client IP addresses
-
-  $$thing =~ s/%CLIENT6IP/$CLIENT6IP/g;
-  $$thing =~ s/%CLIENTIP/$CLIENTIP/g;
-
-  # server IP addresses
-
-  $$thing =~ s/%HOST6IP/$HOST6IP/g;
-  $$thing =~ s/%HOSTIP/$HOSTIP/g;
-
-  # misc
-
-  $$thing =~ s/%CURL/$CURL/g;
-  $$thing =~ s/%PWD/$pwd/g;
-  $$thing =~ s/%POSIX_PWD/$posix_pwd/g;
-
-  my $file_pwd = $pwd;
-  if($file_pwd !~ /^\//) {
-      $file_pwd = "/$file_pwd";
-  }
-
-  $$thing =~ s/%FILE_PWD/$file_pwd/g;
-  $$thing =~ s/%SRCDIR/$srcdir/g;
-  $$thing =~ s/%USER/$USER/g;
-
-  if($$thing =~ /%SSHSRVMD5/) {
-      if(!$SSHSRVMD5) {
-          my $msg = "Fatal: Missing SSH server pubkey MD5. Is server running?";
-          logmsg "$msg\n";
-          stopservers($verbose);
-          die $msg;
-      }
-      $$thing =~ s/%SSHSRVMD5/$SSHSRVMD5/g;
-  }
-
-  # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
-  # used for time-out tests and that would work on most hosts as these
-  # adjust for the startup/check time for this particular host. We needed
-  # to do this to make the test suite run better on very slow hosts.
-
-  my $ftp2 = $ftpchecktime * 2;
-  my $ftp3 = $ftpchecktime * 3;
-
-  $$thing =~ s/%FTPTIME2/$ftp2/g;
-  $$thing =~ s/%FTPTIME3/$ftp3/g;
-
-  # HTTP2
-
-  $$thing =~ s/%H2CVER/$h2cver/g;
+    # HTTP2
+    $$thing =~ s/${prefix}H2CVER/$h2cver/g;
 }
 
 sub fixarray {
@@ -3498,6 +3469,25 @@ sub singletest {
         $why = serverfortest($testnum);
     }
 
+    # Save a preprocessed version of the entire test file. This allows more
+    # "basic" test case readers to enjoy variable replacements.
+    my @entiretest = fulltest();
+    my $otest = "log/test$testnum";
+    open(D, ">$otest");
+    my $diff;
+    for my $s (@entiretest) {
+        my $f = $s;
+        subVariables(\$s, "%");
+        if($f ne $s) {
+            $diff++;
+        }
+        print D $s;
+    }
+    close(D);
+    # remove the separate test file again if nothing was updated to keep
+    # things simpler
+    unlink($otest) if(!$diff);
+
     # timestamp required servers verification end
     $timesrvrend{$testnum} = Time::HiRes::time();
 
@@ -3615,6 +3605,9 @@ sub singletest {
             map s/\r\n/\n/g, @reply;
             map s/\n/\r\n/g, @reply;
         }
+    }
+    for my $r (@reply) {
+        subVariables(\$r);
     }
 
     # this is the valid protocol blurb curl should generate
@@ -4462,7 +4455,7 @@ sub singletest {
             $ok .= "v";
         }
         else {
-            if(!$short && !$disablevalgrind) {
+            if($verbose && !$disablevalgrind) {
                 logmsg " valgrind SKIPPED\n";
             }
             $ok .= "-"; # skipped
@@ -5661,6 +5654,9 @@ sub displaylogs {
         }
         if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum(\..*|)$/)) {
             next; # skip valgrindNnn of other tests
+        }
+        if(($log =~ /^test$testnum$/)) {
+            next; # skip test$testnum since it can be very big
         }
         logmsg "=== Start of file $log\n";
         displaylogcontent("$LOGDIR/$log");

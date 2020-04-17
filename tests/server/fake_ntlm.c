@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010, Mandy Wu, <mandy.wu@intel.com>
- * Copyright (C) 2011 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2011 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,7 +112,6 @@ int main(int argc, char *argv[])
   char buf[1024];
   char logfilename[256];
   FILE *stream;
-  char *filename;
   int error;
   char *type1_input = NULL, *type3_input = NULL;
   char *type1_output = NULL, *type3_output = NULL;
@@ -186,12 +185,10 @@ int main(int argc, char *argv[])
     path = env;
   }
 
-  filename = test2file(testnum);
-  stream = fopen(filename, "rb");
+  stream = test2fopen(testnum);
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", filename);
     logmsg("Couldn't open test file %ld", testnum);
     exit(1);
   }
@@ -205,13 +202,11 @@ int main(int argc, char *argv[])
     }
   }
 
-  stream = fopen(filename, "rb");
+  stream = test2fopen(testnum);
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("Error opening file: %s", filename);
     logmsg("Couldn't open test file %ld", testnum);
-    exit(1);
   }
   else {
     size = 0;
@@ -225,11 +220,10 @@ int main(int argc, char *argv[])
 
   while(fgets(buf, sizeof(buf), stdin)) {
     if(strcmp(buf, type1_input) == 0) {
-      stream = fopen(filename, "rb");
+      stream = test2fopen(testnum);
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", testnum);
         exit(1);
       }
@@ -247,11 +241,10 @@ int main(int argc, char *argv[])
       fflush(stdout);
     }
     else if(strncmp(buf, type3_input, strlen(type3_input)) == 0) {
-      stream = fopen(filename, "rb");
+      stream = test2fopen(testnum);
       if(!stream) {
         error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", testnum);
         exit(1);
       }

@@ -209,6 +209,31 @@ sub loadtest {
     return 0;
 }
 
+sub fulltest {
+    return @xml;
+}
+
+# write the test to the given file
+sub savetest {
+    my ($file)=@_;
+
+    if(open(XML, ">$file")) {
+        binmode XML; # for crapage systems, use binary
+        for(@xml) {
+            print XML $_;
+        }
+        close(XML);
+    }
+    else {
+        # failure
+        if($warning) {
+            print STDERR "file $file wouldn't open!\n";
+        }
+        return 1;
+    }
+    return 0;
+}
+
 #
 # Strip off all lines that match the specified pattern and return
 # the new array.

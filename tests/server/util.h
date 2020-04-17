@@ -28,6 +28,7 @@ void logmsg(const char *msg, ...);
 long timediff(struct timeval newer, struct timeval older);
 
 #define TEST_DATA_PATH "%s/data/test%ld"
+#define ALTTEST_DATA_PATH "%s/log/test%ld"
 
 #define SERVERLOGS_LOCK "log/serverlogs.lock"
 
@@ -53,8 +54,9 @@ void win32_init(void);
 void win32_cleanup(void);
 #endif  /* USE_WINSOCK */
 
-/* returns the path name to the test case file */
-char *test2file(long testno);
+/* fopens the test case file */
+FILE *test2fopen(long testno);
+
 int wait_ms(int timeout_ms);
 int write_pidfile(const char *filename);
 int write_portfile(const char *filename, int port);

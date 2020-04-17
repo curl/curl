@@ -194,11 +194,21 @@ void win32_cleanup(void)
 /* set by the main code to point to where the test dir is */
 const char *path = ".";
 
-char *test2file(long testno)
+FILE *test2fopen(long testno)
 {
-  static char filename[256];
+  FILE *stream;
+  char filename[256];
+  /* first try the alternative, preprocessed, file */
+  msnprintf(filename, sizeof(filename), ALTTEST_DATA_PATH, path, testno);
+  stream = fopen(filename, "rb");
+  if(stream)
+    return stream;
+
+  /* then try the source version */
   msnprintf(filename, sizeof(filename), TEST_DATA_PATH, path, testno);
-  return filename;
+  stream = fopen(filename, "rb");
+
+  return stream;
 }
 
 /*

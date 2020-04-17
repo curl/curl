@@ -247,8 +247,6 @@ static int ProcessRequest(struct httprequest *req)
     /* get the number after it */
     if(ptr) {
       FILE *stream;
-      char *filename;
-
       if((strlen(doc) + strlen(request)) < 200)
         msnprintf(logbuf, sizeof(logbuf), "Got request: %s %s %s/%d.%d",
                   request, doc, prot_str, prot_major, prot_minor);
@@ -288,13 +286,11 @@ static int ProcessRequest(struct httprequest *req)
                 req->testno, req->partno);
       logmsg("%s", logbuf);
 
-      filename = test2file(req->testno);
+      stream = test2fopen(req->testno);
 
-      stream = fopen(filename, "rb");
       if(!stream) {
         int error = errno;
         logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", filename);
         logmsg("Couldn't open test file %ld", req->testno);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
@@ -849,17 +845,13 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     count = strlen(buffer);
   }
   else {
-    char *filename = test2file(req->testno);
+    FILE *stream = test2fopen(req->testno);
     char partbuf[80]="data";
-    FILE *stream;
     if(0 != req->partno)
       msnprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
-
-    stream = fopen(filename, "rb");
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
-      logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
       return 0;
     }
@@ -879,11 +871,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     /* re-open the same file again */
-    stream = fopen(filename, "rb");
+    stream = test2fopen(req->testno);
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
-      logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
       free(ptr);
       return 0;

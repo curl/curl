@@ -235,18 +235,15 @@ static bool socket_domain_is_ip(void)
 static int parse_servercmd(struct httprequest *req)
 {
   FILE *stream;
-  char *filename;
   int error;
 
-  filename = test2file(req->testno);
+  stream = test2fopen(req->testno);
   req->close = FALSE;
   req->connmon = FALSE;
 
-  stream = fopen(filename, "rb");
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("  [1] Error opening file: %s", filename);
     logmsg("  Couldn't open test file %ld", req->testno);
     req->open = FALSE; /* closes connection */
     return 1; /* done */
@@ -991,7 +988,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   }
   else {
     char partbuf[80];
-    char *filename = test2file(req->testno);
 
     /* select the <data> tag for "normal" requests and the <connect> one
        for CONNECT requests (within the <reply> section) */
@@ -1004,11 +1000,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     logmsg("Send response test%ld section <%s>", req->testno, partbuf);
 
-    stream = fopen(filename, "rb");
+    stream = test2fopen(req->testno);
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
-      logmsg("  [3] Error opening file: %s", filename);
       return 0;
     }
     else {
@@ -1027,11 +1022,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     }
 
     /* re-open the same file again */
-    stream = fopen(filename, "rb");
+    stream = test2fopen(req->testno);
     if(!stream) {
       error = errno;
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
-      logmsg("  [4] Error opening file: %s", filename);
       free(ptr);
       return 0;
     }

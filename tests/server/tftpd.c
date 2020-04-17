@@ -944,16 +944,12 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 static int parse_servercmd(struct testcase *req)
 {
   FILE *stream;
-  char *filename;
   int error;
 
-  filename = test2file(req->testno);
-
-  stream = fopen(filename, "rb");
+  stream = test2fopen(req->testno);
   if(!stream) {
     error = errno;
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
-    logmsg("  [1] Error opening file: %s", filename);
     logmsg("  Couldn't open test file %ld", req->testno);
     return 1; /* done */
   }
@@ -1036,7 +1032,7 @@ static int validate_access(struct testcase *test,
     char partbuf[80]="data";
     long partno;
     long testno;
-    char *file;
+    FILE *stream;
 
     ptr++; /* skip the slash */
 
@@ -1061,40 +1057,33 @@ static int validate_access(struct testcase *test,
 
     (void)parse_servercmd(test);
 
-    file = test2file(testno);
+    stream = test2fopen(testno);
 
     if(0 != partno)
       msnprintf(partbuf, sizeof(partbuf), "data%ld", partno);
 
-    if(file) {
-      FILE *stream = fopen(file, "rb");
-      if(!stream) {
-        int error = errno;
-        logmsg("fopen() failed with error: %d %s", error, strerror(error));
-        logmsg("Error opening file: %s", file);
-        logmsg("Couldn't open test file: %s", file);
+    if(!stream) {
+      int error = errno;
+      logmsg("fopen() failed with error: %d %s", error, strerror(error));
+      logmsg("Couldn't open test file for test : %d", testno);
+      return EACCESS;
+    }
+    else {
+      size_t count;
+      int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
+      fclose(stream);
+      if(error) {
+        logmsg("getpart() failed with error: %d", error);
         return EACCESS;
       }
-      else {
-        size_t count;
-        int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
-        fclose(stream);
-        if(error) {
-          logmsg("getpart() failed with error: %d", error);
-          return EACCESS;
-        }
-        if(test->buffer) {
-          test->rptr = test->buffer; /* set read pointer */
-          test->bufsize = count;    /* set total count */
-          test->rcount = count;     /* set data left to read */
-        }
-        else
-          return EACCESS;
+      if(test->buffer) {
+        test->rptr = test->buffer; /* set read pointer */
+        test->bufsize = count;    /* set total count */
+        test->rcount = count;     /* set data left to read */
       }
-
+      else
+        return EACCESS;
     }
-    else
-      return EACCESS;
   }
   else {
     logmsg("no slash found in path");

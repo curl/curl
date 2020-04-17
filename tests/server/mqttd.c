@@ -446,7 +446,6 @@ static curl_socket_t mqttit(curl_socket_t fd)
   size_t remaining_length = 0;
   size_t bytes = 0; /* remaining length field size in bytes */
   char client_id[MAX_CLIENT_ID_LENGTH];
-  char *filename;
   long testno;
 
   static const char protocol[7] = {
@@ -550,8 +549,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         char *data;
         size_t datalen;
         logmsg("Found test number %ld", testno);
-        filename = test2file(testno);
-        stream = fopen(filename, "rb");
+        stream = test2fopen(testno);
         error = getpart(&data, &datalen, "reply", "data", stream);
         if(!error)
           publish(dump, fd, packet_id, topic, data, datalen);
