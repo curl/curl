@@ -75,6 +75,7 @@ do {
     "this.is.an.otherwise-valid.hostname."
     "with-a-label-of-greater-length-than-the-sixty-three-characters-"
     "specified.in.the.RFCs.";
+  int i;
 
   struct test {
     const char *name;
@@ -96,7 +97,7 @@ do {
     { max, DOH_OK }                      /* expect buffer overwrite */
   };
 
-  for(int i = 0; i < (int)(sizeof(playlist)/sizeof(*playlist)); i++) {
+  for(i = 0; i < (int)(sizeof(playlist)/sizeof(*playlist)); i++) {
     const char *name = playlist[i].name;
     size_t olen = 100000;
     struct demo victim;
