@@ -17,7 +17,7 @@ HTTP/1.1 302 OK swsbounce
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
-Location: http://åäö.se:8990/14480001
+Location: http://åäö.se:%HTTPPORT/14480001
 
 redirect
 </data>
@@ -52,7 +52,7 @@ Redirect following to UTF-8 IDN host name
  </name>
 
  <command>
-http://åäö.se:%HTTPPORT/1448 --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -L --connect-to %HOSTIP:8990:%HOSTIP:%HTTPPORT
+http://åäö.se:%HTTPPORT/1448 --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -L --connect-to %HOSTIP:%HTTPPORT:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
