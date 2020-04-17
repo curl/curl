@@ -116,7 +116,7 @@ size_t follow_links(CURLM *multi_handle, memory *mem, char *url)
     return 0;
   }
   size_t count = 0;
-  int i = 0;
+  int i;
   for(i = 0; i < nodeset->nodeNr; i++) {
     double r = rand();
     int x = r * nodeset->nodeNr / RAND_MAX;
