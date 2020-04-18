@@ -18,7 +18,7 @@ HTTP/1.1 307 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
-Location: ftp://127.0.0.1:8992/1055
+Location: ftp://%HOSTIP:%FTPPORT/1055
 Content-Length: 0
 Connection: close
 
@@ -38,10 +38,6 @@ HTTP PUT Location: redirect to FTP URL
  <command>
 http://%HOSTIP:%HTTPPORT/1055 -L -T log/test1055.txt
 </command>
-# The data section doesn't do variable substitution, so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%FTPPORT' ne '8992' );"
-</precheck>
 <file name="log/test1055.txt">
 Weird
      file
