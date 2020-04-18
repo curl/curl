@@ -19,7 +19,7 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Location: ftp://127.0.0.1:8992/10280002
+Location: ftp://%HOSTIP:%FTPPORT/10280002
 Content-Length: 0
 Connection: close
 
@@ -47,10 +47,6 @@ HTTP Location: redirect to FTP URL
  <command>
 http://%HOSTIP:%HTTPPORT/10280001 -L
 </command>
-# The data section doesn't do variable substitution, so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%FTPPORT' ne '8992' );"
-</precheck>
 </client>
 
 #
