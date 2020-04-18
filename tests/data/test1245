@@ -18,7 +18,7 @@ HTTP/1.1 301 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 0
-Location: ftp://127.0.0.1:8992/1245
+Location: ftp://%HOSTIP:%FTPPORT/1245
 Connection: close
 
 </data>
@@ -37,10 +37,6 @@ ftp
 <command>
 --location --proto +all,-ftp --proto-redir -all,+ftp http://%HOSTIP:%HTTPPORT/1245
 </command>
-# The data section doesn't do variable substitution, so we must assert this
-<precheck>
-perl -e "print 'Test requires default test server host and port' if ( '%HOSTIP' ne '127.0.0.1' || '%FTPPORT' ne '8992' );"
-</precheck>
 </client>
 
 #
