@@ -1304,6 +1304,7 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   const char *pidname = ".sockfilt.pid";
+  const char *portfile = NULL; /* none by default */
   bool juggle_again;
   int rc;
   int error;
@@ -1330,6 +1331,11 @@ int main(int argc, char *argv[])
       arg++;
       if(argc>arg)
         pidname = argv[arg++];
+    }
+    else if(!strcmp("--portfile", argv[arg])) {
+      arg++;
+      if(argc > arg)
+        portfile = argv[arg++];
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
@@ -1360,12 +1366,6 @@ int main(int argc, char *argv[])
       if(argc>arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           ((ulnum != 0UL) && ((ulnum < 1025UL) || (ulnum > 65535UL)))) {
-          fprintf(stderr, "sockfilt: invalid --port argument (%s)\n",
-                  argv[arg]);
-          return 0;
-        }
         port = curlx_ultous(ulnum);
         arg++;
       }
@@ -1500,6 +1500,13 @@ int main(int argc, char *argv[])
   if(!wrotepidfile) {
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
+  }
+  if(portfile) {
+    wrotepidfile = write_portfile(portfile, port);
+    if(!wrotepidfile) {
+      write_stdout("FAIL\n", 5);
+      goto sockfilt_cleanup;
+    }
   }
 
   do {

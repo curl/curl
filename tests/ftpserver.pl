@@ -96,6 +96,7 @@ my $listenaddr = '127.0.0.1';  # default address for listener port
 # global vars used for file names
 #
 my $pidfile;            # server pid file name
+my $portfile=".ftpserver.port"; # server port file name
 my $logfile;            # server log file name
 my $mainsockf_pidfile;  # pid file for primary connection sockfilt process
 my $mainsockf_logfile;  # log file for primary connection sockfilt process
@@ -191,6 +192,7 @@ sub exit_signal_handler {
     # For now, simply mimic old behavior.
     killsockfilters($proto, $ipvnum, $idnum, $verbose);
     unlink($pidfile);
+    unlink($portfile);
     if($serverlogslocked) {
         $serverlogslocked = 0;
         clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -390,6 +392,7 @@ sub sysread_or_die {
                "line $lcaller. $srvrname server, sysread error: $!\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
+        unlink($portfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -404,6 +407,7 @@ sub sysread_or_die {
                "line $lcaller. $srvrname server, read zero\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
+        unlink($portfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -418,6 +422,7 @@ sub startsf {
     my $mainsockfcmd = "./server/sockfilt".exe_ext('SRV')." " .
         "--ipv$ipvnum --port $port " .
         "--pidfile \"$mainsockf_pidfile\" " .
+        "--portfile \"$portfile\" " .
         "--logfile \"$mainsockf_logfile\"";
     $sfpid = open2(*SFREAD, *SFWRITE, $mainsockfcmd);
 
@@ -431,6 +436,7 @@ sub startsf {
         logmsg "Failed sockfilt command: $mainsockfcmd\n";
         killsockfilters($proto, $ipvnum, $idnum, $verbose);
         unlink($pidfile);
+        unlink($portfile);
         if($serverlogslocked) {
             $serverlogslocked = 0;
             clear_advisor_read_lock($SERVERLOGS_LOCK);
@@ -2900,6 +2906,7 @@ sub customize {
 # --id        # server instance number
 # --proto     # server protocol
 # --pidfile   # server pid file
+# --portfile  # server port file
 # --logfile   # server log file
 # --ipv4      # server IP version 4
 # --ipv6      # server IP version 6
@@ -2937,6 +2944,12 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--portfile') {
+        if($ARGV[1]) {
+            $portfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
     elsif($ARGV[0] eq '--logfile') {
         if($ARGV[1]) {
             $logfile = $ARGV[1];
@@ -2952,8 +2965,8 @@ while(@ARGV) {
         $listenaddr = '::1' if($listenaddr eq '127.0.0.1');
     }
     elsif($ARGV[0] eq '--port') {
-        if($ARGV[1] && ($ARGV[1] =~ /^(\d+)$/)) {
-            $port = $1 if($1 > 1024);
+        if($ARGV[1] =~ /^(\d+)$/) {
+            $port = $1;
             shift @ARGV;
         }
     }
@@ -3013,6 +3026,15 @@ $SIG{TERM} = \&exit_signal_handler;
 
 startsf();
 
+# actual port
+if($portfile && !$port) {
+    my $aport;
+    open(P, "<$portfile");
+    $aport = <P>;
+    close(P);
+    $port = 0 + $aport;
+}
+
 logmsg sprintf("%s server listens on port IPv${ipvnum}/${port}\n", uc($proto));
 
 open(PID, ">$pidfile");
@@ -3020,7 +3042,6 @@ print PID $$."\n";
 close(PID);
 
 logmsg("logged pid $$ in $pidfile\n");
-
 
 while(1) {
 

@@ -124,7 +124,7 @@ my $base = 8990; # base port number
 my $minport;     # minimum used port number
 my $maxport;     # maximum used port number
 
-my $MQTTPORT;            # MQTT server port
+my $MQTTPORT="[not running]"; # MQTT server port
 my $HTTPPORT;            # HTTP server port
 my $HTTP6PORT;           # HTTP IPv6 server port
 my $HTTPSPORT;           # HTTPS (stunnel) server port
@@ -1744,31 +1744,10 @@ sub runpingpongserver {
     my $logfile;
     my $flags = "";
 
-    if($proto eq "ftp") {
-        $port = ($idnum>1)?$FTP2PORT:$FTPPORT;
-
-        if($ipvnum==6) {
-            # if IPv6, use a different setup
-            $port = $FTP6PORT;
-        }
-    }
-    elsif($proto eq "pop3") {
-        $port = ($ipvnum==6) ? $POP36PORT : $POP3PORT;
-    }
-    elsif($proto eq "imap") {
-        $port = ($ipvnum==6) ? $IMAP6PORT : $IMAPPORT;
-    }
-    elsif($proto eq "smtp") {
-        $port = ($ipvnum==6) ? $SMTP6PORT : $SMTPPORT;
-    }
-    else {
-        print STDERR "Unsupported protocol $proto!!\n";
-        return 0;
-    }
-
     $server = servername_id($proto, $ipvnum, $idnum);
 
     $pidfile = $serverpidfile{$server};
+    my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1787,9 +1766,10 @@ sub runpingpongserver {
 
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--portfile \"$portfile\" ";
     $flags .= "--srcdir \"$srcdir\" --proto $proto ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--ipv$ipvnum --port $port --addr \"$ip\"";
+    $flags .= "--ipv$ipvnum --port 0 --addr \"$ip\"";
 
     my $cmd = "$perl $srcdir/ftpserver.pl $flags";
     my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -1802,6 +1782,11 @@ sub runpingpongserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+
+    # where is it?
+    $port = pidfromfile($portfile);
+
+    logmsg "PINGPONG runs on port $port ($portfile)\n" if($verbose);
 
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
@@ -1816,8 +1801,48 @@ sub runpingpongserver {
 
     $pid2 = $pid3;
 
-    if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $ftppid\n";
+    logmsg "RUN: $srvrname server is PID $ftppid port $port\n" if($verbose);
+
+    # Assign the correct port variable!
+    if($proto eq "ftp") {
+        if($ipvnum == 6) {
+            # if IPv6, use a different setup
+            $FTP6PORT = $port;
+        }
+        elsif($idnum>1) {
+            $FTP2PORT = $port;
+        }
+        else {
+            $FTPPORT = $port;
+        }
+    }
+    elsif($proto eq "pop3") {
+        if($ipvnum == 6) {
+            $POP36PORT = $port;
+        }
+        else {
+            $POP3PORT = $port;
+        }
+    }
+    elsif($proto eq "imap") {
+        if($ipvnum == 6) {
+            $IMAP6PORT  = $port;
+        }
+        else {
+            $IMAPPORT = $port;
+        }
+    }
+    elsif($proto eq "smtp") {
+        if($ipvnum == 6) {
+            $SMTP6PORT = $port;
+        }
+        else {
+            $SMTPPORT = $port;
+        }
+    }
+    else {
+        print STDERR "Unsupported protocol $proto!!\n";
+        return 0;
     }
 
     sleep(1);
@@ -3120,35 +3145,22 @@ sub checksystem {
 
     if($verbose) {
         logmsg "* Ports: ";
-        logmsg sprintf("FTP/%d ", $FTPPORT);
-        logmsg sprintf("FTP2/%d ", $FTP2PORT);
         logmsg sprintf("RTSP/%d ", $RTSPPORT);
         if($stunnel) {
             logmsg sprintf("FTPS/%d ", $FTPSPORT);
             logmsg sprintf("HTTPS/%d ", $HTTPSPORT);
         }
-        logmsg sprintf("\n*   TFTP/%d ", $TFTPPORT);
+        logmsg sprintf("TFTP/%d ", $TFTPPORT);
         if($http_ipv6) {
             logmsg sprintf("RTSP-IPv6/%d ", $RTSP6PORT);
-        }
-        if($ftp_ipv6) {
-            logmsg sprintf("FTP-IPv6/%d ", $FTP6PORT);
         }
         if($tftp_ipv6) {
             logmsg sprintf("TFTP-IPv6/%d ", $TFTP6PORT);
         }
         logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
         logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
-        logmsg sprintf("POP3/%d ", $POP3PORT);
-        logmsg sprintf("IMAP/%d ", $IMAPPORT);
-        logmsg sprintf("SMTP/%d\n", $SMTPPORT);
-        if($ftp_ipv6) {
-            logmsg sprintf("*   POP3-IPv6/%d ", $POP36PORT);
-            logmsg sprintf("IMAP-IPv6/%d ", $IMAP6PORT);
-            logmsg sprintf("SMTP-IPv6/%d\n", $SMTP6PORT);
-        }
         if($httptlssrv) {
-            logmsg sprintf("*   HTTPTLS/%d ", $HTTPTLSPORT);
+            logmsg sprintf("HTTPTLS/%d ", $HTTPTLSPORT);
             if($has_ipv6) {
                 logmsg sprintf("HTTPTLS-IPv6/%d ", $HTTPTLS6PORT);
             }
@@ -3527,7 +3539,7 @@ sub singletest {
         if(@precheck) {
             $cmd = $precheck[0];
             chomp $cmd;
-            subVariables \$cmd;
+            subVariables(\$cmd);
             if($cmd) {
                 my @p = split(/ /, $cmd);
                 if($p[0] !~ /\//) {
@@ -3674,7 +3686,7 @@ sub singletest {
         # make some nice replace operations
         $cmd =~ s/\n//g; # no newlines please
         # substitute variables in the command line
-        subVariables \$cmd;
+        subVariables(\$cmd);
     }
     else {
         # there was no command given, use something silly
@@ -5428,22 +5440,12 @@ if ($gdbthis) {
 }
 
 $minport         = $base; # original base port number
-
 $HTTPSPORT       = $base++; # HTTPS (stunnel) server port
-$FTPPORT         = $base++; # FTP server port
 $FTPSPORT        = $base++; # FTPS (stunnel) server port
-$FTP2PORT        = $base++; # FTP server 2 port
-$FTP6PORT        = $base++; # FTP IPv6 port
 $TFTPPORT        = $base++; # TFTP (UDP) port
 $TFTP6PORT       = $base++; # TFTP IPv6 (UDP) port
 $SSHPORT         = $base++; # SSH (SCP/SFTP) port
 $SOCKSPORT       = $base++; # SOCKS port
-$POP3PORT        = $base++; # POP3 server port
-$POP36PORT       = $base++; # POP3 IPv6 server port
-$IMAPPORT        = $base++; # IMAP server port
-$IMAP6PORT       = $base++; # IMAP IPv6 server port
-$SMTPPORT        = $base++; # SMTP server port
-$SMTP6PORT       = $base++; # SMTP IPv6 server port
 $RTSPPORT        = $base++; # RTSP server port
 $RTSP6PORT       = $base++; # RTSP IPv6 server port
 $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port
