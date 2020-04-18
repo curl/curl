@@ -803,8 +803,15 @@ void restore_signal_handlers(bool keep_sigalrm)
 #ifdef WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
   if(thread_main_window && thread_main_id) {
-    if(PostThreadMessage(thread_main_id, WM_APP, 0, 0))
-      (void)WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE);
+    if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
+      if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {
+        if(CloseHandle(thread_main_window)) {
+          thread_main_window = NULL;
+          thread_main_id = 0;
+        }
+      }
+    }
+  }
   }
 #endif
 }
