@@ -580,6 +580,11 @@ volatile int got_exit_signal = 0;
 /* if next is set indicates the first signal handled in exit_signal_handler */
 volatile int exit_signal = 0;
 
+#ifdef WIN32
+/* event which if set indicates that the program should finish */
+HANDLE exit_event = NULL;
+#endif
+
 /* signal handler that will be triggered to indicate that the program
  * should finish its execution in a controlled manner as soon as possible.
  * The first time this is called it will set got_exit_signal to one and
@@ -592,6 +597,10 @@ static RETSIGTYPE exit_signal_handler(int signum)
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
+#ifdef WIN32
+    if(exit_event)
+      (void)SetEvent(exit_event);
+#endif
   }
   (void)signal(signum, exit_signal_handler);
   errno = old_errno;
@@ -712,6 +721,12 @@ static DWORD WINAPI main_window_loop(LPVOID lpParameter)
 
 void install_signal_handlers(bool keep_sigalrm)
 {
+#ifdef WIN32
+  /* setup windows exit event before any signal can trigger */
+  exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+  if(!exit_event)
+    logmsg("cannot create exit event");
+#endif
 #ifdef SIGHUP
   /* ignore SIGHUP signal */
   old_sighup_handler = signal(SIGHUP, SIG_IGN);
@@ -812,6 +827,10 @@ void restore_signal_handlers(bool keep_sigalrm)
       }
     }
   }
+  if(exit_event) {
+    if(CloseHandle(exit_event)) {
+      exit_event = NULL;
+    }
   }
 #endif
 }
