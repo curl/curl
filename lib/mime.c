@@ -1778,6 +1778,23 @@ const char *Curl_mime_contenttype(const char *filename)
   return NULL;
 }
 
+static bool content_type_match(const char *contenttype, const char *target)
+{
+  size_t len = strlen(target);
+
+  if(contenttype && strncasecompare(contenttype, target, len))
+    switch(contenttype[len]) {
+    case '\0':
+    case '\t':
+    case '\r':
+    case '\n':
+    case ' ':
+    case ';':
+      return TRUE;
+    }
+  return FALSE;
+}
+
 CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
                                    const char *contenttype,
                                    const char *disposition,
@@ -1829,7 +1846,7 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
       boundary = mime->boundary;
   }
   else if(contenttype && !customct &&
-          strcasecompare(contenttype, "text/plain"))
+          content_type_match(contenttype, "text/plain"))
     if(strategy == MIMESTRATEGY_MAIL || !part->filename)
       contenttype = NULL;
 
@@ -1905,7 +1922,7 @@ CURLcode Curl_mime_prepare_headers(curl_mimepart *part,
     curl_mimepart *subpart;
 
     disposition = NULL;
-    if(strcasecompare(contenttype, "multipart/form-data"))
+    if(content_type_match(contenttype, "multipart/form-data"))
       disposition = "form-data";
     for(subpart = mime->firstpart; subpart; subpart = subpart->nextpart) {
       ret = Curl_mime_prepare_headers(subpart, NULL, disposition, strategy);
