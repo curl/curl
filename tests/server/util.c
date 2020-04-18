@@ -632,7 +632,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   }
   if(signum) {
     logmsg("ctrl_event_handler: %d -> %d", dwCtrlType, signum);
-    exit_signal_handler(signum);
+    raise(signum);
   }
   return TRUE;
 }
@@ -656,7 +656,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
     }
     if(signum) {
       logmsg("main_window_proc: %d -> %d", uMsg, signum);
-      exit_signal_handler(signum);
+      raise(signum);
     }
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
