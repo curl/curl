@@ -676,7 +676,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   }
 
   /* allocate internal array for the internal event handles */
-  handles = calloc(nfds, sizeof(HANDLE));
+  handles = calloc(nfds + 1, sizeof(HANDLE));
   if(handles == NULL) {
     CloseHandle(abort);
     CloseHandle(mutex);
@@ -785,8 +785,18 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     }
   }
 
+  /* wait on the number of handles */
+  wait = nfd;
+
+  /* make sure we stop waiting on exit signal event */
+  if(exit_event) {
+    /* we allocated handles nfds + 1 for this */
+    handles[nfd] = exit_event;
+    wait += 1;
+  }
+
   /* wait for one of the internal handles to trigger */
-  wait = WaitForMultipleObjectsEx(nfd, handles, FALSE, timeout_ms, FALSE);
+  wait = WaitForMultipleObjectsEx(wait, handles, FALSE, timeout_ms, FALSE);
 
   /* wait for internal mutex to lock event handling in threads */
   WaitForSingleObjectEx(mutex, INFINITE, FALSE);
