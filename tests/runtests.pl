@@ -1940,7 +1940,6 @@ sub runftpsserver {
 #
 sub runtftpserver {
     my ($id, $verbose, $ipv6) = @_;
-    my $port = $TFTPPORT;
     my $ip = $HOSTIP;
     my $proto = 'tftp';
     my $ipvnum = 4;
@@ -1954,13 +1953,13 @@ sub runtftpserver {
     if($ipv6) {
         # if IPv6, use a different setup
         $ipvnum = 6;
-        $port = $TFTP6PORT;
         $ip = $HOST6IP;
     }
 
     $server = servername_id($proto, $ipvnum, $idnum);
 
     $pidfile = $serverpidfile{$server};
+    my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -1978,9 +1977,11 @@ sub runtftpserver {
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     $flags .= "--verbose " if($debugprotocol);
-    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+    $flags .= "--pidfile \"$pidfile\" ".
+        "--portfile \"$portfile\" ".
+        "--logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
+    $flags .= "--ipv$ipvnum --port 0 --srcdir \"$srcdir\"";
 
     my $cmd = "$perl $srcdir/tftpserver.pl $flags";
     my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
@@ -1993,6 +1994,8 @@ sub runtftpserver {
         $doesntrun{$pidfile} = 1;
         return (0,0);
     }
+
+    my $port = pidfromfile($portfile);
 
     # Server is up. Verify that we can speak to it.
     my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
@@ -2007,12 +2010,12 @@ sub runtftpserver {
     $pid2 = $pid3;
 
     if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $tftppid\n";
+        logmsg "RUN: $srvrname server on PID $tftppid port $port\n";
     }
 
     sleep(1);
 
-    return ($pid2, $tftppid);
+    return ($pid2, $tftppid, $port);
 }
 
 
@@ -3152,12 +3155,8 @@ sub checksystem {
             logmsg sprintf("FTPS/%d ", $FTPSPORT);
             logmsg sprintf("HTTPS/%d ", $HTTPSPORT);
         }
-        logmsg sprintf("TFTP/%d ", $TFTPPORT);
         if($http_ipv6) {
             logmsg sprintf("RTSP-IPv6/%d ", $RTSP6PORT);
-        }
-        if($tftp_ipv6) {
-            logmsg sprintf("TFTP-IPv6/%d ", $TFTP6PORT);
         }
         logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
         logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
@@ -4848,7 +4847,8 @@ sub startservers {
                 stopserver('tftp');
             }
             if(!$run{'tftp'}) {
-                ($pid, $pid2) = runtftpserver("", $verbose);
+                ($pid, $pid2, $TFTPPORT) =
+                    runtftpserver("", $verbose);
                 if($pid <= 0) {
                     return "failed starting TFTP server";
                 }
@@ -4862,7 +4862,8 @@ sub startservers {
                 stopserver('tftp-ipv6');
             }
             if(!$run{'tftp-ipv6'}) {
-                ($pid, $pid2) = runtftpserver("", $verbose, "ipv6");
+                ($pid, $pid2, $TFTP6PORT) =
+                    runtftpserver("", $verbose, "ipv6");
                 if($pid <= 0) {
                     return "failed starting TFTP-IPv6 server";
                 }
@@ -5440,8 +5441,6 @@ if ($gdbthis) {
 $minport         = $base; # original base port number
 $HTTPSPORT       = $base++; # HTTPS (stunnel) server port
 $FTPSPORT        = $base++; # FTPS (stunnel) server port
-$TFTPPORT        = $base++; # TFTP (UDP) port
-$TFTP6PORT       = $base++; # TFTP IPv6 (UDP) port
 $SSHPORT         = $base++; # SSH (SCP/SFTP) port
 $SOCKSPORT       = $base++; # SOCKS port
 $RTSPPORT        = $base++; # RTSP server port
