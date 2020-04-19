@@ -18,7 +18,7 @@ Content-Length: 6
 Connection: close
 Content-Type: text/html
 Funny-head: yesyes
-Alt-Svc: h2=":9014", ma=315360000; persist=0
+Alt-Svc: h2=":%HTTP2PORT", ma=315360000; persist=0
 
 -foo-
 </data>
@@ -64,7 +64,7 @@ date: Thu, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html
 funny-head: yesyes
-alt-svc: h2=":9014", ma=315360000; persist=0
+alt-svc: h2=":%HTTP2PORT", ma=315360000; persist=0
 server: nghttpx
 via: 1.1 nghttpx
 
@@ -74,7 +74,7 @@ date: Thu, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html
 funny-head: yesyes
-alt-svc: h2=":9014", ma=315360000; persist=0
+alt-svc: h2=":%HTTP2PORT", ma=315360000; persist=0
 server: nghttpx
 via: 1.1 nghttpx
 
