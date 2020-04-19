@@ -212,7 +212,8 @@ int Curl_select(curl_socket_t maxfd,   /* highest socket number */
     descriptor set must contain at least one handle to a socket.
 
     It is unclear why WinSock doesn't just handle this for us instead of
-    calling this an error.
+    calling this an error. Luckily, with WinSock, we can _also_ ask how
+    many bits are set on an fd_set. So, let's just check it beforehand.
   */
   r = select((int)maxfd + 1,
              fds_read && fds_read->fd_count ? fds_read : NULL,
@@ -250,17 +251,9 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
                       curl_socket_t writefd, /* socket to write to */
                       timediff_t timeout_ms) /* milliseconds to wait */
 {
-#ifdef HAVE_POLL_FINE
   struct pollfd pfd[3];
   int num;
-#else
-  fd_set fds_read;
-  fd_set fds_write;
-  fd_set fds_err;
-  curl_socket_t maxfd;
-#endif
   int r;
-  int ret;
 
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
@@ -273,8 +266,6 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
-
-#ifdef HAVE_POLL_FINE
 
   num = 0;
   if(readfd0 != CURL_SOCKET_BAD) {
@@ -300,101 +291,30 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   if(r <= 0)
     return r;
 
-  ret = 0;
+  r = 0;
   num = 0;
   if(readfd0 != CURL_SOCKET_BAD) {
     if(pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
-      ret |= CURL_CSELECT_IN;
+      r |= CURL_CSELECT_IN;
     if(pfd[num].revents & (POLLRDBAND|POLLPRI|POLLNVAL))
-      ret |= CURL_CSELECT_ERR;
+      r |= CURL_CSELECT_ERR;
     num++;
   }
   if(readfd1 != CURL_SOCKET_BAD) {
     if(pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
-      ret |= CURL_CSELECT_IN2;
+      r |= CURL_CSELECT_IN2;
     if(pfd[num].revents & (POLLRDBAND|POLLPRI|POLLNVAL))
-      ret |= CURL_CSELECT_ERR;
+      r |= CURL_CSELECT_ERR;
     num++;
   }
   if(writefd != CURL_SOCKET_BAD) {
     if(pfd[num].revents & (POLLWRNORM|POLLOUT))
-      ret |= CURL_CSELECT_OUT;
+      r |= CURL_CSELECT_OUT;
     if(pfd[num].revents & (POLLERR|POLLHUP|POLLNVAL))
-      ret |= CURL_CSELECT_ERR;
+      r |= CURL_CSELECT_ERR;
   }
 
-  return ret;
-
-#else  /* HAVE_POLL_FINE */
-
-  FD_ZERO(&fds_err);
-  maxfd = (curl_socket_t)-1;
-
-  FD_ZERO(&fds_read);
-  if(readfd0 != CURL_SOCKET_BAD) {
-    VERIFY_SOCK(readfd0);
-    FD_SET(readfd0, &fds_read);
-    FD_SET(readfd0, &fds_err);
-    maxfd = readfd0;
-  }
-  if(readfd1 != CURL_SOCKET_BAD) {
-    VERIFY_SOCK(readfd1);
-    FD_SET(readfd1, &fds_read);
-    FD_SET(readfd1, &fds_err);
-    if(readfd1 > maxfd)
-      maxfd = readfd1;
-  }
-
-  FD_ZERO(&fds_write);
-  if(writefd != CURL_SOCKET_BAD) {
-    VERIFY_SOCK(writefd);
-    FD_SET(writefd, &fds_write);
-    FD_SET(writefd, &fds_err);
-    if(writefd > maxfd)
-      maxfd = writefd;
-  }
-
-  /* We know that we have at least one bit set in at least two fd_sets in
-     this case, but we may have no bits set in either fds_read or fd_write,
-     so check for that and handle it.  Luckily, with WinSock, we can _also_
-     ask how many bits are set on an fd_set.
-
-     Note also that WinSock ignores the first argument, so we don't worry
-     about the fact that maxfd is computed incorrectly with WinSock (since
-     curl_socket_t is unsigned in such cases and thus -1 is the largest
-     value).
-  */
-  r = Curl_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
-
-  if(r < 0)
-    return -1;
-  if(r == 0)
-    return 0;
-
-  ret = 0;
-  if(readfd0 != CURL_SOCKET_BAD) {
-    if(FD_ISSET(readfd0, &fds_read))
-      ret |= CURL_CSELECT_IN;
-    if(FD_ISSET(readfd0, &fds_err))
-      ret |= CURL_CSELECT_ERR;
-  }
-  if(readfd1 != CURL_SOCKET_BAD) {
-    if(FD_ISSET(readfd1, &fds_read))
-      ret |= CURL_CSELECT_IN2;
-    if(FD_ISSET(readfd1, &fds_err))
-      ret |= CURL_CSELECT_ERR;
-  }
-  if(writefd != CURL_SOCKET_BAD) {
-    if(FD_ISSET(writefd, &fds_write))
-      ret |= CURL_CSELECT_OUT;
-    if(FD_ISSET(writefd, &fds_err))
-      ret |= CURL_CSELECT_ERR;
-  }
-
-  return ret;
-
-#endif  /* HAVE_POLL_FINE */
-
+  return r;
 }
 
 /*
@@ -457,7 +377,6 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   else
     pending_ms = 0;
   r = poll(ufds, nfds, pending_ms);
-
   if(r < 0)
     return -1;
   if(r == 0)
@@ -497,8 +416,13 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     }
   }
 
+  /*
+     Note also that WinSock ignores the first argument, so we don't worry
+     about the fact that maxfd is computed incorrectly with WinSock (since
+     curl_socket_t is unsigned in such cases and thus -1 is the largest
+     value).
+  */
   r = Curl_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
-
   if(r < 0)
     return -1;
   if(r == 0)
