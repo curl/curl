@@ -72,35 +72,15 @@ The curl Test Suite
 
  1.2 Port numbers used by test servers
 
-  - TCP/8990 for HTTP
-  - TCP/8991 for HTTPS
-  - TCP/8992 for FTP
-  - TCP/8993 for FTPS
-  - TCP/8994 for HTTP IPv6
-  - TCP/8995 for FTP (2)
-  - TCP/8996 for FTP IPv6
-  - UDP/8997 for TFTP
-  - UDP/8998 for TFTP IPv6
-  - TCP/8999 for SCP/SFTP
-  - TCP/9000 for SOCKS
-  - TCP/9001 for POP3
-  - TCP/9002 for POP3 IPv6
-  - TCP/9003 for IMAP
-  - TCP/9004 for IMAP IPv6
-  - TCP/9005 for SMTP
-  - TCP/9006 for SMTP IPv6
-  - TCP/9007 for RTSP
-  - TCP/9008 for RTSP IPv6
-  - TCP/9009 for GOPHER
-  - TCP/9010 for GOPHER IPv6
-  - TCP/9011 for HTTPS server with TLS-SRP support
-  - TCP/9012 for HTTPS IPv6 server with TLS-SRP support
-  - TCP/9013 for HTTP proxy server for CONNECT
-  - TCP/9014 for HTTP/2 server
-  - TCP/9015 for DICT server
-  - TCP/9016 for SMB server
-  - TCP/9017 for SMBS server (reserved)
-  - TCP/9018 for TELNET server with negotiation support
+  Tests are written to use as few fixed fixed port numbers as possible and all
+  tests should be written to use suitable variables instead of port numbers so
+  that test cases continue to work independent on what port numbers the test
+  servers actually use.
+
+  The remaining fixed-port test servers that are still used, use the port
+  range 8890 - 8904 by default, but can be moved with runtests' -b option.
+
+  See the FILEFORMAT for a listing of existing port number variables.
 
  1.3 Test servers
 
