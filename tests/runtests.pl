@@ -124,37 +124,39 @@ my $base = 8990; # base port number
 my $minport;     # minimum used port number
 my $maxport;     # maximum used port number
 
-my $MQTTPORT="[not running]"; # MQTT server port
-my $HTTPPORT;            # HTTP server port
-my $HTTP6PORT;           # HTTP IPv6 server port
-my $HTTPSPORT;           # HTTPS (stunnel) server port
-my $FTPPORT;             # FTP server port
-my $FTP2PORT;            # FTP server 2 port
-my $FTPSPORT;            # FTPS (stunnel) server port
-my $FTP6PORT;            # FTP IPv6 server port
-my $TFTPPORT;            # TFTP
-my $TFTP6PORT;           # TFTP
-my $SSHPORT;             # SCP/SFTP
-my $SOCKSPORT;           # SOCKS4/5 port
-my $POP3PORT;            # POP3
-my $POP36PORT;           # POP3 IPv6 server port
-my $IMAPPORT;            # IMAP
-my $IMAP6PORT;           # IMAP IPv6 server port
-my $SMTPPORT;            # SMTP
-my $SMTP6PORT;           # SMTP IPv6 server port
-my $RTSPPORT;            # RTSP
-my $RTSP6PORT;           # RTSP IPv6 server port
-my $GOPHERPORT;          # Gopher
-my $GOPHER6PORT;         # Gopher IPv6 server port
-my $HTTPTLSPORT;         # HTTP TLS (non-stunnel) server port
-my $HTTPTLS6PORT;        # HTTP TLS (non-stunnel) IPv6 server port
-my $HTTPPROXYPORT;       # HTTP proxy port, when using CONNECT
+my $noport="[not running]";
+
+my $MQTTPORT=$noport;    # MQTT server port
+my $HTTPPORT=$noport;    # HTTP server port
+my $HTTP6PORT=$noport;   # HTTP IPv6 server port
+my $HTTPSPORT=$noport;   # HTTPS (stunnel) server port
+my $FTPPORT=$noport;     # FTP server port
+my $FTP2PORT=$noport;    # FTP server 2 port
+my $FTPSPORT=$noport;    # FTPS (stunnel) server port
+my $FTP6PORT=$noport;    # FTP IPv6 server port
+my $TFTPPORT=$noport;    # TFTP
+my $TFTP6PORT=$noport;   # TFTP
+my $SSHPORT=$noport;     # SCP/SFTP
+my $SOCKSPORT=$noport;   # SOCKS4/5 port
+my $POP3PORT=$noport;    # POP3
+my $POP36PORT=$noport;   # POP3 IPv6 server port
+my $IMAPPORT=$noport;    # IMAP
+my $IMAP6PORT=$noport;   # IMAP IPv6 server port
+my $SMTPPORT=$noport;    # SMTP
+my $SMTP6PORT=$noport;   # SMTP IPv6 server port
+my $RTSPPORT=$noport;    # RTSP
+my $RTSP6PORT=$noport;   # RTSP IPv6 server port
+my $GOPHERPORT=$noport;  # Gopher
+my $GOPHER6PORT=$noport; # Gopher IPv6 server port
+my $HTTPTLSPORT=$noport; # HTTP TLS (non-stunnel) server port
+my $HTTPTLS6PORT=$noport; # HTTP TLS (non-stunnel) IPv6 server port
+my $HTTPPROXYPORT=$noport; # HTTP proxy port, when using CONNECT
+my $HTTP2PORT=$noport;   # HTTP/2 server port
+my $DICTPORT=$noport;    # DICT server port
+my $SMBPORT=$noport;     # SMB server port
+my $SMBSPORT=$noport;    # SMBS server port
+my $NEGTELNETPORT=$noport; # TELNET server port with negotiation
 my $HTTPUNIXPATH;        # HTTP server Unix domain socket path
-my $HTTP2PORT;           # HTTP/2 server port
-my $DICTPORT;            # DICT server port
-my $SMBPORT;             # SMB server port
-my $SMBSPORT;            # SMBS server port
-my $NEGTELNETPORT;       # TELNET server port with negotiation
 
 my $SSHSRVMD5 = "[uninitialized]"; # MD5 of ssh server public key
 
