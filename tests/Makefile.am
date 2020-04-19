@@ -25,7 +25,7 @@ PDFPAGES = testcurl.pdf runtests.pdf
 MANDISTPAGES = runtests.1.dist testcurl.1.dist
 
 EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
- getpart.pm FILEFORMAT README stunnel.pem memanalyze.pl testcurl.pl           \
+ getpart.pm FILEFORMAT.md README stunnel.pem memanalyze.pl testcurl.pl        \
  valgrind.pm ftp.pm sshserver.pl sshhelp.pm pathhelp.pm testcurl.1 runtests.1 \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl      \
  CMakeLists.txt mem-include-scan.pl valgrind.supp extern-scan.pl              \
