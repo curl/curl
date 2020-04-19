@@ -5455,7 +5455,7 @@ $DICTPORT        = $base++; # DICT port
 $SMBPORT         = $base++; # SMB port
 $SMBSPORT        = $base++; # SMBS port
 $NEGTELNETPORT   = $base++; # TELNET port with negotiation
-$HTTPUNIXPATH    = 'http.sock'; # HTTP server Unix domain socket path
+$HTTPUNIXPATH    = "http$$.sock"; # HTTP server Unix domain socket path
 
 $maxport         = $base-1; # updated base port number
 
