@@ -2274,7 +2274,6 @@ sub runmqttserver {
 sub runsocksserver {
     my ($id, $verbose, $ipv6) = @_;
     my $ip=$HOSTIP;
-    my $port = $SOCKSPORT;
     my $proto = 'socks';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
@@ -2287,6 +2286,7 @@ sub runsocksserver {
     $server = servername_id($proto, $ipvnum, $idnum);
 
     $pidfile = $serverpidfile{$server};
+    my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
     if ($doesntrun{$pidfile}) {
@@ -2305,8 +2305,9 @@ sub runsocksserver {
 
     # start our socks server, get commands from the FTP cmd file
     my $cmd="server/socksd".exe_ext('SRV').
-        " --port $port ".
+        " --port 0 ".
         " --pidfile $pidfile".
+        " --portfile $portfile".
         " --backend $HOSTIP".
         " --config $FTPDCMD";
     my ($sockspid, $pid2) = startnew($cmd, $pidfile, 30, 0);
@@ -2319,11 +2320,13 @@ sub runsocksserver {
         return (0,0);
     }
 
+    my $port = pidfromfile($portfile);
+
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $pid2\n";
     }
 
-    return ($pid2, $sockspid);
+    return ($pid2, $sockspid, $port);
 }
 
 #######################################################################
@@ -3160,7 +3163,6 @@ sub checksystem {
             logmsg sprintf("TFTP-IPv6/%d ", $TFTP6PORT);
         }
         logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
-        logmsg sprintf("SOCKS/%d ", $SOCKSPORT);
         if($httptlssrv) {
             logmsg sprintf("HTTPTLS/%d ", $HTTPTLSPORT);
             if($has_ipv6) {
@@ -4886,7 +4888,7 @@ sub startservers {
         }
         elsif($what eq "socks4" || $what eq "socks5" ) {
             if(!$run{'socks'}) {
-                ($pid, $pid2) = runsocksserver("", $verbose);
+                ($pid, $pid2, $SOCKSPORT) = runsocksserver("", $verbose);
                 if($pid <= 0) {
                     return "failed starting socks server";
                 }
@@ -5447,7 +5449,6 @@ $FTPSPORT        = $base++; # FTPS (stunnel) server port
 $TFTPPORT        = $base++; # TFTP (UDP) port
 $TFTP6PORT       = $base++; # TFTP IPv6 (UDP) port
 $SSHPORT         = $base++; # SSH (SCP/SFTP) port
-$SOCKSPORT       = $base++; # SOCKS port
 $RTSPPORT        = $base++; # RTSP server port
 $RTSP6PORT       = $base++; # RTSP IPv6 server port
 $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port

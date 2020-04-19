@@ -883,6 +883,7 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   const char *pidname = ".socksd.pid";
+  const char *portfile = NULL;
   bool juggle_again;
   int error;
   int arg = 1;
@@ -902,6 +903,11 @@ int main(int argc, char *argv[])
       arg++;
       if(argc>arg)
         pidname = argv[arg++];
+    }
+    else if(!strcmp("--portfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        portfile = argv[arg++];
     }
     else if(!strcmp("--config", argv[arg])) {
       arg++;
@@ -943,12 +949,6 @@ int main(int argc, char *argv[])
       if(argc>arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           ((ulnum != 0UL) && ((ulnum < 1025UL) || (ulnum > 65535UL)))) {
-          fprintf(stderr, "socksd: invalid --port argument (%s)\n",
-                  argv[arg]);
-          return 0;
-        }
         port = curlx_ultous(ulnum);
         arg++;
       }
@@ -961,6 +961,7 @@ int main(int argc, char *argv[])
            " --version\n"
            " --logfile [file]\n"
            " --pidfile [file]\n"
+           " --portfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --bindonly\n"
@@ -1011,6 +1012,13 @@ int main(int argc, char *argv[])
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile) {
     goto socks5_cleanup;
+  }
+
+  if(portfile) {
+    wrotepidfile = write_portfile(portfile, port);
+    if(!wrotepidfile) {
+      goto socks5_cleanup;
+    }
   }
 
   do {
