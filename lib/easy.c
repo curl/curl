@@ -509,7 +509,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     before = Curl_now();
 
     /* wait for activity or timeout */
-    pollrc = Curl_poll(fds, numfds, (int)ev->ms);
+    pollrc = Curl_poll(fds, numfds, ev->ms);
 
     after = Curl_now();
 
