@@ -365,6 +365,7 @@ Available substitute variables include:
 - `%IMAPPORT` - Port number of the IMAP server
 - `%MQTTPORT` - Port number of the MQTT server
 - `%NEGTELNETPORT` - Port number of the telnet server
+- `%NOLISTENPORT` - Port number where no service is listening
 - `%POP36PORT` - IPv6 port number of the POP3 server
 - `%POP3PORT` - Port number of the POP3 server
 - `%POSIX_PWD` - Current directory somewhat mingw friendly
