@@ -44,6 +44,7 @@ my $ipvnum = 4;      # default IP version of rtsp server
 my $idnum = 1;       # default rtsp server instance number
 my $proto = 'rtsp';  # protocol the rtsp server speaks
 my $pidfile;         # rtsp server pid file
+my $portfile;
 my $logfile;         # rtsp server log file
 my $srcdir;
 
@@ -55,6 +56,12 @@ while(@ARGV) {
     if($ARGV[0] eq '--pidfile') {
         if($ARGV[1]) {
             $pidfile = $ARGV[1];
+            shift @ARGV;
+        }
+    }
+    elsif($ARGV[0] eq '--portfile') {
+        if($ARGV[1]) {
+            $portfile = $ARGV[1];
             shift @ARGV;
         }
     }
@@ -107,7 +114,9 @@ if(!$logfile) {
     $logfile = server_logfilename($logdir, $proto, $ipvnum, $idnum);
 }
 
-$flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
+$flags .= "--pidfile \"$pidfile\" ".
+    "--portfile \"$portfile\" ".
+    "--logfile \"$logfile\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 exec("server/rtspd".exe_ext('SRV')." $flags");

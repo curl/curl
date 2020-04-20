@@ -1049,6 +1049,7 @@ int main(int argc, char *argv[])
   int flag;
   unsigned short port = DEFAULT_PORT;
   const char *pidname = ".rtsp.pid";
+  const char *portfile = NULL;
   struct httprequest req;
   int rc;
   int error;
@@ -1075,6 +1076,11 @@ int main(int argc, char *argv[])
       if(argc>arg)
         pidname = argv[arg++];
     }
+    else if(!strcmp("--portfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        portfile = argv[arg++];
+    }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
       if(argc>arg)
@@ -1099,12 +1105,6 @@ int main(int argc, char *argv[])
       if(argc>arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum < 1025UL) || (ulnum > 65535UL)) {
-          fprintf(stderr, "rtspd: invalid --port argument (%s)\n",
-                  argv[arg]);
-          return 0;
-        }
         port = curlx_ultous(ulnum);
         arg++;
       }
@@ -1121,6 +1121,7 @@ int main(int argc, char *argv[])
            " --version\n"
            " --logfile [file]\n"
            " --pidfile [file]\n"
+           " --portfile [file]\n"
            " --ipv4\n"
            " --ipv6\n"
            " --port [port]\n"
@@ -1188,6 +1189,49 @@ int main(int argc, char *argv[])
     goto server_cleanup;
   }
 
+  if(!port) {
+    /* The system was supposed to choose a port number, figure out which
+       port we actually got and update the listener port value with it. */
+    curl_socklen_t la_size;
+    srvr_sockaddr_union_t localaddr;
+#ifdef ENABLE_IPV6
+    if(!use_ipv6)
+#endif
+      la_size = sizeof(localaddr.sa4);
+#ifdef ENABLE_IPV6
+    else
+      la_size = sizeof(localaddr.sa6);
+#endif
+    memset(&localaddr.sa, 0, (size_t)la_size);
+    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
+      error = SOCKERRNO;
+      logmsg("getsockname() failed with error: (%d) %s",
+             error, strerror(error));
+      sclose(sock);
+      goto server_cleanup;
+    }
+    switch(localaddr.sa.sa_family) {
+    case AF_INET:
+      port = ntohs(localaddr.sa4.sin_port);
+      break;
+#ifdef ENABLE_IPV6
+    case AF_INET6:
+      port = ntohs(localaddr.sa6.sin6_port);
+      break;
+#endif
+    default:
+      break;
+    }
+    if(!port) {
+      /* Real failure, listener port shall not be zero beyond this point. */
+      logmsg("Apparently getsockname() succeeded, with listener port zero.");
+      logmsg("A valid reason for this failure is a binary built without");
+      logmsg("proper network library linkage. This might not be the only");
+      logmsg("reason, but double check it before anything else.");
+      sclose(sock);
+      goto server_cleanup;
+    }
+  }
   logmsg("Running %s version on port %d", ipv_inuse, (int)port);
 
   /* start accepting connections */
@@ -1207,6 +1251,12 @@ int main(int argc, char *argv[])
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile)
     goto server_cleanup;
+
+  if(portfile) {
+    wrotepidfile = write_portfile(portfile, port);
+    if(!wrotepidfile)
+      goto server_cleanup;
+  }
 
   for(;;) {
     msgsock = accept(sock, NULL, NULL);
