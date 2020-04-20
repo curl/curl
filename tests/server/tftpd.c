@@ -709,7 +709,7 @@ int main(int argc, char **argv)
       logmsg("getsockname() failed with error: (%d) %s",
              error, strerror(error));
       sclose(sock);
-      return CURL_SOCKET_BAD;
+      goto tftpd_cleanup;
     }
     switch(localaddr.sa.sa_family) {
     case AF_INET:
