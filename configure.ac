@@ -2084,7 +2084,8 @@ if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(gnutls, gnutls_check_version,
+      dnl this function is selected since it was introduced in 3.1.10
+      AC_CHECK_LIB(gnutls, gnutls_x509_crt_get_dn2,
        [
        AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
        AC_SUBST(USE_GNUTLS, [1])
@@ -2112,7 +2113,6 @@ if test -z "$ssl_backends" -o "x$OPT_GNUTLS" != xno; then
             AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])
           fi
         fi
-        AC_CHECK_FUNCS([gnutls_certificate_set_x509_key_file2 gnutls_alpn_set_protocols gnutls_ocsp_req_init])
       fi
 
     fi
