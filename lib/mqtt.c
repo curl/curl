@@ -569,6 +569,8 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
         Curl_debug(data, CURLINFO_HEADER_IN, (char *)&byte, 1);
       pkt[mq->npacket++] = byte;
     } while((byte & 0x80) && (mq->npacket < 4));
+    if(result)
+      break;
     mq->remaining_length = mqtt_decode_len(&pkt[0], mq->npacket, NULL);
     mq->npacket = 0;
     if(mq->remaining_length) {
