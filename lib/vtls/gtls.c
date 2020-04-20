@@ -1030,7 +1030,7 @@ gtls_connect_step3(struct connectdata *conn,
   gnutls_x509_crt_t x509_cert, x509_issuer;
   gnutls_datum_t issuerp;
   gnutls_datum_t certfields;
-  char certname[64] = ""; /* limited to 64 chars by ASN.1 */
+  char certname[65] = ""; /* limited to 64 chars by ASN.1 */
   size_t size;
   time_t certclock;
   const char *ptr;
