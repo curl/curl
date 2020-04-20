@@ -1741,10 +1741,10 @@ static CURLcode smtp_parse_custom_request(struct connectdata *conn)
  * Notes:
  *
  * Should a UTF-8 host name require conversion to IDN ACE and we cannot honor
- * that convertion then we shall return success. This allow the caller to send
+ * that conversion then we shall return success. This allow the caller to send
  * the data to the server as a U-label (as per RFC-6531 sect. 3.2).
  *
- * If an mailbox '@' seperator cannot be located then the mailbox is considered
+ * If an mailbox '@' separator cannot be located then the mailbox is considered
  * to be either a local mailbox or an invalid mailbox (depending on what the
  * calling function deems it to be) then the input will simply be returned in
  * the address part with the host name being NULL.
@@ -1765,7 +1765,7 @@ static CURLcode smtp_parse_address(struct connectdata *conn, const char *fqma,
   if(dup[length - 1] == '>')
     dup[length - 1] = '\0';
 
-  /* Extract the host name from the addresss (if we can) */
+  /* Extract the host name from the address (if we can) */
   host->name = strpbrk(dup, "@");
   if(host->name) {
     *host->name = '\0';

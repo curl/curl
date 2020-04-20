@@ -50,7 +50,7 @@ struct MQTT {
   char *sendleftovers;
   size_t nsend; /* size of sendleftovers */
 
-  /* when receving */
+  /* when receiving */
   size_t npacket; /* byte counter */
   unsigned char firstbyte;
   size_t remaining_length;
