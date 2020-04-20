@@ -2110,7 +2110,6 @@ sub runrtspserver {
 sub runsshserver {
     my ($id, $verbose, $ipv6) = @_;
     my $ip=$HOSTIP;
-    my $port = $SSHPORT;
     my $proto = 'ssh';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
@@ -2118,7 +2117,7 @@ sub runsshserver {
     my $srvrname;
     my $pidfile;
     my $logfile;
-    my $flags = "";
+    my $port = 20000; # no lower port
 
     $server = servername_id($proto, $ipvnum, $idnum);
 
@@ -2128,7 +2127,6 @@ sub runsshserver {
     if ($doesntrun{$pidfile}) {
         return (0,0);
     }
-
     my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($server, "$pid");
@@ -2139,60 +2137,87 @@ sub runsshserver {
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
+    my $flags = "";
     $flags .= "--verbose " if($verbose);
     $flags .= "--debugprotocol " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
-    $flags .= "--sshport $port ";
     $flags .= "--user \"$USER\"";
 
-    my $cmd = "$perl $srcdir/sshserver.pl $flags";
-    my ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
+    my $sshpid;
+    my $pid2;
 
-    # on loaded systems sshserver start up can take longer than the timeout
-    # passed to startnew, when this happens startnew completes without being
-    # able to read the pidfile and consequently returns a zero pid2 above.
+    my $wport = 0,
+    my @tports;
+    for(1 .. 10) {
 
-    if($sshpid <= 0 || !pidexists($sshpid)) {
-        # it is NOT alive
-        logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
+        # sshd doesn't have a way to pick an unused random port number, so
+        # instead we iterate over possible port numbers to use until we find
+        # one that works
+        $port += int(rand(500));
+        push @tports, $port;
+
+        my $options = "$flags --sshport $port";
+
+        my $cmd = "$perl $srcdir/sshserver.pl $options";
+        ($sshpid, $pid2) = startnew($cmd, $pidfile, 60, 0);
+
+        # on loaded systems sshserver start up can take longer than the
+        # timeout passed to startnew, when this happens startnew completes
+        # without being able to read the pidfile and consequently returns a
+        # zero pid2 above.
+        if($sshpid <= 0 || !pidexists($sshpid)) {
+            # it is NOT alive
+            logmsg "RUN: failed to start the $srvrname server on $port\n";
+            stopserver($server, "$pid2");
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+
+        # ssh server verification allows some extra time for the server to
+        # start up and gives us the opportunity of recovering the pid from the
+        # pidfile, when this verification succeeds the recovered pid is
+        # assigned to pid2.
+
+        my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+        if(!$pid3) {
+            logmsg "RUN: $srvrname server failed verification\n";
+            # failed to fetch server pid. Kill the server and return failure
+            stopserver($server, "$sshpid $pid2");
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+        $pid2 = $pid3;
+
+        # once it is known that the ssh server is alive, sftp server
+        # verification is performed actually connecting to it, authenticating
+        # and performing a very simple remote command.  This verification is
+        # tried only one time.
+
+        $sshdlog = server_logfilename($LOGDIR, 'ssh', $ipvnum, $idnum);
+        $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
+
+        if(verifysftp('sftp', $ipvnum, $idnum, $ip, $port) < 1) {
+            logmsg "RUN: SFTP server failed verification\n";
+            # failed to talk to it properly. Kill the server and return failure
+            display_sftplog();
+            display_sftpconfig();
+            display_sshdlog();
+            display_sshdconfig();
+            stopserver($server, "$sshpid $pid2");
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+        # we're happy, no need to loop anymore!
+        $wport = $port;
+        last;
     }
 
-    # ssh server verification allows some extra time for the server to start up
-    # and gives us the opportunity of recovering the pid from the pidfile, when
-    # this verification succeeds the recovered pid is assigned to pid2.
-
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to fetch server pid. Kill the server and return failure
-        stopserver($server, "$sshpid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    $pid2 = $pid3;
-
-    # once it is known that the ssh server is alive, sftp server verification
-    # is performed actually connecting to it, authenticating and performing a
-    # very simple remote command.  This verification is tried only one time.
-
-    $sshdlog = server_logfilename($LOGDIR, 'ssh', $ipvnum, $idnum);
-    $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
-
-    if(verifysftp('sftp', $ipvnum, $idnum, $ip, $port) < 1) {
-        logmsg "RUN: SFTP server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        display_sftplog();
-        display_sftpconfig();
-        display_sshdlog();
-        display_sshdconfig();
-        stopserver($server, "$sshpid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
+    if(!$wport) {
+        logmsg "RUN: couldn't start $srvrname. Tried these ports:";
+        logmsg "RUN: ".join(", ", @tports);
+        return (0,0,0);
     }
 
     my $hstpubmd5f = "curl_host_rsa_key.pub_md5";
@@ -2207,11 +2232,9 @@ sub runsshserver {
         die $msg;
     }
 
-    if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $pid2\n";
-    }
+    logmsg "RUN: $srvrname on PID $pid2 port $wport\n";
 
-    return ($pid2, $sshpid);
+    return ($pid2, $sshpid, $wport);
 }
 
 #######################################################################
@@ -3161,7 +3184,6 @@ sub checksystem {
             logmsg sprintf("FTPS/%d ", $FTPSPORT);
             logmsg sprintf("HTTPS/%d ", $HTTPSPORT);
         }
-        logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
         if($httptlssrv) {
             logmsg sprintf("HTTPTLS/%d ", $HTTPTLSPORT);
             if($has_ipv6) {
@@ -3711,8 +3733,7 @@ sub singletest {
                 return -1;
             }
             my $fileContent = join('', @inputfile);
-            subVariables \$fileContent;
-#            logmsg "DEBUG: writing file " . $filename . "\n";
+            subVariables(\$fileContent);
             open(OUTFILE, ">$filename");
             binmode OUTFILE; # for crapage systems, use binary
             print OUTFILE $fileContent;
@@ -4035,7 +4056,7 @@ sub singletest {
     if(@postcheck) {
         $cmd = join("", @postcheck);
         chomp $cmd;
-        subVariables \$cmd;
+        subVariables(\$cmd);
         if($cmd) {
             logmsg "postcheck $cmd\n" if($verbose);
             my $rc = runclient("$cmd");
@@ -4876,7 +4897,7 @@ sub startservers {
         }
         elsif($what eq "sftp" || $what eq "scp") {
             if(!$run{'ssh'}) {
-                ($pid, $pid2) = runsshserver("", $verbose);
+                ($pid, $pid2, $SSHPORT) = runsshserver("", $verbose);
                 if($pid <= 0) {
                     return "failed starting SSH server";
                 }
@@ -5444,7 +5465,6 @@ if ($gdbthis) {
 $minport         = $base; # original base port number
 $HTTPSPORT       = $base++; # HTTPS (stunnel) server port
 $FTPSPORT        = $base++; # FTPS (stunnel) server port
-$SSHPORT         = $base++; # SSH (SCP/SFTP) port
 $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port
 $HTTPTLS6PORT    = $base++; # HTTP TLS (non-stunnel) IPv6 server port
 $HTTP2PORT       = $base++; # HTTP/2 port
