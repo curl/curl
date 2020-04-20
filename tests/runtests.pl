@@ -126,7 +126,7 @@ my $maxport;     # maximum used port number
 
 my $noport="[not running]";
 
-my $NOLISTENPORT=2;      # port number we use for a local non-listening service
+my $NOLISTENPORT=47;     # port number we use for a local non-listening service
 my $MQTTPORT=$noport;    # MQTT server port
 my $HTTPPORT=$noport;    # HTTP server port
 my $HTTP6PORT=$noport;   # HTTP IPv6 server port
