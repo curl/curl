@@ -76,18 +76,18 @@ int Curl_select(curl_socket_t maxfd,
                 fd_set *fds_read,
                 fd_set *fds_write,
                 fd_set *fds_err,
-                time_t timeout_ms);
+                timediff_t timeout_ms);
 
 int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
                       curl_socket_t writefd,
-                      time_t timeout_ms);
+                      timediff_t timeout_ms);
 #define SOCKET_READABLE(x,z) \
   Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
 #define SOCKET_WRITABLE(x,z) \
   Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
 
-int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms);
-int Curl_wait_ms(int timeout_ms);
+int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
+int Curl_wait_ms(timediff_t timeout_ms);
 
 #ifdef TPF
 int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
