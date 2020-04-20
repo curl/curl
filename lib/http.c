@@ -1333,7 +1333,6 @@ CURLcode Curl_add_bufferf(Curl_send_buffer **inp, const char *fmt, ...)
 {
   char *s;
   va_list ap;
-  Curl_send_buffer *in = *inp;
   va_start(ap, fmt);
   s = vaprintf(fmt, ap); /* this allocs a new string to append */
   va_end(ap);
@@ -1344,9 +1343,7 @@ CURLcode Curl_add_bufferf(Curl_send_buffer **inp, const char *fmt, ...)
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */
-  free(in->buffer);
-  free(in);
-  *inp = NULL;
+  Curl_add_buffer_free(inp);
   return CURLE_OUT_OF_MEMORY;
 }
 
@@ -1363,9 +1360,7 @@ CURLcode Curl_add_buffer(Curl_send_buffer **inp, const void *inptr,
     /* If resulting used size of send buffer would wrap size_t, cleanup
        the whole buffer and return error. Otherwise the required buffer
        size will fit into a single allocatable memory chunk */
-    Curl_safefree(in->buffer);
-    free(in);
-    *inp = NULL;
+    Curl_add_buffer_free(inp);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -2615,8 +2610,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   if(conn->bits.altused && !Curl_checkheaders(conn, "Alt-Used")) {
     altused = aprintf("Alt-Used: %s:%d\r\n",
                       conn->conn_to_host.name, conn->conn_to_port);
-    if(!altused)
+    if(!altused) {
+      Curl_add_buffer_free(&req_buffer);
       return CURLE_OUT_OF_MEMORY;
+    }
   }
 #endif
   result =
