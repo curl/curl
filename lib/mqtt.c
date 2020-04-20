@@ -607,8 +607,6 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
   case MQTT_PUBWAIT:
   case MQTT_PUB_REMAIN:
     result = mqtt_read_publish(conn, done);
-    if(result)
-      break;
     break;
 
   default:
