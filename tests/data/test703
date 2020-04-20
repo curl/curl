@@ -31,7 +31,7 @@ proxy
 Attempt connect to non-listening HTTP server via SOCKS5 proxy
  </name>
  <command>
---socks5 %HOSTIP:%SOCKSPORT http://%HOSTIP:60000
+--socks5 %HOSTIP:%SOCKSPORT http://%HOSTIP:%NOLISTENPORT
 </command>
 </client>
 
