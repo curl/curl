@@ -388,7 +388,9 @@ static const char *statenames[]={
   "MQTT_SUBACK",
   "MQTT_SUBACK_COMING",
   "MQTT_PUBWAIT",
-  "MQTT_PUB_REMAIN"
+  "MQTT_PUB_REMAIN",
+
+  "NOT A STATE"
 };
 #endif
 

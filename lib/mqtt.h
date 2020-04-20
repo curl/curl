@@ -35,7 +35,7 @@ enum mqttstate {
   MQTT_PUBWAIT,    /* 5 - wait for publish */
   MQTT_PUB_REMAIN,  /* 6 - wait for the remainder of the publish */
 
-  MQTT_NOSTATE = 99 /* never an actual state */
+  MQTT_NOSTATE /* 7 - never used an actual state */
 };
 
 struct mqtt_conn {
