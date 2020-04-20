@@ -802,7 +802,8 @@ gtls_connect_step3(struct connectdata *conn,
   unsigned int verify_status = 0;
   gnutls_x509_crt_t x509_cert, x509_issuer;
   gnutls_datum_t issuerp;
-  char certbuf[256] = ""; /* big enough? */
+  gnutls_datum_t certfields;
+  char certname[65] = ""; /* limited to 64 chars by ASN.1 */
   size_t size;
   time_t certclock;
   const char *ptr;
@@ -1036,11 +1037,11 @@ gtls_connect_step3(struct connectdata *conn,
           SSL_SET_OPTION(issuercert)?SSL_SET_OPTION(issuercert):"none");
   }
 
-  size = sizeof(certbuf);
+  size = sizeof(certname);
   rc = gnutls_x509_crt_get_dn_by_oid(x509_cert, GNUTLS_OID_X520_COMMON_NAME,
                                      0, /* the first and only one */
                                      FALSE,
-                                     certbuf,
+                                     certname,
                                      &size);
   if(rc) {
     infof(data, "error fetching CN from cert:%s\n",
@@ -1101,16 +1102,16 @@ gtls_connect_step3(struct connectdata *conn,
 
     if(SSL_CONN_CONFIG(verifyhost)) {
       failf(data, "SSL: certificate subject name (%s) does not match "
-            "target host name '%s'", certbuf, dispname);
+            "target host name '%s'", certname, dispname);
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     else
       infof(data, "\t common name: %s (does not match '%s')\n",
-            certbuf, dispname);
+            certname, dispname);
   }
   else
-    infof(data, "\t common name: %s (matched)\n", certbuf);
+    infof(data, "\t common name: %s (matched)\n", certname);
 
   /* Check for time-based validity */
   certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
@@ -1195,9 +1196,10 @@ gtls_connect_step3(struct connectdata *conn,
         gnutls_x509_crt_get_version(x509_cert));
 
 
-  size = sizeof(certbuf);
-  gnutls_x509_crt_get_dn(x509_cert, certbuf, &size);
-  infof(data, "\t subject: %s\n", certbuf);
+  rc = gnutls_x509_crt_get_dn2(x509_cert, &certfields);
+  if(rc != 0)
+    return CURLE_OUT_OF_MEMORY;
+  infof(data, "\t subject: %s\n", certfields.data);
 
   certclock = gnutls_x509_crt_get_activation_time(x509_cert);
   showtime(data, "start date", certclock);
@@ -1205,9 +1207,10 @@ gtls_connect_step3(struct connectdata *conn,
   certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
   showtime(data, "expire date", certclock);
 
-  size = sizeof(certbuf);
-  gnutls_x509_crt_get_issuer_dn(x509_cert, certbuf, &size);
-  infof(data, "\t issuer: %s\n", certbuf);
+  rc = gnutls_x509_crt_get_issuer_dn2(x509_cert, &certfields);
+  if(rc != 0)
+    return CURLE_OUT_OF_MEMORY;
+  infof(data, "\t issuer: %s\n", certfields.data);
 #endif
 
   gnutls_x509_crt_deinit(x509_cert);

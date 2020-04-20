@@ -25,7 +25,6 @@ problems may have been fixed or changed somewhat since this was written!
  2. TLS
  2.1 CURLINFO_SSL_VERIFYRESULT has limited support
  2.2 DER in keychain
- 2.3 GnuTLS backend skips really long certificate fields
  2.4 DarwinSSL won't import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.6 CURL_GLOBAL_SSL
@@ -208,12 +207,6 @@ problems may have been fixed or changed somewhat since this was written!
 
  Curl doesn't recognize certificates in DER format in keychain, but it works
  with PEM.  https://curl.haxx.se/bug/view.cgi?id=1065
-
-2.3 GnuTLS backend skips really long certificate fields
-
- libcurl calls gnutls_x509_crt_get_dn() with a fixed buffer size and if the
- field is too long in the cert, it'll just return an error and the field will
- be displayed blank.
 
 2.4 DarwinSSL won't import PKCS#12 client certificates without a password
 
