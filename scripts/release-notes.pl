@@ -108,10 +108,10 @@ for my $l (@gitlog) {
         my $line = $1;
 
         if($line =~ /^Fixes(:|) .*[^0-9](\d+)/i) {
-            push @fixes, $1;
+            push @fixes, $2;
         }
         elsif($line =~ /^Closes(:|) .*[^0-9](\d+)/i) {
-            push @closes, $1;
+            push @closes, $2;
         }
         elsif($line =~ /^Bug: (.*)/i) {
             push @bug, $1;
