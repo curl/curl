@@ -688,7 +688,7 @@ static CURLcode smb_connection_state(struct connectdata *conn, bool *done)
       return CURLE_COULDNT_CONNECT;
     }
     nrsp = msg;
-    memcpy(smbc->challenge, nrsp->bytes, sizeof(smbc->challenge));
+    memcpy(smbc->challenge, nrsp->bytes, sizeof(nrsp->bytes));
     smbc->session_key = smb_swap32(nrsp->session_key);
     result = smb_send_setup(conn);
     if(result) {
