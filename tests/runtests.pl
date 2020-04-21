@@ -1616,41 +1616,52 @@ sub runhttpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
-    $flags .= "--connect $HTTPPORT --accept $HTTPSPORT";
+    $flags .= "--connect $HTTPPORT";
 
-    my $cmd = "$perl $srcdir/secureserver.pl $flags";
-    my ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my $pid2;
+    my $pid3;
+    my $httpspid;
+    my $port = 24512; # start attempt
+    for (1 .. 10) {
+        $port += int(rand(600));
+        my $options = "$flags --accept $port";
 
-    if($httpspid <= 0 || !pidexists($httpspid)) {
-        # it is NOT alive
-        logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return(0,0);
-    }
+        my $cmd = "$perl $srcdir/secureserver.pl $options";
+        ($httpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $HTTPSPORT);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$httpspid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
+        if($httpspid <= 0 || !pidexists($httpspid)) {
+            # it is NOT alive
+            logmsg "RUN: failed to start the $srvrname server\n";
+            stopserver($server, "$pid2");
+            displaylogs($testnumcheck);
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+
+        # Server is up. Verify that we can speak to it.
+        $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+        if(!$pid3) {
+            logmsg "RUN: $srvrname server failed verification\n";
+            # failed to talk to it properly. Kill the server and return failure
+            stopserver($server, "$httpspid $pid2");
+            displaylogs($testnumcheck);
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+        # we have a server!
+        last;
     }
     # Here pid3 is actually the pid returned by the unsecure-http server.
 
     $runcert{$server} = $certfile;
 
     if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $httpspid\n";
+        logmsg "RUN: $srvrname server is PID $httpspid port $port\n";
     }
 
     sleep(1);
 
-    return ($httpspid, $pid2);
+    return ($httpspid, $pid2, $port);
 }
 
 #######################################################################
@@ -1899,41 +1910,48 @@ sub runftpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
-    $flags .= "--connect $FTPPORT --accept $FTPSPORT";
+    $flags .= "--connect $FTPPORT";
 
-    my $cmd = "$perl $srcdir/secureserver.pl $flags";
-    my ($ftpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+    my $port = 26713;
+    my $pid2;
+    my $pid3;
+    my $ftpspid;
+    for (1 .. 10) {
+        $port += int(rand(700));
+        my $options = "$flags --accept $port";
+        my $cmd = "$perl $srcdir/secureserver.pl $options";
+        ($ftpspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
-    if($ftpspid <= 0 || !pidexists($ftpspid)) {
-        # it is NOT alive
-        logmsg "RUN: failed to start the $srvrname server\n";
-        stopserver($server, "$pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return(0,0);
+        if($ftpspid <= 0 || !pidexists($ftpspid)) {
+            # it is NOT alive
+            logmsg "RUN: failed to start the $srvrname server\n";
+            stopserver($server, "$pid2");
+            displaylogs($testnumcheck);
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+
+        $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
+        if(!$pid3) {
+            logmsg "RUN: $srvrname server failed verification\n";
+            # failed to talk to it properly. Kill the server and return failure
+            stopserver($server, "$ftpspid $pid2");
+            displaylogs($testnumcheck);
+            $doesntrun{$pidfile} = 1;
+            next;
+        }
+        # Here pid3 is actually the pid returned by the unsecure-ftp server.
+
+        $runcert{$server} = $certfile;
+
+        if($verbose) {
+            logmsg "RUN: $srvrname server is PID $ftpspid port $port\n";
+        }
+        last;
     }
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $FTPSPORT);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$ftpspid $pid2");
-        displaylogs($testnumcheck);
-        $doesntrun{$pidfile} = 1;
-        return (0,0);
-    }
-    # Here pid3 is actually the pid returned by the unsecure-ftp server.
-
-    $runcert{$server} = $certfile;
-
-    if($verbose) {
-        logmsg "RUN: $srvrname server is now running PID $ftpspid\n";
-    }
-
     sleep(1);
 
-    return ($ftpspid, $pid2);
+    return ($ftpspid, $pid2, $port);
 }
 
 #######################################################################
@@ -3157,10 +3175,6 @@ sub checksystem {
 
     if($verbose) {
         logmsg "* Ports: ";
-        if($stunnel) {
-            logmsg sprintf("FTPS/%d ", $FTPSPORT);
-            logmsg sprintf("HTTPS/%d ", $HTTPSPORT);
-        }
         logmsg sprintf("\n*   SSH/%d ", $SSHPORT);
         if($httptlssrv) {
             logmsg sprintf("HTTPTLS/%d ", $HTTPTLSPORT);
@@ -4762,7 +4776,8 @@ sub startservers {
                 $run{'ftp'}="$pid $pid2";
             }
             if(!$run{'ftps'}) {
-                ($pid, $pid2) = runftpsserver($verbose, "", $certfile);
+                ($pid, $pid2, $FTPSPORT) =
+                    runftpsserver($verbose, "", $certfile);
                 if($pid <= 0) {
                     return "failed starting FTPS server (stunnel)";
                 }
@@ -4797,7 +4812,8 @@ sub startservers {
                 $run{'http'}="$pid $pid2";
             }
             if(!$run{'https'}) {
-                ($pid, $pid2) = runhttpsserver($verbose, "", $certfile);
+                ($pid, $pid2, $HTTPSPORT) =
+                    runhttpsserver($verbose, "", $certfile);
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
                 }
@@ -5442,8 +5458,6 @@ if ($gdbthis) {
 }
 
 $minport         = $base; # original base port number
-$HTTPSPORT       = $base++; # HTTPS (stunnel) server port
-$FTPSPORT        = $base++; # FTPS (stunnel) server port
 $SSHPORT         = $base++; # SSH (SCP/SFTP) port
 $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port
 $HTTPTLS6PORT    = $base++; # HTTP TLS (non-stunnel) IPv6 server port
