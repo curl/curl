@@ -85,12 +85,15 @@ static size_t brotli_version(char *buf, size_t bufsz)
  * generate the exact same string and never write any temporary data like
  * zeros in the data.
  */
+
+#define VERSION_PARTS 14 /* number of substrings we can concatenate */
+
 char *curl_version(void)
 {
   static char out[300];
   char *outp;
   size_t outlen;
-  const char *src[14];
+  const char *src[VERSION_PARTS];
 #ifdef USE_SSL
   char ssl_version[200];
 #endif
@@ -103,7 +106,7 @@ char *curl_version(void)
 #ifdef USE_ARES
   char cares_version[40];
 #endif
-#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
+#if defined(USE_LIBIDN2)
   char idn_version[40];
 #endif
 #ifdef USE_LIBPSL
@@ -156,14 +159,11 @@ char *curl_version(void)
   src[i++] = cares_version;
 #endif
 #ifdef USE_LIBIDN2
-  if(idn2_check_version(IDN2_VERSION)) {
-    msnprintf(idn_version, sizeof(idn_version),
-              "libidn2/%s", idn2_check_version(NULL));
-    src[i++] = idn_version;
-  }
-#elif defined(USE_WIN32_IDN)
-  msnprintf(idn_version, sizeof(idn_version), "WinIDN");
+  msnprintf(idn_version, sizeof(idn_version),
+            "libidn2/%s", idn2_check_version(NULL));
   src[i++] = idn_version;
+#elif defined(USE_WIN32_IDN)
+  src[i++] = (char *)"WinIDN";
 #endif
 
 #ifdef USE_LIBPSL
@@ -207,6 +207,8 @@ char *curl_version(void)
     src[i++] = rtmp_version;
   }
 #endif
+
+  DEBUGASSERT(i <= VERSION_PARTS);
 
   outp = &out[0];
   outlen = sizeof(out);
