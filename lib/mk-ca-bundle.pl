@@ -531,6 +531,11 @@ while (<TXT>) {
     } else {
       my $data = $cka_value;
       $cka_value = "";
+
+      if(!length($data)) {
+          # if empty, skip
+          next;
+      }
       my $encoded = MIME::Base64::encode_base64($data, '');
       $encoded =~ s/(.{1,${opt_w}})/$1\n/g;
       my $pem = "-----BEGIN CERTIFICATE-----\n"
