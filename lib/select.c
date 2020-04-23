@@ -333,7 +333,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
      curl_socket_t is unsigned in such cases and thus -1 is the largest
      value).
   */
-  r = Curl_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
+  r = Curl_select(maxfd, &fds_read, &fds_write, &fds_err, (time_t)timeout_ms);
 
   if(r < 0)
     return -1;
