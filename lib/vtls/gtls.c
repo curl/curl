@@ -401,6 +401,8 @@ gtls_connect_step1(struct connectdata *conn,
   const char *err = NULL;
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+  long * const certverifyresult = SSL_IS_PROXY() ?
+    &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
 
   if(connssl->state == ssl_connection_complete)
     /* to make us tolerant against being called more than once for the
@@ -409,6 +411,9 @@ gtls_connect_step1(struct connectdata *conn,
 
   if(!gtls_inited)
     Curl_gtls_init();
+
+  /* Initalize certverifyresult to OK */
+  *certverifyresult = 0;
 
   if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) {
     failf(data, "GnuTLS does not support SSLv2");
@@ -458,8 +463,10 @@ gtls_connect_step1(struct connectdata *conn,
     if(rc < 0) {
       infof(data, "error reading ca cert file %s (%s)\n",
             SSL_CONN_CONFIG(CAfile), gnutls_strerror(rc));
-      if(SSL_CONN_CONFIG(verifypeer))
+      if(SSL_CONN_CONFIG(verifypeer)) {
+        *certverifyresult = rc;
         return CURLE_SSL_CACERT_BADFILE;
+      }
     }
     else
       infof(data, "found %d certificates in %s\n", rc,
@@ -474,8 +481,10 @@ gtls_connect_step1(struct connectdata *conn,
     if(rc < 0) {
       infof(data, "error reading ca cert file %s (%s)\n",
             SSL_CONN_CONFIG(CApath), gnutls_strerror(rc));
-      if(SSL_CONN_CONFIG(verifypeer))
+      if(SSL_CONN_CONFIG(verifypeer)) {
+        *certverifyresult = rc;
         return CURLE_SSL_CACERT_BADFILE;
+      }
     }
     else
       infof(data, "found %d certificates in %s\n",
@@ -821,6 +830,8 @@ gtls_connect_step3(struct connectdata *conn,
 #endif
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+  long * const certverifyresult = SSL_IS_PROXY() ?
+    &data->set.proxy_ssl.certverifyresult : &data->set.ssl.certverifyresult;
 
   /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
   ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(session),
@@ -852,6 +863,7 @@ gtls_connect_step3(struct connectdata *conn,
       else {
 #endif
         failf(data, "failed to get server cert");
+        *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
         return CURLE_PEER_FAILED_VERIFICATION;
 #ifdef USE_TLS_SRP
       }
@@ -888,8 +900,11 @@ gtls_connect_step3(struct connectdata *conn,
     rc = gnutls_certificate_verify_peers2(session, &verify_status);
     if(rc < 0) {
       failf(data, "server cert verify failed: %d", rc);
+      *certverifyresult = rc;
       return CURLE_SSL_CONNECT_ERROR;
     }
+
+    *certverifyresult = verify_status;
 
     /* verify_status is a bitmask of gnutls_certificate_status bits */
     if(verify_status & GNUTLS_CERT_INVALID) {
@@ -1119,6 +1134,7 @@ gtls_connect_step3(struct connectdata *conn,
   if(certclock == (time_t)-1) {
     if(SSL_CONN_CONFIG(verifypeer)) {
       failf(data, "server cert expiration date verify failed");
+      *certverifyresult = GNUTLS_CERT_EXPIRED;
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -1129,6 +1145,7 @@ gtls_connect_step3(struct connectdata *conn,
     if(certclock < time(NULL)) {
       if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data, "server certificate expiration date has passed.");
+        *certverifyresult = GNUTLS_CERT_EXPIRED;
         gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
       }
@@ -1144,6 +1161,7 @@ gtls_connect_step3(struct connectdata *conn,
   if(certclock == (time_t)-1) {
     if(SSL_CONN_CONFIG(verifypeer)) {
       failf(data, "server cert activation date verify failed");
+      *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -1154,6 +1172,7 @@ gtls_connect_step3(struct connectdata *conn,
     if(certclock > time(NULL)) {
       if(SSL_CONN_CONFIG(verifypeer)) {
         failf(data, "server certificate not activated yet.");
+        *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
         gnutls_x509_crt_deinit(x509_cert);
         return CURLE_PEER_FAILED_VERIFICATION;
       }
