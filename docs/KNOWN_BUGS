@@ -200,8 +200,8 @@ problems may have been fixed or changed somewhat since this was written!
 
 2.1 CURLINFO_SSL_VERIFYRESULT has limited support
 
- CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
- backends, so relying on this information in a generic app is flaky.
+ CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL, NSS and
+ GnuTLS backends, so relying on this information in a generic app is flaky.
 
 2.2 DER in keychain
 
