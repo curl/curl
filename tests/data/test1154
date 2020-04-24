@@ -30,7 +30,7 @@ Long: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 http
 </server>
  <name>
-HTTP GET
+HTTP GET with 100K (too long) response header
  </name>
  <command>
 http://%HOSTIP:%HTTPPORT/1154
