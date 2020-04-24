@@ -5492,7 +5492,13 @@ sub disabledtests {
                 next;
             }
             if($_ =~ /(\d+)/) {
-                $disabled{$1}=$1; # disable this test number
+                my ($n) = $1;
+                $disabled{$n}=$n; # disable this test number
+                if(! -f "data/test$n") {
+                    print STDERR "WARNING! Non-exiting test $n in DISABLED!\n";
+                    # fail hard to make user notice
+                    exit 1;
+                }
             }
         }
         close(D);
