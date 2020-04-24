@@ -763,6 +763,7 @@ sub torture {
 #
 sub stopserver {
     my ($server, $pidlist) = @_;
+
     #
     # kill sockfilter processes for pingpong relative server
     #
@@ -791,6 +792,12 @@ sub stopserver {
     elsif($server =~ /^(ssh)((\d*)(-ipv6|))$/) {
         # given a ssh server, also kill socks piggybacking one
         push @killservers, "socks${2}";
+    }
+    if($server eq "http") {
+        # since the http2 server is a proxy that needs to know about the
+        # dynamic http port it too needs to get restarted when the http server
+        # is killed
+        push @killservers, "http/2";
     }
     push @killservers, $server;
     #
@@ -2702,7 +2709,7 @@ sub cleardir {
         return 0; # can't open dir
     while($file = readdir(DIR)) {
         if(($file !~ /^\./)) {
-            unlink("$dir/$file");
+            #unlink("$dir/$file");
             $count++;
         }
     }
@@ -3969,64 +3976,9 @@ sub singletest {
 
     my @killtestservers = getpart("client", "killserver");
     if(@killtestservers) {
-        #
-        # All servers relative to the given one must be stopped also
-        #
-        my @killservers;
         foreach my $server (@killtestservers) {
             chomp $server;
-            if($server =~ /^(ftp|http|imap|pop3|smtp)s((\d*)(-ipv6|-unix|))$/) {
-                # given a stunnel ssl server, also kill non-ssl underlying one
-                push @killservers, "${1}${2}";
-            }
-            elsif($server =~ /^(ftp|http|imap|pop3|smtp)((\d*)(-ipv6|-unix|))$/) {
-                # given a non-ssl server, also kill stunnel piggybacking one
-                push @killservers, "${1}s${2}";
-            }
-            elsif($server =~ /^(socks)((\d*)(-ipv6|))$/) {
-                # given a socks server, also kill ssh underlying one
-                push @killservers, "ssh${2}";
-            }
-            elsif($server =~ /^(ssh)((\d*)(-ipv6|))$/) {
-                # given a ssh server, also kill socks piggybacking one
-                push @killservers, "socks${2}";
-            }
-            push @killservers, $server;
-        }
-        #
-        # kill sockfilter processes for pingpong relative servers
-        #
-        foreach my $server (@killservers) {
-            if($server =~ /^(ftp|imap|pop3|smtp)s?(\d*)(-ipv6|)$/) {
-                my $proto  = $1;
-                my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
-                my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
-                killsockfilters($proto, $ipvnum, $idnum, $verbose);
-            }
-        }
-        #
-        # kill server relative pids clearing them in %run hash
-        #
-        my $pidlist;
-        foreach my $server (@killservers) {
-            if($run{$server}) {
-                $pidlist .= "$run{$server} ";
-                $run{$server} = 0;
-            }
-            $runcert{$server} = 0 if($runcert{$server});
-        }
-        killpid($verbose, $pidlist);
-        #
-        # cleanup server pid files
-        #
-        foreach my $server (@killservers) {
-            my $pidfile = $serverpidfile{$server};
-            my $pid = processexists($pidfile);
-            if($pid > 0) {
-                logmsg "Warning: $server server unexpectedly alive\n";
-                killpid($verbose, $pid);
-            }
-            unlink($pidfile) if(-f $pidfile);
+            stopserver($server);
         }
     }
 
