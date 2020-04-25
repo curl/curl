@@ -5446,8 +5446,8 @@ sub disabledtests {
             if($_ =~ /(\d+)/) {
                 my ($n) = $1;
                 $disabled{$n}=$n; # disable this test number
-                if(! -f "data/test$n") {
-                    print STDERR "WARNING! Non-exiting test $n in DISABLED!\n";
+                if(! -f "$srcdir/data/test$n") {
+                    print STDERR "WARNING! Non-existing test $n in DISABLED!\n";
                     # fail hard to make user notice
                     exit 1;
                 }
