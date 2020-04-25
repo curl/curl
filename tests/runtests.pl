@@ -2709,7 +2709,7 @@ sub cleardir {
         return 0; # can't open dir
     while($file = readdir(DIR)) {
         if(($file !~ /^\./)) {
-            #unlink("$dir/$file");
+            unlink("$dir/$file");
             $count++;
         }
     }
