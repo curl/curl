@@ -1333,7 +1333,6 @@ struct urlpieces {
 };
 
 struct UrlState {
-
   /* Points to the connection cache */
   struct conncache *conn_cache;
 

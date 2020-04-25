@@ -193,7 +193,6 @@ struct smb_nt_create_response {
   unsigned int ext_file_attributes;
   curl_off_t allocation_size;
   curl_off_t end_of_file;
-
 } PACK;
 
 struct smb_read {
