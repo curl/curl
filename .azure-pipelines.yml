@@ -34,7 +34,6 @@ pr:
   branches:
     include:
     - 'master'
-    - '*/ci'
 
 stages:
 
