@@ -1085,10 +1085,12 @@ CURLcode Curl_once_resolved(struct connectdata *conn,
 
   result = Curl_setup_conn(conn, protocol_done);
 
-  if(result)
-    /* We're not allowed to return failure with memory left allocated
-       in the connectdata struct, free those here */
-    Curl_disconnect(conn->data, conn, TRUE); /* close the connection */
-
+  if(result) {
+    struct Curl_easy *data = conn->data;
+    DEBUGASSERT(data);
+    Curl_detach_connnection(data);
+    Curl_conncache_remove_conn(data, conn, TRUE);
+    Curl_disconnect(data, conn, TRUE);
+  }
   return result;
 }

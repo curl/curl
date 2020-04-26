@@ -79,7 +79,6 @@ static CURLMcode add_next_timeout(struct curltime now,
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms);
 static void process_pending_handles(struct Curl_multi *multi);
-static void detach_connnection(struct Curl_easy *data);
 
 #ifdef DEBUGBUILD
 static const char * const statename[]={
@@ -112,7 +111,7 @@ static void Curl_init_completed(struct Curl_easy *data)
 
   /* Important: reset the conn pointer so that we don't point to memory
      that could be freed anytime */
-  detach_connnection(data);
+  Curl_detach_connnection(data);
   Curl_expire_clear(data); /* stop all timers */
 }
 
@@ -506,6 +505,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
      easy handle is added */
   memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
 
+  CONNCACHE_LOCK(data);
   /* The closure handle only ever has default timeouts set. To improve the
      state somewhat we clone the timeouts from each added handle so that the
      closure handle always has the same timeouts as the most recently added
@@ -515,6 +515,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->set.server_response_timeout;
   data->state.conn_cache->closure_handle->set.no_signal =
     data->set.no_signal;
+  CONNCACHE_UNLOCK(data);
 
   Curl_update_timer(multi);
   return CURLM_OK;
@@ -589,14 +590,14 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   process_pending_handles(data->multi); /* connection / multiplex */
 
-  CONN_LOCK(data);
-  detach_connnection(data);
+  CONNCACHE_LOCK(data);
+  Curl_detach_connnection(data);
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
     /* conn->data must not remain pointing to this transfer since it is going
        away! Find another to own it! */
     conn->data = conn->easyq.head->ptr;
-    CONN_UNLOCK(data);
+    CONNCACHE_UNLOCK(data);
     DEBUGF(infof(data, "Connection still in use %zu, "
                  "no more multi_done now!\n",
                  conn->easyq.size));
@@ -647,7 +648,8 @@ static CURLcode multi_done(struct Curl_easy *data,
        || (premature && !(conn->handler->flags & PROTOPT_STREAM))) {
     CURLcode res2;
     connclose(conn, "disconnecting");
-    CONN_UNLOCK(data);
+    Curl_conncache_remove_conn(data, conn, FALSE);
+    CONNCACHE_UNLOCK(data);
     res2 = Curl_disconnect(data, conn, premature);
 
     /* If we had an error already, make sure we return that one. But
@@ -666,7 +668,7 @@ static CURLcode multi_done(struct Curl_easy *data,
               conn->bits.conn_to_host ? conn->conn_to_host.dispname :
               conn->host.dispname);
     /* the connection is no longer in use by this transfer */
-    CONN_UNLOCK(data);
+    CONNCACHE_UNLOCK(data);
     if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
       data->state.lastconnect = conn;
@@ -778,8 +780,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
                                 vanish with this handle */
 
   /* Remove the association between the connection and the handle */
-  if(data->conn)
-    detach_connnection(data);
+  Curl_detach_connnection(data);
 
 #ifdef USE_LIBPSL
   /* Remove the PSL association. */
@@ -828,9 +829,13 @@ bool Curl_multiplex_wanted(const struct Curl_multi *multi)
   return (multi && (multi->multiplexing));
 }
 
-/* This is the only function that should clear data->conn. This will
-   occasionally be called with the pointer already cleared. */
-static void detach_connnection(struct Curl_easy *data)
+/*
+ * Curl_detach_connnection() removes the given transfer from the connection.
+ *
+ * This is the only function that should clear data->conn. This will
+ * occasionally be called with the data->conn pointer already cleared.
+ */
+void Curl_detach_connnection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn)
@@ -838,7 +843,11 @@ static void detach_connnection(struct Curl_easy *data)
   data->conn = NULL;
 }
 
-/* This is the only function that should assign data->conn */
+/*
+ * Curl_attach_connnection() attaches this transfer to this connection.
+ *
+ * This is the only function that should assign data->conn
+ */
 void Curl_attach_connnection(struct Curl_easy *data,
                              struct connectdata *conn)
 {
@@ -1540,19 +1549,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     bool stream_error = FALSE;
     rc = CURLM_OK;
 
-    DEBUGASSERT((data->mstate <= CURLM_STATE_CONNECT) ||
-                (data->mstate >= CURLM_STATE_DONE) ||
-                data->conn);
-    if(!data->conn &&
-       data->mstate > CURLM_STATE_CONNECT &&
-       data->mstate < CURLM_STATE_DONE) {
-      /* In all these states, the code will blindly access 'data->conn'
-         so this is precaution that it isn't NULL. And it silences static
-         analyzers. */
-      failf(data, "In state %d with no conn, bail out!\n", data->mstate);
-      return CURLM_INTERNAL_ERROR;
-    }
-
     if(multi_ischanged(multi, TRUE)) {
       DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue!\n"));
       process_pending_handles(multi); /* multiplexed */
@@ -2235,8 +2231,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          * access free'd data, if the connection is free'd and the handle
          * removed before we perform the processing in CURLM_STATE_COMPLETED
          */
-        if(data->conn)
-          detach_connnection(data);
+        Curl_detach_connnection(data);
       }
 
 #ifndef CURL_DISABLE_FTP
@@ -2288,7 +2283,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             /* This is where we make sure that the conn pointer is reset.
                We don't have to do this in every case block above where a
                failure is detected */
-            detach_connnection(data);
+            Curl_detach_connnection(data);
+
+            /* remove connection from cache */
+            Curl_conncache_remove_conn(data, conn, TRUE);
 
             /* disconnect properly */
             Curl_disconnect(data, conn, dead_connection);
