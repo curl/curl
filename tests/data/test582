@@ -24,7 +24,7 @@ lib582
 SFTP upload using multi interface
  </name>
  <command>
-Sftp://%HOSTIP:%SSHPORT%POSIX_PWD/log/upload582.txt %PWD/log/file582.txt %USER:
+Sftp://%HOSTIP:%SSHPORT%SSH_PWD/log/upload582.txt %PWD/log/file582.txt %USER:
 </command>
 <file name="log/file582.txt">
 Moooooooooooo

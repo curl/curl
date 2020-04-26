@@ -16,7 +16,7 @@ sftp
 SFTP retrieval with nonexistent private key file
  </name>
  <command>
---key DOES_NOT_EXIST --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%POSIX_PWD/not-a-valid-file-moooo --insecure --connect-timeout 8
+--key DOES_NOT_EXIST --pubkey curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/not-a-valid-file-moooo --insecure --connect-timeout 8
 </command>
 </client>
 
