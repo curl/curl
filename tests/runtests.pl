@@ -2136,6 +2136,11 @@ sub runsshserver {
         return (0,0);
     }
 
+    my $sshd = find_sshd();
+    if($sshd) {
+        ($sshdid,$sshdvernum,$sshdverstr,$sshderror) = sshversioninfo($sshd);
+    }
+
     my $pid = processexists($pidfile);
     if($pid > 0) {
         stopserver($server, "$pid");
@@ -3258,8 +3263,13 @@ sub subVariables {
     if($file_pwd !~ /^\//) {
         $file_pwd = "/$file_pwd";
     }
+    my $ssh_pwd = $posix_pwd;
+    if ($sshdid && $sshdid =~ /OpenSSH-Windows/) {
+        $ssh_pwd = $file_pwd;
+    }
 
     $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
+    $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
     $$thing =~ s/${prefix}USER/$USER/g;
 
