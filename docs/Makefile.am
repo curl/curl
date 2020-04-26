@@ -54,6 +54,7 @@ EXTRA_DIST =                                    \
  CONTRIBUTE.md                                  \
  CURL-DISABLE.md                                \
  DEPRECATE.md                                   \
+ DYNBUF.md                                      \
  ESNI.md                                        \
  EXPERIMENTAL.md                                \
  FAQ                                            \

@@ -35,13 +35,13 @@
 #include "curl_base64.h"
 #include "connect.h"
 #include "strdup.h"
+#include "dynbuf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
 #define DNS_CLASS_IN 0x01
-#define DOH_MAX_RESPONSE_SIZE 3000 /* bytes */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static const char * const errors[]={
@@ -177,19 +177,10 @@ static size_t
 doh_write_cb(const void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
-  struct dohresponse *mem = (struct dohresponse *)userp;
+  struct dynbuf *mem = (struct dynbuf *)userp;
 
-  if((mem->size + realsize) > DOH_MAX_RESPONSE_SIZE)
-    /* suspiciously much for us */
+  if(Curl_dyn_addn(mem, contents, realsize))
     return 0;
-
-  mem->memory = Curl_saferealloc(mem->memory, mem->size + realsize);
-  if(!mem->memory)
-    /* out of memory! */
-    return 0;
-
-  memcpy(&(mem->memory[mem->size]), contents, realsize);
-  mem->size += realsize;
 
   return realsize;
 }
@@ -238,10 +229,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
   }
 
   p->dnstype = dnstype;
-  p->serverdoh.memory = NULL;
-  /* the memory will be grown as needed by realloc in the doh_write_cb
-     function */
-  p->serverdoh.size = 0;
+  Curl_dyn_init(&p->serverdoh, DYN_DOH_RESPONSE);
 
   /* Note: this is code for sending the DoH request with GET but there's still
      no logic that actually enables this. We should either add that ability or
@@ -272,7 +260,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
   if(!result) {
     /* pass in the struct pointer via a local variable to please coverity and
        the gcc typecheck helpers */
-    struct dohresponse *resp = &p->serverdoh;
+    struct dynbuf *resp = &p->serverdoh;
     ERROR_CHECK_SETOPT(CURLOPT_URL, url);
     ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_write_cb);
     ERROR_CHECK_SETOPT(CURLOPT_WRITEDATA, resp);
@@ -506,38 +494,12 @@ static DOHcode store_aaaa(const unsigned char *doh,
   return DOH_OK;
 }
 
-static DOHcode cnameappend(struct cnamestore *c,
-                           const unsigned char *src,
-                           size_t len)
-{
-  if(!c->alloc) {
-    c->allocsize = len + 1;
-    c->alloc = malloc(c->allocsize);
-    if(!c->alloc)
-      return DOH_OUT_OF_MEM;
-  }
-  else if(c->allocsize < (c->allocsize + len + 1)) {
-    char *ptr;
-    c->allocsize += len + 1;
-    ptr = realloc(c->alloc, c->allocsize);
-    if(!ptr) {
-      free(c->alloc);
-      return DOH_OUT_OF_MEM;
-    }
-    c->alloc = ptr;
-  }
-  memcpy(&c->alloc[c->len], src, len);
-  c->len += len;
-  c->alloc[c->len] = 0; /* keep it zero terminated */
-  return DOH_OK;
-}
-
 static DOHcode store_cname(const unsigned char *doh,
                            size_t dohlen,
                            unsigned int index,
                            struct dohentry *d)
 {
-  struct cnamestore *c;
+  struct dynbuf *c;
   unsigned int loop = 128; /* a valid DNS name can never loop this much */
   unsigned char length;
 
@@ -566,18 +528,15 @@ static DOHcode store_cname(const unsigned char *doh,
       index++;
 
     if(length) {
-      DOHcode rc;
-      if(c->len) {
-        rc = cnameappend(c, (unsigned char *)".", 1);
-        if(rc)
-          return rc;
+      if(Curl_dyn_len(c)) {
+        if(Curl_dyn_add(c, "."))
+          return DOH_OUT_OF_MEM;
       }
       if((index + length) > dohlen)
         return DOH_DNS_BAD_LABEL;
 
-      rc = cnameappend(c, &doh[index], length);
-      if(rc)
-        return rc;
+      if(Curl_dyn_addn(c, &doh[index], length))
+        return DOH_OUT_OF_MEM;
       index += length;
     }
   } while(length && --loop);
@@ -630,10 +589,13 @@ static DOHcode rdata(const unsigned char *doh,
   return DOH_OK;
 }
 
-static void init_dohentry(struct dohentry *de)
+UNITTEST void de_init(struct dohentry *de)
 {
+  int i;
   memset(de, 0, sizeof(*de));
   de->ttl = INT_MAX;
+  for(i = 0; i < DOH_MAX_CNAME; i++)
+    Curl_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
 
@@ -808,7 +770,7 @@ static void showdoh(struct Curl_easy *data,
     }
   }
   for(i = 0; i < d->numcname; i++) {
-    infof(data, "CNAME: %s\n", d->cname[i].alloc);
+    infof(data, "CNAME: %s\n", Curl_dyn_ptr(&d->cname[i]));
   }
 }
 #else
@@ -941,7 +903,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
 {
   int i = 0;
   for(i = 0; i < d->numcname; i++) {
-    free(d->cname[i].alloc);
+    Curl_dyn_free(&d->cname[i]);
   }
 }
 
@@ -959,7 +921,9 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
       CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!data->req.doh.pending) {
-    DOHcode rc[DOH_PROBE_SLOTS];
+    DOHcode rc[DOH_PROBE_SLOTS] = {
+      DOH_OK, DOH_OK
+    };
     struct dohentry de;
     int slot;
     /* remove DOH handles from multi handle and close them */
@@ -968,17 +932,19 @@ CURLcode Curl_doh_is_resolved(struct connectdata *conn,
       Curl_close(&data->req.doh.probe[slot].easy);
     }
     /* parse the responses, create the struct and return it! */
-    init_dohentry(&de);
+    de_init(&de);
     for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
-      rc[slot] = doh_decode(data->req.doh.probe[slot].serverdoh.memory,
-                            data->req.doh.probe[slot].serverdoh.size,
-                            data->req.doh.probe[slot].dnstype,
+      struct dnsprobe *p = &data->req.doh.probe[slot];
+      if(!p->dnstype)
+        continue;
+      rc[slot] = doh_decode(Curl_dyn_uptr(&p->serverdoh),
+                            Curl_dyn_len(&p->serverdoh),
+                            p->dnstype,
                             &de);
-      Curl_safefree(data->req.doh.probe[slot].serverdoh.memory);
+      Curl_dyn_free(&p->serverdoh);
       if(rc[slot]) {
         infof(data, "DOH: %s type %s for %s\n", doh_strerror(rc[slot]),
-              type2name(data->req.doh.probe[slot].dnstype),
-              data->req.doh.host);
+              type2name(p->dnstype), data->req.doh.host);
       }
     } /* next slot */
 

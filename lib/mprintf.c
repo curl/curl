@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1999 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -36,6 +36,7 @@
  */
 
 #include "curl_setup.h"
+#include "dynbuf.h"
 #include <curl/mprintf.h>
 
 #include "curl_memory.h"
@@ -168,11 +169,9 @@ struct nsprintf {
 };
 
 struct asprintf {
-  char *buffer; /* allocated buffer */
-  size_t len;   /* length of string */
-  size_t alloc; /* length of alloc */
-  int fail;     /* (!= 0) if an alloc has failed and thus
-                   the output is not the complete data */
+  struct dynbuf b;
+  bool fail; /* if an alloc has failed and thus the output is not the complete
+                data */
 };
 
 static long dprintf_DollarString(char *input, char **end)
@@ -1031,35 +1030,10 @@ static int alloc_addbyter(int output, FILE *data)
   struct asprintf *infop = (struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
 
-  if(!infop->buffer) {
-    infop->buffer = malloc(32);
-    if(!infop->buffer) {
-      infop->fail = 1;
-      return -1; /* fail */
-    }
-    infop->alloc = 32;
-    infop->len = 0;
+  if(Curl_dyn_addn(&infop->b, &outc, 1)) {
+    infop->fail = 1;
+    return -1; /* fail */
   }
-  else if(infop->len + 1 >= infop->alloc) {
-    char *newptr = NULL;
-    size_t newsize = infop->alloc*2;
-
-    /* detect wrap-around or other overflow problems */
-    if(newsize > infop->alloc)
-      newptr = realloc(infop->buffer, newsize);
-
-    if(!newptr) {
-      infop->fail = 1;
-      return -1; /* fail */
-    }
-    infop->buffer = newptr;
-    infop->alloc = newsize;
-  }
-
-  infop->buffer[ infop->len ] = outc;
-
-  infop->len++;
-
   return outc; /* fputc() returns like this on success */
 }
 
@@ -1068,24 +1042,18 @@ char *curl_maprintf(const char *format, ...)
   va_list ap_save; /* argument pointer */
   int retcode;
   struct asprintf info;
-
-  info.buffer = NULL;
-  info.len = 0;
-  info.alloc = 0;
+  Curl_dyn_init(&info.b, DYN_APRINTF);
   info.fail = 0;
 
   va_start(ap_save, format);
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
   va_end(ap_save);
   if((-1 == retcode) || info.fail) {
-    if(info.alloc)
-      free(info.buffer);
+    Curl_dyn_free(&info.b);
     return NULL;
   }
-  if(info.alloc) {
-    info.buffer[info.len] = 0; /* we terminate this with a zero byte */
-    return info.buffer;
-  }
+  if(Curl_dyn_len(&info.b))
+    return Curl_dyn_ptr(&info.b);
   return strdup("");
 }
 
@@ -1093,23 +1061,16 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
 {
   int retcode;
   struct asprintf info;
-
-  info.buffer = NULL;
-  info.len = 0;
-  info.alloc = 0;
+  Curl_dyn_init(&info.b, DYN_APRINTF);
   info.fail = 0;
 
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
   if((-1 == retcode) || info.fail) {
-    if(info.alloc)
-      free(info.buffer);
+    Curl_dyn_free(&info.b);
     return NULL;
   }
-
-  if(info.alloc) {
-    info.buffer[info.len] = 0; /* we terminate this with a zero byte */
-    return info.buffer;
-  }
+  if(Curl_dyn_len(&info.b))
+    return Curl_dyn_ptr(&info.b);
   return strdup("");
 }
 
