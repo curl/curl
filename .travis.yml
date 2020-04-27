@@ -23,7 +23,7 @@ language: c
 sudo: required
 cache:
     directories:
-        - $HOME/wolfssl-4.0.0-stable
+        - $HOME/wolfssl-4.4.0-stable
         - $HOME/mesalink-1.0.0
         - $HOME/nghttp2-1.39.2
 
