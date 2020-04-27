@@ -174,7 +174,7 @@ UNITTEST DOHcode doh_encode(const char *host,
 }
 
 static size_t
-doh_write_cb(void *contents, size_t size, size_t nmemb, void *userp)
+doh_write_cb(const void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct dohresponse *mem = (struct dohresponse *)userp;
@@ -439,7 +439,7 @@ Curl_addrinfo *Curl_doh(struct connectdata *conn,
   return NULL;
 }
 
-static DOHcode skipqname(unsigned char *doh, size_t dohlen,
+static DOHcode skipqname(const unsigned char *doh, size_t dohlen,
                          unsigned int *indexp)
 {
   unsigned char length;
@@ -463,12 +463,12 @@ static DOHcode skipqname(unsigned char *doh, size_t dohlen,
   return DOH_OK;
 }
 
-static unsigned short get16bit(unsigned char *doh, int index)
+static unsigned short get16bit(const unsigned char *doh, int index)
 {
   return (unsigned short)((doh[index] << 8) | doh[index + 1]);
 }
 
-static unsigned int get32bit(unsigned char *doh, int index)
+static unsigned int get32bit(const unsigned char *doh, int index)
 {
    /* make clang and gcc optimize this to bswap by incrementing
       the pointer first. */
@@ -480,7 +480,7 @@ static unsigned int get32bit(unsigned char *doh, int index)
   return ( (unsigned)doh[0] << 24) | (doh[1] << 16) |(doh[2] << 8) | doh[3];
 }
 
-static DOHcode store_a(unsigned char *doh, int index, struct dohentry *d)
+static DOHcode store_a(const unsigned char *doh, int index, struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
@@ -492,7 +492,9 @@ static DOHcode store_a(unsigned char *doh, int index, struct dohentry *d)
   return DOH_OK;
 }
 
-static DOHcode store_aaaa(unsigned char *doh, int index, struct dohentry *d)
+static DOHcode store_aaaa(const unsigned char *doh,
+                          int index,
+                          struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
@@ -505,7 +507,7 @@ static DOHcode store_aaaa(unsigned char *doh, int index, struct dohentry *d)
 }
 
 static DOHcode cnameappend(struct cnamestore *c,
-                           unsigned char *src,
+                           const unsigned char *src,
                            size_t len)
 {
   if(!c->alloc) {
@@ -530,7 +532,7 @@ static DOHcode cnameappend(struct cnamestore *c,
   return DOH_OK;
 }
 
-static DOHcode store_cname(unsigned char *doh,
+static DOHcode store_cname(const unsigned char *doh,
                            size_t dohlen,
                            unsigned int index,
                            struct dohentry *d)
@@ -585,7 +587,7 @@ static DOHcode store_cname(unsigned char *doh,
   return DOH_OK;
 }
 
-static DOHcode rdata(unsigned char *doh,
+static DOHcode rdata(const unsigned char *doh,
                      size_t dohlen,
                      unsigned short rdlength,
                      unsigned short type,
@@ -635,7 +637,7 @@ static void init_dohentry(struct dohentry *de)
 }
 
 
-UNITTEST DOHcode doh_decode(unsigned char *doh,
+UNITTEST DOHcode doh_decode(const unsigned char *doh,
                             size_t dohlen,
                             DNStype dnstype,
                             struct dohentry *d)
@@ -775,12 +777,12 @@ UNITTEST DOHcode doh_decode(unsigned char *doh,
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void showdoh(struct Curl_easy *data,
-                    struct dohentry *d)
+                    const struct dohentry *d)
 {
   int i;
   infof(data, "TTL: %u seconds\n", d->ttl);
   for(i = 0; i < d->numaddr; i++) {
-    struct dohaddr *a = &d->addr[i];
+    const struct dohaddr *a = &d->addr[i];
     if(a->type == DNS_TYPE_A) {
       infof(data, "DOH A: %u.%u.%u.%u\n",
             a->ip.v4[0], a->ip.v4[1],
