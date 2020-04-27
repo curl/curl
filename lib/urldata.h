@@ -788,15 +788,10 @@ struct proxy_info {
   char *passwd;  /* proxy password string, allocated */
 };
 
-#define CONNECT_BUFFER_SIZE 16384
-
 /* struct for HTTP CONNECT state data */
 struct http_connect_state {
-  char connect_buffer[CONNECT_BUFFER_SIZE];
-  int perline; /* count bytes per line */
+  struct dynbuf rcvbuf;
   int keepon;
-  char *line_start;
-  char *ptr; /* where to store more data */
   curl_off_t cl; /* size of content to read and ignore */
   enum {
     TUNNEL_INIT,    /* init/default/no tunnel state */
