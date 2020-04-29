@@ -37,6 +37,7 @@ Aki Koskinen
 Akos Pasztory
 Akshay Vernekar
 Alain Danteny
+Alain Miniussi
 Alan Jenkins
 Alan Pinstein
 Albert Chin-A-Young
@@ -54,6 +55,7 @@ Alex Baines
 Alex Bligh
 Alex Chan
 Alex Fishman
+Alex Gaynor
 Alex Grebenschikov
 Alex Gruz
 Alex Konev
@@ -78,6 +80,7 @@ Alexander Pepper
 Alexander Peslyak
 Alexander Sinditskiy
 Alexander Traud
+Alexander V. Tikhonov
 Alexander Zhuravlev
 Alexey Borzov
 Alexey Eremikhin
@@ -183,6 +186,7 @@ Arve Knudsen
 Arvid Norberg
 asavah on github
 Ashish Shukla
+Ashwin Metpalli
 Ask Bjørn Hansen
 Askar Safin
 Ates Goral
@@ -266,6 +270,7 @@ Brandon Wang
 Brendan Jurd
 Brent Beardsley
 Brian Akins
+Brian Bergeron
 Brian Carpenter
 Brian Chaplin
 Brian Childs
@@ -291,6 +296,7 @@ bxac on github
 Bylon2 on github
 Byrial Jensen
 Caleb Raitto
+Calvin Buckley
 Cameron Kaiser
 Cameron MacMinn
 Camille Moncelier
@@ -326,6 +332,7 @@ Chris Flerackers
 Chris Gaukroger
 Chris Maltby
 Chris Mumford
+Chris Roberts
 Chris Smowton
 Chris Young
 Christian Fillion
@@ -339,6 +346,7 @@ Christian Schmitz
 Christian Stewart
 Christian Vogt
 Christian Weisgerber
+Christoph Krey
 Christoph M. Becker
 Christophe Demory
 Christophe Dervieux
@@ -394,6 +402,7 @@ Da-Yoon Chung
 daboul on github
 Dag Ekengren
 Dagobert Michelsen
+Daiki Ueno
 Dair Grant
 Dambaev Alexander
 Damian Dixon
@@ -486,12 +495,14 @@ David Walser
 David Woodhouse
 David Wright
 David Yan
+davidedec on github
 dbrowndan on github
 Dengminwen
 Denis Chaplygin
 Denis Feklushkin
 Denis Ollier
 Dennis Clarke
+Dennis Felsing
 Derek Higgins
 Desmond O. Chang
 destman on github
@@ -513,6 +524,7 @@ Dinar
 Dirk Eddelbuettel
 Dirk Feytons
 Dirk Manske
+Dirkjan Bussink
 dkjjr89 on github
 dkwolfe4 on github
 Dmitri Shubin
@@ -606,6 +618,7 @@ Eric Rescorla
 Eric Ridge
 Eric Rosenquist
 Eric S. Raymond
+Eric Sauvageau
 Eric Thelin
 Eric Vergnaud
 Eric Wong
@@ -630,6 +643,7 @@ Evgeny Grin
 Evgeny Turnaev
 eXeC64 on github
 Eygene Ryabinkin
+Eylem Ugurel
 Fabian Frank
 Fabian Hiernaux
 Fabian Keil
@@ -677,6 +691,7 @@ Fred Stluka
 Frederic Lepied
 Frederik B
 Fredrik Thulin
+FuccDucc on github
 Gabriel Kuri
 Gabriel Sjoberg
 Garrett Holmstrom
@@ -684,6 +699,7 @@ Gary Maxwell
 Gaurav Malhotra
 Gautam Kachroo
 Gautam Mani
+Gavin Wong
 Gavrie Philipson
 Gaz Iqbal
 Gaël Portay
@@ -757,6 +773,7 @@ Hanno Böck
 Hanno Kranzhoff
 Hans Steegers
 Hans-Jurgen May
+Hao Wu
 Hardeep Singh
 Haris Okanovic
 Harold Stuart
@@ -786,6 +803,7 @@ Howard Chu
 hsiao yi
 Hubert Kario
 Huzaifa Sidhpurwala
+hydra3333 on github
 Hzhijun
 Ian D Allen
 Ian Fette
@@ -1019,6 +1037,7 @@ Joshua Swink
 Josie Huddleston
 Josue Andrade Gomes
 Jozef Kralik
+JP Mens
 Juan Barreto
 Juan F. Codagnone
 Juan Ignacio Hervás
@@ -1061,6 +1080,7 @@ Kalle Vahlman
 Kamil Dudka
 Kang Lin
 Kang-Jin Lee
+Karl Chen
 Karl Moerder
 Karol Pietrzak
 Kartik Mahajan
@@ -1111,6 +1131,7 @@ Kristiyan Tsaklev
 Kristoffer Gleditsch
 Kunal Ekawde
 Kurt Fankhauser
+Kwon-Young Choi
 Kyle Abramowitz
 Kyle Edwards
 Kyle J. McKay
@@ -1254,6 +1275,7 @@ Markus Elfring
 Markus Koetter
 Markus Moeller
 Markus Oberhumer
+Markus Olsson
 Markus Westerlind
 Maros Priputen
 Marquis de Muesli
@@ -1283,6 +1305,7 @@ Massimiliano Ziccardi
 Massimo Callegari
 Mateusz Loskot
 Mathias Axelsson
+Mathias Gumz
 Mathieu Legare
 Mats Lidell
 Matt Arsenault
@@ -1404,6 +1427,7 @@ Mostyn Bramley-Moore
 Moti Avrahami
 MrdUkk on github
 MrSorcus on github
+Muhammad Herdiansyah
 Muz Dima
 Myk Taylor
 Nach M. S.
@@ -1414,6 +1438,7 @@ Nathan Coulter
 Nathan O'Sullivan
 Nathanael Nerode
 Nathaniel J. Smith
+Nathaniel R. Lewis
 Nathaniel Waisbrot
 Naveen Chandran
 Naveen Noel
@@ -1536,6 +1561,7 @@ Paul Nolan
 Paul Oliver
 Paul Querna
 Paul Saab
+Paul Vixie
 Paulo Roberto Tomasi
 Pavel Cenek
 Pavel Gushchin
@@ -1688,6 +1714,7 @@ Richard Prescott
 Richard Silverman
 Richard van den Berg
 Richy Kim
+Rici Lake
 Rick Deist
 Rick Jones
 Rick Richardson
@@ -1728,6 +1755,7 @@ Rodney Simmons
 Rodric Glaser
 Rodrigo Silva
 Roger Leigh
+Roger Orr
 Roland Blom
 Roland Hieber
 Roland Krikava
@@ -1745,6 +1773,7 @@ Ron Parker
 Ron Zapp
 Ronnie Mose
 Rosimildo da Silva
+Ross Burton
 Roy Bellingan
 Roy Shan
 Rune Kleveland
@@ -1832,6 +1861,7 @@ Siddhartha Prakash Jain
 Sidney San Martín
 Siegfried Gyuricsko
 silveja1 on github
+Simon Chalifoux
 Simon Dick
 Simon H.
 Simon Josefsson
@@ -1869,6 +1899,7 @@ Stefano Simonelli
 Steinar H. Gunderson
 steini2000 on github
 Stepan Broz
+Stepan Efremov
 Stephan Bergmann
 Stephan Lagerholm
 Stephan Mühlstrasser
@@ -1894,6 +1925,7 @@ Steven G. Johnson
 Steven Gu
 Steven M. Schweda
 Steven Parkes
+Steven Penny
 Stian Soiland-Reyes
 Stoned Elipot
 stootill on github
@@ -1924,6 +1956,7 @@ Teemu Yli-Elsila
 Temprimus
 Terri Oda
 Terry Wu
+thanhchungbtc on github
 The Infinnovation team
 TheAssassin on github
 Theodore Dubois
@@ -1954,6 +1987,7 @@ Tim Heckman
 Tim Mcdonough
 Tim Newsome
 Tim Rühsen
+Tim Sedlmeyer
 Tim Sneddon
 Tim Stack
 Tim Starling
@@ -2003,6 +2037,7 @@ Tomasz Kojm
 Tomasz Lacki
 Tommie Gannert
 tommink[at]post.pl
+Tommy Petty
 Tommy Tam
 Ton Voon
 Toni Moreno
@@ -2116,6 +2151,7 @@ Yousuke Kimoto
 Yu Xin
 Yukihiro Kawada
 Yun SangHo
+Yuri Slobodyanyuk
 Yuriy Sosov
 Yves Arrouye
 Yves Lejeune
