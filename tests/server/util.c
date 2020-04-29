@@ -199,7 +199,7 @@ FILE *test2fopen(long testno)
   FILE *stream;
   char filename[256];
   /* first try the alternative, preprocessed, file */
-  msnprintf(filename, sizeof(filename), ALTTEST_DATA_PATH, path, testno);
+  msnprintf(filename, sizeof(filename), ALTTEST_DATA_PATH, ".", testno);
   stream = fopen(filename, "rb");
   if(stream)
     return stream;
