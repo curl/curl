@@ -18,7 +18,7 @@ Verify that CURL_VERSION_* in headers and docs are in sync
  </name>
 
 <command type="perl">
-%SRCDIR/version-scan.pl %SRCDIR/../docs/libcurl/curl_version_info.3 ../include/curl/curl.h
+%SRCDIR/version-scan.pl %SRCDIR/../docs/libcurl/curl_version_info.3 %SRCDIR/../include/curl/curl.h
 </command>
 </client>
 
