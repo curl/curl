@@ -4,7 +4,7 @@ curl and libcurl 7.70.0
  Command line options:         231
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2165
+ Contributors:                 2169
 
 This release includes the following changes:
 
@@ -70,9 +70,12 @@ This release includes the following bugfixes:
  o http2: Fix erroneous debug message that h2 connection closed [21]
  o http: don't consider upload done if the request isn't completely sent off [67]
  o http: free memory when Alt-Used header creation fails due to OOM [98]
+ o lib/mk-ca-bundle: skip empty certs [112]
  o lib670: use the same Win32 API check as all other lib tests
  o lib: fix typos in comments and errormessages
  o lib: never define CURL_CA_BUNDLE with a getenv [51]
+ o libcurl-multi.3: added missing full stop [110]
+ o libssh: avoid options override by configuration files [104]
  o libssh: Use new ECDSA key types to check known hosts [87]
  o mailmap: fixup a few author names/fields
  o Makefile.m32: Improve windres parameter compatibility [17]
@@ -83,6 +86,7 @@ This release includes the following bugfixes:
  o multi: improve parameter check for curl_multi_remove_handle [6]
  o nghttp2: 1.12.0 required [40]
  o ngtcp2: update to git master for the key installation API change [46]
+ o nss: check for PK11_CreateDigestContext() returning NULL [96]
  o openssl: adapt to functions marked as deprecated since version 3 [34]
  o OS400: update strings for ccsid-ifier (fixes the build) [30]
  o output.d: quote the URL when globbing [48]
@@ -94,10 +98,12 @@ This release includes the following bugfixes:
  o schannel: Fix blocking timeout logic [76]
  o schannel: support .P12 or .PFX client certificates [65]
  o scripts/release-notes.pl: add helper script for RELEASE-NOTES maintenance
+ o select: make Curl_socket_check take timediff_t timeout [109]
  o select: move duplicate select preparation code into Curl_select [14]
  o select: remove typecast from SOCKET_WRITABLE/READABLE macros [69]
  o server/getpart: make the "XML-parser" stricter [20]
  o server/resolve: remove AI_CANONNAME to make macos tell the truth [63]
+ o smtp: set auth correctly [103]
  o sockfilt: add logmsg output to select_ws_wait_thread on Windows [32]
  o sockfilt: fix broken pipe on Windows to be ready in select_ws [95]
  o sockfilt: fix handling of ready closed sockets on Windows
@@ -106,6 +112,7 @@ This release includes the following bugfixes:
  o src: Remove C99 constructs to ensure C89 compliance [82]
  o SSLCERTS.md: Fix example code for setting CA cert file [31]
  o test1148: tolerate progress updates better (again) [60]
+ o test1154: set a proper name
  o test1177: verify that all the CURL_VERSION_ bits are documented
  o test1566: verify --etag-compare that gets a 304 back [53]
  o test1908: avoid using fixed port number in test data [75]
@@ -119,6 +126,7 @@ This release includes the following bugfixes:
  o tests: fix conflict between Cygwin/msys and Windows PIDs [81]
  o tests: introduce preprocessed test cases
  o tests: make Python-based servers compatible with Python 2 and 3 [22]
+ o tests: make runtests check that disabled tests exists [108]
  o tests: move pingpong server to dynamic listening port
  o tests: remove python_dependencies for smbserver from our tree [16]
  o tests: run the RTSP test server on a dynamic port number [91]
@@ -130,10 +138,13 @@ This release includes the following bugfixes:
  o tool: do not declare functions with Curl_ prefix [66]
  o tool_operate: fix add_parallel_transfers when more are in queue [10]
  o transfer: cap retries of "dead connections" to 5 [13]
+ o transfer: Switch PUT to GET/HEAD on 303 redirect [111]
+ o travis: bump the wolfssl CI build to use 4.4.0 [97]
  o travis: update the ngtcp2 build to use the latest OpenSSL patch
  o url: allow non-HTTPS altsvc-matching for debug builds [62]
  o version: add 'cainfo' and 'capath' to version info struct [55]
  o version: increase buffer space for ssl version output [74]
+ o version: skip idn2_check_version() check and add precaution [113]
  o vquic: add support for GnuTLS backend of ngtcp2 [41]
  o vtls: fix ssl_config memory-leak on out-of-memory [11]
  o warnless: remove code block for icc that didn't work [72]
@@ -148,20 +159,21 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alain Miniussi, Alexander V. Tikhonov, Alex Gaynor,
-  Anderson Toshiyuki Sasaki, Andrew Kurushin, Björn Stenberg, Brad King,
-  Brian Bergeron, Calvin Buckley, Chris Roberts, Christoph Krey, Clément Notin,
-  Daiki Ueno, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Anderson Toshiyuki Sasaki, Andrew Kurushin, Ashwin Metpalli, Björn Stenberg,
+  Brad King, Brian Bergeron, Calvin Buckley, Chris Roberts, Christoph Krey,
+  Clément Notin, Daiki Ueno, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
   davidedec on github, Dennis Felsing, Dima Tisnek, Dirkjan Bussink,
-  Emil Engler, Eylem Ugurel, Frank Gevaerts, FuccDucc on github, Gavin Wong,
-  Gilles Vollant, Gisle Vanem, Harry Sintonen, hydra3333 on github,
-  James Fuller, Johannes Schindelin, Jon Rumsey, JP Mens, Kamil Dudka,
-  Karl Chen, Kwon-Young Choi, Leo Neat, Maksim Stsepanenka, Marcel Raad,
-  Marc Hörsken, Markus Olsson, Mathias Gumz, Michael Kaufmann, Michael Osipov,
-  Muhammad Herdiansyah, Nathaniel R. Lewis, Patrick Monnerat, Paul Vixie,
-  Ray Satiro, Rici Lake, Roger Orr, Ross Burton, Simon Chalifoux,
-  Stepan Efremov, Steven Penny, thanhchungbtc on github, Timothe Litt,
-  Tim Sedlmeyer, Tommy Petty, Viktor Szakats,
-  (60 contributors)
+  Emil Engler, Eric Sauvageau, Eylem Ugurel, Frank Gevaerts,
+  FuccDucc on github, Gavin Wong, Gilles Vollant, Gisle Vanem, Hao Wu,
+  Harry Sintonen, hydra3333 on github, James Fuller, Johannes Schindelin,
+  Jon Rumsey, JP Mens, Kamil Dudka, Karl Chen, Kwon-Young Choi, Leo Neat,
+  Maksim Stsepanenka, Marcel Raad, Marc Hörsken, Markus Olsson, Mathias Gumz,
+  Michael Kaufmann, Michael Osipov, Muhammad Herdiansyah, Nathaniel R. Lewis,
+  Patrick Monnerat, Paul Vixie, Ray Satiro, Rici Lake, Rikard Falkeborn,
+  Roger Orr, Ross Burton, Simon Chalifoux, Stepan Efremov, Steven Penny,
+  thanhchungbtc on github, Timothe Litt, Tim Sedlmeyer, Tommy Petty,
+  Viktor Szakats, Yuri Slobodyanyuk,
+  (65 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -262,7 +274,17 @@ References to bug reports and discussions on issues:
  [93] = https://curl.haxx.se/bug/?i=5270
  [94] = https://curl.haxx.se/bug/?i=5233
  [95] = https://curl.haxx.se/bug/?i=5228
+ [96] = https://curl.haxx.se/bug/?i=5302
+ [97] = https://curl.haxx.se/bug/?i=5301
  [98] = https://curl.haxx.se/bug/?i=5268
  [99] = https://curl.haxx.se/bug/?i=5266
  [100] = https://curl.haxx.se/bug/?i=5255
  [101] = https://curl.haxx.se/bug/?i=5265
+ [103] = https://curl.haxx.se/bug/?i=5294
+ [104] = https://curl.haxx.se/bug/?i=4972
+ [108] = https://curl.haxx.se/bug/?i=5288
+ [109] = https://curl.haxx.se/bug/?i=5240
+ [110] = https://curl.haxx.se/bug/?i=5285
+ [111] = https://curl.haxx.se/bug/?i=5237
+ [112] = https://curl.haxx.se/bug/?i=5278
+ [113] = https://curl.haxx.se/bug/?i=5281
