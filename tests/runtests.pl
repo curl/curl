@@ -5481,7 +5481,7 @@ sub disabledtests {
                 my ($n) = $1;
                 $disabled{$n}=$n; # disable this test number
                 if(! -f "$srcdir/data/test$n") {
-                    print STDERR "WARNING! Non-exiting test $n in DISABLED!\n";
+                    print STDERR "WARNING! Non-existing test $n in DISABLED!\n";
                     # fail hard to make user notice
                     exit 1;
                 }
