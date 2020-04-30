@@ -30,7 +30,7 @@ HTTP, urlglob retrieval with bad range
 # The error message on stdout implicitly depends on the length of the
 # URL, so refuse to run if the length is unexpected.
 <precheck>
-perl %SRCDIR/libtest/test75.pl http://%HOSTIP:%HTTPPORT/ 22
+perl %SRCDIR/libtest/test75.pl http://%HOSTIP:%NOLISTENPORT/ 22
 </precheck>
 </client>
 

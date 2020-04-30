@@ -23,7 +23,7 @@ lib1550
 verify setting pipeling blacklisting options
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/1550
+http://%HOSTIP:%NOLISTENPORT/1550
 </command>
 </client>
 </testcase>

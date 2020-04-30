@@ -26,7 +26,7 @@ lib501
 simple libcurl attempt operation without URL set
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/501
+http://%HOSTIP:%NOLISTENPORT/501
 </command>
 </client>
 

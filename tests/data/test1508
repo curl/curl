@@ -18,7 +18,7 @@ lib1508
 Close a multi handle without using it
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/path/1508
+http://%HOSTIP:%NOLISTENPORT/path/1508
 </command>
 </client>
 

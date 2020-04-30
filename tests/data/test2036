@@ -22,7 +22,7 @@ http
 HTTP, -O with no slash at all in the URL
  </name>
  <command option="no-output">
-%HOSTIP:%HTTPPORT -O
+%HOSTIP:%NOLISTENPORT -O
 </command>
 </client>
 
