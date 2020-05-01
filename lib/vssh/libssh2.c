@@ -2551,7 +2551,9 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       }
 
       /* upload data */
-      Curl_setup_transfer(data, -1, data->req.size, FALSE, FIRSTSOCKET);
+      data->req.size = data->state.infilesize;
+      Curl_pgrsSetUploadSize(data, data->state.infilesize);
+      Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
 
       /* not set by Curl_setup_transfer to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
