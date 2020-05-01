@@ -32,7 +32,7 @@ Access a non-proxied host with using the combination of --proxy option and NO_PR
 NO_PROXY=%HOSTIP
 </setenv>
 <command>
-http://user:secret@%HOSTIP:%HTTPPORT/1249 --proxy http://dummy:%PROXYPORT/ --max-time 5
+http://user:secret@%HOSTIP:%HTTPPORT/1249 --proxy http://dummy:%NOLISTENPORT/ --max-time 5
 </command>
 </client>
 

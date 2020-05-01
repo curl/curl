@@ -29,7 +29,7 @@ http
 Access a non-proxied host with using the combination of --proxy option and --noproxy option
 </name>
 <command>
-http://user:secret@%HOSTIP:%HTTPPORT/1248 --proxy http://dummy:%PROXYPORT/ --noproxy %HOSTIP --max-time 5
+http://user:secret@%HOSTIP:%HTTPPORT/1248 --proxy http://dummy:%NOLISTENPORT/ --noproxy %HOSTIP --max-time 5
 </command>
 </client>
 
