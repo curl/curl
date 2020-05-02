@@ -4,7 +4,7 @@ curl and libcurl 7.70.1
  Command line options:         231
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2169
+ Contributors:                 2171
 
 This release includes the following changes:
 
@@ -12,7 +12,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o
+ o cirrus: disable SFTP and SCP tests [7]
+ o doc: add missing closing parenthesis in CURLINFO_SSL_VERIFYRESULT.3 [5]
+ o examples: remove asiohiper.cpp [4]
+ o GnuTLS: Backend support for CURLINFO_SSL_VERIFYRESULT [9]
+ o libssh2: set the expected total size in SCP upload init [2]
+ o libtest/cmake: Remove commented code [13]
+ o test1177: look for curl.h in source directory [1]
+ o test75: Remove precheck test
+ o tests: make test 1248 + 1249 use %NOLISTENPORT [3]
+ o tests: pick a random port number for SSH [12]
+ o tests: run stunnel for HTTPS and FTPS on dynamic ports [11]
 
 This release includes the following known bugs:
 
@@ -21,10 +31,21 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+  Dan Fandrich, Daniel Stenberg, Emil Engler, Kamil Dudka, Kane York,
+  Murugan Balraj, Rikard Falkeborn,
+  (7 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.haxx.se/bug/?i=
+ [1] = https://curl.haxx.se/bug/?i=5310
+ [2] = https://curl.haxx.se/mail/archive-2020-05/0000.html
+ [3] = https://curl.haxx.se/bug/?i=5318
+ [4] = https://curl.haxx.se/bug/?i=5090
+ [5] = https://curl.haxx.se/bug/?i=5320
+ [7] = https://curl.haxx.se/bug/?i=5315
+ [9] = https://curl.haxx.se/bug/?i=5287
+ [11] = https://curl.haxx.se/bug/?i=5267
+ [12] = https://curl.haxx.se/bug/?i=5273
+ [13] = https://curl.haxx.se/bug/?i=5311
