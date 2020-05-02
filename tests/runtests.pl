@@ -2257,7 +2257,7 @@ sub runsshserver {
         die $msg;
     }
 
-    logmsg "RUN: $srvrname on PID $pid2 port $wport\n";
+    logmsg "RUN: $srvrname on PID $pid2 port $wport\n" if($verbose);
 
     return ($pid2, $sshpid, $wport);
 }
