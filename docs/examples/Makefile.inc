@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -43,6 +43,6 @@ check_PROGRAMS = 10-at-a-time anyauthput cookie_interface debug fileupload \
 COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c \
   ghiper.c hiperfifo.c htmltidy.c multithread.c opensslthreadlock.c \
   sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
-  smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp \
+  smooth-gtk-thread.c version-check.pl href_extractor.c \
   multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c \
   threaded-shared-conn.c crawler.c ephiperfifo.c multi-event.c
