@@ -83,7 +83,7 @@ EXTRA_DIST =                                    \
  THANKS                                         \
  TODO                                           \
  TheArtOfHttpScripting                          \
- VERSIONS
+ VERSIONS.md
 
 MAN2HTML= roffit $< >$@
 
