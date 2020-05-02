@@ -43,8 +43,7 @@ problems may have been fixed or changed somewhat since this was written!
  4.1 -J and -O with %-encoded file names
  4.2 -J with -C - fails
  4.3 --retry and transfer timeouts
- 4.4 --upload-file . hang if delay in STDIN
- 4.5 Improve --data-urlencode space encoding
+ 4.4 Improve --data-urlencode space encoding
 
  5. Build and portability issues
  5.2 curl-config --libs contains private details
@@ -337,15 +336,7 @@ problems may have been fixed or changed somewhat since this was written!
  https://curl.haxx.se/mail/lib-2008-01/0080.html and Mandriva bug report
  https://qa.mandriva.com/show_bug.cgi?id=22565
 
-4.4 --upload-file . hangs if delay in STDIN
-
- "(echo start; sleep 1; echo end) | curl --upload-file . http://mywebsite -vv"
-
- ... causes a hang when it shouldn't.
-
- See https://github.com/curl/curl/issues/2051
-
-4.5 Improve --data-urlencode space encoding
+4.4 Improve --data-urlencode space encoding
 
  ASCII space characters in --data-urlencode are currently encoded as %20
  rather than +, which RFC 1866 says should be used.
