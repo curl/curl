@@ -509,6 +509,9 @@ static CURLcode resolver_error(struct connectdata *conn)
   return result;
 }
 
+/*
+ * 'entry' may be NULL and then no data is returned
+ */
 static CURLcode thread_wait_resolv(struct connectdata *conn,
                                    struct Curl_dns_entry **entry,
                                    bool report)
@@ -593,8 +596,8 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   int done = 0;
 
-  if(entry)
-    *entry = NULL;
+  DEBUGASSERT(entry);
+  *entry = NULL;
 
   if(!td) {
     DEBUGASSERT(td);
@@ -614,8 +617,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
       return result;
     }
     destroy_async_data(&conn->async);
-    if(entry)
-      *entry = conn->async.dns;
+    *entry = conn->async.dns;
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */

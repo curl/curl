@@ -352,8 +352,8 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
     conn->async.os_specific;
   CURLcode result = CURLE_OK;
 
-  if(dns)
-    *dns = NULL;
+  DEBUGASSERT(dns);
+  *dns = NULL;
 
   waitperform(conn, 0);
 
@@ -381,19 +381,18 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   }
 
   if(res && !res->num_pending) {
-    if(dns) {
-      (void)Curl_addrinfo_callback(conn, res->last_status, res->temp_ai);
-      /* temp_ai ownership is moved to the connection, so we need not free-up
-         them */
-      res->temp_ai = NULL;
-    }
+    (void)Curl_addrinfo_callback(conn, res->last_status, res->temp_ai);
+    /* temp_ai ownership is moved to the connection, so we need not free-up
+       them */
+    res->temp_ai = NULL;
+
     if(!conn->async.dns) {
       failf(data, "Could not resolve: %s (%s)",
             conn->async.hostname, ares_strerror(conn->async.status));
       result = conn->bits.proxy?CURLE_COULDNT_RESOLVE_PROXY:
         CURLE_COULDNT_RESOLVE_HOST;
     }
-    else if(dns)
+    else
       *dns = conn->async.dns;
 
     destroy_async_data(&conn->async);
@@ -408,7 +407,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
  * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
- * If 'entry' is non-NULL, make it point to the resolved dns entry
+ * 'entry' MUST be non-NULL.
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
@@ -420,10 +419,9 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   timediff_t timeout;
   struct curltime now = Curl_now();
-  struct Curl_dns_entry *temp_entry;
 
-  if(entry)
-    *entry = NULL; /* clear on entry */
+  DEBUGASSERT(entry);
+  *entry = NULL; /* clear on entry */
 
   timeout = Curl_timeleft(data, &now, TRUE);
   if(timeout < 0) {
@@ -456,7 +454,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       timeout_ms = 1000;
 
     waitperform(conn, timeout_ms);
-    result = Curl_resolver_is_resolved(conn, entry?&temp_entry:NULL);
+    result = Curl_resolver_is_resolved(conn, entry);
 
     if(result || conn->async.done)
       break;
