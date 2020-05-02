@@ -1572,8 +1572,6 @@ sub runhttpserver {
         logmsg "RUN: $srvrname server is on PID $httppid port $port\n";
     }
 
-    sleep(1);
-
     return ($httppid, $pid2, $port);
 }
 
@@ -1666,8 +1664,6 @@ sub runhttpsserver {
         logmsg "RUN: $srvrname server is PID $httpspid port $port\n";
     }
 
-    sleep(1);
-
     return ($httpspid, $pid2, $port);
 }
 
@@ -1744,8 +1740,6 @@ sub runhttptlsserver {
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $httptlspid\n";
     }
-
-    sleep(1);
 
     return ($httptlspid, $pid2);
 }
@@ -1866,8 +1860,6 @@ sub runpingpongserver {
         return 0;
     }
 
-    sleep(1);
-
     return ($pid2, $ftppid);
 }
 
@@ -1956,7 +1948,6 @@ sub runftpsserver {
         }
         last;
     }
-    sleep(1);
 
     return ($ftpspid, $pid2, $port);
 }
@@ -2039,8 +2030,6 @@ sub runtftpserver {
         logmsg "RUN: $srvrname server on PID $tftppid port $port\n";
     }
 
-    sleep(1);
-
     return ($pid2, $tftppid, $port);
 }
 
@@ -2122,8 +2111,6 @@ sub runrtspserver {
     if($verbose) {
         logmsg "RUN: $srvrname server PID $rtsppid port $port\n";
     }
-
-    sleep(1);
 
     return ($rtsppid, $pid2, $port);
 }
@@ -2462,8 +2449,6 @@ sub rundictserver {
         logmsg "RUN: $srvrname server is now running PID $dictpid\n";
     }
 
-    sleep(1);
-
     return ($dictpid, $pid2);
 }
 
@@ -2539,8 +2524,6 @@ sub runsmbserver {
         logmsg "RUN: $srvrname server is now running PID $smbpid\n";
     }
 
-    sleep(1);
-
     return ($smbpid, $pid2);
 }
 
@@ -2614,8 +2597,6 @@ sub runnegtelnetserver {
     if($verbose) {
         logmsg "RUN: $srvrname server is now running PID $ntelpid\n";
     }
-
-    sleep(1);
 
     return ($ntelpid, $pid2);
 }
