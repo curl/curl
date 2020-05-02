@@ -593,7 +593,8 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   int done = 0;
 
-  *entry = NULL;
+  if(entry)
+    *entry = NULL;
 
   if(!td) {
     DEBUGASSERT(td);
@@ -613,7 +614,8 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
       return result;
     }
     destroy_async_data(&conn->async);
-    *entry = conn->async.dns;
+    if(entry)
+      *entry = conn->async.dns;
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
