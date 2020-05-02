@@ -42,7 +42,7 @@ const char *Curl_http2_strerror(uint32_t err);
 CURLcode Curl_http2_init(struct connectdata *conn);
 void Curl_http2_init_state(struct UrlState *state);
 void Curl_http2_init_userset(struct UserDefined *set);
-CURLcode Curl_http2_request_upgrade(Curl_send_buffer *req,
+CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                                     struct connectdata *conn);
 CURLcode Curl_http2_setup(struct connectdata *conn);
 CURLcode Curl_http2_switched(struct connectdata *conn,

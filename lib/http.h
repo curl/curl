@@ -44,38 +44,19 @@ char *Curl_copy_header_value(const char *header);
 
 char *Curl_checkProxyheaders(const struct connectdata *conn,
                              const char *thisheader);
-/* ------------------------------------------------------------------------- */
-/*
- * The add_buffer series of functions are used to build one large memory chunk
- * from repeated function invokes. Used so that the entire HTTP request can
- * be sent in one go.
- */
-struct Curl_send_buffer {
-  char *buffer;
-  size_t size_max;
-  size_t size_used;
-};
-typedef struct Curl_send_buffer Curl_send_buffer;
-
-Curl_send_buffer *Curl_add_buffer_init(void);
-void Curl_add_buffer_free(Curl_send_buffer **inp);
-CURLcode Curl_add_bufferf(Curl_send_buffer **inp, const char *fmt, ...)
-  WARN_UNUSED_RESULT;
-CURLcode Curl_add_buffer(Curl_send_buffer **inp, const void *inptr,
-                         size_t size) WARN_UNUSED_RESULT;
-CURLcode Curl_add_buffer_send(Curl_send_buffer **inp,
-                              struct connectdata *conn,
-                              curl_off_t *bytes_written,
-                              size_t included_body_bytes,
-                              int socketindex);
+CURLcode Curl_buffer_send(struct dynbuf *in,
+                          struct connectdata *conn,
+                          curl_off_t *bytes_written,
+                          size_t included_body_bytes,
+                          int socketindex);
 
 CURLcode Curl_add_timecondition(const struct connectdata *conn,
-                                Curl_send_buffer *buf);
+                                struct dynbuf *buf);
 CURLcode Curl_add_custom_headers(struct connectdata *conn,
                                  bool is_connect,
-                                 Curl_send_buffer *req_buffer);
+                                 struct dynbuf *req_buffer);
 CURLcode Curl_http_compile_trailers(struct curl_slist *trailers,
-                                    Curl_send_buffer **buffer,
+                                    struct dynbuf *buf,
                                     struct Curl_easy *handle);
 
 /* protocol-specific functions set up to be called by the main engine */
@@ -154,9 +135,9 @@ struct HTTP {
   } sending;
 
 #ifndef CURL_DISABLE_HTTP
-  Curl_send_buffer *send_buffer; /* used if the request couldn't be sent in
-                                    one chunk, points to an allocated
-                                    send_buffer struct */
+  struct dynbuf send_buffer; /* used if the request couldn't be sent in one
+                                chunk, points to an allocated send_buffer
+                                struct */
 #endif
 #ifdef USE_NGHTTP2
   /*********** for HTTP/2 we store stream-local data here *************/
@@ -164,10 +145,10 @@ struct HTTP {
 
   bool bodystarted;
   /* We store non-final and final response headers here, per-stream */
-  Curl_send_buffer *header_recvbuf;
+  struct dynbuf header_recvbuf;
   size_t nread_header_recvbuf; /* number of bytes in header_recvbuf fed into
                                   upper layer */
-  Curl_send_buffer *trailer_recvbuf;
+  struct dynbuf trailer_recvbuf;
   int status_code; /* HTTP status code */
   const uint8_t *pausedata; /* pointer to data received in on_data_chunk */
   size_t pauselen; /* the number of bytes left in data */

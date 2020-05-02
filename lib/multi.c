@@ -616,7 +616,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   /* if the transfer was completed in a paused state there can be buffered
      data left to free */
   for(i = 0; i < data->state.tempcount; i++) {
-    free(data->state.tempwrite[i].buf);
+    Curl_dyn_free(&data->state.tempwrite[i].b);
   }
   data->state.tempcount = 0;
 

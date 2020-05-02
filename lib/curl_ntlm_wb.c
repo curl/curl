@@ -261,15 +261,11 @@ done:
 static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
                                  const char *input, curlntlm state)
 {
-  char *buf = malloc(NTLM_BUFSIZE);
   size_t len_in = strlen(input), len_out = 0;
-
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
-#endif
-
-  if(!buf)
-    return CURLE_OUT_OF_MEMORY;
+  struct dynbuf b;
+  char *ptr = NULL;
+  unsigned char *buf = (unsigned char *)data->state.buffer;
+  Curl_dyn_init(&b, MAX_NTLM_WB_RESPONSE);
 
   while(len_in > 0) {
     ssize_t written = swrite(ntlm->ntlm_auth_hlpr_socket, input, len_in);
@@ -285,10 +281,8 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
   }
   /* Read one line */
   while(1) {
-    ssize_t size;
-    char *newbuf;
-
-    size = sread(ntlm->ntlm_auth_hlpr_socket, buf + len_out, NTLM_BUFSIZE);
+    ssize_t size =
+      sread(ntlm->ntlm_auth_hlpr_socket, buf, data->set.buffer_size);
     if(size == -1) {
       if(errno == EINTR)
         continue;
@@ -297,48 +291,41 @@ static CURLcode ntlm_wb_response(struct Curl_easy *data, struct ntlmdata *ntlm,
     else if(size == 0)
       goto done;
 
-    len_out += size;
-    if(buf[len_out - 1] == '\n') {
-      buf[len_out - 1] = '\0';
-      break;
+    if(Curl_dyn_addn(&b, buf, size))
+      goto done;
+
+    len_out = Curl_dyn_len(&b);
+    ptr = Curl_dyn_ptr(&b);
+    if(len_out && ptr[len_out - 1] == '\n') {
+      ptr[len_out - 1] = '\0';
+      break; /* done! */
     }
-
-    if(len_out > MAX_NTLM_WB_RESPONSE) {
-      failf(data, "too large ntlm_wb response!");
-      free(buf);
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    newbuf = Curl_saferealloc(buf, len_out + NTLM_BUFSIZE);
-    if(!newbuf)
-      return CURLE_OUT_OF_MEMORY;
-
-    buf = newbuf;
+    /* loop */
   }
 
   /* Samba/winbind installed but not configured */
   if(state == NTLMSTATE_TYPE1 &&
      len_out == 3 &&
-     buf[0] == 'P' && buf[1] == 'W')
+     ptr[0] == 'P' && ptr[1] == 'W')
     goto done;
   /* invalid response */
   if(len_out < 4)
     goto done;
   if(state == NTLMSTATE_TYPE1 &&
-     (buf[0]!='Y' || buf[1]!='R' || buf[2]!=' '))
+     (ptr[0]!='Y' || ptr[1]!='R' || ptr[2]!=' '))
     goto done;
   if(state == NTLMSTATE_TYPE2 &&
-     (buf[0]!='K' || buf[1]!='K' || buf[2]!=' ') &&
-     (buf[0]!='A' || buf[1]!='F' || buf[2]!=' '))
+     (ptr[0]!='K' || ptr[1]!='K' || ptr[2]!=' ') &&
+     (ptr[0]!='A' || ptr[1]!='F' || ptr[2]!=' '))
     goto done;
 
-  ntlm->response = aprintf("%.*s", len_out - 4, buf + 3);
-  free(buf);
+  ntlm->response = strdup(ptr + 3);
+  Curl_dyn_free(&b);
   if(!ntlm->response)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 done:
-  free(buf);
+  Curl_dyn_free(&b);
   return CURLE_REMOTE_ACCESS_DENIED;
 }
 

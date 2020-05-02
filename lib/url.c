@@ -122,6 +122,7 @@ bool curl_win32_idn_to_ascii(const char *in, char **out);
 #include "strdup.h"
 #include "setopt.h"
 #include "altsvc.h"
+#include "dynbuf.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -380,7 +381,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   up_free(data);
   Curl_safefree(data->state.buffer);
-  Curl_safefree(data->state.headerbuff);
+  Curl_dyn_free(&data->state.headerb);
   Curl_safefree(data->state.ulbuf);
   Curl_flush_cookies(data, TRUE);
 #ifdef USE_ALTSVC
@@ -408,8 +409,8 @@ CURLcode Curl_close(struct Curl_easy **datap)
   }
 
 #ifndef CURL_DISABLE_DOH
-  free(data->req.doh.probe[0].serverdoh.memory);
-  free(data->req.doh.probe[1].serverdoh.memory);
+  Curl_dyn_free(&data->req.doh.probe[0].serverdoh);
+  Curl_dyn_free(&data->req.doh.probe[1].serverdoh);
   curl_slist_free_all(data->req.doh.headers);
 #endif
 
@@ -609,15 +610,9 @@ CURLcode Curl_open(struct Curl_easy **curl)
     result = CURLE_OUT_OF_MEMORY;
   }
   else {
-    data->state.headerbuff = malloc(HEADERSIZE);
-    if(!data->state.headerbuff) {
-      DEBUGF(fprintf(stderr, "Error: malloc of headerbuff failed\n"));
-      result = CURLE_OUT_OF_MEMORY;
-    }
-    else {
-      result = Curl_init_userdefined(data);
-
-      data->state.headersize = HEADERSIZE;
+    result = Curl_init_userdefined(data);
+    if(!result) {
+      Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
       Curl_convert_init(data);
       Curl_initinfo(data);
 
@@ -632,7 +627,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   if(result) {
     Curl_resolver_cleanup(data->state.resolver);
     free(data->state.buffer);
-    free(data->state.headerbuff);
+    Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     free(data);
     data = NULL;
@@ -3969,7 +3964,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   k->bytecount = 0;
 
   k->buf = data->state.buffer;
-  k->hbufp = data->state.headerbuff;
   k->ignorebody = FALSE;
 
   Curl_speedinit(data);

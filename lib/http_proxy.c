@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -204,7 +204,7 @@ static CURLcode CONNECT(struct connectdata *conn,
     if(TUNNEL_INIT == s->tunnel_state) {
       /* BEGIN CONNECT PHASE */
       char *host_port;
-      Curl_send_buffer *req_buffer;
+      struct dynbuf req_buffer;
 
       infof(data, "Establish HTTP proxy tunnel to %s:%d\n",
             hostname, remote_port);
@@ -215,17 +215,12 @@ static CURLcode CONNECT(struct connectdata *conn,
       free(data->req.newurl);
       data->req.newurl = NULL;
 
-      /* initialize a dynamic send-buffer */
-      req_buffer = Curl_add_buffer_init();
-
-      if(!req_buffer)
-        return CURLE_OUT_OF_MEMORY;
-
       host_port = aprintf("%s:%d", hostname, remote_port);
-      if(!host_port) {
-        Curl_add_buffer_free(&req_buffer);
+      if(!host_port)
         return CURLE_OUT_OF_MEMORY;
-      }
+
+      /* initialize a dynamic send-buffer */
+      Curl_dyn_init(&req_buffer, DYN_HTTP_REQUEST);
 
       /* Setup the proxy-authorization header, if any */
       result = Curl_http_output_auth(conn, "CONNECT", host_port, TRUE);
@@ -248,7 +243,7 @@ static CURLcode CONNECT(struct connectdata *conn,
           aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
                   remote_port);
         if(!hostheader) {
-          Curl_add_buffer_free(&req_buffer);
+          Curl_dyn_free(&req_buffer);
           return CURLE_OUT_OF_MEMORY;
         }
 
@@ -256,7 +251,7 @@ static CURLcode CONNECT(struct connectdata *conn,
           host = aprintf("Host: %s\r\n", hostheader);
           if(!host) {
             free(hostheader);
-            Curl_add_buffer_free(&req_buffer);
+            Curl_dyn_free(&req_buffer);
             return CURLE_OUT_OF_MEMORY;
           }
         }
@@ -268,44 +263,43 @@ static CURLcode CONNECT(struct connectdata *conn,
           useragent = conn->allocptr.uagent;
 
         result =
-          Curl_add_bufferf(&req_buffer,
-                           "CONNECT %s HTTP/%s\r\n"
-                           "%s"  /* Host: */
-                           "%s"  /* Proxy-Authorization */
-                           "%s"  /* User-Agent */
-                           "%s", /* Proxy-Connection */
-                           hostheader,
-                           http,
-                           host?host:"",
-                           conn->allocptr.proxyuserpwd?
-                           conn->allocptr.proxyuserpwd:"",
-                           useragent,
-                           proxyconn);
+          Curl_dyn_addf(&req_buffer,
+                        "CONNECT %s HTTP/%s\r\n"
+                        "%s"  /* Host: */
+                        "%s"  /* Proxy-Authorization */
+                        "%s"  /* User-Agent */
+                        "%s", /* Proxy-Connection */
+                        hostheader,
+                        http,
+                        host?host:"",
+                        conn->allocptr.proxyuserpwd?
+                        conn->allocptr.proxyuserpwd:"",
+                        useragent,
+                        proxyconn);
 
         if(host)
           free(host);
         free(hostheader);
 
         if(!result)
-          result = Curl_add_custom_headers(conn, TRUE, req_buffer);
+          result = Curl_add_custom_headers(conn, TRUE, &req_buffer);
 
         if(!result)
           /* CRLF terminate the request */
-          result = Curl_add_bufferf(&req_buffer, "\r\n");
+          result = Curl_dyn_addf(&req_buffer, "\r\n");
 
         if(!result) {
           /* Send the connect request to the proxy */
           /* BLOCKING */
           result =
-            Curl_add_buffer_send(&req_buffer, conn,
-                                 &data->info.request_size, 0, sockindex);
+            Curl_buffer_send(&req_buffer, conn,
+                             &data->info.request_size, 0, sockindex);
         }
-        req_buffer = NULL;
         if(result)
           failf(data, "Failed sending CONNECT to proxy");
       }
 
-      Curl_add_buffer_free(&req_buffer);
+      Curl_dyn_free(&req_buffer);
       if(result)
         return result;
 

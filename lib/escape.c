@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -79,57 +79,42 @@ char *curl_unescape(const char *string, int length)
 char *curl_easy_escape(struct Curl_easy *data, const char *string,
                        int inlength)
 {
-  size_t alloc;
-  char *ns;
-  char *testing_ptr = NULL;
-  size_t newlen;
-  size_t strindex = 0;
   size_t length;
   CURLcode result;
+  struct dynbuf d;
 
   if(inlength < 0)
     return NULL;
 
-  alloc = (inlength?(size_t)inlength:strlen(string)) + 1;
-  newlen = alloc;
+  Curl_dyn_init(&d, CURL_MAX_INPUT_LENGTH);
 
-  ns = malloc(alloc);
-  if(!ns)
-    return NULL;
-
-  length = alloc-1;
+  length = (inlength?(size_t)inlength:strlen(string));
   while(length--) {
     unsigned char in = *string; /* we need to treat the characters unsigned */
 
-    if(Curl_isunreserved(in))
-      /* just copy this */
-      ns[strindex++] = in;
+    if(Curl_isunreserved(in)) {
+      /* append this */
+      if(Curl_dyn_addn(&d, &in, 1))
+        return NULL;
+    }
     else {
       /* encode it */
-      newlen += 2; /* the size grows with two, since this'll become a %XX */
-      if(newlen > alloc) {
-        alloc *= 2;
-        testing_ptr = Curl_saferealloc(ns, alloc);
-        if(!testing_ptr)
-          return NULL;
-        ns = testing_ptr;
-      }
-
+      char encoded[4];
       result = Curl_convert_to_network(data, (char *)&in, 1);
       if(result) {
         /* Curl_convert_to_network calls failf if unsuccessful */
-        free(ns);
+        Curl_dyn_free(&d);
         return NULL;
       }
 
-      msnprintf(&ns[strindex], 4, "%%%02X", in);
-
-      strindex += 3;
+      msnprintf(encoded, sizeof(encoded), "%%%02X", in);
+      if(Curl_dyn_add(&d, encoded))
+        return NULL;
     }
     string++;
   }
-  ns[strindex] = 0; /* terminate it */
-  return ns;
+
+  return Curl_dyn_ptr(&d);
 }
 
 /*

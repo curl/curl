@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -233,7 +233,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   CURLcode result = CURLE_OK;
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.protop;
-  Curl_send_buffer *req_buffer;
+  struct dynbuf req_buffer;
   curl_off_t postsize = 0; /* for ANNOUNCE and SET_PARAMETER */
   curl_off_t putsize = 0; /* for ANNOUNCE and SET_PARAMETER */
 
@@ -430,16 +430,13 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   }
 
   /* Initialize a dynamic send buffer */
-  req_buffer = Curl_add_buffer_init();
-
-  if(!req_buffer)
-    return CURLE_OUT_OF_MEMORY;
+  Curl_dyn_init(&req_buffer, DYN_RTSP_REQ_HEADER);
 
   result =
-    Curl_add_bufferf(&req_buffer,
-                     "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
-                     "CSeq: %ld\r\n", /* CSeq */
-                     p_request, p_stream_uri, rtsp->CSeq_sent);
+    Curl_dyn_addf(&req_buffer,
+                  "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
+                  "CSeq: %ld\r\n", /* CSeq */
+                  p_request, p_stream_uri, rtsp->CSeq_sent);
   if(result)
     return result;
 
@@ -448,7 +445,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
    * to make comparison easier
    */
   if(p_session_id) {
-    result = Curl_add_bufferf(&req_buffer, "Session: %s\r\n", p_session_id);
+    result = Curl_dyn_addf(&req_buffer, "Session: %s\r\n", p_session_id);
     if(result)
       return result;
   }
@@ -456,24 +453,24 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   /*
    * Shared HTTP-like options
    */
-  result = Curl_add_bufferf(&req_buffer,
-                            "%s" /* transport */
-                            "%s" /* accept */
-                            "%s" /* accept-encoding */
-                            "%s" /* range */
-                            "%s" /* referrer */
-                            "%s" /* user-agent */
-                            "%s" /* proxyuserpwd */
-                            "%s" /* userpwd */
-                            ,
-                            p_transport ? p_transport : "",
-                            p_accept ? p_accept : "",
-                            p_accept_encoding ? p_accept_encoding : "",
-                            p_range ? p_range : "",
-                            p_referrer ? p_referrer : "",
-                            p_uagent ? p_uagent : "",
-                            p_proxyuserpwd ? p_proxyuserpwd : "",
-                            p_userpwd ? p_userpwd : "");
+  result = Curl_dyn_addf(&req_buffer,
+                         "%s" /* transport */
+                         "%s" /* accept */
+                         "%s" /* accept-encoding */
+                         "%s" /* range */
+                         "%s" /* referrer */
+                         "%s" /* user-agent */
+                         "%s" /* proxyuserpwd */
+                         "%s" /* userpwd */
+                         ,
+                         p_transport ? p_transport : "",
+                         p_accept ? p_accept : "",
+                         p_accept_encoding ? p_accept_encoding : "",
+                         p_range ? p_range : "",
+                         p_referrer ? p_referrer : "",
+                         p_uagent ? p_uagent : "",
+                         p_proxyuserpwd ? p_proxyuserpwd : "",
+                         p_userpwd ? p_userpwd : "");
 
   /*
    * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
@@ -486,12 +483,12 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     return result;
 
   if((rtspreq == RTSPREQ_SETUP) || (rtspreq == RTSPREQ_DESCRIBE)) {
-    result = Curl_add_timecondition(conn, req_buffer);
+    result = Curl_add_timecondition(conn, &req_buffer);
     if(result)
       return result;
   }
 
-  result = Curl_add_custom_headers(conn, FALSE, req_buffer);
+  result = Curl_add_custom_headers(conn, FALSE, &req_buffer);
   if(result)
     return result;
 
@@ -516,9 +513,9 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(conn, "Content-Length")) {
         result =
-          Curl_add_bufferf(&req_buffer,
-                           "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
-                           (data->set.upload ? putsize : postsize));
+          Curl_dyn_addf(&req_buffer,
+                        "Content-Length: %" CURL_FORMAT_CURL_OFF_T"\r\n",
+                        (data->set.upload ? putsize : postsize));
         if(result)
           return result;
       }
@@ -526,8 +523,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
       if(rtspreq == RTSPREQ_SET_PARAMETER ||
          rtspreq == RTSPREQ_GET_PARAMETER) {
         if(!Curl_checkheaders(conn, "Content-Type")) {
-          result = Curl_add_bufferf(&req_buffer,
-                                    "Content-Type: text/parameters\r\n");
+          result = Curl_dyn_addf(&req_buffer,
+                                 "Content-Type: text/parameters\r\n");
           if(result)
             return result;
         }
@@ -535,8 +532,8 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
       if(rtspreq == RTSPREQ_ANNOUNCE) {
         if(!Curl_checkheaders(conn, "Content-Type")) {
-          result = Curl_add_bufferf(&req_buffer,
-                                    "Content-Type: application/sdp\r\n");
+          result = Curl_dyn_addf(&req_buffer,
+                                 "Content-Type: application/sdp\r\n");
           if(result)
             return result;
         }
@@ -554,20 +551,20 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
   /* RTSP never allows chunked transfer */
   data->req.forbidchunk = TRUE;
   /* Finish the request buffer */
-  result = Curl_add_buffer(&req_buffer, "\r\n", 2);
+  result = Curl_dyn_add(&req_buffer, "\r\n");
   if(result)
     return result;
 
   if(postsize > 0) {
-    result = Curl_add_buffer(&req_buffer, data->set.postfields,
-                             (size_t)postsize);
+    result = Curl_dyn_addn(&req_buffer, data->set.postfields,
+                           (size_t)postsize);
     if(result)
       return result;
   }
 
   /* issue the request */
-  result = Curl_add_buffer_send(&req_buffer, conn,
-                                &data->info.request_size, 0, FIRSTSOCKET);
+  result = Curl_buffer_send(&req_buffer, conn,
+                            &data->info.request_size, 0, FIRSTSOCKET);
   if(result) {
     failf(data, "Failed sending RTSP request");
     return result;

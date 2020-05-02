@@ -70,12 +70,6 @@ typedef enum {
 #define DOH_MAX_ADDR 24
 #define DOH_MAX_CNAME 4
 
-struct cnamestore {
-  size_t len;       /* length of cname */
-  char *alloc;      /* allocated pointer */
-  size_t allocsize; /* allocated size */
-};
-
 struct dohaddr {
   int type;
   union {
@@ -85,11 +79,11 @@ struct dohaddr {
 };
 
 struct dohentry {
-  unsigned int ttl;
-  int numaddr;
+  struct dynbuf cname[DOH_MAX_CNAME];
   struct dohaddr addr[DOH_MAX_ADDR];
+  int numaddr;
+  unsigned int ttl;
   int numcname;
-  struct cnamestore cname[DOH_MAX_CNAME];
 };
 
 
@@ -103,6 +97,7 @@ DOHcode doh_decode(const unsigned char *doh,
                    size_t dohlen,
                    DNStype dnstype,
                    struct dohentry *d);
+void de_init(struct dohentry *d);
 void de_cleanup(struct dohentry *d);
 #endif
 
