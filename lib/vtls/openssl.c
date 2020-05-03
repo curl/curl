@@ -41,6 +41,7 @@
 #include "slist.h"
 #include "select.h"
 #include "vtls.h"
+#include "keylog.h"
 #include "strcase.h"
 #include "hostcheck.h"
 #include "multiif.h"
@@ -212,24 +213,14 @@
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
 #endif
 
-#define ENABLE_SSLKEYLOGFILE
-
-#ifdef ENABLE_SSLKEYLOGFILE
-struct ssl_tap_state {
-  int master_key_length;
-  unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
-  unsigned char client_random[SSL3_RANDOM_SIZE];
-};
-#endif /* ENABLE_SSLKEYLOGFILE */
-
 struct ssl_backend_data {
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
   SSL*     handle;
   X509*    server_cert;
-#ifdef ENABLE_SSLKEYLOGFILE
-  /* tap_state holds the last seen master key if we're logging them */
-  struct ssl_tap_state tap_state;
+#ifndef HAVE_KEYLOG_CALLBACK
+  /* Set to true once a valid keylog entry has been created to avoid dupes. */
+  bool     keylog_done;
 #endif
 };
 
@@ -241,57 +232,27 @@ struct ssl_backend_data {
  */
 #define RAND_LOAD_LENGTH 1024
 
-#ifdef ENABLE_SSLKEYLOGFILE
-/* The fp for the open SSLKEYLOGFILE, or NULL if not open */
-static FILE *keylog_file_fp;
-
 #ifdef HAVE_KEYLOG_CALLBACK
 static void ossl_keylog_callback(const SSL *ssl, const char *line)
 {
   (void)ssl;
 
-  /* Using fputs here instead of fprintf since libcurl's fprintf replacement
-     may not be thread-safe. */
-  if(keylog_file_fp && line && *line) {
-    char stackbuf[256];
-    char *buf;
-    size_t linelen = strlen(line);
-
-    if(linelen <= sizeof(stackbuf) - 2)
-      buf = stackbuf;
-    else {
-      buf = malloc(linelen + 2);
-      if(!buf)
-        return;
-    }
-    memcpy(buf, line, linelen);
-    buf[linelen] = '\n';
-    buf[linelen + 1] = '\0';
-
-    fputs(buf, keylog_file_fp);
-    if(buf != stackbuf)
-      free(buf);
-  }
+  Curl_tls_keylog_write_line(line);
 }
 #else
-#define KEYLOG_PREFIX      "CLIENT_RANDOM "
-#define KEYLOG_PREFIX_LEN  (sizeof(KEYLOG_PREFIX) - 1)
 /*
- * tap_ssl_key is called by libcurl to make the CLIENT_RANDOMs if the OpenSSL
- * being used doesn't have native support for doing that.
+ * ossl_log_tls12_secret is called by libcurl to make the CLIENT_RANDOMs if the
+ * OpenSSL being used doesn't have native support for doing that.
  */
-static void tap_ssl_key(const SSL *ssl, struct ssl_tap_state *state)
+static void
+ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 {
-  const char *hex = "0123456789ABCDEF";
-  int pos, i;
-  char line[KEYLOG_PREFIX_LEN + 2 * SSL3_RANDOM_SIZE + 1 +
-            2 * SSL_MAX_MASTER_KEY_LENGTH + 1 + 1];
   const SSL_SESSION *session = SSL_get_session(ssl);
   unsigned char client_random[SSL3_RANDOM_SIZE];
   unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
   int master_key_length = 0;
 
-  if(!session || !keylog_file_fp)
+  if(!session || *keylog_done)
     return;
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
@@ -310,44 +271,17 @@ static void tap_ssl_key(const SSL *ssl, struct ssl_tap_state *state)
   }
 #endif
 
+  /* The handshake has not progressed sufficiently yet, or this is a TLS 1.3
+   * session (when curl was built with older OpenSSL headers and running with
+   * newer OpenSSL runtime libraries). */
   if(master_key_length <= 0)
     return;
 
-  /* Skip writing keys if there is no key or it did not change. */
-  if(state->master_key_length == master_key_length &&
-     !memcmp(state->master_key, master_key, master_key_length) &&
-     !memcmp(state->client_random, client_random, SSL3_RANDOM_SIZE)) {
-    return;
-  }
-
-  state->master_key_length = master_key_length;
-  memcpy(state->master_key, master_key, master_key_length);
-  memcpy(state->client_random, client_random, SSL3_RANDOM_SIZE);
-
-  memcpy(line, KEYLOG_PREFIX, KEYLOG_PREFIX_LEN);
-  pos = KEYLOG_PREFIX_LEN;
-
-  /* Client Random for SSLv3/TLS */
-  for(i = 0; i < SSL3_RANDOM_SIZE; i++) {
-    line[pos++] = hex[client_random[i] >> 4];
-    line[pos++] = hex[client_random[i] & 0xF];
-  }
-  line[pos++] = ' ';
-
-  /* Master Secret (size is at most SSL_MAX_MASTER_KEY_LENGTH) */
-  for(i = 0; i < master_key_length; i++) {
-    line[pos++] = hex[master_key[i] >> 4];
-    line[pos++] = hex[master_key[i] & 0xF];
-  }
-  line[pos++] = '\n';
-  line[pos] = '\0';
-
-  /* Using fputs here instead of fprintf since libcurl's fprintf replacement
-     may not be thread-safe. */
-  fputs(line, keylog_file_fp);
+  *keylog_done = true;
+  Curl_tls_keylog_write("CLIENT_RANDOM", client_random,
+                        master_key, master_key_length);
 }
 #endif /* !HAVE_KEYLOG_CALLBACK */
-#endif /* ENABLE_SSLKEYLOGFILE */
 
 static const char *SSL_ERROR_to_str(int err)
 {
@@ -1163,10 +1097,6 @@ static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
  */
 static int Curl_ossl_init(void)
 {
-#ifdef ENABLE_SSLKEYLOGFILE
-  char *keylog_file_name;
-#endif
-
   OPENSSL_load_builtin_modules();
 
 #ifdef USE_OPENSSL_ENGINE
@@ -1199,26 +1129,7 @@ static int Curl_ossl_init(void)
   OpenSSL_add_all_algorithms();
 #endif
 
-#ifdef ENABLE_SSLKEYLOGFILE
-  if(!keylog_file_fp) {
-    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
-    if(keylog_file_name) {
-      keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
-      if(keylog_file_fp) {
-#ifdef WIN32
-        if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
-#else
-        if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
-#endif
-        {
-          fclose(keylog_file_fp);
-          keylog_file_fp = NULL;
-        }
-      }
-      Curl_safefree(keylog_file_name);
-    }
-  }
-#endif
+  Curl_tls_keylog_open();
 
   /* Initialize the extra data indexes */
   if(ossl_get_ssl_conn_index() < 0 || ossl_get_ssl_sockindex_index() < 0)
@@ -1261,12 +1172,7 @@ static void Curl_ossl_cleanup(void)
 #endif
 #endif
 
-#ifdef ENABLE_SSLKEYLOGFILE
-  if(keylog_file_fp) {
-    fclose(keylog_file_fp);
-    keylog_file_fp = NULL;
-  }
-#endif
+  Curl_tls_keylog_close();
 }
 
 /*
@@ -3159,8 +3065,8 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
                      verifypeer ? SSL_VERIFY_PEER : SSL_VERIFY_NONE, NULL);
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
-#if defined(ENABLE_SSLKEYLOGFILE) && defined(HAVE_KEYLOG_CALLBACK)
-  if(keylog_file_fp) {
+#ifdef HAVE_KEYLOG_CALLBACK
+  if(Curl_tls_keylog_enabled()) {
     SSL_CTX_set_keylog_callback(backend->ctx, ossl_keylog_callback);
   }
 #endif
@@ -3283,10 +3189,13 @@ static CURLcode ossl_connect_step2(struct connectdata *conn, int sockindex)
   ERR_clear_error();
 
   err = SSL_connect(backend->handle);
-  /* If keylogging is enabled but the keylog callback is not supported then log
-     secrets here, immediately after SSL_connect by using tap_ssl_key. */
-#if defined(ENABLE_SSLKEYLOGFILE) && !defined(HAVE_KEYLOG_CALLBACK)
-  tap_ssl_key(backend->handle, &backend->tap_state);
+#ifndef HAVE_KEYLOG_CALLBACK
+  if(Curl_tls_keylog_enabled()) {
+    /* If key logging is enabled, wait for the handshake to complete and then
+     * proceed with logging secrets (for TLS 1.2 or older).
+     */
+    ossl_log_tls12_secret(backend->handle, &backend->keylog_done);
+  }
 #endif
 
   /* 1  is fine
