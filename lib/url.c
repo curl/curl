@@ -1531,6 +1531,19 @@ CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
             Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       return CURLE_URL_MALFORMAT;
     }
+#elif defined(HAVE_NETDB_H) && defined(__APPLE__)
+    /* let MacOS/iOS do this as part of DNS service */
+    struct hostent *p = gethostbyname(host->name);
+    if(p) {
+      if(p->h_name && (p->h_name[0] != 0)) {
+        /* host name is idn encoded by MacOS */
+        const char *name = strdup(p->h_name);
+        if(name) {
+          host->encalloc = name; 
+          host->name = name;
+        }
+      }
+	}
 #else
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
@@ -1550,9 +1563,16 @@ void Curl_free_idnconverted_hostname(struct hostname *host)
     host->encalloc = NULL;
   }
 #elif defined(USE_WIN32_IDN)
+  if(host->encalloc) {
   free(host->encalloc); /* must be freed with free() since this was
                            allocated by curl_win32_idn_to_ascii */
   host->encalloc = NULL;
+  }
+#elif defined(HAVE_NETDB_H) && defined(__APPLE__)
+  if(host->encalloc) {
+    free(host->encalloc);
+    host->encalloc = NULL;
+  }
 #else
   (void)host;
 #endif
