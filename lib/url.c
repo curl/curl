@@ -1537,7 +1537,7 @@ CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
     if(p) {
       if(p->h_name && (p->h_name[0] != 0)) {
         /* host name is idn encoded by MacOS */
-        const char *name = strdup(p->h_name);
+        char *name = strdup(p->h_name);
         if(name) {
           host->encalloc = name; 
           host->name = name;
