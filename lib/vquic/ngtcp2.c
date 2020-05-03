@@ -40,6 +40,7 @@
 #include "strerror.h"
 #include "dynbuf.h"
 #include "vquic.h"
+#include "vtls/keylog.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -186,14 +187,11 @@ static void quic_settings(struct quicsocket *qs,
   }
 }
 
-static FILE *keylog_file; /* not thread-safe */
 #ifdef USE_OPENSSL
 static void keylog_callback(const SSL *ssl, const char *line)
 {
   (void)ssl;
-  fputs(line, keylog_file);
-  fputc('\n', keylog_file);
-  fflush(keylog_file);
+  Curl_tls_keylog_write_line(line);
 }
 #elif defined(USE_GNUTLS)
 static int keylog_callback(gnutls_session_t session, const char *label,
@@ -201,36 +199,14 @@ static int keylog_callback(gnutls_session_t session, const char *label,
 {
   gnutls_datum_t crandom;
   gnutls_datum_t srandom;
-  gnutls_datum_t crandom_hex = { NULL, 0 };
-  gnutls_datum_t secret_hex = { NULL, 0 };
-  int rc = 0;
 
   gnutls_session_get_random(session, &crandom, &srandom);
   if(crandom.size != 32) {
     return -1;
   }
 
-  rc = gnutls_hex_encode2(&crandom, &crandom_hex);
-  if(rc < 0) {
-    fprintf(stderr, "gnutls_hex_encode2 failed: %s\n",
-            gnutls_strerror(rc));
-    goto out;
-  }
-
-  rc = gnutls_hex_encode2(secret, &secret_hex);
-  if(rc < 0) {
-    fprintf(stderr, "gnutls_hex_encode2 failed: %s\n",
-            gnutls_strerror(rc));
-    goto out;
-  }
-
-  fprintf(keylog_file, "%s %s %s\n", label, crandom_hex.data, secret_hex.data);
-  fflush(keylog_file);
-
- out:
-  gnutls_free(crandom_hex.data);
-  gnutls_free(secret_hex.data);
-  return rc;
+  Curl_tls_keylog_write(label, crandom.data, secret->data, secret->size);
+  return 0;
 }
 #endif
 
@@ -327,7 +303,6 @@ static SSL_QUIC_METHOD quic_method = {quic_set_encryption_secrets,
 static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 {
   SSL_CTX *ssl_ctx = SSL_CTX_new(TLS_method());
-  const char *keylog_filename;
 
   SSL_CTX_set_min_proto_version(ssl_ctx, TLS1_3_VERSION);
   SSL_CTX_set_max_proto_version(ssl_ctx, TLS1_3_VERSION);
@@ -348,12 +323,10 @@ static SSL_CTX *quic_ssl_ctx(struct Curl_easy *data)
 
   SSL_CTX_set_quic_method(ssl_ctx, &quic_method);
 
-  keylog_filename = getenv("SSLKEYLOGFILE");
-  if(keylog_filename) {
-    keylog_file = fopen(keylog_filename, "wb");
-    if(keylog_file) {
-      SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
-    }
+  /* Open the file if a TLS or QUIC backend has not done this before. */
+  Curl_tls_keylog_open();
+  if(Curl_tls_keylog_enabled()) {
+    SSL_CTX_set_keylog_callback(ssl_ctx, keylog_callback);
   }
 
   return ssl_ctx;
@@ -496,7 +469,6 @@ static int quic_init_ssl(struct quicsocket *qs)
   gnutls_datum_t alpn = {NULL, 0};
   /* this will need some attention when HTTPS proxy over QUIC get fixed */
   const char * const hostname = qs->conn->host.name;
-  const char *keylog_filename;
   int rc;
 
   if(qs->ssl)
@@ -529,12 +501,10 @@ static int quic_init_ssl(struct quicsocket *qs)
     return 1;
   }
 
-  keylog_filename = getenv("SSLKEYLOGFILE");
-  if(keylog_filename) {
-    keylog_file = fopen(keylog_filename, "wb");
-    if(keylog_file) {
-      gnutls_session_set_keylog_function(qs->ssl, keylog_callback);
-    }
+  /* Open the file if a TLS or QUIC backend has not done this before. */
+  Curl_tls_keylog_open();
+  if(Curl_tls_keylog_enabled()) {
+    gnutls_session_set_keylog_function(qs->ssl, keylog_callback);
   }
 
   if(qs->cred)
