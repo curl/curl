@@ -63,6 +63,7 @@
 #include "sendf.h"
 #include "inet_pton.h"
 #include "vtls.h"
+#include "keylog.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
@@ -98,6 +99,107 @@ struct ssl_backend_data {
 
 static Curl_recv wolfssl_recv;
 static Curl_send wolfssl_send;
+
+#ifdef OPENSSL_EXTRA
+/*
+ * Availability note:
+ * The TLS 1.3 secret callback (wolfSSL_set_tls13_secret_cb) was added in
+ * WolfSSL 4.4.0, but requires the -DHAVE_SECRET_CALLBACK build option. If that
+ * option is not set, then TLS 1.3 will not be logged.
+ * For TLS 1.2 and before, we use wolfSSL_get_keys().
+ * SSL_get_client_random and wolfSSL_get_keys require OPENSSL_EXTRA
+ * (--enable-opensslextra or --enable-all).
+ */
+#if defined(HAVE_SECRET_CALLBACK) && defined(WOLFSSL_TLS13)
+static int
+wolfssl_tls13_secret_callback(SSL *ssl, int id, const unsigned char *secret,
+                              int secretSz, void *ctx)
+{
+  const char *label;
+  unsigned char client_random[SSL3_RANDOM_SIZE];
+  (void)ctx;
+
+  if(!ssl || !Curl_tls_keylog_enabled()) {
+    return 0;
+  }
+
+  switch(id) {
+  case CLIENT_EARLY_TRAFFIC_SECRET:
+    label = "CLIENT_EARLY_TRAFFIC_SECRET";
+    break;
+  case CLIENT_HANDSHAKE_TRAFFIC_SECRET:
+    label = "CLIENT_HANDSHAKE_TRAFFIC_SECRET";
+    break;
+  case SERVER_HANDSHAKE_TRAFFIC_SECRET:
+    label = "SERVER_HANDSHAKE_TRAFFIC_SECRET";
+    break;
+  case CLIENT_TRAFFIC_SECRET:
+    label = "CLIENT_TRAFFIC_SECRET_0";
+    break;
+  case SERVER_TRAFFIC_SECRET:
+    label = "SERVER_TRAFFIC_SECRET_0";
+    break;
+  case EARLY_EXPORTER_SECRET:
+    label = "EARLY_EXPORTER_SECRET";
+    break;
+  case EXPORTER_SECRET:
+    label = "EXPORTER_SECRET";
+    break;
+  default:
+    return 0;
+  }
+
+  if(SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE) == 0) {
+    /* Should never happen as wolfSSL_KeepArrays() was called before. */
+    return 0;
+  }
+
+  Curl_tls_keylog_write(label, client_random, secret, secretSz);
+  return 0;
+}
+#endif /* defined(HAVE_SECRET_CALLBACK) && defined(WOLFSSL_TLS13) */
+
+static void
+wolfssl_log_tls12_secret(SSL *ssl)
+{
+  unsigned char *ms, *sr, *cr;
+  unsigned int msLen, srLen, crLen, i, x = 0;
+
+#if LIBWOLFSSL_VERSION_HEX >= 0x0300d000 /* >= 3.13.0 */
+  /* wolfSSL_GetVersion is available since 3.13, we use it instead of
+   * SSL_version since the latter relies on OPENSSL_ALL (--enable-opensslall or
+   * --enable-all). Failing to perform this check could result in an unusable
+   * key log line when TLS 1.3 is actually negotiated. */
+  switch(wolfSSL_GetVersion(ssl)) {
+  case WOLFSSL_SSLV3:
+  case WOLFSSL_TLSV1:
+  case WOLFSSL_TLSV1_1:
+  case WOLFSSL_TLSV1_2:
+    break;
+  default:
+    /* TLS 1.3 does not use this mechanism, the "master secret" returned below
+     * is not directly usable. */
+    return;
+  }
+#endif
+
+  if(SSL_get_keys(ssl, &ms, &msLen, &sr, &srLen, &cr, &crLen) != SSL_SUCCESS) {
+    return;
+  }
+
+  /* Check for a missing master secret and skip logging. That can happen if
+   * curl rejects the server certificate and aborts the handshake.
+   */
+  for(i = 0; i < msLen; i++) {
+    x |= ms[i];
+  }
+  if(x == 0) {
+    return;
+  }
+
+  Curl_tls_keylog_write("CLIENT_RANDOM", cr, ms, msLen);
+}
+#endif /* OPENSSL_EXTRA */
 
 static int do_file_type(const char *type)
 {
@@ -385,6 +487,17 @@ wolfssl_connect_step1(struct connectdata *conn,
   }
 #endif /* HAVE_ALPN */
 
+#ifdef OPENSSL_EXTRA
+  if(Curl_tls_keylog_enabled()) {
+    /* Ensure the Client Random is preserved. */
+    wolfSSL_KeepArrays(backend->handle);
+#if defined(HAVE_SECRET_CALLBACK) && defined(WOLFSSL_TLS13)
+    wolfSSL_set_tls13_secret_cb(backend->handle,
+                                wolfssl_tls13_secret_callback, NULL);
+#endif
+  }
+#endif /* OPENSSL_EXTRA */
+
   /* Check if there's a cached ID we can/should use here! */
   if(SSL_SET_OPTION(primary.sessionid)) {
     void *ssl_sessionid = NULL;
@@ -444,6 +557,31 @@ wolfssl_connect_step2(struct connectdata *conn,
   }
 
   ret = SSL_connect(backend->handle);
+
+#ifdef OPENSSL_EXTRA
+  if(Curl_tls_keylog_enabled()) {
+    /* If key logging is enabled, wait for the handshake to complete and then
+     * proceed with logging secrets (for TLS 1.2 or older).
+     *
+     * During the handshake (ret==-1), wolfSSL_want_read() is true as it waits
+     * for the server response. At that point the master secret is not yet
+     * available, so we must not try to read it.
+     * To log the secret on completion with a handshake failure, detect
+     * completion via the observation that there is nothing to read or write.
+     * Note that OpenSSL SSL_want_read() is always true here. If wolfSSL ever
+     * changes, the worst case is that no key is logged on error.
+     */
+    if(ret == SSL_SUCCESS ||
+       (!wolfSSL_want_read(backend->handle) &&
+        !wolfSSL_want_write(backend->handle))) {
+      wolfssl_log_tls12_secret(backend->handle);
+      /* Client Random and master secrets are no longer needed, erase these.
+       * Ignored while the handshake is still in progress. */
+      wolfSSL_FreeArrays(backend->handle);
+    }
+  }
+#endif  /* OPENSSL_EXTRA */
+
   if(ret != 1) {
     char error_buffer[WOLFSSL_MAX_ERROR_SZ];
     int  detail = SSL_get_error(backend->handle, ret);
@@ -750,6 +888,9 @@ static size_t Curl_wolfssl_version(char *buffer, size_t size)
 
 static int Curl_wolfssl_init(void)
 {
+#ifdef OPENSSL_EXTRA
+  Curl_tls_keylog_open();
+#endif
   return (wolfSSL_Init() == SSL_SUCCESS);
 }
 
@@ -757,6 +898,9 @@ static int Curl_wolfssl_init(void)
 static void Curl_wolfssl_cleanup(void)
 {
   wolfSSL_Cleanup();
+#ifdef OPENSSL_EXTRA
+  Curl_tls_keylog_close();
+#endif
 }
 
 
