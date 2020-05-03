@@ -617,8 +617,7 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
       return result;
     }
     destroy_async_data(&conn->async);
-    if(entry)
-      *entry = conn->async.dns;
+    *entry = conn->async.dns;
   }
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
