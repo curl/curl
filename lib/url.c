@@ -1539,11 +1539,11 @@ CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
         /* host name is idn encoded by MacOS */
         char *name = strdup(p->h_name);
         if(name) {
-          host->encalloc = name; 
+          host->encalloc = name;
           host->name = name;
         }
       }
-	}
+    }
 #else
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
