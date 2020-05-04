@@ -873,8 +873,16 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         conn->tempsock[i] = CURL_SOCKET_BAD;
         post_SOCKS(conn, sockindex, connected);
         connkeep(conn, "HTTP/3 default");
+        return result;
       }
-      return result;
+      /* should we try another protocol family? */
+      if(i == 0 && !conn->parallel_connect &&
+         (Curl_timediff(now, conn->connecttime) >=
+          data->set.happy_eyeballs_timeout)) {
+        conn->parallel_connect = TRUE; /* starting now */
+        trynextip(conn, sockindex, 1);
+      }
+      continue;
     }
 #endif
 
