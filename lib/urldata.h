@@ -153,10 +153,6 @@ typedef ssize_t (Curl_recv)(struct connectdata *conn, /* connection data */
 #include <libssh2_sftp.h>
 #endif /* HAVE_LIBSSH2_H */
 
-/* Initial size of the buffer to store headers in, it'll be enlarged in case
-   of need. */
-#define HEADERSIZE 256
-
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
