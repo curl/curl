@@ -182,9 +182,7 @@ struct HTTP {
 #ifdef USE_NGHTTP3
   size_t unacked_window;
   struct h3out *h3out; /* per-stream buffers for upload */
-  char *overflow_buf; /* excess data received during a single Curl_read */
-  size_t overflow_buflen; /* amount of data currently in overflow_buf */
-  size_t overflow_bufsize; /* size of the overflow_buf allocation */
+  struct dynbuf overflow; /* excess data received during a single Curl_read */
 #endif
 };
 

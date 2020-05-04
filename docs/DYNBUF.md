@@ -54,7 +54,7 @@ Reset the buffer length, but leave the allocation.
 
 Keep `length` bytes of the buffer tail (the last `length` bytes of the
 buffer). The rest of the buffer is dropped. The specified `length` must not be
-larger than the buffer length. (**This function is currently not provided**.)
+larger than the buffer length.
 
 ## ptr
 
