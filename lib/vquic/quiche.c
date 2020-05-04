@@ -64,6 +64,7 @@ static CURLcode http_request(struct connectdata *conn, const void *mem,
 static Curl_recv h3_stream_recv;
 static Curl_send h3_stream_send;
 
+static FILE *qlog_file; /* not thread-safe */
 
 static int quiche_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
@@ -152,6 +153,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
   CURLcode result;
   struct quicsocket *qs = &conn->hequic[sockindex];
   struct Curl_easy *data = conn->data;
+  const char *qlog_dir;
+  char *qlog_filename;
+  char *p;
 
 #ifdef DEBUG_QUICHE
   /* initialize debug log callback only once */
@@ -198,6 +202,24 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
     failf(data, "can't create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
+
+/* TODO: detect UNIX nicely */
+#ifndef _WIN32
+  qlog_dir = getenv("QLOGDIR");
+  if(qlog_dir) {
+    qlog_filename = malloc(strlen(qlog_dir) + 1 + sizeof(qs->scid) + 5);
+    /* TODO: better string concatentation and actually use the hex-formatted SCID */
+    p = qlog_filename;
+    strcpy(p, qlog_dir);
+    strcat(p, "/");
+    strcat(p, "12345678");
+    strcat(p, ".qlog");
+    qlog_file = fopen(qlog_filename, "wb");
+    if(qlog_file) {
+      quiche_conn_set_qlog_fd(qs->conn, fileno(qlog_file), "qlog title", "qlog desc");
+    }
+  }
+#endif
 
   result = flush_egress(conn, sockfd, qs);
   if(result)
