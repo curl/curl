@@ -1559,6 +1559,7 @@ void Curl_conncontrol(struct connectdata *conn,
   /* close if a connection, or a stream that isn't multiplexed */
   bool closeit = (ctrl == CONNCTRL_CONNECTION) ||
     ((ctrl == CONNCTRL_STREAM) && !(conn->handler->flags & PROTOPT_STREAM));
+  DEBUGASSERT(conn);
   if((ctrl == CONNCTRL_STREAM) &&
      (conn->handler->flags & PROTOPT_STREAM))
     DEBUGF(infof(conn->data, "Kill stream: %s\n", reason));
@@ -1574,6 +1575,7 @@ void Curl_conncontrol(struct connectdata *conn,
 bool Curl_conn_data_pending(struct connectdata *conn, int sockindex)
 {
   int readable;
+  DEBUGASSERT(conn);
 
   if(Curl_ssl_data_pending(conn, sockindex) ||
      Curl_recv_has_postponed_data(conn, sockindex))
