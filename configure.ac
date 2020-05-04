@@ -3814,6 +3814,7 @@ if test X"$want_quiche" != Xno; then
           QUICHE_ENABLED=1
           AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
           AC_SUBST(USE_QUICHE, [1])
+          AC_CHECK_FUNCS([quiche_conn_set_qlog_fd])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH]),
