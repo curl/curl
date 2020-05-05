@@ -95,7 +95,7 @@ if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cd $HOME/quiche
-  QUICHE_BSSL_PATH=$HOME/boringssl cargo build -v --release --features pkg-config-meta
+  QUICHE_BSSL_PATH=$HOME/boringssl cargo build -v --release --features pkg-config-meta,qlog
 fi
 
 # Install common libraries.
