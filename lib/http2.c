@@ -126,7 +126,6 @@ static void http2_stream_free(struct HTTP *http)
 {
   if(http) {
     Curl_dyn_free(&http->header_recvbuf);
-    Curl_dyn_free(&http->trailer_recvbuf);
     for(; http->push_headers_used > 0; --http->push_headers_used) {
       free(http->push_headers[http->push_headers_used - 1]);
     }
@@ -963,26 +962,19 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   }
 
   if(stream->bodystarted) {
-    /* This is trailer fields. */
-    /* 4 is for ": " and "\r\n". */
-    uint32_t n = (uint32_t)(namelen + valuelen + 4);
-
+    /* This is a trailer */
+    struct dynbuf trail;
     H2BUGF(infof(data_s, "h2 trailer: %.*s: %.*s\n", namelen, name, valuelen,
                  value));
-
-    result = Curl_dyn_addn(&stream->trailer_recvbuf, &n, sizeof(n));
-    if(result)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    result = Curl_dyn_addn(&stream->trailer_recvbuf, name, namelen);
-    if(result)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    result = Curl_dyn_add(&stream->trailer_recvbuf, ": ");
-    if(result)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    result = Curl_dyn_addn(&stream->trailer_recvbuf, value, valuelen);
-    if(result)
-      return NGHTTP2_ERR_CALLBACK_FAILURE;
-    result = Curl_dyn_add(&stream->trailer_recvbuf, "\r\n\0");
+    Curl_dyn_init(&trail, DYN_H2_TRAILER);
+    result = Curl_dyn_addf(&trail,
+                           "%.*s: %.*s\r\n", namelen, name,
+                           valuelen, value);
+    if(!result)
+      result = Curl_client_write(conn, CLIENTWRITE_HEADER,
+                                 Curl_dyn_ptr(&trail),
+                                 Curl_dyn_len(&trail));
+    Curl_dyn_free(&trail);
     if(result)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
 
@@ -1130,7 +1122,6 @@ void Curl_http2_done(struct Curl_easy *data, bool premature)
   /* there might be allocated resources done before this got the 'h2' pointer
      setup */
   Curl_dyn_free(&http->header_recvbuf);
-  Curl_dyn_free(&http->trailer_recvbuf);
   if(http->push_headers) {
     /* if they weren't used and then freed before */
     for(; http->push_headers_used > 0; --http->push_headers_used) {
@@ -1376,8 +1367,6 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
                                          struct Curl_easy *data,
                                          struct HTTP *stream, CURLcode *err)
 {
-  char *trailer_pos, *trailer_end;
-  CURLcode result;
   struct http_conn *httpc = &conn->proto.httpc;
 
   if(httpc->pause_stream_id == stream->stream_id) {
@@ -1418,25 +1407,6 @@ static ssize_t http2_handle_stream_close(struct connectdata *conn,
           stream->stream_id);
     *err = CURLE_HTTP2_STREAM;
     return -1;
-  }
-
-  if(Curl_dyn_len(&stream->trailer_recvbuf)) {
-    trailer_pos = Curl_dyn_ptr(&stream->trailer_recvbuf);
-    trailer_end = trailer_pos + Curl_dyn_len(&stream->trailer_recvbuf);
-
-    for(; trailer_pos < trailer_end;) {
-      uint32_t n;
-      memcpy(&n, trailer_pos, sizeof(n));
-      trailer_pos += sizeof(n);
-
-      result = Curl_client_write(conn, CLIENTWRITE_HEADER, trailer_pos, n);
-      if(result) {
-        *err = result;
-        return -1;
-      }
-
-      trailer_pos += n + 1;
-    }
   }
 
   stream->close_handled = TRUE;
@@ -2118,7 +2088,6 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   stream->stream_id = -1;
 
   Curl_dyn_init(&stream->header_recvbuf, DYN_H2_HEADERS);
-  Curl_dyn_init(&stream->trailer_recvbuf, DYN_H2_TRAILERS);
 
   if((conn->handler == &Curl_handler_http2_ssl) ||
      (conn->handler == &Curl_handler_http2))
