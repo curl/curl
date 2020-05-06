@@ -1404,6 +1404,7 @@ static void http_connect(curl_socket_t *infdp,
     if(rc > 0) {
       /* socket action */
       bool tcp_fin_wr = FALSE;
+      ssize_t numfd = rc; /* this many bits really */
       timeout_count = 0;
 
       /* ---------------------------------------------------------- */
@@ -1412,6 +1413,7 @@ static void http_connect(curl_socket_t *infdp,
       if((clientfd[DATA] == CURL_SOCKET_BAD) &&
          (serverfd[DATA] == CURL_SOCKET_BAD) && FD_ISSET(rootfd, &input)) {
         /* a new connection on listener socket (most likely from client) */
+        numfd--;
         curl_socket_t datafd = accept(rootfd, NULL, NULL);
         if(datafd != CURL_SOCKET_BAD) {
           struct httprequest req2;
@@ -1476,12 +1478,13 @@ static void http_connect(curl_socket_t *infdp,
       /* ---------------------------------------------------------- */
 
       /* react to tunnel endpoint readable/writable notifications */
-      for(i = 0; i <= max_tunnel_idx; i++) {
+      for(i = 0; (i <= max_tunnel_idx) && numfd; i++) {
         size_t len;
         if(clientfd[i] != CURL_SOCKET_BAD) {
           len = sizeof(readclient[i]) - tos[i];
           if(len && FD_ISSET(clientfd[i], &input)) {
             /* read from client */
+            numfd--;
             rc = sread(clientfd[i], &readclient[i][tos[i]], len);
             if(rc <= 0) {
               logmsg("[%s] got %zd, STOP READING client", data_or_ctrl(i), rc);
@@ -1498,8 +1501,9 @@ static void http_connect(curl_socket_t *infdp,
         }
         if(serverfd[i] != CURL_SOCKET_BAD) {
           len = sizeof(readserver[i])-toc[i];
-          if(len && FD_ISSET(serverfd[i], &input)) {
+          if(len && numfd && FD_ISSET(serverfd[i], &input)) {
             /* read from server */
+            numfd--;
             rc = sread(serverfd[i], &readserver[i][toc[i]], len);
             if(rc <= 0) {
               logmsg("[%s] got %zd, STOP READING server", data_or_ctrl(i), rc);
@@ -1515,8 +1519,9 @@ static void http_connect(curl_socket_t *infdp,
           }
         }
         if(clientfd[i] != CURL_SOCKET_BAD) {
-          if(toc[i] && FD_ISSET(clientfd[i], &output)) {
+          if(toc[i] && numfd && FD_ISSET(clientfd[i], &output)) {
             /* write to client */
+            numfd--;
             rc = swrite(clientfd[i], readserver[i], toc[i]);
             if(rc <= 0) {
               logmsg("[%s] got %zd, STOP WRITING client", data_or_ctrl(i), rc);
@@ -1535,8 +1540,9 @@ static void http_connect(curl_socket_t *infdp,
           }
         }
         if(serverfd[i] != CURL_SOCKET_BAD) {
-          if(tos[i] && FD_ISSET(serverfd[i], &output)) {
+          if(tos[i] && numfd && FD_ISSET(serverfd[i], &output)) {
             /* write to server */
+            numfd--;
             rc = swrite(serverfd[i], readclient[i], tos[i]);
             if(rc <= 0) {
               logmsg("[%s] got %zd, STOP WRITING server", data_or_ctrl(i), rc);
