@@ -2172,6 +2172,7 @@ int main(int argc, char *argv[])
     fd_set output;
     struct timeval timeout = {0, 250000L}; /* 250 ms */
     curl_socket_t maxfd = (curl_socket_t)-1;
+    int numfd;
 
     /* Clear out closed sockets */
     for(socket_idx = num_sockets - 1; socket_idx >= 1; --socket_idx) {
@@ -2220,9 +2221,13 @@ int main(int argc, char *argv[])
       continue;
     }
 
+    /* this is the number of bits set in input and output */
+    numfd = rc;
+
     /* Check if the listening socket is ready to accept */
     if(FD_ISSET(all_sockets[0], &input)) {
       /* Service all queued connections */
+      numfd--;
       curl_socket_t msgsock;
       do {
         msgsock = accept_connection(sock);
@@ -2233,8 +2238,9 @@ int main(int argc, char *argv[])
     }
 
     /* Service all connections that are ready */
-    for(socket_idx = 1; socket_idx < num_sockets; ++socket_idx) {
+    for(socket_idx = 1; numfd && (socket_idx < num_sockets); ++socket_idx) {
       if(FD_ISSET(all_sockets[socket_idx], &input)) {
+        numfd--;
         if(got_exit_signal)
           goto sws_cleanup;
 
