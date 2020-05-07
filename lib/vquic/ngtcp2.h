@@ -63,6 +63,7 @@ struct quicsocket {
 
   nghttp3_conn *h3conn;
   nghttp3_conn_settings h3settings;
+  int qlogfd;
 };
 
 #include "urldata.h"
