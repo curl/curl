@@ -2340,7 +2340,6 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
           /* user, and environement did not specify any ca file or path
              and there is no "curl-ca-bundle.crt" file in standard path
              so the only possible solution is using the windows ca store */
-          /*config->cacert = strdup(CURL_WINDOWS_CA_STORE);*/
           config->native_ca_store = TRUE;
         }
 #endif
