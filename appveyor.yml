@@ -70,7 +70,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -82,7 +82,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -94,7 +94,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: ""
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
         BUILD_SYSTEM: CMake
@@ -106,7 +106,7 @@ environment:
         HTTP_ONLY: ON
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: ""
       # generated CMake-based MSYS Makefiles builds
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
@@ -118,7 +118,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: "C:\\mingw-w64\\x86_64-8.1.0-posix-seh-rt_v6-rev0\\mingw64\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
@@ -131,7 +131,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: "C:\\mingw-w64\\x86_64-7.2.0-posix-seh-rt_v5-rev1\\mingw64\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
@@ -144,7 +144,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: "C:\\mingw-w64\\i686-6.3.0-posix-dwarf-rt_v5-rev1\\mingw32\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
@@ -157,7 +157,7 @@ environment:
         HTTP_ONLY: OFF
         TESTING: ON
         SHARED: OFF
-        DISABLED_TESTS: "~1139 !1501"
+        DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: "C:\\MinGW\\bin"
         MSYS2_ARG_CONV_EXCL: "/*"
         BUILD_OPT: -k
