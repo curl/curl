@@ -131,7 +131,7 @@ Build BoringSSL (it needs to be built manually so it can be reused with curl):
 Build quiche:
 
      % cd ../..
-     % QUICHE_BSSL_PATH=$PWD/deps/boringssl cargo build --release --features pkg-config-meta
+     % QUICHE_BSSL_PATH=$PWD/deps/boringssl cargo build --release --features pkg-config-meta,qlog
 
 Build curl:
 
