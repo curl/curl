@@ -606,7 +606,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname)
     char dest[16]; /* fits a binary IPv6 address */
 #endif
     const char *l = "0123456789abcdefABCDEF:.";
-    if(hlen < 5) /* '[::1]' is the shortest possible valid string */
+    if(hlen < 4) /* '[::]' is the shortest possible valid string */
       return CURLUE_MALFORMED_INPUT;
     hostname++;
     hlen -= 2;

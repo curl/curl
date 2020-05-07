@@ -129,6 +129,15 @@ struct querycase {
 };
 
 static struct testcase get_parts_list[] ={
+  {"[::1]",
+   "http | [11] | [12] | [13] | [::1] | [15] | / | [16] | [17]",
+   CURLU_GUESS_SCHEME, 0, CURLUE_OK },
+  {"[::]",
+   "http | [11] | [12] | [13] | [::] | [15] | / | [16] | [17]",
+   CURLU_GUESS_SCHEME, 0, CURLUE_OK },
+  {"https://[::1]",
+   "https | [11] | [12] | [13] | [::1] | [15] | / | [16] | [17]",
+   0, 0, CURLUE_OK },
   {"user:moo@ftp.example.com/color/#green?no-black",
    "ftp | user | moo | [13] | ftp.example.com | [15] | /color/ | [16] | "
    "green?no-black",
