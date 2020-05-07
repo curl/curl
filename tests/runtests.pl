@@ -4473,7 +4473,7 @@ sub singletest {
     my $duration = sprintf("duration: %02d:%02d",
                            $sofar/60, $sofar%60);
     if(!$automakestyle) {
-        logmsg sprintf("OK (%-3d out of %-3d, %s, took %.1fs, %s)\n",
+        logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s)\n",
                        $count, $total, $left, $took, $duration);
     }
     else {
