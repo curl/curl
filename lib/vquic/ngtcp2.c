@@ -164,7 +164,15 @@ static int setup_initial_crypto_context(struct quicsocket *qs)
 static void qlog_callback(void *user_data, const void *data, size_t datalen)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
-  (void)write(qs->qlogfd, data, datalen);
+  if(qs->qlogfd != -1) {
+    ssize_t rc = write(qs->qlogfd, data, datalen);
+    if(rc == -1) {
+      /* on write error, stop further write attempts */
+      close(qs->qlogfd);
+      qs->qlogfd = -1;
+    }
+  }
+
 }
 
 static void quic_settings(struct quicsocket *qs,
@@ -966,6 +974,8 @@ static CURLcode ng_disconnect(struct connectdata *conn,
   int i;
   struct quicsocket *qs = &conn->hequic[0];
   (void)dead_connection;
+  if(qs->qlogfd != -1)
+    close(qs->qlogfd);
   if(qs->ssl)
 #ifdef USE_OPENSSL
     SSL_free(qs->ssl);
