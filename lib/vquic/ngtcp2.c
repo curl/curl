@@ -39,6 +39,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "dynbuf.h"
+#include "vquic.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -160,9 +161,25 @@ static int setup_initial_crypto_context(struct quicsocket *qs)
   return 0;
 }
 
-static void quic_settings(ngtcp2_settings *s,
-                          uint64_t stream_buffer_size)
+static void qlog_callback(void *user_data, const void *data, size_t datalen)
 {
+  struct quicsocket *qs = (struct quicsocket *)user_data;
+  if(qs->qlogfd != -1) {
+    ssize_t rc = write(qs->qlogfd, data, datalen);
+    if(rc == -1) {
+      /* on write error, stop further write attempts */
+      close(qs->qlogfd);
+      qs->qlogfd = -1;
+    }
+  }
+
+}
+
+static void quic_settings(struct quicsocket *qs,
+                          uint64_t stream_buffer_size,
+                          ngtcp2_cid *dcid)
+{
+  ngtcp2_settings *s = &qs->settings;
   ngtcp2_settings_default(s);
 #ifdef DEBUG_NGTCP2
   s->log_printf = quic_printf;
@@ -177,6 +194,10 @@ static void quic_settings(ngtcp2_settings *s,
   s->transport_params.initial_max_streams_bidi = 1;
   s->transport_params.initial_max_streams_uni = 3;
   s->transport_params.max_idle_timeout = QUIC_IDLE_TIMEOUT;
+  if(qs->qlogfd != -1) {
+    s->qlog.write = qlog_callback;
+    s->qlog.odcid = *dcid;
+  }
 }
 
 static FILE *keylog_file; /* not thread-safe */
@@ -825,6 +846,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   struct quicsocket *qs = &conn->hequic[sockindex];
   char ipbuf[40];
   long port;
+  int qfd;
 #ifdef USE_OPENSSL
   uint8_t paramsbuf[64];
   ngtcp2_transport_params params;
@@ -864,7 +886,9 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   if(result)
     return result;
 
-  quic_settings(&qs->settings, data->set.buffer_size);
+  (void)Curl_qlogdir(data, qs->scid.data, NGTCP2_MAX_CIDLEN, &qfd);
+  qs->qlogfd = qfd; /* -1 if failure above */
+  quic_settings(qs, data->set.buffer_size, &qs->dcid);
 
   qs->local_addrlen = sizeof(qs->local_addr);
   rv = getsockname(sockfd, (struct sockaddr *)&qs->local_addr,
@@ -950,6 +974,8 @@ static CURLcode ng_disconnect(struct connectdata *conn,
   int i;
   struct quicsocket *qs = &conn->hequic[0];
   (void)dead_connection;
+  if(qs->qlogfd != -1)
+    close(qs->qlogfd);
   if(qs->ssl)
 #ifdef USE_OPENSSL
     SSL_free(qs->ssl);

@@ -34,10 +34,7 @@
 #include "multiif.h"
 #include "connect.h"
 #include "strerror.h"
-#include "dynbuf.h"
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
+#include "vquic.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -204,39 +201,12 @@ CURLcode Curl_quic_connect(struct connectdata *conn, curl_socket_t sockfd,
 
   /* Known to not work on Windows */
 #if !defined(WIN32) && defined(HAVE_QUICHE_CONN_SET_QLOG_FD)
-#ifdef O_BINARY
-#define QLOGMODE O_WRONLY|O_CREAT|O_BINARY
-#else
-#define QLOGMODE O_WRONLY|O_CREAT
-#endif
   {
-    const char *qlog_dir = getenv("QLOGDIR");
-    if(qlog_dir) {
-      struct dynbuf fname;
-      unsigned int i;
-      Curl_dyn_init(&fname, DYN_QLOG_NAME);
-      result = Curl_dyn_add(&fname, qlog_dir);
-      if(!result)
-        result = Curl_dyn_add(&fname, "/");
-      for(i = 0; (i < sizeof(qs->scid)) && !result; i++) {
-        char hex[3];
-        msnprintf(hex, 3, "%02x", qs->scid[i]);
-        result = Curl_dyn_add(&fname, hex);
-      }
-      if(!result)
-        result = Curl_dyn_add(&fname, ".qlog");
-
-      if(!result) {
-        int qlogfd = open(Curl_dyn_ptr(&fname), QLOGMODE,
-                          data->set.new_file_perms);
-        if(qlogfd != -1)
-          quiche_conn_set_qlog_fd(qs->conn, qlogfd,
-                                  "qlog title", "curl qlog");
-      }
-      Curl_dyn_free(&fname);
-      if(result)
-        return result;
-    }
+    int qfd;
+    (void)Curl_qlogdir(data, qs->scid, sizeof(qs->scid), &qfd);
+    if(qfd != -1)
+      quiche_conn_set_qlog_fd(qs->conn, qfd,
+                              "qlog title", "curl qlog");
   }
 #endif
 
