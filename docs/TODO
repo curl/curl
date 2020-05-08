@@ -117,10 +117,10 @@
  14. GnuTLS
  14.2 check connection
 
- 15. WinSSL/SChannel
- 15.1 Add support for client certificate authentication
- 15.3 Add support for the --ciphers option
- 15.4 Add option to disable client certificate auto-send
+ 15. Schannel
+ 15.1 Extend support for client certificate authentication
+ 15.2 Extend support for the --ciphers option
+ 15.3 Add option to disable client certificate auto-send
 
  16. SASL
  16.1 Other authentication mechanisms
@@ -793,31 +793,23 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Add a way to check if the connection seems to be alive, to correspond to the
  SSL_peak() way we use with OpenSSL.
 
-15. WinSSL/SChannel
+15. Schannel
 
-15.1 Add support for client certificate authentication
+15.1 Extend support for client certificate authentication
 
- WinSSL/SChannel currently makes use of the OS-level system and user
- certificate and private key stores. This does not allow the application
- or the user to supply a custom client certificate using curl or libcurl.
-
- Therefore support for the existing -E/--cert and --key options should be
- implemented by supplying a custom certificate to the SChannel APIs, see:
+ The existing support for the -E/--cert and --key options could be
+ extended by supplying a custom certificate and key in PEM format, see:
  - Getting a Certificate for Schannel
    https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
 
-15.3 Add support for the --ciphers option
+15.2 Extend support for the --ciphers option
 
- The cipher suites used by WinSSL/SChannel are configured on an OS-level
- instead of an application-level. This does not allow the application or
- the user to customize the configured cipher suites using curl or libcurl.
-
- Therefore support for the existing --ciphers option should be implemented
- by mapping the OpenSSL/GnuTLS cipher suites to the SChannel APIs, see
+ The existing support for the --ciphers option could be extended
+ by mapping the OpenSSL/GnuTLS cipher suites to the Schannel APIs, see
  - Specifying Schannel Ciphers and Cipher Strengths
    https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
 
-15.4 Add option to disable client certificate auto-send
+15.3 Add option to disable client certificate auto-send
 
  Microsoft says "By default, Schannel will, with no notification to the client,
  attempt to locate a client certificate and send it to the server." That could
