@@ -1,4 +1,4 @@
-curl and libcurl 7.70.1
+curl and libcurl 7.71.0
 
  Public curl releases:         192
  Command line options:         231
@@ -8,10 +8,11 @@ curl and libcurl 7.70.1
 
 This release includes the following changes:
 
- o
+ o CURLOPT_SSL_OPTIONS: optional use of Windows' CA store (with openssl) [10]
 
 This release includes the following bugfixes:
 
+ o *_sspi: fix bad uses of CURLE_NOT_BUILT_IN [21]
  o appveyor: disable flaky test 1501 and ignore broken 1056
  o appveyor: disable test 1139 instead of ignoring it
  o asyn-*: remove support for never-used NULL entry pointers [19]
@@ -19,14 +20,17 @@ This release includes the following bugfixes:
  o connect: make happy eyeballs work for QUIC (again) [16]
  o doc: add missing closing parenthesis in CURLINFO_SSL_VERIFYRESULT.3 [5]
  o doc: Rename VERSIONS to VERSIONS.md as it already has Markdown syntax [20]
+ o docs/HTTP3: add qlog to the quiche build instruction
  o dynbuf: introduce internal generic dynamic buffer functions [17]
  o examples: remove asiohiper.cpp [4]
  o GnuTLS: Backend support for CURLINFO_SSL_VERIFYRESULT [9]
  o http2: simplify and clean up trailer handling [6]
  o libssh2: set the expected total size in SCP upload init [2]
  o libtest/cmake: Remove commented code [13]
+ o ngtcp2: introduce qlog support [23]
  o quiche: enable qlog output [14]
  o runtests: remove sleep calls [18]
+ o runtests: show elapsed test time with higher precision (ms)
  o select: fix overflow protection in Curl_socket_check [22]
  o sockfilt: make select_ws stop waiting on exit signal event
  o test1177: look for curl.h in source directory [1]
@@ -37,6 +41,7 @@ This release includes the following bugfixes:
  o tests: pick a random port number for SSH [12]
  o tests: run stunnel for HTTPS and FTPS on dynamic ports [11]
  o travis: add "qlog" as feature in the quiche build
+ o urlapi: accept :: as a valid IPv6 address [15]
 
 This release includes the following known bugs:
 
@@ -45,10 +50,10 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Emil Engler, Kamil Dudka, Kane York,
-  Lucas Pardue, Marc Hörsken, Michael Kaufmann, Murugan Balraj, Ray Satiro,
-  Rikard Falkeborn, rl1987 on github,
-  (12 contributors)
+  Dan Fandrich, Daniel Stenberg, Emil Engler, Gilles Vollant, Kamil Dudka,
+  Kane York, Lucas Pardue, Marc Hörsken, Michael Kaufmann, Murugan Balraj,
+  Pavel Volgarev, Peter Wang, Ray Satiro, Rikard Falkeborn, rl1987 on github,
+  (15 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -63,14 +68,18 @@ References to bug reports and discussions on issues:
  [7] = https://curl.haxx.se/bug/?i=5315
  [8] = https://curl.haxx.se/bug/?i=5328
  [9] = https://curl.haxx.se/bug/?i=5287
+ [10] = https://curl.haxx.se/bug/?i=4346
  [11] = https://curl.haxx.se/bug/?i=5267
  [12] = https://curl.haxx.se/bug/?i=5273
  [13] = https://curl.haxx.se/bug/?i=5311
  [14] = https://curl.haxx.se/bug/?i=5341
+ [15] = https://curl.haxx.se/bug/?i=5344
  [16] = https://curl.haxx.se/bug/?i=5334
  [17] = https://curl.haxx.se/bug/?i=5300
  [18] = https://curl.haxx.se/bug/?i=5323
  [19] = https://curl.haxx.se/bug/?i=5324
  [20] = https://curl.haxx.se/bug/?i=5325
+ [21] = https://curl.haxx.se/bug/?i=5355
  [22] = https://curl.haxx.se/bug/?i=5286
+ [23] = https://curl.haxx.se/bug/?i=5353
  [24] = https://curl.haxx.se/bug/?i=5298
