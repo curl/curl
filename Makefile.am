@@ -36,6 +36,9 @@ CMAKE_DIST =                                    \
  CMake/FindLibSSH2.cmake                        \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindNGHTTP2.cmake                        \
+ CMake/FindNGHTTP3.cmake                        \
+ CMake/FindNGTCP2.cmake                         \
+ CMake/FindQUICHE.cmake                         \
  CMake/FindWolfSSL.cmake                        \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
