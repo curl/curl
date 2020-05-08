@@ -120,6 +120,7 @@ sub readlocalfile {
             die "Invalid format in $dir/.checksrc on line $i\n";
         }
     }
+    close($rcfile);
 }
 
 sub checkwarn {
