@@ -299,9 +299,15 @@ matrix:
         - os: linux
           compiler: gcc
           dist: bionic
+          before_install:
+              # Install and use the current stable release of Go (for boringssl)
+              - gimme --list
+              - eval "$(gimme stable)"
+              - gimme --list
           env:
-              - T=cmake
+              - T=cmake BORINGSSL=yes QUICHE=yes C="-DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl"
               - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+              - PKG_CONFIG_PATH="$HOME/quiche/target/release"
           addons:
               apt:
                   sources:
@@ -314,8 +320,9 @@ matrix:
           compiler: clang
           dist: bionic
           env:
-              - T=cmake
+              - T=cmake NGTCP2=yes C="-DUSE_NGTCP2=ON"
               - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+              - PKG_CONFIG_PATH="$HOME/ngbuild/lib/pkgconfig"
           addons:
               apt:
                   sources:
