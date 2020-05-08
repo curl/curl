@@ -745,6 +745,9 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
+option(ENABLE_ALT_SVC "Enable alt-svc support" OFF)
+set(USE_ALTSVC ${ENABLE_ALT_SVC})
+
 #
 # CA handling
 #
@@ -1312,6 +1315,7 @@ _add_if("Largefile"     (CURL_SIZEOF_CURL_OFF_T GREATER 4) AND
 # TODO SSP1 (WinSSL) check is missing
 _add_if("SSPI"          USE_WINDOWS_SSPI)
 _add_if("GSS-API"       HAVE_GSSAPI)
+_add_if("alt-svc"       ENABLE_ALT_SVC)
 # TODO SSP1 missing for SPNEGO
 _add_if("SPNEGO"        NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
@@ -1327,6 +1331,7 @@ _add_if("TLS-SRP"       USE_TLS_SRP)
 # TODO option --with-nghttp2 tests for nghttp2 lib and nghttp2/nghttp2.h header
 _add_if("HTTP2"         USE_NGHTTP2)
 _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
+_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS OR USE_NSS))
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Enabled features: ${SUPPORT_FEATURES}")

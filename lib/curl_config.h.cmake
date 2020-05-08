@@ -1005,6 +1005,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS
 
+/* to enable alt-svc */
+#cmakedefine USE_ALTSVC 1
+
 /* Define to 1 if you are building a Windows target with large file support. */
 #cmakedefine USE_WIN32_LARGE_FILES 1
 
