@@ -10,7 +10,7 @@
  * Copyright (c) 1998, 1999, 2017 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  *
- * Copyright (C) 2001 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * All rights reserved.
  *
