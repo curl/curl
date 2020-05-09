@@ -687,7 +687,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
       return CURLE_OUT_OF_MEMORY;
     return CURLE_FAILED_INIT;
   }
-  
+
   sigpipe_ignore(data, &pipe_st);
 
   /* run the transfer */
