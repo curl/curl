@@ -645,6 +645,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 static CURLcode easy_perform(struct Curl_easy *data, bool events)
 {
   struct Curl_multi *multi;
+  bool alloc_multi = FALSE;
   CURLMcode mcode;
   CURLcode result = CURLE_OK;
   SIGPIPE_VARIABLE(pipe_st);
@@ -669,7 +670,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     multi = Curl_multi_handle(1, 3);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
-    data->multi_easy = multi;
+    alloc_multi = TRUE;
   }
 
   if(multi->in_callback)
@@ -680,7 +681,8 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
-    curl_multi_cleanup(multi);
+    if(alloc_multi)
+      curl_multi_cleanup(multi);
     if(mcode == CURLM_OUT_OF_MEMORY)
       return CURLE_OUT_OF_MEMORY;
     return CURLE_FAILED_INIT;
@@ -698,6 +700,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   sigpipe_restore(&pipe_st);
 
   /* The multi handle is kept alive, owned by the easy handle */
+  data->multi_easy = multi;
   return result;
 }
 
