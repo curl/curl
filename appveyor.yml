@@ -108,7 +108,7 @@ environment:
         SHARED: OFF
         DISABLED_TESTS: "!1139 !1501"
         COMPILER_PATH: ""
-      # generated CMake-based MSYS Makefiles builds
+      # generated CMake-based MSYS Makefiles builds (mingw cross-compiling)
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: CMake
         PRJ_GEN: "MSYS Makefiles"
@@ -216,7 +216,7 @@ environment:
         PRJ_CFG: "DLL Debug - DLL Windows SSPI - DLL WinIDN"
         TESTING: OFF
         VC_VERSION: VC15
-      # autotools-based builds
+      # autotools-based builds (NOT mingw cross-compiling, but msys2 native)
       - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
         BUILD_SYSTEM: autotools
         TESTING: ON
