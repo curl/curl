@@ -112,26 +112,12 @@ Build curl
 
 ## build
 
-Clone quiche and BoringSSL:
+Build quiche and BoringSSL:
 
      % git clone --recursive https://github.com/cloudflare/quiche
-
-Build BoringSSL (it needs to be built manually so it can be reused with curl):
-
-     % cd quiche/deps/boringssl
-     % mkdir build
-     % cd build
-     % cmake -DCMAKE_POSITION_INDEPENDENT_CODE=on ..
-     % make
-     % cd ..
-     % mkdir -p .openssl/lib
-     % cp build/crypto/libcrypto.a build/ssl/libssl.a .openssl/lib
-     % ln -s $PWD/include .openssl
-
-Build quiche:
-
-     % cd ../..
-     % QUICHE_BSSL_PATH=$PWD/deps/boringssl cargo build --release --features pkg-config-meta,qlog
+     % cargo build --release --features pkg-config-meta,qlog
+     % mkdir deps/boringssl/lib
+     % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/lib/
 
 Build curl:
 
@@ -139,7 +125,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % ./buildconf
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl/.openssl --with-quiche=$PWD/../quiche/target/release --enable-alt-svc
+     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" --with-ssl=$PWD/../quiche/deps/boringssl --with-quiche=$PWD/../quiche/target/release --enable-alt-svc
      % make
 
 ## Run
