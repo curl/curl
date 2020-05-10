@@ -19,6 +19,7 @@
 # KIND, either express or implied.
 #
 ###########################################################################
+add_custom_target(testdeps)
 add_subdirectory(data)
 add_subdirectory(libtest)
 add_subdirectory(server)
