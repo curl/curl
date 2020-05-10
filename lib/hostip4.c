@@ -137,6 +137,16 @@ Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = PF_INET;
   hints.ai_socktype = SOCK_STREAM;
+
+#ifdef USE_LIBIDN2
+  /* done earlier */
+#elif defined(__APPLE__)
+  /* let MacOS or iOS do the IDN translation */
+  if(!Curl_is_ASCII_name(hostname)) {
+    hints.ai_flags |= AI_CANONNAME;
+  }
+#endif
+
   if(port) {
     msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
