@@ -98,7 +98,7 @@ jobs:
     before_install:
     - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
   - env:
-    - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:$HOME/quiche/target/release:/usr/local/lib
+    - T=novalgrind QUICHE="yes" C="--with-ssl=$HOME/quiche/deps/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=$HOME/quiche/target/release:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     before_install:
     - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)

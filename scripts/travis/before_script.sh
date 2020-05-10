@@ -91,11 +91,13 @@ fi
 
 if [ "$TRAVIS_OS_NAME" = linux -a "$QUICHE" ]; then
   cd $HOME
-  git clone --depth=1 https://github.com/cloudflare/quiche.git
+  git clone --depth=1 --recursive https://github.com/cloudflare/quiche.git
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source $HOME/.cargo/env
   cd $HOME/quiche
-  QUICHE_BSSL_PATH=$HOME/boringssl cargo build -v --release --features pkg-config-meta,qlog
+  cargo build -v --release --features pkg-config-meta,qlog
+  mkdir -v deps/boringssl/lib
+  ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/lib/
 fi
 
 # Install common libraries.
