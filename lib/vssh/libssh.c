@@ -336,7 +336,13 @@ static int myssh_is_known(struct connectdata *conn)
   struct curl_khkey knownkey;
 #endif
 
-#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
+  /* libssh 0.8.0 renamed ssh_get_publickey and marked it as deprecated.
+   * Ubuntu 18.04 however ships with a pre-release version (commit 94fa1e38)
+   * that also includes that change. As workaround, check for a symbol from
+   * libssh/sftp.h that was added after 0.7.0 to avoid deprecation warnings.
+   */
+#if (LIBSSH_VERSION_INT >= SSH_VERSION_INT(0, 8, 0)) || \
+    (LIBSSH_VERSION_INT == SSH_VERSION_INT(0, 7, 0) && defined(SSH_S_IFMT))
   rc = ssh_get_server_publickey(sshc->ssh_session, &pubkey);
 #else
   rc = ssh_get_publickey(sshc->ssh_session, &pubkey);
