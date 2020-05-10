@@ -79,6 +79,34 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
     if(ai) {
       struct Curl_easy *data = conn->data;
 
+      #ifdef USE_LIBIDN2
+      /* done earlier */
+      #elif defined(__APPLE__)
+      /* let MacOS or iOS do the IDN translation */
+      if(ai->ai_canonname != NULL) {
+        if(!Curl_is_ASCII_name(conn->async.hostname)) {
+          char *canonname1 = strdup(ai->ai_canonname);
+          if(canonname1) {
+            char *canonname2 = strdup(ai->ai_canonname);
+            if(canonname2) {
+              /* put new canon hostname to use for http */
+              free(conn->async.hostname);
+              free(conn->host.name);
+              conn->host.name = canonname1;
+              conn->async.hostname = canonname2;
+              }
+            else {
+              /* out of memory? */
+              free(canonname1);
+            }
+          }
+          else {
+             /* out of memory? */
+          }
+         }
+       }
+      #endif
+
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
