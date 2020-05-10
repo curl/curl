@@ -1071,14 +1071,6 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  to no impact, neither on the performance nor on the general functionality of
  curl.
 
-19.3 cmake test suite improvements
-
- The cmake build doesn't support 'make show' so it doesn't know which tests
- are in the makefile or not (making appveyor builds do many false warnings
- about it) nor does it support running the test suite if building out-of-tree.
-
- See https://github.com/curl/curl/issues/3109
-
 20. Test suite
 
 20.1 SSL tunnel
