@@ -20,7 +20,8 @@
 #
 ###########################################################################
 language: c
-sudo: required
+os: linux
+dist: bionic
 cache:
   directories:
   - $HOME/wolfssl-4.4.0-stable
@@ -32,139 +33,98 @@ env:
   - LD_LIBRARY_PATH=/usr/local/lib
 
 addons:
-  apt:
+  apt: &common_apt
     config:
       retries: true
-    sources: &common_sources
-    - ubuntu-toolchain-r-test
     packages: &common_packages
     - cmake
-    - gcc-8
     - valgrind
     - libev-dev
     - libc-ares-dev
     - g++-8
-    - libstdc++-8-dev
     - stunnel4
-    - libidn2-0-dev
+    - libidn2-dev
     - gnutls-bin
     - python-impacket
 
-matrix:
+jobs:
   include:
-  - os: linux
-    compiler: gcc
-    dist: trusty
-    env:
+  - env:
     - T=normal C="--with-gssapi --with-libssh2" CHECKSRC=1
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - krb5-user
         - libssh2-1-dev
-  - os: linux
-    compiler: gcc
-    dist: trusty
-    env:
+  - env:
     - T=normal C=--with-libssh
-    - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    # Avoid bionic, its pre-release libssh version triggers deprecation warnings.
+    dist: focal
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
-        - *common_packages
+        - cmake
+        - valgrind
+        - libev-dev
+        - libc-ares-dev
+        - g++-8
+        - stunnel4
+        - libidn2-dev
+        - gnutls-bin
+        # The above list is common_packages minus impacket.
         - libssh-dev
-  - os: linux
-    compiler: gcc
-    dist: trusty
-    env:
+  - env:
     - T=normal C="--enable-ares"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-  - os: linux
-    compiler: gcc
-    dist: trusty
-    env:
+  - env:
     - T=normal C="--enable-mqtt"
-  - os: linux
-    compiler: gcc
-    dist: bionic
-    env:
+  - env:
     - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: gcc
-    dist: bionic
-    before_install:
-    # Install and use the current stable release of Go
-    - gimme --list
-    - eval "$(gimme stable)"
-    - gimme --list
-    env:
+  - env:
     - T=novalgrind BORINGSSL=yes C="--with-ssl=$HOME/boringssl" LD_LIBRARY_PATH=/home/travis/boringssl/lib:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-    addons:
-      apt:
-        sources:
-        - ppa:longsleep/golang-backports
-        - *common_sources
-        packages:
-        - *common_packages
-  - os: linux
-    compiler: gcc
-    dist: bionic
     before_install:
-    # Install and use the current stable release of Go
-    - gimme --list
-    - eval "$(gimme stable)"
-    - gimme --list
-    env:
+    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
+  - env:
     - T=novalgrind BORINGSSL=yes QUICHE="yes" C="--with-ssl=$HOME/boringssl --with-quiche=$HOME/quiche/target/release --enable-alt-svc" LD_LIBRARY_PATH=/home/travis/boringssl/lib:$HOME/quiche/target/release:/usr/local/lib
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    before_install:
+    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: gcc
-    dist: xenial
-    env:
+  - env:
     - T=novalgrind NGTCP2=yes C="--with-ssl=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: gcc
-    dist: xenial
-    env:
+  - env:
     - T=novalgrind NGTCP2=yes GNUTLS=yes C="PKG_CONFIG_PATH=$HOME/ngbuild --without-ssl --with-gnutls=$HOME/ngbuild --with-ngtcp2=$HOME/ngbuild --with-nghttp3=$HOME/ngbuild --enable-alt-svc" NOTESTS=
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
@@ -179,266 +139,186 @@ matrix:
         - libp11-kit-dev
         - libtasn1-6-dev
         - nettle-dev
-  - os: linux
-    compiler: gcc
-    dist: bionic
-    env:
+  - env:
     - T=debug-wolfssl C="--with-wolfssl --without-ssl"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: gcc
-    dist: bionic
-    env:
+  - env:
     - T=debug-mesalink C="--with-mesalink --without-ssl"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: xenial
-    env:
+  - env:
     - T=debug
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - &clang OVERRIDE_CC="CC=clang-9" OVERRIDE_CXX="CXX=clang++-9"
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-xenial-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - &clang_packages [*common_packages, clang-9]
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: xenial
-    env:
+  - env:
     - T=debug C="--enable-alt-svc"
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - *clang
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-xenial-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: xenial
-    env:
+  - env:
     - T=debug C="--with-mbedtls --without-ssl"
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - *clang
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-xenial-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
         - libmbedtls-dev
-  - os: linux
-    compiler: clang
-    dist: bionic
-    env:
+  - env:
     - T=debug C="--with-gnutls --without-ssl"
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - *clang
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-bionic-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - *clang_packages
         - libgnutls28-dev
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: bionic
-    env:
+  - env:
     - T=debug C="--with-nss --without-ssl" NOTESTS=1 CPPFLAGS="-isystem /usr/include/nss"
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - *clang
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-bionic-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - *clang_packages
         - libnss3-dev
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: gcc
-    dist: trusty
-    env:
+  - env:
     - T=iconv
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
-  - os: linux
-    compiler: gcc
-    dist: bionic
-    before_install:
-    # Install and use the current stable release of Go (for boringssl)
-    - gimme --list
-    - eval "$(gimme stable)"
-    - gimme --list
-    env:
+  - env:
     - T=cmake BORINGSSL=yes QUICHE=yes C="-DUSE_QUICHE=1 -DOPENSSL_ROOT_DIR=$HOME/boringssl"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     - PKG_CONFIG_PATH="$HOME/quiche/target/release"
+    before_install:
+    - eval "$(gimme stable)"; gimme --list  # Install latest Go (for boringssl)
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: bionic
-    env:
+  - env:
     - T=cmake NGTCP2=yes C="-DUSE_NGTCP2=ON"
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - *clang
     - PKG_CONFIG_PATH="$HOME/ngbuild/lib/pkgconfig"
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-bionic-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: gcc
-    dist: xenial
-    env:
+  - env:
     - T=torture
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - lcov
         - libpsl-dev
         - libbrotli-dev
         - libssh2-1-dev
-  - os: linux
-    compiler: gcc
-    dist: bionic
-    env:
+  - env:
     - T=distcheck
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: bionic
-    env:
+  - env:
     - T=fuzzer
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - *clang
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-bionic-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: bionic
-    env:
+  - env:
     - T=tidy
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
+    - *clang
+    compiler: clang
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-bionic-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
-        - clang-tidy-7
+        - *clang_packages
+        - clang-tidy-9
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    compiler: clang
-    dist: bionic
-    env:
+  - env:
     - T=scan-build
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
-    addons:
-      apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-bionic-7
-        packages:
-        - *common_packages
-        - clang-7
-        - libpsl-dev
-        - libbrotli-dev
-  - os: linux
+    - *clang
     compiler: clang
-    dist: xenial
-    env:
-    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
-    - OVERRIDE_CC="CC=clang-7" OVERRIDE_CXX="CXX=clang++-7"
     addons:
       apt:
-        sources:
-        - *common_sources
-        - llvm-toolchain-xenial-7
+        <<: *common_apt
         packages:
-        - *common_packages
-        - clang-7
+        - *clang_packages
         - libpsl-dev
         - libbrotli-dev
-  - os: linux
-    arch: arm64
-    compiler: gcc
-    dist: bionic
-    env:
+  - env:
+    - T=debug CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g" LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer" LIBS="-ldl -lubsan"
+    - *clang
+    compiler: clang
+    addons:
+      apt:
+        <<: *common_apt
+        packages:
+        - *clang_packages
+        - libpsl-dev
+        - libbrotli-dev
+  - env:
     - T=debug C="--enable-alt-svc"
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
+    arch: arm64
     addons:
       apt:
-        sources:
-        - *common_sources
+        <<: *common_apt
         packages:
         - *common_packages
         - libpsl-dev
