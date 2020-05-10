@@ -1526,6 +1526,8 @@ CURLcode Curl_idnconvert_hostname(struct connectdata *conn,
             Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       return CURLE_URL_MALFORMAT;
     }
+#elif defined(__APPLE__)
+  /* let MacOS or iOS do the IDN translation */
 #else
     infof(data, "IDN support not present, can't parse Unicode domains\n");
 #endif
