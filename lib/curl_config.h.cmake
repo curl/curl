@@ -428,6 +428,9 @@
 /* Define to 1 if you have the <libssh2.h> header file. */
 #cmakedefine HAVE_LIBSSH2_H 1
 
+/* Define to 1 if you have the <libssh/libssh.h> header file. */
+#cmakedefine HAVE_LIBSSH_LIBSSH_H 1
+
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
 
@@ -968,6 +971,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if WolfSSL is enabled */
 #cmakedefine USE_WOLFSSL 1
+
+/* if libSSH is in use */
+#cmakedefine USE_LIBSSH 1
 
 /* if libSSH2 is in use */
 #cmakedefine USE_LIBSSH2 1
