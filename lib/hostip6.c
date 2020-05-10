@@ -174,6 +174,15 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   hints.ai_socktype = (conn->transport == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
+#ifdef USE_LIBIDN2
+  /* done earlier */
+#elif defined(__APPLE__)
+  /* let MacOS or iOS do the IDN translation */
+  if(!Curl_is_ASCII_name(hostname)) {
+    hints.ai_flags |= AI_CANONNAME;
+  }
+#endif
+
 #ifndef USE_RESOLVE_ON_IPS
   /*
    * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
