@@ -1589,7 +1589,25 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                          config->ssl_version | config->ssl_version_max);
           my_setopt_enum(curl, CURLOPT_PROXY_SSLVERSION,
                          config->proxy_ssl_version);
+
+          {
+            long mask =
+              (config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
+              (config->ssl_revoke_best_effort ?
+               CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
+              (config->native_ca_store ?
+               CURLSSLOPT_NATIVE_CA : 0) |
+              (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
+
+            if(mask)
+              my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);
+          }
+
+          if(config->proxy_ssl_allow_beast)
+            my_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
+                      (long)CURLSSLOPT_ALLOW_BEAST);
         }
+
         if(config->path_as_is)
           my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
@@ -1899,23 +1917,6 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->gssapi_delegation)
           my_setopt_str(curl, CURLOPT_GSSAPI_DELEGATION,
                         config->gssapi_delegation);
-
-        /* new in 7.25.0, 7.44.0 and 7.70.0 */
-        {
-          long mask = (config->ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
-                      (config->ssl_revoke_best_effort ?
-                       CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
-                      (config->native_ca_store ?
-                       CURLSSLOPT_NATIVE_CA : 0) |
-                      (config->ssl_no_revoke ? CURLSSLOPT_NO_REVOKE : 0);
-
-          if(mask)
-            my_setopt_bitmask(curl, CURLOPT_SSL_OPTIONS, mask);
-        }
-
-        if(config->proxy_ssl_allow_beast)
-          my_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
-                    (long)CURLSSLOPT_ALLOW_BEAST);
 
         if(config->mail_auth)
           my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
