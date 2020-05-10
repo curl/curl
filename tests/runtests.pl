@@ -56,8 +56,14 @@
 # These should be the only variables that might be needed to get edited:
 
 BEGIN {
-    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
-    push(@INC, ".");
+    # Define srcdir to the location of the tests source directory. This is
+    # usually set by the Makefile, but for out-of-tree builds with direct
+    # invocation of runtests.pl, it may not be set.
+    if(!defined $ENV{'srcdir'}) {
+        use File::Basename;
+        $ENV{'srcdir'} = dirname(__FILE__);
+    }
+    push(@INC, $ENV{'srcdir'});
     # run time statistics needs Time::HiRes
     eval {
         no warnings "all";
@@ -559,7 +565,11 @@ sub checkcmd {
 #
 my $disttests;
 sub get_disttests {
-    my @dist = `cd data && make show`;
+    my $makeCmd = 'make';
+    if(-f "../CMakeCache.txt") {
+        $makeCmd = 'cmake --build ../.. --target';
+    }
+    my @dist = `cd data && $makeCmd show`;
     $disttests = join("", @dist);
 }
 
@@ -5119,6 +5129,13 @@ disabledtests("$TESTDIR/DISABLED.local");
 #######################################################################
 # Check options to this test program
 #
+
+# Special case for CMake: replace '${TFLAGS}' by the contents of the
+# environment variable (if any).
+if(@ARGV && $ARGV[-1] eq '${TFLAGS}') {
+    pop @ARGV;
+    push(@ARGV, split(' ', $ENV{'TFLAGS'})) if defined($ENV{'TFLAGS'});
+}
 
 my $number=0;
 my $fromnum=-1;

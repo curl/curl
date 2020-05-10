@@ -20,6 +20,9 @@
 #
 ###########################################################################
 
+# TODO build a special libcurlu library for unittests.
+return()
+
 set(UT_SRC
   unit1300.c
   unit1301.c
@@ -63,16 +66,4 @@ foreach(_testfile ${UT_SRC})
   target_link_libraries(${_testname} libcurl ${CURL_LIBS})
   set_target_properties(${_testname}
       PROPERTIES COMPILE_DEFINITIONS "UNITTESTS")
-
-  if(HIDES_CURL_PRIVATE_SYMBOLS)
-    set_target_properties(${_testname}
-      PROPERTIES
-      EXCLUDE_FROM_ALL TRUE
-      EXCLUDE_FROM_DEFAULT_BUILD TRUE
-    )
-  else()
-    add_test(NAME ${_testname}
-             COMMAND ${_testname} "http://www.google.com"
-    )
-  endif()
 endforeach()
