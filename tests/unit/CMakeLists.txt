@@ -58,7 +58,8 @@ include_directories(
 foreach(_testfile ${UT_SRC})
 
   get_filename_component(_testname ${_testfile} NAME_WE)
-  add_executable(${_testname} ${_testfile} ${UT_COMMON_FILES})
+  add_executable(${_testname} EXCLUDE_FROM_ALL ${_testfile} ${UT_COMMON_FILES})
+  #add_dependencies(testdeps ${_testname})
   target_link_libraries(${_testname} libcurl ${CURL_LIBS})
   set_target_properties(${_testname}
       PROPERTIES COMPILE_DEFINITIONS "UNITTESTS")
