@@ -756,6 +756,14 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
   hints.ai_socktype = (conn->transport == TRNSPRT_TCP)?
     SOCK_STREAM : SOCK_DGRAM;
 
+#ifdef USE_LIBIDN2
+  /* done earlier */
+#elif defined(__APPLE__)
+  if(!Curl_is_ASCII_name(hostname)) {
+    hints.ai_flags |= AI_CANONNAME;
+  }
+#endif
+
   reslv->start = Curl_now();
   /* fire up a new resolver thread! */
   if(init_resolve_thread(conn, hostname, port, &hints)) {
