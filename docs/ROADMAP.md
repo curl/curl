@@ -34,19 +34,6 @@ thread-safe `curl_global_init()`
  it can be thread-safe if built with thread-safe 3rd party libraries.
  (probably can't include `curl_global_init_mem()` for obvious reasons)
 
-tiny-curl
----------
-
- There's no immediate action for this but users seem keen on being able to
- building custom minimized versions of libcurl for their products. Make sure
- new features that are "niche" can still be disabled at build-time.
-
-MQTT
-----
-
- Support receiving and sending MQTT messages. Initial work exists in
- https://github.com/curl/curl/pull/3514
-
 Hardcode “localhost”
 --------------------
 
@@ -54,10 +41,3 @@ Hardcode “localhost”
  and actually responds with something else than a local address. Some
  operating systems already do this. Also:
  https://tools.ietf.org/html/draft-ietf-dnsop-let-localhost-be-localhost-02
-
-"menu config"-style build feature selection
--------------------------------------------
-
- Allow easier building of custom libcurl versions with only a selected feature
- where the available features are easily browsable and toggle-able ON/OFF or
- similar.
