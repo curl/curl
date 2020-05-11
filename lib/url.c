@@ -142,17 +142,19 @@ static unsigned int get_protocol_family(unsigned int protocol);
 
 
 /*
- * Protocol table.
+ * Protocol table. Schemes (roughly) in 2019 popularity order:
+ *
+ * HTTPS, HTTP, FTP, FTPS, SFTP, FILE, SCP, SMTP, LDAP, IMAPS, TELNET, IMAP,
+ * LDAPS, SMTPS, TFTP, SMB, POP3, GOPHER POP3S, RTSP, RTMP, SMBS, DICT
  */
-
 static const struct Curl_handler * const protocols[] = {
-
-#ifndef CURL_DISABLE_HTTP
-  &Curl_handler_http,
-#endif
 
 #if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
   &Curl_handler_https,
+#endif
+
+#ifndef CURL_DISABLE_HTTP
+  &Curl_handler_http,
 #endif
 
 #ifndef CURL_DISABLE_FTP
@@ -163,12 +165,23 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_ftps,
 #endif
 
-#ifndef CURL_DISABLE_TELNET
-  &Curl_handler_telnet,
+#if defined(USE_SSH)
+  &Curl_handler_sftp,
 #endif
 
-#ifndef CURL_DISABLE_DICT
-  &Curl_handler_dict,
+#ifndef CURL_DISABLE_FILE
+  &Curl_handler_file,
+#endif
+
+#if defined(USE_SSH) && !defined(USE_WOLFSSH)
+  &Curl_handler_scp,
+#endif
+
+#ifndef CURL_DISABLE_SMTP
+  &Curl_handler_smtp,
+#ifdef USE_SSL
+  &Curl_handler_smtps,
+#endif
 #endif
 
 #ifndef CURL_DISABLE_LDAP
@@ -180,27 +193,19 @@ static const struct Curl_handler * const protocols[] = {
 #endif
 #endif
 
-#ifndef CURL_DISABLE_FILE
-  &Curl_handler_file,
-#endif
-
-#ifndef CURL_DISABLE_TFTP
-  &Curl_handler_tftp,
-#endif
-
-#if defined(USE_SSH) && !defined(USE_WOLFSSH)
-  &Curl_handler_scp,
-#endif
-
-#if defined(USE_SSH)
-  &Curl_handler_sftp,
-#endif
-
 #ifndef CURL_DISABLE_IMAP
   &Curl_handler_imap,
 #ifdef USE_SSL
   &Curl_handler_imaps,
 #endif
+#endif
+
+#ifndef CURL_DISABLE_TELNET
+  &Curl_handler_telnet,
+#endif
+
+#ifndef CURL_DISABLE_TFTP
+  &Curl_handler_tftp,
 #endif
 
 #ifndef CURL_DISABLE_POP3
@@ -219,23 +224,16 @@ static const struct Curl_handler * const protocols[] = {
 #endif
 #endif
 
-#ifndef CURL_DISABLE_SMTP
-  &Curl_handler_smtp,
-#ifdef USE_SSL
-  &Curl_handler_smtps,
-#endif
-#endif
-
 #ifndef CURL_DISABLE_RTSP
   &Curl_handler_rtsp,
 #endif
 
-#ifndef CURL_DISABLE_GOPHER
-  &Curl_handler_gopher,
-#endif
-
 #ifdef CURL_ENABLE_MQTT
   &Curl_handler_mqtt,
+#endif
+
+#ifndef CURL_DISABLE_GOPHER
+  &Curl_handler_gopher,
 #endif
 
 #ifdef USE_LIBRTMP
@@ -245,6 +243,10 @@ static const struct Curl_handler * const protocols[] = {
   &Curl_handler_rtmpte,
   &Curl_handler_rtmps,
   &Curl_handler_rtmpts,
+#endif
+
+#ifndef CURL_DISABLE_DICT
+  &Curl_handler_dict,
 #endif
 
   (struct Curl_handler *) NULL
