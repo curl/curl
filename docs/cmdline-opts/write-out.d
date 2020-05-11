@@ -82,6 +82,10 @@ IPv4 or IPv6 (Added in 7.29.0)
 .B remote_port
 The remote port number of the most recently done connection (Added in 7.29.0)
 .TP
+.B response_code
+The numerical response code that was found in the last transfer (formerly
+known as "http_code"). (Added in 7.18.2)
+.TP
 .B scheme
 The URL scheme (sometimes called protocol) that was effectively used (Added in 7.52.0)
 .TP
