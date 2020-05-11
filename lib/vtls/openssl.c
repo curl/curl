@@ -2973,11 +2973,15 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
                          X509_V_FLAG_TRUSTED_FIRST);
 #endif
 #ifdef X509_V_FLAG_PARTIAL_CHAIN
-    if(!SSL_SET_OPTION(no_partialchain)) {
+    if(!SSL_SET_OPTION(no_partialchain) && !ssl_crlfile) {
       /* Have intermediate certificates in the trust store be treated as
          trust-anchors, in the same way as self-signed root CA certificates
          are. This allows users to verify servers using the intermediate cert
-         only, instead of needing the whole chain. */
+         only, instead of needing the whole chain.
+
+         Due to OpenSSL bug https://github.com/openssl/openssl/issues/5081 we
+         cannot do partial chains with CRL check.
+      */
       X509_STORE_set_flags(SSL_CTX_get_cert_store(backend->ctx),
                            X509_V_FLAG_PARTIAL_CHAIN);
     }
