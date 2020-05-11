@@ -681,6 +681,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
     curl_multi_cleanup(multi);
+    data->multi_easy = NULL;
     if(mcode == CURLM_OUT_OF_MEMORY)
       return CURLE_OUT_OF_MEMORY;
     return CURLE_FAILED_INIT;
