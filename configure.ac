@@ -4727,6 +4727,13 @@ dnl to let curl-config output the static libraries correctly
 ENABLE_STATIC="$enable_static"
 AC_SUBST(ENABLE_STATIC)
 
+dnl merge the pkg-config Libs.private field into Libs when static-only
+if test "x$enable_shared" = "xno"; then
+  LIBCURL_NO_SHARED=$LIBCURL_LIBS
+else
+  LIBCURL_NO_SHARED=
+fi
+AC_SUBST(LIBCURL_NO_SHARED)
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
