@@ -10,16 +10,73 @@ are syntactically valid XML, although a few files are not (lack of support for
 character entities and the preservation of CR/LF characters at the end of
 lines are the biggest differences).
 
-Each test case exists as a file matching the format `tests/data/testNUM`,
-where NUM is considered the unique test number.
+Each test case source exists as a file matching the format
+`tests/data/testNUM`, where NUM is the unique test number, and must begin with
+a 'testcase' tag, which encompasses the remainder of the file.
 
-The file begins with a 'testcase' tag, which encompasses the remainder of the
-file.
+# Preprocessing
+
+When a test is to be executed, the source file is first preprocessed and
+variables are substituted by the their respective contents and the output
+version of the test file is stored as `log/testNUM`. That version is what will
+be read and used by the test servers.
+
+# Variables
+
+When the test is preprocessed, a range of "variables" in the test file will be
+replaced by their content at that time.
+
+Available substitute variables include:
+
+- `%CLIENT6IP` - IPv6 address of the client running curl
+- `%CLIENTIP` - IPv4 address of the client running curl
+- `%CURL` - Path to the curl executable
+- `%FILE_PWD` - Current directory, on windows prefixed with a slash
+- `%FTP6PORT` - IPv6 port number of the FTP server
+- `%FTPPORT` - Port number of the FTP server
+- `%FTPSPORT` - Port number of the FTPS server
+- `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a
+  response from the test FTP server
+- `%FTPTIME3` - Even longer than %FTPTIME2
+- `%GOPHER6PORT` - IPv6 port number of the Gopher server
+- `%GOPHERPORT` - Port number of the Gopher server
+- `%HOST6IP` - IPv6 address of the host running this test
+- `%HOSTIP` - IPv4 address of the host running this test
+- `%HTTP6PORT` - IPv6 port number of the HTTP server
+- `%HTTPPORT` - Port number of the HTTP server
+- `%HTTPSPORT` - Port number of the HTTPS server
+- `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
+- `%HTTPTLSPORT` - Port number of the HTTP TLS server
+- `%HTTPUNIXPATH` - Path to the Unix socket of the HTTP server
+- `%IMAP6PORT` - IPv6 port number of the IMAP server
+- `%IMAPPORT` - Port number of the IMAP server
+- `%MQTTPORT` - Port number of the MQTT server
+- `%NEGTELNETPORT` - Port number of the telnet server
+- `%NOLISTENPORT` - Port number where no service is listening
+- `%POP36PORT` - IPv6 port number of the POP3 server
+- `%POP3PORT` - Port number of the POP3 server
+- `%POSIX_PWD` - Current directory somewhat mingw friendly
+- `%PROXYPORT` - Port number of the HTTP proxy
+- `%PWD` - Current directory
+- `%RTSP6PORT` - IPv6 port number of the RTSP server
+- `%RTSPPORT` - Port number of the RTSP server
+- `%SMBPORT` - Port number of the SMB server
+- `%SMBSPORT` - Port number of the SMBS server
+- `%SMTP6PORT` - IPv6 port number of the SMTP server
+- `%SMTPPORT` - Port number of the SMTP server
+- `%SOCKSPORT` - Port number of the SOCKS4/5 server
+- `%SRCDIR` - Full path to the source dir
+- `%SSHPORT` - Port number of the SCP/SFTP server
+- `%SSHSRVMD5` - MD5 of SSH server's public key
+- `%SSH_PWD` - Current directory friendly for the SSH server
+- `%TFTP6PORT` - IPv6 port number of the TFTP server
+- `%TFTPPORT` - Port number of the TFTP server
+- `%USER` - Login ID of the user running the test
 
 # `<testcase>`
 
-Each test is always within the testcase tag. Each test case is split up in
-four main sections: `info`, `reply`, `client` and `verify`.
+Each test is always specified entirely within the testcase tag. Each test case
+is split up in four main sections: `info`, `reply`, `client` and `verify`.
 
 - **info** provides information about the test case
 
@@ -270,13 +327,12 @@ restart servers.
 A command line that if set gets run by the test script before the test. If an
 output is displayed by the command or if the return code is non-zero, the test
 will be skipped and the (single-line) output will be displayed as reason for
-not running the test.  Variables are substituted as in the `<command>`
-  section.
+not running the test.
 
 ### `<postcheck>`
 A command line that if set gets run by the test script after the test. If
 the command exists with a non-zero status code, the test will be considered
-to have failed. Variables are substituted as in the `<command>` section.
+to have failed.
 
 ### `<tool>`
 Name of tool to invoke instead of "curl". This tool must be built and exist
@@ -292,10 +348,9 @@ Brief test case description, shown when the test runs.
 
 Set the given environment variables to the specified value before the actual
 command is run. They are cleared again after the command has been run.
-Variables are first substituted as in the `<command>` section.
+
 ### `<command [option="no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl"]>`
-Command line to run. There's a bunch of %variables that get replaced
-accordingly.
+Command line to run.
 
 Note that the URL that gets passed to the server actually controls what data
 that is returned. The last slash in the URL must be followed by a number. That
@@ -339,56 +394,9 @@ parameter is the not negative integer number of seconds for the delay. This
 'delay' attribute is intended for very specific test cases, and normally not
 needed.
 
-Available substitute variables include:
-
-- `%CLIENT6IP` - IPv6 address of the client running curl
-- `%CLIENTIP` - IPv4 address of the client running curl
-- `%CURL` - Path to the curl executable
-- `%FILE_PWD` - Current directory, on windows prefixed with a slash
-- `%FTP6PORT` - IPv6 port number of the FTP server
-- `%FTPPORT` - Port number of the FTP server
-- `%FTPSPORT` - Port number of the FTPS server
-- `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a response from the test FTP server
-- `%FTPTIME3` - Even longer than %FTPTIME2
-- `%GOPHER6PORT` - IPv6 port number of the Gopher server
-- `%GOPHERPORT` - Port number of the Gopher server
-- `%HOST6IP` - IPv6 address of the host running this test
-- `%HOSTIP` - IPv4 address of the host running this test
-- `%HTTP6PORT` - IPv6 port number of the HTTP server
-- `%HTTPPORT` - Port number of the HTTP server
-- `%HTTPSPORT` - Port number of the HTTPS server
-- `%HTTPTLS6PORT` - IPv6 port number of the HTTP TLS server
-- `%HTTPTLSPORT` - Port number of the HTTP TLS server
-- `%HTTPUNIXPATH` - Path to the Unix socket of the HTTP server
-- `%IMAP6PORT` - IPv6 port number of the IMAP server
-- `%IMAPPORT` - Port number of the IMAP server
-- `%MQTTPORT` - Port number of the MQTT server
-- `%NEGTELNETPORT` - Port number of the telnet server
-- `%NOLISTENPORT` - Port number where no service is listening
-- `%POP36PORT` - IPv6 port number of the POP3 server
-- `%POP3PORT` - Port number of the POP3 server
-- `%POSIX_PWD` - Current directory somewhat mingw friendly
-- `%PROXYPORT` - Port number of the HTTP proxy
-- `%PWD` - Current directory
-- `%RTSP6PORT` - IPv6 port number of the RTSP server
-- `%RTSPPORT` - Port number of the RTSP server
-- `%SMBPORT` - Port number of the SMB server
-- `%SMBSPORT` - Port number of the SMBS server
-- `%SMTP6PORT` - IPv6 port number of the SMTP server
-- `%SMTPPORT` - Port number of the SMTP server
-- `%SOCKSPORT` - Port number of the SOCKS4/5 server
-- `%SRCDIR` - Full path to the source dir
-- `%SSHPORT` - Port number of the SCP/SFTP server
-- `%SSHSRVMD5` - MD5 of SSH server's public key
-- `%SSH_PWD` - Current directory friendly for the SSH server
-- `%TFTP6PORT` - IPv6 port number of the TFTP server
-- `%TFTPPORT` - Port number of the TFTP server
-- `%USER` - Login ID of the user running the test
-
 ### `<file name="log/filename">`
 This creates the named file with this content before the test case is run,
-which is useful if the test case needs a file to act on.  Variables are
-substituted on the contents of the file as in the `<command>` section.
+which is useful if the test case needs a file to act on.
 
 ### `<stdin [nonewline="yes"]>`
 Pass this given data on stdin to the tool.
@@ -415,20 +423,18 @@ advanced. Example: `s/^EPRT .*/EPRT stripped/`.
 
 the protocol dump curl should transmit, if 'nonewline' is set, we will cut off
 the trailing newline of this given data before comparing with the one actually
-sent by the client Variables are substituted as in the `<command>` section.
-The `<strip>` and `<strippart>` rules are applied before comparisons are made.
+sent by the client The `<strip>` and `<strippart>` rules are applied before
+comparisons are made.
 
 ### `<proxy [nonewline="yes"]>`
 
 The protocol dump curl should transmit to a HTTP proxy (when the http-proxy
 server is used), if 'nonewline' is set, we will cut off the trailing newline
 of this given data before comparing with the one actually sent by the client
-Variables are substituted as in the `<command>` section. The `<strip>` and
-`<strippart>` rules are applied before comparisons are made.
+The `<strip>` and `<strippart>` rules are applied before comparisons are made.
 
 ### `<stdout [mode="text"] [nonewline="yes"]>`
-This verifies that this data was passed to stdout.  Variables are
-substituted as in the `<command>` section.
+This verifies that this data was passed to stdout.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
@@ -439,8 +445,7 @@ before comparing with the one actually received by the client
 ### `<file name="log/filename" [mode="text"]>`
 The file's contents must be identical to this after the test is complete.  Use
 the mode="text" attribute if the output is in text mode on platforms that have
-a text/binary difference.  Variables are substituted as in the `<command>`
-section.
+a text/binary difference.
 
 ### `<file1>`
 1 to 4 can be appended to 'file' to compare more files.
