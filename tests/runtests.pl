@@ -132,7 +132,6 @@ my $HTTPPORT=$noport;    # HTTP server port
 my $HTTP6PORT=$noport;   # HTTP IPv6 server port
 my $HTTPSPORT=$noport;   # HTTPS (stunnel) server port
 my $FTPPORT=$noport;     # FTP server port
-my $FTP2PORT=$noport;    # FTP server 2 port
 my $FTPSPORT=$noport;    # FTPS (stunnel) server port
 my $FTP6PORT=$noport;    # FTP IPv6 server port
 my $TFTPPORT=$noport;    # TFTP
@@ -1824,9 +1823,6 @@ sub runpingpongserver {
             # if IPv6, use a different setup
             $FTP6PORT = $port;
         }
-        elsif($idnum>1) {
-            $FTP2PORT = $port;
-        }
         else {
             $FTPPORT = $port;
         }
@@ -2640,7 +2636,7 @@ sub responsive_pingpong_server {
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
 
     if($proto eq "ftp") {
-        $port = ($idnum>1)?$FTP2PORT:$FTPPORT;
+        $port = $FTPPORT;
 
         if($ipvnum==6) {
             # if IPv6, use a different setup
@@ -3230,7 +3226,6 @@ sub subVariables {
 
     # test server ports
     $$thing =~ s/${prefix}FTP6PORT/$FTP6PORT/g;
-    $$thing =~ s/${prefix}FTP2PORT/$FTP2PORT/g;
     $$thing =~ s/${prefix}FTPSPORT/$FTPSPORT/g;
     $$thing =~ s/${prefix}FTPPORT/$FTPPORT/g;
     $$thing =~ s/${prefix}GOPHER6PORT/$GOPHER6PORT/g;
@@ -4566,20 +4561,6 @@ sub startservers {
                 }
                 printf ("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
                 $run{$what}="$pid $pid2";
-            }
-        }
-        elsif($what eq "ftp2") {
-            if($torture && $run{'ftp2'} &&
-               !responsive_pingpong_server("ftp", "2", $verbose)) {
-                stopserver('ftp2');
-            }
-            if(!$run{'ftp2'}) {
-                ($pid, $pid2) = runpingpongserver("ftp", "2", $verbose);
-                if($pid <= 0) {
-                    return "failed starting FTP2 server";
-                }
-                printf ("* pid ftp2 => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'ftp2'}="$pid $pid2";
             }
         }
         elsif($what eq "ftp-ipv6") {
