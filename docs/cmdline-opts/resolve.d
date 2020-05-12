@@ -1,5 +1,5 @@
 Long: resolve
-Arg: <host:port:address[,address]...>
+Arg: <host:port:addr[,addr]...>
 Help: Resolve the host+port to this address
 Added: 7.21.3
 ---
