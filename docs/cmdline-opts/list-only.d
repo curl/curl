@@ -2,7 +2,7 @@ Long: list-only
 Short: l
 Protocols: FTP POP3
 Help: List only mode
-Added: 7.21.5
+Added: 4.0
 ---
 (FTP)
 When listing an FTP directory, this switch forces a name-only view. This is
