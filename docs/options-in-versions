@@ -1,0 +1,244 @@
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
+
+ This document lists all command line options present in curl, together with
+ exact information about the first curl version that supports it. The options
+ are sorted alphabetically on the long name.
+
+ Long (short)                        Introduced
+
+--abstract-unix-socket               7.53.0
+--alt-svc                            7.64.1
+--anyauth                            7.10.6
+--append (-a)                        4.8
+--basic                              7.10.6
+--cacert                             7.5
+--capath                             7.9.8
+--cert (-E)                          5.0
+--cert-status                        7.41.0
+--cert-type                          7.9.3
+--ciphers                            7.9
+--compressed                         7.10
+--compressed-ssh                     7.56.0
+--config (-K)                        4.10
+--connect-timeout                    7.7
+--connect-to                         7.49.0
+--continue-at (-C)                   4.8
+--cookie (-b)                        4.9
+--cookie-jar (-c)                    7.9
+--create-dirs                        7.10.3
+--crlf                               5.7
+--crlfile                            7.19.7
+--data (-d)                          4.0
+--data-ascii                         7.2
+--data-binary                        7.2
+--data-raw                           7.43.0
+--data-urlencode                     7.18.0
+--delegation                         7.22.0
+--digest                             7.10.6
+--disable (-q)                       5.0
+--disable-eprt                       7.10.5
+--disable-epsv                       7.9.2
+--disallow-username-in-url           7.61.0
+--dns-interface                      7.33.0
+--dns-ipv4-addr                      7.33.0
+--dns-ipv6-addr                      7.33.0
+--dns-servers                        7.33.0
+--doh-url                            7.62.0
+--dump-header (-D)                   5.7
+--egd-file                           7.7
+--engine                             7.9.3
+--etag-compare                       7.68.0
+--etag-save                          7.68.0
+--expect100-timeout                  7.47.0
+--fail (-f)                          4.0
+--fail-early                         7.52.0
+--false-start                        7.42.0
+--form (-F)                          5.0
+--form-string                        7.13.2
+--ftp-account                        7.13.0
+--ftp-alternative-to-user            7.15.5
+--ftp-create-dirs                    7.10.7
+--ftp-method                         7.15.1
+--ftp-pasv                           7.11.0
+--ftp-port (-P)                      4.0
+--ftp-pret                           7.20.0
+--ftp-skip-pasv-ip                   7.14.2
+--ftp-ssl-ccc                        7.16.1
+--ftp-ssl-ccc-mode                   7.16.2
+--ftp-ssl-control                    7.16.0
+--get (-G)                           7.8.1
+--globoff (-g)                       7.6
+--happy-eyeballs-timeout-ms          7.59.0
+--haproxy-protocol                   7.60.0
+--head (-I)                          4.0
+--header (-H)                        5.0
+--help (-h)                          4.0
+--hostpubmd5                         7.17.1
+--http0.9                            7.64.0
+--http1.0 (-0)                       7.9.1
+--http1.1                            7.33.0
+--http2                              7.33.0
+--http2-prior-knowledge              7.49.0
+--http3                              7.66.0
+--ignore-content-length              7.14.1
+--include (-i)                       4.8
+--insecure (-k)                      7.10
+--interface                          7.3
+--ipv4 (-4)                          7.10.8
+--ipv6 (-6)                          7.10.8
+--junk-session-cookies (-j)          7.9.7
+--keepalive-time                     7.18.0
+--key                                7.9.3
+--key-type                           7.9.3
+--krb                                7.3
+--libcurl                            7.16.1
+--limit-rate                         7.10
+--list-only (-l)                     4.0
+--local-port                         7.15.2
+--location (-L)                      4.9
+--location-trusted                   7.10.4
+--login-options                      7.34.0
+--mail-auth                          7.25.0
+--mail-from                          7.20.0
+--mail-rcpt                          7.20.0
+--mail-rcpt-allowfails               7.69.0
+--manual (-M)                        5.2
+--max-filesize                       7.10.8
+--max-redirs                         7.5
+--max-time (-m)                      4.0
+--metalink                           7.27.0
+--negotiate                          7.10.6
+--netrc (-n)                         4.6
+--netrc-file                         7.21.5
+--netrc-optional                     7.9.8
+--next (-:)                          7.36.0
+--no-alpn                            7.36.0
+--no-buffer (-N)                     6.5
+--no-keepalive                       7.18.0
+--no-npn                             7.36.0
+--no-progress-meter                  7.67.0
+--no-sessionid                       7.16.0
+--noproxy                            7.19.4
+--ntlm                               7.10.6
+--ntlm-wb                            7.22.0
+--oauth2-bearer                      7.33.0
+--output (-o)                        4.0
+--parallel (-Z)                      7.66.0
+--parallel-immediate                 7.68.0
+--parallel-max                       7.66.0
+--pass                               7.9.3
+--path-as-is                         7.42.0
+--pinnedpubkey                       7.39.0
+--post301                            7.17.1
+--post302                            7.19.1
+--post303                            7.26.0
+--preproxy                           7.52.0
+--progress-bar (-#)                  5.10
+--proto                              7.20.2
+--proto-default                      7.45.0
+--proto-redir                        7.20.2
+--proxy (-x)                         4.0
+--proxy-anyauth                      7.13.2
+--proxy-basic                        7.12.0
+--proxy-cacert                       7.52.0
+--proxy-capath                       7.52.0
+--proxy-cert                         7.52.0
+--proxy-cert-type                    7.52.0
+--proxy-ciphers                      7.52.0
+--proxy-crlfile                      7.52.0
+--proxy-digest                       7.12.0
+--proxy-header                       7.37.0
+--proxy-insecure                     7.52.0
+--proxy-key                          7.52.0
+--proxy-key-type                     7.52.0
+--proxy-negotiate                    7.17.1
+--proxy-ntlm                         7.10.7
+--proxy-pass                         7.52.0
+--proxy-pinnedpubkey                 7.59.0
+--proxy-service-name                 7.43.0
+--proxy-ssl-allow-beast              7.52.0
+--proxy-tls13-ciphers                7.61.0
+--proxy-tlsauthtype                  7.52.0
+--proxy-tlspassword                  7.52.0
+--proxy-tlsuser                      7.52.0
+--proxy-tlsv1                        7.52.0
+--proxy-user (-U)                    4.0
+--proxy1.0                           7.19.4
+--proxytunnel (-p)                   7.3
+--pubkey                             7.16.2
+--quote (-Q)                         5.3
+--random-file                        7.7
+--range (-r)                         4.0
+--raw                                7.16.2
+--referer (-e)                       4.0
+--remote-header-name (-J)            7.20.0
+--remote-name (-O)                   4.0
+--remote-name-all                    7.19.0
+--remote-time (-R)                   7.9
+--request (-X)                       6.0
+--request-target                     7.55.0
+--resolve                            7.21.3
+--retry                              7.12.3
+--retry-all-errors                   7.71.0
+--retry-connrefused                  7.52.0
+--retry-delay                        7.12.3
+--retry-max-time                     7.12.3
+--sasl-authzid                       7.66.0
+--sasl-ir                            7.31.0
+--service-name                       7.43.0
+--show-error (-S)                    5.9
+--silent (-s)                        4.0
+--socks4                             7.15.2
+--socks4a                            7.18.0
+--socks5                             7.18.0
+--socks5-basic                       7.55.0
+--socks5-gssapi                      7.55.0
+--socks5-gssapi-nec                  7.19.4
+--socks5-gssapi-service              7.19.4
+--socks5-hostname                    7.18.0
+--speed-limit (-Y)                   4.7
+--speed-time (-y)                    4.7
+--ssl                                7.20.0
+--ssl-allow-beast                    7.25.0
+--ssl-no-revoke                      7.44.0
+--ssl-reqd                           7.20.0
+--ssl-revoke-best-effort             7.70.0
+--sslv2 (-2)                         5.9
+--sslv3 (-3)                         5.9
+--stderr                             6.2
+--styled-output                      7.61.0
+--suppress-connect-headers           7.54.0
+--tcp-fastopen                       7.49.0
+--tcp-nodelay                        7.11.2
+--telnet-option (-t)                 7.7
+--tftp-blksize                       7.20.0
+--tftp-no-options                    7.48.0
+--time-cond (-z)                     5.8
+--tls-max                            7.54.0
+--tls13-ciphers                      7.61.0
+--tlsauthtype                        7.21.4
+--tlspassword                        7.21.4
+--tlsuser                            7.21.4
+--tlsv1 (-1)                         7.9.2
+--tlsv1.0                            7.34.0
+--tlsv1.1                            7.34.0
+--tlsv1.2                            7.34.0
+--tlsv1.3                            7.52.0
+--tr-encoding                        7.21.6
+--trace                              7.9.7
+--trace-ascii                        7.9.7
+--trace-time                         7.14.0
+--unix-socket                        7.40.0
+--upload-file (-T)                   4.0
+--url                                7.5
+--use-ascii (-B)                     5.0
+--user (-u)                          4.0
+--user-agent (-A)                    4.5.1
+--verbose (-v)                       4.0
+--version (-V)                       4.0
+--write-out (-w)                     6.5
+--xattr                              7.21.3
