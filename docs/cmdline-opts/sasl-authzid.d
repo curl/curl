@@ -1,5 +1,6 @@
 Long: sasl-authzid
-Help: Use this identity to act as during SASL PLAIN authentication
+Arg: <identity>
+Help: Identity for SASL PLAIN authentication
 Added: 7.66.0
 ---
 Use this authorisation identity (authzid), during SASL PLAIN authentication,
