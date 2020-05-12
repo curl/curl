@@ -33,7 +33,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl           \
  negtelnetserver.py smbserver.py curl_test_data.py                            \
  objnames-test08.sh objnames-test10.sh objnames.inc                           \
  disable-scan.pl manpage-syntax.pl error-codes.pl badsymbols.pl               \
- azure.pm appveyor.pm version-scan.pl
+ azure.pm appveyor.pm version-scan.pl options-scan.pl
 
 DISTCLEANFILES = configurehelp.pm
 

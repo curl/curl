@@ -73,6 +73,7 @@ EXTRA_DIST =                                    \
  LICENSE-MIXING.md                              \
  MAIL-ETIQUETTE                                 \
  MQTT.md                                        \
+ options-in-versions                            \
  PARALLEL-TRANSFERS.md                          \
  README.md                                      \
  RELEASE-PROCEDURE.md                           \
