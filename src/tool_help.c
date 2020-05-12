@@ -400,7 +400,7 @@ static const struct helptxt helptext[] = {
   {"    --retry-delay <seconds>",
    "Wait time between retries"},
   {"    --retry-all-errors",
-   "Retry all errors (use with --retry) (read manpage, don't use by default)"},
+   "Retry all errors (use with --retry)"},
   {"    --retry-max-time <seconds>",
    "Retry only within this period"},
   {"    --sasl-authzid <identity> ",

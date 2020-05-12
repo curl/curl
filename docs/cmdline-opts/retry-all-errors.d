@@ -1,5 +1,5 @@
 Long: retry-all-errors
-Help: Retry all errors (use with --retry) (read manpage, don't use by default)
+Help: Retry all errors (use with --retry)
 Added: 7.71.0
 ---
 Retry on any error. This option is used together with --retry.
