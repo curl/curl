@@ -85,8 +85,6 @@ if [ "$T" = "normal" ]; then
     make test-nonflaky
   fi
   if [ -n $CHECKSRC ]; then
-    echo "enable COPYRIGHTYEAR" > ./docs/examples/.checksrc
-    echo "enable COPYRIGHTYEAR" > ./include/curl/.checksrc
     make checksrc
   fi
 fi
