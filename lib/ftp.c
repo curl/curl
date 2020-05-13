@@ -221,6 +221,7 @@ static void close_secondarysocket(struct connectdata *conn)
     conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
   }
   conn->bits.tcpconnect[SECONDARYSOCKET] = FALSE;
+  conn->bits.proxy_ssl_connected[SECONDARYSOCKET] = FALSE;
 }
 
 /*
@@ -3231,9 +3232,9 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     }
 
     if(conn->ssl[SECONDARYSOCKET].use) {
-      /* The secondary socket is using SSL so we must close down that part
-         first before we close the socket for real */
-      Curl_ssl_close(conn, SECONDARYSOCKET);
+      /* The secondary socket used SSL so we must close down that part first
+         before we close the socket for real */
+      result = Curl_ssl_shutdown(conn, SECONDARYSOCKET);
 
       /* Note that we keep "use" set to TRUE since that (next) connection is
          still requested to use SSL */
