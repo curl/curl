@@ -87,7 +87,8 @@
 
 struct ResolverResults {
   int num_pending; /* number of ares_gethostbyname() requests */
-  Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares parts */
+  struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
+                                    parts */
   int last_status;
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 };
@@ -494,9 +495,9 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
 
 /* Connects results to the list */
 static void compound_results(struct ResolverResults *res,
-                             Curl_addrinfo *ai)
+                             struct Curl_addrinfo *ai)
 {
-  Curl_addrinfo *ai_tail;
+  struct Curl_addrinfo *ai_tail;
   if(!ai)
     return;
   ai_tail = ai;
@@ -538,7 +539,7 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
     res->num_pending--;
 
     if(CURL_ASYNC_SUCCESS == status) {
-      Curl_addrinfo *ai = Curl_he2ai(hostent, conn->async.port);
+      struct Curl_addrinfo *ai = Curl_he2ai(hostent, conn->async.port);
       if(ai) {
         compound_results(res, ai);
       }
@@ -617,10 +618,10 @@ static void query_completed_cb(void *arg,  /* (struct connectdata *) */
  * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
-                                         const char *hostname,
-                                         int port,
-                                         int *waitp)
+struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                                const char *hostname,
+                                                int port,
+                                                int *waitp)
 {
   char *bufp;
   struct Curl_easy *data = conn->data;

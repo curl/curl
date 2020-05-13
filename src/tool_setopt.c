@@ -43,7 +43,7 @@
 #define NV1(e, v) {#e, (v)}
 #define NVEND {NULL, 0}         /* sentinel to mark end of list */
 
-const NameValue setopt_nv_CURLPROXY[] = {
+const struct NameValue setopt_nv_CURLPROXY[] = {
   NV(CURLPROXY_HTTP),
   NV(CURLPROXY_HTTP_1_0),
   NV(CURLPROXY_HTTPS),
@@ -54,7 +54,7 @@ const NameValue setopt_nv_CURLPROXY[] = {
   NVEND,
 };
 
-const NameValue setopt_nv_CURL_SOCKS_PROXY[] = {
+const struct NameValue setopt_nv_CURL_SOCKS_PROXY[] = {
   NV(CURLPROXY_SOCKS4),
   NV(CURLPROXY_SOCKS5),
   NV(CURLPROXY_SOCKS4A),
@@ -62,7 +62,7 @@ const NameValue setopt_nv_CURL_SOCKS_PROXY[] = {
   NVEND,
 };
 
-const NameValueUnsigned setopt_nv_CURLAUTH[] = {
+const struct NameValueUnsigned setopt_nv_CURLAUTH[] = {
   NV(CURLAUTH_ANY),             /* combination */
   NV(CURLAUTH_ANYSAFE),         /* combination */
   NV(CURLAUTH_BASIC),
@@ -76,7 +76,7 @@ const NameValueUnsigned setopt_nv_CURLAUTH[] = {
   NVEND,
 };
 
-const NameValue setopt_nv_CURL_HTTP_VERSION[] = {
+const struct NameValue setopt_nv_CURL_HTTP_VERSION[] = {
   NV(CURL_HTTP_VERSION_NONE),
   NV(CURL_HTTP_VERSION_1_0),
   NV(CURL_HTTP_VERSION_1_1),
@@ -86,7 +86,7 @@ const NameValue setopt_nv_CURL_HTTP_VERSION[] = {
   NVEND,
 };
 
-const NameValue setopt_nv_CURL_SSLVERSION[] = {
+const struct NameValue setopt_nv_CURL_SSLVERSION[] = {
   NV(CURL_SSLVERSION_DEFAULT),
   NV(CURL_SSLVERSION_TLSv1),
   NV(CURL_SSLVERSION_SSLv2),
@@ -98,7 +98,7 @@ const NameValue setopt_nv_CURL_SSLVERSION[] = {
   NVEND,
 };
 
-const NameValue setopt_nv_CURL_TIMECOND[] = {
+const struct NameValue setopt_nv_CURL_TIMECOND[] = {
   NV(CURL_TIMECOND_IFMODSINCE),
   NV(CURL_TIMECOND_IFUNMODSINCE),
   NV(CURL_TIMECOND_LASTMOD),
@@ -106,14 +106,14 @@ const NameValue setopt_nv_CURL_TIMECOND[] = {
   NVEND,
 };
 
-const NameValue setopt_nv_CURLFTPSSL_CCC[] = {
+const struct NameValue setopt_nv_CURLFTPSSL_CCC[] = {
   NV(CURLFTPSSL_CCC_NONE),
   NV(CURLFTPSSL_CCC_PASSIVE),
   NV(CURLFTPSSL_CCC_ACTIVE),
   NVEND,
 };
 
-const NameValue setopt_nv_CURLUSESSL[] = {
+const struct NameValue setopt_nv_CURLUSESSL[] = {
   NV(CURLUSESSL_NONE),
   NV(CURLUSESSL_TRY),
   NV(CURLUSESSL_CONTROL),
@@ -121,7 +121,7 @@ const NameValue setopt_nv_CURLUSESSL[] = {
   NVEND,
 };
 
-const NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
+const struct NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
   NV(CURLSSLOPT_ALLOW_BEAST),
   NV(CURLSSLOPT_NO_REVOKE),
   NV(CURLSSLOPT_NO_PARTIALCHAIN),
@@ -130,7 +130,7 @@ const NameValueUnsigned setopt_nv_CURLSSLOPT[] = {
   NVEND,
 };
 
-const NameValue setopt_nv_CURL_NETRC[] = {
+const struct NameValue setopt_nv_CURL_NETRC[] = {
   NV(CURL_NETRC_IGNORED),
   NV(CURL_NETRC_OPTIONAL),
   NV(CURL_NETRC_REQUIRED),
@@ -139,7 +139,7 @@ const NameValue setopt_nv_CURL_NETRC[] = {
 
 /* These mappings essentially triplicated - see
  * tool_libinfo.c and tool_paramhlp.c */
-const NameValue setopt_nv_CURLPROTO[] = {
+const struct NameValue setopt_nv_CURLPROTO[] = {
   NV(CURLPROTO_ALL),            /* combination */
   NV(CURLPROTO_DICT),
   NV(CURLPROTO_FILE),
@@ -167,7 +167,7 @@ const NameValue setopt_nv_CURLPROTO[] = {
 };
 
 /* These options have non-zero default values. */
-static const NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
+static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   NV1(CURLOPT_SSL_VERIFYPEER, 1),
   NV1(CURLOPT_SSL_VERIFYHOST, 1),
   NV1(CURLOPT_SSL_ENABLE_NPN, 1),
@@ -273,7 +273,7 @@ static char *c_escape(const char *str, size_t len)
 /* setopt wrapper for enum types */
 CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
                           const char *name, CURLoption tag,
-                          const NameValue *nvlist, long lval)
+                          const struct NameValue *nvlist, long lval)
 {
   CURLcode ret = CURLE_OK;
   bool skip = FALSE;
@@ -284,7 +284,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
 
   if(config->libcurl && !skip && !ret) {
     /* we only use this for real if --libcurl was used */
-    const NameValue *nv = NULL;
+    const struct NameValue *nv = NULL;
     for(nv = nvlist; nv->name; nv++) {
       if(nv->value == lval)
         break; /* found it */
@@ -307,7 +307,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
 /* setopt wrapper for flags */
 CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
-                           const NameValue *nvlist, long lval)
+                           const struct NameValue *nvlist, long lval)
 {
   CURLcode ret = CURLE_OK;
   bool skip = FALSE;
@@ -320,7 +320,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
     /* we only use this for real if --libcurl was used */
     char preamble[80];          /* should accommodate any symbol name */
     long rest = lval;           /* bits not handled yet */
-    const NameValue *nv = NULL;
+    const struct NameValue *nv = NULL;
     msnprintf(preamble, sizeof(preamble),
               "curl_easy_setopt(hnd, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
@@ -349,7 +349,7 @@ CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
 /* setopt wrapper for bitmasks */
 CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
                              const char *name, CURLoption tag,
-                             const NameValueUnsigned *nvlist,
+                             const struct NameValueUnsigned *nvlist,
                              long lval)
 {
   CURLcode ret = CURLE_OK;
@@ -363,7 +363,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
     /* we only use this for real if --libcurl was used */
     char preamble[80];
     unsigned long rest = (unsigned long)lval;
-    const NameValueUnsigned *nv = NULL;
+    const struct NameValueUnsigned *nv = NULL;
     msnprintf(preamble, sizeof(preamble),
               "curl_easy_setopt(hnd, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
@@ -418,13 +418,13 @@ static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
 
 static CURLcode libcurl_generate_mime(CURL *curl,
                                       struct GlobalConfig *config,
-                                      tool_mime *toolmime,
+                                      struct tool_mime *toolmime,
                                       int *mimeno);     /* Forward. */
 
 /* Wrapper to generate source code for a mime part. */
 static CURLcode libcurl_generate_mime_part(CURL *curl,
                                            struct GlobalConfig *config,
-                                           tool_mime *part,
+                                           struct tool_mime *part,
                                            int mimeno)
 {
   CURLcode ret = CURLE_OK;
@@ -557,7 +557,7 @@ nomem:
 /* Wrapper to generate source code for a mime structure. */
 static CURLcode libcurl_generate_mime(CURL *curl,
                                       struct GlobalConfig *config,
-                                      tool_mime *toolmime,
+                                      struct tool_mime *toolmime,
                                       int *mimeno)
 {
   CURLcode ret = CURLE_OK;
@@ -641,7 +641,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
     /* Value is expected to be a long */
     long lval = va_arg(arg, long);
     long defval = 0L;
-    const NameValue *nv = NULL;
+    const struct NameValue *nv = NULL;
     for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
       if(!strcmp(name, nv->name)) {
         defval = nv->value;

@@ -271,7 +271,7 @@ CURLcode Curl_SOCKS4(const char *proxy_user,
     /* FALLTHROUGH */
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
-    Curl_addrinfo *hp = NULL;
+    struct Curl_addrinfo *hp = NULL;
     char buf[64];
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
@@ -773,7 +773,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
     /* FALLTHROUGH */
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
-    Curl_addrinfo *hp = NULL;
+    struct Curl_addrinfo *hp = NULL;
     if(dns)
       hp = dns->addr;
     if(!hp) {

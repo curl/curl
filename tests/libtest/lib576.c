@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,10 +24,10 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-typedef struct {
+struct chunk_data {
   int remains;
   int print_content;
-} chunk_data_t;
+};
 
 static
 long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains);
@@ -37,7 +37,7 @@ long chunk_end(void *ptr);
 static
 long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
 {
-  chunk_data_t *ch_d = ptr;
+  struct chunk_data *ch_d = ptr;
   ch_d->remains = remains;
 
   printf("=============================================================\n");
@@ -87,7 +87,7 @@ long chunk_bgn(const struct curl_fileinfo *finfo, void *ptr, int remains)
 static
 long chunk_end(void *ptr)
 {
-  chunk_data_t *ch_d = ptr;
+  struct chunk_data *ch_d = ptr;
   if(ch_d->print_content) {
     ch_d->print_content = 0;
     printf("-------------------------------------------------------------\n");
@@ -101,7 +101,7 @@ int test(char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;
-  chunk_data_t chunk_data = {0, 0};
+  struct chunk_data chunk_data = {0, 0};
   curl_global_init(CURL_GLOBAL_ALL);
   handle = curl_easy_init();
   if(!handle) {

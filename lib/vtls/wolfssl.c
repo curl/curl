@@ -511,8 +511,8 @@ wolfssl_connect_step2(struct connectdata *conn,
     X509 *x509;
     const char *x509_der;
     int x509_der_len;
-    curl_X509certificate x509_parsed;
-    curl_asn1Element *pubkey;
+    struct Curl_X509certificate x509_parsed;
+    struct Curl_asn1Element *pubkey;
     CURLcode result;
 
     x509 = SSL_get_peer_certificate(backend->handle);

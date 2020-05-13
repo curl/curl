@@ -108,13 +108,13 @@ struct ssl_backend_data {
 #define BACKEND connssl->backend
 
 /* Supported ciphers. */
-typedef struct {
+struct gskit_cipher {
   const char *name;            /* Cipher name. */
   const char *gsktoken;        /* Corresponding token for GSKit String. */
   unsigned int versions;       /* SSL version flags. */
-}  gskit_cipher;
+};
 
-static const gskit_cipher  ciphertable[] = {
+static const struct gskit_cipher  ciphertable[] = {
   { "null-md5",         "01",
       CURL_GSKPROTO_SSLV3_MASK | CURL_GSKPROTO_TLSV10_MASK |
       CURL_GSKPROTO_TLSV11_MASK | CURL_GSKPROTO_TLSV12_MASK },
@@ -307,7 +307,7 @@ static CURLcode set_ciphers(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   const char *cipherlist = SSL_CONN_CONFIG(cipher_list);
   const char *clp;
-  const gskit_cipher *ctp;
+  const struct gskit_cipher *ctp;
   int i;
   int l;
   bool unsupported;

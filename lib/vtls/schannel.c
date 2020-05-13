@@ -2243,8 +2243,8 @@ static CURLcode pkp_pin_peer_pubkey(struct connectdata *conn, int sockindex,
     SECURITY_STATUS sspi_status;
     const char *x509_der;
     DWORD x509_der_len;
-    curl_X509certificate x509_parsed;
-    curl_asn1Element *pubkey;
+    struct Curl_X509certificate x509_parsed;
+    struct Curl_asn1Element *pubkey;
 
     sspi_status =
       s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,

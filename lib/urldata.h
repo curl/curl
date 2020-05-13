@@ -613,8 +613,8 @@ struct SingleRequest {
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
-  struct contenc_writer_s *writer_stack;  /* Content unencoding stack. */
-                                          /* See sec 3.5, RFC2616. */
+  /* Content unencoding stack. See sec 3.5, RFC2616. */
+  struct contenc_writer *writer_stack;
   time_t timeofdoc;
   long bodywrites;
   char *buf;
@@ -875,8 +875,8 @@ struct connectdata {
   /* 'ip_addr' is the particular IP we connected to. It points to a struct
      within the DNS cache, so this pointer is only valid as long as the DNS
      cache entry remains locked. It gets unlocked in Curl_done() */
-  Curl_addrinfo *ip_addr;
-  Curl_addrinfo *tempaddr[2]; /* for happy eyeballs */
+  struct Curl_addrinfo *ip_addr;
+  struct Curl_addrinfo *tempaddr[2]; /* for happy eyeballs */
 
   /* 'ip_addr_str' is the ip_addr data as a human readable string.
      It remains available as long as the connection does, which is longer than

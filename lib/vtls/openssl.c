@@ -215,11 +215,11 @@
 #define ENABLE_SSLKEYLOGFILE
 
 #ifdef ENABLE_SSLKEYLOGFILE
-typedef struct ssl_tap_state {
+struct ssl_tap_state {
   int master_key_length;
   unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
   unsigned char client_random[SSL3_RANDOM_SIZE];
-} ssl_tap_state_t;
+};
 #endif /* ENABLE_SSLKEYLOGFILE */
 
 struct ssl_backend_data {
@@ -229,7 +229,7 @@ struct ssl_backend_data {
   X509*    server_cert;
 #ifdef ENABLE_SSLKEYLOGFILE
   /* tap_state holds the last seen master key if we're logging them */
-  ssl_tap_state_t tap_state;
+  struct ssl_tap_state tap_state;
 #endif
 };
 
@@ -280,7 +280,7 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
  * tap_ssl_key is called by libcurl to make the CLIENT_RANDOMs if the OpenSSL
  * being used doesn't have native support for doing that.
  */
-static void tap_ssl_key(const SSL *ssl, ssl_tap_state_t *state)
+static void tap_ssl_key(const SSL *ssl, struct ssl_tap_state *state)
 {
   const char *hex = "0123456789ABCDEF";
   int pos, i;

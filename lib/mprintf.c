@@ -146,7 +146,7 @@ enum {
   FLAGS_FLOATG     = 1<<19  /* %g or %G */
 };
 
-typedef struct {
+struct va_stack {
   FormatType type;
   int flags;
   long width;     /* width OR width parameter number */
@@ -160,7 +160,7 @@ typedef struct {
     } num;
     double dnum;
   } data;
-} va_stack_t;
+};
 
 struct nsprintf {
   char *buffer;
@@ -223,8 +223,8 @@ static bool dprintf_IsQualifierNoDollar(const char *fmt)
  *
  ******************************************************************/
 
-static int dprintf_Pass1(const char *format, va_stack_t *vto, char **endpos,
-                         va_list arglist)
+static int dprintf_Pass1(const char *format, struct va_stack *vto,
+                         char **endpos, va_list arglist)
 {
   char *fmt = (char *)format;
   int param_num = 0;
@@ -570,13 +570,11 @@ static int dprintf_formatf(
   long param; /* current parameter to read */
   long param_num = 0; /* parameter counter */
 
-  va_stack_t vto[MAX_PARAMETERS];
+  struct va_stack vto[MAX_PARAMETERS];
   char *endpos[MAX_PARAMETERS];
   char **end;
-
   char work[BUFFSIZE];
-
-  va_stack_t *p;
+  struct va_stack *p;
 
   /* 'workend' points to the final buffer byte position, but with an extra
      byte as margin to avoid the (false?) warning Coverity gives us

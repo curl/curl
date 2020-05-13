@@ -166,7 +166,7 @@ tcpkeepalive(struct Curl_easy *data,
 
 static CURLcode
 singleipconnect(struct connectdata *conn,
-                const Curl_addrinfo *ai, /* start connecting to this */
+                const struct Curl_addrinfo *ai, /* start connecting to this */
                 int tempindex);          /* 0 or 1 among the temp ones */
 
 /*
@@ -558,11 +558,11 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 
 /* update tempaddr[tempindex] (to the next entry), makes sure to stick
    to the correct family */
-static Curl_addrinfo *ainext(struct connectdata *conn,
-                             int tempindex,
-                             bool next) /* use current or next entry */
+static struct Curl_addrinfo *ainext(struct connectdata *conn,
+                                    int tempindex,
+                                    bool next) /* use current or next entry */
 {
-  Curl_addrinfo *ai = conn->tempaddr[tempindex];
+  struct Curl_addrinfo *ai = conn->tempaddr[tempindex];
   if(ai && next)
     ai = ai->ai_next;
   while(ai && (ai->ai_family != conn->tempfamily[tempindex]))
@@ -587,7 +587,7 @@ static CURLcode trynextip(struct connectdata *conn,
   conn->tempsock[tempindex] = CURL_SOCKET_BAD;
 
   if(sockindex == FIRSTSOCKET) {
-    Curl_addrinfo *ai = conn->tempaddr[tempindex];
+    struct Curl_addrinfo *ai = conn->tempaddr[tempindex];
 
     while(ai) {
       if(ai) {
@@ -1113,7 +1113,7 @@ void Curl_sndbufset(curl_socket_t sockfd)
  * having connected.
  */
 static CURLcode singleipconnect(struct connectdata *conn,
-                                const Curl_addrinfo *ai,
+                                const struct Curl_addrinfo *ai,
                                 int tempindex)
 {
   struct Curl_sockaddr_ex addr;
@@ -1485,7 +1485,7 @@ int Curl_closesocket(struct connectdata *conn,
  *
  */
 CURLcode Curl_socket(struct connectdata *conn,
-                     const Curl_addrinfo *ai,
+                     const struct Curl_addrinfo *ai,
                      struct Curl_sockaddr_ex *addr,
                      curl_socket_t *sockfd)
 {

@@ -78,10 +78,10 @@
 #endif
 
 void
-Curl_freeaddrinfo(Curl_addrinfo *cahead)
+Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
 {
-  Curl_addrinfo *vqualifier canext;
-  Curl_addrinfo *ca;
+  struct Curl_addrinfo *vqualifier canext;
+  struct Curl_addrinfo *ca;
 
   for(ca = cahead; ca != NULL; ca = canext) {
     free(ca->ai_addr);
@@ -112,13 +112,13 @@ int
 Curl_getaddrinfo_ex(const char *nodename,
                     const char *servname,
                     const struct addrinfo *hints,
-                    Curl_addrinfo **result)
+                    struct Curl_addrinfo **result)
 {
   const struct addrinfo *ai;
   struct addrinfo *aihead;
-  Curl_addrinfo *cafirst = NULL;
-  Curl_addrinfo *calast = NULL;
-  Curl_addrinfo *ca;
+  struct Curl_addrinfo *cafirst = NULL;
+  struct Curl_addrinfo *calast = NULL;
+  struct Curl_addrinfo *ca;
   size_t ss_size;
   int error;
 
@@ -151,7 +151,7 @@ Curl_getaddrinfo_ex(const char *nodename,
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(Curl_addrinfo));
+    ca = malloc(sizeof(struct Curl_addrinfo));
     if(!ca) {
       error = EAI_MEMORY;
       break;
@@ -252,7 +252,6 @@ Curl_getaddrinfo_ex(const char *nodename,
  *       struct sockaddr      *ai_addr;
  *       struct Curl_addrinfo *ai_next;
  *     };
- *     typedef struct Curl_addrinfo Curl_addrinfo;
  *
  *   hostent defined in <netdb.h>
  *
@@ -269,12 +268,12 @@ Curl_getaddrinfo_ex(const char *nodename,
  *     #define h_addr  h_addr_list[0]
  */
 
-Curl_addrinfo *
+struct Curl_addrinfo *
 Curl_he2ai(const struct hostent *he, int port)
 {
-  Curl_addrinfo *ai;
-  Curl_addrinfo *prevai = NULL;
-  Curl_addrinfo *firstai = NULL;
+  struct Curl_addrinfo *ai;
+  struct Curl_addrinfo *prevai = NULL;
+  struct Curl_addrinfo *firstai = NULL;
   struct sockaddr_in *addr;
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 *addr6;
@@ -299,7 +298,7 @@ Curl_he2ai(const struct hostent *he, int port)
 #endif
       ss_size = sizeof(struct sockaddr_in);
 
-    ai = calloc(1, sizeof(Curl_addrinfo));
+    ai = calloc(1, sizeof(struct Curl_addrinfo));
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;
       break;
@@ -389,10 +388,10 @@ struct namebuff {
  * given address/host
  */
 
-Curl_addrinfo *
+struct Curl_addrinfo *
 Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 {
-  Curl_addrinfo *ai;
+  struct Curl_addrinfo *ai;
 
 #if defined(__VMS) && \
     defined(__INITIAL_POINTER_SIZE) && (__INITIAL_POINTER_SIZE == 64)
@@ -465,7 +464,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
  * Given an IPv4 or IPv6 dotted string address, this converts it to a proper
  * allocated Curl_addrinfo struct and returns it.
  */
-Curl_addrinfo *Curl_str2addr(char *address, int port)
+struct Curl_addrinfo *Curl_str2addr(char *address, int port)
 {
   struct in_addr in;
   if(Curl_inet_pton(AF_INET, address, &in) > 0)
@@ -488,15 +487,16 @@ Curl_addrinfo *Curl_str2addr(char *address, int port)
  * struct initialized with this path.
  * Set '*longpath' to TRUE if the error is a too long path.
  */
-Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath, bool abstract)
+struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
+                                     bool abstract)
 {
-  Curl_addrinfo *ai;
+  struct Curl_addrinfo *ai;
   struct sockaddr_un *sa_un;
   size_t path_len;
 
   *longpath = FALSE;
 
-  ai = calloc(1, sizeof(Curl_addrinfo));
+  ai = calloc(1, sizeof(struct Curl_addrinfo));
   if(!ai)
     return NULL;
   ai->ai_addr = calloc(1, sizeof(struct sockaddr_un));
@@ -594,9 +594,9 @@ curl_dbg_getaddrinfo(const char *hostname,
  * Work-arounds the sin6_port is always zero bug on iOS 9.3.2 and Mac OS X
  * 10.11.5.
  */
-void Curl_addrinfo_set_port(Curl_addrinfo *addrinfo, int port)
+void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port)
 {
-  Curl_addrinfo *ca;
+  struct Curl_addrinfo *ca;
   struct sockaddr_in *addr;
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 *addr6;

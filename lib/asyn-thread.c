@@ -169,7 +169,7 @@ struct thread_sync_data {
   curl_socket_t sock_pair[2]; /* socket pair */
 #endif
   int sock_error;
-  Curl_addrinfo *res;
+  struct Curl_addrinfo *res;
 #ifdef HAVE_GETADDRINFO
   struct addrinfo hints;
 #endif
@@ -690,10 +690,10 @@ int Curl_resolver_getsock(struct connectdata *conn,
 /*
  * Curl_getaddrinfo() - for platforms without getaddrinfo
  */
-Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
-                                         const char *hostname,
-                                         int port,
-                                         int *waitp)
+struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                                const char *hostname,
+                                                int port,
+                                                int *waitp)
 {
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
@@ -718,10 +718,10 @@ Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
 /*
  * Curl_resolver_getaddrinfo() - for getaddrinfo
  */
-Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
-                                         const char *hostname,
-                                         int port,
-                                         int *waitp)
+struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct connectdata *conn,
+                                                const char *hostname,
+                                                int port,
+                                                int *waitp)
 {
   struct addrinfo hints;
   int pf = PF_INET;

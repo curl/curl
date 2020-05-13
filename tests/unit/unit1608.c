@@ -24,7 +24,7 @@
 #include "hostip.h"
 
 CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                           Curl_addrinfo **addr);
+                           struct Curl_addrinfo **addr);
 
 #define NUM_ADDRS 8
 static struct Curl_addrinfo addrs[NUM_ADDRS];

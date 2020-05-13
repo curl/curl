@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,11 +73,11 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
-static Curl_addrinfo *fake_ai(void)
+static struct Curl_addrinfo *fake_ai(void)
 {
-  static Curl_addrinfo *ai;
+  static struct Curl_addrinfo *ai;
 
-  ai = calloc(1, sizeof(Curl_addrinfo));
+  ai = calloc(1, sizeof(struct Curl_addrinfo));
   if(!ai)
     return NULL;
 

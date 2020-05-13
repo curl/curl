@@ -64,7 +64,7 @@ struct connectdata;
 struct curl_hash *Curl_global_host_cache_init(void);
 
 struct Curl_dns_entry {
-  Curl_addrinfo *addr;
+  struct Curl_addrinfo *addr;
   /* timestamp == 0 -- CURLOPT_RESOLVE entry, doesn't timeout */
   time_t timestamp;
   /* use-counter, use Curl_resolv_unlock to release reference */
@@ -117,10 +117,10 @@ bool Curl_ipvalid(struct connectdata *conn);
  * name resolve layers (selected at build-time). They all take this same set
  * of arguments
  */
-Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                const char *hostname,
-                                int port,
-                                int *waitp);
+struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+                                       const char *hostname,
+                                       int port,
+                                       int *waitp);
 
 
 /* unlock a previously resolved dns entry */
@@ -134,7 +134,7 @@ int Curl_mk_dnscache(struct curl_hash *hash);
 void Curl_hostcache_prune(struct Curl_easy *data);
 
 /* Return # of addresses in a Curl_addrinfo struct */
-int Curl_num_addresses(const Curl_addrinfo *addr);
+int Curl_num_addresses(const struct Curl_addrinfo *addr);
 
 #if defined(CURLDEBUG) && defined(HAVE_GETNAMEINFO)
 int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
@@ -146,7 +146,7 @@ int curl_dogetnameinfo(GETNAMEINFO_QUAL_ARG1 GETNAMEINFO_TYPE_ARG1 sa,
 #endif
 
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
-Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
+struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
 CURLcode Curl_once_resolved(struct connectdata *conn, bool *protocol_connect);
 
@@ -158,14 +158,14 @@ CURLcode Curl_once_resolved(struct connectdata *conn, bool *protocol_connect);
  */
 CURLcode Curl_addrinfo_callback(struct connectdata *conn,
                                 int status,
-                                Curl_addrinfo *ai);
+                                struct Curl_addrinfo *ai);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
  * given in the 'ip' argument. The result will be stored in the buf that is
  * bufsize bytes big.
  */
-const char *Curl_printable_address(const Curl_addrinfo *ip,
+const char *Curl_printable_address(const struct Curl_addrinfo *ip,
                                    char *buf, size_t bufsize);
 
 /*
@@ -187,7 +187,7 @@ Curl_fetch_addr(struct connectdata *conn,
  * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
  */
 struct Curl_dns_entry *
-Curl_cache_addr(struct Curl_easy *data, Curl_addrinfo *addr,
+Curl_cache_addr(struct Curl_easy *data, struct Curl_addrinfo *addr,
                 const char *hostname, int port);
 
 #ifndef INADDR_NONE

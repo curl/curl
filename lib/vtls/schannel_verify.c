@@ -57,7 +57,7 @@
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
 #define END_CERT "\n-----END CERTIFICATE-----"
 
-typedef struct {
+struct cert_chain_engine_config_win7 {
   DWORD cbSize;
   HCERTSTORE hRestrictedRoot;
   HCERTSTORE hRestrictedTrust;
@@ -70,7 +70,7 @@ typedef struct {
   DWORD CycleDetectionModulus;
   HCERTSTORE hExclusiveRoot;
   HCERTSTORE hExclusiveTrustedPeople;
-} CERT_CHAIN_ENGINE_CONFIG_WIN7, *PCERT_CHAIN_ENGINE_CONFIG_WIN7;
+};
 
 static int is_cr_or_lf(char c)
 {
@@ -585,7 +585,7 @@ CURLcode Curl_verify_certificate(struct connectdata *conn, int sockindex)
     }
 
     if(result == CURLE_OK) {
-      CERT_CHAIN_ENGINE_CONFIG_WIN7 engine_config;
+      struct cert_chain_engine_config_win7 engine_config;
       BOOL create_engine_result;
 
       memset(&engine_config, 0, sizeof(engine_config));

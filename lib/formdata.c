@@ -123,11 +123,11 @@ AddHttpPost(char *name, size_t namelength,
  * parent_form_info is NULL.
  *
  ***************************************************************************/
-static FormInfo * AddFormInfo(char *value,
-                              char *contenttype,
-                              FormInfo *parent_form_info)
+static struct FormInfo *AddFormInfo(char *value,
+                                    char *contenttype,
+                                    struct FormInfo *parent_form_info)
 {
-  FormInfo *form_info;
+  struct FormInfo *form_info;
   form_info = calloc(1, sizeof(struct FormInfo));
   if(form_info) {
     if(value)
@@ -204,7 +204,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
                      struct curl_httppost **last_post,
                      va_list params)
 {
-  FormInfo *first_form, *current_form, *form = NULL;
+  struct FormInfo *first_form, *current_form, *form = NULL;
   CURLFORMcode return_value = CURL_FORMADD_OK;
   const char *prevtype = NULL;
   struct curl_httppost *post = NULL;
@@ -521,7 +521,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   if(CURL_FORMADD_OK != return_value) {
     /* On error, free allocated fields for all nodes of the FormInfo linked
        list without deallocating nodes. List nodes are deallocated later on */
-    FormInfo *ptr;
+    struct FormInfo *ptr;
     for(ptr = first_form; ptr != NULL; ptr = ptr->more) {
       if(ptr->name_alloc) {
         Curl_safefree(ptr->name);
@@ -650,7 +650,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       /* On error, free allocated fields for nodes of the FormInfo linked
          list which are not already owned by the httppost linked list
          without deallocating nodes. List nodes are deallocated later on */
-      FormInfo *ptr;
+      struct FormInfo *ptr;
       for(ptr = form; ptr != NULL; ptr = ptr->more) {
         if(ptr->name_alloc) {
           Curl_safefree(ptr->name);
@@ -676,7 +676,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
      fields given that these have either been deallocated or are owned
      now by the httppost linked list */
   while(first_form) {
-    FormInfo *ptr = first_form->more;
+    struct FormInfo *ptr = first_form->more;
     free(first_form);
     first_form = ptr;
   }
