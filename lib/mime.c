@@ -71,7 +71,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
                               curl_mimepart *part);
 static curl_off_t encoder_qp_size(curl_mimepart *part);
 
-static const mime_encoder encoders[] = {
+static const struct mime_encoder encoders[] = {
   {"binary", encoder_nop_read, encoder_nop_size},
   {"8bit", encoder_nop_read, encoder_nop_size},
   {"7bit", encoder_7bit_read, encoder_nop_size},
@@ -269,7 +269,8 @@ static char *Curl_basename(char *path)
 
 
 /* Set readback state. */
-static void mimesetstate(mime_state *state, enum mimestate tok, void *ptr)
+static void mimesetstate(struct mime_state *state,
+                         enum mimestate tok, void *ptr)
 {
   state->state = tok;
   state->ptr = ptr;
@@ -342,7 +343,7 @@ static char *strippath(const char *fullfile)
 }
 
 /* Initialize data encoder state. */
-static void cleanup_encoder_state(mime_encoder_state *p)
+static void cleanup_encoder_state(struct mime_encoder_state *p)
 {
   p->pos = 0;
   p->bufbeg = 0;
@@ -352,9 +353,9 @@ static void cleanup_encoder_state(mime_encoder_state *p)
 
 /* Dummy encoder. This is used for 8bit and binary content encodings. */
 static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
-                               curl_mimepart *part)
+                               struct curl_mimepart *part)
 {
-  mime_encoder_state *st = &part->encstate;
+  struct mime_encoder_state *st = &part->encstate;
   size_t insize = st->bufend - st->bufbeg;
 
   (void) ateof;
@@ -382,7 +383,7 @@ static curl_off_t encoder_nop_size(curl_mimepart *part)
 static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part)
 {
-  mime_encoder_state *st = &part->encstate;
+  struct mime_encoder_state *st = &part->encstate;
   size_t cursize = st->bufend - st->bufbeg;
 
   (void) ateof;
@@ -408,7 +409,7 @@ static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
 static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part)
 {
-  mime_encoder_state *st = &part->encstate;
+  struct mime_encoder_state *st = &part->encstate;
   size_t cursize = 0;
   int i;
   char *ptr = buffer;
@@ -512,7 +513,7 @@ static curl_off_t encoder_base64_size(curl_mimepart *part)
  * Check if a CRLF or end of data is in input buffer at current position + n.
  * Return -1 if more data needed, 1 if CRLF or end of data, else 0.
  */
-static int qp_lookahead_eol(mime_encoder_state *st, int ateof, size_t n)
+static int qp_lookahead_eol(struct mime_encoder_state *st, int ateof, size_t n)
 {
   n += st->bufbeg;
   if(n >= st->bufend && ateof)
@@ -529,7 +530,7 @@ static int qp_lookahead_eol(mime_encoder_state *st, int ateof, size_t n)
 static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
                               curl_mimepart *part)
 {
-  mime_encoder_state *st = &part->encstate;
+  struct mime_encoder_state *st = &part->encstate;
   char *ptr = buffer;
   size_t cursize = 0;
   int softlinebreak;
@@ -740,7 +741,7 @@ static void mime_file_free(void *ptr)
 /* Argument is a pointer to the mime structure. */
 
 /* Readback a byte string segment. */
-static size_t readback_bytes(mime_state *state,
+static size_t readback_bytes(struct mime_state *state,
                              char *buffer, size_t bufsize,
                              const char *bytes, size_t numbytes,
                              const char *trail)
@@ -839,7 +840,7 @@ static size_t read_part_content(curl_mimepart *part,
 static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
                                         size_t bufsize, bool *hasread)
 {
-  mime_encoder_state *st = &part->encstate;
+  struct mime_encoder_state *st = &part->encstate;
   size_t cursize = 0;
   size_t sz;
   bool ateof = FALSE;
@@ -1502,7 +1503,7 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
 CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
-  const mime_encoder *mep;
+  const struct mime_encoder *mep;
 
   if(!part)
     return result;

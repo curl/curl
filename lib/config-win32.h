@@ -724,6 +724,7 @@ Vista
   /* Replicating logic present in afunix.h of newer Windows 10 SDK versions */
 # define UNIX_PATH_MAX 108
 # include <ws2tcpip.h>
+  /* !checksrc! disable TYPEDEFSTRUCT 1 */
   typedef struct sockaddr_un {
     ADDRESS_FAMILY sun_family;
     char sun_path[UNIX_PATH_MAX];

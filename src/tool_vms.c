@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -122,13 +122,13 @@ void vms_special_exit(int code, int vms_show)
  */
 
 /* Structure to hold a DECC$* feature name and its desired value. */
-typedef struct {
+struct decc_feat_t {
   char *name;
   int value;
-} decc_feat_t;
+};
 
 /* Array of DECC$* feature names and their desired values. */
-static decc_feat_t decc_feat_array[] = {
+static struct decc_feat_t decc_feat_array[] = {
   /* Preserve command-line case with SET PROCESS/PARSE_STYLE=EXTENDED */
   { "DECC$ARGV_PARSE_STYLE", 1 },
   /* Preserve case for file names on ODS5 disks. */

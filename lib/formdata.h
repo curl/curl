@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,7 +27,7 @@
 #ifndef CURL_DISABLE_MIME
 
 /* used by FormAdd for temporary storage */
-typedef struct FormInfo {
+struct FormInfo {
   char *name;
   bool name_alloc;
   size_t namelength;
@@ -45,7 +45,7 @@ typedef struct FormInfo {
   char *userp;        /* pointer for the read callback */
   struct curl_slist *contentheader;
   struct FormInfo *more;
-} FormInfo;
+};
 
 CURLcode Curl_getformdata(struct Curl_easy *data,
                           curl_mimepart *,

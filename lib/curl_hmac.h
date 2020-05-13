@@ -34,37 +34,35 @@ typedef void    (* HMAC_hfinal_func)(unsigned char *result, void *context);
 
 
 /* Per-hash function HMAC parameters. */
-
-typedef struct {
-  HMAC_hinit_func       hmac_hinit;     /* Initialize context procedure. */
+struct HMAC_params {
+  HMAC_hinit_func
+  hmac_hinit;     /* Initialize context procedure. */
   HMAC_hupdate_func     hmac_hupdate;   /* Update context with data. */
   HMAC_hfinal_func      hmac_hfinal;    /* Get final result procedure. */
   unsigned int          hmac_ctxtsize;  /* Context structure size. */
   unsigned int          hmac_maxkeylen; /* Maximum key length (bytes). */
   unsigned int          hmac_resultlen; /* Result length (bytes). */
-} HMAC_params;
+};
 
 
 /* HMAC computation context. */
-
-typedef struct {
-  const HMAC_params *hmac_hash; /* Hash function definition. */
+struct HMAC_context {
+  const struct HMAC_params *hmac_hash; /* Hash function definition. */
   void *hmac_hashctxt1;         /* Hash function context 1. */
   void *hmac_hashctxt2;         /* Hash function context 2. */
-} HMAC_context;
+};
 
 
 /* Prototypes. */
-
-HMAC_context * Curl_HMAC_init(const HMAC_params *hashparams,
-                              const unsigned char *key,
-                              unsigned int keylen);
-int Curl_HMAC_update(HMAC_context *context,
+struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
+                                    const unsigned char *key,
+                                    unsigned int keylen);
+int Curl_HMAC_update(struct HMAC_context *context,
                      const unsigned char *data,
                      unsigned int len);
-int Curl_HMAC_final(HMAC_context *context, unsigned char *result);
+int Curl_HMAC_final(struct HMAC_context *context, unsigned char *result);
 
-CURLcode Curl_hmacit(const HMAC_params *hashparams,
+CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
                      const unsigned char *key, const size_t keylen,
                      const unsigned char *data, const size_t datalen,
                      unsigned char *output);

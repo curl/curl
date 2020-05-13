@@ -32,10 +32,10 @@
  * and returns a 'Curl_addrinfo *' with the address information.
  */
 
-Curl_addrinfo *Curl_doh(struct connectdata *conn,
-                        const char *hostname,
-                        int port,
-                        int *waitp);
+struct Curl_addrinfo *Curl_doh(struct connectdata *conn,
+                               const char *hostname,
+                               int port,
+                               int *waitp);
 
 CURLcode Curl_doh_is_resolved(struct connectdata *conn,
                               struct Curl_dns_entry **dns);

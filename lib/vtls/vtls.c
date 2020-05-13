@@ -1084,7 +1084,7 @@ bool Curl_none_false_start(void)
 CURLcode Curl_none_md5sum(unsigned char *input, size_t inputlen,
                           unsigned char *md5sum, size_t md5len UNUSED_PARAM)
 {
-  MD5_context *MD5pw;
+  struct MD5_context *MD5pw;
 
   (void)md5len;
 

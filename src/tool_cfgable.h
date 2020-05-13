@@ -37,8 +37,8 @@ struct GlobalConfig;
 
 struct State {
   struct getout *urlnode;
-  URLGlob *inglob;
-  URLGlob *urls;
+  struct URLGlob *inglob;
+  struct URLGlob *urls;
   char *outfiles;
   char *httpgetfields;
   char *uploadfile;
@@ -194,8 +194,8 @@ struct OperationConfig {
   curl_off_t condtime;
   struct curl_slist *headers;
   struct curl_slist *proxyheaders;
-  tool_mime *mimeroot;
-  tool_mime *mimecurrent;
+  struct tool_mime *mimeroot;
+  struct tool_mime *mimecurrent;
   curl_mime *mimepost;
   struct curl_slist *telnet_options;
   struct curl_slist *resolve;
@@ -261,8 +261,8 @@ struct OperationConfig {
   bool native_ca_store;        /* use the native os ca store */
 
   bool use_metalink;        /* process given URLs as metalink XML file */
-  metalinkfile *metalinkfile_list; /* point to the first node */
-  metalinkfile *metalinkfile_last; /* point to the last/current node */
+  struct metalinkfile *metalinkfile_list; /* point to the first node */
+  struct metalinkfile *metalinkfile_last; /* point to the last/current node */
   char *oauth_bearer;             /* OAuth 2.0 bearer token */
   bool nonpn;                     /* enable/disable TLS NPN extension */
   bool noalpn;                    /* enable/disable TLS ALPN extension */

@@ -699,7 +699,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 {
   CURLcode result = CURLE_OK;
   struct getout *urlnode;
-  metalinkfile *mlfile_last = NULL;
+  struct metalinkfile *mlfile_last = NULL;
   bool orig_noprogress = global->noprogress;
   bool orig_isatty = global->isatty;
   struct State *state = &config->state;
@@ -740,10 +740,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
   while(config->state.urlnode) {
     char *infiles; /* might be a glob pattern */
-    URLGlob *inglob = state->inglob;
+    struct URLGlob *inglob = state->inglob;
     bool metalink = FALSE; /* metalink download? */
-    metalinkfile *mlfile;
-    metalink_resource *mlres;
+    struct metalinkfile *mlfile;
+    struct metalink_resource *mlres;
 
     urlnode = config->state.urlnode;
     if(urlnode->flags & GETOUT_METALINK) {

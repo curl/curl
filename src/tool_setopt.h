@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -43,27 +43,27 @@ bool tool_setopt_skip(CURLoption tag);
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 /* Associate symbolic names with option values */
-typedef struct {
+struct NameValue {
   const char *name;
   long value;
-} NameValue;
+};
 
-typedef struct {
+struct NameValueUnsigned {
   const char *name;
   unsigned long value;
-} NameValueUnsigned;
+};
 
-extern const NameValue setopt_nv_CURLPROXY[];
-extern const NameValue setopt_nv_CURL_SOCKS_PROXY[];
-extern const NameValue setopt_nv_CURL_HTTP_VERSION[];
-extern const NameValue setopt_nv_CURL_SSLVERSION[];
-extern const NameValue setopt_nv_CURL_TIMECOND[];
-extern const NameValue setopt_nv_CURLFTPSSL_CCC[];
-extern const NameValue setopt_nv_CURLUSESSL[];
-extern const NameValueUnsigned setopt_nv_CURLSSLOPT[];
-extern const NameValue setopt_nv_CURL_NETRC[];
-extern const NameValue setopt_nv_CURLPROTO[];
-extern const NameValueUnsigned setopt_nv_CURLAUTH[];
+extern const struct NameValue setopt_nv_CURLPROXY[];
+extern const struct NameValue setopt_nv_CURL_SOCKS_PROXY[];
+extern const struct NameValue setopt_nv_CURL_HTTP_VERSION[];
+extern const struct NameValue setopt_nv_CURL_SSLVERSION[];
+extern const struct NameValue setopt_nv_CURL_TIMECOND[];
+extern const struct NameValue setopt_nv_CURLFTPSSL_CCC[];
+extern const struct NameValue setopt_nv_CURLUSESSL[];
+extern const struct NameValueUnsigned setopt_nv_CURLSSLOPT[];
+extern const struct NameValue setopt_nv_CURL_NETRC[];
+extern const struct NameValue setopt_nv_CURLPROTO[];
+extern const struct NameValueUnsigned setopt_nv_CURLAUTH[];
 
 /* Map options to NameValue sets */
 #define setopt_nv_CURLOPT_HTTP_VERSION setopt_nv_CURL_HTTP_VERSION
@@ -85,13 +85,13 @@ extern const NameValueUnsigned setopt_nv_CURLAUTH[];
 
 CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
                           const char *name, CURLoption tag,
-                          const NameValue *nv, long lval);
+                          const struct NameValue *nv, long lval);
 CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
                            const char *name, CURLoption tag,
-                           const NameValue *nv, long lval);
+                           const struct NameValue *nv, long lval);
 CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
                              const char *name, CURLoption tag,
-                             const NameValueUnsigned *nv, long lval);
+                             const struct NameValueUnsigned *nv, long lval);
 CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
                               const char *name, CURLoption tag,
                               curl_mime *mimepost);

@@ -113,7 +113,7 @@ static CURLcode ftp_parse_url_path(struct connectdata *conn);
 static CURLcode ftp_regular_transfer(struct connectdata *conn, bool *done);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void ftp_pasv_verbose(struct connectdata *conn,
-                             Curl_addrinfo *ai,
+                             struct Curl_addrinfo *ai,
                              char *newhost, /* ascii version */
                              int port);
 #endif
@@ -913,7 +913,7 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
   char myhost[MAX_IPADR_LEN + 1] = "";
 
   struct Curl_sockaddr_storage ss;
-  Curl_addrinfo *res, *ai;
+  struct Curl_addrinfo *res, *ai;
   curl_socklen_t sslen;
   char hbuf[NI_MAXHOST];
   struct sockaddr *sa = (struct sockaddr *)&ss;
@@ -3442,7 +3442,7 @@ static CURLcode ftp_nb_type(struct connectdata *conn,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void
 ftp_pasv_verbose(struct connectdata *conn,
-                 Curl_addrinfo *ai,
+                 struct Curl_addrinfo *ai,
                  char *newhost, /* ascii version */
                  int port)
 {

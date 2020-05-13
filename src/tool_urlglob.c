@@ -34,9 +34,9 @@
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
 
-static CURLcode glob_fixed(URLGlob *glob, char *fixed, size_t len)
+static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
 {
-  URLPattern *pat = &glob->pattern[glob->size];
+  struct URLPattern *pat = &glob->pattern[glob->size];
   pat->type = UPTSet;
   pat->content.Set.size = 1;
   pat->content.Set.ptr_s = 0;
@@ -74,14 +74,14 @@ static int multiply(unsigned long *amount, long with)
   return 0;
 }
 
-static CURLcode glob_set(URLGlob *glob, char **patternp,
+static CURLcode glob_set(struct URLGlob *glob, char **patternp,
                          size_t *posp, unsigned long *amount,
                          int globindex)
 {
   /* processes a set expression with the point behind the opening '{'
      ','-separated elements are collected until the next closing '}'
   */
-  URLPattern *pat;
+  struct URLPattern *pat;
   bool done = FALSE;
   char *buf = glob->glob_buffer;
   char *pattern = *patternp;
@@ -168,7 +168,7 @@ static CURLcode glob_set(URLGlob *glob, char **patternp,
   return CURLE_OK;
 }
 
-static CURLcode glob_range(URLGlob *glob, char **patternp,
+static CURLcode glob_range(struct URLGlob *glob, char **patternp,
                            size_t *posp, unsigned long *amount,
                            int globindex)
 {
@@ -178,7 +178,7 @@ static CURLcode glob_range(URLGlob *glob, char **patternp,
      - num range with leading zeros: e.g. "001-999]"
      expression is checked for well-formedness and collected until the next ']'
   */
-  URLPattern *pat;
+  struct URLPattern *pat;
   int rc;
   char *pattern = *patternp;
   char *c;
@@ -349,7 +349,7 @@ static bool peek_ipv6(const char *str, size_t *skip)
   }
 }
 
-static CURLcode glob_parse(URLGlob *glob, char *pattern,
+static CURLcode glob_parse(struct URLGlob *glob, char *pattern,
                            size_t pos, unsigned long *amount)
 {
   /* processes a literal string component of a URL
@@ -427,14 +427,14 @@ static CURLcode glob_parse(URLGlob *glob, char *pattern,
   return res;
 }
 
-CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
+CURLcode glob_url(struct URLGlob **glob, char *url, unsigned long *urlnum,
                   FILE *error)
 {
   /*
    * We can deal with any-size, just make a buffer with the same length
    * as the specified URL!
    */
-  URLGlob *glob_expand;
+  struct URLGlob *glob_expand;
   unsigned long amount = 0;
   char *glob_buffer;
   CURLcode res;
@@ -446,7 +446,7 @@ CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
     return CURLE_OUT_OF_MEMORY;
   glob_buffer[0] = 0;
 
-  glob_expand = calloc(1, sizeof(URLGlob));
+  glob_expand = calloc(1, sizeof(struct URLGlob));
   if(!glob_expand) {
     Curl_safefree(glob_buffer);
     return CURLE_OUT_OF_MEMORY;
@@ -483,7 +483,7 @@ CURLcode glob_url(URLGlob **glob, char *url, unsigned long *urlnum,
   return CURLE_OK;
 }
 
-void glob_cleanup(URLGlob* glob)
+void glob_cleanup(struct URLGlob *glob)
 {
   size_t i;
   int elem;
@@ -506,9 +506,9 @@ void glob_cleanup(URLGlob* glob)
   Curl_safefree(glob);
 }
 
-CURLcode glob_next_url(char **globbed, URLGlob *glob)
+CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
 {
-  URLPattern *pat;
+  struct URLPattern *pat;
   size_t i;
   size_t len;
   size_t buflen = glob->urllen + 1;
@@ -600,7 +600,7 @@ CURLcode glob_next_url(char **globbed, URLGlob *glob)
   return CURLE_OK;
 }
 
-CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
+CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
 {
   char *target;
   size_t allocsize;
@@ -625,7 +625,7 @@ CURLcode glob_match_url(char **result, char *filename, URLGlob *glob)
     if(*filename == '#' && ISDIGIT(filename[1])) {
       char *ptr = filename;
       unsigned long num = strtoul(&filename[1], &filename, 10);
-      URLPattern *pat = NULL;
+      struct URLPattern *pat = NULL;
 
       if(num && (num < glob->size)) {
         unsigned long i;

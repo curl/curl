@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,7 +75,7 @@
 
 /* Use our own implementation. */
 
-typedef struct {
+struct ldap_urldesc {
   char   *lud_host;
   int     lud_port;
 #if defined(USE_WIN32_LDAP)
@@ -95,10 +95,10 @@ typedef struct {
   size_t    lud_attrs_dups; /* how many were dup'ed, this field is not in the
                                "real" struct so can only be used in code
                                without HAVE_LDAP_URL_PARSE defined */
-} CURL_LDAPURLDesc;
+};
 
 #undef LDAPURLDesc
-#define LDAPURLDesc             CURL_LDAPURLDesc
+#define LDAPURLDesc struct ldap_urldesc
 
 static int  _ldap_url_parse(const struct connectdata *conn,
                             LDAPURLDesc **ludp);

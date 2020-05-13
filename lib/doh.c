@@ -373,10 +373,10 @@ static CURLcode dohprobe(struct Curl_easy *data,
  * 'Curl_addrinfo *' with the address information.
  */
 
-Curl_addrinfo *Curl_doh(struct connectdata *conn,
-                        const char *hostname,
-                        int port,
-                        int *waitp)
+struct Curl_addrinfo *Curl_doh(struct connectdata *conn,
+                               const char *hostname,
+                               int port,
+                               int *waitp)
 {
   struct Curl_easy *data = conn->data;
   CURLcode result = CURLE_OK;
@@ -790,12 +790,12 @@ static void showdoh(struct Curl_easy *data,
  * must be an associated call later to Curl_freeaddrinfo().
  */
 
-static Curl_addrinfo *
+static struct Curl_addrinfo *
 doh2ai(const struct dohentry *de, const char *hostname, int port)
 {
-  Curl_addrinfo *ai;
-  Curl_addrinfo *prevai = NULL;
-  Curl_addrinfo *firstai = NULL;
+  struct Curl_addrinfo *ai;
+  struct Curl_addrinfo *prevai = NULL;
+  struct Curl_addrinfo *firstai = NULL;
   struct sockaddr_in *addr;
 #ifdef ENABLE_IPV6
   struct sockaddr_in6 *addr6;
@@ -824,7 +824,7 @@ doh2ai(const struct dohentry *de, const char *hostname, int port)
       addrtype = AF_INET;
     }
 
-    ai = calloc(1, sizeof(Curl_addrinfo));
+    ai = calloc(1, sizeof(struct Curl_addrinfo));
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;
       break;

@@ -35,46 +35,46 @@ typedef void (*digest_update_func)(void *context,
                                    unsigned int len);
 typedef void (*digest_final_func)(unsigned char *result, void *context);
 
-typedef struct {
+struct digest_params {
   digest_init_func     digest_init;   /* Initialize context procedure */
   digest_update_func   digest_update; /* Update context with data */
   digest_final_func    digest_final;  /* Get final result procedure */
   unsigned int         digest_ctxtsize;  /* Context structure size */
   unsigned int         digest_resultlen; /* Result length (bytes) */
-} digest_params;
+};
 
-typedef struct {
-  const digest_params   *digest_hash;      /* Hash function definition */
+struct digest_context {
+  const struct digest_params *digest_hash; /* Hash function definition */
   void                  *digest_hashctx;   /* Hash function context */
-} digest_context;
+};
 
-typedef struct {
+struct metalink_digest_def {
   const char *hash_name;
-  const digest_params *dparams;
-} metalink_digest_def;
+  const struct digest_params *dparams;
+};
 
-typedef struct {
+struct metalink_digest_alias {
   const char *alias_name;
-  const metalink_digest_def *digest_def;
-} metalink_digest_alias;
+  const struct metalink_digest_def *digest_def;
+};
 
-typedef struct metalink_checksum {
-  const metalink_digest_def *digest_def;
+struct metalink_checksum {
+  const struct metalink_digest_def *digest_def;
   /* raw digest value, not ascii hex digest */
   unsigned char *digest;
-} metalink_checksum;
+};
 
-typedef struct metalink_resource {
+struct metalink_resource {
   struct metalink_resource *next;
   char *url;
-} metalink_resource;
+};
 
-typedef struct metalinkfile {
+struct metalinkfile {
   struct metalinkfile *next;
   char *filename;
-  metalink_checksum *checksum;
-  metalink_resource *resource;
-} metalinkfile;
+  struct metalink_checksum *checksum;
+  struct metalink_resource *resource;
+};
 
 #ifdef USE_METALINK
 
@@ -89,18 +89,18 @@ typedef struct metalinkfile {
                                     (CURL_REQ_LIBMETALINK_MINOR * 100) + \
                                      CURL_REQ_LIBMETALINK_PATCH)
 
-extern const digest_params MD5_DIGEST_PARAMS[1];
-extern const digest_params SHA1_DIGEST_PARAMS[1];
-extern const digest_params SHA256_DIGEST_PARAMS[1];
+extern const struct digest_params MD5_DIGEST_PARAMS[1];
+extern const struct digest_params SHA1_DIGEST_PARAMS[1];
+extern const struct digest_params SHA256_DIGEST_PARAMS[1];
 
 #include <metalink/metalink.h>
 
 /*
  * Counts the resource in the metalinkfile.
  */
-int count_next_metalink_resource(metalinkfile *mlfile);
+int count_next_metalink_resource(struct metalinkfile *mlfile);
 
-void delete_metalinkfile(metalinkfile *mlfile);
+void delete_metalinkfile(struct metalinkfile *mlfile);
 void clean_metalink(struct OperationConfig *config);
 
 /*
@@ -143,7 +143,7 @@ int check_metalink_content_type(const char *content_type);
  *   Metalink does not contain checksum.
  */
 int metalink_check_hash(struct GlobalConfig *config,
-                        metalinkfile *mlfile,
+                        struct metalinkfile *mlfile,
                         const char *filename);
 
 /*

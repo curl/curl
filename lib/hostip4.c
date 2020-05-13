@@ -88,12 +88,12 @@ bool Curl_ipvalid(struct connectdata *conn)
  * flavours have thread-safe versions of the plain gethostbyname() etc.
  *
  */
-Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
-                                const char *hostname,
-                                int port,
-                                int *waitp)
+struct Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+                                       const char *hostname,
+                                       int port,
+                                       int *waitp)
 {
-  Curl_addrinfo *ai = NULL;
+  struct Curl_addrinfo *ai = NULL;
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)conn;
@@ -119,13 +119,13 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
  * implying that only threadsafe code and function calls may be used.
  *
  */
-Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
-                                   int port)
+struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
+                                          int port)
 {
 #if !defined(HAVE_GETADDRINFO_THREADSAFE) && defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
-  Curl_addrinfo *ai = NULL;
+  struct Curl_addrinfo *ai = NULL;
   struct hostent *h = NULL;
   struct hostent *buf = NULL;
 
