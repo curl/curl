@@ -1,14 +1,15 @@
 curl and libcurl 7.71.0
 
  Public curl releases:         192
- Command line options:         231
+ Command line options:         232
  curl_easy_setopt() options:   270
  Public functions in libcurl:  82
- Contributors:                 2172
+ Contributors:                 2175
 
 This release includes the following changes:
 
  o CURLOPT_SSL_OPTIONS: optional use of Windows' CA store (with openssl) [10]
+ o tool: Add option --retry-all-errors to retry on any error [27]
 
 This release includes the following bugfixes:
 
@@ -17,16 +18,23 @@ This release includes the following bugfixes:
  o appveyor: disable test 1139 instead of ignoring it
  o asyn-*: remove support for never-used NULL entry pointers [19]
  o cirrus: disable SFTP and SCP tests [7]
+ o CMake: add ENABLE_ALT_SVC option
+ o CMake: add HTTP/3 support (ngtcp2+nghttp3, quiche) [34]
+ o CMake: do not build test programs by default [30]
+ o CMake: fix runtests.pl with CMake, add new test targets [29]
  o connect: make happy eyeballs work for QUIC (again) [16]
  o doc: add missing closing parenthesis in CURLINFO_SSL_VERIFYRESULT.3 [5]
  o doc: Rename VERSIONS to VERSIONS.md as it already has Markdown syntax [20]
  o docs/HTTP3: add qlog to the quiche build instruction
  o dynbuf: introduce internal generic dynamic buffer functions [17]
+ o easy: fix dangling pointer on easy_perform fail [26]
  o examples: remove asiohiper.cpp [4]
  o GnuTLS: Backend support for CURLINFO_SSL_VERIFYRESULT [9]
  o http2: simplify and clean up trailer handling [6]
+ o libcurl.pc: Merge Libs.private into Libs for static-only builds [28]
  o libssh2: set the expected total size in SCP upload init [2]
  o libtest/cmake: Remove commented code [13]
+ o list-only.d: this option existed already in 4.0
  o ngtcp2: introduce qlog support [23]
  o quiche: enable qlog output [14]
  o runtests: remove sleep calls [18]
@@ -34,6 +42,7 @@ This release includes the following bugfixes:
  o select: fix overflow protection in Curl_socket_check [22]
  o sockfilt: make select_ws stop waiting on exit signal event
  o test1177: look for curl.h in source directory [1]
+ o test1238: avoid tftpd being busy for tests shortly following [33]
  o test613.pl: make tests 613 and 614 work with OpenSSH for Windows [8]
  o test75: Remove precheck test
  o tests: add support for SSH server variant specific transfer paths [24]
@@ -41,7 +50,11 @@ This release includes the following bugfixes:
  o tests: pick a random port number for SSH [12]
  o tests: run stunnel for HTTPS and FTPS on dynamic ports [11]
  o travis: add "qlog" as feature in the quiche build
+ o travis: Add ngtcp2 and quiche tests for CMake
+ o url: reject too long input when parsing credentials [25]
+ o url: sort the protocol schemes in rough popularity order [32]
  o urlapi: accept :: as a valid IPv6 address [15]
+ o write-out.d: added "response_code"
 
 This release includes the following known bugs:
 
@@ -50,10 +63,12 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Dan Fandrich, Daniel Stenberg, Emil Engler, Gilles Vollant, Kamil Dudka,
-  Kane York, Lucas Pardue, Marc Hörsken, Michael Kaufmann, Murugan Balraj,
-  Pavel Volgarev, Peter Wang, Ray Satiro, Rikard Falkeborn, rl1987 on github,
-  (15 contributors)
+  Dan Fandrich, Daniel Stenberg, Emil Engler, Gilles Vollant, James Le Cuirot,
+  Kamil Dudka, Kane York, Lucas Pardue, Marcel Raad, Marc Hörsken,
+  Michael Kaufmann, Murugan Balraj, Pavel Volgarev, Peter Wang, Peter Wu,
+  Ray Satiro, Rikard Falkeborn, rl1987 on github, Samuel Marks,
+  Thomas Bouzerar,
+  (20 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -83,3 +98,12 @@ References to bug reports and discussions on issues:
  [22] = https://curl.haxx.se/bug/?i=5286
  [23] = https://curl.haxx.se/bug/?i=5353
  [24] = https://curl.haxx.se/bug/?i=5298
+ [25] = https://curl.haxx.se/bug/?i=5383
+ [26] = https://curl.haxx.se/bug/?i=5363
+ [27] = https://curl.haxx.se/bug/?i=5185
+ [28] = https://curl.haxx.se/bug/?i=5373
+ [29] = https://curl.haxx.se/bug/?i=5358
+ [30] = https://curl.haxx.se/bug/?i=5368
+ [32] = https://curl.haxx.se/bug/?i=5377
+ [33] = https://curl.haxx.se/bug/?i=5364
+ [34] = https://curl.haxx.se/bug/?i=5359
