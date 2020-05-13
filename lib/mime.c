@@ -685,7 +685,7 @@ static void mime_mem_free(void *ptr)
 
 /* Named file callbacks. */
 /* Argument is a pointer to the mime part. */
-static int mime_open_file(curl_mimepart * part)
+static int mime_open_file(curl_mimepart *part)
 {
   /* Open a MIMEKIND_FILE part. */
 

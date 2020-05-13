@@ -136,7 +136,7 @@ static int ftp_getsock(struct connectdata *conn, curl_socket_t *socks);
 static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode ftp_doing(struct connectdata *conn,
                           bool *dophase_done);
-static CURLcode ftp_setup_connection(struct connectdata * conn);
+static CURLcode ftp_setup_connection(struct connectdata *conn);
 
 static CURLcode init_wc_data(struct connectdata *conn);
 static CURLcode wc_statemach(struct connectdata *conn);

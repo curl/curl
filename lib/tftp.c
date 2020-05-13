@@ -154,7 +154,7 @@ static CURLcode tftp_disconnect(struct connectdata *conn,
 static CURLcode tftp_do(struct connectdata *conn, bool *done);
 static CURLcode tftp_done(struct connectdata *conn,
                           CURLcode, bool premature);
-static CURLcode tftp_setup_connection(struct connectdata * conn);
+static CURLcode tftp_setup_connection(struct connectdata *conn);
 static CURLcode tftp_multi_statemach(struct connectdata *conn, bool *done);
 static CURLcode tftp_doing(struct connectdata *conn, bool *dophase_done);
 static int tftp_getsock(struct connectdata *conn, curl_socket_t *socks);
@@ -1384,7 +1384,7 @@ static CURLcode tftp_do(struct connectdata *conn, bool *done)
   return result;
 }
 
-static CURLcode tftp_setup_connection(struct connectdata * conn)
+static CURLcode tftp_setup_connection(struct connectdata *conn)
 {
   struct Curl_easy *data = conn->data;
   char *type;

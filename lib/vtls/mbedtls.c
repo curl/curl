@@ -239,7 +239,7 @@ mbed_connect_step1(struct connectdata *conn,
                    int sockindex)
 {
   struct Curl_easy *data = conn->data;
-  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
@@ -535,7 +535,7 @@ mbed_connect_step2(struct connectdata *conn,
 {
   int ret;
   struct Curl_easy *data = conn->data;
-  struct ssl_connect_data* connssl = &conn->ssl[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const mbedtls_x509_crt *peercert;
   const char * const pinnedpubkey = SSL_IS_PROXY() ?

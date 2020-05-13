@@ -865,8 +865,8 @@ static int IsMultiplexingPossible(const struct Curl_easy *handle,
 
 #ifndef CURL_DISABLE_PROXY
 static bool
-proxy_info_matches(const struct proxy_info* data,
-                   const struct proxy_info* needle)
+proxy_info_matches(const struct proxy_info *data,
+                   const struct proxy_info *needle)
 {
   if((data->proxytype == needle->proxytype) &&
      (data->port == needle->port) &&
@@ -877,8 +877,8 @@ proxy_info_matches(const struct proxy_info* data,
 }
 
 static bool
-socks_proxy_info_matches(const struct proxy_info* data,
-                         const struct proxy_info* needle)
+socks_proxy_info_matches(const struct proxy_info *data,
+                         const struct proxy_info *needle)
 {
   if(!proxy_info_matches(data, needle))
     return FALSE;
@@ -2002,7 +2002,7 @@ static CURLcode setup_range(struct Curl_easy *data)
  */
 static CURLcode setup_connection_internals(struct connectdata *conn)
 {
-  const struct Curl_handler * p;
+  const struct Curl_handler *p;
   CURLcode result;
 
   /* Perform setup complement if some. */

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -176,7 +176,7 @@ static const char *getASN1Element(curl_asn1Element *elem,
  * Search the null terminated OID or OID identifier in local table.
  * Return the table entry pointer or NULL if not found.
  */
-static const curl_OID * searchOID(const char *oid)
+static const curl_OID *searchOID(const char *oid)
 {
   const curl_OID *op;
   for(op = OIDtable; op->numoid; op++)
