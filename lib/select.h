@@ -91,7 +91,7 @@ int Curl_wait_ms(int timeout_ms);
 
 #ifdef TPF
 int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
-                       fd_set* excepts, struct timeval* tv);
+                       fd_set* excepts, struct timeval *tv);
 #endif
 
 /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1], which

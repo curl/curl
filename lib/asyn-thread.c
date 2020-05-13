@@ -158,7 +158,7 @@ static bool init_resolve_thread(struct connectdata *conn,
 
 /* Data for synchronization between resolver thread and its parent */
 struct thread_sync_data {
-  curl_mutex_t * mtx;
+  curl_mutex_t *mtx;
   int done;
 
   char *hostname;        /* hostname to resolve, Curl_async.hostname
@@ -190,7 +190,7 @@ static struct thread_sync_data *conn_thread_sync_data(struct connectdata *conn)
 
 /* Destroy resolver thread synchronization data */
 static
-void destroy_thread_sync_data(struct thread_sync_data * tsd)
+void destroy_thread_sync_data(struct thread_sync_data *tsd)
 {
   if(tsd->mtx) {
     Curl_mutex_destroy(tsd->mtx);
@@ -216,7 +216,7 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
 
 /* Initialize resolver thread synchronization data */
 static
-int init_thread_sync_data(struct thread_data * td,
+int init_thread_sync_data(struct thread_data *td,
                            const char *hostname,
                            int port,
                            const struct addrinfo *hints)

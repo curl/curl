@@ -73,7 +73,7 @@ char *decc$getenv(const char *__name);
 #   endif
 #endif
 
-    struct passwd * decc_getpwuid(uid_t uid);
+    struct passwd *decc_getpwuid(uid_t uid);
 
 #ifdef __DECC
 #   if __INITIAL_POINTER_SIZE == 32
@@ -138,9 +138,9 @@ static char *vms_getenv(const char *envvar)
 
 static struct passwd vms_passwd_cache;
 
-static struct passwd * vms_getpwuid(uid_t uid)
+static struct passwd *vms_getpwuid(uid_t uid)
 {
-  struct passwd * my_passwd;
+  struct passwd *my_passwd;
 
 /* Hack needed to support 64 bit builds, decc_getpwnam is 32 bit only */
 #ifdef __DECC

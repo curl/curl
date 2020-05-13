@@ -640,10 +640,10 @@ sub scanfile {
         }
 
         # check for 'char * name'
-        if(($l =~ /(^.*(char|int|long|void|curl_slist|CURL|CURLM|CURLMsg|curl_httppost) *(\*+)) (\w+)/) && ($4 ne "const")) {
-            checkwarn("ASTERISKNOSPACE",
+        if(($l =~ /(^.*(char|int|long|void|CURL|CURLM|CURLMsg|[cC]url_[A-Za-z_]+|struct [a-zA-Z_]+) *(\*+)) (\w+)/) && ($4 !~ /^(const|volatile)$/)) {
+            checkwarn("ASTERISKSPACE",
                       $line, length($1), $file, $ol,
-                      "no space after declarative asterisk");
+                      "space after declarative asterisk");
         }
         # check for 'char*'
         if(($l =~ /(^.*(char|int|long|void|curl_slist|CURL|CURLM|CURLMsg|curl_httppost|sockaddr_in|FILE)\*)/)) {
