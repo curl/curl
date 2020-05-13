@@ -81,7 +81,8 @@ CURLcode Curl_auth_create_plain_message(struct Curl_easy *data,
   plen = strlen(passwd);
 
   /* Compute binary message length. Check for overflows. */
-  if(((zlen + clen) > SIZE_T_MAX/4) || (plen > (SIZE_T_MAX/2 - 2)))
+  if((zlen > SIZE_T_MAX/4) || (clen > SIZE_T_MAX/4) ||
+     (plen > (SIZE_T_MAX/2 - 2)))
     return CURLE_OUT_OF_MEMORY;
   plainlen = zlen + clen + plen + 2;
 
