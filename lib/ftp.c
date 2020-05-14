@@ -816,6 +816,7 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks)
 
   if(FTP_STOP == ftpc->state) {
     int bits = GETSOCK_READSOCK(0);
+    bool any = FALSE;
 
     /* if stopped and still in this state, then we're also waiting for a
        connect on the secondary connection */
@@ -830,10 +831,11 @@ static int ftp_domore_getsock(struct connectdata *conn, curl_socket_t *socks)
         if(conn->tempsock[i] != CURL_SOCKET_BAD) {
           socks[s] = conn->tempsock[i];
           bits |= GETSOCK_WRITESOCK(s++);
+          any = TRUE;
         }
       }
     }
-    else {
+    if(!any) {
       socks[1] = conn->sock[SECONDARYSOCKET];
       bits |= GETSOCK_WRITESOCK(1) | GETSOCK_READSOCK(1);
     }
