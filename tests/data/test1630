@@ -1,0 +1,56 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTPS-proxy
+HTTPS-proxy Basic auth
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 22
+
+the content goes here
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+https-proxy
+</server>
+ <name>
+HTTPS-proxy with Basic auth to HTTP without auth
+ </name>
+ <command>
+ -U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x https://%HOSTIP:%HTTPSPROXYPORT http://we.want.that.site.com/1630 --proxy-insecure
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<proxy>
+GET http://we.want.that.site.com/1630 HTTP/1.1
+Host: we.want.that.site.com
+Proxy-Authorization: Basic ZmFrZUB1c2VyOmxvb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29uZw==
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</proxy>
+</verify>
+</testcase>

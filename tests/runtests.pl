@@ -137,6 +137,7 @@ my $MQTTPORT=$noport;    # MQTT server port
 my $HTTPPORT=$noport;    # HTTP server port
 my $HTTP6PORT=$noport;   # HTTP IPv6 server port
 my $HTTPSPORT=$noport;   # HTTPS (stunnel) server port
+my $HTTPSPROXYPORT = $noport; # HTTPS-proxy (stunnel) port
 my $FTPPORT=$noport;     # FTP server port
 my $FTPSPORT=$noport;    # FTPS (stunnel) server port
 my $FTP6PORT=$noport;    # FTP IPv6 server port
@@ -250,6 +251,7 @@ my $has_charconv;   # set if libcurl is built with CharConv support
 my $has_tls_srp;    # set if libcurl is built with TLS-SRP support
 my $has_metalink;   # set if curl is built with Metalink support
 my $has_http2;      # set if libcurl is built with HTTP2 support
+my $has_httpsproxy; # set if libcurl is built with HTTPS-proxy support
 my $has_crypto;     # set if libcurl is built with cryptographic support
 my $has_cares;      # set if built with c-ares
 my $has_threadedres;# set if built with threaded resolver
@@ -1588,7 +1590,7 @@ sub runhttpserver {
 # start the https stunnel based server
 #
 sub runhttpsserver {
-    my ($verbose, $ipv6, $certfile) = @_;
+    my ($verbose, $ipv6, $proxy, $certfile) = @_;
     my $proto = 'https';
     my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
     my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
@@ -1598,6 +1600,11 @@ sub runhttpsserver {
     my $pidfile;
     my $logfile;
     my $flags = "";
+
+    if($proxy eq "proxy") {
+        # the https-proxy runs as https2
+        $idnum = 2;
+    }
 
     if(!$stunnel) {
         return (0,0);
@@ -1630,7 +1637,13 @@ sub runhttpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'stunnel.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
-    $flags .= "--connect $HTTPPORT";
+    if(!$proxy) {
+        $flags .= "--connect $HTTPPORT";
+    }
+    else {
+        # for HTTPS-proxy we connect to the HTTP proxy
+        $flags .= "--connect $HTTPPROXYPORT";
+    }
 
     my $pid2;
     my $pid3;
@@ -2780,43 +2793,44 @@ sub compare {
 }
 
 sub setupfeatures {
-    $feature{"SSL"} = $has_ssl;
-    $feature{"MultiSSL"} = $has_multissl;
-    $feature{"SSLpinning"} = $has_sslpinning;
-    $feature{"OpenSSL"} = $has_openssl;
-    $feature{"GnuTLS"} = $has_gnutls;
-    $feature{"NSS"} = $has_nss;
-    $feature{"WinSSL"} = $has_winssl;
-    $feature{"Schannel"} = $has_winssl; # alias
-    $feature{"sectransp"} = $has_darwinssl;
+    $feature{"alt-svc"} = $has_altsvc;
+    $feature{"brotli"} = $has_brotli;
+    $feature{"crypto"} = $has_crypto;
     $feature{"DarwinSSL"} = $has_darwinssl; # alias
-    $feature{"ld_preload"} = ($has_ldpreload && !$debug_build);
-    $feature{"unittest"} = $debug_build;
     $feature{"debug"} = $debug_build;
-    $feature{"TrackMemory"} = $has_memory_tracking;
-    $feature{"large_file"} = $has_largefile;
+    $feature{"getrlimit"} = $has_getrlimit;
+    $feature{"GnuTLS"} = $has_gnutls;
+    $feature{"GSS-API"} = $has_gssapi;
+    $feature{"http/2"} = $has_http2;
+    $feature{"https-proxy"} = $has_httpsproxy;
     $feature{"idn"} = $has_idn;
     $feature{"ipv6"} = $has_ipv6;
+    $feature{"Kerberos"} = $has_kerberos;
+    $feature{"large_file"} = $has_largefile;
+    $feature{"ld_preload"} = ($has_ldpreload && !$debug_build);
     $feature{"libz"} = $has_libz;
-    $feature{"brotli"} = $has_brotli;
+    $feature{"manual"} = $has_manual;
+    $feature{"Metalink"} = $has_metalink;
+    $feature{"MinGW"} = $has_mingw;
+    $feature{"MultiSSL"} = $has_multissl;
+    $feature{"NSS"} = $has_nss;
     $feature{"NTLM"} = $has_ntlm;
     $feature{"NTLM_WB"} = $has_ntlm_wb;
-    $feature{"SSPI"} = $has_sspi;
-    $feature{"GSS-API"} = $has_gssapi;
-    $feature{"Kerberos"} = $has_kerberos;
-    $feature{"SPNEGO"} = $has_spnego;
-    $feature{"getrlimit"} = $has_getrlimit;
-    $feature{"crypto"} = $has_crypto;
-    $feature{"TLS-SRP"} = $has_tls_srp;
-    $feature{"Metalink"} = $has_metalink;
-    $feature{"http/2"} = $has_http2;
-    $feature{"threaded-resolver"} = $has_threadedres;
+    $feature{"OpenSSL"} = $has_openssl;
     $feature{"PSL"} = $has_psl;
-    $feature{"alt-svc"} = $has_altsvc;
-    $feature{"manual"} = $has_manual;
+    $feature{"Schannel"} = $has_winssl; # alias
+    $feature{"sectransp"} = $has_darwinssl;
+    $feature{"SPNEGO"} = $has_spnego;
+    $feature{"SSL"} = $has_ssl;
+    $feature{"SSLpinning"} = $has_sslpinning;
+    $feature{"SSPI"} = $has_sspi;
+    $feature{"threaded-resolver"} = $has_threadedres;
+    $feature{"TLS-SRP"} = $has_tls_srp;
+    $feature{"TrackMemory"} = $has_memory_tracking;
+    $feature{"unittest"} = $debug_build;
     $feature{"unix-sockets"} = $has_unix;
     $feature{"win32"} = $has_win32;
-    $feature{"MinGW"} = $has_mingw;
+    $feature{"WinSSL"} = $has_winssl;
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
@@ -3063,6 +3077,12 @@ sub checksystem {
 
                 push @protocols, 'http/2';
             }
+            if($feat =~ /HTTPS-proxy/) {
+                $has_httpsproxy=1;
+
+                # 'https-proxy' is used as "server" so consider it a protocol
+                push @protocols, 'https-proxy';
+            }
         }
         #
         # Test harness currently uses a non-stunnel server in order to
@@ -3244,6 +3264,7 @@ sub subVariables {
     $$thing =~ s/${prefix}HTTPTLSPORT/$HTTPTLSPORT/g;
     $$thing =~ s/${prefix}HTTP6PORT/$HTTP6PORT/g;
     $$thing =~ s/${prefix}HTTPSPORT/$HTTPSPORT/g;
+    $$thing =~ s/${prefix}HTTPSPROXYPORT/$HTTPSPROXYPORT/g;
     $$thing =~ s/${prefix}HTTP2PORT/$HTTP2PORT/g;
     $$thing =~ s/${prefix}HTTPPORT/$HTTPPORT/g;
     $$thing =~ s/${prefix}PROXYPORT/$HTTPPROXYPORT/g;
@@ -4769,13 +4790,42 @@ sub startservers {
             }
             if(!$run{'https'}) {
                 ($pid, $pid2, $HTTPSPORT) =
-                    runhttpsserver($verbose, "", $certfile);
+                    runhttpsserver($verbose, "", "", $certfile);
                 if($pid <= 0) {
                     return "failed starting HTTPS server (stunnel)";
                 }
                 logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
                     if($verbose);
                 $run{'https'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "https-proxy") {
+            if(!$stunnel) {
+                # we can't run https-proxy tests without stunnel
+                return "no stunnel";
+            }
+            if($runcert{'https-proxy'} &&
+               ($runcert{'https-proxy'} ne $certfile)) {
+                # stop server when running and using a different cert
+                stopserver('https-proxy');
+            }
+
+            # we front the http-proxy with stunnel so we need to make sure the
+            # proxy runs as well
+            my $f = startservers("http-proxy");
+            if($f) {
+                return $f;1
+            }
+
+            if(!$run{'https-proxy'}) {
+                ($pid, $pid2, $HTTPSPROXYPORT) =
+                    runhttpsserver($verbose, "", "proxy", $certfile);
+                if($pid <= 0) {
+                    return "failed starting HTTPS-proxy (stunnel)";
+                }
+                logmsg sprintf("* pid https-proxy => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'https-proxy'}="$pid $pid2";
             }
         }
         elsif($what eq "httptls") {
