@@ -1,0 +1,87 @@
+<testcase>
+<info>
+<keywords>
+FTP
+HTTPS-proxy
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+# This is the HTTPS proxy response
+<connect>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 0
+
+</connect>
+
+# This is the FTP server response. The Life and Adventures of Robinson Crusoe
+<data>
+I was born in the year 1632, in the city of York, of a good family, though not
+of that country, myfather being a foreigner of Bremen, who settled first at
+Hull.  He got a good estate by merchandise,and leaving off his trade, lived
+afterwards at York, from whence he had married my mother, whoserelations were
+named Robinson, a very good family in that country, and from whom I was
+calledRobinson Kreutznaer; but, by the usual corruption of words in England,
+we are now called—nay wecall ourselves and write our name—Crusoe; and so my
+companions always called me.
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+https-proxy
+</server>
+ <name>
+FTP through HTTPS-proxy
+ </name>
+ <command>
+-p -x https://%HOSTIP:%HTTPSPROXYPORT ftp://ftp.site.thru.https.proxy:%FTPPORT/1631 --proxy-insecure
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+
+# The second CONNECT will be made to the dynamic port number the FTP server
+# opens for us, so we can't compare with a known pre-existing number!
+<strippart>
+s/((https.proxy):(\d+))/$2:12345/
+s/^(User-Agent: curl).*/$1/
+</strippart>
+<proxy>
+CONNECT ftp.site.thru.https.proxy:12345 HTTP/1.1
+Host: ftp.site.thru.https.proxy:12345
+User-Agent: curl
+Proxy-Connection: Keep-Alive
+
+CONNECT ftp.site.thru.https.proxy:12345 HTTP/1.1
+Host: ftp.site.thru.https.proxy:12345
+User-Agent: curl
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PBSZ 0
+PROT P
+PWD
+EPSV
+TYPE I
+SIZE 1631
+RETR 1631
+QUIT
+</protocol>
+</verify>
+</testcase>
