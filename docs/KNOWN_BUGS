@@ -84,6 +84,7 @@ problems may have been fixed or changed somewhat since this was written!
 
  9. SFTP and SCP
  9.1 SFTP doesn't do CURLOPT_POSTQUOTE correct
+ 9.2 wolfssh: publickey auth doesn't work
 
  10. SOCKS
  10.3 FTPS over SOCKS
@@ -632,6 +633,13 @@ problems may have been fixed or changed somewhat since this was written!
  report but it cannot be accepted as-is. See
  https://curl.haxx.se/bug/view.cgi?id=748
 
+9.2 wolfssh: publickey auth doesn't work
+
+ When building curl to use the wolfSSH backend for SFTP, the publickey
+ authentication doesn't work. This is simply funtionality not written for curl
+ yet, the necessary API for make this work is provided by wolfSSH.
+
+ See https://github.com/curl/curl/issues/4820
 
 10. SOCKS
 
