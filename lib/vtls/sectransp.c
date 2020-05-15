@@ -1126,12 +1126,12 @@ static OSStatus CopyIdentityWithLabel(char *label,
 }
 
 static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
+                                           const struct curl_blob *blob,
                                            const char *cPassword,
                                            SecIdentityRef *out_cert_and_key)
 {
   OSStatus status = errSecItemNotFound;
-  CFURLRef pkcs_url = CFURLCreateFromFileSystemRepresentation(NULL,
-    (const UInt8 *)cPath, strlen(cPath), false);
+  CFURLRef pkcs_url = NULL;
   CFStringRef password = cPassword ? CFStringCreateWithCString(NULL,
     cPassword, kCFStringEncodingUTF8) : NULL;
   CFDataRef pkcs_data = NULL;
@@ -1140,8 +1140,26 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
   /* These constants are documented as having first appeared in 10.6 but they
      raise linker errors when used on that cat for some reason. */
 #if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
-  if(CFURLCreateDataAndPropertiesFromResource(NULL, pkcs_url, &pkcs_data,
-   NULL, NULL, &status)) {
+  bool resource_imported;
+
+  if(blob) {
+    pkcs_data = CFDataCreate(kCFAllocatorDefault,
+                             (const unsigned char *)blob->data, blob->len);
+    status = (pkcs_data != NULL) ? errSecSuccess : errSecAllocate;
+    resource_imported = (pkcs_data != NULL);
+  }
+  else {
+    pkcs_url =
+      CFURLCreateFromFileSystemRepresentation(NULL,
+                                              (const UInt8 *)cPath,
+                                              strlen(cPath), false);
+    resource_imported =
+      CFURLCreateDataAndPropertiesFromResource(NULL,
+                                               pkcs_url, &pkcs_data,
+                                               NULL, NULL, &status);
+  }
+
+  if(resource_imported) {
     CFArrayRef items = NULL;
 
   /* On iOS SecPKCS12Import will never add the client certificate to the
@@ -1219,7 +1237,8 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
 #endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
   if(password)
     CFRelease(password);
-  CFRelease(pkcs_url);
+  if(pkcs_url)
+    CFRelease(pkcs_url);
   return status;
 }
 
@@ -1376,8 +1395,10 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
+  const struct curl_blob *ssl_cablob = NULL;
   const bool verifypeer = SSL_CONN_CONFIG(verifypeer);
   char * const ssl_cert = SSL_SET_OPTION(cert);
+  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(cert_blob);
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
@@ -1612,15 +1633,16 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
           "Transport. The private key must be in the Keychain.\n");
   }
 
-  if(ssl_cert) {
+  if(ssl_cert || ssl_cert_blob) {
+    bool is_cert_data = ssl_cert_blob != NULL;
+    bool is_cert_file = (!is_cert_data) && is_file(ssl_cert);
     SecIdentityRef cert_and_key = NULL;
-    bool is_cert_file = is_file(ssl_cert);
 
     /* User wants to authenticate with a client cert. Look for it:
        If we detect that this is a file on disk, then let's load it.
        Otherwise, assume that the user wants to use an identity loaded
        from the Keychain. */
-    if(is_cert_file) {
+    if(is_cert_file || is_cert_data) {
       if(!SSL_SET_OPTION(cert_type))
         infof(data, "WARNING: SSL: Certificate type not set, assuming "
                     "PKCS#12 format.\n");
@@ -1629,7 +1651,7 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
         infof(data, "WARNING: SSL: The Security framework only supports "
                     "loading identities that are in PKCS#12 format.\n");
 
-      err = CopyIdentityFromPKCS12File(ssl_cert,
+      err = CopyIdentityFromPKCS12File(ssl_cert, ssl_cert_blob,
         SSL_SET_OPTION(key_passwd), &cert_and_key);
     }
     else
@@ -1669,27 +1691,30 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
       CFRelease(cert_and_key);
     }
     else {
+      const char *cert_showfilename_error =
+        is_cert_data ? "(memory blob)" : ssl_cert;
+
       switch(err) {
       case errSecAuthFailed: case -25264: /* errSecPkcs12VerifyFailure */
         failf(data, "SSL: Incorrect password for the certificate \"%s\" "
-                    "and its private key.", ssl_cert);
+                    "and its private key.", cert_showfilename_error);
         break;
       case -26275: /* errSecDecode */ case -25257: /* errSecUnknownFormat */
         failf(data, "SSL: Couldn't make sense of the data in the "
                     "certificate \"%s\" and its private key.",
-                    ssl_cert);
+                    cert_showfilename_error);
         break;
       case -25260: /* errSecPassphraseRequired */
         failf(data, "SSL The certificate \"%s\" requires a password.",
-                    ssl_cert);
+                    cert_showfilename_error);
         break;
       case errSecItemNotFound:
         failf(data, "SSL: Can't find the certificate \"%s\" and its private "
-                    "key in the Keychain.", ssl_cert);
+                    "key in the Keychain.", cert_showfilename_error);
         break;
       default:
         failf(data, "SSL: Can't load the certificate \"%s\" and its private "
-                    "key: OSStatus %d", ssl_cert, err);
+                    "key: OSStatus %d", cert_showfilename_error, err);
         break;
       }
       return CURLE_SSL_CERTPROBLEM;
@@ -1721,7 +1746,8 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
 #else
   if(SSLSetSessionOption != NULL) {
 #endif /* CURL_BUILD_MAC */
-    bool break_on_auth = !conn->ssl_config.verifypeer || ssl_cafile;
+    bool break_on_auth = !conn->ssl_config.verifypeer ||
+      ssl_cafile || ssl_cablob;
     err = SSLSetSessionOption(backend->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               break_on_auth);
@@ -1749,10 +1775,11 @@ static CURLcode sectransp_connect_step1(struct connectdata *conn,
   }
 #endif /* CURL_BUILD_MAC_10_6 || CURL_BUILD_IOS */
 
-  if(ssl_cafile && verifypeer) {
-    bool is_cert_file = is_file(ssl_cafile);
+  if((ssl_cafile || ssl_cablob) && verifypeer) {
+    bool is_cert_data = ssl_cablob != NULL;
+    bool is_cert_file = (!is_cert_data) && is_file(ssl_cafile);
 
-    if(!is_cert_file) {
+    if(!(is_cert_file || is_cert_data)) {
       failf(data, "SSL: can't load CA certificate file %s", ssl_cafile);
       return CURLE_SSL_CACERT_BADFILE;
     }
