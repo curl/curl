@@ -621,12 +621,143 @@ static bool is_pkcs11_uri(const char *string)
 static CURLcode Curl_ossl_set_engine(struct Curl_easy *data,
                                      const char *engine);
 
+/* derivated from SSL_CTX_use_certificate_file */
+static int
+SSL_CTX_use_certificate_bio(SSL_CTX *ctx, BIO *in, int type,
+                            const char *key_passwd)
+{
+  int ret = 0;
+  X509 *x = NULL;
+
+  if(type == SSL_FILETYPE_ASN1) {
+    /* j = ERR_R_ASN1_LIB; */
+    x = d2i_X509_bio(in, NULL);
+  }
+  else if(type == SSL_FILETYPE_PEM) {
+    /* ERR_R_PEM_LIB; */
+    x = PEM_read_bio_X509(in, NULL,
+                          passwd_callback, (void *)key_passwd);
+  }
+  else {
+    ret = 0;
+    goto end;
+  }
+
+  if(x == NULL) {
+    ret = 0;
+    goto end;
+  }
+
+  ret = SSL_CTX_use_certificate(ctx, x);
+ end:
+  X509_free(x);
+  return ret;
+}
+
+/* derivated from SSL_CTX_use_PrivateKey_file */
+static int
+SSL_CTX_use_PrivateKey_bio(SSL_CTX *ctx, BIO* in, int type,
+                                const char *key_passwd)
+{
+  int ret = 0;
+  EVP_PKEY *pkey = NULL;
+
+  if(type == SSL_FILETYPE_PEM) {
+      /* j = ERR_R_PEM_LIB;*/
+    pkey = PEM_read_bio_PrivateKey(in, NULL,
+                                     passwd_callback, (void *)key_passwd);
+  }
+  else if(type == SSL_FILETYPE_ASN1) {
+    /* j = ERR_R_ASN1_LIB;*/
+    pkey = d2i_PrivateKey_bio(in, NULL);
+  }
+  else {
+    ret = 0;
+    goto end;
+  }
+  if(pkey == NULL) {
+    ret = 0;
+    goto end;
+  }
+  ret = SSL_CTX_use_PrivateKey(ctx, pkey);
+  EVP_PKEY_free(pkey);
+ end:
+  return ret;
+}
+
+/* derivated from SSL_CTX_use_certificate_chain_file */
+static int
+SSL_CTX_use_certificate_chain_bio(SSL_CTX *ctx, BIO* in,
+                                  const char *key_passwd)
+{
+/* SSL_CTX_add1_chain_cert introduced in OpenSSL 1.0.2 */
+#if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) /* 1.0.2 or later */
+  int ret = 0;
+  X509 *x = NULL;
+  void *passwd_callback_userdata = (void *)key_passwd;
+
+  ERR_clear_error();
+
+  x = PEM_read_bio_X509_AUX(in, NULL,
+                            passwd_callback, (void *)key_passwd);
+
+  if(x == NULL) {
+    ret = 0;
+    goto end;
+  }
+
+  ret = SSL_CTX_use_certificate(ctx, x);
+
+  if(ERR_peek_error() != 0)
+      ret = 0;
+
+  if(ret) {
+    X509 *ca;
+    unsigned long err;
+
+    if(!SSL_CTX_clear_chain_certs(ctx)) {
+      ret = 0;
+      goto end;
+    }
+
+    while((ca = PEM_read_bio_X509(in, NULL, passwd_callback,
+                                  passwd_callback_userdata))
+           != NULL) {
+
+      if(!SSL_CTX_add0_chain_cert(ctx, ca)) {
+        X509_free(ca);
+        ret = 0;
+        goto end;
+      }
+    }
+
+    err = ERR_peek_last_error();
+    if(ERR_GET_LIB(err) == ERR_LIB_PEM
+       && ERR_GET_REASON(err) == PEM_R_NO_START_LINE)
+       ERR_clear_error();
+    else
+      ret = 0;
+  }
+
+ end:
+  X509_free(x);
+  return ret;
+#else
+  (void)ctx; /* unused */
+  (void)in; /* unused */
+  (void)key_passwd; /* unused */
+  return 0;
+#endif
+}
+
 static
 int cert_stuff(struct connectdata *conn,
                SSL_CTX* ctx,
                char *cert_file,
+               BIO *cert_bio,
                const char *cert_type,
                char *key_file,
+               BIO* key_bio,
                const char *key_type,
                char *key_passwd)
 {
@@ -636,10 +767,11 @@ int cert_stuff(struct connectdata *conn,
 
   int file_type = do_file_type(cert_type);
 
-  if(cert_file || (file_type == SSL_FILETYPE_ENGINE)) {
+  if(cert_file || cert_bio || (file_type == SSL_FILETYPE_ENGINE)) {
     SSL *ssl;
     X509 *x509;
     int cert_done = 0;
+    int cert_use_result;
 
     if(key_passwd) {
       /* set the password in the callback userdata */
@@ -652,8 +784,10 @@ int cert_stuff(struct connectdata *conn,
     switch(file_type) {
     case SSL_FILETYPE_PEM:
       /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
-      if(SSL_CTX_use_certificate_chain_file(ctx,
-                                            cert_file) != 1) {
+      cert_use_result = cert_bio ?
+          SSL_CTX_use_certificate_chain_bio(ctx, cert_bio, key_passwd) :
+          SSL_CTX_use_certificate_chain_file(ctx, cert_file);
+      if(cert_use_result != 1) {
         failf(data,
               "could not load PEM client certificate, " OSSL_PACKAGE
               " error %s, "
@@ -668,9 +802,12 @@ int cert_stuff(struct connectdata *conn,
       /* SSL_CTX_use_certificate_file() works with either PEM or ASN1, but
          we use the case above for PEM so this can only be performed with
          ASN1 files. */
-      if(SSL_CTX_use_certificate_file(ctx,
-                                      cert_file,
-                                      file_type) != 1) {
+
+      cert_use_result = cert_bio ?
+          SSL_CTX_use_certificate_bio(ctx, cert_bio,
+                                      file_type, key_passwd) :
+          SSL_CTX_use_certificate_file(ctx, cert_file, file_type);
+      if(cert_use_result != 1) {
         failf(data,
               "could not load ASN1 client certificate, " OSSL_PACKAGE
               " error %s, "
@@ -750,27 +887,31 @@ int cert_stuff(struct connectdata *conn,
       PKCS12 *p12 = NULL;
       EVP_PKEY *pri;
       STACK_OF(X509) *ca = NULL;
+      if(!cert_bio) {
+        fp = BIO_new(BIO_s_file());
+        if(fp == NULL) {
+          failf(data,
+                "BIO_new return NULL, " OSSL_PACKAGE
+                " error %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)) );
+          return 0;
+        }
 
-      fp = BIO_new(BIO_s_file());
-      if(fp == NULL) {
-        failf(data,
-              "BIO_new return NULL, " OSSL_PACKAGE
-              " error %s",
-              ossl_strerror(ERR_get_error(), error_buffer,
-                            sizeof(error_buffer)) );
-        return 0;
+        if(BIO_read_filename(fp, cert_file) <= 0) {
+          failf(data, "could not open PKCS12 file '%s'", cert_file);
+          BIO_free(fp);
+          return 0;
+        }
       }
 
-      if(BIO_read_filename(fp, cert_file) <= 0) {
-        failf(data, "could not open PKCS12 file '%s'", cert_file);
+      p12 = d2i_PKCS12_bio(cert_bio ? cert_bio : fp, NULL);
+      if(fp)
         BIO_free(fp);
-        return 0;
-      }
-      p12 = d2i_PKCS12_bio(fp, NULL);
-      BIO_free(fp);
 
       if(!p12) {
-        failf(data, "error reading PKCS12 file '%s'", cert_file);
+        failf(data, "error reading PKCS12 file '%s'",
+              cert_bio ? "(memory blob)" : cert_file);
         return 0;
       }
 
@@ -851,8 +992,10 @@ int cert_stuff(struct connectdata *conn,
       return 0;
     }
 
-    if(!key_file)
+    if((!key_file) && (!key_bio)) {
       key_file = cert_file;
+      key_bio = cert_bio;
+    }
     else
       file_type = do_file_type(key_type);
 
@@ -862,9 +1005,12 @@ int cert_stuff(struct connectdata *conn,
         break;
       /* FALLTHROUGH */
     case SSL_FILETYPE_ASN1:
-      if(SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type) != 1) {
+      cert_use_result = key_bio ?
+          SSL_CTX_use_PrivateKey_bio(ctx, key_bio, file_type, key_passwd) :
+          SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type);
+      if(cert_use_result != 1) {
         failf(data, "unable to set private key file: '%s' type %s",
-              key_file, key_type?key_type:"PEM");
+              key_file?key_file:"(memory blob)", key_type?key_type:"PEM");
         return 0;
       }
       break;
@@ -2418,6 +2564,7 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   const enum CURL_TLSAUTH ssl_authtype = SSL_SET_OPTION(authtype);
 #endif
   char * const ssl_cert = SSL_SET_OPTION(cert);
+  const struct curl_blob *ssl_cert_blob = SSL_SET_OPTION(cert_blob);
   const char * const ssl_cert_type = SSL_SET_OPTION(cert_type);
   const char * const ssl_cafile = SSL_CONN_CONFIG(CAfile);
   const char * const ssl_capath = SSL_CONN_CONFIG(CApath);
@@ -2662,10 +2809,31 @@ static CURLcode ossl_connect_step1(struct connectdata *conn, int sockindex)
   }
 #endif
 
-  if(ssl_cert || ssl_cert_type) {
-    if(!cert_stuff(conn, backend->ctx, ssl_cert, ssl_cert_type,
-                   SSL_SET_OPTION(key), SSL_SET_OPTION(key_type),
-                   SSL_SET_OPTION(key_passwd))) {
+  if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
+    BIO *ssl_cert_bio = NULL;
+    BIO *ssl_key_bio = NULL;
+    int result_cert_stuff;
+    if(ssl_cert_blob) {
+      ssl_cert_bio = BIO_new_mem_buf(ssl_cert_blob->data,
+                                     (int)ssl_cert_blob->len);
+      if(!ssl_cert_bio)
+        return CURLE_SSL_CERTPROBLEM;
+    }
+    if(SSL_SET_OPTION(key_blob)) {
+      ssl_key_bio = BIO_new_mem_buf(SSL_SET_OPTION(key_blob)->data,
+                                    (int)SSL_SET_OPTION(key_blob)->len);
+      if(!ssl_key_bio)
+        return CURLE_SSL_CERTPROBLEM;
+    }
+    result_cert_stuff = cert_stuff(conn, backend->ctx,
+                   ssl_cert, ssl_cert_bio, ssl_cert_type,
+                   SSL_SET_OPTION(key), ssl_key_bio,
+                   SSL_SET_OPTION(key_type), SSL_SET_OPTION(key_passwd));
+    if(ssl_cert_bio)
+      BIO_free(ssl_cert_bio);
+    if(ssl_key_bio)
+      BIO_free(ssl_key_bio);
+    if(!result_cert_stuff) {
       /* failf() is already done in cert_stuff() */
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -3714,27 +3882,32 @@ static CURLcode servercert(struct connectdata *conn,
        deallocating the certificate. */
 
     /* e.g. match issuer name with provided issuer certificate */
-    if(SSL_SET_OPTION(issuercert)) {
-      fp = BIO_new(BIO_s_file());
-      if(fp == NULL) {
-        failf(data,
-              "BIO_new return NULL, " OSSL_PACKAGE
-              " error %s",
-              ossl_strerror(ERR_get_error(), error_buffer,
-                            sizeof(error_buffer)) );
-        X509_free(backend->server_cert);
-        backend->server_cert = NULL;
-        return CURLE_OUT_OF_MEMORY;
-      }
+    if(SSL_SET_OPTION(issuercert) || SSL_SET_OPTION(issuercert_blob)) {
+      if(SSL_SET_OPTION(issuercert_blob))
+        fp = BIO_new_mem_buf(SSL_SET_OPTION(issuercert_blob)->data,
+                             (int)SSL_SET_OPTION(issuercert_blob)->len);
+      else {
+        fp = BIO_new(BIO_s_file());
+        if(fp == NULL) {
+          failf(data,
+                "BIO_new return NULL, " OSSL_PACKAGE
+                " error %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)) );
+          X509_free(backend->server_cert);
+          backend->server_cert = NULL;
+          return CURLE_OUT_OF_MEMORY;
+        }
 
-      if(BIO_read_filename(fp, SSL_SET_OPTION(issuercert)) <= 0) {
-        if(strict)
-          failf(data, "SSL: Unable to open issuer cert (%s)",
-                SSL_SET_OPTION(issuercert));
-        BIO_free(fp);
-        X509_free(backend->server_cert);
-        backend->server_cert = NULL;
-        return CURLE_SSL_ISSUER_ERROR;
+        if(BIO_read_filename(fp, SSL_SET_OPTION(issuercert)) <= 0) {
+          if(strict)
+            failf(data, "SSL: Unable to open issuer cert (%s)",
+                  SSL_SET_OPTION(issuercert));
+          BIO_free(fp);
+          X509_free(backend->server_cert);
+          backend->server_cert = NULL;
+          return CURLE_SSL_ISSUER_ERROR;
+        }
       }
 
       issuer = PEM_read_bio_X509(fp, NULL, ZERO_NULL, NULL);

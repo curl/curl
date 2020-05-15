@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,6 +24,43 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+/* Application can use a memory PKCS12 certificate with CURLOPT_SSLCERT
+ *  with OpenSSL, Schannel or SecTransport
+ *
+ *
+ *  Example if with certificate binary data and size in:
+ *    void* certdata;
+ *    size_t certsize;
+ *    ...
+ *  set the certificate with:
+ *    struct curl_blob structblob;
+ *    structblob.data = certdata;
+ *    structblob.len = certize;
+ *    structblob.flags = CURL_BLOB_COPY;
+ *    curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &structblob);
+ *  struct curl_blob is just a structures which contain pointer to
+ *  data buffer, length and a boolean flag about buffer duplication
+ *
+ *  with flags CURL_BLOB_COPY, certdata can be discarded
+ *    after calling curl_easy_setopt
+ *  with CURL_BLOB_NOCOPY, the data pointed to is NOT copied by
+ *     the library: as a consequence, it must be preserved by the calling
+ *     application until the associated transfer finishes
+ *
+ * about the idea, see https://curl.haxx.se/mail/lib-2016-09/0074.html */
+
+
+#define CURL_BLOB_COPY     (1)
+#define CURL_BLOB_NOCOPY   (0)
+
+/* the struct curl_blob store binary data parameters */
+
+struct curl_blob {
+    void *data;
+    size_t len;
+    int flags;
+};
 
 CURL_EXTERN CURL *curl_easy_init(void);
 CURL_EXTERN CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);

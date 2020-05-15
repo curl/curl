@@ -683,7 +683,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
     ret = curl_easy_setopt(curl, tag, pval);
 
   }
-  else {
+  else if(tag < CURLOPTTYPE_BLOB) {
     /* Value is expected to be curl_off_t */
     curl_off_t oval = va_arg(arg, curl_off_t);
     msnprintf(buf, sizeof(buf),
@@ -693,6 +693,21 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *config,
 
     if(!oval)
       skip = TRUE;
+  }
+  else {
+    /* Value is a blob */
+    void *pblob = va_arg(arg, void *);
+
+    /* blob are never printable */
+
+    if(pblob) {
+      value = "blobpointer";
+      remark = TRUE;
+    }
+    else
+      skip = TRUE;
+
+    ret = curl_easy_setopt(curl, tag, pblob);
   }
 
   va_end(arg);
