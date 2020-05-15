@@ -1346,10 +1346,11 @@ CURLcode Curl_http2_done_sending(struct connectdata *conn)
 
     struct HTTP *stream = conn->data->req.protop;
 
+    struct http_conn *httpc = &conn->proto.httpc;
+    nghttp2_session *h2 = httpc->h2;
+
     if(stream->upload_left) {
       /* If the stream still thinks there's data left to upload. */
-      struct http_conn *httpc = &conn->proto.httpc;
-      nghttp2_session *h2 = httpc->h2;
 
       stream->upload_left = 0; /* DONE! */
 
@@ -1358,6 +1359,23 @@ CURLcode Curl_http2_done_sending(struct connectdata *conn)
       (void)nghttp2_session_resume_data(h2, stream->stream_id);
 
       (void)h2_process_pending_input(conn, httpc, &result);
+    }
+
+    /* If nghttp2 still has pending frames unsent */
+    if(nghttp2_session_want_write(h2)) {
+      struct Curl_easy *data = conn->data;
+      struct SingleRequest *k = &data->req;
+      int rv;
+
+      H2BUGF(infof(data, "HTTP/2 still wants to send data (easy %p)\n", data));
+
+      /* re-set KEEP_SEND to make sure we are called again */
+      k->keepon |= KEEP_SEND;
+
+      /* and attempt to send the pending frames */
+      rv = h2_session_send(data, h2);
+      if(rv != 0)
+        result = CURLE_SEND_ERROR;
     }
   }
   return result;
