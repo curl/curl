@@ -339,7 +339,7 @@ static int userauth(byte authtype,
   struct connectdata *conn = ctx;
   DEBUGF(infof(conn->data, "wolfssh callback: type %s\n",
                authtype == WOLFSSH_USERAUTH_PASSWORD ? "PASSWORD" :
-               "PUBLICCKEY"));
+               "PUBLICKEY"));
   if(authtype == WOLFSSH_USERAUTH_PASSWORD) {
     authdata->sf.password.password = (byte *)conn->passwd;
     authdata->sf.password.passwordSz = (word32) strlen(conn->passwd);
