@@ -201,7 +201,7 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
-  return s->leng ? s->bufr : (char *)"";
+  return s->bufr;
 }
 
 /*
@@ -212,7 +212,7 @@ unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
-  return s->leng ? (unsigned char *)s->bufr : (unsigned char *)"";
+  return (unsigned char *)s->bufr;
 }
 
 /*
