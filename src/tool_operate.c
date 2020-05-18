@@ -1657,6 +1657,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           }
           if(config->proxy_insecure_ok) {
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0L);
+            protocol = 0;
             my_setopt(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0L);
           }
           else {
