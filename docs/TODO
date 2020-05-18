@@ -109,9 +109,11 @@
  13.6 Provide callback for cert verification
  13.7 improve configure --with-ssl
  13.8 Support DANE
+ 13.9 TLS record padding
  13.10 Support Authority Information Access certificate extension (AIA)
  13.11 Support intermediate & root pinning for PINNEDPUBLICKEY
  13.12 Support HSTS
+ 13.13 Make sure we forbid TLS 1.3 post-handshake authentication
  13.14 Support the clienthello extension
 
  14. GnuTLS
@@ -744,6 +746,14 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  Björn Stenberg wrote a separate initial take on DANE that was never
  completed.
 
+13.9 TLS record padding
+
+ TLS (1.3) offers optional record padding and OpenSSL provides an API for it.
+ I could make sense for libcurl to offer this ability to applications to make
+ traffic patterns harder to figure out by network traffic observers.
+
+ See https://github.com/curl/curl/issues/5398
+
 13.10 Support Authority Information Access certificate extension (AIA)
 
  AIA can provide various things like CRLs but more importantly information
@@ -759,22 +769,29 @@ that doesn't exist on the server, just like --ftp-create-dirs.
 
  CURLOPT_PINNEDPUBLICKEY does not consider the hashes of intermediate & root
  certificates when comparing the pinned keys. Therefore it is not compatible
- with "HTTP Public Key Pinning" as there also intermediate and root certificates
- can be pinned. This is very useful as it prevents webadmins from "locking
- themself out of their servers".
+ with "HTTP Public Key Pinning" as there also intermediate and root
+ certificates can be pinned. This is very useful as it prevents webadmins from
+ "locking themself out of their servers".
 
- Adding this feature would make curls pinning 100% compatible to HPKP and allow
- more flexible pinning.
+ Adding this feature would make curls pinning 100% compatible to HPKP and
+ allow more flexible pinning.
 
 13.12 Support HSTS
 
  "HTTP Strict Transport Security" is TOFU (trust on first use), time-based
  features indicated by a HTTP header send by the webserver. It is widely used
- in browsers and it's purpose is to prevent insecure HTTP connections after
- a previous HTTPS connection. It protects against SSLStripping attacks.
+ in browsers and it's purpose is to prevent insecure HTTP connections after a
+ previous HTTPS connection. It protects against SSLStripping attacks.
 
  Doc: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
  RFC 6797: https://tools.ietf.org/html/rfc6797
+
+13.13 Make sure we forbid TLS 1.3 post-handshake authentication
+
+ RFC 8740 explains how using HTTP/2 must forbid the use of TLS 1.3
+ post-handshake authentication. We should make sure to live up to that.
+
+ See https://github.com/curl/curl/issues/5396
 
 13.14 Support the clienthello extension
 
