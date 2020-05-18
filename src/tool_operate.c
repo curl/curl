@@ -444,7 +444,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       RETRY_FTP,
       RETRY_LAST /* not used */
     } retry = RETRY_NO;
-    long response;
+    long response = 0;
     if((CURLE_OPERATION_TIMEDOUT == result) ||
        (CURLE_COULDNT_RESOLVE_HOST == result) ||
        (CURLE_COULDNT_RESOLVE_PROXY == result) ||
@@ -453,7 +453,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       retry = RETRY_TIMEOUT;
     else if(config->retry_connrefused &&
             (CURLE_COULDNT_CONNECT == result)) {
-      long oserrno;
+      long oserrno = 0;
       curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &oserrno);
       if(ECONNREFUSED == oserrno)
         retry = RETRY_CONNREFUSED;
@@ -464,7 +464,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       /* If it returned OK. _or_ failonerror was enabled and it
          returned due to such an error, check for HTTP transient
          errors to retry on. */
-      long protocol;
+      long protocol = 0;
       curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
       if((protocol == CURLPROTO_HTTP) || (protocol == CURLPROTO_HTTPS)) {
         /* This was HTTP(S) */
@@ -492,7 +492,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       }
     } /* if CURLE_OK */
     else if(result) {
-      long protocol;
+      long protocol = 0;
 
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
       curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
@@ -589,7 +589,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   else if(per->metalink) {
     /* Metalink: Decide to try the next resource or not. Try the next resource
        if download was not successful. */
-    long response;
+    long response = 0;
     if(CURLE_OK == result) {
       /* TODO We want to try next resource when download was
          not successful. How to know that? */
