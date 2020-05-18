@@ -387,7 +387,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
   if(pp->cache_size && pp->cache && pp->cache[0] > '3') {
     /* Data connection could not be established, let's return */
     infof(data, "There is negative response in cache while serv connect\n");
-    Curl_GetFTPResponse(&nread, conn, &ftpcode);
+    (void)Curl_GetFTPResponse(&nread, conn, &ftpcode);
     return CURLE_FTP_ACCEPT_FAILED;
   }
 
@@ -409,7 +409,7 @@ static CURLcode ReceivedServerConnect(struct connectdata *conn, bool *received)
     }
     else if(result & CURL_CSELECT_IN) {
       infof(data, "Ctrl conn has data while waiting for data conn\n");
-      Curl_GetFTPResponse(&nread, conn, &ftpcode);
+      (void)Curl_GetFTPResponse(&nread, conn, &ftpcode);
 
       if(ftpcode/100 > 3)
         return CURLE_FTP_ACCEPT_FAILED;
