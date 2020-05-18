@@ -609,6 +609,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
       if(msg) {
         result = msg->data.result;
         done = TRUE;
+        sleep_ms = 0;
       }
     }
   }
