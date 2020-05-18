@@ -960,11 +960,12 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
         char ipaddress[MAX_IPADR_LEN];
         char buffer[STRERROR_LEN];
-        Curl_printable_address(conn->tempaddr[i], ipaddress, MAX_IPADR_LEN);
-#endif
+        Curl_printable_address(conn->tempaddr[i], ipaddress,
+                               sizeof(ipaddress));
         infof(data, "connect to %s port %ld failed: %s\n",
               ipaddress, conn->port,
               Curl_strerror(error, buffer, sizeof(buffer)));
+#endif
 
         conn->timeoutms_per_addr = conn->tempaddr[i]->ai_next == NULL ?
           allow : allow / 2;

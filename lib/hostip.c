@@ -131,14 +131,14 @@ int Curl_num_addresses(const struct Curl_addrinfo *addr)
 }
 
 /*
- * Curl_printable_address() returns a printable version of the 1st address
+ * Curl_printable_address() stores a printable version of the 1st address
  * given in the 'ai' argument. The result will be stored in the buf that is
  * bufsize bytes big.
  *
- * If the conversion fails, it returns NULL.
+ * If the conversion fails, the target buffer is empty.
  */
-const char *Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
-                                   size_t bufsize)
+void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
+                            size_t bufsize)
 {
   const struct sockaddr_in *sa4;
   const struct in_addr *ipaddr4;
@@ -146,24 +146,27 @@ const char *Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
   const struct sockaddr_in6 *sa6;
   const struct in6_addr *ipaddr6;
 #endif
+  DEBUGASSERT(bufsize);
+  buf[0] = 0;
 
   switch(ai->ai_family) {
     case AF_INET:
       sa4 = (const void *)ai->ai_addr;
       ipaddr4 = &sa4->sin_addr;
-      return Curl_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf,
-                            bufsize);
+      Curl_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf,
+                     bufsize);
+      return;
 #ifdef ENABLE_IPV6
     case AF_INET6:
       sa6 = (const void *)ai->ai_addr;
       ipaddr6 = &sa6->sin6_addr;
-      return Curl_inet_ntop(ai->ai_family, (const void *)ipaddr6, buf,
-                            bufsize);
+      Curl_inet_ntop(ai->ai_family, (const void *)ipaddr6, buf,
+                     bufsize);
+      return;
 #endif
-    default:
+  default:
       break;
   }
-  return NULL;
 }
 
 /*

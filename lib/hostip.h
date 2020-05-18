@@ -165,8 +165,8 @@ CURLcode Curl_addrinfo_callback(struct connectdata *conn,
  * given in the 'ip' argument. The result will be stored in the buf that is
  * bufsize bytes big.
  */
-const char *Curl_printable_address(const struct Curl_addrinfo *ip,
-                                   char *buf, size_t bufsize);
+void Curl_printable_address(const struct Curl_addrinfo *ip,
+                            char *buf, size_t bufsize);
 
 /*
  * Curl_fetch_addr() fetches a 'Curl_dns_entry' already in the DNS cache.
