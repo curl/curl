@@ -47,6 +47,7 @@ include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
 project(CURL C)
+set(CMAKE_C_STANDARD 90)
 
 message(WARNING "the curl cmake build system is poorly maintained. Be aware")
 
@@ -367,6 +368,10 @@ if(CMAKE_USE_SECTRANSP)
 endif()
 
 if(CMAKE_USE_OPENSSL)
+  if ((NOT DEFINED OPENSSL_ROOT_DIR OR NOT IS_DIRECTORY OPENSSL_ROOT_DIR)
+          AND CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND IS_DIRECTORY "/usr/local/opt/openssl")
+    set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
+  endif()
   find_package(OpenSSL REQUIRED)
   set(SSL_ENABLED ON)
   set(USE_OPENSSL ON)
