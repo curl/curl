@@ -774,6 +774,7 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
   CONNECT_RESOLVED:
   case CONNECT_RESOLVED: {
     struct Curl_addrinfo *hp = NULL;
+    size_t destlen;
     if(dns)
       hp = dns->addr;
     if(!hp) {
@@ -782,13 +783,9 @@ CURLcode Curl_SOCKS5(const char *proxy_user,
       return CURLE_COULDNT_RESOLVE_HOST;
     }
 
-    if(Curl_printable_address(hp, dest, sizeof(dest))) {
-      size_t destlen = strlen(dest);
-      msnprintf(dest + destlen, sizeof(dest) - destlen, ":%d", remote_port);
-    }
-    else {
-      strcpy(dest, "unknown");
-    }
+    Curl_printable_address(hp, dest, sizeof(dest));
+    destlen = strlen(dest);
+    msnprintf(dest + destlen, sizeof(dest) - destlen, ":%d", remote_port);
 
     len = 0;
     socksreq[len++] = 5; /* version (SOCKS5) */
