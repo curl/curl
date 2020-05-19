@@ -223,8 +223,7 @@ static void SHA256_Update(SHA256_CTX *ctx,
 
 static void SHA256_Final(unsigned char *digest, SHA256_CTX *ctx)
 {
-  unsigned long length;
-  length = 0;
+  unsigned long length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
   if(length == SHA256_DIGEST_LENGTH)
