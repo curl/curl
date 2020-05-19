@@ -149,6 +149,7 @@
  18.11 Windows: set attribute 'archive' for completed downloads
  18.12 keep running, read instructions from pipe/socket
  18.13 Ratelimit or wait between serial requests
+ 18.14 --dry-run
  18.15 --retry should resume
  18.16 send only part of --data
  18.17 consider file name from the redirected URL with -O ?
@@ -1016,6 +1017,13 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  https://www.ietf.org/id/draft-polli-ratelimit-headers-02.html
 
  See https://github.com/curl/curl/issues/5406
+
+18.14 --dry-run
+
+ A command line option that makes curl show exactly what it would do and send
+ if it would run for real.
+
+ See https://github.com/curl/curl/issues/5426
 
 18.15 --retry should resume
 
