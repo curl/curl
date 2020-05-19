@@ -148,6 +148,7 @@
  18.10 improve how curl works in a windows console window
  18.11 Windows: set attribute 'archive' for completed downloads
  18.12 keep running, read instructions from pipe/socket
+ 18.13 Ratelimit or wait between serial requests
  18.15 --retry should resume
  18.16 send only part of --data
  18.17 consider file name from the redirected URL with -O ?
@@ -1005,6 +1006,16 @@ that doesn't exist on the server, just like --ftp-create-dirs.
  over a socket to make further instructions so that a second subsequent curl
  invoke can talk to the still running instance and ask for transfers to get
  done, and thus maintain its connection pool, DNS cache and more.
+
+18.13 Ratelimit or wait between serial requests
+
+ Consider a command line option that can make curl do multiple serial requests
+ slow, potentially with a (random) wait between transfers. There's also a
+ propsed set of standard HTTP headers to let servers let the client adapt to
+ its rate limits:
+ https://www.ietf.org/id/draft-polli-ratelimit-headers-02.html
+
+ See https://github.com/curl/curl/issues/5406
 
 18.15 --retry should resume
 
