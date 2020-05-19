@@ -2036,6 +2036,23 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT_ORIG],
                              va_arg(param, struct curl_blob *));
     break;
+#ifndef CURL_DISABLE_PROXY
+  case CURLOPT_PROXY_ISSUERCERT:
+    /*
+     * Set Issuer certificate file
+     * to check certificates issuer
+     */
+    result = Curl_setstropt(&data->set.str[STRING_SSL_ISSUERCERT_PROXY],
+                            va_arg(param, char *));
+    break;
+  case CURLOPT_PROXY_ISSUERCERT_BLOB:
+    /*
+     * Blob that holds Issuer certificate to check certificates issuer
+     */
+    result = Curl_setblobopt(&data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY],
+                             va_arg(param, struct curl_blob *));
+    break;
+#endif
 #ifndef CURL_DISABLE_TELNET
   case CURLOPT_TELNETOPTIONS:
     /*

@@ -258,6 +258,8 @@ man_MANS =                                      \
   CURLOPT_PROXY_CAPATH.3                        \
   CURLOPT_PROXY_CRLFILE.3                       \
   CURLOPT_PROXY_KEYPASSWD.3                     \
+  CURLOPT_PROXY_ISSUERCERT.3                    \
+  CURLOPT_PROXY_ISSUERCERT_BLOB.3               \
   CURLOPT_PROXY_PINNEDPUBLICKEY.3               \
   CURLOPT_PROXY_SERVICE_NAME.3                  \
   CURLOPT_PROXY_SSLCERT.3                       \
