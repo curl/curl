@@ -38,6 +38,8 @@ extern const char *path;
 /* global variable, log file name */
 extern const char *serverlogfile;
 
+extern const char *cmdfile;
+
 #if defined(WIN32) || defined(_WIN32)
 #include <process.h>
 #include <fcntl.h>
