@@ -425,10 +425,6 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
     metalink_parser_context_delete(outs->metalink_parser);
 #endif /* USE_METALINK */
 
-  if(outs->is_cd_filename && outs->stream && !global->mute &&
-     outs->filename)
-    printf("curl: Saved to filename '%s'\n", outs->filename);
-
   /* if retry-max-time is non-zero, make sure we haven't exceeded the
      time */
   if(per->retry_numretries &&
