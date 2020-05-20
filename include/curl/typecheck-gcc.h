@@ -392,8 +392,9 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
 /* groups of curl_easy_getinfo infos that take the same type of argument */
 
 /* evaluates to true if info expects a pointer to char * argument */
-#define curlcheck_string_info(info)                     \
-  (CURLINFO_STRING < (info) && (info) < CURLINFO_LONG)
+#define curlcheck_string_info(info)                             \
+  (CURLINFO_STRING < (info) && (info) < CURLINFO_LONG &&        \
+   (info) != CURLINFO_PRIVATE)
 
 /* evaluates to true if info expects a pointer to long argument */
 #define curlcheck_long_info(info)                       \
