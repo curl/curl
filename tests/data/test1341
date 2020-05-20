@@ -40,7 +40,7 @@ HTTP GET with -O -J and Content-Disposition, -D stdout
 CURL_TESTDIR=%PWD/log
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/1341 -J -O -D -
+http://%HOSTIP:%HTTPPORT/1341 -J -O -D - -w "curl: Saved to filename %{filename_effective}\n"
 </command>
 </client>
 
@@ -70,7 +70,7 @@ Connection: close
 Content-Type: text/html
 Content-Disposition: filename=name1341; charset=funny; option=strange
 
-curl: Saved to filename '%PWD/log/name1341'
+curl: Saved to filename %PWD/log/name1341
 </file2>
 
 </verify>
