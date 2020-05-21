@@ -47,7 +47,6 @@ include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
 project(CURL C)
-set(CMAKE_C_STANDARD 90)
 
 message(WARNING "the curl cmake build system is poorly maintained. Be aware")
 
