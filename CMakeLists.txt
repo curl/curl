@@ -246,10 +246,6 @@ if(ENABLE_MANUAL)
   set(USE_MANUAL ON)
 endif()
 
-# We need ansi c-flags, especially on HP
-set(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
-set(CMAKE_REQUIRED_FLAGS ${CMAKE_ANSI_CFLAGS})
-
 if(CURL_STATIC_CRT)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
