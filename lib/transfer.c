@@ -838,6 +838,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
                 ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
                 ", bytecount = %" CURL_FORMAT_CURL_OFF_T "\n",
                 excess, k->size, k->maxdownload, k->bytecount);
+          connclose(conn, "excess found in a read");
         }
 
         nread = (ssize_t) (k->maxdownload - k->bytecount);
