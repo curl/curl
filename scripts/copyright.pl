@@ -55,6 +55,7 @@ my @whitelist=(
     'curl_multi_socket_all.3',
     'curl_strnequal.3',
     'symbols-in-versions',
+    'options-in-versions',
 
     # macos-framework files
     '^lib\/libcurl.plist',
@@ -83,6 +84,9 @@ my @whitelist=(
     # macos framework generated files
     '^src\/macos\/curl.mcp.xml.sit.hqx',
     '^src\/macos\/src\/curl_GUSIConfig.cpp',
+
+    # checksrc control files
+    '\.checksrc$',
 
     );
 
