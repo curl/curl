@@ -149,18 +149,6 @@ quic_from_gtls_level(gnutls_record_encryption_level_t gtls_level)
 }
 #endif
 
-static int setup_initial_crypto_context(struct quicsocket *qs)
-{
-  const ngtcp2_cid *dcid = ngtcp2_conn_get_dcid(qs->qconn);
-
-  if(ngtcp2_crypto_derive_and_install_initial_key(
-         qs->qconn, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-         dcid) != 0)
-    return -1;
-
-  return 0;
-}
-
 static void qlog_callback(void *user_data, const void *data, size_t datalen)
 {
   struct quicsocket *qs = (struct quicsocket *)user_data;
@@ -176,8 +164,7 @@ static void qlog_callback(void *user_data, const void *data, size_t datalen)
 }
 
 static void quic_settings(struct quicsocket *qs,
-                          uint64_t stream_buffer_size,
-                          ngtcp2_cid *dcid)
+                          uint64_t stream_buffer_size)
 {
   ngtcp2_settings *s = &qs->settings;
   ngtcp2_settings_default(s);
@@ -196,7 +183,6 @@ static void quic_settings(struct quicsocket *qs,
   s->transport_params.max_idle_timeout = QUIC_IDLE_TIMEOUT;
   if(qs->qlogfd != -1) {
     s->qlog.write = qlog_callback;
-    s->qlog.odcid = *dcid;
   }
 }
 
@@ -293,13 +279,12 @@ static int quic_set_encryption_secrets(SSL *ssl,
   struct quicsocket *qs = (struct quicsocket *)SSL_get_app_data(ssl);
   int level = quic_from_ossl_level(ossl_level);
 
-  if(level != NGTCP2_CRYPTO_LEVEL_EARLY &&
-     ngtcp2_crypto_derive_and_install_rx_key(
-         qs->qconn, ssl, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
+  if(ngtcp2_crypto_derive_and_install_rx_key(
+         qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
     return 0;
 
   if(ngtcp2_crypto_derive_and_install_tx_key(
-         qs->qconn, ssl, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
+         qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
     return 0;
 
   if(level == NGTCP2_CRYPTO_LEVEL_APP) {
@@ -394,8 +379,8 @@ static int quic_init_ssl(struct quicsocket *qs)
   switch(qs->version) {
 #ifdef NGTCP2_PROTO_VER
   case NGTCP2_PROTO_VER:
-    alpn = (const uint8_t *)NGTCP2_ALPN_H3;
-    alpnlen = sizeof(NGTCP2_ALPN_H3) - 1;
+    alpn = (const uint8_t *)NGHTTP3_ALPN_H3;
+    alpnlen = sizeof(NGHTTP3_ALPN_H3) - 1;
     break;
 #endif
   }
@@ -417,11 +402,11 @@ static int secret_func(gnutls_session_t ssl,
 
   if(level != NGTCP2_CRYPTO_LEVEL_EARLY &&
      ngtcp2_crypto_derive_and_install_rx_key(
-         qs->qconn, ssl, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
+         qs->qconn, NULL, NULL, NULL, level, rx_secret, secretlen) != 0)
     return 0;
 
   if(ngtcp2_crypto_derive_and_install_tx_key(
-         qs->qconn, ssl, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
+         qs->qconn, NULL, NULL, NULL, level, tx_secret, secretlen) != 0)
     return 0;
 
   if(level == NGTCP2_CRYPTO_LEVEL_APP) {
@@ -579,9 +564,9 @@ static int quic_init_ssl(struct quicsocket *qs)
   switch(qs->version) {
 #ifdef NGTCP2_PROTO_VER
   case NGTCP2_PROTO_VER:
-    /* strip the first byte from NGTCP2_ALPN_H3 */
-    alpn.data = (unsigned char *)NGTCP2_ALPN_H3 + 1;
-    alpn.size = sizeof(NGTCP2_ALPN_H3) - 2;
+    /* strip the first byte (the length) from NGHTTP3_ALPN_H3 */
+    alpn.data = (unsigned char *)NGHTTP3_ALPN_H3 + 1;
+    alpn.size = sizeof(NGHTTP3_ALPN_H3) - 2;
     break;
 #endif
   }
@@ -594,27 +579,16 @@ static int quic_init_ssl(struct quicsocket *qs)
 }
 #endif
 
-static int cb_initial(ngtcp2_conn *quic, void *user_data)
-{
-  struct quicsocket *qs = (struct quicsocket *)user_data;
-
-  if(ngtcp2_crypto_read_write_crypto_data(
-       quic, qs->ssl, NGTCP2_CRYPTO_LEVEL_INITIAL, NULL, 0) != 0)
-    return NGTCP2_ERR_CALLBACK_FAILURE;
-
-  return 0;
-}
-
 static int
 cb_recv_crypto_data(ngtcp2_conn *tconn, ngtcp2_crypto_level crypto_level,
                     uint64_t offset,
                     const uint8_t *data, size_t datalen,
                     void *user_data)
 {
-  struct quicsocket *qs = (struct quicsocket *)user_data;
   (void)offset;
+  (void)user_data;
 
-  if(ngtcp2_crypto_read_write_crypto_data(tconn, qs->ssl, crypto_level, data,
+  if(ngtcp2_crypto_read_write_crypto_data(tconn, crypto_level, data,
                                           datalen) != 0)
     return NGTCP2_ERR_CRYPTO;
 
@@ -732,20 +706,6 @@ static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
   return 0;
 }
 
-static int cb_recv_retry(ngtcp2_conn *tconn, const ngtcp2_pkt_hd *hd,
-                         const ngtcp2_pkt_retry *retry, void *user_data)
-{
-  /* Re-generate handshake secrets here because connection ID might change. */
-  struct quicsocket *qs = (struct quicsocket *)user_data;
-  (void)tconn;
-  (void)hd;
-  (void)retry;
-
-  setup_initial_crypto_context(qs);
-
-  return 0;
-}
-
 static int cb_extend_max_local_streams_bidi(ngtcp2_conn *tconn,
                                             uint64_t max_streams,
                                             void *user_data)
@@ -798,7 +758,7 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
 }
 
 static ngtcp2_conn_callbacks ng_callbacks = {
-  cb_initial,
+  ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
   cb_recv_crypto_data,
   cb_handshake_completed,
@@ -812,7 +772,7 @@ static ngtcp2_conn_callbacks ng_callbacks = {
   NULL, /* stream_open */
   cb_stream_close,
   NULL, /* recv_stateless_reset */
-  cb_recv_retry,
+  ngtcp2_crypto_recv_retry_cb,
   cb_extend_max_local_streams_bidi,
   NULL, /* extend_max_local_streams_uni */
   NULL, /* rand  */
@@ -847,11 +807,6 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   char ipbuf[40];
   long port;
   int qfd;
-#ifdef USE_OPENSSL
-  uint8_t paramsbuf[64];
-  ngtcp2_transport_params params;
-  ssize_t nwrite;
-#endif
 
   qs->conn = conn;
 
@@ -888,7 +843,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
 
   (void)Curl_qlogdir(data, qs->scid.data, NGTCP2_MAX_CIDLEN, &qfd);
   qs->qlogfd = qfd; /* -1 if failure above */
-  quic_settings(qs, data->set.buffer_size, &qs->dcid);
+  quic_settings(qs, data->set.buffer_size);
 
   qs->local_addrlen = sizeof(qs->local_addr);
   rv = getsockname(sockfd, (struct sockaddr *)&qs->local_addr,
@@ -910,24 +865,7 @@ CURLcode Curl_quic_connect(struct connectdata *conn,
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
-#ifdef USE_OPENSSL
-  ngtcp2_conn_get_local_transport_params(qs->qconn, &params);
-  nwrite = ngtcp2_encode_transport_params(
-    paramsbuf, sizeof(paramsbuf), NGTCP2_TRANSPORT_PARAMS_TYPE_CLIENT_HELLO,
-    &params);
-  if(nwrite < 0) {
-    failf(data, "ngtcp2_encode_transport_params: %s\n",
-          ngtcp2_strerror((int)nwrite));
-    return CURLE_QUIC_CONNECT_ERROR;
-  }
-
-  if(!SSL_set_quic_transport_params(qs->ssl, paramsbuf, nwrite))
-    return CURLE_QUIC_CONNECT_ERROR;
-#endif
-
-  rc = setup_initial_crypto_context(qs);
-  if(rc)
-    return CURLE_QUIC_CONNECT_ERROR;
+  ngtcp2_conn_set_tls_native_handle(qs->qconn, qs->ssl);
 
   return CURLE_OK;
 }
@@ -1888,6 +1826,7 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
         if(outlen < 0) {
           if(outlen == NGTCP2_ERR_STREAM_DATA_BLOCKED ||
              outlen == NGTCP2_ERR_STREAM_SHUT_WR) {
+            assert(ndatalen == -1);
             rv = nghttp3_conn_block_stream(qs->h3conn, stream_id);
             if(rv != 0) {
               failf(conn->data,
@@ -1910,19 +1849,14 @@ static CURLcode ng_flush_egress(struct connectdata *conn, int sockfd,
             continue;
           }
           else {
+            assert(ndatalen == -1);
             failf(conn->data, "ngtcp2_conn_writev_stream returned error: %s\n",
                   ngtcp2_strerror((int)outlen));
             return CURLE_SEND_ERROR;
           }
         }
-        else if(ndatalen >= 0) {
-          rv = nghttp3_conn_add_write_offset(qs->h3conn, stream_id, ndatalen);
-          if(rv != 0) {
-            failf(conn->data,
-                  "nghttp3_conn_add_write_offset returned error: %s\n",
-                  nghttp3_strerror(rv));
-            return CURLE_SEND_ERROR;
-          }
+        else {
+          assert(ndatalen == -1);
         }
       }
     }
