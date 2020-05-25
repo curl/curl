@@ -412,7 +412,7 @@ gtls_connect_step1(struct connectdata *conn,
   if(!gtls_inited)
     Curl_gtls_init();
 
-  /* Initalize certverifyresult to OK */
+  /* Initialize certverifyresult to OK */
   *certverifyresult = 0;
 
   if(SSL_CONN_CONFIG(version) == CURL_SSLVERSION_SSLv2) {

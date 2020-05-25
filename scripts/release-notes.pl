@@ -65,7 +65,7 @@ for my $l (@releasenotes) {
         $refused[$1]=1;
     }
     elsif($l =~ /^ \[(\d+)\] = (.*)/) {
-        # listed in a refernce, set bit 1
+        # listed in a reference, set bit 1
         $refused[$1] |= 2;
         $refs[$1] = $2;
     }

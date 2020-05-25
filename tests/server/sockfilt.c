@@ -75,7 +75,7 @@
  * structured and well behaved manner to achieve proper program cleanup and
  * termination.
  *
- * Even with the above mechanism implemented it is worthwile to note that
+ * Even with the above mechanism implemented it is worthwhile to note that
  * other signals might still be received, or that there might be systems on
  * which it is not possible to trap and ignore some of the above signals.
  * This implies that for increased portability and reliability the program
@@ -687,7 +687,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* loop over the handles in the input descriptor sets */
   nfd = 0; /* number of handled file descriptors */
-  nth = 0; /* number of interal waiting threads */
+  nth = 0; /* number of internal waiting threads */
   nws = 0; /* number of handled WINSOCK sockets */
   for(fd = 0; fd < nfds; fd++) {
     wsasock = curlx_sitosk(fd);

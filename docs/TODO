@@ -230,7 +230,7 @@
 
  On recent macOS versions, the getaddrinfo() function itself has built-in IDN
  support. By setting the AI_CANONNAME flag, the function will return the
- encoded namne in the ai_canonname struct field in the returned information.
+ encoded name in the ai_canonname struct field in the returned information.
  This could be used by curl on macOS when built without a separate IDN library
  and an IDN host name is used in a URL.
 

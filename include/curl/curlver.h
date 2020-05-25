@@ -39,7 +39,7 @@
 #define LIBCURL_VERSION_PATCH 0
 
 /* This is the numeric version of the libcurl version number, meant for easier
-   parsing and comparions by programs. The LIBCURL_VERSION_NUM define will
+   parsing and comparisons by programs. The LIBCURL_VERSION_NUM define will
    always follow this syntax:
 
          0xXXYYZZ
