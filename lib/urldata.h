@@ -1228,17 +1228,6 @@ typedef enum {
     RTSPREQ_LAST /* last in list */
 } Curl_RtspReq;
 
-/*
- * Values that are generated, temporary or calculated internally for a
- * "session handle" must be defined within the 'struct UrlState'.  This struct
- * will be used within the Curl_easy struct. When the 'Curl_easy'
- * struct is cloned, this data MUST NOT be copied.
- *
- * Remember that any "state" information goes globally for the curl handle.
- * Session-data MUST be put in the connectdata struct and here.  */
-#define MAX_CURL_USER_LENGTH 256
-#define MAX_CURL_PASSWORD_LENGTH 256
-
 struct auth {
   unsigned long want;  /* Bitmask set to the authentication methods wanted by
                           app (with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH). */
