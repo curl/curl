@@ -546,6 +546,7 @@ static const struct feat feats[] = {
   {"SSL",            CURL_VERSION_SSL},
   {"libz",           CURL_VERSION_LIBZ},
   {"brotli",         CURL_VERSION_BROTLI},
+  {"zstd",           CURL_VERSION_ZSTD},
   {"CharConv",       CURL_VERSION_CONV},
   {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
   {"HTTP2",          CURL_VERSION_HTTP2},

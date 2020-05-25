@@ -240,6 +240,7 @@ my $has_ipv6;       # set if libcurl is built with IPv6 support
 my $has_unix;       # set if libcurl is built with Unix sockets support
 my $has_libz;       # set if libcurl is built with libz support
 my $has_brotli;     # set if libcurl is built with brotli support
+my $has_zstd;       # set if libcurl is built with zstd support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;       # set if libcurl is built with NTLM support
 my $has_ntlm_wb;    # set if libcurl is built with NTLM delegation to winbind
@@ -2831,6 +2832,7 @@ sub setupfeatures {
     $feature{"unix-sockets"} = $has_unix;
     $feature{"win32"} = $has_win32;
     $feature{"WinSSL"} = $has_winssl;
+    $feature{"zstd"} = $has_zstd;
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
@@ -3010,6 +3012,9 @@ sub checksystem {
             }
             if($feat =~ /brotli/i) {
                 $has_brotli = 1;
+            }
+            if($feat =~ /zstd/i) {
+                $has_zstd = 1;
             }
             if($feat =~ /NTLM/i) {
                 # NTLM enabled
