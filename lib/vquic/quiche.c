@@ -89,18 +89,24 @@ static int quiche_perform_getsock(const struct connectdata *conn,
   return quiche_getsock((struct connectdata *)conn, socks);
 }
 
-static CURLcode quiche_disconnect(struct connectdata *conn,
-                                  bool dead_connection)
+static CURLcode qs_disconnect(struct quicsocket *qs)
 {
-  struct quicsocket *qs = conn->quic;
-  (void)dead_connection;
-  quiche_h3_config_free(qs->h3config);
-  quiche_h3_conn_free(qs->h3c);
+  if(qs->h3config)
+    quiche_h3_config_free(qs->h3config);
+  if(qs->h3c)
+    quiche_h3_conn_free(qs->h3c);
   quiche_config_free(qs->cfg);
   quiche_conn_free(qs->conn);
   return CURLE_OK;
 }
 
+static CURLcode quiche_disconnect(struct connectdata *conn,
+                                  bool dead_connection)
+{
+  struct quicsocket *qs = conn->quic;
+  (void)dead_connection;
+  return qs_disconnect(qs);
+}
 static unsigned int quiche_conncheck(struct connectdata *conn,
                                      unsigned int checks_to_perform)
 {
@@ -284,11 +290,11 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
 
   result = process_ingress(conn, sockfd, qs);
   if(result)
-    return result;
+    goto error;
 
   result = flush_egress(conn, sockfd, qs);
   if(result)
-    return result;
+    goto error;
 
   if(quiche_conn_is_established(qs->conn)) {
     *done = TRUE;
@@ -296,6 +302,9 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn, int sockindex,
     DEBUGF(infof(conn->data, "quiche established connection!\n"));
   }
 
+  return result;
+  error:
+  qs_disconnect(qs);
   return result;
 }
 
