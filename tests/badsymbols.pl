@@ -76,7 +76,8 @@ sub scanenums {
                 next;
             }
             # parse this!
-            $skipit = 0,
+            $skipit = 0;
+            next;
         }
         if($skipit) {
             next;
@@ -88,8 +89,7 @@ sub scanenums {
             if(($_ !~ /\}(;|)/) &&
                ($_ ne "typedef") &&
                ($_ ne "enum") &&
-               ($_ !~ /^[ \t]*$/) &&
-               ($_ ne "#")) {
+               ($_ !~ /^[ \t]*$/)) {
                 push @syms, $_;
             }
         }
