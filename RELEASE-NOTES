@@ -9,6 +9,7 @@ curl and libcurl 7.71.0
 This release includes the following changes:
 
  o CURLOPT_SSL_OPTIONS: optional use of Windows' CA store (with openssl) [10]
+ o setopt: add CURLOPT_PROXY_ISSUERCERT(_BLOB) for coherency [31]
  o setopt: support certificate options in memory with struct curl_blob [41]
  o tool: Add option --retry-all-errors to retry on any error [27]
 
@@ -56,7 +57,6 @@ This release includes the following bugfixes:
  o runtests: show elapsed test time with higher precision (ms)
  o select: fix overflow protection in Curl_socket_check [22]
  o sendf: make failf() use the mvsnprintf() return code [62]
- o setopt: add CURLOPT_PROXY_ISSUERCERT(_BLOB) for coherency [31]
  o sha256: fixed potentially uninitialized variable [61]
  o sockfilt: make select_ws stop waiting on exit signal event
  o source cleanup: remove all custom typedef structs [42]
