@@ -76,7 +76,7 @@ stages:
           configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
           tflags: -n -t --shallow=40 !FTP
     steps:
-    - script: sudo apt-get update && sudo apt-get install -y stunnel4 python-impacket $(install)
+    - script: sudo apt-get update && sudo apt-get install -y stunnel4 python-impacket libzstd-dev libbrotli-dev $(install)
       displayName: 'apt install'
 
     - script: ./buildconf && ./configure $(configure)

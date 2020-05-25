@@ -24,7 +24,7 @@
 #
 ## Makefile for building curl examples with MingW (GCC-3.2 or later)
 ## and optionally OpenSSL (1.0.2a), libssh2 (1.5), zlib (1.2.8), librtmp (2.4),
-## brotli (1.0.1)
+## brotli (1.0.1), zstd (1.4.5)
 ##
 ## Usage:   mingw32-make -f Makefile.m32 CFG=-feature1[-feature2][-feature3][...]
 ## Example: mingw32-make -f Makefile.m32 CFG=-zlib-ssl-sspi-winidn
@@ -38,6 +38,10 @@
 # Edit the path below to point to the base of your Zlib sources.
 ifndef ZLIB_PATH
 ZLIB_PATH = ../../../zlib-1.2.8
+endif
+# Edit the path below to point to the base of your Zstandard sources.
+ifndef ZSTD_PATH
+ZSTD_PATH = ../../../zstd-1.4.5
 endif
 # Edit the path below to point to the base of your Brotli sources.
 ifndef BROTLI_PATH
@@ -180,6 +184,9 @@ endif
 ifeq ($(findstring -zlib,$(CFG)),-zlib)
 ZLIB = 1
 endif
+ifeq ($(findstring -zstd,$(CFG)),-zstd)
+ZSTD = 1
+endif
 ifeq ($(findstring -brotli,$(CFG)),-brotli)
 BROTLI = 1
 endif
@@ -283,6 +290,11 @@ ifdef ZLIB
   INCLUDES += -I"$(ZLIB_PATH)"
   CFLAGS += -DHAVE_LIBZ -DHAVE_ZLIB_H
   curl_LDADD += -L"$(ZLIB_PATH)" -lz
+endif
+ifdef ZSTD
+  INCLUDES += -I"$(ZSTD_PATH)/include"
+  CFLAGS += -DHAVE_ZSTD
+  curl_LDADD += -L"$(ZSTD_PATH)/lib" -lzstd
 endif
 ifdef BROTLI
   INCLUDES += -I"$(BROTLI_PATH)/include"

@@ -2748,6 +2748,7 @@ typedef enum {
   CURLVERSION_FIFTH,
   CURLVERSION_SIXTH,
   CURLVERSION_SEVENTH,
+  CURLVERSION_EIGHTH,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -2756,7 +2757,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_SEVENTH
+#define CURLVERSION_NOW CURLVERSION_EIGHTH
 
 struct curl_version_info_data {
   CURLversion age;          /* age of the returned struct */
@@ -2802,6 +2803,11 @@ struct curl_version_info_data {
   const char *capath;          /* the built-in default CURLOPT_CAPATH, might
                                   be NULL */
 
+  /* These fields were added in CURLVERSION_EIGHTH */
+  unsigned int zstd_ver_num; /* Numeric Zstd version
+                                  (MAJOR << 24) | (MINOR << 12) | PATCH */
+  const char *zstd_version; /* human readable string. */
+
 };
 typedef struct curl_version_info_data curl_version_info_data;
 
@@ -2836,7 +2842,7 @@ typedef struct curl_version_info_data curl_version_info_data;
 #define CURL_VERSION_BROTLI       (1<<23) /* Brotli features are present. */
 #define CURL_VERSION_ALTSVC       (1<<24) /* Alt-Svc handling built-in */
 #define CURL_VERSION_HTTP3        (1<<25) /* HTTP3 support built-in */
-
+#define CURL_VERSION_ZSTD         (1<<26) /* zstd features are present */
  /*
  * NAME curl_version_info()
  *
