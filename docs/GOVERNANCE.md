@@ -49,7 +49,7 @@ Donations to the project can also come in form of server hosting, providing
 services and paying for people to work on curl related code etc. Usually, such
 donations are services paid for directly by the sponsors.
 
-We grade sponsors in a few different levels and if they meet the criterias,
+We grade sponsors in a few different levels and if they meet the criteria,
 they can be mentioned on the Sponsors page on the curl web site.
 
 ## Commercial Support

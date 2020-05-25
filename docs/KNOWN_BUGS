@@ -49,7 +49,7 @@ problems may have been fixed or changed somewhat since this was written!
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
  5.3 curl compiled on OSX 10.13 failed to run on OSX 10.10
- 5.4 Build with staticly built dependency
+ 5.4 Build with statically built dependency
  5.5 can't handle Unicode arguments in non-Unicode builds on Windows
  5.6 cmake support gaps
  5.7 Visual Studio project gaps
@@ -364,11 +364,11 @@ problems may have been fixed or changed somewhat since this was written!
 
  See https://github.com/curl/curl/issues/2905
 
-5.4 Build with staticly built dependency
+5.4 Build with statically built dependency
 
  The build scripts in curl (autotools, cmake and others) are primarily done to
  work with shared/dynamic third party dependencies. When linking with shared
- libraries, the depedency "chain" is handled automatically by the library
+ libraries, the dependency "chain" is handled automatically by the library
  loader - on all modern systems.
 
  If you instead link with a static library, we need to provide all the
@@ -636,7 +636,7 @@ problems may have been fixed or changed somewhat since this was written!
 9.2 wolfssh: publickey auth doesn't work
 
  When building curl to use the wolfSSH backend for SFTP, the publickey
- authentication doesn't work. This is simply funtionality not written for curl
+ authentication doesn't work. This is simply functionality not written for curl
  yet, the necessary API for make this work is provided by wolfSSH.
 
  See https://github.com/curl/curl/issues/4820

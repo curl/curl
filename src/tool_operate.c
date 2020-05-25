@@ -2418,7 +2418,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
                                  "curl-ca-bundle.crt");
 #if defined(USE_WIN32_CRYPTO)
         if(!config->cacert && !config->capath) {
-          /* user, and environement did not specify any ca file or path
+          /* user, and environment did not specify any ca file or path
              and there is no "curl-ca-bundle.crt" file in standard path
              so the only possible solution is using the windows ca store */
           config->native_ca_store = TRUE;

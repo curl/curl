@@ -1296,7 +1296,7 @@ static CURLcode ftp_state_use_pasv(struct connectdata *conn)
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result = CURLE_OK;
   /*
-    Here's the excecutive summary on what to do:
+    Here's the executive summary on what to do:
 
     PASV is RFC959, expect:
     227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)

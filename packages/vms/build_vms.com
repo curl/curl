@@ -133,7 +133,7 @@ $!                   for non-VAX architectures that triggered link failure.
 $!                   Replaced curl_sys_inc with sys_inc.
 $! 19-Mar-2013, John Malmberg
 $!                   symbol tool_main needs to be quoted when parse style is
-$!                   set to exended in versions of VMS greater than 7.3-1.
+$!                   set to extended in versions of VMS greater than 7.3-1.
 $!                   Remove curlbuild.h generation as it should be pre-built
 $!                   in the curl release or daily tarball.
 $! 12-Jul-2013, John Malmberg

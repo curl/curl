@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * HTTP PUT upload with authentiction using "any" method. libcurl picks the
+ * HTTP PUT upload with authentication using "any" method. libcurl picks the
  * one the server supports/wants.
  * </DESC>
  */
@@ -44,7 +44,7 @@
 #endif
 
 /*
- * This example shows a HTTP PUT operation with authentiction using "any"
+ * This example shows a HTTP PUT operation with authentication using "any"
  * type. It PUTs a file given as a command line argument to the URL also given
  * on the command line.
  *

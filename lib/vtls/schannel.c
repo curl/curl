@@ -43,7 +43,7 @@
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
 #include "strerror.h"
-#include "select.h" /* for the socket readyness */
+#include "select.h" /* for the socket readiness */
 #include "inet_pton.h" /* for IP addr SNI check */
 #include "curl_multibyte.h"
 #include "warnless.h"

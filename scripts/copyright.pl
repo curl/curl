@@ -33,8 +33,8 @@ my @whitelist=(
     '^docs\/cmdline-opts\/[a-z]+(.*)\.d$', # curl.1 pieces
     '(\/|^)[A-Z0-9_.-]+$', # all uppercase file name, possibly with dot and dash
     '(\/|^)[A-Z0-9_-]+\.md$', # all uppercase file name with .md extension
-    '.gitignore', # whereever they are
-    '.gitattributes', # whereever they are
+    '.gitignore', # wherever they are
+    '.gitattributes', # wherever they are
     '^tests/certs/.*', # generated certs
     '^tests/stunnel.pem', # generated cert
     '^tests/valgrind.supp', # valgrind suppressions
