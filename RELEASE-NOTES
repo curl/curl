@@ -2,9 +2,9 @@ curl and libcurl 7.71.0
 
  Public curl releases:         192
  Command line options:         232
- curl_easy_setopt() options:   275
+ curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2178
+ Contributors:                 2181
 
 This release includes the following changes:
 
@@ -25,9 +25,11 @@ This release includes the following bugfixes:
  o CMake: add libssh build support [37]
  o CMake: do not build test programs by default [30]
  o CMake: fix runtests.pl with CMake, add new test targets [29]
+ o configure: fix pthread check with static boringssl
  o configure: the wolfssh backend does not provide SCP [57]
  o connect: make happy eyeballs work for QUIC (again) [16]
  o curl.1: Quote globbed URLs [51]
+ o curl: remove -J "informational" written on stdout [36]
  o doc: add missing closing parenthesis in CURLINFO_SSL_VERIFYRESULT.3 [5]
  o doc: Rename VERSIONS to VERSIONS.md as it already has Markdown syntax [20]
  o docs/HTTP3: add qlog to the quiche build instruction
@@ -37,8 +39,10 @@ This release includes the following bugfixes:
  o easy: fix dangling pointer on easy_perform fail [26]
  o examples: remove asiohiper.cpp [4]
  o ftp: make domore_getsock() return the secondary socket properly
+ o ftp: mark return-ignoring calls to Curl_GetFTPResponse with (void) [64]
  o ftp: shut down the secondary connection properly when SSL is used [43]
  o GnuTLS: Backend support for CURLINFO_SSL_VERIFYRESULT [9]
+ o hostip: make Curl_printable_address not return anything [63]
  o http2: keep trying to send pending frames after req.upload_done [40]
  o http2: simplify and clean up trailer handling [6]
  o libcurl.pc: Merge Libs.private into Libs for static-only builds [28]
@@ -51,6 +55,9 @@ This release includes the following bugfixes:
  o runtests: remove sleep calls [18]
  o runtests: show elapsed test time with higher precision (ms)
  o select: fix overflow protection in Curl_socket_check [22]
+ o sendf: make failf() use the mvsnprintf() return code [62]
+ o setopt: add CURLOPT_PROXY_ISSUERCERT(_BLOB) for coherency [31]
+ o sha256: fixed potentially uninitialized variable [61]
  o sockfilt: make select_ws stop waiting on exit signal event
  o source cleanup: remove all custom typedef structs [42]
  o test1177: look for curl.h in source directory [1]
@@ -64,9 +71,12 @@ This release includes the following bugfixes:
  o tests: run stunnel for HTTPS and FTPS on dynamic ports [11]
  o tool: fixup a few --help descriptions [56]
  o tool: support UTF-16 command line on Windows [46]
+ o tool_operate: fixed potentially uninitialized variables [60]
+ o tool_paramhlp: fixed potentially uninitialized strtol() variable [59]
  o travis: add "qlog" as feature in the quiche build
  o travis: Add ngtcp2 and quiche tests for CMake
  o travis: upgrade to bionic, clang-9, improve readability [35]
+ o typecheck-gcc.h: CURLINFO_PRIVATE does not need a 'char *' [44]
  o url: make the updated credentials URL-encoded in the URL [48]
  o url: reject too long input when parsing credentials [25]
  o url: sort the protocol schemes in rough popularity order [32]
@@ -81,13 +91,14 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Brian Carpenter, Dan Fandrich, Daniel Stenberg, Emil Engler, Gilles Vollant,
-  Gregory Jefferis, James Le Cuirot, Jeroen Ooms, John Simpson, Kamil Dudka,
-  Kane York, Lucas Pardue, Marcel Raad, Marc Hörsken, Michael Kaufmann,
-  Murugan Balraj, Neal Poole, Pavel Volgarev, Peter Wang, Peter Wu, Ray Satiro,
-  Rikard Falkeborn, rl1987 on github, Samuel Marks, Thomas Bouzerar,
-  Vyron Tsingaras,
-  (26 contributors)
+  Billyzou0741326 on github, Brian Carpenter, Dan Fandrich, Daniel Stenberg,
+  Emil Engler, Gilles Vollant, Gregory Jefferis, James Le Cuirot, Jeroen Ooms,
+  John Simpson, Kamil Dudka, Kane York, Lucas Pardue, Marcel Raad,
+  Marc Hörsken, Michael Kaufmann, Murugan Balraj, Neal Poole, Pavel Volgarev,
+  Peter Wang, Peter Wu, Ray Satiro, Rikard Falkeborn, rl1987 on github,
+  Samuel Marks, Siva Sivaraman, Thomas Bouzerar, Vyron Tsingaras,
+  Коваленко Анатолий Викторович,
+  (29 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -123,15 +134,18 @@ References to bug reports and discussions on issues:
  [28] = https://curl.haxx.se/bug/?i=5373
  [29] = https://curl.haxx.se/bug/?i=5358
  [30] = https://curl.haxx.se/bug/?i=5368
+ [31] = https://curl.haxx.se/bug/?i=5431
  [32] = https://curl.haxx.se/bug/?i=5377
  [33] = https://curl.haxx.se/bug/?i=5364
  [34] = https://curl.haxx.se/bug/?i=5359
  [35] = https://curl.haxx.se/bug/?i=5370
+ [36] = https://curl.haxx.se/mail/archive-2020-05/0044.html
  [37] = https://curl.haxx.se/bug/?i=5372
  [40] = https://curl.haxx.se/bug/?i=1410
  [41] = https://curl.haxx.se/bug/?i=5357
  [42] = https://curl.haxx.se/bug/?i=5338
  [43] = https://curl.haxx.se/bug/?i=5340
+ [44] = https://curl.haxx.se/bug/?i=5432
  [46] = https://curl.haxx.se/bug/?i=3784
  [48] = https://github.com/jeroen/curl/issues/224
  [49] = https://curl.haxx.se/bug/?i=5399
@@ -143,3 +157,9 @@ References to bug reports and discussions on issues:
  [55] = https://curl.haxx.se/bug/?i=5374
  [56] = https://curl.haxx.se/bug/?i=5379
  [57] = https://curl.haxx.se/bug/?i=5387
+ [59] = https://curl.haxx.se/bug/?i=5417
+ [60] = https://curl.haxx.se/bug/?i=5416
+ [61] = https://curl.haxx.se/bug/?i=5414
+ [62] = https://curl.haxx.se/bug/?i=5413
+ [63] = https://curl.haxx.se/bug/?i=5411
+ [64] = https://curl.haxx.se/bug/?i=5412
