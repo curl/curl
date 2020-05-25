@@ -906,12 +906,9 @@ static int ng_perform_getsock(const struct connectdata *conn,
   return ng_getsock((struct connectdata *)conn, socks);
 }
 
-static CURLcode ng_disconnect(struct connectdata *conn,
-                              bool dead_connection)
+static CURLcode qs_disconnect(struct quicsocket *qs)
 {
   int i;
-  struct quicsocket *qs = &conn->hequic[0];
-  (void)dead_connection;
   if(qs->qlogfd != -1)
     close(qs->qlogfd);
   if(qs->ssl)
@@ -932,6 +929,13 @@ static CURLcode ng_disconnect(struct connectdata *conn,
   SSL_CTX_free(qs->sslctx);
 #endif
   return CURLE_OK;
+}
+
+static CURLcode ng_disconnect(struct connectdata *conn,
+                              bool dead_connection)
+{
+  (void)dead_connection;
+  return qs_disconnect(&conn->hequic[0]);
 }
 
 static unsigned int ng_conncheck(struct connectdata *conn,
@@ -1706,11 +1710,11 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn,
 
   result = ng_process_ingress(conn, sockfd, qs);
   if(result)
-    return result;
+    goto error;
 
   result = ng_flush_egress(conn, sockfd, qs);
   if(result)
-    return result;
+    goto error;
 
   if(ngtcp2_conn_get_handshake_completed(qs->qconn)) {
     *done = TRUE;
@@ -1718,6 +1722,10 @@ CURLcode Curl_quic_is_connected(struct connectdata *conn,
   }
 
   return result;
+  error:
+  (void)qs_disconnect(qs);
+  return result;
+
 }
 
 static CURLcode ng_process_ingress(struct connectdata *conn, int sockfd,
