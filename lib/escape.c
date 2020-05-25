@@ -134,11 +134,16 @@ CURLcode Curl_urldecode(struct Curl_easy *data,
                         char **ostring, size_t *olen,
                         bool reject_ctrl)
 {
-  size_t alloc = (length?length:strlen(string)) + 1;
-  char *ns = malloc(alloc);
+  size_t alloc;
+  char *ns;
   size_t strindex = 0;
   unsigned long hex;
   CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(string);
+
+  alloc = (length?length:strlen(string)) + 1;
+  ns = malloc(alloc);
 
   if(!ns)
     return CURLE_OUT_OF_MEMORY;
