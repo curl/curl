@@ -2357,7 +2357,7 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
 {
   char *proxyuser = data->set.str[STRING_PROXYUSERNAME];
   char *proxypasswd = data->set.str[STRING_PROXYPASSWORD];
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   if(proxyuser)
     result = Curl_urldecode(data, proxyuser, 0, &conn->http_proxy.user, NULL,
