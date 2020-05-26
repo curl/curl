@@ -2318,7 +2318,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                     data->set.prefer_ascii ? 'a' : 'i');
         }
       }
-      if(conn->bits.user_passwd && !conn->bits.userpwd_in_url)
+      if(conn->bits.user_passwd)
         paste_ftp_userpwd = TRUE;
     }
   }

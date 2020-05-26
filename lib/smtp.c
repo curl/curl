@@ -183,7 +183,7 @@ static void smtp_to_smtps(struct connectdata *conn)
   conn->handler = &Curl_handler_smtps;
 
   /* Set the connection's upgraded to TLS flag */
-  conn->tls_upgraded = TRUE;
+  conn->bits.tls_upgraded = TRUE;
 }
 #else
 #define smtp_to_smtps(x) Curl_nop_stmt
@@ -1617,7 +1617,7 @@ static CURLcode smtp_setup_connection(struct connectdata *conn)
   CURLcode result;
 
   /* Clear the TLS upgraded flag */
-  conn->tls_upgraded = FALSE;
+  conn->bits.tls_upgraded = FALSE;
 
   /* Initialise the SMTP layer */
   result = smtp_init(conn);

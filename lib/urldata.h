@@ -468,19 +468,25 @@ struct ConnectBits {
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
 #endif
   BIT(netrc);         /* name+password provided by netrc */
-  BIT(userpwd_in_url); /* name+password found in url */
   BIT(proxy_connect_closed); /* TRUE if a proxy disconnected the connection
                                 in a CONNECT request with auth, so that
                                 libcurl should reconnect and continue. */
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
-  BIT(type_set);  /* type= was used in the URL */
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_npn);  /* TLS NPN extension? */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
   BIT(connect_only);
   BIT(doh);
+#ifdef USE_UNIX_SOCKETS
+  BIT(abstract_unix_socket);
+#endif
+  BIT(tls_upgraded);
+  BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
+                         accept() */
+  BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
+                            started (happy eyeballs) */
 };
 
 struct hostname {
@@ -1094,20 +1100,7 @@ struct connectdata {
   int retrycount; /* number of retries on a new connection */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
-  BIT(abstract_unix_socket);
 #endif
-  BIT(tls_upgraded);
-  /* the two following *_inuse fields are only flags, not counters in any way.
-     If TRUE it means the channel is in use, and if FALSE it means the channel
-     is up for grabs by one. */
-  BIT(readchannel_inuse);  /* whether the read channel is in use by an easy
-                              handle */
-  BIT(writechannel_inuse); /* whether the write channel is in use by an easy
-                              handle */
-  BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
-                         accept() */
-  BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
-                            started (happy eyeballs) */
 };
 
 /* The end of connectdata. */

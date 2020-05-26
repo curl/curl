@@ -178,7 +178,7 @@ static void pop3_to_pop3s(struct connectdata *conn)
   conn->handler = &Curl_handler_pop3s;
 
   /* Set the connection's upgraded to TLS flag */
-  conn->tls_upgraded = TRUE;
+  conn->bits.tls_upgraded = TRUE;
 }
 #else
 #define pop3_to_pop3s(x) Curl_nop_stmt
@@ -1312,7 +1312,7 @@ static CURLcode pop3_setup_connection(struct connectdata *conn)
     return result;
 
   /* Clear the TLS upgraded flag */
-  conn->tls_upgraded = FALSE;
+  conn->bits.tls_upgraded = FALSE;
 
   return CURLE_OK;
 }
