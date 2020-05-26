@@ -1,0 +1,67 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+
+# connection-monitor enabled to verify that the connection is closed
+# after the excessive data response
+<servercmd>
+connection-monitor
+</servercmd>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+Funny-head: yesyes
+
+More data than Content-Length says!
+</data>
+<datacheck nonewline="yes">
+HTTP/1.1 200 OK
+Content-Length: 6
+Funny-head: yesyes
+
+More d
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP with more data returned than Content-Length says
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/346 http://%HOSTIP:%HTTPPORT/346
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /346 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+[DISCONNECT]
+GET /346 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+[DISCONNECT]
+</protocol>
+</verify>
+</testcase>
