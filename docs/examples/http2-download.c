@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 /* somewhat unix-specific */
 #include <sys/time.h>
@@ -149,6 +150,11 @@ static void setup(struct transfer *t, int num)
   snprintf(filename, 128, "dl-%d", num);
 
   t->out = fopen(filename, "wb");
+  if (!t->out)
+  {
+    fprintf(stderr, "error: could not open file %s for writing: %s\n", filename, strerror(errno));
+    exit(1);
+  }
 
   /* write to this file */
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t->out);
