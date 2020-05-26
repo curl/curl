@@ -876,10 +876,10 @@ CURLcode Curl_is_connected(struct connectdata *conn,
         return result;
       }
       /* should we try another protocol family? */
-      if(i == 0 && !conn->parallel_connect &&
+      if(i == 0 && !conn->bits.parallel_connect &&
          (Curl_timediff(now, conn->connecttime) >=
           data->set.happy_eyeballs_timeout)) {
-        conn->parallel_connect = TRUE; /* starting now */
+        conn->bits.parallel_connect = TRUE; /* starting now */
         trynextip(conn, sockindex, 1);
       }
       continue;
@@ -905,10 +905,10 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       }
 
       /* should we try another protocol family? */
-      if(i == 0 && !conn->parallel_connect &&
+      if(i == 0 && !conn->bits.parallel_connect &&
          (Curl_timediff(now, conn->connecttime) >=
           data->set.happy_eyeballs_timeout)) {
-        conn->parallel_connect = TRUE; /* starting now */
+        conn->bits.parallel_connect = TRUE; /* starting now */
         trynextip(conn, sockindex, 1);
       }
     }
@@ -1452,11 +1452,11 @@ int Curl_closesocket(struct connectdata *conn,
                       curl_socket_t sock)
 {
   if(conn && conn->fclosesocket) {
-    if((sock == conn->sock[SECONDARYSOCKET]) && conn->sock_accepted)
+    if((sock == conn->sock[SECONDARYSOCKET]) && conn->bits.sock_accepted)
       /* if this socket matches the second socket, and that was created with
          accept, then we MUST NOT call the callback but clear the accepted
          status */
-      conn->sock_accepted = FALSE;
+      conn->bits.sock_accepted = FALSE;
     else {
       int rc;
       Curl_multi_closed(conn->data, sock);

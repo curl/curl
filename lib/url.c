@@ -1162,7 +1162,8 @@ ConnectionExists(struct Curl_easy *data,
           continue;
         if(strcmp(needle->unix_domain_socket, check->unix_domain_socket))
           continue;
-        if(needle->abstract_unix_socket != check->abstract_unix_socket)
+        if(needle->bits.abstract_unix_socket !=
+           check->bits.abstract_unix_socket)
           continue;
       }
       else if(check->unix_domain_socket)
@@ -1173,7 +1174,7 @@ ConnectionExists(struct Curl_easy *data,
          (check->handler->flags&PROTOPT_SSL))
         /* don't do mixed SSL and non-SSL connections */
         if(get_protocol_family(check->handler->protocol) !=
-           needle->handler->protocol || !check->tls_upgraded)
+           needle->handler->protocol || !check->bits.tls_upgraded)
           /* except protocols that have been upgraded via TLS */
           continue;
 
@@ -1272,7 +1273,7 @@ ConnectionExists(struct Curl_easy *data,
 
         if((strcasecompare(needle->handler->scheme, check->handler->scheme) ||
             (get_protocol_family(check->handler->protocol) ==
-             needle->handler->protocol && check->tls_upgraded)) &&
+             needle->handler->protocol && check->bits.tls_upgraded)) &&
            (!needle->bits.conn_to_host || strcasecompare(
             needle->conn_to_host.name, check->conn_to_host.name)) &&
            (!needle->bits.conn_to_port ||
@@ -3164,7 +3165,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
       else {
         bool longpath = FALSE;
         hostaddr->addr = Curl_unix2addr(path, &longpath,
-                                        conn->abstract_unix_socket);
+                                        conn->bits.abstract_unix_socket);
         if(hostaddr->addr)
           hostaddr->inuse++;
         else {
@@ -3411,7 +3412,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
-    conn->abstract_unix_socket = data->set.abstract_unix_socket;
+    conn->bits.abstract_unix_socket = data->set.abstract_unix_socket;
   }
 #endif
 

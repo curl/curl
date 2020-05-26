@@ -292,7 +292,7 @@ static CURLcode AcceptServerConnect(struct connectdata *conn)
 
   conn->sock[SECONDARYSOCKET] = s;
   (void)curlx_nonblock(s, TRUE); /* enable non-blocking */
-  conn->sock_accepted = TRUE;
+  conn->bits.sock_accepted = TRUE;
 
   if(data->set.fsockopt) {
     int error = 0;
@@ -4340,7 +4340,6 @@ static CURLcode ftp_setup_connection(struct connectdata *conn)
     char command;
     *type = 0;                     /* it was in the middle of the hostname */
     command = Curl_raw_toupper(type[6]);
-    conn->bits.type_set = TRUE;
 
     switch(command) {
     case 'A': /* ASCII mode */
