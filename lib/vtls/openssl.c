@@ -4439,7 +4439,7 @@ static CURLcode Curl_ossl_sha256sum(const unsigned char *tmp, /* input */
   unsigned int len = 0;
   (void) unused;
 
-  mdctx =  EVP_MD_CTX_create();
+  mdctx = EVP_MD_CTX_create();
   EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
   EVP_DigestUpdate(mdctx, tmp, tmplen);
   EVP_DigestFinal_ex(mdctx, sha256sum, &len);

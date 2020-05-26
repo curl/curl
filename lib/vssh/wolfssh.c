@@ -241,8 +241,8 @@ static ssize_t wsftp_send(struct connectdata *conn, int sockindex,
   int rc;
   (void)sockindex;
 
-  offset[0] =  (word32)sshc->offset&0xFFFFFFFF;
-  offset[1] =  (word32)(sshc->offset>>32)&0xFFFFFFFF;
+  offset[0] = (word32)sshc->offset&0xFFFFFFFF;
+  offset[1] = (word32)(sshc->offset>>32)&0xFFFFFFFF;
 
   rc = wolfSSH_SFTP_SendWritePacket(sshc->ssh_session, sshc->handle,
                                     sshc->handleSz,
@@ -284,8 +284,8 @@ static ssize_t wsftp_recv(struct connectdata *conn, int sockindex,
   word32 offset[2];
   (void)sockindex;
 
-  offset[0] =  (word32)sshc->offset&0xFFFFFFFF;
-  offset[1] =  (word32)(sshc->offset>>32)&0xFFFFFFFF;
+  offset[0] = (word32)sshc->offset&0xFFFFFFFF;
+  offset[1] = (word32)(sshc->offset>>32)&0xFFFFFFFF;
 
   rc = wolfSSH_SFTP_SendReadPacket(sshc->ssh_session, sshc->handle,
                                    sshc->handleSz,

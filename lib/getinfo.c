@@ -320,7 +320,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = data->progress.downloaded;
     break;
   case CURLINFO_SPEED_DOWNLOAD_T:
-    *param_offt =  data->progress.dlspeed;
+    *param_offt = data->progress.dlspeed;
     break;
   case CURLINFO_SPEED_UPLOAD_T:
     *param_offt = data->progress.ulspeed;
@@ -408,13 +408,13 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
     *param_doublep = DOUBLE_SECS(data->progress.t_starttransfer);
     break;
   case CURLINFO_SIZE_UPLOAD:
-    *param_doublep =  (double)data->progress.uploaded;
+    *param_doublep = (double)data->progress.uploaded;
     break;
   case CURLINFO_SIZE_DOWNLOAD:
     *param_doublep = (double)data->progress.downloaded;
     break;
   case CURLINFO_SPEED_DOWNLOAD:
-    *param_doublep =  (double)data->progress.dlspeed;
+    *param_doublep = (double)data->progress.dlspeed;
     break;
   case CURLINFO_SPEED_UPLOAD:
     *param_doublep = (double)data->progress.ulspeed;

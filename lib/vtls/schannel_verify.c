@@ -361,7 +361,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     return actual_length;
   }
 
-  decode_para.cbSize  =  sizeof(CRYPT_DECODE_PARA);
+  decode_para.cbSize = sizeof(CRYPT_DECODE_PARA);
 
   ret_val =
     CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
