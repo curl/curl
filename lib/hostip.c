@@ -492,6 +492,7 @@ enum resolve_t Curl_resolv(struct connectdata *conn,
   enum resolve_t rc = CURLRESOLV_ERROR; /* default to failure */
 
   *entry = NULL;
+  conn->bits.doh = FALSE; /* default is not */
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -1053,7 +1054,7 @@ CURLcode Curl_resolv_check(struct connectdata *conn,
   (void)dns;
 #endif
 
-  if(conn->data->set.doh)
+  if(conn->bits.doh)
     return Curl_doh_is_resolved(conn, dns);
   return Curl_resolver_is_resolved(conn, dns);
 }
@@ -1062,7 +1063,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
                         curl_socket_t *socks)
 {
 #ifdef CURLRES_ASYNCH
-  if(conn->data->set.doh)
+  if(conn->bits.doh)
     /* nothing to wait for during DOH resolve, those handles have their own
        sockets */
     return GETSOCK_BLANK;

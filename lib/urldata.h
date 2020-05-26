@@ -480,6 +480,7 @@ struct ConnectBits {
   BIT(tls_enable_npn);  /* TLS NPN extension? */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
   BIT(connect_only);
+  BIT(doh);
 };
 
 struct hostname {

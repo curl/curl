@@ -389,6 +389,7 @@ struct Curl_addrinfo *Curl_doh(struct connectdata *conn,
   /* start clean, consider allocating this struct on demand */
   memset(&data->req.doh, 0, sizeof(struct dohdata));
 
+  conn->bits.doh = TRUE;
   data->req.doh.host = hostname;
   data->req.doh.port = port;
   data->req.doh.headers =
