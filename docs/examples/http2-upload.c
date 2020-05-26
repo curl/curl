@@ -188,7 +188,7 @@ static void setup(struct input *i, int num, const char *upload)
   snprintf(url, 256, "https://localhost:8443/upload-%d", num);
 
   /* get the file size of the local file */
-  if (!stat(upload, &file_info))
+  if (stat(upload, &file_info))
   {
     fprintf(stderr, "error: could not stat file %s: %s\n", upload, strerror(errno));
     exit(1);
