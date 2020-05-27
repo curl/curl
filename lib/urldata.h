@@ -420,11 +420,23 @@ struct negotiatedata {
  * Boolean values that concerns this connection.
  */
 struct ConnectBits {
-  /* always modify bits.close with the connclose() and connkeep() macros! */
-  bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
-                                  is complete */
   bool tcpconnect[2]; /* the TCP layer (or similar) is connected, this is set
                          the first time on the first connect function call */
+#ifndef CURL_DISABLE_PROXY
+  bool proxy_ssl_connected[2]; /* TRUE when SSL initialization for HTTPS proxy
+                                  is complete */
+  BIT(httpproxy);  /* if set, this transfer is done through a http proxy */
+  BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
+  BIT(proxy_user_passwd); /* user+password for the proxy? */
+  BIT(tunnel_proxy);  /* if CONNECT is used to "tunnel" through the proxy.
+                         This is implicit when SSL-protocols are used through
+                         proxies, but can also be enabled explicitly by
+                         apps */
+  BIT(proxy_connect_closed); /* TRUE if a proxy disconnected the connection
+                                in a CONNECT request with auth, so that
+                                libcurl should reconnect and continue. */
+#endif
+  /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
   BIT(reuse); /* if set, this is a re-used connection */
   BIT(altused); /* this is an alt-svc "redirect" */
@@ -433,10 +445,7 @@ struct ConnectBits {
   BIT(conn_to_port); /* if set, this connection has a "connect to port"
                         that overrides the port in the URL (remote port) */
   BIT(proxy); /* if set, this transfer is done through a proxy - any type */
-  BIT(httpproxy);  /* if set, this transfer is done through a http proxy */
-  BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
   BIT(user_passwd); /* do we use user+password for this connection? */
-  BIT(proxy_user_passwd); /* user+password for the proxy? */
   BIT(ipv6_ip); /* we communicate with a remote site specified with pure IPv6
                    IP address */
   BIT(ipv6);    /* we communicate with a site using an IPv6 address */
@@ -446,10 +455,6 @@ struct ConnectBits {
                          the TCP layer connect */
   BIT(retry);         /* this connection is about to get closed and then
                          re-attempted at another connection. */
-  BIT(tunnel_proxy);  /* if CONNECT is used to "tunnel" through the proxy.
-                         This is implicit when SSL-protocols are used through
-                         proxies, but can also be enabled explicitly by
-                         apps */
   BIT(authneg);       /* TRUE when the auth phase has started, which means
                          that we are creating a request with an auth header,
                          but it is not the final request in the auth
@@ -468,9 +473,6 @@ struct ConnectBits {
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
 #endif
   BIT(netrc);         /* name+password provided by netrc */
-  BIT(proxy_connect_closed); /* TRUE if a proxy disconnected the connection
-                                in a CONNECT request with auth, so that
-                                libcurl should reconnect and continue. */
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
   BIT(multiplex); /* connection is multiplexed */
@@ -910,10 +912,10 @@ struct connectdata {
   char *secondaryhostname; /* secondary socket host name (ftp) */
   struct hostname conn_to_host; /* the host to connect to. valid only if
                                    bits.conn_to_host is set */
-
+#ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
-
+#endif
   long port;       /* which port to use locally */
   int remote_port; /* the remote port, not the proxy port! */
   int conn_to_port; /* the remote port to connect to. valid only if
@@ -961,12 +963,16 @@ struct connectdata {
   struct postponed_data postponed[2]; /* two buffers for two sockets */
 #endif /* USE_RECV_BEFORE_SEND_WORKAROUND */
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
+#ifndef CURL_DISABLE_PROXY
   struct ssl_connect_data proxy_ssl[2]; /* this is for proxy ssl-stuff */
+#endif
 #ifdef USE_SSL
   void *ssl_extra; /* separately allocated backend-specific data */
 #endif
   struct ssl_primary_config ssl_config;
+#ifndef CURL_DISABLE_PROXY
   struct ssl_primary_config proxy_ssl_config;
+#endif
   struct ConnectBits bits;    /* various state-flags for this connection */
 
  /* connecttime: when connect() is called on the current IP address. Used to
@@ -1676,7 +1682,9 @@ struct UserDefined {
   long httpversion; /* when non-zero, a specific HTTP version requested to
                        be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
+#ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
+#endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
   long dns_cache_timeout; /* DNS cache timeout */

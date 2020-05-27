@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -136,6 +136,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
   DEBUGASSERT(conn->data);
 
   if(proxy) {
+#ifndef CURL_DISABLE_PROXY
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     passwdp = conn->http_proxy.passwd;
@@ -145,6 +146,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy)
     ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
     authp = &conn->data->state.authproxy;
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
   else {
     allocuserpwd = &conn->allocptr.userpwd;

@@ -394,7 +394,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_SSLVERSION:
+#ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLVERSION:
+#endif
     /*
      * Set explicit SSL version to try to connect with, as some SSL
      * implementations are lame.
@@ -402,9 +404,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #ifdef USE_SSL
     {
       long version, version_max;
-      struct ssl_primary_config *primary = (option == CURLOPT_SSLVERSION ?
-                                            &data->set.ssl.primary :
-                                            &data->set.proxy_ssl.primary);
+      struct ssl_primary_config *primary = &data->set.ssl.primary;
+#ifndef CURL_DISABLE_PROXY
+      if(option != CURLOPT_SSLVERSION)
+        primary = &data->set.proxy_ssl.primary;
+#endif
 
       arg = va_arg(param, long);
 
@@ -2333,7 +2337,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_SSL_SESSIONID_CACHE:
     data->set.ssl.primary.sessionid = (0 != va_arg(param, long)) ?
       TRUE : FALSE;
+#ifndef CURL_DISABLE_PROXY
     data->set.proxy_ssl.primary.sessionid = data->set.ssl.primary.sessionid;
+#endif
     break;
 
 #ifdef USE_SSH
@@ -2635,9 +2641,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_USERNAME_PROXY],
                             va_arg(param, char *));
+#ifndef CURL_DISABLE_PROXY
     if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
        !data->set.proxy_ssl.authtype)
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+#endif
     break;
   case CURLOPT_TLSAUTH_PASSWORD:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_ORIG],
@@ -2648,9 +2656,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
     result = Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY],
                             va_arg(param, char *));
+#ifndef CURL_DISABLE_PROXY
     if(data->set.str[STRING_TLSAUTH_USERNAME_PROXY] &&
        !data->set.proxy_ssl.authtype)
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_SRP; /* default to SRP */
+#endif
     break;
   case CURLOPT_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
@@ -2660,6 +2670,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
       data->set.ssl.authtype = CURL_TLSAUTH_NONE;
     break;
+#ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
     if(!argptr ||
@@ -2668,6 +2679,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     else
       data->set.proxy_ssl.authtype = CURL_TLSAUTH_NONE;
     break;
+#endif
 #endif
 #ifdef USE_ARES
   case CURLOPT_DNS_SERVERS:

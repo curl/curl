@@ -747,8 +747,8 @@ static CURLcode connect_SOCKS(struct connectdata *conn, int sockindex,
 {
   CURLcode result = CURLE_OK;
 
-  if(conn->bits.socksproxy) {
 #ifndef CURL_DISABLE_PROXY
+  if(conn->bits.socksproxy) {
     /* for the secondary socket (FTP), use the "connect to host"
      * but ignore the "connect to port" (use the secondary port)
      */
@@ -781,11 +781,12 @@ static CURLcode connect_SOCKS(struct connectdata *conn, int sockindex,
       failf(conn->data, "unknown proxytype option given");
       result = CURLE_COULDNT_CONNECT;
     } /* switch proxytype */
-#else
-  (void)sockindex;
-#endif /* CURL_DISABLE_PROXY */
   }
   else
+#else
+    (void)conn;
+    (void)sockindex;
+#endif /* CURL_DISABLE_PROXY */
     *done = TRUE; /* no SOCKS proxy, so consider us connected */
 
   return result;
@@ -986,18 +987,19 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 
     /* if the first address family runs out of addresses to try before
        the happy eyeball timeout, go ahead and try the next family now */
-    {
-      result = trynextip(conn, sockindex, 1);
-      if(!result)
-        return result;
-    }
+    result = trynextip(conn, sockindex, 1);
+    if(!result)
+      return result;
 
+#ifndef CURL_DISABLE_PROXY
     if(conn->bits.socksproxy)
       hostname = conn->socks_proxy.host.name;
     else if(conn->bits.httpproxy)
       hostname = conn->http_proxy.host.name;
-    else if(conn->bits.conn_to_host)
-      hostname = conn->conn_to_host.name;
+    else
+#endif
+      if(conn->bits.conn_to_host)
+        hostname = conn->conn_to_host.name;
     else
       hostname = conn->host.name;
 

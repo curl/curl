@@ -416,8 +416,12 @@ wolfssl_connect_step1(struct connectdata *conn,
 #ifdef ENABLE_IPV6
     struct in6_addr addr6;
 #endif
+#ifndef CURL_DISABLE_PROXY
     const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
       conn->host.name;
+#else
+    const char * const hostname = conn->host.name;
+#endif
     size_t hostname_len = strlen(hostname);
     if((hostname_len < USHRT_MAX) &&
        (0 == Curl_inet_pton(AF_INET, hostname, &addr4)) &&
@@ -538,13 +542,20 @@ wolfssl_connect_step2(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
   struct ssl_backend_data *backend = connssl->backend;
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const char * const dispname = SSL_IS_PROXY() ?
     conn->http_proxy.host.dispname : conn->host.dispname;
   const char * const pinnedpubkey = SSL_IS_PROXY() ?
-                        data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-                        data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+#else
+  const char * const hostname = conn->host.name;
+  const char * const dispname = conn->host.dispname;
+  const char * const pinnedpubkey =
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
+#endif
 
   conn->recv[sockindex] = wolfssl_recv;
   conn->send[sockindex] = wolfssl_send;

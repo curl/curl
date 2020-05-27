@@ -83,6 +83,8 @@ jobs:
   - env:
     - T=normal C="--enable-mqtt"
   - env:
+    - T=normal C="--disable-proxy"
+  - env:
     - T=normal C="--disable-verbose" CPPFLAGS="-Wno-variadic-macros" NOTESTS=1
     - OVERRIDE_CC="CC=gcc-8" OVERRIDE_CXX="CXX=g++-8"
     addons:

@@ -394,11 +394,15 @@ CURLcode Curl_output_ntlm_wb(struct connectdata *conn,
   DEBUGASSERT(conn->data);
 
   if(proxy) {
+#ifndef CURL_DISABLE_PROXY
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->http_proxy.user;
     ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
     authp = &conn->data->state.authproxy;
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
   else {
     allocuserpwd = &conn->allocptr.userpwd;

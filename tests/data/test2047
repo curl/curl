@@ -40,6 +40,7 @@ http
 </server>
 <features>
 idn
+proxy
 </features>
 <setenv>
 LC_ALL=en_US.UTF-8

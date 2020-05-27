@@ -198,9 +198,11 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_SSL_VERIFYRESULT:
     *param_longp = data->set.ssl.certverifyresult;
     break;
+#ifndef CURL_DISABLE_PROXY
   case CURLINFO_PROXY_SSL_VERIFYRESULT:
     *param_longp = data->set.proxy_ssl.certverifyresult;
     break;
+#endif
   case CURLINFO_REDIRECT_COUNT:
     *param_longp = data->set.followlocation;
     break;
