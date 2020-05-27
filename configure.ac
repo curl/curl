@@ -4064,6 +4064,19 @@ AC_CHECK_TYPE(sa_family_t,
 #endif
 ])
 
+# check for suseconds_t
+AC_CHECK_TYPE([suseconds_t],[
+  AC_DEFINE(HAVE_SUSECONDS_T, 1,
+    [Define to 1 if suseconds_t is an available type.])
+], ,[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+])
+
 AC_MSG_CHECKING([if time_t is unsigned])
 CURL_RUN_IFELSE(
   [
