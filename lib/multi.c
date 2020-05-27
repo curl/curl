@@ -304,7 +304,7 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
   curl_socket_t fd = *((curl_socket_t *) key);
   (void) key_length;
 
-  return (fd % slots_num);
+  return ((long)fd % slots_num); /* weirdo FreeRTOS hack */
 }
 
 /*
@@ -1017,8 +1017,8 @@ static int multi_getsock(struct Curl_easy *data,
 }
 
 CURLMcode curl_multi_fdset(struct Curl_multi *multi,
-                           fd_set *read_fd_set, fd_set *write_fd_set,
-                           fd_set *exc_fd_set, int *max_fd)
+                           curl_fd_set *read_fd_set, curl_fd_set *write_fd_set,
+                           curl_fd_set *exc_fd_set, int *max_fd)
 {
   /* Scan through all the easy handles to get the file descriptors set.
      Some easy handles may not have connected to the remote host yet,
@@ -1043,18 +1043,20 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
       curl_socket_t s = CURL_SOCKET_BAD;
 
       if((bitmap & GETSOCK_READSOCK(i)) && VALID_SOCK((sockbunch[i]))) {
-        FD_SET(sockbunch[i], read_fd_set);
+        CURL_FD_SET(sockbunch[i], read_fd_set, eSELECT_READ);
         s = sockbunch[i];
       }
       if((bitmap & GETSOCK_WRITESOCK(i)) && VALID_SOCK((sockbunch[i]))) {
-        FD_SET(sockbunch[i], write_fd_set);
+        CURL_FD_SET(sockbunch[i], write_fd_set, eSELECT_WRITE);
         s = sockbunch[i];
       }
       if(s == CURL_SOCKET_BAD)
         /* this socket is unused, break out of loop */
         break;
+#ifndef FreeRTOS
       if((int)s > this_max_fd)
         this_max_fd = (int)s;
+#endif
     }
 
     data = data->next; /* check next handle */
@@ -1084,8 +1086,8 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
   bool ufds_malloc = FALSE;
   long timeout_internal;
   int retcode = 0;
-  struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
-  struct pollfd *ufds = &a_few_on_stack[0];
+  struct curl_pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
+  struct curl_pollfd *ufds = &a_few_on_stack[0];
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;

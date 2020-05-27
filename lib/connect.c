@@ -114,8 +114,8 @@ tcpkeepalive(struct Curl_easy *data,
   int optval = data->set.tcp_keepalive?1:0;
 
   /* only set IDLE and INTVL if setting KEEPALIVE is successful */
-  if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
-        (void *)&optval, sizeof(optval)) < 0) {
+  if(curl_setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
+                     (void *)&optval, sizeof(optval)) < 0) {
     infof(data, "Failed to set SO_KEEPALIVE on fd %d\n", sockfd);
   }
   else {
@@ -138,16 +138,16 @@ tcpkeepalive(struct Curl_easy *data,
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
-          (void *)&optval, sizeof(optval)) < 0) {
+    if(curl_setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
+                       (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPIDLE on fd %d\n", sockfd);
     }
 #endif
 #ifdef TCP_KEEPINTVL
     optval = curlx_sltosi(data->set.tcp_keepintvl);
     KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
-          (void *)&optval, sizeof(optval)) < 0) {
+    if(curl_setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
+                       (void *)&optval, sizeof(optval)) < 0) {
       infof(data, "Failed to set TCP_KEEPINTVL on fd %d\n", sockfd);
     }
 #endif
@@ -247,7 +247,8 @@ static CURLcode bindlocal(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
 
   struct Curl_sockaddr_storage sa;
-  struct sockaddr *sock = (struct sockaddr *)&sa;  /* bind to this address */
+  struct curl_struct_sockaddr *sock =
+    (struct curl_struct_sockaddr *)&sa;  /* bind to this address */
   curl_socklen_t sizeof_sa = 0; /* size of the data sock points to */
   struct sockaddr_in *si4 = (struct sockaddr_in *)&sa;
 #ifdef ENABLE_IPV6
@@ -306,8 +307,8 @@ static CURLcode bindlocal(struct connectdata *conn,
        * converted to an IP address and would fail Curl_if2ip. Simply try
        * to use it straight away.
        */
-      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                    dev, (curl_socklen_t)strlen(dev) + 1) == 0) {
+      if(curl_setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                         dev, (curl_socklen_t)strlen(dev) + 1) == 0) {
         /* This is typically "errno 1, error: Operation not permitted" if
          * you're not running as root or another suitable privileged
          * user.
@@ -448,8 +449,9 @@ static CURLcode bindlocal(struct connectdata *conn,
   }
 
   for(;;) {
-    if(bind(sockfd, sock, sizeof_sa) >= 0) {
+    if(curl_bind(sockfd, sock, sizeof_sa) >= 0) {
       /* we succeeded to bind */
+#ifdef HAVE_GETSOCKNAME
       struct Curl_sockaddr_storage add;
       curl_socklen_t size = sizeof(add);
       memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
@@ -460,6 +462,7 @@ static CURLcode bindlocal(struct connectdata *conn,
               error, Curl_strerror(error, buffer, sizeof(buffer)));
         return CURLE_INTERFACE_FAILED;
       }
+#endif
       infof(data, "Local port: %hu\n", port);
       conn->bits.bound = TRUE;
       return CURLE_OK;
@@ -489,6 +492,7 @@ static CURLcode bindlocal(struct connectdata *conn,
   return CURLE_INTERFACE_FAILED;
 }
 
+#ifdef HAVE_GETSOCKOPT
 /*
  * verifyconnect() returns TRUE if the connect really has happened.
  */
@@ -555,6 +559,10 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 #endif
   return rc;
 }
+#else
+#define verifyconnect(x,y) TRUE
+#endif
+
 
 /* update tempaddr[tempindex] (to the next entry), makes sure to stick
    to the correct family */
@@ -1028,8 +1036,8 @@ static void tcpnodelay(struct connectdata *conn, curl_socket_t sockfd)
   (void) conn;
 #endif
 
-  if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
-                sizeof(onoff)) < 0)
+  if(curl_setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff,
+                     sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s\n",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
 #else
@@ -1229,18 +1237,18 @@ static CURLcode singleipconnect(struct connectdata *conn,
                       NULL, 0, NULL, NULL);
       }
       else {
-        rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+        rc = curl_connect(sockfd, &addr.sa_addr, addr.addrlen);
       }
 #  else
-      rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+      rc = curl_connect(sockfd, &addr.sa_addr, addr.addrlen);
 #  endif /* HAVE_BUILTIN_AVAILABLE */
-#elif defined(TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
+#elif defined(HAVE_TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
                     (void *)&optval, sizeof(optval)) < 0)
         infof(data, "Failed to enable TCP Fast Open on fd %d\n", sockfd);
 
       rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
-#elif defined(MSG_FASTOPEN) /* old Linux */
+#elif defined(HAVE_MSG_FASTOPEN) /* old Linux */
       if(conn->given->flags & PROTOPT_SSL)
         rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
       else
@@ -1248,7 +1256,7 @@ static CURLcode singleipconnect(struct connectdata *conn,
 #endif
     }
     else {
-      rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+      rc = curl_connect(sockfd, &addr.sa_addr, addr.addrlen);
     }
 
     if(-1 == rc)
@@ -1438,8 +1446,8 @@ bool Curl_connalive(struct connectdata *conn)
   else {
     /* use the socket */
     char buf;
-    if(recv((RECV_TYPE_ARG1)conn->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
-            (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
+    if(curl_recv((RECV_TYPE_ARG1)conn->sock[FIRSTSOCKET], (RECV_TYPE_ARG2)&buf,
+                 (RECV_TYPE_ARG3)1, (RECV_TYPE_ARG4)MSG_PEEK) == 0) {
       return false;   /* FIN received */
     }
   }
@@ -1537,7 +1545,7 @@ CURLcode Curl_socket(struct connectdata *conn,
   }
   else
     /* opensocket callback not set, so simply create the socket now */
-    *sockfd = socket(addr->family, addr->socktype, addr->protocol);
+    *sockfd = curl_socket(addr->family, addr->socktype, addr->protocol);
 
   if(*sockfd == CURL_SOCKET_BAD)
     /* no socket, no connection */

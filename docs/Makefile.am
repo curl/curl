@@ -61,6 +61,7 @@ EXTRA_DIST =                                    \
  FAQ                                            \
  FEATURES                                       \
  GOVERNANCE.md                                  \
+ GPLv3.txt                                      \
  HELP-US.md                                     \
  HISTORY.md                                     \
  HTTP-COOKIES.md                                \
@@ -84,6 +85,7 @@ EXTRA_DIST =                                    \
  SSL-PROBLEMS.md                                \
  SSLCERTS.md                                    \
  THANKS                                         \
+ TINY-CURL.md                                   \
  TODO                                           \
  TheArtOfHttpScripting                          \
  VERSIONS.md

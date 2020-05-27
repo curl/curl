@@ -68,10 +68,14 @@
 
 #else /* HAVE_CONFIG_H */
 
+#ifdef FreeRTOS
+#include "config-freertos.h"
+#endif
+
 #ifdef _WIN32_WCE
 #  include "config-win32ce.h"
 #else
-#  ifdef WIN32
+#  if defined(WIN32) && !defined(FreeRTOS)
 #    include "config-win32.h"
 #  endif
 #endif
@@ -586,6 +590,23 @@
  */
 
 #if defined(_MSC_VER) && !defined(__POCC__)
+#  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
+#    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
+#      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \
+             "Windows Server 2003 PSDK"
+#    else
+#      define CURL_DISABLE_LDAP 1
+#    endif
+#  endif
+#endif
+
+/*
+ * Intentionally fail to build when using msvc 6.0 without PSDK installed.
+ * The brave of heart can circumvent this, defining ALLOW_MSVC6_WITHOUT_PSDK
+ * in lib/config-win32.h although absolutely discouraged and unsupported.
+ */
+
+#if 0
 #  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
 #    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
 #      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \

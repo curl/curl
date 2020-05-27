@@ -73,9 +73,9 @@ struct pollfd
 #define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
 
 int Curl_select(curl_socket_t maxfd,
-                fd_set *fds_read,
-                fd_set *fds_write,
-                fd_set *fds_err,
+                curl_fd_set *fds_read,
+                curl_fd_set *fds_write,
+                curl_fd_set *fds_err,
                 timediff_t timeout_ms);
 
 int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
@@ -97,7 +97,7 @@ int tpf_select_libcurl(int maxfds, fd_set* reads, fd_set* writes,
 /* Winsock and TPF sockets are not in range [0..FD_SETSIZE-1], which
    unfortunately makes it impossible for us to easily check if they're valid
 */
-#if defined(USE_WINSOCK) || defined(TPF)
+#if defined(USE_WINSOCK) || defined(TPF) || defined(FreeRTOS)
 #define VALID_SOCK(x) 1
 #define VERIFY_SOCK(x) Curl_nop_stmt
 #else
