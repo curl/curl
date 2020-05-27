@@ -283,11 +283,14 @@ SKIPPED.
 Features testable here are:
 
 - `alt-svc`
+- `cookies`
 - `crypto`
 - `debug`
+- `DoH`
 - `getrlimit`
 - `GnuTLS`
 - `GSS-API`
+- `HTTP-auth`
 - `http/2`
 - `idn`
 - `ipv6`
@@ -297,10 +300,15 @@ Features testable here are:
 - `libz`
 - `manual`
 - `Metalink`
+- `Mime`
+- `netrc`
 - `NSS`
 - `NTLM`
 - `OpenSSL`
+- `parsedate`
+- `proxy`
 - `PSL`
+- `shuffle-dns`
 - `socks`
 - `SPNEGO`
 - `SSL`
@@ -309,8 +317,10 @@ Features testable here are:
 - `threaded-resolver`
 - `TLS-SRP`
 - `TrackMemory`
+- `typecheck`
 - `unittest`
 - `unix-sockets`
+- `verbose-strings`
 - `win32`
 - `WinSSL`
 
