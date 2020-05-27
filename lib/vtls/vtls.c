@@ -215,6 +215,7 @@ static bool ssl_prefs_check(struct Curl_easy *data)
   return TRUE;
 }
 
+#ifndef CURL_DISABLE_PROXY
 static CURLcode
 ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
 {
@@ -238,17 +239,20 @@ ssl_connect_init_proxy(struct connectdata *conn, int sockindex)
   }
   return CURLE_OK;
 }
+#endif
 
 CURLcode
 Curl_ssl_connect(struct connectdata *conn, int sockindex)
 {
   CURLcode result;
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
     if(result)
       return result;
   }
+#endif
 
   if(!ssl_prefs_check(conn->data))
     return CURLE_SSL_CONNECT_ERROR;
@@ -270,12 +274,13 @@ Curl_ssl_connect_nonblocking(struct connectdata *conn, int sockindex,
                              bool *done)
 {
   CURLcode result;
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_ssl_connected[sockindex]) {
     result = ssl_connect_init_proxy(conn, sockindex);
     if(result)
       return result;
   }
-
+#endif
   if(!ssl_prefs_check(conn->data))
     return CURLE_SSL_CONNECT_ERROR;
 
@@ -321,13 +326,21 @@ bool Curl_ssl_getsessionid(struct connectdata *conn,
   long *general_age;
   bool no_match = TRUE;
 
+#ifndef CURL_DISABLE_PROXY
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
-  const char * const name = isProxy ? conn->http_proxy.host.name :
-    conn->host.name;
+  const char * const name = isProxy ?
+    conn->http_proxy.host.name : conn->host.name;
   int port = isProxy ? (int)conn->port : conn->remote_port;
+#else
+  /* no proxy support */
+  struct ssl_primary_config * const ssl_config = &conn->ssl_config;
+  const char * const name = conn->host.name;
+  int port = conn->remote_port;
+  (void)sockindex;
+#endif
   *ssl_sessionid = NULL;
 
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
@@ -429,14 +442,23 @@ CURLcode Curl_ssl_addsessionid(struct connectdata *conn,
   char *clone_conn_to_host;
   int conn_to_port;
   long *general_age;
+#ifndef CURL_DISABLE_PROXY
   const bool isProxy = CONNECT_PROXY_SSL();
   struct ssl_primary_config * const ssl_config = isProxy ?
     &conn->proxy_ssl_config :
     &conn->ssl_config;
-
+  const char *hostname = isProxy ? conn->http_proxy.host.name :
+    conn->host.name;
+#else
+  /* proxy support disabled */
+  const bool isProxy = FALSE;
+  struct ssl_primary_config * const ssl_config = &conn->ssl_config;
+  const char *hostname = conn->host.name;
+  (void)sockindex;
+#endif
   DEBUGASSERT(SSL_SET_OPTION(primary.sessionid));
 
-  clone_host = strdup(isProxy ? conn->http_proxy.host.name : conn->host.name);
+  clone_host = strdup(hostname);
   if(!clone_host)
     return CURLE_OUT_OF_MEMORY; /* bail out */
 

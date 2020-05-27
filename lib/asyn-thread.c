@@ -494,11 +494,14 @@ static CURLcode resolver_error(struct connectdata *conn)
   const char *host_or_proxy;
   CURLcode result;
 
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy) {
     host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
   }
-  else {
+  else
+#endif
+  {
     host_or_proxy = "host";
     result = CURLE_COULDNT_RESOLVE_HOST;
   }

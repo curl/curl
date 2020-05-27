@@ -264,9 +264,14 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct connectdata *conn,
   size_t len = 0;
   saslstate state1 = SASL_STOP;
   saslstate state2 = SASL_FINAL;
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
+#else
+  const char * const hostname = conn->host.name;
+  const long int port = conn->remote_port;
+#endif
 #if defined(USE_KERBEROS5) || defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
@@ -417,18 +422,23 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   saslstate newstate = SASL_FINAL;
   char *resp = NULL;
+#ifndef CURL_DISABLE_PROXY
   const char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
   const long int port = SSL_IS_PROXY() ? conn->port : conn->remote_port;
+#else
+  const char * const hostname = conn->host.name;
+  const long int port = conn->remote_port;
+#endif
 #if !defined(CURL_DISABLE_CRYPTO_AUTH)
   char *chlg = NULL;
   size_t chlglen = 0;
 #endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) || \
-    defined(USE_NTLM)
+#if !defined(CURL_DISABLE_CRYPTO_AUTH) || defined(USE_KERBEROS5) ||     \
+  defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
-                        data->set.str[STRING_SERVICE_NAME] :
-                        sasl->params->service;
+    data->set.str[STRING_SERVICE_NAME] :
+    sasl->params->service;
   char *serverdata;
 #endif
   size_t len = 0;

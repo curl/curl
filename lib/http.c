@@ -292,9 +292,13 @@ static CURLcode http_output_basic(struct connectdata *conn, bool proxy)
   char *out;
 
   if(proxy) {
+#ifndef CURL_DISABLE_PROXY
     userp = &conn->allocptr.proxyuserpwd;
     user = conn->http_proxy.user;
     pwd = conn->http_proxy.passwd;
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
   }
   else {
     userp = &conn->allocptr.userpwd;
@@ -578,6 +582,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
       conn->data->set.httpversion = CURL_HTTP_VERSION_1_1;
     }
   }
+#ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy_user_passwd &&
      ((data->req.httpcode == 407) ||
       (conn->bits.authneg && data->req.httpcode < 300))) {
@@ -586,6 +591,7 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     if(!pickproxy)
       data->state.authproblem = TRUE;
   }
+#endif
 
   if(pickhost || pickproxy) {
     if((data->set.httpreq != HTTPREQ_GET) &&
@@ -689,10 +695,13 @@ output_auth_headers(struct connectdata *conn,
 #endif
   if(authstatus->picked == CURLAUTH_BASIC) {
     /* Basic */
-    if((proxy && conn->bits.proxy_user_passwd &&
-        !Curl_checkProxyheaders(conn, "Proxy-authorization")) ||
-       (!proxy && conn->bits.user_passwd &&
-        !Curl_checkheaders(conn, "Authorization"))) {
+    if(
+#ifndef CURL_DISABLE_PROXY
+      (proxy && conn->bits.proxy_user_passwd &&
+       !Curl_checkProxyheaders(conn, "Proxy-authorization")) ||
+#endif
+      (!proxy && conn->bits.user_passwd &&
+       !Curl_checkheaders(conn, "Authorization"))) {
       auth = "Basic";
       result = http_output_basic(conn, proxy);
       if(result)
@@ -719,10 +728,15 @@ output_auth_headers(struct connectdata *conn,
   }
 
   if(auth) {
+#ifndef CURL_DISABLE_PROXY
     infof(data, "%s auth using %s with user '%s'\n",
           proxy ? "Proxy" : "Server", auth,
           proxy ? (conn->http_proxy.user ? conn->http_proxy.user : "") :
-                  (conn->user ? conn->user : ""));
+          (conn->user ? conn->user : ""));
+#else
+    infof(data, "Server auth using %s with user '%s'\n",
+          auth, conn->user ? conn->user : "");
+#endif
     authstatus->multipass = (!authstatus->done) ? TRUE : FALSE;
   }
   else
@@ -762,7 +776,10 @@ Curl_http_output_auth(struct connectdata *conn,
   authhost = &data->state.authhost;
   authproxy = &data->state.authproxy;
 
-  if((conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
+  if(
+#ifndef CURL_DISABLE_PROXY
+    (conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
+#endif
      conn->bits.user_passwd || data->set.str[STRING_BEARER])
     /* continue please */;
   else {
@@ -1067,8 +1084,10 @@ static int http_should_fail(struct connectdata *conn)
   */
   if((httpcode == 401) && !conn->bits.user_passwd)
     return TRUE;
+#ifndef CURL_DISABLE_PROXY
   if((httpcode == 407) && !conn->bits.proxy_user_passwd)
     return TRUE;
+#endif
 
   return data->state.authproblem;
 }
@@ -1173,8 +1192,11 @@ CURLcode Curl_buffer_send(struct dynbuf *in,
     return result;
   }
 
-  if((conn->handler->flags & PROTOPT_SSL ||
-     conn->http_proxy.proxytype == CURLPROXY_HTTPS)
+  if((conn->handler->flags & PROTOPT_SSL
+#ifndef CURL_DISABLE_PROXY
+      || conn->http_proxy.proxytype == CURLPROXY_HTTPS
+#endif
+       )
      && conn->httpversion != 20) {
     /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
        when we speak HTTPS, as if only a fraction of it is sent now, this data
@@ -1367,6 +1389,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
      function to make the re-use checks properly be able to check this bit. */
   connkeep(conn, "HTTP default");
 
+#ifndef CURL_DISABLE_PROXY
   /* the CONNECT procedure might not have been completed */
   result = Curl_proxy_connect(conn, FIRSTSOCKET);
   if(result)
@@ -1383,7 +1406,6 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
     /* nothing else to do except wait right now - we're not done here. */
     return CURLE_OK;
 
-#ifndef CURL_DISABLE_PROXY
   if(conn->data->set.haproxyprotocol) {
     /* add HAProxy PROXY protocol header */
     result = add_haproxy_protocol_header(conn);
@@ -1665,6 +1687,7 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
   struct Curl_easy *data = conn->data;
   int i;
 
+#ifndef CURL_DISABLE_PROXY
   enum proxy_use proxy;
 
   if(is_connect)
@@ -1691,6 +1714,10 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
       h[0] = data->set.headers;
     break;
   }
+#else
+  (void)is_connect;
+  h[0] = data->set.headers;
+#endif
 
   /* loop through one or two lists */
   for(i = 0; i < numlists; i++) {
@@ -1922,13 +1949,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 #ifdef USE_NGHTTP2
         if(conn->data->set.httpversion ==
            CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+#ifndef CURL_DISABLE_PROXY
           if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
             /* We don't support HTTP/2 proxies yet. Also it's debatable
                whether or not this setting should apply to HTTP/2 proxies. */
             infof(data, "Ignoring HTTP/2 prior knowledge due to proxy\n");
             break;
           }
-
+#endif
           DEBUGF(infof(data, "HTTP/2 over clean TCP\n"));
           conn->httpversion = 20;
 
@@ -2535,10 +2563,14 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                   conn->allocptr.accept_encoding:"",
                   (data->change.referer && conn->allocptr.ref)?
                   conn->allocptr.ref:"" /* Referer: <data> */,
+#ifndef CURL_DISABLE_PROXY
                   (conn->bits.httpproxy &&
                    !conn->bits.tunnel_proxy &&
                    !Curl_checkProxyheaders(conn, "Proxy-Connection"))?
                   "Proxy-Connection: Keep-Alive\r\n":"",
+#else
+                  "",
+#endif
                   te,
                   altused ? altused : ""
       );
@@ -3646,8 +3678,11 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           k->ignorebody = TRUE; /* Avoid appending error msg to good data. */
         }
         else if(data->set.http_fail_on_error && (k->httpcode >= 400) &&
-           ((k->httpcode != 401) || !conn->bits.user_passwd) &&
-           ((k->httpcode != 407) || !conn->bits.proxy_user_passwd) ) {
+                ((k->httpcode != 401) || !conn->bits.user_passwd)
+#ifndef CURL_DISABLE_PROXY
+                && ((k->httpcode != 407) || !conn->bits.proxy_user_passwd)
+#endif
+          ) {
           /* serious error, go home! */
           print_http_error(data);
           return CURLE_HTTP_RETURNED_ERROR;
@@ -3757,6 +3792,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         data->info.contenttype = contenttype;
       }
     }
+#ifndef CURL_DISABLE_PROXY
     else if((conn->httpversion == 10) &&
             conn->bits.httpproxy &&
             Curl_compareheader(headp, "Proxy-Connection:", "keep-alive")) {
@@ -3779,6 +3815,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
       connclose(conn, "Proxy-Connection: asked to close after done");
       infof(data, "HTTP/1.1 proxy connection set close!\n");
     }
+#endif
     else if((conn->httpversion == 10) &&
             Curl_compareheader(headp, "Connection:", "keep-alive")) {
       /*

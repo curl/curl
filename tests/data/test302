@@ -24,6 +24,7 @@ And you should ignore this data.
 <client>
 <features>
 SSL
+proxy
 </features>
 <server>
 https
