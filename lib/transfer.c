@@ -558,6 +558,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
   size_t excess = 0; /* excess bytes read */
   bool readmore = FALSE; /* used by RTP to signal for more data */
   int maxloops = 100;
+  char *buf = data->state.buffer;
+  DEBUGASSERT(buf);
 
   *done = FALSE;
   *comeback = FALSE;
@@ -592,7 +594,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     if(bytestoread) {
       /* receive data from the network! */
-      result = Curl_read(conn, conn->sockfd, k->buf, bytestoread, &nread);
+      result = Curl_read(conn, conn->sockfd, buf, bytestoread, &nread);
 
       /* read would've blocked */
       if(CURLE_AGAIN == result)
@@ -619,9 +621,8 @@ static CURLcode readwrite_data(struct Curl_easy *data,
     /* indicates data of zero size, i.e. empty file */
     is_empty_data = ((nread == 0) && (k->bodywrites == 0)) ? TRUE : FALSE;
 
-    /* NUL terminate, allowing string ops to be used */
     if(0 < nread || is_empty_data) {
-      k->buf[nread] = 0;
+      buf[nread] = 0;
     }
     else {
       /* if we receive 0 or less here, either the http2 stream is closed or the
@@ -638,7 +639,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
     /* Default buffer to use when we write the buffer, it may be changed
        in the flow below before the actual storing is done. */
-    k->str = k->buf;
+    k->str = buf;
 
     if(conn->handler->readwrite) {
       result = conn->handler->readwrite(data, conn, &nread, &readmore);
@@ -905,10 +906,10 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       /* Parse the excess data */
       k->str += nread;
 
-      if(&k->str[excess] > &k->buf[data->set.buffer_size]) {
+      if(&k->str[excess] > &buf[data->set.buffer_size]) {
         /* the excess amount was too excessive(!), make sure
            it doesn't read out of buffer */
-        excess = &k->buf[data->set.buffer_size] - k->str;
+        excess = &buf[data->set.buffer_size] - k->str;
       }
       nread = (ssize_t)excess;
 
@@ -1467,7 +1468,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
   Curl_safefree(data->info.wouldredirect);
-  data->info.wouldredirect = NULL;
 
   if(data->set.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;

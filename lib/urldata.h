@@ -627,7 +627,6 @@ struct SingleRequest {
   struct contenc_writer *writer_stack;
   time_t timeofdoc;
   long bodywrites;
-  char *buf;
   int keepon;
   char *location;   /* This points to an allocated version of the Location:
                        header data */

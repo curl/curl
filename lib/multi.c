@@ -678,6 +678,7 @@ static CURLcode multi_done(struct Curl_easy *data,
       data->state.lastconnect = NULL;
   }
 
+  Curl_safefree(data->state.buffer);
   Curl_free_request_state(data);
   return result;
 }
@@ -1522,6 +1523,20 @@ static CURLcode protocol_connect(struct connectdata *conn,
   return result; /* pass back status */
 }
 
+/*
+ * preconnect() is called immediately before a connect starts. When a redirect
+ * is followed, this is then called multiple times during a single transfer.
+ */
+static CURLcode preconnect(struct Curl_easy *data)
+{
+  if(!data->state.buffer) {
+    data->state.buffer = malloc(data->set.buffer_size + 1);
+    if(!data->state.buffer)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  return CURLE_OK;
+}
+
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct curltime now,
@@ -1629,6 +1644,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_CONNECT:
       /* Connect. We want to get a connection identifier filled in. */
+      /* init this transfer. */
+      result = preconnect(data);
+      if(result)
+        break;
+
       Curl_pgrsTime(data, TIMER_STARTSINGLE);
       if(data->set.timeout)
         Curl_expire(data, data->set.timeout, EXPIRE_TIMEOUT);
@@ -2058,7 +2078,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       char *newurl = NULL;
       bool retry = FALSE;
       bool comeback = FALSE;
-
+      DEBUGASSERT(data->state.buffer);
       /* check if over send speed */
       send_timeout_ms = 0;
       if(data->set.max_send_speed > 0)

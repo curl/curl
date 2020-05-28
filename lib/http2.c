@@ -258,15 +258,14 @@ static unsigned int http2_conncheck(struct connectdata *check,
 void Curl_http2_setup_req(struct Curl_easy *data)
 {
   struct HTTP *http = data->req.protop;
-
   http->bodystarted = FALSE;
   http->status_code = -1;
   http->pausedata = NULL;
   http->pauselen = 0;
   http->closed = FALSE;
   http->close_handled = FALSE;
-  http->mem = data->state.buffer;
-  http->len = data->set.buffer_size;
+  http->mem = NULL;
+  http->len = 0;
   http->memlen = 0;
 }
 
@@ -2103,6 +2102,8 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   struct http_conn *httpc = &conn->proto.httpc;
   struct HTTP *stream = conn->data->req.protop;
 
+  DEBUGASSERT(conn->data->state.buffer);
+
   stream->stream_id = -1;
 
   Curl_dyn_init(&stream->header_recvbuf, DYN_H2_HEADERS);
@@ -2126,6 +2127,8 @@ CURLcode Curl_http2_setup(struct connectdata *conn)
   stream->upload_left = 0;
   stream->upload_mem = NULL;
   stream->upload_len = 0;
+  stream->mem = conn->data->state.buffer;
+  stream->len = conn->data->set.buffer_size;
 
   httpc->inbuflen = 0;
   httpc->nread_inbuf = 0;
