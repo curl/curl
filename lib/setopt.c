@@ -2076,7 +2076,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       arg = READBUFFER_MIN;
 
     /* Resize if new size */
-    if(arg != data->set.buffer_size) {
+    if((arg != data->set.buffer_size) && data->state.buffer) {
       char *newbuff = realloc(data->state.buffer, arg + 1);
       if(!newbuff) {
         DEBUGF(fprintf(stderr, "Error: realloc of buffer failed\n"));

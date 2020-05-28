@@ -610,31 +610,21 @@ CURLcode Curl_open(struct Curl_easy **curl)
     return result;
   }
 
-  /* We do some initial setup here, all those fields that can't be just 0 */
+  result = Curl_init_userdefined(data);
+  if(!result) {
+    Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
+    Curl_convert_init(data);
+    Curl_initinfo(data);
 
-  data->state.buffer = malloc(READBUFFER_SIZE + 1);
-  if(!data->state.buffer) {
-    DEBUGF(fprintf(stderr, "Error: malloc of buffer failed\n"));
-    result = CURLE_OUT_OF_MEMORY;
-  }
-  else {
-    result = Curl_init_userdefined(data);
-    if(!result) {
-      Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
-      Curl_convert_init(data);
-      Curl_initinfo(data);
+    /* most recent connection is not yet defined */
+    data->state.lastconnect = NULL;
 
-      /* most recent connection is not yet defined */
-      data->state.lastconnect = NULL;
-
-      data->progress.flags |= PGRS_HIDE;
-      data->state.current_speed = -1; /* init to negative == impossible */
-    }
+    data->progress.flags |= PGRS_HIDE;
+    data->state.current_speed = -1; /* init to negative == impossible */
   }
 
   if(result) {
     Curl_resolver_cleanup(data->state.resolver);
-    free(data->state.buffer);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     free(data);
@@ -3973,14 +3963,10 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   k->start = Curl_now(); /* start time */
   k->now = k->start;   /* current time is now */
   k->header = TRUE; /* assume header */
-
   k->bytecount = 0;
-
-  k->buf = data->state.buffer;
   k->ignorebody = FALSE;
 
   Curl_speedinit(data);
-
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
 
