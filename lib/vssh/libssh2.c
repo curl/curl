@@ -1359,7 +1359,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          */
         cp = strchr(cmd, ' ');
         if(cp == NULL) {
-          failf(data, "Syntax error in SFTP command. Supply parameter(s)!");
+          failf(data, "Syntax error command '%s'. Missing parameter!",
+                cmd);
           state(conn, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -1375,7 +1376,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           if(result == CURLE_OUT_OF_MEMORY)
             failf(data, "Out of memory");
           else
-            failf(data, "Syntax error: Bad first parameter");
+            failf(data, "Syntax error: Bad first parameter to '%s'", cmd);
           state(conn, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
           sshc->actualcode = result;
@@ -1400,8 +1401,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
             if(result == CURLE_OUT_OF_MEMORY)
               failf(data, "Out of memory");
             else
-              failf(data, "Syntax error in chgrp/chmod/chown: "
-                    "Bad second parameter");
+              failf(data, "Syntax error in %s: Bad second parameter", cmd);
             Curl_safefree(sshc->quote_path1);
             state(conn, SSH_SFTP_CLOSE);
             sshc->nextstate = SSH_NO_STATE;
