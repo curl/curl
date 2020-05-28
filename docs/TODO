@@ -435,7 +435,7 @@
  - GSSAPI authentication for FTP transfers
 
  - The "DONE" operation (post transfer protocol-specific actions) for the
- protocols SFTP, SMTP, FTP. Fixing Curl_done() for this is a worthy task.
+ protocols SFTP, SMTP, FTP. Fixing multi_done() for this is a worthy task.
 
  - curl_multi_remove_handle for any of the above. See section 2.3.
 
