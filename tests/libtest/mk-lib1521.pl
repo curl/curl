@@ -158,6 +158,7 @@ int test(char *URL)
   curl_socket_t sockfd;
   struct curl_certinfo *certinfo;
   struct curl_tlssessioninfo *tlssession;
+  struct curl_blob blob = { (void *)"silly", 5, 0};
   CURLcode res = CURLE_OK;
   (void)URL; /* not used */
   global_init(CURL_GLOBAL_ALL);
@@ -239,8 +240,12 @@ while(<STDIN>) {
             print "${pref} OFF_HI);\n$check";
             print "${pref} OFF_LO);\n$check";
         }
+        elsif($type eq "CURLOPTTYPE_BLOB") {
+            print "${pref} &blob);\n$check";
+        }
         else {
             print STDERR "\n---- $type\n";
+            exit; # exit to make this noticed!
         }
     }
     elsif($_ =~ /^  CURLINFO_NONE/) {
