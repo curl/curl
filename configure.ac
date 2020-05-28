@@ -1282,12 +1282,14 @@ dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
 AC_MSG_CHECKING([if argv can be written to])
-CURL_RUN_IFELSE([
-int main(int argc, char ** argv) {
-    argv[0][0] = ' ';
-    return (argv[0][0] == ' ')?0:1;
+CURL_RUN_IFELSE([[
+int main(int argc, char **argv)
+{
+  (void)argc;
+  argv[0][0] = ' ';
+  return (argv[0][0] == ' ')?0:1;
 }
-],[
+]],[
   curl_cv_writable_argv=yes
 ],[
   curl_cv_writable_argv=no
