@@ -633,8 +633,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   while(!*ftpcode && !result) {
     /* check and reset timeout value every lap */
-    time_t timeout = Curl_pp_state_timeout(pp, FALSE);
-    time_t interval_ms;
+    timediff_t timeout = Curl_pp_state_timeout(pp, FALSE);
+    timediff_t interval_ms;
 
     if(timeout <= 0) {
       failf(data, "FTP response timeout");
@@ -3252,7 +3252,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
      * data has been transferred. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
-    long old_time = pp->response_time;
+    timediff_t old_time = pp->response_time;
 
     pp->response_time = 60*1000; /* give it only a minute for now */
     pp->response = Curl_now(); /* timeout relative now */

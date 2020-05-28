@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -282,9 +282,9 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
    * stay below 'limit'.
    */
   if(size < CURL_OFF_T_MAX/1000)
-    minimum = (time_t) (CURL_OFF_T_C(1000) * size / limit);
+    minimum = (timediff_t) (CURL_OFF_T_C(1000) * size / limit);
   else {
-    minimum = (time_t) (size / limit);
+    minimum = (timediff_t) (size / limit);
     if(minimum < TIMEDIFF_T_MAX/1000)
       minimum *= 1000;
     else

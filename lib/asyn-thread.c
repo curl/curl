@@ -179,7 +179,7 @@ struct thread_sync_data {
 struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
-  time_t interval_end;
+  timediff_t interval_end;
   struct thread_sync_data tsd;
 };
 
@@ -622,8 +622,8 @@ CURLcode Curl_resolver_is_resolved(struct connectdata *conn,
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
     /* should be fine even if this converts to 32 bit */
-    time_t elapsed = (time_t)Curl_timediff(Curl_now(),
-                                           data->progress.t_startsingle);
+    timediff_t elapsed = Curl_timediff(Curl_now(),
+                                       data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 
@@ -648,7 +648,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
                           curl_socket_t *socks)
 {
   int ret_val = 0;
-  time_t milli;
+  timediff_t milli;
   timediff_t ms;
   struct Curl_easy *data = conn->data;
   struct resdata *reslv = (struct resdata *)data->state.resolver;
@@ -672,7 +672,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)
-      milli = (time_t)ms/3;
+      milli = ms/3;
     else if(ms <= 250)
       milli = 50;
     else
