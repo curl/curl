@@ -44,132 +44,52 @@ stages:
 - stage: linux
   dependsOn: []
   jobs:
-  - job: vanilla
-    displayName: ubuntu default
-    timeoutInMinutes: 20
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: sudo apt install stunnel4 python-impacket
-      displayName: 'apt install'
-
-    - script: ./buildconf && ./configure --enable-debug --enable-werror
-      displayName: 'configure debug'
-
-    - script: make
-      displayName: 'make'
-
-    - script: make test-nonflaky
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: ""
-
-  - job: disable_ipv6
-    displayName: ubuntu w/o IPv6
-    timeoutInMinutes: 20
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: sudo apt install stunnel4 python-impacket
-      displayName: 'apt install'
-
-    - script: ./buildconf && ./configure --disable-ipv6
-      displayName: 'configure disable ipv6'
-
-    - script: make
-      displayName: 'make'
-
-    - script: make test-nonflaky
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: ""
-
-  - job: disable_http_smtp_imap
-    displayName: ubuntu w/o HTTP/SMTP/IMAP
-    timeoutInMinutes: 20
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: sudo apt install stunnel4 python-impacket
-      displayName: 'apt install'
-
-    - script: ./buildconf && ./configure --disable-http --disable-smtp --disable-imap
-      displayName: 'configure disable http/smtp/imap'
-
-    - script: make
-      displayName: 'make'
-
-    - script: make test-nonflaky
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-
-  - job: disable_thredres
-    displayName: ubuntu sync resolver
-    timeoutInMinutes: 20
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: sudo apt install stunnel4 python-impacket
-      displayName: 'apt install'
-
-    - script: ./buildconf && ./configure --disable-threaded-resolver
-      displayName: 'configure disable threaded-resolver'
-
-    - script: make
-      displayName: 'make'
-
-    - script: make test-nonflaky
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: ""
-
-  - job: http_only
-    displayName: ubuntu HTTP only
-    timeoutInMinutes: 20
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: sudo apt install stunnel4 python-impacket
-      displayName: 'apt install'
-
-    - script: ./buildconf && ./configure --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp
-      displayName: 'configure disable non-http'
-
-    - script: make
-      displayName: 'make'
-
-    - script: make test-nonflaky
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: ""
-
-- stage: linux_torture
-  dependsOn: linux
-  jobs:
-  - job: torture
-    displayName: ubuntu torture tests
+  - job: ubuntu
+    # define defaults to make sure variables are always expanded/replaced
+    variables:
+      install: ''
+      configure: ''
+      tflags: ''
     timeoutInMinutes: 60
     pool:
       vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        default:
+          name: default
+          configure: --enable-debug --enable-werror
+        disable_ipv6:
+          name: w/o IPv6
+          configure: --disable-ipv6
+        disable_http_smtp_imap:
+          name: w/o HTTP/SMTP/IMAP
+          configure: --disable-http --disable-smtp --disable-imap
+        disable_thredres:
+          name: sync resolver
+          configure: --disable-threaded-resolver
+        http_only:
+          name: HTTP only
+          configure: --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp
+        torture:
+          name: torture
+          install: libnghttp2-dev
+          configure: --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
+          tflags: -n -t --shallow=40 !FTP
     steps:
-    - script: sudo apt install stunnel4 python-impacket libnghttp2-dev
+    - script: sudo apt-get update && sudo apt-get install -y stunnel4 python-impacket $(install)
       displayName: 'apt install'
 
-    - script: ./buildconf && ./configure --enable-debug --disable-shared --disable-threaded-resolver --enable-alt-svc
-      displayName: 'configure torture'
+    - script: ./buildconf && ./configure $(configure)
+      displayName: 'configure $(name)'
 
     - script: make
       displayName: 'make'
 
     - script: make test-nonflaky
-      displayName: 'torture test'
+      displayName: 'test'
       env:
-        TFLAGS: "-n -t --shallow=40 !FTP"
+        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
+        TFLAGS: "$(tflags)"
 
 ##########################################
 ### Windows jobs below
@@ -180,214 +100,91 @@ stages:
   variables:
     agent.preferPowerShellOnContainers: true
   jobs:
-  - job: windows_msys2_mingw32_debug_openssl
-    displayName: msys2 mingw32 debug openssl
+  - job: windows
+    # define defaults to make sure variables are always expanded/replaced
+    variables:
+      container_img: ''
+      container_cmd: ''
+      configure: ''
+      tflags: ''
     timeoutInMinutes: 90
     pool:
       vmImage: 'windows-2019'
+    strategy:
+      matrix:
+        msys2_mingw32_debug_openssl:
+          name: 32-bit OpenSSL and MQTT
+          container_img: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-mqtt
+          tflags: ~1056 ~1299
+        msys2_mingw64_debug_openssl:
+          name: 64-bit OpenSSL and MQTT
+          container_img: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-mqtt
+          tflags: ~1056 ~1299
+        msys1_mingw_debug_openssl:
+          name: 32-bit OpenSSL (legacy)
+          container_img: mback2k/curl-docker-winbuildenv-msys1-mingw:ltsc2019
+          container_cmd: C:\MinGW\msys\1.0\bin\sh
+          configure: --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug
+          tflags: ~203 ~1056 ~1143
+        msys1_mingw32_debug_openssl:
+          name: 32-bit OpenSSL w/o zlib
+          container_img: mback2k/curl-docker-winbuildenv-msys1-mingw32:ltsc2019
+          container_cmd: C:\MinGW\msys\1.0\bin\sh
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --without-zlib
+          tflags: ~203 ~1056 ~1143 ~1299
+        msys1_mingw64_debug_openssl:
+          name: 64-bit OpenSSL w/o zlib
+          container_img: mback2k/curl-docker-winbuildenv-msys1-mingw64:ltsc2019
+          container_cmd: C:\MinGW\msys\1.0\bin\sh
+          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib
+          tflags: ~203 ~1056 ~1143 ~1299
+        msys2_mingw32_debug_schannel:
+          name: 32-bit Schannel/SSPI/WinIDN
+          container_img: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn
+          tflags: ~165 ~310 ~1013 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001
+        msys2_mingw64_debug_schannel:
+          name: 64-bit Schannel/SSPI/WinIDN
+          container_img: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
+          container_cmd: C:\msys64\usr\bin\sh
+          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn
+          tflags: ~165 ~310 ~1013 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001
+        msys1_mingw_debug_schannel:
+          name: 32-bit Schannel/SSPI/WinIDN (legacy)
+          container_img: mback2k/curl-docker-winbuildenv-msys1-mingw:ltsc2019
+          container_cmd: C:\MinGW\msys\1.0\bin\sh
+          configure: --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --enable-sspi --without-ssl --with-schannel --with-winidn
+          tflags: ~203 ~305 ~310 ~311 ~312 ~313 ~404 ~1013 ~1056 ~1143 ~2034 ~2035 ~2037 ~2038 ~2041 ~2042 ~2048 ~3000 ~3001
+        msys1_mingw32_debug_schannel:
+          name: 32-bit Schannel/SSPI/WinIDN w/o zlib
+          container_img: mback2k/curl-docker-winbuildenv-msys1-mingw32:ltsc2019
+          container_cmd: C:\MinGW\msys\1.0\bin\sh
+          configure: --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib
+          tflags: ~203 ~310 ~1013 ~1056 ~1143 ~1299 ~2034 ~2037 ~2041 ~3000 ~3001
+        msys1_mingw64_debug_schannel:
+          name: 64-bit Schannel/SSPI/WinIDN w/o zlib
+          container_img: mback2k/curl-docker-winbuildenv-msys1-mingw64:ltsc2019
+          container_cmd: C:\MinGW\msys\1.0\bin\sh
+          configure: --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64  --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib
+          tflags: ~203 ~310 ~1013 ~1056 ~1143 ~1299 ~2034 ~2037 ~2041 ~3000 ~3001
     container:
-      image: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
+      image: $(container_img)
       env:
-        MSYSTEM: MINGW32
         MSYS2_PATH_TYPE: inherit
     steps:
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --enable-debug --enable-werror"
-      displayName: 'configure debug'
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && ./buildconf && ./configure $(configure)"
+      displayName: 'configure $(name)'
 
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make"
       displayName: 'make'
 
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
+    - script: $(container_cmd) -l -c "cd $(echo '%cd%') && make test-nonflaky"
       displayName: 'test'
       env:
         AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~1056 ~1299"
-
-  - job: windows_msys2_mingw64_debug_openssl
-    displayName: msys2 mingw64 debug openssl
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
-      env:
-        MSYSTEM: MINGW64
-        MSYS2_PATH_TYPE: inherit
-    steps:
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --enable-debug --enable-werror"
-      displayName: 'configure debug'
-
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~1056 ~1299"
-
-  - job: windows_msys1_mingw_debug_openssl
-    displayName: msys1 mingw debug openssl
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys1-mingw:ltsc2019
-    steps:
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug"
-      displayName: 'configure debug'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~203 ~1056 ~1143"
-
-  - job: windows_msys1_mingw32_debug_openssl
-    displayName: msys1 mingw32 debug openssl
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys1-mingw32:ltsc2019
-    steps:
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --without-zlib --enable-mqtt"
-      displayName: 'configure debug without zlib'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~203 ~1056 ~1143 ~1299"
-
-  - job: windows_msys1_mingw64_debug_openssl
-    displayName: msys1 mingw64 debug openssl
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys1-mingw64:ltsc2019
-    steps:
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64 --enable-debug --enable-werror --without-zlib"
-      displayName: 'configure debug without zlib'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~203 ~1056 ~1143 ~1299"
-
-  - job: windows_msys2_mingw32_debug_schannel
-    displayName: msys2 mingw32 debug schannel
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys2-mingw32:ltsc2019
-      env:
-        MSYSTEM: MINGW32
-        MSYS2_PATH_TYPE: inherit
-    steps:
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn"
-      displayName: 'configure debug with sspi/schannel/winidn'
-
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~165 ~310 ~1013 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001"
-
-  - job: windows_msys2_mingw64_debug_schannel
-    displayName: msys2 mingw64 debug schannel
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys2-mingw64:ltsc2019
-      env:
-        MSYSTEM: MINGW64
-        MSYS2_PATH_TYPE: inherit
-    steps:
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn"
-      displayName: 'configure debug with sspi/schannel/winidn'
-
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\msys64\usr\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~165 ~310 ~1013 ~1056 ~1299 ~1448 ~2034 ~2037 ~2041 ~2046 ~2047 ~3000 ~3001"
-
-  - job: windows_msys1_mingw_debug_schannel
-    displayName: msys1 mingw debug schannel
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys1-mingw:ltsc2019
-    steps:
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-pc-mingw32 --build=i686-pc-mingw32 --prefix=/mingw --enable-debug --enable-sspi --without-ssl --with-schannel --with-winidn"
-      displayName: 'configure debug with sspi/schannel/winidn'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~203 ~305 ~310 ~311 ~312 ~313 ~404 ~1013 ~1056 ~1143 ~2034 ~2035 ~2037 ~2038 ~2041 ~2042 ~2048 ~3000 ~3001"
-
-  - job: windows_msys1_mingw32_debug_schannel
-    displayName: msys1 mingw32 debug schannel
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys1-mingw32:ltsc2019
-    steps:
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=i686-w64-mingw32 --build=i686-w64-mingw32 --prefix=/mingw32 --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib"
-      displayName: 'configure debug with sspi/schannel/winidn without zlib'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~203 ~310 ~1013 ~1056 ~1143 ~1299 ~2034 ~2037 ~2041 ~3000 ~3001"
-
-  - job: windows_msys1_mingw64_debug_schannel
-    displayName: msys1 mingw64 debug schannel
-    timeoutInMinutes: 90
-    pool:
-      vmImage: 'windows-2019'
-    container:
-      image: mback2k/curl-docker-winbuildenv-msys1-mingw64:ltsc2019
-    steps:
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && ./buildconf && ./configure --host=x86_64-w64-mingw32 --build=x86_64-w64-mingw32 --prefix=/mingw64  --enable-debug --enable-werror --enable-sspi --without-ssl --with-schannel --with-winidn --without-zlib"
-      displayName: 'configure debug with sspi/schannel/winidn without zlib'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make"
-      displayName: 'make'
-
-    - script: C:\MinGW\msys\1.0\bin\sh -l -c "cd $(echo '%cd%') && make test-nonflaky"
-      displayName: 'test'
-      env:
-        AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-        TFLAGS: "~203 ~310 ~1013 ~1056 ~1143 ~1299 ~2034 ~2037 ~2041 ~3000 ~3001"
+        TFLAGS: "$(tflags)"
