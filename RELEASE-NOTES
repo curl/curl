@@ -4,7 +4,7 @@ curl and libcurl 7.71.0
  Command line options:         232
  curl_easy_setopt() options:   277
  Public functions in libcurl:  82
- Contributors:                 2181
+ Contributors:                 2186
 
 This release includes the following changes:
 
@@ -16,6 +16,8 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o *_sspi: fix bad uses of CURLE_NOT_BUILT_IN [21]
+ o all: fix codespell errors [75]
+ o altsvc: fix parser for lines ending with CRLF [74]
  o appveyor: disable flaky test 1501 and ignore broken 1056
  o appveyor: disable test 1139 instead of ignoring it
  o asyn-*: remove support for never-used NULL entry pointers [19]
@@ -26,7 +28,9 @@ This release includes the following bugfixes:
  o CMake: add libssh build support [37]
  o CMake: do not build test programs by default [30]
  o CMake: fix runtests.pl with CMake, add new test targets [29]
+ o CMake: rebuild Makefile.inc.cmake when Makefile.inc changes [58]
  o configure: fix pthread check with static boringssl
+ o configure: repair the check if argv can be written to [47]
  o configure: the wolfssh backend does not provide SCP [57]
  o connect: make happy eyeballs work for QUIC (again) [16]
  o curl.1: Quote globbed URLs [51]
@@ -39,27 +43,37 @@ This release includes the following bugfixes:
  o dynbuf: introduce internal generic dynamic buffer functions [17]
  o easy: fix dangling pointer on easy_perform fail [26]
  o examples: remove asiohiper.cpp [4]
+ o FILEFORMAT: add more features that tests can depend on
  o ftp: make domore_getsock() return the secondary socket properly
  o ftp: mark return-ignoring calls to Curl_GetFTPResponse with (void) [64]
  o ftp: shut down the secondary connection properly when SSL is used [43]
  o GnuTLS: Backend support for CURLINFO_SSL_VERIFYRESULT [9]
  o hostip: make Curl_printable_address not return anything [63]
+ o hostip: on macOS avoid DoH when given a numerical IP address [69]
  o http2: keep trying to send pending frames after req.upload_done [40]
  o http2: simplify and clean up trailer handling [6]
  o libcurl.pc: Merge Libs.private into Libs for static-only builds [28]
+ o libssh2: improved error output for wrong quote syntax [39]
  o libssh2: set the expected total size in SCP upload init [2]
  o libtest/cmake: Remove commented code [13]
  o list-only.d: this option existed already in 4.0
+ o ngtcp2: cleanup memory when failing to connect [70]
+ o ngtcp2: fix build with current ngtcp2 master implementing draft 28 [76]
  o ngtcp2: introduce qlog support [23]
  o OpenSSL: have CURLOPT_CRLFILE imply CURLSSLOPT_NO_PARTIALCHAIN [55]
+ o quiche: clean up memory properly when failing to connect [71]
  o quiche: enable qlog output [14]
+ o Revert "buildconf: use find -execdir" [38]
+ o Revert "ssh: ignore timeouts during disconnect" [67]
  o runtests: remove sleep calls [18]
  o runtests: show elapsed test time with higher precision (ms)
  o select: fix overflow protection in Curl_socket_check [22]
  o sendf: make failf() use the mvsnprintf() return code [62]
+ o server/sws: fix asan warning on use of uninitialized variable
  o sha256: fixed potentially uninitialized variable [61]
  o sockfilt: make select_ws stop waiting on exit signal event
  o source cleanup: remove all custom typedef structs [42]
+ o test1167: fixes in badsymbols.pl [73]
  o test1177: look for curl.h in source directory [1]
  o test1238: avoid tftpd being busy for tests shortly following [33]
  o test613.pl: make tests 613 and 614 work with OpenSSH for Windows [8]
@@ -73,15 +87,19 @@ This release includes the following bugfixes:
  o tool: support UTF-16 command line on Windows [46]
  o tool_operate: fixed potentially uninitialized variables [60]
  o tool_paramhlp: fixed potentially uninitialized strtol() variable [59]
+ o transfer: close connection after excess data has been read [66]
  o travis: add "qlog" as feature in the quiche build
  o travis: Add ngtcp2 and quiche tests for CMake
  o travis: upgrade to bionic, clang-9, improve readability [35]
  o typecheck-gcc.h: CURLINFO_PRIVATE does not need a 'char *' [44]
+ o url: accept "any length" credentials for proxy auth [72]
  o url: make the updated credentials URL-encoded in the URL [48]
  o url: reject too long input when parsing credentials [25]
  o url: sort the protocol schemes in rough popularity order [32]
  o urlapi: accept :: as a valid IPv6 address [15]
  o vauth/cleartext: fix theoretical integer overflow [50]
+ o vtls: Extract and simplify key log file handling from OpenSSL
+ o wolfssl: add SSLKEYLOGFILE support [65]
  o write-out.d: added "response_code"
 
 This release includes the following known bugs:
@@ -92,13 +110,14 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Billyzou0741326 on github, Brian Carpenter, Dan Fandrich, Daniel Stenberg,
-  Emil Engler, Gilles Vollant, Gregory Jefferis, James Le Cuirot, Jeroen Ooms,
-  John Simpson, Kamil Dudka, Kane York, Lucas Pardue, Marcel Raad,
-  Marc Hörsken, Michael Kaufmann, Murugan Balraj, Neal Poole, Pavel Volgarev,
+  Emil Engler, Estanislau Augé-Pujadas, Gilles Vollant, Gregory Jefferis,
+  huzunhao on github, James Le Cuirot, Jeroen Ooms, John Simpson, Kamil Dudka,
+  Kane York, Lucas Pardue, Maksim Stsepanenka, Marcel Raad, Marc Hörsken,
+  Max Peal, Michael Kaufmann, Murugan Balraj, Neal Poole, Pavel Volgarev,
   Peter Wang, Peter Wu, Ray Satiro, Rikard Falkeborn, rl1987 on github,
-  Samuel Marks, Siva Sivaraman, Thomas Bouzerar, Vyron Tsingaras,
-  Коваленко Анатолий Викторович,
-  (29 contributors)
+  Samuel Marks, Siva Sivaraman, Thomas Bouzerar, Viktor Szakats,
+  Vyron Tsingaras, Werner Stolz, Will Roberts, Коваленко Анатолий Викторович,
+  (36 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
@@ -141,12 +160,15 @@ References to bug reports and discussions on issues:
  [35] = https://curl.haxx.se/bug/?i=5370
  [36] = https://curl.haxx.se/mail/archive-2020-05/0044.html
  [37] = https://curl.haxx.se/bug/?i=5372
+ [38] = https://curl.haxx.se/bug/?i=5483
+ [39] = https://curl.haxx.se/bug/?i=5474
  [40] = https://curl.haxx.se/bug/?i=1410
  [41] = https://curl.haxx.se/bug/?i=5357
  [42] = https://curl.haxx.se/bug/?i=5338
  [43] = https://curl.haxx.se/bug/?i=5340
  [44] = https://curl.haxx.se/bug/?i=5432
  [46] = https://curl.haxx.se/bug/?i=3784
+ [47] = https://curl.haxx.se/bug/?i=5470
  [48] = https://github.com/jeroen/curl/issues/224
  [49] = https://curl.haxx.se/bug/?i=5399
  [50] = https://curl.haxx.se/bug/?i=5391
@@ -157,9 +179,21 @@ References to bug reports and discussions on issues:
  [55] = https://curl.haxx.se/bug/?i=5374
  [56] = https://curl.haxx.se/bug/?i=5379
  [57] = https://curl.haxx.se/bug/?i=5387
+ [58] = https://curl.haxx.se/bug/?i=5469
  [59] = https://curl.haxx.se/bug/?i=5417
  [60] = https://curl.haxx.se/bug/?i=5416
  [61] = https://curl.haxx.se/bug/?i=5414
  [62] = https://curl.haxx.se/bug/?i=5413
  [63] = https://curl.haxx.se/bug/?i=5411
  [64] = https://curl.haxx.se/bug/?i=5412
+ [65] = https://curl.haxx.se/bug/?i=5327
+ [66] = https://curl.haxx.se/bug/?i=5440
+ [67] = https://curl.haxx.se/mail/lib-2020-05/0068.html
+ [69] = https://curl.haxx.se/bug/?i=5454
+ [70] = https://curl.haxx.se/bug/?i=5447
+ [71] = https://curl.haxx.se/bug/?i=5450
+ [72] = https://curl.haxx.se/bug/?i=5448
+ [73] = https://curl.haxx.se/bug/?i=5442
+ [74] = https://curl.haxx.se/bug/?i=5445
+ [75] = https://curl.haxx.se/bug/?i=5452
+ [76] = https://curl.haxx.se/bug/?i=5444
