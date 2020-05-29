@@ -1665,8 +1665,7 @@ schannel_send(struct connectdata *conn, int sockindex,
     while(len > (size_t)written) {
       ssize_t this_write = 0;
       int what;
-      const timediff_t timeout_ms =
-        Curl_timeleft(conn->data, NULL, FALSE);
+      timediff_t timeout_ms = Curl_timeleft(conn->data, NULL, FALSE);
       if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(conn->data, "schannel: timed out sending data "
@@ -1675,7 +1674,7 @@ schannel_send(struct connectdata *conn, int sockindex,
         written = -1;
         break;
       }
-      if(!timeout_ms)
+      else if(!timeout_ms)
         timeout_ms = TIMEDIFF_T_MAX;
       what = SOCKET_WRITABLE(conn->sock[sockindex], timeout_ms);
       if(what < 0) {
