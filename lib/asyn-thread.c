@@ -179,7 +179,7 @@ struct thread_sync_data {
 struct thread_data {
   curl_thread_t thread_hnd;
   unsigned int poll_interval;
-  time_t interval_end;
+  timediff_t interval_end;
   struct thread_sync_data tsd;
 };
 
