@@ -227,6 +227,11 @@ environment:
         TESTING: ON
         DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
         CONFIG_ARGS: "--enable-debug --enable-werror --enable-alt-svc --disable-threaded-resolver"
+      - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+        BUILD_SYSTEM: autotools
+        TESTING: ON
+        DISABLED_TESTS: "!19 !504 !704 !705 ~1056 !1233"
+        CONFIG_ARGS: "--enable-warnings --enable-werror"
 
 install:
     - set "PATH=C:\msys64\usr\bin;%PATH%"
