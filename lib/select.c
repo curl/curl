@@ -86,18 +86,18 @@ int Curl_wait_ms(timediff_t timeout_ms)
   }
 #if defined(MSDOS)
   delay(timeout_ms);
-#elif defined(USE_WINSOCK)
+#elif defined(WIN32)
   /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
 #if TIMEDIFF_T_MAX > ULONG_MAX
   if(timeout_ms > ULONG_MAX)
-#if ULONG_MAX < INFINITE
     timeout_ms = ULONG_MAX;
-#else
-    timeout_ms = ULONG_MAX-1;
-    /* avoid waiting forever */
 #endif
-#endif
+  /* avoid INFINITE, negated check to not care about > or >= due to max */
+#if INFINITE > 0
+  if(!(timeout_ms < INFINITE))
+    timeout_ms = INFINITE-1;
   Sleep((ULONG)timeout_ms);
+#endif
 #else
 #if defined(HAVE_POLL_FINE)
   /* prevent overflow, timeout_ms is typecast to int. */
@@ -119,14 +119,6 @@ int Curl_wait_ms(timediff_t timeout_ms)
 #endif
     pending_tv.tv_sec = (time_t)tv_sec;
     pending_tv.tv_usec = (suseconds_t)tv_usec;
-#elif defined(WIN32) /* maybe also others in the future */
-#if TIMEDIFF_T_MAX > LONG_MAX
-    /* tv_sec overflow check on Windows there we know it is long */
-    if(tv_sec > LONG_MAX)
-      tv_sec = LONG_MAX;
-#endif
-    pending_tv.tv_sec = (long)tv_sec;
-    pending_tv.tv_usec = (long)tv_usec;
 #else
 #if TIMEDIFF_T_MAX > INT_MAX
     /* tv_sec overflow check in case time_t is signed */
