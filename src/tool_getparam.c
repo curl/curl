@@ -1817,6 +1817,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case 'i':
+      if(config->content_disposition) {
+        warnf(global,
+              "--include and --remote-header-name cannot be combined.\n");
+        return PARAM_BAD_USE;
+      }
       config->show_headers = toggle; /* show the headers as well in the
                                         general output stream */
       break;
