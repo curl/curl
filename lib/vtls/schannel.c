@@ -425,8 +425,12 @@ schannel_connect_step1(struct connectdata *conn, int sockindex)
 #endif
   TCHAR *host_name;
   CURLcode result;
+#ifndef CURL_DISABLE_PROXY
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+#else
+  char * const hostname = conn->host.name;
+#endif
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %hu (step 1/3)\n",
@@ -987,8 +991,12 @@ schannel_connect_step2(struct connectdata *conn, int sockindex)
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
   bool doread;
+#ifndef CURL_DISABLE_PROXY
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+#else
+  char * const hostname = conn->host.name;
+#endif
   const char *pubkey_ptr;
 
   doread = (connssl->connecting_state != ssl_connect_2_writing) ? TRUE : FALSE;
@@ -2107,8 +2115,12 @@ static int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
    */
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+#ifndef CURL_DISABLE_PROXY
   char * const hostname = SSL_IS_PROXY() ? conn->http_proxy.host.name :
     conn->host.name;
+#else
+  char * const hostname = conn->host.name;
+#endif
 
   DEBUGASSERT(data);
 
