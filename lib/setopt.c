@@ -271,6 +271,9 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Do not include the body part in the output data stream.
      */
     data->set.opt_no_body = (0 != va_arg(param, long)) ? TRUE : FALSE;
+    if(data->set.opt_no_body)
+      /* in HTTP lingo, no body means using the HEAD request... */
+      data->set.method = HTTPREQ_HEAD;
     break;
   case CURLOPT_FAILONERROR:
     /*
@@ -292,13 +295,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.upload = (0 != va_arg(param, long)) ? TRUE : FALSE;
     if(data->set.upload) {
       /* If this is HTTP, PUT is what's needed to "upload" */
-      data->set.httpreq = HTTPREQ_PUT;
+      data->set.method = HTTPREQ_PUT;
       data->set.opt_no_body = FALSE; /* this is implied */
     }
     else
       /* In HTTP, the opposite of upload is GET (unless NOBODY is true as
          then this can be changed to HEAD later on) */
-      data->set.httpreq = HTTPREQ_GET;
+      data->set.method = HTTPREQ_GET;
     break;
   case CURLOPT_REQUEST_TARGET:
     result = Curl_setstropt(&data->set.str[STRING_TARGET],
@@ -516,11 +519,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
        CURLOPT_POSTFIELDS isn't used and the POST data is read off the
        callback! */
     if(va_arg(param, long)) {
-      data->set.httpreq = HTTPREQ_POST;
+      data->set.method = HTTPREQ_POST;
       data->set.opt_no_body = FALSE; /* this is implied */
     }
     else
-      data->set.httpreq = HTTPREQ_GET;
+      data->set.method = HTTPREQ_GET;
     break;
 
   case CURLOPT_COPYPOSTFIELDS:
@@ -567,7 +570,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     }
 
     data->set.postfields = data->set.str[STRING_COPYPOSTFIELDS];
-    data->set.httpreq = HTTPREQ_POST;
+    data->set.method = HTTPREQ_POST;
     break;
 
   case CURLOPT_POSTFIELDS:
@@ -577,7 +580,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     data->set.postfields = va_arg(param, void *);
     /* Release old copied data. */
     (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
-    data->set.httpreq = HTTPREQ_POST;
+    data->set.method = HTTPREQ_POST;
     break;
 
   case CURLOPT_POSTFIELDSIZE:
@@ -623,7 +626,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set to make us do HTTP POST
      */
     data->set.httppost = va_arg(param, struct curl_httppost *);
-    data->set.httpreq = HTTPREQ_POST_FORM;
+    data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
     break;
 #endif   /* CURL_DISABLE_HTTP */
@@ -635,7 +638,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     result = Curl_mime_set_subparts(&data->set.mimepost,
                                     va_arg(param, curl_mime *), FALSE);
     if(!result) {
-      data->set.httpreq = HTTPREQ_POST_MIME;
+      data->set.method = HTTPREQ_POST_MIME;
       data->set.opt_no_body = FALSE; /* this is implied */
     }
     break;
@@ -830,7 +833,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * Set to force us do HTTP GET
      */
     if(va_arg(param, long)) {
-      data->set.httpreq = HTTPREQ_GET;
+      data->set.method = HTTPREQ_GET;
       data->set.upload = FALSE; /* switch off upload */
       data->set.opt_no_body = FALSE; /* this is implied */
     }
@@ -940,7 +943,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
 
     /* we don't set
-       data->set.httpreq = HTTPREQ_CUSTOM;
+       data->set.method = HTTPREQ_CUSTOM;
        here, we continue as if we were using the already set type
        and this just changes the actual request keyword */
     break;
