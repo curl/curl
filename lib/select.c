@@ -291,7 +291,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   }
   if(writefd != CURL_SOCKET_BAD) {
     pfd[num].fd = writefd;
-    pfd[num].events = POLLWRNORM|POLLOUT;
+    pfd[num].events = POLLWRNORM|POLLOUT|POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
@@ -319,7 +319,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   if(writefd != CURL_SOCKET_BAD) {
     if(pfd[num].revents & (POLLWRNORM|POLLOUT))
       ret |= CURL_CSELECT_OUT;
-    if(pfd[num].revents & (POLLERR|POLLHUP|POLLNVAL))
+    if(pfd[num].revents & (POLLERR|POLLHUP|POLLPRI|POLLNVAL))
       ret |= CURL_CSELECT_ERR;
   }
 
