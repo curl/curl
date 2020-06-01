@@ -462,7 +462,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->postfieldsize = -1;   /* unknown size */
   set->maxredirs = -1;       /* allow any amount by default */
 
-  set->httpreq = HTTPREQ_GET; /* Default HTTP request */
+  set->method = HTTPREQ_GET; /* Default HTTP request */
   set->rtspreq = RTSPREQ_OPTIONS; /* Default RTSP request */
 #ifndef CURL_DISABLE_FTP
   set->ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
@@ -3992,17 +3992,9 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   data->state.done = FALSE; /* *_done() is not called yet */
   data->state.expect100header = FALSE;
 
-
   if(data->set.opt_no_body)
     /* in HTTP lingo, no body means using the HEAD request... */
-    data->set.httpreq = HTTPREQ_HEAD;
-  else if(HTTPREQ_HEAD == data->set.httpreq)
-    /* ... but if unset there really is no perfect method that is the
-       "opposite" of HEAD but in reality most people probably think GET
-       then. The important thing is that we can't let it remain HEAD if the
-       opt_no_body is set FALSE since then we'll behave wrong when getting
-       HTTP. */
-    data->set.httpreq = HTTPREQ_GET;
+    data->state.httpreq = HTTPREQ_HEAD;
 
   k->start = Curl_now(); /* start time */
   k->now = k->start;   /* current time is now */

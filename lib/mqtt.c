@@ -591,7 +591,7 @@ static CURLcode mqtt_doing(struct connectdata *conn, bool *done)
     if(result)
       break;
 
-    if(conn->data->set.httpreq == HTTPREQ_POST) {
+    if(conn->data->state.httpreq == HTTPREQ_POST) {
       result = mqtt_publish(conn);
       if(!result) {
         result = mqtt_disconnect(conn);

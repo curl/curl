@@ -431,7 +431,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
        skip this rewinding stuff */
     return CURLE_OK;
 
-  switch(data->set.httpreq) {
+  switch(data->state.httpreq) {
   case HTTPREQ_GET:
   case HTTPREQ_HEAD:
     return CURLE_OK;
@@ -452,7 +452,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
   }
   else {
     /* figure out how much data we are expected to send */
-    switch(data->set.httpreq) {
+    switch(data->state.httpreq) {
     case HTTPREQ_POST:
     case HTTPREQ_PUT:
       if(data->state.infilesize != -1)
@@ -594,8 +594,8 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
 #endif
 
   if(pickhost || pickproxy) {
-    if((data->set.httpreq != HTTPREQ_GET) &&
-       (data->set.httpreq != HTTPREQ_HEAD) &&
+    if((data->state.httpreq != HTTPREQ_GET) &&
+       (data->state.httpreq != HTTPREQ_HEAD) &&
        !conn->bits.rewindaftersend) {
       result = http_perhapsrewind(conn);
       if(result)
@@ -616,8 +616,8 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
        authentication is not "done" yet and
        no authentication seems to be required and
        we didn't try HEAD or GET */
-    if((data->set.httpreq != HTTPREQ_GET) &&
-       (data->set.httpreq != HTTPREQ_HEAD)) {
+    if((data->state.httpreq != HTTPREQ_GET) &&
+       (data->state.httpreq != HTTPREQ_HEAD)) {
       data->req.newurl = strdup(data->change.url); /* clone URL */
       if(!data->req.newurl)
         return CURLE_OUT_OF_MEMORY;
@@ -1774,11 +1774,11 @@ CURLcode Curl_add_custom_headers(struct connectdata *conn,
                 header as that will produce *two* in the same request! */
              checkprefix("Host:", compare))
             ;
-          else if(data->set.httpreq == HTTPREQ_POST_FORM &&
+          else if(data->state.httpreq == HTTPREQ_POST_FORM &&
                   /* this header (extended by formdata.c) is sent later */
                   checkprefix("Content-Type:", compare))
             ;
-          else if(data->set.httpreq == HTTPREQ_POST_MIME &&
+          else if(data->state.httpreq == HTTPREQ_POST_MIME &&
                   /* this header is sent later */
                   checkprefix("Content-Type:", compare))
             ;
@@ -1915,7 +1915,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
   const char *te = ""; /* transfer-encoding */
   const char *ptr;
   const char *request;
-  Curl_HttpReq httpreq = data->set.httpreq;
+  Curl_HttpReq httpreq = data->state.httpreq;
 #if !defined(CURL_DISABLE_COOKIES)
   char *addcookies = NULL;
 #endif
@@ -3320,7 +3320,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         if((k->size == -1) && !k->chunk && !conn->bits.close &&
            (conn->httpversion == 11) &&
            !(conn->handler->protocol & CURLPROTO_RTSP) &&
-           data->set.httpreq != HTTPREQ_HEAD) {
+           data->state.httpreq != HTTPREQ_HEAD) {
           /* On HTTP 1.1, when connection is not to get closed, but no
              Content-Length nor Transfer-Encoding chunked have been
              received, according to RFC2616 section 4.4 point 5, we
@@ -3415,7 +3415,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
            * continue sending even if it gets discarded
            */
 
-          switch(data->set.httpreq) {
+          switch(data->state.httpreq) {
           case HTTPREQ_PUT:
           case HTTPREQ_POST:
           case HTTPREQ_POST_FORM:
@@ -3671,7 +3671,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          * depending on how authentication is working.  Other codes
          * are definitely errors, so give up here.
          */
-        if(data->state.resume_from && data->set.httpreq == HTTPREQ_GET &&
+        if(data->state.resume_from && data->state.httpreq == HTTPREQ_GET &&
              k->httpcode == 416) {
           /* "Requested Range Not Satisfiable", just proceed and
              pretend this is no error */

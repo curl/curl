@@ -433,8 +433,8 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   }
   if(data->set.postfields)
     ; /* do nothing */
-  else if(data->set.httpreq == HTTPREQ_POST_MIME ||
-          data->set.httpreq == HTTPREQ_POST_FORM) {
+  else if(data->state.httpreq == HTTPREQ_POST_MIME ||
+          data->state.httpreq == HTTPREQ_POST_FORM) {
     if(Curl_mime_rewind(mimepart)) {
       failf(data, "Cannot rewind mime/post data");
       return CURLE_SEND_FAIL_REWIND;
@@ -719,7 +719,7 @@ static CURLcode readwrite_data(struct Curl_easy *data,
             infof(data, "Ignoring the response-body\n");
           }
           if(data->state.resume_from && !k->content_range &&
-             (data->set.httpreq == HTTPREQ_GET) &&
+             (data->state.httpreq == HTTPREQ_GET) &&
              !k->ignorebody) {
 
             if(k->size == data->state.resume_from) {
@@ -1449,6 +1449,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
   }
 
+  data->state.httpreq = data->set.method;
   data->change.url = data->set.str[STRING_SET_URL];
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
@@ -1469,10 +1470,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authproxy.want = data->set.proxyauth;
   Curl_safefree(data->info.wouldredirect);
 
-  if(data->set.httpreq == HTTPREQ_PUT)
+  if(data->state.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;
-  else if((data->set.httpreq != HTTPREQ_GET) &&
-          (data->set.httpreq != HTTPREQ_HEAD)) {
+  else if((data->state.httpreq != HTTPREQ_GET) &&
+          (data->state.httpreq != HTTPREQ_HEAD)) {
     data->state.infilesize = data->set.postfieldsize;
     if(data->set.postfields && (data->state.infilesize == -1))
       data->state.infilesize = (curl_off_t)strlen(data->set.postfields);
@@ -1683,12 +1684,12 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
-    if((data->set.httpreq == HTTPREQ_POST
-        || data->set.httpreq == HTTPREQ_POST_FORM
-        || data->set.httpreq == HTTPREQ_POST_MIME)
+    if((data->state.httpreq == HTTPREQ_POST
+        || data->state.httpreq == HTTPREQ_POST_FORM
+        || data->state.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       infof(data, "Switch from POST to GET\n");
-      data->set.httpreq = HTTPREQ_GET;
+      data->state.httpreq = HTTPREQ_GET;
     }
     break;
   case 302: /* Found */
@@ -1708,12 +1709,12 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * This behaviour is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
-    if((data->set.httpreq == HTTPREQ_POST
-        || data->set.httpreq == HTTPREQ_POST_FORM
-        || data->set.httpreq == HTTPREQ_POST_MIME)
+    if((data->state.httpreq == HTTPREQ_POST
+        || data->state.httpreq == HTTPREQ_POST_FORM
+        || data->state.httpreq == HTTPREQ_POST_MIME)
        && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       infof(data, "Switch from POST to GET\n");
-      data->set.httpreq = HTTPREQ_GET;
+      data->state.httpreq = HTTPREQ_GET;
     }
     break;
 
@@ -1723,12 +1724,12 @@ CURLcode Curl_follow(struct Curl_easy *data,
      * method is POST and the user specified to keep it as POST.
      * https://github.com/curl/curl/issues/5237#issuecomment-614641049
      */
-    if(data->set.httpreq != HTTPREQ_GET &&
-       ((data->set.httpreq != HTTPREQ_POST &&
-         data->set.httpreq != HTTPREQ_POST_FORM &&
-         data->set.httpreq != HTTPREQ_POST_MIME) ||
+    if(data->state.httpreq != HTTPREQ_GET &&
+       ((data->state.httpreq != HTTPREQ_POST &&
+         data->state.httpreq != HTTPREQ_POST_FORM &&
+         data->state.httpreq != HTTPREQ_POST_MIME) ||
         !(data->set.keep_post & CURL_REDIR_POST_303))) {
-      data->set.httpreq = HTTPREQ_GET;
+      data->state.httpreq = HTTPREQ_GET;
       data->set.upload = false;
       infof(data, "Switch to %s\n",
             data->set.opt_no_body?"HEAD":"GET");

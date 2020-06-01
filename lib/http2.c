@@ -2031,7 +2031,7 @@ static ssize_t http2_send(struct connectdata *conn, int sockindex,
 
   h2_pri_spec(conn->data, &pri_spec);
 
-  switch(conn->data->set.httpreq) {
+  switch(conn->data->state.httpreq) {
   case HTTPREQ_POST:
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:

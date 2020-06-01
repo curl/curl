@@ -498,14 +498,14 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
 
     if(data->set.upload) {
       putsize = data->state.infilesize;
-      data->set.httpreq = HTTPREQ_PUT;
+      data->state.httpreq = HTTPREQ_PUT;
 
     }
     else {
       postsize = (data->state.infilesize != -1)?
         data->state.infilesize:
         (data->set.postfields? (curl_off_t)strlen(data->set.postfields):0);
-      data->set.httpreq = HTTPREQ_POST;
+      data->state.httpreq = HTTPREQ_POST;
     }
 
     if(putsize > 0 || postsize > 0) {
@@ -543,7 +543,7 @@ static CURLcode rtsp_do(struct connectdata *conn, bool *done)
     }
     else if(rtspreq == RTSPREQ_GET_PARAMETER) {
       /* Check for an empty GET_PARAMETER (heartbeat) request */
-      data->set.httpreq = HTTPREQ_HEAD;
+      data->state.httpreq = HTTPREQ_HEAD;
       data->set.opt_no_body = TRUE;
     }
   }
