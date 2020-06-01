@@ -36,6 +36,7 @@
 
 /* curl stuff */
 #include <curl/curl.h>
+#include <curl/mprintf.h>
 
 #ifndef CURLPIPE_MULTIPLEX
 /* This little trick will just make sure that we don't enable pipelining for
@@ -124,8 +125,8 @@ int my_trace(CURL *handle, curl_infotype type,
   }
   secs = epoch_offset + tv.tv_sec;
   now = localtime(&secs);  /* not thread safe but we don't care */
-  snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-           now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+  curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
+                 now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
 
   switch(type) {
   case CURLINFO_TEXT:
@@ -177,29 +178,29 @@ static void setup(struct input *i, int num, const char *upload)
 
   hnd = i->hnd = curl_easy_init();
   i->num = num;
-  snprintf(filename, 128, "dl-%d", num);
+  curl_msnprintf(filename, 128, "dl-%d", num);
   out = fopen(filename, "wb");
-  if (!out)
-  {
-    fprintf(stderr, "error: could not open file %s for writing: %s\n", upload, strerror(errno));
+  if(!out) {
+    fprintf(stderr, "error: could not open file %s for writing: %s\n", upload,
+            strerror(errno));
     exit(1);
   }
 
-  snprintf(url, 256, "https://localhost:8443/upload-%d", num);
+  curl_msnprintf(url, 256, "https://localhost:8443/upload-%d", num);
 
   /* get the file size of the local file */
-  if (stat(upload, &file_info))
-  {
-    fprintf(stderr, "error: could not stat file %s: %s\n", upload, strerror(errno));
+  if(stat(upload, &file_info)) {
+    fprintf(stderr, "error: could not stat file %s: %s\n", upload,
+            strerror(errno));
     exit(1);
   }
 
   uploadsize = file_info.st_size;
 
   i->in = fopen(upload, "rb");
-  if (!i->in)
-  {
-    fprintf(stderr, "error: could not open file %s for reading: %s\n", upload, strerror(errno));
+  if(!i->in) {
+    fprintf(stderr, "error: could not open file %s for reading: %s\n", upload,
+            strerror(errno));
     exit(1);
   }
 
