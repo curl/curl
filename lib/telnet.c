@@ -1315,7 +1315,7 @@ static CURLcode telnet_do(struct connectdata *conn, bool *done)
   DWORD readfile_read;
   int err;
 #else
-  int interval_ms;
+  timediff_t interval_ms;
   struct pollfd pfd[2];
   int poll_cnt;
   curl_off_t total_dl = 0;

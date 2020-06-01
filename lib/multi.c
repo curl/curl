@@ -1255,7 +1255,7 @@ static CURLMcode Curl_multi_wait(struct Curl_multi *multi,
          timeout */
       else if((sleep_ms < 0) && extrawait)
         sleep_ms = timeout_ms;
-      Curl_wait_ms((int)sleep_ms);
+      Curl_wait_ms(sleep_ms);
     }
   }
 

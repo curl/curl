@@ -286,7 +286,7 @@ int Curl_resolver_getsock(struct connectdata *conn,
  * return number of sockets it worked on
  */
 
-static int waitperform(struct connectdata *conn, int timeout_ms)
+static int waitperform(struct connectdata *conn, timediff_t timeout_ms)
 {
   struct Curl_easy *data = conn->data;
   int nfds;
@@ -437,9 +437,13 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
   while(!result) {
     struct timeval *tvp, tv, store;
     int itimeout;
-    int timeout_ms;
+    timediff_t timeout_ms;
 
-    itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
+#if TIMEDIFF_T_MAX > INT_MAX
+    itimeout = (timeout > INT_MAX) ? INT_MAX : (int)timeout;
+#else
+    itimeout = (int)timeout;
+#endif
 
     store.tv_sec = itimeout/1000;
     store.tv_usec = (itimeout%1000)*1000;
@@ -450,7 +454,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
        second is left, otherwise just use 1000ms to make sure the progress
        callback gets called frequent enough */
     if(!tvp->tv_sec)
-      timeout_ms = (int)(tvp->tv_usec/1000);
+      timeout_ms = (timediff_t)(tvp->tv_usec/1000);
     else
       timeout_ms = 1000;
 
@@ -470,7 +474,7 @@ CURLcode Curl_resolver_wait_resolv(struct connectdata *conn,
       else if(timediff > timeout)
         timeout = -1;
       else
-        timeout -= (long)timediff;
+        timeout -= timediff;
       now = now2; /* for next loop */
     }
     if(timeout < 0)
